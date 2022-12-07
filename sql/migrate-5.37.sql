@@ -157,4 +157,106 @@ DELETE FROM iris.system_attribute WHERE name = 'dms_page_off_default_secs';
 -- Remove quick message store system attribute
 DELETE FROM iris.system_attribute WHERE name = 'dms_quickmsg_store_enable';
 
+-- Replace quick_message with msg_pattern
+DROP VIEW quick_message_view;
+DROP VIEW dms_toll_zone_view;
+DROP VIEW iris.quick_message_toll_zone;
+DROP VIEW iris.quick_message_priced;
+DROP VIEW iris.quick_message_open;
+DROP VIEW iris.quick_message_closed;
+DROP VIEW dms_action_view;
+DROP VIEW lane_use_multi_view;
+INSERT INTO iris.resource_type (name) VALUES ('msg_pattern');
+
+UPDATE iris.privilege SET type_n = 'msg_pattern'
+    WHERE type_n = 'quick_message';
+
+CREATE TABLE iris.msg_pattern (
+    name VARCHAR(20) PRIMARY KEY,
+    sign_config VARCHAR(16) REFERENCES iris.sign_config,
+    -- FIXME: replace sign_group with hashtag
+    sign_group VARCHAR(20) REFERENCES iris.sign_group,
+    msg_combining INTEGER NOT NULL REFERENCES iris.msg_combining,
+    multi VARCHAR(1024) NOT NULL
+);
+
+CREATE VIEW msg_pattern_view AS
+    SELECT name, sign_config, sign_group, mc.description AS msg_combining,
+           multi
+    FROM iris.msg_pattern mp
+    LEFT JOIN iris.msg_combining mc ON mp.msg_combining = mc.id;
+GRANT SELECT ON msg_pattern_view TO PUBLIC;
+
+INSERT INTO iris.msg_pattern
+    (name, sign_config, sign_group, msg_combining, multi)
+    SELECT name, sign_config, sign_group, msg_combining, multi
+    FROM iris.quick_message;
+
+ALTER TABLE iris.dms_action
+    ADD COLUMN msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern;
+UPDATE iris.dms_action SET msg_pattern = quick_message;
+ALTER TABLE iris.dms_action DROP COLUMN quick_message;
+
+CREATE VIEW dms_action_view AS
+    SELECT name, action_plan, sign_group, phase, msg_pattern, beacon_enabled,
+           msg_priority
+    FROM iris.dms_action;
+GRANT SELECT ON dms_action_view TO PUBLIC;
+
+ALTER TABLE iris.alert_message
+    ADD COLUMN msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern;
+UPDATE iris.alert_message SET msg_pattern = quick_message;
+ALTER TABLE iris.alert_message DROP COLUMN quick_message;
+
+ALTER TABLE iris.lane_use_multi
+    ADD COLUMN msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern;
+UPDATE iris.lane_use_multi SET msg_pattern = quick_message;
+ALTER TABLE iris.lane_use_multi DROP COLUMN quick_message;
+
+CREATE VIEW lane_use_multi_view AS
+    SELECT name, indication, msg_num, msg_pattern
+    FROM iris.lane_use_multi;
+GRANT SELECT ON lane_use_multi_view TO PUBLIC;
+
+DROP TABLE iris.quick_message;
+
+CREATE VIEW iris.msg_pattern_priced AS
+    SELECT name AS msg_pattern, 'priced'::VARCHAR(6) AS state,
+        unnest(string_to_array(substring(multi FROM '%tzp,#"[^]]*#"]%' FOR '#'),
+        ',')) AS toll_zone
+    FROM iris.msg_pattern WHERE multi LIKE '%tzp%';
+
+CREATE VIEW iris.msg_pattern_open AS
+    SELECT name AS msg_pattern, 'open'::VARCHAR(6) AS state,
+        unnest(string_to_array(substring(multi FROM '%tzo,#"[^]]*#"]%' FOR '#'),
+        ',')) AS toll_zone
+    FROM iris.msg_pattern WHERE multi LIKE '%tzo%';
+
+CREATE VIEW iris.msg_pattern_closed AS
+    SELECT name AS msg_pattern, 'closed'::VARCHAR(6) AS state,
+        unnest(string_to_array(substring(multi FROM '%tzc,#"[^]]*#"]%' FOR '#'),
+        ',')) AS toll_zone
+    FROM iris.msg_pattern WHERE multi LIKE '%tzc%';
+
+CREATE VIEW iris.msg_pattern_toll_zone AS
+    SELECT msg_pattern, state, toll_zone
+        FROM iris.msg_pattern_priced UNION ALL
+    SELECT msg_pattern, state, toll_zone
+        FROM iris.msg_pattern_open UNION ALL
+    SELECT msg_pattern, state, toll_zone
+        FROM iris.msg_pattern_closed;
+
+CREATE VIEW dms_toll_zone_view AS
+    SELECT dms, tz.state, toll_zone, action_plan, da.msg_pattern
+    FROM dms_action_view da
+    JOIN iris.dms_sign_group dsg
+    ON da.sign_group = dsg.sign_group
+    JOIN iris.msg_pattern mp
+    ON da.msg_pattern = mp.name
+    JOIN iris.msg_pattern_toll_zone tz
+    ON da.msg_pattern = tz.msg_pattern;
+GRANT SELECT ON dms_toll_zone_view TO PUBLIC;
+
+DELETE FROM iris.resource_type WHERE name = 'quick_message';
+
 COMMIT;

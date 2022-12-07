@@ -445,12 +445,12 @@ map_extent
 meter_action
 modem
 monitor_style
+msg_pattern
 parking_area
 permission
 plan_phase
 play_list
 privilege
-quick_message
 ramp_meter
 r_node
 road
@@ -610,7 +610,7 @@ PRV_0058	dms_control	dms	msgUser	t
 PRV_0059	dms_control	dms	deviceRequest	t
 PRV_0060	dms_control	sign_message		t
 PRV_0061	dms_policy	dms_sign_group		t
-PRV_0062	dms_policy	quick_message		t
+PRV_0062	dms_policy	msg_pattern		t
 PRV_0063	dms_policy	sign_group		t
 PRV_0064	dms_policy	sign_text		t
 PRV_0065	dms_policy	word		t
@@ -620,7 +620,7 @@ PRV_0068	dms_tab	font		f
 PRV_0069	dms_tab	glyph		f
 PRV_0070	dms_tab	gps		f
 PRV_0071	dms_tab	graphic		f
-PRV_0072	dms_tab	quick_message		f
+PRV_0072	dms_tab	msg_pattern		f
 PRV_0073	dms_tab	sign_config		f
 PRV_007A	dms_tab	sign_detail		f
 PRV_0074	dms_tab	sign_group		f
@@ -667,8 +667,8 @@ PRV_0107	lcs_tab	lane_use_multi		f
 PRV_0108	lcs_tab	lcs		f
 PRV_0109	lcs_tab	lcs_array		f
 PRV_0110	lcs_tab	lcs_indication		f
-PRV_0111	lcs_tab	quick_message		f
-PRV_0112	lcs_tab	lane_marking		f
+PRV_0111	lcs_tab	lane_marking		f
+PRV_0112	lcs_tab	msg_pattern		f
 PRV_0113	meter_admin	ramp_meter		t
 PRV_0114	meter_control	ramp_meter	mLock	t
 PRV_0115	meter_control	ramp_meter	rateNext	t
@@ -2514,7 +2514,7 @@ CREATE VIEW gps_view AS
 GRANT SELECT ON gps_view TO PUBLIC;
 
 --
--- DMS, Graphic, Font, Sign Message, Quick Message, Word, Color Scheme
+-- DMS, Graphic, Font, Sign Message, Message Pattern, Word, Color Scheme
 --
 CREATE TABLE iris.font (
     name VARCHAR(16) PRIMARY KEY,
@@ -3131,21 +3131,21 @@ CREATE VIEW dms_sign_group_view AS
 	JOIN iris.sign_group sg ON d.sign_group = sg.name;
 GRANT SELECT ON dms_sign_group_view TO PUBLIC;
 
-CREATE TABLE iris.quick_message (
-	name VARCHAR(20) PRIMARY KEY,
-	-- FIXME: replace sign_group with hashtag
-	sign_group VARCHAR(20) REFERENCES iris.sign_group,
-	sign_config VARCHAR(16) REFERENCES iris.sign_config,
-	msg_combining INTEGER NOT NULL REFERENCES iris.msg_combining,
-	multi VARCHAR(1024) NOT NULL
+CREATE TABLE iris.msg_pattern (
+    name VARCHAR(20) PRIMARY KEY,
+    sign_config VARCHAR(16) REFERENCES iris.sign_config,
+    -- FIXME: replace sign_group with hashtag
+    sign_group VARCHAR(20) REFERENCES iris.sign_group,
+    msg_combining INTEGER NOT NULL REFERENCES iris.msg_combining,
+    multi VARCHAR(1024) NOT NULL
 );
 
-CREATE VIEW quick_message_view AS
-	SELECT name, sign_group, sign_config, mc.description AS msg_combining,
-	       multi
-	FROM iris.quick_message qm
-	LEFT JOIN iris.msg_combining mc ON qm.msg_combining = mc.id;
-GRANT SELECT ON quick_message_view TO PUBLIC;
+CREATE VIEW msg_pattern_view AS
+    SELECT name, sign_config, sign_group, mc.description AS msg_combining,
+           multi
+    FROM iris.msg_pattern mp
+    LEFT JOIN iris.msg_combining mc ON mp.msg_combining = mc.id;
+GRANT SELECT ON msg_pattern_view TO PUBLIC;
 
 CREATE TABLE iris.sign_text (
 	name VARCHAR(20) PRIMARY KEY,
@@ -3171,19 +3171,19 @@ CREATE VIEW sign_group_text_view AS
 GRANT SELECT ON sign_group_text_view TO PUBLIC;
 
 CREATE TABLE iris.dms_action (
-	name VARCHAR(30) PRIMARY KEY,
-	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group,
-	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
-	quick_message VARCHAR(20) REFERENCES iris.quick_message,
-	beacon_enabled BOOLEAN NOT NULL,
-	msg_priority INTEGER NOT NULL
+    name VARCHAR(30) PRIMARY KEY,
+    action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+    sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group,
+    phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
+    msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern,
+    beacon_enabled BOOLEAN NOT NULL,
+    msg_priority INTEGER NOT NULL
 );
 
 CREATE VIEW dms_action_view AS
-	SELECT name, action_plan, sign_group, phase, quick_message,
-	       beacon_enabled, msg_priority
-	FROM iris.dms_action;
+    SELECT name, action_plan, sign_group, phase, msg_pattern, beacon_enabled,
+           msg_priority
+    FROM iris.dms_action;
 GRANT SELECT ON dms_action_view TO PUBLIC;
 
 CREATE TABLE event.sign_event (
@@ -4166,10 +4166,10 @@ COPY iris.alert_period(id, description) FROM stdin;
 \.
 
 CREATE TABLE iris.alert_message (
-	name VARCHAR(20) PRIMARY KEY,
-	alert_config VARCHAR(20) NOT NULL REFERENCES iris.alert_config,
-	alert_period INTEGER NOT NULL REFERENCES iris.alert_period,
-	quick_message VARCHAR(20) REFERENCES iris.quick_message
+    name VARCHAR(20) PRIMARY KEY,
+    alert_config VARCHAR(20) NOT NULL REFERENCES iris.alert_config,
+    alert_period INTEGER NOT NULL REFERENCES iris.alert_period,
+    msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern
 );
 
 CREATE TABLE cap.alert (
@@ -4472,11 +4472,11 @@ CREATE TABLE iris.lane_use_multi (
     name VARCHAR(10) PRIMARY KEY,
     indication INTEGER NOT NULL REFERENCES iris.lane_use_indication,
     msg_num INTEGER,
-    quick_message VARCHAR(20) REFERENCES iris.quick_message
+    msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern
 );
 
 CREATE VIEW lane_use_multi_view AS
-    SELECT name, indication, msg_num, quick_message
+    SELECT name, indication, msg_num, msg_pattern
     FROM iris.lane_use_multi;
 GRANT SELECT ON lane_use_multi_view TO PUBLIC;
 
@@ -5081,41 +5081,41 @@ CREATE VIEW price_message_event_view AS
 	ON price_message_event.event_desc_id = event_description.event_desc_id;
 GRANT SELECT ON price_message_event_view TO PUBLIC;
 
-CREATE VIEW iris.quick_message_priced AS
-    SELECT name AS quick_message, 'priced'::VARCHAR(6) AS state,
+CREATE VIEW iris.msg_pattern_priced AS
+    SELECT name AS msg_pattern, 'priced'::VARCHAR(6) AS state,
         unnest(string_to_array(substring(multi FROM '%tzp,#"[^]]*#"]%' FOR '#'),
         ',')) AS toll_zone
-    FROM iris.quick_message WHERE multi LIKE '%tzp%';
+    FROM iris.msg_pattern WHERE multi LIKE '%tzp%';
 
-CREATE VIEW iris.quick_message_open AS
-    SELECT name AS quick_message, 'open'::VARCHAR(6) AS state,
+CREATE VIEW iris.msg_pattern_open AS
+    SELECT name AS msg_pattern, 'open'::VARCHAR(6) AS state,
         unnest(string_to_array(substring(multi FROM '%tzo,#"[^]]*#"]%' FOR '#'),
         ',')) AS toll_zone
-    FROM iris.quick_message WHERE multi LIKE '%tzo%';
+    FROM iris.msg_pattern WHERE multi LIKE '%tzo%';
 
-CREATE VIEW iris.quick_message_closed AS
-    SELECT name AS quick_message, 'closed'::VARCHAR(6) AS state,
+CREATE VIEW iris.msg_pattern_closed AS
+    SELECT name AS msg_pattern, 'closed'::VARCHAR(6) AS state,
         unnest(string_to_array(substring(multi FROM '%tzc,#"[^]]*#"]%' FOR '#'),
         ',')) AS toll_zone
-    FROM iris.quick_message WHERE multi LIKE '%tzc%';
+    FROM iris.msg_pattern WHERE multi LIKE '%tzc%';
 
-CREATE VIEW iris.quick_message_toll_zone AS
-    SELECT quick_message, state, toll_zone
-        FROM iris.quick_message_priced UNION ALL
-    SELECT quick_message, state, toll_zone
-        FROM iris.quick_message_open UNION ALL
-    SELECT quick_message, state, toll_zone
-        FROM iris.quick_message_closed;
+CREATE VIEW iris.msg_pattern_toll_zone AS
+    SELECT msg_pattern, state, toll_zone
+        FROM iris.msg_pattern_priced UNION ALL
+    SELECT msg_pattern, state, toll_zone
+        FROM iris.msg_pattern_open UNION ALL
+    SELECT msg_pattern, state, toll_zone
+        FROM iris.msg_pattern_closed;
 
 CREATE VIEW dms_toll_zone_view AS
-    SELECT dms, state, toll_zone, action_plan, dms_action_view.quick_message
-    FROM dms_action_view
-    JOIN iris.dms_sign_group
-    ON dms_action_view.sign_group = dms_sign_group.sign_group
-    JOIN iris.quick_message
-    ON dms_action_view.quick_message = quick_message.name
-    JOIN iris.quick_message_toll_zone
-    ON dms_action_view.quick_message = quick_message_toll_zone.quick_message;
+    SELECT dms, tz.state, toll_zone, action_plan, da.msg_pattern
+    FROM dms_action_view da
+    JOIN iris.dms_sign_group dsg
+    ON da.sign_group = dsg.sign_group
+    JOIN iris.msg_pattern mp
+    ON da.msg_pattern = mp.name
+    JOIN iris.msg_pattern_toll_zone tz
+    ON da.msg_pattern = tz.msg_pattern;
 GRANT SELECT ON dms_toll_zone_view TO PUBLIC;
 
 --
