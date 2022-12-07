@@ -21,7 +21,7 @@ import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.MsgCombining;
-import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
 import static us.mn.state.dot.tms.SignMsgSource.lcs;
@@ -111,9 +111,9 @@ public class OpSendLCSIndications extends OpLCS {
 		String m = "";
 		LaneUseMulti lum = LaneUseMultiHelper.find(ind, sc);
 		if (lum != null) {
-			QuickMessage qm = lum.getQuickMessage();
-			if (qm != null)
-				m = qm.getMulti();
+			MsgPattern pat = lum.getMsgPattern();
+			if (pat != null)
+				m = pat.getMulti();
 		}
 		if (m.length() > 0 || LaneUseIndication.DARK.ordinal() == ind)
 			return m;

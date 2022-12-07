@@ -48,7 +48,7 @@ public class SignMenu extends IMenu {
 		addItem(createSignGroupItem());
 		addItem(createFontItem());
 		addItem(createGraphicItem());
-		addItem(createQuickMessageItem());
+		addItem(createMsgPatternItem());
 		addItem(createWysiwygSelectorItem());
 		addItem(createWordItem());
 		addItem(session.createTableAction(Beacon.SONAR_TYPE));
@@ -104,12 +104,12 @@ public class SignMenu extends IMenu {
 		    } : null;
 	}
 
-	/** Create a quick message menu item action */
-	private IAction createQuickMessageItem() {
-		return QuickMessageForm.isPermitted(session) ?
-		    new IAction("quick.messages") {
+	/** Create a message pattern menu item action */
+	private IAction createMsgPatternItem() {
+		return MsgPatternForm.isPermitted(session) ?
+		    new IAction("message.patterns") {
 			protected void doActionPerformed(ActionEvent e) {
-				desktop.show(new QuickMessageForm(session));
+				desktop.show(new MsgPatternForm(session));
 			}
 		    } : null;
 	}

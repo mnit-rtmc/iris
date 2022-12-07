@@ -27,8 +27,8 @@ import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.MsgCombining;
-import us.mn.state.dot.tms.QuickMessage;
-import us.mn.state.dot.tms.QuickMessageHelper;
+import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
@@ -51,8 +51,8 @@ import static us.mn.state.dot.tms.utils.MultiString.makeCombined;
  * @see us.mn.state.dot.tms.client.dms.DMSPanelPager
  * @see us.mn.state.dot.tms.client.dms.SignMessageComposer
  *
- * @author Erik Engstrom
  * @author Douglas Lau
+ * @author Erik Engstrom
  * @author Michael Darter
  */
 public class DMSDispatcher extends JPanel {
@@ -114,8 +114,8 @@ public class DMSDispatcher extends JPanel {
 	/** Composed MULTI string */
 	private String multi = "";
 
-	/** Selected quick message */
-	private QuickMessage quick_msg = null;
+	/** Selected message pattern */
+	private MsgPattern msg_pattern = null;
 
 	/** Linked incident */
 	private Incident incident;
@@ -154,7 +154,7 @@ public class DMSDispatcher extends JPanel {
 		String ms = DMSHelper.getOperatorMulti(dms);
 		composer.setComposedMulti(ms);
 		multi = composer.getComposedMulti();
-		quick_msg = null;
+		msg_pattern = null;
 		incident = DMSHelper.lookupIncident(dms);
 	}
 
@@ -166,11 +166,11 @@ public class DMSDispatcher extends JPanel {
 		singleTab.setMessage();
 	}
 
-	/** Set the quick message */
-	public void setQuickMessage(QuickMessage qm) {
-		quick_msg = qm;
+	/** Set the message pattern */
+	public void setMsgPattern(MsgPattern pat) {
+		msg_pattern = pat;
 		unlinkIncident();
-		if (!QuickMessageHelper.isMsgCombiningFirst(qm))
+		if (!MsgPatternHelper.isMsgCombiningFirst(pat))
 			setComposedMulti("");
 		else
 			singleTab.setMessage();
@@ -182,9 +182,9 @@ public class DMSDispatcher extends JPanel {
 		if (new MultiString(ms).isBlank())
 			return getPreviewBlank(combining);
 		if (combining) {
-			String quick = getQuickMsgFirst();
-			if (quick != null)
-				return makeCombined(quick, ms);
+			String pmulti = getMsgPatternFirst();
+			if (pmulti != null)
+				return makeCombined(pmulti, ms);
 			String sched = getSchedCombining();
 			if (sched != null)
 				return makeCombined(sched, ms);
@@ -194,18 +194,18 @@ public class DMSDispatcher extends JPanel {
 
 	/** Get preview with blank composed message */
 	private String getPreviewBlank(boolean combining) {
-		String quick = getQuickMsg();
+		String pmulti = getMsgPattern();
 		if (combining) {
-			String quick2 = getQuickMsgSecond();
+			String pmulti2 = getMsgPatternSecond();
 			String sched = getSchedCombining();
-			if (quick2 != null && sched != null)
-				return makeCombined(sched, quick2);
-			else if (quick != null)
-				return quick;
+			if (pmulti2 != null && sched != null)
+				return makeCombined(sched, pmulti2);
+			else if (pmulti != null)
+				return pmulti;
 			else if (sched != null)
 				return sched;
 		}
-		return (quick != null) ? quick : "";
+		return (pmulti != null) ? pmulti : "";
 	}
 
 	/** Get MULTI string from scheduled combining message */
@@ -219,25 +219,25 @@ public class DMSDispatcher extends JPanel {
 		return null;
 	}
 
-	/** Get quick message */
-	private String getQuickMsg() {
-		QuickMessage qm = quick_msg;
-		return (qm != null) ? qm.getMulti() : null;
+	/** Get message pattern */
+	private String getMsgPattern() {
+		MsgPattern pat = msg_pattern;
+		return (pat != null) ? pat.getMulti() : null;
 	}
 
-	/** Get combining quick message (if first) */
-	private String getQuickMsgFirst() {
-		QuickMessage qm = quick_msg;
-		return QuickMessageHelper.isMsgCombiningFirst(qm)
-		      ? qm.getMulti()
+	/** Get combining message pattern (if first) */
+	private String getMsgPatternFirst() {
+		MsgPattern pat = msg_pattern;
+		return MsgPatternHelper.isMsgCombiningFirst(pat)
+		      ? pat.getMulti()
 		      : null;
 	}
 
-	/** Get combining quick message (if second) */
-	private String getQuickMsgSecond() {
-		QuickMessage qm = quick_msg;
-		return QuickMessageHelper.isMsgCombiningSecond(qm)
-		      ? qm.getMulti()
+	/** Get combining message pattern (if second) */
+	private String getMsgPatternSecond() {
+		MsgPattern pat = msg_pattern;
+		return MsgPatternHelper.isMsgCombiningSecond(pat)
+		      ? pat.getMulti()
 		      : null;
 	}
 
@@ -336,19 +336,19 @@ public class DMSDispatcher extends JPanel {
 		if (sc == null)
 			return null;
 		String ms = multi;
-		QuickMessage qm = quick_msg;
+		MsgPattern pat = msg_pattern;
 		if (new MultiString(ms).isBlank()) {
-			if (qm != null) {
-				String quick = qm.getMulti();
+			if (pat != null) {
+				String pmulti = pat.getMulti();
 				MsgCombining mc = MsgCombining.fromOrdinal(
-					qm.getMsgCombining());
-				return createMessage(sc, quick, mc);
+					pat.getMsgCombining());
+				return createMessage(sc, pmulti, mc);
 			} else
 				return creator.createBlankMessage(sc);
 		} else {
-			if (QuickMessageHelper.isMsgCombiningFirst(qm)) {
-				String quick = qm.getMulti();
-				String combined = makeCombined(quick, ms);
+			if (MsgPatternHelper.isMsgCombiningFirst(pat)) {
+				String pmulti = pat.getMulti();
+				String combined = makeCombined(pmulti, ms);
 				// Does combined message fit?
 				if (DMSHelper.createRasters(dms, combined)
 				    != null)
@@ -444,7 +444,7 @@ public class DMSDispatcher extends JPanel {
 		setEnabled(false);
 		composer.setSign(null);
 		setComposedMulti("");
-		quick_msg = null;
+		msg_pattern = null;
 		unlinkIncident();
 		singleTab.setSelected(null);
 	}

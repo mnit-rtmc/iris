@@ -33,11 +33,11 @@ public class ComposerMiscPanel extends JPanel {
 	/** Sign message composer */
 	private final SignMessageComposer composer;
 
-	/** Quick message label */
-	private final ILabel quick_lbl = new ILabel("dms.quick.message");
+	/** Message pattern label */
+	private final ILabel pattern_lbl = new ILabel("msg.pattern");
 
-	/** Combobox used to select a quick message */
-	private final QuickMessageCBox quick_cbx;
+	/** Combobox used to select a message pattern */
+	private final MsgPatternCBox pattern_cbx;
 
 	/** Duration label */
 	private final ILabel dur_lbl = new ILabel("dms.duration");
@@ -54,7 +54,7 @@ public class ComposerMiscPanel extends JPanel {
 	/** Create a new composer miscellaneous panel */
 	public ComposerMiscPanel(DMSDispatcher ds, SignMessageComposer smc) {
 		composer = smc;
-		quick_cbx = new QuickMessageCBox(ds);
+		pattern_cbx = new MsgPatternCBox(ds);
 		layoutPanel();
 		initializeWidgets();
 	}
@@ -70,13 +70,13 @@ public class ComposerMiscPanel extends JPanel {
 			GroupLayout.Alignment.TRAILING);
 		GroupLayout.ParallelGroup vg = gl.createParallelGroup(
 			GroupLayout.Alignment.LEADING);
-		// Quick message widgets
-		quick_lbl.setLabelFor(quick_cbx);
-		lg.addComponent(quick_lbl);
-		vg.addComponent(quick_cbx);
+		// Message pattern widgets
+		pattern_lbl.setLabelFor(pattern_cbx);
+		lg.addComponent(pattern_lbl);
+		vg.addComponent(pattern_cbx);
 		GroupLayout.ParallelGroup g1 = gl.createParallelGroup(
 			GroupLayout.Alignment.CENTER);
-		g1.addComponent(quick_lbl).addComponent(quick_cbx);
+		g1.addComponent(pattern_lbl).addComponent(pattern_cbx);
 		// Duraton widgets
 		dur_lbl.setLabelFor(dur_cbx);
 		lg.addComponent(dur_lbl);
@@ -98,20 +98,20 @@ public class ComposerMiscPanel extends JPanel {
 	/** Clear the widgets */
 	public void clearWidgets() {
 		adjusting++;
-		quick_cbx.setSelectedItem(null);
+		pattern_cbx.setSelectedItem(null);
 		adjusting--;
 	}
 
 	/** Dispose of the message selector */
 	public void dispose() {
 		removeAll();
-		quick_cbx.dispose();
+		pattern_cbx.dispose();
 	}
 
 	/** Select a sign */
 	public void setSign(DMS proxy) {
 		initializeWidgets();
-		quick_cbx.populateModel(proxy);
+		pattern_cbx.populateModel(proxy);
 	}
 
 	/** Initialize the widgets */
@@ -126,10 +126,10 @@ public class ComposerMiscPanel extends JPanel {
 	@Override
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
-		quick_cbx.setEnabled(b);
-		boolean vis = quick_cbx.getItemCount() > 0;
-		quick_lbl.setVisible(vis);
-		quick_cbx.setVisible(vis);
+		pattern_cbx.setEnabled(b);
+		boolean vis = pattern_cbx.getItemCount() > 0;
+		pattern_lbl.setVisible(vis);
+		pattern_cbx.setVisible(vis);
 		dur_cbx.setEnabled(b);
 		dur_cbx.setSelectedItem(0);
 	}

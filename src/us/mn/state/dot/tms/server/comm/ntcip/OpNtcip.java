@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
-import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DeviceImpl;
 import us.mn.state.dot.tms.server.comm.OpDevice;
@@ -74,24 +74,24 @@ abstract public class OpNtcip extends OpDevice {
 		Iterator<LaneUseMulti> it = LaneUseMultiHelper.iterator();
 		while (it.hasNext()) {
 			LaneUseMulti lum = it.next();
-			QuickMessage qm = lum.getQuickMessage();
-			if (qm != null && match(qm, multi))
+			MsgPattern pat = lum.getMsgPattern();
+			if (pat != null && match(pat, multi))
 				return lum;
 		}
 		return null;
 	}
 
-	/** Test if a quick message matches a multi string.
-	 * @param qm Quick message.
+	/** Test if a message pattern matches a multi string.
+	 * @param pat Message pattern.
 	 * @param multi MULTI string to compare.
 	 * @return true if they match. */
-	static private boolean match(QuickMessage qm, String multi) {
-		String re = createRegex(parseMulti(qm.getMulti()));
+	static private boolean match(MsgPattern pat, String multi) {
+		String re = createRegex(parseMulti(pat.getMulti()));
 		return Pattern.matches(re, multi);
 	}
 
 	/** Create a regex which matches any speed advisory values */
-	static private String createRegex(String qm) {
+	static private String createRegex(String ms) {
 		MultiBuilder re = new MultiBuilder() {
 			@Override
 			public void addSpeedAdvisory() {
@@ -101,7 +101,7 @@ abstract public class OpNtcip extends OpDevice {
 		};
 		// Start quoting for regex
 		re.addSpan("\\Q");
-		new MultiString(qm).parse(re);
+		new MultiString(ms).parse(re);
 		// End quoting for regex
 		re.addSpan("\\E");
 		return re.toString();

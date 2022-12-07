@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  * Copyright (C) 2020  SRF Consulting Group, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -52,9 +52,9 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.PlanPhaseHelper;
-import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignGroup;
@@ -511,9 +511,9 @@ public class AlertData {
 		Map<SignConfig, SignGroup> act_groups = createActiveGroups(plan,
 			msgs);
 		for (AlertMessage msg: msgs) {
-			QuickMessage qm = msg.getQuickMessage();
-			SignConfig sc = (qm != null)
-				? qm.getSignConfig()
+			MsgPattern pat = msg.getMsgPattern();
+			SignConfig sc = (pat != null)
+				? pat.getSignConfig()
 				: null;
 			SignGroup asg = act_groups.get(sc);
 			if (asg != null)
@@ -582,9 +582,9 @@ public class AlertData {
 			new TreeMap<SignConfig, SignGroup>(
 			new NumericAlphaComparator<SignConfig>());
 		for (AlertMessage msg: msgs) {
-			QuickMessage qm = msg.getQuickMessage();
-			SignConfig sc = (qm != null)
-				? qm.getSignConfig()
+			MsgPattern pat = msg.getMsgPattern();
+			SignConfig sc = (pat != null)
+				? pat.getSignConfig()
 				: null;
 			if (sc != null && !act_groups.containsKey(sc)) {
 				SignGroup sg = makeActiveGroup(plan, sc);
@@ -630,29 +630,29 @@ public class AlertData {
 		AlertMessage msg, SignGroup grp) throws SonarException
 	{
 		AlertPeriod ap = AlertPeriod.fromOrdinal(msg.getAlertPeriod());
-		QuickMessage qm = msg.getQuickMessage();
-		if (ap == null || qm == null) {
+		MsgPattern pat = msg.getMsgPattern();
+		if (ap == null || pat == null) {
 			log("invalid alert message: " + msg);
 			return;
 		}
 		switch (ap) {
 		case BEFORE:
 			if (cfg.getBeforePeriodHours() > 0)
-				createDmsAction(plan, grp, "alert_before", qm);
+				createDmsAction(plan, grp, "alert_before", pat);
 			break;
 		case DURING:
-			createDmsAction(plan, grp, "alert_during", qm);
+			createDmsAction(plan, grp, "alert_during", pat);
 			break;
 		case AFTER:
 			if (cfg.getAfterPeriodHours() > 0)
-				createDmsAction(plan, grp, "alert_after", qm);
+				createDmsAction(plan, grp, "alert_after", pat);
 			break;
 		}
 	}
 
 	/** Create a DMS action for an action plan */
 	private void createDmsAction(ActionPlanImpl plan, SignGroup sg,
-		String ph, QuickMessage qm) throws SonarException
+		String ph, MsgPattern pat) throws SonarException
 	{
 		String tmpl = plan.getName() + "_%d";
 		String dname = DmsActionImpl.createUniqueName(tmpl);
@@ -661,7 +661,7 @@ public class AlertData {
 			log("plan phase not found, " + ph);
 		int priority = DmsMsgPriority.ALERT_LOW.ordinal();
 		DmsActionImpl da = new DmsActionImpl(dname, plan, sg, phase,
-			qm, false, priority);
+			pat, false, priority);
 		log("created DMS action " + dname);
 		da.notifyCreate();
 	}

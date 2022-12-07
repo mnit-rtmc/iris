@@ -56,7 +56,7 @@ import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSHelper;
 import us.mn.state.dot.tms.MsgCombining;
-import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignDetail;
@@ -637,9 +637,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		assert (amsg != null);
 		DmsAction da = amsg.action;
 		boolean be = da.getBeaconEnabled();
-		QuickMessage qm = da.getQuickMessage();
-		int mc = (qm != null)
-		       ? qm.getMsgCombining()
+		MsgPattern pat = da.getMsgPattern();
+		int mc = (pat != null)
+		       ? pat.getMsgCombining()
 		       : MsgCombining.DISABLE.ordinal();
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
 			da.getMsgPriority());

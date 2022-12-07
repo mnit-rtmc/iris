@@ -34,9 +34,9 @@ import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.ParkingAreaHelper;
-import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.SignTextHelper;
 import us.mn.state.dot.tms.Station;
@@ -231,8 +231,8 @@ public class DmsActionMsg {
 
 	/** Get the MULTI string for the DMS action */
 	private String getActionMulti() {
-		QuickMessage qm = action.getQuickMessage();
-		return (qm != null) ? qm.getMulti().trim() : "";
+		MsgPattern pat = action.getMsgPattern();
+		return (pat != null) ? pat.getMulti().trim() : "";
 	}
 
 	/** Process a DMS action */

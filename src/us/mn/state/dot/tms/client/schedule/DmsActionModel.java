@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,9 @@ import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsMsgPriority;
+import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.PlanPhaseHelper;
-import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -99,17 +99,17 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<DmsAction>("quick.message", 160) {
+		cols.add(new ProxyColumn<DmsAction>("msg.pattern", 160) {
 			public Object getValueAt(DmsAction da) {
-				return da.getQuickMessage();
+				return da.getMsgPattern();
 			}
 			public boolean isEditable(DmsAction da) {
 				return canWrite(da);
 			}
 			public void setValueAt(DmsAction da, Object value) {
 				String v = value.toString().trim();
-				da.setQuickMessage(
-					QuickMessageHelper.lookup(v));
+				da.setMsgPattern(
+					MsgPatternHelper.lookup(v));
 			}
 		});
 		cols.add(new ProxyColumn<DmsAction>("dms.beacon.enabled", 100,

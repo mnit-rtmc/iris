@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseIndication;
-import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -35,7 +35,7 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 	/** Load all the lane-use MULTIs */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, LaneUseMultiImpl.class);
-		store.query("SELECT name, indication, msg_num, quick_message " +
+		store.query("SELECT name, indication, msg_num, msg_pattern " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -44,7 +44,7 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 					row.getString(1),	// name
 					row.getInt(2),		// indication
 					(Integer) row.getObject(3), // msg_num
-					row.getString(4)	// quick_message
+					row.getString(4)        // msg_pattern
 				));
 			}
 		});
@@ -57,7 +57,7 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 		map.put("name", name);
 		map.put("indication", indication);
 		map.put("msg_num", msg_num);
-		map.put("quick_message", quick_message);
+		map.put("msg_pattern", msg_pattern);
 		return map;
 	}
 
@@ -80,17 +80,17 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 
 	/** Create a new lane-use MULTI */
 	private LaneUseMultiImpl(Namespace ns, String n, int i, Integer mn,
-		String qm)
+		String pat)
 	{
-		this(n, i, mn, lookupQuickMessage(qm));
+		this(n, i, mn, lookupMsgPattern(pat));
 	}
 
 	/** Create a new lane-use MULTI */
-	private LaneUseMultiImpl(String n, int i, Integer mn, QuickMessage qm) {
+	private LaneUseMultiImpl(String n, int i, Integer mn, MsgPattern pat) {
 		this(n);
 		indication = i;
 		msg_num = mn;
-		quick_message = qm;
+		msg_pattern = pat;
 	}
 
 	/** Ordinal of LaneUseIndication */
@@ -142,26 +142,26 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 		return msg_num;
 	}
 
-	/** Quick message to send for indication */
-	protected QuickMessage quick_message;
+	/** Message pattern to send for indication */
+	protected MsgPattern msg_pattern;
 
-	/** Set the quick message */
+	/** Set the message pattern */
 	@Override
-	public void setQuickMessage(QuickMessage qm) {
-		quick_message = qm;
+	public void setMsgPattern(MsgPattern pat) {
+		msg_pattern = pat;
 	}
 
-	/** Set the quick message */
-	public void doSetQuickMessage(QuickMessage qm) throws TMSException {
-		if(qm == quick_message)
-			return;
-		store.update(this, "quick_message", qm);
-		setQuickMessage(qm);
+	/** Set the message pattern */
+	public void doSetMsgPattern(MsgPattern pat) throws TMSException {
+		if (pat != msg_pattern) {
+			store.update(this, "msg_pattern", pat);
+			setMsgPattern(pat);
+		}
 	}
 
-	/** Get the quick message */
+	/** Get the message pattern */
 	@Override
-	public QuickMessage getQuickMessage() {
-		return quick_message;
+	public MsgPattern getMsgPattern() {
+		return msg_pattern;
 	}
 }

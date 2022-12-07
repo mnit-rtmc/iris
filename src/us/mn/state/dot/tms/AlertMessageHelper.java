@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ public class AlertMessageHelper extends BaseHelper {
 		while (it.hasNext()) {
 			AlertMessage msg = it.next();
 			if (msg.getAlertConfig() == cfg &&
-			    msg.getQuickMessage() != null)
+			    msg.getMsgPattern() != null)
 				msgs.add(msg);
 		}
 		return msgs;

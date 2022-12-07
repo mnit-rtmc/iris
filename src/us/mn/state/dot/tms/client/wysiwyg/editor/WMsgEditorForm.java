@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import java.awt.Color;
@@ -38,7 +37,7 @@ import javax.swing.event.InternalFrameEvent;
 
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.MsgCombining;
-import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
@@ -65,24 +64,24 @@ public class WMsgEditorForm extends AbstractForm {
 	
 	/** Frame containing this form */
 	private JInternalFrame frame;
-	
+
 	/* Sign/Group and Message being edited */
 	private DMS sign;
 	private SignGroup sg;
-	private QuickMessage qm;
-	
+	private MsgPattern pattern;
+
 	/* what "mode" (single sign or sign group) we're in */ 
 	private Boolean singleSign;
-	
+
 	/* Controller - for handling back and forth between the GUI and renderer */
 	private WController controller;
-	
+
 	/* Currently selected page (defaults to first available) */
 	private JLabel pg_num_lbl;
-	
+
 	/* Menu Bar */
 	private WMsgEditorMenuBar menu_bar;
-	
+
 	/* Message combining combo box */ 
 	private final JComboBox<MsgCombining> combining_cbx =
 		new JComboBox<MsgCombining>(MsgCombining.values());
@@ -143,43 +142,43 @@ public class WMsgEditorForm extends AbstractForm {
 		controller = new WController(this, sg);
 		initForm();
 	}
-	
-	public WMsgEditorForm(Session s, QuickMessage q, DMS d) {
-		super(getWindowTitle(q), true);
+
+	public WMsgEditorForm(Session s, MsgPattern pat, DMS d) {
+		super(getWindowTitle(pat), true);
 		session = s;
 		sign = d;
-		qm = q;
+		pattern = pat;
 		singleSign = true;
-		controller = new WController(this, qm, sign);
+		controller = new WController(this, pattern, sign);
 		initForm();
 	}
-	
-	public WMsgEditorForm(Session s, QuickMessage q, SignGroup g) {
-		super(getWindowTitle(q), true);
+
+	public WMsgEditorForm(Session s, MsgPattern pat, SignGroup g) {
+		super(getWindowTitle(pat), true);
 		session = s;
 		sg = g;
-		qm = q;
+		pattern = pat;
 		singleSign = false;
-		controller = new WController(this, qm, sg);
+		controller = new WController(this, pattern, sg);
 		initForm();
 	}
-	
+
 	/** Get the current client session */
 	public Session getSession() {
 		return session;
 	}
-	
-	public void setWindowTitle(QuickMessage q) {
-		title = getWindowTitle(q);
+
+	public void setWindowTitle(MsgPattern pat) {
+		title = getWindowTitle(pat);
 		frame.setTitle(title);
 	}
-	
-	public static String getWindowTitle(QuickMessage q) {
+
+	public static String getWindowTitle(MsgPattern pat) {
 		String editorName = I18N.get("wysiwyg.editor.title");
-		String msgName = q != null ? q.getName() : "<Untitled>";
+		String msgName = pat != null ? pat.getName() : "<Untitled>";
 		return String.format("%s - %s", editorName, msgName);
 	}
-	
+
 	protected void initForm() {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		
@@ -569,9 +568,8 @@ public class WMsgEditorForm extends AbstractForm {
 	public String getMultiPanelContents() {
 		return epanel.getMultiPanelContents();
 	}
-	
+
 	public WMsgEditorPanel getEditorPanel() {
 		return epanel;
 	}
 }
-	

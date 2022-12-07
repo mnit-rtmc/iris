@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@ import us.mn.state.dot.tms.TMSException;
  * Alert Configuration object server-side implementation.
  *
  * Connects a particular alert type ("event" field) to a number of sign
- * group/quick message pairs to control which signs are eligible for inclusion
- * in an alert and which message template to use.
+ * group/message pattern pairs to control which signs are eligible for
+ * inclusion in an alert and which message template to use.
  *
  * @author Gordon Parikh
  * @author Douglas Lau

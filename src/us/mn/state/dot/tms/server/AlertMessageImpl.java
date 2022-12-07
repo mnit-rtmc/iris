@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.AlertConfig;
 import us.mn.state.dot.tms.AlertMessage;
-import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -34,7 +34,7 @@ public class AlertMessageImpl extends BaseObjectImpl implements AlertMessage {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, AlertMessageImpl.class);
 		store.query("SELECT name, alert_config, alert_period, " +
-			"quick_message FROM iris." + SONAR_TYPE + ";",
+			"msg_pattern FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -50,7 +50,7 @@ public class AlertMessageImpl extends BaseObjectImpl implements AlertMessage {
 		map.put("name", name);
 		map.put("alert_config", alert_config);
 		map.put("alert_period", alert_period);
-		map.put("quick_message", quick_message);
+		map.put("msg_pattern", msg_pattern);
 		return map;
 	}
 
@@ -76,23 +76,23 @@ public class AlertMessageImpl extends BaseObjectImpl implements AlertMessage {
 		this(row.getString(1),  // name
 		     row.getString(2),  // alert_config
 		     row.getInt(3),     // alert_period
-		     row.getString(4)   // quick_message
+		     row.getString(4)   // msg_pattern
 		);
 	}
 
 	/** Create an alert message */
-	private AlertMessageImpl(String n, String ac, int ap, String qm) {
-		this(n, lookupAlertConfig(ac), ap, lookupQuickMessage(qm));
+	private AlertMessageImpl(String n, String ac, int ap, String pat) {
+		this(n, lookupAlertConfig(ac), ap, lookupMsgPattern(pat));
 	}
 
 	/** Create an alert message */
 	public AlertMessageImpl(String n, AlertConfig ac, int ap,
-		QuickMessage qm)
+		MsgPattern pat)
 	{
 		this(n);
 		alert_config = ac;
 		alert_period = ap;
-		quick_message = qm;
+		msg_pattern = pat;
 	}
 
 	/** Alert config */
@@ -127,26 +127,26 @@ public class AlertMessageImpl extends BaseObjectImpl implements AlertMessage {
 		return alert_period;
 	}
 
-	/** Quick message to send when action happens */
-	private QuickMessage quick_message;
+	/** Message to send when action happens */
+	private MsgPattern msg_pattern;
 
-	/** Set the quick message */
+	/** Set the message pattern */
 	@Override
-	public void setQuickMessage(QuickMessage qm) {
-		quick_message = qm;
+	public void setMsgPattern(MsgPattern pat) {
+		msg_pattern = pat;
 	}
 
-	/** Set the quick message */
-	public void doSetQuickMessage(QuickMessage qm) throws TMSException {
-		if (qm != quick_message) {
-			store.update(this, "quick_message", qm);
-			setQuickMessage(qm);
+	/** Set the message pattern */
+	public void doSetMsgPattern(MsgPattern pat) throws TMSException {
+		if (pat != msg_pattern) {
+			store.update(this, "msg_pattern", pat);
+			setMsgPattern(pat);
 		}
 	}
 
-	/** Get the quick message */
+	/** Get the message pattern */
 	@Override
-	public QuickMessage getQuickMessage() {
-		return quick_message;
+	public MsgPattern getMsgPattern() {
+		return msg_pattern;
 	}
 }

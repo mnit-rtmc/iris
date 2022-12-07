@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@ import java.util.Map;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DmsAction;
+import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.PlanPhase;
-import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
@@ -45,7 +45,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DmsActionImpl.class);
 		store.query("SELECT name, action_plan, sign_group, " +
-			"phase, quick_message, beacon_enabled, msg_priority " +
+			"phase, msg_pattern, beacon_enabled, msg_priority " +
 			"FROM iris." + SONAR_TYPE  +";",
 			new ResultFactory()
 		{
@@ -63,7 +63,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		map.put("action_plan", action_plan);
 		map.put("sign_group", sign_group);
 		map.put("phase", phase);
-		map.put("quick_message", quick_message);
+		map.put("msg_pattern", msg_pattern);
 		map.put("beacon_enabled", beacon_enabled);
 		map.put("msg_priority", msg_priority);
 		return map;
@@ -92,29 +92,29 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		     row.getString(2),  // action_plan
 		     row.getString(3),  // sign_group
 		     row.getString(4),  // phase
-		     row.getString(5),  // quick_message
-		     row.getBoolean(6),	// beacon_enabled
+		     row.getString(5),  // msg_pattern
+		     row.getBoolean(6), // beacon_enabled
 		     row.getInt(7)      // msg_priority
 		);
 	}
 
 	/** Create a DMS action */
 	private DmsActionImpl(String n, String a, String sg, String p,
-		String qm, boolean be, int mp)
+		String pat, boolean be, int mp)
 	{
 		this(n, lookupActionPlan(a), lookupSignGroup(sg),
-		    lookupPlanPhase(p), lookupQuickMessage(qm), be, mp);
+		    lookupPlanPhase(p), lookupMsgPattern(pat), be, mp);
 	}
 
 	/** Create a DMS action */
 	public DmsActionImpl(String n, ActionPlan a, SignGroup sg, PlanPhase p,
-		QuickMessage qm, boolean be, int mp)
+		MsgPattern pat, boolean be, int mp)
 	{
 		this(n);
 		action_plan = a;
 		sign_group = sg;
 		phase = p;
-		quick_message = qm;
+		msg_pattern = pat;
 		beacon_enabled = be;
 		msg_priority = mp;
 	}
@@ -160,27 +160,27 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		return phase;
 	}
 
-	/** Quick message to send when action happens */
-	private QuickMessage quick_message;
+	/** Message to send when action happens */
+	private MsgPattern msg_pattern;
 
-	/** Set the quick message */
+	/** Set the message pattern */
 	@Override
-	public void setQuickMessage(QuickMessage qm) {
-		quick_message = qm;
+	public void setMsgPattern(MsgPattern pat) {
+		msg_pattern = pat;
 	}
 
-	/** Set the quick message */
-	public void doSetQuickMessage(QuickMessage qm) throws TMSException {
-		if (qm != quick_message) {
-			store.update(this, "quick_message", qm);
-			setQuickMessage(qm);
+	/** Set the message pattern */
+	public void doSetMsgPattern(MsgPattern pat) throws TMSException {
+		if (pat != msg_pattern) {
+			store.update(this, "msg_pattern", pat);
+			setMsgPattern(pat);
 		}
 	}
 
-	/** Get the quick message */
+	/** Get the message pattern */
 	@Override
-	public QuickMessage getQuickMessage() {
-		return quick_message;
+	public MsgPattern getMsgPattern() {
+		return msg_pattern;
 	}
 
 	/** Beacon enabled flag */

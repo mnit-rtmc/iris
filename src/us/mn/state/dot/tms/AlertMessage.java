@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,9 @@ import us.mn.state.dot.sonar.SonarObject;
 /**
  * Alert Configuration Message.
  *
- * Associates an alert configuration with an alert period, sign group and quick
- * message to control which signs are eligible for inclusion in an alert and
- * which message template to use.
+ * Associates an alert configuration with an alert period, sign group and
+ * message pattern to control which signs are eligible for inclusion in an
+ * alert and which message pattern to use.
  *
  * @author Gordon Parikh
  * @author Douglas Lau
@@ -41,9 +41,9 @@ public interface AlertMessage extends SonarObject {
 	/** Get the alert period (ordinal of AlertPeriod enum) */
 	int getAlertPeriod();
 
-	/** Set the quick message template */
-	void setQuickMessage(QuickMessage qm);
+	/** Set the message pattern */
+	void setMsgPattern(MsgPattern pat);
 
-	/** Get the quick message template */
-	QuickMessage getQuickMessage();
+	/** Get the message pattern */
+	MsgPattern getMsgPattern();
 }

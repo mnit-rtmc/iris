@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2021  Minnesota Department of Transportation
+ * Copyright (C) 2008-2022  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,46 +27,46 @@ import javax.swing.JComboBox;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.DmsSignGroupHelper;
-import us.mn.state.dot.tms.QuickMessage;
-import us.mn.state.dot.tms.QuickMessageHelper;
+import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
- * The quick message combobox is a widget which allows the user to select
- * a precomposed "quick" message.  When the user changes a quick message
+ * The message pattern combobox is a widget which allows the user to select
+ * a message pattern.  When the user changes a message pattern
  * selection via this combobox, the dispatcher is flagged that it should update
  * its widgets with the newly selected message.
  *
- * @see us.mn.state.dot.tms.QuickMessage
+ * @see us.mn.state.dot.tms.MsgPattern
  * @see us.mn.state.dot.tms.client.dms.DMSDispatcher
  *
- * @author Michael Darter
  * @author Douglas Lau
+ * @author Michael Darter
  */
-public class QuickMessageCBox extends JComboBox<QuickMessage> {
+public class MsgPatternCBox extends JComboBox<MsgPattern> {
 
-	/** Check if a quick message should be included in combo box */
-	static private boolean isValidMulti(QuickMessage qm) {
-		MultiString ms = new MultiString(qm.getMulti());
+	/** Check if a message pattern should be included in combo box */
+	static private boolean isValidMulti(MsgPattern pat) {
+		MultiString ms = new MultiString(pat.getMulti());
 		return ms.isValid() && !ms.isSpecial();
 	}
 
-	/** Lookup a quick message by name, or QuickMessage object.
-	 * @return Quick message or null if not found. */
-	static private QuickMessage lookupQuickMsg(Object obj) {
-		if (obj instanceof QuickMessage)
-			return (QuickMessage) obj;
+	/** Lookup a message pattern by name, or MsgPattern object.
+	 * @return Message pattern or null if not found. */
+	static private MsgPattern lookupMsgPattern(Object obj) {
+		if (obj instanceof MsgPattern)
+			return (MsgPattern) obj;
 		else if (obj instanceof String)
-			return QuickMessageHelper.lookup((String) obj);
+			return MsgPatternHelper.lookup((String) obj);
 		else
 			return null;
 	}
 
-	/** Combo box model for quick messages */
-	private final DefaultComboBoxModel<QuickMessage> model =
-		new DefaultComboBoxModel<QuickMessage>();
+	/** Combo box model for message patterns */
+	private final DefaultComboBoxModel<MsgPattern> model =
+		new DefaultComboBoxModel<MsgPattern>();
 
 	/** DMS dispatcher */
 	private final DMSDispatcher dispatcher;
@@ -82,8 +82,8 @@ public class QuickMessageCBox extends JComboBox<QuickMessage> {
 	 * callbacks to this class.  This prevents infinite loops. */
 	private int adjusting = 0;
 
-	/** Create a new quick message combo box */
-	public QuickMessageCBox(DMSDispatcher d) {
+	/** Create a new message pattern combo box */
+	public MsgPatternCBox(DMSDispatcher d) {
 		setModel(model);
 		dispatcher = d;
 		setEditable(true);
@@ -116,64 +116,64 @@ public class QuickMessageCBox extends JComboBox<QuickMessage> {
 	private void handleEditorFocusLost(String item) {
 		String name = item.replace(" ", "");
 		getEditor().setItem(name);
-		QuickMessage qm = lookupQuickMsg(name);
-		if (qm != null)
-			setSelectedItem(qm);
+		MsgPattern pat = lookupMsgPattern(name);
+		if (pat != null)
+			setSelectedItem(pat);
 	}
 
-	/** Update the dispatcher with the selected quick message */
+	/** Update the dispatcher with the selected message pattern */
 	private void updateDispatcher() {
 		if (adjusting == 0) {
-			dispatcher.setQuickMessage(getSelectedMessage());
+			dispatcher.setMsgPattern(getSelectedMessage());
 			dispatcher.selectPreview(true);
 		}
 	}
 
-	/** Get the currently selected quick message */
-	public QuickMessage getSelectedMessage() {
+	/** Get the currently selected message pattern */
+	public MsgPattern getSelectedMessage() {
 		Object item = getSelectedItem();
-		return (item instanceof QuickMessage)
-		      ? (QuickMessage) item
+		return (item instanceof MsgPattern)
+		      ? (MsgPattern) item
 		      : null;
 	}
 
 	/** Set selected item, but only if it is different from the
 	 * currently selected item.  Triggers a call to actionPerformed().
-	 * @param obj May be a String, or QuickMessage. */
+	 * @param obj May be a String, or MsgPattern. */
 	@Override
 	public void setSelectedItem(Object obj) {
-		QuickMessage qm = lookupQuickMsg(obj);
-		if (qm != getSelectedMessage())
-			super.setSelectedItem(qm);
+		MsgPattern pat = lookupMsgPattern(obj);
+		if (pat != getSelectedMessage())
+			super.setSelectedItem(pat);
 	}
 
-	/** Populate the quick message model, with sorted quick messages */
+	/** Populate the message pattern model, sorted */
 	public void populateModel(DMS dms) {
-		TreeSet<QuickMessage> msgs = createMessageSet(dms);
+		TreeSet<MsgPattern> msgs = createMessageSet(dms);
 		adjusting++;
 		model.removeAllElements();
 		model.addElement(null);
-		for (QuickMessage qm: msgs)
-			model.addElement(qm);
+		for (MsgPattern pat: msgs)
+			model.addElement(pat);
 		adjusting--;
 	}
 
-	/** Create a set of quick messages for the specified DMS */
-	private TreeSet<QuickMessage> createMessageSet(DMS dms) {
-		TreeSet<QuickMessage> msgs = new TreeSet<QuickMessage>(
-			new NumericAlphaComparator<QuickMessage>());
+	/** Create a set of message patterns for the specified DMS */
+	private TreeSet<MsgPattern> createMessageSet(DMS dms) {
+		TreeSet<MsgPattern> msgs = new TreeSet<MsgPattern>(
+			new NumericAlphaComparator<MsgPattern>());
 		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
 		while (it.hasNext()) {
 			DmsSignGroup dsg = it.next();
 			if (dsg.getDms() == dms) {
 				SignGroup sg = dsg.getSignGroup();
-				Iterator<QuickMessage> qit =
-					QuickMessageHelper.iterator();
-				while (qit.hasNext()) {
-					QuickMessage qm = qit.next();
-					if (qm.getSignGroup() == sg) {
-						if (isValidMulti(qm))
-							msgs.add(qm);
+				Iterator<MsgPattern> pit =
+					MsgPatternHelper.iterator();
+				while (pit.hasNext()) {
+					MsgPattern pat = pit.next();
+					if (pat.getSignGroup() == sg) {
+						if (isValidMulti(pat))
+							msgs.add(pat);
 					}
 				}
 			}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2021  Minnesota Department of Transportation
+ * Copyright (C) 2018-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.InvalidMsgException;
-import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignConfig;
@@ -38,12 +38,12 @@ import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
- * A panel for editing the properties of a quick message.
+ * A panel for editing the properties of a message pattern.
  *
  * @author Douglas Lau
  */
-public class QuickMessagePanel extends IPanel
-	implements ProxyView<QuickMessage>
+public class MsgPatternPanel extends IPanel
+	implements ProxyView<MsgPattern>
 {
 	/** MULTI text area */
 	private final JTextArea multi_txt = new JTextArea();
@@ -58,7 +58,7 @@ public class QuickMessagePanel extends IPanel
 	private final Session session;
 
 	/** Proxy watcher */
-	private final ProxyWatcher<QuickMessage> watcher;
+	private final ProxyWatcher<MsgPattern> watcher;
 
 	/** Edit mode listener */
 	private final EditModeListener edit_lsnr = new EditModeListener() {
@@ -67,28 +67,28 @@ public class QuickMessagePanel extends IPanel
 		}
 	};
 
-	/** Quick message being edited */
-	private QuickMessage quick_msg;
+	/** Message pattern being edited */
+	private MsgPattern msg_pattern;
 
-	/** Set the quick message */
-	public void setQuickMsg(QuickMessage qm) {
-		watcher.setProxy(qm);
-		updatePixelPanel(qm);
+	/** Set the message pattern */
+	public void setMsgPattern(MsgPattern pat) {
+		watcher.setProxy(pat);
+		updatePixelPanel(pat);
 	}
 
 	/** Create the detector panel */
-	public QuickMessagePanel(Session s, boolean r) {
+	public MsgPatternPanel(Session s, boolean r) {
 		session = s;
-		TypeCache<QuickMessage> cache =
-			s.getSonarState().getDmsCache().getQuickMessages();
-		watcher = new ProxyWatcher<QuickMessage>(cache, this, false);
+		TypeCache<MsgPattern> cache =
+			s.getSonarState().getDmsCache().getMsgPatterns();
+		watcher = new ProxyWatcher<MsgPattern>(cache, this, false);
 	}
 
 	/** Initialize the panel */
 	@Override
 	public void initialize() {
 		super.initialize();
-		add("quick.message.multi");
+		add("msg.pattern.multi");
 		add(multi_txt, Stretch.FULL);
 		multi_txt.setWrapStyleWord(false);
 		add(createPreviewPanel(), Stretch.FULL);
@@ -119,21 +119,21 @@ public class QuickMessagePanel extends IPanel
 
 	/** Set the MULTI string */
 	private void setMulti(String m) {
-		QuickMessage qm = quick_msg;
-		if (qm != null) {
+		MsgPattern pat = msg_pattern;
+		if (pat != null) {
 			MultiString ms = new MultiString(m).normalize();
-			qm.setMulti(ms.toString());
+			pat.setMulti(ms.toString());
 		}
-		updatePixelPanel(qm);
+		updatePixelPanel(pat);
 	}
 
 	/** Update pixel panel preview */
-	private void updatePixelPanel(QuickMessage qm) {
-		if (qm != null) {
-			SignConfig sc = qm.getSignConfig();
+	private void updatePixelPanel(MsgPattern pat) {
+		if (pat != null) {
+			SignConfig sc = pat.getSignConfig();
 			if (sc != null) {
 				updatePixelPanel(sc, new MultiString(
-					qm.getMulti()));
+					pat.getMulti()));
 				return;
 			}
 		}
@@ -188,8 +188,8 @@ public class QuickMessagePanel extends IPanel
 
 	/** Update the edit mode */
 	public void updateEditMode() {
-		QuickMessage qm = quick_msg;
-		multi_txt.setEnabled(session.canWrite(qm, "multi"));
+		MsgPattern pat = msg_pattern;
+		multi_txt.setEnabled(session.canWrite(pat, "multi"));
 	}
 
 	/** Called when all proxies have been enumerated (from ProxyView). */
@@ -198,20 +198,20 @@ public class QuickMessagePanel extends IPanel
 
 	/** Update one attribute (from ProxyView). */
 	@Override
-	public void update(QuickMessage qm, String a) {
+	public void update(MsgPattern pat, String a) {
 		if (null == a) {
-			quick_msg = qm;
+			msg_pattern = pat;
 			updateEditMode();
 		}
 		if (null == a || a.equals("multi"))
-			multi_txt.setText(qm.getMulti());
+			multi_txt.setText(pat.getMulti());
 	}
 
 	/** Clear all attributes (from ProxyView). */
 	@Override
 	public void clear() {
 		setPager(null);
-		quick_msg = null;
+		msg_pattern = null;
 		multi_txt.setEnabled(false);
 		multi_txt.setText("");
 	}

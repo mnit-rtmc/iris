@@ -47,7 +47,7 @@ public class FontFinder {
 	public FontFinder(DMS dms) {
 		font_nums.add(DMSHelper.getDefaultFontNum(dms));
 		groups = findGroups(dms);
-		findQuickMessageTags();
+		findMsgPatternTags();
 		findSignTextTags();
 		findDmsActionTags();
 	}
@@ -75,14 +75,14 @@ public class FontFinder {
 		return g;
 	}
 
-	/** Find font tags in all quick messages for the sign's groups */
-	private void findQuickMessageTags() {
-		Iterator<QuickMessage> it = QuickMessageHelper.iterator();
+	/** Find font tags in all message patterns for the sign's groups */
+	private void findMsgPatternTags() {
+		Iterator<MsgPattern> it = MsgPatternHelper.iterator();
 		while (it.hasNext()) {
-			QuickMessage qm = it.next();
-			SignGroup sg = qm.getSignGroup();
+			MsgPattern pat = it.next();
+			SignGroup sg = pat.getSignGroup();
 			if (sg != null && groups.contains(sg))
-				findFontTags(qm.getMulti());
+				findFontTags(pat.getMulti());
 		}
 	}
 
@@ -102,9 +102,9 @@ public class FontFinder {
 		while (it.hasNext()) {
 			DmsAction da = it.next();
 			SignGroup sg = da.getSignGroup();
-			QuickMessage qm = da.getQuickMessage();
-			if (sg != null && qm != null && groups.contains(sg))
-				findFontTags(qm.getMulti());
+			MsgPattern pat = da.getMsgPattern();
+			if (sg != null && pat != null && groups.contains(sg))
+				findFontTags(pat.getMulti());
 		}
 	}
 

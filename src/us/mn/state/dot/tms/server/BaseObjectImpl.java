@@ -97,7 +97,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		DMSImpl.loadAll();
 		SignGroupImpl.loadAll();
 		DmsSignGroupImpl.loadAll();
-		QuickMessageImpl.loadAll();
+		MsgPatternImpl.loadAll();
 		SignTextImpl.loadAll();
 		GateArmArrayImpl.loadAll();
 		GateArmImpl.loadAll();
@@ -315,11 +315,11 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		      : null;
 	}
 
-	/** Lookup a quick message */
-	static protected QuickMessageImpl lookupQuickMessage(String name) {
-		SonarObject so = lookupObject(QuickMessageImpl.SONAR_TYPE,name);
-		return (so instanceof QuickMessageImpl)
-		      ? (QuickMessageImpl) so
+	/** Lookup a message pattern */
+	static protected MsgPatternImpl lookupMsgPattern(String name) {
+		SonarObject so = lookupObject(MsgPatternImpl.SONAR_TYPE, name);
+		return (so instanceof MsgPatternImpl)
+		      ? (MsgPatternImpl) so
 		      : null;
 	}
 

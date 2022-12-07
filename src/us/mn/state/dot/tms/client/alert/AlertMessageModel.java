@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,8 +27,8 @@ import us.mn.state.dot.tms.AlertConfig;
 import us.mn.state.dot.tms.AlertMessage;
 import us.mn.state.dot.tms.AlertMessageHelper;
 import us.mn.state.dot.tms.AlertPeriod;
-import us.mn.state.dot.tms.QuickMessage;
-import us.mn.state.dot.tms.QuickMessageHelper;
+import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -53,14 +53,14 @@ public class AlertMessageModel extends ProxyTableModel<AlertMessage> {
 		);
 	}
 
-	/** Lookup a quick message */
-	static private QuickMessage lookupQuickMessage(Object value) {
+	/** Lookup a message pattern */
+	static private MsgPattern lookupMsgPattern(Object value) {
 		String v = value.toString().trim();
 		if (v.length() > 0) {
-			QuickMessage qm = QuickMessageHelper.lookup(v);
-			if (null == qm)
-				showHint("quick.message.unknown.hint");
-			return qm;
+			MsgPattern pat = MsgPatternHelper.lookup(v);
+			if (null == pat)
+				showHint("msg.pattern.unknown.hint");
+			return pat;
 		} else
 			return null;
 	}
@@ -89,17 +89,15 @@ public class AlertMessageModel extends ProxyTableModel<AlertMessage> {
 					<AlertPeriod>(AlertPeriod.VALUES));
 			}
 		});
-		cols.add(new ProxyColumn<AlertMessage>("alert.quick.message",
-			120)
-		{
+		cols.add(new ProxyColumn<AlertMessage>("msg.pattern", 120) {
 			public Object getValueAt(AlertMessage am) {
-				return am.getQuickMessage();
+				return am.getMsgPattern();
 			}
 			public boolean isEditable(AlertMessage am) {
 				return canWrite(am);
 			}
 			public void setValueAt(AlertMessage am, Object value) {
-				am.setQuickMessage(lookupQuickMessage(value));
+				am.setMsgPattern(lookupMsgPattern(value));
 			}
 		});
 		return cols;
@@ -117,7 +115,7 @@ public class AlertMessageModel extends ProxyTableModel<AlertMessage> {
 			}
 		});
 		sorter.setComparator(1,
-			new NumericAlphaComparator<QuickMessage>());
+			new NumericAlphaComparator<MsgPattern>());
 		ArrayList<RowSorter.SortKey> keys =
 			new ArrayList<RowSorter.SortKey>();
 		keys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));

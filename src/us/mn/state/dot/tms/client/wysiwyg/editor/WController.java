@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group
+ * Copyright (C) 2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +13,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import java.awt.Color;
@@ -44,8 +44,8 @@ import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.MsgCombining;
-import us.mn.state.dot.tms.QuickMessage;
-import us.mn.state.dot.tms.QuickMessageHelper;
+import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -142,7 +142,7 @@ public class WController {
 	/** Sign/Group and Message being edited */
 	private DMS sign;
 	private SignGroup sg;
-	private QuickMessage qm;
+	private MsgPattern pattern;
 	private String multiString = null;
 	private int msgCombining = MsgCombining.DISABLE.ordinal();
 
@@ -262,16 +262,16 @@ public class WController {
 		setSignGroup(g);
 		init(e);
 	}
-	
-	public WController(WMsgEditorForm e, QuickMessage q, DMS d) {
+
+	public WController(WMsgEditorForm e, MsgPattern pat, DMS d) {
 		setSign(d);
-		setQuickMessage(q);
+		setMsgPattern(pat);
 		init(e);
 	}
-	
-	public WController(WMsgEditorForm e, QuickMessage q, SignGroup g) {
+
+	public WController(WMsgEditorForm e, MsgPattern pat, SignGroup g) {
 		setSignGroup(g);
-		setQuickMessage(q);
+		setMsgPattern(pat);
 		init(e);
 	}
 	
@@ -429,19 +429,19 @@ public class WController {
 		update(false);
 	}
 	
-	/** Set the quick message being edited */
-	public void setQuickMessage(QuickMessage q) {
-		qm = q;
-		
-		// get the MULTI string text from the quick message
-		if (qm != null) {
-			multiString = qm.getMulti();
-			msgCombining = qm.getMsgCombining();
+	/** Set the message pattern being edited */
+	public void setMsgPattern(MsgPattern pat) {
+		pattern = pat;
+
+		// get the MULTI string from the pattern
+		if (pattern != null) {
+			multiString = pattern.getMulti();
+			msgCombining = pattern.getMsgCombining();
 		} else {
 			multiString = "";
 			msgCombining = MsgCombining.DISABLE.ordinal();
 		}
-		
+
 		update();
 	}
 	
@@ -3459,92 +3459,91 @@ public class WController {
 	
 	/** Return whether or not the current message text has been saved. */
 	public boolean isMessageSaved() {
-		// check the MULTI string against the current QuickMessage
+		// check the MULTI string against the current MsgPattern
 		updateMultiString();
-		return multiString.equals(qm.getMulti()) &&
-			(editor.getMsgCombining() == qm.getMsgCombining());
+		return multiString.equals(pattern.getMulti()) &&
+			(editor.getMsgCombining() == pattern.getMsgCombining());
 	}
-	
-	/** Save the current MULTI string in the quick message */
+
+	/** Save the current MULTI string in the message pattern */
 	public Action saveMessage = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
 			// update our MULTI string then save the message
 			updateMultiString();
-			qm.setMulti(multiString);
-			qm.setMsgCombining(editor.getMsgCombining());
+			pattern.setMulti(multiString);
+			pattern.setMsgCombining(editor.getMsgCombining());
 		}
 	};
-	
-	/** Save the current MULTI string in the quick message */
+
+	/** Save the current MULTI string in the message pattern */
 	WController wc = this;
 	public Action saveMessageAs = new AbstractAction() {
 		public void actionPerformed(ActionEvent e) {
 			// open a form to get the new message name
 			// the new form will trigger the rest
 			session.getDesktop().show(new WMsgNewMsgForm(session, wc,
-					qm.getName()));
+				pattern.getName()));
 		}
 	};
-	
-	/** Save a new quick message with the given name (using the current MULTI
-	 *  string) and start editing it.
-	 */
-	public void saveNewQuickMessage(String msgName) {
-		// NOTE we know there is a sign/sign group associated with us, so we
-		// don't have to make those
-		
+
+	/** Save a new message pattern with the given name (using the current
+	 * MULTI string) and start editing it. */
+	public void saveNewMsgPattern(String msgName) {
+		// NOTE we know there is a sign/sign group associated with us,
+		// so we don't have to make those
+
 		// first update our MULTI string
 		updateMultiString();
-		
+
 		// use a worker to do this part since it could take a bit
-		IWorker<QuickMessage> worker = new IWorker<QuickMessage>() {
+		IWorker<MsgPattern> worker = new IWorker<MsgPattern>() {
 			@Override
-			protected QuickMessage doInBackground() {
-				// make the quick message
-				TypeCache<QuickMessage> qmCache = session.getSonarState().
-						getDmsCache().getQuickMessages();
-				HashMap<String, Object> qmAttrs =
-						new HashMap<String, Object>();
-				qmAttrs.put("multi", multiString);
-				qmAttrs.put("msg_combining", editor.getMsgCombining());
+			protected MsgPattern doInBackground() {
+				// make the message pattern
+				TypeCache<MsgPattern> cache = session.getSonarState().
+					getDmsCache().getMsgPatterns();
+				HashMap<String, Object> attrs =
+					new HashMap<String, Object>();
+				attrs.put("multi", multiString);
+				attrs.put("msg_combining", editor.getMsgCombining());
 				if (sg != null)
-					qmAttrs.put("sign_group", sg);
+					attrs.put("sign_group", sg);
 				else {
 					// if we're not editing a sign group, get the single-sign
 					// group
 					SignGroup ssg = SignGroupHelper.lookup(sign.getName());
-					qmAttrs.put("sign_group", ssg);
+					attrs.put("sign_group", ssg);
 				}
-				// save the object, then get the object and set our quick message
-				qmCache.createObject(msgName, qmAttrs);
-				QuickMessage q = null;
-				
+				// save the object, then get the object and set our message pattern
+				cache.createObject(msgName, attrs);
+				MsgPattern pat = null;
+
 				// wait for SONAR to create the new message
 				long tStart = System.nanoTime();
-				while (q == null) {
-					q = QuickMessageHelper.lookup(msgName);
+				while (pat == null) {
+					pat = MsgPatternHelper.lookup(msgName);
 					long tElapsed = System.nanoTime() - tStart;
 					if (tElapsed > MAX_WAIT)
 						break;
 				}
-				return q;
+				return pat;
 			}
-			
+
 			@Override
 			public void done() {
-				QuickMessage q = getResult();
-				if (q != null) {
-					// if we get a quick message, set it as the current one 
-					qm = q;
-					
+				MsgPattern pat = getResult();
+				if (pat != null) {
+					// if we get a pattern, set it as the current one
+					pattern = pat;
+
 					// update the window title too
-					editor.setWindowTitle(qm);
+					editor.setWindowTitle(pattern);
 				} else {
 					// if we didn't, pop up a dialog telling the user that
 					// there was an error and they are still editing the same
 					// message
 					desktop.show(new WMsgErrorDialog(
-							"wysiwyg.new_message.saveas_error"));
+						"wysiwyg.new_message.saveas_error"));
 				}
 			}
 		};
@@ -3556,7 +3555,7 @@ public class WController {
 		if (undoable)
 			// save state to allow undoing
 			saveState();
-		
+
 		multiString = ms;
 		wmsg.parseMulti(multiString);
 		update();
