@@ -50,7 +50,7 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 	/** Check if a message pattern should be included in combo box */
 	static private boolean isValidMulti(MsgPattern pat) {
 		MultiString ms = new MultiString(pat.getMulti());
-		return ms.isValid() && !ms.isSpecial();
+		return ms.isValidMulti();
 	}
 
 	/** Lookup a message pattern by name, or MsgPattern object.

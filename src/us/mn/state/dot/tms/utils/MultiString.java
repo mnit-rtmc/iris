@@ -89,24 +89,24 @@ public class MultiString {
 		public void addClearGuideAdvisory(String dms, int rid,
 			int tsp, String mode, int ridx) {}
 		@Override
+		public void addExitWarning(String did, int occ) {}
+		@Override
 		public void addFeed(String fid) {}
 		@Override
 		public void addParking(String pid, String l_txt, String c_txt){}
 		@Override
 		public void addSlowWarning(int spd, int dist, String mode) {}
 		@Override
-		public void addExitWarning(String did, int occ) {}
+		public void addStandby() {}
 		@Override
-		public void addTolling(String mode, String[] zones) {}
+		public void addTimeAction(String dir, String format) {}
 		@Override
 		public void addTravelTime(String sid, OverLimitMode mode,
 			String o_txt) {}
 		@Override
+		public void addTolling(String mode, String[] zones) {}
+		@Override
 		public void addSpeedAdvisory() {}
-		@Override
-		public void addStandby() {}
-		@Override
-		public void addTimeAction(String dir, String format) {}
 	}
 
 	/** Filter brackets in a span of text */
@@ -160,28 +160,28 @@ public class MultiString {
 			parseCharSpacing(null, cb);
 		else if (ltag.startsWith("tr"))
 			parseTextRectangle(tag.substring(2), cb);
-		else if (ltag.startsWith("tt"))
-			parseTravelTime(tag.substring(2), cb);
-		else if (ltag.startsWith("vsa"))
-			cb.addSpeedAdvisory();
 		else if (ltag.startsWith("cg"))
 			parseClearGuideAdvisory(tag.substring(2), cb);
-		else if (ltag.startsWith("slow"))
-			parseSlowWarning(tag.substring(4), cb);
 		else if (ltag.startsWith("exit"))
 			parseExitWarning(tag.substring(4), cb);
 		else if (ltag.startsWith("feed"))
 			cb.addFeed(tag.substring(4));
-		else if (ltag.startsWith("tz"))
-			parseTolling(tag.substring(2), cb);
-		else if (ltag.startsWith("pa"))
-			parseParking(tag, cb);
-		else if (ltag.startsWith("ta"))
-			parseTimeAction(tag.substring(2), cb);
 		else if (ltag.startsWith("loc"))
 			parseLocator(tag.substring(3), cb);
+		else if (ltag.startsWith("pa"))
+			parseParking(tag, cb);
+		else if (ltag.startsWith("slow"))
+			parseSlowWarning(tag.substring(4), cb);
 		else if (ltag.startsWith("standby"))
 			cb.addStandby();
+		else if (ltag.startsWith("ta"))
+			parseTimeAction(tag.substring(2), cb);
+		else if (ltag.startsWith("tt"))
+			parseTravelTime(tag.substring(2), cb);
+		else if (ltag.startsWith("tz"))
+			parseTolling(tag.substring(2), cb);
+		else if (ltag.startsWith("vsa"))
+			cb.addSpeedAdvisory();
 		else
 			cb.unsupportedTag(tag);
 	}
@@ -541,7 +541,7 @@ public class MultiString {
 		return multi;
 	}
 
-	/** Validate the MULTI string */
+	/** Validate the MULTI string (may contain action / locator tags) */
 	public boolean isValid() {
 		final boolean[] valid = new boolean[] { true };
 		parse(new MultiAdapter() {
@@ -552,6 +552,65 @@ public class MultiString {
 				Matcher m = SPAN.matcher(s);
 				if (!m.matches())
 					valid[0] = false;
+			}
+		});
+		return valid[0];
+	}
+
+	/** Validate the MULTI string (only standard MULTI) */
+	public boolean isValidMulti() {
+		final boolean[] valid = new boolean[] { true };
+		parse(new MultiAdapter() {
+			@Override public void unsupportedTag(String t) {
+				valid[0] = false;
+			}
+			@Override public void addSpan(String s) {
+				Matcher m = SPAN.matcher(s);
+				if (!m.matches())
+					valid[0] = false;
+			}
+			@Override public void addClearGuideAdvisory(
+				String dms, int rid, int tsp, String mode,
+				int ridx)
+			{
+				valid[0] = false;
+			}
+			@Override
+			public void addExitWarning(String did, int occ) {
+				valid[0] = false;
+			}
+			@Override public void addFeed(String fid) {
+				valid[0] = false;
+			}
+			@Override
+			public void addParking(String p, String lt, String ct) {
+				valid[0] = false;
+			}
+			@Override
+			public void addSlowWarning(int spd, int dist, String m){
+				valid[0] = false;
+			}
+			@Override public void addStandby() {
+				valid[0] = false;
+			}
+			@Override
+			public void addTimeAction(String dir, String format) {
+				valid[0] = false;
+			}
+			@Override public void addTravelTime(String sid,
+				OverLimitMode me, String o_txt)
+			{
+				valid[0] = false;
+			}
+			@Override
+			public void addTolling(String mode, String[] zones) {
+				valid[0] = false;
+			}
+			@Override public void addSpeedAdvisory() {
+				valid[0] = false;
+			}
+			@Override public void addLocator(String code) {
+				valid[0] = false;
 			}
 		});
 		return valid[0];
@@ -860,62 +919,6 @@ public class MultiString {
 		for (int i = 0; i < words.length; ++i)
 			words[i] = words[i].trim();
 		return Arrays.asList(words);
-	}
-
-	/** Check for DMS action / incident locator tags */
-	public boolean isSpecial() {
-		final boolean[] special = new boolean[] { false };
-		parse(new MultiAdapter() {
-			@Override
-			public void addClearGuideAdvisory(String dms, int rid,
-				int tsp, String mode, int ridx)
-			{
-				special[0] = true;
-			}
-			@Override
-			public void addExitWarning(String did, int occ) {
-				special[0] = true;
-			}
-			@Override
-			public void addTravelTime(String sid, OverLimitMode me,
-				String o_txt)
-			{
-				special[0] = true;
-			}
-			@Override
-			public void addSpeedAdvisory() {
-				special[0] = true;
-			}
-			@Override
-			public void addSlowWarning(int spd, int dist, String m){
-				special[0] = true;
-			}
-			@Override
-			public void addFeed(String fid) {
-				special[0] = true;
-			}
-			@Override
-			public void addTolling(String mode, String[] zones) {
-				special[0] = true;
-			}
-			@Override
-			public void addParking(String p, String lt, String ct) {
-				special[0] = true;
-			}
-			@Override
-			public void addStandby() {
-				special[0] = true;
-			}
-			@Override
-			public void addTimeAction(String dir, String format) {
-				special[0] = true;
-			}
-			@Override
-			public void addLocator(String code) {
-				special[0] = true;
-			}
-		});
-		return special[0];
 	}
 
 	/** Check if valid shared first (for combining) */
