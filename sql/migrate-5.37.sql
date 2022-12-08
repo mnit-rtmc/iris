@@ -160,6 +160,12 @@ DELETE FROM iris.system_attribute WHERE name = 'dms_quickmsg_store_enable';
 -- Remove DMS message min pages system attribute
 DELETE FROM iris.system_attribute WHERE name = 'dms_message_min_pages';
 
+-- Remove DMS max lines system attribute
+DELETE FROM iris.system_attribute WHERE name = 'dms_max_lines';
+
+-- Remove DMS manufacturer enable system attribute
+DELETE FROM iris.system_attribute WHERE name = 'dms_manufacturer_enable';
+
 -- Replace quick_message with msg_pattern
 DROP VIEW quick_message_view;
 DROP VIEW dms_toll_zone_view;
