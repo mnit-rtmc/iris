@@ -50,7 +50,7 @@ public class SignMessageComposer extends JPanel {
 	private final int max_lines;
 
 	/** Minimum number of pages for a sign message */
-	private final int min_pages;
+	private final int min_pages = 1;
 
 	/** Number of pages on selected sign */
 	private int n_pages;
@@ -98,7 +98,6 @@ public class SignMessageComposer extends JPanel {
 		dispatcher = ds;
 		max_lines = SystemAttrEnum.DMS_MAX_LINES.getInt();
 		n_lines = max_lines;
-		min_pages = SystemAttrEnum.DMS_MESSAGE_MIN_PAGES.getInt();
 		n_pages = min_pages;
 		pages = new ComposerPagePanel[DMS_MESSAGE_MAX_PAGES];
 		for (int i = 0; i < pages.length; i++)
