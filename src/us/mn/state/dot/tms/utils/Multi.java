@@ -180,14 +180,14 @@ public interface Multi {
 	/** Add a speed advisory */
 	void addSpeedAdvisory();
 
-	/** Add a ClearGuide advisory
+	/** Add a ClearGuide advisory.
 	 * @param dms DMS name
 	 * @param rid CG route id
 	 * @param tsp Threshold speed
 	 * @param mode Variable to use: e.g. tt, delay
 	 * @param ridx Route index, zero based */
-	void addClearGuideAdvisory(
-		String dms, int rid, int tsp, String mode, int ridx);
+	void addClearGuideAdvisory(String dms, int rid, int tsp, String mode,
+		int ridx);
 
 	/** Add a slow traffic warning.
 	 * @param spd Highest speed to activate warning.

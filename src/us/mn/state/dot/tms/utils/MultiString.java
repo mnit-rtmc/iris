@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2021  Minnesota Department of Transportation
+ * Copyright (C) 2006-2022  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  * Copyright (C) 2019-2020  SRF Consulting Group
  * Copyright (C) 2021  Iteris Inc.
@@ -86,6 +86,9 @@ public class MultiString {
 		public void setTextRectangle(int x, int y, int w, int h) {}
 		// action tags not allowed in SignText
 		@Override
+		public void addClearGuideAdvisory(String dms, int rid,
+			int tsp, String mode, int ridx) {}
+		@Override
 		public void addFeed(String fid) {}
 		@Override
 		public void addParking(String pid, String l_txt, String c_txt){}
@@ -102,6 +105,8 @@ public class MultiString {
 		public void addSpeedAdvisory() {}
 		@Override
 		public void addStandby() {}
+		@Override
+		public void addTimeAction(String dir, String format) {}
 	}
 
 	/** Filter brackets in a span of text */
@@ -862,6 +867,16 @@ public class MultiString {
 		final boolean[] special = new boolean[] { false };
 		parse(new MultiAdapter() {
 			@Override
+			public void addClearGuideAdvisory(String dms, int rid,
+				int tsp, String mode, int ridx)
+			{
+				special[0] = true;
+			}
+			@Override
+			public void addExitWarning(String did, int occ) {
+				special[0] = true;
+			}
+			@Override
 			public void addTravelTime(String sid, OverLimitMode me,
 				String o_txt)
 			{
@@ -885,6 +900,14 @@ public class MultiString {
 			}
 			@Override
 			public void addParking(String p, String lt, String ct) {
+				special[0] = true;
+			}
+			@Override
+			public void addStandby() {
+				special[0] = true;
+			}
+			@Override
+			public void addTimeAction(String dir, String format) {
 				special[0] = true;
 			}
 			@Override
