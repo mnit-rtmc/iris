@@ -187,7 +187,7 @@ public class DMSHelper extends BaseHelper {
 			if (rb != null)
 				return rb.getLineCount();
 		}
-		return SystemAttrEnum.DMS_MAX_LINES.getInt();
+		return SignMessage.MAX_LINES;
 	}
 
 	/** Create a raster builder for a DMS.

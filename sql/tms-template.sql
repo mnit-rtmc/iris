@@ -174,7 +174,6 @@ dms_gps_jitter_m	100
 dms_high_temp_cutoff	60
 dms_lamp_test_timeout_secs	30
 dms_manufacturer_enable	true
-dms_max_lines	3
 dms_page_on_max_secs	10.0
 dms_page_on_min_secs	0.5
 dms_pixel_off_limit	2

@@ -29,6 +29,12 @@ public interface SignMessage extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "sign_message";
 
+	/** Maximum number of lines per page */
+	int MAX_LINES = 6;
+
+	/** Maximum allowed pages for a message */
+	int MAX_PAGES = 6;
+
 	/** Get the sign configuration */
 	SignConfig getSignConfig();
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2020  Minnesota Department of Transportation
+ * Copyright (C) 2008-2022  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -94,12 +94,11 @@ public class RasterBuilder {
 	public int getLineCount() {
 		int lh = getLineHeightPixels();
 		int ls = getLineSpacingPixels();
-		int l_max = SystemAttrEnum.DMS_MAX_LINES.getInt();
-		for (int lines = 1; lines < l_max; lines++) {
+		for (int lines = 1; lines < SignMessage.MAX_LINES; lines++) {
 			if (lh * (lines + 1) + ls * lines > height)
 				return lines;
 		}
-		return l_max;
+		return SignMessage.MAX_LINES;
 	}
 
 	/** Render a BitmapGraphic for each page */

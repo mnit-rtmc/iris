@@ -19,7 +19,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.IOException;
 import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.DMSType;
-import us.mn.state.dot.tms.SystemAttrEnum;
+import static us.mn.state.dot.tms.SignMessage.MAX_LINES;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.SignConfigImpl;
 import us.mn.state.dot.tms.server.SignDetailImpl;
@@ -303,8 +303,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	/** Estimate the line height (pixels) */
 	private int estimateLineHeight() {
 		int h = s_height.getInteger();
-		int m = SystemAttrEnum.DMS_MAX_LINES.getInt();
-		for (int i = m; i > 0; i--) {
+		for (int i = MAX_LINES; i > 0; i--) {
 			if (0 == h % i)
 				return h / i;
 		}

@@ -22,8 +22,9 @@ import javax.swing.JTabbedPane;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import static us.mn.state.dot.tms.SignMessage.MAX_LINES;
+import static us.mn.state.dot.tms.SignMessage.MAX_PAGES;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import static us.mn.state.dot.tms.SignMessageHelper.DMS_MESSAGE_MAX_PAGES;
 import us.mn.state.dot.tms.client.Session;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.MultiBuilder;
@@ -46,8 +47,6 @@ public class SignMessageComposer extends JPanel {
 	/** DMS dispatcher */
 	private final DMSDispatcher dispatcher;
 
-	/** Maximum number of lines on a sign */
-	private final int max_lines;
 
 	/** Minimum number of pages for a sign message */
 	private final int min_pages = 1;
@@ -96,13 +95,12 @@ public class SignMessageComposer extends JPanel {
 	{
 		session = s;
 		dispatcher = ds;
-		max_lines = SystemAttrEnum.DMS_MAX_LINES.getInt();
-		n_lines = max_lines;
+		n_lines = MAX_LINES;
 		n_pages = min_pages;
-		pages = new ComposerPagePanel[DMS_MESSAGE_MAX_PAGES];
+		pages = new ComposerPagePanel[MAX_PAGES];
 		for (int i = 0; i < pages.length; i++)
-			pages[i] = new ComposerPagePanel(this, max_lines, i);
-		misc_pnl = new ComposerMiscPanel(ds, this);
+			pages[i] = new ComposerPagePanel(this, n_lines, i);
+		misc_pnl = new ComposerMiscPanel(ds);
 		button_pnl = new ComposerButtonPanel(manager, ds, this);
 		layoutPanel();
 		initializeWidgets();
@@ -178,9 +176,9 @@ public class SignMessageComposer extends JPanel {
 
 	/** Calculate the number of pages for the selected sign */
 	private int calculateSignPages(SignTextModel stm) {
-		int ml = (stm != null) ? stm.getLastLine() : max_lines;
+		int ml = (stm != null) ? stm.getLastLine() : MAX_LINES;
 		int np = calculateSignPages(ml, n_lines);
-		return Math.min(DMS_MESSAGE_MAX_PAGES, Math.max(np, min_pages));
+		return Math.min(MAX_PAGES, Math.max(np, min_pages));
 	}
 
 	/** Calculate the number of pages for the sign.

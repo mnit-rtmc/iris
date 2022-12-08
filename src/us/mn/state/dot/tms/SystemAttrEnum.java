@@ -18,7 +18,6 @@
 package us.mn.state.dot.tms;
 
 import java.util.HashMap;
-import static us.mn.state.dot.tms.SignMessageHelper.DMS_MESSAGE_MAX_PAGES;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -72,7 +71,6 @@ public enum SystemAttrEnum {
 	DMS_HIGH_TEMP_CUTOFF(60, 35, 100),
 	DMS_LAMP_TEST_TIMEOUT_SECS(30, 5, 90),
 	DMS_MANUFACTURER_ENABLE(true, Change.RESTART_CLIENT),
-	DMS_MAX_LINES(3, 1, 12, Change.RESTART_CLIENT),
 	DMS_PAGE_ON_MAX_SECS(10.0f, 0f, 100f, Change.RESTART_CLIENT),
 	DMS_PAGE_ON_MIN_SECS(0.5f, 0f, 100f, Change.RESTART_CLIENT),
 	DMS_PIXEL_OFF_LIMIT(2, 1),
