@@ -52,7 +52,7 @@ in a message.
 
 Additional non-MULTI tags are supported in specific contexts, interpreted by
 IRIS and replaced with dynamic values:
-- [Aciton Tags], for use in scheduled DMS actions
+- [Action Tags], for use in scheduled DMS actions
 - [Locator Tags], for incident DMS deployment
 
 
