@@ -48,6 +48,15 @@ in a message.
 | Page off time        | 0.0 s              |
 | Character set        | eightBit (2)       |
 
+## Non-MULTI Tags
 
+Additional non-MULTI tags are supported in specific contexts, interpreted by
+IRIS and replaced with dynamic values:
+- [Aciton Tags], for use in scheduled DMS actions
+- [Locator Tags], for incident DMS deployment
+
+
+[Action Tags]: action_plans.html#dms-action-tags
 [DMS]: dms.html
+[Locator Tags]: incident_dms.html#locator-tags
 [NTCIP]: https://www.ntcip.org/document-numbers-and-status/
