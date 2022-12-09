@@ -208,7 +208,7 @@ public class SingleSignTab extends IPanel {
 			public void stateChanged(ChangeEvent e) {
 				selectPreview(!preview);
 				if ((0 == adjusting) && !preview)
-					updateMessageCurrent(selected);
+					updateMsgCurrent(selected);
 			}
 		});
 		current_pnl.addMouseListener(popper);
@@ -358,7 +358,7 @@ public class SingleSignTab extends IPanel {
 			updateStatus(dms);
 		if (null == a || (a.equals("msgCurrent") && !preview)) {
 			setMessage(dms);
-			updateMessageCurrent(dms);
+			updateMsgCurrent(dms);
 		}
 	}
 
@@ -402,7 +402,7 @@ public class SingleSignTab extends IPanel {
 	}
 
 	/** Update the current message */
-	private void updateMessageCurrent(DMS dms) {
+	private void updateMsgCurrent(DMS dms) {
 		adjusting++;
 		dispatcher.setSignMessage(dms);
 		adjusting--;
