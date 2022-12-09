@@ -246,8 +246,8 @@ public class SignTextModel {
 		return last_line;
 	}
 
-	/** Update the message library with the currently selected messages */
-	public void updateMessageLibrary() {
+	/** Update the library with the currently selected messages */
+	public void updateLibrary() {
 		for (SignTextComboBoxModel mdl: lines.values()) {
 			ClientSignText st = mdl.getEditedSignText();
 			if (st != null)

@@ -390,9 +390,9 @@ public class MessageComposer extends JPanel {
 	}
 
 	/** Update the message library with the currently selected messages */
-	public void updateMessageLibrary() {
+	public void updateLibrary() {
 		SignTextModel stm = st_model;
 		if (stm != null)
-			stm.updateMessageLibrary();
+			stm.updateLibrary();
 	}
 }

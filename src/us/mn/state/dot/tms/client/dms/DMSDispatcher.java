@@ -426,7 +426,7 @@ public class DMSDispatcher extends JPanel {
 			SignMessage sm = createMessage(dms);
 			if (sm != null)
 				dms.setMsgUser(sm);
-			composer.updateMessageLibrary();
+			composer.updateLibrary();
 		}
 		selectPreview(false);
 	}
