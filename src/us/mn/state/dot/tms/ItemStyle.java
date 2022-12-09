@@ -31,6 +31,7 @@ public enum ItemStyle {
 	/* Generic device styles */
 	AVAILABLE,
 	DEPLOYED,
+	UNDEPLOYED,
 	MAINTENANCE,
 	FAILED,
 	INACTIVE,

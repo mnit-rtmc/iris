@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneActionHelper;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.MeterActionHelper;
+import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -94,6 +95,8 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 			return proxy.getActive() && hasTimeAction(proxy);
 		case ACTIVE:
 			return proxy.getActive();
+		case UNDEPLOYED:
+			return proxy.getActive() && isUndeployed(proxy);
 		case ALL:
 			return true;
 		default:
@@ -104,6 +107,11 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	/** Check if the user is permitted to update the given action plan */
 	private boolean isWritePermitted(ActionPlan plan) {
 		return session.isWritePermitted(plan, "phase");
+	}
+
+	/** Test if an aciton plan is deployed */
+	private boolean isUndeployed(ActionPlan p) {
+		return PlanPhase.UNDEPLOYED.equals(p.getPhase().getName());
 	}
 
 	/** Test if an action plan has time actions */
