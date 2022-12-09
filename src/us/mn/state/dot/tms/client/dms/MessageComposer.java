@@ -162,37 +162,43 @@ public class MessageComposer extends JPanel {
 		gl.setAutoCreateContainerGaps(false);
 		// horizontal layout
 		GroupLayout.ParallelGroup hg0 = gl.createParallelGroup(
-			GroupLayout.Alignment.LEADING);
+			GroupLayout.Alignment.TRAILING);
 		hg0.addComponent(pattern_lbl)
 		   .addComponent(pattern_cbx)
 		   .addComponent(clear_btn);
-		GroupLayout.ParallelGroup hg1 = gl.createParallelGroup(
-			GroupLayout.Alignment.TRAILING);
-		hg1.addComponent(dur_lbl).addComponent(send_btn);
-		GroupLayout.ParallelGroup hg2 = gl.createParallelGroup(
-			GroupLayout.Alignment.LEADING);
-		hg2.addComponent(dur_cbx).addComponent(blank_btn);
+		GroupLayout.SequentialGroup hgb = gl.createSequentialGroup();
+		hgb.addComponent(send_btn)
+		   .addGap(UI.hgap)
+		   .addComponent(blank_btn);
+		GroupLayout.ParallelGroup hg1 = gl.createParallelGroup();
+		hg1.addComponent(dur_lbl)
+		   .addComponent(dur_cbx)
+		   .addGroup(hgb);
 		GroupLayout.SequentialGroup hg = gl.createSequentialGroup();
-		hg.addGroup(hg0)
+		hg.addContainerGap()
+		  .addGroup(hg0)
 		  .addGap(UI.hgap)
 		  .addComponent(page_tab)
 		  .addGap(UI.hgap)
 		  .addGroup(hg1)
-		  .addGroup(hg2);
+		  .addContainerGap();
 		gl.setHorizontalGroup(hg);
 		// vertical layout
+		int vgap = 16 * UI.vgap;
 		GroupLayout.SequentialGroup vg0 = gl.createSequentialGroup();
 		vg0.addComponent(pattern_lbl)
 		   .addGap(UI.vgap)
 		   .addComponent(pattern_cbx)
-		   .addGap(UI.vgap)
+		   .addGap(UI.vgap, vgap, vgap)
 		   .addComponent(clear_btn);
-		GroupLayout.ParallelGroup vgd = gl.createParallelGroup();
-		vgd.addComponent(dur_lbl).addComponent(dur_cbx);
 		GroupLayout.ParallelGroup vgb = gl.createParallelGroup();
 		vgb.addComponent(send_btn).addComponent(blank_btn);
 		GroupLayout.SequentialGroup vg1 = gl.createSequentialGroup();
-		vg1.addGroup(vgd).addGap(UI.vgap).addGroup(vgb);
+		vg1.addComponent(dur_lbl)
+		   .addGap(UI.vgap)
+		   .addComponent(dur_cbx)
+		   .addGap(UI.vgap, vgap, vgap)
+		   .addGroup(vgb);
 		GroupLayout.ParallelGroup vg = gl.createParallelGroup();
 		vg.addGroup(vg0);
 		vg.addComponent(page_tab);
