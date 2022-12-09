@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2021  Minnesota Department of Transportation
+ * Copyright (C) 2011-2022  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -53,8 +53,8 @@ public class MsgComboBox extends JComboBox<SignText> {
 	static private final SignText PROTOTYPE_SIGN_TEXT =
 		new ClientSignText("12345678901234567890");
 
-	/** Sign message composer containing the combo box */
-	private final SignMessageComposer composer;
+	/** Message composer containing the combo box */
+	private final MessageComposer composer;
 
 	/** Sign text line number */
 	private final short line;
@@ -83,7 +83,7 @@ public class MsgComboBox extends JComboBox<SignText> {
 
 	/** Create a message combo box.
 	 * @param c Sign message composer. */
-	public MsgComboBox(SignMessageComposer c, short ln) {
+	public MsgComboBox(MessageComposer c, short ln) {
 		composer = c;
 		line = ln;
 		setMaximumRowCount(21);

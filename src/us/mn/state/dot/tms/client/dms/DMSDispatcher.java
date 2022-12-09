@@ -17,6 +17,7 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
 import java.util.Iterator;
 import java.util.Set;
 import javax.swing.JPanel;
@@ -38,6 +39,7 @@ import us.mn.state.dot.tms.WordHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IOptionPane;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiString;
@@ -49,7 +51,7 @@ import static us.mn.state.dot.tms.utils.MultiString.makeCombined;
  *
  * @see us.mn.state.dot.tms.SignMessage
  * @see us.mn.state.dot.tms.client.dms.DMSPanelPager
- * @see us.mn.state.dot.tms.client.dms.SignMessageComposer
+ * @see us.mn.state.dot.tms.client.dms.MessageComposer
  *
  * @author Douglas Lau
  * @author Erik Engstrom
@@ -109,7 +111,106 @@ public class DMSDispatcher extends JPanel {
 	private final SingleSignTab singleTab;
 
 	/** Message composer widget */
-	private final SignMessageComposer composer;
+	private final MessageComposer composer;
+
+	/** Action to send message to selected sign */
+	private final IAction send_msg_act = new IAction("dms.send") {
+		protected void doActionPerformed(ActionEvent e) {
+			sendSelectedMessage();
+		}
+	};
+
+	/** Get action to send selected message */
+	public IAction getSendMsgAction() {
+		return send_msg_act;
+	}
+
+	/** Action to blank selected signs */
+	private final IAction blank_msg_act = new IAction("dms.blank") {
+		protected void doActionPerformed(ActionEvent e) {
+			sendBlankMessage();
+		}
+	};
+
+	/** Blank all selected DMS */
+	private void sendBlankMessage() {
+		for (DMS dms: sel_mdl.getSelected()) {
+			SignConfig sc = dms.getSignConfig();
+			if (sc != null) {
+				SignMessage sm = creator.createBlankMessage(sc);
+				if (sm != null)
+					dms.setMsgUser(sm);
+			}
+		}
+	}
+
+	/** Get action to blank selected signs */
+	public IAction getBlankMsgAction() {
+		return blank_msg_act;
+	}
+
+	/** Action to query message on selected signs */
+	private final IAction query_msg_act = new IAction("dms.query.msg") {
+		protected void doActionPerformed(ActionEvent e) {
+			queryMessage();
+		}
+	};
+
+	/** Query the current message on all selected signs */
+	private void queryMessage() {
+		for (DMS dms: sel_mdl.getSelected()) {
+			dms.setDeviceRequest(
+				DeviceRequest.QUERY_MESSAGE.ordinal());
+		}
+		selectPreview(false);
+	}
+
+	/** Get action to query message on selected signs */
+	public IAction getQueryMsgAction() {
+		return query_msg_act;
+	}
+
+	/** Action to query status of selected signs */
+	private final IAction query_stat_act = new IAction("dms.query.status")
+	{
+		protected void doActionPerformed(ActionEvent e) {
+			queryStatus();
+		}
+	};
+
+	/** Query the status of selected DMS */
+	private void queryStatus() {
+		for (DMS dms: sel_mdl.getSelected()) {
+			dms.setDeviceRequest(
+				DeviceRequest.QUERY_STATUS.ordinal());
+		}
+	}
+
+	/** Get action to query status of selected signs */
+	public IAction getQueryStatusAction() {
+		return query_stat_act;
+	}
+
+	/** Action to pixel test selected signs */
+	private final IAction pixel_test_act = new IAction("dms.test.pixels")
+	{
+		protected void doActionPerformed(ActionEvent e) {
+			requestPixelTest();
+		}
+	};
+
+	/** Pixel test all selected signs */
+	private void requestPixelTest() {
+		for (DMS dms: sel_mdl.getSelected()) {
+			dms.setDeviceRequest(
+				DeviceRequest.TEST_PIXELS.ordinal());
+		}
+	}
+
+	/** Get action to pixel test all selected signs */
+	public IAction getPixelTestAction() {
+		return pixel_test_act;
+	}
 
 	/** Composed MULTI string */
 	private String multi = "";
@@ -118,7 +219,7 @@ public class DMSDispatcher extends JPanel {
 	private MsgPattern msg_pattern = null;
 
 	/** Linked incident */
-	private Incident incident;
+	private Incident incident = null;
 
 	/** Create a new DMS dispatcher */
 	public DMSDispatcher(Session s, DMSManager manager) {
@@ -128,9 +229,10 @@ public class DMSDispatcher extends JPanel {
 		creator = new SignMessageCreator(s);
 		sel_mdl = manager.getSelectionModel();
 		singleTab = new SingleSignTab(session, this);
-		composer = new SignMessageComposer(session, this, manager);
+		composer = new MessageComposer(session, this, manager);
 		add(singleTab, BorderLayout.CENTER);
 		add(composer, BorderLayout.SOUTH);
+		manager.setDispatcher(this);
 	}
 
 	/** Initialize the dispatcher */
@@ -262,7 +364,7 @@ public class DMSDispatcher extends JPanel {
 	}
 
 	/** Send the currently selected message */
-	public void sendSelectedMessage() {
+	private void sendSelectedMessage() {
 		if (shouldSendMessage()) {
 			sendMessage();
 			removeInvalidSelections();
@@ -384,43 +486,6 @@ public class DMSDispatcher extends JPanel {
 		return creator.create(sc, inc_orig, ms, prio, d);
 	}
 
-	/** Blank the select DMS */
-	public void sendBlankMessage() {
-		for (DMS dms: sel_mdl.getSelected()) {
-			SignConfig sc = dms.getSignConfig();
-			if (sc != null) {
-				SignMessage sm = creator.createBlankMessage(sc);
-				if (sm != null)
-					dms.setMsgUser(sm);
-			}
-		}
-	}
-
-	/** Pixel test the selected DMS */
-	public void pixelTestDms() {
-		for (DMS dms: sel_mdl.getSelected()) {
-			dms.setDeviceRequest(
-				DeviceRequest.TEST_PIXELS.ordinal());
-		}
-	}
-
-	/** Query status the selected DMS */
-	public void queryStatusDms() {
-		for (DMS dms: sel_mdl.getSelected()) {
-			dms.setDeviceRequest(
-				DeviceRequest.QUERY_STATUS.ordinal());
-		}
-	}
-
-	/** Query the current message on all selected signs */
-	public void queryMessage() {
-		for (DMS dms: sel_mdl.getSelected()) {
-			dms.setDeviceRequest(
-				DeviceRequest.QUERY_MESSAGE.ordinal());
-		}
-		selectPreview(false);
-	}
-
 	/** Update the selected sign(s) */
 	private void updateSelected() {
 		Set<DMS> sel = sel_mdl.getSelected();
@@ -462,6 +527,11 @@ public class DMSDispatcher extends JPanel {
 
 	/** Set the enabled status of the dispatcher */
 	public void setEnabled(boolean e) {
+		send_msg_act.setEnabled(e && canSend());
+		blank_msg_act.setEnabled(e && canSend());
+		query_msg_act.setEnabled(e && canRequest());
+		query_stat_act.setEnabled(e && canRequest());
+		pixel_test_act.setEnabled(e && canRequest());
 		composer.setEnabled(e && canSend());
 		if (e)
 			selectPreview(false);

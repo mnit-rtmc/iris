@@ -30,8 +30,8 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class ComposerPagePanel extends JPanel {
 
-	/** Sign message composer */
-	private final SignMessageComposer composer;
+	/** Message composer */
+	private final MessageComposer composer;
 
 	/** Maximum number of lines on a sign */
 	private final int max_lines;
@@ -49,8 +49,8 @@ public class ComposerPagePanel extends JPanel {
 	private int n_lines;
 
 	/** Create a new page panel */
-	public ComposerPagePanel(SignMessageComposer smc, int ml, int p) {
-		composer = smc;
+	public ComposerPagePanel(MessageComposer mc, int ml, int p) {
+		composer = mc;
 		n_page = p;
 		max_lines = ml;
 		n_lines = ml;

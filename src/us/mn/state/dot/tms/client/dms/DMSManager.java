@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2019  Minnesota Department of Transportation
+ * Copyright (C) 2008-2022  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  * Copyright (C) 2017-2018  Iteris Inc.
  *
@@ -69,28 +69,12 @@ public class DMSManager extends DeviceManager<DMS> {
 	private final HashMap<DMS, RasterGraphic> rasters =
 		new HashMap<DMS, RasterGraphic>();
 
-	/** Action to blank the selected DMS */
-	private BlankDmsAction blankAction;
+	/** DMS dispatcher */
+	private DMSDispatcher dispatcher;
 
-	/** Action to test DMS */
-	private TestDmsAction test_dms_action;
-
-	/** Action to query status of DMS */
-	private QueryStatusDmsAction qstatus_dms_action;
-
-	/** Set the blank DMS action */
-	public void setBlankAction(BlankDmsAction a) {
-		blankAction = a;
-	}
-
-	/** Set the test DMS action */
-	public void setTestAction(TestDmsAction a) {
-		test_dms_action = a;
-	}
-
-	/** Set the query status DMS action */
-	public void setQueryStatusAction(QueryStatusDmsAction a) {
-		qstatus_dms_action = a;
+	/** Set the DMS dispatcher */
+	public void setDispatcher(DMSDispatcher d) {
+		dispatcher = d;
 	}
 
 	/** Create a new DMS manager */
@@ -184,13 +168,23 @@ public class DMSManager extends DeviceManager<DMS> {
 	/** Fill single selection popup */
 	@Override
 	protected void fillPopupSingle(JPopupMenu p, DMS dms) {
-		if (blankAction != null) {
-			p.add(blankAction);
+		DMSDispatcher d = dispatcher;
+		if (d != null)
+			addPopupActions(p, d);
+		if (WMsgSelectorForm.isPermitted(session)) {
 			p.addSeparator();
-			
-			p.add(launchWysiwygSelector(dms));
-			p.addSeparator();
+			p.add(getWysiwygAction(dms));
 		}
+	}
+
+	/** Add DMS actions to a popup menu */
+	private void addPopupActions(JPopupMenu p, DMSDispatcher d) {
+		p.add(d.getBlankMsgAction());
+		p.addSeparator();
+		p.add(d.getQueryMsgAction());
+		p.add(d.getQueryStatusAction());
+		p.addSeparator();
+		p.add(d.getPixelTestAction());
 	}
 
 	/** Create a popup menu for multiple objects */
@@ -200,12 +194,9 @@ public class DMSManager extends DeviceManager<DMS> {
 		p.add(new JLabel(I18N.get("dms.title") + ": " +
 			n_selected));
 		p.addSeparator();
-		if (blankAction != null)
-			p.add(blankAction);
-		if (test_dms_action != null)
-			p.add(test_dms_action);
-		if (qstatus_dms_action != null)
-			p.add(qstatus_dms_action);
+		DMSDispatcher d = dispatcher;
+		if (d != null)
+			addPopupActions(p, d);
 		return p;
 	}
 
@@ -216,12 +207,12 @@ public class DMSManager extends DeviceManager<DMS> {
 	}
 
 	/** Create a WYSIWYG Selector menu item action */
-	private IAction launchWysiwygSelector(DMS dms) {
-		return WMsgSelectorForm.isPermitted(session) ?
-			new IAction("wysiwyg.menu") {
+	private IAction getWysiwygAction(DMS dms) {
+		return new IAction("wysiwyg.menu") {
 			protected void doActionPerformed(ActionEvent e) {
-				session.getDesktop().show(new WMsgSelectorForm(session, dms));
+				session.getDesktop().show(
+					new WMsgSelectorForm(session, dms));
 			}
-			} : null;
+		};
 	}
 }

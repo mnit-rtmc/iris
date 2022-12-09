@@ -16,7 +16,13 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.Font;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.GroupLayout;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -26,20 +32,21 @@ import static us.mn.state.dot.tms.SignMessage.MAX_LINES;
 import static us.mn.state.dot.tms.SignMessage.MAX_PAGES;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.client.widget.Widgets;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
- * A sign message composer is GUI for composing DMS messages.  It uses a number
- * of optional controls which appear or do not appear on screen as a function
- * of system attributes.
+ * Message composer GUI for sign messages.
  *
  * @author Douglas Lau
  * @author Michael Darter
  * @author Travis Swanston
  */
-public class SignMessageComposer extends JPanel {
+public class MessageComposer extends JPanel {
 
 	/** User session */
 	private final Session session;
@@ -47,15 +54,39 @@ public class SignMessageComposer extends JPanel {
 	/** DMS dispatcher */
 	private final DMSDispatcher dispatcher;
 
+	/** Message pattern label */
+	private final ILabel pattern_lbl = new ILabel("msg.pattern");
 
-	/** Minimum number of pages for a sign message */
-	private final int min_pages = 1;
+	/** Message pattern combo box */
+	private final MsgPatternCBox pattern_cbx;
 
-	/** Number of pages on selected sign */
-	private int n_pages;
+	/** Action listener for pattern combo box */
+	private final ActionListener pattern_listener = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			updatePattern();
+		}
+	};
 
-	/** Number of lines on selected sign */
-	private int n_lines;
+	/** Update the selected pattern */
+	private void updatePattern() {
+		if (adjusting == 0) {
+			adjusting++;
+			dispatcher.setMsgPattern(
+				pattern_cbx.getSelectedPattern());
+			dispatcher.selectPreview(true);
+			adjusting--;
+		}
+	}
+
+	/** Clear action */
+	private final IAction clear_act = new IAction("dms.clear") {
+		protected void doActionPerformed(ActionEvent e) {
+			clearWidgets();
+		}
+	};
+
+	/** Button to clear the selected message */
+	private final JButton clear_btn = new JButton(clear_act);
 
 	/** Sign text model for the selected sign */
 	private SignTextModel st_model;
@@ -66,11 +97,24 @@ public class SignMessageComposer extends JPanel {
 	/** Panels for all pages of message */
 	private final ComposerPagePanel[] pages;
 
-	/** Composer miscellaneous panel */
-	private final ComposerMiscPanel misc_pnl;
+	/** Duration label */
+	private final ILabel dur_lbl = new ILabel("dms.duration");
 
-	/** Composer button panel */
-	private final ComposerButtonPanel button_pnl;
+	/** Used to select the expires time for a message (optional) */
+	private final JComboBox<Expiration> dur_cbx =
+		new JComboBox<Expiration>(Expiration.values());
+
+	/** Button to send composed message */
+	private final JButton send_btn;
+
+	/** Button to blank selected signs */
+	private final JButton blank_btn;
+
+	/** Number of pages on selected sign */
+	private int n_pages;
+
+	/** Number of lines on selected sign */
+	private int n_lines;
 
 	/** Counter to indicate we're adjusting widgets.  This needs to be
 	 * incremented before calling dispatcher methods which might cause
@@ -89,19 +133,23 @@ public class SignMessageComposer extends JPanel {
 		}
 	}
 
-	/** Create a new sign message composer */
-	public SignMessageComposer(Session s, DMSDispatcher ds,
+	/** Create a new message composer */
+	public MessageComposer(Session s, DMSDispatcher ds,
 		DMSManager manager)
 	{
 		session = s;
 		dispatcher = ds;
+		pattern_cbx = new MsgPatternCBox();
+		pattern_cbx.addActionListener(pattern_listener);
+		pattern_lbl.setLabelFor(pattern_cbx);
+		dur_lbl.setLabelFor(dur_cbx);
+		n_pages = 1;
 		n_lines = MAX_LINES;
-		n_pages = min_pages;
 		pages = new ComposerPagePanel[MAX_PAGES];
 		for (int i = 0; i < pages.length; i++)
 			pages[i] = new ComposerPagePanel(this, n_lines, i);
-		misc_pnl = new ComposerMiscPanel(ds);
-		button_pnl = new ComposerButtonPanel(manager, ds, this);
+		send_btn = new JButton(dispatcher.getSendMsgAction());
+		blank_btn = new JButton(dispatcher.getBlankMsgAction());
 		layoutPanel();
 		initializeWidgets();
 	}
@@ -109,39 +157,59 @@ public class SignMessageComposer extends JPanel {
 	/** Layout the panel */
 	private void layoutPanel() {
 		GroupLayout gl = new GroupLayout(this);
+		gl.setHonorsVisibility(false);
 		gl.setAutoCreateGaps(false);
 		gl.setAutoCreateContainerGaps(false);
-		setLayout(gl);
+		// horizontal layout
+		GroupLayout.ParallelGroup hg0 = gl.createParallelGroup(
+			GroupLayout.Alignment.LEADING);
+		hg0.addComponent(pattern_lbl)
+		   .addComponent(pattern_cbx)
+		   .addComponent(clear_btn);
+		GroupLayout.ParallelGroup hg1 = gl.createParallelGroup(
+			GroupLayout.Alignment.TRAILING);
+		hg1.addComponent(dur_lbl).addComponent(send_btn);
+		GroupLayout.ParallelGroup hg2 = gl.createParallelGroup(
+			GroupLayout.Alignment.LEADING);
+		hg2.addComponent(dur_cbx).addComponent(blank_btn);
 		GroupLayout.SequentialGroup hg = gl.createSequentialGroup();
-		GroupLayout.ParallelGroup vg = gl.createParallelGroup();
-		hg.addComponent(page_tab);
-		GroupLayout.ParallelGroup hg1 = gl.createParallelGroup();
-		hg1.addComponent(misc_pnl);
-		hg1.addComponent(button_pnl);
-		hg.addGroup(hg1);
-		GroupLayout.SequentialGroup vg0 = gl.createSequentialGroup();
-		vg0.addComponent(page_tab);
-		vg0.addGap(UI.vgap);
-		vg.addGroup(vg0);
-		GroupLayout.SequentialGroup vg1 = gl.createSequentialGroup();
-		vg1.addComponent(misc_pnl);
-		vg1.addComponent(button_pnl);
-		vg.addGroup(vg1);
+		hg.addGroup(hg0)
+		  .addGap(UI.hgap)
+		  .addComponent(page_tab)
+		  .addGap(UI.hgap)
+		  .addGroup(hg1)
+		  .addGroup(hg2);
 		gl.setHorizontalGroup(hg);
+		// vertical layout
+		GroupLayout.SequentialGroup vg0 = gl.createSequentialGroup();
+		vg0.addComponent(pattern_lbl)
+		   .addGap(UI.vgap)
+		   .addComponent(pattern_cbx)
+		   .addGap(UI.vgap)
+		   .addComponent(clear_btn);
+		GroupLayout.ParallelGroup vgd = gl.createParallelGroup();
+		vgd.addComponent(dur_lbl).addComponent(dur_cbx);
+		GroupLayout.ParallelGroup vgb = gl.createParallelGroup();
+		vgb.addComponent(send_btn).addComponent(blank_btn);
+		GroupLayout.SequentialGroup vg1 = gl.createSequentialGroup();
+		vg1.addGroup(vgd).addGap(UI.vgap).addGroup(vgb);
+		GroupLayout.ParallelGroup vg = gl.createParallelGroup();
+		vg.addGroup(vg0);
+		vg.addComponent(page_tab);
+		vg.addGroup(vg1);
 		gl.setVerticalGroup(vg);
-		misc_pnl.setBorder(UI.panelBorder());
-		button_pnl.setBorder(UI.panelBorder());
+		setLayout(gl);
 	}
 
 	/** Clear the widgets */
-	public void clearWidgets() {
+	private void clearWidgets() {
 		adjusting++;
+		pattern_cbx.setSelectedItem(null);
 		setTabPage(0);
 		for (ComposerPagePanel pg: pages)
 			pg.clearWidgets();
 		dispatcher.setComposedMulti("");
 		dispatcher.unlinkIncident();
-		misc_pnl.clearWidgets();
 		adjusting--;
 	}
 
@@ -153,16 +221,16 @@ public class SignMessageComposer extends JPanel {
 
 	/** Dispose of the message selector */
 	public void dispose() {
+		pattern_cbx.removeActionListener(pattern_listener);
 		removeAll();
 		for (ComposerPagePanel pg: pages)
 			pg.dispose();
-		misc_pnl.dispose();
-		button_pnl.dispose();
 		setSignTextModel(null);
 	}
 
 	/** Update the message combo box models */
 	public void setSign(DMS proxy) {
+		pattern_cbx.populateModel(proxy);
 		SignTextModel stm = createSignTextModel(proxy);
 		setSignTextModel(stm);
 		n_lines = DMSHelper.getLineCount(proxy);
@@ -171,14 +239,13 @@ public class SignMessageComposer extends JPanel {
 		for (ComposerPagePanel pg: pages) {
 			pg.setModels(stm);
 		}
-		misc_pnl.setSign(proxy);
 	}
 
 	/** Calculate the number of pages for the selected sign */
 	private int calculateSignPages(SignTextModel stm) {
 		int ml = (stm != null) ? stm.getLastLine() : MAX_LINES;
 		int np = calculateSignPages(ml, n_lines);
-		return Math.min(MAX_PAGES, Math.max(np, min_pages));
+		return Math.min(MAX_PAGES, np);
 	}
 
 	/** Calculate the number of pages for the sign.
@@ -210,6 +277,9 @@ public class SignMessageComposer extends JPanel {
 
 	/** Initialize the widgets */
 	private void initializeWidgets() {
+		clear_btn.setMargin(UI.buttonInsets());
+		send_btn.setMargin(UI.buttonInsets());
+		blank_btn.setMargin(UI.buttonInsets());
 		boolean cam = canAddMessages();
 		for (int i = 0; i < n_pages; i++) {
 			ComposerPagePanel pg = pages[i];
@@ -219,6 +289,18 @@ public class SignMessageComposer extends JPanel {
 		}
 		while (n_pages < page_tab.getTabCount())
 			page_tab.removeTabAt(n_pages);
+		dur_cbx.setSelectedIndex(0);
+
+		// more prominent margins for send and blank
+		send_btn.setMargin(new Insets(UI.vgap, UI.hgap, UI.vgap,
+			UI.hgap));
+		blank_btn.setMargin(new Insets(UI.vgap, UI.hgap, UI.vgap,
+			UI.hgap));
+
+		// less prominent font for clear button
+		Font f = Widgets.deriveFont("Button.font", Font.PLAIN, 0.80);
+		if (f != null)
+			clear_btn.setFont(f);
 	}
 
 	/** Check if the user can add messages */
@@ -239,16 +321,17 @@ public class SignMessageComposer extends JPanel {
 			page_tab.addTab(title, page);
 	}
 
-	/** Enable or Disable the message selector */
+	/** Enable or Disable the message composer */
 	@Override
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
-		setTabPage(0);
 		adjusting++;
+		setTabPage(0);
+		pattern_cbx.setEnabled(b);
 		for (ComposerPagePanel pnl: pages)
 			pnl.setEnabled(b);
-		misc_pnl.setEnabled(b);
-		button_pnl.setEnabled(b);
+		dur_cbx.setEnabled(b);
+		dur_cbx.setSelectedItem(0);
 		adjusting--;
 	}
 
@@ -296,7 +379,8 @@ public class SignMessageComposer extends JPanel {
 
 	/** Get the selected duration */
 	public Integer getDuration() {
-		return misc_pnl.getDuration();
+		Expiration e = (Expiration) dur_cbx.getSelectedItem();
+		return (e != null) ? e.duration : null;
 	}
 
 	/** Update the message library with the currently selected messages */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2021  Minnesota Department of Transportation
+ * Copyright (C) 2008-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,9 +28,9 @@ import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 
 /**
  * Model for sign text messages.  This class is instantiated and contained by
- * SignMessageComposer.  One SignTextModel is associated with a single DMS.
- * It creates and contains SignTextComboBoxModel objects for each combobox
- * in SignMessageComposer.  This object listens for changes to sign_text and
+ * MessageComposer.  One SignTextModel is associated with a single DMS.  It
+ * creates and contains SignTextComboBoxModel objects for each combobox in
+ * MessageComposer.  This object listens for changes to sign_text and
  * dms_sign_groups and is responsible for updating its model accordingly.
  *
  * @author Douglas Lau
