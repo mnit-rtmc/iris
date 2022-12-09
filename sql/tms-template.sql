@@ -169,7 +169,6 @@ dict_banned_scheme	0
 dms_brightness_enable	true
 dms_comm_loss_enable	true
 dms_composer_edit_mode	1
-dms_duration_enable	true
 dms_gps_jitter_m	100
 dms_high_temp_cutoff	60
 dms_lamp_test_timeout_secs	30

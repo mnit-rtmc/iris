@@ -166,6 +166,9 @@ DELETE FROM iris.system_attribute WHERE name = 'dms_max_lines';
 -- Remove DMS manufacturer enable system attribute
 DELETE FROM iris.system_attribute WHERE name = 'dms_manufacturer_enable';
 
+-- Remove DMS duration enable system attribute
+DELETE FROM iris.system_attribute WHERE name = 'dms_duration_enable';
+
 -- Replace quick_message with msg_pattern
 DROP VIEW quick_message_view;
 DROP VIEW dms_toll_zone_view;
