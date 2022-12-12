@@ -152,4 +152,20 @@ public class RasterBuilder {
 				": \"" + ms + '"');
 		}
 	}
+
+	/** Create raster graphics from a multi string.
+	 * @return Array of RasterGraphic, or null on error. */
+	public RasterGraphic[] createRasters(String multi) {
+		try {
+			return createPixmaps(new MultiString(multi));
+		}
+		catch (IndexOutOfBoundsException e) {
+			// dimensions too small for message
+			return null;
+		}
+		catch (InvalidMsgException e) {
+			// most likely a MultiSyntaxError ...
+			return null;
+		}
+	}
 }

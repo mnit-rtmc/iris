@@ -401,10 +401,10 @@ public class SingleSignTab extends IPanel {
 		}
 	}
 
-	/** Update the current message */
+	/** Update the current message on a sign */
 	private void updateMsgCurrent(DMS dms) {
 		adjusting++;
-		dispatcher.setSignMessage(dms);
+		dispatcher.updateMsgCurrent(dms);
 		adjusting--;
 		expiration_lbl.setText(getExpiration(dms));
 	}

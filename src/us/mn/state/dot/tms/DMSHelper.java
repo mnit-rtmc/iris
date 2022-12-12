@@ -144,20 +144,16 @@ public class DMSHelper extends BaseHelper {
 
 	/** Get the default font number for a DMS */
 	static public int getDefaultFontNum(DMS dms) {
-		Font f = getDefaultFont(dms);
-		return (f != null)
-		      ? f.getNumber()
+		return (dms != null)
+		      ? SignConfigHelper.getDefaultFontNum(dms.getSignConfig())
 		      : FontHelper.DEFAULT_FONT_NUM;
 	}
 
 	/** Get the default font for a DMS */
 	static public Font getDefaultFont(DMS dms) {
-		if (dms != null) {
-			SignConfig sc = dms.getSignConfig();
-			if (sc != null)
-				return sc.getDefaultFont();
-		}
-		return null;
+		return (dms != null)
+		      ? SignConfigHelper.getDefaultFont(dms.getSignConfig())
+		      : null;
 	}
 
 	/** Get the default background color for a DMS */
@@ -190,22 +186,10 @@ public class DMSHelper extends BaseHelper {
 		return SignMessage.MAX_LINES;
 	}
 
-	/** Create a raster builder for a DMS.
-	 * @param dms DMS with proper dimensions for the builder.
-	 * @return A pixel map builder, or null if dimensions are invalid. */
+	/** Create a raster builder for a DMS */
 	static public RasterBuilder createRasterBuilder(DMS dms) {
-		SignConfig sc = dms.getSignConfig();
-		if (sc != null) {
-			int pw = sc.getPixelWidth();
-			int ph = sc.getPixelHeight();
-			int cw = sc.getCharWidth();
-			int ch = sc.getCharHeight();
-			int fn = getDefaultFontNum(dms);
-			ColorScheme cs = ColorScheme.fromOrdinal(
-				sc.getColorScheme());
-			return new RasterBuilder(pw, ph, cw, ch, fn, cs);
-		} else
-			return null;
+		return SignConfigHelper.createRasterBuilder(
+			dms.getSignConfig());
 	}
 
 	/** Return a single string which is formated to be readable
@@ -310,26 +294,7 @@ public class DMSHelper extends BaseHelper {
 	 */
 	static public RasterGraphic[] createRasters(DMS dms, String multi) {
 		RasterBuilder rb = createRasterBuilder(dms);
-		return (rb != null) ? createRasters(rb, multi) : null;
-	}
-
-	/** Create raster graphics using a raster builder and multi string.
-	 * @return RasterGraphic array, one for each page, or null on error.
-	 */
-	static private RasterGraphic[] createRasters(RasterBuilder rb,
-		String multi)
-	{
-		try {
-			return rb.createPixmaps(new MultiString(multi));
-		}
-		catch (IndexOutOfBoundsException e) {
-			// dimensions too small for message
-			return null;
-		}
-		catch (InvalidMsgException e) {
-			// most likely a MultiSyntaxError ...
-			return null;
-		}
+		return (rb != null) ? rb.createRasters(multi) : null;
 	}
 
 	/** Get the owner of the current message */

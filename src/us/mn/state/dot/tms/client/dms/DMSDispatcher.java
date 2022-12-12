@@ -30,8 +30,10 @@ import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.MsgCombining;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
+import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -212,9 +214,6 @@ public class DMSDispatcher extends JPanel {
 		return pixel_test_act;
 	}
 
-	/** Composed MULTI string */
-	private String multi = "";
-
 	/** Selected message pattern */
 	private MsgPattern msg_pattern = null;
 
@@ -251,11 +250,10 @@ public class DMSDispatcher extends JPanel {
 		composer.dispose();
 	}
 
-	/** Set the sign message */
-	public void setSignMessage(DMS dms) {
+	/** Update the current message on a sign */
+	public void updateMsgCurrent(DMS dms) {
 		String ms = DMSHelper.getOperatorMulti(dms);
 		composer.setComposedMulti(ms);
-		multi = composer.getComposedMulti();
 		msg_pattern = null;
 		incident = DMSHelper.lookupIncident(dms);
 	}
@@ -264,7 +262,6 @@ public class DMSDispatcher extends JPanel {
 	 * on the dispatcher with the specified message. */
 	public void setComposedMulti(String ms) {
 		composer.setComposedMulti(ms);
-		multi = ms;
 		singleTab.setMessage();
 	}
 
@@ -272,15 +269,15 @@ public class DMSDispatcher extends JPanel {
 	public void setMsgPattern(MsgPattern pat) {
 		msg_pattern = pat;
 		unlinkIncident();
-		if (!MsgPatternHelper.isMsgCombiningFirst(pat))
-			setComposedMulti("");
-		else
+		if (MsgPatternHelper.isMsgCombiningFirst(pat))
 			singleTab.setMessage();
+		else
+			setComposedMulti("");
 	}
 
 	/** Get the preview MULTI string */
 	public String getPreviewMulti(DMS dms, boolean combining) {
-		String ms = multi;
+		String ms = composer.getComposedMulti();
 		if (new MultiString(ms).isBlank())
 			return getPreviewBlank(combining);
 		if (combining) {
@@ -365,8 +362,9 @@ public class DMSDispatcher extends JPanel {
 
 	/** Send the currently selected message */
 	private void sendSelectedMessage() {
-		if (shouldSendMessage()) {
-			sendMessage();
+		String ms = composer.getComposedMulti();
+		if (shouldSendMessage(ms)) {
+			sendMessage(ms);
 			removeInvalidSelections();
 		}
 	}
@@ -379,8 +377,8 @@ public class DMSDispatcher extends JPanel {
 	/** Determine if the message should be sent, which is a function
  	 * of spell checking options and send confirmation options.
 	 * @return True to send the message else false to cancel. */
-	private boolean shouldSendMessage() {
-		if (WordHelper.spellCheckEnabled() && !checkWords(multi))
+	private boolean shouldSendMessage(String ms) {
+		if (WordHelper.spellCheckEnabled() && !checkWords(ms))
 			return false;
 		if (SystemAttrEnum.DMS_SEND_CONFIRMATION_ENABLE.getBoolean())
 			return showConfirmDialog();
@@ -418,26 +416,26 @@ public class DMSDispatcher extends JPanel {
 	}
 
 	/** Send a new message to all selected DMS */
-	private void sendMessage() {
+	private void sendMessage(String ms) {
 		Set<DMS> signs = getValidSelected();
 		if (signs.size() > 1)
 			unlinkIncident();
 		for (DMS dms: signs) {
-			SignMessage sm = createMessage(dms);
-			if (sm != null)
-				dms.setMsgUser(sm);
-			composer.updateLibrary();
+			SignConfig sc = dms.getSignConfig();
+			if (sc != null) {
+				SignMessage sm = createMessage(sc, ms);
+				if (sm != null) {
+					dms.setMsgUser(sm);
+					composer.updateLibrary();
+				}
+			}
 		}
 		selectPreview(false);
 	}
 
-	/** Create a new message for the specified sign.
+	/** Create a new message for a sign configuration.
 	 * @return A SignMessage from composer selection, or null on error. */
-	private SignMessage createMessage(DMS dms) {
-		SignConfig sc = dms.getSignConfig();
-		if (sc == null)
-			return null;
-		String ms = multi;
+	private SignMessage createMessage(SignConfig sc, String ms) {
 		MsgPattern pat = msg_pattern;
 		if (new MultiString(ms).isBlank()) {
 			if (pat != null) {
@@ -449,12 +447,12 @@ public class DMSDispatcher extends JPanel {
 				return creator.createBlankMessage(sc);
 		} else {
 			if (MsgPatternHelper.isMsgCombiningFirst(pat)) {
+				RasterBuilder rb = SignConfigHelper
+					.createRasterBuilder(sc);
 				String pmulti = pat.getMulti();
 				String combined = makeCombined(pmulti, ms);
 				// Does combined message fit?
-				if (DMSHelper.createRasters(dms, combined)
-				    != null)
-				{
+				if (rb.createRasters(combined) != null) {
 					MsgCombining mc = MsgCombining.DISABLE;
 					return createMessage(sc, combined, mc);
 				}

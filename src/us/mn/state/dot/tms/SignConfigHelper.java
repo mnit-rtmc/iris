@@ -144,4 +144,32 @@ public class SignConfigHelper extends BaseHelper {
 		}
 		return signs;
 	}
+
+	/** Create a raster builder for a sign config */
+	static public RasterBuilder createRasterBuilder(SignConfig sc) {
+		if (sc != null) {
+			int pw = sc.getPixelWidth();
+			int ph = sc.getPixelHeight();
+			int cw = sc.getCharWidth();
+			int ch = sc.getCharHeight();
+			int fn = getDefaultFontNum(sc);
+			ColorScheme cs = ColorScheme.fromOrdinal(
+				sc.getColorScheme());
+			return new RasterBuilder(pw, ph, cw, ch, fn, cs);
+		} else
+			return null;
+	}
+
+	/** Get the default font number for a sign config */
+	static public int getDefaultFontNum(SignConfig sc) {
+		Font f = getDefaultFont(sc);
+		return (f != null)
+		      ? f.getNumber()
+		      : FontHelper.DEFAULT_FONT_NUM;
+	}
+
+	/** Get the default font for a sign config */
+	static public Font getDefaultFont(SignConfig sc) {
+		return (sc != null) ? sc.getDefaultFont() : null;
+	}
 }
