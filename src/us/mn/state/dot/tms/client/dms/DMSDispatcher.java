@@ -493,7 +493,7 @@ public class DMSDispatcher extends JPanel {
 			clearSelected();
 		else {
 			for (DMS dms: sel) {
-				composer.setSign(dms);
+				composer.setSelectedSign(dms);
 				setSelected(dms);
 				break;
 			}
@@ -507,7 +507,7 @@ public class DMSDispatcher extends JPanel {
 	/** Clear the selection */
 	private void clearSelected() {
 		setEnabled(false);
-		composer.setSign(null);
+		composer.setSelectedSign(null);
 		setComposedMulti("");
 		msg_pattern = null;
 		unlinkIncident();

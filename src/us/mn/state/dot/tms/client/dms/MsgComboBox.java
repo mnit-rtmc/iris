@@ -29,12 +29,27 @@ import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
- * GUI for composing DMS messages.
+ * Message composer combo box for one line of sign text.
  *
  * @author Douglas Lau
  * @author Michael Darter
  */
 public class MsgComboBox extends JComboBox<SignText> {
+
+	/** Message combo box text editor */
+	static private class Editor extends JTextField
+		implements ComboBoxEditor
+	{
+		@Override public Component getEditorComponent() {
+			return this;
+		}
+		@Override public Object getItem() {
+			return getMulti(getText());
+		}
+		@Override public void setItem(Object item) {
+			setText(getMulti(item));
+		}
+	}
 
 	/** Get the MULTI string of an item */
 	static private String getMulti(Object item) {
@@ -53,17 +68,11 @@ public class MsgComboBox extends JComboBox<SignText> {
 	static private final SignText PROTOTYPE_SIGN_TEXT =
 		new ClientSignText("12345678901234567890");
 
-	/** Message composer containing the combo box */
-	private final MessageComposer composer;
-
-	/** Sign text line number */
-	private final short line;
-
 	/** Edit mode for combo box */
 	private EditMode edit_mode = EditMode.NEVER;
 
 	/** Combo box editor */
-	private final Editor editor;
+	private final Editor editor = new Editor();
 
 	/** Key listener for key events */
 	private final KeyAdapter keyListener;
@@ -74,18 +83,8 @@ public class MsgComboBox extends JComboBox<SignText> {
 	/** Action listener for editor events */
 	private final ActionListener editorListener;
 
-	/** Listener for combo box events */
-	private final ActionListener comboListener = new ActionListener() {
-		public void actionPerformed(ActionEvent ae) {
-			composer.updateMessage(shouldUnlinkIncident());
-		}
-	};
-
-	/** Create a message combo box.
-	 * @param c Sign message composer. */
-	public MsgComboBox(MessageComposer c, short ln) {
-		composer = c;
-		line = ln;
+	/** Create a message combo box */
+	public MsgComboBox() {
 		setMaximumRowCount(21);
 		// NOTE: We use a prototype display value so that combo boxes
 		//       are always the same size.  This prevents all the
@@ -93,7 +92,6 @@ public class MsgComboBox extends JComboBox<SignText> {
 		//       selected.
 		setPrototypeDisplayValue(PROTOTYPE_SIGN_TEXT);
 		setRenderer(new SignTextCellRenderer());
-		editor = new Editor();
 		keyListener = new KeyAdapter() {
 			public void keyTyped(KeyEvent ke) {
 				doKeyTyped(ke);
@@ -113,13 +111,8 @@ public class MsgComboBox extends JComboBox<SignText> {
 					setEditable(false);
 			}
 		};
-	}
-
-	/** Initialize the message combo box */
-	public void initialize() {
 		setEditMode(false);
 		setEditor(editor);
-		addActionListener(comboListener);
 		addKeyListener(keyListener);
 		editor.addFocusListener(focusListener);
 		editor.addActionListener(editorListener);
@@ -130,7 +123,6 @@ public class MsgComboBox extends JComboBox<SignText> {
 		editor.removeActionListener(editorListener);
 		editor.removeFocusListener(focusListener);
 		removeKeyListener(keyListener);
-		removeActionListener(comboListener);
 	}
 
 	/** Set the edit mode.
@@ -177,12 +169,7 @@ public class MsgComboBox extends JComboBox<SignText> {
 	private void doFocusLost() {
 		if (edit_mode == EditMode.AFTERKEY)
 			setEditable(false);
-		composer.updateMessage(shouldUnlinkIncident());
-	}
-
-	/** Should incident be unlinked on updates? */
-	private boolean shouldUnlinkIncident() {
-		return line == 1;
+		fireActionEvent();
 	}
 
 	/** Get message text */
@@ -191,28 +178,5 @@ public class MsgComboBox extends JComboBox<SignText> {
 			? editor.getItem()
 			: getSelectedItem();
 		return getMulti(item);
-	}
-
-	/** Editor for message combo box */
-	private class Editor extends JTextField implements ComboBoxEditor {
-
-		/** Get the component for the combo box editor */
-		@Override
-		public Component getEditorComponent() {
-			return this;
-		}
-
-		/** Return the edited item */
-		@Override
-		public Object getItem() {
-			return getMulti(getText());
-		}
-
-		/** Set the item that should be edited.
-		 * @param item New value of item */
-		@Override
-		public void setItem(Object item) {
-			setText(getMulti(item));
-		}
 	}
 }

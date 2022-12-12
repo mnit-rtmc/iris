@@ -16,6 +16,8 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.GroupLayout;
 import javax.swing.JPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -57,11 +59,22 @@ public class ComposerPagePanel extends JPanel {
 		line_cbx = new MsgComboBox[max_lines];
 		line_pnl = new JPanel[max_lines];
 		for (int i = 0; i < max_lines; i++) {
-			line_cbx[i] = new MsgComboBox(composer,
-				getLineNumber(i));
-			line_cbx[i].initialize();
+			line_cbx[i] = buildLineComboBox(i);
 		}
 		layoutPanel();
+	}
+
+	/** Build a message line combo box */
+	private MsgComboBox buildLineComboBox(int n) {
+		MsgComboBox cbx = new MsgComboBox();
+		// Unlink incident if the first line (what) is changed
+		final boolean unlink = (n == 0);
+		cbx.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				composer.updateMessage(unlink);
+			}
+		});
+		return cbx;
 	}
 
 	/** Layout the panel */

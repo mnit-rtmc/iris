@@ -234,8 +234,9 @@ public class MessageComposer extends JPanel {
 		setSignTextModel(null);
 	}
 
-	/** Update the message combo box models */
-	public void setSign(DMS proxy) {
+	/** Set the selected sign */
+	public void setSelectedSign(DMS proxy) {
+		adjusting++;
 		pattern_cbx.populateModel(proxy);
 		SignTextModel stm = createSignTextModel(proxy);
 		setSignTextModel(stm);
@@ -245,6 +246,7 @@ public class MessageComposer extends JPanel {
 		for (ComposerPagePanel pg: pages) {
 			pg.setModels(stm);
 		}
+		adjusting--;
 	}
 
 	/** Calculate the number of pages for the selected sign */
