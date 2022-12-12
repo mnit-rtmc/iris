@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  * Copyright (C) 2018  SRF Consulting Group
  *
@@ -274,19 +274,11 @@ public class SingleSignTab extends IPanel {
 	private DMSPanelPager createPreviewPager(DMS dms,
 		SignPixelPanel pix_pnl)
 	{
-		String ms = dispatcher.getPreviewMulti(dms, true);
-		RasterGraphic[] rg = getPreviewPixmaps(dms, ms);
-		// If combined message does not fit, try composed only
-		if (rg == null) {
-			ms = dispatcher.getPreviewMulti(dms, false);
-			rg = getPreviewPixmaps(dms, ms);
-		}
-		return (rg != null) ? new DMSPanelPager(pix_pnl, rg, ms) : null;
-	}
-
-	/** Get pixmaps for the preview message */
-	private RasterGraphic[] getPreviewPixmaps(DMS dms, String ms) {
-		return DMSHelper.createRasters(dms, ms);
+		String ms = dispatcher.getPreviewMulti(dms);
+		RasterGraphic[] rg = DMSHelper.createRasters(dms, ms);
+		return (rg != null)
+		      ? new DMSPanelPager(pix_pnl, rg, ms)
+		      : null;
 	}
 
 	/** Update the current panel */

@@ -31,7 +31,6 @@ import us.mn.state.dot.tms.MsgCombining;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.RasterBuilder;
-import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignMessage;
@@ -214,9 +213,6 @@ public class DMSDispatcher extends JPanel {
 		return pixel_test_act;
 	}
 
-	/** Selected message pattern */
-	private MsgPattern msg_pattern = null;
-
 	/** Linked incident */
 	private Incident incident = null;
 
@@ -254,7 +250,6 @@ public class DMSDispatcher extends JPanel {
 	public void updateMsgCurrent(DMS dms) {
 		String ms = DMSHelper.getOperatorMulti(dms);
 		composer.setComposedMulti(ms);
-		msg_pattern = null;
 		incident = DMSHelper.lookupIncident(dms);
 	}
 
@@ -265,79 +260,40 @@ public class DMSDispatcher extends JPanel {
 		singleTab.setMessage();
 	}
 
-	/** Set the message pattern */
-	public void setMsgPattern(MsgPattern pat) {
-		msg_pattern = pat;
-		unlinkIncident();
-		if (MsgPatternHelper.isMsgCombiningFirst(pat))
-			singleTab.setMessage();
-		else
-			setComposedMulti("");
-	}
-
 	/** Get the preview MULTI string */
-	public String getPreviewMulti(DMS dms, boolean combining) {
+	public String getPreviewMulti(DMS dms) {
 		String ms = composer.getComposedMulti();
 		if (new MultiString(ms).isBlank())
-			return getPreviewBlank(combining);
-		if (combining) {
-			String pmulti = getMsgPatternFirst();
-			if (pmulti != null)
-				return makeCombined(pmulti, ms);
-			String sched = getSchedCombining();
+			return "";
+		MsgPattern pat = composer.getMsgPattern();
+		if (MsgPatternHelper.isMsgCombiningSecond(pat)) {
+			String sched = getSchedCombining(dms);
 			if (sched != null)
-				return makeCombined(sched, ms);
+				return tryMakeCombined(dms, sched, ms);
 		}
 		return ms;
 	}
 
-	/** Get preview with blank composed message */
-	private String getPreviewBlank(boolean combining) {
-		String pmulti = getMsgPattern();
-		if (combining) {
-			String pmulti2 = getMsgPatternSecond();
-			String sched = getSchedCombining();
-			if (pmulti2 != null && sched != null)
-				return makeCombined(sched, pmulti2);
-			else if (pmulti != null)
-				return pmulti;
-			else if (sched != null)
-				return sched;
-		}
-		return (pmulti != null) ? pmulti : "";
+	/** Try to make a combined message.
+	 * @param first MULTI string of first message.
+	 * @param second MULTI string of second message.
+	 * @return Combined message, or second if combined does not fit. */
+	private String tryMakeCombined(DMS dms, String first, String second) {
+		String ms = makeCombined(first, second);
+		// If combined message does not fit, use composed only
+		return (DMSHelper.createRasters(dms, ms) != null)
+		      ? ms
+		      : second;
 	}
 
 	/** Get MULTI string from scheduled combining message */
-	private String getSchedCombining() {
-		DMS dms = getSingleSelection();
+	private String getSchedCombining(DMS dms) {
 		if (dms != null) {
 			SignMessage sm = dms.getMsgSched();
 			if (SignMessageHelper.isMsgCombiningFirst(sm))
 				return sm.getMulti();
 		}
 		return null;
-	}
-
-	/** Get message pattern */
-	private String getMsgPattern() {
-		MsgPattern pat = msg_pattern;
-		return (pat != null) ? pat.getMulti() : null;
-	}
-
-	/** Get combining message pattern (if first) */
-	private String getMsgPatternFirst() {
-		MsgPattern pat = msg_pattern;
-		return MsgPatternHelper.isMsgCombiningFirst(pat)
-		      ? pat.getMulti()
-		      : null;
-	}
-
-	/** Get combining message pattern (if second) */
-	private String getMsgPatternSecond() {
-		MsgPattern pat = msg_pattern;
-		return MsgPatternHelper.isMsgCombiningSecond(pat)
-		      ? pat.getMulti()
-		      : null;
 	}
 
 	/** Get the single selected DMS */
@@ -436,29 +392,11 @@ public class DMSDispatcher extends JPanel {
 	/** Create a new message for a sign configuration.
 	 * @return A SignMessage from composer selection, or null on error. */
 	private SignMessage createMessage(SignConfig sc, String ms) {
-		MsgPattern pat = msg_pattern;
-		if (new MultiString(ms).isBlank()) {
-			if (pat != null) {
-				String pmulti = pat.getMulti();
-				MsgCombining mc = MsgCombining.fromOrdinal(
-					pat.getMsgCombining());
-				return createMessage(sc, pmulti, mc);
-			} else
-				return creator.createBlankMessage(sc);
-		} else {
-			if (MsgPatternHelper.isMsgCombiningFirst(pat)) {
-				RasterBuilder rb = SignConfigHelper
-					.createRasterBuilder(sc);
-				String pmulti = pat.getMulti();
-				String combined = makeCombined(pmulti, ms);
-				// Does combined message fit?
-				if (rb.createRasters(combined) != null) {
-					MsgCombining mc = MsgCombining.DISABLE;
-					return createMessage(sc, combined, mc);
-				}
-			}
-		}
-		MsgCombining mc = MsgCombining.EITHER;
+		if (new MultiString(ms).isBlank())
+			return creator.createBlankMessage(sc);
+		MsgPattern pat = composer.getMsgPattern();
+		MsgCombining mc = MsgCombining.fromOrdinal(
+			pat.getMsgCombining());
 		Incident inc = incident;
 		return (inc != null)
 		      ? createMessage(sc, incident, ms, mc)
@@ -507,7 +445,6 @@ public class DMSDispatcher extends JPanel {
 		setEnabled(false);
 		composer.setSelectedSign(null);
 		setComposedMulti("");
-		msg_pattern = null;
 		unlinkIncident();
 		singleTab.setSelected(null);
 	}

@@ -28,6 +28,7 @@ import javax.swing.JTabbedPane;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.MsgPattern;
 import static us.mn.state.dot.tms.SignMessage.MAX_LINES;
 import static us.mn.state.dot.tms.SignMessage.MAX_PAGES;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -71,11 +72,10 @@ public class MessageComposer extends JPanel {
 	private void updatePattern() {
 		if (adjusting == 0) {
 			adjusting++;
-			dispatcher.setMsgPattern(
-				pattern_cbx.getSelectedPattern());
-			dispatcher.selectPreview(true);
+			// FIXME: clear all page widgets
 			adjusting--;
 		}
+		updateMessage(true);
 	}
 
 	/** Clear action */
@@ -343,8 +343,14 @@ public class MessageComposer extends JPanel {
 		adjusting--;
 	}
 
+	/** Get the selected message pattern */
+	public MsgPattern getMsgPattern() {
+		return pattern_cbx.getSelectedPattern();
+	}
+
 	/** Compose a MULTI string using the contents of the widgets */
 	public String getComposedMulti() {
+		// FIXME: use multi based on selected pattern
 		MultiString[] mess = new MultiString[n_pages];
 		int p = 0;
 		for (int i = 0; i < n_pages; i++) {
