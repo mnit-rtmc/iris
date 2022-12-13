@@ -15,44 +15,21 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import us.mn.state.dot.sonar.client.ProxyListener;
-import us.mn.state.dot.sonar.client.TypeCache;
+import java.util.Iterator;
+import java.util.Set;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DmsSignGroup;
+import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
-import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.SonarState;
-import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
+import us.mn.state.dot.tms.SignTextHelper;
 
 /**
- * Model for sign text messages.  This class is instantiated and contained by
- * MessageComposer.  One SignTextModel is associated with a single DMS.  It
- * creates and contains SignTextComboBoxModel objects for each combobox in
- * MessageComposer.  This object listens for changes to sign_text and
- * dms_sign_groups and is responsible for updating its model accordingly.
+ * Model for sign text messages for a single DMS.  It creates and contains
+ * SignTextComboBoxModel objects for each combobox in MessageComposer.
  *
  * @author Douglas Lau
- * @author Michael Darter
  */
 public class SignTextModel {
-
-	/** DMS associated with this object */
-	private final DMS dms;
-
-	/** DMS sign group type cache, relates dms to sign groups */
-	private final TypeCache<DmsSignGroup> dms_sign_groups;
-
-	/** Sign text type cache, list of all sign text lines */
-	private final TypeCache<SignText> sign_text;
-
-	/** Sign text creator */
-	private final SignTextCreator creator;
-
-	/** Set of DMS member groups.  Access must be synchronized because
-	 * the Swing EDT and sonar threads can access. */
-	private final HashSet<String> groups = new HashSet<String>();
 
 	/** Mapping of line numbers to combo box models */
 	private final HashMap<Short, SignTextComboBoxModel> lines =
@@ -61,144 +38,17 @@ public class SignTextModel {
 	/** Last line in model */
 	private short last_line = 1;
 
-	/** Listener for sign text proxies */
-	private final ProxyListener<SignText> listener =
-		new ProxyListener<SignText>()
-	{
-		public void proxyAdded(SignText proxy) {
-			if (isAssociated(proxy))
-				doAddSignText(proxy);
-		}
-		public void enumerationComplete() { }
-		public void proxyRemoved(SignText proxy) {
-			if (isAssociated(proxy))
-				doRemoveSignText(proxy);
-		}
-		public void proxyChanged(SignText proxy, String a) {
-			if (isAssociated(proxy))
-				doChangeSignText(proxy);
-		}
-	};
-
-	/** Listener for DMS sign groups */
-	private final ProxyListener<DmsSignGroup> dsg_listener =
-		new ProxyListener<DmsSignGroup>()
-	{
-		public void proxyAdded(DmsSignGroup proxy) {
-			if (dms == proxy.getDms())
-				addGroup(proxy.getSignGroup());
-		}
-		public void enumerationComplete() { }
-		public void proxyRemoved(DmsSignGroup proxy) {
-			if (dms == proxy.getDms())
-				removeGroup(proxy.getSignGroup());
-		}
-		public void proxyChanged(DmsSignGroup proxy, String attrib) { }
-	};
-
-
 	/** Create a new sign text model */
-	public SignTextModel(Session s, DMS proxy) {
-		dms = proxy;
-		SonarState st = s.getSonarState();
-		dms_sign_groups = st.getDmsCache().getDmsSignGroups();
-		sign_text = st.getDmsCache().getSignText();
-		creator = new SignTextCreator(s);
-	}
-
-	/** Initialize the sign text model */
-	public void initialize() {
-		dms_sign_groups.addProxyListener(dsg_listener);
-		sign_text.addProxyListener(listener);
-	}
-
-	/** Dispose of the model */
-	public void dispose() {
-		sign_text.removeProxyListener(listener);
-		dms_sign_groups.removeProxyListener(dsg_listener);
-	}
-
-	/** Add a SignText to the model */
-	private void doAddSignText(final SignText st) {
-		// NOTE: updating last_line can't be deferred to the
-		//       swing thread, because getLastLine is called
-		//       before the Runnables get a chance to run.
-		last_line = (short) Math.max(last_line, st.getLine());
-		runSwing(new Runnable() {
-			public void run() {
-				addSignText(st);
+	public SignTextModel(DMS dms) {
+		Set<SignGroup> groups = DmsSignGroupHelper.findGroups(dms);
+		Iterator<SignText> it = SignTextHelper.iterator();
+		while (it.hasNext()) {
+			SignText st = it.next();
+			if (groups.contains(st.getSignGroup())) {
+				short ln = st.getLine();
+				getLineModel(ln).add(st);
+				last_line = (short) Math.max(last_line, ln);
 			}
-		});
-	}
-
-	/** Add a SignText to the model */
-	private void addSignText(SignText st) {
-		getLineModel(st.getLine()).add(st);
-	}
-
-	/** Remove a SignText from the model */
-	private void doRemoveSignText(final SignText st) {
-		runSwing(new Runnable() {
-			public void run() {
-				removeSignText(st);
-			}
-		});
-	}
-
-	/** Remove a SignText from the model */
-	private void removeSignText(SignText st) {
-		getLineModel(st.getLine()).remove(st);
-	}
-
-	/** Change a SignText in the model */
-	private void doChangeSignText(final SignText st) {
-		runSwing(new Runnable() {
-			public void run() {
-				changeSignText(st);
-			}
-		});
-	}
-
-	/** Change a SignText in the model */
-	private void changeSignText(SignText st) {
-		// iterate through all combobox models because the line
-		// may have changed, moving it between comboboxes
-		for (SignTextComboBoxModel mdl: lines.values())
-			mdl.remove(st);
-		addSignText(st);
-	}
-
-	/** Is the sign text associated with the DMS? */
-	private boolean isAssociated(SignText st) {
-		return isMember(st.getSignGroup());
-	}
-
-	/** Is the DMS a member of the specified group? */
-	private boolean isMember(SignGroup g) {
-		synchronized (groups) {
-			return g != null && groups.contains(g.getName());
-		}
-	}
-
-	/** Add all SignText in one sign group to the model */
-	private void addGroup(SignGroup g) {
-		synchronized (groups) {
-			groups.add(g.getName());
-		}
-		for (SignText st: sign_text) {
-			if (st.getSignGroup() == g)
-				doAddSignText(st);
-		}
-	}
-
-	/** Remove all SignText in one sign group from the model */
-	private void removeGroup(SignGroup g) {
-		synchronized (groups) {
-			groups.remove(g.getName());
-		}
-		for (SignText st: sign_text) {
-			if (st.getSignGroup() == g)
-				doRemoveSignText(st);
 		}
 	}
 

@@ -88,9 +88,6 @@ public class MessageComposer extends JPanel {
 	/** Button to clear the selected message */
 	private final JButton clear_btn = new JButton(clear_act);
 
-	/** Sign text model for the selected sign */
-	private SignTextModel st_model;
-
 	/** Tab pane for message pages */
 	private final JTabbedPane page_tab = new JTabbedPane(JTabbedPane.RIGHT);
 
@@ -229,7 +226,6 @@ public class MessageComposer extends JPanel {
 		removeAll();
 		for (ComposerPagePanel pg: pages)
 			pg.dispose();
-		setSignTextModel(null);
 	}
 
 	/** Set the selected sign */
@@ -237,9 +233,7 @@ public class MessageComposer extends JPanel {
 		adjusting++;
 		pattern_cbx.populateModel(proxy);
 		SignTextModel stm = createSignTextModel(proxy);
-		setSignTextModel(stm);
 		n_lines = DMSHelper.getLineCount(proxy);
-		n_pages = calculateSignPages(stm);
 		initializeWidgets();
 		for (ComposerPagePanel pg: pages) {
 			pg.setModels(stm);
@@ -247,38 +241,9 @@ public class MessageComposer extends JPanel {
 		adjusting--;
 	}
 
-	/** Calculate the number of pages for the selected sign */
-	private int calculateSignPages(SignTextModel stm) {
-		int ml = (stm != null) ? stm.getLastLine() : MAX_LINES;
-		int np = calculateSignPages(ml, n_lines);
-		return Math.min(MAX_PAGES, np);
-	}
-
-	/** Calculate the number of pages for the sign.
-	 * @param ml Number of lines in message library.
-	 * @param nl Number of lines on sign face. */
-	static private int calculateSignPages(int ml, int nl) {
-		if (nl > 0)
-			return 1 + Math.max(0, (ml - 1) / nl);
-		else
-			return 1;
-	}
-
 	/** Create a new sign text model */
 	private SignTextModel createSignTextModel(DMS proxy) {
-		return (proxy != null)
-		      ? new SignTextModel(session, proxy)
-		      : null;
-	}
-
-	/** Set a new sign text model */
-	private void setSignTextModel(SignTextModel stm) {
-		SignTextModel om = st_model;
-		if (stm != null)
-			stm.initialize();
-		st_model = stm;
-		if (om != null)
-			om.dispose();
+		return (proxy != null) ? new SignTextModel(proxy) : null;
 	}
 
 	/** Initialize the widgets */
