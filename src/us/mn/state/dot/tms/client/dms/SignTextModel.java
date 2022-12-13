@@ -202,33 +202,6 @@ public class SignTextModel {
 		}
 	}
 
-	/**
-	 * Get the local SignGroup for the DMS.
-	 * @return local SignGroup if it exists, otherwise null
-	 */
-	private SignGroup getLocalSignGroup() {
-		for (DmsSignGroup g: dms_sign_groups) {
-			if (isLocalSignGroup(g))
-				return g.getSignGroup();
-		}
-		return null;
-	}
-
-	/** Check if the given sign group is a local group for the DMS */
-	private boolean isLocalSignGroup(DmsSignGroup g) {
-		return g.getDms() == dms && g.getSignGroup().getLocal();
-	}
-
-	/** Check if user is permitted to add sign text to local sign group */
-	public boolean isLocalSignTextAddPermitted() {
-		SignGroup sg = getLocalSignGroup();
-		if (sg != null) {
-			String oname = sg.getName() + "_XX";
-			return creator.isWritePermitted(oname);
-		} else
-			return false;
-	}
-
 	/** Get the combobox line model for the specified line */
 	public SignTextComboBoxModel getLineModel(short line) {
 		if (lines.containsKey(line))
@@ -244,24 +217,5 @@ public class SignTextModel {
 	/** Get the last line number with sign text */
 	public short getLastLine() {
 		return last_line;
-	}
-
-	/** Update the library with the currently selected messages */
-	public void updateLibrary() {
-		for (SignTextComboBoxModel mdl: lines.values()) {
-			ClientSignText st = mdl.getEditedSignText();
-			if (st != null)
-				createSignText(st);
-		}
-	}
-
-	/** Add a SignText to the local sign text library.
-	 * @param st SignText to create. */
-	private void createSignText(ClientSignText st) {
-		SignGroup sg = getLocalSignGroup();
-		if (sg != null) {
-			creator.create(sg, st.getLine(), st.getMulti(),
-				st.getRank());
-		}
 	}
 }

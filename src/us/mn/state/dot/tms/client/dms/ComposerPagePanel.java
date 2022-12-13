@@ -130,9 +130,9 @@ public class ComposerPagePanel extends JPanel {
 	}
 
 	/** Set the edit mode */
-	public void setEditMode(boolean cam) {
+	public void setEditMode() {
 		for (MsgComboBox cbox: line_cbx)
-			cbox.setEditMode(cam);
+			cbox.setEditMode();
 	}
 
 	/** Set the number of lines on the page */

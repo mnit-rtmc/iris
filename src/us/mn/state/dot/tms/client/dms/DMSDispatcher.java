@@ -44,7 +44,6 @@ import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IOptionPane;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiString;
-import static us.mn.state.dot.tms.utils.MultiString.makeCombined;
 
 /**
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
@@ -280,7 +279,7 @@ public class DMSDispatcher extends JPanel {
 	 * @param second MULTI string of second message.
 	 * @return Combined message, or second if combined does not fit. */
 	private String tryMakeCombined(DMS dms, String first, String second) {
-		String ms = makeCombined(first, second);
+		String ms = MultiString.makeCombined(first, second);
 		// If combined message does not fit, use composed only
 		return (DMSHelper.createRasters(dms, ms) != null)
 		      ? ms
@@ -380,10 +379,8 @@ public class DMSDispatcher extends JPanel {
 			SignConfig sc = dms.getSignConfig();
 			if (sc != null) {
 				SignMessage sm = createMessage(sc, ms);
-				if (sm != null) {
+				if (sm != null)
 					dms.setMsgUser(sm);
-					composer.updateLibrary();
-				}
 			}
 		}
 		selectPreview(false);

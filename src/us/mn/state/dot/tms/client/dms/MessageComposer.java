@@ -286,10 +286,9 @@ public class MessageComposer extends JPanel {
 		clear_btn.setMargin(UI.buttonInsets());
 		send_btn.setMargin(UI.buttonInsets());
 		blank_btn.setMargin(UI.buttonInsets());
-		boolean cam = canAddMessages();
 		for (int i = 0; i < n_pages; i++) {
 			ComposerPagePanel pg = pages[i];
-			pg.setEditMode(cam);
+			pg.setEditMode();
 			pg.setLines(n_lines);
 			setPage(i, pg);
 		}
@@ -307,14 +306,6 @@ public class MessageComposer extends JPanel {
 		Font f = Widgets.deriveFont("Button.font", Font.PLAIN, 0.80);
 		if (f != null)
 			clear_btn.setFont(f);
-	}
-
-	/** Check if the user can add messages */
-	private boolean canAddMessages() {
-		SignTextModel stm = st_model;
-		return (stm != null)
-		      ? stm.isLocalSignTextAddPermitted()
-		      : false;
 	}
 
 	/** Set a page on one tab */
@@ -393,12 +384,5 @@ public class MessageComposer extends JPanel {
 	public Integer getDuration() {
 		Expiration e = (Expiration) dur_cbx.getSelectedItem();
 		return (e != null) ? e.duration : null;
-	}
-
-	/** Update the message library with the currently selected messages */
-	public void updateLibrary() {
-		SignTextModel stm = st_model;
-		if (stm != null)
-			stm.updateLibrary();
 	}
 }

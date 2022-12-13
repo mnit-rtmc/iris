@@ -68,20 +68,46 @@ public class MsgComboBox extends JComboBox<SignText> {
 	static private final SignText PROTOTYPE_SIGN_TEXT =
 		new ClientSignText("12345678901234567890");
 
-	/** Edit mode for combo box */
-	private EditMode edit_mode = EditMode.NEVER;
-
 	/** Combo box editor */
 	private final Editor editor = new Editor();
 
 	/** Key listener for key events */
-	private final KeyAdapter keyListener;
+	private final KeyAdapter key_listener = new KeyAdapter() {
+		@Override public void keyTyped(KeyEvent ke) {
+			if (EditMode.getMode() == EditMode.AFTERKEY &&
+			    !isEditable())
+			{
+				key_event = ke;
+				setEditable(true);
+			}
+		}
+	};
+
+	/** Key event saved when making combobox editable */
+	private KeyEvent key_event;
 
 	/** Focus listener for editor focus events */
-	private final FocusAdapter focusListener;
+	private final FocusAdapter focus_listener = new FocusAdapter() {
+		@Override public void focusGained(FocusEvent fe) {
+			if (key_event != null) {
+				editor.dispatchEvent(key_event);
+				key_event = null;
+			}
+		}
+		@Override public void focusLost(FocusEvent fe) {
+			if (EditMode.getMode() == EditMode.AFTERKEY)
+				setEditable(false);
+			fireActionEvent();
+		}
+	};
 
 	/** Action listener for editor events */
-	private final ActionListener editorListener;
+	private final ActionListener editor_listener = new ActionListener() {
+		@Override public void actionPerformed(ActionEvent ae) {
+			if (EditMode.getMode() == EditMode.AFTERKEY)
+				setEditable(false);
+		}
+	};
 
 	/** Create a message combo box */
 	public MsgComboBox() {
@@ -92,89 +118,28 @@ public class MsgComboBox extends JComboBox<SignText> {
 		//       selected.
 		setPrototypeDisplayValue(PROTOTYPE_SIGN_TEXT);
 		setRenderer(new SignTextCellRenderer());
-		keyListener = new KeyAdapter() {
-			public void keyTyped(KeyEvent ke) {
-				doKeyTyped(ke);
-			}
-		};
-		focusListener = new FocusAdapter() {
-			public void focusGained(FocusEvent fe) {
-				doFocusGained();
-			}
-			public void focusLost(FocusEvent fe) {
-				doFocusLost();
-			}
-		};
-		editorListener = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				if (edit_mode == EditMode.AFTERKEY)
-					setEditable(false);
-			}
-		};
-		setEditMode(false);
+		setEditMode();
 		setEditor(editor);
-		addKeyListener(keyListener);
-		editor.addFocusListener(focusListener);
-		editor.addActionListener(editorListener);
+		addKeyListener(key_listener);
+		editor.addFocusListener(focus_listener);
+		editor.addActionListener(editor_listener);
 	}
 
 	/** Dispose of the message combo box */
 	public void dispose() {
-		editor.removeActionListener(editorListener);
-		editor.removeFocusListener(focusListener);
-		removeKeyListener(keyListener);
+		editor.removeActionListener(editor_listener);
+		editor.removeFocusListener(focus_listener);
+		removeKeyListener(key_listener);
 	}
 
-	/** Set the edit mode.
-	 * @param cam Flag to indicate messages can be added. */
-	public void setEditMode(boolean cam) {
-		edit_mode = getEditMode(cam);
-		if (isEditable() && edit_mode != EditMode.ALWAYS)
-			setEditable(false);
-		if (!isEditable() && edit_mode == EditMode.ALWAYS)
-			setEditable(true);
-	}
-
-	/** Get the edit mode.
-	 * @param cam Flag to indicate the user can add messages */
-	private EditMode getEditMode(boolean cam) {
-		EditMode em = EditMode.getMode();
-		return (cam || em != EditMode.AFTERKEY)
-		      ? em
-		      : EditMode.NEVER;
-	}
-
-	/** Key event saved when making combobox editable */
-	private KeyEvent key_event;
-
-	/** Respond to a key typed event */
-	private void doKeyTyped(KeyEvent ke) {
-		if (edit_mode == EditMode.AFTERKEY) {
-			if (!isEditable()) {
-				setEditable(true);
-				key_event = ke;
-			}
-		}
-	}
-
-	/** Respond to a focus gained event */
-	private void doFocusGained() {
-		if (key_event != null) {
-			editor.dispatchEvent(key_event);
-			key_event = null;
-		}
-	}
-
-	/** Respond to a focus lost event */
-	private void doFocusLost() {
-		if (edit_mode == EditMode.AFTERKEY)
-			setEditable(false);
-		fireActionEvent();
+	/** Set the edit mode */
+	public void setEditMode() {
+		setEditable(EditMode.getMode() == EditMode.ALWAYS);
 	}
 
 	/** Get message text */
 	public String getMessage() {
-		Object item = (edit_mode == EditMode.ALWAYS)
+		Object item = (EditMode.getMode() == EditMode.ALWAYS)
 			? editor.getItem()
 			: getSelectedItem();
 		return getMulti(item);
