@@ -88,11 +88,11 @@ public class MessageComposer extends JPanel {
 	/** Button to clear the selected message */
 	private final JButton clear_btn = new JButton(clear_act);
 
-	/** Tab pane for message pages */
-	private final JTabbedPane page_tab = new JTabbedPane(JTabbedPane.RIGHT);
+	/** Tab pane for text rects */
+	private final JTabbedPane rect_tab = new JTabbedPane(JTabbedPane.RIGHT);
 
-	/** Panels for all pages of message */
-	private final ComposerPagePanel[] pages;
+	/** Panels for all text rectangles */
+	private final TextRectComposer[] rects;
 
 	/** Duration label */
 	private final ILabel dur_lbl = new ILabel("dms.duration");
@@ -107,8 +107,8 @@ public class MessageComposer extends JPanel {
 	/** Button to blank selected signs */
 	private final JButton blank_btn;
 
-	/** Number of pages on selected sign */
-	private int n_pages;
+	/** Number of text rectangles */
+	private int n_rects;
 
 	/** Number of lines on selected sign */
 	private int n_lines;
@@ -139,11 +139,11 @@ public class MessageComposer extends JPanel {
 		pattern_cbx.addActionListener(pattern_listener);
 		pattern_lbl.setLabelFor(pattern_cbx);
 		dur_lbl.setLabelFor(dur_cbx);
-		n_pages = 1;
+		n_rects  = 1;
 		n_lines = MAX_LINES;
-		pages = new ComposerPagePanel[MAX_PAGES];
-		for (int i = 0; i < pages.length; i++)
-			pages[i] = new ComposerPagePanel(this, n_lines, i);
+		rects = new TextRectComposer[MAX_PAGES];
+		for (int i = 0; i < rects.length; i++)
+			rects[i] = new TextRectComposer(this, n_lines, i);
 		send_btn = new JButton(dispatcher.getSendMsgAction());
 		blank_btn = new JButton(dispatcher.getBlankMsgAction());
 		layoutPanel();
@@ -174,7 +174,7 @@ public class MessageComposer extends JPanel {
 		hg.addContainerGap()
 		  .addGroup(hg0)
 		  .addGap(UI.hgap)
-		  .addComponent(page_tab)
+		  .addComponent(rect_tab)
 		  .addGap(UI.hgap)
 		  .addGroup(hg1)
 		  .addContainerGap();
@@ -197,7 +197,7 @@ public class MessageComposer extends JPanel {
 		   .addGroup(vgb);
 		GroupLayout.ParallelGroup vg = gl.createParallelGroup();
 		vg.addGroup(vg0);
-		vg.addComponent(page_tab);
+		vg.addComponent(rect_tab);
 		vg.addGroup(vg1);
 		gl.setVerticalGroup(vg);
 		setLayout(gl);
@@ -207,25 +207,25 @@ public class MessageComposer extends JPanel {
 	private void clearWidgets() {
 		adjusting++;
 		pattern_cbx.setSelectedItem(null);
-		setTabPage(0);
-		for (ComposerPagePanel pg: pages)
-			pg.clearWidgets();
+		setTabRect(0);
+		for (TextRectComposer rc: rects)
+			rc.clearWidgets();
 		adjusting--;
 		updateMessage(true);
 	}
 
-	/** Set tab to page specified */
-	private void setTabPage(int p) {
-		if (page_tab.getTabCount() > 0)
-			page_tab.setSelectedIndex(p);
+	/** Set tab to specified text rect */
+	private void setTabRect(int r) {
+		if (rect_tab.getTabCount() > 0)
+			rect_tab.setSelectedIndex(r);
 	}
 
 	/** Dispose of the message selector */
 	public void dispose() {
 		pattern_cbx.removeActionListener(pattern_listener);
 		removeAll();
-		for (ComposerPagePanel pg: pages)
-			pg.dispose();
+		for (TextRectComposer rc: rects)
+			rc.dispose();
 	}
 
 	/** Set the selected sign */
@@ -235,9 +235,8 @@ public class MessageComposer extends JPanel {
 		SignTextFinder stf = new SignTextFinder(proxy);
 		n_lines = DMSHelper.getLineCount(proxy);
 		initializeWidgets();
-		for (ComposerPagePanel pg: pages) {
-			pg.setModels(stf);
-		}
+		for (TextRectComposer rc: rects)
+			rc.setModels(stf);
 		adjusting--;
 	}
 
@@ -246,14 +245,14 @@ public class MessageComposer extends JPanel {
 		clear_btn.setMargin(UI.buttonInsets());
 		send_btn.setMargin(UI.buttonInsets());
 		blank_btn.setMargin(UI.buttonInsets());
-		for (int i = 0; i < n_pages; i++) {
-			ComposerPagePanel pg = pages[i];
-			pg.setEditMode();
-			pg.setLines(n_lines);
-			setPage(i, pg);
+		for (int i = 0; i < n_rects; i++) {
+			TextRectComposer rc = rects[i];
+			rc.setEditMode();
+			rc.setLines(n_lines);
+			setRect(i, rc);
 		}
-		while (n_pages < page_tab.getTabCount())
-			page_tab.removeTabAt(n_pages);
+		while (n_rects < rect_tab.getTabCount())
+			rect_tab.removeTabAt(n_rects);
 		dur_cbx.setSelectedIndex(0);
 
 		// more prominent margins for send and blank
@@ -268,14 +267,14 @@ public class MessageComposer extends JPanel {
 			clear_btn.setFont(f);
 	}
 
-	/** Set a page on one tab */
-	private void setPage(int n, ComposerPagePanel page) {
+	/** Set a text rect on one tab */
+	private void setRect(int n, TextRectComposer rc) {
 		String title = Integer.toString(n + 1);
-		if (n < page_tab.getTabCount()) {
-			page_tab.setComponentAt(n, page);
-			page_tab.setTitleAt(n, title);
+		if (n < rect_tab.getTabCount()) {
+			rect_tab.setComponentAt(n, rc);
+			rect_tab.setTitleAt(n, title);
 		} else
-			page_tab.addTab(title, page);
+			rect_tab.addTab(title, rc);
 	}
 
 	/** Enable or Disable the message composer */
@@ -283,10 +282,10 @@ public class MessageComposer extends JPanel {
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
 		adjusting++;
-		setTabPage(0);
+		setTabRect(0);
 		pattern_cbx.setEnabled(b);
-		for (ComposerPagePanel pnl: pages)
-			pnl.setEnabled(b);
+		for (TextRectComposer rc: rects)
+			rc.setEnabled(b);
 		dur_cbx.setEnabled(b);
 		dur_cbx.setSelectedItem(0);
 		adjusting--;
@@ -300,17 +299,17 @@ public class MessageComposer extends JPanel {
 	/** Compose a MULTI string using the contents of the widgets */
 	public String getComposedMulti() {
 		// FIXME: use multi based on selected pattern
-		MultiString[] mess = new MultiString[n_pages];
+		MultiString[] mess = new MultiString[n_rects];
 		int p = 0;
-		for (int i = 0; i < n_pages; i++) {
-			mess[i] = pages[i].getMulti();
+		for (int i = 0; i < n_rects; i++) {
+			mess[i] = rects[i].getMulti();
 			if (!mess[i].isBlank())
 				p = i + 1;
 		}
 		return concatenatePages(mess, p);
 	}
 
-	/** Concatenate an array of MULTI pages together.
+	/** Concatenate an array of MULTI rects together.
 	 * @param mess Array of page MULTI strings.
 	 * @param p Number of non-blank pages.
 	 * @return Combined MULTI string for all pages. */
@@ -329,8 +328,8 @@ public class MessageComposer extends JPanel {
 		adjusting++;
 		MultiString multi = new MultiString(ms);
 		String[] lines = multi.getLines(n_lines);
-		for (int i = 0; i < pages.length; i++)
-			pages[i].setSelectedLines(lines);
+		for (int i = 0; i < rects.length; i++)
+			rects[i].setSelectedLines(lines);
 		adjusting--;
 	}
 

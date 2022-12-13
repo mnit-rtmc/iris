@@ -25,12 +25,11 @@ import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
- * The ComposerPagePanel is a GUI panel for tabbed pages related to the sign
- * composer panel.
+ * The TextRectComposer is a panel for text rectangles on a message composer.
  *
  * @author Douglas Lau
  */
-public class ComposerPagePanel extends JPanel {
+public class TextRectComposer extends JPanel {
 
 	/** Message composer */
 	private final MessageComposer composer;
@@ -38,8 +37,8 @@ public class ComposerPagePanel extends JPanel {
 	/** Maximum number of lines on a sign */
 	private final int max_lines;
 
-	/** Page number (0-relative) */
-	private final int n_page;
+	/** Text rectangle number (0-relative) */
+	private final int n_rect;
 
 	/** Panels to wrap message line combo boxes */
 	private final JPanel[] line_pnl;
@@ -50,10 +49,10 @@ public class ComposerPagePanel extends JPanel {
 	/** Number of lines on selected sign */
 	private int n_lines;
 
-	/** Create a new page panel */
-	public ComposerPagePanel(MessageComposer mc, int ml, int p) {
+	/** Create a new text rect composer */
+	public TextRectComposer(MessageComposer mc, int ml, int nr) {
 		composer = mc;
-		n_page = p;
+		n_rect = nr;
 		max_lines = ml;
 		n_lines = ml;
 		line_cbx = new SignTextCBox[max_lines];
@@ -158,7 +157,7 @@ public class ComposerPagePanel extends JPanel {
 
 	/** Get line model number */
 	private short getLineNumber(int n) {
-		return (short) (n_page * n_lines + n + 1);
+		return (short) (n_rect * n_lines + n + 1);
 	}
 
 	/** Set the selected lines */
