@@ -16,11 +16,11 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.util.Iterator;
+import java.util.Set;
 import java.util.TreeSet;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
@@ -67,20 +67,14 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 	private TreeSet<MsgPattern> createMessageSet(DMS dms) {
 		TreeSet<MsgPattern> msgs = new TreeSet<MsgPattern>(
 			new NumericAlphaComparator<MsgPattern>());
-		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
-		while (it.hasNext()) {
-			DmsSignGroup dsg = it.next();
-			if (dsg.getDms() == dms) {
-				SignGroup sg = dsg.getSignGroup();
-				Iterator<MsgPattern> pit =
-					MsgPatternHelper.iterator();
-				while (pit.hasNext()) {
-					MsgPattern pat = pit.next();
-					if (pat.getSignGroup() == sg) {
-						if (isValidMulti(pat))
-							msgs.add(pat);
-					}
-				}
+		Set<SignGroup> groups = DmsSignGroupHelper.findGroups(dms);
+		Iterator<MsgPattern> pit = MsgPatternHelper.iterator();
+		while (pit.hasNext()) {
+			MsgPattern pat = pit.next();
+			if (groups.contains(pat.getSignGroup()) &&
+			    isValidMulti(pat))
+			{
+				msgs.add(pat);
 			}
 		}
 		return msgs;
