@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.TreeMap;
 import us.mn.state.dot.tms.utils.MultiAdapter;
 import us.mn.state.dot.tms.utils.MultiString;
@@ -28,8 +28,8 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class FontFinder {
 
-	/** List of all sign groups for the DMS */
-	private final ArrayList<SignGroup> groups;
+	/** Set of all sign groups for the DMS */
+	private final Set<SignGroup> groups;
 
 	/** Set of font numbers found */
 	private final HashSet<Integer> font_nums = new HashSet<Integer>();
@@ -46,7 +46,7 @@ public class FontFinder {
 	/** Create a font finder for a DMS */
 	public FontFinder(DMS dms) {
 		font_nums.add(DMSHelper.getDefaultFontNum(dms));
-		groups = findGroups(dms);
+		groups = DmsSignGroupHelper.findGroups(dms);
 		findMsgPatternTags();
 		findSignTextTags();
 		findDmsActionTags();
@@ -61,18 +61,6 @@ public class FontFinder {
 				fonts.put(fn, f);
 		}
 		return fonts;
-	}
-
-	/** Find all sign groups for the DMS */
-	private ArrayList<SignGroup> findGroups(DMS dms) {
-		ArrayList<SignGroup> g = new ArrayList<SignGroup>();
-		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
-		while (it.hasNext()) {
-			DmsSignGroup dsg = it.next();
-			if (dsg.getDms() == dms)
-				g.add(dsg.getSignGroup());
-		}
-		return g;
 	}
 
 	/** Find font tags in all message patterns for the sign's groups */
