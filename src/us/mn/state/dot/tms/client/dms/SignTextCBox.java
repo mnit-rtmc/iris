@@ -34,7 +34,7 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class MsgComboBox extends JComboBox<SignText> {
+public class SignTextCBox extends JComboBox<SignText> {
 
 	/** Message combo box text editor */
 	static private class Editor extends JTextField
@@ -109,8 +109,8 @@ public class MsgComboBox extends JComboBox<SignText> {
 		}
 	};
 
-	/** Create a message combo box */
-	public MsgComboBox() {
+	/** Create a sign text combo box */
+	public SignTextCBox() {
 		setMaximumRowCount(21);
 		// NOTE: We use a prototype display value so that combo boxes
 		//       are always the same size.  This prevents all the

@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class SignTextComboBoxModel extends AbstractListModel<SignText>
+public class SignTextCBoxModel extends AbstractListModel<SignText>
 	implements ComboBoxModel<SignText>
 {
 	/** Rank for on-the-fly created sign messages */
@@ -46,10 +46,16 @@ public class SignTextComboBoxModel extends AbstractListModel<SignText>
 	private final short line;
 
 	/** Create a new sign text combo box model.
-	 * @param ln Sign text line number. */
-	protected SignTextComboBoxModel(short ln) {
+	 * @param ln Sign line number. */
+	public SignTextCBoxModel(short ln) {
 		line = ln;
 		items.add(BLANK_SIGN_TEXT);
+	}
+
+	/** Add a SignText to the model.
+	 * NOTE: Do not call this after using in SignTextCBox */
+	public void add(SignText st) {
+		items.add(st);
 	}
 
 	/** Get the element at the specified index */
@@ -123,36 +129,5 @@ public class SignTextComboBoxModel extends AbstractListModel<SignText>
 				return st;
 		}
 		return null;
-	}
-
-	/** Find the index of an item */
-	private int find(SignText t) {
-		int i = 0;
-		for (SignText st: items) {
-			if (st.equals(t))
-				return i;
-			i++;
-		}
-		return -1;
-	}
-
-	/** Add a SignText to the model */
-	public void add(SignText t) {
-		if (items.add(t)) {
-			int i = find(t);
-			if (i >= 0)
-				fireIntervalAdded(this, i, i);
-		}
-	}
-
-	/** Remove a sign text from the model */
-	public void remove(SignText t) {
-		int i = find(t);
-		if (i >= 0) {
-			items.remove(t);
-			if (t.equals(selected))
-				selected = null;
-			fireIntervalRemoved(this, i, i);
-		}
 	}
 }

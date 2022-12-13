@@ -44,8 +44,8 @@ public class ComposerPagePanel extends JPanel {
 	/** Panels to wrap message line combo boxes */
 	private final JPanel[] line_pnl;
 
-	/** Message combo box widgets */
-	private final MsgComboBox[] line_cbx;
+	/** Sign text combo box widgets */
+	private final SignTextCBox[] line_cbx;
 
 	/** Number of lines on selected sign */
 	private int n_lines;
@@ -56,7 +56,7 @@ public class ComposerPagePanel extends JPanel {
 		n_page = p;
 		max_lines = ml;
 		n_lines = ml;
-		line_cbx = new MsgComboBox[max_lines];
+		line_cbx = new SignTextCBox[max_lines];
 		line_pnl = new JPanel[max_lines];
 		for (int i = 0; i < max_lines; i++) {
 			line_cbx[i] = buildLineComboBox(i);
@@ -64,9 +64,9 @@ public class ComposerPagePanel extends JPanel {
 		layoutPanel();
 	}
 
-	/** Build a message line combo box */
-	private MsgComboBox buildLineComboBox(int n) {
-		MsgComboBox cbx = new MsgComboBox();
+	/** Build a sign text combo box */
+	private SignTextCBox buildLineComboBox(int n) {
+		SignTextCBox cbx = new SignTextCBox();
 		// Unlink incident if the first line (what) is changed
 		final boolean unlink = (n == 0);
 		cbx.addActionListener(new ActionListener() {
@@ -110,28 +110,28 @@ public class ComposerPagePanel extends JPanel {
 
 	/** Clear the widgets */
 	public void clearWidgets() {
-		for (MsgComboBox cbox: line_cbx)
+		for (SignTextCBox cbox: line_cbx)
 			cbox.setSelectedIndex(-1);
 	}
 
 	/** Dispose of page panel */
 	public void dispose() {
 		removeAll();
-		for (MsgComboBox cbox: line_cbx)
+		for (SignTextCBox cbox: line_cbx)
 			cbox.dispose();
 	}
 
 	/** Enable or Disable the page panel */
 	@Override
 	public void setEnabled(boolean b) {
-		for (MsgComboBox cbx: line_cbx)
+		for (SignTextCBox cbx: line_cbx)
 			cbx.setEnabled(b);
 		super.setEnabled(b);
 	}
 
 	/** Set the edit mode */
 	public void setEditMode() {
-		for (MsgComboBox cbox: line_cbx)
+		for (SignTextCBox cbox: line_cbx)
 			cbox.setEditMode();
 	}
 
@@ -143,17 +143,17 @@ public class ComposerPagePanel extends JPanel {
 	}
 
 	/** Set the message combo box models */
-	public void setModels(SignTextModel stm) {
+	public void setModels(SignTextFinder stf) {
 		for (int n = 0; n < max_lines; n++)
-			line_cbx[n].setModel(getLineModel(stm, n));
+			line_cbx[n].setModel(getLineModel(stf, n));
 	}
 
 	/** Get line model for a combo box */
-	private SignTextComboBoxModel getLineModel(SignTextModel stm, int n) {
+	private SignTextCBoxModel getLineModel(SignTextFinder stf, int n) {
 		short line = getLineNumber(n);
-		return (stm != null && n < n_lines)
-		     ? stm.getLineModel(line)
-		     : new SignTextComboBoxModel(line);
+		return (n < n_lines)
+		     ? stf.getLineModel(line)
+		     : new SignTextCBoxModel(line);
 	}
 
 	/** Get line model number */
@@ -164,7 +164,7 @@ public class ComposerPagePanel extends JPanel {
 	/** Set the selected lines */
 	public void setSelectedLines(String[] lines) {
 		for (int n = 0; n < max_lines; n++) {
-			MsgComboBox cl = line_cbx[n];
+			SignTextCBox cl = line_cbx[n];
 			int i = getLineNumber(n) - 1;
 			if (i < lines.length) {
 				String ms = new MultiString(lines[i])

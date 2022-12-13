@@ -232,18 +232,13 @@ public class MessageComposer extends JPanel {
 	public void setSelectedSign(DMS proxy) {
 		adjusting++;
 		pattern_cbx.populateModel(proxy);
-		SignTextModel stm = createSignTextModel(proxy);
+		SignTextFinder stf = new SignTextFinder(proxy);
 		n_lines = DMSHelper.getLineCount(proxy);
 		initializeWidgets();
 		for (ComposerPagePanel pg: pages) {
-			pg.setModels(stm);
+			pg.setModels(stf);
 		}
 		adjusting--;
-	}
-
-	/** Create a new sign text model */
-	private SignTextModel createSignTextModel(DMS proxy) {
-		return (proxy != null) ? new SignTextModel(proxy) : null;
 	}
 
 	/** Initialize the widgets */

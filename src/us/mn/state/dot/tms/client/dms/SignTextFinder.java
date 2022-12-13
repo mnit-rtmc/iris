@@ -24,22 +24,19 @@ import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignTextHelper;
 
 /**
- * Model for sign text messages for a single DMS.  It creates and contains
- * SignTextComboBoxModel objects for each combobox in MessageComposer.
+ * Finder for sign text messages for a single DMS.  It creates and contains
+ * SignTextCBoxModel objects for each combobox in MessageComposer.
  *
  * @author Douglas Lau
  */
-public class SignTextModel {
+public class SignTextFinder {
 
-	/** Mapping of line numbers to combo box models */
-	private final HashMap<Short, SignTextComboBoxModel> lines =
-		new HashMap<Short, SignTextComboBoxModel>();
+	/** Mapping of line numbers to models */
+	private final HashMap<Short, SignTextCBoxModel> lines =
+		new HashMap<Short, SignTextCBoxModel>();
 
-	/** Last line in model */
-	private short last_line = 1;
-
-	/** Create a new sign text model */
-	public SignTextModel(DMS dms) {
+	/** Create a new sign text finder */
+	public SignTextFinder(DMS dms) {
 		Set<SignGroup> groups = DmsSignGroupHelper.findGroups(dms);
 		Iterator<SignText> it = SignTextHelper.iterator();
 		while (it.hasNext()) {
@@ -47,25 +44,18 @@ public class SignTextModel {
 			if (groups.contains(st.getSignGroup())) {
 				short ln = st.getLine();
 				getLineModel(ln).add(st);
-				last_line = (short) Math.max(last_line, ln);
 			}
 		}
 	}
 
-	/** Get the combobox line model for the specified line */
-	public SignTextComboBoxModel getLineModel(short line) {
+	/** Get the model for the specified line */
+	public SignTextCBoxModel getLineModel(short line) {
 		if (lines.containsKey(line))
 			return lines.get(line);
 		else {
-			SignTextComboBoxModel mdl = new SignTextComboBoxModel(
-				line);
+			SignTextCBoxModel mdl = new SignTextCBoxModel(line);
 			lines.put(line, mdl);
 			return mdl;
 		}
-	}
-
-	/** Get the last line number with sign text */
-	public short getLastLine() {
-		return last_line;
 	}
 }
