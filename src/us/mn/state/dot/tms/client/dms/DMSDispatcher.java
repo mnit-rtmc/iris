@@ -135,6 +135,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Blank all selected DMS */
 	private void sendBlankMessage() {
+		unlinkIncident();
 		for (DMS dms: sel_mdl.getSelected()) {
 			SignConfig sc = dms.getSignConfig();
 			if (sc != null) {
@@ -143,6 +144,7 @@ public class DMSDispatcher extends JPanel {
 					dms.setMsgUser(sm);
 			}
 		}
+		selectPreview(false);
 	}
 
 	/** Get action to blank selected signs */
@@ -318,15 +320,14 @@ public class DMSDispatcher extends JPanel {
 	/** Send the currently selected message */
 	private void sendSelectedMessage() {
 		String ms = composer.getComposedMulti();
-		if (shouldSendMessage(ms)) {
-			sendMessage(ms);
-			removeInvalidSelections();
+		if (new MultiString(ms).isBlank())
+			sendBlankMessage();
+		else {
+			// Remove all invalid selected DMS
+			sel_mdl.setSelected(getValidSelected());
+			if (shouldSendMessage(ms))
+				sendMessage(ms);
 		}
-	}
-
-	/** Remove all invalid selected DMS */
-	private void removeInvalidSelections() {
-		sel_mdl.setSelected(getValidSelected());
 	}
 
 	/** Determine if the message should be sent, which is a function
@@ -344,8 +345,8 @@ public class DMSDispatcher extends JPanel {
 	/** Show a message confirmation dialog.
 	 * @return True if message should be sent. */
 	private boolean showConfirmDialog() {
-		String m = buildConfirmMsg();
-		return m.isEmpty() || confirmSend(m);
+		String imsg = buildConfirmMsg();
+		return (!imsg.isEmpty()) && confirmSend(imsg);
 	}
 
 	/** Build a confirmation message containing all selected DMS.
@@ -370,7 +371,7 @@ public class DMSDispatcher extends JPanel {
 		return sb.toString();
 	}
 
-	/** Send a new message to all selected DMS */
+	/** Send a new (non-blank) message to all selected DMS */
 	private void sendMessage(String ms) {
 		Set<DMS> signs = getValidSelected();
 		if (signs.size() > 1)
@@ -391,8 +392,6 @@ public class DMSDispatcher extends JPanel {
 	/** Create a new message for a sign configuration.
 	 * @return A SignMessage from composer selection, or null on error. */
 	private SignMessage createMessage(SignConfig sc, String ms) {
-		if (new MultiString(ms).isBlank())
-			return creator.createBlankMessage(sc);
 		MsgPattern pat = composer.getMsgPattern();
 		MsgCombining mc = MsgCombining.fromOrdinal(
 			pat.getMsgCombining());
