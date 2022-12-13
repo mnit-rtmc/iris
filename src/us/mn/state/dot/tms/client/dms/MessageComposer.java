@@ -125,10 +125,9 @@ public class MessageComposer extends JPanel {
 	public void updateMessage(boolean unlink_incident) {
 		if (adjusting == 0) {
 			adjusting++;
-			dispatcher.setComposedMulti(getComposedMulti());
 			if (unlink_incident)
 				dispatcher.unlinkIncident();
-			dispatcher.selectPreview(true);
+			dispatcher.updateMessage();
 			adjusting--;
 		}
 	}
@@ -214,9 +213,8 @@ public class MessageComposer extends JPanel {
 		setTabPage(0);
 		for (ComposerPagePanel pg: pages)
 			pg.clearWidgets();
-		dispatcher.setComposedMulti("");
-		dispatcher.unlinkIncident();
 		adjusting--;
+		updateMessage(true);
 	}
 
 	/** Set tab to page specified */

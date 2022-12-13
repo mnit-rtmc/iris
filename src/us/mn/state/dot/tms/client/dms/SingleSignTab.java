@@ -207,7 +207,7 @@ public class SingleSignTab extends IPanel {
 		tab.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				selectPreview(!preview);
-				if ((0 == adjusting) && !preview)
+				if (!preview)
 					updateMsgCurrent(selected);
 			}
 		});
@@ -395,9 +395,11 @@ public class SingleSignTab extends IPanel {
 
 	/** Update the current message on a sign */
 	private void updateMsgCurrent(DMS dms) {
-		adjusting++;
-		dispatcher.updateMsgCurrent(dms);
-		adjusting--;
+		if (0 == adjusting) {
+			adjusting++;
+			dispatcher.updateMsgCurrent(dms);
+			adjusting--;
+		}
 		expiration_lbl.setText(getExpiration(dms));
 	}
 

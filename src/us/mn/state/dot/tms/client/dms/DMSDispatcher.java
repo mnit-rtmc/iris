@@ -253,10 +253,9 @@ public class DMSDispatcher extends JPanel {
 		incident = DMSHelper.lookupIncident(dms);
 	}
 
-	/** Set the composed MULTI string.  This will update all the widgets
-	 * on the dispatcher with the specified message. */
-	public void setComposedMulti(String ms) {
-		composer.setComposedMulti(ms);
+	/** Update the composed message */
+	public void updateMessage() {
+		selectPreview(true);
 		singleTab.setMessage();
 	}
 
@@ -443,9 +442,8 @@ public class DMSDispatcher extends JPanel {
 	/** Clear the selection */
 	private void clearSelected() {
 		setEnabled(false);
-		composer.setSelectedSign(null);
-		setComposedMulti("");
 		unlinkIncident();
+		composer.setSelectedSign(null);
 		singleTab.setSelected(null);
 	}
 
@@ -473,7 +471,7 @@ public class DMSDispatcher extends JPanel {
 	}
 
 	/** Select the preview mode */
-	public void selectPreview(boolean p) {
+	private void selectPreview(boolean p) {
 		singleTab.selectPreview(p);
 	}
 
