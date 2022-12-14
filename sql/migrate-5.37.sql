@@ -271,4 +271,18 @@ GRANT SELECT ON dms_toll_zone_view TO PUBLIC;
 
 DELETE FROM iris.resource_type WHERE name = 'quick_message';
 
+-- Delete unused sign_config records
+DELETE FROM iris.sign_config WHERE name NOT IN (
+    SELECT sign_config FROM iris._dms WHERE sign_config IS NOT NULL
+    UNION ALL
+    SELECT sign_config FROM iris.msg_pattern WHERE sign_config IS NOT NULL
+    UNION ALL
+    SELECT sign_config FROM iris.sign_message WHERE sign_config IS NOT NULL
+);
+
+-- Delete unused sign_detail records
+DELETE FROM iris.sign_detail WHERE name NOT IN (
+    SELECT sign_detail FROM iris._dms WHERE sign_detail IS NOT NULL
+);
+
 COMMIT;

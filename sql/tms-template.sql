@@ -2738,42 +2738,42 @@ CREATE VIEW sign_detail_view AS
 GRANT SELECT ON sign_detail_view TO PUBLIC;
 
 CREATE TABLE iris.sign_config (
-	name VARCHAR(16) PRIMARY KEY,
-	face_width INTEGER NOT NULL,
-	face_height INTEGER NOT NULL,
-	border_horiz INTEGER NOT NULL,
-	border_vert INTEGER NOT NULL,
-	pitch_horiz INTEGER NOT NULL,
-	pitch_vert INTEGER NOT NULL,
-	pixel_width INTEGER NOT NULL,
-	pixel_height INTEGER NOT NULL,
-	char_width INTEGER NOT NULL,
-	char_height INTEGER NOT NULL,
-	monochrome_foreground INTEGER NOT NULL,
-	monochrome_background INTEGER NOT NULL,
-	color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
-	default_font VARCHAR(16) REFERENCES iris.font,
-	module_width INTEGER,
-	module_height INTEGER
+    name VARCHAR(16) PRIMARY KEY,
+    face_width INTEGER NOT NULL,
+    face_height INTEGER NOT NULL,
+    border_horiz INTEGER NOT NULL,
+    border_vert INTEGER NOT NULL,
+    pitch_horiz INTEGER NOT NULL,
+    pitch_vert INTEGER NOT NULL,
+    pixel_width INTEGER NOT NULL,
+    pixel_height INTEGER NOT NULL,
+    char_width INTEGER NOT NULL,
+    char_height INTEGER NOT NULL,
+    monochrome_foreground INTEGER NOT NULL,
+    monochrome_background INTEGER NOT NULL,
+    color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
+    default_font VARCHAR(16) REFERENCES iris.font,
+    module_width INTEGER,
+    module_height INTEGER
 );
 
 CREATE TRIGGER sign_config_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris.sign_config
-	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    AFTER INSERT OR UPDATE OR DELETE ON iris.sign_config
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW sign_config_view AS
-	SELECT name, face_width, face_height, border_horiz, border_vert,
-	       pitch_horiz, pitch_vert, pixel_width, pixel_height, char_width,
-	       char_height, monochrome_foreground, monochrome_background,
-	       cs.description AS color_scheme, default_font,
-	       module_width, module_height
-	FROM iris.sign_config
-	JOIN iris.color_scheme cs ON sign_config.color_scheme = cs.id;
+    SELECT name, face_width, face_height, border_horiz, border_vert,
+           pitch_horiz, pitch_vert, pixel_width, pixel_height, char_width,
+           char_height, monochrome_foreground, monochrome_background,
+           cs.description AS color_scheme, default_font,
+           module_width, module_height
+    FROM iris.sign_config
+    JOIN iris.color_scheme cs ON sign_config.color_scheme = cs.id;
 GRANT SELECT ON sign_config_view TO PUBLIC;
 
 CREATE TABLE iris.msg_combining (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(8) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(8) NOT NULL
 );
 
 COPY iris.msg_combining (id, description) FROM stdin;
