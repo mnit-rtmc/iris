@@ -21,7 +21,6 @@ import java.util.HashSet;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.PageTimeHelper;
-import us.mn.state.dot.tms.SignDetail;
 import static us.mn.state.dot.tms.SystemAttrEnum.*;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;

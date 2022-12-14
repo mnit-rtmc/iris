@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontFinder;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
-import us.mn.state.dot.tms.SignDetail;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
