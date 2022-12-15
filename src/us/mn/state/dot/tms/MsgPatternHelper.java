@@ -144,6 +144,7 @@ public class MsgPatternHelper extends BaseHelper {
 		final String[] mess;
 		int n_mess = 0;
 		boolean page_clean = true;
+		boolean page_rect = false;
 
 		private TextRectFiller(String[] m) {
 			mess = m;
@@ -159,29 +160,35 @@ public class MsgPatternHelper extends BaseHelper {
 		@Override public void addSpan(String span) {
 			super.addSpan(span);
 			page_clean = false;
+			page_rect = false;
 		}
 		@Override public void addGraphic(int g_num, Integer x,
 			Integer y, String g_id)
 		{
 			super.addGraphic(g_num, x, y, g_id);
 			page_clean = false;
+			page_rect = false;
 		}
 		@Override public void addLine(Integer spacing) {
 			super.addLine(spacing);
 			page_clean = false;
+			page_rect = false;
 		}
 		@Override public void addPage() {
-			if (page_clean)
+			if (page_clean || page_rect)
 				fillRectangle();
 			super.addPage();
 			page_clean = true;
+			page_rect = false;
 		}
 		@Override public void setTextRectangle(int x, int y,
 			int w, int h)
 		{
+			if (page_rect)
+				fillRectangle();
 			super.setTextRectangle(x, y, w, h);
-			fillRectangle();
 			page_clean = false;
+			page_rect = true;
 		}
 	}
 
@@ -193,7 +200,8 @@ public class MsgPatternHelper extends BaseHelper {
 		// fill text rectangles in message pattern
 		new MultiString(pat.getMulti()).parse(trf);
 		// if there's still a text rectangle, fill it at the end
-		trf.fillRectangle();
+		if (trf.page_clean || trf.page_rect)
+			trf.fillRectangle();
 		return trf.toString();
 	}
 }
