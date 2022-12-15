@@ -34,22 +34,22 @@ public class PairTest extends TestCase {
 
 		boolean ok = true;
 
-		assertTrue(((Integer)(new Pair(new Integer(1),
-			new Double(3.25)).car())).compareTo(
-			new Integer(1)) == 0);
-		ok = ok && ((Integer) (new Pair(new Integer(1), new Double(
-			3.25)).car())).compareTo(new Integer(2)) < 0;
+		assertTrue(((Integer)(new Pair(Integer.valueOf(1),
+			Double.valueOf(3.25)).car())).compareTo(
+			Integer.valueOf(1)) == 0);
+		ok = ok && ((Integer) (new Pair(Integer.valueOf(1), Double.valueOf(
+			3.25)).car())).compareTo(Integer.valueOf(2)) < 0;
 		ok = ok && ((Integer) (new Pair(
-			new Integer(1), new Double(3.25)).car())).compareTo(
-				new Integer(-3)) > 0;
+			Integer.valueOf(1), Double.valueOf(3.25)).car())).compareTo(
+				Integer.valueOf(-3)) > 0;
 		ok = ok && ((Double) (new Pair(
-			new Integer(1), new Double(3.25)).cdr())).compareTo(
-				new Double(3.25)) == 0;
-		ok = ok && ((Double) (new Pair(new Integer(1),
-			new Double(3.25)).cdr())).compareTo(new Double(4)) < 0;
+			Integer.valueOf(1), Double.valueOf(3.25)).cdr())).compareTo(
+				Double.valueOf(3.25)) == 0;
+		ok = ok && ((Double) (new Pair(Integer.valueOf(1),
+			Double.valueOf(3.25)).cdr())).compareTo(Double.valueOf(4)) < 0;
 		ok = ok && ((Double) (new Pair(
-			new Integer(1), new Double(3.25)).cdr())).compareTo(
-				new Double(.33)) > 0;
+			Integer.valueOf(1), Double.valueOf(3.25)).cdr())).compareTo(
+				Double.valueOf(.33)) > 0;
 		assertTrue(ok);
 
 		// test findCar()

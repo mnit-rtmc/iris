@@ -17,9 +17,9 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Font;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -29,7 +29,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MsgPattern;
-import static us.mn.state.dot.tms.SignMessage.MAX_LINES;
+import us.mn.state.dot.tms.MsgPatternHelper;
 import static us.mn.state.dot.tms.SignMessage.MAX_PAGES;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
@@ -37,8 +37,8 @@ import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
-import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
+import us.mn.state.dot.tms.utils.TextRect;
 
 /**
  * Message composer GUI for sign messages.
@@ -64,16 +64,44 @@ public class MessageComposer extends JPanel {
 	/** Action listener for pattern combo box */
 	private final ActionListener pattern_listener = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-			updatePattern();
+			if (adjusting == 0) {
+				adjusting++;
+				updatePattern();
+				adjusting--;
+			}
 		}
 	};
 
 	/** Update the selected pattern */
 	private void updatePattern() {
-		if (adjusting == 0) {
-			adjusting++;
-			// FIXME: clear all page widgets
-			adjusting--;
+		MsgPattern pat = getMsgPattern();
+		List<TextRect> trs = MsgPatternHelper.findTextRectangles(pat);
+		n_rects = Math.min(trs.size(), rects.length);
+		while (n_rects < rect_tab.getTabCount())
+			rect_tab.removeTabAt(n_rects);
+		int first = 1;
+		int page_number = 0;
+		char page_letter = 'a' - 1;
+		for (int i = 0; i < n_rects; i++) {
+			TextRect tr = trs.get(i);
+			if (tr.page_number == page_number)
+				page_letter++;
+			else
+				page_letter = 'a' - 1;
+			page_number = tr.page_number;
+			String title = (page_letter >= 'a')
+				? "" + page_number + page_letter
+				: "" + page_number;
+			TextRectComposer rc = rects[i];
+			int n_lines = tr.getLineCount();
+			rc.setModels(finder, first, n_lines);
+			rc.setEditMode();
+			if (i < rect_tab.getTabCount()) {
+				rect_tab.setComponentAt(i, rc);
+				rect_tab.setTitleAt(i, title);
+			} else
+				rect_tab.addTab(title, rc);
+			first += n_lines;
 		}
 		updateMessage(true);
 	}
@@ -107,11 +135,11 @@ public class MessageComposer extends JPanel {
 	/** Button to blank selected signs */
 	private final JButton blank_btn;
 
+	/** Sign text finder for selected sign */
+	private SignTextFinder finder;
+
 	/** Number of text rectangles */
 	private int n_rects;
-
-	/** Number of lines on selected sign */
-	private int n_lines;
 
 	/** Counter to indicate we're adjusting widgets.  This needs to be
 	 * incremented before calling dispatcher methods which might cause
@@ -139,11 +167,10 @@ public class MessageComposer extends JPanel {
 		pattern_cbx.addActionListener(pattern_listener);
 		pattern_lbl.setLabelFor(pattern_cbx);
 		dur_lbl.setLabelFor(dur_cbx);
-		n_rects  = 1;
-		n_lines = MAX_LINES;
 		rects = new TextRectComposer[MAX_PAGES];
 		for (int i = 0; i < rects.length; i++)
-			rects[i] = new TextRectComposer(this, n_lines, i);
+			rects[i] = new TextRectComposer(this);
+		n_rects  = 0;
 		send_btn = new JButton(dispatcher.getSendMsgAction());
 		blank_btn = new JButton(dispatcher.getBlankMsgAction());
 		layoutPanel();
@@ -203,6 +230,18 @@ public class MessageComposer extends JPanel {
 		setLayout(gl);
 	}
 
+	/** Initialize the widgets */
+	private void initializeWidgets() {
+		// less prominent font for clear button
+		Font f = Widgets.deriveFont("Button.font", Font.PLAIN, 0.80);
+		if (f != null)
+			clear_btn.setFont(f);
+		clear_btn.setMargin(UI.buttonInsets());
+		// more prominent margins for send and blank buttons
+		send_btn.setMargin(UI.insets());
+		blank_btn.setMargin(UI.insets());
+	}
+
 	/** Clear the widgets */
 	private void clearWidgets() {
 		adjusting++;
@@ -231,50 +270,10 @@ public class MessageComposer extends JPanel {
 	/** Set the selected sign */
 	public void setSelectedSign(DMS proxy) {
 		adjusting++;
+		finder = new SignTextFinder(proxy);
 		pattern_cbx.populateModel(proxy);
-		SignTextFinder stf = new SignTextFinder(proxy);
-		n_lines = DMSHelper.getLineCount(proxy);
-		initializeWidgets();
-		for (TextRectComposer rc: rects)
-			rc.setModels(stf);
-		adjusting--;
-	}
-
-	/** Initialize the widgets */
-	private void initializeWidgets() {
-		clear_btn.setMargin(UI.buttonInsets());
-		send_btn.setMargin(UI.buttonInsets());
-		blank_btn.setMargin(UI.buttonInsets());
-		for (int i = 0; i < n_rects; i++) {
-			TextRectComposer rc = rects[i];
-			rc.setEditMode();
-			rc.setLines(n_lines);
-			setRect(i, rc);
-		}
-		while (n_rects < rect_tab.getTabCount())
-			rect_tab.removeTabAt(n_rects);
 		dur_cbx.setSelectedIndex(0);
-
-		// more prominent margins for send and blank
-		send_btn.setMargin(new Insets(UI.vgap, UI.hgap, UI.vgap,
-			UI.hgap));
-		blank_btn.setMargin(new Insets(UI.vgap, UI.hgap, UI.vgap,
-			UI.hgap));
-
-		// less prominent font for clear button
-		Font f = Widgets.deriveFont("Button.font", Font.PLAIN, 0.80);
-		if (f != null)
-			clear_btn.setFont(f);
-	}
-
-	/** Set a text rect on one tab */
-	private void setRect(int n, TextRectComposer rc) {
-		String title = Integer.toString(n + 1);
-		if (n < rect_tab.getTabCount()) {
-			rect_tab.setComponentAt(n, rc);
-			rect_tab.setTitleAt(n, title);
-		} else
-			rect_tab.addTab(title, rc);
+		adjusting--;
 	}
 
 	/** Enable or Disable the message composer */
@@ -298,29 +297,11 @@ public class MessageComposer extends JPanel {
 
 	/** Compose a MULTI string using the contents of the widgets */
 	public String getComposedMulti() {
-		// FIXME: use multi based on selected pattern
-		MultiString[] mess = new MultiString[n_rects];
-		int p = 0;
-		for (int i = 0; i < n_rects; i++) {
+		MsgPattern pat = getMsgPattern();
+		String[] mess = new String[n_rects];
+		for (int i = 0; i < mess.length; i++)
 			mess[i] = rects[i].getMulti();
-			if (!mess[i].isBlank())
-				p = i + 1;
-		}
-		return concatenatePages(mess, p);
-	}
-
-	/** Concatenate an array of MULTI rects together.
-	 * @param mess Array of page MULTI strings.
-	 * @param p Number of non-blank pages.
-	 * @return Combined MULTI string for all pages. */
-	private String concatenatePages(MultiString[] mess, int p) {
-		MultiBuilder mb = new MultiBuilder();
-		for (int i = 0; i < p; i++) {
-			if (i > 0)
-				mb.addPage();
-			mb.append(mess[i]);
-		}
-		return mb.toString();
+		return MsgPatternHelper.fillTextRectangles(pat, mess);
 	}
 
 	/** Set the composed MULTI string */

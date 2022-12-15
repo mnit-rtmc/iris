@@ -740,6 +740,14 @@ public class MultiString {
 		return mb.toString();
 	}
 
+	/** Strip trailing empty lines */
+	public String stripTrailingLines() {
+		String ms = multi;
+		while (ms.endsWith("[nl]"))
+			ms = ms.substring(0, ms.length() - 4);
+		return ms;
+	}
+
 	/** Replace all the page times in a MULTI string.
 	 * If no page time tag exists, then a page time tag is prepended.
 	 * @param pt_on Page on-time in tenths of a second.

@@ -21,11 +21,12 @@ import java.awt.event.ActionListener;
 import javax.swing.GroupLayout;
 import javax.swing.JPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
+import static us.mn.state.dot.tms.SignMessage.MAX_LINES;
 import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
- * The TextRectComposer is a panel for text rectangles on a message composer.
+ * TextRectComposer is a panel for text rectangles on a message composer.
  *
  * @author Douglas Lau
  */
@@ -34,40 +35,29 @@ public class TextRectComposer extends JPanel {
 	/** Message composer */
 	private final MessageComposer composer;
 
-	/** Maximum number of lines on a sign */
-	private final int max_lines;
-
-	/** Text rectangle number (0-relative) */
-	private final int n_rect;
-
 	/** Panels to wrap message line combo boxes */
 	private final JPanel[] line_pnl;
 
 	/** Sign text combo box widgets */
 	private final SignTextCBox[] line_cbx;
 
-	/** Number of lines on selected sign */
-	private int n_lines;
-
 	/** Create a new text rect composer */
-	public TextRectComposer(MessageComposer mc, int ml, int nr) {
+	public TextRectComposer(MessageComposer mc) {
 		composer = mc;
-		n_rect = nr;
-		max_lines = ml;
-		n_lines = ml;
-		line_cbx = new SignTextCBox[max_lines];
-		line_pnl = new JPanel[max_lines];
-		for (int i = 0; i < max_lines; i++) {
+		line_cbx = new SignTextCBox[MAX_LINES];
+		line_pnl = new JPanel[MAX_LINES];
+		for (int i = 0; i < MAX_LINES; i++) {
 			line_cbx[i] = buildLineComboBox(i);
+			line_pnl[i] = buildLinePanel(i);
 		}
 		layoutPanel();
 	}
 
 	/** Build a sign text combo box */
-	private SignTextCBox buildLineComboBox(int n) {
+	private SignTextCBox buildLineComboBox(int i) {
 		SignTextCBox cbx = new SignTextCBox();
 		// Unlink incident if the first line (what) is changed
-		final boolean unlink = (n == 0);
+		final boolean unlink = (i == 0);
 		cbx.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				composer.updateMessage(unlink);
@@ -76,10 +66,21 @@ public class TextRectComposer extends JPanel {
 		return cbx;
 	}
 
+	/** Build panel for one line */
+	private JPanel buildLinePanel(int i) {
+		JPanel pnl = new JPanel(new BorderLayout());
+		pnl.setVisible(false);
+		pnl.setBackground(Color.BLACK);
+		pnl.setBorder((i == 0)
+			? UI.panelBorder()
+			: UI.noTopBorder()
+		);
+		pnl.add(line_cbx[i]);
+		return pnl;
+	}
+
 	/** Layout the panel */
 	private void layoutPanel() {
-		for (int i = 0; i < max_lines; i++)
-			initLine(i);
 		GroupLayout gl = new GroupLayout(this);
 		gl.setAutoCreateGaps(false);
 		gl.setAutoCreateContainerGaps(false);
@@ -87,7 +88,7 @@ public class TextRectComposer extends JPanel {
 		setLayout(gl);
 		GroupLayout.ParallelGroup hg = gl.createParallelGroup();
 		GroupLayout.SequentialGroup vg = gl.createSequentialGroup();
-		for (int i = 0; i < max_lines; i++) {
+		for (int i = 0; i < MAX_LINES; i++) {
 			hg.addComponent(line_pnl[i]);
 			vg.addComponent(line_pnl[i]);
 		}
@@ -95,29 +96,17 @@ public class TextRectComposer extends JPanel {
 		gl.setVerticalGroup(vg);
 	}
 
-	/** Initialize one line panel */
-	private void initLine(int i) {
-		JPanel pnl = new JPanel(new BorderLayout());
-		pnl.setBackground(Color.BLACK);
-		if (i == 0)
-			pnl.setBorder(UI.panelBorder());
-		else
-			pnl.setBorder(UI.noTopBorder());
-		pnl.add(line_cbx[i]);
-		line_pnl[i] = pnl;
-	}
-
 	/** Clear the widgets */
 	public void clearWidgets() {
-		for (SignTextCBox cbox: line_cbx)
-			cbox.setSelectedIndex(-1);
+		for (SignTextCBox cbx: line_cbx)
+			cbx.setSelectedIndex(-1);
 	}
 
 	/** Dispose of page panel */
 	public void dispose() {
 		removeAll();
-		for (SignTextCBox cbox: line_cbx)
-			cbox.dispose();
+		for (SignTextCBox cbx: line_cbx)
+			cbx.dispose();
 	}
 
 	/** Enable or Disable the page panel */
@@ -130,66 +119,44 @@ public class TextRectComposer extends JPanel {
 
 	/** Set the edit mode */
 	public void setEditMode() {
-		for (SignTextCBox cbox: line_cbx)
-			cbox.setEditMode();
-	}
-
-	/** Set the number of lines on the page */
-	public void setLines(int nl) {
-		n_lines = nl;
-		for (int n = 0; n < max_lines; n++)
-			line_pnl[n].setVisible(n < nl);
+		for (SignTextCBox cbx: line_cbx)
+			cbx.setEditMode();
 	}
 
 	/** Set the message combo box models */
-	public void setModels(SignTextFinder stf) {
-		for (int n = 0; n < max_lines; n++)
-			line_cbx[n].setModel(getLineModel(stf, n));
-	}
-
-	/** Get line model for a combo box */
-	private SignTextCBoxModel getLineModel(SignTextFinder stf, int n) {
-		short line = getLineNumber(n);
-		return (n < n_lines)
-		     ? stf.getLineModel(line)
-		     : new SignTextCBoxModel(line);
-	}
-
-	/** Get line model number */
-	private short getLineNumber(int n) {
-		return (short) (n_rect * n_lines + n + 1);
+	public void setModels(SignTextFinder stf, int first, int n_lines) {
+		for (int i = 0; i < MAX_LINES; i++) {
+			if (i < n_lines) {
+				short ln = (short) (first + i);
+				line_cbx[i].setModel(stf.getLineModel(ln));
+				line_pnl[i].setVisible(true);
+			} else {
+				line_pnl[i].setVisible(false);
+				line_cbx[i].setModel(new SignTextCBoxModel());
+			}
+		}
 	}
 
 	/** Set the selected lines */
 	public void setSelectedLines(String[] lines) {
-		for (int n = 0; n < max_lines; n++) {
-			SignTextCBox cl = line_cbx[n];
-			int i = getLineNumber(n) - 1;
+		for (int i = 0; i < MAX_LINES; i++) {
 			if (i < lines.length) {
 				String ms = new MultiString(lines[i])
 					.normalizeLine().stripFonts().toString();
-				cl.getModel().setSelectedItem(ms);
-			} else if (cl.getItemCount() > 0)
-				cl.setSelectedIndex(0);
+				line_cbx[i].getModel().setSelectedItem(ms);
+			} else
+				line_cbx[i].setSelectedIndex(-1);
 		}
 	}
 
-	/** Get a MULTI string for the page.
-	 * @return MULTI string for the page. */
-	public MultiString getMulti() {
+	/** Get MULTI string of composed text */
+	public String getMulti() {
 		MultiBuilder mb = new MultiBuilder();
-		String[] mess = new String[n_lines];
-		int m = 0;
-		for (int i = 0; i < mess.length; i++) {
-			mess[i] = line_cbx[i].getMessage();
-			if (mess[i].length() > 0)
-				m = i + 1;
-		}
-		for (int i = 0; i < m; i++) {
+		for (int i = 0; i < MAX_LINES; i++) {
 			if (i > 0)
 				mb.addLine(null);
-			new MultiString(mess[i]).parse(mb);
+			new MultiString(line_cbx[i].getMessage()).parse(mb);
 		}
-		return mb.toMultiString();
+		return mb.toMultiString().stripTrailingLines();
 	}
 }

@@ -52,6 +52,11 @@ public class SignTextCBoxModel extends AbstractListModel<SignText>
 		items.add(BLANK_SIGN_TEXT);
 	}
 
+	/** Create a blank sign text combo box model */
+	public SignTextCBoxModel() {
+		line = 0;
+	}
+
 	/** Add a SignText to the model.
 	 * NOTE: Do not call this after using in SignTextCBox */
 	public void add(SignText st) {

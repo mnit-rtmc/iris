@@ -21,7 +21,6 @@ import java.util.Iterator;
 import org.json.JSONException;
 import org.json.JSONObject;
 import us.mn.state.dot.tms.utils.Base64;
-import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.SString;
 

@@ -33,13 +33,13 @@ public class PageTimeHelper {
 	private PageTimeHelper() { }
 
 	/** Get minimum page-on interval */
-	static private Interval minPageOnInterval() {
+	static Interval minPageOnInterval() {
 		return new Interval(
 			SystemAttrEnum.DMS_PAGE_ON_MIN_SECS.getFloat());
 	}
 
 	/** Get maximum page-on interval */
-	static private Interval maxPageOnInterval() {
+	static Interval maxPageOnInterval() {
 		return new Interval(
 			SystemAttrEnum.DMS_PAGE_ON_MAX_SECS.getFloat());
 	}

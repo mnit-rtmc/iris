@@ -113,32 +113,31 @@ public class MultiAdapter implements Multi {
 	 * @param b Blue component (0-255). */
 	@Override
 	public void addColorRectangle(int x, int y, int w, int h, int r, int g,
-		int b) { }
+		int b) {}
 
 	/** Set the text rectangle */
 	@Override
-	public void setTextRectangle(int x, int y, int w, int h) { }
+	public void setTextRectangle(int x, int y, int w, int h) {}
 
 	/** Set the font number.
 	 * @param f_num Font number (1 to 255)
 	 * @param f_id Font version ID (4-digit hex string)
 	 * Use the sign's default font if f_num is null. */
 	@Override
-	public void setFont(Integer f_num, String f_id) { }
+	public void setFont(Integer f_num, String f_id) {}
 
 	/** Set the character spacing.
 	 * @param sc Character spacing (null means use font spacing) */
 	@Override
-	public void setCharSpacing(Integer sc) { }
+	public void setCharSpacing(Integer sc) {}
 
 	/** Add a span of text */
 	@Override
-	public void addSpan(String span) { }
+	public void addSpan(String span) {}
 
 	/** Add a graphic */
 	@Override
-	public void addGraphic(int g_num, Integer x, Integer y, String g_id) { }
-
+	public void addGraphic(int g_num, Integer x, Integer y, String g_id) {}
 
 	/** Add a ClearGuide advisory */
 	@Override
