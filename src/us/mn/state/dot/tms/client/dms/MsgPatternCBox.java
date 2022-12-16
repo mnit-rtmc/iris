@@ -58,9 +58,10 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 	public void populateModel(DMS dms) {
 		TreeSet<MsgPattern> msgs = createMessageSet(dms);
 		model.removeAllElements();
-		model.addElement(null);
+		// FIXME: add null if no "default" message found
 		for (MsgPattern pat: msgs)
 			model.addElement(pat);
+		// FIXME: set default as selected item
 	}
 
 	/** Create a set of message patterns for the specified DMS */

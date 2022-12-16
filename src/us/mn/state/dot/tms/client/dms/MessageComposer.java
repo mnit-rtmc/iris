@@ -307,10 +307,7 @@ public class MessageComposer extends JPanel {
 	/** Set the composed MULTI string */
 	public void setComposedMulti(String ms) {
 		adjusting++;
-		MultiString multi = new MultiString(ms);
-		String[] lines = multi.getLines(n_lines);
-		for (int i = 0; i < rects.length; i++)
-			rects[i].setSelectedLines(lines);
+		// FIXME: find best matching pattern, then split lines
 		adjusting--;
 	}
 
