@@ -128,6 +128,8 @@ public class MsgPatternHelper extends BaseHelper {
 		if (pat == null)
 			return new ArrayList<TextRect>();
 		SignConfig sc = pat.getSignConfig();
+		if (sc == null)
+			return new ArrayList<TextRect>();
 		int width = sc.getPixelWidth();
 		int height = sc.getPixelHeight();
 		int fn = SignConfigHelper.getDefaultFontNum(sc);

@@ -36,6 +36,19 @@ public class TextRect {
 		font_num = fn;
 	}
 
+	/** Compare with another text rectangle for equality */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof TextRect) {
+			TextRect rhs = (TextRect) obj;
+			return page_number == rhs.page_number &&
+			       width == rhs.width &&
+			       height == rhs.height &&
+			       font_num == rhs.font_num;
+		} else
+			return false;
+	}
+
 	/** Get the number of lines of text on the rectangle */
 	public int getLineCount() {
 		// color scheme doesn't matter here
