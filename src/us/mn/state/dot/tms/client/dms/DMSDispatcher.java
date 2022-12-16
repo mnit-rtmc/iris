@@ -297,7 +297,7 @@ public class DMSDispatcher extends JPanel {
 	}
 
 	/** Get the single selected DMS */
-	private DMS getSingleSelection() {
+	public DMS getSingleSelection() {
 		return sel_mdl.getSingleSelection();
 	}
 

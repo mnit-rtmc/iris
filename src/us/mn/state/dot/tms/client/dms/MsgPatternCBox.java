@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.client.dms;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroupHelper;
@@ -45,23 +44,24 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 		return ms.isValidMulti();
 	}
 
-	/** Combo box model for message patterns */
-	private final DefaultComboBoxModel<MsgPattern> model =
-		new DefaultComboBoxModel<MsgPattern>();
-
-	/** Create a new message pattern combo box */
-	public MsgPatternCBox() {
-		setModel(model);
-	}
-
 	/** Populate the message pattern model, sorted */
 	public void populateModel(DMS dms) {
+		setSelectedIndex(-1);
 		TreeSet<MsgPattern> msgs = createMessageSet(dms);
-		model.removeAllElements();
-		// FIXME: add null if no "default" message found
+		// check for a fillable pattern
+		boolean fillable = false;
+		for (MsgPattern pat: msgs) {
+			int n = MsgPatternHelper.findTextRectangles(pat).size();
+			if (n > 0) {
+				fillable = true;
+				break;
+			}
+		}
+		removeAllItems();
+		if (!fillable)
+			addItem(null);
 		for (MsgPattern pat: msgs)
-			model.addElement(pat);
-		// FIXME: set default as selected item
+			addItem(pat);
 	}
 
 	/** Create a set of message patterns for the specified DMS */
@@ -86,7 +86,7 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 	public void setEnabled(boolean e) {
 		super.setEnabled(e);
 		if (!e) {
-			setSelectedItem(null);
+			setSelectedIndex(-1);
 			removeAllItems();
 		}
 	}
@@ -97,5 +97,29 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 		return (obj instanceof MsgPattern)
 		      ? (MsgPattern) obj
 		      : null;
+	}
+
+	/** Set the pattern from a matching MULTI string */
+	public void setMulti(String ms) {
+		MsgPattern best = null;
+		for (int i = 0; i < getItemCount(); i++) {
+			MsgPattern pat = getItemAt(i);
+			if (pat != null) {
+				int n = MsgPatternHelper
+					.findTextRectangles(pat).size();
+				if (n > 0) {
+					if (best != null) {
+						int blen = best.getMulti()
+							.length();
+						int len = pat.getMulti()
+							.length();
+						if (len < blen)
+							best = pat;
+					} else
+						best = pat;
+				}
+			}
+		}
+		setSelectedItem(best);
 	}
 }

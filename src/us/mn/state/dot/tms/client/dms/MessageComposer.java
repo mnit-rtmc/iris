@@ -19,6 +19,7 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -30,6 +31,8 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
+import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SignConfigHelper;
 import static us.mn.state.dot.tms.SignMessage.MAX_PAGES;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
@@ -74,8 +77,7 @@ public class MessageComposer extends JPanel {
 
 	/** Update the selected pattern */
 	private void updatePattern() {
-		MsgPattern pat = getMsgPattern();
-		List<TextRect> trs = MsgPatternHelper.findTextRectangles(pat);
+		List<TextRect> trs = getPatternTextRects();
 		n_rects = Math.min(trs.size(), rects.length);
 		while (n_rects < rect_tab.getTabCount())
 			rect_tab.removeTabAt(n_rects);
@@ -104,6 +106,30 @@ public class MessageComposer extends JPanel {
 			first += n_lines;
 		}
 		updateMessage(true);
+	}
+
+	/** Get the text rectangles for the selected pattern */
+	private List<TextRect> getPatternTextRects() {
+		MsgPattern pat = getMsgPattern();
+		if (pat != null)
+			return MsgPatternHelper.findTextRectangles(pat);
+		else {
+			ArrayList<TextRect> trs = new ArrayList<TextRect>();
+			DMS dms = dispatcher.getSingleSelection();
+			if (dms != null) {
+				SignConfig sc = dms.getSignConfig();
+				if (sc != null) {
+					int fn = SignConfigHelper
+						.getDefaultFontNum(sc);
+					trs.add(new TextRect(1,
+						sc.getPixelWidth(),
+						sc.getPixelHeight(),
+						fn
+					));
+				}
+			}
+			return trs;
+		}
 	}
 
 	/** Clear action */
@@ -306,9 +332,8 @@ public class MessageComposer extends JPanel {
 
 	/** Set the composed MULTI string */
 	public void setComposedMulti(String ms) {
-		adjusting++;
-		// FIXME: find best matching pattern, then split lines
-		adjusting--;
+		pattern_cbx.setMulti(ms);
+		// FIXME: split lines
 	}
 
 	/** Check if beacon is enabled */

@@ -107,7 +107,7 @@ public class SignMenu extends IMenu {
 	/** Create a message pattern menu item action */
 	private IAction createMsgPatternItem() {
 		return MsgPatternForm.isPermitted(session) ?
-		    new IAction("message.patterns") {
+		    new IAction("msg.patterns") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new MsgPatternForm(session));
 			}

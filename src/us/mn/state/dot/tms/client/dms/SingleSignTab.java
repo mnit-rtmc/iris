@@ -348,7 +348,7 @@ public class SingleSignTab extends IPanel {
 		}
 		if (a == null || a.equals("operation"))
 			updateStatus(dms);
-		if (null == a || (a.equals("msgCurrent") && !preview)) {
+		if ("msgCurrent".equals(a) && !preview) {
 			setMessage(dms);
 			updateMsgCurrent(dms);
 		}
