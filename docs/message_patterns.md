@@ -19,8 +19,8 @@ between messages by inserting the [MULTI] string `[cf][fo][jl][jp]`.
 
 ### Sequenced Message Combining
 
-If the first message ends with an `[np]` tag, it can be combined with another
-message to make a repeating _sequence_ of pages.
+If the scheduled message ends with an `[np]` tag, it can be combined with an
+operator message to make a repeating _sequence_ of pages.
 
 Example:
 - Scheduled message:
@@ -35,19 +35,19 @@ Example:
 ### Shared Message Combining
 
 With this method, the sign is partitioned into two regions, displaying both
-messages simultaneously.  The first message is prepended to each page of the
-second message.
+messages simultaneously.  The scheduled message is prepended to each page of
+the operator message.
 
-- The first message must contain no `[np]` tags.
-- The first message must end with a `[tr…]` (text rectangle) tag.
-- The second message must contain the same `[tr…]` tag on each page.
+- The scheduled message must contain no `[np]` tags.
+- The scheduled message must end with a `[tr…]` (text rectangle) tag.
+- The operator message must contain that same `[tr…]` tag on each page.
 - Only `[cf]`, `[fo]`, `[jl]` and `[jp]` tags are allowed before the `[tr…]`
   tag on each page (no text spans).
 
-Example:  
-- First message:
+Example:
+- Scheduled message:
   `[cr1,1,240,24,1,23,9][cf250,250,250][fo13][tr1,5,240,18][jl3]EXPRESS LANE[tr1,31,240,40]OPEN TO ALL[nl6]TRAFFIC[g7,110,75][cr241,1,2,96,255,255,255][tr243,1,350,96]`
-- Second message:
+- Operator message:
   `[tr243,1,350,96]STALLED VEHICLE[nl]IN RIGHT LANE[nl]USE CAUTION`
 - Combined message:
   `[cr1,1,240,24,1,23,9][cf250,250,250][fo13][tr1,5,240,18][jl3]EXPRESS LANE[tr1,31,240,40]OPEN TO ALL[nl6]TRAFFIC[g7,110,75][cr241,1,2,96,255,255,255][cf][fo][jl][jp][tr243,1,350,96]STALLED VEHICLE[nl]IN RIGHT LANE[nl]USE CAUTION`
