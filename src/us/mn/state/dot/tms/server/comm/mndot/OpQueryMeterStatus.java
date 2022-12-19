@@ -44,7 +44,7 @@ public class OpQueryMeterStatus extends Op170Device {
 	/** Create a new query meter status operation.
 	 * @param rm Ramp meter. */
 	public OpQueryMeterStatus(RampMeterImpl rm) {
-		super(PriorityLevel.SHORT_POLL, rm);
+		super(PriorityLevel.POLL_HIGH, rm);
 		meter = rm;
 	}
 

@@ -16,8 +16,11 @@
  */
 package us.mn.state.dot.tms;
 
+import java.io.IOException;
 import java.util.Iterator;
-import us.mn.state.dot.tms.utils.MultiBuilder;
+import org.json.JSONException;
+import org.json.JSONObject;
+import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -139,45 +142,17 @@ public class DMSHelper extends BaseHelper {
 	}
 
 	/** Get the default font number for a DMS */
-	static public int getDefaultFontNumber(DMS dms) {
-		Font f = getDefaultFont(dms);
-		return (f != null)
-		      ? f.getNumber()
+	static public int getDefaultFontNum(DMS dms) {
+		return (dms != null)
+		      ? SignConfigHelper.getDefaultFontNum(dms.getSignConfig())
 		      : FontHelper.DEFAULT_FONT_NUM;
 	}
 
 	/** Get the default font for a DMS */
 	static public Font getDefaultFont(DMS dms) {
-		if (dms != null) {
-			SignConfig sc = dms.getSignConfig();
-			if (sc != null)
-				return sc.getDefaultFont();
-		}
-		return null;
-	}
-
-	/** Get the exclude font number for a DMS
-	 * @return Exclude font number or -1 if not found */
-	static public int getExcludeFontNumber(DMS dms) {
-		Font f = getExcludeFont(dms);
-		return (f != null) ? f.getNumber() : -1;
-	}
-
-	/** Get the exclude font for a DMS
-	 * @return Exclude font or null if not found */
-	static public Font getExcludeFont(DMS dms) {
-		if (dms != null) {
-			SignConfig sc = dms.getSignConfig();
-			if (sc != null)
-				return sc.getExcludeFont();
-		}
-		return null;
-	}
-
-	/** Get the font number for a DMS */
-	static private int getFontNumber(DMS dms) {
-		Font f = dms.getOverrideFont();
-		return (f != null) ? f.getNumber() : getDefaultFontNumber(dms);
+		return (dms != null)
+		      ? SignConfigHelper.getDefaultFont(dms.getSignConfig())
+		      : null;
 	}
 
 	/** Get the default background color for a DMS */
@@ -198,43 +173,6 @@ public class DMSHelper extends BaseHelper {
 		        : ColorScheme.UNKNOWN;
 	}
 
-	/** Add DMS overrides to a MULTI string */
-	static public String addMultiOverrides(DMS dms, String multi) {
-		ColorScheme scheme = getColorScheme(dms);
-		Font f = dms.getOverrideFont();
-		Integer fg = dms.getOverrideForeground();
-		Integer bg = dms.getOverrideBackground();
-		return (f != null || fg != null || bg != null)
-		      ? addMultiOverrides(multi, f, scheme, fg, bg)
-		      : multi;
-	}
-
-	/** Adjust a MULTI string with override font / colors */
-	static private String addMultiOverrides(String multi, Font f,
-		ColorScheme scheme, Integer fg, Integer bg)
-	{
-		MultiBuilder mb = new MultiBuilder();
-		if (f != null)
-			mb.setFont(f.getNumber(), null);
-		if (ColorScheme.COLOR_24_BIT == scheme) {
-			if (fg != null) {
-				DmsColor c = new DmsColor(fg);
-				mb.setColorForeground(c.red, c.green, c.blue);
-			}
-			if (bg != null) {
-				DmsColor c = new DmsColor(fg);
-				mb.setPageBackground(c.red, c.green, c.blue);
-			}
-		} else {
-			if (fg != null)
-				mb.setColorForeground(fg);
-			if (bg != null)
-				mb.setPageBackground(bg);
-		}
-		mb.append(new MultiString(multi));
-		return mb.toString();
-	}
-
 	/** Get the number of lines on a DMS.
 	 * @param dms DMS to check.
 	 * @return Number of text lines on the DMS. */
@@ -244,25 +182,13 @@ public class DMSHelper extends BaseHelper {
 			if (rb != null)
 				return rb.getLineCount();
 		}
-		return SystemAttrEnum.DMS_MAX_LINES.getInt();
+		return SignMessage.MAX_LINES;
 	}
 
-	/** Create a raster builder for a DMS.
-	 * @param dms DMS with proper dimensions for the builder.
-	 * @return A pixel map builder, or null if dimensions are invalid. */
+	/** Create a raster builder for a DMS */
 	static public RasterBuilder createRasterBuilder(DMS dms) {
-		SignConfig sc = dms.getSignConfig();
-		if (sc != null) {
-			int pw = sc.getPixelWidth();
-			int ph = sc.getPixelHeight();
-			int cw = sc.getCharWidth();
-			int ch = sc.getCharHeight();
-			int f = getFontNumber(dms);
-			ColorScheme cs = ColorScheme.fromOrdinal(
-				sc.getColorScheme());
-			return new RasterBuilder(pw, ph, cw, ch, f, cs);
-		} else
-			return null;
+		return SignConfigHelper.createRasterBuilder(
+			dms.getSignConfig());
 	}
 
 	/** Return a single string which is formated to be readable
@@ -308,17 +234,6 @@ public class DMSHelper extends BaseHelper {
 		if (line == null)
 			return false;
 		return SString.enclosedBy(line, "_");
-	}
-
-	/** Create a bitmap graphic for the specified DMS */
-	static public BitmapGraphic createBitmapGraphic(DMS dms) {
-		SignConfig sc = dms.getSignConfig();
-		if (sc != null) {
-			int pw = sc.getPixelWidth();
-			int ph = sc.getPixelHeight();
-			return new BitmapGraphic(pw, ph);
-		} else
-			return null;
 	}
 
 	/** Create bitmap graphics for all pages of a specified DMS.
@@ -378,26 +293,7 @@ public class DMSHelper extends BaseHelper {
 	 */
 	static public RasterGraphic[] createRasters(DMS dms, String multi) {
 		RasterBuilder rb = createRasterBuilder(dms);
-		return (rb != null) ? createRasters(rb, multi) : null;
-	}
-
-	/** Create raster graphics using a raster builder and multi string.
-	 * @return RasterGraphic array, one for each page, or null on error.
-	 */
-	static private RasterGraphic[] createRasters(RasterBuilder rb,
-		String multi)
-	{
-		try {
-			return rb.createPixmaps(new MultiString(multi));
-		}
-		catch (IndexOutOfBoundsException e) {
-			// dimensions too small for message
-			return null;
-		}
-		catch (InvalidMsgException e) {
-			// most likely a MultiSyntaxError ...
-			return null;
-		}
+		return (rb != null) ? rb.createRasters(multi) : null;
 	}
 
 	/** Get the owner of the current message */
@@ -451,6 +347,77 @@ public class DMSHelper extends BaseHelper {
 				String ms = String.join(" ", words);
 				if (createPageOne(dms, ms) != null)
 					return ms;
+			}
+		}
+		return null;
+	}
+
+	/** Get DMS status attribute */
+	static public Object getStatus(DMS dms, String key) {
+		String status = (dms != null) ? dms.getStatus() : null;
+		if (status != null) {
+			try {
+				JSONObject jo = new JSONObject(status);
+				return jo.opt(key);
+			}
+			catch (JSONException e) {
+				// malformed JSON
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	/** Create stuck pixel bitmap */
+	static public BitmapGraphic createStuckBitmap(DMS dms, String key)
+		throws InvalidMsgException
+	{
+		String stuck = (dms != null) ? dms.getStuckPixels() : null;
+		if (stuck != null) {
+			BitmapGraphic bg = createBitmapGraphic(dms);
+			if (bg != null) {
+				try {
+					JSONObject jo = new JSONObject(stuck);
+					return setStuckPixels(bg, jo.opt(key));
+				}
+				catch (JSONException e) {
+					throw new InvalidMsgException(
+						"Malformed JSON");
+				}
+			}
+		}
+		return null;
+	}
+
+	/** Create a bitmap graphic for the specified DMS */
+	static private BitmapGraphic createBitmapGraphic(DMS dms) {
+		SignConfig sc = dms.getSignConfig();
+		if (sc != null) {
+			int pw = sc.getPixelWidth();
+			int ph = sc.getPixelHeight();
+			return new BitmapGraphic(pw, ph);
+		} else
+			return null;
+	}
+
+	/** Get stuck pixel bitmap */
+	static private BitmapGraphic setStuckPixels(BitmapGraphic bg,
+		Object bm) throws InvalidMsgException
+	{
+		if (bm instanceof String) {
+			String bmap = (String) bm;
+			try {
+				byte[] pixels = Base64.decode(bmap);
+				if (pixels.length == bg.length()) {
+					bg.setPixelData(pixels);
+					return bg;
+				}
+			}
+			catch (IOException e) {
+				throw new InvalidMsgException("Base64 decode");
+			}
+			catch (IndexOutOfBoundsException e) {
+				// stuck bitmap doesn't match current dimensions
 			}
 		}
 		return null;

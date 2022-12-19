@@ -45,7 +45,7 @@ public class OpRead extends OpController<ClearGuideProperty> {
 	 * @param ci Controller
 	 * @param fid Feed ID */
 	protected OpRead(Tokens cgtoks, ControllerImpl ci, String fid) {
-		super(PriorityLevel.SHORT_POLL, ci);
+		super(PriorityLevel.POLL_HIGH, ci);
 		cg_tokens = cgtoks;
 		feed = fid;
 	}

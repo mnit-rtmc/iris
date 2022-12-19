@@ -93,14 +93,16 @@ impl AncillaryData for GeoLocAnc {
     ) -> Result<()> {
         if let Some(uri) = self.next_uri(view, pri) {
             match uri.borrow() {
-                ROAD_URI => self.roads = Some(json.into_serde::<Vec<Road>>()?),
+                ROAD_URI => {
+                    self.roads = Some(serde_wasm_bindgen::from_value(json)?)
+                }
                 DIRECTION_URI => {
                     self.directions =
-                        Some(json.into_serde::<Vec<Direction>>()?);
+                        Some(serde_wasm_bindgen::from_value(json)?);
                 }
                 ROAD_MODIFIER_URI => {
                     self.modifiers =
-                        Some(json.into_serde::<Vec<RoadModifier>>()?);
+                        Some(serde_wasm_bindgen::from_value(json)?);
                 }
                 _ => (),
             }

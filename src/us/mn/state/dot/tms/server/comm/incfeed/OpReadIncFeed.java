@@ -32,7 +32,7 @@ public class OpReadIncFeed extends OpController<IncFeedProperty> {
 
 	/** Create a new operation to read incident feed */
 	protected OpReadIncFeed(ControllerImpl c, IncidentCache ic) {
-		super(PriorityLevel.SHORT_POLL, c);
+		super(PriorityLevel.POLL_HIGH, c);
 		cache = ic;
 	}
 

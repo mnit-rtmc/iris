@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2019-2020  SRF Consulting Group
+ * Copyright (C) 2022       Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +13,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.wysiwyg.selector;
 
 import java.awt.Dimension;
@@ -53,7 +53,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.MsgCombining;
-import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
@@ -81,7 +81,7 @@ public class WMsgSelectorForm extends AbstractForm {
 	/** Device listing */
 	private Map<String,DMS> dmsList = new HashMap<String,DMS>();
 	private Map<String,SignGroup> signGroupList =
-			new HashMap<String,SignGroup>();
+		new HashMap<String,SignGroup>();
 	private ArrayList<String> dmsNames;
 	private ArrayList<String> signGroupNames;
 	private ArrayList<String> messageList = new ArrayList<String>();
@@ -96,36 +96,36 @@ public class WMsgSelectorForm extends AbstractForm {
 	private JScrollPane sgrp_pn;
 	private int DMS_TAB = 0;
 	private int SIGN_GROUP_TAB = 1; 
-	
+
 	/** Message list */
 	private JList<String> msg_list;
 	private JScrollPane msg_pn;
-	
+
 	/** User session */
 	private final Session session;
-	
+
 	/** Edit mode enabled/disabled */
 	boolean editMode;
-	
+
 	/** Current selections */
 	private DMS selectedDMS;
 	private SignGroup selectedSignGroup;
-	private QuickMessage selectedMessage;
-	
+	private MsgPattern selectedMessage;
+
 	/** Controller for rendering a preview */
 	private WController controller;
-	
+
 	/** Use the page list as the message preview */
 	private WPageList msg_preview;
 	private JScrollPane msg_preview_pn;
-	
+
 	/** Buttons */
 	private JButton reload_btn;
 	private JButton create_btn;
 	private JButton edit_btn;
 	private JButton clone_btn;
 	private JButton delete_btn;
-	
+
 	/** Button enabled/disabled */
 	private boolean createEnabled = false;
 	private boolean editEnabled = false;
@@ -136,8 +136,8 @@ public class WMsgSelectorForm extends AbstractForm {
 	private final EditModeListener edit_lsnr = new EditModeListener() {
 		public void editModeChanged() {
 			// check if edit mode is enabled based on whether or not we can write
-			// a QuickMessage
-			editMode = session.canWrite(QuickMessage.SONAR_TYPE);
+			// a MsgPattern
+			editMode = session.canWrite(MsgPattern.SONAR_TYPE);
 			
 			// update the button panel to reflect the change
 			updateButtonPanel();
@@ -179,24 +179,23 @@ public class WMsgSelectorForm extends AbstractForm {
 		
 		// TODO
 	}
-	
+
 	/** Preselected DMS (from DMS context menu when message is deployed)
 	 * TODO/NOTE this isn't implemented anywhere since there isn't a good way
-	 * to see if a message deployed is a QuickMessage)
-	 */
-	public WMsgSelectorForm(Session s, QuickMessage qm, DMS sign) {
+	 * to see if a message deployed is a MsgPattern) */
+	public WMsgSelectorForm(Session s, MsgPattern pat, DMS sign) {
 		super(I18N.get("wysiwyg.selector.title"), true);
 		session = s;
 		initForm();
-		selectedMessage = qm;
+		selectedMessage = pat;
 		selectedDMS = sign;
 
 		// TODO
 	}
-	
-	/** Preselected SignGroup and QuickMessage
-	 * (from {@code View -> Message Signs -> Quick Messages} menu) */
-	public WMsgSelectorForm(Session s, QuickMessage qm, SignGroup sg) {
+
+	/** Preselected SignGroup and MsgPattern
+	 * (from {@code View -> Message Signs -> Message Patterns} menu) */
+	public WMsgSelectorForm(Session s, MsgPattern pat, SignGroup sg) {
 		super(I18N.get("wysiwyg.selector.title"), true);
 		session = s;
 		initForm();
@@ -210,12 +209,11 @@ public class WMsgSelectorForm extends AbstractForm {
 		else
 			selectSignGroup(selectedSignGroup.getName());
 		
-		/* now select the QuickMessage (note that we need to set
+		/* now select the MsgPattern (note that we need to set
 		 * selectedMessage here since it will be reset when the DMS or
-		 * SignGroup is selected in the GUI)
-		 */
-		selectedMessage = qm;
-		selectQuickMessage(selectedMessage.getName());
+		 * SignGroup is selected in the GUI) */
+		selectedMessage = pat;
+		selectMsgPattern(selectedMessage.getName());
 	}
 	
 	/** Select the DMS with the given name in the scroll pane list */
@@ -240,23 +238,22 @@ public class WMsgSelectorForm extends AbstractForm {
 		updateUI();
 	}
 	
-	/** Select the QuickMessage with the given name in the scroll pane list */
-	private void selectQuickMessage(String name) {
+	/** Select the MsgPattern with the given name in the scroll pane list */
+	private void selectMsgPattern(String name) {
 		int indx = messageList.indexOf(name);
 		msg_list.setSelectedIndex(indx);
 		msg_list.ensureIndexIsVisible(indx);
-		
+
 		// enable the edit/clone/delete buttons
 		enableEditButtons();
 		updateUI();
 	}
-	
 
 	/** Get the selectedDMS in the form */
 	public DMS getSelectedDMS() {
 		return selectedDMS;
 	}
-	
+
 	/** Set the selectedDMS in the form */
 	public void setSelectedDMS(DMS dms) {
 		selectedDMS = dms;
@@ -274,7 +271,7 @@ public class WMsgSelectorForm extends AbstractForm {
 			
 			// update the controller
 			controller.setSign(selectedDMS);
-			controller.setQuickMessage(null);
+			controller.setMsgPattern(null);
 			
 			// update the page list
 			if (controller.multiConfigUseable())
@@ -286,7 +283,7 @@ public class WMsgSelectorForm extends AbstractForm {
 			disableButtons();
 			updateMessageList();
 			controller.setSign(null);
-			controller.setQuickMessage(null);
+			controller.setMsgPattern(null);
 			msg_preview.clearPageList();
 		}
 	}
@@ -314,7 +311,7 @@ public class WMsgSelectorForm extends AbstractForm {
 			// update the controller
 			controller.setSign(null);
 			controller.setSignGroup(selectedSignGroup);
-			controller.setQuickMessage(null);
+			controller.setMsgPattern(null);
 			
 			// update the page list
 			if (controller.multiConfigUseable())
@@ -327,19 +324,19 @@ public class WMsgSelectorForm extends AbstractForm {
 			updateMessageList();
 			controller.setSign(null);
 			controller.setSignGroup(null);
-			controller.setQuickMessage(null);
+			controller.setMsgPattern(null);
 			msg_preview.clearPageList();
 		}
 	}
 	
 	/** Get the selectedMessage in the form */
-	public QuickMessage getSelectedMessage() {
+	public MsgPattern getSelectedMessage() {
 		return selectedMessage;
 	}
 	
 	/** Set the selectedMessage in the form */
-	public void setSelectedMessage(QuickMessage qm) {
-		selectedMessage = qm;
+	public void setSelectedMessage(MsgPattern pat) {
+		selectedMessage = pat;
 		if (selectedMessage != null) {
 			// enable edit buttons if not null 
 			enableEditButtons();
@@ -364,7 +361,7 @@ public class WMsgSelectorForm extends AbstractForm {
 			);
 
 			// update the controller
-			controller.setQuickMessage(selectedMessage);
+			controller.setMsgPattern(selectedMessage);
 			
 			// update the page list
 			if (controller.getMultiConfig() != null) {
@@ -380,7 +377,7 @@ public class WMsgSelectorForm extends AbstractForm {
 			msgInfo = "";
 			
 			// rest the controller
-			controller.setQuickMessage(null);
+			controller.setMsgPattern(null);
 			
 			// update the page list
 			if (controller.getMultiConfig() != null)
@@ -562,7 +559,7 @@ public class WMsgSelectorForm extends AbstractForm {
 		session.addEditModeListener(edit_lsnr);
 		
 		/** Check edit mode right now */
-		editMode = session.canWrite(QuickMessage.SONAR_TYPE);
+		editMode = session.canWrite(MsgPattern.SONAR_TYPE);
 		
 		/** Add a panel for the status bar */
 		msgInfo = "";
@@ -927,12 +924,12 @@ public class WMsgSelectorForm extends AbstractForm {
 		msg_list.updateUI();
 	}
 	
-	/** Update the list of messages from a list of QuickMessage objects */
-	public void updateMessageList(ArrayList<QuickMessage> qmList) {
+	/** Update the list of messages from a list of MsgPattern objects */
+	public void updateMessageList(ArrayList<MsgPattern> patList) {
 		// reset the messages list then add the message names
 		messageList.clear();
-		for (QuickMessage qm : qmList) {
-			messageList.add(qm.getName());
+		for (MsgPattern pat : patList) {
+			messageList.add(pat.getName());
 		}
 		messageList.sort(String::compareToIgnoreCase);
 		msg_list.updateUI();
@@ -943,7 +940,7 @@ public class WMsgSelectorForm extends AbstractForm {
 			// DMS/SignGroup
 			String mName = selectedMessage.getName();
 			if (messageList.contains(mName)) {
-				selectQuickMessage(mName);
+				selectMsgPattern(mName);
 			} else {
 				// if it's not in our list, reset
 				selectedMessage = null;
@@ -1080,15 +1077,15 @@ public class WMsgSelectorForm extends AbstractForm {
 		// make sure we have a single-sign sign group for this sign
 		SignGroup sg = getSingleSignGroup(s, sign);
 		
-		// create a new quick message
-		TypeCache<QuickMessage> qmCache = s.getSonarState().
-				getDmsCache().getQuickMessages();
-		HashMap<String, Object> qmAttrs = new HashMap<String, Object>();
-		qmAttrs.put("sign_group", sg);
-		qmAttrs.put("multi", "");
-		qmCache.createObject(msgName, qmAttrs);
+		// create a new message pattern
+		TypeCache<MsgPattern> cache = s.getSonarState().
+			getDmsCache().getMsgPatterns();
+		HashMap<String, Object> attrs = new HashMap<String, Object>();
+		attrs.put("sign_group", sg);
+		attrs.put("multi", "");
+		cache.createObject(msgName, attrs);
 	}
-	
+
 	/** Get the single-sign sign group for a sign. If it does not exist,
 	 *  it is created.
 	 */
@@ -1114,60 +1111,60 @@ public class WMsgSelectorForm extends AbstractForm {
 		}
 		return sg;
 	}
-	
+
 	/** Create a message for a sign group */
 	public static void CreateMsg(Session s, SignGroup sg, String msgName) {
-		// create a new quick message
-		TypeCache<QuickMessage> qmCache = s.getSonarState().
-				getDmsCache().getQuickMessages();
-		HashMap<String, Object> qmAttrs = new HashMap<String, Object>();
-		qmAttrs.put("sign_group", sg);
-		qmAttrs.put("multi", "");
-		qmCache.createObject(msgName, qmAttrs);
+		// create a new message pattern
+		TypeCache<MsgPattern> cache = s.getSonarState().
+			getDmsCache().getMsgPatterns();
+		HashMap<String, Object> attrs = new HashMap<String, Object>();
+		attrs.put("sign_group", sg);
+		attrs.put("multi", "");
+		cache.createObject(msgName, attrs);
 	}
-	
+
 	/** Edit an existing message for a sign */
-	public static void EditMsg(Session s, QuickMessage qm, DMS sign) {
+	public static void EditMsg(Session s, MsgPattern pat, DMS sign) {
 		// launch the editor
 		SmartDesktop desktop = s.getDesktop();
-		WMsgEditorForm editor = new WMsgEditorForm(s, qm, sign);
-		JInternalFrame frame = desktop.show(editor);
-		editor.setFrame(frame);
-	}	
-	
-	/** Edit an existing message for a sign group */
-	public static void EditMsg(Session s, QuickMessage qm, SignGroup sg) {
-		// launch the editor
-		SmartDesktop desktop = s.getDesktop();
-		WMsgEditorForm editor = new WMsgEditorForm(s, qm, sg);
+		WMsgEditorForm editor = new WMsgEditorForm(s, pat, sign);
 		JInternalFrame frame = desktop.show(editor);
 		editor.setFrame(frame);
 	}
-	
-	/** Clone a message for a sign OR group - we get the sign/group from the
-	 *  quick message, and whether it's a single-sign group or real sign group
-	 *  is handled implicitly (the operations we need to do are the same).
-	 */
-	public static void CloneMsg(Session s, QuickMessage qm, String msgName) {
-		// create a new quick message with the same sign group and MULTI as
-		// the original but with a new name
-		TypeCache<QuickMessage> qmCache = s.getSonarState().
-				getDmsCache().getQuickMessages();
-		HashMap<String, Object> qmAttrs = new HashMap<String, Object>();
-		
+
+	/** Edit an existing message for a sign group */
+	public static void EditMsg(Session s, MsgPattern pat, SignGroup sg) {
+		// launch the editor
+		SmartDesktop desktop = s.getDesktop();
+		WMsgEditorForm editor = new WMsgEditorForm(s, pat, sg);
+		JInternalFrame frame = desktop.show(editor);
+		editor.setFrame(frame);
+	}
+
+	/** Clone a message for a sign OR group - we get the sign/group from
+	 * the message pattern, and whether it's a single-sign group or real
+	 * sign group is handled implicitly (the operations we need to do are
+	 * the same). */
+	public static void CloneMsg(Session s, MsgPattern pat, String msgName) {
+		// create a new message pattern with the same sign group and
+		// MULTI as the original but with a new name
+		TypeCache<MsgPattern> cache = s.getSonarState().
+			getDmsCache().getMsgPatterns();
+		HashMap<String, Object> attrs = new HashMap<String, Object>();
+
 		// get either the group or config - one has to be not null
-		SignGroup sg = qm.getSignGroup();
+		SignGroup sg = pat.getSignGroup();
 		if (sg != null)
-			qmAttrs.put("sign_group", sg);
+			attrs.put("sign_group", sg);
 		else
-			qmAttrs.put("sign_config", qm.getSignConfig());
-		qmAttrs.put("multi", qm.getMulti());
-		qmCache.createObject(msgName, qmAttrs);
-	}	
-	
+			attrs.put("sign_config", pat.getSignConfig());
+		attrs.put("multi", pat.getMulti());
+		cache.createObject(msgName, attrs);
+	}
+
 	/** Delete a message */
-	public static void DeleteMsg(QuickMessage qm) {
-		qm.destroy();
+	public static void DeleteMsg(MsgPattern pat) {
+		pat.destroy();
 	}
 	
 }

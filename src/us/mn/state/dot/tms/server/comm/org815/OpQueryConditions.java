@@ -30,7 +30,7 @@ public class OpQueryConditions extends OpOrg815 {
 
 	/** Create a new operation to query conditions */
 	public OpQueryConditions(WeatherSensorImpl ws) {
-		super(PriorityLevel.SHORT_POLL, ws);
+		super(PriorityLevel.POLL_HIGH, ws);
 	}
 
 	/** Create the second phase of the operation */

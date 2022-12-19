@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -26,12 +26,12 @@ import javax.swing.JPanel;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
-import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -123,7 +123,7 @@ public class PropPixels extends IPanel {
 	public void updateAttribute(String a) {
 		// NOTE: msgCurrent attribute changes after all sign
 		//       dimension attributes are updated.
-		if (a == null || a.equals("pixelStatus") ||
+		if (a == null || a.equals("stuckPixels") ||
 		    a.equals("msgCurrent"))
 			updatePixelStatus();
 		if (a == null) {
@@ -133,55 +133,37 @@ public class PropPixels extends IPanel {
 		}
 	}
 
-	/** Update the pixel status */
+	/** Update stuck pixel status */
 	private void updatePixelStatus() {
 		updatePixelPanel(stuck_off_pnl);
 		updatePixelPanel(stuck_on_pnl);
 		stuck_off_pnl.setDrawModules(true);
 		stuck_on_pnl.setDrawModules(true);
-		String[] pixels = dms.getPixelStatus();
-		if (pixels != null && pixels.length == 2) {
-			try {
-				updatePixelStatus(pixels);
+		try {
+			BitmapGraphic stuck_off = DMSHelper.createStuckBitmap(
+				dms, DMS.STUCK_OFF_BITMAP
+			);
+			stuck_off_pnl.setGraphic(stuck_off);
+			BitmapGraphic stuck_on = DMSHelper.createStuckBitmap(
+				dms, DMS.STUCK_ON_BITMAP
+			);
+			stuck_on_pnl.setGraphic(stuck_on);
+			int n_bad = 0;
+			if (stuck_off != null)
+				n_bad += stuck_off.getLitCount();
+			if (stuck_on != null)
+				n_bad += stuck_on.getLitCount();
+			if (stuck_off != null || stuck_on != null) {
+				bad_pixels_lbl.setText(String.valueOf(n_bad));
 				return;
 			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
+		}
+		catch (InvalidMsgException e) {
+			// fall thru
 		}
 		stuck_off_pnl.setGraphic(null);
 		stuck_on_pnl.setGraphic(null);
 		bad_pixels_lbl.setText(UNKNOWN);
-	}
-
-	/** Update the pixel status */
-	private void updatePixelStatus(String[] pixels) throws IOException {
-		BitmapGraphic stuckOff = createBlankBitmap();
-		BitmapGraphic stuckOn = createBlankBitmap();
-		if (stuckOff == null || stuckOn == null)
-			return;
-		byte[] b_off = Base64.decode(pixels[DMS.STUCK_OFF_BITMAP]);
-		if (b_off.length == stuckOff.length())
-			stuckOff.setPixelData(b_off);
-		stuck_off_pnl.setGraphic(stuckOff);
-		byte[] b_on = Base64.decode(pixels[DMS.STUCK_ON_BITMAP]);
-		if (b_on.length == stuckOn.length())
-			stuckOn.setPixelData(b_on);
-		stuck_on_pnl.setGraphic(stuckOn);
-		int n_off = stuckOff.getLitCount();
-		int n_on = stuckOn.getLitCount();
-		bad_pixels_lbl.setText(String.valueOf(n_off + n_on));
-	}
-
-	/** Create a blank bitmap */
-	private BitmapGraphic createBlankBitmap() {
-		SignConfig sc = dms.getSignConfig();
-		if (sc != null) {
-			int w = sc.getPixelWidth();
-			int h = sc.getPixelHeight();
-			return new BitmapGraphic(w, h);
-		} else
-			return null;
 	}
 
 	/** Update the dimensions of a sign pixel panel */

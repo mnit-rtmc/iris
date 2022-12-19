@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import us.mn.state.dot.tms.utils.I18N;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
@@ -29,19 +31,19 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 public class PhotocellTableModel extends AbstractTableModel {
 
 	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 3;
+	static private final int COLUMN_COUNT = 3;
 
 	/** Photocell description column number */
-	static protected final int COL_DESCRIPTION = 0;
+	static private final int COL_DESC = 0;
 
-	/** Photocell status column number */
-	static protected final int COL_STATUS = 1;
+	/** Photocell error column number */
+	static private final int COL_ERROR = 1;
 
 	/** Photocell reading detail column number */
-	static protected final int COL_READING = 2;
+	static private final int COL_READING = 2;
 
 	/** Create a new table column */
-	static protected TableColumn createColumn(int column, int width,
+	static private TableColumn createColumn(int column, int width,
 		String header)
 	{
 		TableColumn c = new TableColumn(column, UI.scaled(width));
@@ -49,53 +51,61 @@ public class PhotocellTableModel extends AbstractTableModel {
 		return c;
 	}
 
+	/** Get one photocell value */
+	static private String getColumn(JSONObject pc, int column) {
+		if (pc == null)
+			return null;
+		switch (column) {
+			case COL_DESC: return pc.optString("description");
+			case COL_ERROR: return pc.optString("error");
+			case COL_READING:
+				Number n = pc.optNumber("reading");
+				return (n != null) ? n.toString() : null;
+			default: return null;
+		}
+	}
+
 	/** Photocell status array */
-	protected final String[] status;
+	private final JSONArray status;
 
 	/** Create a new photocell table model */
-	public PhotocellTableModel(String[] s) {
+	public PhotocellTableModel(JSONArray s) {
 		status = s;
 	}
 
 	/** Get the column count */
+	@Override
 	public int getColumnCount() {
 		return COLUMN_COUNT;
 	}
 
 	/** Get the column class */
+	@Override
 	public Class getColumnClass(int column) {
 		return String.class;
 	}
 
 	/** Get the row count */
+	@Override
 	public int getRowCount() {
-		return status.length;
+		return status.length();
 	}
 
 	/** Get the value at a specific cell */
+	@Override
 	public Object getValueAt(int row, int column) {
-		if(row >= 0 && row < status.length)
-			return parseValue(status[row], column);
-		else
-			return null;
-	}
-
-	/** Parse one status value */
-	static protected String parseValue(String s, int column) {
-		String[] cols = s.split(",");
-		if(column >= 0 && column < cols.length)
-			return cols[column];
-		else
-			return null;
+		return (row >= 0 && row < status.length())
+		      ? getColumn(status.optJSONObject(row), column)
+		      : null;
 	}
 
 	/** Create the table column model */
 	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_DESCRIPTION, 120,
+		m.addColumn(createColumn(COL_DESC, 120,
 			I18N.get("dms.photocell.description")));
-		m.addColumn(createColumn(COL_STATUS, 80,
-			I18N.get("dms.photocell.status")));
+		m.addColumn(createColumn(COL_ERROR, 80,
+			I18N.get("dms.photocell.error")));
 		m.addColumn(createColumn(COL_READING, 80,
 			I18N.get("dms.photocell.reading")));
 		return m;

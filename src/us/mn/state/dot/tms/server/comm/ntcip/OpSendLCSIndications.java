@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.MsgCombining;
-import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
 import static us.mn.state.dot.tms.SignMsgSource.lcs;
@@ -47,7 +47,7 @@ public class OpSendLCSIndications extends OpLCS {
 
 	/** Create a new operation to send LCS indications */
 	public OpSendLCSIndications(LCSArrayImpl l, Integer[] ind, User u) {
-		super(PriorityLevel.DEVICE_DATA, l, u);
+		super(PriorityLevel.COMMAND, l, u);
 		assert u != null;
 		indications = ind;
 		msgs = new SignMessage[ind.length];
@@ -111,9 +111,9 @@ public class OpSendLCSIndications extends OpLCS {
 		String m = "";
 		LaneUseMulti lum = LaneUseMultiHelper.find(ind, sc);
 		if (lum != null) {
-			QuickMessage qm = lum.getQuickMessage();
-			if (qm != null)
-				m = qm.getMulti();
+			MsgPattern pat = lum.getMsgPattern();
+			if (pat != null)
+				m = pat.getMulti();
 		}
 		if (m.length() > 0 || LaneUseIndication.DARK.ordinal() == ind)
 			return m;

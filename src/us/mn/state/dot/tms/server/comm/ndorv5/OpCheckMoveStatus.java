@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2022  SRF Consulting Group
- * Copyright (C) 2021       Minnesota Department of Transportation
+ * Copyright (C) 2021-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ public class OpCheckMoveStatus extends OpGateNdorV5 {
 	@SuppressWarnings("unchecked")
 	public OpCheckMoveStatus(GateArmImpl d, User o,
 			GateArmState gas, int delaySec) {
-		super(PriorityLevel.DEVICE_DATA, d, false); // priority 5, non-exclusive
+		super(PriorityLevel.POLL_LOW, d, false); // non-exclusive
 		user = o;
 		target_state = gas;
 		if (gas == GateArmState.CLOSED)

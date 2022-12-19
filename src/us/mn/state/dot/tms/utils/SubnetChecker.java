@@ -158,14 +158,10 @@ public final class SubnetChecker {
 		String target = attrib.getValue();
 		String [] strs = target.split("=");
 		if (strs.length != 2) {
-			System.out.println(
-				"SubnetChecker: Target error 1: "+aName+": \""+target+"\"");
 			return null;
 		}
 		strs = strs[0].trim().split(":");
 		if ((strs.length < 1) || (strs.length > 2)) {
-			System.out.println(
-				"SubnetChecker: Target error 2: "+aName+": \""+target+"\"");
 			return null;
 		}
 		return target;
@@ -211,7 +207,6 @@ public final class SubnetChecker {
 					break;
 				}
 				if (updateReq) {
-					System.out.println("SubnetChecker: Update requested");
 					break;
 				}
 				// time for automatic update?
@@ -222,14 +217,12 @@ public final class SubnetChecker {
 				// snooze or time-change detected?
 				delta = Math.abs(now - prev);
 				if (delta > 10000) {
-					System.out.println("SubnetChecker: Sleep-mode detected: "+delta);
 					break;  // yes
 				}
 				// IP address change?
 				tmp = getAllMyAddresses();
 				if (!ipAddressList.equals(tmp)) {
 					ipAddressList = tmp;
-					System.out.println("SubnetChecker: Address change detected");
 					break;  // yes
 				}
 				prev = now;
@@ -246,8 +239,6 @@ public final class SubnetChecker {
 				target = TARGETS[i];
 				strs = target.split("=");
 				if (strs.length != 2) {
-					System.out.println(
-						"Subnet target error: \""+target+"\"");
 					continue;  // bad target string
 				}
 				host = strs[0].trim();
@@ -266,7 +257,6 @@ public final class SubnetChecker {
 				if (gotPing) {
 					if (!subnetName.equals(subnet)) {
 						subnetName = subnet;
-						System.out.println("SubnetChecker.subnet = "+subnet);
 					}
 					return;
 				}
@@ -274,7 +264,6 @@ public final class SubnetChecker {
 			// didn't get any responses...
 			if (!subnetName.equals(UNKNOWN)) {
 				subnetName = UNKNOWN;
-				System.out.println("SubnetChecker.subnet = "+UNKNOWN);
 			}
 		}
 	}

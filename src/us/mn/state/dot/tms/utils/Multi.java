@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  * Copyright (C) 2009  AHMCT, University of California
  * Copyright (C) 2019-2020  SRF Consulting Group
  * Copyright (C) 2021  Iteris Inc.
@@ -109,6 +109,11 @@ public interface Multi {
 			else
 				return UNDEFINED;
 		}
+
+		/** Get the default line justification */
+		static public JustificationLine defaultValue() {
+			return CENTER;
+		}
 	}
 
 	/** Set the line justification.
@@ -128,6 +133,11 @@ public interface Multi {
 				return VALUES[o];
 			else
 				return UNDEFINED;
+		}
+
+		/** Get the default page justification */
+		static public JustificationPage defaultValue() {
+			return TOP;
 		}
 	}
 
@@ -154,7 +164,44 @@ public interface Multi {
 	/** Set the text rectangle */
 	void setTextRectangle(int x, int y, int w, int h);
 
-	/* IRIS-specific quick message tags (not part of MULTI) */
+	/* IRIS-specific DMS action tags (not part of MULTI) */
+
+	/** Add a ClearGuide advisory.
+	 * @param dms DMS name
+	 * @param rid CG route id
+	 * @param tsp Threshold speed
+	 * @param mode Variable to use: e.g. tt, delay
+	 * @param ridx Route index, zero based */
+	void addClearGuideAdvisory(String dms, int rid, int tsp, String mode,
+		int ridx);
+
+	/** Add an exit backup warning.
+	 * @param did Exit detector ID.
+	 * @param occ Occupancy threshold to activate warning. */
+	void addExitWarning(String did, int occ);
+
+	/** Add a feed message */
+	void addFeed(String fid);
+
+	/** Add parking area availability.
+	 * @param pid Parking area ID.
+	 * @param l_txt Text for low availability.
+	 * @param c_txt Text for closed area. */
+	void addParking(String pid, String l_txt, String c_txt);
+
+	/** Add a slow traffic warning.
+	 * @param spd Highest speed to activate warning.
+	 * @param dist Distance to search for slow traffic (1/10 mile).
+	 * @param mode Tag replacement mode (none, dist or speed). */
+	void addSlowWarning(int spd, int dist, String mode);
+
+	/** Add a standby-message tag */
+	void addStandby();
+
+	/** Add a time action substitution field.
+	 *  @param dir Chronoligical direction ("n" or "p").
+	 *  @param format Format pattern (DateTimeFormattter). */
+	void addTimeAction(String dir, String format);
 
 	/** Modes for travel time over limit handling */
 	enum OverLimitMode {
@@ -167,49 +214,12 @@ public interface Multi {
 	 * @param o_txt Over limit text. */
 	void addTravelTime(String sid, OverLimitMode mode, String o_txt);
 
-	/** Add a speed advisory */
-	void addSpeedAdvisory();
-
-	/** Add a ClearGuide advisory
-	 * @param dms DMS name
-	 * @param rid CG route id
-	 * @param tsp Threshold speed
-	 * @param mode Variable to use: e.g. tt, delay
-	 * @param ridx Route index, zero based */
-	void addClearGuideAdvisory(
-		String dms, int rid, int tsp, String mode, int ridx);
-
-	/** Add a slow traffic warning.
-	 * @param spd Highest speed to activate warning.
-	 * @param dist Distance to search for slow traffic (1/10 mile).
-	 * @param mode Tag replacement mode (none, dist or speed). */
-	void addSlowWarning(int spd, int dist, String mode);
-
-	/** Add an exit backup warning.
-	 * @param did Exit detector ID.
-	 * @param occ Occupancy threshold to activate warning. */
-	void addExitWarning(String did, int occ);
-
-	/** Add a feed message */
-	void addFeed(String fid);
-
 	/** Add a tolling message */
 	void addTolling(String mode, String[] zones);
 
-	/** Add parking area availability.
-	 * @param pid Parking area ID.
-	 * @param l_txt Text for low availability.
-	 * @param c_txt Text for closed area. */
-	void addParking(String pid, String l_txt, String c_txt);
-
-	/** Add a time action substitution field.
-	 *  @param dir Chronoligical direction ("n" or "p").
-	 *  @param format Format pattern (DateTimeFormattter). */
-	void addTimeAction(String dir, String format);
+	/** Add a speed advisory */
+	void addSpeedAdvisory();
 
 	/** Add an incident locator */
 	void addLocator(String code);
-
-	/** Add a standby-message tag */
-	void addStandby();
 }

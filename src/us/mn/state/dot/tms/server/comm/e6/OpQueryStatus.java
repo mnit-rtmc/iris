@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2016  Minnesota Department of Transportation
+ * Copyright (C) 2015-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ public class OpQueryStatus extends OpE6 {
 
 	/** Create a new "query status" operation */
 	public OpQueryStatus(TagReaderImpl tr) {
-		super(PriorityLevel.DEVICE_DATA, tr);
+		super(PriorityLevel.POLL_LOW, tr);
 	}
 
 	/** Create the second phase of the operation */

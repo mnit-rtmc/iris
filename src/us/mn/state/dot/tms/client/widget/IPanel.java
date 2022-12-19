@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2021  Minnesota Department of Transportation
+ * Copyright (C) 2007-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
@@ -35,6 +36,17 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  * @author Douglas Lau
  */
 public class IPanel extends JPanel {
+
+	/** Parse an integer in a text field */
+	static public Integer parseInt(JTextField txt) {
+		try {
+			String t = txt.getText().trim();
+			return Integer.parseInt(t);
+		}
+		catch (NumberFormatException e) {
+			return null;
+		}
+	}
 
 	/** Stretch types */
 	public enum Stretch {

@@ -47,7 +47,7 @@ public class OpSendSampleSettings extends Op170 {
 
 	/** Create a new send sample settings operation */
 	public OpSendSampleSettings(ControllerImpl c) {
-		this(PriorityLevel.DOWNLOAD, c);
+		this(PriorityLevel.SETTINGS, c);
 	}
 
 	/** Create the first phase of the operation */

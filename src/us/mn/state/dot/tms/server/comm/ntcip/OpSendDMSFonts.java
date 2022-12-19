@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontFinder;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
-import us.mn.state.dot.tms.SignDetail;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -105,7 +104,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 	/** Create a new operation to send fonts to a DMS */
 	public OpSendDMSFonts(DMSImpl d) {
-		super(PriorityLevel.DOWNLOAD, d);
+		super(PriorityLevel.SETTINGS, d);
 		FontFinder ff = new FontFinder(d);
 		fonts = ff.getFonts();
 	}
@@ -279,12 +278,9 @@ public class OpSendDMSFonts extends OpDMS {
 	 *
 	 * @return True if the DMS is affected by this issue */
 	private boolean addcoFontIssue(int fnum) {
-		return fnum > 2 && isAddco() && isVersion("3.4.21");
-	}
-
-	/** Determine if the firmware version matches a given value */
-	private boolean isVersion(String version) {
-		return getVersion().contains(version);
+		return (fnum > 2) &&
+		      isAddco() &&
+		      getVersion().contains("3.4.21");
 	}
 
 	/** Get the first phase of the next font */

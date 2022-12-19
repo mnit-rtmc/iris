@@ -71,7 +71,7 @@ public class ModuleTable {
 			// remove trailing comma
 			if (sb.charAt(sb.length() - 1) == ',')
 				sb.setLength(sb.length() - 1);
-			sb.append("},");
+			sb.append('}');
 			return sb.toString();
 		}
 	}
@@ -99,29 +99,37 @@ public class ModuleTable {
 		return tr;
 	}
 
+	/** Get software version (last software module in table) */
+	private String getVersion() {
+		String v = null;
+		for (Row row : table_rows) {
+			if (row.m_type.getEnum() == ModuleType.software)
+				v = trimTruncate(row.version);
+		}
+		return v;
+	}
+
 	/** Get JSON representation */
 	public String toJson() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("{\"hw\":");
-		sb.append(typeRowsJson(ModuleType.hardware));
-		sb.append(",\"sw\":");
-		sb.append(typeRowsJson(ModuleType.software));
+		sb.append('{');
+		sb.append(Json.arr("hw", typeRowsJson(ModuleType.hardware)));
+		sb.append(Json.arr("sw", typeRowsJson(ModuleType.software)));
+		sb.append(Json.str("version", getVersion()));
+		// remove trailing comma
+		if (sb.charAt(sb.length() - 1) == ',')
+			sb.setLength(sb.length() - 1);
 		sb.append('}');
 		return sb.toString();
 	}
 
 	/** Get all module rows of the given type as JSON */
-	private String typeRowsJson(ModuleType m_type) {
-		StringBuilder sb = new StringBuilder();
-		sb.append('[');
+	private String[] typeRowsJson(ModuleType m_type) {
+		ArrayList<String> rows = new ArrayList<String>();
 		for (Row row : table_rows) {
 			if (row.m_type.getEnum() == m_type)
-				sb.append(row.toJson());
+				rows.add(row.toJson());
 		}
-		// remove trailing comma
-		if (sb.charAt(sb.length() - 1) == ',')
-			sb.setLength(sb.length() - 1);
-		sb.append(']');
-		return sb.toString();
+		return rows.toArray(new String[0]);
 	}
 }

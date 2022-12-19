@@ -12,10 +12,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
+package us.mn.state.dot.tms.server.comm.snmp;
 
-import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
-import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
 import us.mn.state.dot.tms.utils.Json;
 
 /**

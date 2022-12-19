@@ -48,6 +48,12 @@ public interface Beacon extends Device {
 	 * verify circuit. */
 	Integer getVerifyPin();
 
+	/** Set the external detect mode */
+	void setExtMode(boolean em);
+
+	/** Get the external detect mode */
+	boolean getExtMode();
+
 	/** Set beacon state request (ordinal of BeaconState) */
 	void setState(int bs);
 

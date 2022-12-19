@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.wysiwyg.selector;
 
 import java.awt.GridBagConstraints;
@@ -30,7 +29,7 @@ import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * WYSIWYG DMS Message Editor Confirmation Form for deleting QuickMessages.
+ * WYSIWYG DMS Message Editor Confirmation Form for deleting messages.
  *
  * @author Gordon Parikh - SRF Consulting
  */
@@ -41,11 +40,11 @@ public class WMsgConfirmDeleteForm extends AbstractForm {
 	private final Session session;
 	private WMsgSelectorForm selectorForm;
 	private String messageName;
-	
+
 	/** Buttons */
 	private JButton yes_btn;
 	private JButton no_btn;
-	
+
 	public WMsgConfirmDeleteForm(Session s,
 			WMsgSelectorForm sForm, String mName) {
 		super(I18N.get("wysiwyg.confirm_delete.title"), true);
@@ -56,7 +55,7 @@ public class WMsgConfirmDeleteForm extends AbstractForm {
 		no_btn = new JButton(cancel);
 		yes_btn = new JButton(delete);
 	}
-	
+
 	/** Initialize the form */
 	@Override
 	protected void initialize() {
@@ -72,28 +71,28 @@ public class WMsgConfirmDeleteForm extends AbstractForm {
 		gbc.ipady = 0;
 		gbc.weightx = 0.5;
 		gbc.weighty = 0.5;
-		
+
 		// warning text
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		p.add(new JLabel(String.format(I18N.get(
 				"wysiwyg.confirm_delete.message"), messageName)), gbc);
-		
+
 		/* Yes button */
 		gbc.gridx = 0;
 		gbc.gridy = 1;
 		gbc.gridwidth = 1;
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		p.add(yes_btn, gbc);
-		
+
 		/* No button */
 		gbc.gridx = 1;
 		gbc.anchor = GridBagConstraints.BASELINE_TRAILING;
 		p.add(no_btn, gbc);
-		
+
 		add(p);
 	}
-	
+
 	/** Cancel action */
 	private final IAction cancel = new IAction(
 		"wysiwyg.confirm_delete.no") {
@@ -102,7 +101,7 @@ public class WMsgConfirmDeleteForm extends AbstractForm {
 			close(session.getDesktop());
 		}
 	};
-	
+
 	/** Delete action */
 	private final IAction delete = new IAction(
 			"wysiwyg.confirm_delete.yes") {

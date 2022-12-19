@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2021  Minnesota Department of Transportation
+ * Copyright (C) 2013-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -288,7 +288,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Set fault description */
 	public void setFaultNotify(String flt) {
-		flt = truncateString(flt, 32);
+		flt = trimTruncate(flt, 32);
 		if (!objectEquals(flt, fault)) {
 			try {
 				store.update(this, "fault", flt);

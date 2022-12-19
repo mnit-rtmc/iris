@@ -71,13 +71,24 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 		super(link, TCP, false);
 	}
 
-	/** Create an operation */
-	private void createOp(String n, ControllerIoImpl cio, OpStep s) {
+	/** Create a controller operation */
+	private void createOp(String n, ControllerImpl c, OpStep s,
+		PriorityLevel pl)
+	{
+		Operation op = new Operation(n, c, s);
+		op.setPriority(pl);
+		addOp(op);
+	}
+
+	/** Create a controller I/O operation */
+	private void createOp(String n, ControllerIoImpl cio, OpStep s,
+		PriorityLevel pl)
+	{
 		Controller c = cio.getController();
 		if (c instanceof ControllerImpl) {
 			ControllerImpl ci = (ControllerImpl) c;
 			Operation op = new Operation(n, ci, cio, s);
-			op.setPriority(PriorityLevel.SHORT_POLL);
+			op.setPriority(pl);
 			addOp(op);
 		}
 	}
@@ -85,34 +96,30 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 	/** Perform a controller reset */
 	@Override
 	public void resetController(ControllerImpl c) {
-		createSettingsOp("system.command.op", c,
-			new OpSystemCommand(counter));
+		createOp("system.command.op", c, new OpSystemCommand(counter),
+			PriorityLevel.SETTINGS);
 	}
 
 	/** Send settings to a controller */
 	@Override
 	public void sendSettings(ControllerImpl c) {
-		createSettingsOp("clock.status.op", c,
-			new OpClockStatus(counter));
-		createSettingsOp("system.attribute.op", c,
-			new OpSystemAttributes(counter));
-		createSettingsOp("detector.op.configure", c,
-			new OpDetectorConfigure(counter, 0));
-		createSettingsOp("firmware.version.op", c,
-			new OpFirmwareVersion(counter));
+		createOp("clock.status.op", c, new OpClockStatus(counter),
+			PriorityLevel.SETTINGS);
+		createOp("system.attribute.op", c,
+			new OpSystemAttributes(counter),
+			PriorityLevel.SETTINGS);
+		createOp("detector.op.configure", c,
+			new OpDetectorConfigure(counter, 0),
+			PriorityLevel.SETTINGS);
+		createOp("firmware.version.op", c,
+			new OpFirmwareVersion(counter),
+			PriorityLevel.SETTINGS);
 		RampMeterImpl meter1 = lookupMeter(c, METER_1_PIN);
 		if (meter1 != null)
 			sendRequest(meter1, DeviceRequest.SEND_SETTINGS);
 		RampMeterImpl meter2 = lookupMeter(c, METER_2_PIN);
 		if (meter2 != null)
 			sendRequest(meter2, DeviceRequest.SEND_SETTINGS);
-	}
-
-	/** Create a settings operation */
-	private void createSettingsOp(String n, ControllerImpl c, OpStep s) {
-		Operation op = new Operation(n, c, s);
-		op.setPriority(PriorityLevel.DOWNLOAD);
-		addOp(op);
 	}
 
 	/** Query sample data.
@@ -126,10 +133,9 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 				binEventData(c, per_sec);
 		} else {
 			// Long polling period, check detector configs
-			Operation op = new Operation("detector.op.query.config",
-				c, new OpQueryDetConfig(counter, 0));
-			op.setPriority(PriorityLevel.DEVICE_DATA);
-			addOp(op);
+			createOp("detector.op.query.config", c,
+				new OpQueryDetConfig(counter, 0),
+				PriorityLevel.POLL_LOW);
 		}
 	}
 
@@ -147,7 +153,7 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 		if (ds == null || ds.isDone()) {
 			Operation op = new Operation("detector.op.status", c,
 				new OpDetectorStatus());
-			op.setPriority(PriorityLevel.DEVICE_DATA);
+			op.setPriority(PriorityLevel.IDLE);
 			collectors.put(c, op);
 			addOp(op);
 		}
@@ -160,11 +166,13 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 		switch (r) {
 		case SEND_SETTINGS:
 			createOp("ramp.meter.op.configure", meter,
-				new OpMeterConfigure(counter, meter));
+				new OpMeterConfigure(counter, meter),
+				PriorityLevel.SETTINGS);
 			break;
 		case QUERY_STATUS:
 			createOp("ramp.meter.op.query.status", meter,
-				new OpQueryMeterStatus(counter, meter));
+				new OpQueryMeterStatus(counter, meter),
+				PriorityLevel.POLL_HIGH);
 			break;
 		default:
 			// Ignore other requests
@@ -176,7 +184,8 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 	@Override
 	public void sendReleaseRate(RampMeterImpl meter, Integer rate) {
 		createOp("ramp.meter.op.send.status", meter,
-			new OpSendMeterStatus(counter, meter, rate));
+			new OpSendMeterStatus(counter, meter, rate),
+			PriorityLevel.COMMAND);
 	}
 
 	/** Send a device request to a beacon */
@@ -185,7 +194,8 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 		switch (r) {
 		case QUERY_STATUS:
 			createOp("beacon.op.query.state", b,
-				new OpQueryBeaconState(counter, b));
+				new OpQueryBeaconState(counter, b),
+				PriorityLevel.POLL_HIGH);
 			break;
 		default:
 			// Ignore other requests
@@ -197,7 +207,8 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 	@Override
 	public void setFlashing(BeaconImpl b, boolean f) {
 		createOp("beacon.op.send.state", b,
-			new OpSendBeaconState(counter, b, f));
+			new OpSendBeaconState(counter, b, f),
+			PriorityLevel.COMMAND);
 	}
 
 	/** Send a device request to an LCS array */
@@ -223,7 +234,8 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 		switch (r) {
 		case QUERY_STATUS:
 			createOp("alarm.op.query.state", alarm,
-				new OpQueryAlarmState(counter, alarm));
+				new OpQueryAlarmState(counter, alarm),
+				PriorityLevel.POLL_HIGH);
 			break;
 		default:
 			// Ignore other requests

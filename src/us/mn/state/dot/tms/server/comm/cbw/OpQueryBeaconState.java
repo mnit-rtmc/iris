@@ -37,7 +37,7 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 
 	/** Create a new query beacon state operation */
 	public OpQueryBeaconState(BeaconImpl b) {
-		super(PriorityLevel.SHORT_POLL, b);
+		super(PriorityLevel.POLL_HIGH, b);
 		beacon = b;
 		String m = ControllerHelper.getSetup(controller, "model");
 		Model mdl = Model.fromValue(m);
@@ -66,41 +66,24 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
-		if (isSuccess()) {
+		if (isSuccess())
 			beacon.setStateNotify(getState());
-			setMaintStatus(formatMaintStatus());
-		}
 		super.cleanup();
 	}
 
 	/** Get the beacon state */
 	private BeaconState getState() {
-		boolean relay = getBeaconRelay();
-		Integer vp = beacon.getVerifyPin();
-		if (vp != null) {
-			boolean verify = prop.getInput(vp);
-			if (relay && !verify)
-				return BeaconState.FAULT_NO_VERIFY;
-			if (verify && !relay)
-				return BeaconState.FAULT_STUCK_ON;
-		}
-		BeaconState bs = (relay)
-			? BeaconState.FLASHING
-			: BeaconState.DARK;
-		return bs;
+		return beacon.getBeaconState(getRelayValue(), getVerifyValue());
 	}
 
-	/** Get beacon relay state */
-	private boolean getBeaconRelay() {
+	/** Get beacon relay value */
+	private boolean getRelayValue() {
 		return prop.getRelay(beacon.getPin());
 	}
 
-	/** Format the maintenance status */
-	private String formatMaintStatus() {
-		switch (getState()) {
-			case FAULT_NO_VERIFY: return "Verify failed";
-			case FAULT_STUCK_ON: return "Verify stuck";
-			default: return "";
-		}
+	/** Get beacon verify value */
+	private boolean getVerifyValue() {
+		Integer vp = beacon.getVerifyPin();
+		return (vp != null) ? prop.getInput(vp) : false;
 	}
 }

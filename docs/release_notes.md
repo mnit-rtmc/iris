@@ -1,5 +1,24 @@
 # IRIS 5.x Release Notes
 
+5.36.0 (30 Nov 2022)
+ - Added DMS `status` and `stuck_pixels` JSON columns to DB
+ - Reworked comm priority levels for all protocols
+ - Fixed Wavetronix clock sync (PriorityLevel.IDLE)
+ - Store modules in controller `setup` as `hw` / `sw` arrays
+ - Use software module version for ESS (not `sysDescr`)
+ - Query/store modules for NTCIP DMS devices
+ - Fixed beacon style ordering
+ - Dropped SONAR `sample`/`settings` attributes from `weather_sensor`
+ - Renamed `system_attribute` endpoint to `system_attribute_pub`
+
+5.35.0 (18 Nov 2022)
+ - Support monitoring externally controlled beacons
+ - Added `sonar.protocols` property to control TLS protocol versions
+ - Improved REST API documentation
+ - Extend "Send Settings" button to also send device settings
+ - Store NTCIP module table in controller `setup`
+ - Improved support for development with Eclipse
+
 5.34.0 (7 Sep 2022)
  - Added beacon "state" attribute/LUT (replaces "flashing")
  - Fixed beacon verify problem

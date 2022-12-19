@@ -22,6 +22,48 @@ use std::borrow::{Borrow, Cow};
 use std::fmt;
 use wasm_bindgen::JsValue;
 
+/// Photocell status
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct Photocell {
+    description: String,
+    error: Option<String>,
+    reading: Option<i32>,
+}
+
+/// Power supply status
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct PowerSupply {
+    description: String,
+    supply_type: String,
+    error: Option<String>,
+    detail: String,
+    voltage: Option<f32>,
+}
+
+/// Sign status
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct SignStatus {
+    photocells: Option<Vec<Photocell>>,
+    light_output: Option<u32>,
+    power_supplies: Option<Vec<PowerSupply>>,
+    cabinet_temp_min: Option<i32>,
+    cabinet_temp_max: Option<i32>,
+    ambient_temp_min: Option<i32>,
+    ambient_temp_max: Option<i32>,
+    housing_temp_min: Option<i32>,
+    housing_temp_max: Option<i32>,
+    ldc_pot_base: Option<i32>,
+    pixel_current_low: Option<i32>,
+    pixel_current_high: Option<i32>,
+}
+
+/// Stuck pixel bitmaps (Base64-encoded)
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct StuckPixels {
+    off: Option<String>,
+    on: Option<String>,
+}
+
 /// Dms
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Dms {
@@ -32,6 +74,8 @@ pub struct Dms {
     pub geo_loc: Option<String>,
     pub pin: Option<u32>,
     pub msg_current: Option<String>,
+    pub status: Option<SignStatus>,
+    pub stuck_pixels: Option<StuckPixels>,
 }
 
 /// Sign Message
@@ -83,8 +127,7 @@ impl AncillaryData for DmsAnc {
         if let Some(uri) = self.next_uri(view, pri) {
             match uri.borrow() {
                 SIGN_MSG_URI => {
-                    self.messages =
-                        Some(json.into_serde::<Vec<SignMessage>>()?);
+                    self.messages = Some(serde_wasm_bindgen::from_value(json)?);
                 }
                 _ => self.dev.set_json(view, pri, json)?,
             }

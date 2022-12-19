@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,11 +36,11 @@ import us.mn.state.dot.tms.client.widget.IPanel;
  */
 public class PropSetup extends IPanel {
 
-	/** External beacon combo box model */
+	/** Remote beacon combo box model */
 	private final IComboBoxModel<Beacon> beacon_mdl;
 
-	/** External beacon action */
-	private final IAction beacon_act = new IAction("dms.beacon.ext") {
+	/** Remote beacon action */
+	private final IAction beacon_act = new IAction("dms.beacon.rem") {
 		protected void doActionPerformed(ActionEvent e) {
 			dms.setBeacon(beacon_mdl.getSelectedProxy());
 		}
@@ -50,7 +50,7 @@ public class PropSetup extends IPanel {
 		}
 	};
 
-	/** External beacon combo box */
+	/** Remote beacon combo box */
 	private final JComboBox<Beacon> beacon_cbx = new JComboBox<Beacon>();
 
 	/** Numbered graphic model */

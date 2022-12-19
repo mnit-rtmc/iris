@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  * Copyright (C) 2019-2020  SRF Consulting Group
  * Copyright (C) 2021  Iteris Inc.
  *
@@ -113,31 +113,70 @@ public class MultiAdapter implements Multi {
 	 * @param b Blue component (0-255). */
 	@Override
 	public void addColorRectangle(int x, int y, int w, int h, int r, int g,
-		int b) { }
+		int b) {}
 
 	/** Set the text rectangle */
 	@Override
-	public void setTextRectangle(int x, int y, int w, int h) { }
+	public void setTextRectangle(int x, int y, int w, int h) {}
 
 	/** Set the font number.
 	 * @param f_num Font number (1 to 255)
 	 * @param f_id Font version ID (4-digit hex string)
 	 * Use the sign's default font if f_num is null. */
 	@Override
-	public void setFont(Integer f_num, String f_id) { }
+	public void setFont(Integer f_num, String f_id) {}
 
 	/** Set the character spacing.
 	 * @param sc Character spacing (null means use font spacing) */
 	@Override
-	public void setCharSpacing(Integer sc) { }
+	public void setCharSpacing(Integer sc) {}
 
 	/** Add a span of text */
 	@Override
-	public void addSpan(String span) { }
+	public void addSpan(String span) {}
 
 	/** Add a graphic */
 	@Override
-	public void addGraphic(int g_num, Integer x, Integer y, String g_id) { }
+	public void addGraphic(int g_num, Integer x, Integer y, String g_id) {}
+
+	/** Add a ClearGuide advisory */
+	@Override
+	public void addClearGuideAdvisory(String dms, int wid, int tsp,
+		String mode, int ridx) {}
+
+	/** Add an exit backup warning.
+	 * @param did Exit detector ID.
+	 * @param occ Occupancy threshold to activate warning. */
+	@Override
+	public void addExitWarning(String did, int occ) {}
+
+	/** Add a feed message */
+	@Override
+	public void addFeed(String fid) {}
+
+	/** Add parking area availability.
+	 * @param pid Parking area ID.
+	 * @param l_txt Text for low availability.
+	 * @param c_txt Text for closed area. */
+	@Override
+	public void addParking(String pid, String l_txt, String c_txt) {}
+
+	/** Add a slow traffic warning.
+	 * @param spd Highest speed to activate warning.
+	 * @param dist Distance to search for slow traffic (1/10 mile).
+	 * @param mode Tag replacement mode (none, dist or speed). */
+	@Override
+	public void addSlowWarning(int spd, int dist, String mode) {}
+
+	/** Add a standby-message tag */
+	@Override
+	public void addStandby() {}
+
+	/** Add a time action substitution field.
+	 *  @param dir Chronoligical direction ("n" or "p").
+	 *  @param format Format pattern (DateTimeFormattter). */
+	@Override
+	public void addTimeAction(String dir, String format) {}
 
 	/** Add a travel time destination.
 	 * @param sid Destination station ID.
@@ -145,56 +184,17 @@ public class MultiAdapter implements Multi {
 	 * @param o_txt Over limit text. */
 	@Override
 	public void addTravelTime(String sid, OverLimitMode mode, String o_txt)
-	{ }
-
-	/** Add a speed advisory */
-	@Override
-	public void addSpeedAdvisory() { }
-
-	/** Add a ClearGuide advisory */
-	@Override
-	public void addClearGuideAdvisory(
-		String dms, int wid, int tsp, String mode, int ridx) {}
-
-	/** Add a slow traffic warning.
-	 * @param spd Highest speed to activate warning.
-	 * @param dist Distance to search for slow traffic (1/10 mile).
-	 * @param mode Tag replacement mode (none, dist or speed). */
-	@Override
-	public void addSlowWarning(int spd, int dist, String mode) { }
-
-	/** Add an exit backup warning.
-	 * @param did Exit detector ID.
-	 * @param occ Occupancy threshold to activate warning. */
-	@Override
-	public void addExitWarning(String did, int occ) { }
-
-	/** Add a feed message */
-	@Override
-	public void addFeed(String fid) { }
+	{}
 
 	/** Add a tolling message */
 	@Override
-	public void addTolling(String mode, String[] zones) { }
+	public void addTolling(String mode, String[] zones) {}
 
-	/** Add parking area availability.
-	 * @param pid Parking area ID.
-	 * @param l_txt Text for low availability.
-	 * @param c_txt Text for closed area. */
+	/** Add a speed advisory */
 	@Override
-	public void addParking(String pid, String l_txt, String c_txt) { }
-
-	/** Add a time action substitution field.
-	 *  @param dir Chronoligical direction ("n" or "p").
-	 *  @param format Format pattern (DateTimeFormattter). */
-	@Override
-	public void addTimeAction(String dir, String format) { }
+	public void addSpeedAdvisory() {}
 
 	/** Add an incident locator */
 	@Override
-	public void addLocator(String code) { }
-
-	/** Add a standby-message tag */
-	@Override
-	public void addStandby() { }
+	public void addLocator(String code) {}
 }

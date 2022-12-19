@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,10 @@ import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import org.json.JSONArray;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -109,13 +111,13 @@ public class PropBrightness extends IPanel {
 
 	/** Update one attribute on the panel */
 	public void updateAttribute(String a) {
-		if(a == null || a.equals("photocellStatus"))
+		if (a == null || a.equals("status"))
 			updatePhotocellStatus();
-		if (a == null || a.equals("lightOutput") ||
+		if (a == null || a.equals("status") ||
 		    a.equals("msgCurrent"))
 		{
-			Integer o = dms.getLightOutput();
-			if(o != null)
+			Object o = DMSHelper.getStatus(dms, DMS.LIGHT_OUTPUT);
+			if (o instanceof Integer)
 				output_lbl.setText("" + o + "%");
 			else
 				output_lbl.setText(UNKNOWN);
@@ -125,9 +127,10 @@ public class PropBrightness extends IPanel {
 
 	/** Update the photocell status */
 	private void updatePhotocellStatus() {
-		String[] s = dms.getPhotocellStatus();
-		if(s != null) {
-			PhotocellTableModel m = new PhotocellTableModel(s);
+		Object ps = DMSHelper.getStatus(dms, DMS.PHOTOCELLS);
+		if (ps instanceof JSONArray) {
+			PhotocellTableModel m = new PhotocellTableModel(
+				(JSONArray) ps);
 			photocell_tbl.setColumnModel(m.createColumnModel());
 			photocell_tbl.setModel(m);
 		}

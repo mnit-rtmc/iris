@@ -50,9 +50,9 @@ pub enum Error {
     #[error("Parse error")]
     Parse(),
 
-    /// Serde JSON error
+    /// Serde wasm-bindgen error
     #[error("Serialization error")]
-    SerdeJson(#[from] serde_json::Error),
+    SerdeWasmBindgen(#[from] serde_wasm_bindgen::Error),
 }
 
 /// Bulb result

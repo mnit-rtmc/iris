@@ -54,7 +54,7 @@ public class OpQueryGpsLocation extends OpNtcip {
 
 	/** Create a new query GPS location operation */
 	public OpQueryGpsLocation(GpsImpl g, GeoLocImpl l) {
-		super(PriorityLevel.DEVICE_DATA, g);
+		super(PriorityLevel.POLL_LOW, g);
 		gps = g;
 		loc = l;
 		gps.setLatestPollNotify();

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.MsgCombining;
-import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
@@ -32,56 +32,55 @@ import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import static us.mn.state.dot.tms.client.widget.IOptionPane.showHint;
 
 /**
- * Table model for quick messages, which is for editing and creating
- * quick messages.
+ * Table model for editing and creating message patterns.
  *
- * @author Michael Darter
  * @author Douglas Lau
+ * @author Michael Darter
  */
-public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
+public class MsgPatternTableModel extends ProxyTableModel<MsgPattern> {
 
 	/** Create a proxy descriptor */
-	static public ProxyDescriptor<QuickMessage> descriptor(Session s) {
-		return new ProxyDescriptor<QuickMessage>(
-			s.getSonarState().getDmsCache().getQuickMessages(),
+	static public ProxyDescriptor<MsgPattern> descriptor(Session s) {
+		return new ProxyDescriptor<MsgPattern>(
+			s.getSonarState().getDmsCache().getMsgPatterns(),
 			false
 		);
 	}
 
 	/** Create the columns in the model */
 	@Override
-	protected ArrayList<ProxyColumn<QuickMessage>> createColumns() {
-		ArrayList<ProxyColumn<QuickMessage>> cols =
-			new ArrayList<ProxyColumn<QuickMessage>>(4);
-		cols.add(new ProxyColumn<QuickMessage>("quick.message.name",
+	protected ArrayList<ProxyColumn<MsgPattern>> createColumns() {
+		ArrayList<ProxyColumn<MsgPattern>> cols =
+			new ArrayList<ProxyColumn<MsgPattern>>(4);
+		cols.add(new ProxyColumn<MsgPattern>("msg.pattern.name",
 			180)
 		{
-			public Object getValueAt(QuickMessage qm) {
-				return qm.getName();
+			public Object getValueAt(MsgPattern pat) {
+				return pat.getName();
 			}
 		});
-		cols.add(new ProxyColumn<QuickMessage>("dms.group", 120) {
-			public Object getValueAt(QuickMessage qm) {
-				return qm.getSignGroup();
+		cols.add(new ProxyColumn<MsgPattern>("dms.group", 120) {
+			public Object getValueAt(MsgPattern pat) {
+				return pat.getSignGroup();
 			}
-			public boolean isEditable(QuickMessage qm) {
-				return canWrite(qm);
+			public boolean isEditable(MsgPattern pat) {
+				return canWrite(pat);
 			}
-			public void setValueAt(QuickMessage qm, Object value) {
-				qm.setSignGroup(lookupSignGroup(value));
+			public void setValueAt(MsgPattern pat, Object value) {
+				pat.setSignGroup(lookupSignGroup(value));
 			}
 		});
-		cols.add(new ProxyColumn<QuickMessage>("quick.message.config",
+		cols.add(new ProxyColumn<MsgPattern>("msg.pattern.config",
 			120)
 		{
-			public Object getValueAt(QuickMessage qm) {
-				return qm.getSignConfig();
+			public Object getValueAt(MsgPattern pat) {
+				return pat.getSignConfig();
 			}
-			public boolean isEditable(QuickMessage qm) {
-				return canWrite(qm);
+			public boolean isEditable(MsgPattern pat) {
+				return canWrite(pat);
 			}
-			public void setValueAt(QuickMessage qm, Object value) {
-				qm.setSignConfig((value instanceof SignConfig)
+			public void setValueAt(MsgPattern pat, Object value) {
+				pat.setSignConfig((value instanceof SignConfig)
 				                ? (SignConfig) value
 				                : null);
 			}
@@ -93,18 +92,18 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<QuickMessage>("dms.msg.combining", 90){
-			public Object getValueAt(QuickMessage qm) {
-				int mc = qm.getMsgCombining();
+		cols.add(new ProxyColumn<MsgPattern>("dms.msg.combining", 90){
+			public Object getValueAt(MsgPattern pat) {
+				int mc = pat.getMsgCombining();
 				return MsgCombining.fromOrdinal(mc);
 			}
-			public boolean isEditable(QuickMessage qm) {
-				return canWrite(qm);
+			public boolean isEditable(MsgPattern pat) {
+				return canWrite(pat);
 			}
-			public void setValueAt(QuickMessage qm, Object value) {
+			public void setValueAt(MsgPattern pat, Object value) {
 				if (value instanceof MsgCombining) {
 					MsgCombining mc = (MsgCombining) value;
-					qm.setMsgCombining(mc.ordinal());
+					pat.setMsgCombining(mc.ordinal());
 				}
 			}
 			protected TableCellEditor createCellEditor() {
@@ -134,7 +133,7 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 
 	/** Create a new table model.
 	 * @param s Session */
-	public QuickMessageTableModel(Session s) {
+	public MsgPatternTableModel(Session s) {
 		super(s, descriptor(s), 12, 20);
 		config_mdl = new ProxyListModel<SignConfig>(
 			s.getSonarState().getDmsCache().getSignConfigs());

@@ -107,9 +107,12 @@ impl AncillaryData for GateArmAnc {
         if let Some(uri) = self.next_uri(view, pri) {
             match uri.borrow() {
                 GATE_ARM_STATE_URI => {
-                    self.states = Some(json.into_serde::<Vec<GateArmState>>()?);
+                    self.states = Some(serde_wasm_bindgen::from_value(json)?);
                 }
-                _ => self.controller = Some(json.into_serde::<Controller>()?),
+                _ => {
+                    self.controller =
+                        Some(serde_wasm_bindgen::from_value(json)?)
+                }
             }
         }
         Ok(())

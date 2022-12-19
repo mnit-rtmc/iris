@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
-import us.mn.state.dot.tms.QuickMessageHelper;
+import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -95,15 +95,15 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 					lum.setMsgNum(null);
 			}
 		});
-		cols.add(new ProxyColumn<LaneUseMulti>("dms.quick.message",160){
+		cols.add(new ProxyColumn<LaneUseMulti>("msg.pattern", 160) {
 			public Object getValueAt(LaneUseMulti lum) {
-				return lum.getQuickMessage();
+				return lum.getMsgPattern();
 			}
 			public boolean isEditable(LaneUseMulti lum) {
 				return canWrite(lum);
 			}
 			public void setValueAt(LaneUseMulti lum, Object value) {
-				lum.setQuickMessage(QuickMessageHelper.lookup(
+				lum.setMsgPattern(MsgPatternHelper.lookup(
 					value.toString()));
 			}
 		});

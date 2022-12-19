@@ -50,9 +50,9 @@ public class OpQueryEssSettings extends OpEss {
 	/** Sub-surface sensors table */
 	private final SubSurfaceSensorsTable ss_table;
 
-	/** Create a new query status object */
+	/** Create a new query settings object */
 	public OpQueryEssSettings(WeatherSensorImpl ws) {
-		super(PriorityLevel.DEVICE_DATA, ws);
+		super(PriorityLevel.POLL_LOW, ws);
 		ws_table = ess_rec.ws_table;
 		ts_table = ess_rec.ts_table;
 		ps_table = ess_rec.ps_table;
@@ -62,31 +62,7 @@ public class OpQueryEssSettings extends OpEss {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase phaseTwo() {
-		return new QuerySettings();
-	}
-
-	/** Phase to query settings */
-	protected class QuerySettings extends Phase {
-
-		/** Query values */
-		@SuppressWarnings("unchecked")
-		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(ess_rec.sys_descr.node);
-			mess.add(ess_rec.sys_contact.node);
-			mess.add(ess_rec.sys_name.node);
-			mess.add(ess_rec.sys_location.node);
-			mess.queryProps();
-			String version = ess_rec.sys_descr.getValue();
-			// Some models include this at the start
-			if (version.startsWith("sysDescr.0: "))
-				version = version.substring(12);
-			controller.setVersionNotify(version);
-			logQuery(ess_rec.sys_descr.node);
-			logQuery(ess_rec.sys_contact.node);
-			logQuery(ess_rec.sys_name.node);
-			logQuery(ess_rec.sys_location.node);
-			return new QueryElevation();
-		}
+		return new QueryElevation();
 	}
 
 	/** Phase to query elevation values */
@@ -266,7 +242,7 @@ public class OpQueryEssSettings extends OpEss {
 	@Override
 	public void cleanup() {
 		if (isSuccess())
-			w_sensor.setSettingsNotify(ess_rec.toJson());
+			w_sensor.setSettings(ess_rec.toJson());
 		super.cleanup();
 	}
 }

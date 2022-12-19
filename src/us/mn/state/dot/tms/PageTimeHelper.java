@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,27 +33,35 @@ public class PageTimeHelper {
 	private PageTimeHelper() { }
 
 	/** Get minimum page-on interval */
-	static public Interval minPageOnInterval() {
+	static Interval minPageOnInterval() {
 		return new Interval(
 			SystemAttrEnum.DMS_PAGE_ON_MIN_SECS.getFloat());
 	}
 
 	/** Get maximum page-on interval */
-	static public Interval maxPageOnInterval() {
+	static Interval maxPageOnInterval() {
 		return new Interval(
 			SystemAttrEnum.DMS_PAGE_ON_MAX_SECS.getFloat());
 	}
 
 	/** Get default page-on interval */
 	static public Interval defaultPageOnInterval() {
-		return new Interval(
-			SystemAttrEnum.DMS_PAGE_ON_DEFAULT_SECS.getFloat());
+		return new Interval(2.8f);
+	}
+
+	/** Get default page-on time (ds) */
+	static public int defaultPageOnTimeDs() {
+		return defaultPageOnInterval().round(DECISECONDS);
 	}
 
 	/** Get default page-off interval */
 	static public Interval defaultPageOffInterval() {
-		return new Interval(
-			SystemAttrEnum.DMS_PAGE_OFF_DEFAULT_SECS.getFloat());
+		return new Interval(0.0f);
+	}
+
+	/** Get default page-off time (ds) */
+	static public int defaultPageOffTimeDs() {
+		return defaultPageOffInterval().round(DECISECONDS);
 	}
 
 	/** Validate a page-on interval.

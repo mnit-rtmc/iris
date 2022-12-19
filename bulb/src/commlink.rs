@@ -67,15 +67,15 @@ impl AncillaryData for CommLinkAnc {
         if let Some(uri) = self.next_uri(view, pri) {
             match uri.borrow() {
                 CONTROLLER_URI => {
-                    let mut controllers =
-                        json.into_serde::<Vec<Controller>>()?;
+                    let mut controllers: Vec<Controller> =
+                        serde_wasm_bindgen::from_value(json)?;
                     controllers
                         .retain(|c| c.comm_link.as_deref() == Some(&pri.name));
                     self.controllers = Some(controllers);
                 }
                 _ => {
-                    let comm_configs = json.into_serde::<Vec<CommConfig>>()?;
-                    self.comm_configs = Some(comm_configs);
+                    self.comm_configs =
+                        Some(serde_wasm_bindgen::from_value(json)?);
                 }
             }
         }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017-2018  Minnesota Department of Transportation
+ * Copyright (C) 2017-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ import us.mn.state.dot.tms.PlayListHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
+import us.mn.state.dot.tms.client.widget.IPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -44,16 +45,6 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class CatalogPanel extends JPanel {
-
-	/** Parse an integer */
-	static private Integer parseInt(String t) {
-		try {
-			return Integer.parseInt(t);
-		}
-		catch (NumberFormatException e) {
-			return null;
-		}
-	}
 
 	/** User Session */
 	private final Session session;
@@ -257,7 +248,7 @@ public class CatalogPanel extends JPanel {
 	private void createJobs() {
 		seq_txt.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
-			    Integer n = parseInt(seq_txt.getText());
+			    Integer n = IPanel.parseInt(seq_txt);
 			    seq_txt.setText((n != null) ? n.toString() : "");
 			    catalog.setSeqNum(n);
 			}

@@ -41,7 +41,7 @@ public class OpQuerySpeed extends OpDR500 {
 
 	/** Create a new query speed operation */
 	public OpQuerySpeed(ControllerImpl c, int p) {
-		super(PriorityLevel.SHORT_POLL, c);
+		super(PriorityLevel.POLL_HIGH, c);
 		per_sec = p;
 	}
 

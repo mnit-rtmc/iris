@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  * Copyright (C) 2019-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -35,18 +35,6 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  * @author John L. Stanley - SRF Consulting
  */
 public class MultiRenderer extends MultiAdapter {
-
-	/** Default line justification */
-	static public JustificationLine defaultJustificationLine() {
-		return JustificationLine.fromOrdinal(SystemAttrEnum
-			.DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
-	}
-
-	/** Default page justification */
-	static public JustificationPage defaultJustificationPage() {
-		return JustificationPage.fromOrdinal(SystemAttrEnum
-			.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
-	}
 
 	/** Raster graphic factory */
 	private final RasterGraphic.Factory factory;
@@ -87,10 +75,10 @@ public class MultiRenderer extends MultiAdapter {
 	private final LinkedList<Block> blocks = new LinkedList<Block>();
 
 	/** Current page justification */
-	private JustificationPage just_page = defaultJustificationPage();
+	private JustificationPage just_page = JustificationPage.defaultValue();
 
 	/** Current line justification */
-	private JustificationLine just_line = defaultJustificationLine();
+	private JustificationLine just_line = JustificationLine.defaultValue();
 
 	/** Current raster graphic to render */
 	private RasterGraphic raster;
@@ -157,10 +145,9 @@ public class MultiRenderer extends MultiAdapter {
 	 * Use IRIS's default page justification if jp is null. */
 	@Override
 	public void setJustificationPage(JustificationPage jp) {
-		if (jp == null)
-			just_page = defaultJustificationPage();
-		else
-			just_page = jp;
+		just_page = (jp != null)
+		          ? jp
+		          : JustificationPage.defaultValue();
 		Block block = new Block();
 		Block cb = currentBlock();
 		if (block.justp.ordinal() < cb.justp.ordinal())
@@ -173,10 +160,9 @@ public class MultiRenderer extends MultiAdapter {
 	 * Use IRIS's default line justification if jl is null. */
 	@Override
 	public void setJustificationLine(JustificationLine jl) {
-		if (jl == null)
-			just_line = defaultJustificationLine();
-		else
-			just_line = jl;
+		just_line = (jl != null)
+		          ? jl
+		          : JustificationLine.defaultValue();
 	}
 
 	/** Set the font number.

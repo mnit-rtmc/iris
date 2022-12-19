@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,17 +16,14 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.event.ActionEvent;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
@@ -62,12 +59,6 @@ public class PropMessages extends JPanel {
 	/** Sign pixel panel */
 	private final SignPixelPanel pixel_pnl = new SignPixelPanel(40, 400);
 
-	/** Override font label */
-	private final ILabel font_lbl = new ILabel("dms.font.override");
-
-	/** Override font combo box */
-	private final JComboBox<Font> font_cbx = new JComboBox<Font>();
-
 	/** User session */
 	private final Session session;
 
@@ -102,14 +93,6 @@ public class PropMessages extends JPanel {
 		setBorder(UI.border);
 		sign_group_pnl.initialize();
 		sign_text_pnl.initialize();
-		font_cbx.setAction(new IAction("font") {
-			protected void doActionPerformed(ActionEvent e) {
-				proxy.setOverrideFont(
-					(Font) font_cbx.getSelectedItem());
-			}
-		});
-		font_cbx.setModel(new IComboBoxModel<Font>(
-			session.getSonarState().getDmsCache().getFontModel()));
 		layoutPanel();
 	}
 
@@ -140,11 +123,6 @@ public class PropMessages extends JPanel {
 		g0.addComponent(sign_text_pnl);
 		hg.addGroup(g0);
 		hg.addComponent(preview_pnl);
-		GroupLayout.SequentialGroup g1 = gl.createSequentialGroup();
-		g1.addComponent(font_lbl);
-		g1.addGap(UI.hgap);
-		g1.addComponent(font_cbx);
-		hg.addGroup(g1);
 		return hg;
 	}
 
@@ -158,11 +136,6 @@ public class PropMessages extends JPanel {
 		vg.addGap(UI.vgap);
 		vg.addComponent(preview_pnl);
 		vg.addGap(UI.vgap);
-		GroupLayout.ParallelGroup g1 = gl.createBaselineGroup(false,
-			false);
-		g1.addComponent(font_lbl);
-		g1.addComponent(font_cbx);
-		vg.addGroup(g1);
 		return vg;
 	}
 
@@ -203,7 +176,7 @@ public class PropMessages extends JPanel {
 		}
 		SignText st = sign_text_pnl.getSelectedProxy();
 		if (st != null)
-			pixel_pnl.setGraphic(renderMessage(st));
+			pixel_pnl.setGraphic(renderSignText(st));
 		else
 			pixel_pnl.setGraphic(null);
 	}
@@ -217,18 +190,18 @@ public class PropMessages extends JPanel {
 			return null;
 	}
 
-	/** Render a message to a raster graphic */
-	private RasterGraphic renderMessage(SignText st) {
+	/** Render a sign text to a raster graphic */
+	private RasterGraphic renderSignText(SignText st) {
 		MultiString multi = new MultiString(st.getMulti());
-		RasterGraphic[] pages = renderPages(multi);
+		RasterGraphic[] pages = renderSignText(multi);
 		if (pages != null && pages.length > 0)
 			return pages[0];
 		else
 			return null;
 	}
 
-	/** Render the pages of a text message */
-	private RasterGraphic[] renderPages(MultiString ms) {
+	/** Render a sign text (single-line) */
+	private RasterGraphic[] renderSignText(MultiString ms) {
 		SignConfig sc = proxy.getSignConfig();
 		if (null == sc)
 			return null;
@@ -236,7 +209,7 @@ public class PropMessages extends JPanel {
 		int h = getLineHeightPixels();
 		int cw = sc.getCharWidth();
 		int ch = sc.getCharHeight();
-		int df = DMSHelper.getDefaultFontNumber(proxy);
+		int df = DMSHelper.getDefaultFontNum(proxy);
 		ColorScheme cs = ColorScheme.fromOrdinal(sc.getColorScheme());
 		RasterBuilder rb = new RasterBuilder(w, h, cw, ch, df, cs);
 		try {
@@ -247,15 +220,8 @@ public class PropMessages extends JPanel {
 		}
 	}
 
-	/** Update the edit mode */
-	public void updateEditMode() {
-		font_cbx.setEnabled(canWrite("overrideFont"));
-	}
-
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
-		if (null == a || a.equals("overrideFont"))
-			font_cbx.setSelectedItem(proxy.getOverrideFont());
 		// NOTE: msgCurrent attribute changes after all sign
 		//       dimension attributes are updated.
 		if (a == null || a.equals("msgCurrent"))

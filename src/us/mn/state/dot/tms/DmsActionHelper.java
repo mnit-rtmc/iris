@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,8 +77,8 @@ public class DmsActionHelper extends BaseHelper {
 		while (dit.hasNext()) {
 			DmsAction da = dit.next();
 			if (da.getActionPlan() == ap) {
-				QuickMessage qm = da.getQuickMessage();
-				if (qm.getSignConfig() == cfg)
+				MsgPattern pat = da.getMsgPattern();
+				if (pat.getSignConfig() == cfg)
 					groups.add(da.getSignGroup());
 			}
 		}

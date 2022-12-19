@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2021  Minnesota Department of Transportation
+ * Copyright (C) 2016-2022  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -89,8 +89,7 @@ public class SignConfigHelper extends BaseHelper {
 
 	/** Check if a font is usable for a sign configuration */
 	static public boolean isFontUsable(SignConfig sc, Font f) {
-		return isFontWidthUsable(sc, f) && 
-			isFontHeightUsable(sc, f) && !isFontExcluded(sc, f);
+		return isFontWidthUsable(sc, f) &&  isFontHeightUsable(sc, f);
 	}
 
 	/** Check if a font width is usable for a sign configuration. */
@@ -146,13 +145,31 @@ public class SignConfigHelper extends BaseHelper {
 		return signs;
 	}
 
-	/** Check if a font is excluded */
-	static public boolean isFontExcluded(SignConfig sc, Font f) {
-		if (sc != null && f != null) {
-			Font ef = sc.getExcludeFont();
-			return ef != null ? 
-				ef.getNumber() == f.getNumber() : false;
-		}
-		return true;
+	/** Create a raster builder for a sign config */
+	static public RasterBuilder createRasterBuilder(SignConfig sc) {
+		if (sc != null) {
+			int pw = sc.getPixelWidth();
+			int ph = sc.getPixelHeight();
+			int cw = sc.getCharWidth();
+			int ch = sc.getCharHeight();
+			int fn = getDefaultFontNum(sc);
+			ColorScheme cs = ColorScheme.fromOrdinal(
+				sc.getColorScheme());
+			return new RasterBuilder(pw, ph, cw, ch, fn, cs);
+		} else
+			return null;
+	}
+
+	/** Get the default font number for a sign config */
+	static public int getDefaultFontNum(SignConfig sc) {
+		Font f = getDefaultFont(sc);
+		return (f != null)
+		      ? f.getNumber()
+		      : FontHelper.DEFAULT_FONT_NUM;
+	}
+
+	/** Get the default font for a sign config */
+	static public Font getDefaultFont(SignConfig sc) {
+		return (sc != null) ? sc.getDefaultFont() : null;
 	}
 }

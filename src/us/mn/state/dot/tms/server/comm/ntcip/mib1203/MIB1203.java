@@ -65,6 +65,8 @@ public enum MIB1203 {
 	multiCfg			(dms, 4),
 	  defaultBackgroundColor	(multiCfg, 1),
 	  defaultForegroundColor	(multiCfg, 2),
+	  defaultFlashOn		(multiCfg, 3),
+	  defaultFlashOff		(multiCfg, 4),
 	  defaultFont			(multiCfg, 5),
 	  defaultJustificationLine	(multiCfg, 6),
 	  defaultJustificationPage	(multiCfg, 7),
@@ -76,6 +78,15 @@ public enum MIB1203 {
 	  dmsSupportedMultiTags		(multiCfg, 14),		// V2
 	  dmsMaxNumberPages		(multiCfg, 15),		// V2
 	  dmsMaxMultiStringLength	(multiCfg, 16),		// V2
+	  defaultFlashOnActivate	(multiCfg, 17),		// V2
+	  defaultFlashOffActivate	(multiCfg, 18),		// V2
+	  defaultFontActivate		(multiCfg, 19),		// V2
+	  defaultJustificationLineActivate(multiCfg, 20),	// V2
+	  defaultJustificationPageActivate(multiCfg, 21),	// V2
+	  defaultPageOnTimeActivate	(multiCfg, 22),		// V2
+	  defaultPageOffTimeActivate	(multiCfg, 23),		// V2
+	  defaultBackgroundRGBActivate	(multiCfg, 24),		// V2
+	  defaultForegroundRGBActivate	(multiCfg, 25),		// V2
 	dmsMessage			(dms, 5),
 	  dmsNumPermanentMsg		(dmsMessage, 1),
 	  dmsNumChangeableMsg		(dmsMessage, 2),

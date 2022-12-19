@@ -16,9 +16,7 @@
  */
 package us.mn.state.dot.tms;
 
-import java.io.IOException;
 import java.util.Iterator;
-import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -28,9 +26,6 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Michael Darter
  */
 public class SignMessageHelper extends BaseHelper {
-
-	/** Maximum allowed pages for any message */
-	static public final int DMS_MESSAGE_MAX_PAGES = 6;
 
 	/** Do not allow objects of this class */
 	private SignMessageHelper() {
@@ -130,7 +125,7 @@ public class SignMessageHelper extends BaseHelper {
 		int src = sm.getSource();
 		return SignMsgSource.standby.checkBit(src);
 	}
-	
+
 	/** Get the bitmap graphic for all pages of the specified DMS.
 	 * @param sm SignMessage in question.
 	 * @param dms Sign with the graphic.
@@ -163,9 +158,6 @@ public class SignMessageHelper extends BaseHelper {
 		try {
 			validateBitmaps(multi, dms);
 		}
-		catch (IOException e) {
-			throw new InvalidMsgException("Base64 decode error");
-		}
 		catch (IndexOutOfBoundsException e) {
 			throw new InvalidMsgException(e.getMessage());
 		}
@@ -174,9 +166,9 @@ public class SignMessageHelper extends BaseHelper {
 	/** Validate sign message bitmaps.
 	 * @param multi Message MULTI string.
 	 * @param dms Sign to check.
-	 * @throws IOException, InvalidMsgException. */
+	 * @throws InvalidMsgException. */
 	static private void validateBitmaps(MultiString multi, DMS dms)
-		throws IOException, InvalidMsgException
+		throws InvalidMsgException
 	{
 		BitmapGraphic[] bmaps = DMSHelper.createBitmaps(dms,
 			multi.toString());
@@ -185,70 +177,37 @@ public class SignMessageHelper extends BaseHelper {
 		if (bmaps.length == 0)
 			throw new InvalidMsgException("no pages");
 		if (!multi.isBlank()) {
-			BitmapGraphic[] stuck = createStuckBitmaps(dms);
-			if (stuck != null) {
+			BitmapGraphic stuck_off = DMSHelper.createStuckBitmap(
+				dms, DMS.STUCK_OFF_BITMAP);
+			BitmapGraphic stuck_on = DMSHelper.createStuckBitmap(
+				dms, DMS.STUCK_ON_BITMAP);
+			if (stuck_off != null && stuck_on != null) {
 				for (BitmapGraphic bg : bmaps) {
-					validateBitmap(bg, stuck);
+					validateBitmap(bg, stuck_off, stuck_on);
 				}
 			}
 		}
 	}
 
-	/** Create stuck pixel bitmaps */
-	static private BitmapGraphic[] createStuckBitmaps(DMS dms)
-		throws IOException
-	{
-		String[] ps = dms.getPixelStatus();
-		if (ps != null && ps.length == 2) {
-			BitmapGraphic off = createStuckBitmap(dms,
-				ps[DMS.STUCK_OFF_BITMAP]);
-			BitmapGraphic on = createStuckBitmap(dms,
-				ps[DMS.STUCK_ON_BITMAP]);
-			if (off != null && on != null) {
-				BitmapGraphic[] bg = new BitmapGraphic[2];
-				bg[DMS.STUCK_OFF_BITMAP] = off;
-				bg[DMS.STUCK_ON_BITMAP] = on;
-				return bg;
-			}
-		}
-		return null;
-	}
-
-	/** Create one stuck pixel bitmap */
-	static private BitmapGraphic createStuckBitmap(DMS dms, String p)
-		throws IOException
-	{
-		byte[] bd = Base64.decode(p);
-		BitmapGraphic bg = DMSHelper.createBitmapGraphic(dms);
-		if (bg != null && bd.length == bg.length()) {
-			try {
-				bg.setPixelData(bd);
-				return bg;
-			}
-			catch (IndexOutOfBoundsException e) {
-				// stuck bitmap doesn't match current dimensions
-			}
-		}
-		return null;
-	}
-
 	/** Validate one message bitmap.
 	 * @param bg Bitmap graphic to validate.
-	 * @param stuck Stuck pixel bitmaps (off and on).
-	 * @throws IOException, InvalidMsgException. */
+	 * @param stuck_off Stuck off pixel bitmap.
+	 * @param stuck_on Stuck on pixel bitmap.
+	 * @throws InvalidMsgException. */
 	static private void validateBitmap(BitmapGraphic bg,
-		BitmapGraphic[] stuck) throws IOException, InvalidMsgException
+		BitmapGraphic stuck_off, BitmapGraphic stuck_on)
+		throws InvalidMsgException
 	{
 		if (bg.length() == 0)
 			throw new InvalidMsgException("sign size");
-		for (BitmapGraphic s : stuck) {
-			// This should never happen
-			if (s.length() != bg.length())
-				throw new InvalidMsgException("stuck size", true);
-		}
+		// This should never happen
+		if (stuck_off.length() != bg.length())
+			throw new InvalidMsgException("stuck off size", true);
+		if (stuck_on.length() != bg.length())
+			throw new InvalidMsgException("stuck on size", true);
 		BitmapGraphic temp = bg.createBlankCopy();
 		temp.setPixelData(bg.getPixelData());
-		temp.clearTransparent(stuck[DMS.STUCK_OFF_BITMAP]);
+		temp.clearTransparent(stuck_off);
 		int n_off = temp.getLitCount();
 		int off_lim = SystemAttrEnum.DMS_PIXEL_OFF_LIMIT.getInt();
 		if (off_lim >= 0 && n_off > off_lim) {
@@ -257,7 +216,7 @@ public class SignMessageHelper extends BaseHelper {
 		}
 		temp.setPixelData(bg.getPixelData());
 		temp.outlineLitPixels();
-		temp.clearTransparent(stuck[DMS.STUCK_ON_BITMAP]);
+		temp.clearTransparent(stuck_on);
 		int n_on = temp.getLitCount();
 		int on_lim = SystemAttrEnum.DMS_PIXEL_ON_LIMIT.getInt();
 		if (on_lim >= 0 && n_on > on_lim) {

@@ -157,8 +157,7 @@ impl AncillaryData for CommConfigAnc {
         _pri: &CommConfig,
         json: JsValue,
     ) -> Result<()> {
-        let protocols = json.into_serde::<Vec<Protocol>>()?;
-        self.protocols = Some(protocols);
+        self.protocols = Some(serde_wasm_bindgen::from_value(json)?);
         Ok(())
     }
 }

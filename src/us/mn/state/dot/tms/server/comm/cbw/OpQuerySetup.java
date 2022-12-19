@@ -34,7 +34,7 @@ public class OpQuerySetup extends OpDevice<CBWProperty> {
 
 	/** Create a new query setup operation */
 	public OpQuerySetup(BeaconImpl b) {
-		super(PriorityLevel.DEVICE_DATA, b);
+		super(PriorityLevel.CONFIGURE, b);
 	}
 
 	/** Create the second phase of the operation */

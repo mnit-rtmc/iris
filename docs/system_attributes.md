@@ -50,28 +50,17 @@ System Attribute                 | Description
 `dms_brightness_enable`          | Display [DMS] brightness information
 `dms_comm_loss_enable`           | Enable blanking [DMS] after communication time out
 `dms_composer_edit_mode`         | [DMS] message line combo box mode (0=not editable, 1=always editable, 2=editable after key press if identity sign group exists)
-`dms_default_justification_line` | Default [DMS] line justification (2=LEFT, 3=CENTER, 4=RIGHT, 5=FULL)
-`dms_default_justification_page` | Default [DMS] page justification (2=TOP, 3=MIDDLE, 4=BOTTOM)
-`dms_duration_enable`            | Enable widgets to select [DMS] message duration
-`dms_font_selection_enable`      | Allow font to be selected for [DMS] messages
 `dms_gps_jitter_m`               | Threshold (m) for GPS change to update [DMS] location
 `dms_high_temp_cutoff`           | Temperature at which [DMS] should shut off
 `dms_lamp_test_timeout_secs`     | Time to wait for [DMS] lamp test to complete
-`dms_manufacturer_enable`        | Enable manufacturer-specific [DMS] widgets
-`dms_max_lines`                  | Maximum lines per page on a [DMS]
-`dms_message_min_pages`          | Minimum number of pages to allow on [DMS] message interface
-`dms_page_off_default_secs`      | Default [DMS] page off time
-`dms_page_on_default_secs`       | Default [DMS] page on time
 `dms_page_on_max_secs`           | Maximum selectable [DMS] page on time (seconds)
 `dms_page_on_min_secs`           | Minimum selectable [DMS] page on time (seconds)
-`dms_page_on_selection_enable`   | Allow [DMS] page on time to be selected
 `dms_pixel_off_limit`            | Number of stuck-off pixels allowed in a [DMS] message
 `dms_pixel_on_limit`             | Number of adjacent stuck-on pixels allowed in a [DMS] message
 `dms_pixel_maint_threshold`      | Number of pixel failures before requiring maintenance
 `dms_pixel_status_enable`        | Enable reporting of [DMS] pixel status errors
 `dms_pixel_test_timeout_secs`    | Time to wait for [DMS] pixel test to complete
 `dms_querymsg_enable`            | Enable widgets to query [DMS] message
-`dms_quickmsg_store_enable`      | Enable button to store composed [DMS] message as a quick-message
 `dms_render_size`                | Specifies Chooser icon size: 0=Large, 1=Medium, 2=Small, 3=Auto
 `dms_reset_enable`               | Enable button to reset [DMS]
 `dms_send_confirmation_enable`   | Enable a confirmation dialog box when the [DMS] Send button is pressed

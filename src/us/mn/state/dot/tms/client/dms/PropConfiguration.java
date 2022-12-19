@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -147,9 +147,6 @@ public class PropConfiguration extends IPanel {
 	/** Font height label */
 	private final JLabel font_height_lbl = IPanel.createValueLabel();
 
-	/** Exclude font combo box */
-	private final JComboBox<Font> ex_font_cbx = new JComboBox<Font>();
-
 	/** Module width edit field */
 	private final JTextField module_width_txt = new JTextField(4);
 
@@ -202,8 +199,6 @@ public class PropConfiguration extends IPanel {
 		add(font_cbx, Stretch.LAST);
 		add("dms.font.height");
 		add(font_height_lbl, Stretch.LAST);
-		add("dms.font.exclude");
-		add(ex_font_cbx, Stretch.LAST);
 		add("dms.module.width");
 		add(module_width_txt, Stretch.LAST);
 		add("dms.module.height");
@@ -215,14 +210,6 @@ public class PropConfiguration extends IPanel {
 			}
 		});
 		font_cbx.setModel(new IComboBoxModel<Font>(
-			session.getSonarState().getDmsCache().getFontModel()));
-		ex_font_cbx.setAction(new IAction(null) {
-			protected void doActionPerformed(ActionEvent e) {
-				config.setExcludeFont(
-					(Font) ex_font_cbx.getSelectedItem());
-			}
-		});
-		ex_font_cbx.setModel(new IComboBoxModel<Font>(
 			session.getSonarState().getDmsCache().getFontModel()));
 		module_width_txt.addFocusListener(new FocusAdapter() {
 			@Override
@@ -244,7 +231,6 @@ public class PropConfiguration extends IPanel {
 	/** Update the edit mode */
 	public void updateEditMode() {
 		font_cbx.setEnabled(canWrite("defaultFont"));
-		ex_font_cbx.setEnabled(canWrite("excludeFont"));
 		module_width_txt.setEnabled(canWrite("moduleWidth"));
 		module_height_txt.setEnabled(canWrite("moduleHeight"));
 	}
@@ -279,8 +265,6 @@ public class PropConfiguration extends IPanel {
 			font_cbx.setSelectedItem(sc.getDefaultFont());
 			font_height_lbl.setText(calculateFontHeight());
 		}
-		if (null == a || a.equals("excludeFont"))
-			ex_font_cbx.setSelectedItem(sc.getExcludeFont());
 		if (null == a || a.equals("moduleHeight")) {
 			module_height_txt.setText(
 				SString.intToString(sc.getModuleHeight()));

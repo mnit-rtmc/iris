@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,11 +38,11 @@ public interface DmsAction extends SonarObject {
 	/** Get the phase to perform action */
 	PlanPhase getPhase();
 
-	/** Set the quick message */
-	void setQuickMessage(QuickMessage qm);
+	/** Set the message pattern */
+	void setMsgPattern(MsgPattern pat);
 
-	/** Get the quick message */
-	QuickMessage getQuickMessage();
+	/** Get the message pattern */
+	MsgPattern getMsgPattern();
 
 	/** Set beacon enabled flag */
 	void setBeaconEnabled(boolean be);

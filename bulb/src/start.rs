@@ -12,7 +12,7 @@
 //
 use crate::error::{Error, Result};
 use crate::fetch::{fetch_get, fetch_post};
-use crate::permission::{permissions_html, Permission};
+use crate::permission::permissions_html;
 use crate::resource::{Resource, View};
 use crate::util::Doc;
 use std::cell::RefCell;
@@ -411,7 +411,7 @@ async fn fill_resource_select() {
 /// Fetch permission access list
 async fn fetch_access_list(config: bool) -> Result<String> {
     let json = fetch_get("/iris/api/access").await?;
-    let permissions = json.into_serde::<Vec<Permission>>()?;
+    let permissions = serde_wasm_bindgen::from_value(json)?;
     Ok(permissions_html(permissions, config))
 }
 

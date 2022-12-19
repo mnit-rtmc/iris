@@ -75,7 +75,7 @@ impl AncillaryData for LcsArrayAnc {
         _pri: &LcsArray,
         json: JsValue,
     ) -> Result<()> {
-        self.locks = Some(json.into_serde::<Vec<LcsLock>>()?);
+        self.locks = Some(serde_wasm_bindgen::from_value(json)?);
         Ok(())
     }
 }

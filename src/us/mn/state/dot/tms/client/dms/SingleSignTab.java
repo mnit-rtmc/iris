@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  * Copyright (C) 2018  SRF Consulting Group
  *
@@ -207,8 +207,8 @@ public class SingleSignTab extends IPanel {
 		tab.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				selectPreview(!preview);
-				if ((0 == adjusting) && !preview)
-					updateMessageCurrent(selected);
+				if (!preview)
+					updateMsgCurrent(selected);
 			}
 		});
 		current_pnl.addMouseListener(popper);
@@ -274,19 +274,11 @@ public class SingleSignTab extends IPanel {
 	private DMSPanelPager createPreviewPager(DMS dms,
 		SignPixelPanel pix_pnl)
 	{
-		String ms = dispatcher.getPreviewMulti(dms, true);
-		RasterGraphic[] rg = getPreviewPixmaps(dms, ms);
-		// If combined message does not fit, try composed only
-		if (rg == null) {
-			ms = dispatcher.getPreviewMulti(dms, false);
-			rg = getPreviewPixmaps(dms, ms);
-		}
-		return (rg != null) ? new DMSPanelPager(pix_pnl, rg, ms) : null;
-	}
-
-	/** Get pixmaps for the preview message */
-	private RasterGraphic[] getPreviewPixmaps(DMS dms, String ms) {
-		return DMSHelper.createRasters(dms, ms);
+		String ms = dispatcher.getPreviewMulti(dms);
+		RasterGraphic[] rg = DMSHelper.createRasters(dms, ms);
+		return (rg != null)
+		      ? new DMSPanelPager(pix_pnl, rg, ms)
+		      : null;
 	}
 
 	/** Update the current panel */
@@ -340,9 +332,9 @@ public class SingleSignTab extends IPanel {
 	private void updateAttribute(DMS dms, String a) {
 		if (a == null || a.equals("name"))
 			name_lbl.setText(dms.getName());
-		if (a == null || a.equals("lightOutput")) {
-			Integer o = dms.getLightOutput();
-			if (o != null)
+		if (a == null || a.equals("status")) {
+			Object o = DMSHelper.getStatus(dms, DMS.LIGHT_OUTPUT);
+			if (o instanceof Integer)
 				brightness_lbl.setText("" + o + "%");
 			else
 				brightness_lbl.setText("");
@@ -356,9 +348,9 @@ public class SingleSignTab extends IPanel {
 		}
 		if (a == null || a.equals("operation"))
 			updateStatus(dms);
-		if (null == a || (a.equals("msgCurrent") && !preview)) {
+		if ("msgCurrent".equals(a) && !preview) {
 			setMessage(dms);
-			updateMessageCurrent(dms);
+			updateMsgCurrent(dms);
 		}
 	}
 
@@ -401,11 +393,13 @@ public class SingleSignTab extends IPanel {
 		}
 	}
 
-	/** Update the current message */
-	private void updateMessageCurrent(DMS dms) {
-		adjusting++;
-		dispatcher.setSignMessage(dms);
-		adjusting--;
+	/** Update the current message on a sign */
+	private void updateMsgCurrent(DMS dms) {
+		if (0 == adjusting) {
+			adjusting++;
+			dispatcher.updateMsgCurrent(dms);
+			adjusting--;
+		}
 		expiration_lbl.setText(getExpiration(dms));
 	}
 

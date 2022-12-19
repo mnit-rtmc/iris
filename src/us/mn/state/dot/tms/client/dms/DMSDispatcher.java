@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2021  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  * Copyright (C) 2017-2018  Iteris Inc.
  *
@@ -17,6 +17,7 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
 import java.util.Iterator;
 import java.util.Set;
 import javax.swing.JPanel;
@@ -24,14 +25,14 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
-import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.MsgCombining;
-import us.mn.state.dot.tms.QuickMessage;
-import us.mn.state.dot.tms.QuickMessageHelper;
-import us.mn.state.dot.tms.RasterGraphic;
+import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.MsgPatternHelper;
+import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -39,10 +40,10 @@ import us.mn.state.dot.tms.WordHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IOptionPane;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiString;
-import static us.mn.state.dot.tms.utils.MultiString.makeCombined;
 
 /**
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
@@ -50,10 +51,10 @@ import static us.mn.state.dot.tms.utils.MultiString.makeCombined;
  *
  * @see us.mn.state.dot.tms.SignMessage
  * @see us.mn.state.dot.tms.client.dms.DMSPanelPager
- * @see us.mn.state.dot.tms.client.dms.SignMessageComposer
+ * @see us.mn.state.dot.tms.client.dms.MessageComposer
  *
- * @author Erik Engstrom
  * @author Douglas Lau
+ * @author Erik Engstrom
  * @author Michael Darter
  */
 public class DMSDispatcher extends JPanel {
@@ -110,16 +111,111 @@ public class DMSDispatcher extends JPanel {
 	private final SingleSignTab singleTab;
 
 	/** Message composer widget */
-	private final SignMessageComposer composer;
+	private final MessageComposer composer;
 
-	/** Composed MULTI string */
-	private String multi = "";
+	/** Action to send message to selected sign */
+	private final IAction send_msg_act = new IAction("dms.send") {
+		protected void doActionPerformed(ActionEvent e) {
+			sendSelectedMessage();
+		}
+	};
 
-	/** Selected quick message */
-	private QuickMessage quick_msg = null;
+	/** Get action to send selected message */
+	public IAction getSendMsgAction() {
+		return send_msg_act;
+	}
+
+	/** Action to blank selected signs */
+	private final IAction blank_msg_act = new IAction("dms.blank") {
+		protected void doActionPerformed(ActionEvent e) {
+			sendBlankMessage();
+		}
+	};
+
+	/** Blank all selected DMS */
+	private void sendBlankMessage() {
+		unlinkIncident();
+		for (DMS dms: sel_mdl.getSelected()) {
+			SignConfig sc = dms.getSignConfig();
+			if (sc != null) {
+				SignMessage sm = creator.createBlankMessage(sc);
+				if (sm != null)
+					dms.setMsgUser(sm);
+			}
+		}
+		selectPreview(false);
+	}
+
+	/** Get action to blank selected signs */
+	public IAction getBlankMsgAction() {
+		return blank_msg_act;
+	}
+
+	/** Action to query message on selected signs */
+	private final IAction query_msg_act = new IAction("dms.query.msg") {
+		protected void doActionPerformed(ActionEvent e) {
+			queryMessage();
+		}
+	};
+
+	/** Query the current message on all selected signs */
+	private void queryMessage() {
+		for (DMS dms: sel_mdl.getSelected()) {
+			dms.setDeviceRequest(
+				DeviceRequest.QUERY_MESSAGE.ordinal());
+		}
+		selectPreview(false);
+	}
+
+	/** Get action to query message on selected signs */
+	public IAction getQueryMsgAction() {
+		return query_msg_act;
+	}
+
+	/** Action to query status of selected signs */
+	private final IAction query_stat_act = new IAction("dms.query.status")
+	{
+		protected void doActionPerformed(ActionEvent e) {
+			queryStatus();
+		}
+	};
+
+	/** Query the status of selected DMS */
+	private void queryStatus() {
+		for (DMS dms: sel_mdl.getSelected()) {
+			dms.setDeviceRequest(
+				DeviceRequest.QUERY_STATUS.ordinal());
+		}
+	}
+
+	/** Get action to query status of selected signs */
+	public IAction getQueryStatusAction() {
+		return query_stat_act;
+	}
+
+	/** Action to pixel test selected signs */
+	private final IAction pixel_test_act = new IAction("dms.test.pixels")
+	{
+		protected void doActionPerformed(ActionEvent e) {
+			requestPixelTest();
+		}
+	};
+
+	/** Pixel test all selected signs */
+	private void requestPixelTest() {
+		for (DMS dms: sel_mdl.getSelected()) {
+			dms.setDeviceRequest(
+				DeviceRequest.TEST_PIXELS.ordinal());
+		}
+	}
+
+	/** Get action to pixel test all selected signs */
+	public IAction getPixelTestAction() {
+		return pixel_test_act;
+	}
 
 	/** Linked incident */
-	private Incident incident;
+	private Incident incident = null;
 
 	/** Create a new DMS dispatcher */
 	public DMSDispatcher(Session s, DMSManager manager) {
@@ -129,9 +225,10 @@ public class DMSDispatcher extends JPanel {
 		creator = new SignMessageCreator(s);
 		sel_mdl = manager.getSelectionModel();
 		singleTab = new SingleSignTab(session, this);
-		composer = new SignMessageComposer(session, this, manager);
+		composer = new MessageComposer(session, this, manager);
 		add(singleTab, BorderLayout.CENTER);
 		add(composer, BorderLayout.SOUTH);
+		manager.setDispatcher(this);
 	}
 
 	/** Initialize the dispatcher */
@@ -150,75 +247,47 @@ public class DMSDispatcher extends JPanel {
 		composer.dispose();
 	}
 
-	/** Set the sign message */
-	public void setSignMessage(DMS dms) {
+	/** Update the current message on a sign */
+	public void updateMsgCurrent(DMS dms) {
 		String ms = DMSHelper.getOperatorMulti(dms);
 		composer.setComposedMulti(ms);
-		multi = composer.getComposedMulti();
-		quick_msg = null;
 		incident = DMSHelper.lookupIncident(dms);
 	}
 
-	/** Set the composed MULTI string.  This will update all the widgets
-	 * on the dispatcher with the specified message. */
-	public void setComposedMulti(String ms) {
-		composer.setComposedMulti(ms);
-		multi = ms;
+	/** Update the composed message */
+	public void updateMessage() {
+		selectPreview(true);
 		singleTab.setMessage();
 	}
 
-	/** Set the quick message */
-	public void setQuickMessage(QuickMessage qm) {
-		quick_msg = qm;
-		unlinkIncident();
-		if (!QuickMessageHelper.isMsgCombiningFirst(qm))
-			setComposedMulti("");
-		else
-			singleTab.setMessage();
-	}
-
-	/** Get the composed MULTI string */
-	private String getComposedMulti(DMS dms) {
-		return DMSHelper.addMultiOverrides(dms, multi);
-	}
-
 	/** Get the preview MULTI string */
-	public String getPreviewMulti(DMS dms, boolean combining) {
-		Font of = dms.getOverrideFont();
-		Integer f_num = (of != null) ? of.getNumber() : null;
-		String ms = getComposedMulti(dms);
+	public String getPreviewMulti(DMS dms) {
+		String ms = composer.getComposedMulti();
 		if (new MultiString(ms).isBlank())
-			return getPreviewBlank(f_num, combining);
-		if (combining) {
-			String quick = getQuickMsgFirst();
-			if (quick != null)
-				return makeCombined(quick, ms, f_num);
-			String sched = getSchedCombining();
+			return "";
+		MsgPattern pat = composer.getMsgPattern();
+		if (MsgPatternHelper.isMsgCombiningSecond(pat)) {
+			String sched = getSchedCombining(dms);
 			if (sched != null)
-				return makeCombined(sched, ms, f_num);
+				return tryMakeCombined(dms, sched, ms);
 		}
 		return ms;
 	}
 
-	/** Get preview with blank composed message */
-	private String getPreviewBlank(Integer f_num, boolean combining) {
-		String quick = getQuickMsg();
-		if (combining) {
-			String quick2 = getQuickMsgSecond();
-			String sched = getSchedCombining();
-			if (quick2 != null && sched != null)
-				return makeCombined(sched, quick2, f_num);
-			else if (quick != null)
-				return quick;
-			else if (sched != null)
-				return sched;
-		}
-		return (quick != null) ? quick : "";
+	/** Try to make a combined message.
+	 * @param first MULTI string of first message.
+	 * @param second MULTI string of second message.
+	 * @return Combined message, or second if combined does not fit. */
+	private String tryMakeCombined(DMS dms, String first, String second) {
+		String ms = MultiString.makeCombined(first, second);
+		// If combined message does not fit, use composed only
+		return (DMSHelper.createRasters(dms, ms) != null)
+		      ? ms
+		      : second;
 	}
 
 	/** Get MULTI string from scheduled combining message */
-	private String getSchedCombining() {
-		DMS dms = getSingleSelection();
+	private String getSchedCombining(DMS dms) {
 		if (dms != null) {
 			SignMessage sm = dms.getMsgSched();
 			if (SignMessageHelper.isMsgCombiningFirst(sm))
@@ -227,30 +296,8 @@ public class DMSDispatcher extends JPanel {
 		return null;
 	}
 
-	/** Get quick message */
-	private String getQuickMsg() {
-		QuickMessage qm = quick_msg;
-		return (qm != null) ? qm.getMulti() : null;
-	}
-
-	/** Get combining quick message (if first) */
-	private String getQuickMsgFirst() {
-		QuickMessage qm = quick_msg;
-		return QuickMessageHelper.isMsgCombiningFirst(qm)
-		      ? qm.getMulti()
-		      : null;
-	}
-
-	/** Get combining quick message (if second) */
-	private String getQuickMsgSecond() {
-		QuickMessage qm = quick_msg;
-		return QuickMessageHelper.isMsgCombiningSecond(qm)
-		      ? qm.getMulti()
-		      : null;
-	}
-
 	/** Get the single selected DMS */
-	private DMS getSingleSelection() {
+	public DMS getSingleSelection() {
 		return sel_mdl.getSingleSelection();
 	}
 
@@ -270,23 +317,23 @@ public class DMSDispatcher extends JPanel {
 	}
 
 	/** Send the currently selected message */
-	public void sendSelectedMessage() {
-		if (shouldSendMessage()) {
-			sendMessage();
-			removeInvalidSelections();
+	private void sendSelectedMessage() {
+		String ms = composer.getComposedMulti();
+		if (new MultiString(ms).isBlank())
+			sendBlankMessage();
+		else {
+			// Remove all invalid selected DMS
+			sel_mdl.setSelected(getValidSelected());
+			if (shouldSendMessage(ms))
+				sendMessage(ms);
 		}
-	}
-
-	/** Remove all invalid selected DMS */
-	private void removeInvalidSelections() {
-		sel_mdl.setSelected(getValidSelected());
 	}
 
 	/** Determine if the message should be sent, which is a function
  	 * of spell checking options and send confirmation options.
 	 * @return True to send the message else false to cancel. */
-	private boolean shouldSendMessage() {
-		if (WordHelper.spellCheckEnabled() && !checkWords(multi))
+	private boolean shouldSendMessage(String ms) {
+		if (WordHelper.spellCheckEnabled() && !checkWords(ms))
 			return false;
 		if (SystemAttrEnum.DMS_SEND_CONFIRMATION_ENABLE.getBoolean())
 			return showConfirmDialog();
@@ -297,8 +344,8 @@ public class DMSDispatcher extends JPanel {
 	/** Show a message confirmation dialog.
 	 * @return True if message should be sent. */
 	private boolean showConfirmDialog() {
-		String m = buildConfirmMsg();
-		return m.isEmpty() || confirmSend(m);
+		String imsg = buildConfirmMsg();
+		return (!imsg.isEmpty()) && confirmSend(imsg);
 	}
 
 	/** Build a confirmation message containing all selected DMS.
@@ -323,54 +370,28 @@ public class DMSDispatcher extends JPanel {
 		return sb.toString();
 	}
 
-	/** Send a new message to all selected DMS */
-	private void sendMessage() {
+	/** Send a new (non-blank) message to all selected DMS */
+	private void sendMessage(String ms) {
 		Set<DMS> signs = getValidSelected();
 		if (signs.size() > 1)
 			unlinkIncident();
 		for (DMS dms: signs) {
-			SignMessage sm = createMessage(dms);
-			if (sm != null)
-				dms.setMsgUser(sm);
-			composer.updateMessageLibrary();
+			SignConfig sc = dms.getSignConfig();
+			if (sc != null) {
+				SignMessage sm = createMessage(sc, ms);
+				if (sm != null)
+					dms.setMsgUser(sm);
+			}
 		}
 		selectPreview(false);
 	}
 
-	/** Create a new message for the specified sign.
+	/** Create a new message for a sign configuration.
 	 * @return A SignMessage from composer selection, or null on error. */
-	private SignMessage createMessage(DMS dms) {
-		SignConfig sc = dms.getSignConfig();
-		if (sc == null)
-			return null;
-		String ms = getComposedMulti(dms);
-		QuickMessage qm = quick_msg;
-		if (new MultiString(ms).isBlank()) {
-			if (qm != null) {
-				String quick = qm.getMulti();
-				MsgCombining mc = MsgCombining.fromOrdinal(
-					qm.getMsgCombining());
-				return createMessage(sc, quick, mc);
-			} else
-				return creator.createBlankMessage(sc);
-		} else {
-			if (QuickMessageHelper.isMsgCombiningFirst(qm)) {
-				Font of = dms.getOverrideFont();
-				Integer f_num = (of != null)
-					? of.getNumber()
-					: null;
-				String quick = qm.getMulti();
-				String combined = makeCombined(quick, ms, f_num);
-				// Does combined message fit?
-				if (DMSHelper.createRasters(dms, combined)
-				    != null)
-				{
-					MsgCombining mc = MsgCombining.DISABLE;
-					return createMessage(sc, combined, mc);
-				}
-			}
-		}
-		MsgCombining mc = MsgCombining.EITHER;
+	private SignMessage createMessage(SignConfig sc, String ms) {
+		MsgPattern pat = composer.getMsgPattern();
+		MsgCombining mc = MsgCombining.fromOrdinal(
+			pat.getMsgCombining());
 		Incident inc = incident;
 		return (inc != null)
 		      ? createMessage(sc, incident, ms, mc)
@@ -396,43 +417,6 @@ public class DMSDispatcher extends JPanel {
 		return creator.create(sc, inc_orig, ms, prio, d);
 	}
 
-	/** Blank the select DMS */
-	public void sendBlankMessage() {
-		for (DMS dms: sel_mdl.getSelected()) {
-			SignConfig sc = dms.getSignConfig();
-			if (sc != null) {
-				SignMessage sm = creator.createBlankMessage(sc);
-				if (sm != null)
-					dms.setMsgUser(sm);
-			}
-		}
-	}
-
-	/** Pixel test the selected DMS */
-	public void pixelTestDms() {
-		for (DMS dms: sel_mdl.getSelected()) {
-			dms.setDeviceRequest(
-				DeviceRequest.TEST_PIXELS.ordinal());
-		}
-	}
-
-	/** Query status the selected DMS */
-	public void queryStatusDms() {
-		for (DMS dms: sel_mdl.getSelected()) {
-			dms.setDeviceRequest(
-				DeviceRequest.QUERY_STATUS.ordinal());
-		}
-	}
-
-	/** Query the current message on all selected signs */
-	public void queryMessage() {
-		for (DMS dms: sel_mdl.getSelected()) {
-			dms.setDeviceRequest(
-				DeviceRequest.QUERY_MESSAGE.ordinal());
-		}
-		selectPreview(false);
-	}
-
 	/** Update the selected sign(s) */
 	private void updateSelected() {
 		Set<DMS> sel = sel_mdl.getSelected();
@@ -440,7 +424,7 @@ public class DMSDispatcher extends JPanel {
 			clearSelected();
 		else {
 			for (DMS dms: sel) {
-				composer.setSign(dms);
+				composer.setSelectedSign(dms);
 				setSelected(dms);
 				break;
 			}
@@ -454,10 +438,8 @@ public class DMSDispatcher extends JPanel {
 	/** Clear the selection */
 	private void clearSelected() {
 		setEnabled(false);
-		composer.setSign(null);
-		setComposedMulti("");
-		quick_msg = null;
 		unlinkIncident();
+		composer.setSelectedSign(null);
 		singleTab.setSelected(null);
 	}
 
@@ -474,13 +456,18 @@ public class DMSDispatcher extends JPanel {
 
 	/** Set the enabled status of the dispatcher */
 	public void setEnabled(boolean e) {
+		send_msg_act.setEnabled(e && canSend());
+		blank_msg_act.setEnabled(e && canSend());
+		query_msg_act.setEnabled(e && canRequest());
+		query_stat_act.setEnabled(e && canRequest());
+		pixel_test_act.setEnabled(e && canRequest());
 		composer.setEnabled(e && canSend());
 		if (e)
 			selectPreview(false);
 	}
 
 	/** Select the preview mode */
-	public void selectPreview(boolean p) {
+	private void selectPreview(boolean p) {
 		singleTab.selectPreview(p);
 	}
 

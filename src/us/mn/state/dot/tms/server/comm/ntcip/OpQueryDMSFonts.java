@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2021  Minnesota Department of Transportation
+ * Copyright (C) 2018-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.utils.Base64;
+import us.mn.state.dot.tms.utils.DevelCfg;
 
 /**
  * Operation to query all fonts on a DMS controller.
@@ -37,7 +38,9 @@ import us.mn.state.dot.tms.utils.Base64;
 public class OpQueryDMSFonts extends OpDMS {
 
 	/** Directory to store font files */
-	static private final String FONT_FILE_DIR = "/var/log/iris/fonts/";
+	static private final String FONT_FILE_DIR = 
+		DevelCfg.get("font.output.dir", "/var/log/iris/fonts/");
+			
 	static {
 		File dir = new File(FONT_FILE_DIR);
 		if (!dir.exists())
@@ -58,7 +61,7 @@ public class OpQueryDMSFonts extends OpDMS {
 
 	/** Create a new operation to query fonts from a DMS */
 	public OpQueryDMSFonts(DMSImpl d) {
-		super(PriorityLevel.DEVICE_DATA, d);
+		super(PriorityLevel.POLL_LOW, d);
 		writer = createWriter();
 	}
 

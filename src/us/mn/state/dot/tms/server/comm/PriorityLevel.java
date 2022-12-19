@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2021  Minnesota Department of Transportation
+ * Copyright (C) 2002-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,11 @@ package us.mn.state.dot.tms.server.comm;
  * @author Douglas Lau
  */
 public enum PriorityLevel {
-	URGENT,      /* 0 */
-	COMMAND,     /* 1 */
-	SHORT_POLL,  /* 2 */
-	DOWNLOAD,    /* 3 */
-	LONG_POLL,   /* 4 */
-	DEVICE_DATA, /* 5 */
-	DIAGNOSTIC;  /* 6 */
+	CONFIGURE,   /* 0: system-level configuration queries */
+	COMMAND,     /* 1: user initiated commands */
+	POLL_HIGH,   /* 2: high-priority poll (short period) */
+	SETTINGS,    /* 3: sending settings */
+	POLL_LOW,    /* 4: low-priority poll (long period) */
+	DIAGNOSTIC,  /* 5: diagnostics and testing */
+	IDLE;        /* 6: idle/continuous queries */
 }

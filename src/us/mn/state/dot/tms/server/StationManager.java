@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2021  Minnesota Department of Transportation
+ * Copyright (C) 2004-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.Iterator;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
+import us.mn.state.dot.tms.utils.DevelCfg;
 import us.mn.state.dot.tms.utils.FileIO;
 
 /**
@@ -38,8 +39,8 @@ class StationManager {
 		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
 	/** JSON output directory */
-	static private final File JSON_OUTPUT_DIRECTORY =
-		new File("/var/www/html/iris/");
+	static private final File JSON_OUTPUT_DIRECTORY = new File(
+		DevelCfg.get("json.output.dir", "/var/www/html/iris/"));
 
 	/** Location of station XML file */
 	static private final String SAMPLE_XML = "stat_sample.xml";

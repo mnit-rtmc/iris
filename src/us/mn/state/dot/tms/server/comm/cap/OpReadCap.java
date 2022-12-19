@@ -35,7 +35,7 @@ public class OpReadCap extends OpController<CapProperty> {
 
 	/** Create a new operation to read alert feed */
 	protected OpReadCap(ControllerImpl c, String fid) {
-		this(PriorityLevel.SHORT_POLL, c, fid);
+		this(PriorityLevel.POLL_HIGH, c, fid);
 	}
 
 	/** Create a new operation to read alert feed with custom priority level.

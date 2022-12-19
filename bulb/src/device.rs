@@ -96,9 +96,12 @@ impl<D: Device> AncillaryData for DeviceAnc<D> {
             match uri.borrow() {
                 CONTROLLER_URI => {
                     self.controllers =
-                        Some(json.into_serde::<Vec<Controller>>()?);
+                        Some(serde_wasm_bindgen::from_value(json)?);
                 }
-                _ => self.controller = Some(json.into_serde::<Controller>()?),
+                _ => {
+                    self.controller =
+                        Some(serde_wasm_bindgen::from_value(json)?)
+                }
             }
         }
         Ok(())

@@ -27,6 +27,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
@@ -44,7 +46,6 @@ import us.mn.state.dot.tms.DmsMsgPriority;
 import static us.mn.state.dot.tms.DmsMsgPriority.BLANK;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.Font;
-import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Gps;
@@ -55,7 +56,7 @@ import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSHelper;
 import us.mn.state.dot.tms.MsgCombining;
-import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignDetail;
@@ -135,10 +136,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"gps, static_graphic, purpose, hidden, beacon, " +
-			"preset, sign_config, sign_detail, override_font, " +
-			"override_foreground, override_background, " +
-			"msg_user, msg_sched, msg_current, expire_time " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+			"preset, sign_config, sign_detail, msg_user, " +
+			"msg_sched, msg_current, expire_time, status, " +
+			"stuck_pixels FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DMSImpl(row));
@@ -175,13 +176,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("preset", preset);
 		map.put("sign_config", sign_config);
 		map.put("sign_detail", sign_detail);
-		map.put("override_font", override_font);
-		map.put("override_foreground", override_foreground);
-		map.put("override_background", override_background);
 		map.put("msg_user", msg_user);
 		map.put("msg_sched", msg_sched);
 		map.put("msg_current", msg_current);
 		map.put("expire_time", asTimestamp(expire_time));
+		map.put("status", status);
+		map.put("stuck_pixels", stuck_pixels);
 		return map;
 	}
 
@@ -210,72 +210,56 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		g.notifyCreate();
 		geo_loc = g;
 		expire_time = null;
+		status = null;
+		stuck_pixels = null;
 	}
 
 	/** Create a dynamic message sign */
 	private DMSImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),            // name
-		     row.getString(2),            // geo_loc
-		     row.getString(3),            // controller
-		     row.getInt(4),               // pin
-		     row.getString(5),            // notes
-		     row.getString(6),            // gps
-		     row.getString(7),            // static_graphic
-		     row.getInt(8),               // purpose
-		     row.getBoolean(9),           // hidden
-		     row.getString(10),           // beacon
-		     row.getString(11),           // preset
-		     row.getString(12),           // sign_config
-		     row.getString(13),           // sign_detail
-		     row.getString(14),           // override_font
-		     (Integer) row.getObject(15), // override_foreground
-		     (Integer) row.getObject(16), // override_background
-		     row.getString(17),           // msg_user
-		     row.getString(18),           // msg_sched
-		     row.getString(19),           // msg_current
-		     row.getTimestamp(20)         // expire_time
+		this(row.getString(1),     // name
+		     row.getString(2),     // geo_loc
+		     row.getString(3),     // controller
+		     row.getInt(4),        // pin
+		     row.getString(5),     // notes
+		     row.getString(6),     // gps
+		     row.getString(7),     // static_graphic
+		     row.getInt(8),        // purpose
+		     row.getBoolean(9),    // hidden
+		     row.getString(10),    // beacon
+		     row.getString(11),    // preset
+		     row.getString(12),    // sign_config
+		     row.getString(13),    // sign_detail
+		     row.getString(14),    // msg_user
+		     row.getString(15),    // msg_sched
+		     row.getString(16),    // msg_current
+		     row.getTimestamp(17), // expire_time
+		     row.getString(18),    // status
+		     row.getString(19)     // stuck_pixels
 		);
 	}
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, String loc, String c, int p, String nt,
 		String g, String sg, int dp, boolean h, String b, String cp,
-		String sc, String sd, String of, Integer fg, Integer bg,
-		String mu, String ms, String mc, Date et)
+		String sc, String sd, String mu, String ms, String mc,
+		Date et, String st, String sp)
 	{
-		this(n, lookupGeoLoc(loc), lookupController(c), p, nt,
-		     lookupGps(g), lookupGraphic(sg),
-		     DevicePurpose.fromOrdinal(dp), h, lookupBeacon(b),
-		     lookupPreset(cp), SignConfigHelper.lookup(sc),
-		     SignDetailHelper.lookup(sd), FontHelper.lookup(of), fg, bg,
-		     SignMessageHelper.lookup(mu), SignMessageHelper.lookup(ms),
-		     SignMessageHelper.lookup(mc), et);
-	}
-
-	/** Create a dynamic message sign */
-	private DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
-		int p, String nt, GpsImpl g, Graphic sg, DevicePurpose dp,
-		boolean h, Beacon b, CameraPreset cp, SignConfig sc,
-		SignDetail sd, Font of, Integer fg, Integer bg, SignMessage mu,
-		SignMessage ms, SignMessage mc, Date et)
-	{
-		super(n, c, p, nt);
-		geo_loc = loc;
-		gps = g;
-		static_graphic = sg;
-		purpose = dp;
+		super(n, lookupController(c), p, nt);
+		geo_loc = lookupGeoLoc(loc);
+		gps = lookupGps(g);
+		static_graphic = lookupGraphic(sg);
+		purpose = DevicePurpose.fromOrdinal(dp);
 		hidden = h;
-		beacon = b;
-		setPreset(cp);
-		sign_config = sc;
-		sign_detail = sd;
-		override_font = of;
-		override_foreground = fg;
-		override_background = bg;
-		msg_user = mu;
-		msg_sched = ms;
-		msg_current = mc;
+		beacon = lookupBeacon(b);
+		setPreset(lookupPreset(cp));
+		sign_config = SignConfigHelper.lookup(sc);
+		sign_detail = SignDetailHelper.lookup(sd);
+		msg_user = SignMessageHelper.lookup(mu);
+		msg_sched = SignMessageHelper.lookup(ms);
+		msg_current = SignMessageHelper.lookup(mc);
 		expire_time = stampMillis(et);
+		status = st;
+		stuck_pixels = sp;
 		initTransients();
 	}
 
@@ -429,16 +413,16 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return hidden;
 	}
 
-	/** External beacon */
+	/** Remote beacon */
 	private Beacon beacon;
 
-	/** Set external beacon */
+	/** Set remote beacon */
 	@Override
 	public void setBeacon(Beacon b) {
 		beacon = b;
 	}
 
-	/** Set external beacon */
+	/** Set remote beacon */
 	public void doSetBeacon(Beacon b) throws TMSException {
 		if (b != beacon) {
 			store.update(this, "beacon", b);
@@ -446,13 +430,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
-	/** Get external beacon */
+	/** Get remote beacon */
 	@Override
 	public Beacon getBeacon() {
 		return beacon;
 	}
 
-	/** Update external beacon */
+	/** Update remote beacon */
 	private void updateBeacon() {
 		Beacon b = beacon;
 		if (b != null) {
@@ -548,253 +532,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Reset sign state (and notify clients) */
 	public void resetStateNotify() {
-		setPixelStatusNotify(null);
+		setStatusNotify(null);
+		setStuckPixelsNotify(null);
 		setMsgSchedNotify(null);
 		setMsgUserNull();
 		setMsgCurrentNotify(null, "RESET");
-	}
-
-	/** Override font */
-	private Font override_font;
-
-	/** Set the override font */
-	@Override
-	public void setOverrideFont(Font f) {
-		override_font = f;
-	}
-
-	/** Set the override font */
-	public void doSetOverrideFont(Font f) throws TMSException {
-		if (f != override_font) {
-			store.update(this, "override_font", f);
-			setOverrideFont(f);
-		}
-	}
-
-	/** Get the override font */
-	@Override
-	public Font getOverrideFont() {
-		return override_font;
-	}
-
-	/** Override foreground color (24-bit rgb) */
-	private Integer override_foreground;
-
-	/** Set override foreground color (24-bit rgb) */
-	@Override
-	public void setOverrideForeground(Integer fg) {
-		override_foreground = fg;
-	}
-
-	/** Set override foreground color (24-bit rgb) */
-	public void doSetOverrideForeground(Integer fg) throws TMSException {
-		if (!objectEquals(fg, override_foreground)) {
-			store.update(this, "override_foreground", fg);
-			setOverrideForeground(fg);
-		}
-	}
-
-	/** Get override foreground color (24-bit rgb) */
-	@Override
-	public Integer getOverrideForeground() {
-		return override_foreground;
-	}
-
-	/** Override background color (24-bit rgb) */
-	private Integer override_background;
-
-	/** Set override background color (24-bit rgb) */
-	@Override
-	public void setOverrideBackground(Integer bg) {
-		override_background = bg;
-	}
-
-	/** Set override background color (24-bit rgb) */
-	public void doSetOverrideBackground(Integer bg) throws TMSException {
-		if (!objectEquals(bg, override_background)) {
-			store.update(this, "override_background", bg);
-			setOverrideBackground(bg);
-		}
-	}
-
-	/** Get override background color (24-bit rgb) */
-	@Override
-	public Integer getOverrideBackground() {
-		return override_background;
-	}
-
-	/** Minimum cabinet temperature */
-	private transient Integer minCabinetTemp;
-
-	/** Set the minimum cabinet temperature */
-	public void setMinCabinetTemp(Integer t) {
-		if (!objectEquals(t, minCabinetTemp)) {
-			minCabinetTemp = t;
-			notifyAttribute("minCabinetTemp");
-		}
-	}
-
-	/** Get the minimum cabinet temperature */
-	@Override
-	public Integer getMinCabinetTemp() {
-		return minCabinetTemp;
-	}
-
-	/** Maximum cabinet temperature */
-	private transient Integer maxCabinetTemp;
-
-	/** Set the maximum cabinet temperature */
-	public void setMaxCabinetTemp(Integer t) {
-		if (!objectEquals(t, maxCabinetTemp)) {
-			maxCabinetTemp = t;
-			notifyAttribute("maxCabinetTemp");
-		}
-	}
-
-	/** Get the maximum cabinet temperature */
-	@Override
-	public Integer getMaxCabinetTemp() {
-		return maxCabinetTemp;
-	}
-
-	/** Minimum ambient temperature */
-	private transient Integer minAmbientTemp;
-
-	/** Set the minimum ambient temperature */
-	public void setMinAmbientTemp(Integer t) {
-		if (!objectEquals(t, minAmbientTemp)) {
-			minAmbientTemp = t;
-			notifyAttribute("minAmbientTemp");
-		}
-	}
-
-	/** Get the minimum ambient temperature */
-	@Override
-	public Integer getMinAmbientTemp() {
-		return minAmbientTemp;
-	}
-
-	/** Maximum ambient temperature */
-	private transient Integer maxAmbientTemp;
-
-	/** Set the maximum ambient temperature */
-	public void setMaxAmbientTemp(Integer t) {
-		if (!objectEquals(t, maxAmbientTemp)) {
-			maxAmbientTemp = t;
-			notifyAttribute("maxAmbientTemp");
-		}
-	}
-
-	/** Get the maximum ambient temperature */
-	@Override
-	public Integer getMaxAmbientTemp() {
-		return maxAmbientTemp;
-	}
-
-	/** Minimum housing temperature */
-	private transient Integer minHousingTemp;
-
-	/** Set the minimum housing temperature */
-	public void setMinHousingTemp(Integer t) {
-		if (!objectEquals(t, minHousingTemp)) {
-			minHousingTemp = t;
-			notifyAttribute("minHousingTemp");
-		}
-	}
-
-	/** Get the minimum housing temperature */
-	@Override
-	public Integer getMinHousingTemp() {
-		return minHousingTemp;
-	}
-
-	/** Maximum housing temperature */
-	private transient Integer maxHousingTemp;
-
-	/** Set the maximum housing temperature */
-	public void setMaxHousingTemp(Integer t) {
-		if (!objectEquals(t, maxHousingTemp)) {
-			maxHousingTemp = t;
-			notifyAttribute("maxHousingTemp");
-		}
-	}
-
-	/** Get the maximum housing temperature */
-	@Override
-	public Integer getMaxHousingTemp() {
-		return maxHousingTemp;
-	}
-
-	/** Current light output (percentage) of the sign */
-	private transient Integer lightOutput;
-
-	/** Set the light output of the sign (percentage) */
-	public void setLightOutput(Integer l) {
-		if (!objectEquals(l, lightOutput)) {
-			lightOutput = l;
-			notifyAttribute("lightOutput");
-		}
-	}
-
-	/** Get the light output of the sign (percentage) */
-	@Override
-	public Integer getLightOutput() {
-		return lightOutput;
-	}
-
-	/** Pixel status.  This is an array of two Base64-encoded bitmaps.
-	 * The first indicates stuck-off pixels, the second stuck-on pixels. */
-	private transient String[] pixelStatus;
-
-	/** Set the pixel status array */
-	public void setPixelStatusNotify(String[] p) {
-		if (!Arrays.equals(p, pixelStatus)) {
-			pixelStatus = p;
-			notifyAttribute("pixelStatus");
-		}
-	}
-
-	/** Get the pixel status array */
-	@Override
-	public String[] getPixelStatus() {
-		return pixelStatus;
-	}
-
-	/** Power supply status.  This is an array of status for each power
-	 * supply.
-	 * @see DMS.getPowerStatus */
-	private transient String[] powerStatus = new String[0];
-
-	/** Set the power supply status table */
-	public void setPowerStatus(String[] t) {
-		if (!Arrays.equals(t, powerStatus)) {
-			powerStatus = t;
-			notifyAttribute("powerStatus");
-		}
-	}
-
-	/** Get the power supply status table */
-	@Override
-	public String[] getPowerStatus() {
-		return powerStatus;
-	}
-
-	/** Photocell status.  This is an array of status for each photocell.
-	 * @see DMS.getPhotocellStatus */
-	private transient String[] photocellStatus = new String[0];
-
-	/** Set the photocell status table */
-	public void setPhotocellStatus(String[] t) {
-		if (!Arrays.equals(t, photocellStatus)) {
-			photocellStatus = t;
-			notifyAttribute("photocellStatus");
-		}
-	}
-
-	/** Get the photocell status table */
-	@Override
-	public String[] getPhotocellStatus() {
-		return photocellStatus;
 	}
 
 	/** Create a blank message for the sign */
@@ -895,9 +637,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		assert (amsg != null);
 		DmsAction da = amsg.action;
 		boolean be = da.getBeaconEnabled();
-		QuickMessage qm = da.getQuickMessage();
-		int mc = (qm != null)
-		       ? qm.getMsgCombining()
+		MsgPattern pat = da.getMsgPattern();
+		int mc = (pat != null)
+		       ? pat.getMsgCombining()
 		       : MsgCombining.DISABLE.ordinal();
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
 			da.getMsgPriority());
@@ -1168,15 +910,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return checkPriority(sched, user) ? sched : user;
 	}
 
-	/** Create a combined sign message. */
+	/** Create a combined sign message */
 	private SignMessage createMsgCombined(SignMessage user,
 		SignMessage sched)
 	{
 		String inc = user.getIncident();
-		Font of = getOverrideFont();
-		Integer f_num = (of != null) ? of.getNumber() : null;
 		String ms = MultiString.makeCombined(sched.getMulti(),
-			user.getMulti(), f_num);
+			user.getMulti());
 		boolean be = user.getBeaconEnabled();
 		int mc = MsgCombining.DISABLE.ordinal();
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
@@ -1268,55 +1008,67 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return expire_time;
 	}
 
-	/** LDC pot base (Ledstar-specific value) */
-	private transient Integer ldcPotBase;
+	/** Current (JSON) sign status */
+	private String status;
 
-	/** Set the LDC pot base */
-	public void setLdcPotBaseNotify(Integer base) {
-		if (!objectEquals(base, ldcPotBase)) {
-			ldcPotBase = base;
-			notifyAttribute("ldcPotBase");
+	/** Set the current sign status as JSON */
+	public void setStatusNotify(String st) {
+		if (!objectEquals(st, status)) {
+			try {
+				store.update(this, "status", st);
+				status = st;
+				notifyAttribute("status");
+			}
+			catch (TMSException e) {
+				logError("status: " + e.getMessage());
+			}
 		}
 	}
 
-	/** Get the LDC pot base */
-	@Override
-	public Integer getLdcPotBase() {
-		return ldcPotBase;
-	}
-
-	/** Pixel low current threshold (Ledstar-specific value) */
-	private transient Integer pixelCurrentLow;
-
-	/** Set the pixel low curent threshold */
-	public void setPixelCurrentLowNotify(Integer low) {
-		if (!objectEquals(low, pixelCurrentLow)) {
-			pixelCurrentLow = low;
-			notifyAttribute("pixelCurrentLow");
+	/** Set a status value and notify clients of the change */
+	public void setStatusNotify(String key, Object value) {
+		String s = status;
+		try {
+			JSONObject jo = (s != null)
+				? new JSONObject(s)
+				: new JSONObject();
+			jo.put(key, value);
+			setStatusNotify(jo.toString());
+		}
+		catch (JSONException e) {
+			// malformed JSON
+			e.printStackTrace();
 		}
 	}
 
-	/** Get the pixel low current threshold */
+	/** Get the current status as JSON */
 	@Override
-	public Integer getPixelCurrentLow() {
-		return pixelCurrentLow;
+	public String getStatus() {
+		return status;
 	}
 
-	/** Pixel high current threshold (Ledstar-specific value) */
-	private transient Integer pixelCurrentHigh;
+	/** Stuck pixel bitmaps as JSON.  There are two Base64-encoded bitmaps
+	 * as attributes STUCK_ON_BITMAP and STUCK_OFF_BITMAP. */
+	private String stuck_pixels;
 
-	/** Set the pixel high curent threshold */
-	public void setPixelCurrentHighNotify(Integer high) {
-		if (!objectEquals(high, pixelCurrentHigh)) {
-			pixelCurrentHigh = high;
-			notifyAttribute("pixelCurrentHigh");
+	/** Set the stuck pixel JSON and notify clients */
+	public void setStuckPixelsNotify(String sp) {
+		if (!objectEquals(sp, stuck_pixels)) {
+			try {
+				store.update(this, "stuck_pixels", sp);
+				stuck_pixels = sp;
+				notifyAttribute("stuckPixels");
+			}
+			catch (TMSException e) {
+				logError("stuck_pixels: " + e.getMessage());
+			}
 		}
 	}
 
-	/** Get the pixel high current threshold */
+	/** Get the stuck pixels as JSON */
 	@Override
-	public Integer getPixelCurrentHigh() {
-		return pixelCurrentHigh;
+	public String getStuckPixels() {
+		return stuck_pixels;
 	}
 
 	/** Feedback brightness sample data */

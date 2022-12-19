@@ -41,7 +41,7 @@ public class WMsgWarningForm extends AbstractForm {
 	private final Session session;
 	private WMsgSelectorForm selectorForm;
 	private String missingType;
-	
+
 	/** Buttons */
 	private JButton reload_btn;
 	private JButton cancel_btn;
@@ -51,7 +51,7 @@ public class WMsgWarningForm extends AbstractForm {
 		session = s;
 		selectorForm = sForm;
 		missingType = mType;
-		
+
 		cancel_btn = new JButton(cancel);
 		reload_btn = new JButton(reload);
 	}
@@ -76,7 +76,7 @@ public class WMsgWarningForm extends AbstractForm {
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		p.add(new JLabel(String.format(I18N.get("wysiwyg.warning.message"), missingType)), gbc);
-		
+
 		/* Reload button */
 		gbc.gridx = 0;
 		gbc.gridy = 1;

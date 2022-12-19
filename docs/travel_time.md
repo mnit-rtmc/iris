@@ -64,7 +64,7 @@ limit text either prepended or appended.
 ## Travel Time Action Tag
 
 The estimated travel time (in minutes) can be displayed in DMS messages using
-[DMS actions].  A `[tt` *…* `]` [action tag] in the [quick message] will be
+[DMS actions].  A `[tt` *…* `]` [action tag] in the [message pattern] will be
 replaced with the appropriate value.  It has the following format:
 
 `[tt` *dest,mode,over* `]`
@@ -99,8 +99,8 @@ DOWNTN[nl][ttS300,blank] MIN
 [action tag]: action_plans.html#dms-action-tags
 [corridor]: road_topology.html#corridors
 [DMS actions]: action_plans.html#dms-actions
+[message pattern]: message_patterns.html
 [node type]: road_topology.html#r_node-types
-[quick message]: dms.html#quick-messages
 [road topology]: road_topology.html
 [station]: road_topology.html#r_node-types
 [station ID]: road_topology.html#station-id

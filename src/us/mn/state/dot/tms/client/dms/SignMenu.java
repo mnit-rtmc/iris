@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -48,10 +48,10 @@ public class SignMenu extends IMenu {
 		addItem(createSignGroupItem());
 		addItem(createFontItem());
 		addItem(createGraphicItem());
-		addItem(createQuickMessageItem());
-		addItem(session.createTableAction(Beacon.SONAR_TYPE));
-		addItem(createWordItem());
+		addItem(createMsgPatternItem());
 		addItem(createWysiwygSelectorItem());
+		addItem(createWordItem());
+		addItem(session.createTableAction(Beacon.SONAR_TYPE));
 	}
 
 	/** Create a sign config menu item action */
@@ -104,12 +104,22 @@ public class SignMenu extends IMenu {
 		    } : null;
 	}
 
-	/** Create a quick message menu item action */
-	private IAction createQuickMessageItem() {
-		return QuickMessageForm.isPermitted(session) ?
-		    new IAction("quick.messages") {
+	/** Create a message pattern menu item action */
+	private IAction createMsgPatternItem() {
+		return MsgPatternForm.isPermitted(session) ?
+		    new IAction("msg.patterns") {
 			protected void doActionPerformed(ActionEvent e) {
-				desktop.show(new QuickMessageForm(session));
+				desktop.show(new MsgPatternForm(session));
+			}
+		    } : null;
+	}
+
+	/** Create a WYSIWYG Selector menu item action */
+	private IAction createWysiwygSelectorItem() {
+		return WMsgSelectorForm.isPermitted(session) ?
+		    new IAction("wysiwyg.menu") {
+			protected void doActionPerformed(ActionEvent e) {
+				desktop.show(new WMsgSelectorForm(session));
 			}
 		    } : null;
 	}
@@ -122,15 +132,5 @@ public class SignMenu extends IMenu {
 				desktop.show(new WordForm(session));
 			}
 		    } : null;
-	}
-	
-	/** Create a WYSIWYG Selector menu item action */
-	private IAction createWysiwygSelectorItem() {
-		return WMsgSelectorForm.isPermitted(session) ?
-			new IAction("wysiwyg.menu") {
-			protected void doActionPerformed(ActionEvent e) {
-				desktop.show(new WMsgSelectorForm(session));
-			}
-			} : null;
 	}
 }

@@ -51,10 +51,10 @@ public interface DMS extends Device {
 	/** Get the hidden flag */
 	boolean getHidden();
 
-	/** Set external beacon */
+	/** Set remote beacon */
 	void setBeacon(Beacon b);
 
-	/** Get external beacon */
+	/** Get remote beacon */
 	Beacon getBeacon();
 
 	/** Set verification camera preset */
@@ -69,23 +69,8 @@ public interface DMS extends Device {
 	/** Get the sign detail */
 	SignDetail getSignDetail();
 
-	/** Set the override font */
-	void setOverrideFont(Font f);
-
-	/** Get the override font */
-	Font getOverrideFont();
-
-	/** Set override foreground color (24-bit rgb) */
-	void setOverrideForeground(Integer fg);
-
-	/** Get override foreground color (24-bit rgb) */
-	Integer getOverrideForeground();
-
-	/** Set override background color (24-bit rgb) */
-	void setOverrideBackground(Integer bg);
-
-	/** Get override background color (24-bit rgb) */
-	Integer getOverrideBackground();
+	/** Set the user sign message */
+	void setMsgUser(SignMessage sm);
 
 	/** Get the scheduled sign message */
 	SignMessage getMsgSched();
@@ -99,68 +84,60 @@ public interface DMS extends Device {
 	 * @see java.lang.System#currentTimeMillis */
 	Long getExpireTime();
 
-	/* Transient attributes (not stored in database) */
+	/** Get the current status as JSON */
+	String getStatus();
 
-	/** Set the user sign message */
-	void setMsgUser(SignMessage sm);
+	/** Status JSON attributes */
 
-	/** Get the minimum cabinet temperature (Celsius) */
-	Integer getMinCabinetTemp();
+	/** Photocell array.
+	 *
+	 * An array of photocell objects, one for each sensor, plus one for the
+	 * composite of all sensors.  Each object has 3 fields: `description`,
+	 * `error`, and `reading` */
+	String PHOTOCELLS = "photocells";
 
-	/** Get the maximum cabinet temperature (Celsius) */
-	Integer getMaxCabinetTemp();
+	/** Light output; Integer (percentage) */
+	String LIGHT_OUTPUT = "light_output";
 
-	/** Get the minimum ambient temperature (Celsius) */
-	Integer getMinAmbientTemp();
+	/** Power supplies array.
+	 *
+	 * An array of power supply objects, consisting of `description`,
+	 * `supply_type`, `error`, `detail` and `voltage` */
+	String POWER_SUPPLIES = "power_supplies";
 
-	/** Get the maximum ambient temperature (Celsius) */
-	Integer getMaxAmbientTemp();
+	/** Minimum cabinet temperature; Integer (Celsius) */
+	String CABINET_TEMP_MIN = "cabinet_temp_min";
 
-	/** Get the minimum housing temperature (Celsius) */
-	Integer getMinHousingTemp();
+	/** Maximum cabinet temperature; Integer (Celsius) */
+	String CABINET_TEMP_MAX = "cabinet_temp_max";
 
-	/** Get the maximum housing temperature (Celsius) */
-	Integer getMaxHousingTemp();
+	/** Minimum ambient temperature; Integer (Celsius) */
+	String AMBIENT_TEMP_MIN = "ambient_temp_min";
 
-	/** Get the light output (percentage) */
-	Integer getLightOutput();
+	/** Maximum ambient temperature; Integer (Celsius) */
+	String AMBIENT_TEMP_MAX = "ambient_temp_max";
 
-	/** Index of stuck-off bitmap in pixel and lamp status arrays */
-	int STUCK_OFF_BITMAP = 0;
+	/** Minimum housing temperature; Integer (Celsius) */
+	String HOUSING_TEMP_MIN = "housing_temp_min";
 
-	/** Index of stuck-on bitmap in pixel and lamp status arrays */
-	int STUCK_ON_BITMAP = 1;
+	/** Maximum housing temperature; Integer (Celsius) */
+	String HOUSING_TEMP_MAX = "housing_temp_max";
 
-	/** Get the pixel status.
-	 * @return Pixel status as an array of two Base64-encoded bitmaps.  The
-	 *         first bitmap is "stuck off", and the second is "stuck on".
-	 *         If the pixel status is not known, null is returned. */
-	String[] getPixelStatus();
+	/** Pot base; Integer (LEDSTAR only) */
+	String LDC_POT_BASE = "lcd_pot_base";
 
-	/** Get power supply status.
-	 * @return Power supply status as an array of strings, one for each
-	 *         supply.  Each string in the array has 4 fields, seperated by
-	 *         commas.  The fields are: description, supply type, status,
-	 *         and detail. */
-	String[] getPowerStatus();
+	/** Pixel low current threshold; Integer (LEDSTAR only) */
+	String PIXEL_CURRENT_LOW = "pixel_current_low";
 
-	/** Get photocell status.
-	 * @return Photocell status as an array of strings, one for each light
-	 *         sensor (plus one for the composite of all sensors).  Each
-	 *         string in the array has 3 fields, seperated by commas.  The
-	 *         fields are: description, status, and current reading. */
-	String[] getPhotocellStatus();
+	/** Pixel high current threshold; Integer (LEDSTAR only) */
+	String PIXEL_CURRENT_HIGH = "pixel_current_high";
 
-	/* Manufacturer-specific attributes */
+	/** Get the stuck pixels as JSON */
+	String getStuckPixels();
 
-	/* LEDSTAR-specific attributes */
+	/** Stuck-off attribute; Base64-encoded bitmap */
+	String STUCK_OFF_BITMAP = "off";
 
-	/** Get the LDC pot base (LEDSTAR) */
-	Integer getLdcPotBase();
-
-	/** Get the pixel low current threshold (LEDSTAR) */
-	Integer getPixelCurrentLow();
-
-	/** Get the pixel high current threshold (LEDSTAR) */
-	Integer getPixelCurrentHigh();
+	/** Stuck-on attribute; Base64-encoded bitmap */
+	String STUCK_ON_BITMAP = "on";
 }

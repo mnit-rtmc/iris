@@ -51,7 +51,7 @@ public class OpQueryEssStatus extends OpEss {
 
 	/** Create new query ESS status operation */
 	public OpQueryEssStatus(WeatherSensorImpl ws) {
-		super(PriorityLevel.DEVICE_DATA, ws);
+		super(PriorityLevel.POLL_LOW, ws);
 		ws_table = ess_rec.ws_table;
 		ts_table = ess_rec.ts_table;
 		ps_table = ess_rec.ps_table;
@@ -105,7 +105,7 @@ public class OpQueryEssStatus extends OpEss {
 		// the wind sensor table to update only once every 12 hours or
 		// so.  The workaround is to query the (deprecated) wind sensor
 		// objects from 1204v1 (for LX controllers only).
-		return (getVersion().contains("LX"))
+		return (getSoftwareModel().contains("LX"))
 			? new QueryWindSensorV1()
 			: new QueryWindSensorsV2();
 	}
@@ -511,7 +511,7 @@ public class OpQueryEssStatus extends OpEss {
 	@Override
 	public void cleanup() {
 		if (isSuccess()) {
-			w_sensor.setSampleNotify(ess_rec.toJson());
+			w_sensor.setSample(ess_rec.toJson());
 			ess_rec.store(w_sensor);
 		}
 		super.cleanup();

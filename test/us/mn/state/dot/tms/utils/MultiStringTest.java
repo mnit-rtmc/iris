@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -510,7 +510,7 @@ public class MultiStringTest extends TestCase {
 	}
 
 	private void checkCombine(String ms1, String ms2, String rs) {
-		assertTrue(MultiString.makeCombined(ms1, ms2, null).equals(rs));
+		assertTrue(MultiString.makeCombined(ms1, ms2).equals(rs));
 	}
 
 	public void testGetFonts() {
@@ -630,5 +630,20 @@ public class MultiStringTest extends TestCase {
 		assertFalse(new MultiString("A").isBlank());
 		assertFalse(new MultiString("[g1]").isBlank());
 		assertFalse(new MultiString("[pb0,1,2]").isBlank());
+	}
+
+	public void testStrip() {
+		assertTrue(new MultiString("[fo3]ABC").stripFonts()
+			.equals("ABC"));
+		assertTrue(new MultiString("[pt50o0]ABC").stripPageTime()
+			.equals("ABC"));
+		assertTrue(new MultiString("[nl]").stripTrailingLines()
+			.equals(""));
+		assertTrue(new MultiString("ABC[nl]").stripTrailingLines()
+			.equals("ABC"));
+		assertTrue(new MultiString("ABC[nl][nl]").stripTrailingLines()
+			.equals("ABC"));
+		assertTrue(new MultiString("[nl]ABC[nl]").stripTrailingLines()
+			.equals("[nl]ABC"));
 	}
 }

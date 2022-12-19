@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2019-2022  SRF Consulting Group
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,12 +13,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.utils.wysiwyg;
 
 import java.util.LinkedList;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.InvalidMsgException;
+import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.MultiConfig;
 import us.mn.state.dot.tms.utils.MultiSyntaxError;
@@ -33,25 +34,13 @@ import us.mn.state.dot.tms.utils.Multi.JustificationPage;
  *  MultiRenderer, written by Doug Lau.)
  */
 public class WRenderer {
-	
-	/** Default line justification */
-	static public JustificationLine defaultJustificationLine() {
-		return JustificationLine.fromOrdinal(SystemAttrEnum
-			.DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
-	}
-
-	/** Default page justification */
-	static public JustificationPage defaultJustificationPage() {
-		return JustificationPage.fromOrdinal(SystemAttrEnum
-			.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
-	}
 
 	/* Font cache */
 	private WFontCache fontCache = new WFontCache();
-	
+
 	/* Graphics cache */
 	private WGraphicCache graphicCache = new WGraphicCache();
-	
+
 	/** Message default render-state from MultiConfig */
 	private WState startState;
 
@@ -67,9 +56,9 @@ public class WRenderer {
 	/** Error manager (for passing rendering
 	 *  errors to WYSIWYG editor) */
 	private WEditorErrorManager errMan;
-	
+
 	//-------------------------------------------
-	
+
 	/**
 	 * Create a new MULTI renderer.
 	 * 
@@ -137,10 +126,9 @@ public class WRenderer {
 	/** Render a WtJustPage token */
 	public void renderJustificationPage(WtJustPage tok) {
 		JustificationPage jp = tok.getJustification();
-		if (jp == null)
-			state.justPage = defaultJustificationPage();
-		else
-			state.justPage = jp;
+		state.justPage = (jp != null)
+		               ? jp
+		               : JustificationPage.defaultValue();
 		Block block = new Block();
 		Block cb = currentBlock();
 		if (block.justp.ordinal() < cb.justp.ordinal()) {
@@ -153,10 +141,9 @@ public class WRenderer {
 	/** Render a WtJustLine token */
 	public void renderJustificationLine(WtJustLine tok) {
 		JustificationLine jl = tok.getJustification();
-		if (jl == null)
-			state.justLine = defaultJustificationLine();
-		else
-			state.justLine = jl;
+		state.justLine = (jl != null)
+		               ? jl
+		               : JustificationLine.defaultValue();
 	}
 
 	/** Render a WtFont token */
@@ -470,14 +457,14 @@ public class WRenderer {
 	public void renderPageTimes(WtPageTime tok) {
 		Integer pt_on = tok.getPageOnTime();
 		if (pt_on == null)
-			state.pageOn = WState.getIrisDefaultPageOnTime();
+			state.pageOn = PageTimeHelper.defaultPageOnTimeDs();
 		else if ((pt_on < 1) || (pt_on > 255))
 			reportError(MultiSyntaxError.unsupportedTagValue, tok);
 		else
 			state.pageOn = pt_on;
 		Integer pt_off = tok.getPageOffTime();
 		if (pt_off == null)
-			state.pageOff = WState.getIrisDefaultPageOffTime();
+			state.pageOff = PageTimeHelper.defaultPageOffTimeDs();
 		else if ((pt_off < 0) || (pt_off > 255))
 			reportError(MultiSyntaxError.unsupportedTagValue, tok);
 		else

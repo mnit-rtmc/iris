@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.wysiwyg.selector;
 
 import java.util.ArrayList;
@@ -22,11 +21,11 @@ import javax.swing.SwingWorker;
 
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.SignConfig;
-import us.mn.state.dot.tms.QuickMessage;
-import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.wysiwyg.selector.WMsgSelectorForm;
 
@@ -37,8 +36,8 @@ import us.mn.state.dot.tms.client.wysiwyg.selector.WMsgSelectorForm;
  * @author Gordon Parikh - SRF Consulting
  */
 public class WMsgSelectorSignProcess extends
-				SwingWorker<ArrayList<QuickMessage>,Boolean> {
-
+	SwingWorker<ArrayList<MsgPattern>, Boolean>
+{
 	protected final Session session;
 	protected final String signOrGroupName;
 	protected WMsgSelectorForm selectorForm;
@@ -49,19 +48,19 @@ public class WMsgSelectorSignProcess extends
 		this.signOrGroupName = sName;
 		this.selectorForm = sForm;
 	}
-	
+
 	/** Check that the sign exists and return a list of messages */
-	protected ArrayList<QuickMessage> doInBackground() throws Exception {
+	protected ArrayList<MsgPattern> doInBackground() throws Exception {
 		DMS dms = null;
 		SignGroup sg = null;
 		SignConfig dmsConfig = null;
 		Boolean signOrGroupExists = false;
-		ArrayList<QuickMessage> qmList = new ArrayList<QuickMessage>();
-		
-		// the "signName" we get is either the name of a sign OR a sign group
-		// first try to look up the sign
+		ArrayList<MsgPattern> plist = new ArrayList<MsgPattern>();
+
+		// the "signName" we get is either the name of a sign
+		// OR a sign group first try to look up the sign
 		dms = DMSHelper.lookup(signOrGroupName);
-		
+
 		if (dms != null) {
 			// if the sign exists, get the sign's config
 			dmsConfig = dms.getSignConfig();
@@ -73,7 +72,7 @@ public class WMsgSelectorSignProcess extends
 		} else {
 			// if the sign doesn't exist, try looking for a sign group
 			sg = SignGroupHelper.lookup(signOrGroupName);
-			
+
 			if (sg != null) {
 				// sign groups don't have a config, so just set that this
 				// exists
@@ -83,33 +82,35 @@ public class WMsgSelectorSignProcess extends
 				selectorForm.setSelectedSignGroup(sg);
 			}
 		}
-		
+
 		if (signOrGroupExists) {
 			// sign or group exists - get a list of messages
-			
-			// iterate through all QuickMessages to find matching ones
-			Iterator<QuickMessage> qmit = QuickMessageHelper.iterator();
-			while (qmit.hasNext()) {
-				QuickMessage qm = qmit.next();
-				
+
+			// iterate through all MsgPatterns to find matching ones
+			Iterator<MsgPattern> pit = MsgPatternHelper.iterator();
+			while (pit.hasNext()) {
+				MsgPattern pat = pit.next();
+
 				// first check if the SignGroup matches
-				SignGroup qmsg = qm.getSignGroup();
-				// if it does, add the message to the list and go to the next
-				// one
-				if (qmsg != null && signOrGroupName.equals(qmsg.getName()))
-					qmList.add(qm);
+				SignGroup psg = pat.getSignGroup();
+				// if it does, add the message to the list
+				// and go to the next one
+				if (psg != null && signOrGroupName.equals(psg.getName()))
+					plist.add(pat);
 				else if (dmsConfig != null) {
 					// if the groups don't match but we have a sign config,
 					// check if that matches
-					SignConfig qmsc = qm.getSignConfig();
-					if (qmsc != null && qmsc.getName().equals(
-							dmsConfig.getName()))
-						qmList.add(qm);
+					SignConfig psc = pat.getSignConfig();
+					if (psc != null && psc.getName().equals(
+						dmsConfig.getName()))
+					{
+						plist.add(pat);
+					}
 				}
 			}
-			
+
 			// return whatever messages we have
-			return qmList;
+			return plist;
 		} else {
 			// sign doesn't exist anymore - show a warning
 			return null;
@@ -118,9 +119,9 @@ public class WMsgSelectorSignProcess extends
 	
 	protected void done() {
 		try {
-			ArrayList<QuickMessage> qmList = get();
-			if (qmList != null)
-				selectorForm.updateMessageList(qmList);
+			ArrayList<MsgPattern> plist = get();
+			if (plist != null)
+				selectorForm.updateMessageList(plist);
 			else {
 				// show a warning
 				// get the object type to show in the warning

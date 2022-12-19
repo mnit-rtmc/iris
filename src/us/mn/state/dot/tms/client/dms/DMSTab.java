@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ public class DMSTab extends MapTab<DMS> {
  	public DMSTab(Session session, DMSManager man) {
 		super(man);
 		dispatcher = new DMSDispatcher(session, man);
+		man.setDispatcher(dispatcher);
 		summary = man.createStyleSummary(true);
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);

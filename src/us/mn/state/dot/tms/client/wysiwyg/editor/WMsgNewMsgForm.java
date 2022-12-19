@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import java.awt.GridBagConstraints;
@@ -25,8 +24,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.QuickMessage;
-import us.mn.state.dot.tms.QuickMessageHelper;
+import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
@@ -46,31 +45,31 @@ public class WMsgNewMsgForm extends AbstractForm {
 
 	/** User session */
 	private final Session session;
-	
+
 	/** Handle to controller or selector form */
 	private WController controller;
 	private WMsgSelectorForm selectorForm;
-	
+
 	/** Sign/Group we were given */
 	private DMS sign;
 	private SignGroup signGroup;
-	
-	/** Quick message (for cloning, not always provided) */
-	private QuickMessage qm;
-	
+
+	/** Message pattern (for cloning, not always provided) */
+	private MsgPattern pattern;
+
 	/** Info message */
 	private JLabel infoMsg;
-	
+
 	/** Text entry field */
 	private JTextField msgNameInput;
-	
+
 	/** Buttons */
 	private JButton ok_btn;
 	private JButton cancel_btn;
-	
+
 	/** Amount of time in nanoseconds to wait for a message to be created */
 	private final static long MAX_WAIT = 10000000000L;
-	
+
 	public WMsgNewMsgForm(Session s, WMsgSelectorForm sForm, DMS d) {
 		super(I18N.get("wysiwyg.new_message.title"), true);
 		session = s;
@@ -92,29 +91,29 @@ public class WMsgNewMsgForm extends AbstractForm {
 		ok_btn = new JButton(createMsg);
 	}
 	
-	public WMsgNewMsgForm(Session s, WMsgSelectorForm sForm, DMS d, QuickMessage q) {
+	public WMsgNewMsgForm(Session s, WMsgSelectorForm sForm, DMS d, MsgPattern pat) {
 		super(I18N.get("wysiwyg.new_message.title"), true);
 		session = s;
 		selectorForm = sForm;
 		sign = d;
-		qm = q;
+		pattern = pat;
 		initForm();
-		
+
 		// prefill the text with the previous message name
-		msgNameInput.setText(qm.getName());
+		msgNameInput.setText(pattern.getName());
 		ok_btn = new JButton(cloneMsg);
 	}
 	
-	public WMsgNewMsgForm(Session s, WMsgSelectorForm sForm, SignGroup sg, QuickMessage q) {
+	public WMsgNewMsgForm(Session s, WMsgSelectorForm sForm, SignGroup sg, MsgPattern pat) {
 		super(I18N.get("wysiwyg.new_message.title"), true);
 		session = s;
 		selectorForm = sForm;
 		signGroup = sg;
-		qm = q;
+		pattern = pat;
 		initForm();
 
 		// prefill the text with the previous message name
-		msgNameInput.setText(qm.getName());
+		msgNameInput.setText(pattern.getName());
 		ok_btn = new JButton(cloneMsg);
 	}
 	
@@ -205,48 +204,48 @@ public class WMsgNewMsgForm extends AbstractForm {
 	private final IAction createMsg = new IAction(
 			"wysiwyg.new_message.ok") {
 		protected void doActionPerformed(ActionEvent e) {
-			// try to create a new quick message
-			String newMsgName = createNewQuickMessage();
-			
+			// try to create a new message pattern
+			String newMsgName = createNewMsgPattern();
+
 			// create and start a worker if we get one
 			if (newMsgName != null) {
-				IWorker<QuickMessage> worker = new IWorker<QuickMessage>() {
+				IWorker<MsgPattern> worker = new IWorker<MsgPattern>() {
 					@Override
-					protected QuickMessage doInBackground() {
+					protected MsgPattern doInBackground() {
 						// create the message
 						if (sign != null) {
 							WMsgSelectorForm.CreateMsg(
-									session, sign, newMsgName);
+								session, sign, newMsgName);
 						} else if (signGroup != null) {
 							WMsgSelectorForm.CreateMsg(
-									session, signGroup, newMsgName);
+								session, signGroup, newMsgName);
 						}
-						
+
 						// wait for SONAR to create the new message
-						QuickMessage q = null;
+						MsgPattern pat = null;
 						long tStart = System.nanoTime();
-						while (q == null) {
-							q = QuickMessageHelper.lookup(newMsgName);
+						while (pat == null) {
+							pat = MsgPatternHelper.lookup(newMsgName);
 							long tElapsed = System.nanoTime() - tStart;
 							if (tElapsed > MAX_WAIT)
 								break;
 						}
-						return q;
+						return pat;
 					}
 					
 					@Override
 					public void done() {
-						qm = getResult();
+						pattern = getResult();
 						try {
-							if (qm != null) {
+							if (pattern != null) {
 								selectorForm.reloadForm();
-								
+
 								if (sign != null) {
 									WMsgSelectorForm.EditMsg(
-											session, qm, sign);
+										session, pattern, sign);
 								} else if (signGroup != null) {
 									WMsgSelectorForm.EditMsg(
-											session, qm, signGroup);
+										session, pattern, signGroup);
 								}
 								close(session.getDesktop());
 							} else
@@ -268,44 +267,44 @@ public class WMsgNewMsgForm extends AbstractForm {
 			"wysiwyg.new_message.ok") {
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception {
-			// try to create a new quick message
-			String newMsgName = createNewQuickMessage();
+			// try to create a new message pattern
+			String newMsgName = createNewMsgPattern();
 
 			// create and start a worker if we get one
 			if (newMsgName != null) {
-				IWorker<QuickMessage> worker = new IWorker<QuickMessage>() {
+				IWorker<MsgPattern> worker = new IWorker<MsgPattern>() {
 					@Override
-					protected QuickMessage doInBackground() {
+					protected MsgPattern doInBackground() {
 						// the clone operation is the same for signs and
 						// groups (we use the same sign group as the existing
-						// quick message)
-						WMsgSelectorForm.CloneMsg(session, qm, newMsgName);
-						
+						// message pattern)
+						WMsgSelectorForm.CloneMsg(session, pattern, newMsgName);
+
 						// wait for SONAR to create the new message
-						QuickMessage q = null;
+						MsgPattern pat = null;
 						long tStart = System.nanoTime();
-						while (q == null) {
-							q = QuickMessageHelper.lookup(newMsgName);
+						while (pat == null) {
+							pat = MsgPatternHelper.lookup(newMsgName);
 							long tElapsed = System.nanoTime() - tStart;
 							if (tElapsed > MAX_WAIT)
 								break;
 						}
-						return q;
+						return pat;
 					}
-					
+
 					@Override
 					public void done() {
-						qm = getResult();
+						pattern = getResult();
 						try {
-							if (qm != null) {
+							if (pattern != null) {
 								selectorForm.reloadForm();
-								
+
 								if (sign != null) {
 									WMsgSelectorForm.EditMsg(
-											session, qm, sign);
+										session, pattern, sign);
 								} else if (signGroup != null) {
 									WMsgSelectorForm.EditMsg(
-											session, qm, signGroup);
+										session, pattern, signGroup);
 								}
 								close(session.getDesktop());
 							} else
@@ -321,19 +320,19 @@ public class WMsgNewMsgForm extends AbstractForm {
 				setWarningText();
 		}
 	};
-	
+
 	/** Save Message As action */
 	private final IAction saveMsgAs = new IAction(
 			"wysiwyg.new_message.ok") {
 		protected void doActionPerformed(ActionEvent e)
 				throws Exception {
-			// try to create a new quick message
-			String newMsgName = createNewQuickMessage();
-			
+			// try to create a new message pattern
+			String newMsgName = createNewMsgPattern();
+
 			// if it works (i.e. there is no existing message with that name)
 			// then tell the controller to save as and close this form
 			if (newMsgName != null) {
-				controller.saveNewQuickMessage(newMsgName);
+				controller.saveNewMsgPattern(newMsgName);
 				close(session.getDesktop());
 			} else {
 				// if not, show a warning
@@ -341,20 +340,18 @@ public class WMsgNewMsgForm extends AbstractForm {
 			}
 		}
 	};
-	
-	/** Create a new QuickMessage from the current text input
-	 *  @return the new quick message that was created, or null if it existed
+
+	/** Create a new MsgPattern from the current text input
+	 *  @return the new message pattern that was created, or null if it existed
 	 */
-	private String createNewQuickMessage() {
+	private String createNewMsgPattern() {
 		// get the message name from the text input field
 		String newMsgName = msgNameInput.getText().trim();
 		System.out.println(String.format(
-				"Creating new QuickMessage '%s' ...", newMsgName));
-		
+			"Creating new MsgPattern '%s' ...", newMsgName));
+
 		// check if the message exists already
-		QuickMessage qm = QuickMessageHelper.lookup(newMsgName);
-		if (qm != null)
-			return null;
-		return newMsgName;
+		MsgPattern pat = MsgPatternHelper.lookup(newMsgName);
+		return (pat != null) ? null : newMsgName;
 	}
 }

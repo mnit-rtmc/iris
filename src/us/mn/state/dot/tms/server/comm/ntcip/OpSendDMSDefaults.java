@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSType;
-import us.mn.state.dot.tms.SignDetail;
+import us.mn.state.dot.tms.PageTimeHelper;
 import static us.mn.state.dot.tms.SystemAttrEnum.*;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -55,16 +55,9 @@ public class OpSendDMSDefaults extends OpDMS {
 	/** Number of missed polling periods for comm loss threshold */
 	static private final int COMM_LOSS_PERIODS = 10;
 
-	/** Certain Ledstar firmware versions can lock up with
-	 * a CTO error if dmsTimeCommLoss is set to a non-zero value */
-	static private final HashSet<String> CTO_BLACKLIST =
-		new HashSet<String>(Arrays.asList(
-		"VMS-MN2A-27x105 V2.6 Apr 20,2011"
-	));
-
 	/** Create a new operation to send DMS default parameters */
 	public OpSendDMSDefaults(DMSImpl d) {
-		super(PriorityLevel.DOWNLOAD, d);
+		super(PriorityLevel.SETTINGS, d);
 	}
 
 	/** Create the second phase of the operation */
@@ -97,25 +90,23 @@ public class OpSendDMSDefaults extends OpDMS {
 			mess.storeProps();
 			return supportsPixelService()
 			      ? new PixelService()
-			      : new MessageDefaults();
+			      : new FlashDefaults();
 		}
 	}
 
 	/** Get the comm loss threshold */
 	private int getCommLossMinutes() {
-		return (isCommLossEnabled() && !isCommLossBlacklisted())
+		return isCommLossEnabled()
 		     ? Math.max(COMM_LOSS_MINIMUM_MINS, getLinkCommLossMins())
 		     : 0;
 	}
 
 	/** Is DMS comm loss enabled? */
 	private boolean isCommLossEnabled() {
-		return DMS_COMM_LOSS_ENABLE.getBoolean();
-	}
-
-	/** Is the controller blacklisted for comm loss setting */
-	private boolean isCommLossBlacklisted() {
-		return CTO_BLACKLIST.contains(getVersion());
+		// check for (Ledstar) firmware version which locks up with
+		// a CTO error if dmsTimeCommLoss is set to a non-zero value
+		return DMS_COMM_LOSS_ENABLE.getBoolean() &&
+		      (getVersion() != "VMS-MN2A-27x105 V2.6 Apr 20,2011");
 	}
 
 	/** Get the comm loss threshold for the comm link */
@@ -142,6 +133,30 @@ public class OpSendDMSDefaults extends OpDMS {
 			logStore(freq);
 			logStore(time);
 			mess.storeProps();
+			return new FlashDefaults();
+		}
+	}
+
+	/** Phase to set the flash defaults */
+	protected class FlashDefaults extends Phase {
+
+		/** Set the flash defaults */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			ASN1Integer flash_on = defaultFlashOn.makeInt();
+			ASN1Integer flash_off = defaultFlashOff.makeInt();
+			flash_on.setInteger(0);
+			flash_off.setInteger(0);
+			mess.add(flash_on);
+			mess.add(flash_off);
+			logStore(flash_on);
+			logStore(flash_off);
+			try {
+				mess.storeProps();
+			}
+			catch (ControllerException e) {
+				logError("Error setting flash defaults");
+			}
 			return new MessageDefaults();
 		}
 	}
@@ -160,12 +175,18 @@ public class OpSendDMSDefaults extends OpDMS {
 				defaultJustificationPage.node);
 			ASN1Integer on_time = defaultPageOnTime.makeInt();
 			ASN1Integer off_time = defaultPageOffTime.makeInt();
-			line.setInteger(DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
-			page.setInteger(DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
-			on_time.setInteger(Math.round(10 *
-				DMS_PAGE_ON_DEFAULT_SECS.getFloat()));
-			off_time.setInteger(Math.round(10 *
-				DMS_PAGE_OFF_DEFAULT_SECS.getFloat()));
+			line.setInteger(
+				JustificationLine.defaultValue().ordinal()
+			);
+			page.setInteger(
+				JustificationPage.defaultValue().ordinal()
+			);
+			on_time.setInteger(
+				PageTimeHelper.defaultPageOnTimeDs()
+			);
+			off_time.setInteger(
+				PageTimeHelper.defaultPageOffTimeDs()
+			);
 			mess.add(line);
 			mess.add(page);
 			mess.add(on_time);
@@ -229,7 +250,7 @@ public class OpSendDMSDefaults extends OpDMS {
 			//       need to check that the password is not null
 			//       before attempting to set them.
 			if (isCharMatrix() && controller.getPassword() != null)
-				return new AddcoDefaults();
+				return new AddcoCharMatrixDefaults();
 			else
 				return null;
 		} else
@@ -304,8 +325,8 @@ public class OpSendDMSDefaults extends OpDMS {
 		}
 	}
 
-	/** Phase to set ADDCO-specific object defaults */
-	protected class AddcoDefaults extends Phase {
+	/** Phase to set ADDCO-specific character matrix object defaults */
+	protected class AddcoCharMatrixDefaults extends Phase {
 
 		/** Set ADDCO-specific object defaults */
 		@SuppressWarnings("unchecked")

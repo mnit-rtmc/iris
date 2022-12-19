@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2019-2020  SRF Consulting Group
+ * Copyright (C) 2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,8 +70,7 @@ public class MultiConfig {
 	// "Errors" = Problems that prevent
 	// creating a usable MultiConfig.
 
-	private Set<String> errors =
-			new LinkedHashSet<String>();
+	private Set<String> errors = new LinkedHashSet<String>();
 
 	private void logError(String errStr) {
 		errors.add(errStr);
@@ -85,19 +85,18 @@ public class MultiConfig {
 	public boolean isUseable() {
 		return errors.isEmpty();
 	}
-	
+
 	private void clearErrors() {
 		errors = new LinkedHashSet<String>();
 	}
-	
+
 	//===========================================
 	// "Warnings" = Problems that don't prevent
 	// creating a usable MultiConfig (by using a
 	// mix of compromises and/or "IRIS default"
 	// values).
 
-	private Set<String> warnings =
-			new LinkedHashSet<String>();
+	private Set<String> warnings = new LinkedHashSet<String>();
 
 	private void logWarning(String errStr) {
 		warnings.add(errStr);
@@ -113,29 +112,29 @@ public class MultiConfig {
 	final static public String CONFIG    = "Config";
 	final static public String SIGNGROUP = "SignGroup";
 	private String type;  // "Sign", "Config", or "SignGroup"
-	
+
 	private String name;
 
 	/** If the MultiConfig is for a single Sign,
 	 *  or a config, this list is null.
-	 *  
+	 *
 	 *  If this MultiConfig is for a SignGroup,
 	 *  this list contains one MultiConfig for each
 	 *  configuration (same dmsType, geometry,
 	 *  default font, and default BG/FG colors)
 	 *  in the SignGroup.  This list is sorted
 	 *  with the most common configuration first,
-	 *  and has names "Config_1", "Config_2", etc... 
+	 *  and has names "Config_1", "Config_2", etc...
 	 */
 	private List<MultiConfig> configList = null;
 
 	/** If the MultiConfig is for a single Sign,
 	 *  this list is null.
-	 *  
+	 *
 	 *  If this MultiConfig is for a config, this
 	 *  list contains a MultiConfig for each sign
 	 *  with that config.
-	 *  
+	 *
 	 *  If this MultiConfig is for a SignGroup,
 	 *  this list contains a MultiConfig for each
 	 *  sign in that sign group.
@@ -144,26 +143,21 @@ public class MultiConfig {
 
 	//-------------
 	// values obtained from more than one source
-	
+
 	private DmsColor defaultBG;
 	private DmsColor defaultFG;
-	
+
 	/** Values used in MultiExpandDafaults to replace
 	 *  default-value color tags with explicit-value
 	 *  tags. */
 	private int[] defaultBGTagVal = null;
 	private int[] defaultFGTagVal = null;
-	
-	/** Default-font number the database says we
-	 *  should be using (after applying optional
-	 *  sign-specific override). */
+
+	/** Default-font number */
 	private int defaultFontNo;
 
 	/** Default-font (if it exists in IRIS database) */
 	private Font defaultFont;
-
-	/** Value used in MultiExpandDefaults to expand "default font" tag. */
-	private Integer defaultFontTagVal;
 
 	//-------------
 	// values from SignConfig
@@ -183,7 +177,7 @@ public class MultiConfig {
 	/** Sign width & height in pixels */
 	private int pixelWidth;
 	private int pixelHeight;
-	
+
 	/** Character width & height in pixels (0 means variable) */
 	private int charWidth;
 	private int charHeight;
@@ -197,7 +191,7 @@ public class MultiConfig {
 
 	//-------------
 	// values from SignDetail
-	
+
 	/** Does sign have a beacon? */
 	private boolean bHasBeacon;
 
@@ -215,7 +209,7 @@ public class MultiConfig {
 
 	//===========================================
 	// Helper methods
-	
+
 	/** Convert a grayscale (0-255) and an LED color into
 	 *  a 24bit render-color for rendering 8bitMono signs. */
 	static private DmsColor genMono8bitColor(int iColor, DmsColor baseColor) {
@@ -229,17 +223,14 @@ public class MultiConfig {
 
 	/** Convert a DmsColor into a 3-int tag-value */
 	static private int[] genTagVal3(DmsColor c) {
-		return new int[]{
-				c.red,
-				c.green,
-				c.blue};
+		return new int[] { c.red, c.green, c.blue};
 	}
-	
+
 	/** Convert an integer into a 1-int tag-value */
 	static private int[] genTagVal1(int iTagVal) {
-		return new int[]{iTagVal};
+		return new int[] { iTagVal };
 	}
-	
+
 	/** Generate IRIS-default BG/FG colors */
 	@SuppressWarnings("incomplete-switch")
 	private void genIrisDefaultColors() {
@@ -294,20 +285,20 @@ public class MultiConfig {
 	//===========================================
 	// Methods to test/modify MULTI-tags supported
 	// by a given MultiConfig
-	
+
 	/** Does this MultiConfig support a given MULTI tag? */
 	public boolean supportsTag(MultiTag tag) {
 		int mask = 1 << tag.ordinal();
 		return ((supportedTags & mask) != 0);
 	}
-	
+
 	/** Remove support-flag for a MULTI tag */
 	private void removeTagSupport(MultiTag tag) {
 		int mask = 1 << tag.ordinal();
 		if ((supportedTags & mask) != 0)
 			supportedTags ^= mask;
 	}
-	
+
 	//===========================================
 	// Basic-colors mode
 	//
@@ -336,7 +327,7 @@ public class MultiConfig {
 	public boolean usingBasicColorsMode() {
 		return bUsingBasicColorsMode;
 	}
-	
+
 	//===========================================
 	// Methods that copy data from a SignConfig,
 	// SignDetail, or DMS object 
@@ -379,7 +370,7 @@ public class MultiConfig {
 		monochromeFG = signConfig.getMonochromeForeground();
 		colorScheme  = ColorScheme.fromOrdinal(signConfig.getColorScheme());
 		//NOTE:  defaultFont is handled in loadSign
-		
+
 		if (pixelWidth <= 0)
 			logError("pixelWidth = "+pixelWidth);
 		if (pixelHeight <= 0)
@@ -435,7 +426,7 @@ public class MultiConfig {
 		}
 		return true;
 	}
-	
+
 	/* Load Sign/DMS values */
 	@SuppressWarnings("incomplete-switch")
 	private void loadSign(DMS dms) throws TMSException {
@@ -447,40 +438,6 @@ public class MultiConfig {
 		loadSignDetail(dms);
 
 		genIrisDefaultColors();
-
-		// Apply DMS-specific "override" FG/BG colors
-		Integer oBG = dms.getOverrideBackground();
-		if (oBG != null) {
-			defaultBG = new DmsColor(oBG);
-			switch (colorScheme) {
-				case MONOCHROME_1_BIT:
-				case MONOCHROME_8_BIT:
-				case COLOR_CLASSIC:
-					defaultBGTagVal = genTagVal1(oBG);
-					break;
-				case COLOR_24_BIT:
-					defaultBGTagVal = new int[]{
-							defaultBG.red,
-							defaultBG.green,
-							defaultBG.blue};
-			}
-		}
-		Integer oFG = dms.getOverrideForeground();
-		if (oFG != null) {
-			defaultFG = new DmsColor(oFG);
-			switch (colorScheme) {
-				case MONOCHROME_1_BIT:
-				case MONOCHROME_8_BIT:
-				case COLOR_CLASSIC:
-					defaultFGTagVal = new int[]{oFG};
-					break;
-				case COLOR_24_BIT:
-					defaultFGTagVal = new int[]{
-							defaultFG.red,
-							defaultFG.green,
-							defaultFG.blue};
-			}
-		}
 
 		// SanityCheck: Did we get usable default colors?
 		String msg = null;
@@ -496,15 +453,9 @@ public class MultiConfig {
 			forceBasicColorsMode(msg);
 
 		// Figure out what font we should be using
-		defaultFontNo = DMSHelper.getDefaultFontNumber(dms);
-		Font f = dms.getOverrideFont();
-		if (f != null) {
-			defaultFont = f;
-			defaultFontTagVal = f.getNumber();
-		}
-		else
-			defaultFont = FontHelper.find(defaultFontNo);
-		
+		defaultFontNo = DMSHelper.getDefaultFontNum(dms);
+		defaultFont = FontHelper.find(defaultFontNo);
+
 		// SanityCheck: Do we have a copy of the default font?
 		if (defaultFont == null)
 			logError("Default font ("+defaultFontNo+") not in database");
@@ -512,7 +463,7 @@ public class MultiConfig {
 
 	//===========================================
 	// Static-private methods for creating a MultiConfig
-	
+
 	/** Private method to generate a dummy
 	 *  MultiConfig from an exception */
 	static private MultiConfig fromException(Exception ex) {
@@ -530,7 +481,7 @@ public class MultiConfig {
 		mcfg.logError("ERROR:  "+msg);
 		return mcfg;
 	}
-	
+
 	/** Private base method used for generating
 	 *  all types of MultiConfig */
 	static private MultiConfig fromDms(DMS dms, String type) {
@@ -539,7 +490,7 @@ public class MultiConfig {
 				return fromErrorMsg("Unable to load a null sign configuration");
 			if ((dms.getName() == null) || dms.getName().isEmpty())
 				return fromErrorMsg("Unable to load a nameless sign configuration");
-			
+
 			MultiConfig mcfg = new MultiConfig();
 			mcfg.loadSign(dms);
 			mcfg.name = dms.getName();
@@ -561,7 +512,7 @@ public class MultiConfig {
 		DMS dms = DMSHelper.lookup(signName);
 		return fromDms(dms, type);
 	}
-	
+
 	//===========================================
 	// static public methods for creating a MultiConfig
 
@@ -623,7 +574,7 @@ public class MultiConfig {
 		MultiConfig mcSignGroup = fromSignName(mcConfig.name, SIGNGROUP);
 		mcSignGroup.name = sg.getName();
 		mcSignGroup.configList = mcaConfigs;
-		
+
 		// Sort final list of sign MultiConfigs by sign name
 		mcaSigns.sort(compareByName);
 		mcSignGroup.signList = mcaSigns;
@@ -705,7 +656,7 @@ public class MultiConfig {
 			return 1;
 		return dc1.rgb() - dc2.rgb();
 	}
-	
+
 	/** Compare by DmsType, geometry, default font,
 	 *  and default background/foreground colors. */
 	private int compare2(MultiConfig mc2) {
@@ -717,7 +668,7 @@ public class MultiConfig {
 		if (cmp != 0)
 			return cmp;
 		if (defaultBG == null)
-		cmp = compareDmsColors(defaultBG, mc2.defaultBG);
+			cmp = compareDmsColors(defaultBG, mc2.defaultBG);
 		if (cmp != 0)
 			return cmp;
 		return compareDmsColors(defaultFG, mc2.defaultFG);
@@ -731,7 +682,7 @@ public class MultiConfig {
 				return mc1.compare1(mc2);
 			}
 		};
-		
+
 	/** Comparator to sort MultiConfig(s) by name */
 	private static Comparator<MultiConfig> compareByName =
 		new Comparator<MultiConfig>() {
@@ -739,7 +690,7 @@ public class MultiConfig {
 				return mc1.getName().compareTo(mc2.getName());
 			}
 		};
-			
+
 	/** Comparator to sort MultiConfig(s) by DmsType,
 	 *  geometry, default font, and BG/FG colors. */
 	private static Comparator<MultiConfig> comparator2 =
@@ -752,7 +703,7 @@ public class MultiConfig {
 				return mc1.compare2(mc2);
 			}
 		};
-	
+
 	/** Comparator to sort by number of entries
 	 *  in each Multiconfig's signList.  Usable
 	 *  configurations come before unusable.
@@ -777,7 +728,7 @@ public class MultiConfig {
 				return s2 - s1;
 			}
 		};
-		
+
 	/* Generate a hashkey-string containing
 	 * dmsType, sign geometry, and
 	 * default font. */
@@ -831,9 +782,9 @@ public class MultiConfig {
 		// Bin all MultiConfigs with the same config.
 		// (Creates a new MC for each config.)
 		HashMap<String,MultiConfig> mchConfigMap =
-				new HashMap<String,MultiConfig>();
+			new HashMap<String,MultiConfig>();
 		ArrayList<MultiConfig> mcaConfigList =
-				new ArrayList<MultiConfig>();
+			new ArrayList<MultiConfig>();
 		String key;
 		MultiConfig mcGroup;
 		for (MultiConfig mc : mcaAll) {
@@ -878,7 +829,7 @@ public class MultiConfig {
 	}
 
 	//------
-	
+
 	public DmsColor getDefaultBG() {
 		return defaultBG;
 	}
@@ -913,12 +864,6 @@ public class MultiConfig {
 		return FontHelper.DEFAULT_FONT_NUM;
 	}
 
-	/* Configured default font tag value.
-	 * If null, indicates no overrides */
-	public Integer getDefaultFontTagVal() {
-		return defaultFontTagVal;
-	}
-
 	/** Get horizontal pitch (mm)
 	 * (center-to-center distance between LED pixels) */
 	public int getPitchHoriz() {
@@ -945,12 +890,12 @@ public class MultiConfig {
 	public int getBorderHoriz() {
 		return borderHoriz;
 	}
-	
+
 	/** Get vertical border (mm) */
 	public int getBorderVert() {
 		return borderVert;
 	}
-	
+
 	/** Get sign width (pixels) */
 	public int getPixelWidth() {
 		return pixelWidth;

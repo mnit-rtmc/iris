@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -33,13 +33,13 @@ import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
  * @author Douglas Lau
  * @author Travis Swanston
  */
-class OpReset extends OpDms
-{
-	/** Create a new DMS query status object.
+class OpReset extends OpDms {
+
+	/** Create a new DMS reset object.
 	 *  @param d Current DMS.
 	 *  @param u User performing the action, may be null. */
 	OpReset(DMSImpl d, User u) {
-		super(PriorityLevel.DEVICE_DATA, d, "Reinitializing the CMS",u);
+		super(PriorityLevel.SETTINGS, d, "Reinitializing the CMS",u);
 	}
 
 	/** Create the second phase of the operation */

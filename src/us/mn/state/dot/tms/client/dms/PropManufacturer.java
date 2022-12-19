@@ -21,6 +21,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignDetail;
 import us.mn.state.dot.tms.client.Session;
@@ -44,8 +45,8 @@ public class PropManufacturer extends IPanel {
 		return (s != null && s.length() > 0) ? s : UNKNOWN;
 	}
 
-	/** Format an integer field */
-	static private String formatInt(Integer i) {
+	/** Format an object field */
+	static private String formatObj(Object i) {
 		return (i != null) ? i.toString() : UNKNOWN;
 	}
 
@@ -169,15 +170,16 @@ public class PropManufacturer extends IPanel {
 				dms.getController(), "version");
 			version_lbl.setText(formatString(v));
 		}
-		if (null == a || a.equals("ldcPotBase"))
-			pot_base_lbl.setText(formatInt(dms.getLdcPotBase()));
-		if (null == a || a.equals("pixelCurrentLow")) {
-			current_low_lbl.setText(formatInt(
-				dms.getPixelCurrentLow()));
-		}
-		if (null == a || a.equals("pixelCurrentHigh")) {
-			current_high_lbl.setText(formatInt(
-				dms.getPixelCurrentHigh()));
+		if (null == a || a.equals("status")) {
+			pot_base_lbl.setText(formatObj(
+				DMSHelper.getStatus(dms, DMS.LDC_POT_BASE)
+			));
+			current_low_lbl.setText(formatObj(
+				DMSHelper.getStatus(dms, DMS.PIXEL_CURRENT_LOW)
+			));
+			current_high_lbl.setText(formatObj(
+				DMSHelper.getStatus(dms,DMS.PIXEL_CURRENT_HIGH)
+			));
 		}
 		if (null == a || a.equals("signConfig")) {
 			SignConfig sc = dms.getSignConfig();

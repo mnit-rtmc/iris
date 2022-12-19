@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -96,8 +96,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			tab.add(I18N.get("dms.pixels"), pixel_pnl);
 		if (SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean())
 			tab.add(I18N.get("dms.brightness"), bright_pnl);
-		if (SystemAttrEnum.DMS_MANUFACTURER_ENABLE.getBoolean())
-			tab.add(I18N.get("dms.manufacturer"), manufacturer_pnl);
+		tab.add(I18N.get("dms.manufacturer"), manufacturer_pnl);
 		add(tab);
 		add(op_pnl, BorderLayout.SOUTH);
 		super.initialize();
@@ -118,7 +117,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected void updateEditMode() {
 		location_pnl.updateEditMode();
 		setup_pnl.updateEditMode();
-		messages_pnl.updateEditMode();
 	}
 
 	/** Update one attribute on the form */

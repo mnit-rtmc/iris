@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2020  Minnesota Department of Transportation
+ * Copyright (C) 2008-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,12 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.SystemAttrEnum.DETECTOR_AUTO_FAIL_ENABLE;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.DevelCfg;
 
 /**
  * A system attribute is a name mapped to a string value.
@@ -55,35 +57,34 @@ public class SystemAttributeImpl extends BaseObjectImpl
 
 	/** Validate the database version */
 	static private void validateDatabaseVersion() {
-		String c_version = "@@VERSION@@";
-		String db_version = SystemAttrEnum.DATABASE_VERSION.getString();
-		if (!validateVersions(c_version, db_version)) {
+		String v_code = DevelCfg.get("db.version", "@@VERSION@@");
+		String v_db = SystemAttrEnum.DATABASE_VERSION.getString();
+		if (!validateVersions(v_code, v_db)) {
 			StringBuilder b = new StringBuilder();
 			b.append("Failure: database_version (");
-			b.append(db_version);
+			b.append(v_db);
 			b.append(") does not match the required value (");
-			b.append(c_version);
+			b.append(v_code);
 			b.append(").  Shutting down.");
 			System.err.println(b.toString());
+			// Sleep 30 seconds to avoid spamming the log file
+			TimeSteward.sleep_well(30000);
 			System.exit(1);
 		}
 	}
 
 	/** Validate the database version */
-	static private boolean validateVersions(String v0, String v1) {
-		String[] va0 = v0.split("\\.");
-		String[] va1 = v1.split("\\.");
-		// Versions must be "major.minor.micro"
-		if (va0.length != 3 || va1.length != 3)
+	static private boolean validateVersions(String v_code, String v_db) {
+		if (v_code != null && v_db != null) {
+			String[] code = v_code.split("\\.");
+			String[] db = v_db.split("\\.");
+			// Check that major and minor versions are the same
+			return code.length >= 2 &&
+			       db.length >= 2 &&
+			       code[0].equals(db[0]) &&
+			       code[1].equals(db[1]);
+		} else
 			return false;
-		// Check that major versions match
-		if (!va0[0].equals(va1[0]))
-			return false;
-		// Check that minor versions match
-		if (!va0[1].equals(va1[1]))
-			return false;
-		// It's OK if micro versions don't match
-		return true;
 	}
 
 	/** Get a mapping of the columns */

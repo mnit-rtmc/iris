@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Glyph;
-import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignDetail;
 import us.mn.state.dot.tms.SignGroup;
@@ -83,12 +83,12 @@ public class DmsCache {
 		return sign_messages;
 	}
 
-	/** Cache of quick messages */
-	private final TypeCache<QuickMessage> quick_messages;
+	/** Cache of msg patterns */
+	private final TypeCache<MsgPattern> msg_patterns;
 
-	/** Get the quick message cache */
-	public TypeCache<QuickMessage> getQuickMessages() {
-		return quick_messages;
+	/** Get the msg pattern cache */
+	public TypeCache<MsgPattern> getMsgPatterns() {
+		return msg_patterns;
 	}
 
 	/** Cache of dynamic message signs */
@@ -145,7 +145,7 @@ public class DmsCache {
 			client);
 		sign_messages = new TypeCache<SignMessage>(SignMessage.class,
 			client);
-		quick_messages = new TypeCache<QuickMessage>(QuickMessage.class,
+		msg_patterns = new TypeCache<MsgPattern>(MsgPattern.class,
 			client);
 		dmss = new TypeCache<DMS>(DMS.class, client);
 		dms_model = new ProxyListModel<DMS>(dmss);
@@ -166,15 +166,8 @@ public class DmsCache {
 		client.populateReadable(dmss);
 		if (client.canRead(DMS.SONAR_TYPE)) {
 			dmss.ignoreAttribute("operation");
-			dmss.ignoreAttribute("minCabinetTemp");
-			dmss.ignoreAttribute("maxCabinetTemp");
-			dmss.ignoreAttribute("minAmbientTemp");
-			dmss.ignoreAttribute("maxAmbientTemp");
-			dmss.ignoreAttribute("minHousingTemp");
-			dmss.ignoreAttribute("maxHousingTemp");
-			dmss.ignoreAttribute("lightOutput");
-			dmss.ignoreAttribute("photocellStatus");
-			dmss.ignoreAttribute("powerStatus");
+			dmss.ignoreAttribute("status");
+			dmss.ignoreAttribute("stuckPixels");
 			// We can't ignore msgCurrent because
 			// DmsCellRenderer lists need the updates
 			dmss.ignoreAttribute("msgSched");
@@ -182,7 +175,7 @@ public class DmsCache {
 		}
 		client.populateReadable(sign_groups);
 		client.populateReadable(dms_sign_groups);
-		client.populateReadable(quick_messages);
+		client.populateReadable(msg_patterns);
 		client.populateReadable(sign_text);
 	}
 }

@@ -40,7 +40,7 @@ public class OpQueryConfig extends OpCanoga {
 
 	/** Create an operation to query the Canoga configuration */
 	public OpQueryConfig(ControllerImpl c) {
-		this(PriorityLevel.DOWNLOAD, c);
+		this(PriorityLevel.SETTINGS, c);
 	}
 
 	/** Create the first phase of the operation */

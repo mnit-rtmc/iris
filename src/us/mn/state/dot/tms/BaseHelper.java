@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import us.mn.state.dot.sonar.User;
 abstract public class BaseHelper {
 
 	/** Compare two (possibly-null) objects for equality */
-	static protected boolean objectEquals(Object o0, Object o1) {
+	static public boolean objectEquals(Object o0, Object o1) {
 		return (o0 != null) ? o0.equals(o1) : o1 == null;
 	}
 

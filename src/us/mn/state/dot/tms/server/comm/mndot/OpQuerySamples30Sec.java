@@ -37,7 +37,7 @@ public class OpQuerySamples30Sec extends OpQuerySamples {
 
 	/** Create a new 30-second data operation */
 	public OpQuerySamples30Sec(ControllerImpl c) {
-		super(PriorityLevel.SHORT_POLL, c);
+		super(PriorityLevel.POLL_HIGH, c);
 	}
 
 	/** Create the first phase of the operation */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import us.mn.state.dot.sonar.SonarObject;
 
 /**
  * A lane-use MULTI is an association between lane-use indication and a
- * quick message MULTI string.
+ * message pattern MULTI.
  *
  * @author Douglas Lau
  */
@@ -39,9 +39,9 @@ public interface LaneUseMulti extends SonarObject {
 	/** Get the message number */
 	Integer getMsgNum();
 
-	/** Set the quick message */
-	void setQuickMessage(QuickMessage qm);
+	/** Set the message pattern */
+	void setMsgPattern(MsgPattern pat);
 
-	/** Get the quick message */
-	QuickMessage getQuickMessage();
+	/** Get the message pattern */
+	MsgPattern getMsgPattern();
 }

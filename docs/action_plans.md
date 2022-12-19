@@ -30,15 +30,17 @@ the **Next Phase**.  *Hold Time* must be a multiple of 30 seconds.
 
 [DMS] actions have an associated *sign group* to determine which signs are
 affected by the action.  The action happens when the corresponding action plan
-phase is selected.  The [quick message] indicates which message is activated.
-If **activate beacon** is selected, the sign beacon will also be activated.
-**Message priority** determines the priority of messages created by the action.
+phase is selected.  The [message pattern] indicates which message is activated.
+If **activate beacon** is selected, the sign's _internal_ beacon will also be
+activated.  **Message priority** determines the priority of messages created by
+the action.
 
 ### DMS Action Tags
 
-Some *[MULTI]-like* tags are supported in [quick message]s used by DMS actions.
-These tags are interpreted by IRIS before sending the message to the DMS.  NOTE:
-they are **only** usable in action plan messages - not operator-selected ones.
+Some *[MULTI]-like* tags are supported in [message pattern]s used by DMS
+actions.  These tags are interpreted by IRIS before sending the message to the
+DMS.  NOTE: they are **only** usable in action plan messages - not
+operator-selected ones.
 
 Tag              | Description
 -----------------|------------------
@@ -82,7 +84,7 @@ the specified phase.
 
 The time of a scheduled **time action** can be displayed in DMS messages using
 [DMS actions](#dms-actions) within the same action plan.  A `[ta` *…* `]`
-[action tag](#dms-action-tag) in the [quick message] will be replaced with the
+[action tag](#dms-action-tag) in the [message pattern] will be replaced with the
 appropriate value.  It has the following format:
 
 `[ta` *dir*,*format* `]`
@@ -171,11 +173,11 @@ than the value of the `action_plan_event_purge_days` [system attribute].
 [DateTimeFormatter]: https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
 [DMS]: dms.html
 [exit ramp backup]: exit_backup.html
+[message pattern]: message_patterns.html
 [Msg-Feed]: comm_links.html#msg-feed
-[MULTI]: dms.html#multi
+[MULTI]: multi.html
 [Parking area]: parking_areas.html
 [preset]: cameras.html#presets
-[quick message]: dms.html#quick-messages
 [ramp meter]: ramp_meters.html
 [Slow traffic]: slow_warning.html
 [Variable speed advisory]: vsa.html

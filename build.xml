@@ -20,7 +20,7 @@
 	<property name="images.dir" value="images"/>
 	<property name="bin.dir" value="bin"/>
 	<property name="lib.dir" value="lib"/>
- 	<property name="i18n.dir" value="etc/i18n"/>
+	<property name="i18n.dir" value="etc/i18n"/>
 	<property name="docs.dir" value="docs"/>
 	<property name="sql.dir" value="sql"/>
 
@@ -45,11 +45,11 @@
 	<property name="build.images" value="${build.dir}/images"/>
 	<property name="build.classes" value="${build.dir}/classes"/>
 	<property name="build.javadocs" value="${build.dir}/javadocs"/>
- 	<property name="build.deps" value="${build.dir}/deps"/>
- 	<property name="build.tar" value= "${build.dir}/${name}-${version}"/>
- 	<property name="build.rpm" value="${build.dir}/rpm"/>
- 	<property name="tar.file"
- 	          value="${build.rpm}/SOURCES/${name}-${version}.tar.gz"/>
+	<property name="build.deps" value="${build.dir}/deps"/>
+	<property name="build.tar" value= "${build.dir}/${name}-${version}"/>
+	<property name="build.rpm" value="${build.dir}/rpm"/>
+	<property name="tar.file"
+	          value="${build.rpm}/SOURCES/${name}-${version}.tar.gz"/>
 
 	<!-- Install directory configuration -->
 	<property name="install.dir" value="${build.dir}/install"/>

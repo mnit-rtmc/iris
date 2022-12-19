@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ public class OpSendLCSSettings extends OpLCS {
 
 	/** Create a new operation to send LCS settings */
 	public OpSendLCSSettings(LCSArrayImpl l) {
-		super(PriorityLevel.DEVICE_DATA, l);
+		super(PriorityLevel.SETTINGS, l);
 	}
 
 	/** Create the second phase of the operation */

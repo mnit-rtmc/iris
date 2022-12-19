@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.client.widget.DialogHandler;
 import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
+import us.mn.state.dot.tms.utils.DevelCfg;
 import us.mn.state.dot.tms.utils.HttpProxySelector;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.PropertyLoader;
@@ -34,8 +35,8 @@ import us.mn.state.dot.tms.utils.PropertyLoader;
 public class MainClient {
 
 	/** Name of default properties file to load */
-	static private final String DEFAULT_PROPERTIES =
-		"iris-client.properties";
+	static private final String DEFAULT_PROPERTIES = 
+		DevelCfg.get("client.prop.file", "iris-client.properties");
 
 	/** Get the name of the property file to use */
 	static private String getPropertyFile(String[] args) {

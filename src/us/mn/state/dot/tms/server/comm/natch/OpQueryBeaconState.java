@@ -16,8 +16,10 @@ package us.mn.state.dot.tms.server.comm.natch;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
+import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
  * Step to query a beacon
@@ -29,33 +31,61 @@ public class OpQueryBeaconState extends OpNatch {
 	/** Beacon device */
 	private final BeaconImpl beacon;
 
-	/** Pin status property */
-	private final PinStatusProp prop;
+	/** Relay pin status property */
+	private final PinStatusProp relay;
+
+	/** Verify pin status property */
+	private final PinStatusProp verify;
+
+	/** Flag when relay query is done.
+	 *  Can only be true if verify is not null. */
+	private boolean relay_done;
 
 	/** Create a new query beacon state step */
 	public OpQueryBeaconState(Counter c, BeaconImpl b) {
 		beacon = b;
-		prop = new PinStatusProp(c, beacon.getPin());
+		relay = new PinStatusProp(c, beacon.getPin());
+		Integer vp = beacon.getVerifyPin();
+		verify = (vp != null) ? new PinStatusProp(c, vp) : null;
 	}
 
 	/** Poll the controller */
 	@Override
 	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
-		prop.encodeQuery(op, tx_buf);
+		if (relay_done)
+			verify.encodeQuery(op, tx_buf);
+		else
+			relay.encodeQuery(op, tx_buf);
 		setPolling(false);
 	}
 
 	/** Get the property */
 	@Override
 	protected NatchProp getProp() {
-		return prop;
+		return (relay_done) ? verify : relay;
 	}
 
 	/** Handle received property */
 	@Override
 	protected void handleReceived(Operation op, NatchProp pr) {
-		assert pr == prop;
-		beacon.setFlashingNotify(prop.getStatus());
-		setDone(true);
+		if (pr == relay && verify != null)
+			relay_done = true;
+		else
+			setDone(true);
+	}
+
+	/** Get the next step */
+	@Override
+	public OpStep next() {
+		if (done) {
+			boolean rs = relay.getStatus();
+			boolean vs = (verify != null)
+				? verify.getStatus()
+				: false;
+			BeaconState bs = beacon.getBeaconState(rs, vs);
+			beacon.setStateNotify(bs);
+			return null;
+		} else
+			return this;
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2020  Minnesota Department of Transportation
+ * Copyright (C) 2015-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ public class OpSendSensorSettings extends OpDR500 {
 
 	/** Create a new operation to send settings to a sensor */
 	public OpSendSensorSettings(ControllerImpl c) {
-		this(PriorityLevel.DOWNLOAD, c);
+		this(PriorityLevel.SETTINGS, c);
 	}
 
 	/** Create the first phase of the operation */

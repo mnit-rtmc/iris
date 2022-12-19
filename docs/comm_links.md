@@ -2,21 +2,21 @@
 
 Select `View ➔ Maintenance ➔ Comm Links` menu item
 
-A **comm link** is a network connection to an external [device] or system.  IRIS
-is capable of supporting thousands of simultaneous comm links.
+A **comm link** is a network connection to field [device]s or external system
+**feeds**. IRIS is capable of supporting thousands of simultaneous comm links.
 
-## URI
+`Description`: A short text description of the comm link.
 
-The **URI** includes a DNS host name or network IP address, and port number,
-using the standard `host:port` convention.  It can also contain an optional
-**scheme** prefix, which can be either `udp://`, `tcp://` or `modem://`.  If
-present, the scheme will override the _default scheme_ for the selected
-protocol.  For example, to use the [Pelco-D](#pelco-d) protocol over TCP
-(instead of the default UDP), prepend `tcp://` to the URI.
+`URI`: The _Uniform Resource Identifier_ includes a DNS host name or network IP
+address, and port number, using the standard `host:port` convention.  It can
+also contain an optional **scheme** prefix, which can be either `udp://`,
+`tcp://` or `modem://`.  If present, the scheme will override the _default
+scheme_ for the selected protocol.  For example, to use the [Pelco-D](#pelco-d)
+protocol over TCP (instead of the default UDP), prepend `tcp://` to the URI.
 
-## Poll Enabled
+`Poll Enabled`: Polling can be disabled using this value.
 
-Polling can be disabled using this value.
+`Comm Config`: Configuration of properties shared among multiple comm links.
 
 # Comm Config
 
@@ -75,9 +75,9 @@ Up to 4 detectors can be associated with each [controller], using [IO pin]s
 
 ### CAP
 
-The Common Alerting Protocol [CAP] is used for polling feeds such as the
-Integrated Public Alert and Warning System [IPAWS].  [Alerts] can be used to
-automatically post weather and other messages to Dynamic Message Signs.  For
+The Common Alerting Protocol [CAP] is used for polling external feeds such as
+the Integrated Public Alert and Warning System [IPAWS].  [Alerts] can be used
+to automatically post weather and other messages to Dynamic Message Signs.  For
 IPAWS, this requires an `HTTPS` URI provided by the Federal Emergency Management
 Agency and a [controller] set to `ACTIVE` condition.
 
@@ -87,10 +87,7 @@ The `cbw` protocol can be used for [beacons], using a Control-By-Web controller.
 The _default scheme_ is `http`.  _Multi-drop_ is not supported.  Depending on
 the model, up to 16 [beacons] can be associated with each [controller].
 
-The [IO Pin]s are used for controlling relays.  Beacons can also have associated
-verify circuits, with an output pin to energize the circuit and a matching
-digital input to verify it.  The verify pin can be the same as the flasher pin,
-if they are wired together.
+The [IO Pin]s are outputs for controlling relays.
 
 | Model Number | IO Pins |
 |--------------|---------|
@@ -101,6 +98,11 @@ if they are wired together.
 | X-410        | 1 - 4   |
 | X-WR-10R12   | 1 - 10  |
 | X-332        | 1 - 16  |
+
+### ClearGuide
+
+The `clearguide` protocol can be used for to connect with a [ClearGuide]
+external system feed.
 
 ### Cohu
 
@@ -216,52 +218,31 @@ The `msgfeed` protocol can be used to interface with an external system that
 generates [DMS] messages.  Periodically, IRIS will poll the URI (using `http`)
 for DMS messages.
 
-#### Msg-Feed Format
-
 The external system should respond with an ASCII text file, with one line per
-message to be deployed.
+message to be deployed.  Each line contains 3 fields: `dms`, `message` and
+`expire`, separated by tab characters `\t` (ASCII 0x09), and terminated with a
+single newline character `\n` (ASCII 0x0A).
 
-Each line must contain 3 fields, separated by tab characters `\t` (ASCII 0x09),
-and terminated with a single newline character `\n` (ASCII 0x0A).  The fields
-are **DMS name**, [MULTI] **string**, and **expiration time**.  The _DMS name_
-must exactly match one of the DMS as identified by IRIS.  The _MULTI string_
-specifies a message to display on the sign, using the _MULTI_ markup language.
-The _expiration time_ field indicates the date and time that the message should
-expire, in [RFC 3339] format, with `full-date` and `full-time` separated by a
-space instead of `T`.
 ```
-V66E37	CRASH[nl]5 MILES AHEAD[nl]LEFT LANE CLOSED	2019-10-02 11:37:00-05:00
+V66E37\tSNOW PLOW[nl]AHEAD[nl]USE CAUTION\t2022-10-02 11:37:00-05:00
 ```
 
-#### Msg-Feed Action Plan
+`dms`: Name of the sign to deploy.  Must be a member of a sign group referenced
+by a [DMS action].  Additionally, that action must be associated with the
+current phase of an active [action plan].  The [message pattern] of the
+_DMS action_ must be a `feed` [action tag].  For example, if the `msgfeed`
+_Comm Link_ name is `XYZ`, then the pattern must be `[feedXYZ]`.
 
-An [action plan] is required to associate a [DMS action] with the feed.  The
-_DMS action_ must have a [quick message] with a `feed` [action tag]:
+`multi`: Message to deploy, using the [MULTI] markup language.  Each line of
+the message must be defined in the sign's message library.  This check allows
+only "administrator-approved" messages, but it can be disabled by changing the
+`msg_feed_verify` [system attribute] to `false`.  **WARNING**: only disable
+this check if the message feed host is fully trusted, and there is no
+possibility of man-in-the-middle attacks.
 
-`[feed` *n* `]`
-
-So, if the _message feed_ is on a _Comm Link_ called `LFEED`, then the quick
-message [MULTI] string must be `[feedLFEED]`.  Also, the _action plan_ must be
-active and deployed.  This requirement allows only administrator-approved DMS to
-be controlled by the message feed.
-
-#### Msg-Feed Text
-
-All messages used by the feed must be defined in the DMS message library.  This
-requirement allows only administrator-approved messages to be deployed by the
-_message feed_.  In some circumstances, it may be appropriate to disable this
-checking.  For example, if the message feed host is fully trusted and there is
-no possibility of man-in-the-middle attacks between IRIS and the feed host.  In
-this case the `msg_feed_verify` [system attribute] can be set to `false` to
-disable this check.
-
-#### Msg-Feed Beacons
-
-To activate DMS [beacons] through a message feed, configure 2 message feeds.
-One is for DMS containing messages with activated beacons and the other for
-messages with deactivated beacons.  There is no way to control which message
-feed is executed first, so each message feed must list each DMS and at least one
-of the message feeds must contain a blank _MULTI_ for each DMS.
+`expire`: Date/time when the message will expire, using [RFC 3339]
+`full-date` / `full-time` separated by a space.  The message will not be
+displayed after this time.  Leave `expire` blank to cancel a previous message.
 
 ### Natch
 
@@ -368,6 +349,7 @@ camera can be associated with each [controller], using [IO pin] 1.
 [camera keyboard]: cameras.html#camera-keyboards
 [CAP]: http://docs.oasis-open.org/emergency/cap/v1.2/CAP-v1.2.html
 [changeable LCS]: lcs.html#changeable-lcs
+[ClearGuide]: clearguide.html
 [controller]: controllers.html
 [device]: controllers.html#devices
 [DMS]: dms.html
@@ -380,12 +362,12 @@ camera can be associated with each [controller], using [IO pin] 1.
 [IO pin]: controllers.html#io-pins
 [IPAWS]: https://www.fema.gov/emergency-managers/practitioners/integrated-public-alert-warning-system
 [LCS]: lcs.html
+[message pattern]: message_patterns.html
 [monstream]: video.html#monstream
-[MULTI]: dms.html#multi
+[MULTI]: multi.html
 [Natch protocol]: natch.html
 [parking area]: parking_areas.html
 [PTZ]: cameras.html#pan-tilt-and-zoom
-[quick message]: dms.html#quick-messages
 [ramp meters]: ramp_meters.html
 [RFC 3339]: https://tools.ietf.org/html/rfc3339#section-5.6
 [RWIS]: rwis.html

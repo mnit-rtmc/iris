@@ -97,7 +97,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		DMSImpl.loadAll();
 		SignGroupImpl.loadAll();
 		DmsSignGroupImpl.loadAll();
-		QuickMessageImpl.loadAll();
+		MsgPatternImpl.loadAll();
 		SignTextImpl.loadAll();
 		GateArmArrayImpl.loadAll();
 		GateArmImpl.loadAll();
@@ -315,11 +315,11 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		      : null;
 	}
 
-	/** Lookup a quick message */
-	static protected QuickMessageImpl lookupQuickMessage(String name) {
-		SonarObject so = lookupObject(QuickMessageImpl.SONAR_TYPE,name);
-		return (so instanceof QuickMessageImpl)
-		      ? (QuickMessageImpl) so
+	/** Lookup a message pattern */
+	static protected MsgPatternImpl lookupMsgPattern(String name) {
+		SonarObject so = lookupObject(MsgPatternImpl.SONAR_TYPE, name);
+		return (so instanceof MsgPatternImpl)
+		      ? (MsgPatternImpl) so
 		      : null;
 	}
 
@@ -538,17 +538,20 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		      : null;
 	}
 
-	/** Truncate a string to a given maximum length.
-	 * @param arg String to be truncated.
+	/** Trim and truncate a string to a given maximum length.
+	 * @param value String to be truncated (may be null).
 	 * @param maxlen Maximum length of string (characters).
-	 * @return Truncated string, or null. */
-	static protected String truncateString(String arg, int maxlen) {
-		if (arg != null) {
-			return (arg.length() <= maxlen)
-			      ? arg
-			      : arg.substring(0, maxlen);
-		} else
-			return null;
+	 * @return Trimmed, truncated string, or null. */
+	static protected String trimTruncate(String value, int maxlen) {
+		if (value != null) {
+			String v = value.trim();
+			if (v.length() > 0) {
+				return (v.length() <= maxlen)
+				      ? v
+				      : v.substring(0, maxlen);
+			}
+		}
+		return null;
 	}
 
 	/** Log an event */

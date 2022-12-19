@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,17 +28,6 @@ import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
  * @author Douglas Lau
  */
 public class PropSetup extends IPanel {
-
-	/** Parse an integer */
-	static private Integer parseInt(JTextField txt) {
-		try {
-			String t = txt.getText().trim();
-			return Integer.parseInt(t);
-		}
-		catch (NumberFormatException e) {
-			return null;
-		}
-	}
 
 	/** Format an integer field */
 	static private void formatInt(JTextField txt, Integer v) {

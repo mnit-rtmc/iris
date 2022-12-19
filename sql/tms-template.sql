@@ -6,11 +6,11 @@
 -- update data (usually blank).
 --
 -- PAYLOAD: 'publish ' || name, 'video_loss' (camera)
---          'fail_time' (controller)
---          'setup' (controller)
+--          'setup', 'fail_time' (controller)
 --          'connected' (comm_link)
 --          'auto_fail' (detector)
---          'msg_user', 'msg_sched', 'msg_current', 'expire_time' (dms)
+--          'msg_user', 'msg_sched', 'msg_current', 'expire_time',
+--              'status', 'stuck_pixels' (dms)
 --          'settings', 'sample' (weather_sensor)
 --          'time_stamp' (parking_area)
 --          id (road_class)
@@ -160,7 +160,7 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.34.0
+database_version	5.36.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_secs	60
@@ -169,28 +169,17 @@ dict_banned_scheme	0
 dms_brightness_enable	true
 dms_comm_loss_enable	true
 dms_composer_edit_mode	1
-dms_default_justification_line	3
-dms_default_justification_page	2
-dms_duration_enable	true
-dms_font_selection_enable	false
 dms_gps_jitter_m	100
 dms_high_temp_cutoff	60
 dms_lamp_test_timeout_secs	30
-dms_manufacturer_enable	true
-dms_max_lines	3
-dms_message_min_pages	1
-dms_page_off_default_secs	0.0
-dms_page_on_default_secs	2.0
 dms_page_on_max_secs	10.0
 dms_page_on_min_secs	0.5
-dms_page_on_selection_enable	false
 dms_pixel_off_limit	2
 dms_pixel_on_limit	1
 dms_pixel_maint_threshold	35
 dms_pixel_status_enable	true
 dms_pixel_test_timeout_secs	30
 dms_querymsg_enable	false
-dms_quickmsg_store_enable	false
 dms_reset_enable	false
 dms_send_confirmation_enable	false
 dms_update_font_table	true
@@ -452,12 +441,12 @@ map_extent
 meter_action
 modem
 monitor_style
+msg_pattern
 parking_area
 permission
 plan_phase
 play_list
 privilege
-quick_message
 ramp_meter
 r_node
 road
@@ -617,7 +606,7 @@ PRV_0058	dms_control	dms	msgUser	t
 PRV_0059	dms_control	dms	deviceRequest	t
 PRV_0060	dms_control	sign_message		t
 PRV_0061	dms_policy	dms_sign_group		t
-PRV_0062	dms_policy	quick_message		t
+PRV_0062	dms_policy	msg_pattern		t
 PRV_0063	dms_policy	sign_group		t
 PRV_0064	dms_policy	sign_text		t
 PRV_0065	dms_policy	word		t
@@ -627,7 +616,7 @@ PRV_0068	dms_tab	font		f
 PRV_0069	dms_tab	glyph		f
 PRV_0070	dms_tab	gps		f
 PRV_0071	dms_tab	graphic		f
-PRV_0072	dms_tab	quick_message		f
+PRV_0072	dms_tab	msg_pattern		f
 PRV_0073	dms_tab	sign_config		f
 PRV_007A	dms_tab	sign_detail		f
 PRV_0074	dms_tab	sign_group		f
@@ -674,8 +663,8 @@ PRV_0107	lcs_tab	lane_use_multi		f
 PRV_0108	lcs_tab	lcs		f
 PRV_0109	lcs_tab	lcs_array		f
 PRV_0110	lcs_tab	lcs_indication		f
-PRV_0111	lcs_tab	quick_message		f
-PRV_0112	lcs_tab	lane_marking		f
+PRV_0111	lcs_tab	lane_marking		f
+PRV_0112	lcs_tab	msg_pattern		f
 PRV_0113	meter_admin	ramp_meter		t
 PRV_0114	meter_control	ramp_meter	mLock	t
 PRV_0115	meter_control	ramp_meter	rateNext	t
@@ -1278,8 +1267,8 @@ GRANT SELECT ON action_plan_event_view TO PUBLIC;
 -- Comm Protocols, Comm Links, Modems, Cabinets, Controllers
 --
 CREATE TABLE iris.comm_protocol (
-	id SMALLINT PRIMARY KEY,
-	description VARCHAR(20) NOT NULL
+    id SMALLINT PRIMARY KEY,
+    description VARCHAR(20) NOT NULL
 );
 
 COPY iris.comm_protocol (id, description) FROM stdin;
@@ -1330,32 +1319,31 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 \.
 
 CREATE TABLE iris.comm_config (
-	name VARCHAR(10) PRIMARY KEY,
-	description VARCHAR(20) NOT NULL UNIQUE,
-	protocol SMALLINT NOT NULL REFERENCES iris.comm_protocol(id),
-	modem BOOLEAN NOT NULL,
-	timeout_ms INTEGER NOT NULL,
-	poll_period_sec INTEGER NOT NULL,
-	long_poll_period_sec INTEGER NOT NULL,
-	idle_disconnect_sec INTEGER NOT NULL,
-	no_response_disconnect_sec INTEGER NOT NULL
+    name VARCHAR(10) PRIMARY KEY,
+    description VARCHAR(20) NOT NULL UNIQUE,
+    protocol SMALLINT NOT NULL REFERENCES iris.comm_protocol(id),
+    modem BOOLEAN NOT NULL,
+    timeout_ms INTEGER NOT NULL,
+    poll_period_sec INTEGER NOT NULL,
+    long_poll_period_sec INTEGER NOT NULL,
+    idle_disconnect_sec INTEGER NOT NULL,
+    no_response_disconnect_sec INTEGER NOT NULL
 );
 
 ALTER TABLE iris.comm_config
-	ADD CONSTRAINT poll_period_ck
-	CHECK (poll_period_sec >= 5
-	       AND long_poll_period_sec >= poll_period_sec);
+    ADD CONSTRAINT poll_period_ck
+    CHECK (poll_period_sec >= 5 AND long_poll_period_sec >= poll_period_sec);
 
 CREATE TRIGGER comm_config_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.comm_config
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW comm_config_view AS
-	SELECT cc.name, cc.description, cp.description AS protocol, modem,
-	       timeout_ms, poll_period_sec, long_poll_period_sec,
-	       idle_disconnect_sec, no_response_disconnect_sec
-	FROM iris.comm_config cc
-	JOIN iris.comm_protocol cp ON cc.protocol = cp.id;
+    SELECT cc.name, cc.description, cp.description AS protocol, modem,
+           timeout_ms, poll_period_sec, long_poll_period_sec,
+           idle_disconnect_sec, no_response_disconnect_sec
+    FROM iris.comm_config cc
+    JOIN iris.comm_protocol cp ON cc.protocol = cp.id;
 GRANT SELECT ON comm_config_view TO PUBLIC;
 
 CREATE TABLE iris.comm_link (
@@ -1414,12 +1402,12 @@ CREATE VIEW modem_view AS
 GRANT SELECT ON modem_view TO PUBLIC;
 
 CREATE TABLE iris.cabinet_style (
-	name VARCHAR(20) PRIMARY KEY,
-	police_panel_pin_1 INTEGER,
-	police_panel_pin_2 INTEGER,
-	watchdog_reset_pin_1 INTEGER,
-	watchdog_reset_pin_2 INTEGER,
-	dip INTEGER
+    name VARCHAR(20) PRIMARY KEY,
+    police_panel_pin_1 INTEGER,
+    police_panel_pin_2 INTEGER,
+    watchdog_reset_pin_1 INTEGER,
+    watchdog_reset_pin_2 INTEGER,
+    dip INTEGER
 );
 
 CREATE TRIGGER cabinet_style_notify_trig
@@ -1427,14 +1415,14 @@ CREATE TRIGGER cabinet_style_notify_trig
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW cabinet_style_view AS
-	SELECT name, police_panel_pin_1, police_panel_pin_2,
-	       watchdog_reset_pin_1, watchdog_reset_pin_2, dip
-	FROM iris.cabinet_style;
+    SELECT name, police_panel_pin_1, police_panel_pin_2,
+           watchdog_reset_pin_1, watchdog_reset_pin_2, dip
+    FROM iris.cabinet_style;
 GRANT SELECT ON cabinet_style_view TO PUBLIC;
 
 CREATE TABLE iris.condition (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(12) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(12) NOT NULL
 );
 
 COPY iris.condition (id, description) FROM stdin;
@@ -2080,7 +2068,7 @@ GRANT SELECT ON alarm_event_view TO PUBLIC;
 --
 CREATE TABLE iris.beacon_state (
     id INTEGER PRIMARY KEY,
-    description VARCHAR(16) NOT NULL
+    description VARCHAR(18) NOT NULL
 );
 
 COPY iris.beacon_state (id, description) FROM stdin;
@@ -2091,6 +2079,7 @@ COPY iris.beacon_state (id, description) FROM stdin;
 4	Flashing
 5	Fault: No Verify
 6	Fault: Stuck On
+7	Flashing: External
 \.
 
 CREATE TABLE iris._beacon (
@@ -2099,6 +2088,7 @@ CREATE TABLE iris._beacon (
     message VARCHAR(128) NOT NULL,
     notes VARCHAR(128) NOT NULL,
     verify_pin INTEGER,
+    ext_mode BOOLEAN NOT NULL,
     state INTEGER NOT NULL REFERENCES iris.beacon_state
 );
 
@@ -2126,8 +2116,8 @@ CREATE TRIGGER beacon_table_notify_trig
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.beacon AS
-    SELECT b.name, geo_loc, controller, pin, notes, message, verify_pin, preset,
-           state
+    SELECT b.name, geo_loc, controller, pin, notes, message, verify_pin,
+           ext_mode, preset, state
     FROM iris._beacon b
     JOIN iris.controller_io cio ON b.name = cio.name
     JOIN iris._device_preset p ON b.name = p.name;
@@ -2139,9 +2129,10 @@ BEGIN
         VALUES (NEW.name, 'beacon', NEW.controller, NEW.pin);
     INSERT INTO iris._device_preset (name, preset)
         VALUES (NEW.name, NEW.preset);
-    INSERT INTO iris._beacon (name, geo_loc, notes, message, verify_pin, state)
+    INSERT INTO iris._beacon (name, geo_loc, notes, message, verify_pin,
+                              ext_mode, state)
         VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.message,
-                NEW.verify_pin, NEW.state);
+                NEW.verify_pin, NEW.ext_mode, NEW.state);
     RETURN NEW;
 END;
 $beacon_insert$ LANGUAGE plpgsql;
@@ -2165,6 +2156,7 @@ BEGIN
            notes = NEW.notes,
            message = NEW.message,
            verify_pin = NEW.verify_pin,
+           ext_mode = NEW.ext_mode,
            state = NEW.state
      WHERE name = OLD.name;
     RETURN NEW;
@@ -2183,8 +2175,8 @@ CREATE VIEW beacon_view AS
     SELECT b.name, b.notes, b.message, p.camera, p.preset_num, b.geo_loc,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
            l.landmark, l.lat, l.lon, l.corridor, l.location,
-           b.controller, b.pin, b.verify_pin, ctr.comm_link, ctr.drop_id,
-           ctr.condition, bs.description AS state
+           b.controller, b.pin, b.verify_pin, b.ext_mode,
+           ctr.comm_link, ctr.drop_id, ctr.condition, bs.description AS state
     FROM iris.beacon b
     JOIN iris.beacon_state bs ON b.state = bs.id
     LEFT JOIN iris.camera_preset p ON b.preset = p.name
@@ -2518,7 +2510,7 @@ CREATE VIEW gps_view AS
 GRANT SELECT ON gps_view TO PUBLIC;
 
 --
--- DMS, Graphic, Font, Sign Message, Quick Message, Word, Color Scheme
+-- DMS, Graphic, Font, Sign Message, Message Pattern, Word, Color Scheme
 --
 CREATE TABLE iris.font (
     name VARCHAR(16) PRIMARY KEY,
@@ -2746,43 +2738,42 @@ CREATE VIEW sign_detail_view AS
 GRANT SELECT ON sign_detail_view TO PUBLIC;
 
 CREATE TABLE iris.sign_config (
-	name VARCHAR(16) PRIMARY KEY,
-	face_width INTEGER NOT NULL,
-	face_height INTEGER NOT NULL,
-	border_horiz INTEGER NOT NULL,
-	border_vert INTEGER NOT NULL,
-	pitch_horiz INTEGER NOT NULL,
-	pitch_vert INTEGER NOT NULL,
-	pixel_width INTEGER NOT NULL,
-	pixel_height INTEGER NOT NULL,
-	char_width INTEGER NOT NULL,
-	char_height INTEGER NOT NULL,
-	monochrome_foreground INTEGER NOT NULL,
-	monochrome_background INTEGER NOT NULL,
-	color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
-	default_font VARCHAR(16) REFERENCES iris.font,
-	exclude_font VARCHAR(16) REFERENCES iris.font,
-	module_width INTEGER,
-	module_height INTEGER
+    name VARCHAR(16) PRIMARY KEY,
+    face_width INTEGER NOT NULL,
+    face_height INTEGER NOT NULL,
+    border_horiz INTEGER NOT NULL,
+    border_vert INTEGER NOT NULL,
+    pitch_horiz INTEGER NOT NULL,
+    pitch_vert INTEGER NOT NULL,
+    pixel_width INTEGER NOT NULL,
+    pixel_height INTEGER NOT NULL,
+    char_width INTEGER NOT NULL,
+    char_height INTEGER NOT NULL,
+    monochrome_foreground INTEGER NOT NULL,
+    monochrome_background INTEGER NOT NULL,
+    color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
+    default_font VARCHAR(16) REFERENCES iris.font,
+    module_width INTEGER,
+    module_height INTEGER
 );
 
 CREATE TRIGGER sign_config_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris.sign_config
-	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    AFTER INSERT OR UPDATE OR DELETE ON iris.sign_config
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW sign_config_view AS
-	SELECT name, face_width, face_height, border_horiz, border_vert,
-	       pitch_horiz, pitch_vert, pixel_width, pixel_height, char_width,
-	       char_height, monochrome_foreground, monochrome_background,
-	       cs.description AS color_scheme, default_font, exclude_font,
-	       module_width, module_height
-	FROM iris.sign_config
-	JOIN iris.color_scheme cs ON sign_config.color_scheme = cs.id;
+    SELECT name, face_width, face_height, border_horiz, border_vert,
+           pitch_horiz, pitch_vert, pixel_width, pixel_height, char_width,
+           char_height, monochrome_foreground, monochrome_background,
+           cs.description AS color_scheme, default_font,
+           module_width, module_height
+    FROM iris.sign_config
+    JOIN iris.color_scheme cs ON sign_config.color_scheme = cs.id;
 GRANT SELECT ON sign_config_view TO PUBLIC;
 
 CREATE TABLE iris.msg_combining (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(8) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(8) NOT NULL
 );
 
 COPY iris.msg_combining (id, description) FROM stdin;
@@ -2933,54 +2924,53 @@ WEST	W	t
 \.
 
 CREATE TABLE iris.graphic (
-	name VARCHAR(20) PRIMARY KEY,
-	g_number INTEGER NOT NULL UNIQUE,
-	color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
-	height INTEGER NOT NULL,
-	width INTEGER NOT NULL,
-	transparent_color INTEGER,
-	pixels TEXT NOT NULL
+    name VARCHAR(20) PRIMARY KEY,
+    g_number INTEGER NOT NULL UNIQUE,
+    color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
+    height INTEGER NOT NULL,
+    width INTEGER NOT NULL,
+    transparent_color INTEGER,
+    pixels TEXT NOT NULL
 );
 
 CREATE TRIGGER graphic_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris.graphic
-	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    AFTER INSERT OR UPDATE OR DELETE ON iris.graphic
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 ALTER TABLE iris.graphic
-	ADD CONSTRAINT graphic_number_ck
-	CHECK (g_number > 0 AND g_number <= 999);
+    ADD CONSTRAINT graphic_number_ck
+    CHECK (g_number > 0 AND g_number <= 999);
 ALTER TABLE iris.graphic
-	ADD CONSTRAINT graphic_height_ck
-	CHECK (height > 0);
+    ADD CONSTRAINT graphic_height_ck
+    CHECK (height >= 1 AND height <= 144);
 ALTER TABLE iris.graphic
-	ADD CONSTRAINT graphic_width_ck
-	CHECK (width > 0);
+    ADD CONSTRAINT graphic_width_ck
+    CHECK (width >= 1 AND width <= 240);
 
 CREATE VIEW graphic_view AS
-	SELECT name, g_number, cs.description AS color_scheme, height, width,
-	       transparent_color, pixels
-	FROM iris.graphic
-	JOIN iris.color_scheme cs ON graphic.color_scheme = cs.id;
+    SELECT name, g_number, cs.description AS color_scheme, height, width,
+           transparent_color, pixels
+    FROM iris.graphic
+    JOIN iris.color_scheme cs ON graphic.color_scheme = cs.id;
 GRANT SELECT ON graphic_view TO PUBLIC;
 
 CREATE TABLE iris._dms (
-	name VARCHAR(20) PRIMARY KEY,
-	geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
-	notes text NOT NULL,
-	gps VARCHAR(20) REFERENCES iris._gps,
-	static_graphic VARCHAR(20) REFERENCES iris.graphic,
-	purpose INTEGER NOT NULL REFERENCES iris.device_purpose,
-	hidden BOOLEAN NOT NULL,
-	beacon VARCHAR(20) REFERENCES iris._beacon,
-	sign_config VARCHAR(16) REFERENCES iris.sign_config,
-	sign_detail VARCHAR(12) REFERENCES iris.sign_detail,
-	override_font VARCHAR(16) REFERENCES iris.font,
-	override_foreground INTEGER,
-	override_background INTEGER,
-	msg_user VARCHAR(20) REFERENCES iris.sign_message,
-	msg_sched VARCHAR(20) REFERENCES iris.sign_message,
-	msg_current VARCHAR(20) REFERENCES iris.sign_message,
-	expire_time TIMESTAMP WITH time zone
+    name VARCHAR(20) PRIMARY KEY,
+    geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
+    notes VARCHAR(128) NOT NULL,
+    gps VARCHAR(20) REFERENCES iris._gps,
+    static_graphic VARCHAR(20) REFERENCES iris.graphic,
+    purpose INTEGER NOT NULL REFERENCES iris.device_purpose,
+    hidden BOOLEAN NOT NULL,
+    beacon VARCHAR(20) REFERENCES iris._beacon,
+    sign_config VARCHAR(16) REFERENCES iris.sign_config,
+    sign_detail VARCHAR(12) REFERENCES iris.sign_detail,
+    msg_user VARCHAR(20) REFERENCES iris.sign_message,
+    msg_sched VARCHAR(20) REFERENCES iris.sign_message,
+    msg_current VARCHAR(20) REFERENCES iris.sign_message,
+    expire_time TIMESTAMP WITH time zone,
+    status JSONB,
+    stuck_pixels JSONB
 );
 
 ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
@@ -2997,6 +2987,10 @@ BEGIN
         NOTIFY dms, 'msg_current';
     ELSIF (NEW.expire_time IS DISTINCT FROM OLD.expire_time) THEN
         NOTIFY dms, 'expire_time';
+    ELSIF (NEW.status IS DISTINCT FROM OLD.status) THEN
+        NOTIFY dms, 'status';
+    ELSIF (NEW.stuck_pixels IS DISTINCT FROM OLD.stuck_pixels) THEN
+        NOTIFY dms, 'stuck_pixels';
     ELSE
         NOTIFY dms;
     END IF;
@@ -3015,8 +3009,7 @@ CREATE TRIGGER dms_table_notify_trig
 CREATE VIEW iris.dms AS
     SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
            purpose, hidden, beacon, preset, sign_config, sign_detail,
-           override_font, override_foreground, override_background, msg_user,
-           msg_sched, msg_current, expire_time
+           msg_user, msg_sched, msg_current, expire_time, status, stuck_pixels
     FROM iris._dms d
     JOIN iris.controller_io cio ON d.name = cio.name
     JOIN iris._device_preset p ON d.name = p.name;
@@ -3030,13 +3023,13 @@ BEGIN
          VALUES (NEW.name, NEW.preset);
     INSERT INTO iris._dms (
         name, geo_loc, notes, gps, static_graphic, purpose, hidden, beacon,
-        sign_config, sign_detail, override_font, override_foreground,
-        override_background, msg_user, msg_sched, msg_current, expire_time
+        sign_config, sign_detail, msg_user, msg_sched, msg_current,
+        expire_time, status, stuck_pixels
     ) VALUES (
         NEW.name, NEW.geo_loc, NEW.notes, NEW.gps, NEW.static_graphic,
         NEW.purpose, NEW.hidden, NEW.beacon, NEW.sign_config, NEW.sign_detail,
-        NEW.override_font, NEW.override_foreground, NEW.override_background,
-        NEW.msg_user, NEW.msg_sched, NEW.msg_current, NEW.expire_time
+        NEW.msg_user, NEW.msg_sched, NEW.msg_current, NEW.expire_time,
+        NEW.status, NEW.stuck_pixels
     );
     RETURN NEW;
 END;
@@ -3066,13 +3059,12 @@ BEGIN
            beacon = NEW.beacon,
            sign_config = NEW.sign_config,
            sign_detail = NEW.sign_detail,
-           override_font = NEW.override_font,
-           override_foreground = NEW.override_foreground,
-           override_background = NEW.override_background,
            msg_user = NEW.msg_user,
            msg_sched = NEW.msg_sched,
            msg_current = NEW.msg_current,
-           expire_time = NEW.expire_time
+           expire_time = NEW.expire_time,
+           status = NEW.status,
+           stuck_pixels = NEW.stuck_pixels
      WHERE name = OLD.name;
     RETURN NEW;
 END;
@@ -3090,15 +3082,15 @@ CREATE VIEW dms_view AS
     SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.gps,
            d.static_graphic, dp.description AS purpose, d.hidden, d.beacon,
            p.camera, p.preset_num, d.sign_config, d.sign_detail,
-           default_font, override_font, override_foreground,
-           override_background, msg_user, msg_sched, msg_current,
-           expire_time, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
+           default_font, msg_user, msg_sched, msg_current, expire_time,
+           status, stuck_pixels,
+           l.roadway, l.road_dir, l.cross_mod, l.cross_street,
            l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location
     FROM iris.dms d
     LEFT JOIN iris.camera_preset p ON d.preset = p.name
     LEFT JOIN geo_loc_view l ON d.geo_loc = l.name
     LEFT JOIN iris.device_purpose dp ON d.purpose = dp.id
-    LEFT JOIN sign_config_view sc ON d.sign_config = sc.name;
+    LEFT JOIN iris.sign_config sc ON d.sign_config = sc.name;
 GRANT SELECT ON dms_view TO PUBLIC;
 
 CREATE VIEW dms_message_view AS
@@ -3135,21 +3127,21 @@ CREATE VIEW dms_sign_group_view AS
 	JOIN iris.sign_group sg ON d.sign_group = sg.name;
 GRANT SELECT ON dms_sign_group_view TO PUBLIC;
 
-CREATE TABLE iris.quick_message (
-	name VARCHAR(20) PRIMARY KEY,
-	-- FIXME: drop sign_group?
-	sign_group VARCHAR(20) REFERENCES iris.sign_group,
-	sign_config VARCHAR(16) REFERENCES iris.sign_config,
-	msg_combining INTEGER NOT NULL REFERENCES iris.msg_combining,
-	multi VARCHAR(1024) NOT NULL
+CREATE TABLE iris.msg_pattern (
+    name VARCHAR(20) PRIMARY KEY,
+    sign_config VARCHAR(16) REFERENCES iris.sign_config,
+    -- FIXME: replace sign_group with hashtag
+    sign_group VARCHAR(20) REFERENCES iris.sign_group,
+    msg_combining INTEGER NOT NULL REFERENCES iris.msg_combining,
+    multi VARCHAR(1024) NOT NULL
 );
 
-CREATE VIEW quick_message_view AS
-	SELECT name, sign_group, sign_config, mc.description AS msg_combining,
-	       multi
-	FROM iris.quick_message qm
-	LEFT JOIN iris.msg_combining mc ON qm.msg_combining = mc.id;
-GRANT SELECT ON quick_message_view TO PUBLIC;
+CREATE VIEW msg_pattern_view AS
+    SELECT name, sign_config, sign_group, mc.description AS msg_combining,
+           multi
+    FROM iris.msg_pattern mp
+    LEFT JOIN iris.msg_combining mc ON mp.msg_combining = mc.id;
+GRANT SELECT ON msg_pattern_view TO PUBLIC;
 
 CREATE TABLE iris.sign_text (
 	name VARCHAR(20) PRIMARY KEY,
@@ -3175,19 +3167,19 @@ CREATE VIEW sign_group_text_view AS
 GRANT SELECT ON sign_group_text_view TO PUBLIC;
 
 CREATE TABLE iris.dms_action (
-	name VARCHAR(30) PRIMARY KEY,
-	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group,
-	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
-	quick_message VARCHAR(20) REFERENCES iris.quick_message,
-	beacon_enabled BOOLEAN NOT NULL,
-	msg_priority INTEGER NOT NULL
+    name VARCHAR(30) PRIMARY KEY,
+    action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+    sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group,
+    phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
+    msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern,
+    beacon_enabled BOOLEAN NOT NULL,
+    msg_priority INTEGER NOT NULL
 );
 
 CREATE VIEW dms_action_view AS
-	SELECT name, action_plan, sign_group, phase, quick_message,
-	       beacon_enabled, msg_priority
-	FROM iris.dms_action;
+    SELECT name, action_plan, sign_group, phase, msg_pattern, beacon_enabled,
+           msg_priority
+    FROM iris.dms_action;
 GRANT SELECT ON dms_action_view TO PUBLIC;
 
 CREATE TABLE event.sign_event (
@@ -4170,10 +4162,10 @@ COPY iris.alert_period(id, description) FROM stdin;
 \.
 
 CREATE TABLE iris.alert_message (
-	name VARCHAR(20) PRIMARY KEY,
-	alert_config VARCHAR(20) NOT NULL REFERENCES iris.alert_config,
-	alert_period INTEGER NOT NULL REFERENCES iris.alert_period,
-	quick_message VARCHAR(20) REFERENCES iris.quick_message
+    name VARCHAR(20) PRIMARY KEY,
+    alert_config VARCHAR(20) NOT NULL REFERENCES iris.alert_config,
+    alert_period INTEGER NOT NULL REFERENCES iris.alert_period,
+    msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern
 );
 
 CREATE TABLE cap.alert (
@@ -4476,11 +4468,11 @@ CREATE TABLE iris.lane_use_multi (
     name VARCHAR(10) PRIMARY KEY,
     indication INTEGER NOT NULL REFERENCES iris.lane_use_indication,
     msg_num INTEGER,
-    quick_message VARCHAR(20) REFERENCES iris.quick_message
+    msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern
 );
 
 CREATE VIEW lane_use_multi_view AS
-    SELECT name, indication, msg_num, quick_message
+    SELECT name, indication, msg_num, msg_pattern
     FROM iris.lane_use_multi;
 GRANT SELECT ON lane_use_multi_view TO PUBLIC;
 
@@ -4631,8 +4623,8 @@ COPY iris.meter_algorithm (id, description) FROM stdin;
 \.
 
 CREATE TABLE iris.meter_lock (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(16) NOT NULL
 );
 
 COPY iris.meter_lock (id, description) FROM stdin;
@@ -4647,7 +4639,7 @@ COPY iris.meter_lock (id, description) FROM stdin;
 CREATE TABLE iris._ramp_meter (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-    notes text NOT NULL,
+    notes VARCHAR(128) NOT NULL,
     meter_type INTEGER NOT NULL REFERENCES iris.meter_type(id),
     storage INTEGER NOT NULL,
     max_wait INTEGER NOT NULL,
@@ -4662,10 +4654,10 @@ ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
 CREATE FUNCTION iris.ramp_meter_notify() RETURNS TRIGGER AS
-	$ramp_meter_notify$
+    $ramp_meter_notify$
 BEGIN
-	NOTIFY ramp_meter;
-	RETURN NULL; -- AFTER trigger return is ignored
+    NOTIFY ramp_meter;
+    RETURN NULL; -- AFTER trigger return is ignored
 END;
 $ramp_meter_notify$ LANGUAGE plpgsql;
 
@@ -4753,10 +4745,10 @@ CREATE VIEW ramp_meter_view AS
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
 
 CREATE TABLE iris.meter_action (
-	name VARCHAR(30) PRIMARY KEY,
-	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter,
-	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
+    name VARCHAR(30) PRIMARY KEY,
+    action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+    ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter,
+    phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
 CREATE VIEW meter_action_view AS
@@ -5085,41 +5077,41 @@ CREATE VIEW price_message_event_view AS
 	ON price_message_event.event_desc_id = event_description.event_desc_id;
 GRANT SELECT ON price_message_event_view TO PUBLIC;
 
-CREATE VIEW iris.quick_message_priced AS
-    SELECT name AS quick_message, 'priced'::VARCHAR(6) AS state,
+CREATE VIEW iris.msg_pattern_priced AS
+    SELECT name AS msg_pattern, 'priced'::VARCHAR(6) AS state,
         unnest(string_to_array(substring(multi FROM '%tzp,#"[^]]*#"]%' FOR '#'),
         ',')) AS toll_zone
-    FROM iris.quick_message WHERE multi LIKE '%tzp%';
+    FROM iris.msg_pattern WHERE multi LIKE '%tzp%';
 
-CREATE VIEW iris.quick_message_open AS
-    SELECT name AS quick_message, 'open'::VARCHAR(6) AS state,
+CREATE VIEW iris.msg_pattern_open AS
+    SELECT name AS msg_pattern, 'open'::VARCHAR(6) AS state,
         unnest(string_to_array(substring(multi FROM '%tzo,#"[^]]*#"]%' FOR '#'),
         ',')) AS toll_zone
-    FROM iris.quick_message WHERE multi LIKE '%tzo%';
+    FROM iris.msg_pattern WHERE multi LIKE '%tzo%';
 
-CREATE VIEW iris.quick_message_closed AS
-    SELECT name AS quick_message, 'closed'::VARCHAR(6) AS state,
+CREATE VIEW iris.msg_pattern_closed AS
+    SELECT name AS msg_pattern, 'closed'::VARCHAR(6) AS state,
         unnest(string_to_array(substring(multi FROM '%tzc,#"[^]]*#"]%' FOR '#'),
         ',')) AS toll_zone
-    FROM iris.quick_message WHERE multi LIKE '%tzc%';
+    FROM iris.msg_pattern WHERE multi LIKE '%tzc%';
 
-CREATE VIEW iris.quick_message_toll_zone AS
-    SELECT quick_message, state, toll_zone
-        FROM iris.quick_message_priced UNION ALL
-    SELECT quick_message, state, toll_zone
-        FROM iris.quick_message_open UNION ALL
-    SELECT quick_message, state, toll_zone
-        FROM iris.quick_message_closed;
+CREATE VIEW iris.msg_pattern_toll_zone AS
+    SELECT msg_pattern, state, toll_zone
+        FROM iris.msg_pattern_priced UNION ALL
+    SELECT msg_pattern, state, toll_zone
+        FROM iris.msg_pattern_open UNION ALL
+    SELECT msg_pattern, state, toll_zone
+        FROM iris.msg_pattern_closed;
 
 CREATE VIEW dms_toll_zone_view AS
-    SELECT dms, state, toll_zone, action_plan, dms_action_view.quick_message
-    FROM dms_action_view
-    JOIN iris.dms_sign_group
-    ON dms_action_view.sign_group = dms_sign_group.sign_group
-    JOIN iris.quick_message
-    ON dms_action_view.quick_message = quick_message.name
-    JOIN iris.quick_message_toll_zone
-    ON dms_action_view.quick_message = quick_message_toll_zone.quick_message;
+    SELECT dms, tz.state, toll_zone, action_plan, da.msg_pattern
+    FROM dms_action_view da
+    JOIN iris.dms_sign_group dsg
+    ON da.sign_group = dsg.sign_group
+    JOIN iris.msg_pattern mp
+    ON da.msg_pattern = mp.name
+    JOIN iris.msg_pattern_toll_zone tz
+    ON da.msg_pattern = tz.msg_pattern;
 GRANT SELECT ON dms_toll_zone_view TO PUBLIC;
 
 --

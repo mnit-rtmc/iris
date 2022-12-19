@@ -12,13 +12,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.wysiwyg.selector;
 
 import javax.swing.SwingWorker;
 
-import us.mn.state.dot.tms.QuickMessage;
-import us.mn.state.dot.tms.QuickMessageHelper;
+import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.wysiwyg.selector.WMsgSelectorForm;
 import us.mn.state.dot.tms.utils.I18N;
@@ -34,35 +33,36 @@ public class WMsgSelectorMessageProcess extends SwingWorker<Boolean,Boolean> {
 	protected final Session session;
 	protected final String messageName;
 	protected WMsgSelectorForm selectorForm;
-	
+
 	public WMsgSelectorMessageProcess(Session s, String mName, WMsgSelectorForm sForm) {
 		this.session = s;
 		this.messageName = mName;
 		this.selectorForm = sForm;
 	}
-	
+
 	/** Check that the message exists */
 	protected Boolean doInBackground() throws Exception {
 		// lookup the message, set the selectedMessage in the form (null or
 		// not), and return whether or not the message exists 
-		QuickMessage qm = QuickMessageHelper.lookup(messageName);
-		selectorForm.setSelectedMessage(qm);
-		return qm != null;
+		MsgPattern pat = MsgPatternHelper.lookup(messageName);
+		selectorForm.setSelectedMessage(pat);
+		return pat != null;
 	}
-	
+
 	protected void done() {
 		try {
-			Boolean qmExists = get();
+			Boolean exists = get();
 			String selectMsg = I18N.get("wysiwyg.selector.select_sign");
 			String errorMsg = I18N.get("wysiwyg.selector.error");
-			if (!qmExists && !messageName.equals(selectMsg)
-					&& !messageName.equals(errorMsg)) {
+			if (!exists && !messageName.equals(selectMsg)
+				&& !messageName.equals(errorMsg))
+			{
 				// if the message doesn't exist, show a warning
 				session.getDesktop().show(new WMsgWarningForm(
-						session, selectorForm, "QuickMessage"));
+					session, selectorForm, "MsgPattern"));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}	
+	}
 }

@@ -108,7 +108,6 @@ struct SignDetail {
 
 /// Data needed for rendering sign messages
 struct MsgData {
-    attrs: HashMap<String, String>,
     configs: HashMap<String, SignConfig>,
     fonts: FontCache,
     graphics: GraphicCache,
@@ -370,19 +369,15 @@ impl SignConfig {
         let color_ctx = ColorCtx::new(color_scheme, fg_default, bg_default);
         let char_width = self.char_width()?;
         let char_height = self.char_height()?;
-        let page_on_time_ds = msg_data.page_on_default_ds();
-        let page_off_time_ds = msg_data.page_off_default_ds();
-        let just_page = msg_data.page_justification_default();
-        let just_line = msg_data.line_justification_default();
         let fname = self.default_font();
         let font_num = msg_data.font_default(fname)?;
         Ok(Pages::builder(width, height)
             .with_color_ctx(color_ctx)
             .with_char_size(char_width, char_height)
-            .with_page_on_time_ds(page_on_time_ds)
-            .with_page_off_time_ds(page_off_time_ds)
-            .with_justification_page(just_page)
-            .with_justification_line(just_line)
+            .with_page_on_time_ds(28)
+            .with_page_off_time_ds(0)
+            .with_justification_page(JustificationPage::Top)
+            .with_justification_line(JustificationLine::Center)
             .with_font_num(font_num)
             .with_fonts(Some(msg_data.fonts()))
             .with_graphics(Some(msg_data.graphics()))
@@ -485,32 +480,14 @@ impl MsgData {
     /// Load message data from a file path
     fn load(dir: &Path) -> Result<Self> {
         debug!("MsgData::load");
-        let attrs = MsgData::load_system_attributes(dir)?;
         let configs = SignConfig::load(dir)?;
         let fonts = load_fonts(dir)?;
         let graphics = load_graphics(dir)?;
         Ok(MsgData {
-            attrs,
             configs,
             fonts,
             graphics,
         })
-    }
-
-    /// Load system attributes from a JSON file
-    fn load_system_attributes(dir: &Path) -> Result<HashMap<String, String>> {
-        debug!("load_system_attributes");
-        let mut n = PathBuf::new();
-        n.push(dir);
-        n.push("system_attribute");
-        let r = BufReader::new(File::open(&n)?);
-        let mut j: Vec<HashMap<String, String>> = serde_json::from_reader(r)?;
-        match j.pop() {
-            Some(da) => Ok(da),
-            _ => {
-                Err(UnknownResourceError::new("system attributes".to_string()))
-            }
-        }
     }
 
     /// Lookup a config
@@ -520,54 +497,6 @@ impl MsgData {
             Some(c) => Ok(c),
             None => Err(UnknownResourceError::new(format!("Config: {}", cfg))),
         }
-    }
-
-    /// Get an attribute (seconds) in u8 deciseconds
-    fn get_as_ds(&self, name: &str) -> Option<u8> {
-        if let Some(value) = self.attrs.get(name) {
-            if let Ok(sec) = value.parse::<f32>() {
-                let ds = sec * 10.0;
-                if (0.0..=255.0).contains(&ds) {
-                    return Some(ds as u8);
-                }
-            }
-        }
-        debug!("MsgData::get_as_ds, {} missing!", name);
-        None
-    }
-
-    /// Get the default page on time
-    fn page_on_default_ds(&self) -> u8 {
-        self.get_as_ds("dms_page_on_default_secs").unwrap_or(20)
-    }
-
-    /// Get the default page off time
-    fn page_off_default_ds(&self) -> u8 {
-        self.get_as_ds("dms_page_off_default_secs").unwrap_or(0)
-    }
-
-    /// Get the default page justification
-    fn page_justification_default(&self) -> JustificationPage {
-        const ATTR: &str = "dms_default_justification_page";
-        if let Some(value) = self.attrs.get(ATTR) {
-            if let Some(pj) = JustificationPage::new(value) {
-                return pj;
-            }
-        }
-        debug!("MsgData::page_justification_default, {} missing!", ATTR);
-        JustificationPage::Top
-    }
-
-    /// Get the default line justification
-    fn line_justification_default(&self) -> JustificationLine {
-        const ATTR: &str = "dms_default_justification_line";
-        if let Some(value) = self.attrs.get(ATTR) {
-            if let Some(lj) = JustificationLine::new(value) {
-                return lj;
-            }
-        }
-        debug!("MsgData::line_justification_default, {} missing!", ATTR);
-        JustificationLine::Center
     }
 
     /// Get the default font number
