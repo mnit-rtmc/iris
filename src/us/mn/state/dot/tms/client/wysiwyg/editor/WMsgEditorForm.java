@@ -36,7 +36,6 @@ import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.MsgCombining;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.Session;
@@ -81,13 +80,6 @@ public class WMsgEditorForm extends AbstractForm {
 
 	/* Menu Bar */
 	private WMsgEditorMenuBar menu_bar;
-
-	/* Message combining combo box */ 
-	private final JComboBox<MsgCombining> combining_cbx =
-		new JComboBox<MsgCombining>(MsgCombining.values());
-
-	/* Prefix Check Box */ 
-	private JCheckBox prefix_chk;
 
 	/* Standby Check Box */ 
 	private JCheckBox standby_chk;
@@ -187,8 +179,7 @@ public class WMsgEditorForm extends AbstractForm {
 		/* Menu Bar */
 		menu_bar = new WMsgEditorMenuBar();
 		
-		/* Prefix and Standby Check Boxes */ 
-		prefix_chk = new JCheckBox();
+		/* Standby Check Boxes */ 
 		standby_chk = new JCheckBox(controller.toggleStandbyMsg);
 		
 		/* Sign group drop-down - only present if editing for sign group */
@@ -337,20 +328,15 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		gbPanel.add(epanel, gbc);
 		
-		/* Beacon and combining */
-		/* Prefix and Standby CheckBoxes */
+		/* Beacon */
+		/* Standby CheckBox */
 		gbc.gridx = 1;
 		gbc.gridy = 3;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		JPanel pPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		pPanel.add(new ILabel("wysiwyg.editor.prefix"));
-		pPanel.add(combining_cbx);
 		gbPanel.add(pPanel, gbc);
-		combining_cbx.setSelectedIndex(controller.getMsgCombining());
-		pPanel.add(prefix_chk);
-		pPanel.add(Box.createHorizontalStrut(10));
 		pPanel.add(new ILabel("wysiwyg.editor.standby"));
 		pPanel.add(standby_chk);
 		gbPanel.add(pPanel, gbc);
@@ -554,12 +540,7 @@ public class WMsgEditorForm extends AbstractForm {
 				+ sg.getName() + "    ";
 		return "";
 	}
-	
-	/** Return the message combining value */
-	public int getMsgCombining() {
-		return combining_cbx.getSelectedIndex();
-	}
-	
+
 	/** Return the state of the standby message box. */
 	public boolean getStandby() {
 		return standby_chk.isSelected();

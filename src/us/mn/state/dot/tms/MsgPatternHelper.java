@@ -62,20 +62,6 @@ public class MsgPatternHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Is message allowed to combine first? */
-	static public boolean isMsgCombiningFirst(MsgPattern pat) {
-		return pat != null &&
-		      (pat.getMsgCombining() == MsgCombining.FIRST.ordinal() ||
-		       pat.getMsgCombining() == MsgCombining.EITHER.ordinal());
-	}
-
-	/** Is message allowed to combine second? */
-	static public boolean isMsgCombiningSecond(MsgPattern pat) {
-		return pat != null &&
-		      (pat.getMsgCombining() == MsgCombining.SECOND.ordinal() ||
-		       pat.getMsgCombining() == MsgCombining.EITHER.ordinal());
-	}
-
 	/** Finder for text rectangles in MULTI strings */
 	static private class TextRectFinder extends MultiAdapter {
 		final int width;

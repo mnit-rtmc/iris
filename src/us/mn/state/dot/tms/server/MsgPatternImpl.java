@@ -46,7 +46,7 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, MsgPatternImpl.class);
 		store.query("SELECT name, sign_config, sign_group, " +
-			"msg_combining, multi FROM iris." + SONAR_TYPE + ";",
+			"multi FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -62,7 +62,6 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern {
 		map.put("name", name);
 		map.put("sign_config", sign_config);
 		map.put("sign_group", sign_group);
-		map.put("msg_combining", msg_combining);
 		map.put("multi", multi);
 		return map;
 	}
@@ -89,26 +88,21 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern {
 		this(row.getString(1),  // name
 		     row.getString(2),  // sign_config
 		     row.getString(3),  // sign_group
-		     row.getInt(4),     // msg_combining
-		     row.getString(5)   // multi
+		     row.getString(4)   // multi
 		);
 	}
 
 	/** Create a message pattern */
-	private MsgPatternImpl(String n, String sc, String sg, int mc,
-		String m)
-	{
-		this(n, lookupSignConfig(sc), lookupSignGroup(sg), mc, m);
+	private MsgPatternImpl(String n, String sc, String sg, String m) {
+		this(n, lookupSignConfig(sc), lookupSignGroup(sg), m);
 	}
 
 	/** Create a message pattern */
-	public MsgPatternImpl(String n, SignConfig sc, SignGroup sg, int mc,
-		String m)
+	public MsgPatternImpl(String n, SignConfig sc, SignGroup sg, String m)
 	{
 		super(n);
 		sign_config = sc;
 		sign_group = sg;
-		msg_combining = mc;
 		multi = m;
 	}
 
@@ -159,31 +153,6 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern {
 			store.update(this, "sign_group", sg);
 			setSignGroup(sg);
 		}
-	}
-
-	/** Message combining value */
-	private int msg_combining;
-
-	/** Set message combining value.
-	 * @see us.mn.state.dot.tms.MsgCombining */
-	@Override
-	public void setMsgCombining(int mc) {
-		msg_combining = mc;
-	}
-
-	/** Set message combining value */
-	public void doSetMsgCombining(int mc) throws TMSException {
-		if (mc != msg_combining) {
-			store.update(this, "msg_combining", mc);
-			setMsgCombining(mc);
-		}
-	}
-
-	/** Get message combining value.
-	 * @see us.mn.state.dot.tms.MsgCombining */
-	@Override
-	public int getMsgCombining() {
-		return msg_combining;
 	}
 
 	/** Message MULTI string, contains message text for all pages */

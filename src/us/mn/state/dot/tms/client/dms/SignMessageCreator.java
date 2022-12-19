@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2022  Minnesota Department of Transportation
  * Copyright (C) 2020       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.client.dms;
 import java.util.HashMap;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DmsMsgPriority;
-import us.mn.state.dot.tms.MsgCombining;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
@@ -80,14 +79,13 @@ public class SignMessageCreator {
 	 * @param sc Sign configuration.
 	 * @param multi MULTI text.
 	 * @param be Beacon enabled.
-	 * @param mc Message combining.
 	 * @param duration Message duration; null for indefinite.
 	 * @return New sign message, or null on error.
 	 */
 	public SignMessage create(SignConfig sc, String multi, boolean be,
-		MsgCombining mc, Integer duration)
+		 Integer duration)
 	{
-		return create(sc, null, multi, be, mc, DmsMsgPriority.OPERATOR,
+		return create(sc, null, multi, be, DmsMsgPriority.OPERATOR,
 			SignMsgSource.operator.bit(), user, duration);
 	}
 
@@ -96,9 +94,8 @@ public class SignMessageCreator {
 	 * @return Blank sign message, or null on error.
 	 */
 	public SignMessage createBlankMessage(SignConfig sc) {
-		return create(sc, null, "", false, MsgCombining.DISABLE,
-			DmsMsgPriority.BLANK, SignMsgSource.blank.bit(), null,
-			null);
+		return create(sc, null, "", false, DmsMsgPriority.BLANK,
+			SignMsgSource.blank.bit(), null, null);
 	}
 
 	/** Create an incident sign message.
@@ -114,9 +111,8 @@ public class SignMessageCreator {
 		DmsMsgPriority mp, Integer duration)
 	{
 		if (multi.length() > 0) {
-			return create(sc, inc, multi, false,
-				MsgCombining.EITHER, mp, INCIDENT_SRC, user,
-				duration);
+			return create(sc, inc, multi, false, mp,
+				INCIDENT_SRC, user, duration);
 		} else
 			return createBlankMessage(sc);
 	}
@@ -127,7 +123,6 @@ public class SignMessageCreator {
 	 * @param inc Associated incident (original name).
 	 * @param multi MULTI text.
 	 * @param be Beacon enabled.
-	 * @param mc Message combining.
 	 * @param mp Message priority.
 	 * @param src Sign message source bits.
 	 * @param owner User name.
@@ -135,8 +130,8 @@ public class SignMessageCreator {
 	 * @return Proxy of new sign message, or null on error.
 	 */
 	private SignMessage create(SignConfig sc, String inc, String multi,
-		boolean be, MsgCombining mc, DmsMsgPriority mp, int src,
-		String owner, Integer duration)
+		boolean be, DmsMsgPriority mp, int src, String owner,
+		Integer duration)
 	{
 		WMessage wmsg = new WMessage(multi);
 		if (wmsg.removeAll(WTokenType.standby)) {
@@ -145,13 +140,13 @@ public class SignMessageCreator {
 			src |= SignMsgSource.standby.bit();
 		}
 		SignMessage sm = SignMessageHelper.find(sc, inc, multi, be,
-				mc.ordinal(), mp, src, owner, duration);
+			mp, src, owner, duration);
 		String prefix = createPrefix(src);
 		if (sm != null && sm.getName().startsWith(prefix))
 			return sm;
 		String name = createName(prefix);
 		if (name != null) {
-			return create(name, sc, inc, multi, be, mc, mp, src,
+			return create(name, sc, inc, multi, be, mp, src,
 			              owner, duration);
 		} else
 			return null;
@@ -164,7 +159,6 @@ public class SignMessageCreator {
 	 * @param inc Associated incident (original name).
 	 * @param multi MULTI text.
 	 * @param be Beacon enabled.
-	 * @param mc Message combining value.
 	 * @param mp Message priority.
 	 * @param src Sign message source bits.
 	 * @param owner User name.
@@ -172,8 +166,8 @@ public class SignMessageCreator {
 	 * @return Proxy of new sign message, or null on error.
 	 */
 	private SignMessage create(String name, SignConfig sc, String inc,
-		String multi, boolean be, MsgCombining mc, DmsMsgPriority mp,
-		int src, String owner, Integer duration)
+		String multi, boolean be, DmsMsgPriority mp, int src,
+		String owner, Integer duration)
 	{
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("sign_config", sc);
@@ -181,7 +175,6 @@ public class SignMessageCreator {
 			attrs.put("incident", inc);
 		attrs.put("multi", multi);
 		attrs.put("beacon_enabled", be);
-		attrs.put("msg_combining", mc.ordinal());
 		attrs.put("msg_priority", Integer.valueOf(mp.ordinal()));
 		attrs.put("source", Integer.valueOf(src));
 		if (owner != null)

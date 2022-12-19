@@ -49,10 +49,6 @@ public interface SignMessage extends SonarObject {
 	/** Get beacon enabled flag */
 	boolean getBeaconEnabled();
 
-	/** Get message combining value.
-	 * @see us.mn.state.dot.tms.MsgCombining */
-	int getMsgCombining();
-
 	/** Get the message priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DmsMsgPriority */

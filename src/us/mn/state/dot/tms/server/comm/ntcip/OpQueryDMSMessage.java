@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.DmsMsgPriority;
-import us.mn.state.dot.tms.MsgCombining;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -199,12 +198,11 @@ public class OpQueryDMSMessage extends OpDMS {
 	private void setMsgCurrent() {
 		if (status.getEnum() == DmsMessageStatus.valid) {
 			boolean be = (beacon.getInteger() == 1);
-			int mc = MsgCombining.DISABLE.ordinal();
 			DmsMsgPriority rp = getMsgPriority();
 			int src = rp.getSource();
 			Integer duration = parseDuration(time.getInteger());
-			SignMessage sm = dms.createMsg(ms.getValue(), be, mc,
-				rp, src, "OTHER SYSTEM", duration);
+			SignMessage sm = dms.createMsg(ms.getValue(), be, rp,
+				src, "OTHER SYSTEM", duration);
 			setMsgCurrent(sm, "OTHER SYSTEM");
 		} else
 			setErrorStatus("INVALID STATUS: " + status);
