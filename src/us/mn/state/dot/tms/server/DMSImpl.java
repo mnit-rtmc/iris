@@ -884,22 +884,34 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private SignMessage getMsgCombined() {
 		SignMessage sched = msg_sched;	// Avoid race
 		SignMessage user = msg_user;	// Avoid race
+		SignMessage combined = tryCombine(sched, user);
+		if (combined != null)
+			return combined;
+		else
+			return checkPriority(sched, user) ? sched : user;
+	}
+
+	/** Try to make a combined sched/user message */
+	private SignMessage tryCombine(SignMessage sched, SignMessage user) {
+		if (null == sched || null == user)
+			return null;
 		RasterBuilder rb = DMSHelper.createRasterBuilder(this);
 		String ms = rb.combineMulti(sched.getMulti(), user.getMulti());
 		if (ms != null && rb.createRasters(ms) != null) {
 			SignMessage sm = createMsgCombined(sched, user, ms);
 			if (sm != null) {
-				// Check whether combined message fits on sign
+				// Check whether combined message can be
+				// displayed without too many pixel errors
 				try {
 					SignMessageHelper.validate(sm, this);
 					return sm;
 				}
 				catch (InvalidMsgException e) {
-					// combined message does not fit!
+					// too many pixel errors
 				}
 			}
 		}
-		return checkPriority(sched, user) ? sched : user;
+		return null;
 	}
 
 	/** Create a combined sign message */
