@@ -7,6 +7,19 @@ A _message pattern_ is a partially or fully composed [MULTI] message associated
 with a sign config.  They can be scheduled by [DMS action]s as part of an
 [action plan] or selected by operators and optionally composed with _sign text_.
 
+## Composing Messages
+
+On the sign message composer, when an operator selects a [DMS], the _Message
+Pattern_ selector is populated with all patterns having a matching sign group
+and containing **NO** DMS [action tags].  If none of those patterns contain a
+text rectangle for composing with sign text, an "empty" pattern is also
+provided.
+
+When one of those patterns is selected, sign text selectors are populated
+depending on the text rectangles of that pattern.  The message preview is
+updated as the message is being composed.  Once complete, pressing the **Send**
+button will put the message onto the DMS.
+
 ## Message Combining
 
 In some cases, a scheduled message can be combined with the operator composed
@@ -39,7 +52,7 @@ messages simultaneously.  The scheduled message is prepended to each page of
 the operator message.
 
 - The scheduled message must contain no `[np]` tags.
-- The scheduled message must contain one `[tr…]` tag with no text.
+- The scheduled message must end with a `[tr…]` tag.
 - Each page of the operator message must start with that same `[tr…]` tag.
 - The operator message must not contain any other `[tr…]` tags.
 
@@ -56,6 +69,8 @@ Example:
 
 
 [action plan]: action_plans.html
+[action tag]: action_plans.html#dms-action-tags
+[DMS]: dms.html
 [DMS action]: action_plans.html#dms-actions
 [MULTI]: multi.html
 [WYSIWYG editor]: wysiwyg.html
