@@ -5,20 +5,7 @@ Select `View ➔ Message Signs ➔ Message Patterns` or
 
 A _message pattern_ is a partially or fully composed [MULTI] message associated
 with a sign config.  They can be scheduled by [DMS action]s as part of an
-[action plan] or selected by operators and optionally composed with _sign text_.
-
-## Composing Messages
-
-On the sign message composer, when an operator selects a [DMS], the _Message
-Pattern_ selector is populated with all patterns having a matching sign group
-and containing **NO** DMS [action tags].  If none of those patterns contain a
-text rectangle for composing with sign text, an "empty" pattern is also
-provided.
-
-When one of those patterns is selected, sign text selectors are populated
-depending on the text rectangles of that pattern.  The message preview is
-updated as the message is being composed.  Once complete, pressing the **Send**
-button will put the message onto the DMS.
+[action plan] or selected by operators when [composing messages].
 
 ## Message Combining
 
@@ -67,10 +54,8 @@ Example:
 ![](images/msg_combined_shared.gif)
 
 
-
 [action plan]: action_plans.html
-[action tag]: action_plans.html#dms-action-tags
-[DMS]: dms.html
+[composing messages]: dms.html#composing-messages
 [DMS action]: action_plans.html#dms-actions
 [MULTI]: multi.html
 [WYSIWYG editor]: wysiwyg.html

@@ -68,13 +68,22 @@ All       | All signs
 
 ## Composing Messages
 
-When a DMS is selected, the current message is displayed along with location
-information.  A [message pattern] selector is populated with messages for sign
-groups containing the DMS.  When a pattern is selected, a series of _Sign Text_
-selectors is populated with messages from the message library, one for each
-line of the pattern.
+When a DMS is selected, a few things happen:
+- the sign's location is displayed
+- the current message is rendered
+- the [message pattern] selector is populated with messages for sign groups
+  containing the DMS and containing **NO** [action tags]
+- if no pattern contains a text rectangle for composing with sign text, an
+  "empty" pattern is provided
+
+When a pattern is selected, a series of _Sign Text_ selectors is populated
+with messages from the message library, depending on the text rectangles of
+that pattern.  The message preview is updated as the message is being
+composed.  Once complete, pressing the **Send** button will put the message
+onto the DMS.
 
 
+[action tags]: action_plans.html#dms-action-tags
 [beacon]: beacons.html
 [comm link]: comm_links.html
 [fonts]: fonts.html
