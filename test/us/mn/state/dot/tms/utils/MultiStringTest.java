@@ -479,40 +479,6 @@ public class MultiStringTest extends TestCase {
 		assertTrue(cms.equals(ms2.toString()));
 	}
 
-	public void testCombineShared() {
-		checkCombine("P[tr1,10,50,20]", "A",
-			"P[tr1,10,50,20][cf][fo][jl][jp]A");
-		checkCombine("P[tr1,10,50,20]", "A[np]B",
-			"P[tr1,10,50,20][cf][fo][jl][jp]A[np]" +
-			"P[tr1,10,50,20][cf][fo][jl][jp]B");
-		checkCombine("P[tr1,10,50,20]", "A[np]B[np]C",
-			"P[tr1,10,50,20][cf][fo][jl][jp]A[np]" +
-			"P[tr1,10,50,20][cf][fo][jl][jp]B[np]" +
-			"P[tr1,10,50,20][cf][fo][jl][jp]C");
-	}
-
-	public void testCombineSequenced() {
-		checkCombine("", "", "[cf][fo][jl][jp][np]");
-		checkCombine("AAA", "", "AAA[cf][fo][jl][jp][np]");
-		checkCombine("AAA", "BBB", "AAA[cf][fo][jl][jp][np]BBB");
-	}
-
-	public void testCombineNotShared() {
-		// invalid text rectangle tag
-		checkCombine("P[tr1,10,50]", "A",
-			"P[tr1,10,50][cf][fo][jl][jp][np]A");
-		// new page not allowed in first message for shared
-		checkCombine("P[np]Q[tr1,10,50,20]", "A",
-			"P[np]Q[tr1,10,50,20][cf][fo][jl][jp][np]A");
-		// text rectangle not allowed in second message for shared
-		checkCombine("P[tr1,10,50,20]", "A[tr51,1,50,20]B",
-			"P[tr1,10,50,20][cf][fo][jl][jp][np]A[tr51,1,50,20]B");
-	}
-
-	private void checkCombine(String ms1, String ms2, String rs) {
-		assertTrue(MultiString.makeCombined(ms1, ms2).equals(rs));
-	}
-
 	public void testGetFonts() {
 		// bogus default font numbers
 		assertTrue(new MultiString("").getFonts(-10).length == 0);
@@ -645,5 +611,48 @@ public class MultiStringTest extends TestCase {
 			.equals("ABC"));
 		assertTrue(new MultiString("[nl]ABC[nl]").stripTrailingLines()
 			.equals("[nl]ABC"));
+	}
+
+	public void testTrailingTr() {
+		assertTrue(new MultiString("")
+			.trailingTextRectangle() == null);
+		assertTrue(new MultiString("[tr1,1,2,2]ABC")
+			.trailingTextRectangle() == null);
+		assertTrue("[tr1,1,2,2]".equals(new MultiString("[tr1,1,2,2]")
+			.trailingTextRectangle()));
+		assertTrue("[tr1,1,2,2]".equals(new MultiString(
+			"ABC[tr1,1,2,2]").trailingTextRectangle()));
+	}
+
+	public void testEachPageStartsWith() {
+		assertFalse(new MultiString("")
+			.eachPageStartsWith("[jl]"));
+		assertTrue(new MultiString("[tr1,1,2,2]ABC")
+			.eachPageStartsWith("[tr1,1,2,2]"));
+		assertFalse(new MultiString("[tr1,1,2,2]ABC[np][tr2,2,2,2]123")
+			.eachPageStartsWith("[tr1,1,2,2]"));
+		assertTrue(new MultiString("[fo5]ABC[np][fo5]123")
+			.eachPageStartsWith("[fo5]"));
+		assertFalse(new MultiString("[fo5]ABC[np][fo5]123")
+			.eachPageStartsWith("[fo5]_"));
+	}
+
+	public void testHasOneTextRectPerPage() {
+		assertFalse(new MultiString("").hasOneTextRectPerPage());
+		assertFalse(new MultiString("ABC").hasOneTextRectPerPage());
+		assertTrue(new MultiString("[tr1,1,10,10]")
+			.hasOneTextRectPerPage());
+		assertTrue(new MultiString("ABC[tr1,1,10,10]123")
+			.hasOneTextRectPerPage());
+		assertFalse(new MultiString("[tr1,1,8,8]ABC[tr8,8,2,2]123")
+			.hasOneTextRectPerPage());
+		assertFalse(new MultiString("[tr1,1,8,8][np]")
+			.hasOneTextRectPerPage());
+		assertTrue(new MultiString("[tr1,1,8,8][np][tr1,1,5,5]")
+			.hasOneTextRectPerPage());
+		assertFalse(new MultiString("[tr1,1,4,4][np][tr4,4,2,2][np]")
+			.hasOneTextRectPerPage());
+		assertTrue(new MultiString("[tr1,1,2,2][np][tr3,3,2,2][np][tr6,6,2,2]")
+			.hasOneTextRectPerPage());
 	}
 }

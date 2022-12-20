@@ -62,54 +62,7 @@ public class MsgPatternHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Finder for text rectangles in MULTI strings */
-	static private class TextRectFinder extends MultiAdapter {
-		final int width;
-		final int height;
-		final int font_def;
-		ArrayList<TextRect> rects = new ArrayList<TextRect>();
-		int font_num;
-		int page = 1;
-		boolean page_clean = true;
-
-		private TextRectFinder(int w, int h, int fn) {
-			width = w;
-			height = h;
-			font_def = fn;
-			font_num = fn;
-		}
-
-		@Override public void addSpan(String span) {
-			page_clean = false;
-		}
-		@Override public void setFont(Integer f_num, String f_id) {
-			font_num = (f_num != null) ? f_num : font_def;
-		}
-		@Override public void addGraphic(int g_num, Integer x,
-			Integer y, String g_id)
-		{
-			page_clean = false;
-		}
-		@Override public void addLine(Integer spacing) {
-			page_clean = false;
-		}
-		@Override public void addPage() {
-			if (page_clean) {
-				rects.add(new TextRect(page, width,
-					height, font_num));
-			}
-			page++;
-			page_clean = true;
-		}
-		@Override public void setTextRectangle(int x, int y,
-			int w, int h)
-		{
-			rects.add(new TextRect(page, w, h, font_num));
-			page_clean = false;
-		}
-	}
-
-	/** Find text rectangles in a pattern (including implicit) */
+	/** Find unused text rectangles in a pattern */
 	static public List<TextRect> findTextRectangles(MsgPattern pat) {
 		if (pat == null)
 			return new ArrayList<TextRect>();
@@ -119,77 +72,14 @@ public class MsgPatternHelper extends BaseHelper {
 		int width = sc.getPixelWidth();
 		int height = sc.getPixelHeight();
 		int fn = SignConfigHelper.getDefaultFontNum(sc);
-		TextRectFinder trf = new TextRectFinder(width, height, fn);
-		// find text rectangles in message pattern
-		new MultiString(pat.getMulti()).parse(trf);
-		// this creates a text rect on last page only if it's clean
-		trf.addPage();
-		return trf.rects;
-	}
-
-	/** Filler for text rectangles in MULTI strings */
-	static private class TextRectFiller extends MultiBuilder {
-		final String[] mess;
-		int n_mess = 0;
-		boolean page_clean = true;
-		boolean page_rect = false;
-
-		private TextRectFiller(String[] m) {
-			mess = m;
-		}
-
-		private void fillRectangle() {
-			if (n_mess < mess.length) {
-				super.append(new MultiString(mess[n_mess]));
-				n_mess++;
-			}
-		}
-
-		@Override public void addSpan(String span) {
-			super.addSpan(span);
-			page_clean = false;
-			page_rect = false;
-		}
-		@Override public void addGraphic(int g_num, Integer x,
-			Integer y, String g_id)
-		{
-			super.addGraphic(g_num, x, y, g_id);
-			page_clean = false;
-			page_rect = false;
-		}
-		@Override public void addLine(Integer spacing) {
-			super.addLine(spacing);
-			page_clean = false;
-			page_rect = false;
-		}
-		@Override public void addPage() {
-			if (page_clean || page_rect)
-				fillRectangle();
-			super.addPage();
-			page_clean = true;
-			page_rect = false;
-		}
-		@Override public void setTextRectangle(int x, int y,
-			int w, int h)
-		{
-			if (page_rect)
-				fillRectangle();
-			super.setTextRectangle(x, y, w, h);
-			page_clean = false;
-			page_rect = true;
-		}
+		return TextRect.find(width, height, fn, pat.getMulti());
 	}
 
 	/** Fill text rectangles in a pattern */
 	static public String fillTextRectangles(MsgPattern pat, String[] mess) {
-		if (pat == null)
+		if (pat != null)
+			return TextRect.fill(pat.getMulti(), mess);
+		else
 			return "";
-		TextRectFiller trf = new TextRectFiller(mess);
-		// fill text rectangles in message pattern
-		new MultiString(pat.getMulti()).parse(trf);
-		// if there's still a text rectangle, fill it at the end
-		if (trf.page_clean || trf.page_rect)
-			trf.fillRectangle();
-		return trf.toString();
 	}
 }

@@ -265,10 +265,15 @@ public class DMSDispatcher extends JPanel {
 		if (new MultiString(ms).isBlank())
 			return "";
 		String sched = getSchedMulti(dms);
-		if (sched != null)
-			return tryMakeCombined(dms, sched, ms);
-		else
-			return ms;
+		if (sched != null) {
+			RasterBuilder rb = DMSHelper.createRasterBuilder(dms);
+			if (rb != null) {
+				String cmb = rb.combineMulti(sched, ms);
+				if (cmb != null)
+					return cmb;
+			}
+		}
+		return ms;
 	}
 
 	/** Get MULTI string from scheduled message */
@@ -279,19 +284,6 @@ public class DMSDispatcher extends JPanel {
 				return sm.getMulti();
 		}
 		return null;
-	}
-
-	/** Try to make a combined message.
-	 * @param first MULTI string of first message.
-	 * @param second MULTI string of second message.
-	 * @return Combined message, or second if combined does not fit. */
-	private String tryMakeCombined(DMS dms, String first, String second) {
-		String ms = MultiString.makeCombined(first, second);
-		// If combined message does not fit, use composed only
-		if (ms != null && DMSHelper.createRasters(dms, ms) != null)
-			return ms;
-		else
-			return second;
 	}
 
 	/** Get the single selected DMS */

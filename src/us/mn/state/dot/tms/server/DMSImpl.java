@@ -56,6 +56,7 @@ import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSHelper;
 import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignDetail;
@@ -883,8 +884,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private SignMessage getMsgCombined() {
 		SignMessage sched = msg_sched;	// Avoid race
 		SignMessage user = msg_user;	// Avoid race
-		String ms = tryMakeCombined(sched, user);
-		if (ms != null) {
+		RasterBuilder rb = DMSHelper.createRasterBuilder(this);
+		String ms = rb.combineMulti(sched.getMulti(), user.getMulti());
+		if (ms != null && rb.createRasters(ms) != null) {
 			SignMessage sm = createMsgCombined(sched, user, ms);
 			if (sm != null) {
 				// Check whether combined message fits on sign
@@ -898,17 +900,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			}
 		}
 		return checkPriority(sched, user) ? sched : user;
-	}
-
-	/** Try to make a combined message */
-	private String tryMakeCombined(SignMessage sched, SignMessage user) {
-		if (sched != null && user != null) {
-			return MultiString.makeCombined(
-				sched.getMulti(),
-				user.getMulti()
-			);
-		} else
-			return null;
 	}
 
 	/** Create a combined sign message */

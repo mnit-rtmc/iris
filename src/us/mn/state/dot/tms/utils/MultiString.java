@@ -42,10 +42,6 @@ public class MultiString {
 	static private final Pattern SPAN = Pattern.compile(
 		"[ !\"#$%&'()*+,-./0-9:;<=>?@A-Z\\[\\\\\\]^_`a-z{|}~]*");
 
-	/** Regular expression to match message ending with a text rectangle */
-	static private final Pattern ENDS_WITH_TR = Pattern.compile(
-		".*\\[tr\\d+,\\d+,\\d+,\\d+\\]");
-
 	/** A MULTI builder for normalizing spans and removing invalid tags */
 	static private class MultiNormalizer extends MultiBuilder {
 		@Override
@@ -464,45 +460,6 @@ public class MultiString {
 		return occ != null && occ > 0 && occ < 100;
 	}
 
-	/** Make a combined message (either shared or sequenced) */
-	static public String makeCombined(String first, String second) {
-		final MultiString ms1 = new MultiString(first);
-		final MultiString ms2 = new MultiString(second);
-		if (ms1.isValidSharedFirst() && ms2.isValidSharedSecond()) {
-			// Prepend first message before each page of second
-			MultiBuilder mb = new MultiBuilder(first) {
-				@Override
-				public void addPage() {
-					super.addPage();
-					// Add first message to next page
-					append(ms1);
-					// Reset these to default values
-					setColorForeground(null);
-					setFont(null, null);
-					setJustificationLine(null);
-					setJustificationPage(null);
-				}
-			};
-			mb.setColorForeground(null);
-			mb.setFont(null, null);
-			mb.setJustificationLine(null);
-			mb.setJustificationPage(null);
-			ms2.parse(mb);
-			return mb.toString();
-		} else {
-			MultiBuilder mb = new MultiBuilder(first);
-			// Reset these to default values
-			mb.setColorForeground(null);
-			mb.setFont(null, null);
-			mb.setJustificationLine(null);
-			mb.setJustificationPage(null);
-			// Add second page
-			mb.addPage();
-			mb.append(ms2);
-			return mb.toString();
-		}
-	}
-
 	/** MULTI string buffer */
 	private final String multi;
 
@@ -748,6 +705,45 @@ public class MultiString {
 		return ms;
 	}
 
+	/** Check for (and return) trailing text rectangle tag */
+	public String trailingTextRectangle() {
+		final String[] tr = new String[] { "[TR]" };
+		parse(new MultiAdapter() {
+			@Override public void setTextRectangle(int x, int y,
+				int w, int h)
+			{
+				tr[0] = "[tr" + x + ',' + y + ',' + w + ',' +
+					h + ']';
+			}
+		});
+		return multi.endsWith(tr[0]) ? tr[0] : null;
+	}
+
+	/** Check if each page starts with the given tag */
+	public boolean eachPageStartsWith(String tag) {
+		for (String page: getPages()) {
+			if (!page.startsWith(tag))
+				return false;
+		}
+		return true;
+	}
+
+	/** Check that a message has exactly one text rectangle per page */
+	public boolean hasOneTextRectPerPage() {
+		final int[] tr = new int[1];
+		parse(new MultiAdapter() {
+			@Override public void addPage() {
+				tr[0] = (1 == tr[0]) ? 0 : 2;
+			}
+			@Override public void setTextRectangle(int x, int y,
+				int w, int h)
+			{
+				tr[0]++;
+			}
+		});
+		return 1 == tr[0];
+	}
+
 	/** Replace all the page times in a MULTI string.
 	 * If no page time tag exists, then a page time tag is prepended.
 	 * @param pt_on Page on-time in tenths of a second.
@@ -927,36 +923,5 @@ public class MultiString {
 		for (int i = 0; i < words.length; ++i)
 			words[i] = words[i].trim();
 		return Arrays.asList(words);
-	}
-
-	/** Check if valid shared first (for combining) */
-	private boolean isValidSharedFirst() {
-		if (!endsWithTextRect())
-			return false;
-		final boolean[] valid = new boolean[] { true };
-		parse(new MultiAdapter() {
-			@Override
-			public void addPage() {
-				valid[0] = false;
-			}
-		});
-		return valid[0];
-	}
-
-	/** Check if a message ends with a text rectangle */
-	private boolean endsWithTextRect() {
-		return ENDS_WITH_TR.matcher(multi).matches();
-	}
-
-	/** Check if valid shared second (for combining) */
-	private boolean isValidSharedSecond() {
-		final boolean[] valid = new boolean[] { true };
-		parse(new MultiAdapter() {
-			@Override
-			public void setTextRectangle(int x, int y, int w,int h){
-				valid[0] = false;
-			}
-		});
-		return valid[0];
 	}
 }

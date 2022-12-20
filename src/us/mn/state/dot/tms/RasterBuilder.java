@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms;
 
 import java.util.ArrayList;
+import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiRenderer;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.MultiSyntaxError;
@@ -167,5 +168,85 @@ public class RasterBuilder {
 			// most likely a MultiSyntaxError ...
 			return null;
 		}
+	}
+
+	/** Try to make a combined message.
+	 * @param first MULTI string of first message.
+	 * @param second MULTI string of second message.
+	 * @return Combined message, or null on error. */
+	public String combineMulti(String first, String second) {
+		if (first != null || second != null)
+			return makeCombined(first, second);
+		else
+			return null;
+	}
+
+	/** Make a combined message (either sequenced or shared) */
+	private String makeCombined(String first, String second) {
+		MultiString ms1 = new MultiString(first);
+		MultiString ms2 = new MultiString(second);
+		if (ms1.isBlank() || ms2.isBlank())
+			return null;
+		if (canCombineSequence(first)) {
+			// First message ends with new page tag
+			MultiBuilder mb = new MultiBuilder(first);
+			// Reset these to default values
+			mb.setColorForeground(null);
+			mb.setFont(null, null);
+			mb.setJustificationLine(null);
+			mb.setJustificationPage(null);
+			// Add second message
+			mb.append(ms2);
+			return mb.toString();
+		}
+		if (canCombineShared(ms1, ms2)) {
+			// strip trailing text rect from first message
+			String tr = ms1.trailingTextRectangle();
+			first = first.substring(0, first.length()-tr.length());
+			final MultiString msg1 = new MultiString(first);
+			// Prepend first message before each page of second
+			MultiBuilder mb = new MultiBuilder(first) {
+				@Override
+				public void addPage() {
+					super.addPage();
+					// Reset these to default values
+					setColorForeground(null);
+					setFont(null, null);
+					setJustificationLine(null);
+					setJustificationPage(null);
+					// Add first message to next page
+					append(msg1);
+					// Reset these to default values
+					setColorForeground(null);
+					setFont(null, null);
+					setJustificationLine(null);
+					setJustificationPage(null);
+				}
+			};
+			mb.setColorForeground(null);
+			mb.setFont(null, null);
+			mb.setJustificationLine(null);
+			mb.setJustificationPage(null);
+			ms2.parse(mb);
+			return mb.toString();
+		}
+		return null;
+	}
+
+	// Check if messages can be combined in a sequence
+	private boolean canCombineSequence(String ms) {
+		return ms.endsWith("[np]");
+	}
+
+	/** Check if messages can be combined with shared pages */
+	private boolean canCombineShared(MultiString first,
+		MultiString second)
+	{
+		if (first.getNumPages() > 1)
+			return false;
+		String tr = first.trailingTextRectangle();
+		return (tr != null)
+			&& second.eachPageStartsWith(tr)
+			&& second.hasOneTextRectPerPage();
 	}
 }

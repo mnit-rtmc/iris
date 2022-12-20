@@ -39,10 +39,9 @@ messages simultaneously.  The scheduled message is prepended to each page of
 the operator message.
 
 - The scheduled message must contain no `[np]` tags.
-- The scheduled message must end with a `[tr…]` (text rectangle) tag.
-- The operator message must contain that same `[tr…]` tag on each page.
-- Only `[cf]`, `[fo]`, `[jl]` and `[jp]` tags are allowed before the `[tr…]`
-  tag on each page (no text spans).
+- The scheduled message must contain one `[tr…]` tag with no text.
+- Each page of the operator message must start with that same `[tr…]` tag.
+- The operator message must not contain any other `[tr…]` tags.
 
 Example:
 - Scheduled message:
