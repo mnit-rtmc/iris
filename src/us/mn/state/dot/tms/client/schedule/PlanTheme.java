@@ -43,6 +43,9 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 	/** Color for active camera style */
 	static private final Color COLOR_CAMERA = new Color(0, 192, 255);
 
+	/** Color for undeployed plans */
+	static private final Color COLOR_UNDEPLOYED = new Color(255, 0, 0);
+
 	/** Symbol for DMS */
 	static private final VectorSymbol SYM_DMS = new VectorSymbol(
 		new DmsMarker());
@@ -66,12 +69,14 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 	/** Create a new plan theme */
 	public PlanTheme(PlanManager man) {
 		super(man, new PlanMarker());
+		// These are all the filtering buttons
 		addStyle(ItemStyle.DMS, COLOR_SCHEDULED);
 		addStyle(ItemStyle.BEACON, COLOR_DEPLOYED);
 		addStyle(ItemStyle.CAMERA, COLOR_CAMERA);
 		addStyle(ItemStyle.METER, MeterTheme.COLOR_METERING);
 		addStyle(ItemStyle.TIME, COLOR_SCHEDULE);
 		addStyle(ItemStyle.ACTIVE, COLOR);
+		addStyle(ItemStyle.UNDEPLOYED, COLOR_UNDEPLOYED);
 		addStyle(ItemStyle.ALL);
 	}
 
