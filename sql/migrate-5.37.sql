@@ -131,13 +131,12 @@ GRANT SELECT ON dms_view TO PUBLIC;
 CREATE VIEW dms_message_view AS
     SELECT d.name, msg_current, cc.description AS condition,
            fail_time IS NOT NULL AS failed, multi, beacon_enabled,
-           mc.description AS msg_combining, msg_priority,
-           iris.sign_msg_sources(source) AS sources, duration, expire_time
+           msg_priority, iris.sign_msg_sources(source) AS sources,
+           duration, expire_time
     FROM iris.dms d
     LEFT JOIN iris.controller c ON d.controller = c.name
     LEFT JOIN iris.condition cc ON c.condition = cc.id
-    LEFT JOIN iris.sign_message sm ON d.msg_current = sm.name
-    LEFT JOIN iris.msg_combining mc ON sm.msg_combining = mc.id;
+    LEFT JOIN iris.sign_message sm ON d.msg_current = sm.name;
 GRANT SELECT ON dms_message_view TO PUBLIC;
 
 -- Remove DMS font selection system attribute
@@ -188,20 +187,17 @@ CREATE TABLE iris.msg_pattern (
     sign_config VARCHAR(16) REFERENCES iris.sign_config,
     -- FIXME: replace sign_group with hashtag
     sign_group VARCHAR(20) REFERENCES iris.sign_group,
-    msg_combining INTEGER NOT NULL REFERENCES iris.msg_combining,
     multi VARCHAR(1024) NOT NULL
 );
 
 CREATE VIEW msg_pattern_view AS
-    SELECT name, sign_config, sign_group, mc.description AS msg_combining,
-           multi
-    FROM iris.msg_pattern mp
-    LEFT JOIN iris.msg_combining mc ON mp.msg_combining = mc.id;
+    SELECT name, sign_config, sign_group, multi
+    FROM iris.msg_pattern;
 GRANT SELECT ON msg_pattern_view TO PUBLIC;
 
 INSERT INTO iris.msg_pattern
-    (name, sign_config, sign_group, msg_combining, multi)
-    SELECT name, sign_config, sign_group, msg_combining, multi
+    (name, sign_config, sign_group, multi)
+    SELECT name, sign_config, sign_group, multi
     FROM iris.quick_message;
 
 ALTER TABLE iris.dms_action
@@ -284,5 +280,18 @@ DELETE FROM iris.sign_config WHERE name NOT IN (
 DELETE FROM iris.sign_detail WHERE name NOT IN (
     SELECT sign_detail FROM iris._dms WHERE sign_detail IS NOT NULL
 );
+
+-- DROP msg_combining table
+DROP VIEW sign_message_view;
+
+ALTER TABLE iris.sign_message DROP COLUMN msg_combining;
+
+DROP TABLE iris.msg_combining;
+
+CREATE VIEW sign_message_view AS
+    SELECT name, sign_config, incident, multi, beacon_enabled, msg_priority,
+           iris.sign_msg_sources(source) AS sources, owner, duration
+    FROM iris.sign_message;
+GRANT SELECT ON sign_message_view TO PUBLIC;
 
 COMMIT;
