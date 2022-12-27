@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.server.comm.monstream.MonStreamPoller;
 import us.mn.state.dot.tms.server.comm.msgfeed.MsgFeedPoller;
 import us.mn.state.dot.tms.server.comm.natch.NatchPoller;
 import us.mn.state.dot.tms.server.comm.ndorv5.GateNdorV5Poller;
+import us.mn.state.dot.tms.server.comm.ndotbeacon.NdotBeaconPoller;
 import us.mn.state.dot.tms.server.comm.ntcip.NtcipPoller;
 import us.mn.state.dot.tms.server.comm.org815.Org815Poller;
 import us.mn.state.dot.tms.server.comm.pelcod.PelcoDPoller;
@@ -55,6 +56,7 @@ import us.mn.state.dot.tms.server.comm.viconptz.ViconPTZPoller;
  * A factory for creating device poller objects.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public class DevicePollerFactory {
 
@@ -131,6 +133,8 @@ public class DevicePollerFactory {
 			return new CapPoller(link);
 		case CLEARGUIDE:
 			return new ClearGuidePoller(link);
+		case NDOT_BEACON:
+			return new NdotBeaconPoller(link);
 		default:
 			return null;
 		}
