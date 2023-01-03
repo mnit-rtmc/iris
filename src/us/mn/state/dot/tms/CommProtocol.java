@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2021  Minnesota Department of Transportation
  * Copyright (C) 2012-2021  Iteris Inc.
+ * Copyright (C) 2015-2022  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +25,7 @@ import java.util.Comparator;
  *
  * @author Douglas Lau
  * @author Michael Darter
+ * @author John L. Stanley - SRF Consulting
  */
 public enum CommProtocol {
 
@@ -102,9 +104,8 @@ public enum CommProtocol {
 	@Deprecated
 	CHP_INCIDENTS("CHP Incidents", false),
 
-	/** URMS (24) */
-	@Deprecated
-	URMS("URMS"),
+	/** Nebraska (NDOT) Beacon (24) */
+	NDOT_BEACON("NDOT Beacon", false),
 
 	/** Digital Loggers Inc DIN Relay (25) */
 	DIN_RELAY("DLI DIN Relay", false),

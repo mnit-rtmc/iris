@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2004-2022  Minnesota Department of Transportation
+ * Copyright (C) 2022       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +37,7 @@ import us.mn.state.dot.tms.server.event.BeaconEvent;
  * A Beacon is a light which flashes toward oncoming traffic.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public class BeaconImpl extends DeviceImpl implements Beacon {
 
@@ -178,7 +180,8 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	protected boolean needsMaintenance() {
 		int bs = state;
 		return bs == BeaconState.FAULT_NO_VERIFY.ordinal()
-		    || bs == BeaconState.FAULT_STUCK_ON.ordinal();
+			|| bs == BeaconState.FAULT_STUCK_ON.ordinal()
+			|| super.needsMaintenance();
 	}
 
 	/** Device location */
