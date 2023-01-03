@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2021  Iteris Inc.
  *
@@ -71,66 +71,10 @@ public class MessageComposer extends JPanel {
 				adjusting++;
 				updatePattern();
 				adjusting--;
+				updateMessage(true);
 			}
 		}
 	};
-
-	/** Update the selected pattern */
-	private void updatePattern() {
-		List<TextRect> trs = getPatternTextRects();
-		n_rects = Math.min(trs.size(), rects.length);
-		while (n_rects < rect_tab.getTabCount())
-			rect_tab.removeTabAt(n_rects);
-		int first = 1;
-		int page_number = 0;
-		char page_letter = 'a' - 1;
-		for (int i = 0; i < n_rects; i++) {
-			TextRect tr = trs.get(i);
-			if (tr.page_number == page_number)
-				page_letter++;
-			else
-				page_letter = 'a' - 1;
-			page_number = tr.page_number;
-			String title = (page_letter >= 'a')
-				? "" + page_number + page_letter
-				: "" + page_number;
-			TextRectComposer rc = rects[i];
-			int n_lines = tr.getLineCount();
-			rc.setModels(finder, first, n_lines);
-			rc.setEditMode();
-			if (i < rect_tab.getTabCount()) {
-				rect_tab.setComponentAt(i, rc);
-				rect_tab.setTitleAt(i, title);
-			} else
-				rect_tab.addTab(title, rc);
-			first += n_lines;
-		}
-		updateMessage(true);
-	}
-
-	/** Get the text rectangles for the selected pattern */
-	private List<TextRect> getPatternTextRects() {
-		MsgPattern pat = getMsgPattern();
-		if (pat != null)
-			return MsgPatternHelper.findTextRectangles(pat);
-		else {
-			ArrayList<TextRect> trs = new ArrayList<TextRect>();
-			DMS dms = dispatcher.getSingleSelection();
-			if (dms != null) {
-				SignConfig sc = dms.getSignConfig();
-				if (sc != null) {
-					int fn = SignConfigHelper
-						.getDefaultFontNum(sc);
-					trs.add(new TextRect(1,
-						sc.getPixelWidth(),
-						sc.getPixelHeight(),
-						fn
-					));
-				}
-			}
-			return trs;
-		}
-	}
 
 	/** Clear action */
 	private final IAction clear_act = new IAction("dms.clear") {
@@ -164,7 +108,7 @@ public class MessageComposer extends JPanel {
 	/** Sign text finder for selected sign */
 	private SignTextFinder finder;
 
-	/** Number of text rectangles */
+	/** Number of text rectangles in selected pattern */
 	private int n_rects;
 
 	/** Counter to indicate we're adjusting widgets.  This needs to be
@@ -314,6 +258,62 @@ public class MessageComposer extends JPanel {
 		dur_cbx.setEnabled(b);
 		dur_cbx.setSelectedItem(0);
 		adjusting--;
+	}
+
+	/** Update the selected pattern */
+	private void updatePattern() {
+		List<TextRect> trs = getPatternTextRects();
+		n_rects = Math.min(trs.size(), rects.length);
+		while (n_rects < rect_tab.getTabCount())
+			rect_tab.removeTabAt(n_rects);
+		int first = 1;
+		int page_number = 0;
+		char page_letter = 'a' - 1;
+		for (int i = 0; i < n_rects; i++) {
+			TextRect tr = trs.get(i);
+			if (tr.page_number == page_number)
+				page_letter++;
+			else
+				page_letter = 'a' - 1;
+			page_number = tr.page_number;
+			String title = (page_letter >= 'a')
+				? "" + page_number + page_letter
+				: "" + page_number;
+			TextRectComposer rc = rects[i];
+			int n_lines = tr.getLineCount();
+			rc.setModels(finder, first, n_lines);
+			rc.setEditMode();
+			if (i < rect_tab.getTabCount()) {
+				rect_tab.setComponentAt(i, rc);
+				rect_tab.setTitleAt(i, title);
+			} else
+				rect_tab.addTab(title, rc);
+			first += n_lines;
+		}
+	}
+
+	/** Get the text rectangles for the selected pattern */
+	private List<TextRect> getPatternTextRects() {
+		MsgPattern pat = getMsgPattern();
+		if (pat != null)
+			return MsgPatternHelper.findTextRectangles(pat);
+		else {
+			ArrayList<TextRect> trs = new ArrayList<TextRect>();
+			DMS dms = dispatcher.getSingleSelection();
+			if (dms != null) {
+				SignConfig sc = dms.getSignConfig();
+				if (sc != null) {
+					int fn = SignConfigHelper
+						.getDefaultFontNum(sc);
+					trs.add(new TextRect(1,
+						sc.getPixelWidth(),
+						sc.getPixelHeight(),
+						fn
+					));
+				}
+			}
+			return trs;
+		}
 	}
 
 	/** Get the selected message pattern */
