@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,6 +73,11 @@ public class MsgPatternHelper extends BaseHelper {
 		int height = sc.getPixelHeight();
 		int fn = SignConfigHelper.getDefaultFontNum(sc);
 		return TextRect.find(width, height, fn, pat.getMulti());
+	}
+
+	/** Check if a pattern has unused text rectangles */
+	static public boolean hasTextRectangles(MsgPattern pat) {
+		return findTextRectangles(pat).size() > 0;
 	}
 
 	/** Fill text rectangles in a pattern */

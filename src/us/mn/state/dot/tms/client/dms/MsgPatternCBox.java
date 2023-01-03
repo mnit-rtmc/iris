@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2023  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -51,8 +51,7 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 		// check for a fillable pattern
 		boolean fillable = false;
 		for (MsgPattern pat: msgs) {
-			int n = MsgPatternHelper.findTextRectangles(pat).size();
-			if (n > 0) {
+			if (MsgPatternHelper.hasTextRectangles(pat)) {
 				fillable = true;
 				break;
 			}
@@ -105,9 +104,7 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 		for (int i = 0; i < getItemCount(); i++) {
 			MsgPattern pat = getItemAt(i);
 			if (pat != null) {
-				int n = MsgPatternHelper
-					.findTextRectangles(pat).size();
-				if (n > 0) {
+				if (MsgPatternHelper.hasTextRectangles(pat)) {
 					if (best != null) {
 						int blen = best.getMulti()
 							.length();
