@@ -104,11 +104,15 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 		for (int i = 0; i < getItemCount(); i++) {
 			MsgPattern pat = getItemAt(i);
 			if (pat != null) {
+				String multi = pat.getMulti();
+				if (multi.equals(ms)) {
+					best = pat;
+					break;
+				}
 				if (MsgPatternHelper.hasTextRectangles(pat)) {
 					if (best != null) {
+						int len = multi.length();
 						int blen = best.getMulti()
-							.length();
-						int len = pat.getMulti()
 							.length();
 						if (len < blen)
 							best = pat;
