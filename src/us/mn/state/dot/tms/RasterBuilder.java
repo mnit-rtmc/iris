@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2023  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -190,11 +190,13 @@ public class RasterBuilder {
 		if (canCombineSequence(first)) {
 			// First message ends with new page tag
 			MultiBuilder mb = new MultiBuilder(first);
-			// Reset these to default values
-			mb.setColorForeground(null);
+			// Reset some MULTI to default values
+			// NOTE: [cf] already reset at end of first msg
+			//       Don't need mb.setColorForeground(null);
 			mb.setFont(null, null);
 			mb.setJustificationLine(null);
 			mb.setJustificationPage(null);
+			mb.addPage();
 			// Add second message
 			mb.append(ms2);
 			return mb.toString();
@@ -235,7 +237,7 @@ public class RasterBuilder {
 
 	// Check if messages can be combined in a sequence
 	private boolean canCombineSequence(String ms) {
-		return ms.endsWith("[np]");
+		return ms.endsWith("[cf]");
 	}
 
 	/** Check if messages can be combined with shared pages */

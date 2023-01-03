@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2022  Minnesota Department of Transportation
+ * Copyright (C) 2022-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@ public class RasterBuilderTest extends TestCase {
 
 	public void testCombineFailed() {
 		checkCombine("", "", null);
-		checkCombine("AAA[np]", "", null);
-		checkCombine("[np]", "123", null);
+		checkCombine("AAA[cf]", "", null);
+		checkCombine("[cf]", "123", null);
 		// invalid text rectangle tag
 		checkCombine("P[tr1,10,50]", "[tr1,10,50]A", null);
 		// new page not allowed in first message for shared
@@ -42,9 +42,9 @@ public class RasterBuilderTest extends TestCase {
 	}
 
 	public void testCombineSequenced() {
-		checkCombine("AAA[np]", "123", "AAA[np][cf][fo][jl][jp]123");
-		checkCombine("AAA[np]", "123[np]XYZ",
-			"AAA[np][cf][fo][jl][jp]123[np]XYZ");
+		checkCombine("AAA[cf]", "123", "AAA[cf][fo][jl][jp][np]123");
+		checkCombine("AAA[cf]", "123[np]XYZ",
+			"AAA[cf][fo][jl][jp][np]123[np]XYZ");
 	}
 
 	public void testCombineShared1() {

@@ -19,16 +19,16 @@ between messages by inserting the [MULTI] string `[cf][fo][jl][jp]`.
 
 ### Sequenced Message Combining
 
-If the scheduled message ends with an `[np]` tag, it can be combined with an
-operator message to make a repeating _sequence_ of pages.
+If the scheduled message ends with a default `[cf]` tag, it can be combined
+with an operator message to make a repeating _sequence_ of pages.
 
 Example:
 - Scheduled message:
-  `[cr1,1,160,54,0,0,125][cr1,18,160,1,255,255,255][tr1,1,160,17][cf255,255,255][fo5][jp3]TRUCK PARKING[tr4,24,154,30][jl2]REST AREA[jl4]4 MI[nl5][jl2]SPACES OPEN[jl4]10[np]`
+  `[cr1,1,160,54,0,0,125][cr1,18,160,1,255,255,255][tr1,1,160,17][cf255,255,255][fo5][jp3]TRUCK PARKING[tr4,24,154,30][jl2]REST AREA[jl4]4 MI[nl5][jl2]SPACES OPEN[jl4]10[cf]`
 - Operator message:
   `STALLED VEHICLE[nl]IN RIGHT LANE[nl]USE CAUTION`
 - Combined message:
-  `[cr1,1,160,54,0,0,125][cr1,18,160,1,255,255,255][tr1,1,160,17][cf255,255,255][fo5][jp3]TRUCK PARKING[tr4,24,154,30][jl2]REST AREA[jl4]4 MI[nl5][jl2]SPACES OPEN[jl4]10[np][cf][fo][jl][jp]STALLED VEHICLE[nl]IN RIGHT LANE[nl]USE CAUTION`
+  `[cr1,1,160,54,0,0,125][cr1,18,160,1,255,255,255][tr1,1,160,17][cf255,255,255][fo5][jp3]TRUCK PARKING[tr4,24,154,30][jl2]REST AREA[jl4]4 MI[nl5][jl2]SPACES OPEN[jl4]10[cf][fo][jl][jp][np]STALLED VEHICLE[nl]IN RIGHT LANE[nl]USE CAUTION`
 
 ![](images/msg_combined_sequenced.gif)
 
