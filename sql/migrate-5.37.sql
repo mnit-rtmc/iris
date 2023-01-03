@@ -294,4 +294,8 @@ CREATE VIEW sign_message_view AS
     FROM iris.sign_message;
 GRANT SELECT ON sign_message_view TO PUBLIC;
 
+-- Update protocols to make one for NDOT beacons
+UPDATE iris.comm_protocol SET description = 'NDOT Beacon'
+    WHERE id = 24;
+
 COMMIT;
