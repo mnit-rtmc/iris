@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2022  Minnesota Department of Transportation
+ * Copyright (C) 2022-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.utils;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.RasterBuilder;
@@ -59,133 +60,226 @@ public class TextRect {
 		return rb.getLineCount();
 	}
 
-	/** Finder for text rectangles in MULTI strings */
-	static private class Finder extends MultiAdapter {
-		final int width;
-		final int height;
-		final int font_def;
-		final ArrayList<TextRect> rects = new ArrayList<TextRect>();
-		int font_num;
-		int page = 1;
-		TextRect tr;
+	/** Scanner for text rectangles in MULTI strings */
+	abstract private class Scanner extends MultiAdapter {
+		int page = 1;  // current page
+		int font_cur;  // current font
+		TextRect rect; // current rect
+		boolean empty; // current rect empty
 
-		private Finder(int w, int h, int fn) {
-			width = w;
-			height = h;
-			font_def = fn;
-			font_num = fn;
-			tr = pageRect();
+		private Scanner() {
+			font_cur = font_num;
+			rect = pageRect();
+			empty = true;
 		}
 		private TextRect pageRect() {
-			return new TextRect(page, width, height, font_num);
+			return new TextRect(page, width, height, font_cur);
 		}
-		private void foundRect() {
-			rects.add(new TextRect(tr.page_number, tr.width,
-				tr.height, font_num));
+		void startRect(TextRect tr) {
+			if (empty && !rect.equals(pageRect()))
+				endRect(rect);
+			rect = tr;
+			empty = true;
 		}
+		abstract void endRect(TextRect tr);
 
 		@Override public void addSpan(String span) {
-			tr = null;
+			empty = false;
 		}
 		@Override public void setFont(Integer f_num, String f_id) {
-			font_num = (f_num != null) ? f_num : font_def;
+			font_cur = (f_num != null) ? f_num : font_num;
 		}
 		@Override public void addGraphic(int g_num, Integer x,
 			Integer y, String g_id)
 		{
-			tr = null;
+			empty = false;
 		}
 		@Override public void addLine(Integer spacing) {
-			tr = null;
+			empty = false;
 		}
 		@Override public void addPage() {
-			if (tr != null)
-				foundRect();
 			page++;
-			tr = pageRect();
+			startRect(pageRect());
 		}
 		@Override public void setTextRectangle(int x, int y,
 			int w, int h)
 		{
-			if (tr != null && !tr.equals(pageRect()))
-				foundRect();
-			tr = new TextRect(page, w, h, font_num);
+			startRect(new TextRect(page, w, h, font_cur));
 		}
 	}
 
 	/** Find unused text rectangles in a MULTI string */
-	static public List<TextRect> find(int width, int height, int fn,
-		String multi)
-	{
-		Finder finder = new Finder(width, height, fn);
+	public List<TextRect> find(String multi) {
+		final ArrayList<TextRect> rects = new ArrayList<TextRect>();
+		Scanner scanner = new Scanner() {
+			@Override void endRect(TextRect tr) {
+				rects.add(tr);
+			}
+		};
 		// find text rectangles in MULTI string
-		new MultiString(multi).parse(finder);
+		new MultiString(multi).parse(scanner);
 		// this creates a text rect on last page only if it's clean
-		finder.addPage();
-		return finder.rects;
+		scanner.addPage();
+		return rects;
 	}
 
 	/** Filler for text rectangles in MULTI strings */
-	static private class Filler extends MultiBuilder {
-		final String[] mess;
-		int n_mess = 0;
-		boolean page_clean = true;
-		boolean page_rect = false;
-
-		private Filler(String[] m) {
-			mess = m;
-		}
-
-		private void fillRectangle() {
-			if (n_mess < mess.length) {
-				super.append(new MultiString(mess[n_mess]));
-				n_mess++;
+	private class Filler extends MultiBuilder {
+		final Iterator<String> lines;
+		final Scanner scanner = new Scanner() {
+			@Override void endRect(TextRect tr) {
+				int n_lines = tr.getLineCount();
+				while (n_lines > 0) {
+					if (lines.hasNext()) {
+						String ln = lines.next();
+						Filler.this.append(
+							new MultiString(ln));
+					}
+					n_lines--;
+					if (n_lines > 0)
+						Filler.super.addLine(null);
+				}
 			}
+		};
+
+		private Filler(List<String> lns) {
+			lines = lns.iterator();
 		}
 
 		@Override public void addSpan(String span) {
+			scanner.addSpan(span);
 			super.addSpan(span);
-			page_clean = false;
-			page_rect = false;
 		}
 		@Override public void addGraphic(int g_num, Integer x,
 			Integer y, String g_id)
 		{
+			scanner.addGraphic(g_num, x, y, g_id);
 			super.addGraphic(g_num, x, y, g_id);
-			page_clean = false;
-			page_rect = false;
 		}
 		@Override public void addLine(Integer spacing) {
+			scanner.addLine(spacing);
 			super.addLine(spacing);
-			page_clean = false;
-			page_rect = false;
 		}
 		@Override public void addPage() {
-			if (page_clean || page_rect)
-				fillRectangle();
+			scanner.addPage();
 			super.addPage();
-			page_clean = true;
-			page_rect = false;
 		}
 		@Override public void setTextRectangle(int x, int y,
 			int w, int h)
 		{
-			if (page_rect)
-				fillRectangle();
+			scanner.setTextRectangle(x, y, w, h);
 			super.setTextRectangle(x, y, w, h);
-			page_clean = false;
-			page_rect = true;
 		}
 	}
 
-	/** Fill text rectangles in a MULTI string */
-	static public String fill(String multi, String[] mess) {
-		Filler filler = new Filler(mess);
+	/** Fill text rectangles in a pattern MULTI string.
+	 *
+	 * This is the inverse of `splitLines`.
+	 *
+	 * @param pat_ms The pattern MULTI string to fill.
+	 * @param lines Text lines in order of text rectangles, padded to
+	 *              each rectangle's getLineCount total.
+	 * @return The filled MULTI string.
+	 */
+	public String fill(String pat_ms, List<String> lines) {
+		Filler filler = new Filler(lines);
 		// fill text rectangles in MULTI string
-		new MultiString(multi).parse(filler);
+		new MultiString(pat_ms).parse(filler);
 		// if there's still a text rectangle, fill it at the end
-		if (filler.page_clean || filler.page_rect)
-			filler.fillRectangle();
+		filler.scanner.addPage();
 		return filler.toString();
+	}
+
+	/** Splitter for lines in text rectangles */
+	private class Splitter extends Scanner {
+		final List<TextRect> rects;
+		final ArrayList<String> lines = new ArrayList<String>();
+		boolean within;
+		int n_lines;
+
+		private Splitter(List<TextRect> trs) {
+			rects = trs;
+			within = rects.contains(TextRect.this);
+			n_lines = 0;
+			if (within)
+				lines.add("");
+		}
+		private void append(String ms) {
+			if (within) {
+				String line = lines.remove(lines.size() - 1);
+				lines.add(line + ms);
+			}
+		}
+
+		@Override void startRect(TextRect tr) {
+			if (within) {
+				int n = lines.size() - n_lines;
+				int c = rect.getLineCount();
+				// remove excess lines which don't fit
+				while (n > c) {
+					int j = lines.size() - 1;
+					lines.remove(j);
+					n--;
+				}
+				// pad lines to fill text rectangle
+				while (n < c) {
+					lines.add("");
+					n++;
+				}
+			}
+			n_lines = lines.size();
+			within = rects.contains(tr);
+			if (within)
+				lines.add("");
+			rect = tr;
+		}
+		@Override void endRect(TextRect tr) {}
+		@Override public void addSpan(String span) {
+			append(span);
+		}
+		@Override public void addLine(Integer spacing) {
+			if (within)
+				lines.add("");
+		}
+		@Override public void setColorForeground(Integer x) {
+			String xx = (x != null) ? "" + x : "";
+			append("[cf" + xx + "]");
+		}
+		@Override public void setColorForeground(int r, int g, int b) {
+			append("[cf" + r + ',' + g + ',' + b + ']');
+		}
+		@Override public void setCharSpacing(Integer sc) {
+			append((sc != null)
+				? "[sc" + sc + "]"
+				: "[/sc]");
+		}
+		@Override
+		public void setJustificationLine(JustificationLine jl) {
+			String n = (jl != null &&
+			            jl != JustificationLine.UNDEFINED)
+				? "" + jl.ordinal()
+				: "";
+			append("[jl" + n + "]");
+		}
+	}
+
+	/** Split a MULTI string into lines based on text rectangles in a
+	 *  pattern.
+	 *
+	 * This is the inverse of `fill`.
+	 *
+	 * @param pat_ms The MULTI string from a message pattern.
+	 * @param multi The MULTI string to split (not pattern).
+	 * @return Text lines in order of text rectangles, padded to
+	 *         each rectangle's getLineCount total.
+	 */
+	public List<String> splitLines(String pat_ms, String multi) {
+		List<TextRect> rects = find(pat_ms);
+		Splitter splitter = new Splitter(rects);
+		// fill text rectangles in MULTI string
+		new MultiString(multi).parse(splitter);
+		// if there's still a text rectangle, split it at the end
+		splitter.addPage();
+		return splitter.lines;
 	}
 }

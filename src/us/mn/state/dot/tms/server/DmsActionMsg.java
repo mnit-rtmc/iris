@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2022  Minnesota Department of Transportation
+ * Copyright (C) 2013-2023  Minnesota Department of Transportation
  * Copyright (C) 2021-2022  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +36,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.ParkingAreaHelper;
 import us.mn.state.dot.tms.SignMsgSource;
@@ -350,19 +352,21 @@ public class DmsActionMsg {
 	/** Get the feed message string */
 	private String getFeedMsg(FeedMsg msg) {
 		addSrc(SignMsgSource.external);
-		MultiString _multi = msg.getMulti();
-		if (!isMsgFeedVerifyEnabled() || isFeedMsgValid(_multi))
-			return _multi.toString();
+		String ms = msg.getMulti().toString();
+		if (!isMsgFeedVerifyEnabled() || isFeedMsgValid(ms))
+			return ms;
 		else
-			return fail("Invalid feed msg: " + _multi);
+			return fail("Invalid feed msg: " + ms);
 	}
 
 	/** Test if a feed message is valid */
-	private boolean isFeedMsgValid(MultiString _multi) {
-		int n_lines = DMSHelper.getLineCount(dms);
-		String[] lines = _multi.getLines(n_lines);
-		for (int i = 0; i < lines.length; i++) {
-			if (!isValidSignText((short) (i + 1), lines[i]))
+	private boolean isFeedMsgValid(String ms) {
+		MsgPattern pat = action.getMsgPattern();
+		if (pat == null)
+			return false;
+		List<String> lines = MsgPatternHelper.splitLines(pat, ms);
+		for (int i = 0; i < lines.size(); i++) {
+			if (!isValidSignText((short) (i + 1), lines.get(i)))
 				return false;
 		}
 		return true;

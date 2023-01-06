@@ -64,15 +64,23 @@ public class MsgPatternHelper extends BaseHelper {
 
 	/** Find unused text rectangles in a pattern */
 	static public List<TextRect> findTextRectangles(MsgPattern pat) {
+		TextRect tr = defaultRect(pat);
+		return (tr != null)
+			? tr.find(pat.getMulti())
+			: new ArrayList<TextRect>();
+	}
+
+	/** Get default text rectangle for a pattern */
+	static private TextRect defaultRect(MsgPattern pat) {
 		if (pat == null)
-			return new ArrayList<TextRect>();
+			return null;
 		SignConfig sc = pat.getSignConfig();
 		if (sc == null)
-			return new ArrayList<TextRect>();
+			return null;
 		int width = sc.getPixelWidth();
 		int height = sc.getPixelHeight();
 		int fn = SignConfigHelper.getDefaultFontNum(sc);
-		return TextRect.find(width, height, fn, pat.getMulti());
+		return new TextRect(1, width, height, fn);
 	}
 
 	/** Check if a pattern has unused text rectangles */
@@ -81,10 +89,20 @@ public class MsgPatternHelper extends BaseHelper {
 	}
 
 	/** Fill text rectangles in a pattern */
-	static public String fillTextRectangles(MsgPattern pat, String[] mess) {
-		if (pat != null)
-			return TextRect.fill(pat.getMulti(), mess);
-		else
-			return "";
+	static public String fillTextRectangles(MsgPattern pat,
+		List<String> lines)
+	{
+		TextRect tr = defaultRect(pat);
+		return (tr != null)
+			? tr.fill(pat.getMulti(), lines)
+			: "";
+	}
+
+	/** Split MULTI string into lines with a pattern */
+	static public List<String> splitLines(MsgPattern pat, String ms) {
+		TextRect tr = defaultRect(pat);
+		return (tr != null)
+			? tr.splitLines(pat.getMulti(), ms)
+			: new ArrayList<String>();
 	}
 }

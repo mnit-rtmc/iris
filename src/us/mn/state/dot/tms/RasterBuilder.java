@@ -80,7 +80,7 @@ public class RasterBuilder {
 		if (c_height > 0)
 			return c_height;
 		Font f = FontHelper.find(default_font);
-		return (f != null) ? f.getHeight() : height;
+		return (f != null) ? f.getHeight() : 8;
 	}
 
 	/** Get the optimal line spacing (pixels) */

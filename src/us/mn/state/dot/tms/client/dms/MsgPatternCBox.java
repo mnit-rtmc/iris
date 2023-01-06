@@ -98,8 +98,8 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 		      : null;
 	}
 
-	/** Set the pattern from a matching MULTI string */
-	public void setMulti(String ms) {
+	/** Find the best pattern for a MULTI string */
+	public MsgPattern findBestPattern(String ms) {
 		MsgPattern best = null;
 		for (int i = 0; i < getItemCount(); i++) {
 			MsgPattern pat = getItemAt(i);
@@ -121,6 +121,6 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 				}
 			}
 		}
-		setSelectedItem(best);
+		return best;
 	}
 }

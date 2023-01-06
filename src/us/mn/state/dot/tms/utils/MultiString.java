@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2022  Minnesota Department of Transportation
+ * Copyright (C) 2006-2023  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  * Copyright (C) 2019-2020  SRF Consulting Group
  * Copyright (C) 2021  Iteris Inc.
@@ -67,6 +67,8 @@ public class MultiString {
 		@Override
 		public void addColorRectangle(int x, int y, int w, int h,
 			int r, int g, int b) {}
+		@Override
+		public void setFont(Integer fn, String f_id) {}
 		@Override
 		public void addGraphic(int g_num, Integer x, Integer y,
 			String g_id) {}
@@ -864,43 +866,6 @@ public class MultiString {
 	/** Get message pages as an array of strings */
 	private String[] getPages() {
 		return multi.split("\\[np\\]");
-	}
-
-	/** Get message lines as an array of strings (with tags).
-	 * Every n_lines elements in the returned array represent one page.
-	 * @param n_lines Number of lines per page.
-	 * @return A string array containing text for each line. */
-	public String[] getLines(int n_lines) {
-		String[] pages = getPages();
-		int n_total = n_lines * pages.length;
-		String[] lines = new String[n_total];
-		for (int i = 0; i < lines.length; i++)
-			lines[i] = "";
-		for (int i = 0; i < pages.length; i++) {
-			String page = removePrefix(pages[i]);
-			int p = i * n_lines;
-			String[] lns = page.split("\\[nl.?\\]");
-			for (int ln = 0; ln < lns.length; ln++) {
-				int j = p + ln;
-				if (j < n_total) {
-					MultiString ms = new MultiString(
-						lns[ln]);
-					lines[j] = ms.normalizeLine().toString();
-				} else {
-					// MULTI string defines more than
-					// n_lines on this page.  We'll just
-					// have to ignore this span.
-				}
-			}
-		}
-		return lines;
-	}
-
-	/** Remove all prefix before the last [tr...] tag */
-	static private String removePrefix(String page) {
-		String[] parts = page.split("\\[tr.*?\\]", -1);
-		int len = parts.length;
-		return (len > 0) ? parts[len - 1] : "";
 	}
 
 	/** Get a MULTI string as text only (tags stripped) */

@@ -20,6 +20,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -323,17 +324,24 @@ public class MessageComposer extends JPanel {
 
 	/** Compose a MULTI string using the contents of the widgets */
 	public String getComposedMulti() {
+		ArrayList<String> lines = new ArrayList<String>();
+		for (int i = 0; i < n_rects; i++)
+			rects[i].getSelectedLines(lines);
 		MsgPattern pat = getMsgPattern();
-		String[] mess = new String[n_rects];
-		for (int i = 0; i < mess.length; i++)
-			mess[i] = rects[i].getMulti();
-		return MsgPatternHelper.fillTextRectangles(pat, mess);
+		return MsgPatternHelper.fillTextRectangles(pat, lines);
 	}
 
 	/** Set the composed MULTI string */
 	public void setComposedMulti(String ms) {
-		pattern_cbx.setMulti(ms);
-		// FIXME: split lines
+		MsgPattern pat = pattern_cbx.findBestPattern(ms);
+		pattern_cbx.setSelectedItem(pat);
+		if (pat != null) {
+			List<String> lines = MsgPatternHelper
+				.splitLines(pat, ms);
+			Iterator<String> lns = lines.iterator();
+			for (int i = 0; i < n_rects; i++)
+				rects[i].setSelectedLines(lns);
+		}
 	}
 
 	/** Check if beacon is enabled */
