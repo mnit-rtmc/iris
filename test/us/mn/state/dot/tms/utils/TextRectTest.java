@@ -227,6 +227,10 @@ public class TextRectTest extends TestCase {
 			"ABC[nl][nl][np]123");
 		fillSplit("123[np]", Arrays.asList("", "ABC", ""),
 			"123[np][nl]ABC[nl]");
+		fillSplit("[fo2][np]",
+			Arrays.asList("ABC", "DEF", "", "", "123", "456"),
+			"ABC[nl]DEF[nl][fo2][np][nl]123[nl]456"
+		);
 	}
 
 	public void testFillSplitTrNp() {
