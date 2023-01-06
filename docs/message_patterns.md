@@ -7,6 +7,21 @@ A _message pattern_ is a partially or fully composed [MULTI] message associated
 with a sign config.  They can be scheduled by [DMS action]s as part of an
 [action plan] or selected by operators when [composing messages].
 
+## Fillable Text Rectangles
+
+Text rectangles within a pattern can be _fillable_ to allow operators to fill
+in parts of a message with sign text.  A fillable text rectangle can either be
+defined by a `[tr…]` tag, or be a full page (`[np]` tag or beginning of
+message).
+
+A rectangle is only fillable if it contains no text or `[nl…]` tags.  A full
+page can only be fillable if it contains no `[tr…]` tags.
+
+The text composed by operators will be inserted directly after a blank text
+rectangle.  For example, if the pattern is: `[tr1,1,100,10][g5]`, and the
+operator selected the message `CRASH[nl]AHEAD`, the composed message would
+be `[tr1,1,100,10]CRASH[nl]AHEAD[g5]`.
+
 ## Message Combining
 
 In some cases, a scheduled message can be combined with the operator composed

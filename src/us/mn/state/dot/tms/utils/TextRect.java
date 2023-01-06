@@ -64,55 +64,55 @@ public class TextRect {
 	abstract private class Scanner extends MultiAdapter {
 		int page = 1;  // current page
 		int font_cur;  // current font
+		TextRect page_rect; // page rect
 		TextRect rect; // current rect
-		boolean empty; // current rect empty
+		boolean fillable; // current rect fillable
 
 		private Scanner() {
 			font_cur = font_num;
-			rect = pageRect();
-			empty = true;
+			page_rect = pageRect();
+			rect = page_rect;
+			fillable = true;
 		}
 		private TextRect pageRect() {
 			return new TextRect(page, width, height, font_cur);
 		}
 		void startRect(TextRect tr) {
-			if (empty && !rect.equals(pageRect()))
-				endRect(rect);
+			if (fillable)
+				fillableRect(rect);
 			rect = tr;
-			empty = true;
+			fillable = true;
 		}
-		abstract void endRect(TextRect tr);
+		abstract void fillableRect(TextRect tr);
 
 		@Override public void addSpan(String span) {
-			empty = false;
+			fillable = false;
 		}
 		@Override public void setFont(Integer f_num, String f_id) {
 			font_cur = (f_num != null) ? f_num : font_num;
 		}
-		@Override public void addGraphic(int g_num, Integer x,
-			Integer y, String g_id)
-		{
-			empty = false;
-		}
 		@Override public void addLine(Integer spacing) {
-			empty = false;
+			fillable = false;
 		}
 		@Override public void addPage() {
 			page++;
-			startRect(pageRect());
+			page_rect = pageRect();
+			startRect(page_rect);
 		}
 		@Override public void setTextRectangle(int x, int y,
 			int w, int h)
 		{
+			if (rect.equals(page_rect))
+				fillable = false;
 			startRect(new TextRect(page, w, h, font_cur));
 		}
 	}
 
-	/** Find unused text rectangles in a MULTI string */
+	/** Find fillable text rectangles in a MULTI string */
 	public List<TextRect> find(String multi) {
 		final ArrayList<TextRect> rects = new ArrayList<TextRect>();
 		Scanner scanner = new Scanner() {
-			@Override void endRect(TextRect tr) {
+			@Override void fillableRect(TextRect tr) {
 				rects.add(tr);
 			}
 		};
@@ -125,50 +125,48 @@ public class TextRect {
 
 	/** Filler for text rectangles in MULTI strings */
 	private class Filler extends MultiBuilder {
+		final List<TextRect> rects;
 		final Iterator<String> lines;
-		final Scanner scanner = new Scanner() {
-			@Override void endRect(TextRect tr) {
-				int n_lines = tr.getLineCount();
-				while (n_lines > 0) {
-					if (lines.hasNext()) {
-						String ln = lines.next();
-						Filler.this.append(
-							new MultiString(ln));
-					}
-					n_lines--;
-					if (n_lines > 0)
-						Filler.super.addLine(null);
-				}
-			}
-		};
+		int page = 1;  // current page
+		int font_cur;  // current font
 
-		private Filler(List<String> lns) {
+		private Filler(List<TextRect> trs, List<String> lns) {
+			rects = trs;
 			lines = lns.iterator();
+			font_cur = font_num;
+			fillRect(new TextRect(page, width, height, font_cur));
 		}
 
-		@Override public void addSpan(String span) {
-			scanner.addSpan(span);
-			super.addSpan(span);
+		private void fillRect(TextRect tr) {
+			if (!rects.contains(tr))
+				return;
+			int n_lines = tr.getLineCount();
+			while (n_lines > 0) {
+				if (lines.hasNext()) {
+					String ln = lines.next();
+					Filler.this.append(
+						new MultiString(ln));
+				}
+				n_lines--;
+				if (n_lines > 0)
+					Filler.super.addLine(null);
+			}
 		}
-		@Override public void addGraphic(int g_num, Integer x,
-			Integer y, String g_id)
-		{
-			scanner.addGraphic(g_num, x, y, g_id);
-			super.addGraphic(g_num, x, y, g_id);
-		}
-		@Override public void addLine(Integer spacing) {
-			scanner.addLine(spacing);
-			super.addLine(spacing);
+
+		@Override public void setFont(Integer f_num, String f_id) {
+			super.setFont(f_num, f_id);
+			font_cur = (f_num != null) ? f_num : font_num;
 		}
 		@Override public void addPage() {
-			scanner.addPage();
 			super.addPage();
+			page++;
+			fillRect(new TextRect(page, width, height, font_cur));
 		}
 		@Override public void setTextRectangle(int x, int y,
 			int w, int h)
 		{
-			scanner.setTextRectangle(x, y, w, h);
 			super.setTextRectangle(x, y, w, h);
+			fillRect(new TextRect(page, w, h, font_cur));
 		}
 	}
 
@@ -182,19 +180,18 @@ public class TextRect {
 	 * @return The filled MULTI string.
 	 */
 	public String fill(String pat_ms, List<String> lines) {
-		Filler filler = new Filler(lines);
+		List<TextRect> rects = find(pat_ms);
+		Filler filler = new Filler(rects, lines);
 		// fill text rectangles in MULTI string
 		new MultiString(pat_ms).parse(filler);
-		// if there's still a text rectangle, fill it at the end
-		filler.scanner.addPage();
 		return filler.toString();
 	}
 
 	/** Splitter for lines in text rectangles */
 	private class Splitter extends Scanner {
-		final List<TextRect> rects;
+		final List<TextRect> rects; // fillable rectangles from pattern
 		final ArrayList<String> lines = new ArrayList<String>();
-		boolean within;
+		boolean within; // currently within a fillable rectangle
 		int n_lines;
 
 		private Splitter(List<TextRect> trs) {
@@ -233,7 +230,7 @@ public class TextRect {
 				lines.add("");
 			rect = tr;
 		}
-		@Override void endRect(TextRect tr) {}
+		@Override void fillableRect(TextRect tr) {}
 		@Override public void addSpan(String span) {
 			append(span);
 		}

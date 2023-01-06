@@ -197,75 +197,50 @@ public class TextRectTest extends TestCase {
 	public void testFillSplitTr() {
 		fillSplit("[tr1,1,50,8]", Arrays.asList("ABC"),
 			"[tr1,1,50,8]ABC");
+		fillSplit("ABC[tr1,1,50,8]", Arrays.asList("DEF"),
+			"ABC[tr1,1,50,8]DEF");
 		fillSplit("[tr1,1,50,8][tr1,10,50,8]",
 			Arrays.asList("ABC", "123"),
 			"[tr1,1,50,8]ABC[tr1,10,50,8]123"
 		);
-		/*
 		fillSplit("[tr1,1,50,8][fo2][tr1,10,50,8]",
 			Arrays.asList("ABC", "123"),
 			"[tr1,1,50,8]ABC[fo2][tr1,10,50,8]123"
 		);
-		fillSplit("[fo2][tr1,1,50,8][fo3][tr1,10,50,8][np]",
-			Arrays.asList("ABC", "123", "XYZ"),
-			"[fo2][tr1,1,50,8]ABC[fo3][tr1,10,50,8]123[np]XYZ"
-		);*/
-	}
-/*
-	public void testSplitLinesWithRectangles() {
-		TextRect tr2 = new TextRect(1, 10, 10, 1);
-		TextRect tr3 = new TextRect(1, 20, 20, 1);
-		// text rectangle tags
-		checkSplit("[tr1,1,10,10]ABC", Arrays.asList("ABC"),
-			Arrays.asList(tr2));
-		checkSplit("ABC[tr1,1,10,10]DEF", Arrays.asList("ABC"));
-		checkSplit("ABC[tr1,1,10,10]DEF",
-			Arrays.asList("ABC", "DEF"),
-			Arrays.asList(tr, tr2));
-		checkSplit("[tr1,1,10,10]ABC[tr10,10,20,20]DEF",
-			Arrays.asList("ABC", "DEF"),
-			Arrays.asList(tr2, tr3));
+		fillSplit("[g1][tr1,1,50,8]",
+			Arrays.asList("ABC"),
+			"[g1][tr1,1,50,8]ABC"
+		);
 	}
 
-	public void testSplitMultiPage() {
-		TextRect tr2 = new TextRect(1, 10, 10, 1);
-		TextRect pg2 = new TextRect(2, 50, 50, 1);
-		TextRect pg3 = new TextRect(3, 50, 50, 1);
-		// only one page in rects
-		checkSplit("ABC[np]DEF", Arrays.asList("ABC"));
-		checkSplit("ABC[np]",
-			Arrays.asList("ABC", ""),
-			Arrays.asList(tr3, pg2));
-		checkSplit("ABC[np][nl]",
-			Arrays.asList("ABC", "", ""),
-			Arrays.asList(tr3, pg2));
-		checkSplit("ABC[np]DEF",
-			Arrays.asList("ABC", "DEF"),
-			Arrays.asList(tr3, pg2));
-		checkSplit("ABC[nl][np]DEF",
-			Arrays.asList("ABC", "", "DEF"),
-			Arrays.asList(tr3, pg2));
-		checkSplit("ABC[nl][np]DEF[np]GHI",
-			Arrays.asList("ABC", "", "DEF"),
-			Arrays.asList(tr3, pg2));
-		checkSplit("ABC[nl][np]DEF[np]GHI",
-			Arrays.asList("ABC", "", "DEF", "GHI"),
-			Arrays.asList(tr3, pg2, pg3));
-		checkSplit("ABC[nl]DEF[np]GHI",
-			Arrays.asList("ABC", "DEF", "GHI"),
-			Arrays.asList(tr3, pg2));
-		checkSplit("ABC[nl][nl]DEF[np][nl]",
-			Arrays.asList("ABC", "", "DEF", "", ""),
-			Arrays.asList(tr3, pg2));
-		checkSplit("ABC[nl]DEF[np]GHI[nl]JKL",
-			Arrays.asList("ABC", "DEF", "GHI", "JKL"),
-			Arrays.asList(tr3, pg2));
-		checkSplit("ABC[nl]DEF[np]GHI[nl][nl]JKL",
-			Arrays.asList("ABC", "DEF", "GHI", "", "JKL"),
-			Arrays.asList(tr, pg2));
-		checkSplit("[tr1,1,10,10]ABC[np]DEF",
-			Arrays.asList("ABC", "DEF"),
-			Arrays.asList(tr2, pg2));
+	public void testFillSplitNp() {
+		fillSplit("[np]", Arrays.asList("", "", "", "", "", ""),
+			"[nl][nl][np][nl][nl]");
+		fillSplit("[np]", Arrays.asList("ABC", "", "", "", "", ""),
+			"ABC[nl][nl][np][nl][nl]");
+		fillSplit("[np]", Arrays.asList("ABC", "", "", "123", "", ""),
+			"ABC[nl][nl][np]123[nl][nl]");
+		fillSplit("[np][np]",
+			Arrays.asList("","","ABC","","","DEF","","","GHI"),
+			"[nl][nl]ABC[np][nl][nl]DEF[np][nl][nl]GHI");
+		fillSplit("[np]123", Arrays.asList("ABC", "", ""),
+			"ABC[nl][nl][np]123");
+		fillSplit("123[np]", Arrays.asList("", "ABC", ""),
+			"123[np][nl]ABC[nl]");
 	}
-	*/
+
+	public void testFillSplitTrNp() {
+		fillSplit("[fo2][np][tr1,1,50,8]",
+			Arrays.asList("ABC", "DEF", "XYZ", "123"),
+			"ABC[nl]DEF[nl]XYZ[fo2][np][tr1,1,50,8]123"
+		);
+		fillSplit("[fo2][tr1,1,50,8][fo3][np]",
+			Arrays.asList("ABC", "123", "XYZ", ""),
+			"[fo2][tr1,1,50,8]ABC[fo3][np]123[nl]XYZ[nl]"
+		);
+		fillSplit("[fo2][tr1,1,50,8][fo3][tr1,10,50,8][np]",
+			Arrays.asList("ABC", "123", "XYZ", "", ""),
+			"[fo2][tr1,1,50,8]ABC[fo3][tr1,10,50,8]123[np]XYZ[nl][nl]"
+		);
+	}
 }
