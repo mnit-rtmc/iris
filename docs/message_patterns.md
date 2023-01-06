@@ -14,10 +14,10 @@ in parts of a message with sign text.  A fillable text rectangle can either be
 defined by a `[tr…]` tag, or be a full page (`[np]` tag or beginning of
 message).
 
-A rectangle is only fillable if it contains no text or `[nl…]` tags.  A full
-page can only be fillable if it contains no `[tr…]` tags.
+A rectangle is only fillable if it contains no text or `[nl…]` tags.
+Additionally, a full page can only be fillable if it contains no `[tr…]` tags.
 
-The text composed by operators will be inserted directly after a blank text
+The text composed by operators will be inserted directly after a fillable text
 rectangle.  For example, if the pattern is: `[tr1,1,100,10][g5]`, and the
 operator selected the message `CRASH[nl]AHEAD`, the composed message would
 be `[tr1,1,100,10]CRASH[nl]AHEAD[g5]`.

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  * Copyright (C) 2017-2018  Iteris Inc.
  *
@@ -27,8 +27,6 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
-import us.mn.state.dot.tms.MsgPattern;
-import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;

@@ -298,28 +298,23 @@ public class MessageComposer extends JPanel {
 		MsgPattern pat = getMsgPattern();
 		if (pat != null)
 			return MsgPatternHelper.findTextRectangles(pat);
-		else {
-			ArrayList<TextRect> trs = new ArrayList<TextRect>();
-			DMS dms = dispatcher.getSingleSelection();
-			if (dms != null) {
-				SignConfig sc = dms.getSignConfig();
-				if (sc != null) {
-					int fn = SignConfigHelper
-						.getDefaultFontNum(sc);
-					trs.add(new TextRect(1,
-						sc.getPixelWidth(),
-						sc.getPixelHeight(),
-						fn
-					));
-				}
-			}
-			return trs;
-		}
+		else
+			return new ArrayList<TextRect>();
 	}
 
 	/** Get the selected message pattern */
 	public MsgPattern getMsgPattern() {
-		return pattern_cbx.getSelectedPattern();
+		MsgPattern pat = pattern_cbx.getSelectedPattern();
+		if (pat != null)
+			return pat;
+		// make a "client" pattern just for composing
+		DMS dms = dispatcher.getSingleSelection();
+		if (dms != null) {
+			SignConfig sc = dms.getSignConfig();
+			if (sc != null)
+				return new ClientMsgPattern(sc, "");
+		}
+		return null;
 	}
 
 	/** Compose a MULTI string using the contents of the widgets */
@@ -335,6 +330,8 @@ public class MessageComposer extends JPanel {
 	public void setComposedMulti(String ms) {
 		MsgPattern pat = pattern_cbx.findBestPattern(ms);
 		pattern_cbx.setSelectedItem(pat);
+		// this makes a ClientMsgPattern if none selected
+		pat = getMsgPattern();
 		if (pat != null) {
 			List<String> lines = MsgPatternHelper
 				.splitLines(pat, ms);
