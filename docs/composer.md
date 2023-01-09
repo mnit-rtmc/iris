@@ -14,7 +14,7 @@ determine how a message was composed: **exclude_font**, **override_font**,
 
 ![](images/dms_composer_new.png)
 
-With v5.37+, the operator selects a **Message Pattern** first, or accepts the
+With v5.37+, the operator selects a [message pattern] first, or accepts the
 default. Then, depending on the pattern, may optionally select sign text
 line-by-line.  The pattern determines which font, foreground and background
 colors, page times, graphics, color rectangles, justifaction, character
@@ -25,12 +25,15 @@ quick message.
 The following features were **removed**, since message patterns make them
 redundant:
 
-* `dms_font_selection_enable` system attribute
-* `dms_page_on_selection_enable` system attribute
 * DMS `override_font`
 * DMS `override_foreground`
 * DMS `override_background`
 * Sign Config `exclude_font`
+* Several system attributes: `dms_default_justification_line`,
+`dms_default_justification_page`, `dms_duration_enable`,
+`dms_font_selection_enable`, `dms_manufacturer_enable`, `dms_max_lines`,
+`dms_message_min_pages`, `dms_page_on_selection_enable`,
+`dms_quickmsg_store_enable`
 
 Also, [message combining] was reworked to be more automatic.  There is no
 `msg_combining` field for patterns as there was for quick messages.
@@ -50,5 +53,6 @@ must be added.
 
 [fillable text rectangles]: message_patterns.html#fillable-text-rectangles
 [message combining]: message_patterns.html#message-combining
+[message pattern]: message_patterns.html
 [MULTI]: multi.html
 [shared messages]: message_patterns.html#shared-message-combining
