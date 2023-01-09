@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2002-2020  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
+ * Copyright (C) 2022-2023  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +17,7 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.FlowLayout;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -42,6 +44,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  * @author Travis Swanston
  * @author Michael Janson
  * @author Gordon Parikh
+ * @author John L. Stanley
  */
 public class StreamControlPanel extends JPanel {
 
@@ -50,9 +53,10 @@ public class StreamControlPanel extends JPanel {
 		STOP("camera.stream.stop"),
 		PLAY("camera.stream.play"),
 		PLAY_EXTERNAL("camera.stream.playext"),
+		RESTORE_LAYOUT("camera.layout.restore"),
+		CLOSE_ALL_LAYOUTS("camera.layout.close"),
 		SAVE_LAYOUT("camera.layout.save"),
-		DELETE_LAYOUT("camera.layout.delete"),
-		RESTORE_LAYOUT("camera.layout.restore");
+		DELETE_LAYOUT("camera.layout.delete");
 
 		/** Command I18n text */
 		private final String text_id;
@@ -93,14 +97,17 @@ public class StreamControlPanel extends JPanel {
 			case PLAY_EXTERNAL:
 				pnl.playExternal();
 				break;
+			case RESTORE_LAYOUT:
+				pnl.restoreLayout();
+				break;
+			case CLOSE_ALL_LAYOUTS:
+				pnl.closeAllLayouts();
+				break;
 			case SAVE_LAYOUT:
 				pnl.saveLayout();
 				break;
 			case DELETE_LAYOUT:
 				pnl.deleteLayout();
-				break;
-			case RESTORE_LAYOUT:
-				pnl.restoreLayout();
 				break;
 			}
 		}
@@ -149,6 +156,9 @@ public class StreamControlPanel extends JPanel {
 	/** Restore layout button */
 	private final JButton restore_layout_btn;
 
+	/** Close all layouts button */
+	private final JButton close_all_layouts_btn;
+
 	/** Create a stream control panel.
 	 * @param s User session. */
 	public StreamControlPanel(Session s, StreamPanel pnl) {
@@ -165,20 +175,24 @@ public class StreamControlPanel extends JPanel {
 		layout_cbx = new JComboBox<String>(layout_mdl);
 		layout_cbx.setToolTipText(I18N.get("camera.layout"));
 		layout_cbx.setPrototypeDisplayValue("layout_MMM");
+		restore_layout_btn = StreamCommand.RESTORE_LAYOUT
+				.createButton(this);
+		close_all_layouts_btn = StreamCommand.CLOSE_ALL_LAYOUTS
+				.createButton(this);
 		save_layout_btn = StreamCommand.SAVE_LAYOUT.createButton(this);
 		delete_layout_btn = StreamCommand.DELETE_LAYOUT
-			.createButton(this);
-		restore_layout_btn = StreamCommand.RESTORE_LAYOUT
-			.createButton(this);
-
+				.createButton(this);
+		
 		add(stop_btn);
 		add(play_btn);
 		add(playext_btn);
-		add(Box.createHorizontalStrut(UI.hgap));
+		add(Box.createHorizontalStrut(UI.hgap*2));
 		add(layout_cbx);
+		add(restore_layout_btn);
+		add(close_all_layouts_btn);
+		add(Box.createHorizontalStrut(UI.hgap*2));
 		add(save_layout_btn);
 		add(delete_layout_btn);
-		add(restore_layout_btn);
 
 		updateButtonState(false, false);
 		updateLayoutList();
@@ -215,6 +229,15 @@ public class StreamControlPanel extends JPanel {
 		StreamLayout layout = new StreamLayout(props, getLayoutName());
 		layout.restoreFrames(desktop);
 		updateLayoutList();
+		updateCloseAllLayoutsBtn();
+	}
+
+	/** Close all open video layouts */
+	public void closeAllLayouts() {
+		ArrayList<Frame> oldFrames = StreamLayout.getOpenFramesList();
+		for (Frame f: oldFrames)
+			f.dispose();
+		updateCloseAllLayoutsBtn();
 	}
 
 	/** Delete the selected layout */
@@ -240,6 +263,7 @@ public class StreamControlPanel extends JPanel {
 		for (String ln: layoutNames)
 			layout_mdl.addElement(ln);
 		layout_cbx.setSelectedItem(layoutName);
+		updateCloseAllLayoutsBtn();
 	}
 
 	/** Update the button state */
@@ -247,6 +271,7 @@ public class StreamControlPanel extends JPanel {
 		stop_btn.setEnabled(has_camera && is_streaming);
 		play_btn.setEnabled(has_camera && !is_streaming);
 		playext_btn.setEnabled(has_camera);
+		updateCloseAllLayoutsBtn();
 	}
 
 	/** Update the edit mode */
@@ -255,5 +280,10 @@ public class StreamControlPanel extends JPanel {
 		save_layout_btn.setEnabled(editMode);
 		delete_layout_btn.setEnabled(editMode);
 		layout_cbx.setEditable(editMode);
+	}
+
+	/** Update the close all layouts button */
+	private void updateCloseAllLayoutsBtn() {
+		close_all_layouts_btn.setEnabled(StreamLayout.framesAreOpen());
 	}
 }
