@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021-2022  Minnesota Department of Transportation
+ * Copyright (C) 2021-2023  Minnesota Department of Transportation
  * Copyright (C) 2020  SRF Consulting Group, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -474,21 +474,22 @@ public class AlertData {
 	private void createAlertInfo(AlertConfig cfg) throws SonarException,
 		TMSException
 	{
-		SignGroup sign_group = cfg.getSignGroup();
-		if (sign_group == null)
+		SignGroup cfg_group = cfg.getSignGroup();
+		if (cfg_group == null)
 			return;
-		Set<DMS> signs = SignGroupHelper.getAllSigns(sign_group);
-		signs.retainAll(all_dms);
-		if (!signs.isEmpty()) {
-			ActionPlanImpl plan = createPlan(cfg);
+		Set<DMS> plan_dms = SignGroupHelper.getAllSigns(cfg_group);
+		plan_dms.retainAll(all_dms);
+		if (!plan_dms.isEmpty()) {
+			ActionPlanImpl plan = createPlan(cfg, plan_dms);
 			if (plan != null)
-				createAlertInfo(plan, signs);
+				createAlertInfo(plan, plan_dms);
 		} else
 			log("no signs found for " + cfg.getName());
 	}
 
 	/** Create an action plan for this alert */
-	private ActionPlanImpl createPlan(AlertConfig cfg) throws SonarException
+	private ActionPlanImpl createPlan(AlertConfig cfg, Set<DMS> plan_dms)
+		throws SonarException
 	{
 		Set<AlertMessage> msgs = AlertMessageHelper
 			.getValidMessages(cfg);
@@ -509,7 +510,7 @@ public class AlertData {
 		plan.notifyCreate();
 		createTimeActions(cfg, plan);
 		Map<SignConfig, SignGroup> act_groups = createActiveGroups(plan,
-			msgs);
+			plan_dms, msgs);
 		for (AlertMessage msg: msgs) {
 			MsgPattern pat = msg.getMsgPattern();
 			SignConfig sc = (pat != null)
@@ -575,7 +576,7 @@ public class AlertData {
 
 	/** Create sign groups for active sign configs */
 	private Map<SignConfig, SignGroup> createActiveGroups(
-		ActionPlanImpl plan, Set<AlertMessage> msgs)
+		ActionPlanImpl plan, Set<DMS> plan_dms, Set<AlertMessage> msgs)
 		throws SonarException
 	{
 		TreeMap<SignConfig, SignGroup> act_groups =
@@ -587,7 +588,8 @@ public class AlertData {
 				? pat.getSignConfig()
 				: null;
 			if (sc != null && !act_groups.containsKey(sc)) {
-				SignGroup sg = makeActiveGroup(plan, sc);
+				SignGroup sg = makeActiveGroup(plan, plan_dms,
+					sc);
 				if (sg != null)
 					act_groups.put(sc, sg);
 			}
@@ -596,11 +598,11 @@ public class AlertData {
 	}
 
 	/** Make "active" sign group */
-	private SignGroup makeActiveGroup(ActionPlanImpl plan, SignConfig sc)
-		throws SonarException
+	private SignGroup makeActiveGroup(ActionPlanImpl plan,
+		Set<DMS> plan_dms, SignConfig sc) throws SonarException
 	{
 		Set<DMS> signs = SignConfigHelper.getAllSigns(sc);
-		signs.retainAll(all_dms);
+		signs.retainAll(plan_dms);
 		if (!signs.isEmpty()) {
 			signs.retainAll(auto_dms);
 			return createSignGroup(plan, "ACT", signs);
@@ -667,10 +669,10 @@ public class AlertData {
 	}
 
 	/** Create an alert info */
-	private void createAlertInfo(ActionPlanImpl plan, Set<DMS> signs)
+	private void createAlertInfo(ActionPlanImpl plan, Set<DMS> plan_dms)
 		throws SonarException
 	{
-		SignGroup sign_group = createSignGroup(plan, "ALL", signs);
+		SignGroup sign_group = createSignGroup(plan, "ALL", plan_dms);
 		String aname = AlertInfoImpl.createUniqueName();
 		String replaces = null; // FIXME
 		int st = (plan.getActive())
