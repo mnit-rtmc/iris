@@ -1,8 +1,8 @@
 # DMS Message Composer Redesign
 
-## Current Composer UI
+## Old Composer UI (before v5.37)
 
-![](images/dms_composer_current.png)
+![](images/dms_composer_old.png)
 
 The operator selects a message line-by-line of sign text on the left.
 Alternatively, a **Quick Message** can be selected.  There are _optional_
@@ -10,9 +10,9 @@ Font and Page on-time widgets.  In addition, there are other fields which
 determine how a message is composed: **exclude_font**, **override_font**,
 **overrode_foreground** and **override_background**.
 
-## Redesigned Composer UI
+## New Composer UI (v5.37+)
 
-![](images/dms_composer_mockup.png)
+![](images/dms_composer_new.png)
 
 Now, the operator selects a message **Pattern** first, or accepts the default.
 Then, depending on the pattern, may optionally select sign text line-by-line.
