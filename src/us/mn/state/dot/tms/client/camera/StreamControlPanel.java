@@ -27,6 +27,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+
 import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.UserProperty;
@@ -230,7 +233,7 @@ public class StreamControlPanel extends JPanel {
 	private void restoreLayout(boolean bCtrl) {
 		StreamLayout layout = new StreamLayout(props, getLayoutName());
 		if (!bCtrl)
-			closeAllLayouts();
+			queueCloseOldLayouts(StreamLayout.getOpenFramesList());
 		layout.restoreFrames(desktop);
 		updateLayoutList();
 		updateCloseAllLayoutsBtn();
@@ -244,6 +247,38 @@ public class StreamControlPanel extends JPanel {
 		updateCloseAllLayoutsBtn();
 	}
 
+	/** Queue a close old-frames to be done
+	 *   -after- all new frames are drawn.
+	 * Done this way to smooth the transition from old-
+	 * layout video panels to new-layout video panels.
+	 * (Reduces the odds that the video proxy will
+	 *  totally drop and restart a video stream.)
+	 * @param oldFrames Old layout video frames to be closed */ 
+	public void queueCloseOldLayouts(ArrayList<Frame> oldFrames) {
+		new SwingWorker<Void, Void>() {
+			@Override
+			protected Void doInBackground() throws Exception {
+				// First, wait 2sec for the new video frames to start being drawn.
+				Thread.sleep(2000);
+				return null;
+			}
+			@Override
+			protected void done() {
+				// Then, wait for all new video frames to finish being drawn.
+				SwingUtilities.invokeLater(new Runnable() 
+				{
+					public void run()
+					{
+						// Finally, close all old video frames.
+						for (Frame f: oldFrames)
+							f.dispose();
+						updateCloseAllLayoutsBtn();
+					}
+				});
+			}
+		}.execute();
+	}
+	
 	/** Delete the selected layout */
 	private void deleteLayout() {
 		UserProperty.deleteStreamLayout(props, getLayoutName());
