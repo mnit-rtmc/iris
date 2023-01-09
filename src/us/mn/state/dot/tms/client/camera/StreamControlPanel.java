@@ -71,7 +71,7 @@ public class StreamControlPanel extends JPanel {
 			IAction ia = new IAction(text_id) {
 				@Override
 				protected void doActionPerformed(ActionEvent ev) {
-					handleButton(pnl);
+					handleButton(pnl, ev);
 				}
 			};
 			final JButton btn = new JButton(ia);
@@ -85,8 +85,9 @@ public class StreamControlPanel extends JPanel {
 			return btn;
 		}
 
-		/** Handle control button press */
-		private void handleButton(StreamControlPanel pnl) {
+		/** Handle button press */
+		private void handleButton(StreamControlPanel pnl, ActionEvent ev) {
+			boolean bCtrl = (ev.getModifiers() & ActionEvent.CTRL_MASK) != 0;
 			switch (this) {
 			case STOP:
 				pnl.stopStream();
@@ -98,7 +99,7 @@ public class StreamControlPanel extends JPanel {
 				pnl.playExternal();
 				break;
 			case RESTORE_LAYOUT:
-				pnl.restoreLayout();
+				pnl.restoreLayout(bCtrl);
 				break;
 			case CLOSE_ALL_LAYOUTS:
 				pnl.closeAllLayouts();
@@ -224,9 +225,12 @@ public class StreamControlPanel extends JPanel {
 		updateLayoutList();
 	}
 
-	/** Restore the saved layout */
-	private void restoreLayout() {
+	/** Restore the selected layout 
+	 * @param bCtrl If true, don't auto-close previous open layout(s) */
+	private void restoreLayout(boolean bCtrl) {
 		StreamLayout layout = new StreamLayout(props, getLayoutName());
+		if (!bCtrl)
+			closeAllLayouts();
 		layout.restoreFrames(desktop);
 		updateLayoutList();
 		updateCloseAllLayoutsBtn();

@@ -65,34 +65,15 @@ public class StreamLayout {
 
 	/** Restore the stream frames */
 	public void restoreFrames(SmartDesktop desktop) {
-		HashMap<String, Frame> frames = getOpenFramesMap();
 		for (int i = 0; i < num_streams; i++) {
 			String cam_name = props.get(STREAM_CCTV.name + "." + i);
 			Camera cam = CameraHelper.lookup(cam_name);
-			if (cam != null) {
-				String title = VidWindow.getWindowTitle(cam);
-				if (frames.containsKey(title)) {
-					Frame f = frames.get(title);
-					f.setVisible(true);
-					f.toFront();
-				} else
-					openStreamFrame(desktop, cam, i);
-			}
+			if (cam != null)
+				openStreamFrame(desktop, cam, i);
 		}
 	}
 
-	/** Get a hashmap of open streaming frames */
-	private HashMap<String, Frame> getOpenFramesMap() {
-		Frame[] frames = IrisClient.getFrames();
-		HashMap<String, Frame> vidFrames = new HashMap<String, Frame>();
-		for (Frame f: frames) {
-			if (VidWindow.isFrame(f))
-				vidFrames.put(f.getTitle(), f);
-		}
-		return vidFrames;
-	}
-
-	/** Get an arraylist of open streaming frames */
+	/** Get an array-list of open streaming frames */
 	static ArrayList<Frame> getOpenFramesList() {
 		Frame[] frames = IrisClient.getFrames();
 		ArrayList<Frame> frameList = new ArrayList<>();
