@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  * Copyright (C) 2018  SRF Consulting Group
  *
@@ -234,7 +234,7 @@ public class SingleSignTab extends IPanel {
 
 	/** Select the preview (or current) tab */
 	public void selectPreview(boolean p) {
-		if (0 == adjusting) {
+		if ((0 == adjusting) && (p != preview)) {
 			preview = p;
 			adjusting++;
 			setMessage(selected);

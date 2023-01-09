@@ -335,9 +335,11 @@ public class MessageComposer extends JPanel {
 		if (pat != null) {
 			List<String> lines = MsgPatternHelper
 				.splitLines(pat, ms);
+			adjusting++;
 			Iterator<String> lns = lines.iterator();
 			for (int i = 0; i < n_rects; i++)
 				rects[i].setSelectedLines(lns);
+			adjusting--;
 		}
 	}
 
