@@ -48,6 +48,7 @@ added for operators to use.
 must be added.
 
 
+[fillable text rectangles]: message_patterns.html#fillable-text-rectangles
 [message combining]: message_patterns.html#message-combining
 [MULTI]: multi.html
 [shared messages]: message_patterns.html#shared-message-combining
