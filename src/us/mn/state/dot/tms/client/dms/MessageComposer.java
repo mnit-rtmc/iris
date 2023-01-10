@@ -34,7 +34,6 @@ import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
-import static us.mn.state.dot.tms.SignMessage.MAX_PAGES;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -52,6 +51,9 @@ import us.mn.state.dot.tms.utils.TextRect;
  * @author Travis Swanston
  */
 public class MessageComposer extends JPanel {
+
+	/** Maximum allowed number of pages in a message */
+	static private final int MAX_PAGES = 6;
 
 	/** User session */
 	private final Session session;
