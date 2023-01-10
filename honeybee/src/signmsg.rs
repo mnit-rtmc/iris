@@ -436,7 +436,7 @@ impl SignConfig {
                 let rgb = page.pixel(x as i32, y as i32);
                 let sr = u8::from(Gray::value(rgb.convert::<Gray8>()));
                 // Clamp radius between 0.6 and 0.8 (blooming)
-                let r = s * (sr as f32 / 255.0).max(0.6).min(0.8);
+                let r = s * (sr as f32 / 255.0).clamp(0.6, 0.8);
                 let clr = if sr > 20 { rgb } else { dark };
                 render_circle(&mut face, palette, px, py, r, clr);
             }

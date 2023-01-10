@@ -978,7 +978,7 @@ impl Resource {
         let n = make_name(dir, name);
         let writer = BufWriter::new(File::create(&backup)?);
         let count = self.fetch_writer(client, writer)?;
-        rename(backup, &n)?;
+        rename(backup, n)?;
         info!("{}: wrote {} rows in {:?}", name, count, t.elapsed());
         Ok(())
     }
