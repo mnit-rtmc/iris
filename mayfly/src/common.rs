@@ -1,6 +1,6 @@
 // common.rs
 //
-// Copyright (c) 2019-2021  Minnesota Department of Transportation
+// Copyright (c) 2019-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -134,7 +134,7 @@ impl From<Body> for tide::Result {
             Ok(Response::builder(StatusCode::Ok)
                 .content_type("application/json")
                 .body(String::from(body))
-                .header("cache-control", &format!("max-age={}", max_age))
+                .header("cache-control", format!("max-age={}", max_age))
                 .build())
         } else {
             Ok(Response::builder(StatusCode::Ok)

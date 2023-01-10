@@ -1,6 +1,6 @@
 // query.rs
 //
-// Copyright (c) 2019-2021  Minnesota Department of Transportation
+// Copyright (c) 2019-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -295,7 +295,7 @@ fn check_date(name: &str, dir: bool) -> Option<&str> {
     } else if name.len() == 16 && name.ends_with(DEXT) {
         name.get(..8).unwrap_or("")
     } else {
-        &""
+        ""
     };
     parse_date(dt).ok().map(|_| dt)
 }
@@ -377,7 +377,7 @@ fn check_detector(name: &str, dir: bool) -> Option<&str> {
         let path = Path::new(name);
         path.extension()
             .and_then(|ext| ext.to_str())
-            .and_then(|ext| file_ext(ext))
+            .and_then(file_ext)
             .and_then(|_| path.file_stem())
             .and_then(|f| f.to_str())
     } else {
