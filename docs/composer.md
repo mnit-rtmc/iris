@@ -47,7 +47,7 @@ need to be created and associated with appropriate sign groups / configs.
 2. For [shared messages], a pattern with a fillable `[tr…]` tag should be
 added for operators to use.
 3. For signs which used `override_font`, `override_foreground` or
-`override_background`, a pattern with a [MULTI] string such as `[f…][tr…]`
+`override_background`, a pattern with a [MULTI] string such as `[fo…][tr…]`
 must be added.
 
 
