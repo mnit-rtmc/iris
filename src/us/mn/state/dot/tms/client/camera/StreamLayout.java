@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  Minnesota Department of Transportation
+ * Copyright (C) 2023  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +17,7 @@ package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
 import us.mn.state.dot.tms.Camera;
@@ -31,6 +33,7 @@ import us.mn.state.dot.tms.client.widget.SmartDesktop;
  * @author Douglas Lau
  * @author Michael Janson
  * @author Gordon Parikh
+ * @author John L. Stanley
  */
 public class StreamLayout {
 
@@ -62,33 +65,31 @@ public class StreamLayout {
 
 	/** Restore the stream frames */
 	public void restoreFrames(SmartDesktop desktop) {
-		HashMap<String, Frame> frames = getOpenFrames();
 		for (int i = 0; i < num_streams; i++) {
 			String cam_name = props.get(STREAM_CCTV.name + "." + i);
 			Camera cam = CameraHelper.lookup(cam_name);
-			if (cam != null) {
-				String title = VidWindow.getWindowTitle(cam);
-				if (frames.containsKey(title)) {
-					Frame f = frames.get(title);
-					f.setVisible(true);
-					f.toFront();
-				} else
-					openStreamFrame(desktop, cam, i);
-			}
+			if (cam != null)
+				openStreamFrame(desktop, cam, i);
 		}
 	}
 
-	/** Get a mapping of open streaming frames */
-	private HashMap<String, Frame> getOpenFrames() {
+	/** Get an array-list of open streaming frames */
+	static ArrayList<Frame> getOpenFramesList() {
 		Frame[] frames = IrisClient.getFrames();
-		HashMap<String, Frame> vidFrames = new HashMap<String, Frame>();
+		ArrayList<Frame> frameList = new ArrayList<>();
 		for (Frame f: frames) {
 			if (VidWindow.isFrame(f))
-				vidFrames.put(f.getTitle(), f);
+				frameList.add(f);
 		}
-		return vidFrames;
+		return frameList;
 	}
 
+	/** Report if one or more layout-video frames are open */
+	static public boolean framesAreOpen() {
+		ArrayList<Frame> frameList = getOpenFramesList();
+		return !frameList.isEmpty();
+	}
+	
 	/** Open a camera stream frame */
 	private void openStreamFrame(SmartDesktop desktop, Camera cam, int i) {
 		int src = getPropI(STREAM_SRC.name + "." + i);
