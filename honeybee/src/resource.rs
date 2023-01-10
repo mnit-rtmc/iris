@@ -1,6 +1,6 @@
 // resource.rs
 //
-// Copyright (C) 2018-2022  Minnesota Department of Transportation
+// Copyright (C) 2018-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -674,7 +674,7 @@ const SIGN_MSG_RES: Resource = Resource::SignMsg(
     Listen::All("sign_message"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, sign_config, incident, multi, beacon_enabled, \
-             msg_combining, msg_priority, sources, owner, duration \
+             msg_priority, sources, owner, duration \
       FROM sign_message_view \
       ORDER BY name\
     ) r",

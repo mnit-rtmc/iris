@@ -1,6 +1,6 @@
 // signmsg.rs
 //
-// Copyright (C) 2018-2022  Minnesota Department of Transportation
+// Copyright (C) 2018-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -131,7 +131,6 @@ struct SignMessage {
     incident: Option<String>,
     multi: String,
     beacon_enabled: bool,
-    msg_combining: String,
     msg_priority: i32,
     sources: String,
     owner: Option<String>,
