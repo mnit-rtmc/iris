@@ -26,6 +26,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -224,6 +225,19 @@ public class StreamControlPanel extends JPanel {
 
 	/** Save the current layout */
 	private void saveLayout() {
+		String layoutName = getLayoutName();
+		Integer num = UserProperty.getLayoutNumber(props, layoutName);
+		if (num != null) {
+			String title = I18N.get("camera.layout.save.query.title");
+			String msg   = I18N.get("camera.layout.save.query.msg");
+			msg = String.format(msg, layoutName);
+			int result = JOptionPane.showConfirmDialog(this,
+					msg, title,
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE);
+			if (result != JOptionPane.YES_OPTION)
+				return;
+		}
 		UserProperty.saveStreamLayout(props, getLayoutName());
 		updateLayoutList();
 	}
@@ -281,6 +295,21 @@ public class StreamControlPanel extends JPanel {
 	
 	/** Delete the selected layout */
 	private void deleteLayout() {
+		Object[] options = {"Yes", "No"};
+		String layoutName = getLayoutName();
+		Integer num = UserProperty.getLayoutNumber(props, layoutName);
+		if (num != null) {
+			String title = I18N.get("camera.layout.delete.query.title");
+			String msg   = I18N.get("camera.layout.delete.query.msg");
+			msg = String.format(msg, layoutName);
+			int result = JOptionPane.showOptionDialog(this,
+					msg, title,
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.WARNING_MESSAGE,
+					null, options, options[1]);
+			if (result != JOptionPane.YES_OPTION)
+				return;
+		}
 		UserProperty.deleteStreamLayout(props, getLayoutName());
 		updateLayoutList();
 	}
