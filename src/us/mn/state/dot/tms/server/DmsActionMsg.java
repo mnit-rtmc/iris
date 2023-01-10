@@ -40,6 +40,7 @@ import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.ParkingAreaHelper;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.SignTextHelper;
 import us.mn.state.dot.tms.Station;
@@ -363,10 +364,10 @@ public class DmsActionMsg {
 
 	/** Test if a feed message is valid */
 	private boolean isFeedMsgValid(FeedMsg msg, String ms) {
-		DMS dms = DMSHelper.lookup(msg.getDms());
-		if (dms == null)
+		SignConfig sc = msg.getSignConfig();
+		if (sc == null)
 			return false;
-		MsgPattern pat = new TransMsgPattern(dms.getSignConfig(), "");
+		MsgPattern pat = new TransMsgPattern(sc, "");
 		List<String> lines = MsgPatternHelper.splitLines(pat, ms);
 		for (int i = 0; i < lines.size(); i++) {
 			if (!isValidSignText((short) (i + 1), lines.get(i)))

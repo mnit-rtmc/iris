@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2020  Minnesota Department of Transportation
+ * Copyright (C) 2011-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.Locale;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -111,5 +112,13 @@ public class FeedMsg {
 	/** Check if the feed message has expired */
 	public boolean hasExpired() {
 		return expire == null || expire.before(new Date());
+	}
+
+	/** Get the DMS sign config */
+	public SignConfig getSignConfig() {
+		DMS d = DMSHelper.lookup(dms);
+		return (d != null)
+		      ? d.getSignConfig()
+		      : null;
 	}
 }
