@@ -12,18 +12,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.dms;
-
-import us.mn.state.dot.tms.MsgPattern;
-import us.mn.state.dot.tms.SignConfig;
-import us.mn.state.dot.tms.SignGroup;
+package us.mn.state.dot.tms;
 
 /**
- * Client-side message pattern.
+ * Transient message pattern.
  *
  * @author Douglas Lau
  */
-public class ClientMsgPattern implements MsgPattern {
+public class TransMsgPattern implements MsgPattern {
 
 	/** Sign configuration */
 	private final SignConfig config;
@@ -31,8 +27,8 @@ public class ClientMsgPattern implements MsgPattern {
 	/** Sign text MULTI string */
 	private final String multi;
 
-	/** Create a new client msg pattern */
-	public ClientMsgPattern(SignConfig sc, String m) {
+	/** Create a new transient msg pattern */
+	public TransMsgPattern(SignConfig sc, String m) {
 		config = sc;
 		multi = m;
 	}
@@ -40,7 +36,7 @@ public class ClientMsgPattern implements MsgPattern {
 	/** Get the SONAR object name */
 	@Override
 	public String getName() {
-		return "client_msg_pattern_" + multi;
+		return "trans_msg_pattern_" + multi;
 	}
 
 	/** Get the SONAR type name */

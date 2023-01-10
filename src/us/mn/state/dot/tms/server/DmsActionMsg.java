@@ -32,6 +32,7 @@ import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsMsgPriority;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
@@ -46,6 +47,7 @@ import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.TransMsgPattern;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.TollZoneHelper;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
@@ -353,17 +355,18 @@ public class DmsActionMsg {
 	private String getFeedMsg(FeedMsg msg) {
 		addSrc(SignMsgSource.external);
 		String ms = msg.getMulti().toString();
-		if (!isMsgFeedVerifyEnabled() || isFeedMsgValid(ms))
+		if (!isMsgFeedVerifyEnabled() || isFeedMsgValid(msg, ms))
 			return ms;
 		else
 			return fail("Invalid feed msg: " + ms);
 	}
 
 	/** Test if a feed message is valid */
-	private boolean isFeedMsgValid(String ms) {
-		MsgPattern pat = action.getMsgPattern();
-		if (pat == null)
+	private boolean isFeedMsgValid(FeedMsg msg, String ms) {
+		DMS dms = DMSHelper.lookup(msg.getDms());
+		if (dms == null)
 			return false;
+		MsgPattern pat = new TransMsgPattern(dms.getSignConfig(), "");
 		List<String> lines = MsgPatternHelper.splitLines(pat, ms);
 		for (int i = 0; i < lines.size(); i++) {
 			if (!isValidSignText((short) (i + 1), lines.get(i)))

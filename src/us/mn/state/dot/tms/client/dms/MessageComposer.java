@@ -35,6 +35,7 @@ import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.TransMsgPattern;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
@@ -314,7 +315,7 @@ public class MessageComposer extends JPanel {
 		if (dms != null) {
 			SignConfig sc = dms.getSignConfig();
 			if (sc != null)
-				return new ClientMsgPattern(sc, "");
+				return new TransMsgPattern(sc, "");
 		}
 		return null;
 	}
@@ -332,7 +333,7 @@ public class MessageComposer extends JPanel {
 	public void setComposedMulti(String ms) {
 		MsgPattern pat = pattern_cbx.findBestPattern(ms);
 		pattern_cbx.setSelectedItem(pat);
-		// this makes a ClientMsgPattern if none selected
+		// this makes a TransMsgPattern if none selected
 		pat = getMsgPattern();
 		if (pat != null) {
 			List<String> lines = MsgPatternHelper
