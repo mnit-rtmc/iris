@@ -1,5 +1,18 @@
 # IRIS 5.x Release Notes
 
+5.37.0 (11 Jan 2023)
+ - Redesigned DMS [message composer](composer.html), replacing quick messages
+   with message patterns and removing many redundant features
+ - Simplify message combining, using MULTI only
+ - Implement and document [default MULTI values](multi.html#default-values)
+ - Fixed weather alert sign group check
+ - Improved DMS status JSON
+ - Added graphic size constraints to database
+ - Improved DMS action tag filtering
+ - Added Nebraska beacon protocol
+ - Added enhancements for video window layout
+ - Added item style for undeployed action plans
+
 5.36.0 (30 Nov 2022)
  - Added DMS `status` and `stuck_pixels` JSON columns to DB
  - Reworked comm priority levels for all protocols
