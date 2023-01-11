@@ -18,9 +18,9 @@ A rectangle is only fillable if it contains no text or `[nl…]` tags.
 Additionally, a full page can only be fillable if it contains no `[tr…]` tags.
 
 The text composed by operators will be inserted directly after a fillable text
-rectangle.  For example, if the pattern is: `[tr1,1,100,10][g5]`, and the
+rectangle.  For example, if the pattern is: `[tr1,1,100,16][g5]`, and the
 operator selected the message `CRASH[nl]AHEAD`, the composed message would
-be `[tr1,1,100,10]CRASH[nl]AHEAD[g5]`.
+be `[tr1,1,100,16]CRASH[nl]AHEAD[g5]`.
 
 ## Message Combining
 
@@ -29,8 +29,9 @@ message:
 - **Sequence**: separate pages
 - **Shared**: split pages using _text rectangles_
 
-The foreground color, font, and justification are reset to default values
-between messages by inserting the [MULTI] string `[cf][fo][jl][jp]`.
+The foreground color, font, page- and line-justification are reset to default
+values between messages by inserting `[cf]`, `[fo]`, `[jp]` and `[jl]` [MULTI]
+tags.
 
 ### Sequenced Message Combining
 
@@ -43,7 +44,7 @@ Example:
 - Operator message:
   `STALLED VEHICLE[nl]IN RIGHT LANE[nl]USE CAUTION`
 - Combined message:
-  `[cr1,1,160,54,0,0,125][cr1,18,160,1,255,255,255][tr1,1,160,17][cf255,255,255][fo5][jp3]TRUCK PARKING[tr4,24,154,30][jl2]REST AREA[jl4]4 MI[nl5][jl2]SPACES OPEN[jl4]10[cf][fo][jl][jp][np]STALLED VEHICLE[nl]IN RIGHT LANE[nl]USE CAUTION`
+  `[cr1,1,160,54,0,0,125][cr1,18,160,1,255,255,255][tr1,1,160,17][cf255,255,255][fo5][jp3]TRUCK PARKING[tr4,24,154,30][jl2]REST AREA[jl4]4 MI[nl5][jl2]SPACES OPEN[jl4]10[cf][np][fo][jp][jl]STALLED VEHICLE[nl]IN RIGHT LANE[nl]USE CAUTION`
 
 ![](images/msg_combined_sequenced.gif)
 
@@ -64,7 +65,7 @@ Example:
 - Operator message:
   `[tr243,1,350,96]STALLED VEHICLE[nl]IN RIGHT LANE[nl]USE CAUTION`
 - Combined message:
-  `[cr1,1,240,24,1,23,9][cf250,250,250][fo13][tr1,5,240,18][jl3]EXPRESS LANE[tr1,31,240,40]OPEN TO ALL[nl6]TRAFFIC[g7,110,75][cr241,1,2,96,255,255,255][cf][fo][jl][jp][tr243,1,350,96]STALLED VEHICLE[nl]IN RIGHT LANE[nl]USE CAUTION`
+  `[cr1,1,240,24,1,23,9][cf250,250,250][fo13][tr1,5,240,18][jl3]EXPRESS LANE[tr1,31,240,40]OPEN TO ALL[nl6]TRAFFIC[g7,110,75][cr241,1,2,96,255,255,255][tr243,1,350,96][cf][fo][jp][jl]STALLED VEHICLE[nl]IN RIGHT LANE[nl]USE CAUTION`
 
 ![](images/msg_combined_shared.gif)
 

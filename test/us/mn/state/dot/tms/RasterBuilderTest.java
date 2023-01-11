@@ -42,33 +42,33 @@ public class RasterBuilderTest extends TestCase {
 	}
 
 	public void testCombineSequenced() {
-		checkCombine("AAA[cf]", "123", "AAA[cf][fo][jl][jp][np]123");
+		checkCombine("AAA[cf]", "123", "AAA[cf][np][fo][jp][jl]123");
 		checkCombine("AAA[cf]", "123[np]XYZ",
-			"AAA[cf][fo][jl][jp][np]123[np]XYZ");
+			"AAA[cf][np][fo][jp][jl]123[np]XYZ");
 	}
 
 	public void testCombineShared1() {
 		checkCombine("P[tr1,10,50,20]", "[tr1,10,50,20]A",
-			"P[cf][fo][jl][jp][tr1,10,50,20]A");
+			"P[tr1,10,50,20][cf][fo][jp][jl]A");
 	}
 
 	public void testCombineShared2() {
 		String tr = "[tr1,10,50,20]";
-		String df = "[cf][fo][jl][jp]";
+		String df = "[cf][fo][jp][jl]";
 		checkCombine("P" + tr,
 			tr + "A[np]" + tr + "B",
-			"P" + df + tr + "A[np]" + df +
-			"P" + df + tr + "B");
+			"P" + tr + df + "A[np]" + df +
+			"P" + tr + df + "B");
 	}
 
 	public void testCombineShared3() {
 		String tr = "[tr1,10,50,20]";
-		String df = "[cf][fo][jl][jp]";
+		String df = "[cf][fo][jp][jl]";
 		checkCombine("P" + tr,
 			tr + "A[np]" + tr + "B[np]" + tr + "C",
-			"P" + df + tr + "A[np]" + df +
-			"P" + df + tr + "B[np]" + df +
-			"P" + df + tr + "C");
+			"P" + tr + df + "A[np]" + df +
+			"P" + tr + df + "B[np]" + df +
+			"P" + tr + df + "C");
 	}
 
 	private void checkCombine(String ms1, String ms2, String rs) {

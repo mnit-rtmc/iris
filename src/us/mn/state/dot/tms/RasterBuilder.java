@@ -190,45 +190,44 @@ public class RasterBuilder {
 		if (canCombineSequence(first)) {
 			// First message ends with new page tag
 			MultiBuilder mb = new MultiBuilder(first);
+			mb.addPage();
 			// Reset some MULTI to default values
 			// NOTE: [cf] already reset at end of first msg
 			//       Don't need mb.setColorForeground(null);
 			mb.setFont(null, null);
-			mb.setJustificationLine(null);
 			mb.setJustificationPage(null);
-			mb.addPage();
+			mb.setJustificationLine(null);
 			// Add second message
 			mb.append(ms2);
 			return mb.toString();
 		}
 		if (canCombineShared(ms1, ms2)) {
-			// strip trailing text rect from first message
-			String tr = ms1.trailingTextRectangle();
-			first = first.substring(0, first.length()-tr.length());
-			final MultiString msg1 = new MultiString(first);
-			// Prepend first message before each page of second
-			MultiBuilder mb = new MultiBuilder(first) {
+			// Insert first message before each page of second
+			MultiBuilder mb = new MultiBuilder() {
 				@Override
 				public void addPage() {
 					super.addPage();
 					// Reset these to default values
 					setColorForeground(null);
 					setFont(null, null);
-					setJustificationLine(null);
 					setJustificationPage(null);
-					// Add first message to next page
-					append(msg1);
+					setJustificationLine(null);
+				}
+				@Override
+				public void setTextRectangle(int x, int y,
+					int w, int h)
+				{
+					// Insert first message, which ends
+					// with this text rectangle, so there
+					// is no need to repeat it
+					append(ms1);
 					// Reset these to default values
 					setColorForeground(null);
 					setFont(null, null);
-					setJustificationLine(null);
 					setJustificationPage(null);
+					setJustificationLine(null);
 				}
 			};
-			mb.setColorForeground(null);
-			mb.setFont(null, null);
-			mb.setJustificationLine(null);
-			mb.setJustificationPage(null);
 			ms2.parse(mb);
 			return mb.toString();
 		}
