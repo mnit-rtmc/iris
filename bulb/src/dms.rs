@@ -70,10 +70,15 @@ pub struct Dms {
     pub name: String,
     pub location: Option<String>,
     pub controller: Option<String>,
-    // full attributes
-    pub geo_loc: Option<String>,
-    pub pin: Option<u32>,
+    pub notes: String,
     pub msg_current: Option<String>,
+    // full attributes
+    pub pin: Option<u32>,
+    pub sign_config: Option<String>,
+    pub sign_detail: Option<String>,
+    pub msg_sched: Option<String>,
+    pub msg_user: Option<String>,
+    pub geo_loc: Option<String>,
     pub status: Option<SignStatus>,
     pub stuck_pixels: Option<StuckPixels>,
 }
