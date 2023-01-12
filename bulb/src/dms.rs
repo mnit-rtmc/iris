@@ -91,7 +91,6 @@ pub struct SignMessage {
     pub incident: Option<String>,
     pub multi: String,
     pub beacon_enabled: bool,
-    pub msg_combining: String,
     pub msg_priority: u32,
     pub sources: String,
     pub owner: Option<String>,
