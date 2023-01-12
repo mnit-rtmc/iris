@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2022  Minnesota Department of Transportation
+ * Copyright (C) 2011-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,6 @@ public class FontFinder {
 		font_nums.add(DMSHelper.getDefaultFontNum(dms));
 		groups = DmsSignGroupHelper.findGroups(dms);
 		findMsgPatternTags();
-		findSignTextTags();
 		findDmsActionTags();
 	}
 
@@ -71,16 +70,6 @@ public class FontFinder {
 			SignGroup sg = pat.getSignGroup();
 			if (sg != null && groups.contains(sg))
 				findFontTags(pat.getMulti());
-		}
-	}
-
-	/** Find font tags in all SignText for the sign's groups */
-	private void findSignTextTags() {
-		Iterator<SignText> it = SignTextHelper.iterator();
-		while (it.hasNext()) {
-			SignText st = it.next();
-			if (groups.contains(st.getSignGroup()))
-				findFontTags(st.getMulti());
 		}
 	}
 
