@@ -179,7 +179,6 @@ dms_pixel_on_limit	1
 dms_pixel_maint_threshold	35
 dms_pixel_status_enable	true
 dms_pixel_test_timeout_secs	30
-dms_querymsg_enable	false
 dms_reset_enable	false
 dms_send_confirmation_enable	false
 dms_update_font_table	true

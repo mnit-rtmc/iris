@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  * Copyright (C) 2009-2015  AHMCT, University of California
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
  * Copyright (C) 2012-2021  Iteris Inc.
  * Copyright (C) 2015-2020  SRF Consulting Group
  *
@@ -76,7 +76,6 @@ public enum SystemAttrEnum {
 	DMS_PIXEL_MAINT_THRESHOLD(35, 1),
 	DMS_PIXEL_STATUS_ENABLE(true, Change.RESTART_CLIENT),
 	DMS_PIXEL_TEST_TIMEOUT_SECS(30, 5, 90),
-	DMS_QUERYMSG_ENABLE(false, Change.RESTART_CLIENT),
 	DMS_RESET_ENABLE(false, Change.RESTART_CLIENT),
 	DMS_SEND_CONFIRMATION_ENABLE(false, Change.RESTART_CLIENT),
 	DMS_UPDATE_FONT_TABLE(true),

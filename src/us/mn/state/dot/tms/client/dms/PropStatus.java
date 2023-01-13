@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -94,9 +94,7 @@ public class PropStatus extends IPanel {
 	private final ZTable power_tbl = new ZTable();
 
 	/** Query message action */
-	private final IAction query_msg = new IAction("dms.query.msg", "",
-		SystemAttrEnum.DMS_QUERYMSG_ENABLE)
-	{
+	private final IAction query_msg_act = new IAction("dms.query.msg") {
 		protected void doActionPerformed(ActionEvent e) {
 			dms.setDeviceRequest(DeviceRequest.
 				QUERY_MESSAGE.ordinal());
@@ -182,10 +180,8 @@ public class PropStatus extends IPanel {
 	/** Build the button box */
 	private Box buildButtonBox() {
 		Box box = Box.createHorizontalBox();
-		if(query_msg.getIEnabled()) {
-			box.add(new JButton(query_msg));
-			box.add(Box.createHorizontalStrut(UI.hgap));
-		}
+		box.add(new JButton(query_msg_act));
+		box.add(Box.createHorizontalStrut(UI.hgap));
 		box.add(new JButton(config));
 		box.add(Box.createHorizontalStrut(UI.hgap));
 		box.add(new JButton(query_status));
@@ -219,7 +215,7 @@ public class PropStatus extends IPanel {
 		}
 		if (null == a) {
 			boolean r = canRequest();
-			query_msg.setEnabled(r);
+			query_msg_act.setEnabled(r);
 			config.setEnabled(r);
 			query_status.setEnabled(r);
 			query_settings.setEnabled(r);
