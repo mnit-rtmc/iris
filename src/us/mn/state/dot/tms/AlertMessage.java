@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
- * Copyright (C) 2021-2022  Minnesota Department of Transportation
+ * Copyright (C) 2021-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,9 @@ import us.mn.state.dot.sonar.SonarObject;
 /**
  * Alert Configuration Message.
  *
- * Associates an alert configuration with an alert period, sign group and
- * message pattern to control which signs are eligible for inclusion in an
- * alert and which message pattern to use.
+ * Associates an alert configuration with an alert config, period and message
+ * pattern to control which signs are eligible for inclusion in an alert and
+ * which message pattern to use.
  *
  * @author Gordon Parikh
  * @author Douglas Lau
