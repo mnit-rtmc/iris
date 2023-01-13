@@ -43,7 +43,6 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsColor;
-import us.mn.state.dot.tms.MsgCombining;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.SignGroup;
@@ -144,7 +143,6 @@ public class WController {
 	private SignGroup sg;
 	private MsgPattern pattern;
 	private String multiString = null;
-	private int msgCombining = MsgCombining.DISABLE.ordinal();
 
 	/** Amount of time in nanoseconds to wait for a message to be created */
 	private final static long MAX_WAIT = 10000000000L;
@@ -434,13 +432,10 @@ public class WController {
 		pattern = pat;
 
 		// get the MULTI string from the pattern
-		if (pattern != null) {
+		if (pattern != null)
 			multiString = pattern.getMulti();
-			msgCombining = pattern.getMsgCombining();
-		} else {
+		else
 			multiString = "";
-			msgCombining = MsgCombining.DISABLE.ordinal();
-		}
 
 		update();
 	}
@@ -3461,8 +3456,7 @@ public class WController {
 	public boolean isMessageSaved() {
 		// check the MULTI string against the current MsgPattern
 		updateMultiString();
-		return multiString.equals(pattern.getMulti()) &&
-			(editor.getMsgCombining() == pattern.getMsgCombining());
+		return multiString.equals(pattern.getMulti());
 	}
 
 	/** Save the current MULTI string in the message pattern */
@@ -3471,7 +3465,6 @@ public class WController {
 			// update our MULTI string then save the message
 			updateMultiString();
 			pattern.setMulti(multiString);
-			pattern.setMsgCombining(editor.getMsgCombining());
 		}
 	};
 
@@ -3505,7 +3498,6 @@ public class WController {
 				HashMap<String, Object> attrs =
 					new HashMap<String, Object>();
 				attrs.put("multi", multiString);
-				attrs.put("msg_combining", editor.getMsgCombining());
 				if (sg != null)
 					attrs.put("sign_group", sg);
 				else {
@@ -4120,17 +4112,11 @@ public class WController {
 	public DMS getSign() {
 		return sign;
 	}
-	
-	/** Return message combining value. */
-	public int getMsgCombining() {
-		return msgCombining;
-	}
-	
+
 	/** Return whether or not the current message is a standby message. */
 	public boolean isStandby() {
 		if (wmsg != null)
 			return wmsg.isStandby();
 		return false;
 	}
-	
 }

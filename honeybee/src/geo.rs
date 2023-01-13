@@ -1,6 +1,6 @@
 // geo.rs
 //
-// Copyright (C) 2019-2021  Minnesota Department of Transportation
+// Copyright (C) 2019-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ pub struct WebMercatorPos {
 
 /// Limit a value to valid range
 fn limit_value(val: f64, limit: f64) -> f64 {
-    val.min(limit).max(-limit)
+    val.clamp(-limit, limit)
 }
 
 impl Wgs84Pos {

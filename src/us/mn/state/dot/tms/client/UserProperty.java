@@ -3,6 +3,7 @@
  * Copyright (C) 2012-2020  Minnesota Department of Transportation
  * Copyright (C) 2010-2014  AHMCT, University of California
  * Copyright (C) 2017       Iteris Inc.
+ * Copyright (C) 2023       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +41,7 @@ import us.mn.state.dot.tms.VideoMonitor;
  * @author Douglas Lau
  * @author Michael Darter
  * @author Travis Swanston
+ * @author John L. Stanley
  */
 public enum UserProperty {
 	WIN_EXT_STATE	("win.extstate"),
@@ -305,6 +307,7 @@ public enum UserProperty {
 
 		Frame[] frames = IrisClient.getFrames();
 		int j = 0;
+		setProp(p, STREAM_LNAME, layoutName, lnum);
 		for (Frame f : frames) {
 			String frame_title = f.getTitle();
 			if (frame_title.contains("Stream Panel") && f.isVisible()) {
@@ -315,7 +318,6 @@ public enum UserProperty {
 				setProp(p, STREAM_X, String.valueOf(f.getX()), lnum, j);
 				setProp(p, STREAM_Y, String.valueOf(f.getY()), lnum, j);
 				setProp(p, STREAM_SRC, String.valueOf(0), lnum, j); // TODO
-				setProp(p, STREAM_LNAME, layoutName, lnum);
 				j += 1;
 			}
 		}

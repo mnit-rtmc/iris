@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2002-2020  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
+ * Copyright (C) 2022-2023  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +23,8 @@ import java.awt.event.ActionListener;
 import java.util.HashSet;
 import java.util.Set;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.Timer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
@@ -39,6 +42,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  * @author Travis Swanston
  * @author Michael Janson
  * @author Gordon Parikh
+ * @author John L. Stanley
  */
 public class StreamPanel extends JPanel {
 
@@ -184,12 +188,35 @@ public class StreamPanel extends JPanel {
 		});
 	}
 
-	/** Play stream on external player */
+	/** Play stream on external player
+	 * Done this way to smooth the transition from
+	 * camera-tab video panel to external video panel.
+	 * (Reduces the odds that the video proxy will
+	 *  totally drop and restart a video stream.) */
 	private void playExternal(SmartDesktop desktop) {
-		stopStream();
 		desktop.showExtFrame(new VidWindow(camera, true, Size.MEDIUM));
+		new SwingWorker<Void, Void>() {
+			@Override
+			protected Void doInBackground() throws Exception {
+				// First, wait 2sec for the external panel to start being drawn.
+				Thread.sleep(2000);
+				return null;
+			}
+			@Override
+			protected void done() {
+				// Then, wait for AWT thread queue to empty.
+				SwingUtilities.invokeLater(new Runnable() 
+				{
+					public void run()
+					{
+						// Finally, stop the old video panel
+						stopStream();
+					}
+				});
+			}
+		}.execute();
 	}
-
+	
 	/** Update stream status */
 	private void updateStatus() {
 		STREAMER.addJob(new Job() {

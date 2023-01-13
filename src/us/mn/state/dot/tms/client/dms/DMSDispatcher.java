@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  * Copyright (C) 2017-2018  Iteris Inc.
  *
@@ -27,9 +27,6 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
-import us.mn.state.dot.tms.MsgCombining;
-import us.mn.state.dot.tms.MsgPattern;
-import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
@@ -265,32 +262,23 @@ public class DMSDispatcher extends JPanel {
 		String ms = composer.getComposedMulti();
 		if (new MultiString(ms).isBlank())
 			return "";
-		MsgPattern pat = composer.getMsgPattern();
-		if (MsgPatternHelper.isMsgCombiningSecond(pat)) {
-			String sched = getSchedCombining(dms);
-			if (sched != null)
-				return tryMakeCombined(dms, sched, ms);
+		String sched = getSchedMulti(dms);
+		if (sched != null) {
+			RasterBuilder rb = DMSHelper.createRasterBuilder(dms);
+			if (rb != null) {
+				String cmb = rb.combineMulti(sched, ms);
+				if (cmb != null)
+					return cmb;
+			}
 		}
 		return ms;
 	}
 
-	/** Try to make a combined message.
-	 * @param first MULTI string of first message.
-	 * @param second MULTI string of second message.
-	 * @return Combined message, or second if combined does not fit. */
-	private String tryMakeCombined(DMS dms, String first, String second) {
-		String ms = MultiString.makeCombined(first, second);
-		// If combined message does not fit, use composed only
-		return (DMSHelper.createRasters(dms, ms) != null)
-		      ? ms
-		      : second;
-	}
-
-	/** Get MULTI string from scheduled combining message */
-	private String getSchedCombining(DMS dms) {
+	/** Get MULTI string from scheduled message */
+	private String getSchedMulti(DMS dms) {
 		if (dms != null) {
 			SignMessage sm = dms.getMsgSched();
-			if (SignMessageHelper.isMsgCombiningFirst(sm))
+			if (sm != null)
 				return sm.getMulti();
 		}
 		return null;
@@ -389,27 +377,19 @@ public class DMSDispatcher extends JPanel {
 	/** Create a new message for a sign configuration.
 	 * @return A SignMessage from composer selection, or null on error. */
 	private SignMessage createMessage(SignConfig sc, String ms) {
-		MsgPattern pat = composer.getMsgPattern();
-		MsgCombining mc = MsgCombining.fromOrdinal(
-			pat.getMsgCombining());
 		Incident inc = incident;
-		return (inc != null)
-		      ? createMessage(sc, incident, ms, mc)
-		      : createMessage(sc, ms, mc);
-	}
-
-	/** Create a new message using the specified MULTI */
-	private SignMessage createMessage(SignConfig sc, String ms,
-		MsgCombining mc)
-	{
-		Integer d = composer.getDuration();
-		boolean be = composer.isBeaconEnabled();
-		return creator.create(sc, ms, be, mc, d);
+		if (inc != null)
+			return createMessage(sc, incident, ms);
+		else {
+			boolean be = composer.isBeaconEnabled();
+			Integer d = composer.getDuration();
+			return creator.create(sc, ms, be, d);
+		}
 	}
 
 	/** Create a new message linked to an incident */
 	private SignMessage createMessage(SignConfig sc, Incident inc,
-		String ms, MsgCombining mc)
+		String ms)
 	{
 		String inc_orig = IncidentHelper.getOriginalName(inc);
 		DmsMsgPriority prio = IncidentHelper.getPriority(inc);

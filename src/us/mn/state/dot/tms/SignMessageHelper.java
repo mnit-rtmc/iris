@@ -49,15 +49,14 @@ public class SignMessageHelper extends BaseHelper {
 	 * @param inc Associated incident (original name).
 	 * @param multi MULTI string.
 	 * @param be Beacon enabled flag.
-	 * @param mc Message combining.
 	 * @param mp Message priority.
 	 * @param src Message source.
 	 * @param owner Use name (null for any).
 	 * @param d Duration (null for indefinite).
 	 * @return Matching sign message, or null if not found. */
 	static public SignMessage find(SignConfig sc, String inc, String multi,
-		boolean be, int mc, DmsMsgPriority mp, int src,
-		String owner, Integer d)
+		boolean be, DmsMsgPriority mp, int src, String owner,
+		Integer d)
 	{
 		int mpi = mp.ordinal();
 		Iterator<SignMessage> it = iterator();
@@ -67,7 +66,6 @@ public class SignMessageHelper extends BaseHelper {
 			    objectEquals(inc, sm.getIncident()) &&
 			    multi.equals(sm.getMulti()) &&
 			    be == sm.getBeaconEnabled() &&
-			    mc == sm.getMsgCombining() &&
 			    mpi == sm.getMsgPriority() &&
 			    sourceEquals(src, sm) &&
 			    objectEquals(owner, sm.getOwner()) &&
@@ -75,20 +73,6 @@ public class SignMessageHelper extends BaseHelper {
 				return sm;
 		}
 		return null;
-	}
-
-	/** Is message allowed to combine first? */
-	static public boolean isMsgCombiningFirst(SignMessage sm) {
-		return sm != null &&
-		      (sm.getMsgCombining() == MsgCombining.FIRST.ordinal() ||
-		       sm.getMsgCombining() == MsgCombining.EITHER.ordinal());
-	}
-
-	/** Is message allowed to combined second? */
-	static public boolean isMsgCombiningSecond(SignMessage sm) {
-		return sm != null &&
-		      (sm.getMsgCombining() == MsgCombining.SECOND.ordinal() ||
-		       sm.getMsgCombining() == MsgCombining.EITHER.ordinal());
 	}
 
 	/** Sign msg source bits to ignore */

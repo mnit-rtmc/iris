@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2023  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms;
 
 import java.util.ArrayList;
+import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiRenderer;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.MultiSyntaxError;
@@ -79,7 +80,7 @@ public class RasterBuilder {
 		if (c_height > 0)
 			return c_height;
 		Font f = FontHelper.find(default_font);
-		return (f != null) ? f.getHeight() : height;
+		return (f != null) ? f.getHeight() : 8;
 	}
 
 	/** Get the optimal line spacing (pixels) */
@@ -167,5 +168,86 @@ public class RasterBuilder {
 			// most likely a MultiSyntaxError ...
 			return null;
 		}
+	}
+
+	/** Try to make a combined message.
+	 * @param first MULTI string of first message.
+	 * @param second MULTI string of second message.
+	 * @return Combined message, or null on error. */
+	public String combineMulti(String first, String second) {
+		if (first != null || second != null)
+			return makeCombined(first, second);
+		else
+			return null;
+	}
+
+	/** Make a combined message (either sequenced or shared) */
+	private String makeCombined(String first, String second) {
+		MultiString ms1 = new MultiString(first);
+		MultiString ms2 = new MultiString(second);
+		if (ms1.isBlank() || ms2.isBlank())
+			return null;
+		if (canCombineSequence(first)) {
+			// First message ends with new page tag
+			MultiBuilder mb = new MultiBuilder(first);
+			mb.addPage();
+			// Reset some MULTI to default values
+			// NOTE: [cf] already reset at end of first msg
+			//       Don't need mb.setColorForeground(null);
+			mb.setFont(null, null);
+			mb.setJustificationPage(null);
+			mb.setJustificationLine(null);
+			// Add second message
+			mb.append(ms2);
+			return mb.toString();
+		}
+		if (canCombineShared(ms1, ms2)) {
+			// Insert first message before each page of second
+			MultiBuilder mb = new MultiBuilder() {
+				@Override
+				public void addPage() {
+					super.addPage();
+					// Reset these to default values
+					setColorForeground(null);
+					setFont(null, null);
+					setJustificationPage(null);
+					setJustificationLine(null);
+				}
+				@Override
+				public void setTextRectangle(int x, int y,
+					int w, int h)
+				{
+					// Insert first message, which ends
+					// with this text rectangle, so there
+					// is no need to repeat it
+					append(ms1);
+					// Reset these to default values
+					setColorForeground(null);
+					setFont(null, null);
+					setJustificationPage(null);
+					setJustificationLine(null);
+				}
+			};
+			ms2.parse(mb);
+			return mb.toString();
+		}
+		return null;
+	}
+
+	// Check if messages can be combined in a sequence
+	private boolean canCombineSequence(String ms) {
+		return ms.endsWith("[cf]");
+	}
+
+	/** Check if messages can be combined with shared pages */
+	private boolean canCombineShared(MultiString first,
+		MultiString second)
+	{
+		if (first.getNumPages() > 1)
+			return false;
+		String tr = first.trailingTextRectangle();
+		return (tr != null)
+			&& second.eachPageStartsWith(tr)
+			&& second.hasOneTextRectPerPage();
 	}
 }

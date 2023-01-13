@@ -1,6 +1,6 @@
 // signmsg.rs
 //
-// Copyright (C) 2018-2022  Minnesota Department of Transportation
+// Copyright (C) 2018-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -131,7 +131,6 @@ struct SignMessage {
     incident: Option<String>,
     multi: String,
     beacon_enabled: bool,
-    msg_combining: String,
     msg_priority: i32,
     sources: String,
     owner: Option<String>,
@@ -437,7 +436,7 @@ impl SignConfig {
                 let rgb = page.pixel(x as i32, y as i32);
                 let sr = u8::from(Gray::value(rgb.convert::<Gray8>()));
                 // Clamp radius between 0.6 and 0.8 (blooming)
-                let r = s * (sr as f32 / 255.0).max(0.6).min(0.8);
+                let r = s * (sr as f32 / 255.0).clamp(0.6, 0.8);
                 let clr = if sr > 20 { rgb } else { dark };
                 render_circle(&mut face, palette, px, py, r, clr);
             }

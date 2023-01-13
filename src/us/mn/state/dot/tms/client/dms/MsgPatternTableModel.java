@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
-import us.mn.state.dot.tms.MsgCombining;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignGroup;
@@ -51,7 +50,7 @@ public class MsgPatternTableModel extends ProxyTableModel<MsgPattern> {
 	@Override
 	protected ArrayList<ProxyColumn<MsgPattern>> createColumns() {
 		ArrayList<ProxyColumn<MsgPattern>> cols =
-			new ArrayList<ProxyColumn<MsgPattern>>(4);
+			new ArrayList<ProxyColumn<MsgPattern>>(3);
 		cols.add(new ProxyColumn<MsgPattern>("msg.pattern.name",
 			180)
 		{
@@ -89,27 +88,6 @@ public class MsgPatternTableModel extends ProxyTableModel<MsgPattern> {
 					new JComboBox<SignConfig>();
 				cbx.setModel(new IComboBoxModel<SignConfig>(
 					config_mdl));
-				return new DefaultCellEditor(cbx);
-			}
-		});
-		cols.add(new ProxyColumn<MsgPattern>("dms.msg.combining", 90){
-			public Object getValueAt(MsgPattern pat) {
-				int mc = pat.getMsgCombining();
-				return MsgCombining.fromOrdinal(mc);
-			}
-			public boolean isEditable(MsgPattern pat) {
-				return canWrite(pat);
-			}
-			public void setValueAt(MsgPattern pat, Object value) {
-				if (value instanceof MsgCombining) {
-					MsgCombining mc = (MsgCombining) value;
-					pat.setMsgCombining(mc.ordinal());
-				}
-			}
-			protected TableCellEditor createCellEditor() {
-				JComboBox<MsgCombining> cbx =
-					new JComboBox<MsgCombining>(
-					MsgCombining.values());
 				return new DefaultCellEditor(cbx);
 			}
 		});

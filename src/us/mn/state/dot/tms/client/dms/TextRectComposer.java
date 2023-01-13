@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Iterator;
 import javax.swing.GroupLayout;
 import javax.swing.JPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -137,26 +139,29 @@ public class TextRectComposer extends JPanel {
 		}
 	}
 
-	/** Set the selected lines */
-	public void setSelectedLines(String[] lines) {
+	/** Get the selected lines (populate array) */
+	public void getSelectedLines(ArrayList<String> lines) {
 		for (int i = 0; i < MAX_LINES; i++) {
-			if (i < lines.length) {
-				String ms = new MultiString(lines[i])
-					.normalizeLine().stripFonts().toString();
-				line_cbx[i].getModel().setSelectedItem(ms);
-			} else
-				line_cbx[i].setSelectedIndex(-1);
+			if (line_pnl[i].isVisible())
+				lines.add(line_cbx[i].getMessage());
 		}
 	}
 
-	/** Get MULTI string of composed text */
-	public String getMulti() {
-		MultiBuilder mb = new MultiBuilder();
+	/** Set the selected lines */
+	public void setSelectedLines(Iterator<String> lines) {
 		for (int i = 0; i < MAX_LINES; i++) {
-			if (i > 0)
-				mb.addLine(null);
-			new MultiString(line_cbx[i].getMessage()).parse(mb);
+			if (line_pnl[i].isVisible()) {
+				if (lines.hasNext()) {
+					String line = lines.next();
+					String ms = new MultiString(line)
+						.normalizeLine()
+						.toString();
+					line_cbx[i]
+						.getModel()
+						.setSelectedItem(ms);
+				} else
+					line_cbx[i].setSelectedIndex(-1);
+			}
 		}
-		return mb.toMultiString().stripTrailingLines();
 	}
 }

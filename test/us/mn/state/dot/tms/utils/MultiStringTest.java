@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,147 +58,6 @@ public class MultiStringTest extends TestCase {
 
 	private void checkGetNumPages(String m, int p) {
 		assertTrue(new MultiString(m).getNumPages() == p);
-	}
-
-	public void testGetLinesSinglePage() {
-		checkGetLines("", new String[] { "" });
-		checkGetLines("ABC", new String[] { "ABC" });
-		checkGetLines("ABC[nl]DEF", new String[] { "ABC", "DEF" });
-		checkGetLines("ABC[nl]DEF[nl]GHI",
-			new String[] { "ABC", "DEF", "GHI" });
-		checkGetLines("ABC[nl]DEF[nl]GHI[nl]JKL",
-			new String[] { "ABC", "DEF", "GHI", "JKL" });
-		checkGetLines("ABC[nl]", new String[] { "ABC" });
-		checkGetLines("ABC[nl][nl]", new String[] { "ABC" });
-		checkGetLines("ABC[nl][nl][nl]", new String[] { "ABC" });
-		checkGetLines("[nl]DEF", new String[] { "", "DEF" });
-		checkGetLines("[nl]DEF[nl]GHI",
-			new String[] { "", "DEF", "GHI" });
-		checkGetLines("[nl]DEF[nl]GHI[nl]JKL",
-			new String[] { "", "DEF", "GHI", "JKL" });
-		// new line tags with spacing
-		checkGetLines("ABC[nl3]DEF",
-			new String[] { "ABC", "DEF" });
-		checkGetLines("ABC[nl]DEF[nl2]GHI",
-			new String[] { "ABC", "DEF", "GHI" });
-		// character spacing tags
-		checkGetLines("ABC[sc3]DEF", new String[] { "ABC[sc3]DEF" });
-		checkGetLines("ABC[sc3]DEF[/sc]GHI", new String[] {
-			"ABC[sc3]DEF[/sc]GHI" });
-	}
-
-	public void testGetTextLineTags() {
-		// check invalid tags
-		checkGetLines("ABC[nl]D[j1x]E[j1x]F[nl]GHI",
-			new String[] {"ABC", "DEF", "GHI"});
-		// line justification tags
-		checkGetLines("ABC[nl][jl2]D[jl3]E[jl4]F[nl]GHI",
-			new String[] {"ABC", "[jl2]D[jl3]E[jl4]F", "GHI"});
-		// Test for non-line tags being stripped
-		checkGetLines("[cb8]ABC", new String[] { "ABC" });
-		checkGetLines("[pb0,0,0]ABC", new String[] { "ABC" });
-		checkGetLines("[cr255,0,0]ABC", new String[] { "ABC" });
-		checkGetLines("[fo1]ABC", new String[] { "[fo1]ABC" });
-		checkGetLines("[g1,0,0]ABC", new String[] { "ABC" });
-		checkGetLines("[jp3]ABC", new String[] { "ABC" });
-		checkGetLines("[pt50o0]ABC", new String[] { "ABC" });
-		checkGetLines("[tr0,0,5,5]ABC", new String[] { "ABC" });
-		checkGetLines("ABC[nl][cb8]DEF", new String[] { "ABC", "DEF" });
-		checkGetLines("ABC[nl][pb0,0,0]DEF",
-			new String[] { "ABC", "DEF" });
-		checkGetLines("ABC[nl][cr255,0,0]DEF",
-			new String[] { "ABC", "DEF" });
-		checkGetLines("ABC[nl][fo1]DEF",
-			new String[] { "ABC", "[fo1]DEF" });
-		checkGetLines("ABC[nl][g1,0,0]DEF",
-			new String[] { "ABC", "DEF" });
-		checkGetLines("ABC[nl][jp3]DEF", new String[] { "ABC", "DEF" });
-		checkGetLines("ABC[nl][pt50o0]DEF",
-			new String[] { "ABC", "DEF" });
-		checkGetLines("ABC[nl][tr0,0,5,5]DEF",
-			new String[] { "DEF" });
-		// mixed line and non-line tags
-		checkGetLines("[jp3]ABC[jl4]DEF",
-			new String[] { "ABC[jl4]DEF" });
-		checkGetLines("[jl2]ABC[nl]DEF[g1,1,1]",
-			new String[] { "[jl2]ABC", "DEF" });
-		checkGetLines("[cf0,0,0]ABC[nl]DE[sc5]F",
-			new String[] { "[cf0,0,0]ABC", "DE[sc5]F" });
-	}
-
-	private void checkGetLines(String multi, String[] text) {
-		for (int i = 1; i <= 6; i++) {
-			String[] lns = new MultiString(multi).getLines(i);
-			assertTrue(lns.length == i);
-			for (int j = 0; j < i; j++) {
-				if (j < text.length)
-					assertTrue(lns[j].equals(text[j]));
-				else
-					assertTrue(lns[j].equals(""));
-			}
-		}
-	}
-
-	public void testGetLinesMultiPage() {
-		checkGetLines("ABC[np]", 1, new String[] { "ABC" });
-		checkGetLines("ABC[np]", 2, new String[] { "ABC", "" });
-		checkGetLines("ABC[np]", 3, new String[] { "ABC", "", "" });
-		checkGetLines("ABC[np][nl]", 1, new String[] { "ABC", "" });
-		checkGetLines("ABC[np][nl]", 2,
-			new String[] { "ABC", "", "", "" });
-		checkGetLines("ABC[np][nl]", 3,
-			new String[] { "ABC", "", "", "", "", "" });
-		checkGetLines("ABC[np]DEF", 2,
-			new String[] { "ABC", "", "DEF", "" });
-		checkGetLines("ABC[nl][np]DEF", 2,
-			new String[] { "ABC", "", "DEF", "" });
-		checkGetLines("ABC[nl][np]DEF[np]GHI", 2,
-			new String[] { "ABC", "", "DEF", "", "GHI", "" });
-		checkGetLines("ABC[nl]DEF[np]GHI", 2,
-			new String[] { "ABC", "DEF", "GHI", "" });
-		checkGetLines("ABC[nl][nl]DEF[np][nl]", 3,
-			new String[] {"ABC", "", "DEF", "", "", "" });
-		checkGetLines("ABC[nl]DEF[np]GHI[nl]JKL", 2,
-			new String[] { "ABC", "DEF", "GHI", "JKL" });
-		checkGetLines("ABC[nl]DEF[np]GHI[nl][nl]JKL", 2,
-			new String[] { "ABC", "DEF", "GHI", "" });
-		checkGetLines("ABC[nl]DEF[np]GHI[nl]JKL", 3,
-			new String[] { "ABC", "DEF", "", "GHI", "JKL", "" });
-		checkGetLines("ABC[nl]DEF[np]GHI[nl][nl]JKL", 3,
-			new String[] { "ABC", "DEF", "", "GHI", "", "JKL" });
-		checkGetLines("ABC[nl]DEF[np]GHI[nl]JKL[nl]MNO", 2,
-			new String[] { "ABC", "DEF", "GHI", "JKL" });
-		checkGetLines("ABC[nl][np]", 3, new String[] { "ABC", "", "" });
-		checkGetLines("ABC[nl][np]DEF", 3,
-			new String[] { "ABC", "", "", "DEF", "", "" });
-		checkGetLines("ABC[nl][np]DEF[np]", 3,
-			new String[] { "ABC", "", "", "DEF", "", "" });
-		checkGetLines("ABC[nl]DEF[np]GHI", 3,
-			new String[] { "ABC", "DEF", "", "GHI", "", "" });
-	}
-
-	private void checkGetLines(String multi, int n_lines, String[] text) {
-		assertTrue(Arrays.equals(new MultiString(multi).getLines(
-			n_lines), text));
-	}
-
-	public void testGetLinesPrefix() {
-		checkGetLines("[g1,1,1]ABC", "[g1,1,1]", 1,
-			new String[] { "ABC" });
-		checkGetLines("[g1,1,1]ABC[nl]DEF[np][g1,1,1]GHI[nl]JKL",
-			"[g1,1,1]", 2, new String[] { "ABC", "DEF", "GHI",
-			"JKL" });
-		checkGetLines("ABC[tr10,1,50,50]ABC[nl]DEF[np]" +
-			"ABC[tr10,1,50,50]GHI[nl]JKL",
-			"ABC[tr10,1,50,50]", 2, new String[] { "ABC", "DEF",
-			"GHI", "JKL" });
-	}
-
-	private void checkGetLines(String multi, String prefix, int n_lines,
-		String[] text)
-	{
-		assertTrue(Arrays.equals(new MultiString(multi).getLines(
-			n_lines), text));
 	}
 
 	public void testEquals() {
@@ -292,7 +151,7 @@ public class MultiStringTest extends TestCase {
 		checkNormalizeLine("[cf128,128,128]ABC", "[cf128,128,128]ABC");
 		checkNormalizeLine("[cr1,1,5,5,3]ABC", "ABC");
 		checkNormalizeLine("[cr1,1,5,5,255,255,0]ABC", "ABC");
-		checkNormalizeLine("[fo1]ABC", "[fo1]ABC");
+		checkNormalizeLine("[fo1]ABC", "ABC");
 		checkNormalizeLine("[g1]ABC", "ABC");
 		checkNormalizeLine("[jl2]ABC", "[jl2]ABC");
 		checkNormalizeLine("[jp1]ABC", "ABC");
@@ -479,40 +338,6 @@ public class MultiStringTest extends TestCase {
 		assertTrue(cms.equals(ms2.toString()));
 	}
 
-	public void testCombineShared() {
-		checkCombine("P[tr1,10,50,20]", "A",
-			"P[tr1,10,50,20][cf][fo][jl][jp]A");
-		checkCombine("P[tr1,10,50,20]", "A[np]B",
-			"P[tr1,10,50,20][cf][fo][jl][jp]A[np]" +
-			"P[tr1,10,50,20][cf][fo][jl][jp]B");
-		checkCombine("P[tr1,10,50,20]", "A[np]B[np]C",
-			"P[tr1,10,50,20][cf][fo][jl][jp]A[np]" +
-			"P[tr1,10,50,20][cf][fo][jl][jp]B[np]" +
-			"P[tr1,10,50,20][cf][fo][jl][jp]C");
-	}
-
-	public void testCombineSequenced() {
-		checkCombine("", "", "[cf][fo][jl][jp][np]");
-		checkCombine("AAA", "", "AAA[cf][fo][jl][jp][np]");
-		checkCombine("AAA", "BBB", "AAA[cf][fo][jl][jp][np]BBB");
-	}
-
-	public void testCombineNotShared() {
-		// invalid text rectangle tag
-		checkCombine("P[tr1,10,50]", "A",
-			"P[tr1,10,50][cf][fo][jl][jp][np]A");
-		// new page not allowed in first message for shared
-		checkCombine("P[np]Q[tr1,10,50,20]", "A",
-			"P[np]Q[tr1,10,50,20][cf][fo][jl][jp][np]A");
-		// text rectangle not allowed in second message for shared
-		checkCombine("P[tr1,10,50,20]", "A[tr51,1,50,20]B",
-			"P[tr1,10,50,20][cf][fo][jl][jp][np]A[tr51,1,50,20]B");
-	}
-
-	private void checkCombine(String ms1, String ms2, String rs) {
-		assertTrue(MultiString.makeCombined(ms1, ms2).equals(rs));
-	}
-
 	public void testGetFonts() {
 		// bogus default font numbers
 		assertTrue(new MultiString("").getFonts(-10).length == 0);
@@ -645,5 +470,48 @@ public class MultiStringTest extends TestCase {
 			.equals("ABC"));
 		assertTrue(new MultiString("[nl]ABC[nl]").stripTrailingLines()
 			.equals("[nl]ABC"));
+	}
+
+	public void testTrailingTr() {
+		assertTrue(new MultiString("")
+			.trailingTextRectangle() == null);
+		assertTrue(new MultiString("[tr1,1,2,2]ABC")
+			.trailingTextRectangle() == null);
+		assertTrue("[tr1,1,2,2]".equals(new MultiString("[tr1,1,2,2]")
+			.trailingTextRectangle()));
+		assertTrue("[tr1,1,2,2]".equals(new MultiString(
+			"ABC[tr1,1,2,2]").trailingTextRectangle()));
+	}
+
+	public void testEachPageStartsWith() {
+		assertFalse(new MultiString("")
+			.eachPageStartsWith("[jl]"));
+		assertTrue(new MultiString("[tr1,1,2,2]ABC")
+			.eachPageStartsWith("[tr1,1,2,2]"));
+		assertFalse(new MultiString("[tr1,1,2,2]ABC[np][tr2,2,2,2]123")
+			.eachPageStartsWith("[tr1,1,2,2]"));
+		assertTrue(new MultiString("[fo5]ABC[np][fo5]123")
+			.eachPageStartsWith("[fo5]"));
+		assertFalse(new MultiString("[fo5]ABC[np][fo5]123")
+			.eachPageStartsWith("[fo5]_"));
+	}
+
+	public void testHasOneTextRectPerPage() {
+		assertFalse(new MultiString("").hasOneTextRectPerPage());
+		assertFalse(new MultiString("ABC").hasOneTextRectPerPage());
+		assertTrue(new MultiString("[tr1,1,10,10]")
+			.hasOneTextRectPerPage());
+		assertTrue(new MultiString("ABC[tr1,1,10,10]123")
+			.hasOneTextRectPerPage());
+		assertFalse(new MultiString("[tr1,1,8,8]ABC[tr8,8,2,2]123")
+			.hasOneTextRectPerPage());
+		assertFalse(new MultiString("[tr1,1,8,8][np]")
+			.hasOneTextRectPerPage());
+		assertTrue(new MultiString("[tr1,1,8,8][np][tr1,1,5,5]")
+			.hasOneTextRectPerPage());
+		assertFalse(new MultiString("[tr1,1,4,4][np][tr4,4,2,2][np]")
+			.hasOneTextRectPerPage());
+		assertTrue(new MultiString("[tr1,1,2,2][np][tr3,3,2,2][np][tr6,6,2,2]")
+			.hasOneTextRectPerPage());
 	}
 }

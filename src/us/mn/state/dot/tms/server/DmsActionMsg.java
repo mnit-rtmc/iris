@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2022  Minnesota Department of Transportation
+ * Copyright (C) 2013-2023  Minnesota Department of Transportation
  * Copyright (C) 2021-2022  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,12 +32,15 @@ import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsMsgPriority;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.ParkingAreaHelper;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.SignTextHelper;
 import us.mn.state.dot.tms.Station;
@@ -44,6 +48,7 @@ import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.TransMsgPattern;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.TollZoneHelper;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
@@ -350,19 +355,22 @@ public class DmsActionMsg {
 	/** Get the feed message string */
 	private String getFeedMsg(FeedMsg msg) {
 		addSrc(SignMsgSource.external);
-		MultiString _multi = msg.getMulti();
-		if (!isMsgFeedVerifyEnabled() || isFeedMsgValid(_multi))
-			return _multi.toString();
+		String ms = msg.getMulti().toString();
+		if (!isMsgFeedVerifyEnabled() || isFeedMsgValid(msg, ms))
+			return ms;
 		else
-			return fail("Invalid feed msg: " + _multi);
+			return fail("Invalid feed msg: " + ms);
 	}
 
 	/** Test if a feed message is valid */
-	private boolean isFeedMsgValid(MultiString _multi) {
-		int n_lines = DMSHelper.getLineCount(dms);
-		String[] lines = _multi.getLines(n_lines);
-		for (int i = 0; i < lines.length; i++) {
-			if (!isValidSignText((short) (i + 1), lines[i]))
+	private boolean isFeedMsgValid(FeedMsg msg, String ms) {
+		SignConfig sc = msg.getSignConfig();
+		if (sc == null)
+			return false;
+		MsgPattern pat = new TransMsgPattern(sc, "");
+		List<String> lines = MsgPatternHelper.splitLines(pat, ms);
+		for (int i = 0; i < lines.size(); i++) {
+			if (!isValidSignText((short) (i + 1), lines.get(i)))
 				return false;
 		}
 		return true;

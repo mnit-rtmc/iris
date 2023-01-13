@@ -1,6 +1,6 @@
 // graft.rs
 //
-// Copyright (C) 2021-2022  Minnesota Department of Transportation
+// Copyright (C) 2021-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -535,7 +535,7 @@ async fn resource_get(res: &'static str, req: Request<State>) -> tide::Result {
     log::info!("GET {}", req.url());
     let (etag, body) = resp!(resource_get_json(res, req).await);
     Ok(Response::builder(StatusCode::Ok)
-        .header("ETag", &etag)
+        .header("ETag", etag)
         .body(body)
         .content_type("application/json")
         .build())

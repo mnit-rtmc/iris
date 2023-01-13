@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2018  Minnesota Department of Transportation
+ * Copyright (C) 2008-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,11 +49,13 @@ public class FontHelper extends BaseHelper {
 
 	/** Find a font using a font number */
 	static public Font find(int f_num) {
-		Iterator<Font> it = iterator();
-		while(it.hasNext()) {
-			Font f = it.next();
-			if(f.getNumber() == f_num)
-				return f;
+		if (namespace != null) {
+			Iterator<Font> it = iterator();
+			while (it.hasNext()) {
+				Font f = it.next();
+				if (f.getNumber() == f_num)
+					return f;
+			}
 		}
 		return null;
 	}

@@ -26,7 +26,6 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.IrisUserHelper;
-import us.mn.state.dot.tms.MsgCombining;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.SignMessageImpl;
@@ -243,9 +242,8 @@ class OpQueryMsg extends OpDms {
 		if (rpri == DmsMsgPriority.INVALID)
 			rpri = DmsMsgPriority.OTHER_SYSTEM;
 
-		int mc = MsgCombining.DISABLE.ordinal();
-		return (SignMessageImpl) m_dms.createMsg(multi, false, mc,
-			rpri, EXT_OPER, null, duration);
+		return (SignMessageImpl) m_dms.createMsg(multi, false, rpri,
+			EXT_OPER, null, duration);
 	}
 
 	/** Return a MULTI with an updated page on-time with the value read
@@ -430,8 +428,6 @@ class OpQueryMsg extends OpDms {
 			Integer duramins = calcMsgDuration(useont,
 				useofft, ont, offt);
 
-			int mc = MsgCombining.DISABLE.ordinal();
-
 			// have text
 			if(txtavail) {
 				// update page on-time in MULTI with value
@@ -440,7 +436,7 @@ class OpQueryMsg extends OpDms {
 				// MULTI string.
 				msgtext = updatePageOnTime(msgtext, pgOnTime);
 				SignMessageImpl sm = (SignMessageImpl)
-					m_dms.createMsg(msgtext, false, mc,
+					m_dms.createMsg(msgtext, false,
 					rpri, EXT_OPER, iuser, duramins);
 				if (sm != null)
 					m_dms.setMsgCurrentNotify(sm, iuser);
@@ -460,7 +456,7 @@ class OpQueryMsg extends OpDms {
 				}
 				if (sm == null) {
 					sm = (SignMessageImpl) m_dms.createMsg(
-						"", false, mc, rpri, EXT_OPER,
+						"", false, rpri, EXT_OPER,
 						iuser, null);
 					if (sm != null) {
 						m_dms.setMsgCurrentNotify(sm,

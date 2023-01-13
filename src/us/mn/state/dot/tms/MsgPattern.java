@@ -41,14 +41,6 @@ public interface MsgPattern extends SonarObject {
 	 * @param sg Sign group to associate; null for no group. */
 	void setSignGroup(SignGroup sg);
 
-	/** Get message combining value.
-	 * @see us.mn.state.dot.tms.MsgCombining */
-	int getMsgCombining();
-
-	/** Set message combining value.
-	 * @see us.mn.state.dot.tms.MsgCombining */
-	void setMsgCombining(int mc);
-
 	/** Get the message MULTI string.
 	 * @return Message text in MULTI markup.
 	 * @see us.mn.state.dot.tms.utils.MultiString */

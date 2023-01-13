@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -70,10 +70,15 @@ pub struct Dms {
     pub name: String,
     pub location: Option<String>,
     pub controller: Option<String>,
-    // full attributes
-    pub geo_loc: Option<String>,
-    pub pin: Option<u32>,
+    pub notes: String,
     pub msg_current: Option<String>,
+    // full attributes
+    pub pin: Option<u32>,
+    pub sign_config: Option<String>,
+    pub sign_detail: Option<String>,
+    pub msg_sched: Option<String>,
+    pub msg_user: Option<String>,
+    pub geo_loc: Option<String>,
     pub status: Option<SignStatus>,
     pub stuck_pixels: Option<StuckPixels>,
 }
@@ -86,7 +91,6 @@ pub struct SignMessage {
     pub incident: Option<String>,
     pub multi: String,
     pub beacon_enabled: bool,
-    pub msg_combining: String,
     pub msg_priority: u32,
     pub sources: String,
     pub owner: Option<String>,
@@ -180,7 +184,7 @@ impl Dms {
     fn to_html_compact(&self, anc: &DmsAnc) -> String {
         let comm_state = anc.dev.comm_state(self);
         let item_state = self.item_state(anc);
-        let location = HtmlStr::new(&self.location);
+        let location = HtmlStr::new(&self.location).with_len(32);
         let disabled = disabled_attr(self.controller.is_some());
         format!(
             "<div class='{NAME} end'>{comm_state} {self} {item_state}</div>\

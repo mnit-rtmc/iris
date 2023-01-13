@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017 Iteris Inc.
- * Copyright (C) 2019-2022  Minnesota Department of Transportation
+ * Copyright (C) 2019-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -144,7 +144,14 @@ public class OpQueryEssStatus extends OpEss {
 			mess.add(tr.spot_direction.node);
 			mess.add(tr.gust_speed.node);
 			mess.add(tr.gust_direction.node);
-			mess.queryProps();
+			try {
+				mess.queryProps();
+			}
+			catch (NoSuchName e) {
+				// Some controllers sometimes seem to randomly
+				// forget what windSensorGustDirection is
+				return new QueryTemperatureSensors();
+			}
 			logQuery(tr.avg_speed.node);
 			logQuery(tr.avg_direction.node);
 			logQuery(tr.spot_speed.node);
@@ -217,7 +224,14 @@ public class OpQueryEssStatus extends OpEss {
 		protected Phase poll(CommMessage mess) throws IOException {
 			TemperatureSensorsTable.Row tr = ts_table.addRow();
 			mess.add(tr.air_temp.node);
-			mess.queryProps();
+			try {
+				mess.queryProps();
+			}
+			catch (NoSuchName e) {
+				// Some controllers sometimes seem to randomly
+				// forget what essAirTemperature is
+				return new QueryPrecipitation();
+			}
 			logQuery(tr.air_temp.node);
 			return ts_table.isDone()
 			      ? new QueryPrecipitation()

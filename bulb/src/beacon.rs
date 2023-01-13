@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -138,7 +138,7 @@ impl Beacon {
         let comm_state = anc.dev.comm_state(self);
         let item_state = self.item_state(anc);
         let disabled = disabled_attr(self.controller.is_some());
-        let location = HtmlStr::new(&self.location);
+        let location = HtmlStr::new(&self.location).with_len(32);
         format!(
             "<div class='{NAME} end'>{comm_state} {self} {item_state}</div>\
             <div class='info fill{disabled}'>{location}</div>"

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2021  Iteris Inc.
  *
@@ -20,6 +20,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -33,8 +34,8 @@ import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
-import static us.mn.state.dot.tms.SignMessage.MAX_PAGES;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.TransMsgPattern;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
@@ -51,6 +52,9 @@ import us.mn.state.dot.tms.utils.TextRect;
  * @author Travis Swanston
  */
 public class MessageComposer extends JPanel {
+
+	/** Maximum allowed number of pages in a message */
+	static private final int MAX_PAGES = 6;
 
 	/** User session */
 	private final Session session;
@@ -71,66 +75,10 @@ public class MessageComposer extends JPanel {
 				adjusting++;
 				updatePattern();
 				adjusting--;
+				updateMessage(true);
 			}
 		}
 	};
-
-	/** Update the selected pattern */
-	private void updatePattern() {
-		List<TextRect> trs = getPatternTextRects();
-		n_rects = Math.min(trs.size(), rects.length);
-		while (n_rects < rect_tab.getTabCount())
-			rect_tab.removeTabAt(n_rects);
-		int first = 1;
-		int page_number = 0;
-		char page_letter = 'a' - 1;
-		for (int i = 0; i < n_rects; i++) {
-			TextRect tr = trs.get(i);
-			if (tr.page_number == page_number)
-				page_letter++;
-			else
-				page_letter = 'a' - 1;
-			page_number = tr.page_number;
-			String title = (page_letter >= 'a')
-				? "" + page_number + page_letter
-				: "" + page_number;
-			TextRectComposer rc = rects[i];
-			int n_lines = tr.getLineCount();
-			rc.setModels(finder, first, n_lines);
-			rc.setEditMode();
-			if (i < rect_tab.getTabCount()) {
-				rect_tab.setComponentAt(i, rc);
-				rect_tab.setTitleAt(i, title);
-			} else
-				rect_tab.addTab(title, rc);
-			first += n_lines;
-		}
-		updateMessage(true);
-	}
-
-	/** Get the text rectangles for the selected pattern */
-	private List<TextRect> getPatternTextRects() {
-		MsgPattern pat = getMsgPattern();
-		if (pat != null)
-			return MsgPatternHelper.findTextRectangles(pat);
-		else {
-			ArrayList<TextRect> trs = new ArrayList<TextRect>();
-			DMS dms = dispatcher.getSingleSelection();
-			if (dms != null) {
-				SignConfig sc = dms.getSignConfig();
-				if (sc != null) {
-					int fn = SignConfigHelper
-						.getDefaultFontNum(sc);
-					trs.add(new TextRect(1,
-						sc.getPixelWidth(),
-						sc.getPixelHeight(),
-						fn
-					));
-				}
-			}
-			return trs;
-		}
-	}
 
 	/** Clear action */
 	private final IAction clear_act = new IAction("dms.clear") {
@@ -164,7 +112,7 @@ public class MessageComposer extends JPanel {
 	/** Sign text finder for selected sign */
 	private SignTextFinder finder;
 
-	/** Number of text rectangles */
+	/** Number of text rectangles in selected pattern */
 	private int n_rects;
 
 	/** Counter to indicate we're adjusting widgets.  This needs to be
@@ -316,24 +264,86 @@ public class MessageComposer extends JPanel {
 		adjusting--;
 	}
 
+	/** Update the selected pattern */
+	private void updatePattern() {
+		List<TextRect> trs = getPatternTextRects();
+		n_rects = Math.min(trs.size(), rects.length);
+		while (n_rects < rect_tab.getTabCount())
+			rect_tab.removeTabAt(n_rects);
+		int first = 1;
+		int page_number = 0;
+		char page_letter = 'a' - 1;
+		for (int i = 0; i < n_rects; i++) {
+			TextRect tr = trs.get(i);
+			if (tr.page_number == page_number)
+				page_letter++;
+			else
+				page_letter = 'a' - 1;
+			page_number = tr.page_number;
+			String title = (page_letter >= 'a')
+				? "" + page_number + page_letter
+				: "" + page_number;
+			TextRectComposer rc = rects[i];
+			int n_lines = tr.getLineCount();
+			rc.setModels(finder, first, n_lines);
+			rc.setEditMode();
+			if (i < rect_tab.getTabCount()) {
+				rect_tab.setComponentAt(i, rc);
+				rect_tab.setTitleAt(i, title);
+			} else
+				rect_tab.addTab(title, rc);
+			first += n_lines;
+		}
+	}
+
+	/** Get the text rectangles for the selected pattern */
+	private List<TextRect> getPatternTextRects() {
+		MsgPattern pat = getMsgPattern();
+		if (pat != null)
+			return MsgPatternHelper.findTextRectangles(pat);
+		else
+			return new ArrayList<TextRect>();
+	}
+
 	/** Get the selected message pattern */
 	public MsgPattern getMsgPattern() {
-		return pattern_cbx.getSelectedPattern();
+		MsgPattern pat = pattern_cbx.getSelectedPattern();
+		if (pat != null)
+			return pat;
+		// make a "client" pattern just for composing
+		DMS dms = dispatcher.getSingleSelection();
+		if (dms != null) {
+			SignConfig sc = dms.getSignConfig();
+			if (sc != null)
+				return new TransMsgPattern(sc, "");
+		}
+		return null;
 	}
 
 	/** Compose a MULTI string using the contents of the widgets */
 	public String getComposedMulti() {
+		ArrayList<String> lines = new ArrayList<String>();
+		for (int i = 0; i < n_rects; i++)
+			rects[i].getSelectedLines(lines);
 		MsgPattern pat = getMsgPattern();
-		String[] mess = new String[n_rects];
-		for (int i = 0; i < mess.length; i++)
-			mess[i] = rects[i].getMulti();
-		return MsgPatternHelper.fillTextRectangles(pat, mess);
+		return MsgPatternHelper.fillTextRectangles(pat, lines);
 	}
 
 	/** Set the composed MULTI string */
 	public void setComposedMulti(String ms) {
-		pattern_cbx.setMulti(ms);
-		// FIXME: split lines
+		MsgPattern pat = pattern_cbx.findBestPattern(ms);
+		pattern_cbx.setSelectedItem(pat);
+		// this makes a TransMsgPattern if none selected
+		pat = getMsgPattern();
+		if (pat != null) {
+			List<String> lines = MsgPatternHelper
+				.splitLines(pat, ms);
+			adjusting++;
+			Iterator<String> lns = lines.iterator();
+			for (int i = 0; i < n_rects; i++)
+				rects[i].setSelectedLines(lns);
+			adjusting--;
+		}
 	}
 
 	/** Check if beacon is enabled */
