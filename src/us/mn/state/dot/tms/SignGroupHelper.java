@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,17 +49,6 @@ public class SignGroupHelper extends BaseHelper {
 		while (it.hasNext()) {
 			DmsSignGroup dsg = it.next();
 			if (dsg.getSignGroup() == sg)
-				return true;
-		}
-		return false;
-	}
-
-	/** Check if a sign group has any sign text messages */
-	static public boolean hasSignText(SignGroup sg) {
-		Iterator<SignText> it = SignTextHelper.iterator();
-		while (it.hasNext()) {
-			SignText st = it.next();
-			if (st.getSignGroup() == sg)
 				return true;
 		}
 		return false;

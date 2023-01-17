@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2017  Minnesota Department of Transportation
+ * Copyright (C) 2008-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,40 +12,37 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.dms;
-
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.SignText;
+package us.mn.state.dot.tms;
 
 /**
- * Client-side sign text for message selector combo boxes.
+ * Transient message line implementation.
  *
  * @author Douglas Lau
  */
-public class ClientSignText implements SignText {
+public class TransMsgLine implements MsgLine {
 
-	/** Sign text MULTI string */
+	/** Msg line MULTI string */
 	private final String multi;
 
-	/** Sign text line number */
+	/** Msg line number */
 	private final short line;
 
-	/** Sign text rank */
+	/** Msg line rank */
 	private final short rank;
 
-	/** Create a new client sign text.
-	 * @param m Multi string of sign text.
+	/** Create a new transient message line.
+	 * @param m Multi string.
 	 * @param ln Line number.
 	 * @param r Message rank. */
-	public ClientSignText(String m, short ln, short r) {
+	public TransMsgLine(String m, short ln, short r) {
 		multi = m;
 		line = ln;
 		rank = r;
 	}
 
-	/** Create a new client sign text.
-	 * @param m Multi string of sign text. */
-	public ClientSignText(String m) {
+	/** Create a new transient message line.
+	 * @param m Multi string of message line. */
+	public TransMsgLine(String m) {
 		this(m, (short) 0, (short) 0);
 	}
 
@@ -58,7 +55,7 @@ public class ClientSignText implements SignText {
 	/** Get the SONAR object name */
 	@Override
 	public String getName() {
-		return "client_sign_text_" + multi;
+		return "ml_" + multi;
 	}
 
 	/** Get the SONAR type name */
@@ -67,19 +64,19 @@ public class ClientSignText implements SignText {
 		return SONAR_TYPE;
 	}
 
-	/** Get the sign group */
+	/** Get the message pattern */
 	@Override
-	public SignGroup getSignGroup() {
+	public MsgPattern getMsgPattern() {
 		return null;
 	}
 
-	/** Set the line */
+	/** Set the line number */
 	@Override
 	public void setLine(short l) {
 		// do nothing
 	}
 
-	/** Get the line */
+	/** Get the line number*/
 	@Override
 	public short getLine() {
 		return line;

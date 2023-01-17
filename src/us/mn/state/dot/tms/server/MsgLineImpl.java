@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2019  Minnesota Department of Transportation
+ * Copyright (C) 2004-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,36 +15,31 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.SignText;
-import us.mn.state.dot.tms.SignTextHelper;
+import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.MsgLine;
+import us.mn.state.dot.tms.MsgLineHelper;
 import us.mn.state.dot.tms.TMSException;
 
 /**
- * Sign text contains the properties of a single line MULTI string for display
- * on a dynamic message sign (DMS).
+ * A message line contains the properties of a single line MULTI string for
+ * filling in a message pattern.
  *
  * @author Douglas Lau
  */
-public class SignTextImpl extends BaseObjectImpl implements SignText {
+public class MsgLineImpl extends BaseObjectImpl implements MsgLine {
 
-	/** Load all the sign text */
+	/** Load all the message lines */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, SignTextImpl.class);
-		store.query("SELECT name, sign_group, line, multi, rank " +
+		namespace.registerType(SONAR_TYPE, MsgLineImpl.class);
+		store.query("SELECT name, msg_pattern, line, multi, rank " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new SignTextImpl(
-					row.getString(1),	// name
-					row.getString(2),	// sign_group
-					row.getShort(3),	// line
-					row.getString(4),	// multi
-					row.getShort(5)		// rank
-				));
+				namespace.addObject(new MsgLineImpl(row));
 			}
 		});
 	}
@@ -54,7 +49,7 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("sign_group", sign_group);
+		map.put("msg_pattern", msg_pattern);
 		map.put("line", line);
 		map.put("multi", multi);
 		map.put("rank", rank);
@@ -73,44 +68,48 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 		return SONAR_TYPE;
 	}
 
-	/** Create a new sign text message */
-	public SignTextImpl(String n) {
+	/** Create a new message line */
+	public MsgLineImpl(String n) {
 		super(n);
 	}
 
-	/** Create a new sign text message */
-	private SignTextImpl(String n, SignGroup g, short l, String m, short r) {
+	/** Create a message line */
+	private MsgLineImpl(ResultSet row) throws SQLException {
+		this(row.getString(1),  // name
+		     row.getString(2),  // msg_pattern
+		     row.getShort(3),   // line
+		     row.getString(4),  // multi
+		     row.getShort(5));  // rank
+	}
+
+	/** Create a message line */
+	private MsgLineImpl(String n, String mp, short l, String m, short r) {
 		super(n);
-		sign_group = g;
+		msg_pattern = lookupMsgPattern(mp);
 		line = l;
 		multi = m;
 		rank = r;
 	}
 
-	/** Create a new sign text message */
-	private SignTextImpl(String n, String g, short l, String m, short p) {
-		this(n, lookupSignGroup(g), l, m, p);
-	}
+	/** Message pattern */
+	private MsgPattern msg_pattern;
 
-	/** Sign group */
-	private SignGroup sign_group;
-
-	/** Get the sign group */
+	/** Get the message pattern */
 	@Override
-	public SignGroup getSignGroup() {
-		return sign_group;
+	public MsgPattern getMsgPattern() {
+		return msg_pattern;
 	}
 
 	/** Line number on sign (usually 1-3) */
 	private short line;
 
-	/** Set the line */
+	/** Set the line number */
 	@Override
 	public void setLine(short l) {
 		line = l;
 	}
 
-	/** Set the line */
+	/** Set the line number */
 	public void doSetLine(short l) throws TMSException {
 		if (l != line) {
 			store.update(this, "line", l);
@@ -136,7 +135,7 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 	/** Set the MULTI string */
 	public void doSetMulti(String m) throws TMSException {
 		if (!m.equals(multi)) {
-			if (!SignTextHelper.isMultiValid(m))
+			if (!MsgLineHelper.isMultiValid(m))
 			    throw new ChangeVetoException("Invalid MULTI: " + m);
 			store.update(this, "multi", m);
 			setMulti(m);

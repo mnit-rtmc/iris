@@ -38,11 +38,11 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
+import us.mn.state.dot.tms.MsgLineHelper;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.ParkingAreaHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMsgSource;
-import us.mn.state.dot.tms.SignTextHelper;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -370,16 +370,16 @@ public class DmsActionMsg {
 		MsgPattern pat = new TransMsgPattern(sc, "");
 		List<String> lines = MsgPatternHelper.splitLines(pat, ms);
 		for (int i = 0; i < lines.size(); i++) {
-			if (!isValidSignText((short) (i + 1), lines.get(i)))
+			if (!isValidMsgLine((short) (i + 1), lines.get(i)))
 				return false;
 		}
 		return true;
 	}
 
-	/** Check if a MULTI string is a valid sign text for the sign group */
-	private boolean isValidSignText(short line, String ms) {
+	/** Check if a MULTI string is a valid message text */
+	private boolean isValidMsgLine(short line, String ms) {
 		return ms.isEmpty() ||
-		       SignTextHelper.match(action.getSignGroup(), line, ms);
+		       MsgLineHelper.match(action.getMsgPattern(), line, ms);
 	}
 
 	/** Calculate speed advisory span */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2023  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,55 +19,56 @@ import java.util.TreeSet;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.SignText;
+import us.mn.state.dot.tms.MsgLine;
+import us.mn.state.dot.tms.TransMsgLine;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
- * Model for a sign text line combo box.
+ * Model for a message line combo box.
  *
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class SignTextCBoxModel extends AbstractListModel<SignText>
-	implements ComboBoxModel<SignText>
+public class MsgLineCBoxModel extends AbstractListModel<MsgLine>
+	implements ComboBoxModel<MsgLine>
 {
-	/** Rank for on-the-fly created sign messages */
+	/** Rank for on-the-fly messages */
 	static private final short ON_THE_FLY_RANK = 99;
 
-	/** Blank client-side sign text object */
-	static private final SignText BLANK_SIGN_TEXT =
-		new ClientSignText("");
+	/** Blank client-side message line */
+	static private final MsgLine BLANK_LINE =
+		new TransMsgLine("");
 
-	/** Set of sorted SignText items */
-	private final TreeSet<SignText> items =
-		new TreeSet<SignText>(new SignTextComparator());
+	/** Set of sorted MsgLine items */
+	private final TreeSet<MsgLine> items =
+		new TreeSet<MsgLine>(new MsgLineComparator());
 
-	/** Sign text line number */
+	/** Message line number */
 	private final short line;
 
-	/** Create a new sign text combo box model.
-	 * @param ln Sign line number. */
-	public SignTextCBoxModel(short ln) {
+	/** Create a new message line combo box model.
+	 * @param ln Line number. */
+	public MsgLineCBoxModel(short ln) {
 		line = ln;
-		items.add(BLANK_SIGN_TEXT);
+		items.add(BLANK_LINE);
 	}
 
-	/** Create a blank sign text combo box model */
-	public SignTextCBoxModel() {
+	/** Create a blank message line combo box model */
+	public MsgLineCBoxModel() {
 		line = 0;
 	}
 
-	/** Add a SignText to the model.
-	 * NOTE: Do not call this after using in SignTextCBox */
-	public void add(SignText st) {
+	/** Add a MsgLine to the model.
+	 * NOTE: Do not call this after using in MsgLineCBox */
+	public void add(MsgLine st) {
 		items.add(st);
 	}
 
 	/** Get the element at the specified index */
 	@Override
-	public SignText getElementAt(int index) {
+	public MsgLine getElementAt(int index) {
 		int i = 0;
-		for (SignText t: items) {
+		for (MsgLine t: items) {
 			if (i == index)
 				return t;
 			i++;
@@ -81,19 +82,19 @@ public class SignTextCBoxModel extends AbstractListModel<SignText>
 		return items.size();
 	}
 
-	/** Selected SignText item */
-	private SignText selected;
+	/** Selected MsgLine item */
+	private MsgLine selected;
 
 	/** Get the selected item */
 	@Override
 	public Object getSelectedItem() {
-		SignText st = selected;
+		MsgLine mt = selected;
 		// filter lines that should be ignored
-		if (st != null && st instanceof ClientSignText) {
-			if (DMSHelper.ignoreLineFilter(st.getMulti()))
-				return BLANK_SIGN_TEXT;
+		if (mt != null && mt instanceof TransMsgLine) {
+			if (DMSHelper.ignoreLineFilter(mt.getMulti()))
+				return BLANK_LINE;
 		}
-		return st;
+		return mt;
 	}
 
 	/**
@@ -104,34 +105,34 @@ public class SignTextCBoxModel extends AbstractListModel<SignText>
 	 */
 	@Override
 	public void setSelectedItem(Object item) {
-		if (item instanceof SignText)
-			selected = (SignText) item;
+		if (item instanceof MsgLine)
+			selected = (MsgLine) item;
 		else if (item instanceof String)
-			selected = getSignText((String) item);
+			selected = getMsgLine((String) item);
 		else
 			selected = null;
 		// this results in a call to the editor's setItem method
 		fireContentsChanged(this, -1, -1);
 	}
 
-	/** Get or create a sign text for the given string */
-	private SignText getSignText(String s) {
+	/** Get or create a message line for the given string */
+	private MsgLine getMsgLine(String s) {
 		MultiString multi = new MultiString(s.trim()).normalizeLine();
 		if (multi.isBlank())
-			return BLANK_SIGN_TEXT;
+			return BLANK_LINE;
 		String ms = multi.toString();
-		SignText st = lookupMessage(ms);
-		return (st != null)
-		      ? st
-		      : new ClientSignText(ms, line, ON_THE_FLY_RANK);
+		MsgLine mt = lookupMessage(ms);
+		return (mt != null)
+		      ? mt
+		      : new TransMsgLine(ms, line, ON_THE_FLY_RANK);
 	}
 
-	/** Lookup a sign text.
-	 * @return Existing SignText, or null if not found. */
-	private SignText lookupMessage(String ms) {
-		for (SignText st: items) {
-			if (ms.equals(st.getMulti()))
-				return st;
+	/** Lookup a message line.
+	 * @return Existing MsgLine, or null if not found. */
+	private MsgLine lookupMessage(String ms) {
+		for (MsgLine mt: items) {
+			if (ms.equals(mt.getMulti()))
+				return mt;
 		}
 		return null;
 	}

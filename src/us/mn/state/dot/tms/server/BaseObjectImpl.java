@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2022  Minnesota Department of Transportation
+ * Copyright (C) 2007-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -98,7 +98,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		SignGroupImpl.loadAll();
 		DmsSignGroupImpl.loadAll();
 		MsgPatternImpl.loadAll();
-		SignTextImpl.loadAll();
+		MsgLineImpl.loadAll();
 		GateArmArrayImpl.loadAll();
 		GateArmImpl.loadAll();
 		TagReaderImpl.loadAll();

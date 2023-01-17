@@ -109,8 +109,8 @@ public class MessageComposer extends JPanel {
 	/** Button to blank selected signs */
 	private final JButton blank_btn;
 
-	/** Sign text finder for selected sign */
-	private SignTextFinder finder;
+	/** Message line finder for selected sign */
+	private MsgLineFinder finder;
 
 	/** Number of text rectangles in selected pattern */
 	private int n_rects;
@@ -244,7 +244,7 @@ public class MessageComposer extends JPanel {
 	/** Set the selected sign */
 	public void setSelectedSign(DMS proxy) {
 		adjusting++;
-		finder = new SignTextFinder(proxy);
+		finder = new MsgLineFinder(proxy);
 		pattern_cbx.populateModel(proxy);
 		dur_cbx.setSelectedIndex(0);
 		adjusting--;

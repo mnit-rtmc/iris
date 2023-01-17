@@ -82,7 +82,7 @@ public class MultiString {
 		public void setPageTimes(Integer on, Integer off) {}
 		@Override
 		public void setTextRectangle(int x, int y, int w, int h) {}
-		// action tags not allowed in SignText
+		// action tags also not allowed in MsgText
 		@Override
 		public void addClearGuideAdvisory(String dms, int rid,
 			int tsp, String mode, int ridx) {}

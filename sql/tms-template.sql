@@ -441,6 +441,7 @@ meter_action
 modem
 monitor_style
 msg_pattern
+msg_line
 parking_area
 permission
 plan_phase
@@ -456,7 +457,6 @@ sign_config
 sign_detail
 sign_group
 sign_message
-sign_text
 station
 system_attribute
 tag_reader
@@ -607,7 +607,7 @@ PRV_0060	dms_control	sign_message		t
 PRV_0061	dms_policy	dms_sign_group		t
 PRV_0062	dms_policy	msg_pattern		t
 PRV_0063	dms_policy	sign_group		t
-PRV_0064	dms_policy	sign_text		t
+PRV_0064	dms_policy	msg_line		t
 PRV_0065	dms_policy	word		t
 PRV_0066	dms_tab	dms		f
 PRV_0067	dms_tab	dms_sign_group		f
@@ -616,11 +616,11 @@ PRV_0069	dms_tab	glyph		f
 PRV_0070	dms_tab	gps		f
 PRV_0071	dms_tab	graphic		f
 PRV_0072	dms_tab	msg_pattern		f
+PRV_0076	dms_tab	msg_line		f
 PRV_0073	dms_tab	sign_config		f
 PRV_007A	dms_tab	sign_detail		f
 PRV_0074	dms_tab	sign_group		f
 PRV_0075	dms_tab	sign_message		f
-PRV_0076	dms_tab	sign_text		f
 PRV_0077	dms_tab	word		f
 PRV_0078	gate_arm_admin	gate_arm		t
 PRV_0079	gate_arm_admin	gate_arm_array		t
@@ -3123,28 +3123,20 @@ CREATE VIEW msg_pattern_view AS
     FROM iris.msg_pattern;
 GRANT SELECT ON msg_pattern_view TO PUBLIC;
 
-CREATE TABLE iris.sign_text (
-	name VARCHAR(20) PRIMARY KEY,
-	sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group,
-	line SMALLINT NOT NULL,
-	multi VARCHAR(64) NOT NULL,
-	rank SMALLINT NOT NULL,
-	CONSTRAINT sign_text_line CHECK ((line >= 1) AND (line <= 12)),
-	CONSTRAINT sign_text_rank CHECK ((rank >= 1) AND (rank <= 99))
+CREATE TABLE iris.msg_line (
+    name VARCHAR(10) PRIMARY KEY,
+    msg_pattern VARCHAR(20) NOT NULL REFERENCES iris.msg_pattern,
+    line SMALLINT NOT NULL,
+    multi VARCHAR(64) NOT NULL,
+    rank SMALLINT NOT NULL,
+    CONSTRAINT msg_line_line CHECK ((line >= 1) AND (line <= 12)),
+    CONSTRAINT msg_line_rank CHECK ((rank >= 1) AND (rank <= 99))
 );
 
-CREATE VIEW sign_text_view AS
-	SELECT dms, local, line, multi, rank
-	FROM iris.dms_sign_group dsg
-	JOIN iris.sign_group sg ON dsg.sign_group = sg.name
-	JOIN iris.sign_text st ON sg.name = st.sign_group;
-GRANT SELECT ON sign_text_view TO PUBLIC;
-
-CREATE VIEW sign_group_text_view AS
-	SELECT sign_group, line, multi, rank
-	FROM iris.sign_group sg
-	JOIN iris.sign_text st ON sg.name = st.sign_group;
-GRANT SELECT ON sign_group_text_view TO PUBLIC;
+CREATE VIEW msg_line_view AS
+    SELECT name, msg_pattern, line, multi, rank
+    FROM iris.msg_line;
+GRANT SELECT ON msg_line_view TO PUBLIC;
 
 CREATE TABLE iris.dms_action (
     name VARCHAR(30) PRIMARY KEY,

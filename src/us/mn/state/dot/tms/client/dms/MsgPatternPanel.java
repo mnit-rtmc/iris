@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2022  Minnesota Department of Transportation
+ * Copyright (C) 2018-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,25 +15,28 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.BorderFactory;
+import javax.swing.GroupLayout;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.ColorScheme;
-import us.mn.state.dot.tms.Font;
-import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.MsgLine;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
-import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.client.widget.ILabel;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiString;
 
@@ -42,17 +45,26 @@ import us.mn.state.dot.tms.utils.MultiString;
  *
  * @author Douglas Lau
  */
-public class MsgPatternPanel extends IPanel
+public class MsgPatternPanel extends JPanel
 	implements ProxyView<MsgPattern>
 {
+	/** MULTI label */
+	private final ILabel multi_lbl = new ILabel("msg.pattern.multi");
+
 	/** MULTI text area */
 	private final JTextArea multi_txt = new JTextArea();
 
 	/** Sign pixel panel */
 	private final SignPixelPanel pixel_pnl = new SignPixelPanel(100, 180);
 
+	/** Message preview panel */
+	private final JPanel preview_pnl;
+
 	/** Pager for sign pixel panel */
 	private DMSPanelPager pager;
+
+	/** Msg line panel */
+	private final ProxyTablePanel<MsgLine> msg_line_pnl;
 
 	/** User session */
 	private final Session session;
@@ -76,26 +88,16 @@ public class MsgPatternPanel extends IPanel
 		updatePixelPanel(pat);
 	}
 
-	/** Create the detector panel */
+	/** Create the message pattern panel */
 	public MsgPatternPanel(Session s, boolean r) {
 		session = s;
 		TypeCache<MsgPattern> cache =
 			s.getSonarState().getDmsCache().getMsgPatterns();
 		watcher = new ProxyWatcher<MsgPattern>(cache, this, false);
-	}
-
-	/** Initialize the panel */
-	@Override
-	public void initialize() {
-		super.initialize();
-		add("msg.pattern.multi");
-		add(multi_txt, Stretch.FULL);
-		multi_txt.setWrapStyleWord(false);
-		add(createPreviewPanel(), Stretch.FULL);
-		createJobs();
-		watcher.initialize();
-		clear();
-		session.addEditModeListener(edit_lsnr);
+		preview_pnl = createPreviewPanel();
+		msg_line_pnl = new ProxyTablePanel<MsgLine>(
+			new MsgLineTableModel(s, null)
+		);
 	}
 
 	/** Create message preview panel */
@@ -105,6 +107,47 @@ public class MsgPatternPanel extends IPanel
 			I18N.get("dms.message.preview")));
 		pnl.add(pixel_pnl, BorderLayout.CENTER);
 		return pnl;
+	}
+
+	/** Initialize the panel */
+	public void initialize() {
+		setBorder(UI.border);
+		multi_txt.setWrapStyleWord(false);
+		pixel_pnl.setFilterColor(new Color(0, 0, 255, 48));
+		msg_line_pnl.initialize();
+		layoutPanel();
+		watcher.initialize();
+		createJobs();
+		session.addEditModeListener(edit_lsnr);
+		clear();
+	}
+
+	/** Layout the panel */
+	private void layoutPanel() {
+		GroupLayout gl = new GroupLayout(this);
+		gl.setHonorsVisibility(false);
+		gl.setAutoCreateGaps(false);
+		gl.setAutoCreateContainerGaps(false);
+		// horizontal layout
+		GroupLayout.ParallelGroup hg = gl.createParallelGroup();
+		hg.addGroup(gl.createSequentialGroup()
+		              .addComponent(multi_lbl)
+		              .addGap(UI.hgap)
+		              .addComponent(multi_txt))
+		  .addComponent(preview_pnl)
+		  .addComponent(msg_line_pnl);
+		gl.setHorizontalGroup(hg);
+		// vertical layout
+		GroupLayout.SequentialGroup vg = gl.createSequentialGroup();
+		vg.addGroup(gl.createParallelGroup()
+		              .addComponent(multi_lbl)
+		              .addComponent(multi_txt))
+		  .addGap(UI.vgap)
+		  .addComponent(preview_pnl)
+		  .addGap(UI.vgap)
+		  .addComponent(msg_line_pnl);
+		gl.setVerticalGroup(vg);
+		setLayout(gl);
 	}
 
 	/** Create the jobs */
@@ -118,55 +161,41 @@ public class MsgPatternPanel extends IPanel
 	}
 
 	/** Set the MULTI string */
-	private void setMulti(String m) {
+	private void setMulti(String ms) {
 		MsgPattern pat = msg_pattern;
 		if (pat != null) {
-			MultiString ms = new MultiString(m).normalize();
-			pat.setMulti(ms.toString());
+			MultiString multi = new MultiString(ms).normalize();
+			pat.setMulti(multi.toString());
 		}
 		updatePixelPanel(pat);
 	}
 
 	/** Update pixel panel preview */
 	private void updatePixelPanel(MsgPattern pat) {
-		if (pat != null) {
-			SignConfig sc = pat.getSignConfig();
-			if (sc != null) {
-				updatePixelPanel(sc, new MultiString(
-					pat.getMulti()));
-				return;
-			}
+		SignConfig sc = (pat != null) ? pat.getSignConfig() : null;
+		String ms = (pat != null) ? pat.getMulti() : "";
+		MultiString multi = new MultiString(ms);
+		if (sc != null)
+			pixel_pnl.setDimensions(sc);
+		else {
+			pixel_pnl.setPhysicalDimensions(0, 0, 0, 0, 0, 0);
+			pixel_pnl.setLogicalDimensions(0, 0, 0, 0);
 		}
-		pixel_pnl.setPhysicalDimensions(0, 0, 0, 0, 0, 0);
-		pixel_pnl.setLogicalDimensions(0, 0, 0, 0);
-		pixel_pnl.setGraphic(null);
-		pixel_pnl.repaint();
+		setPager(createPager(sc, multi));
 	}
 
 	/** Update pixel panel preview */
-	private void updatePixelPanel(SignConfig sc, MultiString multi) {
-		pixel_pnl.setDimensions(sc);
-		int pw = sc.getPixelWidth();
-		int ph = sc.getPixelHeight();
-		int cw = sc.getCharWidth();
-		int ch = sc.getCharHeight();
-		Font f = sc.getDefaultFont();
-		int df = (f != null)
-		       ? f.getNumber()
-		       : FontHelper.DEFAULT_FONT_NUM;
-		ColorScheme cs = ColorScheme.fromOrdinal(sc.getColorScheme());
-		RasterBuilder rb = new RasterBuilder(pw, ph, cw, ch, df, cs);
+	private DMSPanelPager createPager(SignConfig sc, MultiString multi) {
+		RasterBuilder rb = SignConfigHelper.createRasterBuilder(sc);
 		try {
 			RasterGraphic[] rg = rb.createPixmaps(multi);
 			if (rg != null) {
 				String ms = multi.toString();
-				setPager(new DMSPanelPager(pixel_pnl, rg, ms));
-				return;
+				return new DMSPanelPager(pixel_pnl, rg, ms);
 			}
 		}
 		catch (InvalidMsgException e) { /* fall through */ }
-		setPager(null);
-		pixel_pnl.setGraphic(null);
+		return null;
 	}
 
 	/** Set the DMS panel pager */
@@ -174,16 +203,17 @@ public class MsgPatternPanel extends IPanel
 		DMSPanelPager op = pager;
 		if (op != null)
 			op.dispose();
+		pixel_pnl.setGraphic(null);
+		pixel_pnl.repaint();
 		pager = p;
 	}
 
 	/** Dispose of the panel */
-	@Override
 	public void dispose() {
-		clear();
-		session.removeEditModeListener(edit_lsnr);
+		msg_line_pnl.dispose();
 		watcher.dispose();
-		super.dispose();
+		session.removeEditModeListener(edit_lsnr);
+		clear();
 	}
 
 	/** Update the edit mode */
@@ -201,18 +231,21 @@ public class MsgPatternPanel extends IPanel
 	public void update(MsgPattern pat, String a) {
 		if (null == a) {
 			msg_pattern = pat;
+			// FIXME: msg_line_pnl.setModel(...);
 			updateEditMode();
 		}
 		if (null == a || a.equals("multi"))
 			multi_txt.setText(pat.getMulti());
 	}
 
-	/** Clear all attributes (from ProxyView). */
+	/** Clear all attributes (from ProxyView) */
 	@Override
 	public void clear() {
-		setPager(null);
 		msg_pattern = null;
 		multi_txt.setEnabled(false);
 		multi_txt.setText("");
+		pixel_pnl.setPhysicalDimensions(0, 0, 0, 0, 0, 0);
+		pixel_pnl.setLogicalDimensions(0, 0, 0, 0);
+		setPager(null);
 	}
 }

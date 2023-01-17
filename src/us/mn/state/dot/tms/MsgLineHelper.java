@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2019  Minnesota Department of Transportation
+ * Copyright (C) 2011-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,37 +18,37 @@ import java.util.Iterator;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
- * Helper class for sign text.
+ * Helper class for message lines.
  *
  * @author Douglas Lau
  */
-public class SignTextHelper extends BaseHelper {
+public class MsgLineHelper extends BaseHelper {
 
 	/** Don't allow instances to be created */
-	private SignTextHelper() {
+	private MsgLineHelper() {
 		assert false;
 	}
 
-	/** Lookup the sign text with the specified name */
-	static public SignText lookup(String name) {
-		return (SignText) namespace.lookupObject(SignText.SONAR_TYPE,
+	/** Lookup the message line with the specified name */
+	static public MsgLine lookup(String name) {
+		return (MsgLine) namespace.lookupObject(MsgLine.SONAR_TYPE,
 			name);
 	}
 
-	/** Get a sign text iterator */
-	static public Iterator<SignText> iterator() {
-		return new IteratorWrapper<SignText>(namespace.iterator(
-			SignText.SONAR_TYPE));
+	/** Get a message line iterator */
+	static public Iterator<MsgLine> iterator() {
+		return new IteratorWrapper<MsgLine>(namespace.iterator(
+			MsgLine.SONAR_TYPE));
 	}
 
-	/** Check if there is a matching sign text */
-	static public boolean match(SignGroup sg, short line, String multi) {
-		Iterator<SignText> it = iterator();
+	/** Check if there is a matching msg line */
+	static public boolean match(MsgPattern pat, short line, String multi) {
+		Iterator<MsgLine> it = iterator();
 		while (it.hasNext()) {
-			SignText st = it.next();
-			if (st.getSignGroup() == sg &&
-			    st.getLine() == line &&
-			    st.getMulti().equals(multi))
+			MsgLine mt = it.next();
+			if (mt.getMsgPattern() == pat &&
+			    mt.getLine() == line &&
+			    mt.getMulti().equals(multi))
 				return true;
 		}
 		return false;
@@ -56,7 +56,7 @@ public class SignTextHelper extends BaseHelper {
 
 	/** Validate a MULTI string */
 	static public boolean isMultiValid(String m) {
-		return m.length() <= SignText.MAX_LEN_MULTI &&
+		return m.length() <= MsgLine.MAX_LEN_MULTI &&
 		       m.equals(new MultiString(m).normalizeLine().toString());
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2022  Minnesota Department of Transportation
+ * Copyright (C) 2011-2023  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,16 +25,17 @@ import java.awt.event.KeyEvent;
 import javax.swing.ComboBoxEditor;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
-import us.mn.state.dot.tms.SignText;
+import us.mn.state.dot.tms.MsgLine;
+import us.mn.state.dot.tms.TransMsgLine;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
- * Message composer combo box for one line of sign text.
+ * Message composer combo box for one line of message lines.
  *
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class SignTextCBox extends JComboBox<SignText> {
+public class MsgLineCBox extends JComboBox<MsgLine> {
 
 	/** Message combo box text editor */
 	static private class Editor extends JTextField
@@ -54,8 +55,8 @@ public class SignTextCBox extends JComboBox<SignText> {
 	/** Get the MULTI string of an item */
 	static private String getMulti(Object item) {
 		if (item != null) {
-			String ms = (item instanceof SignText)
-				? ((SignText) item).getMulti()
+			String ms = (item instanceof MsgLine)
+				? ((MsgLine) item).getMulti()
 				: item.toString();
 			return new MultiString(ms.trim())
 				.normalizeLine()
@@ -64,9 +65,9 @@ public class SignTextCBox extends JComboBox<SignText> {
 		return "";
 	}
 
-	/** Prototype sign text */
-	static private final SignText PROTOTYPE_SIGN_TEXT =
-		new ClientSignText("12345678901234567890");
+	/** Prototype message line */
+	static private final MsgLine PROTOTYPE_TEXT =
+		new TransMsgLine("12345678901234567890");
 
 	/** Combo box editor */
 	private final Editor editor = new Editor();
@@ -109,15 +110,15 @@ public class SignTextCBox extends JComboBox<SignText> {
 		}
 	};
 
-	/** Create a sign text combo box */
-	public SignTextCBox() {
+	/** Create a message line combo box */
+	public MsgLineCBox() {
 		setMaximumRowCount(21);
 		// NOTE: We use a prototype display value so that combo boxes
 		//       are always the same size.  This prevents all the
 		//       widgets from being rearranged whenever a new sign is
 		//       selected.
-		setPrototypeDisplayValue(PROTOTYPE_SIGN_TEXT);
-		setRenderer(new SignTextCellRenderer());
+		setPrototypeDisplayValue(PROTOTYPE_TEXT);
+		setRenderer(new MsgLineCellRenderer());
 		setEditMode();
 		setEditor(editor);
 		addKeyListener(key_listener);
@@ -137,7 +138,7 @@ public class SignTextCBox extends JComboBox<SignText> {
 		setEditable(EditMode.getMode() == EditMode.ALWAYS);
 	}
 
-	/** Get message text */
+	/** Get message string */
 	public String getMessage() {
 		Object item = (EditMode.getMode() == EditMode.ALWAYS)
 			? editor.getItem()

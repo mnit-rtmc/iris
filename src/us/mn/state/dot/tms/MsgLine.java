@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2019  Minnesota Department of Transportation
+ * Copyright (C) 2004-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,26 +17,26 @@ package us.mn.state.dot.tms;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * Sign text contains the properties of a single line MULTI string for display
- * on a dynamic message sign (DMS).
+ * A message line contains the properties of a single line MULTI string for
+ * filling in a message pattern.
  *
  * @author Douglas Lau
  */
-public interface SignText extends SonarObject {
+public interface MsgLine extends SonarObject {
 
 	/** SONAR type name */
-	String SONAR_TYPE = "sign_text";
+	String SONAR_TYPE = "msg_line";
 
 	/** Maximum length of MULTI string */
 	int MAX_LEN_MULTI = 64;
 
-	/** Get the sign group */
-	SignGroup getSignGroup();
+	/** Get the message pattern */
+	MsgPattern getMsgPattern();
 
-	/** Set the line */
+	/** Set the line number */
 	void setLine(short l);
 
-	/** Get the line */
+	/** Get the line number */
 	short getLine();
 
 	/** Set the MULTI string */

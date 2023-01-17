@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,40 +20,42 @@ import java.util.Set;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.SignText;
-import us.mn.state.dot.tms.SignTextHelper;
+import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.MsgLine;
+import us.mn.state.dot.tms.MsgLineHelper;
 
 /**
- * Finder for sign text messages for a single DMS.  It creates and contains
- * SignTextCBoxModel objects for each combobox in MessageComposer.
+ * Finder for message lines for a single DMS.  It creates and contains
+ * MsgLineCBoxModel objects for each combobox in MessageComposer.
  *
  * @author Douglas Lau
  */
-public class SignTextFinder {
+public class MsgLineFinder {
 
 	/** Mapping of line numbers to models */
-	private final HashMap<Short, SignTextCBoxModel> lines =
-		new HashMap<Short, SignTextCBoxModel>();
+	private final HashMap<Short, MsgLineCBoxModel> lines =
+		new HashMap<Short, MsgLineCBoxModel>();
 
-	/** Create a new sign text finder */
-	public SignTextFinder(DMS dms) {
+	/** Create a new message line finder */
+	public MsgLineFinder(DMS dms) {
 		Set<SignGroup> groups = DmsSignGroupHelper.findGroups(dms);
-		Iterator<SignText> it = SignTextHelper.iterator();
+		Iterator<MsgLine> it = MsgLineHelper.iterator();
 		while (it.hasNext()) {
-			SignText st = it.next();
-			if (groups.contains(st.getSignGroup())) {
-				short ln = st.getLine();
-				getLineModel(ln).add(st);
+			MsgLine mt = it.next();
+			MsgPattern pat = mt.getMsgPattern();
+			if (groups.contains(pat.getSignGroup())) {
+				short ln = mt.getLine();
+				getLineModel(ln).add(mt);
 			}
 		}
 	}
 
 	/** Get the model for the specified line */
-	public SignTextCBoxModel getLineModel(short line) {
+	public MsgLineCBoxModel getLineModel(short line) {
 		if (lines.containsKey(line))
 			return lines.get(line);
 		else {
-			SignTextCBoxModel mdl = new SignTextCBoxModel(line);
+			MsgLineCBoxModel mdl = new MsgLineCBoxModel(line);
 			lines.put(line, mdl);
 			return mdl;
 		}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,49 +15,49 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.util.Comparator;
-import us.mn.state.dot.tms.SignText;
+import us.mn.state.dot.tms.MsgLine;
 
 /**
- * Comparator for sorting sign text messages.
+ * Comparator for sorting message lines.
  *
  * @author Douglas Lau
  */
-public class SignTextComparator implements Comparator<SignText> {
+public class MsgLineComparator implements Comparator<MsgLine> {
 
-	/** Compare one sign text message with another */
+	/** Compare one message line with another */
 	@Override
-	public int compare(SignText st0, SignText st1) {
-		int c = compareLine(st0, st1);
+	public int compare(MsgLine ml0, MsgLine ml1) {
+		int c = compareLine(ml0, ml1);
 		if (c == 0)
-			c = compareRank(st0, st1);
+			c = compareRank(ml0, ml1);
 		if (c == 0)
-			c = compareMulti(st0, st1);
+			c = compareMulti(ml0, ml1);
 		if (c == 0)
-			c = compareName(st0, st1);
+			c = compareName(ml0, ml1);
 		return c;
 	}
 
 	/** Compare line numbers */
-	private int compareLine(SignText st0, SignText st1) {
-		Short l0 = st0.getLine();
-		Short l1 = st1.getLine();
+	private int compareLine(MsgLine ml0, MsgLine ml1) {
+		Short l0 = ml0.getLine();
+		Short l1 = ml1.getLine();
 		return l0.compareTo(l1);
 	}
 
 	/** Compare ranks */
-	private int compareRank(SignText st0, SignText st1) {
-		Short r0 = st0.getRank();
-		Short r1 = st1.getRank();
+	private int compareRank(MsgLine ml0, MsgLine ml1) {
+		Short r0 = ml0.getRank();
+		Short r1 = ml1.getRank();
 		return r0.compareTo(r1);
 	}
 
 	/** Compare multi strings */
-	private int compareMulti(SignText st0, SignText st1) {
-		return st0.getMulti().compareTo(st1.getMulti());
+	private int compareMulti(MsgLine ml0, MsgLine ml1) {
+		return ml0.getMulti().compareTo(ml1.getMulti());
 	}
 
 	/** Compare names */
-	private int compareName(SignText st0, SignText st1) {
-		return st0.getName().compareTo(st1.getName());
+	private int compareName(MsgLine ml0, MsgLine ml1) {
+		return ml0.getName().compareTo(ml1.getName());
 	}
 }

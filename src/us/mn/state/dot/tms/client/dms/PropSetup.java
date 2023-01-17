@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2022  Minnesota Department of Transportation
+ * Copyright (C) 2019-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -132,7 +132,7 @@ public class PropSetup extends IPanel {
 		graphic_cbx.setRenderer(new GraphicListCellRenderer());
 		purpose_cbx.setModel(purpose_mdl);
 		purpose_cbx.setAction(purpose_act);
-		add("dms.beacon.ext");
+		add("dms.beacon.rem");
 		add(beacon_cbx, Stretch.LAST);
 		add("dms.static.graphic");
 		add(graphic_cbx, Stretch.LAST);

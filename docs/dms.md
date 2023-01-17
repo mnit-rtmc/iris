@@ -35,21 +35,6 @@ Hidden         | hide sign when _available_ or _deployed_ styles are selected
 **Internal** beacons are controlled through the DMS controller using the [NTCIP]
 protocol.  **Remote** [beacon]s are controlled using a separate [comm link].
 
-_Sign groups_ and associated _sign text_ libraries can be managed in the
-**Messages** tab.
-
-All sign groups are displayed in the table, even if the DMS is not a member of
-that group.  To add the DMS to a group, select the _Member_ check box.
-
-When a sign group is selected, its message library is displayed in the _sign
-text_ table.  Each row contains a message for one _line_ of the sign.  The
-_rank_ determines sort order in message lists.
-
-The _message preview_ displays a graphical rendering of the selected sign text.
-
-Select an _override font_ to use a font other than the _default font_ from the
-sign configuration.
-
 ## Operating
 
 Each DMS can have a number of _styles_, depending on its current state.  Styles
@@ -73,14 +58,13 @@ When a DMS is selected, a few things happen:
 - the current message is rendered
 - the [message pattern] selector is populated with messages for sign groups
   containing the DMS and containing **NO** [action tags]
-- if no pattern contains a text rectangle for composing with sign text, an
-  "empty" pattern is provided
+- if no pattern contains a text rectangle for composing, an "empty" pattern
+  is provided
 
-When a pattern is selected, a series of _Sign Text_ selectors is populated
-with messages from the message library, depending on the text rectangles of
-that pattern.  The message preview is updated as the message is being
-composed.  Once complete, pressing the **Send** button will put the message
-onto the DMS.
+When a pattern is selected, a series of selectors is populated with message
+lines, depending on the text rectangles of that pattern.  The message preview
+is updated as the message is being composed.  Once complete, pressing the
+**Send** button will put the message onto the DMS.
 
 
 [action tags]: action_plans.html#dms-action-tags
