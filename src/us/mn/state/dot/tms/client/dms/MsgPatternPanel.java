@@ -55,7 +55,7 @@ public class MsgPatternPanel extends JPanel
 	private final JTextArea multi_txt = new JTextArea();
 
 	/** Sign pixel panel */
-	private final SignPixelPanel pixel_pnl = new SignPixelPanel(100, 180);
+	private final SignPixelPanel pixel_pnl = new SignPixelPanel(180, 100);
 
 	/** Message preview panel */
 	private final JPanel preview_pnl;

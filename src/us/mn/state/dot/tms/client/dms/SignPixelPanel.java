@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -112,12 +112,12 @@ public class SignPixelPanel extends JPanel {
 	private RasterGraphic graphic;
 
 	/** Create a new sign pixel panel.
-	 * @param h Height of panel.
-	 * @param w Width of panel. */
-	public SignPixelPanel(int h, int w) {
+	 * @param w Width of panel.
+	 * @param h Height of panel. */
+	public SignPixelPanel(int w, int h) {
 		super(true);
 		face_color = Color.BLACK;
-		setSizes(h, w);
+		setSizes(w, h);
 	}
 
 	/** Set the sign face color.
@@ -189,7 +189,7 @@ public class SignPixelPanel extends JPanel {
 	}
 
 	/** Set the panel size */
-	private void setSizes(int height, int width) {
+	private void setSizes(int width, int height) {
 		Dimension d = UI.dimension(width, height);
 		setMinimumSize(d);
 		setPreferredSize(d);

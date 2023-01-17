@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2018  SRF Consulting Group
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,15 +32,15 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 public class StaticGraphicPanel extends JLabel {
 
 	/** Create a new static graphic panel.
-	 * @param h Pixel height of image.
-	 * @param w Pixel width of image. */
-	public StaticGraphicPanel(int h, int w) {
+	 * @param w Pixel width of image.
+	 * @param h Pixel height of image. */
+	public StaticGraphicPanel(int w, int h) {
 		setHorizontalAlignment(SwingConstants.TRAILING);
-		setSizes(h, w);
+		setSizes(w, h);
 	}
 
 	/** Set the image size */
-	private void setSizes(int height, int width) {
+	private void setSizes(int width, int height) {
 		Dimension d = UI.dimension(width, height);
 		setMinimumSize(d);
 		setPreferredSize(d);
