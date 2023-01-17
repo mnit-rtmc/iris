@@ -52,10 +52,10 @@ public class MsgPatternPanel extends JPanel
 	private final ILabel multi_lbl = new ILabel("msg.pattern.multi");
 
 	/** MULTI text area */
-	private final JTextArea multi_txt = new JTextArea();
+	private final JTextArea multi_txt = new JTextArea(5, 40);
 
 	/** Sign pixel panel */
-	private final SignPixelPanel pixel_pnl = new SignPixelPanel(180, 100);
+	private final SignPixelPanel pixel_pnl = new SignPixelPanel(200, 100);
 
 	/** Message preview panel */
 	private final JPanel preview_pnl;
@@ -112,6 +112,7 @@ public class MsgPatternPanel extends JPanel
 	/** Initialize the panel */
 	public void initialize() {
 		setBorder(UI.border);
+		multi_txt.setLineWrap(true);
 		multi_txt.setWrapStyleWord(false);
 		pixel_pnl.setFilterColor(new Color(0, 0, 255, 48));
 		msg_line_pnl.initialize();
@@ -181,12 +182,19 @@ public class MsgPatternPanel extends JPanel
 			pixel_pnl.setPhysicalDimensions(0, 0, 0, 0, 0, 0);
 			pixel_pnl.setLogicalDimensions(0, 0, 0, 0);
 		}
+		pixel_pnl.setGraphic(null);
 		setPager(createPager(sc, multi));
 	}
 
-	/** Update pixel panel preview */
+	/** Create pixel panel pager */
 	private DMSPanelPager createPager(SignConfig sc, MultiString multi) {
 		RasterBuilder rb = SignConfigHelper.createRasterBuilder(sc);
+		return (rb != null) ? createPager(rb, multi) : null;
+	}
+
+	/** Create pixel panel pager */
+	private DMSPanelPager createPager(RasterBuilder rb, MultiString multi)
+	{
 		try {
 			RasterGraphic[] rg = rb.createPixmaps(multi);
 			if (rg != null) {
@@ -203,7 +211,6 @@ public class MsgPatternPanel extends JPanel
 		DMSPanelPager op = pager;
 		if (op != null)
 			op.dispose();
-		pixel_pnl.setGraphic(null);
 		pixel_pnl.repaint();
 		pager = p;
 	}
@@ -231,7 +238,8 @@ public class MsgPatternPanel extends JPanel
 	public void update(MsgPattern pat, String a) {
 		if (null == a) {
 			msg_pattern = pat;
-			// FIXME: msg_line_pnl.setModel(...);
+			msg_line_pnl.setModel(new MsgLineTableModel(session,
+				pat));
 			updateEditMode();
 		}
 		if (null == a || a.equals("multi"))
@@ -246,6 +254,7 @@ public class MsgPatternPanel extends JPanel
 		multi_txt.setText("");
 		pixel_pnl.setPhysicalDimensions(0, 0, 0, 0, 0, 0);
 		pixel_pnl.setLogicalDimensions(0, 0, 0, 0);
+		pixel_pnl.setGraphic(null);
 		setPager(null);
 	}
 }
