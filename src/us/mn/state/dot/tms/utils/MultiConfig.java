@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2019-2020  SRF Consulting Group
- * Copyright (C) 2022  Minnesota Department of Transportation
+ * Copyright (C) 2022-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,14 +29,10 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.DmsColor;
-import us.mn.state.dot.tms.DmsSignGroup;
-import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignDetail;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.TMSException;
 
 /** MultiConfig - Configuration-info
@@ -46,11 +42,9 @@ import us.mn.state.dot.tms.TMSException;
  * and sign_detail records.
  * 
  * Obtain a MultiConfig by calling one of:
- *   MultiConfig.from(DMS), 
- *   MultiConfig.from(SignGroup), 
+ *   MultiConfig.from(DMS),
  *   MultiConfig.fromSign("SignName"), or
- *   MultiConfig.fromSignGroup("GroupName").
- *   
+ *
  * WARNING:  Check that the MultiCongig's
  *   isUseable() method returns true before
  *   trying to use the MultiConfig object
@@ -61,10 +55,8 @@ import us.mn.state.dot.tms.TMSException;
 
 public class MultiConfig {
 
-	/* Create using from(..), fromSign(..),
-	 * or fromSignGroup(..). **/
-	private MultiConfig() {
-	}
+	/* Create using from(..) or fromSign(..) */
+	private MultiConfig() { }
 
 	//===========================================
 	// "Errors" = Problems that prevent
@@ -108,25 +100,12 @@ public class MultiConfig {
 
 	//===========================================
 
-	final static public String SIGN      = "Sign";
-	final static public String CONFIG    = "Config";
-	final static public String SIGNGROUP = "SignGroup";
-	private String type;  // "Sign", "Config", or "SignGroup"
+	final static public String SIGN    = "Sign";
+	final static public String CONFIG  = "Config";
+
+	private String type;  // "Sign", "Config"
 
 	private String name;
-
-	/** If the MultiConfig is for a single Sign,
-	 *  or a config, this list is null.
-	 *
-	 *  If this MultiConfig is for a SignGroup,
-	 *  this list contains one MultiConfig for each
-	 *  configuration (same dmsType, geometry,
-	 *  default font, and default BG/FG colors)
-	 *  in the SignGroup.  This list is sorted
-	 *  with the most common configuration first,
-	 *  and has names "Config_1", "Config_2", etc...
-	 */
-	private List<MultiConfig> configList = null;
 
 	/** If the MultiConfig is for a single Sign,
 	 *  this list is null.
@@ -134,10 +113,6 @@ public class MultiConfig {
 	 *  If this MultiConfig is for a config, this
 	 *  list contains a MultiConfig for each sign
 	 *  with that config.
-	 *
-	 *  If this MultiConfig is for a SignGroup,
-	 *  this list contains a MultiConfig for each
-	 *  sign in that sign group.
 	 */
 	private List<MultiConfig> signList = null;
 
@@ -526,98 +501,10 @@ public class MultiConfig {
 		return fromSignName(signName, SIGN);
 	}
 
-	/** Create a MultiConfig tree from a SignGroup object. */
-	static public MultiConfig from(SignGroup sg) {
-		if (sg == null)
-			return fromErrorMsg("Unable to load a null SignGroup configuration");
-		if ((sg.getName() == null) || sg.getName().isEmpty())
-			return fromErrorMsg("Unable to load a nameless SignGroup configuration");
-
-		// build an array list of sign MultiConfig objects
-		MultiConfig mcSign;
-		DmsSignGroup dsg;
-		DMS dms;
-		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
-		ArrayList<MultiConfig> mcaSigns = new ArrayList<MultiConfig>();
-		while (it.hasNext()) {
-			dsg = it.next();
-			if (dsg.getSignGroup() == sg) {
-				dms = dsg.getDms();
-				if (dms == null)
-					continue;
-				try {
-					mcSign = from(dms);
-					if (mcSign == null)
-						continue;
-					mcaSigns.add(mcSign);
-				} catch (TMSException e) {
-					// Should never happen...
-					e.printStackTrace();
-				}
-			}
-		}
-		if (mcaSigns.isEmpty())
-			return fromErrorMsg("Unable to load any configurations for sign group "+sg.getName());
-
-		// Sort and group the sign-MultiConfigs,
-		// creating a new config-MultiConfig for
-		// each set of identical signs.
-		ArrayList<MultiConfig> mcaConfigs;
-		mcaConfigs = sortAndGroup(mcaSigns);
-		if (mcaConfigs.isEmpty())
-			return null;
-
-		// Create a primary SignGroup-MultiConfig
-		// based on the most common config in
-		// in the SignGroup.
-		MultiConfig mcConfig = mcaConfigs.get(0);
-		MultiConfig mcSignGroup = fromSignName(mcConfig.name, SIGNGROUP);
-		mcSignGroup.name = sg.getName();
-		mcSignGroup.configList = mcaConfigs;
-
-		// Sort final list of sign MultiConfigs by sign name
-		mcaSigns.sort(compareByName);
-		mcSignGroup.signList = mcaSigns;
-
-		// Rename config MultiConfigs based on
-		// position in list and number of signs
-		// in each config.
-		int cfgNo = 1;
-		int cnt;
-		String suffix;
-		boolean oneGood = false;
-		for (MultiConfig mc : mcaConfigs) {
-			if (mc.signList != null) {
-				cnt = mc.signList.size();
-				suffix = (cnt == 1) ? " sign)" : " signs)";
-				mc.name = CONFIG+"_"+cfgNo+" ("+cnt+suffix;
-			}
-			else {
-				// This "shouldn't be possible", but...
-				mc.name = CONFIG+"_"+cfgNo+" (no signs)";
-			}
-			if (mc.isUseable())
-				oneGood = true;
-			++cfgNo;
-		}
-		if (oneGood) {
-			mcSignGroup.clearErrors();
-		}
-
-		return mcSignGroup;
-	}
-
-	/** Create a MultiConfig tree from a SignGroup name. */
-	static public MultiConfig fromSignGroup(String groupName) {
-		SignGroup sg = SignGroupHelper.lookup(groupName);
-		return from(sg);
-	}
-
 	//===========================================
 	// Sorting and Grouping
 
-	/** Compare by DmsType, geometry, and
-	 *  default font. */
+	/** Compare by DmsType, geometry, and default font. */
 	private int compare1(MultiConfig mc2) {
 		if (dmsType == null) {
 			System.out.println("MultiConfig.compare1: dmsType is null");
@@ -768,28 +655,25 @@ public class MultiConfig {
 		return sb.toString();
 	}
 
-	/** Convert a MultiConfig array-list to a sign-group
+	/** Convert a MultiConfig array-list to a hashtag
 	 *  MultiConfig and a set of config-MultiConfig(s).
 	 *  All the signs represented in a config-MultiConfig
 	 *  have the same geometry and default font.
-	 * @param mca  Source MultiConfig array-list
-	 * @return
 	 */
-	private static ArrayList<MultiConfig>
-			sortAndGroup(ArrayList<MultiConfig> mcaAll) {
+	static private ArrayList<MultiConfig> sortAndGroup(
+		ArrayList<MultiConfig> mcaAll)
+	{
 		// Sort by DmsType, geometry, font, and color(s)
 		mcaAll.sort(comparator2);
 		// Bin all MultiConfigs with the same config.
 		// (Creates a new MC for each config.)
-		HashMap<String,MultiConfig> mchConfigMap =
-			new HashMap<String,MultiConfig>();
+		HashMap<String, MultiConfig> mchConfigMap =
+			new HashMap<String, MultiConfig>();
 		ArrayList<MultiConfig> mcaConfigList =
 			new ArrayList<MultiConfig>();
-		String key;
-		MultiConfig mcGroup;
 		for (MultiConfig mc : mcaAll) {
-			key = mc.genHashKey1();
-			mcGroup = mchConfigMap.get(key);
+			String key = mc.genHashKey1();
+			MultiConfig mcGroup = mchConfigMap.get(key);
 			if (mcGroup == null) {
 				mcGroup = fromSignName(mc.name, CONFIG);
 				if (mcGroup == null)
@@ -814,14 +698,6 @@ public class MultiConfig {
 
 	public String getName() {
 		return name;
-	}
-
-	public boolean isGroup() {
-		return SIGNGROUP.equals(type);
-	}
-
-	public List<MultiConfig> getConfigList() {
-		return configList;
 	}
 
 	public List<MultiConfig> getSignList() {

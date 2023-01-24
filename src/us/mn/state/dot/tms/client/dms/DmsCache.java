@@ -16,14 +16,12 @@ package us.mn.state.dot.tms.client.dms;
 
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgLine;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignDetail;
-import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
@@ -107,22 +105,6 @@ public class DmsCache {
 		return dms_model;
 	}
 
-	/** Cache of sign groups */
-	private final TypeCache<SignGroup> sign_groups;
-
-	/** Get the sign group cache */
-	public TypeCache<SignGroup> getSignGroups() {
-		return sign_groups;
-	}
-
-	/** Cache of DMS sign groups */
-	private final TypeCache<DmsSignGroup> dms_sign_groups;
-
-	/** Get the DMS sign group cache */
-	public TypeCache<DmsSignGroup> getDmsSignGroups() {
-		return dms_sign_groups;
-	}
-
 	/** Cache of message lines */
 	private final TypeCache<MsgLine> msg_lines;
 
@@ -150,9 +132,6 @@ public class DmsCache {
 		dmss = new TypeCache<DMS>(DMS.class, client);
 		dms_model = new ProxyListModel<DMS>(dmss);
 		dms_model.initialize();
-		sign_groups = new TypeCache<SignGroup>(SignGroup.class, client);
-		dms_sign_groups = new TypeCache<DmsSignGroup>(
-			DmsSignGroup.class, client);
 		msg_lines = new TypeCache<MsgLine>(MsgLine.class, client);
 	}
 
@@ -173,8 +152,6 @@ public class DmsCache {
 			dmss.ignoreAttribute("msgSched");
 			dmss.ignoreAttribute("expireTime");
 		}
-		client.populateReadable(sign_groups);
-		client.populateReadable(dms_sign_groups);
 		client.populateReadable(msg_patterns);
 		client.populateReadable(msg_lines);
 	}

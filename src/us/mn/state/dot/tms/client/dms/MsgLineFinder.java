@@ -18,11 +18,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DmsSignGroupHelper;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MsgLine;
 import us.mn.state.dot.tms.MsgLineHelper;
+import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.MsgPatternHelper;
 
 /**
  * Finder for message lines for a single DMS.  It creates and contains
@@ -32,20 +32,30 @@ import us.mn.state.dot.tms.MsgLineHelper;
  */
 public class MsgLineFinder {
 
+	/** The DMS */
+	private final DMS dms;
+
 	/** Mapping of line numbers to models */
 	private final HashMap<Short, MsgLineCBoxModel> lines =
 		new HashMap<Short, MsgLineCBoxModel>();
 
 	/** Create a new message line finder */
-	public MsgLineFinder(DMS dms) {
-		Set<SignGroup> groups = DmsSignGroupHelper.findGroups(dms);
+	public MsgLineFinder(DMS d) {
+		dms = d;
 		Iterator<MsgLine> it = MsgLineHelper.iterator();
-		while (it.hasNext()) {
-			MsgLine mt = it.next();
-			MsgPattern pat = mt.getMsgPattern();
-			if (groups.contains(pat.getSignGroup())) {
-				short ln = mt.getLine();
-				getLineModel(ln).add(mt);
+		while (it.hasNext())
+			checkLine(it.next());
+	}
+
+	/** Check if a message line belongs */
+	private void checkLine(MsgLine ml) {
+		MsgPattern pat = ml.getMsgPattern();
+		String cht = pat.getComposeHashtag();
+		if (cht != null && DMSHelper.hasHashtag(dms, cht)) {
+			String rht = ml.getRestrictHashtag();
+			if (rht == null || DMSHelper.hasHashtag(dms, rht)) {
+				short ln = ml.getLine();
+				getLineModel(ln).add(ml);
 			}
 		}
 	}

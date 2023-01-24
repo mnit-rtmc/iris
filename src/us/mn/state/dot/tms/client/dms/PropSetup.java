@@ -15,12 +15,18 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.util.ArrayList;
+import java.util.Iterator;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JTextArea;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.DevicePurpose;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
@@ -35,6 +41,9 @@ import us.mn.state.dot.tms.client.widget.IPanel;
  * @author Douglas Lau
  */
 public class PropSetup extends IPanel {
+
+	/** Hashtag text area */
+	private final JTextArea hashtag_txt = new JTextArea(20, 4);
 
 	/** Remote beacon combo box model */
 	private final IComboBoxModel<Beacon> beacon_mdl;
@@ -125,6 +134,15 @@ public class PropSetup extends IPanel {
 	@Override
 	public void initialize() {
 		super.initialize();
+		hashtag_txt.addFocusListener(new FocusAdapter() {
+			@Override public void focusLost(FocusEvent e) {
+				String ht = hashtag_txt.getText();
+				String[] tags = DMSHelper.makeHashtags(
+					ht.split(" ")
+				);
+				dms.setHashtags(tags);
+			}
+		});
 		beacon_cbx.setModel(beacon_mdl);
 		beacon_cbx.setAction(beacon_act);
 		graphic_cbx.setModel(graphic_mdl);
@@ -132,6 +150,8 @@ public class PropSetup extends IPanel {
 		graphic_cbx.setRenderer(new GraphicListCellRenderer());
 		purpose_cbx.setModel(purpose_mdl);
 		purpose_cbx.setAction(purpose_act);
+		add("dms.hashtags");
+		add(hashtag_txt, Stretch.LAST);
 		add("dms.beacon.rem");
 		add(beacon_cbx, Stretch.LAST);
 		add("dms.static.graphic");
@@ -150,6 +170,7 @@ public class PropSetup extends IPanel {
 
 	/** Update the edit mode */
 	public void updateEditMode() {
+		hashtag_txt.setEnabled(canWrite("hashtags"));
 		graphic_act.setEnabled(canWrite("staticGraphic"));
 		beacon_act.setEnabled(canWrite("beacon"));
 		purpose_act.setEnabled(canWrite("purpose"));
@@ -158,6 +179,13 @@ public class PropSetup extends IPanel {
 
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
+		if (null == a || a.equals("hashtags")) {
+			String[] hashtags = dms.getHashtags();
+			String ht = (hashtags != null)
+				? String.join(" ", hashtags)
+				: "";
+			hashtag_txt.setText(ht);
+		}
 		if (null == a || a.equals("staticGraphic"))
 			graphic_act.updateSelected();
 		if (null == a || a.equals("beacon"))

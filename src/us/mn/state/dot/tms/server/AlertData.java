@@ -50,15 +50,12 @@ import us.mn.state.dot.tms.CapUrgency;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
-import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.PlanPhaseHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.utils.MultiString;
@@ -72,6 +69,9 @@ import us.mn.state.dot.tms.utils.NumericAlphaComparator;
  * @author Gordon Parikh
  */
 public class AlertData {
+
+	/** Interval value of one hour (ms) */
+	static private final long HOUR_MS = 60 * 60 * 1000;
 
 	/** Log a message */
 	static private void log(String msg) {
@@ -451,17 +451,17 @@ public class AlertData {
 	}
 
 	/** Find all signs within given alert area threshold */
-	private void findSigns(TreeSet<DMS> dms, int th) throws TMSException {
+	private void findSigns(TreeSet<DMS> signs, int th) throws TMSException {
 		BaseObjectImpl.store.query(buildDMSQuery(geo_poly, th),
 			new ResultFactory()
 		{
 			@Override public void create(ResultSet row) {
 				try {
-					String dnm = row.getString(1);
-					log("found DMS, " + dnm);
-					DMS d = DMSHelper.lookup(dnm);
+					String nm = row.getString(1);
+					log("found DMS, " + nm);
+					DMS d = DMSHelper.lookup(nm);
 					if (d != null)
-						dms.add(d);
+						signs.add(d);
 				}
 				catch (SQLException e) {
 					log("finding DMS, " + e.getMessage());
@@ -474,17 +474,14 @@ public class AlertData {
 	private void createAlertInfo(AlertConfig cfg) throws SonarException,
 		TMSException
 	{
-		SignGroup cfg_group = cfg.getSignGroup();
-		if (cfg_group == null)
+		String cfg_hashtag = cfg.getDmsHashtag();
+		if (cfg_hashtag == null)
 			return;
-		Set<DMS> plan_dms = SignGroupHelper.getAllSigns(cfg_group);
+		Set<DMS> plan_dms = DMSHelper.findAllTagged(cfg_hashtag);
 		plan_dms.retainAll(all_dms);
-		if (!plan_dms.isEmpty()) {
-			ActionPlanImpl plan = createPlan(cfg, plan_dms);
-			if (plan != null)
-				createAlertInfo(plan, plan_dms);
-		} else
-			log("no signs found for " + cfg.getName());
+		ActionPlanImpl plan = createPlan(cfg, plan_dms);
+		if (plan != null)
+			createAlertInfo(plan, plan_dms);
 	}
 
 	/** Create an action plan for this alert */
@@ -495,6 +492,11 @@ public class AlertData {
 			.getValidMessages(cfg);
 		if (msgs.isEmpty()) {
 			log("no messages for " + cfg.getName());
+			return null;
+		}
+		removeUntaggedSigns(plan_dms, msgs);
+		if (plan_dms.isEmpty()) {
+			log("no signs for " + cfg.getName());
 			return null;
 		}
 		// Create action plan
@@ -509,18 +511,34 @@ public class AlertData {
 		log("created plan " + pname);
 		plan.notifyCreate();
 		createTimeActions(cfg, plan);
-		Map<SignConfig, SignGroup> act_groups = createActiveGroups(plan,
-			plan_dms, msgs);
 		for (AlertMessage msg: msgs) {
-			MsgPattern pat = msg.getMsgPattern();
-			SignConfig sc = (pat != null)
-				? pat.getSignConfig()
-				: null;
-			SignGroup asg = act_groups.get(sc);
-			if (asg != null)
-				createDmsActions(cfg, plan, msg, asg);
+			String ht = createActiveHashtag(plan, msg, plan_dms);
+			if (ht != null)
+				createDmsActions(plan, msg, ht);
 		}
 		return plan;
+	}
+
+	/** Remove DMS without AlertMessage restrict hashtag */
+	private void removeUntaggedSigns(Set<DMS> signs,
+		Set<AlertMessage> msgs)
+	{
+		TreeSet<String> tags = new TreeSet<String>();
+		for (AlertMessage msg: msgs)
+			tags.add(msg.getRestrictHashtag());
+		Iterator<DMS> it = signs.iterator();
+		while (it.hasNext()) {
+			DMS dms = it.next();
+			boolean found = false;
+			for (String tag: tags) {
+				if (DMSHelper.hasHashtag(dms, tag)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found)
+				it.remove();
+		}
 	}
 
 	/** Lookup the current plan phase name */
@@ -532,9 +550,6 @@ public class AlertData {
 		}
 		return PlanPhase.UNDEPLOYED;
 	}
-
-	/** Interval value of one hour (ms) */
-	static private final long HOUR_MS = 60 * 60 * 1000;
 
 	/** Create the time actions for an action plan */
 	private void createTimeActions(AlertConfig cfg, ActionPlanImpl plan)
@@ -574,62 +589,39 @@ public class AlertData {
 		ta.notifyCreate();
 	}
 
-	/** Create sign groups for active sign configs */
-	private Map<SignConfig, SignGroup> createActiveGroups(
-		ActionPlanImpl plan, Set<DMS> plan_dms, Set<AlertMessage> msgs)
-		throws SonarException
+	/** Create "active" DMS hashtag */
+	private String createActiveHashtag(ActionPlanImpl plan,
+		AlertMessage msg, Set<DMS> plan_dms) throws SonarException
 	{
-		TreeMap<SignConfig, SignGroup> act_groups =
-			new TreeMap<SignConfig, SignGroup>(
-			new NumericAlphaComparator<SignConfig>());
-		for (AlertMessage msg: msgs) {
-			MsgPattern pat = msg.getMsgPattern();
-			SignConfig sc = (pat != null)
-				? pat.getSignConfig()
-				: null;
-			if (sc != null && !act_groups.containsKey(sc)) {
-				SignGroup sg = makeActiveGroup(plan, plan_dms,
-					sc);
-				if (sg != null)
-					act_groups.put(sc, sg);
-			}
-		}
-		return act_groups;
-	}
-
-	/** Make "active" sign group */
-	private SignGroup makeActiveGroup(ActionPlanImpl plan,
-		Set<DMS> plan_dms, SignConfig sc) throws SonarException
-	{
-		Set<DMS> signs = SignConfigHelper.getAllSigns(sc);
+		String ht = msg.getRestrictHashtag();
+		Set<DMS> signs = DMSHelper.findAllTagged(ht);
 		signs.retainAll(plan_dms);
 		if (!signs.isEmpty()) {
 			signs.retainAll(auto_dms);
-			return createSignGroup(plan, "ACT", signs);
+			return createHashtags(plan, "", signs);
 		} else
 			return null;
 	}
 
-	/** Create a sign group for an action plan */
-	private SignGroup createSignGroup(ActionPlanImpl plan, String gv,
-		Set<DMS> dms) throws SonarException
+	/** Create hashtags for a set of DMS in an action plan */
+	private String createHashtags(ActionPlanImpl plan, String gv,
+		Set<DMS> signs) throws SonarException
 	{
-		String tmpl = plan.getName() + "_" + gv + "_%d";
-		String gname = SignGroupImpl.createUniqueName(tmpl);
-		SignGroupImpl sg = new SignGroupImpl(gname);
-		sg.notifyCreate();
-		for (DMS d: dms) {
-			String nm = DmsSignGroupHelper.createUniqueName(tmpl);
-			DmsSignGroupImpl dsg = new DmsSignGroupImpl(nm, d, sg);
-			dsg.notifyCreate();
+		String[] parts = plan.getName().split("_", 2);
+		String num = parts[parts.length - 1];
+		String ht = "alert" + event.name().toLowerCase() + num + gv;
+		for (DMS d: signs) {
+			if (d instanceof DMSImpl) {
+				DMSImpl dms = (DMSImpl) d;
+				dms.addHashtagNotify(ht);
+			}
 		}
-		log("created sign group " + gname);
-		return sg;
+		return ht;
 	}
 
-	/** Create DMS actions */
-	private void createDmsActions(AlertConfig cfg, ActionPlanImpl plan,
-		AlertMessage msg, SignGroup grp) throws SonarException
+	/** Create DMS actions for an alert message */
+	private void createDmsActions(ActionPlanImpl plan, AlertMessage msg,
+		String ht) throws SonarException
 	{
 		AlertPeriod ap = AlertPeriod.fromOrdinal(msg.getAlertPeriod());
 		MsgPattern pat = msg.getMsgPattern();
@@ -637,23 +629,24 @@ public class AlertData {
 			log("invalid alert message: " + msg);
 			return;
 		}
+		AlertConfig cfg = msg.getAlertConfig();
 		switch (ap) {
 		case BEFORE:
 			if (cfg.getBeforePeriodHours() > 0)
-				createDmsAction(plan, grp, "alert_before", pat);
+				createDmsAction(plan, ht, "alert_before", pat);
 			break;
 		case DURING:
-			createDmsAction(plan, grp, "alert_during", pat);
+			createDmsAction(plan, ht, "alert_during", pat);
 			break;
 		case AFTER:
 			if (cfg.getAfterPeriodHours() > 0)
-				createDmsAction(plan, grp, "alert_after", pat);
+				createDmsAction(plan, ht, "alert_after", pat);
 			break;
 		}
 	}
 
 	/** Create a DMS action for an action plan */
-	private void createDmsAction(ActionPlanImpl plan, SignGroup sg,
+	private void createDmsAction(ActionPlanImpl plan, String ht,
 		String ph, MsgPattern pat) throws SonarException
 	{
 		String tmpl = plan.getName() + "_%d";
@@ -662,7 +655,7 @@ public class AlertData {
 		if (phase == null)
 			log("plan phase not found, " + ph);
 		int priority = DmsMsgPriority.ALERT_LOW.ordinal();
-		DmsActionImpl da = new DmsActionImpl(dname, plan, sg, phase,
+		DmsActionImpl da = new DmsActionImpl(dname, plan, phase, ht,
 			pat, false, priority);
 		log("created DMS action " + dname);
 		da.notifyCreate();
@@ -672,7 +665,7 @@ public class AlertData {
 	private void createAlertInfo(ActionPlanImpl plan, Set<DMS> plan_dms)
 		throws SonarException
 	{
-		SignGroup sign_group = createSignGroup(plan, "ALL", plan_dms);
+		String aht = createHashtags(plan, "all", plan_dms);
 		String aname = AlertInfoImpl.createUniqueName();
 		String replaces = null; // FIXME
 		int st = (plan.getActive())
@@ -683,7 +676,7 @@ public class AlertData {
 			response_type.ordinal(), urgency.ordinal(),
 			severity.ordinal(), certainty.ordinal(), headline,
 			description, instruction, area_desc, geo_poly,
-			centroid[0], centroid[1], sign_group, plan, st);
+			centroid[0], centroid[1], aht, plan, st);
 		log("created alert info " + aname);
 		ai.notifyCreate();
 	}

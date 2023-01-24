@@ -42,6 +42,7 @@ import us.mn.state.dot.tms.MsgLineHelper;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.ParkingAreaHelper;
 import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
@@ -63,6 +64,7 @@ import static us.mn.state.dot.tms.units.Speed.Units.MPH;
 import static us.mn.state.dot.tms.utils.Multi.OverLimitMode;
 import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
+import us.mn.state.dot.tms.utils.TextRect;
 
 /**
  * A DMS action message parses custom action tags, which are similar to MULTI,
@@ -367,8 +369,9 @@ public class DmsActionMsg {
 		SignConfig sc = msg.getSignConfig();
 		if (sc == null)
 			return false;
-		MsgPattern pat = new TransMsgPattern(sc, "");
-		List<String> lines = MsgPatternHelper.splitLines(pat, ms);
+		TextRect tr = SignConfigHelper.textRect(sc);
+		MsgPattern pat = new TransMsgPattern("");
+		List<String> lines = MsgPatternHelper.splitLines(pat, tr, ms);
 		for (int i = 0; i < lines.size(); i++) {
 			if (!isValidMsgLine((short) (i + 1), lines.get(i)))
 				return false;

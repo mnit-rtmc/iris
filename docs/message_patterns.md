@@ -24,6 +24,11 @@ be `[tr1,1,100,16]CRASH[nl]AHEAD[g5]`.
 
 ## Message Lines
 
+A fillable pattern can have lines of text associated with it.  Each line is
+used in a specific fillable rectangle of the pattern.  Lines can be ordered
+in the message composer by **rank**, 1-99.  Lines can also be restricted to
+specific signs by adding a **restrict hashtag**.
+
 ## Message Combining
 
 In some cases, a scheduled message can be combined with the operator composed

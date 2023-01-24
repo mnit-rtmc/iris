@@ -245,7 +245,8 @@ public class MessageComposer extends JPanel {
 	public void setSelectedSign(DMS proxy) {
 		adjusting++;
 		finder = new MsgLineFinder(proxy);
-		pattern_cbx.populateModel(proxy);
+		TextRect tr = fullTextRect(proxy);
+		pattern_cbx.populateModel(proxy, tr);
 		dur_cbx.setSelectedIndex(0);
 		adjusting--;
 	}
@@ -299,51 +300,50 @@ public class MessageComposer extends JPanel {
 	/** Get the text rectangles for the selected pattern */
 	private List<TextRect> getPatternTextRects() {
 		MsgPattern pat = getMsgPattern();
-		if (pat != null)
-			return MsgPatternHelper.findTextRectangles(pat);
-		else
-			return new ArrayList<TextRect>();
+		TextRect tr = fullTextRect();
+		return MsgPatternHelper.findTextRectangles(pat, tr);
 	}
 
 	/** Get the selected message pattern */
 	public MsgPattern getMsgPattern() {
 		MsgPattern pat = pattern_cbx.getSelectedPattern();
-		if (pat != null)
-			return pat;
-		// make a "client" pattern just for composing
-		DMS dms = dispatcher.getSingleSelection();
-		if (dms != null) {
-			SignConfig sc = dms.getSignConfig();
-			if (sc != null)
-				return new TransMsgPattern(sc, "");
-		}
-		return null;
+		return (pat != null) ? pat : new TransMsgPattern("");
+	}
+
+	/** Get the full text rectangle of the selected sign */
+	private TextRect fullTextRect() {
+		return fullTextRect(dispatcher.getSingleSelection());
+	}
+
+	/** Get the full text rectangle of the selected sign */
+	private TextRect fullTextRect(DMS dms) {
+		SignConfig sc = (dms != null) ? dms.getSignConfig() : null;
+		return SignConfigHelper.textRect(sc);
 	}
 
 	/** Compose a MULTI string using the contents of the widgets */
 	public String getComposedMulti() {
+		MsgPattern pat = getMsgPattern();
+		TextRect tr = fullTextRect();
 		ArrayList<String> lines = new ArrayList<String>();
 		for (int i = 0; i < n_rects; i++)
 			rects[i].getSelectedLines(lines);
-		MsgPattern pat = getMsgPattern();
-		return MsgPatternHelper.fillTextRectangles(pat, lines);
+		return MsgPatternHelper.fillTextRectangles(pat, tr, lines);
 	}
 
 	/** Set the composed MULTI string */
 	public void setComposedMulti(String ms) {
-		MsgPattern pat = pattern_cbx.findBestPattern(ms);
+		TextRect tr = fullTextRect();
+		MsgPattern pat = pattern_cbx.findBestPattern(ms, tr);
 		pattern_cbx.setSelectedItem(pat);
 		// this makes a TransMsgPattern if none selected
 		pat = getMsgPattern();
-		if (pat != null) {
-			List<String> lines = MsgPatternHelper
-				.splitLines(pat, ms);
-			adjusting++;
-			Iterator<String> lns = lines.iterator();
-			for (int i = 0; i < n_rects; i++)
-				rects[i].setSelectedLines(lns);
-			adjusting--;
-		}
+		List<String> lines = MsgPatternHelper.splitLines(pat, tr, ms);
+		adjusting++;
+		Iterator<String> lns = lines.iterator();
+		for (int i = 0; i < n_rects; i++)
+			rects[i].setSelectedLines(lns);
+		adjusting--;
 	}
 
 	/** Check if beacon is enabled */

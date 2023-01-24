@@ -70,6 +70,18 @@ public class TransMsgLine implements MsgLine {
 		return null;
 	}
 
+	/** Set restrict hashtag, or null for none */
+	@Override
+	public void setRestrictHashtag(String rht) {
+		// do nothing
+	}
+
+	/** Get restrict hashtag, or null for none */
+	@Override
+	public String getRestrictHashtag() {
+		return null;
+	}
+
 	/** Set the line number */
 	@Override
 	public void setLine(short l) {

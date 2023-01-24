@@ -26,7 +26,6 @@ import javax.swing.JTextField;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
-import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -43,6 +42,9 @@ import us.mn.state.dot.tms.utils.I18N;
 @SuppressWarnings("serial")
 public class WMsgNewMsgForm extends AbstractForm {
 
+	/** Amount of time in nanoseconds to wait for a message to be created */
+	static private final long MAX_WAIT = 10000000000L;
+
 	/** User session */
 	private final Session session;
 
@@ -50,9 +52,8 @@ public class WMsgNewMsgForm extends AbstractForm {
 	private WController controller;
 	private WMsgSelectorForm selectorForm;
 
-	/** Sign/Group we were given */
+	/** Sign we were given */
 	private DMS sign;
-	private SignGroup signGroup;
 
 	/** Message pattern (for cloning, not always provided) */
 	private MsgPattern pattern;
@@ -67,9 +68,6 @@ public class WMsgNewMsgForm extends AbstractForm {
 	private JButton ok_btn;
 	private JButton cancel_btn;
 
-	/** Amount of time in nanoseconds to wait for a message to be created */
-	private final static long MAX_WAIT = 10000000000L;
-
 	public WMsgNewMsgForm(Session s, WMsgSelectorForm sForm, DMS d) {
 		super(I18N.get("wysiwyg.new_message.title"), true);
 		session = s;
@@ -81,16 +79,7 @@ public class WMsgNewMsgForm extends AbstractForm {
 		// we were called
 		ok_btn = new JButton(createMsg);
 	}
-	
-	public WMsgNewMsgForm(Session s, WMsgSelectorForm sForm, SignGroup sg) {
-		super(I18N.get("wysiwyg.new_message.title"), true);
-		session = s;
-		selectorForm = sForm;
-		signGroup = sg;
-		initForm();
-		ok_btn = new JButton(createMsg);
-	}
-	
+
 	public WMsgNewMsgForm(Session s, WMsgSelectorForm sForm, DMS d, MsgPattern pat) {
 		super(I18N.get("wysiwyg.new_message.title"), true);
 		session = s;
@@ -103,27 +92,14 @@ public class WMsgNewMsgForm extends AbstractForm {
 		msgNameInput.setText(pattern.getName());
 		ok_btn = new JButton(cloneMsg);
 	}
-	
-	public WMsgNewMsgForm(Session s, WMsgSelectorForm sForm, SignGroup sg, MsgPattern pat) {
-		super(I18N.get("wysiwyg.new_message.title"), true);
-		session = s;
-		selectorForm = sForm;
-		signGroup = sg;
-		pattern = pat;
-		initForm();
 
-		// prefill the text with the previous message name
-		msgNameInput.setText(pattern.getName());
-		ok_btn = new JButton(cloneMsg);
-	}
-	
 	public WMsgNewMsgForm(Session s, WController c, String prefill) {
 		super(I18N.get("wysiwyg.new_message.title"), true);
 		session = s;
 		controller = c;
 		initForm();
 		ok_btn = new JButton(saveMsgAs);
-		
+
 		// prefill the text with the previous message name (or whatever really)
 		msgNameInput.setText(prefill);
 	}
@@ -133,7 +109,7 @@ public class WMsgNewMsgForm extends AbstractForm {
 		msgNameInput = new JTextField();
 		cancel_btn = new JButton(cancel);
 	}
-	
+
 	/** Initialize the form */
 	@Override
 	protected void initialize() {
@@ -149,30 +125,30 @@ public class WMsgNewMsgForm extends AbstractForm {
 		gbc.ipady = 0;
 		gbc.weightx = 1;
 		gbc.weighty = 1;
-		
+
 		/* info text */
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		p.add(infoMsg, gbc);
-		
+
 		/* New Message name input */
 		gbc.gridy = 1;
 		p.add(msgNameInput, gbc);
-		
+
 		/* OK button */
 		gbc.gridy = 2;
 		gbc.gridwidth = 1;
 		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
 		p.add(ok_btn, gbc);
-		
+
 		/* Cancel button */
 		gbc.gridx = 1;
 		gbc.anchor = GridBagConstraints.BASELINE_TRAILING;
 		p.add(cancel_btn, gbc);
-		
+
 		add(p);
 	}
-	
+
 	/** Add a warning to the info text that the message exists already */
 	private void setWarningText() {
 		infoMsg.setText(I18N.get("wysiwyg.new_message.warning"));
@@ -184,13 +160,13 @@ public class WMsgNewMsgForm extends AbstractForm {
 	private void setErrorText() {
 		infoMsg.setText(I18N.get("wysiwyg.new_message.error"));
 	}
-	
+
 	/** Reset the info label to the original prompt
 	 *  TODO not sure if this is actually needed. */
 	private void resetInfoLabel() {
 		infoMsg.setText(I18N.get("wysiwyg.new_message.info"));
 	}
-	
+
 	/** Cancel action */
 	private final IAction cancel = new IAction(
 		"wysiwyg.new_message.cancel") {
@@ -199,7 +175,7 @@ public class WMsgNewMsgForm extends AbstractForm {
 			close(session.getDesktop());
 		}
 	};
-	
+
 	/** Create Message action */
 	private final IAction createMsg = new IAction(
 			"wysiwyg.new_message.ok") {
@@ -216,9 +192,6 @@ public class WMsgNewMsgForm extends AbstractForm {
 						if (sign != null) {
 							WMsgSelectorForm.CreateMsg(
 								session, sign, newMsgName);
-						} else if (signGroup != null) {
-							WMsgSelectorForm.CreateMsg(
-								session, signGroup, newMsgName);
 						}
 
 						// wait for SONAR to create the new message
@@ -232,7 +205,7 @@ public class WMsgNewMsgForm extends AbstractForm {
 						}
 						return pat;
 					}
-					
+
 					@Override
 					public void done() {
 						pattern = getResult();
@@ -243,9 +216,6 @@ public class WMsgNewMsgForm extends AbstractForm {
 								if (sign != null) {
 									WMsgSelectorForm.EditMsg(
 										session, pattern, sign);
-								} else if (signGroup != null) {
-									WMsgSelectorForm.EditMsg(
-										session, pattern, signGroup);
 								}
 								close(session.getDesktop());
 							} else
@@ -302,9 +272,6 @@ public class WMsgNewMsgForm extends AbstractForm {
 								if (sign != null) {
 									WMsgSelectorForm.EditMsg(
 										session, pattern, sign);
-								} else if (signGroup != null) {
-									WMsgSelectorForm.EditMsg(
-										session, pattern, signGroup);
 								}
 								close(session.getDesktop());
 							} else

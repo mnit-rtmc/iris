@@ -33,6 +33,12 @@ public interface MsgLine extends SonarObject {
 	/** Get the message pattern */
 	MsgPattern getMsgPattern();
 
+	/** Set restrict hashtag, or null for none */
+	void setRestrictHashtag(String rht);
+
+	/** Get restrict hashtag, or null for none */
+	String getRestrictHashtag();
+
 	/** Set the line number */
 	void setLine(short l);
 

@@ -60,17 +60,17 @@ public class MsgLineCBoxModel extends AbstractListModel<MsgLine>
 
 	/** Add a MsgLine to the model.
 	 * NOTE: Do not call this after using in MsgLineCBox */
-	public void add(MsgLine st) {
-		items.add(st);
+	public void add(MsgLine ml) {
+		items.add(ml);
 	}
 
 	/** Get the element at the specified index */
 	@Override
 	public MsgLine getElementAt(int index) {
 		int i = 0;
-		for (MsgLine t: items) {
+		for (MsgLine ml: items) {
 			if (i == index)
-				return t;
+				return ml;
 			i++;
 		}
 		return null;
@@ -88,13 +88,13 @@ public class MsgLineCBoxModel extends AbstractListModel<MsgLine>
 	/** Get the selected item */
 	@Override
 	public Object getSelectedItem() {
-		MsgLine mt = selected;
+		MsgLine ml = selected;
 		// filter lines that should be ignored
-		if (mt != null && mt instanceof TransMsgLine) {
-			if (DMSHelper.ignoreLineFilter(mt.getMulti()))
+		if (ml != null && ml instanceof TransMsgLine) {
+			if (DMSHelper.ignoreLineFilter(ml.getMulti()))
 				return BLANK_LINE;
 		}
-		return mt;
+		return ml;
 	}
 
 	/**
@@ -121,18 +121,18 @@ public class MsgLineCBoxModel extends AbstractListModel<MsgLine>
 		if (multi.isBlank())
 			return BLANK_LINE;
 		String ms = multi.toString();
-		MsgLine mt = lookupMessage(ms);
-		return (mt != null)
-		      ? mt
+		MsgLine ml = lookupMsgLine(ms);
+		return (ml != null)
+		      ? ml
 		      : new TransMsgLine(ms, line, ON_THE_FLY_RANK);
 	}
 
 	/** Lookup a message line.
 	 * @return Existing MsgLine, or null if not found. */
-	private MsgLine lookupMessage(String ms) {
-		for (MsgLine mt: items) {
-			if (ms.equals(mt.getMulti()))
-				return mt;
+	private MsgLine lookupMsgLine(String ms) {
+		for (MsgLine ml: items) {
+			if (ms.equals(ml.getMulti()))
+				return ml;
 		}
 		return null;
 	}

@@ -25,7 +25,7 @@ message can help you identify sign resolution requirements, the availability of
 graphics and the space needed for [action tag]s that have variable number of
 characters.  Items to check include:
 
-- Signs of different size and resolution can be included in a single sign group.
+- Signs of different size and resolution can be included.
   Does the content of message fit on the sigs where you want to use it?
 - Only [graphic images] in the library can be used in messages.  Are all images
   you want to use loaded in the IRIS image library?
@@ -83,18 +83,6 @@ be undone.
 A message can be saved under a new name using `Save As` button.  It is located
 at the bottom of the editor window.  Clicking it will open a window where you
 can enter a new name for your message.
-
-### Sign Groups
-
-Signs are organized into groups, and a sign can be a member of multiple groups.
-A group can have as few as one sign or could include all of the signs
-configured in the system.  When you create a message, it will be available to
-all signs in the selected group from the message selector.
-
-If a sign is later selected for use that is not part of that group, or is
-physically incapable of displaying the message due to size or color
-restrictions, the message will not appear in the list of message patterns for
-the sign.
 
 ## Sign Pages
 
@@ -212,8 +200,8 @@ the sign on which they will be used.
 #### Using Graphics
 
 To place a graphic in your message, click the `Graphic` button in the editor
-window.  Available graphics for your sign or sign group will appear in the drop
-down list.  To insert the selected graphic, click on the `Add Graphic` button.
+window.  Available graphics for your sign will appear in the drop down list.
+To insert the selected graphic, click on the `Add Graphic` button.
 
 ![](images/wysiwyg_graphic_selection.png)
 

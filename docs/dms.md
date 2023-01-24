@@ -26,11 +26,19 @@ The following features are supported:
 The DMS properties form can be used to configure the sign.
 
 Field          | Description
----------------|--------------------------------------------------
+---------------|-------------------------------------------------
+Hashtags       | space-separated list of tags for selecting signs
 Remote beacon  | beacon activated automatically when sign deployed
 Static graphic | image of static sign in which DMS is inset
 Device purpose | _general_ or _dedicated_ purpose for sign operation
 Hidden         | hide sign when _available_ or _deployed_ styles are selected
+
+A **hashtag** is the `#` character, followed by a string of letters and/or
+numbers.  The are used to select signs for:
+- [message pattern]s for composing
+- automated [DMS actions]
+- [alert configurations] and [alert messages]
+- [lane-use MULTI] indications
 
 **Internal** beacons are controlled through the DMS controller using the [NTCIP]
 protocol.  **Remote** [beacon]s are controlled using a separate [comm link].
@@ -56,10 +64,9 @@ All       | All signs
 When a DMS is selected, a few things happen:
 - the sign's location is displayed
 - the current message is rendered
-- the [message pattern] selector is populated with messages for sign groups
-  containing the DMS and containing **NO** [action tags]
-- if no pattern contains a text rectangle for composing, an "empty" pattern
-  is provided
+- the [message pattern] selector is populated:
+  * only patterns whose **compose** hashtag matches the sign
+  * only patterns containing **NO** [action tags]
 
 When a pattern is selected, a series of selectors is populated with message
 lines, depending on the text rectangles of that pattern.  The message preview
@@ -68,12 +75,16 @@ is updated as the message is being composed.  Once complete, pressing the
 
 
 [action tags]: action_plans.html#dms-action-tags
+[alert configurations]: alert.html#dms-hashtags
+[alert messages]: alert.html#alert-messages
 [beacon]: beacons.html
 [comm link]: comm_links.html
+[DMS actions]: action_plans.html#dms-actions
 [fonts]: fonts.html
 [graphic images]: graphics.html
-[NTCIP]: comm_links.html#ntcip
+[lane-use MULTI]: lcs.html#lane-use-multi
 [message pattern]: message_patterns.html
+[NTCIP]: comm_links.html#ntcip
 [Slow traffic]: slow_warning.html
 [Travel time]: travel_time.html
 [Variable speed advisories]: vsa.html

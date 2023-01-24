@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,9 @@ import java.util.Map;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DmsAction;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.PlanPhase;
-import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
@@ -44,8 +44,8 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	/** Load all the DMS actions */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DmsActionImpl.class);
-		store.query("SELECT name, action_plan, sign_group, " +
-			"phase, msg_pattern, beacon_enabled, msg_priority " +
+		store.query("SELECT name, action_plan, phase, dms_hashtag," +
+			"msg_pattern, beacon_enabled, msg_priority " +
 			"FROM iris." + SONAR_TYPE  +";",
 			new ResultFactory()
 		{
@@ -61,8 +61,8 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("action_plan", action_plan);
-		map.put("sign_group", sign_group);
 		map.put("phase", phase);
+		map.put("dms_hashtag", dms_hashtag);
 		map.put("msg_pattern", msg_pattern);
 		map.put("beacon_enabled", beacon_enabled);
 		map.put("msg_priority", msg_priority);
@@ -90,8 +90,8 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	private DmsActionImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name
 		     row.getString(2),  // action_plan
-		     row.getString(3),  // sign_group
-		     row.getString(4),  // phase
+		     row.getString(3),  // phase
+		     row.getString(4),  // dms_hashtag
 		     row.getString(5),  // msg_pattern
 		     row.getBoolean(6), // beacon_enabled
 		     row.getInt(7)      // msg_priority
@@ -99,21 +99,21 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	}
 
 	/** Create a DMS action */
-	private DmsActionImpl(String n, String a, String sg, String p,
+	private DmsActionImpl(String n, String a, String p, String ht,
 		String pat, boolean be, int mp)
 	{
-		this(n, lookupActionPlan(a), lookupSignGroup(sg),
-		    lookupPlanPhase(p), lookupMsgPattern(pat), be, mp);
+		this(n, lookupActionPlan(a), lookupPlanPhase(p), ht,
+		     lookupMsgPattern(pat), be, mp);
 	}
 
 	/** Create a DMS action */
-	public DmsActionImpl(String n, ActionPlan a, SignGroup sg, PlanPhase p,
+	public DmsActionImpl(String n, ActionPlan a, PlanPhase p, String ht,
 		MsgPattern pat, boolean be, int mp)
 	{
 		this(n);
 		action_plan = a;
-		sign_group = sg;
 		phase = p;
+		dms_hashtag = ht;
 		msg_pattern = pat;
 		beacon_enabled = be;
 		msg_priority = mp;
@@ -126,15 +126,6 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	@Override
 	public ActionPlan getActionPlan() {
 		return action_plan;
-	}
-
-	/** Sign group */
-	private SignGroup sign_group;
-
-	/** Get the sign group */
-	@Override
-	public SignGroup getSignGroup() {
-		return sign_group;
 	}
 
 	/** Action plan phase to trigger DMS action */
@@ -158,6 +149,32 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	@Override
 	public PlanPhase getPhase() {
 		return phase;
+	}
+
+	/** DMS hashtag */
+	private String dms_hashtag;
+
+	/** Set the DMS hashtag */
+	@Override
+	public void setDmsHashtag(String ht) {
+		dms_hashtag = ht;
+	}
+
+	/** Set the DMS hashtag */
+	public void doSetDmsHashtag(String ht) throws TMSException {
+		String t = DMSHelper.normalizeHashtag(ht);
+		if (!objectEquals(t, ht))
+			throw new ChangeVetoException("Bad hashtag");
+		if (!objectEquals(ht, dms_hashtag)) {
+			store.update(this, "dms_hashtag", ht);
+			setDmsHashtag(ht);
+		}
+	}
+
+	/** Get the DMS hashtag */
+	@Override
+	public String getDmsHashtag() {
+		return dms_hashtag;
 	}
 
 	/** Message to send when action happens */

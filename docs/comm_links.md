@@ -227,7 +227,7 @@ single newline character `\n` (ASCII 0x0A).
 V66E37\tSNOW PLOW[nl]AHEAD[nl]USE CAUTION\t2022-10-02 11:37:00-05:00
 ```
 
-`dms`: Name of the sign to deploy.  Must be a member of a sign group referenced
+`dms`: Name of the sign to deploy, which must have the hashtag referenced
 by a [DMS action].  Additionally, that action must be associated with the
 current phase of an active [action plan].  The [message pattern] of the
 _DMS action_ must be a `feed` [action tag].  For example, if the `msgfeed`

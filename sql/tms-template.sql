@@ -413,7 +413,6 @@ day_plan
 detector
 dms
 dms_action
-dms_sign_group
 domain
 encoder_stream
 encoder_type
@@ -455,7 +454,6 @@ role
 rpt_conduit
 sign_config
 sign_detail
-sign_group
 sign_message
 station
 system_attribute
@@ -604,13 +602,10 @@ PRV_005A	dms_admin	sign_detail		t
 PRV_0058	dms_control	dms	msgUser	t
 PRV_0059	dms_control	dms	deviceRequest	t
 PRV_0060	dms_control	sign_message		t
-PRV_0061	dms_policy	dms_sign_group		t
 PRV_0062	dms_policy	msg_pattern		t
-PRV_0063	dms_policy	sign_group		t
 PRV_0064	dms_policy	msg_line		t
 PRV_0065	dms_policy	word		t
 PRV_0066	dms_tab	dms		f
-PRV_0067	dms_tab	dms_sign_group		f
 PRV_0068	dms_tab	font		f
 PRV_0069	dms_tab	glyph		f
 PRV_0070	dms_tab	gps		f
@@ -619,7 +614,6 @@ PRV_0072	dms_tab	msg_pattern		f
 PRV_0076	dms_tab	msg_line		f
 PRV_0073	dms_tab	sign_config		f
 PRV_007A	dms_tab	sign_detail		f
-PRV_0074	dms_tab	sign_group		f
 PRV_0075	dms_tab	sign_message		f
 PRV_0077	dms_tab	word		f
 PRV_0078	gate_arm_admin	gate_arm		t
@@ -3088,44 +3082,32 @@ CREATE VIEW dms_message_view AS
     LEFT JOIN iris.sign_message sm ON d.msg_current = sm.name;
 GRANT SELECT ON dms_message_view TO PUBLIC;
 
-CREATE TABLE iris.sign_group (
-	name VARCHAR(20) PRIMARY KEY,
-	local BOOLEAN NOT NULL
+CREATE TABLE iris.dms_hashtag (
+    dms VARCHAR(20) NOT NULL REFERENCES iris._dms,
+    hashtag VARCHAR(16) NOT NULL
 );
+ALTER TABLE iris.dms_hashtag ADD PRIMARY KEY (dms, hashtag);
 
-CREATE VIEW sign_group_view AS
-	SELECT name, local
-	FROM iris.sign_group;
-GRANT SELECT ON sign_group_view TO PUBLIC;
-
-CREATE TABLE iris.dms_sign_group (
-	name VARCHAR(42) PRIMARY KEY,
-	dms VARCHAR(20) NOT NULL REFERENCES iris._dms,
-	sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group
-);
-
-CREATE VIEW dms_sign_group_view AS
-	SELECT d.name, dms, sign_group, local
-	FROM iris.dms_sign_group d
-	JOIN iris.sign_group sg ON d.sign_group = sg.name;
-GRANT SELECT ON dms_sign_group_view TO PUBLIC;
+CREATE VIEW dms_hashtag_view AS
+    SELECT dms, hashtag
+    FROM iris.dms_hashtag;
+GRANT SELECT ON dms_hashtag_view TO PUBLIC;
 
 CREATE TABLE iris.msg_pattern (
     name VARCHAR(20) PRIMARY KEY,
-    sign_config VARCHAR(16) REFERENCES iris.sign_config,
-    -- FIXME: replace sign_group with hashtag
-    sign_group VARCHAR(20) REFERENCES iris.sign_group,
-    multi VARCHAR(1024) NOT NULL
+    multi VARCHAR(1024) NOT NULL,
+    compose_hashtag VARCHAR(16)
 );
 
 CREATE VIEW msg_pattern_view AS
-    SELECT name, sign_config, sign_group, multi
+    SELECT name, multi, compose_hashtag
     FROM iris.msg_pattern;
 GRANT SELECT ON msg_pattern_view TO PUBLIC;
 
 CREATE TABLE iris.msg_line (
     name VARCHAR(10) PRIMARY KEY,
     msg_pattern VARCHAR(20) NOT NULL REFERENCES iris.msg_pattern,
+    restrict_hashtag VARCHAR(16),
     line SMALLINT NOT NULL,
     multi VARCHAR(64) NOT NULL,
     rank SMALLINT NOT NULL,
@@ -3134,23 +3116,23 @@ CREATE TABLE iris.msg_line (
 );
 
 CREATE VIEW msg_line_view AS
-    SELECT name, msg_pattern, line, multi, rank
+    SELECT name, msg_pattern, restrict_hashtag, line, multi, rank
     FROM iris.msg_line;
 GRANT SELECT ON msg_line_view TO PUBLIC;
 
 CREATE TABLE iris.dms_action (
     name VARCHAR(30) PRIMARY KEY,
     action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-    sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group,
     phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
+    dms_hashtag VARCHAR(16) NOT NULL,
     msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern,
     beacon_enabled BOOLEAN NOT NULL,
     msg_priority INTEGER NOT NULL
 );
 
 CREATE VIEW dms_action_view AS
-    SELECT name, action_plan, sign_group, phase, msg_pattern, beacon_enabled,
-           msg_priority
+    SELECT name, action_plan, phase, dms_hashtag, msg_pattern,
+           beacon_enabled, msg_priority
     FROM iris.dms_action;
 GRANT SELECT ON dms_action_view TO PUBLIC;
 
@@ -4091,40 +4073,40 @@ COPY cap.certainty(id, description) FROM stdin;
 \.
 
 CREATE TABLE iris.alert_config (
-	name VARCHAR(20) PRIMARY KEY,
-	event VARCHAR(3) REFERENCES cap.event,
-	response_shelter BOOLEAN NOT NULL,
-	response_evacuate BOOLEAN NOT NULL,
-	response_prepare BOOLEAN NOT NULL,
-	response_execute BOOLEAN NOT NULL,
-	response_avoid BOOLEAN NOT NULL,
-	response_monitor BOOLEAN NOT NULL,
-	response_all_clear BOOLEAN NOT NULL,
-	response_none BOOLEAN NOT NULL,
-	urgency_unknown BOOLEAN NOT NULL,
-	urgency_past BOOLEAN NOT NULL,
-	urgency_future BOOLEAN NOT NULL,
-	urgency_expected BOOLEAN NOT NULL,
-	urgency_immediate BOOLEAN NOT NULL,
-	severity_unknown BOOLEAN NOT NULL,
-	severity_minor BOOLEAN NOT NULL,
-	severity_moderate BOOLEAN NOT NULL,
-	severity_severe BOOLEAN NOT NULL,
-	severity_extreme BOOLEAN NOT NULL,
-	certainty_unknown BOOLEAN NOT NULL,
-	certainty_unlikely BOOLEAN NOT NULL,
-	certainty_possible BOOLEAN NOT NULL,
-	certainty_likely BOOLEAN NOT NULL,
-	certainty_observed BOOLEAN NOT NULL,
-	auto_deploy BOOLEAN NOT NULL,
-	before_period_hours INTEGER NOT NULL,
-	after_period_hours INTEGER NOT NULL,
-	sign_group VARCHAR(20) REFERENCES iris.sign_group
+    name VARCHAR(20) PRIMARY KEY,
+    event VARCHAR(3) REFERENCES cap.event,
+    response_shelter BOOLEAN NOT NULL,
+    response_evacuate BOOLEAN NOT NULL,
+    response_prepare BOOLEAN NOT NULL,
+    response_execute BOOLEAN NOT NULL,
+    response_avoid BOOLEAN NOT NULL,
+    response_monitor BOOLEAN NOT NULL,
+    response_all_clear BOOLEAN NOT NULL,
+    response_none BOOLEAN NOT NULL,
+    urgency_unknown BOOLEAN NOT NULL,
+    urgency_past BOOLEAN NOT NULL,
+    urgency_future BOOLEAN NOT NULL,
+    urgency_expected BOOLEAN NOT NULL,
+    urgency_immediate BOOLEAN NOT NULL,
+    severity_unknown BOOLEAN NOT NULL,
+    severity_minor BOOLEAN NOT NULL,
+    severity_moderate BOOLEAN NOT NULL,
+    severity_severe BOOLEAN NOT NULL,
+    severity_extreme BOOLEAN NOT NULL,
+    certainty_unknown BOOLEAN NOT NULL,
+    certainty_unlikely BOOLEAN NOT NULL,
+    certainty_possible BOOLEAN NOT NULL,
+    certainty_likely BOOLEAN NOT NULL,
+    certainty_observed BOOLEAN NOT NULL,
+    auto_deploy BOOLEAN NOT NULL,
+    before_period_hours INTEGER NOT NULL,
+    after_period_hours INTEGER NOT NULL,
+    dms_hashtag VARCHAR(16) NOT NULL
 );
 
 CREATE TABLE iris.alert_period (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(10) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(10) NOT NULL
 );
 
 COPY iris.alert_period(id, description) FROM stdin;
@@ -4137,18 +4119,19 @@ CREATE TABLE iris.alert_message (
     name VARCHAR(20) PRIMARY KEY,
     alert_config VARCHAR(20) NOT NULL REFERENCES iris.alert_config,
     alert_period INTEGER NOT NULL REFERENCES iris.alert_period,
-    msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern
+    msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern,
+    restrict_hashtag VARCHAR(16) NOT NULL
 );
 
 CREATE TABLE cap.alert (
-	identifier VARCHAR(128) PRIMARY KEY,
-	alert JSONB NOT NULL,
-	receive_date TIMESTAMP WITH time zone NOT NULL
+    identifier VARCHAR(128) PRIMARY KEY,
+    alert JSONB NOT NULL,
+    receive_date TIMESTAMP WITH time zone NOT NULL
 );
 
 CREATE TABLE iris.alert_state (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(12) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(12) NOT NULL
 );
 
 COPY iris.alert_state(id, description) FROM stdin;
@@ -4160,26 +4143,26 @@ COPY iris.alert_state(id, description) FROM stdin;
 \.
 
 CREATE TABLE cap.alert_info (
-	name VARCHAR(20) PRIMARY KEY,
-	alert VARCHAR(128) NOT NULL REFERENCES cap.alert(identifier),
-	replaces VARCHAR(24) REFERENCES cap.alert_info,
-	start_date TIMESTAMP WITH time zone,
-	end_date TIMESTAMP WITH time zone,
-	event VARCHAR(3) NOT NULL REFERENCES cap.event,
-	response_type INTEGER NOT NULL REFERENCES cap.response_type,
-	urgency INTEGER NOT NULL REFERENCES cap.urgency,
-	severity INTEGER NOT NULL REFERENCES cap.severity,
-	certainty INTEGER NOT NULL REFERENCES cap.certainty,
-	headline VARCHAR(256),
-	description VARCHAR(4096),
-	instruction VARCHAR(4096),
-	area_desc VARCHAR(256) NOT NULL,
-	geo_poly geometry(multipolygon) NOT NULL,
-	lat double precision NOT NULL,
-	lon double precision NOT NULL,
-	sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group,
-	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	alert_state INTEGER NOT NULL REFERENCES iris.alert_state
+    name VARCHAR(20) PRIMARY KEY,
+    alert VARCHAR(128) NOT NULL REFERENCES cap.alert(identifier),
+    replaces VARCHAR(24) REFERENCES cap.alert_info,
+    start_date TIMESTAMP WITH time zone,
+    end_date TIMESTAMP WITH time zone,
+    event VARCHAR(3) NOT NULL REFERENCES cap.event,
+    response_type INTEGER NOT NULL REFERENCES cap.response_type,
+    urgency INTEGER NOT NULL REFERENCES cap.urgency,
+    severity INTEGER NOT NULL REFERENCES cap.severity,
+    certainty INTEGER NOT NULL REFERENCES cap.certainty,
+    headline VARCHAR(256),
+    description VARCHAR(4096),
+    instruction VARCHAR(4096),
+    area_desc VARCHAR(256) NOT NULL,
+    geo_poly geometry(multipolygon) NOT NULL,
+    lat double precision NOT NULL,
+    lon double precision NOT NULL,
+    all_hashtag VARCHAR(16) NOT NULL,
+    action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+    alert_state INTEGER NOT NULL REFERENCES iris.alert_state
 );
 
 --
@@ -4440,11 +4423,12 @@ CREATE TABLE iris.lane_use_multi (
     name VARCHAR(10) PRIMARY KEY,
     indication INTEGER NOT NULL REFERENCES iris.lane_use_indication,
     msg_num INTEGER,
-    msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern
+    msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern,
+    dms_hashtag VARCHAR(16)
 );
 
 CREATE VIEW lane_use_multi_view AS
-    SELECT name, indication, msg_num, msg_pattern
+    SELECT name, indication, msg_num, msg_pattern, dms_hashtag
     FROM iris.lane_use_multi;
 GRANT SELECT ON lane_use_multi_view TO PUBLIC;
 
@@ -5078,8 +5062,8 @@ CREATE VIEW iris.msg_pattern_toll_zone AS
 CREATE VIEW dms_toll_zone_view AS
     SELECT dms, tz.state, toll_zone, action_plan, da.msg_pattern
     FROM dms_action_view da
-    JOIN iris.dms_sign_group dsg
-    ON da.sign_group = dsg.sign_group
+    JOIN iris.dms_hashtag dh
+    ON da.dms_hashtag = dh.dms
     JOIN iris.msg_pattern mp
     ON da.msg_pattern = mp.name
     JOIN iris.msg_pattern_toll_zone tz

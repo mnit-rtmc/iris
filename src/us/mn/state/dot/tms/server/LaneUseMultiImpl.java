@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,10 +15,11 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.MsgPattern;
@@ -35,17 +36,12 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 	/** Load all the lane-use MULTIs */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, LaneUseMultiImpl.class);
-		store.query("SELECT name, indication, msg_num, msg_pattern " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, indication, msg_num, msg_pattern, " +
+			"dms_hashtag FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new LaneUseMultiImpl(
-					namespace,
-					row.getString(1),	// name
-					row.getInt(2),		// indication
-					(Integer) row.getObject(3), // msg_num
-					row.getString(4)        // msg_pattern
-				));
+				namespace.addObject(new LaneUseMultiImpl(row));
 			}
 		});
 	}
@@ -58,6 +54,7 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 		map.put("indication", indication);
 		map.put("msg_num", msg_num);
 		map.put("msg_pattern", msg_pattern);
+		map.put("dms_hashtag", dms_hashtag);
 		return map;
 	}
 
@@ -78,19 +75,25 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 		super(n);
 	}
 
-	/** Create a new lane-use MULTI */
-	private LaneUseMultiImpl(Namespace ns, String n, int i, Integer mn,
-		String pat)
-	{
-		this(n, i, mn, lookupMsgPattern(pat));
+	/** Create a lane-use MULTI */
+	private LaneUseMultiImpl(ResultSet row) throws SQLException {
+		this(row.getString(1), // name
+		     row.getInt(2),    // indication
+		     row.getObject(3), // msg_num
+		     row.getString(4), // msg_pattern
+		     row.getString(5)  // dms_hashtag
+		);
 	}
 
 	/** Create a new lane-use MULTI */
-	private LaneUseMultiImpl(String n, int i, Integer mn, MsgPattern pat) {
-		this(n);
+	private LaneUseMultiImpl(String n, int i, Object mn, String pat,
+		String ht)
+	{
+		super(n);
 		indication = i;
-		msg_num = mn;
-		msg_pattern = pat;
+		msg_num = (Integer) mn;
+		msg_pattern = lookupMsgPattern(pat);
+		dms_hashtag = ht;
 	}
 
 	/** Ordinal of LaneUseIndication */
@@ -104,10 +107,10 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 
 	/** Set the indication (ordinal of LaneUseIndication) */
 	public void doSetIndication(int i) throws TMSException {
-		if(i == indication)
+		if (i == indication)
 			return;
 		LaneUseIndication ind = LaneUseIndication.fromOrdinal(i);
-		if(ind == null)
+		if (ind == null)
 			throw new ChangeVetoException("Invalid indication:" +i);
 		store.update(this, "indication", i);
 		setIndication(i);
@@ -163,5 +166,31 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 	@Override
 	public MsgPattern getMsgPattern() {
 		return msg_pattern;
+	}
+
+	/** DMS hashtag */
+	private String dms_hashtag;
+
+	/** Set the DMS hashtag */
+	@Override
+	public void setDmsHashtag(String ht) {
+		dms_hashtag = ht;
+	}
+
+	/** Set the DMS hashtag */
+	public void doSetDmsHashtag(String ht) throws TMSException {
+		String t = DMSHelper.normalizeHashtag(ht);
+		if (!objectEquals(t, ht))
+			throw new ChangeVetoException("Bad hashtag");
+		if (!objectEquals(ht, dms_hashtag)) {
+			store.update(this, "dms_hashtag", ht);
+			setDmsHashtag(ht);
+		}
+	}
+
+	/** Get the DMS hashtag */
+	@Override
+	public String getDmsHashtag() {
+		return dms_hashtag;
 	}
 }

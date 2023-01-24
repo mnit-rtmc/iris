@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2008-2009  AHMCT, University of California
  * Copyright (C) 2012-2021  Iteris Inc.
  * Copyright (C) 2016-2020  SRF Consulting Group
@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeSet;
 import org.json.JSONException;
 import org.json.JSONObject;
 import us.mn.state.dot.sched.Job;
@@ -84,6 +85,9 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
+	/** DMS / hashtag mapping */
+	static private TagMapping mapping;
+
 	/** Test if a sign message is from a specified source */
 	static private boolean isMsgSource(SignMessage sm, SignMsgSource src) {
 		return (sm != null) && src.checkBit(sm.getSource());
@@ -134,6 +138,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Load all the DMS */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
+		mapping = new TagMapping(store, "iris", SONAR_TYPE,
+			"hashtag");
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"gps, static_graphic, purpose, hidden, beacon, " +
 			"preset, sign_config, sign_detail, msg_user, " +
@@ -215,7 +221,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Create a dynamic message sign */
-	private DMSImpl(ResultSet row) throws SQLException {
+	private DMSImpl(ResultSet row) throws Exception {
 		this(row.getString(1),     // name
 		     row.getString(2),     // geo_loc
 		     row.getString(3),     // controller
@@ -242,7 +248,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private DMSImpl(String n, String loc, String c, int p, String nt,
 		String g, String sg, int dp, boolean h, String b, String cp,
 		String sc, String sd, String mu, String ms, String mc,
-		Date et, String st, String sp)
+		Date et, String st, String sp) throws TMSException
 	{
 		super(n, lookupController(c), p, nt);
 		geo_loc = lookupGeoLoc(loc);
@@ -260,7 +266,16 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		expire_time = stampMillis(et);
 		status = st;
 		stuck_pixels = sp;
+		hashtags = lookupHashtagMapping();
 		initTransients();
+	}
+
+	/** Lookup mapping of hashtags */
+	private String[] lookupHashtagMapping() throws TMSException {
+		TreeSet<String> ht_set = new TreeSet<String>();
+		for (String ht: mapping.lookup(this))
+			ht_set.add(ht);
+		return ht_set.toArray(new String[0]);
 	}
 
 	/** Destroy an object */
@@ -411,6 +426,57 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public boolean getHidden() {
 		return hidden;
+	}
+
+	/** Hashtags for the DMS */
+	private String[] hashtags = new String[0];
+
+	/** Set the hashtags assigned to the DMS */
+	@Override
+	public void setHashtags(String[] ht) {
+		hashtags = ht;
+	}
+
+	/** Set the hashtags assigned to the DMS */
+	public synchronized void doSetHashtags(String[] ht)
+		throws TMSException
+	{
+		String[] ht2 = DMSHelper.makeHashtags(ht);
+		if (!Arrays.equals(ht, ht2))
+			throw new ChangeVetoException("Bad hashtags");
+		if (!Arrays.equals(ht, hashtags)) {
+			TreeSet<String> ht_set = new TreeSet<String>(
+				Arrays.asList(ht)
+			);
+			mapping.update(this, ht_set);
+			setHashtags(ht);
+		}
+	}
+
+	/** Add a hashtag to the DMS */
+	public synchronized void addHashtagNotify(String aht) {
+		aht = DMSHelper.normalizeHashtag(aht);
+		if (aht == null)
+			return;
+		TreeSet<String> ht_set = new TreeSet<String>(
+			Arrays.asList(hashtags)
+		);
+		if (ht_set.add(aht)) {
+			try {
+				mapping.update(this, ht_set);
+				hashtags = ht_set.toArray(new String[0]);
+				notifyAttribute("hashtags");
+			}
+			catch (TMSException e) {
+				logError("hashtags map: " + e.getMessage());
+			}
+		}
+	}
+
+	/** Get the hashtags assigned to the DMS */
+	@Override
+	public String[] getHashtags() {
+		return hashtags;
 	}
 
 	/** Remote beacon */

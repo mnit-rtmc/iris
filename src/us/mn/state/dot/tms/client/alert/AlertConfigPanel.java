@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +33,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.AlertConfig;
 import us.mn.state.dot.tms.AlertMessage;
 import us.mn.state.dot.tms.CapEvent;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.SignGroupHelper;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
@@ -69,16 +68,9 @@ public class AlertConfigPanel extends IPanel {
 		}
 	}
 
-	/** Lookup a sign group */
-	static private SignGroup lookupSignGroup(Object value) {
-		String v = value.toString().trim();
-		if (v.length() > 0) {
-			SignGroup sg = SignGroupHelper.lookup(v);
-			if (null == sg)
-				showHint("dms.group.unknown.hint");
-			return sg;
-		} else
-			return null;
+	/** Check a hashtag */
+	static private String checkHashtag(Object value) {
+		return DMSHelper.normalizeHashtag(value.toString());
 	}
 
 	/** AlertConfig action */
@@ -343,8 +335,8 @@ public class AlertConfigPanel extends IPanel {
 	private final JSpinner aft_spn = new JSpinner(
 		new SpinnerNumberModel(0, 0, 24, 1));
 
-	/** Sign group text field */
-	private final JTextField group_txt = new JTextField(20);
+	/** DMS hashtag text field */
+	private final JTextField hashtag_txt = new JTextField(16);
 
 	/** Alert message table panel */
 	private final ProxyTablePanel<AlertMessage> msg_panel;
@@ -461,10 +453,9 @@ public class AlertConfigPanel extends IPanel {
 				bfr_spn.setValue(cfg.getBeforePeriodHours());
 			if (a == null || a.equals("afterPeriodHours"))
 				aft_spn.setValue(cfg.getAfterPeriodHours());
-			if (a == null || a.equals("signGroup")) {
-				SignGroup sg = cfg.getSignGroup();
-				group_txt.setText(
-					(sg != null) ? sg.getName() : "");
+			if (a == null || a.equals("dmsHashtag")) {
+				String ht = cfg.getDmsHashtag();
+				hashtag_txt.setText((ht != null) ? ht : "");
 			}
 		}
 		@Override public void clear() {
@@ -524,8 +515,8 @@ public class AlertConfigPanel extends IPanel {
 			bfr_spn.setValue(0);
 			aft_spn.setEnabled(false);
 			aft_spn.setValue(0);
-			group_txt.setEnabled(false);
-			group_txt.setText("");
+			hashtag_txt.setEnabled(false);
+			hashtag_txt.setText("");
 		}
 	};
 
@@ -610,8 +601,8 @@ public class AlertConfigPanel extends IPanel {
 		add(bfr_spn);
 		add("alert.after_period_hours");
 		add(aft_spn, Stretch.LAST);
-		add("alert.group");
-		add(group_txt, Stretch.LAST);
+		add("alert.hashtag");
+		add(hashtag_txt, Stretch.LAST);
 		add(msg_panel, Stretch.FULL);
 		createJobs();
 		watcher.initialize();
@@ -634,9 +625,9 @@ public class AlertConfigPanel extends IPanel {
 				setAfterPeriodHours(h.intValue());
 			}
 		});
-		group_txt.addFocusListener(new FocusAdapter() {
+		hashtag_txt.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
-				setSignGroup(group_txt.getText());
+				setDmsHashtag(hashtag_txt.getText());
 			}
 		});
 	}
@@ -655,11 +646,11 @@ public class AlertConfigPanel extends IPanel {
 			cfg.setAfterPeriodHours(h);
 	}
 
-	/** Set the sign group */
-	private void setSignGroup(Object v) {
+	/** Set the DMS hashtag */
+	private void setDmsHashtag(Object v) {
 		AlertConfig cfg = alert_cfg;
 		if (cfg != null)
-			cfg.setSignGroup(lookupSignGroup(v));
+			cfg.setDmsHashtag(checkHashtag(v));
 	}
 
 	/** Dispose of the panel */
@@ -702,6 +693,6 @@ public class AlertConfigPanel extends IPanel {
 		auto_deploy_chk.setEnabled(write);
 		bfr_spn.setEnabled(write);
 		aft_spn.setEnabled(write);
-		group_txt.setEnabled(write);
+		hashtag_txt.setEnabled(write);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021-2022  Minnesota Department of Transportation
+ * Copyright (C) 2021-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -78,5 +79,24 @@ public class AlertMessageHelper extends BaseHelper {
 				msgs.add(msg);
 		}
 		return msgs;
+	}
+
+	/** Get set of DMS with an alert using a given message pattern */
+	static public Set<DMS> findSigns(MsgPattern pat) {
+		HashSet<DMS> signs = new HashSet<DMS>();
+		Iterator<AlertMessage> it = iterator();
+		while (it.hasNext()) {
+			AlertMessage msg = it.next();
+			String rht = msg.getRestrictHashtag();
+			if (msg.getMsgPattern() == pat) {
+				AlertConfig cfg = msg.getAlertConfig();
+				String ht = cfg.getDmsHashtag();
+				for (DMS dms: DMSHelper.findAllTagged(ht)) {
+					if (DMSHelper.hasHashtag(dms, rht))
+						signs.add(dms);
+				}
+			}
+		}
+		return signs;
 	}
 }

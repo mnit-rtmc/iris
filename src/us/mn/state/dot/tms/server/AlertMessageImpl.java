@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021-2022  Minnesota Department of Transportation
+ * Copyright (C) 2021-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.AlertConfig;
 import us.mn.state.dot.tms.AlertMessage;
+import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.TMSException;
 
@@ -34,8 +36,8 @@ public class AlertMessageImpl extends BaseObjectImpl implements AlertMessage {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, AlertMessageImpl.class);
 		store.query("SELECT name, alert_config, alert_period, " +
-			"msg_pattern FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+			"msg_pattern, restrict_hashtag FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new AlertMessageImpl(row));
@@ -51,6 +53,7 @@ public class AlertMessageImpl extends BaseObjectImpl implements AlertMessage {
 		map.put("alert_config", alert_config);
 		map.put("alert_period", alert_period);
 		map.put("msg_pattern", msg_pattern);
+		map.put("restrict_hashtag", restrict_hashtag);
 		return map;
 	}
 
@@ -76,23 +79,20 @@ public class AlertMessageImpl extends BaseObjectImpl implements AlertMessage {
 		this(row.getString(1),  // name
 		     row.getString(2),  // alert_config
 		     row.getInt(3),     // alert_period
-		     row.getString(4)   // msg_pattern
+		     row.getString(4),  // msg_pattern
+		     row.getString(5)   // restrict_hashtag
 		);
 	}
 
 	/** Create an alert message */
-	private AlertMessageImpl(String n, String ac, int ap, String pat) {
-		this(n, lookupAlertConfig(ac), ap, lookupMsgPattern(pat));
-	}
-
-	/** Create an alert message */
-	public AlertMessageImpl(String n, AlertConfig ac, int ap,
-		MsgPattern pat)
+	public AlertMessageImpl(String n, String ac, int ap, String pat,
+		String rht)
 	{
 		this(n);
-		alert_config = ac;
+		alert_config = lookupAlertConfig(ac);
 		alert_period = ap;
-		msg_pattern = pat;
+		msg_pattern = lookupMsgPattern(pat);
+		restrict_hashtag = rht;
 	}
 
 	/** Alert config */
@@ -148,5 +148,31 @@ public class AlertMessageImpl extends BaseObjectImpl implements AlertMessage {
 	@Override
 	public MsgPattern getMsgPattern() {
 		return msg_pattern;
+	}
+
+	/** Restrict hashtag */
+	private String restrict_hashtag;
+
+	/** Get restrict hashtag, or null for none */
+	@Override
+	public String getRestrictHashtag() {
+		return restrict_hashtag;
+	}
+
+	/** Set restrict hashtag, or null for none */
+	@Override
+	public void setRestrictHashtag(String rht) {
+		restrict_hashtag = rht;
+	}
+
+	/** Set restrict hashtag, or null for none */
+	public void doSetRestrictHashtag(String rht) throws TMSException {
+		String ht = DMSHelper.normalizeHashtag(rht);
+		if (!objectEquals(ht, rht))
+			throw new ChangeVetoException("Bad hashtag");
+		if (!objectEquals(rht, restrict_hashtag)) {
+			store.update(this, "restrict_hashtag", rht);
+			setRestrictHashtag(rht);
+		}
 	}
 }

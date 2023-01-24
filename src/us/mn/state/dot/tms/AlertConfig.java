@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -193,9 +193,9 @@ public interface AlertConfig extends SonarObject {
 	/** Get the duration in hours for the "after" alert period */
 	int getAfterPeriodHours();
 
-	/** Set the sign group */
-	void setSignGroup(SignGroup sg);
+	/** Set the DMS hashtag */
+	void setDmsHashtag(String ht);
 
-	/** Get the sign group */
-	SignGroup getSignGroup();
+	/** Get the DMS hashtag */
+	String getDmsHashtag();
 }

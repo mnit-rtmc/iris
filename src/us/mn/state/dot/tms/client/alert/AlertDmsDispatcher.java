@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,13 +32,10 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.AlertInfo;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsActionHelper;
-import us.mn.state.dot.tms.DmsSignGroup;
-import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SignConfig;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.map.MapObject;
@@ -57,14 +54,19 @@ import us.mn.state.dot.tms.utils.NumericAlphaComparator;
  */
 public class AlertDmsDispatcher extends IPanel {
 
+	/** Get the active hashtag for the alert */
+	static public String getActiveHashtag(String aht) {
+		if (aht != null && aht.endsWith("all"))
+			return aht.substring(0, aht.length() - 3);
+		else
+			return null;
+	}
+
 	/** Alert manager */
 	private final AlertManager manager;
 
 	/** DMS manager */
 	private final DMSManager dms_manager;
-
-	/** DMS sign group type cache */
-	private final TypeCache<DmsSignGroup> dms_sign_groups;
 
 	/** Table of DMS included in this alert */
 	private final ZTable dms_tbl;
@@ -96,58 +98,51 @@ public class AlertDmsDispatcher extends IPanel {
 				boolean selected = (Boolean) value;
 				DMS dms = (DMS) dms_mdl.getValueAt(row, 0);
 				if (selected)
-					addToGroup(dms);
+					addToAlert(dms);
 				else
-					removeFromGroup(dms);
+					removeFromAlert(dms);
 			}
 		}
 	}
 
-	/** Find an active sign group for the alert */
-	private SignGroup findActiveGroup(DMS dms) {
+	/** Get the active hashtag for the alert */
+	private String getActiveHashtag() {
 		AlertInfo ai = manager.getSelectionModel().getSingleSelection();
-		SignConfig cfg = dms.getSignConfig();
-		return (ai != null && cfg != null)
-		      ? findActiveGroup(ai.getActionPlan(), cfg)
+		return (ai != null)
+		      ? getActiveHashtag(ai.getAllHashtag())
 		      : null;
 	}
 
-	/** Find an active sign group for the alert */
-	private SignGroup findActiveGroup(ActionPlan plan, SignConfig cfg) {
-		Set<SignGroup> groups = DmsActionHelper.findGroups(plan, cfg);
-		Iterator<SignGroup> it = groups.iterator();
-		return it.hasNext() ? it.next() : null;
+	/** Add a DMS to alert's active hashtag */
+	private void addToAlert(DMS dms) {
+		String ht = getActiveHashtag();
+		if (ht != null)
+			addDmsHashtag(dms, ht);
 	}
 
-	/** Add a DMS to its active sign group */
-	private void addToGroup(DMS dms) {
-		SignGroup sg = findActiveGroup(dms);
-		if (sg != null)
-			createDmsSignGroup(dms, sg);
-	}
-
-	/** Create a new DMS sign group */
-	private void createDmsSignGroup(DMS dms, SignGroup sg) {
-		String tmpl = sg.getName() + "_%d";
-		String oname = DmsSignGroupHelper.createUniqueName(tmpl);
-		HashMap<String, Object> attrs = new HashMap<String, Object>();
-		attrs.put("dms", dms);
-		attrs.put("sign_group", sg);
-		dms_sign_groups.createObject(oname, attrs);
+	/** Add a hashtag to a DMS */
+	private void addDmsHashtag(DMS dms, String ht) {
+		TreeSet<String> hashtags = new TreeSet<String>();
+		hashtags.add(ht);
+		for (String dht: dms.getHashtags())
+			hashtags.add(dht);
+		dms.setHashtags(hashtags.toArray(new String[0]));
 	}
 
 	/** Remove a DMS from its active sign group */
-	private void removeFromGroup(DMS dms) {
-		SignGroup sg = findActiveGroup(dms);
-		if (sg != null)
-			removeDmsSignGroup(dms, sg);
+	private void removeFromAlert(DMS dms) {
+		String ht = getActiveHashtag();
+		if (ht != null)
+			removeDmsHashtag(dms, ht);
 	}
 
-	/** Remove a DMS sign group */
-	private void removeDmsSignGroup(DMS dms, SignGroup sg) {
-		DmsSignGroup dsg = DmsSignGroupHelper.find(dms, sg);
-		if (dsg != null)
-			dsg.destroy();
+	/** Remove a hashtag from a DMS */
+	private void removeDmsHashtag(DMS dms, String ht) {
+		TreeSet<String> hashtags = new TreeSet<String>();
+		for (String dht: dms.getHashtags())
+			hashtags.add(dht);
+		hashtags.remove(ht);
+		dms.setHashtags(hashtags.toArray(new String[0]));
 	}
 
 	/** Included DMS table model */
@@ -187,8 +182,6 @@ public class AlertDmsDispatcher extends IPanel {
 	public AlertDmsDispatcher(Session s, AlertManager m) {
 		manager = m;
 		dms_manager = s.getDMSManager();
-		dms_sign_groups = s.getSonarState().getDmsCache()
-			.getDmsSignGroups();
 		dms_tbl = new ZTable();
 		dms_tbl.setAutoCreateColumnsFromModel(true);
 		dms_tbl.setVisibleRowCount(8);
@@ -240,7 +233,7 @@ public class AlertDmsDispatcher extends IPanel {
 		dmsWorker.execute();
 	}
 
-	/** Lookup DMS for alert */
+	/** Lookup all DMS for alert */
 	private HashMap<DMS, Boolean> lookupDmsMap(AlertInfo ai) {
 		// use a HashMap to support a check box for controlling
 		// inclusion in the alert and a list to control sorting
@@ -250,8 +243,8 @@ public class AlertDmsDispatcher extends IPanel {
 			ActionPlan plan = ai.getActionPlan();
 			Set<DMS> included = DmsActionHelper.findSigns(plan);
 			// Find all DMS for alert info
-			SignGroup sg = ai.getSignGroup();
-			for (DMS d: SignGroupHelper.getAllSigns(sg))
+			String aht = ai.getAllHashtag();
+			for (DMS d: DMSHelper.findAllTagged(aht))
 				dm.put(d, included.contains(d));
 		}
 		return dm;

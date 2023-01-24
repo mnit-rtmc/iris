@@ -62,47 +62,66 @@ public class MsgPatternHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Find unused text rectangles in a pattern */
-	static public List<TextRect> findTextRectangles(MsgPattern pat) {
-		TextRect tr = defaultRect(pat);
-		return (tr != null)
-			? tr.find(pat.getMulti())
-			: new ArrayList<TextRect>();
-	}
-
-	/** Get default text rectangle for a pattern */
-	static private TextRect defaultRect(MsgPattern pat) {
+	/** Find all sign configs for a message pattern.
+	 * This includes configs for:
+	 * - the pattern's compose hashtag
+	 * - Lane use multi with the pattern
+	 * - DMS action with the pattern
+	 * - Alert config + message with the pattern */
+	static public List<SignConfig> findSignConfigs(MsgPattern pat) {
+		ArrayList<SignConfig> cfgs = new ArrayList<SignConfig>();
 		if (pat == null)
-			return null;
-		SignConfig sc = pat.getSignConfig();
-		if (sc == null)
-			return null;
-		int width = sc.getPixelWidth();
-		int height = sc.getPixelHeight();
-		int fn = SignConfigHelper.getDefaultFontNum(sc);
-		return new TextRect(1, width, height, fn);
+			return cfgs;
+		ArrayList<String> hashtags = new ArrayList<String>();
+		String cht = pat.getComposeHashtag();
+		if (cht != null)
+			hashtags.add(cht);
+		hashtags.addAll(LaneUseMultiHelper.findHashtags(pat));
+		hashtags.addAll(DmsActionHelper.findHashtags(pat));
+		for (String ht: hashtags) {
+			for (DMS dms: DMSHelper.findAllTagged(ht)) {
+				SignConfig sc = dms.getSignConfig();
+				if (sc != null && !cfgs.contains(sc))
+					cfgs.add(sc);
+			}
+		}
+		for (DMS dms: AlertMessageHelper.findSigns(pat)) {
+			SignConfig sc = dms.getSignConfig();
+			if (sc != null && !cfgs.contains(sc))
+				cfgs.add(sc);
+		}
+		return cfgs;
 	}
 
-	/** Check if a pattern has unused text rectangles */
-	static public boolean hasTextRectangles(MsgPattern pat) {
-		return findTextRectangles(pat).size() > 0;
+	/** Find unused text rectangles in a pattern */
+	static public List<TextRect> findTextRectangles(MsgPattern pat,
+		TextRect tr)
+	{
+		return (tr != null)
+		      ? tr.find(pat.getMulti())
+		      : new ArrayList<TextRect>();
+	}
+
+	/** Check if a pattern has "fillable" text rectangles */
+	static public boolean isFillable(MsgPattern pat, TextRect tr) {
+		return findTextRectangles(pat, tr).size() > 0;
 	}
 
 	/** Fill text rectangles in a pattern */
-	static public String fillTextRectangles(MsgPattern pat,
+	static public String fillTextRectangles(MsgPattern pat, TextRect tr,
 		List<String> lines)
 	{
-		TextRect tr = defaultRect(pat);
 		return (tr != null)
-			? tr.fill(pat.getMulti(), lines)
-			: "";
+		      ? tr.fill(pat.getMulti(), lines)
+		      : "";
 	}
 
 	/** Split MULTI string into lines with a pattern */
-	static public List<String> splitLines(MsgPattern pat, String ms) {
-		TextRect tr = defaultRect(pat);
+	static public List<String> splitLines(MsgPattern pat, TextRect tr,
+		String ms)
+	{
 		return (tr != null)
-			? tr.splitLines(pat.getMulti(), ms)
-			: new ArrayList<String>();
+		      ? tr.splitLines(pat.getMulti(), ms)
+		      : new ArrayList<String>();
 	}
 }

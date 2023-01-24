@@ -20,9 +20,9 @@ import us.mn.state.dot.sonar.SonarObject;
 /**
  * Alert Configuration Message.
  *
- * Associates an alert configuration with an alert config, period and message
- * pattern to control which signs are eligible for inclusion in an alert and
- * which message pattern to use.
+ * Associates an alert config, period, message pattern and DMS hashtag to
+ * control which signs are eligible for inclusion in an alert and which
+ * message pattern to use.
  *
  * @author Gordon Parikh
  * @author Douglas Lau
@@ -46,4 +46,10 @@ public interface AlertMessage extends SonarObject {
 
 	/** Get the message pattern */
 	MsgPattern getMsgPattern();
+
+	/** Set hashtag to restrict (must also match alert config) */
+	void setRestrictHashtag(String rht);
+
+	/** Get hashtag to restrict (must also match alert config) */
+	String getRestrictHashtag();
 }

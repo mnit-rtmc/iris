@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,8 +29,6 @@ import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.PlanPhaseHelper;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -73,11 +71,17 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	protected ArrayList<ProxyColumn<DmsAction>> createColumns() {
 		ArrayList<ProxyColumn<DmsAction>> cols =
 			new ArrayList<ProxyColumn<DmsAction>>(5);
-		cols.add(new ProxyColumn<DmsAction>("action.plan.dms.group",
+		cols.add(new ProxyColumn<DmsAction>("action.plan.hashtag",
 			120)
 		{
 			public Object getValueAt(DmsAction da) {
-				return da.getSignGroup();
+				return da.getDmsHashtag();
+			}
+			public boolean isEditable(DmsAction da) {
+				return canWrite(da);
+			}
+			public void setValueAt(DmsAction da, Object value) {
+				da.setDmsHashtag(value.toString().trim());
 			}
 		});
 		cols.add(new ProxyColumn<DmsAction>("action.plan.phase", 100) {
@@ -178,14 +182,14 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 			new TableRowSorter<ProxyTableModel<DmsAction>>(this)
 		{
 			@Override public boolean isSortable(int c) {
-				return c == 0;
+				return c <= 1;
 			}
 		};
-		sorter.setComparator(0,new NumericAlphaComparator<SignGroup>());
 		sorter.setSortsOnUpdates(true);
 		LinkedList<RowSorter.SortKey> keys =
 			new LinkedList<RowSorter.SortKey>();
 		keys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+		keys.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
 		sorter.setSortKeys(keys);
 		return sorter;
 	}
@@ -199,21 +203,17 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	/** Create an object with the name */
 	@Override
 	public void createObject(String name) {
-		SignGroup sg = SignGroupHelper.lookup(name.trim());
-		if (sg != null && action_plan != null)
-			create(sg);
-		else
-			IOptionPane.showHint("action.plan.dms.hint");
+		create(name);
 	}
 
 	/** Create a new DMS action */
-	private void create(SignGroup sg) {
+	private void create(String hashtag) {
 		String name = createUniqueName();
 		if (name != null) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("action_plan", action_plan);
-			attrs.put("sign_group", sg);
+			attrs.put("dms_hashtag", hashtag);
 			attrs.put("phase", lookupPlanPhase());
 			attrs.put("msg_priority",
 				DmsMsgPriority.SCHED_A.ordinal());

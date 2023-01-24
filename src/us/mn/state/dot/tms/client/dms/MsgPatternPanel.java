@@ -18,6 +18,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JPanel;
@@ -25,6 +26,7 @@ import javax.swing.JTextArea;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.MsgLine;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
@@ -45,9 +47,8 @@ import us.mn.state.dot.tms.utils.MultiString;
  *
  * @author Douglas Lau
  */
-public class MsgPatternPanel extends JPanel
-	implements ProxyView<MsgPattern>
-{
+public class MsgPatternPanel extends JPanel {
+
 	/** MULTI label */
 	private final ILabel multi_lbl = new ILabel("msg.pattern.multi");
 
@@ -72,6 +73,33 @@ public class MsgPatternPanel extends JPanel
 	/** Proxy watcher */
 	private final ProxyWatcher<MsgPattern> watcher;
 
+	/** Proxy view */
+	private final ProxyView<MsgPattern> view = new ProxyView<MsgPattern>() {
+		@Override public void enumerationComplete() { }
+
+		@Override public void update(MsgPattern pat, String a) {
+			if (null == a) {
+				msg_pattern = pat;
+				msg_line_pnl.setModel(new MsgLineTableModel(
+					session, pat));
+				updateEditMode();
+			}
+			if (null == a || a.equals("multi"))
+				multi_txt.setText(pat.getMulti());
+			updatePixelPanel(pat);
+		}
+
+		@Override public void clear() {
+			msg_pattern = null;
+			multi_txt.setEnabled(false);
+			multi_txt.setText("");
+			pixel_pnl.setPhysicalDimensions(0, 0, 0, 0, 0, 0);
+			pixel_pnl.setLogicalDimensions(0, 0, 0, 0);
+			pixel_pnl.setGraphic(null);
+			setPager(null);
+		}
+	};
+
 	/** Edit mode listener */
 	private final EditModeListener edit_lsnr = new EditModeListener() {
 		public void editModeChanged() {
@@ -79,21 +107,26 @@ public class MsgPatternPanel extends JPanel
 		}
 	};
 
+	/** Update the edit mode */
+	private void updateEditMode() {
+		MsgPattern pat = msg_pattern;
+		multi_txt.setEnabled(session.canWrite(pat, "multi"));
+	}
+
 	/** Message pattern being edited */
 	private MsgPattern msg_pattern;
 
 	/** Set the message pattern */
 	public void setMsgPattern(MsgPattern pat) {
 		watcher.setProxy(pat);
-		updatePixelPanel(pat);
 	}
 
 	/** Create the message pattern panel */
-	public MsgPatternPanel(Session s, boolean r) {
+	public MsgPatternPanel(Session s) {
 		session = s;
 		TypeCache<MsgPattern> cache =
 			s.getSonarState().getDmsCache().getMsgPatterns();
-		watcher = new ProxyWatcher<MsgPattern>(cache, this, false);
+		watcher = new ProxyWatcher<MsgPattern>(cache, view, false);
 		preview_pnl = createPreviewPanel();
 		msg_line_pnl = new ProxyTablePanel<MsgLine>(
 			new MsgLineTableModel(s, null)
@@ -120,7 +153,7 @@ public class MsgPatternPanel extends JPanel
 		watcher.initialize();
 		createJobs();
 		session.addEditModeListener(edit_lsnr);
-		clear();
+		view.clear();
 	}
 
 	/** Layout the panel */
@@ -168,12 +201,13 @@ public class MsgPatternPanel extends JPanel
 			MultiString multi = new MultiString(ms).normalize();
 			pat.setMulti(multi.toString());
 		}
-		updatePixelPanel(pat);
 	}
 
 	/** Update pixel panel preview */
 	private void updatePixelPanel(MsgPattern pat) {
-		SignConfig sc = (pat != null) ? pat.getSignConfig() : null;
+		// FIXME: add a sign config selector
+		List<SignConfig> cfgs = MsgPatternHelper.findSignConfigs(pat);
+		SignConfig sc =  (cfgs.size() > 0) ? cfgs.get(0) : null;
 		String ms = (pat != null) ? pat.getMulti() : "";
 		MultiString multi = new MultiString(ms);
 		if (sc != null)
@@ -220,41 +254,6 @@ public class MsgPatternPanel extends JPanel
 		msg_line_pnl.dispose();
 		watcher.dispose();
 		session.removeEditModeListener(edit_lsnr);
-		clear();
-	}
-
-	/** Update the edit mode */
-	public void updateEditMode() {
-		MsgPattern pat = msg_pattern;
-		multi_txt.setEnabled(session.canWrite(pat, "multi"));
-	}
-
-	/** Called when all proxies have been enumerated (from ProxyView). */
-	@Override
-	public void enumerationComplete() { }
-
-	/** Update one attribute (from ProxyView). */
-	@Override
-	public void update(MsgPattern pat, String a) {
-		if (null == a) {
-			msg_pattern = pat;
-			msg_line_pnl.setModel(new MsgLineTableModel(session,
-				pat));
-			updateEditMode();
-		}
-		if (null == a || a.equals("multi"))
-			multi_txt.setText(pat.getMulti());
-	}
-
-	/** Clear all attributes (from ProxyView) */
-	@Override
-	public void clear() {
-		msg_pattern = null;
-		multi_txt.setEnabled(false);
-		multi_txt.setText("");
-		pixel_pnl.setPhysicalDimensions(0, 0, 0, 0, 0, 0);
-		pixel_pnl.setLogicalDimensions(0, 0, 0, 0);
-		pixel_pnl.setGraphic(null);
-		setPager(null);
+		view.clear();
 	}
 }

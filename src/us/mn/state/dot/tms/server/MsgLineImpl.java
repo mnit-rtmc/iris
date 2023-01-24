@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgLine;
 import us.mn.state.dot.tms.MsgLineHelper;
@@ -35,8 +36,9 @@ public class MsgLineImpl extends BaseObjectImpl implements MsgLine {
 	/** Load all the message lines */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, MsgLineImpl.class);
-		store.query("SELECT name, msg_pattern, line, multi, rank " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, msg_pattern, restrict_hashtag," +
+			"line, multi, rank FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new MsgLineImpl(row));
@@ -50,6 +52,7 @@ public class MsgLineImpl extends BaseObjectImpl implements MsgLine {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("msg_pattern", msg_pattern);
+		map.put("restrict_hashtag", restrict_hashtag);
 		map.put("line", line);
 		map.put("multi", multi);
 		map.put("rank", rank);
@@ -77,15 +80,19 @@ public class MsgLineImpl extends BaseObjectImpl implements MsgLine {
 	private MsgLineImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name
 		     row.getString(2),  // msg_pattern
-		     row.getShort(3),   // line
-		     row.getString(4),  // multi
-		     row.getShort(5));  // rank
+		     row.getString(3),  // restrict_hashtag
+		     row.getShort(4),   // line
+		     row.getString(5),  // multi
+		     row.getShort(6));  // rank
 	}
 
 	/** Create a message line */
-	private MsgLineImpl(String n, String mp, short l, String m, short r) {
+	private MsgLineImpl(String n, String mp, String rht, short l,
+		String m, short r)
+	{
 		super(n);
 		msg_pattern = lookupMsgPattern(mp);
+		restrict_hashtag = rht;
 		line = l;
 		multi = m;
 		rank = r;
@@ -98,6 +105,32 @@ public class MsgLineImpl extends BaseObjectImpl implements MsgLine {
 	@Override
 	public MsgPattern getMsgPattern() {
 		return msg_pattern;
+	}
+
+	/** Restrict hashtag */
+	private String restrict_hashtag;
+
+	/** Get restrict hashtag, or null for none */
+	@Override
+	public String getRestrictHashtag() {
+		return restrict_hashtag;
+	}
+
+	/** Set restrict hashtag, or null for none */
+	@Override
+	public void setRestrictHashtag(String rht) {
+		restrict_hashtag = rht;
+	}
+
+	/** Set restrict hashtag, or null for none */
+	public void doSetRestrictHashtag(String rht) throws TMSException {
+		String ht = DMSHelper.normalizeHashtag(rht);
+		if (!objectEquals(ht, rht))
+			throw new ChangeVetoException("Bad hashtag");
+		if (!objectEquals(rht, restrict_hashtag)) {
+			store.update(this, "restrict_hashtag", rht);
+			setRestrictHashtag(rht);
+		}
 	}
 
 	/** Line number on sign (usually 1-3) */

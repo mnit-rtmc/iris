@@ -21,15 +21,11 @@ package us.mn.state.dot.tms;
  */
 public class TransMsgPattern implements MsgPattern {
 
-	/** Sign configuration */
-	private final SignConfig config;
-
 	/** Sign text MULTI string */
 	private final String multi;
 
 	/** Create a new transient msg pattern */
-	public TransMsgPattern(SignConfig sc, String m) {
-		config = sc;
+	public TransMsgPattern(String m) {
 		multi = m;
 	}
 
@@ -45,29 +41,10 @@ public class TransMsgPattern implements MsgPattern {
 		return SONAR_TYPE;
 	}
 
-	/** Set the sign config */
+	/** Get the MULTI string */
 	@Override
-	public void setSignConfig(SignConfig sc) {
-		// do nothing
-	}
-
-	/** Get the sign config */
-	@Override
-	public SignConfig getSignConfig() {
-		return config;
-	}
-
-	/** Set the sign group */
-	@Override
-	public void setSignGroup(SignGroup sg) {
-		// do nothing
-	}
-
-	/** Get the sign group */
-	@Override
-	public SignGroup getSignGroup() {
-		assert(false);
-		return null;
+	public String getMulti() {
+		return multi;
 	}
 
 	/** Set the MULTI string */
@@ -76,10 +53,19 @@ public class TransMsgPattern implements MsgPattern {
 		// do nothing
 	}
 
-	/** Get the MULTI string */
+	/** Get the hashtag for composing with the pattern.
+	 * @return hashtag; null for no composing. */
 	@Override
-	public String getMulti() {
-		return multi;
+	public String getComposeHashtag() {
+		assert(false);
+		return null;
+	}
+
+	/** Set the hashtag for composing with the pattern.
+	 * @param cht hashtag; null for no composing. */
+	@Override
+	public void setComposeHashtag(String cht) {
+		// do nothing
 	}
 
 	/** Destroy the object */

@@ -20,12 +20,12 @@ import java.util.Set;
 import java.util.TreeSet;
 import javax.swing.JComboBox;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DmsSignGroupHelper;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
-import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
+import us.mn.state.dot.tms.utils.TextRect;
 
 /**
  * The message pattern combobox is a widget which allows the user to select
@@ -45,13 +45,13 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 	}
 
 	/** Populate the message pattern model, sorted */
-	public void populateModel(DMS dms) {
+	public void populateModel(DMS dms, TextRect tr) {
 		setSelectedIndex(-1);
-		TreeSet<MsgPattern> msgs = createMessageSet(dms);
+		TreeSet<MsgPattern> pats = findPatterns(dms);
 		// check for a fillable pattern
 		boolean fillable = false;
-		for (MsgPattern pat: msgs) {
-			if (MsgPatternHelper.hasTextRectangles(pat)) {
+		for (MsgPattern pat: pats) {
+			if (MsgPatternHelper.isFillable(pat, tr)) {
 				fillable = true;
 				break;
 			}
@@ -59,25 +59,24 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 		removeAllItems();
 		if (!fillable)
 			addItem(null);
-		for (MsgPattern pat: msgs)
+		for (MsgPattern pat: pats)
 			addItem(pat);
 	}
 
-	/** Create a set of message patterns for the specified DMS */
-	private TreeSet<MsgPattern> createMessageSet(DMS dms) {
-		TreeSet<MsgPattern> msgs = new TreeSet<MsgPattern>(
+	/** Find all message patterns for the specified DMS */
+	private TreeSet<MsgPattern> findPatterns(DMS dms) {
+		TreeSet<MsgPattern> pats = new TreeSet<MsgPattern>(
 			new NumericAlphaComparator<MsgPattern>());
-		Set<SignGroup> groups = DmsSignGroupHelper.findGroups(dms);
 		Iterator<MsgPattern> pit = MsgPatternHelper.iterator();
 		while (pit.hasNext()) {
 			MsgPattern pat = pit.next();
-			if (groups.contains(pat.getSignGroup()) &&
-			    isValidMulti(pat))
-			{
-				msgs.add(pat);
+			String cht = pat.getComposeHashtag();
+			if (cht != null && isValidMulti(pat)) {
+				if (DMSHelper.hasHashtag(dms, cht))
+					pats.add(pat);
 			}
 		}
-		return msgs;
+		return pats;
 	}
 
 	/** Set the enabled status */
@@ -99,7 +98,7 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 	}
 
 	/** Find the best pattern for a MULTI string */
-	public MsgPattern findBestPattern(String ms) {
+	public MsgPattern findBestPattern(String ms, TextRect tr) {
 		MsgPattern best = null;
 		for (int i = 0; i < getItemCount(); i++) {
 			MsgPattern pat = getItemAt(i);
@@ -109,7 +108,7 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 					best = pat;
 					break;
 				}
-				if (MsgPatternHelper.hasTextRectangles(pat)) {
+				if (MsgPatternHelper.isFillable(pat, tr)) {
 					if (best != null) {
 						int len = multi.length();
 						int blen = best.getMulti()
