@@ -43,15 +43,13 @@ public class MsgPatternTableModel extends ProxyTableModel<MsgPattern> {
 	protected ArrayList<ProxyColumn<MsgPattern>> createColumns() {
 		ArrayList<ProxyColumn<MsgPattern>> cols =
 			new ArrayList<ProxyColumn<MsgPattern>>(2);
-		cols.add(new ProxyColumn<MsgPattern>("msg.pattern.name",
-			180)
-		{
+		cols.add(new ProxyColumn<MsgPattern>("msg.pattern.name", 168){
 			public Object getValueAt(MsgPattern pat) {
 				return pat.getName();
 			}
 		});
 		cols.add(new ProxyColumn<MsgPattern>(
-			"msg.pattern.compose.hashtag", 120)
+			"msg.pattern.compose.hashtag", 110)
 		{
 			public Object getValueAt(MsgPattern pat) {
 				return pat.getComposeHashtag();
@@ -71,6 +69,6 @@ public class MsgPatternTableModel extends ProxyTableModel<MsgPattern> {
 	/** Create a new table model.
 	 * @param s Session */
 	public MsgPatternTableModel(Session s) {
-		super(s, descriptor(s), 12, 20);
+		super(s, descriptor(s), 18, 20);
 	}
 }

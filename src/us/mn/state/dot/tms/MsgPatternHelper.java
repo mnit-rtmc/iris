@@ -85,9 +85,8 @@ public class MsgPatternHelper extends BaseHelper {
 					cfgs.add(sc);
 			}
 		}
-		for (DMS dms: AlertMessageHelper.findSigns(pat)) {
-			SignConfig sc = dms.getSignConfig();
-			if (sc != null && !cfgs.contains(sc))
+		for (SignConfig sc: AlertMessageHelper.findSignConfigs(pat)) {
+			if (!cfgs.contains(sc))
 				cfgs.add(sc);
 		}
 		return cfgs;

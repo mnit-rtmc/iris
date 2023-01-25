@@ -42,7 +42,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
-import static us.mn.state.dot.tms.client.widget.IOptionPane.showHint;
 
 /**
  * A panel for editing the properties of an alert config.

@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.awt.GridLayout;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
@@ -43,7 +42,6 @@ public class MsgPatternForm extends ProxyTableForm<MsgPattern> {
 	@Override
 	public void initialize() {
 		super.initialize();
-		setLayout(new GridLayout(1, 2));
 		add(((MsgPatternTablePanel) panel).pat_pnl);
 	}
 }

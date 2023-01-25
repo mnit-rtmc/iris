@@ -47,9 +47,9 @@ public interface AlertMessage extends SonarObject {
 	/** Get the message pattern */
 	MsgPattern getMsgPattern();
 
-	/** Set hashtag to restrict (must also match alert config) */
-	void setRestrictHashtag(String rht);
+	/** Set sign configuration */
+	void setSignConfig(SignConfig sc);
 
-	/** Get hashtag to restrict (must also match alert config) */
-	String getRestrictHashtag();
+	/** Get sign configuration */
+	SignConfig getSignConfig();
 }

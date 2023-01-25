@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,7 +90,7 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 
 	/** Create a new meter action table model */
 	public MeterActionModel(Session s, ActionPlan ap) {
-		super(s, descriptor(s), 16);
+		super(s, descriptor(s), 12);
 		action_plan = ap;
 		phase_mdl = s.getSonarState().getPhaseModel();
 	}

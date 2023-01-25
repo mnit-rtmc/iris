@@ -236,7 +236,9 @@ public class MsgPatternPanel extends JPanel {
 				return new DMSPanelPager(pixel_pnl, rg, ms);
 			}
 		}
-		catch (InvalidMsgException e) { /* fall through */ }
+		catch (InvalidMsgException | IndexOutOfBoundsException e) {
+			/* fall through */
+		}
 		return null;
 	}
 

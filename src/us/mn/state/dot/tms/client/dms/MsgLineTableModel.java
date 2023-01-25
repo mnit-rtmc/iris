@@ -19,12 +19,14 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgLine;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import static us.mn.state.dot.tms.client.widget.IOptionPane.showHint;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -62,7 +64,20 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 	@Override
 	protected ArrayList<ProxyColumn<MsgLine>> createColumns() {
 		ArrayList<ProxyColumn<MsgLine>> cols =
-			new ArrayList<ProxyColumn<MsgLine>>(3);
+			new ArrayList<ProxyColumn<MsgLine>>(4);
+		cols.add(new ProxyColumn<MsgLine>("dms.hashtag", 72) {
+			public Object getValueAt(MsgLine ml) {
+				return ml.getRestrictHashtag();
+			}
+			public boolean isEditable(MsgLine ml) {
+				return canWrite(ml);
+			}
+			public void setValueAt(MsgLine ml, Object value) {
+				String ht = DMSHelper.normalizeHashtag(
+					value.toString());
+				ml.setRestrictHashtag(ht);
+			}
+		});
 		cols.add(new ProxyColumn<MsgLine>("dms.line", 36, Short.class){
 			public Object getValueAt(MsgLine ml) {
 				return ml.getLine();
@@ -77,7 +92,7 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 				}
 			}
 		});
-		cols.add(new ProxyColumn<MsgLine>("dms.multi", 400) {
+		cols.add(new ProxyColumn<MsgLine>("dms.multi", 320) {
 			public Object getValueAt(MsgLine ml) {
 				return ml.getMulti();
 			}

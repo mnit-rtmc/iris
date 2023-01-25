@@ -42,9 +42,11 @@ public class MsgLineFinder {
 	/** Create a new message line finder */
 	public MsgLineFinder(DMS d) {
 		dms = d;
-		Iterator<MsgLine> it = MsgLineHelper.iterator();
-		while (it.hasNext())
-			checkLine(it.next());
+		if (dms != null) {
+			Iterator<MsgLine> it = MsgLineHelper.iterator();
+			while (it.hasNext())
+				checkLine(it.next());
+		}
 	}
 
 	/** Check if a message line belongs */

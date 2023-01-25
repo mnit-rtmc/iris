@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021-2022  Minnesota Department of Transportation
+ * Copyright (C) 2021-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,8 @@ import us.mn.state.dot.tms.AlertMessageHelper;
 import us.mn.state.dot.tms.AlertPeriod;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
+import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -65,12 +67,24 @@ public class AlertMessageModel extends ProxyTableModel<AlertMessage> {
 			return null;
 	}
 
+	/** Lookup a sign config */
+	static private SignConfig lookupSignConfig(Object value) {
+		String v = value.toString().trim();
+		if (v.length() > 0) {
+			SignConfig sc = SignConfigHelper.lookup(v);
+			if (null == sc)
+				showHint("sign.config.unknown.hint");
+			return sc;
+		} else
+			return null;
+	}
+
 	/** Create the columns in the model */
 	@Override
 	protected ArrayList<ProxyColumn<AlertMessage>> createColumns() {
 		ArrayList<ProxyColumn<AlertMessage>> cols =
-			new ArrayList<ProxyColumn<AlertMessage>>(2);
-		cols.add(new ProxyColumn<AlertMessage>("alert.period", 100) {
+			new ArrayList<ProxyColumn<AlertMessage>>(3);
+		cols.add(new ProxyColumn<AlertMessage>("alert.period", 80) {
 			public Object getValueAt(AlertMessage am) {
 				return AlertPeriod.fromOrdinal(
 					am.getAlertPeriod());
@@ -98,6 +112,18 @@ public class AlertMessageModel extends ProxyTableModel<AlertMessage> {
 			}
 			public void setValueAt(AlertMessage am, Object value) {
 				am.setMsgPattern(lookupMsgPattern(value));
+			}
+		});
+		cols.add(new ProxyColumn<AlertMessage>("dms.config.short", 120)
+		{
+			public Object getValueAt(AlertMessage am) {
+				return am.getSignConfig();
+			}
+			public boolean isEditable(AlertMessage am) {
+				return canWrite(am);
+			}
+			public void setValueAt(AlertMessage am, Object value) {
+				am.setSignConfig(lookupSignConfig(value));
 			}
 		});
 		return cols;

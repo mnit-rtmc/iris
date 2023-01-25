@@ -494,7 +494,7 @@ public class AlertData {
 			log("no messages for " + cfg.getName());
 			return null;
 		}
-		removeUntaggedSigns(plan_dms, msgs);
+		removeNoConfigSigns(plan_dms, msgs);
 		if (plan_dms.isEmpty()) {
 			log("no signs for " + cfg.getName());
 			return null;
@@ -519,24 +519,18 @@ public class AlertData {
 		return plan;
 	}
 
-	/** Remove DMS without AlertMessage restrict hashtag */
-	private void removeUntaggedSigns(Set<DMS> signs,
+	/** Remove DMS without AlertMessage sign configurations */
+	private void removeNoConfigSigns(Set<DMS> signs,
 		Set<AlertMessage> msgs)
 	{
-		TreeSet<String> tags = new TreeSet<String>();
+		TreeSet<SignConfig> cfgs = new TreeSet<SignConfig>();
 		for (AlertMessage msg: msgs)
-			tags.add(msg.getRestrictHashtag());
+			cfgs.add(msg.getSignConfig());
 		Iterator<DMS> it = signs.iterator();
 		while (it.hasNext()) {
 			DMS dms = it.next();
-			boolean found = false;
-			for (String tag: tags) {
-				if (DMSHelper.hasHashtag(dms, tag)) {
-					found = true;
-					break;
-				}
-			}
-			if (!found)
+			SignConfig sc = dms.getSignConfig();
+			if (sc == null || !cfgs.contains(sc))
 				it.remove();
 		}
 	}
@@ -593,9 +587,16 @@ public class AlertData {
 	private String createActiveHashtag(ActionPlanImpl plan,
 		AlertMessage msg, Set<DMS> plan_dms) throws SonarException
 	{
-		String ht = msg.getRestrictHashtag();
-		Set<DMS> signs = DMSHelper.findAllTagged(ht);
-		signs.retainAll(plan_dms);
+		SignConfig sc = msg.getSignConfig();
+		TreeSet<DMS> signs = new TreeSet<DMS>(
+			new NumericAlphaComparator<DMS>());
+		Iterator<DMS> it = DMSHelper.iterator();
+		while (it.hasNext()) {
+			DMS dms = it.next();
+			if (dms.getSignConfig() == sc &&
+			    plan_dms.contains(dms))
+				signs.add(dms);
+		}
 		if (!signs.isEmpty()) {
 			signs.retainAll(auto_dms);
 			return createHashtags(plan, "", signs);

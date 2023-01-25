@@ -26,6 +26,7 @@ import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsMsgPriority;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.PlanPhaseHelper;
@@ -35,7 +36,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
-import us.mn.state.dot.tms.client.widget.IOptionPane;
+import static us.mn.state.dot.tms.client.widget.IOptionPane.showHint;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
@@ -81,7 +82,12 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				return canWrite(da);
 			}
 			public void setValueAt(DmsAction da, Object value) {
-				da.setDmsHashtag(value.toString().trim());
+				String ht = DMSHelper.normalizeHashtag(
+					value.toString());
+				if (ht != null)
+					da.setDmsHashtag(ht);
+				else
+					showHint("dms.hashtag.invalid.hint");
 			}
 		});
 		cols.add(new ProxyColumn<DmsAction>("action.plan.phase", 100) {
@@ -164,7 +170,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 
 	/** Create a new DMS action table model */
 	public DmsActionModel(Session s, ActionPlan ap) {
-		super(s, descriptor(s), 16);
+		super(s, descriptor(s), 12);
 		action_plan = ap;
 		phase_mdl = s.getSonarState().getPhaseModel();
 	}
@@ -182,14 +188,13 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 			new TableRowSorter<ProxyTableModel<DmsAction>>(this)
 		{
 			@Override public boolean isSortable(int c) {
-				return c <= 1;
+				return c == 0;
 			}
 		};
 		sorter.setSortsOnUpdates(true);
 		LinkedList<RowSorter.SortKey> keys =
 			new LinkedList<RowSorter.SortKey>();
 		keys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
-		keys.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
 		sorter.setSortKeys(keys);
 		return sorter;
 	}
@@ -200,10 +205,14 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		return action_plan != null && super.canAdd();
 	}
 
-	/** Create an object with the name */
+	/** Create an object with a hashtag */
 	@Override
-	public void createObject(String name) {
-		create(name);
+	public void createObject(String hashtag) {
+		String ht = DMSHelper.normalizeHashtag(hashtag);
+		if (ht != null && ht.equals(hashtag))
+			create(hashtag);
+		else
+			showHint("dms.hashtag.invalid.hint");
 	}
 
 	/** Create a new DMS action */

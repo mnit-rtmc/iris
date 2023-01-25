@@ -67,6 +67,8 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 	private TreeSet<MsgPattern> findPatterns(DMS dms) {
 		TreeSet<MsgPattern> pats = new TreeSet<MsgPattern>(
 			new NumericAlphaComparator<MsgPattern>());
+		if (dms == null)
+			return pats;
 		Iterator<MsgPattern> pit = MsgPatternHelper.iterator();
 		while (pit.hasNext()) {
 			MsgPattern pat = pit.next();

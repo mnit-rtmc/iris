@@ -81,22 +81,18 @@ public class AlertMessageHelper extends BaseHelper {
 		return msgs;
 	}
 
-	/** Get set of DMS with an alert using a given message pattern */
-	static public Set<DMS> findSigns(MsgPattern pat) {
-		HashSet<DMS> signs = new HashSet<DMS>();
+	/** Get set of alert msg sign configs for a given message pattern */
+	static public Set<SignConfig> findSignConfigs(MsgPattern pat) {
+		HashSet<SignConfig> cfgs = new HashSet<SignConfig>();
 		Iterator<AlertMessage> it = iterator();
 		while (it.hasNext()) {
 			AlertMessage msg = it.next();
-			String rht = msg.getRestrictHashtag();
 			if (msg.getMsgPattern() == pat) {
-				AlertConfig cfg = msg.getAlertConfig();
-				String ht = cfg.getDmsHashtag();
-				for (DMS dms: DMSHelper.findAllTagged(ht)) {
-					if (DMSHelper.hasHashtag(dms, rht))
-						signs.add(dms);
-				}
+				SignConfig sc = msg.getSignConfig();
+				if (sc != null)
+					cfgs.add(sc);
 			}
 		}
-		return signs;
+		return cfgs;
 	}
 }

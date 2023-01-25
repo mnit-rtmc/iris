@@ -4101,7 +4101,7 @@ CREATE TABLE iris.alert_config (
     auto_deploy BOOLEAN NOT NULL,
     before_period_hours INTEGER NOT NULL,
     after_period_hours INTEGER NOT NULL,
-    dms_hashtag VARCHAR(16) NOT NULL
+    dms_hashtag VARCHAR(16)
 );
 
 CREATE TABLE iris.alert_period (
@@ -4120,7 +4120,7 @@ CREATE TABLE iris.alert_message (
     alert_config VARCHAR(20) NOT NULL REFERENCES iris.alert_config,
     alert_period INTEGER NOT NULL REFERENCES iris.alert_period,
     msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern,
-    restrict_hashtag VARCHAR(16) NOT NULL
+    sign_config VARCHAR(16) REFERENCES iris.sign_config
 );
 
 CREATE TABLE cap.alert (
@@ -5060,10 +5060,10 @@ CREATE VIEW iris.msg_pattern_toll_zone AS
         FROM iris.msg_pattern_closed;
 
 CREATE VIEW dms_toll_zone_view AS
-    SELECT dms, tz.state, toll_zone, action_plan, da.msg_pattern
+    SELECT dms, dh.hashtag, tz.state, toll_zone, action_plan, da.msg_pattern
     FROM dms_action_view da
     JOIN iris.dms_hashtag dh
-    ON da.dms_hashtag = dh.dms
+    ON da.dms_hashtag = dh.hashtag
     JOIN iris.msg_pattern mp
     ON da.msg_pattern = mp.name
     JOIN iris.msg_pattern_toll_zone tz
