@@ -240,7 +240,6 @@ public class MsgPatternPanel extends JPanel {
 	private void selectSignCfg() {
 		MsgPattern pat = msg_pattern;
 		String ms = (pat != null) ? pat.getMulti() : "";
-		MultiString multi = new MultiString(ms);
 		SignConfig sc = config_lst.getSelectedValue();
 		if (sc != null)
 			pixel_pnl.setDimensions(sc);
@@ -249,29 +248,21 @@ public class MsgPatternPanel extends JPanel {
 			pixel_pnl.setLogicalDimensions(0, 0, 0, 0);
 		}
 		pixel_pnl.setGraphic(null);
-		setPager(createPager(sc, multi));
+		setPager(createPager(sc, ms));
 	}
 
 	/** Create pixel panel pager */
-	private DMSPanelPager createPager(SignConfig sc, MultiString multi) {
+	private DMSPanelPager createPager(SignConfig sc, String ms) {
 		RasterBuilder rb = SignConfigHelper.createRasterBuilder(sc);
-		return (rb != null) ? createPager(rb, multi) : null;
+		return (rb != null) ? createPager(rb, ms) : null;
 	}
 
 	/** Create pixel panel pager */
-	private DMSPanelPager createPager(RasterBuilder rb, MultiString multi)
-	{
-		try {
-			RasterGraphic[] rg = rb.createPixmaps(multi);
-			if (rg != null) {
-				String ms = multi.toString();
-				return new DMSPanelPager(pixel_pnl, rg, ms);
-			}
-		}
-		catch (InvalidMsgException | IndexOutOfBoundsException e) {
-			/* fall through */
-		}
-		return null;
+	private DMSPanelPager createPager(RasterBuilder rb, String ms) {
+		RasterGraphic[] rg = rb.createRasters(ms);
+		return (rg != null)
+		      ? new DMSPanelPager(pixel_pnl, rg, ms)
+		      : null;
 	}
 
 	/** Set the DMS panel pager */

@@ -120,8 +120,24 @@ public class RasterBuilder {
 		return bitmaps.toArray(new BitmapGraphic[0]);
 	}
 
+	/** Create raster graphics from a multi string.
+	 * @return Array of RasterGraphic, or null on error. */
+	public RasterGraphic[] createRasters(String multi) {
+		try {
+			return createPixmaps(new MultiString(multi));
+		}
+		catch (IndexOutOfBoundsException e) {
+			// dimensions too small for message
+			return null;
+		}
+		catch (InvalidMsgException e) {
+			// most likely a MultiSyntaxError ...
+			return null;
+		}
+	}
+
 	/** Render a PixmapGraphic for each page */
-	public RasterGraphic[] createPixmaps(MultiString ms)
+	private RasterGraphic[] createPixmaps(MultiString ms)
 		throws InvalidMsgException
 	{
 		final ArrayList<RasterGraphic> pixmaps =
@@ -151,22 +167,6 @@ public class RasterBuilder {
 		if (err != MultiSyntaxError.none) {
 			throw new InvalidMsgException(err.toString() +
 				": \"" + ms + '"');
-		}
-	}
-
-	/** Create raster graphics from a multi string.
-	 * @return Array of RasterGraphic, or null on error. */
-	public RasterGraphic[] createRasters(String multi) {
-		try {
-			return createPixmaps(new MultiString(multi));
-		}
-		catch (IndexOutOfBoundsException e) {
-			// dimensions too small for message
-			return null;
-		}
-		catch (InvalidMsgException e) {
-			// most likely a MultiSyntaxError ...
-			return null;
 		}
 	}
 

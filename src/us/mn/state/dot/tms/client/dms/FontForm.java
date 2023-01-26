@@ -37,7 +37,6 @@ import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
-import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * A form for displaying and editing DMS fonts
@@ -309,8 +308,7 @@ public class FontForm extends AbstractForm {
 	/** Render a message to a raster graphic */
 	private RasterGraphic renderMessage(Font f) {
 		if (f != null) {
-			MultiString ms = new MultiString(PANGRAM);
-			RasterGraphic[] pages = renderPages(f, ms);
+			RasterGraphic[] pages = renderPangram(f);
 			if (pages != null && pages.length > 0)
 				return pages[0];
 		}
@@ -318,19 +316,14 @@ public class FontForm extends AbstractForm {
 	}
 
 	/** Render the pages of a text message */
-	private RasterGraphic[] renderPages(Font f, MultiString ms) {
+	private RasterGraphic[] renderPangram(Font f) {
 		int h = fontHeight(f);
 		int cw = fontWidth(f);
 		int w = pangram_width(f, cw);
 		int df = f.getNumber();
 		ColorScheme cs = ColorScheme.MONOCHROME_1_BIT;
-		RasterBuilder b = new RasterBuilder(w, h, cw, 0, df, cs);
-		try {
-			return b.createPixmaps(ms);
-		}
-		catch (InvalidMsgException e) {
-			return null;
-		}
+		RasterBuilder rb = new RasterBuilder(w, h, cw, 0, df, cs);
+		return rb.createRasters(PANGRAM);
 	}
 
 	/** Change the selected glyph */
