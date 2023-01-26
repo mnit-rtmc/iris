@@ -20,8 +20,11 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.List;
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
 import javax.swing.GroupLayout;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.InvalidMsgException;
@@ -38,6 +41,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiString;
@@ -54,6 +58,12 @@ public class MsgPatternPanel extends JPanel {
 
 	/** MULTI text area */
 	private final JTextArea multi_txt = new JTextArea(5, 40);
+
+	/** Sign config list */
+	private final JList<SignConfig> config_lst = new JList<SignConfig>();
+
+	/** Sign config scroll pane */
+	private final JScrollPane config_pnl;
 
 	/** Sign pixel panel */
 	private final SignPixelPanel pixel_pnl = new SignPixelPanel(200, 100);
@@ -127,6 +137,8 @@ public class MsgPatternPanel extends JPanel {
 		TypeCache<MsgPattern> cache =
 			s.getSonarState().getDmsCache().getMsgPatterns();
 		watcher = new ProxyWatcher<MsgPattern>(cache, view, false);
+		config_pnl = new JScrollPane(config_lst);
+		config_pnl.setMaximumSize(UI.dimension(112, 118));
 		preview_pnl = createPreviewPanel();
 		msg_line_pnl = new ProxyTablePanel<MsgLine>(
 			new MsgLineTableModel(s, null)
@@ -147,6 +159,11 @@ public class MsgPatternPanel extends JPanel {
 		setBorder(UI.border);
 		multi_txt.setLineWrap(true);
 		multi_txt.setWrapStyleWord(false);
+		config_lst.addListSelectionListener(new IListSelectionAdapter() {
+			@Override public void valueChanged() {
+				selectSignCfg();
+			}
+		});
 		pixel_pnl.setFilterColor(new Color(0, 0, 255, 48));
 		msg_line_pnl.initialize();
 		layoutPanel();
@@ -168,7 +185,10 @@ public class MsgPatternPanel extends JPanel {
 		              .addComponent(multi_lbl)
 		              .addGap(UI.hgap)
 		              .addComponent(multi_txt))
-		  .addComponent(preview_pnl)
+		  .addGroup(gl.createSequentialGroup()
+		              .addComponent(config_pnl)
+		              .addGap(UI.hgap)
+		              .addComponent(preview_pnl))
 		  .addComponent(msg_line_pnl);
 		gl.setHorizontalGroup(hg);
 		// vertical layout
@@ -177,7 +197,9 @@ public class MsgPatternPanel extends JPanel {
 		              .addComponent(multi_lbl)
 		              .addComponent(multi_txt))
 		  .addGap(UI.vgap)
-		  .addComponent(preview_pnl)
+		  .addGroup(gl.createParallelGroup()
+		              .addComponent(config_pnl)
+		              .addComponent(preview_pnl))
 		  .addGap(UI.vgap)
 		  .addComponent(msg_line_pnl);
 		gl.setVerticalGroup(vg);
@@ -205,11 +227,21 @@ public class MsgPatternPanel extends JPanel {
 
 	/** Update pixel panel preview */
 	private void updatePixelPanel(MsgPattern pat) {
-		// FIXME: add a sign config selector
 		List<SignConfig> cfgs = MsgPatternHelper.findSignConfigs(pat);
-		SignConfig sc =  (cfgs.size() > 0) ? cfgs.get(0) : null;
+		DefaultListModel<SignConfig> mdl =
+			new DefaultListModel<SignConfig>();
+		for (SignConfig cfg: cfgs)
+			mdl.addElement(cfg);
+		config_lst.setModel(mdl);
+		config_lst.setSelectedIndex(0);
+	}
+
+	/** Select a sign config */
+	private void selectSignCfg() {
+		MsgPattern pat = msg_pattern;
 		String ms = (pat != null) ? pat.getMulti() : "";
 		MultiString multi = new MultiString(ms);
+		SignConfig sc = config_lst.getSelectedValue();
 		if (sc != null)
 			pixel_pnl.setDimensions(sc);
 		else {

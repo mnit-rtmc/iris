@@ -5,6 +5,32 @@ BEGIN;
 
 SELECT iris.update_version('5.37.0', '5.38.0');
 
+-- Make temp table for "small" sign groups
+CREATE TEMP TABLE sign_group_small AS (
+    SELECT st.sign_group AS small
+    FROM iris.sign_text st
+    JOIN iris.sign_group sg ON st.sign_group = sg.name
+    WHERE local = false AND line > 3
+    GROUP BY st.sign_group
+);
+-- Make temp table for one/two page patterns
+CREATE TEMP TABLE sign_group_pattern (
+    sign_group VARCHAR(20) PRIMARY KEY,
+    pattern VARCHAR(20) NOT NULL
+);
+INSERT INTO sign_group_pattern (sign_group, pattern) (
+    SELECT name, 'ONE_PAGE'
+    FROM iris.sign_group
+    GROUP BY name
+);
+UPDATE sign_group_pattern SET pattern = 'TWO_PAGE' WHERE sign_group IN (
+    SELECT st.sign_group
+    FROM iris.sign_text st
+    JOIN iris.sign_group sg ON st.sign_group = sg.name
+    WHERE line > 3
+    GROUP BY st.sign_group
+);
+
 -- NOTE: This has checks for MnDOT group names.
 --       For other agencies, it may need agency-specific tweaks
 CREATE FUNCTION sign_group_hashtag(TEXT) RETURNS TEXT AS $sgh$
@@ -14,7 +40,7 @@ DECLARE
     word TEXT;
     res TEXT := '#';
 BEGIN
-    IF sign_group = 'STD_8CH' THEN
+    IF sign_group IN (SELECT small FROM sign_group_small) THEN
         RETURN '#Small';
     ELSIF sign_group = 'VPARK' THEN
         RETURN '#TadGarage';
@@ -80,25 +106,30 @@ UPDATE iris.msg_pattern
     SET compose_hashtag = sign_group_hashtag(sign_group)
     WHERE sign_group IS NOT NULL;
 
+-- Insert/update basic message patterns
 INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
-    VALUES ('ONE_PAGE', '', '#ThreeLine');
-UPDATE iris.msg_pattern SET compose_hashtag = '#Small'
-    WHERE name = 'TWO_PAGE';
+    VALUES ('ONE_PAGE', '', '#ThreeLine')
+    ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#ThreeLine';
+INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
+    VALUES ('TWO_PAGE', '[np]', '#Small')
+    ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#Small';
 
 -- ONE_PAGE message lines
 INSERT INTO iris.msg_line (name, msg_pattern, line, multi, rank) (
     SELECT 'ml_1' || ROW_NUMBER() OVER (ORDER BY name),
-           'ONE_PAGE', line, multi, rank
-    FROM iris.sign_text
-    WHERE sign_group_hashtag(sign_group) = '#ThreeLine'
+           pattern, line, multi, rank
+    FROM iris.sign_text st
+    JOIN sign_group_pattern p ON st.sign_group = p.sign_group
+    WHERE sign_group_hashtag(st.sign_group) = '#ThreeLine'
 );
 
 -- TWO_PAGE message lines
 INSERT INTO iris.msg_line (name, msg_pattern, line, multi, rank) (
     SELECT 'ml_2' || ROW_NUMBER() OVER (ORDER BY name),
-           'TWO_PAGE', line, multi, rank
-    FROM iris.sign_text
-    WHERE sign_group_hashtag(sign_group) = '#Small'
+           pattern, line, multi, rank
+    FROM iris.sign_text st
+    JOIN sign_group_pattern p ON st.sign_group = p.sign_group
+    WHERE sign_group_hashtag(st.sign_group) = '#Small'
 );
 
 -- Local message lines
@@ -106,13 +137,19 @@ INSERT INTO iris.msg_line (name, msg_pattern, restrict_hashtag, line, multi,
                            rank)
 (
     SELECT 'ml_3' || ROW_NUMBER() OVER (ORDER BY st.name),
-           'ONE_PAGE', sign_group_hashtag(st.sign_group), line, multi, rank
+           pattern, sign_group_hashtag(st.sign_group), line, multi, rank
     FROM iris.sign_text st
+    JOIN sign_group_pattern p ON st.sign_group = p.sign_group
     JOIN iris.sign_group sg ON st.sign_group = sg.name
     WHERE local = true
 );
 
-DROP TABLE iris.sign_text;
+-- Delete "duplicate" message lines
+DELETE FROM iris.msg_line WHERE ctid NOT IN (
+    SELECT min(ctid)
+    FROM iris.msg_line
+    GROUP BY msg_pattern, restrict_hashtag, line, multi, rank
+);
 
 CREATE VIEW msg_line_view AS
     SELECT name, msg_pattern, restrict_hashtag, line, multi, rank
@@ -195,6 +232,7 @@ GRANT SELECT ON lane_use_multi_view TO PUBLIC;
 ALTER TABLE iris.msg_pattern DROP COLUMN sign_config;
 ALTER TABLE iris.msg_pattern DROP COLUMN sign_group;
 
+DROP TABLE iris.sign_text;
 DROP TABLE iris.dms_sign_group;
 DROP TABLE iris.sign_group;
 
