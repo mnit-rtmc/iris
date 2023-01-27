@@ -120,6 +120,23 @@ public class RasterBuilder {
 		return bitmaps.toArray(new BitmapGraphic[0]);
 	}
 
+	/** Check if a MULTI string is rasterizable */
+	public boolean isRasterizable(String ms) {
+		if (ms == null)
+			return false;
+		try {
+			return createPixmaps(new MultiString(ms)) != null;
+		}
+		catch (IndexOutOfBoundsException e) {
+			// dimensions too small for message
+			return false;
+		}
+		catch (InvalidMsgException e) {
+			// probably MultiSyntaxError or something
+			return false;
+		}
+	}
+
 	/** Create raster graphics from a multi string.
 	 * @return Array of RasterGraphic, or null on error. */
 	public RasterGraphic[] createRasters(String multi) {

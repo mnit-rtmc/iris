@@ -18,6 +18,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -27,7 +28,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.MsgLine;
@@ -45,6 +45,7 @@ import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiString;
+import us.mn.state.dot.tms.utils.TextRect;
 
 /**
  * A panel for editing the properties of a message pattern.
@@ -88,25 +89,22 @@ public class MsgPatternPanel extends JPanel {
 		@Override public void enumerationComplete() { }
 
 		@Override public void update(MsgPattern pat, String a) {
-			if (null == a) {
-				msg_pattern = pat;
-				msg_line_pnl.setModel(new MsgLineTableModel(
-					session, pat));
-				updateEditMode();
-			}
-			if (null == a || a.equals("multi"))
+			if (null == a)
+				updateMsgPattern(pat);
+			if (null == a || a.equals("multi")) {
 				multi_txt.setText(pat.getMulti());
-			updatePixelPanel(pat);
+				updatePixelPnl();
+			}
 		}
 
 		@Override public void clear() {
 			msg_pattern = null;
 			multi_txt.setEnabled(false);
 			multi_txt.setText("");
+			setPager(null);
 			pixel_pnl.setPhysicalDimensions(0, 0, 0, 0, 0, 0);
 			pixel_pnl.setLogicalDimensions(0, 0, 0, 0);
 			pixel_pnl.setGraphic(null);
-			setPager(null);
 		}
 	};
 
@@ -142,7 +140,12 @@ public class MsgPatternPanel extends JPanel {
 		preview_pnl = createPreviewPanel();
 		msg_line_pnl = new ProxyTablePanel<MsgLine>(
 			new MsgLineTableModel(s, null)
-		);
+		) {
+			@Override protected void selectProxy() {
+				super.selectProxy();
+				updatePixelPnl();
+			}
+		};
 	}
 
 	/** Create message preview panel */
@@ -161,7 +164,7 @@ public class MsgPatternPanel extends JPanel {
 		multi_txt.setWrapStyleWord(false);
 		config_lst.addListSelectionListener(new IListSelectionAdapter() {
 			@Override public void valueChanged() {
-				selectSignCfg();
+				updatePixelPnl();
 			}
 		});
 		pixel_pnl.setFilterColor(new Color(0, 0, 255, 48));
@@ -225,8 +228,10 @@ public class MsgPatternPanel extends JPanel {
 		}
 	}
 
-	/** Update pixel panel preview */
-	private void updatePixelPanel(MsgPattern pat) {
+	/** Update the message pattern */
+	private void updateMsgPattern(MsgPattern pat) {
+		msg_pattern = pat;
+		msg_line_pnl.setModel(new MsgLineTableModel(session, pat));
 		List<SignConfig> cfgs = MsgPatternHelper.findSignConfigs(pat);
 		DefaultListModel<SignConfig> mdl =
 			new DefaultListModel<SignConfig>();
@@ -234,21 +239,39 @@ public class MsgPatternPanel extends JPanel {
 			mdl.addElement(cfg);
 		config_lst.setModel(mdl);
 		config_lst.setSelectedIndex(0);
+		updateEditMode();
 	}
 
-	/** Select a sign config */
-	private void selectSignCfg() {
-		MsgPattern pat = msg_pattern;
-		String ms = (pat != null) ? pat.getMulti() : "";
+	/** Update the pixel panel */
+	private void updatePixelPnl() {
+		setPager(null);
 		SignConfig sc = config_lst.getSelectedValue();
-		if (sc != null)
+		if (sc != null) {
 			pixel_pnl.setDimensions(sc);
-		else {
+			String ms = getPreviewMulti(sc);
+			setPager(createPager(sc, ms));
+		} else {
 			pixel_pnl.setPhysicalDimensions(0, 0, 0, 0, 0, 0);
 			pixel_pnl.setLogicalDimensions(0, 0, 0, 0);
+			pixel_pnl.setGraphic(null);
 		}
-		pixel_pnl.setGraphic(null);
-		setPager(createPager(sc, ms));
+	}
+
+	/** Get preview MULTI string */
+	private String getPreviewMulti(SignConfig sc) {
+		assert sc != null;
+		MsgPattern pat = msg_pattern;
+		String ms = (pat != null) ? pat.getMulti() : "";
+		ArrayList<String> lines = new ArrayList<String>();
+		MsgLine ml = msg_line_pnl.getSelectedProxy();
+		if (ml != null) {
+			int line = ml.getLine();
+			while (lines.size() + 1 < line)
+				lines.add("");
+			lines.add(ml.getMulti());
+		}
+		TextRect tr = SignConfigHelper.textRect(sc);
+		return tr.fill(ms, lines);
 	}
 
 	/** Create pixel panel pager */
@@ -270,7 +293,6 @@ public class MsgPatternPanel extends JPanel {
 		DMSPanelPager op = pager;
 		if (op != null)
 			op.dispose();
-		pixel_pnl.repaint();
 		pager = p;
 	}
 

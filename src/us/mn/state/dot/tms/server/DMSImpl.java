@@ -963,7 +963,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			return null;
 		RasterBuilder rb = DMSHelper.createRasterBuilder(this);
 		String ms = rb.combineMulti(sched.getMulti(), user.getMulti());
-		if (ms != null && rb.createRasters(ms) != null) {
+		if (rb.isRasterizable(ms)) {
 			SignMessage sm = createMsgCombined(sched, user, ms);
 			if (sm != null) {
 				// Check whether combined message can be

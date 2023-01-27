@@ -323,12 +323,15 @@ public class MessageComposer extends JPanel {
 
 	/** Compose a MULTI string using the contents of the widgets */
 	public String getComposedMulti() {
-		MsgPattern pat = getMsgPattern();
 		TextRect tr = fullTextRect();
-		ArrayList<String> lines = new ArrayList<String>();
-		for (int i = 0; i < n_rects; i++)
-			rects[i].getSelectedLines(lines);
-		return MsgPatternHelper.fillTextRectangles(pat, tr, lines);
+		if (tr != null) {
+			MsgPattern pat = getMsgPattern();
+			ArrayList<String> lines = new ArrayList<String>();
+			for (int i = 0; i < n_rects; i++)
+				rects[i].getSelectedLines(lines);
+			return tr.fill(pat.getMulti(), lines);
+		} else
+			return "";
 	}
 
 	/** Set the composed MULTI string */

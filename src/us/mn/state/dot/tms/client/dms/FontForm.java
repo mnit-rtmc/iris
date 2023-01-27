@@ -131,7 +131,7 @@ public class FontForm extends AbstractForm {
 		super(I18N.get("font.title"));
 		glyphs = s.getSonarState().getDmsCache().getGlyphs();
 		font_pnl = new ProxyTablePanel<Font>(new FontModel(s)) {
-			protected void selectProxy() {
+			@Override protected void selectProxy() {
 				super.selectProxy();
 				selectFont();
 			}

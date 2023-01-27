@@ -106,15 +106,6 @@ public class MsgPatternHelper extends BaseHelper {
 		return findTextRectangles(pat, tr).size() > 0;
 	}
 
-	/** Fill text rectangles in a pattern */
-	static public String fillTextRectangles(MsgPattern pat, TextRect tr,
-		List<String> lines)
-	{
-		return (tr != null)
-		      ? tr.fill(pat.getMulti(), lines)
-		      : "";
-	}
-
 	/** Split MULTI string into lines with a pattern */
 	static public List<String> splitLines(MsgPattern pat, TextRect tr,
 		String ms)
