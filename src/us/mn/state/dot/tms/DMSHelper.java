@@ -352,7 +352,7 @@ public class DMSHelper extends BaseHelper {
 	 * @param dms Sign in question.
 	 * @return RasterGraphic array, one for each page, or null on error.
 	 */
-	static public RasterGraphic[] createRasters(DMS dms) {
+	static private RasterGraphic[] createRasters(DMS dms) {
 		if (dms != null) {
 			SignMessage sm = dms.getMsgCurrent();
 			if (sm != null)
@@ -366,7 +366,7 @@ public class DMSHelper extends BaseHelper {
 	 * @param multi MULTI string.
 	 * @return RasterGraphic array, one for each page, or null on error.
 	 */
-	static public RasterGraphic[] createRasters(DMS dms, String multi) {
+	static private RasterGraphic[] createRasters(DMS dms, String multi) {
 		RasterBuilder rb = createRasterBuilder(dms);
 		return (rb != null) ? rb.createRasters(multi) : null;
 	}

@@ -54,6 +54,9 @@ import us.mn.state.dot.tms.utils.TextRect;
  */
 public class MsgPatternPanel extends JPanel {
 
+	/** Preview filter color */
+	static private final Color PREVIEW_CLR = new Color(0, 0, 255, 48);
+
 	/** MULTI label */
 	private final ILabel multi_lbl = new ILabel("msg.pattern.multi");
 
@@ -167,7 +170,6 @@ public class MsgPatternPanel extends JPanel {
 				updatePixelPnl();
 			}
 		});
-		pixel_pnl.setFilterColor(new Color(0, 0, 255, 48));
 		msg_line_pnl.initialize();
 		layoutPanel();
 		watcher.initialize();
@@ -277,14 +279,8 @@ public class MsgPatternPanel extends JPanel {
 	/** Create pixel panel pager */
 	private SignPixelPager createPager(SignConfig sc, String ms) {
 		RasterBuilder rb = SignConfigHelper.createRasterBuilder(sc);
-		return (rb != null) ? createPager(rb, ms) : null;
-	}
-
-	/** Create pixel panel pager */
-	private SignPixelPager createPager(RasterBuilder rb, String ms) {
-		RasterGraphic[] rg = rb.createRasters(ms);
-		return (rg != null)
-		      ? new SignPixelPager(pixel_pnl, rg, ms)
+		return (rb != null)
+		      ? new SignPixelPager(pixel_pnl, rb, ms, PREVIEW_CLR)
 		      : null;
 	}
 

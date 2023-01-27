@@ -37,7 +37,6 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.RasterBuilder;
-import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.CameraPresetAction;
@@ -62,6 +61,9 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Michael Darter
  */
 public class SingleSignTab extends IPanel {
+
+	/** Preview filter color */
+	static private final Color PREVIEW_CLR = new Color(0, 0, 255, 48);
 
 	/** Get the expiration time of a DMS message */
 	static private String getExpiration(DMS dms) {
@@ -176,7 +178,6 @@ public class SingleSignTab extends IPanel {
 		setIncidentAction(null);
 		// Make label opaque so that we can set the background color
 		status_lbl.setOpaque(true);
-		preview_pnl.setFilterColor(new Color(0, 0, 255, 48));
 		add("device.name");
 		add(name_lbl);
 		if (SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean()) {
@@ -274,22 +275,18 @@ public class SingleSignTab extends IPanel {
 		SignPixelPanel pix_pnl)
 	{
 		String ms = dispatcher.getPreviewMulti(dms);
-		RasterGraphic[] rg = DMSHelper.createRasters(dms, ms);
-		return (rg != null)
-		      ? new SignPixelPager(pix_pnl, rg, ms)
-		      : null;
+		RasterBuilder rb = DMSHelper.createRasterBuilder(dms);
+		return new SignPixelPager(pix_pnl, rb, ms, PREVIEW_CLR);
 	}
 
 	/** Update the current panel */
 	private SignPixelPager createCurrentPager(DMS dms,
 		SignPixelPanel pix_pnl)
 	{
-		RasterGraphic[] rg = DMSHelper.createRasters(dms);
-		if (rg != null) {
-			String ms = DMSHelper.getMultiString(dms);
-			return new SignPixelPager(pix_pnl, rg, ms);
-		} else
-			return null;
+		String ms = DMSHelper.getMultiString(dms);
+		RasterBuilder rb = DMSHelper.createRasterBuilder(dms);
+		Color clr = SignPixelPanel.filterColor(dms);
+		return new SignPixelPager(pix_pnl, rb, ms, clr);
 	}
 
 	/** Set a single selected DMS */
@@ -355,7 +352,6 @@ public class SingleSignTab extends IPanel {
 
 	/** Update the status widgets */
 	private void updateStatus(DMS dms) {
-		current_pnl.setFilterColor(SignPixelPanel.filterColor(dms));
 		if (DMSHelper.isFailed(dms)) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.GRAY);

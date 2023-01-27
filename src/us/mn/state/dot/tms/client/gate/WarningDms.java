@@ -20,7 +20,7 @@ import java.awt.event.MouseEvent;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.RasterGraphic;
+import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.SignPixelPager;
 import us.mn.state.dot.tms.client.dms.SignPixelPanel;
@@ -100,12 +100,12 @@ public class WarningDms {
 
 	/** Update the DMS */
 	private void updateDms(DMS d) {
-		pix_pnl.setFilterColor(filterColor(d));
-		RasterGraphic[] rg = DMSHelper.createRasters(d);
-		if (rg != null) {
+		RasterBuilder rb = DMSHelper.createRasterBuilder(d);
+		if (rb != null) {
+			Color clr = filterColor(d);
 			String ms = DMSHelper.getMultiString(d);
 			pix_pnl.setDimensions(d.getSignConfig());
-			setPager(new SignPixelPager(pix_pnl, rg, ms));
+			setPager(new SignPixelPager(pix_pnl, rb, ms, clr));
 		} else
 			clearDms();
 	}

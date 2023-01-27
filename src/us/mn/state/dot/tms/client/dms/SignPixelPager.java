@@ -14,11 +14,13 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.Color;
 import javax.swing.Timer;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.PageTimeHelper;
+import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.MILLISECONDS;
@@ -31,6 +33,9 @@ import static us.mn.state.dot.tms.units.Interval.Units.MILLISECONDS;
  * @author Michael Darter
  */
 public class SignPixelPager {
+
+	/** Filter color for invalid message */
+	static private final Color INVALID_CLR = new Color(255, 128, 0, 48);
 
 	/** Time period for timer tick which updates panel */
 	static private final int TIMER_TICK_MS = 100;
@@ -64,10 +69,21 @@ public class SignPixelPager {
 
 	/** Create a new sign pixel pager.
 	 * @param pnl SignPixelPanel.
+	 @ @param rb Raster builder.
 	 * @param rg Array of raster graphics, one per page.
 	 * @param ms MULTI string. */
-	public SignPixelPager(SignPixelPanel pnl, RasterGraphic[] rg, String ms) {
+	public SignPixelPager(SignPixelPanel pnl, RasterBuilder rb, String ms,
+		Color clr)
+	{
 		pixel_pnl = pnl;
+		RasterGraphic[] rg = rb.createRasters(ms);
+		if (rg != null)
+			pixel_pnl.setFilterColor(clr);
+		else {
+			pixel_pnl.setFilterColor(INVALID_CLR);
+			ms = "";
+			rg = rb.createRasters("");
+		}
 		rasters = rg;
 		page_on = PageTimeHelper.pageOnIntervals(ms);
 		page_off = PageTimeHelper.pageOffIntervals(ms);
