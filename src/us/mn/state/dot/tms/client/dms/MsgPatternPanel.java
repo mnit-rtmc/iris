@@ -73,7 +73,7 @@ public class MsgPatternPanel extends JPanel {
 	private final JPanel preview_pnl;
 
 	/** Pager for sign pixel panel */
-	private DMSPanelPager pager;
+	private SignPixelPager pager;
 
 	/** Msg line panel */
 	private final ProxyTablePanel<MsgLine> msg_line_pnl;
@@ -275,22 +275,22 @@ public class MsgPatternPanel extends JPanel {
 	}
 
 	/** Create pixel panel pager */
-	private DMSPanelPager createPager(SignConfig sc, String ms) {
+	private SignPixelPager createPager(SignConfig sc, String ms) {
 		RasterBuilder rb = SignConfigHelper.createRasterBuilder(sc);
 		return (rb != null) ? createPager(rb, ms) : null;
 	}
 
 	/** Create pixel panel pager */
-	private DMSPanelPager createPager(RasterBuilder rb, String ms) {
+	private SignPixelPager createPager(RasterBuilder rb, String ms) {
 		RasterGraphic[] rg = rb.createRasters(ms);
 		return (rg != null)
-		      ? new DMSPanelPager(pixel_pnl, rg, ms)
+		      ? new SignPixelPager(pixel_pnl, rg, ms)
 		      : null;
 	}
 
 	/** Set the DMS panel pager */
-	private void setPager(DMSPanelPager p) {
-		DMSPanelPager op = pager;
+	private void setPager(SignPixelPager p) {
+		SignPixelPager op = pager;
 		if (op != null)
 			op.dispose();
 		pager = p;

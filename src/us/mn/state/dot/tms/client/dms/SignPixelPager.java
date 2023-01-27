@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ import static us.mn.state.dot.tms.units.Interval.Units.MILLISECONDS;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DMSPanelPager {
+public class SignPixelPager {
 
 	/** Time period for timer tick which updates panel */
 	static private final int TIMER_TICK_MS = 100;
@@ -62,12 +62,12 @@ public class DMSPanelPager {
 	/** Blanking state -- true during blank time between pages */
 	private boolean isBlanking = false;
 
-	/** Create a new DMS panel pager.
-	 * @param p SignPixelPanel.
+	/** Create a new sign pixel pager.
+	 * @param pnl SignPixelPanel.
 	 * @param rg Array of raster graphics, one per page.
 	 * @param ms MULTI string. */
-	public DMSPanelPager(SignPixelPanel p, RasterGraphic[] rg, String ms) {
-		pixel_pnl = p;
+	public SignPixelPager(SignPixelPanel pnl, RasterGraphic[] rg, String ms) {
+		pixel_pnl = pnl;
 		rasters = rg;
 		page_on = PageTimeHelper.pageOnIntervals(ms);
 		page_off = PageTimeHelper.pageOffIntervals(ms);

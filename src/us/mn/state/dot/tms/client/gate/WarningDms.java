@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.dms.DMSPanelPager;
+import us.mn.state.dot.tms.client.dms.SignPixelPager;
 import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
@@ -63,7 +63,7 @@ public class WarningDms {
 	public final SignPixelPanel pix_pnl = new SignPixelPanel(132, 80);
 
 	/** Pager for sign pixel panel */
-	private DMSPanelPager pager;
+	private SignPixelPager pager;
 
 	/** Create a new warning DMS */
 	public WarningDms(Session s) {
@@ -105,7 +105,7 @@ public class WarningDms {
 		if (rg != null) {
 			String ms = DMSHelper.getMultiString(d);
 			pix_pnl.setDimensions(d.getSignConfig());
-			setPager(new DMSPanelPager(pix_pnl, rg, ms));
+			setPager(new SignPixelPager(pix_pnl, rg, ms));
 		} else
 			clearDms();
 	}
@@ -118,8 +118,8 @@ public class WarningDms {
 	}
 
 	/** Set the pager */
-	private void setPager(DMSPanelPager p) {
-		DMSPanelPager op = pager;
+	private void setPager(SignPixelPager p) {
+		SignPixelPager op = pager;
 		if (op != null)
 			op.dispose();
 		pager = p;

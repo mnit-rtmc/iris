@@ -47,7 +47,6 @@ import us.mn.state.dot.tms.utils.MultiString;
  * It contains several other components and keeps their state synchronized.
  *
  * @see us.mn.state.dot.tms.SignMessage
- * @see us.mn.state.dot.tms.client.dms.DMSPanelPager
  * @see us.mn.state.dot.tms.client.dms.MessageComposer
  *
  * @author Douglas Lau

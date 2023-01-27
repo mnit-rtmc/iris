@@ -112,8 +112,8 @@ public class SingleSignTab extends IPanel {
 	/** Preview sign face panel */
 	private final SignFacePanel preview_pnl = new SignFacePanel();
 
-	/** Pager for selected DMS panel */
-	private DMSPanelPager pager;
+	/** Pager for selected pixel panel */
+	private SignPixelPager pager;
 
 	/** Mouse listener for popup menus */
 	private final MouseListener popper = new MouseAdapter() {
@@ -259,8 +259,8 @@ public class SingleSignTab extends IPanel {
 		return (preview) ? preview_pnl : current_pnl;
 	}
 
-	/** Create a DMS panel pager */
-	private DMSPanelPager createPager(DMS dms, SignPixelPanel pix_pnl) {
+	/** Create a pixel panel pager */
+	private SignPixelPager createPager(DMS dms, SignPixelPanel pix_pnl) {
 		if (dms != null) {
 			return (preview)
 			      ? createPreviewPager(dms, pix_pnl)
@@ -270,24 +270,24 @@ public class SingleSignTab extends IPanel {
 	}
 
 	/** Create a preview panel pager */
-	private DMSPanelPager createPreviewPager(DMS dms,
+	private SignPixelPager createPreviewPager(DMS dms,
 		SignPixelPanel pix_pnl)
 	{
 		String ms = dispatcher.getPreviewMulti(dms);
 		RasterGraphic[] rg = DMSHelper.createRasters(dms, ms);
 		return (rg != null)
-		      ? new DMSPanelPager(pix_pnl, rg, ms)
+		      ? new SignPixelPager(pix_pnl, rg, ms)
 		      : null;
 	}
 
 	/** Update the current panel */
-	private DMSPanelPager createCurrentPager(DMS dms,
+	private SignPixelPager createCurrentPager(DMS dms,
 		SignPixelPanel pix_pnl)
 	{
 		RasterGraphic[] rg = DMSHelper.createRasters(dms);
 		if (rg != null) {
 			String ms = DMSHelper.getMultiString(dms);
-			return new DMSPanelPager(pix_pnl, rg, ms);
+			return new SignPixelPager(pix_pnl, rg, ms);
 		} else
 			return null;
 	}
@@ -402,9 +402,9 @@ public class SingleSignTab extends IPanel {
 		expiration_lbl.setText(getExpiration(dms));
 	}
 
-	/** Set the DMS panel pager */
-	private void setPager(DMSPanelPager p) {
-		DMSPanelPager op = pager;
+	/** Set the sign pixel pager */
+	private void setPager(SignPixelPager p) {
+		SignPixelPager op = pager;
 		if (op != null)
 			op.dispose();
 		pager = p;

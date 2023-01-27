@@ -66,7 +66,7 @@ public class SignPixelPanel extends JPanel {
 	/** Color of sign face */
 	private Color face_color;
 
-	/** Color if filter mask */
+	/** Color of filter mask */
 	private Color filter_color;
 
 	/** Sign width (mm) */
