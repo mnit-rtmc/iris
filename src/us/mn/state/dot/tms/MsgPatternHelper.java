@@ -91,27 +91,4 @@ public class MsgPatternHelper extends BaseHelper {
 		}
 		return cfgs;
 	}
-
-	/** Find unused text rectangles in a pattern */
-	static public List<TextRect> findTextRectangles(MsgPattern pat,
-		TextRect tr)
-	{
-		return (tr != null)
-		      ? tr.find(pat.getMulti())
-		      : new ArrayList<TextRect>();
-	}
-
-	/** Check if a pattern has "fillable" text rectangles */
-	static public boolean isFillable(MsgPattern pat, TextRect tr) {
-		return findTextRectangles(pat, tr).size() > 0;
-	}
-
-	/** Split MULTI string into lines with a pattern */
-	static public List<String> splitLines(MsgPattern pat, TextRect tr,
-		String ms)
-	{
-		return (tr != null)
-		      ? tr.splitLines(pat.getMulti(), ms)
-		      : new ArrayList<String>();
-	}
 }

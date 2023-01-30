@@ -49,7 +49,6 @@ import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.TransMsgPattern;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.TollZoneHelper;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
@@ -367,22 +366,19 @@ public class DmsActionMsg {
 	/** Test if a feed message is valid */
 	private boolean isFeedMsgValid(FeedMsg msg, String ms) {
 		SignConfig sc = msg.getSignConfig();
-		if (sc == null)
+		MsgPattern pat = action.getMsgPattern();
+		if (sc == null || pat == null)
 			return false;
 		TextRect tr = SignConfigHelper.textRect(sc);
-		MsgPattern pat = new TransMsgPattern("");
-		List<String> lines = MsgPatternHelper.splitLines(pat, tr, ms);
-		for (int i = 0; i < lines.size(); i++) {
-			if (!isValidMsgLine((short) (i + 1), lines.get(i)))
+		List<String> lines = tr.splitLines(pat.getMulti(), ms);
+		short num = 0;
+		for (String line: lines) {
+			num++;
+			if ((!line.isEmpty()) &&
+			    (!MsgLineHelper.match(pat, num, line)))
 				return false;
 		}
 		return true;
-	}
-
-	/** Check if a MULTI string is a valid message text */
-	private boolean isValidMsgLine(short line, String ms) {
-		return ms.isEmpty() ||
-		       MsgLineHelper.match(action.getMsgPattern(), line, ms);
 	}
 
 	/** Calculate speed advisory span */

@@ -31,11 +31,9 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MsgPattern;
-import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.TransMsgPattern;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
@@ -299,15 +297,16 @@ public class MessageComposer extends JPanel {
 
 	/** Get the text rectangles for the selected pattern */
 	private List<TextRect> getPatternTextRects() {
-		MsgPattern pat = getMsgPattern();
 		TextRect tr = fullTextRect();
-		return MsgPatternHelper.findTextRectangles(pat, tr);
+		MsgPattern pat = getMsgPattern();
+		return (tr != null && pat != null)
+		      ? tr.find(pat.getMulti())
+		      : new ArrayList<TextRect>();
 	}
 
 	/** Get the selected message pattern */
 	public MsgPattern getMsgPattern() {
-		MsgPattern pat = pattern_cbx.getSelectedPattern();
-		return (pat != null) ? pat : new TransMsgPattern("");
+		return pattern_cbx.getSelectedPattern();
 	}
 
 	/** Get the full text rectangle of the selected sign */
@@ -324,8 +323,8 @@ public class MessageComposer extends JPanel {
 	/** Compose a MULTI string using the contents of the widgets */
 	public String getComposedMulti() {
 		TextRect tr = fullTextRect();
-		if (tr != null) {
-			MsgPattern pat = getMsgPattern();
+		MsgPattern pat = getMsgPattern();
+		if (tr != null && pat != null) {
 			ArrayList<String> lines = new ArrayList<String>();
 			for (int i = 0; i < n_rects; i++)
 				rects[i].getSelectedLines(lines);
@@ -339,16 +338,19 @@ public class MessageComposer extends JPanel {
 	/** Set the composed MULTI string */
 	public void setComposedMulti(String ms) {
 		TextRect tr = fullTextRect();
-		MsgPattern pat = pattern_cbx.findBestPattern(ms, tr);
-		pattern_cbx.setSelectedItem(pat);
-		// this makes a TransMsgPattern if none selected
-		pat = getMsgPattern();
-		List<String> lines = MsgPatternHelper.splitLines(pat, tr, ms);
-		adjusting++;
-		Iterator<String> lns = lines.iterator();
-		for (int i = 0; i < n_rects; i++)
-			rects[i].setSelectedLines(lns);
-		adjusting--;
+		if (tr != null) {
+			MsgPattern pat = pattern_cbx.findBestPattern(ms, tr);
+			pattern_cbx.setSelectedItem(pat);
+			pat = getMsgPattern();
+			String multi = (pat != null) ? pat.getMulti() : "";
+			List<String> lines = tr.splitLines(multi, ms);
+			adjusting++;
+			Iterator<String> lns = lines.iterator();
+			for (int i = 0; i < n_rects; i++)
+				rects[i].setSelectedLines(lns);
+			adjusting--;
+		} else
+			pattern_cbx.setSelectedItem(null);
 	}
 
 	/** Check if beacon is enabled */

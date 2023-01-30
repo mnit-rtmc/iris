@@ -44,21 +44,17 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 		return ms.isValidMulti();
 	}
 
+	/** Check if a pattern has "fillable" text rectangles */
+	static private boolean isFillable(MsgPattern pat, TextRect tr) {
+		assert pat != null && tr != null;
+		return tr.find(pat.getMulti()).size() > 0;
+	}
+
 	/** Populate the message pattern model, sorted */
 	public void populateModel(DMS dms, TextRect tr) {
 		setSelectedIndex(-1);
 		TreeSet<MsgPattern> pats = findPatterns(dms);
-		// check for a fillable pattern
-		boolean fillable = false;
-		for (MsgPattern pat: pats) {
-			if (MsgPatternHelper.isFillable(pat, tr)) {
-				fillable = true;
-				break;
-			}
-		}
 		removeAllItems();
-		if (!fillable)
-			addItem(null);
 		for (MsgPattern pat: pats)
 			addItem(pat);
 	}
@@ -101,6 +97,7 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 
 	/** Find the best pattern for a MULTI string */
 	public MsgPattern findBestPattern(String ms, TextRect tr) {
+		assert tr != null;
 		MsgPattern best = null;
 		for (int i = 0; i < getItemCount(); i++) {
 			MsgPattern pat = getItemAt(i);
@@ -110,7 +107,7 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 					best = pat;
 					break;
 				}
-				if (MsgPatternHelper.isFillable(pat, tr)) {
+				if (isFillable(pat, tr)) {
 					if (best != null) {
 						int len = multi.length();
 						int blen = best.getMulti()
