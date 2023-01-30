@@ -78,6 +78,9 @@ public interface DMS extends Device {
 	/** Set the user sign message */
 	void setMsgUser(SignMessage sm);
 
+	/** Get the user sign message */
+	SignMessage getMsgUser();
+
 	/** Get the scheduled sign message */
 	SignMessage getMsgSched();
 

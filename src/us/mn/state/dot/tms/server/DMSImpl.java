@@ -312,7 +312,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		// user message to prevent it from popping up days later, after
 		// communication is restored.
 		if (!c && getFailMillis() >= COMM_FAIL_BLANK_THRESHOLD_MS)
-			setMsgUserNull();
+			setMsgUserNotify(null);
 	}
 
 	/** Get the configure flag.
@@ -600,8 +600,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public void resetStateNotify() {
 		setStatusNotify(null);
 		setStuckPixelsNotify(null);
+		setMsgUserNotify(null);
 		setMsgSchedNotify(null);
-		setMsgUserNull();
 		setMsgCurrentNotify(null, "RESET");
 	}
 
@@ -733,6 +733,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * A null value indicates that the user message is unknown. */
 	private SignMessage msg_user;
 
+	/** Get the user sign messasge.
+	 * @return User sign message */
+	@Override
+	public SignMessage getMsgUser() {
+		return msg_user;
+	}
+
 	/** Set the user selected sign message */
 	@Override
 	public void setMsgUser(SignMessage sm) {
@@ -750,15 +757,18 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
-	/** Set the user selected sign message to null, without sending
-	 *  anything to the sign. */
-	public void setMsgUserNull() {
-		try {
-			store.update(this, "msg_user", null);
-			setMsgUser(null);
-		}
-		catch (TMSException e) {
-			logError("setMsgUserNull: " + e.getMessage());
+	/** Set the user selected sign message,
+	 *  without validating or sending anything to the sign. */
+	public void setMsgUserNotify(SignMessage sm) {
+		if (!objectEquals(msg_user, sm)) {
+			try {
+				store.update(this, "msg_user", sm);
+				setMsgUser(sm);
+				notifyAttribute("msgUser");
+			}
+			catch (TMSException e) {
+				logError("msg_user: " + e.getMessage());
+			}
 		}
 	}
 
@@ -780,25 +790,21 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			updateSchedMsg();
 	}
 
-	/** Set the scheduled sign message */
-	private void setMsgSched(SignMessage sm) {
-		try {
-			store.update(this, "msg_sched", sm);
-			msg_sched = sm;
-		}
-		catch (TMSException e) {
-			logError("msg_sched: " + e.getMessage());
-		}
-	}
-
 	/** Set the scheduled sign message.
 	 * @param sm New scheduled sign message.
 	 * @return true If scheduled message changed. */
 	private boolean setMsgSchedNotify(SignMessage sm) {
 		if (!objectEquals(msg_sched, sm)) {
-			setMsgSched(sm);
-			notifyAttribute("msgSched");
-			return true;
+			try {
+				store.update(this, "msg_sched", sm);
+				msg_sched = sm;
+				notifyAttribute("msgSched");
+				return true;
+			}
+			catch (TMSException e) {
+				logError("msg_sched: " + e.getMessage());
+				return false;
+			}
 		} else
 			return false;
 	}
