@@ -699,10 +699,10 @@ public class MultiString {
 		return mb.toString();
 	}
 
-	/** Strip trailing empty lines */
-	public String stripTrailingLines() {
+	/** Strip trailing whitespace tags */
+	public String stripTrailingWhitespaceTags() {
 		String ms = multi;
-		while (ms.endsWith("[nl]"))
+		while (ms.endsWith("[nl]") || ms.endsWith("[np]"))
 			ms = ms.substring(0, ms.length() - 4);
 		return ms;
 	}

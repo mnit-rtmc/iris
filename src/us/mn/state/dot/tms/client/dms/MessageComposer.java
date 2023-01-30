@@ -329,7 +329,9 @@ public class MessageComposer extends JPanel {
 			ArrayList<String> lines = new ArrayList<String>();
 			for (int i = 0; i < n_rects; i++)
 				rects[i].getSelectedLines(lines);
-			return tr.fill(pat.getMulti(), lines);
+			String ms = tr.fill(pat.getMulti(), lines);
+			MultiString multi = new MultiString(ms);
+			return multi.stripTrailingWhitespaceTags().toString();
 		} else
 			return "";
 	}

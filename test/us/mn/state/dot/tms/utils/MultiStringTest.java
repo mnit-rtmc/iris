@@ -462,14 +462,16 @@ public class MultiStringTest extends TestCase {
 			.equals("ABC"));
 		assertTrue(new MultiString("[pt50o0]ABC").stripPageTime()
 			.equals("ABC"));
-		assertTrue(new MultiString("[nl]").stripTrailingLines()
+		assertTrue(new MultiString("[nl]").stripTrailingWhitespaceTags()
 			.equals(""));
-		assertTrue(new MultiString("ABC[nl]").stripTrailingLines()
+		assertTrue(new MultiString("ABC[nl]").stripTrailingWhitespaceTags()
 			.equals("ABC"));
-		assertTrue(new MultiString("ABC[nl][nl]").stripTrailingLines()
+		assertTrue(new MultiString("ABC[nl][nl]").stripTrailingWhitespaceTags()
 			.equals("ABC"));
-		assertTrue(new MultiString("[nl]ABC[nl]").stripTrailingLines()
+		assertTrue(new MultiString("[nl]ABC[nl]").stripTrailingWhitespaceTags()
 			.equals("[nl]ABC"));
+		assertTrue(new MultiString("ABC[nl][np][nl]").stripTrailingWhitespaceTags()
+			.equals("ABC"));
 	}
 
 	public void testTrailingTr() {
