@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.client.dms;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -52,11 +53,13 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 
 	/** Populate the message pattern model, sorted */
 	public void populateModel(DMS dms, TextRect tr) {
-		setSelectedIndex(-1);
+		DefaultComboBoxModel<MsgPattern> mdl =
+			new DefaultComboBoxModel<MsgPattern>();
 		TreeSet<MsgPattern> pats = findPatterns(dms);
-		removeAllItems();
 		for (MsgPattern pat: pats)
-			addItem(pat);
+			mdl.addElement(pat);
+		mdl.setSelectedItem(null);
+		setModel(mdl);
 	}
 
 	/** Find all message patterns for the specified DMS */

@@ -102,6 +102,8 @@ public class TextRectComposer extends JPanel {
 	public void clearWidgets() {
 		for (MsgLineCBox cbx: line_cbx)
 			cbx.setSelectedIndex(-1);
+		for (JPanel pnl: line_pnl)
+			pnl.setVisible(false);
 	}
 
 	/** Dispose of page panel */
@@ -116,6 +118,10 @@ public class TextRectComposer extends JPanel {
 	public void setEnabled(boolean b) {
 		for (MsgLineCBox cbx: line_cbx)
 			cbx.setEnabled(b);
+		if (!b) {
+			for (JPanel pnl: line_pnl)
+				pnl.setVisible(false);
+		}
 		super.setEnabled(b);
 	}
 

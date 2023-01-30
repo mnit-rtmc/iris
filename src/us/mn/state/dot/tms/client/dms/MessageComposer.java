@@ -218,11 +218,9 @@ public class MessageComposer extends JPanel {
 	/** Clear the widgets */
 	private void clearWidgets() {
 		adjusting++;
-		pattern_cbx.setSelectedItem(null);
 		setTabRect(0);
-		for (TextRectComposer rc: rects)
-			rc.clearWidgets();
 		dur_cbx.setSelectedIndex(0);
+		setComposedMulti("");
 		adjusting--;
 	}
 
@@ -258,8 +256,8 @@ public class MessageComposer extends JPanel {
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
 		adjusting++;
-		setTabRect(0);
 		pattern_cbx.setEnabled(b);
+		setTabRect(0);
 		for (TextRectComposer rc: rects)
 			rc.setEnabled(b);
 		dur_cbx.setEnabled(b);
@@ -299,6 +297,9 @@ public class MessageComposer extends JPanel {
 				rect_tab.addTab(title, rc);
 			first += n_lines;
 		}
+		// at least one tab required for proper layout
+		if (rect_tab.getTabCount() < 1)
+			rect_tab.addTab("", rects[0]);
 	}
 
 	/** Get the text rectangles for the given pattern */
@@ -353,8 +354,11 @@ public class MessageComposer extends JPanel {
 			for (int i = 0; i < n_rects; i++)
 				rects[i].setSelectedLines(lns);
 			adjusting--;
-		} else
+		} else {
 			pattern_cbx.setSelectedItem(null);
+			for (TextRectComposer rc: rects)
+				rc.clearWidgets();
+		}
 	}
 
 	/** Check if beacon is enabled */
