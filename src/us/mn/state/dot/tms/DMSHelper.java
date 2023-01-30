@@ -204,13 +204,12 @@ public class DMSHelper extends BaseHelper {
 		return "";
 	}
 
-	/** Get the operator sent MULTI string currently on a DMS.
+	/** Get the user sent MULTI string currently on a DMS.
 	 * @param dms DMS to lookup. */
-	static public String getOperatorMulti(DMS dms) {
+	static public String getUserMulti(DMS dms) {
 		if (dms != null) {
-			SignMessage sm = dms.getMsgCurrent();
-			if (sm != null
-			 && SignMsgSource.operator.checkBit(sm.getSource()))
+			SignMessage sm = dms.getMsgUser();
+			if (sm != null)
 				return sm.getMulti();
 		}
 		return "";
