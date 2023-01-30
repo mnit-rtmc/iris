@@ -126,11 +126,11 @@ public class TextRectComposer extends JPanel {
 	}
 
 	/** Set the message combo box models */
-	public void setModels(MsgLineFinder mtf, int first, int n_lines) {
+	public void setModels(MsgLineFinder mlf, int first, int n_lines) {
 		for (int i = 0; i < MAX_LINES; i++) {
 			if (i < n_lines) {
 				short ln = (short) (first + i);
-				line_cbx[i].setModel(mtf.getLineModel(ln));
+				line_cbx[i].setModel(mlf.getLineModel(ln));
 				line_pnl[i].setVisible(true);
 			} else {
 				line_pnl[i].setVisible(false);

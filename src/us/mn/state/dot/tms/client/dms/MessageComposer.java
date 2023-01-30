@@ -82,6 +82,7 @@ public class MessageComposer extends JPanel {
 	private final IAction clear_act = new IAction("dms.clear") {
 		protected void doActionPerformed(ActionEvent e) {
 			clearWidgets();
+			updateMessage(true);
 		}
 	};
 
@@ -107,8 +108,8 @@ public class MessageComposer extends JPanel {
 	/** Button to blank selected signs */
 	private final JButton blank_btn;
 
-	/** Message line finder for selected sign */
-	private MsgLineFinder finder;
+	/** Selected sign */
+	private DMS dms;
 
 	/** Number of text rectangles in selected pattern */
 	private int n_rects;
@@ -221,8 +222,8 @@ public class MessageComposer extends JPanel {
 		setTabRect(0);
 		for (TextRectComposer rc: rects)
 			rc.clearWidgets();
+		dur_cbx.setSelectedIndex(0);
 		adjusting--;
-		updateMessage(true);
 	}
 
 	/** Set tab to specified text rect */
@@ -242,10 +243,13 @@ public class MessageComposer extends JPanel {
 	/** Set the selected sign */
 	public void setSelectedSign(DMS proxy) {
 		adjusting++;
-		finder = new MsgLineFinder(proxy);
-		TextRect tr = fullTextRect(proxy);
+		dms = proxy;
+		TextRect tr = fullTextRect();
 		pattern_cbx.populateModel(proxy, tr);
 		dur_cbx.setSelectedIndex(0);
+		// if sign is null, pattern_listener doesn't call this
+		if (proxy == null)
+			updatePattern();
 		adjusting--;
 	}
 
@@ -265,7 +269,9 @@ public class MessageComposer extends JPanel {
 
 	/** Update the selected pattern */
 	private void updatePattern() {
-		List<TextRect> trs = getPatternTextRects();
+		MsgPattern pat = getMsgPattern();
+		MsgLineFinder finder = new MsgLineFinder(dms, pat);
+		List<TextRect> trs = getPatternTextRects(pat);
 		n_rects = Math.min(trs.size(), rects.length);
 		while (n_rects < rect_tab.getTabCount())
 			rect_tab.removeTabAt(n_rects);
@@ -295,27 +301,27 @@ public class MessageComposer extends JPanel {
 		}
 	}
 
-	/** Get the text rectangles for the selected pattern */
-	private List<TextRect> getPatternTextRects() {
+	/** Get the text rectangles for the given pattern */
+	private List<TextRect> getPatternTextRects(MsgPattern pat) {
 		TextRect tr = fullTextRect();
-		MsgPattern pat = getMsgPattern();
 		return (tr != null && pat != null)
 		      ? tr.find(pat.getMulti())
 		      : new ArrayList<TextRect>();
 	}
 
 	/** Get the selected message pattern */
-	public MsgPattern getMsgPattern() {
+	private MsgPattern getMsgPattern() {
 		return pattern_cbx.getSelectedPattern();
+	}
+
+	/** Get MULTI string of selected message pattern */
+	private String getPatternMulti() {
+		MsgPattern pat = getMsgPattern();
+		return (pat != null) ? pat.getMulti() : "";
 	}
 
 	/** Get the full text rectangle of the selected sign */
 	private TextRect fullTextRect() {
-		return fullTextRect(dispatcher.getSingleSelection());
-	}
-
-	/** Get the full text rectangle of the selected sign */
-	private TextRect fullTextRect(DMS dms) {
 		SignConfig sc = (dms != null) ? dms.getSignConfig() : null;
 		return SignConfigHelper.textRect(sc);
 	}
@@ -323,12 +329,11 @@ public class MessageComposer extends JPanel {
 	/** Compose a MULTI string using the contents of the widgets */
 	public String getComposedMulti() {
 		TextRect tr = fullTextRect();
-		MsgPattern pat = getMsgPattern();
-		if (tr != null && pat != null) {
+		if (tr != null) {
 			ArrayList<String> lines = new ArrayList<String>();
 			for (int i = 0; i < n_rects; i++)
 				rects[i].getSelectedLines(lines);
-			String ms = tr.fill(pat.getMulti(), lines);
+			String ms = tr.fill(getPatternMulti(), lines);
 			MultiString multi = new MultiString(ms);
 			return multi.stripTrailingWhitespaceTags().toString();
 		} else
@@ -341,9 +346,8 @@ public class MessageComposer extends JPanel {
 		if (tr != null) {
 			MsgPattern pat = pattern_cbx.findBestPattern(ms, tr);
 			pattern_cbx.setSelectedItem(pat);
-			pat = getMsgPattern();
-			String multi = (pat != null) ? pat.getMulti() : "";
-			List<String> lines = tr.splitLines(multi, ms);
+			String pat_ms = getPatternMulti();
+			List<String> lines = tr.splitLines(pat_ms, ms);
 			adjusting++;
 			Iterator<String> lns = lines.iterator();
 			for (int i = 0; i < n_rects; i++)

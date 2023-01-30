@@ -40,25 +40,24 @@ public class MsgLineFinder {
 		new HashMap<Short, MsgLineCBoxModel>();
 
 	/** Create a new message line finder */
-	public MsgLineFinder(DMS d) {
+	public MsgLineFinder(DMS d, MsgPattern pat) {
 		dms = d;
 		if (dms != null) {
 			Iterator<MsgLine> it = MsgLineHelper.iterator();
-			while (it.hasNext())
-				checkLine(it.next());
+			while (it.hasNext()) {
+				MsgLine ml = it.next();
+				if (ml.getMsgPattern() == pat)
+					checkLine(ml);
+			}
 		}
 	}
 
 	/** Check if a message line belongs */
 	private void checkLine(MsgLine ml) {
-		MsgPattern pat = ml.getMsgPattern();
-		String cht = pat.getComposeHashtag();
-		if (cht != null && DMSHelper.hasHashtag(dms, cht)) {
-			String rht = ml.getRestrictHashtag();
-			if (rht == null || DMSHelper.hasHashtag(dms, rht)) {
-				short ln = ml.getLine();
-				getLineModel(ln).add(ml);
-			}
+		String rht = ml.getRestrictHashtag();
+		if (rht == null || DMSHelper.hasHashtag(dms, rht)) {
+			short ln = ml.getLine();
+			getLineModel(ln).add(ml);
 		}
 	}
 
