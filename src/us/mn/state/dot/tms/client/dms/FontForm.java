@@ -221,7 +221,7 @@ public class FontForm extends AbstractForm {
 
 	/** Lookup the glyphs in the selected font */
 	private void lookupGlyphs(Font font) {
-		Collection<Glyph> gs = FontHelper.lookupGlyphs(font);
+		Collection<Glyph> gs = FontHelper.lookupGlyphs(font).values();
 		gmap.clear();
 		renderer.clearBitmaps();
 		for (Glyph g: gs)
