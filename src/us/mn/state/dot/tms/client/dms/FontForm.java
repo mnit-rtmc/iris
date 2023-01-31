@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
-import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
@@ -50,14 +49,9 @@ public class FontForm extends AbstractForm {
 
 	/** Get the width of pangram panel (pixels) */
 	static private int pangram_width(Font f, int cw) {
-		if (cw > 0)
-			return cw * PANGRAM.length();
-		try {
-			return FontHelper.calculateWidth(f, PANGRAM);
-		}
-		catch (InvalidMsgException e) {
-			return 0;
-		}
+		return (cw > 0)
+		      ? PANGRAM.length() * cw
+		      : Math.max(FontHelper.calculateWidth(f, PANGRAM), 0);
 	}
 
 	/** Check if the user is permitted to use the form */

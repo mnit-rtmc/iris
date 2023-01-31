@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.GlyphHelper;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
-import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
@@ -650,12 +649,12 @@ public class MultiRenderer extends MultiAdapter {
 			return (font != null) ? font.getHeight() : 0;
 		}
 		int getWidth() {
-			try {
-				return FontHelper.calculateWidth(font, span,
-					c_space);
-			}
-			catch (InvalidMsgException e) {
-				syntax_err=MultiSyntaxError.characterNotDefined;
+			int w = FontHelper.calculateWidth(font, span, c_space);
+			if (w >= 0)
+				return w;
+			else {
+				syntax_err = 
+					MultiSyntaxError.characterNotDefined;
 				return 0;
 			}
 		}

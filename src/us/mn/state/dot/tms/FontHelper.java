@@ -102,11 +102,9 @@ public class FontHelper extends BaseHelper {
 	/** Calculate the width of a span of text.
 	 * @param font Font to use for text
 	 * @param t Text to calculate
-	 * @return Width in pixels of text
-	 * @throws InvalidMsgException if the font is missing a character */
-	static public int calculateWidth(Font font, String t)
-		throws InvalidMsgException
-	{
+	 * @return Width in pixels of text,
+	 *         or -1 if the font is missing a character. */
+	static public int calculateWidth(Font font, String t) {
 		return calculateWidth(font, t, font.getCharSpacing());
 	}
 
@@ -114,18 +112,19 @@ public class FontHelper extends BaseHelper {
 	 * @param font Font to use for text.
 	 * @param t Text to calculate.
 	 * @param cs Character spacing.
-	 * @return Width in pixels of text.
-	 * @throws InvalidMsgException if the font is missing a character */
-	static public int calculateWidth(Font font, String t, int cs)
-		throws InvalidMsgException
-	{
+	 * @return Width in pixels of text,
+	 *         or -1 if the font is missing a character. */
+	static public int calculateWidth(Font font, String t, int cs) {
 		int w = 0;
 		for (int i = 0; i < t.length(); i++) {
 			if (i > 0)
 				w += cs;
 			int cp = t.charAt(i);
 			Glyph g = lookupGlyph(font, cp);
-			w += g.getWidth();
+			if (g != null)
+				w += g.getWidth();
+			else
+				return -1;
 		}
 		return w;
 	}
