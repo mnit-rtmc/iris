@@ -247,7 +247,7 @@ public class MessageComposer extends JPanel {
 		dur_cbx.setSelectedIndex(0);
 		// if sign is null, pattern_listener doesn't call this
 		if (proxy == null)
-			updatePattern();
+			pattern_cbx.setSelectedItem(null);
 		adjusting--;
 	}
 
@@ -298,8 +298,10 @@ public class MessageComposer extends JPanel {
 			first += n_lines;
 		}
 		// at least one tab required for proper layout
-		if (rect_tab.getTabCount() < 1)
+		if (rect_tab.getTabCount() < 1) {
+			rects[0].setEnabled(false);
 			rect_tab.addTab("", rects[0]);
+		}
 	}
 
 	/** Get the text rectangles for the given pattern */
