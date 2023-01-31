@@ -30,6 +30,8 @@ import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
+import us.mn.state.dot.tms.TransMsgLine;
+import us.mn.state.dot.tms.WordHelper;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.TextRect;
 
@@ -108,8 +110,13 @@ public class MsgLineFinder {
 		String rht = ml.getRestrictHashtag();
 		if (rht == null || DMSHelper.hasHashtag(dms, rht)) {
 			short line = ml.getLine();
-			if (isWidthOk(line, ml))
-				getLineModel(line).add(ml);
+			do {
+				if (isWidthOk(line, ml)) {
+					getLineModel(line).add(ml);
+					break;
+				}
+				ml = createAbbreviated(ml);
+			} while (ml != null);
 		}
 	}
 
@@ -143,6 +150,42 @@ public class MsgLineFinder {
 				return -1;
 		}
 		return width;
+	}
+
+	/** Create an abbreviated message line */
+	private MsgLine createAbbreviated(MsgLine ml) {
+		String ms = ml.getMulti();
+		String[] words = ms.split(" ");
+		// Abbreviate words with non-blank abbreviations
+		for (int i = words.length - 1; i >= 0; i--) {
+			String abbrev = WordHelper.abbreviate(words[i]);
+			if (abbrev != null && abbrev.length() > 0) {
+				words[i] = abbrev;
+				return createAbbreviated(ml, words);
+			}
+		}
+		// Abbreviate words with blank abbreviations
+		for (int i = words.length - 1; i >= 0; i--) {
+			String abbrev = WordHelper.abbreviate(words[i]);
+			if (abbrev != null) {
+				words[i] = abbrev;
+				return createAbbreviated(ml, words);
+			}
+		}
+		return null;
+	}
+
+	/** Create an abbreviated message line */
+	private MsgLine createAbbreviated(MsgLine ml, String[] words) {
+		StringBuilder sb = new StringBuilder();
+		for (String word: words) {
+			if (word.length() > 0)
+				sb.append(word).append(' ');
+		}
+		String ms = sb.toString().trim();
+		return (ms.length() > 0)
+		      ? new TransMsgLine(ms, ml.getLine(), ml.getRank())
+		      : null;
 	}
 
 	/** Get the model for the specified line */
