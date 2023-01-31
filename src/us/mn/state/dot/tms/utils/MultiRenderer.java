@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  * Copyright (C) 2019-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -375,9 +375,6 @@ public class MultiRenderer extends MultiAdapter {
 			for (Block block: blocks)
 				block.render();
 		}
-		catch (InvalidMsgException e) {
-			syntax_err = MultiSyntaxError.characterNotDefined;
-		}
 		catch (IndexOutOfBoundsException e) {
 			syntax_err = MultiSyntaxError.textTooBig;
 		}
@@ -442,7 +439,7 @@ public class MultiRenderer extends MultiAdapter {
 				lines.addLast(new Line(null));
 			return lines.peekLast();
 		}
-		void render() throws InvalidMsgException {
+		void render() {
 			int ex = getExtraHeight();
 			if (ex < 0) {
 				syntax_err = MultiSyntaxError.textTooBig;
@@ -543,7 +540,7 @@ public class MultiRenderer extends MultiAdapter {
 				fragments.addLast(new Fragment());
 			return fragments.peekLast();
 		}
-		void render(int base) throws InvalidMsgException {
+		void render(int base) {
 			for (Fragment f: fragments)
 				f.render(base);
 		}
@@ -568,7 +565,7 @@ public class MultiRenderer extends MultiAdapter {
 		void addSpan(Span s) {
 			spans.add(s);
 		}
-		void render(int base) throws InvalidMsgException {
+		void render(int base) {
 			int ex = getExtraWidth();
 			if (ex < 0) {
 				syntax_err = MultiSyntaxError.textTooBig;
@@ -666,13 +663,16 @@ public class MultiRenderer extends MultiAdapter {
 			assert font != null;
 			return (font != null) ? font.getLineSpacing() : 0;
 		}
-		void render(int x, int base) throws InvalidMsgException {
+		void render(int x, int base) {
 			int y = base - getHeight();
 			for (int i = 0; i < span.length(); i++) {
 				int cp = span.charAt(i);
 				Glyph g = FontHelper.lookupGlyph(font, cp);
-				renderGlyph(g, foreground, x, y);
-				x += g.getWidth() + c_space;
+				if (g != null) {
+					renderGlyph(g, foreground, x, y);
+					x += g.getWidth() + c_space;
+				} else
+					syntax_err = MultiSyntaxError.characterNotDefined;
 			}
 		}
 	}

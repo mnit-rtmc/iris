@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,16 +89,14 @@ public class FontHelper extends BaseHelper {
 	}
 
 	/** Lookup a glyph in the specified font */
-	static public Glyph lookupGlyph(Font font, int cp)
-		throws InvalidMsgException
-	{
+	static public Glyph lookupGlyph(Font font, int cp) {
 		Iterator<Glyph> it = GlyphHelper.iterator();
 		while (it.hasNext()) {
 			Glyph g = it.next();
 			if (g.getFont() == font && g.getCodePoint() == cp)
 				return g;
 		}
-		throw new InvalidMsgException("code point: " + cp);
+		return null;
 	}
 
 	/** Calculate the width of a span of text.
