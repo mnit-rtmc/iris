@@ -14,9 +14,9 @@
  */
 package us.mn.state.dot.tms;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -77,7 +77,7 @@ public class FontHelper extends BaseHelper {
 	}
 
 	/** Lookup the glyphs in the specified font */
-	static public Collection<Glyph> lookupGlyphs(Font font) {
+	static public Map<Integer, Glyph> lookupGlyphs(Font font) {
 		TreeMap<Integer, Glyph> glyphs = new TreeMap<Integer, Glyph>();
 		Iterator<Glyph> it = GlyphHelper.iterator();
 		while (it.hasNext()) {
@@ -85,7 +85,7 @@ public class FontHelper extends BaseHelper {
 			if (g.getFont() == font)
 				glyphs.put(g.getCodePoint(), g);
 		}
-		return glyphs.values();
+		return glyphs;
 	}
 
 	/** Lookup a glyph in the specified font */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,8 @@ public class FontVersionByteStream extends CRCStream {
 
 	/** Create a new FontVersionByteStream */
 	public FontVersionByteStream(Font font, int f_num) throws IOException {
-		Collection<Glyph> glyphs = FontHelper.lookupGlyphs(font);
+		Collection<Glyph> glyphs =
+			FontHelper.lookupGlyphs(font).values();
 		DataOutputStream dos = new DataOutputStream(this);
 		dos.writeByte(f_num);
 		dos.writeByte(font.getHeight());

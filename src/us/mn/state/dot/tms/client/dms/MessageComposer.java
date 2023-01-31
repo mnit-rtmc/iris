@@ -268,7 +268,7 @@ public class MessageComposer extends JPanel {
 	/** Update the selected pattern */
 	private void updatePattern() {
 		MsgPattern pat = getMsgPattern();
-		MsgLineFinder finder = new MsgLineFinder(dms, pat);
+		MsgLineFinder finder = MsgLineFinder.create(dms, pat);
 		List<TextRect> trs = getPatternTextRects(pat);
 		n_rects = Math.min(trs.size(), rects.length);
 		while (n_rects < rect_tab.getTabCount())
