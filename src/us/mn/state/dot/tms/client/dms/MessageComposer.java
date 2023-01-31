@@ -299,7 +299,7 @@ public class MessageComposer extends JPanel {
 		}
 		// at least one tab required for proper layout
 		if (rect_tab.getTabCount() < 1) {
-			rects[0].setEnabled(false);
+			rects[0].setModels(null, 0, 0);
 			rect_tab.addTab("", rects[0]);
 		}
 	}
