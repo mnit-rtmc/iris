@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2023  Minnesota Department of Transportation
+ * Copyright (C) 2023       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +18,8 @@ package us.mn.state.dot.tms;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import us.mn.state.dot.tms.client.dms.DMSDispatcher;
 import us.mn.state.dot.tms.utils.MultiAdapter;
 import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
@@ -26,6 +29,7 @@ import us.mn.state.dot.tms.utils.TextRect;
  * Helper class for messages patterns.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public class MsgPatternHelper extends BaseHelper {
 
@@ -72,9 +76,7 @@ public class MsgPatternHelper extends BaseHelper {
 
 	/** Get default text rectangle for a pattern */
 	static private TextRect defaultRect(MsgPattern pat) {
-		if (pat == null)
-			return null;
-		SignConfig sc = pat.getSignConfig();
+		SignConfig sc = DMSDispatcher.getSelectedSignConfig(pat);
 		if (sc == null)
 			return null;
 		int width = sc.getPixelWidth();

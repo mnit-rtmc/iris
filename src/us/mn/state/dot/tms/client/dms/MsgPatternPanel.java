@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2018-2022  Minnesota Department of Transportation
+ * Copyright (C) 2023       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +42,7 @@ import us.mn.state.dot.tms.utils.MultiString;
  * A panel for editing the properties of a message pattern.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public class MsgPatternPanel extends IPanel
 	implements ProxyView<MsgPattern>
@@ -129,13 +131,11 @@ public class MsgPatternPanel extends IPanel
 
 	/** Update pixel panel preview */
 	private void updatePixelPanel(MsgPattern pat) {
-		if (pat != null) {
-			SignConfig sc = pat.getSignConfig();
-			if (sc != null) {
-				updatePixelPanel(sc, new MultiString(
-					pat.getMulti()));
-				return;
-			}
+		SignConfig sc = DMSDispatcher.getSelectedSignConfig(pat);
+		if (sc != null) {
+			updatePixelPanel(sc, new MultiString(
+				pat.getMulti()));
+			return;
 		}
 		pixel_pnl.setPhysicalDimensions(0, 0, 0, 0, 0, 0);
 		pixel_pnl.setLogicalDimensions(0, 0, 0, 0);

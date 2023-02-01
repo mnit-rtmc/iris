@@ -3,6 +3,7 @@
  * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  * Copyright (C) 2017-2018  Iteris Inc.
+ * Copyright (C) 2023       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +28,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
+import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
@@ -53,6 +55,7 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Douglas Lau
  * @author Erik Engstrom
  * @author Michael Darter
+ * @author John L. Stanley - SRF Consulting
  */
 public class DMSDispatcher extends JPanel {
 
@@ -399,6 +402,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Update the selected sign(s) */
 	private void updateSelected() {
+		saveSelectedSignConfig();
 		Set<DMS> sel = sel_mdl.getSelected();
 		if (sel.size() == 0)
 			clearSelected();
@@ -489,5 +493,44 @@ public class DMSDispatcher extends JPanel {
 	/** Can a device request be sent to the specified DMS? */
 	public boolean canRequest(DMS dms) {
 		return isWritePermitted(dms, "deviceRequest");
+	}
+	
+	/** SignConfig for selected sign(S) */
+	static private SignConfig selSignConfig;
+	
+	/** Save selected sign(s) sign-config.
+	 * Saves null if: no sign is selected; one of the
+	 * selected signs doesn't have a sign config; or any
+	 * of the selected signs have different sign-configs. */
+	public void saveSelectedSignConfig() {
+		SignConfig scNew = null, sc;
+		for (DMS dms: sel_mdl.getSelected()) {
+			sc = dms.getSignConfig();
+			if (sc == null) {
+				scNew = null;
+				break;    // sign doesn't have a sign config
+			}
+			if (scNew == null) {
+				scNew = sc;
+				continue; // first selected sign
+			}
+			if (scNew != sc) {
+				scNew = null;
+				break;    // mixed sign configs
+			}
+		}
+		selSignConfig = scNew;
+	}
+	
+	/** Get selected sign config.
+	 * Returns pat.getSignConfig() if non null.
+	 * Otherwise, returns sign config of the selected sign(s). */
+	static public SignConfig getSelectedSignConfig(MsgPattern pat) {
+		if (pat != null) {
+			SignConfig sc = pat.getSignConfig();
+			if (sc != null)
+				return sc;
+		}
+		return selSignConfig;
 	}
 }
