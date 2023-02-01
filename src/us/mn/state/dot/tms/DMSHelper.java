@@ -53,8 +53,11 @@ public class DMSHelper extends BaseHelper {
 
 	/** Normalize a hashtag value */
 	static public String normalizeHashtag(String ht) {
-		ht = ht.trim();
-		return ht.matches("#[A-Za-z0-9]+") ? ht : null;
+		if (ht != null) {
+			ht = ht.trim();
+			return ht.matches("#[A-Za-z0-9]+") ? ht : null;
+		} else
+			return null;
 	}
 
 	/** Make an ordered array of hashtags */
