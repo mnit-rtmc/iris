@@ -5,32 +5,6 @@ BEGIN;
 
 SELECT iris.update_version('5.37.0', '5.38.0');
 
--- Make temp table for "small" sign groups
-CREATE TEMP TABLE sign_group_small AS (
-    SELECT st.sign_group AS small
-    FROM iris.sign_text st
-    JOIN iris.sign_group sg ON st.sign_group = sg.name
-    WHERE local = false AND line > 3
-    GROUP BY st.sign_group
-);
--- Make temp table for one/two page patterns
-CREATE TEMP TABLE sign_group_pattern (
-    sign_group VARCHAR(20) PRIMARY KEY,
-    pattern VARCHAR(20) NOT NULL
-);
-INSERT INTO sign_group_pattern (sign_group, pattern) (
-    SELECT name, 'ONE_PAGE'
-    FROM iris.sign_group
-    GROUP BY name
-);
-UPDATE sign_group_pattern SET pattern = 'TWO_PAGE' WHERE sign_group IN (
-    SELECT st.sign_group
-    FROM iris.sign_text st
-    JOIN iris.sign_group sg ON st.sign_group = sg.name
-    WHERE line > 3
-    GROUP BY st.sign_group
-);
-
 -- NOTE: This has checks for MnDOT group names.
 --       For other agencies, it may need agency-specific tweaks
 CREATE FUNCTION sign_group_hashtag(TEXT) RETURNS TEXT AS $sgh$
@@ -40,10 +14,20 @@ DECLARE
     word TEXT;
     res TEXT := '#';
 BEGIN
-    IF sign_group IN (SELECT small FROM sign_group_small) THEN
+    IF sign_group = 'GATES' OR sign_group = 'MOA' THEN
+        RETURN '#OneLine';
+    ELSIF sign_group LIKE '%2LN%' THEN
+        RETURN '#TwoLine';
+    ELSIF sign_group IN (SELECT name FROM sign_group_small) THEN
         RETURN '#Small';
-    ELSIF sign_group = 'VPARK' THEN
+    ELSIF sign_group = 'TAD_GARAGE' THEN
+        RETURN '#FourLine';
+    ELSIF sign_group = 'VPARK' OR sign_group = 'TAD_GARAGE' THEN
         RETURN '#TadGarage';
+    ELSIF sign_group LIKE '%TEST%' THEN
+        RETURN '#Test';
+    ELSIF sign_group LIKE '%PIXEL%' OR sign_group LIKE '%STD%' THEN
+        RETURN '#ThreeLine';
     END IF;
     words = regexp_split_to_array(
         regexp_replace(sign_group, '(\d+)', '_\1_', 'g'),
@@ -51,21 +35,17 @@ BEGIN
     );
     FOREACH word IN ARRAY words
     LOOP
-        IF word = 'TEST' THEN
-            RETURN '#Test';
-        ELSIF word = 'PIXEL' OR word = 'STD' THEN
-            RETURN '#ThreeLine';
-        ELSIF word = 'C' AND sign_group LIKE 'C_%' THEN
-            res = res || 'Cty';
+        IF word = 'ALL' THEN
+            RETURN res;
         ELSIF word = 'ACT' THEN
             res = res || 'p';
+        ELSIF word = 'C' AND sign_group LIKE 'C_%' THEN
+            res = res || 'Cty';
         ELSIF word = 'MNPASS' THEN
             res = res || 'Ezpass';
         ELSIF word = 'PX' OR word = 'REV' OR word = 'WIDE' THEN
             res = res || 'Px';
-        ELSIF word = 'VDL' THEN
-            res = res || 'VDL';
-        ELSIF length(word) > 2 THEN
+        ELSIF length(word) > 2 AND word != 'VDL' THEN
             res = res || initcap(word);
         ELSIF word != 'LG' AND word != 'SM' THEN
             res = res || upper(word);
@@ -74,6 +54,57 @@ BEGIN
     RETURN res;
 END;
 $sgh$ LANGUAGE plpgsql;
+
+-- Make temp table for "small" sign groups
+CREATE TEMP TABLE sign_group_small AS (
+    SELECT st.sign_group AS name
+    FROM iris.sign_text st
+    JOIN iris.sign_group sg ON st.sign_group = sg.name
+    WHERE local = false AND line > 4
+    GROUP BY st.sign_group
+);
+
+-- Make temp table for associating sign groups with patterns
+CREATE TEMP TABLE sign_group_pattern (
+    sign_group VARCHAR(20) PRIMARY KEY,
+    pattern VARCHAR(20) NOT NULL,
+    hashtag VARCHAR(16)
+);
+
+-- By default, start all sign groups with 3 line pattern
+INSERT INTO sign_group_pattern (sign_group, pattern) (
+    SELECT name, '.3_LINE'
+    FROM iris.sign_group
+    GROUP BY name
+);
+UPDATE sign_group_pattern
+    SET hashtag = sign_group_hashtag(sign_group)
+    WHERE sign_group IN
+(
+    SELECT st.sign_group
+    FROM iris.sign_text st
+    JOIN iris.sign_group sg ON st.sign_group = sg.name
+    WHERE local = true
+    GROUP BY st.sign_group
+);
+UPDATE sign_group_pattern SET pattern = '.1_LINE' WHERE sign_group = 'GATES';
+UPDATE sign_group_pattern SET pattern = '.2_LINE' WHERE sign_group IN (
+    SELECT st.sign_group
+    FROM iris.sign_text st
+    JOIN iris.sign_group sg ON st.sign_group = sg.name
+    WHERE line > 3
+    GROUP BY st.sign_group
+);
+UPDATE sign_group_pattern SET pattern = '.2_PAGE' WHERE sign_group IN (
+    SELECT st.sign_group
+    FROM iris.sign_text st
+    JOIN iris.sign_group sg ON st.sign_group = sg.name
+    WHERE line > 4
+    GROUP BY st.sign_group
+);
+UPDATE sign_group_pattern SET pattern = '.4_LINE' WHERE sign_group IN (
+    'TAD_GARAGE', 'V394E16', 'V394E17', 'V52N34'
+);
 
 -- Remove DMS query message enable system attribute
 DELETE FROM iris.system_attribute WHERE name = 'dms_querymsg_enable';
@@ -100,6 +131,10 @@ CREATE TABLE iris.msg_line (
     CONSTRAINT msg_line_rank CHECK ((rank >= 1) AND (rank <= 99))
 );
 
+-- temporary index for conflict checks
+CREATE UNIQUE INDEX temp_conflict_idx
+    ON iris.msg_line (msg_pattern, line, multi);
+
 ALTER TABLE iris.msg_pattern ADD COLUMN compose_hashtag VARCHAR(16);
 
 UPDATE iris.msg_pattern
@@ -108,48 +143,35 @@ UPDATE iris.msg_pattern
 
 -- Insert/update basic message patterns
 INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
-    VALUES ('ONE_PAGE', '', '#ThreeLine')
+    VALUES ('.1_LINE', '', '#OneLine')
+    ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#OneLine';
+INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
+    VALUES ('.2_LINE', '[np]', '#TwoLine')
+    ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#TwoLine';
+INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
+    VALUES ('.3_LINE', '', '#ThreeLine')
     ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#ThreeLine';
 INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
-    VALUES ('TWO_PAGE', '[np]', '#Small')
+    VALUES ('.4_LINE', '', '#FourLine')
+    ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#FourLine';
+INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
+    VALUES ('.2_PAGE', '[np]', '#Small')
     ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#Small';
 
--- ONE_PAGE message lines
-INSERT INTO iris.msg_line (name, msg_pattern, line, multi, rank) (
-    SELECT 'ml_1' || ROW_NUMBER() OVER (ORDER BY name),
-           pattern, line, multi, rank
+INSERT INTO iris.msg_line (
+    name, msg_pattern, restrict_hashtag, line, multi, rank
+) (
+    SELECT DISTINCT ON (pattern, line, multi)
+        'ml_' || ROW_NUMBER() OVER (ORDER BY name),
+        pattern, hashtag, line, multi, rank
     FROM iris.sign_text st
     JOIN sign_group_pattern p ON st.sign_group = p.sign_group
-    WHERE sign_group_hashtag(st.sign_group) = '#ThreeLine'
+    ORDER BY pattern, line, multi, hashtag DESC, rank
 );
 
--- TWO_PAGE message lines
-INSERT INTO iris.msg_line (name, msg_pattern, line, multi, rank) (
-    SELECT 'ml_2' || ROW_NUMBER() OVER (ORDER BY name),
-           pattern, line, multi, rank
-    FROM iris.sign_text st
-    JOIN sign_group_pattern p ON st.sign_group = p.sign_group
-    WHERE sign_group_hashtag(st.sign_group) = '#Small'
-);
+-- ON CONFLICT (msg_pattern, line, multi) DO NOTHING;
 
--- Local message lines
-INSERT INTO iris.msg_line (name, msg_pattern, restrict_hashtag, line, multi,
-                           rank)
-(
-    SELECT 'ml_3' || ROW_NUMBER() OVER (ORDER BY st.name),
-           pattern, sign_group_hashtag(st.sign_group), line, multi, rank
-    FROM iris.sign_text st
-    JOIN sign_group_pattern p ON st.sign_group = p.sign_group
-    JOIN iris.sign_group sg ON st.sign_group = sg.name
-    WHERE local = true
-);
-
--- Delete "duplicate" message lines
-DELETE FROM iris.msg_line WHERE ctid NOT IN (
-    SELECT min(ctid)
-    FROM iris.msg_line
-    GROUP BY msg_pattern, restrict_hashtag, line, multi, rank
-);
+DROP INDEX iris.temp_conflict_idx;
 
 CREATE VIEW msg_line_view AS
     SELECT name, msg_pattern, restrict_hashtag, line, multi, rank
