@@ -3099,6 +3099,14 @@ CREATE TABLE iris.msg_pattern (
     compose_hashtag VARCHAR(16)
 );
 
+COPY iris.msg_pattern (name, multi, compose_hashtag) FROM stdin;
+.1_LINE		#OneLine
+.2_LINE	[np]	#TwoLine
+.3_LINE		#ThreeLine
+.4_LINE		#FourLine
+.2_PAGE	[np]	#Small
+\.
+
 CREATE VIEW msg_pattern_view AS
     SELECT name, multi, compose_hashtag
     FROM iris.msg_pattern;
