@@ -273,7 +273,8 @@ public class MsgPatternPanel extends JPanel {
 			lines.add(ml.getMulti());
 		}
 		TextRect tr = SignConfigHelper.textRect(sc);
-		return tr.fill(ms, lines);
+		MultiString multi = new MultiString(tr.fill(ms, lines));
+		return multi.stripTrailingWhitespaceTags().toString();
 	}
 
 	/** Create pixel panel pager */
