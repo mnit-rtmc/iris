@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2023  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +20,7 @@ package us.mn.state.dot.tms;
  * the iris.device_purpose look-up table.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public enum DevicePurpose {
 	GENERAL,        // 0
@@ -27,7 +29,8 @@ public enum DevicePurpose {
 	PARKING,        // 3
 	TRAVEL_TIME,    // 4
 	SAFETY,         // 5
-	LANE_USE;       // 6
+	LANE_USE,       // 6
+	VSL;            // 7
 
 	/** Cached values array */
 	static private final DevicePurpose[] VALUES = values();
