@@ -391,40 +391,19 @@ public class DMSHelper extends BaseHelper {
 
 	/** Check if a MULTI string fits on a DMS.
 	 * @param dms Sign in question.
-	 * @param multi MULTI string.
+	 * @param ms MULTI string.
 	 * @param abbrev Check word abbreviations.
 	 * @return Best fit MULTI string, or null if message does not fit. */
-	static public String checkMulti(DMS dms, String multi, boolean abbrev) {
-		return (createPageOne(dms, multi) != null)
-		      ? multi
-		      : (abbrev) ? checkMultiAbbrev(dms, multi) : null;
-	}
-
-	/** Check if a MULTI string fits on a DMS (with abbreviations).
-	 * @param dms Sign in question.
-	 * @param multi MULTI string.
-	 * @return Best fit MULTI string, or null if message does not fit. */
-	static private String checkMultiAbbrev(DMS dms, String multi) {
-		String[] words = multi.split(" ");
-		// Abbreviate words with non-blank abbreviations
-		for (int i = words.length - 1; i >= 0; i--) {
-			String abbrev = WordHelper.abbreviate(words[i]);
-			if (abbrev != null && abbrev.length() > 0) {
-				words[i] = abbrev;
-				String ms = String.join(" ", words);
-				if (createPageOne(dms, ms) != null)
-					return ms;
-			}
-		}
-		// Abbreviate words with blank abbreviations
-		for (int i = words.length - 1; i >= 0; i--) {
-			String abbrev = WordHelper.abbreviate(words[i]);
-			if (abbrev != null) {
-				words[i] = abbrev;
-				String ms = String.join(" ", words);
-				if (createPageOne(dms, ms) != null)
-					return ms;
-			}
+	static public String checkMulti(DMS dms, String ms, boolean abbrev) {
+		// it's possible to configure infinite abbrev loops,
+		// so limit this to 20 iterations
+		for (int i = 0; i < 20 && ms != null; i++) {
+			if (createPageOne(dms, ms) != null)
+				return ms;
+			if (abbrev)
+				ms = WordHelper.abbreviate(ms);
+			else
+				break;
 		}
 		return null;
 	}

@@ -110,13 +110,15 @@ public class MsgLineFinder {
 		String rht = ml.getRestrictHashtag();
 		if (rht == null || DMSHelper.hasHashtag(dms, rht)) {
 			short line = ml.getLine();
-			do {
+			// it's possible to configure infinite abbrev loops,
+			// so limit this to 20 iterations
+			for (int i = 0; i < 20 && ml != null; i++) {
 				if (isWidthOk(line, ml)) {
 					getLineModel(line).add(ml);
 					break;
 				}
 				ml = createAbbreviated(ml);
-			} while (ml != null);
+			}
 		}
 	}
 
@@ -154,36 +156,8 @@ public class MsgLineFinder {
 
 	/** Create an abbreviated message line */
 	private MsgLine createAbbreviated(MsgLine ml) {
-		String ms = ml.getMulti();
-		String[] words = ms.split(" ");
-		// Abbreviate words with non-blank abbreviations
-		for (int i = words.length - 1; i >= 0; i--) {
-			String abbrev = WordHelper.abbreviate(words[i]);
-			if (abbrev != null && abbrev.length() > 0) {
-				words[i] = abbrev;
-				return createAbbreviated(ml, words);
-			}
-		}
-		// Abbreviate words with blank abbreviations
-		for (int i = words.length - 1; i >= 0; i--) {
-			String abbrev = WordHelper.abbreviate(words[i]);
-			if (abbrev != null) {
-				words[i] = abbrev;
-				return createAbbreviated(ml, words);
-			}
-		}
-		return null;
-	}
-
-	/** Create an abbreviated message line */
-	private MsgLine createAbbreviated(MsgLine ml, String[] words) {
-		StringBuilder sb = new StringBuilder();
-		for (String word: words) {
-			if (word.length() > 0)
-				sb.append(word).append(' ');
-		}
-		String ms = sb.toString().trim();
-		return (ms.length() > 0)
+		String ms = WordHelper.abbreviate(ml.getMulti());
+		return (ms != null)
 		      ? new TransMsgLine(ms, ml.getLine(), ml.getRank())
 		      : null;
 	}
