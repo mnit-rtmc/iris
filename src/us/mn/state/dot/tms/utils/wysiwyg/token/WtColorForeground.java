@@ -114,13 +114,6 @@ public class WtColorForeground extends WToken implements Wt_ColorToken {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#isNormalizeLine()
-	 */
-	public boolean isNormalizeLine() {
-		return true;
-	}
-
 	public Integer getZValue() {
 		return z;
 	}

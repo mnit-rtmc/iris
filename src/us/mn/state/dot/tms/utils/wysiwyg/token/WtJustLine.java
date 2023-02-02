@@ -75,13 +75,6 @@ public class WtJustLine extends WToken {
 			sb.append(jl.ordinal());
 	}
 
-	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#isNormalizeLine()
-	 */
-	public boolean isNormalizeLine() {
-		return true;
-	}
-	
 	public String getDescription() {
 		return String.format("%s tag: %s",
 				getType().getLabel(), getJustification().toString());
