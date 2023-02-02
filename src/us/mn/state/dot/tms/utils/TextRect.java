@@ -27,13 +27,17 @@ import us.mn.state.dot.tms.RasterBuilder;
  */
 public class TextRect {
 	public final int page_number;
+	public final int rx;
+	public final int ry;
 	public final int width;
 	public final int height;
 	public final int font_num;
 
 	/** Create a new text rectangle */
-	public TextRect(int pn, int w, int h, int fn) {
+	public TextRect(int pn, int x, int y, int w, int h, int fn) {
 		page_number = pn;
+		rx = x;
+		ry = y;
 		width = w;
 		height = h;
 		font_num = fn;
@@ -45,6 +49,8 @@ public class TextRect {
 		if (obj instanceof TextRect) {
 			TextRect rhs = (TextRect) obj;
 			return page_number == rhs.page_number &&
+			       rx == rhs.rx &&
+			       ry == rhs.ry &&
 			       width == rhs.width &&
 			       height == rhs.height &&
 			       font_num == rhs.font_num;
@@ -75,7 +81,8 @@ public class TextRect {
 			fillable = true;
 		}
 		private TextRect pageRect() {
-			return new TextRect(page, width, height, font_cur);
+			return new TextRect(page, rx, ry, width, height,
+				font_cur);
 		}
 		void startRect(TextRect tr) {
 			if (fillable)
@@ -104,7 +111,7 @@ public class TextRect {
 		{
 			if (rect.equals(page_rect))
 				fillable = false;
-			startRect(new TextRect(page, w, h, font_cur));
+			startRect(new TextRect(page, x, y, w, h, font_cur));
 		}
 	}
 
@@ -134,7 +141,8 @@ public class TextRect {
 			rects = trs;
 			lines = lns.iterator();
 			font_cur = font_num;
-			fillRect(new TextRect(page, width, height, font_cur));
+			fillRect(new TextRect(page, rx, ry, width, height,
+				font_cur));
 		}
 
 		private void fillRect(TextRect tr) {
@@ -160,13 +168,14 @@ public class TextRect {
 		@Override public void addPage() {
 			super.addPage();
 			page++;
-			fillRect(new TextRect(page, width, height, font_cur));
+			fillRect(new TextRect(page, rx, ry, width, height,
+				font_cur));
 		}
 		@Override public void setTextRectangle(int x, int y,
 			int w, int h)
 		{
 			super.setTextRectangle(x, y, w, h);
-			fillRect(new TextRect(page, w, h, font_cur));
+			fillRect(new TextRect(page, x, y, w, h, font_cur));
 		}
 	}
 

@@ -16,11 +16,11 @@ package us.mn.state.dot.tms;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import us.mn.state.dot.tms.utils.MultiAdapter;
 import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
-import us.mn.state.dot.tms.utils.TextRect;
 
 /**
  * Helper class for messages patterns.
@@ -72,7 +72,7 @@ public class MsgPatternHelper extends BaseHelper {
 		ArrayList<SignConfig> cfgs = new ArrayList<SignConfig>();
 		if (pat == null)
 			return cfgs;
-		ArrayList<String> hashtags = new ArrayList<String>();
+		LinkedHashSet<String> hashtags = new LinkedHashSet<String>();
 		String cht = pat.getComposeHashtag();
 		if (cht != null)
 			hashtags.add(cht);

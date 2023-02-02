@@ -180,7 +180,7 @@ public class SignConfigHelper extends BaseHelper {
 			int width = sc.getPixelWidth();
 			int height = sc.getPixelHeight();
 			int fn = getDefaultFontNum(sc);
-			return new TextRect(1, width, height, fn);
+			return new TextRect(1, 1, 1, width, height, fn);
 		} else
 			return null;
 	}
