@@ -36,8 +36,8 @@ public class MsgLineCellRenderer implements ListCellRenderer<MsgLine> {
 	/** Highlight color for special rank levels */
 	static private final Color HIGHLIGHT = new Color(204, 204, 255);
 
-	/** Get a message line as string */
-	static private String asString(MsgLine value) {
+	/** Get a message line as text */
+	static private String asText(MsgLine value) {
 		if (value != null) {
 			String v = new MultiString(value.getMulti()).asText();
 			if (v.length() > 0)
@@ -62,7 +62,7 @@ public class MsgLineCellRenderer implements ListCellRenderer<MsgLine> {
 		boolean isSelected, boolean cellHasFocus)
 	{
 		cell.setBackground(null);
-		cell.getListCellRendererComponent(list, asString(value), index,
+		cell.getListCellRendererComponent(list, asText(value), index,
 			isSelected, cellHasFocus);
 		if (value != null && (value.getRank() != 50) && !isSelected)
 			cell.setBackground(HIGHLIGHT);

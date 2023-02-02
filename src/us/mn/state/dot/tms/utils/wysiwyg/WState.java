@@ -18,7 +18,6 @@ import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.utils.Multi.JustificationLine;
 import us.mn.state.dot.tms.utils.Multi.JustificationPage;
 import us.mn.state.dot.tms.utils.MultiConfig;
-import us.mn.state.dot.tms.utils.MultiRenderer;
 
 /** WYSIWYG-editor State
  * 

@@ -241,7 +241,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 			tt.append(": ");
 			tt.append(loc);
 			tt.append(": ");
-			tt.append(DMSHelper.buildMsgLine(dms));
+			tt.append(DMSHelper.buildMsgText(dms));
 			break;
 		case MEDIUM:
 			tt.append(name);

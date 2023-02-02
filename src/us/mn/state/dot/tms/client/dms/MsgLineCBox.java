@@ -67,7 +67,7 @@ public class MsgLineCBox extends JComboBox<MsgLine> {
 
 	/** Prototype message line */
 	static private final MsgLine PROTOTYPE_TEXT =
-		new TransMsgLine("12345678901234567890");
+		new TransMsgLine("123456789012345678901234");
 
 	/** Combo box editor */
 	private final Editor editor = new Editor();

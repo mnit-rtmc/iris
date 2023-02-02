@@ -273,7 +273,7 @@ public class DMSHelper extends BaseHelper {
 	 * specified DMS.
 	 * @param dms The DMS containing the message.
 	 * @return Text of message on the DMS. */
-	static public String buildMsgLine(DMS dms) {
+	static public String buildMsgText(DMS dms) {
 		SignMessage sm = dms.getMsgCurrent();
 		if (sm != null) {
 			String multi = sm.getMulti();
