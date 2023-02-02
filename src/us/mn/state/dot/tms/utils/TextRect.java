@@ -15,9 +15,14 @@
 package us.mn.state.dot.tms.utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import us.mn.state.dot.tms.ColorScheme;
+import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.FontHelper;
+import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.RasterBuilder;
 
 /**
@@ -32,6 +37,9 @@ public class TextRect {
 	public final int width;
 	public final int height;
 	public final int font_num;
+
+	/** Glyph width cache */
+	private HashMap<Integer, Integer> glyph_widths;
 
 	/** Create a new text rectangle */
 	public TextRect(int pn, int x, int y, int w, int h, int fn) {
@@ -287,5 +295,63 @@ public class TextRect {
 		// if there's still a text rectangle, split it at the end
 		splitter.addPage();
 		return splitter.lines;
+	}
+
+	/** Width checker for MULTI lines */
+	private class WidthChecker extends MultiAdapter {
+		final int font_char_spacing;
+		Integer char_spacing; // current character spacing
+		int width;        // pixel width
+
+		private WidthChecker(int cs) {
+			font_char_spacing = cs;
+			char_spacing = null;
+			width = 0;
+		}
+		private int getCharSpacing() {
+			return (char_spacing != null)
+			      ? char_spacing
+			      : font_char_spacing;
+		}
+
+		@Override public void addSpan(String span) {
+			int len = span.length();
+			if (len > 0)
+				width += getCharSpacing() * (len - 1);
+			for (char cp: span.toCharArray()) {
+				Integer w = glyph_widths.get((int) cp);
+				if (w != null)
+					width += w;
+			}
+		}
+		@Override public void setCharSpacing(Integer sc) {
+			char_spacing = sc;
+		}
+	}
+
+	/** Calculate the width of a single line MULTI string.
+	 * Note: result will be invalid if not a single line. */
+	public int calculateWidth(String ms) {
+		Font font = FontHelper.find(font_num);
+		if (font == null)
+			return -1;
+		if (glyph_widths == null)
+			cacheGlyphWidths(font);
+		WidthChecker checker = new WidthChecker(font.getCharSpacing());
+		new MultiString(ms).parse(checker);
+		return checker.width;
+	}
+
+	/** Create a cache of glyph widths for a font */
+	private void cacheGlyphWidths(Font font) {
+		glyph_widths = new HashMap<Integer, Integer>();
+		for (Map.Entry<Integer, Glyph> ent :
+			FontHelper.lookupGlyphs(font).entrySet())
+		{
+			glyph_widths.put(
+				ent.getKey(),
+				ent.getValue().getWidth()
+			);
+		}
 	}
 }

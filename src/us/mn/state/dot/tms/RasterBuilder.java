@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.utils.MultiSyntaxError;
  * A raster builder creates raster graphics for DMS display.
  *
  * @see us.mn.state.dot.tms.utils.Multi
- * @see us.mn.state.dot.tms.utils.MultiAdapter
  * @see us.mn.state.dot.tms.utils.MultiString
  *
  * @author Douglas Lau
