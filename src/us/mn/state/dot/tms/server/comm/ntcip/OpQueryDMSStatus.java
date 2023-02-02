@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2023       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +41,7 @@ import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
  * failure information.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public class OpQueryDMSStatus extends OpDMS {
 
@@ -190,19 +192,9 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query the DMS controller temperature */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer min_cab = tempMinCtrlCabinet.makeInt();
-			ASN1Integer max_cab = tempMaxCtrlCabinet.makeInt();
-			mess.add(min_cab);
-			mess.add(max_cab);
-			mess.queryProps();
-			logQuery(min_cab);
-			logQuery(max_cab);
-			int mn = min_cab.getInteger();
-			int mx = max_cab.getInteger();
-			if (mn <= mx) {
-				putStatus(DMS.CABINET_TEMP_MIN, mn);
-				putStatus(DMS.CABINET_TEMP_MAX, mx);
-			}
+			pollTemp(mess,
+					tempMinCtrlCabinet, DMS.CABINET_TEMP_MIN,
+					tempMaxCtrlCabinet, DMS.CABINET_TEMP_MAX);
 			return new AmbientTemperature();
 		}
 	}
@@ -213,24 +205,9 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query the DMS ambient temperature */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer min_amb = tempMinAmbient.makeInt();
-			ASN1Integer max_amb = tempMaxAmbient.makeInt();
-			mess.add(min_amb);
-			mess.add(max_amb);
-			try {
-				mess.queryProps();
-				logQuery(min_amb);
-				logQuery(max_amb);
-				int mn = min_amb.getInteger();
-				int mx = max_amb.getInteger();
-				if (mn <= mx) {
-					putStatus(DMS.AMBIENT_TEMP_MIN, mn);
-					putStatus(DMS.AMBIENT_TEMP_MAX, mx);
-				}
-			}
-			catch (NoSuchName e) {
-				// Ledstar has no ambient temp objects
-			}
+			pollTemp(mess,
+					tempMinAmbient, DMS.AMBIENT_TEMP_MIN,
+					tempMaxAmbient, DMS.AMBIENT_TEMP_MAX);
 			return new HousingTemperature();
 		}
 	}
@@ -241,19 +218,9 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query the DMS housing temperature */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer min_hou = tempMinSignHousing.makeInt();
-			ASN1Integer max_hou = tempMaxSignHousing.makeInt();
-			mess.add(min_hou);
-			mess.add(max_hou);
-			mess.queryProps();
-			logQuery(min_hou);
-			logQuery(max_hou);
-			int mn = min_hou.getInteger();
-			int mx = max_hou.getInteger();
-			if (mn <= mx) {
-				putStatus(DMS.HOUSING_TEMP_MIN, mn);
-				putStatus(DMS.HOUSING_TEMP_MAX, mx);
-			}
+			pollTemp(mess,
+					tempMinSignHousing, DMS.HOUSING_TEMP_MIN,
+					tempMaxSignHousing, DMS.HOUSING_TEMP_MAX);
 			return new Failures();
 		}
 	}
@@ -627,5 +594,31 @@ public class OpQueryDMSStatus extends OpDMS {
 		    || ShortErrorStatus.ATTACHED_DEVICE.isSet(se)
 		    || ShortErrorStatus.CONTROLLER.isSet(se)
 		    || ShortErrorStatus.CRITICAL_TEMPERATURE.isSet(se);
+	}
+	
+	/** Consolidated method to query temperature status */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void pollTemp(CommMessage mess,
+			MIB1203 min_obj, String min_key,
+			MIB1203 max_obj, String max_key)
+					throws IOException {
+		ASN1Integer min_temp = min_obj.makeInt();
+		ASN1Integer max_temp = max_obj.makeInt();
+		mess.add(min_temp);
+		mess.add(max_temp);
+		try {
+			mess.queryProps();
+			logQuery(min_temp);
+			logQuery(max_temp);
+			int mn = min_temp.getInteger();
+			int mx = max_temp.getInteger();
+			if (mn <= mx) {
+				putStatus(min_key, mn);
+				putStatus(max_key, mx);
+			}
+		}
+		catch (NoSuchName e) {
+			// Some signs don't have all temperature objects.
+		}
 	}
 }
