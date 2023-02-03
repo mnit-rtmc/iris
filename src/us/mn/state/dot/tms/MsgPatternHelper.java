@@ -89,4 +89,15 @@ public class MsgPatternHelper extends BaseHelper {
 		}
 		return cfgs;
 	}
+
+	/** Check if a message pattern has associated lines */
+	static public boolean hasLines(MsgPattern pat) {
+		Iterator<MsgLine> it = MsgLineHelper.iterator();
+		while (it.hasNext()) {
+			MsgLine ml = it.next();
+			if (ml.getMsgPattern() == pat)
+				return true;
+		}
+		return false;
+	}
 }

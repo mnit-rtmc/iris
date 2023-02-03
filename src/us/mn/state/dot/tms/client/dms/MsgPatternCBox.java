@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.swing.DefaultComboBoxModel;
@@ -45,10 +46,26 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 		return ms.isValidMulti();
 	}
 
-	/** Check if a pattern has "fillable" text rectangles */
-	static private boolean isFillable(MsgPattern pat, TextRect tr) {
-		assert pat != null && tr != null;
-		return tr.find(pat.getMulti()).size() > 0;
+	/** Compare two message patterns.
+	 * Patterns with a trailing text rectangle are preferred. */
+	static private MsgPattern betterPattern(MsgPattern p0, MsgPattern p1) {
+		if (p0 == null)
+			return p1;
+		if (p1 == null)
+			return p0;
+		String t0 = new MultiString(p0.getMulti())
+			.trailingTextRectangle();
+		String t1 = new MultiString(p1.getMulti())
+			.trailingTextRectangle();
+		if (t0 == null && t1 != null)
+			return p1;
+		else if (t1 == null && t0 != null)
+			return p0;
+		else {
+			int l0 = p0.getMulti().length();
+			int l1 = p1.getMulti().length();
+			return (l0 < l1) ? p0 : p1;
+		}
 	}
 
 	/** Populate the message pattern model, sorted */
@@ -85,7 +102,7 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 	public void setEnabled(boolean e) {
 		super.setEnabled(e);
 		if (!e) {
-			setSelectedIndex(-1);
+			setSelectedItem(null);
 			removeAllItems();
 		}
 	}
@@ -104,24 +121,38 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 		MsgPattern best = null;
 		for (int i = 0; i < getItemCount(); i++) {
 			MsgPattern pat = getItemAt(i);
-			if (pat != null) {
-				String multi = pat.getMulti();
-				if (multi.equals(ms)) {
-					best = pat;
-					break;
-				}
-				if (isFillable(pat, tr)) {
-					if (best != null) {
-						int len = multi.length();
-						int blen = best.getMulti()
-							.length();
-						if (len < blen)
-							best = pat;
-					} else
-						best = pat;
-				}
-			}
+			String multi = pat.getMulti();
+			// check for perfect match
+			if (multi.length() > 0 && multi.equals(ms))
+				return pat;
+			// check if pattern has "fillable" text rectangles
+			if (tr.find(multi).size() > 0)
+				best = betterPattern(best, pat);
 		}
 		return best;
+	}
+
+	/** Find a substitute pattern containing message lines */
+	public MsgPattern findSubstitutePattern(TextRect tr,
+		MsgPattern pattern)
+	{
+		assert tr != null;
+		List<TextRect> rects = tr.find(pattern.getMulti());
+		return (rects.size() > 0)
+		      ? findSubstitutePattern(tr, rects.get(0).getLineCount())
+		      : null;
+	}
+
+	/** Find a substitute pattern containing message lines */
+	private MsgPattern findSubstitutePattern(TextRect tr, int n_lines) {
+		for (int i = 0; i < getItemCount(); i++) {
+			MsgPattern pat = getItemAt(i);
+			List<TextRect> rects = tr.find(pat.getMulti());
+			if (rects.size() > 0 &&
+			    rects.get(0).getLineCount() == n_lines &&
+			    MsgPatternHelper.hasLines(pat))
+				return pat;
+		}
+		return null;
 	}
 }

@@ -38,9 +38,9 @@ import us.mn.state.dot.tms.utils.TextRect;
 public class MsgLineFinder {
 
 	/** Create a message line finder */
-	static public MsgLineFinder create(DMS d, MsgPattern pat) {
+	static public MsgLineFinder create(DMS d, MsgPattern pat, String ms) {
 		return (d != null && pat != null)
-		      ? new MsgLineFinder(d, pat)
+		      ? new MsgLineFinder(d, pat, ms)
 		      : null;
 	}
 
@@ -55,14 +55,17 @@ public class MsgLineFinder {
 	private final HashMap<Short, MsgLineCBoxModel> models =
 		new HashMap<Short, MsgLineCBoxModel>();
 
-	/** Create a new message line finder */
-	private MsgLineFinder(DMS d, MsgPattern pat) {
+	/** Create a new message line finder.
+	 * @param d The sign.
+	 * @param pat Message pattern for matching lines.
+	 * @param ms MULTI string for finding text rectangles. */
+	private MsgLineFinder(DMS d, MsgPattern pat, String ms) {
 		dms = d;
 		SignConfig sc = dms.getSignConfig();
 		TextRect full_rect = SignConfigHelper.textRect(sc);
 		// make line-to-TextRect array
 		line_rects.add(null); // line 0 is invalid
-		for (TextRect tr: full_rect.find(pat.getMulti())) {
+		for (TextRect tr: full_rect.find(ms)) {
 			for (int i = 0; i < tr.getLineCount(); i++)
 				line_rects.add(tr);
 		}
@@ -101,5 +104,10 @@ public class MsgLineFinder {
 			models.put(line, mdl);
 			return mdl;
 		}
+	}
+
+	/** Check if no lines were found */
+	public boolean isEmpty() {
+		return models.isEmpty();
 	}
 }

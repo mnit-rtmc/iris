@@ -217,11 +217,9 @@ public class MessageComposer extends JPanel {
 
 	/** Clear the widgets */
 	private void clearWidgets() {
-		adjusting++;
 		setTabRect(0);
 		dur_cbx.setSelectedIndex(0);
 		setComposedMulti("");
-		adjusting--;
 	}
 
 	/** Set tab to specified text rect */
@@ -240,7 +238,6 @@ public class MessageComposer extends JPanel {
 
 	/** Set the selected sign */
 	public void setSelectedSign(DMS proxy) {
-		adjusting++;
 		dms = proxy;
 		TextRect tr = fullTextRect();
 		pattern_cbx.populateModel(proxy, tr);
@@ -248,27 +245,36 @@ public class MessageComposer extends JPanel {
 		// if sign is null, pattern_listener doesn't call this
 		if (proxy == null)
 			pattern_cbx.setSelectedItem(null);
-		adjusting--;
 	}
 
 	/** Enable or Disable the message composer */
 	@Override
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
-		adjusting++;
 		pattern_cbx.setEnabled(b);
 		setTabRect(0);
 		for (TextRectComposer rc: rects)
 			rc.setEnabled(b);
 		dur_cbx.setEnabled(b);
 		dur_cbx.setSelectedItem(0);
-		adjusting--;
 	}
 
 	/** Update the selected pattern */
 	private void updatePattern() {
 		MsgPattern pat = getMsgPattern();
-		MsgLineFinder finder = MsgLineFinder.create(dms, pat);
+		String ms = (pat != null) ? pat.getMulti() : "";
+		MsgLineFinder finder = MsgLineFinder.create(dms, pat, ms);
+		if (finder != null && finder.isEmpty()) {
+			TextRect ftr = fullTextRect();
+			if (ftr != null) {
+				MsgPattern sub = pattern_cbx
+					.findSubstitutePattern(ftr, pat);
+				if (sub != null) {
+					finder = MsgLineFinder.create(dms,
+						sub, ms);
+				}
+			}
+		}
 		List<TextRect> trs = getPatternTextRects(pat);
 		n_rects = Math.min(trs.size(), rects.length);
 		while (n_rects < rect_tab.getTabCount())
@@ -288,8 +294,10 @@ public class MessageComposer extends JPanel {
 				: "" + page_number;
 			TextRectComposer rc = rects[i];
 			int n_lines = tr.getLineCount();
+			adjusting++;
 			rc.setModels(finder, first, n_lines);
 			rc.setEditMode();
+			adjusting--;
 			if (i < rect_tab.getTabCount()) {
 				rect_tab.setComponentAt(i, rc);
 				rect_tab.setTitleAt(i, title);
@@ -299,7 +307,9 @@ public class MessageComposer extends JPanel {
 		}
 		// at least one tab required for proper layout
 		if (rect_tab.getTabCount() < 1) {
+			adjusting++;
 			rects[0].setModels(null, 0, 0);
+			adjusting--;
 			rect_tab.addTab("", rects[0]);
 		}
 	}
@@ -351,15 +361,17 @@ public class MessageComposer extends JPanel {
 			pattern_cbx.setSelectedItem(pat);
 			String pat_ms = getPatternMulti();
 			List<String> lines = tr.splitLines(pat_ms, ms);
-			adjusting++;
 			Iterator<String> lns = lines.iterator();
+			adjusting++;
 			for (int i = 0; i < n_rects; i++)
 				rects[i].setSelectedLines(lns);
 			adjusting--;
 		} else {
 			pattern_cbx.setSelectedItem(null);
+			adjusting++;
 			for (TextRectComposer rc: rects)
 				rc.clearWidgets();
+			adjusting--;
 		}
 	}
 

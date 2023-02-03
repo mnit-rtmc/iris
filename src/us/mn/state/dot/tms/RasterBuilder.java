@@ -201,9 +201,9 @@ public class RasterBuilder {
 	private String makeCombined(String first, String second) {
 		MultiString ms1 = new MultiString(first);
 		MultiString ms2 = new MultiString(second);
-		if (ms1.isBlank() || ms2.isBlank())
+		if (ms1.isBlank())
 			return null;
-		if (canCombineSequence(first)) {
+		if (canCombineSequence(first) && !ms2.isBlank()) {
 			// First message ends with new page tag
 			MultiBuilder mb = new MultiBuilder(first);
 			mb.addPage();
