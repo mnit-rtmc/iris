@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.TransMsgPattern;
 import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
@@ -131,12 +132,10 @@ public class MsgPatternPanel extends IPanel
 
 	/** Update pixel panel preview */
 	private void updatePixelPanel(MsgPattern pat) {
-		SignConfig sc = pat.getSignConfig();
-		if (sc == null)
-			sc = DMSDispatcher.getSelectedSignConfig();
-		if (sc != null) {
-			updatePixelPanel(sc,
-					new MultiString(pat.getMulti()));
+		TransMsgPattern tpat = DMSDispatcher.getTransMsgPattern(pat);
+		if (tpat != null) {
+			updatePixelPanel(tpat.getSignConfig(),
+					new MultiString(tpat.getMulti()));
 			return;
 		}
 		pixel_pnl.setPhysicalDimensions(0, 0, 0, 0, 0, 0);
