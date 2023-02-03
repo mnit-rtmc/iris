@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +15,12 @@
 package us.mn.state.dot.tms.client.incident;
 
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
+import us.mn.state.dot.tms.utils.TextRect;
 
 /**
  * MULTI string builder for incidents.
@@ -28,8 +29,8 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class IncMultiBuilder {
 
-	/** Sign to deploy */
-	private final DMS dms;
+	/** Text rectangle */
+	private final TextRect tr;
 
 	/** Location of incident */
 	private final GeoLoc loc;
@@ -40,19 +41,20 @@ public class IncMultiBuilder {
 	/** Location MULTI builder */
 	private final MultiBuilder builder;
 
-	/** Total lines on DMS */
+	/** Total lines on text rectangle */
 	private final int max_lines;
 
 	/** Line count */
 	private int n_lines;
 
 	/** Create a new incident MULTI builder */
-	public IncMultiBuilder(DMS s, GeoLoc l, Distance d) {
-		dms = s;
+	public IncMultiBuilder(DMS dms, GeoLoc l, Distance d) {
+		// FIXME: find best pattern, then use first fillable rectangle
+		tr = SignConfigHelper.textRect(dms.getSignConfig());
 		loc = l;
 		dist = d;
 		builder = new MultiBuilder();
-		max_lines = DMSHelper.getLineCount(dms);
+		max_lines = (tr != null) ? tr.getLineCount() : 0;
 		n_lines = 0;
 	}
 
@@ -76,22 +78,21 @@ public class IncMultiBuilder {
 
 	/** Build MULTI string, replacing [loc] tags */
 	private MultiString buildMulti(String multi) {
-		if (multi != null) {
+		if (tr != null && multi != null) {
 			// First try to retain affixes, but strip if necessary
-			MultiString ms = checkMulti(multi, true);
-			return (ms != null) ? ms : checkMulti(multi, false);
+			MultiString ms = checkLine(multi, true);
+			return (ms != null) ? ms : checkLine(multi, false);
 		} else
 			return null;
 	}
 
-	/** Check if a MULTI string fits on the DMS */
-	private MultiString checkMulti(String multi, boolean retain_affixes) {
+	/** Check if a MULTI line fits on the text rectangle */
+	private MultiString checkLine(String ms, boolean retain_affixes) {
 		LocMultiBuilder lmb = new LocMultiBuilder(loc, dist,
 			retain_affixes);
-		new MultiString(multi).parse(lmb);
+		new MultiString(ms).parse(lmb);
 		// Don't try abbreviating if we're retaining affixes
-		multi = DMSHelper.checkMulti(dms, lmb.toString(),
-			!retain_affixes);
+		String multi = tr.checkLine(lmb.toString(), !retain_affixes);
 		return (multi != null) ? new MultiString(multi) : null;
 	}
 

@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.RasterBuilder;
+import us.mn.state.dot.tms.WordHelper;
 
 /**
  * Text rectangle on a full-matrix sign
@@ -353,5 +354,24 @@ public class TextRect {
 				ent.getValue().getWidth()
 			);
 		}
+	}
+
+	/** Check if a MULTI line fits in the text rectangle.
+	 * @param ms MULTI line (only line-valid tags allowed!).
+	 * @param abbrev If true, try to abbreviate words if necessary.
+	 * @return Possibly abbreviated line, or null if it does not fit. */
+	public String checkLine(String ms, boolean abbrev) {
+		// it's possible to configure infinite abbrev loops,
+		// so limit this to 20 iterations
+		for (int i = 0; i < 20 && ms != null; i++) {
+			int w = calculateWidth(ms);
+			if (w >= 0 && w <= width)
+				return ms;
+			if (abbrev)
+				ms = WordHelper.abbreviate(ms);
+			else
+				break;
+		}
+		return null;
 	}
 }

@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.TransMsgLine;
-import us.mn.state.dot.tms.WordHelper;
 import us.mn.state.dot.tms.utils.TextRect;
 
 /**
@@ -80,34 +79,17 @@ public class MsgLineFinder {
 		String rht = ml.getRestrictHashtag();
 		if (rht == null || DMSHelper.hasHashtag(dms, rht)) {
 			short line = ml.getLine();
-			// it's possible to configure infinite abbrev loops,
-			// so limit this to 20 iterations
-			for (int i = 0; i < 20 && ml != null; i++) {
-				if (isWidthOk(line, ml)) {
-					getLineModel(line).add(ml);
-					break;
+			if (line < line_rects.size()) {
+				TextRect tr = line_rects.get(line);
+				String ms = tr.checkLine(ml.getMulti(), true);
+				if (ms != null) {
+					getLineModel(line).add(
+						new TransMsgLine(ms, line,
+							ml.getRank())
+					);
 				}
-				ml = createAbbreviated(ml);
 			}
 		}
-	}
-
-	/** Check if a message linee width is OK */
-	private boolean isWidthOk(int line, MsgLine ml) {
-		if (line < line_rects.size()) {
-			TextRect tr = line_rects.get(line);
-			int w = tr.calculateWidth(ml.getMulti());
-			return (w > 0 && w <= tr.width);
-		} else
-			return false;
-	}
-
-	/** Create an abbreviated message line */
-	private MsgLine createAbbreviated(MsgLine ml) {
-		String ms = WordHelper.abbreviate(ml.getMulti());
-		return (ms != null)
-		      ? new TransMsgLine(ms, ml.getLine(), ml.getRank())
-		      : null;
 	}
 
 	/** Get the model for the specified line */

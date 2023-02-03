@@ -389,25 +389,6 @@ public class DMSHelper extends BaseHelper {
 		      : null;
 	}
 
-	/** Check if a MULTI string fits on a DMS.
-	 * @param dms Sign in question.
-	 * @param ms MULTI string.
-	 * @param abbrev Check word abbreviations.
-	 * @return Best fit MULTI string, or null if message does not fit. */
-	static public String checkMulti(DMS dms, String ms, boolean abbrev) {
-		// it's possible to configure infinite abbrev loops,
-		// so limit this to 20 iterations
-		for (int i = 0; i < 20 && ms != null; i++) {
-			if (createPageOne(dms, ms) != null)
-				return ms;
-			if (abbrev)
-				ms = WordHelper.abbreviate(ms);
-			else
-				break;
-		}
-		return null;
-	}
-
 	/** Get DMS status attribute */
 	static public Object getStatus(DMS dms, String key) {
 		String status = (dms != null) ? dms.getStatus() : null;
