@@ -301,12 +301,12 @@ public class TextRect {
 	private class WidthChecker extends MultiAdapter {
 		final int font_char_spacing;
 		Integer char_spacing; // current character spacing
-		int width;        // pixel width
+		int px_width;        // pixel width
 
 		private WidthChecker(int cs) {
 			font_char_spacing = cs;
 			char_spacing = null;
-			width = 0;
+			px_width = 0;
 		}
 		private int getCharSpacing() {
 			return (char_spacing != null)
@@ -317,11 +317,11 @@ public class TextRect {
 		@Override public void addSpan(String span) {
 			int len = span.length();
 			if (len > 0)
-				width += getCharSpacing() * (len - 1);
+				px_width += getCharSpacing() * (len - 1);
 			for (char cp: span.toCharArray()) {
 				Integer w = glyph_widths.get((int) cp);
-				if (w != null)
-					width += w;
+				// if glyph not found, make it "too wide"
+				px_width += (w != null) ? w : width + 1;
 			}
 		}
 		@Override public void setCharSpacing(Integer sc) {
@@ -339,7 +339,7 @@ public class TextRect {
 			cacheGlyphWidths(font);
 		WidthChecker checker = new WidthChecker(font.getCharSpacing());
 		new MultiString(ms).parse(checker);
-		return checker.width;
+		return checker.px_width;
 	}
 
 	/** Create a cache of glyph widths for a font */
