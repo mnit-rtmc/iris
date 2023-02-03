@@ -158,6 +158,20 @@ INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
     VALUES ('.2_PAGE', '[np]', '#Small')
     ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#Small';
 
+-- Some MnDOT-specific patterns
+INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
+    VALUES ('.3_LINE_370', '[tr156,1,214,56]', '#Ezpass370Px')
+    ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#Ezpass370Px';
+INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
+    VALUES ('.3_LINE_390', '[tr1,1,224,70]', '#V94W08')
+    ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#V94W08';
+INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
+    VALUES ('.3_LINE_592', '[tr243,1,350,96]', '#Ezpass592Px')
+    ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#Ezpass592Px';
+INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
+    VALUES ('.4_LINE_TAD', '[fo6][tr1,1,150,56]', '#TadGarage')
+    ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#TadGarage';
+
 INSERT INTO iris.msg_line (
     name, msg_pattern, restrict_hashtag, line, multi, rank
 ) (
