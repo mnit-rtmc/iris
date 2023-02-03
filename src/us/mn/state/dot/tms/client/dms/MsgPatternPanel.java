@@ -35,6 +35,7 @@ import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
+import us.mn.state.dot.tms.WordHelper;
 import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
@@ -262,17 +263,36 @@ public class MsgPatternPanel extends JPanel {
 	/** Get preview MULTI string */
 	private String getPreviewMulti(SignConfig sc) {
 		assert sc != null;
+		TextRect tr = SignConfigHelper.textRect(sc);
 		MsgPattern pat = msg_pattern;
 		String ms = (pat != null) ? pat.getMulti() : "";
 		ArrayList<String> lines = new ArrayList<String>();
 		MsgLine ml = msg_line_pnl.getSelectedProxy();
 		if (ml != null) {
 			int line = ml.getLine();
+			// find the text rectangle containing the line
+			int i = 0;
+			TextRect rect = null;
+			for (TextRect r : tr.find(ms)) {
+				i += r.getLineCount();
+				if (i >= line) {
+					rect = r;
+					break;
+				}
+			}
+			String ln = ml.getMulti();
+			if (rect != null) {
+				for (int j = 0; j < 20 && ln != null; j++) {
+					int w = rect.calculateWidth(ln);
+					if (w <= rect.width)
+						break;
+					ln = WordHelper.abbreviate(ln);
+				}
+			}
 			while (lines.size() + 1 < line)
 				lines.add("");
-			lines.add(ml.getMulti());
+			lines.add((ln != null) ? ln : ml.getMulti());
 		}
-		TextRect tr = SignConfigHelper.textRect(sc);
 		MultiString multi = new MultiString(tr.fill(ms, lines));
 		return multi.stripTrailingWhitespaceTags().toString();
 	}
