@@ -298,26 +298,21 @@ public class MessageComposer extends JPanel {
 
 	/** Get the text rectangles for the selected pattern */
 	private List<TextRect> getPatternTextRects() {
-		MsgPattern pat = getMsgPattern();
-		if (pat != null)
-			return MsgPatternHelper.findTextRectangles(pat);
+		TransMsgPattern tpat = getSelectedTransMsgPattern();
+		if (tpat != null)
+			return MsgPatternHelper.findTextRectangles(tpat);
 		else
 			return new ArrayList<TextRect>();
 	}
 
-	/** Get the selected message pattern */
-	public MsgPattern getMsgPattern() {
-		MsgPattern pat = pattern_cbx.getSelectedPattern();
-		if (pat != null)
-			return pat;
+	/** Get the selected MsgPattern as a TransMsgPattern.
+	 * Uses sign-config from selected sign if MsgPattern
+	 * has a null sign-config. 
+	 * Returns null if it fails for any reason. */
+	private TransMsgPattern getSelectedTransMsgPattern() {
 		// make a "client" pattern just for composing
-		DMS dms = dispatcher.getSingleSelection();
-		if (dms != null) {
-			SignConfig sc = dms.getSignConfig();
-			if (sc != null)
-				return new TransMsgPattern(sc, "");
-		}
-		return null;
+		MsgPattern pat = pattern_cbx.getSelectedPattern();
+		return DMSDispatcher.getTransMsgPattern(pat);
 	}
 
 	/** Compose a MULTI string using the contents of the widgets */
@@ -325,8 +320,8 @@ public class MessageComposer extends JPanel {
 		ArrayList<String> lines = new ArrayList<String>();
 		for (int i = 0; i < n_rects; i++)
 			rects[i].getSelectedLines(lines);
-		MsgPattern pat = getMsgPattern();
-		return MsgPatternHelper.fillTextRectangles(pat, lines);
+		TransMsgPattern tpat = getSelectedTransMsgPattern();
+		return MsgPatternHelper.fillTextRectangles(tpat, lines);
 	}
 
 	/** Set the composed MULTI string */
@@ -334,10 +329,10 @@ public class MessageComposer extends JPanel {
 		MsgPattern pat = pattern_cbx.findBestPattern(ms);
 		pattern_cbx.setSelectedItem(pat);
 		// this makes a TransMsgPattern if none selected
-		pat = getMsgPattern();
-		if (pat != null) {
+		TransMsgPattern tpat = DMSDispatcher.getTransMsgPattern(pat);
+		if (tpat != null) {
 			List<String> lines = MsgPatternHelper
-				.splitLines(pat, ms);
+				.splitLines(tpat, ms);
 			adjusting++;
 			Iterator<String> lns = lines.iterator();
 			for (int i = 0; i < n_rects; i++)
