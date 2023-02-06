@@ -241,10 +241,11 @@ public class MessageComposer extends JPanel {
 		dms = proxy;
 		TextRect tr = fullTextRect();
 		pattern_cbx.populateModel(proxy, tr);
-		dur_cbx.setSelectedIndex(0);
 		// if sign is null, pattern_listener doesn't call this
-		if (proxy == null)
+		if (proxy == null) {
 			pattern_cbx.setSelectedItem(null);
+			dur_cbx.setSelectedIndex(0);
+		}
 	}
 
 	/** Enable or Disable the message composer */
