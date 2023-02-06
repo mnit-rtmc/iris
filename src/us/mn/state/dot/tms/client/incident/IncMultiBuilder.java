@@ -14,11 +14,14 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
+import java.util.ArrayList;
+import java.util.Set;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.units.Distance;
-import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.TextRect;
 
@@ -29,8 +32,14 @@ import us.mn.state.dot.tms.utils.TextRect;
  */
 public class IncMultiBuilder {
 
-	/** Text rectangle */
-	private final TextRect tr;
+	/** Message pattern */
+	private final MsgPattern msg_pattern;
+
+	/** Message lines */
+	private final ArrayList<String> lines = new ArrayList<String>();
+
+	/** Full text rectangle */
+	private final TextRect full_rect;
 
 	/** Location of incident */
 	private final GeoLoc loc;
@@ -38,72 +47,65 @@ public class IncMultiBuilder {
 	/** Distance upstream of incident */
 	private final Distance dist;
 
-	/** Location MULTI builder */
-	private final MultiBuilder builder;
-
-	/** Total lines on text rectangle */
-	private final int max_lines;
-
-	/** Line count */
-	private int n_lines;
-
 	/** Create a new incident MULTI builder */
 	public IncMultiBuilder(DMS dms, GeoLoc l, Distance d) {
-		// FIXME: find best pattern, then use first fillable rectangle
-		tr = SignConfigHelper.textRect(dms.getSignConfig());
+		MsgPattern best = null;
+		for (MsgPattern mp: MsgPatternHelper.findAllCompose(dms))
+			best = MsgPatternHelper.better(best, mp);
+		msg_pattern = best;
+		full_rect = SignConfigHelper.textRect(dms.getSignConfig());
 		loc = l;
 		dist = d;
-		builder = new MultiBuilder();
-		max_lines = (tr != null) ? tr.getLineCount() : 0;
-		n_lines = 0;
 	}
 
 	/** Add a line to MULTI string */
-	public boolean addLine(String multi) {
-		MultiString ms = buildMulti(multi);
-		if (ms != null) {
-			if (builder.toString().length() > 0) {
-				if (n_lines >= max_lines) {
-					builder.addPage();
-					n_lines = 0;
-				} else
-					builder.addLine(null);
+	public boolean addLine(String ms) {
+		if (full_rect != null && ms != null) {
+			TextRect tr = getTextRect(lines.size() + 1);
+			if (tr != null) {
+				String line = checkLine(tr, ms);
+				if (line != null) {
+					lines.add(line);
+					return true;
+				}
 			}
-			n_lines++;
-			ms.parse(builder);
-			return true;
-		} else
-			return false;
+		}
+		return false;
 	}
 
-	/** Build MULTI string, replacing [loc] tags */
-	private MultiString buildMulti(String multi) {
-		if (tr != null && multi != null) {
-			// First try to retain affixes, but strip if necessary
-			MultiString ms = checkLine(multi, true);
-			return (ms != null) ? ms : checkLine(multi, false);
-		} else
-			return null;
+	/** Get the text rectangle for a given line number */
+	private TextRect getTextRect(int n_line) {
+		int count = 0;
+		for (TextRect tr: full_rect.find(msg_pattern.getMulti())) {
+			count += tr.getLineCount();
+			if (n_line <= count)
+				return tr;
+		}
+		return null;
 	}
 
-	/** Check if a MULTI line fits on the text rectangle */
-	private MultiString checkLine(String ms, boolean retain_affixes) {
+	/** Check a MULTI line, replacing [loc] tags and abbreviating if
+	 * necessary */
+	private String checkLine(TextRect tr, String ms) {
+		// First try to retain affixes, but strip if necessary
+		String line = checkLine(tr, ms, true);
+		return (line != null) ? line : checkLine(tr, ms, false);
+	}
+
+	/** Check if a MULTI line fits on a text rectangle */
+	private String checkLine(TextRect tr, String ms,
+		boolean retain_affixes)
+	{
 		LocMultiBuilder lmb = new LocMultiBuilder(loc, dist,
 			retain_affixes);
 		new MultiString(ms).parse(lmb);
 		// Don't try abbreviating if we're retaining affixes
-		String multi = tr.checkLine(lmb.toString(), !retain_affixes);
-		return (multi != null) ? new MultiString(multi) : null;
+		return tr.checkLine(lmb.toString(), !retain_affixes);
 	}
 
 	/** Get the MULTI as a String */
 	@Override
 	public String toString() {
-		return builder.toString();
-	}
-
-	/** Get the MULTI string */
-	public MultiString toMultiString() {
-		return builder.toMultiString();
+		return full_rect.fill(msg_pattern.getMulti(), lines);
 	}
 }
