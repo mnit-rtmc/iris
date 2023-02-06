@@ -1552,6 +1552,7 @@ COPY iris.device_purpose (id, description) FROM stdin;
 4	travel time
 5	safety
 6	lane use
+7	VSL
 \.
 
 --
