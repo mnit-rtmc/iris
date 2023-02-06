@@ -3,7 +3,7 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
-SELECT iris.update_version('5.37.0', '5.38.0');
+SELECT iris.update_version('5.38.0', '5.39.0');
 
 -- NOTE: This has checks for MnDOT group names.
 --       For other agencies, it may need agency-specific tweaks
@@ -104,9 +104,6 @@ UPDATE sign_group_pattern SET pattern = '.4.LINE' WHERE sign_group = 'V52N34';
 UPDATE sign_group_pattern SET pattern = '.4.LINE.GARAGE' WHERE sign_group IN (
     'TAD_GARAGE', 'V394E16', 'V394E17'
 );
-
--- Remove DMS query message enable system attribute
-DELETE FROM iris.system_attribute WHERE name = 'dms_querymsg_enable';
 
 -- Rename sign_text to msg_line
 INSERT INTO iris.resource_type (name) VALUES ('msg_line');
