@@ -31,10 +31,13 @@ import javax.swing.table.DefaultTableModel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.AlertInfo;
+import us.mn.state.dot.tms.AlertMessageHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.DMSManager;
@@ -53,14 +56,6 @@ import us.mn.state.dot.tms.utils.NumericAlphaComparator;
  * @author Douglas Lau
  */
 public class AlertDmsDispatcher extends IPanel {
-
-	/** Get the active hashtag for the alert */
-	static public String getActiveHashtag(String aht) {
-		if (aht != null && aht.endsWith("all"))
-			return aht.substring(0, aht.length() - 3);
-		else
-			return null;
-	}
 
 	/** Alert manager */
 	private final AlertManager manager;
@@ -98,29 +93,45 @@ public class AlertDmsDispatcher extends IPanel {
 				boolean selected = (Boolean) value;
 				DMS dms = (DMS) dms_mdl.getValueAt(row, 0);
 				if (selected)
-					addToAlert(dms);
+					addActiveHashtag(dms);
 				else
-					removeFromAlert(dms);
+					removeActiveHashtag(dms);
 			}
 		}
 	}
 
-	/** Get the active hashtag for the alert */
-	private String getActiveHashtag() {
+	/** Get selected alert's active hashtag for a DMS */
+	private String getActiveHashtag(DMS dms) {
 		AlertInfo ai = manager.getSelectionModel().getSingleSelection();
-		return (ai != null)
-		      ? getActiveHashtag(ai.getAllHashtag())
+		SignConfig sc = dms.getSignConfig();
+		return (ai != null && sc != null)
+		      ? getActiveHashtag(ai, sc)
 		      : null;
 	}
 
-	/** Add a DMS to alert's active hashtag */
-	private void addToAlert(DMS dms) {
-		String ht = getActiveHashtag();
+	/** Get active hashtag for a given alert / sign config */
+	private String getActiveHashtag(AlertInfo ai, SignConfig sc) {
+		ActionPlan ap = ai.getActionPlan();
+		Iterator<DmsAction> it = DmsActionHelper.iterator();
+		while (it.hasNext()) {
+			DmsAction da = it.next();
+			if (da.getActionPlan() == ap) {
+				MsgPattern pat = da.getMsgPattern();
+				if (AlertMessageHelper.find(pat, sc) != null)
+					return da.getDmsHashtag();
+			}
+		}
+		return null;
+	}
+
+	/** Add alert's active hashtag to a sign */
+	private void addActiveHashtag(DMS dms) {
+		String ht = getActiveHashtag(dms);
 		if (ht != null)
 			addDmsHashtag(dms, ht);
 	}
 
-	/** Add a hashtag to a DMS */
+	/** Add a hashtag to a sign */
 	private void addDmsHashtag(DMS dms, String ht) {
 		TreeSet<String> hashtags = new TreeSet<String>();
 		hashtags.add(ht);
@@ -129,14 +140,14 @@ public class AlertDmsDispatcher extends IPanel {
 		dms.setHashtags(hashtags.toArray(new String[0]));
 	}
 
-	/** Remove a DMS from its active sign group */
-	private void removeFromAlert(DMS dms) {
-		String ht = getActiveHashtag();
+	/** Remove alert's active hashtag from a sign */
+	private void removeActiveHashtag(DMS dms) {
+		String ht = getActiveHashtag(dms);
 		if (ht != null)
 			removeDmsHashtag(dms, ht);
 	}
 
-	/** Remove a hashtag from a DMS */
+	/** Remove a hashtag from a sign */
 	private void removeDmsHashtag(DMS dms, String ht) {
 		TreeSet<String> hashtags = new TreeSet<String>();
 		for (String dht: dms.getHashtags())

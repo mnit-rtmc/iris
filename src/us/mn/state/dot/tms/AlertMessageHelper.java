@@ -95,4 +95,16 @@ public class AlertMessageHelper extends BaseHelper {
 		}
 		return cfgs;
 	}
+
+	/** Find an alert message for a message pattern and sign config */
+	static public AlertMessage find(MsgPattern pat, SignConfig sc) {
+		Iterator<AlertMessage> it = iterator();
+		while (it.hasNext()) {
+			AlertMessage msg = it.next();
+			if (msg.getMsgPattern() == pat &&
+			    sc == msg.getSignConfig())
+				return msg;
+		}
+		return null;
+	}
 }

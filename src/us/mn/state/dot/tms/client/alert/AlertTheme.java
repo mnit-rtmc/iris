@@ -244,25 +244,25 @@ public class AlertTheme extends ProxyTheme<AlertInfo> {
 		dmsTheme.setScale(scale);
 		dmsSymbol = (VectorSymbol) dmsTheme.getSymbol();
 		String aht = ai.getAllHashtag();
-		String ht = AlertDmsDispatcher.getActiveHashtag(aht);
+		Set<DMS> active = AlertInfoHelper.findActiveSigns(ai);
 		if (st == AlertState.PENDING) {
-			// draw DMS with alert ALL, then ACT hashtags
+			// draw DMS with alert All hashtag, then active
 			// (in that order so the styles look right)
 			Iterator<DMS> it = DMSHelper.hashtagIterator(aht);
 			while (it.hasNext())
 				drawDms(g, it.next(), dmsAvailableStyle, t);
-			it = DMSHelper.hashtagIterator(ht);
+			it = active.iterator();
 			while (it.hasNext())
 				drawDms(g, it.next(), dmsDeployedStyle, t);
 		} else if (st == AlertState.ACTIVE) {
-			// for active alerts draw only deployed DMS
-			Iterator<DMS> it = DMSHelper.hashtagIterator(ht);
+			// for active alerts draw only active DMS
+			Iterator<DMS> it = active.iterator();
 			while (it.hasNext())
 				drawDms(g, it.next(), dmsDeployedStyle, t);
 		} else {
-			// for cleared alerts draw only deployed DMS
+			// for cleared alerts draw only active DMS
 			// but using "all" style
-			Iterator<DMS> it = DMSHelper.hashtagIterator(ht);
+			Iterator<DMS> it = active.iterator();
 			while (it.hasNext())
 				drawDms(g, it.next(), dmsAllStyle, t);
 		}

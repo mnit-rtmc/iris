@@ -511,10 +511,14 @@ public class AlertData {
 		log("created plan " + pname);
 		plan.notifyCreate();
 		createTimeActions(cfg, plan);
+		int num = 1;
 		for (AlertMessage msg: msgs) {
-			String ht = createActiveHashtag(plan, msg, plan_dms);
-			if (ht != null)
+			String ht = createActiveHashtag(plan, msg, "a" + num,
+				plan_dms);
+			if (ht != null) {
 				createDmsActions(plan, msg, ht);
+				num++;
+			}
 		}
 		return plan;
 	}
@@ -585,7 +589,8 @@ public class AlertData {
 
 	/** Create "active" DMS hashtag */
 	private String createActiveHashtag(ActionPlanImpl plan,
-		AlertMessage msg, Set<DMS> plan_dms) throws SonarException
+		AlertMessage msg, String suffix, Set<DMS> plan_dms)
+		throws SonarException
 	{
 		SignConfig sc = msg.getSignConfig();
 		TreeSet<DMS> signs = new TreeSet<DMS>(
@@ -599,18 +604,20 @@ public class AlertData {
 		}
 		if (!signs.isEmpty()) {
 			signs.retainAll(auto_dms);
-			return createHashtags(plan, "", signs);
+			return createHashtags(plan, suffix, signs);
 		} else
 			return null;
 	}
 
 	/** Create hashtags for a set of DMS in an action plan */
-	private String createHashtags(ActionPlanImpl plan, String gv,
+	private String createHashtags(ActionPlanImpl plan, String suffix,
 		Set<DMS> signs) throws SonarException
 	{
 		String[] parts = plan.getName().split("_", 2);
 		String num = parts[parts.length - 1];
-		String ht = "alert" + event.name().toLowerCase() + num + gv;
+		String ht = "#Alert" +
+			event.name().substring(0, 1).toUpperCase() +
+			event.name().substring(1).toLowerCase() + num + suffix;
 		for (DMS d: signs) {
 			if (d instanceof DMSImpl) {
 				DMSImpl dms = (DMSImpl) d;
@@ -666,7 +673,7 @@ public class AlertData {
 	private void createAlertInfo(ActionPlanImpl plan, Set<DMS> plan_dms)
 		throws SonarException
 	{
-		String aht = createHashtags(plan, "all", plan_dms);
+		String aht = createHashtags(plan, "", plan_dms);
 		String aname = AlertInfoImpl.createUniqueName();
 		String replaces = null; // FIXME
 		int st = (plan.getActive())

@@ -36,7 +36,7 @@ BEGIN
         IF word = 'ALL' THEN
             RETURN res;
         ELSIF word = 'ACT' THEN
-            res = res || 'p';
+            res = res || 'a';
         ELSIF word = 'C' AND sign_group LIKE 'C_%' THEN
             res = res || 'Cty';
         ELSIF word = 'MNPASS' THEN
