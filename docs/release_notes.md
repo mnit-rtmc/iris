@@ -1,5 +1,11 @@
 # IRIS 5.x Release Notes
 
+5.38.0 (6 Feb 2023)
+ - Always enable "Query Msg" in DMS popup menu
+ - Improved handling of NTCIP DMS temperature objects
+ - Added VSL device purpose for DMS
+ - Fixed problems related to msg pattern changes
+
 5.37.0 (11 Jan 2023)
  - Redesigned DMS [message composer](composer.html), replacing quick messages
    with message patterns and removing many redundant features
