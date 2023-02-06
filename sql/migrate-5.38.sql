@@ -20,8 +20,6 @@ BEGIN
         RETURN '#TwoLine';
     ELSIF sign_group IN (SELECT name FROM sign_group_small) THEN
         RETURN '#Small';
-    ELSIF sign_group = 'TAD_GARAGE' THEN
-        RETURN '#FourLine';
     ELSIF sign_group = 'VPARK' OR sign_group = 'TAD_GARAGE' THEN
         RETURN '#TadGarage';
     ELSIF sign_group LIKE '%TEST%' THEN
@@ -73,7 +71,7 @@ CREATE TEMP TABLE sign_group_pattern (
 
 -- By default, start all sign groups with 3 line pattern
 INSERT INTO sign_group_pattern (sign_group, pattern) (
-    SELECT name, '.3_LINE'
+    SELECT name, '.3.LINE'
     FROM iris.sign_group
     GROUP BY name
 );
@@ -87,23 +85,24 @@ UPDATE sign_group_pattern
     WHERE local = true
     GROUP BY st.sign_group
 );
-UPDATE sign_group_pattern SET pattern = '.1_LINE' WHERE sign_group = 'GATES';
-UPDATE sign_group_pattern SET pattern = '.2_LINE' WHERE sign_group IN (
+UPDATE sign_group_pattern SET pattern = '.1.LINE' WHERE sign_group = 'GATES';
+UPDATE sign_group_pattern SET pattern = '.2.LINE' WHERE sign_group IN (
     SELECT st.sign_group
     FROM iris.sign_text st
     JOIN iris.sign_group sg ON st.sign_group = sg.name
     WHERE line > 3
     GROUP BY st.sign_group
 );
-UPDATE sign_group_pattern SET pattern = '.2_PAGE' WHERE sign_group IN (
+UPDATE sign_group_pattern SET pattern = '.2.PAGE' WHERE sign_group IN (
     SELECT st.sign_group
     FROM iris.sign_text st
     JOIN iris.sign_group sg ON st.sign_group = sg.name
     WHERE line > 4
     GROUP BY st.sign_group
 );
-UPDATE sign_group_pattern SET pattern = '.4_LINE' WHERE sign_group IN (
-    'TAD_GARAGE', 'V394E16', 'V394E17', 'V52N34'
+UPDATE sign_group_pattern SET pattern = '.4.LINE' WHERE sign_group = 'V52N34';
+UPDATE sign_group_pattern SET pattern = '.4.LINE.GARAGE' WHERE sign_group IN (
+    'TAD_GARAGE', 'V394E16', 'V394E17'
 );
 
 -- Remove DMS query message enable system attribute
@@ -143,33 +142,33 @@ UPDATE iris.msg_pattern
 
 -- Insert/update basic message patterns
 INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
-    VALUES ('.1_LINE', '', '#OneLine')
+    VALUES ('.1.LINE', '', '#OneLine')
     ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#OneLine';
 INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
-    VALUES ('.2_LINE', '[np]', '#TwoLine')
+    VALUES ('.2.LINE', '[np]', '#TwoLine')
     ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#TwoLine';
 INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
-    VALUES ('.3_LINE', '', '#ThreeLine')
+    VALUES ('.3.LINE', '', '#ThreeLine')
     ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#ThreeLine';
 INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
-    VALUES ('.4_LINE', '', '#FourLine')
+    VALUES ('.4.LINE', '', '#FourLine')
     ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#FourLine';
 INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
-    VALUES ('.2_PAGE', '[np]', '#Small')
+    VALUES ('.2.PAGE', '[np]', '#Small')
     ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#Small';
 
 -- Some MnDOT-specific patterns
 INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
-    VALUES ('.3_LINE_370', '[tr156,1,214,56]', '#Ezpass370Px')
+    VALUES ('.3.LINE.370', '[tr156,1,214,56]', '#Ezpass370Px')
     ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#Ezpass370Px';
 INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
-    VALUES ('.3_LINE_390', '[tr1,1,224,70]', '#V94W08')
+    VALUES ('.3.LINE.390', '[tr1,1,224,70]', '#V94W08')
     ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#V94W08';
 INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
-    VALUES ('.3_LINE_592', '[tr243,1,350,96]', '#Ezpass592Px')
+    VALUES ('.3.LINE.592', '[tr243,1,350,96]', '#Ezpass592Px')
     ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#Ezpass592Px';
 INSERT INTO iris.msg_pattern (name, multi, compose_hashtag)
-    VALUES ('.4_LINE_TAD', '[fo6][tr1,1,150,56]', '#TadGarage')
+    VALUES ('.4.LINE.GARAGE', '[fo6][tr1,1,150,56]', '#TadGarage')
     ON CONFLICT (name) DO UPDATE SET compose_hashtag = '#TadGarage';
 
 INSERT INTO iris.msg_line (
