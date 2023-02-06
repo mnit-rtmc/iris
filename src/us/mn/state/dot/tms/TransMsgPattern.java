@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2023  Minnesota Department of Transportation
+ * Copyright (C) 2023  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +17,15 @@ package us.mn.state.dot.tms;
 
 /**
  * Transient message pattern.
+ * 
+ * Temporary copy of a MsgPattern with extra
+ * processing to assure the SignConfig and
+ * message string will be non-null.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
-public class TransMsgPattern implements MsgPattern {
+public class TransMsgPattern {
 
 	/** Sign configuration */
 	private final SignConfig config;
@@ -27,64 +33,29 @@ public class TransMsgPattern implements MsgPattern {
 	/** Sign text MULTI string */
 	private final String multi;
 
-	/** Create a new transient msg pattern */
-	public TransMsgPattern(SignConfig sc, String m) {
+	/** Create a new TransMsgPattern */
+	private TransMsgPattern(SignConfig sc, String ms) {
 		config = sc;
-		multi = m;
+		multi = ms;
 	}
-
-	/** Get the SONAR object name */
-	@Override
-	public String getName() {
-		return "trans_msg_pattern_" + multi;
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
-	/** Set the sign config */
-	@Override
-	public void setSignConfig(SignConfig sc) {
-		// do nothing
+	
+	/** Generate a new TransMsgPattern.
+	 * If either parameter is null, returns null.
+	 * Otherwise, returns a new TransMsgPattern.
+	 */
+	static public TransMsgPattern generate(SignConfig sc, String ms) {
+		if ((sc == null) || (ms == null))
+			return null;
+		return new TransMsgPattern(sc, ms);
 	}
 
 	/** Get the sign config */
-	@Override
 	public SignConfig getSignConfig() {
 		return config;
 	}
 
-	/** Set the sign group */
-	@Override
-	public void setSignGroup(SignGroup sg) {
-		// do nothing
-	}
-
-	/** Get the sign group */
-	@Override
-	public SignGroup getSignGroup() {
-		assert(false);
-		return null;
-	}
-
-	/** Set the MULTI string */
-	@Override
-	public void setMulti(String m) {
-		// do nothing
-	}
-
 	/** Get the MULTI string */
-	@Override
 	public String getMulti() {
 		return multi;
-	}
-
-	/** Destroy the object */
-	@Override
-	public void destroy() {
-		// do nothing
 	}
 }

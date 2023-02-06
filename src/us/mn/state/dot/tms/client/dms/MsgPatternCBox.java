@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.TransMsgPattern;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
@@ -50,8 +51,10 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 		TreeSet<MsgPattern> msgs = createMessageSet(dms);
 		// check for a fillable pattern
 		boolean fillable = false;
+		TransMsgPattern tpat;
 		for (MsgPattern pat: msgs) {
-			if (MsgPatternHelper.hasTextRectangles(pat)) {
+			tpat = DMSDispatcher.getTransMsgPattern(pat);
+			if (MsgPatternHelper.hasTextRectangles(tpat)) {
 				fillable = true;
 				break;
 			}
@@ -101,6 +104,7 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 	/** Find the best pattern for a MULTI string */
 	public MsgPattern findBestPattern(String ms) {
 		MsgPattern best = null;
+		TransMsgPattern tpat;
 		for (int i = 0; i < getItemCount(); i++) {
 			MsgPattern pat = getItemAt(i);
 			if (pat != null) {
@@ -109,7 +113,8 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 					best = pat;
 					break;
 				}
-				if (MsgPatternHelper.hasTextRectangles(pat)) {
+				tpat = DMSDispatcher.getTransMsgPattern(pat);
+				if (MsgPatternHelper.hasTextRectangles(tpat)) {
 					if (best != null) {
 						int len = multi.length();
 						int blen = best.getMulti()

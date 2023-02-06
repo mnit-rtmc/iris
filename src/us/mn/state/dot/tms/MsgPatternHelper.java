@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2023  Minnesota Department of Transportation
+ * Copyright (C) 2023       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +27,7 @@ import us.mn.state.dot.tms.utils.TextRect;
  * Helper class for messages patterns.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public class MsgPatternHelper extends BaseHelper {
 
@@ -63,20 +65,18 @@ public class MsgPatternHelper extends BaseHelper {
 	}
 
 	/** Find unused text rectangles in a pattern */
-	static public List<TextRect> findTextRectangles(MsgPattern pat) {
-		TextRect tr = defaultRect(pat);
+	static public List<TextRect> findTextRectangles(TransMsgPattern tpat) {
+		TextRect tr = defaultRect(tpat);
 		return (tr != null)
-			? tr.find(pat.getMulti())
+			? tr.find(tpat.getMulti())
 			: new ArrayList<TextRect>();
 	}
 
 	/** Get default text rectangle for a pattern */
-	static private TextRect defaultRect(MsgPattern pat) {
-		if (pat == null)
+	static private TextRect defaultRect(TransMsgPattern tpat) {
+		if (tpat == null)
 			return null;
-		SignConfig sc = pat.getSignConfig();
-		if (sc == null)
-			return null;
+		SignConfig sc = tpat.getSignConfig();
 		int width = sc.getPixelWidth();
 		int height = sc.getPixelHeight();
 		int fn = SignConfigHelper.getDefaultFontNum(sc);
@@ -84,25 +84,26 @@ public class MsgPatternHelper extends BaseHelper {
 	}
 
 	/** Check if a pattern has unused text rectangles */
-	static public boolean hasTextRectangles(MsgPattern pat) {
-		return findTextRectangles(pat).size() > 0;
+	static public boolean hasTextRectangles(TransMsgPattern tpat) {
+		return findTextRectangles(tpat).size() > 0;
 	}
 
 	/** Fill text rectangles in a pattern */
-	static public String fillTextRectangles(MsgPattern pat,
+	static public String fillTextRectangles(TransMsgPattern tpat,
 		List<String> lines)
 	{
-		TextRect tr = defaultRect(pat);
+		TextRect tr = defaultRect(tpat);
 		return (tr != null)
-			? tr.fill(pat.getMulti(), lines)
+			? tr.fill(tpat.getMulti(), lines)
 			: "";
 	}
 
 	/** Split MULTI string into lines with a pattern */
-	static public List<String> splitLines(MsgPattern pat, String ms) {
-		TextRect tr = defaultRect(pat);
+	static public List<String> splitLines(TransMsgPattern tpat, String ms) {
+		TextRect tr = defaultRect(tpat);
 		return (tr != null)
-			? tr.splitLines(pat.getMulti(), ms)
+			? tr.splitLines(tpat.getMulti(), ms)
 			: new ArrayList<String>();
 	}
+	
 }
