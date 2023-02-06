@@ -3,7 +3,6 @@
  * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  * Copyright (C) 2017-2018  Iteris Inc.
- * Copyright (C) 2023       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,14 +27,12 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
-import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.TransMsgPattern;
 import us.mn.state.dot.tms.WordHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
@@ -56,7 +53,6 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Douglas Lau
  * @author Erik Engstrom
  * @author Michael Darter
- * @author John L. Stanley - SRF Consulting
  */
 public class DMSDispatcher extends JPanel {
 
@@ -403,7 +399,6 @@ public class DMSDispatcher extends JPanel {
 
 	/** Update the selected sign(s) */
 	private void updateSelected() {
-		saveSelectedSignConfig();
 		Set<DMS> sel = sel_mdl.getSelected();
 		if (sel.size() == 0)
 			clearSelected();
@@ -494,55 +489,5 @@ public class DMSDispatcher extends JPanel {
 	/** Can a device request be sent to the specified DMS? */
 	public boolean canRequest(DMS dms) {
 		return isWritePermitted(dms, "deviceRequest");
-	}
-	
-	/** SignConfig for selected sign(S) */
-	static private SignConfig selSignConfig;
-	
-	/** Save selected sign(s) sign-config.
-	 * Saves null if: no sign is selected; one of
-	 * the selected signs doesn't have a sign config;
-	 * or any of the selected signs have different
-	 * sign-configs. */
-	public void saveSelectedSignConfig() {
-		SignConfig scNew = null, sc;
-		for (DMS dms: sel_mdl.getSelected()) {
-			sc = dms.getSignConfig();
-			if (sc == null) {
-				scNew = null;
-				break;    // sign doesn't have a sign config
-			}
-			if (scNew == null) {
-				scNew = sc;
-				continue; // first selected sign
-			}
-			if (scNew != sc) {
-				scNew = null;
-				break;    // mixed sign configs
-			}
-			scNew = sc;
-		}
-		selSignConfig = scNew;
-	}
-	
-	/** Get sign config for selected sign(s).
-	 * Returns null if no sign selected or all
-	 * selected signs don't have same sign config. */
-	static public SignConfig getSelectedSignConfig() {
-		return selSignConfig;
-	}
-
-	/** Create a TransMsgPattern from a MsgPattern..
-	 * Uses SignConfig from MsgPattern if it's not null.
-	 * Or uses SignConfig from the selected sign(s).
-	 * Returns null if it fails for any reason. */
-	static public TransMsgPattern getTransMsgPattern(MsgPattern pat) {
-		if (pat == null)
-			return null;
-		SignConfig sc = pat.getSignConfig();
-		if (sc == null)
-			sc = selSignConfig;
-		String ms = pat.getMulti();
-		return TransMsgPattern.generate(sc, ms);
 	}
 }

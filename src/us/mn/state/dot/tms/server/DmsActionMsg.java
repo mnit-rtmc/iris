@@ -367,8 +367,8 @@ public class DmsActionMsg {
 		SignConfig sc = msg.getSignConfig();
 		if (sc == null)
 			return false;
-		TransMsgPattern tpat = TransMsgPattern.generate(sc, "");
-		List<String> lines = MsgPatternHelper.splitLines(tpat, ms);
+		MsgPattern pat = new TransMsgPattern(sc, "");
+		List<String> lines = MsgPatternHelper.splitLines(pat, ms);
 		for (int i = 0; i < lines.size(); i++) {
 			if (!isValidSignText((short) (i + 1), lines.get(i)))
 				return false;
