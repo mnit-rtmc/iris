@@ -18,7 +18,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import us.mn.state.dot.tms.utils.MultiString;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * Helper class for messages patterns.
@@ -58,6 +61,53 @@ public class MsgPatternHelper extends BaseHelper {
 			}
 		}
 		return null;
+	}
+
+	/** Find all compose message patterns for the specified DMS, sorted */
+	static public Set<MsgPattern> findAllCompose(DMS dms) {
+		TreeSet<MsgPattern> pats = new TreeSet<MsgPattern>(
+			new NumericAlphaComparator<MsgPattern>());
+		if (dms == null)
+			return pats;
+		Iterator<MsgPattern> it = iterator();
+		while (it.hasNext()) {
+			MsgPattern pat = it.next();
+			String cht = pat.getComposeHashtag();
+			if (cht != null && isValidMulti(pat)) {
+				if (DMSHelper.hasHashtag(dms, cht))
+					pats.add(pat);
+			}
+		}
+		return pats;
+	}
+
+	/** Check if a message pattern contains only valid MULTI */
+	static private boolean isValidMulti(MsgPattern pat) {
+		MultiString ms = new MultiString(pat.getMulti());
+		return ms.isValidMulti();
+	}
+
+	/** Compare two message patterns, preferring those with a trailing
+	 * text rectangle.
+	 * @return "Better" of the provided patterns. */
+	static public MsgPattern better(MsgPattern p0, MsgPattern p1) {
+		if (p0 == null)
+			return p1;
+		if (p1 == null)
+			return p0;
+		String t0 = new MultiString(p0.getMulti())
+			.trailingTextRectangle();
+		String t1 = new MultiString(p1.getMulti())
+			.trailingTextRectangle();
+		if (t0 == null && t1 != null)
+			return p1;
+		else if (t1 == null && t0 != null)
+			return p0;
+		else {
+			int l0 = p0.getMulti().length();
+			int l1 = p1.getMulti().length();
+			return (l0 < l1) ? p0 : p1;
+		}
 	}
 
 	/** Find all sign configs for a message pattern.

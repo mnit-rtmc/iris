@@ -15,18 +15,12 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
-import us.mn.state.dot.tms.utils.MultiString;
-import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 import us.mn.state.dot.tms.utils.TextRect;
 
 /**
@@ -40,61 +34,14 @@ import us.mn.state.dot.tms.utils.TextRect;
  */
 public class MsgPatternCBox extends JComboBox<MsgPattern> {
 
-	/** Check if a message pattern should be included in combo box */
-	static private boolean isValidMulti(MsgPattern pat) {
-		MultiString ms = new MultiString(pat.getMulti());
-		return ms.isValidMulti();
-	}
-
-	/** Compare two message patterns.
-	 * Patterns with a trailing text rectangle are preferred. */
-	static private MsgPattern betterPattern(MsgPattern p0, MsgPattern p1) {
-		if (p0 == null)
-			return p1;
-		if (p1 == null)
-			return p0;
-		String t0 = new MultiString(p0.getMulti())
-			.trailingTextRectangle();
-		String t1 = new MultiString(p1.getMulti())
-			.trailingTextRectangle();
-		if (t0 == null && t1 != null)
-			return p1;
-		else if (t1 == null && t0 != null)
-			return p0;
-		else {
-			int l0 = p0.getMulti().length();
-			int l1 = p1.getMulti().length();
-			return (l0 < l1) ? p0 : p1;
-		}
-	}
-
 	/** Populate the message pattern model, sorted */
 	public void populateModel(DMS dms, TextRect tr) {
 		DefaultComboBoxModel<MsgPattern> mdl =
 			new DefaultComboBoxModel<MsgPattern>();
-		TreeSet<MsgPattern> pats = findPatterns(dms);
-		for (MsgPattern pat: pats)
+		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms))
 			mdl.addElement(pat);
 		mdl.setSelectedItem(null);
 		setModel(mdl);
-	}
-
-	/** Find all message patterns for the specified DMS */
-	private TreeSet<MsgPattern> findPatterns(DMS dms) {
-		TreeSet<MsgPattern> pats = new TreeSet<MsgPattern>(
-			new NumericAlphaComparator<MsgPattern>());
-		if (dms == null)
-			return pats;
-		Iterator<MsgPattern> pit = MsgPatternHelper.iterator();
-		while (pit.hasNext()) {
-			MsgPattern pat = pit.next();
-			String cht = pat.getComposeHashtag();
-			if (cht != null && isValidMulti(pat)) {
-				if (DMSHelper.hasHashtag(dms, cht))
-					pats.add(pat);
-			}
-		}
-		return pats;
 	}
 
 	/** Set the enabled status */
@@ -127,7 +74,7 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 				return pat;
 			// check if pattern has "fillable" text rectangles
 			if (tr.find(multi).size() > 0)
-				best = betterPattern(best, pat);
+				best = MsgPatternHelper.better(best, pat);
 		}
 		return best;
 	}
