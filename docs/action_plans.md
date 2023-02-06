@@ -28,7 +28,7 @@ the **Next Phase**.  *Hold Time* must be a multiple of 30 seconds.
 
 ## DMS Actions
 
-[DMS] actions have an associated *sign group* to determine which signs are
+[DMS] actions have an associated *hashtag* to determine which signs are
 affected by the action.  The action happens when the corresponding action plan
 phase is selected.  The [message pattern] indicates which message is activated.
 If **activate beacon** is selected, the sign's _internal_ beacon will also be

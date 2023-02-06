@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -96,7 +96,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		setMsgCurrent(sm, (oper_expire) ? "EXPIRED" : "FIELD BLANK");
 		/* User msg just expired -- set it to null */
 		if (oper_expire)
-			dms.setMsgUserNull();
+			dms.setMsgUserNotify(null);
 		return null;
 	}
 

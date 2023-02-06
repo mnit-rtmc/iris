@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2014  Minnesota Department of Transportation
+ * Copyright (C) 2012-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,6 @@ public final class SwingRunner {
 	static private void log(String msg, long e) {
 		System.err.println("SwingRunner took " + e + " ms");
 		System.err.println("  from: " + msg);
-		
 		if (msg.contains("R_NodeManager")) {
 			R_Node_Load_Total += e;
 			System.err.println("    Total of " + R_Node_Load_Total

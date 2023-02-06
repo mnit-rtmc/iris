@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2008-2009  AHMCT, University of California
  * Copyright (C) 2012-2021  Iteris Inc.
  * Copyright (C) 2016-2020  SRF Consulting Group
@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeSet;
 import org.json.JSONException;
 import org.json.JSONObject;
 import us.mn.state.dot.sched.Job;
@@ -84,6 +85,9 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
+	/** DMS / hashtag mapping */
+	static private TagMapping mapping;
+
 	/** Test if a sign message is from a specified source */
 	static private boolean isMsgSource(SignMessage sm, SignMsgSource src) {
 		return (sm != null) && src.checkBit(sm.getSource());
@@ -134,6 +138,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Load all the DMS */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
+		mapping = new TagMapping(store, "iris", SONAR_TYPE,
+			"hashtag");
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"gps, static_graphic, purpose, hidden, beacon, " +
 			"preset, sign_config, sign_detail, msg_user, " +
@@ -215,7 +221,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Create a dynamic message sign */
-	private DMSImpl(ResultSet row) throws SQLException {
+	private DMSImpl(ResultSet row) throws Exception {
 		this(row.getString(1),     // name
 		     row.getString(2),     // geo_loc
 		     row.getString(3),     // controller
@@ -242,7 +248,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private DMSImpl(String n, String loc, String c, int p, String nt,
 		String g, String sg, int dp, boolean h, String b, String cp,
 		String sc, String sd, String mu, String ms, String mc,
-		Date et, String st, String sp)
+		Date et, String st, String sp) throws TMSException
 	{
 		super(n, lookupController(c), p, nt);
 		geo_loc = lookupGeoLoc(loc);
@@ -260,7 +266,16 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		expire_time = stampMillis(et);
 		status = st;
 		stuck_pixels = sp;
+		hashtags = lookupHashtagMapping();
 		initTransients();
+	}
+
+	/** Lookup mapping of hashtags */
+	private String[] lookupHashtagMapping() throws TMSException {
+		TreeSet<String> ht_set = new TreeSet<String>();
+		for (String ht: mapping.lookup(this))
+			ht_set.add(ht);
+		return ht_set.toArray(new String[0]);
 	}
 
 	/** Destroy an object */
@@ -297,7 +312,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		// user message to prevent it from popping up days later, after
 		// communication is restored.
 		if (!c && getFailMillis() >= COMM_FAIL_BLANK_THRESHOLD_MS)
-			setMsgUserNull();
+			setMsgUserNotify(null);
 	}
 
 	/** Get the configure flag.
@@ -411,6 +426,57 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public boolean getHidden() {
 		return hidden;
+	}
+
+	/** Hashtags for the DMS */
+	private String[] hashtags = new String[0];
+
+	/** Set the hashtags assigned to the DMS */
+	@Override
+	public void setHashtags(String[] ht) {
+		hashtags = ht;
+	}
+
+	/** Set the hashtags assigned to the DMS */
+	public synchronized void doSetHashtags(String[] ht)
+		throws TMSException
+	{
+		String[] ht2 = DMSHelper.makeHashtags(ht);
+		if (!Arrays.equals(ht, ht2))
+			throw new ChangeVetoException("Bad hashtags");
+		if (!Arrays.equals(ht, hashtags)) {
+			TreeSet<String> ht_set = new TreeSet<String>(
+				Arrays.asList(ht)
+			);
+			mapping.update(this, ht_set);
+			setHashtags(ht);
+		}
+	}
+
+	/** Add a hashtag to the DMS */
+	public synchronized void addHashtagNotify(String aht) {
+		aht = DMSHelper.normalizeHashtag(aht);
+		if (aht == null)
+			return;
+		TreeSet<String> ht_set = new TreeSet<String>(
+			Arrays.asList(hashtags)
+		);
+		if (ht_set.add(aht)) {
+			try {
+				mapping.update(this, ht_set);
+				hashtags = ht_set.toArray(new String[0]);
+				notifyAttribute("hashtags");
+			}
+			catch (TMSException e) {
+				logError("hashtags map: " + e.getMessage());
+			}
+		}
+	}
+
+	/** Get the hashtags assigned to the DMS */
+	@Override
+	public String[] getHashtags() {
+		return hashtags;
 	}
 
 	/** Remote beacon */
@@ -534,8 +600,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public void resetStateNotify() {
 		setStatusNotify(null);
 		setStuckPixelsNotify(null);
+		setMsgUserNotify(null);
 		setMsgSchedNotify(null);
-		setMsgUserNull();
 		setMsgCurrentNotify(null, "RESET");
 	}
 
@@ -667,6 +733,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * A null value indicates that the user message is unknown. */
 	private SignMessage msg_user;
 
+	/** Get the user sign messasge.
+	 * @return User sign message */
+	@Override
+	public SignMessage getMsgUser() {
+		return msg_user;
+	}
+
 	/** Set the user selected sign message */
 	@Override
 	public void setMsgUser(SignMessage sm) {
@@ -684,15 +757,18 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
-	/** Set the user selected sign message to null, without sending
-	 *  anything to the sign. */
-	public void setMsgUserNull() {
-		try {
-			store.update(this, "msg_user", null);
-			setMsgUser(null);
-		}
-		catch (TMSException e) {
-			logError("setMsgUserNull: " + e.getMessage());
+	/** Set the user selected sign message,
+	 *  without validating or sending anything to the sign. */
+	public void setMsgUserNotify(SignMessage sm) {
+		if (!objectEquals(msg_user, sm)) {
+			try {
+				store.update(this, "msg_user", sm);
+				setMsgUser(sm);
+				notifyAttribute("msgUser");
+			}
+			catch (TMSException e) {
+				logError("msg_user: " + e.getMessage());
+			}
 		}
 	}
 
@@ -714,25 +790,21 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			updateSchedMsg();
 	}
 
-	/** Set the scheduled sign message */
-	private void setMsgSched(SignMessage sm) {
-		try {
-			store.update(this, "msg_sched", sm);
-			msg_sched = sm;
-		}
-		catch (TMSException e) {
-			logError("msg_sched: " + e.getMessage());
-		}
-	}
-
 	/** Set the scheduled sign message.
 	 * @param sm New scheduled sign message.
 	 * @return true If scheduled message changed. */
 	private boolean setMsgSchedNotify(SignMessage sm) {
 		if (!objectEquals(msg_sched, sm)) {
-			setMsgSched(sm);
-			notifyAttribute("msgSched");
-			return true;
+			try {
+				store.update(this, "msg_sched", sm);
+				msg_sched = sm;
+				notifyAttribute("msgSched");
+				return true;
+			}
+			catch (TMSException e) {
+				logError("msg_sched: " + e.getMessage());
+				return false;
+			}
 		} else
 			return false;
 	}
@@ -897,7 +969,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			return null;
 		RasterBuilder rb = DMSHelper.createRasterBuilder(this);
 		String ms = rb.combineMulti(sched.getMulti(), user.getMulti());
-		if (ms != null && rb.createRasters(ms) != null) {
+		if (rb.isRasterizable(ms)) {
 			SignMessage sm = createMsgCombined(sched, user, ms);
 			if (sm != null) {
 				// Check whether combined message can be

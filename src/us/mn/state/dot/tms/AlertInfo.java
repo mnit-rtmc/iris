@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,8 +80,8 @@ public interface AlertInfo extends SonarObject {
 	/** Get the longitude of the alert area's centroid */
 	double getLon();
 
-	/** Get the group containing all auto and optional signs */
-	SignGroup getSignGroup();
+	/** Get the DMS hashtag for all auto and optional signs */
+	String getAllHashtag();
 
 	/** Get the action plan */
 	ActionPlan getActionPlan();

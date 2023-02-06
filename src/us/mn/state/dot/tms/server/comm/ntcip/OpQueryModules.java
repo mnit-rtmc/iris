@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2022  Minnesota Department of Transportation
+ * Copyright (C) 2022-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,27 +54,38 @@ public class OpQueryModules extends OpNtcip {
 			mess.add(mod_table.modules);
 			mess.queryProps();
 			logQuery(mod_table.modules);
-			return !mod_table.isDone() ? new QueryModule() : null;
+			return nextRow();
 		}
+	}
+
+	/** Get phase to query the next row */
+	private QueryModule nextRow() {
+		return !mod_table.isDone()
+		      ? new QueryModule(mod_table.addRow())
+		      : null;
 	}
 
 	/** Phase to query a module */
 	protected class QueryModule extends Phase {
+		private final ModuleTable.Row row;
+
+		private QueryModule(ModuleTable.Row tr) {
+			row = tr;
+		}
 
 		/** Query the module make, model and version */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ModuleTable.Row tr = mod_table.addRow();
-			mess.add(tr.make);
-			mess.add(tr.model);
-			mess.add(tr.version);
-			mess.add(tr.m_type);
+			mess.add(row.make);
+			mess.add(row.model);
+			mess.add(row.version);
+			mess.add(row.m_type);
 			mess.queryProps();
-			logQuery(tr.make);
-			logQuery(tr.model);
-			logQuery(tr.version);
-			logQuery(tr.m_type);
-			return !mod_table.isDone() ? this : null;
+			logQuery(row.make);
+			logQuery(row.model);
+			logQuery(row.version);
+			logQuery(row.m_type);
+			return nextRow();
 		}
 	}
 

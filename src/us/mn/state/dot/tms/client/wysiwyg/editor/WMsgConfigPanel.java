@@ -107,52 +107,48 @@ public class WMsgConfigPanel extends IPanel {
 	private JList<String> warningList;
 	private DefaultListModel<String> warningListModel =
 			new DefaultListModel<String>();
-	
-	/** Sign Group MultiConfig */
-	private MultiConfig signGroupMultiConfig;
-	
+
 	/** Panel to display when errors and warnings appear */
 	private JPanel errorsWarningsPanel;
-	
+
 	/** Panel to display when warnings appear */
 	private JPanel warningsConfigPanel;
 	private IPanel wcp;
-	
+
 	/** Panel to display when no warnings or errors appear */
 	private JPanel goodConfigPanel;
 	private IPanel gcp;
-	
+
 	/** Sign Group MultiConfig errors and warnings */
 	private ArrayList<String> sgmcErrors = new ArrayList<String>();
 	private ArrayList<String> sgmcWarnings = new ArrayList<String>();
-	
+
 	/** "Active" MultiConfig */
 	private MultiConfig multiConfig;
 
 	/** Active MultiConfig errors and warnings */
 	private ArrayList<String> mcErrors = new ArrayList<String>();
 	private ArrayList<String> mcWarnings = new ArrayList<String>();
-	
+
 	private JLabel errorLabel;
 	private JLabel eWarningLabel;
 	private JLabel warningLabel;
-	
+
 	/** Create a new MULTI-mode panel */
 	public WMsgConfigPanel(WController c) {
 		controller = c;
-		
+
 		// get MultiConfig(s)
-		signGroupMultiConfig = controller.getSignGroupMultiConfig();
 		multiConfig = controller.getMultiConfig();
-		
+
 		// default error/warning labels
 		errorLabel = new JLabel(I18N.get("wysiwyg.config.errors"));
 		eWarningLabel = new JLabel(I18N.get("wysiwyg.config.warnings"));
 		warningLabel = new JLabel(I18N.get("wysiwyg.config.warnings"));
-		
+
 		// check for errors
 		updateErrorsWarnings();
-		
+
 		initialize();
 		setLayout(new BorderLayout());
 		JPanel p;
@@ -170,7 +166,7 @@ public class WMsgConfigPanel extends IPanel {
 			p = goodConfigPanel;
 		add(p, BorderLayout.CENTER);
 	}
-	
+
 	public boolean hasErrors() {
 		return !sgmcErrors.isEmpty() || !mcErrors.isEmpty();
 	}
@@ -178,7 +174,7 @@ public class WMsgConfigPanel extends IPanel {
 	public boolean hasWarnings() {
 		return !sgmcWarnings.isEmpty() || !mcWarnings.isEmpty();
 	}
-	
+
 	public void setActiveMultiConfig(MultiConfig mc) {
 		multiConfig = mc;
 		removeAll();

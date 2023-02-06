@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,9 @@
  */
 package us.mn.state.dot.tms;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -77,7 +77,7 @@ public class FontHelper extends BaseHelper {
 	}
 
 	/** Lookup the glyphs in the specified font */
-	static public Collection<Glyph> lookupGlyphs(Font font) {
+	static public Map<Integer, Glyph> lookupGlyphs(Font font) {
 		TreeMap<Integer, Glyph> glyphs = new TreeMap<Integer, Glyph>();
 		Iterator<Glyph> it = GlyphHelper.iterator();
 		while (it.hasNext()) {
@@ -85,30 +85,26 @@ public class FontHelper extends BaseHelper {
 			if (g.getFont() == font)
 				glyphs.put(g.getCodePoint(), g);
 		}
-		return glyphs.values();
+		return glyphs;
 	}
 
 	/** Lookup a glyph in the specified font */
-	static public Glyph lookupGlyph(Font font, int cp)
-		throws InvalidMsgException
-	{
+	static public Glyph lookupGlyph(Font font, int cp) {
 		Iterator<Glyph> it = GlyphHelper.iterator();
 		while (it.hasNext()) {
 			Glyph g = it.next();
 			if (g.getFont() == font && g.getCodePoint() == cp)
 				return g;
 		}
-		throw new InvalidMsgException("code point: " + cp);
+		return null;
 	}
 
 	/** Calculate the width of a span of text.
 	 * @param font Font to use for text
 	 * @param t Text to calculate
-	 * @return Width in pixels of text
-	 * @throws InvalidMsgException if the font is missing a character */
-	static public int calculateWidth(Font font, String t)
-		throws InvalidMsgException
-	{
+	 * @return Width in pixels of text,
+	 *         or -1 if the font is missing a character. */
+	static public int calculateWidth(Font font, String t) {
 		return calculateWidth(font, t, font.getCharSpacing());
 	}
 
@@ -116,18 +112,19 @@ public class FontHelper extends BaseHelper {
 	 * @param font Font to use for text.
 	 * @param t Text to calculate.
 	 * @param cs Character spacing.
-	 * @return Width in pixels of text.
-	 * @throws InvalidMsgException if the font is missing a character */
-	static public int calculateWidth(Font font, String t, int cs)
-		throws InvalidMsgException
-	{
+	 * @return Width in pixels of text,
+	 *         or -1 if the font is missing a character. */
+	static public int calculateWidth(Font font, String t, int cs) {
 		int w = 0;
 		for (int i = 0; i < t.length(); i++) {
 			if (i > 0)
 				w += cs;
 			int cp = t.charAt(i);
 			Glyph g = lookupGlyph(font, cp);
-			w += g.getWidth();
+			if (g != null)
+				w += g.getWidth();
+			else
+				return -1;
 		}
 		return w;
 	}

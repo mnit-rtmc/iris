@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.utils.MultiSyntaxError;
  * A raster builder creates raster graphics for DMS display.
  *
  * @see us.mn.state.dot.tms.utils.Multi
- * @see us.mn.state.dot.tms.utils.MultiAdapter
  * @see us.mn.state.dot.tms.utils.MultiString
  *
  * @author Douglas Lau
@@ -120,8 +119,41 @@ public class RasterBuilder {
 		return bitmaps.toArray(new BitmapGraphic[0]);
 	}
 
+	/** Check if a MULTI string is rasterizable */
+	public boolean isRasterizable(String ms) {
+		if (ms == null)
+			return false;
+		try {
+			return createPixmaps(new MultiString(ms)) != null;
+		}
+		catch (IndexOutOfBoundsException e) {
+			// dimensions too small for message
+			return false;
+		}
+		catch (InvalidMsgException e) {
+			// probably MultiSyntaxError or something
+			return false;
+		}
+	}
+
+	/** Create raster graphics from a multi string.
+	 * @return Array of RasterGraphic, or null on error. */
+	public RasterGraphic[] createRasters(String multi) {
+		try {
+			return createPixmaps(new MultiString(multi));
+		}
+		catch (IndexOutOfBoundsException e) {
+			// dimensions too small for message
+			return null;
+		}
+		catch (InvalidMsgException e) {
+			// most likely a MultiSyntaxError ...
+			return null;
+		}
+	}
+
 	/** Render a PixmapGraphic for each page */
-	public RasterGraphic[] createPixmaps(MultiString ms)
+	private RasterGraphic[] createPixmaps(MultiString ms)
 		throws InvalidMsgException
 	{
 		final ArrayList<RasterGraphic> pixmaps =
@@ -154,22 +186,6 @@ public class RasterBuilder {
 		}
 	}
 
-	/** Create raster graphics from a multi string.
-	 * @return Array of RasterGraphic, or null on error. */
-	public RasterGraphic[] createRasters(String multi) {
-		try {
-			return createPixmaps(new MultiString(multi));
-		}
-		catch (IndexOutOfBoundsException e) {
-			// dimensions too small for message
-			return null;
-		}
-		catch (InvalidMsgException e) {
-			// most likely a MultiSyntaxError ...
-			return null;
-		}
-	}
-
 	/** Try to make a combined message.
 	 * @param first MULTI string of first message.
 	 * @param second MULTI string of second message.
@@ -185,9 +201,9 @@ public class RasterBuilder {
 	private String makeCombined(String first, String second) {
 		MultiString ms1 = new MultiString(first);
 		MultiString ms2 = new MultiString(second);
-		if (ms1.isBlank() || ms2.isBlank())
+		if (ms1.isBlank())
 			return null;
-		if (canCombineSequence(first)) {
+		if (canCombineSequence(first) && !ms2.isBlank()) {
 			// First message ends with new page tag
 			MultiBuilder mb = new MultiBuilder(first);
 			mb.addPage();

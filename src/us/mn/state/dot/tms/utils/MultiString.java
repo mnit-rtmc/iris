@@ -44,11 +44,10 @@ public class MultiString {
 
 	/** A MULTI builder for normalizing spans and removing invalid tags */
 	static private class MultiNormalizer extends MultiBuilder {
-		@Override
-		public void addSpan(String s) {
+		@Override public void addSpan(String s) {
 			Matcher m = SPAN.matcher(s);
 			while (m.find())
-				super.addSpan(filterSpan(m.group()));
+				super.addSpan(m.group());
 		}
 	}
 
@@ -82,7 +81,7 @@ public class MultiString {
 		public void setPageTimes(Integer on, Integer off) {}
 		@Override
 		public void setTextRectangle(int x, int y, int w, int h) {}
-		// action tags not allowed in SignText
+		// action tags also not allowed in MsgText
 		@Override
 		public void addClearGuideAdvisory(String dms, int rid,
 			int tsp, String mode, int ridx) {}
@@ -699,10 +698,10 @@ public class MultiString {
 		return mb.toString();
 	}
 
-	/** Strip trailing empty lines */
-	public String stripTrailingLines() {
+	/** Strip trailing whitespace tags */
+	public String stripTrailingWhitespaceTags() {
 		String ms = multi;
-		while (ms.endsWith("[nl]"))
+		while (ms.endsWith("[nl]") || ms.endsWith("[np]"))
 			ms = ms.substring(0, ms.length() - 4);
 		return ms;
 	}
@@ -873,12 +872,15 @@ public class MultiString {
 		final StringBuilder sb = new StringBuilder();
 		parse(new MultiAdapter() {
 			@Override public void addSpan(String span) {
-				if (sb.length() > 0)
-					sb.append(' ');
-				sb.append(filterSpan(span.trim()));
+				String sp = span.trim();
+				if (sp.length() > 0) {
+					if (sb.length() > 0)
+						sb.append(' ');
+					sb.append(sp);
+				}
 			}
 		});
-		return sb.toString().trim();
+		return sb.toString();
 	}
 
 	/** Get the words in the message as a list.

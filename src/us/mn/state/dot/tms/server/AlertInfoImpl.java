@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,6 @@ import us.mn.state.dot.tms.AlertInfo;
 import us.mn.state.dot.tms.AlertState;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.IteratorWrapper;
-import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
@@ -57,7 +56,7 @@ public class AlertInfoImpl extends BaseObjectImpl implements AlertInfo {
 		store.query("SELECT name, alert, replaces, start_date, " +
 			"end_date, event, response_type, urgency, severity, " +
 			"certainty, headline, description, instruction, " +
-			"area_desc, geo_poly, lat, lon, sign_group, " +
+			"area_desc, geo_poly, lat, lon, all_hashtag, " +
 			"action_plan, alert_state FROM cap." + SONAR_TYPE +
 			" WHERE alert_state < 2;", new ResultFactory()
 		{
@@ -88,7 +87,7 @@ public class AlertInfoImpl extends BaseObjectImpl implements AlertInfo {
 		map.put("geo_poly", geo_poly);
 		map.put("lat", lat);
 		map.put("lon", lon);
-		map.put("sign_group", sign_group);
+		map.put("all_hashtag", all_hashtag);
 		map.put("action_plan", action_plan);
 		map.put("alert_state", alert_state);
 		return map;
@@ -125,7 +124,7 @@ public class AlertInfoImpl extends BaseObjectImpl implements AlertInfo {
 		     row.getObject(15),    // geo_poly
 		     row.getDouble(16),    // lat
 		     row.getDouble(17),    // lon
-		     row.getString(18),    // sign_group
+		     row.getString(18),    // all_hashtag
 		     row.getString(19),    // action_plan
 		     row.getInt(20)        // alert_state
 		);
@@ -135,18 +134,18 @@ public class AlertInfoImpl extends BaseObjectImpl implements AlertInfo {
 	private AlertInfoImpl(String n, String al, String rpl, Date sd, Date ed,
 		String ev, int rt, int ur, int sv, int cy, String hl,
 		String dsc, String ins, String adsc, Object gp, double lt,
-		double ln, String grp, String pln, int st)
+		double ln, String aht, String pln, int st)
 	{
 		this(n, al, rpl, sd, ed, ev, rt, ur, sv, cy, hl, dsc, ins, adsc,
-		     SQLConnection.multiPolygon(gp), lt, ln,
-		     lookupSignGroup(grp), lookupActionPlan(pln), st);
+		     SQLConnection.multiPolygon(gp), lt, ln, aht,
+		     lookupActionPlan(pln), st);
 	}
 
 	/** Create an alert info */
 	public AlertInfoImpl(String n, String al, String rpl, Date sd, Date ed,
 		String ev, int rt, int ur, int sv, int cy, String hl,
 		String dsc, String ins, String adsc, MultiPolygon gp, double lt,
-		double ln, SignGroup grp, ActionPlanImpl pln, int st)
+		double ln, String aht, ActionPlanImpl pln, int st)
 	{
 		super(n);
 		alert = al;
@@ -165,7 +164,7 @@ public class AlertInfoImpl extends BaseObjectImpl implements AlertInfo {
 		geo_poly = gp;
 		lat = lt;
 		lon = ln;
-		sign_group = grp;
+		all_hashtag = aht;
 		action_plan = pln;
 		alert_state = st;
 	}
@@ -332,13 +331,13 @@ public class AlertInfoImpl extends BaseObjectImpl implements AlertInfo {
 		return lon;
 	}
 
-	/** Group containing all auto and optional signs */
-	private SignGroup sign_group;
+	/** DMS hashtag for all auto and optional signs */
+	private String all_hashtag;
 
-	/** Get the group containing all auto and optional signs */
+	/** Get the DMS hashtag for all auto and optional signs */
 	@Override
-	public SignGroup getSignGroup() {
-		return sign_group;
+	public String getAllHashtag() {
+		return all_hashtag;
 	}
 
 	/** Action plan */

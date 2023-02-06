@@ -10,9 +10,9 @@ with a sign config.  They can be scheduled by [DMS action]s as part of an
 ## Fillable Text Rectangles
 
 Text rectangles within a pattern can be _fillable_ to allow operators to fill
-in parts of a message with sign text.  A fillable text rectangle can either be
-defined by a `[tr…]` tag, or be a full page (`[np]` tag or beginning of
-message).
+in those areas with [message lines](#message-lines).  A fillable text rectangle
+can either be defined by a `[tr…]` tag, or be a full page (`[np]` tag or
+beginning of message).
 
 A rectangle is only fillable if it contains no text or `[nl…]` tags.
 Additionally, a full page can only be fillable if it contains no `[tr…]` tags.
@@ -21,6 +21,18 @@ The text composed by operators will be inserted directly after a fillable text
 rectangle.  For example, if the pattern is: `[tr1,1,100,16][g5]`, and the
 operator selected the message `CRASH[nl]AHEAD`, the composed message would
 be `[tr1,1,100,16]CRASH[nl]AHEAD[g5]`.
+
+## Message Lines
+
+A pattern with fillable text rectangles can have lines of text associated with
+it.  Each line is used in a specific fillable rectangle of the pattern.  Lines
+can be ordered in the message composer by **rank**, 1-99.  Lines can also be
+restricted to specific signs by adding a **restrict hashtag**.
+
+When composing messages, if a pattern is selected which has fillable text
+rectangles but no lines, a **substitute** pattern will be chosen to provide
+them instead.  Both patterns must have the same number of lines in their text
+rectangles.
 
 ## Message Combining
 

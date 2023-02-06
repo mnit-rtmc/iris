@@ -15,7 +15,9 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Helper class for AlertInfo.
@@ -40,5 +42,23 @@ public class AlertInfoHelper extends BaseHelper {
 	static public Iterator<AlertInfo> iterator() {
 		return new IteratorWrapper<AlertInfo>(namespace.iterator(
 			AlertInfo.SONAR_TYPE));
+	}
+
+	/** Find all active signs */
+	static public Set<DMS> findActiveSigns(AlertInfo ai) {
+		HashSet<DMS> signs = new HashSet<DMS>();
+		ActionPlan ap = ai.getActionPlan();
+		Iterator<DmsAction> it = DmsActionHelper.iterator();
+		while (it.hasNext()) {
+			DmsAction da = it.next();
+			if (da.getActionPlan() == ap) {
+				String ht = da.getDmsHashtag();
+				Iterator<DMS> dit = DMSHelper
+					.hashtagIterator(ht);
+				while (dit.hasNext())
+					signs.add(dit.next());
+			}
+		}
+		return signs;
 	}
 }

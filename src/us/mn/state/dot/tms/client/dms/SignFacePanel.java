@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2023  Minnesota Department of Transportation
  * Copyright (C) 2018  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -46,19 +46,19 @@ public class SignFacePanel extends JPanel {
 	private final CardLayout cards = new CardLayout();
 
 	/** Dynamic sign pixel panel */
-	private final SignPixelPanel dynamic_pnl = new SignPixelPanel(HEIGHT,
-		WIDTH);
+	private final SignPixelPanel dynamic_pnl = new SignPixelPanel(WIDTH,
+		HEIGHT);
 
 	/** Hybrid sign panel */
 	private final JPanel hybrid_pnl = new JPanel();
 
 	/** Static sign graphic panel */
 	private final StaticGraphicPanel hybrid_static_pnl =
-		new StaticGraphicPanel(HEIGHT, WIDTH / 2);
+		new StaticGraphicPanel(WIDTH / 2, HEIGHT);
 
 	/** Hybrid sign pixel panel */
 	private final SignPixelPanel hybrid_dynamic_pnl = new SignPixelPanel(
-		HEIGHT, WIDTH / 2);
+		WIDTH / 2, HEIGHT);
 
 	/** Create a new sign face panel */
 	public SignFacePanel() {

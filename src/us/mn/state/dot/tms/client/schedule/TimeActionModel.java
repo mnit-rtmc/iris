@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,7 +97,7 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 
 	/** Create a new time action table model */
 	public TimeActionModel(Session s, ActionPlan ap) {
-		super(s, descriptor(s), 16);
+		super(s, descriptor(s), 12);
 		action_plan = ap;
 		phase_mdl = s.getSonarState().getPhaseModel();
 	}

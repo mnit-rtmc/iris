@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,6 +51,12 @@ public interface DMS extends Device {
 	/** Get the hidden flag */
 	boolean getHidden();
 
+	/** Set the hashtags */
+	void setHashtags(String[] ht);
+
+	/** Get the hashtags */
+	String[] getHashtags();
+
 	/** Set remote beacon */
 	void setBeacon(Beacon b);
 
@@ -71,6 +77,9 @@ public interface DMS extends Device {
 
 	/** Set the user sign message */
 	void setMsgUser(SignMessage sm);
+
+	/** Get the user sign message */
+	SignMessage getMsgUser();
 
 	/** Get the scheduled sign message */
 	SignMessage getMsgSched();

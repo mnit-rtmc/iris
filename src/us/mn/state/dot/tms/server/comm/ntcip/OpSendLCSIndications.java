@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.MsgPattern;
-import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
 import static us.mn.state.dot.tms.SignMsgSource.lcs;
 import us.mn.state.dot.tms.TMSException;
@@ -80,12 +79,9 @@ public class OpSendLCSIndications extends OpLCS {
 		int ind = indications[lane];
 		DMSImpl dms = dmss[lane];
 		if (dms != null) {
-			SignConfig sc = dms.getSignConfig();
-			if (sc != null) {
-				String ms = createIndicationMulti(ind, sc);
-				if (ms != null)
-					return createSignMessage(dms, ms, ind);
-			}
+			String ms = createIndicationMulti(ind, dms);
+			if (ms != null)
+				return createSignMessage(dms, ms, ind);
 		}
 		return null;
 	}
@@ -105,9 +101,9 @@ public class OpSendLCSIndications extends OpLCS {
 	}
 
 	/** Create a MULTI string for a lane use indication */
-	private String createIndicationMulti(int ind, SignConfig sc) {
+	private String createIndicationMulti(int ind, DMSImpl dms) {
 		String m = "";
-		LaneUseMulti lum = LaneUseMultiHelper.find(ind, sc);
+		LaneUseMulti lum = LaneUseMultiHelper.find(ind, dms);
 		if (lum != null) {
 			MsgPattern pat = lum.getMsgPattern();
 			if (pat != null)

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2022  Minnesota Department of Transportation
+ * Copyright (C) 2007-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,10 +95,8 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		RampMeterImpl.loadAll();
 		SignMessageImpl.loadAll();
 		DMSImpl.loadAll();
-		SignGroupImpl.loadAll();
-		DmsSignGroupImpl.loadAll();
 		MsgPatternImpl.loadAll();
-		SignTextImpl.loadAll();
+		MsgLineImpl.loadAll();
 		GateArmArrayImpl.loadAll();
 		GateArmImpl.loadAll();
 		TagReaderImpl.loadAll();
@@ -298,20 +296,6 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		SonarObject so = lookupObject(SignConfigImpl.SONAR_TYPE, name);
 		return (so instanceof SignConfigImpl)
 		      ? (SignConfigImpl) so
-		      : null;
-	}
-
-	/** Lookup a sign group */
-	static protected SignGroupImpl lookupSignGroup(String name) {
-		SonarObject so = lookupObject(SignGroupImpl.SONAR_TYPE, name);
-		return (so instanceof SignGroupImpl) ? (SignGroupImpl)so : null;
-	}
-
-	/** Lookup a DMS sign group */
-	static protected DmsSignGroupImpl lookupDmsSignGroup(String name) {
-		SonarObject so = lookupObject(DmsSignGroupImpl.SONAR_TYPE,name);
-		return (so instanceof DmsSignGroupImpl)
-		      ? (DmsSignGroupImpl) so
 		      : null;
 	}
 

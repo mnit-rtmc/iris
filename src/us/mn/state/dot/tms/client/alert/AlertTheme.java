@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Set;
 import org.postgis.MultiPolygon;
 import org.postgis.Point;
@@ -38,8 +39,6 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.dms.DmsTheme;
@@ -244,30 +243,29 @@ public class AlertTheme extends ProxyTheme<AlertInfo> {
 		float scale = dManager.getLayerState().getScale();
 		dmsTheme.setScale(scale);
 		dmsSymbol = (VectorSymbol) dmsTheme.getSymbol();
+		String aht = ai.getAllHashtag();
+		Set<DMS> active = AlertInfoHelper.findActiveSigns(ai);
 		if (st == AlertState.PENDING) {
-			// draw all DMS in group, then auto DMS
+			// draw DMS with alert All hashtag, then active
 			// (in that order so the styles look right)
-			SignGroup sg = ai.getSignGroup();
-			for (DMS d: SignGroupHelper.getAllSigns(sg))
-				drawDms(g, d, dmsAvailableStyle, t);
-			for (DMS d: findPlanSigns(ai))
-				drawDms(g, d, dmsDeployedStyle, t);
+			Iterator<DMS> it = DMSHelper.hashtagIterator(aht);
+			while (it.hasNext())
+				drawDms(g, it.next(), dmsAvailableStyle, t);
+			it = active.iterator();
+			while (it.hasNext())
+				drawDms(g, it.next(), dmsDeployedStyle, t);
 		} else if (st == AlertState.ACTIVE) {
-			// for active alerts draw only deployed DMS
-			for (DMS d: findPlanSigns(ai))
-				drawDms(g, d, dmsDeployedStyle, t);
+			// for active alerts draw only active DMS
+			Iterator<DMS> it = active.iterator();
+			while (it.hasNext())
+				drawDms(g, it.next(), dmsDeployedStyle, t);
 		} else {
-			// for cleared alerts draw only deployed DMS
+			// for cleared alerts draw only active DMS
 			// but using "all" style
-			for (DMS d: findPlanSigns(ai))
-				drawDms(g, d, dmsAllStyle, t);
+			Iterator<DMS> it = active.iterator();
+			while (it.hasNext())
+				drawDms(g, it.next(), dmsAllStyle, t);
 		}
-	}
-
-	/** Find signs in action plan */
-	private Set<DMS> findPlanSigns(AlertInfo ai) {
-		ActionPlan plan = ai.getActionPlan();
-		return DmsActionHelper.findSigns(plan);
 	}
 
 	/** Draw the DMS with the given name on the graphics context using the

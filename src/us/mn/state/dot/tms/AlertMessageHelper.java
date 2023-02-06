@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021-2022  Minnesota Department of Transportation
+ * Copyright (C) 2021-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -78,5 +79,32 @@ public class AlertMessageHelper extends BaseHelper {
 				msgs.add(msg);
 		}
 		return msgs;
+	}
+
+	/** Get set of alert msg sign configs for a given message pattern */
+	static public Set<SignConfig> findSignConfigs(MsgPattern pat) {
+		HashSet<SignConfig> cfgs = new HashSet<SignConfig>();
+		Iterator<AlertMessage> it = iterator();
+		while (it.hasNext()) {
+			AlertMessage msg = it.next();
+			if (msg.getMsgPattern() == pat) {
+				SignConfig sc = msg.getSignConfig();
+				if (sc != null)
+					cfgs.add(sc);
+			}
+		}
+		return cfgs;
+	}
+
+	/** Find an alert message for a message pattern and sign config */
+	static public AlertMessage find(MsgPattern pat, SignConfig sc) {
+		Iterator<AlertMessage> it = iterator();
+		while (it.hasNext()) {
+			AlertMessage msg = it.next();
+			if (msg.getMsgPattern() == pat &&
+			    sc == msg.getSignConfig())
+				return msg;
+		}
+		return null;
 	}
 }

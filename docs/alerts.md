@@ -86,12 +86,12 @@ each alert.
 Select the `View ➔ Alerts ➔ Alert Configurations` menu item.
 
 This dialog displays the alert configurations and allows creating new ones.
-A configuration links specific alert properties with a sign group and one or
+A configuration links specific alert properties with a DMS hashtag and one or
 more alert messages.
 
 To create a new alert configuration, press the `Create` button.  After the new
 configuration appears in the list, select it and assign the desired properties
-to match.  Also, select a sign group and create one or more messages.
+to match.  Also, select a DMS hashtag and create one or more messages.
 
 ### Event Types
 
@@ -130,12 +130,12 @@ has ended.  The duration of these periods is controlled via the "Hours Before"
 and "Hours After" times, respectively.  A value of 0 will disable that period
 for the configuration.
 
-### Sign Groups
+### DMS Hashtags
 
 Signs that are eligible for inclusion in an alert configuration should be
-collected into a single sign group.  When an alert matches the configuration,
-only signs from that group will be considered when searching the area defined by
-the alert CAP message.
+tagged with a specific DMS hashtag.  When an alert matches the configuration,
+only signs with that hashtag will be considered when searching the area defined
+by the alert CAP message.
 
 Signs that are inside the alert area will be automatically used to display
 messages describing the alert, unless an operator decides to exclude them.
@@ -153,7 +153,7 @@ deployment when reviewed in the deployment dialog.
 An alert message defines an *alert period* and a [message pattern].  The period
 can be `BEFORE`, `DURING` or `AFTER`, and selects the time relative to the start
 and end of the alert.  The message pattern will be displayed on signs with a
-matching **sign config** during the associated period.
+matching **restrict hashtag** during the associated period.
 
 A message pattern can contain DMS [action tags], since alerts are deployed as
 action plans.  Specifically, the [time action tag] is useful for displaying the
@@ -186,7 +186,7 @@ to approve alerts for deployment in addition to editing active deployments.
 When a new alert is received that is eligible for a message deployment, the
 IRIS server will process it to determine the signs for inclusion and the
 message(s) that will be displayed.  Each matching alert configuration will add
-an entry to the alert list, with a corresponding sign group.  If the
+an entry to the alert list, with a corresponding DMS hashtag.  If the
 configuration is not marked "auto deploy", its state will be "Pending".
 
 Operators may adjust the signs that are included in the deployment by checking

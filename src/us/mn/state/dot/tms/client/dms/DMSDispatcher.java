@@ -47,7 +47,6 @@ import us.mn.state.dot.tms.utils.MultiString;
  * It contains several other components and keeps their state synchronized.
  *
  * @see us.mn.state.dot.tms.SignMessage
- * @see us.mn.state.dot.tms.client.dms.DMSPanelPager
  * @see us.mn.state.dot.tms.client.dms.MessageComposer
  *
  * @author Douglas Lau
@@ -246,7 +245,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Update the current message on a sign */
 	public void updateMsgCurrent(DMS dms) {
-		String ms = DMSHelper.getOperatorMulti(dms);
+		String ms = DMSHelper.getUserMulti(dms);
 		composer.setComposedMulti(ms);
 		incident = DMSHelper.lookupIncident(dms);
 	}
@@ -260,8 +259,6 @@ public class DMSDispatcher extends JPanel {
 	/** Get the preview MULTI string */
 	public String getPreviewMulti(DMS dms) {
 		String ms = composer.getComposedMulti();
-		if (new MultiString(ms).isBlank())
-			return "";
 		String sched = getSchedMulti(dms);
 		if (sched != null) {
 			RasterBuilder rb = DMSHelper.createRasterBuilder(dms);

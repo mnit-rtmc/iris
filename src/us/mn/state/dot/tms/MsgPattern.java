@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,20 +27,6 @@ public interface MsgPattern extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "msg_pattern";
 
-	/** Get the sign configuration */
-	SignConfig getSignConfig();
-
-	/** Set the sign configuration */
-	void setSignConfig(SignConfig sc);
-
-	/** Get the sign group associated with the pattern.
-	 * @return Sign group; null for no group. */
-	SignGroup getSignGroup();
-
-	/** Set the sign group associated with the pattern.
-	 * @param sg Sign group to associate; null for no group. */
-	void setSignGroup(SignGroup sg);
-
 	/** Get the message MULTI string.
 	 * @return Message text in MULTI markup.
 	 * @see us.mn.state.dot.tms.utils.MultiString */
@@ -50,4 +36,12 @@ public interface MsgPattern extends SonarObject {
 	 * @param multi Message text in MULTI markup.
 	 * @see us.mn.state.dot.tms.utils.MultiString */
 	void setMulti(String multi);
+
+	/** Get the hashtag for composing with the pattern.
+	 * @return hashtag; null for no composing. */
+	String getComposeHashtag();
+
+	/** Set the hashtag for composing with the pattern.
+	 * @param cht hashtag; null for no composing. */
+	void setComposeHashtag(String cht);
 }

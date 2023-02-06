@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,13 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.Color;
 import javax.swing.Timer;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.PageTimeHelper;
+import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.MILLISECONDS;
@@ -30,7 +32,10 @@ import static us.mn.state.dot.tms.units.Interval.Units.MILLISECONDS;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DMSPanelPager {
+public class SignPixelPager {
+
+	/** Filter color for invalid message */
+	static private final Color INVALID_CLR = new Color(255, 128, 0, 48);
 
 	/** Time period for timer tick which updates panel */
 	static private final int TIMER_TICK_MS = 100;
@@ -62,12 +67,23 @@ public class DMSPanelPager {
 	/** Blanking state -- true during blank time between pages */
 	private boolean isBlanking = false;
 
-	/** Create a new DMS panel pager.
-	 * @param p SignPixelPanel.
+	/** Create a new sign pixel pager.
+	 * @param pnl SignPixelPanel.
+	 @ @param rb Raster builder.
 	 * @param rg Array of raster graphics, one per page.
 	 * @param ms MULTI string. */
-	public DMSPanelPager(SignPixelPanel p, RasterGraphic[] rg, String ms) {
-		pixel_pnl = p;
+	public SignPixelPager(SignPixelPanel pnl, RasterBuilder rb, String ms,
+		Color clr)
+	{
+		pixel_pnl = pnl;
+		RasterGraphic[] rg = rb.createRasters(ms);
+		if (rg != null)
+			pixel_pnl.setFilterColor(clr);
+		else {
+			pixel_pnl.setFilterColor(INVALID_CLR);
+			ms = "";
+			rg = rb.createRasters("");
+		}
 		rasters = rg;
 		page_on = PageTimeHelper.pageOnIntervals(ms);
 		page_off = PageTimeHelper.pageOffIntervals(ms);

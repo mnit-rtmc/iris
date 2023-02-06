@@ -38,17 +38,17 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
+import us.mn.state.dot.tms.MsgLineHelper;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.ParkingAreaHelper;
 import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignMsgSource;
-import us.mn.state.dot.tms.SignTextHelper;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.TransMsgPattern;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.TollZoneHelper;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
@@ -63,6 +63,7 @@ import static us.mn.state.dot.tms.units.Speed.Units.MPH;
 import static us.mn.state.dot.tms.utils.Multi.OverLimitMode;
 import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
+import us.mn.state.dot.tms.utils.TextRect;
 
 /**
  * A DMS action message parses custom action tags, which are similar to MULTI,
@@ -365,21 +366,19 @@ public class DmsActionMsg {
 	/** Test if a feed message is valid */
 	private boolean isFeedMsgValid(FeedMsg msg, String ms) {
 		SignConfig sc = msg.getSignConfig();
-		if (sc == null)
+		MsgPattern pat = action.getMsgPattern();
+		if (sc == null || pat == null)
 			return false;
-		MsgPattern pat = new TransMsgPattern(sc, "");
-		List<String> lines = MsgPatternHelper.splitLines(pat, ms);
-		for (int i = 0; i < lines.size(); i++) {
-			if (!isValidSignText((short) (i + 1), lines.get(i)))
+		TextRect tr = SignConfigHelper.textRect(sc);
+		List<String> lines = tr.splitLines(pat.getMulti(), ms);
+		short num = 0;
+		for (String line: lines) {
+			num++;
+			if ((!line.isEmpty()) &&
+			    (!MsgLineHelper.match(pat, num, line)))
 				return false;
 		}
 		return true;
-	}
-
-	/** Check if a MULTI string is a valid sign text for the sign group */
-	private boolean isValidSignText(short line, String ms) {
-		return ms.isEmpty() ||
-		       SignTextHelper.match(action.getSignGroup(), line, ms);
 	}
 
 	/** Calculate speed advisory span */

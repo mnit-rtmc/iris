@@ -16,108 +16,58 @@ package us.mn.state.dot.tms.client.wysiwyg.selector;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-
 import javax.swing.SwingWorker;
-
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.wysiwyg.selector.WMsgSelectorForm;
 
 /** Worker thread that handles background tasks
- * for the WYSIWYG message selector, checking 
- * that signs/sign groups exist.
- * 
+ * for the WYSIWYG message selector, checking
+ * that sign exists.
+ *
  * @author Gordon Parikh - SRF Consulting
  */
 public class WMsgSelectorSignProcess extends
 	SwingWorker<ArrayList<MsgPattern>, Boolean>
 {
-	protected final Session session;
-	protected final String signOrGroupName;
-	protected WMsgSelectorForm selectorForm;
-	
+	private final Session session;
+	private final String signName;
+	private final WMsgSelectorForm selectorForm;
+
 	public WMsgSelectorSignProcess(Session s, String sName,
-			WMsgSelectorForm sForm) {
-		this.session = s;
-		this.signOrGroupName = sName;
-		this.selectorForm = sForm;
+		WMsgSelectorForm sForm)
+	{
+		session = s;
+		signName = sName;
+		selectorForm = sForm;
 	}
 
 	/** Check that the sign exists and return a list of messages */
+	@Override
 	protected ArrayList<MsgPattern> doInBackground() throws Exception {
-		DMS dms = null;
-		SignGroup sg = null;
-		SignConfig dmsConfig = null;
-		Boolean signOrGroupExists = false;
+		DMS dms = DMSHelper.lookup(signName);
+		if (dms == null)
+			return null;
+
+		selectorForm.setSelectedDMS(dms);
+		SignConfig dmsConfig = dms.getSignConfig();
 		ArrayList<MsgPattern> plist = new ArrayList<MsgPattern>();
 
-		// the "signName" we get is either the name of a sign
-		// OR a sign group first try to look up the sign
-		dms = DMSHelper.lookup(signOrGroupName);
-
-		if (dms != null) {
-			// if the sign exists, get the sign's config
-			dmsConfig = dms.getSignConfig();
-			signOrGroupExists = true;
-			
-			// set the selector form's selectedDMS (this does a bunch of
-			// stuff)
-			selectorForm.setSelectedDMS(dms);
-		} else {
-			// if the sign doesn't exist, try looking for a sign group
-			sg = SignGroupHelper.lookup(signOrGroupName);
-
-			if (sg != null) {
-				// sign groups don't have a config, so just set that this
-				// exists
-				signOrGroupExists = true;
-
-				// set the selector form's selectedSignGroup (and other stuff)
-				selectorForm.setSelectedSignGroup(sg);
-			}
+		Iterator<MsgPattern> pit = MsgPatternHelper.iterator();
+		while (pit.hasNext()) {
+			MsgPattern pat = pit.next();
+			String cht = pat.getComposeHashtag();
+			if (cht != null && DMSHelper.hasHashtag(dms, cht))
+				plist.add(pat);
 		}
-
-		if (signOrGroupExists) {
-			// sign or group exists - get a list of messages
-
-			// iterate through all MsgPatterns to find matching ones
-			Iterator<MsgPattern> pit = MsgPatternHelper.iterator();
-			while (pit.hasNext()) {
-				MsgPattern pat = pit.next();
-
-				// first check if the SignGroup matches
-				SignGroup psg = pat.getSignGroup();
-				// if it does, add the message to the list
-				// and go to the next one
-				if (psg != null && signOrGroupName.equals(psg.getName()))
-					plist.add(pat);
-				else if (dmsConfig != null) {
-					// if the groups don't match but we have a sign config,
-					// check if that matches
-					SignConfig psc = pat.getSignConfig();
-					if (psc != null && psc.getName().equals(
-						dmsConfig.getName()))
-					{
-						plist.add(pat);
-					}
-				}
-			}
-
-			// return whatever messages we have
-			return plist;
-		} else {
-			// sign doesn't exist anymore - show a warning
-			return null;
-		}
+		return plist;
 	}
-	
-	protected void done() {
+
+	@Override protected void done() {
 		try {
 			ArrayList<MsgPattern> plist = get();
 			if (plist != null)
@@ -128,11 +78,9 @@ public class WMsgSelectorSignProcess extends
 				String selectedType = "<unknown type>";
 				if (selectorForm.getSelectedDMS() != null)
 					selectedType = "DMS";
-				else if (selectorForm.getSelectedSignGroup() != null)
-					selectedType = "SignGroup";
-				
+
 				session.getDesktop().show(new WMsgWarningForm(
-						session, selectorForm, selectedType));
+					session, selectorForm, selectedType));
 			}
 		} catch (Exception e) {
 			// if something happens, clear the list (showing an error message)
@@ -140,5 +88,5 @@ public class WMsgSelectorSignProcess extends
 			selectorForm.updateMessageList(true);
 			e.printStackTrace();
 		}
-	}	
+	}
 }

@@ -37,7 +37,6 @@ import javax.swing.event.InternalFrameEvent;
 
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.MsgPattern;
-import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -57,20 +56,16 @@ import us.mn.state.dot.tms.utils.wysiwyg.WPage;
 @SuppressWarnings("serial")
 
 public class WMsgEditorForm extends AbstractForm {
-	
+
 	/** User session */
 	private final Session session;
-	
+
 	/** Frame containing this form */
 	private JInternalFrame frame;
 
 	/* Sign/Group and Message being edited */
 	private DMS sign;
-	private SignGroup sg;
 	private MsgPattern pattern;
-
-	/* what "mode" (single sign or sign group) we're in */ 
-	private Boolean singleSign;
 
 	/* Controller - for handling back and forth between the GUI and renderer */
 	private WController controller;
@@ -84,9 +79,6 @@ public class WMsgEditorForm extends AbstractForm {
 	/* Standby Check Box */ 
 	private JCheckBox standby_chk;
 
-	/* Sign drop-down (only present for groups) */
-	private WMultiConfigComboBox multiConfigList;
-	
 	/* Page List */
 	private JPanel page_btn_pnl;
 	private JButton page_add_btn;
@@ -95,13 +87,13 @@ public class WMsgEditorForm extends AbstractForm {
 	private JButton page_mv_down_btn;
 	private WPageList page_list;
 	private JScrollPane page_list_pn;
-	
+
 	/** Error label to display when MultiConfig generation fails */
 	private JLabel multiConfigError;
-	
+
 	/** Main Editor Panel */
 	private WMsgEditorPanel epanel;
-	
+
 	/** Buttons */
 	private JButton cancel_btn;
 	private JButton save_as_btn;
@@ -109,29 +101,19 @@ public class WMsgEditorForm extends AbstractForm {
 
 	/** Key Bindings */
 	private WEditorKeyBindings editorKeyBindings;
-	
+
 	public WMsgEditorForm(Session s) {
 		super(getWindowTitle(null), true);
 		session = s;
 		controller = new WController(this);
 		initForm();
 	}
-	
+
 	public WMsgEditorForm(Session s, DMS d) {
 		super(getWindowTitle(null), true);
 		session = s;
 		sign = d;
-		singleSign = true;
 		controller = new WController(this, sign);
-		initForm();
-	}
-	
-	public WMsgEditorForm(Session s, SignGroup g) {
-		super(getWindowTitle(null), true);
-		session = s;
-		sg = g;
-		singleSign = false;
-		controller = new WController(this, sg);
 		initForm();
 	}
 
@@ -140,18 +122,7 @@ public class WMsgEditorForm extends AbstractForm {
 		session = s;
 		sign = d;
 		pattern = pat;
-		singleSign = true;
 		controller = new WController(this, pattern, sign);
-		initForm();
-	}
-
-	public WMsgEditorForm(Session s, MsgPattern pat, SignGroup g) {
-		super(getWindowTitle(pat), true);
-		session = s;
-		sg = g;
-		pattern = pat;
-		singleSign = false;
-		controller = new WController(this, pattern, sg);
 		initForm();
 	}
 
@@ -181,19 +152,14 @@ public class WMsgEditorForm extends AbstractForm {
 		
 		/* Standby Check Boxes */ 
 		standby_chk = new JCheckBox(controller.toggleStandbyMsg);
-		
-		/* Sign group drop-down - only present if editing for sign group */
-		if (signGroupMessage()) {
-			multiConfigList = controller.getConfigComboBox();
-		}
-		
+
 		/* Page number label (default to 1) */
 		pg_num_lbl = new JLabel(String.format(I18N.get(
 				"wysiwyg.editor.page_number"), 1));
-		
+
 		/* Page List */
 		page_list = controller.getPageList();
-		
+
 		/* Page buttons */
 		page_add_btn = new JButton(controller.pageAdd);
 		ImageIcon pg_add_icon = Icons.getIconByPropName(
@@ -201,31 +167,31 @@ public class WMsgEditorForm extends AbstractForm {
 		page_add_btn.setIcon(pg_add_icon);
 		page_add_btn.setHideActionText(true);
 		page_add_btn.setMargin(new Insets(0,0,0,0));
-		
+
 		page_del_btn = new JButton(controller.pageDelete);
 		ImageIcon pg_del_icon = Icons.getIconByPropName(
 				"wysiwyg.editor.page_delete");
 		page_del_btn.setIcon(pg_del_icon);
 		page_del_btn.setHideActionText(true);
 		page_del_btn.setMargin(new Insets(0,0,0,0));
-		
+
 		page_mv_up_btn = new JButton(controller.pageMoveUp);
 		ImageIcon pg_mv_up_icon = Icons.getIconByPropName(
 				"wysiwyg.editor.page_move_up");
 		page_mv_up_btn.setIcon(pg_mv_up_icon);
 		page_mv_up_btn.setHideActionText(true);
 		page_mv_up_btn.setMargin(new Insets(0,0,0,0));
-		
+
 		page_mv_down_btn = new JButton(controller.pageMoveDown);
 		ImageIcon pg_mv_down_icon = Icons.getIconByPropName(
 				"wysiwyg.editor.page_move_down");
 		page_mv_down_btn.setIcon(pg_mv_down_icon);
 		page_mv_down_btn.setHideActionText(true);
 		page_mv_down_btn.setMargin(new Insets(0,0,0,0));
-		
+
 		/* Main Editor Panel */
 		epanel = new WMsgEditorPanel(controller);
-		
+
 		/* Buttons */
 		cancel_btn = new JButton(cancel);
 		save_as_btn = new JButton(saveas);
@@ -255,25 +221,18 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.gridy = 0;
 		JPanel lPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		lPanel.add(new JLabel(getSignLabel()), gbc);
-		
-		/* Sign Name Label or Group Drop-Down */
-		if (singleSignMessage())
-			lPanel.add(new JLabel(controller.getSign().getName()), gbc);
-		else if (signGroupMessage() && multiConfigList != null)
-			lPanel.add(multiConfigList, gbc);
+
+		/* Sign Name Label */
+		lPanel.add(new JLabel(controller.getSign().getName()), gbc);
 		gbPanel.add(lPanel, gbc);
-		
+
 		/* Error label (only appears when a bad MultiConfig is used) */
 		gbc.gridx = 1;
 		gbc.gridy = 0;
 		multiConfigError = new JLabel();
 		multiConfigError.setForeground(Color.RED);
 		gbPanel.add(multiConfigError, gbc);
-		if (signGroupMessage() && multiConfigList == null
-				|| !controller.multiConfigUseable()) {
-			multiConfigError.setText(I18N.get("wysiwyg.editor.bad_config"));
-		}
-		
+
 		/* Page # Label */
 		gbc.gridx = 1;
 		gbc.gridy = 1;
@@ -515,30 +474,12 @@ public class WMsgEditorForm extends AbstractForm {
 			controller.saveMessage.actionPerformed(e);
 		}
 	};
-	
-	/** Returns true if editing a message for a single sign, false otherwise
-	 * (i.e. a group or TODO config). */
-	private boolean singleSignMessage() {
-		return singleSign;
-	}
-	
-	/** Returns true if editing a sign group message */
-	private boolean signGroupMessage() {
-		return !singleSign;
-	}
-	
+
 	/** Returns the string that should be used for the label next to the sign
-	 * name or sign group drop-down. */
+	 * name drop-down. */
 	private String getSignLabel() {
-		// check if editing the message for a single sign or a group
-		if (singleSignMessage())
-			// just have it say "Sign:"
-			return I18N.get("wysiwyg.sign") + ":";
-		else if (signGroupMessage())
-			// "Sign Group {group_name}, Sign: "
-			return I18N.get("wysiwyg.sign_group") + ": "
-				+ sg.getName() + "    ";
-		return "";
+		// just have it say "Sign:"
+		return I18N.get("wysiwyg.sign") + ":";
 	}
 
 	/** Return the state of the standby message box. */

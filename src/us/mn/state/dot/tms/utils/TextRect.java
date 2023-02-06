@@ -15,10 +15,16 @@
 package us.mn.state.dot.tms.utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import us.mn.state.dot.tms.ColorScheme;
+import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.FontHelper;
+import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.RasterBuilder;
+import us.mn.state.dot.tms.WordHelper;
 
 /**
  * Text rectangle on a full-matrix sign
@@ -27,13 +33,20 @@ import us.mn.state.dot.tms.RasterBuilder;
  */
 public class TextRect {
 	public final int page_number;
+	public final int rx;
+	public final int ry;
 	public final int width;
 	public final int height;
 	public final int font_num;
 
+	/** Glyph width cache */
+	private HashMap<Integer, Integer> glyph_widths;
+
 	/** Create a new text rectangle */
-	public TextRect(int pn, int w, int h, int fn) {
+	public TextRect(int pn, int x, int y, int w, int h, int fn) {
 		page_number = pn;
+		rx = x;
+		ry = y;
 		width = w;
 		height = h;
 		font_num = fn;
@@ -45,6 +58,8 @@ public class TextRect {
 		if (obj instanceof TextRect) {
 			TextRect rhs = (TextRect) obj;
 			return page_number == rhs.page_number &&
+			       rx == rhs.rx &&
+			       ry == rhs.ry &&
 			       width == rhs.width &&
 			       height == rhs.height &&
 			       font_num == rhs.font_num;
@@ -75,7 +90,8 @@ public class TextRect {
 			fillable = true;
 		}
 		private TextRect pageRect() {
-			return new TextRect(page, width, height, font_cur);
+			return new TextRect(page, rx, ry, width, height,
+				font_cur);
 		}
 		void startRect(TextRect tr) {
 			if (fillable)
@@ -104,7 +120,7 @@ public class TextRect {
 		{
 			if (rect.equals(page_rect))
 				fillable = false;
-			startRect(new TextRect(page, w, h, font_cur));
+			startRect(new TextRect(page, x, y, w, h, font_cur));
 		}
 	}
 
@@ -134,7 +150,8 @@ public class TextRect {
 			rects = trs;
 			lines = lns.iterator();
 			font_cur = font_num;
-			fillRect(new TextRect(page, width, height, font_cur));
+			fillRect(new TextRect(page, rx, ry, width, height,
+				font_cur));
 		}
 
 		private void fillRect(TextRect tr) {
@@ -160,13 +177,14 @@ public class TextRect {
 		@Override public void addPage() {
 			super.addPage();
 			page++;
-			fillRect(new TextRect(page, width, height, font_cur));
+			fillRect(new TextRect(page, rx, ry, width, height,
+				font_cur));
 		}
 		@Override public void setTextRectangle(int x, int y,
 			int w, int h)
 		{
 			super.setTextRectangle(x, y, w, h);
-			fillRect(new TextRect(page, w, h, font_cur));
+			fillRect(new TextRect(page, x, y, w, h, font_cur));
 		}
 	}
 
@@ -278,5 +296,82 @@ public class TextRect {
 		// if there's still a text rectangle, split it at the end
 		splitter.addPage();
 		return splitter.lines;
+	}
+
+	/** Width checker for MULTI lines */
+	private class WidthChecker extends MultiAdapter {
+		final int font_char_spacing;
+		Integer char_spacing; // current character spacing
+		int px_width;        // pixel width
+
+		private WidthChecker(int cs) {
+			font_char_spacing = cs;
+			char_spacing = null;
+			px_width = 0;
+		}
+		private int getCharSpacing() {
+			return (char_spacing != null)
+			      ? char_spacing
+			      : font_char_spacing;
+		}
+
+		@Override public void addSpan(String span) {
+			int len = span.length();
+			if (len > 0)
+				px_width += getCharSpacing() * (len - 1);
+			for (char cp: span.toCharArray()) {
+				Integer w = glyph_widths.get((int) cp);
+				// if glyph not found, make it "too wide"
+				px_width += (w != null) ? w : width + 1;
+			}
+		}
+		@Override public void setCharSpacing(Integer sc) {
+			char_spacing = sc;
+		}
+	}
+
+	/** Calculate the width of a single line MULTI string.
+	 * Note: result will be invalid if not a single line. */
+	public int calculateWidth(String ms) {
+		Font font = FontHelper.find(font_num);
+		if (font == null)
+			return -1;
+		if (glyph_widths == null)
+			cacheGlyphWidths(font);
+		WidthChecker checker = new WidthChecker(font.getCharSpacing());
+		new MultiString(ms).parse(checker);
+		return checker.px_width;
+	}
+
+	/** Create a cache of glyph widths for a font */
+	private void cacheGlyphWidths(Font font) {
+		glyph_widths = new HashMap<Integer, Integer>();
+		for (Map.Entry<Integer, Glyph> ent :
+			FontHelper.lookupGlyphs(font).entrySet())
+		{
+			glyph_widths.put(
+				ent.getKey(),
+				ent.getValue().getWidth()
+			);
+		}
+	}
+
+	/** Check if a MULTI line fits in the text rectangle.
+	 * @param ms MULTI line (only line-valid tags allowed!).
+	 * @param abbrev If true, try to abbreviate words if necessary.
+	 * @return Possibly abbreviated line, or null if it does not fit. */
+	public String checkLine(String ms, boolean abbrev) {
+		// it's possible to configure infinite abbrev loops,
+		// so limit this to 20 iterations
+		for (int i = 0; i < 20 && ms != null; i++) {
+			int w = calculateWidth(ms);
+			if (w >= 0 && w <= width)
+				return ms;
+			if (abbrev)
+				ms = WordHelper.abbreviate(ms);
+			else
+				break;
+		}
+		return null;
 	}
 }

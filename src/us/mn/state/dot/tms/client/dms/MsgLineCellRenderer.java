@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,15 +20,15 @@ import javax.swing.JList;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
-import us.mn.state.dot.tms.SignText;
+import us.mn.state.dot.tms.MsgLine;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
- * Cell renderer used for sign text.
+ * Cell renderer used for message lines.
  *
  * @author Douglas Lau
  */
-public class SignTextCellRenderer implements ListCellRenderer<SignText> {
+public class MsgLineCellRenderer implements ListCellRenderer<MsgLine> {
 
 	/** Blank string (must contain a space to be visible on combo box) */
 	static private final String BLANK = " ";
@@ -36,8 +36,8 @@ public class SignTextCellRenderer implements ListCellRenderer<SignText> {
 	/** Highlight color for special rank levels */
 	static private final Color HIGHLIGHT = new Color(204, 204, 255);
 
-	/** Get a sign text as string */
-	static private String asText(SignText value) {
+	/** Get a message line as text */
+	static private String asText(MsgLine value) {
 		if (value != null) {
 			String v = new MultiString(value.getMulti()).asText();
 			if (v.length() > 0)
@@ -50,15 +50,15 @@ public class SignTextCellRenderer implements ListCellRenderer<SignText> {
 	private final DefaultListCellRenderer cell =
 		new DefaultListCellRenderer();
 
-	/** Create a new sign text cell renderer */
-	public SignTextCellRenderer() {
+	/** Create a new message line cell renderer */
+	public MsgLineCellRenderer() {
 		cell.setHorizontalAlignment(SwingConstants.CENTER);
 	}
 
-	/** Configure the renderer component for a sign text message */
+	/** Configure the renderer component for a message line */
 	@Override
 	public Component getListCellRendererComponent(
-		JList<? extends SignText> list, SignText value, int index,
+		JList<? extends MsgLine> list, MsgLine value, int index,
 		boolean isSelected, boolean cellHasFocus)
 	{
 		cell.setBackground(null);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2022  Minnesota Department of Transportation
+ * Copyright (C) 2016-2023  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
+import us.mn.state.dot.tms.utils.TextRect;
 
 /**
  * Helper for dealing with sign configurations.
@@ -171,5 +172,16 @@ public class SignConfigHelper extends BaseHelper {
 	/** Get the default font for a sign config */
 	static public Font getDefaultFont(SignConfig sc) {
 		return (sc != null) ? sc.getDefaultFont() : null;
+	}
+
+	/** Get default text rectangle for a sign config */
+	static public TextRect textRect(SignConfig sc) {
+		if (sc != null) {
+			int width = sc.getPixelWidth();
+			int height = sc.getPixelHeight();
+			int fn = getDefaultFontNum(sc);
+			return new TextRect(1, 1, 1, width, height, fn);
+		} else
+			return null;
 	}
 }

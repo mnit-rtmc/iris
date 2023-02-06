@@ -16,11 +16,12 @@ package us.mn.state.dot.tms;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
-import us.mn.state.dot.tms.utils.MultiAdapter;
-import us.mn.state.dot.tms.utils.MultiBuilder;
+import java.util.Set;
+import java.util.TreeSet;
 import us.mn.state.dot.tms.utils.MultiString;
-import us.mn.state.dot.tms.utils.TextRect;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * Helper class for messages patterns.
@@ -62,47 +63,91 @@ public class MsgPatternHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Find unused text rectangles in a pattern */
-	static public List<TextRect> findTextRectangles(MsgPattern pat) {
-		TextRect tr = defaultRect(pat);
-		return (tr != null)
-			? tr.find(pat.getMulti())
-			: new ArrayList<TextRect>();
+	/** Find all compose message patterns for the specified DMS, sorted */
+	static public Set<MsgPattern> findAllCompose(DMS dms) {
+		TreeSet<MsgPattern> pats = new TreeSet<MsgPattern>(
+			new NumericAlphaComparator<MsgPattern>());
+		if (dms == null)
+			return pats;
+		Iterator<MsgPattern> it = iterator();
+		while (it.hasNext()) {
+			MsgPattern pat = it.next();
+			String cht = pat.getComposeHashtag();
+			if (cht != null && isValidMulti(pat)) {
+				if (DMSHelper.hasHashtag(dms, cht))
+					pats.add(pat);
+			}
+		}
+		return pats;
 	}
 
-	/** Get default text rectangle for a pattern */
-	static private TextRect defaultRect(MsgPattern pat) {
+	/** Check if a message pattern contains only valid MULTI */
+	static private boolean isValidMulti(MsgPattern pat) {
+		MultiString ms = new MultiString(pat.getMulti());
+		return ms.isValidMulti();
+	}
+
+	/** Compare two message patterns, preferring those with a trailing
+	 * text rectangle.
+	 * @return "Better" of the provided patterns. */
+	static public MsgPattern better(MsgPattern p0, MsgPattern p1) {
+		if (p0 == null)
+			return p1;
+		if (p1 == null)
+			return p0;
+		String t0 = new MultiString(p0.getMulti())
+			.trailingTextRectangle();
+		String t1 = new MultiString(p1.getMulti())
+			.trailingTextRectangle();
+		if (t0 == null && t1 != null)
+			return p1;
+		else if (t1 == null && t0 != null)
+			return p0;
+		else {
+			int l0 = p0.getMulti().length();
+			int l1 = p1.getMulti().length();
+			return (l0 < l1) ? p0 : p1;
+		}
+	}
+
+	/** Find all sign configs for a message pattern.
+	 * This includes configs for:
+	 * - the pattern's compose hashtag
+	 * - Lane use multi with the pattern
+	 * - DMS action with the pattern
+	 * - Alert config + message with the pattern */
+	static public List<SignConfig> findSignConfigs(MsgPattern pat) {
+		ArrayList<SignConfig> cfgs = new ArrayList<SignConfig>();
 		if (pat == null)
-			return null;
-		SignConfig sc = pat.getSignConfig();
-		if (sc == null)
-			return null;
-		int width = sc.getPixelWidth();
-		int height = sc.getPixelHeight();
-		int fn = SignConfigHelper.getDefaultFontNum(sc);
-		return new TextRect(1, width, height, fn);
+			return cfgs;
+		LinkedHashSet<String> hashtags = new LinkedHashSet<String>();
+		String cht = pat.getComposeHashtag();
+		if (cht != null)
+			hashtags.add(cht);
+		hashtags.addAll(LaneUseMultiHelper.findHashtags(pat));
+		hashtags.addAll(DmsActionHelper.findHashtags(pat));
+		for (String ht: hashtags) {
+			for (DMS dms: DMSHelper.findAllTagged(ht)) {
+				SignConfig sc = dms.getSignConfig();
+				if (sc != null && !cfgs.contains(sc))
+					cfgs.add(sc);
+			}
+		}
+		for (SignConfig sc: AlertMessageHelper.findSignConfigs(pat)) {
+			if (!cfgs.contains(sc))
+				cfgs.add(sc);
+		}
+		return cfgs;
 	}
 
-	/** Check if a pattern has unused text rectangles */
-	static public boolean hasTextRectangles(MsgPattern pat) {
-		return findTextRectangles(pat).size() > 0;
-	}
-
-	/** Fill text rectangles in a pattern */
-	static public String fillTextRectangles(MsgPattern pat,
-		List<String> lines)
-	{
-		TextRect tr = defaultRect(pat);
-		return (tr != null)
-			? tr.fill(pat.getMulti(), lines)
-			: "";
-	}
-
-	/** Split MULTI string into lines with a pattern */
-	static public List<String> splitLines(MsgPattern pat, String ms) {
-		TextRect tr = defaultRect(pat);
-		return (tr != null)
-			? tr.splitLines(pat.getMulti(), ms)
-			: new ArrayList<String>();
+	/** Check if a message pattern has associated lines */
+	static public boolean hasLines(MsgPattern pat) {
+		Iterator<MsgLine> it = MsgLineHelper.iterator();
+		while (it.hasNext()) {
+			MsgLine ml = it.next();
+			if (ml.getMsgPattern() == pat)
+				return true;
+		}
+		return false;
 	}
 }

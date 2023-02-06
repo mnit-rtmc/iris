@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@ import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.AlertInfo;
-import us.mn.state.dot.tms.AlertInfoHelper;
 import us.mn.state.dot.tms.AlertState;
 import us.mn.state.dot.tms.CapCertainty;
 import us.mn.state.dot.tms.CapEvent;

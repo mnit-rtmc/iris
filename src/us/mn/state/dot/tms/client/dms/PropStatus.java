@@ -182,9 +182,9 @@ public class PropStatus extends IPanel {
 		Box box = Box.createHorizontalBox();
 		box.add(new JButton(query_msg_act));
 		box.add(Box.createHorizontalStrut(UI.hgap));
-		box.add(new JButton(config));
-		box.add(Box.createHorizontalStrut(UI.hgap));
 		box.add(new JButton(query_status));
+		box.add(Box.createHorizontalStrut(UI.hgap));
+		box.add(new JButton(config));
 		box.add(Box.createHorizontalStrut(UI.hgap));
 		box.add(new JButton(query_settings));
 		box.add(Box.createHorizontalStrut(UI.hgap));

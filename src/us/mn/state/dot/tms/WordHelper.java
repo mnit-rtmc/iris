@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2016  Iteris Inc.
- * Copyright (C) 2019-2020  Minnesota Department of Transportation
+ * Copyright (C) 2019-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -291,11 +291,48 @@ public class WordHelper extends BaseHelper {
 		}
 	}
 
-	/** Lookup a word and return its abbreviation */
-	static public String abbreviate(String w) {
+	/** Abbreviate text if possible.
+	 * @return Abbreviated text, or null if can't be abbreviated. */
+	static public String abbreviate(String txt) {
+		String[] words = txt.split(" ");
+		// Abbreviate words with non-blank abbreviations
+		for (int i = words.length - 1; i >= 0; i--) {
+			String abbr = lookupAbbrev(words[i]);
+			if (abbr != null && abbr.length() > 0) {
+				words[i] = abbr;
+				return joinWords(words);
+			}
+		}
+		// Abbreviate words with blank abbreviations
+		for (int i = words.length - 1; i >= 0; i--) {
+			String abbr = lookupAbbrev(words[i]);
+			if (abbr != null) {
+				words[i] = abbr;
+				return joinWords(words);
+			}
+		}
+		return null;
+	}
+
+	/** Lookup a word and get its abbreviation */
+	static private String lookupAbbrev(String w) {
 		Word word = lookup(w);
 		return (word != null && word.getAllowed())
 		      ? word.getAbbr()
 		      : null;
+	}
+
+	/** Join an array of words, skipping blank entries */
+	static private String joinWords(String[] words) {
+		StringBuilder sb = new StringBuilder();
+		for (String word: words) {
+			if (word != null && word.length() > 0) {
+				if (sb.length() > 0)
+					sb.append(' ');
+				sb.append(word);
+			}
+		}
+		String ms = sb.toString();
+		return (ms.length() > 0) ? ms : null;
 	}
 }

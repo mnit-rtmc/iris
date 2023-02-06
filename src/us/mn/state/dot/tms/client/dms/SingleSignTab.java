@@ -36,9 +36,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.RasterBuilder;
-import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.CameraPresetAction;
@@ -63,6 +61,9 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Michael Darter
  */
 public class SingleSignTab extends IPanel {
+
+	/** Preview filter color */
+	static private final Color PREVIEW_CLR = new Color(0, 0, 255, 48);
 
 	/** Get the expiration time of a DMS message */
 	static private String getExpiration(DMS dms) {
@@ -113,8 +114,8 @@ public class SingleSignTab extends IPanel {
 	/** Preview sign face panel */
 	private final SignFacePanel preview_pnl = new SignFacePanel();
 
-	/** Pager for selected DMS panel */
-	private DMSPanelPager pager;
+	/** Pager for selected pixel panel */
+	private SignPixelPager pager;
 
 	/** Mouse listener for popup menus */
 	private final MouseListener popper = new MouseAdapter() {
@@ -177,7 +178,6 @@ public class SingleSignTab extends IPanel {
 		setIncidentAction(null);
 		// Make label opaque so that we can set the background color
 		status_lbl.setOpaque(true);
-		preview_pnl.setFilterColor(new Color(0, 0, 255, 48));
 		add("device.name");
 		add(name_lbl);
 		if (SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean()) {
@@ -260,8 +260,8 @@ public class SingleSignTab extends IPanel {
 		return (preview) ? preview_pnl : current_pnl;
 	}
 
-	/** Create a DMS panel pager */
-	private DMSPanelPager createPager(DMS dms, SignPixelPanel pix_pnl) {
+	/** Create a pixel panel pager */
+	private SignPixelPager createPager(DMS dms, SignPixelPanel pix_pnl) {
 		if (dms != null) {
 			return (preview)
 			      ? createPreviewPager(dms, pix_pnl)
@@ -271,26 +271,22 @@ public class SingleSignTab extends IPanel {
 	}
 
 	/** Create a preview panel pager */
-	private DMSPanelPager createPreviewPager(DMS dms,
+	private SignPixelPager createPreviewPager(DMS dms,
 		SignPixelPanel pix_pnl)
 	{
 		String ms = dispatcher.getPreviewMulti(dms);
-		RasterGraphic[] rg = DMSHelper.createRasters(dms, ms);
-		return (rg != null)
-		      ? new DMSPanelPager(pix_pnl, rg, ms)
-		      : null;
+		RasterBuilder rb = DMSHelper.createRasterBuilder(dms);
+		return new SignPixelPager(pix_pnl, rb, ms, PREVIEW_CLR);
 	}
 
 	/** Update the current panel */
-	private DMSPanelPager createCurrentPager(DMS dms,
+	private SignPixelPager createCurrentPager(DMS dms,
 		SignPixelPanel pix_pnl)
 	{
-		RasterGraphic[] rg = DMSHelper.createRasters(dms);
-		if (rg != null) {
-			String ms = DMSHelper.getMultiString(dms);
-			return new DMSPanelPager(pix_pnl, rg, ms);
-		} else
-			return null;
+		String ms = DMSHelper.getMultiString(dms);
+		RasterBuilder rb = DMSHelper.createRasterBuilder(dms);
+		Color clr = SignPixelPanel.filterColor(dms);
+		return new SignPixelPager(pix_pnl, rb, ms, clr);
 	}
 
 	/** Set a single selected DMS */
@@ -356,7 +352,6 @@ public class SingleSignTab extends IPanel {
 
 	/** Update the status widgets */
 	private void updateStatus(DMS dms) {
-		current_pnl.setFilterColor(SignPixelPanel.filterColor(dms));
 		if (DMSHelper.isFailed(dms)) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.GRAY);
@@ -403,9 +398,9 @@ public class SingleSignTab extends IPanel {
 		expiration_lbl.setText(getExpiration(dms));
 	}
 
-	/** Set the DMS panel pager */
-	private void setPager(DMSPanelPager p) {
-		DMSPanelPager op = pager;
+	/** Set the sign pixel pager */
+	private void setPager(SignPixelPager p) {
+		SignPixelPager op = pager;
 		if (op != null)
 			op.dispose();
 		pager = p;

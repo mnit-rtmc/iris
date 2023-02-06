@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -550,7 +550,7 @@ public class OpSendDMSFonts extends OpDMS {
 			logStore(line_spacing);
 			mess.storeProps();
 			Collection<Glyph> glyphs =
-				FontHelper.lookupGlyphs(frow.font);
+				FontHelper.lookupGlyphs(frow.font).values();
 			if (glyphs.isEmpty()) {
 				if (version2)
 					return new ValidateFontV2(frow);

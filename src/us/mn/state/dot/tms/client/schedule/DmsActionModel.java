@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,18 +26,17 @@ import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsMsgPriority;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.PlanPhaseHelper;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
-import us.mn.state.dot.tms.client.widget.IOptionPane;
+import static us.mn.state.dot.tms.client.widget.IOptionPane.showHint;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
@@ -73,11 +72,22 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	protected ArrayList<ProxyColumn<DmsAction>> createColumns() {
 		ArrayList<ProxyColumn<DmsAction>> cols =
 			new ArrayList<ProxyColumn<DmsAction>>(5);
-		cols.add(new ProxyColumn<DmsAction>("action.plan.dms.group",
+		cols.add(new ProxyColumn<DmsAction>("action.plan.hashtag",
 			120)
 		{
 			public Object getValueAt(DmsAction da) {
-				return da.getSignGroup();
+				return da.getDmsHashtag();
+			}
+			public boolean isEditable(DmsAction da) {
+				return canWrite(da);
+			}
+			public void setValueAt(DmsAction da, Object value) {
+				String ht = DMSHelper.normalizeHashtag(
+					value.toString());
+				if (ht != null)
+					da.setDmsHashtag(ht);
+				else
+					showHint("dms.hashtag.invalid.hint");
 			}
 		});
 		cols.add(new ProxyColumn<DmsAction>("action.plan.phase", 100) {
@@ -160,7 +170,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 
 	/** Create a new DMS action table model */
 	public DmsActionModel(Session s, ActionPlan ap) {
-		super(s, descriptor(s), 16);
+		super(s, descriptor(s), 12);
 		action_plan = ap;
 		phase_mdl = s.getSonarState().getPhaseModel();
 	}
@@ -181,7 +191,6 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				return c == 0;
 			}
 		};
-		sorter.setComparator(0,new NumericAlphaComparator<SignGroup>());
 		sorter.setSortsOnUpdates(true);
 		LinkedList<RowSorter.SortKey> keys =
 			new LinkedList<RowSorter.SortKey>();
@@ -196,24 +205,24 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		return action_plan != null && super.canAdd();
 	}
 
-	/** Create an object with the name */
+	/** Create an object with a hashtag */
 	@Override
-	public void createObject(String name) {
-		SignGroup sg = SignGroupHelper.lookup(name.trim());
-		if (sg != null && action_plan != null)
-			create(sg);
+	public void createObject(String hashtag) {
+		String ht = DMSHelper.normalizeHashtag(hashtag);
+		if (ht != null && ht.equals(hashtag))
+			create(hashtag);
 		else
-			IOptionPane.showHint("action.plan.dms.hint");
+			showHint("dms.hashtag.invalid.hint");
 	}
 
 	/** Create a new DMS action */
-	private void create(SignGroup sg) {
+	private void create(String hashtag) {
 		String name = createUniqueName();
 		if (name != null) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("action_plan", action_plan);
-			attrs.put("sign_group", sg);
+			attrs.put("dms_hashtag", hashtag);
 			attrs.put("phase", lookupPlanPhase());
 			attrs.put("msg_priority",
 				DmsMsgPriority.SCHED_A.ordinal());

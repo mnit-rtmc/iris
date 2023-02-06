@@ -128,18 +128,11 @@ public class WtTextChar extends WToken {
 		return super.isValid();
 	}
 
-	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#isNormalizeLine()
-	 */
-	public boolean isNormalizeLine() {
-		return true;
-	}
-	
 	/** Set the font used for this token. Called by the renderer. */
 	public void setFont(WFont wf) {
 		wfont = wf;
 	}
-	
+
 	/** Get the font used for this token. */
 	public WFont getFont() {
 		return wfont;
