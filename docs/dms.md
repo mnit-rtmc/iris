@@ -34,7 +34,7 @@ Device purpose | _general_ or _dedicated_ purpose for sign operation
 Hidden         | hide sign when _available_ or _deployed_ styles are selected
 
 A **hashtag** is the `#` character, followed by a string of letters and/or
-numbers.  The are used to select signs for:
+numbers.  They are used to select signs for:
 - [message pattern]s for composing
 - automated [DMS actions]
 - [alert configurations] and [alert messages]

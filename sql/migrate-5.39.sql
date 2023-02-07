@@ -82,7 +82,8 @@ UPDATE sign_group_pattern
     SELECT st.sign_group
     FROM iris.sign_text st
     JOIN iris.sign_group sg ON st.sign_group = sg.name
-    WHERE local = true
+    WHERE sign_group_hashtag(sign_group)
+        NOT IN ('#Small', '#TwoLine', '#ThreeLine')
     GROUP BY st.sign_group
 );
 UPDATE sign_group_pattern SET pattern = '.1.LINE' WHERE sign_group = 'GATES';
