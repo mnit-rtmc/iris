@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017 Iteris Inc.
- * Copyright (C) 2019-2022  Minnesota Department of Transportation
+ * Copyright (C) 2019-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -107,17 +107,17 @@ public class OpQueryEssSettings extends OpEss {
 
 	/** Phase to query all rows in wind table (V2+) */
 	protected class QueryWindTableV2 extends Phase {
+		private final WindSensorsTable.Row tr = ws_table.addRow();
 
 		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			WindSensorsTable.Row tr = ws_table.addRow();
 			mess.add(tr.height.node);
 			mess.queryProps();
 			logQuery(tr.height.node);
 			return ws_table.isDone()
 			      ? new QueryTemperatureSensors()
-			      : this;
+			      : new QueryWindTableV2();
 		}
 	}
 
@@ -156,15 +156,17 @@ public class OpQueryEssSettings extends OpEss {
 
 	/** Phase to query all rows in temperature table */
 	protected class QueryTemperatureTable extends Phase {
+		private final TemperatureSensorsTable.Row tr = ts_table.addRow();
 
 		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			TemperatureSensorsTable.Row tr = ts_table.addRow();
 			mess.add(tr.height.node);
 			mess.queryProps();
 			logQuery(tr.height.node);
-			return ts_table.isDone() ? new QueryPavement() : this;
+			return ts_table.isDone()
+			      ? new QueryPavement()
+			      : new QueryTemperatureTable();
 		}
 	}
 
@@ -185,11 +187,11 @@ public class OpQueryEssSettings extends OpEss {
 
 	/** Phase to query all rows in pavement table */
 	protected class QueryPavementTable extends Phase {
+		private final PavementSensorsTable.Row pr = ps_table.addRow();
 
 		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			PavementSensorsTable.Row pr = ps_table.addRow();
 			mess.add(pr.location);
 			mess.add(pr.pavement_type);
 			mess.add(pr.height.node);
@@ -201,7 +203,9 @@ public class OpQueryEssSettings extends OpEss {
 			logQuery(pr.height.node);
 			logQuery(pr.exposure.node);
 			logQuery(pr.sensor_type);
-			return ps_table.isDone() ? new QuerySubSurface() : this;
+			return ps_table.isDone()
+			      ? new QuerySubSurface()
+			      : new QueryPavementTable();
 		}
 	}
 
@@ -222,11 +226,11 @@ public class OpQueryEssSettings extends OpEss {
 
 	/** Phase to query all rows in sub-surface table */
 	protected class QuerySubSurfaceTable extends Phase {
+		private final SubSurfaceSensorsTable.Row sr = ss_table.addRow();
 
 		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			SubSurfaceSensorsTable.Row sr = ss_table.addRow();
 			mess.add(sr.location);
 			mess.add(sr.sub_surface_type);
 			mess.add(sr.depth);
@@ -234,7 +238,9 @@ public class OpQueryEssSettings extends OpEss {
 			logQuery(sr.location);
 			logQuery(sr.sub_surface_type);
 			logQuery(sr.depth);
-			return ss_table.isDone() ? null : this;
+			return ss_table.isDone()
+			      ? null
+			      : new QuerySubSurfaceTable();
 		}
 	}
 

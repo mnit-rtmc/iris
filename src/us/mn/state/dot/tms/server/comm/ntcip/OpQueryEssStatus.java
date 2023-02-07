@@ -133,11 +133,11 @@ public class OpQueryEssStatus extends OpEss {
 
 	/** Phase to query all rows in wind table (V2+) */
 	protected class QueryWindTableV2 extends Phase {
+		private final WindSensorsTable.Row tr = ws_table.addRow();
 
 		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			WindSensorsTable.Row tr = ws_table.addRow();
 			mess.add(tr.avg_speed.node);
 			mess.add(tr.avg_direction.node);
 			mess.add(tr.spot_speed.node);
@@ -160,7 +160,7 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(tr.gust_direction.node);
 			return ws_table.isDone()
 			      ? new QueryTemperatureSensors()
-			      : this;
+			      : new QueryWindSensorsV2();
 		}
 	}
 
@@ -218,11 +218,12 @@ public class OpQueryEssStatus extends OpEss {
 
 	/** Phase to query all rows in temperature table */
 	protected class QueryTemperatureTable extends Phase {
+		private final TemperatureSensorsTable.Row tr =
+			ts_table.addRow();
 
 		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			TemperatureSensorsTable.Row tr = ts_table.addRow();
 			mess.add(tr.air_temp.node);
 			try {
 				mess.queryProps();
@@ -235,7 +236,7 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(tr.air_temp.node);
 			return ts_table.isDone()
 			      ? new QueryPrecipitation()
-			      : this;
+			      : new QueryTemperatureTable();
 		}
 	}
 
@@ -283,10 +284,8 @@ public class OpQueryEssStatus extends OpEss {
 
 	/** Phase to query rows in pavement table */
 	protected class QueryPavementTable extends Phase {
-		private final PavementSensorsTable.Row pr;
-		private QueryPavementTable() {
-			pr = ps_table.addRow();
-		}
+		private final PavementSensorsTable.Row pr =
+			ps_table.addRow();
 
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
@@ -402,10 +401,8 @@ public class OpQueryEssStatus extends OpEss {
 
 	/** Phase to query rows in sub-surface table */
 	protected class QuerySubSurfaceTable extends Phase {
-		private final SubSurfaceSensorsTable.Row sr;
-		private QuerySubSurfaceTable() {
-			sr = ss_table.addRow();
-		}
+		private final SubSurfaceSensorsTable.Row sr =
+			ss_table.addRow();
 
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
