@@ -245,6 +245,11 @@ public class MsgPatternPanel extends JPanel {
 		updateEditMode();
 	}
 
+	/** Get the selected sign configuration */
+	public SignConfig getSelectedSignConfig() {
+		return config_lst.getSelectedValue();
+	}
+
 	/** Update the pixel panel */
 	private void updatePixelPnl() {
 		setPager(null);

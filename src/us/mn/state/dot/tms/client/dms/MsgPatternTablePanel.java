@@ -17,12 +17,16 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.event.ActionEvent;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
+import javax.swing.JInternalFrame;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.widget.IAction;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
-import us.mn.state.dot.tms.client.wysiwyg.selector.WMsgSelectorForm;
+import us.mn.state.dot.tms.client.wysiwyg.editor.WMsgEditorForm;
 
 /**
  * Message pattern table panel
@@ -36,14 +40,28 @@ public class MsgPatternTablePanel extends ProxyTablePanel<MsgPattern> {
 
 	final MsgPatternPanel pat_pnl;
 
-	/** Create a WYSIWYG Selector button action */
+	/** Create a WYSIWYG edit button action */
 	private final IAction wysiwyg_act =
 		new IAction("wysiwyg.selector.edit")
 	{
 		protected void doActionPerformed(ActionEvent e) {
 			MsgPattern pat = getSelectedProxy();
-			session.getDesktop().show(
-				new WMsgSelectorForm(session, pat));
+			SignConfig sc = pat_pnl.getSelectedSignConfig();
+			if (pat == null || sc == null)
+				return;
+			// Find a sign using the selected configuration
+			DMS sign = null;
+			for (DMS d : SignConfigHelper.getAllSigns(sc)) {
+				sign = d;
+				break;
+			}
+			if (sign == null)
+				return;
+			WMsgEditorForm editor = new WMsgEditorForm(session,
+				pat, sign);
+			JInternalFrame frame = session.getDesktop()
+				.show(editor);
+			editor.setFrame(frame);
 		}
 	};
 
@@ -84,9 +102,8 @@ public class MsgPatternTablePanel extends ProxyTablePanel<MsgPattern> {
 	@Override public void updateButtonPanel() {
 		super.updateButtonPanel();
 		MsgPattern pat = getSelectedProxy();
-		boolean permitted = WMsgSelectorForm.isPermitted(session);
 		boolean canEdit = pat != null;
 		boolean canAdd = model.canAdd();
-		wysiwyg_act.setEnabled(permitted && canEdit && canAdd);
+		wysiwyg_act.setEnabled(canEdit && canAdd);
 	}
 }
