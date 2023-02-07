@@ -63,7 +63,7 @@ public class WMsgEditorForm extends AbstractForm {
 	/** Frame containing this form */
 	private JInternalFrame frame;
 
-	/* Sign/Group and Message being edited */
+	/* Sign and pattern being edited */
 	private DMS sign;
 	private MsgPattern pattern;
 
@@ -215,8 +215,8 @@ public class WMsgEditorForm extends AbstractForm {
 		gbc.ipady = 0;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
-		
-		/* Sign/Group Label and sign name label or MultiConfig drop-down */
+
+		/* Sign Label and sign name label or MultiConfig drop-down */
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		JPanel lPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));

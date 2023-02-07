@@ -92,7 +92,7 @@ public class WImagePanel extends JPanel {
 	private final static boolean PIX_END = false;
 	private final static boolean LED_SEP = true;
 	private final static boolean LED = false;
-	
+
 	public WImagePanel(WController c, int w, int h) {
 		controller = c;
 		width = w;
@@ -100,14 +100,14 @@ public class WImagePanel extends JPanel {
 		init();
 		controller.setSignPanel(this);
 	}
-	
+
 	public WImagePanel(int w, int h, boolean usePreviewImg) {
 		width = w;
 		height = h;
 		preview = usePreviewImg;
 		init();
 	}
-	
+
 	private void init() {
 		setLayout(new FlowLayout(FlowLayout.CENTER));
 		Dimension d = new Dimension(width, height);
@@ -118,30 +118,30 @@ public class WImagePanel extends JPanel {
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		
+
 		if (image != null) {
 			g.drawImage(image, 0, 0, width, height, null);
-			
+
 			// add the caret to the image if it's enabled
 			if (caretOn)
 				drawCaret(g);
-			
+
 			// add a text selection if something is selected
 			if (selectionOn)
 				drawTextSelection(g);
-			
+
 			// same with text rectangles
 			if (tcgRectsOn)
 				drawRectangles(g);
 		}
 	}
-	
+
 	public void setPage(WPage p) {
 		pg = p;
-		
+
 		// get the raster object, set the image size, and get the image
 		wr = pg.getRaster();
-		
+
 		if (wr != null) {
 			try {
 				if (!preview) {
@@ -158,7 +158,7 @@ public class WImagePanel extends JPanel {
 		}
 		repaint();
 	}
-	
+
 	/** Initialize the raster provided with the sign panel's dimensions. */
 	public void initRaster(WRaster r) {
 		if (r != null) {
@@ -169,7 +169,7 @@ public class WImagePanel extends JPanel {
 			}
 		}
 	}
-	
+
 	public void setImageSize(int w, int h) {
 		width = w;
 		height = h;

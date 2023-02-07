@@ -448,7 +448,7 @@ public class MultiConfig {
 		mcfg.logError("   "+ex.getLocalizedMessage());
 		return mcfg;
 	}
-	
+
 	/** Private method to generate a dummy
 	 *  MultiConfig from an error message */
 	static private MultiConfig fromErrorMsg(String msg) {
