@@ -102,7 +102,9 @@ UPDATE sign_group_pattern SET pattern = '.2.PAGE' WHERE sign_group IN (
     GROUP BY st.sign_group
 );
 UPDATE sign_group_pattern SET pattern = '.4.LINE' WHERE sign_group = 'V52N34';
-UPDATE sign_group_pattern SET pattern = '.4.LINE.GARAGE' WHERE sign_group IN (
+UPDATE sign_group_pattern SET pattern = '.4.LINE.GARAGE', hashtag = NULL
+    WHERE sign_group IN
+(
     'TAD_GARAGE', 'V394E16', 'V394E17'
 );
 
