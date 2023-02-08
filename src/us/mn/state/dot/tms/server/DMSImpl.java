@@ -613,69 +613,69 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Create a message for the sign.
 	 * @param m MULTI string for message.
-	 * @param be Beacon enabled flag.
+	 * @param fb Flash beacon flag.
 	 * @param mp Message priority.
 	 * @param src Message source.
 	 * @param o Message owner.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	public SignMessage createMsg(String m, boolean be,
+	public SignMessage createMsg(String m, boolean fb,
 		DmsMsgPriority mp, int src, String o, Integer d)
 	{
-		return createMsg(null, m, be, mp, src, o, d);
+		return createMsg(null, m, fb, mp, src, o, d);
 	}
 
 	/** Create a message for the sign.
 	 * @param inc Associated incident (original name).
 	 * @param m MULTI string for message.
-	 * @param be Beacon enabled flag.
+	 * @param fb Flash beacon flag.
 	 * @param mp Message priority.
 	 * @param src Message source.
 	 * @param o Message owner.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	private SignMessage createMsg(String inc, String m, boolean be,
+	private SignMessage createMsg(String inc, String m, boolean fb,
 		DmsMsgPriority mp, int src, String o, Integer d)
 	{
-		return findOrCreateMsg(inc, m, be, mp, src, o, d);
+		return findOrCreateMsg(inc, m, fb, mp, src, o, d);
 	}
 
 	/** Find or create a sign message.
 	 * @param inc Associated incident (original name).
 	 * @param m MULTI string for message.
-	 * @param be Beacon enabled flag.
+	 * @param fb Flash beacon flag.
 	 * @param mp Message priority.
 	 * @param src Message source.
 	 * @param o Message owner.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	private SignMessage findOrCreateMsg(String inc, String m, boolean be,
+	private SignMessage findOrCreateMsg(String inc, String m, boolean fb,
 		DmsMsgPriority mp, int src, String o, Integer d)
 	{
 		SignMessage esm = SignMessageHelper.find(sign_config, inc, m,
-			be, mp, src, o, d);
+			fb, mp, src, o, d);
 		if (esm != null)
 			return esm;
 		else
-			return createMsgNotify(inc, m, be, mp, src, o, d);
+			return createMsgNotify(inc, m, fb, mp, src, o, d);
 	}
 
 	/** Create a new sign message and notify clients.
 	 * @param inc Associated incident (original name).
 	 * @param m MULTI string for message.
-	 * @param be Beacon enabled flag.
+	 * @param fb Flash beacon flag.
 	 * @param mp Message priority.
 	 * @param src Message source.
 	 * @param o Message owner.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	private SignMessage createMsgNotify(String inc, String m, boolean be,
+	private SignMessage createMsgNotify(String inc, String m, boolean fb,
 		DmsMsgPriority mp, int src, String o, Integer d)
 	{
 		SignConfig sc = sign_config;
 		if (null == sc)
 			return null;
-		SignMessageImpl sm = new SignMessageImpl(sc, inc, m, be, mp,
+		SignMessageImpl sm = new SignMessageImpl(sc, inc, m, fb, mp,
 			src, o, d);
 		try {
 			sm.notifyCreate();
@@ -697,12 +697,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private SignMessage createMsgSched(DmsActionMsg amsg) {
 		assert (amsg != null);
 		DmsAction da = amsg.action;
-		boolean be = da.getBeaconEnabled();
+		boolean fb = da.getFlashBeacon();
 		MsgPattern pat = da.getMsgPattern();
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
 			da.getMsgPriority());
 		String o = da.getActionPlan().getName();
-		return createMsg(amsg.getMulti(), be, mp, amsg.getSrc(), o,
+		return createMsg(amsg.getMulti(), fb, mp, amsg.getSrc(), o,
 			getDuration(da));
 	}
 
@@ -991,13 +991,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		SignMessage user, String ms)
 	{
 		String inc = user.getIncident();
-		boolean be = user.getBeaconEnabled();
+		boolean fb = user.getFlashBeacon();
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
 			user.getMsgPriority());
 		int src = user.getSource() | sched.getSource();
 		String o = user.getOwner();
 		Integer dur = user.getDuration();
-		return createMsg(inc, ms, be, mp, src, o, dur);
+		return createMsg(inc, ms, fb, mp, src, o, dur);
 	}
 
 	/** Compare sign messages for higher priority */
@@ -1208,10 +1208,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return isMsgSource(getMsgCurrent(), SignMsgSource.alert);
 	}
 
-	/** Test if the current message has beacon enabled */
+	/** Test if the current message has beacon flashing */
 	private boolean isMsgBeacon() {
 		SignMessage sm = getMsgCurrent();
-		return (sm != null) && sm.getBeaconEnabled();
+		return (sm != null) && sm.getFlashBeacon();
 	}
 
 	/** Test if a DMS is active, not failed and deployed */

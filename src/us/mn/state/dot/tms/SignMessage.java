@@ -43,8 +43,8 @@ public interface SignMessage extends SonarObject {
 	 * @see us.mn.state.dot.tms.utils.MultiString */
 	String getMulti();
 
-	/** Get beacon enabled flag */
-	boolean getBeaconEnabled();
+	/** Get flash beacon flag */
+	boolean getFlashBeacon();
 
 	/** Get the message priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).

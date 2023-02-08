@@ -2819,7 +2819,7 @@ CREATE TABLE iris.sign_message (
     sign_config VARCHAR(16) NOT NULL REFERENCES iris.sign_config,
     incident VARCHAR(16),
     multi VARCHAR(1024) NOT NULL,
-    beacon_enabled BOOLEAN NOT NULL,
+    flash_beacon BOOLEAN NOT NULL,
     msg_priority INTEGER NOT NULL,
     source INTEGER NOT NULL,
     owner VARCHAR(16),
@@ -2831,7 +2831,7 @@ CREATE TRIGGER sign_message_notify_trig
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW sign_message_view AS
-    SELECT name, sign_config, incident, multi, beacon_enabled, msg_priority,
+    SELECT name, sign_config, incident, multi, flash_beacon, msg_priority,
            iris.sign_msg_sources(source) AS sources, owner, duration
     FROM iris.sign_message;
 GRANT SELECT ON sign_message_view TO PUBLIC;
@@ -3074,7 +3074,7 @@ GRANT SELECT ON dms_view TO PUBLIC;
 
 CREATE VIEW dms_message_view AS
     SELECT d.name, msg_current, cc.description AS condition,
-           fail_time IS NOT NULL AS failed, multi, beacon_enabled,
+           fail_time IS NOT NULL AS failed, multi, flash_beacon,
            msg_priority, iris.sign_msg_sources(source) AS sources,
            duration, expire_time
     FROM iris.dms d
@@ -3135,13 +3135,13 @@ CREATE TABLE iris.dms_action (
     phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
     dms_hashtag VARCHAR(16) NOT NULL,
     msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern,
-    beacon_enabled BOOLEAN NOT NULL,
+    flash_beacon BOOLEAN NOT NULL,
     msg_priority INTEGER NOT NULL
 );
 
 CREATE VIEW dms_action_view AS
     SELECT name, action_plan, phase, dms_hashtag, msg_pattern,
-           beacon_enabled, msg_priority
+           flash_beacon, msg_priority
     FROM iris.dms_action;
 GRANT SELECT ON dms_action_view TO PUBLIC;
 

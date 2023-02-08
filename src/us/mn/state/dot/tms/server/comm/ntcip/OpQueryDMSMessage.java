@@ -128,7 +128,7 @@ public class OpQueryDMSMessage extends OpDMS {
 	private boolean checkMsgCrc(SignMessage sm, boolean gids) {
 		String ms = lookupMulti(sm);
 		String multi = (gids) ? parseMulti(ms) : ms;
-		int crc = DmsMessageCRC.calculate(multi, getBeaconEnabled(sm),
+		int crc = DmsMessageCRC.calculate(multi, getFlashBeacon(sm),
 			false);
 		return source.getCrc() == crc;
 	}
@@ -140,9 +140,9 @@ public class OpQueryDMSMessage extends OpDMS {
 		return (sm != null) ? sm.getMulti() : "";
 	}
 
-	/** Get beacon enabled flag for a sign message */
-	private boolean getBeaconEnabled(SignMessage sm) {
-		return (sm != null) ? sm.getBeaconEnabled() : false;
+	/** Get flash beacon flag for a sign message */
+	private boolean getFlashBeacon(SignMessage sm) {
+		return (sm != null) ? sm.getFlashBeacon() : false;
 	}
 
 	/** Process an invalid message source from the sign controller */

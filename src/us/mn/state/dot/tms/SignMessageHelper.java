@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2023  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  * Copyright (C) 2021  Iteris Inc.
  *
@@ -48,14 +48,14 @@ public class SignMessageHelper extends BaseHelper {
 	 * @param sc Sign configuration.
 	 * @param inc Associated incident (original name).
 	 * @param multi MULTI string.
-	 * @param be Beacon enabled flag.
+	 * @param fb Flash beacon flag.
 	 * @param mp Message priority.
 	 * @param src Message source.
 	 * @param owner Use name (null for any).
 	 * @param d Duration (null for indefinite).
 	 * @return Matching sign message, or null if not found. */
 	static public SignMessage find(SignConfig sc, String inc, String multi,
-		boolean be, DmsMsgPriority mp, int src, String owner,
+		boolean fb, DmsMsgPriority mp, int src, String owner,
 		Integer d)
 	{
 		int mpi = mp.ordinal();
@@ -65,7 +65,7 @@ public class SignMessageHelper extends BaseHelper {
 			if (objectEquals(sc, sm.getSignConfig()) &&
 			    objectEquals(inc, sm.getIncident()) &&
 			    multi.equals(sm.getMulti()) &&
-			    be == sm.getBeaconEnabled() &&
+			    fb == sm.getFlashBeacon() &&
 			    mpi == sm.getMsgPriority() &&
 			    sourceEquals(src, sm) &&
 			    objectEquals(owner, sm.getOwner()) &&
