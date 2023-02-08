@@ -182,8 +182,6 @@ INSERT INTO iris.msg_line (
     ORDER BY pattern, line, multi, hashtag DESC, rank
 );
 
--- ON CONFLICT (msg_pattern, line, multi) DO NOTHING;
-
 DROP INDEX iris.temp_conflict_idx;
 
 CREATE VIEW msg_line_view AS

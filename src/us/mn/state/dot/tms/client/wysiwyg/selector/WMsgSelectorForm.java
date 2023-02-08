@@ -75,7 +75,6 @@ public class WMsgSelectorForm extends AbstractForm {
 	/** Device listing */
 	private Map<String,DMS> dmsList = new HashMap<String,DMS>();
 	private ArrayList<String> dmsNames;
-	private ArrayList<String> signGroupNames;
 	private ArrayList<String> messageList = new ArrayList<String>();
 
 	/** Sign listing */
@@ -826,7 +825,6 @@ public class WMsgSelectorForm extends AbstractForm {
 		TypeCache<MsgPattern> cache = s.getSonarState().
 			getDmsCache().getMsgPatterns();
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
-//		attrs.put("sign_group", sg);
 		attrs.put("multi", "");
 		cache.createObject(msgName, attrs);
 	}

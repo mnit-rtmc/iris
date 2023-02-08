@@ -1,5 +1,16 @@
 # IRIS 5.x Release Notes
 
+5.39.0 (8 Feb 2023)
+ - Replaced DMS sign groups with #hashtags.  **WARNING**: the
+   migrate-5.39.sql script requires agency-specific tweaks!
+ - Replaced SignText with MsgLine, now tied to MsgPatterns
+ - Improved MsgPattern UI (select by sign config)
+ - Improved sign pixel preview rendering
+ - Abbreviate/filter out msg lines which don't fit on sign
+ - For patterns with no msg lines, find substitue pattern for line select
+ - Fixed problem with incident auto deploy on "split" signs
+ - Fixed NTCIP table corruption for ESS objects
+
 5.38.0 (6 Feb 2023)
  - Always enable "Query Msg" in DMS popup menu
  - Improved handling of NTCIP DMS temperature objects
