@@ -45,7 +45,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DmsActionImpl.class);
 		store.query("SELECT name, action_plan, phase, dms_hashtag," +
-			"msg_pattern, beacon_enabled, msg_priority " +
+			"msg_pattern, flash_beacon, msg_priority " +
 			"FROM iris." + SONAR_TYPE  +";",
 			new ResultFactory()
 		{
@@ -64,7 +64,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		map.put("phase", phase);
 		map.put("dms_hashtag", dms_hashtag);
 		map.put("msg_pattern", msg_pattern);
-		map.put("beacon_enabled", beacon_enabled);
+		map.put("flash_beacon", flash_beacon);
 		map.put("msg_priority", msg_priority);
 		return map;
 	}
@@ -93,29 +93,29 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		     row.getString(3),  // phase
 		     row.getString(4),  // dms_hashtag
 		     row.getString(5),  // msg_pattern
-		     row.getBoolean(6), // beacon_enabled
+		     row.getBoolean(6), // flash_beacon
 		     row.getInt(7)      // msg_priority
 		);
 	}
 
 	/** Create a DMS action */
 	private DmsActionImpl(String n, String a, String p, String ht,
-		String pat, boolean be, int mp)
+		String pat, boolean fb, int mp)
 	{
 		this(n, lookupActionPlan(a), lookupPlanPhase(p), ht,
-		     lookupMsgPattern(pat), be, mp);
+		     lookupMsgPattern(pat), fb, mp);
 	}
 
 	/** Create a DMS action */
 	public DmsActionImpl(String n, ActionPlan a, PlanPhase p, String ht,
-		MsgPattern pat, boolean be, int mp)
+		MsgPattern pat, boolean fb, int mp)
 	{
 		this(n);
 		action_plan = a;
 		phase = p;
 		dms_hashtag = ht;
 		msg_pattern = pat;
-		beacon_enabled = be;
+		flash_beacon = fb;
 		msg_priority = mp;
 	}
 
@@ -200,27 +200,27 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		return msg_pattern;
 	}
 
-	/** Beacon enabled flag */
-	private boolean beacon_enabled;
+	/** Flash beacon flag */
+	private boolean flash_beacon;
 
-	/** Set beacon enabled flag */
+	/** Set flash beacon flag */
 	@Override
-	public void setBeaconEnabled(boolean be) {
-		beacon_enabled = be;
+	public void setFlashBeacon(boolean fb) {
+		flash_beacon = fb;
 	}
 
-	/** Set beacon enabled flag */
-	public void doSetBeaconEnabled(boolean be) throws TMSException {
-		if (be != beacon_enabled) {
-			store.update(this, "beacon_enabled", be);
-			setBeaconEnabled(be);
+	/** Set flash beacon flag */
+	public void doSetFlashBeacon(boolean fb) throws TMSException {
+		if (fb != flash_beacon) {
+			store.update(this, "flash_beacon", fb);
+			setFlashBeacon(fb);
 		}
 	}
 
-	/** Get beacon enabled flag */
+	/** Get flash beacon flag */
 	@Override
-	public boolean getBeaconEnabled() {
-		return beacon_enabled;
+	public boolean getFlashBeacon() {
+		return flash_beacon;
 	}
 
 	/** Message priority */

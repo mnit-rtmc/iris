@@ -78,14 +78,14 @@ public class SignMessageCreator {
 	 *
 	 * @param sc Sign configuration.
 	 * @param multi MULTI text.
-	 * @param be Beacon enabled.
+	 * @param fb Flash beacon.
 	 * @param duration Message duration; null for indefinite.
 	 * @return New sign message, or null on error.
 	 */
-	public SignMessage create(SignConfig sc, String multi, boolean be,
+	public SignMessage create(SignConfig sc, String multi, boolean fb,
 		 Integer duration)
 	{
-		return create(sc, null, multi, be, DmsMsgPriority.OPERATOR,
+		return create(sc, null, multi, fb, DmsMsgPriority.OPERATOR,
 			SignMsgSource.operator.bit(), user, duration);
 	}
 
@@ -122,7 +122,7 @@ public class SignMessageCreator {
 	 * @param sc Sign configuration.
 	 * @param inc Associated incident (original name).
 	 * @param multi MULTI text.
-	 * @param be Beacon enabled.
+	 * @param fb Flash beacon.
 	 * @param mp Message priority.
 	 * @param src Sign message source bits.
 	 * @param owner User name.
@@ -130,7 +130,7 @@ public class SignMessageCreator {
 	 * @return Proxy of new sign message, or null on error.
 	 */
 	private SignMessage create(SignConfig sc, String inc, String multi,
-		boolean be, DmsMsgPriority mp, int src, String owner,
+		boolean fb, DmsMsgPriority mp, int src, String owner,
 		Integer duration)
 	{
 		WMessage wmsg = new WMessage(multi);
@@ -139,14 +139,14 @@ public class SignMessageCreator {
 			mp = DmsMsgPriority.STANDBY;
 			src |= SignMsgSource.standby.bit();
 		}
-		SignMessage sm = SignMessageHelper.find(sc, inc, multi, be,
+		SignMessage sm = SignMessageHelper.find(sc, inc, multi, fb,
 			mp, src, owner, duration);
 		String prefix = createPrefix(src);
 		if (sm != null && sm.getName().startsWith(prefix))
 			return sm;
 		String name = createName(prefix);
 		if (name != null) {
-			return create(name, sc, inc, multi, be, mp, src,
+			return create(name, sc, inc, multi, fb, mp, src,
 			              owner, duration);
 		} else
 			return null;
@@ -158,7 +158,7 @@ public class SignMessageCreator {
 	 * @param sc Sign configuration.
 	 * @param inc Associated incident (original name).
 	 * @param multi MULTI text.
-	 * @param be Beacon enabled.
+	 * @param fb Flash beacon.
 	 * @param mp Message priority.
 	 * @param src Sign message source bits.
 	 * @param owner User name.
@@ -166,7 +166,7 @@ public class SignMessageCreator {
 	 * @return Proxy of new sign message, or null on error.
 	 */
 	private SignMessage create(String name, SignConfig sc, String inc,
-		String multi, boolean be, DmsMsgPriority mp, int src,
+		String multi, boolean fb, DmsMsgPriority mp, int src,
 		String owner, Integer duration)
 	{
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
@@ -174,7 +174,7 @@ public class SignMessageCreator {
 		if (inc != null)
 			attrs.put("incident", inc);
 		attrs.put("multi", multi);
-		attrs.put("beacon_enabled", be);
+		attrs.put("flash_beacon", fb);
 		attrs.put("msg_priority", Integer.valueOf(mp.ordinal()));
 		attrs.put("source", Integer.valueOf(src));
 		if (owner != null)

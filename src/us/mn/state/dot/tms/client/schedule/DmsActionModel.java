@@ -122,18 +122,18 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 					MsgPatternHelper.lookup(v));
 			}
 		});
-		cols.add(new ProxyColumn<DmsAction>("dms.beacon.enabled", 100,
+		cols.add(new ProxyColumn<DmsAction>("dms.flash.beacon", 100,
 			Boolean.class)
 		{
 			public Object getValueAt(DmsAction da) {
-				return da.getBeaconEnabled();
+				return da.getFlashBeacon();
 			}
 			public boolean isEditable(DmsAction da) {
 				return canWrite(da);
 			}
 			public void setValueAt(DmsAction da, Object value) {
 				if (value instanceof Boolean)
-					da.setBeaconEnabled((Boolean)value);
+					da.setFlashBeacon((Boolean) value);
 			}
 		});
 		cols.add(new ProxyColumn<DmsAction>("dms.msg.priority",

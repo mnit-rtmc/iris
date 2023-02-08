@@ -47,11 +47,11 @@ public interface DmsAction extends SonarObject {
 	/** Get the message pattern */
 	MsgPattern getMsgPattern();
 
-	/** Set beacon enabled flag */
-	void setBeaconEnabled(boolean be);
+	/** Set flash beacon flag */
+	void setFlashBeacon(boolean fb);
 
-	/** Get beacon enabled flag */
-	boolean getBeaconEnabled();
+	/** Get flash beacon flag */
+	boolean getFlashBeacon();
 
 	/** Set the message priority.
 	 * @param p Priority ranging from 1 (low) to 255 (high).

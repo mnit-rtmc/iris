@@ -376,8 +376,8 @@ public class MessageComposer extends JPanel {
 		}
 	}
 
-	/** Check if beacon is enabled */
-	public boolean isBeaconEnabled() {
+	/** Check if beacon should be flashing */
+	public boolean getFlashBeacon() {
 		// FIXME: add component for this
 		return false;
 	}

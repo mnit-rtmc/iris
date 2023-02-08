@@ -90,7 +90,7 @@ pub struct SignMessage {
     pub sign_config: String,
     pub incident: Option<String>,
     pub multi: String,
-    pub beacon_enabled: bool,
+    pub flash_beacon: bool,
     pub msg_priority: u32,
     pub sources: String,
     pub owner: Option<String>,

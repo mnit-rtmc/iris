@@ -130,7 +130,7 @@ struct SignMessage {
     sign_config: String,
     incident: Option<String>,
     multi: String,
-    beacon_enabled: bool,
+    flash_beacon: bool,
     msg_priority: i32,
     sources: String,
     owner: Option<String>,

@@ -378,9 +378,9 @@ public class DMSDispatcher extends JPanel {
 		if (inc != null)
 			return createMessage(sc, incident, ms);
 		else {
-			boolean be = composer.isBeaconEnabled();
+			boolean fb = composer.getFlashBeacon();
 			Integer d = composer.getDuration();
-			return creator.create(sc, ms, be, d);
+			return creator.create(sc, ms, fb, d);
 		}
 	}
 
