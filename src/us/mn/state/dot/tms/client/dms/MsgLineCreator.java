@@ -55,7 +55,7 @@ public class MsgLineCreator {
 	 * @param multi MULTI string.
 	 * @param rank Message rank.
 	 */
-	public void create(MsgPattern pat, short line, String multi,
+	public String create(MsgPattern pat, short line, String multi,
 		short rank)
 	{
 		multi = new MultiString(multi).normalizeLine().toString();
@@ -68,7 +68,9 @@ public class MsgLineCreator {
 			attrs.put("multi", multi);
 			attrs.put("rank", Short.valueOf(rank));
 			cache.createObject(name, attrs);
-		}
+			return name;
+		} else
+			return null;
 	}
 
 	/** Check if the user is permitted to write the named message line */
