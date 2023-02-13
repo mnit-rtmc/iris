@@ -238,12 +238,13 @@ public class MessageComposer extends JPanel {
 
 	/** Set the selected sign */
 	public void setSelectedSign(DMS proxy) {
-		dms = proxy;
-		TextRect tr = fullTextRect();
-		pattern_cbx.populateModel(proxy, tr);
-		// if sign is null, pattern_listener doesn't call this
-		if (proxy == null) {
-			pattern_cbx.setSelectedItem(null);
+		if (!DMSHelper.objectEquals(proxy, dms)) {
+			dms = proxy;
+			TextRect tr = fullTextRect();
+			pattern_cbx.populateModel(proxy, tr);
+			// if sign is null, pattern_listener doesn't call this
+			if (proxy == null)
+				pattern_cbx.setSelectedItem(null);
 			dur_cbx.setSelectedIndex(0);
 		}
 	}
@@ -251,13 +252,15 @@ public class MessageComposer extends JPanel {
 	/** Enable or Disable the message composer */
 	@Override
 	public void setEnabled(boolean b) {
-		super.setEnabled(b);
-		pattern_cbx.setEnabled(b);
-		setTabRect(0);
-		for (TextRectComposer rc: rects)
-			rc.setEnabled(b);
-		dur_cbx.setEnabled(b);
-		dur_cbx.setSelectedItem(0);
+		if (b != isEnabled()) {
+			super.setEnabled(b);
+			pattern_cbx.setEnabled(b);
+			setTabRect(0);
+			for (TextRectComposer rc: rects)
+				rc.setEnabled(b);
+			dur_cbx.setEnabled(b);
+			dur_cbx.setSelectedIndex(0);
+		}
 	}
 
 	/** Update the selected pattern */
