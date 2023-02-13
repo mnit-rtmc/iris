@@ -20,7 +20,6 @@ import javax.swing.JPanel;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.SidePanel;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
 
 /**
