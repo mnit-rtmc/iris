@@ -262,7 +262,14 @@ public class MsgPatternPanel extends JPanel {
 	/** Update the message pattern */
 	private void updateMsgPattern(MsgPattern pat) {
 		msg_pattern = pat;
-		msg_line_pnl.setModel(new MsgLineTableModel(session, pat));
+		msg_line_pnl.setModel(new MsgLineTableModel(session, pat) {
+			@Override protected void proxyUpdate(MsgLine ml) {
+				if (ml.getName().equals(selected)) {
+					msg_line_pnl.selectProxy(ml);
+					selected = null;
+				}
+			}
+		});
 		List<SignConfig> cfgs = MsgPatternHelper.findSignConfigs(pat);
 		DefaultListModel<SignConfig> mdl =
 			new DefaultListModel<SignConfig>();

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2017  Minnesota Department of Transportation
+ * Copyright (C) 2007-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,8 +75,10 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		}
 		protected void proxyAddedSwing(T proxy) {
 			int i = doProxyAdded(proxy);
-			if (i >= 0)
+			if (i >= 0) {
 				fireTableRowsInserted(i, i);
+				proxyUpdate(proxy);
+			}
 		}
 		protected void enumerationCompleteSwing(Collection<T> proxies) {
 			for (T proxy: proxies) {
@@ -94,6 +96,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		}
 		protected void proxyChangedSwing(T proxy, String attr) {
 			ProxyTableModel.this.proxyChangedSwing(proxy);
+			proxyUpdate(proxy);
 		}
 		protected boolean checkAttributeChange(String attr) {
 			return ProxyTableModel.this.checkAttributeChange(attr);
@@ -248,6 +251,9 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		else if (pre < 0 && post >= 0)
 			fireTableRowsInserted(post, post);
 	}
+
+	/** Proxy updated in the table model */
+	protected void proxyUpdate(T proxy) { }
 
 	/** Check if an attribute change is interesting */
 	protected boolean checkAttributeChange(String attr) {

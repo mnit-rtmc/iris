@@ -73,6 +73,7 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 				return canWrite(ml);
 			}
 			public void setValueAt(MsgLine ml, Object value) {
+				selected = ml.getName();
 				String ht = DMSHelper.normalizeHashtag(
 					value.toString());
 				ml.setRestrictHashtag(ht);
@@ -87,6 +88,7 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 			}
 			public void setValueAt(MsgLine ml, Object value) {
 				if (value instanceof Number) {
+					selected = ml.getName();
 					Number n = (Number) value;
 					ml.setLine(n.shortValue());
 				}
@@ -100,6 +102,7 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 				return canWrite(ml);
 			}
 			public void setValueAt(MsgLine ml, Object value) {
+				selected = ml.getName();
 				ml.setMulti(formatMulti(value));
 			}
 			protected TableCellRenderer createCellRenderer() {
@@ -116,6 +119,7 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 			}
 			public void setValueAt(MsgLine ml, Object value) {
 				if (value instanceof Number) {
+					selected = ml.getName();
 					Number n = (Number) value;
 					ml.setRank(n.shortValue());
 				}
@@ -132,6 +136,9 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 
 	/** Message line creator */
 	private final MsgLineCreator creator;
+
+	/** Name of selected message line */
+	protected String selected;
 
 	/** Create a new message line table model */
 	public MsgLineTableModel(Session s, MsgPattern pat) {
@@ -165,8 +172,8 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 		if (msg_pattern != null) {
 			String ms = formatMulti(v);
 			if (ms.length() > 0) {
-				creator.create(msg_pattern, (short) 1, ms,
-					DEF_RANK);
+				selected = creator.create(msg_pattern,
+					(short) 1, ms, DEF_RANK);
 			}
 		}
 	}
