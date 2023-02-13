@@ -44,8 +44,9 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern {
 	/** Load all the message patterns */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, MsgPatternImpl.class);
-		store.query("SELECT name, multi, compose_hashtag " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, multi, flash_beacon, " +
+			"compose_hashtag FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new MsgPatternImpl(row));
@@ -59,6 +60,7 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("multi", multi);
+		map.put("flash_beacon", flash_beacon);
 		map.put("compose_hashtag", compose_hashtag);
 		return map;
 	}
@@ -84,14 +86,16 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern {
 	private MsgPatternImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name
 		     row.getString(2),  // multi
-		     row.getString(3)   // compose_hashtag
+		     row.getBoolean(3), // flash_beacon
+		     row.getString(4)   // compose_hashtag
 		);
 	}
 
 	/** Create a message pattern */
-	private MsgPatternImpl(String n, String m, String cht) {
+	private MsgPatternImpl(String n, String m, boolean fb, String cht) {
 		super(n);
 		multi = m;
+		flash_beacon = fb;
 		compose_hashtag = cht;
 	}
 
@@ -121,6 +125,29 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern {
 		if (!m.equals(multi)) {
 			store.update(this, "multi", m);
 			setMulti(m);
+		}
+	}
+
+	/** Flash beacon flag */
+	private boolean flash_beacon;
+
+	/** Get flash beacon flag */
+	@Override
+	public boolean getFlashBeacon() {
+		return flash_beacon;
+	}
+
+	/** Set flash beacon flag */
+	@Override
+	public void setFlashBeacon(boolean fb) {
+		flash_beacon = fb;
+	}
+
+	/** Set flash beacon flag */
+	public void doSetFlashBeacon(boolean fb) throws TMSException {
+		if (fb != flash_beacon) {
+			store.update(this, "flash_beacon", fb);
+			setFlashBeacon(fb);
 		}
 	}
 

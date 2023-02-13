@@ -3097,19 +3097,20 @@ GRANT SELECT ON dms_hashtag_view TO PUBLIC;
 CREATE TABLE iris.msg_pattern (
     name VARCHAR(20) PRIMARY KEY,
     multi VARCHAR(1024) NOT NULL,
+    flash_beacon BOOLEAN NOT NULL,
     compose_hashtag VARCHAR(16)
 );
 
-COPY iris.msg_pattern (name, multi, compose_hashtag) FROM stdin;
-.1_LINE		#OneLine
-.2_LINE	[np]	#TwoLine
-.3_LINE		#ThreeLine
-.4_LINE		#FourLine
-.2_PAGE	[np]	#Small
+COPY iris.msg_pattern (name, multi, flash_beacon, compose_hashtag) FROM stdin;
+.1_LINE		f	#OneLine
+.2_LINE	[np]	f	#TwoLine
+.3_LINE		f	#ThreeLine
+.4_LINE		f	#FourLine
+.2_PAGE	[np]	f	#Small
 \.
 
 CREATE VIEW msg_pattern_view AS
-    SELECT name, multi, compose_hashtag
+    SELECT name, multi, flash_beacon, compose_hashtag
     FROM iris.msg_pattern;
 GRANT SELECT ON msg_pattern_view TO PUBLIC;
 
@@ -3135,13 +3136,11 @@ CREATE TABLE iris.dms_action (
     phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
     dms_hashtag VARCHAR(16) NOT NULL,
     msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern,
-    flash_beacon BOOLEAN NOT NULL,
     msg_priority INTEGER NOT NULL
 );
 
 CREATE VIEW dms_action_view AS
-    SELECT name, action_plan, phase, dms_hashtag, msg_pattern,
-           flash_beacon, msg_priority
+    SELECT name, action_plan, phase, dms_hashtag, msg_pattern, msg_priority
     FROM iris.dms_action;
 GRANT SELECT ON dms_action_view TO PUBLIC;
 

@@ -697,8 +697,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private SignMessage createMsgSched(DmsActionMsg amsg) {
 		assert (amsg != null);
 		DmsAction da = amsg.action;
-		boolean fb = da.getFlashBeacon();
 		MsgPattern pat = da.getMsgPattern();
+		boolean fb = (pat != null) && pat.getFlashBeacon();
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
 			da.getMsgPriority());
 		String o = da.getActionPlan().getName();

@@ -664,7 +664,7 @@ public class AlertData {
 			log("plan phase not found, " + ph);
 		int priority = DmsMsgPriority.ALERT_LOW.ordinal();
 		DmsActionImpl da = new DmsActionImpl(dname, plan, phase, ht,
-			pat, false, priority);
+			pat, priority);
 		log("created DMS action " + dname);
 		da.notifyCreate();
 	}

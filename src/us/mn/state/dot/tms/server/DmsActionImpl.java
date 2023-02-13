@@ -45,9 +45,8 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DmsActionImpl.class);
 		store.query("SELECT name, action_plan, phase, dms_hashtag," +
-			"msg_pattern, flash_beacon, msg_priority " +
-			"FROM iris." + SONAR_TYPE  +";",
-			new ResultFactory()
+			"msg_pattern, msg_priority FROM iris." + SONAR_TYPE +
+			";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DmsActionImpl(row));
@@ -64,7 +63,6 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		map.put("phase", phase);
 		map.put("dms_hashtag", dms_hashtag);
 		map.put("msg_pattern", msg_pattern);
-		map.put("flash_beacon", flash_beacon);
 		map.put("msg_priority", msg_priority);
 		return map;
 	}
@@ -93,29 +91,27 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		     row.getString(3),  // phase
 		     row.getString(4),  // dms_hashtag
 		     row.getString(5),  // msg_pattern
-		     row.getBoolean(6), // flash_beacon
-		     row.getInt(7)      // msg_priority
+		     row.getInt(6)      // msg_priority
 		);
 	}
 
 	/** Create a DMS action */
 	private DmsActionImpl(String n, String a, String p, String ht,
-		String pat, boolean fb, int mp)
+		String pat, int mp)
 	{
 		this(n, lookupActionPlan(a), lookupPlanPhase(p), ht,
-		     lookupMsgPattern(pat), fb, mp);
+		     lookupMsgPattern(pat), mp);
 	}
 
 	/** Create a DMS action */
 	public DmsActionImpl(String n, ActionPlan a, PlanPhase p, String ht,
-		MsgPattern pat, boolean fb, int mp)
+		MsgPattern pat, int mp)
 	{
 		this(n);
 		action_plan = a;
 		phase = p;
 		dms_hashtag = ht;
 		msg_pattern = pat;
-		flash_beacon = fb;
 		msg_priority = mp;
 	}
 
@@ -198,29 +194,6 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	@Override
 	public MsgPattern getMsgPattern() {
 		return msg_pattern;
-	}
-
-	/** Flash beacon flag */
-	private boolean flash_beacon;
-
-	/** Set flash beacon flag */
-	@Override
-	public void setFlashBeacon(boolean fb) {
-		flash_beacon = fb;
-	}
-
-	/** Set flash beacon flag */
-	public void doSetFlashBeacon(boolean fb) throws TMSException {
-		if (fb != flash_beacon) {
-			store.update(this, "flash_beacon", fb);
-			setFlashBeacon(fb);
-		}
-	}
-
-	/** Get flash beacon flag */
-	@Override
-	public boolean getFlashBeacon() {
-		return flash_beacon;
 	}
 
 	/** Message priority */
