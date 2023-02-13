@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.GroupLayout;
+import javax.swing.JCheckBox;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -41,6 +43,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -63,6 +66,18 @@ public class MsgPatternPanel extends JPanel {
 
 	/** MULTI text area */
 	private final JTextArea multi_txt = new JTextArea(5, 40);
+
+	/** Flash beacon label */
+	private final ILabel beacon_lbl = new ILabel("dms.flash.beacon");
+
+	/** Checkbox for flash beacon flag */
+	private final JCheckBox beacon_chk = new JCheckBox(new IAction(null) {
+		protected void doActionPerformed(ActionEvent e) {
+			MsgPattern pat = msg_pattern;
+			if (pat != null)
+				pat.setFlashBeacon(beacon_chk.isSelected());
+		}
+	});
 
 	/** Sign config list */
 	private final JList<SignConfig> config_lst = new JList<SignConfig>();
@@ -95,6 +110,8 @@ public class MsgPatternPanel extends JPanel {
 		@Override public void update(MsgPattern pat, String a) {
 			if (null == a)
 				updateMsgPattern(pat);
+			if (null == a || a.equals("flashBeacon"))
+				beacon_chk.setSelected(pat.getFlashBeacon());
 			if (null == a || a.equals("multi")) {
 				multi_txt.setText(pat.getMulti());
 				updatePixelPnl();
@@ -105,6 +122,8 @@ public class MsgPatternPanel extends JPanel {
 			msg_pattern = null;
 			multi_txt.setEnabled(false);
 			multi_txt.setText("");
+			beacon_chk.setEnabled(false);
+			beacon_chk.setSelected(false);
 			setPager(null);
 			pixel_pnl.setPhysicalDimensions(0, 0, 0, 0, 0, 0);
 			pixel_pnl.setLogicalDimensions(0, 0, 0, 0);
@@ -123,6 +142,7 @@ public class MsgPatternPanel extends JPanel {
 	private void updateEditMode() {
 		MsgPattern pat = msg_pattern;
 		multi_txt.setEnabled(session.canWrite(pat, "multi"));
+		beacon_chk.setEnabled(session.canWrite(pat, "flashBeacon"));
 	}
 
 	/** Message pattern being edited */
@@ -192,6 +212,10 @@ public class MsgPatternPanel extends JPanel {
 		              .addGap(UI.hgap)
 		              .addComponent(multi_txt))
 		  .addGroup(gl.createSequentialGroup()
+		              .addComponent(beacon_lbl)
+		              .addGap(UI.hgap)
+		              .addComponent(beacon_chk))
+		  .addGroup(gl.createSequentialGroup()
 		              .addComponent(config_pnl)
 		              .addGap(UI.hgap)
 		              .addComponent(preview_pnl))
@@ -202,6 +226,10 @@ public class MsgPatternPanel extends JPanel {
 		vg.addGroup(gl.createParallelGroup()
 		              .addComponent(multi_lbl)
 		              .addComponent(multi_txt))
+		  .addGap(UI.vgap)
+		  .addGroup(gl.createParallelGroup()
+		              .addComponent(beacon_lbl)
+		              .addComponent(beacon_chk))
 		  .addGap(UI.vgap)
 		  .addGroup(gl.createParallelGroup()
 		              .addComponent(config_pnl)

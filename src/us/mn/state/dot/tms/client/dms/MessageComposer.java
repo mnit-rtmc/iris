@@ -378,8 +378,8 @@ public class MessageComposer extends JPanel {
 
 	/** Check if beacon should be flashing */
 	public boolean getFlashBeacon() {
-		// FIXME: add component for this
-		return false;
+		MsgPattern pat = getMsgPattern();
+		return (pat != null) && pat.getFlashBeacon();
 	}
 
 	/** Get the selected duration */

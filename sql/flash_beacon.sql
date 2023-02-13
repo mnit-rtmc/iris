@@ -29,18 +29,14 @@ CREATE VIEW dms_message_view AS
     LEFT JOIN iris.sign_message sm ON d.msg_current = sm.name;
 GRANT SELECT ON dms_message_view TO PUBLIC;
 
--- Rename beacon_enabled to flash_beacon in dms_action
+-- Drop beacon_enabled from in dms_action
 DROP VIEW dms_toll_zone_view;
 DROP VIEW dms_action_view;
 
-ALTER TABLE iris.dms_action ADD COLUMN flash_beacon BOOLEAN;
-UPDATE iris.dms_action SET flash_beacon = beacon_enabled;
-ALTER TABLE iris.dms_action ALTER COLUMN flash_beacon SET NOT NULL;
 ALTER TABLE iris.dms_action DROP COLUMN beacon_enabled;
 
 CREATE VIEW dms_action_view AS
-    SELECT name, action_plan, phase, dms_hashtag, msg_pattern,
-           flash_beacon, msg_priority
+    SELECT name, action_plan, phase, dms_hashtag, msg_pattern, msg_priority
     FROM iris.dms_action;
 GRANT SELECT ON dms_action_view TO PUBLIC;
 
@@ -54,5 +50,17 @@ CREATE VIEW dms_toll_zone_view AS
     JOIN iris.msg_pattern_toll_zone tz
     ON da.msg_pattern = tz.msg_pattern;
 GRANT SELECT ON dms_toll_zone_view TO PUBLIC;
+
+DROP VIEW msg_pattern_view;
+
+-- Add flash_beacon to msg_pattern
+ALTER TABLE iris.msg_pattern ADD COLUMN flash_beacon BOOLEAN;
+UPDATE iris.msg_pattern SET flash_beacon = false;
+ALTER TABLE iris.msg_pattern ALTER COLUMN flash_beacon SET NOT NULL;
+
+CREATE VIEW msg_pattern_view AS
+    SELECT name, multi, flash_beacon, compose_hashtag
+    FROM iris.msg_pattern;
+GRANT SELECT ON msg_pattern_view TO PUBLIC;
 
 COMMIT;

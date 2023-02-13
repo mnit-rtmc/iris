@@ -37,6 +37,12 @@ public interface MsgPattern extends SonarObject {
 	 * @see us.mn.state.dot.tms.utils.MultiString */
 	void setMulti(String multi);
 
+	/** Get flash beacon flag */
+	boolean getFlashBeacon();
+
+	/** Set flash beacon flag */
+	void setFlashBeacon(boolean fb);
+
 	/** Get the hashtag for composing with the pattern.
 	 * @return hashtag; null for no composing. */
 	String getComposeHashtag();
