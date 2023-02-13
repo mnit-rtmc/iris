@@ -57,7 +57,7 @@ public class SidePanel extends JPanel {
 		super(new BorderLayout());
 		map = m;
 		setMinimumSize(UI.dimension(500, 200));
-		setPreferredSize(UI.dimension(500, 200));
+		setPreferredSize(UI.dimension(540, 200));
 		tab_pane = new JTabbedPane(JTabbedPane.TOP);
 		add(tab_pane, BorderLayout.CENTER);
 		tab_pane.addChangeListener(new ChangeListener() {
