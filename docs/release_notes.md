@@ -1,5 +1,11 @@
 # IRIS 5.x Release Notes
 
+5.40.0 (14 Feb 2023)
+ - Renamed `beacon_enabled` to `flash_beacon` (DB)
+ - Add `flash_beacon` to MsgPattern (remove from DmsAction)
+ - Improved UI for editing MsgLine records
+ - Clear message composer duration when selecting a new sign
+
 5.39.0 (8 Feb 2023)
  - Replaced DMS sign groups with #hashtags.  **WARNING**: the
    migrate-5.39.sql script requires agency-specific tweaks!
