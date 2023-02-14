@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017  Iteris Inc.
- * Copyright (C) 2019-2022  Minnesota Department of Transportation
+ * Copyright (C) 2019-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
@@ -100,10 +99,7 @@ public class SubSurfaceSensorsTable {
 			Distance d = convertDepth(depth);
 			if (d != null) {
 				Float dm = d.asFloat(METERS);
-				NumberFormat f = NumberFormat.getInstance();
-				f.setMaximumFractionDigits(2); // cm
-				f.setMinimumFractionDigits(1);
-				return f.format(dm);
+				return Num.format(dm, 2); // cm
 			} else
 				return null;
 		}

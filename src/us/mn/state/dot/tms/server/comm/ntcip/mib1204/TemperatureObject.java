@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2022  Minnesota Department of Transportation
+ * Copyright (C) 2019-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
-import java.text.NumberFormat;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.units.Temperature;
 import static us.mn.state.dot.tms.units.Temperature.Units.CELSIUS;
@@ -69,10 +68,7 @@ public class TemperatureObject {
 		Double t = tempC();
 		if (t != null) {
 			// Format temp C to 1 decimal place
-			NumberFormat f = NumberFormat.getInstance();
-			f.setMaximumFractionDigits(1);
-			f.setMinimumFractionDigits(1);
-			return Json.num(key, f.format(t));
+			return Json.num(key, Num.format(t, 1));
 		} else
 			return "";
 	}

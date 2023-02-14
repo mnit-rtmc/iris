@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2022  Minnesota Department of Transportation
+ * Copyright (C) 2019-2023  Minnesota Department of Transportation
  * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -15,7 +15,6 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
-import java.text.NumberFormat;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
@@ -54,15 +53,7 @@ public class PrecipitationValues {
 
 	/** Format precipitation rate to tenths of mm/hr */
 	static private String formatPrecipRate(ASN1Integer pr) {
-		Float pr_mm_hr = convertPrecipRate(pr);
-		if (pr_mm_hr != null) {
-			// Format mm/hr to 1 decimal place
-			NumberFormat f = NumberFormat.getInstance();
-			f.setMaximumFractionDigits(1);
-			f.setMinimumFractionDigits(1);
-			return f.format(pr_mm_hr);
-		} else
-			return null;
+		return Num.format(convertPrecipRate(pr), 1);
 	}
 
 	/** Convert precipitation total.
@@ -81,14 +72,7 @@ public class PrecipitationValues {
 
 	/** Format precipitation total to mm units with 1 decimal place */
 	static private String formatPrecipTotal(ASN1Integer pt) {
-		Float pt_mm = convertPrecipTotal(pt);
-		if (pt_mm != null) {
-			NumberFormat f = NumberFormat.getInstance();
-			f.setMaximumFractionDigits(1);
-			f.setMinimumFractionDigits(1);
-			return f.format(pt_mm);
-		} else
-			return null;
+		return Num.format(convertPrecipTotal(pt), 1);
 	}
 
 	/** Relative humidity */
