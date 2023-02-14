@@ -82,7 +82,7 @@ public class DmsActionJob extends Job {
 			logSched(dms, "checking " + da);
 		if (shouldReplace(da, dms)) {
 			DmsActionMsg amsg = new DmsActionMsg(da, dms, logger);
-			if (amsg.isValid())
+			if (amsg.isRasterizable())
 				dms_actions.put(dms, amsg);
 		} else if (logger.isOpen())
 			logSched(dms, "dropping " + da);

@@ -206,6 +206,11 @@ public class DmsActionMsg {
 		return valid && (multi != null);
 	}
 
+	/** Check if the message is rasterizable */
+	public boolean isRasterizable() {
+		return isValid() && DMSHelper.isRasterizable(dms, multi);
+	}
+
 	/** Get the MULTI string */
 	public String getMulti() {
 		return multi;

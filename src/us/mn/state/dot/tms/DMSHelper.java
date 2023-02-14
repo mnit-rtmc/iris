@@ -459,4 +459,10 @@ public class DMSHelper extends BaseHelper {
 		}
 		return null;
 	}
+
+	/** Check if a MULTI string is rasterizable for a sign */
+	static public boolean isRasterizable(DMS dms, String ms) {
+		RasterBuilder rb = createRasterBuilder(dms);
+		return rb != null && rb.isRasterizable(ms);
+	}
 }
