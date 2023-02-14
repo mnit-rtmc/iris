@@ -3,6 +3,8 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
+SELECT iris.update_version('5.39.0', '5.40.0');
+
 -- Rename beacon_enabled to flash_beacon in sign_message
 DROP VIEW dms_message_view;
 DROP VIEW sign_message_view;
@@ -62,5 +64,18 @@ CREATE VIEW msg_pattern_view AS
     SELECT name, multi, flash_beacon, compose_hashtag
     FROM iris.msg_pattern;
 GRANT SELECT ON msg_pattern_view TO PUBLIC;
+
+-- Fix msg_line hashtags
+UPDATE iris.msg_line SET msg_pattern = '.2.LINE'
+    WHERE msg_pattern = '.3.LINE' AND restrict_hashtag IN
+(
+    SELECT '#' || dms FROM dms_hashtag_view WHERE hashtag = '#TwoLine'
+);
+
+UPDATE iris.msg_line SET msg_pattern = '.3.LINE'
+    WHERE msg_pattern = '.2.PAGE' AND restrict_hashtag IN
+(
+    SELECT '#' || dms FROM dms_hashtag_view WHERE hashtag = '#ThreeLine'
+);
 
 COMMIT;
