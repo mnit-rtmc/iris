@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2018  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,22 +22,14 @@ import java.util.ArrayList;
  * @author Douglas Lau
  */
 public enum RFProtocol {
-	IT2200		(4),	/* 0 */
-	SeGo		(6),	/* 1 */
-	IAG		(7),	/* 2 */
-	ASTMv6		(9),	/* 3 (aka CVISN) */
-	Title21		(3),	/* 4 */
-	ATA_Full	(1),	/* 5 */
-	eGo		(5),	/* 6 */
-	ATA_Half	(2);	/* 7 */
-
-	/** Create a new RF protocol */
-	private RFProtocol(int b) {
-		bit = 1 << b;
-	}
-
-	/** Bit assignment (for "set protocol" / "get protocol" commands) */
-	public final int bit;
+	IT2200,   /* 0 */
+	SeGo,     /* 1 */
+	IAG,      /* 2 */
+	ASTMv6,   /* 3 (aka CVISN) */
+	Title21,  /* 4 */
+	ATA_Full, /* 5 */
+	eGo,      /* 6 */
+	ATA_Half; /* 7 */
 
 	/** Lookup an RF protocol from an ordinal value */
 	static public RFProtocol fromOrdinal(int o) {
@@ -46,15 +38,5 @@ public enum RFProtocol {
 				return p;
 		}
 		return null;
-	}
-
-	/** Get the protocols from a set of bits */
-	static public RFProtocol[] fromBits(int b) {
-		ArrayList<RFProtocol> list = new ArrayList<RFProtocol>();
-		for (RFProtocol p: values()) {
-			if ((b & p.bit) != 0)
-				list.add(p);
-		}
-		return list.toArray(new RFProtocol[0]);
 	}
 }
