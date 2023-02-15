@@ -106,6 +106,9 @@ public class IncMultiBuilder {
 	/** Get the MULTI as a String */
 	@Override
 	public String toString() {
-		return full_rect.fill(msg_pattern.getMulti(), lines);
+		MultiString multi = new MultiString(
+			full_rect.fill(msg_pattern.getMulti(), lines)
+		);
+		return multi.stripTrailingWhitespaceTags();
 	}
 }
