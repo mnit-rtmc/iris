@@ -4962,45 +4962,45 @@ CREATE VIEW tag_reader_dms_view AS
 GRANT SELECT ON tag_reader_dms_view TO PUBLIC;
 
 CREATE TABLE event.tag_type (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(16) NOT NULL
 );
 
 COPY event.tag_type (id, description) FROM stdin;
 0	Unknown
 1	SeGo
 2	IAG
-3	ASTMv6
+3	6C
 \.
 
 CREATE TABLE event.tag_read_event (
-	event_id SERIAL PRIMARY KEY,
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	tag_type INTEGER NOT NULL REFERENCES event.tag_type,
-	agency INTEGER,
-	tag_id INTEGER NOT NULL,
-	tag_reader VARCHAR(20) NOT NULL,
-	hov BOOLEAN NOT NULL,
-	trip_id INTEGER
+    event_id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_desc_id INTEGER NOT NULL
+        REFERENCES event.event_description(event_desc_id),
+    tag_type INTEGER NOT NULL REFERENCES event.tag_type,
+    agency INTEGER,
+    tag_id INTEGER NOT NULL,
+    tag_reader VARCHAR(20) NOT NULL,
+    hov BOOLEAN NOT NULL,
+    trip_id INTEGER
 );
 
 CREATE INDEX ON event.tag_read_event(tag_id);
 
 CREATE VIEW tag_read_event_view AS
-	SELECT event_id, event_date, event_description.description,
-	       tag_type.description AS tag_type, agency, tag_id, tag_reader,
-	       toll_zone, tollway, hov, trip_id
-	FROM event.tag_read_event
-	JOIN event.event_description
-	ON   tag_read_event.event_desc_id = event_description.event_desc_id
-	JOIN event.tag_type
-	ON   tag_read_event.tag_type = tag_type.id
-	JOIN iris._tag_reader
-	ON   tag_read_event.tag_reader = _tag_reader.name
-	LEFT JOIN iris.toll_zone
-	ON        _tag_reader.toll_zone = toll_zone.name;
+    SELECT event_id, event_date, event_description.description,
+           tag_type.description AS tag_type, agency, tag_id, tag_reader,
+           toll_zone, tollway, hov, trip_id
+    FROM event.tag_read_event
+    JOIN event.event_description
+    ON tag_read_event.event_desc_id = event_description.event_desc_id
+    JOIN event.tag_type
+    ON tag_read_event.tag_type = tag_type.id
+    JOIN iris._tag_reader
+    ON tag_read_event.tag_reader = _tag_reader.name
+    LEFT JOIN iris.toll_zone
+    ON _tag_reader.toll_zone = toll_zone.name;
 GRANT SELECT ON tag_read_event_view TO PUBLIC;
 
 -- Allow trip_id column to be updated by roles which have been granted
