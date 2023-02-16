@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2018  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ package us.mn.state.dot.tms.server;
  */
 public enum TagType {
 	UNKNOWN,
-	SeGo,
-	IAG,
-	ASTM;
+	SeGo,    // TransCore Super eGo
+	IAG,     // E-Zpass InterAgency Group
+	_6C;     // ISO/IEC 18000-63
 }

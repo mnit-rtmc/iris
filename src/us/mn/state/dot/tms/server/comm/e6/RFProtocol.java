@@ -14,22 +14,27 @@
  */
 package us.mn.state.dot.tms.server.comm.e6;
 
-import java.util.ArrayList;
-
 /**
  * RF protocol definitions for E6 multiprotocol reader.
  *
  * @author Douglas Lau
  */
 public enum RFProtocol {
-	IT2200,   /* 0 */
-	SeGo,     /* 1 */
-	IAG,      /* 2 */
-	ASTMv6,   /* 3 (aka CVISN) */
-	Title21,  /* 4 */
-	ATA_Full, /* 5 */
-	eGo,      /* 6 */
-	ATA_Half; /* 7 */
+	@Deprecated
+	IT2200,   /* 0 (legacy, unsupported) */
+	SeGo,     /* 1 (TransCore Super eGo) */
+	IAG,      /* 2 (E-Zpass InterAgency Group) */
+	@Deprecated
+	ASTMv6,   /* 3 (legacy, unsupported) */
+	@Deprecated
+	Title21,  /* 4 (legacy, unsupported) */
+	@Deprecated
+	ATA_Full, /* 5 (legacy, unsupported) */
+	@Deprecated
+	eGo,      /* 6 (legacy, unsupported) */
+	@Deprecated
+	ATA_Half, /* 7 (legacy, unsupported) */
+	_6C;      /* 8 (ISO/IEC 18000-63) */
 
 	/** Lookup an RF protocol from an ordinal value */
 	static public RFProtocol fromOrdinal(int o) {
