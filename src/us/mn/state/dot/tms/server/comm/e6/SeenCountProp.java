@@ -37,18 +37,18 @@ public class SeenCountProp extends E6Property {
 	private final RFProtocol protocol;
 
 	/** Seen count frames */
-	private int seen;
+	private Integer seen;
 
 	/** Get the seen count */
-	public int getSeen() {
+	public Integer getSeen() {
 		return seen;
 	}
 
 	/** Unique count frames */
-	private int unique;
+	private Integer unique;
 
 	/** Get the unique count */
-	public int getUnique() {
+	public Integer getUnique() {
 		return unique;
 	}
 
@@ -61,7 +61,9 @@ public class SeenCountProp extends E6Property {
 
 	/** Create a seen count property */
 	public SeenCountProp(RFProtocol p) {
-		this(p, 0, 0);
+		protocol = p;
+		seen = null;
+		unique = null;
 	}
 
 	/** Get the command */
@@ -95,11 +97,13 @@ public class SeenCountProp extends E6Property {
 	/** Get the store packet data */
 	@Override
 	public byte[] storeData() {
+		int sn = (seen != null) ? seen : 0;
+		int uq = (unique != null) ? unique : 0;
 		byte[] d = new byte[7];
 		format16(d, 0, STORE);
 		format8(d, 2, protocol.value);
-		format16(d, 3, seen);
-		format16(d, 5, unique);
+		format16(d, 3, sn);
+		format16(d, 5, uq);
 		return d;
 	}
 

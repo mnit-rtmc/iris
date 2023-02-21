@@ -44,10 +44,10 @@ public class MasterSlaveProp extends E6Property {
 	}
 
 	/** Slave select count */
-	private int slave;
+	private Integer slave;
 
 	/** Get the slave select count */
-	public int getSlaveSelectCount() {
+	public Integer getSlaveSelectCount() {
 		return slave;
 	}
 
@@ -59,7 +59,8 @@ public class MasterSlaveProp extends E6Property {
 
 	/** Create a new master/slave property */
 	public MasterSlaveProp() {
-		this(TagReaderSyncMode.SLAVE, 0);
+		mode = null;
+		slave = null;
 	}
 
 	/** Get the command */
@@ -88,16 +89,19 @@ public class MasterSlaveProp extends E6Property {
 			mode = m;
 		else
 			throw new ParsingException("INVALID SYNC MODE");
-		slave = d[5];
+		slave = (int) d[5];
 	}
 
 	/** Get the store packet data */
 	@Override
 	public byte[] storeData() {
+		TagReaderSyncMode m =
+			(mode != null) ? mode : TagReaderSyncMode.SLAVE;
+		int s = (slave != null) ? slave : 0;
 		byte[] d = new byte[4];
 		format16(d, 0, STORE);
-		format8(d, 2, 1 << mode.ordinal());
-		format8(d, 3, slave);
+		format8(d, 2, 1 << m.ordinal());
+		format8(d, 3, s);
 		return d;
 	}
 

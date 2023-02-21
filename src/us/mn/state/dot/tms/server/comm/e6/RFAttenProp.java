@@ -39,18 +39,18 @@ public class RFAttenProp extends E6Property {
 	private final RFProtocol protocol;
 
 	/** Downlink attenuation value (0 - 15 dB) */
-	private int downlink;
+	private Integer downlink;
 
 	/** Get downlink attenuation (db) */
-	public int getDownlinkDb() {
+	public Integer getDownlinkDb() {
 		return downlink;
 	}
 
 	/** Uplink attenuation value (0 - 15 dB) */
-	private int uplink;
+	private Integer uplink;
 
 	/** Get uplink attenuation (db) */
-	public int getUplinkDb() {
+	public Integer getUplinkDb() {
 		return uplink;
 	}
 
@@ -63,7 +63,9 @@ public class RFAttenProp extends E6Property {
 
 	/** Create an FR attenuation property */
 	public RFAttenProp(RFProtocol p) {
-		this(p, 0, 0);
+		protocol = p;
+		downlink = null;
+		uplink = null;
 	}
 
 	/** Get the command */
@@ -102,10 +104,12 @@ public class RFAttenProp extends E6Property {
 	/** Get the store packet data */
 	@Override
 	public byte[] storeData() {
+		int dn = (downlink != null) ? downlink : 0;
+		int up = (uplink != null) ? uplink : 0;
 		byte[] d = new byte[4];
 		format8(d, 0, STORE);
 		format8(d, 1, protocol.value << 4);
-		format8(d, 2, ((downlink << 4) & 0xF0) | (uplink & 0x0F));
+		format8(d, 2, ((dn << 4) & 0xF0) | (up & 0x0F));
 		format8(d, 3, 0x0D);	// Carriage-return
 		return d;
 	}

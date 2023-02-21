@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2018  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,8 +31,9 @@ public class FrequencyProp extends E6Property {
 	static private final int FREQ_STEP_KHZ = 250;
 
 	/** Get the frequency value from KHz */
-	static private int value_from_khz(int khz) {
-		return (khz - FREQ_BASE_KHZ) / FREQ_STEP_KHZ;
+	static private Integer value_from_khz(int khz) {
+		int val = (khz - FREQ_BASE_KHZ) / FREQ_STEP_KHZ;
+		return (val >= 0 && val <= 0xFFFF) ? val : null;
 	}
 
 	/** RF transceiver command */
@@ -60,11 +61,11 @@ public class FrequencyProp extends E6Property {
 	private final Source source;
 
 	/** Frequency value */
-	private int value;
+	private Integer value;
 
 	/** Get the frequency (KHz) */
-	public int getFreqKhz() {
-		return FREQ_BASE_KHZ + value * FREQ_STEP_KHZ;
+	public Integer getFreqKhz() {
+		return value;
 	}
 
 	/** Create a frequency property */
@@ -76,7 +77,7 @@ public class FrequencyProp extends E6Property {
 	/** Create a frequency property */
 	public FrequencyProp(Source s) {
 		source = s;
-		value = 0;
+		value = null;
 	}
 
 	/** Get the command */
@@ -114,10 +115,11 @@ public class FrequencyProp extends E6Property {
 	/** Get the store packet data */
 	@Override
 	public byte[] storeData() {
+		int val = (value != null) ? value : 0;
 		byte[] d = new byte[5];
 		format8(d, 0, STORE);
 		format8(d, 1, source.ordinal());
-		format16(d, 2, value);
+		format16(d, 2, val);
 		format8(d, 4, 0x0D);	// Carriage-return
 		return d;
 	}

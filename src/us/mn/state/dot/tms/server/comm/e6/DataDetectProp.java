@@ -40,10 +40,10 @@ public class DataDetectProp extends E6Property {
 	private final RFProtocol protocol;
 
 	/** Data detect value (0 - 20 dB) */
-	private int value;
+	private Integer value;
 
 	/** Get the data detect value */
-	public int getValue() {
+	public Integer getValue() {
 		return value;
 	}
 
@@ -55,7 +55,8 @@ public class DataDetectProp extends E6Property {
 
 	/** Create a data detect property */
 	public DataDetectProp(RFProtocol p) {
-		this(p, 0);
+		protocol = p;
+		value = null;
 	}
 
 	/** Get the command */
@@ -93,10 +94,11 @@ public class DataDetectProp extends E6Property {
 	/** Get the store packet data */
 	@Override
 	public byte[] storeData() {
+		int val = (value != null) ? value : 0;
 		byte[] d = new byte[4];
 		format8(d, 0, STORE);
 		format8(d, 1, protocol.value << 4);
-		format8(d, 2, value);
+		format8(d, 2, val);
 		format8(d, 3, 0x0D);	// Carriage-return
 		return d;
 	}
