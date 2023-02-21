@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2022  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,10 +27,6 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpQuerySettings extends OpE6 {
 
-	/** Supported protocols */
-	static private final RFProtocol[] PROTOCOLS = {
-		RFProtocol.SeGo, RFProtocol.IAG
-	};
 
 	/** Create a new "query settings" operation */
 	public OpQuerySettings(TagReaderImpl tr) {
@@ -107,13 +103,8 @@ public class OpQuerySettings extends OpE6 {
 
 	/** Get the next query phase */
 	private Phase<E6Property> nextQueryPhase(RFProtocol p_prot) {
-		for (RFProtocol p: PROTOCOLS) {
-			if (null == p_prot)
-				return new QueryAtten(p);
-			if (p == p_prot)
-				p_prot = null;
-		}
-		return new QueryLineLoss();
+		RFProtocol p = RFProtocol.next(p_prot);
+		return (p != null) ? new QueryAtten(p) : new QueryLineLoss();
 	}
 
 	/** Phase to query the RF attenuation for one protocol */

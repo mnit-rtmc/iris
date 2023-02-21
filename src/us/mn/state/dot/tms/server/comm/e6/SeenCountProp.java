@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2018  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ public class SeenCountProp extends E6Property {
 	public byte[] queryData() {
 		byte[] d = new byte[3];
 		format16(d, 0, QUERY);
-		format8(d, 2, protocol.ordinal());
+		format8(d, 2, protocol.value);
 		return d;
 	}
 
@@ -86,7 +86,7 @@ public class SeenCountProp extends E6Property {
 			throw new ParsingException("DATA LEN: " + d.length);
 		if (parse16(d, 2) != QUERY)
 			throw new ParsingException("SUB CMD");
-		if (RFProtocol.fromOrdinal(parse8(d, 4)) != protocol)
+		if (RFProtocol.fromValue(parse8(d, 4)) != protocol)
 			throw new ParsingException("RF PROTOCOL");
 		seen = parse16(d, 5);
 		unique = parse16(d, 7);
@@ -97,7 +97,7 @@ public class SeenCountProp extends E6Property {
 	public byte[] storeData() {
 		byte[] d = new byte[7];
 		format16(d, 0, STORE);
-		format8(d, 2, protocol.ordinal());
+		format8(d, 2, protocol.value);
 		format16(d, 3, seen);
 		format16(d, 5, unique);
 		return d;
@@ -110,7 +110,7 @@ public class SeenCountProp extends E6Property {
 			throw new ParsingException("DATA LEN: " + d.length);
 		if (parse16(d, 2) != STORE)
 			throw new ParsingException("SUB CMD");
-		if (RFProtocol.fromOrdinal(parse8(d, 4)) != protocol)
+		if (RFProtocol.fromValue(parse8(d, 4)) != protocol)
 			throw new ParsingException("RF PROTOCOL");
 	}
 
