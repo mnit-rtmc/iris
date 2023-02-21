@@ -42,36 +42,23 @@ public class OpSendSettings extends OpE6 {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase<E6Property> phaseTwo() {
+		// store ACK timeout without checking it first
+		// to prevent timeout errors on an invalid config
 		return new StoreAckTimeout();
 	}
 
-	/** Phase to store the data ack timeout */
+	/** Phase to store the data ACK timeout */
 	private class StoreAckTimeout extends Phase<E6Property> {
 
-		/** Store the ack timeout */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			AckTimeoutProp dat = new AckTimeoutProp(
-				AckTimeoutProp.Protocol.udp_ip,
-				getTimeout(mess));
-			mess.logStore(dat);
-			sendStore(mess, dat);
-			return new QueryAckTimeout();
-		}
-	}
-
-	/** Phase to query the data ack timeout */
-	private class QueryAckTimeout extends Phase<E6Property> {
-
-		/** Query the ack timeout */
+		/** Store the ACK timeout */
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
 			AckTimeoutProp ato = new AckTimeoutProp(
-				AckTimeoutProp.Protocol.udp_ip);
-			sendQuery(mess, ato);
-			mess.logQuery(ato);
+				AckTimeoutProp.Protocol.udp_ip,
+				getTimeout(mess));
+			mess.logStore(ato);
+			sendStore(mess, ato);
 			return new QueryTimeDate();
 		}
 	}
@@ -240,7 +227,8 @@ public class OpSendSettings extends OpE6 {
 				FrequencyProp.Source.downlink);
 			sendQuery(mess, freq);
 			mess.logQuery(freq);
-			return (freq.getFreqKhz() != downlink_freq)
+			Integer f = freq.getFreqKhz();
+			return (f == null || f != downlink_freq)
 			      ? new StoreDownlink(downlink_freq)
 			      : checkUplink();
 		}
@@ -286,7 +274,8 @@ public class OpSendSettings extends OpE6 {
 				FrequencyProp.Source.uplink);
 			sendQuery(mess, freq);
 			mess.logQuery(freq);
-			return (freq.getFreqKhz() != uplink_freq)
+			Integer f = freq.getFreqKhz();
+			return (f == null || f != uplink_freq)
 			      ? new StoreUplink(uplink_freq)
 			      : nextProtocol(null);
 		}
@@ -374,8 +363,10 @@ public class OpSendSettings extends OpE6 {
 				return nextProtocol(protocol);
 			}
 			mess.logQuery(atten);
-			return (atten.getDownlinkDb() != atten_down
-			     || atten.getUplinkDb() != atten_up)
+			Integer dl = atten.getDownlinkDb();
+			Integer ul = atten.getUplinkDb();
+			return (dl == null || dl != atten_down ||
+			        ul == null || ul != atten_up)
 			      ? new StoreAtten(protocol, atten_down, atten_up)
 			      : checkDataDetect(protocol);
 		}
@@ -441,7 +432,8 @@ public class OpSendSettings extends OpE6 {
 				data_detect);
 			sendQuery(mess, det);
 			mess.logQuery(det);
-			return (det.getValue() != data_detect)
+			Integer dd = det.getValue();
+			return (dd == null || dd != data_detect)
 			      ? new StoreDataDetect(protocol, data_detect)
 			      : checkSeen(protocol);
 		}
@@ -519,8 +511,10 @@ public class OpSendSettings extends OpE6 {
 			SeenCountProp seen = new SeenCountProp(protocol);
 			sendQuery(mess, seen);
 			mess.logQuery(seen);
-			return (seen.getSeen() != seen_count
-			     || seen.getUnique() != unique_count)
+			Integer sc = seen.getSeen();
+			Integer uc = seen.getUnique();
+			return (sc == null || sc != seen_count ||
+			        uc == null || uc != unique_count)
 			      ? new StoreSeen(protocol, seen_count,unique_count)
 			      : nextProtocol(protocol);
 		}
@@ -569,8 +563,9 @@ public class OpSendSettings extends OpE6 {
 			LineLossProp loss = new LineLossProp();
 			sendQuery(mess, loss);
 			mess.logQuery(loss);
-			return (loss.getValue() != line_loss)
-			      ?	new StoreLineLoss(line_loss)
+			Integer ll = loss.getValue();
+			return (ll == null || ll != line_loss)
+			      ? new StoreLineLoss(line_loss)
 			      : checkSyncMode();
 		}
 	}
@@ -618,8 +613,10 @@ public class OpSendSettings extends OpE6 {
 			MasterSlaveProp mstr = new MasterSlaveProp();
 			sendQuery(mess, mstr);
 			mess.logQuery(mstr);
-			return (mstr.getMode() != sync_mode
-			     || mstr.getSlaveSelectCount() != slave_select)
+			TagReaderSyncMode mode = mstr.getMode();
+			Integer slave = mstr.getSlaveSelectCount();
+			return (mode == null || mode != sync_mode ||
+			        slave == 0 || slave != slave_select)
 			      ? new StoreSyncMode(sync_mode, slave_select)
 			      : lastPhase();
 		}
