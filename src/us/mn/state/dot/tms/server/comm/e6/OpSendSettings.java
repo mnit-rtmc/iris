@@ -616,7 +616,7 @@ public class OpSendSettings extends OpE6 {
 			TagReaderSyncMode mode = mstr.getMode();
 			Integer slave = mstr.getSlaveSelectCount();
 			return (mode == null || mode != sync_mode ||
-			        slave == 0 || slave != slave_select)
+			        slave == null || slave != slave_select)
 			      ? new StoreSyncMode(sync_mode, slave_select)
 			      : lastPhase();
 		}

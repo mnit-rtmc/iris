@@ -65,7 +65,9 @@ public class FrequencyProp extends E6Property {
 
 	/** Get the frequency (KHz) */
 	public Integer getFreqKhz() {
-		return value;
+		return (value != null)
+		      ? FREQ_BASE_KHZ + value * FREQ_STEP_KHZ
+		      : null;
 	}
 
 	/** Create a frequency property */
