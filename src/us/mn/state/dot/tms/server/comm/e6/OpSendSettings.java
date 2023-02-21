@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2022  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,11 +30,6 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  */
 public class OpSendSettings extends OpE6 {
-
-	/** Supported protocols */
-	static private final RFProtocol[] PROTOCOLS = {
-		RFProtocol.SeGo, RFProtocol.IAG
-	};
 
 	/** Flag to indicate stop mode */
 	private boolean stop = false;
@@ -318,13 +313,8 @@ public class OpSendSettings extends OpE6 {
 
 	/** Get the next protocol phase */
 	private Phase<E6Property> nextProtocol(RFProtocol p_prot) {
-		for (RFProtocol p: PROTOCOLS) {
-			if (null == p_prot)
-				return checkAtten(p);
-			if (p == p_prot)
-				p_prot = null;
-		}
-		return checkLineLoss();
+		RFProtocol p = RFProtocol.next(p_prot);
+		return (p != null) ? checkAtten(p) : checkLineLoss();
 	}
 
 	/** Get check attenuation phase (or later) */

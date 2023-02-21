@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2018  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ public class DataDetectProp extends E6Property {
 	public byte[] queryData() {
 		byte[] d = new byte[3];
 		format8(d, 0, QUERY);
-		format8(d, 1, protocol.ordinal() << 4);
+		format8(d, 1, protocol.value << 4);
 		format8(d, 2, 0x0D);	// Carriage-return
 		return d;
 	}
@@ -81,7 +81,7 @@ public class DataDetectProp extends E6Property {
 			throw new ParsingException("DATA LEN: " + d.length);
 		if (parse8(d, 2) != QUERY)
 			throw new ParsingException("SUB CMD");
-		if (RFProtocol.fromOrdinal(parse8(d, 3) >> 4) != protocol)
+		if (RFProtocol.fromValue(parse8(d, 3) >> 4) != protocol)
 			throw new ParsingException("RF PROTOCOL");
 		if (parse8(d, 5) != 0)
 			throw new ParsingException("ACK");
@@ -95,7 +95,7 @@ public class DataDetectProp extends E6Property {
 	public byte[] storeData() {
 		byte[] d = new byte[4];
 		format8(d, 0, STORE);
-		format8(d, 1, protocol.ordinal() << 4);
+		format8(d, 1, protocol.value << 4);
 		format8(d, 2, value);
 		format8(d, 3, 0x0D);	// Carriage-return
 		return d;
@@ -108,7 +108,7 @@ public class DataDetectProp extends E6Property {
 			throw new ParsingException("DATA LEN: " + d.length);
 		if (parse8(d, 2) != STORE)
 			throw new ParsingException("SUB CMD");
-		if (RFProtocol.fromOrdinal(parse8(d, 3) >> 4) != protocol)
+		if (RFProtocol.fromValue(parse8(d, 3) >> 4) != protocol)
 			throw new ParsingException("RF PROTOCOL");
 		if (parse8(d, 4) != 0)
 			throw new ParsingException("ACK");

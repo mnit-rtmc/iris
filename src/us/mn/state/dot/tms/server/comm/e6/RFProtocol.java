@@ -20,28 +20,36 @@ package us.mn.state.dot.tms.server.comm.e6;
  * @author Douglas Lau
  */
 public enum RFProtocol {
-	@Deprecated
-	IT2200,   /* 0 (legacy, unsupported) */
-	SeGo,     /* 1 (TransCore Super eGo) */
-	IAG,      /* 2 (E-Zpass InterAgency Group) */
-	@Deprecated
-	ASTMv6,   /* 3 (legacy, unsupported) */
-	@Deprecated
-	Title21,  /* 4 (legacy, unsupported) */
-	@Deprecated
-	ATA_Full, /* 5 (legacy, unsupported) */
-	@Deprecated
-	eGo,      /* 6 (legacy, unsupported) */
-	@Deprecated
-	ATA_Half, /* 7 (legacy, unsupported) */
-	_6C;      /* 8 (ISO/IEC 18000-63) */
+	SeGo(1),  /* TransCore Super eGo */
+	IAG(2),   /* E-Zpass InterAgency Group */
+	_6C(8);   /* ISO/IEC 18000-63 */
 
-	/** Lookup an RF protocol from an ordinal value */
-	static public RFProtocol fromOrdinal(int o) {
-		for (RFProtocol p: values()) {
-			if (p.ordinal() == o)
-				return p;
+	/** Protocol value for E6 */
+	public final int value;
+
+	/** Create an RF protocol */
+	private RFProtocol(int v) {
+		value = v;
+	}
+
+	/** Lookup an RF protocol from a value */
+	static public RFProtocol fromValue(int p) {
+		switch (p) {
+			case 1: return SeGo;
+			case 2: return IAG;
+			case 8: return _6C;
+			default: return null;
 		}
-		return null;
+	}
+
+	/** Get the next protocol */
+	static public RFProtocol next(RFProtocol p) {
+		if (null == p)
+			return SeGo;
+		switch (p) {
+			case SeGo: return IAG;
+			case IAG: return _6C;
+			default: return null;
+		}
 	}
 }
