@@ -183,9 +183,10 @@ public class ReaderSettings {
 		StringBuilder sb = new StringBuilder();
 		sb.append('{');
 		sb.append(Json.num("ack_timeout", ack_timeout.getValue()));
-		sb.append(Json.num("downlink_freq",
+		sb.append(Json.num("downlink_freq_khz",
 			downlink_freq.getFreqKhz()));
-		sb.append(Json.num("uplink_freq", uplink_freq.getFreqKhz()));
+		sb.append(Json.num("uplink_freq_khz",
+			uplink_freq.getFreqKhz()));
 		sb.append(Json.sub("sego", sego.toJson()));
 		sb.append(Json.sub("iag", iag.toJson()));
 		sb.append(Json.sub("_6c", _6c.toJson()));

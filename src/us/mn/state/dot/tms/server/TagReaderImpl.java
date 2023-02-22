@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2019  Minnesota Department of Transportation
+ * Copyright (C) 2014-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,8 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		mapping = new TableMapping(store, "iris", SONAR_TYPE,
 			DMS.SONAR_TYPE);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"toll_zone, downlink_freq_khz, uplink_freq_khz, " +
+			"toll_zone, settings, " +
+			"downlink_freq_khz, uplink_freq_khz, " +
 			"sego_atten_downlink_db, sego_atten_uplink_db, " +
 			"sego_data_detect_db, sego_seen_count, " +
 			"sego_unique_count, iag_atten_downlink_db, " +
@@ -77,6 +78,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		map.put("pin", pin);
 		map.put("notes", notes);
 		map.put("toll_zone", toll_zone);
+		map.put("settings", settings);
 		map.put("downlink_freq_khz", downlink_freq_khz);
 		map.put("uplink_freq_khz", uplink_freq_khz);
 		map.put("sego_atten_downlink_db", sego_atten_downlink_db);
@@ -116,39 +118,43 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		     row.getInt(4),              // pin
 		     row.getString(5),           // notes
 		     row.getString(6),           // toll_zone
-		     (Integer) row.getObject(7), // downlink_freq_khz
-		     (Integer) row.getObject(8), // uplink_freq_khz
-		     (Integer) row.getObject(9), // sego_atten_downlink_db
-		     (Integer) row.getObject(10),// sego_atten_uplink_db
-		     (Integer) row.getObject(11),// sego_data_detect_db
-		     (Integer) row.getObject(12),// sego_seen_count
-		     (Integer) row.getObject(13),// sego_unique_count
-		     (Integer) row.getObject(14),// iag_atten_downlink_db
-		     (Integer) row.getObject(15),// iag_atten_uplink_db
-		     (Integer) row.getObject(16),// iag_data_detect_db
-		     (Integer) row.getObject(17),// iag_seen_count
-		     (Integer) row.getObject(18),// iag_unique_count
-		     (Integer) row.getObject(19),// line_loss_db
-		     (Integer) row.getObject(20),// sync_mode
-		     (Integer) row.getObject(21) // slave_select_count
+		     row.getString(7),           // settings
+		     (Integer) row.getObject(8), // downlink_freq_khz
+		     (Integer) row.getObject(9), // uplink_freq_khz
+		     (Integer) row.getObject(10),// sego_atten_downlink_db
+		     (Integer) row.getObject(11),// sego_atten_uplink_db
+		     (Integer) row.getObject(12),// sego_data_detect_db
+		     (Integer) row.getObject(13),// sego_seen_count
+		     (Integer) row.getObject(14),// sego_unique_count
+		     (Integer) row.getObject(15),// iag_atten_downlink_db
+		     (Integer) row.getObject(16),// iag_atten_uplink_db
+		     (Integer) row.getObject(17),// iag_data_detect_db
+		     (Integer) row.getObject(18),// iag_seen_count
+		     (Integer) row.getObject(19),// iag_unique_count
+		     (Integer) row.getObject(20),// line_loss_db
+		     (Integer) row.getObject(21),// sync_mode
+		     (Integer) row.getObject(22) // slave_select_count
 		);
 	}
 
 	/** Create a tag reader */
 	private TagReaderImpl(String n, String l, String c, int p, String nt,
-		String tz, Integer df, Integer uf, Integer sad, Integer sau,
+		String tz, String st,
+		Integer df, Integer uf, Integer sad, Integer sau,
 		Integer sdd, Integer ssc, Integer suc, Integer iad, Integer iau,
 		Integer idd, Integer isc, Integer iuc, Integer ll, Integer sm,
 		Integer sc) throws TMSException
 	{
 		this(n, lookupGeoLoc(l), lookupController(c), p, nt,
-		     lookupTollZone(tz), df, uf, sad, sau, sdd, ssc, suc, iad,
+		     lookupTollZone(tz), st,
+		     df, uf, sad, sau, sdd, ssc, suc, iad,
 		     iau, idd, isc, iuc, ll, sm, sc);
 	}
 
 	/** Create a tag reader */
 	private TagReaderImpl(String n, GeoLocImpl l, ControllerImpl c,
-		int p, String nt, TollZone tz, Integer df, Integer uf,
+		int p, String nt, TollZone tz, String st,
+		Integer df, Integer uf,
 		Integer sad, Integer sau, Integer sdd, Integer ssc, Integer suc,
 		Integer iad, Integer iau, Integer idd, Integer isc, Integer iuc,
 		Integer ll, Integer sm, Integer sc) throws TMSException
@@ -156,6 +162,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		super(n, c, p, nt);
 		geo_loc = l;
 		toll_zone = tz;
+		settings = st;
 		downlink_freq_khz = df;
 		uplink_freq_khz = uf;
 		sego_atten_downlink_db = sad;
@@ -231,6 +238,27 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	@Override
 	public TollZone getTollZone() {
 		return toll_zone;
+	}
+
+	/** Settings (JSON) read from tag reader */
+	private String settings;
+
+	/** Set the JSON settings */
+	public void setSettings(String s) {
+		if (!objectEquals(s, settings)) {
+			try {
+				store.update(this, "settings", s);
+				settings = s;
+			}
+			catch (TMSException e) {
+				logError("settings: " + e.getMessage());
+			}
+		}
+	}
+
+	/** Get the JSON settings */
+	public String getSettings() {
+		return settings;
 	}
 
 	/** Downlink frequency (khz) */
