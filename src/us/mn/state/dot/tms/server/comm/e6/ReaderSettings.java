@@ -30,10 +30,12 @@ public class ReaderSettings {
 		public final RFAttenProp rf_atten;
 		public final DataDetectProp data_detect;
 		public final SeenCountProp seen_count;
+		public final ProtocolSlotProp slot;
 		public ProtocolSettings(RFProtocol p) {
 			rf_atten = new RFAttenProp(p);
 			data_detect = new DataDetectProp(p);
 			seen_count = new SeenCountProp(p);
+			slot = new ProtocolSlotProp(p);
 		}
 		/** Get JSON representation */
 		public String toJson() {
@@ -48,6 +50,7 @@ public class ReaderSettings {
 			sb.append(Json.num("seen_count", seen_count.getSeen()));
 			sb.append(Json.num("unique_count",
 				seen_count.getUnique()));
+			sb.append(Json.num("slot", slot.getSlot()));
 			if (sb.length() < 2)
 				return null;
 			// remove trailing comma
@@ -179,6 +182,12 @@ public class ReaderSettings {
 					iag.seen_count.getUnique());
 				break;
 		}
+	}
+
+	/** Get protocol slot property */
+	public ProtocolSlotProp getSlot(RFProtocol p) {
+		// Slot is only required for IAG protocol
+		return (RFProtocol.IAG == p) ? iag.slot : null;
 	}
 
 	/** Get JSON representation */
