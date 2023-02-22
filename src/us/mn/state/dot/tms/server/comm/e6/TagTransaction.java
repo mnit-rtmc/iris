@@ -297,7 +297,7 @@ public class TagTransaction extends E6Property {
 
 	/** Parse a 6C HOV value */
 	private boolean parse6C_HOV() {
-		switch ((parse8(data, 8) >> 4) & 0x05) {
+		switch ((parse8(data, 8) >> 4) & 0x07) {
 		// 000: single mode
 		case 0: return false;
 		// 001: SOV (non-carpool)
