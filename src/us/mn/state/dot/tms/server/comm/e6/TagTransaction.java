@@ -165,8 +165,8 @@ public class TagTransaction extends E6Property {
 		return (TransactionType.sego_read_streamlined_page_4 == tt
 		     || TransactionType.sego_read_streamlined_page_9 == tt)
 		     && isLengthValid()
-		     && isSeGoReadCRCValid()
 		     && isSeGoTolling()
+		     && isSeGoReadCRCValid()
 		     && isSeGoPage0CRCValid();
 	}
 
@@ -185,7 +185,7 @@ public class TagTransaction extends E6Property {
 	/** Is it a SeGo tolling tag? */
 	private boolean isSeGoTolling() {
 		/* Non-tolling tags have E022 at start of page 0 */
-		return data[2] != 0xE0;
+		return parse16(data, 2) != 0xE022;
 	}
 
 	/** Check if SeGo page 0 CRC is valid.  NOTE: length must be valid */
@@ -265,7 +265,8 @@ public class TagTransaction extends E6Property {
 		return (TransactionType.epc_6c_read == tt) &&
 		       isLengthValid() &&
 		       is6CNumberingISO() &&
-		       is6CApplicationFamilyIdentifier();
+		       is6CApplicationFamilyIdentifier() &&
+		       is6CDataStorageFormatIdentifier();
 	}
 
 	/** Check if EPC numbering system indicator is ISO */
@@ -344,11 +345,11 @@ public class TagTransaction extends E6Property {
 
 	/** Parse a tag type in a seen frame count transaction */
 	private TagType parseSeenTagType() {
-		switch (data[2]) {
-		case 1: return TagType.SeGo;
-		case 2: return TagType.IAG;
-		case 8: return TagType._6C;
-		default: return null;
+		switch (parse8(data, 2)) {
+			case 1: return TagType.SeGo;
+			case 2: return TagType.IAG;
+			case 8: return TagType._6C;
+			default: return null;
 		}
 	}
 
