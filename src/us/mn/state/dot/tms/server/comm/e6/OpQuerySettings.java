@@ -234,9 +234,8 @@ public class OpQuerySettings extends OpE6 {
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
-		if (isSuccess()) {
-			// FIXME: store settings
-		}
+		if (isSuccess())
+			tag_reader.setSettings(settings.toJson());
 		super.cleanup();
 	}
 }

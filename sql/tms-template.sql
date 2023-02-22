@@ -12,6 +12,7 @@
 --          'msg_user', 'msg_sched', 'msg_current', 'expire_time',
 --              'status', 'stuck_pixels' (dms)
 --          'settings', 'sample' (weather_sensor)
+--          'settings' (tag_reader)
 --          'time_stamp' (parking_area)
 --          id (road_class)
 --          name (r_node, road, any resource_n in geo_loc)
@@ -4813,6 +4814,7 @@ CREATE VIEW toll_zone_view AS
 	FROM iris.toll_zone;
 GRANT SELECT ON toll_zone_view TO PUBLIC;
 
+-- FIXME: remove after settings JSON finished
 CREATE TABLE iris.tag_reader_sync_mode (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(16) NOT NULL
@@ -4826,10 +4828,11 @@ COPY iris.tag_reader_sync_mode (id, description) FROM stdin;
 \.
 
 CREATE TABLE iris._tag_reader (
-	name VARCHAR(20) PRIMARY KEY,
-	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-	notes VARCHAR(64) NOT NULL,
-	toll_zone VARCHAR(20) REFERENCES iris.toll_zone(name),
+    name VARCHAR(20) PRIMARY KEY,
+    geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
+    notes VARCHAR(64) NOT NULL,
+    toll_zone VARCHAR(20) REFERENCES iris.toll_zone(name),
+    settings JSONB,
 	downlink_freq_khz INTEGER,
 	uplink_freq_khz INTEGER,
 	sego_atten_downlink_db INTEGER,
@@ -4851,19 +4854,27 @@ ALTER TABLE iris._tag_reader ADD CONSTRAINT _tag_reader_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
 CREATE FUNCTION iris.tag_reader_notify() RETURNS TRIGGER AS
-	$tag_reader_notify$
+    $tag_reader_notify$
 BEGIN
-	NOTIFY tag_reader;
-	RETURN NULL; -- AFTER trigger return is ignored
+    IF (NEW.settings IS DISTINCT FROM OLD.settings) THEN
+        NOTIFY tag_reader, 'settings';
+    ELSE
+        NOTIFY tag_reader;
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
 END;
 $tag_reader_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER tag_reader_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris._tag_reader
-	FOR EACH STATEMENT EXECUTE PROCEDURE iris.tag_reader_notify();
+    AFTER UPDATE ON iris._tag_reader
+    FOR EACH ROW EXECUTE PROCEDURE iris.tag_reader_notify();
+
+CREATE TRIGGER tag_reader_table_notify_trig
+    AFTER INSERT OR DELETE ON iris._tag_reader
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.tag_reader AS
-    SELECT t.name, geo_loc, controller, pin, notes, toll_zone,
+    SELECT t.name, geo_loc, controller, pin, notes, toll_zone, settings,
            downlink_freq_khz, uplink_freq_khz, sego_atten_downlink_db,
            sego_atten_uplink_db, sego_data_detect_db, sego_seen_count,
            sego_unique_count, iag_atten_downlink_db, iag_atten_uplink_db,
@@ -4877,13 +4888,15 @@ BEGIN
     INSERT INTO iris.controller_io (name, resource_n, controller, pin)
          VALUES (NEW.name, 'tag_reader', NEW.controller, NEW.pin);
     INSERT INTO iris._tag_reader (
-        name, geo_loc, notes, toll_zone, downlink_freq_khz, uplink_freq_khz,
+        name, geo_loc, notes, toll_zone, settings,
+        downlink_freq_khz, uplink_freq_khz,
         sego_atten_downlink_db, sego_atten_uplink_db, sego_data_detect_db,
         sego_seen_count, sego_unique_count, iag_atten_downlink_db,
         iag_atten_uplink_db, iag_data_detect_db, iag_seen_count,
         iag_unique_count, line_loss_db, sync_mode, slave_select_count
     ) VALUES (
-        NEW.name, NEW.geo_loc, NEW.notes, NEW.toll_zone, NEW.downlink_freq_khz,
+        NEW.name, NEW.geo_loc, NEW.notes, NEW.toll_zone, NEW.settings,
+        NEW.downlink_freq_khz,
         NEW.uplink_freq_khz, NEW.sego_atten_downlink_db,
         NEW.sego_atten_uplink_db, NEW.sego_data_detect_db, NEW.sego_seen_count,
         NEW.sego_unique_count, NEW.iag_atten_downlink_db,
@@ -4910,6 +4923,7 @@ BEGIN
        SET geo_loc = NEW.geo_loc,
            notes = NEW.notes,
            toll_zone = NEW.toll_zone,
+           settings = NEW.settings,
            downlink_freq_khz = NEW.downlink_freq_khz,
            uplink_freq_khz = NEW.uplink_freq_khz,
            sego_atten_downlink_db = NEW.sego_atten_downlink_db,
@@ -4940,6 +4954,7 @@ CREATE TRIGGER tag_reader_delete_trig
 
 CREATE VIEW tag_reader_view AS
     SELECT t.name, t.geo_loc, location, controller, pin, notes, toll_zone,
+           settings,
            downlink_freq_khz, uplink_freq_khz, sego_atten_downlink_db,
            sego_atten_uplink_db, sego_data_detect_db, sego_seen_count,
            sego_unique_count, iag_atten_downlink_db, iag_atten_uplink_db,
@@ -4951,14 +4966,14 @@ CREATE VIEW tag_reader_view AS
 GRANT SELECT ON tag_reader_view TO PUBLIC;
 
 CREATE TABLE iris.tag_reader_dms (
-	tag_reader VARCHAR(20) NOT NULL REFERENCES iris._tag_reader,
-	dms VARCHAR(20) NOT NULL REFERENCES iris._dms
+    tag_reader VARCHAR(20) NOT NULL REFERENCES iris._tag_reader,
+    dms VARCHAR(20) NOT NULL REFERENCES iris._dms
 );
 ALTER TABLE iris.tag_reader_dms ADD PRIMARY KEY (tag_reader, dms);
 
 CREATE VIEW tag_reader_dms_view AS
-	SELECT tag_reader, dms
-	FROM iris.tag_reader_dms;
+    SELECT tag_reader, dms
+    FROM iris.tag_reader_dms;
 GRANT SELECT ON tag_reader_dms_view TO PUBLIC;
 
 CREATE TABLE event.tag_type (
