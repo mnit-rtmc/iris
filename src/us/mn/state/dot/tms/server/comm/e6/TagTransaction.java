@@ -37,6 +37,9 @@ public class TagTransaction extends E6Property {
 	/** IAG CRC-16 */
 	static private final CRC IAG_CRC = new CRC(16, 0x1021, 0x0000, false);
 
+	/* EZPass Interagency Group ID */
+	static private final int IAG_GROUP_ID_EZPASS = 65;
+
 	/** 6C coalition application family identifier */
 	static private final int AFI_6C_COALITION = 0xB0;
 
@@ -228,6 +231,7 @@ public class TagTransaction extends E6Property {
 		return (TransactionType.iag_read == tt
 		     || TransactionType.iag_read_authenticated == tt)
 		     && isLengthValid()
+		     && isIAGGroupValid()
 		     && isIAG_CRCValid();
 	}
 
@@ -243,13 +247,20 @@ public class TagTransaction extends E6Property {
 		return parse16(data, 32);
 	}
 
+	/** Check if IAG group is EZPass Interagency Group */
+	private boolean isIAGGroupValid() {
+		return (parse8(data, 3) & 0x7F) == IAG_GROUP_ID_EZPASS;
+	}
+
 	/** Parse an IAG ID */
 	private Integer parseIAGId() {
+		/* transponder serial number is 24 bits */
 		return (parse32(data, 4) >> 1) & 0xFFFFFF;
 	}
 
 	/** Parse an IAG agency */
 	private Integer parseIAGAgency() {
+		/* agency ID is 7 bits */
 		return (parse8(data, 4) >> 1) & 0x7F;
 	}
 
