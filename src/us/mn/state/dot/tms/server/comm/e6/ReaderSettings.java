@@ -95,6 +95,9 @@ public class ReaderSettings {
 	/** Master / slave */
 	public final MasterSlaveProp master_slave = new MasterSlaveProp();
 
+	/** RF control */
+	public final RFControlProp rf_control = new RFControlProp();
+
 	/** Create new reader settings */
 	public ReaderSettings() { }
 
@@ -197,6 +200,7 @@ public class ReaderSettings {
 		sb.append(Json.str("sync_mode", master_slave.getMode()));
 		sb.append(Json.str("slave_select_count",
 			master_slave.getSlaveSelectCount()));
+		sb.append(Json.str("rf_control", rf_control.getValue()));
 		// remove trailing comma
 		if (sb.charAt(sb.length() - 1) == ',')
 			sb.setLength(sb.length() - 1);

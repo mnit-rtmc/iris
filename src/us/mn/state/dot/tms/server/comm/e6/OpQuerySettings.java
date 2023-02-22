@@ -227,6 +227,19 @@ public class OpQuerySettings extends OpE6 {
 			tag_reader.setSlaveSelectCountNotify(
 				settings.master_slave.getSlaveSelectCount()
 			);
+			return new QueryRFControl();
+		}
+	}
+
+	/** Phase to query the RF control setting */
+	private class QueryRFControl extends Phase<E6Property> {
+
+		/** Query the RF control setting */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			sendQuery(mess, settings.rf_control);
+			mess.logQuery(settings.rf_control);
 			return null;
 		}
 	}
