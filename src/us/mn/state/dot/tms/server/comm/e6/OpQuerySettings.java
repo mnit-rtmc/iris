@@ -166,6 +166,26 @@ public class OpQuerySettings extends OpE6 {
 			sendQuery(mess, seen);
 			mess.logQuery(seen);
 			settings.storeSeenUnique(tag_reader, protocol);
+			return new QuerySlot(protocol);
+		}
+	}
+
+	/** Phase to query the slot for one protocol */
+	private class QuerySlot extends Phase<E6Property> {
+		private final RFProtocol protocol;
+		private QuerySlot(RFProtocol p) {
+			protocol = p;
+		}
+
+		/** Query the protocol slot */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			ProtocolSlotProp slot = settings.getSlot(protocol);
+			if (slot != null) {
+				sendQuery(mess, slot);
+				mess.logQuery(slot);
+			}
 			return nextQueryPhase(protocol);
 		}
 	}
