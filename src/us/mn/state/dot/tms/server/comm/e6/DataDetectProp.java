@@ -42,7 +42,7 @@ public class DataDetectProp extends E6Property {
 	/** Data detect value (0 - 20 dB) */
 	private Integer value;
 
-	/** Get the data detect value */
+	/** Get the data detect value (dB) */
 	public Integer getValue() {
 		return value;
 	}
