@@ -30,11 +30,13 @@ public class ReaderSettings {
 		public final RFAttenProp rf_atten;
 		public final DataDetectProp data_detect;
 		public final SeenCountProp seen_count;
+		public final UplinkSourceProp uplink_source;
 		public final ProtocolSlotProp slot;
 		public ProtocolSettings(RFProtocol p) {
 			rf_atten = new RFAttenProp(p);
 			data_detect = new DataDetectProp(p);
 			seen_count = new SeenCountProp(p);
+			uplink_source = new UplinkSourceProp(p);
 			slot = new ProtocolSlotProp(p);
 		}
 		/** Get JSON representation */
@@ -50,6 +52,8 @@ public class ReaderSettings {
 			sb.append(Json.num("seen_count", seen_count.getSeen()));
 			sb.append(Json.num("unique_count",
 				seen_count.getUnique()));
+			sb.append(Json.str("uplink_source",
+				uplink_source.getValue()));
 			sb.append(Json.num("slot", slot.getSlot()));
 			if (sb.length() < 2)
 				return null;
@@ -67,11 +71,11 @@ public class ReaderSettings {
 
 	/** Downlink frequency */
 	public final FrequencyProp downlink_freq = new FrequencyProp(
-		FrequencyProp.Source.downlink);
+		Source.downlink);
 
 	/** Uplink frequency */
 	public final FrequencyProp uplink_freq = new FrequencyProp(
-		FrequencyProp.Source.uplink);
+		Source.uplink);
 
 	/** Settings for SeGo protocol */
 	public final ProtocolSettings sego =
@@ -184,6 +188,16 @@ public class ReaderSettings {
 		}
 	}
 
+	/** Get uplink source control property */
+	public UplinkSourceProp getUplinkSource(RFProtocol p) {
+		switch (p) {
+			case SeGo: return sego.uplink_source;
+			case IAG: return iag.uplink_source;
+			case _6C: return _6c.uplink_source;
+			default: return null;
+		}
+	}
+
 	/** Get protocol slot property */
 	public ProtocolSlotProp getSlot(RFProtocol p) {
 		// Slot is only required for IAG protocol
@@ -203,11 +217,11 @@ public class ReaderSettings {
 		sb.append(Json.sub("iag", iag.toJson()));
 		sb.append(Json.sub("_6c", _6c.toJson()));
 		sb.append(Json.num("line_loss_db", line_loss.getValue()));
-		sb.append(Json.num("mux_mode", mux_mode.getValue()));
+		sb.append(Json.str("mux_mode", mux_mode.getValue()));
 		sb.append(Json.num("antenna_channel",
 			antenna_channel.getValue()));
 		sb.append(Json.str("sync_mode", master_slave.getMode()));
-		sb.append(Json.str("slave_select_count",
+		sb.append(Json.num("slave_select_count",
 			master_slave.getSlaveSelectCount()));
 		sb.append(Json.str("rf_control", rf_control.getValue()));
 		// remove trailing comma

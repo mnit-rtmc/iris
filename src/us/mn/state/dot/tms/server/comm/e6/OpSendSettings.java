@@ -225,7 +225,7 @@ public class OpSendSettings extends OpE6 {
 			throws IOException
 		{
 			FrequencyProp freq = new FrequencyProp(
-				FrequencyProp.Source.downlink);
+				Source.downlink);
 			sendQuery(mess, freq);
 			mess.logQuery(freq);
 			Integer f = freq.getFreqKhz();
@@ -247,7 +247,7 @@ public class OpSendSettings extends OpE6 {
 			throws IOException
 		{
 			FrequencyProp freq = new FrequencyProp(
-				FrequencyProp.Source.downlink);
+				Source.downlink);
 			freq.setFreqKhz(downlink_freq);
 			mess.logStore(freq);
 			// NOTE: can only store this in STOP mode
@@ -273,8 +273,7 @@ public class OpSendSettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			FrequencyProp freq = new FrequencyProp(
-				FrequencyProp.Source.uplink);
+			FrequencyProp freq = new FrequencyProp(Source.uplink);
 			sendQuery(mess, freq);
 			mess.logQuery(freq);
 			Integer f = freq.getFreqKhz();
@@ -295,8 +294,7 @@ public class OpSendSettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			FrequencyProp freq = new FrequencyProp(
-				FrequencyProp.Source.uplink);
+			FrequencyProp freq = new FrequencyProp(Source.uplink);
 			freq.setFreqKhz(uplink_freq);
 			mess.logStore(freq);
 			// NOTE: can only store this in STOP mode
