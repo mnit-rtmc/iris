@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2022  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,7 +77,8 @@ public class OpQueryStatus extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			BufferingModeProp mode = new BufferingModeProp(false);
+			BufferingModeProp mode = new BufferingModeProp();
+			mode.setEnabled(false);
 			mess.logStore(mode);
 			sendStore(mess, mode);
 			return new QueryBufferedCount();

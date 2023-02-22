@@ -41,23 +41,26 @@ public class RFAttenProp extends E6Property {
 	/** Downlink attenuation value (0 - 15 dB) */
 	private Integer downlink;
 
-	/** Get downlink attenuation (db) */
+	/** Get downlink attenuation (dB) */
 	public Integer getDownlinkDb() {
 		return downlink;
+	}
+
+	/** Set downlink attenuation (dB) */
+	public void setDownlinkDb(Integer d) {
+		downlink = d;
 	}
 
 	/** Uplink attenuation value (0 - 15 dB) */
 	private Integer uplink;
 
-	/** Get uplink attenuation (db) */
+	/** Get uplink attenuation (dB) */
 	public Integer getUplinkDb() {
 		return uplink;
 	}
 
-	/** Create an FR attenuation property */
-	public RFAttenProp(RFProtocol p, int d, int u) {
-		protocol = p;
-		downlink = d;
+	/** Set uplink attenuation (dB) */
+	public void setUplinkDb(Integer u) {
 		uplink = u;
 	}
 

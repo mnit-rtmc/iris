@@ -61,8 +61,8 @@ public class MuxModeProp extends E6Property {
 		return value;
 	}
 
-	/** Create a mux mode property */
-	public MuxModeProp(Value v) {
+	/** Set the mux mode value */
+	public void setValue(Value v) {
 		value = v;
 	}
 

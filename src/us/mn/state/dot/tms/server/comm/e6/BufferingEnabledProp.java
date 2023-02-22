@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,14 +41,14 @@ public class BufferingEnabledProp extends E6Property {
 		return enabled;
 	}
 
-	/** Create a new buffering enabled property */
-	public BufferingEnabledProp(boolean e) {
+	/** Set enabled status */
+	public void setEnabled(boolean e) {
 		enabled = e;
 	}
 
 	/** Create a new buffering enabled property */
 	public BufferingEnabledProp() {
-		this(false);
+		enabled = false;
 	}
 
 	/** Get the command */
