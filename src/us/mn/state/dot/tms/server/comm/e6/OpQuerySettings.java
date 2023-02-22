@@ -166,6 +166,25 @@ public class OpQuerySettings extends OpE6 {
 			sendQuery(mess, seen);
 			mess.logQuery(seen);
 			settings.storeSeenUnique(tag_reader, protocol);
+			return new QueryUplinkSource(protocol);
+		}
+	}
+
+	/** Phase to query the uplink source control for one protocol */
+	private class QueryUplinkSource extends Phase<E6Property> {
+		private final RFProtocol protocol;
+		private QueryUplinkSource(RFProtocol p) {
+			protocol = p;
+		}
+
+		/** Query the uplink source */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			UplinkSourceProp src =
+				settings.getUplinkSource(protocol);
+			sendQuery(mess, src);
+			mess.logQuery(src);
 			return new QuerySlot(protocol);
 		}
 	}

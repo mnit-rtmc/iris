@@ -18,44 +18,42 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Protocol slot property.
- *
- * This is only required for the IAG protocol.
+ * Uplink source control property.
  *
  * @author Douglas Lau
  */
-public class ProtocolSlotProp extends E6Property {
+public class UplinkSourceProp extends E6Property {
 
-	/** Tag transaction config command */
+	/** RF transceiver command */
 	static private final Command CMD = new Command(
-		CommandGroup.TAG_TRANSACTION_CONFIG);
+		CommandGroup.RF_TRANSCEIVER);
 
 	/** Store command code */
-	static private final int STORE = 0x004B;
+	static private final int STORE = 0x57;
 
 	/** Query command code */
-	static private final int QUERY = 0x004C;
+	static private final int QUERY = 0x58;
 
 	/** RF protocol */
-	public final RFProtocol protocol;
+	private final RFProtocol protocol;
 
-	/** Protocol slot number */
-	private Integer slot;
+	/** Source value */
+	private Source source;
 
-	/** Get the slot number */
-	public Integer getSlot() {
-		return slot;
+	/** Get the source (downlink/uplink) */
+	public Source getValue() {
+		return source;
 	}
 
-	/** Set the slot number */
-	public void setSlot(Integer sl) {
-		slot = sl;
+	/** Set the source (downlink/uplink)*/
+	public void setValue(Source s) {
+		source = s;
 	}
 
-	/** Create a protocol slot property */
-	public ProtocolSlotProp(RFProtocol p) {
+	/** Create an uplink source control property */
+	public UplinkSourceProp(RFProtocol p) {
 		protocol = p;
-		slot = null;
+		source = null;
 	}
 
 	/** Get the command */
@@ -68,8 +66,9 @@ public class ProtocolSlotProp extends E6Property {
 	@Override
 	public byte[] queryData() {
 		byte[] d = new byte[3];
-		format16(d, 0, QUERY);
-		format8(d, 2, protocol.value);
+		format8(d, 0, QUERY);
+		format8(d, 1, protocol.value << 4);
+		format8(d, 2, 0x0D);	// Carriage-return
 		return d;
 	}
 
@@ -78,40 +77,64 @@ public class ProtocolSlotProp extends E6Property {
 	public void parseQuery(byte[] d) throws IOException {
 		if (d.length != 6)
 			throw new ParsingException("DATA LEN: " + d.length);
-		if (parse16(d, 2) != QUERY)
+		if (parse8(d, 2) != QUERY)
 			throw new ParsingException("SUB CMD");
-		if (RFProtocol.fromValue(parse8(d, 4)) != protocol)
+		if (RFProtocol.fromValue(parse8(d, 3) >> 4) != protocol)
 			throw new ParsingException("RF PROTOCOL");
-		slot = parse8(d, 5);
+		if (parse8(d, 4) != 0)
+			throw new ParsingException("ACK");
+		if (parse8(d, 5) != 0x0D)
+			throw new ParsingException("CR");
+		switch (parse8(d, 3) & 0x0F) {
+			case 0:
+				source = Source.uplink;
+				break;
+			case 1:
+				source = Source.downlink;
+				break;
+			default:
+				throw new ParsingException("SOURCE");
+		}
 	}
 
 	/** Get the store packet data */
 	@Override
 	public byte[] storeData() {
-		int sl = (slot != null) ? slot : 0;
-		byte[] d = new byte[4];
-		format16(d, 0, STORE);
-		format8(d, 2, protocol.value);
-		format8(d, 3, sl);
+		byte[] d = new byte[3];
+		format8(d, 0, STORE);
+		format8(d, 1, protSrc());
+		format8(d, 2, 0x0D);	// Carriage-return
 		return d;
+	}
+
+	/** Get encoded protocol / source */
+	private int protSrc() {
+		// protocol is upper 4 bits, source is lower 4
+		int prot = protocol.value << 4;
+		if (Source.downlink == source)
+			return prot | 1;
+		else
+			return prot;
 	}
 
 	/** Parse a received store packet */
 	@Override
 	public void parseStore(byte[] d) throws IOException {
-		// FIXME: is protocol included in response? (doc says no)
-		if (d.length != 4 && d.length != 5)
+		if (d.length != 6)
 			throw new ParsingException("DATA LEN: " + d.length);
-		if (parse16(d, 2) != STORE)
+		if (parse8(d, 2) != STORE)
 			throw new ParsingException("SUB CMD");
-		if (d.length == 5 &&
-		    RFProtocol.fromValue(parse8(d, 4)) != protocol)
-			throw new ParsingException("RF PROTOCOL");
+		if (parse8(d, 3) != protSrc())
+			throw new ParsingException("PROT/SOURCE");
+		if (parse8(d, 4) != 0) // 1 is NAK
+			throw new ParsingException("ACK");
+		if (parse8(d, 5) != 0x0D)
+			throw new ParsingException("CR");
 	}
 
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		return protocol + " slot: " + slot;
+		return protocol + " uplink source control: " + source;
 	}
 }

@@ -48,17 +48,6 @@ public class FrequencyProp extends E6Property {
 	/** Query command code */
 	static private final int QUERY = 0x61;
 
-	/** Source values */
-	public enum Source {
-		downlink, uplink;
-		static public Source fromOrdinal(int o) {
-			for (Source s: values())
-				if (s.ordinal() == o)
-					return s;
-			return null;
-		}
-	};
-
 	/** Source value */
 	private final Source source;
 
