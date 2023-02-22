@@ -20,7 +20,6 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 /**
  * Data detect threshold property.
  * For SeGo, the range is 0 - 20 dB.
- * For ASTMv6, the range is 0 - 15 dB.
  *
  * @author Douglas Lau
  */
@@ -47,9 +46,8 @@ public class DataDetectProp extends E6Property {
 		return value;
 	}
 
-	/** Create a data detect property */
-	public DataDetectProp(RFProtocol p, int v) {
-		protocol = p;
+	/** Set the data detect value (dB) */
+	public void setValue(Integer v) {
 		value = v;
 	}
 

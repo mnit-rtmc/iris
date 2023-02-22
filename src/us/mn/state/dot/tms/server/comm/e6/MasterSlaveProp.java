@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2018  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,11 @@ public class MasterSlaveProp extends E6Property {
 		return mode;
 	}
 
+	/** Set the sync mode */
+	public void setMode(TagReaderSyncMode m) {
+		mode = m;
+	}
+
 	/** Slave select count */
 	private Integer slave;
 
@@ -52,8 +57,7 @@ public class MasterSlaveProp extends E6Property {
 	}
 
 	/** Create a new master/slave property */
-	public MasterSlaveProp(TagReaderSyncMode m, int s) {
-		mode = m;
+	public void setSlaveSelectCount(Integer s) {
 		slave = s;
 	}
 

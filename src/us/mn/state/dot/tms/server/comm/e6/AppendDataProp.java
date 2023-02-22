@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2018  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,14 +53,14 @@ public class AppendDataProp extends E6Property {
 		return value;
 	}
 
-	/** Create a new append data value */
-	public AppendDataProp(Value v) {
+	/** Set append data value */
+	public void setValue(Value v) {
 		value = v;
 	}
 
 	/** Create a new append data value */
 	public AppendDataProp() {
-		this(Value.disabled);
+		value = null;
 	}
 
 	/** Get the command */
@@ -94,6 +94,7 @@ public class AppendDataProp extends E6Property {
 	/** Get the store packet data */
 	@Override
 	public byte[] storeData() {
+		Value val = (value != null) ? value : Value.disabled;
 		byte[] d = new byte[3];
 		format16(d, 0, STORE);
 		format8(d, 2, value.ordinal());

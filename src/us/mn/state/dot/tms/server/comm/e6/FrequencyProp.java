@@ -20,6 +20,8 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 /**
  * RF Frequency property.
  *
+ * Reader must be in stop mode to store this property.
+ *
  * @author Douglas Lau
  */
 public class FrequencyProp extends E6Property {
@@ -70,9 +72,8 @@ public class FrequencyProp extends E6Property {
 		      : null;
 	}
 
-	/** Create a frequency property */
-	public FrequencyProp(Source s, int khz) {
-		source = s;
+	/** Set the frequency (KHz)*/
+	public void setFreqKhz(int khz) {
 		value = value_from_khz(khz);
 	}
 

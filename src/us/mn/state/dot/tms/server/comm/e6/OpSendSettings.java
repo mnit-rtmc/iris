@@ -55,8 +55,8 @@ public class OpSendSettings extends OpE6 {
 			throws IOException
 		{
 			AckTimeoutProp ato = new AckTimeoutProp(
-				AckTimeoutProp.Protocol.udp_ip,
-				getTimeout(mess));
+				AckTimeoutProp.Protocol.udp_ip);
+			ato.setValue(getTimeout(mess));
 			mess.logStore(ato);
 			sendStore(mess, ato);
 			return new QueryTimeDate();
@@ -117,11 +117,11 @@ public class OpSendSettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			BufferingEnabledProp enabled =
+			BufferingEnabledProp buffering =
 				new BufferingEnabledProp();
-			sendQuery(mess, enabled);
-			mess.logQuery(enabled);
-			return enabled.isEnabled()
+			sendQuery(mess, buffering);
+			mess.logQuery(buffering);
+			return buffering.isEnabled()
 			     ? new QueryAppendData()
 			     : new StoreBufferingEnabled();
 		}
@@ -134,10 +134,11 @@ public class OpSendSettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			BufferingEnabledProp enabled =
-				new BufferingEnabledProp(true);
-			mess.logStore(enabled);
-			sendStore(mess, enabled);
+			BufferingEnabledProp buffering =
+				new BufferingEnabledProp();
+			buffering.setEnabled(true);
+			mess.logStore(buffering);
+			sendStore(mess, buffering);
 			return new QueryAppendData();
 		}
 	}
@@ -166,8 +167,8 @@ public class OpSendSettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			AppendDataProp append = new AppendDataProp(
-				AppendDataProp.Value.date_time_stamp);
+			AppendDataProp append = new AppendDataProp();
+			append.setValue(AppendDataProp.Value.date_time_stamp);
 			mess.logStore(append);
 			sendStore(mess, append);
 			return new QueryRFControl();
@@ -198,8 +199,8 @@ public class OpSendSettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			RFControlProp ctrl = new RFControlProp(
-				RFControlProp.Value.continuous);
+			RFControlProp ctrl = new RFControlProp();
+			ctrl.setValue(RFControlProp.Value.continuous);
 			mess.logStore(ctrl);
 			sendStore(mess, ctrl);
 			return checkDownlink();
@@ -246,8 +247,10 @@ public class OpSendSettings extends OpE6 {
 			throws IOException
 		{
 			FrequencyProp freq = new FrequencyProp(
-				FrequencyProp.Source.downlink, downlink_freq);
+				FrequencyProp.Source.downlink);
+			freq.setFreqKhz(downlink_freq);
 			mess.logStore(freq);
+			// NOTE: can only store this in STOP mode
 			sendStore(mess, freq);
 			return checkUplink();
 		}
@@ -293,8 +296,10 @@ public class OpSendSettings extends OpE6 {
 			throws IOException
 		{
 			FrequencyProp freq = new FrequencyProp(
-				FrequencyProp.Source.uplink, uplink_freq);
+				FrequencyProp.Source.uplink);
+			freq.setFreqKhz(uplink_freq);
 			mess.logStore(freq);
+			// NOTE: can only store this in STOP mode
 			sendStore(mess, freq);
 			return nextProtocol(null);
 		}
@@ -387,8 +392,9 @@ public class OpSendSettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			RFAttenProp atten = new RFAttenProp(protocol,
-				atten_down, atten_up);
+			RFAttenProp atten = new RFAttenProp(protocol);
+			atten.setDownlinkDb(atten_down);
+			atten.setUplinkDb(atten_up);
 			mess.logStore(atten);
 			sendStore(mess, atten);
 			return checkDataDetect(protocol);
@@ -428,8 +434,7 @@ public class OpSendSettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			DataDetectProp det = new DataDetectProp(protocol,
-				data_detect);
+			DataDetectProp det = new DataDetectProp(protocol);
 			sendQuery(mess, det);
 			mess.logQuery(det);
 			Integer dd = det.getValue();
@@ -452,8 +457,8 @@ public class OpSendSettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			DataDetectProp det = new DataDetectProp(protocol,
-				data_detect);
+			DataDetectProp det = new DataDetectProp(protocol);
+			det.setValue(data_detect);
 			mess.logStore(det);
 			sendStore(mess, det);
 			return checkSeen(protocol);
@@ -535,8 +540,9 @@ public class OpSendSettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			SeenCountProp seen = new SeenCountProp(protocol,
-				seen_count, unique_count);
+			SeenCountProp seen = new SeenCountProp(protocol);
+			seen.setSeen(seen_count);
+			seen.setUnique(unique_count);
 			mess.logStore(seen);
 			sendStore(mess, seen);
 			return nextProtocol(protocol);
@@ -581,7 +587,8 @@ public class OpSendSettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			LineLossProp loss = new LineLossProp(line_loss);
+			LineLossProp loss = new LineLossProp();
+			loss.setValue(line_loss);
 			mess.logStore(loss);
 			sendStore(mess, loss);
 			return checkSyncMode();
@@ -635,8 +642,9 @@ public class OpSendSettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			MasterSlaveProp mstr = new MasterSlaveProp(sync_mode,
-				slave_select);
+			MasterSlaveProp mstr = new MasterSlaveProp();
+			mstr.setMode(sync_mode);
+			mstr.setSlaveSelectCount(slave_select);
 			mess.logStore(mstr);
 			sendStore(mess, mstr);
 			return lastPhase();
@@ -655,7 +663,8 @@ public class OpSendSettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			ModeProp mode = new ModeProp(ModeProp.Mode.read_write);
+			ModeProp mode = new ModeProp();
+			mode.setMode(ModeProp.Mode.read_write);
 			mess.logStore(mode);
 			sendStore(mess, mode);
 			return null;

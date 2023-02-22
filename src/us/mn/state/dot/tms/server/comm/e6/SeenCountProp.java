@@ -44,6 +44,11 @@ public class SeenCountProp extends E6Property {
 		return seen;
 	}
 
+	/** Set the seen count */
+	public void setSeen(Integer s) {
+		seen = s;
+	}
+
 	/** Unique count frames */
 	private Integer unique;
 
@@ -52,10 +57,8 @@ public class SeenCountProp extends E6Property {
 		return unique;
 	}
 
-	/** Create a seen count property */
-	public SeenCountProp(RFProtocol p, int s, int u) {
-		protocol = p;
-		seen = s;
+	/** Set the unique count */
+	public void setUnique(Integer u) {
 		unique = u;
 	}
 

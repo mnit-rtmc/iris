@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,8 +61,8 @@ public class AntennaChannelProp extends E6Property {
 		return value;
 	}
 
-	/** Create an antenna channel property */
-	public AntennaChannelProp(Value v) {
+	/** Set antenna channel control value */
+	public void setValue(Value v) {
 		value = v;
 	}
 

@@ -41,14 +41,14 @@ public class BufferingModeProp extends E6Property {
 		return enabled;
 	}
 
-	/** Create a new buffering mode property */
-	public BufferingModeProp(boolean e) {
+	/** Set buffering mode */
+	public void setEnabled(boolean e) {
 		enabled = e;
 	}
 
 	/** Create a new buffering mode property */
 	public BufferingModeProp() {
-		this(false);
+		enabled = false;
 	}
 
 	/** Get the command */

@@ -52,8 +52,8 @@ public class RFControlProp extends E6Property {
 		return value;
 	}
 
-	/** Create a new RF control property */
-	public RFControlProp(Value v) {
+	/** Set control value */
+	public void setValue(Value v) {
 		value = v;
 	}
 

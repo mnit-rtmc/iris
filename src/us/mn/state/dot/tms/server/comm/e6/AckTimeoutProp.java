@@ -55,10 +55,9 @@ public class AckTimeoutProp extends E6Property {
 		return value;
 	}
 
-	/** Create a new acknowledge timeout property */
-	public AckTimeoutProp(Protocol p, int t) {
-		protocol = p;
-		value = t;
+	/** Set the data acknowledge timeout (ms) */
+	public void setValue(Integer v) {
+		value = v;
 	}
 
 	/** Create a new acknowledge timeout property */
