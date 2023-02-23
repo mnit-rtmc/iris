@@ -33,23 +33,23 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * - QueryBufferingEnabled -> StoreBufferingEnabled
  * - QueryAppendData -> StoreAppendData
  * - QueryRFControl -> StoreRFControl
- * - CheckDownlink -> StoreDownlink
- * - CheckUplink -> StoreUplink
+ * - CheckDownlinkFreq -> StoreDownlinkFreq
+ * - CheckUplinkFreq -> StoreUplinkFreq
+ * - CheckLineLoss -> StoreLineLoss
+ * - CheckMasterSlave -> StoreMasterSlave
  * - For each protocol:
  *   * CheckAtten -> StoreAtten
  *   * CheckDataDetect -> StoreDataDetect
  *   * CheckSeen -> StoreSeen
- * - CheckLineLoss -> StoreLineLoss
- * - CheckSyncMode -> StoreSyncMode
  * - StoreMode
  *
  * TODO: Future additional phases:
  * - Replace QueryRFControl with CheckRFControl
+ * - CheckMuxMode -> StoreMuxMode
+ * - CheckAntennaChannel -> StoreAntennaChannel
  * - For each protocol:
  *   * CheckUplinkSource -> StoreUplinkSource
  *   * CheckSlot -> StoreSlot
- * - CheckMuxMode -> StoreMuxMode
- * - CheckAntennaChannel -> StoreAntennaChannel
  *
  * @author Douglas Lau
  */
@@ -140,10 +140,9 @@ public class OpSendSettings extends OpE6 {
 			TimeDateProp stamp = new TimeDateProp();
 			sendQuery(mess, stamp);
 			mess.logQuery(stamp);
-			if (stamp.isNear(500))
-				return new QueryMode();
-			else
-				return new StoreTimeDate();
+			return (stamp.isNear(500))
+			      ? new QueryMode()
+			      : new StoreTimeDate();
 		}
 	}
 
@@ -254,7 +253,7 @@ public class OpSendSettings extends OpE6 {
 			mess.logQuery(ctrl);
 			RFControlProp.Value v = ctrl.getValue();
 			return (RFControlProp.Value.continuous == v)
-			     ? checkDownlink()
+			     ? checkDownlinkFreq()
 			     : new StoreRFControl();
 		}
 	}
@@ -270,24 +269,24 @@ public class OpSendSettings extends OpE6 {
 			ctrl.setValue(RFControlProp.Value.continuous);
 			mess.logStore(ctrl);
 			sendStore(mess, ctrl);
-			return checkDownlink();
+			return checkDownlinkFreq();
 		}
 	}
 
 	/** Create phase to check the downlink frequency */
-	private Phase<E6Property> checkDownlink() {
+	private Phase<E6Property> checkDownlinkFreq() {
 		Integer df = tag_reader.getDownlinkFreqKhz();
 		if (df != null) {
 			checkInt("downlink_freq_khz", df);
-			return new CheckDownlink(df);
+			return new CheckDownlinkFreq(df);
 		} else
-			return checkUplink();
+			return checkUplinkFreq();
 	}
 
 	/** Phase to check the downlink frequency */
-	private class CheckDownlink extends Phase<E6Property> {
+	private class CheckDownlinkFreq extends Phase<E6Property> {
 		private final int downlink_freq;
-		private CheckDownlink(int df) {
+		private CheckDownlinkFreq(int df) {
 			downlink_freq = df;
 		}
 
@@ -302,15 +301,15 @@ public class OpSendSettings extends OpE6 {
 			Integer f = freq.getFreqKhz();
 			// NOTE: can only store frequency in STOP mode
 			return (stop && (f == null || f != downlink_freq))
-			      ? new StoreDownlink(downlink_freq)
-			      : checkUplink();
+			      ? new StoreDownlinkFreq(downlink_freq)
+			      : checkUplinkFreq();
 		}
 	}
 
 	/** Phase to store the downlink frequency */
-	private class StoreDownlink extends Phase<E6Property> {
+	private class StoreDownlinkFreq extends Phase<E6Property> {
 		private final int downlink_freq;
-		private StoreDownlink(int df) {
+		private StoreDownlinkFreq(int df) {
 			downlink_freq = df;
 		}
 
@@ -323,24 +322,24 @@ public class OpSendSettings extends OpE6 {
 			freq.setFreqKhz(downlink_freq);
 			mess.logStore(freq);
 			sendStore(mess, freq);
-			return checkUplink();
+			return checkUplinkFreq();
 		}
 	}
 
 	/** Create phase to check the uplink frequency */
-	private Phase<E6Property> checkUplink() {
+	private Phase<E6Property> checkUplinkFreq() {
 		Integer uf = tag_reader.getUplinkFreqKhz();
 		if (uf != null) {
 			checkInt("uplink_freq_khz", uf);
-			return new CheckUplink(uf);
+			return new CheckUplinkFreq(uf);
 		} else
-			return nextProtocol(null);
+			return checkLineLoss();
 	}
 
 	/** Phase to check the uplink frequency */
-	private class CheckUplink extends Phase<E6Property> {
+	private class CheckUplinkFreq extends Phase<E6Property> {
 		private final int uplink_freq;
-		private CheckUplink(int uf) {
+		private CheckUplinkFreq(int uf) {
 			uplink_freq = uf;
 		}
 
@@ -354,15 +353,15 @@ public class OpSendSettings extends OpE6 {
 			Integer f = freq.getFreqKhz();
 			// NOTE: can only store frequency in STOP mode
 			return (stop && (f == null || f != uplink_freq))
-			      ? new StoreUplink(uplink_freq)
-			      : nextProtocol(null);
+			      ? new StoreUplinkFreq(uplink_freq)
+			      : checkLineLoss();
 		}
 	}
 
 	/** Phase to store the uplink frequency */
-	private class StoreUplink extends Phase<E6Property> {
+	private class StoreUplinkFreq extends Phase<E6Property> {
 		private final int uplink_freq;
-		private StoreUplink(int uf) {
+		private StoreUplinkFreq(int uf) {
 			uplink_freq = uf;
 		}
 
@@ -374,6 +373,115 @@ public class OpSendSettings extends OpE6 {
 			freq.setFreqKhz(uplink_freq);
 			mess.logStore(freq);
 			sendStore(mess, freq);
+			return checkLineLoss();
+		}
+	}
+
+	/** Create phase to check the line loss */
+	private Phase<E6Property> checkLineLoss() {
+		Integer ll = tag_reader.getLineLossDb();
+		if (ll != null) {
+			checkInt("line_loss_db", ll);
+			return new CheckLineLoss(ll);
+		} else
+			return checkMasterSlave();
+	}
+
+	/** Phase to check the line loss */
+	private class CheckLineLoss extends Phase<E6Property> {
+		private final int line_loss;
+		private CheckLineLoss(int ll) {
+			line_loss = ll;
+		}
+
+		/** Check the line loss */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			LineLossProp loss = new LineLossProp();
+			sendQuery(mess, loss);
+			mess.logQuery(loss);
+			Integer ll = loss.getValue();
+			return (ll == null || ll != line_loss)
+			      ? new StoreLineLoss(line_loss)
+			      : checkMasterSlave();
+		}
+	}
+
+	/** Phase to store line loss */
+	private class StoreLineLoss extends Phase<E6Property> {
+		private final int line_loss;
+		private StoreLineLoss(int ll) {
+			line_loss = ll;
+		}
+
+		/** Store line loss */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			LineLossProp loss = new LineLossProp();
+			loss.setValue(line_loss);
+			mess.logStore(loss);
+			sendStore(mess, loss);
+			return checkMasterSlave();
+		}
+	}
+
+	/** Create phase to check master / slave settings */
+	private Phase<E6Property> checkMasterSlave() {
+		TagReaderSyncMode sm = tag_reader.getSyncMode();
+		Integer sc = tag_reader.getSlaveSelectCount();
+		if (sm != null && sc != null) {
+			checkStr("sync_mode", sm.toString());
+			checkInt("slave_select_count", sc);
+			return new CheckMasterSlave(sm, sc);
+		} else
+			return nextProtocol(null);
+	}
+
+	/** Phase to check master / slave settings */
+	private class CheckMasterSlave  extends Phase<E6Property> {
+		private final TagReaderSyncMode sync_mode;
+		private final int slave_select;
+		private CheckMasterSlave(TagReaderSyncMode sm, int sc) {
+			sync_mode = sm;
+			slave_select = sc;
+		}
+
+		/** Query master / slave settings */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			MasterSlaveProp mstr = new MasterSlaveProp();
+			sendQuery(mess, mstr);
+			mess.logQuery(mstr);
+			TagReaderSyncMode mode = mstr.getMode();
+			Integer slave = mstr.getSlaveSelectCount();
+			return (mode == null || mode != sync_mode ||
+			        slave == null || slave != slave_select)
+			      ? new StoreMasterSlave(sync_mode, slave_select)
+			      : nextProtocol(null);
+		}
+	}
+
+	/** Phase to store master / slave settings */
+	private class StoreMasterSlave extends Phase<E6Property> {
+		private final TagReaderSyncMode sync_mode;
+		private final int slave_select;
+		private StoreMasterSlave(TagReaderSyncMode sm, int sc) {
+			sync_mode = sm;
+			slave_select = sc;
+		}
+
+		/** Store master / slave settings */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			MasterSlaveProp mstr = new MasterSlaveProp();
+			mstr.setMode(sync_mode);
+			mstr.setSlaveSelectCount(slave_select);
+			mess.logStore(mstr);
+			sendStore(mess, mstr);
 			return nextProtocol(null);
 		}
 	}
@@ -381,7 +489,7 @@ public class OpSendSettings extends OpE6 {
 	/** Get the next protocol phase */
 	private Phase<E6Property> nextProtocol(RFProtocol p_prot) {
 		RFProtocol p = RFProtocol.next(p_prot);
-		return (p != null) ? checkAtten(p) : checkLineLoss();
+		return (p != null) ? checkAtten(p) : lastPhase();
 	}
 
 	/** Get check attenuation phase (or later) */
@@ -627,115 +735,6 @@ public class OpSendSettings extends OpE6 {
 			mess.logStore(seen);
 			sendStore(mess, seen);
 			return nextProtocol(protocol);
-		}
-	}
-
-	/** Create phase to check the line loss */
-	private Phase<E6Property> checkLineLoss() {
-		Integer ll = tag_reader.getLineLossDb();
-		if (ll != null) {
-			checkInt("line_loss_db", ll);
-			return new CheckLineLoss(ll);
-		} else
-			return checkSyncMode();
-	}
-
-	/** Phase to check the line loss */
-	private class CheckLineLoss extends Phase<E6Property> {
-		private final int line_loss;
-		private CheckLineLoss(int ll) {
-			line_loss = ll;
-		}
-
-		/** Check the line loss */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			LineLossProp loss = new LineLossProp();
-			sendQuery(mess, loss);
-			mess.logQuery(loss);
-			Integer ll = loss.getValue();
-			return (ll == null || ll != line_loss)
-			      ? new StoreLineLoss(line_loss)
-			      : checkSyncMode();
-		}
-	}
-
-	/** Phase to store line loss */
-	private class StoreLineLoss extends Phase<E6Property> {
-		private final int line_loss;
-		private StoreLineLoss(int ll) {
-			line_loss = ll;
-		}
-
-		/** Store line loss */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			LineLossProp loss = new LineLossProp();
-			loss.setValue(line_loss);
-			mess.logStore(loss);
-			sendStore(mess, loss);
-			return checkSyncMode();
-		}
-	}
-
-	/** Create phase to check sync mode / slave select count */
-	private Phase<E6Property> checkSyncMode() {
-		TagReaderSyncMode sm = tag_reader.getSyncMode();
-		Integer sc = tag_reader.getSlaveSelectCount();
-		if (sm != null && sc != null) {
-			checkStr("sync_mode", sm.toString());
-			checkInt("slave_select_count", sc);
-			return new CheckSyncMode(sm, sc);
-		} else
-			return lastPhase();
-	}
-
-	/** Phase to check sync mode / slave select count */
-	private class CheckSyncMode extends Phase<E6Property> {
-		private final TagReaderSyncMode sync_mode;
-		private final int slave_select;
-		private CheckSyncMode(TagReaderSyncMode sm, int sc) {
-			sync_mode = sm;
-			slave_select = sc;
-		}
-
-		/** Query sync mode / slave select count */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			MasterSlaveProp mstr = new MasterSlaveProp();
-			sendQuery(mess, mstr);
-			mess.logQuery(mstr);
-			TagReaderSyncMode mode = mstr.getMode();
-			Integer slave = mstr.getSlaveSelectCount();
-			return (mode == null || mode != sync_mode ||
-			        slave == null || slave != slave_select)
-			      ? new StoreSyncMode(sync_mode, slave_select)
-			      : lastPhase();
-		}
-	}
-
-	/** Phase to store sync mode / slave select count */
-	private class StoreSyncMode extends Phase<E6Property> {
-		private final TagReaderSyncMode sync_mode;
-		private final int slave_select;
-		private StoreSyncMode(TagReaderSyncMode sm, int sc) {
-			sync_mode = sm;
-			slave_select = sc;
-		}
-
-		/** Store sync mode / slave select count */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			MasterSlaveProp mstr = new MasterSlaveProp();
-			mstr.setMode(sync_mode);
-			mstr.setSlaveSelectCount(slave_select);
-			mess.logStore(mstr);
-			sendStore(mess, mstr);
-			return lastPhase();
 		}
 	}
 

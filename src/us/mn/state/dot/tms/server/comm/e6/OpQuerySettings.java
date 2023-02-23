@@ -98,12 +98,27 @@ public class OpQuerySettings extends OpE6 {
 			sendQuery(mess, ack_timeout);
 			mess.logQuery(ack_timeout);
 			putSetting("ack_timeout", ack_timeout.getValue());
-			return new QueryDownlink();
+			return new QueryRFControl();
+		}
+	}
+
+	/** Phase to query the RF control setting */
+	private class QueryRFControl extends Phase<E6Property> {
+
+		/** Query the RF control setting */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			RFControlProp rf_control = new RFControlProp();
+			sendQuery(mess, rf_control);
+			mess.logQuery(rf_control);
+			putSetting("rf_control", rf_control.getValue());
+			return new QueryDownlinkFreq();
 		}
 	}
 
 	/** Phase to query the downlink frequency */
-	private class QueryDownlink extends Phase<E6Property> {
+	private class QueryDownlinkFreq extends Phase<E6Property> {
 
 		/** Query the downlink frequency */
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
@@ -116,12 +131,12 @@ public class OpQuerySettings extends OpE6 {
 			Integer fr = freq.getFreqKhz();
 			tag_reader.setDownlinkFreqKhzNotify(fr);
 			putSetting("downlink_freq_khz", fr);
-			return new QueryUplink();
+			return new QueryUplinkFreq();
 		}
 	}
 
 	/** Phase to query the uplink frequency */
-	private class QueryUplink extends Phase<E6Property> {
+	private class QueryUplinkFreq extends Phase<E6Property> {
 
 		/** Query the uplink frequency */
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
@@ -133,6 +148,78 @@ public class OpQuerySettings extends OpE6 {
 			Integer fr = freq.getFreqKhz();
 			tag_reader.setUplinkFreqKhzNotify(fr);
 			putSetting("uplink_freq_khz", fr);
+			return new QueryLineLoss();
+		}
+	}
+
+	/** Phase to query the line loss */
+	private class QueryLineLoss extends Phase<E6Property> {
+
+		/** Query the line loss */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			LineLossProp line_loss = new LineLossProp();
+			sendQuery(mess, line_loss);
+			mess.logQuery(line_loss);
+			Integer ll = line_loss.getValue();
+			tag_reader.setLineLossDbNotify(ll);
+			putSetting("line_loss_db", ll);
+			return new QueryMasterSlave();
+		}
+	}
+
+	/** Phase to query the master/slave setting */
+	private class QueryMasterSlave extends Phase<E6Property> {
+
+		/** Query the master/slave setting */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			MasterSlaveProp master_slave = new MasterSlaveProp();
+			sendQuery(mess, master_slave);
+			mess.logQuery(master_slave);
+			tag_reader.setSyncModeNotify(
+				master_slave.getMode()
+			);
+			putSetting("sync_mode", master_slave.getMode());
+			tag_reader.setSlaveSelectCountNotify(
+				master_slave.getSlaveSelectCount()
+			);
+			putSetting("slave_select_count",
+				master_slave.getSlaveSelectCount());
+			return new QueryMuxMode();
+		}
+	}
+
+	/** Phase to query the mux mode */
+	private class QueryMuxMode extends Phase<E6Property> {
+
+		/** Query the mux mode */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			MuxModeProp mux_mode = new MuxModeProp();
+			sendQuery(mess, mux_mode);
+			mess.logQuery(mux_mode);
+			putSetting("mux_mode", mux_mode.getValue());
+			return new QueryAntennaChannel();
+		}
+	}
+
+	/** Phase to query the manual antenna channel control */
+	private class QueryAntennaChannel extends Phase<E6Property> {
+
+		/** Query the manual antenna channel */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			AntennaChannelProp antenna_channel =
+				new AntennaChannelProp();
+			sendQuery(mess, antenna_channel);
+			mess.logQuery(antenna_channel);
+			putSetting("antenna_channel",
+				antenna_channel.getValue());
 			return nextQueryPhase(null);
 		}
 	}
@@ -142,7 +229,7 @@ public class OpQuerySettings extends OpE6 {
 		RFProtocol p = RFProtocol.next(prot);
 		return (p != null)
 		      ? new QueryAtten(new ProtocolSettings(p))
-		      : new QueryLineLoss();
+		      : null;
 	}
 
 	/** Phase to query the RF attenuation for one protocol */
@@ -175,7 +262,8 @@ public class OpQuerySettings extends OpE6 {
 		}
 	}
 
-	/** Store RF attenuation for one protocol */
+	/** Store RF attenuation for one protocol.
+	 * FIXME: remove this after JSON settings is tested */
 	private void storeRfAtten(TagReaderImpl tr, RFAttenProp atten) {
 		switch (atten.protocol) {
 			case SeGo:
@@ -214,7 +302,8 @@ public class OpQuerySettings extends OpE6 {
 		}
 	}
 
-	/** Store data detect for one protocol */
+	/** Store data detect for one protocol.
+	 * FIXME: remove this after JSON settings is tested */
 	private void storeDataDetect(TagReaderImpl tr, DataDetectProp det) {
 		switch (det.protocol) {
 			case SeGo:
@@ -248,7 +337,8 @@ public class OpQuerySettings extends OpE6 {
 		}
 	}
 
-	/** Store seen/unique for one protocol */
+	/** Store seen/unique for one protocol.
+	 * FIXME: remove this after JSON settings is tested */
 	private void storeSeenUnique(TagReaderImpl tr, SeenCountProp seen) {
 		switch (seen.protocol) {
 			case SeGo:
@@ -303,93 +393,6 @@ public class OpQuerySettings extends OpE6 {
 			putSetting(p_settings.protocol.toString().toLowerCase(),
 				p_settings.settings);
 			return nextQueryPhase(p_settings.protocol);
-		}
-	}
-
-	/** Phase to query the line loss */
-	private class QueryLineLoss extends Phase<E6Property> {
-
-		/** Query the line loss */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			LineLossProp line_loss = new LineLossProp();
-			sendQuery(mess, line_loss);
-			mess.logQuery(line_loss);
-			Integer ll = line_loss.getValue();
-			tag_reader.setLineLossDbNotify(ll);
-			putSetting("line_loss_db", ll);
-			return new QueryMuxMode();
-		}
-	}
-
-	/** Phase to query the mux mode */
-	private class QueryMuxMode extends Phase<E6Property> {
-
-		/** Query the mux mode */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			MuxModeProp mux_mode = new MuxModeProp();
-			sendQuery(mess, mux_mode);
-			mess.logQuery(mux_mode);
-			putSetting("mux_mode", mux_mode.getValue());
-			return new QueryAntennaChannel();
-		}
-	}
-
-	/** Phase to query the manual antenna channel control */
-	private class QueryAntennaChannel extends Phase<E6Property> {
-
-		/** Query the manual antenna channel */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			AntennaChannelProp antenna_channel =
-				new AntennaChannelProp();
-			sendQuery(mess, antenna_channel);
-			mess.logQuery(antenna_channel);
-			putSetting("antenna_channel",
-				antenna_channel.getValue());
-			return new QueryMasterSlave();
-		}
-	}
-
-	/** Phase to query the master/slave setting */
-	private class QueryMasterSlave extends Phase<E6Property> {
-
-		/** Query the master/slave setting */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			MasterSlaveProp master_slave = new MasterSlaveProp();
-			sendQuery(mess, master_slave);
-			mess.logQuery(master_slave);
-			tag_reader.setSyncModeNotify(
-				master_slave.getMode()
-			);
-			putSetting("sync_mode", master_slave.getMode());
-			tag_reader.setSlaveSelectCountNotify(
-				master_slave.getSlaveSelectCount()
-			);
-			putSetting("slave_select_count",
-				master_slave.getSlaveSelectCount());
-			return new QueryRFControl();
-		}
-	}
-
-	/** Phase to query the RF control setting */
-	private class QueryRFControl extends Phase<E6Property> {
-
-		/** Query the RF control setting */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			RFControlProp rf_control = new RFControlProp();
-			sendQuery(mess, rf_control);
-			mess.logQuery(rf_control);
-			putSetting("rf_control", rf_control.getValue());
-			return null;
 		}
 	}
 
