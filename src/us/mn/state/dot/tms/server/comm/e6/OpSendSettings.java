@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.server.comm.e6;
 
 import java.io.IOException;
+import org.json.JSONException;
+import org.json.JSONObject;
 import us.mn.state.dot.tms.TagReaderSyncMode;
 import us.mn.state.dot.tms.server.TagReaderImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -24,9 +26,67 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 /**
  * Operation to send settings to an E6.
  *
+ * Phases:
+ * - StoreAckTimeout
+ * - QueryTimeDate -> StoreTimeDate
+ * - QueryMode
+ * - QueryBufferingEnabled -> StoreBufferingEnabled
+ * - QueryAppendData -> StoreAppendData
+ * - QueryRFControl -> StoreRFControl
+ * - CheckDownlink -> StoreDownlink
+ * - CheckUplink -> StoreUplink
+ * - For each protocol:
+ *   * CheckAtten -> StoreAtten
+ *   * CheckDataDetect -> StoreDataDetect
+ *   * CheckSeen -> StoreSeen
+ * - CheckLineLoss -> StoreLineLoss
+ * - CheckSyncMode -> StoreSyncMode
+ * - StoreMode
+ *
+ * TODO: Future additional phases:
+ * - Replace QueryRFControl with CheckRFControl
+ * - For each protocol:
+ *   * CheckUplinkSource -> StoreUplinkSource
+ *   * CheckSlot -> StoreSlot
+ * - CheckMuxMode -> StoreMuxMode
+ * - CheckAntennaChannel -> StoreAntennaChannel
+ *
  * @author Douglas Lau
  */
 public class OpSendSettings extends OpE6 {
+
+	/** Stored settings from tag reader */
+	private final JSONObject settings;
+
+	/** Check for an String value in JSON settings */
+	private void checkStr(String key, String val) {
+		if (settings.has(key) && val.equals(settings.optString(key)))
+			return;
+		logError("checkStr FAILED: " + key);
+	}
+
+	/** Check for an int value in JSON settings */
+	private void checkInt(String key, int val) {
+		if (settings.has(key)) {
+			int v = settings.optInt(key);
+			if (v == val)
+				return;
+		}
+		logError("checkInt FAILED: " + key);
+	}
+
+	/** Check for an int protocol value in JSON settings */
+	private void checkInt(String key, RFProtocol p, int val) {
+		JSONObject pval = settings.optJSONObject(
+			p.toString().toLowerCase()
+		);
+		if (pval != null) {
+			int v = pval.optInt(key);
+			if (v == val)
+				return;
+		}
+		logError("checkInt FAILED: " + key);
+	}
 
 	/** Flag to indicate stop mode */
 	private boolean stop = false;
@@ -34,6 +94,16 @@ public class OpSendSettings extends OpE6 {
 	/** Create a new "send settings" operation */
 	public OpSendSettings(TagReaderImpl tr) {
 		super(PriorityLevel.SETTINGS, tr);
+		JSONObject js;
+		try {
+			js = new JSONObject(tr.getSettings());
+		}
+		catch (JSONException e) {
+			logError("new: " + e.getMessage() + ", " +
+				tr.getSettings());
+			js = new JSONObject();
+		}
+		settings = js;
 	}
 
 	/** Create the second phase of the operation */
@@ -207,7 +277,11 @@ public class OpSendSettings extends OpE6 {
 	/** Create phase to check the downlink frequency */
 	private Phase<E6Property> checkDownlink() {
 		Integer df = tag_reader.getDownlinkFreqKhz();
-		return (df != null) ? new CheckDownlink(df) : checkUplink();
+		if (df != null) {
+			checkInt("downlink_freq_khz", df);
+			return new CheckDownlink(df);
+		} else
+			return checkUplink();
 	}
 
 	/** Phase to check the downlink frequency */
@@ -256,7 +330,11 @@ public class OpSendSettings extends OpE6 {
 	/** Create phase to check the uplink frequency */
 	private Phase<E6Property> checkUplink() {
 		Integer uf = tag_reader.getUplinkFreqKhz();
-		return (uf != null) ? new CheckUplink(uf) : nextProtocol(null);
+		if (uf != null) {
+			checkInt("uplink_freq_khz", uf);
+			return new CheckUplink(uf);
+		} else
+			return nextProtocol(null);
 	}
 
 	/** Phase to check the uplink frequency */
@@ -310,9 +388,12 @@ public class OpSendSettings extends OpE6 {
 	private Phase<E6Property> checkAtten(RFProtocol p) {
 		Integer ad = getAttenDownlink(p);
 		Integer au = getAttenUplink(p);
-		return (ad != null && au != null)
-		      ? new CheckAtten(p, ad, au)
-		      : checkDataDetect(p);
+		if (ad != null && au != null) {
+			checkInt("rf_atten_downlink_db", p, ad);
+			checkInt("rf_atten_uplink_db", p, au);
+			return new CheckAtten(p, ad, au);
+		} else
+			return checkDataDetect(p);
 	}
 
 	/** Get downlink attenuation for one protocol */
@@ -399,9 +480,11 @@ public class OpSendSettings extends OpE6 {
 	/** Get check data detect phase (or later) */
 	private Phase<E6Property> checkDataDetect(RFProtocol p) {
 		Integer dd = getDataDetect(p);
-		return (dd != null)
-		      ? new CheckDataDetect(p, dd)
-		      : checkSeen(p);
+		if (dd != null) {
+			checkInt("data_detect_db", p, dd);
+			return new CheckDataDetect(p, dd);
+		} else
+			return checkSeen(p);
 	}
 
 	/** Get data detect for one protocol */
@@ -464,9 +547,12 @@ public class OpSendSettings extends OpE6 {
 	private Phase<E6Property> checkSeen(RFProtocol p) {
 		Integer sc = getSeenCount(p);
 		Integer uc = getUniqueCount(p);
-		return (sc != null && uc != null)
-		      ? new CheckSeen(p, sc, uc)
-		      : nextProtocol(p);
+		if (sc != null && uc != null) {
+			checkInt("seen_count", p, sc);
+			checkInt("unique_count", p, uc);
+			return new CheckSeen(p, sc, uc);
+		} else
+			return nextProtocol(p);
 	}
 
 	/** Get seen count for one protocol */
@@ -547,7 +633,11 @@ public class OpSendSettings extends OpE6 {
 	/** Create phase to check the line loss */
 	private Phase<E6Property> checkLineLoss() {
 		Integer ll = tag_reader.getLineLossDb();
-		return (ll != null) ? new CheckLineLoss(ll) : checkSyncMode();
+		if (ll != null) {
+			checkInt("line_loss_db", ll);
+			return new CheckLineLoss(ll);
+		} else
+			return checkSyncMode();
 	}
 
 	/** Phase to check the line loss */
@@ -594,9 +684,12 @@ public class OpSendSettings extends OpE6 {
 	private Phase<E6Property> checkSyncMode() {
 		TagReaderSyncMode sm = tag_reader.getSyncMode();
 		Integer sc = tag_reader.getSlaveSelectCount();
-		return (sm != null && sc != null)
-		      ? new CheckSyncMode(sm, sc)
-		      : lastPhase();
+		if (sm != null && sc != null) {
+			checkStr("sync_mode", sm.toString());
+			checkInt("slave_select_count", sc);
+			return new CheckSyncMode(sm, sc);
+		} else
+			return lastPhase();
 	}
 
 	/** Phase to check sync mode / slave select count */
