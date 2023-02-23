@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.server.comm.e6;
 
 import java.io.IOException;
+import org.json.JSONException;
+import org.json.JSONObject;
 import us.mn.state.dot.tms.server.TagReaderImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerException;
@@ -27,8 +29,36 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpQuerySettings extends OpE6 {
 
-	/** Reader settings */
-	private final ReaderSettings settings = new ReaderSettings();
+	/** Settings for one RF protocol */
+	private class ProtocolSettings {
+		final RFProtocol protocol;
+		final JSONObject settings = new JSONObject();
+		ProtocolSettings(RFProtocol p) {
+			protocol = p;
+		}
+		void put(String key, Object value) {
+			try {
+				settings.put(key, value);
+			}
+			catch (JSONException e) {
+				logError("put: " + e.getMessage() + ", " +
+					key);
+			}
+		}
+	}
+
+	/** Tag reader settings */
+	private final JSONObject settings = new JSONObject();
+
+	/** Put an object into settings */
+	private void putSetting(String key, Object value) {
+		try {
+			settings.put(key, value);
+		}
+		catch (JSONException e) {
+			logError("putSetting: " + e.getMessage() + ", " + key);
+		}
+	}
 
 	/** Create a new "query settings" operation */
 	public OpQuerySettings(TagReaderImpl tr) {
@@ -63,8 +93,11 @@ public class OpQuerySettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			sendQuery(mess, settings.ack_timeout);
-			mess.logQuery(settings.ack_timeout);
+			AckTimeoutProp ack_timeout = new AckTimeoutProp(
+				AckTimeoutProp.Protocol.udp_ip);
+			sendQuery(mess, ack_timeout);
+			mess.logQuery(ack_timeout);
+			putSetting("ack_timeout", ack_timeout.getValue());
 			return new QueryDownlink();
 		}
 	}
@@ -76,11 +109,13 @@ public class OpQuerySettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			sendQuery(mess, settings.downlink_freq);
-			mess.logQuery(settings.downlink_freq);
-			tag_reader.setDownlinkFreqKhzNotify(
-				settings.downlink_freq.getFreqKhz()
-			);
+			FrequencyProp freq = new FrequencyProp(
+				Source.downlink);
+			sendQuery(mess, freq);
+			mess.logQuery(freq);
+			Integer fr = freq.getFreqKhz();
+			tag_reader.setDownlinkFreqKhzNotify(fr);
+			putSetting("downlink_freq_khz", fr);
 			return new QueryUplink();
 		}
 	}
@@ -92,89 +127,146 @@ public class OpQuerySettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			sendQuery(mess, settings.uplink_freq);
-			mess.logQuery(settings.uplink_freq);
-			tag_reader.setUplinkFreqKhzNotify(
-				settings.uplink_freq.getFreqKhz()
-			);
+			FrequencyProp freq = new FrequencyProp(Source.uplink);
+			sendQuery(mess, freq);
+			mess.logQuery(freq);
+			Integer fr = freq.getFreqKhz();
+			tag_reader.setUplinkFreqKhzNotify(fr);
+			putSetting("uplink_freq_khz", fr);
 			return nextQueryPhase(null);
 		}
 	}
 
 	/** Get the next query phase */
-	private Phase<E6Property> nextQueryPhase(RFProtocol p_prot) {
-		RFProtocol p = RFProtocol.next(p_prot);
-		return (p != null) ? new QueryAtten(p) : new QueryLineLoss();
+	private Phase<E6Property> nextQueryPhase(RFProtocol prot) {
+		RFProtocol p = RFProtocol.next(prot);
+		return (p != null)
+		      ? new QueryAtten(new ProtocolSettings(p))
+		      : new QueryLineLoss();
 	}
 
 	/** Phase to query the RF attenuation for one protocol */
 	private class QueryAtten extends Phase<E6Property> {
-		private final RFProtocol protocol;
-		private QueryAtten(RFProtocol p) {
-			protocol = p;
+		private final ProtocolSettings p_settings;
+		private QueryAtten(ProtocolSettings ps) {
+			p_settings = ps;
 		}
 
 		/** Query the RF attenuation */
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			RFAttenProp atten = settings.getRfAtten(protocol);
+			RFAttenProp atten = new RFAttenProp(
+				p_settings.protocol);
 			try {
 				sendQuery(mess, atten);
 			}
 			catch (ControllerException e) {
 				// SUB_COMMAND_ERROR => protocol not supported
-				return nextQueryPhase(protocol);
+				return nextQueryPhase(p_settings.protocol);
 			}
 			mess.logQuery(atten);
-			settings.storeRfAtten(tag_reader, protocol);
-			return new QueryDataDetect(protocol);
+			storeRfAtten(tag_reader, atten);
+			p_settings.put("rf_atten_downlink_db",
+				atten.getDownlinkDb());
+			p_settings.put("rf_atten_uplink_db",
+				atten.getUplinkDb());
+			return new QueryDataDetect(p_settings);
+		}
+	}
+
+	/** Store RF attenuation for one protocol */
+	private void storeRfAtten(TagReaderImpl tr, RFAttenProp atten) {
+		switch (atten.protocol) {
+			case SeGo:
+				tr.setSeGoAttenDownlinkDbNotify(
+					atten.getDownlinkDb());
+				tr.setSeGoAttenUplinkDbNotify(
+					atten.getUplinkDb());
+				break;
+			case IAG:
+				tr.setIAGAttenDownlinkDbNotify(
+					atten.getDownlinkDb());
+				tr.setIAGAttenUplinkDbNotify(
+					atten.getUplinkDb());
+				break;
 		}
 	}
 
 	/** Phase to query the data detect for one protocol */
 	private class QueryDataDetect extends Phase<E6Property> {
-		private final RFProtocol protocol;
-		private QueryDataDetect(RFProtocol p) {
-			protocol = p;
+		private final ProtocolSettings p_settings;
+		private QueryDataDetect(ProtocolSettings ps) {
+			p_settings = ps;
 		}
 
 		/** Query the data detect */
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			DataDetectProp det = settings.getDataDetect(protocol);
+			DataDetectProp det =
+				new DataDetectProp(p_settings.protocol);
 			sendQuery(mess, det);
 			mess.logQuery(det);
-			settings.storeDataDetect(tag_reader, protocol);
-			return new QuerySeen(protocol);
+			storeDataDetect(tag_reader, det);
+			p_settings.put("data_detect_db", det.getValue());
+			return new QuerySeen(p_settings);
+		}
+	}
+
+	/** Store data detect for one protocol */
+	private void storeDataDetect(TagReaderImpl tr, DataDetectProp det) {
+		switch (det.protocol) {
+			case SeGo:
+				tr.setSeGoDataDetectDbNotify(det.getValue());
+				break;
+			case IAG:
+				tr.setIAGDataDetectDbNotify(det.getValue());
+				break;
 		}
 	}
 
 	/** Phase to query the seen count for one protocol */
 	private class QuerySeen extends Phase<E6Property> {
-		private final RFProtocol protocol;
-		private QuerySeen(RFProtocol p) {
-			protocol = p;
+		private final ProtocolSettings p_settings;
+		private QuerySeen(ProtocolSettings ps) {
+			p_settings = ps;
 		}
 
 		/** Query the seen count */
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			SeenCountProp seen = settings.getSeenCount(protocol);
-			sendQuery(mess, seen);
-			mess.logQuery(seen);
-			settings.storeSeenUnique(tag_reader, protocol);
-			return new QueryUplinkSource(protocol);
+			SeenCountProp seen_count =
+				new SeenCountProp(p_settings.protocol);
+			sendQuery(mess, seen_count);
+			mess.logQuery(seen_count);
+			storeSeenUnique(tag_reader, seen_count);
+			p_settings.put("seen_count", seen_count.getSeen());
+			p_settings.put("unique_count", seen_count.getUnique());
+			return new QueryUplinkSource(p_settings);
+		}
+	}
+
+	/** Store seen/unique for one protocol */
+	private void storeSeenUnique(TagReaderImpl tr, SeenCountProp seen) {
+		switch (seen.protocol) {
+			case SeGo:
+				tr.setSeGoSeenCountNotify(seen.getSeen());
+				tr.setSeGoUniqueCountNotify(seen.getUnique());
+				break;
+			case IAG:
+				tr.setIAGSeenCountNotify(seen.getSeen());
+				tr.setIAGUniqueCountNotify(seen.getUnique());
+				break;
 		}
 	}
 
 	/** Phase to query the uplink source control for one protocol */
 	private class QueryUplinkSource extends Phase<E6Property> {
-		private final RFProtocol protocol;
-		private QueryUplinkSource(RFProtocol p) {
-			protocol = p;
+		private final ProtocolSettings p_settings;
+		private QueryUplinkSource(ProtocolSettings ps) {
+			p_settings = ps;
 		}
 
 		/** Query the uplink source */
@@ -182,30 +274,35 @@ public class OpQuerySettings extends OpE6 {
 			throws IOException
 		{
 			UplinkSourceProp src =
-				settings.getUplinkSource(protocol);
+				new UplinkSourceProp(p_settings.protocol);
 			sendQuery(mess, src);
 			mess.logQuery(src);
-			return new QuerySlot(protocol);
+			p_settings.put("uplink_source", src.getValue());
+			return new QuerySlot(p_settings);
 		}
 	}
 
 	/** Phase to query the slot for one protocol */
 	private class QuerySlot extends Phase<E6Property> {
-		private final RFProtocol protocol;
-		private QuerySlot(RFProtocol p) {
-			protocol = p;
+		private final ProtocolSettings p_settings;
+		private QuerySlot(ProtocolSettings ps) {
+			p_settings = ps;
 		}
 
 		/** Query the protocol slot */
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			ProtocolSlotProp slot = settings.getSlot(protocol);
-			if (slot != null) {
+			if (RFProtocol.IAG == p_settings.protocol) {
+				ProtocolSlotProp slot =
+					new ProtocolSlotProp(RFProtocol.IAG);
 				sendQuery(mess, slot);
 				mess.logQuery(slot);
+				p_settings.put("slot", slot.getSlot());
 			}
-			return nextQueryPhase(protocol);
+			putSetting(p_settings.protocol.toString().toLowerCase(),
+				p_settings.settings);
+			return nextQueryPhase(p_settings.protocol);
 		}
 	}
 
@@ -216,11 +313,12 @@ public class OpQuerySettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			sendQuery(mess, settings.line_loss);
-			mess.logQuery(settings.line_loss);
-			tag_reader.setLineLossDbNotify(
-				settings.line_loss.getValue()
-			);
+			LineLossProp line_loss = new LineLossProp();
+			sendQuery(mess, line_loss);
+			mess.logQuery(line_loss);
+			Integer ll = line_loss.getValue();
+			tag_reader.setLineLossDbNotify(ll);
+			putSetting("line_loss_db", ll);
 			return new QueryMuxMode();
 		}
 	}
@@ -232,8 +330,10 @@ public class OpQuerySettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			sendQuery(mess, settings.mux_mode);
-			mess.logQuery(settings.mux_mode);
+			MuxModeProp mux_mode = new MuxModeProp();
+			sendQuery(mess, mux_mode);
+			mess.logQuery(mux_mode);
+			putSetting("mux_mode", mux_mode.getValue());
 			return new QueryAntennaChannel();
 		}
 	}
@@ -245,8 +345,12 @@ public class OpQuerySettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			sendQuery(mess, settings.antenna_channel);
-			mess.logQuery(settings.antenna_channel);
+			AntennaChannelProp antenna_channel =
+				new AntennaChannelProp();
+			sendQuery(mess, antenna_channel);
+			mess.logQuery(antenna_channel);
+			putSetting("antenna_channel",
+				antenna_channel.getValue());
 			return new QueryMasterSlave();
 		}
 	}
@@ -258,14 +362,18 @@ public class OpQuerySettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			sendQuery(mess, settings.master_slave);
-			mess.logQuery(settings.master_slave);
+			MasterSlaveProp master_slave = new MasterSlaveProp();
+			sendQuery(mess, master_slave);
+			mess.logQuery(master_slave);
 			tag_reader.setSyncModeNotify(
-				settings.master_slave.getMode()
+				master_slave.getMode()
 			);
+			putSetting("sync_mode", master_slave.getMode());
 			tag_reader.setSlaveSelectCountNotify(
-				settings.master_slave.getSlaveSelectCount()
+				master_slave.getSlaveSelectCount()
 			);
+			putSetting("slave_select_count",
+				master_slave.getSlaveSelectCount());
 			return new QueryRFControl();
 		}
 	}
@@ -277,8 +385,10 @@ public class OpQuerySettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			sendQuery(mess, settings.rf_control);
-			mess.logQuery(settings.rf_control);
+			RFControlProp rf_control = new RFControlProp();
+			sendQuery(mess, rf_control);
+			mess.logQuery(rf_control);
+			putSetting("rf_control", rf_control.getValue());
 			return null;
 		}
 	}
@@ -287,7 +397,7 @@ public class OpQuerySettings extends OpE6 {
 	@Override
 	public void cleanup() {
 		if (isSuccess())
-			tag_reader.setSettings(settings.toJson());
+			tag_reader.setSettings(settings.toString());
 		super.cleanup();
 	}
 }

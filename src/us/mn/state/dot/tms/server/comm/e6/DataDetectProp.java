@@ -36,7 +36,7 @@ public class DataDetectProp extends E6Property {
 	static private final int QUERY = 0x54;
 
 	/** RF protocol */
-	private final RFProtocol protocol;
+	public final RFProtocol protocol;
 
 	/** Data detect value (0 - 20 dB) */
 	private Integer value;
