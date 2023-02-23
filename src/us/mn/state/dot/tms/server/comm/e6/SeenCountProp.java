@@ -34,7 +34,7 @@ public class SeenCountProp extends E6Property {
 	static private final int QUERY = 0x0067;
 
 	/** RF protocol */
-	private final RFProtocol protocol;
+	public final RFProtocol protocol;
 
 	/** Seen count frames */
 	private Integer seen;

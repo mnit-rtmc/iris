@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2016  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.e6;
 
 import java.io.IOException;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.TagReaderImpl;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -26,6 +27,15 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  */
 abstract public class OpE6 extends OpDevice<E6Property> {
+
+	/** E6 error log */
+	static public final DebugLog E6_ERR = new DebugLog("e6_err");
+
+	/** Log an error msg */
+	protected void logError(String msg) {
+		if (E6_ERR.isOpen())
+			E6_ERR.log(tag_reader.getName() + "! " + msg);
+	}
 
 	/** Tag reader device */
 	protected final TagReaderImpl tag_reader;

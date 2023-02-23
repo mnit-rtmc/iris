@@ -36,7 +36,7 @@ public class RFAttenProp extends E6Property {
 	static private final int QUERY = 0x52;
 
 	/** RF protocol */
-	private final RFProtocol protocol;
+	public final RFProtocol protocol;
 
 	/** Downlink attenuation value (0 - 15 dB) */
 	private Integer downlink;
