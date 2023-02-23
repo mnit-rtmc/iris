@@ -23,9 +23,6 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to send settings to an E6.
- * If the reader is in stop mode, send all settings.
- * Otherwise, check that settings are ok, and if not, put into stop mode and
- * start over.
  *
  * @author Douglas Lau
  */
@@ -229,7 +226,8 @@ public class OpSendSettings extends OpE6 {
 			sendQuery(mess, freq);
 			mess.logQuery(freq);
 			Integer f = freq.getFreqKhz();
-			return (f == null || f != downlink_freq)
+			// NOTE: can only store frequency in STOP mode
+			return (stop && (f == null || f != downlink_freq))
 			      ? new StoreDownlink(downlink_freq)
 			      : checkUplink();
 		}
@@ -250,7 +248,6 @@ public class OpSendSettings extends OpE6 {
 				Source.downlink);
 			freq.setFreqKhz(downlink_freq);
 			mess.logStore(freq);
-			// NOTE: can only store this in STOP mode
 			sendStore(mess, freq);
 			return checkUplink();
 		}
@@ -277,7 +274,8 @@ public class OpSendSettings extends OpE6 {
 			sendQuery(mess, freq);
 			mess.logQuery(freq);
 			Integer f = freq.getFreqKhz();
-			return (f == null || f != uplink_freq)
+			// NOTE: can only store frequency in STOP mode
+			return (stop && (f == null || f != uplink_freq))
 			      ? new StoreUplink(uplink_freq)
 			      : nextProtocol(null);
 		}
@@ -297,7 +295,6 @@ public class OpSendSettings extends OpE6 {
 			FrequencyProp freq = new FrequencyProp(Source.uplink);
 			freq.setFreqKhz(uplink_freq);
 			mess.logStore(freq);
-			// NOTE: can only store this in STOP mode
 			sendStore(mess, freq);
 			return nextProtocol(null);
 		}
