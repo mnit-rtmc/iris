@@ -613,7 +613,9 @@ public class AlertData {
 	private String createHashtags(ActionPlanImpl plan, String suffix,
 		Set<DMS> signs) throws SonarException
 	{
-		String[] parts = plan.getName().split("_", 2);
+		// Plan names are "ALERT_" + event + "_" + num,
+		// ex. ALERT_WSW_37 or ALERT_BZW_15
+		String[] parts = plan.getName().split("_", 3);
 		String num = parts[parts.length - 1];
 		String ht = "#Alert" +
 			event.name().substring(0, 1).toUpperCase() +
