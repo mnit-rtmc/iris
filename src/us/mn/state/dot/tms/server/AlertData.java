@@ -59,7 +59,6 @@ import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.utils.MultiString;
-import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * Alert Data processed from JSON info section.
@@ -494,7 +493,8 @@ public class AlertData {
 			log("no messages for " + cfg.getName());
 			return null;
 		}
-		removeNoConfigSigns(plan_dms, msgs);
+		// only keep signs with sign configs defined by alert messages
+		plan_dms.retainAll(lookupSigns(msgs));
 		if (plan_dms.isEmpty()) {
 			log("no signs for " + cfg.getName());
 			return null;
@@ -512,31 +512,61 @@ public class AlertData {
 		plan.notifyCreate();
 		createTimeActions(cfg, plan);
 		int num = 1;
-		for (AlertMessage msg: msgs) {
-			String ht = createActiveHashtag(plan, msg, "a" + num,
-				plan_dms);
-			if (ht != null) {
-				createDmsActions(plan, msg, ht);
-				num++;
-			}
+		for (Map.Entry<MsgPattern, TreeSet<AlertMessage>> ent:
+		     patMsgs(msgs))
+		{
+			MsgPattern pat = ent.getKey();
+			Set<AlertMessage> p_msgs = ent.getValue();
+			Set<DMS> signs = lookupSigns(p_msgs);
+			signs.retainAll(plan_dms);
+			if (signs.isEmpty())
+				continue;
+			signs.retainAll(auto_dms);
+			String ht = createHashtags(plan, "a" + num, signs);
+			for (AlertMessage msg: p_msgs)
+				createDmsAction(plan, msg, ht);
+			num++;
 		}
 		return plan;
 	}
 
-	/** Remove DMS without AlertMessage sign configurations */
-	private void removeNoConfigSigns(Set<DMS> signs,
-		Set<AlertMessage> msgs)
-	{
+	/** Lookup signs for a set of alert messages */
+	private Set<DMS> lookupSigns(Set<AlertMessage> msgs) {
+		// first, find all sign configurations
 		TreeSet<SignConfig> cfgs = new TreeSet<SignConfig>();
 		for (AlertMessage msg: msgs)
 			cfgs.add(msg.getSignConfig());
-		Iterator<DMS> it = signs.iterator();
+		// then, look up the signs with those configs
+		TreeSet<DMS> signs = new TreeSet<DMS>();
+		Iterator<DMS> it = DMSHelper.iterator();
 		while (it.hasNext()) {
 			DMS dms = it.next();
-			SignConfig sc = dms.getSignConfig();
-			if (sc == null || !cfgs.contains(sc))
-				it.remove();
+			if (cfgs.contains(dms.getSignConfig()))
+				signs.add(dms);
 		}
+		return signs;
+	}
+
+	/** Lookup alert messages for each message pattern */
+	private Set<Map.Entry<MsgPattern, TreeSet<AlertMessage>>> patMsgs(
+		Set<AlertMessage> msgs)
+	{
+		TreeMap<MsgPattern, TreeSet<AlertMessage>> pat_msgs =
+			new TreeMap<MsgPattern, TreeSet<AlertMessage>>();
+		for (AlertMessage msg: msgs) {
+			MsgPattern pat = msg.getMsgPattern();
+			SignConfig sc = msg.getSignConfig();
+			if (pat != null && sc != null) {
+				if (!pat_msgs.containsKey(pat)) {
+					pat_msgs.put(
+						pat,
+						new TreeSet<AlertMessage>()
+					);
+				}
+				pat_msgs.get(pat).add(msg);
+			}
+		}
+		return pat_msgs.entrySet();
 	}
 
 	/** Lookup the current plan phase name */
@@ -587,28 +617,6 @@ public class AlertData {
 		ta.notifyCreate();
 	}
 
-	/** Create "active" DMS hashtag */
-	private String createActiveHashtag(ActionPlanImpl plan,
-		AlertMessage msg, String suffix, Set<DMS> plan_dms)
-		throws SonarException
-	{
-		SignConfig sc = msg.getSignConfig();
-		TreeSet<DMS> signs = new TreeSet<DMS>(
-			new NumericAlphaComparator<DMS>());
-		Iterator<DMS> it = DMSHelper.iterator();
-		while (it.hasNext()) {
-			DMS dms = it.next();
-			if (dms.getSignConfig() == sc &&
-			    plan_dms.contains(dms))
-				signs.add(dms);
-		}
-		if (!signs.isEmpty()) {
-			signs.retainAll(auto_dms);
-			return createHashtags(plan, suffix, signs);
-		} else
-			return null;
-	}
-
 	/** Create hashtags for a set of DMS in an action plan */
 	private String createHashtags(ActionPlanImpl plan, String suffix,
 		Set<DMS> signs) throws SonarException
@@ -629,8 +637,8 @@ public class AlertData {
 		return ht;
 	}
 
-	/** Create DMS actions for an alert message */
-	private void createDmsActions(ActionPlanImpl plan, AlertMessage msg,
+	/** Create DMS action for an alert message */
+	private void createDmsAction(ActionPlanImpl plan, AlertMessage msg,
 		String ht) throws SonarException
 	{
 		AlertPeriod ap = AlertPeriod.fromOrdinal(msg.getAlertPeriod());

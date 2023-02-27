@@ -32,8 +32,9 @@ import us.mn.state.dot.tms.utils.UniqueNameCreator;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern {
-
+public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
+	Comparable<MsgPatternImpl>
+{
 	/** Create a unique MsgPattern record name */
 	static public String createUniqueName(String template) {
 		UniqueNameCreator unc = new UniqueNameCreator(template, 20,
@@ -75,6 +76,12 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern {
 	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
+	}
+
+	/** Compare to another message pattern */
+	@Override
+	public int compareTo(MsgPatternImpl o) {
+		return name.compareTo(o.name);
 	}
 
 	/** Create a new message (by SONAR clients) */

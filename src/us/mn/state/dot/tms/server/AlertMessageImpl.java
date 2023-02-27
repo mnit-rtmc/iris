@@ -31,8 +31,9 @@ import us.mn.state.dot.tms.TMSException;
  *
  * @author Douglas Lau
  */
-public class AlertMessageImpl extends BaseObjectImpl implements AlertMessage {
-
+public class AlertMessageImpl extends BaseObjectImpl implements AlertMessage,
+	Comparable<AlertMessageImpl>
+{
 	/** Load all the alert messages */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, AlertMessageImpl.class);
@@ -68,6 +69,12 @@ public class AlertMessageImpl extends BaseObjectImpl implements AlertMessage {
 	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
+	}
+
+	/** Compare to another alert message */
+	@Override
+	public int compareTo(AlertMessageImpl o) {
+		return name.compareTo(o.name);
 	}
 
 	/** Create a new alert message */
