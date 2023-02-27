@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.e6;
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import us.mn.state.dot.tms.TagReaderSyncMode;
 import us.mn.state.dot.tms.server.TagReaderImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerException;
@@ -179,10 +180,12 @@ public class OpQuerySettings extends OpE6 {
 			MasterSlaveProp master_slave = new MasterSlaveProp();
 			sendQuery(mess, master_slave);
 			mess.logQuery(master_slave);
-			tag_reader.setSyncModeNotify(
-				master_slave.getMode()
-			);
-			putSetting("sync_mode", master_slave.getMode());
+			TagReaderSyncMode md = master_slave.getMode();
+			tag_reader.setSyncModeNotify(md);
+			if (md != null) {
+				putSetting("sync_mode",
+					md.toString().toLowerCase());
+			}
 			tag_reader.setSlaveSelectCountNotify(
 				master_slave.getSlaveSelectCount()
 			);

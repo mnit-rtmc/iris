@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -167,7 +167,7 @@ SELECT name, enabled FROM iris.role WHERE name = $1";
 
 /// SQL query for one tag reader
 pub const TAG_READER: &str = "\
-SELECT t.name, location, geo_loc, controller, pin, notes, toll_zone \
+SELECT t.name, location, geo_loc, controller, pin, notes, toll_zone, settings \
 FROM iris.tag_reader t \
 LEFT JOIN geo_loc_view gl ON t.geo_loc = gl.name \
 WHERE t.name = $1";

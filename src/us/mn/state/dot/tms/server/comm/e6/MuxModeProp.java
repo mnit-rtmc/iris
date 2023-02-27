@@ -37,10 +37,10 @@ public class MuxModeProp extends E6Property {
 	static public enum Value {
 		no_multiplexing (0x00),
 		channel_0       (0x01),
-		channel_0_1     (0x03),
-		channel_2_3     (0x0C),
-		channel_0_1_2   (0x07),
-		channel_0_1_2_3 (0x0F);
+		channel_01      (0x03),
+		channel_23      (0x0C),
+		channel_012     (0x07),
+		channel_0123    (0x0F);
 		private Value(int b) {
 			bits = b;
 		}

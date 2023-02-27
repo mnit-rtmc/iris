@@ -267,11 +267,11 @@ Since `geo_loc` resources can only be created and deleted with an associated
 
 ### `tag_reader`
 
-| Access       | Minimal        | Full       |
-|--------------|----------------|------------|
-| Read Only    | name, location | geo\_loc   |
-| 💡 Plan      | notes          | toll\_zone |
-| 🔧 Configure | controller     | pin        |
+| Access       | Minimal        | Full               |
+|--------------|----------------|--------------------|
+| Read Only    | name, location | geo\_loc, settings |
+| 💡 Plan      | notes          | toll\_zone         |
+| 🔧 Configure | controller     | pin                |
 
 ### `user`
 
