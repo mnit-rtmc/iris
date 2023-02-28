@@ -355,7 +355,7 @@ public class DmsActionMsg {
 		FeedMsg msg = FeedBucket.getMessage(fid, dms.getName());
 		return (msg != null)
 		      ? getFeedMsg(msg)
-		      : fail("Invalid feed ID");
+		      : fail("No message for sign");
 	}
 
 	/** Get the feed message string */
