@@ -94,14 +94,15 @@ public class OpSendSettings extends OpE6 {
 	/** Create a new "send settings" operation */
 	public OpSendSettings(TagReaderImpl tr) {
 		super(PriorityLevel.SETTINGS, tr);
-		JSONObject js;
+		JSONObject js = new JSONObject();
 		try {
-			js = new JSONObject(tr.getSettings());
+			String st = tr.getSettings();
+			if (st != null)
+				js = new JSONObject(st);
 		}
 		catch (JSONException e) {
 			logError("new: " + e.getMessage() + ", " +
 				tr.getSettings());
-			js = new JSONObject();
 		}
 		settings = js;
 	}
@@ -432,7 +433,7 @@ public class OpSendSettings extends OpE6 {
 		TagReaderSyncMode sm = tag_reader.getSyncMode();
 		Integer sc = tag_reader.getSlaveSelectCount();
 		if (sm != null && sc != null) {
-			checkStr("sync_mode", sm.toString());
+			checkStr("sync_mode", sm.toString().toLowerCase());
 			checkInt("slave_select_count", sc);
 			return new CheckMasterSlave(sm, sc);
 		} else
