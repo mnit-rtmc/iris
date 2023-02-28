@@ -3,6 +3,8 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
+SELECT iris.update_version('5.40.0', '5.41.0');
+
 -- Delete any old ASTMv6 events (just in case)
 DELETE FROM event.tag_read_event WHERE tag_type = 3;
 

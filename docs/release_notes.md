@@ -1,5 +1,13 @@
 # IRIS 5.x Release Notes
 
+5.41.0 (28 Feb 2023)
+ - Add support for 6C coalition tolling tags
+ - Add tag reader `settings` JSON column
+ - Query additional tag reader settings
+ - Fixed invaliid #tag for active CAP alerts
+ - Improved DMS action scheduling
+ - Fixed obscure NTCIP parsing errors
+
 5.40.0 (14 Feb 2023)
  - Renamed `beacon_enabled` to `flash_beacon` (DB)
  - Add `flash_beacon` to MsgPattern (remove from DmsAction)
