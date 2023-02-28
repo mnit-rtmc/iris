@@ -534,14 +534,18 @@ public class AlertData {
 	private Set<DMS> lookupSigns(Set<AlertMessage> msgs) {
 		// first, find all sign configurations
 		TreeSet<SignConfig> cfgs = new TreeSet<SignConfig>();
-		for (AlertMessage msg: msgs)
-			cfgs.add(msg.getSignConfig());
+		for (AlertMessage msg: msgs) {
+			SignConfig sc = msg.getSignConfig();
+			if (sc != null)
+				cfgs.add(sc);
+		}
 		// then, look up the signs with those configs
 		TreeSet<DMS> signs = new TreeSet<DMS>();
 		Iterator<DMS> it = DMSHelper.iterator();
 		while (it.hasNext()) {
 			DMS dms = it.next();
-			if (cfgs.contains(dms.getSignConfig()))
+			SignConfig sc = dms.getSignConfig();
+			if (sc != null && cfgs.contains(sc))
 				signs.add(dms);
 		}
 		return signs;
