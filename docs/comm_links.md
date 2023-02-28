@@ -234,8 +234,8 @@ _DMS action_ must be a `feed` [action tag].  For example, if the `msgfeed`
 _Comm Link_ name is `XYZ`, then the pattern must be `[feedXYZ]`.
 
 `multi`: Message to deploy, using the [MULTI] markup language.  Each line of
-the message must be defined in the sign's message library.  This check allows
-only "administrator-approved" messages, but it can be disabled by changing the
+the message must exist in the pattern's library.  This check allows only
+"administrator-approved" messages, but it can be disabled by changing the
 `msg_feed_verify` [system attribute] to `false`.  **WARNING**: only disable
 this check if the message feed host is fully trusted, and there is no
 possibility of man-in-the-middle attacks.
