@@ -4,7 +4,7 @@
  - Add support for 6C coalition tolling tags
  - Add tag reader `settings` JSON column
  - Query additional tag reader settings
- - Fixed invaliid #tag for active CAP alerts
+ - Fixed invalid #tag for active CAP alerts
  - Improved DMS action scheduling
  - Fixed obscure NTCIP parsing errors
 
