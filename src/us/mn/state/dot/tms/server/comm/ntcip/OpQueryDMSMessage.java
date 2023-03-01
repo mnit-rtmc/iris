@@ -38,8 +38,11 @@ import us.mn.state.dot.tms.utils.MultiString;
 public class OpQueryDMSMessage extends OpDMS {
 
 	/** MULTI string for current buffer */
-	private final ASN1String ms = new ASN1String(dmsMessageMultiString
-		.node, DmsMessageMemoryType.currentBuffer.ordinal(), 1);
+	private final ASN1String multi_string = new ASN1String(
+		dmsMessageMultiString.node,
+		DmsMessageMemoryType.currentBuffer.ordinal(),
+		1
+	);
 
 	/** Beacon setting for current buffer */
 	private final ASN1Integer beacon = dmsMessageBeacon.makeInt(
@@ -144,7 +147,7 @@ public class OpQueryDMSMessage extends OpDMS {
 			return null;
 		} else {
 			String multi = lookupMulti(sm);
-			if (multi.equals(ms.getValue())) {
+			if (multi.equals(multi_string.getValue())) {
 				System.err.println("processMessageValid: " +
 					dms + ", CRC mismatch for (" + multi +
 					")");
@@ -157,9 +160,9 @@ public class OpQueryDMSMessage extends OpDMS {
 	 * @param gids Include graphic version IDs in MULTI string. */
 	private boolean checkMsgCrc(SignMessage sm, boolean gids) {
 		String ms = lookupMulti(sm);
-		String multi = (gids) ? parseMulti(ms) : ms;
-		int crc = DmsMessageCRC.calculate(multi, getFlashBeacon(sm),
-			false);
+		boolean fb = getFlashBeacon(sm);
+		ms = (gids) ? addGraphicIds(ms) : ms;
+		int crc = DmsMessageCRC.calculate(ms, fb, false);
 		return source.getCrc() == crc;
 	}
 
@@ -169,7 +172,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		/** Query the current message */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(ms);
+			mess.add(multi_string);
 			if (supportsBeaconActivation())
 				mess.add(beacon);
 			else
@@ -178,7 +181,7 @@ public class OpQueryDMSMessage extends OpDMS {
 			mess.add(status);
 			mess.add(time);
 			mess.queryProps();
-			logQuery(ms);
+			logQuery(multi_string);
 			if (supportsBeaconActivation())
 				logQuery(beacon);
 			logQuery(prior);
@@ -192,12 +195,12 @@ public class OpQueryDMSMessage extends OpDMS {
 	/** Set the current message on the sign */
 	private void setMsgCurrent() {
 		if (status.getEnum() == DmsMessageStatus.valid) {
-			boolean be = (beacon.getInteger() == 1);
+			boolean fb = (beacon.getInteger() == 1);
 			DmsMsgPriority rp = getMsgPriority();
 			int src = rp.getSource();
 			Integer duration = parseDuration(time.getInteger());
-			SignMessage sm = dms.createMsg(ms.getValue(), be, rp,
-				src, "OTHER SYSTEM", duration);
+			SignMessage sm = dms.createMsg(multi_string.getValue(),
+				fb, rp, src, "OTHER SYSTEM", duration);
 			setMsgCurrent(sm, "OTHER SYSTEM");
 		} else
 			setErrorStatus("INVALID STATUS: " + status);
@@ -211,7 +214,8 @@ public class OpQueryDMSMessage extends OpDMS {
 			return DmsMsgPriority.OTHER_SYSTEM;
 		if (DmsMsgPriority.BLANK == rp) {
 			/* If MULTI is not blank, some other system sent it */
-			MultiString multi = new MultiString(ms.getValue());
+			MultiString multi = new MultiString(
+				multi_string.getValue());
 			if (!multi.isBlank())
 				return DmsMsgPriority.OTHER_SYSTEM;
 		}
