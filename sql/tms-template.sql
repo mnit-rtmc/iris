@@ -4800,54 +4800,26 @@ GRANT SELECT ON meter_event_view TO PUBLIC;
 -- Toll Zones, Tag Readers
 --
 CREATE TABLE iris.toll_zone (
-	name VARCHAR(20) PRIMARY KEY,
-	start_id VARCHAR(10) REFERENCES iris.r_node(station_id),
-	end_id VARCHAR(10) REFERENCES iris.r_node(station_id),
-	tollway VARCHAR(16),
-	alpha REAL,
-	beta REAL,
-	max_price REAL
+    name VARCHAR(20) PRIMARY KEY,
+    start_id VARCHAR(10) REFERENCES iris.r_node(station_id),
+    end_id VARCHAR(10) REFERENCES iris.r_node(station_id),
+    tollway VARCHAR(16),
+    alpha REAL,
+    beta REAL,
+    max_price REAL
 );
 
 CREATE VIEW toll_zone_view AS
-	SELECT name, start_id, end_id, tollway, alpha, beta, max_price
-	FROM iris.toll_zone;
+    SELECT name, start_id, end_id, tollway, alpha, beta, max_price
+    FROM iris.toll_zone;
 GRANT SELECT ON toll_zone_view TO PUBLIC;
-
--- FIXME: remove after settings JSON finished
-CREATE TABLE iris.tag_reader_sync_mode (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
-);
-
-COPY iris.tag_reader_sync_mode (id, description) FROM stdin;
-0	slave
-1	master
-2	GPS secondary
-3	GPS primary
-\.
 
 CREATE TABLE iris._tag_reader (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
     notes VARCHAR(64) NOT NULL,
     toll_zone VARCHAR(20) REFERENCES iris.toll_zone(name),
-    settings JSONB,
-	downlink_freq_khz INTEGER,
-	uplink_freq_khz INTEGER,
-	sego_atten_downlink_db INTEGER,
-	sego_atten_uplink_db INTEGER,
-	sego_data_detect_db INTEGER,
-	sego_seen_count INTEGER,
-	sego_unique_count INTEGER,
-	iag_atten_downlink_db INTEGER,
-	iag_atten_uplink_db INTEGER,
-	iag_data_detect_db INTEGER,
-	iag_seen_count INTEGER,
-	iag_unique_count INTEGER,
-	line_loss_db INTEGER,
-	sync_mode INTEGER REFERENCES iris.tag_reader_sync_mode,
-	slave_select_count INTEGER
+    settings JSONB
 );
 
 ALTER TABLE iris._tag_reader ADD CONSTRAINT _tag_reader_fkey
@@ -4874,12 +4846,7 @@ CREATE TRIGGER tag_reader_table_notify_trig
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.tag_reader AS
-    SELECT t.name, geo_loc, controller, pin, notes, toll_zone, settings,
-           downlink_freq_khz, uplink_freq_khz, sego_atten_downlink_db,
-           sego_atten_uplink_db, sego_data_detect_db, sego_seen_count,
-           sego_unique_count, iag_atten_downlink_db, iag_atten_uplink_db,
-           iag_data_detect_db, iag_seen_count, iag_unique_count, line_loss_db,
-           sync_mode, slave_select_count
+    SELECT t.name, geo_loc, controller, pin, notes, toll_zone, settings
     FROM iris._tag_reader t JOIN iris.controller_io cio ON t.name = cio.name;
 
 CREATE FUNCTION iris.tag_reader_insert() RETURNS TRIGGER AS
@@ -4888,21 +4855,9 @@ BEGIN
     INSERT INTO iris.controller_io (name, resource_n, controller, pin)
          VALUES (NEW.name, 'tag_reader', NEW.controller, NEW.pin);
     INSERT INTO iris._tag_reader (
-        name, geo_loc, notes, toll_zone, settings,
-        downlink_freq_khz, uplink_freq_khz,
-        sego_atten_downlink_db, sego_atten_uplink_db, sego_data_detect_db,
-        sego_seen_count, sego_unique_count, iag_atten_downlink_db,
-        iag_atten_uplink_db, iag_data_detect_db, iag_seen_count,
-        iag_unique_count, line_loss_db, sync_mode, slave_select_count
+        name, geo_loc, notes, toll_zone, settings
     ) VALUES (
-        NEW.name, NEW.geo_loc, NEW.notes, NEW.toll_zone, NEW.settings,
-        NEW.downlink_freq_khz,
-        NEW.uplink_freq_khz, NEW.sego_atten_downlink_db,
-        NEW.sego_atten_uplink_db, NEW.sego_data_detect_db, NEW.sego_seen_count,
-        NEW.sego_unique_count, NEW.iag_atten_downlink_db,
-        NEW.iag_atten_uplink_db, NEW.iag_data_detect_db, NEW.iag_seen_count,
-        NEW.iag_unique_count, NEW.line_loss_db, NEW.sync_mode,
-        NEW.slave_select_count
+        NEW.name, NEW.geo_loc, NEW.notes, NEW.toll_zone, NEW.settings
     );
     RETURN NEW;
 END;
@@ -4923,22 +4878,7 @@ BEGIN
        SET geo_loc = NEW.geo_loc,
            notes = NEW.notes,
            toll_zone = NEW.toll_zone,
-           settings = NEW.settings,
-           downlink_freq_khz = NEW.downlink_freq_khz,
-           uplink_freq_khz = NEW.uplink_freq_khz,
-           sego_atten_downlink_db = NEW.sego_atten_downlink_db,
-           sego_atten_uplink_db = NEW.sego_atten_uplink_db,
-           sego_data_detect_db = NEW.sego_data_detect_db,
-           sego_seen_count = NEW.sego_seen_count,
-           sego_unique_count = NEW.sego_unique_count,
-           iag_atten_downlink_db = NEW.iag_atten_downlink_db,
-           iag_atten_uplink_db = NEW.iag_atten_uplink_db,
-           iag_data_detect_db = NEW.iag_data_detect_db,
-           iag_seen_count = NEW.iag_seen_count,
-           iag_unique_count = NEW.iag_unique_count,
-           line_loss_db = NEW.line_loss_db,
-           sync_mode = NEW.sync_mode,
-           slave_select_count = NEW.slave_select_count
+           settings = NEW.settings
      WHERE name = OLD.name;
     RETURN NEW;
 END;
@@ -4954,15 +4894,9 @@ CREATE TRIGGER tag_reader_delete_trig
 
 CREATE VIEW tag_reader_view AS
     SELECT t.name, t.geo_loc, location, controller, pin, notes, toll_zone,
-           settings,
-           downlink_freq_khz, uplink_freq_khz, sego_atten_downlink_db,
-           sego_atten_uplink_db, sego_data_detect_db, sego_seen_count,
-           sego_unique_count, iag_atten_downlink_db, iag_atten_uplink_db,
-           iag_data_detect_db, iag_seen_count, iag_unique_count, line_loss_db,
-           m.description AS sync_mode, slave_select_count
+           settings
     FROM iris.tag_reader t
-    LEFT JOIN geo_loc_view l ON t.geo_loc = l.name
-    LEFT JOIN iris.tag_reader_sync_mode m ON t.sync_mode = m.id;
+    LEFT JOIN geo_loc_view l ON t.geo_loc = l.name;
 GRANT SELECT ON tag_reader_view TO PUBLIC;
 
 CREATE TABLE iris.tag_reader_dms (
@@ -5021,12 +4955,12 @@ GRANT SELECT ON tag_read_event_view TO PUBLIC;
 -- Allow trip_id column to be updated by roles which have been granted
 -- update permission on tag_read_event_view
 CREATE FUNCTION event.tag_read_event_view_update() RETURNS TRIGGER AS
-	$tag_read_event_view_update$
+    $tag_read_event_view_update$
 BEGIN
-	UPDATE event.tag_read_event
-	   SET trip_id = NEW.trip_id
-	 WHERE event_id = OLD.event_id;
-	RETURN NEW;
+    UPDATE event.tag_read_event
+       SET trip_id = NEW.trip_id
+     WHERE event_id = OLD.event_id;
+    RETURN NEW;
 END;
 $tag_read_event_view_update$ LANGUAGE plpgsql;
 

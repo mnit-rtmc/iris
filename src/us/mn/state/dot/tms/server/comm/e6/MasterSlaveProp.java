@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.e6;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.TagReaderSyncMode;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -36,16 +35,16 @@ public class MasterSlaveProp extends E6Property {
 	static private final int QUERY = 0x0046;
 
 	/** Synchronization mode */
-	private TagReaderSyncMode mode;
+	private SyncMode mode;
 
 	/** Get the sync mode */
-	public TagReaderSyncMode getMode() {
+	public SyncMode getMode() {
 		return mode;
 	}
 
 	/** Set the sync mode */
-	public void setMode(TagReaderSyncMode m) {
-		mode = m;
+	public void setMode(SyncMode sm) {
+		mode = sm;
 	}
 
 	/** Slave select count */
@@ -88,9 +87,9 @@ public class MasterSlaveProp extends E6Property {
 			throw new ParsingException("DATA LEN: " + d.length);
 		if (parse16(d, 2) != QUERY)
 			throw new ParsingException("SUB CMD");
-		TagReaderSyncMode m = TagReaderSyncMode.fromBits(d[4]);
-		if (m != null)
-			mode = m;
+		SyncMode sm = SyncMode.fromBits(d[4]);
+		if (sm != null)
+			mode = sm;
 		else
 			throw new ParsingException("INVALID SYNC MODE");
 		slave = (int) d[5];
@@ -99,13 +98,12 @@ public class MasterSlaveProp extends E6Property {
 	/** Get the store packet data */
 	@Override
 	public byte[] storeData() {
-		TagReaderSyncMode m =
-			(mode != null) ? mode : TagReaderSyncMode.SLAVE;
-		int s = (slave != null) ? slave : 0;
+		SyncMode sm = (mode != null) ? mode : SyncMode.slave;
+		int sl = (slave != null) ? slave : 0;
 		byte[] d = new byte[4];
 		format16(d, 0, STORE);
-		format8(d, 2, 1 << m.ordinal());
-		format8(d, 3, s);
+		format8(d, 2, 1 << sm.ordinal());
+		format8(d, 3, sl);
 		return d;
 	}
 
