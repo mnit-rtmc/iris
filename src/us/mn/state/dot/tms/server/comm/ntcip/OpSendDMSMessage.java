@@ -322,9 +322,11 @@ public class OpSendDMSMessage extends OpDMS {
 				setErrorStatus(status.toString());
 				return null;
 			}
-			ASN1String ms = new ASN1String(dmsMessageMultiString
-				.node,DmsMessageMemoryType.changeable.ordinal(),
-				msg_num);
+			ASN1String multi_string = new ASN1String(
+				dmsMessageMultiString.node,
+				DmsMessageMemoryType.changeable.ordinal(),
+				msg_num
+			);
 			ASN1Integer beacon = dmsMessageBeacon.makeInt(
 				DmsMessageMemoryType.changeable, msg_num);
 			ASN1Integer srv = dmsMessagePixelService.makeInt(
@@ -334,11 +336,11 @@ public class OpSendDMSMessage extends OpDMS {
 				dmsMessageRunTimePriority.node,
 				DmsMessageMemoryType.changeable.ordinal(),
 				msg_num);
-			ms.setString(multi);
+			multi_string.setString(multi);
 			beacon.setInteger(message.getFlashBeacon() ? 1 : 0);
 			srv.setInteger(0);
 			prior.setInteger(message.getMsgPriority());
-			mess.add(ms);
+			mess.add(multi_string);
 			// NOTE: If dmsMessageBeacon and dmsMessagePixelService
 			//       objects exist, they must be set, since they are
 			//       used when calculating dmsMessageCRC
@@ -347,7 +349,7 @@ public class OpSendDMSMessage extends OpDMS {
 			if (supportsPixelService())
 				mess.add(srv);
 			mess.add(prior);
-			logStore(ms);
+			logStore(multi_string);
 			if (supportsBeaconActivation())
 				logStore(beacon);
 			if (supportsPixelService())
@@ -393,10 +395,10 @@ public class OpSendDMSMessage extends OpDMS {
 			if (status.getEnum() != DmsMessageStatus.valid)
 				return new QueryValidateMsgErr();
 			if (message_crc != crc.getInteger()) {
-				String ms = "Message CRC: " +
+				String msg = "Message CRC: " +
 					Integer.toHexString(message_crc) + ", "+
 					Integer.toHexString(crc.getInteger());
-				setErrorStatus(ms);
+				setErrorStatus(msg);
 				return null;
 			}
 			msg_validated = true;
