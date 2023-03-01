@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,7 +27,7 @@ public enum DmsMessageMemoryType {
 	permanent	(true),
 	changeable	(true),
 	_volatile	(true),
-	currentBuffer	(true), // Changed to true to support message 
+	currentBuffer	(true), // Changed to true to support message
 				// restore after Skyline power cycle events
 	schedule	(true),
 	blank		(true);

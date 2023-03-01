@@ -73,6 +73,31 @@ public class OpQueryDMSMessage extends OpDMS {
 	private final MessageIDCode source = new MessageIDCode(
 		dmsMsgTableSource.node);
 
+	/** Lookup the MULTI string for a sign message.
+	 * @param sm Sign message.
+	 * @return MULTI string or empty string. */
+	private String lookupMulti(SignMessage sm) {
+		return (sm != null) ? sm.getMulti() : "";
+	}
+
+	/** Get flash beacon flag for a sign message */
+	private boolean getFlashBeacon(SignMessage sm) {
+		return (sm != null) ? sm.getFlashBeacon() : false;
+	}
+
+	/** Phase to query the current message source */
+	protected class QueryMessageSource extends Phase {
+
+		/** Query the current message source */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(source);
+			mess.queryProps();
+			logQuery(source);
+			return processMessageSource();
+		}
+	}
+
 	/** Process the message table source from the sign controller */
 	private Phase processMessageSource() {
 		DmsMessageMemoryType mem_type = source.getMemoryType();
@@ -84,7 +109,12 @@ public class OpQueryDMSMessage extends OpDMS {
 			else if (mem_type.valid)
 				return processMessageValid();
 		}
-		return processMessageInvalid();
+		/* The source table is not valid.  This condition has been
+		 * observed in old Skyline signs after being powered down for
+		 * extended periods of time.  It can be cleared up by sending
+		 * settings operation. */
+		setErrorStatus("INVALID SOURCE: " + source);
+		return null;
 	}
 
 	/** Process a blank message source from the sign controller */
@@ -131,41 +161,6 @@ public class OpQueryDMSMessage extends OpDMS {
 		int crc = DmsMessageCRC.calculate(multi, getFlashBeacon(sm),
 			false);
 		return source.getCrc() == crc;
-	}
-
-	/** Lookup the MULTI string for a sign message.
-	 * @param sm Sign message.
-	 * @return MULTI string or empty string. */
-	private String lookupMulti(SignMessage sm) {
-		return (sm != null) ? sm.getMulti() : "";
-	}
-
-	/** Get flash beacon flag for a sign message */
-	private boolean getFlashBeacon(SignMessage sm) {
-		return (sm != null) ? sm.getFlashBeacon() : false;
-	}
-
-	/** Process an invalid message source from the sign controller */
-	private Phase processMessageInvalid() {
-		/* The source table is not valid.  This condition has been
-		 * observed in old Skyline signs after being powered down for
-		 * extended periods of time.  It can be cleared up by sending
-		 * settings operation. */
-		setErrorStatus("INVALID SOURCE: " + source);
-		return null;
-	}
-
-	/** Phase to query the current message source */
-	protected class QueryMessageSource extends Phase {
-
-		/** Query the current message source */
-		@SuppressWarnings("unchecked")
-		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(source);
-			mess.queryProps();
-			logQuery(source);
-			return processMessageSource();
-		}
 	}
 
 	/** Phase to query the current message */
