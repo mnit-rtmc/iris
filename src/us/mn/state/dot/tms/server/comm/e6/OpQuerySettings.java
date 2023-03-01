@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.e6;
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
-import us.mn.state.dot.tms.TagReaderSyncMode;
 import us.mn.state.dot.tms.server.TagReaderImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerException;
@@ -129,9 +128,7 @@ public class OpQuerySettings extends OpE6 {
 				Source.downlink);
 			sendQuery(mess, freq);
 			mess.logQuery(freq);
-			Integer fr = freq.getFreqKhz();
-			tag_reader.setDownlinkFreqKhzNotify(fr);
-			putSetting("downlink_freq_khz", fr);
+			putSetting("downlink_freq_khz", freq.getFreqKhz());
 			return new QueryUplinkFreq();
 		}
 	}
@@ -146,9 +143,7 @@ public class OpQuerySettings extends OpE6 {
 			FrequencyProp freq = new FrequencyProp(Source.uplink);
 			sendQuery(mess, freq);
 			mess.logQuery(freq);
-			Integer fr = freq.getFreqKhz();
-			tag_reader.setUplinkFreqKhzNotify(fr);
-			putSetting("uplink_freq_khz", fr);
+			putSetting("uplink_freq_khz", freq.getFreqKhz());
 			return new QueryLineLoss();
 		}
 	}
@@ -163,9 +158,7 @@ public class OpQuerySettings extends OpE6 {
 			LineLossProp line_loss = new LineLossProp();
 			sendQuery(mess, line_loss);
 			mess.logQuery(line_loss);
-			Integer ll = line_loss.getValue();
-			tag_reader.setLineLossDbNotify(ll);
-			putSetting("line_loss_db", ll);
+			putSetting("line_loss_db", line_loss.getValue());
 			return new QueryMasterSlave();
 		}
 	}
@@ -180,15 +173,9 @@ public class OpQuerySettings extends OpE6 {
 			MasterSlaveProp master_slave = new MasterSlaveProp();
 			sendQuery(mess, master_slave);
 			mess.logQuery(master_slave);
-			TagReaderSyncMode md = master_slave.getMode();
-			tag_reader.setSyncModeNotify(md);
-			if (md != null) {
-				putSetting("sync_mode",
-					md.toString().toLowerCase());
-			}
-			tag_reader.setSlaveSelectCountNotify(
-				master_slave.getSlaveSelectCount()
-			);
+			SyncMode sm = master_slave.getMode();
+			if (sm != null)
+				putSetting("sync_mode", sm.toString());
 			putSetting("slave_select_count",
 				master_slave.getSlaveSelectCount());
 			return new QueryMuxMode();
@@ -256,31 +243,11 @@ public class OpQuerySettings extends OpE6 {
 				return nextQueryPhase(p_settings.protocol);
 			}
 			mess.logQuery(atten);
-			storeRfAtten(tag_reader, atten);
 			p_settings.put("rf_atten_downlink_db",
 				atten.getDownlinkDb());
 			p_settings.put("rf_atten_uplink_db",
 				atten.getUplinkDb());
 			return new QueryDataDetect(p_settings);
-		}
-	}
-
-	/** Store RF attenuation for one protocol.
-	 * FIXME: remove this after JSON settings is tested */
-	private void storeRfAtten(TagReaderImpl tr, RFAttenProp atten) {
-		switch (atten.protocol) {
-			case SeGo:
-				tr.setSeGoAttenDownlinkDbNotify(
-					atten.getDownlinkDb());
-				tr.setSeGoAttenUplinkDbNotify(
-					atten.getUplinkDb());
-				break;
-			case IAG:
-				tr.setIAGAttenDownlinkDbNotify(
-					atten.getDownlinkDb());
-				tr.setIAGAttenUplinkDbNotify(
-					atten.getUplinkDb());
-				break;
 		}
 	}
 
@@ -299,22 +266,8 @@ public class OpQuerySettings extends OpE6 {
 				new DataDetectProp(p_settings.protocol);
 			sendQuery(mess, det);
 			mess.logQuery(det);
-			storeDataDetect(tag_reader, det);
 			p_settings.put("data_detect_db", det.getValue());
 			return new QuerySeen(p_settings);
-		}
-	}
-
-	/** Store data detect for one protocol.
-	 * FIXME: remove this after JSON settings is tested */
-	private void storeDataDetect(TagReaderImpl tr, DataDetectProp det) {
-		switch (det.protocol) {
-			case SeGo:
-				tr.setSeGoDataDetectDbNotify(det.getValue());
-				break;
-			case IAG:
-				tr.setIAGDataDetectDbNotify(det.getValue());
-				break;
 		}
 	}
 
@@ -333,25 +286,9 @@ public class OpQuerySettings extends OpE6 {
 				new SeenCountProp(p_settings.protocol);
 			sendQuery(mess, seen_count);
 			mess.logQuery(seen_count);
-			storeSeenUnique(tag_reader, seen_count);
 			p_settings.put("seen_count", seen_count.getSeen());
 			p_settings.put("unique_count", seen_count.getUnique());
 			return new QueryUplinkSource(p_settings);
-		}
-	}
-
-	/** Store seen/unique for one protocol.
-	 * FIXME: remove this after JSON settings is tested */
-	private void storeSeenUnique(TagReaderImpl tr, SeenCountProp seen) {
-		switch (seen.protocol) {
-			case SeGo:
-				tr.setSeGoSeenCountNotify(seen.getSeen());
-				tr.setSeGoUniqueCountNotify(seen.getUnique());
-				break;
-			case IAG:
-				tr.setIAGSeenCountNotify(seen.getSeen());
-				tr.setIAGUniqueCountNotify(seen.getUnique());
-				break;
 		}
 	}
 

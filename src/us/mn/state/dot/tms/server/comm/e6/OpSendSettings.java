@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.e6;
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
-import us.mn.state.dot.tms.TagReaderSyncMode;
 import us.mn.state.dot.tms.server.TagReaderImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerException;
@@ -59,33 +58,23 @@ public class OpSendSettings extends OpE6 {
 	private final JSONObject settings;
 
 	/** Check for an String value in JSON settings */
-	private void checkStr(String key, String val) {
-		if (settings.has(key) && val.equals(settings.optString(key)))
-			return;
-		logError("checkStr FAILED: " + key);
+	private String strSetting(String key) {
+		return settings.optString(key, null);
 	}
 
-	/** Check for an int value in JSON settings */
-	private void checkInt(String key, int val) {
-		if (settings.has(key)) {
-			int v = settings.optInt(key);
-			if (v == val)
-				return;
-		}
-		logError("checkInt FAILED: " + key);
+	/** Get an int value in JSON settings */
+	private Integer intSetting(String key) {
+		return settings.has(key) ? settings.optInt(key) : null;
 	}
 
-	/** Check for an int protocol value in JSON settings */
-	private void checkInt(String key, RFProtocol p, int val) {
+	/** Get an int protocol value in JSON settings */
+	private Integer intSetting(RFProtocol p, String key) {
 		JSONObject pval = settings.optJSONObject(
 			p.toString().toLowerCase()
 		);
-		if (pval != null) {
-			int v = pval.optInt(key);
-			if (v == val)
-				return;
-		}
-		logError("checkInt FAILED: " + key);
+		return (pval != null && pval.has(key))
+		      ? pval.optInt(key)
+		      : null;
 	}
 
 	/** Flag to indicate stop mode */
@@ -276,12 +265,10 @@ public class OpSendSettings extends OpE6 {
 
 	/** Create phase to check the downlink frequency */
 	private Phase<E6Property> checkDownlinkFreq() {
-		Integer df = tag_reader.getDownlinkFreqKhz();
-		if (df != null) {
-			checkInt("downlink_freq_khz", df);
-			return new CheckDownlinkFreq(df);
-		} else
-			return checkUplinkFreq();
+		Integer df = intSetting("downlink_freq_khz");
+		return (df != null)
+		      ? new CheckDownlinkFreq(df)
+		      : checkUplinkFreq();
 	}
 
 	/** Phase to check the downlink frequency */
@@ -329,12 +316,10 @@ public class OpSendSettings extends OpE6 {
 
 	/** Create phase to check the uplink frequency */
 	private Phase<E6Property> checkUplinkFreq() {
-		Integer uf = tag_reader.getUplinkFreqKhz();
-		if (uf != null) {
-			checkInt("uplink_freq_khz", uf);
-			return new CheckUplinkFreq(uf);
-		} else
-			return checkLineLoss();
+		Integer uf = intSetting("uplink_freq_khz");
+		return (uf != null)
+		      ? new CheckUplinkFreq(uf)
+		      : checkLineLoss();
 	}
 
 	/** Phase to check the uplink frequency */
@@ -380,12 +365,10 @@ public class OpSendSettings extends OpE6 {
 
 	/** Create phase to check the line loss */
 	private Phase<E6Property> checkLineLoss() {
-		Integer ll = tag_reader.getLineLossDb();
-		if (ll != null) {
-			checkInt("line_loss_db", ll);
-			return new CheckLineLoss(ll);
-		} else
-			return checkMasterSlave();
+		Integer ll = intSetting("line_loss_db");
+		return (ll != null)
+		      ? new CheckLineLoss(ll)
+		      : checkMasterSlave();
 	}
 
 	/** Phase to check the line loss */
@@ -430,21 +413,18 @@ public class OpSendSettings extends OpE6 {
 
 	/** Create phase to check master / slave settings */
 	private Phase<E6Property> checkMasterSlave() {
-		TagReaderSyncMode sm = tag_reader.getSyncMode();
-		Integer sc = tag_reader.getSlaveSelectCount();
-		if (sm != null && sc != null) {
-			checkStr("sync_mode", sm.toString().toLowerCase());
-			checkInt("slave_select_count", sc);
-			return new CheckMasterSlave(sm, sc);
-		} else
-			return nextProtocol(null);
+		SyncMode sm = SyncMode.fromValue(strSetting("sync_mode"));
+		Integer sc = intSetting("slave_select_count");
+		return (sm != null && sc != null)
+		      ? new CheckMasterSlave(sm, sc)
+		      : nextProtocol(null);
 	}
 
 	/** Phase to check master / slave settings */
 	private class CheckMasterSlave  extends Phase<E6Property> {
-		private final TagReaderSyncMode sync_mode;
+		private final SyncMode sync_mode;
 		private final int slave_select;
-		private CheckMasterSlave(TagReaderSyncMode sm, int sc) {
+		private CheckMasterSlave(SyncMode sm, int sc) {
 			sync_mode = sm;
 			slave_select = sc;
 		}
@@ -456,9 +436,9 @@ public class OpSendSettings extends OpE6 {
 			MasterSlaveProp mstr = new MasterSlaveProp();
 			sendQuery(mess, mstr);
 			mess.logQuery(mstr);
-			TagReaderSyncMode mode = mstr.getMode();
+			SyncMode sm = mstr.getMode();
 			Integer slave = mstr.getSlaveSelectCount();
-			return (mode == null || mode != sync_mode ||
+			return (sm == null || sm != sync_mode ||
 			        slave == null || slave != slave_select)
 			      ? new StoreMasterSlave(sync_mode, slave_select)
 			      : nextProtocol(null);
@@ -467,9 +447,9 @@ public class OpSendSettings extends OpE6 {
 
 	/** Phase to store master / slave settings */
 	private class StoreMasterSlave extends Phase<E6Property> {
-		private final TagReaderSyncMode sync_mode;
+		private final SyncMode sync_mode;
 		private final int slave_select;
-		private StoreMasterSlave(TagReaderSyncMode sm, int sc) {
+		private StoreMasterSlave(SyncMode sm, int sc) {
 			sync_mode = sm;
 			slave_select = sc;
 		}
@@ -495,38 +475,11 @@ public class OpSendSettings extends OpE6 {
 
 	/** Get check attenuation phase (or later) */
 	private Phase<E6Property> checkAtten(RFProtocol p) {
-		Integer ad = getAttenDownlink(p);
-		Integer au = getAttenUplink(p);
-		if (ad != null && au != null) {
-			checkInt("rf_atten_downlink_db", p, ad);
-			checkInt("rf_atten_uplink_db", p, au);
-			return new CheckAtten(p, ad, au);
-		} else
-			return checkDataDetect(p);
-	}
-
-	/** Get downlink attenuation for one protocol */
-	private Integer getAttenDownlink(RFProtocol p) {
-		switch (p) {
-		case SeGo:
-			return tag_reader.getSeGoAttenDownlinkDb();
-		case IAG:
-			return tag_reader.getIAGAttenDownlinkDb();
-		default:
-			return null;
-		}
-	}
-
-	/** Get uplink attenuation for one protocol */
-	private Integer getAttenUplink(RFProtocol p) {
-		switch (p) {
-		case SeGo:
-			return tag_reader.getSeGoAttenUplinkDb();
-		case IAG:
-			return tag_reader.getIAGAttenUplinkDb();
-		default:
-			return null;
-		}
+		Integer ad = intSetting(p, "rf_atten_downlink_db");
+		Integer au = intSetting(p, "rf_atten_uplink_db");
+		return (ad != null && au != null)
+		      ? new CheckAtten(p, ad, au)
+		      : checkDataDetect(p);
 	}
 
 	/** Phase to check RF attenuation for one protocol */
@@ -588,24 +541,10 @@ public class OpSendSettings extends OpE6 {
 
 	/** Get check data detect phase (or later) */
 	private Phase<E6Property> checkDataDetect(RFProtocol p) {
-		Integer dd = getDataDetect(p);
-		if (dd != null) {
-			checkInt("data_detect_db", p, dd);
-			return new CheckDataDetect(p, dd);
-		} else
-			return checkSeen(p);
-	}
-
-	/** Get data detect for one protocol */
-	private Integer getDataDetect(RFProtocol p) {
-		switch (p) {
-		case SeGo:
-			return tag_reader.getSeGoDataDetectDb();
-		case IAG:
-			return tag_reader.getIAGDataDetectDb();
-		default:
-			return null;
-		}
+		Integer dd = intSetting(p, "data_detect_db");
+		return (dd != null)
+		      ? new CheckDataDetect(p, dd)
+		      : checkSeen(p);
 	}
 
 	/** Phase to check the data detect for one protocol */
@@ -654,38 +593,11 @@ public class OpSendSettings extends OpE6 {
 
 	/** Get check seen count phase (or later) */
 	private Phase<E6Property> checkSeen(RFProtocol p) {
-		Integer sc = getSeenCount(p);
-		Integer uc = getUniqueCount(p);
-		if (sc != null && uc != null) {
-			checkInt("seen_count", p, sc);
-			checkInt("unique_count", p, uc);
-			return new CheckSeen(p, sc, uc);
-		} else
-			return nextProtocol(p);
-	}
-
-	/** Get seen count for one protocol */
-	private Integer getSeenCount(RFProtocol p) {
-		switch (p) {
-		case SeGo:
-			return tag_reader.getSeGoSeenCount();
-		case IAG:
-			return tag_reader.getIAGSeenCount();
-		default:
-			return null;
-		}
-	}
-
-	/** Get unique count for one protocol */
-	private Integer getUniqueCount(RFProtocol p) {
-		switch (p) {
-		case SeGo:
-			return tag_reader.getSeGoUniqueCount();
-		case IAG:
-			return tag_reader.getIAGUniqueCount();
-		default:
-			return null;
-		}
+		Integer sc = intSetting(p, "seen_count");
+		Integer uc = intSetting(p, "unique_count");
+		return (sc != null && uc != null)
+		      ? new CheckSeen(p, sc, uc)
+		      : nextProtocol(p);
 	}
 
 	/** Phase to check seen count for one protocol */
