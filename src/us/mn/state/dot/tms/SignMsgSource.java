@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2021  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -38,7 +38,33 @@ public enum SignMsgSource {
 	parking,        // 12 parking availability with [pa...] tag
 	clearguide,     // 13 ClearGuide advisory with [cg...] tag
 	exit_warning,   // 14 exit backup warning with [exit...] tag
-	standby;        // 15 Standby message with [standby] tag
+	standby,        // 15 Standby message with [standby] tag
+	expired,        // 16 message expired
+	reset;          // 17 sign reset
+
+	/** Values array */
+	static private final SignMsgSource[] VALUES = values();
+
+	/** Get the bits for a set of sources */
+	static public int toBits(SignMsgSource... sources) {
+		int bits = 0;
+		for (SignMsgSource src: sources)
+			bits |= src.bit();
+		return bits;
+	}
+
+	/** Get a string representation of a set of source bits */
+	static public String toString(int bits) {
+		StringBuilder sb = new StringBuilder();
+		for (SignMsgSource src: VALUES) {
+			if (src.checkBit(bits)) {
+				if (sb.length() > 0)
+					sb.append('+');
+				sb.append(src.toString());
+			}
+		}
+		return sb.toString();
+	}
 
 	/** Get the bit for a source */
 	public int bit() {
@@ -48,13 +74,5 @@ public enum SignMsgSource {
 	/** Check if the source bit is set */
 	public boolean checkBit(int bits) {
 		return (bits & bit()) != 0;
-	}
-
-	/** Get the bits for a set of sources */
-	static public int toBits(SignMsgSource... sources) {
-		int bits = 0;
-		for (SignMsgSource src: sources)
-			bits |= src.bit();
-		return bits;
 	}
 }

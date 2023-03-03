@@ -125,8 +125,8 @@ public class OpQueryDMSMessage extends OpDMS {
 		/* Maybe the current msg just expired */
 		boolean oper_expire = SignMessageHelper
 			.isOperatorExpiring(dms.getMsgCurrent());
-		SignMessage sm = dms.createMsgBlank();
-		setMsgCurrent(sm, (oper_expire) ? "EXPIRED" : "FIELD BLANK");
+		SignMessage sm = dms.createMsgBlank(oper_expire);
+		setMsgCurrent(sm);
 		/* User msg just expired -- set it to null */
 		if (oper_expire)
 			dms.setMsgUserNotify(null);
@@ -143,7 +143,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		 * CRC of the message IRIS knows about */
 		SignMessage sm = dms.getMsgCurrent();
 		if (checkMsgCrc(sm, true) || checkMsgCrc(sm, false)) {
-			setMsgCurrent(sm, sm.getOwner());
+			setMsgCurrent(sm);
 			return null;
 		} else {
 			String multi = lookupMulti(sm);
@@ -199,9 +199,10 @@ public class OpQueryDMSMessage extends OpDMS {
 			DmsMsgPriority rp = getMsgPriority();
 			int src = rp.getSource();
 			Integer duration = parseDuration(time.getInteger());
+			String owner = SignMessageHelper.makeMsgOwner(src);
 			SignMessage sm = dms.createMsg(multi_string.getValue(),
-				fb, rp, src, "OTHER SYSTEM", duration);
-			setMsgCurrent(sm, "OTHER SYSTEM");
+				owner, fb, rp, src, duration);
+			setMsgCurrent(sm);
 		} else
 			setErrorStatus("INVALID STATUS: " + status);
 	}
@@ -223,9 +224,9 @@ public class OpQueryDMSMessage extends OpDMS {
 	}
 
 	/** Set the current message on the sign */
-	private void setMsgCurrent(SignMessage sm, String owner) {
+	private void setMsgCurrent(SignMessage sm) {
 		if (sm != null)
-			dms.setMsgCurrentNotify(sm, owner);
+			dms.setMsgCurrentNotify(sm);
 		else
 			setErrorStatus("MSG RENDER FAILED");
 	}

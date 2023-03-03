@@ -373,12 +373,6 @@ public class DMSHelper extends BaseHelper {
 		return (rb != null) ? rb.createRasters(multi) : null;
 	}
 
-	/** Get the owner of the current message */
-	static public String getOwner(DMS dms) {
-		SignMessage sm = dms.getMsgCurrent();
-		return (sm != null) ? sm.getOwner() : null;
-	}
-
 	/** Lookup the associated incident */
 	static public Incident lookupIncident(DMS dms) {
 		if (null == dms)

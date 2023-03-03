@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -19,7 +19,6 @@ package us.mn.state.dot.tms.server.comm.dmsxml;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SignMessage;
@@ -52,8 +51,8 @@ class OpMessage extends OpDms {
 	private final String m_bitmaps;
 
 	/** Create a new DMS command message object */
-	public OpMessage(DMSImpl d, SignMessage m, User u) {
-		super(PriorityLevel.COMMAND, d, "Sending new message", u);
+	public OpMessage(DMSImpl d, SignMessage m) {
+		super(PriorityLevel.COMMAND, d, "Sending new message");
 		m_sm = m;
 		BitmapGraphic[] bitmaps = SignMessageHelper.getBitmaps(m, d);
 		m_npages = (bitmaps != null) ? bitmaps.length : 0;
@@ -196,7 +195,7 @@ class OpMessage extends OpDms {
 		xrr.addReq("RunPriority", m_sm.getMsgPriority());
 
 		// Owner
-		xrr.addReq("Owner", (m_user != null) ? m_user.getName() : "");
+		xrr.addReq("Owner", m_sm.getMsgOwner());
 
 		// bitmap
 		xrr.addReq("Bitmap", m_bitmaps);
@@ -246,7 +245,7 @@ class OpMessage extends OpDms {
 		updateMaintStatus("");
 		if (valid) {
 			setErrorStatus("");
-			m_dms.setMsgCurrentNotify(m_sm, m_sm.getOwner());
+			m_dms.setMsgCurrentNotify(m_sm);
 		} else {
 			LOG.log("OpMessage.parseResponse(): response " +
 				"from SensorServer received, ignored " +

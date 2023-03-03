@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  * Copyright (C) 2020       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,7 +37,7 @@ public class SignMessageCreator {
 	/** Create sign message name prefix.
 	 * @param src Sign message source bits. */
 	static private String createPrefix(int src) {
-		return (SignMsgSource.blank.bit() == src) ? "blank_" : "user_";
+		return SignMsgSource.blank.checkBit(src) ? "blank_" : "user_";
 	}
 
 	/** Message source bits for incident messages */
@@ -86,7 +86,7 @@ public class SignMessageCreator {
 		 Integer duration)
 	{
 		return create(sc, null, multi, fb, DmsMsgPriority.OPERATOR,
-			SignMsgSource.operator.bit(), user, duration);
+			SignMsgSource.operator.bit(), duration);
 	}
 
 	/** Create a new blank message.
@@ -95,7 +95,7 @@ public class SignMessageCreator {
 	 */
 	public SignMessage createBlankMessage(SignConfig sc) {
 		return create(sc, null, "", false, DmsMsgPriority.BLANK,
-			SignMsgSource.blank.bit(), null, null);
+			SignMsgSource.blank.bit(), null);
 	}
 
 	/** Create an incident sign message.
@@ -112,7 +112,7 @@ public class SignMessageCreator {
 	{
 		if (multi.length() > 0) {
 			return create(sc, inc, multi, false, mp,
-				INCIDENT_SRC, user, duration);
+				INCIDENT_SRC, duration);
 		} else
 			return createBlankMessage(sc);
 	}
@@ -125,13 +125,11 @@ public class SignMessageCreator {
 	 * @param fb Flash beacon.
 	 * @param mp Message priority.
 	 * @param src Sign message source bits.
-	 * @param owner User name.
 	 * @param duration Message duration; null for indefinite.
 	 * @return Proxy of new sign message, or null on error.
 	 */
 	private SignMessage create(SignConfig sc, String inc, String multi,
-		boolean fb, DmsMsgPriority mp, int src, String owner,
-		Integer duration)
+		boolean fb, DmsMsgPriority mp, int src, Integer duration)
 	{
 		WMessage wmsg = new WMessage(multi);
 		if (wmsg.removeAll(WTokenType.standby)) {
@@ -139,15 +137,16 @@ public class SignMessageCreator {
 			mp = DmsMsgPriority.STANDBY;
 			src |= SignMsgSource.standby.bit();
 		}
-		SignMessage sm = SignMessageHelper.find(sc, inc, multi, fb,
-			mp, src, owner, duration);
+		String owner = SignMessageHelper.makeMsgOwner(src, user);
+		SignMessage sm = SignMessageHelper.find(sc, inc, multi, owner,
+			fb, mp, src, duration);
 		String prefix = createPrefix(src);
 		if (sm != null && sm.getName().startsWith(prefix))
 			return sm;
 		String name = createName(prefix);
 		if (name != null) {
-			return create(name, sc, inc, multi, fb, mp, src,
-			              owner, duration);
+			return create(name, sc, inc, multi, owner, fb, mp, src,
+			              duration);
 		} else
 			return null;
 	}
@@ -158,27 +157,26 @@ public class SignMessageCreator {
 	 * @param sc Sign configuration.
 	 * @param inc Associated incident (original name).
 	 * @param multi MULTI text.
+	 * @param msg_owner Message owner.
 	 * @param fb Flash beacon.
 	 * @param mp Message priority.
 	 * @param src Sign message source bits.
-	 * @param owner User name.
 	 * @param duration Message duration; null for indefinite.
 	 * @return Proxy of new sign message, or null on error.
 	 */
 	private SignMessage create(String name, SignConfig sc, String inc,
-		String multi, boolean fb, DmsMsgPriority mp, int src,
-		String owner, Integer duration)
+		String multi, String msg_owner, boolean fb, DmsMsgPriority mp,
+		int src, Integer duration)
 	{
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("sign_config", sc);
 		if (inc != null)
 			attrs.put("incident", inc);
 		attrs.put("multi", multi);
+		attrs.put("msg_owner", msg_owner);
 		attrs.put("flash_beacon", fb);
 		attrs.put("msg_priority", Integer.valueOf(mp.ordinal()));
 		attrs.put("source", Integer.valueOf(src));
-		if (owner != null)
-			attrs.put("owner", owner);
 		if (duration != null)
 			attrs.put("duration", duration);
 		sign_messages.createObject(name, attrs);

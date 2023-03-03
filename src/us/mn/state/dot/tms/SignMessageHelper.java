@@ -44,18 +44,47 @@ public class SignMessageHelper extends BaseHelper {
 			SignMessage.SONAR_TYPE));
 	}
 
+	/** Make a message owner string */
+	static public String makeMsgOwner(int src) {
+		return "IRIS; " + SignMsgSource.toString(src);
+	}
+
+	/** Make a message owner string with name */
+	static public String makeMsgOwner(int src, String name) {
+		return "IRIS; " + SignMsgSource.toString(src) + "; " +
+			name;
+	}
+
+	/** Get the system part of message owner */
+	static public String getMsgOwnerSystem(SignMessage sm) {
+		String[] owner = sm.getMsgOwner().split(";", 3);
+		return (owner.length > 0) ? owner[0].trim() : "";
+	}
+
+	/** Get the sources part of message owner */
+	static public String getMsgOwnerSources(SignMessage sm) {
+		String[] owner = sm.getMsgOwner().split(";", 3);
+		return (owner.length > 1) ? owner[1].trim() : "";
+	}
+
+	/** Get the name part of message owner */
+	static public String getMsgOwnerName(SignMessage sm) {
+		String[] owner = sm.getMsgOwner().split(";", 3);
+		return (owner.length > 2) ? owner[2].trim() : "";
+	}
+
 	/** Find a sign message with matching attributes.
 	 * @param sc Sign configuration.
 	 * @param inc Associated incident (original name).
 	 * @param multi MULTI string.
+	 * @param owner Message owner.
 	 * @param fb Flash beacon flag.
 	 * @param mp Message priority.
 	 * @param src Message source.
-	 * @param owner Use name (null for any).
 	 * @param d Duration (null for indefinite).
 	 * @return Matching sign message, or null if not found. */
 	static public SignMessage find(SignConfig sc, String inc, String multi,
-		boolean fb, DmsMsgPriority mp, int src, String owner,
+		String owner, boolean fb, DmsMsgPriority mp, int src,
 		Integer d)
 	{
 		int mpi = mp.ordinal();
@@ -65,10 +94,10 @@ public class SignMessageHelper extends BaseHelper {
 			if (objectEquals(sc, sm.getSignConfig()) &&
 			    objectEquals(inc, sm.getIncident()) &&
 			    multi.equals(sm.getMulti()) &&
+			    objectEquals(owner, sm.getMsgOwner()) &&
 			    fb == sm.getFlashBeacon() &&
 			    mpi == sm.getMsgPriority() &&
 			    sourceEquals(src, sm) &&
-			    objectEquals(owner, sm.getOwner()) &&
 			    objectEquals(d, sm.getDuration()))
 				return sm;
 		}

@@ -65,7 +65,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, SignMessageImpl.class);
 		store.query("SELECT name, sign_config, incident, multi, " +
-			"flash_beacon, msg_priority, source, owner, " +
+			"msg_owner, flash_beacon, msg_priority, source, " +
 			"duration FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
@@ -83,10 +83,10 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		map.put("sign_config", sign_config);
 		map.put("incident", incident);
 		map.put("multi", multi);
+		map.put("msg_owner", msg_owner);
 		map.put("flash_beacon", flash_beacon);
 		map.put("msg_priority", msg_priority);
 		map.put("source", source);
-		map.put("owner", owner);
 		map.put("duration", duration);
 		return map;
 	}
@@ -115,41 +115,41 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		     row.getString(2),           // sign_config
 		     row.getString(3),           // incident
 		     row.getString(4),           // multi
-		     row.getBoolean(5),          // flash_beacon
-		     row.getInt(6),              // msg_priority
-		     row.getInt(7),              // source
-		     row.getString(8),           // owner
+		     row.getString(5),           // msg_owner
+		     row.getBoolean(6),          // flash_beacon
+		     row.getInt(7),              // msg_priority
+		     row.getInt(8),              // source
 		     (Integer) row.getObject(9)  // duration
 		);
 	}
 
 	/** Create a sign message */
 	private SignMessageImpl(String n, String sc, String inc, String m,
-		boolean fb, int mp, int s, String o, Integer d)
+		String o, boolean fb, int mp, int s, Integer d)
 	{
 		super(n);
 		sign_config = SignConfigHelper.lookup(sc);
 		incident = inc;
 		multi = m;
+		msg_owner = o;
 		flash_beacon = fb;
 		msg_priority = mp;
 		source = s;
-		owner = o;
 		duration = d;
 	}
 
 	/** Create a new sign message (by IRIS) */
-	public SignMessageImpl(SignConfig sc, String inc, String m, boolean fb,
-		DmsMsgPriority mp, int s, String o, Integer d)
+	public SignMessageImpl(SignConfig sc, String inc, String m, String o,
+		boolean fb, DmsMsgPriority mp, int s, Integer d)
 	{
 		super(createUniqueName());
 		sign_config = sc;
 		incident = inc;
 		multi = m;
+		msg_owner = o;
 		flash_beacon = fb;
 		msg_priority = mp.ordinal();
 		source = s;
-		owner = o;
 		duration = d;
 		logMsg("created (server)");
 	}
@@ -189,6 +189,25 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		return multi;
 	}
 
+	/** Message owner */
+	private String msg_owner;
+
+	/** Get the message owner.
+	 *
+	 * It contains 3 parts, separated by semicolons, for example
+	 * "IRIS; operator+schedule; john.smith"
+	 *  1. System ("IRIS")
+	 *  2. Sources ("operator+schedule")
+	 *  3. Name: user or action plan ("john.smith")
+	 *
+	 * @return Message owner
+	 * @see us.mn.state.dot.tms.SignMsgSource
+	 */
+	@Override
+	public String getMsgOwner() {
+		return msg_owner;
+	}
+
 	/** Flash beacon flag */
 	private boolean flash_beacon;
 
@@ -218,16 +237,6 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	@Override
 	public int getSource() {
 		return source;
-	}
-
-	/** Owner of message */
-	private String owner;
-
-	/** Get the message owner.
-	 * @return Message owner (User or action plan name). */
-	@Override
-	public String getOwner() {
-		return owner;
 	}
 
 	/** Duration of message (minutes) */

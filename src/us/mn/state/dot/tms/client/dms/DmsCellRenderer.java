@@ -33,6 +33,8 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.RasterGraphic;
+import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.CellRendererSize;
 import us.mn.state.dot.tms.client.widget.ILabel;
@@ -221,10 +223,12 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		      : null;
 	}
 
-	/** Get the owner user name (may be overridden) */
+	/** Get the current message owner */
 	protected String getOwner(DMS dms) {
-		String o = DMSHelper.getOwner(dms);
-		return (o != null) ? o : "";
+		SignMessage sm = dms.getMsgCurrent();
+		return SignMessageHelper.isBlank(sm)
+		      ? ""
+		      : SignMessageHelper.getMsgOwnerName(sm);
 	}
 
 	/** Update tooltip */
