@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  * Copyright (C) 2017-2021  Iteris Inc.
  *
@@ -136,12 +136,12 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 	/** Send a new message to the sign */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void sendMessage(DMSImpl dms, SignMessage sm, String owner) {
+	public void sendMessage(DMSImpl dms, SignMessage sm) {
 		if (dms.getMsgCurrent() == sm) {
 			if (SignMessageHelper.isScheduledExpiring(sm))
 				addOp(new OpUpdateDMSDuration(dms, sm));
 		} else
-			addOp(new OpSendDMSMessage(dms, sm, owner));
+			addOp(new OpSendDMSMessage(dms, sm));
 	}
 
 	/** Send a request to the GPS */

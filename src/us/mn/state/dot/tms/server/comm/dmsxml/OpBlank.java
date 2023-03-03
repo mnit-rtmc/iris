@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -17,7 +17,6 @@
 package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.io.IOException;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -38,8 +37,8 @@ class OpBlank extends OpDms {
 	private final SignMessage m_sm;
 
 	/** Create a new DMS blank object */
-	OpBlank(DMSImpl d, SignMessage mess, User u) {
-		super(PriorityLevel.COMMAND, d, "Blanking the CMS", u);
+	OpBlank(DMSImpl d, SignMessage mess) {
+		super(PriorityLevel.COMMAND, d, "Blanking the CMS");
 		m_sm = mess;
 	}
 
@@ -72,7 +71,7 @@ class OpBlank extends OpDms {
 		xrr.addReq("Address", controller.getDrop());
 		xrr.addReq("ActPriority", m_sm.getMsgPriority());
 		xrr.addReq("RunPriority", m_sm.getMsgPriority());
-		xrr.addReq("Owner", (m_user != null) ? m_user.getName() : "");
+		xrr.addReq("Owner", m_sm.getMsgOwner());
 
 		// response
 		xrr.addRes("Id");
@@ -122,7 +121,7 @@ class OpBlank extends OpDms {
 		// update dms
 		updateMaintStatus("");
 		if (valid)
-			m_dms.setMsgCurrentNotify(m_sm, m_sm.getOwner());
+			m_dms.setMsgCurrentNotify(m_sm);
 		else {
 			LOG.log(
 				"OpBlank: response from SensorServer " +

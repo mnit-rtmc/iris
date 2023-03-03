@@ -93,24 +93,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return (sm != null) && src.checkBit(sm.getSource());
 	}
 
-	/** Get the owner of a sign message */
-	static private String getOwner(SignMessage sm, String user) {
-		if (isMsgSource(sm, SignMsgSource.alert))
-			return "ALERT";
-		StringBuilder sb = new StringBuilder();
-		if (isMsgSource(sm, SignMsgSource.operator) ||
-		    isMsgSource(sm, SignMsgSource.blank))
-			sb.append(user);
-		if (isMsgSource(sm, SignMsgSource.schedule)) {
-			if (sb.length() == 0) {
-				String o = sm.getOwner();
-				sb.append((o != null) ? o : "PLAN");
-			} else
-				sb.append('*');
-		}
-		return sb.toString();
-	}
-
 	/** Comm fail time threshold to blank user message */
 	static private final long COMM_FAIL_BLANK_THRESHOLD_MS = 5 * 60 * 1000;
 
@@ -602,58 +584,62 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		setStuckPixelsNotify(null);
 		setMsgUserNotify(null);
 		setMsgSchedNotify(null);
-		setMsgCurrentNotify(null, "RESET");
+		setMsgCurrentNotify(null);
 	}
 
 	/** Create a blank message for the sign */
-	public SignMessage createMsgBlank() {
-		return findOrCreateMsg(null, "", false, BLANK,
-			SignMsgSource.blank.bit(), null, null);
+	public SignMessage createMsgBlank(boolean expired) {
+		int src = SignMsgSource.blank.bit();
+		if (expired)
+			src |= SignMsgSource.expired.bit();
+		String owner = SignMessageHelper.makeMsgOwner(src);
+		return findOrCreateMsg(null, "", owner, false, BLANK, src,
+			null);
 	}
 
 	/** Create a message for the sign.
 	 * @param m MULTI string for message.
+	 * @param o Message owner.
 	 * @param fb Flash beacon flag.
 	 * @param mp Message priority.
 	 * @param src Message source.
-	 * @param o Message owner.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	public SignMessage createMsg(String m, boolean fb,
-		DmsMsgPriority mp, int src, String o, Integer d)
+	public SignMessage createMsg(String m, String o, boolean fb,
+		DmsMsgPriority mp, int src, Integer d)
 	{
-		return createMsg(null, m, fb, mp, src, o, d);
+		return createMsg(null, m, o, fb, mp, src, d);
 	}
 
 	/** Create a message for the sign.
 	 * @param inc Associated incident (original name).
 	 * @param m MULTI string for message.
+	 * @param o Message owner.
 	 * @param fb Flash beacon flag.
 	 * @param mp Message priority.
 	 * @param src Message source.
-	 * @param o Message owner.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	private SignMessage createMsg(String inc, String m, boolean fb,
-		DmsMsgPriority mp, int src, String o, Integer d)
+	private SignMessage createMsg(String inc, String m, String o,
+		boolean fb, DmsMsgPriority mp, int src, Integer d)
 	{
-		return findOrCreateMsg(inc, m, fb, mp, src, o, d);
+		return findOrCreateMsg(inc, m, o, fb, mp, src, d);
 	}
 
 	/** Find or create a sign message.
 	 * @param inc Associated incident (original name).
 	 * @param m MULTI string for message.
+	 * @param o Message owner.
 	 * @param fb Flash beacon flag.
 	 * @param mp Message priority.
 	 * @param src Message source.
-	 * @param o Message owner.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	private SignMessage findOrCreateMsg(String inc, String m, boolean fb,
-		DmsMsgPriority mp, int src, String o, Integer d)
+	private SignMessage findOrCreateMsg(String inc, String m, String o,
+		boolean fb, DmsMsgPriority mp, int src, Integer d)
 	{
 		SignMessage esm = SignMessageHelper.find(sign_config, inc, m,
-			fb, mp, src, o, d);
+			o, fb, mp, src, d);
 		if (esm != null)
 			return esm;
 		else
@@ -675,8 +661,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		SignConfig sc = sign_config;
 		if (null == sc)
 			return null;
-		SignMessageImpl sm = new SignMessageImpl(sc, inc, m, fb, mp,
-			src, o, d);
+		SignMessageImpl sm = new SignMessageImpl(sc, inc, m, o, fb,
+			mp, src, d);
 		try {
 			sm.notifyCreate();
 			return sm;
@@ -701,8 +687,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		boolean fb = (pat != null) && pat.getFlashBeacon();
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
 			da.getMsgPriority());
-		String o = da.getActionPlan().getName();
-		return createMsg(amsg.getMulti(), fb, mp, amsg.getSrc(), o,
+		int src = amsg.getSrc();
+		String owner = SignMessageHelper.makeMsgOwner(src,
+			da.getActionPlan().getName());
+		return createMsg(amsg.getMulti(), owner, fb, mp, src,
 			getDuration(da));
 	}
 
@@ -753,7 +741,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			store.update(this, "msg_user", sm);
 			setMsgUser(sm);
 			sm = getMsgValidated();
-			sendMsg(sm, getOwner(sm, getProcUser()));
+			sendMsg(sm);
 		}
 	}
 
@@ -859,13 +847,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Set the current message.
-	 * @param sm Sign message.
-	 * @param owner Message owner. */
-	public void setMsgCurrentNotify(SignMessage sm, String owner) {
+	 * @param sm Sign message. */
+	public void setMsgCurrentNotify(SignMessage sm) {
 		if (isMsgSource(sm, SignMsgSource.tolling))
 			logPriceMessages(EventType.PRICE_VERIFIED);
 		if (sm != msg_current) {
-			logMsg(sm, owner);
+			logMsg(sm);
 			setMsgCurrent(sm);
 			notifyAttribute("msgCurrent");
 			updateExpireTime(sm);
@@ -889,11 +876,14 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Log a message.
-	 * @param sm Sign message.
-	 * @param owner Message owner. */
-	private void logMsg(SignMessage sm, String owner) {
+	 * @param sm Sign message. */
+	private void logMsg(SignMessage sm) {
 		EventType et = EventType.DMS_DEPLOYED;
 		String text = (sm != null) ? sm.getMulti() : null;
+		String owner = (sm != null)
+			? sm.getMsgOwner()
+			: SignMessageHelper.makeMsgOwner(
+				SignMsgSource.reset.bit());
 		Integer duration = (sm != null) ? sm.getDuration() : null;
 		if (SignMessageHelper.isBlank(sm)) {
 			et = EventType.DMS_CLEARED;
@@ -931,7 +921,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			}
 		}
 		// no message, or invalid -- blank the sign
-		return createMsgBlank();
+		return createMsgBlank(false);
 	}
 
 	/** Validate a sign message */
@@ -944,7 +934,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				e.getEventType(),
 				name,
 				sm.getMulti(),
-				sm.getOwner(),
+				sm.getMsgOwner(),
 				sm.getDuration()
 			));
 			throw e;
@@ -995,9 +985,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
 			user.getMsgPriority());
 		int src = user.getSource() | sched.getSource();
-		String o = user.getOwner();
+		String uname = SignMessageHelper.getMsgOwnerName(user);
+		String owner = SignMessageHelper.makeMsgOwner(src, uname);
 		Integer dur = user.getDuration();
-		return createMsg(inc, ms, fb, mp, src, o, dur);
+		return createMsg(inc, ms, owner, fb, mp, src, dur);
 	}
 
 	/** Compare sign messages for higher priority */
@@ -1011,7 +1002,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param sm Sign message (not null). */
 	private void sendMsgLogError(SignMessage sm) {
 		try {
-			sendMsg(sm, getOwner(sm, sm.getOwner()));
+			sendMsg(sm);
 		}
 		catch (TMSException e) {
 			logError("sendMsgLogError: " + e.getMessage());
@@ -1019,26 +1010,24 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Send message to DMS.
-	 * @param sm Sign message (not null).
-	 * @param owner Message owner. */
-	private void sendMsg(SignMessage sm, String owner) throws TMSException {
+	 * @param sm Sign message (not null). */
+	private void sendMsg(SignMessage sm) throws TMSException {
 		DMSPoller p = getDMSPoller();
 		if (null == p) {
 			throw new ChangeVetoException(name +
 				": NO ACTIVE POLLER");
 		}
 		if (sm != null)
-			sendMsg(p, sm, owner);
+			sendMsg(p, sm);
 	}
 
 	/** Set the next sign message.
 	 * @param p DMS poller.
-	 * @param sm Sign message (not null).
-	 * @param owner Message owner. */
-	private void sendMsg(DMSPoller p, SignMessage sm, String owner) {
+	 * @param sm Sign message (not null). */
+	private void sendMsg(DMSPoller p, SignMessage sm) {
 		if (isMsgSource(sm, SignMsgSource.tolling))
 		    logPriceMessages(EventType.PRICE_DEPLOYED);
-		p.sendMessage(this, sm, owner);
+		p.sendMessage(this, sm);
 	}
 
 	/** Check if the sign has a reference to a sign message */
@@ -1349,18 +1338,15 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		Long et = expire_time;
 		if (et != null) {
 			long now = TimeSteward.currentTimeMillis();
-			if (now >= et)
-				setMsgUserBlank();
-		}
-	}
-
-	/** Blank the user selected sign message */
-	private void setMsgUserBlank() {
-		try {
-			doSetMsgUser(createMsgBlank());
-		}
-		catch (TMSException e) {
-			logError("setMsgUserBlank: " + e.getMessage());
+			if (now >= et) {
+				try {
+					doSetMsgUser(createMsgBlank(true));
+				}
+				catch (TMSException e) {
+					logError("checkMsgExpiration: " +
+						e.getMessage());
+				}
+			}
 		}
 	}
 

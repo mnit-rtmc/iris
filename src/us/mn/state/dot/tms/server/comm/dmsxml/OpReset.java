@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -17,10 +17,11 @@
 package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.io.IOException;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -36,10 +37,9 @@ import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
 class OpReset extends OpDms {
 
 	/** Create a new DMS reset object.
-	 *  @param d Current DMS.
-	 *  @param u User performing the action, may be null. */
-	OpReset(DMSImpl d, User u) {
-		super(PriorityLevel.SETTINGS, d, "Reinitializing the CMS",u);
+	 *  @param d Current DMS. */
+	OpReset(DMSImpl d) {
+		super(PriorityLevel.SETTINGS, d, "Reinitializing the CMS");
 	}
 
 	/** Create the second phase of the operation */
@@ -69,7 +69,8 @@ class OpReset extends OpDms {
 		xrr.addReq("Address", controller.getDrop());
 		xrr.addReq("ActPriority", DmsMsgPriority.OVERRIDE.ordinal());
 		xrr.addReq("RunPriority", DmsMsgPriority.BLANK.ordinal());
-		xrr.addReq("Owner", (m_user != null) ? m_user.getName() : "");
+		xrr.addReq("Owner", SignMessageHelper.makeMsgOwner(
+			SignMsgSource.reset.bit()));
 
 		// responses
 		xrr.addRes("Id");
@@ -120,9 +121,9 @@ class OpReset extends OpDms {
 		updateMaintStatus("");
 		if(valid) {
 			setErrorStatus("");
-			SignMessage sm = m_dms.createMsgBlank();
+			SignMessage sm = m_dms.createMsgBlank(false);
 			if (sm != null)
-				m_dms.setMsgCurrentNotify(sm, "FIELD BLANK");
+				m_dms.setMsgCurrentNotify(sm);
 
 		// valid flag is false
 		} else {

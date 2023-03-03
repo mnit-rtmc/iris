@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2018  Minnesota Department of Transportation
+ * Copyright (C) 2007-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,10 +29,9 @@ public interface DMSPoller {
 	/** Send a device request */
 	void sendRequest(DMSImpl dms, DeviceRequest r);
 
-	/** Send a message to the sign. If the message is already deployed on
+	/** Send a message to the sign.  If the message is already deployed on
 	 * the sign, restart the time remaining.
 	 * @param dms Sign to send message.
-	 * @param sm Message to send.
-	 * @param owner Message owner. */
-	void sendMessage(DMSImpl dms, SignMessage sm, String owner);
+	 * @param sm Message to send. */
+	void sendMessage(DMSImpl dms, SignMessage sm);
 }
