@@ -592,14 +592,14 @@ public class AlertData {
 		if (before_hours > 0) {
 			long sd = start_date.getTime();
 			Date before = new Date(sd - before_hours * HOUR_MS);
-			createTimeAction(plan, before, "alert_before");
+			createTimeAction(plan, before, PlanPhase.ALERT_BEFORE);
 		}
 		// Create "during" action
-		createTimeAction(plan, start_date, "alert_during");
+		createTimeAction(plan, start_date, PlanPhase.ALERT_DURING);
 		// Create "after" action
 		int after_hours = cfg.getAfterPeriodHours();
 		if (after_hours > 0)
-			createTimeAction(plan, end_date, "alert_after");
+			createTimeAction(plan, end_date, PlanPhase.ALERT_AFTER);
 		// Create final time action
 		long ed = end_date.getTime();
 		Date after = new Date(ed + after_hours * HOUR_MS);
@@ -654,15 +654,19 @@ public class AlertData {
 		AlertConfig cfg = msg.getAlertConfig();
 		switch (ap) {
 		case BEFORE:
-			if (cfg.getBeforePeriodHours() > 0)
-				createDmsAction(plan, ht, "alert_before", pat);
+			if (cfg.getBeforePeriodHours() > 0) {
+				createDmsAction(plan, ht,
+					PlanPhase.ALERT_BEFORE, pat);
+			}
 			break;
 		case DURING:
-			createDmsAction(plan, ht, "alert_during", pat);
+			createDmsAction(plan, ht, PlanPhase.ALERT_DURING, pat);
 			break;
 		case AFTER:
-			if (cfg.getAfterPeriodHours() > 0)
-				createDmsAction(plan, ht, "alert_after", pat);
+			if (cfg.getAfterPeriodHours() > 0) {
+				createDmsAction(plan, ht, PlanPhase.ALERT_AFTER,
+					pat);
+			}
 			break;
 		}
 	}

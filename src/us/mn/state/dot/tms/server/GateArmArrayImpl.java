@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2021  Minnesota Department of Transportation
+ * Copyright (C) 2013-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -470,11 +470,13 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Update the action plan phase */
 	private void updatePlanPhase(ActionPlanImpl ap) throws TMSException {
 		if (isMsgOpen()) {
-			PlanPhase op = lookupPlanPhase("ga_open");
+			PlanPhase op = lookupPlanPhase(
+				PlanPhase.GATE_ARM_OPEN);
 			if (op != null && ap.setPhaseNotify(op))
 				updateDmsActions();
 		} else {
-			PlanPhase cp = lookupPlanPhase("ga_closed");
+			PlanPhase cp = lookupPlanPhase(
+				PlanPhase.GATE_ARM_CLOSED);
 			if (cp != null && ap.setPhaseNotify(cp))
 				updateDmsActions();
 		}

@@ -29,6 +29,21 @@ public interface PlanPhase extends SonarObject {
 	/** Undeployed phase name */
 	String UNDEPLOYED = "undeployed";
 
+	/** Alert before phase name */
+	String ALERT_BEFORE = "alert_before";
+
+	/** Alert during phase name */
+	String ALERT_DURING = "alert_during";
+
+	/** Alert after phase name */
+	String ALERT_AFTER = "alert_after";
+
+	/** Gate arm open phase name */
+	String GATE_ARM_OPEN = "ga_open";
+
+	/** Gate arm closed phase name */
+	String GATE_ARM_CLOSED = "ga_closed";
+
 	/** Set the hold time (seconds) */
 	void setHoldTime(int s);
 
