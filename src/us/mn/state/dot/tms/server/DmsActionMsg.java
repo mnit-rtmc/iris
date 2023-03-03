@@ -31,7 +31,6 @@ import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.DmsAction;
-import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
@@ -41,6 +40,7 @@ import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.MsgLineHelper;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.ParkingAreaHelper;
+import us.mn.state.dot.tms.PlanPhaseHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignMsgSource;
@@ -308,16 +308,14 @@ public class DmsActionMsg {
 			return postProcess(_multi.toString());
 	}
 
-	/** Check if the action has gate arm priority */
+	/** Check if the action source is gate arm */
 	private boolean isGateArm() {
-		return SignMsgSource.gate_arm.checkBit(DmsMsgPriority
-			.fromOrdinal(action.getMsgPriority()).getSource());
+		return PlanPhaseHelper.isGateArm(action.getPhase());
 	}
 
-	/** Check if the action has alert priority */
+	/** Check if the action source is alert */
 	private boolean isAlert() {
-		return SignMsgSource.alert.checkBit(DmsMsgPriority.fromOrdinal(
-			action.getMsgPriority()).getSource());
+		return PlanPhaseHelper.isAlert(action.getPhase());
 	}
 
 	/** Check if message is blank */

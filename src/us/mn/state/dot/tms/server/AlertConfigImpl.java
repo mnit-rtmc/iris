@@ -826,11 +826,11 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 		if (now < sd - bfr_ms)
 			return PlanPhase.UNDEPLOYED;
 		else if (now < sd)
-			return "alert_before";
+			return PlanPhase.ALERT_BEFORE;
 		else if (now < ed)
-			return "alert_during";
+			return PlanPhase.ALERT_DURING;
 		else if (now < ed + aft_ms)
-			return "alert_after";
+			return PlanPhase.ALERT_AFTER;
 		else
 			return PlanPhase.UNDEPLOYED;
 	}
