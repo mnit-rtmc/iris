@@ -19,6 +19,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -27,6 +28,7 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
+import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -40,6 +42,13 @@ public class OpQueryDMSMessage extends OpDMS {
 	/** MULTI string for current buffer */
 	private final ASN1String multi_string = new ASN1String(
 		dmsMessageMultiString.node,
+		DmsMessageMemoryType.currentBuffer.ordinal(),
+		1
+	);
+
+	/** Message owner for current buffer */
+	private final DisplayString msg_owner = new DisplayString(
+		dmsMessageOwner.node,
 		DmsMessageMemoryType.currentBuffer.ordinal(),
 		1
 	);
@@ -173,6 +182,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(multi_string);
+			mess.add(msg_owner);
 			if (supportsBeaconActivation())
 				mess.add(beacon);
 			else
@@ -182,6 +192,7 @@ public class OpQueryDMSMessage extends OpDMS {
 			mess.add(time);
 			mess.queryProps();
 			logQuery(multi_string);
+			logQuery(msg_owner);
 			if (supportsBeaconActivation())
 				logQuery(beacon);
 			logQuery(prior);
@@ -195,13 +206,14 @@ public class OpQueryDMSMessage extends OpDMS {
 	/** Set the current message on the sign */
 	private void setMsgCurrent() {
 		if (status.getEnum() == DmsMessageStatus.valid) {
+			String ms = multi_string.getValue();
+			String owner = msg_owner.getValue();
 			boolean fb = (beacon.getInteger() == 1);
 			DmsMsgPriority rp = getMsgPriority();
-			int src = rp.getSource();
+			int src = SignMsgSource.external.bit();
 			Integer duration = parseDuration(time.getInteger());
-			String owner = SignMessageHelper.makeMsgOwner(src);
-			SignMessage sm = dms.createMsg(multi_string.getValue(),
-				owner, fb, rp, src, duration);
+			SignMessage sm = dms.createMsg(ms, owner, fb, rp, src,
+				duration);
 			setMsgCurrent(sm);
 		} else
 			setErrorStatus("INVALID STATUS: " + status);

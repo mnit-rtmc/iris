@@ -323,6 +323,11 @@ public class OpSendDMSMessage extends OpDMS {
 				DmsMessageMemoryType.changeable.ordinal(),
 				msg_num
 			);
+			DisplayString msg_owner = new DisplayString(
+				dmsMessageOwner.node,
+				DmsMessageMemoryType.changeable.ordinal(),
+				msg_num
+			);
 			ASN1Integer beacon = dmsMessageBeacon.makeInt(
 				DmsMessageMemoryType.changeable, msg_num);
 			ASN1Integer srv = dmsMessagePixelService.makeInt(
@@ -333,10 +338,12 @@ public class OpSendDMSMessage extends OpDMS {
 				DmsMessageMemoryType.changeable.ordinal(),
 				msg_num);
 			multi_string.setString(multi);
+			msg_owner.setString(message.getMsgOwner());
 			beacon.setInteger(message.getFlashBeacon() ? 1 : 0);
 			srv.setInteger(0);
 			prior.setInteger(message.getMsgPriority());
 			mess.add(multi_string);
+			mess.add(msg_owner);
 			// NOTE: If dmsMessageBeacon and dmsMessagePixelService
 			//       objects exist, they must be set, since they are
 			//       used when calculating dmsMessageCRC
@@ -346,6 +353,7 @@ public class OpSendDMSMessage extends OpDMS {
 				mess.add(srv);
 			mess.add(prior);
 			logStore(multi_string);
+			logStore(msg_owner);
 			if (supportsBeaconActivation())
 				logStore(beacon);
 			if (supportsPixelService())
