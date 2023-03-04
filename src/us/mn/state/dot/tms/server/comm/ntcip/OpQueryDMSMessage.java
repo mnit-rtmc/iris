@@ -19,7 +19,6 @@ import java.io.IOException;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
-import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -210,9 +209,8 @@ public class OpQueryDMSMessage extends OpDMS {
 			String owner = msg_owner.getValue();
 			boolean fb = (beacon.getInteger() == 1);
 			DmsMsgPriority rp = getMsgPriority();
-			int src = SignMsgSource.external.bit();
 			Integer duration = parseDuration(time.getInteger());
-			SignMessage sm = dms.createMsg(ms, owner, fb, rp, src,
+			SignMessage sm = dms.createMsg(ms, owner, fb, rp,
 				duration);
 			setMsgCurrent(sm);
 		} else

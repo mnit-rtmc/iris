@@ -80,12 +80,10 @@ public class SignMessageHelper extends BaseHelper {
 	 * @param owner Message owner.
 	 * @param fb Flash beacon flag.
 	 * @param mp Message priority.
-	 * @param src Message source.
 	 * @param d Duration (null for indefinite).
 	 * @return Matching sign message, or null if not found. */
 	static public SignMessage find(SignConfig sc, String inc, String multi,
-		String owner, boolean fb, DmsMsgPriority mp, int src,
-		Integer d)
+		String owner, boolean fb, DmsMsgPriority mp, Integer d)
 	{
 		int mpi = mp.ordinal();
 		Iterator<SignMessage> it = iterator();
@@ -97,29 +95,10 @@ public class SignMessageHelper extends BaseHelper {
 			    objectEquals(owner, sm.getMsgOwner()) &&
 			    fb == sm.getFlashBeacon() &&
 			    mpi == sm.getMsgPriority() &&
-			    sourceEquals(src, sm) &&
 			    objectEquals(d, sm.getDuration()))
 				return sm;
 		}
 		return null;
-	}
-
-	/** Sign msg source bits to ignore */
-	static private final int SRC_IGNORE = SignMsgSource.toBits(
-		SignMsgSource.tolling,
-		SignMsgSource.travel_time,
-		SignMsgSource.external
-	);
-
-	/** Check sign message source.
-	 * @param src Message source.
-	 * @param sm Sign message to check.
-	 * @return true if source matches. */
-	static private boolean sourceEquals(int src, SignMessage sm) {
-		// ignore tolling and external bits for comparison
-		int srct = src           | SRC_IGNORE;
-		int sms = sm.getSource() | SRC_IGNORE;
-		return srct == sms;
 	}
 
 	/** Check if a sign message is blank */
@@ -133,10 +112,11 @@ public class SignMessageHelper extends BaseHelper {
 		return ms == null || new MultiString(ms).isBlank();
 	}
 
-	/** Check if a sign message is a standby message */
-	static public boolean isStandby(SignMessage sm) {
-		int src = sm.getSource();
-		return SignMsgSource.standby.checkBit(src);
+	/** Get source bits for a sign message */
+	static public int sourceBits(SignMessage sm) {
+		return (sm != null)
+		      ? SignMsgSource.fromString(getMsgOwnerSources(sm))
+		      : 0;
 	}
 
 	/** Get the bitmap graphic for all pages of the specified DMS.
@@ -242,26 +222,26 @@ public class SignMessageHelper extends BaseHelper {
 	 * This should only be true for messages from "sticky" DMS actions.
 	 * @param sm The sign message. */
 	static public boolean isScheduledIndefinite(SignMessage sm) {
-		int src = sm.getSource();
-		return SignMsgSource.schedule.checkBit(src) &&
+		int bits = sourceBits(sm);
+		return SignMsgSource.schedule.checkBit(bits) &&
 		      (sm.getDuration() == null) &&
-		      !SignMsgSource.operator.checkBit(src);
+		      !SignMsgSource.operator.checkBit(bits);
 	}
 
 	/** Check if a message is scheduled and expires.
 	 * @param sm The sign message. */
 	static public boolean isScheduledExpiring(SignMessage sm) {
-		int src = sm.getSource();
-		return SignMsgSource.schedule.checkBit(src) &&
+		int bits = sourceBits(sm);
+		return SignMsgSource.schedule.checkBit(bits) &&
 		      (sm.getDuration() != null) &&
-		      !SignMsgSource.operator.checkBit(src);
+		      !SignMsgSource.operator.checkBit(bits);
 	}
 
 	/** Check if a message is operator created and expires.
 	 * @param sm The sign message. */
 	static public boolean isOperatorExpiring(SignMessage sm) {
-		return (!isBlank(sm))
-		    && (sm.getDuration() != null)
-		    && SignMsgSource.operator.checkBit(sm.getSource());
+		return (!isBlank(sm)) &&
+		       (sm.getDuration() != null) &&
+		       SignMsgSource.operator.checkBit(sourceBits(sm));
 	}
 }

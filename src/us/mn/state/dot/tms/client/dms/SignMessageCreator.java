@@ -139,7 +139,7 @@ public class SignMessageCreator {
 		}
 		String owner = SignMessageHelper.makeMsgOwner(src, user);
 		SignMessage sm = SignMessageHelper.find(sc, inc, multi, owner,
-			fb, mp, src, duration);
+			fb, mp, duration);
 		String prefix = createPrefix(src);
 		if (sm != null && sm.getName().startsWith(prefix))
 			return sm;

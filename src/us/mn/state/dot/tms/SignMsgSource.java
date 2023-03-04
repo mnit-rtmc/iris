@@ -16,31 +16,31 @@
 package us.mn.state.dot.tms;
 
 /**
- * Sign message source enumeration.  The ordinal values correspond to the bits
- * in the iris.sign_msg_source look-up table.
+ * Sign message source enumeration.
  *
  * @author Douglas Lau
  * @author Michael Darter
  */
 public enum SignMsgSource {
-	blank,          //  0 blank message
-	operator,       //  1 IRIS operator
-	schedule,       //  2 scheduled DMS action
-	tolling,        //  3 DMS action with [tz...] tag
-	gate_arm,       //  4 gate arm system
-	lcs,            //  5 lane-use control signal
-	alert,          //  6 alert system (IPAWS or other)
-	external,       //  7 external system
-	travel_time,    //  8 DMS action with [tt...] tag
-	incident,       //  9 deployed incident
-	slow_warning,   // 10 slow warning with [slow...] tag
-	speed_advisory, // 11 speed advisory with [vsa] tag
-	parking,        // 12 parking availability with [pa...] tag
-	clearguide,     // 13 ClearGuide advisory with [cg...] tag
-	exit_warning,   // 14 exit backup warning with [exit...] tag
-	standby,        // 15 Standby message with [standby] tag
-	expired,        // 16 message expired
-	reset;          // 17 sign reset
+	unknown,        //  1 unknown source
+	reset,          //  2 sign reset
+	blank,          //  3 message blank
+	expired,        //  4 message expired
+	external,       //  5 external system
+	operator,       //  6 IRIS operator
+	incident,       //  7 deployed incident
+	lcs,            //  8 lane-use control signal
+	gate_arm,       //  9 gate arm system
+	alert,          // 10 alert system (IPAWS or other)
+	schedule,       // 11 scheduled DMS action
+	clearguide,     // 12 ClearGuide advisory with [cg...] tag
+	exit_warning,   // 13 exit backup warning with [exit...] tag
+	parking,        // 14 parking availability with [pa...] tag
+	slow_warning,   // 15 slow warning with [slow...] tag
+	speed_advisory, // 16 speed advisory with [vsa] tag
+	standby,        // 17 standby message with [standby] tag
+	tolling,        // 18 tolling with [tz...] tag
+	travel_time;    // 19 travel time with [tt...] tag
 
 	/** Values array */
 	static private final SignMsgSource[] VALUES = values();
@@ -64,6 +64,23 @@ public enum SignMsgSource {
 			}
 		}
 		return sb.toString();
+	}
+
+	/** Get source bits from a '+' delimited string */
+	static public int fromString(String sources) {
+		int bits = 0;
+		for (String src: sources.split("+"))
+			bits |= fromStr(src.trim()).bit();
+		return bits;
+	}
+
+	/** Get a source from a string */
+	static private SignMsgSource fromStr(String src) {
+		for (SignMsgSource s: VALUES) {
+			if (s.toString().equals(src))
+				return s;
+		}
+		return unknown;
 	}
 
 	/** Get the bit for a source */

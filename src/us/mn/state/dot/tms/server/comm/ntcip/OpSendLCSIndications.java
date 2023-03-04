@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
-import static us.mn.state.dot.tms.SignMsgSource.lcs;
+import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
@@ -97,11 +97,10 @@ public class OpSendLCSIndications extends OpLCS {
 			return dms.createMsgBlank(false);
 		else {
 			String owner = SignMessageHelper.makeMsgOwner(
-				lcs.bit(),
+				SignMsgSource.lcs.bit(),
 				user.getName()
 			);
-			return dms.createMsg(ms, owner, false, LCS, lcs.bit(),
-			                     null);
+			return dms.createMsg(ms, owner, false, LCS, null);
 		}
 	}
 

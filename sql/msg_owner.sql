@@ -42,18 +42,21 @@ UPDATE iris.sign_message
     SET msg_owner = 'IRIS; ' || iris.sign_msg_sources(source) || '; ' || COALESCE(owner, '');
 ALTER TABLE iris.sign_message ALTER COLUMN msg_owner SET NOT NULL;
 ALTER TABLE iris.sign_message DROP COLUMN owner;
+ALTER TABLE iris.sign_message DROP COLUMN source;
+
+DROP FUNCTION iris.sign_message_sources(INTEGER);
+DROP TABLE iris.sign_msg_source;
 
 CREATE VIEW sign_message_view AS
     SELECT name, sign_config, incident, multi, msg_owner, flash_beacon,
-           msg_priority, iris.sign_msg_sources(source) AS sources, duration
+           msg_priority, duration
     FROM iris.sign_message;
 GRANT SELECT ON sign_message_view TO PUBLIC;
 
 CREATE VIEW dms_message_view AS
     SELECT d.name, msg_current, cc.description AS condition,
-           fail_time IS NOT NULL AS failed, multi, flash_beacon,
-           msg_priority, iris.sign_msg_sources(source) AS sources,
-           duration, expire_time
+           fail_time IS NOT NULL AS failed, multi, msg_owner, flash_beacon,
+           msg_priority, duration, expire_time
     FROM iris.dms d
     LEFT JOIN iris.controller c ON d.controller = c.name
     LEFT JOIN iris.condition cc ON c.condition = cc.id
