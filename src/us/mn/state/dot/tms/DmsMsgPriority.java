@@ -57,47 +57,4 @@ public enum DmsMsgPriority {
 		else
 			return INVALID;
 	}
-
-	/** Get SignMsgSource for a run-time priority */
-	public int getSource() {
-		switch (this) {
-		case BLANK:
-		case OVERRIDE:
-			return SignMsgSource.blank.bit();
-		case STANDBY:
-			return SignMsgSource.standby.bit();
-		case TRAVEL_TIME:
-			return SignMsgSource.toBits(SignMsgSource.schedule,
-			                            SignMsgSource.travel_time);
-		case PSA:
-		case SCHED_A:
-		case SCHED_B:
-		case SCHED_C:
-		case SCHED_D:
-		case SCHED_HIGH:
-			return SignMsgSource.schedule.bit();
-		case OPERATOR:
-			return SignMsgSource.operator.bit();
-		case GATE_ARM:
-			return SignMsgSource.toBits(SignMsgSource.schedule,
-			                            SignMsgSource.gate_arm);
-		case LCS:
-			return SignMsgSource.toBits(SignMsgSource.operator,
-			                            SignMsgSource.lcs);
-		case INCIDENT_LOW:
-		case INCIDENT_MED:
-		case INCIDENT_HIGH:
-			return SignMsgSource.toBits(SignMsgSource.operator,
-			                            SignMsgSource.incident);
-		case ALERT_LOW:
-		case ALERT_MED:
-		case ALERT_HIGH:
-			return SignMsgSource.toBits(SignMsgSource.schedule,
-			                            SignMsgSource.alert);
-		case OTHER_SYSTEM:
-			return SignMsgSource.external.bit();
-		default:
-			return SignMsgSource.external.bit();
-		}
-	}
 }

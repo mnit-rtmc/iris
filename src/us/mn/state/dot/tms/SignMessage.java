@@ -64,11 +64,6 @@ public interface SignMessage extends SonarObject {
 	 * @see us.mn.state.dot.tms.DmsMsgPriority */
 	int getMsgPriority();
 
-	/** Get the sign message source value.
-	 * @return Sign message source.
-	 * @see us.mn.state.dot.tms.SignMsgSource */
-	int getSource();
-
 	/** Get the message duration.
 	 * @return Duration in minutes; null means indefinite. */
 	Integer getDuration();

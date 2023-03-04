@@ -93,7 +93,6 @@ pub struct SignMessage {
     pub msg_owner: Option<String>,
     pub flash_beacon: bool,
     pub msg_priority: u32,
-    pub sources: String,
     pub duration: Option<u32>,
 }
 

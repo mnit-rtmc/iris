@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.SignMessageImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -45,10 +44,6 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Travis Swanston
  */
 class OpQueryMsg extends OpDms {
-
-	/** External operator source */
-	static private final int EXT_OPER = SignMsgSource.toBits(
-		SignMsgSource.external, SignMsgSource.operator);
 
 	/** device request */
 	private DeviceRequest m_req;
@@ -246,7 +241,7 @@ class OpQueryMsg extends OpDms {
 		DmsMsgPriority rpri, Integer duration)
 	{
 		return (SignMessageImpl) m_dms.createMsg(multi, owner, false,
-			rpri, EXT_OPER, duration);
+			rpri, duration);
 	}
 
 	/** Return a MULTI with an updated page on-time with the value read
