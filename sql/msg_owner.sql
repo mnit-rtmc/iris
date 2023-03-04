@@ -44,7 +44,7 @@ ALTER TABLE iris.sign_message ALTER COLUMN msg_owner SET NOT NULL;
 ALTER TABLE iris.sign_message DROP COLUMN owner;
 ALTER TABLE iris.sign_message DROP COLUMN source;
 
-DROP FUNCTION iris.sign_message_sources(INTEGER);
+DROP FUNCTION iris.sign_msg_sources(INTEGER);
 DROP TABLE iris.sign_msg_source;
 
 CREATE VIEW sign_message_view AS
