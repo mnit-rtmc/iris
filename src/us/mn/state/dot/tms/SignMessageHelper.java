@@ -116,7 +116,7 @@ public class SignMessageHelper extends BaseHelper {
 	static public int sourceBits(SignMessage sm) {
 		return (sm != null)
 		      ? SignMsgSource.fromString(getMsgOwnerSources(sm))
-		      : 0;
+		      : SignMsgSource.unknown.bit();
 	}
 
 	/** Get the bitmap graphic for all pages of the specified DMS.

@@ -22,25 +22,25 @@ package us.mn.state.dot.tms;
  * @author Michael Darter
  */
 public enum SignMsgSource {
-	unknown,        //  1 unknown source
-	reset,          //  2 sign reset
-	blank,          //  3 message blank
-	expired,        //  4 message expired
-	external,       //  5 external system
-	operator,       //  6 IRIS operator
-	incident,       //  7 deployed incident
-	lcs,            //  8 lane-use control signal
-	gate_arm,       //  9 gate arm system
-	alert,          // 10 alert system (IPAWS or other)
-	schedule,       // 11 scheduled DMS action
-	clearguide,     // 12 ClearGuide advisory with [cg...] tag
-	exit_warning,   // 13 exit backup warning with [exit...] tag
-	parking,        // 14 parking availability with [pa...] tag
-	slow_warning,   // 15 slow warning with [slow...] tag
-	speed_advisory, // 16 speed advisory with [vsa] tag
-	standby,        // 17 standby message with [standby] tag
-	tolling,        // 18 tolling with [tz...] tag
-	travel_time;    // 19 travel time with [tt...] tag
+	unknown,        //  0 unknown source
+	reset,          //  1 sign reset
+	blank,          //  2 message blank
+	expired,        //  3 message expired
+	external,       //  4 external system
+	operator,       //  5 IRIS operator
+	incident,       //  6 deployed incident
+	lcs,            //  7 lane-use control signal
+	gate_arm,       //  8 gate arm system
+	alert,          //  9 alert system (IPAWS or other)
+	schedule,       // 10 scheduled DMS action
+	clearguide,     // 11 ClearGuide advisory with [cg...] tag
+	exit_warning,   // 12 exit backup warning with [exit...] tag
+	parking,        // 13 parking availability with [pa...] tag
+	slow_warning,   // 14 slow warning with [slow...] tag
+	speed_advisory, // 15 speed advisory with [vsa] tag
+	standby,        // 16 standby message with [standby] tag
+	tolling,        // 17 tolling with [tz...] tag
+	travel_time;    // 18 travel time with [tt...] tag
 
 	/** Values array */
 	static private final SignMsgSource[] VALUES = values();
