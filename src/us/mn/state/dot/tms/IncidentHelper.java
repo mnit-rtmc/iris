@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,11 +83,11 @@ public class IncidentHelper extends BaseHelper {
 		return IncImpact.severity(inc, lc);
 	}
 
-	/** Get the DMS message priority for an incident */
-	static public DmsMsgPriority getPriority(Incident inc) {
+	/** Get the sign message priority for an incident */
+	static public SignMsgPriority getPriority(Incident inc) {
 		if (inc != null) {
 			if (inc.getCleared())
-				return DmsMsgPriority.PSA;
+				return SignMsgPriority.low_sys;
 			IncSeverity sev = getSeverity(inc);
 			if (sev != null)
 				return sev.priority;

@@ -17,10 +17,10 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.util.HashMap;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.utils.wysiwyg.WMessage;
@@ -85,7 +85,7 @@ public class SignMessageCreator {
 	public SignMessage create(SignConfig sc, String multi, boolean fb,
 		 Integer duration)
 	{
-		return create(sc, null, multi, fb, DmsMsgPriority.OPERATOR,
+		return create(sc, null, multi, fb, SignMsgPriority.high_1,
 			SignMsgSource.operator.bit(), duration);
 	}
 
@@ -94,7 +94,7 @@ public class SignMessageCreator {
 	 * @return Blank sign message, or null on error.
 	 */
 	public SignMessage createBlankMessage(SignConfig sc) {
-		return create(sc, null, "", false, DmsMsgPriority.BLANK,
+		return create(sc, null, "", false, SignMsgPriority.low_1,
 			SignMsgSource.blank.bit(), null);
 	}
 
@@ -108,7 +108,7 @@ public class SignMessageCreator {
 	 * @return New sign message, or null on error.
 	 */
 	public SignMessage create(SignConfig sc, String inc, String multi,
-		DmsMsgPriority mp, Integer duration)
+		SignMsgPriority mp, Integer duration)
 	{
 		if (multi.length() > 0) {
 			return create(sc, inc, multi, false, mp,
@@ -129,12 +129,12 @@ public class SignMessageCreator {
 	 * @return Proxy of new sign message, or null on error.
 	 */
 	private SignMessage create(SignConfig sc, String inc, String multi,
-		boolean fb, DmsMsgPriority mp, int src, Integer duration)
+		boolean fb, SignMsgPriority mp, int src, Integer duration)
 	{
 		WMessage wmsg = new WMessage(multi);
 		if (wmsg.removeAll(WTokenType.standby)) {
 			multi = wmsg.toString();
-			mp = DmsMsgPriority.STANDBY;
+			mp = SignMsgPriority.low_1;
 			src |= SignMsgSource.standby.bit();
 		}
 		String owner = SignMessageHelper.makeMsgOwner(src, user);
@@ -165,7 +165,7 @@ public class SignMessageCreator {
 	 * @return Proxy of new sign message, or null on error.
 	 */
 	private SignMessage create(String name, SignConfig sc, String inc,
-		String multi, String msg_owner, boolean fb, DmsMsgPriority mp,
+		String multi, String msg_owner, boolean fb, SignMsgPriority mp,
 		int src, Integer duration)
 	{
 		HashMap<String, Object> attrs = new HashMap<String, Object>();

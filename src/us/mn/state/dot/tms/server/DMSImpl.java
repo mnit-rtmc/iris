@@ -43,8 +43,6 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsMsgPriority;
-import static us.mn.state.dot.tms.DmsMsgPriority.BLANK;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.GeoLoc;
@@ -64,6 +62,7 @@ import us.mn.state.dot.tms.SignDetail;
 import us.mn.state.dot.tms.SignDetailHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.geo.Position;
@@ -592,7 +591,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public SignMessage createMsgBlank(int src) {
 		src |= SignMsgSource.blank.bit();
 		String owner = SignMessageHelper.makeMsgOwner(src);
-		return findOrCreateMsg(null, "", owner, false, BLANK, null);
+		SignMsgPriority mp = SignMsgPriority.low_1;
+		return findOrCreateMsg(null, "", owner, false, mp, null);
 	}
 
 	/** Create a message for the sign.
@@ -603,7 +603,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	public SignMessage createMsg(String m, String o, boolean fb,
-		DmsMsgPriority mp, Integer d)
+		SignMsgPriority mp, Integer d)
 	{
 		return createMsg(null, m, o, fb, mp, d);
 	}
@@ -617,7 +617,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage createMsg(String inc, String m, String o,
-		boolean fb, DmsMsgPriority mp, Integer d)
+		boolean fb, SignMsgPriority mp, Integer d)
 	{
 		return findOrCreateMsg(inc, m, o, fb, mp, d);
 	}
@@ -631,7 +631,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage findOrCreateMsg(String inc, String m, String o,
-		boolean fb, DmsMsgPriority mp, Integer d)
+		boolean fb, SignMsgPriority mp, Integer d)
 	{
 		SignMessage esm = SignMessageHelper.find(sign_config, inc, m,
 			o, fb, mp, d);
@@ -650,7 +650,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage createMsgNotify(String inc, String m, String o,
-		boolean fb, DmsMsgPriority mp, Integer d)
+		boolean fb, SignMsgPriority mp, Integer d)
 	{
 		SignConfig sc = sign_config;
 		if (null == sc)
@@ -679,7 +679,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		DmsAction da = amsg.action;
 		MsgPattern pat = da.getMsgPattern();
 		boolean fb = (pat != null) && pat.getFlashBeacon();
-		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
+		SignMsgPriority mp = SignMsgPriority.fromOrdinal(
 			da.getMsgPriority());
 		int src = amsg.getSources();
 		String owner = SignMessageHelper.makeMsgOwner(src,
@@ -976,7 +976,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	{
 		String inc = user.getIncident();
 		boolean fb = user.getFlashBeacon();
-		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
+		SignMsgPriority mp = SignMsgPriority.fromOrdinal(
 			user.getMsgPriority());
 		// combine user and scheduled message sources
 		int src = SignMsgSource.fromString(

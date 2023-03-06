@@ -24,7 +24,6 @@ import javax.swing.JPanel;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.RasterBuilder;
@@ -32,6 +31,7 @@ import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.WordHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -389,9 +389,9 @@ public class DMSDispatcher extends JPanel {
 		String ms)
 	{
 		String inc_orig = IncidentHelper.getOriginalName(inc);
-		DmsMsgPriority prio = IncidentHelper.getPriority(inc);
+		SignMsgPriority mp = IncidentHelper.getPriority(inc);
 		Integer d = composer.getDuration();
-		return creator.create(sc, inc_orig, ms, prio, d);
+		return creator.create(sc, inc_orig, ms, mp, d);
 	}
 
 	/** Update the selected sign(s) */

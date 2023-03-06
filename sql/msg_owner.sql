@@ -85,4 +85,30 @@ CREATE VIEW recent_sign_event_view AS
     WHERE event_date > (CURRENT_TIMESTAMP - interval '90 days');
 GRANT SELECT ON recent_sign_event_view TO PUBLIC;
 
+-- Replace DmsMsgPriority with SignMsgPriority values
+-- ALERT_LOW => low_4
+UPDATE iris.sign_message SET msg_priority = 4 WHERE msg_priority = 5;
+UPDATE iris.dms_action SET msg_priority = 4 WHERE msg_priority = 5;
+-- LCS => high_1
+UPDATE iris.sign_message SET msg_priority = 11 WHERE msg_priority = 15;
+UPDATE iris.dms_action SET msg_priority = 11 WHERE msg_priority = 15;
+-- OPERATOR => high_1
+UPDATE iris.sign_message SET msg_priority = 11 WHERE msg_priority = 12;
+UPDATE iris.dms_action SET msg_priority = 11 WHERE msg_priority = 12;
+-- INCIDENT_LOW => high_2
+UPDATE iris.sign_message SET msg_priority = 12 WHERE msg_priority = 16;
+UPDATE iris.dms_action SET msg_priority = 12 WHERE msg_priority = 16;
+-- INCIDENT_MED => high_3
+UPDATE iris.sign_message SET msg_priority = 13 WHERE msg_priority = 17;
+UPDATE iris.dms_action SET msg_priority = 13 WHERE msg_priority = 17;
+-- SCHED_HIGH => high_3
+UPDATE iris.sign_message SET msg_priority = 13 WHERE msg_priority = 18;
+UPDATE iris.dms_action SET msg_priority = 13 WHERE msg_priority = 18;
+-- INCIDENT_HIGH => high_4
+UPDATE iris.sign_message SET msg_priority = 14 WHERE msg_priority = 19;
+UPDATE iris.dms_action SET msg_priority = 14 WHERE msg_priority = 19;
+-- ALERT_HIGH => high_4
+UPDATE iris.sign_message SET msg_priority = 14 WHERE msg_priority = 20;
+UPDATE iris.dms_action SET msg_priority = 14 WHERE msg_priority = 20;
+
 COMMIT;

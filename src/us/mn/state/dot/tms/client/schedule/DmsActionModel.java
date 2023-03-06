@@ -25,11 +25,11 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DmsAction;
-import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.PlanPhaseHelper;
+import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -54,17 +54,19 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	}
 
 	/** Allowed message priorities */
-	static private final DmsMsgPriority[] PRIORITIES = {
-		DmsMsgPriority.PSA,
-		DmsMsgPriority.TRAVEL_TIME,
-		DmsMsgPriority.ALERT_LOW,
-		DmsMsgPriority.SCHED_A,
-		DmsMsgPriority.SCHED_B,
-		DmsMsgPriority.SCHED_C,
-		DmsMsgPriority.SCHED_D,
-		DmsMsgPriority.ALERT_MED,
-		DmsMsgPriority.GATE_ARM,
-		DmsMsgPriority.SCHED_HIGH
+	static private final SignMsgPriority[] PRIORITIES = {
+		SignMsgPriority.low_1,
+		SignMsgPriority.low_2,
+		SignMsgPriority.low_3,
+		SignMsgPriority.low_4,
+		SignMsgPriority.medium_1,
+		SignMsgPriority.medium_2,
+		SignMsgPriority.medium_3,
+		SignMsgPriority.medium_4,
+		SignMsgPriority.high_1,
+		SignMsgPriority.high_2,
+		SignMsgPriority.high_3,
+		SignMsgPriority.high_4
 	};
 
 	/** Create the columns in the model */
@@ -126,22 +128,22 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 			120)
 		{
 			public Object getValueAt(DmsAction da) {
-				return DmsMsgPriority.fromOrdinal(
+				return SignMsgPriority.fromOrdinal(
 				       da.getMsgPriority());
 			}
 			public boolean isEditable(DmsAction da) {
 				return canWrite(da);
 			}
 			public void setValueAt(DmsAction da, Object value) {
-				if (value instanceof DmsMsgPriority) {
-					DmsMsgPriority p =
-						(DmsMsgPriority) value;
-					da.setMsgPriority(p.ordinal());
+				if (value instanceof SignMsgPriority) {
+					SignMsgPriority mp =
+						(SignMsgPriority) value;
+					da.setMsgPriority(mp.ordinal());
 				}
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox<DmsMsgPriority> cbx = new JComboBox
-					<DmsMsgPriority>(PRIORITIES);
+				JComboBox<SignMsgPriority> cbx = new JComboBox
+					<SignMsgPriority>(PRIORITIES);
 				return new DefaultCellEditor(cbx);
 			}
 		});
@@ -211,7 +213,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 			attrs.put("dms_hashtag", hashtag);
 			attrs.put("phase", lookupPlanPhase());
 			attrs.put("msg_priority",
-				DmsMsgPriority.SCHED_A.ordinal());
+				SignMsgPriority.medium_1.ordinal());
 			descriptor.cache.createObject(name, attrs);
 		}
 	}

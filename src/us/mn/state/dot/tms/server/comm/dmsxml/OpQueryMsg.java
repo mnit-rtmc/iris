@@ -22,8 +22,8 @@ import java.util.GregorianCalendar;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.SignMessageImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -188,11 +188,11 @@ class OpQueryMsg extends OpDms {
 	 *        which dmsxml will always return.
 	 * @param duration Message duration (in minutes).
 	 * @param pgOnTime DMS page on time.
-	 * @param rpri DMS message runtime priority.
+	 * @param rpri Sign message runtime priority.
 	 * @return A SignMessage that contains the text of the message and
 	 *         a rendered bitmap. */
 	private SignMessageImpl createSignMessageWithBitmap(String sbitmap,
-		Integer duration, Interval pgOnTime, DmsMsgPriority rpri,
+		Integer duration, Interval pgOnTime, SignMsgPriority rpri,
 		String owner)
 	{
 		if(sbitmap == null)
@@ -230,15 +230,15 @@ class OpQueryMsg extends OpDms {
 			"multistring=" + multi);
 
 		// priority is invalid, as expected
-		if (rpri == DmsMsgPriority.INVALID)
-			rpri = DmsMsgPriority.OTHER_SYSTEM;
+		if (rpri == SignMsgPriority.invalid)
+			rpri = SignMsgPriority.medium_sys;
 
 		return createMsg(multi, owner, rpri, duration);
 	}
 
 	/** Create a sign message */
 	private SignMessageImpl createMsg(String multi, String owner,
-		DmsMsgPriority rpri, Integer duration)
+		SignMsgPriority rpri, Integer duration)
 	{
 		return (SignMessageImpl) m_dms.createMsg(multi, owner, false,
 			rpri, duration);
@@ -302,8 +302,8 @@ class OpQueryMsg extends OpDms {
 		String errmsg = "";
 		boolean txtavail = false;
 		String msgtext = "";
-		DmsMsgPriority apri = DmsMsgPriority.INVALID;
-		DmsMsgPriority rpri = DmsMsgPriority.INVALID;
+		SignMsgPriority apri = SignMsgPriority.invalid;
+		SignMsgPriority rpri = SignMsgPriority.invalid;
 		String owner = "";
 		boolean useont = false;
 		Calendar ont = new GregorianCalendar();
@@ -335,16 +335,16 @@ class OpQueryMsg extends OpDms {
 				msgtext = xrr.getResString("MsgText");
 
 				// activation priority
-				apri = DmsMsgPriority.fromOrdinal(
+				apri = SignMsgPriority.fromOrdinal(
 					xrr.getResInt("ActPriority"));
-				apri = (apri == DmsMsgPriority.INVALID) ?
-					DmsMsgPriority.OPERATOR : apri;
+				if (apri == SignMsgPriority.invalid)
+					apri = SignMsgPriority.high_1;
 
 				// runtime priority
-				rpri = DmsMsgPriority.fromOrdinal(
+				rpri = SignMsgPriority.fromOrdinal(
 					xrr.getResInt("RunPriority"));
-				rpri = (rpri == DmsMsgPriority.INVALID) ?
-					DmsMsgPriority.BLANK : rpri;
+				if (rpri == SignMsgPriority.invalid)
+					rpri = SignMsgPriority.low_1;
 
 				// owner
 				owner = xrr.getResString("Owner");
