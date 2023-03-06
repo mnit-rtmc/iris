@@ -69,7 +69,7 @@ public enum SignMsgSource {
 	/** Get source bits from a '+' delimited string */
 	static public int fromString(String sources) {
 		int bits = 0;
-		for (String src: sources.split("+"))
+		for (String src: sources.split("\\+"))
 			bits |= fromStr(src.trim()).bit();
 		return bits;
 	}
