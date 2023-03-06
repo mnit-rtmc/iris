@@ -83,7 +83,7 @@ public class SignMessageHelper extends BaseHelper {
 	 * @param d Duration (null for indefinite).
 	 * @return Matching sign message, or null if not found. */
 	static public SignMessage find(SignConfig sc, String inc, String multi,
-		String owner, boolean fb, DmsMsgPriority mp, Integer d)
+		String owner, boolean fb, SignMsgPriority mp, Integer d)
 	{
 		int mpi = mp.ordinal();
 		Iterator<SignMessage> it = iterator();

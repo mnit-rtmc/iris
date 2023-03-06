@@ -201,7 +201,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 
 	/** Set the message priority.
 	 * @param mp Priority ranging from 1 (low) to 255 (high).
-	 * @see us.mn.state.dot.tms.DmsMsgPriority */
+	 * @see us.mn.state.dot.tms.SignMsgPriority */
 	@Override
 	public void setMsgPriority(int mp) {
 		msg_priority = mp;
@@ -217,7 +217,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 
 	/** Get the message priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).
-	 * @see us.mn.state.dot.tms.DmsMsgPriority */
+	 * @see us.mn.state.dot.tms.SignMsgPriority */
 	@Override
 	public int getMsgPriority() {
 		return msg_priority;

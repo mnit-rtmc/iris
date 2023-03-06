@@ -15,14 +15,13 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.DmsMsgPriority;
-import static us.mn.state.dot.tms.DmsMsgPriority.LCS;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -100,7 +99,8 @@ public class OpSendLCSIndications extends OpLCS {
 				SignMsgSource.lcs.bit(),
 				user.getName()
 			);
-			return dms.createMsg(ms, owner, false, LCS, null);
+			SignMsgPriority mp = SignMsgPriority.high_1;
+			return dms.createMsg(ms, owner, false, mp, null);
 		}
 	}
 

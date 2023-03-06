@@ -49,11 +49,11 @@ public interface DmsAction extends SonarObject {
 
 	/** Set the message priority.
 	 * @param p Priority ranging from 1 (low) to 255 (high).
-	 * @see us.mn.state.dot.tms.DmsMsgPriority */
+	 * @see us.mn.state.dot.tms.SignMsgPriority */
 	void setMsgPriority(int p);
 
 	/** Get the message priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).
-	 * @see us.mn.state.dot.tms.DmsMsgPriority */
+	 * @see us.mn.state.dot.tms.SignMsgPriority */
 	int getMsgPriority();
 }

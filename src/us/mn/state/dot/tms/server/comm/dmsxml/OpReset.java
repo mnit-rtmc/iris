@@ -17,10 +17,10 @@
 package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -67,8 +67,8 @@ class OpReset extends OpDms {
 		// request
 		xrr.addReq("Id", generateId());
 		xrr.addReq("Address", controller.getDrop());
-		xrr.addReq("ActPriority", DmsMsgPriority.OVERRIDE.ordinal());
-		xrr.addReq("RunPriority", DmsMsgPriority.BLANK.ordinal());
+		xrr.addReq("ActPriority", SignMsgPriority.high_sys.ordinal());
+		xrr.addReq("RunPriority", SignMsgPriority.low_1.ordinal());
 		xrr.addReq("Owner", SignMessageHelper.makeMsgOwner(
 			SignMsgSource.reset.bit()));
 

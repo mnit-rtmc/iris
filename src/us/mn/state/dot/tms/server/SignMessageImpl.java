@@ -22,10 +22,10 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 
@@ -136,7 +136,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Create a new sign message (by IRIS) */
 	public SignMessageImpl(SignConfig sc, String inc, String m, String o,
-		boolean fb, DmsMsgPriority mp, Integer d)
+		boolean fb, SignMsgPriority mp, Integer d)
 	{
 		super(createUniqueName());
 		sign_config = sc;
@@ -217,7 +217,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Get the message priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).
-	 * @see us.mn.state.dot.tms.DmsMsgPriority */
+	 * @see us.mn.state.dot.tms.SignMsgPriority */
 	@Override
 	public int getMsgPriority() {
 		return msg_priority;

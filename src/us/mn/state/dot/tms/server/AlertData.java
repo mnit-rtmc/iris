@@ -49,13 +49,13 @@ import us.mn.state.dot.tms.CapSeverity;
 import us.mn.state.dot.tms.CapUrgency;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.PlanPhaseHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
+import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.utils.MultiString;
@@ -680,9 +680,9 @@ public class AlertData {
 		PlanPhase phase = PlanPhaseHelper.lookup(ph);
 		if (phase == null)
 			log("plan phase not found, " + ph);
-		int priority = DmsMsgPriority.ALERT_LOW.ordinal();
+		int mp = SignMsgPriority.low_4.ordinal();
 		DmsActionImpl da = new DmsActionImpl(dname, plan, phase, ht,
-			pat, priority);
+			pat, mp);
 		log("created DMS action " + dname);
 		da.notifyCreate();
 	}

@@ -20,12 +20,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.ColorScheme;
-import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -332,8 +332,8 @@ public class OpSendDMSMessage extends OpDMS {
 				DmsMessageMemoryType.changeable, msg_num);
 			ASN1Integer srv = dmsMessagePixelService.makeInt(
 				DmsMessageMemoryType.changeable, msg_num);
-			ASN1Enum<DmsMsgPriority> prior = new ASN1Enum<
-				DmsMsgPriority>(DmsMsgPriority.class,
+			ASN1Enum<SignMsgPriority> prior = new ASN1Enum<
+				SignMsgPriority>(SignMsgPriority.class,
 				dmsMessageRunTimePriority.node,
 				DmsMessageMemoryType.changeable.ordinal(),
 				msg_num);

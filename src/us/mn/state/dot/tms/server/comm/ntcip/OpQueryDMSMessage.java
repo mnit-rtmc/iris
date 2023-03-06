@@ -16,9 +16,9 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -58,8 +58,8 @@ public class OpQueryDMSMessage extends OpDMS {
 		DmsMessageMemoryType.currentBuffer, 1);
 
 	/** Message priority for current buffer */
-	private final ASN1Enum<DmsMsgPriority> prior = new ASN1Enum<
-		DmsMsgPriority>(DmsMsgPriority.class, dmsMessageRunTimePriority
+	private final ASN1Enum<SignMsgPriority> prior = new ASN1Enum<
+		SignMsgPriority>(SignMsgPriority.class, dmsMessageRunTimePriority
 		.node, DmsMessageMemoryType.currentBuffer.ordinal(), 1);
 
 	/** Message status for current buffer */
@@ -211,9 +211,9 @@ public class OpQueryDMSMessage extends OpDMS {
 			String ms = multi_string.getValue();
 			String owner = msg_owner.getValue();
 			boolean fb = (beacon.getInteger() == 1);
-			DmsMsgPriority rp = getMsgPriority();
+			SignMsgPriority mp = getMsgPriority();
 			Integer duration = parseDuration(time.getInteger());
-			SignMessage sm = dms.createMsg(ms, owner, fb, rp,
+			SignMessage sm = dms.createMsg(ms, owner, fb, mp,
 				duration);
 			setMsgCurrent(sm);
 		} else
@@ -221,19 +221,10 @@ public class OpQueryDMSMessage extends OpDMS {
 	}
 
 	/** Get the message priority of the current message */
-	private DmsMsgPriority getMsgPriority() {
-		DmsMsgPriority rp = prior.getEnum();
+	private SignMsgPriority getMsgPriority() {
+		SignMsgPriority mp = prior.getEnum();
 		/* If the priority is unknown, some other system sent it */
-		if (null == rp)
-			return DmsMsgPriority.OTHER_SYSTEM;
-		if (DmsMsgPriority.BLANK == rp) {
-			/* If MULTI is not blank, some other system sent it */
-			MultiString multi = new MultiString(
-				multi_string.getValue());
-			if (!multi.isBlank())
-				return DmsMsgPriority.OTHER_SYSTEM;
-		}
-		return rp;
+		return (mp != null) ? mp : SignMsgPriority.medium_sys;
 	}
 
 	/** Set the current message on the sign */
