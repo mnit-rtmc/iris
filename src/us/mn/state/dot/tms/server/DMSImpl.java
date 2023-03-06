@@ -683,7 +683,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		boolean fb = (pat != null) && pat.getFlashBeacon();
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
 			da.getMsgPriority());
-		int src = amsg.getSrc();
+		int src = amsg.getSources();
 		String owner = SignMessageHelper.makeMsgOwner(src,
 			da.getActionPlan().getName());
 		return createMsg(amsg.getMulti(), owner, fb, mp,
