@@ -158,17 +158,17 @@ public class DmsActionMsg {
 	/** Valid message flag */
 	private boolean valid;
 
-	/** DMS message source flags */
-	private int src;
+	/** Sign message sources */
+	private int sources;
 
-	/** Add a message source flag */
-	private void addSrc(SignMsgSource s) {
-		src |= s.bit();
+	/** Add a message source */
+	private void addSource(SignMsgSource s) {
+		sources |= s.bit();
 	}
 
-	/** Get the source flag bits */
-	public int getSrc() {
-		return src;
+	/** Get the message sources */
+	public int getSources() {
+		return sources;
 	}
 
 	/** Mapping of station IDs to travel times */
@@ -295,11 +295,11 @@ public class DmsActionMsg {
 
 	/** Process DMS action tags */
 	private String process(String ms) {
-		addSrc(SignMsgSource.schedule);
+		addSource(SignMsgSource.schedule);
 		if (isGateArm())
-			addSrc(SignMsgSource.gate_arm);
+			addSource(SignMsgSource.gate_arm);
 		if (isAlert())
-			addSrc(SignMsgSource.alert);
+			addSource(SignMsgSource.alert);
 		new MultiString(ms).parse(builder);
 		MultiString _multi = builder.toMultiString();
 		if (isBlank(_multi))
@@ -358,7 +358,7 @@ public class DmsActionMsg {
 
 	/** Get the feed message string */
 	private String getFeedMsg(FeedMsg msg) {
-		addSrc(SignMsgSource.external);
+		addSource(SignMsgSource.external);
 		String ms = msg.getMulti().toString();
 		if (!isMsgFeedVerifyEnabled() || isFeedMsgValid(msg, ms))
 			return ms;
@@ -386,7 +386,7 @@ public class DmsActionMsg {
 
 	/** Calculate speed advisory span */
 	private String speedAdvisorySpan() {
-		addSrc(SignMsgSource.speed_advisory);
+		addSource(SignMsgSource.speed_advisory);
 		Corridor cor = lookupCorridor();
 		return (cor != null)
 		      ? calculateSpeedAdvisory(cor)
@@ -432,7 +432,7 @@ public class DmsActionMsg {
 	 * @param dist Distance to search for slow traffic (1/10 mile).
 	 * @param mode Tag replacement mode (none, dist or speed). */
 	private String slowWarningSpan(int spd, int dist, String mode) {
-		addSrc(SignMsgSource.slow_warning);
+		addSource(SignMsgSource.slow_warning);
 		return slowWarningSpan(createSpeed(spd), createDist(dist),mode);
 	}
 
@@ -440,7 +440,7 @@ public class DmsActionMsg {
 	 * @param did Exit detector ID.
 	 * @param occ Threshold occupancy to activate warning. */
 	private String exitWarningSpan(String did, int occ) {
-		addSrc(SignMsgSource.exit_warning);
+		addSource(SignMsgSource.exit_warning);
 		Detector det = DetectorHelper.lookup(did);
 		return (det instanceof DetectorImpl)
 		      ? exitWarningSpan((DetectorImpl) det, occ)
@@ -546,7 +546,7 @@ public class DmsActionMsg {
 
 	/** Calculate tolling text span */
 	private String tollingSpan(String mode, String[] zones) {
-		addSrc(SignMsgSource.tolling);
+		addSource(SignMsgSource.tolling);
 		if (zones.length < 1)
 			return fail("No toll zones");
 		switch (mode) {
@@ -614,7 +614,7 @@ public class DmsActionMsg {
 	private void processTravelTime(String sid, OverLimitMode mode,
 		String o_txt)
 	{
-		addSrc(SignMsgSource.travel_time);
+		addSource(SignMsgSource.travel_time);
 		Route r = findRoute(sid);
 		if (r != null && r.legCount() > 0)
 			processTravelTime(r, sid, mode, o_txt);
@@ -758,7 +758,7 @@ public class DmsActionMsg {
 
 	/** Calculate parking area availability span */
 	private String parkingSpan(String pid, String l_txt, String c_txt) {
-		addSrc(SignMsgSource.parking);
+		addSource(SignMsgSource.parking);
 		ParkingArea pa = ParkingAreaHelper.lookup(pid);
 		if (pa instanceof ParkingAreaImpl) {
 			ParkingAreaImpl pai = (ParkingAreaImpl) pa;
@@ -786,11 +786,11 @@ public class DmsActionMsg {
 	 * @param min Min statistic value, 0 to ignore.
 	 * @param mode Variable to use: tt, delay
 	 * @param ridx Route index, zero based */
-	private String clearGuideSpan(
-		String dms, int rid, int min, String mode, int ridx)
+	private String clearGuideSpan(String dms, int rid, int min,
+		String mode, int ridx)
 	{
-		addSrc(SignMsgSource.clearguide);
-		addSrc(SignMsgSource.external);
+		addSource(SignMsgSource.clearguide);
+		addSource(SignMsgSource.external);
 		return calcClearGuideAdvisory(dms, rid, min, mode, ridx);
 	}
 
