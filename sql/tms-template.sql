@@ -161,7 +161,7 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.41.0
+database_version	5.42.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_secs	60
@@ -2766,64 +2766,14 @@ CREATE VIEW sign_config_view AS
     JOIN iris.color_scheme cs ON sign_config.color_scheme = cs.id;
 GRANT SELECT ON sign_config_view TO PUBLIC;
 
-CREATE TABLE iris.sign_msg_source (
-	bit INTEGER PRIMARY KEY,
-	source VARCHAR(16) NOT NULL
-);
-ALTER TABLE iris.sign_msg_source ADD CONSTRAINT msg_source_bit_ck
-	CHECK (bit >= 0 AND bit < 32);
-
-COPY iris.sign_msg_source (bit, source) FROM stdin;
-0	blank
-1	operator
-2	schedule
-3	tolling
-4	gate arm
-5	lcs
-6	alert
-7	external
-8	travel time
-9	incident
-10	slow warning
-11	speed advisory
-12	parking
-13	clearguide
-14	exit warning
-15	standby
-\.
-
-CREATE FUNCTION iris.sign_msg_sources(INTEGER) RETURNS TEXT
-	AS $sign_msg_sources$
-DECLARE
-	src ALIAS FOR $1;
-	res TEXT;
-	ms RECORD;
-	b INTEGER;
-BEGIN
-	res = '';
-	FOR ms IN SELECT bit, source FROM iris.sign_msg_source ORDER BY bit LOOP
-		b = 1 << ms.bit;
-		IF (src & b) = b THEN
-			IF char_length(res) > 0 THEN
-				res = res || ', ' || ms.source;
-			ELSE
-				res = ms.source;
-			END IF;
-		END IF;
-	END LOOP;
-	RETURN res;
-END;
-$sign_msg_sources$ LANGUAGE plpgsql;
-
 CREATE TABLE iris.sign_message (
     name VARCHAR(20) PRIMARY KEY,
     sign_config VARCHAR(16) NOT NULL REFERENCES iris.sign_config,
     incident VARCHAR(16),
     multi VARCHAR(1024) NOT NULL,
+    msg_owner VARCHAR(127) NOT NULL,
     flash_beacon BOOLEAN NOT NULL,
     msg_priority INTEGER NOT NULL,
-    source INTEGER NOT NULL,
-    owner VARCHAR(16),
     duration INTEGER
 );
 
@@ -2832,8 +2782,8 @@ CREATE TRIGGER sign_message_notify_trig
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW sign_message_view AS
-    SELECT name, sign_config, incident, multi, flash_beacon, msg_priority,
-           iris.sign_msg_sources(source) AS sources, owner, duration
+    SELECT name, sign_config, incident, multi, msg_owner, flash_beacon,
+           msg_priority, duration
     FROM iris.sign_message;
 GRANT SELECT ON sign_message_view TO PUBLIC;
 
@@ -3075,9 +3025,8 @@ GRANT SELECT ON dms_view TO PUBLIC;
 
 CREATE VIEW dms_message_view AS
     SELECT d.name, msg_current, cc.description AS condition,
-           fail_time IS NOT NULL AS failed, multi, flash_beacon,
-           msg_priority, iris.sign_msg_sources(source) AS sources,
-           duration, expire_time
+           fail_time IS NOT NULL AS failed, multi, msg_owner, flash_beacon,
+           msg_priority, duration, expire_time
     FROM iris.dms d
     LEFT JOIN iris.controller c ON d.controller = c.name
     LEFT JOIN iris.condition cc ON c.condition = cc.id
@@ -3152,7 +3101,7 @@ CREATE TABLE event.sign_event (
         REFERENCES event.event_description(event_desc_id),
     device_id VARCHAR(20),
     multi VARCHAR(1024),
-    owner VARCHAR(16),
+    msg_owner VARCHAR(127),
     duration INTEGER
 );
 CREATE INDEX ON event.sign_event(event_date);
@@ -3174,14 +3123,14 @@ $multi_message$ LANGUAGE plpgsql;
 
 CREATE VIEW sign_event_view AS
     SELECT event_id, event_date, description, device_id,
-           event.multi_message(multi) as message, multi, owner, duration
+           event.multi_message(multi) as message, multi, msg_owner, duration
     FROM event.sign_event JOIN event.event_description
     ON sign_event.event_desc_id = event_description.event_desc_id;
 GRANT SELECT ON sign_event_view TO PUBLIC;
 
 CREATE VIEW recent_sign_event_view AS
     SELECT event_id, event_date, description, device_id, message, multi,
-           owner, duration
+           msg_owner, duration
     FROM sign_event_view
     WHERE event_date > (CURRENT_TIMESTAMP - interval '90 days');
 GRANT SELECT ON recent_sign_event_view TO PUBLIC;
