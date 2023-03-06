@@ -64,7 +64,9 @@ public class SignMessageHelper extends BaseHelper {
 	/** Get the sources part of message owner */
 	static public String getMsgOwnerSources(SignMessage sm) {
 		String[] owner = sm.getMsgOwner().split(";", 3);
-		return (owner.length > 1) ? owner[1].trim() : "";
+		return (owner.length > 1)
+		      ? owner[1].trim()
+		      : SignMsgSource.external.toString();
 	}
 
 	/** Get the name part of message owner */
