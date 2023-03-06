@@ -589,10 +589,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Create a blank message for the sign */
-	public SignMessage createMsgBlank(boolean expired) {
-		int src = SignMsgSource.blank.bit();
-		if (expired)
-			src |= SignMsgSource.expired.bit();
+	public SignMessage createMsgBlank(int src) {
+		src |= SignMsgSource.blank.bit();
 		String owner = SignMessageHelper.makeMsgOwner(src);
 		return findOrCreateMsg(null, "", owner, false, BLANK, null);
 	}
@@ -917,7 +915,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			}
 		}
 		// no message, or invalid -- blank the sign
-		return createMsgBlank(false);
+		return createMsgBlank(0);
 	}
 
 	/** Validate a sign message */
@@ -1342,7 +1340,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			long now = TimeSteward.currentTimeMillis();
 			if (now >= et) {
 				try {
-					doSetMsgUser(createMsgBlank(true));
+					int src = SignMsgSource.expired.bit();
+					doSetMsgUser(createMsgBlank(src));
 				}
 				catch (TMSException e) {
 					logError("checkMsgExpiration: " +

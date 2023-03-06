@@ -119,9 +119,10 @@ class OpReset extends OpDms {
 
 		// process response
 		updateMaintStatus("");
-		if(valid) {
+		if (valid) {
 			setErrorStatus("");
-			SignMessage sm = m_dms.createMsgBlank(false);
+			SignMessage sm = m_dms.createMsgBlank(
+				SignMsgSource.reset.bit());
 			if (sm != null)
 				m_dms.setMsgCurrentNotify(sm);
 

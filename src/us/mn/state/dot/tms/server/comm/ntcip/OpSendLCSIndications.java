@@ -94,7 +94,7 @@ public class OpSendLCSIndications extends OpLCS {
 	private SignMessage createSignMessage(DMSImpl dms, String ms, int ind) {
 		MultiString multi = new MultiString(ms);
 		if (multi.isBlank())
-			return dms.createMsgBlank(false);
+			return dms.createMsgBlank(SignMsgSource.lcs.bit());
 		else {
 			String owner = SignMessageHelper.makeMsgOwner(
 				SignMsgSource.lcs.bit(),
