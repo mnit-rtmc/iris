@@ -16,30 +16,26 @@ SELECT action_plan
     AND sched_date + make_interval(weeks => 2) < CURRENT_DATE
   GROUP BY action_plan;
 
-SELECT sign_group
-  INTO TEMP purge_alert_sign_group_all
+SELECT all_hashtag
+  INTO TEMP purge_alert_all_hashtag
   FROM cap.alert_info
   WHERE end_date + make_interval(weeks => 2) < CURRENT_DATE
-  GROUP by sign_group;
+  GROUP by all_hashtag;
 
-SELECT sign_group
-  INTO TEMP purge_alert_sign_group_act
+SELECT dms_hashtag
+  INTO TEMP purge_alert_dms_hashtag
   FROM iris.dms_action
   WHERE action_plan IN (SELECT action_plan FROM purge_alert_action_plan)
-  GROUP by sign_group;
+  GROUP by dms_hashtag;
 
-DELETE FROM iris.dms_sign_group
-  WHERE sign_group IN (SELECT sign_group FROM purge_alert_sign_group_all);
-DELETE FROM iris.dms_sign_group
-  WHERE sign_group IN (SELECT sign_group FROM purge_alert_sign_group_act);
+DELETE FROM iris.dms_hashtag
+  WHERE hashtag IN (SELECT all_hashtag FROM purge_alert_all_hashtag);
+DELETE FROM iris.dms_hashtag
+  WHERE hashtag IN (SELECT dms_hashtag FROM purge_alert_dms_hashtag);
 DELETE FROM iris.dms_action
   WHERE action_plan IN (SELECT action_plan FROM purge_alert_action_plan);
 DELETE FROM cap.alert_info
   WHERE action_plan IN (SELECT action_plan FROM purge_alert_action_plan);
-DELETE FROM iris.sign_group
-  WHERE name IN (SELECT sign_group FROM purge_alert_sign_group_all);
-DELETE FROM iris.sign_group
-  WHERE name IN (SELECT sign_group FROM purge_alert_sign_group_act);
 DELETE FROM iris.time_action
   WHERE action_plan IN (SELECT action_plan FROM purge_alert_action_plan);
 DELETE FROM iris.action_plan
