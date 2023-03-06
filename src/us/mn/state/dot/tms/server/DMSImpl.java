@@ -731,6 +731,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Set the user selected sign message */
 	public void doSetMsgUser(SignMessage sm) throws TMSException {
 		if (!objectEquals(msg_user, sm)) {
+			String unm = SignMessageHelper.getMsgOwnerName(sm);
+			if (!unm.equals(getProcUser())) {
+				// FIXME: if this does not show up in stderr,
+				//        change this to throw an exception
+				System.err.println("doSetMsgUser: " + unm +
+					" != " + getProcUser());
+			}
 			validateMsg(sm);
 			store.update(this, "msg_user", sm);
 			setMsgUser(sm);
@@ -985,8 +992,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			SignMsgSource.fromString(
 				SignMessageHelper.getMsgOwnerSources(sched)
 			);
-		String uname = SignMessageHelper.getMsgOwnerName(user);
-		String owner = SignMessageHelper.makeMsgOwner(src, uname);
+		String unm = SignMessageHelper.getMsgOwnerName(user);
+		String owner = SignMessageHelper.makeMsgOwner(src, unm);
 		Integer dur = user.getDuration();
 		return createMsg(inc, ms, owner, fb, mp, dur);
 	}
