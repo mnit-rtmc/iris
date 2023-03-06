@@ -19,6 +19,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -96,10 +97,10 @@ public class OpQueryDMSMessage extends OpDMS {
 		return (sm != null) ? sm.getFlashBeacon() : false;
 	}
 
-	/** Phase to query the current message source */
+	/** Phase to query the current message source (memory type) */
 	protected class QueryMessageSource extends Phase {
 
-		/** Query the current message source */
+		/** Query the current message source (memory type) */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(source);
@@ -109,7 +110,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		}
 	}
 
-	/** Process the message table source from the sign controller */
+	/** Process the current message table source (memory type) */
 	private Phase processMessageSource() {
 		DmsMessageMemoryType mem_type = source.getMemoryType();
 		if (mem_type != null) {
@@ -130,14 +131,16 @@ public class OpQueryDMSMessage extends OpDMS {
 
 	/** Process a blank message source from the sign controller */
 	private Phase processMessageBlank() {
+		int src = 0;
 		/* Maybe the current msg just expired */
-		boolean oper_expire = SignMessageHelper
-			.isOperatorExpiring(dms.getMsgCurrent());
-		SignMessage sm = dms.createMsgBlank(oper_expire);
-		setMsgCurrent(sm);
-		/* User msg just expired -- set it to null */
-		if (oper_expire)
+		if (SignMessageHelper.isOperatorExpiring(
+		    dms.getMsgCurrent()))
+		{
+			src = SignMsgSource.expired.bit();
+			/* User msg just expired -- set it to null */
 			dms.setMsgUserNotify(null);
+		}
+		setMsgCurrent(dms.createMsgBlank(src));
 		return null;
 	}
 
