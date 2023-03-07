@@ -140,14 +140,23 @@ impl AncillaryData for DmsAnc {
 }
 
 impl DmsAnc {
-    /// Get message sources
-    fn sources(&self, msg: Option<&str>) -> Option<&str> {
+    /// Get message owner
+    fn msg_owner(&self, msg: Option<&str>) -> Option<&str> {
         match (&self.messages, msg) {
             (Some(messages), Some(msg)) => messages
                 .iter()
                 .find(|m| m.name == msg)
-                .map(|m| &m.sources[..]),
+                .filter(|m| m.msg_owner.is_some())
+                .map(|m| m.msg_owner.as_deref().unwrap()),
             _ => None,
+        }
+    }
+
+    /// Get message sources
+    fn sources(&self, msg: Option<&str>) -> Option<&str> {
+        match self.msg_owner(msg) {
+            Some(owner) => owner.split(';').nth(1),
+            None => None,
         }
     }
 
