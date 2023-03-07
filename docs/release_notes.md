@@ -1,5 +1,13 @@
 # IRIS 5.x Release Notes
 
+5.42.0 (7 Mar 2023)
+ - Replaced `sign_message` owner with `msg_owner`
+ - Removed `sign_message` source (now in `msg_owner`)
+ - NTCIP: store `msg_owner` in dmsMessageOwner object
+ - Renamed msg priorities to `low_1, low_2 ..., medium_*, high_*``
+ - Removed tag reader properties which are now in `settings`
+ - Fixed problems in CAP alert processing
+
 5.41.0 (28 Feb 2023)
  - Add support for 6C coalition tolling tags
  - Add tag reader `settings` JSON column
