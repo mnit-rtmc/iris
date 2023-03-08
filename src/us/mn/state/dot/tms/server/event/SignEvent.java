@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ public class SignEvent extends BaseEvent {
 	private final String multi;
 
 	/** Message owner */
-	private final String owner;
+	private final String msg_owner;
 
 	/** Duration (minutes) */
 	private final Integer duration;
@@ -76,7 +76,7 @@ public class SignEvent extends BaseEvent {
 		assert isSignEvent(et);
 		device_id = d;
 		multi = m;
-		owner = o;
+		msg_owner = o;
 		duration = dur;
 	}
 
@@ -94,7 +94,7 @@ public class SignEvent extends BaseEvent {
 		map.put("event_date", new Timestamp(event_date.getTime()));
 		map.put("device_id", device_id);
 		map.put("multi", multi);
-		map.put("owner", owner);
+		map.put("msg_owner", msg_owner);
 		map.put("duration", duration);
 		return map;
 	}

@@ -145,7 +145,7 @@ public class SignMessageCreator {
 			return sm;
 		String name = createName(prefix);
 		if (name != null) {
-			return create(name, sc, inc, multi, owner, fb, mp, src,
+			return create(name, sc, inc, multi, owner, fb, mp,
 			              duration);
 		} else
 			return null;
@@ -160,13 +160,12 @@ public class SignMessageCreator {
 	 * @param msg_owner Message owner.
 	 * @param fb Flash beacon.
 	 * @param mp Message priority.
-	 * @param src Sign message source bits.
 	 * @param duration Message duration; null for indefinite.
 	 * @return Proxy of new sign message, or null on error.
 	 */
 	private SignMessage create(String name, SignConfig sc, String inc,
 		String multi, String msg_owner, boolean fb, SignMsgPriority mp,
-		int src, Integer duration)
+		Integer duration)
 	{
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("sign_config", sc);
@@ -176,7 +175,6 @@ public class SignMessageCreator {
 		attrs.put("msg_owner", msg_owner);
 		attrs.put("flash_beacon", fb);
 		attrs.put("msg_priority", Integer.valueOf(mp.ordinal()));
-		attrs.put("source", Integer.valueOf(src));
 		if (duration != null)
 			attrs.put("duration", duration);
 		sign_messages.createObject(name, attrs);
