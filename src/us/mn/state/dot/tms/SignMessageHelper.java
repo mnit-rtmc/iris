@@ -78,14 +78,14 @@ public class SignMessageHelper extends BaseHelper {
 	/** Find a sign message with matching attributes.
 	 * @param sc Sign configuration.
 	 * @param inc Associated incident (original name).
-	 * @param multi MULTI string.
+	 * @param ms MULTI string.
 	 * @param owner Message owner.
 	 * @param fb Flash beacon flag.
 	 * @param mp Message priority.
-	 * @param d Duration (null for indefinite).
+	 * @param dur Duration (null for indefinite).
 	 * @return Matching sign message, or null if not found. */
-	static public SignMessage find(SignConfig sc, String inc, String multi,
-		String owner, boolean fb, SignMsgPriority mp, Integer d)
+	static public SignMessage find(SignConfig sc, String inc, String ms,
+		String owner, boolean fb, SignMsgPriority mp, Integer dur)
 	{
 		int mpi = mp.ordinal();
 		Iterator<SignMessage> it = iterator();
@@ -93,11 +93,11 @@ public class SignMessageHelper extends BaseHelper {
 			SignMessage sm = it.next();
 			if (objectEquals(sc, sm.getSignConfig()) &&
 			    objectEquals(inc, sm.getIncident()) &&
-			    multi.equals(sm.getMulti()) &&
+			    ms.equals(sm.getMulti()) &&
 			    objectEquals(owner, sm.getMsgOwner()) &&
 			    fb == sm.getFlashBeacon() &&
 			    mpi == sm.getMsgPriority() &&
-			    objectEquals(d, sm.getDuration()))
+			    objectEquals(dur, sm.getDuration()))
 				return sm;
 		}
 		return null;
