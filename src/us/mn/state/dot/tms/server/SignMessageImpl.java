@@ -21,10 +21,12 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
@@ -40,6 +42,12 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Sign msg debug log */
 	static private final DebugLog MSG_LOG = new DebugLog("sign_msg");
+
+	/** Log an error */
+	static private void logErr(String msg) {
+		if (MSG_LOG.isOpen())
+			MSG_LOG.log(msg);
+	}
 
 	/** Last allocated system message ID */
 	static private int last_id = 0;
@@ -59,6 +67,42 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		if (last_id < 0)
 			last_id = 0;
 		return "system_" + last_id;
+	}
+
+	/** Find or create a sign message.
+	 * @param sc Sign configuration.
+	 * @param inc Associated incident (original name).
+	 * @param ms MULTI string for message.
+	 * @param owner Message owner.
+	 * @param fb Flash beacon flag.
+	 * @param mp Message priority.
+	 * @param dur Duration in minutes; null means indefinite.
+	 * @return New sign message, or null on error. */
+	static public SignMessage findOrCreate(SignConfig sc, String inc,
+		String ms, String owner, boolean fb, SignMsgPriority mp,
+		Integer dur)
+	{
+		if (sc == null)
+			return null;
+		SignMessage esm = SignMessageHelper.find(sc, inc, ms, owner,
+			fb, mp, dur);
+		if (esm != null)
+			return esm;
+		// no matching message found, create it
+		SignMessageImpl sm = new SignMessageImpl(sc, inc, ms, owner,
+			fb, mp, dur);
+		try {
+			sm.notifyCreate();
+			return sm;
+		}
+		catch (SonarException e) {
+			// This can pretty much only happen when the SONAR task
+			// processor does not store the sign message within 30
+			// seconds.  It *shouldn't* happen, but there may be
+			// a rare bug which triggers it.
+			logErr("createNotify: " + e.getMessage());
+			return null;
+		}
 	}
 
 	/** Load all the sign messages */
@@ -121,31 +165,31 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	}
 
 	/** Create a sign message */
-	private SignMessageImpl(String n, String sc, String inc, String m,
-		String o, boolean fb, int mp, Integer d)
+	private SignMessageImpl(String n, String sc, String inc, String ms,
+		String owner, boolean fb, int mp, Integer dur)
 	{
 		super(n);
 		sign_config = SignConfigHelper.lookup(sc);
 		incident = inc;
-		multi = m;
-		msg_owner = o;
+		multi = ms;
+		msg_owner = owner;
 		flash_beacon = fb;
 		msg_priority = mp;
-		duration = d;
+		duration = dur;
 	}
 
 	/** Create a new sign message (by IRIS) */
-	public SignMessageImpl(SignConfig sc, String inc, String m, String o,
-		boolean fb, SignMsgPriority mp, Integer d)
+	private SignMessageImpl(SignConfig sc, String inc, String ms,
+		String owner, boolean fb, SignMsgPriority mp, Integer dur)
 	{
 		super(createUniqueName());
 		sign_config = sc;
 		incident = inc;
-		multi = m;
-		msg_owner = o;
+		multi = ms;
+		msg_owner = owner;
 		flash_beacon = fb;
 		msg_priority = mp.ordinal();
-		duration = d;
+		duration = dur;
 		logMsg("created (server)");
 	}
 

@@ -592,83 +592,22 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		src |= SignMsgSource.blank.bit();
 		String owner = SignMessageHelper.makeMsgOwner(src);
 		SignMsgPriority mp = SignMsgPriority.low_1;
-		return findOrCreateMsg(null, "", owner, false, mp, null);
+		return SignMessageImpl.findOrCreate(sign_config, null, "",
+			owner, false, mp, null);
 	}
 
 	/** Create a message for the sign.
-	 * @param m MULTI string for message.
-	 * @param o Message owner.
+	 * @param ms MULTI string for message.
+	 * @param owner Message owner.
 	 * @param fb Flash beacon flag.
 	 * @param mp Message priority.
-	 * @param d Duration in minutes; null means indefinite.
+	 * @param dur Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	public SignMessage createMsg(String m, String o, boolean fb,
-		SignMsgPriority mp, Integer d)
+	public SignMessage createMsg(String ms, String owner, boolean fb,
+		SignMsgPriority mp, Integer dur)
 	{
-		return createMsg(null, m, o, fb, mp, d);
-	}
-
-	/** Create a message for the sign.
-	 * @param inc Associated incident (original name).
-	 * @param m MULTI string for message.
-	 * @param o Message owner.
-	 * @param fb Flash beacon flag.
-	 * @param mp Message priority.
-	 * @param d Duration in minutes; null means indefinite.
-	 * @return New sign message, or null on error. */
-	private SignMessage createMsg(String inc, String m, String o,
-		boolean fb, SignMsgPriority mp, Integer d)
-	{
-		return findOrCreateMsg(inc, m, o, fb, mp, d);
-	}
-
-	/** Find or create a sign message.
-	 * @param inc Associated incident (original name).
-	 * @param m MULTI string for message.
-	 * @param o Message owner.
-	 * @param fb Flash beacon flag.
-	 * @param mp Message priority.
-	 * @param d Duration in minutes; null means indefinite.
-	 * @return New sign message, or null on error. */
-	private SignMessage findOrCreateMsg(String inc, String m, String o,
-		boolean fb, SignMsgPriority mp, Integer d)
-	{
-		SignMessage esm = SignMessageHelper.find(sign_config, inc, m,
-			o, fb, mp, d);
-		if (esm != null)
-			return esm;
-		else
-			return createMsgNotify(inc, m, o, fb, mp, d);
-	}
-
-	/** Create a new sign message and notify clients.
-	 * @param inc Associated incident (original name).
-	 * @param m MULTI string for message.
-	 * @param o Message owner.
-	 * @param fb Flash beacon flag.
-	 * @param mp Message priority.
-	 * @param d Duration in minutes; null means indefinite.
-	 * @return New sign message, or null on error. */
-	private SignMessage createMsgNotify(String inc, String m, String o,
-		boolean fb, SignMsgPriority mp, Integer d)
-	{
-		SignConfig sc = sign_config;
-		if (null == sc)
-			return null;
-		SignMessageImpl sm = new SignMessageImpl(sc, inc, m, o, fb,
-			mp, d);
-		try {
-			sm.notifyCreate();
-			return sm;
-		}
-		catch (SonarException e) {
-			// This can pretty much only happen when the SONAR task
-			// processor does not store the sign message within 30
-			// seconds.  It *shouldn't* happen, but there may be
-			// a rare bug which triggers it.
-			logError("createMsgNotify: " + e.getMessage());
-			return null;
-		}
+		return SignMessageImpl.findOrCreate(sign_config, null, ms,
+			owner, fb, mp, dur);
 	}
 
 	/** Create a scheduled message.
@@ -677,15 +616,17 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private SignMessage createMsgSched(DmsActionMsg amsg) {
 		assert (amsg != null);
 		DmsAction da = amsg.action;
+		String ms = amsg.getMulti();
+		int src = amsg.getSources();
+		String owner = SignMessageHelper.makeMsgOwner(src,
+			da.getActionPlan().getName());
 		MsgPattern pat = da.getMsgPattern();
 		boolean fb = (pat != null) && pat.getFlashBeacon();
 		SignMsgPriority mp = SignMsgPriority.fromOrdinal(
 			da.getMsgPriority());
-		int src = amsg.getSources();
-		String owner = SignMessageHelper.makeMsgOwner(src,
-			da.getActionPlan().getName());
-		return createMsg(amsg.getMulti(), owner, fb, mp,
-			getDuration(da));
+		Integer dur = getDuration(da);
+		return SignMessageImpl.findOrCreate(sign_config, null, ms,
+			owner, fb, mp, dur);
 	}
 
 	/** Get the duration of a DMS action.
@@ -995,7 +936,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		String unm = SignMessageHelper.getMsgOwnerName(user);
 		String owner = SignMessageHelper.makeMsgOwner(src, unm);
 		Integer dur = user.getDuration();
-		return createMsg(inc, ms, owner, fb, mp, dur);
+		return SignMessageImpl.findOrCreate(sign_config, inc, ms,
+			owner, fb, mp, dur);
 	}
 
 	/** Compare sign messages for higher priority */
