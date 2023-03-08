@@ -315,7 +315,7 @@ const DMS_STAT_RES: Resource = Resource::Simple(
     "dms_message",
     Listen::Include("dms", &["msg_current"]),
     "SELECT row_to_json(r)::text FROM (\
-      SELECT name, msg_current, failed, sources, duration, expire_time \
+      SELECT name, msg_current, failed, duration, expire_time \
       FROM dms_message_view WHERE condition = 'Active' \
       ORDER BY name\
     ) r",
