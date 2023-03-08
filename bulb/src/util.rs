@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ where
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match &self.0 {
-            Some(v) => write!(f, "{}", v),
+            Some(v) => write!(f, "{v}"),
             None => Ok(()),
         }
     }
@@ -134,7 +134,7 @@ impl<S> HtmlStr<S> {
                 '>' => write!(f, "&gt;")?,
                 '"' => write!(f, "&quot;")?,
                 '\'' => write!(f, "&#x27;")?,
-                _ => write!(f, "{}", c)?,
+                _ => write!(f, "{c}")?,
             }
         }
         Ok(())

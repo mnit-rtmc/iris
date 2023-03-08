@@ -1,6 +1,6 @@
 // fetcher.rs
 //
-// Copyright (C) 2018-2021  Minnesota Department of Transportation
+// Copyright (C) 2018-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ pub fn start() -> Result<()> {
 pub fn create_client(db: &str) -> Result<Client> {
     let username = whoami::username();
     // Format path for unix domain socket -- not worth using percent_encode
-    let uds = format!("postgres://{}@%2Frun%2Fpostgresql/{}", username, db);
+    let uds = format!("postgres://{username}@%2Frun%2Fpostgresql/{db}");
     let mut client = Client::connect(&uds, NoTls).context("connect to DB")?;
     // The postgres crate sets the session time zone to UTC.
     // We need to set it back to LOCAL time zone, so that row_to_json
@@ -45,7 +45,7 @@ pub fn create_client(db: &str) -> Result<Client> {
     // the LOCAL and DEFAULT zones are also reset to UTC, so the PGTZ
     // environment variable must be used for this purpose.
     if let Some(tz) = time_zone() {
-        let time_zone = format!("SET TIME ZONE '{}'", tz);
+        let time_zone = format!("SET TIME ZONE '{tz}'");
         client
             .execute(&time_zone[..], &[])
             .context("set time zone")?;

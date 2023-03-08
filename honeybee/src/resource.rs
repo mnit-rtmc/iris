@@ -33,7 +33,7 @@ pub fn make_name(dir: &Path, n: &str) -> PathBuf {
 
 /// Make a PathBuf for a backup file
 pub fn make_backup_name(dir: &Path, n: &str) -> PathBuf {
-    make_name(dir, &format!("{}~", n))
+    make_name(dir, &format!("{n}~"))
 }
 
 /// Listen enum for postgres NOTIFY events
@@ -1015,7 +1015,7 @@ pub fn listen_all(client: &mut Client) -> Result<()> {
         }
     }
     for channel in channels {
-        let listen = format!("LISTEN {}", channel);
+        let listen = format!("LISTEN {channel}");
         client.execute(&listen[..], &[])?;
     }
     Ok(())

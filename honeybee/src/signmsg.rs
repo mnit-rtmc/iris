@@ -493,7 +493,7 @@ impl MsgData {
         let cfg = &s.sign_config;
         match self.configs.get(cfg) {
             Some(c) => Ok(c),
-            None => Err(UnknownResourceError::new(format!("Config: {}", cfg))),
+            None => Err(UnknownResourceError::new(format!("Config: {cfg}"))),
         }
     }
 
@@ -503,7 +503,7 @@ impl MsgData {
             Some(fname) => match self.fonts.lookup_name(fname) {
                 Some(font) => Ok(font.number()),
                 None => {
-                    Err(UnknownResourceError::new(format!("Font: {}", fname)))
+                    Err(UnknownResourceError::new(format!("Font: {fname}")))
                 }
             },
             None => Ok(1),

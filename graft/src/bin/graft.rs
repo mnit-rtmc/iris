@@ -499,7 +499,7 @@ fn make_name(res: &'static str, nm: &str) -> Result<String> {
     if nm.len() > 64 || nm.contains(invalid_char) || nm.contains('/') {
         Err(SonarError::InvalidName)
     } else {
-        Ok(format!("{}/{}", res, nm))
+        Ok(format!("{res}/{nm}"))
     }
 }
 
@@ -513,7 +513,7 @@ fn make_att(res: &'static str, nm: &str, att: &str) -> Result<String> {
         } else {
             att.to_case(Case::Camel)
         };
-        Ok(format!("{}/{}", nm, att))
+        Ok(format!("{nm}/{att}"))
     }
 }
 
