@@ -90,7 +90,7 @@ pub struct SignMessage {
     pub sign_config: String,
     pub incident: Option<String>,
     pub multi: String,
-    pub msg_owner: Option<String>,
+    pub msg_owner: String,
     pub flash_beacon: bool,
     pub msg_priority: u32,
     pub duration: Option<u32>,
@@ -146,8 +146,7 @@ impl DmsAnc {
             (Some(messages), Some(msg)) => messages
                 .iter()
                 .find(|m| m.name == msg)
-                .filter(|m| m.msg_owner.is_some())
-                .map(|m| m.msg_owner.as_deref().unwrap()),
+                .map(|m| &m.msg_owner[..]),
             _ => None,
         }
     }
