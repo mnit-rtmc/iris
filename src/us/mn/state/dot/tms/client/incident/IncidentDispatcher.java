@@ -692,18 +692,18 @@ public class IncidentDispatcher extends IPanel
 	}
 
 	/** Send new sign message to a DMS */
-	public void sendMessage(String dn, Incident inc, String multi,
-		Integer duration)
+	public void sendMessage(String dn, Incident inc, String ms,
+		Integer dur)
 	{
 		SignMsgPriority mp = IncidentHelper.getPriority(inc);
 		String inc_orig = IncidentHelper.getOriginalName(inc);
-		if (multi != null && mp != null) {
+		if (ms != null && mp != null) {
 			DMS dms = DMSHelper.lookup(dn);
 			if (dms != null) {
 				SignConfig sc = dms.getSignConfig();
 				if (sc != null) {
-					sendMessage(dms, sc, inc_orig, multi,
-						mp, duration);
+					sendMessage(dms, sc, inc_orig, ms,
+						mp, dur);
 				}
 			}
 		}
@@ -712,12 +712,12 @@ public class IncidentDispatcher extends IPanel
 	/** Send new sign message to the specified DMS */
 	private void sendMessage(final DMS dms, final SignConfig sc,
 		final String inc_orig, final String ms,
-		final SignMsgPriority mp, final Integer duration)
+		final SignMsgPriority mp, final Integer dur)
 	{
 		runSwing(new Runnable() {
 			public void run() {
-				SignMessage sm = sm_creator.create(sc, inc_orig,
-					ms, mp, duration);
+				SignMessage sm = sm_creator.createMsg(sc,
+					inc_orig, ms, mp, dur);
 				if (sm != null)
 					dms.setMsgUser(sm);
 			}

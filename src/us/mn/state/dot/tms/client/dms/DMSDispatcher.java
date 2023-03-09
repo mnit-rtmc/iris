@@ -134,7 +134,7 @@ public class DMSDispatcher extends JPanel {
 		for (DMS dms: sel_mdl.getSelected()) {
 			SignConfig sc = dms.getSignConfig();
 			if (sc != null) {
-				SignMessage sm = creator.createBlankMessage(sc);
+				SignMessage sm = creator.createMsgBlank(sc);
 				if (sm != null)
 					dms.setMsgUser(sm);
 			}
@@ -380,7 +380,7 @@ public class DMSDispatcher extends JPanel {
 		else {
 			boolean fb = composer.getFlashBeacon();
 			Integer d = composer.getDuration();
-			return creator.create(sc, ms, fb, d);
+			return creator.createMsg(sc, ms, fb, d);
 		}
 	}
 
@@ -391,7 +391,7 @@ public class DMSDispatcher extends JPanel {
 		String inc_orig = IncidentHelper.getOriginalName(inc);
 		SignMsgPriority mp = IncidentHelper.getPriority(inc);
 		Integer d = composer.getDuration();
-		return creator.create(sc, inc_orig, ms, mp, d);
+		return creator.createMsg(sc, inc_orig, ms, mp, d);
 	}
 
 	/** Update the selected sign(s) */
