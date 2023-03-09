@@ -34,12 +34,6 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
  */
 public class SignMessageCreator {
 
-	/** Create sign message name prefix.
-	 * @param src Sign message source bits. */
-	static private String createPrefix(int src) {
-		return SignMsgSource.blank.checkBit(src) ? "blank_" : "user_";
-	}
-
 	/** Message source bits for incident messages */
 	static private final int INCIDENT_SRC =
 		SignMsgSource.operator.bit() | SignMsgSource.incident.bit();
@@ -137,7 +131,7 @@ public class SignMessageCreator {
 			fb, mp, dur);
 		if (sm != null)
 			return sm;
-		String name = createName(src);
+		String name = createName();
 		return (name != null)
 		      ? createMsg(name, sc, inc, ms, owner, fb, mp, dur)
 		      : null;
@@ -178,23 +172,21 @@ public class SignMessageCreator {
 			return null;
 	}
 
-	/** Create a sign message name.
-	 * @param src Sign message source bits. */
-	private String createName(int src) {
-		String name = createUniqueSignMessageName(src);
+	/** Create a sign message name */
+	private String createName() {
+		String name = createUniqueSignMessageName();
 		return canAddSignMessage(name) ? name : null;
 	}
 
 	/** Create a SignMessage name.  The form of the name is prefix + hash
-	 * of user name with uid appended.
-	 * @param src Sign message source bits. */
-	private String createUniqueSignMessageName(int src) {
+	 * of user name with uid appended. */
+	private String createUniqueSignMessageName() {
 		// NOTE: uid needs to persist between calls so that calling
 		// this method twice in a row doesn't return the same name
 		final int uid_max = sign_messages.size() + MAX_IN_PROCESS_NAMES;
 		for (int i = 0; i < uid_max; i++) {
 			final int _uid = (uid + i) % uid_max + 1;
-			String n = createName(src, _uid);
+			String n = createName(_uid);
 			if (sign_messages.lookupObject(n) == null) {
 				uid = _uid;
 				return n;
@@ -205,12 +197,10 @@ public class SignMessageCreator {
 	}
 
 	/** Create a SignMessage name.
-	 * @param src Sign message source bits.
 	 * @param i ID of name.
 	 * @return Name of SignMessage. */
-	private String createName(int src, int i) {
-		String prefix = createPrefix(src);
-		return prefix + Integer.toHexString((user + i).hashCode());
+	private String createName(int i) {
+		return "user_" + Integer.toHexString((user + i).hashCode());
 	}
 
 	/** Check if the user can add the named sign message */
@@ -220,6 +210,6 @@ public class SignMessageCreator {
 
 	/** Check if the user can create a sign message */
 	public boolean canCreate() {
-		return canAddSignMessage(createName(0, 0));
+		return canAddSignMessage(createName(0));
 	}
 }
