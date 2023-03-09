@@ -135,10 +135,9 @@ public class SignMessageCreator {
 		String owner = SignMessageHelper.makeMsgOwner(src, user);
 		SignMessage sm = SignMessageHelper.find(sc, inc, ms, owner,
 			fb, mp, dur);
-		String prefix = createPrefix(src);
-		if (sm != null && sm.getName().startsWith(prefix))
+		if (sm != null)
 			return sm;
-		String name = createName(prefix);
+		String name = createName(src);
 		return (name != null)
 		      ? createMsg(name, sc, inc, ms, owner, fb, mp, dur)
 		      : null;
@@ -180,22 +179,22 @@ public class SignMessageCreator {
 	}
 
 	/** Create a sign message name.
-	 * @param prefix Prefix to use for name. */
-	private String createName(String prefix) {
-		String name = createUniqueSignMessageName(prefix);
+	 * @param src Sign message source bits. */
+	private String createName(int src) {
+		String name = createUniqueSignMessageName(src);
 		return canAddSignMessage(name) ? name : null;
 	}
 
 	/** Create a SignMessage name.  The form of the name is prefix + hash
 	 * of user name with uid appended.
-	 * @param prefix Prefix to use for name. */
-	private String createUniqueSignMessageName(String prefix) {
+	 * @param src Sign message source bits. */
+	private String createUniqueSignMessageName(int src) {
 		// NOTE: uid needs to persist between calls so that calling
 		// this method twice in a row doesn't return the same name
 		final int uid_max = sign_messages.size() + MAX_IN_PROCESS_NAMES;
 		for (int i = 0; i < uid_max; i++) {
 			final int _uid = (uid + i) % uid_max + 1;
-			String n = createName(prefix, _uid);
+			String n = createName(src, _uid);
 			if (sign_messages.lookupObject(n) == null) {
 				uid = _uid;
 				return n;
@@ -206,9 +205,11 @@ public class SignMessageCreator {
 	}
 
 	/** Create a SignMessage name.
+	 * @param src Sign message source bits.
 	 * @param i ID of name.
 	 * @return Name of SignMessage. */
-	private String createName(String prefix, int i) {
+	private String createName(int src, int i) {
+		String prefix = createPrefix(src);
 		return prefix + Integer.toHexString((user + i).hashCode());
 	}
 
@@ -219,6 +220,6 @@ public class SignMessageCreator {
 
 	/** Check if the user can create a sign message */
 	public boolean canCreate() {
-		return canAddSignMessage(createName(createPrefix(0), 0));
+		return canAddSignMessage(createName(0, 0));
 	}
 }
