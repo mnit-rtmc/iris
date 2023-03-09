@@ -34,7 +34,7 @@ public class SignMessageHelper extends BaseHelper {
 
 	/** Lookup the sign message with the specified name */
 	static public SignMessage lookup(String name) {
-		return (SignMessage)namespace.lookupObject(
+		return (SignMessage) namespace.lookupObject(
 			SignMessage.SONAR_TYPE, name);
 	}
 
@@ -105,13 +105,8 @@ public class SignMessageHelper extends BaseHelper {
 
 	/** Check if a sign message is blank */
 	static public boolean isBlank(SignMessage sm) {
-		return (null == sm) || isMultiBlank(sm);
-	}
-
-	/** Check if the MULTI string is blank */
-	static private boolean isMultiBlank(SignMessage sm) {
-		String ms = sm.getMulti();
-		return ms == null || new MultiString(ms).isBlank();
+		return (null == sm) ||
+		       new MultiString(sm.getMulti()).isBlank();
 	}
 
 	/** Get source bits for a sign message */
