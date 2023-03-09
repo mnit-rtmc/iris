@@ -300,6 +300,40 @@ public class AlertData {
 		       SystemAttrEnum.ALERT_SIGN_THRESH_OPT_METERS.getInt();
 	}
 
+	/** Lookup an alert period for a set of alert messages */
+	static private AlertPeriod lookupPeriod(Set<AlertMessage> msgs) {
+		AlertPeriod period = null;
+		for (AlertMessage msg: msgs) {
+			AlertPeriod ap = AlertPeriod.fromOrdinal(
+				msg.getAlertPeriod());
+			if (ap == null || (period != null && period != ap))
+				log("invalid alert message: " + msg);
+			else
+				period = ap;
+		}
+		return period;
+	}
+
+	/** Lookup a phase name for an alert config / period */
+	static private String lookupPhase(AlertConfig cfg, AlertPeriod ap) {
+		if (ap == null)
+			return null;
+		switch (ap) {
+			case BEFORE:
+				return (cfg.getBeforePeriodHours() > 0)
+				      ? PlanPhase.ALERT_BEFORE
+				      : null;
+			case DURING:
+				return PlanPhase.ALERT_DURING;
+			case AFTER:
+				return (cfg.getAfterPeriodHours() > 0)
+				      ? PlanPhase.ALERT_AFTER
+				      : null;
+			default:
+				return null;
+		}
+	}
+
 	/** Alert identifier */
 	private final String identifier;
 
@@ -517,14 +551,20 @@ public class AlertData {
 		{
 			MsgPattern pat = ent.getKey();
 			Set<AlertMessage> p_msgs = ent.getValue();
+			String ph = lookupPhase(cfg, lookupPeriod(p_msgs));
+			phase = PlanPhaseHelper.lookup(ph);
+			if (phase == null) {
+				if (ph != null)
+					log("plan phase not found: " + ph);
+				continue;
+			}
 			Set<DMS> signs = lookupSigns(p_msgs);
 			signs.retainAll(plan_dms);
 			if (signs.isEmpty())
 				continue;
 			signs.retainAll(auto_dms);
 			String ht = createHashtags(plan, "a" + num, signs);
-			for (AlertMessage msg: p_msgs)
-				createDmsAction(plan, msg, ht);
+			createDmsAction(plan, ht, phase, pat);
 			num++;
 		}
 		return plan;
@@ -641,45 +681,12 @@ public class AlertData {
 		return ht;
 	}
 
-	/** Create DMS action for an alert message */
-	private void createDmsAction(ActionPlanImpl plan, AlertMessage msg,
-		String ht) throws SonarException
-	{
-		AlertPeriod ap = AlertPeriod.fromOrdinal(msg.getAlertPeriod());
-		MsgPattern pat = msg.getMsgPattern();
-		if (ap == null || pat == null) {
-			log("invalid alert message: " + msg);
-			return;
-		}
-		AlertConfig cfg = msg.getAlertConfig();
-		switch (ap) {
-		case BEFORE:
-			if (cfg.getBeforePeriodHours() > 0) {
-				createDmsAction(plan, ht,
-					PlanPhase.ALERT_BEFORE, pat);
-			}
-			break;
-		case DURING:
-			createDmsAction(plan, ht, PlanPhase.ALERT_DURING, pat);
-			break;
-		case AFTER:
-			if (cfg.getAfterPeriodHours() > 0) {
-				createDmsAction(plan, ht, PlanPhase.ALERT_AFTER,
-					pat);
-			}
-			break;
-		}
-	}
-
 	/** Create a DMS action for an action plan */
 	private void createDmsAction(ActionPlanImpl plan, String ht,
-		String ph, MsgPattern pat) throws SonarException
+		PlanPhase phase, MsgPattern pat) throws SonarException
 	{
 		String tmpl = plan.getName() + "_%d";
 		String dname = DmsActionImpl.createUniqueName(tmpl);
-		PlanPhase phase = PlanPhaseHelper.lookup(ph);
-		if (phase == null)
-			log("plan phase not found, " + ph);
 		int mp = SignMsgPriority.low_4.ordinal();
 		DmsActionImpl da = new DmsActionImpl(dname, plan, phase, ht,
 			pat, mp);
