@@ -14,7 +14,7 @@ The following features are supported:
 * Sending and displaying [sign message]s
 * Querying [sign configuration] information
 * Querying diagnostic information
-* Querying or sending [fonts]
+* Querying or sending [font]s
 * Sending [graphic images] to be displayed
 * [Travel time] estimation
 * [Variable speed advisories]
@@ -27,9 +27,9 @@ Sign configuration is queried from a sign controller when communication is
 established.  It consists of:
 - Physical dimensions (height, width, border, pixel pitch)
 - Pixel dimensions and style (char-, line- or full-matrix)
-- Color scheme
+- Color scheme or monochrome colors
 
-Each unique configuration has a default font, which can be changed by an
+Each unique configuration has a default [font], which can be changed by an
 administrator.
 
 ## Setup
@@ -104,7 +104,7 @@ minutes.
 [beacon]: beacons.html
 [comm link]: comm_links.html
 [DMS actions]: action_plans.html#dms-actions
-[fonts]: fonts.html
+[font]: fonts.html
 [graphic images]: graphics.html
 [lane-use MULTI]: lcs.html#lane-use-multi
 [message pattern]: message_patterns.html
