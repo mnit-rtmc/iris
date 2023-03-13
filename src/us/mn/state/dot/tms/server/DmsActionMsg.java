@@ -243,7 +243,7 @@ public class DmsActionMsg {
 	/** Get the MULTI string for the DMS action */
 	private String getActionMulti() {
 		MsgPattern pat = action.getMsgPattern();
-		return (pat != null) ? pat.getMulti().trim() : "";
+		return (pat != null) ? pat.getMulti().trim() : EMPTY_SPAN;
 	}
 
 	/** Process a DMS action */
@@ -263,6 +263,9 @@ public class DmsActionMsg {
 		}
 		@Override public void addSpeedAdvisory() {
 			addSpan(speedAdvisorySpan());
+		}
+		@Override public void addStandby() {
+			addSource(SignMsgSource.standby);
 		}
 		@Override public void addClearGuideAdvisory(
 			String dms, int rid, int tsp, String mode, int ridx)
