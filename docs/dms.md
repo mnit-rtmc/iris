@@ -11,8 +11,8 @@ configurations are supported.
 The following features are supported:
 
 * Querying currently displayed message
-* Sending and displaying new messages
-* Querying configuration information
+* Sending and displaying [sign message]s
+* Querying [sign configuration] information
 * Querying diagnostic information
 * Querying or sending [fonts]
 * Sending [graphic images] to be displayed
@@ -21,9 +21,20 @@ The following features are supported:
 * [Slow traffic] warnings
 * Checking banned or allowed [word] lists
 
+## Configuration
+
+Sign configuration is queried from a sign controller when communication is
+established.  It consists of:
+- Physical dimensions (height, width, border, pixel pitch)
+- Pixel dimensions and style (char-, line- or full-matrix)
+- Color scheme
+
+Each unique configuration has a default font, which can be changed by an
+administrator.
+
 ## Setup
 
-The DMS properties form can be used to configure the sign.
+The DMS properties form has setup information.
 
 Field          | Description
 ---------------|-------------------------------------------------
@@ -71,7 +82,20 @@ When a DMS is selected, a few things happen:
 When a pattern is selected, a series of selectors is populated with message
 lines, depending on the text rectangles of that pattern.  The message preview
 is updated as the message is being composed.  Once complete, pressing the
-**Send** button will put the message onto the DMS.
+**Send** button will create a [sign message] and put it onto the DMS.
+
+## Sign Messages
+
+A sign message contains all information needed to display a message:
+- [sign configuration]
+- [MULTI] string
+- owner (`system`; `sources`; `user`)
+- priority (`low_1`, `low_2`,... `low_4`, `medium_1`,... `high_1`,... `high_4`)
+- duration (minutes)
+
+Messages are created when operators compose them, and also when [DMS actions]
+are scheduled.  They are deleted automatically after being unused for a few
+minutes.
 
 
 [action tags]: action_plans.html#dms-action-tags
@@ -84,7 +108,10 @@ is updated as the message is being composed.  Once complete, pressing the
 [graphic images]: graphics.html
 [lane-use MULTI]: lcs.html#lane-use-multi
 [message pattern]: message_patterns.html
+[MULTI]: multi.html
 [NTCIP]: comm_links.html#ntcip
+[sign configuration]: dms.html#configuration
+[sign message]: dms.html#sign-messages
 [Slow traffic]: slow_warning.html
 [Travel time]: travel_time.html
 [Variable speed advisories]: vsa.html
