@@ -25,6 +25,7 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.sonar.server.ServerNamespace;
+import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import us.mn.state.dot.tms.server.event.BaseEvent;
@@ -459,7 +460,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			if (u != null)
 				return u;
 		}
-		return "IRIS user";
+		return BaseHelper.USER_AUTO;
 	}
 
 	/** Notify SONAR clients of an object created */

@@ -46,7 +46,7 @@ public class SignMessageHelper extends BaseHelper {
 
 	/** Make a message owner string */
 	static public String makeMsgOwner(int src) {
-		return "IRIS; " + SignMsgSource.toString(src);
+		return makeMsgOwner(src, USER_AUTO);
 	}
 
 	/** Make a message owner string with name */
