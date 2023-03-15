@@ -319,7 +319,7 @@ const DMS_STAT_RES: Resource = Resource::Simple(
     Listen::Include("dms", &["msg_current"]),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, msg_current, \
-             replace(substring(msg_owner FROM 'IRIS; (.*);.*'), '+', ', ') \
+             replace(substring(msg_owner FROM 'IRIS; ([^;]*).*'), '+', ', ') \
              AS sources, failed, duration, expire_time \
       FROM dms_message_view WHERE condition = 'Active' \
       ORDER BY name\
