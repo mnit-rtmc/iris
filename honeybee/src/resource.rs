@@ -311,11 +311,16 @@ const DMS_PUB_RES: Resource = Resource::Simple(
 );
 
 /// DMS status resource
+///
+/// NOTE: the `sources` attribute is deprecated,
+///       but required by external systems (for now)
 const DMS_STAT_RES: Resource = Resource::Simple(
     "dms_message",
     Listen::Include("dms", &["msg_current"]),
     "SELECT row_to_json(r)::text FROM (\
-      SELECT name, msg_current, failed, duration, expire_time \
+      SELECT name, msg_current, \
+             replace(substring(msg_owner FROM 'IRIS; (.*);.*'), '+', ', ') \
+             AS sources, failed, duration, expire_time \
       FROM dms_message_view WHERE condition = 'Active' \
       ORDER BY name\
     ) r",
