@@ -109,7 +109,7 @@ Priorities determine precedence between operator messages and [DMS actions].
 | `low_4`: 4   | `medium_4`: 9    | `high_4`: 14   |
 | `low_sys`: 5 | `medium_sys`: 10 | `high_sys`: 15 |
 
-Messages composed by operators have `high_1` priority.  Cleared incidents use
+Messages composed by operators have `high_1` priority.  [Cleared incidents] use
 the `low_sys` priority.  Messages sent by external systems are assigned to
 `medium_sys`.
 
@@ -118,6 +118,7 @@ the `low_sys` priority.  Messages sent by external systems are assigned to
 [alert configurations]: alert.html#dms-hashtags
 [alert messages]: alert.html#alert-messages
 [beacon]: beacons.html
+[cleared incidents]: incident_dms.html#clearing
 [comm link]: comm_links.html
 [DMS actions]: action_plans.html#dms-actions
 [font]: fonts.html

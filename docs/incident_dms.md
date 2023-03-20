@@ -189,12 +189,14 @@ devices and devices to be blanked.
 When a `major` severity incident is cleared, a new message will be sent to each
 linked sign.  The _descriptor_ and _locator_ will be the same, but _advice_
 will be taken from the `incident_clear_advice_multi` [system attribute].  The
-_cleared_ message will be deployed with `PSA` message priority for 5 minutes.
+_cleared_ message will be deployed with `low_sys` [message priority] for 5
+minutes.
 
 
 [allowed words]: words.html
 [DMS]: dms.html
 [exits]: road_topology.html#r_node-types
+[message priority]: dms.html#message-priority
 [MULTI]: multi.html
 [pickable]: road_topology.html#pickable
 [system attribute]: system_attributes.html
