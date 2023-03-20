@@ -90,12 +90,28 @@ A sign message contains all information needed to display a message:
 - [sign configuration]
 - [MULTI] string
 - owner (`system`; `sources`; `user`)
-- priority (`low_1`, `low_2`,... `low_4`, `medium_1`,... `high_1`,... `high_4`)
+- [priority]
 - duration (minutes)
 
 Messages are created when operators compose them, and also when [DMS actions]
 are scheduled.  They are deleted automatically after being unused for a few
 minutes.
+
+### Message Priority
+
+Priorities determine precedence between operator messages and [DMS actions].
+
+| Low          | Medium           | High           |
+|--------------|------------------|----------------|
+| `low_1`: 1   | `medium_1`: 6    | `high_1`: 11   |
+| `low_2`: 2   | `medium_2`: 7    | `high_2`: 12   |
+| `low_3`: 3   | `medium_3`: 8    | `high_3`: 13   |
+| `low_4`: 4   | `medium_4`: 9    | `high_4`: 14   |
+| `low_sys`: 5 | `medium_sys`: 10 | `high_sys`: 15 |
+
+Messages composed by operators have `high_1` priority.  Cleared incidents use
+the `low_sys` priority.  Messages sent by external systems are assigned to
+`medium_sys`.
 
 
 [action tags]: action_plans.html#dms-action-tags
@@ -110,6 +126,7 @@ minutes.
 [message pattern]: message_patterns.html
 [MULTI]: multi.html
 [NTCIP]: comm_links.html#ntcip
+[priority]: dms.html#message-priority
 [sign configuration]: dms.html#configuration
 [sign message]: dms.html#sign-messages
 [Slow traffic]: slow_warning.html
