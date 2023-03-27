@@ -103,11 +103,11 @@ Priorities determine precedence between operator messages and [DMS actions].
 
 | Low          | Medium           | High           |
 |--------------|------------------|----------------|
-| `low_1`: 1   | `medium_1`: 6    | `high_1`: 11   |
-| `low_2`: 2   | `medium_2`: 7    | `high_2`: 12   |
-| `low_3`: 3   | `medium_3`: 8    | `high_3`: 13   |
-| `low_4`: 4   | `medium_4`: 9    | `high_4`: 14   |
-| `low_sys`: 5 | `medium_sys`: 10 | `high_sys`: 15 |
+| 1: `low_1`   | 6: `medium_1`    | 11: `high_1`   |
+| 2: `low_2`   | 7: `medium_2`    | 12: `high_2`   |
+| 3: `low_3`   | 8: `medium_3`    | 13: `high_3`   |
+| 4: `low_4`   | 9: `medium_4`    | 14: `high_4`   |
+| 5: `low_sys` | 10: `medium_sys` | 15: `high_sys` |
 
 Messages composed by operators have `high_1` priority.  [Cleared incidents] use
 the `low_sys` priority.  Messages sent by external systems are assigned to
