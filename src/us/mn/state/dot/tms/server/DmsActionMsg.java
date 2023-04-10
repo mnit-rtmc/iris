@@ -307,7 +307,7 @@ public class DmsActionMsg {
 		MultiString _multi = builder.toMultiString();
 		if (isBlank(_multi))
 			return (valid) ? feed_msg : null;
-	 	else
+		else
 			return postProcess(_multi.toString());
 	}
 

@@ -4513,9 +4513,9 @@ GRANT SELECT ON parking_area_view TO PUBLIC;
 -- Ramp Meters
 --
 CREATE TABLE iris.meter_type (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(32) NOT NULL,
-	lanes INTEGER NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(32) NOT NULL,
+    lanes INTEGER NOT NULL
 );
 
 COPY iris.meter_type (id, description, lanes) FROM stdin;
@@ -4525,8 +4525,8 @@ COPY iris.meter_type (id, description, lanes) FROM stdin;
 \.
 
 CREATE TABLE iris.meter_algorithm (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(32) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(32) NOT NULL
 );
 
 COPY iris.meter_algorithm (id, description) FROM stdin;
@@ -4666,17 +4666,17 @@ CREATE TABLE iris.meter_action (
 );
 
 CREATE VIEW meter_action_view AS
-	SELECT ramp_meter, ta.phase, time_of_day, day_plan, sched_date
-	FROM iris.meter_action ma, iris.action_plan ap, iris.time_action ta
-	WHERE ma.action_plan = ap.name
-	AND ap.name = ta.action_plan
-	AND active = true
-	ORDER BY ramp_meter, time_of_day;
+    SELECT ramp_meter, ta.phase, time_of_day, day_plan, sched_date
+    FROM iris.meter_action ma, iris.action_plan ap, iris.time_action ta
+    WHERE ma.action_plan = ap.name
+    AND ap.name = ta.action_plan
+    AND active = true
+    ORDER BY ramp_meter, time_of_day;
 GRANT SELECT ON meter_action_view TO PUBLIC;
 
 CREATE TABLE event.meter_phase (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(16) NOT NULL
 );
 
 COPY event.meter_phase (id, description) FROM stdin;
@@ -4687,8 +4687,8 @@ COPY event.meter_phase (id, description) FROM stdin;
 \.
 
 CREATE TABLE event.meter_queue_state (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(16) NOT NULL
 );
 
 COPY event.meter_queue_state (id, description) FROM stdin;
@@ -4699,8 +4699,8 @@ COPY event.meter_queue_state (id, description) FROM stdin;
 \.
 
 CREATE TABLE event.meter_limit_control (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(16) NOT NULL
 );
 
 COPY event.meter_limit_control (id, description) FROM stdin;
@@ -4712,37 +4712,37 @@ COPY event.meter_limit_control (id, description) FROM stdin;
 \.
 
 CREATE TABLE event.meter_event (
-	event_id SERIAL PRIMARY KEY,
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter
-		ON DELETE CASCADE,
-	phase INTEGER NOT NULL REFERENCES event.meter_phase,
-	q_state INTEGER NOT NULL REFERENCES event.meter_queue_state,
-	q_len REAL NOT NULL,
-	dem_adj REAL NOT NULL,
-	wait_secs INTEGER NOT NULL,
-	limit_ctrl INTEGER NOT NULL REFERENCES event.meter_limit_control,
-	min_rate INTEGER NOT NULL,
-	rel_rate INTEGER NOT NULL,
-	max_rate INTEGER NOT NULL,
-	d_node VARCHAR(10),
-	seg_density REAL NOT NULL
+    event_id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_desc_id INTEGER NOT NULL
+        REFERENCES event.event_description(event_desc_id),
+    ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter
+        ON DELETE CASCADE,
+    phase INTEGER NOT NULL REFERENCES event.meter_phase,
+    q_state INTEGER NOT NULL REFERENCES event.meter_queue_state,
+    q_len REAL NOT NULL,
+    dem_adj REAL NOT NULL,
+    wait_secs INTEGER NOT NULL,
+    limit_ctrl INTEGER NOT NULL REFERENCES event.meter_limit_control,
+    min_rate INTEGER NOT NULL,
+    rel_rate INTEGER NOT NULL,
+    max_rate INTEGER NOT NULL,
+    d_node VARCHAR(10),
+    seg_density REAL NOT NULL
 );
 
 CREATE VIEW meter_event_view AS
-	SELECT event_id, event_date, event_description.description,
-	       ramp_meter, meter_phase.description AS phase,
-	       meter_queue_state.description AS q_state, q_len, dem_adj,
-	       wait_secs, meter_limit_control.description AS limit_ctrl,
-	       min_rate, rel_rate, max_rate, d_node, seg_density
-	FROM event.meter_event
-	JOIN event.event_description
-	ON meter_event.event_desc_id = event_description.event_desc_id
-	JOIN event.meter_phase ON phase = meter_phase.id
-	JOIN event.meter_queue_state ON q_state = meter_queue_state.id
-	JOIN event.meter_limit_control ON limit_ctrl = meter_limit_control.id;
+    SELECT event_id, event_date, event_description.description,
+           ramp_meter, meter_phase.description AS phase,
+           meter_queue_state.description AS q_state, q_len, dem_adj,
+           wait_secs, meter_limit_control.description AS limit_ctrl,
+           min_rate, rel_rate, max_rate, d_node, seg_density
+    FROM event.meter_event
+    JOIN event.event_description
+    ON meter_event.event_desc_id = event_description.event_desc_id
+    JOIN event.meter_phase ON phase = meter_phase.id
+    JOIN event.meter_queue_state ON q_state = meter_queue_state.id
+    JOIN event.meter_limit_control ON limit_ctrl = meter_limit_control.id;
 GRANT SELECT ON meter_event_view TO PUBLIC;
 
 --
