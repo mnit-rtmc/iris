@@ -141,10 +141,8 @@ public class PavementSensorsTable {
 			black_ice_signal = new ASN1Enum<SurfaceBlackIceSignal>(
 				SurfaceBlackIceSignal.class,
 				essSurfaceBlackIceSignal.node, row);
-			// Note: friction coefficient is not part of pavement
-			//       table (even though it *should* be)
 			friction = new PercentObject("friction",
-				essMobileFriction.makeInt());
+				pavementSensorFrictionCoefficient.makeInt(row));
 		}
 
 		/** Get the sensor location */

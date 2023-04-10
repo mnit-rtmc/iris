@@ -2,7 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2017  SRF Consulting Group
  * Copyright (C) 2017-2021  Iteris Inc.
- * Copyright (C) 2019-2022  Minnesota Department of Transportation
+ * Copyright (C) 2019-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,11 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
 
 /**
- * MIB nodes for NTCIP 1204 -
- *  Object Definitions for Environmental Sensor Stations (ESS)
+ * MIB nodes for NTCIP 1204 - Environmental Sensor Stations (ESS)
  *
  * @author John L. Stanley - SRF Consulting
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public enum MIB1204 {
 	ess					(MIB1201.devices, 5),
@@ -118,8 +118,8 @@ public enum MIB1204 {
 	      essVisibility			(essNtcipVisibility, 1),
 	      essVisibilitySituation		(essNtcipVisibility, 3),
 	    essNtcipPavement			(essNtcip, 9),
-              numEssPavementSensors		(essNtcipPavement, 1),
-              essPavementSensorTable		(essNtcipPavement, 2),
+	      numEssPavementSensors		(essNtcipPavement, 1),
+	      essPavementSensorTable		(essNtcipPavement, 2),
 	        essPavementSensorEntry		(essPavementSensorTable, 1),
 	          essPavementSensorIndex	(essPavementSensorEntry, 1),
 	          essPavementSensorLocation	(essPavementSensorEntry, 2),
@@ -138,9 +138,17 @@ public enum MIB1204 {
 	          essPavementSensorError	(essPavementSensorEntry, 15),
 	          essSurfaceIceOrWaterDepth	(essPavementSensorEntry, 16),
 	          essSurfaceConductivityV2	(essPavementSensorEntry, 17),
-		  pavementSensorModelInformation(essPavementSensorEntry, 18),
-		  pavementSensorTemperatureDepth(essPavementSensorEntry, 19),
-              numEssSubSurfaceSensors		(essNtcipPavement, 3),
+	          pavementSensorModelInformation(essPavementSensorEntry, 18),
+	          pavementSensorTemperatureDepth(essPavementSensorEntry, 19),
+	          pavementSensorLatitude	(essPavementSensorEntry, 20), // V4
+	          pavementSensorLongitude	(essPavementSensorEntry, 21), // V4
+	          pavementSensorSurfaceCondition(essPavementSensorEntry, 22), // V4
+	          pavementSensorForecastCondition(essPavementSensorEntry, 23), // V4
+	          pavementSensorFrictionCoefficient(essPavementSensorEntry, 24), // V4
+	          pavementMonitorLatitude	(essPavementSensorEntry, 25), // V4
+	          pavementMonitorLongitude	(essPavementSensorEntry, 26), // V4
+	          pavementIcePercentage		(essPavementSensorEntry, 27), // V4
+	      numEssSubSurfaceSensors		(essNtcipPavement, 3),
 	      essSubSurfaceSensorTable		(essNtcipPavement, 4),
 	        essSubSurfaceSensorEntry	(essSubSurfaceSensorTable, 1),
 	          essSubSurfaceSensorIndex	(essSubSurfaceSensorEntry, 1),

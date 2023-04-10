@@ -20,7 +20,9 @@ import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.EssRec;
+import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.essMobileFriction;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorsTable;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PercentObject;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.SubSurfaceSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.TemperatureSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.WindSensorsTable;
@@ -293,14 +295,19 @@ public class OpQueryEssStatus extends OpEss {
 			mess.add(ps_table.num_sensors);
 			mess.queryProps();
 			logQuery(ps_table.num_sensors);
-			return ps_table.isDone()
-			      ? new QuerySubSurface()
-			      : new QueryPavementTable();
+			return nextPavementRow();
 		}
 	}
 
-	/** Phase to query rows in pavement table */
-	protected class QueryPavementTable extends Phase {
+	/** Get phase to query next pavement sensor row */
+	private Phase nextPavementRow() {
+		return ps_table.isDone()
+		      ? new QuerySubSurface()
+		      : new QueryPavementRow();
+	}
+
+	/** Phase to query one pavement sensor row */
+	protected class QueryPavementRow extends Phase {
 		private final PavementSensorsTable.Row pr =
 			ps_table.addRow();
 
@@ -321,66 +328,38 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(pr.sensor_error);
 			logQuery(pr.salinity);
 			logQuery(pr.black_ice_signal);
-			// only read friction for the first row
-			return (pr.number == 1)
-			      ? new QueryFrictionCoefficient(pr)
-			      : new QueryPavementTableV2(pr);
+			return new QueryPavementRowV2(pr);
 		}
 	}
 
-	/** Phase to query friction coefficient.
-	 * Note: some vendors support essMobileFriction for permanent stations
-	 *       (non-mobile).  We'll pretend it's part of the pavement sensors
-	 *       table (first row only), because that's where it should be. */
-	protected class QueryFrictionCoefficient extends Phase {
+	/** Phase to query one pavement sensor row (V2) */
+	protected class QueryPavementRowV2 extends Phase {
 		private final PavementSensorsTable.Row pr;
-		private QueryFrictionCoefficient(PavementSensorsTable.Row r) {
+		private QueryPavementRowV2(PavementSensorsTable.Row r) {
 			pr = r;
 		}
 
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(pr.friction.node);
-			try {
-				mess.queryProps();
-				logQuery(pr.friction.node);
-			}
-			catch (NoSuchName e) {
-				// Note: some vendors do not support this object
-			}
-			return new QueryPavementTableV2(pr);
-		}
-	}
-
-	/** Phase to query pavement table data (V2) */
-	protected class QueryPavementTableV2 extends Phase {
-		private final PavementSensorsTable.Row pr;
-		private QueryPavementTableV2(PavementSensorsTable.Row r) {
-			pr = r;
-		}
-
-		@SuppressWarnings("unchecked")
-		protected Phase poll(CommMessage mess) throws IOException {
+			// Note: this object was introduced in V2
 			mess.add(pr.ice_or_water_depth);
 			// Note: essSurfaceConductivityV2 could be polled here
 			try {
 				mess.queryProps();
 				logQuery(pr.ice_or_water_depth);
-				return ps_table.isDone()
-				      ? new QuerySubSurface()
-				      : new QueryPavementTable();
+				return new QueryPavementRowV4(pr);
 			}
 			catch (NoSuchName e) {
-				// Note: this object was introduced in V2
-				return new QueryPavementTableV1(pr);
+				// Fallback to V1 water depth
+				return new QueryPavementRowV1(pr);
 			}
 		}
 	}
 
-	/** Phase to query pavement table data (V1) */
-	protected class QueryPavementTableV1 extends Phase {
+	/** Phase to query one pavement sensor row (V1) */
+	protected class QueryPavementRowV1 extends Phase {
 		private final PavementSensorsTable.Row pr;
-		private QueryPavementTableV1(PavementSensorsTable.Row r) {
+		private QueryPavementRowV1(PavementSensorsTable.Row r) {
 			pr = r;
 		}
 
@@ -395,9 +374,61 @@ public class OpQueryEssStatus extends OpEss {
 			catch (NoSuchName e) {
 				// Note: this object was deprecated in V2
 			}
-			return ps_table.isDone()
-			      ? new QuerySubSurface()
-			      : new QueryPavementTable();
+			return nextPavementRow();
+		}
+	}
+
+	/** Phase to query one pavement sensor row (V4) */
+	protected class QueryPavementRowV4 extends Phase {
+		private final PavementSensorsTable.Row pr;
+		private QueryPavementRowV4(PavementSensorsTable.Row r) {
+			pr = r;
+		}
+
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			// Note: this object was added in V4
+			mess.add(pr.friction.node);
+			try {
+				mess.queryProps();
+				logQuery(pr.friction.node);
+			}
+			catch (NoSuchName e) {
+				// Fallback to mobile friction (1st row only)
+				if (pr.number == 1)
+					return new QueryMobileFriction(pr);
+			}
+			return nextPavementRow();
+		}
+	}
+
+	/** Phase to query mobile friction (as fallback).
+	 * Note: some vendors support essMobileFriction for permanent stations
+	 *       (non-mobile).  We'll pretend it's part of the pavement sensors
+	 *       table (first row only). */
+	protected class QueryMobileFriction extends Phase {
+		private final PavementSensorsTable.Row pr;
+		private QueryMobileFriction(PavementSensorsTable.Row r) {
+			pr = r;
+		}
+
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			// Note: mobile friction is not part of pavement table
+			PercentObject mf = new PercentObject("friction",
+				essMobileFriction.makeInt());
+			mess.add(mf.node);
+			try {
+				mess.queryProps();
+				logQuery(mf.node);
+				pr.friction.node.setInteger(
+					mf.node.getInteger()
+				);
+			}
+			catch (NoSuchName e) {
+				// Note: some vendors do not support this object
+			}
+			return nextPavementRow();
 		}
 	}
 
