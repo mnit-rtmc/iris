@@ -642,8 +642,8 @@ public class IncidentDispatcher extends IPanel
 
 	/** Clear an incident */
 	private void clearIncident(Incident inc) {
-		inc.setCleared(true);
 		ArrayList<DMS> signs = IncidentHelper.getDeployedSigns(inc);
+		inc.setCleared(true);
 		if (signs.size() > 0) {
 			HashMap<String, String> msgs = clearedMessages(inc,
 				signs);
