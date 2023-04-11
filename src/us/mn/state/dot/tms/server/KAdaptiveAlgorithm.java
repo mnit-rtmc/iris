@@ -335,8 +335,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			MeterState ms = new MeterState(meter, en);
 			meter_states.put(meter.getName(), ms);
 			return true;
-		} else
+		} else {
+			if (ALG_LOG.isOpen())
+				log("No entrance node " + meter.getName());
 			return false;
+		}
 	}
 
 	/** Find an entrance node matching the given ramp meter.
