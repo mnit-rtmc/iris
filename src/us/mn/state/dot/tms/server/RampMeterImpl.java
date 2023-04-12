@@ -66,17 +66,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Default maximum wait time (in seconds) */
 	static public final int DEFAULT_MAX_WAIT = 240;
 
-	/** Lookup a single green detector in a sampler set */
-	static private DetectorImpl lookupGreen(SamplerSet ss) {
-		SamplerSet greens = ss.filter(LaneCode.GREEN);
-		if (1 == greens.size()) {
-			VehicleSampler vs = greens.getAll().get(0);
-			if (vs instanceof DetectorImpl)
-				return (DetectorImpl) vs;
-		}
-		return null;
-	}
-
 	/** Filter a releae rate for valid range */
 	static public int filterRate(int r) {
 		r = Math.max(r, getMinRelease());
@@ -630,7 +619,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		if (s != null)
 			s.validate(this);
 		else
-			logError("No algorithm state");
+			logError("validateAlgorithm: No state");
 	}
 
 	/** Ramp meter queue status */
@@ -800,7 +789,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 				if (cd_road != null)
 					cd_road.findActiveNode(finder);
 			}
-		}
+		} else
+			logError("getSamplerSet: no corridor");
 		return new SamplerSet(finder.samplers);
 	}
 
@@ -864,6 +854,18 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		green_det = lookupGreen(ss);
 	}
 
+	/** Lookup a single green detector in a sampler set */
+	private DetectorImpl lookupGreen(SamplerSet ss) {
+		SamplerSet greens = ss.filter(LaneCode.GREEN);
+		if (1 == greens.size()) {
+			VehicleSampler vs = greens.getAll().get(0);
+			if (vs instanceof DetectorImpl)
+				return (DetectorImpl) vs;
+		}
+		logError("lookupGreen: wrong size " + greens.size());
+		return null;
+	}
+
 	/** Get the corridor containing the ramp meter */
 	public Corridor getCorridor() {
 		return corridors.getCorridor(geo_loc);
@@ -895,6 +897,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			if (n instanceof R_NodeImpl)
 				return (R_NodeImpl) n;
 		}
+		logError("getR_Node: No green det");
 		return null;
 	}
 
@@ -909,6 +912,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		GeoLoc loc = n.getGeoLoc();
 		if (isSameCorridor(loc))
 			return n;
+		if (isDeviceLogging())
+			logError("findEntrance: corridor mismatch " + n);
 		Corridor c = corridors.getCorridor(loc);
 		if (c != null)
 			return c.findActiveNode(new EntranceFinder());

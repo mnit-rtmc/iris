@@ -335,11 +335,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			MeterState ms = new MeterState(meter, en);
 			meter_states.put(meter.getName(), ms);
 			return true;
-		} else {
-			if (ALG_LOG.isOpen())
-				log("No entrance node " + meter.getName());
+		} else
 			return false;
-		}
 	}
 
 	/** Find an entrance node matching the given ramp meter.
@@ -347,12 +344,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @return Entrance node matching ramp meter. */
 	private EntranceNode findEntranceNode(RampMeterImpl meter) {
 		R_NodeImpl rnode = meter.getEntranceNode();
+		if (null == rnode) {
+			if (ALG_LOG.isOpen())
+				log("No entrance node " + meter.getName());
+			return null;
+		}
 		for (Node n = head; n != null; n = n.downstream) {
 			if (n instanceof EntranceNode) {
-				EntranceNode en = (EntranceNode)n;
+				EntranceNode en = (EntranceNode) n;
 				if (en.rnode.equals(rnode))
 					return en;
 			}
+		}
+		if (ALG_LOG.isOpen()) {
+			log("Entrance " + rnode.getName() + " for " +
+				meter.getName() + " not found");
 		}
 		return null;
 	}
