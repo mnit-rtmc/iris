@@ -172,9 +172,10 @@ public class OpQueryEssStatus extends OpEss {
 		/** Query values */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			// NOTE: some old stations don't support spot wind
 			mess.add(ws_table.avg_direction.node);
 			mess.add(ws_table.avg_speed.node);
+			mess.add(ws_table.spot_direction.node);
+			mess.add(ws_table.spot_speed.node);
 			mess.add(ws_table.gust_direction.node);
 			mess.add(ws_table.gust_speed.node);
 			try {
@@ -186,28 +187,10 @@ public class OpQueryEssStatus extends OpEss {
 			}
 			logQuery(ws_table.avg_direction.node);
 			logQuery(ws_table.avg_speed.node);
+			logQuery(ws_table.spot_direction.node);
+			logQuery(ws_table.spot_speed.node);
 			logQuery(ws_table.gust_direction.node);
 			logQuery(ws_table.gust_speed.node);
-			return new QuerySpotWindV1();
-		}
-	}
-
-	/** Phase to query spot wind values (V1) */
-	protected class QuerySpotWindV1 extends Phase {
-
-		/** Query values */
-		@SuppressWarnings("unchecked")
-		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(ws_table.spot_direction.node);
-			mess.add(ws_table.spot_speed.node);
-			try {
-				mess.queryProps();
-				logQuery(ws_table.spot_direction.node);
-				logQuery(ws_table.spot_speed.node);
-			}
-			catch (NoSuchName e) {
-				// we tried...
-			}
 			return new QueryTemperatureSensors();
 		}
 	}
