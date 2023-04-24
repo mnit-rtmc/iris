@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2015  Minnesota Department of Transportation
+ * Copyright (C) 2002-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,6 +92,14 @@ abstract public class BER extends ASN1 {
 	/** Encode an integer value */
 	protected void encodeInteger(int value) throws IOException {
 		byte[] buffer = new byte[4];
+		int len = encodeInt(value, buffer);
+		encodeIdentifier(ASN1Tag.INTEGER);
+		encodeLength(len);
+		encoder.write(buffer, 0, len);
+	}
+
+	/** Encode an integer value */
+	private int encodeInt(int value, byte[] buffer) throws IOException {
 		int len = 0;
 		boolean flag = false;
 		for (int shift = 23; shift > 0; shift -= 8) {
@@ -99,10 +107,17 @@ abstract public class BER extends ASN1 {
 			if (test != 0 && test != 0x1FF)
 				flag = true;
 			if (flag)
-				buffer[len++] = (byte)(test >> 1);
+				buffer[len++] = (byte) (test >> 1);
 		}
-		buffer[len++] = (byte)(value & 0xFF);
-		encodeIdentifier(ASN1Tag.INTEGER);
+		buffer[len++] = (byte) (value & 0xFF);
+		return len;
+	}
+
+	/** Encode a Counter value */
+	public void encodeCounter(int value) throws IOException {
+		byte[] buffer = new byte[4];
+		int len = encodeInt(value, buffer);
+		encodeIdentifier(SNMPTag.COUNTER);
 		encodeLength(len);
 		encoder.write(buffer, 0, len);
 	}
@@ -207,13 +222,18 @@ abstract public class BER extends ASN1 {
 		// dmsFreeVolatileMemory as INTEGER_SKYLINE instead of INTEGER
 		if (tag != ASN1Tag.INTEGER && tag != SNMPTag.INTEGER_SKYLINE)
 			throw new ParsingException("EXPECTED AN INTEGER TAG");
+		return decodeInt(is);
+	}
+
+	/** Decode an integer length/value */
+	private int decodeInt(InputStream is) throws IOException {
 		int length = decodeLength(is);
 		if (length < 1 || length > 4)
 			throw new ParsingException("INVALID INTEGER LENGTH");
 		int value = is.read();
 		if (value < 0)
 			throw END_OF_STREAM;
-		value = (byte)value;	// NOTE: cast to preserve sign
+		value = (byte) value;  // NOTE: cast to preserve sign
 		for (int i = 1; i < length; i++) {
 			value <<= 8;
 			int v = is.read();
@@ -222,6 +242,14 @@ abstract public class BER extends ASN1 {
 			value |= v;
 		}
 		return value;
+	}
+
+	/** Decode a counter */
+	public int decodeCounter(InputStream is) throws IOException {
+		Tag tag = decodeIdentifier(is);
+		if (tag != SNMPTag.COUNTER)
+			throw new ParsingException("EXPECTED COUNTER");
+		return decodeInt(is);
 	}
 
 	/** Decode an octet string */
