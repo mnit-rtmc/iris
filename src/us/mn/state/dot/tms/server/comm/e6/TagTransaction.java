@@ -52,6 +52,7 @@ public class TagTransaction extends E6Property {
 		sego_read_verify_page        (0x3022, 20),
 		sego_read_regular            (0x3023, 6),
 		seen_frame_count             (0x3043, 6),
+		// NOTE: the page 9 transaction is obsolete
 		sego_read_streamlined_page_9 (0x3070, 21+7),
 		iag_read                     (0x5026, 35+7),
 		iag_read_authenticated       (0x5030, 35+7),
@@ -165,6 +166,7 @@ public class TagTransaction extends E6Property {
 	/** Check if transaction is a valid SeGo streamlined read */
 	private boolean isSeGoReadValid() {
 		TransactionType tt = getTransactionType();
+		// NOTE: the page 9 transaction is obsolete
 		return (TransactionType.sego_read_streamlined_page_4 == tt
 		     || TransactionType.sego_read_streamlined_page_9 == tt)
 		     && isLengthValid()
