@@ -16,14 +16,9 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
-import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
-import us.mn.state.dot.tms.server.comm.ntcip.mib1201.GlobalDaylightSaving;
-import static us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201.globalDaylightSaving;
-import static us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201.globalTime;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.EssRec;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.essMobileFriction;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorsTable;
@@ -31,8 +26,6 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PercentObject;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.SubSurfaceSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.TemperatureSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.WindSensorsTable;
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
-import us.mn.state.dot.tms.server.comm.snmp.Counter;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 
 /**
@@ -70,68 +63,7 @@ public class OpQueryEssStatus extends OpEss {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase phaseTwo() {
-		// Some versions of LX model RPUs (v1.38?) contain a bug which
-		// causes objects in tables (air temp / wind sensor) to update
-		// only once every 12 hours or so.  The workaround is to set the
-		// RPU clock (globalTime) whenever polling this data.
-		// FIXME: does this workaround have the intended effect?
-		return (getSoftwareModel().contains("LX"))
-			? new QueryGlobalTime()
-			: new QueryPressure();
-	}
-
-	/** Phase to query global time */
-	private class QueryGlobalTime extends Phase {
-
-		@SuppressWarnings("unchecked")
-		protected Phase poll(CommMessage mess) throws IOException {
-			Counter global_time = new Counter(globalTime.node);
-			ASN1Enum<GlobalDaylightSaving> global_dst =
-				new ASN1Enum<GlobalDaylightSaving>(
-				GlobalDaylightSaving.class,
-				globalDaylightSaving.node);
-			mess.add(global_time);
-			mess.add(global_dst);
-			try {
-				mess.queryProps();
-				logQuery(global_time);
-				logQuery(global_dst);
-				return new SetGlobalTime();
-			}
-			catch (ControllerException e) {
-				System.err.println("QueryGlobalTime: " +
-					e.getMessage());
-			}
-			return new QueryPressure();
-		}
-	}
-
-	/** Phase to set global time */
-	private class SetGlobalTime extends Phase {
-
-		@SuppressWarnings("unchecked")
-		protected Phase poll(CommMessage mess) throws IOException {
-			Counter global_time = new Counter(globalTime.node);
-			long ms = TimeSteward.currentTimeMillis();
-			global_time.setInteger((int) (ms / 1000));
-			ASN1Enum<GlobalDaylightSaving> global_dst =
-				new ASN1Enum<GlobalDaylightSaving>(
-				GlobalDaylightSaving.class,
-				globalDaylightSaving.node);
-			global_dst.setEnum(GlobalDaylightSaving.disableDST);
-			mess.add(global_time);
-			mess.add(global_dst);
-			try {
-				logStore(global_time);
-				logStore(global_dst);
-				mess.storeProps();
-			}
-			catch (ControllerException e) {
-				System.err.println("SetGlobalTime: " +
-					e.getMessage());
-			}
-			return new QueryPressure();
-		}
+		return new QueryPressure();
 	}
 
 	/** Phase to query atmospheric pressure */
@@ -175,7 +107,6 @@ public class OpQueryEssStatus extends OpEss {
 		// the wind sensor table to update only once every 12 hours or
 		// so.  The workaround is to query the (deprecated) wind sensor
 		// objects from 1204v1 (for LX controllers only).
-		// FIXME: may be unnecessary in favor of globalTime workaround
 		return (getSoftwareModel().contains("LX"))
 			? new QueryWindSensorV1()
 			: new QueryWindSensorsV2();
