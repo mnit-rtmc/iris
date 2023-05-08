@@ -29,7 +29,7 @@ purged automatically when older than the value of the `alarm_event_purge_days`
 [system attribute].
 
 
-[MnDOT-170]: comm_links.html#mndot-170
+[MnDOT-170]: protocols.html#mndot-170
 [permissions]: user_roles.html#permissions
-[protocol]: comm_links.html#protocols
+[protocol]: protocols.html
 [system attribute]: system_attributes.html

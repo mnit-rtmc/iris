@@ -70,12 +70,12 @@ the value of the `beacon_event_purge_days` [system attribute].
 
 [action plans]: action_plans.html
 [beacon actions]: action_plans.html#beacon-actions
-[CBW]: comm_links.html#cbw
-[Din-Relay]: comm_links.html#din-relay
+[CBW]: protocols.html#cbw
+[Din-Relay]: protocols.html#din-relay
 [DMS]: dms.html
-[MnDOT-170]: comm_links.html#mndot-170
-[Natch]: comm_links.html#natch
-[NTCIP]: comm_links.html#ntcip
+[MnDOT-170]: protocols.html#mndot-170
+[Natch]: protocols.html#natch
+[NTCIP]: protocols.html#ntcip
 [permissions]: user_roles.html#permissions
 [remote]: dms.html#setup
 [system attribute]: system_attributes.html

@@ -126,7 +126,7 @@ the `low_sys` priority.  Messages sent by external systems are assigned to
 [lane-use MULTI]: lcs.html#lane-use-multi
 [message pattern]: message_patterns.html
 [MULTI]: multi.html
-[NTCIP]: comm_links.html#ntcip
+[NTCIP]: protocols.html#ntcip
 [priority]: dms.html#message-priority
 [sign configuration]: dms.html#configuration
 [sign message]: dms.html#sign-messages

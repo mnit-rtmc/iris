@@ -111,7 +111,7 @@ RTMS [G4] vlog         | N/A             | [vlog]
 [NTCIP]                | 0-255 sec       | Count, Occupancy
 
 For protocols which allow the binning intereval to be adjusted, it will be set
-to the poll [period] of the comm link.
+to the poll [period] of the [comm config].
 
 ## Auto Fail
 
@@ -322,26 +322,27 @@ indicates missing data.  Any data outside the valid ranges should be considered
 _missing_.
 
 
-[Canoga]: comm_links.html#canoga
+[Canoga]: protocols.html#canoga
+[comm config]: comm_config.html
 [comm link]: comm_links.html
 [controller]: controllers.html
 [district]: installation.html#server-properties
-[DR-500]: comm_links.html#dr-500
-[DXM]: comm_links.html#dxm
-[G4]: comm_links.html#g4
+[DR-500]: protocols.html#dr-500
+[DXM]: protocols.html#dxm
+[G4]: protocols.html#g4
 [IO pins]: controllers.html#io-pins
 [Mayfly]: https://github.com/mnit-rtmc/iris/tree/master/mayfly
-[MnDOT-170]: comm_links.html#mndot-170
-[Natch]: comm_links.html#natch
-[NTCIP]: comm_links.html#ntcip
+[MnDOT-170]: protocols.html#mndot-170
+[Natch]: protocols.html#natch
+[NTCIP]: protocols.html#ntcip
 [Parking area]: parking_areas.html
-[period]: comm_links.html#poll-period
-[protocols]: comm_links.html#protocols
+[period]: protocols.html#poll-period
+[protocols]: protocols.html
 [r_node]: road_topology.html#r_nodes
 [Ramp metering]: ramp_meters.html
 [road topology]: road_topology.html
 [roads]: road_topology.html#roads
-[SmartSensor]: comm_links.html#smartsensor
+[SmartSensor]: protocols.html#smartsensor
 [station]: road_topology.html#r_node-types
 [system attribute]: system_attributes.html
 [Tolling]: tolling.html

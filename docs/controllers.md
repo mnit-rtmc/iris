@@ -78,7 +78,12 @@ Each controller has a set of **IO pins** for connecting [devices](#devices) or
 [flow streams].  Every _device_ or _flow stream_ must be assigned to an _IO pin_
 to be used.  The function of these pins is [protocol] specific.
 
-## Cabinet Style Resources
+# Cabinet Styles
+
+Controllers can have an associated cabinet style, used for MnDOT-170 and Natch
+[protocol]s.
+
+## Resources
 
 * `iris/api/cabinet_style`
 * `iris/api/cabinet_style/{name}`
@@ -92,18 +97,19 @@ to be used.  The function of these pins is [protocol] specific.
 [alarms]: alarms.html
 [beacons]: beacons.html
 [cameras]: cameras.html
-[CBW]: comm_links.html#cbw
+[CBW]: protocols.html#cbw
 [comm link]: comm_links.html
 [dynamic message signs]: dms.html
 [flow streams]: flow_streams.html
 [gate arms]: gate_arms.html
 [GPS]: gps.html
 [lane-use control signs]: lcs.html
-[protocol]: comm_links.html#protocols
-[NTCIP]: comm_links.html#ntcip
+[permissions]: user_roles.html#permissions
+[protocol]: protocols.html
+[NTCIP]: protocols.html#ntcip
 [ramp meters]: ramp_meters.html
 [road weather information systems]: rwis.html
-[SierraGX]: comm_links.html#sierragx
+[SierraGX]: protocols.html#sierragx
 [tag readers]: tolling.html#tag-readers
 [vehicle detection systems]: vehicle_detection.html
 [video monitors]: video.html

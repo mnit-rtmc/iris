@@ -100,5 +100,5 @@ Key                           | Value
 _† Wind direction in degrees clockwise from due north_.
 
 
-[NTCIP]: comm_links.html#ntcip
-[ORG-815]: comm_links.html#org815
+[NTCIP]: protocols.html#ntcip
+[ORG-815]: protocols.html#org815

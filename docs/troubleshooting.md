@@ -91,26 +91,26 @@ Filename               | Description
 
 
 [Alert]: alerts.html
-[Canoga]: comm_links.html#canoga
-[CAP]: comm_links.html#cap
-[CBW]: comm_links.html#cbw
-[DIN-Relay]: comm_links.html#din-relay
+[Canoga]: protocols.html#canoga
+[CAP]: protocols.html#cap
+[CBW]: protocols.html#cbw
+[DIN-Relay]: protocols.html#din-relay
 [district]: installation.html#server-properties
-[DMS-XML]: comm_links.html#dms-xml
-[E6]: comm_links.html#e6
-[G4]: comm_links.html#g4
-[Infinova]: comm_links.html#infinova
-[Manchester]: comm_links.html#manchester
-[MnDOT-170]: comm_links.html#mndot-170
-[Msg-Feed]: comm_links.html#msg-feed
-[NTCIP]: comm_links.html#ntcip
-[ORG-815]: comm_links.html#org815
-[Pelco-D]: comm_links.html#pelco-d
+[DMS-XML]: protocols.html#dms-xml
+[E6]: protocols.html#e6
+[G4]: protocols.html#g4
+[Infinova]: protocols.html#infinova
+[Manchester]: protocols.html#manchester
+[MnDOT-170]: protocols.html#mndot-170
+[Msg-Feed]: protocols.html#msg-feed
+[NTCIP]: protocols.html#ntcip
+[ORG-815]: protocols.html#org815
+[Pelco-D]: protocols.html#pelco-d
 [slow traffic]: slow_warning.html
 [station]: road_topology.html#r_node-types
-[SS105]: comm_links.html#smartsensor
-[SS125]: comm_links.html#smartsensor
-[STC]: comm_links.html#stc
+[SS105]: protocols.html#smartsensor
+[SS125]: protocols.html#smartsensor
+[STC]: protocols.html#stc
 [system attribute]: system_attributes.html
 [Variable speed advisory]: vsa.html
 [vehicle detection systems]: vehicle_detection.html

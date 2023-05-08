@@ -141,9 +141,9 @@ Otherwise, requests will be made directly to the camera's encoder address.
 [iris-client.properties]: client_properties.html
 [MonStream]: video.html#monstream
 [multicast]: https://en.wikipedia.org/wiki/Multicast_address
-[Pelco-P]: comm_links.html#pelcop
+[Pelco-P]: protocols.html#pelcop
 [play list]: video.html#play-lists
-[protocol]: comm_links.html#protocols
+[protocol]: protocols.html
 [ramp meter]: ramp_meters.html
 [SDP]: https://en.wikipedia.org/wiki/Session_Description_Protocol
 [streambed]: https://github.com/mnit-rtmc/streambed

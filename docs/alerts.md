@@ -66,8 +66,7 @@ and loaded into the `tms` database.
 
 To load geometry data, download the latest [Public Forecast Zones] shapefile
 to the IRIS server and unzip it.  To import the file, execute the following
-command on the
-server:
+command on the server:
 ```
 shp2pgsql -G <nws_shapefile>.shp cap.nws_zones | psql tms
 ```
@@ -252,7 +251,7 @@ so care must be taken to ensure the testing is done in a controlled manner.
 
 [action tags]: action_plans.html#dms-action-tags
 [alert configuration]: #alert-configuration
-[comm config]: comm_links.html#comm-config
+[comm config]: comm_config.html
 [comm link]: comm_links.html
 [controller]: controllers.html
 [CAP]: http://docs.oasis-open.org/emergency/cap/v1.2/CAP-v1.2.html
