@@ -23,9 +23,10 @@ Attribute [permissions]:
 **URI**, or _Uniform Resource Identifier_ includes a DNS host name or network IP
 address, and port number, using the standard `host:port` convention.  It can
 also contain an optional **scheme** prefix, which can be either `udp://`,
-`tcp://` or `modem://`.  If present, the scheme will override the _default
-scheme_ for the selected protocol.  For example, to use the [Pelco-D]
-protocol over TCP (instead of the default UDP), prepend `tcp://` to the URI.
+`tcp://` or `modem://` for [modem] links.  If present, the scheme will override
+the _default scheme_ for the selected protocol.  For example, to use the
+[Pelco-D] protocol over TCP (instead of the default UDP), prepend `tcp://` to
+the URI.
 
 **Poll Enabled** is a flag which can enable or disable polling.
 
@@ -35,5 +36,6 @@ links.
 
 [comm config]: comm_config.html
 [device]: controllers.html#devices
+[modem]: modem.html
 [pelco-d]: protocols.html#pelco-d
 [permissions]: user_roles.html#permissions

@@ -182,14 +182,6 @@ Since `geo_loc` resources can only be created and deleted with an associated
 | Read Only    | name, lcs, indication |      |
 | 🔧 Configure | controller            | pin  |
 
-### `modem`
-
-| Access       | Minimal    | Full        |
-|--------------|------------|-------------|
-| Read Only    | name       |             |
-| 💡 Plan      | enabled    | timeout\_ms |
-| 🔧 Configure |            | uri, config |
-
 ### `permission`
 
 | Access       | Minimal                             | Full |

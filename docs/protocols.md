@@ -1,8 +1,8 @@
 # Protocols
 
 A [comm link] communicates with remote [controller]s using one of several
-supported protocols, each of which supports specific [device] types.  Some
-protocols support **multi-drop** addressing, with multiple controllers per
+protocols, each of which supports specific [device] types.  Some also
+support **multi-drop** addressing, with more than one controller per
 _comm link_.
 
 ## Axis PTZ
