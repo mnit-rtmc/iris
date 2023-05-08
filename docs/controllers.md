@@ -8,6 +8,23 @@ Sometimes a controller represents a separate physical _box_, which is connected
 to devices, and other times the controller may be embedded within the device.
 In either case, a controller is required for any communication to a device.
 
+## Resource
+
+`iris/api/controller` / `iris/api/controller/{name}`
+
+Also, a read only `controller_io` resource is available with
+`GET iris/api/controller_io/{name}`.  It contains an array of objects
+consisting of `pin`, `name` and `resource_n`.
+
+Attribute [permissions]:
+
+| Access       | Minimal                              | Full     |
+|--------------|--------------------------------------|----------|
+| Read Only    | name, location, setup, fail\_time    | geo\_loc |
+| 👉 Operate   |                                      | download, device\_req |
+| 💡 Plan      | condition, notes                     |          |
+| 🔧 Configure | comm\_link, drop\_id, cabinet\_style | password |
+
 ## Drop Address
 
 Some [protocol]s support _multi-drop_ addressing, while others are _single-drop_

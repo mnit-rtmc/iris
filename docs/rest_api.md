@@ -114,19 +114,6 @@ A `Content-Type: application/json` header is included where appropriate.
 | 💡 Plan      | poll\_enabled                  |      |
 | 🔧 Configure | description, uri, comm\_config |      |
 
-### `controller`
-
-| Access       | Minimal                              | Full     |
-|--------------|--------------------------------------|----------|
-| Read Only    | name, location, setup, fail\_time    | geo\_loc |
-| 👉 Operate   |                                      | download, device\_req |
-| 💡 Plan      | condition, notes                     |          |
-| 🔧 Configure | comm\_link, drop\_id, cabinet\_style | password |
-
-Also, a read only `controller_io` resource is available with
-`GET iris/api/controller_io/{name}`.  It contains an array of objects consisting
-of `pin`, `name` and `resource_n`.
-
 ### `detector`
 
 | Access       | Minimal     | Full                       |
