@@ -35,7 +35,7 @@ public class OpSyncTime extends OpNtcip {
 
 	/** Create new sync time operation */
 	public OpSyncTime(DeviceImpl d) {
-		super(PriorityLevel.POLL_LOW, d);
+		super(PriorityLevel.CONFIGURE, d);
 	}
 
 	/** Create the second phase of the operation */
