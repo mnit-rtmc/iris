@@ -82,13 +82,6 @@ A `Content-Type: application/json` header is included where appropriate.
 
 ## Resource Types
 
-### `alarm`
-
-| Access       | Minimal                 | Full          |
-|--------------|-------------------------|---------------|
-| Read Only    | name, state             | trigger\_time |
-| 🔧 Configure | description, controller | pin           |
-
 ### `beacon`
 
 | Access       | Minimal        | Full                        |

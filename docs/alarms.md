@@ -9,6 +9,13 @@ failure, high temperature, low voltage, _etc_.
 An alarm can be created for controllers using a [protocol] that generates
 alarms, such as [MnDOT-170].
 
+## [Permissions]
+
+| Access       | Minimal                 | Full          |
+|--------------|-------------------------|---------------|
+| Read Only    | name, state             | trigger\_time |
+| 🔧 Configure | description, controller | pin           |
+
 ## Events
 
 The `state` field is set to `true` when _triggered_.  When it changes, a
@@ -18,5 +25,6 @@ purged automatically when older than the value of the `alarm_event_purge_days`
 
 
 [MnDOT-170]: comm_links.html#mndot-170
+[permissions]: user_roles.html#permissions
 [protocol]: comm_links.html#protocols
 [system attribute]: system_attributes.html
