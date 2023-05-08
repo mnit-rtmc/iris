@@ -82,15 +82,6 @@ A `Content-Type: application/json` header is included where appropriate.
 
 ## Resource Types
 
-### `beacon`
-
-| Access       | Minimal        | Full                        |
-|--------------|----------------|-----------------------------|
-| Read Only    | name, location | geo\_loc                    |
-| 👉 Operate   | state          |                             |
-| 💡 Plan      | message, notes | preset                      |
-| 🔧 Configure | controller     | pin, verify\_pin, ext\_mode |
-
 ### `cabinet_style`
 
 | Access       | Minimal    | Full |

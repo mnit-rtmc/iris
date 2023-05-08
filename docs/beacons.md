@@ -1,12 +1,10 @@
 # Beacons
 
+Select `View ➔ Message Signs ➔ Beacons` menu item
+
 A beacon is a light or set of lights that flashes toward oncoming traffic.
 Sometimes called _flashers_ or _wig-wags_, their purpose is to draw attention to
 a static sign or [DMS].
-
-## Setup
-
-Select `View ➔ Message Signs ➔ Beacons` menu item
 
 Beacons can be connected to controllers using one of these protocols:
 - [CBW]
@@ -14,20 +12,25 @@ Beacons can be connected to controllers using one of these protocols:
 - [MnDOT-170]
 - [Natch]
 
-These fields are available for configuring a beacon:
+## Attribute [Permissions]
 
-| Field      | Description                              |
-|------------|------------------------------------------|
-| Message    | Static text message on sign              |
-| Notes      | Administrative notes                     |
-| Pin        | Controller output pin to activate beacon |
-| Verify Pin | Verify circuit I/O pin                   |
-| Ext Mode   | External detect verify mode              |
+| Access       | Minimal        | Full                        |
+|--------------|----------------|-----------------------------|
+| Read Only    | name, location | geo\_loc                    |
+| 👉 Operate   | state          |                             |
+| 💡 Plan      | message, notes | preset                      |
+| 🔧 Configure | controller     | pin, verify\_pin, ext\_mode |
 
-**Verify Pin** is a digital input to sense whether the lights are activated, for
-beacons which have verify circuitry.  For the [CBW] protocol, it is also an
-output to energize the verify circuit.  **Pin** and **Verify Pin** can be the
-same.
+**Message** is a static text message on the sign.
+
+**Notes** can be any extra information about the beacon.
+
+**Pin** is the controller output pin to activate beacon.
+
+**Verify Pin** is a digital input to sense whether the lights are activated,
+for beacons which have verify circuitry.  For the [CBW] protocol, it is also
+an output to energize the verify circuit.  **Pin** and **Verify Pin** can be
+the same.
 
 **Ext Mode** determines the state reported when a verify is detected without
 being commanded:
@@ -35,15 +38,7 @@ being commanded:
 - true: `Flashing: External` (use when an external system can control the
   beacon)
 
-## State
-
-Beacons can be controlled in a few ways:
-- Changing state manually through the user interface
-- Deploying or blanking DMS with a [remote] beacon
-- Activating a ramp meter with an advance warning beacon
-- With [action plans] containing [beacon actions]
-
-A beacon can be in one of these states:
+**State** is one of the following values:
 
 | State              | Description                                   |
 |--------------------|-----------------------------------------------|
@@ -53,6 +48,12 @@ A beacon can be in one of these states:
 | Flashing: External | Lights flashing, commanded by external system |
 | Fault: Stuck On    | Lights flashing, but not commanded            |
 | Fault: No Verify   | Flashing commanded, but not verified          |
+
+Beacons can be controlled in a few ways:
+- Changing state manually through the user interface
+- Deploying or blanking DMS with a [remote] beacon
+- Activating a ramp meter with an advance warning beacon
+- With [action plans] containing [beacon actions]
 
 
 ## Events
@@ -70,5 +71,6 @@ the value of the `beacon_event_purge_days` [system attribute].
 [MnDOT-170]: comm_links.html#mndot-170
 [Natch]: comm_links.html#natch
 [NTCIP]: comm_links.html#ntcip
+[permissions]: user_roles.html#permissions
 [remote]: dms.html#setup
 [system attribute]: system_attributes.html

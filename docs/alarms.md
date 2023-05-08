@@ -9,7 +9,7 @@ failure, high temperature, low voltage, _etc_.
 An alarm can be created for controllers using a [protocol] that generates
 alarms, such as [MnDOT-170].
 
-## [Permissions]
+## Attribute [Permissions]
 
 | Access       | Minimal                 | Full          |
 |--------------|-------------------------|---------------|
