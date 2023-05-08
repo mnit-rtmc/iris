@@ -82,13 +82,6 @@ A `Content-Type: application/json` header is included where appropriate.
 
 ## Resource Types
 
-### `cabinet_style`
-
-| Access       | Minimal    | Full |
-|--------------|------------|------|
-| Read Only    | name       |      |
-| 🔧 Configure |            | police\_panel\_pin\_1, police\_panel\_pin\_2, watchdog\_reset\_pin\_1, watchdog\_reset\_pin\_2, dip |
-
 ### `camera`
 
 | Access       | Minimal              | Full                  |

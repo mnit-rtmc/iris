@@ -12,9 +12,10 @@ Beacons can be connected to controllers using one of these protocols:
 - [MnDOT-170]
 - [Natch]
 
-## Resource
+## Resources
 
-`iris/api/beacon` / `iris/api/beacon/{name}`
+* `iris/api/beacon`
+* `iris/api/beacon/{name}`
 
 Attribute [permissions]:
 

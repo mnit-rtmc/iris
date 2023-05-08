@@ -8,13 +8,14 @@ Sometimes a controller represents a separate physical _box_, which is connected
 to devices, and other times the controller may be embedded within the device.
 In either case, a controller is required for any communication to a device.
 
-## Resource
+## Resources
 
-`iris/api/controller` / `iris/api/controller/{name}`
+* `iris/api/controller`
+* `iris/api/controller/{name}`
+* `iris/api/controller_io/{name}`
 
-Also, a read only `controller_io` resource is available with
-`GET iris/api/controller_io/{name}`.  It contains an array of objects
-consisting of `pin`, `name` and `resource_n`.
+The read-only `controller_io` resource returns an array of objects consisting
+of `pin`, `name` and `resource_n`.
 
 Attribute [permissions]:
 
@@ -76,6 +77,16 @@ using an appropriate protocol for the device.
 Each controller has a set of **IO pins** for connecting [devices](#devices) or
 [flow streams].  Every _device_ or _flow stream_ must be assigned to an _IO pin_
 to be used.  The function of these pins is [protocol] specific.
+
+## Cabinet Style Resources
+
+* `iris/api/cabinet_style`
+* `iris/api/cabinet_style/{name}`
+
+| Access       | Minimal    | Full |
+|--------------|------------|------|
+| Read Only    | name       |      |
+| 🔧 Configure |            | police\_panel\_pin\_1, police\_panel\_pin\_2, watchdog\_reset\_pin\_1, watchdog\_reset\_pin\_2, dip |
 
 
 [alarms]: alarms.html
