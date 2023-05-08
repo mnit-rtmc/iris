@@ -91,22 +91,6 @@ A `Content-Type: application/json` header is included where appropriate.
 | 💡 Plan      | notes, publish       | streamable            |
 | 🔧 Configure | controller, cam\_num | pin, cam\_template, encoder\_type, enc\_address, enc\_port, enc\_mcast, enc\_channel
 
-### `comm_config`
-
-| Access       | Minimal     | Full |
-|--------------|-------------|------|
-| Read Only    | name        |      |
-| 💡 Plan      |             | timeout\_ms, idle\_disconnect\_sec, no\_response\_disconnect\_sec |
-| 🔧 Configure | description | protocol, modem, poll\_period\_sec, long\_poll\_period\_sec |
-
-### `comm_link`
-
-| Access       | Minimal                        | Full |
-|--------------|--------------------------------|------|
-| Read Only    | name, connected                |      |
-| 💡 Plan      | poll\_enabled                  |      |
-| 🔧 Configure | description, uri, comm\_config |      |
-
 ### `detector`
 
 | Access       | Minimal     | Full                       |

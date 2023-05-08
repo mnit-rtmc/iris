@@ -2,6 +2,22 @@
 
 Select `View ➔ Maintenance ➔ Comm Config` menu item
 
+A comm configuration is a set of properties which is shared among multiple
+[comm link]s.
+
+## Resources
+
+* `iris/api/comm_config`
+* `iris/api/comm_config/{name}`
+
+Attribute [permissions]:
+
+| Access       | Minimal     | Full |
+|--------------|-------------|------|
+| Read Only    | name        |      |
+| 💡 Plan      |             | timeout\_ms, idle\_disconnect\_sec, no\_response\_disconnect\_sec |
+| 🔧 Configure | description | protocol, modem, poll\_period\_sec, long\_poll\_period\_sec |
+
 [Protocol] determines what type of [device] or system is on the other end of
 a [comm link].
 
@@ -30,4 +46,5 @@ disables this feature.
 [comm link]: comm_links.html
 [controller]: controllers.html
 [device]: controllers.html#devices
+[permissions]: user_roles.html#permissions
 [protocol]: protocols.html
