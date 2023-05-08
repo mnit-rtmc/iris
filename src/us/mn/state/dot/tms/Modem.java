@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2022  Minnesota Department of Transportation
+ * Copyright (C) 2011-2023  Minnesota Department of Transportation
  * Copyright (C) 2015  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -47,10 +47,10 @@ public interface Modem extends SonarObject {
 
 	/** Get the modem state (ordinal of ModemState) */
 	int getState();
-	
+
 	/** Set the modem enabled boolean */
 	void setEnabled(boolean b);
-	
+
 	/** Get the modem enabled boolean */
 	boolean getEnabled();
 }
