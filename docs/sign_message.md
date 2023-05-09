@@ -9,6 +9,7 @@ after being unused for a few minutes.
 
 * `iris/sign_message`
 * `iris/img/{name}.gif`
+* `iris/api/sign_message` (`POST`)
 
 Attribute [permissions]:
 
@@ -25,9 +26,11 @@ The [MULTI] string contains the text and/or [graphics] of the message.
 
 The **msg_owner** is a string containing 3 fields, separated by semicolons
 (`system`; `sources`; `user`):
-- `system`: normally IRIS
-- `sources`: one or more sources, separated by `+`
+- `system`: normally "IRIS"; possibly another system
+- `sources`: "operator" or [action tag] sources, separated by `+`
 - `user`: name of user who created the message
+
+**Flash Beacon** indicates whether an associated beacon should flash.
 
 **Duration** determines how long a message will be displayed (minutes).
 
@@ -48,6 +51,7 @@ the `low_sys` priority.  Messages sent by external systems are assigned to
 `medium_sys`.
 
 
+[action tag]: action_plans.html#dms-action-tags
 [cleared incidents]: incident_dms.html#clearing
 [compose]: dms.html#composing-messages
 [DMS]: dms.html
