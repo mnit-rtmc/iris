@@ -1,15 +1,9 @@
 # Sign Messages
 
-Messages are created when operators compose them, and also when [DMS actions]
-are scheduled.  They are deleted automatically after being unused for a few
-minutes.
-
-A sign message contains all information needed to display a message on a [DMS]:
-- [sign configuration]
-- [MULTI] string
-- owner (`system`; `sources`; `user`)
-- [message priority]
-- duration (minutes)
+A sign message is an immutable record containing all information needed to
+display a message on a [DMS].  They are created when operators [compose] them,
+and also when [DMS actions] are scheduled.  They are deleted automatically
+after being unused for a few minutes.
 
 ## Resources
 
@@ -25,9 +19,21 @@ Attribute [permissions]:
 | 💡 Plan      |             | Dictionary [word] check |
 | 🔧 Configure |             | No check                |
 
-## Message Priority
+[Sign configuration] determines the type of sign that can display the message.
 
-Priorities determine precedence between operator messages and [DMS actions].
+The [MULTI] string contains the text and/or [graphics] of the message.
+
+The **msg_owner** is a string containing 3 fields, separated by semicolons
+(`system`; `sources`; `user`):
+- `system`: normally IRIS
+- `sources`: one or more sources, separated by `+`
+- `user`: name of user who created the message
+
+**Duration** determines how long a message will be displayed (minutes).
+
+### Message Priority
+
+Priority determines precedence between operator messages and [DMS actions].
 
 | Low          | Medium           | High           |
 |--------------|------------------|----------------|
@@ -43,9 +49,10 @@ the `low_sys` priority.  Messages sent by external systems are assigned to
 
 
 [cleared incidents]: incident_dms.html#clearing
+[compose]: dms.html#composing-messages
 [DMS]: dms.html
 [DMS actions]: action_plans.html#dms-actions
-[message priority]: #message-priority
+[graphics]: graphics.html
 [MULTI]: multi.html
 [permissions]: user_roles.html#permissions
 [sign configuration]: sign_configuration.html

@@ -246,7 +246,7 @@ Since `geo_loc` resources can only be created and deleted with an associated
 [Comm Link]: comm_links.html
 [Controller]: controllers.html
 [DMS]: dms.html
-[Modem]: modems.html
+[Modem]: modem.html
 [permission]: user_roles.html#permissions
 [resource types]: #resource-types
 [Road Weather Information System]: rwis.html
