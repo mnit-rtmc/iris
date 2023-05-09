@@ -3,16 +3,13 @@
 Select `View ➔ Message Signs ➔ DMS` menu item
 
 A _dynamic message sign_ (DMS) is a sign which is capable of changing the
-message displayed to motorists.  They can be classified as _character-matrix_,
-_line-matrix_ or _full-matrix_ depending on the spacing between pixels.  Some
-are monochrome and others support full color display.  All of these
-configurations are supported.
+message displayed to motorists.
 
 The following features are supported:
 
-* Querying currently displayed message
+* Querying currently displayed [sign message]
 * Sending and displaying [sign message]s
-* Querying [sign configuration] information
+* Querying [sign configuration]
 * Querying diagnostic information
 * Querying or sending [font]s
 * Sending [graphic images] to be displayed
@@ -21,16 +18,20 @@ The following features are supported:
 * [Slow traffic] warnings
 * Checking banned or allowed [word] lists
 
-## Configuration
+## Resources
 
-Sign configuration is queried from a sign controller when communication is
-established.  It consists of:
-- Physical dimensions (height, width, border, pixel pitch)
-- Pixel dimensions and style (char-, line- or full-matrix)
-- Color scheme or monochrome colors
+* `iris/dms_pub`
+* `iris/api/dms`
+* `iris/api/dms/{name}`
 
-Each unique configuration has a default [font], which can be changed by an
-administrator.
+Attribute [permissions]:
+
+| Access       | Minimal                      | Full      |
+|--------------|------------------------------|-----------|
+| Read Only    | name, location, msg\_current | sign\_config, sign\_detail, geo\_loc, msg\_sched, status, stuck\_pixels |
+| 👉 Operate   |                              | msg\_user |
+| 💡 Plan      | notes                        |           |
+| 🔧 Configure | controller                   | pin       |
 
 ## Setup
 
@@ -84,35 +85,6 @@ lines, depending on the text rectangles of that pattern.  The message preview
 is updated as the message is being composed.  Once complete, pressing the
 **Send** button will create a [sign message] and put it onto the DMS.
 
-## Sign Messages
-
-A sign message contains all information needed to display a message:
-- [sign configuration]
-- [MULTI] string
-- owner (`system`; `sources`; `user`)
-- [priority]
-- duration (minutes)
-
-Messages are created when operators compose them, and also when [DMS actions]
-are scheduled.  They are deleted automatically after being unused for a few
-minutes.
-
-### Message Priority
-
-Priorities determine precedence between operator messages and [DMS actions].
-
-| Low          | Medium           | High           |
-|--------------|------------------|----------------|
-| 1: `low_1`   | 6: `medium_1`    | 11: `high_1`   |
-| 2: `low_2`   | 7: `medium_2`    | 12: `high_2`   |
-| 3: `low_3`   | 8: `medium_3`    | 13: `high_3`   |
-| 4: `low_4`   | 9: `medium_4`    | 14: `high_4`   |
-| 5: `low_sys` | 10: `medium_sys` | 15: `high_sys` |
-
-Messages composed by operators have `high_1` priority.  [Cleared incidents] use
-the `low_sys` priority.  Messages sent by external systems are assigned to
-`medium_sys`.
-
 
 [action tags]: action_plans.html#dms-action-tags
 [alert configurations]: alert.html#dms-hashtags
@@ -125,11 +97,10 @@ the `low_sys` priority.  Messages sent by external systems are assigned to
 [graphic images]: graphics.html
 [lane-use MULTI]: lcs.html#lane-use-multi
 [message pattern]: message_patterns.html
-[MULTI]: multi.html
 [NTCIP]: protocols.html#ntcip
-[priority]: dms.html#message-priority
-[sign configuration]: dms.html#configuration
-[sign message]: dms.html#sign-messages
+[permissions]: user_roles.html#permissions
+[sign configuration]: sign_configuration.html
+[sign message]: sign_message.html
 [Slow traffic]: slow_warning.html
 [Travel time]: travel_time.html
 [Variable speed advisories]: vsa.html

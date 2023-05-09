@@ -2,7 +2,7 @@
 
 Select `View ➔ Message Signs ➔ Graphics` menu item
 
-Graphic images can be displayed on [DMS] sign messages.  These can be warning
+Graphic images can be displayed on [DMS] [sign message]s.  These can be warning
 pictographs, interstate shields or other signs.
 
 Image editing, resizing, painting, *etc.* is not supported - graphics must be
@@ -39,4 +39,5 @@ operators understand the sign's function.
 [edit mode]: user_interface.html#edit-mode
 [GIMP]: https://www.gimp.org/
 [MULTI]: multi.html
+[sign message]: sign_message.html
 [static sign]: dms.html#setup

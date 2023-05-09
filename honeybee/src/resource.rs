@@ -655,7 +655,8 @@ const SIGN_CONFIG_RES: Resource = Resource::Simple(
       SELECT name, face_width, face_height, border_horiz, border_vert, \
              pitch_horiz, pitch_vert, pixel_width, pixel_height, \
              char_width, char_height, monochrome_foreground, \
-             monochrome_background, color_scheme, default_font \
+             monochrome_background, color_scheme, default_font, \
+             module_width, module_height \
       FROM sign_config_view\
     ) r",
 );

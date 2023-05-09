@@ -10,7 +10,7 @@ Data requests are split into *public* and *restricted* paths:
 - `iris/img/`: Public sign images (no authentication)
 - `iris/api/`: Restricted data (needs session authentication)
 - `iris/api/login`: Authentication endpoint
-- `iris/api/access`: User's access permissions
+- `iris/api/access`: User's access [permission]s
 
 ## Public Resources
 
@@ -24,7 +24,7 @@ These resources are JSON arrays, fetched using http `GET` requests.
 - `iris/graphic`: Graphics for DMS
 - `iris/incident`: Currently active incidents
 - `iris/rwis`: [Road Weather Information System]
-- `iris/sign_config`: DMS sign configurations
+- `iris/sign_config`: DMS [sign configuration]s
 - `iris/sign_detail`: DMS sign detail information
 - `iris/sign_message`: Active DMS sign messages
 - `iris/station_sample`: Vehicle detection station data
@@ -82,6 +82,14 @@ A `Content-Type: application/json` header is included where appropriate.
 
 ## Resource Types
 
+| Communication   | Devices  |
+|-----------------|----------|
+| [Comm Config]   | [Alarm]  |
+| [Comm Link]     | [Beacon] |
+| [Controller]    | [Camera] |
+| [Cabinet Style] | [DMS]    |
+| [Modem]         |          |
+
 ### `camera`
 
 | Access       | Minimal              | Full                  |
@@ -99,15 +107,6 @@ A `Content-Type: application/json` header is included where appropriate.
 | 👉 Operate   |             | field\_length, force\_fail |
 | 💡 Plan      | notes       | abandoned                  |
 | 🔧 Configure | controller  | pin, r\_node, lane\_code, lane\_number, fake |
-
-### `dms`
-
-| Access       | Minimal                      | Full      |
-|--------------|------------------------------|-----------|
-| Read Only    | name, location, msg\_current | sign\_config, sign\_detail, geo\_loc, msg\_sched, status, stuck\_pixels |
-| 👉 Operate   |                              | msg\_user |
-| 💡 Plan      | notes                        |           |
-| 🔧 Configure | controller                   | pin       |
 
 ### `flow_stream`
 
@@ -239,9 +238,19 @@ Since `geo_loc` resources can only be created and deleted with an associated
 | 🔧 Configure | controller               | pin  |
 
 
-[permission]: #permission
+[Alarm]: alarms.html
+[Beacon]: beacons.html
+[Cabinet Style]: controllers.html#cabinet-styles
+[Camera]: cameras.html
+[Comm Config]: comm_config.html
+[Comm Link]: comm_links.html
+[Controller]: controllers.html
+[DMS]: dms.html
+[Modem]: modems.html
+[permission]: user_roles.html#permissions
 [resource types]: #resource-types
 [Road Weather Information System]: rwis.html
-[role]: #role
+[role]: user_roles.html#roles
+[sign configuration]: sign_configuration.html
 [system attributes]: system_attributes.html
 [user]: #user

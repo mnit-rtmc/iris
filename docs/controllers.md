@@ -15,7 +15,7 @@ In either case, a controller is required for any communication to a device.
 * `iris/api/controller_io/{name}`
 
 The read-only `controller_io` resource returns an array of objects consisting
-of `pin`, `name` and `resource_n`.
+of `pin`, `name` and `resource_n` of associated [devices](#devices).
 
 Attribute [permissions]:
 
