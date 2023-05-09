@@ -26,7 +26,7 @@ These resources are JSON arrays, fetched using http `GET` requests.
 - `iris/rwis`: [Road Weather Information System]
 - `iris/sign_config`: DMS [sign configuration]s
 - `iris/sign_detail`: DMS sign detail information
-- `iris/sign_message`: Active DMS sign messages
+- `iris/sign_message`: Active DMS [sign message]s
 - `iris/station_sample`: Vehicle detection station data
 - `iris/system_attribute_pub`: Public [system attributes]
 - `iris/TPIMS_archive`: Truck parking archive data
@@ -50,7 +50,7 @@ These resources are static, and may only change on IRIS updates:
 
 ### Sign Images
 
-The resources in `iris/img/` are GIF images of active sign messages from
+The resources in `iris/img/` are GIF images of active [sign message]s from
 `sign_message`.
 
 ## Login and Access
@@ -252,5 +252,6 @@ Since `geo_loc` resources can only be created and deleted with an associated
 [Road Weather Information System]: rwis.html
 [role]: user_roles.html#roles
 [sign configuration]: sign_configuration.html
+[sign message]: sign_message.html
 [system attributes]: system_attributes.html
 [user]: #user

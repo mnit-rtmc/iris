@@ -90,7 +90,6 @@ is updated as the message is being composed.  Once complete, pressing the
 [alert configurations]: alert.html#dms-hashtags
 [alert messages]: alert.html#alert-messages
 [beacon]: beacons.html
-[cleared incidents]: incident_dms.html#clearing
 [comm link]: comm_links.html
 [DMS actions]: action_plans.html#dms-actions
 [font]: fonts.html

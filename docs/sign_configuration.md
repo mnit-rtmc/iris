@@ -17,7 +17,7 @@ Attribute [permissions]:
 | Read Only    | name, face\_width, face\_height, border\_horiz, border\_vert, pitch\_horiz, pitch\_vert, pixel\_width, pixel\_height, char\_width, char\_height, monochrome\_foreground, monochrome\_background, color\_scheme |
 | 🔧 Configure | default\_font, module\_width, module\_height |
 
-**Face Width** and **face height** are the dimensions of the full face of the
+**Face width** and **height** are the dimensions of the full face of the
 sign, in milimeters.
 
 **Border** is the area around the pixels on the face of the sign.
@@ -28,7 +28,7 @@ sign, in milimeters.
 | _line-matrix_      | > 0          | 0             |
 | _full-matrix_      | 0            | 0             |
 
-The **default [font]** is used for sign messages which do not specify a font.
+The **default [font]** is used for [sign message]s which do not specify a font.
 
 **Module** width and height are the dimensions of physical pixel modules.
 
@@ -37,3 +37,4 @@ The **default [font]** is used for sign messages which do not specify a font.
 [DMS]: dms.html
 [font]: fonts.html
 [permissions]: user_roles.html#permissions
+[sign message]: sign_message.html

@@ -11,6 +11,20 @@ A sign message contains all information needed to display a message on a [DMS]:
 - [message priority]
 - duration (minutes)
 
+## Resources
+
+* `iris/sign_message`
+* `iris/img/{name}.gif`
+
+Attribute [permissions]:
+
+| Access       | Minimal     | `multi` check on `POST` |
+|--------------|-------------|-------------------------|
+| Read Only    | name, sign\_config, incident, multi, msg\_owner, flash\_beacon, msg\_priority, duration |
+| 👉 Operate   |             | Match `msg_pattern` with `compose_hashtag` |
+| 💡 Plan      |             | Dictionary [word] check |
+| 🔧 Configure |             | No check                |
+
 ## Message Priority
 
 Priorities determine precedence between operator messages and [DMS actions].
@@ -28,6 +42,11 @@ the `low_sys` priority.  Messages sent by external systems are assigned to
 `medium_sys`.
 
 
+[cleared incidents]: incident_dms.html#clearing
+[DMS]: dms.html
 [DMS actions]: action_plans.html#dms-actions
 [message priority]: #message-priority
+[MULTI]: multi.html
+[permissions]: user_roles.html#permissions
 [sign configuration]: sign_configuration.html
+[word]: words.html
