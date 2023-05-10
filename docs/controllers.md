@@ -104,7 +104,7 @@ Controllers can have an associated cabinet style, used for MnDOT-170 and Natch
 [gate arms]: gate_arms.html
 [GPS]: gps.html
 [lane-use control signs]: lcs.html
-[permissions]: user_roles.html#permissions
+[permissions]: permissions.html
 [protocol]: protocols.html
 [NTCIP]: protocols.html#ntcip
 [ramp meters]: ramp_meters.html

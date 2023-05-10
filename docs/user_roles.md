@@ -9,6 +9,17 @@ _role_ must both be enabled.  If the _user_ has a **distinguished name** (dn),
 then authentication is performed using [LDAP].  Otherwise, the supplied password
 is checked against the stored password hash for the account.
 
+## Resources
+
+* `iris/api/user`
+* `iris/api/user/{name}`
+
+| Access       | Minimal          | Full |
+|--------------|------------------|------|
+| Read Only    | name             |      |
+| 💡 Plan      | enabled          |      |
+| 🔧 Configure | full\_name, role |      |
+
 ## Roles
 
 A role defines the set of [capabilities](#capabilities) associated with a _user_
@@ -20,37 +31,15 @@ Other _roles_ can be created to allow different capability sets, as needed.
 **WARNING: if the administrator role or admin user are disabled, the ability to
 make further changes will be lost immediately.**
 
-### Permissions
+### Role Resources
 
-Role *permissions* are a newer feature intended to replace *capabilities* and
-*privileges*.  For now, they determine permissions for web access only.  Each
-permission record is made up of *access*, *resource* and *batch* values.
+* `iris/api/role`
+* `iris/api/role/{name}`
 
-There are 4 access levels, with increasing permissiveness:
-
-| Level | Access       | Permissions              |
-|-------|--------------|--------------------------|
-|     1 | 👁️  View      | Monitor / read           |
-|     2 | 👉 Operate   | + Control                |
-|     3 | 💡 Plan      | + Policies, scheduling   |
-|     4 | 🔧 Configure | + Create, update, delete |
-
-[Resource] is the `type` part of the URI:
-
-| Resource         | *Operate* (2) Access          | *Plan* (3) Access         |
-|------------------|-------------------------------|---------------------------|
-| `action_plan`    | `phase`                       |                           |
-| `beacon`         | `flashing`                    |                           |
-| `camera`         | `ptz` `recallPreset`          | `publish`                 |
-| `detector`       |                               | `fieldLength` `forceFail` |
-| `dms`            | `msgUser`                     | `deviceRequest`           |
-| `gate_arm`       | `armStateNext` `ownerNext`    | `deviceRequest`           |
-| `lcs`            | `indicationsNext` `ownerNext` |                           |
-| `ramp_meter`     | `rateNext` `mLock`            |                           |
-| `video_monitor`  | `camera`                      |                           |
-
-A *batch* is a group to which a resource may belong.  These typically are used
-for districts or similar regional divisions.
+| Access       | Minimal    | Full |
+|--------------|------------|------|
+| Read Only    | name       |      |
+| 💡 Plan      | enabled    |      |
 
 ## Capabilities
 
@@ -110,5 +99,4 @@ These records are purged automatically when older than the value of the
 [device]: controllers.html#devices
 [LCS]: lcs.html
 [LDAP]: installation.html#ldap
-[resource]: rest_api.html#resource-types
 [system attribute]: system_attributes.html

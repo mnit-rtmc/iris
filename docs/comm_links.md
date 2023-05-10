@@ -38,4 +38,4 @@ links.
 [device]: controllers.html#devices
 [modem]: modem.html
 [pelco-d]: protocols.html#pelco-d
-[permissions]: user_roles.html#permissions
+[permissions]: permissions.html
