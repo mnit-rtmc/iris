@@ -619,7 +619,7 @@ const PERMISSION_RES: Resource = Resource::Simple(
     "api/permission",
     Listen::All("permission"),
     "SELECT row_to_json(r)::text FROM (\
-      SELECT id, role, resource_n, batch, access_n \
+      SELECT id, role, resource_n, hashtag, access_n \
       FROM iris.permission \
       ORDER BY role, resource_n, id\
     ) r",

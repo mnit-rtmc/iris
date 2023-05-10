@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ pub struct Permission {
     pub id: u32,
     pub role: String,
     pub resource_n: String,
-    pub batch: Option<String>,
+    pub hashtag: Option<String>,
     pub access_n: u32,
 }
 
@@ -155,7 +155,7 @@ fn access_html(selected: u32) -> String {
 pub fn permissions_html(access: Vec<Permission>, config: bool) -> String {
     let mut html = "<option/>".to_string();
     for perm in &access {
-        if perm.batch.is_none() {
+        if perm.hashtag.is_none() {
             if config {
                 add_option(Resource::Alarm, perm, &mut html);
             }
@@ -241,7 +241,7 @@ impl Permission {
     fn to_html_edit(&self, anc: &PermissionAnc) -> String {
         let role = anc.roles_html(self);
         let resource = anc.resource_types_html(self);
-        let batch = HtmlStr::new(&self.batch);
+        let hashtag = HtmlStr::new(&self.hashtag);
         let access = access_html(self.access_n);
         format!(
             "<div class='row'>\
@@ -253,8 +253,8 @@ impl Permission {
               {resource}\
             </div>\
             <div class='row'>\
-               <label for='batch'>Batch</label>\
-               <input id='batch' maxlength='16' size='16' value='{batch}'>\
+               <label for='hashtag'>Hashtag</label>\
+               <input id='hashtag' maxlength='16' size='16' value='{hashtag}'>\
             </div>\
             <div class='row'>\
               <label for='access_n'>Access</label>\
@@ -317,7 +317,7 @@ impl Card for Permission {
         let mut fields = Fields::new();
         fields.changed_select("role", &self.role);
         fields.changed_select("resource_n", &self.resource_n);
-        fields.changed_input("batch", &self.batch);
+        fields.changed_input("hashtag", &self.hashtag);
         fields.changed_select("access_n", self.access_n);
         fields.into_value().to_string()
     }

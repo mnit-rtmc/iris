@@ -33,4 +33,9 @@ CREATE VIEW comm_link_view AS
     JOIN iris.comm_protocol cp ON cc.protocol = cp.id;
 GRANT SELECT ON comm_link_view TO PUBLIC;
 
+-- Rename permission `batch` to `hashtag`
+ALTER TABLE iris.permission ADD COLUMN hashtag VARCHAR(16);
+UPDATE iris.permission SET hashtag = batch;
+ALTER TABLE iris.permission DROP COLUMN batch;
+
 COMMIT;

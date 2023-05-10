@@ -10,17 +10,19 @@ access only.
 * `iris/api/permission/{id}`
 * `iris/api/access`
 
-| Access       | Minimal                             | Full |
-|--------------|-------------------------------------|------|
-| Read Only    | id                                  |      |
-| 🔧 Configure | role, resource\_n, batch, access\_n |      |
+| Access       | Minimal                               | Full |
+|--------------|---------------------------------------|------|
+| Read Only    | id                                    |      |
+| 🔧 Configure | role, resource\_n, hashtag, access\_n |      |
 
 [Role] is the user role associated with the permissions.
 
 [Resource] is the `type` part of the URI.
 
-A **batch** is a group to which a resource may belong.  These typically are
-used for districts or similar regional divisions.
+A **hashtag** is the `#` character, followed by a string of letters and/or
+numbers.  They can be used for grouping resources into districts or other
+categories.  NOTE: this feature depends on adding hashtags to relevant
+resources, which is incomplete.
 
 There are 4 **access** levels, with increasing permissiveness:
 

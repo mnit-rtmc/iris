@@ -148,7 +148,7 @@ WHERE name = $1";
 
 /// SQL query for one permission
 pub const PERMISSION: &str = "\
-SELECT id, role, resource_n, batch, access_n \
+SELECT id, role, resource_n, hashtag, access_n \
 FROM iris.permission \
 WHERE id = $1";
 

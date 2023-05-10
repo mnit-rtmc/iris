@@ -468,7 +468,7 @@ CREATE TABLE iris.permission (
     id SERIAL PRIMARY KEY,
     role VARCHAR(15) NOT NULL REFERENCES iris.role ON DELETE CASCADE,
     resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
-    batch VARCHAR(16),
+    hashtag VARCHAR(16),
     access_n INTEGER NOT NULL,
     CONSTRAINT permission_access_n CHECK (access_n >= 1 AND access_n <= 4)
 );
