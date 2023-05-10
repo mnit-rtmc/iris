@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -125,7 +125,6 @@ pub struct CommConfig {
     pub description: String,
     // full attributes
     pub protocol: Option<u32>,
-    pub modem: Option<bool>,
     pub timeout_ms: Option<u32>,
     pub poll_period_sec: Option<u32>,
     pub long_poll_period_sec: Option<u32>,
@@ -203,11 +202,6 @@ impl CommConfig {
     fn to_html_edit(&self, anc: &CommConfigAnc) -> String {
         let description = HtmlStr::new(&self.description);
         let protocols = anc.protocols_html(self);
-        let modem = if let Some(true) = self.modem {
-            " checked"
-        } else {
-            ""
-        };
         let timeout_ms = OptVal(self.timeout_ms);
         let poll_periods = period_options(&PERIODS[1..], self.poll_period_sec);
         let long_periods =
@@ -224,10 +218,6 @@ impl CommConfig {
             <div class='row'>\
               <label for='protocol'>Protocol</label>\
               {protocols}\
-            </div>\
-            <div class='row'>\
-              <label for='modem'>Modem</label>\
-              <input id='modem' type='checkbox'{modem}>\
             </div>\
             <div class='row'>\
               <label for='timeout_ms'>Timeout (ms)</label>\
@@ -303,7 +293,6 @@ impl Card for CommConfig {
         let mut fields = Fields::new();
         fields.changed_input("description", &self.description);
         fields.changed_select("protocol", self.protocol);
-        fields.changed_input("modem", self.modem);
         fields.changed_input("timeout_ms", self.timeout_ms);
         fields.changed_select("poll_period_sec", self.poll_period_sec);
         fields

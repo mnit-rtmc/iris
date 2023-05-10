@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2020-2022  Minnesota Department of Transportation
+ * Copyright (C) 2020-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 	/** Load all the comm configs */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, CommConfigImpl.class);
-		store.query("SELECT name, description, protocol, modem, " +
+		store.query("SELECT name, description, protocol, " +
 			"timeout_ms, poll_period_sec, long_poll_period_sec, " +
 			"idle_disconnect_sec, no_response_disconnect_sec " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
@@ -64,7 +64,6 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 		map.put("name", name);
 		map.put("description", description);
 		map.put("protocol", (short) protocol.ordinal());
-		map.put("modem", modem);
 		map.put("timeout_ms", timeout_ms);
 		map.put("poll_period_sec", poll_period_sec);
 		map.put("long_poll_period_sec", long_poll_period_sec);
@@ -96,24 +95,22 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 		this(row.getString(1),  // name
 		     row.getString(2),  // description
 		     row.getShort(3),   // protocol
-		     row.getBoolean(4), // modem
-		     row.getInt(5),     // timeout_ms
-		     row.getInt(6),     // poll_period_sec
-		     row.getInt(7),     // long_poll_period_sec
-		     row.getInt(8),     // idle_disconnect_sec
-		     row.getInt(9)      // no_response_disconnect_sec
+		     row.getInt(4),     // timeout_ms
+		     row.getInt(5),     // poll_period_sec
+		     row.getInt(6),     // long_poll_period_sec
+		     row.getInt(7),     // idle_disconnect_sec
+		     row.getInt(8)      // no_response_disconnect_sec
 		);
 	}
 
 	/** Create a comm config */
-	private CommConfigImpl(String n, String d, short p, boolean m, int t,
-		int pp, int lpp, int idsc, int nrdsc)
+	private CommConfigImpl(String n, String d, short p, int t, int pp,
+		int lpp, int idsc, int nrdsc)
 	{
 		super(n);
 		description = d;
 		CommProtocol cp = CommProtocol.fromOrdinal(p);
 		protocol = (cp != null) ? cp : CommProtocol.NTCIP_C;
-		modem = m;
 		timeout_ms = t;
 		poll_period_sec = pp;
 		long_poll_period_sec = lpp;
@@ -182,31 +179,6 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 	@Override
 	public short getProtocol() {
 		return (short) protocol.ordinal();
-	}
-
-	/** Modem flag */
-	private boolean modem;
-
-	/** Set modem flag */
-	@Override
-	public void setModem(boolean m) {
-		testGateArmDisable(name, "set modem");
-		modem = m;
-		CommLinkImpl.recreatePollers(this);
-	}
-
-	/** Set the modem flag */
-	public void doSetModem(boolean m) throws TMSException {
-		if (m != modem) {
-			store.update(this, "modem", m);
-			setModem(m);
-		}
-	}
-
-	/** Get modem flag */
-	@Override
-	public boolean getModem() {
-		return modem;
 	}
 
 	/** Polling timeout (milliseconds) */

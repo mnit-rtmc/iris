@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -128,8 +128,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		Iterator<CommConfig> it = CommConfigHelper.iterator();
 		while (it.hasNext()) {
 			cc = it.next();
-			if (CommProtocol.NTCIP_A.ordinal() == cc.getProtocol()
-			    && !cc.getModem())
+			if (CommProtocol.NTCIP_A.ordinal() == cc.getProtocol())
 				break;
 		}
 		if (cc != null)
