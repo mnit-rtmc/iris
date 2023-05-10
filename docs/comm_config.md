@@ -16,12 +16,10 @@ Attribute [permissions]:
 |--------------|-------------|------|
 | Read Only    | name        |      |
 | 💡 Plan      |             | timeout\_ms, idle\_disconnect\_sec, no\_response\_disconnect\_sec |
-| 🔧 Configure | description | protocol, modem, poll\_period\_sec, long\_poll\_period\_sec |
+| 🔧 Configure | description | protocol, poll\_period\_sec, long\_poll\_period\_sec |
 
 [Protocol] determines what type of [device] or system is on the other end of
 a [comm link].
-
-**Modem** is a flag indicating the connection uses a _dial-up_ or _cell_ modem.
 
 **Poll period** determines how frequently [controller]s on a [comm link] are
 polled.  It can range from 5 seconds to 24 hours.

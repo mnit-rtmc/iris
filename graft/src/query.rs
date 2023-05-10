@@ -43,9 +43,8 @@ WHERE c.name = $1";
 
 /// SQL query for one comm config
 pub const COMM_CONFIG: &str = "\
-SELECT name, description, protocol, modem, poll_period_sec, \
-       long_poll_period_sec, timeout_ms, idle_disconnect_sec, \
-       no_response_disconnect_sec \
+SELECT name, description, protocol, poll_period_sec, long_poll_period_sec, \
+       timeout_ms, idle_disconnect_sec, no_response_disconnect_sec \
 FROM iris.comm_config \
 WHERE name = $1";
 

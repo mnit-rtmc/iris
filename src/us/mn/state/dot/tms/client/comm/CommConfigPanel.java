@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2020  Minnesota Department of Transportation
+ * Copyright (C) 2020-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,9 +48,6 @@ public class CommConfigPanel extends ProxyPanel<CommConfig> {
 	/** Protocol label */
 	private final JLabel protocol_lbl = createValueLabel();
 
-	/** Modem label */
-	private final JLabel modem_lbl = createValueLabel();
-
 	/** Timeout label */
 	private final JLabel timeout_lbl = createValueLabel();
 
@@ -87,8 +84,6 @@ public class CommConfigPanel extends ProxyPanel<CommConfig> {
 		add(description_lbl, Stretch.LAST);
 		add("comm.config.protocol");
 		add(protocol_lbl, Stretch.LAST);
-		add("comm.config.modem");
-		add(modem_lbl, Stretch.LAST);
 		add("comm.config.timeout_ms");
 		add(timeout_lbl, Stretch.LAST);
 		add("comm.config.poll_period_sec");
@@ -114,8 +109,6 @@ public class CommConfigPanel extends ProxyPanel<CommConfig> {
 			protocol_lbl.setText(CommProtocol.fromOrdinal(
 				cc.getProtocol()).toString());
 		}
-		if (a == null || a.equals("modem"))
-			modem_lbl.setText(cc.getModem() ? "Yes" : "No");
 		if (a == null || a.equals("timeoutMs"))
 			timeout_lbl.setText("" + cc.getTimeoutMs() + " ms");
 		if (a == null || a.equals("pollPeriodSec"))
@@ -139,7 +132,6 @@ public class CommConfigPanel extends ProxyPanel<CommConfig> {
 	protected void clearView() {
 		description_lbl.setText("");
 		protocol_lbl.setText("");
-		modem_lbl.setText("");
 		timeout_lbl.setText("");
 		period_lbl.setText("");
 		long_period_lbl.setText("");

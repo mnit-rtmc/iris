@@ -1316,7 +1316,6 @@ CREATE TABLE iris.comm_config (
     name VARCHAR(10) PRIMARY KEY,
     description VARCHAR(20) NOT NULL UNIQUE,
     protocol SMALLINT NOT NULL REFERENCES iris.comm_protocol(id),
-    modem BOOLEAN NOT NULL,
     timeout_ms INTEGER NOT NULL,
     poll_period_sec INTEGER NOT NULL,
     long_poll_period_sec INTEGER NOT NULL,
@@ -1328,12 +1327,19 @@ ALTER TABLE iris.comm_config
     ADD CONSTRAINT poll_period_ck
     CHECK (poll_period_sec >= 5 AND long_poll_period_sec >= poll_period_sec);
 
+COPY iris.comm_config (name, description, protocol, timeout_ms,
+                       poll_period_sec, long_poll_period_sec,
+                       idle_disconnect_sec, no_response_disconnect_sec)
+FROM stdin;
+cfg_0	NTCIP udp	11	1000	30	300	0	0
+\.
+
 CREATE TRIGGER comm_config_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.comm_config
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW comm_config_view AS
-    SELECT cc.name, cc.description, cp.description AS protocol, modem,
+    SELECT cc.name, cc.description, cp.description AS protocol,
            timeout_ms, poll_period_sec, long_poll_period_sec,
            idle_disconnect_sec, no_response_disconnect_sec
     FROM iris.comm_config cc
@@ -1372,7 +1378,7 @@ CREATE TRIGGER comm_link_table_notify_trig
 CREATE VIEW comm_link_view AS
     SELECT cl.name, cl.description, uri, poll_enabled,
            cp.description AS protocol, cc.description AS comm_config,
-           modem, timeout_ms, poll_period_sec, connected
+           timeout_ms, poll_period_sec, connected
     FROM iris.comm_link cl
     JOIN iris.comm_config cc ON cl.comm_config = cc.name
     JOIN iris.comm_protocol cp ON cc.protocol = cp.id;
