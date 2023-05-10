@@ -22,6 +22,8 @@ SET client_encoding = 'UTF8';
 \set ON_ERROR_STOP
 BEGIN;
 
+ALTER SCHEMA public OWNER TO tms;
+
 CREATE SCHEMA iris;
 ALTER SCHEMA iris OWNER TO tms;
 
@@ -266,12 +268,6 @@ BEGIN
 	RETURN ver_new;
 END;
 $update_version$ language plpgsql;
-
-CREATE VIEW dms_attribute_view AS
-	SELECT name, value
-	FROM iris.system_attribute
-	WHERE name LIKE 'dms\_%';
-GRANT SELECT ON dms_attribute_view TO PUBLIC;
 
 --
 -- Roles, Domains, Users, Capabilities and Privileges
