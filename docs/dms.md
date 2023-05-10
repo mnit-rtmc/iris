@@ -26,12 +26,12 @@ The following features are supported:
 
 Attribute [permissions]:
 
-| Access       | Minimal                      | Full      |
-|--------------|------------------------------|-----------|
+| Access       | Minimal                      | Full        |
+|--------------|------------------------------|-------------|
 | Read Only    | name, location, msg\_current | sign\_config, sign\_detail, geo\_loc, msg\_sched, status, stuck\_pixels |
-| 👉 Operate   |                              | msg\_user |
-| 💡 Plan      | notes                        |           |
-| 🔧 Configure | controller                   | pin       |
+| 👉 Operate   |                              | msg\_user   |
+| 💡 Plan      | notes                        | device\_req |
+| 🔧 Configure | controller                   | pin         |
 
 ## Setup
 
@@ -97,7 +97,7 @@ is updated as the message is being composed.  Once complete, pressing the
 [lane-use MULTI]: lcs.html#lane-use-multi
 [message pattern]: message_patterns.html
 [NTCIP]: protocols.html#ntcip
-[permissions]: user_roles.html#permissions
+[permissions]: permissions.html
 [sign configuration]: sign_configuration.html
 [sign message]: sign_message.html
 [Slow traffic]: slow_warning.html

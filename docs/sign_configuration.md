@@ -36,5 +36,5 @@ The **default [font]** is used for [sign message]s which do not specify a font.
 [controller]: controllers.html
 [DMS]: dms.html
 [font]: fonts.html
-[permissions]: user_roles.html#permissions
+[permissions]: permissions.html
 [sign message]: sign_message.html

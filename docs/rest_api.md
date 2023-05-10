@@ -16,10 +16,10 @@ Data requests are split into *public* and *restricted* paths:
 
 These resources are JSON arrays, fetched using http `GET` requests.
 
-- `iris/camera_pub`: Camera locations and configuration
+- `iris/camera_pub`: [Camera] locations and configuration
 - `iris/detector_pub`: Vehicle detectors
-- `iris/dms_message`: Current DMS messages and status
-- `iris/dms_pub`: DMS locations and configuration
+- `iris/dms_message`: Current [DMS] messages and status
+- `iris/dms_pub`: [DMS] locations and configuration
 - `iris/font`: Bitmapped fonts for DMS
 - `iris/graphic`: Graphics for DMS
 - `iris/incident`: Currently active incidents
@@ -37,9 +37,9 @@ These resources are JSON arrays, fetched using http `GET` requests.
 
 These resources are static, and may only change on IRIS updates:
 
-- `iris/beacon_state`: Beacon states
+- `iris/beacon_state`: [Beacon] states
 - `iris/comm_protocol`: Communication protocols
-- `iris/condition`: Controller conditions
+- `iris/condition`: [Controller] conditions
 - `iris/direction`: Travel directions
 - `iris/gate_arm_interlock`: Gate arm interlocks
 - `iris/gate_arm_state`: Gate arm states
@@ -82,13 +82,13 @@ A `Content-Type: application/json` header is included where appropriate.
 
 ## Resource Types
 
-| Communication   | Devices  |
-|-----------------|----------|
-| [Comm Config]   | [Alarm]  |
-| [Comm Link]     | [Beacon] |
-| [Controller]    | [Camera] |
-| [Cabinet Style] | [DMS]    |
-| [Modem]         |          |
+| Access Control | Communication   | Devices  |
+|----------------|-----------------|----------|
+| [domain]       | [comm_config]   | [alarm]  |
+| [permission]   | [comm_link]     | [beacon] |
+| [role]         | [controller]    | [camera] |
+| [user]         | [cabinet_style] | [dms]    |
+|                | [modem]         |          |
 
 ### `camera`
 
@@ -181,13 +181,6 @@ Since `geo_loc` resources can only be created and deleted with an associated
 | Read Only    | name, lcs, indication |      |
 | 🔧 Configure | controller            | pin  |
 
-### `permission`
-
-| Access       | Minimal                             | Full |
-|--------------|-------------------------------------|------|
-| Read Only    | id                                  |      |
-| 🔧 Configure | role, resource\_n, batch, access\_n |      |
-
 ### `ramp_meter`
 
 | Access       | Minimal        | Full                             |
@@ -197,13 +190,6 @@ Since `geo_loc` resources can only be created and deleted with an associated
 | 💡 Plan      | notes          | storage, max\_wait, algorithm, am\_target, pm\_target |
 | 🔧 Configure | controller     | pin, meter\_type, beacon, preset |
 
-### `role`
-
-| Access       | Minimal    | Full |
-|--------------|------------|------|
-| Read Only    | name       |      |
-| 💡 Plan      | enabled    |      |
-
 ### `tag_reader`
 
 | Access       | Minimal        | Full               |
@@ -211,14 +197,6 @@ Since `geo_loc` resources can only be created and deleted with an associated
 | Read Only    | name, location | geo\_loc, settings |
 | 💡 Plan      | notes          | toll\_zone         |
 | 🔧 Configure | controller     | pin                |
-
-### `user`
-
-| Access       | Minimal          | Full |
-|--------------|------------------|------|
-| Read Only    | name             |      |
-| 💡 Plan      | enabled          |      |
-| 🔧 Configure | full\_name, role |      |
 
 ### `video_monitor`
 
@@ -238,20 +216,21 @@ Since `geo_loc` resources can only be created and deleted with an associated
 | 🔧 Configure | controller               | pin  |
 
 
-[Alarm]: alarms.html
-[Beacon]: beacons.html
-[Cabinet Style]: controllers.html#cabinet-styles
-[Camera]: cameras.html
-[Comm Config]: comm_config.html
-[Comm Link]: comm_links.html
-[Controller]: controllers.html
-[DMS]: dms.html
-[Modem]: modem.html
-[permission]: user_roles.html#permissions
+[alarm]: alarms.html
+[beacon]: beacons.html
+[cabinet_style]: controllers.html#cabinet-styles
+[camera]: cameras.html
+[comm_config]: comm_config.html
+[comm_link]: comm_links.html
+[controller]: controllers.html
+[dms]: dms.html
+[domain]: user_roles.html#domains
+[modem]: modem.html
+[permission]: permissions.html
 [resource types]: #resource-types
 [Road Weather Information System]: rwis.html
 [role]: user_roles.html#roles
 [sign configuration]: sign_configuration.html
 [sign message]: sign_message.html
 [system attributes]: system_attributes.html
-[user]: #user
+[user]: user_roles.html

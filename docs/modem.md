@@ -21,4 +21,4 @@ Attribute [permissions]:
 
 
 [comm link]: comm_links.html
-[permissions]: user_roles.html#permissions
+[permissions]: permissions.html

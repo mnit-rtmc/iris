@@ -76,6 +76,6 @@ the value of the `beacon_event_purge_days` [system attribute].
 [MnDOT-170]: protocols.html#mndot-170
 [Natch]: protocols.html#natch
 [NTCIP]: protocols.html#ntcip
-[permissions]: user_roles.html#permissions
+[permissions]: permissions.html
 [remote]: dms.html#setup
 [system attribute]: system_attributes.html

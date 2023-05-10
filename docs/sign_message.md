@@ -58,6 +58,6 @@ the `low_sys` priority.  Messages sent by external systems are assigned to
 [DMS actions]: action_plans.html#dms-actions
 [graphics]: graphics.html
 [MULTI]: multi.html
-[permissions]: user_roles.html#permissions
+[permissions]: permissions.html
 [sign configuration]: sign_configuration.html
 [word]: words.html

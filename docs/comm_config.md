@@ -44,5 +44,5 @@ disables this feature.
 [comm link]: comm_links.html
 [controller]: controllers.html
 [device]: controllers.html#devices
-[permissions]: user_roles.html#permissions
+[permissions]: permissions.html
 [protocol]: protocols.html
