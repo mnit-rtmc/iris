@@ -464,6 +464,18 @@ weather_sensor
 word
 \.
 
+CREATE TABLE iris.hashtag (
+    resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
+    name VARCHAR(20) NOT NULL,
+    hashtag VARCHAR(16) NOT NULL
+);
+ALTER TABLE iris.hashtag ADD PRIMARY KEY (resource_n, name, hashtag);
+
+CREATE VIEW hashtag_view AS
+    SELECT resource_n, name, hashtag
+    FROM iris.hashtag;
+GRANT SELECT ON hashtag_view TO PUBLIC;
+
 CREATE TABLE iris.permission (
     id SERIAL PRIMARY KEY,
     role VARCHAR(15) NOT NULL REFERENCES iris.role ON DELETE CASCADE,
