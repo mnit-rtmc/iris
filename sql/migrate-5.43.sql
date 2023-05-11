@@ -38,4 +38,17 @@ ALTER TABLE iris.permission ADD COLUMN hashtag VARCHAR(16);
 UPDATE iris.permission SET hashtag = batch;
 ALTER TABLE iris.permission DROP COLUMN batch;
 
+-- Add resource hashtags
+CREATE TABLE iris.hashtag (
+    resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
+    name VARCHAR(20) NOT NULL,
+    hashtag VARCHAR(16) NOT NULL
+);
+ALTER TABLE iris.hashtag ADD PRIMARY KEY (resource_n, name, hashtag);
+
+CREATE VIEW hashtag_view AS
+    SELECT resource_n, name, hashtag
+    FROM iris.hashtag;
+GRANT SELECT ON hashtag_view TO PUBLIC;
+
 COMMIT;
