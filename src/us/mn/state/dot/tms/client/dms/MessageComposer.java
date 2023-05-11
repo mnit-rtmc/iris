@@ -300,7 +300,6 @@ public class MessageComposer extends JPanel {
 			int n_lines = tr.getLineCount();
 			adjusting++;
 			rc.setModels(finder, first, n_lines);
-			rc.setEditMode();
 			adjusting--;
 			if (i < rect_tab.getTabCount()) {
 				rect_tab.setComponentAt(i, rc);

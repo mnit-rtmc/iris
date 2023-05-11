@@ -51,4 +51,7 @@ CREATE VIEW hashtag_view AS
     FROM iris.hashtag;
 GRANT SELECT ON hashtag_view TO PUBLIC;
 
+-- Delete dms_composer_edit_mode system attribute
+DELETE FROM iris.system_attribute WHERE name = 'dms_composer_edit_mode';
+
 COMMIT;

@@ -125,12 +125,6 @@ public class TextRectComposer extends JPanel {
 		super.setEnabled(b);
 	}
 
-	/** Set the edit mode */
-	public void setEditMode() {
-		for (MsgLineCBox cbx: line_cbx)
-			cbx.setEditMode();
-	}
-
 	/** Set the message combo box models */
 	public void setModels(MsgLineFinder mlf, int first, int n_lines) {
 		for (int i = 0; i < MAX_LINES; i++) {

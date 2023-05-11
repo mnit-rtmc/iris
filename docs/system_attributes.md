@@ -49,7 +49,6 @@ System Attribute                 | Description
 `dict_banned_scheme`             | Spell checking scheme for banned words: 0=none, 1=recommend to not use banned words, 2=messages can't contain banned words
 `dms_brightness_enable`          | Display [DMS] brightness information
 `dms_comm_loss_enable`           | Enable blanking [DMS] after communication time out
-`dms_composer_edit_mode`         | [DMS] message line combo box mode (0=not editable, 1=always editable, 2=editable after key press if identity sign group exists)
 `dms_gps_jitter_m`               | Threshold (m) for GPS change to update [DMS] location
 `dms_high_temp_cutoff`           | Temperature at which [DMS] should shut off
 `dms_lamp_test_timeout_secs`     | Time to wait for [DMS] lamp test to complete
