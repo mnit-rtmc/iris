@@ -75,9 +75,7 @@ public class MsgLineCBox extends JComboBox<MsgLine> {
 	/** Key listener for key events */
 	private final KeyAdapter key_listener = new KeyAdapter() {
 		@Override public void keyTyped(KeyEvent ke) {
-			if (EditMode.getMode() == EditMode.AFTERKEY &&
-			    !isEditable())
-			{
+			if (!isEditable()) {
 				key_event = ke;
 				setEditable(true);
 			}
@@ -96,8 +94,7 @@ public class MsgLineCBox extends JComboBox<MsgLine> {
 			}
 		}
 		@Override public void focusLost(FocusEvent fe) {
-			if (EditMode.getMode() == EditMode.AFTERKEY)
-				setEditable(false);
+			setEditable(false);
 			fireActionEvent();
 		}
 	};
@@ -105,8 +102,7 @@ public class MsgLineCBox extends JComboBox<MsgLine> {
 	/** Action listener for editor events */
 	private final ActionListener editor_listener = new ActionListener() {
 		@Override public void actionPerformed(ActionEvent ae) {
-			if (EditMode.getMode() == EditMode.AFTERKEY)
-				setEditable(false);
+			setEditable(false);
 		}
 	};
 
@@ -119,7 +115,6 @@ public class MsgLineCBox extends JComboBox<MsgLine> {
 		//       selected.
 		setPrototypeDisplayValue(PROTOTYPE_TEXT);
 		setRenderer(new MsgLineCellRenderer());
-		setEditMode();
 		setEditor(editor);
 		addKeyListener(key_listener);
 		editor.addFocusListener(focus_listener);
@@ -133,16 +128,8 @@ public class MsgLineCBox extends JComboBox<MsgLine> {
 		removeKeyListener(key_listener);
 	}
 
-	/** Set the edit mode */
-	public void setEditMode() {
-		setEditable(EditMode.getMode() == EditMode.ALWAYS);
-	}
-
 	/** Get message string */
 	public String getMessage() {
-		Object item = (EditMode.getMode() == EditMode.ALWAYS)
-			? editor.getItem()
-			: getSelectedItem();
-		return getMulti(item);
+		return getMulti(getSelectedItem());
 	}
 }
