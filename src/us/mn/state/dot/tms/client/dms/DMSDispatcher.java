@@ -33,7 +33,6 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.WordHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
@@ -54,26 +53,6 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Michael Darter
  */
 public class DMSDispatcher extends JPanel {
-
-	/** Check all the words in the specified MULTI string.
-	 * @param ms Multi string to spell check.
-	 * @return True to send the sign message else false to cancel. */
-	static private boolean checkWords(String ms) {
-		String msg = WordHelper.spellCheck(ms);
-		String amsg = WordHelper.abbreviationCheck(ms);
-		if (msg.isEmpty() && amsg.isEmpty())
-			return true;
-		if (msg.isEmpty())
-			return confirmSend(amsg);
-		String imsg = msg + amsg;
-		if (WordHelper.spellCheckEnforced()) {
-			IOptionPane.showError("word.spell.check", imsg);
-			return false;
-		} else if (WordHelper.spellCheckRecommend())
-			return confirmSend(imsg);
-		else
-			return false;
-	}
 
 	/** Confirm sending message */
 	static private boolean confirmSend(String imsg) {
@@ -318,8 +297,6 @@ public class DMSDispatcher extends JPanel {
  	 * of spell checking options and send confirmation options.
 	 * @return True to send the message else false to cancel. */
 	private boolean shouldSendMessage(String ms) {
-		if (WordHelper.spellCheckEnabled() && !checkWords(ms))
-			return false;
 		if (SystemAttrEnum.DMS_SEND_CONFIRMATION_ENABLE.getBoolean())
 			return showConfirmDialog();
 		else

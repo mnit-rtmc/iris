@@ -60,4 +60,3 @@ the `low_sys` priority.  Messages sent by external systems are assigned to
 [MULTI]: multi.html
 [permissions]: permissions.html
 [sign configuration]: sign_configuration.html
-[word]: words.html

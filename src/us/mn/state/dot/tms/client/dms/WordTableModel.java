@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015  Iteris Inc.
- * Copyright (C) 2020  Minnesota Department of Transportation
+ * Copyright (C) 2020-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ public class WordTableModel extends ProxyTableModel<Word> {
 			new ArrayList<ProxyColumn<Word>>(2);
 		cols.add(new ProxyColumn<Word>("word", 140) {
 			public Object getValueAt(Word wo) {
-				return WordHelper.decode(wo.getName());
+				return WordHelper.decodeWord(wo.getName());
 			}
 		});
 		cols.add(new ProxyColumn<Word>("word.abbr", 80) {
@@ -91,7 +91,7 @@ public class WordTableModel extends ProxyTableModel<Word> {
 	@Override
 	public void createObject(String name) {
 		if (name.length() > 0) {
-			String en = WordHelper.encode(name);
+			String en = WordHelper.encodeWord(name);
 			descriptor.cache.createObject(en, createAttrs(name));
 		}
 	}
