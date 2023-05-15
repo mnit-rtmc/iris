@@ -54,4 +54,8 @@ GRANT SELECT ON hashtag_view TO PUBLIC;
 -- Delete dms_composer_edit_mode system attribute
 DELETE FROM iris.system_attribute WHERE name = 'dms_composer_edit_mode';
 
+-- Delete dict_*_scheme system attributes
+DELETE FROM iris.system_attribute WHERE name = 'dict_allowed_scheme';
+DELETE FROM iris.system_attribute WHERE name = 'dict_banned_scheme';
+
 COMMIT;

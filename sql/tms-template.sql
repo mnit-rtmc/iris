@@ -167,8 +167,6 @@ database_version	5.42.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_secs	60
-dict_allowed_scheme	0
-dict_banned_scheme	0
 dms_brightness_enable	true
 dms_comm_loss_enable	true
 dms_gps_jitter_m	100

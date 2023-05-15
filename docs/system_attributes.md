@@ -45,8 +45,6 @@ System Attribute                 | Description
 `database_version`               | IRIS database version; developer attribute.  **Do not change**.
 `detector_auto_fail_enable`      | Enable "auto fail" of traffic detectors with suspicious data
 `detector_event_purge_days`      | Number of days after which detector events will be purged
-`dict_allowed_scheme`            | Spell checking scheme for allowed words: 0=none 1=recommend replacement words, 2=messages can only contain allowed words
-`dict_banned_scheme`             | Spell checking scheme for banned words: 0=none, 1=recommend to not use banned words, 2=messages can't contain banned words
 `dms_brightness_enable`          | Display [DMS] brightness information
 `dms_comm_loss_enable`           | Enable blanking [DMS] after communication time out
 `dms_gps_jitter_m`               | Threshold (m) for GPS change to update [DMS] location

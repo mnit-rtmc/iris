@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015  Iteris Inc.
- * Copyright (C) 2020  Minnesota Department of Transportation
+ * Copyright (C) 2020-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ package us.mn.state.dot.tms;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * A word which can be allowed or banned for use in DMS messages.
+ * A word which can be banned or allowed in free-form DMS messages.
  *
  * @author Michael Darter
  */
