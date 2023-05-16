@@ -166,7 +166,10 @@ impl State {
             }
         }
         let rows = transaction
-            .execute(UPDATE_PERM, &[&id, &role, &resource_n, &hashtag, &access_n])
+            .execute(
+                UPDATE_PERM,
+                &[&id, &role, &resource_n, &hashtag, &access_n],
+            )
             .map_err(|_e| SonarError::Conflict)?;
         if rows == 1 {
             transaction.commit()?;
