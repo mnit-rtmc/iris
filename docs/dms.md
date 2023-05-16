@@ -16,7 +16,7 @@ The following features are supported:
 * [Travel time] estimation
 * [Variable speed advisories]
 * [Slow traffic] warnings
-* Checking banned or allowed [word] lists
+* Free-form text entry with banned [word] checks
 
 ## Resources
 
@@ -32,6 +32,8 @@ Attribute [permissions]:
 | 👉 Operate   |                              | msg\_user   |
 | 💡 Plan      | notes                        | device\_req |
 | 🔧 Configure | controller                   | pin         |
+
+Checks of [free-form text] are also affected by the access level.
 
 ## Setup
 
@@ -80,10 +82,19 @@ When a DMS is selected, a few things happen:
   * only patterns whose **compose** hashtag matches the sign
   * only patterns containing **NO** [action tags]
 
-When a pattern is selected, a series of selectors is populated with message
-lines, depending on the text rectangles of that pattern.  The message preview
-is updated as the message is being composed.  Once complete, pressing the
-**Send** button will create a [sign message] and put it onto the DMS.
+When an operator chooses a pattern, a series of selectors is populated with
+[message lines], depending on the [fillable text rectangles].  These selectors
+may also allow **free-form text** entry, depending on the permision access
+level of the user:
+
+* 👉 **Operate**: No free-form text permitted
+* 💡 **Plan**: Free-form text checked for **banned** [word]s
+* 🔧 **Configure**: Any free-form text permitted (no check)
+
+The message preview is updated as the user composes the message.  When the
+**Send** button is pressed, a [sign message] is created and set as `msg_user`.
+The server then performs a validation check ensuring the user has permission
+for any free-form text.
 
 
 [action tags]: action_plans.html#dms-action-tags
@@ -91,10 +102,13 @@ is updated as the message is being composed.  Once complete, pressing the
 [alert messages]: alert.html#alert-messages
 [beacon]: beacons.html
 [comm link]: comm_links.html
+[free-form text]: #composing-messages
 [DMS actions]: action_plans.html#dms-actions
+[fillable text rectangles]: message_patterns.html#fillable-text-rectangles
 [font]: fonts.html
 [graphic images]: graphics.html
 [lane-use MULTI]: lcs.html#lane-use-multi
+[message lines]: message_patterns.html#message-lines
 [message pattern]: message_patterns.html
 [NTCIP]: protocols.html#ntcip
 [permissions]: permissions.html

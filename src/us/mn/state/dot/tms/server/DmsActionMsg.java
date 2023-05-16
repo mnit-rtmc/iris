@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,12 +36,10 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
-import us.mn.state.dot.tms.MsgLineHelper;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.ParkingAreaHelper;
 import us.mn.state.dot.tms.PlanPhaseHelper;
 import us.mn.state.dot.tms.SignConfig;
-import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
@@ -63,7 +60,6 @@ import static us.mn.state.dot.tms.units.Speed.Units.MPH;
 import static us.mn.state.dot.tms.utils.Multi.OverLimitMode;
 import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
-import us.mn.state.dot.tms.utils.TextRect;
 
 /**
  * A DMS action message parses custom action tags, which are similar to MULTI,
@@ -373,18 +369,7 @@ public class DmsActionMsg {
 	private boolean isFeedMsgValid(FeedMsg msg, String ms) {
 		SignConfig sc = msg.getSignConfig();
 		MsgPattern pat = action.getMsgPattern();
-		if (sc == null || pat == null)
-			return false;
-		TextRect tr = SignConfigHelper.textRect(sc);
-		List<String> lines = tr.splitLines(pat.getMulti(), ms);
-		short num = 0;
-		for (String line: lines) {
-			num++;
-			if ((!line.isEmpty()) &&
-			    (!MsgLineHelper.match(pat, num, line)))
-				return false;
-		}
-		return true;
+		return MsgPatternHelper.validateLines(pat, sc, ms);
 	}
 
 	/** Calculate speed advisory span */

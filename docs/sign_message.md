@@ -13,12 +13,9 @@ after being unused for a few minutes.
 
 Attribute [permissions]:
 
-| Access       | Minimal     | `multi` check on `POST` |
-|--------------|-------------|-------------------------|
+| Access       | Minimal     |
+|--------------|-------------|
 | Read Only    | name, sign\_config, incident, multi, msg\_owner, flash\_beacon, msg\_priority, duration |
-| 👉 Operate   |             | Match `msg_pattern` with `compose_hashtag` |
-| 💡 Plan      |             | Dictionary [word] check |
-| 🔧 Configure |             | No check                |
 
 [Sign configuration] determines the type of sign that can display the message.
 

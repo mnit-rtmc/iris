@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
+import us.mn.state.dot.tms.utils.TextRect;
 
 /**
  * Helper class for messages patterns.
@@ -149,5 +150,45 @@ public class MsgPatternHelper extends BaseHelper {
 				return true;
 		}
 		return false;
+	}
+
+	/** Validate text lines for a message pattern */
+	static public boolean validateLines(MsgPattern pat, SignConfig sc,
+		String ms)
+	{
+		if (sc == null || pat == null)
+			return false;
+		TextRect tr = SignConfigHelper.textRect(sc);
+		List<String> lines = tr.splitLines(pat.getMulti(), ms);
+		short num = 0;
+		for (String line: lines) {
+			num++;
+			if ((!line.isEmpty()) &&
+			    (!MsgLineHelper.match(pat, num, line)))
+				return false;
+		}
+		return true;
+	}
+
+	/** Validate text words for a message pattern */
+	static public String validateWords(MsgPattern pat, SignConfig sc,
+		String ms)
+	{
+		if (sc == null || pat == null)
+			return "NULL VALUE";
+		StringBuilder sb = new StringBuilder();
+		TextRect tr = SignConfigHelper.textRect(sc);
+		List<String> lines = tr.splitLines(pat.getMulti(), ms);
+		for (String line: lines) {
+			for (String word: line.split(" ")) {
+				word = word.trim();
+				if (WordHelper.isBanned(word)) {
+					if (sb.length() > 0)
+						sb.append(", ");
+					sb.append(word);
+				}
+			}
+		}
+		return (sb.length() > 0) ? sb.toString() : null;
 	}
 }

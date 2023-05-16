@@ -459,4 +459,34 @@ public class DMSHelper extends BaseHelper {
 		RasterBuilder rb = createRasterBuilder(dms);
 		return rb != null && rb.isRasterizable(ms);
 	}
+
+	/** Validate free-form message lines */
+	static public String validateFreeFormLines(DMS dms, String ms) {
+		if (dms == null || ms == null)
+			return "NULL VALUE";
+		SignConfig sc = dms.getSignConfig();
+		if (sc == null)
+			return "NULL VALUE";
+		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms)) {
+			if (MsgPatternHelper.validateLines(pat, sc, ms))
+				return null;
+		}
+		return "NOT PERMITTED";
+	}
+
+	/** Validate free-form message words */
+	static public String validateFreeFormWords(DMS dms, String ms) {
+		if (dms == null || ms == null)
+			return "NULL VALUE";
+		SignConfig sc = dms.getSignConfig();
+		if (sc == null)
+			return "NULL VALUE";
+		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms)) {
+			String msg = MsgPatternHelper.validateWords(pat, sc,
+				ms);
+			if (msg != null)
+				return msg;
+		}
+		return null;
+	}
 }
