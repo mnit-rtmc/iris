@@ -463,8 +463,11 @@ word
 
 CREATE TABLE iris.hashtag (
     resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
+    -- FIXME: replace with int ID
     name VARCHAR(20) NOT NULL,
-    hashtag VARCHAR(16) NOT NULL
+    hashtag VARCHAR(16) NOT NULL,
+
+    CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$')
 );
 ALTER TABLE iris.hashtag ADD PRIMARY KEY (resource_n, name, hashtag);
 
@@ -479,6 +482,8 @@ CREATE TABLE iris.permission (
     resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
     hashtag VARCHAR(16),
     access_n INTEGER NOT NULL,
+
+    CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$'),
     CONSTRAINT permission_access_n CHECK (access_n >= 1 AND access_n <= 4)
 );
 
@@ -3046,7 +3051,9 @@ GRANT SELECT ON dms_message_view TO PUBLIC;
 
 CREATE TABLE iris.dms_hashtag (
     dms VARCHAR(20) NOT NULL REFERENCES iris._dms,
-    hashtag VARCHAR(16) NOT NULL
+    hashtag VARCHAR(16) NOT NULL,
+
+    CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$')
 );
 ALTER TABLE iris.dms_hashtag ADD PRIMARY KEY (dms, hashtag);
 
@@ -3059,7 +3066,9 @@ CREATE TABLE iris.msg_pattern (
     name VARCHAR(20) PRIMARY KEY,
     multi VARCHAR(1024) NOT NULL,
     flash_beacon BOOLEAN NOT NULL,
-    compose_hashtag VARCHAR(16)
+    compose_hashtag VARCHAR(16),
+
+    CONSTRAINT hashtag_ck CHECK (compose_hashtag ~ '^#[A-Za-z0-9]+$')
 );
 
 COPY iris.msg_pattern (name, multi, flash_beacon, compose_hashtag) FROM stdin;
@@ -3082,6 +3091,8 @@ CREATE TABLE iris.msg_line (
     line SMALLINT NOT NULL,
     multi VARCHAR(64) NOT NULL,
     rank SMALLINT NOT NULL,
+
+    CONSTRAINT hashtag_ck CHECK (restrict_hashtag ~ '^#[A-Za-z0-9]+$'),
     CONSTRAINT msg_line_line CHECK ((line >= 1) AND (line <= 12)),
     CONSTRAINT msg_line_rank CHECK ((rank >= 1) AND (rank <= 99))
 );
@@ -3097,7 +3108,9 @@ CREATE TABLE iris.dms_action (
     phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
     dms_hashtag VARCHAR(16) NOT NULL,
     msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern,
-    msg_priority INTEGER NOT NULL
+    msg_priority INTEGER NOT NULL,
+
+    CONSTRAINT hashtag_ck CHECK (dms_hashtag ~ '^#[A-Za-z0-9]+$')
 );
 
 CREATE VIEW dms_action_view AS
@@ -4070,7 +4083,9 @@ CREATE TABLE iris.alert_config (
     auto_deploy BOOLEAN NOT NULL,
     before_period_hours INTEGER NOT NULL,
     after_period_hours INTEGER NOT NULL,
-    dms_hashtag VARCHAR(16)
+    dms_hashtag VARCHAR(16),
+
+    CONSTRAINT hashtag_ck CHECK (dms_hashtag ~ '^#[A-Za-z0-9]+$')
 );
 
 CREATE TABLE iris.alert_period (
@@ -4131,7 +4146,9 @@ CREATE TABLE cap.alert_info (
     lon double precision NOT NULL,
     all_hashtag VARCHAR(16) NOT NULL,
     action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-    alert_state INTEGER NOT NULL REFERENCES iris.alert_state
+    alert_state INTEGER NOT NULL REFERENCES iris.alert_state,
+
+    CONSTRAINT hashtag_ck CHECK (all_hashtag ~ '^#[A-Za-z0-9]+$')
 );
 
 --
@@ -4393,7 +4410,9 @@ CREATE TABLE iris.lane_use_multi (
     indication INTEGER NOT NULL REFERENCES iris.lane_use_indication,
     msg_num INTEGER,
     msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern,
-    dms_hashtag VARCHAR(16)
+    dms_hashtag VARCHAR(16),
+
+    CONSTRAINT hashtag_ck CHECK (dms_hashtag ~ '^#[A-Za-z0-9]+$')
 );
 
 CREATE VIEW lane_use_multi_view AS
