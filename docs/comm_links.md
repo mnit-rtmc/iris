@@ -12,11 +12,11 @@ A **comm link** is a network connection to field [device]s or external system
 
 Attribute [permissions]:
 
-| Access       | Minimal                        | Full |
-|--------------|--------------------------------|------|
-| Read Only    | name, connected                |      |
-| 💡 Plan      | poll\_enabled                  |      |
-| 🔧 Configure | description, uri, comm\_config |      |
+| Access       | Minimal                        |
+|--------------|--------------------------------|
+| Read Only    | name, connected                |
+| 💡 Plan      | poll\_enabled                  |
+| 🔧 Configure | description, uri, comm\_config |
 
 **Description** is s short text description of the comm link.
 

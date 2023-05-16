@@ -14,11 +14,11 @@ is checked against the stored password hash for the account.
 * `iris/api/user`
 * `iris/api/user/{name}`
 
-| Access       | Minimal          | Full |
-|--------------|------------------|------|
-| Read Only    | name             |      |
-| 💡 Plan      | enabled          |      |
-| 🔧 Configure | full\_name, role |      |
+| Access       | Minimal          |
+|--------------|------------------|
+| Read Only    | name             |
+| 💡 Plan      | enabled          |
+| 🔧 Configure | full\_name, role |
 
 ## Roles
 
@@ -36,10 +36,10 @@ make further changes will be lost immediately.**
 * `iris/api/role`
 * `iris/api/role/{name}`
 
-| Access       | Minimal    | Full |
-|--------------|------------|------|
-| Read Only    | name       |      |
-| 💡 Plan      | enabled    |      |
+| Access       | Minimal    |
+|--------------|------------|
+| Read Only    | name       |
+| 💡 Plan      | enabled    |
 
 ## Capabilities
 

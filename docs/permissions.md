@@ -10,10 +10,10 @@ access only.
 * `iris/api/permission/{id}`
 * `iris/api/access`
 
-| Access       | Minimal                               | Full |
-|--------------|---------------------------------------|------|
-| Read Only    | id                                    |      |
-| 🔧 Configure | role, resource\_n, hashtag, access\_n |      |
+| Access       | Minimal                               |
+|--------------|---------------------------------------|
+| Read Only    | id                                    |
+| 🔧 Configure | role, resource\_n, hashtag, access\_n |
 
 [Role] is the user role associated with the permissions.
 
