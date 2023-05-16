@@ -35,14 +35,18 @@ GRANT SELECT ON comm_link_view TO PUBLIC;
 
 -- Rename permission `batch` to `hashtag`
 ALTER TABLE iris.permission ADD COLUMN hashtag VARCHAR(16);
-UPDATE iris.permission SET hashtag = batch;
+UPDATE iris.permission SET hashtag = NULL;
+ALTER TABLE iris.permission ADD CONSTRAINT hashtag_ck
+    CHECK (hashtag ~ '^#[A-Za-z0-9]+$');
 ALTER TABLE iris.permission DROP COLUMN batch;
 
 -- Add resource hashtags
 CREATE TABLE iris.hashtag (
     resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
     name VARCHAR(20) NOT NULL,
-    hashtag VARCHAR(16) NOT NULL
+    hashtag VARCHAR(16) NOT NULL,
+
+    CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$')
 );
 ALTER TABLE iris.hashtag ADD PRIMARY KEY (resource_n, name, hashtag);
 
@@ -50,6 +54,30 @@ CREATE VIEW hashtag_view AS
     SELECT resource_n, name, hashtag
     FROM iris.hashtag;
 GRANT SELECT ON hashtag_view TO PUBLIC;
+
+-- Remove invalid characters from hashtags
+UPDATE iris.msg_line
+    SET restrict_hashtag = translate(restrict_hashtag, '-_', '');
+UPDATE iris.dms_action
+    SET dms_hashtag = translate(dms_hashtag, '-_', '');
+UPDATE cap.alert_info
+    SET all_hashtag = translate(all_hashtag, '-_', '');
+
+-- Add hashtag check constraints
+ALTER TABLE iris.dms_hashtag ADD
+    CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$');
+ALTER TABLE iris.msg_pattern ADD
+    CONSTRAINT hashtag_ck CHECK (compose_hashtag ~ '^#[A-Za-z0-9]+$');
+ALTER TABLE iris.msg_line ADD
+    CONSTRAINT hashtag_ck CHECK (restrict_hashtag ~ '^#[A-Za-z0-9]+$');
+ALTER TABLE iris.dms_action ADD
+    CONSTRAINT hashtag_ck CHECK (dms_hashtag ~ '^#[A-Za-z0-9]+$');
+ALTER TABLE iris.alert_config ADD
+    CONSTRAINT hashtag_ck CHECK (dms_hashtag ~ '^#[A-Za-z0-9]+$');
+ALTER TABLE cap.alert_info ADD
+    CONSTRAINT hashtag_ck CHECK (all_hashtag ~ '^#[A-Za-z0-9]+$');
+ALTER TABLE iris.lane_use_multi ADD
+    CONSTRAINT hashtag_ck CHECK (dms_hashtag ~ '^#[A-Za-z0-9]+$');
 
 -- Delete dms_composer_edit_mode system attribute
 DELETE FROM iris.system_attribute WHERE name = 'dms_composer_edit_mode';
