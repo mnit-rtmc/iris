@@ -425,7 +425,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	{
 		String[] ht2 = DMSHelper.makeHashtags(ht);
 		if (!Arrays.equals(ht, ht2))
-			throw new ChangeVetoException("Bad hashtags");
+			throw new ChangeVetoException("BAD HASHTAGS");
 		if (!Arrays.equals(ht, hashtags)) {
 			TreeSet<String> ht_set = new TreeSet<String>(
 				Arrays.asList(ht)
@@ -678,12 +678,49 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				throw new ChangeVetoException("USER: " +
 					unm + " != " + pusr);
 			}
+			checkMsgUser(sm);
 			validateMsg(sm);
 			store.update(this, "msg_user", sm);
 			setMsgUser(sm);
 			sm = getMsgValidated();
 			sendMsg(sm);
 		}
+	}
+
+	/** Check if the user has permission to send a given message */
+	private void checkMsgUser(SignMessage sm) throws TMSException {
+		switch (queryPermAccess()) {
+		// FIXME: remove this case after testing
+		case 0: // no permission record
+			return;
+		case 2: // "Operate" access level
+			denyFreeForm(sm);
+			return;
+		case 3: // "Plan" access level
+			checkFreeFormBanned(sm);
+			return;
+		case 4: // "Configure" access level
+			// not checked
+			return;
+		default:
+			throw new ChangeVetoException("NOT PERMITTED");
+		}
+	}
+
+	/** Deny free-form text in a message */
+	private void denyFreeForm(SignMessage sm) throws TMSException {
+		String msg = DMSHelper.validateFreeFormLines(this,
+			sm.getMulti());
+		if (msg != null)
+			throw new ChangeVetoException("FREE-FORM: " + msg);
+	}
+
+	/** Check for banned words in free-form text */
+	private void checkFreeFormBanned(SignMessage sm) throws TMSException {
+		String msg = DMSHelper.validateFreeFormWords(this,
+			sm.getMulti());
+		if (msg != null)
+			throw new ChangeVetoException("BANNED WORDS: " + msg);
 	}
 
 	/** Set the user selected sign message,

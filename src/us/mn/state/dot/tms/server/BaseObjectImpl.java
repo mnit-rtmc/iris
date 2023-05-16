@@ -547,4 +547,37 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			}
 		});
 	}
+
+	/** Query user's permission access level for this object.
+	 *
+	 * @return Access level (0-4)
+	 *         0 none, 1 view, 2 operate, 3 plan, 4 configure */
+	public int queryPermAccess() throws TMSException {
+		String res = getTypeName();
+		String user = getProcUser();
+		final int[] access = { 0 };
+		store.query("SELECT max(access_n) " +
+			"FROM iris.permission p " +
+			"JOIN iris.i_user u ON u.role = p.role " +
+			"WHERE resource_n = '" + res + "' " +
+			"AND u.name = '" + user + "' " +
+			"AND (" +
+				"p.hashtag IS NULL OR " +
+				"p.hashtag IN (" +
+					"SELECT hashtag " +
+					"FROM iris.hashtag " +
+					"WHERE resource_n = '" + res + "' " +
+					"AND name = '" + getName() + "'" +
+				")" +
+			");",
+			new ResultFactory()
+		{
+			@Override public void create(ResultSet row)
+				throws SQLException
+			{
+				access[0] = row.getInt(1);
+			}
+		});
+		return access[0];
+	}
 }

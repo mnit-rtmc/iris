@@ -32,8 +32,8 @@ import us.mn.state.dot.tms.utils.MultiString;
 public class MsgLineCBoxModel extends AbstractListModel<MsgLine>
 	implements ComboBoxModel<MsgLine>
 {
-	/** Rank for on-the-fly messages */
-	static private final short ON_THE_FLY_RANK = 99;
+	/** Rank for free-form messages */
+	static private final short FREE_FORM_RANK = 99;
 
 	/** Blank client-side message line */
 	static private final MsgLine BLANK_LINE =
@@ -124,7 +124,7 @@ public class MsgLineCBoxModel extends AbstractListModel<MsgLine>
 		MsgLine ml = lookupMsgLine(ms);
 		return (ml != null)
 		      ? ml
-		      : new TransMsgLine(ms, line, ON_THE_FLY_RANK);
+		      : new TransMsgLine(ms, line, FREE_FORM_RANK);
 	}
 
 	/** Lookup a message line.

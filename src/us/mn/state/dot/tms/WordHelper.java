@@ -21,8 +21,6 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import us.mn.state.dot.tms.utils.I18N;
-import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -82,90 +80,14 @@ public class WordHelper extends BaseHelper {
 		}
 	}
 
-	/** Spell check a MULTI string.
-	 * @param multi MULTI string containing words to check.
-	 * @return An empty string if no words are misspelled, otherwise a 
-	 *	   message for the user. */
-	static public String spellCheck(String multi) {
-		StringBuilder msg = new StringBuilder();
-		msg.append(buildBannedUserMsg(multi));
-		msg.append(buildAllowedUserMsg(multi));
-		return msg.toString();
-	}
-
-	/** Indent for messages */
-	static private String INDENT = "    ";
-
-	/** Build a user message for words that are banned.
-	 * @param ms MULTI string
-	 * @return A user message indicating which words are misspelled */
-	static private String buildBannedUserMsg(String multi) {
-		List<String> bw = spellCheck(multi, false);
-		if (bw.size() <= 0)
-			return "";
-		StringBuilder msg = new StringBuilder();
-		msg.append(I18N.get("word.banned.msg"));
-		msg.append("\n").append(INDENT);
-		for (int i = 0; i < bw.size(); ++i) {
-			msg.append(bw.get(i));
-			if (i < bw.size() - 1)
-				msg.append(", ");
-		}
-		msg.append("\n");
-		return msg.toString();
-	}
-
-	/** Build a user message for words that are not explicitly allowed.
-	 * @param ms MULTI string
-	 * @return A user message indicating which words are misspelled */
-	static private String buildAllowedUserMsg(String multi) {
-		List<String> aw = spellCheck(multi, true);
-		if (aw.size() <= 0)
-			return "";
-		StringBuilder msg = new StringBuilder();
-		msg.append(I18N.get("word.not.allowed"));
-		msg.append("\n").append(INDENT);
-		for (int i = 0; i < aw.size(); ++i) {
-			msg.append(aw.get(i));
-			if (i < aw.size() - 1)
-				msg.append(", ");
-		}
-		msg.append("\n");
-		return msg.toString();
-	}
-
-	/** Spell check a MULTI string, returning the misspelled words.
-	 * @param ms MULTI string containing words to check.
-	 * @param a True to check against allowed words else banned words.
-	 * @return A list of incorrect words. */
-	static private List<String> spellCheck(String ms, boolean a) {
-		return spellCheck(new MultiString(ms).getWords(), a);
-	}
-
-	/** Spell check a list of words, returning the misspelled words.
-	 * @param ws List of words in the message to spellcheck
-	 * @param a True for the allowed list else banned word list.
-	 * @return A list of words from the argument ws that are not 
-	 * 	   contained in the dictionary */
-	static private List<String> spellCheck(List<String> ws, boolean a) {
-		ArrayList<String> wrong = new ArrayList<String>();
-		for (String w : ws) {
-			if (!spellCheckWord(w, a))
-				wrong.add(w);
-		}
-		return wrong;
-	}
-
-	/** Is the specified word misspelled?
-	 * @param w Word to check
-	 * @param allow True to spell check with allowed word list else use
-	 *              the banned word list.
-	 * @return True if word argument is in the dictionary else false */
-	static private boolean spellCheckWord(String w, boolean allow) {
+	/** Check if a word is banned */
+	static public boolean isBanned(String w) {
 		if (ignoreWord(w))
-			return true;
-		Word dwd = lookup(w);
-		return (dwd != null) ? dwd.getAllowed() : !allow;
+			return false;
+		else {
+			Word word = lookup(w);
+			return (word != null) && !word.getAllowed();
+		}
 	}
 
 	/** Ignore a word? */
