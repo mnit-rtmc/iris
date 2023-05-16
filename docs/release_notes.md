@@ -1,5 +1,13 @@
 # IRIS 5.x Release Notes
 
+5.43.0 (16 May 2023)
+ - Check free-form DMS text with `msg_user` permissions
+ - Removed `dms_composer_edit_mode` system attribute
+ - Removed `dict_allowed_scheme` system attribute
+ - Removed `dict_banned_scheme` system attribute
+ - Removed unused database columns and views
+ - Improved documentation
+
 5.42.0 (7 Mar 2023)
  - Replaced `sign_message` owner with `msg_owner`
  - Removed `sign_message` source (now in `msg_owner`)
