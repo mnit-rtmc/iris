@@ -20,6 +20,12 @@ is checked against the stored password hash for the account.
 | 💡 Plan      | enabled          |
 | 🔧 Configure | full\_name, role |
 
+## Domains
+
+A network _domain_ uses [CIDR] to restrict the IP addresses from which a _user_
+can connect to IRIS.  To log in, a _user_ must be assigned to a matching
+_enabled_ domain.
+
 ## Roles
 
 A role defines the set of [capabilities](#capabilities) associated with a _user_
@@ -60,6 +66,8 @@ interface for all users.
 **WARNING: the** `base_admin` **capability can grant access for all IRIS
 functions.**
 
+(NOTE: capabilities are being phased out in favor of [permissions])
+
 ## Privileges
 
 A _privilege_ grants read or write access to one type of object.  There are 5
@@ -68,16 +76,12 @@ fields required to fully specify a _privilege_.
 Field     | Description
 ----------|----------------------------------------------------
 Type      | Object type selected from a list of available types
-Object    | A regular expression to match object names.  NOTE: Write access only.  This feature will be removed in a future version of IRIS.
+Object    | A regular expression to match object names.
 Group     | Used to divide objects into related groups.  This is an experimental feature intended to replace the **object** field.  NOTE: Write access only.
 Attribute | Write access to a specific attribute of an object type can be specified with this field.
 Write     | When this checkbox is checked, write access is granted.  Otherwise, the privilege grants read access.  To be granted write access, a role must also have read access to the object type.
 
-## Domains
-
-A network _domain_ uses [CIDR] to restrict the IP addresses from which a _user_
-can connect to IRIS.  To log in, a _user_ must be assigned to a matching
-_enabled_ domain.
+(NOTE: privileges are being phased out in favor of [permissions])
 
 ## Events
 
@@ -99,4 +103,5 @@ These records are purged automatically when older than the value of the
 [device]: controllers.html#devices
 [LCS]: lcs.html
 [LDAP]: installation.html#ldap
+[permissions]: permissions.html
 [system attribute]: system_attributes.html

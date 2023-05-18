@@ -327,6 +327,7 @@ admin	any_ipv4
 admin	any_ipv6
 \.
 
+-- FIXME: remove after permissions are used everywhere
 CREATE TABLE iris.capability (
 	name VARCHAR(16) PRIMARY KEY,
 	enabled BOOLEAN NOT NULL
@@ -523,6 +524,7 @@ CREATE TRIGGER permission_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.permission
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
+-- FIXME: remove after permissions are used everywhere
 CREATE TABLE iris.privilege (
     name VARCHAR(8) PRIMARY KEY,
     capability VARCHAR(16) NOT NULL REFERENCES iris.capability,
@@ -718,6 +720,7 @@ COPY iris.privilege (name, capability, type_n, group_n, write) FROM stdin;
 PRV_003D	camera_tab	play_list	user	t
 \.
 
+-- FIXME: remove after permissions are used everywhere
 CREATE TABLE iris.role_capability (
 	role VARCHAR(15) NOT NULL REFERENCES iris.role,
 	capability VARCHAR(16) NOT NULL REFERENCES iris.capability
@@ -789,6 +792,7 @@ operator	sensor_tab
 operator	toll_tab
 \.
 
+-- FIXME: remove after permissions are used everywhere
 CREATE VIEW role_privilege_view AS
 	SELECT role, role_capability.capability, type_n, obj_n, group_n, attr_n,
 	       write
