@@ -284,9 +284,9 @@ CREATE TRIGGER role_notify_trig
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE TABLE iris.domain (
-	name VARCHAR(15) PRIMARY KEY,
-	cidr VARCHAR(64) NOT NULL,
-	enabled BOOLEAN NOT NULL
+    name VARCHAR(15) PRIMARY KEY,
+    cidr VARCHAR(64) NOT NULL,
+    enabled BOOLEAN NOT NULL
 );
 
 COPY iris.domain (name, cidr, enabled) FROM stdin;
@@ -295,12 +295,12 @@ any_ipv6	::0/0	t
 \.
 
 CREATE TABLE iris.i_user (
-	name VARCHAR(15) PRIMARY KEY,
-	full_name VARCHAR(31) NOT NULL,
-	password VARCHAR(64) NOT NULL,
-	dn VARCHAR(128) NOT NULL,
-	role VARCHAR(15) REFERENCES iris.role,
-	enabled BOOLEAN NOT NULL
+    name VARCHAR(15) PRIMARY KEY,
+    full_name VARCHAR(31) NOT NULL,
+    password VARCHAR(64) NOT NULL,
+    dn VARCHAR(128) NOT NULL,
+    role VARCHAR(15) REFERENCES iris.role,
+    enabled BOOLEAN NOT NULL
 );
 
 COPY iris.i_user (name, full_name, password, dn, role, enabled) FROM stdin;
@@ -312,13 +312,13 @@ CREATE TRIGGER i_user_notify_trig
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW i_user_view AS
-	SELECT name, full_name, dn, role, enabled
-	FROM iris.i_user;
+    SELECT name, full_name, dn, role, enabled
+    FROM iris.i_user;
 GRANT SELECT ON i_user_view TO PUBLIC;
 
 CREATE TABLE iris.i_user_domain (
-	i_user VARCHAR(15) NOT NULL REFERENCES iris.i_user,
-	domain VARCHAR(15) NOT NULL REFERENCES iris.domain
+    i_user VARCHAR(15) NOT NULL REFERENCES iris.i_user,
+    domain VARCHAR(15) NOT NULL REFERENCES iris.domain
 );
 ALTER TABLE iris.i_user_domain ADD PRIMARY KEY (i_user, domain);
 
