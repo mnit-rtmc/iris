@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2020  Minnesota Department of Transportation
+ * Copyright (C) 2004-2023  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -317,7 +317,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	}
 
 	/** Update the count labels for each style status */
-	public void updateCounts() {
+	private void updateCounts() {
 		if (startButtonUpdate()) {
 			IWorker<Void> worker = new IWorker<Void>() {
 				@Override
@@ -337,67 +337,61 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Flag to indicate button update in progress */
 	private ButtonUpdateState update_state = ButtonUpdateState.done;
 
-	/** Start button update.
+	/** Get button update state */
+	private ButtonUpdateState getState() {
+		synchronized (update_state) {
+			return update_state;
+		}
+	}
+
+	/** Set button update state */
+	private ButtonUpdateState setState(ButtonUpdateState state) {
+		synchronized (update_state) {
+			ButtonUpdateState st = update_state;
+			update_state = state;
+			return st;
+		}
+	}
+
+	/** Start button update.  (Called by TaskProcessor thread)
 	 * @return true If new worker needs to be created. */
 	private boolean startButtonUpdate() {
-		synchronized (buttons) {
-			boolean b = (ButtonUpdateState.done == update_state);
-			update_state = ButtonUpdateState.starting;
-			for (StyleButton btn : buttons)
-				btn.n_count = 0;
-			return b;
-		}
+		return setState(ButtonUpdateState.starting) ==
+		       ButtonUpdateState.done;
 	}
 
 	/** Update the counts for each style status */
 	private void doUpdateCounts() {
-		while (checkUpdateStatus())
-			tryUpdateCounts();
-	}
-
-	/** Check button update status.  If "starting", switch to "working" and
-	 * return true.  Else, switch to "done" and return false. */
-	private boolean checkUpdateStatus() {
-		synchronized (buttons) {
-			if (ButtonUpdateState.starting == update_state) {
-				update_state = ButtonUpdateState.working;
-				return true;
-			} else {
-				update_state = ButtonUpdateState.done;
-				return false;
-			}
-		}
+		while (tryUpdateCounts());
 	}
 
 	/** Try to update the counts for each style status */
-	private void tryUpdateCounts() {
+	private boolean tryUpdateCounts() {
+		setState(ButtonUpdateState.working);
+		for (StyleButton btn : buttons)
+			btn.n_count = 0;
 		for (T proxy : manager.getCache()) {
-			if (updateCount(proxy))
-				break;
+			updateCount(proxy);
+			if (getState() == ButtonUpdateState.starting)
+				return true;
 		}
+		return setState(ButtonUpdateState.done) ==
+		       ButtonUpdateState.starting;
 	}
 
 	/** Update the style button counts for one proxy */
-	private boolean updateCount(T proxy) {
+	private void updateCount(T proxy) {
 		for (StyleButton btn : buttons) {
-			if (manager.checkStyle(btn.i_style, proxy)) {
-				synchronized (buttons) {
-					btn.n_count++;
-				}
-			}
-		}
-		synchronized (buttons) {
-			return update_state != ButtonUpdateState.working;
+			if (manager.checkStyle(btn.i_style, proxy))
+				btn.n_count++;
 		}
 	}
 
 	/** Update the count labels */
 	private void updateCountLabels() {
-		synchronized (buttons) {
-			for (StyleButton btn : buttons) {
-				btn.setText(Integer.toString(btn.n_count) +
-					' ' + btn.i_style);
-			}
+		for (StyleButton btn : buttons) {
+			btn.setText(Integer.toString(btn.n_count) + ' ' +
+				btn.i_style);
 		}
 	}
 
