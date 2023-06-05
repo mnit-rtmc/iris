@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2017  Minnesota Department of Transportation
+ * Copyright (C) 2016-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,6 +87,11 @@ public class DeviceReqProp extends CohuPTZProp {
 	/** Toggle wiper latch command */
 	static private final byte[] CMD_WIPER_TOGGLE = new byte[] {
 		(byte) 'L', (byte) '3'
+	};
+
+	/** Toggle heater latch command */
+	static private final byte[] CMD_HEATER_TOGGLE = new byte[] {
+		(byte) 'L', (byte) '4'
 	};
 
 	/** Device request */
