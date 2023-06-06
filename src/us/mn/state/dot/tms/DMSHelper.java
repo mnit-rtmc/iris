@@ -468,10 +468,10 @@ public class DMSHelper extends BaseHelper {
 		if (sc == null)
 			return "NULL VALUE";
 		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms)) {
-			if (!MsgPatternHelper.validateLines(pat, sc, ms))
-				return "NOT PERMITTED";
+			if (MsgPatternHelper.validateLines(pat, sc, ms))
+				return null;
 		}
-		return null;
+		return "NOT PERMITTED";
 	}
 
 	/** Validate free-form message words */

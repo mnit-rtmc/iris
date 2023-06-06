@@ -158,8 +158,9 @@ public class MsgPatternHelper extends BaseHelper {
 	{
 		if (sc == null || pat == null)
 			return false;
+		String pat_ms = pat.getMulti();
 		TextRect tr = SignConfigHelper.textRect(sc);
-		List<String> lines = tr.splitLines(pat.getMulti(), ms);
+		List<String> lines = tr.splitLines(pat_ms, ms);
 		short num = 0;
 		for (String line: lines) {
 			num++;
@@ -167,7 +168,7 @@ public class MsgPatternHelper extends BaseHelper {
 			    (!MsgLineHelper.match(pat, num, line)))
 				return false;
 		}
-		return true;
+		return ms.equals(tr.fill(pat_ms, lines));
 	}
 
 	/** Validate text words for a message pattern */
