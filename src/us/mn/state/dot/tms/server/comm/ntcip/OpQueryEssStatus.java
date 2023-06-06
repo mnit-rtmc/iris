@@ -103,6 +103,7 @@ public class OpQueryEssStatus extends OpEss {
 
 	/** Get phase to query wind sensor data */
 	private Phase queryWindSensors() {
+		// FIXME: remove this workaround when bug is understood
 		// LX model RPUs contain a bug which sometimes causes objects in
 		// the wind sensor table to update only once every 12 hours or
 		// so.  The workaround is to query the (deprecated) wind sensor
