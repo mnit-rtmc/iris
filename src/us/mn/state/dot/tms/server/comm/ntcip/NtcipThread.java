@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2020  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,17 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  * @author Douglas Lau
  */
 public class NtcipThread extends CommThread {
+
+	/** Maximum request-id to use for Ledstar controllers.
+	 *
+	 * Some firmware versions encode request-id values greater
+	 * than 127 as negative (-128,-127,-126,...) */
+	static private final int REQUEST_ID_MAX_LEDSTAR = 0x7F;
+
+	/** Check an operation for Ledstar controller */
+	static private boolean isLedstar(OpController o) {
+		return (o instanceof OpNtcip) && ((OpNtcip) o).isLedstar();
+	}
 
 	/** Communication protocol */
 	private final CommProtocol protocol;
@@ -70,7 +81,12 @@ public class NtcipThread extends CommThread {
 		throws IOException
 	{
 		ControllerImpl c = o.getController();
-		return snmp.new Message(m.getOutputStream(c),
-			m.getInputStream("", c), c.getPassword());
+		if (isLedstar(o))
+			return snmp.new Message(m.getOutputStream(c),
+				m.getInputStream("", c), c.getPassword(),
+				REQUEST_ID_MAX_LEDSTAR);
+		else
+			return snmp.new Message(m.getOutputStream(c),
+				m.getInputStream("", c), c.getPassword());
 	}
 }

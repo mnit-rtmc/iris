@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2022  Minnesota Department of Transportation
+ * Copyright (C) 2002-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,36 +77,6 @@ abstract public class OpDMS extends OpNtcip {
 		else
 			dms.setConfigure(false);
 		super.cleanup();
-	}
-
-	/** Check if DMS make contains a value.
-	 *
-	 * NOTE: value must be all lower-case */
-	private boolean isMakeContaining(String value) {
-		assert value.equals(value.toLowerCase());
-		SignDetail sd = dms.getSignDetail();
-		String make = (sd != null) ? sd.getSoftwareMake() : null;
-		return (make != null) && make.toLowerCase().contains(value);
-	}
-
-	/** Check if DMS make is ADDCO */
-	protected boolean isAddco() {
-		return isMakeContaining("addco");
-	}
-
-	/** Check if DMS make is American Signal */
-	protected boolean isAmericanSignal() {
-		return isMakeContaining("american signal");
-	}
-
-	/** Check if DMS make is LEDSTAR */
-	protected boolean isLedstar() {
-		return isMakeContaining("ledstar");
-	}
-
-	/** Check if DMS make is Skyline */
-	protected boolean isSkyline() {
-		return isMakeContaining("skyline");
 	}
 
 	/** Check if DMS type is character matrix */

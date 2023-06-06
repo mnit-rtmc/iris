@@ -206,6 +206,35 @@ abstract public class OpNtcip extends OpDevice {
 		return ControllerHelper.getSetup(controller, "sw", "model");
 	}
 
+	/** Check if DMS make contains a value.
+	 *
+	 * NOTE: value must be all lower-case */
+	private boolean isMakeContaining(String value) {
+		assert value.equals(value.toLowerCase());
+		String make = getSoftwareMake();
+		return (make != null) && make.toLowerCase().contains(value);
+	}
+
+	/** Check if software make is ADDCO */
+	protected boolean isAddco() {
+		return isMakeContaining("addco");
+	}
+
+	/** Check if software make is American Signal */
+	protected boolean isAmericanSignal() {
+		return isMakeContaining("american signal");
+	}
+
+	/** Check if software make is LEDSTAR */
+	protected boolean isLedstar() {
+		return isMakeContaining("ledstar");
+	}
+
+	/** Check if software make is Skyline */
+	protected boolean isSkyline() {
+		return isMakeContaining("skyline");
+	}
+
 	/** Get the firmware version */
 	protected String getVersion() {
 		return ControllerHelper.getSetup(controller, "version");
