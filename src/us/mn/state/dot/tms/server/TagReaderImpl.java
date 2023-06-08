@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2019  Minnesota Department of Transportation
+ * Copyright (C) 2014-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.TagReader;
-import us.mn.state.dot.tms.TagReaderSyncMode;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
@@ -52,14 +51,8 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		mapping = new TableMapping(store, "iris", SONAR_TYPE,
 			DMS.SONAR_TYPE);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"toll_zone, downlink_freq_khz, uplink_freq_khz, " +
-			"sego_atten_downlink_db, sego_atten_uplink_db, " +
-			"sego_data_detect_db, sego_seen_count, " +
-			"sego_unique_count, iag_atten_downlink_db, " +
-			"iag_atten_uplink_db, iag_data_detect_db, " +
-			"iag_seen_count, iag_unique_count, line_loss_db, " +
-			"sync_mode, slave_select_count FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+			"toll_zone, settings FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new TagReaderImpl(row));
@@ -77,22 +70,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		map.put("pin", pin);
 		map.put("notes", notes);
 		map.put("toll_zone", toll_zone);
-		map.put("downlink_freq_khz", downlink_freq_khz);
-		map.put("uplink_freq_khz", uplink_freq_khz);
-		map.put("sego_atten_downlink_db", sego_atten_downlink_db);
-		map.put("sego_atten_uplink_db", sego_atten_uplink_db);
-		map.put("sego_data_detect_db", sego_data_detect_db);
-		map.put("sego_seen_count", sego_seen_count);
-		map.put("sego_unique_count", sego_unique_count);
-		map.put("iag_atten_downlink_db", iag_atten_downlink_db);
-		map.put("iag_atten_uplink_db", iag_atten_uplink_db);
-		map.put("iag_data_detect_db", iag_data_detect_db);
-		map.put("iag_seen_count", iag_seen_count);
-		map.put("iag_unique_count", iag_unique_count);
-		map.put("line_loss_db", line_loss_db);
-		TagReaderSyncMode sm = sync_mode;
-		map.put("sync_mode", (sm != null) ? sm.ordinal() : null);
-		map.put("slave_select_count", slave_select_count);
+		map.put("settings", settings);
 		return map;
 	}
 
@@ -110,67 +88,32 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 
 	/** Create a tag reader */
 	private TagReaderImpl(ResultSet row) throws SQLException, TMSException {
-		this(row.getString(1),           // name
-		     row.getString(2),           // geo_loc
-		     row.getString(3),           // controller
-		     row.getInt(4),              // pin
-		     row.getString(5),           // notes
-		     row.getString(6),           // toll_zone
-		     (Integer) row.getObject(7), // downlink_freq_khz
-		     (Integer) row.getObject(8), // uplink_freq_khz
-		     (Integer) row.getObject(9), // sego_atten_downlink_db
-		     (Integer) row.getObject(10),// sego_atten_uplink_db
-		     (Integer) row.getObject(11),// sego_data_detect_db
-		     (Integer) row.getObject(12),// sego_seen_count
-		     (Integer) row.getObject(13),// sego_unique_count
-		     (Integer) row.getObject(14),// iag_atten_downlink_db
-		     (Integer) row.getObject(15),// iag_atten_uplink_db
-		     (Integer) row.getObject(16),// iag_data_detect_db
-		     (Integer) row.getObject(17),// iag_seen_count
-		     (Integer) row.getObject(18),// iag_unique_count
-		     (Integer) row.getObject(19),// line_loss_db
-		     (Integer) row.getObject(20),// sync_mode
-		     (Integer) row.getObject(21) // slave_select_count
+		this(row.getString(1),     // name
+		     row.getString(2),     // geo_loc
+		     row.getString(3),     // controller
+		     row.getInt(4),        // pin
+		     row.getString(5),     // notes
+		     row.getString(6),     // toll_zone
+		     row.getString(7)      // settings
 		);
 	}
 
 	/** Create a tag reader */
 	private TagReaderImpl(String n, String l, String c, int p, String nt,
-		String tz, Integer df, Integer uf, Integer sad, Integer sau,
-		Integer sdd, Integer ssc, Integer suc, Integer iad, Integer iau,
-		Integer idd, Integer isc, Integer iuc, Integer ll, Integer sm,
-		Integer sc) throws TMSException
+		String tz, String st) throws TMSException
 	{
 		this(n, lookupGeoLoc(l), lookupController(c), p, nt,
-		     lookupTollZone(tz), df, uf, sad, sau, sdd, ssc, suc, iad,
-		     iau, idd, isc, iuc, ll, sm, sc);
+		     lookupTollZone(tz), st);
 	}
 
 	/** Create a tag reader */
 	private TagReaderImpl(String n, GeoLocImpl l, ControllerImpl c,
-		int p, String nt, TollZone tz, Integer df, Integer uf,
-		Integer sad, Integer sau, Integer sdd, Integer ssc, Integer suc,
-		Integer iad, Integer iau, Integer idd, Integer isc, Integer iuc,
-		Integer ll, Integer sm, Integer sc) throws TMSException
+		int p, String nt, TollZone tz, String st) throws TMSException
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
 		toll_zone = tz;
-		downlink_freq_khz = df;
-		uplink_freq_khz = uf;
-		sego_atten_downlink_db = sad;
-		sego_atten_uplink_db = sau;
-		sego_data_detect_db = sdd;
-		sego_seen_count = ssc;
-		sego_unique_count = suc;
-		iag_atten_downlink_db = iad;
-		iag_atten_uplink_db = iau;
-		iag_data_detect_db = idd;
-		iag_seen_count = isc;
-		iag_unique_count = iuc;
-		line_loss_db = ll;
-		sync_mode = TagReaderSyncMode.fromOrdinal(sm);
-		slave_select_count = sc;
+		settings = st;
 		dmss = lookupDMSMapping();
 		initTransients();
 	}
@@ -233,396 +176,25 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		return toll_zone;
 	}
 
-	/** Downlink frequency (khz) */
-	private Integer downlink_freq_khz;
+	/** Settings (JSON) read from tag reader */
+	private String settings;
 
-	/** Set the downlink frequency */
-	private void setDownlinkFreqKhz(Integer df) {
-		downlink_freq_khz = df;
-	}
-
-	/** Set the downlink frequency */
-	public void setDownlinkFreqKhzNotify(Integer df) {
-		if (!objectEquals(df, downlink_freq_khz)) {
+	/** Set the JSON settings */
+	public void setSettings(String s) {
+		if (!objectEquals(s, settings)) {
 			try {
-				store.update(this, "downlink_freq_khz", df);
-				setDownlinkFreqKhz(df);
+				store.update(this, "settings", s);
+				settings = s;
 			}
 			catch (TMSException e) {
-				logError("downlink_freq_khz: " +e.getMessage());
+				logError("settings: " + e.getMessage());
 			}
 		}
 	}
 
-	/** Get the downlink frequency (khz) */
-	public Integer getDownlinkFreqKhz() {
-		return downlink_freq_khz;
-	}
-
-	/** Uplink frequency (khz) */
-	private Integer uplink_freq_khz;
-
-	/** Set the uplink frequency */
-	private void setUplinkFreqKhz(Integer uf) {
-		uplink_freq_khz = uf;
-	}
-
-	/** Set the uplink frequency */
-	public void setUplinkFreqKhzNotify(Integer uf) {
-		if (!objectEquals(uf, uplink_freq_khz)) {
-			try {
-				store.update(this, "uplink_freq_khz", uf);
-				setUplinkFreqKhz(uf);
-			}
-			catch (TMSException e) {
-				logError("uplink_freq_khz: " + e.getMessage());
-			}
-		}
-	}
-
-	/** Get the uplink frequency (khz) */
-	public Integer getUplinkFreqKhz() {
-		return uplink_freq_khz;
-	}
-
-	/** SeGo downlink attenuation (db) */
-	private Integer sego_atten_downlink_db;
-
-	/** Set the SeGo downlink attenuation */
-	private void setSeGoAttenDownlinkDb(Integer sad) {
-		sego_atten_downlink_db = sad;
-	}
-
-	/** Set the SeGo downlink attenuation */
-	public void setSeGoAttenDownlinkDbNotify(Integer sad) {
-		if (!objectEquals(sad, sego_atten_downlink_db)) {
-			try {
-				store.update(this,"sego_atten_downlink_db",sad);
-				setSeGoAttenDownlinkDb(sad);
-			}
-			catch (TMSException e) {
-				logError("sego_atten_downlink_db: " +
-					e.getMessage());
-			}
-		}
-	}
-
-	/** Get the SeGo downlink attenuation */
-	public Integer getSeGoAttenDownlinkDb() {
-		return sego_atten_downlink_db;
-	}
-
-	/** SeGo uplink attenuation (db) */
-	private Integer sego_atten_uplink_db;
-
-	/** Set the SeGo uplink attenuation */
-	private void setSeGoAttenUplinkDb(Integer sau) {
-		sego_atten_uplink_db = sau;
-	}
-
-	/** Set the SeGo uplink attenuation */
-	public void setSeGoAttenUplinkDbNotify(Integer sau) {
-		if (!objectEquals(sau, sego_atten_uplink_db)) {
-			try {
-				store.update(this, "sego_atten_uplink_db", sau);
-				setSeGoAttenUplinkDb(sau);
-			}
-			catch (TMSException e) {
-				logError("sego_atten_uplink_db: " +
-					e.getMessage());
-			}
-		}
-	}
-
-	/** Get the SeGo uplink attenuation */
-	public Integer getSeGoAttenUplinkDb() {
-		return sego_atten_uplink_db;
-	}
-
-	/** SeGo data detect (db) */
-	private Integer sego_data_detect_db;
-
-	/** Set the SeGo data detect */
-	private void setSeGoDataDetectDb(Integer sdd) {
-		sego_data_detect_db = sdd;
-	}
-
-	/** Set the SeGo data detect */
-	public void setSeGoDataDetectDbNotify(Integer sdd) {
-		if (!objectEquals(sdd, sego_data_detect_db)) {
-			try {
-				store.update(this, "sego_data_detect_db", sdd);
-				setSeGoDataDetectDb(sdd);
-			}
-			catch (TMSException e) {
-				logError("sego_data_detect_db: " +
-					e.getMessage());
-			}
-		}
-	}
-
-	/** Get the SeGo data detect */
-	public Integer getSeGoDataDetectDb() {
-		return sego_data_detect_db;
-	}
-
-	/** SeGo seen count */
-	private Integer sego_seen_count;
-
-	/** Set the SeGo seen count */
-	private void setSeGoSeenCount(Integer ssc) {
-		sego_seen_count = ssc;
-	}
-
-	/** Set the SeGo seen count */
-	public void setSeGoSeenCountNotify(Integer ssc) {
-		if (!objectEquals(ssc, sego_seen_count)) {
-			try {
-				store.update(this, "sego_seen_count", ssc);
-				setSeGoSeenCount(ssc);
-			}
-			catch (TMSException e) {
-				logError("sego_seen_count: " + e.getMessage());
-			}
-		}
-	}
-
-	/** Get the SeGo seen count */
-	public Integer getSeGoSeenCount() {
-		return sego_seen_count;
-	}
-
-	/** SeGo unique count */
-	private Integer sego_unique_count;
-
-	/** Set the SeGo unique count */
-	private void setSeGoUniqueCount(Integer suc) {
-		sego_unique_count = suc;
-	}
-
-	/** Set the SeGo unique count */
-	public void setSeGoUniqueCountNotify(Integer suc) {
-		if (!objectEquals(suc, sego_unique_count)) {
-			try {
-				store.update(this, "sego_unique_count", suc);
-				setSeGoUniqueCount(suc);
-			}
-			catch (TMSException e) {
-				logError("sego_unique_count: " +e.getMessage());
-			}
-		}
-	}
-
-	/** Get the SeGo unique count */
-	public Integer getSeGoUniqueCount() {
-		return sego_unique_count;
-	}
-
-	/** IAG downlink attenuation (db) */
-	private Integer iag_atten_downlink_db;
-
-	/** Set the IAG downlink attenuation */
-	private void setIAGAttenDownlinkDb(Integer iad) {
-		iag_atten_downlink_db = iad;
-	}
-
-	/** Set the IAG downlink attenuation */
-	public void setIAGAttenDownlinkDbNotify(Integer iad) {
-		if (!objectEquals(iad, iag_atten_downlink_db)) {
-			try {
-				store.update(this, "iag_atten_downlink_db",iad);
-				setIAGAttenDownlinkDb(iad);
-			}
-			catch (TMSException e) {
-				logError("iag_atten_downlink_db: " +
-					e.getMessage());
-			}
-		}
-	}
-
-	/** Get the IAG downlink attenuation */
-	public Integer getIAGAttenDownlinkDb() {
-		return iag_atten_downlink_db;
-	}
-
-	/** IAG uplink attenuation (db) */
-	private Integer iag_atten_uplink_db;
-
-	/** Set the IAG uplink attenuation */
-	private void setIAGAttenUplinkDb(Integer iau) {
-		iag_atten_uplink_db = iau;
-	}
-
-	/** Set the IAG uplink attenuation */
-	public void setIAGAttenUplinkDbNotify(Integer iau) {
-		if (!objectEquals(iau, iag_atten_uplink_db)) {
-			try {
-				store.update(this, "iag_atten_uplink_db", iau);
-				setIAGAttenUplinkDb(iau);
-			}
-			catch (TMSException e) {
-				logError("iag_atten_uplink_db: " +
-					e.getMessage());
-			}
-		}
-	}
-
-	/** Get the IAG uplink attenuation */
-	public Integer getIAGAttenUplinkDb() {
-		return iag_atten_uplink_db;
-	}
-
-	/** IAG data detect (db) */
-	private Integer iag_data_detect_db;
-
-	/** Set the IAG data detect */
-	private void setIAGDataDetectDb(Integer idd) {
-		iag_data_detect_db = idd;
-	}
-
-	/** Set the IAG data detect */
-	public void setIAGDataDetectDbNotify(Integer idd) {
-		if (!objectEquals(idd, iag_data_detect_db)) {
-			try {
-				store.update(this, "iag_data_detect_db", idd);
-				setIAGDataDetectDb(idd);
-			}
-			catch (TMSException e) {
-				logError("iag_data_detect_db: " +
-					e.getMessage());
-			}
-		}
-	}
-
-	/** Get the IAG data detect */
-	public Integer getIAGDataDetectDb() {
-		return iag_data_detect_db;
-	}
-
-	/** IAG seen count */
-	private Integer iag_seen_count;
-
-	/** Set the IAG seen count */
-	private void setIAGSeenCount(Integer isc) {
-		iag_seen_count = isc;
-	}
-
-	/** Set the IAG seen count */
-	public void setIAGSeenCountNotify(Integer isc) {
-		if (!objectEquals(isc, iag_seen_count)) {
-			try {
-				store.update(this, "iag_seen_count", isc);
-				setIAGSeenCount(isc);
-			}
-			catch (TMSException e) {
-				logError("iag_seen_count: " + e.getMessage());
-			}
-		}
-	}
-
-	/** Get the IAG seen count */
-	public Integer getIAGSeenCount() {
-		return iag_seen_count;
-	}
-
-	/** IAG unique count */
-	private Integer iag_unique_count;
-
-	/** Set the IAG unique count */
-	private void setIAGUniqueCount(Integer iuc) {
-		iag_unique_count = iuc;
-	}
-
-	/** Set the IAG unique count */
-	public void setIAGUniqueCountNotify(Integer iuc) {
-		if (!objectEquals(iuc, iag_unique_count)) {
-			try {
-				store.update(this, "iag_unique_count", iuc);
-				setIAGUniqueCount(iuc);
-			}
-			catch (TMSException e) {
-				logError("iag_unique_count: " + e.getMessage());
-			}
-		}
-	}
-
-	/** Get the IAG unique count */
-	public Integer getIAGUniqueCount() {
-		return iag_unique_count;
-	}
-
-	/** Line loss (db) */
-	private Integer line_loss_db;
-
-	/** Set the line loss */
-	private void setLineLossDb(Integer ll) {
-		line_loss_db = ll;
-	}
-
-	/** Set the line loss */
-	public void setLineLossDbNotify(Integer ll) {
-		if (!objectEquals(ll, line_loss_db)) {
-			try {
-				store.update(this, "line_loss_db", ll);
-				setLineLossDb(ll);
-			}
-			catch (TMSException e) {
-				logError("line_loss_db: " + e.getMessage());
-			}
-		}
-	}
-
-	/** Get the line loss */
-	public Integer getLineLossDb() {
-		return line_loss_db;
-	}
-
-	/** Synchrnization mode */
-	private TagReaderSyncMode sync_mode;
-
-	/** Set the synchronization mode */
-	public void setSyncModeNotify(TagReaderSyncMode sm) {
-		if (!objectEquals(sm, sync_mode)) {
-			int m = (sm != null) ? sm.ordinal() : null;
-			try {
-				store.update(this, "sync_mode", m);
-				sync_mode = sm;
-			}
-			catch (TMSException e) {
-				logError("sync_mode: " + e.getMessage());
-			}
-		}
-	}
-
-	/** Get the synchronization mode */
-	public TagReaderSyncMode getSyncMode() {
-		return sync_mode;
-	}
-
-	/** Slave select count */
-	private Integer slave_select_count;
-
-	/** Set the slave select count */
-	private void setSlaveSelectCount(Integer sc) {
-		slave_select_count = sc;
-	}
-
-	/** Set the slave select count */
-	public void setSlaveSelectCountNotify(Integer sc) {
-		if (!objectEquals(sc, slave_select_count)) {
-			try {
-				store.update(this, "slave_select_count", sc);
-				setSlaveSelectCount(sc);
-			}
-			catch (TMSException e) {
-				logError("slave_select_count: "+e.getMessage());
-			}
-		}
-	}
-
-	/** Get the slave select count */
-	public Integer getSlaveSelectCount() {
-		return slave_select_count;
+	/** Get the JSON settings */
+	public String getSettings() {
+		return settings;
 	}
 
 	/** DMSs for the tag reader */

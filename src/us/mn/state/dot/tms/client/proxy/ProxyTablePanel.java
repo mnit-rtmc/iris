@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -82,7 +82,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 			deleteSelectedProxy();
 		}
 	};
-	
+
 	/** Mouse listener for table */
 	private final MouseAdapter mouser = new MouseAdapter() {
 		@Override
@@ -217,7 +217,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		return new JScrollPane(t,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, hs);
 	}
-	
+
 	/** Selection listener for triggering events on selection. */
 	protected IListSelectionAdapter selectionListener =
 		new IListSelectionAdapter()
@@ -227,7 +227,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 			selectProxy();
 		}
 	};
-	
+
 	/** Create Gui jobs */
 	protected void createJobs() {
 		ListSelectionModel s = table.getSelectionModel();
@@ -240,7 +240,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 			add_txt.setAction(add_proxy);
 		}
 	}
-	
+
 	/** Disable selection handling on the table (so synthetic selection events
 	 *  don't re-trigger actions. Removes the list selection listener from the
 	 *  selection model. The enableSelectionHandling() method reverses this.
@@ -303,7 +303,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		add_txt.setText("");
 		model.createObject(name);
 	}
-	
+
 	/** Delete the selected proxy object */
 	protected void deleteSelectedProxy() {
 		T proxy = getSelectedProxy();
@@ -336,7 +336,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		} else
 			s.clearSelection();
 	}
-	
+
 	/** Check if the table has this proxy */
 	public boolean hasProxy(T proxy) {
 		return model.getIndex(proxy) >= 0;

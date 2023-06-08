@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2023  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  * Copyright (C) 2021  Iteris Inc.
  *
@@ -34,7 +34,7 @@ public class SignMessageHelper extends BaseHelper {
 
 	/** Lookup the sign message with the specified name */
 	static public SignMessage lookup(String name) {
-		return (SignMessage)namespace.lookupObject(
+		return (SignMessage) namespace.lookupObject(
 			SignMessage.SONAR_TYPE, name);
 	}
 
@@ -44,19 +44,48 @@ public class SignMessageHelper extends BaseHelper {
 			SignMessage.SONAR_TYPE));
 	}
 
+	/** Make a message owner string */
+	static public String makeMsgOwner(int src) {
+		return makeMsgOwner(src, USER_AUTO);
+	}
+
+	/** Make a message owner string with name */
+	static public String makeMsgOwner(int src, String name) {
+		return "IRIS; " + SignMsgSource.toString(src) + "; " +
+			name;
+	}
+
+	/** Get the system part of message owner */
+	static public String getMsgOwnerSystem(SignMessage sm) {
+		String[] owner = sm.getMsgOwner().split(";", 3);
+		return (owner.length > 0) ? owner[0].trim() : "";
+	}
+
+	/** Get the sources part of message owner */
+	static public String getMsgOwnerSources(SignMessage sm) {
+		String[] owner = sm.getMsgOwner().split(";", 3);
+		return (owner.length > 1)
+		      ? owner[1].trim()
+		      : SignMsgSource.external.toString();
+	}
+
+	/** Get the name part of message owner */
+	static public String getMsgOwnerName(SignMessage sm) {
+		String[] owner = sm.getMsgOwner().split(";", 3);
+		return (owner.length > 2) ? owner[2].trim() : "";
+	}
+
 	/** Find a sign message with matching attributes.
 	 * @param sc Sign configuration.
 	 * @param inc Associated incident (original name).
-	 * @param multi MULTI string.
-	 * @param be Beacon enabled flag.
+	 * @param ms MULTI string.
+	 * @param owner Message owner.
+	 * @param fb Flash beacon flag.
 	 * @param mp Message priority.
-	 * @param src Message source.
-	 * @param owner Use name (null for any).
-	 * @param d Duration (null for indefinite).
+	 * @param dur Duration (null for indefinite).
 	 * @return Matching sign message, or null if not found. */
-	static public SignMessage find(SignConfig sc, String inc, String multi,
-		boolean be, DmsMsgPriority mp, int src, String owner,
-		Integer d)
+	static public SignMessage find(SignConfig sc, String inc, String ms,
+		String owner, boolean fb, SignMsgPriority mp, Integer dur)
 	{
 		int mpi = mp.ordinal();
 		Iterator<SignMessage> it = iterator();
@@ -64,50 +93,27 @@ public class SignMessageHelper extends BaseHelper {
 			SignMessage sm = it.next();
 			if (objectEquals(sc, sm.getSignConfig()) &&
 			    objectEquals(inc, sm.getIncident()) &&
-			    multi.equals(sm.getMulti()) &&
-			    be == sm.getBeaconEnabled() &&
+			    ms.equals(sm.getMulti()) &&
+			    objectEquals(owner, sm.getMsgOwner()) &&
+			    fb == sm.getFlashBeacon() &&
 			    mpi == sm.getMsgPriority() &&
-			    sourceEquals(src, sm) &&
-			    objectEquals(owner, sm.getOwner()) &&
-			    objectEquals(d, sm.getDuration()))
+			    objectEquals(dur, sm.getDuration()))
 				return sm;
 		}
 		return null;
 	}
 
-	/** Sign msg source bits to ignore */
-	static private final int SRC_IGNORE = SignMsgSource.toBits(
-		SignMsgSource.tolling,
-		SignMsgSource.travel_time,
-		SignMsgSource.external
-	);
-
-	/** Check sign message source.
-	 * @param src Message source.
-	 * @param sm Sign message to check.
-	 * @return true if source matches. */
-	static private boolean sourceEquals(int src, SignMessage sm) {
-		// ignore tolling and external bits for comparison
-		int srct = src           | SRC_IGNORE;
-		int sms = sm.getSource() | SRC_IGNORE;
-		return srct == sms;
-	}
-
 	/** Check if a sign message is blank */
 	static public boolean isBlank(SignMessage sm) {
-		return (null == sm) || isMultiBlank(sm);
+		return (null == sm) ||
+		       new MultiString(sm.getMulti()).isBlank();
 	}
 
-	/** Check if the MULTI string is blank */
-	static private boolean isMultiBlank(SignMessage sm) {
-		String ms = sm.getMulti();
-		return ms == null || new MultiString(ms).isBlank();
-	}
-
-	/** Check if a sign message is a standby message */
-	static public boolean isStandby(SignMessage sm) {
-		int src = sm.getSource();
-		return SignMsgSource.standby.checkBit(src);
+	/** Get source bits for a sign message */
+	static public int sourceBits(SignMessage sm) {
+		return (sm != null)
+		      ? SignMsgSource.fromString(getMsgOwnerSources(sm))
+		      : SignMsgSource.unknown.bit();
 	}
 
 	/** Get the bitmap graphic for all pages of the specified DMS.
@@ -213,26 +219,26 @@ public class SignMessageHelper extends BaseHelper {
 	 * This should only be true for messages from "sticky" DMS actions.
 	 * @param sm The sign message. */
 	static public boolean isScheduledIndefinite(SignMessage sm) {
-		int src = sm.getSource();
-		return SignMsgSource.schedule.checkBit(src) &&
+		int bits = sourceBits(sm);
+		return SignMsgSource.schedule.checkBit(bits) &&
 		      (sm.getDuration() == null) &&
-		      !SignMsgSource.operator.checkBit(src);
+		      !SignMsgSource.operator.checkBit(bits);
 	}
 
 	/** Check if a message is scheduled and expires.
 	 * @param sm The sign message. */
 	static public boolean isScheduledExpiring(SignMessage sm) {
-		int src = sm.getSource();
-		return SignMsgSource.schedule.checkBit(src) &&
+		int bits = sourceBits(sm);
+		return SignMsgSource.schedule.checkBit(bits) &&
 		      (sm.getDuration() != null) &&
-		      !SignMsgSource.operator.checkBit(src);
+		      !SignMsgSource.operator.checkBit(bits);
 	}
 
 	/** Check if a message is operator created and expires.
 	 * @param sm The sign message. */
 	static public boolean isOperatorExpiring(SignMessage sm) {
-		return (!isBlank(sm))
-		    && (sm.getDuration() != null)
-		    && SignMsgSource.operator.checkBit(sm.getSource());
+		return (!isBlank(sm)) &&
+		       (sm.getDuration() != null) &&
+		       SignMsgSource.operator.checkBit(sourceBits(sm));
 	}
 }

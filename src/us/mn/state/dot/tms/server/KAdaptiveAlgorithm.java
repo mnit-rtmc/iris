@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2022  Minnesota Department of Transportation
+ * Copyright (C) 2001-2023  Minnesota Department of Transportation
  * Copyright (C) 2011-2012  University of Minnesota Duluth (NATSRL)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -193,7 +193,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			KAdaptiveAlgorithm alg = lookupAlgorithm(c);
 			if (alg.createMeterState(meter))
 				return alg;
-		}
+		} else if (ALG_LOG.isOpen())
+			ALG_LOG.log("No corridor for " + meter.getName());
 		return null;
 	}
 
@@ -302,7 +303,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				log(ms.toString());
 			if (MeterEvent.getEnabled())
 				ms.logMeterEvent();
-		}
+		} else if (ALG_LOG.isOpen())
+			log("No state for " + meter.getName());
 	}
 
 	/** Get ramp meter queue state enum value */
@@ -342,12 +344,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @return Entrance node matching ramp meter. */
 	private EntranceNode findEntranceNode(RampMeterImpl meter) {
 		R_NodeImpl rnode = meter.getEntranceNode();
+		if (null == rnode) {
+			if (ALG_LOG.isOpen())
+				log("No entrance node " + meter.getName());
+			return null;
+		}
 		for (Node n = head; n != null; n = n.downstream) {
 			if (n instanceof EntranceNode) {
-				EntranceNode en = (EntranceNode)n;
+				EntranceNode en = (EntranceNode) n;
 				if (en.rnode.equals(rnode))
 					return en;
 			}
+		}
+		if (ALG_LOG.isOpen()) {
+			log("Entrance " + rnode.getName() + " for " +
+				meter.getName() + " not found");
 		}
 		return null;
 	}

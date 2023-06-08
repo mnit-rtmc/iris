@@ -31,11 +31,9 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MsgPattern;
-import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.TransMsgPattern;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
@@ -84,6 +82,7 @@ public class MessageComposer extends JPanel {
 	private final IAction clear_act = new IAction("dms.clear") {
 		protected void doActionPerformed(ActionEvent e) {
 			clearWidgets();
+			updateMessage(true);
 		}
 	};
 
@@ -109,8 +108,8 @@ public class MessageComposer extends JPanel {
 	/** Button to blank selected signs */
 	private final JButton blank_btn;
 
-	/** Sign text finder for selected sign */
-	private SignTextFinder finder;
+	/** Selected sign */
+	private DMS dms;
 
 	/** Number of text rectangles in selected pattern */
 	private int n_rects;
@@ -218,13 +217,9 @@ public class MessageComposer extends JPanel {
 
 	/** Clear the widgets */
 	private void clearWidgets() {
-		adjusting++;
-		pattern_cbx.setSelectedItem(null);
 		setTabRect(0);
-		for (TextRectComposer rc: rects)
-			rc.clearWidgets();
-		adjusting--;
-		updateMessage(true);
+		dur_cbx.setSelectedIndex(0);
+		setComposedMulti("");
 	}
 
 	/** Set tab to specified text rect */
@@ -243,30 +238,48 @@ public class MessageComposer extends JPanel {
 
 	/** Set the selected sign */
 	public void setSelectedSign(DMS proxy) {
-		adjusting++;
-		finder = new SignTextFinder(proxy);
-		pattern_cbx.populateModel(proxy);
-		dur_cbx.setSelectedIndex(0);
-		adjusting--;
+		if (!DMSHelper.objectEquals(proxy, dms)) {
+			dms = proxy;
+			TextRect tr = fullTextRect();
+			pattern_cbx.populateModel(proxy, tr);
+			// if sign is null, pattern_listener doesn't call this
+			if (proxy == null)
+				pattern_cbx.setSelectedItem(null);
+			dur_cbx.setSelectedIndex(0);
+		}
 	}
 
 	/** Enable or Disable the message composer */
 	@Override
 	public void setEnabled(boolean b) {
-		super.setEnabled(b);
-		adjusting++;
-		setTabRect(0);
-		pattern_cbx.setEnabled(b);
-		for (TextRectComposer rc: rects)
-			rc.setEnabled(b);
-		dur_cbx.setEnabled(b);
-		dur_cbx.setSelectedItem(0);
-		adjusting--;
+		if (b != isEnabled()) {
+			super.setEnabled(b);
+			pattern_cbx.setEnabled(b);
+			setTabRect(0);
+			for (TextRectComposer rc: rects)
+				rc.setEnabled(b);
+			dur_cbx.setEnabled(b);
+			dur_cbx.setSelectedIndex(0);
+		}
 	}
 
 	/** Update the selected pattern */
 	private void updatePattern() {
-		List<TextRect> trs = getPatternTextRects();
+		MsgPattern pat = getMsgPattern();
+		String ms = (pat != null) ? pat.getMulti() : "";
+		MsgLineFinder finder = MsgLineFinder.create(dms, pat, ms);
+		if (finder != null && finder.isEmpty()) {
+			TextRect ftr = fullTextRect();
+			if (ftr != null) {
+				MsgPattern sub = pattern_cbx
+					.findSubstitutePattern(ftr, pat);
+				if (sub != null) {
+					finder = MsgLineFinder.create(dms,
+						sub, ms);
+				}
+			}
+		}
+		List<TextRect> trs = getPatternTextRects(pat);
 		n_rects = Math.min(trs.size(), rects.length);
 		while (n_rects < rect_tab.getTabCount())
 			rect_tab.removeTabAt(n_rects);
@@ -285,8 +298,9 @@ public class MessageComposer extends JPanel {
 				: "" + page_number;
 			TextRectComposer rc = rects[i];
 			int n_lines = tr.getLineCount();
+			adjusting++;
 			rc.setModels(finder, first, n_lines);
-			rc.setEditMode();
+			adjusting--;
 			if (i < rect_tab.getTabCount()) {
 				rect_tab.setComponentAt(i, rc);
 				rect_tab.setTitleAt(i, title);
@@ -294,62 +308,80 @@ public class MessageComposer extends JPanel {
 				rect_tab.addTab(title, rc);
 			first += n_lines;
 		}
+		// at least one tab required for proper layout
+		if (rect_tab.getTabCount() < 1) {
+			adjusting++;
+			rects[0].setModels(null, 0, 0);
+			adjusting--;
+			rect_tab.addTab("", rects[0]);
+		}
 	}
 
-	/** Get the text rectangles for the selected pattern */
-	private List<TextRect> getPatternTextRects() {
-		MsgPattern pat = getMsgPattern();
-		if (pat != null)
-			return MsgPatternHelper.findTextRectangles(pat);
-		else
-			return new ArrayList<TextRect>();
+	/** Get the text rectangles for the given pattern */
+	private List<TextRect> getPatternTextRects(MsgPattern pat) {
+		TextRect tr = fullTextRect();
+		return (tr != null && pat != null)
+		      ? tr.find(pat.getMulti())
+		      : new ArrayList<TextRect>();
 	}
 
 	/** Get the selected message pattern */
-	public MsgPattern getMsgPattern() {
-		MsgPattern pat = pattern_cbx.getSelectedPattern();
-		if (pat != null)
-			return pat;
-		// make a "client" pattern just for composing
-		DMS dms = dispatcher.getSingleSelection();
-		if (dms != null) {
-			SignConfig sc = dms.getSignConfig();
-			if (sc != null)
-				return new TransMsgPattern(sc, "");
-		}
-		return null;
+	private MsgPattern getMsgPattern() {
+		return pattern_cbx.getSelectedPattern();
+	}
+
+	/** Get MULTI string of selected message pattern */
+	private String getPatternMulti() {
+		MsgPattern pat = getMsgPattern();
+		return (pat != null) ? pat.getMulti() : "";
+	}
+
+	/** Get the full text rectangle of the selected sign */
+	private TextRect fullTextRect() {
+		SignConfig sc = (dms != null) ? dms.getSignConfig() : null;
+		return SignConfigHelper.textRect(sc);
 	}
 
 	/** Compose a MULTI string using the contents of the widgets */
 	public String getComposedMulti() {
-		ArrayList<String> lines = new ArrayList<String>();
-		for (int i = 0; i < n_rects; i++)
-			rects[i].getSelectedLines(lines);
-		MsgPattern pat = getMsgPattern();
-		return MsgPatternHelper.fillTextRectangles(pat, lines);
+		TextRect tr = fullTextRect();
+		if (tr != null) {
+			ArrayList<String> lines = new ArrayList<String>();
+			for (int i = 0; i < n_rects; i++)
+				rects[i].getSelectedLines(lines);
+			String ms = tr.fill(getPatternMulti(), lines);
+			MultiString multi = new MultiString(ms);
+			return multi.stripTrailingWhitespaceTags().toString();
+		} else
+			return "";
 	}
 
 	/** Set the composed MULTI string */
 	public void setComposedMulti(String ms) {
-		MsgPattern pat = pattern_cbx.findBestPattern(ms);
-		pattern_cbx.setSelectedItem(pat);
-		// this makes a TransMsgPattern if none selected
-		pat = getMsgPattern();
-		if (pat != null) {
-			List<String> lines = MsgPatternHelper
-				.splitLines(pat, ms);
-			adjusting++;
+		TextRect tr = fullTextRect();
+		if (tr != null) {
+			MsgPattern pat = pattern_cbx.findBestPattern(ms, tr);
+			pattern_cbx.setSelectedItem(pat);
+			String pat_ms = getPatternMulti();
+			List<String> lines = tr.splitLines(pat_ms, ms);
 			Iterator<String> lns = lines.iterator();
+			adjusting++;
 			for (int i = 0; i < n_rects; i++)
 				rects[i].setSelectedLines(lns);
+			adjusting--;
+		} else {
+			pattern_cbx.setSelectedItem(null);
+			adjusting++;
+			for (TextRectComposer rc: rects)
+				rc.clearWidgets();
 			adjusting--;
 		}
 	}
 
-	/** Check if beacon is enabled */
-	public boolean isBeaconEnabled() {
-		// FIXME: add component for this
-		return false;
+	/** Check if beacon should be flashing */
+	public boolean getFlashBeacon() {
+		MsgPattern pat = getMsgPattern();
+		return (pat != null) && pat.getFlashBeacon();
 	}
 
 	/** Get the selected duration */

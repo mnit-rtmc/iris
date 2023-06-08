@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2019  Minnesota Department of Transportation
+ * Copyright (C) 2016-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms;
 
-import static us.mn.state.dot.tms.DmsMsgPriority.*;
 import static us.mn.state.dot.tms.IncRange.*;
 
 /**
@@ -23,18 +22,18 @@ import static us.mn.state.dot.tms.IncRange.*;
  * @author Douglas Lau
  */
 public enum IncSeverity {
-	minor  (near,   INCIDENT_LOW),
-	normal (middle, INCIDENT_MED),
-	major  (far,    INCIDENT_HIGH);
+	minor  (near,   SignMsgPriority.high_2),
+	normal (middle, SignMsgPriority.high_3),
+	major  (far,    SignMsgPriority.high_4);
 
 	/** Maximum range to DMS */
 	public final IncRange maximum_range;
 
 	/** Message priority */
-	public final DmsMsgPriority priority;
+	public final SignMsgPriority priority;
 
 	/** Create an incident severity value */
-	private IncSeverity(IncRange r, DmsMsgPriority p) {
+	private IncSeverity(IncRange r, SignMsgPriority p) {
 		maximum_range = r;
 		priority = p;
 	}

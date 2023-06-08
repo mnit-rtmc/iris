@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2019  Minnesota Department of Transportation
+ * Copyright (C) 2011-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,15 +33,12 @@ import us.mn.state.dot.tms.CameraActionHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
-import us.mn.state.dot.tms.DmsSignGroup;
-import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneActionHelper;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.MeterActionHelper;
 import us.mn.state.dot.tms.PlanPhase;
-import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
@@ -267,22 +264,8 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 	}
 
 	/** Get a count of DMS controlled by an action plan */
-	private int countDMS(ActionPlan p) {
-		HashSet<SignGroup> plan_groups = new HashSet<SignGroup>();
-		Iterator<DmsAction> dit = DmsActionHelper.iterator();
-		while (dit.hasNext()) {
-			DmsAction da = dit.next();
-			if (da.getActionPlan() == p)
-				plan_groups.add(da.getSignGroup());
-		}
-		HashSet<DMS> plan_signs = new HashSet<DMS>();
-		Iterator<DmsSignGroup> git = DmsSignGroupHelper.iterator();
-		while (git.hasNext()) {
-			DmsSignGroup dsg = git.next();
-			if (plan_groups.contains(dsg.getSignGroup()))
-				plan_signs.add(dsg.getDms());
-		}
-		return plan_signs.size();
+	private int countDMS(ActionPlan ap) {
+		return DmsActionHelper.findSigns(ap).size();
 	}
 
 	/** Get a count a beacons controlled by an action plan */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -19,14 +19,11 @@ package us.mn.state.dot.tms.server.comm.dmsxml;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.IrisUserHelper;
-import us.mn.state.dot.tms.SignMsgSource;
+import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.SignMessageImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -48,10 +45,6 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 class OpQueryMsg extends OpDms {
 
-	/** External operator source */
-	static private final int EXT_OPER = SignMsgSource.toBits(
-		SignMsgSource.external, SignMsgSource.operator);
-
 	/** device request */
 	private DeviceRequest m_req;
 
@@ -60,14 +53,11 @@ class OpQueryMsg extends OpDms {
 
 	/** Constructor.
 	 *  @param d DMS.
-	 *  @param u User originating the request or null for IRIS.
 	 *  @param req Device request.
 	 *  @param startup True to indicate this is the device startup
 	 *	   request, which is ignored for DMS on dial-up lines. */
-	OpQueryMsg(DMSImpl d, User u, DeviceRequest req,
-		boolean startup)
-	{
-		super(PriorityLevel.POLL_LOW, d, "Retrieving message", u);
+	OpQueryMsg(DMSImpl d, DeviceRequest req, boolean startup) {
+		super(PriorityLevel.POLL_LOW, d, "Retrieving message");
 		m_req = req;
 		m_startup = startup;
 	}
@@ -198,11 +188,12 @@ class OpQueryMsg extends OpDms {
 	 *        which dmsxml will always return.
 	 * @param duration Message duration (in minutes).
 	 * @param pgOnTime DMS page on time.
-	 * @param rpri DMS message runtime priority.
+	 * @param rpri Sign message runtime priority.
 	 * @return A SignMessage that contains the text of the message and
 	 *         a rendered bitmap. */
 	private SignMessageImpl createSignMessageWithBitmap(String sbitmap,
-		Integer duration, Interval pgOnTime, DmsMsgPriority rpri)
+		Integer duration, Interval pgOnTime, SignMsgPriority rpri,
+		String owner)
 	{
 		if(sbitmap == null)
 			return null;
@@ -239,11 +230,18 @@ class OpQueryMsg extends OpDms {
 			"multistring=" + multi);
 
 		// priority is invalid, as expected
-		if (rpri == DmsMsgPriority.INVALID)
-			rpri = DmsMsgPriority.OTHER_SYSTEM;
+		if (rpri == SignMsgPriority.invalid)
+			rpri = SignMsgPriority.medium_sys;
 
-		return (SignMessageImpl) m_dms.createMsg(multi, false, rpri,
-			EXT_OPER, null, duration);
+		return createMsg(multi, owner, rpri, duration);
+	}
+
+	/** Create a sign message */
+	private SignMessageImpl createMsg(String multi, String owner,
+		SignMsgPriority rpri, Integer duration)
+	{
+		return (SignMessageImpl) m_dms.createMsg(multi, owner, false,
+			rpri, duration);
 	}
 
 	/** Return a MULTI with an updated page on-time with the value read
@@ -304,8 +302,8 @@ class OpQueryMsg extends OpDms {
 		String errmsg = "";
 		boolean txtavail = false;
 		String msgtext = "";
-		DmsMsgPriority apri = DmsMsgPriority.INVALID;
-		DmsMsgPriority rpri = DmsMsgPriority.INVALID;
+		SignMsgPriority apri = SignMsgPriority.invalid;
+		SignMsgPriority rpri = SignMsgPriority.invalid;
 		String owner = "";
 		boolean useont = false;
 		Calendar ont = new GregorianCalendar();
@@ -337,16 +335,16 @@ class OpQueryMsg extends OpDms {
 				msgtext = xrr.getResString("MsgText");
 
 				// activation priority
-				apri = DmsMsgPriority.fromOrdinal(
+				apri = SignMsgPriority.fromOrdinal(
 					xrr.getResInt("ActPriority"));
-				apri = (apri == DmsMsgPriority.INVALID) ?
-					DmsMsgPriority.OPERATOR : apri;
+				if (apri == SignMsgPriority.invalid)
+					apri = SignMsgPriority.high_1;
 
 				// runtime priority
-				rpri = DmsMsgPriority.fromOrdinal(
+				rpri = SignMsgPriority.fromOrdinal(
 					xrr.getResInt("RunPriority"));
-				rpri = (rpri == DmsMsgPriority.INVALID) ?
-					DmsMsgPriority.BLANK : rpri;
+				if (rpri == SignMsgPriority.invalid)
+					rpri = SignMsgPriority.low_1;
 
 				// owner
 				owner = xrr.getResString("Owner");
@@ -401,18 +399,6 @@ class OpQueryMsg extends OpDms {
 			if (updateMaintStatus(owner))
 				sendMaintenanceEmail();
 
-			String iuser = null;
-
-			// get user name via owner
-			if (owner != null) {
-				User irisUser = IrisUserHelper.lookup(owner);
-				iuser = (irisUser == null) ?
-					null : irisUser.getName();
-				LOG.log("OpQueryMsg: owner read from " +
-					"sensorserver=" + owner +
-					", Iris user lookup=" + iuser);
-			}
-
 			// have on time? if not, create
 			if (!useont) {
 				useont=true;
@@ -435,11 +421,10 @@ class OpQueryMsg extends OpDms {
 				// the DisplayTimeMS XML field, not the
 				// MULTI string.
 				msgtext = updatePageOnTime(msgtext, pgOnTime);
-				SignMessageImpl sm = (SignMessageImpl)
-					m_dms.createMsg(msgtext, false,
-					rpri, EXT_OPER, iuser, duramins);
+				SignMessageImpl sm = createMsg(msgtext, owner,
+					rpri, duramins);
 				if (sm != null)
-					m_dms.setMsgCurrentNotify(sm, iuser);
+					m_dms.setMsgCurrentNotify(sm);
 
 			// don't have text
 			} else {
@@ -448,20 +433,14 @@ class OpQueryMsg extends OpDms {
 				if (usebitmap) {
 					sm = createSignMessageWithBitmap(
 						bitmap, duramins, pgOnTime,
-						rpri);
-					if (sm != null) {
-						m_dms.setMsgCurrentNotify(sm,
-							iuser);
-					}
+						rpri, owner);
+					if (sm != null)
+						m_dms.setMsgCurrentNotify(sm);
 				}
 				if (sm == null) {
-					sm = (SignMessageImpl) m_dms.createMsg(
-						"", false, rpri, EXT_OPER,
-						iuser, null);
-					if (sm != null) {
-						m_dms.setMsgCurrentNotify(sm,
-							iuser);
-					}
+					sm = createMsg("", owner, rpri, null);
+					if (sm != null)
+						m_dms.setMsgCurrentNotify(sm);
 				}
 			}
 

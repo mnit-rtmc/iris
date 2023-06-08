@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
- * Copyright (C) 2021-2022  Minnesota Department of Transportation
+ * Copyright (C) 2021-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,9 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.AlertConfig;
+import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.PlanPhase;
-import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -54,8 +55,9 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 			"severity_extreme, certainty_unknown, " +
 			"certainty_unlikely, certainty_possible, " +
 			"certainty_likely, certainty_observed, auto_deploy, " +
-			"before_period_hours, after_period_hours, sign_group " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+			"before_period_hours, after_period_hours, " +
+			"dms_hashtag FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			@Override
 			public void create(ResultSet row) throws Exception {
@@ -95,7 +97,7 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 		     row.getBoolean(26), // auto_deploy
 		     row.getInt(27),     // before_period_hours
 		     row.getInt(28),     // after_period_hours
-		     row.getString(29)   // sign_group
+		     row.getString(29)   // dms_hashtag
 		);
 	}
 
@@ -105,7 +107,7 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 		boolean rn, boolean uu, boolean up, boolean uf, boolean ue,
 		boolean ui, boolean su, boolean sm, boolean sd, boolean ss,
 		boolean se, boolean cu, boolean cy, boolean cp, boolean cl,
-		boolean co, boolean ad, int bfrh, int afth, String sg)
+		boolean co, boolean ad, int bfrh, int afth, String dht)
 		throws TMSException
 	{
 		super(n);
@@ -136,7 +138,7 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 		auto_deploy = ad;
 		before_period_hours = bfrh;
 		after_period_hours = afth;
-		sign_group = lookupSignGroup(sg);
+		dms_hashtag = dht;
 	}
 
 	/** Create an alert config */
@@ -188,7 +190,7 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 		map.put("auto_deploy", auto_deploy);
 		map.put("before_period_hours", before_period_hours);
 		map.put("after_period_hours", after_period_hours);
-		map.put("sign_group", sign_group);
+		map.put("dms_hashtag", dms_hashtag);
 		return map;
 	}
 
@@ -824,35 +826,38 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 		if (now < sd - bfr_ms)
 			return PlanPhase.UNDEPLOYED;
 		else if (now < sd)
-			return "alert_before";
+			return PlanPhase.ALERT_BEFORE;
 		else if (now < ed)
-			return "alert_during";
+			return PlanPhase.ALERT_DURING;
 		else if (now < ed + aft_ms)
-			return "alert_after";
+			return PlanPhase.ALERT_AFTER;
 		else
 			return PlanPhase.UNDEPLOYED;
 	}
 
-	/** Sign group */
-	private SignGroup sign_group;
+	/** DMS hashtag */
+	private String dms_hashtag;
 
-	/** Set the sign group */
+	/** Set the DMS hashtag */
 	@Override
-	public void setSignGroup(SignGroup sg) {
-		sign_group = sg;
+	public void setDmsHashtag(String ht) {
+		dms_hashtag = ht;
 	}
 
-	/** Set the sign group */
-	public void doSetSignGroup(SignGroup sg) throws TMSException {
-		if (sg != sign_group) {
-			store.update(this, "sign_group", sg);
-			setSignGroup(sg);
+	/** Set the DMS hashtag */
+	public void doSetDmsHashtag(String ht) throws TMSException {
+		String t = DMSHelper.normalizeHashtag(ht);
+		if (!objectEquals(t, ht))
+			throw new ChangeVetoException("Bad hashtag");
+		if (!objectEquals(ht, dms_hashtag)) {
+			store.update(this, "dms_hashtag", ht);
+			setDmsHashtag(ht);
 		}
 	}
 
-	/** Get the sign group */
+	/** Get the DMS hashtag */
 	@Override
-	public SignGroup getSignGroup() {
-		return sign_group;
+	public String getDmsHashtag() {
+		return dms_hashtag;
 	}
 }

@@ -77,7 +77,7 @@ A static sink encoding is:
 [encoder type]: cameras.html#encoder-types
 [IO pin]: controllers.html#io-pins
 [multicast]: https://en.wikipedia.org/wiki/Multicast_address
-[protocol]: comm_links.html#protocols
+[protocol]: protocols.html
 [stream]: cameras.html#streams
 [streambed]: https://github.com/mnit-rtmc/streambed
 [video monitor]: video.html

@@ -9,6 +9,23 @@ _role_ must both be enabled.  If the _user_ has a **distinguished name** (dn),
 then authentication is performed using [LDAP].  Otherwise, the supplied password
 is checked against the stored password hash for the account.
 
+## Resources
+
+* `iris/api/user`
+* `iris/api/user/{name}`
+
+| Access       | Minimal          |
+|--------------|------------------|
+| Read Only    | name             |
+| 💡 Plan      | enabled          |
+| 🔧 Configure | full\_name, role |
+
+## Domains
+
+A network _domain_ uses [CIDR] to restrict the IP addresses from which a _user_
+can connect to IRIS.  To log in, a _user_ must be assigned to a matching
+_enabled_ domain.
+
 ## Roles
 
 A role defines the set of [capabilities](#capabilities) associated with a _user_
@@ -20,37 +37,15 @@ Other _roles_ can be created to allow different capability sets, as needed.
 **WARNING: if the administrator role or admin user are disabled, the ability to
 make further changes will be lost immediately.**
 
-### Permissions
+### Role Resources
 
-Role *permissions* are a newer feature intended to replace *capabilities* and
-*privileges*.  For now, they determine permissions for web access only.  Each
-permission record is made up of *access*, *resource* and *batch* values.
+* `iris/api/role`
+* `iris/api/role/{name}`
 
-There are 4 access levels, with increasing permissiveness:
-
-| Level | Access       | Permissions              |
-|-------|--------------|--------------------------|
-|     1 | 👁️ View      | Monitor / read           |
-|     2 | 👉 Operate   | + Control                |
-|     3 | 💡 Plan      | + Policies, scheduling   |
-|     4 | 🔧 Configure | + Create, update, delete |
-
-[Resource] is the `type` part of the URI:
-
-| Resource         | *Operate* (2) Access          | *Plan* (3) Access         |
-|------------------|-------------------------------|---------------------------|
-| `action_plan`    | `phase`                       |                           |
-| `beacon`         | `flashing`                    |                           |
-| `camera`         | `ptz` `recallPreset`          | `publish`                 |
-| `detector`       |                               | `fieldLength` `forceFail` |
-| `dms`            | `msgUser`                     | `deviceRequest`           |
-| `gate_arm`       | `armStateNext` `ownerNext`    | `deviceRequest`           |
-| `lcs`            | `indicationsNext` `ownerNext` |                           |
-| `ramp_meter`     | `rateNext` `mLock`            |                           |
-| `video_monitor`  | `camera`                      |                           |
-
-A *batch* is a group to which a resource may belong.  These typically are used
-for districts or similar regional divisions.
+| Access       | Minimal    |
+|--------------|------------|
+| Read Only    | name       |
+| 💡 Plan      | enabled    |
 
 ## Capabilities
 
@@ -71,6 +66,8 @@ interface for all users.
 **WARNING: the** `base_admin` **capability can grant access for all IRIS
 functions.**
 
+(NOTE: capabilities are being phased out in favor of [permissions])
+
 ## Privileges
 
 A _privilege_ grants read or write access to one type of object.  There are 5
@@ -79,16 +76,12 @@ fields required to fully specify a _privilege_.
 Field     | Description
 ----------|----------------------------------------------------
 Type      | Object type selected from a list of available types
-Object    | A regular expression to match object names.  NOTE: Write access only.  This feature will be removed in a future version of IRIS.
+Object    | A regular expression to match object names.
 Group     | Used to divide objects into related groups.  This is an experimental feature intended to replace the **object** field.  NOTE: Write access only.
 Attribute | Write access to a specific attribute of an object type can be specified with this field.
 Write     | When this checkbox is checked, write access is granted.  Otherwise, the privilege grants read access.  To be granted write access, a role must also have read access to the object type.
 
-## Domains
-
-A network _domain_ uses [CIDR] to restrict the IP addresses from which a _user_
-can connect to IRIS.  To log in, a _user_ must be assigned to a matching
-_enabled_ domain.
+(NOTE: privileges are being phased out in favor of [permissions])
 
 ## Events
 
@@ -110,5 +103,5 @@ These records are purged automatically when older than the value of the
 [device]: controllers.html#devices
 [LCS]: lcs.html
 [LDAP]: installation.html#ldap
-[resource]: rest_api.html#resource-types
+[permissions]: permissions.html
 [system attribute]: system_attributes.html

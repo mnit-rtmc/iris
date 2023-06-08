@@ -18,6 +18,72 @@ use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
+/// RF Control
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum RfControl {
+    Sense,
+    Continuous,
+}
+
+/// Synchronization Mode
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SyncMode {
+    Slave,
+    Master,
+    GpsSecondary,
+    GpsPrimary,
+}
+
+/// Antenna Channel
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum AntennaChannel {
+    Channel0,
+    Channel1,
+    Channel2,
+    Channel3,
+    DisableManualControl,
+}
+
+/// Source
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Source {
+    Downlink,
+    Uplink,
+}
+
+/// Protocol Settings
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct ProtocolSettings {
+    rf_atten_downlink_db: Option<u32>,
+    rf_atten_uplink_db: Option<u32>,
+    data_detect_db: Option<u32>,
+    seen_count: Option<u32>,
+    unique_count: Option<u32>,
+    uplink_source: Option<Source>,
+    slot: Option<u32>,
+}
+
+/// Tag Reader Settings
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct TagReaderSettings {
+    ack_timeout: Option<u32>,
+    rf_control: Option<RfControl>,
+    downlink_freq_khz: Option<u32>,
+    uplink_freq_khz: Option<u32>,
+    line_loss_db: Option<u32>,
+    sync_mode: Option<SyncMode>,
+    slave_select_count: Option<u32>,
+    mux_mode: Option<String>,
+    antenna_channel: Option<AntennaChannel>,
+    sego: Option<ProtocolSettings>,
+    iag: Option<ProtocolSettings>,
+    _6c: Option<ProtocolSettings>,
+}
+
 /// Tag Reader
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct TagReader {
@@ -27,6 +93,7 @@ pub struct TagReader {
     // full attributes
     pub geo_loc: Option<String>,
     pub pin: Option<u32>,
+    pub settings: Option<TagReaderSettings>,
 }
 
 type TagReaderAnc = DeviceAnc<TagReader>;

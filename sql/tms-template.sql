@@ -12,6 +12,7 @@
 --          'msg_user', 'msg_sched', 'msg_current', 'expire_time',
 --              'status', 'stuck_pixels' (dms)
 --          'settings', 'sample' (weather_sensor)
+--          'settings' (tag_reader)
 --          'time_stamp' (parking_area)
 --          id (road_class)
 --          name (r_node, road, any resource_n in geo_loc)
@@ -20,6 +21,8 @@ SET client_encoding = 'UTF8';
 
 \set ON_ERROR_STOP
 BEGIN;
+
+ALTER SCHEMA public OWNER TO tms;
 
 CREATE SCHEMA iris;
 ALTER SCHEMA iris OWNER TO tms;
@@ -160,15 +163,12 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.37.0
+database_version	5.43.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_secs	60
-dict_allowed_scheme	0
-dict_banned_scheme	0
 dms_brightness_enable	true
 dms_comm_loss_enable	true
-dms_composer_edit_mode	1
 dms_gps_jitter_m	100
 dms_high_temp_cutoff	60
 dms_lamp_test_timeout_secs	30
@@ -179,7 +179,6 @@ dms_pixel_on_limit	1
 dms_pixel_maint_threshold	35
 dms_pixel_status_enable	true
 dms_pixel_test_timeout_secs	30
-dms_querymsg_enable	false
 dms_reset_enable	false
 dms_send_confirmation_enable	false
 dms_update_font_table	true
@@ -267,12 +266,6 @@ BEGIN
 END;
 $update_version$ language plpgsql;
 
-CREATE VIEW dms_attribute_view AS
-	SELECT name, value
-	FROM iris.system_attribute
-	WHERE name LIKE 'dms\_%';
-GRANT SELECT ON dms_attribute_view TO PUBLIC;
-
 --
 -- Roles, Domains, Users, Capabilities and Privileges
 --
@@ -291,9 +284,9 @@ CREATE TRIGGER role_notify_trig
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE TABLE iris.domain (
-	name VARCHAR(15) PRIMARY KEY,
-	cidr VARCHAR(64) NOT NULL,
-	enabled BOOLEAN NOT NULL
+    name VARCHAR(15) PRIMARY KEY,
+    cidr VARCHAR(64) NOT NULL,
+    enabled BOOLEAN NOT NULL
 );
 
 COPY iris.domain (name, cidr, enabled) FROM stdin;
@@ -302,12 +295,12 @@ any_ipv6	::0/0	t
 \.
 
 CREATE TABLE iris.i_user (
-	name VARCHAR(15) PRIMARY KEY,
-	full_name VARCHAR(31) NOT NULL,
-	password VARCHAR(64) NOT NULL,
-	dn VARCHAR(128) NOT NULL,
-	role VARCHAR(15) REFERENCES iris.role,
-	enabled BOOLEAN NOT NULL
+    name VARCHAR(15) PRIMARY KEY,
+    full_name VARCHAR(31) NOT NULL,
+    password VARCHAR(64) NOT NULL,
+    dn VARCHAR(128) NOT NULL,
+    role VARCHAR(15) REFERENCES iris.role,
+    enabled BOOLEAN NOT NULL
 );
 
 COPY iris.i_user (name, full_name, password, dn, role, enabled) FROM stdin;
@@ -319,13 +312,13 @@ CREATE TRIGGER i_user_notify_trig
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW i_user_view AS
-	SELECT name, full_name, dn, role, enabled
-	FROM iris.i_user;
+    SELECT name, full_name, dn, role, enabled
+    FROM iris.i_user;
 GRANT SELECT ON i_user_view TO PUBLIC;
 
 CREATE TABLE iris.i_user_domain (
-	i_user VARCHAR(15) NOT NULL REFERENCES iris.i_user,
-	domain VARCHAR(15) NOT NULL REFERENCES iris.domain
+    i_user VARCHAR(15) NOT NULL REFERENCES iris.i_user,
+    domain VARCHAR(15) NOT NULL REFERENCES iris.domain
 );
 ALTER TABLE iris.i_user_domain ADD PRIMARY KEY (i_user, domain);
 
@@ -334,6 +327,7 @@ admin	any_ipv4
 admin	any_ipv6
 \.
 
+-- FIXME: remove after permissions are used everywhere
 CREATE TABLE iris.capability (
 	name VARCHAR(16) PRIMARY KEY,
 	enabled BOOLEAN NOT NULL
@@ -414,7 +408,6 @@ day_plan
 detector
 dms
 dms_action
-dms_sign_group
 domain
 encoder_stream
 encoder_type
@@ -442,6 +435,7 @@ meter_action
 modem
 monitor_style
 msg_pattern
+msg_line
 parking_area
 permission
 plan_phase
@@ -455,9 +449,7 @@ role
 rpt_conduit
 sign_config
 sign_detail
-sign_group
 sign_message
-sign_text
 station
 system_attribute
 tag_reader
@@ -470,12 +462,29 @@ weather_sensor
 word
 \.
 
+CREATE TABLE iris.hashtag (
+    resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
+    -- FIXME: replace with int ID
+    name VARCHAR(20) NOT NULL,
+    hashtag VARCHAR(16) NOT NULL,
+
+    CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$')
+);
+ALTER TABLE iris.hashtag ADD PRIMARY KEY (resource_n, name, hashtag);
+
+CREATE VIEW hashtag_view AS
+    SELECT resource_n, name, hashtag
+    FROM iris.hashtag;
+GRANT SELECT ON hashtag_view TO PUBLIC;
+
 CREATE TABLE iris.permission (
     id SERIAL PRIMARY KEY,
     role VARCHAR(15) NOT NULL REFERENCES iris.role ON DELETE CASCADE,
     resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
-    batch VARCHAR(16),
+    hashtag VARCHAR(16),
     access_n INTEGER NOT NULL,
+
+    CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$'),
     CONSTRAINT permission_access_n CHECK (access_n >= 1 AND access_n <= 4)
 );
 
@@ -515,6 +524,7 @@ CREATE TRIGGER permission_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.permission
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
+-- FIXME: remove after permissions are used everywhere
 CREATE TABLE iris.privilege (
     name VARCHAR(8) PRIMARY KEY,
     capability VARCHAR(16) NOT NULL REFERENCES iris.capability,
@@ -605,23 +615,19 @@ PRV_005A	dms_admin	sign_detail		t
 PRV_0058	dms_control	dms	msgUser	t
 PRV_0059	dms_control	dms	deviceRequest	t
 PRV_0060	dms_control	sign_message		t
-PRV_0061	dms_policy	dms_sign_group		t
 PRV_0062	dms_policy	msg_pattern		t
-PRV_0063	dms_policy	sign_group		t
-PRV_0064	dms_policy	sign_text		t
+PRV_0064	dms_policy	msg_line		t
 PRV_0065	dms_policy	word		t
 PRV_0066	dms_tab	dms		f
-PRV_0067	dms_tab	dms_sign_group		f
 PRV_0068	dms_tab	font		f
 PRV_0069	dms_tab	glyph		f
 PRV_0070	dms_tab	gps		f
 PRV_0071	dms_tab	graphic		f
 PRV_0072	dms_tab	msg_pattern		f
+PRV_0076	dms_tab	msg_line		f
 PRV_0073	dms_tab	sign_config		f
 PRV_007A	dms_tab	sign_detail		f
-PRV_0074	dms_tab	sign_group		f
 PRV_0075	dms_tab	sign_message		f
-PRV_0076	dms_tab	sign_text		f
 PRV_0077	dms_tab	word		f
 PRV_0078	gate_arm_admin	gate_arm		t
 PRV_0079	gate_arm_admin	gate_arm_array		t
@@ -714,6 +720,7 @@ COPY iris.privilege (name, capability, type_n, group_n, write) FROM stdin;
 PRV_003D	camera_tab	play_list	user	t
 \.
 
+-- FIXME: remove after permissions are used everywhere
 CREATE TABLE iris.role_capability (
 	role VARCHAR(15) NOT NULL REFERENCES iris.role,
 	capability VARCHAR(16) NOT NULL REFERENCES iris.capability
@@ -785,6 +792,7 @@ operator	sensor_tab
 operator	toll_tab
 \.
 
+-- FIXME: remove after permissions are used everywhere
 CREATE VIEW role_privilege_view AS
 	SELECT role, role_capability.capability, type_n, obj_n, group_n, attr_n,
 	       write
@@ -1137,13 +1145,13 @@ CREATE TABLE iris.map_extent (
 -- Day Matchers, Day Plans, Plan Phases, Action Plans and Time Actions
 --
 CREATE TABLE iris.day_matcher (
-	name VARCHAR(32) PRIMARY KEY,
-	holiday BOOLEAN NOT NULL,
-	month INTEGER NOT NULL,
-	day INTEGER NOT NULL,
-	week INTEGER NOT NULL,
-	weekday INTEGER NOT NULL,
-	shift INTEGER NOT NULL
+    name VARCHAR(32) PRIMARY KEY,
+    holiday BOOLEAN NOT NULL,
+    month INTEGER NOT NULL,
+    day INTEGER NOT NULL,
+    week INTEGER NOT NULL,
+    weekday INTEGER NOT NULL,
+    shift INTEGER NOT NULL
 );
 
 COPY iris.day_matcher (name, holiday, month, day, week, weekday, shift) FROM stdin;
@@ -1162,7 +1170,7 @@ New Years Eve	t	11	31	0	0	0
 \.
 
 CREATE TABLE iris.day_plan (
-	name VARCHAR(10) PRIMARY KEY
+    name VARCHAR(10) PRIMARY KEY
 );
 
 COPY iris.day_plan (name) FROM stdin;
@@ -1172,8 +1180,8 @@ WORK_DAYS
 \.
 
 CREATE TABLE iris.day_plan_day_matcher (
-	day_plan VARCHAR(10) NOT NULL REFERENCES iris.day_plan,
-	day_matcher VARCHAR(32) NOT NULL REFERENCES iris.day_matcher
+    day_plan VARCHAR(10) NOT NULL REFERENCES iris.day_plan,
+    day_matcher VARCHAR(32) NOT NULL REFERENCES iris.day_matcher
 );
 ALTER TABLE iris.day_plan_day_matcher ADD PRIMARY KEY (day_plan, day_matcher);
 
@@ -1197,9 +1205,9 @@ WORK_DAYS	New Years Eve
 \.
 
 CREATE TABLE iris.plan_phase (
-	name VARCHAR(12) PRIMARY KEY,
-	hold_time INTEGER NOT NULL,
-	next_phase VARCHAR(12) REFERENCES iris.plan_phase
+    name VARCHAR(12) PRIMARY KEY,
+    hold_time INTEGER NOT NULL,
+    next_phase VARCHAR(12) REFERENCES iris.plan_phase
 );
 
 COPY iris.plan_phase (name, hold_time, next_phase) FROM stdin;
@@ -1213,54 +1221,54 @@ ga_closed	0	\N
 \.
 
 CREATE TABLE iris.action_plan (
-	name VARCHAR(16) PRIMARY KEY,
-	description VARCHAR(64) NOT NULL,
-	group_n VARCHAR(16),
-	sync_actions BOOLEAN NOT NULL,
-	sticky BOOLEAN NOT NULL,
-	active BOOLEAN NOT NULL,
-	default_phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
-	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
+    name VARCHAR(16) PRIMARY KEY,
+    description VARCHAR(64) NOT NULL,
+    group_n VARCHAR(16),
+    sync_actions BOOLEAN NOT NULL,
+    sticky BOOLEAN NOT NULL,
+    active BOOLEAN NOT NULL,
+    default_phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
+    phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
 CREATE VIEW action_plan_view AS
-	SELECT name, description, group_n, sync_actions, sticky, active,
-	       default_phase, phase
-	FROM iris.action_plan;
+    SELECT name, description, group_n, sync_actions, sticky, active,
+           default_phase, phase
+    FROM iris.action_plan;
 GRANT SELECT ON action_plan_view TO PUBLIC;
 
 CREATE TABLE iris.time_action (
-	name VARCHAR(30) PRIMARY KEY,
-	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	day_plan VARCHAR(10) REFERENCES iris.day_plan,
-	sched_date DATE,
-	time_of_day TIME WITHOUT TIME ZONE NOT NULL,
-	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
-	CONSTRAINT time_action_date CHECK (
-		((day_plan IS NULL) OR (sched_date IS NULL)) AND
-		((day_plan IS NOT NULL) OR (sched_date IS NOT NULL))
-	)
+    name VARCHAR(30) PRIMARY KEY,
+    action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+    day_plan VARCHAR(10) REFERENCES iris.day_plan,
+    sched_date DATE,
+    time_of_day TIME WITHOUT TIME ZONE NOT NULL,
+    phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
+    CONSTRAINT time_action_date CHECK (
+        ((day_plan IS NULL) OR (sched_date IS NULL)) AND
+        ((day_plan IS NOT NULL) OR (sched_date IS NOT NULL))
+    )
 );
 
 CREATE VIEW time_action_view AS
-	SELECT name, action_plan, day_plan, sched_date, time_of_day, phase
-	FROM iris.time_action;
+    SELECT name, action_plan, day_plan, sched_date, time_of_day, phase
+    FROM iris.time_action;
 GRANT SELECT ON time_action_view TO PUBLIC;
 
 CREATE TABLE event.action_plan_event (
-	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	action_plan VARCHAR(16) NOT NULL,
-	detail VARCHAR(15) NOT NULL
+    event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_desc_id INTEGER NOT NULL
+        REFERENCES event.event_description(event_desc_id),
+    action_plan VARCHAR(16) NOT NULL,
+    detail VARCHAR(15) NOT NULL
 );
 
 CREATE VIEW action_plan_event_view AS
-	SELECT e.event_id, e.event_date, ed.description AS event_description,
-	       e.action_plan, e.detail
-	FROM event.action_plan_event e
-	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+    SELECT e.event_id, e.event_date, ed.description AS event_description,
+           e.action_plan, e.detail
+    FROM event.action_plan_event e
+    JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
 GRANT SELECT ON action_plan_event_view TO PUBLIC;
 
 --
@@ -1322,7 +1330,6 @@ CREATE TABLE iris.comm_config (
     name VARCHAR(10) PRIMARY KEY,
     description VARCHAR(20) NOT NULL UNIQUE,
     protocol SMALLINT NOT NULL REFERENCES iris.comm_protocol(id),
-    modem BOOLEAN NOT NULL,
     timeout_ms INTEGER NOT NULL,
     poll_period_sec INTEGER NOT NULL,
     long_poll_period_sec INTEGER NOT NULL,
@@ -1334,12 +1341,19 @@ ALTER TABLE iris.comm_config
     ADD CONSTRAINT poll_period_ck
     CHECK (poll_period_sec >= 5 AND long_poll_period_sec >= poll_period_sec);
 
+COPY iris.comm_config (name, description, protocol, timeout_ms,
+                       poll_period_sec, long_poll_period_sec,
+                       idle_disconnect_sec, no_response_disconnect_sec)
+FROM stdin;
+cfg_0	NTCIP udp	11	1000	30	300	0	0
+\.
+
 CREATE TRIGGER comm_config_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.comm_config
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW comm_config_view AS
-    SELECT cc.name, cc.description, cp.description AS protocol, modem,
+    SELECT cc.name, cc.description, cp.description AS protocol,
            timeout_ms, poll_period_sec, long_poll_period_sec,
            idle_disconnect_sec, no_response_disconnect_sec
     FROM iris.comm_config cc
@@ -1378,7 +1392,7 @@ CREATE TRIGGER comm_link_table_notify_trig
 CREATE VIEW comm_link_view AS
     SELECT cl.name, cl.description, uri, poll_enabled,
            cp.description AS protocol, cc.description AS comm_config,
-           modem, timeout_ms, poll_period_sec, connected
+           timeout_ms, poll_period_sec, connected
     FROM iris.comm_link cl
     JOIN iris.comm_config cc ON cl.comm_config = cc.name
     JOIN iris.comm_protocol cp ON cc.protocol = cp.id;
@@ -1553,6 +1567,7 @@ COPY iris.device_purpose (id, description) FROM stdin;
 4	travel time
 5	safety
 6	lane use
+7	VSL
 \.
 
 --
@@ -2771,64 +2786,14 @@ CREATE VIEW sign_config_view AS
     JOIN iris.color_scheme cs ON sign_config.color_scheme = cs.id;
 GRANT SELECT ON sign_config_view TO PUBLIC;
 
-CREATE TABLE iris.sign_msg_source (
-	bit INTEGER PRIMARY KEY,
-	source VARCHAR(16) NOT NULL
-);
-ALTER TABLE iris.sign_msg_source ADD CONSTRAINT msg_source_bit_ck
-	CHECK (bit >= 0 AND bit < 32);
-
-COPY iris.sign_msg_source (bit, source) FROM stdin;
-0	blank
-1	operator
-2	schedule
-3	tolling
-4	gate arm
-5	lcs
-6	alert
-7	external
-8	travel time
-9	incident
-10	slow warning
-11	speed advisory
-12	parking
-13	clearguide
-14	exit warning
-15	standby
-\.
-
-CREATE FUNCTION iris.sign_msg_sources(INTEGER) RETURNS TEXT
-	AS $sign_msg_sources$
-DECLARE
-	src ALIAS FOR $1;
-	res TEXT;
-	ms RECORD;
-	b INTEGER;
-BEGIN
-	res = '';
-	FOR ms IN SELECT bit, source FROM iris.sign_msg_source ORDER BY bit LOOP
-		b = 1 << ms.bit;
-		IF (src & b) = b THEN
-			IF char_length(res) > 0 THEN
-				res = res || ', ' || ms.source;
-			ELSE
-				res = ms.source;
-			END IF;
-		END IF;
-	END LOOP;
-	RETURN res;
-END;
-$sign_msg_sources$ LANGUAGE plpgsql;
-
 CREATE TABLE iris.sign_message (
     name VARCHAR(20) PRIMARY KEY,
     sign_config VARCHAR(16) NOT NULL REFERENCES iris.sign_config,
     incident VARCHAR(16),
     multi VARCHAR(1024) NOT NULL,
-    beacon_enabled BOOLEAN NOT NULL,
+    msg_owner VARCHAR(127) NOT NULL,
+    flash_beacon BOOLEAN NOT NULL,
     msg_priority INTEGER NOT NULL,
-    source INTEGER NOT NULL,
-    owner VARCHAR(16),
     duration INTEGER
 );
 
@@ -2837,8 +2802,8 @@ CREATE TRIGGER sign_message_notify_trig
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW sign_message_view AS
-    SELECT name, sign_config, incident, multi, beacon_enabled, msg_priority,
-           iris.sign_msg_sources(source) AS sources, owner, duration
+    SELECT name, sign_config, incident, multi, msg_owner, flash_beacon,
+           msg_priority, duration
     FROM iris.sign_message;
 GRANT SELECT ON sign_message_view TO PUBLIC;
 
@@ -3080,86 +3045,80 @@ GRANT SELECT ON dms_view TO PUBLIC;
 
 CREATE VIEW dms_message_view AS
     SELECT d.name, msg_current, cc.description AS condition,
-           fail_time IS NOT NULL AS failed, multi, beacon_enabled,
-           msg_priority, iris.sign_msg_sources(source) AS sources,
-           duration, expire_time
+           fail_time IS NOT NULL AS failed, multi, msg_owner, flash_beacon,
+           msg_priority, duration, expire_time
     FROM iris.dms d
     LEFT JOIN iris.controller c ON d.controller = c.name
     LEFT JOIN iris.condition cc ON c.condition = cc.id
     LEFT JOIN iris.sign_message sm ON d.msg_current = sm.name;
 GRANT SELECT ON dms_message_view TO PUBLIC;
 
-CREATE TABLE iris.sign_group (
-	name VARCHAR(20) PRIMARY KEY,
-	local BOOLEAN NOT NULL
+CREATE TABLE iris.dms_hashtag (
+    dms VARCHAR(20) NOT NULL REFERENCES iris._dms,
+    hashtag VARCHAR(16) NOT NULL,
+
+    CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$')
 );
+ALTER TABLE iris.dms_hashtag ADD PRIMARY KEY (dms, hashtag);
 
-CREATE VIEW sign_group_view AS
-	SELECT name, local
-	FROM iris.sign_group;
-GRANT SELECT ON sign_group_view TO PUBLIC;
-
-CREATE TABLE iris.dms_sign_group (
-	name VARCHAR(42) PRIMARY KEY,
-	dms VARCHAR(20) NOT NULL REFERENCES iris._dms,
-	sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group
-);
-
-CREATE VIEW dms_sign_group_view AS
-	SELECT d.name, dms, sign_group, local
-	FROM iris.dms_sign_group d
-	JOIN iris.sign_group sg ON d.sign_group = sg.name;
-GRANT SELECT ON dms_sign_group_view TO PUBLIC;
+CREATE VIEW dms_hashtag_view AS
+    SELECT dms, hashtag
+    FROM iris.dms_hashtag;
+GRANT SELECT ON dms_hashtag_view TO PUBLIC;
 
 CREATE TABLE iris.msg_pattern (
     name VARCHAR(20) PRIMARY KEY,
-    sign_config VARCHAR(16) REFERENCES iris.sign_config,
-    -- FIXME: replace sign_group with hashtag
-    sign_group VARCHAR(20) REFERENCES iris.sign_group,
-    multi VARCHAR(1024) NOT NULL
+    multi VARCHAR(1024) NOT NULL,
+    flash_beacon BOOLEAN NOT NULL,
+    compose_hashtag VARCHAR(16),
+
+    CONSTRAINT hashtag_ck CHECK (compose_hashtag ~ '^#[A-Za-z0-9]+$')
 );
 
+COPY iris.msg_pattern (name, multi, flash_beacon, compose_hashtag) FROM stdin;
+.1_LINE		f	#OneLine
+.2_LINE	[np]	f	#TwoLine
+.3_LINE		f	#ThreeLine
+.4_LINE		f	#FourLine
+.2_PAGE	[np]	f	#Small
+\.
+
 CREATE VIEW msg_pattern_view AS
-    SELECT name, sign_config, sign_group, multi
+    SELECT name, multi, flash_beacon, compose_hashtag
     FROM iris.msg_pattern;
 GRANT SELECT ON msg_pattern_view TO PUBLIC;
 
-CREATE TABLE iris.sign_text (
-	name VARCHAR(20) PRIMARY KEY,
-	sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group,
-	line SMALLINT NOT NULL,
-	multi VARCHAR(64) NOT NULL,
-	rank SMALLINT NOT NULL,
-	CONSTRAINT sign_text_line CHECK ((line >= 1) AND (line <= 12)),
-	CONSTRAINT sign_text_rank CHECK ((rank >= 1) AND (rank <= 99))
+CREATE TABLE iris.msg_line (
+    name VARCHAR(10) PRIMARY KEY,
+    msg_pattern VARCHAR(20) NOT NULL REFERENCES iris.msg_pattern,
+    restrict_hashtag VARCHAR(16),
+    line SMALLINT NOT NULL,
+    multi VARCHAR(64) NOT NULL,
+    rank SMALLINT NOT NULL,
+
+    CONSTRAINT hashtag_ck CHECK (restrict_hashtag ~ '^#[A-Za-z0-9]+$'),
+    CONSTRAINT msg_line_line CHECK ((line >= 1) AND (line <= 12)),
+    CONSTRAINT msg_line_rank CHECK ((rank >= 1) AND (rank <= 99))
 );
 
-CREATE VIEW sign_text_view AS
-	SELECT dms, local, line, multi, rank
-	FROM iris.dms_sign_group dsg
-	JOIN iris.sign_group sg ON dsg.sign_group = sg.name
-	JOIN iris.sign_text st ON sg.name = st.sign_group;
-GRANT SELECT ON sign_text_view TO PUBLIC;
-
-CREATE VIEW sign_group_text_view AS
-	SELECT sign_group, line, multi, rank
-	FROM iris.sign_group sg
-	JOIN iris.sign_text st ON sg.name = st.sign_group;
-GRANT SELECT ON sign_group_text_view TO PUBLIC;
+CREATE VIEW msg_line_view AS
+    SELECT name, msg_pattern, restrict_hashtag, line, multi, rank
+    FROM iris.msg_line;
+GRANT SELECT ON msg_line_view TO PUBLIC;
 
 CREATE TABLE iris.dms_action (
     name VARCHAR(30) PRIMARY KEY,
     action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-    sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group,
     phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
+    dms_hashtag VARCHAR(16) NOT NULL,
     msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern,
-    beacon_enabled BOOLEAN NOT NULL,
-    msg_priority INTEGER NOT NULL
+    msg_priority INTEGER NOT NULL,
+
+    CONSTRAINT hashtag_ck CHECK (dms_hashtag ~ '^#[A-Za-z0-9]+$')
 );
 
 CREATE VIEW dms_action_view AS
-    SELECT name, action_plan, sign_group, phase, msg_pattern, beacon_enabled,
-           msg_priority
+    SELECT name, action_plan, phase, dms_hashtag, msg_pattern, msg_priority
     FROM iris.dms_action;
 GRANT SELECT ON dms_action_view TO PUBLIC;
 
@@ -3170,7 +3129,7 @@ CREATE TABLE event.sign_event (
         REFERENCES event.event_description(event_desc_id),
     device_id VARCHAR(20),
     multi VARCHAR(1024),
-    owner VARCHAR(16),
+    msg_owner VARCHAR(127),
     duration INTEGER
 );
 CREATE INDEX ON event.sign_event(event_date);
@@ -3192,14 +3151,14 @@ $multi_message$ LANGUAGE plpgsql;
 
 CREATE VIEW sign_event_view AS
     SELECT event_id, event_date, description, device_id,
-           event.multi_message(multi) as message, multi, owner, duration
+           event.multi_message(multi) as message, multi, msg_owner, duration
     FROM event.sign_event JOIN event.event_description
     ON sign_event.event_desc_id = event_description.event_desc_id;
 GRANT SELECT ON sign_event_view TO PUBLIC;
 
 CREATE VIEW recent_sign_event_view AS
     SELECT event_id, event_date, description, device_id, message, multi,
-           owner, duration
+           msg_owner, duration
     FROM sign_event_view
     WHERE event_date > (CURRENT_TIMESTAMP - interval '90 days');
 GRANT SELECT ON recent_sign_event_view TO PUBLIC;
@@ -4100,40 +4059,42 @@ COPY cap.certainty(id, description) FROM stdin;
 \.
 
 CREATE TABLE iris.alert_config (
-	name VARCHAR(20) PRIMARY KEY,
-	event VARCHAR(3) REFERENCES cap.event,
-	response_shelter BOOLEAN NOT NULL,
-	response_evacuate BOOLEAN NOT NULL,
-	response_prepare BOOLEAN NOT NULL,
-	response_execute BOOLEAN NOT NULL,
-	response_avoid BOOLEAN NOT NULL,
-	response_monitor BOOLEAN NOT NULL,
-	response_all_clear BOOLEAN NOT NULL,
-	response_none BOOLEAN NOT NULL,
-	urgency_unknown BOOLEAN NOT NULL,
-	urgency_past BOOLEAN NOT NULL,
-	urgency_future BOOLEAN NOT NULL,
-	urgency_expected BOOLEAN NOT NULL,
-	urgency_immediate BOOLEAN NOT NULL,
-	severity_unknown BOOLEAN NOT NULL,
-	severity_minor BOOLEAN NOT NULL,
-	severity_moderate BOOLEAN NOT NULL,
-	severity_severe BOOLEAN NOT NULL,
-	severity_extreme BOOLEAN NOT NULL,
-	certainty_unknown BOOLEAN NOT NULL,
-	certainty_unlikely BOOLEAN NOT NULL,
-	certainty_possible BOOLEAN NOT NULL,
-	certainty_likely BOOLEAN NOT NULL,
-	certainty_observed BOOLEAN NOT NULL,
-	auto_deploy BOOLEAN NOT NULL,
-	before_period_hours INTEGER NOT NULL,
-	after_period_hours INTEGER NOT NULL,
-	sign_group VARCHAR(20) REFERENCES iris.sign_group
+    name VARCHAR(20) PRIMARY KEY,
+    event VARCHAR(3) REFERENCES cap.event,
+    response_shelter BOOLEAN NOT NULL,
+    response_evacuate BOOLEAN NOT NULL,
+    response_prepare BOOLEAN NOT NULL,
+    response_execute BOOLEAN NOT NULL,
+    response_avoid BOOLEAN NOT NULL,
+    response_monitor BOOLEAN NOT NULL,
+    response_all_clear BOOLEAN NOT NULL,
+    response_none BOOLEAN NOT NULL,
+    urgency_unknown BOOLEAN NOT NULL,
+    urgency_past BOOLEAN NOT NULL,
+    urgency_future BOOLEAN NOT NULL,
+    urgency_expected BOOLEAN NOT NULL,
+    urgency_immediate BOOLEAN NOT NULL,
+    severity_unknown BOOLEAN NOT NULL,
+    severity_minor BOOLEAN NOT NULL,
+    severity_moderate BOOLEAN NOT NULL,
+    severity_severe BOOLEAN NOT NULL,
+    severity_extreme BOOLEAN NOT NULL,
+    certainty_unknown BOOLEAN NOT NULL,
+    certainty_unlikely BOOLEAN NOT NULL,
+    certainty_possible BOOLEAN NOT NULL,
+    certainty_likely BOOLEAN NOT NULL,
+    certainty_observed BOOLEAN NOT NULL,
+    auto_deploy BOOLEAN NOT NULL,
+    before_period_hours INTEGER NOT NULL,
+    after_period_hours INTEGER NOT NULL,
+    dms_hashtag VARCHAR(16),
+
+    CONSTRAINT hashtag_ck CHECK (dms_hashtag ~ '^#[A-Za-z0-9]+$')
 );
 
 CREATE TABLE iris.alert_period (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(10) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(10) NOT NULL
 );
 
 COPY iris.alert_period(id, description) FROM stdin;
@@ -4146,18 +4107,19 @@ CREATE TABLE iris.alert_message (
     name VARCHAR(20) PRIMARY KEY,
     alert_config VARCHAR(20) NOT NULL REFERENCES iris.alert_config,
     alert_period INTEGER NOT NULL REFERENCES iris.alert_period,
-    msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern
+    msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern,
+    sign_config VARCHAR(16) REFERENCES iris.sign_config
 );
 
 CREATE TABLE cap.alert (
-	identifier VARCHAR(128) PRIMARY KEY,
-	alert JSONB NOT NULL,
-	receive_date TIMESTAMP WITH time zone NOT NULL
+    identifier VARCHAR(128) PRIMARY KEY,
+    alert JSONB NOT NULL,
+    receive_date TIMESTAMP WITH time zone NOT NULL
 );
 
 CREATE TABLE iris.alert_state (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(12) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(12) NOT NULL
 );
 
 COPY iris.alert_state(id, description) FROM stdin;
@@ -4169,26 +4131,28 @@ COPY iris.alert_state(id, description) FROM stdin;
 \.
 
 CREATE TABLE cap.alert_info (
-	name VARCHAR(20) PRIMARY KEY,
-	alert VARCHAR(128) NOT NULL REFERENCES cap.alert(identifier),
-	replaces VARCHAR(24) REFERENCES cap.alert_info,
-	start_date TIMESTAMP WITH time zone,
-	end_date TIMESTAMP WITH time zone,
-	event VARCHAR(3) NOT NULL REFERENCES cap.event,
-	response_type INTEGER NOT NULL REFERENCES cap.response_type,
-	urgency INTEGER NOT NULL REFERENCES cap.urgency,
-	severity INTEGER NOT NULL REFERENCES cap.severity,
-	certainty INTEGER NOT NULL REFERENCES cap.certainty,
-	headline VARCHAR(256),
-	description VARCHAR(4096),
-	instruction VARCHAR(4096),
-	area_desc VARCHAR(256) NOT NULL,
-	geo_poly geometry(multipolygon) NOT NULL,
-	lat double precision NOT NULL,
-	lon double precision NOT NULL,
-	sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group,
-	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	alert_state INTEGER NOT NULL REFERENCES iris.alert_state
+    name VARCHAR(20) PRIMARY KEY,
+    alert VARCHAR(128) NOT NULL REFERENCES cap.alert(identifier),
+    replaces VARCHAR(24) REFERENCES cap.alert_info,
+    start_date TIMESTAMP WITH time zone,
+    end_date TIMESTAMP WITH time zone,
+    event VARCHAR(3) NOT NULL REFERENCES cap.event,
+    response_type INTEGER NOT NULL REFERENCES cap.response_type,
+    urgency INTEGER NOT NULL REFERENCES cap.urgency,
+    severity INTEGER NOT NULL REFERENCES cap.severity,
+    certainty INTEGER NOT NULL REFERENCES cap.certainty,
+    headline VARCHAR(256),
+    description VARCHAR(4096),
+    instruction VARCHAR(4096),
+    area_desc VARCHAR(256) NOT NULL,
+    geo_poly geometry(multipolygon) NOT NULL,
+    lat double precision NOT NULL,
+    lon double precision NOT NULL,
+    all_hashtag VARCHAR(16) NOT NULL,
+    action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+    alert_state INTEGER NOT NULL REFERENCES iris.alert_state,
+
+    CONSTRAINT hashtag_ck CHECK (all_hashtag ~ '^#[A-Za-z0-9]+$')
 );
 
 --
@@ -4449,11 +4413,14 @@ CREATE TABLE iris.lane_use_multi (
     name VARCHAR(10) PRIMARY KEY,
     indication INTEGER NOT NULL REFERENCES iris.lane_use_indication,
     msg_num INTEGER,
-    msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern
+    msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern,
+    dms_hashtag VARCHAR(16),
+
+    CONSTRAINT hashtag_ck CHECK (dms_hashtag ~ '^#[A-Za-z0-9]+$')
 );
 
 CREATE VIEW lane_use_multi_view AS
-    SELECT name, indication, msg_num, msg_pattern
+    SELECT name, indication, msg_num, msg_pattern, dms_hashtag
     FROM iris.lane_use_multi;
 GRANT SELECT ON lane_use_multi_view TO PUBLIC;
 
@@ -4580,9 +4547,9 @@ GRANT SELECT ON parking_area_view TO PUBLIC;
 -- Ramp Meters
 --
 CREATE TABLE iris.meter_type (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(32) NOT NULL,
-	lanes INTEGER NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(32) NOT NULL,
+    lanes INTEGER NOT NULL
 );
 
 COPY iris.meter_type (id, description, lanes) FROM stdin;
@@ -4592,8 +4559,8 @@ COPY iris.meter_type (id, description, lanes) FROM stdin;
 \.
 
 CREATE TABLE iris.meter_algorithm (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(32) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(32) NOT NULL
 );
 
 COPY iris.meter_algorithm (id, description) FROM stdin;
@@ -4733,17 +4700,17 @@ CREATE TABLE iris.meter_action (
 );
 
 CREATE VIEW meter_action_view AS
-	SELECT ramp_meter, ta.phase, time_of_day, day_plan, sched_date
-	FROM iris.meter_action ma, iris.action_plan ap, iris.time_action ta
-	WHERE ma.action_plan = ap.name
-	AND ap.name = ta.action_plan
-	AND active = true
-	ORDER BY ramp_meter, time_of_day;
+    SELECT ramp_meter, ta.phase, time_of_day, day_plan, sched_date
+    FROM iris.meter_action ma, iris.action_plan ap, iris.time_action ta
+    WHERE ma.action_plan = ap.name
+    AND ap.name = ta.action_plan
+    AND active = true
+    ORDER BY ramp_meter, time_of_day;
 GRANT SELECT ON meter_action_view TO PUBLIC;
 
 CREATE TABLE event.meter_phase (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(16) NOT NULL
 );
 
 COPY event.meter_phase (id, description) FROM stdin;
@@ -4754,8 +4721,8 @@ COPY event.meter_phase (id, description) FROM stdin;
 \.
 
 CREATE TABLE event.meter_queue_state (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(16) NOT NULL
 );
 
 COPY event.meter_queue_state (id, description) FROM stdin;
@@ -4766,8 +4733,8 @@ COPY event.meter_queue_state (id, description) FROM stdin;
 \.
 
 CREATE TABLE event.meter_limit_control (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(16) NOT NULL
 );
 
 COPY event.meter_limit_control (id, description) FROM stdin;
@@ -4779,113 +4746,90 @@ COPY event.meter_limit_control (id, description) FROM stdin;
 \.
 
 CREATE TABLE event.meter_event (
-	event_id SERIAL PRIMARY KEY,
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter
-		ON DELETE CASCADE,
-	phase INTEGER NOT NULL REFERENCES event.meter_phase,
-	q_state INTEGER NOT NULL REFERENCES event.meter_queue_state,
-	q_len REAL NOT NULL,
-	dem_adj REAL NOT NULL,
-	wait_secs INTEGER NOT NULL,
-	limit_ctrl INTEGER NOT NULL REFERENCES event.meter_limit_control,
-	min_rate INTEGER NOT NULL,
-	rel_rate INTEGER NOT NULL,
-	max_rate INTEGER NOT NULL,
-	d_node VARCHAR(10),
-	seg_density REAL NOT NULL
+    event_id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_desc_id INTEGER NOT NULL
+        REFERENCES event.event_description(event_desc_id),
+    ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter
+        ON DELETE CASCADE,
+    phase INTEGER NOT NULL REFERENCES event.meter_phase,
+    q_state INTEGER NOT NULL REFERENCES event.meter_queue_state,
+    q_len REAL NOT NULL,
+    dem_adj REAL NOT NULL,
+    wait_secs INTEGER NOT NULL,
+    limit_ctrl INTEGER NOT NULL REFERENCES event.meter_limit_control,
+    min_rate INTEGER NOT NULL,
+    rel_rate INTEGER NOT NULL,
+    max_rate INTEGER NOT NULL,
+    d_node VARCHAR(10),
+    seg_density REAL NOT NULL
 );
 
 CREATE VIEW meter_event_view AS
-	SELECT event_id, event_date, event_description.description,
-	       ramp_meter, meter_phase.description AS phase,
-	       meter_queue_state.description AS q_state, q_len, dem_adj,
-	       wait_secs, meter_limit_control.description AS limit_ctrl,
-	       min_rate, rel_rate, max_rate, d_node, seg_density
-	FROM event.meter_event
-	JOIN event.event_description
-	ON meter_event.event_desc_id = event_description.event_desc_id
-	JOIN event.meter_phase ON phase = meter_phase.id
-	JOIN event.meter_queue_state ON q_state = meter_queue_state.id
-	JOIN event.meter_limit_control ON limit_ctrl = meter_limit_control.id;
+    SELECT event_id, event_date, event_description.description,
+           ramp_meter, meter_phase.description AS phase,
+           meter_queue_state.description AS q_state, q_len, dem_adj,
+           wait_secs, meter_limit_control.description AS limit_ctrl,
+           min_rate, rel_rate, max_rate, d_node, seg_density
+    FROM event.meter_event
+    JOIN event.event_description
+    ON meter_event.event_desc_id = event_description.event_desc_id
+    JOIN event.meter_phase ON phase = meter_phase.id
+    JOIN event.meter_queue_state ON q_state = meter_queue_state.id
+    JOIN event.meter_limit_control ON limit_ctrl = meter_limit_control.id;
 GRANT SELECT ON meter_event_view TO PUBLIC;
 
 --
 -- Toll Zones, Tag Readers
 --
 CREATE TABLE iris.toll_zone (
-	name VARCHAR(20) PRIMARY KEY,
-	start_id VARCHAR(10) REFERENCES iris.r_node(station_id),
-	end_id VARCHAR(10) REFERENCES iris.r_node(station_id),
-	tollway VARCHAR(16),
-	alpha REAL,
-	beta REAL,
-	max_price REAL
+    name VARCHAR(20) PRIMARY KEY,
+    start_id VARCHAR(10) REFERENCES iris.r_node(station_id),
+    end_id VARCHAR(10) REFERENCES iris.r_node(station_id),
+    tollway VARCHAR(16),
+    alpha REAL,
+    beta REAL,
+    max_price REAL
 );
 
 CREATE VIEW toll_zone_view AS
-	SELECT name, start_id, end_id, tollway, alpha, beta, max_price
-	FROM iris.toll_zone;
+    SELECT name, start_id, end_id, tollway, alpha, beta, max_price
+    FROM iris.toll_zone;
 GRANT SELECT ON toll_zone_view TO PUBLIC;
 
-CREATE TABLE iris.tag_reader_sync_mode (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
-);
-
-COPY iris.tag_reader_sync_mode (id, description) FROM stdin;
-0	slave
-1	master
-2	GPS secondary
-3	GPS primary
-\.
-
 CREATE TABLE iris._tag_reader (
-	name VARCHAR(20) PRIMARY KEY,
-	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-	notes VARCHAR(64) NOT NULL,
-	toll_zone VARCHAR(20) REFERENCES iris.toll_zone(name),
-	downlink_freq_khz INTEGER,
-	uplink_freq_khz INTEGER,
-	sego_atten_downlink_db INTEGER,
-	sego_atten_uplink_db INTEGER,
-	sego_data_detect_db INTEGER,
-	sego_seen_count INTEGER,
-	sego_unique_count INTEGER,
-	iag_atten_downlink_db INTEGER,
-	iag_atten_uplink_db INTEGER,
-	iag_data_detect_db INTEGER,
-	iag_seen_count INTEGER,
-	iag_unique_count INTEGER,
-	line_loss_db INTEGER,
-	sync_mode INTEGER REFERENCES iris.tag_reader_sync_mode,
-	slave_select_count INTEGER
+    name VARCHAR(20) PRIMARY KEY,
+    geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
+    notes VARCHAR(64) NOT NULL,
+    toll_zone VARCHAR(20) REFERENCES iris.toll_zone(name),
+    settings JSONB
 );
 
 ALTER TABLE iris._tag_reader ADD CONSTRAINT _tag_reader_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
 CREATE FUNCTION iris.tag_reader_notify() RETURNS TRIGGER AS
-	$tag_reader_notify$
+    $tag_reader_notify$
 BEGIN
-	NOTIFY tag_reader;
-	RETURN NULL; -- AFTER trigger return is ignored
+    IF (NEW.settings IS DISTINCT FROM OLD.settings) THEN
+        NOTIFY tag_reader, 'settings';
+    ELSE
+        NOTIFY tag_reader;
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
 END;
 $tag_reader_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER tag_reader_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON iris._tag_reader
-	FOR EACH STATEMENT EXECUTE PROCEDURE iris.tag_reader_notify();
+    AFTER UPDATE ON iris._tag_reader
+    FOR EACH ROW EXECUTE PROCEDURE iris.tag_reader_notify();
+
+CREATE TRIGGER tag_reader_table_notify_trig
+    AFTER INSERT OR DELETE ON iris._tag_reader
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW iris.tag_reader AS
-    SELECT t.name, geo_loc, controller, pin, notes, toll_zone,
-           downlink_freq_khz, uplink_freq_khz, sego_atten_downlink_db,
-           sego_atten_uplink_db, sego_data_detect_db, sego_seen_count,
-           sego_unique_count, iag_atten_downlink_db, iag_atten_uplink_db,
-           iag_data_detect_db, iag_seen_count, iag_unique_count, line_loss_db,
-           sync_mode, slave_select_count
+    SELECT t.name, geo_loc, controller, pin, notes, toll_zone, settings
     FROM iris._tag_reader t JOIN iris.controller_io cio ON t.name = cio.name;
 
 CREATE FUNCTION iris.tag_reader_insert() RETURNS TRIGGER AS
@@ -4894,19 +4838,9 @@ BEGIN
     INSERT INTO iris.controller_io (name, resource_n, controller, pin)
          VALUES (NEW.name, 'tag_reader', NEW.controller, NEW.pin);
     INSERT INTO iris._tag_reader (
-        name, geo_loc, notes, toll_zone, downlink_freq_khz, uplink_freq_khz,
-        sego_atten_downlink_db, sego_atten_uplink_db, sego_data_detect_db,
-        sego_seen_count, sego_unique_count, iag_atten_downlink_db,
-        iag_atten_uplink_db, iag_data_detect_db, iag_seen_count,
-        iag_unique_count, line_loss_db, sync_mode, slave_select_count
+        name, geo_loc, notes, toll_zone, settings
     ) VALUES (
-        NEW.name, NEW.geo_loc, NEW.notes, NEW.toll_zone, NEW.downlink_freq_khz,
-        NEW.uplink_freq_khz, NEW.sego_atten_downlink_db,
-        NEW.sego_atten_uplink_db, NEW.sego_data_detect_db, NEW.sego_seen_count,
-        NEW.sego_unique_count, NEW.iag_atten_downlink_db,
-        NEW.iag_atten_uplink_db, NEW.iag_data_detect_db, NEW.iag_seen_count,
-        NEW.iag_unique_count, NEW.line_loss_db, NEW.sync_mode,
-        NEW.slave_select_count
+        NEW.name, NEW.geo_loc, NEW.notes, NEW.toll_zone, NEW.settings
     );
     RETURN NEW;
 END;
@@ -4927,21 +4861,7 @@ BEGIN
        SET geo_loc = NEW.geo_loc,
            notes = NEW.notes,
            toll_zone = NEW.toll_zone,
-           downlink_freq_khz = NEW.downlink_freq_khz,
-           uplink_freq_khz = NEW.uplink_freq_khz,
-           sego_atten_downlink_db = NEW.sego_atten_downlink_db,
-           sego_atten_uplink_db = NEW.sego_atten_uplink_db,
-           sego_data_detect_db = NEW.sego_data_detect_db,
-           sego_seen_count = NEW.sego_seen_count,
-           sego_unique_count = NEW.sego_unique_count,
-           iag_atten_downlink_db = NEW.iag_atten_downlink_db,
-           iag_atten_uplink_db = NEW.iag_atten_uplink_db,
-           iag_data_detect_db = NEW.iag_data_detect_db,
-           iag_seen_count = NEW.iag_seen_count,
-           iag_unique_count = NEW.iag_unique_count,
-           line_loss_db = NEW.line_loss_db,
-           sync_mode = NEW.sync_mode,
-           slave_select_count = NEW.slave_select_count
+           settings = NEW.settings
      WHERE name = OLD.name;
     RETURN NEW;
 END;
@@ -4957,78 +4877,73 @@ CREATE TRIGGER tag_reader_delete_trig
 
 CREATE VIEW tag_reader_view AS
     SELECT t.name, t.geo_loc, location, controller, pin, notes, toll_zone,
-           downlink_freq_khz, uplink_freq_khz, sego_atten_downlink_db,
-           sego_atten_uplink_db, sego_data_detect_db, sego_seen_count,
-           sego_unique_count, iag_atten_downlink_db, iag_atten_uplink_db,
-           iag_data_detect_db, iag_seen_count, iag_unique_count, line_loss_db,
-           m.description AS sync_mode, slave_select_count
+           settings
     FROM iris.tag_reader t
-    LEFT JOIN geo_loc_view l ON t.geo_loc = l.name
-    LEFT JOIN iris.tag_reader_sync_mode m ON t.sync_mode = m.id;
+    LEFT JOIN geo_loc_view l ON t.geo_loc = l.name;
 GRANT SELECT ON tag_reader_view TO PUBLIC;
 
 CREATE TABLE iris.tag_reader_dms (
-	tag_reader VARCHAR(20) NOT NULL REFERENCES iris._tag_reader,
-	dms VARCHAR(20) NOT NULL REFERENCES iris._dms
+    tag_reader VARCHAR(20) NOT NULL REFERENCES iris._tag_reader,
+    dms VARCHAR(20) NOT NULL REFERENCES iris._dms
 );
 ALTER TABLE iris.tag_reader_dms ADD PRIMARY KEY (tag_reader, dms);
 
 CREATE VIEW tag_reader_dms_view AS
-	SELECT tag_reader, dms
-	FROM iris.tag_reader_dms;
+    SELECT tag_reader, dms
+    FROM iris.tag_reader_dms;
 GRANT SELECT ON tag_reader_dms_view TO PUBLIC;
 
 CREATE TABLE event.tag_type (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(16) NOT NULL
 );
 
 COPY event.tag_type (id, description) FROM stdin;
 0	Unknown
 1	SeGo
 2	IAG
-3	ASTMv6
+3	6C
 \.
 
 CREATE TABLE event.tag_read_event (
-	event_id SERIAL PRIMARY KEY,
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	tag_type INTEGER NOT NULL REFERENCES event.tag_type,
-	agency INTEGER,
-	tag_id INTEGER NOT NULL,
-	tag_reader VARCHAR(20) NOT NULL,
-	hov BOOLEAN NOT NULL,
-	trip_id INTEGER
+    event_id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_desc_id INTEGER NOT NULL
+        REFERENCES event.event_description(event_desc_id),
+    tag_type INTEGER NOT NULL REFERENCES event.tag_type,
+    agency INTEGER,
+    tag_id INTEGER NOT NULL,
+    tag_reader VARCHAR(20) NOT NULL,
+    hov BOOLEAN NOT NULL,
+    trip_id INTEGER
 );
 
 CREATE INDEX ON event.tag_read_event(tag_id);
 
 CREATE VIEW tag_read_event_view AS
-	SELECT event_id, event_date, event_description.description,
-	       tag_type.description AS tag_type, agency, tag_id, tag_reader,
-	       toll_zone, tollway, hov, trip_id
-	FROM event.tag_read_event
-	JOIN event.event_description
-	ON   tag_read_event.event_desc_id = event_description.event_desc_id
-	JOIN event.tag_type
-	ON   tag_read_event.tag_type = tag_type.id
-	JOIN iris._tag_reader
-	ON   tag_read_event.tag_reader = _tag_reader.name
-	LEFT JOIN iris.toll_zone
-	ON        _tag_reader.toll_zone = toll_zone.name;
+    SELECT event_id, event_date, event_description.description,
+           tag_type.description AS tag_type, agency, tag_id, tag_reader,
+           toll_zone, tollway, hov, trip_id
+    FROM event.tag_read_event
+    JOIN event.event_description
+    ON tag_read_event.event_desc_id = event_description.event_desc_id
+    JOIN event.tag_type
+    ON tag_read_event.tag_type = tag_type.id
+    JOIN iris._tag_reader
+    ON tag_read_event.tag_reader = _tag_reader.name
+    LEFT JOIN iris.toll_zone
+    ON _tag_reader.toll_zone = toll_zone.name;
 GRANT SELECT ON tag_read_event_view TO PUBLIC;
 
 -- Allow trip_id column to be updated by roles which have been granted
 -- update permission on tag_read_event_view
 CREATE FUNCTION event.tag_read_event_view_update() RETURNS TRIGGER AS
-	$tag_read_event_view_update$
+    $tag_read_event_view_update$
 BEGIN
-	UPDATE event.tag_read_event
-	   SET trip_id = NEW.trip_id
-	 WHERE event_id = OLD.event_id;
-	RETURN NEW;
+    UPDATE event.tag_read_event
+       SET trip_id = NEW.trip_id
+     WHERE event_id = OLD.event_id;
+    RETURN NEW;
 END;
 $tag_read_event_view_update$ LANGUAGE plpgsql;
 
@@ -5085,10 +5000,10 @@ CREATE VIEW iris.msg_pattern_toll_zone AS
         FROM iris.msg_pattern_closed;
 
 CREATE VIEW dms_toll_zone_view AS
-    SELECT dms, tz.state, toll_zone, action_plan, da.msg_pattern
+    SELECT dms, dh.hashtag, tz.state, toll_zone, action_plan, da.msg_pattern
     FROM dms_action_view da
-    JOIN iris.dms_sign_group dsg
-    ON da.sign_group = dsg.sign_group
+    JOIN iris.dms_hashtag dh
+    ON da.dms_hashtag = dh.hashtag
     JOIN iris.msg_pattern mp
     ON da.msg_pattern = mp.name
     JOIN iris.msg_pattern_toll_zone tz

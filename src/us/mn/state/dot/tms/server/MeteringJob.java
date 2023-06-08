@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ public class MeteringJob extends Job {
 		while (it.hasNext()) {
 			RampMeter rm = it.next();
 			if (rm instanceof RampMeterImpl) {
-				RampMeterImpl meter = (RampMeterImpl)rm;
+				RampMeterImpl meter = (RampMeterImpl) rm;
 				meter.validateAlgorithm();
 			}
 		}

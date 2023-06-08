@@ -3,52 +3,59 @@
 Select `View ➔ Message Signs ➔ DMS` menu item
 
 A _dynamic message sign_ (DMS) is a sign which is capable of changing the
-message displayed to motorists.  They can be classified as _character-matrix_,
-_line-matrix_ or _full-matrix_ depending on the spacing between pixels.  Some
-are monochrome and others support full color display.  All of these
-configurations are supported.
+message displayed to motorists.
 
 The following features are supported:
 
-* Querying currently displayed message
-* Sending and displaying new messages
-* Querying configuration information
+* Querying currently displayed [sign message]
+* Sending and displaying [sign message]s
+* Querying [sign configuration]
 * Querying diagnostic information
-* Querying or sending [fonts]
+* Querying or sending [font]s
 * Sending [graphic images] to be displayed
 * [Travel time] estimation
 * [Variable speed advisories]
 * [Slow traffic] warnings
-* Checking banned or allowed [word] lists
+* Free-form text entry with banned [word] checks
+
+## Resources
+
+* `iris/dms_pub`
+* `iris/api/dms`
+* `iris/api/dms/{name}`
+
+Attribute [permissions]:
+
+| Access       | Minimal                      | Full        |
+|--------------|------------------------------|-------------|
+| Read Only    | name, location, msg\_current | sign\_config, sign\_detail, geo\_loc, msg\_sched, status, stuck\_pixels |
+| 👉 Operate   |                              | msg\_user   |
+| 💡 Plan      | notes                        | device\_req |
+| 🔧 Configure | controller                   | pin         |
+
+Checks of [free-form text] are also affected by the access level.
 
 ## Setup
 
-The DMS properties form can be used to configure the sign.
+The DMS properties form has setup information.
 
 Field          | Description
----------------|--------------------------------------------------
+---------------|-------------------------------------------------
+Hashtags       | space-separated list of tags for selecting signs
 Remote beacon  | beacon activated automatically when sign deployed
 Static graphic | image of static sign in which DMS is inset
 Device purpose | _general_ or _dedicated_ purpose for sign operation
 Hidden         | hide sign when _available_ or _deployed_ styles are selected
 
+A **hashtag** is the `#` character, followed by a string of letters and/or
+numbers.  They are used to select signs for:
+- [message pattern]s for composing
+- automated [DMS actions]
+- [alert configurations] and [alert messages]
+- [lane-use MULTI] indications
+
 **Internal** beacons are controlled through the DMS controller using the [NTCIP]
 protocol.  **Remote** [beacon]s are controlled using a separate [comm link].
-
-_Sign groups_ and associated _sign text_ libraries can be managed in the
-**Messages** tab.
-
-All sign groups are displayed in the table, even if the DMS is not a member of
-that group.  To add the DMS to a group, select the _Member_ check box.
-
-When a sign group is selected, its message library is displayed in the _sign
-text_ table.  Each row contains a message for one _line_ of the sign.  The
-_rank_ determines sort order in message lists.
-
-The _message preview_ displays a graphical rendering of the selected sign text.
-
-Select an _override font_ to use a font other than the _default font_ from the
-sign configuration.
 
 ## Operating
 
@@ -71,25 +78,42 @@ All       | All signs
 When a DMS is selected, a few things happen:
 - the sign's location is displayed
 - the current message is rendered
-- the [message pattern] selector is populated with messages for sign groups
-  containing the DMS and containing **NO** [action tags]
-- if no pattern contains a text rectangle for composing with sign text, an
-  "empty" pattern is provided
+- the [message pattern] selector is populated:
+  * only patterns whose **compose** hashtag matches the sign
+  * only patterns containing **NO** [action tags]
 
-When a pattern is selected, a series of _Sign Text_ selectors is populated
-with messages from the message library, depending on the text rectangles of
-that pattern.  The message preview is updated as the message is being
-composed.  Once complete, pressing the **Send** button will put the message
-onto the DMS.
+When an operator chooses a pattern, a series of selectors is populated with
+[message lines], depending on the [fillable text rectangles].  These selectors
+may also allow **free-form text** entry, depending on the permision access
+level of the user:
+
+* 👉 **Operate**: No free-form text permitted
+* 💡 **Plan**: Free-form text checked for **banned** [word]s
+* 🔧 **Configure**: Any free-form text permitted (no check)
+
+The message preview is updated as the user composes the message.  When the
+**Send** button is pressed, a [sign message] is created and set as `msg_user`.
+The server then performs a validation check ensuring the user has permission
+for any free-form text.
 
 
 [action tags]: action_plans.html#dms-action-tags
+[alert configurations]: alert.html#dms-hashtags
+[alert messages]: alert.html#alert-messages
 [beacon]: beacons.html
 [comm link]: comm_links.html
-[fonts]: fonts.html
+[free-form text]: #composing-messages
+[DMS actions]: action_plans.html#dms-actions
+[fillable text rectangles]: message_patterns.html#fillable-text-rectangles
+[font]: fonts.html
 [graphic images]: graphics.html
-[NTCIP]: comm_links.html#ntcip
+[lane-use MULTI]: lcs.html#lane-use-multi
+[message lines]: message_patterns.html#message-lines
 [message pattern]: message_patterns.html
+[NTCIP]: protocols.html#ntcip
+[permissions]: permissions.html
+[sign configuration]: sign_configuration.html
+[sign message]: sign_message.html
 [Slow traffic]: slow_warning.html
 [Travel time]: travel_time.html
 [Variable speed advisories]: vsa.html

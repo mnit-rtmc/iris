@@ -62,15 +62,14 @@
  5. Create DMS Actions
     - Click on the Action Plan just created (e.g. `slick_roads`)
     - Click the DMS Actions tab
-    - In the edit field on the bottom of the form, type the name of an existing
-      sign group
+    - In the edit field on the bottom of the form, type a DMS hashtag
     - Press the `Create` button
     - The new DMS Action should appear in the table
     - Select the `deployed` phase for the DMS action
     - Click on the `Message Pattern` column in the DMS Action just created
     - Specify the name of an existing [message pattern] to send to the sign
     - Repeat the above DMS Actions steps as many times as desired to send a
-      message to additional sign groups
+      message to additional DMS hashtags
  6. Activate the messages on the signs
     - Select the `Plan` tab to the left of the map
     - Locate the action plan from the list and select it

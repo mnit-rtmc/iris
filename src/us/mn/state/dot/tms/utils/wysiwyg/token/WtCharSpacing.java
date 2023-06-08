@@ -70,13 +70,6 @@ public class WtCharSpacing extends WToken {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#isNormalizeLine()
-	 */
-	public boolean isNormalizeLine() {
-		return true;
-	}
-	
 	/** Return char spacing */
 	public Integer getCharSpacing() {
 		return sc;

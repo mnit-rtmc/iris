@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2018  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,17 +37,14 @@ public class TagTransaction extends E6Property {
 	/** IAG CRC-16 */
 	static private final CRC IAG_CRC = new CRC(16, 0x1021, 0x0000, false);
 
-	/** SeGo authority code for FDOT.
-	 * Also used for interoperability, with 16 million range IDs */
-	static private final int AUTHORITY_FDOT = 0x0A01;
+	/* EZPass Interagency Group ID */
+	static private final int IAG_GROUP_ID_EZPASS = 65;
 
-	/** SeGo authority code for NCTA */
-	static private final int AUTHORITY_NCTA = 0x0A07;
+	/** 6C coalition application family identifier */
+	static private final int AFI_6C_COALITION = 0xB0;
 
-	/** SeGo authority code for MnPASS */
-	static private final int AUTHORITY_MNPASS = 0x0A09;
-
-	/* FIXME: change to 4-digit authority code */
+	/** 6C coalition data storage format identifier */
+	static private final int DSFID_6C_COALITION = 0x3E;
 
 	/** Tag transaction types */
 	public enum TransactionType {
@@ -55,15 +52,17 @@ public class TagTransaction extends E6Property {
 		sego_read_verify_page        (0x3022, 20),
 		sego_read_regular            (0x3023, 6),
 		seen_frame_count             (0x3043, 6),
+		// NOTE: the page 9 transaction is obsolete
 		sego_read_streamlined_page_9 (0x3070, 21+7),
-		astm_read                    (0x5014, 10+7),
 		iag_read                     (0x5026, 35+7),
-		iag_read_authenticated       (0x5030, 35+7);
+		iag_read_authenticated       (0x5030, 35+7),
+		epc_6c_read                  (0x7010, 29+7);
 		private TransactionType(int c, int l) {
 			code = c;
 			len = l;
 		}
 		public final int code;
+		/** Length in bytes; appended time/date is 7 */
 		public final int len;
 		static public TransactionType fromCode(int c) {
 			for (TransactionType tt: values()) {
@@ -93,7 +92,7 @@ public class TagTransaction extends E6Property {
 	public boolean isValidRead() {
 		return isSeGoReadValid()
 		    || isIAGReadValid()
-		    || isASTMReadValid();
+		    || is6CReadValid();
 	}
 
 	/** Get the transaction type code */
@@ -115,17 +114,13 @@ public class TagTransaction extends E6Property {
 
 	/** Get the date/time stamp */
 	public Long getStamp() {
-		if (isSeGoReadValid())
-			return parseStamp(21);
-		if (isIAGReadValid())
-			return parseStamp(35);
-		if (isASTMReadValid())
-			return parseStamp(10);
-		return null;
+		return isValidRead() ? parseAppendedStamp() : null;
 	}
 
-	/** Parse a time / date stamp */
-	private Long parseStamp(int off) {
+	/** Parse appended time / date stamp */
+	private Long parseAppendedStamp() {
+		assert data.length >= 7;
+		int off = data.length - 7;
 		try {
 			return parseTimeDate(data, off);
 		}
@@ -134,19 +129,14 @@ public class TagTransaction extends E6Property {
 		}
 	}
 
-	/** Parse an ASTM stamp */
-	private Long parseASTMStamp() {
-		return null;
-	}
-
 	/** Get the tag type */
 	public TagType getTagType() {
 		if (isSeGoReadValid())
 			return TagType.SeGo;
 		if (isIAGReadValid())
 			return TagType.IAG;
-		if (isASTMReadValid())
-			return TagType.ASTM;
+		if (is6CReadValid())
+			return TagType._6C;
 		return null;
 	}
 
@@ -156,6 +146,8 @@ public class TagTransaction extends E6Property {
 			return parseSeGoAgency();
 		if (isIAGReadValid())
 			return parseIAGAgency();
+		if (is6CReadValid())
+			return parse6CAgency();
 		else
 			return null;
 	}
@@ -166,19 +158,20 @@ public class TagTransaction extends E6Property {
 			return parseSeGoId();
 		if (isIAGReadValid())
 			return parseIAGId();
-		if (isASTMReadValid())
-			return parseASTMId();
+		if (is6CReadValid())
+			return parse6CId();
 		return null;
 	}
 
 	/** Check if transaction is a valid SeGo streamlined read */
 	private boolean isSeGoReadValid() {
 		TransactionType tt = getTransactionType();
+		// NOTE: the page 9 transaction is obsolete
 		return (TransactionType.sego_read_streamlined_page_4 == tt
 		     || TransactionType.sego_read_streamlined_page_9 == tt)
 		     && isLengthValid()
+		     && isSeGoTolling()
 		     && isSeGoReadCRCValid()
-		     && isSeGoMnPass()
 		     && isSeGoPage0CRCValid();
 	}
 
@@ -194,10 +187,10 @@ public class TagTransaction extends E6Property {
 		return parse16(data, 18);
 	}
 
-	/** Is it a SeGo MnPass tag? */
-	private boolean isSeGoMnPass() {
-		/* Non-MnPass tags have E022 at start of page 0 */
-		return data[2] != 0xE0;
+	/** Is it a SeGo tolling tag? */
+	private boolean isSeGoTolling() {
+		/* Non-tolling tags have E022 at start of page 0 */
+		return parse16(data, 2) != 0xE022;
 	}
 
 	/** Check if SeGo page 0 CRC is valid.  NOTE: length must be valid */
@@ -240,6 +233,7 @@ public class TagTransaction extends E6Property {
 		return (TransactionType.iag_read == tt
 		     || TransactionType.iag_read_authenticated == tt)
 		     && isLengthValid()
+		     && isIAGGroupValid()
 		     && isIAG_CRCValid();
 	}
 
@@ -255,13 +249,20 @@ public class TagTransaction extends E6Property {
 		return parse16(data, 32);
 	}
 
+	/** Check if IAG group is EZPass Interagency Group */
+	private boolean isIAGGroupValid() {
+		return (parse8(data, 3) & 0x7F) == IAG_GROUP_ID_EZPASS;
+	}
+
 	/** Parse an IAG ID */
 	private Integer parseIAGId() {
+		/* transponder serial number is 24 bits */
 		return (parse32(data, 4) >> 1) & 0xFFFFFF;
 	}
 
 	/** Parse an IAG agency */
 	private Integer parseIAGAgency() {
+		/* agency ID is 7 bits */
 		return (parse8(data, 4) >> 1) & 0x7F;
 	}
 
@@ -270,17 +271,60 @@ public class TagTransaction extends E6Property {
 		return (parse8(data, 26) & 0x03) != 0;
 	}
 
-	/** Check if transaction is a valid ASTM read */
-	private boolean isASTMReadValid() {
+	/** Check if transaction is a valid 6C read */
+	private boolean is6CReadValid() {
 		TransactionType tt = getTransactionType();
-		// FIXME: check CRC
-		return (TransactionType.astm_read == tt)
-		     && isLengthValid();
+		// FIXME: check hash
+		return (TransactionType.epc_6c_read == tt) &&
+		       isLengthValid() &&
+		       is6CNumberingISO() &&
+		       is6CApplicationFamilyIdentifier() &&
+		       is6CDataStorageFormatIdentifier();
 	}
 
-	/** Parse an ASTM ID */
-	private Integer parseASTMId() {
-		return parse32(data, 3);
+	/** Check if EPC numbering system indicator is ISO */
+	private boolean is6CNumberingISO() {
+		return (parse8(data, 2) & 0x01) != 0;
+	}
+
+	/** Check if application family identifier is 6C coalition */
+	private boolean is6CApplicationFamilyIdentifier() {
+		return parse8(data, 3) == AFI_6C_COALITION;
+	}
+
+	/** Check if data storage format identifier is 6C coalition */
+	private boolean is6CDataStorageFormatIdentifier() {
+		return parse8(data, 4) == DSFID_6C_COALITION;
+	}
+
+	/** Parse a 6C ID */
+	private Integer parse6CId() {
+		/* transponder serial number is 28 bits, mask off MSN */
+		return parse32(data, 10) & 0x0FFFFFFF;
+	}
+
+	/** Parse a 6C agency */
+	private Integer parse6CAgency() {
+		/* agency is 12 bits */
+		return (parse16(data, 9) >> 4) & 0x0FFF;
+	}
+
+	/** Parse a 6C HOV value */
+	private boolean parse6C_HOV() {
+		switch ((parse8(data, 8) >> 4) & 0x07) {
+		// 000: single mode
+		case 0: return false;
+		// 001: SOV (non-carpool)
+		case 1: return false;
+		// 010: HOV 2+
+		case 2: return true;
+		// 010: HOV 3+
+		case 3: return true;
+		// 100: Carpool
+		case 4: return true;
+		// 101, 110, 111: reserved
+		default: return false;
+		}
 	}
 
 	/** Get HOV flag */
@@ -289,8 +333,8 @@ public class TagTransaction extends E6Property {
 			return parseSeGoHOV();
 		if (isIAGReadValid())
 			return parseIAG_HOV();
-		if (isASTMReadValid())
-			return false;
+		if (is6CReadValid())
+			return parse6C_HOV();
 		return null;
 	}
 
@@ -314,11 +358,11 @@ public class TagTransaction extends E6Property {
 
 	/** Parse a tag type in a seen frame count transaction */
 	private TagType parseSeenTagType() {
-		switch (data[2]) {
-		case 1: return TagType.SeGo;
-		case 2: return TagType.IAG;
-		case 3: return TagType.ASTM;
-		default: return null;
+		switch (parse8(data, 2)) {
+			case 1: return TagType.SeGo;
+			case 2: return TagType.IAG;
+			case 8: return TagType._6C;
+			default: return null;
 		}
 	}
 
@@ -345,7 +389,7 @@ public class TagTransaction extends E6Property {
 			if (!isSeGoReadCRCValid()) {
 				sb.append(" INVALID CRC: ");
 				sb.append(getSeGoCRC16());
-			} else if (isSeGoMnPass() && !isSeGoPage0CRCValid()) {
+			} else if (isSeGoTolling() && !isSeGoPage0CRCValid()) {
 				sb.append(" INVALID PAGE0 CRC: ");
 				sb.append(getSeGoCRC12());
 			}

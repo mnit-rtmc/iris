@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.wysiwyg.editor;
 
 import java.awt.Component;
@@ -20,7 +19,6 @@ import java.util.IllegalFormatException;
 
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
@@ -36,78 +34,71 @@ import us.mn.state.dot.tms.utils.MultiString;
  *
  * @author Gordon Parikh - SRF Consulting
  */
-
 public class WPagePanel extends Component {
 
-	// TODO TODO TODO
-
 	/* Sign and MultiString of Message being edited */
-	private DMS sign;
-	private MultiString ms;
-	
+	private final DMS sign;
+	private final MultiString ms;
+
 	/* Page # of the page shown in this panel, also other page stuff */
-	private int pn = 0;
+	private final int pn;
 	private String page;
 	private String pgOnInt;
 	private String pgOffInt;
-	
+
 	/* RasterBuilder and RasterGraphic for rendering page */
 	private RasterBuilder rb;
 	private RasterGraphic prg;
-	
+
 	public WPagePanel(DMS d, MultiString m, int pageNum) {
 		sign = d;
 		ms = m;
 		pn = pageNum;
-		
+
 		// get the page in question (and page on/off intervals)
 		page = ms.getPage(pn);
 		setPageOnIntervalStr();
 		setPageOffIntervalStr();
-		
+
 		// render the page's graphic
 		renderPageRaster();
 	}
-	
+
 	private void setPageOnIntervalStr() {
 		Interval dflt = PageTimeHelper.defaultPageOnInterval();
 		Interval[] pg_on = ms.pageOnIntervals(dflt);
-		if (pn >=0 && pn < pg_on.length)
+		if (pn >= 0 && pn < pg_on.length)
 			pgOnInt = pg_on[pn].toString();
 		else
 			pgOnInt = "0 s";
 	}
-	
+
 	private void setPageOffIntervalStr() {
 		Interval dflt = PageTimeHelper.defaultPageOffInterval();
 		Interval[] pg_off = ms.pageOffIntervals(dflt);
-		if (pn >=0 && pn < pg_off.length)
+		if (pn >= 0 && pn < pg_off.length)
 			pgOffInt = pg_off[pn].toString();
 		else
 			pgOffInt = "0 s";
 	}
-	
+
 	public RasterGraphic getPageRaster() {
 		return prg;
 	}
-	
+
 	/* Render the RasterGraphic for the page */
 	private void renderPageRaster() {
 		// create a RasterBuilder for this sign
 		rb = DMSHelper.createRasterBuilder(sign);
-		
+
 		if (rb != null) {
-			// try to render the page graphics
-			// TODO do something if we hit these exceptions
-			RasterGraphic[] rg = null;
-			prg = null;
-			try {
-				// generate all message graphics but save the graphic for this
-				// page only
-				rg = rb.createPixmaps(ms);
+			// generate all message graphics
+			// but save the graphic for this page only
+			RasterGraphic[] rg = rb.createRasters(ms.toString());
+			if (pn >= 0 && pn < rg.length)
 				prg = rg[pn];
-			} catch (IndexOutOfBoundsException e) {
-			} catch (InvalidMsgException e) { }
+			else
+				prg = null;
 		}
 	}
 	
@@ -126,15 +117,15 @@ public class WPagePanel extends Component {
 		spp.setDimensions(sign.getSignConfig());
 		spp.setGraphic(getPageRaster());
 	}
-	
+
 	public DMS getDMS() {
 		return sign;
 	}
-	
+
 	public String getDmsName() {
 		return sign.getName();
 	}
-	
+
 	public String getPageNumberLabel() {
 		// add 1 to the page number since it's 0 indexed here
 		try {

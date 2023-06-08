@@ -43,22 +43,26 @@ public interface SignMessage extends SonarObject {
 	 * @see us.mn.state.dot.tms.utils.MultiString */
 	String getMulti();
 
-	/** Get beacon enabled flag */
-	boolean getBeaconEnabled();
+	/** Get the message owner.
+	 *
+	 * It contains 3 parts, separated by semicolons, for example
+	 * "IRIS; operator+schedule; john.smith"
+	 *  1. System ("IRIS")
+	 *  2. Sources ("operator+schedule")
+	 *  3. Name: user or action plan ("john.smith")
+	 *
+	 * @return Message owner
+	 * @see us.mn.state.dot.tms.SignMsgSource
+	 */
+	String getMsgOwner();
+
+	/** Get flash beacon flag */
+	boolean getFlashBeacon();
 
 	/** Get the message priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).
-	 * @see us.mn.state.dot.tms.DmsMsgPriority */
+	 * @see us.mn.state.dot.tms.SignMsgPriority */
 	int getMsgPriority();
-
-	/** Get the sign message source value.
-	 * @return Sign message source.
-	 * @see us.mn.state.dot.tms.SignMsgSource */
-	int getSource();
-
-	/** Get the message owner.
-	 * @return Message owner (User or action plan name). */
-	String getOwner();
 
 	/** Get the message duration.
 	 * @return Duration in minutes; null means indefinite. */

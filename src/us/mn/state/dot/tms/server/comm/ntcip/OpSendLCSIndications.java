@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,15 +15,14 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.DmsMsgPriority;
-import static us.mn.state.dot.tms.DmsMsgPriority.LCS;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.MsgPattern;
-import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
-import static us.mn.state.dot.tms.SignMsgSource.lcs;
+import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.SignMsgPriority;
+import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
@@ -80,12 +79,9 @@ public class OpSendLCSIndications extends OpLCS {
 		int ind = indications[lane];
 		DMSImpl dms = dmss[lane];
 		if (dms != null) {
-			SignConfig sc = dms.getSignConfig();
-			if (sc != null) {
-				String ms = createIndicationMulti(ind, sc);
-				if (ms != null)
-					return createSignMessage(dms, ms, ind);
-			}
+			String ms = createIndicationMulti(ind, dms);
+			if (ms != null)
+				return createSignMessage(dms, ms, ind);
 		}
 		return null;
 	}
@@ -97,17 +93,21 @@ public class OpSendLCSIndications extends OpLCS {
 	private SignMessage createSignMessage(DMSImpl dms, String ms, int ind) {
 		MultiString multi = new MultiString(ms);
 		if (multi.isBlank())
-			return dms.createMsgBlank();
+			return dms.createMsgBlank(SignMsgSource.lcs.bit());
 		else {
-			return dms.createMsg(ms, false, LCS, lcs.bit(),
-			                     user.getName(), null);
+			String owner = SignMessageHelper.makeMsgOwner(
+				SignMsgSource.lcs.bit(),
+				user.getName()
+			);
+			SignMsgPriority mp = SignMsgPriority.high_1;
+			return dms.createMsg(ms, owner, false, mp, null);
 		}
 	}
 
 	/** Create a MULTI string for a lane use indication */
-	private String createIndicationMulti(int ind, SignConfig sc) {
+	private String createIndicationMulti(int ind, DMSImpl dms) {
 		String m = "";
-		LaneUseMulti lum = LaneUseMultiHelper.find(ind, sc);
+		LaneUseMulti lum = LaneUseMultiHelper.find(ind, dms);
 		if (lum != null) {
 			MsgPattern pat = lum.getMsgPattern();
 			if (pat != null)

@@ -33,20 +33,20 @@ Tag                                           | Description              | Suppo
 Some tags have **default** values, which will be used if a tag is not specified
 in a message.
 
-| Description          | Default Value      |
-|----------------------|--------------------|
-| Background color     | black (0)          |
-| Background color RGB | 0, 0, 0            |
-| Foreground color     | amber (9)          |
-| Foreground color RGB | 255, 208, 0        |
-| Flash on time        | 0.0 s              |
-| Flash off time       | 0.0 s              |
-| Font                 | by **sign config** |
-| Line justificaiton   | center (3)         |
-| Page justification   | top (2)            |
-| Page on time         | 2.8 s              |
-| Page off time        | 0.0 s              |
-| Character set        | eightBit (2)       |
+| Description          | Default Value       |
+|----------------------|---------------------|
+| Background color     | 0 (black)           |
+| Background color RGB | 0, 0, 0 (black)     |
+| Foreground color     | 9 (amber)           |
+| Foreground color RGB | 255, 208, 0 (amber) |
+| Flash on time        | 0.0 s               |
+| Flash off time       | 0.0 s               |
+| Font                 | by [sign config]    |
+| Line justificaiton   | 3 (center)          |
+| Page justification   | 2 (top)             |
+| Page on time         | 2.8 s               |
+| Page off time        | 0.0 s               |
+| Character set        | 2 (eightBit)        |
 
 ## Non-MULTI Tags
 
@@ -60,3 +60,4 @@ IRIS and replaced with dynamic values:
 [DMS]: dms.html
 [Locator Tags]: incident_dms.html#locator-tags
 [NTCIP]: https://www.ntcip.org/document-numbers-and-status/
+[sign config]: dms.html#configuration

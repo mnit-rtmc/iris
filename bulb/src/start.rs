@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -403,7 +403,7 @@ async fn fill_resource_select() {
             STATE.with(|rc| rc.borrow_mut().initialized = true);
         }
         Err(e) => {
-            console::log_1(&format!("fill_resource_select: {:?}", e).into());
+            console::log_1(&format!("fill_resource_select: {e:?}").into());
         }
     }
 }

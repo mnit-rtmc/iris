@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,14 @@ public class DisplayString extends ASN1OctetString {
 	/** Get the object value */
 	@Override
 	public String getValue() {
-		return new String(getByteValue());
+		StringBuilder sb = new StringBuilder();
+		for (byte b: getByteValue()) {
+			// Only display non-NUL ASCII
+			if (b > 0 && b < 128)
+				sb.append((char) b);
+			else
+				break;
+		}
+		return sb.toString();
 	}
 }

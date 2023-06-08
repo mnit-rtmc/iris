@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ public class AntennaChannelProp extends E6Property {
 	static private final int QUERY = 0x002B;
 
 	/** Channel control values */
-	public enum Value {
+	static public enum Value {
 		channel_0(1),
 		channel_1(2),
 		channel_2(3),
@@ -56,14 +56,19 @@ public class AntennaChannelProp extends E6Property {
 	/** Antenna channel control value */
 	private Value value;
 
-	/** Create an antenna channel property */
-	public AntennaChannelProp(Value v) {
+	/** Get antenna channel control value */
+	public Value getValue() {
+		return value;
+	}
+
+	/** Set antenna channel control value */
+	public void setValue(Value v) {
 		value = v;
 	}
 
 	/** Create an antenna channel property */
 	public AntennaChannelProp() {
-		this(Value.disable_manual_control);
+		value = null;
 	}
 
 	/** Get the command */
@@ -97,9 +102,12 @@ public class AntennaChannelProp extends E6Property {
 	/** Get the store packet data */
 	@Override
 	public byte[] storeData() {
+		Value val = (value != null)
+		          ? value
+		          : Value.disable_manual_control;
 		byte[] d = new byte[3];
 		format16(d, 0, STORE);
-		format8(d, 2, value.value);
+		format8(d, 2, val.value);
 		return d;
 	}
 

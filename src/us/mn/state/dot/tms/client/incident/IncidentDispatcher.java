@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,6 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.IncidentHelper;
@@ -55,6 +54,7 @@ import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.CameraCellRenderer;
 import us.mn.state.dot.tms.client.camera.CameraSelectAction;
@@ -642,8 +642,8 @@ public class IncidentDispatcher extends IPanel
 
 	/** Clear an incident */
 	private void clearIncident(Incident inc) {
-		inc.setCleared(true);
 		ArrayList<DMS> signs = IncidentHelper.getDeployedSigns(inc);
+		inc.setCleared(true);
 		if (signs.size() > 0) {
 			HashMap<String, String> msgs = clearedMessages(inc,
 				signs);
@@ -692,18 +692,18 @@ public class IncidentDispatcher extends IPanel
 	}
 
 	/** Send new sign message to a DMS */
-	public void sendMessage(String dn, Incident inc, String multi,
-		Integer duration)
+	public void sendMessage(String dn, Incident inc, String ms,
+		Integer dur)
 	{
-		DmsMsgPriority prio = IncidentHelper.getPriority(inc);
+		SignMsgPriority mp = IncidentHelper.getPriority(inc);
 		String inc_orig = IncidentHelper.getOriginalName(inc);
-		if (multi != null && prio != null) {
+		if (ms != null && mp != null) {
 			DMS dms = DMSHelper.lookup(dn);
 			if (dms != null) {
 				SignConfig sc = dms.getSignConfig();
 				if (sc != null) {
-					sendMessage(dms, sc, inc_orig, multi,
-						prio, duration);
+					sendMessage(dms, sc, inc_orig, ms,
+						mp, dur);
 				}
 			}
 		}
@@ -711,13 +711,13 @@ public class IncidentDispatcher extends IPanel
 
 	/** Send new sign message to the specified DMS */
 	private void sendMessage(final DMS dms, final SignConfig sc,
-		final String inc_orig, final String ms, final DmsMsgPriority prio,
-		final Integer duration)
+		final String inc_orig, final String ms,
+		final SignMsgPriority mp, final Integer dur)
 	{
 		runSwing(new Runnable() {
 			public void run() {
-				SignMessage sm = sm_creator.create(sc, inc_orig,
-					ms, prio, duration);
+				SignMessage sm = sm_creator.createMsg(sc,
+					inc_orig, ms, mp, dur);
 				if (sm != null)
 					dms.setMsgUser(sm);
 			}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2012  Minnesota Department of Transportation
+ * Copyright (C) 2011-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,22 @@ public class PlanPhaseHelper extends BaseHelper {
 
 	/** Lookup the phase with the specified name */
 	static public PlanPhase lookup(String name) {
-		return (PlanPhase)namespace.lookupObject(PlanPhase.SONAR_TYPE,
+		return (PlanPhase) namespace.lookupObject(PlanPhase.SONAR_TYPE,
 			name);
+	}
+
+	/** Check if a plan phase is for alerts */
+	static public boolean isAlert(PlanPhase phase) {
+		return phase != null &&
+		      (PlanPhase.ALERT_BEFORE.equals(phase.getName()) ||
+		       PlanPhase.ALERT_DURING.equals(phase.getName()) ||
+		       PlanPhase.ALERT_AFTER.equals(phase.getName()));
+	}
+
+	/** Check if a plan phase is for gate arms */
+	static public boolean isGateArm(PlanPhase phase) {
+		return phase != null &&
+		      (PlanPhase.GATE_ARM_OPEN.equals(phase.getName()) ||
+		       PlanPhase.GATE_ARM_CLOSED.equals(phase.getName()));
 	}
 }

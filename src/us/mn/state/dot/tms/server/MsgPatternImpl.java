@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MsgPattern;
-import us.mn.state.dot.tms.SignConfig;
-import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
@@ -33,8 +32,9 @@ import us.mn.state.dot.tms.utils.UniqueNameCreator;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern {
-
+public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
+	Comparable<MsgPatternImpl>
+{
 	/** Create a unique MsgPattern record name */
 	static public String createUniqueName(String template) {
 		UniqueNameCreator unc = new UniqueNameCreator(template, 20,
@@ -45,8 +45,8 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern {
 	/** Load all the message patterns */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, MsgPatternImpl.class);
-		store.query("SELECT name, sign_config, sign_group, " +
-			"multi FROM iris." + SONAR_TYPE + ";",
+		store.query("SELECT name, multi, flash_beacon, " +
+			"compose_hashtag FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -60,9 +60,9 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("sign_config", sign_config);
-		map.put("sign_group", sign_group);
 		map.put("multi", multi);
+		map.put("flash_beacon", flash_beacon);
+		map.put("compose_hashtag", compose_hashtag);
 		return map;
 	}
 
@@ -78,6 +78,12 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern {
 		return SONAR_TYPE;
 	}
 
+	/** Compare to another message pattern */
+	@Override
+	public int compareTo(MsgPatternImpl o) {
+		return name.compareTo(o.name);
+	}
+
 	/** Create a new message (by SONAR clients) */
 	public MsgPatternImpl(String n) {
 		super(n);
@@ -86,73 +92,18 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern {
 	/** Create a message pattern */
 	private MsgPatternImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name
-		     row.getString(2),  // sign_config
-		     row.getString(3),  // sign_group
-		     row.getString(4)   // multi
+		     row.getString(2),  // multi
+		     row.getBoolean(3), // flash_beacon
+		     row.getString(4)   // compose_hashtag
 		);
 	}
 
 	/** Create a message pattern */
-	private MsgPatternImpl(String n, String sc, String sg, String m) {
-		this(n, lookupSignConfig(sc), lookupSignGroup(sg), m);
-	}
-
-	/** Create a message pattern */
-	public MsgPatternImpl(String n, SignConfig sc, SignGroup sg, String m)
-	{
+	private MsgPatternImpl(String n, String m, boolean fb, String cht) {
 		super(n);
-		sign_config = sc;
-		sign_group = sg;
 		multi = m;
-	}
-
-	/** Sign config */
-	private SignConfig sign_config;
-
-	/** Get the sign configuration */
-	@Override
-	public SignConfig getSignConfig() {
-		return sign_config;
-	}
-
-	/** Set the sign configuration */
-	@Override
-	public void setSignConfig(SignConfig sc) {
-		sign_config = sc;
-	}
-
-	/** Set the sign configuration */
-	public void doSetSignConfig(SignConfig sc) throws TMSException {
-		if (sc != sign_config) {
-			store.update(this, "sign_config", sc);
-			setSignConfig(sc);
-		}
-	}
-
-	/** Sign group */
-	private SignGroup sign_group;
-
-	/** Get the sign group associated with the message pattern.
-	 * @return Sign group for message; null for no group. */
-	@Override
-	public SignGroup getSignGroup() {
-		return sign_group;
-	}
-
-	/** Set the sign group associated with the message pattern.
-	 * @param sg Sign group to associate; null for no group. */
-	@Override
-	public void setSignGroup(SignGroup sg) {
-		sign_group = sg;
-	}
-
-	/** Set the sign group associated with the message pattern.
-	 * @param sg Sign group to associate; null for no group. */
-	public void doSetSignGroup(SignGroup sg) throws TMSException {
-		if (sg != sign_group) {
-			store.update(this, "sign_group", sg);
-			setSignGroup(sg);
-		}
+		flash_beacon = fb;
+		compose_hashtag = cht;
 	}
 
 	/** Message MULTI string, contains message text for all pages */
@@ -181,6 +132,57 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern {
 		if (!m.equals(multi)) {
 			store.update(this, "multi", m);
 			setMulti(m);
+		}
+	}
+
+	/** Flash beacon flag */
+	private boolean flash_beacon;
+
+	/** Get flash beacon flag */
+	@Override
+	public boolean getFlashBeacon() {
+		return flash_beacon;
+	}
+
+	/** Set flash beacon flag */
+	@Override
+	public void setFlashBeacon(boolean fb) {
+		flash_beacon = fb;
+	}
+
+	/** Set flash beacon flag */
+	public void doSetFlashBeacon(boolean fb) throws TMSException {
+		if (fb != flash_beacon) {
+			store.update(this, "flash_beacon", fb);
+			setFlashBeacon(fb);
+		}
+	}
+
+	/** DMS hashtag for composing */
+	private String compose_hashtag;
+
+	/** Get the hashtag for composing with the pattern.
+	 * @return hashtag; null for no composing. */
+	@Override
+	public String getComposeHashtag() {
+		return compose_hashtag;
+	}
+
+	/** Set the hashtag for composing with the pattern.
+	 * @param cht hashtag; null for no composing. */
+	@Override
+	public void setComposeHashtag(String cht) {
+		compose_hashtag = cht;
+	}
+
+	/** Set the hashtag for composing with the pattern */
+	public void doSetComposeHashtag(String cht) throws TMSException {
+		String ht = DMSHelper.normalizeHashtag(cht);
+		if (!objectEquals(ht, cht))
+			throw new ChangeVetoException("Bad hashtag");
+		if (!objectEquals(cht, compose_hashtag)) {
+			store.update(this, "compose_hashtag", cht);
+			setComposeHashtag(cht);
 		}
 	}
 }

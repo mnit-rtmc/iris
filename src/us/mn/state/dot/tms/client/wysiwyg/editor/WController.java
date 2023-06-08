@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group
- * Copyright (C) 2022  Minnesota Department of Transportation
+ * Copyright (C) 2022-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,8 +45,6 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -93,9 +91,12 @@ import us.mn.state.dot.tms.utils.MultiConfig;
 
 public class WController {
 
+	/** Amount of time in nanoseconds to wait for a message to be created */
+	static private final long MAX_WAIT = 10000000000L;
+
 	/** Flag to enable/disable verbose logging output */
 	private final static boolean DEBUG = false; 
-	
+
 	/** Editing modes */
 	private final static String MODE_TEXT = "text";
 	private final static String MODE_GRAPHIC = "graphic";
@@ -103,25 +104,25 @@ public class WController {
 	private final static String MODE_TEXTRECT = "text_rectangle";
 	private final static String MODE_MULTITAG = "multi_tag";
 	private String editingMode = MODE_TEXT;
-	
+
 	/** Client Session and SmartDesktop */
 	private Session session;
 	private SmartDesktop desktop;
-	
+
 	/** Keep a handle to the editor form and sign pixel panel for any updates
 	 *  we need to make from here */
 	private WMsgEditorForm editor;
 	private WImagePanel signPanel;
 	private WMsgMultiPanel multiPanel;
-	
+
 	/** Keep a list of MULTI strings for undoing/redoing */
 	private ArrayList<WHistory> undoStack = new ArrayList<WHistory>();
 	private ArrayList<WHistory> redoStack = new ArrayList<WHistory>();
-	
+
 	/** Keep the size of the undo stack as of the last good state (i.e. with
 	 *  no MULTI/renderer errors) for restoring. */
 	private int lastGoodState = 0;
-	
+
 	/** Cursor that will change depending on mode, etc. */
 	private Cursor textCursor;
 	private Cursor graphicCursor;
@@ -130,82 +131,72 @@ public class WController {
 	private HashMap<String, Cursor> resizeCursors;
 	private Cursor newRectCursor;
 	private Cursor cursor;
-	
+
 	/** Mouse drag parameters */
 	private boolean dragStarted = false;
 	private WPoint lastPress;
 	private WToken startTok;
 	private WToken endTok;
 	private String resizeDir;
-	
-	/** Sign/Group and Message being edited */
+
+	/** Sign and Message being edited */
 	private DMS sign;
-	private SignGroup sg;
 	private MsgPattern pattern;
 	private String multiString = null;
 
-	/** Amount of time in nanoseconds to wait for a message to be created */
-	private final static long MAX_WAIT = 10000000000L;
-	
 	/** MultiConfigs for config-related stuff  */
 	/** "Active" MultiConfig */
 	private MultiConfig multiConfig;
-	
-	/** "Master" Sign Group MultiConfig (largest sign group) */
-	private MultiConfig signGroupMultiConfig;
-	
-	/** MultiConfig ComboBox for sign groups */
-	private WMultiConfigComboBox multiConfigList;
-	
+
 	/** Whether or not MULTI mode is forced */
 	private boolean forceMULTI = false;
-	
+
 	/** Currently selected page (defaults to first available) */
 	private int selectedPageIndx = 0;
 	private WPage selectedPage;
-	
+
 	/** Click threshold for selecting rectangles/graphics (in WYSIWYG
 	 *  coordinates) */
 	public final static int rThreshold = 3;
-	
+
 	/** Text rectangle(s) on the selected page */
 	private ArrayList<WgTextRect> textRects;
-	
+
 	/** Currently selected/active text rectangle (may be the implicit "whole-
 	 *  sign" text rectangle) and the tokens it contains. */
 	private WgTextRect selectedTextRect;
 	private WTokenList trTokens = new WTokenList();
-	
+
 	/** Color rectangle(s) on the selected page */
 	private ArrayList<WgColorRect> colorRects;
-	
+
 	/** Either text or color rectangles on the selected page, depending on
 	 *  the mode
 	 */
 	private ArrayList<WgRectangle> modeRects = new ArrayList<WgRectangle>();
-	
+
 	/** Index of the selected rectangle in the rectangles for the cureent mode */
 	private int selectedRectIndx = 0;
-	
+
 	/** Currently selected rectangle (text or color). If in text rectangle
 	 *  mode, this will be the same as the selectedTextRectangle.
 	 */
 	private WgRectangle selectedRectangle;
-	
+
 	/** Handles of currently selected text or color rectangles */
 	private HashMap<String,Rectangle> resizeHandles;
 
 	/** Graphic list model */
 	private DefaultComboBoxModel<Graphic> supportedGraphics =
 			new DefaultComboBoxModel<Graphic>();
-	
+
 	/** Graphics on the selected page */
 	private WTokenList graphics = new WTokenList();
-	
+
 	/** Currently selected graphic and index in the list */
 	private WtGraphic selectedGraphic;
 	private int selectedGraphicIndx = -1;
-	
+
 	/** Token lists for helping with caret placement and stuff */
 	private WTokenList tokensBefore = new WTokenList();
 	private WTokenList tokensSelected = new WTokenList();
@@ -214,50 +205,45 @@ public class WController {
 	private int caretPageIndx = 0;
 	private boolean caretOn = true;
 	public final static int CARET_EOP = -1;
-	
+
 	/** Toggle for how non-text tags are handled. If false (default), non-text
 	 *  tags are skipped, otherwise they can be manipulated through caret
 	 *  navigation and a status bar below the sign panel.
 	 */
 	private boolean stepNonTextTags = false;
-	
+
 	/** Keep track of stepNonTextTags outside of MULTI mode */
 	private boolean snttNonMultiMode = false;
-	
+
 	/** WMessage for working with rendered message */
 	private WMessage wmsg = null;
-	
+
 	/** Render Error Manager for receiving errors from renderer */
 	private WEditorErrorManager errMan = new WEditorErrorManager(); 
-	
+
 	/** Current and default fonts */
 	private Font font;
 	private Font defaultFont;
-	
+
 	/** Current and default colors */
 	private DmsColor fgColor;
 	private DmsColor bgColor;
 	private DmsColor colorRectColor;
 	private Integer colorRectMonoColor;
-	
+
 	/** Page list */
 	private WPageList pageList;
-	
+
 	public WController() {
 		// empty controller - everything will be set later as it is available
-	}	
-	
+	}
+
 	public WController(WMsgEditorForm e) {
 		init(e);
-	}	
-	
+	}
+
 	public WController(WMsgEditorForm e, DMS d) {
 		setSign(d);
-		init(e);
-	}
-	
-	public WController(WMsgEditorForm e, SignGroup g) {
-		setSignGroup(g);
 		init(e);
 	}
 
@@ -267,24 +253,18 @@ public class WController {
 		init(e);
 	}
 
-	public WController(WMsgEditorForm e, MsgPattern pat, SignGroup g) {
-		setSignGroup(g);
-		setMsgPattern(pat);
-		init(e);
-	}
-	
 	/** Print the message to stdout */
 	public static void println(String msg) {
 		if (DEBUG)
 			System.out.println(msg);
 	}
-	
+
 	/** Print a String.formatted message to stdout */
 	public static void println(String fmt, Object... args) {
 		if (DEBUG)
 			println(String.format(fmt, args));
 	}
-	
+
 	/** Print the tokens before, selected, and after the caret */
 	public void printCaretTokens() {
 		println("trTokens: %s", trTokens.toString());
@@ -292,7 +272,7 @@ public class WController {
 		println("Selected: %s", tokensSelected.toString());
 		println("After: %s", tokensAfter.toString());
 	}
-	
+
 	/** Perform some initialization on the controller. Sets the editor form
 	 *  handle, sets up the mouse cursor, etc.
 	 */
@@ -300,14 +280,14 @@ public class WController {
 		editor = e;
 		session = editor.getSession();
 		desktop = session.getDesktop();
-		
+
 		// initialize the cursor, starting in text mode
 		initCursors();
 
 		// initialize the page list
 		makePageList();
 	}
-	
+
 	/** Initialize some things that need to take place after all elements of
 	 *  the editor are in place. Called by the WMsgEditorForm at the end of
 	 *  initialize().
@@ -316,21 +296,21 @@ public class WController {
 		// do an update to render the message and fill the page list, then
 		// initialize the caret and mouse cursors
 		update();
-		
+
 		if (!forceMULTI) {
 			initCaret();
 			initCursors();
-			
+
 			// also give the sign panel focus so the user can immediately start
 			// typing
 			signPanel.requestFocusInWindow();
 		}
 	}
-	
+
 	/** Set the sign being used */
 	public void setSign(DMS d) {
 		sign = d;
-		
+
 		// generate the MultiConfig for the sign
 		if (sign != null) {
 			try {
@@ -346,47 +326,7 @@ public class WController {
 		}
 		update();
 	}
-	
-	/** Set the sign group being used */
-	public void setSignGroup(SignGroup g) {
-		sg = g;
-		
-		if (sg != null) {
-			// generate the MultiConfig for the sign group
-			try {
-				signGroupMultiConfig = MultiConfig.from(sg);
-			} catch (Exception e) {
-				// with a null MultiConfig, we will force MULTI mode
-				if (DEBUG)
-					e.printStackTrace();
-			}
-			
-			if (signGroupMultiConfig != null) {
-				// use the "primary" MultiConfig to initialize
-				MultiConfig mc = signGroupMultiConfig;
-				if (signGroupMultiConfig != null) {
-					if (signGroupMultiConfig.getConfigList() != null
-							&& !signGroupMultiConfig.getConfigList().isEmpty())
-						mc = signGroupMultiConfig.getConfigList().get(0);
-					else if (signGroupMultiConfig.getSignList() != null
-							&& !signGroupMultiConfig.getSignList().isEmpty())
-						mc = signGroupMultiConfig.getSignList().get(0);
-				}
-				initFromMultiConfig(mc);
-				
-				// create the ComboBox for displaying/selecting different
-				// configs and signs
-				multiConfigList = WMultiConfigComboBox.
-						fromSignGroupMultiConfig(signGroupMultiConfig, this);
-			} else
-				forceMULTI = true;
-		} else {
-			multiConfig = null;
-			sign = null;
-		}
-		update();
-	}
-	
+
 	/** Initialize some necessary defaults from the MultiConfig provided. This
 	 *  sets the "Active" MultiConfig.
 	 */
@@ -396,14 +336,14 @@ public class WController {
 			// initialize the font and colors from the MultiConfig
 			font = multiConfig.getDefaultFont();
 			defaultFont = font;
-			
+
 			fgColor = multiConfig.getDefaultFG();
 			bgColor = multiConfig.getDefaultBG();
-			
+
 			// use the default foreground color for color rectangles (so we
 			// always have one)
 			colorRectColor = multiConfig.getDefaultFG();
-			
+
 			// default monochrome to 1 or 255
 			colorRectMonoColor = 1;
 			if (multiConfig.colorScheme == ColorScheme.MONOCHROME_8_BIT)
@@ -412,21 +352,17 @@ public class WController {
 			// if our MultiConfig is null, we can't use WYSIWYG mode
 			forceMULTI = true;
 	}
-	
-	public WMultiConfigComboBox getConfigComboBox() {
-		return multiConfigList;
-	}
-	
+
 	/** Set the "active" MultiConfig used for rendering the sign panel. */
 	public void setActiveMultiConfig(MultiConfig mc) {
 		multiConfig = mc;
-		
+
 		// check functions supported by this MultiConfig
 		editor.setActiveMultiConfig(multiConfig);
-		
+
 		update(false);
 	}
-	
+
 	/** Set the message pattern being edited */
 	public void setMsgPattern(MsgPattern pat) {
 		pattern = pat;
@@ -439,28 +375,28 @@ public class WController {
 
 		update();
 	}
-	
+
 	/** Return a new WPoint object created from the mouse event object and the
 	 *  selected page's WRaster.
 	 */
 	private WPoint getWPoint(MouseEvent e) {
 		return new WPoint(e, getActiveRaster());
 	}
-	
+
 	/** Handle a click on the main editor panel */
 	public void handleClick(MouseEvent e) {
 		update();
-		
+
 		// create a WPoint for this click
 		WPoint p = getWPoint(e);
-		
+
 		// first set any active rectangles or graphics that might have been
 		// selected
 		if (inTextRectMode() || inColorRectMode())
 			setSelectedRectangle(findRectangle(p));
 		else if (inGraphicMode())
 			setSelectedGraphic(findGraphic(p));
-		
+
 		// in text mode place the caret based on the mouse coordinates
 		if (inTextMode() || inMultiTagMode())
 			moveCaret(p);
@@ -473,20 +409,20 @@ public class WController {
 				clearCaret();
 		} else if (inColorRectMode() || inGraphicMode())
 			clearCaret();
-		
+
 		// get focus for the sign panel when someone clicks on it
 		signPanel.requestFocusInWindow();
 	}
-	
+
 	/** Handle a mouse move event on the main editor panel */
 	public void handleMouseMove(MouseEvent e) {
 		// create a WPoint for this mouse event
 		WPoint p = getWPoint(e);
-		
+
 		// set the drag mode (which sets the mouse cursor)
 		setDragMode(p);
 	}
-	
+
 	/** Handle a mouse pressed event  */
 	public void handleMousePressed(MouseEvent e) {
 		if (e.getButton() == MouseEvent.BUTTON1) {
@@ -497,12 +433,12 @@ public class WController {
 				setSelectedRectangle(findRectangle(p));
 			else if (inGraphicMode())
 				setSelectedGraphic(findGraphic(p));
-			
+
 			// set the drag mode given what the user just clicked on and save
 			// these coordinates
 			setDragMode(p);
 			lastPress = p;
-			
+
 			if (inTextSelectionMode()) {
 				// get the closest token to start the selection handler
 				startTok = findClosestTextToken(lastPress);
@@ -519,14 +455,14 @@ public class WController {
 	/** Handle a mouse drag event on the main editor panel */
 	public void handleMouseDrag(MouseEvent e) {
 		if (SwingUtilities.isLeftMouseButton(e)) {
-			
+
 			// create a WPoint for this event
 			WPoint p = getWPoint(e);
-			
+
 			// record the drag as having started (creates an undo point)
 			if (!dragStarted)
 				startDrag();
-			
+
 			// if we're in text selection mode (text mode or text rectangle
 			// mode), update the selection
 			if (inTextSelectionMode())
@@ -546,10 +482,10 @@ public class WController {
 	/** Finalize any active drag motion. */
 	public void handleMouseReleased(MouseEvent e) {
 		println("Mouse released");
-		
+
 		// construct a WPoint from the mouse event
 		WPoint p = getWPoint(e);
-				
+
 		// if the x and y are the same as the last press, do nothing
 		// (handleClick SHOULD take care of it...)
 		if (lastPress != null &&
@@ -563,17 +499,17 @@ public class WController {
 			else if (inNewRectMode())
 				finishNewRectangleOperation(p);
 		}
-		
+
 		if (inTextSelectionMode())
 			printCaretTokens();
-		
+
 		// end any active drag operation
 		endDrag();
-		
+
 		// get focus for this component when someone clicks on it
 		signPanel.requestFocusInWindow();
 	}
-	
+
 	/** Start a drag operation. This creates an undo point depending on the
 	 *  current mode. This is called the first time a new drag event is
 	 *  received, not on a mouse pressed event, so anything that needs to be
@@ -586,7 +522,7 @@ public class WController {
 				saveState();
 		}
 	}
-	
+
 	/** End a drag operation. */
 	private void endDrag() {
 		// reset the drag handler
@@ -596,17 +532,17 @@ public class WController {
 		endTok = null;
 		resizeDir = null;
 	}
-	
+
 	/** Update the text selection from mouse movement. */
 	private void updateTextSelection(WPoint p) {
 		endTok = findClosestTextToken(p);
-		
+
 		// update the selection if they're not the same token
 		if ((startTok != endTok) && startTok != null && endTok != null) {
 			// get the indices and figure out which is first
 			int start = trTokens.indexOf(startTok);
 			int end = trTokens.indexOf(endTok);
-			
+
 			boolean includeEnd = false;
 			selectingForwards = true;
 			int si;
@@ -630,27 +566,27 @@ public class WController {
 			updateTextSelection(si, ei, includeEnd, selectingForwards);
 		}
 	}
-	
+
 	/** Update the text selection from indices and directions. */
 	private void updateTextSelection(int si, int ei,
 			boolean includeEnd, boolean forwards) {
 		// update the token lists
 		updateTokenListsSelection(si, ei, includeEnd);
-		
+
 		// tell the image panel what the selection is
 		signPanel.setTextSelection(tokensSelected);
-		
+
 		// move the caret too - do it "manually" to avoid changing token
 		// lists (the caret page index is set above)
 		if (forwards)
 			signPanel.setCaretLocation(tokensSelected.getLast(), true);
 		else
 			signPanel.setCaretLocation(tokensSelected.get(0), false);
-		
+
 		// update the toolbar
 		updateTextToolbar();
 	}
-	
+
 	/** Update the move operation given the current cursor position. */
 	private void updateMoveOperation(WPoint p) {
 		// try to get the token to move
@@ -664,13 +600,13 @@ public class WController {
 		if (mTok != null && lastPress != null) {
 			// hide the caret before a move
 			clearCaret();
-			
+
 			// calculate the safe change in position
 			int ox = p.getSignX() - lastPress.getSignX();
 			int oy = p.getSignY() - lastPress.getSignY();
 			int offsetX = checkMoveOffsetX(ox, mTok);
 			int offsetY = checkMoveOffsetY(oy, mTok);
-			
+
 			// move the token and update the last press
 			mTok.moveTok(offsetX, offsetY);
 			lastPress = p;
@@ -679,7 +615,7 @@ public class WController {
 			update();
 		}
 	}
-	
+
 	/** Check that the X offset value ox will not move the rectangle or
 	 *  graphic token t beyond the sign border. If it won't, ox is returned
 	 *  unchanged, otherwise the value will be reduced until it will fit on
@@ -690,7 +626,7 @@ public class WController {
 			throw new RuntimeException("Invalid token type");
 		int x = t.getParamX();
 		int rx = t.getRightEdge();
-		
+
 		WRaster wr = getActiveRaster();
 		if (wr != null) {
 			if (x + ox < 1)
@@ -700,7 +636,7 @@ public class WController {
 		}
 		return ox;
 	}
-		
+
 	/** Check that the Y offset value oy will not move the rectangle or
 	 *  graphic token t beyond the sign border. If it won't, oy is returned
 	 *  unchanged, otherwise the value will be reduced until it will fit on
@@ -711,7 +647,7 @@ public class WController {
 			throw new RuntimeException("Invalid token type");
 		int y = t.getParamY();
 		int by = t.getBottomEdge();
-		
+
 		WRaster wr = getActiveRaster();
 		if (wr != null) {
 			if (y + oy < 1)
@@ -721,7 +657,7 @@ public class WController {
 		}
 		return oy;
 	}
-	
+
 	/** Update the resize operation given the current cursor position. */
 	private void updateResizeOperation(WPoint p) {
 		if (inTextRectMode() || inColorRectMode()) {
@@ -737,11 +673,11 @@ public class WController {
 				lastPress = p;
 			}
 		}
-		
+
 		// update everything
 		update();
 	}
-	
+
 	/** Update the new rectangle operation given the current cursor position.
 	 *  This only provides feedback for the user.
 	 */
@@ -753,19 +689,19 @@ public class WController {
 			int y = Math.min(lastPress.getWysiwygY(), p.getWysiwygY());
 			int rx = Math.max(lastPress.getWysiwygX(), p.getWysiwygX());
 			int by = Math.max(lastPress.getWysiwygY(), p.getWysiwygY());
-			
+
 			// calculate the size of the new rectangle
 			int w = rx - x;
 			int h = by - y;
-			
+
 			// pass the parameters to the sign panel for drawing
 			signPanel.setRectangleInProgress(x, y, w, h);
 		}
 	}
-	
+
 	/** Finish the new rectangle operation. This actually creates the
 	 *  rectangle (text or color).
-	 *  
+	 *
 	 *  Note that to simplify things, the rectangle that is created will
 	 *  differ very slightly from the one that was being drawn due to the
 	 *  position of LED separators. This will not be very noticeable and can
@@ -845,7 +781,7 @@ public class WController {
 			signPanel.clearRectangleInProgress();
 		}
 	}
-	
+
 	/** Add a graphic to the current page. The graphic will be added to (1, 1)
 	 *  (in sign coordinates), but it can be moved later.
 	 */
@@ -1113,9 +1049,9 @@ public class WController {
 		if (selectedTextRect != null) {
 			WToken cTok = null;
 			boolean toRight = false;
-			
+
 			println("Caret at %d", caretIndx);
-			
+
 			// slice the list
 			if (caretIndx >= trTokens.size())
 				caretIndx = trTokens.size();
@@ -1123,18 +1059,18 @@ public class WController {
 				caretIndx = 0;
 			tokensBefore = trTokens.slice(0, caretIndx);
 			tokensAfter = trTokens.slice(caretIndx, trTokens.size());
-			
+
 			// set the new caret location
 			cTok = getCaretToken();
 			toRight = tokensAfter.isEmpty();
-			
+
 //			if (cTok != null)
 			if (cTok == null && !selectedTextRect.isWholeSign())
 				// if we didn't get a token, the current text rectangle is
 				// empty - if this is an actual text rectangle, use the
 				// WtTextRectangle token
 				cTok = selectedTextRect.getRectToken();
-			
+
 			if (cTok != null) {
 				// most characters and left of newline - left of character 
 				if (!(cTok.isType(WTokenType.newLine) && toRight)) {
@@ -1170,15 +1106,15 @@ public class WController {
 					caretPageIndx = selectedPage.getNumTokens();
 			}
 			caretOn = true;
-			
+
 			// a click resets the selection
 			tokensSelected.clear();
 			signPanel.clearTextSelection();
 			selectingForwards = null;
-			
+
 			// for debugging (only in effect if DEBUG is true)
 			printCaretTokens();
-			
+
 			updateTextToolbar();
 			updateNonTextTagInfo();
 		} else
@@ -2661,11 +2597,11 @@ public class WController {
 			}
 		}
 		addTextOptionToken(fTok, afTok);
-		
+
 		// TODO update the text selection on the sign panel since the font
 		// size probably changed - we need to update the caret so the tokens
 		// in tokensSelected have the correct sizes
-		
+
 		// update the toolbar
 		updateTextToolbar();
 	}
@@ -3417,7 +3353,7 @@ public class WController {
 		
 		if (multiConfigUseable() && wmsg != null) {
 			wmsg.renderMsg(multiConfig, errMan);
-			
+
 			// set the WYSIWYG image size on the pages
 			if (signPanel != null) {
 				try {
@@ -3429,7 +3365,7 @@ public class WController {
 				}
 			}
 		}
-		
+
 		// check for errors from the renderer
 		if (errMan.hasErrors()) {
 			// show or update the dynamic error panel to tell the user what's
@@ -3482,7 +3418,7 @@ public class WController {
 	/** Save a new message pattern with the given name (using the current
 	 * MULTI string) and start editing it. */
 	public void saveNewMsgPattern(String msgName) {
-		// NOTE we know there is a sign/sign group associated with us,
+		// NOTE we know there is a sign associated with us,
 		// so we don't have to make those
 
 		// first update our MULTI string
@@ -3498,14 +3434,6 @@ public class WController {
 				HashMap<String, Object> attrs =
 					new HashMap<String, Object>();
 				attrs.put("multi", multiString);
-				if (sg != null)
-					attrs.put("sign_group", sg);
-				else {
-					// if we're not editing a sign group, get the single-sign
-					// group
-					SignGroup ssg = SignGroupHelper.lookup(sign.getName());
-					attrs.put("sign_group", ssg);
-				}
 				// save the object, then get the object and set our message pattern
 				cache.createObject(msgName, attrs);
 				MsgPattern pat = null;
@@ -3541,7 +3469,7 @@ public class WController {
 		};
 		worker.execute();
 	}
-	
+
 	/** Update the controller with a MULTI string (this action can be undone) */
 	public void setMultiString(String ms, boolean undoable) {
 		if (undoable)
@@ -3552,25 +3480,25 @@ public class WController {
 		wmsg.parseMulti(multiString);
 		update();
 	}
-	
+
 	public void update() {
 		update(true);
 	}
-	
+
 	public void update(boolean focus) {
 		renderMsg();
 		updateMultiPanel();
-		
+
 		if (!forceMULTI) {
 			updatePageListModel();
 			updateCursor();
-			
+
 			if (signPanel != null && focus)
 				// give focus to the sign panel if requested
 				signPanel.requestFocusInWindow();
 		}
 	}
-	
+
 	/** Update the text toolbar if one is available. */
 	private void updateTextToolbar() {
 		if (editor != null && !forceMULTI)
@@ -3693,11 +3621,11 @@ public class WController {
 			editSelectedPageTiming();
 		}
 	};
-	
+
 	public WPage getSelectedPage() {
 		return selectedPage;
 	}
-	
+
 	/** Get the currently active raster from the selected page. Ensures the
 	 *  raster object has been initialized with the dimensions of the sign
 	 *  panel.
@@ -3707,19 +3635,19 @@ public class WController {
 		if (selectedPage != null) {
 			// get the raster for the selected page
 			wr = selectedPage.getRaster();
-			
+
 			// make sure it's initialized
 			if (wr != null && !wr.isWysiwygInitialized() && signPanel != null)
 				signPanel.initRaster(wr);
 		}
 		return wr;
 	}
-	
+
 	/** Update rectangle handling on the selected page. */
 	public void updateRectangles() {
 		// make color and text rectangle GUI objects for this page
 		selectedPage.makeGuiRectangles(rThreshold);
-		
+
 		// get GUI text rectangles and set the active one
 		textRects = selectedPage.getTextRects();
 
@@ -3734,7 +3662,7 @@ public class WController {
 		
 		// re-select the selected rectangle from our index
 		updateSelectedRectangle();
-		
+
 		// update the sign panel
 		if (signPanel != null) {
 			if (modeRects != null && (inTextRectMode() || inColorRectMode()))
@@ -3749,7 +3677,7 @@ public class WController {
 		// check if this rectangle exists - if it doesn't, de-select
 		if (modeRects != null && selectedRectIndx >= modeRects.size())
 			selectedRectIndx = -1;
-		
+
 		// in text mode, edit the whole-sign rectangle
 		// note that modeRects is reversed, so the whole-sign rect. is last
 		if (inTextMode())
@@ -3784,7 +3712,7 @@ public class WController {
 				selectedRectangle.initGeom(getActiveRaster(), rThreshold);
 			resizeHandles = selectedRectangle.getResizeHandles();
 			signPanel.setSelectedRectangle(selectedRectangle);
-			
+
 			// if this is a text rectangle, set the selected text rectangle
 			if (selectedRectangle instanceof WgTextRect) {
 				setSelectedTextRectangle((WgTextRect) selectedRectangle);
@@ -3818,7 +3746,7 @@ public class WController {
 		// order in MULTI so the search goes from top to bottom
 		graphics = selectedPage.getTokensOfType(WTokenType.graphic);
 		graphics.reverse();
-		
+
 		// highlight them on the sign panel
 		if (signPanel != null) {
 			if (inGraphicMode())
@@ -3826,11 +3754,11 @@ public class WController {
 			else if (!(inTextRectMode() || inColorRectMode()))
 				signPanel.clearRectangles();
 		}
-		
+
 		// reset the selected graphic handle based on the index
 		updateSelectedGraphic();
 	}
-	
+
 	/** Update the selected graphic based on the index. */
 	private void updateSelectedGraphic() {
 		if (inGraphicMode()) {
@@ -3854,12 +3782,12 @@ public class WController {
 		} else {
 			selectedGraphic = null;
 			selectedGraphicIndx = -1;
-			
+
 			if (!(inTextRectMode() || inColorRectMode()))
 				signPanel.clearSelectedRegion();
 		}
 	}
-	
+
 	/** Get the label indicating the page number */
 	public static String getPageNumberLabel(int pn) {
 		try {
@@ -3869,20 +3797,20 @@ public class WController {
 			return "Page" + pn+1;
 		}
 	}
-	
+
 	/** Update the cursor that is active over the sign pixel panel */
 	private void updateCursor() {
 		if (signPanel != null) {
 			signPanel.setCursor(cursor);
 		}
 	}
-	
+
 	/** Set the cursor that is active over the sign pixel panel */
 	private void setCursor(Cursor c) {
 		cursor = c;
 		updateCursor();
 	}
-	
+
 	/** Set the cursor type based on the editing mode */
 	private void setCursorFromMode() {
 		if (inTextMode())
@@ -4012,11 +3940,7 @@ public class WController {
 	public MultiConfig getMultiConfig() {
 		return multiConfig;
 	}
-	
-	public MultiConfig getSignGroupMultiConfig() {
-		return signGroupMultiConfig;
-	}
-	
+
 	public boolean multiConfigUseable() {
 		return multiConfig != null && multiConfig.isUseable();
 	}
@@ -4029,13 +3953,13 @@ public class WController {
 			return multiConfig.getColorScheme();
 		return ColorScheme.UNKNOWN;
 	}
-	
+
 	public ProxyListModel<Font> getFontModel() {
 		if (session != null) {
 			return session.getSonarState().getDmsCache().getFontModel();
 		} return null;
 	}
-	
+
 	/** Update the list model of graphics supported by the current MultiConfig
 	 *  based on the dimensions and color scheme of the sign.
 	 */
@@ -4045,10 +3969,10 @@ public class WController {
 			int maxHeight = multiConfig.getPixelHeight();
 			int maxWidth = multiConfig.getPixelWidth();
 			int colorScheme = multiConfig.getColorScheme().ordinal();
-			
+
 			// clear the list we have before updating
 			supportedGraphics.removeAllElements();
-			
+
 			// filter the list of all graphics available to ones we support
 			Iterator<Graphic> it = GraphicHelper.iterator();
 			while (it.hasNext()) {
@@ -4062,12 +3986,12 @@ public class WController {
 		} else
 			supportedGraphics.removeAllElements();
 	}
-	
+
 	public DefaultComboBoxModel<Graphic> getGraphicModel() {
 		updateGraphicModel();
 		return supportedGraphics;
 	}
-	
+
 	public Font getCurrentFont() {
 		return font;
 	}
@@ -4075,35 +3999,35 @@ public class WController {
 	public Font getDefaultFont() {
 		return defaultFont;
 	}
-	
+
 	public void setMultiPanel(WMsgMultiPanel mp) {
 		multiPanel = mp;
 	}
-	
+
 	public void setSignPanel(WImagePanel sp) {
 		signPanel = sp;
 	}
-	
+
 	public DmsColor getForegroundColor() {
 		return fgColor;
 	}
-		
+
 	public DmsColor getBackgroundColor() {
 		return bgColor;
 	}
-	
+
 	public Integer getMonochromeColor() {
 		return colorRectMonoColor;
 	}
-	
+
 	public Session getSession() {
 		return session;
 	}
-		
+
 	public SmartDesktop getDesktop() {
 		return desktop;
 	}
-	
+
 	public WMsgEditorForm getEditorForm() {
 		return editor;
 	}

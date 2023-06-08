@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,42 +46,43 @@ public class DmsActionHelper extends BaseHelper {
 
 	/** Get set of DMS controlled by an action plan */
 	static public TreeSet<DMS> findSigns(ActionPlan ap) {
-		Set<SignGroup> plan_groups = findGroups(ap);
+		Set<String> plan_hashtags = findHashtags(ap);
 		TreeSet<DMS> plan_signs = new TreeSet<DMS>(
 			new NumericAlphaComparator<DMS>());
-		Iterator<DmsSignGroup> git = DmsSignGroupHelper.iterator();
-		while (git.hasNext()) {
-			DmsSignGroup dsg = git.next();
-			if (plan_groups.contains(dsg.getSignGroup()))
-				plan_signs.add(dsg.getDms());
+		Iterator<DMS> it = DMSHelper.iterator();
+		while (it.hasNext()) {
+			DMS dms = it.next();
+			for (String ht: plan_hashtags) {
+				if (DMSHelper.hasHashtag(dms, ht)) {
+					plan_signs.add(dms);
+					break;
+				}
+			}
 		}
 		return plan_signs;
 	}
 
-	/** Find all sign groups associated with an action plan */
-	static public Set<SignGroup> findGroups(ActionPlan ap) {
-		HashSet<SignGroup> plan_groups = new HashSet<SignGroup>();
-		Iterator<DmsAction> dit = iterator();
-		while (dit.hasNext()) {
-			DmsAction da = dit.next();
+	/** Find all DMS hashtags associated with an action plan */
+	static public Set<String> findHashtags(ActionPlan ap) {
+		HashSet<String> hashtags = new HashSet<String>();
+		Iterator<DmsAction> it = iterator();
+		while (it.hasNext()) {
+			DmsAction da = it.next();
 			if (da.getActionPlan() == ap)
-				plan_groups.add(da.getSignGroup());
+				hashtags.add(da.getDmsHashtag());
 		}
-		return plan_groups;
+		return hashtags;
 	}
 
-	/** Find sign groups associated with an action plan and sign config */
-	static public Set<SignGroup> findGroups(ActionPlan ap, SignConfig cfg) {
-		HashSet<SignGroup> groups = new HashSet<SignGroup>();
-		Iterator<DmsAction> dit = iterator();
-		while (dit.hasNext()) {
-			DmsAction da = dit.next();
-			if (da.getActionPlan() == ap) {
-				MsgPattern pat = da.getMsgPattern();
-				if (pat.getSignConfig() == cfg)
-					groups.add(da.getSignGroup());
-			}
+	/** Get set of hashtags with an action using a given message pattern */
+	static public Set<String> findHashtags(MsgPattern pat) {
+		HashSet<String> hashtags = new HashSet<String>();
+		Iterator<DmsAction> it = iterator();
+		while (it.hasNext()) {
+			DmsAction da = it.next();
+			if (da.getMsgPattern() == pat)
+				hashtags.add(da.getDmsHashtag());
 		}
-		return groups;
+		return hashtags;
 	}
 }

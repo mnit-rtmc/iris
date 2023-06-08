@@ -90,10 +90,9 @@ pub struct SignMessage {
     pub sign_config: String,
     pub incident: Option<String>,
     pub multi: String,
-    pub beacon_enabled: bool,
+    pub msg_owner: String,
+    pub flash_beacon: bool,
     pub msg_priority: u32,
-    pub sources: String,
-    pub owner: Option<String>,
     pub duration: Option<u32>,
 }
 
@@ -141,14 +140,22 @@ impl AncillaryData for DmsAnc {
 }
 
 impl DmsAnc {
-    /// Get message sources
-    fn sources(&self, msg: Option<&str>) -> Option<&str> {
+    /// Get message owner
+    fn msg_owner(&self, msg: Option<&str>) -> Option<&str> {
         match (&self.messages, msg) {
             (Some(messages), Some(msg)) => messages
                 .iter()
                 .find(|m| m.name == msg)
-                .map(|m| &m.sources[..]),
+                .map(|m| &m.msg_owner[..]),
             _ => None,
+        }
+    }
+
+    /// Get message sources
+    fn sources(&self, msg: Option<&str>) -> Option<&str> {
+        match self.msg_owner(msg) {
+            Some(owner) => owner.split(';').nth(1),
+            None => None,
         }
     }
 

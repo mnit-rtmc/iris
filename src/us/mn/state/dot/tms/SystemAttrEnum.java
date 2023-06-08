@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  * Copyright (C) 2009-2015  AHMCT, University of California
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
  * Copyright (C) 2012-2021  Iteris Inc.
  * Copyright (C) 2015-2020  SRF Consulting Group
  *
@@ -61,11 +61,8 @@ public enum SystemAttrEnum {
 	DETECTOR_AUTO_FAIL_ENABLE(true),
 	DETECTOR_EVENT_PURGE_DAYS(90, 0),
 	DETECTOR_OCC_SPIKE_SECS(60, 0, 500),
-	DICT_ALLOWED_SCHEME(0, 0, 2),
-	DICT_BANNED_SCHEME(0, 0, 2),
 	DMS_BRIGHTNESS_ENABLE(true, Change.RESTART_CLIENT),
 	DMS_COMM_LOSS_ENABLE(true),
-	DMS_COMPOSER_EDIT_MODE(1, 0, 2, Change.RESTART_CLIENT),
 	DMS_GPS_JITTER_M(100, 0, 2000),
 	DMS_HIGH_TEMP_CUTOFF(60, 35, 100),
 	DMS_LAMP_TEST_TIMEOUT_SECS(30, 5, 90),
@@ -76,7 +73,6 @@ public enum SystemAttrEnum {
 	DMS_PIXEL_MAINT_THRESHOLD(35, 1),
 	DMS_PIXEL_STATUS_ENABLE(true, Change.RESTART_CLIENT),
 	DMS_PIXEL_TEST_TIMEOUT_SECS(30, 5, 90),
-	DMS_QUERYMSG_ENABLE(false, Change.RESTART_CLIENT),
 	DMS_RESET_ENABLE(false, Change.RESTART_CLIENT),
 	DMS_SEND_CONFIRMATION_ENABLE(false, Change.RESTART_CLIENT),
 	DMS_UPDATE_FONT_TABLE(true),

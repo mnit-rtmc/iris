@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2018  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,47 +14,42 @@
  */
 package us.mn.state.dot.tms.server.comm.e6;
 
-import java.util.ArrayList;
-
 /**
  * RF protocol definitions for E6 multiprotocol reader.
  *
  * @author Douglas Lau
  */
 public enum RFProtocol {
-	IT2200		(4),	/* 0 */
-	SeGo		(6),	/* 1 */
-	IAG		(7),	/* 2 */
-	ASTMv6		(9),	/* 3 (aka CVISN) */
-	Title21		(3),	/* 4 */
-	ATA_Full	(1),	/* 5 */
-	eGo		(5),	/* 6 */
-	ATA_Half	(2);	/* 7 */
+	SeGo(1),  /* TransCore Super eGo */
+	IAG(2),   /* E-Zpass InterAgency Group */
+	_6C(8);   /* ISO/IEC 18000-63 */
 
-	/** Create a new RF protocol */
-	private RFProtocol(int b) {
-		bit = 1 << b;
+	/** Protocol value for E6 */
+	public final int value;
+
+	/** Create an RF protocol */
+	private RFProtocol(int v) {
+		value = v;
 	}
 
-	/** Bit assignment (for "set protocol" / "get protocol" commands) */
-	public final int bit;
-
-	/** Lookup an RF protocol from an ordinal value */
-	static public RFProtocol fromOrdinal(int o) {
-		for (RFProtocol p: values()) {
-			if (p.ordinal() == o)
-				return p;
+	/** Lookup an RF protocol from a value */
+	static public RFProtocol fromValue(int p) {
+		switch (p) {
+			case 1: return SeGo;
+			case 2: return IAG;
+			case 8: return _6C;
+			default: return null;
 		}
-		return null;
 	}
 
-	/** Get the protocols from a set of bits */
-	static public RFProtocol[] fromBits(int b) {
-		ArrayList<RFProtocol> list = new ArrayList<RFProtocol>();
-		for (RFProtocol p: values()) {
-			if ((b & p.bit) != 0)
-				list.add(p);
+	/** Get the next protocol */
+	static public RFProtocol next(RFProtocol p) {
+		if (null == p)
+			return SeGo;
+		switch (p) {
+			case SeGo: return IAG;
+			case IAG: return _6C;
+			default: return null;
 		}
-		return list.toArray(new RFProtocol[0]);
 	}
 }

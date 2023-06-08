@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,9 +16,10 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.SignMsgPriority;
+import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -27,6 +28,7 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
+import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -38,16 +40,26 @@ import us.mn.state.dot.tms.utils.MultiString;
 public class OpQueryDMSMessage extends OpDMS {
 
 	/** MULTI string for current buffer */
-	private final ASN1String ms = new ASN1String(dmsMessageMultiString
-		.node, DmsMessageMemoryType.currentBuffer.ordinal(), 1);
+	private final ASN1String multi_string = new ASN1String(
+		dmsMessageMultiString.node,
+		DmsMessageMemoryType.currentBuffer.ordinal(),
+		1
+	);
+
+	/** Message owner for current buffer */
+	private final DisplayString msg_owner = new DisplayString(
+		dmsMessageOwner.node,
+		DmsMessageMemoryType.currentBuffer.ordinal(),
+		1
+	);
 
 	/** Beacon setting for current buffer */
 	private final ASN1Integer beacon = dmsMessageBeacon.makeInt(
 		DmsMessageMemoryType.currentBuffer, 1);
 
 	/** Message priority for current buffer */
-	private final ASN1Enum<DmsMsgPriority> prior = new ASN1Enum<
-		DmsMsgPriority>(DmsMsgPriority.class, dmsMessageRunTimePriority
+	private final ASN1Enum<SignMsgPriority> prior = new ASN1Enum<
+		SignMsgPriority>(SignMsgPriority.class, dmsMessageRunTimePriority
 		.node, DmsMessageMemoryType.currentBuffer.ordinal(), 1);
 
 	/** Message status for current buffer */
@@ -73,7 +85,32 @@ public class OpQueryDMSMessage extends OpDMS {
 	private final MessageIDCode source = new MessageIDCode(
 		dmsMsgTableSource.node);
 
-	/** Process the message table source from the sign controller */
+	/** Lookup the MULTI string for a sign message.
+	 * @param sm Sign message.
+	 * @return MULTI string or empty string. */
+	private String lookupMulti(SignMessage sm) {
+		return (sm != null) ? sm.getMulti() : "";
+	}
+
+	/** Get flash beacon flag for a sign message */
+	private boolean getFlashBeacon(SignMessage sm) {
+		return (sm != null) ? sm.getFlashBeacon() : false;
+	}
+
+	/** Phase to query the current message source (memory type) */
+	protected class QueryMessageSource extends Phase {
+
+		/** Query the current message source (memory type) */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(source);
+			mess.queryProps();
+			logQuery(source);
+			return processMessageSource();
+		}
+	}
+
+	/** Process the current message table source (memory type) */
 	private Phase processMessageSource() {
 		DmsMessageMemoryType mem_type = source.getMemoryType();
 		if (mem_type != null) {
@@ -84,19 +121,26 @@ public class OpQueryDMSMessage extends OpDMS {
 			else if (mem_type.valid)
 				return processMessageValid();
 		}
-		return processMessageInvalid();
+		/* The source table is not valid.  This condition has been
+		 * observed in old Skyline signs after being powered down for
+		 * extended periods of time.  It can be cleared up by sending
+		 * settings operation. */
+		setErrorStatus("INVALID SOURCE: " + source);
+		return null;
 	}
 
 	/** Process a blank message source from the sign controller */
 	private Phase processMessageBlank() {
+		int src = 0;
 		/* Maybe the current msg just expired */
-		boolean oper_expire = SignMessageHelper
-			.isOperatorExpiring(dms.getMsgCurrent());
-		SignMessage sm = dms.createMsgBlank();
-		setMsgCurrent(sm, (oper_expire) ? "EXPIRED" : "FIELD BLANK");
-		/* User msg just expired -- set it to null */
-		if (oper_expire)
-			dms.setMsgUserNull();
+		if (SignMessageHelper.isOperatorExpiring(
+		    dms.getMsgCurrent()))
+		{
+			src = SignMsgSource.expired.bit();
+			/* User msg just expired -- set it to null */
+			dms.setMsgUserNotify(null);
+		}
+		setMsgCurrent(dms.createMsgBlank(src));
 		return null;
 	}
 
@@ -110,11 +154,11 @@ public class OpQueryDMSMessage extends OpDMS {
 		 * CRC of the message IRIS knows about */
 		SignMessage sm = dms.getMsgCurrent();
 		if (checkMsgCrc(sm, true) || checkMsgCrc(sm, false)) {
-			setMsgCurrent(sm, sm.getOwner());
+			setMsgCurrent(sm);
 			return null;
 		} else {
 			String multi = lookupMulti(sm);
-			if (multi.equals(ms.getValue())) {
+			if (multi.equals(multi_string.getValue())) {
 				System.err.println("processMessageValid: " +
 					dms + ", CRC mismatch for (" + multi +
 					")");
@@ -127,45 +171,10 @@ public class OpQueryDMSMessage extends OpDMS {
 	 * @param gids Include graphic version IDs in MULTI string. */
 	private boolean checkMsgCrc(SignMessage sm, boolean gids) {
 		String ms = lookupMulti(sm);
-		String multi = (gids) ? parseMulti(ms) : ms;
-		int crc = DmsMessageCRC.calculate(multi, getBeaconEnabled(sm),
-			false);
+		boolean fb = getFlashBeacon(sm);
+		ms = (gids) ? addGraphicIds(ms) : ms;
+		int crc = DmsMessageCRC.calculate(ms, fb, false);
 		return source.getCrc() == crc;
-	}
-
-	/** Lookup the MULTI string for a sign message.
-	 * @param sm Sign message.
-	 * @return MULTI string or empty string. */
-	private String lookupMulti(SignMessage sm) {
-		return (sm != null) ? sm.getMulti() : "";
-	}
-
-	/** Get beacon enabled flag for a sign message */
-	private boolean getBeaconEnabled(SignMessage sm) {
-		return (sm != null) ? sm.getBeaconEnabled() : false;
-	}
-
-	/** Process an invalid message source from the sign controller */
-	private Phase processMessageInvalid() {
-		/* The source table is not valid.  This condition has been
-		 * observed in old Skyline signs after being powered down for
-		 * extended periods of time.  It can be cleared up by sending
-		 * settings operation. */
-		setErrorStatus("INVALID SOURCE: " + source);
-		return null;
-	}
-
-	/** Phase to query the current message source */
-	protected class QueryMessageSource extends Phase {
-
-		/** Query the current message source */
-		@SuppressWarnings("unchecked")
-		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(source);
-			mess.queryProps();
-			logQuery(source);
-			return processMessageSource();
-		}
 	}
 
 	/** Phase to query the current message */
@@ -174,7 +183,8 @@ public class OpQueryDMSMessage extends OpDMS {
 		/** Query the current message */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(ms);
+			mess.add(multi_string);
+			mess.add(msg_owner);
 			if (supportsBeaconActivation())
 				mess.add(beacon);
 			else
@@ -183,7 +193,8 @@ public class OpQueryDMSMessage extends OpDMS {
 			mess.add(status);
 			mess.add(time);
 			mess.queryProps();
-			logQuery(ms);
+			logQuery(multi_string);
+			logQuery(msg_owner);
 			if (supportsBeaconActivation())
 				logQuery(beacon);
 			logQuery(prior);
@@ -197,36 +208,29 @@ public class OpQueryDMSMessage extends OpDMS {
 	/** Set the current message on the sign */
 	private void setMsgCurrent() {
 		if (status.getEnum() == DmsMessageStatus.valid) {
-			boolean be = (beacon.getInteger() == 1);
-			DmsMsgPriority rp = getMsgPriority();
-			int src = rp.getSource();
+			String ms = multi_string.getValue();
+			String owner = msg_owner.getValue();
+			boolean fb = (beacon.getInteger() == 1);
+			SignMsgPriority mp = getMsgPriority();
 			Integer duration = parseDuration(time.getInteger());
-			SignMessage sm = dms.createMsg(ms.getValue(), be, rp,
-				src, "OTHER SYSTEM", duration);
-			setMsgCurrent(sm, "OTHER SYSTEM");
+			SignMessage sm = dms.createMsg(ms, owner, fb, mp,
+				duration);
+			setMsgCurrent(sm);
 		} else
 			setErrorStatus("INVALID STATUS: " + status);
 	}
 
 	/** Get the message priority of the current message */
-	private DmsMsgPriority getMsgPriority() {
-		DmsMsgPriority rp = prior.getEnum();
+	private SignMsgPriority getMsgPriority() {
+		SignMsgPriority mp = prior.getEnum();
 		/* If the priority is unknown, some other system sent it */
-		if (null == rp)
-			return DmsMsgPriority.OTHER_SYSTEM;
-		if (DmsMsgPriority.BLANK == rp) {
-			/* If MULTI is not blank, some other system sent it */
-			MultiString multi = new MultiString(ms.getValue());
-			if (!multi.isBlank())
-				return DmsMsgPriority.OTHER_SYSTEM;
-		}
-		return rp;
+		return (mp != null) ? mp : SignMsgPriority.medium_sys;
 	}
 
 	/** Set the current message on the sign */
-	private void setMsgCurrent(SignMessage sm, String owner) {
+	private void setMsgCurrent(SignMessage sm) {
 		if (sm != null)
-			dms.setMsgCurrentNotify(sm, owner);
+			dms.setMsgCurrentNotify(sm);
 		else
 			setErrorStatus("MSG RENDER FAILED");
 	}

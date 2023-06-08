@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2021  Minnesota Department of Transportation
+ * Copyright (C) 2007-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
-import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
@@ -37,7 +36,6 @@ import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
-import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * A form for displaying and editing DMS fonts
@@ -51,14 +49,9 @@ public class FontForm extends AbstractForm {
 
 	/** Get the width of pangram panel (pixels) */
 	static private int pangram_width(Font f, int cw) {
-		if (cw > 0)
-			return cw * PANGRAM.length();
-		try {
-			return FontHelper.calculateWidth(f, PANGRAM);
-		}
-		catch (InvalidMsgException e) {
-			return 0;
-		}
+		return (cw > 0)
+		      ? PANGRAM.length() * cw
+		      : Math.max(FontHelper.calculateWidth(f, PANGRAM), 0);
 	}
 
 	/** Check if the user is permitted to use the form */
@@ -110,7 +103,7 @@ public class FontForm extends AbstractForm {
 	private final ProxyTablePanel<Font> font_pnl;
 
 	/** Sign pixel panel */
-	private final SignPixelPanel pixel_pnl = new SignPixelPanel(40, 400);
+	private final SignPixelPanel pixel_pnl = new SignPixelPanel(400, 40);
 
 	/** Glyph list */
 	private final JList<Integer> glist = new JList<Integer>();
@@ -132,7 +125,7 @@ public class FontForm extends AbstractForm {
 		super(I18N.get("font.title"));
 		glyphs = s.getSonarState().getDmsCache().getGlyphs();
 		font_pnl = new ProxyTablePanel<Font>(new FontModel(s)) {
-			protected void selectProxy() {
+			@Override protected void selectProxy() {
 				super.selectProxy();
 				selectFont();
 			}
@@ -228,7 +221,7 @@ public class FontForm extends AbstractForm {
 
 	/** Lookup the glyphs in the selected font */
 	private void lookupGlyphs(Font font) {
-		Collection<Glyph> gs = FontHelper.lookupGlyphs(font);
+		Collection<Glyph> gs = FontHelper.lookupGlyphs(font).values();
 		gmap.clear();
 		renderer.clearBitmaps();
 		for (Glyph g: gs)
@@ -309,8 +302,7 @@ public class FontForm extends AbstractForm {
 	/** Render a message to a raster graphic */
 	private RasterGraphic renderMessage(Font f) {
 		if (f != null) {
-			MultiString ms = new MultiString(PANGRAM);
-			RasterGraphic[] pages = renderPages(f, ms);
+			RasterGraphic[] pages = renderPangram(f);
 			if (pages != null && pages.length > 0)
 				return pages[0];
 		}
@@ -318,19 +310,14 @@ public class FontForm extends AbstractForm {
 	}
 
 	/** Render the pages of a text message */
-	private RasterGraphic[] renderPages(Font f, MultiString ms) {
+	private RasterGraphic[] renderPangram(Font f) {
 		int h = fontHeight(f);
 		int cw = fontWidth(f);
 		int w = pangram_width(f, cw);
 		int df = f.getNumber();
 		ColorScheme cs = ColorScheme.MONOCHROME_1_BIT;
-		RasterBuilder b = new RasterBuilder(w, h, cw, 0, df, cs);
-		try {
-			return b.createPixmaps(ms);
-		}
-		catch (InvalidMsgException e) {
-			return null;
-		}
+		RasterBuilder rb = new RasterBuilder(w, h, cw, 0, df, cs);
+		return rb.createRasters(PANGRAM);
 	}
 
 	/** Change the selected glyph */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2022  Minnesota Department of Transportation
+ * Copyright (C) 2016-2023  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -35,8 +35,9 @@ import us.mn.state.dot.tms.utils.UniqueNameCreator;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
-
+public class SignConfigImpl extends BaseObjectImpl implements SignConfig,
+	Comparable<SignConfigImpl>
+{
 	/** Create a unique sign config name */
 	static private String createUniqueName(String template) {
 		UniqueNameCreator unc = new UniqueNameCreator(template, 16,
@@ -151,6 +152,19 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
+	}
+
+	/** Compare to another sign config */
+	@Override
+	public int compareTo(SignConfigImpl sc) {
+		int c = Integer.compare(pixel_width, sc.pixel_width);
+		if (c != 0)
+			return c;
+		c = Integer.compare(pixel_height, sc.pixel_height);
+		if (c != 0)
+			return c;
+		else
+			return name.compareTo(sc.name);
 	}
 
 	/** Create a sign config */

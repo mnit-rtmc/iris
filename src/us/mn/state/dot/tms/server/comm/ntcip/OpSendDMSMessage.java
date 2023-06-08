@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,12 +20,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.ColorScheme;
-import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -112,9 +112,6 @@ public class OpSendDMSMessage extends OpDMS {
 	/** Sign message */
 	private final SignMessage message;
 
-	/** Message owner */
-	private final String owner;
-
 	/** MULTI string */
 	private final String multi;
 
@@ -169,14 +166,13 @@ public class OpSendDMSMessage extends OpDMS {
 	}
 
 	/** Create a new send DMS message operation */
-	public OpSendDMSMessage(DMSImpl d, SignMessage sm, String o) {
+	public OpSendDMSMessage(DMSImpl d, SignMessage sm) {
 		super(PriorityLevel.COMMAND, d);
 		message = sm;
-		owner = o;
-		multi = parseMulti(sm.getMulti());
+		multi = addGraphicIds(sm.getMulti());
 		msg_num = lookupMsgNum(multi);
 		message_crc = DmsMessageCRC.calculate(multi,
-			sm.getBeaconEnabled(), false);
+			sm.getFlashBeacon(), false);
 		status = makeStatus(DmsMessageMemoryType.changeable, msg_num);
 		graphics = GraphicHelper.lookupMulti(multi);
 	}
@@ -232,7 +228,7 @@ public class OpSendDMSMessage extends OpDMS {
 			catch (GenError e) {
 				return new QueryActivateMsgErr();
 			}
-			dms.setMsgCurrentNotify(message, owner);
+			dms.setMsgCurrentNotify(message);
 			return new SetLossMsgs();
 		}
 	}
@@ -322,23 +318,32 @@ public class OpSendDMSMessage extends OpDMS {
 				setErrorStatus(status.toString());
 				return null;
 			}
-			ASN1String ms = new ASN1String(dmsMessageMultiString
-				.node,DmsMessageMemoryType.changeable.ordinal(),
-				msg_num);
+			ASN1String multi_string = new ASN1String(
+				dmsMessageMultiString.node,
+				DmsMessageMemoryType.changeable.ordinal(),
+				msg_num
+			);
+			DisplayString msg_owner = new DisplayString(
+				dmsMessageOwner.node,
+				DmsMessageMemoryType.changeable.ordinal(),
+				msg_num
+			);
 			ASN1Integer beacon = dmsMessageBeacon.makeInt(
 				DmsMessageMemoryType.changeable, msg_num);
 			ASN1Integer srv = dmsMessagePixelService.makeInt(
 				DmsMessageMemoryType.changeable, msg_num);
-			ASN1Enum<DmsMsgPriority> prior = new ASN1Enum<
-				DmsMsgPriority>(DmsMsgPriority.class,
+			ASN1Enum<SignMsgPriority> prior = new ASN1Enum<
+				SignMsgPriority>(SignMsgPriority.class,
 				dmsMessageRunTimePriority.node,
 				DmsMessageMemoryType.changeable.ordinal(),
 				msg_num);
-			ms.setString(multi);
-			beacon.setInteger(message.getBeaconEnabled() ? 1 : 0);
+			multi_string.setString(multi);
+			msg_owner.setString(message.getMsgOwner());
+			beacon.setInteger(message.getFlashBeacon() ? 1 : 0);
 			srv.setInteger(0);
 			prior.setInteger(message.getMsgPriority());
-			mess.add(ms);
+			mess.add(multi_string);
+			mess.add(msg_owner);
 			// NOTE: If dmsMessageBeacon and dmsMessagePixelService
 			//       objects exist, they must be set, since they are
 			//       used when calculating dmsMessageCRC
@@ -347,7 +352,8 @@ public class OpSendDMSMessage extends OpDMS {
 			if (supportsPixelService())
 				mess.add(srv);
 			mess.add(prior);
-			logStore(ms);
+			logStore(multi_string);
+			logStore(msg_owner);
 			if (supportsBeaconActivation())
 				logStore(beacon);
 			if (supportsPixelService())
@@ -393,10 +399,10 @@ public class OpSendDMSMessage extends OpDMS {
 			if (status.getEnum() != DmsMessageStatus.valid)
 				return new QueryValidateMsgErr();
 			if (message_crc != crc.getInteger()) {
-				String ms = "Message CRC: " +
+				String msg = "Message CRC: " +
 					Integer.toHexString(message_crc) + ", "+
 					Integer.toHexString(crc.getInteger());
-				setErrorStatus(ms);
+				setErrorStatus(msg);
 				return null;
 			}
 			msg_validated = true;
@@ -463,7 +469,7 @@ public class OpSendDMSMessage extends OpDMS {
 			catch (GenError e) {
 				return new QueryActivateMsgErr();
 			}
-			dms.setMsgCurrentNotify(message, owner);
+			dms.setMsgCurrentNotify(message);
 			return new SetLossMsgs();
 		}
 	}

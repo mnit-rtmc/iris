@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2021  Minnesota Department of Transportation
+ * Copyright (C) 2013-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,9 @@ import java.awt.event.MouseEvent;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.RasterGraphic;
+import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.dms.DMSPanelPager;
+import us.mn.state.dot.tms.client.dms.SignPixelPager;
 import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
@@ -60,10 +60,10 @@ public class WarningDms {
 	private final ProxyWatcher<DMS> watcher;
 
 	/** Sign pixel panel */
-	public final SignPixelPanel pix_pnl = new SignPixelPanel(80, 132);
+	public final SignPixelPanel pix_pnl = new SignPixelPanel(132, 80);
 
 	/** Pager for sign pixel panel */
-	private DMSPanelPager pager;
+	private SignPixelPager pager;
 
 	/** Create a new warning DMS */
 	public WarningDms(Session s) {
@@ -100,12 +100,12 @@ public class WarningDms {
 
 	/** Update the DMS */
 	private void updateDms(DMS d) {
-		pix_pnl.setFilterColor(filterColor(d));
-		RasterGraphic[] rg = DMSHelper.createRasters(d);
-		if (rg != null) {
+		RasterBuilder rb = DMSHelper.createRasterBuilder(d);
+		if (rb != null) {
+			Color clr = filterColor(d);
 			String ms = DMSHelper.getMultiString(d);
 			pix_pnl.setDimensions(d.getSignConfig());
-			setPager(new DMSPanelPager(pix_pnl, rg, ms));
+			setPager(new SignPixelPager(pix_pnl, rb, ms, clr));
 		} else
 			clearDms();
 	}
@@ -118,8 +118,8 @@ public class WarningDms {
 	}
 
 	/** Set the pager */
-	private void setPager(DMSPanelPager p) {
-		DMSPanelPager op = pager;
+	private void setPager(SignPixelPager p) {
+		SignPixelPager op = pager;
 		if (op != null)
 			op.dispose();
 		pager = p;

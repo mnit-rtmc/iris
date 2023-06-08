@@ -50,13 +50,13 @@ pub struct GateArmAnc {
 /// Get arm warn state
 pub fn warn_state(arm_state: u32) -> &'static str {
     match arm_state {
-        1 => "‼️",     // fault
-        2 => "⚠️",     // opening
-        3 => "✔️",     // open
-        4 => "⚠️",     // warn_close
+        1 => "‼️",    // fault
+        2 => "⚠️",    // opening
+        3 => "✔️",    // open
+        4 => "⚠️",    // warn_close
         5 => "⚠️ ⛔", // closing
-        6 => "⛔",        // closed
-        _ => "❓",        // unknown
+        6 => "⛔",   // closed
+        _ => "❓",   // unknown
     }
 }
 

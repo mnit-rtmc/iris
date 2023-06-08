@@ -40,13 +40,13 @@ public class TextRectComposer extends JPanel {
 	/** Panels to wrap message line combo boxes */
 	private final JPanel[] line_pnl;
 
-	/** Sign text combo box widgets */
-	private final SignTextCBox[] line_cbx;
+	/** Message line combo box widgets */
+	private final MsgLineCBox[] line_cbx;
 
 	/** Create a new text rect composer */
 	public TextRectComposer(MessageComposer mc) {
 		composer = mc;
-		line_cbx = new SignTextCBox[MAX_LINES];
+		line_cbx = new MsgLineCBox[MAX_LINES];
 		line_pnl = new JPanel[MAX_LINES];
 		for (int i = 0; i < MAX_LINES; i++) {
 			line_cbx[i] = buildLineComboBox(i);
@@ -55,9 +55,9 @@ public class TextRectComposer extends JPanel {
 		layoutPanel();
 	}
 
-	/** Build a sign text combo box */
-	private SignTextCBox buildLineComboBox(int i) {
-		SignTextCBox cbx = new SignTextCBox();
+	/** Build a message line combo box */
+	private MsgLineCBox buildLineComboBox(int i) {
+		MsgLineCBox cbx = new MsgLineCBox();
 		// Unlink incident if the first line (what) is changed
 		final boolean unlink = (i == 0);
 		cbx.addActionListener(new ActionListener() {
@@ -100,41 +100,41 @@ public class TextRectComposer extends JPanel {
 
 	/** Clear the widgets */
 	public void clearWidgets() {
-		for (SignTextCBox cbx: line_cbx)
+		for (MsgLineCBox cbx: line_cbx)
 			cbx.setSelectedIndex(-1);
+		for (JPanel pnl: line_pnl)
+			pnl.setVisible(false);
 	}
 
 	/** Dispose of page panel */
 	public void dispose() {
 		removeAll();
-		for (SignTextCBox cbx: line_cbx)
+		for (MsgLineCBox cbx: line_cbx)
 			cbx.dispose();
 	}
 
 	/** Enable or Disable the page panel */
 	@Override
 	public void setEnabled(boolean b) {
-		for (SignTextCBox cbx: line_cbx)
+		for (MsgLineCBox cbx: line_cbx)
 			cbx.setEnabled(b);
+		if (!b) {
+			for (JPanel pnl: line_pnl)
+				pnl.setVisible(false);
+		}
 		super.setEnabled(b);
 	}
 
-	/** Set the edit mode */
-	public void setEditMode() {
-		for (SignTextCBox cbx: line_cbx)
-			cbx.setEditMode();
-	}
-
 	/** Set the message combo box models */
-	public void setModels(SignTextFinder stf, int first, int n_lines) {
+	public void setModels(MsgLineFinder mlf, int first, int n_lines) {
 		for (int i = 0; i < MAX_LINES; i++) {
-			if (i < n_lines) {
+			if (i < n_lines && mlf != null) {
 				short ln = (short) (first + i);
-				line_cbx[i].setModel(stf.getLineModel(ln));
+				line_cbx[i].setModel(mlf.getLineModel(ln));
 				line_pnl[i].setVisible(true);
 			} else {
 				line_pnl[i].setVisible(false);
-				line_cbx[i].setModel(new SignTextCBoxModel());
+				line_cbx[i].setModel(new MsgLineCBoxModel());
 			}
 		}
 	}

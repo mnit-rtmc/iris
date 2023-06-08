@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017  Iteris Inc.
- * Copyright (C) 2019-2022  Minnesota Department of Transportation
+ * Copyright (C) 2019-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
@@ -142,10 +141,8 @@ public class PavementSensorsTable {
 			black_ice_signal = new ASN1Enum<SurfaceBlackIceSignal>(
 				SurfaceBlackIceSignal.class,
 				essSurfaceBlackIceSignal.node, row);
-			// Note: friction coefficient is not part of pavement
-			//       table (even though it *should* be)
 			friction = new PercentObject("friction",
-				essMobileFriction.makeInt());
+				pavementSensorFrictionCoefficient.makeInt(row));
 		}
 
 		/** Get the sensor location */
@@ -195,10 +192,7 @@ public class PavementSensorsTable {
 			Distance d = convertDepthV1(water_depth);
 			if (d != null) {
 				Float mm = d.asFloat(METERS);
-				NumberFormat f = NumberFormat.getInstance();
-				f.setMaximumFractionDigits(3); // mm
-				f.setMinimumFractionDigits(1);
-				return f.format(mm);
+				return Num.format(mm, 3); // mm
 			} else
 				return null;
 		}
@@ -208,10 +202,7 @@ public class PavementSensorsTable {
 			Distance d = convertDepthV2(ice_or_water_depth);
 			if (d != null) {
 				Float mm = d.asFloat(METERS);
-				NumberFormat f = NumberFormat.getInstance();
-				f.setMaximumFractionDigits(4); // tenth of mm
-				f.setMinimumFractionDigits(1);
-				return f.format(mm);
+				return Num.format(mm, 4); // tenth of mm
 			} else
 				return getWaterDepth();
 		}

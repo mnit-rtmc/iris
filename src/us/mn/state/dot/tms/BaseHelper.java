@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,9 @@ import us.mn.state.dot.sonar.User;
  * @author Douglas Lau
  */
 abstract public class BaseHelper {
+
+	/** User name for automatic actions */
+	static public final String USER_AUTO = "AUTO";
 
 	/** Compare two (possibly-null) objects for equality */
 	static public boolean objectEquals(Object o0, Object o1) {

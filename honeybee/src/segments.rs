@@ -227,7 +227,7 @@ impl fmt::Display for TravelDir {
             TravelDir::Eb => "EB",
             TravelDir::Wb => "WB",
         };
-        write!(f, "{}", dir)
+        write!(f, "{dir}")
     }
 }
 

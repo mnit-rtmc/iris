@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2022  Minnesota Department of Transportation
+ * Copyright (C) 2013-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ abstract public class OpNtcip extends OpDevice {
 		MultiString ms = new MultiString(m);
 		if (ms.isBlank())
 			return LaneUseIndication.DARK.ordinal();
-		LaneUseMulti lum = findLaneUseMulti(parseMulti(m));
+		LaneUseMulti lum = findLaneUseMulti(addGraphicIds(m));
 		if (lum != null)
 			return lum.getIndication();
 		else
@@ -86,7 +86,7 @@ abstract public class OpNtcip extends OpDevice {
 	 * @param multi MULTI string to compare.
 	 * @return true if they match. */
 	static private boolean match(MsgPattern pat, String multi) {
-		String re = createRegex(parseMulti(pat.getMulti()));
+		String re = createRegex(addGraphicIds(pat.getMulti()));
 		return Pattern.matches(re, multi);
 	}
 
@@ -110,7 +110,7 @@ abstract public class OpNtcip extends OpDevice {
 	/** Parse a MULTI string and add graphic version IDs.
 	 * @param ms Original MULTI string.
 	 * @return MULTI string with graphic IDs added. */
-	static protected String parseMulti(String ms) {
+	static protected String addGraphicIds(String ms) {
 		MultiBuilder mb = new MultiBuilder() {
 			@Override
 			public void addGraphic(int g_num, Integer x, Integer y,
@@ -204,6 +204,35 @@ abstract public class OpNtcip extends OpDevice {
 	/** Get the software model */
 	protected String getSoftwareModel() {
 		return ControllerHelper.getSetup(controller, "sw", "model");
+	}
+
+	/** Check if DMS make contains a value.
+	 *
+	 * NOTE: value must be all lower-case */
+	private boolean isMakeContaining(String value) {
+		assert value.equals(value.toLowerCase());
+		String make = getSoftwareMake();
+		return (make != null) && make.toLowerCase().contains(value);
+	}
+
+	/** Check if software make is ADDCO */
+	protected boolean isAddco() {
+		return isMakeContaining("addco");
+	}
+
+	/** Check if software make is American Signal */
+	protected boolean isAmericanSignal() {
+		return isMakeContaining("american signal");
+	}
+
+	/** Check if software make is LEDSTAR */
+	protected boolean isLedstar() {
+		return isMakeContaining("ledstar");
+	}
+
+	/** Check if software make is Skyline */
+	protected boolean isSkyline() {
+		return isMakeContaining("skyline");
 	}
 
 	/** Get the firmware version */

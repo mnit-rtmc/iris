@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -50,12 +50,12 @@ public class PropPixels extends IPanel {
 	private final JLabel bad_pixels_lbl = createValueLabel();
 
 	/** Stuck off pixel panel */
-	private final SignPixelPanel stuck_off_pnl = new SignPixelPanel(100,
-		400);
+	private final SignPixelPanel stuck_off_pnl = new SignPixelPanel(400,
+		100);
 
 	/** Stuck on pixel panel */
-	private final SignPixelPanel stuck_on_pnl = new SignPixelPanel(100,
-		400);
+	private final SignPixelPanel stuck_on_pnl = new SignPixelPanel(400,
+		100);
 
 	/** Action to query pixel failures */
 	private final IAction query_pixels = new IAction("dms.query.pixels") {

@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2016  SRF Consulting Group
- * Copyright (C) 2018-2020  Minnesota Department of Transportation
+ * Copyright (C) 2018-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,7 +78,7 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		namespace.registerType(SONAR_TYPE, GpsImpl.class);
 		store.query("SELECT name, controller, pin, notes, " +
 			"latest_poll, latest_sample, lat, lon FROM iris." +
-			SONAR_TYPE  + ";", new ResultFactory()
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new GpsImpl(row));
@@ -207,6 +207,7 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		return (dp instanceof GpsPoller) ? (GpsPoller) dp : null;
 	}
 
+	/** Get controller comm link */
 	public CommLink getCommLink() {
 		Controller c = controller;
 		return (c != null) ? c.getCommLink() : null;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ public class ProposedDmsCellRenderer extends DmsCellRenderer {
 		model = m;
 	}
 
-	/** Get the owner user name */
+	/** Get the message owner */
 	@Override
 	protected String getOwner(DMS dms) {
 		return session.getUser().getName();

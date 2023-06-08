@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2018  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 /**
  * Data detect threshold property.
  * For SeGo, the range is 0 - 20 dB.
- * For ASTMv6, the range is 0 - 15 dB.
  *
  * @author Douglas Lau
  */
@@ -37,25 +36,25 @@ public class DataDetectProp extends E6Property {
 	static private final int QUERY = 0x54;
 
 	/** RF protocol */
-	private final RFProtocol protocol;
+	public final RFProtocol protocol;
 
 	/** Data detect value (0 - 20 dB) */
-	private int value;
+	private Integer value;
 
-	/** Get the data detect value */
-	public int getValue() {
+	/** Get the data detect value (dB) */
+	public Integer getValue() {
 		return value;
 	}
 
-	/** Create a data detect property */
-	public DataDetectProp(RFProtocol p, int v) {
-		protocol = p;
+	/** Set the data detect value (dB) */
+	public void setValue(Integer v) {
 		value = v;
 	}
 
 	/** Create a data detect property */
 	public DataDetectProp(RFProtocol p) {
-		this(p, 0);
+		protocol = p;
+		value = null;
 	}
 
 	/** Get the command */
@@ -69,7 +68,7 @@ public class DataDetectProp extends E6Property {
 	public byte[] queryData() {
 		byte[] d = new byte[3];
 		format8(d, 0, QUERY);
-		format8(d, 1, protocol.ordinal() << 4);
+		format8(d, 1, protocol.value << 4);
 		format8(d, 2, 0x0D);	// Carriage-return
 		return d;
 	}
@@ -81,7 +80,7 @@ public class DataDetectProp extends E6Property {
 			throw new ParsingException("DATA LEN: " + d.length);
 		if (parse8(d, 2) != QUERY)
 			throw new ParsingException("SUB CMD");
-		if (RFProtocol.fromOrdinal(parse8(d, 3) >> 4) != protocol)
+		if (RFProtocol.fromValue(parse8(d, 3) >> 4) != protocol)
 			throw new ParsingException("RF PROTOCOL");
 		if (parse8(d, 5) != 0)
 			throw new ParsingException("ACK");
@@ -93,10 +92,11 @@ public class DataDetectProp extends E6Property {
 	/** Get the store packet data */
 	@Override
 	public byte[] storeData() {
+		int val = (value != null) ? value : 0;
 		byte[] d = new byte[4];
 		format8(d, 0, STORE);
-		format8(d, 1, protocol.ordinal() << 4);
-		format8(d, 2, value);
+		format8(d, 1, protocol.value << 4);
+		format8(d, 2, val);
 		format8(d, 3, 0x0D);	// Carriage-return
 		return d;
 	}
@@ -108,7 +108,7 @@ public class DataDetectProp extends E6Property {
 			throw new ParsingException("DATA LEN: " + d.length);
 		if (parse8(d, 2) != STORE)
 			throw new ParsingException("SUB CMD");
-		if (RFProtocol.fromOrdinal(parse8(d, 3) >> 4) != protocol)
+		if (RFProtocol.fromValue(parse8(d, 3) >> 4) != protocol)
 			throw new ParsingException("RF PROTOCOL");
 		if (parse8(d, 4) != 0)
 			throw new ParsingException("ACK");

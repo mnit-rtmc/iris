@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2022  Minnesota Department of Transportation
+ * Copyright (C) 2002-2023  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.io.IOException;
 import java.util.Random;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.CommConfig;
 import us.mn.state.dot.tms.DmsColor;
@@ -60,9 +59,6 @@ abstract class OpDms extends OpDevice {
 	/** Bitmap page length for dmsxml protocol */
 	static final int BM_PGLEN_BYTES = BM_WIDTH * BM_HEIGHT / 8;
 
-	/** User who deployed the message */
-	final User m_user;
-
 	/** DMS to operate */
 	final DMSImpl m_dms;
 
@@ -73,11 +69,10 @@ abstract class OpDms extends OpDevice {
 	private int m_retry = 0;
 
 	/** Create a new DMS operation */
-	OpDms(PriorityLevel p, DMSImpl d, String opDesc, User user) {
+	OpDms(PriorityLevel p, DMSImpl d, String opDesc) {
 		super(p, d);
 		m_dms = d;
 		m_opDesc = opDesc;
-		m_user = user;
 	}
 
 	/** Cleanup the operation. Called by CommThread.doPoll(). */
@@ -154,9 +149,7 @@ abstract class OpDms extends OpDevice {
 	public String getOperationDescription() {
 		m_opDesc = (m_opDesc == null ?
 			"Unnamed operation" : m_opDesc);
-		if(m_user == null)
-			return m_opDesc;
-		return m_opDesc + " (" + m_user.getFullName() + ")";
+		return m_opDesc;
 	}
 
 	/** return true if dms has been configured */

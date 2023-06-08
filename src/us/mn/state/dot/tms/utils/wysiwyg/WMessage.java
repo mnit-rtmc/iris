@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.utils.wysiwyg;
 
 import java.util.ArrayList;
@@ -30,15 +29,14 @@ import us.mn.state.dot.tms.utils.wysiwyg.token.WtNewPage;
 import us.mn.state.dot.tms.utils.wysiwyg.token.WtTextChar;
 
 /** WYSIWYG-editor Message object
- * 
+ *
  * Contains a series of WPage objects and
  * methods for manipulating them.
- * 
+ *
  * Also contains methods for parsing and
  * building MULTI strings;
- * 
- * @author John L. Stanley - SRF Consulting
  *
+ * @author John L. Stanley - SRF Consulting
  */
 public class WMessage {
 
@@ -83,13 +81,13 @@ public class WMessage {
 	public boolean isChanged() {
 		return bChanged;
 	}
-	
+
 	//===========================================
-	
+
 	private List<WPage> pagelist = null;
-	
+
 	public int getPageCount() {
-		return pagelist.size();		
+		return pagelist.size();
 	}
 
 	/** Get WPage from message.
@@ -114,7 +112,7 @@ public class WMessage {
 		bChanged = true;
 		return np;
 	}
-	
+
 	/* Remove (and return) page number provided */
 	public WPage removePage(int pageNo) {
 		bChanged = true;
@@ -125,9 +123,9 @@ public class WMessage {
 		bChanged = true;
 		pagelist.add(pageNo, page);
 	}
-	
+
 	//===========================================
-	
+
 	/** Load MULTI string into a WMessage */
 	public void parseMulti(String multiStr) {
 		startPage1();
@@ -136,13 +134,13 @@ public class WMessage {
 		ms.parse(parser);
 		bChanged = true;
 	}
-	
+
 	/** Reparse MULTI string after adding/changing/deleting tokens */
 	public void reparseMulti() {
 		String multiStr = toString();
 		parseMulti(multiStr);
 	}
-	
+
 	/** Create a MULTI string from a WMessage */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -156,7 +154,7 @@ public class WMessage {
 		}
 		return sb.toString();
 	}
-	
+
 	/** Execute Multi callbacks for all tokens in a WMessage */
 	public void doMulti(Multi multi) {
 		Iterator<WPage> it = pagelist.iterator();
@@ -196,39 +194,6 @@ public class WMessage {
 		return true;
 	}
 
-	/** Get a MULTI string as text only (tags stripped) */
-	public String asText() {
-		StringBuilder sb = new StringBuilder();
-		boolean betweenWords = false;
-		Iterator<WToken> it = tokens();
-		WToken tok;
-		while (it.hasNext()) {
-			tok = it.next();
-			if (!tok.isTag()) {
-				if ((tok instanceof WtTextChar)
-				 && ((WtTextChar)tok).isBlank()) {
-					betweenWords = true;
-				}
-				else {
-					if (betweenWords)
-						sb.append(' ');
-					betweenWords = false;
-					sb.append(tok.toString());
-				}
-			}
-			else
-				betweenWords = true;
-		}
-		return sb.toString();
-	}
-
-	/** Return a value indicating if the message is single or multi-page.
-	 * @return True if the message contains a single page else false
-	 * for multi-page. */
-	public boolean singlePage() {
-		return getNumPages() <= 1;
-	}
-
 	/** Get the number of pages in the WMessage */
 	public int getNumPages() {
 		return pagelist.size();
@@ -260,35 +225,6 @@ public class WMessage {
 		while (it.hasNext()) {
 			tok = it.next();
 			if (tok.isValid())
-				sb.append(tok.toString());
-		}
-		return sb.toString();
-	}
-
-	/** Normalize a single line MULTI string.
-	 * @return The normalized MULTI string. */
-	public String normalizeLine() {
-		StringBuilder sb = new StringBuilder();
-		Iterator<WToken> it = tokens();
-		WToken tok;
-		while (it.hasNext()) {
-			tok = it.next();
-			if (tok.isNormalizeLine())
-				sb.append(tok.toString());
-		}
-		return sb.toString();
-	}
-
-	/** Normalize a single line MULTI string
-	 *  using different normalization criteria.
-	 * @return The normalized MULTI string. */
-	public String normalizeLine2() {
-		StringBuilder sb = new StringBuilder();
-		Iterator<WToken> it = tokens();
-		WToken tok;
-		while (it.hasNext()) {
-			tok = it.next();
-			if (tok.isNormalizeLine2())
 				sb.append(tok.toString());
 		}
 		return sb.toString();

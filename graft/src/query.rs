@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -43,9 +43,8 @@ WHERE c.name = $1";
 
 /// SQL query for one comm config
 pub const COMM_CONFIG: &str = "\
-SELECT name, description, protocol, modem, poll_period_sec, \
-       long_poll_period_sec, timeout_ms, idle_disconnect_sec, \
-       no_response_disconnect_sec \
+SELECT name, description, protocol, poll_period_sec, long_poll_period_sec, \
+       timeout_ms, idle_disconnect_sec, no_response_disconnect_sec \
 FROM iris.comm_config \
 WHERE name = $1";
 
@@ -149,7 +148,7 @@ WHERE name = $1";
 
 /// SQL query for one permission
 pub const PERMISSION: &str = "\
-SELECT id, role, resource_n, batch, access_n \
+SELECT id, role, resource_n, hashtag, access_n \
 FROM iris.permission \
 WHERE id = $1";
 
@@ -167,7 +166,7 @@ SELECT name, enabled FROM iris.role WHERE name = $1";
 
 /// SQL query for one tag reader
 pub const TAG_READER: &str = "\
-SELECT t.name, location, geo_loc, controller, pin, notes, toll_zone \
+SELECT t.name, location, geo_loc, controller, pin, notes, toll_zone, settings \
 FROM iris.tag_reader t \
 LEFT JOIN geo_loc_view gl ON t.geo_loc = gl.name \
 WHERE t.name = $1";

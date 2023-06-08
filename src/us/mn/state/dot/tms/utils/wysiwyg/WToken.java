@@ -82,19 +82,6 @@ abstract public class WToken {
 		return true;
 	}
 
-	/** Include this in the WMessage.MultiNormalizer() string?
-	 *  {WToken default = false} */
-	public boolean isNormalizeLine() {
-		return false;
-	}
-
-	/** Include this in the WMessage.MultiNormalizer2() string? */
-	public boolean isNormalizeLine2() {
-		// Normally, this is identical to isNormalizeLine()
-		// The ONLY place it's different is in WtFont.
-		return isNormalizeLine();
-	}
-
 	/** Is this token part of the message-text?
 	 * (WYSIWYG flag.  The only tokens that are
 	 *  not part of the message-text are graphics,
@@ -104,7 +91,7 @@ abstract public class WToken {
 	public boolean isText() {
 		return true;
 	}
-	
+
 	/** Is this token a printable text character that is part of the message
 	 *  text? This includes text characters (blank or not) and newlines.
 	 *  {WToken default = false} */

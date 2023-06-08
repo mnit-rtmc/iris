@@ -28,11 +28,11 @@ the **Next Phase**.  *Hold Time* must be a multiple of 30 seconds.
 
 ## DMS Actions
 
-[DMS] actions have an associated *sign group* to determine which signs are
+[DMS] actions have an associated *hashtag* to determine which signs are
 affected by the action.  The action happens when the corresponding action plan
 phase is selected.  The [message pattern] indicates which message is activated.
-If **activate beacon** is selected, the sign's _internal_ beacon will also be
-activated.  **Message priority** determines the priority of messages created by
+If **flash beacon** is selected, the sign's _internal_ beacon will also be
+activated.  [Message priority] determines the priority of messages created by
 the action.
 
 ### DMS Action Tags
@@ -174,7 +174,8 @@ than the value of the `action_plan_event_purge_days` [system attribute].
 [DMS]: dms.html
 [exit ramp backup]: exit_backup.html
 [message pattern]: message_patterns.html
-[Msg-Feed]: comm_links.html#msg-feed
+[message priority]: dms.html#message-priority
+[Msg-Feed]: protocols.html#msg-feed
 [MULTI]: multi.html
 [Parking area]: parking_areas.html
 [preset]: cameras.html#presets

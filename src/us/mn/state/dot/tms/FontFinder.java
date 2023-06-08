@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2022  Minnesota Department of Transportation
+ * Copyright (C) 2011-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,8 +28,8 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class FontFinder {
 
-	/** Set of all sign groups for the DMS */
-	private final Set<SignGroup> groups;
+	/** DMS to search */
+	private final DMS dms;
 
 	/** Set of font numbers found */
 	private final HashSet<Integer> font_nums = new HashSet<Integer>();
@@ -44,11 +44,10 @@ public class FontFinder {
 	};
 
 	/** Create a font finder for a DMS */
-	public FontFinder(DMS dms) {
+	public FontFinder(DMS d) {
+		dms = d;
 		font_nums.add(DMSHelper.getDefaultFontNum(dms));
-		groups = DmsSignGroupHelper.findGroups(dms);
 		findMsgPatternTags();
-		findSignTextTags();
 		findDmsActionTags();
 	}
 
@@ -63,36 +62,28 @@ public class FontFinder {
 		return fonts;
 	}
 
-	/** Find font tags in all message patterns for the sign's groups */
+	/** Find font tags in all message patterns for the sign's hashtags */
 	private void findMsgPatternTags() {
 		Iterator<MsgPattern> it = MsgPatternHelper.iterator();
 		while (it.hasNext()) {
 			MsgPattern pat = it.next();
-			SignGroup sg = pat.getSignGroup();
-			if (sg != null && groups.contains(sg))
+			String cht = pat.getComposeHashtag();
+			if (cht != null && DMSHelper.hasHashtag(dms, cht))
 				findFontTags(pat.getMulti());
 		}
 	}
 
-	/** Find font tags in all SignText for the sign's groups */
-	private void findSignTextTags() {
-		Iterator<SignText> it = SignTextHelper.iterator();
-		while (it.hasNext()) {
-			SignText st = it.next();
-			if (groups.contains(st.getSignGroup()))
-				findFontTags(st.getMulti());
-		}
-	}
-
-	/** Find font tags in all DMS actions for the sign's groups */
+	/** Find font tags in all DMS actions for the sign's hashtags */
 	private void findDmsActionTags() {
 		Iterator<DmsAction> it = DmsActionHelper.iterator();
 		while (it.hasNext()) {
 			DmsAction da = it.next();
-			SignGroup sg = da.getSignGroup();
 			MsgPattern pat = da.getMsgPattern();
-			if (sg != null && pat != null && groups.contains(sg))
-				findFontTags(pat.getMulti());
+			if (pat != null) {
+				String ht = da.getDmsHashtag();
+				if (DMSHelper.hasHashtag(dms, ht))
+					findFontTags(pat.getMulti());
+			}
 		}
 	}
 

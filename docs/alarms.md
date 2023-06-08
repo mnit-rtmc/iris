@@ -9,6 +9,18 @@ failure, high temperature, low voltage, _etc_.
 An alarm can be created for controllers using a [protocol] that generates
 alarms, such as [MnDOT-170].
 
+## Resources
+
+* `iris/api/alarm`
+* `iris/api/alarm/{name}`
+
+Attribute [permissions]:
+
+| Access       | Minimal                 | Full          |
+|--------------|-------------------------|---------------|
+| Read Only    | name, state             | trigger\_time |
+| 🔧 Configure | description, controller | pin           |
+
 ## Events
 
 The `state` field is set to `true` when _triggered_.  When it changes, a
@@ -17,6 +29,7 @@ purged automatically when older than the value of the `alarm_event_purge_days`
 [system attribute].
 
 
-[MnDOT-170]: comm_links.html#mndot-170
-[protocol]: comm_links.html#protocols
+[MnDOT-170]: protocols.html#mndot-170
+[permissions]: permissions.html
+[protocol]: protocols.html
 [system attribute]: system_attributes.html

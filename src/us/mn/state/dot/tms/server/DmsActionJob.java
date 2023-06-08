@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,6 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
-import us.mn.state.dot.tms.DmsSignGroup;
-import us.mn.state.dot.tms.DmsSignGroupHelper;
-import us.mn.state.dot.tms.SignGroup;
 
 /**
  * Job to perform DMS actions.
@@ -70,15 +67,12 @@ public class DmsActionJob extends Job {
 
 	/** Perform a DMS action */
 	private void performDmsAction(DmsAction da) {
-		SignGroup sg = da.getSignGroup();
-		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
+		String ht = da.getDmsHashtag();
+		Iterator<DMS> it = DMSHelper.hashtagIterator(ht);
 		while (it.hasNext()) {
-			DmsSignGroup dsg = it.next();
-			if (dsg.getSignGroup() == sg) {
-				DMS dms = dsg.getDms();
-				if (dms instanceof DMSImpl)
-					checkAction(da, (DMSImpl) dms);
-			}
+			DMS dms = it.next();
+			if (dms instanceof DMSImpl)
+				checkAction(da, (DMSImpl) dms);
 		}
 	}
 
@@ -88,7 +82,7 @@ public class DmsActionJob extends Job {
 			logSched(dms, "checking " + da);
 		if (shouldReplace(da, dms)) {
 			DmsActionMsg amsg = new DmsActionMsg(da, dms, logger);
-			if (amsg.isValid())
+			if (amsg.isRasterizable())
 				dms_actions.put(dms, amsg);
 		} else if (logger.isOpen())
 			logSched(dms, "dropping " + da);

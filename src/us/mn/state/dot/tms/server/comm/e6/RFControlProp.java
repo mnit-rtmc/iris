@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2018  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ public class RFControlProp extends E6Property {
 	static private final int QUERY = 0x0007;
 
 	/** Control values */
-	public enum Value {
+	static public enum Value {
 		sense, continuous;
 		static public Value fromOrdinal(int o) {
 			for (Value v: values())
@@ -52,14 +52,14 @@ public class RFControlProp extends E6Property {
 		return value;
 	}
 
-	/** Create a new RF control property */
-	public RFControlProp(Value v) {
+	/** Set control value */
+	public void setValue(Value v) {
 		value = v;
 	}
 
 	/** Create a new RF control property */
 	public RFControlProp() {
-		this(Value.sense);
+		value = null;
 	}
 
 	/** Get the command */
@@ -93,6 +93,7 @@ public class RFControlProp extends E6Property {
 	/** Get the store packet data */
 	@Override
 	public byte[] storeData() {
+		Value val = (value != null) ? value : Value.sense;
 		byte[] d = new byte[3];
 		format16(d, 0, STORE);
 		format8(d, 2, value.ordinal());

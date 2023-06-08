@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,17 +48,22 @@ public class AckTimeoutProp extends E6Property {
 	private final Protocol protocol;
 
 	/** Data acknowledge timeout (ms) */
-	private int timeout;
+	private Integer value;
 
-	/** Create a new acknowledge timeout property */
-	public AckTimeoutProp(Protocol p, int t) {
-		protocol = p;
-		timeout = t;
+	/** Get the data acknowledge timeout (ms) */
+	public Integer getValue() {
+		return value;
+	}
+
+	/** Set the data acknowledge timeout (ms) */
+	public void setValue(Integer v) {
+		value = v;
 	}
 
 	/** Create a new acknowledge timeout property */
 	public AckTimeoutProp(Protocol p) {
-		this(p, 0);
+		protocol = p;
+		value = null;
 	}
 
 	/** Get the command */
@@ -85,12 +90,13 @@ public class AckTimeoutProp extends E6Property {
 			throw new ParsingException("SUB CMD");
 		if (Protocol.fromOrdinal(parse8(d, 4)) != protocol)
 			throw new ParsingException("PROTOCOL");
-		timeout = parse16(d, 5);
+		value = parse16(d, 5);
 	}
 
 	/** Get the store packet data */
 	@Override
 	public byte[] storeData() {
+		int timeout = (value != null) ? value : 0;
 		byte[] d = new byte[5];
 		format16(d, 0, STORE);
 		format8(d, 2, protocol.ordinal());
@@ -112,6 +118,6 @@ public class AckTimeoutProp extends E6Property {
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		return protocol + " ack timeout: " + timeout + " ms";
+		return protocol + " ack timeout: " + value + " ms";
 	}
 }

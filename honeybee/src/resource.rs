@@ -33,7 +33,7 @@ pub fn make_name(dir: &Path, n: &str) -> PathBuf {
 
 /// Make a PathBuf for a backup file
 pub fn make_backup_name(dir: &Path, n: &str) -> PathBuf {
-    make_name(dir, &format!("{}~", n))
+    make_name(dir, &format!("{n}~"))
 }
 
 /// Listen enum for postgres NOTIFY events
@@ -300,7 +300,13 @@ const DMS_PUB_RES: Resource = Resource::Simple(
     "dms_pub",
     Listen::Exclude(
         "dms",
-        &["msg_user", "msg_sched", "msg_current", "expire_time", "status"],
+        &[
+            "msg_user",
+            "msg_sched",
+            "msg_current",
+            "expire_time",
+            "status",
+        ],
     ),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, sign_config, sign_detail, roadway, road_dir, \
@@ -311,11 +317,16 @@ const DMS_PUB_RES: Resource = Resource::Simple(
 );
 
 /// DMS status resource
+///
+/// NOTE: the `sources` attribute is deprecated,
+///       but required by external systems (for now)
 const DMS_STAT_RES: Resource = Resource::Simple(
     "dms_message",
     Listen::Include("dms", &["msg_current"]),
     "SELECT row_to_json(r)::text FROM (\
-      SELECT name, msg_current, failed, sources, duration, expire_time \
+      SELECT name, msg_current, \
+             replace(substring(msg_owner FROM 'IRIS; ([^;]*).*'), '+', ', ') \
+             AS sources, failed, duration, expire_time \
       FROM dms_message_view WHERE condition = 'Active' \
       ORDER BY name\
     ) r",
@@ -614,7 +625,7 @@ const PERMISSION_RES: Resource = Resource::Simple(
     "api/permission",
     Listen::All("permission"),
     "SELECT row_to_json(r)::text FROM (\
-      SELECT id, role, resource_n, batch, access_n \
+      SELECT id, role, resource_n, hashtag, access_n \
       FROM iris.permission \
       ORDER BY role, resource_n, id\
     ) r",
@@ -650,7 +661,8 @@ const SIGN_CONFIG_RES: Resource = Resource::Simple(
       SELECT name, face_width, face_height, border_horiz, border_vert, \
              pitch_horiz, pitch_vert, pixel_width, pixel_height, \
              char_width, char_height, monochrome_foreground, \
-             monochrome_background, color_scheme, default_font \
+             monochrome_background, color_scheme, default_font, \
+             module_width, module_height \
       FROM sign_config_view\
     ) r",
 );
@@ -673,8 +685,8 @@ const SIGN_MSG_RES: Resource = Resource::SignMsg(
     "sign_message",
     Listen::All("sign_message"),
     "SELECT row_to_json(r)::text FROM (\
-      SELECT name, sign_config, incident, multi, beacon_enabled, \
-             msg_priority, sources, owner, duration \
+      SELECT name, sign_config, incident, multi, msg_owner, flash_beacon, \
+             msg_priority, duration \
       FROM sign_message_view \
       ORDER BY name\
     ) r",
@@ -1015,7 +1027,7 @@ pub fn listen_all(client: &mut Client) -> Result<()> {
         }
     }
     for channel in channels {
-        let listen = format!("LISTEN {}", channel);
+        let listen = format!("LISTEN {channel}");
         client.execute(&listen[..], &[])?;
     }
     Ok(())

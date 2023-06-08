@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  * Copyright (C) 2020       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,14 +17,12 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.util.HashMap;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.utils.wysiwyg.WMessage;
-import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 
 /**
  * This is a utility class to create sign messages.
@@ -33,12 +31,6 @@ import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
  * @author John L. Stanley - SRF Consulting
  */
 public class SignMessageCreator {
-
-	/** Create sign message name prefix.
-	 * @param src Sign message source bits. */
-	static private String createPrefix(int src) {
-		return (SignMsgSource.blank.bit() == src) ? "blank_" : "user_";
-	}
 
 	/** Message source bits for incident messages */
 	static private final int INCIDENT_SRC =
@@ -69,87 +61,72 @@ public class SignMessageCreator {
 		user = s.getUser().getName();
 	}
 
-	/** Create a new sign message creator */
-	public SignMessageCreator() {
-		this(Session.getCurrent());
-	}
-
-	/** Create a new sign message.
+	/** Create an operator sign message.
 	 *
 	 * @param sc Sign configuration.
-	 * @param multi MULTI text.
-	 * @param be Beacon enabled.
-	 * @param duration Message duration; null for indefinite.
+	 * @param ms MULTI text.
+	 * @param fb Flash beacon.
+	 * @param dur Message duration; null for indefinite.
 	 * @return New sign message, or null on error.
 	 */
-	public SignMessage create(SignConfig sc, String multi, boolean be,
-		 Integer duration)
+	public SignMessage createMsg(SignConfig sc, String ms, boolean fb,
+		 Integer dur)
 	{
-		return create(sc, null, multi, be, DmsMsgPriority.OPERATOR,
-			SignMsgSource.operator.bit(), user, duration);
+		return createMsg(sc, null, ms, fb, SignMsgPriority.high_1,
+			SignMsgSource.operator.bit(), dur);
 	}
 
 	/** Create a new blank message.
 	 *
 	 * @return Blank sign message, or null on error.
 	 */
-	public SignMessage createBlankMessage(SignConfig sc) {
-		return create(sc, null, "", false, DmsMsgPriority.BLANK,
-			SignMsgSource.blank.bit(), null, null);
+	public SignMessage createMsgBlank(SignConfig sc) {
+		return createMsg(sc, null, "", false, SignMsgPriority.low_1,
+			SignMsgSource.blank.bit(), null);
 	}
 
 	/** Create an incident sign message.
 	 *
 	 * @param sc Sign configuration.
 	 * @param inc Associated incident (original name).
-	 * @param multi MULTI text.
+	 * @param ms MULTI text.
 	 * @param mp Message priority.
-	 * @param duration Message duration; null for indefinite.
+	 * @param dur Message duration; null for indefinite.
 	 * @return New sign message, or null on error.
 	 */
-	public SignMessage create(SignConfig sc, String inc, String multi,
-		DmsMsgPriority mp, Integer duration)
+	public SignMessage createMsg(SignConfig sc, String inc, String ms,
+		SignMsgPriority mp, Integer dur)
 	{
-		if (multi.length() > 0) {
-			return create(sc, inc, multi, false, mp,
-				INCIDENT_SRC, user, duration);
+		if (ms.length() > 0) {
+			return createMsg(sc, inc, ms, false, mp,
+				INCIDENT_SRC, dur);
 		} else
-			return createBlankMessage(sc);
+			return createMsgBlank(sc);
 	}
 
 	/** Create a new sign message.
 	 *
 	 * @param sc Sign configuration.
 	 * @param inc Associated incident (original name).
-	 * @param multi MULTI text.
-	 * @param be Beacon enabled.
+	 * @param ms MULTI text.
+	 * @param fb Flash beacon.
 	 * @param mp Message priority.
 	 * @param src Sign message source bits.
-	 * @param owner User name.
-	 * @param duration Message duration; null for indefinite.
+	 * @param dur Message duration; null for indefinite.
 	 * @return Proxy of new sign message, or null on error.
 	 */
-	private SignMessage create(SignConfig sc, String inc, String multi,
-		boolean be, DmsMsgPriority mp, int src, String owner,
-		Integer duration)
+	private SignMessage createMsg(SignConfig sc, String inc, String ms,
+		boolean fb, SignMsgPriority mp, int src, Integer dur)
 	{
-		WMessage wmsg = new WMessage(multi);
-		if (wmsg.removeAll(WTokenType.standby)) {
-			multi = wmsg.toString();
-			mp = DmsMsgPriority.STANDBY;
-			src |= SignMsgSource.standby.bit();
-		}
-		SignMessage sm = SignMessageHelper.find(sc, inc, multi, be,
-			mp, src, owner, duration);
-		String prefix = createPrefix(src);
-		if (sm != null && sm.getName().startsWith(prefix))
+		String owner = SignMessageHelper.makeMsgOwner(src, user);
+		SignMessage sm = SignMessageHelper.find(sc, inc, ms, owner,
+			fb, mp, dur);
+		if (sm != null)
 			return sm;
-		String name = createName(prefix);
-		if (name != null) {
-			return create(name, sc, inc, multi, be, mp, src,
-			              owner, duration);
-		} else
-			return null;
+		String name = createName();
+		return (name != null)
+		      ? createMsg(name, sc, inc, ms, owner, fb, mp, dur)
+		      : null;
 	}
 
 	/** Create a new sign message.
@@ -157,56 +134,51 @@ public class SignMessageCreator {
 	 * @param name Sign message name.
 	 * @param sc Sign configuration.
 	 * @param inc Associated incident (original name).
-	 * @param multi MULTI text.
-	 * @param be Beacon enabled.
+	 * @param ms MULTI text.
+	 * @param msg_owner Message owner.
+	 * @param fb Flash beacon.
 	 * @param mp Message priority.
-	 * @param src Sign message source bits.
-	 * @param owner User name.
-	 * @param duration Message duration; null for indefinite.
+	 * @param dur Message duration; null for indefinite.
 	 * @return Proxy of new sign message, or null on error.
 	 */
-	private SignMessage create(String name, SignConfig sc, String inc,
-		String multi, boolean be, DmsMsgPriority mp, int src,
-		String owner, Integer duration)
+	private SignMessage createMsg(String name, SignConfig sc, String inc,
+		String ms, String msg_owner, boolean fb, SignMsgPriority mp,
+		Integer dur)
 	{
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("sign_config", sc);
 		if (inc != null)
 			attrs.put("incident", inc);
-		attrs.put("multi", multi);
-		attrs.put("beacon_enabled", be);
+		attrs.put("multi", ms);
+		attrs.put("msg_owner", msg_owner);
+		attrs.put("flash_beacon", fb);
 		attrs.put("msg_priority", Integer.valueOf(mp.ordinal()));
-		attrs.put("source", Integer.valueOf(src));
-		if (owner != null)
-			attrs.put("owner", owner);
-		if (duration != null)
-			attrs.put("duration", duration);
+		if (dur != null)
+			attrs.put("duration", dur);
 		sign_messages.createObject(name, attrs);
 		SignMessage sm = sign_messages.lookupObjectWait(name);
 		// Make sure this is the sign message we just created
-		if (sm != null && multi.equals(sm.getMulti()))
+		if (sm != null && ms.equals(sm.getMulti()))
 			return sm;
 		else
 			return null;
 	}
 
-	/** Create a sign message name.
-	 * @param prefix Prefix to use for name. */
-	private String createName(String prefix) {
-		String name = createUniqueSignMessageName(prefix);
+	/** Create a sign message name */
+	private String createName() {
+		String name = createUniqueSignMessageName();
 		return canAddSignMessage(name) ? name : null;
 	}
 
 	/** Create a SignMessage name.  The form of the name is prefix + hash
-	 * of user name with uid appended.
-	 * @param prefix Prefix to use for name. */
-	private String createUniqueSignMessageName(String prefix) {
+	 * of user name with uid appended. */
+	private String createUniqueSignMessageName() {
 		// NOTE: uid needs to persist between calls so that calling
 		// this method twice in a row doesn't return the same name
 		final int uid_max = sign_messages.size() + MAX_IN_PROCESS_NAMES;
 		for (int i = 0; i < uid_max; i++) {
 			final int _uid = (uid + i) % uid_max + 1;
-			String n = createName(prefix, _uid);
+			String n = createName(_uid);
 			if (sign_messages.lookupObject(n) == null) {
 				uid = _uid;
 				return n;
@@ -219,8 +191,8 @@ public class SignMessageCreator {
 	/** Create a SignMessage name.
 	 * @param i ID of name.
 	 * @return Name of SignMessage. */
-	private String createName(String prefix, int i) {
-		return prefix + Integer.toHexString((user + i).hashCode());
+	private String createName(int i) {
+		return "user_" + Integer.toHexString((user + i).hashCode());
 	}
 
 	/** Check if the user can add the named sign message */
@@ -230,6 +202,6 @@ public class SignMessageCreator {
 
 	/** Check if the user can create a sign message */
 	public boolean canCreate() {
-		return canAddSignMessage(createName(createPrefix(0), 0));
+		return canAddSignMessage(createName(0));
 	}
 }

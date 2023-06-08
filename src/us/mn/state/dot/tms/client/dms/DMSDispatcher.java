@@ -24,7 +24,6 @@ import javax.swing.JPanel;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.RasterBuilder;
@@ -32,8 +31,8 @@ import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.WordHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
@@ -47,7 +46,6 @@ import us.mn.state.dot.tms.utils.MultiString;
  * It contains several other components and keeps their state synchronized.
  *
  * @see us.mn.state.dot.tms.SignMessage
- * @see us.mn.state.dot.tms.client.dms.DMSPanelPager
  * @see us.mn.state.dot.tms.client.dms.MessageComposer
  *
  * @author Douglas Lau
@@ -55,26 +53,6 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Michael Darter
  */
 public class DMSDispatcher extends JPanel {
-
-	/** Check all the words in the specified MULTI string.
-	 * @param ms Multi string to spell check.
-	 * @return True to send the sign message else false to cancel. */
-	static private boolean checkWords(String ms) {
-		String msg = WordHelper.spellCheck(ms);
-		String amsg = WordHelper.abbreviationCheck(ms);
-		if (msg.isEmpty() && amsg.isEmpty())
-			return true;
-		if (msg.isEmpty())
-			return confirmSend(amsg);
-		String imsg = msg + amsg;
-		if (WordHelper.spellCheckEnforced()) {
-			IOptionPane.showError("word.spell.check", imsg);
-			return false;
-		} else if (WordHelper.spellCheckRecommend())
-			return confirmSend(imsg);
-		else
-			return false;
-	}
 
 	/** Confirm sending message */
 	static private boolean confirmSend(String imsg) {
@@ -135,7 +113,7 @@ public class DMSDispatcher extends JPanel {
 		for (DMS dms: sel_mdl.getSelected()) {
 			SignConfig sc = dms.getSignConfig();
 			if (sc != null) {
-				SignMessage sm = creator.createBlankMessage(sc);
+				SignMessage sm = creator.createMsgBlank(sc);
 				if (sm != null)
 					dms.setMsgUser(sm);
 			}
@@ -246,7 +224,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Update the current message on a sign */
 	public void updateMsgCurrent(DMS dms) {
-		String ms = DMSHelper.getOperatorMulti(dms);
+		String ms = DMSHelper.getUserMulti(dms);
 		composer.setComposedMulti(ms);
 		incident = DMSHelper.lookupIncident(dms);
 	}
@@ -260,8 +238,6 @@ public class DMSDispatcher extends JPanel {
 	/** Get the preview MULTI string */
 	public String getPreviewMulti(DMS dms) {
 		String ms = composer.getComposedMulti();
-		if (new MultiString(ms).isBlank())
-			return "";
 		String sched = getSchedMulti(dms);
 		if (sched != null) {
 			RasterBuilder rb = DMSHelper.createRasterBuilder(dms);
@@ -321,8 +297,6 @@ public class DMSDispatcher extends JPanel {
  	 * of spell checking options and send confirmation options.
 	 * @return True to send the message else false to cancel. */
 	private boolean shouldSendMessage(String ms) {
-		if (WordHelper.spellCheckEnabled() && !checkWords(ms))
-			return false;
 		if (SystemAttrEnum.DMS_SEND_CONFIRMATION_ENABLE.getBoolean())
 			return showConfirmDialog();
 		else
@@ -381,9 +355,9 @@ public class DMSDispatcher extends JPanel {
 		if (inc != null)
 			return createMessage(sc, incident, ms);
 		else {
-			boolean be = composer.isBeaconEnabled();
+			boolean fb = composer.getFlashBeacon();
 			Integer d = composer.getDuration();
-			return creator.create(sc, ms, be, d);
+			return creator.createMsg(sc, ms, fb, d);
 		}
 	}
 
@@ -392,9 +366,9 @@ public class DMSDispatcher extends JPanel {
 		String ms)
 	{
 		String inc_orig = IncidentHelper.getOriginalName(inc);
-		DmsMsgPriority prio = IncidentHelper.getPriority(inc);
+		SignMsgPriority mp = IncidentHelper.getPriority(inc);
 		Integer d = composer.getDuration();
-		return creator.create(sc, inc_orig, ms, prio, d);
+		return creator.createMsg(sc, inc_orig, ms, mp, d);
 	}
 
 	/** Update the selected sign(s) */

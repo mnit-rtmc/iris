@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +30,6 @@ import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.DmsAction;
-import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
@@ -40,15 +38,14 @@ import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.ParkingAreaHelper;
+import us.mn.state.dot.tms.PlanPhaseHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMsgSource;
-import us.mn.state.dot.tms.SignTextHelper;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.TransMsgPattern;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.TollZoneHelper;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
@@ -157,17 +154,17 @@ public class DmsActionMsg {
 	/** Valid message flag */
 	private boolean valid;
 
-	/** DMS message source flags */
-	private int src;
+	/** Sign message sources */
+	private int sources;
 
-	/** Add a message source flag */
-	private void addSrc(SignMsgSource s) {
-		src |= s.bit();
+	/** Add a message source */
+	private void addSource(SignMsgSource s) {
+		sources |= s.bit();
 	}
 
-	/** Get the source flag bits */
-	public int getSrc() {
-		return src;
+	/** Get the message sources */
+	public int getSources() {
+		return sources;
 	}
 
 	/** Mapping of station IDs to travel times */
@@ -205,6 +202,11 @@ public class DmsActionMsg {
 		return valid && (multi != null);
 	}
 
+	/** Check if the message is rasterizable */
+	public boolean isRasterizable() {
+		return isValid() && DMSHelper.isRasterizable(dms, multi);
+	}
+
 	/** Get the MULTI string */
 	public String getMulti() {
 		return multi;
@@ -237,7 +239,7 @@ public class DmsActionMsg {
 	/** Get the MULTI string for the DMS action */
 	private String getActionMulti() {
 		MsgPattern pat = action.getMsgPattern();
-		return (pat != null) ? pat.getMulti().trim() : "";
+		return (pat != null) ? pat.getMulti().trim() : EMPTY_SPAN;
 	}
 
 	/** Process a DMS action */
@@ -257,6 +259,9 @@ public class DmsActionMsg {
 		}
 		@Override public void addSpeedAdvisory() {
 			addSpan(speedAdvisorySpan());
+		}
+		@Override public void addStandby() {
+			addSource(SignMsgSource.standby);
 		}
 		@Override public void addClearGuideAdvisory(
 			String dms, int rid, int tsp, String mode, int ridx)
@@ -289,29 +294,27 @@ public class DmsActionMsg {
 
 	/** Process DMS action tags */
 	private String process(String ms) {
-		addSrc(SignMsgSource.schedule);
+		addSource(SignMsgSource.schedule);
 		if (isGateArm())
-			addSrc(SignMsgSource.gate_arm);
+			addSource(SignMsgSource.gate_arm);
 		if (isAlert())
-			addSrc(SignMsgSource.alert);
+			addSource(SignMsgSource.alert);
 		new MultiString(ms).parse(builder);
 		MultiString _multi = builder.toMultiString();
 		if (isBlank(_multi))
 			return (valid) ? feed_msg : null;
-	 	else
+		else
 			return postProcess(_multi.toString());
 	}
 
-	/** Check if the action has gate arm priority */
+	/** Check if the action source is gate arm */
 	private boolean isGateArm() {
-		return SignMsgSource.gate_arm.checkBit(DmsMsgPriority
-			.fromOrdinal(action.getMsgPriority()).getSource());
+		return PlanPhaseHelper.isGateArm(action.getPhase());
 	}
 
-	/** Check if the action has alert priority */
+	/** Check if the action source is alert */
 	private boolean isAlert() {
-		return SignMsgSource.alert.checkBit(DmsMsgPriority.fromOrdinal(
-			action.getMsgPriority()).getSource());
+		return PlanPhaseHelper.isAlert(action.getPhase());
 	}
 
 	/** Check if message is blank */
@@ -349,12 +352,12 @@ public class DmsActionMsg {
 		FeedMsg msg = FeedBucket.getMessage(fid, dms.getName());
 		return (msg != null)
 		      ? getFeedMsg(msg)
-		      : fail("Invalid feed ID");
+		      : fail("No message for sign");
 	}
 
 	/** Get the feed message string */
 	private String getFeedMsg(FeedMsg msg) {
-		addSrc(SignMsgSource.external);
+		addSource(SignMsgSource.external);
 		String ms = msg.getMulti().toString();
 		if (!isMsgFeedVerifyEnabled() || isFeedMsgValid(msg, ms))
 			return ms;
@@ -365,26 +368,13 @@ public class DmsActionMsg {
 	/** Test if a feed message is valid */
 	private boolean isFeedMsgValid(FeedMsg msg, String ms) {
 		SignConfig sc = msg.getSignConfig();
-		if (sc == null)
-			return false;
-		MsgPattern pat = new TransMsgPattern(sc, "");
-		List<String> lines = MsgPatternHelper.splitLines(pat, ms);
-		for (int i = 0; i < lines.size(); i++) {
-			if (!isValidSignText((short) (i + 1), lines.get(i)))
-				return false;
-		}
-		return true;
-	}
-
-	/** Check if a MULTI string is a valid sign text for the sign group */
-	private boolean isValidSignText(short line, String ms) {
-		return ms.isEmpty() ||
-		       SignTextHelper.match(action.getSignGroup(), line, ms);
+		MsgPattern pat = action.getMsgPattern();
+		return MsgPatternHelper.validateLines(pat, sc, ms);
 	}
 
 	/** Calculate speed advisory span */
 	private String speedAdvisorySpan() {
-		addSrc(SignMsgSource.speed_advisory);
+		addSource(SignMsgSource.speed_advisory);
 		Corridor cor = lookupCorridor();
 		return (cor != null)
 		      ? calculateSpeedAdvisory(cor)
@@ -430,7 +420,7 @@ public class DmsActionMsg {
 	 * @param dist Distance to search for slow traffic (1/10 mile).
 	 * @param mode Tag replacement mode (none, dist or speed). */
 	private String slowWarningSpan(int spd, int dist, String mode) {
-		addSrc(SignMsgSource.slow_warning);
+		addSource(SignMsgSource.slow_warning);
 		return slowWarningSpan(createSpeed(spd), createDist(dist),mode);
 	}
 
@@ -438,7 +428,7 @@ public class DmsActionMsg {
 	 * @param did Exit detector ID.
 	 * @param occ Threshold occupancy to activate warning. */
 	private String exitWarningSpan(String did, int occ) {
-		addSrc(SignMsgSource.exit_warning);
+		addSource(SignMsgSource.exit_warning);
 		Detector det = DetectorHelper.lookup(did);
 		return (det instanceof DetectorImpl)
 		      ? exitWarningSpan((DetectorImpl) det, occ)
@@ -544,7 +534,7 @@ public class DmsActionMsg {
 
 	/** Calculate tolling text span */
 	private String tollingSpan(String mode, String[] zones) {
-		addSrc(SignMsgSource.tolling);
+		addSource(SignMsgSource.tolling);
 		if (zones.length < 1)
 			return fail("No toll zones");
 		switch (mode) {
@@ -612,7 +602,7 @@ public class DmsActionMsg {
 	private void processTravelTime(String sid, OverLimitMode mode,
 		String o_txt)
 	{
-		addSrc(SignMsgSource.travel_time);
+		addSource(SignMsgSource.travel_time);
 		Route r = findRoute(sid);
 		if (r != null && r.legCount() > 0)
 			processTravelTime(r, sid, mode, o_txt);
@@ -756,7 +746,7 @@ public class DmsActionMsg {
 
 	/** Calculate parking area availability span */
 	private String parkingSpan(String pid, String l_txt, String c_txt) {
-		addSrc(SignMsgSource.parking);
+		addSource(SignMsgSource.parking);
 		ParkingArea pa = ParkingAreaHelper.lookup(pid);
 		if (pa instanceof ParkingAreaImpl) {
 			ParkingAreaImpl pai = (ParkingAreaImpl) pa;
@@ -784,11 +774,11 @@ public class DmsActionMsg {
 	 * @param min Min statistic value, 0 to ignore.
 	 * @param mode Variable to use: tt, delay
 	 * @param ridx Route index, zero based */
-	private String clearGuideSpan(
-		String dms, int rid, int min, String mode, int ridx)
+	private String clearGuideSpan(String dms, int rid, int min,
+		String mode, int ridx)
 	{
-		addSrc(SignMsgSource.clearguide);
-		addSrc(SignMsgSource.external);
+		addSource(SignMsgSource.clearguide);
+		addSource(SignMsgSource.external);
 		return calcClearGuideAdvisory(dms, rid, min, mode, ridx);
 	}
 

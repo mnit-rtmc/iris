@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,6 +55,9 @@ public class ReaperJob extends Job {
 	/** Seconds to offset each poll from start of interval */
 	static private final int OFFSET_SECS = 27;
 
+	/** List of sign messages */
+	private final ArrayList<SignMessageImpl> sign_msgs;
+
 	/** List of zombie sign messages */
 	private final ArrayList<SignMessageImpl> zombie_msgs;
 
@@ -67,6 +70,7 @@ public class ReaperJob extends Job {
 	/** Create a new job to reap dead stuff */
 	public ReaperJob() {
 		super(Calendar.MINUTE, 1, Calendar.SECOND, OFFSET_SECS);
+		sign_msgs = new ArrayList<SignMessageImpl>();
 		zombie_msgs = new ArrayList<SignMessageImpl>();
 		zombie_incs = new ArrayList<IncidentImpl>();
 		zombie_alerts = new ArrayList<AlertInfoImpl>();
@@ -81,21 +85,37 @@ public class ReaperJob extends Job {
 		FeedBucket.purgeExpired();
 	}
 
-	/** Reap sign messages which have been unused for awhile */
+	/** Reap sign messages which have not been used for awhile */
 	private void reapSignMessages() {
-		// NOTE: there is a small race where a client could send a
-		// message to a DMS just after isReferenced is called.  It can
-		// only happen during a very short window about one minute
-		// after the message loses its last reference.  Is it worth
-		// making a fix for this unlikely scenario?
 		if (zombie_msgs.isEmpty()) {
-			findReapableMessages();
-			removeReferencedMessages();
+			if (sign_msgs.isEmpty())
+				findAllSignMessages();
+			else
+				checkForZombieMessages();
 		} else {
 			for (SignMessageImpl sm: zombie_msgs)
 				reapMessage(sm);
 			zombie_msgs.clear();
 		}
+	}
+
+	/** Find all sign messages */
+	private void findAllSignMessages() {
+		Iterator<SignMessage> it = SignMessageHelper.iterator();
+		while (it.hasNext()) {
+			SignMessage sm = it.next();
+			if (sm instanceof SignMessageImpl)
+				sign_msgs.add((SignMessageImpl) sm);
+		}
+	}
+
+	/** Check for zombie sign messages */
+	private void checkForZombieMessages() {
+		for (SignMessageImpl sm: sign_msgs) {
+			if (!isReferenced(sm))
+				zombie_msgs.add(sm);
+		}
+		sign_msgs.clear();
 	}
 
 	/** Reap one sign message */
@@ -105,29 +125,13 @@ public class ReaperJob extends Job {
 		// This is needed because objects are removed
 		// asynchronously from the namespace.
 		SignMessage m = SignMessageHelper.lookup(sm.getName());
-		if ((m == sm) && !isReferenced(m)) {
+		if (m != sm)
+			sm.logMsg("lookup failed (reaper)");
+		else if (!isReferenced(sm)) {
+			// NOTE: there is a race where a DMS could acquire
+			//       a reference just before notifyRemove
 			sm.notifyRemove();
 			sm.logMsg("removed (reaper)");
-		}
-	}
-
-	/** Find all reapable sign messages */
-	private void findReapableMessages() {
-		Iterator<SignMessage> it = SignMessageHelper.iterator();
-		while (it.hasNext()) {
-			SignMessage sm = it.next();
-			if (sm instanceof SignMessageImpl)
-				zombie_msgs.add((SignMessageImpl) sm);
-		}
-	}
-
-	/** Remove referenced sign messages */
-	private void removeReferencedMessages() {
-		Iterator<SignMessageImpl> it = zombie_msgs.iterator();
-		while (it.hasNext()) {
-			SignMessage sm = it.next();
-			if (isReferenced(sm))
-				it.remove();
 		}
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  * Copyright (C) 2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,11 +28,10 @@ import us.mn.state.dot.tms.BeaconAction;
 import us.mn.state.dot.tms.BeaconActionHelper;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
-import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneActionHelper;
 import us.mn.state.dot.tms.LaneMarking;
@@ -40,7 +39,6 @@ import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.MeterActionHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
@@ -381,16 +379,13 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Check if a DMS action is deployable */
 	private boolean isDeployable(DmsAction da) {
-		SignGroup sg = da.getSignGroup();
-		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
+		String dht = da.getDmsHashtag();
+		Iterator<DMS> it = DMSHelper.hashtagIterator(dht);
 		while (it.hasNext()) {
-			DmsSignGroup dsg = it.next();
-			if (dsg.getSignGroup() == sg) {
-				DMS dms = dsg.getDms();
-				if (dms instanceof DMSImpl) {
-					if (((DMSImpl) dms).hasError())
-						return false;
-				}
+			DMS dms = it.next();
+			if (dms instanceof DMSImpl) {
+				if (((DMSImpl) dms).hasError())
+					return false;
 			}
 		}
 		return true;

@@ -130,10 +130,9 @@ struct SignMessage {
     sign_config: String,
     incident: Option<String>,
     multi: String,
-    beacon_enabled: bool,
+    msg_owner: String,
+    flash_beacon: bool,
     msg_priority: i32,
-    sources: String,
-    owner: Option<String>,
     duration: Option<i32>,
 }
 
@@ -494,7 +493,7 @@ impl MsgData {
         let cfg = &s.sign_config;
         match self.configs.get(cfg) {
             Some(c) => Ok(c),
-            None => Err(UnknownResourceError::new(format!("Config: {}", cfg))),
+            None => Err(UnknownResourceError::new(format!("Config: {cfg}"))),
         }
     }
 
@@ -504,7 +503,7 @@ impl MsgData {
             Some(fname) => match self.fonts.lookup_name(fname) {
                 Some(font) => Ok(font.number()),
                 None => {
-                    Err(UnknownResourceError::new(format!("Font: {}", fname)))
+                    Err(UnknownResourceError::new(format!("Font: {fname}")))
                 }
             },
             None => Ok(1),

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -33,6 +33,8 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.RasterGraphic;
+import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.CellRendererSize;
 import us.mn.state.dot.tms.client.widget.ILabel;
@@ -106,7 +108,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 	private final JLabel owner_lbl = new ILabel("", Font.ITALIC, 0.8f);
 
 	/** Sign pixel panel to display sign message */
-	private final SignPixelPanel pixel_pnl = new SignPixelPanel(50, 200);
+	private final SignPixelPanel pixel_pnl = new SignPixelPanel(200, 50);
 
 	/** Location panel */
 	private final JPanel loc_pnl = new JPanel();
@@ -221,10 +223,12 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		      : null;
 	}
 
-	/** Get the owner user name (may be overridden) */
+	/** Get the current message owner */
 	protected String getOwner(DMS dms) {
-		String o = DMSHelper.getOwner(dms);
-		return (o != null) ? o : "";
+		SignMessage sm = dms.getMsgCurrent();
+		return SignMessageHelper.isBlank(sm)
+		      ? ""
+		      : SignMessageHelper.getMsgOwnerName(sm);
 	}
 
 	/** Update tooltip */
@@ -241,7 +245,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 			tt.append(": ");
 			tt.append(loc);
 			tt.append(": ");
-			tt.append(DMSHelper.buildMsgLine(dms));
+			tt.append(DMSHelper.buildMsgText(dms));
 			break;
 		case MEDIUM:
 			tt.append(name);

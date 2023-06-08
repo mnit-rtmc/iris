@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2023  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  * Copyright (C) 2021  Iteris Inc.
  *
@@ -18,10 +18,13 @@ package us.mn.state.dot.tms;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 import org.json.JSONException;
 import org.json.JSONObject;
 import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.MultiString;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -46,6 +49,81 @@ public class DMSHelper extends BaseHelper {
 	static public Iterator<DMS> iterator() {
 		return new IteratorWrapper<DMS>(namespace.iterator(
 			DMS.SONAR_TYPE));
+	}
+
+	/** Normalize a hashtag value */
+	static public String normalizeHashtag(String ht) {
+		if (ht != null) {
+			ht = ht.trim();
+			return ht.matches("#[A-Za-z0-9]+") ? ht : null;
+		} else
+			return null;
+	}
+
+	/** Make an ordered array of hashtags */
+	static public String[] makeHashtags(String[] ht) {
+		TreeSet<String> tags = new TreeSet<String>();
+		for (String tag: ht) {
+			tag = normalizeHashtag(tag);
+			if (tag != null)
+				tags.add(tag);
+		}
+		return tags.toArray(new String[0]);
+	}
+
+	/** Hashtag filter iterator */
+	static public class DmsHashtagIterator implements Iterator<DMS> {
+		private final String hashtag;
+		private final Iterator<DMS> wrapped;
+		private DMS next;
+		public DmsHashtagIterator(String ht, Iterator<DMS> it) {
+			hashtag = ht;
+			wrapped = it;
+			next = null;
+		}
+		@Override public boolean hasNext() {
+			while (next == null && wrapped.hasNext()) {
+				next = wrapped.next();
+				if (hasHashtag(next, hashtag))
+					return true;
+				next = null;
+			}
+			return (next != null);
+		}
+		@Override public DMS next() {
+			DMS n = next;
+			next = null;
+			return n;
+		}
+		@Override public void remove() {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	/** Get a DMS iterator for a given hashtag */
+	static public Iterator<DMS> hashtagIterator(String ht) {
+		return new DmsHashtagIterator(ht, iterator());
+	}
+
+	/** Find all DMS with a given hashtag */
+	static public Set<DMS> findAllTagged(String ht) {
+		TreeSet<DMS> signs = new TreeSet<DMS>(
+			new NumericAlphaComparator<DMS>());
+		Iterator<DMS> it = hashtagIterator(ht);
+		while (it.hasNext())
+			signs.add(it.next());
+		return signs;
+	}
+
+	/** Check if a DMS has a hashtag */
+	static public boolean hasHashtag(DMS dms, String hashtag) {
+		if (hashtag != null) {
+			for (String tag: dms.getHashtags()) {
+				if (hashtag.equalsIgnoreCase(tag))
+					return true;
+			}
+		}
+		return false;
 	}
 
 	/** Get the maintenance status of a DMS */
@@ -129,13 +207,12 @@ public class DMSHelper extends BaseHelper {
 		return "";
 	}
 
-	/** Get the operator sent MULTI string currently on a DMS.
+	/** Get the user sent MULTI string currently on a DMS.
 	 * @param dms DMS to lookup. */
-	static public String getOperatorMulti(DMS dms) {
+	static public String getUserMulti(DMS dms) {
 		if (dms != null) {
-			SignMessage sm = dms.getMsgCurrent();
-			if (sm != null
-			 && SignMsgSource.operator.checkBit(sm.getSource()))
+			SignMessage sm = dms.getMsgUser();
+			if (sm != null)
 				return sm.getMulti();
 		}
 		return "";
@@ -196,7 +273,7 @@ public class DMSHelper extends BaseHelper {
 	 * specified DMS.
 	 * @param dms The DMS containing the message.
 	 * @return Text of message on the DMS. */
-	static public String buildMsgLine(DMS dms) {
+	static public String buildMsgText(DMS dms) {
 		SignMessage sm = dms.getMsgCurrent();
 		if (sm != null) {
 			String multi = sm.getMulti();
@@ -277,7 +354,7 @@ public class DMSHelper extends BaseHelper {
 	 * @param dms Sign in question.
 	 * @return RasterGraphic array, one for each page, or null on error.
 	 */
-	static public RasterGraphic[] createRasters(DMS dms) {
+	static private RasterGraphic[] createRasters(DMS dms) {
 		if (dms != null) {
 			SignMessage sm = dms.getMsgCurrent();
 			if (sm != null)
@@ -291,15 +368,9 @@ public class DMSHelper extends BaseHelper {
 	 * @param multi MULTI string.
 	 * @return RasterGraphic array, one for each page, or null on error.
 	 */
-	static public RasterGraphic[] createRasters(DMS dms, String multi) {
+	static private RasterGraphic[] createRasters(DMS dms, String multi) {
 		RasterBuilder rb = createRasterBuilder(dms);
 		return (rb != null) ? rb.createRasters(multi) : null;
-	}
-
-	/** Get the owner of the current message */
-	static public String getOwner(DMS dms) {
-		SignMessage sm = dms.getMsgCurrent();
-		return (sm != null) ? sm.getOwner() : null;
 	}
 
 	/** Lookup the associated incident */
@@ -310,46 +381,6 @@ public class DMSHelper extends BaseHelper {
 		return (sm != null)
 		      ? IncidentHelper.lookupOriginal(sm.getIncident())
 		      : null;
-	}
-
-	/** Check if a MULTI string fits on a DMS.
-	 * @param dms Sign in question.
-	 * @param multi MULTI string.
-	 * @param abbrev Check word abbreviations.
-	 * @return Best fit MULTI string, or null if message does not fit. */
-	static public String checkMulti(DMS dms, String multi, boolean abbrev) {
-		return (createPageOne(dms, multi) != null)
-		      ? multi
-		      : (abbrev) ? checkMultiAbbrev(dms, multi) : null;
-	}
-
-	/** Check if a MULTI string fits on a DMS (with abbreviations).
-	 * @param dms Sign in question.
-	 * @param multi MULTI string.
-	 * @return Best fit MULTI string, or null if message does not fit. */
-	static private String checkMultiAbbrev(DMS dms, String multi) {
-		String[] words = multi.split(" ");
-		// Abbreviate words with non-blank abbreviations
-		for (int i = words.length - 1; i >= 0; i--) {
-			String abbrev = WordHelper.abbreviate(words[i]);
-			if (abbrev != null && abbrev.length() > 0) {
-				words[i] = abbrev;
-				String ms = String.join(" ", words);
-				if (createPageOne(dms, ms) != null)
-					return ms;
-			}
-		}
-		// Abbreviate words with blank abbreviations
-		for (int i = words.length - 1; i >= 0; i--) {
-			String abbrev = WordHelper.abbreviate(words[i]);
-			if (abbrev != null) {
-				words[i] = abbrev;
-				String ms = String.join(" ", words);
-				if (createPageOne(dms, ms) != null)
-					return ms;
-			}
-		}
-		return null;
 	}
 
 	/** Get DMS status attribute */
@@ -419,6 +450,42 @@ public class DMSHelper extends BaseHelper {
 			catch (IndexOutOfBoundsException e) {
 				// stuck bitmap doesn't match current dimensions
 			}
+		}
+		return null;
+	}
+
+	/** Check if a MULTI string is rasterizable for a sign */
+	static public boolean isRasterizable(DMS dms, String ms) {
+		RasterBuilder rb = createRasterBuilder(dms);
+		return rb != null && rb.isRasterizable(ms);
+	}
+
+	/** Validate free-form message lines */
+	static public String validateFreeFormLines(DMS dms, String ms) {
+		if (dms == null || ms == null)
+			return "NULL VALUE";
+		SignConfig sc = dms.getSignConfig();
+		if (sc == null)
+			return "NULL VALUE";
+		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms)) {
+			if (MsgPatternHelper.validateLines(pat, sc, ms))
+				return null;
+		}
+		return "NOT PERMITTED";
+	}
+
+	/** Validate free-form message words */
+	static public String validateFreeFormWords(DMS dms, String ms) {
+		if (dms == null || ms == null)
+			return "NULL VALUE";
+		SignConfig sc = dms.getSignConfig();
+		if (sc == null)
+			return "NULL VALUE";
+		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms)) {
+			String msg = MsgPatternHelper.validateWords(pat, sc,
+				ms);
+			if (msg != null)
+				return msg;
 		}
 		return null;
 	}

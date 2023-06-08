@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2018  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,34 +34,39 @@ public class SeenCountProp extends E6Property {
 	static private final int QUERY = 0x0067;
 
 	/** RF protocol */
-	private final RFProtocol protocol;
+	public final RFProtocol protocol;
 
 	/** Seen count frames */
-	private int seen;
+	private Integer seen;
 
 	/** Get the seen count */
-	public int getSeen() {
+	public Integer getSeen() {
 		return seen;
 	}
 
+	/** Set the seen count */
+	public void setSeen(Integer s) {
+		seen = s;
+	}
+
 	/** Unique count frames */
-	private int unique;
+	private Integer unique;
 
 	/** Get the unique count */
-	public int getUnique() {
+	public Integer getUnique() {
 		return unique;
 	}
 
-	/** Create a seen count property */
-	public SeenCountProp(RFProtocol p, int s, int u) {
-		protocol = p;
-		seen = s;
+	/** Set the unique count */
+	public void setUnique(Integer u) {
 		unique = u;
 	}
 
 	/** Create a seen count property */
 	public SeenCountProp(RFProtocol p) {
-		this(p, 0, 0);
+		protocol = p;
+		seen = null;
+		unique = null;
 	}
 
 	/** Get the command */
@@ -75,7 +80,7 @@ public class SeenCountProp extends E6Property {
 	public byte[] queryData() {
 		byte[] d = new byte[3];
 		format16(d, 0, QUERY);
-		format8(d, 2, protocol.ordinal());
+		format8(d, 2, protocol.value);
 		return d;
 	}
 
@@ -86,7 +91,7 @@ public class SeenCountProp extends E6Property {
 			throw new ParsingException("DATA LEN: " + d.length);
 		if (parse16(d, 2) != QUERY)
 			throw new ParsingException("SUB CMD");
-		if (RFProtocol.fromOrdinal(parse8(d, 4)) != protocol)
+		if (RFProtocol.fromValue(parse8(d, 4)) != protocol)
 			throw new ParsingException("RF PROTOCOL");
 		seen = parse16(d, 5);
 		unique = parse16(d, 7);
@@ -95,11 +100,13 @@ public class SeenCountProp extends E6Property {
 	/** Get the store packet data */
 	@Override
 	public byte[] storeData() {
+		int sn = (seen != null) ? seen : 0;
+		int uq = (unique != null) ? unique : 0;
 		byte[] d = new byte[7];
 		format16(d, 0, STORE);
-		format8(d, 2, protocol.ordinal());
-		format16(d, 3, seen);
-		format16(d, 5, unique);
+		format8(d, 2, protocol.value);
+		format16(d, 3, sn);
+		format16(d, 5, uq);
 		return d;
 	}
 
@@ -110,7 +117,7 @@ public class SeenCountProp extends E6Property {
 			throw new ParsingException("DATA LEN: " + d.length);
 		if (parse16(d, 2) != STORE)
 			throw new ParsingException("SUB CMD");
-		if (RFProtocol.fromOrdinal(parse8(d, 4)) != protocol)
+		if (RFProtocol.fromValue(parse8(d, 4)) != protocol)
 			throw new ParsingException("RF PROTOCOL");
 	}
 

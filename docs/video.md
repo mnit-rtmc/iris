@@ -2,7 +2,7 @@
 
 A _video monitor_ is a dedicated screen which can display [camera] streams in
 real time.  IRIS can quickly switch the stream and title text displayed on a
-video monitor, using supported protocols.
+video monitor, using supported [protocol]s.
 
 ## MonStream
 
@@ -100,6 +100,6 @@ assigned sequence numbers, so they can be used in the same way.
 [IO pin]: controllers.html#io-pins
 [MonStream]: https://github.com/mnit-rtmc/monstream
 [Privilege]: user_roles.html#privileges
-[protocol]: comm_links.html#protocols
+[protocol]: protocols.html
 [selector tool]: cameras.html#selector-tool
 [system attribute]: system_attributes.html

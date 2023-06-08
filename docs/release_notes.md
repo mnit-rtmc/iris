@@ -1,5 +1,52 @@
 # IRIS 5.x Release Notes
 
+5.43.0 (16 May 2023)
+ - Check free-form DMS text with `msg_user` permissions
+ - Removed `dms_composer_edit_mode` system attribute
+ - Removed `dict_allowed_scheme` system attribute
+ - Removed `dict_banned_scheme` system attribute
+ - Removed unused database columns and views
+ - Improved documentation
+
+5.42.0 (7 Mar 2023)
+ - Replaced `sign_message` owner with `msg_owner`
+ - Removed `sign_message` source (now in `msg_owner`)
+ - NTCIP: store `msg_owner` in dmsMessageOwner object
+ - Renamed msg priorities to `low_1, low_2 ..., medium_*, high_*``
+ - Removed tag reader properties which are now in `settings`
+ - Fixed problems in CAP alert processing
+
+5.41.0 (28 Feb 2023)
+ - Add support for 6C coalition tolling tags
+ - Add tag reader `settings` JSON column
+ - Query additional tag reader settings
+ - Fixed invalid #tag for active CAP alerts
+ - Improved DMS action scheduling
+ - Fixed obscure NTCIP parsing errors
+
+5.40.0 (14 Feb 2023)
+ - Renamed `beacon_enabled` to `flash_beacon` (DB)
+ - Add `flash_beacon` to MsgPattern (remove from DmsAction)
+ - Improved UI for editing MsgLine records
+ - Clear message composer duration when selecting a new sign
+
+5.39.0 (8 Feb 2023)
+ - Replaced DMS sign groups with #hashtags.  **WARNING**: the
+   migrate-5.39.sql script requires agency-specific tweaks!
+ - Replaced SignText with MsgLine, now tied to MsgPatterns
+ - Improved MsgPattern UI (select by sign config)
+ - Improved sign pixel preview rendering
+ - Abbreviate/filter out msg lines which don't fit on sign
+ - For patterns with no msg lines, find substitue pattern for line select
+ - Fixed problem with incident auto deploy on "split" signs
+ - Fixed NTCIP table corruption for ESS objects
+
+5.38.0 (6 Feb 2023)
+ - Always enable "Query Msg" in DMS popup menu
+ - Improved handling of NTCIP DMS temperature objects
+ - Added VSL device purpose for DMS
+ - Fixed problems related to msg pattern changes
+
 5.37.0 (11 Jan 2023)
  - Redesigned DMS [message composer](composer.html), replacing quick messages
    with message patterns and removing many redundant features

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2018  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,34 +36,39 @@ public class RFAttenProp extends E6Property {
 	static private final int QUERY = 0x52;
 
 	/** RF protocol */
-	private final RFProtocol protocol;
+	public final RFProtocol protocol;
 
 	/** Downlink attenuation value (0 - 15 dB) */
-	private int downlink;
+	private Integer downlink;
 
-	/** Get downlink attenuation (db) */
-	public int getDownlinkDb() {
+	/** Get downlink attenuation (dB) */
+	public Integer getDownlinkDb() {
 		return downlink;
 	}
 
-	/** Uplink attenuation value (0 - 15 dB) */
-	private int uplink;
+	/** Set downlink attenuation (dB) */
+	public void setDownlinkDb(Integer d) {
+		downlink = d;
+	}
 
-	/** Get uplink attenuation (db) */
-	public int getUplinkDb() {
+	/** Uplink attenuation value (0 - 15 dB) */
+	private Integer uplink;
+
+	/** Get uplink attenuation (dB) */
+	public Integer getUplinkDb() {
 		return uplink;
 	}
 
-	/** Create an FR attenuation property */
-	public RFAttenProp(RFProtocol p, int d, int u) {
-		protocol = p;
-		downlink = d;
+	/** Set uplink attenuation (dB) */
+	public void setUplinkDb(Integer u) {
 		uplink = u;
 	}
 
 	/** Create an FR attenuation property */
 	public RFAttenProp(RFProtocol p) {
-		this(p, 0, 0);
+		protocol = p;
+		downlink = null;
+		uplink = null;
 	}
 
 	/** Get the command */
@@ -77,7 +82,7 @@ public class RFAttenProp extends E6Property {
 	public byte[] queryData() {
 		byte[] d = new byte[3];
 		format8(d, 0, QUERY);
-		format8(d, 1, protocol.ordinal() << 4);
+		format8(d, 1, protocol.value << 4);
 		format8(d, 2, 0x0D);	// Carriage-return
 		return d;
 	}
@@ -89,7 +94,7 @@ public class RFAttenProp extends E6Property {
 			throw new ParsingException("DATA LEN: " + d.length);
 		if (parse8(d, 2) != QUERY)
 			throw new ParsingException("SUB CMD");
-		if (RFProtocol.fromOrdinal(parse8(d, 3) >> 4) != protocol)
+		if (RFProtocol.fromValue(parse8(d, 3) >> 4) != protocol)
 			throw new ParsingException("RF PROTOCOL");
 		if (parse8(d, 5) != 0)
 			throw new ParsingException("ACK");
@@ -102,10 +107,12 @@ public class RFAttenProp extends E6Property {
 	/** Get the store packet data */
 	@Override
 	public byte[] storeData() {
+		int dn = (downlink != null) ? downlink : 0;
+		int up = (uplink != null) ? uplink : 0;
 		byte[] d = new byte[4];
 		format8(d, 0, STORE);
-		format8(d, 1, protocol.ordinal() << 4);
-		format8(d, 2, ((downlink << 4) & 0xF0) | (uplink & 0x0F));
+		format8(d, 1, protocol.value << 4);
+		format8(d, 2, ((dn << 4) & 0xF0) | (up & 0x0F));
 		format8(d, 3, 0x0D);	// Carriage-return
 		return d;
 	}
@@ -117,7 +124,7 @@ public class RFAttenProp extends E6Property {
 			throw new ParsingException("DATA LEN: " + d.length);
 		if (parse8(d, 2) != STORE)
 			throw new ParsingException("SUB CMD");
-		if (RFProtocol.fromOrdinal(parse8(d, 3) >> 4) != protocol)
+		if (RFProtocol.fromValue(parse8(d, 3) >> 4) != protocol)
 			throw new ParsingException("RF PROTOCOL");
 		if (parse8(d, 4) != 0)
 			throw new ParsingException("ACK");

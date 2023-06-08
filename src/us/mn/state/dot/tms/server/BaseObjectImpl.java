@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2022  Minnesota Department of Transportation
+ * Copyright (C) 2007-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.sonar.server.ServerNamespace;
+import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import us.mn.state.dot.tms.server.event.BaseEvent;
@@ -95,10 +96,8 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		RampMeterImpl.loadAll();
 		SignMessageImpl.loadAll();
 		DMSImpl.loadAll();
-		SignGroupImpl.loadAll();
-		DmsSignGroupImpl.loadAll();
 		MsgPatternImpl.loadAll();
-		SignTextImpl.loadAll();
+		MsgLineImpl.loadAll();
 		GateArmArrayImpl.loadAll();
 		GateArmImpl.loadAll();
 		TagReaderImpl.loadAll();
@@ -301,20 +300,6 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		      : null;
 	}
 
-	/** Lookup a sign group */
-	static protected SignGroupImpl lookupSignGroup(String name) {
-		SonarObject so = lookupObject(SignGroupImpl.SONAR_TYPE, name);
-		return (so instanceof SignGroupImpl) ? (SignGroupImpl)so : null;
-	}
-
-	/** Lookup a DMS sign group */
-	static protected DmsSignGroupImpl lookupDmsSignGroup(String name) {
-		SonarObject so = lookupObject(DmsSignGroupImpl.SONAR_TYPE,name);
-		return (so instanceof DmsSignGroupImpl)
-		      ? (DmsSignGroupImpl) so
-		      : null;
-	}
-
 	/** Lookup a message pattern */
 	static protected MsgPatternImpl lookupMsgPattern(String name) {
 		SonarObject so = lookupObject(MsgPatternImpl.SONAR_TYPE, name);
@@ -475,7 +460,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			if (u != null)
 				return u;
 		}
-		return "IRIS user";
+		return BaseHelper.USER_AUTO;
 	}
 
 	/** Notify SONAR clients of an object created */
@@ -561,5 +546,38 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 				ev.doStore();
 			}
 		});
+	}
+
+	/** Query user's permission access level for this object.
+	 *
+	 * @return Access level (0-4)
+	 *         0 none, 1 view, 2 operate, 3 plan, 4 configure */
+	public int queryPermAccess() throws TMSException {
+		String res = getTypeName();
+		String user = getProcUser();
+		final int[] access = { 0 };
+		store.query("SELECT max(access_n) " +
+			"FROM iris.permission p " +
+			"JOIN iris.i_user u ON u.role = p.role " +
+			"WHERE resource_n = '" + res + "' " +
+			"AND u.name = '" + user + "' " +
+			"AND (" +
+				"p.hashtag IS NULL OR " +
+				"p.hashtag IN (" +
+					"SELECT hashtag " +
+					"FROM iris.hashtag " +
+					"WHERE resource_n = '" + res + "' " +
+					"AND name = '" + getName() + "'" +
+				")" +
+			");",
+			new ResultFactory()
+		{
+			@Override public void create(ResultSet row)
+				throws SQLException
+			{
+				access[0] = row.getInt(1);
+			}
+		});
+		return access[0];
 	}
 }

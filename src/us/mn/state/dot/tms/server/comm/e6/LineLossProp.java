@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,21 +35,21 @@ public class LineLossProp extends E6Property {
 	static private final int QUERY = 0x56;
 
 	/** Line loss value (0 - 3 dB) */
-	private int value = 0;
+	private Integer value;
 
 	/** Get line loss (dB) */
-	public int getValue() {
+	public Integer getValue() {
 		return value;
 	}
 
-	/** Create a line loss property */
-	public LineLossProp(int v) {
+	/** Set line loss (dB) */
+	public void setValue(Integer v) {
 		value = v;
 	}
 
 	/** Create a line loss property */
 	public LineLossProp() {
-		this(0);
+		value = null;
 	}
 
 	/** Get the command */
@@ -84,9 +84,10 @@ public class LineLossProp extends E6Property {
 	/** Get the store packet data */
 	@Override
 	public byte[] storeData() {
+		int val = (value != null) ? value : 0;
 		byte[] d = new byte[3];
 		format8(d, 0, STORE);
-		format8(d, 1, value);
+		format8(d, 1, val);
 		format8(d, 2, 0x0D);	// Carriage-return
 		return d;
 	}
@@ -98,7 +99,8 @@ public class LineLossProp extends E6Property {
 			throw new ParsingException("DATA LEN: " + d.length);
 		if (parse8(d, 2) != STORE)
 			throw new ParsingException("SUB CMD");
-		if (parse8(d, 3) != value)
+		int val = (value != null) ? value : 0;
+		if (parse8(d, 3) != val)
 			throw new ParsingException("LINE LOSS");
 		if (parse8(d, 4) != 0)
 			throw new ParsingException("ACK");

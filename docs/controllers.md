@@ -8,6 +8,24 @@ Sometimes a controller represents a separate physical _box_, which is connected
 to devices, and other times the controller may be embedded within the device.
 In either case, a controller is required for any communication to a device.
 
+## Resources
+
+* `iris/api/controller`
+* `iris/api/controller/{name}`
+* `iris/api/controller_io/{name}`
+
+The read-only `controller_io` resource returns an array of objects consisting
+of `pin`, `name` and `resource_n` of associated [devices](#devices).
+
+Attribute [permissions]:
+
+| Access       | Minimal                              | Full     |
+|--------------|--------------------------------------|----------|
+| Read Only    | name, location, setup, fail\_time    | geo\_loc |
+| 👉 Operate   |                                      | download, device\_req |
+| 💡 Plan      | condition, notes                     |          |
+| 🔧 Configure | comm\_link, drop\_id, cabinet\_style | password |
+
 ## Drop Address
 
 Some [protocol]s support _multi-drop_ addressing, while others are _single-drop_
@@ -60,22 +78,38 @@ Each controller has a set of **IO pins** for connecting [devices](#devices) or
 [flow streams].  Every _device_ or _flow stream_ must be assigned to an _IO pin_
 to be used.  The function of these pins is [protocol] specific.
 
+# Cabinet Styles
+
+Controllers can have an associated cabinet style, used for MnDOT-170 and Natch
+[protocol]s.
+
+## Resources
+
+* `iris/api/cabinet_style`
+* `iris/api/cabinet_style/{name}`
+
+| Access       | Minimal    | Full |
+|--------------|------------|------|
+| Read Only    | name       |      |
+| 🔧 Configure |            | police\_panel\_pin\_1, police\_panel\_pin\_2, watchdog\_reset\_pin\_1, watchdog\_reset\_pin\_2, dip |
+
 
 [alarms]: alarms.html
 [beacons]: beacons.html
 [cameras]: cameras.html
-[CBW]: comm_links.html#cbw
+[CBW]: protocols.html#cbw
 [comm link]: comm_links.html
 [dynamic message signs]: dms.html
 [flow streams]: flow_streams.html
 [gate arms]: gate_arms.html
 [GPS]: gps.html
 [lane-use control signs]: lcs.html
-[protocol]: comm_links.html#protocols
-[NTCIP]: comm_links.html#ntcip
+[permissions]: permissions.html
+[protocol]: protocols.html
+[NTCIP]: protocols.html#ntcip
 [ramp meters]: ramp_meters.html
 [road weather information systems]: rwis.html
-[SierraGX]: comm_links.html#sierragx
+[SierraGX]: protocols.html#sierragx
 [tag readers]: tolling.html#tag-readers
 [vehicle detection systems]: vehicle_detection.html
 [video monitors]: video.html

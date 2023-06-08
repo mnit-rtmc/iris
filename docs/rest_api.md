@@ -10,23 +10,23 @@ Data requests are split into *public* and *restricted* paths:
 - `iris/img/`: Public sign images (no authentication)
 - `iris/api/`: Restricted data (needs session authentication)
 - `iris/api/login`: Authentication endpoint
-- `iris/api/access`: User's access permissions
+- `iris/api/access`: User's access [permission]s
 
 ## Public Resources
 
 These resources are JSON arrays, fetched using http `GET` requests.
 
-- `iris/camera_pub`: Camera locations and configuration
+- `iris/camera_pub`: [Camera] locations and configuration
 - `iris/detector_pub`: Vehicle detectors
-- `iris/dms_message`: Current DMS messages and status
-- `iris/dms_pub`: DMS locations and configuration
+- `iris/dms_message`: Current [DMS] messages and status
+- `iris/dms_pub`: [DMS] locations and configuration
 - `iris/font`: Bitmapped fonts for DMS
 - `iris/graphic`: Graphics for DMS
 - `iris/incident`: Currently active incidents
 - `iris/rwis`: [Road Weather Information System]
-- `iris/sign_config`: DMS sign configurations
+- `iris/sign_config`: DMS [sign configuration]s
 - `iris/sign_detail`: DMS sign detail information
-- `iris/sign_message`: Active DMS sign messages
+- `iris/sign_message`: Active DMS [sign message]s
 - `iris/station_sample`: Vehicle detection station data
 - `iris/system_attribute_pub`: Public [system attributes]
 - `iris/TPIMS_archive`: Truck parking archive data
@@ -37,9 +37,9 @@ These resources are JSON arrays, fetched using http `GET` requests.
 
 These resources are static, and may only change on IRIS updates:
 
-- `iris/beacon_state`: Beacon states
+- `iris/beacon_state`: [Beacon] states
 - `iris/comm_protocol`: Communication protocols
-- `iris/condition`: Controller conditions
+- `iris/condition`: [Controller] conditions
 - `iris/direction`: Travel directions
 - `iris/gate_arm_interlock`: Gate arm interlocks
 - `iris/gate_arm_state`: Gate arm states
@@ -50,7 +50,7 @@ These resources are static, and may only change on IRIS updates:
 
 ### Sign Images
 
-The resources in `iris/img/` are GIF images of active sign messages from
+The resources in `iris/img/` are GIF images of active [sign message]s from
 `sign_message`.
 
 ## Login and Access
@@ -82,28 +82,13 @@ A `Content-Type: application/json` header is included where appropriate.
 
 ## Resource Types
 
-### `alarm`
-
-| Access       | Minimal                 | Full          |
-|--------------|-------------------------|---------------|
-| Read Only    | name, state             | trigger\_time |
-| 🔧 Configure | description, controller | pin           |
-
-### `beacon`
-
-| Access       | Minimal        | Full                        |
-|--------------|----------------|-----------------------------|
-| Read Only    | name, location | geo\_loc                    |
-| 👉 Operate   | state          |                             |
-| 💡 Plan      | message, notes | preset                      |
-| 🔧 Configure | controller     | pin, verify\_pin, ext\_mode |
-
-### `cabinet_style`
-
-| Access       | Minimal    | Full |
-|--------------|------------|------|
-| Read Only    | name       |      |
-| 🔧 Configure |            | police\_panel\_pin\_1, police\_panel\_pin\_2, watchdog\_reset\_pin\_1, watchdog\_reset\_pin\_2, dip |
+| Access Control | Communication   | Devices  |
+|----------------|-----------------|----------|
+| [domain]       | [comm_config]   | [alarm]  |
+| [permission]   | [comm_link]     | [beacon] |
+| [role]         | [controller]    | [camera] |
+| [user]         | [cabinet_style] | [dms]    |
+|                | [modem]         |          |
 
 ### `camera`
 
@@ -114,35 +99,6 @@ A `Content-Type: application/json` header is included where appropriate.
 | 💡 Plan      | notes, publish       | streamable            |
 | 🔧 Configure | controller, cam\_num | pin, cam\_template, encoder\_type, enc\_address, enc\_port, enc\_mcast, enc\_channel
 
-### `comm_config`
-
-| Access       | Minimal     | Full |
-|--------------|-------------|------|
-| Read Only    | name        |      |
-| 💡 Plan      |             | timeout\_ms, idle\_disconnect\_sec, no\_response\_disconnect\_sec |
-| 🔧 Configure | description | protocol, modem, poll\_period\_sec, long\_poll\_period\_sec |
-
-### `comm_link`
-
-| Access       | Minimal                        | Full |
-|--------------|--------------------------------|------|
-| Read Only    | name, connected                |      |
-| 💡 Plan      | poll\_enabled                  |      |
-| 🔧 Configure | description, uri, comm\_config |      |
-
-### `controller`
-
-| Access       | Minimal                              | Full     |
-|--------------|--------------------------------------|----------|
-| Read Only    | name, location, setup, fail\_time    | geo\_loc |
-| 👉 Operate   |                                      | download, device\_req |
-| 💡 Plan      | condition, notes                     |          |
-| 🔧 Configure | comm\_link, drop\_id, cabinet\_style | password |
-
-Also, a read only `controller_io` resource is available with
-`GET iris/api/controller_io/{name}`.  It contains an array of objects consisting
-of `pin`, `name` and `resource_n`.
-
 ### `detector`
 
 | Access       | Minimal     | Full                       |
@@ -151,15 +107,6 @@ of `pin`, `name` and `resource_n`.
 | 👉 Operate   |             | field\_length, force\_fail |
 | 💡 Plan      | notes       | abandoned                  |
 | 🔧 Configure | controller  | pin, r\_node, lane\_code, lane\_number, fake |
-
-### `dms`
-
-| Access       | Minimal                      | Full      |
-|--------------|------------------------------|-----------|
-| Read Only    | name, location, msg\_current | sign\_config, sign\_detail, geo\_loc, msg\_sched, status, stuck\_pixels |
-| 👉 Operate   |                              | msg\_user |
-| 💡 Plan      | notes                        |           |
-| 🔧 Configure | controller                   | pin       |
 
 ### `flow_stream`
 
@@ -234,21 +181,6 @@ Since `geo_loc` resources can only be created and deleted with an associated
 | Read Only    | name, lcs, indication |      |
 | 🔧 Configure | controller            | pin  |
 
-### `modem`
-
-| Access       | Minimal    | Full        |
-|--------------|------------|-------------|
-| Read Only    | name       |             |
-| 💡 Plan      | enabled    | timeout\_ms |
-| 🔧 Configure |            | uri, config |
-
-### `permission`
-
-| Access       | Minimal                             | Full |
-|--------------|-------------------------------------|------|
-| Read Only    | id                                  |      |
-| 🔧 Configure | role, resource\_n, batch, access\_n |      |
-
 ### `ramp_meter`
 
 | Access       | Minimal        | Full                             |
@@ -258,28 +190,13 @@ Since `geo_loc` resources can only be created and deleted with an associated
 | 💡 Plan      | notes          | storage, max\_wait, algorithm, am\_target, pm\_target |
 | 🔧 Configure | controller     | pin, meter\_type, beacon, preset |
 
-### `role`
-
-| Access       | Minimal    | Full |
-|--------------|------------|------|
-| Read Only    | name       |      |
-| 💡 Plan      | enabled    |      |
-
 ### `tag_reader`
 
-| Access       | Minimal        | Full       |
-|--------------|----------------|------------|
-| Read Only    | name, location | geo\_loc   |
-| 💡 Plan      | notes          | toll\_zone |
-| 🔧 Configure | controller     | pin        |
-
-### `user`
-
-| Access       | Minimal          | Full |
-|--------------|------------------|------|
-| Read Only    | name             |      |
-| 💡 Plan      | enabled          |      |
-| 🔧 Configure | full\_name, role |      |
+| Access       | Minimal        | Full               |
+|--------------|----------------|--------------------|
+| Read Only    | name, location | geo\_loc, settings |
+| 💡 Plan      | notes          | toll\_zone         |
+| 🔧 Configure | controller     | pin                |
 
 ### `video_monitor`
 
@@ -299,9 +216,21 @@ Since `geo_loc` resources can only be created and deleted with an associated
 | 🔧 Configure | controller               | pin  |
 
 
-[permission]: #permission
+[alarm]: alarms.html
+[beacon]: beacons.html
+[cabinet_style]: controllers.html#cabinet-styles
+[camera]: cameras.html
+[comm_config]: comm_config.html
+[comm_link]: comm_links.html
+[controller]: controllers.html
+[dms]: dms.html
+[domain]: user_roles.html#domains
+[modem]: modem.html
+[permission]: permissions.html
 [resource types]: #resource-types
 [Road Weather Information System]: rwis.html
-[role]: #role
+[role]: user_roles.html#roles
+[sign configuration]: sign_configuration.html
+[sign message]: sign_message.html
 [system attributes]: system_attributes.html
-[user]: #user
+[user]: user_roles.html

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,14 +29,17 @@ public interface DmsAction extends SonarObject {
 	/** Get the action plan */
 	ActionPlan getActionPlan();
 
-	/** Get the sign group */
-	SignGroup getSignGroup();
-
 	/** Set the phase to perform action */
 	void setPhase(PlanPhase p);
 
 	/** Get the phase to perform action */
 	PlanPhase getPhase();
+
+	/** Set the DMS hashtag */
+	void setDmsHashtag(String ht);
+
+	/** Get the DMS hashtag */
+	String getDmsHashtag();
 
 	/** Set the message pattern */
 	void setMsgPattern(MsgPattern pat);
@@ -44,19 +47,13 @@ public interface DmsAction extends SonarObject {
 	/** Get the message pattern */
 	MsgPattern getMsgPattern();
 
-	/** Set beacon enabled flag */
-	void setBeaconEnabled(boolean be);
-
-	/** Get beacon enabled flag */
-	boolean getBeaconEnabled();
-
 	/** Set the message priority.
 	 * @param p Priority ranging from 1 (low) to 255 (high).
-	 * @see us.mn.state.dot.tms.DmsMsgPriority */
+	 * @see us.mn.state.dot.tms.SignMsgPriority */
 	void setMsgPriority(int p);
 
 	/** Get the message priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).
-	 * @see us.mn.state.dot.tms.DmsMsgPriority */
+	 * @see us.mn.state.dot.tms.SignMsgPriority */
 	int getMsgPriority();
 }

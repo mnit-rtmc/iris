@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,14 +58,14 @@ public class ModeProp extends E6Property {
 		return mode;
 	}
 
-	/** Create a mode property */
-	public ModeProp(Mode m) {
+	/** Set the mode */
+	public void setMode(Mode m) {
 		mode = m;
 	}
 
 	/** Create a mode property */
 	public ModeProp() {
-		this(Mode.stop);
+		mode = null;
 	}
 
 	/** Get the command */
@@ -95,9 +95,10 @@ public class ModeProp extends E6Property {
 	/** Get the store packet data */
 	@Override
 	public byte[] storeData() {
+		Mode m = (mode != null) ? mode : Mode.stop;
 		byte[] d = new byte[3];
 		format16(d, 0, STORE);
-		format8(d, 2, mode.value);
+		format8(d, 2, m.value);
 		return d;
 	}
 

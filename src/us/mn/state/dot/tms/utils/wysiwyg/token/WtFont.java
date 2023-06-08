@@ -71,21 +71,6 @@ public class WtFont extends WToken {
 		}
 	}
 
-
-	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#isNormalizeLine()
-	 */
-	public boolean isNormalizeLine() {
-		return true;
-	}
-
-	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.wysiwyg.WToken#isNormalizeLine2()
-	 */
-	public boolean isNormalizeLine2() {
-		return false;
-	}
-	
 	/**
 	 * @return the f_num
 	 */

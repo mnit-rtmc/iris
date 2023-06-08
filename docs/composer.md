@@ -4,7 +4,7 @@
 
 ![](images/dms_composer_old.png)
 
-The operator would select a message line-by-line of sign text on the left.
+The operator would select a message line-by-line of text on the left.
 Alternatively, a **Quick Message** could be selected.  There were _optional_
 Font and Page on-time widgets.  In addition, there were other fields which
 determine how a message was composed: **exclude_font**, **override_font**,
@@ -15,12 +15,12 @@ determine how a message was composed: **exclude_font**, **override_font**,
 ![](images/dms_composer_new.png)
 
 With v5.37+, the operator selects a [message pattern] first, or accepts the
-default. Then, depending on the pattern, may optionally select sign text
+default. Then, depending on the pattern, may optionally select text
 line-by-line.  The pattern determines which font, foreground and background
 colors, page times, graphics, color rectangles, justifaction, character
-spacing, etc.  If a pattern contains [fillable text rectangles], then sign text
-can be placed there using the line-by-line method.  Otherwise, it acts like a
-quick message.
+spacing, etc.  If a pattern contains [fillable text rectangles], then message
+text can be placed there using the line-by-line method.  Otherwise, it acts
+like a quick message.
 
 The following features were **removed**, since message patterns make them
 redundant:

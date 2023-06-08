@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,6 +99,7 @@ public enum MIB1203 {
 	  dmsMessageEntry		(dmsMessageTable, 1),
 	    dmsMessageMemoryType	(dmsMessageEntry, 1),
 	    dmsMessageMultiString	(dmsMessageEntry, 3),
+	    dmsMessageOwner		(dmsMessageEntry, 4),
 	    dmsMessageCRC		(dmsMessageEntry, 5),
 	    dmsMessageBeacon		(dmsMessageEntry, 6),
 	    dmsMessagePixelService	(dmsMessageEntry, 7),

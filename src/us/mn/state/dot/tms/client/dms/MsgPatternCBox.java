@@ -15,17 +15,13 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.List;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.utils.MultiString;
-import us.mn.state.dot.tms.utils.NumericAlphaComparator;
+import us.mn.state.dot.tms.utils.TextRect;
 
 /**
  * The message pattern combobox is a widget which allows the user to select
@@ -38,46 +34,14 @@ import us.mn.state.dot.tms.utils.NumericAlphaComparator;
  */
 public class MsgPatternCBox extends JComboBox<MsgPattern> {
 
-	/** Check if a message pattern should be included in combo box */
-	static private boolean isValidMulti(MsgPattern pat) {
-		MultiString ms = new MultiString(pat.getMulti());
-		return ms.isValidMulti();
-	}
-
 	/** Populate the message pattern model, sorted */
-	public void populateModel(DMS dms) {
-		setSelectedIndex(-1);
-		TreeSet<MsgPattern> msgs = createMessageSet(dms);
-		// check for a fillable pattern
-		boolean fillable = false;
-		for (MsgPattern pat: msgs) {
-			if (MsgPatternHelper.hasTextRectangles(pat)) {
-				fillable = true;
-				break;
-			}
-		}
-		removeAllItems();
-		if (!fillable)
-			addItem(null);
-		for (MsgPattern pat: msgs)
-			addItem(pat);
-	}
-
-	/** Create a set of message patterns for the specified DMS */
-	private TreeSet<MsgPattern> createMessageSet(DMS dms) {
-		TreeSet<MsgPattern> msgs = new TreeSet<MsgPattern>(
-			new NumericAlphaComparator<MsgPattern>());
-		Set<SignGroup> groups = DmsSignGroupHelper.findGroups(dms);
-		Iterator<MsgPattern> pit = MsgPatternHelper.iterator();
-		while (pit.hasNext()) {
-			MsgPattern pat = pit.next();
-			if (groups.contains(pat.getSignGroup()) &&
-			    isValidMulti(pat))
-			{
-				msgs.add(pat);
-			}
-		}
-		return msgs;
+	public void populateModel(DMS dms, TextRect tr) {
+		DefaultComboBoxModel<MsgPattern> mdl =
+			new DefaultComboBoxModel<MsgPattern>();
+		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms))
+			mdl.addElement(pat);
+		mdl.setSelectedItem(null);
+		setModel(mdl);
 	}
 
 	/** Set the enabled status */
@@ -85,7 +49,7 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 	public void setEnabled(boolean e) {
 		super.setEnabled(e);
 		if (!e) {
-			setSelectedIndex(-1);
+			setSelectedItem(null);
 			removeAllItems();
 		}
 	}
@@ -99,28 +63,43 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 	}
 
 	/** Find the best pattern for a MULTI string */
-	public MsgPattern findBestPattern(String ms) {
+	public MsgPattern findBestPattern(String ms, TextRect tr) {
+		assert tr != null;
 		MsgPattern best = null;
 		for (int i = 0; i < getItemCount(); i++) {
 			MsgPattern pat = getItemAt(i);
-			if (pat != null) {
-				String multi = pat.getMulti();
-				if (multi.equals(ms)) {
-					best = pat;
-					break;
-				}
-				if (MsgPatternHelper.hasTextRectangles(pat)) {
-					if (best != null) {
-						int len = multi.length();
-						int blen = best.getMulti()
-							.length();
-						if (len < blen)
-							best = pat;
-					} else
-						best = pat;
-				}
-			}
+			String multi = pat.getMulti();
+			// check for perfect match
+			if (multi.length() > 0 && multi.equals(ms))
+				return pat;
+			// check if pattern has "fillable" text rectangles
+			if (tr.find(multi).size() > 0)
+				best = MsgPatternHelper.better(best, pat);
 		}
 		return best;
+	}
+
+	/** Find a substitute pattern containing message lines */
+	public MsgPattern findSubstitutePattern(TextRect tr,
+		MsgPattern pattern)
+	{
+		assert tr != null;
+		List<TextRect> rects = tr.find(pattern.getMulti());
+		return (rects.size() > 0)
+		      ? findSubstitutePattern(tr, rects.get(0).getLineCount())
+		      : null;
+	}
+
+	/** Find a substitute pattern containing message lines */
+	private MsgPattern findSubstitutePattern(TextRect tr, int n_lines) {
+		for (int i = 0; i < getItemCount(); i++) {
+			MsgPattern pat = getItemAt(i);
+			List<TextRect> rects = tr.find(pat.getMulti());
+			if (rects.size() > 0 &&
+			    rects.get(0).getLineCount() == n_lines &&
+			    MsgPatternHelper.hasLines(pat))
+				return pat;
+		}
+		return null;
 	}
 }

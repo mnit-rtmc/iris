@@ -1,6 +1,6 @@
 // state.rs
 //
-// Copyright (C) 2021-2022  Minnesota Department of Transportation
+// Copyright (C) 2021-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ pub struct Permission {
     pub id: i32,
     pub role: String,
     pub resource_n: String,
-    pub batch: Option<String>,
+    pub hashtag: Option<String>,
     pub access_n: i32,
 }
 
@@ -49,7 +49,7 @@ impl Permission {
             id: row.get(0),
             role: row.get(1),
             resource_n: row.get(2),
-            batch: row.get(3),
+            hashtag: row.get(3),
             access_n: row.get(4),
         }
     }
@@ -73,7 +73,7 @@ VALUES ($1, $2, $3)";
 /// Update one permission
 const UPDATE_PERM: &str = "\
 UPDATE iris.permission \
-SET (role, resource_n, batch, access_n) = ($2, $3, $4, $5) \
+SET (role, resource_n, hashtag, access_n) = ($2, $3, $4, $5) \
 WHERE id = $1";
 
 /// Delete one permission
@@ -84,17 +84,17 @@ WHERE id = $1";
 
 /// Query access permissions for a user
 const QUERY_ACCESS: &str = "\
-SELECT p.id, p.role, p.resource_n, p.batch, p.access_n \
+SELECT p.id, p.role, p.resource_n, p.hashtag, p.access_n \
 FROM iris.i_user u \
 JOIN iris.role r ON u.role = r.name \
 JOIN iris.permission p ON p.role = r.name \
 WHERE u.enabled = true AND r.enabled = true \
 AND u.name = $1 \
-ORDER BY p.resource_n, p.batch";
+ORDER BY p.resource_n, p.hashtag";
 
 /// Query permissions for a user / resource
 const QUERY_PERMISSIONS: &str = "\
-SELECT p.id, p.role, p.resource_n, p.batch, p.access_n \
+SELECT p.id, p.role, p.resource_n, p.hashtag, p.access_n \
 FROM iris.i_user u \
 JOIN iris.role r ON u.role = r.name \
 JOIN iris.permission p ON p.role = r.name \
@@ -146,7 +146,7 @@ impl State {
             id,
             mut role,
             mut resource_n,
-            mut batch,
+            mut hashtag,
             mut access_n,
         } = Permission::from_row(row);
         if let Some(Value::String(r)) = obj.remove("role") {
@@ -155,9 +155,9 @@ impl State {
         if let Some(Value::String(r)) = obj.remove("resource_n") {
             resource_n = r;
         }
-        match obj.remove("batch") {
-            Some(Value::String(b)) => batch = Some(b),
-            Some(Value::Null) => batch = None,
+        match obj.remove("hashtag") {
+            Some(Value::String(ht)) => hashtag = Some(ht),
+            Some(Value::Null) => hashtag = None,
             _ => (),
         };
         if let Some(Value::Number(a)) = obj.remove("access_n") {
@@ -166,7 +166,10 @@ impl State {
             }
         }
         let rows = transaction
-            .execute(UPDATE_PERM, &[&id, &role, &resource_n, &batch, &access_n])
+            .execute(
+                UPDATE_PERM,
+                &[&id, &role, &resource_n, &hashtag, &access_n],
+            )
             .map_err(|_e| SonarError::Conflict)?;
         if rows == 1 {
             transaction.commit()?;
@@ -206,7 +209,7 @@ impl State {
         let mut client = self.pool.get()?;
         for row in client.query(QUERY_PERMISSIONS, &[&user, &res])? {
             let perm = Permission::from_row(row);
-            if perm.batch.is_none() {
+            if perm.hashtag.is_none() {
                 return Ok(perm);
             }
         }
