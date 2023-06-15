@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -188,6 +188,6 @@ public class LensPanel extends JPanel {
 		iris_open_btn.setEnabled(e);
 		iris_close_btn.setEnabled(e);
 		wiper_btn.setEnabled(e);
-		reset_btn.setEnabled(e);
+		reset_btn.setEnabled(false); // FIXME
 	}
 }
