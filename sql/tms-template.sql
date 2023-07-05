@@ -1757,8 +1757,158 @@ CREATE VIEW camera_view AS
 GRANT SELECT ON camera_view TO PUBLIC;
 
 CREATE TABLE iris._cam_sequence (
-	seq_num INTEGER PRIMARY KEY
+    seq_num INTEGER PRIMARY KEY
 );
+
+CREATE TABLE iris._play_list (
+    name VARCHAR(20) PRIMARY KEY,
+    seq_num INTEGER REFERENCES iris._cam_sequence,
+    description VARCHAR(32)
+);
+
+CREATE VIEW iris.play_list AS
+    SELECT name, seq_num, description
+    FROM iris._play_list;
+
+CREATE FUNCTION iris.play_list_insert() RETURNS TRIGGER AS
+    $play_list_insert$
+BEGIN
+    IF NEW.seq_num IS NOT NULL THEN
+        INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
+    END IF;
+    INSERT INTO iris._play_list (name, seq_num, description)
+         VALUES (NEW.name, NEW.seq_num, NEW.description);
+    RETURN NEW;
+END;
+$play_list_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER play_list_insert_trig
+    INSTEAD OF INSERT ON iris.play_list
+    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_insert();
+
+CREATE FUNCTION iris.play_list_update() RETURNS TRIGGER AS
+    $play_list_update$
+BEGIN
+    IF NEW.seq_num IS NOT NULL AND (OLD.seq_num IS NULL OR
+                                    NEW.seq_num != OLD.seq_num)
+    THEN
+        INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
+    END IF;
+    UPDATE iris._play_list
+       SET seq_num = NEW.seq_num,
+           description = NEW.description
+     WHERE name = OLD.name;
+    IF OLD.seq_num IS NOT NULL AND (NEW.seq_num IS NULL OR
+                                    NEW.seq_num != OLD.seq_num)
+    THEN
+        DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
+    END IF;
+    RETURN NEW;
+END;
+$play_list_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER play_list_update_trig
+    INSTEAD OF UPDATE ON iris.play_list
+    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_update();
+
+CREATE FUNCTION iris.play_list_delete() RETURNS TRIGGER AS
+    $play_list_delete$
+BEGIN
+    DELETE FROM iris._play_list WHERE name = OLD.name;
+    IF FOUND THEN
+        DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
+        RETURN OLD;
+    ELSE
+        RETURN NULL;
+    END IF;
+END;
+$play_list_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER play_list_delete_trig
+    INSTEAD OF DELETE ON iris.play_list
+    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_delete();
+
+CREATE TABLE iris.play_list_camera (
+    play_list VARCHAR(20) NOT NULL REFERENCES iris._play_list,
+    ordinal INTEGER NOT NULL,
+    camera VARCHAR(20) NOT NULL REFERENCES iris._camera
+);
+ALTER TABLE iris.play_list_camera ADD PRIMARY KEY (play_list, ordinal);
+
+CREATE VIEW play_list_view AS
+    SELECT play_list, ordinal, seq_num, camera
+    FROM iris.play_list_camera
+    JOIN iris.play_list ON play_list_camera.play_list = play_list.name;
+GRANT SELECT ON play_list_view TO PUBLIC;
+
+CREATE TABLE iris._catalog (
+    name VARCHAR(20) PRIMARY KEY,
+    seq_num INTEGER NOT NULL REFERENCES iris._cam_sequence,
+    description VARCHAR(32)
+);
+
+CREATE VIEW iris.catalog AS
+    SELECT name, seq_num, description
+    FROM iris._catalog;
+
+CREATE FUNCTION iris.catalog_insert() RETURNS TRIGGER AS
+    $catalog_insert$
+BEGIN
+    INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
+    INSERT INTO iris._catalog (name, seq_num, description)
+         VALUES (NEW.name, NEW.seq_num, NEW.description);
+    RETURN NEW;
+END;
+$catalog_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER catalog_insert_trig
+    INSTEAD OF INSERT ON iris.catalog
+    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_insert();
+
+CREATE FUNCTION iris.catalog_update() RETURNS TRIGGER AS
+    $catalog_update$
+BEGIN
+    IF NEW.seq_num != OLD.seq_num THEN
+        INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
+    END IF;
+    UPDATE iris._catalog
+       SET seq_num = NEW.seq_num,
+           description = NEW.description
+     WHERE name = OLD.name;
+    IF NEW.seq_num != OLD.seq_num THEN
+        DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
+    END IF;
+    RETURN NEW;
+END;
+$catalog_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER catalog_update_trig
+    INSTEAD OF UPDATE ON iris.catalog
+    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_update();
+
+CREATE FUNCTION iris.catalog_delete() RETURNS TRIGGER AS
+    $catalog_delete$
+BEGIN
+    DELETE FROM iris._catalog WHERE name = OLD.name;
+    IF FOUND THEN
+        DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
+        RETURN OLD;
+    ELSE
+        RETURN NULL;
+    END IF;
+END;
+$catalog_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER catalog_delete_trig
+    INSTEAD OF DELETE ON iris.catalog
+    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_delete();
+
+CREATE TABLE iris.catalog_play_list (
+    catalog VARCHAR(20) NOT NULL REFERENCES iris._catalog,
+    ordinal INTEGER NOT NULL,
+    play_list VARCHAR(20) NOT NULL REFERENCES iris._play_list
+);
+ALTER TABLE iris.catalog_play_list ADD PRIMARY KEY (catalog, ordinal);
 
 CREATE TABLE iris.vid_src_template (
 	name VARCHAR(20) PRIMARY KEY,
@@ -1782,156 +1932,6 @@ CREATE TABLE iris.cam_vid_src_ord (
 	src_order INTEGER,
 	src_template VARCHAR(20) REFERENCES iris.vid_src_template
 );
-
-CREATE TABLE iris._play_list (
-	name VARCHAR(20) PRIMARY KEY,
-	seq_num INTEGER REFERENCES iris._cam_sequence,
-	description VARCHAR(32)
-);
-
-CREATE VIEW iris.play_list AS
-	SELECT name, seq_num, description
-	FROM iris._play_list;
-
-CREATE FUNCTION iris.play_list_insert() RETURNS TRIGGER AS
-	$play_list_insert$
-BEGIN
-	IF NEW.seq_num IS NOT NULL THEN
-		INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
-	END IF;
-	INSERT INTO iris._play_list (name, seq_num, description)
-	     VALUES (NEW.name, NEW.seq_num, NEW.description);
-	RETURN NEW;
-END;
-$play_list_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER play_list_insert_trig
-    INSTEAD OF INSERT ON iris.play_list
-    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_insert();
-
-CREATE FUNCTION iris.play_list_update() RETURNS TRIGGER AS
-	$play_list_update$
-BEGIN
-	IF NEW.seq_num IS NOT NULL AND (OLD.seq_num IS NULL OR
-	                                NEW.seq_num != OLD.seq_num)
-	THEN
-		INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
-	END IF;
-	UPDATE iris._play_list
-	   SET seq_num = NEW.seq_num,
-	       description = NEW.description
-	 WHERE name = OLD.name;
-	IF OLD.seq_num IS NOT NULL AND (NEW.seq_num IS NULL OR
-	                                NEW.seq_num != OLD.seq_num)
-	THEN
-		DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
-	END IF;
-	RETURN NEW;
-END;
-$play_list_update$ LANGUAGE plpgsql;
-
-CREATE TRIGGER play_list_update_trig
-    INSTEAD OF UPDATE ON iris.play_list
-    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_update();
-
-CREATE FUNCTION iris.play_list_delete() RETURNS TRIGGER AS
-	$play_list_delete$
-BEGIN
-	DELETE FROM iris._play_list WHERE name = OLD.name;
-	IF FOUND THEN
-		DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$play_list_delete$ LANGUAGE plpgsql;
-
-CREATE TRIGGER play_list_delete_trig
-    INSTEAD OF DELETE ON iris.play_list
-    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_delete();
-
-CREATE TABLE iris.play_list_camera (
-	play_list VARCHAR(20) NOT NULL REFERENCES iris._play_list,
-	ordinal INTEGER NOT NULL,
-	camera VARCHAR(20) NOT NULL REFERENCES iris._camera
-);
-ALTER TABLE iris.play_list_camera ADD PRIMARY KEY (play_list, ordinal);
-
-CREATE VIEW play_list_view AS
-	SELECT play_list, ordinal, seq_num, camera
-	FROM iris.play_list_camera
-	JOIN iris.play_list ON play_list_camera.play_list = play_list.name;
-GRANT SELECT ON play_list_view TO PUBLIC;
-
-CREATE TABLE iris._catalog (
-	name VARCHAR(20) PRIMARY KEY,
-	seq_num INTEGER NOT NULL REFERENCES iris._cam_sequence,
-	description VARCHAR(32)
-);
-
-CREATE VIEW iris.catalog AS
-	SELECT name, seq_num, description
-	FROM iris._catalog;
-
-CREATE FUNCTION iris.catalog_insert() RETURNS TRIGGER AS
-	$catalog_insert$
-BEGIN
-	INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
-	INSERT INTO iris._catalog (name, seq_num, description)
-	     VALUES (NEW.name, NEW.seq_num, NEW.description);
-	RETURN NEW;
-END;
-$catalog_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER catalog_insert_trig
-    INSTEAD OF INSERT ON iris.catalog
-    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_insert();
-
-CREATE FUNCTION iris.catalog_update() RETURNS TRIGGER AS
-	$catalog_update$
-BEGIN
-	IF NEW.seq_num != OLD.seq_num THEN
-		INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
-	END IF;
-	UPDATE iris._catalog
-	   SET seq_num = NEW.seq_num,
-	       description = NEW.description
-	 WHERE name = OLD.name;
-	IF NEW.seq_num != OLD.seq_num THEN
-		DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
-	END IF;
-	RETURN NEW;
-END;
-$catalog_update$ LANGUAGE plpgsql;
-
-CREATE TRIGGER catalog_update_trig
-    INSTEAD OF UPDATE ON iris.catalog
-    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_update();
-
-CREATE FUNCTION iris.catalog_delete() RETURNS TRIGGER AS
-	$catalog_delete$
-BEGIN
-	DELETE FROM iris._catalog WHERE name = OLD.name;
-	IF FOUND THEN
-		DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$catalog_delete$ LANGUAGE plpgsql;
-
-CREATE TRIGGER catalog_delete_trig
-    INSTEAD OF DELETE ON iris.catalog
-    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_delete();
-
-CREATE TABLE iris.catalog_play_list (
-	catalog VARCHAR(20) NOT NULL REFERENCES iris._catalog,
-	ordinal INTEGER NOT NULL,
-	play_list VARCHAR(20) NOT NULL REFERENCES iris._play_list
-);
-ALTER TABLE iris.catalog_play_list ADD PRIMARY KEY (catalog, ordinal);
 
 CREATE TABLE event.camera_switch_event (
 	event_id SERIAL PRIMARY KEY,
