@@ -3053,18 +3053,37 @@ CREATE VIEW dms_message_view AS
     LEFT JOIN iris.sign_message sm ON d.msg_current = sm.name;
 GRANT SELECT ON dms_message_view TO PUBLIC;
 
-CREATE TABLE iris.dms_hashtag (
-    dms VARCHAR(20) NOT NULL REFERENCES iris._dms,
-    hashtag VARCHAR(16) NOT NULL,
+CREATE VIEW iris.dms_hashtag AS
+    SELECT name AS dms, hashtag FROM iris.hashtag WHERE resource_n = 'dms';
 
-    CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$')
-);
-ALTER TABLE iris.dms_hashtag ADD PRIMARY KEY (dms, hashtag);
+CREATE FUNCTION iris.dms_hashtag_insert() RETURNS TRIGGER AS
+    $dms_hashtag_insert$
+BEGIN
+    INSERT INTO iris.hashtag (resource_n, name, hashtag)
+         VALUES ('dms', NEW.dms, NEW.hashtag);
+    RETURN NEW;
+END;
+$dms_hashtag_insert$ LANGUAGE plpgsql;
 
-CREATE VIEW dms_hashtag_view AS
-    SELECT dms, hashtag
-    FROM iris.dms_hashtag;
-GRANT SELECT ON dms_hashtag_view TO PUBLIC;
+CREATE TRIGGER dms_hashtag_insert_trig
+    INSTEAD OF INSERT ON iris.dms_hashtag
+    FOR EACH ROW EXECUTE PROCEDURE iris.dms_hashtag_insert();
+
+CREATE FUNCTION iris.dms_hashtag_delete() RETURNS TRIGGER AS
+    $dms_hashtag_delete$
+BEGIN
+    DELETE FROM iris.hashtag WHERE resource_n = 'dms' AND name = OLD.dms;
+    IF FOUND THEN
+        RETURN OLD;
+    ELSE
+        RETURN NULL;
+    END IF;
+END;
+$dms_hashtag_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER dms_hashtag_delete_trig
+    INSTEAD OF DELETE ON iris.dms_hashtag
+    FOR EACH ROW EXECUTE PROCEDURE iris.dms_hashtag_delete();
 
 CREATE TABLE iris.msg_pattern (
     name VARCHAR(20) PRIMARY KEY,
