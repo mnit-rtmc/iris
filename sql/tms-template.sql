@@ -1879,7 +1879,7 @@ CREATE FUNCTION iris.catalog_insert() RETURNS TRIGGER AS
 BEGIN
 	INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
 	INSERT INTO iris._catalog (name, seq_num, description)
-	     VALUES (NEW.name,NEW.seq_num, NEW.catalog);
+	     VALUES (NEW.name, NEW.seq_num, NEW.description);
 	RETURN NEW;
 END;
 $catalog_insert$ LANGUAGE plpgsql;
