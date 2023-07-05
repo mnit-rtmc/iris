@@ -288,9 +288,14 @@ const DMS_RES: Resource = Resource::Simple(
     "api/dms",
     Listen::Exclude("dms", &["msg_user", "msg_sched", "expire_time"]),
     "SELECT row_to_json(r)::text FROM (\
-      SELECT d.name, controller, location, notes, msg_current \
+      SELECT d.name, controller, location, notes, hashtags, msg_current \
       FROM iris.dms d \
       LEFT JOIN geo_loc_view gl ON d.geo_loc = gl.name \
+      LEFT JOIN (\
+        SELECT dms, string_agg(hashtag, ' ' ORDER BY hashtag) AS hashtags \
+        FROM iris.dms_hashtag \
+        GROUP BY dms\
+      ) h ON d.name = h.dms \
       ORDER BY d.name\
     ) r",
 );

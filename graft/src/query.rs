@@ -79,10 +79,16 @@ WHERE d.name = $1";
 
 /// SQL query for one DMS
 pub const DMS: &str = "\
-SELECT d.name, location, geo_loc, controller, pin, notes, sign_config, \
-       sign_detail, msg_user, msg_sched, msg_current, status, stuck_pixels \
+SELECT d.name, location, geo_loc, controller, pin, notes, hashtags, \
+       sign_config, sign_detail, msg_user, msg_sched, msg_current, status, \
+       stuck_pixels \
 FROM iris.dms d \
 LEFT JOIN geo_loc_view gl ON d.geo_loc = gl.name \
+LEFT JOIN (\
+    SELECT dms, string_agg(hashtag, ' ' ORDER BY hashtag) AS hashtags \
+    FROM iris.dms_hashtag \
+    GROUP BY dms\
+) h ON d.name = h.dms \
 WHERE d.name = $1";
 
 /// SQL query for one flow stream
