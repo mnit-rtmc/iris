@@ -433,12 +433,6 @@ public class CameraImpl extends DeviceImpl implements Camera {
 			return true;
 	}
 
-	/** Get flag to indicate video loss */
-	@Override
-	public boolean getVideoLoss() {
-		return video_loss;
-	}
-
 	/** Get the camera poller */
 	private CameraPoller getCameraPoller() {
 		DevicePoller dp = getPoller();
