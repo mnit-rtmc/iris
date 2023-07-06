@@ -690,9 +690,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Check if the user has permission to send a given message */
 	private void checkMsgUser(SignMessage sm) throws TMSException {
 		switch (queryPermAccess()) {
-		// FIXME: remove this case after testing
-		case 0: // no permission record
-			return;
 		case 2: // "Operate" access level
 			denyFreeForm(sm);
 			return;
