@@ -152,44 +152,60 @@ public class MsgPatternHelper extends BaseHelper {
 		return false;
 	}
 
-	/** Validate text lines for a message pattern */
-	static public boolean validateLines(MsgPattern pat, SignConfig sc,
+	/** Split lines of a message based on a pattern.
+	 * @return Fillable message lines, or null on error. */
+	static private List<String> splitLines(MsgPattern pat, DMS dms,
 		String ms)
 	{
-		if (sc == null || pat == null)
-			return false;
+		if (pat == null || dms == null)
+			return null;
+		SignConfig sc = dms.getSignConfig();
+		if (sc == null)
+			return null;
 		String pat_ms = pat.getMulti();
 		TextRect tr = SignConfigHelper.textRect(sc);
 		List<String> lines = tr.splitLines(pat_ms, ms);
+		// validate that filling the rectangle produces the same msg
+		String ms2 = new MultiString(tr.fill(pat_ms, lines))
+			.stripTrailingWhitespaceTags();
+		return ms2.equals(ms) ? lines : null;
+	}
+
+	/** Validate text lines for a message pattern.
+	 * @return Empty string (wrong pattern), validation error message,
+	 *         or null on success. */
+	static public String validateLines(MsgPattern pat, DMS dms,
+		String ms)
+	{
+		List<String> lines = splitLines(pat, dms, ms);
+		if (lines == null)
+			return "";
 		short num = 0;
 		for (String line: lines) {
 			num++;
 			if ((!line.isEmpty()) &&
 			    (!MsgLineHelper.match(pat, num, line)))
-				return false;
+				return "FREE-FORM NOT PERMITTED: " + line;
 		}
-		return ms.equals(tr.fill(pat_ms, lines));
+		return null;
 	}
 
-	/** Validate text words for a message pattern */
-	static public String validateWords(MsgPattern pat, SignConfig sc,
+	/** Validate text words for a message pattern.
+	 * @return Empty string (wrong pattern), validation error message,
+	 *         or null on success. */
+	static public String validateWords(MsgPattern pat, DMS dms,
 		String ms)
 	{
-		if (sc == null || pat == null)
-			return "NULL VALUE";
-		StringBuilder sb = new StringBuilder();
-		TextRect tr = SignConfigHelper.textRect(sc);
-		List<String> lines = tr.splitLines(pat.getMulti(), ms);
+		List<String> lines = splitLines(pat, dms, ms);
+		if (lines == null)
+			return "";
 		for (String line: lines) {
 			for (String word: line.split(" ")) {
 				word = word.trim();
-				if (WordHelper.isBanned(word)) {
-					if (sb.length() > 0)
-						sb.append(", ");
-					sb.append(word);
-				}
+				if (WordHelper.isBanned(word))
+					return "BANNED WORD: " + word;
 			}
 		}
-		return (sb.length() > 0) ? sb.toString() : null;
+		return null;
 	}
 }

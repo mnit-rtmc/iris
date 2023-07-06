@@ -46,6 +46,7 @@ public class MsgLineHelper extends BaseHelper {
 		Iterator<MsgLine> it = iterator();
 		while (it.hasNext()) {
 			MsgLine mt = it.next();
+			// FIXME: check restrict hashtag
 			if (mt.getMsgPattern() == pat &&
 			    mt.getLine() == line &&
 			    mt.getMulti().equals(multi))

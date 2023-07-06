@@ -712,7 +712,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		String msg = DMSHelper.validateFreeFormLines(this,
 			sm.getMulti());
 		if (msg != null)
-			throw new ChangeVetoException("FREE-FORM: " + msg);
+			throw new ChangeVetoException(msg);
 	}
 
 	/** Check for banned words in free-form text */
@@ -720,7 +720,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		String msg = DMSHelper.validateFreeFormWords(this,
 			sm.getMulti());
 		if (msg != null)
-			throw new ChangeVetoException("BANNED WORDS: " + msg);
+			throw new ChangeVetoException(msg);
 	}
 
 	/** Set the user selected sign message,
