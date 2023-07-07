@@ -161,10 +161,14 @@ macro_rules! add_routes {
 }
 
 /// Lookup authorized access for a resource
-fn auth_access(res: &'static str, req: &Request<State>) -> Result<Access> {
+fn auth_access(
+    res: &'static str,
+    req: &Request<State>,
+    name: Option<&str>,
+) -> Result<Access> {
     let session = req.session();
     let auth: AuthMap = session.get("auth").ok_or(SonarError::Unauthorized)?;
-    let perm = req.state().permission_user_res(&auth.username, res)?;
+    let perm = req.state().permission_user_res(&auth.username, res, name)?;
     Access::new(perm.access_n).ok_or(SonarError::Unauthorized)
 }
 
@@ -343,7 +347,7 @@ async fn permission_post(req: Request<State>) -> tide::Result {
 
 /// `POST` one permission record
 async fn permission_post2(mut req: Request<State>) -> Result<()> {
-    auth_access("permission", &req)?.check(Access::Configure)?;
+    auth_access("permission", &req, None)?.check(Access::Configure)?;
     let obj = body_json_obj(&mut req).await?;
     let role = obj.get("role");
     let resource_n = obj.get("resource_n");
@@ -372,7 +376,7 @@ async fn permission_get(req: Request<State>) -> tide::Result {
 
 /// Get permission record as JSON
 async fn permission_get_json(req: Request<State>) -> Result<String> {
-    auth_access("permission", &req)?.check(Access::View)?;
+    auth_access("permission", &req, None)?.check(Access::View)?;
     let id = obj_id(&req)?;
     let perm = spawn_blocking(move || req.state().permission(id)).await?;
     Ok(serde_json::to_value(perm)?.to_string())
@@ -387,7 +391,7 @@ async fn permission_patch(req: Request<State>) -> tide::Result {
 
 /// `PATCH` one permission record
 async fn permission_patch2(mut req: Request<State>) -> Result<()> {
-    auth_access("permission", &req)?.check(Access::Configure)?;
+    auth_access("permission", &req, None)?.check(Access::Configure)?;
     let id = obj_id(&req)?;
     let obj = body_json_obj(&mut req).await?;
     spawn_blocking(move || req.state().permission_patch(id, obj)).await
@@ -402,7 +406,7 @@ async fn permission_delete(req: Request<State>) -> tide::Result {
 
 /// `DELETE` one permission record
 async fn permission_delete2(req: Request<State>) -> Result<()> {
-    auth_access("permission", &req)?.check(Access::Configure)?;
+    auth_access("permission", &req, None)?.check(Access::Configure)?;
     let id = obj_id(&req)?;
     spawn_blocking(move || req.state().permission_delete(id)).await
 }
@@ -433,8 +437,9 @@ async fn sql_get_by_name(
     sql: &'static str,
     req: Request<State>,
 ) -> Result<String> {
-    auth_access(res_name(resource_n), &req)?.check(Access::View)?;
     let name = req_name(&req)?;
+    auth_access(res_name(resource_n), &req, Some(&name))?
+        .check(Access::View)?;
     spawn_blocking(move || req.state().get_by_pkey(sql, &name)).await
 }
 
@@ -458,8 +463,9 @@ async fn sql_get_array_by_name(
     sql: &'static str,
     req: Request<State>,
 ) -> Result<String> {
-    auth_access(res_name(resource_n), &req)?.check(Access::View)?;
     let name = req_name(&req)?;
+    auth_access(res_name(resource_n), &req, Some(&name))?
+        .check(Access::View)?;
     spawn_blocking(move || req.state().get_array_by_pkey(sql, &name)).await
 }
 
@@ -517,19 +523,6 @@ fn make_att(res: &'static str, nm: &str, att: &str) -> Result<String> {
     }
 }
 
-/// Get Sonar object name from a request
-fn obj_name(res: &'static str, req: &Request<State>) -> Result<String> {
-    match req.param("name") {
-        Ok(name) => {
-            let name = percent_decode_str(name)
-                .decode_utf8()
-                .or(Err(SonarError::InvalidName))?;
-            make_name(res, &name)
-        }
-        Err(_) => Err(SonarError::InvalidName),
-    }
-}
-
 /// `GET` a file resource
 async fn resource_get(res: &'static str, req: Request<State>) -> tide::Result {
     log::info!("GET {}", req.url());
@@ -546,7 +539,7 @@ async fn resource_get_json(
     resource_n: &'static str,
     req: Request<State>,
 ) -> Result<(String, Body)> {
-    auth_access(res_name(resource_n), &req)?.check(Access::View)?;
+    auth_access(res_name(resource_n), &req, None)?.check(Access::View)?;
     let path = PathBuf::from(format!("{STATIC_PATH}/{resource_n}"));
     let etag = resource_etag(&path).await?;
     if let Some(values) = req.header("If-None-Match") {
@@ -589,7 +582,7 @@ async fn sonar_object_post2(
     res: &'static str,
     mut req: Request<State>,
 ) -> Result<()> {
-    auth_access(res, &req)?.check(Access::Configure)?;
+    auth_access(res, &req, None)?.check(Access::Configure)?;
     let obj = body_json_obj(&mut req).await?;
     match obj.get("name") {
         Some(Value::String(name)) => {
@@ -635,8 +628,8 @@ async fn sonar_object_patch2(
     res: &'static str,
     mut req: Request<State>,
 ) -> Result<()> {
-    let nm = obj_name(res, &req)?;
-    let access = auth_access(res, &req)?;
+    let name = req_name(&req)?;
+    let access = auth_access(res, &req, Some(&name))?;
     // *At least* Operate access needed (further checks below)
     access.check(Access::Operate)?;
     let obj = body_json_obj(&mut req).await?;
@@ -645,6 +638,7 @@ async fn sonar_object_patch2(
         access.check(Access::from_type_key(&(res, key)))?;
     }
     let mut c = connection(&req).await?;
+    let nm = format!("{res}/{name}");
     // first pass
     for (key, value) in obj.iter() {
         let key = &key[..];
@@ -674,9 +668,10 @@ async fn sonar_object_delete(
     req: Request<State>,
 ) -> tide::Result {
     log::info!("DELETE {}", req.url());
-    let access = resp!(auth_access(res, &req));
+    let access = resp!(auth_access(res, &req, None));
     resp!(access.check(Access::Configure));
-    let nm = resp!(obj_name(res, &req));
+    let name = resp!(req_name(&req));
+    let nm = format!("{res}/{name}");
     let mut c = resp!(connection(&req).await);
     resp!(c.remove_object(&nm).await);
     Ok(Response::builder(StatusCode::Accepted).build())

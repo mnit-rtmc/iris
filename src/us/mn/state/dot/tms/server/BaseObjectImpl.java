@@ -559,7 +559,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		store.query("SELECT max(access_n) " +
 			"FROM iris.permission p " +
 			"JOIN iris.i_user u ON u.role = p.role " +
-			"WHERE resource_n = '" + res + "' " +
+			"WHERE p.resource_n = '" + res + "' " +
 			"AND u.name = '" + user + "' " +
 			"AND (" +
 				"p.hashtag IS NULL OR " +
