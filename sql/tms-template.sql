@@ -488,8 +488,8 @@ CREATE TABLE iris.permission (
     CONSTRAINT permission_access_n CHECK (access_n >= 1 AND access_n <= 4)
 );
 
-CREATE UNIQUE INDEX permission_role_resource_n_idx
-    ON iris.permission (role, resource_n);
+CREATE UNIQUE INDEX permission_role_resource_n_hashtag_idx
+    ON iris.permission (role, resource_n, COALESCE(hashtag, ''));
 
 COPY iris.permission (role, resource_n, access_n) FROM stdin;
 administrator	alarm	4

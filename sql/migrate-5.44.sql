@@ -78,4 +78,9 @@ CREATE VIEW dms_toll_zone_view AS
     ON da.msg_pattern = tz.msg_pattern;
 GRANT SELECT ON dms_toll_zone_view TO PUBLIC;
 
+-- Include hashtag in unique permission index
+DROP INDEX iris.permission_role_resource_n_idx;
+CREATE UNIQUE INDEX permission_role_resource_n_hashtag_idx
+    ON iris.permission (role, resource_n, COALESCE(hashtag, ''));
+
 COMMIT;

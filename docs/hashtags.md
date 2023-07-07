@@ -14,8 +14,8 @@ categories.
 - [Permissions] can restrict access by hashtag
 
 
-[alert configurations]: alert.html#dms-hashtags
-[alert messages]: alert.html#alert-messages
+[alert configurations]: alerts.html#dms-hashtags
+[alert messages]: alerts.html#alert-messages
 [DMS]: dms.html
 [DMS actions]: action_plans.html#dms-actions
 [lane-use MULTI]: lcs.html#lane-use-multi
