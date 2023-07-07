@@ -19,10 +19,9 @@ access only.
 
 [Resource] is the `type` part of the URI.
 
-A **hashtag** is the `#` character, followed by a string of letters and/or
-numbers.  They can be used for grouping resources into districts or other
-categories.  NOTE: this feature depends on adding hashtags to relevant
-resources, which is incomplete.
+[Hashtag] restricts the permission to resources which have the assigned tag.
+Permissions containing hashtags are only checked for updates to existing
+resources, not creation/deletion.
 
 There are 4 **access** levels, with increasing permissiveness:
 
@@ -33,8 +32,12 @@ There are 4 **access** levels, with increasing permissiveness:
 |     3 | 💡 Plan      | + Policies, scheduling   |
 |     4 | 🔧 Configure | + Create, update, delete |
 
+When checks are performed, the **highest** access level of matching permissions
+is used.
+
 
 [capabilities]: user_roles.html#capabilities
+[hashtag]: hashtags.html
 [privileges]: user_roles.html#privileges
 [resource]: rest_api.html#resource-types
 [role]: user_roles.html#roles

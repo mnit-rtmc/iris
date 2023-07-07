@@ -4,8 +4,11 @@ Select `View ➔ Message Signs ➔ Message Patterns` or
 `View ➔ Message Signs ➔ Message Editor` menu items
 
 A _message pattern_ is a partially or fully composed [MULTI] message associated
-with a sign config.  They can be scheduled by [DMS action]s as part of an
-[action plan] or selected by operators when [composing messages].
+with a sign config.  They can be:
+
+* Selected by operators [composing messages], for signs matching the _compose_
+  [hashtag]
+* Scheduled by [DMS action]s as part of an [action plan]
 
 ## Fillable Text Rectangles
 
@@ -27,7 +30,7 @@ be `[tr1,1,100,16]CRASH[nl]AHEAD[g5]`.
 A pattern with fillable text rectangles can have lines of text associated with
 it.  Each line is used in a specific fillable rectangle of the pattern.  Lines
 can be ordered in the message composer by **rank**, 1-99.  Lines can also be
-restricted to specific signs by adding a **restrict hashtag**.
+restricted to specific signs by adding a **restrict** [hashtag].
 
 When composing messages, if a pattern is selected which has fillable text
 rectangles but no lines, a **substitute** pattern will be chosen to provide
@@ -85,5 +88,6 @@ Example:
 [action plan]: action_plans.html
 [composing messages]: dms.html#composing-messages
 [DMS action]: action_plans.html#dms-actions
+[hashtag]: hashtags.html
 [MULTI]: multi.html
 [WYSIWYG editor]: wysiwyg.html

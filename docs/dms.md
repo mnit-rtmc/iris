@@ -40,19 +40,12 @@ Checks of [free-form text] are also affected by the access level.
 The DMS properties form has setup information.
 
 Field          | Description
----------------|-------------------------------------------------
-Hashtags       | space-separated list of tags for selecting signs
+---------------|------------------------------------------------
+Hashtags       | space-separated list of [hashtag]s for the sign
 Remote beacon  | beacon activated automatically when sign deployed
 Static graphic | image of static sign in which DMS is inset
 Device purpose | _general_ or _dedicated_ purpose for sign operation
 Hidden         | hide sign when _available_ or _deployed_ styles are selected
-
-A **hashtag** is the `#` character, followed by a string of letters and/or
-numbers.  They are used to select signs for:
-- [message pattern]s for composing
-- automated [DMS actions]
-- [alert configurations] and [alert messages]
-- [lane-use MULTI] indications
 
 **Internal** beacons are controlled through the DMS controller using the [NTCIP]
 protocol.  **Remote** [beacon]s are controlled using a separate [comm link].
@@ -79,7 +72,7 @@ When a DMS is selected, a few things happen:
 - the sign's location is displayed
 - the current message is rendered
 - the [message pattern] selector is populated:
-  * only patterns whose **compose** hashtag matches the sign
+  * only patterns whose **compose** [hashtag] matches the sign
   * only patterns containing **NO** [action tags]
 
 When an operator chooses a pattern, a series of selectors is populated with
@@ -98,8 +91,6 @@ for any free-form text.
 
 
 [action tags]: action_plans.html#dms-action-tags
-[alert configurations]: alert.html#dms-hashtags
-[alert messages]: alert.html#alert-messages
 [beacon]: beacons.html
 [comm link]: comm_links.html
 [free-form text]: #composing-messages
@@ -107,7 +98,7 @@ for any free-form text.
 [fillable text rectangles]: message_patterns.html#fillable-text-rectangles
 [font]: fonts.html
 [graphic images]: graphics.html
-[lane-use MULTI]: lcs.html#lane-use-multi
+[hashtag]: hashtags.html
 [message lines]: message_patterns.html#message-lines
 [message pattern]: message_patterns.html
 [NTCIP]: protocols.html#ntcip
