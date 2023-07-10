@@ -57,12 +57,6 @@ public class SNMP extends BER {
 	/** Public community name */
 	static public final String PUBLIC = "Public";
 
-	/** Maximum SNMP request-id */
-	static private final int REQUEST_ID_MAX = 0x7FFFFFFF;
-
-	/** Next SNMP request-id */
-	private int request_id_next = 0;
-
 	/** Encode an SNMP message */
 	private void encodeSNMPMessage(String community) throws IOException {
 		byte[] pdu = getEncodedData();
@@ -105,21 +99,13 @@ public class SNMP extends BER {
 			new ArrayList<ASN1Object>();
 
 		/** Create a new SNMP message */
-		public Message(OutputStream o, InputStream i, String c) {
-			this(o, i, c, REQUEST_ID_MAX);
-		}
-
-		/** Create a new SNMP message */
 		public Message(OutputStream o, InputStream i, String c,
-			int request_id_max)
+			int req_id)
 		{
 			os = o;
 			is = i;
 			community = (c != null) ? c : PUBLIC;
-			request_id = request_id_next;
-			request_id_next = (request_id_next < request_id_max)
-				? request_id_next + 1
-				: 0;
+			request_id = req_id;
 		}
 
 		/** Add a controller property */

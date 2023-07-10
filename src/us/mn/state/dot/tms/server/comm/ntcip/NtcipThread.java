@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Random;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -26,6 +27,7 @@ import us.mn.state.dot.tms.server.comm.MessengerException;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.OpQueue;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
+import us.mn.state.dot.tms.server.comm.snmp.ReqIdGenerator;
 
 /**
  * NTCIP thread
@@ -34,15 +36,68 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  */
 public class NtcipThread extends CommThread {
 
-	/** Maximum request-id to use for Ledstar controllers.
-	 *
-	 * Some firmware versions encode request-id values greater
-	 * than 127 as negative (-128,-127,-126,...) */
-	static private final int REQUEST_ID_MAX_LEDSTAR = 0x7F;
+	/** Default request-ID generator */
+	private final ReqIdGenerator req_id_gen = new ReqIdGenerator() {
+		/** Maximum SNMP request-id */
+		static private final int REQUEST_ID_MAX = 0x7FFFFFFF;
+
+		/** SNMP request-id */
+		private int req_id = 0;
+
+		/** Get the next request-ID */
+		@Override public int next() {
+			req_id = (req_id < REQUEST_ID_MAX) ? req_id + 1 : 1;
+			return req_id;
+		}
+	};
+
+	/** Request-ID generator for Ledstar controllers */
+	private final ReqIdGenerator req_id_gen_ledstar = new ReqIdGenerator() {
+		/** Maximum request-id to use for Ledstar controllers.
+		 *
+		 * Some firmware versions encode request-id values greater
+		 * than 127 as negative (-128,-127,-126,...) */
+		static private final int REQUEST_ID_MAX = 0x7F;
+
+		/** SNMP request-id */
+		private int req_id = 0;
+
+		/** Get the next request-ID */
+		@Override public int next() {
+			req_id = (req_id < REQUEST_ID_MAX) ? req_id + 1 : 1;
+			return req_id;
+		}
+	};
+
+	/** Request-ID generator for Vaisala LX controllers */
+	private final ReqIdGenerator req_id_gen_lx = new ReqIdGenerator() {
+		/** Random number generator */
+		private Random random = new Random();
+
+		/** Get the next request-ID */
+		@Override public int next() {
+			return random.nextInt(1 << 31);
+		}
+	};
 
 	/** Check an operation for Ledstar controller */
 	static private boolean isLedstar(OpController o) {
 		return (o instanceof OpNtcip) && ((OpNtcip) o).isLedstar();
+	}
+
+	/** Check an operation for a Vaisala LX controller */
+	static private boolean isVaisalaLx(OpController o) {
+		return (o instanceof OpNtcip) && ((OpNtcip) o).isVaisalaLx();
+	}
+
+	/** Generate a request-ID */
+	private int generateReqId(OpController o) {
+		if (isLedstar(o))
+			return req_id_gen_ledstar.next();
+		else if (isVaisalaLx(o))
+			return req_id_gen_lx.next();
+		else
+			return req_id_gen.next();
 	}
 
 	/** Communication protocol */
@@ -81,12 +136,8 @@ public class NtcipThread extends CommThread {
 		throws IOException
 	{
 		ControllerImpl c = o.getController();
-		if (isLedstar(o))
-			return snmp.new Message(m.getOutputStream(c),
-				m.getInputStream("", c), c.getPassword(),
-				REQUEST_ID_MAX_LEDSTAR);
-		else
-			return snmp.new Message(m.getOutputStream(c),
-				m.getInputStream("", c), c.getPassword());
+		int req_id = generateReqId(o);
+		return snmp.new Message(m.getOutputStream(c),
+			m.getInputStream("", c), c.getPassword(), req_id);
 	}
 }

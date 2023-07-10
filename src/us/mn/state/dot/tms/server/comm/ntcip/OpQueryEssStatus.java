@@ -108,7 +108,7 @@ public class OpQueryEssStatus extends OpEss {
 		// the wind sensor table to update only once every 12 hours or
 		// so.  The workaround is to query the (deprecated) wind sensor
 		// objects from 1204v1 (for LX controllers only).
-		return (getSoftwareModel().contains("LX"))
+		return isVaisalaLx()
 			? new QueryWindSensorV1()
 			: new QueryWindSensorsV2();
 	}
