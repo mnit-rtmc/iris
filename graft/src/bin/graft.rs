@@ -256,6 +256,8 @@ async fn main() -> tide::Result<()> {
     add_routes!(route, "lcs_array", query::LCS_ARRAY);
     add_routes!(route, "lcs_indication", query::LCS_INDICATION);
     add_routes!(route, "modem", query::MODEM);
+    add_routes!(route, "msg_line", query::MSG_LINE);
+    add_routes!(route, "msg_pattern", query::MSG_PATTERN);
     add_routes!(route, "ramp_meter", query::RAMP_METER);
     route.at("/road").get(|req| resource_get("road", req));
     route

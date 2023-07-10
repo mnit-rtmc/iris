@@ -83,4 +83,14 @@ DROP INDEX iris.permission_role_resource_n_idx;
 CREATE UNIQUE INDEX permission_role_resource_n_hashtag_idx
     ON iris.permission (role, resource_n, COALESCE(hashtag, ''));
 
+-- Notify listeners when a message pattern changes
+CREATE TRIGGER msg_pattern_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.msg_pattern
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
+-- Notify listeners when a message line changes
+CREATE TRIGGER msg_line_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.msg_line
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
 COMMIT;

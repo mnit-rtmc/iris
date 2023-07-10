@@ -152,6 +152,18 @@ pub const MODEM: &str = "\
 SELECT name, uri, config, enabled, timeout_ms FROM iris.modem \
 WHERE name = $1";
 
+/// SQL query for one message line
+pub const MSG_LINE: &str = "\
+SELECT name, msg_pattern, line, multi, rank, restrict_hashtag \
+FROM iris.msg_line \
+WHERE name = $1";
+
+/// SQL query for one message pattern
+pub const MSG_PATTERN: &str = "\
+SELECT name, multi, flash_beacon, compose_hashtag \
+FROM iris.msg_pattern \
+WHERE name = $1";
+
 /// SQL query for one permission
 pub const PERMISSION: &str = "\
 SELECT id, role, resource_n, hashtag, access_n \

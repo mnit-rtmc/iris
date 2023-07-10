@@ -3102,6 +3102,10 @@ COPY iris.msg_pattern (name, multi, flash_beacon, compose_hashtag) FROM stdin;
 .2_PAGE	[np]	f	#Small
 \.
 
+CREATE TRIGGER msg_pattern_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.msg_pattern
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
 CREATE VIEW msg_pattern_view AS
     SELECT name, multi, flash_beacon, compose_hashtag
     FROM iris.msg_pattern;
@@ -3119,6 +3123,10 @@ CREATE TABLE iris.msg_line (
     CONSTRAINT msg_line_line CHECK ((line >= 1) AND (line <= 12)),
     CONSTRAINT msg_line_rank CHECK ((rank >= 1) AND (rank <= 99))
 );
+
+CREATE TRIGGER msg_line_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.msg_line
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW msg_line_view AS
     SELECT name, msg_pattern, restrict_hashtag, line, multi, rank

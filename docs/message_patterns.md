@@ -10,6 +10,27 @@ with a sign config.  They can be:
   [hashtag]
 * Scheduled by [DMS action]s as part of an [action plan]
 
+<details>
+<summary>
+
+## Resources
+
+</summary>
+
+* `iris/api/msg_pattern`
+* `iris/api/msg_pattern/{name}`
+
+Attribute [permissions]:
+
+| Access       | Minimal          | Full          |
+|--------------|------------------|---------------|
+| Read Only    | name             |               |
+| 👉 Operate   |                  |               |
+| 💡 Plan      | compose\_hashtag | flash\_beacon |
+| 🔧 Configure | multi            |               |
+
+</details>
+
 ## Fillable Text Rectangles
 
 Text rectangles within a pattern can be _fillable_ to allow operators to fill
@@ -36,6 +57,27 @@ When composing messages, if a pattern is selected which has fillable text
 rectangles but no lines, a **substitute** pattern will be chosen to provide
 them instead.  Both patterns must have the same number of lines in their text
 rectangles.
+
+<details>
+<summary>
+
+### Message Line Resources
+
+</summary>
+
+* `iris/api/msg_line`
+* `iris/api/msg_line/{name}`
+
+Attribute [permissions]:
+
+| Access       | Minimal                   | Full |
+|--------------|---------------------------|------|
+| Read Only    | name                      |      |
+| 👉 Operate   |                           |      |
+| 💡 Plan      | restrict\_hashtag         | rank |
+| 🔧 Configure | msg\_pattern, line, multi |      |
+
+</details>
 
 ## Message Combining
 

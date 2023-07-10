@@ -367,6 +367,28 @@ const GRAPHIC_RES: Resource = Resource::Simple(
     ) r",
 );
 
+/// Message line resource
+const MSG_LINE_RES: Resource = Resource::Simple(
+    "api/msg_line",
+    Listen::All("msg_line"),
+    "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
+      SELECT name, msg_pattern, line, multi, restrict_hashtag \
+      FROM iris.msg_line \
+      ORDER BY msg_pattern, line, rank, restrict_hashtag\
+    ) r",
+);
+
+/// Message pattern resource
+const MSG_PATTERN_RES: Resource = Resource::Simple(
+    "api/msg_pattern",
+    Listen::All("msg_pattern"),
+    "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
+      SELECT name, multi, compose_hashtag \
+      FROM iris.msg_pattern \
+      ORDER BY name\
+    ) r",
+);
+
 /// Incident resource
 const INCIDENT_RES: Resource = Resource::Simple(
     "incident",
@@ -810,6 +832,8 @@ const ALL: &[Resource] = &[
     DMS_STAT_RES,
     FONT_RES,
     GRAPHIC_RES,
+    MSG_LINE_RES,
+    MSG_PATTERN_RES,
     INCIDENT_RES,
     R_NODE_RES,
     DETECTOR_RES,
