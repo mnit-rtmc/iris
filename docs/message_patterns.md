@@ -11,11 +11,7 @@ with a sign config.  They can be:
 * Scheduled by [DMS action]s as part of an [action plan]
 
 <details>
-<summary>
-
-## Resources
-
-</summary>
+<summary>## Resources</summary>
 
 * `iris/api/msg_pattern`
 * `iris/api/msg_pattern/{name}`
