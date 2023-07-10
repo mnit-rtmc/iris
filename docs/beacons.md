@@ -27,7 +27,7 @@ Attribute [permissions]:
 | 💡 Plan      | message, notes | preset                      |
 | 🔧 Configure | controller     | pin, verify\_pin, ext\_mode |
 
-</summary>
+</details>
 
 ## Setup
 
