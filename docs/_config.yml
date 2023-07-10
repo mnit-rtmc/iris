@@ -5,4 +5,4 @@ markdown: CommonMarkGhPages
 
 commonmark:
   options: ["UNSAFE"]
-  extensions: ["autolink", "table"]
+  extensions: ["table"]
