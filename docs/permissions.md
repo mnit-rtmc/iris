@@ -4,7 +4,8 @@
 [capabilities] and [privileges].  For now, they determine permissions for web
 access only.
 
-## Resources
+<details>
+<summary>API Resources</summary>
 
 * `iris/api/permission`
 * `iris/api/permission/{id}`
@@ -14,6 +15,10 @@ access only.
 |--------------|---------------------------------------|
 | Read Only    | id                                    |
 | 🔧 Configure | role, resource\_n, hashtag, access\_n |
+
+</details>
+
+## Setup
 
 [Role] is the user role associated with the permissions.
 

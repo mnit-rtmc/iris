@@ -18,7 +18,8 @@ The following features are supported:
 * [Slow traffic] warnings
 * Free-form text entry with banned [word] checks
 
-## Resources
+<details>
+<summary>API Resources</summary>
 
 * `iris/dms_pub`
 * `iris/api/dms`
@@ -34,6 +35,8 @@ Attribute [permissions]:
 | 🔧 Configure | controller                   | pin         |
 
 Checks of [free-form text] are also affected by the access level.
+
+</details>
 
 ## Setup
 

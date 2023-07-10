@@ -9,7 +9,8 @@ _role_ must both be enabled.  If the _user_ has a **distinguished name** (dn),
 then authentication is performed using [LDAP].  Otherwise, the supplied password
 is checked against the stored password hash for the account.
 
-## Resources
+<details>
+<summary>API Resources</summary>
 
 * `iris/api/user`
 * `iris/api/user/{name}`
@@ -19,6 +20,8 @@ is checked against the stored password hash for the account.
 | Read Only    | name             |
 | 💡 Plan      | enabled          |
 | 🔧 Configure | full\_name, role |
+
+</details>
 
 ## Domains
 
@@ -37,7 +40,8 @@ Other _roles_ can be created to allow different capability sets, as needed.
 **WARNING: if the administrator role or admin user are disabled, the ability to
 make further changes will be lost immediately.**
 
-### Role Resources
+<details>
+<summary>API Resources</summary>
 
 * `iris/api/role`
 * `iris/api/role/{name}`
@@ -46,6 +50,8 @@ make further changes will be lost immediately.**
 |--------------|------------|
 | Read Only    | name       |
 | 💡 Plan      | enabled    |
+
+</details>
 
 ## Capabilities
 

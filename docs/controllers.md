@@ -8,7 +8,8 @@ Sometimes a controller represents a separate physical _box_, which is connected
 to devices, and other times the controller may be embedded within the device.
 In either case, a controller is required for any communication to a device.
 
-## Resources
+<details>
+<summary>API Resources</summary>
 
 * `iris/api/controller`
 * `iris/api/controller/{name}`
@@ -25,6 +26,8 @@ Attribute [permissions]:
 | 👉 Operate   |                                      | download, device\_req |
 | 💡 Plan      | condition, notes                     |          |
 | 🔧 Configure | comm\_link, drop\_id, cabinet\_style | password |
+
+</details>
 
 ## Drop Address
 
@@ -83,7 +86,8 @@ to be used.  The function of these pins is [protocol] specific.
 Controllers can have an associated cabinet style, used for MnDOT-170 and Natch
 [protocol]s.
 
-## Resources
+<details>
+<summary>API Resources</summary>
 
 * `iris/api/cabinet_style`
 * `iris/api/cabinet_style/{name}`
@@ -92,6 +96,8 @@ Controllers can have an associated cabinet style, used for MnDOT-170 and Natch
 |--------------|------------|------|
 | Read Only    | name       |      |
 | 🔧 Configure |            | police\_panel\_pin\_1, police\_panel\_pin\_2, watchdog\_reset\_pin\_1, watchdog\_reset\_pin\_2, dip |
+
+</details>
 
 
 [alarms]: alarms.html
