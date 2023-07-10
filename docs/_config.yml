@@ -1,2 +1,8 @@
 title: IRIS
 icon: images/iris_icon.svg
+
+markdown: CommonMarkGhPages
+
+commonmark:
+  options: ["UNSAFE"]
+  extensions: ["table"]
