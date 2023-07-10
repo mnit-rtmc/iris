@@ -1,5 +1,13 @@
 # IRIS 5.x Release Notes
 
+5.44.0 (10 Jul 2023)
+ - Reworked free-form text validation algorithm
+ - Removed `dms_hashtag_view` (use `hashtag_view`)
+ - Randomize request-ID generation for LX controllers
+ - Fix for creating camera catalogs
+ - Clear camera video loss when encoder is not defined
+ - Add `msg_pattern` and `msg_line` API resources
+
 5.43.0 (16 May 2023)
  - Check free-form DMS text with `msg_user` permissions
  - Removed `dms_composer_edit_mode` system attribute
