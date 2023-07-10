@@ -1,13 +1,13 @@
 [package]
 name = "honeybee"
-version = "0.30.0"
+version = "0.31.0"
 description = "Server for publishing IRIS data as JSON / GIF"
 license = "GPL-2.0-or-later"
 edition = "2021"
 
 [dependencies]
 anyhow = "1.0"
-base64 = "0.13"
+base64 = "0.21"
 gift = "0.10"
 log = "0.4"
 ntcip = "0.5"
