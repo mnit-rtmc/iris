@@ -34,7 +34,7 @@ There are 4 **access** levels, with increasing permissiveness:
 |-------|--------------|--------------------------|
 |     1 | 👁️  View      | Monitor / read           |
 |     2 | 👉 Operate   | + Control                |
-|     3 | 💡 Plan      | + Policies, scheduling   |
+|     3 | 💡 Manage    | + Policies, scheduling   |
 |     4 | 🔧 Configure | + Create, update, delete |
 
 When checks are performed, the **highest** access level of matching permissions

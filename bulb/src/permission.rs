@@ -125,7 +125,7 @@ fn access_str(access_n: u32, long: bool) -> &'static str {
         (2, false) => "👉",
         (2, true) => "👉 operate",
         (3, false) => "💡",
-        (3, true) => "💡 plan",
+        (3, true) => "💡 manage",
         (4, false) => "🔧",
         (4, true) => "🔧 configure",
         _ => "❓",

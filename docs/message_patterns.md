@@ -22,7 +22,7 @@ Attribute [permissions]:
 |--------------|------------------|---------------|
 | Read Only    | name             |               |
 | 👉 Operate   |                  |               |
-| 💡 Plan      | compose\_hashtag | flash\_beacon |
+| 💡 Manage    | compose\_hashtag | flash\_beacon |
 | 🔧 Configure | multi            |               |
 
 </details>
@@ -66,7 +66,7 @@ Attribute [permissions]:
 |--------------|---------------------------|------|
 | Read Only    | name                      |      |
 | 👉 Operate   |                           |      |
-| 💡 Plan      | restrict\_hashtag         | rank |
+| 💡 Manage    | restrict\_hashtag         | rank |
 | 🔧 Configure | msg\_pattern, line, multi |      |
 
 </details>

@@ -551,7 +551,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	/** Query user's permission access level for this object.
 	 *
 	 * @return Access level (0-4)
-	 *         0 none, 1 view, 2 operate, 3 plan, 4 configure */
+	 *         0 none, 1 view, 2 operate, 3 manage, 4 configure */
 	public int queryPermAccess() throws TMSException {
 		String res = getTypeName();
 		String user = getProcUser();

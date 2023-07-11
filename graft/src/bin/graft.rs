@@ -46,8 +46,8 @@ const OPERATE: &[(&str, &str)] = &[
     ("lane_marking", "deployed"),
 ];
 
-/// Slice of (type/attribute) tuples requiring Plan or higher permission
-const PLAN: &[(&str, &str)] = &[
+/// Slice of (type/attribute) tuples requiring Manage or higher permission
+const MANAGE: &[(&str, &str)] = &[
     ("beacon", "message"),
     ("beacon", "notes"),
     ("beacon", "preset"),
@@ -85,7 +85,7 @@ const PATCH_FIRST_PASS: &[(&str, &str)] = &[
 pub enum Access {
     View,
     Operate,
-    Plan,
+    Manage,
     Configure,
 }
 
@@ -177,8 +177,8 @@ impl Access {
     fn from_type_key(tp_att: &(&'static str, &str)) -> Self {
         if OPERATE.contains(tp_att) {
             Access::Operate
-        } else if PLAN.contains(tp_att) {
-            Access::Plan
+        } else if MANAGE.contains(tp_att) {
+            Access::Manage
         } else {
             Access::Configure
         }
@@ -189,7 +189,7 @@ impl Access {
         match level {
             1 => Some(Self::View),
             2 => Some(Self::Operate),
-            3 => Some(Self::Plan),
+            3 => Some(Self::Manage),
             4 => Some(Self::Configure),
             _ => None,
         }
@@ -200,7 +200,7 @@ impl Access {
         match self {
             Access::View => 1,
             Access::Operate => 2,
-            Access::Plan => 3,
+            Access::Manage => 3,
             Access::Configure => 4,
         }
     }

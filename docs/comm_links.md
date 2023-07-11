@@ -16,7 +16,7 @@ Attribute [permissions]:
 | Access       | Minimal                        |
 |--------------|--------------------------------|
 | Read Only    | name, connected                |
-| 💡 Plan      | poll\_enabled                  |
+| 💡 Manage    | poll\_enabled                  |
 | 🔧 Configure | description, uri, comm\_config |
 
 </details>

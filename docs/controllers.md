@@ -24,7 +24,7 @@ Attribute [permissions]:
 |--------------|--------------------------------------|----------|
 | Read Only    | name, location, setup, fail\_time    | geo\_loc |
 | 👉 Operate   |                                      | download, device\_req |
-| 💡 Plan      | condition, notes                     |          |
+| 💡 Manage    | condition, notes                     |          |
 | 🔧 Configure | comm\_link, drop\_id, cabinet\_style | password |
 
 </details>

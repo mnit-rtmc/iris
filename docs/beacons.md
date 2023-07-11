@@ -24,7 +24,7 @@ Attribute [permissions]:
 |--------------|----------------|-----------------------------|
 | Read Only    | name, location | geo\_loc                    |
 | 👉 Operate   | state          |                             |
-| 💡 Plan      | message, notes | preset                      |
+| 💡 Manage    | message, notes | preset                      |
 | 🔧 Configure | controller     | pin, verify\_pin, ext\_mode |
 
 </details>

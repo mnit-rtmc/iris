@@ -31,7 +31,7 @@ Attribute [permissions]:
 |--------------|------------------------------|-------------|
 | Read Only    | name, location, msg\_current | sign\_config, sign\_detail, geo\_loc, msg\_sched, status, stuck\_pixels |
 | 👉 Operate   |                              | msg\_user   |
-| 💡 Plan      | notes, hashtags              | device\_req |
+| 💡 Manage    | notes, hashtags              | device\_req |
 | 🔧 Configure | controller                   | pin         |
 
 Checks of [free-form text] are also affected by the access level.
@@ -84,7 +84,7 @@ may also allow **free-form text** entry, depending on the permision access
 level of the user:
 
 * 👉 **Operate**: No free-form text permitted
-* 💡 **Plan**: Free-form text checked for **banned** [word]s
+* 💡 **Manage**: Free-form text checked for **banned** [word]s
 * 🔧 **Configure**: Any free-form text permitted (no check)
 
 The message preview is updated as the user composes the message.  When the

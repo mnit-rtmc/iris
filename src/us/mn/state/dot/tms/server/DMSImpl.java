@@ -693,7 +693,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		case 2: // "Operate" access level
 			denyFreeForm(sm);
 			return;
-		case 3: // "Plan" access level
+		case 3: // "Manage" access level
 			checkFreeFormBanned(sm);
 			return;
 		case 4: // "Configure" access level

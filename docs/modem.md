@@ -17,7 +17,7 @@ Attribute [permissions]:
 | Access       | Minimal    | Full        |
 |--------------|------------|-------------|
 | Read Only    | name       |             |
-| 💡 Plan      | enabled    | timeout\_ms |
+| 💡 Manage    | enabled    | timeout\_ms |
 | 🔧 Configure |            | uri, config |
 
 </details>
