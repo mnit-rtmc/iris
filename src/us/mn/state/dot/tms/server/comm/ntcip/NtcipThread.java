@@ -69,7 +69,13 @@ public class NtcipThread extends CommThread {
 		}
 	};
 
-	/** Request-ID generator for Vaisala LX controllers */
+	/** Request-ID generator for Vaisala LX controllers.
+	 *
+	 * Vaisala LX model RPUs contain a bug which causes objects in tables
+	 * to update only once every 12 hours or so.  The workaround is to
+	 * randomize SNMP request-IDs.  Tables known to be affected are
+	 * windSensorTable and essTemperatureSensorTable.
+	 */
 	private final ReqIdGenerator req_id_gen_lx = new ReqIdGenerator() {
 		/** Random number generator */
 		private Random random = new Random();

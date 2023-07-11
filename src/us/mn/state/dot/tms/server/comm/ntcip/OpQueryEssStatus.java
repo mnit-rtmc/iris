@@ -103,11 +103,12 @@ public class OpQueryEssStatus extends OpEss {
 
 	/** Get phase to query wind sensor data */
 	private Phase queryWindSensors() {
-		// FIXME: remove this workaround when bug is understood
-		// LX model RPUs contain a bug which sometimes causes objects in
-		// the wind sensor table to update only once every 12 hours or
-		// so.  The workaround is to query the (deprecated) wind sensor
-		// objects from 1204v1 (for LX controllers only).
+		// Vaisala LX model RPUs contain a bug which causes objects
+		// in tables to update only once every 12 hours or so.  The
+		// preferred workaround is to randomize SNMP request-IDs.
+		// This lesser workaround is to query the (deprecated) wind
+		// sensor objects from 1204v1
+		// FIXME: remove this workaround after testing
 		return isVaisalaLx()
 			? new QueryWindSensorV1()
 			: new QueryWindSensorsV2();
