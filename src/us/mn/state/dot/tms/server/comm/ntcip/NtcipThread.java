@@ -76,7 +76,7 @@ public class NtcipThread extends CommThread {
 
 		/** Get the next request-ID */
 		@Override public int next() {
-			return random.nextInt(1 << 31);
+			return random.nextInt(0x7FFFFFFF);
 		}
 	};
 
