@@ -1,7 +1,7 @@
 # Message Patterns
 
 Select `View ➔ Message Signs ➔ Message Patterns` or
-`View ➔ Message Signs ➔ Message Editor` menu items
+`View ➔ Message Signs ➔ Message Editor` ([WYSIWYG]) menu items
 
 A _message pattern_ is a partially or fully composed [MULTI] message associated
 with a sign config.  They can be:
@@ -49,10 +49,9 @@ it.  Each line is used in a specific fillable rectangle of the pattern.  Lines
 can be ordered in the message composer by **rank**, 1-99.  Lines can also be
 restricted to specific signs by adding a **restrict** [hashtag].
 
-When composing messages, if a pattern is selected which has fillable text
-rectangles but no lines, a **substitute** pattern will be chosen to provide
-them instead.  Both patterns must have the same number of lines in their text
-rectangles.
+If a pattern has fillable text rectangles but no lines, a **substitute**
+pattern will be chosen to provide them instead.  Both patterns must have the
+same number of lines in their text rectangles.
 
 <details>
 <summary>API Resources</summary>
@@ -125,4 +124,4 @@ Example:
 [hashtag]: hashtags.html
 [MULTI]: multi.html
 [permissions]: permissions.html
-[WYSIWYG editor]: wysiwyg.html
+[WYSIWYG]: wysiwyg.html

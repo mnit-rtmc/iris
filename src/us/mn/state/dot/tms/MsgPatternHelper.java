@@ -141,15 +141,23 @@ public class MsgPatternHelper extends BaseHelper {
 		return cfgs;
 	}
 
-	/** Check if a message pattern has associated lines */
-	static public boolean hasLines(MsgPattern pat) {
+	/** Get the count of lines associated with a message pattern */
+	static public int lineCount(MsgPattern pat) {
+		int n_lines = 0;
 		Iterator<MsgLine> it = MsgLineHelper.iterator();
 		while (it.hasNext()) {
 			MsgLine ml = it.next();
 			if (ml.getMsgPattern() == pat)
-				return true;
+				n_lines = Math.max(n_lines, ml.getLine());
 		}
-		return false;
+		return n_lines;
+	}
+
+	/** Get full text rectangle for a sign */
+	static private TextRect fullTextRect(DMS dms) {
+		return (dms != null)
+		      ? SignConfigHelper.textRect(dms.getSignConfig())
+		      : null;
 	}
 
 	/** Split lines of a message based on a pattern.
@@ -157,13 +165,12 @@ public class MsgPatternHelper extends BaseHelper {
 	static private List<String> splitLines(MsgPattern pat, DMS dms,
 		String ms)
 	{
-		if (pat == null || dms == null)
+		if (pat == null)
 			return null;
-		SignConfig sc = dms.getSignConfig();
-		if (sc == null)
+		TextRect tr = fullTextRect(dms);
+		if (tr == null)
 			return null;
 		String pat_ms = pat.getMulti();
-		TextRect tr = SignConfigHelper.textRect(sc);
 		List<String> lines = tr.splitLines(pat_ms, ms);
 		// validate that filling the rectangle produces the same msg
 		String ms2 = new MultiString(tr.fill(pat_ms, lines))
@@ -204,6 +211,44 @@ public class MsgPatternHelper extends BaseHelper {
 				word = word.trim();
 				if (WordHelper.isBanned(word))
 					return "BANNED WORD: " + word;
+			}
+		}
+		return null;
+	}
+
+	/** Make list of text rectangles for each line in a pattern */
+	static public List<TextRect> lineTextRects(MsgPattern pat, DMS dms) {
+		if (pat == null)
+			return null;
+		TextRect full_rect = fullTextRect(dms);
+		if (full_rect == null)
+			return null;
+		ArrayList<TextRect> rects = new ArrayList<TextRect>();
+		rects.add(null); // line 0 is invalid
+		String pat_ms = pat.getMulti();
+		for (TextRect tr: full_rect.find(pat_ms)) {
+			for (int i = 0; i < tr.getLineCount(); i++)
+				rects.add(tr);
+		}
+		return rects;
+	}
+
+	/** Find a substitute pattern with associated message lines */
+	static public MsgPattern findSubstitute(MsgPattern pat, DMS dms,
+		int n_lines)
+	{
+		Iterator<MsgPattern> it = iterator();
+		while (it.hasNext()) {
+			MsgPattern mp = it.next();
+			if (mp == pat)
+				continue;
+			String cht = mp.getComposeHashtag();
+			if (cht != null &&
+			    DMSHelper.hasHashtag(dms, cht) &&
+			    isValidMulti(mp) &&
+			    lineCount(mp) == n_lines)
+			{
+				return mp;
 			}
 		}
 		return null;

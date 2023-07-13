@@ -14,8 +14,11 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import us.mn.state.dot.tms.utils.MultiString;
+import us.mn.state.dot.tms.utils.TextRect;
 
 /**
  * Helper class for message lines.
@@ -59,5 +62,56 @@ public class MsgLineHelper extends BaseHelper {
 	static public boolean isMultiValid(String m) {
 		return m.length() <= MsgLine.MAX_LEN_MULTI &&
 		       m.equals(new MultiString(m).normalizeLine().toString());
+	}
+
+	/** Find all compose lines for a message pattern */
+	static public List<MsgLine> findAllCompose(MsgPattern pat, DMS dms) {
+		ArrayList<MsgLine> lines = new ArrayList<MsgLine>();
+		List<TextRect> line_rects =
+			MsgPatternHelper.lineTextRects(pat, dms);
+		if (line_rects == null || line_rects.size() <= 1)
+			return lines;
+		if (MsgPatternHelper.lineCount(pat) == 0) {
+			int n_lines = line_rects.size() - 1;
+			pat = MsgPatternHelper.findSubstitute(pat, dms,
+				n_lines);
+			if (pat == null)
+				return lines;
+		}
+		Iterator<MsgLine> it = iterator();
+		while (it.hasNext()) {
+			MsgLine ml = it.next();
+			if (checkLine(ml, pat, dms)) {
+				MsgLine aml = abbreviateLine(ml, line_rects);
+				if (aml != null)
+					lines.add(aml);
+			}
+		}
+		return lines;
+	}
+
+	/** Check if a message line belongs */
+	static private boolean checkLine(MsgLine ml, MsgPattern pat, DMS dms) {
+		if (ml.getMsgPattern() == pat) {
+			String rht = ml.getRestrictHashtag();
+			return (rht == null || DMSHelper.hasHashtag(dms, rht));
+		}
+		return false;
+	}
+
+	/** Abbreviate a line for available text rectangle */
+	static private MsgLine abbreviateLine(MsgLine ml,
+		List<TextRect> line_rects)
+	{
+		short line = ml.getLine();
+		if (line < line_rects.size()) {
+			TextRect tr = line_rects.get(line);
+			String ms = tr.checkLine(ml.getMulti(), true);
+			if (ms != null) {
+				return new TransMsgLine(ms, line,
+					ml.getRank());
+			}
+		}
+		return null;
 	}
 }
