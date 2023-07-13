@@ -706,6 +706,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Deny free-form text in a message */
 	private void denyFreeForm(SignMessage sm) throws TMSException {
+		if (SignMessageHelper.isBlank(sm))
+			return;
 		String msg = DMSHelper.validateFreeFormLines(this,
 			sm.getMulti());
 		if (msg != null)
@@ -714,6 +716,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Check for banned words in free-form text */
 	private void checkFreeFormBanned(SignMessage sm) throws TMSException {
+		if (SignMessageHelper.isBlank(sm))
+			return;
 		String msg = DMSHelper.validateFreeFormWords(this,
 			sm.getMulti());
 		if (msg != null)
