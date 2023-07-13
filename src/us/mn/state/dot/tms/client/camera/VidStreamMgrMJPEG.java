@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2019-2020  SRF Consulting Group
+ * Copyright (C) 2003-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +47,7 @@ public class VidStreamMgrMJPEG extends VidStreamMgr {
 
 	/** Input stream to read */
 	private InputStream stream;
-	
+
 	//-------------------------------------------
 
 	/** Create an MJPEG stream manager.
@@ -122,6 +123,7 @@ public class VidStreamMgrMJPEG extends VidStreamMgr {
 		try {
 			url = new URL(vreq.getConfig());
 			c = url.openConnection();
+			c.setUseCaches(false);
 			String upass = url.getUserInfo();
 			if (upass != null) {
 				String auth = "Basic " + new String(Base64.encode(
