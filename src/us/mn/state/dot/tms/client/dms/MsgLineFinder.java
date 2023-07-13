@@ -43,7 +43,7 @@ public class MsgLineFinder {
 	 * @param pat Message pattern for matching lines.
 	 * @param dms The sign. */
 	private MsgLineFinder(MsgPattern pat, DMS dms) {
-		for (MsgLine ml: MsgLineHelper.findAllCompose(pat, dms)) {
+		for (MsgLine ml: MsgLineHelper.findAllLines(pat, dms)) {
 			getLineModel(ml.getLine()).add(ml);
 		}
 	}

@@ -187,14 +187,28 @@ public class MsgPatternHelper extends BaseHelper {
 		List<String> lines = splitLines(pat, dms, ms);
 		if (lines == null)
 			return "";
+		List<MsgLine> msg_lines =
+			MsgLineHelper.findAllLines(pat, dms);
 		short num = 0;
 		for (String line: lines) {
 			num++;
-			if ((!line.isEmpty()) &&
-			    (!MsgLineHelper.match(pat, num, line)))
+			if (line.isEmpty())
+				continue;
+			if (!validateLine(msg_lines, num, line))
 				return "FREE-FORM NOT PERMITTED: " + line;
 		}
 		return null;
+	}
+
+	/** Validate one message line */
+	static private boolean validateLine(List<MsgLine> msg_lines,
+		short num, String line)
+	{
+		for (MsgLine ml: msg_lines) {
+			if (ml.getLine() == num && line.equals(ml.getMulti()))
+				return true;
+		}
+		return false;
 	}
 
 	/** Validate text words for a message pattern.

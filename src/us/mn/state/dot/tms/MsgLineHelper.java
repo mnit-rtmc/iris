@@ -44,28 +44,14 @@ public class MsgLineHelper extends BaseHelper {
 			MsgLine.SONAR_TYPE));
 	}
 
-	/** Check if there is a matching msg line */
-	static public boolean match(MsgPattern pat, short line, String multi) {
-		Iterator<MsgLine> it = iterator();
-		while (it.hasNext()) {
-			MsgLine mt = it.next();
-			// FIXME: check restrict hashtag
-			if (mt.getMsgPattern() == pat &&
-			    mt.getLine() == line &&
-			    mt.getMulti().equals(multi))
-				return true;
-		}
-		return false;
-	}
-
 	/** Validate a MULTI string */
 	static public boolean isMultiValid(String m) {
 		return m.length() <= MsgLine.MAX_LEN_MULTI &&
 		       m.equals(new MultiString(m).normalizeLine().toString());
 	}
 
-	/** Find all compose lines for a message pattern */
-	static public List<MsgLine> findAllCompose(MsgPattern pat, DMS dms) {
+	/** Find all lines for a message pattern */
+	static public List<MsgLine> findAllLines(MsgPattern pat, DMS dms) {
 		ArrayList<MsgLine> lines = new ArrayList<MsgLine>();
 		List<TextRect> line_rects =
 			MsgPatternHelper.lineTextRects(pat, dms);
