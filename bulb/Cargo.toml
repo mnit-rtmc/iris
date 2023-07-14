@@ -1,7 +1,7 @@
 [package]
 name = "bulb"
-version = "0.11.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
 
 [lib]
 crate-type = ["cdylib"]
@@ -41,10 +41,3 @@ features = [
   'ScrollLogicalPosition',
   'TransitionEvent',
 ]
-
-[profile.release]
-opt-level = "s"
-lto = true
-codegen-units = 1
-panic = "abort"
-strip = "symbols"

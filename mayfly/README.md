@@ -9,7 +9,6 @@ handled by the IRIS server.
 ## Building
 
 ```
-rustup target add x86_64-unknown-linux-musl
 git clone https://github.com/mnit-rtmc/iris.git
 cd iris/mayfly/
 cargo build --release
@@ -19,7 +18,7 @@ cargo build --release
 
 As root:
 ```
-cp ./target/x86_64-unknown-linux-musl/release/mayfly /usr/local/bin
+cp ../target/release/mayfly /usr/local/bin
 cp mayfly.service /etc/systemd/system
 systemctl enable mayfly.service
 systemctl start mayfly.service
@@ -35,7 +34,7 @@ archive files.  This enables backward-compatibility for the older `trafdat`
 service, and also improves performance for some mayfly requests.
 
 After building, it is located at
-`./target/x86_64-unknown-linux-musl/release/cocoon`.
+`../target/release/cocoon`.
 
 ### Running
 
