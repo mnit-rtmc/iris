@@ -73,8 +73,8 @@ public class MsgPatternHelper extends BaseHelper {
 		Iterator<MsgPattern> it = iterator();
 		while (it.hasNext()) {
 			MsgPattern pat = it.next();
-			String cht = pat.getComposeHashtag();
-			if (cht != null && isValidMulti(pat)) {
+			if (isValidMulti(pat)) {
+				String cht = pat.getComposeHashtag();
 				if (DMSHelper.hasHashtag(dms, cht))
 					pats.add(pat);
 			}
@@ -254,15 +254,13 @@ public class MsgPatternHelper extends BaseHelper {
 		Iterator<MsgPattern> it = iterator();
 		while (it.hasNext()) {
 			MsgPattern mp = it.next();
-			if (mp == pat)
-				continue;
-			String cht = mp.getComposeHashtag();
-			if (cht != null &&
-			    DMSHelper.hasHashtag(dms, cht) &&
-			    isValidMulti(mp) &&
-			    lineCount(mp) == n_lines)
-			{
-				return mp;
+			if (mp != pat && isValidMulti(mp)) {
+				String cht = mp.getComposeHashtag();
+				if (DMSHelper.hasHashtag(dms, cht) &&
+				    lineCount(mp) == n_lines)
+				{
+					return mp;
+				}
 			}
 		}
 		return null;
