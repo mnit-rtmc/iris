@@ -53,7 +53,7 @@ Hidden         | hide sign when _available_ or _deployed_ styles are selected
 **Internal** beacons are controlled through the DMS controller using the [NTCIP]
 protocol.  **Remote** [beacon]s are controlled using a separate [comm link].
 
-## Operating
+## Styles
 
 Each DMS can have a number of _styles_, depending on its current state.  Styles
 are ordered by precedence, determining which color a map marker is drawn.
@@ -88,9 +88,9 @@ level of the user:
 * 🔧 **Configure**: Any free-form text permitted (no check)
 
 The message preview is updated as the user composes the message.  When the
-**Send** button is pressed, a [sign message] is created and set as `msg_user`.
-The server then performs a validation check ensuring the user has permission
-for any free-form text.
+**Send** button is pressed, a [sign message] is created and set as the operator
+message.  The server then performs a validation check ensuring the user has
+permission for any free-form text.
 
 
 [action tags]: action_plans.html#dms-action-tags
