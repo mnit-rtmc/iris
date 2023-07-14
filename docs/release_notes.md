@@ -169,7 +169,7 @@
  - Moved `beacon_activation_flag` and `pixel_service_flag` to `sign_detail`
 
 5.24.0 (11 Oct 2021)
- - Added DMS [message combining](dms.md#message-combining) feature
+ - Added DMS message combining feature
  - Added "Send Settings" button to controller form
  - Added `DETECTOR_OCC_SPIKE_SECS` system attribute
  - Added some pin configuration fields to cabinet style table

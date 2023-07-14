@@ -72,21 +72,24 @@ Attribute [permissions]:
 
 ## Message Combining
 
-In some cases, a scheduled message can be combined with the operator composed
-message:
-- **Sequence**: separate pages
-- **Shared**: split pages using _text rectangles_
+Scheduled messages can be configured to combine them with the current operator
+message (if any).  This can be done in two ways:
 
-The foreground color, font, page- and line-justification are reset to default
-values between messages by inserting `[cf]`, `[fo]`, `[jp]` and `[jl]` [MULTI]
-tags.
+- **Sequenced**: ![](images/msg_combined_sequenced.gif)
+- **Shared**: ![](images/msg_combined_shared.gif)
 
-### Sequenced Message Combining
+Properties including foreground color, font, page- and line-justification are
+reset to default values by inserting `[cf]`, `[fo]`, `[jp]` and `[jl]` [MULTI]
+tags between messages.
+
+### Sequenced
 
 If the scheduled message ends with a default `[cf]` tag, it can be combined
 with an operator message to make a repeating _sequence_ of pages.
 
-Example:
+<details>
+<summary>Example</summary>
+
 - Scheduled message:
   `[cr1,1,160,54,0,0,125][cr1,18,160,1,255,255,255][tr1,1,160,17][cf255,255,255][fo5][jp3]TRUCK PARKING[tr4,24,154,30][jl2]REST AREA[jl4]4 MI[nl5][jl2]SPACES OPEN[jl4]10[cf]`
 - Operator message:
@@ -94,20 +97,22 @@ Example:
 - Combined message:
   `[cr1,1,160,54,0,0,125][cr1,18,160,1,255,255,255][tr1,1,160,17][cf255,255,255][fo5][jp3]TRUCK PARKING[tr4,24,154,30][jl2]REST AREA[jl4]4 MI[nl5][jl2]SPACES OPEN[jl4]10[cf][np][fo][jp][jl]STALLED VEHICLE[nl]IN RIGHT LANE[nl]USE CAUTION`
 
-![](images/msg_combined_sequenced.gif)
+</details>
 
-### Shared Message Combining
+### Shared
 
-With this method, the sign is partitioned into two regions, displaying both
-messages simultaneously.  The scheduled message is prepended to each page of
-the operator message.
+With this method, the sign is partitioned into two regions, with the operator
+message in a _text rectangle_.  The scheduled message is prepended to each page
+of the operator message.
 
 - The scheduled message must contain no `[np]` tags.
 - The scheduled message must end with a `[tr…]` tag.
 - Each page of the operator message must start with that same `[tr…]` tag.
 - The operator message must not contain any other `[tr…]` tags.
 
-Example:
+<details>
+<summary>Example</summary>
+
 - Scheduled message:
   `[cr1,1,240,24,1,23,9][cf250,250,250][fo13][tr1,5,240,18][jl3]EXPRESS LANE[tr1,31,240,40]OPEN TO ALL[nl6]TRAFFIC[g7,110,75][cr241,1,2,96,255,255,255][tr243,1,350,96]`
 - Operator message:
@@ -115,7 +120,7 @@ Example:
 - Combined message:
   `[cr1,1,240,24,1,23,9][cf250,250,250][fo13][tr1,5,240,18][jl3]EXPRESS LANE[tr1,31,240,40]OPEN TO ALL[nl6]TRAFFIC[g7,110,75][cr241,1,2,96,255,255,255][tr243,1,350,96][cf][fo][jp][jl]STALLED VEHICLE[nl]IN RIGHT LANE[nl]USE CAUTION`
 
-![](images/msg_combined_shared.gif)
+</details>
 
 
 [action plan]: action_plans.html
