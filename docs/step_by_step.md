@@ -79,10 +79,7 @@
     - Change the phase back to `undeployed` to blank the signs
 
 Notes:
- - Before running through these steps, create the Sign Groups and Message
-   Patterns desired
- - The message patterns that the Action Plan references don't have to be
-   assigned to a Sign Group
+ - Before running through these steps, create the desired [message pattern]s
  - Use the device debug log to diagnose problems with scheduled messages not
    appearing on signs
 
