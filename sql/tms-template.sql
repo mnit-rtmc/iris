@@ -1,22 +1,6 @@
 --
 -- PostgreSQL database template for IRIS
 --
--- NOTIFY messages can be received asynchronously with the LISTEN command.
--- The channel is the same as a table name, and the payload is for specific
--- update data (usually blank).
---
--- PAYLOAD: 'publish ' || name, 'video_loss' (camera)
---          'setup', 'fail_time' (controller)
---          'connected' (comm_link)
---          'auto_fail' (detector)
---          'msg_user', 'msg_sched', 'msg_current', 'expire_time',
---              'status', 'stuck_pixels' (dms)
---          'settings', 'sample' (weather_sensor)
---          'settings' (tag_reader)
---          'time_stamp' (parking_area)
---          id (road_class)
---          name (r_node, road, any resource_n in geo_loc)
---
 SET client_encoding = 'UTF8';
 
 \set ON_ERROR_STOP
