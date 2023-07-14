@@ -56,14 +56,14 @@ incident roadway.
 
 ## Severity
 
-Incident severity determines the **maximum range** and **message priority**.
+Incident severity determines the **maximum range** and [message priority].
 There are three severity values: `minor`, `normal`, and `major`.
 
 Severity | Maximum Range | Message Priority
 ---------|---------------|-----------------
-`minor`  | `near`        | `INCIDENT_LOW`
-`normal` | `middle`      | `INCIDENT_MED`
-`major`  | `far`         | `INCIDENT_HIGH`
+`minor`  | `near`        | `high_2`
+`normal` | `middle`      | `high_3`
+`major`  | `far`         | `high_4`
 
 Severity depends on how many lanes are _blocked_ or _affected_, as well as the
 **lane type** at the incident location.
@@ -196,7 +196,7 @@ minutes.
 [allowed words]: words.html
 [DMS]: dms.html
 [exits]: road_topology.html#r_node-types
-[message priority]: dms.html#message-priority
+[message priority]: sign_message.html#message-priority
 [MULTI]: multi.html
 [pickable]: road_topology.html#pickable
 [system attribute]: system_attributes.html

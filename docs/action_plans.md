@@ -175,7 +175,7 @@ than the value of the `action_plan_event_purge_days` [system attribute].
 [exit ramp backup]: exit_backup.html
 [hashtag]: hashtags.html
 [message pattern]: message_patterns.html
-[message priority]: dms.html#message-priority
+[message priority]: sign_message.html#message-priority
 [Msg-Feed]: protocols.html#msg-feed
 [MULTI]: multi.html
 [Parking area]: parking_areas.html
