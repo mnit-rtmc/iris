@@ -1,5 +1,6 @@
 [workspace]
 members = ["honeybee", "graft", "mayfly", "bulb"]
+resolver = "2"
 
 [workspace.package]
 version = "5.44.3"
