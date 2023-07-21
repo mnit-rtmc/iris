@@ -8,6 +8,9 @@ Each message is composed of three parts: **descriptor** (_what?_), **locator**
 (_where?_) and **advice** (_how?_).  Suggestions are only made if a match is
 found for all three parts.
 
+If a suggested message is too wide for the sign, it will be [abbreviated].  If
+it cannot be shrunk to fit, it will be discarded.
+
 ## Impact
 
 Every incident is assigned an **impact**, based on which lanes are _blocked_ or
@@ -147,17 +150,6 @@ Impacted Lanes | count of non-shoulder lanes impacted
 Rows where _open_ and / or _impacted lanes_ are specified will be matched in
 preference to rows where they are not.
 
-## Abbreviation
-
-If a message is too wide to fit on the sign, an abbreviated version can be
-created using the [allowed words] list.
-
-On lines which are too wide, a single word from the _allowed words_ list is
-replaced with its abbreviated form.  Then the line is checked again, and if
-still too wide, the process repeats.  If it still doesn't fit after all
-possible words have been abbreviated, the message is discarded, with no
-suggestion for that sign.
-
 ## Dedicated Purpose Signs
 
 _Dedicated purpose_ signs normally cannot be used for incidents.  An exception
@@ -190,7 +182,7 @@ _cleared_ message will be deployed with `low_sys` [message priority] for 5
 minutes.
 
 
-[allowed words]: words.html
+[abbreviated]: words.html#abbreviation
 [DMS]: dms.html
 [exits]: road_topology.html#r_node-types
 [message priority]: sign_message.html#message-priority

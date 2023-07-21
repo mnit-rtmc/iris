@@ -79,9 +79,11 @@ When a DMS is selected, a few things happen:
   * only patterns containing **NO** [action tags]
 
 When an operator chooses a pattern, a series of selectors is populated with
-[message lines], depending on the [fillable text rectangles].  These selectors
-may also allow **free-form text** entry, depending on the permision access
-level of the user:
+[message lines], depending on the [fillable text rectangles].  Any lines which
+are too wide to fit the sign are [abbreviated] as necessary.
+
+The selectors may also allow **free-form text** entry, depending on the
+permision access level of the user:
 
 * 👉 **Operate**: No free-form text permitted
 * 💡 **Manage**: Free-form text checked for **banned** [word]s
@@ -93,6 +95,7 @@ message.  The server then performs a validation check ensuring the user has
 permission for any free-form text.
 
 
+[abbreviated]: words.html#abbreviation
 [action tags]: action_plans.html#dms-action-tags
 [beacon]: beacons.html
 [comm link]: comm_links.html
