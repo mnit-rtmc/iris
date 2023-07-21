@@ -464,29 +464,31 @@ public class DMSHelper extends BaseHelper {
 	static public String validateFreeFormLines(DMS dms, String ms) {
 		if (dms == null || ms == null)
 			return "NULL VALUE";
+		String err = "NO PATTERN";
 		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms)) {
-			String err = MsgPatternHelper
+			String e = MsgPatternHelper
 				.validateLines(pat, dms, ms);
-			if (err == null)
+			if (e == null)
 				return null;
-			else if (!err.isEmpty())
-				return err;
+			else if (!e.isEmpty())
+				err = e;
 		}
-		return "NO PATTERN";
+		return err;
 	}
 
 	/** Validate free-form message words */
 	static public String validateFreeFormWords(DMS dms, String ms) {
 		if (dms == null || ms == null)
 			return "NULL VALUE";
+		String err = "NO PATTERN";
 		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms)) {
-			String err = MsgPatternHelper
+			String e = MsgPatternHelper
 				.validateWords(pat, dms, ms);
-			if (err == null)
+			if (e == null)
 				return null;
-			else if (!err.isEmpty())
-				return err;
+			else if (!e.isEmpty())
+				err = e;
 		}
-		return "NO PATTERN";
+		return err;
 	}
 }
