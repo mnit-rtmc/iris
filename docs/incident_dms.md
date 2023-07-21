@@ -152,14 +152,11 @@ preference to rows where they are not.
 If a message is too wide to fit on the sign, an abbreviated version can be
 created using the [allowed words] list.
 
-Each line which doesn't fit is split into words.  Starting at the end, any word
-which appears in the _allowed words_ list is replaced with its abbreviated form.
-Then the line is checked again, and if still too wide, the process repeats.
-Words with empty abbreviations are checked last, only if all other abbreviations
-are insufficient.
-
-If a line is still too wide after all words are checked, the message is
-discarded, with no suggestion for that sign.
+On lines which are too wide, a single word from the _allowed words_ list is
+replaced with its abbreviated form.  Then the line is checked again, and if
+still too wide, the process repeats.  If it still doesn't fit after all
+possible words have been abbreviated, the message is discarded, with no
+suggestion for that sign.
 
 ## Dedicated Purpose Signs
 
