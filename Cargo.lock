@@ -485,7 +485,7 @@ dependencies = [
 
 [[package]]
 name = "bulb"
-version = "5.44.3"
+version = "5.44.4"
 dependencies = [
  "console_error_panic_hook",
  "humantime",
@@ -975,7 +975,7 @@ dependencies = [
 
 [[package]]
 name = "graft"
-version = "5.44.3"
+version = "5.44.4"
 dependencies = [
  "anyhow",
  "async-std",
@@ -1054,7 +1054,7 @@ dependencies = [
 
 [[package]]
 name = "honeybee"
-version = "5.44.3"
+version = "5.44.4"
 dependencies = [
  "anyhow",
  "base64 0.21.2",
@@ -1241,7 +1241,7 @@ checksum = "b247793f15143d0addc67f46255b1836a061d738caa558b9f6235a63ecb3febb"
 
 [[package]]
 name = "mayfly"
-version = "5.44.3"
+version = "5.44.4"
 dependencies = [
  "argh",
  "async-std",

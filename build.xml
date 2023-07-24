@@ -385,8 +385,7 @@
 	<target name="tarball"
 	        description="Create source tarball">
 		<copy todir="${build.tar}">
-			<fileset dir="${basedir}"
-			         excludes="build/**,bulb/target/**,graft/target/**,honeybee/target/**,mayfly/target/**" />
+			<fileset dir="${basedir}" excludes="build/**,target/**" />
 		</copy>
 		<tar destfile="${tar.file}"
 		     basedir="${build.dir}"
