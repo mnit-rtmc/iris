@@ -69,7 +69,7 @@ INSERT INTO iris.i_user (name, full_name, password, dn, role, enabled)
   VALUES('admin', 'IRIS Administrator', '+vAwDtk/0KGx9k+kIoKFgWWbd3Ku8e/FOHoZoHB65PAuNEiN2muHVavP0fztOi4=', '', 'administrator', 't');
 
 INSERT INTO iris.i_user_domain (i_user, domain)
-  VALUES('admin', 'any_ipv4');
+  VALUES ('admin', 'any_ipv4'), ('admin', 'any_ipv6');
 
 INSERT INTO iris.map_extent (name, lat, lon, zoom)
   VALUES('Home', 44.9648, -93.2485, 11);
