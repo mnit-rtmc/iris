@@ -29,8 +29,8 @@ SET search_path = public, pg_catalog;
 CREATE SEQUENCE event.event_id_seq;
 
 CREATE TABLE event.event_description (
-	event_desc_id INTEGER PRIMARY KEY,
-	description text NOT NULL
+    event_desc_id INTEGER PRIMARY KEY,
+    description text NOT NULL
 );
 
 COPY event.event_description (event_desc_id, description) FROM stdin;
@@ -102,8 +102,8 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 -- System attributes
 --
 CREATE TABLE iris.system_attribute (
-	name VARCHAR(32) PRIMARY KEY,
-	value VARCHAR(64) NOT NULL
+    name VARCHAR(32) PRIMARY KEY,
+    value VARCHAR(64) NOT NULL
 );
 
 CREATE FUNCTION iris.table_notify() RETURNS TRIGGER AS
@@ -455,6 +455,26 @@ CREATE TABLE iris.hashtag (
     CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$')
 );
 ALTER TABLE iris.hashtag ADD PRIMARY KEY (resource_n, name, hashtag);
+
+CREATE FUNCTION iris.resource_notify() RETURNS TRIGGER AS
+    $resource_notify$
+DECLARE
+    arg TEXT;
+BEGIN
+    FOREACH arg IN ARRAY TG_ARGV LOOP
+        IF (TG_OP = 'DELETE') THEN
+            PERFORM pg_notify(OLD.resource_n, arg);
+        ELSE
+            PERFORM pg_notify(NEW.resource_n, arg);
+        END IF;
+    END LOOP;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$resource_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER resource_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.hashtag
+    FOR EACH ROW EXECUTE PROCEDURE iris.resource_notify('hashtags');
 
 CREATE VIEW hashtag_view AS
     SELECT resource_n, name, hashtag
@@ -944,17 +964,9 @@ CREATE TABLE iris.geo_loc (
     lon double precision
 );
 
-CREATE FUNCTION iris.resource_notify() RETURNS TRIGGER AS
-    $resource_notify$
-BEGIN
-    PERFORM pg_notify(NEW.resource_n, NEW.name);
-    RETURN NULL; -- AFTER trigger return is ignored
-END;
-$resource_notify$ LANGUAGE plpgsql;
-
 CREATE TRIGGER resource_notify_trig
     AFTER UPDATE ON iris.geo_loc
-    FOR EACH ROW EXECUTE PROCEDURE iris.resource_notify();
+    FOR EACH ROW EXECUTE PROCEDURE iris.resource_notify('geo_loc');
 
 CREATE FUNCTION iris.geo_location(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT)
 	RETURNS TEXT AS $geo_location$
@@ -1518,7 +1530,7 @@ CREATE TRIGGER controller_io_notify_trig
 
 CREATE TRIGGER resource_notify_trig
     AFTER UPDATE ON iris.controller_io
-    FOR EACH ROW EXECUTE PROCEDURE iris.resource_notify();
+    FOR EACH ROW EXECUTE PROCEDURE iris.resource_notify('controller_io');
 
 CREATE FUNCTION iris.controller_io_delete() RETURNS TRIGGER AS
     $controller_io_delete$
