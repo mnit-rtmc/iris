@@ -14,7 +14,7 @@ use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
 use crate::item::ItemState;
 use crate::resource::{
-    disabled_attr, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
+    AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
@@ -191,12 +191,15 @@ impl Dms {
     fn to_html_compact(&self, anc: &DmsAnc) -> String {
         let comm_state = anc.dev.comm_state(self);
         let item_state = self.item_state(anc);
-        let location = HtmlStr::new(&self.location).with_len(32);
-        let disabled = disabled_attr(self.controller.is_some());
-        format!(
-            "<div class='{NAME} end'>{comm_state} {self} {item_state}</div>\
-            <div class='info fill{disabled}'>{location}</div>"
-        )
+        let mut html = format!(
+            "<div class='{NAME} end'>{comm_state} {self} {item_state}</div>"
+        );
+        if let Some(msg_current) = &self.msg_current {
+            html.push_str("<img class='message' src='/iris/img/");
+            html.push_str(msg_current);
+            html.push_str(".gif'>");
+        }
+        html
     }
 
     /// Convert to Status HTML
