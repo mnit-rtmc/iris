@@ -357,16 +357,17 @@ public class DmsActionMsg {
 	/** Get the feed message string */
 	private String getFeedMsg(FeedMsg msg) {
 		addSource(SignMsgSource.external);
-		String ms = msg.getMulti().toString();
-		if (!isMsgFeedVerifyEnabled() || isFeedMsgValid(msg, ms))
-			return ms;
+		if (!isMsgFeedVerifyEnabled() || isFeedMsgValid(msg))
+			return msg.getMulti().toString();
 		else
-			return fail("Invalid feed msg: " + ms);
+			return fail("Invalid feed msg: " + msg.getFeedMulti());
 	}
 
 	/** Test if a feed message is valid */
-	private boolean isFeedMsgValid(FeedMsg msg, String ms) {
+	private boolean isFeedMsgValid(FeedMsg msg) {
 		MsgPattern pat = action.getMsgPattern();
+		// Must validate with feed tag included
+		String ms = msg.getFeedMulti();
 		return MsgPatternHelper.validateLines(pat, dms, ms) == null;
 	}
 
