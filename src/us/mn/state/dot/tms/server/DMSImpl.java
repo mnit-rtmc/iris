@@ -1299,6 +1299,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Send a device request operation */
 	@Override
 	protected void sendDeviceRequest(DeviceRequest dr) {
+		if (DeviceRequest.RESET_DEVICE == dr)
+			resetStateNotify();
 		DMSPoller p = getDMSPoller();
 		if (p != null)
 			p.sendRequest(this, dr);
