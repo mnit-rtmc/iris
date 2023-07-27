@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::device::{Device, DeviceAnc};
+use crate::item::ItemState;
 use crate::resource::{
     disabled_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
@@ -35,13 +36,18 @@ type CameraAnc = DeviceAnc<Camera>;
 impl Camera {
     pub const RESOURCE_N: &'static str = "camera";
 
+    /// Get the item state
+    fn item_state(&self, anc: &CameraAnc) -> ItemState {
+        anc.item_state_opt(self).unwrap_or(ItemState::Available)
+    }
+
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &CameraAnc) -> String {
-        let comm_state = anc.comm_state(self);
+        let item_state = self.item_state(anc);
         let location = HtmlStr::new(&self.location).with_len(32);
         let disabled = disabled_attr(self.controller.is_some());
         format!(
-            "<div class='{NAME} end'>🕹️{comm_state} {self}</div>\
+            "<div class='{NAME} end'>🕹️ {self} {item_state}</div>\
             <div class='info fill{disabled}'>{location}</div>"
         )
     }
@@ -120,7 +126,7 @@ impl Card for Camera {
     fn is_match(&self, search: &str, anc: &CameraAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || anc.comm_state(self).is_match(search)
+            || self.item_state(anc).is_match(search)
     }
 
     /// Convert to HTML view

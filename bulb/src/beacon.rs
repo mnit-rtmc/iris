@@ -109,16 +109,14 @@ impl Beacon {
 
     /// Get item state
     fn item_state(&self, anc: &BeaconAnc) -> ItemState {
-        if anc.dev.is_active(self) {
+        anc.dev.item_state_opt(self).unwrap_or_else(|| {
             match self.state {
                 0 => ItemState::Unknown,
                 2 => ItemState::Available,
                 4 => ItemState::Deployed,
                 _ => ItemState::Maintenance,
             }
-        } else {
-            ItemState::Unknown
-        }
+        })
     }
 
     /// Get beacon state
@@ -135,12 +133,11 @@ impl Beacon {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &BeaconAnc) -> String {
-        let comm_state = anc.dev.comm_state(self);
         let item_state = self.item_state(anc);
         let disabled = disabled_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='{NAME} end'>{comm_state} {self} {item_state}</div>\
+            "<div class='{NAME} end'>{self} {item_state}</div>\
             <div class='info fill{disabled}'>{location}</div>"
         )
     }
@@ -148,8 +145,6 @@ impl Beacon {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &BeaconAnc, config: bool) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
-        let comm_state = anc.dev.comm_state(self);
-        let comm_desc = comm_state.description();
         let item_state = self.item_state(anc);
         let item_desc = item_state.description();
         let flashing = if self.flashing() {
@@ -164,7 +159,6 @@ impl Beacon {
               <span class='info'>{location}</span>\
             </div>\
             <div class='row'>\
-              <span>{comm_state} {comm_desc}</span>\
               <span>{item_state} {item_desc}</span>\
             </div>\
             <div class='beacon-container row center'>\
@@ -262,7 +256,6 @@ impl Card for Beacon {
     fn is_match(&self, search: &str, anc: &BeaconAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || anc.dev.comm_state(self).is_match(search)
             || self.item_state(anc).is_match(search)
             || self.message.contains_lower(search)
             || self.notes.contains_lower(search)

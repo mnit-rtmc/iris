@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::device::{Device, DeviceAnc};
+use crate::item::ItemState;
 use crate::resource::{
     disabled_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
@@ -101,13 +102,18 @@ type TagReaderAnc = DeviceAnc<TagReader>;
 impl TagReader {
     pub const RESOURCE_N: &'static str = "tag_reader";
 
+    /// Get the item state
+    fn item_state(&self, anc: &TagReaderAnc) -> ItemState {
+        anc.item_state_opt(self).unwrap_or(ItemState::Available)
+    }
+
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &TagReaderAnc) -> String {
-        let comm_state = anc.comm_state(self);
+        let item_state = self.item_state(anc);
         let location = HtmlStr::new(&self.location).with_len(32);
         let disabled = disabled_attr(self.controller.is_some());
         format!(
-            "<div class='{NAME} end'>{comm_state} {self}</div>\
+            "<div class='{NAME} end'>{self} {item_state}</div>\
             <div class='info fill{disabled}'>{location}</div>"
         )
     }
@@ -178,7 +184,7 @@ impl Card for TagReader {
     fn is_match(&self, search: &str, anc: &TagReaderAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || anc.comm_state(self).is_match(search)
+            || self.item_state(anc).is_match(search)
     }
 
     /// Convert to HTML view

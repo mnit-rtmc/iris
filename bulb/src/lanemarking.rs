@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::device::{Device, DeviceAnc};
+use crate::item::ItemState;
 use crate::resource::{
     disabled_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
@@ -36,13 +37,18 @@ type LaneMarkingAnc = DeviceAnc<LaneMarking>;
 impl LaneMarking {
     pub const RESOURCE_N: &'static str = "lane_marking";
 
+    /// Get the item state
+    fn item_state(&self, anc: &LaneMarkingAnc) -> ItemState {
+        anc.item_state_opt(self).unwrap_or(ItemState::Available)
+    }
+
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LaneMarkingAnc) -> String {
-        let comm_state = anc.comm_state(self);
+        let item_state = self.item_state(anc);
         let disabled = disabled_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='{NAME} end'>{comm_state} {self}</div>\
+            "<div class='{NAME} end'>{self} {item_state}</div>\
             <div class='info fill{disabled}'>{location}</div>"
         )
     }

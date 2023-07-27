@@ -15,33 +15,39 @@ use std::fmt;
 /// Item state
 #[derive(Clone, Copy)]
 pub enum ItemState {
-    Unknown,
     Available,
     Deployed,
     Scheduled,
     Maintenance,
+    Failed,
+    Disabled,
+    Unknown,
 }
 
 impl ItemState {
     /// Get the item state code
     pub fn code(self) -> &'static str {
         match self {
-            Self::Unknown => "❓",
-            Self::Available => "🔹",
+            Self::Available => "👍",
             Self::Deployed => "🔶",
             Self::Scheduled => "🕗",
             Self::Maintenance => "◾",
+            Self::Failed => "💀",
+            Self::Disabled => "🔻",
+            Self::Unknown => "❓",
         }
     }
 
     /// Get the item state description
     pub fn description(self) -> &'static str {
         match self {
-            Self::Unknown => "unknown",
             Self::Available => "available",
             Self::Deployed => "deployed",
             Self::Scheduled => "scheduled",
             Self::Maintenance => "maintenance",
+            Self::Failed => "failed",
+            Self::Disabled => "disabled",
+            Self::Unknown => "unknown",
         }
     }
 

@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::device::{Device, DeviceAnc};
+use crate::item::ItemState;
 use crate::resource::{
     disabled_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
@@ -687,6 +688,11 @@ fn sub_surface_html(
 impl WeatherSensor {
     pub const RESOURCE_N: &'static str = "weather_sensor";
 
+    /// Get the item state
+    fn item_state(&self, anc: &WeatherSensorAnc) -> ItemState {
+        anc.item_state_opt(self).unwrap_or(ItemState::Available)
+    }
+
     /// Get sample as HTML
     fn sample_html(&self) -> String {
         match &self.sample {
@@ -697,11 +703,11 @@ impl WeatherSensor {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &WeatherSensorAnc) -> String {
-        let comm_state = anc.comm_state(self);
+        let item_state = self.item_state(anc);
         let disabled = disabled_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='{NAME} end'>{comm_state} {self}</div>\
+            "<div class='{NAME} end'>{self} {item_state}</div>\
             <div class='info fill{disabled}'>{location}</div>"
         )
     }
@@ -711,8 +717,8 @@ impl WeatherSensor {
         let location = HtmlStr::new(&self.location).with_len(64);
         let site_id = HtmlStr::new(&self.site_id);
         let alt_id = HtmlStr::new(&self.alt_id);
-        let comm_state = anc.comm_state(self);
-        let comm_desc = comm_state.description();
+        let item_state = self.item_state(anc);
+        let item_desc = item_state.description();
         let mut status = format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
@@ -721,7 +727,7 @@ impl WeatherSensor {
               <span class='info'>{site_id}</span>\
               <span class='info'>{alt_id}</span>\
             </div>\
-            <span>{comm_state} {comm_desc}</span>"
+            <span>{item_state} {item_desc}</span>"
         );
         if let Some(sample_time) = &self.sample_time {
             status.push_str(&format!(
@@ -812,7 +818,7 @@ impl Card for WeatherSensor {
             || self.location.contains_lower(search)
             || self.site_id.contains_lower(search)
             || self.alt_id.contains_lower(search)
-            || anc.comm_state(self).is_match(search)
+            || self.item_state(anc).is_match(search)
             || self.notes.contains_lower(search)
     }
 

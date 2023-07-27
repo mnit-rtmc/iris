@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,8 +10,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::controller::{CommState, Controller};
+use crate::controller::Controller;
 use crate::error::Result;
+use crate::item::ItemState;
 use crate::resource::{AncillaryData, View};
 use std::borrow::{Borrow, Cow};
 use std::marker::PhantomData;
@@ -57,20 +58,10 @@ impl<D: Device> DeviceAnc<D> {
         }
     }
 
-    /// Get comm state
-    pub fn comm_state(&self, pri: &D) -> CommState {
-        match self.controller(pri) {
-            Some(ctrl) => ctrl.comm_state(),
-            None => CommState::Disabled,
-        }
-    }
-
-    /// Is device active?
-    pub fn is_active(&self, pri: &D) -> bool {
-        match self.controller(pri) {
-            Some(ctrl) => ctrl.is_active(),
-            None => false,
-        }
+    /// Get item state
+    pub fn item_state_opt(&self, pri: &D) -> Option<ItemState> {
+        self.controller(pri)
+            .map_or(Some(ItemState::Disabled), |c| c.item_state_opt())
     }
 }
 

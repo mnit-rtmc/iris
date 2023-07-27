@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::device::{Device, DeviceAnc};
+use crate::item::ItemState;
 use crate::resource::{disabled_attr, Card, View, EDIT_BUTTON, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
@@ -31,13 +32,18 @@ type VideoMonitorAnc = DeviceAnc<VideoMonitor>;
 impl VideoMonitor {
     pub const RESOURCE_N: &'static str = "video_monitor";
 
+    /// Get the item state
+    fn item_state(&self, anc: &VideoMonitorAnc) -> ItemState {
+        anc.item_state_opt(self).unwrap_or(ItemState::Available)
+    }
+
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &VideoMonitorAnc) -> String {
-        let comm_state = anc.comm_state(self);
+        let item_state = self.item_state(anc);
         let disabled = disabled_attr(self.controller.is_some());
         let mon_num = self.mon_num;
         format!(
-            "<div class='{NAME} end'>{comm_state} {self}</div>\
+            "<div class='{NAME} end'>{self} {item_state}</div>\
             <div class='info fill{disabled}'>{mon_num}</div>"
         )
     }
@@ -104,7 +110,7 @@ impl Card for VideoMonitor {
     fn is_match(&self, search: &str, anc: &VideoMonitorAnc) -> bool {
         self.name.contains_lower(search)
             || self.mon_num.to_string().contains(search)
-            || anc.comm_state(self).is_match(search)
+            || self.item_state(anc).is_match(search)
     }
 
     /// Convert to HTML view

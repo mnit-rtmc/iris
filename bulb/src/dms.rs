@@ -161,7 +161,7 @@ impl SignMessage {
     }
 
     /// Get item state
-    fn item_state(&self) -> Option<ItemState> {
+    fn item_state_opt(&self) -> Option<ItemState> {
         self.sources().map(|src| {
             if src.contains("schedule") {
                 ItemState::Scheduled
@@ -193,10 +193,12 @@ impl DmsAnc {
     }
 
     /// Get item state
-    fn item_state(&self, msg: Option<&str>) -> ItemState {
-        self.sign_message(msg)
-            .and_then(|m| m.item_state())
-            .unwrap_or(ItemState::Unknown)
+    fn item_state(&self, dms: &Dms) -> ItemState {
+        self.dev.item_state_opt(dms).unwrap_or_else(|| {
+            self.sign_message(dms.msg_current.as_deref())
+                .and_then(|m| m.item_state_opt())
+                .unwrap_or(ItemState::Unknown)
+        })
     }
 }
 
@@ -205,20 +207,14 @@ impl Dms {
 
     /// Get item state
     fn item_state(&self, anc: &DmsAnc) -> ItemState {
-        if anc.dev.is_active(self) {
-            anc.item_state(self.msg_current.as_deref())
-        } else {
-            ItemState::Unknown
-        }
+        anc.item_state(self)
     }
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &DmsAnc) -> String {
-        let comm_state = anc.dev.comm_state(self);
         let item_state = self.item_state(anc);
-        let mut html = format!(
-            "<div class='{NAME} end'>{comm_state} {self} {item_state}</div>"
-        );
+        let mut html =
+            format!("<div class='{NAME} end'>{self} {item_state}</div>");
         if let Some(msg_current) = &self.msg_current {
             html.push_str("<img class='message' src='/iris/img/");
             html.push_str(msg_current);
@@ -230,14 +226,11 @@ impl Dms {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &DmsAnc, config: bool) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
-        let comm_state = anc.dev.comm_state(self);
-        let comm_desc = comm_state.description();
         let item_state = self.item_state(anc);
         let item_desc = item_state.description();
         let mut status = format!(
             "<div class='info fill'>{location}</div>\
             <div class='row'>\
-              <span>{comm_state} {comm_desc}</span>\
               <span>{item_state} {item_desc}</span>\
             </div>"
         );
@@ -306,7 +299,6 @@ impl Card for Dms {
     fn is_match(&self, search: &str, anc: &DmsAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || anc.dev.comm_state(self).is_match(search)
             || self.item_state(anc).is_match(search)
             || anc
                 .sign_message(self.msg_current.as_deref())
