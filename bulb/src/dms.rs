@@ -139,39 +139,68 @@ impl AncillaryData for DmsAnc {
     }
 }
 
-impl DmsAnc {
+impl SignMessage {
     /// Get message owner
-    fn msg_owner(&self, msg: Option<&str>) -> Option<&str> {
-        match (&self.messages, msg) {
-            (Some(messages), Some(msg)) => messages
-                .iter()
-                .find(|m| m.name == msg)
-                .map(|m| &m.msg_owner[..]),
-            _ => None,
-        }
+    fn owner(&self) -> &str {
+        &self.msg_owner
     }
 
-    /// Get message sources
-    fn sources(&self, msg: Option<&str>) -> Option<&str> {
-        match self.msg_owner(msg) {
-            Some(owner) => owner.split(';').nth(1),
-            None => None,
-        }
+    /// Get "system" owner
+    fn system(&self) -> Option<&str> {
+        self.owner().split(';').nth(0)
+    }
+
+    /// Get "sources" owner
+    fn sources(&self) -> Option<&str> {
+        self.owner().split(';').nth(1)
+    }
+
+    /// Get "user" owner
+    fn user(&self) -> Option<&str> {
+        self.owner().split(';').nth(2)
+    }
+
+    /// Get item state
+    fn item_state(&self) -> Option<ItemState> {
+        self.sources().map(|src| {
+            if src.contains("schedule") {
+                ItemState::Scheduled
+            } else if !src.contains("blank") {
+                ItemState::Deployed
+            } else {
+                ItemState::Available
+            }
+        })
+    }
+
+    /// Check if a search string matches
+    fn is_match(&self, search: &str) -> bool {
+        // checks are ordered by "most likely to be searched"
+        self.multi.contains_lower(search)
+            || self
+                .item_state()
+                .unwrap_or(ItemState::Unknown)
+                .is_match(search)
+            || self.user().is_some_and(|u| u.contains_lower(search))
+            || self.system().is_some_and(|s| s.contains_lower(search))
+    }
+}
+
+impl DmsAnc {
+    /// Find a sign message
+    fn sign_message(&self, msg: Option<&str>) -> Option<&SignMessage> {
+        msg.and_then(|msg| {
+            self.messages
+                .as_ref()
+                .and_then(|msgs| msgs.iter().find(|m| m.name == msg))
+        })
     }
 
     /// Get item state
     fn item_state(&self, msg: Option<&str>) -> ItemState {
-        self.sources(msg)
-            .map(|src| {
-                if src.contains("schedule") {
-                    ItemState::Scheduled
-                } else if !src.contains("blank") {
-                    ItemState::Deployed
-                } else {
-                    ItemState::Available
-                }
-            })
-            .unwrap_or(ItemState::Available)
+        self.sign_message(msg)
+            .and_then(|m| m.item_state())
+            .unwrap_or(ItemState::Unknown)
     }
 }
 
@@ -282,7 +311,9 @@ impl Card for Dms {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
             || anc.dev.comm_state(self).is_match(search)
-            || self.item_state(anc).is_match(search)
+            || anc
+                .sign_message(self.msg_current.as_deref())
+                .is_some_and(|m| m.is_match(search))
     }
 
     /// Convert to HTML view
