@@ -186,6 +186,9 @@ public class TextRect {
 			super.setTextRectangle(x, y, w, h);
 			fillRect(new TextRect(page, x, y, w, h, font_cur));
 		}
+		@Override public void addFeed(String fid) {
+			// strip feed tags
+		}
 	}
 
 	/** Fill text rectangles in a pattern MULTI string.

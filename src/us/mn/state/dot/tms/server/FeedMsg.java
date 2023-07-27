@@ -64,11 +64,6 @@ public class FeedMsg {
 		return multi;
 	}
 
-	/** Get MULTI including "feed" tag */
-	public String getFeedMulti() {
-		return "[feed" + feed + ']' + multi.toString();
-	}
-
 	/** Expire time */
 	private final Date expire;
 
