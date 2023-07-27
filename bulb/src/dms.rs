@@ -177,10 +177,6 @@ impl SignMessage {
     fn is_match(&self, search: &str) -> bool {
         // checks are ordered by "most likely to be searched"
         self.multi.contains_lower(search)
-            || self
-                .item_state()
-                .unwrap_or(ItemState::Unknown)
-                .is_match(search)
             || self.user().is_some_and(|u| u.contains_lower(search))
             || self.system().is_some_and(|s| s.contains_lower(search))
     }
@@ -311,6 +307,7 @@ impl Card for Dms {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
             || anc.dev.comm_state(self).is_match(search)
+            || self.item_state(anc).is_match(search)
             || anc
                 .sign_message(self.msg_current.as_deref())
                 .is_some_and(|m| m.is_match(search))
