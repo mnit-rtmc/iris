@@ -25,6 +25,20 @@ pub enum ItemState {
 }
 
 impl ItemState {
+    /// Lookup an item state by code
+    pub fn from_code(code: &str) -> Option<Self> {
+        match code {
+            "👍" => Some(Self::Available),
+            "🔶" => Some(Self::Deployed),
+            "🕗" => Some(Self::Scheduled),
+            "◾" => Some(Self::Maintenance),
+            "💀" => Some(Self::Failed),
+            "🔻" => Some(Self::Disabled),
+            "❓" => Some(Self::Unknown),
+            _ => None,
+        }
+    }
+
     /// Get the item state code
     pub fn code(self) -> &'static str {
         match self {

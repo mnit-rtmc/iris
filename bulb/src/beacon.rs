@@ -109,14 +109,14 @@ impl Beacon {
 
     /// Get item state
     fn item_state(&self, anc: &BeaconAnc) -> ItemState {
-        anc.dev.item_state_opt(self).unwrap_or_else(|| {
-            match self.state {
+        anc.dev
+            .item_state_opt(self)
+            .unwrap_or_else(|| match self.state {
                 0 => ItemState::Unknown,
                 2 => ItemState::Available,
                 4 => ItemState::Deployed,
                 _ => ItemState::Maintenance,
-            }
-        })
+            })
     }
 
     /// Get beacon state
