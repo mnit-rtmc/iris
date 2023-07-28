@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.HexString;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 
 /**
@@ -49,24 +50,14 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 			MSG_LOG.log(msg);
 	}
 
-	/** Last allocated system message ID */
-	static private int last_id = 0;
-
 	/** Create a unique sign message name */
-	static private synchronized String createUniqueName() {
-		String n = createNextName();
-		while (namespace.lookupObject(SONAR_TYPE, n) != null)
-			n = createNextName();
-		return n;
-	}
-
-	/** Create the next system message name */
-	static private String createNextName() {
-		last_id++;
-		// Check if the ID has rolled over to negative numbers
-		if (last_id < 0)
-			last_id = 0;
-		return "system_" + last_id;
+	static private String createUniqueName(SignConfig sc, String inc,
+		String ms, String owner, boolean fb, SignMsgPriority mp,
+		Integer dur)
+	{
+		int hash = SignMessageHelper.hash(sc, inc, ms, owner, fb, mp,
+			dur);
+		return "sys_" + HexString.format(hash, 8);
 	}
 
 	/** Find or create a sign message.
@@ -182,7 +173,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	private SignMessageImpl(SignConfig sc, String inc, String ms,
 		String owner, boolean fb, SignMsgPriority mp, Integer dur)
 	{
-		super(createUniqueName());
+		super(createUniqueName(sc, inc, ms, owner, fb, mp, dur));
 		sign_config = sc;
 		incident = inc;
 		multi = ms;
