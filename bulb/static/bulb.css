@@ -125,10 +125,7 @@ button.go_link {
 }
 
 .sb_div {
-  margin: 0.1rem;
-}
-.sb_label {
-  flex: 0 1 min-content;
+  display: inline;
   margin: 0.1rem;
 }
 
