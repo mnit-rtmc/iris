@@ -28,13 +28,21 @@ img {
   max-height: 6rem;
 }
 
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 100%;
+  margin: 0;
+}
+
 button {
   appearance: none;
   display: inline-block;
   border: 1px solid #888;
   border-radius: 0.2rem;
   padding: 0.1rem 0.2rem;
-  margin-right: 0.1rem;
   background: none;
   color: black;
   cursor: pointer;
