@@ -1,5 +1,15 @@
 # IRIS 5.x Release Notes
 
+5.45.0 (31 Jul 2023)
+ - Improvements to DMS resources within web UI
+ - Replaced DevicePurpose/hidden with reserved hashtags
+ - NOTIFY listeners when DMS hashtags change
+ - Add "errors" to DMS `status` JSON column
+ - Changed `sign_message` name generation to avoid clashes
+ - Disable caching of MJPEG video streams
+ - Added workaround for LX temperature updating issue
+ - Fixed free-form text validation issues
+
 5.44.0 (10 Jul 2023)
  - Reworked free-form text validation algorithm
  - Removed `dms_hashtag_view` (use `hashtag_view`)
