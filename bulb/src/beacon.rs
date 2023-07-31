@@ -115,7 +115,7 @@ impl Beacon {
                 0 => ItemState::Unknown,
                 2 => ItemState::Available,
                 4 => ItemState::Deployed,
-                _ => ItemState::Maintenance,
+                _ => ItemState::Warning,
             })
     }
 

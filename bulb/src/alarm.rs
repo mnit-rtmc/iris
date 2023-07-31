@@ -38,7 +38,7 @@ impl Alarm {
     fn item_state(&self, anc: &AlarmAnc) -> ItemState {
         anc.item_state_opt(self).unwrap_or_else(|| {
             if self.state {
-                ItemState::Maintenance
+                ItemState::Warning
             } else {
                 ItemState::Available
             }

@@ -40,7 +40,6 @@ public class OpQueryDMSFonts extends OpDMS {
 	/** Directory to store font files */
 	static private final String FONT_FILE_DIR = 
 		DevelCfg.get("font.output.dir", "/var/log/iris/fonts/");
-			
 	static {
 		File dir = new File(FONT_FILE_DIR);
 		if (!dir.exists())

@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ pub enum ItemState {
     Available,
     Deployed,
     Scheduled,
-    Maintenance,
+    Warning,
     Failed,
     Disabled,
     Unknown,
@@ -28,10 +28,10 @@ impl ItemState {
     /// Lookup an item state by code
     pub fn from_code(code: &str) -> Option<Self> {
         match code {
-            "👍" => Some(Self::Available),
+            "🔹" => Some(Self::Available),
             "🔶" => Some(Self::Deployed),
             "🕗" => Some(Self::Scheduled),
-            "◾" => Some(Self::Maintenance),
+            "⚠️" => Some(Self::Warning),
             "💀" => Some(Self::Failed),
             "🔻" => Some(Self::Disabled),
             "❓" => Some(Self::Unknown),
@@ -42,10 +42,10 @@ impl ItemState {
     /// Get the item state code
     pub fn code(self) -> &'static str {
         match self {
-            Self::Available => "👍",
+            Self::Available => "🔹",
             Self::Deployed => "🔶",
             Self::Scheduled => "🕗",
-            Self::Maintenance => "◾",
+            Self::Warning => "⚠️",
             Self::Failed => "💀",
             Self::Disabled => "🔻",
             Self::Unknown => "❓",
@@ -58,7 +58,7 @@ impl ItemState {
             Self::Available => "available",
             Self::Deployed => "deployed",
             Self::Scheduled => "scheduled",
-            Self::Maintenance => "maintenance",
+            Self::Warning => "warning",
             Self::Failed => "failed",
             Self::Disabled => "disabled",
             Self::Unknown => "unknown",
