@@ -39,18 +39,6 @@ public interface DMS extends Device {
 	/** Get static graphic (hybrid sign) */
 	Graphic getStaticGraphic();
 
-	/** Set device purpose (ordinal of DevicePurpose) */
-	void setPurpose(int p);
-
-	/** Get device purpose (ordinal of DevicePurpose) */
-	int getPurpose();
-
-	/** Set the hidden flag */
-	void setHidden(boolean h);
-
-	/** Get the hidden flag */
-	boolean getHidden();
-
 	/** Set the hashtags */
 	void setHashtags(String[] ht);
 

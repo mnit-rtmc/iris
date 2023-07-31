@@ -126,6 +126,34 @@ public class DMSHelper extends BaseHelper {
 		return false;
 	}
 
+	/** Check if a DMS is hidden (#Hidden hashtag) */
+	static public boolean isHidden(DMS dms) {
+		return hasHashtag(dms, "#Hidden");
+	}
+
+	/** Reserved hashtags for dedicated-purpose signs */
+	static private final String[] DEDICATED_PURPOSE_TAGS = new String[] {
+	     "#Hidden",
+	     "#LaneUse",
+	     "#Parking",
+	     "#Safety",
+	     "#Tolling",
+	     "#TravelTime",
+	     "#VSL",
+	     "#Wayfinding"
+	};
+
+	/** Check if a DMS is general-purpose */
+	static public boolean isGeneralPurpose(DMS dms) {
+		for (String tag: dms.getHashtags()) {
+			for (String ht: DEDICATED_PURPOSE_TAGS) {
+				if (ht.equalsIgnoreCase(tag))
+					return false;
+			}
+		}
+		return true;
+	}
+
 	/** Get the maintenance status of a DMS */
 	static public String getMaintenance(DMS proxy) {
 		return ControllerHelper.getMaintenance(proxy.getController());

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2020  Minnesota Department of Transportation
+ * Copyright (C) 2019-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import java.util.Iterator;
 import java.util.TreeSet;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.CorridorFinder;
-import us.mn.state.dot.tms.DevicePurpose;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -190,21 +189,18 @@ public class UpstreamDeviceFinder {
 	private boolean isDeployable(DMS dms, UpstreamDevice ed,
 		boolean branched)
 	{
-		if (dms.getHidden() ||
-		    DMSHelper.isFailed(dms) ||
-		   !DMSHelper.isActive(dms))
-			return false;
-		switch (DevicePurpose.fromOrdinal(dms.getPurpose())) {
-			case GENERAL: return true;
-			case TOLLING: return isTollingDeployable(ed, branched);
-			default: return false;
-		}
+		return DMSHelper.isActive(dms) &&
+		      !DMSHelper.isFailed(dms) &&
+		      (DMSHelper.isGeneralPurpose(dms) ||
+		       isTollingDeployable(dms, ed, branched));
 	}
 
-	/** Check if a TOLLING sign is deployable */
-	private boolean isTollingDeployable(UpstreamDevice ed,
+	/** Check if a sign is #Tolling and deployable */
+	private boolean isTollingDeployable(DMS dms, UpstreamDevice ed,
 		boolean branched)
 	{
+		if (!DMSHelper.hasHashtag(dms, "#Tolling"))
+			return false;
 		if (branched)
 			return false;
 		if (ed.distance.m() > MAX_TOLLING_DEPLOYMENT_DIST.m())

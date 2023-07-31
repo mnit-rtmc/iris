@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019  Minnesota Department of Transportation
+ * Copyright (C) 2019-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
-import us.mn.state.dot.tms.DevicePurpose;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.map.MapObject;
 import us.mn.state.dot.tms.client.map.Style;
@@ -91,14 +91,12 @@ public class DmsTheme extends ProxyTheme<DMS> {
 	private Symbol getPurposeSymbol(MapObject mo) {
 		DMS proxy = manager.findProxy(mo);
 		if (proxy != null) {
-			int p = proxy.getPurpose();
-			DevicePurpose dp = DevicePurpose.fromOrdinal(p);
-			switch (dp) {
-				case WAYFINDING: return WAYFINDING_SYMBOL;
-				case TOLLING: return TOLLING_SYMBOL;
-				case PARKING: return PARKING_SYMBOL;
-				default: return null;
-			}
+			if (DMSHelper.hasHashtag(proxy, "#Wayfinding"))
+				return WAYFINDING_SYMBOL;
+			if (DMSHelper.hasHashtag(proxy, "#Tolling"))
+				return TOLLING_SYMBOL;
+			if (DMSHelper.hasHashtag(proxy, "#Parking"))
+				return PARKING_SYMBOL;
 		}
 		return null;
 	}

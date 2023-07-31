@@ -14,7 +14,7 @@ The following features are supported:
 * Querying or sending [font]s
 * Sending [graphic images] to be displayed
 * [Travel time] estimation
-* [Variable speed advisories]
+* [Variable speed] advisories
 * [Slow traffic] warnings
 * Free-form text entry with banned [word] checks
 
@@ -47,8 +47,6 @@ Field          | Description
 Hashtags       | space-separated list of [hashtag]s for the sign
 Remote beacon  | beacon activated automatically when sign deployed
 Static graphic | image of static sign in which DMS is inset
-Device purpose | _general_ or _dedicated_ purpose for sign operation
-Hidden         | hide sign when _available_ or _deployed_ styles are selected
 
 **Internal** beacons are controlled through the DMS controller using the [NTCIP]
 protocol.  **Remote** [beacon]s are controlled using a separate [comm link].
@@ -66,7 +64,7 @@ Schedule  | Displaying a scheduled message
 External  | Displaying a message from an external system (not IRIS)
 Maint.    | Sign requires maintenance, but might still be functional
 Failed    | Communication failure to sign
-Purpose   | _Dedicated-purpose_ sign (travel time, wayfinding, etc.)
+Purpose   | [Dedicated purpose] sign
 All       | All signs
 
 ## Composing Messages
@@ -100,6 +98,7 @@ permission for any free-form text.
 [beacon]: beacons.html
 [comm link]: comm_links.html
 [free-form text]: #composing-messages
+[dedicated purpose]: hashtags.html#dedicated-purpose
 [DMS actions]: action_plans.html#dms-actions
 [fillable text rectangles]: message_patterns.html#fillable-text-rectangles
 [font]: fonts.html
@@ -112,6 +111,6 @@ permission for any free-form text.
 [sign configuration]: sign_configuration.html
 [sign message]: sign_message.html
 [Slow traffic]: slow_warning.html
-[Travel time]: travel_time.html
-[Variable speed advisories]: vsa.html
+[travel time]: travel_time.html
+[variable speed]: vsa.html
 [word]: words.html

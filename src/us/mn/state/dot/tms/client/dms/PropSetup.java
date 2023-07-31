@@ -24,7 +24,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JTextArea;
 import us.mn.state.dot.tms.Beacon;
-import us.mn.state.dot.tms.DevicePurpose;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Graphic;
@@ -82,38 +81,6 @@ public class PropSetup extends IPanel {
 	/** Static image graphic combo box */
 	private final JComboBox<Graphic> graphic_cbx = new JComboBox<Graphic>();
 
-	/** Device purpose model */
-	private final DefaultComboBoxModel<DevicePurpose> purpose_mdl =
-		new DefaultComboBoxModel<DevicePurpose>(DevicePurpose.values());
-
-	/** Device purpose action */
-	private final IAction purpose_act = new IAction("dms.purpose") {
-		protected void doActionPerformed(ActionEvent e) {
-			DevicePurpose dp = (DevicePurpose) purpose_mdl
-				.getSelectedItem();
-			dms.setPurpose((dp != null)
-					? dp.ordinal()
-					: DevicePurpose.GENERAL.ordinal());
-		}
-		@Override
-		protected void doUpdateSelected() {
-			DevicePurpose dp = DevicePurpose.fromOrdinal(
-				dms.getPurpose());
-			purpose_mdl.setSelectedItem(dp);
-		}
-	};
-
-	/** Device purpose combo box */
-	private final JComboBox<DevicePurpose> purpose_cbx =
-		new JComboBox<DevicePurpose>();
-
-	/** Checkbox for hidden flag */
-	private final JCheckBox hidden_chk = new JCheckBox(new IAction(null) {
-		protected void doActionPerformed(ActionEvent e) {
-			dms.setHidden(hidden_chk.isSelected());
-		}
-	});
-
 	/** User session */
 	private final Session session;
 
@@ -148,18 +115,12 @@ public class PropSetup extends IPanel {
 		graphic_cbx.setModel(graphic_mdl);
 		graphic_cbx.setAction(graphic_act);
 		graphic_cbx.setRenderer(new GraphicListCellRenderer());
-		purpose_cbx.setModel(purpose_mdl);
-		purpose_cbx.setAction(purpose_act);
 		add("dms.hashtags");
 		add(hashtag_txt, Stretch.LAST);
 		add("dms.beacon.rem");
 		add(beacon_cbx, Stretch.LAST);
 		add("dms.static.graphic");
 		add(graphic_cbx, Stretch.LAST);
-		add("dms.purpose");
-		add(purpose_cbx, Stretch.LAST);
-		add("dms.hidden");
-		add(hidden_chk, Stretch.LAST);
 	}
 
 	/** Dispose of the panel */
@@ -173,8 +134,6 @@ public class PropSetup extends IPanel {
 		hashtag_txt.setEnabled(canWrite("hashtags"));
 		graphic_act.setEnabled(canWrite("staticGraphic"));
 		beacon_act.setEnabled(canWrite("beacon"));
-		purpose_act.setEnabled(canWrite("purpose"));
-		hidden_chk.setEnabled(canWrite("hidden"));
 	}
 
 	/** Update one attribute on the form tab */
@@ -190,10 +149,6 @@ public class PropSetup extends IPanel {
 			graphic_act.updateSelected();
 		if (null == a || a.equals("beacon"))
 			beacon_act.updateSelected();
-		if (null == a || a.equals("purpose"))
-			purpose_act.updateSelected();
-		if (null == a || a.equals("hidden"))
-			hidden_chk.setSelected(dms.getHidden());
 	}
 
 	/** Check if the user can write an attribute */

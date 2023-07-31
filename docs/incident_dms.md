@@ -150,10 +150,10 @@ Impacted Lanes | count of non-shoulder lanes impacted
 Rows where _open_ and / or _impacted lanes_ are specified will be matched in
 preference to rows where they are not.
 
-## Dedicated Purpose Signs
+## Sign Restrictions
 
-_Dedicated purpose_ signs normally cannot be used for incidents.  An exception
-is `tolling` signs — they are used if these conditions are met:
+[Dedicated purpose] signs normally cannot be used for incidents.  An exception
+is _#Tolling_ signs — they are used if these conditions are met:
 
 * Sign and incident are on the same roadway (not _branched_)
 * Sign is less than 1 mile upstream of the incident
@@ -183,6 +183,7 @@ minutes.
 
 
 [abbreviated]: words.html#abbreviation
+[dedicated purpose]: hashtags.html#dedicated-purpose
 [DMS]: dms.html
 [exits]: road_topology.html#r_node-types
 [message priority]: sign_message.html#message-priority

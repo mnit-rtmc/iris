@@ -1550,22 +1550,6 @@ CREATE VIEW controller_io_view AS
     FROM iris.controller_io;
 GRANT SELECT ON controller_io_view TO PUBLIC;
 
-CREATE TABLE iris.device_purpose (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL UNIQUE
-);
-
-COPY iris.device_purpose (id, description) FROM stdin;
-0	general
-1	wayfinding
-2	tolling
-3	parking
-4	travel time
-5	safety
-6	lane use
-7	VSL
-\.
-
 --
 -- Cameras, Encoders, Play Lists, Catalogs, Presets
 --
@@ -2927,8 +2911,6 @@ CREATE TABLE iris._dms (
     notes VARCHAR(128) NOT NULL,
     gps VARCHAR(20) REFERENCES iris._gps,
     static_graphic VARCHAR(20) REFERENCES iris.graphic,
-    purpose INTEGER NOT NULL REFERENCES iris.device_purpose,
-    hidden BOOLEAN NOT NULL,
     beacon VARCHAR(20) REFERENCES iris._beacon,
     sign_config VARCHAR(16) REFERENCES iris.sign_config,
     sign_detail VARCHAR(12) REFERENCES iris.sign_detail,
@@ -2975,7 +2957,7 @@ CREATE TRIGGER dms_table_notify_trig
 
 CREATE VIEW iris.dms AS
     SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
-           purpose, hidden, beacon, preset, sign_config, sign_detail,
+           beacon, preset, sign_config, sign_detail,
            msg_user, msg_sched, msg_current, expire_time, status, stuck_pixels
     FROM iris._dms d
     JOIN iris.controller_io cio ON d.name = cio.name
@@ -2989,12 +2971,12 @@ BEGIN
     INSERT INTO iris._device_preset (name, preset)
          VALUES (NEW.name, NEW.preset);
     INSERT INTO iris._dms (
-        name, geo_loc, notes, gps, static_graphic, purpose, hidden, beacon,
+        name, geo_loc, notes, gps, static_graphic, beacon,
         sign_config, sign_detail, msg_user, msg_sched, msg_current,
         expire_time, status, stuck_pixels
     ) VALUES (
         NEW.name, NEW.geo_loc, NEW.notes, NEW.gps, NEW.static_graphic,
-        NEW.purpose, NEW.hidden, NEW.beacon, NEW.sign_config, NEW.sign_detail,
+        NEW.beacon, NEW.sign_config, NEW.sign_detail,
         NEW.msg_user, NEW.msg_sched, NEW.msg_current, NEW.expire_time,
         NEW.status, NEW.stuck_pixels
     );
@@ -3021,8 +3003,6 @@ BEGIN
            notes = NEW.notes,
            gps = NEW.gps,
            static_graphic = NEW.static_graphic,
-           purpose = NEW.purpose,
-           hidden = NEW.hidden,
            beacon = NEW.beacon,
            sign_config = NEW.sign_config,
            sign_detail = NEW.sign_detail,
@@ -3047,16 +3027,15 @@ CREATE TRIGGER dms_delete_trig
 
 CREATE VIEW dms_view AS
     SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.gps,
-           d.static_graphic, dp.description AS purpose, d.hidden, d.beacon,
-           p.camera, p.preset_num, d.sign_config, d.sign_detail,
-           default_font, msg_user, msg_sched, msg_current, expire_time,
+           d.sign_config, d.sign_detail, d.static_graphic, d.beacon,
+           p.camera, p.preset_num, default_font,
+           msg_user, msg_sched, msg_current, expire_time,
            status, stuck_pixels,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street,
            l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location
     FROM iris.dms d
     LEFT JOIN iris.camera_preset p ON d.preset = p.name
     LEFT JOIN geo_loc_view l ON d.geo_loc = l.name
-    LEFT JOIN iris.device_purpose dp ON d.purpose = dp.id
     LEFT JOIN iris.sign_config sc ON d.sign_config = sc.name;
 GRANT SELECT ON dms_view TO PUBLIC;
 
