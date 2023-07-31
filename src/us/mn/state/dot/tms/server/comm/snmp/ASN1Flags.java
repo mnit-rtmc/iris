@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2016  Minnesota Department of Transportation
+ * Copyright (C) 2015-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,6 +48,11 @@ public class ASN1Flags<T extends Enum> extends ASN1Enum {
 	/** Get the object value */
 	@Override
 	public String getValue() {
+		return getValue(", ");
+	}
+
+	/** Get the object value */
+	public String getValue(String delimiter) {
 		StringBuilder buf = new StringBuilder();
 		Enum[] values = lookupEnumConstants();
 		if (values != null) {
@@ -56,7 +61,7 @@ public class ASN1Flags<T extends Enum> extends ASN1Enum {
 				int bit = 1 << i;
 				if ((v & bit) != 0) {
 					if (buf.length() > 0)
-						buf.append(", ");
+						buf.append(delimiter);
 					buf.append(values[i]);
 				}
 			}

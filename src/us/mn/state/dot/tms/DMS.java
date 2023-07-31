@@ -86,6 +86,15 @@ public interface DMS extends Device {
 
 	/** Status JSON attributes */
 
+	/** Error conditions.
+	 *
+	 * Semicolon-delimited list of error conditions of the sign:
+	 * `other`, `communications`, `power`, `attached_device`, `lamp`,
+	 * `pixel`, `photocell`, `message`, `controller`, `temperature`,
+	 * `climate_control`, `critical_temperature`, `drum_rotor`,
+	 * `door_open`, `humidity` */
+	String ERRORS = "errors";
+
 	/** Photocell array.
 	 *
 	 * An array of photocell objects, one for each sensor, plus one for the
