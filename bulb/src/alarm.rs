@@ -36,13 +36,17 @@ impl Alarm {
 
     /// Get the item state
     fn item_state(&self, anc: &AlarmAnc) -> ItemState {
-        anc.item_state_opt(self).unwrap_or_else(|| {
-            if self.state {
-                ItemState::Warning
-            } else {
-                ItemState::Available
+        let item_state = anc.item_state(self);
+        match item_state {
+            ItemState::Available => {
+                if self.state {
+                    ItemState::Fault
+                } else {
+                    ItemState::Available
+                }
             }
-        })
+            _ => item_state,
+        }
     }
 
     /// Convert to Compact HTML

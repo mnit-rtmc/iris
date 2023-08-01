@@ -11,7 +11,6 @@
 // GNU General Public License for more details.
 //
 use crate::device::{Device, DeviceAnc};
-use crate::item::ItemState;
 use crate::resource::{disabled_attr, Card, View, EDIT_BUTTON, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
@@ -32,14 +31,9 @@ type VideoMonitorAnc = DeviceAnc<VideoMonitor>;
 impl VideoMonitor {
     pub const RESOURCE_N: &'static str = "video_monitor";
 
-    /// Get the item state
-    fn item_state(&self, anc: &VideoMonitorAnc) -> ItemState {
-        anc.item_state_opt(self).unwrap_or(ItemState::Available)
-    }
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &VideoMonitorAnc) -> String {
-        let item_state = self.item_state(anc);
+        let item_state = anc.item_state(self);
         let disabled = disabled_attr(self.controller.is_some());
         let mon_num = self.mon_num;
         format!(
@@ -110,7 +104,7 @@ impl Card for VideoMonitor {
     fn is_match(&self, search: &str, anc: &VideoMonitorAnc) -> bool {
         self.name.contains_lower(search)
             || self.mon_num.to_string().contains(search)
-            || self.item_state(anc).is_match(search)
+            || anc.item_state(self).is_match(search)
     }
 
     /// Convert to HTML view

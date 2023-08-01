@@ -11,7 +11,6 @@
 // GNU General Public License for more details.
 //
 use crate::device::{Device, DeviceAnc};
-use crate::item::ItemState;
 use crate::resource::{disabled_attr, Card, View, EDIT_BUTTON, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
@@ -40,14 +39,9 @@ type DetectorAnc = DeviceAnc<Detector>;
 impl Detector {
     pub const RESOURCE_N: &'static str = "detector";
 
-    /// Get the item state
-    fn item_state(&self, anc: &DetectorAnc) -> ItemState {
-        anc.item_state_opt(self).unwrap_or(ItemState::Available)
-    }
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &DetectorAnc) -> String {
-        let item_state = self.item_state(anc);
+        let item_state = anc.item_state(self);
         let label = HtmlStr::new(&self.label);
         let enabled = self.controller.is_some()
             || self
@@ -122,7 +116,7 @@ impl Card for Detector {
     fn is_match(&self, search: &str, anc: &DetectorAnc) -> bool {
         self.name.contains_lower(search)
             || self.label.contains_lower(search)
-            || self.item_state(anc).is_match(search)
+            || anc.item_state(self).is_match(search)
     }
 
     /// Convert to HTML view

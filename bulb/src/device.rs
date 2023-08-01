@@ -59,9 +59,9 @@ impl<D: Device> DeviceAnc<D> {
     }
 
     /// Get item state
-    pub fn item_state_opt(&self, pri: &D) -> Option<ItemState> {
+    pub fn item_state(&self, pri: &D) -> ItemState {
         self.controller(pri)
-            .map_or(Some(ItemState::Disabled), |c| c.item_state_opt())
+            .map_or(ItemState::Disabled, |c| c.item_state())
     }
 }
 

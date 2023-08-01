@@ -269,22 +269,17 @@ impl Controller {
         self.condition == 1
     }
 
-    /// Get item state option
-    pub fn item_state_opt(&self) -> Option<ItemState> {
+    /// Get item state
+    pub fn item_state(&self) -> ItemState {
         if self.is_active() {
             if self.fail_time.is_some() {
-                Some(ItemState::Failed)
+                ItemState::Offline
             } else {
-                None
+                ItemState::Available
             }
         } else {
-            Some(ItemState::Disabled)
+            ItemState::Disabled
         }
-    }
-
-    /// Get item state
-    fn item_state(&self) -> ItemState {
-        self.item_state_opt().unwrap_or(ItemState::Available)
     }
 
     /// Get controller `link:drop`

@@ -12,7 +12,7 @@
 //
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
-use crate::item::ItemState;
+use crate::item::{ItemState, ItemStates};
 use crate::resource::{
     AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
@@ -161,17 +161,26 @@ impl SignMessage {
         self.owner().split(';').nth(2)
     }
 
-    /// Get item state
-    fn item_state_opt(&self) -> Option<ItemState> {
-        self.sources().map(|src| {
-            if src.contains("schedule") {
-                ItemState::Scheduled
-            } else if !src.contains("blank") {
-                ItemState::Deployed
-            } else {
-                ItemState::Available
-            }
-        })
+    /// Get item states
+    fn item_states(&self) -> ItemStates {
+        self.sources()
+            .map(|src| {
+                let mut states = ItemStates::default();
+                if src.contains("blank") {
+                    states = states.with(ItemState::Available);
+                }
+                if src.contains("operator") {
+                    states = states.with(ItemState::Deployed);
+                }
+                if src.contains("schedule") {
+                    states = states.with(ItemState::Planned);
+                }
+                if src.contains("external") {
+                    states = states.with(ItemState::External);
+                }
+                states
+            })
+            .unwrap_or(ItemState::Unknown.into())
     }
 
     /// Check if a search string matches
@@ -193,29 +202,32 @@ impl DmsAnc {
         })
     }
 
-    /// Get item state
-    fn item_state(&self, dms: &Dms) -> ItemState {
-        self.dev.item_state_opt(dms).unwrap_or_else(|| {
-            self.sign_message(dms.msg_current.as_deref())
-                .and_then(|m| m.item_state_opt())
-                .unwrap_or(ItemState::Unknown)
-        })
+    /// Get message item states
+    fn msg_states(&self, msg: Option<&str>) -> ItemStates {
+        self.sign_message(msg)
+            .map(|m| m.item_states())
+            .unwrap_or(ItemState::Unknown.into())
     }
 }
 
 impl Dms {
     pub const RESOURCE_N: &'static str = "dms";
 
-    /// Get item state
-    fn item_state(&self, anc: &DmsAnc) -> ItemState {
-        anc.item_state(self)
+    /// Get item states
+    fn item_states(&self, anc: &DmsAnc) -> ItemStates {
+        let state = anc.dev.item_state(self);
+        let mut states = match state {
+            ItemState::Available => anc.msg_states(self.msg_current.as_deref()),
+            _ => state.into(),
+        };
+        states
     }
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &DmsAnc) -> String {
-        let item_state = self.item_state(anc);
+        let item_states = self.item_states(anc);
         let mut html =
-            format!("<div class='{NAME} end'>{self} {item_state}</div>");
+            format!("<div class='{NAME} end'>{self} {item_states}</div>");
         if let Some(msg_current) = &self.msg_current {
             html.push_str("<img class='message' src='/iris/img/");
             html.push_str(msg_current);
@@ -227,12 +239,11 @@ impl Dms {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &DmsAnc, config: bool) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
-        let item_state = self.item_state(anc);
-        let item_desc = item_state.description();
+        let item_states = self.item_states(anc).description();
         let mut status = format!(
             "<div class='info fill'>{location}</div>\
             <div class='row'>\
-              <span>{item_state} {item_desc}</span>\
+              <span>{item_states}</span>\
             </div>"
         );
         if let Some(msg_current) = &self.msg_current {
@@ -300,7 +311,7 @@ impl Card for Dms {
     fn is_match(&self, search: &str, anc: &DmsAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || self.item_state(anc).is_match(search)
+            || self.item_states(anc).is_match(search)
             || anc
                 .sign_message(self.msg_current.as_deref())
                 .is_some_and(|m| m.is_match(search))

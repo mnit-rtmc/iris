@@ -11,7 +11,6 @@
 // GNU General Public License for more details.
 //
 use crate::device::{Device, DeviceAnc};
-use crate::item::ItemState;
 use crate::resource::{
     disabled_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
@@ -688,11 +687,6 @@ fn sub_surface_html(
 impl WeatherSensor {
     pub const RESOURCE_N: &'static str = "weather_sensor";
 
-    /// Get the item state
-    fn item_state(&self, anc: &WeatherSensorAnc) -> ItemState {
-        anc.item_state_opt(self).unwrap_or(ItemState::Available)
-    }
-
     /// Get sample as HTML
     fn sample_html(&self) -> String {
         match &self.sample {
@@ -703,7 +697,7 @@ impl WeatherSensor {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &WeatherSensorAnc) -> String {
-        let item_state = self.item_state(anc);
+        let item_state = anc.item_state(self);
         let disabled = disabled_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
@@ -717,7 +711,7 @@ impl WeatherSensor {
         let location = HtmlStr::new(&self.location).with_len(64);
         let site_id = HtmlStr::new(&self.site_id);
         let alt_id = HtmlStr::new(&self.alt_id);
-        let item_state = self.item_state(anc);
+        let item_state = anc.item_state(self);
         let item_desc = item_state.description();
         let mut status = format!(
             "<div class='row'>\
@@ -818,7 +812,7 @@ impl Card for WeatherSensor {
             || self.location.contains_lower(search)
             || self.site_id.contains_lower(search)
             || self.alt_id.contains_lower(search)
-            || self.item_state(anc).is_match(search)
+            || anc.item_state(self).is_match(search)
             || self.notes.contains_lower(search)
     }
 

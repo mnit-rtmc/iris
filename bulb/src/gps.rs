@@ -11,7 +11,6 @@
 // GNU General Public License for more details.
 //
 use crate::device::{Device, DeviceAnc};
-use crate::item::ItemState;
 use crate::resource::{disabled_attr, Card, View, EDIT_BUTTON};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
@@ -32,15 +31,10 @@ type GpsAnc = DeviceAnc<Gps>;
 impl Gps {
     pub const RESOURCE_N: &'static str = "gps";
 
-    /// Get the item state
-    fn item_state(&self, anc: &GpsAnc) -> ItemState {
-        anc.item_state_opt(self).unwrap_or(ItemState::Available)
-    }
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &GpsAnc) -> String {
         let disabled = disabled_attr(self.controller.is_some());
-        let item_state = self.item_state(anc);
+        let item_state = anc.item_state(self);
         format!("<div class='end{disabled}'>{self} {item_state}</div>")
     }
 
