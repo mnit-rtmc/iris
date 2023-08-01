@@ -71,8 +71,9 @@ pub struct Dms {
     pub name: String,
     pub location: Option<String>,
     pub controller: Option<String>,
-    pub notes: String,
+    pub notes: Option<String>,
     pub msg_current: Option<String>,
+    pub has_faults: Option<bool>,
     // full attributes
     pub pin: Option<u32>,
     pub sign_config: Option<String>,
@@ -220,6 +221,9 @@ impl Dms {
             ItemState::Available => anc.msg_states(self.msg_current.as_deref()),
             _ => state.into(),
         };
+        if self.has_faults.is_some_and(|f| f) {
+            states = states.with(ItemState::Fault);
+        }
         states
     }
 
@@ -311,6 +315,7 @@ impl Card for Dms {
     fn is_match(&self, search: &str, anc: &DmsAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
+            || self.notes.as_ref().is_some_and(|n| n.contains_lower(search))
             || self.item_states(anc).is_match(search)
             || anc
                 .sign_message(self.msg_current.as_deref())

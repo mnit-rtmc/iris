@@ -27,12 +27,12 @@ The following features are supported:
 
 Attribute [permissions]:
 
-| Access       | Minimal                      | Full        |
-|--------------|------------------------------|-------------|
-| Read Only    | name, location, msg\_current | sign\_config, sign\_detail, geo\_loc, msg\_sched, status, stuck\_pixels |
-| 👉 Operate   |                              | msg\_user   |
-| 💡 Manage    | notes, hashtags              | device\_req |
-| 🔧 Configure | controller                   | pin         |
+| Access       | Minimal                                  | Full        |
+|--------------|------------------------------------------|-------------|
+| Read Only    | name, location, msg\_current, has_faults | sign\_config, sign\_detail, geo\_loc, msg\_sched, status, stuck\_pixels |
+| 👉 Operate   |                                          | msg\_user   |
+| 💡 Manage    | notes, hashtags                          | device\_req |
+| 🔧 Configure | controller                               | pin         |
 
 Checks of [free-form text] are also affected by the access level.
 
