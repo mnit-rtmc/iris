@@ -234,8 +234,9 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(shortError);
 			mess.queryProps();
 			logQuery(shortError);
-			putStatus(DMS.ERRORS,
-				shortError.getValue(";").toLowerCase());
+			String faults = shortError.getValue(";");
+			if (faults.length() > 0)
+				putStatus(DMS.FAULTS, faults.toLowerCase());
 			return new MoreFailures();
 		}
 	}

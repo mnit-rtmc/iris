@@ -43,7 +43,7 @@ pub struct PowerSupply {
 /// Sign status
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct SignStatus {
-    errors: Option<String>,
+    faults: Option<String>,
     photocells: Option<Vec<Photocell>>,
     light_output: Option<u32>,
     power_supplies: Option<Vec<PowerSupply>>,

@@ -289,7 +289,7 @@ const DMS_RES: Resource = Resource::Simple(
     Listen::Exclude("dms", &["msg_user", "msg_sched", "expire_time"]),
     "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
       SELECT d.name, location, msg_current, \
-             NULLIF(char_length(status->>'errors') > 0, false) AS has_faults, \
+             NULLIF(char_length(status->>'faults') > 0, false) AS has_faults, \
              NULLIF(notes, '') AS notes, hashtags, controller \
       FROM iris.dms d \
       LEFT JOIN geo_loc_view gl ON d.geo_loc = gl.name \
