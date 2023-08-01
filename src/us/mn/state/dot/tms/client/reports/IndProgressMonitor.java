@@ -121,7 +121,7 @@ public class IndProgressMonitor extends ProgressMonitor {
 			f = ProgressMonitor.class.getDeclaredField("myBar");
 			try {
 				f.setAccessible(true);
-			} catch (java.lang.reflect.InaccessibleObjectException e) {
+			} catch (Exception e) {
 				bPlanB  = true;
 				return false;
 			}
