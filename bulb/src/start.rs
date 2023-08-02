@@ -439,6 +439,8 @@ fn handle_sb_resource_ev(rname: String) {
     search.set_value("");
     let value = search_value();
     let res = Resource::from_name(&rname);
+    let sb_state = doc.elem::<HtmlSelectElement>("sb_state");
+    sb_state.set_inner_html(&res.item_state_options());
     spawn_local(populate_list(res, value));
 }
 

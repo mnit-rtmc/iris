@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -604,6 +604,19 @@ impl Resource {
         match self {
             Self::Beacon => handle_click::<Beacon>(self, name, id).await,
             _ => Ok(false),
+        }
+    }
+
+    /// Get all item states as html options
+    pub fn item_state_options(self) -> &'static str {
+        match self {
+            Self::Dms => Dms::item_state_options(),
+            _ => {
+                "<option value=''>all ↴</option>\
+                 <option value='🔹'>🔹 available</option>\
+                 <option value='🔌'>🔌 offline</option>\
+                 <option value='🔻'>🔻 disabled</option>"
+            }
         }
     }
 }

@@ -182,7 +182,7 @@ impl SignMessage {
                 }
                 states
             })
-            .unwrap_or(ItemState::Unknown.into())
+            .unwrap_or(ItemState::Fault.into())
     }
 
     /// Check if a search string matches
@@ -208,12 +208,38 @@ impl DmsAnc {
     fn msg_states(&self, msg: Option<&str>) -> ItemStates {
         self.sign_message(msg)
             .map(|m| m.item_states())
-            .unwrap_or(ItemState::Unknown.into())
+            .unwrap_or(ItemState::Fault.into())
     }
 }
 
 impl Dms {
     pub const RESOURCE_N: &'static str = "dms";
+
+    /// Check if dedicated-purpose sign
+    fn is_dedicated(&self) -> bool {
+        self.hashtags.as_ref().is_some_and(|h| {
+            h.contains_lower("#laneuse")
+                || h.contains_lower("#parking")
+                || h.contains_lower("#safety")
+                || h.contains_lower("#tolling")
+                || h.contains_lower("#traveltime")
+                || h.contains_lower("#vsl")
+                || h.contains_lower("#wayfinding")
+        })
+    }
+
+    /// Get all item states as html options
+    pub fn item_state_options() -> &'static str {
+        "<option value=''>all ↴</option>\
+         <option value='🔹'>🔹 available</option>\
+         <option value='🔶'>🔶 deployed</option>\
+         <option value='🕗'>🕗 planned</option>\
+         <option value='👽'>👽 external</option>\
+         <option value='🎯'>🎯 dedicated</option>\
+         <option value='⚠️'>⚠️ fault</option>\
+         <option value='🔌'>🔌 offline</option>\
+         <option value='🔻'>🔻 disabled</option>"
+    }
 
     /// Get item states
     fn item_states(&self, anc: &DmsAnc) -> ItemStates {
@@ -222,6 +248,9 @@ impl Dms {
             ItemState::Available => anc.msg_states(self.msg_current.as_deref()),
             _ => state.into(),
         };
+        if self.is_dedicated() {
+            states = states.with(ItemState::Dedicated);
+        }
         if self.has_faults.is_some_and(|f| f) {
             states = states.with(ItemState::Fault);
         }
