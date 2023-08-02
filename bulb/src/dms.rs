@@ -72,6 +72,7 @@ pub struct Dms {
     pub location: Option<String>,
     pub controller: Option<String>,
     pub notes: Option<String>,
+    pub hashtags: Option<String>,
     pub msg_current: Option<String>,
     pub has_faults: Option<bool>,
     // full attributes
@@ -243,18 +244,15 @@ impl Dms {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &DmsAnc, config: bool) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
-        let item_states = self.item_states(anc).description();
-        let mut status = format!(
-            "<div class='info fill'>{location}</div>\
-            <div class='row'>\
-              <span>{item_states}</span>\
-            </div>"
-        );
+        let mut status = format!("<div class='info fill'>{location}</div>");
         if let Some(msg_current) = &self.msg_current {
             status.push_str("<img class='message' src='/iris/img/");
             status.push_str(msg_current);
             status.push_str(".gif'>");
         }
+        status.push_str("<div class='end'>");
+        status.push_str(&self.item_states(anc).description());
+        status.push_str("</div>");
         if config {
             status.push_str("<div class='row'>");
             status.push_str(&anc.dev.controller_button());
@@ -315,7 +313,14 @@ impl Card for Dms {
     fn is_match(&self, search: &str, anc: &DmsAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || self.notes.as_ref().is_some_and(|n| n.contains_lower(search))
+            || self
+                .notes
+                .as_ref()
+                .is_some_and(|n| n.contains_lower(search))
+            || self
+                .hashtags
+                .as_ref()
+                .is_some_and(|h| h.contains_lower(search))
             || self.item_states(anc).is_match(search)
             || anc
                 .sign_message(self.msg_current.as_deref())
