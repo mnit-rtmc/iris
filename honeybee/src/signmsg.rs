@@ -171,130 +171,200 @@ impl SignConfig {
         self.default_font.as_deref()
     }
 
-    /// Get the horizontal border (mm).
-    /// Sanity check included in case the sign vendor supplies stupid values.
-    fn horizontal_border_mm(&self) -> f32 {
-        let excess_mm = self.horizontal_excess_mm();
-        let border_horiz = self.border_horiz as f32;
-        border_horiz.min(0_f32.max(excess_mm / 2.0))
-    }
-
     /// Get the face width (mm)
-    fn face_width(&self) -> f32 {
-        self.face_width as f32
+    fn face_width_mm(&self) -> f32 {
+        self.face_width.max(0) as f32
     }
 
-    /// Get the face height (mm)
-    fn face_height(&self) -> f32 {
-        self.face_height as f32
+    /// Get the width of the sign (pixels)
+    fn pixel_width(&self) -> i32 {
+        self.pixel_width.max(0)
     }
 
-    /// Get the horizontal excess (mm).
-    fn horizontal_excess_mm(&self) -> f32 {
-        let pixels_mm = (self.pitch_horiz * (self.pixel_width - 1)) as f32;
-        self.face_width() - pixels_mm
-    }
-
-    /// Get the character height
-    fn char_height(&self) -> Result<u8> {
-        Ok(self.char_height.try_into()?)
-    }
-
-    /// Get the character width
-    fn char_width(&self) -> Result<u8> {
-        Ok(self.char_width.try_into()?)
-    }
-
-    /// Get the horizontal character offset (mm)
-    fn char_offset_mm(&self, x: u32) -> f32 {
-        if self.char_width > 1 {
-            let gap = (x / self.char_width as u32) as f32;
-            gap * self.char_gap_mm()
+    /// Get the horizontal border (mm)
+    ///
+    /// Sanity checked in case vendor supplied stupid values.
+    fn border_horiz_mm(&self) -> f32 {
+        let pix = self.pixel_width() + self.gap_char_count();
+        let min_width = (pix as f32) * self.pitch_horiz_mm();
+        let extra = (self.face_width_mm() - min_width).max(0.0);
+        if self.gap_char_count() > 0 {
+            let border = self.border_horiz.max(0) as f32;
+            border.min(extra / 2.0)
         } else {
-            0.0
+            // Ignore border_horiz if there are no character gaps
+            extra / 2.0
         }
     }
 
-    /// Get the character gap (mm)
-    fn char_gap_mm(&self) -> f32 {
-        let excess_mm = self.horizontal_excess_mm();
-        let border_mm = self.horizontal_border_mm() * 2.0;
-        let gaps = self.char_gaps() as f32;
-        if excess_mm > border_mm && gaps > 0.0 {
-            (excess_mm - border_mm) / gaps
+    /// Get the pixel width (mm)
+    fn pixel_width_mm(&self) -> f32 {
+        self.face_width_mm() - self.border_horiz_mm() * 2.0
+    }
+
+    /// Get the horizontal pitch
+    fn pitch_horiz(&self) -> i32 {
+        self.pitch_horiz.max(0)
+    }
+
+    /// Get the horizontal pitch (mm)
+    ///
+    /// Sanity checked in case vendor supplied stupid values.
+    fn pitch_horiz_mm(&self) -> f32 {
+        let pitch = self.pitch_horiz() as f32;
+        let pix = self.pixel_width() + self.gap_char_count();
+        if pix > 0 {
+            pitch.min(self.face_width_mm() / pix as f32)
         } else {
-            0.0
+            pitch
         }
     }
 
     /// Get the number of gaps between characters
-    fn char_gaps(&self) -> i32 {
-        if self.char_width > 1 && self.pixel_width > self.char_width {
-            (self.pixel_width / self.char_width) - 1
+    fn gap_char_count(&self) -> i32 {
+        if self.char_width > 1 && self.pixel_width() > self.char_width {
+            (self.pixel_width() - 1) / self.char_width
         } else {
             0
         }
     }
 
     /// Get the X-position of a pixel on the sign (from 0 to 1)
-    fn pixel_x(&self, x: u32) -> f32 {
-        let hb = self.horizontal_border_mm();
-        let co = self.char_offset_mm(x);
-        let pos = hb + co + (self.pitch_horiz * x as i32) as f32;
-        pos / self.face_width()
+    fn pixel_x(&self, x: i32) -> f32 {
+        let border = self.border_horiz_mm();
+        let offset = self.char_offset_mm(x);
+        let x = x as f32 + 0.5; // shift to center of pixel
+        let pos = border + offset + x * self.pitch_horiz_mm();
+        pos / self.face_width_mm()
     }
 
-    /// Get the vertical border (mm).
-    /// Sanity check included in case the sign vendor supplies stupid values.
-    fn vertical_border_mm(&self) -> f32 {
-        let excess_mm = self.vertical_excess_mm();
-        let border_vert = self.border_vert as f32;
-        border_vert.min(0_f32.max(excess_mm / 2.0))
+    /// Get the horizontal character offset (mm)
+    fn char_offset_mm(&self, x: i32) -> f32 {
+        if self.char_width > 1 {
+            let char_num = (x / self.char_width) as f32;
+            char_num * self.gap_char_mm()
+        } else {
+            0.0
+        }
     }
 
-    /// Get the vertical excess (mm).
-    fn vertical_excess_mm(&self) -> f32 {
-        let pixels_mm = (self.pitch_vert * (self.pixel_height - 1)) as f32;
-        self.face_height() - pixels_mm
+    /// Get the character gap (mm)
+    fn gap_char_mm(&self) -> f32 {
+        let gaps = self.gap_char_count();
+        if gaps > 0 {
+            self.excess_char_mm() / gaps as f32
+        } else {
+            0.0
+        }
+    }
+
+    /// Get excess width for character gaps (mm)
+    fn excess_char_mm(&self) -> f32 {
+        let pix_mm = self.pitch_horiz_mm() * self.pixel_width() as f32;
+        (self.pixel_width_mm() - pix_mm).max(0.0)
+    }
+
+    /// Get the face height (mm)
+    fn face_height_mm(&self) -> f32 {
+        self.face_height.max(0) as f32
+    }
+
+    /// Get the height of the sign (pixels)
+    fn pixel_height(&self) -> i32 {
+        self.pixel_height.max(0)
+    }
+
+    /// Get the vertical border (mm)
+    ///
+    /// Sanity checked in case vendor supplied stupid values.
+    fn border_vert_mm(&self) -> f32 {
+        let pix = self.pixel_height() + self.gap_line_count();
+        let min_height = (pix as f32) * self.pitch_vert_mm();
+        let extra = (self.face_height_mm() - min_height).max(0.0);
+        if self.gap_line_count() > 0 {
+            let border = self.border_vert.max(0) as f32;
+            border.min(extra / 2.0)
+        } else {
+            // Ignore border_vert if there are no line gaps
+            extra / 2.0
+        }
+    }
+
+    /// Get the pixel height (mm)
+    fn pixel_height_mm(&self) -> f32 {
+        self.face_height_mm() - self.border_vert_mm() * 2.0
+    }
+
+    /// Get the vertical pitch
+    fn pitch_vert(&self) -> i32 {
+        self.pitch_vert.max(0)
+    }
+
+    /// Get the vertical pitch (mm)
+    ///
+    /// Sanity checked in case vendor supplied stupid values.
+    fn pitch_vert_mm(&self) -> f32 {
+        let pitch = self.pitch_vert() as f32;
+        let pix = self.pixel_height() + self.gap_line_count();
+        if pix > 0 {
+            pitch.min(self.face_height_mm() / pix as f32)
+        } else {
+            pitch
+        }
     }
 
     /// Get the number of gaps between lines
-    fn line_gaps(&self) -> i32 {
-        if self.char_height > 1 && self.pixel_height > self.char_height {
-            (self.pixel_height / self.char_height) - 1
+    fn gap_line_count(&self) -> i32 {
+        if self.char_height > 1 && self.pixel_height() > self.char_height {
+            (self.pixel_height() - 1) / self.char_height
         } else {
             0
         }
     }
 
+    /// Get the Y-position of a pixel on the sign (from 0 to 1)
+    fn pixel_y(&self, y: i32) -> f32 {
+        let border = self.border_vert_mm();
+        let offset = self.line_offset_mm(y);
+        let y = y as f32 + 0.5; // shift to center of pixel
+        let pos = border + offset + y * self.pitch_vert_mm();
+        pos / self.face_height_mm()
+    }
+
     /// Get the vertical line offset (mm)
-    fn line_offset_mm(&self, y: u32) -> f32 {
+    fn line_offset_mm(&self, y: i32) -> f32 {
         if self.char_height > 1 {
-            let gap = (y / self.char_height as u32) as f32;
-            gap * self.line_gap_mm()
+            let line_num = (y / self.char_height) as f32;
+            line_num * self.gap_line_mm()
         } else {
             0.0
         }
     }
 
     /// Get the line gap (mm)
-    fn line_gap_mm(&self) -> f32 {
-        let excess_mm = self.vertical_excess_mm();
-        let border_mm = self.vertical_border_mm() * 2.0;
-        let gaps = self.line_gaps() as f32;
-        if excess_mm > border_mm && gaps > 0.0 {
-            (excess_mm - border_mm) / gaps
+    fn gap_line_mm(&self) -> f32 {
+        let gaps = self.gap_line_count();
+        if gaps > 0 {
+            self.excess_line_mm() / gaps as f32
         } else {
             0.0
         }
     }
 
-    /// Get the Y-position of a pixel on the sign (from 0 to 1)
-    fn pixel_y(&self, y: u32) -> f32 {
-        let vb = self.vertical_border_mm();
-        let lo = self.line_offset_mm(y);
-        let pos = vb + lo + (self.pitch_vert * y as i32) as f32;
-        pos / self.face_height()
+    /// Get excess height for line gaps (mm).
+    fn excess_line_mm(&self) -> f32 {
+        let pix_mm = self.pitch_vert_mm() * self.pixel_height() as f32;
+        (self.pixel_height_mm() - pix_mm).max(0.0)
+    }
+
+    /// Get the character width as u8
+    fn char_width(&self) -> Result<u8> {
+        Ok(self.char_width.try_into()?)
+    }
+
+    /// Get the character height as u8
+    fn char_height(&self) -> Result<u8> {
+        Ok(self.char_height.try_into()?)
     }
 
     /// Get the color scheme value
@@ -384,8 +454,8 @@ impl SignConfig {
 
     /// Calculate the size of rendered DMS
     fn calculate_size(&self) -> (u16, u16) {
-        let fw = self.face_width();
-        let fh = self.face_height();
+        let fw = self.face_width_mm();
+        let fh = self.face_height_mm();
         if fw > 0.0 && fh > 0.0 {
             let sx = PIX_WIDTH / fw;
             let sy = PIX_HEIGHT / fh;
@@ -429,9 +499,9 @@ impl SignConfig {
         let s = sx.min(sy);
         debug!("face: {:?}, scale: {}", self.name(), s);
         for y in 0..ph {
-            let py = self.pixel_y(y) * h as f32;
+            let py = self.pixel_y(y as i32) * h as f32;
             for x in 0..pw {
-                let px = self.pixel_x(x) * w as f32;
+                let px = self.pixel_x(x as i32) * w as f32;
                 let rgb = page.pixel(x as i32, y as i32);
                 let sr = u8::from(Gray::value(rgb.convert::<Gray8>()));
                 // Clamp radius between 0.6 and 0.8 (blooming)
