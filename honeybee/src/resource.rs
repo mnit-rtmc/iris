@@ -881,7 +881,7 @@ fn fetch_simple<W: Write>(
 /// * `client` The database connection.
 /// * `sender` Sender for segment messages.
 fn fetch_all_nodes(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
-    debug!("fetch_all_nodes");
+    log::debug!("fetch_all_nodes");
     sender.send(SegMsg::Order(false))?;
     for row in &client.query(RNode::SQL_ALL, &[])? {
         sender.send(SegMsg::UpdateNode(RNode::from_row(row)))?;
@@ -900,7 +900,7 @@ fn fetch_one_node(
     name: &str,
     sender: &Sender<SegMsg>,
 ) -> Result<()> {
-    debug!("fetch_one_node: {}", name);
+    log::debug!("fetch_one_node: {}", name);
     let rows = &client.query(RNode::SQL_ONE, &[&name])?;
     if rows.len() == 1 {
         for row in rows.iter() {
@@ -918,7 +918,7 @@ fn fetch_one_node(
 /// * `client` The database connection.
 /// * `sender` Sender for segment messages.
 fn fetch_all_roads(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
-    debug!("fetch_all_roads");
+    log::debug!("fetch_all_roads");
     for row in &client.query(Road::SQL_ALL, &[])? {
         sender.send(SegMsg::UpdateRoad(Road::from_row(row)))?;
     }
@@ -935,7 +935,7 @@ fn fetch_one_road(
     name: &str,
     sender: &Sender<SegMsg>,
 ) -> Result<()> {
-    debug!("fetch_one_road: {}", name);
+    log::debug!("fetch_one_road: {}", name);
     let rows = &client.query(Road::SQL_ONE, &[&name])?;
     if let Some(row) = rows.iter().next() {
         sender.send(SegMsg::UpdateRoad(Road::from_row(row)))?;
@@ -1014,7 +1014,7 @@ impl Resource {
     /// * `client` The database connection.
     /// * `name` File name.
     fn fetch_file(&self, client: &mut Client, name: &str) -> Result<()> {
-        debug!("fetch_file: {:?}", name);
+        log::debug!("fetch_file: {:?}", name);
         let t = Instant::now();
         let dir = Path::new("");
         let backup = make_backup_name(dir, name);
@@ -1022,7 +1022,7 @@ impl Resource {
         let writer = BufWriter::new(File::create(&backup)?);
         let count = self.fetch_writer(client, writer)?;
         rename(backup, n)?;
-        info!("{}: wrote {} rows in {:?}", name, count, t.elapsed());
+        log::info!("{}: wrote {} rows in {:?}", name, count, t.elapsed());
         Ok(())
     }
 
@@ -1087,7 +1087,7 @@ pub fn notify(
     payload: &str,
     sender: &Sender<SegMsg>,
 ) -> Result<()> {
-    info!("notify: {}, {}", &chan, &payload);
+    log::info!("notify: {}, {}", &chan, &payload);
     let mut found = false;
     for res in ALL {
         if res.listen().is_listening(chan, payload) {
@@ -1098,7 +1098,7 @@ pub fn notify(
         }
     }
     if !found {
-        warn!("unknown resource: ({}, {})", &chan, &payload);
+        log::warn!("unknown resource: ({}, {})", &chan, &payload);
     }
     Ok(())
 }

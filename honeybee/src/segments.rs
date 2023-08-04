@@ -1,6 +1,6 @@
 // segments.rs
 //
-// Copyright (C) 2019-2022  Minnesota Department of Transportation
+// Copyright (C) 2019-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ use postgis::ewkb::{LineString, Point, Polygon};
 use postgres::types::ToSql;
 use postgres::{Client, Row, Statement, Transaction};
 use serde::Serializer;
+use serde_derive::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
@@ -117,7 +118,7 @@ struct AtomicFile<'a> {
 impl<'a> AtomicFile<'a> {
     /// Create a new atomic file
     fn new(dir: &'a Path, name: &'a str) -> Result<Self> {
-        debug!("AtomicFile::new {:?}", name);
+        log::debug!("AtomicFile::new {:?}", name);
         if !dir.is_dir() {
             create_dir_all(dir)?;
         }
@@ -134,11 +135,11 @@ impl<'a> AtomicFile<'a> {
 
 impl Drop for AtomicFile<'_> {
     fn drop(&mut self) {
-        debug!("AtomicFile::drop: {:?}", &self.name);
+        log::debug!("AtomicFile::drop: {:?}", &self.name);
         let backup = make_backup_name(self.dir, self.name);
         let path = make_name(self.dir, self.name);
         if let Err(e) = rename(backup, path) {
-            error!("rename: {:?}", e);
+            log::error!("rename: {:?}", e);
         }
     }
 }
@@ -359,7 +360,7 @@ impl Corridor {
         r_class: i16,
         scale: f64,
     ) -> Self {
-        debug!("Corridor::new {}", &cor_id);
+        log::debug!("Corridor::new {}", &cor_id);
         let nodes = vec![];
         let count = 0;
         Corridor {
@@ -446,7 +447,7 @@ impl Corridor {
             }
             None => 0,
         };
-        debug!(
+        log::debug!(
             "order_nodes: {}, count: {} of {}",
             self.cor_id,
             self.count,
@@ -461,7 +462,7 @@ impl Corridor {
         statement: &Statement,
     ) -> Result<()> {
         let pts = self.create_points();
-        info!("{}: {} points", self.cor_id, pts.len());
+        log::info!("{}: {} points", self.cor_id, pts.len());
         if !pts.is_empty() {
             let segments = Segments::new(self, pts);
             segments.create_all(trans, statement)?;
@@ -495,7 +496,7 @@ impl Corridor {
 
     /// Add a node to corridor
     fn add_node(&mut self, node: RNode, ordered: bool) {
-        debug!(
+        log::debug!(
             "add_node {} to {} ({} + 1)",
             &node.name,
             &self.cor_id,
@@ -510,7 +511,7 @@ impl Corridor {
 
     /// Update a node
     fn update_node(&mut self, node: RNode, ordered: bool) {
-        debug!(
+        log::debug!(
             "update_node {} to {} ({})",
             &node.name,
             &self.cor_id,
@@ -523,7 +524,7 @@ impl Corridor {
                 valid_before = n.is_valid();
                 *n = node;
             }
-            None => error!("update_node: {} not found", node.name),
+            None => log::error!("update_node: {} not found", node.name),
         }
         if ordered && (valid_before || valid_after) {
             self.order_nodes();
@@ -532,7 +533,7 @@ impl Corridor {
 
     /// Remove a node
     fn remove_node(&mut self, name: &str, ordered: bool) {
-        debug!(
+        log::debug!(
             "remove_node {} from {} ({} - 1)",
             &name,
             &self.cor_id,
@@ -545,7 +546,7 @@ impl Corridor {
                     self.order_nodes();
                 }
             }
-            None => error!("remove_node: {} not found", name),
+            None => log::error!("remove_node: {} not found", name),
         }
     }
 
@@ -767,7 +768,7 @@ impl SegmentState {
                     Some(_) => self.update_corridor_node(cor_id, node),
                 }
             }
-            _ => debug!("ignoring node: {}", &node.name),
+            _ => log::debug!("ignoring node: {}", &node.name),
         }
     }
 
@@ -798,11 +799,11 @@ impl SegmentState {
             Some(cor) => {
                 cor.remove_node(name, self.ordered);
                 if cor.nodes.is_empty() {
-                    debug!("removing corridor: {:?}", cid);
+                    log::debug!("removing corridor: {:?}", cid);
                     self.corridors.remove(cid);
                 }
             }
-            None => error!("corridor ID not found {:?}", cid),
+            None => log::error!("corridor ID not found {:?}", cid),
         }
     }
 
@@ -810,7 +811,7 @@ impl SegmentState {
     fn update_corridor_node(&mut self, cid: &CorridorId, node: RNode) {
         match self.corridors.get_mut(cid) {
             Some(cor) => cor.update_node(node, self.ordered),
-            None => error!("corridor ID not found {:?}", cid),
+            None => log::error!("corridor ID not found {:?}", cid),
         }
     }
 
@@ -818,7 +819,7 @@ impl SegmentState {
     fn remove_node(&mut self, name: &str) {
         match self.node_cors.remove(name) {
             Some(ref cid) => self.remove_corridor_node(cid, name),
-            None => error!("corridor not found for node: {}", name),
+            None => log::error!("corridor not found for node: {}", name),
         }
     }
 
@@ -840,7 +841,7 @@ impl SegmentState {
 
     /// Update a road class or scale
     fn update_road(&mut self, road: Road) -> Result<()> {
-        debug!("update_road {}", road.name);
+        log::debug!("update_road {}", road.name);
         let name = road.name.clone();
         self.roads.insert(name.clone(), road);
         if self.ordered {
@@ -872,6 +873,6 @@ pub fn receive_nodes(receiver: Receiver<SegMsg>) -> Result<()> {
             SegMsg::RemoveNode(name) => state.remove_node(&name),
             SegMsg::Order(ordered) => state.set_ordered(ordered)?,
         }
-        debug!("total corridors: {}", state.corridors.len());
+        log::debug!("total corridors: {}", state.corridors.len());
     }
 }

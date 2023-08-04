@@ -14,10 +14,6 @@
 //
 //! The signmsg module is for rendering DMS sign messages to .gif files.
 //!
-//! It reads JSON files containing sign configurations, fonts, graphics, etc.
-//! and renders to images.  This design allows it to be
-//! used in Web Assembly contexts.
-//!
 use crate::resource::{make_backup_name, make_name};
 use crate::Result;
 use gift::{Encoder, Step};
@@ -31,6 +27,7 @@ use pix::{
     rgb::{Rgb, SRgb8},
     Palette, Raster,
 };
+use serde_derive::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::convert::TryInto;
 use std::fmt;
@@ -147,7 +144,7 @@ fn rgb_from_i32(rgb: i32) -> (u8, u8, u8) {
 impl SignConfig {
     /// Load sign configurations from a JSON file
     fn load(dir: &Path) -> Result<HashMap<String, SignConfig>> {
-        debug!("SignConfig::load");
+        log::debug!("SignConfig::load");
         let mut n = PathBuf::new();
         n.push(dir);
         n.push("sign_config");
@@ -497,7 +494,7 @@ impl SignConfig {
         let sx = w as f32 / pw as f32;
         let sy = h as f32 / ph as f32;
         let s = sx.min(sy);
-        debug!("face: {:?}, scale: {}", self.name(), s);
+        log::debug!("face: {:?}, scale: {}", self.name(), s);
         for y in 0..ph {
             let py = self.pixel_y(y as i32) * h as f32;
             for x in 0..pw {
@@ -516,7 +513,7 @@ impl SignConfig {
 
 /// Load fonts from a JSON file
 fn load_fonts(dir: &Path) -> Result<FontCache> {
-    debug!("load_fonts");
+    log::debug!("load_fonts");
     let mut n = PathBuf::new();
     n.push(dir);
     n.push("font");
@@ -531,7 +528,7 @@ fn load_fonts(dir: &Path) -> Result<FontCache> {
 
 /// Load graphics from a JSON file
 fn load_graphics(dir: &Path) -> Result<GraphicCache> {
-    debug!("load_graphics");
+    log::debug!("load_graphics");
     let mut n = PathBuf::new();
     n.push(dir);
     n.push("graphic");
@@ -547,7 +544,7 @@ fn load_graphics(dir: &Path) -> Result<GraphicCache> {
 impl MsgData {
     /// Load message data from a file path
     fn load(dir: &Path) -> Result<Self> {
-        debug!("MsgData::load");
+        log::debug!("MsgData::load");
         let configs = SignConfig::load(dir)?;
         let fonts = load_fonts(dir)?;
         let graphics = load_graphics(dir)?;
@@ -594,7 +591,7 @@ impl MsgData {
 impl SignMessage {
     /// Load sign messages from a JSON file
     fn load_all(dir: &Path) -> Result<Vec<SignMessage>> {
-        debug!("SignMessage::load_all");
+        log::debug!("SignMessage::load_all");
         let mut n = PathBuf::new();
         n.push(dir);
         n.push("sign_message");
@@ -613,21 +610,24 @@ impl SignMessage {
     /// * `images` Image cache.
     fn fetch(&self, msg_data: &MsgData, images: &mut ImageCache) -> Result<()> {
         let name = images.make_name(&self.name);
-        debug!("SignMessage::fetch: {:?}", name);
+        log::debug!("SignMessage::fetch: {:?}", name);
         if !images.contains(&name) {
             let backup = images.make_backup_name(&self.name);
             let writer = BufWriter::new(File::create(&backup)?);
             let t = Instant::now();
             if let Err(e) = self.render_sign_msg(msg_data, writer) {
-                warn!(
+                log::warn!(
                     "{}, cfg={}, multi={} {:?}",
-                    &self.name, self.sign_config, self.multi, e
+                    &self.name,
+                    self.sign_config,
+                    self.multi,
+                    e
                 );
                 remove_file(&backup)?;
                 return Ok(());
             };
             rename(backup, name)?;
-            info!("{}.gif rendered in {:?}", &self.name, t.elapsed());
+            log::info!("{}.gif rendered in {:?}", &self.name, t.elapsed());
         }
         Ok(())
     }
@@ -702,9 +702,9 @@ impl ImageCache {
     /// Remove expired image files
     fn remove_expired(&mut self) {
         for p in self.files.drain() {
-            info!("remove_expired: {:?}", &p);
+            log::info!("remove_expired: {:?}", &p);
             if let Err(e) = remove_file(&p) {
-                error!("{:?}", e);
+                log::error!("{:?}", e);
             }
         }
     }
@@ -758,10 +758,10 @@ fn render_circle(
                         *raster.pixel_mut(x as i32, y as i32) =
                             Gray8::new(d as u8);
                     } else {
-                        warn!("Blending failed -- color palette full!");
+                        log::warn!("Blending failed -- color palette full!");
                     }
                 } else {
-                    warn!("Index not found in color palette!");
+                    log::warn!("Index not found in color palette!");
                 }
             }
         }
