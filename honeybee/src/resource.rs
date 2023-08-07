@@ -954,6 +954,17 @@ impl Resource {
         }
     }
 
+    /// Get the SQL value
+    fn sql(&self) -> &'static str {
+        match self {
+            Resource::Graphic(_, sql) => sql,
+            Resource::RNode(_) => unreachable!(),
+            Resource::Road(_) => unreachable!(),
+            Resource::Simple(_, _, sql) => sql,
+            Resource::SignMsg(_, _, sql) => sql,
+        }
+    }
+
     /// Fetch the resource from a connection.
     ///
     /// * `client` The database connection.
@@ -1020,23 +1031,11 @@ impl Resource {
         let backup = make_backup_name(dir, name);
         let n = make_name(dir, name);
         let writer = BufWriter::new(File::create(&backup)?);
-        let count = self.fetch_writer(client, writer)?;
+        let sql = self.sql();
+        let count = fetch_simple(client, sql, writer)?;
         rename(backup, n)?;
         log::info!("{}: wrote {} rows in {:?}", name, count, t.elapsed());
         Ok(())
-    }
-
-    /// Fetch to a writer.
-    ///
-    /// * `client` The database connection.
-    /// * `w` Writer for the file.
-    fn fetch_writer<W: Write>(&self, client: &mut Client, w: W) -> Result<u32> {
-        match self {
-            Resource::RNode(_) => unreachable!(),
-            Resource::Road(_) => unreachable!(),
-            Resource::Simple(_, _, sql) => fetch_simple(client, sql, w),
-            Resource::SignMsg(_, _, sql) => fetch_simple(client, sql, w),
-        }
     }
 
     /// Fetch sign messages resource.
