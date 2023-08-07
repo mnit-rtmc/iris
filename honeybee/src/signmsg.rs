@@ -84,25 +84,6 @@ struct SignConfig {
     default_font: Option<String>,
 }
 
-/// Sign detail
-#[derive(Deserialize, Serialize)]
-struct SignDetail {
-    name: String,
-    dms_type: String,
-    portable: bool,
-    technology: String,
-    sign_access: String,
-    legend: String,
-    beacon_type: String,
-    hardware_make: String,
-    hardware_model: String,
-    software_make: String,
-    software_model: String,
-    supported_tags: i32,
-    max_pages: i32,
-    max_multi_len: i32,
-}
-
 /// Data needed for rendering sign messages
 struct MsgData {
     configs: HashMap<String, SignConfig>,
