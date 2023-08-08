@@ -9,7 +9,7 @@ use std::io::BufWriter;
 use std::path::{Path, PathBuf};
 
 /// Make a PathBuf for a backup file
-fn make_backup_name(path: &Path) -> PathBuf {
+fn backup_path(path: &Path) -> PathBuf {
     let mut path = PathBuf::from(path);
     path.as_mut_os_string().push("~");
     path
@@ -31,10 +31,10 @@ pub struct Cache {
 impl AtomicFile {
     /// Create a new atomic file
     pub fn new(dir: &Path, name: &str) -> Result<Self> {
-        let mut path = PathBuf::new();
-        path.push(dir);
+        let mut path = dir.to_path_buf();
         path.push(name);
-        log::debug!("AtomicFile::new {name}");
+        log::debug!("AtomicFile::new {path:?}");
+        // Use parent in case name contains path separators
         if let Some(dir) = path.parent() {
             if !dir.is_dir() {
                 create_dir_all(dir)?;
@@ -45,25 +45,24 @@ impl AtomicFile {
 
     /// Create the file and get writer
     pub fn writer(&self) -> Result<BufWriter<File>> {
-        let mut path = self.path.clone();
-        path.as_mut_os_string().push("~");
+        let path = backup_path(&self.path);
         Ok(BufWriter::new(File::create(path)?))
     }
 
     /// Cancel writing file
     pub fn cancel(&self) -> Result<()> {
-        let name = make_backup_name(&self.path);
-        log::debug!("cancel: {name:?}");
-        remove_file(&name)?;
+        let path = backup_path(&self.path);
+        log::debug!("cancel: {path:?}");
+        remove_file(&path)?;
         Ok(())
     }
 }
 
 impl Drop for AtomicFile {
     fn drop(&mut self) {
-        let backup = make_backup_name(&self.path);
-        log::debug!("AtomicFile::drop: {backup:?}");
-        if let Err(e) = rename(backup, &self.path) {
+        let path = backup_path(&self.path);
+        log::debug!("AtomicFile::drop: {path:?}");
+        if let Err(e) = rename(path, &self.path) {
             log::error!("AtomicFile::drop rename: {e:?}");
         }
     }
@@ -119,10 +118,9 @@ impl Drop for Cache {
     fn drop(&mut self) {
         for name in self.files.drain() {
             log::debug!("Cache::drop: {name:?}");
-            let mut p = PathBuf::new();
-            p.push(&self.dir);
-            p.push(name);
-            if let Err(e) = remove_file(&p) {
+            let mut path = self.dir.clone();
+            path.push(name);
+            if let Err(e) = remove_file(&path) {
                 log::error!("Cache::drop: {e:?}");
             }
         }
