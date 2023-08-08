@@ -14,7 +14,7 @@
 //
 //! The signmsg module is for rendering DMS sign messages to .gif files.
 //!
-use crate::resource::{make_backup_name, make_name};
+use crate::files::Cache;
 use crate::Result;
 use gift::{Encoder, Step};
 use ntcip::dms::multi::{
@@ -28,11 +28,11 @@ use pix::{
     Palette, Raster,
 };
 use serde_derive::{Deserialize, Serialize};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::convert::TryInto;
 use std::fmt;
-use std::fs::{read_dir, remove_file, rename, File};
-use std::io::{BufReader, BufWriter, Write};
+use std::fs::File;
+use std::io::{BufReader, Write};
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 
@@ -89,16 +89,6 @@ struct MsgData {
     configs: HashMap<String, SignConfig>,
     fonts: FontCache,
     graphics: GraphicCache,
-}
-
-/// Cache of image files
-struct ImageCache {
-    /// Image directory
-    img_dir: PathBuf,
-    /// Image extension
-    ext: String,
-    /// Cached image files
-    files: HashSet<PathBuf>,
 }
 
 /// Sign message
@@ -588,28 +578,29 @@ impl SignMessage {
     /// Fetch sign message .gif if it is not in the image cache.
     ///
     /// * `msg_data` Data required to render messages.
-    /// * `images` Image cache.
-    fn fetch(&self, msg_data: &MsgData, images: &mut ImageCache) -> Result<()> {
-        let name = images.make_name(&self.name);
-        log::debug!("SignMessage::fetch: {:?}", name);
-        if !images.contains(&name) {
-            let backup = images.make_backup_name(&self.name);
-            let writer = BufWriter::new(File::create(&backup)?);
-            let t = Instant::now();
-            if let Err(e) = self.render_sign_msg(msg_data, writer) {
-                log::warn!(
-                    "{}, cfg={}, multi={} {:?}",
-                    &self.name,
-                    self.sign_config,
-                    self.multi,
-                    e
-                );
-                remove_file(&backup)?;
-                return Ok(());
-            };
-            rename(backup, name)?;
-            log::info!("{}.gif rendered in {:?}", &self.name, t.elapsed());
+    /// * `cache` Image cache.
+    fn fetch(&self, msg_data: &MsgData, cache: &mut Cache) -> Result<()> {
+        let mut name = self.name.clone();
+        name.push_str(".gif");
+        if cache.contains(&name) {
+            cache.keep(&name);
+            return Ok(());
         }
+        let file = cache.file(&name)?;
+        log::debug!("SignMessage::fetch: {:?}", &name);
+        let writer = file.writer()?;
+        let t = Instant::now();
+        if let Err(e) = self.render_sign_msg(msg_data, writer) {
+            log::warn!(
+                "{}, cfg={}, multi={} {e:?}",
+                &name,
+                self.sign_config,
+                self.multi,
+            );
+            file.cancel()?;
+            return Ok(());
+        };
+        log::info!("{} rendered in {:?}", &name, t.elapsed());
         Ok(())
     }
 
@@ -621,73 +612,6 @@ impl SignMessage {
     ) -> Result<()> {
         let cfg = msg_data.config(self)?;
         cfg.render_sign_config(writer, self.multi(), msg_data)
-    }
-}
-
-impl ImageCache {
-    /// Create a set of image files
-    fn new(dir: &Path, ext: &str) -> Result<Self> {
-        let mut img_dir = PathBuf::new();
-        img_dir.push(dir);
-        img_dir.push("img");
-        let files = ImageCache::files(img_dir.as_path(), ext)?;
-        let ext = ext.to_string();
-        Ok(ImageCache {
-            img_dir,
-            ext,
-            files,
-        })
-    }
-
-    /// Lookup a listing of files with a given extension
-    fn files(img_dir: &Path, ext: &str) -> Result<HashSet<PathBuf>> {
-        let mut files = HashSet::new();
-        if img_dir.is_dir() {
-            for f in read_dir(img_dir)? {
-                let f = f?;
-                if f.file_type()?.is_file() {
-                    let p = f.path();
-                    if let Some(e) = p.extension() {
-                        if e == ext {
-                            files.insert(p);
-                        }
-                    }
-                }
-            }
-        }
-        Ok(files)
-    }
-
-    /// Make image file name
-    fn dir_name(&self, name: &str) -> (&Path, String) {
-        (self.img_dir.as_path(), format!("{}.{}", name, self.ext))
-    }
-
-    /// Make image file name
-    fn make_name(&self, name: &str) -> PathBuf {
-        let (dir, n) = self.dir_name(name);
-        make_name(dir, &n)
-    }
-
-    /// Make backup image file name
-    fn make_backup_name(&self, name: &str) -> PathBuf {
-        let (dir, n) = self.dir_name(name);
-        make_backup_name(dir, &n)
-    }
-
-    /// Check if an image exists
-    fn contains(&mut self, n: &Path) -> bool {
-        self.files.remove(n)
-    }
-
-    /// Remove expired image files
-    fn remove_expired(&mut self) {
-        for p in self.files.drain() {
-            log::info!("remove_expired: {:?}", &p);
-            if let Err(e) = remove_file(&p) {
-                log::error!("{:?}", e);
-            }
-        }
     }
 }
 
@@ -792,11 +716,13 @@ fn palette_threshold_rgb8_256(v: usize) -> SRgb8 {
 /// * `dir` Output file directory.
 pub fn render_all(dir: &Path) -> Result<()> {
     let msg_data = MsgData::load(dir)?;
-    let mut images = ImageCache::new(dir, "gif")?;
+    let mut img_dir = PathBuf::new();
+    img_dir.push(dir);
+    img_dir.push("img");
+    let mut cache = Cache::new(img_dir.as_path(), "gif")?;
     let sign_msgs = SignMessage::load_all(dir)?;
     for sign_msg in sign_msgs {
-        sign_msg.fetch(&msg_data, &mut images)?;
+        sign_msg.fetch(&msg_data, &mut cache)?;
     }
-    images.remove_expired();
     Ok(())
 }

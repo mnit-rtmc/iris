@@ -13,8 +13,8 @@
 // GNU General Public License for more details.
 //
 use crate::fetcher::create_client;
+use crate::files::AtomicFile;
 use crate::geo::{WebMercatorPos, Wgs84Pos};
-use crate::resource::{make_backup_name, make_name};
 use crate::Result;
 use pointy::{Float, Pt};
 use postgis::ewkb::{LineString, Point, Polygon};
@@ -26,9 +26,7 @@ use std::cmp::Ordering;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::fmt;
-use std::fs::{create_dir_all, rename, File};
 use std::hash::{Hash, Hasher};
-use std::io::BufWriter;
 use std::path::Path;
 use std::sync::mpsc::Receiver;
 
@@ -105,43 +103,6 @@ enum TravelDir {
     Eb,
     /// Westbound
     Wb,
-}
-
-/// A file which is written, then renamed atomically
-struct AtomicFile<'a> {
-    /// Directory to store file
-    dir: &'a Path,
-    /// File name
-    name: &'a str,
-}
-
-impl<'a> AtomicFile<'a> {
-    /// Create a new atomic file
-    fn new(dir: &'a Path, name: &'a str) -> Result<Self> {
-        log::debug!("AtomicFile::new {:?}", name);
-        if !dir.is_dir() {
-            create_dir_all(dir)?;
-        }
-        Ok(AtomicFile { dir, name })
-    }
-
-    /// Create the file and get writer
-    fn writer(&self) -> Result<BufWriter<File>> {
-        Ok(BufWriter::new(File::create(make_backup_name(
-            self.dir, self.name,
-        ))?))
-    }
-}
-
-impl Drop for AtomicFile<'_> {
-    fn drop(&mut self) {
-        log::debug!("AtomicFile::drop: {:?}", &self.name);
-        let backup = make_backup_name(self.dir, self.name);
-        let path = make_name(self.dir, self.name);
-        if let Err(e) = rename(backup, path) {
-            log::error!("rename: {:?}", e);
-        }
-    }
 }
 
 impl TravelDir {

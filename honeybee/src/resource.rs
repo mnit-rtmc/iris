@@ -12,6 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::files::AtomicFile;
 use crate::segments::{RNode, Road, SegMsg};
 use crate::signmsg::render_all;
 use crate::Result;
@@ -20,24 +21,10 @@ use ntcip::dms::Graphic;
 use pix::{el::Pixel, gray::Gray8, rgb::SRgb8, Palette, Raster};
 use postgres::Client;
 use std::collections::HashSet;
-use std::fs::{rename, File};
-use std::io::{BufWriter, Write};
-use std::path::{Path, PathBuf};
+use std::io::Write;
+use std::path::Path;
 use std::sync::mpsc::Sender;
 use std::time::Instant;
-
-/// Make a PathBuf from a Path and file name
-pub fn make_name(dir: &Path, n: &str) -> PathBuf {
-    let mut p = PathBuf::new();
-    p.push(dir);
-    p.push(n);
-    p
-}
-
-/// Make a PathBuf for a backup file
-pub fn make_backup_name(dir: &Path, n: &str) -> PathBuf {
-    make_name(dir, &format!("{n}~"))
-}
 
 /// Listen enum for postgres NOTIFY events
 #[derive(PartialEq, Eq, Hash)]
@@ -1036,12 +1023,11 @@ impl Resource {
         log::debug!("fetch_file: {:?}", name);
         let t = Instant::now();
         let dir = Path::new("");
-        let backup = make_backup_name(dir, name);
-        let n = make_name(dir, name);
-        let writer = BufWriter::new(File::create(&backup)?);
+        let file = AtomicFile::new(dir, name)?;
+        let writer = file.writer()?;
         let sql = self.sql();
         let count = fetch_simple(client, sql, writer)?;
-        rename(backup, n)?;
+        drop(file);
         log::info!("{}: wrote {} rows in {:?}", name, count, t.elapsed());
         Ok(())
     }
@@ -1082,7 +1068,7 @@ fn write_graphic(dir: &Path, graphic: Graphic) -> Result<()> {
         let green = (tc >> 8) as u8;
         let blue = tc as u8;
         palette.set_entry(SRgb8::new(red, green, blue));
-        log::warn!("write_graphic: {name}, {tc:X?} transparent");
+        log::debug!("write_graphic: {name}, {tc:X?} transparent");
     }
     palette.set_threshold_fn(palette_threshold_rgb8_256);
     for y in 0..height {
@@ -1095,15 +1081,13 @@ fn write_graphic(dir: &Path, graphic: Graphic) -> Result<()> {
             }
         }
     }
-    log::warn!("write_graphic: {name}, {}", palette.len());
-    let backup = make_backup_name(dir, &name);
-    let n = make_name(dir, &name);
-    let mut writer = BufWriter::new(File::create(&backup)?);
+    log::debug!("write_graphic: {name}, {}", palette.len());
+    let file = AtomicFile::new(dir, &name)?;
+    let mut writer = file.writer()?;
     let mut enc = Encoder::new(&mut writer).into_step_enc();
     let step = Step::with_indexed(indexed, palette)
         .with_transparent_color(graphic.transparent_color().map(|_tc| 0));
     enc.encode_step(&step)?;
-    rename(backup, n)?;
     Ok(())
 }
 
