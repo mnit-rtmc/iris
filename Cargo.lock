@@ -947,9 +947,9 @@ dependencies = [
 
 [[package]]
 name = "gift"
-version = "0.10.0"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a9ac9f4c949147ba6721435188949f98f8f7beafef85652835b316094e459559"
+checksum = "16b59737f616ff61e34b28ea53175f9a9b59e32221ce1240e2367022532bb0ed"
 dependencies = [
  "log",
  "pix",
@@ -1291,9 +1291,9 @@ dependencies = [
 
 [[package]]
 name = "ntcip"
-version = "0.5.2"
+version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc98b7ca49d4d53099157dda7d6904ac139b28d4c9509c91f327db8eed568a4d"
+checksum = "a96c47ca4faea06cb7c3536469224d0c4bc9f6e419f7020e812e4f42e5c2e52a"
 dependencies = [
  "base64 0.13.1",
  "log",

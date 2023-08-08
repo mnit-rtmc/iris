@@ -15,6 +15,9 @@
 use crate::segments::{RNode, Road, SegMsg};
 use crate::signmsg::render_all;
 use crate::Result;
+use gift::{Encoder, Step};
+use ntcip::dms::Graphic;
+use pix::{el::Pixel, gray::Gray8, rgb::SRgb8, Palette, Raster};
 use postgres::Client;
 use std::collections::HashSet;
 use std::fs::{rename, File};
@@ -102,6 +105,12 @@ impl Listen {
 /// A resource which can be fetched from a database connection.
 #[derive(PartialEq, Eq, Hash)]
 enum Resource {
+    /// Graphic resource.
+    ///
+    /// * Listen specification.
+    /// * SQL query.
+    Graphic(Listen, &'static str),
+
     /// RNode resource.
     ///
     /// * Listen specification.
@@ -121,10 +130,9 @@ enum Resource {
 
     /// Sign message resource.
     ///
-    /// * File name.
     /// * Listen specification.
     /// * SQL query.
-    SignMsg(&'static str, Listen, &'static str),
+    SignMsg(Listen, &'static str),
 }
 
 /// Camera resource
@@ -358,8 +366,7 @@ const FONT_RES: Resource = Resource::Simple(
 );
 
 /// Graphic resource
-const GRAPHIC_RES: Resource = Resource::Simple(
-    "graphic",
+const GRAPHIC_RES: Resource = Resource::Graphic(
     Listen::All("graphic"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT g_number AS number, name, height, width, color_scheme, \
@@ -711,7 +718,6 @@ const SIGN_DETAIL_RES: Resource = Resource::Simple(
 
 /// Sign message resource
 const SIGN_MSG_RES: Resource = Resource::SignMsg(
-    "sign_message",
     Listen::All("sign_message"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, sign_config, incident, multi, msg_owner, flash_beacon, \
@@ -947,10 +953,11 @@ impl Resource {
     /// Get the listen value
     fn listen(&self) -> &Listen {
         match self {
+            Resource::Graphic(lsn, _) => lsn,
             Resource::RNode(lsn) => lsn,
             Resource::Road(lsn) => lsn,
             Resource::Simple(_, lsn, _) => lsn,
-            Resource::SignMsg(_, lsn, _) => lsn,
+            Resource::SignMsg(lsn, _) => lsn,
         }
     }
 
@@ -961,7 +968,7 @@ impl Resource {
             Resource::RNode(_) => unreachable!(),
             Resource::Road(_) => unreachable!(),
             Resource::Simple(_, _, sql) => sql,
-            Resource::SignMsg(_, _, sql) => sql,
+            Resource::SignMsg(_, sql) => sql,
         }
     }
 
@@ -977,10 +984,11 @@ impl Resource {
         sender: &Sender<SegMsg>,
     ) -> Result<()> {
         match self {
+            Resource::Graphic(_, _) => self.fetch_graphics(client),
             Resource::RNode(_) => self.fetch_nodes(client, payload, sender),
             Resource::Road(_) => self.fetch_roads(client, payload, sender),
             Resource::Simple(n, _, _) => self.fetch_file(client, n),
-            Resource::SignMsg(n, _, _) => self.fetch_sign_msgs(client, n),
+            Resource::SignMsg(_, _) => self.fetch_sign_msgs(client),
         }
     }
 
@@ -1038,12 +1046,73 @@ impl Resource {
         Ok(())
     }
 
+    /// Fetch graphics resource.
+    fn fetch_graphics(&self, client: &mut Client) -> Result<()> {
+        log::debug!("fetch_graphics");
+        let t = Instant::now();
+        let dir = Path::new("api/img");
+        let mut count = 0;
+        let sql = self.sql();
+        for row in &client.query(sql, &[])? {
+            write_graphic(&dir, serde_json::from_str(row.get(0))?)?;
+            count += 1;
+        }
+        log::info!("fetch_graphics: wrote {count} rows in {:?}", t.elapsed());
+        Ok(())
+    }
+
     /// Fetch sign messages resource.
-    fn fetch_sign_msgs(&self, client: &mut Client, name: &str) -> Result<()> {
-        self.fetch_file(client, name)?;
+    fn fetch_sign_msgs(&self, client: &mut Client) -> Result<()> {
+        self.fetch_file(client, "sign_message")?;
         // FIXME: spawn another thread for this?
         render_all(Path::new(""))
     }
+}
+
+/// Write a graphic image to a file
+fn write_graphic(dir: &Path, graphic: Graphic) -> Result<()> {
+    let name = format!("G{}.gif", graphic.number());
+    let raster = graphic.to_raster();
+    let mut indexed = Raster::with_clear(raster.width(), raster.height());
+    let height = raster.height().try_into().unwrap();
+    let width = raster.width().try_into().unwrap();
+    let mut palette = Palette::new(256);
+    if let Some(tc) = graphic.transparent_color() {
+        let red = (tc >> 16) as u8;
+        let green = (tc >> 8) as u8;
+        let blue = tc as u8;
+        palette.set_entry(SRgb8::new(red, green, blue));
+        log::warn!("write_graphic: {name}, {tc:X?} transparent");
+    }
+    palette.set_threshold_fn(palette_threshold_rgb8_256);
+    for y in 0..height {
+        for x in 0..width {
+            let clr = raster.pixel(x, y);
+            if let Some(idx) = palette.set_entry(clr.convert()) {
+                *indexed.pixel_mut(x, y) = Gray8::new(idx as u8);
+            } else {
+                *indexed.pixel_mut(x, y) = Gray8::new(0);
+            }
+        }
+    }
+    log::warn!("write_graphic: {name}, {}", palette.len());
+    let backup = make_backup_name(dir, &name);
+    let n = make_name(dir, &name);
+    let mut writer = BufWriter::new(File::create(&backup)?);
+    let mut enc = Encoder::new(&mut writer).into_step_enc();
+    let step = Step::with_indexed(indexed, palette)
+        .with_transparent_color(graphic.transparent_color().map(|_tc| 0));
+    enc.encode_step(&step)?;
+    rename(backup, n)?;
+    Ok(())
+}
+
+/// Get the difference threshold for SRgb8 with 256 capacity palette
+fn palette_threshold_rgb8_256(v: usize) -> SRgb8 {
+    let red = (v & 0xFF) as u8 >> 5;
+    let green = (v & 0xFF) as u8 >> 5;
+    let blue = (v & 0xFF) as u8 >> 6;
+    SRgb8::new(red, green, blue)
 }
 
 /// Listen for notifications on all channels we need to monitor.
