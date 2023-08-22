@@ -17,17 +17,77 @@ use crate::segments::{RNode, Road, SegMsg};
 use crate::signmsg::render_all;
 use crate::Result;
 use gift::{Encoder, Step};
-use ntcip::dms::Graphic;
+use ntcip::dms::graphic::Graphic;
+use ntcip::dms::multi::Color;
 use pix::{el::Pixel, gray::Gray8, rgb::SRgb8, Palette, Raster};
 use postgres::Client;
+use serde_derive::Deserialize;
 use std::collections::HashSet;
 use std::io::Write;
 use std::path::Path;
 use std::sync::mpsc::Sender;
 use std::time::Instant;
 
+/// Glyph from font
+#[derive(Deserialize)]
+pub struct Glyph {
+    pub code_point: u16,
+    pub width: u8,
+    #[serde(with = "super::base64")]
+    pub bitmap: Vec<u8>,
+}
+
+/// Font resource
+#[derive(Deserialize)]
+pub struct FontRes {
+    pub f_number: u8,
+    pub name: String,
+    pub height: u8,
+    pub width: u8,
+    pub char_spacing: u8,
+    pub line_spacing: u8,
+    pub glyphs: Vec<Glyph>,
+    pub version_id: u16,
+}
+
+/// Graphic resource
+#[derive(Deserialize)]
+struct GraphicRes {
+    number: u8,
+    name: String,
+    height: u8,
+    width: u16,
+    color_scheme: String,
+    transparent_color: Option<i32>,
+    #[serde(with = "super::base64")]
+    bitmap: Vec<u8>,
+}
+
+impl From<GraphicRes> for Graphic {
+    fn from(gr: GraphicRes) -> Self {
+        let transparent_color = match gr.transparent_color {
+            Some(tc) => {
+                let red = (tc >> 16) as u8;
+                let green = (tc >> 8) as u8;
+                let blue = tc as u8;
+                Some(Color::Rgb(red, green, blue))
+            }
+            _ => None,
+        };
+        Graphic {
+            number: gr.number,
+            name: gr.name,
+            height: gr.height,
+            width: gr.width,
+            gtype: gr.color_scheme[..].into(),
+            transparent_color,
+            bitmap: gr.bitmap,
+        }
+    }
+}
+
 /// Listen enum for postgres NOTIFY events
-#[derive(PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 enum Listen {
     /// Do not listen
     Nope,
@@ -90,8 +150,14 @@ impl Listen {
 }
 
 /// A resource which can be fetched from a database connection.
-#[derive(PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 enum Resource {
+    /// Font resource.
+    ///
+    /// * Listen specification.
+    /// * SQL query.
+    Font(Listen, &'static str),
+
     /// Graphic resource.
     ///
     /// * Listen specification.
@@ -335,19 +401,18 @@ const DMS_STAT_RES: Resource = Resource::Simple(
 );
 
 /// Font resource
-const FONT_RES: Resource = Resource::Simple(
-    "font",
+const FONT_RES: Resource = Resource::Font(
     Listen::Two("font", "glyph"),
     "SELECT row_to_json(f)::text FROM (\
-      SELECT f_number AS number, name, height, char_spacing, line_spacing, \
+      SELECT f_number, name, height, width, char_spacing, line_spacing, \
              array(SELECT row_to_json(c) FROM (\
-               SELECT code_point AS number, width, \
+               SELECT code_point, width, \
                       replace(pixels, E'\n', '') AS bitmap \
                FROM iris.glyph \
                WHERE font = ft.name \
                ORDER BY code_point \
              ) AS c) \
-           AS characters, version_id \
+           AS glyphs, version_id \
       FROM iris.font ft ORDER BY name\
     ) AS f",
 );
@@ -940,6 +1005,7 @@ impl Resource {
     /// Get the listen value
     fn listen(&self) -> &Listen {
         match self {
+            Resource::Font(lsn, _) => lsn,
             Resource::Graphic(lsn, _) => lsn,
             Resource::RNode(lsn) => lsn,
             Resource::Road(lsn) => lsn,
@@ -951,6 +1017,7 @@ impl Resource {
     /// Get the SQL value
     fn sql(&self) -> &'static str {
         match self {
+            Resource::Font(_, sql) => sql,
             Resource::Graphic(_, sql) => sql,
             Resource::RNode(_) => unreachable!(),
             Resource::Road(_) => unreachable!(),
@@ -971,6 +1038,7 @@ impl Resource {
         sender: &Sender<SegMsg>,
     ) -> Result<()> {
         match self {
+            Resource::Font(_, _) => self.fetch_fonts(client),
             Resource::Graphic(_, _) => self.fetch_graphics(client),
             Resource::RNode(_) => self.fetch_nodes(client, payload, sender),
             Resource::Road(_) => self.fetch_roads(client, payload, sender),
@@ -1032,6 +1100,21 @@ impl Resource {
         Ok(())
     }
 
+    /// Fetch font resources
+    fn fetch_fonts(&self, client: &mut Client) -> Result<()> {
+        log::debug!("fetch_fonts");
+        let t = Instant::now();
+        let dir = Path::new("api/font");
+        let mut count = 0;
+        let sql = self.sql();
+        for row in &client.query(sql, &[])? {
+            write_font(&dir, serde_json::from_str(row.get(0))?)?;
+            count += 1;
+        }
+        log::info!("fetch_fonts: wrote {count} rows in {:?}", t.elapsed());
+        Ok(())
+    }
+
     /// Fetch graphics resource.
     fn fetch_graphics(&self, client: &mut Client) -> Result<()> {
         log::debug!("fetch_graphics");
@@ -1055,20 +1138,59 @@ impl Resource {
     }
 }
 
+/// Write a font to an .ifnt file
+fn write_font(dir: &Path, font: FontRes) -> Result<()> {
+    let name = format!("{}.ifnt", font.name);
+    log::debug!("write_font: {name}");
+    let file = AtomicFile::new(dir, &name)?;
+    let mut writer = file.writer()?;
+    writeln!(writer, "name: {}", font.name)?;
+    writeln!(writer, "font_number: {}", font.f_number)?;
+    writeln!(writer, "height: {}", font.height)?;
+    writeln!(writer, "width: {}", font.width)?;
+    writeln!(writer, "char_spacing: {}", font.char_spacing)?;
+    writeln!(writer, "line_spacing: {}", font.line_spacing)?;
+    for glyph in font.glyphs {
+        let cp = u32::from(glyph.code_point);
+        if let Some(ch) = char::from_u32(cp) {
+            writeln!(writer)?;
+            writeln!(writer, "codepoint: {cp} {ch}")?;
+            for row in 0..usize::from(font.height) {
+                for col in 0..usize::from(glyph.width) {
+                    if glyph.is_pixel_lit(row, col) {
+                        write!(writer, "X")?;
+                    } else {
+                        write!(writer, ".")?;
+                    }
+                }
+                writeln!(writer)?;
+            }
+        }
+    }
+    Ok(())
+}
+
+impl Glyph {
+    fn is_pixel_lit(&self, row: usize, col: usize) -> bool {
+        let pos = row * usize::from(self.width) + col;
+        let b8 = pos / 8;
+        let bit = 7 - pos % 8;
+        (self.bitmap[b8] >> bit) & 1 != 0
+    }
+}
+
 /// Write a graphic image to a file
-fn write_graphic(dir: &Path, graphic: Graphic) -> Result<()> {
-    let name = format!("G{}.gif", graphic.number());
+fn write_graphic(dir: &Path, graphic: GraphicRes) -> Result<()> {
+    let graphic = Graphic::from(graphic);
+    let name = format!("g{}.gif", graphic.number);
     let raster = graphic.to_raster();
     let mut indexed = Raster::with_clear(raster.width(), raster.height());
     let height = raster.height().try_into().unwrap();
     let width = raster.width().try_into().unwrap();
     let mut palette = Palette::new(256);
-    if let Some(tc) = graphic.transparent_color() {
-        let red = (tc >> 16) as u8;
-        let green = (tc >> 8) as u8;
-        let blue = tc as u8;
+    if let Some(Color::Rgb(red, green, blue)) = graphic.transparent_color {
         palette.set_entry(SRgb8::new(red, green, blue));
-        log::debug!("write_graphic: {name}, {tc:X?} transparent");
+        log::debug!("write_graphic: {name}, transparent {red},{green},{blue}");
     }
     palette.set_threshold_fn(palette_threshold_rgb8_256);
     for y in 0..height {
@@ -1085,18 +1207,18 @@ fn write_graphic(dir: &Path, graphic: Graphic) -> Result<()> {
     let file = AtomicFile::new(dir, &name)?;
     let mut writer = file.writer()?;
     let mut enc = Encoder::new(&mut writer).into_step_enc();
-    let step = Step::with_indexed(indexed, palette)
-        .with_transparent_color(graphic.transparent_color().map(|_tc| 0));
+    let step = Step::with_indexed(indexed, palette).with_transparent_color(
+        // transparent color always palette index 0
+        graphic.transparent_color.map(|_| 0),
+    );
     enc.encode_step(&step)?;
     Ok(())
 }
 
 /// Get the difference threshold for SRgb8 with 256 capacity palette
 fn palette_threshold_rgb8_256(v: usize) -> SRgb8 {
-    let red = (v & 0xFF) as u8 >> 5;
-    let green = (v & 0xFF) as u8 >> 5;
-    let blue = (v & 0xFF) as u8 >> 6;
-    SRgb8::new(red, green, blue)
+    let val = (v & 0xFF) as u8;
+    SRgb8::new(val >> 5, val >> 5, val >> 4)
 }
 
 /// Listen for notifications on all channels we need to monitor.
@@ -1122,6 +1244,7 @@ pub fn listen_all(client: &mut Client) -> Result<()> {
 /// * `sender` Sender for segment messages.
 pub fn fetch_all(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
     for res in ALL {
+        log::debug!("fetch_all: {res:?}");
         res.fetch(client, "", sender)?;
     }
     Ok(())

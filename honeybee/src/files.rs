@@ -3,8 +3,9 @@
 // Copyright (C) 2023  Minnesota Department of Transportation
 //
 use crate::Result;
+use anyhow::Context;
 use std::collections::HashSet;
-use std::fs::{create_dir_all, read_dir, rename, remove_file, File};
+use std::fs::{create_dir_all, read_dir, remove_file, rename, File};
 use std::io::BufWriter;
 use std::path::{Path, PathBuf};
 
@@ -37,23 +38,29 @@ impl AtomicFile {
         // Use parent in case name contains path separators
         if let Some(dir) = path.parent() {
             if !dir.is_dir() {
-                create_dir_all(dir)?;
+                create_dir_all(dir).context("create: {dir:?}")?;
             }
         }
         Ok(AtomicFile { path })
     }
 
+    /// Get file path
+    pub fn path(&self) -> &Path {
+        &self.path
+    }
+
     /// Create the file and get writer
     pub fn writer(&self) -> Result<BufWriter<File>> {
         let path = backup_path(&self.path);
-        Ok(BufWriter::new(File::create(path)?))
+        Ok(BufWriter::new(
+            File::create(&path).with_context(|| format!("create: {path:?}"))?,
+        ))
     }
 
     /// Cancel writing file
     pub fn cancel(&self) -> Result<()> {
         let path = backup_path(&self.path);
-        log::debug!("cancel: {path:?}");
-        remove_file(&path)?;
+        remove_file(&path).context("remove: {path:?}")?;
         Ok(())
     }
 }
@@ -69,18 +76,8 @@ impl Drop for AtomicFile {
 }
 
 impl Cache {
-    /// Create a set of files
-    pub fn new(dir: &Path, ext: &str) -> Result<Self> {
-        let files = Cache::files(dir, ext)?;
-        let dir = dir.into();
-        Ok(Cache {
-            dir,
-            files,
-        })
-    }
-
     /// Lookup a listing of files with a given extension
-    fn files(dir: &Path, ext: &str) -> Result<HashSet<PathBuf>> {
+    fn read_dir(dir: &Path, ext: &str) -> Result<HashSet<PathBuf>> {
         let mut files = HashSet::new();
         if dir.is_dir() {
             for f in read_dir(dir)? {
@@ -96,6 +93,18 @@ impl Cache {
             }
         }
         Ok(files)
+    }
+
+    /// Create a set of files
+    pub fn new(dir: &Path, ext: &str) -> Result<Self> {
+        let files = Cache::read_dir(dir, ext)?;
+        let dir = dir.into();
+        Ok(Cache { dir, files })
+    }
+
+    /// Get a draining iterator of paths
+    pub fn drain(&mut self) -> impl Iterator<Item = PathBuf> + '_ {
+        self.files.drain()
     }
 
     /// Check if cache contains a file

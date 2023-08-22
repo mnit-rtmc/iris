@@ -37,6 +37,7 @@ const BASE_SCALE: f64 = 1.0 / 6.0;
 const OUTER_SCALE: f64 = 16.0 / 6.0;
 
 /// Road definition
+#[allow(unused)]
 pub struct Road {
     name: String,
     abbrev: String,

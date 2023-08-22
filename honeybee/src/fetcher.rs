@@ -76,6 +76,7 @@ fn notify_loop(client: &mut Client, sender: Sender<SegMsg>) -> Result<()> {
     loop {
         let mut nots = pending_notifications(client)?;
         for (channel, payload) in nots.drain() {
+            log::debug!("notify on {channel}");
             resource::notify(client, &channel, &payload, &sender)?;
         }
     }

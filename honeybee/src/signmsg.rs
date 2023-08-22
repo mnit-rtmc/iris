@@ -14,22 +14,24 @@
 //
 //! The signmsg module is for rendering DMS sign messages to .gif files.
 //!
-use crate::files::Cache;
+use crate::files::{AtomicFile, Cache};
 use crate::Result;
-use gift::{Encoder, Step};
-use ntcip::dms::multi::{
-    ColorClassic, ColorCtx, ColorScheme, JustificationLine, JustificationPage,
-};
-use ntcip::dms::{Font, FontCache, Graphic, GraphicCache, Pages};
-use pix::{
-    el::Pixel,
-    gray::{Gray, Gray8},
-    rgb::{Rgb, SRgb8},
-    Palette, Raster,
-};
-use serde_derive::{Deserialize, Serialize};
+use anyhow::Context;
+use gift::{Decoder, Encoder, Step};
+use ntcip::dms::config::{MultiCfg, SignCfg, VmsCfg};
+use ntcip::dms::font::{ifnt, FontTable};
+use ntcip::dms::graphic::{Graphic, GraphicTable};
+use ntcip::dms::multi::{Color, ColorScheme, JustificationPage};
+use ntcip::dms::{Dms, Page};
+use pix::bgr::SBgr8;
+use pix::chan::Ch8;
+use pix::el::Pixel;
+use pix::gray::{Gray, Gray8};
+use pix::ops::SrcOver;
+use pix::rgb::{Rgba8p, SRgb8};
+use pix::{Palette, Raster};
+use serde_derive::Deserialize;
 use std::collections::HashMap;
-use std::convert::TryInto;
 use std::fmt;
 use std::fs::File;
 use std::io::{BufReader, Write};
@@ -65,7 +67,8 @@ impl UnknownResourceError {
 }
 
 /// Sign configuration
-#[derive(Deserialize, Serialize)]
+#[allow(unused)]
+#[derive(Deserialize)]
 struct SignConfig {
     name: String,
     face_width: i32,
@@ -82,17 +85,19 @@ struct SignConfig {
     monochrome_background: i32,
     color_scheme: String,
     default_font: Option<String>,
+    module_width: Option<i32>,
+    module_height: Option<i32>,
 }
 
 /// Data needed for rendering sign messages
 struct MsgData {
+    dms: Dms,
     configs: HashMap<String, SignConfig>,
-    fonts: FontCache,
-    graphics: GraphicCache,
 }
 
 /// Sign message
-#[derive(Deserialize, Serialize)]
+#[allow(unused)]
+#[derive(Deserialize)]
 struct SignMessage {
     name: String,
     sign_config: String,
@@ -116,613 +121,383 @@ impl SignConfig {
     /// Load sign configurations from a JSON file
     fn load(dir: &Path) -> Result<HashMap<String, SignConfig>> {
         log::debug!("SignConfig::load");
-        let mut n = PathBuf::new();
-        n.push(dir);
-        n.push("sign_config");
-        let r = BufReader::new(File::open(&n)?);
+        let mut path = PathBuf::new();
+        path.push(dir);
+        path.push("sign_config");
+        let reader = BufReader::new(
+            File::open(&path).with_context(|| format!("load {path:?}"))?,
+        );
+        let cfgs: Vec<SignConfig> = serde_json::from_reader(reader)?;
         let mut configs = HashMap::new();
-        let j: Vec<SignConfig> = serde_json::from_reader(r)?;
-        for c in j {
-            let cn = c.name.clone();
-            configs.insert(cn, c);
+        for config in cfgs {
+            let cn = config.name.clone();
+            configs.insert(cn, config);
         }
         Ok(configs)
     }
 
-    /// Get config name
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    /// Get default font
-    fn default_font(&self) -> Option<&str> {
-        self.default_font.as_deref()
-    }
-
-    /// Get the face width (mm)
-    fn face_width_mm(&self) -> f32 {
-        self.face_width.max(0) as f32
-    }
-
-    /// Get the width of the sign (pixels)
-    fn pixel_width(&self) -> i32 {
-        self.pixel_width.max(0)
-    }
-
-    /// Get the horizontal border (mm)
-    ///
-    /// Sanity checked in case vendor supplied stupid values.
-    fn border_horiz_mm(&self) -> f32 {
-        let pix = self.pixel_width() + self.gap_char_count();
-        let min_width = (pix as f32) * self.pitch_horiz_mm();
-        let extra = (self.face_width_mm() - min_width).max(0.0);
-        if self.gap_char_count() > 0 {
-            let border = self.border_horiz.max(0) as f32;
-            border.min(extra / 2.0)
-        } else {
-            // Ignore border_horiz if there are no character gaps
-            extra / 2.0
+    /// Create NTCIP sign config
+    fn sign_cfg(&self) -> SignCfg {
+        SignCfg {
+            sign_height: self.face_height as u16,
+            sign_width: self.face_width as u16,
+            horizontal_border: self.border_horiz as u16,
+            vertical_border: self.border_vert as u16,
+            ..Default::default()
         }
     }
 
-    /// Get the pixel width (mm)
-    fn pixel_width_mm(&self) -> f32 {
-        self.face_width_mm() - self.border_horiz_mm() * 2.0
-    }
-
-    /// Get the horizontal pitch
-    fn pitch_horiz(&self) -> i32 {
-        self.pitch_horiz.max(0)
-    }
-
-    /// Get the horizontal pitch (mm)
-    ///
-    /// Sanity checked in case vendor supplied stupid values.
-    fn pitch_horiz_mm(&self) -> f32 {
-        let pitch = self.pitch_horiz() as f32;
-        let pix = self.pixel_width() + self.gap_char_count();
-        if pix > 0 {
-            pitch.min(self.face_width_mm() / pix as f32)
-        } else {
-            pitch
+    /// Create NTCIP VMS config
+    fn vms_cfg(&self) -> VmsCfg {
+        let fg = rgb_from_i32(self.monochrome_foreground);
+        let bg = rgb_from_i32(self.monochrome_background);
+        let monochrome_color = [fg.0, fg.1, fg.2, bg.0, bg.1, bg.2];
+        VmsCfg {
+            char_height_pixels: self.char_height as u8,
+            char_width_pixels: self.char_width as u8,
+            sign_height_pixels: self.pixel_height as u16,
+            sign_width_pixels: self.pixel_width as u16,
+            horizontal_pitch: self.pitch_horiz as u8,
+            vertical_pitch: self.pitch_vert as u8,
+            monochrome_color,
+            ..Default::default()
         }
     }
 
-    /// Get the number of gaps between characters
-    fn gap_char_count(&self) -> i32 {
-        if self.char_width > 1 && self.pixel_width() > self.char_width {
-            (self.pixel_width() - 1) / self.char_width
-        } else {
-            0
+    /// Create NTCIP MULTI config
+    fn multi_cfg(&self, dms: &Dms) -> MultiCfg {
+        let default_font = self
+            .default_font
+            .as_ref()
+            .and_then(|f| dms.font_definition().lookup_name(f))
+            .map(|f| f.number)
+            .unwrap_or(1);
+        // Some IRIS defaults differ from NTCIP defaults
+        MultiCfg {
+            default_flash_on: 0,
+            default_flash_off: 0,
+            default_font,
+            default_justification_page: JustificationPage::Top,
+            default_page_on_time: 28,
+            default_page_off_time: 0,
+            color_scheme: self.color_scheme[..].into(),
+            ..Default::default()
         }
-    }
-
-    /// Get the X-position of a pixel on the sign (from 0 to 1)
-    fn pixel_x(&self, x: i32) -> f32 {
-        let border = self.border_horiz_mm();
-        let offset = self.char_offset_mm(x);
-        let x = x as f32 + 0.5; // shift to center of pixel
-        let pos = border + offset + x * self.pitch_horiz_mm();
-        pos / self.face_width_mm()
-    }
-
-    /// Get the horizontal character offset (mm)
-    fn char_offset_mm(&self, x: i32) -> f32 {
-        if self.char_width > 1 {
-            let char_num = (x / self.char_width) as f32;
-            char_num * self.gap_char_mm()
-        } else {
-            0.0
-        }
-    }
-
-    /// Get the character gap (mm)
-    fn gap_char_mm(&self) -> f32 {
-        let gaps = self.gap_char_count();
-        if gaps > 0 {
-            self.excess_char_mm() / gaps as f32
-        } else {
-            0.0
-        }
-    }
-
-    /// Get excess width for character gaps (mm)
-    fn excess_char_mm(&self) -> f32 {
-        let pix_mm = self.pitch_horiz_mm() * self.pixel_width() as f32;
-        (self.pixel_width_mm() - pix_mm).max(0.0)
-    }
-
-    /// Get the face height (mm)
-    fn face_height_mm(&self) -> f32 {
-        self.face_height.max(0) as f32
-    }
-
-    /// Get the height of the sign (pixels)
-    fn pixel_height(&self) -> i32 {
-        self.pixel_height.max(0)
-    }
-
-    /// Get the vertical border (mm)
-    ///
-    /// Sanity checked in case vendor supplied stupid values.
-    fn border_vert_mm(&self) -> f32 {
-        let pix = self.pixel_height() + self.gap_line_count();
-        let min_height = (pix as f32) * self.pitch_vert_mm();
-        let extra = (self.face_height_mm() - min_height).max(0.0);
-        if self.gap_line_count() > 0 {
-            let border = self.border_vert.max(0) as f32;
-            border.min(extra / 2.0)
-        } else {
-            // Ignore border_vert if there are no line gaps
-            extra / 2.0
-        }
-    }
-
-    /// Get the pixel height (mm)
-    fn pixel_height_mm(&self) -> f32 {
-        self.face_height_mm() - self.border_vert_mm() * 2.0
-    }
-
-    /// Get the vertical pitch
-    fn pitch_vert(&self) -> i32 {
-        self.pitch_vert.max(0)
-    }
-
-    /// Get the vertical pitch (mm)
-    ///
-    /// Sanity checked in case vendor supplied stupid values.
-    fn pitch_vert_mm(&self) -> f32 {
-        let pitch = self.pitch_vert() as f32;
-        let pix = self.pixel_height() + self.gap_line_count();
-        if pix > 0 {
-            pitch.min(self.face_height_mm() / pix as f32)
-        } else {
-            pitch
-        }
-    }
-
-    /// Get the number of gaps between lines
-    fn gap_line_count(&self) -> i32 {
-        if self.char_height > 1 && self.pixel_height() > self.char_height {
-            (self.pixel_height() - 1) / self.char_height
-        } else {
-            0
-        }
-    }
-
-    /// Get the Y-position of a pixel on the sign (from 0 to 1)
-    fn pixel_y(&self, y: i32) -> f32 {
-        let border = self.border_vert_mm();
-        let offset = self.line_offset_mm(y);
-        let y = y as f32 + 0.5; // shift to center of pixel
-        let pos = border + offset + y * self.pitch_vert_mm();
-        pos / self.face_height_mm()
-    }
-
-    /// Get the vertical line offset (mm)
-    fn line_offset_mm(&self, y: i32) -> f32 {
-        if self.char_height > 1 {
-            let line_num = (y / self.char_height) as f32;
-            line_num * self.gap_line_mm()
-        } else {
-            0.0
-        }
-    }
-
-    /// Get the line gap (mm)
-    fn gap_line_mm(&self) -> f32 {
-        let gaps = self.gap_line_count();
-        if gaps > 0 {
-            self.excess_line_mm() / gaps as f32
-        } else {
-            0.0
-        }
-    }
-
-    /// Get excess height for line gaps (mm).
-    fn excess_line_mm(&self) -> f32 {
-        let pix_mm = self.pitch_vert_mm() * self.pixel_height() as f32;
-        (self.pixel_height_mm() - pix_mm).max(0.0)
-    }
-
-    /// Get the character width as u8
-    fn char_width(&self) -> Result<u8> {
-        Ok(self.char_width.try_into()?)
-    }
-
-    /// Get the character height as u8
-    fn char_height(&self) -> Result<u8> {
-        Ok(self.char_height.try_into()?)
-    }
-
-    /// Get the color scheme value
-    fn color_scheme(&self) -> ColorScheme {
-        self.color_scheme[..].into()
-    }
-
-    /// Get the default foreground color
-    fn foreground_default_rgb(&self) -> (u8, u8, u8) {
-        match self.color_scheme() {
-            ColorScheme::ColorClassic | ColorScheme::Color24Bit => {
-                ColorClassic::Amber.rgb()
-            }
-            _ => rgb_from_i32(self.monochrome_foreground),
-        }
-    }
-
-    /// Get the default background color
-    fn background_default_rgb(&self) -> (u8, u8, u8) {
-        match self.color_scheme() {
-            ColorScheme::ColorClassic | ColorScheme::Color24Bit => {
-                ColorClassic::Black.rgb()
-            }
-            _ => rgb_from_i32(self.monochrome_background),
-        }
-    }
-
-    /// Render a sign message to a Vec of steps
-    fn render_sign_config<W: Write>(
-        &self,
-        mut writer: W,
-        multi: &str,
-        msg_data: &MsgData,
-    ) -> Result<()> {
-        let mut palette = Palette::new(256);
-        palette.set_threshold_fn(palette_threshold_rgb8_256);
-        palette.set_entry(SRgb8::default());
-        let mut steps = Vec::new();
-        let pages = self.pages(msg_data, multi)?;
-        let (w, h) = self.calculate_size();
-        for page in pages {
-            let (raster, delay_ds) = page?;
-            let delay = delay_ds * 10;
-            let step = self.make_face_step(raster, &mut palette, w, h, delay);
-            steps.push(step);
-        }
-        let mut enc = Encoder::new(&mut writer).into_step_enc();
-        enc = if steps.len() > 1 {
-            enc.with_loop_count(0)
-        } else {
-            enc
-        };
-        for step in steps {
-            enc.encode_step(&step)?;
-        }
-        Ok(())
-    }
-
-    /// Create pages for a sign config.
-    fn pages<'a>(
-        &self,
-        msg_data: &'a MsgData,
-        multi: &'a str,
-    ) -> Result<Pages<'a>> {
-        let width = self.pixel_width.try_into()?;
-        let height = self.pixel_height.try_into()?;
-        let color_scheme = self.color_scheme();
-        let fg_default = self.foreground_default_rgb();
-        let bg_default = self.background_default_rgb();
-        let color_ctx = ColorCtx::new(color_scheme, fg_default, bg_default);
-        let char_width = self.char_width()?;
-        let char_height = self.char_height()?;
-        let fname = self.default_font();
-        let font_num = msg_data.font_default(fname)?;
-        Ok(Pages::builder(width, height)
-            .with_color_ctx(color_ctx)
-            .with_char_size(char_width, char_height)
-            .with_page_on_time_ds(28)
-            .with_page_off_time_ds(0)
-            .with_justification_page(JustificationPage::Top)
-            .with_justification_line(JustificationLine::Center)
-            .with_font_num(font_num)
-            .with_fonts(Some(msg_data.fonts()))
-            .with_graphics(Some(msg_data.graphics()))
-            .build(multi))
-    }
-
-    /// Calculate the size of rendered DMS
-    fn calculate_size(&self) -> (u16, u16) {
-        let fw = self.face_width_mm();
-        let fh = self.face_height_mm();
-        if fw > 0.0 && fh > 0.0 {
-            let sx = PIX_WIDTH / fw;
-            let sy = PIX_HEIGHT / fh;
-            let s = sx.min(sy);
-            let w = (fw * s).round() as u16;
-            let h = (fh * s).round() as u16;
-            (w, h)
-        } else {
-            (PIX_WIDTH as u16, PIX_HEIGHT as u16)
-        }
-    }
-
-    /// Make a .gif step of sign face
-    fn make_face_step(
-        &self,
-        page: Raster<SRgb8>,
-        palette: &mut Palette,
-        w: u16,
-        h: u16,
-        delay: u16,
-    ) -> Step {
-        let raster = self.make_face_raster(page, palette, w, h);
-        Step::with_indexed(raster, palette.clone())
-            .with_delay_time_cs(Some(delay))
-    }
-
-    /// Make a raster of sign face
-    fn make_face_raster(
-        &self,
-        page: Raster<SRgb8>,
-        palette: &mut Palette,
-        w: u16,
-        h: u16,
-    ) -> Raster<Gray8> {
-        let dark = SRgb8::new(20, 20, 0);
-        let mut face = Raster::with_clear(w.into(), h.into());
-        let ph = page.height();
-        let pw = page.width();
-        let sx = w as f32 / pw as f32;
-        let sy = h as f32 / ph as f32;
-        let s = sx.min(sy);
-        log::debug!("face: {:?}, scale: {}", self.name(), s);
-        for y in 0..ph {
-            let py = self.pixel_y(y as i32) * h as f32;
-            for x in 0..pw {
-                let px = self.pixel_x(x as i32) * w as f32;
-                let rgb = page.pixel(x as i32, y as i32);
-                let sr = u8::from(Gray::value(rgb.convert::<Gray8>()));
-                // Clamp radius between 0.6 and 0.8 (blooming)
-                let r = s * (sr as f32 / 255.0).clamp(0.6, 0.8);
-                let clr = if sr > 20 { rgb } else { dark };
-                render_circle(&mut face, palette, px, py, r, clr);
-            }
-        }
-        face
     }
 }
 
 /// Load fonts from a JSON file
-fn load_fonts(dir: &Path) -> Result<FontCache> {
+fn load_fonts(dir: &Path) -> Result<FontTable> {
     log::debug!("load_fonts");
-    let mut n = PathBuf::new();
-    n.push(dir);
-    n.push("font");
-    let r = BufReader::new(File::open(&n)?);
-    let mut fonts = FontCache::default();
-    let j: Vec<Font> = serde_json::from_reader(r)?;
-    for f in j {
-        fonts.insert(f);
+    let mut path = PathBuf::new();
+    path.push(dir);
+    path.push("api");
+    path.push("font");
+    let mut cache = Cache::new(&path, "ifnt")?;
+    let mut fonts = FontTable::default();
+    path.push("_placeholder_.ifnt");
+    for nm in cache.drain() {
+        path.set_file_name(nm);
+        let file =
+            File::open(&path).with_context(|| format!("font {path:?}"))?;
+        fonts.push(ifnt::read(file)?)?;
     }
+    fonts.sort();
     Ok(fonts)
 }
 
 /// Load graphics from a JSON file
-fn load_graphics(dir: &Path) -> Result<GraphicCache> {
+fn load_graphics(dir: &Path) -> Result<GraphicTable> {
     log::debug!("load_graphics");
-    let mut n = PathBuf::new();
-    n.push(dir);
-    n.push("graphic");
-    let r = BufReader::new(File::open(&n)?);
-    let mut graphics = GraphicCache::default();
-    let j: Vec<Graphic> = serde_json::from_reader(r)?;
-    for g in j {
-        graphics.insert(g);
+    let mut path = PathBuf::new();
+    path.push(dir);
+    path.push("api");
+    path.push("img");
+    let mut cache = Cache::new(&path, "gif")?;
+    let mut graphics = GraphicTable::default();
+    path.push("_placeholder_.gif");
+    for nm in cache.drain() {
+        let number: u8 = nm
+            .as_os_str()
+            .to_str()
+            .unwrap()
+            .replace(|c: char| !c.is_numeric(), "")
+            .parse()?;
+        path.set_file_name(&nm);
+        let file = File::open(&path)
+            .with_context(|| format!("load_graphics {path:?}"))?;
+        let reader = BufReader::new(file);
+        if let Some(step) = Decoder::new(reader).into_steps().nth(0) {
+            let graphic = make_graphic(number, step?);
+            graphics.push(graphic)?;
+        }
     }
+    graphics.sort();
     Ok(graphics)
+}
+
+/// Make a graphic from a step
+fn make_graphic(number: u8, step: Step) -> Graphic {
+    let name = format!("g{number}");
+    let raster: Raster<SBgr8> = Raster::with_raster(step.raster());
+    let height = raster.height().try_into().unwrap();
+    let width = raster.width().try_into().unwrap();
+    let transparent_color =
+        step.transparent_color().map(|_c| Color::Rgb(0, 0, 0));
+    let slice: Box<[u8]> = raster.into();
+    let bitmap: Vec<u8> = slice.into();
+    Graphic {
+        number,
+        name,
+        height,
+        width,
+        gtype: ColorScheme::Color24Bit,
+        transparent_color,
+        bitmap,
+    }
 }
 
 impl MsgData {
     /// Load message data from a file path
     fn load(dir: &Path) -> Result<Self> {
         log::debug!("MsgData::load");
+        let dms = Dms::builder()
+            .with_font_definition(load_fonts(dir)?)
+            .with_graphic_definition(load_graphics(dir)?)
+            .build();
         let configs = SignConfig::load(dir)?;
-        let fonts = load_fonts(dir)?;
-        let graphics = load_graphics(dir)?;
-        Ok(MsgData {
-            configs,
-            fonts,
-            graphics,
-        })
+        Ok(MsgData { dms, configs })
     }
 
     /// Lookup a config
-    fn config(&self, s: &SignMessage) -> Result<&SignConfig> {
-        let cfg = &s.sign_config;
+    fn config(&self, msg: &SignMessage) -> Result<&SignConfig> {
+        let cfg = &msg.sign_config;
         match self.configs.get(cfg) {
             Some(c) => Ok(c),
             None => Err(UnknownResourceError::new(format!("Config: {cfg}"))),
         }
     }
 
-    /// Get the default font number
-    fn font_default(&self, fname: Option<&str>) -> Result<u8> {
-        match fname {
-            Some(fname) => match self.fonts.lookup_name(fname) {
-                Some(font) => Ok(font.number()),
-                None => {
-                    Err(UnknownResourceError::new(format!("Font: {fname}")))
-                }
-            },
-            None => Ok(1),
-        }
-    }
-
-    /// Get font mapping
-    fn fonts(&self) -> &FontCache {
-        &self.fonts
-    }
-
-    /// Get graphic mapping
-    fn graphics(&self) -> &GraphicCache {
-        &self.graphics
-    }
-}
-
-impl SignMessage {
-    /// Load sign messages from a JSON file
-    fn load_all(dir: &Path) -> Result<Vec<SignMessage>> {
-        log::debug!("SignMessage::load_all");
-        let mut n = PathBuf::new();
-        n.push(dir);
-        n.push("sign_message");
-        let r = BufReader::new(File::open(&n)?);
-        Ok(serde_json::from_reader(r)?)
-    }
-
-    /// Get the MULTI string
-    fn multi(&self) -> &str {
-        &self.multi
-    }
-
-    /// Fetch sign message .gif if it is not in the image cache.
-    ///
-    /// * `msg_data` Data required to render messages.
-    /// * `cache` Image cache.
-    fn fetch(&self, msg_data: &MsgData, cache: &mut Cache) -> Result<()> {
-        let mut name = self.name.clone();
-        name.push_str(".gif");
-        if cache.contains(&name) {
-            cache.keep(&name);
-            return Ok(());
-        }
-        let file = cache.file(&name)?;
-        log::debug!("SignMessage::fetch: {:?}", &name);
-        let writer = file.writer()?;
+    /// Render sign message .gif
+    fn render_sign_msg(
+        &mut self,
+        msg: &SignMessage,
+        file: AtomicFile,
+    ) -> Result<()> {
+        log::debug!("render_sign_msg: {:?}", file.path());
         let t = Instant::now();
-        if let Err(e) = self.render_sign_msg(msg_data, writer) {
-            log::warn!(
-                "{}, cfg={}, multi={} {e:?}",
-                &name,
-                self.sign_config,
-                self.multi,
-            );
+        let writer = file.writer()?;
+        let cfg = self.config(msg)?;
+        let multi_cfg = cfg.multi_cfg(&self.dms);
+        self.dms = self
+            .dms
+            .clone()
+            .into_builder()
+            .with_sign_cfg(cfg.sign_cfg())
+            .with_vms_cfg(cfg.vms_cfg())
+            .with_multi_cfg(multi_cfg)
+            .build();
+        if let Err(e) = render_msg(&self.dms, &msg.multi, writer) {
+            log::warn!("{:?}, multi={} {e:?}", file.path(), msg.multi);
             file.cancel()?;
             return Ok(());
         };
-        log::info!("{} rendered in {:?}", &name, t.elapsed());
+        log::info!("{:?} rendered in {:?}", file.path(), t.elapsed());
         Ok(())
     }
+}
 
-    /// Render into a .gif file
-    fn render_sign_msg<W: Write>(
-        &self,
-        msg_data: &MsgData,
-        writer: W,
-    ) -> Result<()> {
-        let cfg = msg_data.config(self)?;
-        cfg.render_sign_config(writer, self.multi(), msg_data)
+/// Render a sign message into a .gif file
+fn render_msg<W: Write>(dms: &Dms, multi: &str, mut writer: W) -> Result<()> {
+    let (width, height) = face_size(dms);
+    let mut steps = Vec::new();
+    for page in dms.render_pages(multi) {
+        let Page {
+            raster,
+            duration_ds,
+        } = page?;
+        let delay_cs = duration_ds * 10;
+        let mut palette = make_palette(&raster);
+        let face = make_face_raster(dms, raster, width, height);
+        let indexed = make_indexed(face, &mut palette);
+        steps.push(
+            Step::with_indexed(indexed, palette)
+                .with_delay_time_cs(Some(delay_cs)),
+        );
     }
+    let mut enc = Encoder::new(&mut writer).into_step_enc();
+    enc = if steps.len() > 1 {
+        enc.with_loop_count(0)
+    } else {
+        enc
+    };
+    for step in steps {
+        enc.encode_step(&step)?;
+    }
+    Ok(())
+}
+
+/// Calculate size to render DMS "face"
+fn face_size(dms: &Dms) -> (u16, u16) {
+    let fw = dms.face_width_mm();
+    let fh = dms.face_height_mm();
+    if fw > 0.0 && fh > 0.0 {
+        let sx = PIX_WIDTH / fw;
+        let sy = PIX_HEIGHT / fh;
+        let s = sx.min(sy);
+        let w = (fw * s).round() as u16;
+        let h = (fh * s).round() as u16;
+        (w, h)
+    } else {
+        (PIX_WIDTH as u16, PIX_HEIGHT as u16)
+    }
+}
+
+/// Make a raster of sign face
+fn make_face_raster(
+    dms: &Dms,
+    raster: Raster<SRgb8>,
+    width: u16,
+    height: u16,
+) -> Raster<SRgb8> {
+    let mut face = Raster::<Rgba8p>::with_clear(width.into(), height.into());
+    let rw = raster.width();
+    let rh = raster.height();
+    let sx = width as f32 / rw as f32;
+    let sy = height as f32 / rh as f32;
+    let scale = sx.min(sy);
+    for y in 0..rh {
+        let py = dms.pixel_y(y as i32, 0.5) * height as f32;
+        for x in 0..rw {
+            let px = dms.pixel_x(x as i32, 0.5) * width as f32;
+            let clr = raster.pixel(x as i32, y as i32);
+            // calculate "brightness" for blooming
+            let sr = u8::from(Gray::value(clr.convert::<Gray8>()));
+            if sr > 0 {
+                // clamp radius between 0.5 and 0.8 (blooming)
+                let r = scale * (sr as f32 / 255.0).clamp(0.5, 0.8);
+                render_circle(&mut face, px, py, r, clr);
+            } else {
+                // "glint" on dark pixel
+                let px = dms.pixel_x(x as i32, 0.25) * width as f32;
+                let py = dms.pixel_y(y as i32, 0.25) * height as f32;
+                let r = scale * 0.1;
+                let dim = SRgb8::new(32, 32, 32);
+                render_circle(&mut face, px, py, r, dim);
+            }
+        }
+    }
+    Raster::<SRgb8>::with_raster(&face)
 }
 
 /// Render an attenuated circle.
 ///
-/// * `raster` Indexed raster.
-/// * `palette` Global color palette.
+/// * `raster` Face raster.
 /// * `cx` X-Center of circle.
 /// * `cy` Y-Center of circle.
 /// * `r` Radius of circle.
 /// * `clr` Color of circle.
 fn render_circle(
-    raster: &mut Raster<Gray8>,
-    palette: &mut Palette,
+    raster: &mut Raster<Rgba8p>,
     cx: f32,
     cy: f32,
     r: f32,
     clr: SRgb8,
 ) {
-    let x0 = (cx - r).floor().max(0.0) as u32;
-    let x1 = (cx + r).ceil().min(raster.width() as f32) as u32;
-    let y0 = (cy - r).floor().max(0.0) as u32;
-    let y1 = (cy + r).ceil().min(raster.height() as f32) as u32;
-    let rs = r.powi(2);
+    let src: Rgba8p = clr.convert();
+    let x0 = (cx - r).floor().max(0.0) as i32;
+    let x1 = (cx + r).ceil().min(raster.width() as f32) as i32;
+    let y0 = (cy - r).floor().max(0.0) as i32;
+    let y1 = (cy + r).ceil().min(raster.height() as f32) as i32;
+    let rsq = r.powi(2);
     for y in y0..y1 {
         let yd = (cy - y as f32 - 0.5).abs();
         let ys = yd.powi(2);
         for x in x0..x1 {
             let xd = (cx - x as f32 - 0.5).abs();
             let xs = xd.powi(2);
-            let mut ds = xs + ys;
+            let mut dsq = xs + ys;
             // If center is within this pixel, make it brighter
-            if ds < 1.0 {
-                ds = ds.powi(2);
+            if dsq < 1.0 {
+                dsq = dsq.powi(2);
             }
             // compare distance squared with radius squared
-            let drs = ds / rs;
+            let drs = dsq / rsq;
             let v = 1.0 - drs.powi(2).min(1.0);
             if v > 0.0 {
-                // blend with existing pixel
-                let i = u8::from(Gray::value(raster.pixel(x as i32, y as i32)));
-                if let Some(p) = palette.entry(i as usize) {
-                    // TODO: add a blending operation for this
-                    let red = (Rgb::red(clr) * v).max(Rgb::red(p));
-                    let green = (Rgb::green(clr) * v).max(Rgb::green(p));
-                    let blue = (Rgb::blue(clr) * v).max(Rgb::blue(p));
-                    let rgb = SRgb8::new(red, green, blue);
-                    if let Some(d) = palette.set_entry(rgb) {
-                        *raster.pixel_mut(x as i32, y as i32) =
-                            Gray8::new(d as u8);
-                    } else {
-                        log::warn!("Blending failed -- color palette full!");
-                    }
-                } else {
-                    log::warn!("Index not found in color palette!");
-                }
+                let alpha = Ch8::from(v);
+                raster
+                    .pixel_mut(x, y)
+                    .composite_channels_alpha(&src, SrcOver, &alpha);
             }
         }
     }
 }
 
+/// Make a palette from colors in a raster
+fn make_palette(raster: &Raster<SRgb8>) -> Palette {
+    let mut palette = Palette::new(256);
+    palette.set_entry(SRgb8::default());
+    for pixel in raster.pixels() {
+        palette.set_entry(*pixel);
+    }
+    palette
+}
+
+/// Make an indexed raster
+fn make_indexed(face: Raster<SRgb8>, palette: &mut Palette) -> Raster<Gray8> {
+    palette.set_threshold_fn(palette_threshold_rgb8_256);
+    let mut indexed = Raster::with_clear(face.width(), face.height());
+    for y in 0..face.height() as i32 {
+        for x in 0..face.width() as i32 {
+            if let Some(e) = palette.set_entry(face.pixel(x, y)) {
+                *indexed.pixel_mut(x, y) = Gray8::new(e as u8);
+            } else {
+                log::warn!("Blending failed -- color palette full!");
+            }
+        }
+    }
+    indexed
+}
+
 /// Get the difference threshold for SRgb8 with 256 capacity palette
 fn palette_threshold_rgb8_256(v: usize) -> SRgb8 {
-    let i = match v as u8 {
-        0x00..=0x0F => 0,
-        0x10..=0x1E => 1,
-        0x1F..=0x2D => 2,
-        0x2E..=0x3B => 3,
-        0x3C..=0x49 => 4,
-        0x4A..=0x56 => 5,
-        0x57..=0x63 => 6,
-        0x64..=0x6F => 7,
-        0x70..=0x7B => 8,
-        0x7C..=0x86 => 9,
-        0x87..=0x91 => 10,
-        0x92..=0x9B => 11,
-        0x9C..=0xA5 => 12,
-        0xA6..=0xAE => 13,
-        0xAF..=0xB7 => 14,
-        0xB8..=0xBF => 15,
-        0xC0..=0xC7 => 16,
-        0xC8..=0xCE => 17,
-        0xCF..=0xD5 => 18,
-        0xD6..=0xDB => 19,
-        0xDC..=0xE1 => 20,
-        0xE2..=0xE6 => 21,
-        0xE7..=0xEB => 22,
-        0xEC..=0xEF => 23,
-        0xF0..=0xF3 => 24,
-        0xF4..=0xF6 => 25,
-        0xF7..=0xF9 => 26,
-        0xFA..=0xFB => 27,
-        0xFC..=0xFD => 28,
-        0xFE..=0xFE => 29,
-        0xFF..=0xFF => 30,
-    };
-    SRgb8::new(i * 4, i * 4, i * 5)
+    let val = (v & 0xFF) as u8;
+    SRgb8::new(val >> 3, val >> 3, val >> 2)
+}
+
+impl SignMessage {
+    /// Load sign messages from a JSON file
+    fn load_all(dir: &Path) -> Result<Vec<SignMessage>> {
+        log::debug!("SignMessage::load_all");
+        let mut path = PathBuf::new();
+        path.push(dir);
+        path.push("sign_message");
+        let file =
+            File::open(&path).with_context(|| format!("load_all {path:?}"))?;
+        let reader = BufReader::new(file);
+        Ok(serde_json::from_reader(reader)?)
+    }
 }
 
 /// Fetch all sign messages.
 ///
 /// * `dir` Output file directory.
 pub fn render_all(dir: &Path) -> Result<()> {
-    let msg_data = MsgData::load(dir)?;
-    let mut img_dir = PathBuf::new();
-    img_dir.push(dir);
-    img_dir.push("img");
-    let mut cache = Cache::new(img_dir.as_path(), "gif")?;
-    let sign_msgs = SignMessage::load_all(dir)?;
-    for sign_msg in sign_msgs {
-        sign_msg.fetch(&msg_data, &mut cache)?;
+    let mut msg_data = MsgData::load(dir)?;
+    let mut path = PathBuf::new();
+    path.push(dir);
+    path.push("img");
+    let mut cache = Cache::new(path.as_path(), "gif")?;
+    for sign_msg in SignMessage::load_all(dir)? {
+        let mut name = sign_msg.name.clone();
+        name.push_str(".gif");
+        if cache.contains(&name) {
+            cache.keep(&name);
+        } else {
+            let file = cache.file(&name)?;
+            msg_data.render_sign_msg(&sign_msg, file)?;
+        }
     }
     Ok(())
 }
