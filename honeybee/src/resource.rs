@@ -17,6 +17,7 @@ use crate::segments::{RNode, Road, SegMsg};
 use crate::signmsg::render_all;
 use crate::Result;
 use gift::{Encoder, Step};
+use ntcip::dms::font::{ifnt, CharacterEntry, Font};
 use ntcip::dms::graphic::Graphic;
 use ntcip::dms::multi::Color;
 use pix::{el::Pixel, gray::Gray8, rgb::SRgb8, Palette, Raster};
@@ -30,24 +31,25 @@ use std::time::Instant;
 
 /// Glyph from font
 #[derive(Deserialize)]
-pub struct Glyph {
-    pub code_point: u16,
-    pub width: u8,
+struct Glyph {
+    code_point: u16,
+    width: u8,
     #[serde(with = "super::base64")]
-    pub bitmap: Vec<u8>,
+    bitmap: Vec<u8>,
 }
 
 /// Font resource
 #[derive(Deserialize)]
-pub struct FontRes {
-    pub f_number: u8,
-    pub name: String,
-    pub height: u8,
-    pub width: u8,
-    pub char_spacing: u8,
-    pub line_spacing: u8,
-    pub glyphs: Vec<Glyph>,
-    pub version_id: u16,
+struct FontRes {
+    f_number: u8,
+    name: String,
+    height: u8,
+    #[allow(dead_code)]
+    width: u8,
+    char_spacing: u8,
+    line_spacing: u8,
+    glyphs: Vec<Glyph>,
+    version_id: u16,
 }
 
 /// Graphic resource
@@ -61,6 +63,35 @@ struct GraphicRes {
     transparent_color: Option<i32>,
     #[serde(with = "super::base64")]
     bitmap: Vec<u8>,
+}
+
+impl From<Glyph> for CharacterEntry {
+    fn from(gl: Glyph) -> Self {
+        CharacterEntry {
+            number: gl.code_point,
+            width: gl.width,
+            bitmap: gl.bitmap,
+        }
+    }
+}
+
+impl From<FontRes> for Font {
+    fn from(fr: FontRes) -> Self {
+        let characters = fr
+            .glyphs
+            .into_iter()
+            .map(|g| CharacterEntry::from(g))
+            .collect();
+        Font {
+            number: fr.f_number,
+            name: fr.name,
+            height: fr.height,
+            char_spacing: fr.char_spacing,
+            line_spacing: fr.line_spacing,
+            characters,
+            version_id: fr.version_id,
+        }
+    }
 }
 
 impl From<GraphicRes> for Graphic {
@@ -1108,7 +1139,12 @@ impl Resource {
         let mut count = 0;
         let sql = self.sql();
         for row in &client.query(sql, &[])? {
-            write_font(&dir, serde_json::from_str(row.get(0))?)?;
+            let font: FontRes = serde_json::from_str(row.get(0))?;
+            let font = Font::from(font);
+            let name = format!("{}.ifnt", font.name);
+            let file = AtomicFile::new(dir, &name)?;
+            let writer = file.writer()?;
+            ifnt::write(writer, &font)?;
             count += 1;
         }
         log::info!("fetch_fonts: wrote {count} rows in {:?}", t.elapsed());
@@ -1135,47 +1171,6 @@ impl Resource {
         self.fetch_file(client, "sign_message")?;
         // FIXME: spawn another thread for this?
         render_all(Path::new(""))
-    }
-}
-
-/// Write a font to an .ifnt file
-fn write_font(dir: &Path, font: FontRes) -> Result<()> {
-    let name = format!("{}.ifnt", font.name);
-    log::debug!("write_font: {name}");
-    let file = AtomicFile::new(dir, &name)?;
-    let mut writer = file.writer()?;
-    writeln!(writer, "name: {}", font.name)?;
-    writeln!(writer, "font_number: {}", font.f_number)?;
-    writeln!(writer, "height: {}", font.height)?;
-    writeln!(writer, "width: {}", font.width)?;
-    writeln!(writer, "char_spacing: {}", font.char_spacing)?;
-    writeln!(writer, "line_spacing: {}", font.line_spacing)?;
-    for glyph in font.glyphs {
-        let cp = u32::from(glyph.code_point);
-        if let Some(ch) = char::from_u32(cp) {
-            writeln!(writer)?;
-            writeln!(writer, "codepoint: {cp} {ch}")?;
-            for row in 0..usize::from(font.height) {
-                for col in 0..usize::from(glyph.width) {
-                    if glyph.is_pixel_lit(row, col) {
-                        write!(writer, "X")?;
-                    } else {
-                        write!(writer, ".")?;
-                    }
-                }
-                writeln!(writer)?;
-            }
-        }
-    }
-    Ok(())
-}
-
-impl Glyph {
-    fn is_pixel_lit(&self, row: usize, col: usize) -> bool {
-        let pos = row * usize::from(self.width) + col;
-        let b8 = pos / 8;
-        let bit = 7 - pos % 8;
-        (self.bitmap[b8] >> bit) & 1 != 0
     }
 }
 
