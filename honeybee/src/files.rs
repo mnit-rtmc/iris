@@ -60,7 +60,7 @@ impl AtomicFile {
     /// Cancel writing file
     pub fn cancel(&self) -> Result<()> {
         let path = backup_path(&self.path);
-        remove_file(&path).context("remove: {path:?}")?;
+        remove_file(path).context("remove: {path:?}")?;
         Ok(())
     }
 }

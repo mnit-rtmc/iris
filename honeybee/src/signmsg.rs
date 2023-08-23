@@ -160,7 +160,6 @@ impl SignConfig {
             horizontal_pitch: self.pitch_horiz as u8,
             vertical_pitch: self.pitch_vert as u8,
             monochrome_color,
-            ..Default::default()
         }
     }
 
@@ -227,7 +226,7 @@ fn load_graphics(dir: &Path) -> Result<GraphicTable> {
         let file = File::open(&path)
             .with_context(|| format!("load_graphics {path:?}"))?;
         let reader = BufReader::new(file);
-        if let Some(step) = Decoder::new(reader).into_steps().nth(0) {
+        if let Some(step) = Decoder::new(reader).into_steps().next() {
             let graphic = make_graphic(number, step?);
             graphics.push(graphic)?;
         }

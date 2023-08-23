@@ -77,11 +77,8 @@ impl From<Glyph> for CharacterEntry {
 
 impl From<FontRes> for Font {
     fn from(fr: FontRes) -> Self {
-        let characters = fr
-            .glyphs
-            .into_iter()
-            .map(|g| CharacterEntry::from(g))
-            .collect();
+        let characters =
+            fr.glyphs.into_iter().map(CharacterEntry::from).collect();
         Font {
             number: fr.f_number,
             name: fr.name,
@@ -1159,7 +1156,7 @@ impl Resource {
         let mut count = 0;
         let sql = self.sql();
         for row in &client.query(sql, &[])? {
-            write_graphic(&dir, serde_json::from_str(row.get(0))?)?;
+            write_graphic(dir, serde_json::from_str(row.get(0))?)?;
             count += 1;
         }
         log::info!("fetch_graphics: wrote {count} rows in {:?}", t.elapsed());
