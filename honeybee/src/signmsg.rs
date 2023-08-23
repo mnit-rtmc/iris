@@ -39,10 +39,10 @@ use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 /// Maximum pixel width of DMS images
-const PIX_WIDTH: f32 = 450.0;
+const PIX_WIDTH: u16 = 450;
 
 /// Maximum pixel height of DMS images
-const PIX_HEIGHT: f32 = 100.0;
+const PIX_HEIGHT: u16 = 100;
 
 /// Unknown resource error
 #[derive(Debug)]
@@ -341,14 +341,21 @@ fn face_size(dms: &Dms) -> (u16, u16) {
     let fw = dms.face_width_mm();
     let fh = dms.face_height_mm();
     if fw > 0.0 && fh > 0.0 {
-        let sx = PIX_WIDTH / fw;
-        let sy = PIX_HEIGHT / fh;
-        let s = sx.min(sy);
-        let w = (fw * s).round() as u16;
-        let h = (fh * s).round() as u16;
-        (w, h)
+        let sx = f32::from(PIX_WIDTH) / fw;
+        let sy = f32::from(PIX_HEIGHT) / fh;
+        if sx > sy {
+            let w = (fw * sy).round() as u16;
+            // Bump up to next even value
+            let w = (w + 1) & 0b11111111_11111110;
+            (w, PIX_HEIGHT)
+        } else {
+            let h = (fh * sx).round() as u16;
+            // Bump up to next even value
+            let h = (h + 1) & 0b11111111_11111110;
+            (PIX_WIDTH, h)
+        }
     } else {
-        (PIX_WIDTH as u16, PIX_HEIGHT as u16)
+        (PIX_WIDTH, PIX_HEIGHT)
     }
 }
 
