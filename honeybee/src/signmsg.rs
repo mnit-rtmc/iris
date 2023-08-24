@@ -27,7 +27,6 @@ use pix::bgr::SBgr8;
 use pix::chan::Ch8;
 use pix::el::Pixel;
 use pix::gray::{Gray, Gray8};
-use pix::ops::SrcOver;
 use pix::rgb::{Rgba8p, SRgb8};
 use pix::{Palette, Raster};
 use serde_derive::Deserialize;
@@ -367,74 +366,87 @@ fn make_face_raster(
     height: u16,
 ) -> Raster<SRgb8> {
     let mut face = Raster::<Rgba8p>::with_clear(width.into(), height.into());
-    let rw = raster.width();
-    let rh = raster.height();
-    let sx = width as f32 / rw as f32;
-    let sy = height as f32 / rh as f32;
+    let sx = face.width() as f32 / raster.width() as f32;
+    let sy = face.height() as f32 / raster.height() as f32;
     let scale = sx.min(sy);
-    for y in 0..rh {
-        let py = dms.pixel_y(y as i32, 0.5) * height as f32;
-        for x in 0..rw {
-            let px = dms.pixel_x(x as i32, 0.5) * width as f32;
+    // Render each LED onto the closest pixel of face raster
+    for y in 0..raster.height() {
+        let py = dms.pixel_y(y, height.into()) as i32;
+        for x in 0..raster.width() {
+            let px = dms.pixel_x(x, width.into()) as i32;
+            let mut clr = raster.pixel(x as i32, y as i32);
+            if clr == SRgb8::default() {
+                clr = SRgb8::new(26, 26, 26);
+            }
+            *face.pixel_mut(px, py) = clr.convert();
+            if px + 1 < width.into() && py + 1 < height.into() {
+                *face.pixel_mut(px + 1, py + 1) = clr.convert();
+            }
+        }
+    }
+    // Render blooming effect for lit LEDs
+    for y in 0..raster.height() {
+        let py = dms.pixel_y(y, height.into());
+        for x in 0..raster.width() {
             let clr = raster.pixel(x as i32, y as i32);
-            // calculate "brightness" for blooming
-            let sr = u8::from(Gray::value(clr.convert::<Gray8>()));
-            if sr > 0 {
-                // clamp radius between 0.5 and 0.8 (blooming)
-                let r = scale * (sr as f32 / 255.0).clamp(0.5, 0.8);
-                render_circle(&mut face, px, py, r, clr);
-            } else {
-                // "glint" on dark pixel
-                let px = dms.pixel_x(x as i32, 0.25) * width as f32;
-                let py = dms.pixel_y(y as i32, 0.25) * height as f32;
-                let r = scale * 0.1;
-                let dim = SRgb8::new(32, 32, 32);
-                render_circle(&mut face, px, py, r, dim);
+            if clr != SRgb8::default() {
+                let px = dms.pixel_x(x, width.into());
+                // calculate blooming "brightness"
+                let bloom = u8::from(Gray::value(clr.convert::<Gray8>()));
+                // clamp blooming radius between 0.5 and 0.75
+                let rad = scale * (bloom as f32 / 255.0).clamp(0.5, 0.75);
+                render_bloom(&mut face, px, py, rad, clr);
             }
         }
     }
     Raster::<SRgb8>::with_raster(&face)
 }
 
-/// Render an attenuated circle.
+/// Render blooming LED.
 ///
 /// * `raster` Face raster.
-/// * `cx` X-Center of circle.
-/// * `cy` Y-Center of circle.
-/// * `r` Radius of circle.
-/// * `clr` Color of circle.
-fn render_circle(
+/// * `cx` X-Center of LED.
+/// * `cy` Y-Center of LED.
+/// * `rad` Radius of blooming.
+/// * `clr` LED color.
+fn render_bloom(
     raster: &mut Raster<Rgba8p>,
     cx: f32,
     cy: f32,
-    r: f32,
+    rad: f32,
     clr: SRgb8,
 ) {
     let src: Rgba8p = clr.convert();
-    let x0 = (cx - r).floor().max(0.0) as i32;
-    let x1 = (cx + r).ceil().min(raster.width() as f32) as i32;
-    let y0 = (cy - r).floor().max(0.0) as i32;
-    let y1 = (cy + r).ceil().min(raster.height() as f32) as i32;
-    let rsq = r.powi(2);
+    let x0 = (cx - rad).floor().max(0.0) as i32;
+    let x1 = (cx + rad).ceil().min(raster.width() as f32) as i32;
+    let y0 = (cy - rad).floor().max(0.0) as i32;
+    let y1 = (cy + rad).ceil().min(raster.height() as f32) as i32;
+    let rad_sq = rad.powi(2);
     for y in y0..y1 {
-        let yd = (cy - y as f32 - 0.5).abs();
-        let ys = yd.powi(2);
+        let yd = y as f32 - cy;
         for x in x0..x1 {
-            let xd = (cx - x as f32 - 0.5).abs();
-            let xs = xd.powi(2);
-            let mut dsq = xs + ys;
-            // If center is within this pixel, make it brighter
-            if dsq < 1.0 {
-                dsq = dsq.powi(2);
+            let xd = x as f32 - cx;
+            let mut sam: u8 = 0;
+            if xd.powi(2) + yd.powi(2) < rad_sq {
+                sam += 51;
             }
-            // compare distance squared with radius squared
-            let drs = dsq / rsq;
-            let v = 1.0 - drs.powi(2).min(1.0);
-            if v > 0.0 {
-                let alpha = Ch8::from(v);
+            if (xd - 0.4).powi(2) + (yd - 0.2).powi(2) < rad_sq {
+                sam += 51;
+            }
+            if (xd + 0.3).powi(2) + (yd - 0.3).powi(2) < rad_sq {
+                sam += 51;
+            }
+            if (xd - 0.2).powi(2) + (yd + 0.4).powi(2) < rad_sq {
+                sam += 51;
+            }
+            if (xd + 0.3).powi(2) + (yd + 0.3).powi(2) < rad_sq {
+                sam += 51;
+            }
+            if sam > 0 {
+                let alpha = Ch8::from(sam);
                 raster
                     .pixel_mut(x, y)
-                    .composite_channels_alpha(&src, SrcOver, &alpha);
+                    .composite_channels_alpha(&src, pix::ops::Plus, &alpha);
             }
         }
     }
