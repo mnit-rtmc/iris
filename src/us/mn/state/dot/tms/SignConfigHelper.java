@@ -153,7 +153,7 @@ public class SignConfigHelper extends BaseHelper {
 			int ph = sc.getPixelHeight();
 			int cw = sc.getCharWidth();
 			int ch = sc.getCharHeight();
-			int fn = getDefaultFontNum(sc);
+			int fn = sc.getDefaultFont();
 			ColorScheme cs = ColorScheme.fromOrdinal(
 				sc.getColorScheme());
 			return new RasterBuilder(pw, ph, cw, ch, fn, cs);
@@ -161,25 +161,12 @@ public class SignConfigHelper extends BaseHelper {
 			return null;
 	}
 
-	/** Get the default font number for a sign config */
-	static public int getDefaultFontNum(SignConfig sc) {
-		Font f = getDefaultFont(sc);
-		return (f != null)
-		      ? f.getNumber()
-		      : FontHelper.DEFAULT_FONT_NUM;
-	}
-
-	/** Get the default font for a sign config */
-	static public Font getDefaultFont(SignConfig sc) {
-		return (sc != null) ? sc.getDefaultFont() : null;
-	}
-
 	/** Get default text rectangle for a sign config */
 	static public TextRect textRect(SignConfig sc) {
 		if (sc != null) {
 			int width = sc.getPixelWidth();
 			int height = sc.getPixelHeight();
-			int fn = getDefaultFontNum(sc);
+			int fn = sc.getDefaultFont();
 			return new TextRect(1, 1, 1, width, height, fn);
 		} else
 			return null;

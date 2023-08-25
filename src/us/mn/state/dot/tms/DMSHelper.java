@@ -248,16 +248,15 @@ public class DMSHelper extends BaseHelper {
 
 	/** Get the default font number for a DMS */
 	static public int getDefaultFontNum(DMS dms) {
-		return (dms != null)
-		      ? SignConfigHelper.getDefaultFontNum(dms.getSignConfig())
+		SignConfig sc = (dms != null) ? dms.getSignConfig() : null;
+		return (sc != null)
+		      ? sc.getDefaultFont()
 		      : FontHelper.DEFAULT_FONT_NUM;
 	}
 
 	/** Get the default font for a DMS */
 	static public Font getDefaultFont(DMS dms) {
-		return (dms != null)
-		      ? SignConfigHelper.getDefaultFont(dms.getSignConfig())
-		      : null;
+		return FontHelper.find(getDefaultFontNum(dms));
 	}
 
 	/** Get the default background color for a DMS */

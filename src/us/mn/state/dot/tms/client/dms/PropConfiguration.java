@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
@@ -205,8 +206,9 @@ public class PropConfiguration extends IPanel {
 		add(module_height_txt, Stretch.LAST);
 		font_cbx.setAction(new IAction("font") {
 			protected void doActionPerformed(ActionEvent e) {
-				config.setDefaultFont(
-					(Font) font_cbx.getSelectedItem());
+				Font f = (Font) font_cbx.getSelectedItem();
+				if (f != null)
+					config.setDefaultFont(f.getNumber());
 			}
 		});
 		font_cbx.setModel(new IComboBoxModel<Font>(
@@ -262,8 +264,11 @@ public class PropConfiguration extends IPanel {
 			c_scheme_lbl.setText(cs.description);
 		}
 		if (null == a || a.equals("defaultFont")) {
-			font_cbx.setSelectedItem(sc.getDefaultFont());
-			font_height_lbl.setText(calculateFontHeight());
+			Font f = FontHelper.find(sc.getDefaultFont());
+			if (f != null) {
+				font_cbx.setSelectedItem(f);
+				font_height_lbl.setText(calculateFontHeight());
+			}
 		}
 		if (null == a || a.equals("moduleHeight")) {
 			module_height_txt.setText(
@@ -278,7 +283,7 @@ public class PropConfiguration extends IPanel {
 	/** Calculate the height of the default font on the sign */
 	private String calculateFontHeight() {
 		SignConfig sc = config;
-		Font f = sc.getDefaultFont();
+		Font f = FontHelper.find(sc.getDefaultFont());
 		if (f != null) {
 			int pv = sc.getPitchVert();
 			int h = f.getHeight();

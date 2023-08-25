@@ -2747,7 +2747,7 @@ CREATE TABLE iris.sign_config (
     monochrome_foreground INTEGER NOT NULL,
     monochrome_background INTEGER NOT NULL,
     color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
-    default_font VARCHAR(16) REFERENCES iris.font,
+    default_font INTEGER NOT NULL,
     module_width INTEGER,
     module_height INTEGER
 );

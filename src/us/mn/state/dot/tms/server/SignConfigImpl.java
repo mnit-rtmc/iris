@@ -76,8 +76,8 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig,
 			String template = "sc_" + pxw + "x" + pxh + "_%d";
 			String n = createUniqueName(template);
 			SignConfigImpl sci = new SignConfigImpl(n, fw, fh, bh,
-				bv, ph, pv, pxw, pxh, cw, ch, mf, mb, cs, "",
-				0, 0);
+				bv, ph, pv, pxw, pxh, cw, ch, mf, mb, cs,
+				FontHelper.DEFAULT_FONT_NUM, 0, 0);
 			return createNotify(sci);
 		}
 	}
@@ -183,7 +183,7 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig,
 		     row.getInt(12),     // monochrome_foreground
 		     row.getInt(13),     // monochrome_background
 		     row.getInt(14),     // color_scheme
-		     row.getString(15),  // default_font
+		     row.getInt(15),     // default_font
 		     row.getInt(16),     // module_width
 		     row.getInt(17)      // module_height
 		);
@@ -192,7 +192,7 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig,
 	/** Create a sign config */
 	private SignConfigImpl(String n, int fw, int fh, int bh, int bv, int ph,
 		int pv, int pxw, int pxh, int cw, int ch, int mf, int mb,
-		int cs, String df, int mw, int mh)
+		int cs, int df, int mw, int mh)
 	{
 		super(n);
 		face_width = fw;
@@ -208,7 +208,7 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig,
 		monochrome_foreground = mf;
 		monochrome_background = mb;
 		color_scheme = ColorScheme.fromOrdinal(cs);
-		default_font = FontHelper.lookup(df);
+		default_font = df;
 		module_width = mw;
 		module_height = mh;
 	}
@@ -330,26 +330,26 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig,
 		return color_scheme.ordinal();
 	}
 
-	/** Default font */
-	private Font default_font;
+	/** Default font number */
+	private int default_font;
 
-	/** Set the default font */
+	/** Set the default font number */
 	@Override
-	public void setDefaultFont(Font f) {
-		default_font = f;
+	public void setDefaultFont(int df) {
+		default_font = df;
 	}
 
-	/** Set the default font */
-	public void doSetDefaultFont(Font f) throws TMSException {
-		if (f != default_font) {
-			store.update(this, "default_font", f);
-			setDefaultFont(f);
+	/** Set the default font number */
+	public void doSetDefaultFont(int df) throws TMSException {
+		if (df != default_font) {
+			store.update(this, "default_font", df);
+			setDefaultFont(df);
 		}
 	}
 
-	/** Get the default font */
+	/** Get the default font number */
 	@Override
-	public Font getDefaultFont() {
+	public int getDefaultFont() {
 		return default_font;
 	}
 
