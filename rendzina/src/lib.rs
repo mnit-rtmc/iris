@@ -50,7 +50,7 @@ pub enum Error {
 /// Result type
 pub type Result<T> = std::result::Result<T, Error>;
 
-/// IRIS Sign configuration
+/// Sign configuration (in IRIS)
 #[derive(Debug, Deserialize)]
 pub struct SignConfig {
     pub name: String,
