@@ -123,9 +123,10 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 
 # /var/lib/iris
 %dir %attr(3775,tms,tms) /var/lib/iris
-%attr(0444,root,root) /var/lib/iris/sql/
 %dir %attr(0755,root,root) /var/lib/iris/sql
-%dir %attr(0755,root,root) /var/lib/iris/sql/fonts
+%attr(0444,root,root) /var/lib/iris/sql/*.sql
+%dir %attr(0755,root,root) /var/lib/iris/fonts
+%attr(0444,root,root) /var/lib/iris/fonts/*.ifnt
 %dir %attr(3775,tms,tms) /var/lib/iris/meter
 %dir %attr(3775,tms,tms) /var/lib/iris/traffic
 %dir %attr(3775,tms,tms) /var/lib/iris/backup

@@ -17,6 +17,7 @@
 	<!-- Base directory configuration -->
 	<property name="src.dir" value="src"/>
 	<property name="etc.dir" value="etc"/>
+	<property name="fonts.dir" value="fonts"/>
 	<property name="images.dir" value="images"/>
 	<property name="bin.dir" value="bin"/>
 	<property name="lib.dir" value="lib"/>
@@ -343,9 +344,9 @@
 			<fileset file="${sql.dir}/tms-template.sql"/>
 			<fileset file="${sql.dir}/migrate-*.sql"/>
 		</copy>
-		<mkdir dir="${install.dir}/var/lib/iris/sql/fonts"/>
-		<copy todir="${install.dir}/var/lib/iris/sql/fonts">
-			<fileset file="${sql.dir}/fonts/*.sql"/>
+		<mkdir dir="${install.dir}/var/lib/iris/fonts"/>
+		<copy todir="${install.dir}/var/lib/iris/fonts">
+			<fileset file="${fonts.dir}/*.ifnt"/>
 		</copy>
 		<mkdir dir="${install.dir}/var/lib/iris/meter"/>
 		<mkdir dir="${install.dir}/var/lib/iris/traffic"/>
