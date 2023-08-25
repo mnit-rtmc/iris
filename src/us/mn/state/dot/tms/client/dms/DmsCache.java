@@ -52,11 +52,6 @@ public class DmsCache {
 	/** Cache of glyph proxies */
 	private final TypeCache<Glyph> glyphs;
 
-	/** Get the glyph type cache */
-	public TypeCache<Glyph> getGlyphs() {
-		return glyphs;
-	}
-
 	/** Cache of sign configs */
 	private final TypeCache<SignConfig> sign_configs;
 
