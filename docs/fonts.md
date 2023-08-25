@@ -58,6 +58,7 @@ Number | Font Name      | Description
 20     | `26_full`      | 26 pixel high full-matrix
 17     | `_09_full_12`  | 9 pixel high (12 with lower case descenders)
 18     | `_7_full`      | 7 pixel high full-matrix
+19     | `_9_line`      | 9 pixel high line-matrix
 
 ### Non-ASCII Characters
 
