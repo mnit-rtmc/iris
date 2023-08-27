@@ -274,6 +274,9 @@ fn make_face_raster(
     Raster::<SRgb8>::with_raster(&face)
 }
 
+/// Sample value of one fifth (1/5) covered (255)
+const SAMPLE_FIFTH: u8 = 51;
+
 /// Render blooming LED.
 ///
 /// * `raster` Face raster.
@@ -300,19 +303,19 @@ fn render_bloom(
             let xd = x as f32 - cx;
             let mut sam: u8 = 0;
             if xd.powi(2) + yd.powi(2) < rad_sq {
-                sam += 51;
+                sam += SAMPLE_FIFTH;
             }
             if (xd - 0.4).powi(2) + (yd - 0.2).powi(2) < rad_sq {
-                sam += 51;
+                sam += SAMPLE_FIFTH;
             }
             if (xd + 0.3).powi(2) + (yd - 0.3).powi(2) < rad_sq {
-                sam += 51;
+                sam += SAMPLE_FIFTH;
             }
             if (xd - 0.2).powi(2) + (yd + 0.4).powi(2) < rad_sq {
-                sam += 51;
+                sam += SAMPLE_FIFTH;
             }
             if (xd + 0.3).powi(2) + (yd + 0.3).powi(2) < rad_sq {
-                sam += 51;
+                sam += SAMPLE_FIFTH;
             }
             if sam > 0 {
                 let alpha = Ch8::from(sam);
