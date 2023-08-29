@@ -186,13 +186,18 @@ pub fn render<W: Write>(mut writer: W, dms: &Dms, multi: &str) -> Result<()> {
         );
     }
     let mut enc = Encoder::new(&mut writer).into_step_enc();
-    enc = if steps.len() > 1 {
+    let len = steps.len();
+    enc = if len > 1 {
         enc.with_loop_count(0)
     } else {
         enc
     };
     for step in steps {
-        enc.encode_step(&step)?;
+        if len < 2 {
+            enc.encode_step(&step.with_delay_time_cs(None))?;
+        } else {
+            enc.encode_step(&step)?;
+        }
     }
     Ok(())
 }
