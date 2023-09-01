@@ -281,18 +281,19 @@ public class DMSHelper extends BaseHelper {
 	 * @param dms DMS to check.
 	 * @return Number of text lines on the DMS. */
 	static public int getLineCount(DMS dms) {
-		if (dms != null) {
-			RasterBuilder rb = createRasterBuilder(dms);
-			if (rb != null)
-				return rb.getLineCount();
-		}
-		return SignMessage.MAX_LINES;
+		RasterBuilder rb = createRasterBuilder(dms);
+		return (rb != null)
+		      ? rb.getLineCount()
+		      : SignMessage.MAX_LINES;
 	}
 
 	/** Create a raster builder for a DMS */
 	static public RasterBuilder createRasterBuilder(DMS dms) {
-		return SignConfigHelper.createRasterBuilder(
-			dms.getSignConfig());
+		if (dms != null) {
+			return SignConfigHelper.createRasterBuilder(
+				dms.getSignConfig());
+		} else
+			return null;
 	}
 
 	/** Return a single string which is formated to be readable
@@ -349,10 +350,9 @@ public class DMSHelper extends BaseHelper {
 		throws InvalidMsgException
 	{
 		RasterBuilder rb = createRasterBuilder(dms);
-		if (rb != null)
-			return rb.createBitmaps(new MultiString(ms));
-		else
-			return null;
+		return (rb != null)
+		      ? rb.createBitmaps(new MultiString(ms))
+		      : null;
 	}
 
 	/** Get the current raster graphic for page one of the specified DMS.
@@ -484,7 +484,7 @@ public class DMSHelper extends BaseHelper {
 	/** Check if a MULTI string is rasterizable for a sign */
 	static public boolean isRasterizable(DMS dms, String ms) {
 		RasterBuilder rb = createRasterBuilder(dms);
-		return rb != null && rb.isRasterizable(ms);
+		return (rb != null) && rb.isRasterizable(ms);
 	}
 
 	/** Validate free-form message lines */
