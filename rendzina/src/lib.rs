@@ -178,8 +178,9 @@ pub fn render<W: Write>(mut writer: W, dms: &Dms, multi: &str) -> Result<()> {
         } = page?;
         let delay_cs = duration_ds * 10;
         let mut palette = make_palette(&raster);
+        palette.set_threshold_fn(palette_threshold_rgb8_256);
         let face = make_face_raster(dms, raster, width, height);
-        let indexed = make_indexed(face, &mut palette);
+        let indexed = palette.make_indexed(face);
         steps.push(
             Step::with_indexed(indexed, palette)
                 .with_delay_time_cs(Some(delay_cs)),
@@ -332,22 +333,6 @@ fn render_bloom(
             }
         }
     }
-}
-
-/// Make an indexed raster
-fn make_indexed(face: Raster<SRgb8>, palette: &mut Palette) -> Raster<Gray8> {
-    palette.set_threshold_fn(palette_threshold_rgb8_256);
-    let mut indexed = Raster::with_clear(face.width(), face.height());
-    for y in 0..face.height() as i32 {
-        for x in 0..face.width() as i32 {
-            if let Some(e) = palette.set_entry(face.pixel(x, y)) {
-                *indexed.pixel_mut(x, y) = Gray8::new(e as u8);
-            } else {
-                log::warn!("make_indexed: color palette full!");
-            }
-        }
-    }
-    indexed
 }
 
 /// Get the difference threshold for SRgb8 with 256 capacity palette

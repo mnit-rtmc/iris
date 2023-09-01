@@ -13,3 +13,5 @@ lto = true
 codegen-units = 1
 panic = "abort"
 strip = "symbols"
+
+[patch.crates-io]

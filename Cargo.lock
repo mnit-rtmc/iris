@@ -1299,9 +1299,9 @@ dependencies = [
 
 [[package]]
 name = "ntcip"
-version = "0.7.1"
+version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77e15a9ad61135e40caac2ee7acee05d804c050ef0346245ed330b2ca221b947"
+checksum = "a233cef3a16ee6b22f2a509011e27c43d01a85fce2456f7b7ad143bd2014a3d4"
 dependencies = [
  "log",
  "pix",
@@ -1441,9 +1441,9 @@ checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 
 [[package]]
 name = "pix"
-version = "0.13.2"
+version = "0.13.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c2b6992b377680150280d4708bda8207ba9e71f70507b5504f2e28d8e8e48c1"
+checksum = "5de5067af0cd27add969cdb4ef2eecc955f59235f3b7a75a3c6ac9562cfb6b81"
 
 [[package]]
 name = "pointy"

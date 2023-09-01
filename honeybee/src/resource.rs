@@ -20,7 +20,7 @@ use gift::{Encoder, Step};
 use ntcip::dms::font::{ifnt, CharacterEntry, Font};
 use ntcip::dms::graphic::Graphic;
 use ntcip::dms::multi::Color;
-use pix::{el::Pixel, gray::Gray8, rgb::SRgb8, Palette, Raster};
+use pix::{rgb::SRgb8, Palette};
 use postgres::Client;
 use serde_derive::Deserialize;
 use std::collections::HashSet;
@@ -1176,25 +1176,13 @@ fn write_graphic(dir: &Path, graphic: GraphicRes) -> Result<()> {
     let graphic = Graphic::from(graphic);
     let name = format!("g{}.gif", graphic.number);
     let raster = graphic.to_raster();
-    let mut indexed = Raster::with_clear(raster.width(), raster.height());
-    let height = raster.height().try_into().unwrap();
-    let width = raster.width().try_into().unwrap();
     let mut palette = Palette::new(256);
     if let Some(Color::Rgb(red, green, blue)) = graphic.transparent_color {
         palette.set_entry(SRgb8::new(red, green, blue));
         log::debug!("write_graphic: {name}, transparent {red},{green},{blue}");
     }
     palette.set_threshold_fn(palette_threshold_rgb8_256);
-    for y in 0..height {
-        for x in 0..width {
-            let clr = raster.pixel(x, y);
-            if let Some(idx) = palette.set_entry(clr.convert()) {
-                *indexed.pixel_mut(x, y) = Gray8::new(idx as u8);
-            } else {
-                *indexed.pixel_mut(x, y) = Gray8::new(0);
-            }
-        }
-    }
+    let indexed = palette.make_indexed(raster);
     log::debug!("write_graphic: {name}, {}", palette.len());
     let file = AtomicFile::new(dir, &name)?;
     let mut writer = file.writer()?;
