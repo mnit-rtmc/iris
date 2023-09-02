@@ -62,16 +62,16 @@ Number | Font Name      | Description
 
 ### Non-ASCII Characters
 
-| Character       | Code Point | ASCII | Fonts
-|-----------------|------------|-------|---------------------------------
-| <sup>`ND`</sup> | 38         | &     | `14_ledstar`
-| ◊               | 42         | *     | `07_line`, `_07_full`, `26_full`
-| ↖               | 94         | ^     | `14_ledstar`
-| █               | 96         | \`    | `14_ledstar`
-| ↙               | 123        | {     | `_07_full`, `14_ledstar`
-| ↓               | 125        | }     | `_07_full`
-| ↘               | 125        | }     | `14_ledstar`
-| `wide space`    | 126        | ~     | `_07_full`
+| Character     | Code Point | ASCII | Fonts
+|---------------|------------|-------|---------------------------------
+| <sup>ND</sup> | 38         | &     | `14_ledstar`
+| ◊             | 42         | *     | `07_line`, `_07_full`, `26_full`
+| ↖             | 94         | ^     | `14_ledstar`
+| █             | 96         | \`    | `14_ledstar`
+| ↙             | 123        | {     | `_07_full`, `14_ledstar`
+| ↓             | 125        | }     | `_07_full`
+| ↘             | 125        | }     | `14_ledstar`
+| `wide space`  | 126        | ~     | `_07_full`
 
 
 [DMS]: dms.html
