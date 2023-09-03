@@ -48,7 +48,6 @@ System Attribute                 | Description
 `dms_brightness_enable`          | Display [DMS] brightness information
 `dms_comm_loss_enable`           | Enable blanking [DMS] after communication time out
 `dms_gps_jitter_m`               | Threshold (m) for GPS change to update [DMS] location
-`dms_high_temp_cutoff`           | Temperature at which [DMS] should shut off
 `dms_lamp_test_timeout_secs`     | Time to wait for [DMS] lamp test to complete
 `dms_page_on_max_secs`           | Maximum selectable [DMS] page on time (seconds)
 `dms_page_on_min_secs`           | Minimum selectable [DMS] page on time (seconds)

@@ -154,7 +154,6 @@ detector_occ_spike_secs	60
 dms_brightness_enable	true
 dms_comm_loss_enable	true
 dms_gps_jitter_m	100
-dms_high_temp_cutoff	60
 dms_lamp_test_timeout_secs	30
 dms_page_on_max_secs	10.0
 dms_page_on_min_secs	0.5

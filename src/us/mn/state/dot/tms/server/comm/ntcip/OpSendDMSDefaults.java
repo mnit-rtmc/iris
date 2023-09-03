@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2019-2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -54,6 +54,9 @@ public class OpSendDMSDefaults extends OpDMS {
 
 	/** Number of missed polling periods for comm loss threshold */
 	static private final int COMM_LOSS_PERIODS = 10;
+
+	/** Temperature (C) at which DMS shuts off automatically */
+	static private final int DMS_HIGH_TEMP_CUTOFF = 60;
 
 	/** Create a new operation to send DMS default parameters */
 	public OpSendDMSDefaults(DMSImpl d) {
@@ -266,7 +269,7 @@ public class OpSendDMSDefaults extends OpDMS {
 			ASN1Integer temp = ledHighTempCutoff.makeInt();
 			ASN1Integer override = ledSignErrorOverride.makeInt();
 			ASN1Integer limit = ledBadPixelLimit.makeInt();
-			temp.setInteger(DMS_HIGH_TEMP_CUTOFF.getInt());
+			temp.setInteger(DMS_HIGH_TEMP_CUTOFF);
 			limit.setInteger(500);
 			mess.add(temp);
 			mess.add(override);
@@ -300,7 +303,7 @@ public class OpSendDMSDefaults extends OpDMS {
 			ASN1Integer day_rate = dynBrightDayRate.makeInt();
 			ASN1Integer night_rate = dynBrightNightRate.makeInt();
 			ASN1Integer max_lvl = dynBrightMaxNightManLvl.makeInt();
-			temp.setInteger(DMS_HIGH_TEMP_CUTOFF.getInt());
+			temp.setInteger(DMS_HIGH_TEMP_CUTOFF);
 			day_night.setInteger(32);
 			day_rate.setInteger(1);
 			night_rate.setInteger(15);
