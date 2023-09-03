@@ -53,7 +53,8 @@ CREATE VIEW dms_view AS
     LEFT JOIN iris.sign_config sc ON d.sign_config = sc.name;
 GRANT SELECT ON dms_view TO PUBLIC;
 
--- Delete dms_high_temp_cutoff system attribute
+-- Delete unneeded system attributes
 DELETE FROM iris.system_attribute WHERE name = 'dms_high_temp_cutoff';
+DELETE FROM iris.system_attribute WHERE name = 'dms_reset_enable';
 
 COMMIT;

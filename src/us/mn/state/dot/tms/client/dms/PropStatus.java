@@ -138,9 +138,7 @@ public class PropStatus extends IPanel {
 	};
 
 	/** Reset DMS action */
-	private final IAction reset = new IAction("dms.reset", "",
-		SystemAttrEnum.DMS_RESET_ENABLE)
-	{
+	private final IAction reset = new IAction("dms.reset") {
 		protected void doActionPerformed(ActionEvent e) {
 			dms.setDeviceRequest(DeviceRequest.
 				RESET_DEVICE.ordinal());
@@ -189,10 +187,8 @@ public class PropStatus extends IPanel {
 		box.add(new JButton(query_settings));
 		box.add(Box.createHorizontalStrut(UI.hgap));
 		box.add(new JButton(send_settings));
-		if(reset.getIEnabled()) {
-			box.add(Box.createHorizontalStrut(UI.hgap));
-			box.add(new JButton(reset));
-		}
+		box.add(Box.createHorizontalStrut(UI.hgap));
+		box.add(new JButton(reset));
 		return box;
 	}
 
