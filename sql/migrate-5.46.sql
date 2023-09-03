@@ -56,5 +56,6 @@ GRANT SELECT ON dms_view TO PUBLIC;
 -- Delete unneeded system attributes
 DELETE FROM iris.system_attribute WHERE name = 'dms_high_temp_cutoff';
 DELETE FROM iris.system_attribute WHERE name = 'dms_reset_enable';
+DELETE FROM iris.system_attribute WHERE name = 'dms_pixel_status_enable';
 
 COMMIT;
