@@ -87,8 +87,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		tab.add(I18N.get("device.setup"), setup_pnl);
 		tab.add(I18N.get("device.status"), status_pnl);
 		tab.add(I18N.get("dms.pixels"), pixel_pnl);
-		if (SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean())
-			tab.add(I18N.get("dms.brightness"), bright_pnl);
+		tab.add(I18N.get("dms.brightness"), bright_pnl);
 		tab.add(I18N.get("dms.manufacturer"), manufacturer_pnl);
 		add(tab);
 		add(op_pnl, BorderLayout.SOUTH);

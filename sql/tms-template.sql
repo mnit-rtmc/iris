@@ -151,7 +151,6 @@ database_version	5.45.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_secs	60
-dms_brightness_enable	true
 dms_comm_loss_enable	true
 dms_gps_jitter_m	100
 dms_lamp_test_timeout_secs	30

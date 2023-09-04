@@ -180,10 +180,8 @@ public class SingleSignTab extends IPanel {
 		status_lbl.setOpaque(true);
 		add("device.name");
 		add(name_lbl);
-		if (SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean()) {
-			add("dms.brightness");
-			add(brightness_lbl);
-		}
+		add("dms.brightness");
+		add(brightness_lbl);
 		add("camera");
 		add(preset_btn, Stretch.RIGHT);
 		add("location");
