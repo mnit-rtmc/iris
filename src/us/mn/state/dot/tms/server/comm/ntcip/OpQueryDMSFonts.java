@@ -197,10 +197,17 @@ public class OpQueryDMSFonts extends OpDMS {
 			    && height.getInteger() > 0;
 		}
 
+		/** Create font file name */
+		private String fileName() {
+			if (status.getEnum() == FontStatus.permanent)
+				return "f" + number + "-perm.ifnt";
+			else
+				return "f" + number + ".ifnt";
+		}
+
 		/** Write the font header */
 		private Phase writeHeader() throws IOException {
-			PrintWriter writer = createWriter("f" + number +
-				".ifnt");
+			PrintWriter writer = createWriter(fileName());
 			writer.println("name: " + name);
 			writer.println("font_number: " + number);
 			writer.println("height: " + height);
