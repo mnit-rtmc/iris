@@ -1,7 +1,5 @@
 # Fonts
 
-Select `View ➔ Message Signs ➔ DMS Fonts` menu item
-
 A font is a set of bitmapped glyphs for displaying text on a [DMS].  Fonts can
 contain only printable ASCII characters (U+0020 to U+007E).
 
