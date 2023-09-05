@@ -1,5 +1,14 @@
 # IRIS 5.x Release Notes
 
+5.46.0 (5 Sep 2023)
+ - Changed `sign_config.default_font` to a number
+ - Converted all fonts to .ifnt format
+ - Removed Java font editor
+ - Renamed DMS status->errors JSON to status->faults
+ - honeybee: Reworked sign rendering
+ - Removed unneeded system attributes: `dms_brightness_enable`,
+   `dms_pixel_status_enable`, `dms_reset_enable`, `dms_high_temp_cutoff`
+
 5.45.0 (31 Jul 2023)
  - Improvements to DMS resources within web UI
  - Replaced DevicePurpose/hidden with reserved hashtags
