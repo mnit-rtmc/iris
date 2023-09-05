@@ -64,6 +64,9 @@ public class OpQueryDMSFonts extends OpDMS {
 	/** Directory to write font files */
 	private final File dir;
 
+	/** Flag for version 2 or later (with support for fontStatus) */
+	private boolean version2;
+
 	/** Create a new operation to query fonts from a DMS */
 	public OpQueryDMSFonts(DMSImpl d) {
 		super(PriorityLevel.POLL_LOW, d);
@@ -88,18 +91,15 @@ public class OpQueryDMSFonts extends OpDMS {
 			try {
 				mess.queryProps();
 				logQuery(max_char_sz);
+				version2 = true;
 			}
 			catch (NoSuchName e) {
 				// Note: if this object doesn't exist, then the
 				//       sign must not support v2.
+				version2 = false;
 			}
 			return new QueryNumFonts();
 		}
-	}
-
-	/** Is DMS 1203v2 or later? */
-	private boolean isAtLeastV2() {
-		return max_char_sz.getInteger() > 0;
 	}
 
 	/** Phase to query the number of supported fonts */
@@ -171,7 +171,7 @@ public class OpQueryDMSFonts extends OpDMS {
 			mess.add(char_spacing);
 			mess.add(line_spacing);
 			mess.add(version);
-			if (isAtLeastV2())
+			if (version2)
 				mess.add(status);
 			try {
 				mess.queryProps();

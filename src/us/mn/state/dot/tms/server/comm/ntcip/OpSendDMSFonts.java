@@ -99,7 +99,7 @@ public class OpSendDMSFonts extends OpDMS {
 	private final TreeMap<Integer, FontRow> rows =
 		new TreeMap<Integer, FontRow>();
 
-	/** Flag for version 2 controller (with support for fontStatus) */
+	/** Flag for version 2 or later (with support for fontStatus) */
 	private boolean version2;
 
 	/** Create a new operation to send fonts to a DMS */
@@ -603,8 +603,8 @@ public class OpSendDMSFonts extends OpDMS {
 				mess.storeProps();
 			}
 			catch (NoSuchName ex) {
-				// SESA char matrix V20170904: 
-				// ignore bad characterWidth
+				// Note: SESA char matrix signs respond with
+				//       NoSuchName when setting characterWidth
 			}
 			count++;
 			if (count % 20 == 0 && !controller.isFailed())
@@ -621,8 +621,8 @@ public class OpSendDMSFonts extends OpDMS {
 		}
 	}
 
-	/** Validate the font. This forces a fontVersionID update on some signs
-	 * which implement 1203 version 1 (LedStar). */
+	/** Validate the font.  This forces a fontVersionID update on signs
+	 * which implement 1203 version 1. */
 	private class ValidateFontV1 extends Phase {
 		private final FontRow frow;
 		private ValidateFontV1(FontRow fr) {
