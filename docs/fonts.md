@@ -60,6 +60,9 @@ Number | Font Name      | Description
 
 ### Non-ASCII Characters
 
+Since NTCIP 1203 does not support Unicode, ASCII characters must be used as
+surrogates for arrows, diamonds, etc:
+
 | Character     | Code Point | ASCII | Fonts
 |---------------|------------|-------|---------------------------------
 | <sup>ND</sup> | 38         | &     | `14_ledstar`
@@ -70,6 +73,13 @@ Number | Font Name      | Description
 | ↓             | 125        | }     | `_07_full`
 | ↘             | 125        | }     | `14_ledstar`
 | `wide space`  | 126        | ~     | `_07_full`
+
+## Send and Query Fonts
+
+The status tab of the DMS properties dialog contains two settings buttons.
+Pressing `Send Settings` will cause all necessary fonts to be sent to the sign.
+`Query Settings` will read all fonts currently on the sign, and store them in
+the `/var/lib/iris/fonts/{sign_name}` directory.
 
 
 [DMS]: dms.html

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2022  Minnesota Department of Transportation
+ * Copyright (C) 2018-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
-import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.DevelCfg;
 
 /**
@@ -37,17 +36,21 @@ import us.mn.state.dot.tms.utils.DevelCfg;
  */
 public class OpQueryDMSFonts extends OpDMS {
 
-	/** Directory to store font files */
-	static private final String FONT_FILE_DIR = 
-		DevelCfg.get("font.output.dir", "/var/log/iris/fonts/");
-	static {
-		File dir = new File(FONT_FILE_DIR);
-		if (!dir.exists())
-			dir.mkdirs();
+	/** Make a font status object */
+	static private ASN1Enum<FontStatus> makeStatus(int row) {
+		return new ASN1Enum<FontStatus>(FontStatus.class,
+			fontStatus.node, row);
 	}
 
-	/** Maximum character size */
-	private final ASN1Integer max_char_sz = fontMaxCharacterSize.makeInt();
+	/** Directory to store font files */
+	static private final String FONT_FILE_DIR = 
+		DevelCfg.get("font.output.dir", "/var/lib/iris/fonts/");
+
+	/** Create a writer for a font file */
+	private PrintWriter createWriter(String f) throws IOException {
+		File file = new File(dir, f);
+		return new PrintWriter(file);
+	}
 
 	/** Number of fonts supported */
 	private final ASN1Integer num_fonts = numFonts.makeInt();
@@ -55,32 +58,24 @@ public class OpQueryDMSFonts extends OpDMS {
 	/** Maximum number of characters in a font */
 	private final ASN1Integer max_characters = maxFontCharacters.makeInt();
 
-	/** Writer for font file */
-	private final PrintWriter writer;
+	/** Maximum character size */
+	private final ASN1Integer max_char_sz = fontMaxCharacterSize.makeInt();
+
+	/** Directory to write font files */
+	private final File dir;
 
 	/** Create a new operation to query fonts from a DMS */
 	public OpQueryDMSFonts(DMSImpl d) {
 		super(PriorityLevel.POLL_LOW, d);
-		writer = createWriter();
-	}
-
-	/** Create a writer for the font file */
-	private PrintWriter createWriter() {
-		String f = "fonts-" + dms.getName() + ".sql";
-		File file = new File(FONT_FILE_DIR, f);
-		try {
-			return new PrintWriter(file);
-		}
-		catch (IOException e) {
-			logError("createWriter: " + e.getMessage());
-			return null;
-		}
+		dir = new File(FONT_FILE_DIR, d.getName());
+		if (!dir.exists())
+			dir.mkdirs();
 	}
 
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase phaseTwo() {
-		return (writer != null) ? new Query1203Version() : null;
+		return new Query1203Version();
 	}
 
 	/** Phase to determine if v2 or greater */
@@ -102,6 +97,11 @@ public class OpQueryDMSFonts extends OpDMS {
 		}
 	}
 
+	/** Is DMS 1203v2 or later? */
+	private boolean isAtLeastV2() {
+		return max_char_sz.getInteger() > 0;
+	}
+
 	/** Phase to query the number of supported fonts */
 	private class QueryNumFonts extends Phase {
 
@@ -113,29 +113,26 @@ public class OpQueryDMSFonts extends OpDMS {
 			mess.queryProps();
 			logQuery(num_fonts);
 			logQuery(max_characters);
-			write_header();
+			writeLimits();
 			return nextFont(0);
 		}
 	}
 
-	/** Write the font file header */
-	private void write_header() {
-		writer.println("\\set ON_ERROR_STOP");
-		writer.println("SET SESSION AUTHORIZATION 'tms';");
-		writer.println("BEGIN;");
-		writer.println();
-		writer.println("-- " + max_char_sz);
-		writer.println("-- " + max_characters);
-		writer.println("-- " + num_fonts);
-		writer.println();
+	/** Write the font limits */
+	private void writeLimits() throws IOException {
+		PrintWriter writer = createWriter("limits.txt");
+		writer.println("numFonts: " + num_fonts);
+		writer.println("maxFontCharacters: " + max_characters);
+		writer.println("fontMaxCharacterSize: " + max_char_sz);
+		writer.flush();
+		writer.close();
 	}
 
 	/** Get phase to query the next font */
-	private Phase nextFont(int r) {
-		if (r < num_fonts.getInteger())
-			return new QueryFont(r + 1);
-		else
-			return null;
+	private Phase nextFont(int r) throws IOException {
+		return (r < num_fonts.getInteger())
+		      ? new QueryFont(r + 1)
+		      : null;
 	}
 
 	/** Phase to query one row of font table */
@@ -144,27 +141,38 @@ public class OpQueryDMSFonts extends OpDMS {
 		/** Row to query */
 		private final int row;
 
+		private final ASN1Integer number;
+		private final DisplayString name;
+		private final ASN1Integer height;
+		private final ASN1Integer char_spacing;
+		private final ASN1Integer line_spacing;
+		private final ASN1Integer version;
+		private final ASN1Enum<FontStatus> status;
+
 		/** Create a query font phase */
-		private QueryFont(int r) {
+		private QueryFont(int r) throws IOException {
 			row = r;
+			number = fontNumber.makeInt(row);
+			name = new DisplayString(fontName.node, row);
+			height = fontHeight.makeInt(row);
+			char_spacing = fontCharSpacing.makeInt(row);
+			line_spacing = fontLineSpacing.makeInt(row);
+			version = fontVersionID.makeInt(row);
+			status = makeStatus(row);
+			status.setEnum(FontStatus.unmanaged);
 		}
 
-		/** Query the font number for one row in font table */
+		/** Query one row in font table */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer number = fontNumber.makeInt(row);
-			DisplayString name = new DisplayString(fontName.node,
-				row);
-			ASN1Integer height = fontHeight.makeInt(row);
-			ASN1Integer char_spacing = fontCharSpacing.makeInt(row);
-			ASN1Integer line_spacing = fontLineSpacing.makeInt(row);
-			ASN1Integer version = fontVersionID.makeInt(row);
 			mess.add(number);
 			mess.add(name);
 			mess.add(height);
 			mess.add(char_spacing);
 			mess.add(line_spacing);
 			mess.add(version);
+			if (isAtLeastV2())
+				mess.add(status);
 			try {
 				mess.queryProps();
 				logQuery(number);
@@ -173,119 +181,108 @@ public class OpQueryDMSFonts extends OpDMS {
 				logQuery(char_spacing);
 				logQuery(line_spacing);
 				logQuery(version);
+				logQuery(status);
 			}
 			catch (NoSuchName e) {
 				// Note: some vendors respond with NoSuchName
 				//       if the font is not valid
 				return nextFont(row);
 			}
-			if (height.getInteger() > 0) {
-				write_font(name.getValue(), number.getInteger(),
-				           height.getInteger(),
-				           line_spacing.getInteger(),
-				           char_spacing.getInteger(),
-				           version.getInteger());
-				return nextCharacter(name.getValue(), row, 0);
-			} else
-				return nextFont(row);
+			return isValid() ? writeHeader() : nextFont(row);
+		}
+
+		/** Check if font is valid */
+		private boolean isValid() {
+			return status.getEnum().isValid()
+			    && height.getInteger() > 0;
+		}
+
+		/** Write the font header */
+		private Phase writeHeader() throws IOException {
+			PrintWriter writer = createWriter("f" + number +
+				".ifnt");
+			writer.println("name: " + name);
+			writer.println("font_number: " + number);
+			writer.println("height: " + height);
+			writer.println("width: 0");
+			writer.println("line_spacing: " + line_spacing);
+			writer.println("char_spacing: " + char_spacing);
+			return nextCharacter(writer, height.getInteger(),
+				row, 0);
 		}
 	}
 
-	/** Write the font data */
-	private void write_font(String name, int number, int height,
-		int line_spacing, int char_spacing, int version)
-	{
-		writer.println("INSERT INTO iris.font (name, f_number, " +
-			"height, width, line_spacing,");
-		writer.println("char_spacing, version_id) VALUES ('" +
-		               name + "', " +
-		               number + ", " +
-		               height + ", " +
-		               "0, " + // font width
-		               line_spacing + ", " +
-		               char_spacing + ", " +
-		               version + ");");
-		writer.println();
-		writer.println("COPY iris.glyph (name, font, code_point, " +
-			"width, pixels) FROM stdin;");
-	}
-
 	/** Get phase to query the next character in a font */
-	private Phase nextCharacter(String name, int r, int cr) {
+	private Phase nextCharacter(PrintWriter writer, int height, int r,
+		int cr) throws IOException
+	{
 		if (cr < max_characters.getInteger())
-			return new QueryCharacter(name, r, cr + 1);
+			return new QueryCharacter(writer, height, r, cr + 1);
 		else {
-			write_font_done();
+			writer.flush();
+			writer.close();
 			return nextFont(r);
 		}
 	}
 
-	/** Write end font */
-	private void write_font_done() {
-		writer.println("\\.");
-		writer.println();
-	}
-
 	/** Phase to query one character */
 	private class QueryCharacter extends Phase {
-
-		/** Font name */
-		private final String name;
-
-		/** Font row */
+		private final PrintWriter writer;
+		private final int height;
 		private final int row;
-
-		/** Character row */
 		private final int crow;
+		private final ASN1Integer char_width;
+		private final ASN1OctetString char_bitmap;
 
 		/** Create a new add character phase */
-		public QueryCharacter(String n, int r, int cr) {
-			name = n;
+		public QueryCharacter(PrintWriter w, int h, int r, int cr) {
+			writer = w;
+			height = h;
 			row = r;
 			crow = cr;
+			char_width = characterWidth.makeInt(row,
+				crow);
+			char_bitmap = new ASN1OctetString(
+				characterBitmap.node, row, crow);
 		}
 
 		/** Add a character to the font table */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer char_width = characterWidth.makeInt(row,
-				crow);
-			ASN1OctetString char_bitmap = new ASN1OctetString(
-				characterBitmap.node, row, crow);
 			mess.add(char_width);
 			mess.add(char_bitmap);
 			mess.queryProps();
 			logQuery(char_width);
 			logQuery(char_bitmap);
-			if (char_width.getInteger() > 0) {
-				write_char(name, crow, char_width.getInteger(),
-				           char_bitmap);
-			}
-			return nextCharacter(name, row, crow);
+			if (char_width.getInteger() > 0)
+				writeChar();
+			return nextCharacter(writer, height, row, crow);
 		}
-	}
 
-	/** Write character data */
-	private void write_char(String name, int crow, int width,
-		ASN1OctetString bitmap)
-	{
-		String bmap = Base64.encode(bitmap.getByteValue());
-		String cname = name + "_" + crow;
-		writer.println(cname + '\t' +
-		               name + '\t' +
-		               crow + '\t' +
-		               width + '\t' +
-		               bmap.replace("\n", "\\n"));
-	}
+		/** Write character data */
+		private void writeChar() throws IOException {
+			writer.println();
+			writer.println("codepoint: " + crow + ' ' +
+				(char) crow);
+			int width = char_width.getInteger();
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					if (isPixelLit(x, y))
+						writer.print('X');
+					else
+						writer.print('.');
+				}
+				writer.println();
+			}
+		}
 
-	/** Cleanup the operation */
-	@Override
-	public void cleanup() {
-		super.cleanup();
-		if (writer != null) {
-			writer.println("COMMIT;");
-			writer.flush();
-			writer.close();
+		/** Check if a pixel is lit */
+		private boolean isPixelLit(int x, int y) {
+			int pos = y * char_width.getInteger() + x;
+			int off = pos / 8;
+			int bit = 7 - (pos & 7); // 0b0111
+			byte[] bitmap = char_bitmap.getByteValue();
+			return (bitmap[off] >> bit & 1) != 0;
 		}
 	}
 }

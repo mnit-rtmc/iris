@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,4 +33,17 @@ public enum FontStatus {
 	notUsedReq,
 	unmanagedReq,
 	unmanaged;
+
+	/** Check if status is valid */
+	public boolean isValid() {
+		switch (this) {
+			case readyForUse:
+			case inUse:
+			case permanent:
+			case unmanaged:
+				return true;
+			default:
+				return false;
+		}
+	}
 }
