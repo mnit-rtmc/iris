@@ -37,7 +37,7 @@ ifnt_import.py [font file] | psql tms
 
 Number | Font Name | Description
 -------|-----------|---------------------
-5      | `F05-C`   | 7x5 character-matrix
+5      | `F07-C`   | 7x5 character-matrix
 7      | `F07`     | 7 height
 8      | `F08`     | 8 height
 9      | `F09`     | 9 height
