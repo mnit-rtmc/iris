@@ -122,9 +122,9 @@ public class OpQueryDMSFonts extends OpDMS {
 	/** Write the font limits */
 	private void writeLimits() throws IOException {
 		PrintWriter writer = createWriter("limits.txt");
-		writer.println("numFonts: " + num_fonts);
-		writer.println("maxFontCharacters: " + max_characters);
-		writer.println("fontMaxCharacterSize: " + max_char_sz);
+		writer.println(num_fonts);
+		writer.println(max_characters);
+		writer.println(max_char_sz);
 		writer.flush();
 		writer.close();
 	}
@@ -217,12 +217,14 @@ public class OpQueryDMSFonts extends OpDMS {
 		/** Write the font header */
 		private Phase writeHeader() throws IOException {
 			PrintWriter writer = createWriter(fileName());
-			writer.println("name: " + name);
-			writer.println("font_number: " + number);
-			writer.println("height: " + height);
+			writer.println("name: " + name.getValue());
+			writer.println("font_number: " + number.getInteger());
+			writer.println("height: " + height.getInteger());
 			writer.println("width: 0");
-			writer.println("line_spacing: " + line_spacing);
-			writer.println("char_spacing: " + char_spacing);
+			writer.println("line_spacing: " +
+				line_spacing.getInteger());
+			writer.println("char_spacing: " +
+				char_spacing.getInteger());
 			return nextCharacter(writer, height.getInteger(),
 				row, 0);
 		}
