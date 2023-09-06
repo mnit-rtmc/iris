@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.utils.DevelCfg;
+import us.mn.state.dot.tms.utils.HexString;
 
 /**
  * Operation to query all fonts on a DMS controller.
@@ -146,7 +147,7 @@ public class OpQueryDMSFonts extends OpDMS {
 		private final ASN1Integer height;
 		private final ASN1Integer char_spacing;
 		private final ASN1Integer line_spacing;
-		private final ASN1Integer version;
+		private final ASN1Integer version_id;
 		private final ASN1Enum<FontStatus> status;
 
 		/** Create a query font phase */
@@ -157,7 +158,7 @@ public class OpQueryDMSFonts extends OpDMS {
 			height = fontHeight.makeInt(row);
 			char_spacing = fontCharSpacing.makeInt(row);
 			line_spacing = fontLineSpacing.makeInt(row);
-			version = fontVersionID.makeInt(row);
+			version_id = fontVersionID.makeInt(row);
 			status = makeStatus(row);
 			status.setEnum(FontStatus.unmanaged);
 		}
@@ -170,7 +171,7 @@ public class OpQueryDMSFonts extends OpDMS {
 			mess.add(height);
 			mess.add(char_spacing);
 			mess.add(line_spacing);
-			mess.add(version);
+			mess.add(version_id);
 			if (version2)
 				mess.add(status);
 			try {
@@ -180,7 +181,7 @@ public class OpQueryDMSFonts extends OpDMS {
 				logQuery(height);
 				logQuery(char_spacing);
 				logQuery(line_spacing);
-				logQuery(version);
+				logQuery(version_id);
 				logQuery(status);
 			}
 			catch (NoSuchName e) {
@@ -199,10 +200,18 @@ public class OpQueryDMSFonts extends OpDMS {
 
 		/** Create font file name */
 		private String fileName() {
+			int num = number.getInteger();
+			StringBuilder nm = new StringBuilder();
+			nm.append('F');
+			if (num < 10)
+				nm.append('0');
+			nm.append(num);
+			nm.append('-');
+			nm.append(HexString.format(version_id.getInteger(), 4));
 			if (status.getEnum() == FontStatus.permanent)
-				return "f" + number + "-perm.ifnt";
-			else
-				return "f" + number + ".ifnt";
+				nm.append("-perm");
+			nm.append(".ifnt");
+			return nm.toString();
 		}
 
 		/** Write the font header */

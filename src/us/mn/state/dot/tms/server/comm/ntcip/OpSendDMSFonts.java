@@ -313,18 +313,19 @@ public class OpSendDMSFonts extends OpDMS {
 		/** Verify a font */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer version = fontVersionID.makeInt(frow.row);
-			mess.add(version);
+			ASN1Integer version_id =
+				fontVersionID.makeInt(frow.row);
+			mess.add(version_id);
 			try {
 				mess.queryProps();
 			}
 			catch (NoSuchName e) {
 				// Note: some vendors respond with NoSuchName
 				//       if the font is not valid
-				version.setInteger(-1);
+				version_id.setInteger(-1);
 			}
-			int v = version.getInteger();
-			logQuery(version);
+			int v = version_id.getInteger();
+			logQuery(version_id);
 			if (isVersionIDCorrect(v)) {
 				logError("Font is valid");
 				return defaultOrNextFontPhase(frow);
