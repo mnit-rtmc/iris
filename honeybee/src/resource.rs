@@ -1141,7 +1141,10 @@ impl Resource {
             let name = format!("{}.ifnt", font.name);
             let file = AtomicFile::new(dir, &name)?;
             let writer = file.writer()?;
-            ifnt::write(writer, &font)?;
+            if let Err(e) = ifnt::write(writer, &font) {
+                log::error!("fetch_fonts {name}: {e:?}");
+                file.cancel()?;
+            }
             count += 1;
         }
         log::info!("fetch_fonts: wrote {count} rows in {:?}", t.elapsed());
