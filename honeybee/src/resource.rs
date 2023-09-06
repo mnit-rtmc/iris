@@ -1143,7 +1143,7 @@ impl Resource {
             let writer = file.writer()?;
             if let Err(e) = ifnt::write(writer, &font) {
                 log::error!("fetch_fonts {name}: {e:?}");
-                file.cancel()?;
+                let _res = file.cancel();
             }
             count += 1;
         }
