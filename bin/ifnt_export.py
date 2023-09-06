@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''This script connects to an IRIS database and exports a single font in .ifnt
 format.'''

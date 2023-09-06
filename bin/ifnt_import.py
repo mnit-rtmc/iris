@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''This script takes a font in .ifnt format and creates a series of SQL
 statements to import the font into IRIS.'''
@@ -62,7 +62,7 @@ def parse_glyph(name, height, width, lines):
                 pixels.append(bits)
                 bit_mask = 0b10000000
                 bits = 0
-    if bit_mask < 0b1000000:
+    if bit_mask < 0b10000000:
         pixels.append(bits)
     print (COPY_GLYPH % (name, code_point, name, code_point, width,
         b64encode(pixels).decode('ASCII')))
