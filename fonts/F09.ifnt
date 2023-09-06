@@ -1,9 +1,9 @@
-name: 07_line
-font_number: 2
-height: 7
+name: F09
+font_number: 9
+height: 9
 width: 0
 char_spacing: 2
-line_spacing: 0
+line_spacing: 2
 
 codepoint: 32  
 .
@@ -13,8 +13,12 @@ codepoint: 32
 .
 .
 .
+.
+.
 
 codepoint: 33 !
+X.
+X.
 X.
 X.
 X.
@@ -31,26 +35,33 @@ X.X
 ...
 ...
 ...
+...
+...
 
 codepoint: 35 #
 .X.X.
 .X.X.
 XXXXX
 .X.X.
+.X.X.
 XXXXX
 .X.X.
 .X.X.
+.....
 
 codepoint: 36 $
 ..X..
 .XXX.
 X.X..
+X.X..
 .XXX.
+..X.X
 ..X.X
 .XXX.
 ..X..
 
 codepoint: 37 %
+.....
 XX...
 XX..X
 ...X.
@@ -58,19 +69,24 @@ XX..X
 .X...
 X..XX
 ...XX
+.....
 
 codepoint: 38 &
-.X...
-X.X..
-X.X..
-.X...
-X.X.X
-X..X.
-.XX.X
+..X...
+.X.X..
+.X.X..
+..X...
+.XX...
+X..X.X
+X...X.
+X...X.
+.XXX.X
 
 codepoint: 39 '
 X
 X
+.
+.
 .
 .
 .
@@ -83,6 +99,8 @@ codepoint: 40 (
 X..
 X..
 X..
+X..
+X..
 .X.
 ..X
 
@@ -92,19 +110,24 @@ X..
 ..X
 ..X
 ..X
+..X
+..X
 .X.
 X..
 
 codepoint: 42 *
-...X...
-..X.X..
-.X...X.
-X.....X
-.X...X.
-..X.X..
-...X...
+.....
+..X..
+X.X.X
+.XXX.
+..X..
+.XXX.
+X.X.X
+..X..
+.....
 
 codepoint: 43 +
+.....
 .....
 ..X..
 ..X..
@@ -112,8 +135,11 @@ XXXXX
 ..X..
 ..X..
 .....
+.....
 
 codepoint: 44 ,
+...
+...
 ...
 ...
 ...
@@ -126,7 +152,9 @@ codepoint: 45 -
 ....
 ....
 ....
+....
 XXXX
+....
 ....
 ....
 ....
@@ -138,25 +166,31 @@ codepoint: 46 .
 ..
 ..
 ..
+..
+..
 X.
 
 codepoint: 47 /
-.....
 ....X
+....X
+...X.
 ...X.
 ..X..
 .X...
+.X...
 X....
-.....
+X....
 
 codepoint: 48 0
-.XX.
-X..X
-X..X
-X..X
-X..X
-X..X
-.XX.
+.XXX.
+X...X
+X...X
+X...X
+X...X
+X...X
+X...X
+X...X
+.XXX.
 
 codepoint: 49 1
 .X.
@@ -165,90 +199,111 @@ XX.
 .X.
 .X.
 .X.
+.X.
+.X.
 XXX
 
 codepoint: 50 2
-.XX.
-X..X
-...X
-..X.
-.X..
-X...
-XXXX
+.XXX.
+X...X
+....X
+...X.
+..X..
+.X...
+X....
+X....
+XXXXX
 
 codepoint: 51 3
-.XX.
-X..X
-...X
-.XX.
-...X
-X..X
-.XX.
+.XXX.
+X...X
+....X
+....X
+..XX.
+....X
+....X
+X...X
+.XXX.
 
 codepoint: 52 4
 ...X.
 ..XX.
 .X.X.
 X..X.
+X..X.
 XXXXX
+...X.
 ...X.
 ...X.
 
 codepoint: 53 5
-XXXX
-X...
-X...
-.XX.
-...X
-X..X
-.XX.
+XXXXX
+X....
+X....
+X....
+XXXX.
+....X
+....X
+X...X
+.XXX.
 
 codepoint: 54 6
-.XX.
-X..X
-X...
-XXX.
-X..X
-X..X
-.XX.
+.XXX.
+X...X
+X....
+X....
+XXXX.
+X...X
+X...X
+X...X
+.XXX.
 
 codepoint: 55 7
-XXXX
-...X
-...X
-..X.
-..X.
-.X..
-.X..
+XXXXX
+....X
+....X
+...X.
+...X.
+..X..
+..X..
+.X...
+.X...
 
 codepoint: 56 8
-.XX.
-X..X
-X..X
-.XX.
-X..X
-X..X
-.XX.
+.XXX.
+X...X
+X...X
+X...X
+.XXX.
+X...X
+X...X
+X...X
+.XXX.
 
 codepoint: 57 9
-.XX.
-X..X
-X..X
-.XXX
-...X
-X..X
-.XX.
+.XXX.
+X...X
+X...X
+X...X
+.XXXX
+....X
+....X
+X...X
+.XXX.
 
 codepoint: 58 :
 ..
 ..
+..
 X.
 ..
 X.
+..
 ..
 ..
 
 codepoint: 59 ;
+...
 ...
 ...
 .X.
@@ -256,8 +311,10 @@ codepoint: 59 ;
 .X.
 X..
 ...
+...
 
 codepoint: 60 <
+....
 ...X
 ..X.
 .X..
@@ -265,17 +322,21 @@ X...
 .X..
 ..X.
 ...X
+....
 
 codepoint: 61 =
 ....
 ....
+....
 XXXX
 ....
 XXXX
+....
 ....
 ....
 
 codepoint: 62 >
+....
 X...
 .X..
 ..X.
@@ -283,99 +344,122 @@ X...
 ..X.
 .X..
 X...
+....
 
 codepoint: 63 ?
-.XX.
-X..X
-...X
-..X.
-..X.
-....
-..X.
-
-codepoint: 64 @
 .XXX.
 X...X
-X..XX
-X.X.X
-X..XX
-X....
-.XXX.
+....X
+....X
+...X.
+..X..
+..X..
+.....
+..X..
+
+codepoint: 64 @
+.XXXX.
+X....X
+X..X.X
+X.X.XX
+X.X..X
+X.X..X
+X..XXX
+X.....
+.XXXX.
 
 codepoint: 65 A
-.XX.
-X..X
-X..X
-XXXX
-X..X
-X..X
-X..X
+..X..
+.X.X.
+X...X
+X...X
+XXXXX
+X...X
+X...X
+X...X
+X...X
 
 codepoint: 66 B
-XXX.
-X..X
-X..X
-XXX.
-X..X
-X..X
-XXX.
+XXXX.
+X...X
+X...X
+X...X
+XXXX.
+X...X
+X...X
+X...X
+XXXX.
 
 codepoint: 67 C
-.XX.
-X..X
-X...
-X...
-X...
-X..X
-.XX.
+.XXX.
+X...X
+X....
+X....
+X....
+X....
+X....
+X...X
+.XXX.
 
 codepoint: 68 D
-XXX.
-X..X
-X..X
-X..X
-X..X
-X..X
-XXX.
+XXXX.
+X...X
+X...X
+X...X
+X...X
+X...X
+X...X
+X...X
+XXXX.
 
 codepoint: 69 E
-XXXX
-X...
-X...
-XXX.
-X...
-X...
-XXXX
+XXXXX
+X....
+X....
+X....
+XXX..
+X....
+X....
+X....
+XXXXX
 
 codepoint: 70 F
-XXXX
-X...
-X...
-XXX.
-X...
-X...
-X...
+XXXXX
+X....
+X....
+X....
+XXX..
+X....
+X....
+X....
+X....
 
 codepoint: 71 G
-.XX.
-X..X
-X...
-X.XX
-X..X
-X..X
-.XXX
+.XXX.
+X...X
+X....
+X....
+X..XX
+X...X
+X...X
+X...X
+.XXX.
 
 codepoint: 72 H
-X..X
-X..X
-X..X
-XXXX
-X..X
-X..X
-X..X
+X...X
+X...X
+X...X
+X...X
+XXXXX
+X...X
+X...X
+X...X
+X...X
 
 codepoint: 73 I
 XXX
+.X.
+.X.
 .X.
 .X.
 .X.
@@ -389,19 +473,25 @@ codepoint: 74 J
 ...X
 ...X
 ...X
+...X
+...X
 X..X
 .XX.
 
 codepoint: 75 K
-X..X
-X..X
-X.X.
-XX..
-X.X.
-X..X
-X..X
+X...X
+X...X
+X..X.
+X.X..
+XX...
+X.X..
+X..X.
+X...X
+X...X
 
 codepoint: 76 L
+X...
+X...
 X...
 X...
 X...
@@ -418,36 +508,46 @@ X..X..X
 X..X..X
 X.....X
 X.....X
+X.....X
+X.....X
 
 codepoint: 78 N
-X...X
-XX..X
-XX..X
-X.X.X
-X..XX
-X..XX
-X...X
+XX...X
+XX...X
+X.X..X
+X.X..X
+X..X.X
+X..X.X
+X...XX
+X...XX
+X....X
 
 codepoint: 79 O
-.XX.
-X..X
-X..X
-X..X
-X..X
-X..X
-.XX.
+.XXX.
+X...X
+X...X
+X...X
+X...X
+X...X
+X...X
+X...X
+.XXX.
 
 codepoint: 80 P
-XXX.
-X..X
-X..X
-XXX.
-X...
-X...
-X...
+XXXX.
+X...X
+X...X
+X...X
+XXXX.
+X....
+X....
+X....
+X....
 
 codepoint: 81 Q
 .XXX.
+X...X
+X...X
 X...X
 X...X
 X...X
@@ -456,22 +556,26 @@ X..X.
 .XX.X
 
 codepoint: 82 R
-XXX.
-X..X
-X..X
-XXX.
-X.X.
-X..X
-X..X
+XXXX.
+X...X
+X...X
+X...X
+XXXX.
+X.X..
+X..X.
+X...X
+X...X
 
 codepoint: 83 S
-.XX.
-X..X
-X...
-.XX.
-...X
-X..X
-.XX.
+.XXX.
+X...X
+X....
+X....
+.XXX.
+....X
+....X
+X...X
+.XXX.
 
 codepoint: 84 T
 XXXXX
@@ -481,17 +585,22 @@ XXXXX
 ..X..
 ..X..
 ..X..
+..X..
+..X..
 
 codepoint: 85 U
-X..X
-X..X
-X..X
-X..X
-X..X
-X..X
-.XX.
+X...X
+X...X
+X...X
+X...X
+X...X
+X...X
+X...X
+X...X
+.XXX.
 
 codepoint: 86 V
+X...X
 X...X
 X...X
 X...X
@@ -499,11 +608,14 @@ X...X
 .X.X.
 .X.X.
 ..X..
+..X..
 
 codepoint: 87 W
 X.....X
 X.....X
 X.....X
+X.....X
+X..X..X
 X..X..X
 X.X.X.X
 X.X.X.X
@@ -512,16 +624,20 @@ X.X.X.X
 codepoint: 88 X
 X...X
 X...X
+X...X
 .X.X.
 ..X..
 .X.X.
+X...X
 X...X
 X...X
 
 codepoint: 89 Y
 X...X
 X...X
+X...X
 .X.X.
+..X..
 ..X..
 ..X..
 ..X..
@@ -531,7 +647,9 @@ codepoint: 90 Z
 XXXXX
 ....X
 ...X.
+...X.
 ..X..
+.X...
 .X...
 X....
 XXXXX
@@ -543,19 +661,25 @@ X..
 X..
 X..
 X..
+X..
+X..
 XXX
 
 codepoint: 92 \
-.....
 X....
+X....
+.X...
 .X...
 ..X..
 ...X.
+...X.
 ....X
-.....
+....X
 
 codepoint: 93 ]
 XXX
+..X
+..X
 ..X
 ..X
 ..X
@@ -571,8 +695,12 @@ X...X
 .....
 .....
 .....
+.....
+.....
 
 codepoint: 95 _
+.....
+.....
 .....
 .....
 .....

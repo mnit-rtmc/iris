@@ -35,28 +35,29 @@ IRIS database, use ifnt_import.py (in `bin` directory):
 ifnt_import.py [font file] | psql tms
 ```
 
-Number | Font Name      | Description
--------|----------------|---------------------
-1      | `07_char`      | 7x5 character matrix
-2      | `07_line`      | 7 pixel high line-matrix
-3      | `08_full`      | 8 pixel high full-matrix
-4      | `09_full`      | 9 pixel high full-matrix
-5      | `10_full`      | 10 pixel high full-matrix
-6      | `11_full`      | 11 pixel high full-matrix
-7      | `12_full`      | 12 pixel high full-matrix
-8      | `12_full_bold` | 12 pixel high full-matrix bold
-9      | `13_full`      | 13 pixel high full-matrix
-10     | `14_ledstar`   | 14 pixel high full-matrix
-11     | `14_full`      | 14 pixel high full-matrix
-21     | `15_full`      | 15 pixel high full-matrix
-13     | `16_full`      | 16 pixel high full-matrix
-14     | `18_full`      | 18 pixel high full-matrix
-15     | `20_full`      | 20 pixel high full-matrix
-16     | `24_full`      | 24 pixel high full-matrix
-20     | `26_full`      | 26 pixel high full-matrix
-17     | `_09_full_12`  | 9 pixel high (12 with lower case descenders)
-18     | `_7_full`      | 7 pixel high full-matrix
-19     | `_9_line`      | 9 pixel high line-matrix
+Number | Font Name | Description
+-------|-----------|---------------------
+5      | `F05-C`   | 7x5 character-matrix
+7      | `F07`     | 7 height
+8      | `F08`     | 8 height
+9      | `F09`     | 9 height
+10     | `F10`     | 10 height
+11     | `F11`     | 11 height
+12     | `F12`     | 12 height
+13     | `F13`     | 13 height
+14     | `F14`     | 14 height
+15     | `F15`     | 15 height
+16     | `F16`     | 16 height
+18     | `F18`     | 18 height
+20     | `F20`     | 20 height
+24     | `F24`     | 24 height
+26     | `F26`     | 26 height
+107    | `F07-L`   | 7 height line-matrix
+109    | `F09-L`   | 9 height line-matrix
+112    | `F12-A`   | 12 height ASCII (9 height caps)
+114    | `F14-A`   | 14 height ASCII
+212    | `F12-B`   | 12 height bold
+214    | `F14-N`   | 14 height narrow
 
 ### Non-ASCII Characters
 
@@ -64,15 +65,15 @@ Since NTCIP 1203 does not support Unicode, ASCII characters must be used as
 surrogates for arrows, diamonds, etc:
 
 | Character     | Code Point | ASCII | Fonts
-|---------------|------------|-------|---------------------------------
-| <sup>ND</sup> | 38         | &     | `14_ledstar`
-| ◊             | 42         | *     | `07_line`, `_07_full`, `26_full`
-| ↖             | 94         | ^     | `14_ledstar`
-| █             | 96         | \`    | `14_ledstar`
-| ↙             | 123        | {     | `_07_full`, `14_ledstar`
-| ↓             | 125        | }     | `_07_full`
-| ↘             | 125        | }     | `14_ledstar`
-| `wide space`  | 126        | ~     | `_07_full`
+|---------------|------------|-------|----------------------
+| <sup>ND</sup> | 38         | &     | `F14-A`
+| ◊             | 42         | *     | `F07`, `F07-L`, `F26`
+| ↖             | 94         | ^     | `F14-A`
+| █             | 96         | \`    | `F14-A`
+| ↙             | 123        | {     | `F07`, `F14-A`
+| ↓             | 125        | }     | `F07`
+| ↘             | 125        | }     | `F14-A`
+| `wide space`  | 126        | ~     | `F07`
 
 ## Send and Query Fonts
 
