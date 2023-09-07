@@ -57,7 +57,6 @@ Number | Font Name | Description
 112    | `F12-A`   | 12 height ASCII (9 height caps)
 114    | `F14-A`   | 14 height ASCII
 212    | `F12-B`   | 12 height bold
-214    | `F14-N`   | 14 height narrow
 
 ### Non-ASCII Characters
 
