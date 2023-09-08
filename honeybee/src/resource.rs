@@ -428,6 +428,16 @@ const DMS_STAT_RES: Resource = Resource::Simple(
     ) r",
 );
 
+/// Font list resource
+const FONT_LIST_RES: Resource = Resource::Simple(
+    "api/fonts",
+    Listen::All("font"),
+    "SELECT row_to_json(r)::text FROM (\
+      SELECT f_number, name \
+      FROM iris.font ORDER BY f_number\
+    ) r",
+);
+
 /// Font resource
 const FONT_RES: Resource = Resource::Font(
     Listen::Two("font", "glyph"),
@@ -918,6 +928,7 @@ const ALL: &[Resource] = &[
     DMS_RES,
     DMS_PUB_RES,
     DMS_STAT_RES,
+    FONT_LIST_RES,
     FONT_RES,
     GRAPHIC_RES,
     MSG_LINE_RES,
