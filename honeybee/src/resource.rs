@@ -433,7 +433,7 @@ const FONT_LIST_RES: Resource = Resource::Simple(
     "api/fonts",
     Listen::All("font"),
     "SELECT row_to_json(r)::text FROM (\
-      SELECT f_number, name \
+      SELECT f_number AS font_number, name \
       FROM iris.font ORDER BY f_number\
     ) r",
 );
