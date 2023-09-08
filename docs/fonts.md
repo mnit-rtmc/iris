@@ -3,7 +3,61 @@
 A font is a set of bitmapped glyphs for displaying text on a [DMS].  Fonts can
 contain only printable ASCII characters (U+0020 to U+007E).
 
-When selecting a font, a few parameters must be considered, such as pixel pitch,
+## Predefined Fonts
+
+A number of fonts are included in the `/var/lib/iris/fonts` directory.  These
+fonts are designed to have a similar visual style.  To import a font into the
+IRIS database, use ifnt_import.py (in `bin` directory):
+
+```
+ifnt_import.py [font file] | psql tms
+```
+
+Name    | Number | Description
+--------|--------|---------------------
+`F07-C` | 5      | 7x5 character-matrix
+`F07`   | 7      | 7 px height
+`F08`   | 8      | 8 px height
+`F09`   | 9      | 9 px height
+`F10`   | 10     | 10 px height
+`F11`   | 11     | 11 px height
+`F12`   | 12     | 12 px height
+`F13`   | 13     | 13 px height
+`F14`   | 14     | 14 px height
+`F15`   | 15     | 15 px height
+`F16`   | 16     | 16 px height
+`F18`   | 18     | 18 px height
+`F20`   | 20     | 20 px height
+`F24`   | 24     | 24 px height
+`F26`   | 26     | 26 px height
+`F07-L` | 107 †  | 7 px height line-matrix
+`F09-L` | 109 †  | 9 px height line-matrix
+`F12-A` | 112 †  | 12 px height all-ASCII (9 height caps)
+`F14-A` | 114 †  | 14 px height all-ASCII
+`F12-B` | 212 †  | 12 px height bold
+
+_† For simplicity, most font numbers match the pixel height.  Alternate styles
+add multiples of 100 to pixel height._
+
+### Non-ASCII Characters
+
+Since NTCIP 1203 does not support Unicode, ASCII characters must be used as
+surrogates for arrows, diamonds, etc:
+
+| Character     | Code Point | ASCII | Fonts
+|---------------|------------|-------|----------------------
+| <sup>ND</sup> | 38         | &     | `F14-A`
+| ◊             | 42         | *     | `F07`, `F07-L`, `F26`
+| ↖             | 94         | ^     | `F14-A`
+| █             | 96         | \`    | `F14-A`
+| ↙             | 123        | {     | `F07`, `F14-A`
+| ↓             | 125        | }     | `F07`
+| ↘             | 125        | }     | `F14-A`
+| `wide space`  | 126        | ~     | `F07`
+
+## Choosing Fonts
+
+When choosing a font, a few parameters must be considered, such as pixel pitch,
 desired character height, and font weight.  Pixel pitch varies from 70 mm down
 to 20 mm or smaller.
 
@@ -24,55 +78,6 @@ Upper-case only fonts are recommended for larger pixel pitch, but fonts with
 lower-case characters can be used if pitch is below 50 mm.  If a message
 containing lower-case characters is used with an upper-case only font, it will
 be converted to upper-case.
-
-## Predefined Fonts
-
-A number of fonts are included in the `/var/lib/iris/fonts` directory.  These
-fonts are designed to have a similar visual style.  To import a font into the
-IRIS database, use ifnt_import.py (in `bin` directory):
-
-```
-ifnt_import.py [font file] | psql tms
-```
-
-Number | Font Name | Description
--------|-----------|---------------------
-5      | `F07-C`   | 7x5 character-matrix
-7      | `F07`     | 7 height
-8      | `F08`     | 8 height
-9      | `F09`     | 9 height
-10     | `F10`     | 10 height
-11     | `F11`     | 11 height
-12     | `F12`     | 12 height
-13     | `F13`     | 13 height
-14     | `F14`     | 14 height
-15     | `F15`     | 15 height
-16     | `F16`     | 16 height
-18     | `F18`     | 18 height
-20     | `F20`     | 20 height
-24     | `F24`     | 24 height
-26     | `F26`     | 26 height
-107    | `F07-L`   | 7 height line-matrix
-109    | `F09-L`   | 9 height line-matrix
-112    | `F12-A`   | 12 height ASCII (9 height caps)
-114    | `F14-A`   | 14 height ASCII
-212    | `F12-B`   | 12 height bold
-
-### Non-ASCII Characters
-
-Since NTCIP 1203 does not support Unicode, ASCII characters must be used as
-surrogates for arrows, diamonds, etc:
-
-| Character     | Code Point | ASCII | Fonts
-|---------------|------------|-------|----------------------
-| <sup>ND</sup> | 38         | &     | `F14-A`
-| ◊             | 42         | *     | `F07`, `F07-L`, `F26`
-| ↖             | 94         | ^     | `F14-A`
-| █             | 96         | \`    | `F14-A`
-| ↙             | 123        | {     | `F07`, `F14-A`
-| ↓             | 125        | }     | `F07`
-| ↘             | 125        | }     | `F14-A`
-| `wide space`  | 126        | ~     | `F07`
 
 ## Send and Query Fonts
 
