@@ -488,7 +488,7 @@ dependencies = [
 
 [[package]]
 name = "bulb"
-version = "5.46.1"
+version = "5.46.2"
 dependencies = [
  "console_error_panic_hook",
  "humantime",
@@ -987,7 +987,7 @@ dependencies = [
 
 [[package]]
 name = "graft"
-version = "5.46.1"
+version = "5.46.2"
 dependencies = [
  "anyhow",
  "async-std",
@@ -1066,7 +1066,7 @@ dependencies = [
 
 [[package]]
 name = "honeybee"
-version = "5.46.1"
+version = "5.46.2"
 dependencies = [
  "anyhow",
  "base64 0.13.1",
@@ -1255,7 +1255,7 @@ checksum = "b247793f15143d0addc67f46255b1836a061d738caa558b9f6235a63ecb3febb"
 
 [[package]]
 name = "mayfly"
-version = "5.46.1"
+version = "5.46.2"
 dependencies = [
  "argh",
  "async-std",
@@ -1703,7 +1703,7 @@ checksum = "dbb5fb1acd8a1a18b3dd5be62d25485eb770e05afb408a9627d14d451bae12da"
 
 [[package]]
 name = "rendzina"
-version = "5.46.1"
+version = "5.46.2"
 dependencies = [
  "gift",
  "log",
