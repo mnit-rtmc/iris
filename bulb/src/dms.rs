@@ -246,6 +246,7 @@ impl Dms {
         let state = anc.dev.item_state(self);
         let mut states = match state {
             ItemState::Available => anc.msg_states(self.msg_current.as_deref()),
+            ItemState::Disabled => return ItemState::Disabled.into(),
             _ => state.into(),
         };
         if self.is_dedicated() {
