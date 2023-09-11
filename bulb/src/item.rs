@@ -37,8 +37,8 @@ pub enum ItemState {
 
 /// Item states
 #[derive(Clone, Debug, Default)]
-pub struct ItemStates {
-    all: Vec<ItemState>,
+pub struct ItemStates<'a> {
+    all: Vec<(ItemState, &'a str)>,
 }
 
 impl fmt::Display for ItemState {
@@ -100,10 +100,10 @@ impl ItemState {
     }
 }
 
-impl fmt::Display for ItemStates {
+impl<'a> fmt::Display for ItemStates<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut first = true;
-        for state in self.iter() {
+        for (state, _dtl) in self.all.iter() {
             if !first {
                 write!(f, " ")?;
                 first = false;
@@ -114,41 +114,45 @@ impl fmt::Display for ItemStates {
     }
 }
 
-impl From<ItemState> for ItemStates {
+impl<'a> From<ItemState> for ItemStates<'a> {
     fn from(state: ItemState) -> Self {
-        ItemStates { all: vec![state] }
+        ItemStates {
+            all: vec![(state, "")],
+        }
     }
 }
 
-impl ItemStates {
-    /// Get an iterator of all states
-    pub fn iter(&self) -> impl Iterator<Item = &ItemState> {
-        self.all.iter()
-    }
-
+impl<'a> ItemStates<'a> {
     /// Include an item state
-    pub fn with(mut self, state: ItemState) -> Self {
-        if !self.all.contains(&state) {
-            self.all.push(state);
+    pub fn with(mut self, state: ItemState, dtl: &'a str) -> Self {
+        if !self.all.iter().any(|is| is.0 == state) {
+            self.all.push((state, dtl));
         }
         self
     }
 
     /// Check if a search string matches
     pub fn is_match(&self, search: &str) -> bool {
-        self.iter().any(|s| s.is_match(search))
+        self.all.iter().any(|(s, _dtl)| s.is_match(search))
     }
 
-    /// Get description of item states
-    pub fn description(&self) -> String {
+    /// Get item states as html
+    pub fn as_html(&self) -> String {
         let mut desc = String::new();
-        for state in self.iter() {
+        for (state, dtl) in self.all.iter() {
             if !desc.is_empty() {
                 desc.push(' ');
             }
+            desc.push_str("<div class='tooltip'>");
             desc.push_str(state.code());
             desc.push(' ');
             desc.push_str(state.description());
+            if !dtl.is_empty() {
+                desc.push_str("<span>");
+                desc.push_str(dtl);
+                desc.push_str("</span>");
+            }
+            desc.push_str("</div>");
         }
         desc
     }

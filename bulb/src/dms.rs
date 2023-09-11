@@ -149,48 +149,48 @@ impl SignMessage {
     }
 
     /// Get "system" owner
-    fn system(&self) -> Option<&str> {
-        self.owner().split(';').nth(0)
+    fn system(&self) -> &str {
+        self.owner().split(';').next().unwrap_or("")
     }
 
     /// Get "sources" owner
-    fn sources(&self) -> Option<&str> {
-        self.owner().split(';').nth(1)
+    fn sources(&self) -> &str {
+        self.owner().split(';').nth(1).unwrap_or("")
     }
 
     /// Get "user" owner
-    fn user(&self) -> Option<&str> {
-        self.owner().split(';').nth(2)
+    fn user(&self) -> &str {
+        self.owner().split(';').nth(2).unwrap_or("")
     }
 
     /// Get item states
     fn item_states(&self) -> ItemStates {
-        self.sources()
-            .map(|src| {
-                let mut states = ItemStates::default();
-                if src.contains("blank") {
-                    states = states.with(ItemState::Available);
-                }
-                if src.contains("operator") {
-                    states = states.with(ItemState::Deployed);
-                }
-                if src.contains("schedule") {
-                    states = states.with(ItemState::Planned);
-                }
-                if src.contains("external") {
-                    states = states.with(ItemState::External);
-                }
-                states
-            })
-            .unwrap_or(ItemState::Fault.into())
+        let sources = self.sources();
+        let mut states = ItemStates::default();
+        if sources.contains("blank") {
+            states = states.with(ItemState::Available, "");
+        }
+        if sources.contains("operator") {
+            states = states.with(ItemState::Deployed, self.user());
+        }
+        if sources.contains("schedule") {
+            states = states.with(ItemState::Planned, self.user());
+        }
+        if sources.contains("external") {
+            states = states.with(ItemState::External, self.user());
+        }
+        if sources.is_empty() {
+            states = states.with(ItemState::Fault, "unknown source");
+        }
+        states
     }
 
     /// Check if a search string matches
     fn is_match(&self, search: &str) -> bool {
         // checks are ordered by "most likely to be searched"
         self.multi.contains_lower(search)
-            || self.user().is_some_and(|u| u.contains_lower(search))
-            || self.system().is_some_and(|s| s.contains_lower(search))
+            || self.user().contains_lower(search)
+            || self.system().contains_lower(search)
     }
 }
 
@@ -242,7 +242,7 @@ impl Dms {
     }
 
     /// Get item states
-    fn item_states(&self, anc: &DmsAnc) -> ItemStates {
+    fn item_states<'a>(&'a self, anc: &'a DmsAnc) -> ItemStates<'a> {
         let state = anc.dev.item_state(self);
         let mut states = match state {
             ItemState::Available => anc.msg_states(self.msg_current.as_deref()),
@@ -250,12 +250,25 @@ impl Dms {
             _ => state.into(),
         };
         if self.is_dedicated() {
-            states = states.with(ItemState::Dedicated);
+            states = states.with(
+                ItemState::Dedicated,
+                self.hashtags.as_deref().unwrap_or(""),
+            );
         }
         if self.has_faults.is_some_and(|f| f) {
-            states = states.with(ItemState::Fault);
+            states = states.with(ItemState::Fault, self.faults());
         }
         states
+    }
+
+    /// Get status faults
+    fn faults(&self) -> &str {
+        if let Some(status) = &self.status {
+            if let Some(faults) = &status.faults {
+                return faults;
+            }
+        }
+        ""
     }
 
     /// Convert to Compact HTML
@@ -281,7 +294,7 @@ impl Dms {
             status.push_str(".gif'>");
         }
         status.push_str("<div class='end'>");
-        status.push_str(&self.item_states(anc).description());
+        status.push_str(&self.item_states(anc).as_html());
         status.push_str("</div>");
         if config {
             status.push_str("<div class='row'>");

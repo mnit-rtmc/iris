@@ -115,11 +115,10 @@ impl Beacon {
                 2 => ItemState::Available.into(),
                 4 => ItemState::Deployed.into(),
                 5 => ItemState::Fault.into(),
-                6 => {
-                    ItemStates::from(ItemState::Deployed).with(ItemState::Fault)
-                }
+                6 => ItemStates::from(ItemState::Deployed)
+                    .with(ItemState::Fault, "stuck on"),
                 7 => ItemStates::from(ItemState::Deployed)
-                    .with(ItemState::External),
+                    .with(ItemState::External, "external flashing"),
                 _ => ItemState::Unknown.into(),
             },
             _ => state.into(),
@@ -152,7 +151,7 @@ impl Beacon {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &BeaconAnc, config: bool) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
-        let item_states = self.item_states(anc).description();
+        let item_states = self.item_states(anc).as_html();
         let flashing = if self.flashing() {
             CLASS_FLASHING
         } else {
@@ -164,9 +163,7 @@ impl Beacon {
             "<div class='row'>\
               <span class='info'>{location}</span>\
             </div>\
-            <div class='row'>\
-              <span>{item_states}</span>\
-            </div>\
+            <div class='row'>{item_states}</div>\
             <div class='beacon-container row center'>\
               <button id='ob_flashing'></button>\
               <label for='ob_flashing' class='beacon'>\

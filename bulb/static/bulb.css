@@ -207,6 +207,29 @@ button.go_link {
   transition: left 100ms ease-in-out;
 }
 
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted gray;
+}
+
+.tooltip * {
+  visibility: hidden;
+  inline-size: max-content;
+  z-index: 1;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  padding: 0.5rem;
+  border-radius: 0.2rem;
+  background-color: #400;
+  color: #fff;
+}
+
+.tooltip:hover * {
+  visibility: visible;
+}
+
 .cards {
   display: flex;
   flex-wrap: wrap;
