@@ -440,7 +440,7 @@ fn handle_sb_resource_ev(rname: String) {
     let value = search_value();
     let res = Resource::from_name(&rname);
     let sb_state = doc.elem::<HtmlSelectElement>("sb_state");
-    sb_state.set_inner_html(&res.item_state_options());
+    sb_state.set_inner_html(res.item_state_options());
     spawn_local(populate_list(res, value));
 }
 
@@ -484,7 +484,7 @@ fn search_value() -> String {
     let search = doc.elem::<HtmlInputElement>("sb_search");
     let mut value = search.value();
     if let Some(istate) = doc.select_parse::<String>("sb_state") {
-        if let Some(_) = ItemState::from_code(&istate) {
+        if ItemState::from_code(&istate).is_some() {
             value.push(' ');
             value.push_str(&istate);
         }
