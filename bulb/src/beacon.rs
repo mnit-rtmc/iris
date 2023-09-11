@@ -151,7 +151,7 @@ impl Beacon {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &BeaconAnc, config: bool) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
-        let item_states = self.item_states(anc).as_html();
+        let item_states = self.item_states(anc).to_html();
         let flashing = if self.flashing() {
             CLASS_FLASHING
         } else {

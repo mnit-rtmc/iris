@@ -210,24 +210,51 @@ button.go_link {
 .tooltip {
   position: relative;
   display: inline-block;
-  border-bottom: 1px dotted gray;
+  border-bottom: 0.1rem dotted gray;
 }
 
 .tooltip * {
   visibility: hidden;
-  inline-size: max-content;
+  inline-size: min-content;
   z-index: 1;
   position: absolute;
-  top: 100%;
+  bottom: 100%;
   right: 0;
   padding: 0.5rem;
   border-radius: 0.2rem;
-  background-color: #400;
   color: #fff;
 }
 
 .tooltip:hover * {
   visibility: visible;
+}
+
+.available {
+  background-color: #004;
+}
+.deployed {
+  background-color: #440;
+}
+.planned {
+  background-color: #044;
+}
+.external {
+  background-color: #040;
+}
+.dedicated {
+  background-color: #404;
+}
+.fault {
+  background-color: #420;
+}
+.offline {
+  background-color: #444;
+}
+.disabled {
+  background-color: #400;
+}
+.unknown {
+  background-color: #400;
 }
 
 .cards {

@@ -136,8 +136,8 @@ impl<'a> ItemStates<'a> {
         self.all.iter().any(|(s, _dtl)| s.is_match(search))
     }
 
-    /// Get item states as html
-    pub fn as_html(&self) -> String {
+    /// Convert item states to html
+    pub fn to_html(&self) -> String {
         let mut desc = String::new();
         for (state, dtl) in self.all.iter() {
             if !desc.is_empty() {
@@ -148,7 +148,9 @@ impl<'a> ItemStates<'a> {
             desc.push(' ');
             desc.push_str(state.description());
             if !dtl.is_empty() {
-                desc.push_str("<span>");
+                desc.push_str("<span class='");
+                desc.push_str(state.description());
+                desc.push_str("'>");
                 desc.push_str(dtl);
                 desc.push_str("</span>");
             }

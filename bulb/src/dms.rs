@@ -177,7 +177,7 @@ impl SignMessage {
             states = states.with(ItemState::Planned, self.user());
         }
         if sources.contains("external") {
-            states = states.with(ItemState::External, self.user());
+            states = states.with(ItemState::External, "");
         }
         if sources.is_empty() {
             states = states.with(ItemState::Fault, "unknown source");
@@ -215,16 +215,25 @@ impl DmsAnc {
 impl Dms {
     pub const RESOURCE_N: &'static str = "dms";
 
-    /// Check if dedicated-purpose sign
-    fn is_dedicated(&self) -> bool {
-        self.hashtags.as_ref().is_some_and(|h| {
-            h.contains_lower("#laneuse")
-                || h.contains_lower("#parking")
-                || h.contains_lower("#safety")
-                || h.contains_lower("#tolling")
-                || h.contains_lower("#traveltime")
-                || h.contains_lower("#vsl")
-                || h.contains_lower("#wayfinding")
+    /// Get one dedicated hashtag, if defined
+    fn dedicated(&self) -> Option<&str> {
+        self.hashtags.as_ref().and_then(|h| {
+            let h = h.to_lowercase();
+            for tag in [
+                "#LaneUse",
+                "#Parking",
+                "#Tolling",
+                "#TravelTime",
+                "#Wayfinding",
+                "#Safety",
+                "#Vsl",
+                "#Hidden",
+            ] {
+                if h.contains(&tag.to_lowercase()) {
+                    return Some(tag);
+                }
+            }
+            None
         })
     }
 
@@ -249,11 +258,8 @@ impl Dms {
             ItemState::Disabled => return ItemState::Disabled.into(),
             _ => state.into(),
         };
-        if self.is_dedicated() {
-            states = states.with(
-                ItemState::Dedicated,
-                self.hashtags.as_deref().unwrap_or(""),
-            );
+        if let Some(dedicated) = self.dedicated() {
+            states = states.with(ItemState::Dedicated, dedicated);
         }
         if self.has_faults.is_some_and(|f| f) {
             states = states.with(ItemState::Fault, self.faults());
@@ -294,7 +300,7 @@ impl Dms {
             status.push_str(".gif'>");
         }
         status.push_str("<div class='end'>");
-        status.push_str(&self.item_states(anc).as_html());
+        status.push_str(&self.item_states(anc).to_html());
         status.push_str("</div>");
         if config {
             status.push_str("<div class='row'>");
