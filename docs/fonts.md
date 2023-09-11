@@ -15,29 +15,31 @@ ifnt_import.py [font file] | psql tms
 
 Name    | Number | Description
 --------|--------|---------------------
-`F07-C` | 5      | 7x5 character-matrix
 `F07`   | 7      | 7 px height
+`F07-C` | 5      | 7 px height, 5 px width character-matrix
+`F07-L` | 107 †  | 7 px height line-matrix
 `F08`   | 8      | 8 px height
 `F09`   | 9      | 9 px height
+`F09-L` | 109 †  | 9 px height line-matrix
 `F10`   | 10     | 10 px height
 `F11`   | 11     | 11 px height
 `F12`   | 12     | 12 px height
+`F12-A` | 112 †  | 12 px height all-ASCII (9 height caps)
+`F12-B` | 212 †  | 12 px height bold
 `F13`   | 13     | 13 px height
 `F14`   | 14     | 14 px height
+`F14-A` | 114 †  | 14 px height all-ASCII
 `F15`   | 15     | 15 px height
 `F16`   | 16     | 16 px height
 `F18`   | 18     | 18 px height
 `F20`   | 20     | 20 px height
 `F24`   | 24     | 24 px height
 `F26`   | 26     | 26 px height
-`F07-L` | 107 †  | 7 px height line-matrix
-`F09-L` | 109 †  | 9 px height line-matrix
-`F12-A` | 112 †  | 12 px height all-ASCII (9 height caps)
-`F14-A` | 114 †  | 14 px height all-ASCII
-`F12-B` | 212 †  | 12 px height bold
 
-_† For simplicity, most font numbers match the pixel height.  Alternate styles
-add multiples of 100 to pixel height._
+_† Normally font number is the same as pixel height, but variations use
+1xx or 2xx._
+
+Numbers 1-4 are reserved for **permanent** fonts used by some signs.
 
 ### Non-ASCII Characters
 
