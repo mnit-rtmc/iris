@@ -6,15 +6,10 @@ contain only printable ASCII characters (U+0020 to U+007E).
 ## Predefined Fonts
 
 A number of fonts are included in the `/var/lib/iris/fonts` directory.  These
-fonts are designed to have a similar visual style.  To import a font into the
-IRIS database, use ifnt_import.py (in `bin` directory):
-
-```
-ifnt_import.py [font file] | psql tms
-```
+fonts are designed to have a similar visual style.
 
 Name    | Number | Description
---------|--------|---------------------
+--------|--------|-----------------------------------------
 `F07`   | 7      | 7 px height
 `F07-C` | 5      | 7 px height, 5 px width character-matrix
 `F07-L` | 107 †  | 7 px height line-matrix
@@ -40,6 +35,13 @@ _† Normally font number is the same as pixel height, but variations use
 1xx or 2xx._
 
 Numbers 1-4 are reserved for **permanent** fonts used by some signs.
+
+To import a font into the IRIS database, use ifnt_import.py (in `bin`
+directory):
+
+```
+ifnt_import.py [font file] | psql tms
+```
 
 ### Non-ASCII Characters
 
