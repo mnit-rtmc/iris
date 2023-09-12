@@ -151,7 +151,10 @@ impl<'a> ItemStates<'a> {
                 desc.push_str("<span class='");
                 desc.push_str(state.description());
                 desc.push_str("'>");
-                desc.push_str(dtl);
+                for d in dtl.split(';') {
+                    desc.push_str(d);
+                    desc.push(' ');
+                }
                 desc.push_str("</span>");
             }
             desc.push_str("</div>");

@@ -180,7 +180,7 @@ impl SignMessage {
             states = states.with(ItemState::External, "");
         }
         if sources.is_empty() {
-            states = states.with(ItemState::Fault, "unknown source");
+            states = states.with(ItemState::Fault, "source unknown");
         }
         states
     }
@@ -206,9 +206,9 @@ impl DmsAnc {
 
     /// Get message item states
     fn msg_states(&self, msg: Option<&str>) -> ItemStates {
-        self.sign_message(msg)
-            .map(|m| m.item_states())
-            .unwrap_or(ItemState::Fault.into())
+        self.sign_message(msg).map(|m| m.item_states()).unwrap_or(
+            ItemStates::default().with(ItemState::Fault, "message unknown"),
+        )
     }
 }
 
@@ -237,6 +237,21 @@ impl Dms {
         })
     }
 
+    /// Get faults, if any
+    fn faults(&self) -> Option<&str> {
+        if let Some(true) = self.has_faults {
+            if let Some(status) = &self.status {
+                if let Some(faults) = &status.faults {
+                    return Some(faults);
+                }
+            }
+            // full attribute doesn't match minimal has_faults?!
+            Some("has_faults")
+        } else {
+            None
+        }
+    }
+
     /// Get all item states as html options
     pub fn item_state_options() -> &'static str {
         "<option value=''>all ↴</option>\
@@ -254,27 +269,19 @@ impl Dms {
     fn item_states<'a>(&'a self, anc: &'a DmsAnc) -> ItemStates<'a> {
         let state = anc.dev.item_state(self);
         let mut states = match state {
-            ItemState::Available => anc.msg_states(self.msg_current.as_deref()),
             ItemState::Disabled => return ItemState::Disabled.into(),
+            ItemState::Available => anc.msg_states(self.msg_current.as_deref()),
+            ItemState::Offline => ItemStates::default()
+                .with(ItemState::Offline, "FIXME: since fail time"),
             _ => state.into(),
         };
         if let Some(dedicated) = self.dedicated() {
             states = states.with(ItemState::Dedicated, dedicated);
         }
-        if self.has_faults.is_some_and(|f| f) {
-            states = states.with(ItemState::Fault, self.faults());
+        if let Some(faults) = self.faults() {
+            states = states.with(ItemState::Fault, faults);
         }
         states
-    }
-
-    /// Get status faults
-    fn faults(&self) -> &str {
-        if let Some(status) = &self.status {
-            if let Some(faults) = &status.faults {
-                return faults;
-            }
-        }
-        ""
     }
 
     /// Convert to Compact HTML
