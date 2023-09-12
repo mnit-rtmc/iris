@@ -783,7 +783,7 @@ const USER_RES: Resource = Resource::Simple(
 const SIGN_CONFIG_RES: Resource = Resource::Simple(
     "sign_config",
     Listen::All("sign_config"),
-    "SELECT row_to_json(r)::text FROM (\
+    "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
       SELECT name, face_width, face_height, border_horiz, border_vert, \
              pitch_horiz, pitch_vert, pixel_width, pixel_height, \
              char_width, char_height, monochrome_foreground, \
