@@ -180,7 +180,7 @@ impl SignMessage {
             states = states.with(ItemState::External, "");
         }
         if sources.is_empty() {
-            states = states.with(ItemState::Fault, "source unknown");
+            states = states.with(ItemState::External, self.system());
         }
         states
     }
