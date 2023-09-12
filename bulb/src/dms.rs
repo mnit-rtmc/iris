@@ -212,29 +212,30 @@ impl DmsAnc {
     }
 }
 
+/// All hashtags for dedicated purpose
+const DEDICATED: &[&str] = &[
+    "#LaneUse",
+    "#Parking",
+    "#Tolling",
+    "#TravelTime",
+    "#Wayfinding",
+    "#Safety",
+    "#Vsl",
+    "#Hidden",
+];
+
 impl Dms {
     pub const RESOURCE_N: &'static str = "dms";
 
     /// Get one dedicated hashtag, if defined
     fn dedicated(&self) -> Option<&str> {
-        self.hashtags.as_ref().and_then(|h| {
-            let h = h.to_lowercase();
-            for tag in [
-                "#LaneUse",
-                "#Parking",
-                "#Tolling",
-                "#TravelTime",
-                "#Wayfinding",
-                "#Safety",
-                "#Vsl",
-                "#Hidden",
-            ] {
-                if h.contains(&tag.to_lowercase()) {
-                    return Some(tag);
-                }
-            }
-            None
-        })
+        self.hashtags
+            .as_ref()
+            .and_then(|h| {
+                let h = h.to_lowercase();
+                DEDICATED.iter().find(|tag| h.contains(&tag.to_lowercase()))
+            })
+            .copied()
     }
 
     /// Get faults, if any
