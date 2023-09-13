@@ -12,9 +12,9 @@
 //
 use crate::controller::Controller;
 use crate::error::Result;
+use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::resource::{AncillaryData, View};
-use std::borrow::{Borrow, Cow};
 use std::marker::PhantomData;
 use wasm_bindgen::JsValue;
 
@@ -71,7 +71,7 @@ impl<D: Device> AncillaryData for DeviceAnc<D> {
     type Primary = D;
 
     /// Get next ancillary URI
-    fn next_uri(&self, view: View, pri: &D) -> Option<Cow<str>> {
+    fn next_uri(&self, view: View, pri: &D) -> Option<Uri> {
         match (view, &self.controllers, &pri.controller(), &self.controller) {
             (View::Search, None, _, _) => Some(CONTROLLER_URI.into()),
             (View::Compact | View::Status(_), _, Some(ctrl), None) => {

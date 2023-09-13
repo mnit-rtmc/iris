@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -11,10 +11,10 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
+use crate::fetch::Uri;
 use crate::resource::{AncillaryData, Card, View, EDIT_BUTTON, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr};
 use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
 use std::fmt;
 use wasm_bindgen::JsValue;
 
@@ -61,7 +61,7 @@ impl AncillaryData for LcsArrayAnc {
     type Primary = LcsArray;
 
     /// Get next ancillary URI
-    fn next_uri(&self, _view: View, _pri: &LcsArray) -> Option<Cow<str>> {
+    fn next_uri(&self, _view: View, _pri: &LcsArray) -> Option<Uri> {
         match &self.locks {
             None => Some(LCS_LOCK_URI.into()),
             _ => None,

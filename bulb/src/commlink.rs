@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,12 +13,12 @@
 use crate::commconfig::CommConfig;
 use crate::controller::Controller;
 use crate::error::Result;
+use crate::fetch::Uri;
 use crate::resource::{
     disabled_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use serde::{Deserialize, Serialize};
-use std::borrow::{Borrow, Cow};
 use std::fmt;
 use wasm_bindgen::JsValue;
 
@@ -47,7 +47,7 @@ impl AncillaryData for CommLinkAnc {
     type Primary = CommLink;
 
     /// Get next ancillary URI
-    fn next_uri(&self, view: View, _pri: &CommLink) -> Option<Cow<str>> {
+    fn next_uri(&self, view: View, _pri: &CommLink) -> Option<Uri> {
         match (view, &self.controllers, &self.comm_configs) {
             (View::Status(_), None, _) => Some(CONTROLLER_URI.into()),
             (View::Status(_) | View::Edit | View::Search, _, None) => {

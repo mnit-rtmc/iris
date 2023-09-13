@@ -11,13 +11,13 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
+use crate::fetch::Uri;
 use crate::gatearm::warn_state;
 use crate::resource::{
     AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr};
 use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
 use std::fmt;
 use wasm_bindgen::JsValue;
 
@@ -66,7 +66,7 @@ impl AncillaryData for GateArmArrayAnc {
     type Primary = GateArmArray;
 
     /// Get next ancillary URI
-    fn next_uri(&self, view: View, _pri: &GateArmArray) -> Option<Cow<str>> {
+    fn next_uri(&self, view: View, _pri: &GateArmArray) -> Option<Uri> {
         match (view, &self.states) {
             (View::Search | View::Status(_), None) => {
                 Some(GATE_ARM_STATE_URI.into())

@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -11,11 +11,11 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
+use crate::fetch::Uri;
 use crate::resource::{disabled_attr, AncillaryData, Card, View};
 use crate::role::Role;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
 use std::fmt;
 use wasm_bindgen::JsValue;
 
@@ -38,7 +38,7 @@ impl AncillaryData for UserAnc {
     type Primary = User;
 
     /// Get next ancillary URI
-    fn next_uri(&self, view: View, _pri: &User) -> Option<Cow<str>> {
+    fn next_uri(&self, view: View, _pri: &User) -> Option<Uri> {
         match (view, &self.roles) {
             (View::Edit, None) => Some("/iris/api/role".into()),
             _ => None,

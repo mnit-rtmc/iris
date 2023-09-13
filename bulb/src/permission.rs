@@ -11,13 +11,13 @@
 // GNU General Public License for more details.
 //
 use crate::error::{Error, Result};
+use crate::fetch::Uri;
 use crate::resource::{AncillaryData, Card, Resource, View, NAME};
 use crate::role::Role;
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, Select};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
-use std::borrow::{Borrow, Cow};
 use std::fmt;
 use wasm_bindgen::JsValue;
 
@@ -45,7 +45,7 @@ impl AncillaryData for PermissionAnc {
     type Primary = Permission;
 
     /// Get next ancillary URI
-    fn next_uri(&self, view: View, _pri: &Permission) -> Option<Cow<str>> {
+    fn next_uri(&self, view: View, _pri: &Permission) -> Option<Uri> {
         match (view, &self.resource_types, &self.roles) {
             (View::Create | View::Edit, None, _) => {
                 Some(RESOURCE_TYPE_URI.into())

@@ -14,6 +14,7 @@ use crate::cabinetstyle::CabinetStyle;
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::error::Result;
+use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::resource::{
     disabled_attr, AncillaryData, Card, Resource, View, EDIT_BUTTON,
@@ -21,7 +22,6 @@ use crate::resource::{
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select, TextArea};
 use serde::{Deserialize, Serialize};
-use std::borrow::{Borrow, Cow};
 use std::fmt;
 use wasm_bindgen::JsValue;
 
@@ -84,7 +84,7 @@ impl AncillaryData for ControllerAnc {
     type Primary = Controller;
 
     /// Get next ancillary URI
-    fn next_uri(&self, view: View, pri: &Controller) -> Option<Cow<str>> {
+    fn next_uri(&self, view: View, pri: &Controller) -> Option<Uri> {
         match (
             view,
             &self.conditions,

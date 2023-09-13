@@ -11,15 +11,41 @@
 // GNU General Public License for more details.
 //
 use crate::error::{Error, Result};
+use std::borrow::{Borrow, Cow};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{console, Request, RequestInit, Response};
 
+/// Uniform resource identifier
+#[derive(Clone, Debug)]
+pub struct Uri<'a>(Cow<'a, str>);
+
+impl From<String> for Uri<'_> {
+    fn from(s: String) -> Self {
+        Uri(Cow::Owned(s))
+    }
+}
+
+impl From<&'static str> for Uri<'_> {
+    fn from(s: &'static str) -> Self {
+        Uri(Cow::Borrowed(s))
+    }
+}
+
+impl Uri<'_> {
+    pub fn borrow(&self) -> &str {
+        self.0.borrow()
+    }
+}
+
 /// Fetch a GET request
-pub async fn get(uri: &str) -> Result<JsValue> {
+pub async fn get<'a, U>(uri: U) -> Result<JsValue>
+where
+    U: Into<Uri<'a>>,
+{
     let window = web_sys::window().unwrap_throw();
-    let req = Request::new_with_str(uri).map_err(|e| {
+    let req = Request::new_with_str(uri.into().borrow()).map_err(|e| {
         console::log_1(&e);
         Error::FetchRequest()
     })?;
@@ -85,19 +111,31 @@ fn resp_status(sc: u16) -> Result<()> {
 }
 
 /// Fetch a PATCH request
-pub async fn patch(uri: &str, json: &JsValue) -> Result<()> {
-    let resp = perform_fetch("PATCH", uri, Some(json)).await?;
+pub async fn patch<'a, U>(uri: U, json: &JsValue) -> Result<()>
+where
+    U: Into<Uri<'a>>,
+{
+    let uri = uri.into();
+    let resp = perform_fetch("PATCH", uri.borrow(), Some(json)).await?;
     resp_status(resp.status())
 }
 
 /// Fetch a POST request
-pub async fn post(uri: &str, json: &JsValue) -> Result<()> {
-    let resp = perform_fetch("POST", uri, Some(json)).await?;
+pub async fn post<'a, U>(uri: U, json: &JsValue) -> Result<()>
+where
+    U: Into<Uri<'a>>,
+{
+    let uri = uri.into();
+    let resp = perform_fetch("POST", uri.borrow(), Some(json)).await?;
     resp_status(resp.status())
 }
 
 /// Fetch a DELETE request
-pub async fn delete(uri: &str) -> Result<()> {
-    let resp = perform_fetch("DELETE", uri, None).await?;
+pub async fn delete<'a, U>(uri: U) -> Result<()>
+where
+    U: Into<Uri<'a>>,
+{
+    let uri = uri.into();
+    let resp = perform_fetch("DELETE", uri.borrow(), None).await?;
     resp_status(resp.status())
 }

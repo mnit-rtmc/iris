@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -11,10 +11,10 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
+use crate::fetch::Uri;
 use crate::resource::{AncillaryData, Card, View};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
 use serde::{Deserialize, Serialize};
-use std::borrow::{Borrow, Cow};
 use std::fmt;
 use wasm_bindgen::JsValue;
 
@@ -75,7 +75,7 @@ impl AncillaryData for GeoLocAnc {
     type Primary = GeoLoc;
 
     /// Get next ancillary URI
-    fn next_uri(&self, view: View, _pri: &GeoLoc) -> Option<Cow<str>> {
+    fn next_uri(&self, view: View, _pri: &GeoLoc) -> Option<Uri> {
         match (view, &self.roads, &self.directions, &self.modifiers) {
             (View::Edit, None, _, _) => Some(ROAD_URI.into()),
             (View::Edit, _, None, _) => Some(DIRECTION_URI.into()),

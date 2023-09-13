@@ -11,10 +11,10 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
+use crate::fetch::Uri;
 use crate::resource::{AncillaryData, Card, View, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
 use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
 use std::fmt;
 use wasm_bindgen::JsValue;
 
@@ -142,7 +142,7 @@ impl AncillaryData for CommConfigAnc {
     type Primary = CommConfig;
 
     /// Get next ancillary URI
-    fn next_uri(&self, view: View, _pri: &CommConfig) -> Option<Cow<str>> {
+    fn next_uri(&self, view: View, _pri: &CommConfig) -> Option<Uri> {
         match (view, &self.protocols) {
             (View::Edit, None) => Some("/iris/comm_protocol".into()),
             _ => None,

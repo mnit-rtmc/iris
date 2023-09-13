@@ -12,12 +12,12 @@
 //
 use crate::controller::Controller;
 use crate::error::Result;
+use crate::fetch::Uri;
 use crate::resource::{
     disabled_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
-use std::borrow::{Borrow, Cow};
 use std::fmt;
 use wasm_bindgen::JsValue;
 
@@ -87,7 +87,7 @@ impl AncillaryData for GateArmAnc {
     type Primary = GateArm;
 
     /// Get next ancillary URI
-    fn next_uri(&self, view: View, pri: &GateArm) -> Option<Cow<str>> {
+    fn next_uri(&self, view: View, pri: &GateArm) -> Option<Uri> {
         match (view, &self.states, &self.controller, &pri.controller()) {
             (_, None, _, _) => Some(GATE_ARM_STATE_URI.into()),
             (View::Status(_), _, None, Some(ctrl)) => {

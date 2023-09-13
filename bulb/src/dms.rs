@@ -12,13 +12,13 @@
 //
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
+use crate::fetch::Uri;
 use crate::item::{ItemState, ItemStates};
 use crate::resource::{
     AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
-use std::borrow::{Borrow, Cow};
 use std::fmt;
 use wasm_bindgen::JsValue;
 
@@ -112,7 +112,7 @@ impl AncillaryData for DmsAnc {
     type Primary = Dms;
 
     /// Get next ancillary data URI
-    fn next_uri(&self, view: View, pri: &Self::Primary) -> Option<Cow<str>> {
+    fn next_uri(&self, view: View, pri: &Self::Primary) -> Option<Uri> {
         self.dev
             .next_uri(view, pri)
             .or_else(|| match (view, &self.messages) {
