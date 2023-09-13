@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ use wasm_bindgen_futures::JsFuture;
 use web_sys::{console, Request, RequestInit, Response};
 
 /// Fetch a GET request
-pub async fn fetch_get(uri: &str) -> Result<JsValue> {
+pub async fn get(uri: &str) -> Result<JsValue> {
     let window = web_sys::window().unwrap_throw();
     let req = Request::new_with_str(uri).map_err(|e| {
         console::log_1(&e);
@@ -85,19 +85,19 @@ fn resp_status(sc: u16) -> Result<()> {
 }
 
 /// Fetch a PATCH request
-pub async fn fetch_patch(uri: &str, json: &JsValue) -> Result<()> {
+pub async fn patch(uri: &str, json: &JsValue) -> Result<()> {
     let resp = perform_fetch("PATCH", uri, Some(json)).await?;
     resp_status(resp.status())
 }
 
 /// Fetch a POST request
-pub async fn fetch_post(uri: &str, json: &JsValue) -> Result<()> {
+pub async fn post(uri: &str, json: &JsValue) -> Result<()> {
     let resp = perform_fetch("POST", uri, Some(json)).await?;
     resp_status(resp.status())
 }
 
 /// Fetch a DELETE request
-pub async fn fetch_delete(uri: &str) -> Result<()> {
+pub async fn delete(uri: &str) -> Result<()> {
     let resp = perform_fetch("DELETE", uri, None).await?;
     resp_status(resp.status())
 }
