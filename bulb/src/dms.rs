@@ -131,7 +131,7 @@ impl AncillaryData for DmsAnc {
         json: JsValue,
     ) -> Result<()> {
         if let Some(uri) = self.next_uri(view, pri) {
-            match uri.borrow() {
+            match uri.as_str() {
                 SIGN_MSG_URI => {
                     self.messages = Some(serde_wasm_bindgen::from_value(json)?);
                 }

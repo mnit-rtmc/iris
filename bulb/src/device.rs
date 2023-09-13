@@ -84,7 +84,7 @@ impl<D: Device> AncillaryData for DeviceAnc<D> {
     /// Put ancillary JSON data
     fn set_json(&mut self, view: View, pri: &D, json: JsValue) -> Result<()> {
         if let Some(uri) = self.next_uri(view, pri) {
-            match uri.borrow() {
+            match uri.as_str() {
                 CONTROLLER_URI => {
                     self.controllers =
                         Some(serde_wasm_bindgen::from_value(json)?);

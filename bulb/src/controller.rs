@@ -118,7 +118,7 @@ impl AncillaryData for ControllerAnc {
         json: JsValue,
     ) -> Result<()> {
         if let Some(uri) = self.next_uri(view, pri) {
-            match uri.borrow() {
+            match uri.as_str() {
                 CONDITION_URI => {
                     self.conditions =
                         Some(serde_wasm_bindgen::from_value(json)?);

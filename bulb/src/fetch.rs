@@ -34,7 +34,7 @@ impl From<&'static str> for Uri<'_> {
 }
 
 impl Uri<'_> {
-    pub fn borrow(&self) -> &str {
+    pub fn as_str(&self) -> &str {
         self.0.borrow()
     }
 }
@@ -45,7 +45,7 @@ where
     U: Into<Uri<'a>>,
 {
     let window = web_sys::window().unwrap_throw();
-    let req = Request::new_with_str(uri.into().borrow()).map_err(|e| {
+    let req = Request::new_with_str(uri.into().as_str()).map_err(|e| {
         console::log_1(&e);
         Error::FetchRequest()
     })?;
@@ -116,7 +116,7 @@ where
     U: Into<Uri<'a>>,
 {
     let uri = uri.into();
-    let resp = perform_fetch("PATCH", uri.borrow(), Some(json)).await?;
+    let resp = perform_fetch("PATCH", uri.as_str(), Some(json)).await?;
     resp_status(resp.status())
 }
 
@@ -126,7 +126,7 @@ where
     U: Into<Uri<'a>>,
 {
     let uri = uri.into();
-    let resp = perform_fetch("POST", uri.borrow(), Some(json)).await?;
+    let resp = perform_fetch("POST", uri.as_str(), Some(json)).await?;
     resp_status(resp.status())
 }
 
@@ -136,6 +136,6 @@ where
     U: Into<Uri<'a>>,
 {
     let uri = uri.into();
-    let resp = perform_fetch("DELETE", uri.borrow(), None).await?;
+    let resp = perform_fetch("DELETE", uri.as_str(), None).await?;
     resp_status(resp.status())
 }

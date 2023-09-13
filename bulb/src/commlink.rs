@@ -65,7 +65,7 @@ impl AncillaryData for CommLinkAnc {
         json: JsValue,
     ) -> Result<()> {
         if let Some(uri) = self.next_uri(view, pri) {
-            match uri.borrow() {
+            match uri.as_str() {
                 CONTROLLER_URI => {
                     let mut controllers: Vec<Controller> =
                         serde_wasm_bindgen::from_value(json)?;

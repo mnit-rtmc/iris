@@ -91,7 +91,7 @@ impl AncillaryData for LcsIndicationAnc {
         json: JsValue,
     ) -> Result<()> {
         if let Some(uri) = self.next_uri(view, pri) {
-            match uri.borrow() {
+            match uri.as_str() {
                 LANE_USE_INDICATION_URI => {
                     self.indications =
                         Some(serde_wasm_bindgen::from_value(json)?);
