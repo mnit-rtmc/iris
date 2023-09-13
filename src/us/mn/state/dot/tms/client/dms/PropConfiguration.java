@@ -39,7 +39,6 @@ import us.mn.state.dot.tms.utils.HexString;
 import static us.mn.state.dot.tms.units.Distance.Units.INCHES;
 import static us.mn.state.dot.tms.units.Distance.Units.MILLIMETERS;
 import us.mn.state.dot.tms.utils.I18N;
-import us.mn.state.dot.tms.utils.SString;
 
 /**
  * PropConfiguration is a GUI panel for displaying sign configuration on a
@@ -216,15 +215,15 @@ public class PropConfiguration extends IPanel {
 		module_width_txt.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				config.setModuleWidth(SString.stringToInt(
-					module_width_txt.getText()));
+				config.setModuleWidth(parseInt(
+					module_width_txt));
 			}
 		});
 		module_height_txt.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				config.setModuleHeight(SString.stringToInt(
-					module_height_txt.getText()));
+				config.setModuleHeight(parseInt(
+					module_height_txt));
 			}
 		});
 		updateAttribute(null);
@@ -271,12 +270,16 @@ public class PropConfiguration extends IPanel {
 			}
 		}
 		if (null == a || a.equals("moduleHeight")) {
-			module_height_txt.setText(
-				SString.intToString(sc.getModuleHeight()));
+			Integer h = sc.getModuleHeight();
+			module_height_txt.setText((h != null)
+			                         ? h.toString()
+			                         : "");
 		}
 		if (null == a || a.equals("moduleWidth")) {
-			module_width_txt.setText(
-				SString.intToString(sc.getModuleWidth()));
+			Integer w = sc.getModuleWidth();
+			module_width_txt.setText((w != null)
+			                        ? w.toString()
+			                        : "");
 		}
 	}
 
