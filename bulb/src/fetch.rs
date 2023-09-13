@@ -19,30 +19,30 @@ use web_sys::{console, Request, RequestInit, Response};
 
 /// Uniform resource identifier
 #[derive(Clone, Debug)]
-pub struct Uri<'a>(Cow<'a, str>);
+pub struct Uri(Cow<'static, str>);
 
-impl From<String> for Uri<'_> {
+impl From<String> for Uri {
     fn from(s: String) -> Self {
         Uri(Cow::Owned(s))
     }
 }
 
-impl From<&'static str> for Uri<'_> {
+impl From<&'static str> for Uri {
     fn from(s: &'static str) -> Self {
         Uri(Cow::Borrowed(s))
     }
 }
 
-impl Uri<'_> {
+impl Uri {
     pub fn as_str(&self) -> &str {
         self.0.borrow()
     }
 }
 
 /// Fetch a GET request
-pub async fn get<'a, U>(uri: U) -> Result<JsValue>
+pub async fn get<U>(uri: U) -> Result<JsValue>
 where
-    U: Into<Uri<'a>>,
+    U: Into<Uri>,
 {
     let window = web_sys::window().unwrap_throw();
     let req = Request::new_with_str(uri.into().as_str()).map_err(|e| {
@@ -111,9 +111,9 @@ fn resp_status(sc: u16) -> Result<()> {
 }
 
 /// Fetch a PATCH request
-pub async fn patch<'a, U>(uri: U, json: &JsValue) -> Result<()>
+pub async fn patch<U>(uri: U, json: &JsValue) -> Result<()>
 where
-    U: Into<Uri<'a>>,
+    U: Into<Uri>,
 {
     let uri = uri.into();
     let resp = perform_fetch("PATCH", uri.as_str(), Some(json)).await?;
@@ -121,9 +121,9 @@ where
 }
 
 /// Fetch a POST request
-pub async fn post<'a, U>(uri: U, json: &JsValue) -> Result<()>
+pub async fn post<U>(uri: U, json: &JsValue) -> Result<()>
 where
-    U: Into<Uri<'a>>,
+    U: Into<Uri>,
 {
     let uri = uri.into();
     let resp = perform_fetch("POST", uri.as_str(), Some(json)).await?;
@@ -131,9 +131,9 @@ where
 }
 
 /// Fetch a DELETE request
-pub async fn delete<'a, U>(uri: U) -> Result<()>
+pub async fn delete<U>(uri: U) -> Result<()>
 where
-    U: Into<Uri<'a>>,
+    U: Into<Uri>,
 {
     let uri = uri.into();
     let resp = perform_fetch("DELETE", uri.as_str(), None).await?;
