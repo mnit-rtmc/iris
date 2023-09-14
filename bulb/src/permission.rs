@@ -19,6 +19,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
 use std::fmt;
+use std::iter::empty;
 use wasm_bindgen::JsValue;
 
 /// Permission
@@ -44,34 +45,31 @@ const ROLE_URI: &str = "/iris/api/role";
 impl AncillaryData for PermissionAnc {
     type Primary = Permission;
 
-    /// Get next ancillary URI
-    fn next_uri(&self, view: View, _pri: &Permission) -> Option<Uri> {
-        match (view, &self.resource_types, &self.roles) {
-            (View::Create | View::Edit, None, _) => {
-                Some(RESOURCE_TYPE_URI.into())
-            }
-            (View::Create | View::Edit, _, None) => Some(ROLE_URI.into()),
-            _ => None,
+    /// Get URI iterator
+    fn uri_iter(
+        &self,
+        _pri: &Permission,
+        view: View,
+    ) -> Box<dyn Iterator<Item = Uri>> {
+        match view {
+            View::Create | View::Edit => Box::new(
+                [RESOURCE_TYPE_URI.into(), ROLE_URI.into()].into_iter(),
+            ),
+            _ => Box::new(empty()),
         }
     }
 
     /// Put ancillary JSON data
     fn set_json(
         &mut self,
-        view: View,
-        pri: &Permission,
+        _pri: &Permission,
+        uri: Uri,
         json: JsValue,
     ) -> Result<()> {
-        if let Some(uri) = self.next_uri(view, pri) {
-            match uri.as_str() {
-                RESOURCE_TYPE_URI => {
-                    self.resource_types =
-                        Some(serde_wasm_bindgen::from_value(json)?);
-                }
-                _ => {
-                    self.roles = Some(serde_wasm_bindgen::from_value(json)?);
-                }
-            }
+        if uri.as_str() == RESOURCE_TYPE_URI {
+            self.resource_types = Some(serde_wasm_bindgen::from_value(json)?);
+        } else {
+            self.roles = Some(serde_wasm_bindgen::from_value(json)?);
         }
         Ok(())
     }

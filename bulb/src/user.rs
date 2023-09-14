@@ -17,6 +17,7 @@ use crate::role::Role;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use std::iter::{empty, once};
 use wasm_bindgen::JsValue;
 
 /// User
@@ -37,19 +38,23 @@ pub struct UserAnc {
 impl AncillaryData for UserAnc {
     type Primary = User;
 
-    /// Get next ancillary URI
-    fn next_uri(&self, view: View, _pri: &User) -> Option<Uri> {
-        match (view, &self.roles) {
-            (View::Edit, None) => Some("/iris/api/role".into()),
-            _ => None,
+    /// Get URI iterator
+    fn uri_iter(
+        &self,
+        _pri: &User,
+        view: View,
+    ) -> Box<dyn Iterator<Item = Uri>> {
+        match view {
+            View::Edit => Box::new(once("/iris/api/role".into())),
+            _ => Box::new(empty()),
         }
     }
 
     /// Put ancillary JSON data
     fn set_json(
         &mut self,
-        _view: View,
         _pri: &User,
+        _uri: Uri,
         json: JsValue,
     ) -> Result<()> {
         self.roles = Some(serde_wasm_bindgen::from_value(json)?);

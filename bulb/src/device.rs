@@ -15,6 +15,7 @@ use crate::error::Result;
 use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::resource::{AncillaryData, View};
+use std::iter::{empty, once};
 use std::marker::PhantomData;
 use wasm_bindgen::JsValue;
 
@@ -70,30 +71,23 @@ const CONTROLLER_URI: &str = "/iris/api/controller";
 impl<D: Device> AncillaryData for DeviceAnc<D> {
     type Primary = D;
 
-    /// Get next ancillary URI
-    fn next_uri(&self, view: View, pri: &D) -> Option<Uri> {
-        match (view, &self.controllers, &pri.controller(), &self.controller) {
-            (View::Search, None, _, _) => Some(CONTROLLER_URI.into()),
-            (View::Compact | View::Status(_), _, Some(ctrl), None) => {
-                Some(format!("/iris/api/controller/{}", &ctrl).into())
+    /// Get URI iterator
+    fn uri_iter(&self, pri: &D, view: View) -> Box<dyn Iterator<Item = Uri>> {
+        match (view, &pri.controller()) {
+            (View::Search, _) => Box::new(once(CONTROLLER_URI.into())),
+            (View::Compact | View::Status(_), Some(ctrl)) => {
+                Box::new(once(format!("/iris/api/controller/{ctrl}").into()))
             }
-            _ => None,
+            _ => Box::new(empty()),
         }
     }
 
     /// Put ancillary JSON data
-    fn set_json(&mut self, view: View, pri: &D, json: JsValue) -> Result<()> {
-        if let Some(uri) = self.next_uri(view, pri) {
-            match uri.as_str() {
-                CONTROLLER_URI => {
-                    self.controllers =
-                        Some(serde_wasm_bindgen::from_value(json)?);
-                }
-                _ => {
-                    self.controller =
-                        Some(serde_wasm_bindgen::from_value(json)?)
-                }
-            }
+    fn set_json(&mut self, _pri: &D, uri: Uri, json: JsValue) -> Result<()> {
+        if uri.as_str() == CONTROLLER_URI {
+            self.controllers = Some(serde_wasm_bindgen::from_value(json)?);
+        } else {
+            self.controller = Some(serde_wasm_bindgen::from_value(json)?);
         }
         Ok(())
     }

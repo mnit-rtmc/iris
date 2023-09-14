@@ -23,6 +23,7 @@ use crate::resource::{
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select, TextArea};
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use std::iter::empty;
 use wasm_bindgen::JsValue;
 
 /// Controller conditions
@@ -83,62 +84,61 @@ const CABINET_STYLE_URI: &str = "/iris/api/cabinet_style";
 impl AncillaryData for ControllerAnc {
     type Primary = Controller;
 
-    /// Get next ancillary URI
-    fn next_uri(&self, view: View, pri: &Controller) -> Option<Uri> {
-        match (
-            view,
-            &self.conditions,
-            &self.comm_links,
-            &self.comm_configs,
-            &self.cabinet_styles,
-            &self.controller_io,
-        ) {
-            (View::Search | View::Status(_) | View::Edit, None, _, _, _, _) => {
-                Some(CONDITION_URI.into())
-            }
-            (View::Search | View::Status(_), _, None, _, _, _) => {
-                Some(COMM_LINK_URI.into())
-            }
-            (View::Search | View::Status(_), _, _, None, _, _) => {
-                Some(COMM_CONFIG_URI.into())
-            }
-            (View::Edit, _, _, _, None, _) => Some(CABINET_STYLE_URI.into()),
-            (View::Status(_), _, _, _, _, None) => {
-                Some(format!("/iris/api/controller_io/{}", &pri.name).into())
-            }
-            _ => None,
+    /// Get URI iterator
+    fn uri_iter(
+        &self,
+        pri: &Controller,
+        view: View,
+    ) -> Box<dyn Iterator<Item = Uri>> {
+        match view {
+            View::Search => Box::new(
+                [
+                    CONDITION_URI.into(),
+                    COMM_LINK_URI.into(),
+                    COMM_CONFIG_URI.into(),
+                ]
+                .into_iter(),
+            ),
+            View::Status(_) => Box::new(
+                [
+                    CONDITION_URI.into(),
+                    COMM_LINK_URI.into(),
+                    COMM_CONFIG_URI.into(),
+                    format!("/iris/api/controller_io/{}", &pri.name).into(),
+                ]
+                .into_iter(),
+            ),
+            View::Edit => Box::new(
+                [CONDITION_URI.into(), CABINET_STYLE_URI.into()].into_iter(),
+            ),
+            _ => Box::new(empty()),
         }
     }
 
     /// Put ancillary JSON data
     fn set_json(
         &mut self,
-        view: View,
-        pri: &Controller,
+        _pri: &Controller,
+        uri: Uri,
         json: JsValue,
     ) -> Result<()> {
-        if let Some(uri) = self.next_uri(view, pri) {
-            match uri.as_str() {
-                CONDITION_URI => {
-                    self.conditions =
-                        Some(serde_wasm_bindgen::from_value(json)?);
-                }
-                COMM_LINK_URI => {
-                    self.comm_links =
-                        Some(serde_wasm_bindgen::from_value(json)?);
-                }
-                COMM_CONFIG_URI => {
-                    self.comm_configs =
-                        Some(serde_wasm_bindgen::from_value(json)?);
-                }
-                CABINET_STYLE_URI => {
-                    self.cabinet_styles =
-                        Some(serde_wasm_bindgen::from_value(json)?);
-                }
-                _ => {
-                    self.controller_io =
-                        Some(serde_wasm_bindgen::from_value(json)?);
-                }
+        match uri.as_str() {
+            CONDITION_URI => {
+                self.conditions = Some(serde_wasm_bindgen::from_value(json)?);
+            }
+            COMM_LINK_URI => {
+                self.comm_links = Some(serde_wasm_bindgen::from_value(json)?);
+            }
+            COMM_CONFIG_URI => {
+                self.comm_configs = Some(serde_wasm_bindgen::from_value(json)?);
+            }
+            CABINET_STYLE_URI => {
+                self.cabinet_styles =
+                    Some(serde_wasm_bindgen::from_value(json)?);
+            }
+            _ => {
+                self.controller_io =
+                    Some(serde_wasm_bindgen::from_value(json)?);
             }
         }
         Ok(())

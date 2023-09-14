@@ -494,6 +494,7 @@ dependencies = [
  "humantime",
  "mag",
  "percent-encoding",
+ "rendzina",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",

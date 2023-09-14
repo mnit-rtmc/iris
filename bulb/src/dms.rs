@@ -18,6 +18,7 @@ use crate::resource::{
     AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use rendzina::SignConfig;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use wasm_bindgen::JsValue;
@@ -99,44 +100,80 @@ pub struct SignMessage {
     pub duration: Option<u32>,
 }
 
+/// Message Pattern
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct MsgPattern {
+    pub name: String,
+    pub compose_hashtag: Option<String>,
+    pub multi: String,
+    pub flash_beacon: Option<bool>,
+}
+
+/// Font name
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct FontName {
+    pub font_number: u8,
+    pub name: String,
+}
+
 /// DMS ancillary data
 #[derive(Default)]
 pub struct DmsAnc {
     dev: DeviceAnc<Dms>,
     messages: Option<Vec<SignMessage>>,
+    configs: Option<Vec<SignConfig>>,
+    patterns: Option<Vec<MsgPattern>>,
+    fnames: Option<Vec<FontName>>,
 }
 
 const SIGN_MSG_URI: &str = "/iris/sign_message";
+const SIGN_CFG_URI: &str = "/iris/sign_config";
+const MSG_PATTERN_URI: &str = "/iris/api/msg_pattern";
+const FONTS_URI: &str = "/iris/api/fonts";
 
 impl AncillaryData for DmsAnc {
     type Primary = Dms;
 
-    /// Get next ancillary data URI
-    fn next_uri(&self, view: View, pri: &Self::Primary) -> Option<Uri> {
-        self.dev
-            .next_uri(view, pri)
-            .or_else(|| match (view, &self.messages) {
-                (View::Compact | View::Search | View::Status(_), None) => {
-                    Some(SIGN_MSG_URI.into())
-                }
-                _ => None,
-            })
+    /// Get ancillary URI iterator
+    fn uri_iter(
+        &self,
+        pri: &Self::Primary,
+        view: View,
+    ) -> Box<dyn Iterator<Item = Uri>> {
+        let mut uris = Vec::new();
+        if let View::Compact | View::Search = view {
+            uris.push(SIGN_MSG_URI.into());
+        }
+        if let View::Status(_) = view {
+            uris.push(SIGN_MSG_URI.into());
+            uris.push(SIGN_CFG_URI.into());
+            uris.push(MSG_PATTERN_URI.into());
+            uris.push(FONTS_URI.into());
+        }
+        Box::new(uris.into_iter().chain(self.dev.uri_iter(pri, view)))
     }
 
     /// Set ancillary JSON data
     fn set_json(
         &mut self,
-        view: View,
         pri: &Self::Primary,
+        uri: Uri,
         json: JsValue,
     ) -> Result<()> {
-        if let Some(uri) = self.next_uri(view, pri) {
-            match uri.as_str() {
-                SIGN_MSG_URI => {
-                    self.messages = Some(serde_wasm_bindgen::from_value(json)?);
-                }
-                _ => self.dev.set_json(view, pri, json)?,
+        match uri.as_str() {
+            SIGN_MSG_URI => {
+                self.messages = Some(serde_wasm_bindgen::from_value(json)?);
             }
+            SIGN_CFG_URI => {
+                self.configs = Some(serde_wasm_bindgen::from_value(json)?);
+            }
+            MSG_PATTERN_URI => {
+                self.patterns = Some(serde_wasm_bindgen::from_value(json)?);
+            }
+            FONTS_URI => {
+                self.fnames = Some(serde_wasm_bindgen::from_value(json)?);
+            }
+            _ => self.dev.set_json(pri, uri, json)?,
         }
         Ok(())
     }

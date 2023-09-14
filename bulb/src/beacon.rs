@@ -20,6 +20,7 @@ use crate::resource::{
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use std::iter::once;
 use wasm_bindgen::JsValue;
 
 /// Beacon States
@@ -57,32 +58,28 @@ const BEACON_STATE_URI: &str = "/iris/beacon_state";
 impl AncillaryData for BeaconAnc {
     type Primary = Beacon;
 
-    /// Get next ancillary data URI
-    fn next_uri(&self, view: View, pri: &Self::Primary) -> Option<Uri> {
-        self.dev
-            .next_uri(view, pri)
-            .or_else(|| match (view, &self.states) {
-                (View::Compact | View::Search | View::Status(_), None) => {
-                    Some(BEACON_STATE_URI.into())
-                }
-                _ => None,
-            })
+    /// Get ancillary URI iterator
+    fn uri_iter(
+        &self,
+        pri: &Self::Primary,
+        view: View,
+    ) -> Box<dyn Iterator<Item = Uri>> {
+        Box::new(
+            once(BEACON_STATE_URI.into()).chain(self.dev.uri_iter(pri, view)),
+        )
     }
 
     /// Set ancillary JSON data
     fn set_json(
         &mut self,
-        view: View,
         pri: &Self::Primary,
+        uri: Uri,
         json: JsValue,
     ) -> Result<()> {
-        if let Some(uri) = self.next_uri(view, pri) {
-            match uri.as_str() {
-                BEACON_STATE_URI => {
-                    self.states = Some(serde_wasm_bindgen::from_value(json)?);
-                }
-                _ => self.dev.set_json(view, pri, json)?,
-            }
+        if uri.as_str() == BEACON_STATE_URI {
+            self.states = Some(serde_wasm_bindgen::from_value(json)?);
+        } else {
+            self.dev.set_json(pri, uri, json)?;
         }
         Ok(())
     }

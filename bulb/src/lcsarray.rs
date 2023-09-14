@@ -16,6 +16,7 @@ use crate::resource::{AncillaryData, Card, View, EDIT_BUTTON, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr};
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use std::iter::once;
 use wasm_bindgen::JsValue;
 
 /// LCS locks
@@ -60,19 +61,20 @@ const LCS_LOCK_URI: &str = "/iris/lcs_lock";
 impl AncillaryData for LcsArrayAnc {
     type Primary = LcsArray;
 
-    /// Get next ancillary URI
-    fn next_uri(&self, _view: View, _pri: &LcsArray) -> Option<Uri> {
-        match &self.locks {
-            None => Some(LCS_LOCK_URI.into()),
-            _ => None,
-        }
+    /// Get URI iterator
+    fn uri_iter(
+        &self,
+        _pri: &LcsArray,
+        _view: View,
+    ) -> Box<dyn Iterator<Item = Uri>> {
+        Box::new(once(LCS_LOCK_URI.into()))
     }
 
     /// Put ancillary JSON data
     fn set_json(
         &mut self,
-        _view: View,
         _pri: &LcsArray,
+        _uri: Uri,
         json: JsValue,
     ) -> Result<()> {
         self.locks = Some(serde_wasm_bindgen::from_value(json)?);
