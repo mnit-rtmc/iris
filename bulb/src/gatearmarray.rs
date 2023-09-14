@@ -80,15 +80,15 @@ impl AncillaryData for GateArmArrayAnc {
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
         _pri: &GateArmArray,
         _uri: Uri,
-        json: JsValue,
-    ) -> Result<()> {
-        self.states = Some(serde_wasm_bindgen::from_value(json)?);
-        Ok(())
+        data: JsValue,
+    ) -> Result<bool> {
+        self.states = Some(serde_wasm_bindgen::from_value(data)?);
+        Ok(false)
     }
 }
 

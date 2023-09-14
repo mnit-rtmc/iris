@@ -94,26 +94,26 @@ impl AncillaryData for GeoLocAnc {
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
         _pri: &GeoLoc,
         uri: Uri,
-        json: JsValue,
-    ) -> Result<()> {
+        data: JsValue,
+    ) -> Result<bool> {
         match uri.as_str() {
             ROAD_URI => {
-                self.roads = Some(serde_wasm_bindgen::from_value(json)?)
+                self.roads = Some(serde_wasm_bindgen::from_value(data)?)
             }
             DIRECTION_URI => {
-                self.directions = Some(serde_wasm_bindgen::from_value(json)?);
+                self.directions = Some(serde_wasm_bindgen::from_value(data)?);
             }
             ROAD_MODIFIER_URI => {
-                self.modifiers = Some(serde_wasm_bindgen::from_value(json)?);
+                self.modifiers = Some(serde_wasm_bindgen::from_value(data)?);
             }
             _ => (),
         }
-        Ok(())
+        Ok(false)
     }
 }
 

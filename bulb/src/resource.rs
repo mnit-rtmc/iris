@@ -147,14 +147,14 @@ pub trait AncillaryData {
         Box::new(empty())
     }
 
-    /// Set ancillary JSON data
-    fn set_json(
+    /// Set ancillary data
+    fn set_data(
         &mut self,
         _pri: &Self::Primary,
         _uri: Uri,
-        _json: JsValue,
-    ) -> Result<()> {
-        Ok(())
+        _data: JsValue,
+    ) -> Result<bool> {
+        Ok(false)
     }
 }
 
@@ -663,14 +663,22 @@ async fn fetch_list<C: Card>(
 /// Fetch ancillary data
 async fn fetch_ancillary<C: Card>(view: View, pri: &C) -> Result<C::Ancillary> {
     let mut anc = C::Ancillary::default();
-    for uri in anc.uri_iter(pri, view) {
-        match fetch::get(uri.clone()).await {
-            Ok(json) => anc.set_json(pri, uri, json)?,
-            Err(Error::FetchResponseForbidden()) => {
-                // Oops, we don't have permission to read ancillary data
-                break;
+    let mut more = true;
+    while more {
+        more = false;
+        for uri in anc.uri_iter(pri, view) {
+            match fetch::get(uri.clone()).await {
+                Ok(data) => {
+                    if anc.set_data(pri, uri, data)? {
+                        more = true;
+                    }
+                }
+                Err(Error::FetchResponseForbidden()) => {
+                    // Oops, we don't have permission to read ancillary data
+                    break;
+                }
+                Err(e) => return Err(e),
             }
-            Err(e) => return Err(e),
         }
     }
     Ok(anc)

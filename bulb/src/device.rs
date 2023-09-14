@@ -82,13 +82,13 @@ impl<D: Device> AncillaryData for DeviceAnc<D> {
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(&mut self, _pri: &D, uri: Uri, json: JsValue) -> Result<()> {
+    /// Put ancillary data
+    fn set_data(&mut self, _pri: &D, uri: Uri, data: JsValue) -> Result<bool> {
         if uri.as_str() == CONTROLLER_URI {
-            self.controllers = Some(serde_wasm_bindgen::from_value(json)?);
+            self.controllers = Some(serde_wasm_bindgen::from_value(data)?);
         } else {
-            self.controller = Some(serde_wasm_bindgen::from_value(json)?);
+            self.controller = Some(serde_wasm_bindgen::from_value(data)?);
         }
-        Ok(())
+        Ok(false)
     }
 }

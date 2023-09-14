@@ -12,12 +12,13 @@
 //
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
-use crate::fetch::Uri;
+use crate::fetch::{ContentType, Uri};
 use crate::item::{ItemState, ItemStates};
 use crate::resource::{
     AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use ntcip::dms::font::{ifnt, FontTable};
 use rendzina::SignConfig;
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -124,6 +125,7 @@ pub struct DmsAnc {
     configs: Option<Vec<SignConfig>>,
     patterns: Option<Vec<MsgPattern>>,
     fnames: Option<Vec<FontName>>,
+    fonts: FontTable,
 }
 
 const SIGN_MSG_URI: &str = "/iris/sign_message";
@@ -141,6 +143,16 @@ impl AncillaryData for DmsAnc {
         view: View,
     ) -> Box<dyn Iterator<Item = Uri>> {
         let mut uris = Vec::new();
+        // Have we been here before?
+        if let Some(fnames) = &self.fnames {
+            for fname in fnames {
+                uris.push(
+                    Uri::from(format!("/iris/api/font/{}.ifnt", fname.name))
+                        .with_content_type(ContentType::Text),
+                );
+            }
+            return Box::new(uris.into_iter());
+        }
         if let View::Compact | View::Search = view {
             uris.push(SIGN_MSG_URI.into());
         }
@@ -153,29 +165,38 @@ impl AncillaryData for DmsAnc {
         Box::new(uris.into_iter().chain(self.dev.uri_iter(pri, view)))
     }
 
-    /// Set ancillary JSON data
-    fn set_json(
+    /// Set ancillary data
+    fn set_data(
         &mut self,
         pri: &Self::Primary,
         uri: Uri,
-        json: JsValue,
-    ) -> Result<()> {
+        data: JsValue,
+    ) -> Result<bool> {
         match uri.as_str() {
             SIGN_MSG_URI => {
-                self.messages = Some(serde_wasm_bindgen::from_value(json)?);
+                self.messages = Some(serde_wasm_bindgen::from_value(data)?);
             }
             SIGN_CFG_URI => {
-                self.configs = Some(serde_wasm_bindgen::from_value(json)?);
+                self.configs = Some(serde_wasm_bindgen::from_value(data)?);
             }
             MSG_PATTERN_URI => {
-                self.patterns = Some(serde_wasm_bindgen::from_value(json)?);
+                self.patterns = Some(serde_wasm_bindgen::from_value(data)?);
             }
             FONTS_URI => {
-                self.fnames = Some(serde_wasm_bindgen::from_value(json)?);
+                self.fnames = Some(serde_wasm_bindgen::from_value(data)?);
+                return Ok(true);
             }
-            _ => self.dev.set_json(pri, uri, json)?,
+            _ => {
+                if uri.as_str().ends_with(".ifnt") {
+                    let font: String = serde_wasm_bindgen::from_value(data)?;
+                    let font = ifnt::read(font.as_bytes())?;
+                    self.fonts.push(font)?;
+                } else {
+                    return self.dev.set_data(pri, uri, data);
+                }
+            }
         }
-        Ok(())
+        Ok(false)
     }
 }
 

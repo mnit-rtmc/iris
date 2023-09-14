@@ -154,15 +154,15 @@ impl AncillaryData for CommConfigAnc {
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
         _pri: &CommConfig,
         _uri: Uri,
-        json: JsValue,
-    ) -> Result<()> {
-        self.protocols = Some(serde_wasm_bindgen::from_value(json)?);
-        Ok(())
+        data: JsValue,
+    ) -> Result<bool> {
+        self.protocols = Some(serde_wasm_bindgen::from_value(data)?);
+        Ok(false)
     }
 }
 

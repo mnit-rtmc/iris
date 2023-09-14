@@ -493,6 +493,7 @@ dependencies = [
  "console_error_panic_hook",
  "humantime",
  "mag",
+ "ntcip",
  "percent-encoding",
  "rendzina",
  "serde",

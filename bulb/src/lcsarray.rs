@@ -70,15 +70,15 @@ impl AncillaryData for LcsArrayAnc {
         Box::new(once(LCS_LOCK_URI.into()))
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
         _pri: &LcsArray,
         _uri: Uri,
-        json: JsValue,
-    ) -> Result<()> {
-        self.locks = Some(serde_wasm_bindgen::from_value(json)?);
-        Ok(())
+        data: JsValue,
+    ) -> Result<bool> {
+        self.locks = Some(serde_wasm_bindgen::from_value(data)?);
+        Ok(false)
     }
 }
 

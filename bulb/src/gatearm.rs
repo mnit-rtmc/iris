@@ -101,19 +101,19 @@ impl AncillaryData for GateArmAnc {
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
         _pri: &GateArm,
         uri: Uri,
-        json: JsValue,
-    ) -> Result<()> {
+        data: JsValue,
+    ) -> Result<bool> {
         if uri.as_str() == GATE_ARM_STATE_URI {
-            self.states = Some(serde_wasm_bindgen::from_value(json)?);
+            self.states = Some(serde_wasm_bindgen::from_value(data)?);
         } else {
-            self.controller = Some(serde_wasm_bindgen::from_value(json)?);
+            self.controller = Some(serde_wasm_bindgen::from_value(data)?);
         }
-        Ok(())
+        Ok(false)
     }
 }
 

@@ -115,33 +115,33 @@ impl AncillaryData for ControllerAnc {
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
         _pri: &Controller,
         uri: Uri,
-        json: JsValue,
-    ) -> Result<()> {
+        data: JsValue,
+    ) -> Result<bool> {
         match uri.as_str() {
             CONDITION_URI => {
-                self.conditions = Some(serde_wasm_bindgen::from_value(json)?);
+                self.conditions = Some(serde_wasm_bindgen::from_value(data)?);
             }
             COMM_LINK_URI => {
-                self.comm_links = Some(serde_wasm_bindgen::from_value(json)?);
+                self.comm_links = Some(serde_wasm_bindgen::from_value(data)?);
             }
             COMM_CONFIG_URI => {
-                self.comm_configs = Some(serde_wasm_bindgen::from_value(json)?);
+                self.comm_configs = Some(serde_wasm_bindgen::from_value(data)?);
             }
             CABINET_STYLE_URI => {
                 self.cabinet_styles =
-                    Some(serde_wasm_bindgen::from_value(json)?);
+                    Some(serde_wasm_bindgen::from_value(data)?);
             }
             _ => {
                 self.controller_io =
-                    Some(serde_wasm_bindgen::from_value(json)?);
+                    Some(serde_wasm_bindgen::from_value(data)?);
             }
         }
-        Ok(())
+        Ok(false)
     }
 }
 

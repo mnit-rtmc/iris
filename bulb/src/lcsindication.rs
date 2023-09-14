@@ -94,19 +94,19 @@ impl AncillaryData for LcsIndicationAnc {
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
         _pri: &LcsIndication,
         uri: Uri,
-        json: JsValue,
-    ) -> Result<()> {
+        data: JsValue,
+    ) -> Result<bool> {
         if uri.as_str() == LANE_USE_INDICATION_URI {
-            self.indications = Some(serde_wasm_bindgen::from_value(json)?);
+            self.indications = Some(serde_wasm_bindgen::from_value(data)?);
         } else {
-            self.controller = Some(serde_wasm_bindgen::from_value(json)?);
+            self.controller = Some(serde_wasm_bindgen::from_value(data)?);
         }
-        Ok(())
+        Ok(false)
     }
 }
 

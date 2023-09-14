@@ -17,25 +17,58 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{console, Request, RequestInit, Response};
 
+/// Fetchable content types
+#[derive(Copy, Clone, Debug)]
+pub enum ContentType {
+    Json,
+    Text,
+}
+
+impl ContentType {
+    /// Get string slice usable in Accept header
+    fn as_str(self) -> &'static str {
+        match self {
+            ContentType::Json => "application/json",
+            ContentType::Text => "text/plain",
+        }
+    }
+}
+
 /// Uniform resource identifier
 #[derive(Clone, Debug)]
-pub struct Uri(Cow<'static, str>);
+pub struct Uri {
+    cow: Cow<'static, str>,
+    content_type: ContentType,
+}
 
 impl From<String> for Uri {
     fn from(s: String) -> Self {
-        Uri(Cow::Owned(s))
+        Uri {
+            cow: Cow::Owned(s),
+            content_type: ContentType::Json,
+        }
     }
 }
 
 impl From<&'static str> for Uri {
     fn from(s: &'static str) -> Self {
-        Uri(Cow::Borrowed(s))
+        Uri {
+            cow: Cow::Borrowed(s),
+            content_type: ContentType::Json,
+        }
     }
 }
 
 impl Uri {
+    /// Set the content type
+    pub fn with_content_type(mut self, content_type: ContentType) -> Self {
+        self.content_type = content_type;
+        self
+    }
+
+    /// Get URI as string slice
     pub fn as_str(&self) -> &str {
-        self.0.borrow()
+        self.cow.borrow()
     }
 }
 
@@ -44,13 +77,14 @@ pub async fn get<U>(uri: U) -> Result<JsValue>
 where
     U: Into<Uri>,
 {
+    let uri = uri.into();
     let window = web_sys::window().unwrap_throw();
-    let req = Request::new_with_str(uri.into().as_str()).map_err(|e| {
+    let req = Request::new_with_str(uri.as_str()).map_err(|e| {
         console::log_1(&e);
         Error::FetchRequest()
     })?;
     req.headers()
-        .set("Accept", "application/json")
+        .set("Accept", uri.content_type.as_str())
         .map_err(|e| {
             console::log_1(&e);
             Error::FetchRequest()
@@ -63,11 +97,17 @@ where
         })?;
     let resp: Response = resp.dyn_into().unwrap_throw();
     resp_status(resp.status())?;
-    let json = resp.json().map_err(|e| {
-        console::log_1(&e);
-        Error::FetchRequest()
-    })?;
-    JsFuture::from(json).await.map_err(|e| {
+    let data = match uri.content_type {
+        ContentType::Json => resp.json().map_err(|e| {
+            console::log_1(&e);
+            Error::FetchRequest()
+        })?,
+        ContentType::Text => resp.text().map_err(|e| {
+            console::log_1(&e);
+            Error::FetchRequest()
+        })?,
+    };
+    JsFuture::from(data).await.map_err(|e| {
         console::log_1(&e);
         Error::FetchRequest()
     })

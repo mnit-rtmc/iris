@@ -69,19 +69,19 @@ impl AncillaryData for BeaconAnc {
         )
     }
 
-    /// Set ancillary JSON data
-    fn set_json(
+    /// Set ancillary data
+    fn set_data(
         &mut self,
         pri: &Self::Primary,
         uri: Uri,
-        json: JsValue,
-    ) -> Result<()> {
+        data: JsValue,
+    ) -> Result<bool> {
         if uri.as_str() == BEACON_STATE_URI {
-            self.states = Some(serde_wasm_bindgen::from_value(json)?);
+            self.states = Some(serde_wasm_bindgen::from_value(data)?);
         } else {
-            self.dev.set_json(pri, uri, json)?;
+            self.dev.set_data(pri, uri, data)?;
         }
-        Ok(())
+        Ok(false)
     }
 }
 

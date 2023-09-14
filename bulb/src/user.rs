@@ -50,15 +50,15 @@ impl AncillaryData for UserAnc {
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
         _pri: &User,
         _uri: Uri,
-        json: JsValue,
-    ) -> Result<()> {
-        self.roles = Some(serde_wasm_bindgen::from_value(json)?);
-        Ok(())
+        data: JsValue,
+    ) -> Result<bool> {
+        self.roles = Some(serde_wasm_bindgen::from_value(data)?);
+        Ok(false)
     }
 }
 

@@ -61,26 +61,26 @@ impl AncillaryData for CommLinkAnc {
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
         pri: &CommLink,
         uri: Uri,
-        json: JsValue,
-    ) -> Result<()> {
+        data: JsValue,
+    ) -> Result<bool> {
         match uri.as_str() {
             CONTROLLER_URI => {
                 let mut controllers: Vec<Controller> =
-                    serde_wasm_bindgen::from_value(json)?;
+                    serde_wasm_bindgen::from_value(data)?;
                 controllers
                     .retain(|c| c.comm_link.as_deref() == Some(&pri.name));
                 self.controllers = Some(controllers);
             }
             _ => {
-                self.comm_configs = Some(serde_wasm_bindgen::from_value(json)?);
+                self.comm_configs = Some(serde_wasm_bindgen::from_value(data)?);
             }
         }
-        Ok(())
+        Ok(false)
     }
 }
 

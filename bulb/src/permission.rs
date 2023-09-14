@@ -59,19 +59,19 @@ impl AncillaryData for PermissionAnc {
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
         _pri: &Permission,
         uri: Uri,
-        json: JsValue,
-    ) -> Result<()> {
+        data: JsValue,
+    ) -> Result<bool> {
         if uri.as_str() == RESOURCE_TYPE_URI {
-            self.resource_types = Some(serde_wasm_bindgen::from_value(json)?);
+            self.resource_types = Some(serde_wasm_bindgen::from_value(data)?);
         } else {
-            self.roles = Some(serde_wasm_bindgen::from_value(json)?);
+            self.roles = Some(serde_wasm_bindgen::from_value(data)?);
         }
-        Ok(())
+        Ok(false)
     }
 }
 
