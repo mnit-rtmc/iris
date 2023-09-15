@@ -123,7 +123,7 @@ pub struct DmsAnc {
     dev: DeviceAnc<Dms>,
     messages: Option<Vec<SignMessage>>,
     configs: Option<Vec<SignConfig>>,
-    patterns: Option<Vec<MsgPattern>>,
+    compose_patterns: Vec<MsgPattern>,
     fnames: Option<Vec<FontName>>,
     fonts: FontTable,
 }
@@ -131,7 +131,7 @@ pub struct DmsAnc {
 const SIGN_MSG_URI: &str = "/iris/sign_message";
 const SIGN_CFG_URI: &str = "/iris/sign_config";
 const MSG_PATTERN_URI: &str = "/iris/api/msg_pattern";
-const FONTS_URI: &str = "/iris/api/fonts";
+const FONT_URI: &str = "/iris/font";
 
 impl AncillaryData for DmsAnc {
     type Primary = Dms;
@@ -147,7 +147,7 @@ impl AncillaryData for DmsAnc {
         if let Some(fnames) = &self.fnames {
             for fname in fnames {
                 uris.push(
-                    Uri::from(format!("/iris/api/font/{}.ifnt", fname.name))
+                    Uri::from(format!("/iris/ifnt/{}.ifnt", fname.name))
                         .with_content_type(ContentType::Text),
                 );
             }
@@ -160,7 +160,7 @@ impl AncillaryData for DmsAnc {
             uris.push(SIGN_MSG_URI.into());
             uris.push(SIGN_CFG_URI.into());
             uris.push(MSG_PATTERN_URI.into());
-            uris.push(FONTS_URI.into());
+            uris.push(FONT_URI.into());
         }
         Box::new(uris.into_iter().chain(self.dev.uri_iter(pri, view)))
     }
@@ -180,9 +180,16 @@ impl AncillaryData for DmsAnc {
                 self.configs = Some(serde_wasm_bindgen::from_value(data)?);
             }
             MSG_PATTERN_URI => {
-                self.patterns = Some(serde_wasm_bindgen::from_value(data)?);
+                let mut patterns: Vec<MsgPattern> =
+                    serde_wasm_bindgen::from_value(data)?;
+                patterns.retain(|p| {
+                    p.compose_hashtag
+                        .as_ref()
+                        .is_some_and(|h| pri.has_hashtag(&h))
+                });
+                self.compose_patterns = patterns;
             }
-            FONTS_URI => {
+            FONT_URI => {
                 self.fnames = Some(serde_wasm_bindgen::from_value(data)?);
                 return Ok(true);
             }
@@ -372,7 +379,9 @@ impl Dms {
         status.push_str("<div class='end'>");
         status.push_str(&self.item_states(anc).to_html());
         status.push_str("</div>");
-        status.push_str(&self.compose_patterns(anc));
+        if !anc.compose_patterns.is_empty() {
+            status.push_str(&self.compose_patterns(anc));
+        }
         if config {
             status.push_str("<div class='row'>");
             status.push_str(&anc.dev.controller_button());
@@ -388,19 +397,13 @@ impl Dms {
         let mut html = String::new();
         html.push_str("<div class='fill'>");
         html.push_str("<select id='pattern'>");
-        if let Some(patterns) = &anc.patterns {
-            for pat in patterns {
-                if let Some(compose_hashtag) = &pat.compose_hashtag {
-                    if self.has_hashtag(compose_hashtag) {
-                        html.push_str("<option value='");
-                        html.push_str(&pat.name);
-                        html.push_str("'>");
-                        // FIXME: render as gif
-                        html.push_str(&pat.multi);
-                        html.push_str("</option>");
-                    }
-                }
-            }
+        for pat in &anc.compose_patterns {
+            html.push_str("<option value='");
+            html.push_str(&pat.name);
+            html.push_str("'>");
+            // FIXME: render as gif
+            html.push_str(&pat.multi);
+            html.push_str("</option>");
         }
         html.push_str("</select>");
         html.push_str("</div>");
