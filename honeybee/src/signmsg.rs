@@ -88,8 +88,7 @@ fn load_fonts(dir: &Path) -> Result<FontTable> {
     log::debug!("load_fonts");
     let mut path = PathBuf::new();
     path.push(dir);
-    path.push("api");
-    path.push("font");
+    path.push("ifnt");
     let mut cache = Cache::new(&path, "ifnt")?;
     let mut fonts = FontTable::default();
     path.push("_placeholder_.ifnt");
