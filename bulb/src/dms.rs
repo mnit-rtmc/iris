@@ -121,10 +121,10 @@ pub struct FontName {
 #[derive(Default)]
 pub struct DmsAnc {
     dev: DeviceAnc<Dms>,
-    messages: Option<Vec<SignMessage>>,
-    configs: Option<Vec<SignConfig>>,
+    messages: Vec<SignMessage>,
+    configs: Vec<SignConfig>,
     compose_patterns: Vec<MsgPattern>,
-    fnames: Option<Vec<FontName>>,
+    fnames: Vec<FontName>,
     fonts: FontTable,
 }
 
@@ -144,8 +144,8 @@ impl AncillaryData for DmsAnc {
     ) -> Box<dyn Iterator<Item = Uri>> {
         let mut uris = Vec::new();
         // Have we been here before?
-        if let Some(fnames) = &self.fnames {
-            for fname in fnames {
+        if !self.fnames.is_empty() {
+            for fname in &self.fnames {
                 uris.push(
                     Uri::from(format!("/iris/ifnt/{}.ifnt", fname.name))
                         .with_content_type(ContentType::Text),
@@ -174,10 +174,10 @@ impl AncillaryData for DmsAnc {
     ) -> Result<bool> {
         match uri.as_str() {
             SIGN_MSG_URI => {
-                self.messages = Some(serde_wasm_bindgen::from_value(data)?);
+                self.messages = serde_wasm_bindgen::from_value(data)?;
             }
             SIGN_CFG_URI => {
-                self.configs = Some(serde_wasm_bindgen::from_value(data)?);
+                self.configs = serde_wasm_bindgen::from_value(data)?;
             }
             MSG_PATTERN_URI => {
                 let mut patterns: Vec<MsgPattern> =
@@ -185,13 +185,13 @@ impl AncillaryData for DmsAnc {
                 patterns.retain(|p| {
                     p.compose_hashtag
                         .as_ref()
-                        .is_some_and(|h| pri.has_hashtag(&h))
+                        .is_some_and(|h| pri.has_hashtag(h))
                 });
                 self.compose_patterns = patterns;
             }
             FONT_URI => {
-                self.fnames = Some(serde_wasm_bindgen::from_value(data)?);
-                return Ok(true);
+                self.fnames = serde_wasm_bindgen::from_value(data)?;
+                return Ok(!self.fnames.is_empty());
             }
             _ => {
                 if uri.as_str().ends_with(".ifnt") {
@@ -262,11 +262,7 @@ impl SignMessage {
 impl DmsAnc {
     /// Find a sign message
     fn sign_message(&self, msg: Option<&str>) -> Option<&SignMessage> {
-        msg.and_then(|msg| {
-            self.messages
-                .as_ref()
-                .and_then(|msgs| msgs.iter().find(|m| m.name == msg))
-        })
+        msg.and_then(|msg| self.messages.iter().find(|m| m.name == msg))
     }
 
     /// Get message item states
