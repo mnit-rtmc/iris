@@ -109,24 +109,25 @@ fn load_graphics(dir: &Path) -> Result<GraphicTable> {
     log::debug!("load_graphics");
     let mut path = PathBuf::new();
     path.push(dir);
-    path.push("api");
-    path.push("img");
+    path.push("gif");
     let mut cache = Cache::new(&path, "gif")?;
     let mut graphics = GraphicTable::default();
     path.push("_placeholder_.gif");
     for nm in cache.drain() {
-        let number: u8 = nm
+        if let Ok(number) = nm
             .as_os_str()
             .to_str()
             .unwrap()
             .replace(|c: char| !c.is_numeric(), "")
-            .parse()?;
-        path.set_file_name(&nm);
-        let file = File::open(&path)
-            .with_context(|| format!("load_graphics {path:?}"))?;
-        let reader = BufReader::new(file);
-        let graphic = load_graphic(reader, number)?;
-        graphics.push(graphic)?;
+            .parse::<u8>()
+        {
+            path.set_file_name(&nm);
+            let file = File::open(&path)
+                .with_context(|| format!("load_graphics {path:?}"))?;
+            let reader = BufReader::new(file);
+            let graphic = load_graphic(reader, number)?;
+            graphics.push(graphic)?;
+        }
     }
     graphics.sort();
     Ok(graphics)

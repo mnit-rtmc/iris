@@ -430,7 +430,7 @@ const DMS_STAT_RES: Resource = Resource::Simple(
 
 /// Font list resource
 const FONT_LIST_RES: Resource = Resource::Simple(
-    "api/fonts",
+    "font",
     Listen::All("font"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT f_number AS font_number, name \
@@ -453,6 +453,18 @@ const FONT_RES: Resource = Resource::Font(
            AS glyphs, version_id \
       FROM iris.font ft ORDER BY name\
     ) AS f",
+);
+
+/// Graphic list resource
+const GRAPHIC_LIST_RES: Resource = Resource::Simple(
+    "graphic",
+    Listen::All("graphic"),
+    "SELECT row_to_json(r)::text FROM (\
+      SELECT g_number AS number, 'G' || g_number AS name \
+      FROM iris.graphic \
+      WHERE g_number < 256 \
+      ORDER BY number\
+    ) r",
 );
 
 /// Graphic resource
@@ -930,6 +942,7 @@ const ALL: &[Resource] = &[
     DMS_STAT_RES,
     FONT_LIST_RES,
     FONT_RES,
+    GRAPHIC_LIST_RES,
     GRAPHIC_RES,
     MSG_LINE_RES,
     MSG_PATTERN_RES,
@@ -1143,7 +1156,7 @@ impl Resource {
     fn fetch_fonts(&self, client: &mut Client) -> Result<()> {
         log::debug!("fetch_fonts");
         let t = Instant::now();
-        let dir = Path::new("api/font");
+        let dir = Path::new("ifnt");
         let mut count = 0;
         let sql = self.sql();
         for row in &client.query(sql, &[])? {
@@ -1166,7 +1179,7 @@ impl Resource {
     fn fetch_graphics(&self, client: &mut Client) -> Result<()> {
         log::debug!("fetch_graphics");
         let t = Instant::now();
-        let dir = Path::new("api/img");
+        let dir = Path::new("gif");
         let mut count = 0;
         let sql = self.sql();
         for row in &client.query(sql, &[])? {
@@ -1188,7 +1201,7 @@ impl Resource {
 /// Write a graphic image to a file
 fn write_graphic(dir: &Path, graphic: GraphicRes) -> Result<()> {
     let graphic = Graphic::from(graphic);
-    let name = format!("g{}.gif", graphic.number);
+    let name = format!("G{}.gif", graphic.number);
     let raster = graphic.to_raster();
     let mut palette = Palette::new(256);
     if let Some(Color::Rgb(red, green, blue)) = graphic.transparent_color {
