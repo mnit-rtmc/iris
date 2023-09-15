@@ -285,15 +285,19 @@ const DEDICATED: &[&str] = &[
 impl Dms {
     pub const RESOURCE_N: &'static str = "dms";
 
+    /// Check if DMS has a given hashtag
+    fn has_hashtag(&self, hashtag: &str) -> bool {
+        match &self.hashtags {
+            Some(hashtags) => {
+                hashtags.split(' ').any(|h| hashtag.eq_ignore_ascii_case(h))
+            }
+            None => false,
+        }
+    }
+
     /// Get one dedicated hashtag, if defined
     fn dedicated(&self) -> Option<&str> {
-        self.hashtags
-            .as_ref()
-            .and_then(|h| {
-                let h = h.to_lowercase();
-                DEDICATED.iter().find(|tag| h.contains(&tag.to_lowercase()))
-            })
-            .copied()
+        DEDICATED.iter().find(|tag| self.has_hashtag(tag)).copied()
     }
 
     /// Get faults, if any
@@ -368,6 +372,7 @@ impl Dms {
         status.push_str("<div class='end'>");
         status.push_str(&self.item_states(anc).to_html());
         status.push_str("</div>");
+        status.push_str(&self.compose_patterns(anc));
         if config {
             status.push_str("<div class='row'>");
             status.push_str(&anc.dev.controller_button());
@@ -376,6 +381,30 @@ impl Dms {
             status.push_str("</div>");
         }
         status
+    }
+
+    /// Build compose pattern HTML
+    fn compose_patterns(&self, anc: &DmsAnc) -> String {
+        let mut html = String::new();
+        html.push_str("<div class='fill'>");
+        html.push_str("<select id='pattern'>");
+        if let Some(patterns) = &anc.patterns {
+            for pat in patterns {
+                if let Some(compose_hashtag) = &pat.compose_hashtag {
+                    if self.has_hashtag(compose_hashtag) {
+                        html.push_str("<option value='");
+                        html.push_str(&pat.name);
+                        html.push_str("'>");
+                        // FIXME: render as gif
+                        html.push_str(&pat.multi);
+                        html.push_str("</option>");
+                    }
+                }
+            }
+        }
+        html.push_str("</select>");
+        html.push_str("</div>");
+        html
     }
 
     /// Convert to Edit HTML
@@ -432,10 +461,7 @@ impl Card for Dms {
                 .notes
                 .as_ref()
                 .is_some_and(|n| n.contains_lower(search))
-            || self
-                .hashtags
-                .as_ref()
-                .is_some_and(|h| h.contains_lower(search))
+            || self.has_hashtag(search)
             || self.item_states(anc).is_match(search)
             || anc
                 .sign_message(self.msg_current.as_deref())
