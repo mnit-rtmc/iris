@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -11,11 +11,12 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
+use crate::fetch::Uri;
 use crate::resource::{AncillaryData, Card, View, EDIT_BUTTON, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr};
 use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
 use std::fmt;
+use std::iter::once;
 use wasm_bindgen::JsValue;
 
 /// LCS locks
@@ -60,23 +61,24 @@ const LCS_LOCK_URI: &str = "/iris/lcs_lock";
 impl AncillaryData for LcsArrayAnc {
     type Primary = LcsArray;
 
-    /// Get next ancillary URI
-    fn next_uri(&self, _view: View, _pri: &LcsArray) -> Option<Cow<str>> {
-        match &self.locks {
-            None => Some(LCS_LOCK_URI.into()),
-            _ => None,
-        }
+    /// Get URI iterator
+    fn uri_iter(
+        &self,
+        _pri: &LcsArray,
+        _view: View,
+    ) -> Box<dyn Iterator<Item = Uri>> {
+        Box::new(once(LCS_LOCK_URI.into()))
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
-        _view: View,
         _pri: &LcsArray,
-        json: JsValue,
-    ) -> Result<()> {
-        self.locks = Some(serde_wasm_bindgen::from_value(json)?);
-        Ok(())
+        _uri: Uri,
+        data: JsValue,
+    ) -> Result<bool> {
+        self.locks = Some(serde_wasm_bindgen::from_value(data)?);
+        Ok(false)
     }
 }
 

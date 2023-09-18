@@ -173,7 +173,7 @@ single newline character `\n` (ASCII 0x0A).
 V66E37\tSNOW PLOW[nl]AHEAD[nl]USE CAUTION\t2022-10-02 11:37:00-05:00
 ```
 
-`dms`: Name of the sign to deploy, which must have the hashtag referenced
+`dms`: Name of the sign to deploy, which must have the [hashtag] referenced
 by a [DMS action].  Additionally, that action must be associated with the
 current phase of an active [action plan].  The [message pattern] of the
 _DMS action_ must be a `feed` [action tag].  For example, if the `msgfeed`
@@ -303,6 +303,7 @@ camera can be associated with each [controller], using [IO pin] 1.
 [flow stream]: flow_streams.html
 [gate arm]: gate_arms.html
 [GPS]: gps.html
+[hashtag]: hashtags.html
 [incidents]: incidents.html
 [indications]: lcs.html#indications
 [IO pin]: controllers.html#io-pins

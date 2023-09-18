@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2017  Minnesota Department of Transportation
+ * Copyright (C) 2003-2023  Minnesota Department of Transportation
  * Copyright (C) 2015  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -90,6 +90,7 @@ public class MJPEGStream implements VideoStream {
 	/** Create an input stream from an HTTP connection */
 	protected InputStream createInputStream() throws IOException {
 		URLConnection c = url.openConnection();
+		c.setUseCaches(false);
 		String upass = url.getUserInfo();
 		if (upass != null) {
 			String auth = "Basic " + new String(Base64.encode(

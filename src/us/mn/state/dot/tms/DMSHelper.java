@@ -126,6 +126,34 @@ public class DMSHelper extends BaseHelper {
 		return false;
 	}
 
+	/** Check if a DMS is hidden (#Hidden hashtag) */
+	static public boolean isHidden(DMS dms) {
+		return hasHashtag(dms, "#Hidden");
+	}
+
+	/** Reserved hashtags for dedicated-purpose signs */
+	static private final String[] DEDICATED_PURPOSE_TAGS = new String[] {
+	     "#Hidden",
+	     "#LaneUse",
+	     "#Parking",
+	     "#Safety",
+	     "#Tolling",
+	     "#TravelTime",
+	     "#VSL",
+	     "#Wayfinding"
+	};
+
+	/** Check if a DMS is general-purpose */
+	static public boolean isGeneralPurpose(DMS dms) {
+		for (String tag: dms.getHashtags()) {
+			for (String ht: DEDICATED_PURPOSE_TAGS) {
+				if (ht.equalsIgnoreCase(tag))
+					return false;
+			}
+		}
+		return true;
+	}
+
 	/** Get the maintenance status of a DMS */
 	static public String getMaintenance(DMS proxy) {
 		return ControllerHelper.getMaintenance(proxy.getController());
@@ -220,16 +248,15 @@ public class DMSHelper extends BaseHelper {
 
 	/** Get the default font number for a DMS */
 	static public int getDefaultFontNum(DMS dms) {
-		return (dms != null)
-		      ? SignConfigHelper.getDefaultFontNum(dms.getSignConfig())
+		SignConfig sc = (dms != null) ? dms.getSignConfig() : null;
+		return (sc != null)
+		      ? sc.getDefaultFont()
 		      : FontHelper.DEFAULT_FONT_NUM;
 	}
 
 	/** Get the default font for a DMS */
 	static public Font getDefaultFont(DMS dms) {
-		return (dms != null)
-		      ? SignConfigHelper.getDefaultFont(dms.getSignConfig())
-		      : null;
+		return FontHelper.find(getDefaultFontNum(dms));
 	}
 
 	/** Get the default background color for a DMS */
@@ -254,18 +281,19 @@ public class DMSHelper extends BaseHelper {
 	 * @param dms DMS to check.
 	 * @return Number of text lines on the DMS. */
 	static public int getLineCount(DMS dms) {
-		if (dms != null) {
-			RasterBuilder rb = createRasterBuilder(dms);
-			if (rb != null)
-				return rb.getLineCount();
-		}
-		return SignMessage.MAX_LINES;
+		RasterBuilder rb = createRasterBuilder(dms);
+		return (rb != null)
+		      ? rb.getLineCount()
+		      : SignMessage.MAX_LINES;
 	}
 
 	/** Create a raster builder for a DMS */
 	static public RasterBuilder createRasterBuilder(DMS dms) {
-		return SignConfigHelper.createRasterBuilder(
-			dms.getSignConfig());
+		if (dms != null) {
+			return SignConfigHelper.createRasterBuilder(
+				dms.getSignConfig());
+		} else
+			return null;
 	}
 
 	/** Return a single string which is formated to be readable
@@ -322,10 +350,9 @@ public class DMSHelper extends BaseHelper {
 		throws InvalidMsgException
 	{
 		RasterBuilder rb = createRasterBuilder(dms);
-		if (rb != null)
-			return rb.createBitmaps(new MultiString(ms));
-		else
-			return null;
+		return (rb != null)
+		      ? rb.createBitmaps(new MultiString(ms))
+		      : null;
 	}
 
 	/** Get the current raster graphic for page one of the specified DMS.
@@ -457,36 +484,38 @@ public class DMSHelper extends BaseHelper {
 	/** Check if a MULTI string is rasterizable for a sign */
 	static public boolean isRasterizable(DMS dms, String ms) {
 		RasterBuilder rb = createRasterBuilder(dms);
-		return rb != null && rb.isRasterizable(ms);
+		return (rb != null) && rb.isRasterizable(ms);
 	}
 
 	/** Validate free-form message lines */
 	static public String validateFreeFormLines(DMS dms, String ms) {
 		if (dms == null || ms == null)
 			return "NULL VALUE";
-		SignConfig sc = dms.getSignConfig();
-		if (sc == null)
-			return "NULL VALUE";
+		String err = "NO PATTERN";
 		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms)) {
-			if (MsgPatternHelper.validateLines(pat, sc, ms))
+			String e = MsgPatternHelper
+				.validateLines(pat, dms, ms);
+			if (e == null)
 				return null;
+			else if (!e.isEmpty())
+				err = e;
 		}
-		return "NOT PERMITTED";
+		return err;
 	}
 
 	/** Validate free-form message words */
 	static public String validateFreeFormWords(DMS dms, String ms) {
 		if (dms == null || ms == null)
 			return "NULL VALUE";
-		SignConfig sc = dms.getSignConfig();
-		if (sc == null)
-			return "NULL VALUE";
+		String err = "NO PATTERN";
 		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms)) {
-			String msg = MsgPatternHelper.validateWords(pat, sc,
-				ms);
-			if (msg != null)
-				return msg;
+			String e = MsgPatternHelper
+				.validateWords(pat, dms, ms);
+			if (e == null)
+				return null;
+			else if (!e.isEmpty())
+				err = e;
 		}
-		return null;
+		return err;
 	}
 }

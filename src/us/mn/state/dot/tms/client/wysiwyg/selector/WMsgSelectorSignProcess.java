@@ -61,7 +61,7 @@ public class WMsgSelectorSignProcess extends
 		while (pit.hasNext()) {
 			MsgPattern pat = pit.next();
 			String cht = pat.getComposeHashtag();
-			if (cht != null && DMSHelper.hasHashtag(dms, cht))
+			if (DMSHelper.hasHashtag(dms, cht))
 				plist.add(pat);
 		}
 		return plist;

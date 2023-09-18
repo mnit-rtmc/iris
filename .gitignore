@@ -8,6 +8,7 @@ iris-client*
 *.swp
 devel/
 devel*.cfg
+target/
 
 # For Eclipse output
 bin/eclipse/

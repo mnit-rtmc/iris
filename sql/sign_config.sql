@@ -27,7 +27,7 @@ VALUES (
 	0,        -- monochrome_foreground
 	0,        -- monochrome_background
 	4,        -- color_scheme
-	'26_full' -- default_font
+	1         -- default_font
 );
 
 COMMIT;

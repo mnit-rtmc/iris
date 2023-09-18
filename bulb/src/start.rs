@@ -11,7 +11,8 @@
 // GNU General Public License for more details.
 //
 use crate::error::{Error, Result};
-use crate::fetch::{fetch_get, fetch_post};
+use crate::fetch;
+use crate::item::ItemState;
 use crate::permission::permissions_html;
 use crate::resource::{Resource, View};
 use crate::util::Doc;
@@ -142,10 +143,9 @@ impl DeferredAction {
 /// Search list using the value from "sb_search"
 fn search_list() {
     let doc = Doc::get();
-    let search = doc.elem::<HtmlInputElement>("sb_search");
-    let value = search.value();
     if let Some(rname) = doc.select_parse::<String>("sb_resource") {
         let res = Resource::from_name(&rname);
+        let value = search_value();
         spawn_local(populate_list(res, value));
     }
 }
@@ -378,13 +378,10 @@ async fn add_sidebar() -> JsResult<()> {
     let doc = Doc(doc);
     let sidebar: HtmlElement = doc.elem("sidebar");
     sidebar.set_inner_html(SIDEBAR);
-    add_select_event_listener(&doc.elem("sb_resource"))?;
+    add_resource_event_listener(&doc.elem("sb_resource"))?;
     add_change_event_listener(&doc.elem("sb_config"))?;
-    add_toggle_event_listener(&doc.elem("sb_ok"))?;
-    add_toggle_event_listener(&doc.elem("sb_failed"))?;
-    add_toggle_event_listener(&doc.elem("sb_unknown"))?;
-    add_toggle_event_listener(&doc.elem("sb_deployed"))?;
     add_input_event_listener(&doc.elem("sb_search"))?;
+    add_state_event_listener(&doc.elem("sb_state"))?;
     add_click_event_listener(&sidebar)?;
     add_transition_event_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window).unwrap_throw();
@@ -410,13 +407,13 @@ async fn fill_resource_select() {
 
 /// Fetch permission access list
 async fn fetch_access_list(config: bool) -> Result<String> {
-    let json = fetch_get("/iris/api/access").await?;
+    let json = fetch::get("/iris/api/access").await?;
     let permissions = serde_wasm_bindgen::from_value(json)?;
     Ok(permissions_html(permissions, config))
 }
 
-/// Add an "input" event listener to a `select` element
-fn add_select_event_listener(elem: &HtmlSelectElement) -> JsResult<()> {
+/// Add an "input" event listener to the resource `select` element
+fn add_resource_event_listener(elem: &HtmlSelectElement) -> JsResult<()> {
     let closure = Closure::wrap(Box::new(|e: Event| {
         let rname = e
             .current_target()
@@ -440,8 +437,10 @@ fn handle_sb_resource_ev(rname: String) {
     let doc = Doc::get();
     let search = doc.elem::<HtmlInputElement>("sb_search");
     search.set_value("");
-    let value = update_search_toggles();
+    let value = search_value();
     let res = Resource::from_name(&rname);
+    let sb_state = doc.elem::<HtmlSelectElement>("sb_state");
+    sb_state.set_inner_html(res.item_state_options());
     spawn_local(populate_list(res, value));
 }
 
@@ -465,14 +464,13 @@ async fn reload_resources() {
     search_list();
 }
 
-/// Add a "change" event listener to a toggle element
-fn add_toggle_event_listener(elem: &HtmlInputElement) -> JsResult<()> {
+/// Add an "input" event listener to the item state `select` element
+fn add_state_event_listener(elem: &HtmlSelectElement) -> JsResult<()> {
     let closure = Closure::wrap(Box::new(|_e: Event| {
-        update_search_toggles();
         search_list();
-    }) as Box<dyn Fn(_)>);
+    }) as Box<dyn FnMut(_)>);
     elem.add_event_listener_with_callback(
-        "change",
+        "input",
         closure.as_ref().unchecked_ref(),
     )?;
     // can't drop closure, just forget it to make JS happy
@@ -480,29 +478,17 @@ fn add_toggle_event_listener(elem: &HtmlInputElement) -> JsResult<()> {
     Ok(())
 }
 
-/// Update "sb_search" from toggle buttons
-fn update_search_toggles() -> String {
+/// Get value to search
+fn search_value() -> String {
     let doc = Doc::get();
     let search = doc.elem::<HtmlInputElement>("sb_search");
-    let value = search.value();
-    let mut tokens: Vec<&str> = value
-        .split_whitespace()
-        .filter(|t| !"👍💀🔻❓🔶".contains(*t))
-        .collect();
-    if doc.input_bool("sb_ok") {
-        tokens.push("👍");
+    let mut value = search.value();
+    if let Some(istate) = doc.select_parse::<String>("sb_state") {
+        if ItemState::from_code(&istate).is_some() {
+            value.push(' ');
+            value.push_str(&istate);
+        }
     }
-    if doc.input_bool("sb_failed") {
-        tokens.push("💀");
-    }
-    if doc.input_bool("sb_unknown") {
-        tokens.push("❓");
-    }
-    if doc.input_bool("sb_deployed") {
-        tokens.push("🔶");
-    }
-    let value = tokens.join(" ");
-    search.set_value(&value);
     value
 }
 
@@ -609,7 +595,7 @@ async fn handle_login() {
     ) {
         let js = format!("{{\"username\":\"{user}\",\"password\":\"{pass}\"}}");
         let js = js.into();
-        match fetch_post("/iris/api/login", &js).await {
+        match fetch::post("/iris/api/login", &js).await {
             Ok(_) => {
                 let pass = doc.elem::<HtmlInputElement>("login_pass");
                 pass.set_value("");

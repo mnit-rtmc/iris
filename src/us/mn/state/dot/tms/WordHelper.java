@@ -99,23 +99,27 @@ public class WordHelper extends BaseHelper {
 	 * @return Abbreviated text, or null if can't be abbreviated. */
 	static public String abbreviate(String txt) {
 		String[] words = txt.split(" ");
-		// Abbreviate words with non-blank abbreviations
-		for (int i = words.length - 1; i >= 0; i--) {
-			String abbr = lookupAbbrev(words[i]);
-			if (abbr != null && abbr.length() > 0) {
-				words[i] = abbr;
-				return joinWords(words);
+		int index = -1;
+		String abbr = null;
+		int score = 0;
+		for (int i = 0; i < words.length; i++) {
+			String word = words[i];
+			int sc = word.length();
+			// Prefer to abbreviate longer words
+			if (sc > score) {
+				String ab = lookupAbbrev(word);
+				if (ab != null && !ab.equals(word)) {
+					index = i;
+					abbr = ab;
+					score = sc;
+				}
 			}
 		}
-		// Abbreviate words with blank abbreviations
-		for (int i = words.length - 1; i >= 0; i--) {
-			String abbr = lookupAbbrev(words[i]);
-			if (abbr != null) {
-				words[i] = abbr;
-				return joinWords(words);
-			}
-		}
-		return null;
+		if (abbr != null) {
+			words[index] = abbr;
+			return joinWords(words);
+		} else
+			return null;
 	}
 
 	/** Lookup a word and get its abbreviation */

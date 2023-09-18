@@ -39,18 +39,6 @@ public interface DMS extends Device {
 	/** Get static graphic (hybrid sign) */
 	Graphic getStaticGraphic();
 
-	/** Set device purpose (ordinal of DevicePurpose) */
-	void setPurpose(int p);
-
-	/** Get device purpose (ordinal of DevicePurpose) */
-	int getPurpose();
-
-	/** Set the hidden flag */
-	void setHidden(boolean h);
-
-	/** Get the hidden flag */
-	boolean getHidden();
-
 	/** Set the hashtags */
 	void setHashtags(String[] ht);
 
@@ -97,6 +85,15 @@ public interface DMS extends Device {
 	String getStatus();
 
 	/** Status JSON attributes */
+
+	/** Fault conditions.
+	 *
+	 * Semicolon-delimited list of fault conditions of the sign:
+	 * `other`, `communications`, `power`, `attached_device`, `lamp`,
+	 * `pixel`, `photocell`, `message`, `controller`, `temperature`,
+	 * `climate_control`, `critical_temperature`, `drum_rotor`,
+	 * `door_open`, `humidity` */
+	String FAULTS = "faults";
 
 	/** Photocell array.
 	 *

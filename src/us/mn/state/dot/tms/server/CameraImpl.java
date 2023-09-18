@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2020  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -397,8 +397,9 @@ public class CameraImpl extends DeviceImpl implements Camera {
 
 	/** Set flag to indicate video loss */
 	public void setVideoLossNotify(boolean vl, String mon) {
+		// Clear video loss state if no encoder config
 		if (!isEncoderConfigured())
-			return;
+			vl = false;
 		long now = TimeSteward.currentTimeMillis();
 		if (vl != video_loss && shouldUpdateVideoLoss(vl, now)) {
 			setVideoLoss(vl);
@@ -431,12 +432,6 @@ public class CameraImpl extends DeviceImpl implements Camera {
 			   && !isReportStale(video_loss_report, now);
 		} else
 			return true;
-	}
-
-	/** Get flag to indicate video loss */
-	@Override
-	public boolean getVideoLoss() {
-		return video_loss;
 	}
 
 	/** Get the camera poller */

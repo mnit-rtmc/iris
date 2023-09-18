@@ -1,11 +1,67 @@
 # Fonts
 
-Select `View ➔ Message Signs ➔ DMS Fonts` menu item
-
 A font is a set of bitmapped glyphs for displaying text on a [DMS].  Fonts can
 contain only printable ASCII characters (U+0020 to U+007E).
 
-When selecting a font, a few parameters must be considered, such as pixel pitch,
+## Predefined Fonts
+
+A number of fonts are included in the `/var/lib/iris/fonts` directory.  These
+fonts are designed to have a similar visual style.
+
+Name    | Number | Description
+--------|--------|-----------------------------------------
+`F07`   | 7      | 7 px height
+`F07-C` | 5      | 7 px height, 5 px width character-matrix
+`F07-L` | 107 †  | 7 px height line-matrix
+`F08`   | 8      | 8 px height
+`F09`   | 9      | 9 px height
+`F09-L` | 109 †  | 9 px height line-matrix
+`F10`   | 10     | 10 px height
+`F11`   | 11     | 11 px height
+`F12`   | 12     | 12 px height
+`F12-A` | 112 †  | 12 px height all-ASCII (9 height caps)
+`F12-B` | 212 †  | 12 px height bold
+`F13`   | 13     | 13 px height
+`F14`   | 14     | 14 px height
+`F14-A` | 114 †  | 14 px height all-ASCII
+`F15`   | 15     | 15 px height
+`F16`   | 16     | 16 px height
+`F18`   | 18     | 18 px height
+`F20`   | 20     | 20 px height
+`F24`   | 24     | 24 px height
+`F26`   | 26     | 26 px height
+
+_† Normally font number is the same as pixel height, but variations use
+1xx or 2xx._
+
+Numbers 1-4 are reserved for **permanent** fonts used by some signs.
+
+To import a font into the IRIS database, use ifnt_import.py (in `bin`
+directory):
+
+```
+ifnt_import.py [font file] | psql tms
+```
+
+### Non-ASCII Characters
+
+Since NTCIP 1203 does not support Unicode, ASCII characters must be used as
+surrogates for arrows, diamonds, etc:
+
+| Character     | Code Point | ASCII | Fonts
+|---------------|------------|-------|----------------------
+| <sup>ND</sup> | 38         | &     | `F14-A`
+| ◊             | 42         | *     | `F07`, `F07-L`, `F26`
+| ↖             | 94         | ^     | `F14-A`
+| █             | 96         | \`    | `F14-A`
+| ↙             | 123        | {     | `F07`, `F14-A`
+| ↓             | 125        | }     | `F07`
+| ↘             | 125        | }     | `F14-A`
+| `wide space`  | 126        | ~     | `F07`
+
+## Choosing Fonts
+
+When choosing a font, a few parameters must be considered, such as pixel pitch,
 desired character height, and font weight.  Pixel pitch varies from 70 mm down
 to 20 mm or smaller.
 
@@ -27,39 +83,12 @@ lower-case characters can be used if pitch is below 50 mm.  If a message
 containing lower-case characters is used with an upper-case only font, it will
 be converted to upper-case.
 
-## Predefined Fonts
+## Send and Query Fonts
 
-A number of fonts are included in the `sql/fonts` directory.  These fonts are
-designed to have a similar visual style.  To import a font into the IRIS
-database, use psql:
-
-```
-psql tms -f [font file]
-```
-
-Number | Font Name      | Description
--------|----------------|---------------------
-1      | `07_char`      | 7x5 character matrix
-2      | `07_line`      | 7 pixel high line-matrix
-3      | `08_full`      | 8 pixel high full-matrix
-4      | `09_full`      | 9 pixel high full-matrix
-5      | `10_full`      | 10 pixel high full-matrix
-6      | `11_full`      | 11 pixel high full-matrix
-7      | `12_full`      | 12 pixel high full-matrix
-8      | `12_full_bold` | 12 pixel high full-matrix bold
-9      | `13_full`      | 13 pixel high full-matrix
-11     | `14_full`      | 14 pixel high full-matrix
-21     | `15_full`      | 15 pixel high full-matrix
-13     | `16_full`      | 16 pixel high full-matrix
-14     | `18_full`      | 18 pixel high full-matrix
-15     | `20_full`      | 20 pixel high full-matrix
-16     | `24_full`      | 24 pixel high full-matrix
-20     | `26_full`      | 26 pixel high full-matrix
-17     | `_09_full_12`  | 9 pixel high (12 with lower case descenders)
-18     | `_7_full`      | 7 pixel high full-matrix
-
-The IRIS client also contains a font editor which can be used to design new DMS
-fonts.
+The status tab of the DMS properties dialog contains two settings buttons.
+Pressing `Send Settings` will cause all necessary fonts to be sent to the sign.
+`Query Settings` will read all fonts currently on the sign, and store them in
+the `/var/lib/iris/fonts/{sign_name}` directory.
 
 
 [DMS]: dms.html

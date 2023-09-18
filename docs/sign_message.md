@@ -5,7 +5,8 @@ display a message on a [DMS].  They are created when operators [compose] them,
 and also when [DMS actions] are scheduled.  They are deleted automatically
 after being unused for a few minutes.
 
-## Resources
+<details>
+<summary>API Resources</summary>
 
 * `iris/sign_message`
 * `iris/img/{name}.gif`
@@ -16,6 +17,8 @@ Attribute [permissions]:
 | Access       | Minimal     |
 |--------------|-------------|
 | Read Only    | name, sign\_config, incident, multi, msg\_owner, flash\_beacon, msg\_priority, duration |
+
+</details>
 
 [Sign configuration] determines the type of sign that can display the message.
 

@@ -17,6 +17,7 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
+import java.util.Objects;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -87,6 +88,7 @@ public class SignMessageHelper extends BaseHelper {
 	static public SignMessage find(SignConfig sc, String inc, String ms,
 		String owner, boolean fb, SignMsgPriority mp, Integer dur)
 	{
+		// FIXME: use hash to implement this
 		int mpi = mp.ordinal();
 		Iterator<SignMessage> it = iterator();
 		while (it.hasNext()) {
@@ -240,5 +242,20 @@ public class SignMessageHelper extends BaseHelper {
 		return (!isBlank(sm)) &&
 		       (sm.getDuration() != null) &&
 		       SignMsgSource.operator.checkBit(sourceBits(sm));
+	}
+
+	/** Make a hash code given sign message attributes.
+	 * @param sc Sign configuration.
+	 * @param inc Associated incident (original name).
+	 * @param ms MULTI string.
+	 * @param owner Message owner.
+	 * @param fb Flash beacon flag.
+	 * @param mp Message priority.
+	 * @param dur Duration (null for indefinite).
+	 * @return Matching sign message, or null if not found. */
+	static public int hash(SignConfig sc, String inc, String ms,
+		String owner, boolean fb, SignMsgPriority mp, Integer dur)
+	{
+		return Objects.hash(sc.getName(), inc, ms, owner, fb, mp, dur);
 	}
 }

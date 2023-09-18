@@ -11,14 +11,15 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
+use crate::fetch::Uri;
 use crate::gatearm::warn_state;
 use crate::resource::{
     AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr};
 use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
 use std::fmt;
+use std::iter::{empty, once};
 use wasm_bindgen::JsValue;
 
 /// Gate arm states
@@ -65,25 +66,29 @@ const GATE_ARM_STATE_URI: &str = "/iris/gate_arm_state";
 impl AncillaryData for GateArmArrayAnc {
     type Primary = GateArmArray;
 
-    /// Get next ancillary URI
-    fn next_uri(&self, view: View, _pri: &GateArmArray) -> Option<Cow<str>> {
-        match (view, &self.states) {
-            (View::Search | View::Status(_), None) => {
-                Some(GATE_ARM_STATE_URI.into())
+    /// Get ancillary URI iterator
+    fn uri_iter(
+        &self,
+        _pri: &GateArmArray,
+        view: View,
+    ) -> Box<dyn Iterator<Item = Uri>> {
+        match view {
+            View::Search | View::Status(_) => {
+                Box::new(once(GATE_ARM_STATE_URI.into()))
             }
-            _ => None,
+            _ => Box::new(empty()),
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
-        _view: View,
         _pri: &GateArmArray,
-        json: JsValue,
-    ) -> Result<()> {
-        self.states = Some(serde_wasm_bindgen::from_value(json)?);
-        Ok(())
+        _uri: Uri,
+        data: JsValue,
+    ) -> Result<bool> {
+        self.states = Some(serde_wasm_bindgen::from_value(data)?);
+        Ok(false)
     }
 }
 

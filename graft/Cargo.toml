@@ -1,9 +1,9 @@
 [package]
 name = "graft"
-version = "0.15.0"
 description = "Web Server for proxying IRIS sonar objects"
 license = "GPL-2.0-or-later"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
 
 [dependencies]
 anyhow = "1.0"

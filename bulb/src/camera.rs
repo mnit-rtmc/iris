@@ -37,11 +37,11 @@ impl Camera {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &CameraAnc) -> String {
-        let comm_state = anc.comm_state(self);
+        let item_state = anc.item_state(self);
         let location = HtmlStr::new(&self.location).with_len(32);
         let disabled = disabled_attr(self.controller.is_some());
         format!(
-            "<div class='{NAME} end'>🕹️{comm_state} {self}</div>\
+            "<div class='{NAME} end'>🕹️ {self} {item_state}</div>\
             <div class='info fill{disabled}'>{location}</div>"
         )
     }
@@ -120,7 +120,7 @@ impl Card for Camera {
     fn is_match(&self, search: &str, anc: &CameraAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || anc.comm_state(self).is_match(search)
+            || anc.item_state(self).is_match(search)
     }
 
     /// Convert to HTML view

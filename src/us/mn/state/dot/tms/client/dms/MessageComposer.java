@@ -240,8 +240,7 @@ public class MessageComposer extends JPanel {
 	public void setSelectedSign(DMS proxy) {
 		if (!DMSHelper.objectEquals(proxy, dms)) {
 			dms = proxy;
-			TextRect tr = fullTextRect();
-			pattern_cbx.populateModel(proxy, tr);
+			pattern_cbx.populateModel(proxy);
 			// if sign is null, pattern_listener doesn't call this
 			if (proxy == null)
 				pattern_cbx.setSelectedItem(null);
@@ -266,19 +265,7 @@ public class MessageComposer extends JPanel {
 	/** Update the selected pattern */
 	private void updatePattern() {
 		MsgPattern pat = getMsgPattern();
-		String ms = (pat != null) ? pat.getMulti() : "";
-		MsgLineFinder finder = MsgLineFinder.create(dms, pat, ms);
-		if (finder != null && finder.isEmpty()) {
-			TextRect ftr = fullTextRect();
-			if (ftr != null) {
-				MsgPattern sub = pattern_cbx
-					.findSubstitutePattern(ftr, pat);
-				if (sub != null) {
-					finder = MsgLineFinder.create(dms,
-						sub, ms);
-				}
-			}
-		}
+		MsgLineFinder finder = MsgLineFinder.create(pat, dms);
 		List<TextRect> trs = getPatternTextRects(pat);
 		n_rects = Math.min(trs.size(), rects.length);
 		while (n_rects < rect_tab.getTabCount())

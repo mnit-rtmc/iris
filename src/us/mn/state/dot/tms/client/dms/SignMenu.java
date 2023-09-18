@@ -45,7 +45,6 @@ public class SignMenu extends IMenu {
 		addItem(session.createTableAction(DMS.SONAR_TYPE));
 		addItem(createSignConfigItem());
 		addItem(createSignDetailItem());
-		addItem(createFontItem());
 		addItem(createGraphicItem());
 		addItem(createMsgPatternItem());
 		addItem(createWysiwygSelectorItem());
@@ -69,16 +68,6 @@ public class SignMenu extends IMenu {
 		    new IAction("dms.detail") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new SignDetailForm(session));
-			}
-		    } : null;
-	}
-
-	/** Create a font menu item action */
-	private IAction createFontItem() {
-		return FontForm.isPermitted(session) ?
-		    new IAction("font.title") {
-			protected void doActionPerformed(ActionEvent e) {
-				desktop.show(new FontForm(session));
 			}
 		    } : null;
 	}

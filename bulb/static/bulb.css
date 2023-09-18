@@ -17,8 +17,24 @@ details summary {
 textarea {
   resize: none;
 }
-img.message {
+img {
+  object-fit: contain;
   max-width: 100%;
+}
+.card img.message {
+  max-height: 3rem;
+}
+.form img.message {
+  max-height: 6rem;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 100%;
+  margin: 0;
 }
 
 button {
@@ -27,7 +43,6 @@ button {
   border: 1px solid #888;
   border-radius: 0.2rem;
   padding: 0.1rem 0.2rem;
-  margin-right: 0.1rem;
   background: none;
   color: black;
   cursor: pointer;
@@ -92,33 +107,30 @@ button.go_link {
   flex-direction: column;
   justify-content: flex-start;
   user-select: none;
-  flex: 0 0 100%;
+  flex: 0 1 100%;
   margin: 0;
   background-image: url(iris.svg);
   background-repeat: no-repeat;
   background-position: center;
 }
 
-@media screen and (min-width: 32rem) {
+@media screen and (min-width: 36rem) {
   #mapid {
     display: block;
-    flex: 3 1 auto;
+    flex: 3 1 60%;
   }
   #sidebar {
-    flex: 1 0 12rem;
+    flex: 2 0 40%;
   }
 }
 
 .sb_div {
-  margin: 0.1rem;
-}
-.sb_label {
-  flex: 0 1 min-content;
+  display: inline;
   margin: 0.1rem;
 }
 
 #sb_list {
-  flex: 1 0 fill;
+  flex: 0 1 100%;
   margin: 0.1rem;
   overflow-y: auto;
 }
@@ -195,23 +207,73 @@ button.go_link {
   transition: left 100ms ease-in-out;
 }
 
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 0.1rem dotted gray;
+}
+
+.tooltip * {
+  visibility: hidden;
+  inline-size: min-content;
+  z-index: 1;
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  padding: 0.5rem;
+  border-radius: 0.2rem;
+  color: #fff;
+}
+
+.tooltip:hover * {
+  visibility: visible;
+}
+
+.available {
+  background-color: #004;
+}
+.deployed {
+  background-color: #440;
+}
+.planned {
+  background-color: #044;
+}
+.external {
+  background-color: #040;
+}
+.dedicated {
+  background-color: #404;
+}
+.fault {
+  background-color: #420;
+}
+.offline {
+  background-color: #444;
+}
+.disabled {
+  background-color: #400;
+}
+.unknown {
+  background-color: #400;
+}
+
 .cards {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   list-style: none;
-  padding: 0;
-  margin: 0.2rem;
+  padding: 0.2rem;
+  margin: 0;
 }
 .card {
   display: flex;
-  flex: 10rem;
+  flex: 1 0 8rem;
   flex-direction: column;
   justify-content: space-between;
   white-space: nowrap;
   overflow: hidden;
   box-sizing: border-box;
-  padding: 0 0.2rem;
+  padding: 0.1rem 0.2rem;
   margin: 0.1rem;
   background-color: #eee;
   border-radius: 0.1rem;
@@ -220,6 +282,17 @@ button.go_link {
 .card:hover {
   box-shadow: 0.2rem 0.2rem 0.2rem 0 rgba(0, 0, 0, 0.5);
   background-color: #ccc;
+}
+.form {
+  flex: 0 1 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #eee;
+  overflow: hidden;
+  padding: 0.1rem 0.2rem;
+  margin: 0.1rem;
+  border-radius: 0.1rem;
+  box-shadow: 0.2rem 0.2rem 0.2rem 0 rgba(0, 0, 0, 0.2);
 }
 .title {
   font-weight: bold;
@@ -243,18 +316,6 @@ button.go_link {
 }
 .disabled {
   text-decoration: line-through;
-}
-.form {
-  flex: fill;
-  display: flex;
-  flex-direction: column;
-  background-color: #eee;
-  overflow-x: none;
-  overflow-y: auto;
-  margin: 0.1rem;
-  padding: 0.1rem 0.2rem;
-  border-radius: 0.1rem;
-  box-shadow: 0.2rem 0.2rem 0.2rem 0 rgba(0, 0, 0, 0.2);
 }
 .row {
   display: flex;

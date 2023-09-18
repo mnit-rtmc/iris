@@ -39,7 +39,6 @@ import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.ParkingAreaHelper;
 import us.mn.state.dot.tms.PlanPhaseHelper;
-import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
@@ -359,17 +358,16 @@ public class DmsActionMsg {
 	private String getFeedMsg(FeedMsg msg) {
 		addSource(SignMsgSource.external);
 		String ms = msg.getMulti().toString();
-		if (!isMsgFeedVerifyEnabled() || isFeedMsgValid(msg, ms))
+		if (!isMsgFeedVerifyEnabled() || isFeedMsgValid(ms))
 			return ms;
 		else
 			return fail("Invalid feed msg: " + ms);
 	}
 
 	/** Test if a feed message is valid */
-	private boolean isFeedMsgValid(FeedMsg msg, String ms) {
-		SignConfig sc = msg.getSignConfig();
+	private boolean isFeedMsgValid(String ms) {
 		MsgPattern pat = action.getMsgPattern();
-		return MsgPatternHelper.validateLines(pat, sc, ms);
+		return MsgPatternHelper.validateLines(pat, dms, ms) == null;
 	}
 
 	/** Calculate speed advisory span */

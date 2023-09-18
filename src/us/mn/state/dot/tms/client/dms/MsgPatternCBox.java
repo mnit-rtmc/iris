@@ -15,7 +15,6 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import us.mn.state.dot.tms.DMS;
@@ -35,7 +34,7 @@ import us.mn.state.dot.tms.utils.TextRect;
 public class MsgPatternCBox extends JComboBox<MsgPattern> {
 
 	/** Populate the message pattern model, sorted */
-	public void populateModel(DMS dms, TextRect tr) {
+	public void populateModel(DMS dms) {
 		DefaultComboBoxModel<MsgPattern> mdl =
 			new DefaultComboBoxModel<MsgPattern>();
 		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms))
@@ -77,29 +76,5 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 				best = MsgPatternHelper.better(best, pat);
 		}
 		return best;
-	}
-
-	/** Find a substitute pattern containing message lines */
-	public MsgPattern findSubstitutePattern(TextRect tr,
-		MsgPattern pattern)
-	{
-		assert tr != null;
-		List<TextRect> rects = tr.find(pattern.getMulti());
-		return (rects.size() > 0)
-		      ? findSubstitutePattern(tr, rects.get(0).getLineCount())
-		      : null;
-	}
-
-	/** Find a substitute pattern containing message lines */
-	private MsgPattern findSubstitutePattern(TextRect tr, int n_lines) {
-		for (int i = 0; i < getItemCount(); i++) {
-			MsgPattern pat = getItemAt(i);
-			List<TextRect> rects = tr.find(pat.getMulti());
-			if (rects.size() > 0 &&
-			    rects.get(0).getLineCount() == n_lines &&
-			    MsgPatternHelper.hasLines(pat))
-				return pat;
-		}
-		return null;
 	}
 }

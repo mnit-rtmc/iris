@@ -180,10 +180,8 @@ public class SingleSignTab extends IPanel {
 		status_lbl.setOpaque(true);
 		add("device.name");
 		add(name_lbl);
-		if (SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean()) {
-			add("dms.brightness");
-			add(brightness_lbl);
-		}
+		add("dms.brightness");
+		add(brightness_lbl);
 		add("camera");
 		add(preset_btn, Stretch.RIGHT);
 		add("location");
@@ -263,28 +261,29 @@ public class SingleSignTab extends IPanel {
 	/** Create a pixel panel pager */
 	private SignPixelPager createPager(DMS dms, SignPixelPanel pix_pnl) {
 		if (dms != null) {
-			return (preview)
-			      ? createPreviewPager(dms, pix_pnl)
-			      : createCurrentPager(dms, pix_pnl);
-		} else
-			return null;
+			RasterBuilder rb = DMSHelper.createRasterBuilder(dms);
+			if (rb != null) {
+				return (preview)
+				      ? createPreviewPager(dms, rb, pix_pnl)
+				      : createCurrentPager(dms, rb, pix_pnl);
+			}
+		}
+		return null;
 	}
 
 	/** Create a preview panel pager */
-	private SignPixelPager createPreviewPager(DMS dms,
+	private SignPixelPager createPreviewPager(DMS dms, RasterBuilder rb,
 		SignPixelPanel pix_pnl)
 	{
 		String ms = dispatcher.getPreviewMulti(dms);
-		RasterBuilder rb = DMSHelper.createRasterBuilder(dms);
 		return new SignPixelPager(pix_pnl, rb, ms, PREVIEW_CLR);
 	}
 
 	/** Update the current panel */
-	private SignPixelPager createCurrentPager(DMS dms,
+	private SignPixelPager createCurrentPager(DMS dms, RasterBuilder rb,
 		SignPixelPanel pix_pnl)
 	{
 		String ms = DMSHelper.getMultiString(dms);
-		RasterBuilder rb = DMSHelper.createRasterBuilder(dms);
 		Color clr = SignPixelPanel.filterColor(dms);
 		return new SignPixelPager(pix_pnl, rb, ms, clr);
 	}

@@ -68,7 +68,7 @@ public class FontFinder {
 		while (it.hasNext()) {
 			MsgPattern pat = it.next();
 			String cht = pat.getComposeHashtag();
-			if (cht != null && DMSHelper.hasHashtag(dms, cht))
+			if (DMSHelper.hasHashtag(dms, cht))
 				findFontTags(pat.getMulti());
 		}
 	}

@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,6 +10,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use ntcip::dms::font::ifnt;
+use ntcip::dms::multi::SyntaxError;
 
 /// Bulb errors
 #[derive(Debug, thiserror::Error)]
@@ -17,6 +19,14 @@ pub enum Error {
     /// Fetch request error
     #[error("Fetch request error")]
     FetchRequest(),
+
+    /// Invalid font error
+    #[error("Invalid font {0}")]
+    InvalidFont(#[from] ifnt::Error),
+
+    /// MULTI syntax error
+    #[error("MULTI syntax error {0}")]
+    MultiSyntax(#[from] SyntaxError),
 
     /// Fetch response "Unauthorized 401"
     #[error("Unauthorized")]

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- ant build file for IRIS project
-     Copyright (C) 2007-2022  Minnesota Department of Transportation
+     Copyright (C) 2007-2023  Minnesota Department of Transportation
 
      This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 	<!-- Base directory configuration -->
 	<property name="src.dir" value="src"/>
 	<property name="etc.dir" value="etc"/>
+	<property name="fonts.dir" value="fonts"/>
 	<property name="images.dir" value="images"/>
 	<property name="bin.dir" value="bin"/>
 	<property name="lib.dir" value="lib"/>
@@ -90,6 +91,7 @@
 	<target name="check-rpm">
 		<antcall target="check-dep">
 			<param name="file.dep" value="iris-build.properties"/>
+			<param name="file.dep" value="javax.activation.jar"/>
 			<param name="file.dep" value="mail.jar"/>
 			<param name="file.dep" value="jna-${jna_version}.jar"/>
 			<param name="file.dep"
@@ -231,6 +233,7 @@
 		</copy>
 		<copy todir="${dist.server}">
 			<fileset dir="${lib.dir}">
+				<include name="javax.activation.jar"/>
 				<include name="mail.jar"/>
 				<include name="json-${json_version}.jar"/>
 				<include name="postgis-jdbc-${postgis_version}.jar"/>
@@ -285,6 +288,7 @@
 		<mkdir dir="${dist.client}/lib"/>
 		<copy todir="${dist.client}/lib">
 			<fileset dir="${lib.dir}">
+				<include name="javax.activation.jar"/>
 				<include name="mail.jar"/>
 				<include name="jna-${jna_version}.jar"/>
 				<include name="jna-platform-${jna_version}.jar"/>
@@ -340,9 +344,9 @@
 			<fileset file="${sql.dir}/tms-template.sql"/>
 			<fileset file="${sql.dir}/migrate-*.sql"/>
 		</copy>
-		<mkdir dir="${install.dir}/var/lib/iris/sql/fonts"/>
-		<copy todir="${install.dir}/var/lib/iris/sql/fonts">
-			<fileset file="${sql.dir}/fonts/*.sql"/>
+		<mkdir dir="${install.dir}/var/lib/iris/fonts"/>
+		<copy todir="${install.dir}/var/lib/iris/fonts">
+			<fileset file="${fonts.dir}/*.ifnt"/>
 		</copy>
 		<mkdir dir="${install.dir}/var/lib/iris/meter"/>
 		<mkdir dir="${install.dir}/var/lib/iris/traffic"/>
@@ -385,8 +389,7 @@
 	<target name="tarball"
 	        description="Create source tarball">
 		<copy todir="${build.tar}">
-			<fileset dir="${basedir}"
-			         excludes="build/**,bulb/target/**,graft/target/**,honeybee/target/**,mayfly/target/**" />
+			<fileset dir="${basedir}" excludes="build/**,target/**" />
 		</copy>
 		<tar destfile="${tar.file}"
 		     basedir="${build.dir}"

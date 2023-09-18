@@ -1,0 +1,17 @@
+[workspace]
+members = ["honeybee", "graft", "mayfly", "bulb", "rendzina"]
+resolver = "2"
+
+[workspace.package]
+version = "5.46.2"
+edition = "2021"
+
+[profile.web]
+inherits = "release"
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "symbols"
+
+[patch.crates-io]

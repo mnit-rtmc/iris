@@ -2,7 +2,7 @@
 #
 # /usr/bin/iris_ctl -- Script for initializing and updating IRIS
 #
-# Copyright (C) 2012-2021  Minnesota Department of Transportation
+# Copyright (C) 2012-2023  Minnesota Department of Transportation
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -96,7 +96,7 @@ function create_tms_user() {
 
 function create_tms_database() {
 	echo "Creating tms database"
-	create_db="createdb tms; psql tms -f /var/lib/iris/sql/tms-template.sql; psql tms -f /var/lib/iris/sql/fonts/07_char.sql -f /var/lib/iris/sql/fonts/07_line.sql -f /var/lib/iris/sql/fonts/08_full.sql -f /var/lib/iris/sql/fonts/09_full.sql -f /var/lib/iris/sql/fonts/10_full.sql -f /var/lib/iris/sql/fonts/11_full.sql -f /var/lib/iris/sql/fonts/12_full.sql -f /var/lib/iris/sql/fonts/13_full.sql -f /var/lib/iris/sql/fonts/14_full.sql -f /var/lib/iris/sql/fonts/15_full.sql -f /var/lib/iris/sql/fonts/16_full.sql -f /var/lib/iris/sql/fonts/18_full.sql -f /var/lib/iris/sql/fonts/20_full.sql -f /var/lib/iris/sql/fonts/24_full.sql -f /var/lib/iris/sql/fonts/26_full.sql"
+	create_db="createdb tms; psql tms -f /var/lib/iris/sql/tms-template.sql"
 	su --login postgres -c "$create_db"
 }
 

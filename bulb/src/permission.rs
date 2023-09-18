@@ -11,14 +11,15 @@
 // GNU General Public License for more details.
 //
 use crate::error::{Error, Result};
+use crate::fetch::Uri;
 use crate::resource::{AncillaryData, Card, Resource, View, NAME};
 use crate::role::Role;
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, Select};
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
-use std::borrow::{Borrow, Cow};
 use std::fmt;
+use std::iter::empty;
 use wasm_bindgen::JsValue;
 
 /// Permission
@@ -44,36 +45,33 @@ const ROLE_URI: &str = "/iris/api/role";
 impl AncillaryData for PermissionAnc {
     type Primary = Permission;
 
-    /// Get next ancillary URI
-    fn next_uri(&self, view: View, _pri: &Permission) -> Option<Cow<str>> {
-        match (view, &self.resource_types, &self.roles) {
-            (View::Create | View::Edit, None, _) => {
-                Some(RESOURCE_TYPE_URI.into())
-            }
-            (View::Create | View::Edit, _, None) => Some(ROLE_URI.into()),
-            _ => None,
+    /// Get URI iterator
+    fn uri_iter(
+        &self,
+        _pri: &Permission,
+        view: View,
+    ) -> Box<dyn Iterator<Item = Uri>> {
+        match view {
+            View::Create | View::Edit => Box::new(
+                [RESOURCE_TYPE_URI.into(), ROLE_URI.into()].into_iter(),
+            ),
+            _ => Box::new(empty()),
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
-        view: View,
-        pri: &Permission,
-        json: JsValue,
-    ) -> Result<()> {
-        if let Some(uri) = self.next_uri(view, pri) {
-            match uri.borrow() {
-                RESOURCE_TYPE_URI => {
-                    self.resource_types =
-                        Some(serde_wasm_bindgen::from_value(json)?);
-                }
-                _ => {
-                    self.roles = Some(serde_wasm_bindgen::from_value(json)?);
-                }
-            }
+        _pri: &Permission,
+        uri: Uri,
+        data: JsValue,
+    ) -> Result<bool> {
+        if uri.as_str() == RESOURCE_TYPE_URI {
+            self.resource_types = Some(serde_wasm_bindgen::from_value(data)?);
+        } else {
+            self.roles = Some(serde_wasm_bindgen::from_value(data)?);
         }
-        Ok(())
+        Ok(false)
     }
 }
 
@@ -125,7 +123,7 @@ fn access_str(access_n: u32, long: bool) -> &'static str {
         (2, false) => "👉",
         (2, true) => "👉 operate",
         (3, false) => "💡",
-        (3, true) => "💡 plan",
+        (3, true) => "💡 manage",
         (4, false) => "🔧",
         (4, true) => "🔧 configure",
         _ => "❓",

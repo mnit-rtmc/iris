@@ -235,6 +235,11 @@ abstract public class OpNtcip extends OpDevice {
 		return isMakeContaining("skyline");
 	}
 
+	/** Check if software model is Vaisala LX */
+	protected boolean isVaisalaLx() {
+		return getSoftwareModel().contains("LX");
+	}
+
 	/** Get the firmware version */
 	protected String getVersion() {
 		return ControllerHelper.getSetup(controller, "version");

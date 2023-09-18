@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,54 +14,17 @@ use crate::cabinetstyle::CabinetStyle;
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::error::Result;
+use crate::fetch::Uri;
+use crate::item::ItemState;
 use crate::resource::{
     disabled_attr, AncillaryData, Card, Resource, View, EDIT_BUTTON,
     LOC_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select, TextArea};
 use serde::{Deserialize, Serialize};
-use std::borrow::{Borrow, Cow};
 use std::fmt;
+use std::iter::empty;
 use wasm_bindgen::JsValue;
-
-/// Comm state
-#[derive(Clone, Copy)]
-pub enum CommState {
-    Disabled,
-    Online,
-    Failed,
-}
-
-impl CommState {
-    /// Get the comm state code
-    pub fn code(self) -> &'static str {
-        match self {
-            Self::Disabled => "🔻",
-            Self::Online => "👍",
-            Self::Failed => "💀",
-        }
-    }
-
-    /// Get the comm state description
-    pub fn description(self) -> &'static str {
-        match self {
-            Self::Disabled => "disabled",
-            Self::Online => "online",
-            Self::Failed => "failed",
-        }
-    }
-
-    /// Check if a search string matches
-    pub fn is_match(self, search: &str) -> bool {
-        self.code().contains(search) || self.description().contains(search)
-    }
-}
-
-impl fmt::Display for CommState {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.code())
-    }
-}
 
 /// Controller conditions
 #[derive(Debug, Deserialize, Serialize)]
@@ -121,65 +84,64 @@ const CABINET_STYLE_URI: &str = "/iris/api/cabinet_style";
 impl AncillaryData for ControllerAnc {
     type Primary = Controller;
 
-    /// Get next ancillary URI
-    fn next_uri(&self, view: View, pri: &Controller) -> Option<Cow<str>> {
-        match (
-            view,
-            &self.conditions,
-            &self.comm_links,
-            &self.comm_configs,
-            &self.cabinet_styles,
-            &self.controller_io,
-        ) {
-            (View::Search | View::Status(_) | View::Edit, None, _, _, _, _) => {
-                Some(CONDITION_URI.into())
-            }
-            (View::Search | View::Status(_), _, None, _, _, _) => {
-                Some(COMM_LINK_URI.into())
-            }
-            (View::Search | View::Status(_), _, _, None, _, _) => {
-                Some(COMM_CONFIG_URI.into())
-            }
-            (View::Edit, _, _, _, None, _) => Some(CABINET_STYLE_URI.into()),
-            (View::Status(_), _, _, _, _, None) => {
-                Some(format!("/iris/api/controller_io/{}", &pri.name).into())
-            }
-            _ => None,
+    /// Get URI iterator
+    fn uri_iter(
+        &self,
+        pri: &Controller,
+        view: View,
+    ) -> Box<dyn Iterator<Item = Uri>> {
+        match view {
+            View::Search => Box::new(
+                [
+                    CONDITION_URI.into(),
+                    COMM_LINK_URI.into(),
+                    COMM_CONFIG_URI.into(),
+                ]
+                .into_iter(),
+            ),
+            View::Status(_) => Box::new(
+                [
+                    CONDITION_URI.into(),
+                    COMM_LINK_URI.into(),
+                    COMM_CONFIG_URI.into(),
+                    format!("/iris/api/controller_io/{}", &pri.name).into(),
+                ]
+                .into_iter(),
+            ),
+            View::Edit => Box::new(
+                [CONDITION_URI.into(), CABINET_STYLE_URI.into()].into_iter(),
+            ),
+            _ => Box::new(empty()),
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
-        view: View,
-        pri: &Controller,
-        json: JsValue,
-    ) -> Result<()> {
-        if let Some(uri) = self.next_uri(view, pri) {
-            match uri.borrow() {
-                CONDITION_URI => {
-                    self.conditions =
-                        Some(serde_wasm_bindgen::from_value(json)?);
-                }
-                COMM_LINK_URI => {
-                    self.comm_links =
-                        Some(serde_wasm_bindgen::from_value(json)?);
-                }
-                COMM_CONFIG_URI => {
-                    self.comm_configs =
-                        Some(serde_wasm_bindgen::from_value(json)?);
-                }
-                CABINET_STYLE_URI => {
-                    self.cabinet_styles =
-                        Some(serde_wasm_bindgen::from_value(json)?);
-                }
-                _ => {
-                    self.controller_io =
-                        Some(serde_wasm_bindgen::from_value(json)?);
-                }
+        _pri: &Controller,
+        uri: Uri,
+        data: JsValue,
+    ) -> Result<bool> {
+        match uri.as_str() {
+            CONDITION_URI => {
+                self.conditions = Some(serde_wasm_bindgen::from_value(data)?);
+            }
+            COMM_LINK_URI => {
+                self.comm_links = Some(serde_wasm_bindgen::from_value(data)?);
+            }
+            COMM_CONFIG_URI => {
+                self.comm_configs = Some(serde_wasm_bindgen::from_value(data)?);
+            }
+            CABINET_STYLE_URI => {
+                self.cabinet_styles =
+                    Some(serde_wasm_bindgen::from_value(data)?);
+            }
+            _ => {
+                self.controller_io =
+                    Some(serde_wasm_bindgen::from_value(data)?);
             }
         }
-        Ok(())
+        Ok(false)
     }
 }
 
@@ -307,16 +269,16 @@ impl Controller {
         self.condition == 1
     }
 
-    /// Get comm state
-    pub fn comm_state(&self) -> CommState {
+    /// Get item state
+    pub fn item_state(&self) -> ItemState {
         if self.is_active() {
             if self.fail_time.is_some() {
-                CommState::Failed
+                ItemState::Offline
             } else {
-                CommState::Online
+                ItemState::Available
             }
         } else {
-            CommState::Disabled
+            ItemState::Disabled
         }
     }
 
@@ -367,11 +329,11 @@ impl Controller {
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let comm_state = self.comm_state();
+        let item_state = self.item_state();
         let disabled = disabled_attr(self.is_active());
         let link_drop = HtmlStr::new(self.link_drop());
         format!(
-            "<div class='{NAME} end'>{comm_state} {self}</div>\
+            "<div class='{NAME} end'>{self} {item_state}</div>\
             <div class='info fill{disabled}'>{link_drop}</div>"
         )
     }
@@ -380,8 +342,8 @@ impl Controller {
     fn to_html_status(&self, anc: &ControllerAnc) -> String {
         let rname = Resource::CommLink.rname();
         let condition = anc.condition(self);
-        let comm_state = self.comm_state();
-        let comm_desc = comm_state.description();
+        let item_state = self.item_state();
+        let item_desc = item_state.description();
         let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
         let comm_config = anc.comm_config(self);
@@ -436,7 +398,7 @@ impl Controller {
         format!(
             "<div class='row'>\
               <span>{condition}</span>\
-              <span>{comm_state} {comm_desc}</span>\
+              <span>{item_state} {item_desc}</span>\
               <span>\
                 <button type='button' class='go_link' \
                         data-link='{comm_link}' data-type='{rname}'>\
@@ -522,7 +484,7 @@ impl Card for Controller {
     fn is_match(&self, search: &str, anc: &ControllerAnc) -> bool {
         self.name.contains_lower(search)
             || self.link_drop().contains_lower(search)
-            || self.comm_state().is_match(search)
+            || self.item_state().is_match(search)
             || anc.condition(self).contains_lower(search)
             || anc.comm_config(self).contains_lower(search)
             || self.location.contains_lower(search)

@@ -8,6 +8,9 @@ Each message is composed of three parts: **descriptor** (_what?_), **locator**
 (_where?_) and **advice** (_how?_).  Suggestions are only made if a match is
 found for all three parts.
 
+If a suggested message is too wide for the sign, it will be [abbreviated].  If
+it cannot be shrunk to fit, it will be discarded.
+
 ## Impact
 
 Every incident is assigned an **impact**, based on which lanes are _blocked_ or
@@ -56,14 +59,14 @@ incident roadway.
 
 ## Severity
 
-Incident severity determines the **maximum range** and **message priority**.
+Incident severity determines the **maximum range** and [message priority].
 There are three severity values: `minor`, `normal`, and `major`.
 
 Severity | Maximum Range | Message Priority
 ---------|---------------|-----------------
-`minor`  | `near`        | `INCIDENT_LOW`
-`normal` | `middle`      | `INCIDENT_MED`
-`major`  | `far`         | `INCIDENT_HIGH`
+`minor`  | `near`        | `high_2`
+`normal` | `middle`      | `high_3`
+`major`  | `far`         | `high_4`
 
 Severity depends on how many lanes are _blocked_ or _affected_, as well as the
 **lane type** at the incident location.
@@ -147,24 +150,10 @@ Impacted Lanes | count of non-shoulder lanes impacted
 Rows where _open_ and / or _impacted lanes_ are specified will be matched in
 preference to rows where they are not.
 
-## Abbreviation
+## Sign Restrictions
 
-If a message is too wide to fit on the sign, an abbreviated version can be
-created using the [allowed words] list.
-
-Each line which doesn't fit is split into words.  Starting at the end, any word
-which appears in the _allowed words_ list is replaced with its abbreviated form.
-Then the line is checked again, and if still too wide, the process repeats.
-Words with empty abbreviations are checked last, only if all other abbreviations
-are insufficient.
-
-If a line is still too wide after all words are checked, the message is
-discarded, with no suggestion for that sign.
-
-## Dedicated Purpose Signs
-
-_Dedicated purpose_ signs normally cannot be used for incidents.  An exception
-is `tolling` signs — they are used if these conditions are met:
+[Dedicated purpose] signs normally cannot be used for incidents.  An exception
+is _#Tolling_ signs — they are used if these conditions are met:
 
 * Sign and incident are on the same roadway (not _branched_)
 * Sign is less than 1 mile upstream of the incident
@@ -193,10 +182,11 @@ _cleared_ message will be deployed with `low_sys` [message priority] for 5
 minutes.
 
 
-[allowed words]: words.html
+[abbreviated]: words.html#abbreviation
+[dedicated purpose]: hashtags.html#dedicated-purpose
 [DMS]: dms.html
 [exits]: road_topology.html#r_node-types
-[message priority]: dms.html#message-priority
+[message priority]: sign_message.html#message-priority
 [MULTI]: multi.html
 [pickable]: road_topology.html#pickable
 [system attribute]: system_attributes.html

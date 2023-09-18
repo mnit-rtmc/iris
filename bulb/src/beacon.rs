@@ -12,14 +12,15 @@
 //
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
-use crate::item::ItemState;
+use crate::fetch::Uri;
+use crate::item::{ItemState, ItemStates};
 use crate::resource::{
     disabled_attr, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use serde::{Deserialize, Serialize};
-use std::borrow::{Borrow, Cow};
 use std::fmt;
+use std::iter::once;
 use wasm_bindgen::JsValue;
 
 /// Beacon States
@@ -57,34 +58,30 @@ const BEACON_STATE_URI: &str = "/iris/beacon_state";
 impl AncillaryData for BeaconAnc {
     type Primary = Beacon;
 
-    /// Get next ancillary data URI
-    fn next_uri(&self, view: View, pri: &Self::Primary) -> Option<Cow<str>> {
-        self.dev
-            .next_uri(view, pri)
-            .or_else(|| match (view, &self.states) {
-                (View::Compact | View::Search | View::Status(_), None) => {
-                    Some(BEACON_STATE_URI.into())
-                }
-                _ => None,
-            })
+    /// Get ancillary URI iterator
+    fn uri_iter(
+        &self,
+        pri: &Self::Primary,
+        view: View,
+    ) -> Box<dyn Iterator<Item = Uri>> {
+        Box::new(
+            once(BEACON_STATE_URI.into()).chain(self.dev.uri_iter(pri, view)),
+        )
     }
 
-    /// Set ancillary JSON data
-    fn set_json(
+    /// Set ancillary data
+    fn set_data(
         &mut self,
-        view: View,
         pri: &Self::Primary,
-        json: JsValue,
-    ) -> Result<()> {
-        if let Some(uri) = self.next_uri(view, pri) {
-            match uri.borrow() {
-                BEACON_STATE_URI => {
-                    self.states = Some(serde_wasm_bindgen::from_value(json)?);
-                }
-                _ => self.dev.set_json(view, pri, json)?,
-            }
+        uri: Uri,
+        data: JsValue,
+    ) -> Result<bool> {
+        if uri.as_str() == BEACON_STATE_URI {
+            self.states = Some(serde_wasm_bindgen::from_value(data)?);
+        } else {
+            self.dev.set_data(pri, uri, data)?;
         }
-        Ok(())
+        Ok(false)
     }
 }
 
@@ -107,17 +104,21 @@ impl Beacon {
         matches!(self.state, 4 | 6 | 7)
     }
 
-    /// Get item state
-    fn item_state(&self, anc: &BeaconAnc) -> ItemState {
-        if anc.dev.is_active(self) {
-            match self.state {
-                0 => ItemState::Unknown,
-                2 => ItemState::Available,
-                4 => ItemState::Deployed,
-                _ => ItemState::Maintenance,
-            }
-        } else {
-            ItemState::Unknown
+    /// Get item states
+    fn item_states(&self, anc: &BeaconAnc) -> ItemStates {
+        let state = anc.dev.item_state(self);
+        match state {
+            ItemState::Available => match self.state {
+                2 => ItemState::Available.into(),
+                4 => ItemState::Deployed.into(),
+                5 => ItemState::Fault.into(),
+                6 => ItemStates::from(ItemState::Deployed)
+                    .with(ItemState::Fault, "stuck on"),
+                7 => ItemStates::from(ItemState::Deployed)
+                    .with(ItemState::External, "external flashing"),
+                _ => ItemState::Unknown.into(),
+            },
+            _ => state.into(),
         }
     }
 
@@ -135,12 +136,11 @@ impl Beacon {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &BeaconAnc) -> String {
-        let comm_state = anc.dev.comm_state(self);
-        let item_state = self.item_state(anc);
+        let item_states = self.item_states(anc);
         let disabled = disabled_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='{NAME} end'>{comm_state} {self} {item_state}</div>\
+            "<div class='{NAME} end'>{self} {item_states}</div>\
             <div class='info fill{disabled}'>{location}</div>"
         )
     }
@@ -148,10 +148,7 @@ impl Beacon {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &BeaconAnc, config: bool) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
-        let comm_state = anc.dev.comm_state(self);
-        let comm_desc = comm_state.description();
-        let item_state = self.item_state(anc);
-        let item_desc = item_state.description();
+        let item_states = self.item_states(anc).to_html();
         let flashing = if self.flashing() {
             CLASS_FLASHING
         } else {
@@ -163,10 +160,7 @@ impl Beacon {
             "<div class='row'>\
               <span class='info'>{location}</span>\
             </div>\
-            <div class='row'>\
-              <span>{comm_state} {comm_desc}</span>\
-              <span>{item_state} {item_desc}</span>\
-            </div>\
+            <div class='row'>{item_states}</div>\
             <div class='beacon-container row center'>\
               <button id='ob_flashing'></button>\
               <label for='ob_flashing' class='beacon'>\
@@ -262,8 +256,7 @@ impl Card for Beacon {
     fn is_match(&self, search: &str, anc: &BeaconAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || anc.dev.comm_state(self).is_match(search)
-            || self.item_state(anc).is_match(search)
+            || self.item_states(anc).is_match(search)
             || self.message.contains_lower(search)
             || self.notes.contains_lower(search)
     }

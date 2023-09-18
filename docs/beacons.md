@@ -12,7 +12,8 @@ Beacons can be connected to controllers using one of these protocols:
 - [MnDOT-170]
 - [Natch]
 
-## Resources
+<details>
+<summary>API Resources</summary>
 
 * `iris/api/beacon`
 * `iris/api/beacon/{name}`
@@ -23,8 +24,12 @@ Attribute [permissions]:
 |--------------|----------------|-----------------------------|
 | Read Only    | name, location | geo\_loc                    |
 | 👉 Operate   | state          |                             |
-| 💡 Plan      | message, notes | preset                      |
+| 💡 Manage    | message, notes | preset                      |
 | 🔧 Configure | controller     | pin, verify\_pin, ext\_mode |
+
+</details>
+
+## Setup
 
 **Message** is a static text message on the sign.
 

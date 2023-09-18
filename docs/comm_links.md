@@ -5,7 +5,8 @@ Select `View ➔ Maintenance ➔ Comm Links` menu item
 A **comm link** is a network connection to field [device]s or external system
 **feeds**.  IRIS is capable of supporting thousands of simultaneous comm links.
 
-## Resources
+<details>
+<summary>API Resources</summary>
 
 * `iris/api/comm_link`
 * `iris/api/comm_link/{name}`
@@ -15,8 +16,12 @@ Attribute [permissions]:
 | Access       | Minimal                        |
 |--------------|--------------------------------|
 | Read Only    | name, connected                |
-| 💡 Plan      | poll\_enabled                  |
+| 💡 Manage    | poll\_enabled                  |
 | 🔧 Configure | description, uri, comm\_config |
+
+</details>
+
+## Setup
 
 **Description** is s short text description of the comm link.
 

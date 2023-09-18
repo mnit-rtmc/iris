@@ -12,13 +12,14 @@
 //
 use crate::controller::Controller;
 use crate::error::Result;
+use crate::fetch::Uri;
 use crate::resource::{
     disabled_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
-use std::borrow::{Borrow, Cow};
 use std::fmt;
+use std::iter::once;
 use wasm_bindgen::JsValue;
 
 /// Gate arm states
@@ -86,36 +87,33 @@ const GATE_ARM_STATE_URI: &str = "/iris/gate_arm_state";
 impl AncillaryData for GateArmAnc {
     type Primary = GateArm;
 
-    /// Get next ancillary URI
-    fn next_uri(&self, view: View, pri: &GateArm) -> Option<Cow<str>> {
-        match (view, &self.states, &self.controller, &pri.controller()) {
-            (_, None, _, _) => Some(GATE_ARM_STATE_URI.into()),
-            (View::Status(_), _, None, Some(ctrl)) => {
-                Some(format!("/iris/api/controller/{}", &ctrl).into())
+    /// Get URI iterator
+    fn uri_iter(
+        &self,
+        pri: &GateArm,
+        view: View,
+    ) -> Box<dyn Iterator<Item = Uri>> {
+        match (view, &pri.controller()) {
+            (View::Status(_), Some(ctrl)) => {
+                Box::new(once(format!("/iris/api/controller/{ctrl}").into()))
             }
-            _ => None,
+            _ => Box::new(once(GATE_ARM_STATE_URI.into())),
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
-        view: View,
-        pri: &GateArm,
-        json: JsValue,
-    ) -> Result<()> {
-        if let Some(uri) = self.next_uri(view, pri) {
-            match uri.borrow() {
-                GATE_ARM_STATE_URI => {
-                    self.states = Some(serde_wasm_bindgen::from_value(json)?);
-                }
-                _ => {
-                    self.controller =
-                        Some(serde_wasm_bindgen::from_value(json)?)
-                }
-            }
+        _pri: &GateArm,
+        uri: Uri,
+        data: JsValue,
+    ) -> Result<bool> {
+        if uri.as_str() == GATE_ARM_STATE_URI {
+            self.states = Some(serde_wasm_bindgen::from_value(data)?);
+        } else {
+            self.controller = Some(serde_wasm_bindgen::from_value(data)?);
         }
-        Ok(())
+        Ok(false)
     }
 }
 

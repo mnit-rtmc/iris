@@ -49,8 +49,8 @@ The editor can be accessed in one of two ways:
 
 Once the editor is launched, the Message Selector window will appear.
 
-You can now select a sign group to get a list of existing messages.  If you want
-to edit a message, select it from the list and a preview will appear.
+You can now select a sign to get a list of existing messages.  If you want to
+edit a message, select it from the list and a preview will appear.
 
 ![](images/wysiwyg_message_selector.png)
 

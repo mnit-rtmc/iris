@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,22 +35,27 @@ impl Alarm {
     pub const RESOURCE_N: &'static str = "alarm";
 
     /// Get the item state
-    fn item_state(&self) -> ItemState {
-        match (self.controller.is_some(), self.state) {
-            (false, _) => ItemState::Unknown,
-            (true, false) => ItemState::Available,
-            (true, true) => ItemState::Maintenance,
+    fn item_state(&self, anc: &AlarmAnc) -> ItemState {
+        let item_state = anc.item_state(self);
+        match item_state {
+            ItemState::Available => {
+                if self.state {
+                    ItemState::Fault
+                } else {
+                    ItemState::Available
+                }
+            }
+            _ => item_state,
         }
     }
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &AlarmAnc) -> String {
-        let comm_state = anc.comm_state(self);
         let disabled = disabled_attr(self.controller.is_some());
-        let item_state = self.item_state();
+        let item_state = self.item_state(anc);
         let description = HtmlStr::new(&self.description);
         format!(
-            "<div class='{NAME} end'>{comm_state} {self} {item_state}</div>\
+            "<div class='{NAME} end'>{self} {item_state}</div>\
             <div class='info fill{disabled}'>{description}</div>"
         )
     }
@@ -58,7 +63,7 @@ impl Alarm {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &AlarmAnc) -> String {
         let description = HtmlStr::new(&self.description);
-        let item_state = self.item_state();
+        let item_state = self.item_state(anc);
         let item_desc = item_state.description();
         let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
         let ctrl_button = anc.controller_button();
@@ -129,8 +134,7 @@ impl Card for Alarm {
     fn is_match(&self, search: &str, anc: &AlarmAnc) -> bool {
         self.description.contains_lower(search)
             || self.name.contains_lower(search)
-            || anc.comm_state(self).is_match(search)
-            || self.item_state().is_match(search)
+            || self.item_state(anc).is_match(search)
     }
 
     /// Convert to HTML view

@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ impl Detector {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &DetectorAnc) -> String {
-        let comm_state = anc.comm_state(self);
+        let item_state = anc.item_state(self);
         let label = HtmlStr::new(&self.label);
         let enabled = self.controller.is_some()
             || self
@@ -51,7 +51,7 @@ impl Detector {
                 .is_some();
         let disabled = disabled_attr(enabled);
         format!(
-            "<div class='{NAME} end'>{comm_state} {self}</div>\
+            "<div class='{NAME} end'>{self} {item_state}</div>\
             <div class='info fill{disabled}'>{label}</div>"
         )
     }
@@ -116,7 +116,7 @@ impl Card for Detector {
     fn is_match(&self, search: &str, anc: &DetectorAnc) -> bool {
         self.name.contains_lower(search)
             || self.label.contains_lower(search)
-            || anc.comm_state(self).is_match(search)
+            || anc.item_state(self).is_match(search)
     }
 
     /// Convert to HTML view

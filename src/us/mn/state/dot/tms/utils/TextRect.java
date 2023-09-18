@@ -118,6 +118,10 @@ public class TextRect {
 		@Override public void setTextRectangle(int x, int y,
 			int w, int h)
 		{
+			if (w == 0)
+				w = width - (x - 1);
+			if (h == 0)
+				h = height - (y - 1);
 			if (rect.equals(page_rect))
 				fillable = false;
 			startRect(new TextRect(page, x, y, w, h, font_cur));
@@ -184,7 +188,14 @@ public class TextRect {
 			int w, int h)
 		{
 			super.setTextRectangle(x, y, w, h);
+			if (w == 0)
+				w = width - (x - 1);
+			if (h == 0)
+				h = height - (y - 1);
 			fillRect(new TextRect(page, x, y, w, h, font_cur));
+		}
+		@Override public void addFeed(String fid) {
+			// strip feed tags
 		}
 	}
 

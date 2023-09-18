@@ -105,6 +105,5 @@ their operands by a space.
 
 [Bug reports]: https://github.com/mnit-rtmc/iris/issues
 [Fedora]: http://fedoraproject.org
-[JavaMail jar]: https://javaee.github.io/javamail/#Download_JavaMail_Release
 [pull request]: https://github.com/mnit-rtmc/iris/pulls
 [web-based user interface]: web_ui.html

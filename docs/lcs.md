@@ -32,7 +32,7 @@ of traffic.  In addition to being used as an LCS, it can display
 
 A _lane-use MULTI_ associates an [indication](#indications) with a
 [message pattern].  The message typically contains a [graphic image] of the
-_indication_.  To be used, the _hashtag_ must match the DMS.
+_indication_.  To be used, the [hashtag] must match the DMS.
 
 ## Changeable LCS
 
@@ -50,6 +50,7 @@ well as the DMS which represents the LCS.
 [controller]: controllers.html
 [DMS]: dms.html
 [graphic image]: graphics.html
+[hashtag]: hashtags.html
 [IO pin]: controllers.html#io-pins
 [message pattern]: message_patterns.html
 [variable speed advisories]: vsa.html

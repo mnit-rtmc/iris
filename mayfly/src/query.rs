@@ -228,7 +228,7 @@ const MAX_AGE_SEC: u64 = 100 * 7 * 24 * 60 * 60;
 /// Get max age for cache control heder
 fn max_age(date: &str) -> Option<u64> {
     if let Ok(date) = parse_date(date) {
-        let today = Local::today().naive_local();
+        let today = Local::now().date_naive();
         if today > date + Duration::days(2) {
             Some(MAX_AGE_SEC)
         } else {

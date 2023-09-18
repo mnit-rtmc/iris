@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,10 +10,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::controller::{CommState, Controller};
+use crate::controller::Controller;
 use crate::error::Result;
+use crate::fetch::Uri;
+use crate::item::ItemState;
 use crate::resource::{AncillaryData, View};
-use std::borrow::{Borrow, Cow};
+use std::iter::{empty, once};
 use std::marker::PhantomData;
 use wasm_bindgen::JsValue;
 
@@ -57,20 +59,10 @@ impl<D: Device> DeviceAnc<D> {
         }
     }
 
-    /// Get comm state
-    pub fn comm_state(&self, pri: &D) -> CommState {
-        match self.controller(pri) {
-            Some(ctrl) => ctrl.comm_state(),
-            None => CommState::Disabled,
-        }
-    }
-
-    /// Is device active?
-    pub fn is_active(&self, pri: &D) -> bool {
-        match self.controller(pri) {
-            Some(ctrl) => ctrl.is_active(),
-            None => false,
-        }
+    /// Get item state
+    pub fn item_state(&self, pri: &D) -> ItemState {
+        self.controller(pri)
+            .map_or(ItemState::Disabled, |c| c.item_state())
     }
 }
 
@@ -79,31 +71,24 @@ const CONTROLLER_URI: &str = "/iris/api/controller";
 impl<D: Device> AncillaryData for DeviceAnc<D> {
     type Primary = D;
 
-    /// Get next ancillary URI
-    fn next_uri(&self, view: View, pri: &D) -> Option<Cow<str>> {
-        match (view, &self.controllers, &pri.controller(), &self.controller) {
-            (View::Search, None, _, _) => Some(CONTROLLER_URI.into()),
-            (View::Compact | View::Status(_), _, Some(ctrl), None) => {
-                Some(format!("/iris/api/controller/{}", &ctrl).into())
+    /// Get URI iterator
+    fn uri_iter(&self, pri: &D, view: View) -> Box<dyn Iterator<Item = Uri>> {
+        match (view, &pri.controller()) {
+            (View::Search, _) => Box::new(once(CONTROLLER_URI.into())),
+            (View::Compact | View::Status(_), Some(ctrl)) => {
+                Box::new(once(format!("/iris/api/controller/{ctrl}").into()))
             }
-            _ => None,
+            _ => Box::new(empty()),
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(&mut self, view: View, pri: &D, json: JsValue) -> Result<()> {
-        if let Some(uri) = self.next_uri(view, pri) {
-            match uri.borrow() {
-                CONTROLLER_URI => {
-                    self.controllers =
-                        Some(serde_wasm_bindgen::from_value(json)?);
-                }
-                _ => {
-                    self.controller =
-                        Some(serde_wasm_bindgen::from_value(json)?)
-                }
-            }
+    /// Put ancillary data
+    fn set_data(&mut self, _pri: &D, uri: Uri, data: JsValue) -> Result<bool> {
+        if uri.as_str() == CONTROLLER_URI {
+            self.controllers = Some(serde_wasm_bindgen::from_value(data)?);
+        } else {
+            self.controller = Some(serde_wasm_bindgen::from_value(data)?);
         }
-        Ok(())
+        Ok(false)
     }
 }

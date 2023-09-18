@@ -551,7 +551,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	/** Query user's permission access level for this object.
 	 *
 	 * @return Access level (0-4)
-	 *         0 none, 1 view, 2 operate, 3 plan, 4 configure */
+	 *         0 none, 1 view, 2 operate, 3 manage, 4 configure */
 	public int queryPermAccess() throws TMSException {
 		String res = getTypeName();
 		String user = getProcUser();
@@ -559,7 +559,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		store.query("SELECT max(access_n) " +
 			"FROM iris.permission p " +
 			"JOIN iris.i_user u ON u.role = p.role " +
-			"WHERE resource_n = '" + res + "' " +
+			"WHERE p.resource_n = '" + res + "' " +
 			"AND u.name = '" + user + "' " +
 			"AND (" +
 				"p.hashtag IS NULL OR " +

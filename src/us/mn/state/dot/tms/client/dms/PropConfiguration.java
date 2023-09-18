@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
@@ -38,7 +39,6 @@ import us.mn.state.dot.tms.utils.HexString;
 import static us.mn.state.dot.tms.units.Distance.Units.INCHES;
 import static us.mn.state.dot.tms.units.Distance.Units.MILLIMETERS;
 import us.mn.state.dot.tms.utils.I18N;
-import us.mn.state.dot.tms.utils.SString;
 
 /**
  * PropConfiguration is a GUI panel for displaying sign configuration on a
@@ -205,8 +205,9 @@ public class PropConfiguration extends IPanel {
 		add(module_height_txt, Stretch.LAST);
 		font_cbx.setAction(new IAction("font") {
 			protected void doActionPerformed(ActionEvent e) {
-				config.setDefaultFont(
-					(Font) font_cbx.getSelectedItem());
+				Font f = (Font) font_cbx.getSelectedItem();
+				if (f != null)
+					config.setDefaultFont(f.getNumber());
 			}
 		});
 		font_cbx.setModel(new IComboBoxModel<Font>(
@@ -214,15 +215,15 @@ public class PropConfiguration extends IPanel {
 		module_width_txt.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				config.setModuleWidth(SString.stringToInt(
-					module_width_txt.getText()));
+				config.setModuleWidth(parseInt(
+					module_width_txt));
 			}
 		});
 		module_height_txt.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				config.setModuleHeight(SString.stringToInt(
-					module_height_txt.getText()));
+				config.setModuleHeight(parseInt(
+					module_height_txt));
 			}
 		});
 		updateAttribute(null);
@@ -262,23 +263,30 @@ public class PropConfiguration extends IPanel {
 			c_scheme_lbl.setText(cs.description);
 		}
 		if (null == a || a.equals("defaultFont")) {
-			font_cbx.setSelectedItem(sc.getDefaultFont());
-			font_height_lbl.setText(calculateFontHeight());
+			Font f = FontHelper.find(sc.getDefaultFont());
+			if (f != null) {
+				font_cbx.setSelectedItem(f);
+				font_height_lbl.setText(calculateFontHeight());
+			}
 		}
 		if (null == a || a.equals("moduleHeight")) {
-			module_height_txt.setText(
-				SString.intToString(sc.getModuleHeight()));
+			Integer h = sc.getModuleHeight();
+			module_height_txt.setText((h != null)
+			                         ? h.toString()
+			                         : "");
 		}
 		if (null == a || a.equals("moduleWidth")) {
-			module_width_txt.setText(
-				SString.intToString(sc.getModuleWidth()));
+			Integer w = sc.getModuleWidth();
+			module_width_txt.setText((w != null)
+			                        ? w.toString()
+			                        : "");
 		}
 	}
 
 	/** Calculate the height of the default font on the sign */
 	private String calculateFontHeight() {
 		SignConfig sc = config;
-		Font f = sc.getDefaultFont();
+		Font f = FontHelper.find(sc.getDefaultFont());
 		if (f != null) {
 			int pv = sc.getPitchVert();
 			int h = f.getHeight();

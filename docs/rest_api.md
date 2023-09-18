@@ -96,7 +96,7 @@ A `Content-Type: application/json` header is included where appropriate.
 |--------------|----------------------|-----------------------|
 | Read Only    | name, location       | geo\_loc, video\_loss |
 | 👉 Operate   |                      | ptz                   |
-| 💡 Plan      | notes, publish       | streamable            |
+| 💡 Manage    | notes, publish       | streamable            |
 | 🔧 Configure | controller, cam\_num | pin, cam\_template, encoder\_type, enc\_address, enc\_port, enc\_mcast, enc\_channel
 
 ### `detector`
@@ -105,7 +105,7 @@ A `Content-Type: application/json` header is included where appropriate.
 |--------------|-------------|----------------------------|
 | Read Only    | name, label | auto\_fail                 |
 | 👉 Operate   |             | field\_length, force\_fail |
-| 💡 Plan      | notes       | abandoned                  |
+| 💡 Manage    | notes       | abandoned                  |
 | 🔧 Configure | controller  | pin, r\_node, lane\_code, lane\_number, fake |
 
 ### `flow_stream`
@@ -114,7 +114,7 @@ A `Content-Type: application/json` header is included where appropriate.
 |--------------|------------|----------------------------|
 | Read Only    | name       | status                     |
 | 👉 Operate   |            | camera, mon\_num           |
-| 💡 Plan      |            | restricted, address, port  |
+| 💡 Manage    |            | restricted, address, port  |
 | 🔧 Configure | controller | pin, loc\_overlay, quality |
 
 ### `gate_arm`
@@ -122,7 +122,7 @@ A `Content-Type: application/json` header is included where appropriate.
 | Access       | Minimal                    | Full                  |
 |--------------|----------------------------|-----------------------|
 | Read Only    | name, location, arm\_state | ga\_array, idx, fault |
-| 💡 Plan      | notes                      |                       |
+| 💡 Manage    | notes                      |                       |
 | 🔧 Configure | controller                 | pin                   |
 
 ### `gate_arm_array`
@@ -131,7 +131,7 @@ A `Content-Type: application/json` header is included where appropriate.
 |--------------|---------------------------|----------|
 | Read Only    | name, location, interlock | geo\_loc |
 | 👉 Operate   | arm\_state                |          |
-| 💡 Plan      | notes                     |          |
+| 💡 Manage    | notes                     |          |
 | 🔧 Configure |                           | opposing, prereq, camera, approach, action\_plan |
 
 ### `geo_loc`
@@ -153,7 +153,7 @@ Since `geo_loc` resources can only be created and deleted with an associated
 | Access       | Minimal    | Full                                   |
 |--------------|------------|----------------------------------------|
 | Read Only    | name       | latest\_poll, latest\_sample, lat, lon |
-| 💡 Plan      | notes      |                                        |
+| 💡 Manage    | notes      |                                        |
 | 🔧 Configure | controller | pin                                    |
 
 ### `lane_marking`
@@ -162,7 +162,7 @@ Since `geo_loc` resources can only be created and deleted with an associated
 |--------------|----------------|----------|
 | Read Only    | name, location | geo\_loc |
 | 👉 Operate   | deployed       |          |
-| 💡 Plan      | notes          |          |
+| 💡 Manage    | notes          |          |
 | 🔧 Configure | controller     | pin      |
 
 ### `lcs_array`
@@ -171,7 +171,7 @@ Since `geo_loc` resources can only be created and deleted with an associated
 |--------------|------------|-------|
 | Read Only    | name       |       |
 | 👉 Operate   | lcs\_lock  |       |
-| 💡 Plan      | notes      |       |
+| 💡 Manage    | notes      |       |
 | 🔧 Configure |            | shift |
 
 ### `lcs_indication`
@@ -187,7 +187,7 @@ Since `geo_loc` resources can only be created and deleted with an associated
 |--------------|----------------|----------------------------------|
 | Read Only    | name, location | geo\_loc                         |
 | 👉 Operate   |                | m\_lock, rate                    |
-| 💡 Plan      | notes          | storage, max\_wait, algorithm, am\_target, pm\_target |
+| 💡 Manage    | notes          | storage, max\_wait, algorithm, am\_target, pm\_target |
 | 🔧 Configure | controller     | pin, meter\_type, beacon, preset |
 
 ### `tag_reader`
@@ -195,7 +195,7 @@ Since `geo_loc` resources can only be created and deleted with an associated
 | Access       | Minimal        | Full               |
 |--------------|----------------|--------------------|
 | Read Only    | name, location | geo\_loc, settings |
-| 💡 Plan      | notes          | toll\_zone         |
+| 💡 Manage    | notes          | toll\_zone         |
 | 🔧 Configure | controller     | pin                |
 
 ### `video_monitor`
@@ -204,7 +204,7 @@ Since `geo_loc` resources can only be created and deleted with an associated
 |--------------|----------------------|----------------------------|
 | Read Only    | name                 |                            |
 | 👉 Operate   |                      | camera                     |
-| 💡 Plan      | notes                | restricted, monitor\_style |
+| 💡 Manage    | notes                | restricted, monitor\_style |
 | 🔧 Configure | mon\_num, controller | pin                        |
 
 ### `weather_sensor`
@@ -212,7 +212,7 @@ Since `geo_loc` resources can only be created and deleted with an associated
 | Access       | Minimal                  | Full |
 |--------------|--------------------------|------|
 | Read Only    | name, location           | geo\_loc, settings, sample, sample\_time |
-| 💡 Plan      | site\_id, alt\_id, notes |      |
+| 💡 Manage    | site\_id, alt\_id, notes |      |
 | 🔧 Configure | controller               | pin  |
 
 

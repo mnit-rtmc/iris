@@ -1,5 +1,32 @@
 # IRIS 5.x Release Notes
 
+5.46.0 (5 Sep 2023)
+ - Changed `sign_config.default_font` to a number
+ - Converted all fonts to .ifnt format
+ - Removed Java font editor
+ - Renamed DMS status->errors JSON to status->faults
+ - honeybee: Reworked sign rendering
+ - Removed unneeded system attributes: `dms_brightness_enable`,
+   `dms_pixel_status_enable`, `dms_reset_enable`, `dms_high_temp_cutoff`
+
+5.45.0 (31 Jul 2023)
+ - Improvements to DMS resources within web UI
+ - Replaced DevicePurpose/hidden with reserved hashtags
+ - NOTIFY listeners when DMS hashtags change
+ - Add "errors" to DMS `status` JSON column
+ - Changed `sign_message` name generation to avoid clashes
+ - Disable caching of MJPEG video streams
+ - Added workaround for LX temperature updating issue
+ - Fixed free-form text validation issues
+
+5.44.0 (10 Jul 2023)
+ - Reworked free-form text validation algorithm
+ - Removed `dms_hashtag_view` (use `hashtag_view`)
+ - Randomize request-ID generation for LX controllers
+ - Fix for creating camera catalogs
+ - Clear camera video loss when encoder is not defined
+ - Add `msg_pattern` and `msg_line` API resources
+
 5.43.0 (16 May 2023)
  - Check free-form DMS text with `msg_user` permissions
  - Removed `dms_composer_edit_mode` system attribute
@@ -161,7 +188,7 @@
  - Moved `beacon_activation_flag` and `pixel_service_flag` to `sign_detail`
 
 5.24.0 (11 Oct 2021)
- - Added DMS [message combining](dms.md#message-combining) feature
+ - Added DMS message combining feature
  - Added "Send Settings" button to controller form
  - Added `DETECTOR_OCC_SPIKE_SECS` system attribute
  - Added some pin configuration fields to cabinet style table

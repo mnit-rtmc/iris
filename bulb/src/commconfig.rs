@@ -11,11 +11,12 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
+use crate::fetch::Uri;
 use crate::resource::{AncillaryData, Card, View, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
 use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
 use std::fmt;
+use std::iter::{empty, once};
 use wasm_bindgen::JsValue;
 
 /// Time units for period selections
@@ -141,23 +142,27 @@ pub struct CommConfigAnc {
 impl AncillaryData for CommConfigAnc {
     type Primary = CommConfig;
 
-    /// Get next ancillary URI
-    fn next_uri(&self, view: View, _pri: &CommConfig) -> Option<Cow<str>> {
-        match (view, &self.protocols) {
-            (View::Edit, None) => Some("/iris/comm_protocol".into()),
-            _ => None,
+    /// Get ancillary URI iterator
+    fn uri_iter(
+        &self,
+        _pri: &CommConfig,
+        view: View,
+    ) -> Box<dyn Iterator<Item = Uri>> {
+        match view {
+            View::Edit => Box::new(once("/iris/comm_protocol".into())),
+            _ => Box::new(empty()),
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
-        _view: View,
         _pri: &CommConfig,
-        json: JsValue,
-    ) -> Result<()> {
-        self.protocols = Some(serde_wasm_bindgen::from_value(json)?);
-        Ok(())
+        _uri: Uri,
+        data: JsValue,
+    ) -> Result<bool> {
+        self.protocols = Some(serde_wasm_bindgen::from_value(data)?);
+        Ok(false)
     }
 }
 

@@ -173,8 +173,8 @@ public class TextRectTest extends TestCase {
 		String multi)
 	{
 		String ms = tr3.fill(pat_ms, lines);
-		List<String> lns = tr3.splitLines(pat_ms, multi);
 		assertTrue(multi.equals(ms));
+		List<String> lns = tr3.splitLines(pat_ms, multi);
 		assertTrue(lines.equals(lns));
 	}
 
@@ -192,6 +192,12 @@ public class TextRectTest extends TestCase {
 			"ABC[nl]123[nl]DEF");
 		fillSplit("", Arrays.asList("[jl2]ABC", "", ""),
 			"[jl2]ABC[nl][nl]");
+		fillSplit("",
+			Arrays.asList("CRASH", "AT MAIN ST", "USE CAUTION"),
+			"CRASH[nl]AT MAIN ST[nl]USE CAUTION");
+		fillSplit("[feedL0000]",
+			Arrays.asList("SNOWPLOW", "AHEAD", "USE CAUTION"),
+			"SNOWPLOW[nl]AHEAD[nl]USE CAUTION");
 	}
 
 	public void testFillSplitTr() {

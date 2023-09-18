@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,11 +33,11 @@ impl VideoMonitor {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &VideoMonitorAnc) -> String {
-        let comm_state = anc.comm_state(self);
+        let item_state = anc.item_state(self);
         let disabled = disabled_attr(self.controller.is_some());
         let mon_num = self.mon_num;
         format!(
-            "<div class='{NAME} end'>{comm_state} {self}</div>\
+            "<div class='{NAME} end'>{self} {item_state}</div>\
             <div class='info fill{disabled}'>{mon_num}</div>"
         )
     }
@@ -104,7 +104,7 @@ impl Card for VideoMonitor {
     fn is_match(&self, search: &str, anc: &VideoMonitorAnc) -> bool {
         self.name.contains_lower(search)
             || self.mon_num.to_string().contains(search)
-            || anc.comm_state(self).is_match(search)
+            || anc.item_state(self).is_match(search)
     }
 
     /// Convert to HTML view

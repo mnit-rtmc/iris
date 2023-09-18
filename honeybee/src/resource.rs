@@ -12,32 +12,110 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::files::AtomicFile;
 use crate::segments::{RNode, Road, SegMsg};
 use crate::signmsg::render_all;
 use crate::Result;
+use gift::{Encoder, Step};
+use ntcip::dms::font::{ifnt, CharacterEntry, Font};
+use ntcip::dms::graphic::Graphic;
+use ntcip::dms::multi::Color;
+use pix::{rgb::SRgb8, Palette};
 use postgres::Client;
+use serde_derive::Deserialize;
 use std::collections::HashSet;
-use std::fs::{rename, File};
-use std::io::{BufWriter, Write};
-use std::path::{Path, PathBuf};
+use std::io::Write;
+use std::path::Path;
 use std::sync::mpsc::Sender;
 use std::time::Instant;
 
-/// Make a PathBuf from a Path and file name
-pub fn make_name(dir: &Path, n: &str) -> PathBuf {
-    let mut p = PathBuf::new();
-    p.push(dir);
-    p.push(n);
-    p
+/// Glyph from font
+#[derive(Deserialize)]
+struct Glyph {
+    code_point: u16,
+    width: u8,
+    #[serde(with = "super::base64")]
+    bitmap: Vec<u8>,
 }
 
-/// Make a PathBuf for a backup file
-pub fn make_backup_name(dir: &Path, n: &str) -> PathBuf {
-    make_name(dir, &format!("{n}~"))
+/// Font resource
+#[derive(Deserialize)]
+struct FontRes {
+    f_number: u8,
+    name: String,
+    height: u8,
+    #[allow(dead_code)]
+    width: u8,
+    char_spacing: u8,
+    line_spacing: u8,
+    glyphs: Vec<Glyph>,
+    version_id: u16,
+}
+
+/// Graphic resource
+#[derive(Deserialize)]
+struct GraphicRes {
+    number: u8,
+    name: String,
+    height: u8,
+    width: u16,
+    color_scheme: String,
+    transparent_color: Option<i32>,
+    #[serde(with = "super::base64")]
+    bitmap: Vec<u8>,
+}
+
+impl From<Glyph> for CharacterEntry {
+    fn from(gl: Glyph) -> Self {
+        CharacterEntry {
+            number: gl.code_point,
+            width: gl.width,
+            bitmap: gl.bitmap,
+        }
+    }
+}
+
+impl From<FontRes> for Font {
+    fn from(fr: FontRes) -> Self {
+        let characters =
+            fr.glyphs.into_iter().map(CharacterEntry::from).collect();
+        Font {
+            number: fr.f_number,
+            name: fr.name,
+            height: fr.height,
+            char_spacing: fr.char_spacing,
+            line_spacing: fr.line_spacing,
+            characters,
+            version_id: fr.version_id,
+        }
+    }
+}
+
+impl From<GraphicRes> for Graphic {
+    fn from(gr: GraphicRes) -> Self {
+        let transparent_color = match gr.transparent_color {
+            Some(tc) => {
+                let red = (tc >> 16) as u8;
+                let green = (tc >> 8) as u8;
+                let blue = tc as u8;
+                Some(Color::Rgb(red, green, blue))
+            }
+            _ => None,
+        };
+        Graphic {
+            number: gr.number,
+            name: gr.name,
+            height: gr.height,
+            width: gr.width,
+            gtype: gr.color_scheme[..].into(),
+            transparent_color,
+            bitmap: gr.bitmap,
+        }
+    }
 }
 
 /// Listen enum for postgres NOTIFY events
-#[derive(PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 enum Listen {
     /// Do not listen
     Nope,
@@ -100,8 +178,20 @@ impl Listen {
 }
 
 /// A resource which can be fetched from a database connection.
-#[derive(PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 enum Resource {
+    /// Font resource.
+    ///
+    /// * Listen specification.
+    /// * SQL query.
+    Font(Listen, &'static str),
+
+    /// Graphic resource.
+    ///
+    /// * Listen specification.
+    /// * SQL query.
+    Graphic(Listen, &'static str),
+
     /// RNode resource.
     ///
     /// * Listen specification.
@@ -121,10 +211,9 @@ enum Resource {
 
     /// Sign message resource.
     ///
-    /// * File name.
     /// * Listen specification.
     /// * SQL query.
-    SignMsg(&'static str, Listen, &'static str),
+    SignMsg(Listen, &'static str),
 }
 
 /// Camera resource
@@ -287,10 +376,17 @@ const DETECTOR_PUB_RES: Resource = Resource::Simple(
 const DMS_RES: Resource = Resource::Simple(
     "api/dms",
     Listen::Exclude("dms", &["msg_user", "msg_sched", "expire_time"]),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT d.name, controller, location, notes, msg_current \
+    "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
+      SELECT d.name, location, msg_current, \
+             NULLIF(char_length(status->>'faults') > 0, false) AS has_faults, \
+             NULLIF(notes, '') AS notes, hashtags, controller \
       FROM iris.dms d \
       LEFT JOIN geo_loc_view gl ON d.geo_loc = gl.name \
+      LEFT JOIN (\
+        SELECT dms, string_agg(hashtag, ' ' ORDER BY hashtag) AS hashtags \
+        FROM iris.dms_hashtag \
+        GROUP BY dms\
+      ) h ON d.name = h.dms \
       ORDER BY d.name\
     ) r",
 );
@@ -332,33 +428,75 @@ const DMS_STAT_RES: Resource = Resource::Simple(
     ) r",
 );
 
-/// Font resource
-const FONT_RES: Resource = Resource::Simple(
+/// Font list resource
+const FONT_LIST_RES: Resource = Resource::Simple(
     "font",
+    Listen::All("font"),
+    "SELECT row_to_json(r)::text FROM (\
+      SELECT f_number AS font_number, name \
+      FROM iris.font ORDER BY f_number\
+    ) r",
+);
+
+/// Font resource
+const FONT_RES: Resource = Resource::Font(
     Listen::Two("font", "glyph"),
     "SELECT row_to_json(f)::text FROM (\
-      SELECT f_number AS number, name, height, char_spacing, line_spacing, \
+      SELECT f_number, name, height, width, char_spacing, line_spacing, \
              array(SELECT row_to_json(c) FROM (\
-               SELECT code_point AS number, width, \
+               SELECT code_point, width, \
                       replace(pixels, E'\n', '') AS bitmap \
                FROM iris.glyph \
                WHERE font = ft.name \
                ORDER BY code_point \
              ) AS c) \
-           AS characters, version_id \
+           AS glyphs, version_id \
       FROM iris.font ft ORDER BY name\
     ) AS f",
 );
 
-/// Graphic resource
-const GRAPHIC_RES: Resource = Resource::Simple(
+/// Graphic list resource
+const GRAPHIC_LIST_RES: Resource = Resource::Simple(
     "graphic",
+    Listen::All("graphic"),
+    "SELECT row_to_json(r)::text FROM (\
+      SELECT g_number AS number, 'G' || g_number AS name \
+      FROM iris.graphic \
+      WHERE g_number < 256 \
+      ORDER BY number\
+    ) r",
+);
+
+/// Graphic resource
+const GRAPHIC_RES: Resource = Resource::Graphic(
     Listen::All("graphic"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT g_number AS number, name, height, width, color_scheme, \
              transparent_color, replace(pixels, E'\n', '') AS bitmap \
       FROM graphic_view \
       WHERE g_number < 256\
+    ) r",
+);
+
+/// Message line resource
+const MSG_LINE_RES: Resource = Resource::Simple(
+    "api/msg_line",
+    Listen::All("msg_line"),
+    "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
+      SELECT name, msg_pattern, line, multi, restrict_hashtag \
+      FROM iris.msg_line \
+      ORDER BY msg_pattern, line, rank, restrict_hashtag\
+    ) r",
+);
+
+/// Message pattern resource
+const MSG_PATTERN_RES: Resource = Resource::Simple(
+    "api/msg_pattern",
+    Listen::All("msg_pattern"),
+    "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
+      SELECT name, multi, compose_hashtag \
+      FROM iris.msg_pattern \
+      ORDER BY name\
     ) r",
 );
 
@@ -657,7 +795,7 @@ const USER_RES: Resource = Resource::Simple(
 const SIGN_CONFIG_RES: Resource = Resource::Simple(
     "sign_config",
     Listen::All("sign_config"),
-    "SELECT row_to_json(r)::text FROM (\
+    "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
       SELECT name, face_width, face_height, border_horiz, border_vert, \
              pitch_horiz, pitch_vert, pixel_width, pixel_height, \
              char_width, char_height, monochrome_foreground, \
@@ -682,7 +820,6 @@ const SIGN_DETAIL_RES: Resource = Resource::Simple(
 
 /// Sign message resource
 const SIGN_MSG_RES: Resource = Resource::SignMsg(
-    "sign_message",
     Listen::All("sign_message"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, sign_config, incident, multi, msg_owner, flash_beacon, \
@@ -803,8 +940,12 @@ const ALL: &[Resource] = &[
     DMS_RES,
     DMS_PUB_RES,
     DMS_STAT_RES,
+    FONT_LIST_RES,
     FONT_RES,
+    GRAPHIC_LIST_RES,
     GRAPHIC_RES,
+    MSG_LINE_RES,
+    MSG_PATTERN_RES,
     INCIDENT_RES,
     R_NODE_RES,
     DETECTOR_RES,
@@ -850,7 +991,7 @@ fn fetch_simple<W: Write>(
 /// * `client` The database connection.
 /// * `sender` Sender for segment messages.
 fn fetch_all_nodes(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
-    debug!("fetch_all_nodes");
+    log::debug!("fetch_all_nodes");
     sender.send(SegMsg::Order(false))?;
     for row in &client.query(RNode::SQL_ALL, &[])? {
         sender.send(SegMsg::UpdateNode(RNode::from_row(row)))?;
@@ -869,7 +1010,7 @@ fn fetch_one_node(
     name: &str,
     sender: &Sender<SegMsg>,
 ) -> Result<()> {
-    debug!("fetch_one_node: {}", name);
+    log::debug!("fetch_one_node: {}", name);
     let rows = &client.query(RNode::SQL_ONE, &[&name])?;
     if rows.len() == 1 {
         for row in rows.iter() {
@@ -887,7 +1028,7 @@ fn fetch_one_node(
 /// * `client` The database connection.
 /// * `sender` Sender for segment messages.
 fn fetch_all_roads(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
-    debug!("fetch_all_roads");
+    log::debug!("fetch_all_roads");
     for row in &client.query(Road::SQL_ALL, &[])? {
         sender.send(SegMsg::UpdateRoad(Road::from_row(row)))?;
     }
@@ -904,7 +1045,7 @@ fn fetch_one_road(
     name: &str,
     sender: &Sender<SegMsg>,
 ) -> Result<()> {
-    debug!("fetch_one_road: {}", name);
+    log::debug!("fetch_one_road: {}", name);
     let rows = &client.query(Road::SQL_ONE, &[&name])?;
     if let Some(row) = rows.iter().next() {
         sender.send(SegMsg::UpdateRoad(Road::from_row(row)))?;
@@ -916,10 +1057,24 @@ impl Resource {
     /// Get the listen value
     fn listen(&self) -> &Listen {
         match self {
+            Resource::Font(lsn, _) => lsn,
+            Resource::Graphic(lsn, _) => lsn,
             Resource::RNode(lsn) => lsn,
             Resource::Road(lsn) => lsn,
             Resource::Simple(_, lsn, _) => lsn,
-            Resource::SignMsg(_, lsn, _) => lsn,
+            Resource::SignMsg(lsn, _) => lsn,
+        }
+    }
+
+    /// Get the SQL value
+    fn sql(&self) -> &'static str {
+        match self {
+            Resource::Font(_, sql) => sql,
+            Resource::Graphic(_, sql) => sql,
+            Resource::RNode(_) => unreachable!(),
+            Resource::Road(_) => unreachable!(),
+            Resource::Simple(_, _, sql) => sql,
+            Resource::SignMsg(_, sql) => sql,
         }
     }
 
@@ -935,10 +1090,12 @@ impl Resource {
         sender: &Sender<SegMsg>,
     ) -> Result<()> {
         match self {
+            Resource::Font(_, _) => self.fetch_fonts(client),
+            Resource::Graphic(_, _) => self.fetch_graphics(client),
             Resource::RNode(_) => self.fetch_nodes(client, payload, sender),
             Resource::Road(_) => self.fetch_roads(client, payload, sender),
             Resource::Simple(n, _, _) => self.fetch_file(client, n),
-            Resource::SignMsg(n, _, _) => self.fetch_sign_msgs(client, n),
+            Resource::SignMsg(_, _) => self.fetch_sign_msgs(client),
         }
     }
 
@@ -983,37 +1140,92 @@ impl Resource {
     /// * `client` The database connection.
     /// * `name` File name.
     fn fetch_file(&self, client: &mut Client, name: &str) -> Result<()> {
-        debug!("fetch_file: {:?}", name);
+        log::debug!("fetch_file: {:?}", name);
         let t = Instant::now();
         let dir = Path::new("");
-        let backup = make_backup_name(dir, name);
-        let n = make_name(dir, name);
-        let writer = BufWriter::new(File::create(&backup)?);
-        let count = self.fetch_writer(client, writer)?;
-        rename(backup, n)?;
-        info!("{}: wrote {} rows in {:?}", name, count, t.elapsed());
+        let file = AtomicFile::new(dir, name)?;
+        let writer = file.writer()?;
+        let sql = self.sql();
+        let count = fetch_simple(client, sql, writer)?;
+        drop(file);
+        log::info!("{}: wrote {} rows in {:?}", name, count, t.elapsed());
         Ok(())
     }
 
-    /// Fetch to a writer.
-    ///
-    /// * `client` The database connection.
-    /// * `w` Writer for the file.
-    fn fetch_writer<W: Write>(&self, client: &mut Client, w: W) -> Result<u32> {
-        match self {
-            Resource::RNode(_) => unreachable!(),
-            Resource::Road(_) => unreachable!(),
-            Resource::Simple(_, _, sql) => fetch_simple(client, sql, w),
-            Resource::SignMsg(_, _, sql) => fetch_simple(client, sql, w),
+    /// Fetch font resources
+    fn fetch_fonts(&self, client: &mut Client) -> Result<()> {
+        log::debug!("fetch_fonts");
+        let t = Instant::now();
+        let dir = Path::new("ifnt");
+        let mut count = 0;
+        let sql = self.sql();
+        for row in &client.query(sql, &[])? {
+            let font: FontRes = serde_json::from_str(row.get(0))?;
+            let font = Font::from(font);
+            let name = format!("{}.ifnt", font.name);
+            let file = AtomicFile::new(dir, &name)?;
+            let writer = file.writer()?;
+            if let Err(e) = ifnt::write(writer, &font) {
+                log::error!("fetch_fonts {name}: {e:?}");
+                let _res = file.cancel();
+            }
+            count += 1;
         }
+        log::info!("fetch_fonts: wrote {count} rows in {:?}", t.elapsed());
+        Ok(())
+    }
+
+    /// Fetch graphics resource.
+    fn fetch_graphics(&self, client: &mut Client) -> Result<()> {
+        log::debug!("fetch_graphics");
+        let t = Instant::now();
+        let dir = Path::new("gif");
+        let mut count = 0;
+        let sql = self.sql();
+        for row in &client.query(sql, &[])? {
+            write_graphic(dir, serde_json::from_str(row.get(0))?)?;
+            count += 1;
+        }
+        log::info!("fetch_graphics: wrote {count} rows in {:?}", t.elapsed());
+        Ok(())
     }
 
     /// Fetch sign messages resource.
-    fn fetch_sign_msgs(&self, client: &mut Client, name: &str) -> Result<()> {
-        self.fetch_file(client, name)?;
+    fn fetch_sign_msgs(&self, client: &mut Client) -> Result<()> {
+        self.fetch_file(client, "sign_message")?;
         // FIXME: spawn another thread for this?
         render_all(Path::new(""))
     }
+}
+
+/// Write a graphic image to a file
+fn write_graphic(dir: &Path, graphic: GraphicRes) -> Result<()> {
+    let graphic = Graphic::from(graphic);
+    let name = format!("G{}.gif", graphic.number);
+    let raster = graphic.to_raster();
+    let mut palette = Palette::new(256);
+    if let Some(Color::Rgb(red, green, blue)) = graphic.transparent_color {
+        palette.set_entry(SRgb8::new(red, green, blue));
+        log::debug!("write_graphic: {name}, transparent {red},{green},{blue}");
+    }
+    palette.set_threshold_fn(palette_threshold_rgb8_256);
+    let indexed = palette.make_indexed(raster);
+    log::debug!("write_graphic: {name}, {}", palette.len());
+    let file = AtomicFile::new(dir, &name)?;
+    let mut writer = file.writer()?;
+    let mut enc = Encoder::new(&mut writer).into_step_enc();
+    let step = Step::with_indexed(indexed, palette).with_transparent_color(
+        // transparent color always palette index 0
+        graphic.transparent_color.map(|_| 0),
+    );
+    enc.encode_step(&step)?;
+    Ok(())
+}
+
+/// Get the difference threshold for SRgb8 with 256 capacity palette
+fn palette_threshold_rgb8_256(v: usize) -> SRgb8 {
+    let val = (v & 0xFF) as u8;
+    SRgb8::new(val >> 5, val >> 5, val >> 4)
 }
 
 /// Listen for notifications on all channels we need to monitor.
@@ -1039,6 +1251,7 @@ pub fn listen_all(client: &mut Client) -> Result<()> {
 /// * `sender` Sender for segment messages.
 pub fn fetch_all(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
     for res in ALL {
+        log::debug!("fetch_all: {res:?}");
         res.fetch(client, "", sender)?;
     }
     Ok(())
@@ -1056,7 +1269,7 @@ pub fn notify(
     payload: &str,
     sender: &Sender<SegMsg>,
 ) -> Result<()> {
-    info!("notify: {}, {}", &chan, &payload);
+    log::info!("notify: {}, {}", &chan, &payload);
     let mut found = false;
     for res in ALL {
         if res.listen().is_listening(chan, payload) {
@@ -1067,7 +1280,7 @@ pub fn notify(
         }
     }
     if !found {
-        warn!("unknown resource: ({}, {})", &chan, &payload);
+        log::warn!("unknown resource: ({}, {})", &chan, &payload);
     }
     Ok(())
 }

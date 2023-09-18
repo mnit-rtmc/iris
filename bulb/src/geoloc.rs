@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -11,11 +11,12 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
+use crate::fetch::Uri;
 use crate::resource::{AncillaryData, Card, View};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
 use serde::{Deserialize, Serialize};
-use std::borrow::{Borrow, Cow};
 use std::fmt;
+use std::iter::empty;
 use wasm_bindgen::JsValue;
 
 /// Road definitions
@@ -74,40 +75,45 @@ const ROAD_MODIFIER_URI: &str = "/iris/road_modifier";
 impl AncillaryData for GeoLocAnc {
     type Primary = GeoLoc;
 
-    /// Get next ancillary URI
-    fn next_uri(&self, view: View, _pri: &GeoLoc) -> Option<Cow<str>> {
-        match (view, &self.roads, &self.directions, &self.modifiers) {
-            (View::Edit, None, _, _) => Some(ROAD_URI.into()),
-            (View::Edit, _, None, _) => Some(DIRECTION_URI.into()),
-            (View::Edit, _, _, None) => Some(ROAD_MODIFIER_URI.into()),
-            _ => None,
+    /// Get URI iterator
+    fn uri_iter(
+        &self,
+        _pri: &GeoLoc,
+        view: View,
+    ) -> Box<dyn Iterator<Item = Uri>> {
+        match view {
+            View::Edit => Box::new(
+                [
+                    ROAD_URI.into(),
+                    DIRECTION_URI.into(),
+                    ROAD_MODIFIER_URI.into(),
+                ]
+                .into_iter(),
+            ),
+            _ => Box::new(empty()),
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
-        view: View,
-        pri: &GeoLoc,
-        json: JsValue,
-    ) -> Result<()> {
-        if let Some(uri) = self.next_uri(view, pri) {
-            match uri.borrow() {
-                ROAD_URI => {
-                    self.roads = Some(serde_wasm_bindgen::from_value(json)?)
-                }
-                DIRECTION_URI => {
-                    self.directions =
-                        Some(serde_wasm_bindgen::from_value(json)?);
-                }
-                ROAD_MODIFIER_URI => {
-                    self.modifiers =
-                        Some(serde_wasm_bindgen::from_value(json)?);
-                }
-                _ => (),
+        _pri: &GeoLoc,
+        uri: Uri,
+        data: JsValue,
+    ) -> Result<bool> {
+        match uri.as_str() {
+            ROAD_URI => {
+                self.roads = Some(serde_wasm_bindgen::from_value(data)?)
             }
+            DIRECTION_URI => {
+                self.directions = Some(serde_wasm_bindgen::from_value(data)?);
+            }
+            ROAD_MODIFIER_URI => {
+                self.modifiers = Some(serde_wasm_bindgen::from_value(data)?);
+            }
+            _ => (),
         }
-        Ok(())
+        Ok(false)
     }
 }
 

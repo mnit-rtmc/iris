@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -11,12 +11,13 @@
 // GNU General Public License for more details.
 //
 use crate::error::Result;
+use crate::fetch::Uri;
 use crate::resource::{disabled_attr, AncillaryData, Card, View};
 use crate::role::Role;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
 use std::fmt;
+use std::iter::{empty, once};
 use wasm_bindgen::JsValue;
 
 /// User
@@ -37,23 +38,27 @@ pub struct UserAnc {
 impl AncillaryData for UserAnc {
     type Primary = User;
 
-    /// Get next ancillary URI
-    fn next_uri(&self, view: View, _pri: &User) -> Option<Cow<str>> {
-        match (view, &self.roles) {
-            (View::Edit, None) => Some("/iris/api/role".into()),
-            _ => None,
+    /// Get URI iterator
+    fn uri_iter(
+        &self,
+        _pri: &User,
+        view: View,
+    ) -> Box<dyn Iterator<Item = Uri>> {
+        match view {
+            View::Edit => Box::new(once("/iris/api/role".into())),
+            _ => Box::new(empty()),
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
-        _view: View,
         _pri: &User,
-        json: JsValue,
-    ) -> Result<()> {
-        self.roles = Some(serde_wasm_bindgen::from_value(json)?);
-        Ok(())
+        _uri: Uri,
+        data: JsValue,
+    ) -> Result<bool> {
+        self.roles = Some(serde_wasm_bindgen::from_value(data)?);
+        Ok(false)
     }
 }
 

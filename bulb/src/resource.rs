@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ use crate::controller::Controller;
 use crate::detector::Detector;
 use crate::dms::Dms;
 use crate::error::{Error, Result};
-use crate::fetch::{fetch_delete, fetch_get, fetch_patch, fetch_post};
+use crate::fetch::{self, Uri};
 use crate::flowstream::FlowStream;
 use crate::gatearm::GateArm;
 use crate::gatearmarray::GateArmArray;
@@ -42,8 +42,8 @@ use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::de::DeserializeOwned;
 use serde_json::map::Map;
 use serde_json::Value;
-use std::borrow::{Borrow, Cow};
 use std::fmt;
+use std::iter::empty;
 use wasm_bindgen::JsValue;
 
 /// CSS class for titles
@@ -138,19 +138,23 @@ enum Search {
 pub trait AncillaryData {
     type Primary;
 
-    /// Get next ancillary data URI
-    fn next_uri(&self, _view: View, _pri: &Self::Primary) -> Option<Cow<str>> {
-        None
+    /// Get URI iterator
+    fn uri_iter(
+        &self,
+        _pri: &Self::Primary,
+        _view: View,
+    ) -> Box<dyn Iterator<Item = Uri>> {
+        Box::new(empty())
     }
 
-    /// Set ancillary JSON data
-    fn set_json(
+    /// Set ancillary data
+    fn set_data(
         &mut self,
-        _view: View,
         _pri: &Self::Primary,
-        _json: JsValue,
-    ) -> Result<()> {
-        Ok(())
+        _uri: Uri,
+        _data: JsValue,
+    ) -> Result<bool> {
+        Ok(false)
     }
 }
 
@@ -310,7 +314,7 @@ impl Resource {
     /// Delete a resource by name
     pub async fn delete(self, name: &str) -> Result<()> {
         let uri = self.uri_name(name);
-        fetch_delete(&uri).await
+        fetch::delete(uri).await
     }
 
     /// Lookup resource symbol
@@ -482,7 +486,7 @@ impl Resource {
         let changed = self.fetch_changed(name).await?;
         if !changed.is_empty() {
             let uri = self.uri_name(name);
-            fetch_patch(&uri, &changed.into()).await?;
+            fetch::patch(uri, &changed.into()).await?;
         }
         Ok(())
     }
@@ -537,7 +541,7 @@ impl Resource {
             _ => self.create_value(&doc)?,
         };
         let json = value.into();
-        fetch_post(&format!("/iris/api/{}", self.rname()), &json).await?;
+        fetch::post(format!("/iris/api/{}", self.rname()), &json).await?;
         Ok(())
     }
 
@@ -554,7 +558,7 @@ impl Resource {
     /// Fetch primary JSON resource
     async fn fetch_primary<C: Card>(self, name: &str) -> Result<C> {
         let uri = self.uri_name(name);
-        let json = fetch_get(&uri).await?;
+        let json = fetch::get(uri).await?;
         C::new(json)
     }
 
@@ -606,6 +610,19 @@ impl Resource {
             _ => Ok(false),
         }
     }
+
+    /// Get all item states as html options
+    pub fn item_state_options(self) -> &'static str {
+        match self {
+            Self::Dms => Dms::item_state_options(),
+            _ => {
+                "<option value=''>all ↴</option>\
+                 <option value='🔹'>🔹 available</option>\
+                 <option value='🔌'>🔌 offline</option>\
+                 <option value='🔻'>🔻 disabled</option>"
+            }
+        }
+    }
 }
 
 /// Fetch JSON array and build card list
@@ -615,7 +632,7 @@ async fn fetch_list<C: Card>(
     config: bool,
 ) -> Result<String> {
     let rname = res.rname();
-    let json = fetch_get(&format!("/iris/api/{rname}")).await?;
+    let json = fetch::get(format!("/iris/api/{rname}")).await?;
     let search = Search::new(search);
     let mut html = String::new();
     html.push_str("<ul class='cards'>");
@@ -646,18 +663,22 @@ async fn fetch_list<C: Card>(
 /// Fetch ancillary data
 async fn fetch_ancillary<C: Card>(view: View, pri: &C) -> Result<C::Ancillary> {
     let mut anc = C::Ancillary::default();
-    // Only loop 50 times in case we make no progress
-    for _ in 0..50 {
-        match anc.next_uri(view, pri) {
-            Some(uri) => match fetch_get(uri.borrow()).await {
-                Ok(json) => anc.set_json(view, pri, json)?,
+    let mut more = true;
+    while more {
+        more = false;
+        for uri in anc.uri_iter(pri, view) {
+            match fetch::get(uri.clone()).await {
+                Ok(data) => {
+                    if anc.set_data(pri, uri, data)? {
+                        more = true;
+                    }
+                }
                 Err(Error::FetchResponseForbidden()) => {
                     // Oops, we don't have permission to read ancillary data
                     break;
                 }
                 Err(e) => return Err(e),
-            },
-            None => break,
+            }
         }
     }
     Ok(anc)
@@ -679,7 +700,7 @@ async fn handle_click<C: Card>(
     let changed = pri.click_changed(id);
     if !changed.is_empty() {
         let uri = res.uri_name(name);
-        fetch_patch(&uri, &changed.into()).await?;
+        fetch::patch(uri, &changed.into()).await?;
     }
     Ok(true)
 }

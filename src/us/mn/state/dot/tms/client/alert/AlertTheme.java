@@ -30,7 +30,6 @@ import java.util.Set;
 import org.postgis.MultiPolygon;
 import org.postgis.Point;
 import org.postgis.Polygon;
-import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.AlertInfo;
 import us.mn.state.dot.tms.AlertInfoHelper;
 import us.mn.state.dot.tms.AlertState;

@@ -92,14 +92,39 @@ WHERE u.enabled = true AND r.enabled = true \
 AND u.name = $1 \
 ORDER BY p.resource_n, p.hashtag";
 
-/// Query permissions for a user / resource
-const QUERY_PERMISSIONS: &str = "\
+/// Query permission for a user / resource (no hashtag)
+const QUERY_PERMISSION: &str = "\
 SELECT p.id, p.role, p.resource_n, p.hashtag, p.access_n \
-FROM iris.i_user u \
-JOIN iris.role r ON u.role = r.name \
-JOIN iris.permission p ON p.role = r.name \
-WHERE u.enabled = true AND r.enabled = true \
-AND u.name = $1 AND resource_n = $2";
+FROM iris.permission p \
+JOIN iris.role r ON p.role = r.name \
+JOIN iris.i_user u ON u.role = r.name \
+WHERE r.enabled = true \
+AND u.enabled = true \
+AND u.name = $1 \
+AND p.resource_n = $2 \
+AND p.hashtag IS NULL";
+
+/// Query permission for a user / resource / name
+const QUERY_PERMISSION_NAMED: &str = "\
+SELECT p.id, p.role, p.resource_n, p.hashtag, p.access_n \
+FROM iris.permission p \
+JOIN iris.role r ON p.role = r.name \
+JOIN iris.i_user u ON u.role = r.name \
+WHERE r.enabled = true \
+AND u.enabled = true \
+AND u.name = $1 \
+AND p.resource_n = $2 \
+AND (\
+  p.hashtag IS NULL OR \
+  p.hashtag IN (\
+    SELECT hashtag \
+    FROM iris.hashtag h \
+    WHERE h.resource_n = p.resource_n \
+    AND h.name = $3 \
+  )\
+) \
+ORDER BY access_n DESC \
+LIMIT 1";
 
 impl State {
     /// Create new postgres application state
@@ -205,15 +230,23 @@ impl State {
         &self,
         user: &str,
         res: &str,
+        name: Option<&str>,
     ) -> Result<Permission> {
         let mut client = self.pool.get()?;
-        for row in client.query(QUERY_PERMISSIONS, &[&user, &res])? {
-            let perm = Permission::from_row(row);
-            if perm.hashtag.is_none() {
-                return Ok(perm);
+        match name {
+            Some(name) => {
+                let row = client
+                    .query_one(QUERY_PERMISSION_NAMED, &[&user, &res, &name])
+                    .map_err(|_e| SonarError::Forbidden)?;
+                Ok(Permission::from_row(row))
+            }
+            None => {
+                let row = client
+                    .query_one(QUERY_PERMISSION, &[&user, &res])
+                    .map_err(|_e| SonarError::Forbidden)?;
+                Ok(Permission::from_row(row))
             }
         }
-        Err(SonarError::Forbidden)
     }
 
     /// Query one row by primary key

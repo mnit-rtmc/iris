@@ -62,7 +62,7 @@ fn time_zone() -> Option<String> {
         Ok(tz) => Some(tz),
         Err(env::VarError::NotPresent) => None,
         Err(env::VarError::NotUnicode(_)) => {
-            error!("{} env var is not unicode!", PGTZ);
+            log::error!("{} env var is not unicode!", PGTZ);
             None
         }
     }
@@ -76,6 +76,7 @@ fn notify_loop(client: &mut Client, sender: Sender<SegMsg>) -> Result<()> {
     loop {
         let mut nots = pending_notifications(client)?;
         for (channel, payload) in nots.drain() {
+            log::debug!("notify on {channel}");
             resource::notify(client, &channel, &payload, &sender)?;
         }
     }

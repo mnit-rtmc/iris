@@ -38,7 +38,6 @@ import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.DevicePurpose;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DMS;
@@ -123,11 +122,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		mapping = new TagMapping(store, "iris", SONAR_TYPE,
 			"hashtag");
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"gps, static_graphic, purpose, hidden, beacon, " +
-			"preset, sign_config, sign_detail, msg_user, " +
-			"msg_sched, msg_current, expire_time, status, " +
-			"stuck_pixels FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+			"gps, static_graphic, beacon, preset, sign_config, " +
+			"sign_detail, msg_user, msg_sched, msg_current, " +
+			"expire_time, status, stuck_pixels FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DMSImpl(row));
@@ -158,8 +156,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("notes", notes);
 		map.put("gps", gps);
 		map.put("static_graphic", static_graphic);
-		map.put("purpose", getPurpose());
-		map.put("hidden", hidden);
 		map.put("beacon", beacon);
 		map.put("preset", preset);
 		map.put("sign_config", sign_config);
@@ -211,33 +207,29 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		     row.getString(5),     // notes
 		     row.getString(6),     // gps
 		     row.getString(7),     // static_graphic
-		     row.getInt(8),        // purpose
-		     row.getBoolean(9),    // hidden
-		     row.getString(10),    // beacon
-		     row.getString(11),    // preset
-		     row.getString(12),    // sign_config
-		     row.getString(13),    // sign_detail
-		     row.getString(14),    // msg_user
-		     row.getString(15),    // msg_sched
-		     row.getString(16),    // msg_current
-		     row.getTimestamp(17), // expire_time
-		     row.getString(18),    // status
-		     row.getString(19)     // stuck_pixels
+		     row.getString(8),     // beacon
+		     row.getString(9),     // preset
+		     row.getString(10),    // sign_config
+		     row.getString(11),    // sign_detail
+		     row.getString(12),    // msg_user
+		     row.getString(13),    // msg_sched
+		     row.getString(14),    // msg_current
+		     row.getTimestamp(15), // expire_time
+		     row.getString(16),    // status
+		     row.getString(17)     // stuck_pixels
 		);
 	}
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, String loc, String c, int p, String nt,
-		String g, String sg, int dp, boolean h, String b, String cp,
-		String sc, String sd, String mu, String ms, String mc,
-		Date et, String st, String sp) throws TMSException
+		String g, String sg, String b, String cp, String sc,
+		String sd, String mu, String ms, String mc, Date et,
+		String st, String sp) throws TMSException
 	{
 		super(n, lookupController(c), p, nt);
 		geo_loc = lookupGeoLoc(loc);
 		gps = lookupGps(g);
 		static_graphic = lookupGraphic(sg);
-		purpose = DevicePurpose.fromOrdinal(dp);
-		hidden = h;
 		beacon = lookupBeacon(b);
 		setPreset(lookupPreset(cp));
 		sign_config = SignConfigHelper.lookup(sc);
@@ -359,57 +351,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return static_graphic;
 	}
 
-	/** Dedicated device purpose */
-	private DevicePurpose purpose;
-
-	/** Set device purpose (ordinal of DevicePurpose) */
-	@Override
-	public void setPurpose(int p) {
-		purpose = DevicePurpose.fromOrdinal(p);
-	}
-
-	/** Set device purpose (ordinal of DevicePurpose) */
-	public void doSetPurpose(int p) throws TMSException {
-		if (p != getPurpose()) {
-			store.update(this, "purpose", p);
-			setPurpose(p);
-			updateStyles();
-		}
-	}
-
-	/** Get device purpose (ordinal of DevicePurpose) */
-	@Override
-	public int getPurpose() {
-		DevicePurpose dp = purpose;
-		return (dp != null)
-		      ? dp.ordinal()
-		      : DevicePurpose.GENERAL.ordinal();
-	}
-
-	/** Flag indicating hidden sign */
-	private boolean hidden;
-
-	/** Set the hidden flag */
-	@Override
-	public void setHidden(boolean h) {
-		hidden = h;
-	}
-
-	/** Set the hidden flag */
-	public void doSetHidden(boolean h) throws TMSException {
-		if (h != hidden) {
-			store.update(this, "hidden", h);
-			setHidden(h);
-			updateStyles();
-		}
-	}
-
-	/** Get the hidden flag */
-	@Override
-	public boolean getHidden() {
-		return hidden;
-	}
-
 	/** Hashtags for the DMS */
 	private String[] hashtags = new String[0];
 
@@ -432,6 +373,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			);
 			mapping.update(this, ht_set);
 			setHashtags(ht);
+			updateStyles();
 		}
 	}
 
@@ -448,6 +390,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				mapping.update(this, ht_set);
 				hashtags = ht_set.toArray(new String[0]);
 				notifyAttribute("hashtags");
+				updateStyles();
 			}
 			catch (TMSException e) {
 				logError("hashtags map: " + e.getMessage());
@@ -690,13 +633,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Check if the user has permission to send a given message */
 	private void checkMsgUser(SignMessage sm) throws TMSException {
 		switch (queryPermAccess()) {
-		// FIXME: remove this case after testing
-		case 0: // no permission record
-			return;
 		case 2: // "Operate" access level
 			denyFreeForm(sm);
 			return;
-		case 3: // "Plan" access level
+		case 3: // "Manage" access level
 			checkFreeFormBanned(sm);
 			return;
 		case 4: // "Configure" access level
@@ -709,18 +649,22 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Deny free-form text in a message */
 	private void denyFreeForm(SignMessage sm) throws TMSException {
+		if (SignMessageHelper.isBlank(sm))
+			return;
 		String msg = DMSHelper.validateFreeFormLines(this,
 			sm.getMulti());
 		if (msg != null)
-			throw new ChangeVetoException("FREE-FORM: " + msg);
+			throw new ChangeVetoException(msg);
 	}
 
 	/** Check for banned words in free-form text */
 	private void checkFreeFormBanned(SignMessage sm) throws TMSException {
+		if (SignMessageHelper.isBlank(sm))
+			return;
 		String msg = DMSHelper.validateFreeFormWords(this,
 			sm.getMulti());
 		if (msg != null)
-			throw new ChangeVetoException("BANNED WORDS: " + msg);
+			throw new ChangeVetoException(msg);
 	}
 
 	/** Set the user selected sign message,
@@ -1149,7 +1093,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	protected boolean isAvailable() {
 		return super.isAvailable()
 		    && (isMsgBlank() || isMsgStandby())
-		    && purpose == DevicePurpose.GENERAL;
+		    && DMSHelper.isGeneralPurpose(this);
 	}
 
 	/** Test if current message is blank */
@@ -1238,7 +1182,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			s |= ItemStyle.ACTIVE.bit();
 		else
 			s |= ItemStyle.INACTIVE.bit();
-		if (hidden)
+		if (DMSHelper.isHidden(this))
 			s |= ItemStyle.HIDDEN.bit();
 		else {
 			if (isAvailable())
@@ -1254,7 +1198,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			s |= ItemStyle.MAINTENANCE.bit();
 		if (isActive() && isFailed())
 			s |= ItemStyle.FAILED.bit();
-		if (isActive() && purpose != DevicePurpose.GENERAL)
+		if (isActive() && !DMSHelper.isGeneralPurpose(this))
 			s |= ItemStyle.PURPOSE.bit();
 		return s;
 	}
@@ -1298,6 +1242,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Send a device request operation */
 	@Override
 	protected void sendDeviceRequest(DeviceRequest dr) {
+		if (DeviceRequest.RESET_DEVICE == dr)
+			resetStateNotify();
 		DMSPoller p = getDMSPoller();
 		if (p != null)
 			p.sendRequest(this, dr);

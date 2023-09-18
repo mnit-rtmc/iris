@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  * Copyright (C) 2023       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,7 +37,7 @@ import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 
 /**
- * This operation queries the status of a DMS. This includes temperature and
+ * This operation queries the status of a DMS.  This includes temperature and
  * failure information.
  *
  * @author Douglas Lau
@@ -193,8 +193,8 @@ public class OpQueryDMSStatus extends OpDMS {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			pollTemp(mess,
-					tempMinCtrlCabinet, DMS.CABINET_TEMP_MIN,
-					tempMaxCtrlCabinet, DMS.CABINET_TEMP_MAX);
+				tempMinCtrlCabinet, DMS.CABINET_TEMP_MIN,
+				tempMaxCtrlCabinet, DMS.CABINET_TEMP_MAX);
 			return new AmbientTemperature();
 		}
 	}
@@ -206,8 +206,8 @@ public class OpQueryDMSStatus extends OpDMS {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			pollTemp(mess,
-					tempMinAmbient, DMS.AMBIENT_TEMP_MIN,
-					tempMaxAmbient, DMS.AMBIENT_TEMP_MAX);
+				tempMinAmbient, DMS.AMBIENT_TEMP_MIN,
+				tempMaxAmbient, DMS.AMBIENT_TEMP_MAX);
 			return new HousingTemperature();
 		}
 	}
@@ -219,8 +219,8 @@ public class OpQueryDMSStatus extends OpDMS {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			pollTemp(mess,
-					tempMinSignHousing, DMS.HOUSING_TEMP_MIN,
-					tempMaxSignHousing, DMS.HOUSING_TEMP_MAX);
+				tempMinSignHousing, DMS.HOUSING_TEMP_MIN,
+				tempMaxSignHousing, DMS.HOUSING_TEMP_MAX);
 			return new Failures();
 		}
 	}
@@ -234,6 +234,9 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(shortError);
 			mess.queryProps();
 			logQuery(shortError);
+			String faults = shortError.getValue(";");
+			if (faults.length() > 0)
+				putStatus(DMS.FAULTS, faults.toLowerCase());
 			return new MoreFailures();
 		}
 	}
@@ -595,13 +598,13 @@ public class OpQueryDMSStatus extends OpDMS {
 		    || ShortErrorStatus.CONTROLLER.isSet(se)
 		    || ShortErrorStatus.CRITICAL_TEMPERATURE.isSet(se);
 	}
-	
+
 	/** Consolidated method to query temperature status */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void pollTemp(CommMessage mess,
-			MIB1203 min_obj, String min_key,
-			MIB1203 max_obj, String max_key)
-					throws IOException {
+		MIB1203 min_obj, String min_key,
+		MIB1203 max_obj, String max_key) throws IOException
+	{
 		ASN1Integer min_temp = min_obj.makeInt();
 		ASN1Integer max_temp = max_obj.makeInt();
 		mess.add(min_temp);

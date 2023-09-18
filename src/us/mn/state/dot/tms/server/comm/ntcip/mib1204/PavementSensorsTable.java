@@ -181,7 +181,7 @@ public class PavementSensorsTable {
 			return pavement_temp.getTempC();
 		}
 
-		/** Get pavement sensor error or null on error */
+		/** Get pavement sensor error or null if OK */
 		public PavementSensorError getPavementSensorError() {
 			PavementSensorError pse = sensor_error.getEnum();
 			return (pse != null && pse.isError()) ? pse : null;
@@ -199,6 +199,12 @@ public class PavementSensorsTable {
 
 		/** Get surface ice or water depth formatted to meter units */
 		private String getIceOrWaterDepth() {
+			// With an error condition, some Vaisala firmware
+			// return 255 for essSurfaceIceOrWaterDepth instead of
+			// 65535.  We must check for a sensor error first to
+			// avoid erroneously returning 25.5 mm in that case.
+			if (getPavementSensorError() != null)
+				return null;
 			Distance d = convertDepthV2(ice_or_water_depth);
 			if (d != null) {
 				Float mm = d.asFloat(METERS);

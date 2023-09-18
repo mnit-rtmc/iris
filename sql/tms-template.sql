@@ -1,22 +1,6 @@
 --
 -- PostgreSQL database template for IRIS
 --
--- NOTIFY messages can be received asynchronously with the LISTEN command.
--- The channel is the same as a table name, and the payload is for specific
--- update data (usually blank).
---
--- PAYLOAD: 'publish ' || name, 'video_loss' (camera)
---          'setup', 'fail_time' (controller)
---          'connected' (comm_link)
---          'auto_fail' (detector)
---          'msg_user', 'msg_sched', 'msg_current', 'expire_time',
---              'status', 'stuck_pixels' (dms)
---          'settings', 'sample' (weather_sensor)
---          'settings' (tag_reader)
---          'time_stamp' (parking_area)
---          id (road_class)
---          name (r_node, road, any resource_n in geo_loc)
---
 SET client_encoding = 'UTF8';
 
 \set ON_ERROR_STOP
@@ -45,8 +29,8 @@ SET search_path = public, pg_catalog;
 CREATE SEQUENCE event.event_id_seq;
 
 CREATE TABLE event.event_description (
-	event_desc_id INTEGER PRIMARY KEY,
-	description text NOT NULL
+    event_desc_id INTEGER PRIMARY KEY,
+    description text NOT NULL
 );
 
 COPY event.event_description (event_desc_id, description) FROM stdin;
@@ -118,8 +102,8 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 -- System attributes
 --
 CREATE TABLE iris.system_attribute (
-	name VARCHAR(32) PRIMARY KEY,
-	value VARCHAR(64) NOT NULL
+    name VARCHAR(32) PRIMARY KEY,
+    value VARCHAR(64) NOT NULL
 );
 
 CREATE FUNCTION iris.table_notify() RETURNS TRIGGER AS
@@ -163,23 +147,19 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.43.0
+database_version	5.46.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_secs	60
-dms_brightness_enable	true
 dms_comm_loss_enable	true
 dms_gps_jitter_m	100
-dms_high_temp_cutoff	60
 dms_lamp_test_timeout_secs	30
 dms_page_on_max_secs	10.0
 dms_page_on_min_secs	0.5
 dms_pixel_off_limit	2
 dms_pixel_on_limit	1
 dms_pixel_maint_threshold	35
-dms_pixel_status_enable	true
 dms_pixel_test_timeout_secs	30
-dms_reset_enable	false
 dms_send_confirmation_enable	false
 dms_update_font_table	true
 dmsxml_reinit_detect	false
@@ -472,6 +452,26 @@ CREATE TABLE iris.hashtag (
 );
 ALTER TABLE iris.hashtag ADD PRIMARY KEY (resource_n, name, hashtag);
 
+CREATE FUNCTION iris.resource_notify() RETURNS TRIGGER AS
+    $resource_notify$
+DECLARE
+    arg TEXT;
+BEGIN
+    FOREACH arg IN ARRAY TG_ARGV LOOP
+        IF (TG_OP = 'DELETE') THEN
+            PERFORM pg_notify(OLD.resource_n, arg);
+        ELSE
+            PERFORM pg_notify(NEW.resource_n, arg);
+        END IF;
+    END LOOP;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$resource_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER resource_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.hashtag
+    FOR EACH ROW EXECUTE PROCEDURE iris.resource_notify('hashtags');
+
 CREATE VIEW hashtag_view AS
     SELECT resource_n, name, hashtag
     FROM iris.hashtag;
@@ -488,8 +488,8 @@ CREATE TABLE iris.permission (
     CONSTRAINT permission_access_n CHECK (access_n >= 1 AND access_n <= 4)
 );
 
-CREATE UNIQUE INDEX permission_role_resource_n_idx
-    ON iris.permission (role, resource_n);
+CREATE UNIQUE INDEX permission_role_resource_n_hashtag_idx
+    ON iris.permission (role, resource_n, COALESCE(hashtag, ''));
 
 COPY iris.permission (role, resource_n, access_n) FROM stdin;
 administrator	alarm	4
@@ -960,17 +960,9 @@ CREATE TABLE iris.geo_loc (
     lon double precision
 );
 
-CREATE FUNCTION iris.resource_notify() RETURNS TRIGGER AS
-    $resource_notify$
-BEGIN
-    PERFORM pg_notify(NEW.resource_n, NEW.name);
-    RETURN NULL; -- AFTER trigger return is ignored
-END;
-$resource_notify$ LANGUAGE plpgsql;
-
 CREATE TRIGGER resource_notify_trig
     AFTER UPDATE ON iris.geo_loc
-    FOR EACH ROW EXECUTE PROCEDURE iris.resource_notify();
+    FOR EACH ROW EXECUTE PROCEDURE iris.resource_notify('geo_loc');
 
 CREATE FUNCTION iris.geo_location(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT)
 	RETURNS TEXT AS $geo_location$
@@ -1534,7 +1526,7 @@ CREATE TRIGGER controller_io_notify_trig
 
 CREATE TRIGGER resource_notify_trig
     AFTER UPDATE ON iris.controller_io
-    FOR EACH ROW EXECUTE PROCEDURE iris.resource_notify();
+    FOR EACH ROW EXECUTE PROCEDURE iris.resource_notify('controller_io');
 
 CREATE FUNCTION iris.controller_io_delete() RETURNS TRIGGER AS
     $controller_io_delete$
@@ -1553,22 +1545,6 @@ CREATE VIEW controller_io_view AS
     SELECT name, resource_n, controller, pin
     FROM iris.controller_io;
 GRANT SELECT ON controller_io_view TO PUBLIC;
-
-CREATE TABLE iris.device_purpose (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL UNIQUE
-);
-
-COPY iris.device_purpose (id, description) FROM stdin;
-0	general
-1	wayfinding
-2	tolling
-3	parking
-4	travel time
-5	safety
-6	lane use
-7	VSL
-\.
 
 --
 -- Cameras, Encoders, Play Lists, Catalogs, Presets
@@ -1757,8 +1733,158 @@ CREATE VIEW camera_view AS
 GRANT SELECT ON camera_view TO PUBLIC;
 
 CREATE TABLE iris._cam_sequence (
-	seq_num INTEGER PRIMARY KEY
+    seq_num INTEGER PRIMARY KEY
 );
+
+CREATE TABLE iris._play_list (
+    name VARCHAR(20) PRIMARY KEY,
+    seq_num INTEGER REFERENCES iris._cam_sequence,
+    description VARCHAR(32)
+);
+
+CREATE VIEW iris.play_list AS
+    SELECT name, seq_num, description
+    FROM iris._play_list;
+
+CREATE FUNCTION iris.play_list_insert() RETURNS TRIGGER AS
+    $play_list_insert$
+BEGIN
+    IF NEW.seq_num IS NOT NULL THEN
+        INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
+    END IF;
+    INSERT INTO iris._play_list (name, seq_num, description)
+         VALUES (NEW.name, NEW.seq_num, NEW.description);
+    RETURN NEW;
+END;
+$play_list_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER play_list_insert_trig
+    INSTEAD OF INSERT ON iris.play_list
+    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_insert();
+
+CREATE FUNCTION iris.play_list_update() RETURNS TRIGGER AS
+    $play_list_update$
+BEGIN
+    IF NEW.seq_num IS NOT NULL AND (OLD.seq_num IS NULL OR
+                                    NEW.seq_num != OLD.seq_num)
+    THEN
+        INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
+    END IF;
+    UPDATE iris._play_list
+       SET seq_num = NEW.seq_num,
+           description = NEW.description
+     WHERE name = OLD.name;
+    IF OLD.seq_num IS NOT NULL AND (NEW.seq_num IS NULL OR
+                                    NEW.seq_num != OLD.seq_num)
+    THEN
+        DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
+    END IF;
+    RETURN NEW;
+END;
+$play_list_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER play_list_update_trig
+    INSTEAD OF UPDATE ON iris.play_list
+    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_update();
+
+CREATE FUNCTION iris.play_list_delete() RETURNS TRIGGER AS
+    $play_list_delete$
+BEGIN
+    DELETE FROM iris._play_list WHERE name = OLD.name;
+    IF FOUND THEN
+        DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
+        RETURN OLD;
+    ELSE
+        RETURN NULL;
+    END IF;
+END;
+$play_list_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER play_list_delete_trig
+    INSTEAD OF DELETE ON iris.play_list
+    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_delete();
+
+CREATE TABLE iris.play_list_camera (
+    play_list VARCHAR(20) NOT NULL REFERENCES iris._play_list,
+    ordinal INTEGER NOT NULL,
+    camera VARCHAR(20) NOT NULL REFERENCES iris._camera
+);
+ALTER TABLE iris.play_list_camera ADD PRIMARY KEY (play_list, ordinal);
+
+CREATE VIEW play_list_view AS
+    SELECT play_list, ordinal, seq_num, camera
+    FROM iris.play_list_camera
+    JOIN iris.play_list ON play_list_camera.play_list = play_list.name;
+GRANT SELECT ON play_list_view TO PUBLIC;
+
+CREATE TABLE iris._catalog (
+    name VARCHAR(20) PRIMARY KEY,
+    seq_num INTEGER NOT NULL REFERENCES iris._cam_sequence,
+    description VARCHAR(32)
+);
+
+CREATE VIEW iris.catalog AS
+    SELECT name, seq_num, description
+    FROM iris._catalog;
+
+CREATE FUNCTION iris.catalog_insert() RETURNS TRIGGER AS
+    $catalog_insert$
+BEGIN
+    INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
+    INSERT INTO iris._catalog (name, seq_num, description)
+         VALUES (NEW.name, NEW.seq_num, NEW.description);
+    RETURN NEW;
+END;
+$catalog_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER catalog_insert_trig
+    INSTEAD OF INSERT ON iris.catalog
+    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_insert();
+
+CREATE FUNCTION iris.catalog_update() RETURNS TRIGGER AS
+    $catalog_update$
+BEGIN
+    IF NEW.seq_num != OLD.seq_num THEN
+        INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
+    END IF;
+    UPDATE iris._catalog
+       SET seq_num = NEW.seq_num,
+           description = NEW.description
+     WHERE name = OLD.name;
+    IF NEW.seq_num != OLD.seq_num THEN
+        DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
+    END IF;
+    RETURN NEW;
+END;
+$catalog_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER catalog_update_trig
+    INSTEAD OF UPDATE ON iris.catalog
+    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_update();
+
+CREATE FUNCTION iris.catalog_delete() RETURNS TRIGGER AS
+    $catalog_delete$
+BEGIN
+    DELETE FROM iris._catalog WHERE name = OLD.name;
+    IF FOUND THEN
+        DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
+        RETURN OLD;
+    ELSE
+        RETURN NULL;
+    END IF;
+END;
+$catalog_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER catalog_delete_trig
+    INSTEAD OF DELETE ON iris.catalog
+    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_delete();
+
+CREATE TABLE iris.catalog_play_list (
+    catalog VARCHAR(20) NOT NULL REFERENCES iris._catalog,
+    ordinal INTEGER NOT NULL,
+    play_list VARCHAR(20) NOT NULL REFERENCES iris._play_list
+);
+ALTER TABLE iris.catalog_play_list ADD PRIMARY KEY (catalog, ordinal);
 
 CREATE TABLE iris.vid_src_template (
 	name VARCHAR(20) PRIMARY KEY,
@@ -1782,156 +1908,6 @@ CREATE TABLE iris.cam_vid_src_ord (
 	src_order INTEGER,
 	src_template VARCHAR(20) REFERENCES iris.vid_src_template
 );
-
-CREATE TABLE iris._play_list (
-	name VARCHAR(20) PRIMARY KEY,
-	seq_num INTEGER REFERENCES iris._cam_sequence,
-	description VARCHAR(32)
-);
-
-CREATE VIEW iris.play_list AS
-	SELECT name, seq_num, description
-	FROM iris._play_list;
-
-CREATE FUNCTION iris.play_list_insert() RETURNS TRIGGER AS
-	$play_list_insert$
-BEGIN
-	IF NEW.seq_num IS NOT NULL THEN
-		INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
-	END IF;
-	INSERT INTO iris._play_list (name, seq_num, description)
-	     VALUES (NEW.name, NEW.seq_num, NEW.description);
-	RETURN NEW;
-END;
-$play_list_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER play_list_insert_trig
-    INSTEAD OF INSERT ON iris.play_list
-    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_insert();
-
-CREATE FUNCTION iris.play_list_update() RETURNS TRIGGER AS
-	$play_list_update$
-BEGIN
-	IF NEW.seq_num IS NOT NULL AND (OLD.seq_num IS NULL OR
-	                                NEW.seq_num != OLD.seq_num)
-	THEN
-		INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
-	END IF;
-	UPDATE iris._play_list
-	   SET seq_num = NEW.seq_num,
-	       description = NEW.description
-	 WHERE name = OLD.name;
-	IF OLD.seq_num IS NOT NULL AND (NEW.seq_num IS NULL OR
-	                                NEW.seq_num != OLD.seq_num)
-	THEN
-		DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
-	END IF;
-	RETURN NEW;
-END;
-$play_list_update$ LANGUAGE plpgsql;
-
-CREATE TRIGGER play_list_update_trig
-    INSTEAD OF UPDATE ON iris.play_list
-    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_update();
-
-CREATE FUNCTION iris.play_list_delete() RETURNS TRIGGER AS
-	$play_list_delete$
-BEGIN
-	DELETE FROM iris._play_list WHERE name = OLD.name;
-	IF FOUND THEN
-		DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$play_list_delete$ LANGUAGE plpgsql;
-
-CREATE TRIGGER play_list_delete_trig
-    INSTEAD OF DELETE ON iris.play_list
-    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_delete();
-
-CREATE TABLE iris.play_list_camera (
-	play_list VARCHAR(20) NOT NULL REFERENCES iris._play_list,
-	ordinal INTEGER NOT NULL,
-	camera VARCHAR(20) NOT NULL REFERENCES iris._camera
-);
-ALTER TABLE iris.play_list_camera ADD PRIMARY KEY (play_list, ordinal);
-
-CREATE VIEW play_list_view AS
-	SELECT play_list, ordinal, seq_num, camera
-	FROM iris.play_list_camera
-	JOIN iris.play_list ON play_list_camera.play_list = play_list.name;
-GRANT SELECT ON play_list_view TO PUBLIC;
-
-CREATE TABLE iris._catalog (
-	name VARCHAR(20) PRIMARY KEY,
-	seq_num INTEGER NOT NULL REFERENCES iris._cam_sequence,
-	description VARCHAR(32)
-);
-
-CREATE VIEW iris.catalog AS
-	SELECT name, seq_num, description
-	FROM iris._catalog;
-
-CREATE FUNCTION iris.catalog_insert() RETURNS TRIGGER AS
-	$catalog_insert$
-BEGIN
-	INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
-	INSERT INTO iris._catalog (name, seq_num, description)
-	     VALUES (NEW.name,NEW.seq_num, NEW.catalog);
-	RETURN NEW;
-END;
-$catalog_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER catalog_insert_trig
-    INSTEAD OF INSERT ON iris.catalog
-    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_insert();
-
-CREATE FUNCTION iris.catalog_update() RETURNS TRIGGER AS
-	$catalog_update$
-BEGIN
-	IF NEW.seq_num != OLD.seq_num THEN
-		INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
-	END IF;
-	UPDATE iris._catalog
-	   SET seq_num = NEW.seq_num,
-	       description = NEW.description
-	 WHERE name = OLD.name;
-	IF NEW.seq_num != OLD.seq_num THEN
-		DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
-	END IF;
-	RETURN NEW;
-END;
-$catalog_update$ LANGUAGE plpgsql;
-
-CREATE TRIGGER catalog_update_trig
-    INSTEAD OF UPDATE ON iris.catalog
-    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_update();
-
-CREATE FUNCTION iris.catalog_delete() RETURNS TRIGGER AS
-	$catalog_delete$
-BEGIN
-	DELETE FROM iris._catalog WHERE name = OLD.name;
-	IF FOUND THEN
-		DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$catalog_delete$ LANGUAGE plpgsql;
-
-CREATE TRIGGER catalog_delete_trig
-    INSTEAD OF DELETE ON iris.catalog
-    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_delete();
-
-CREATE TABLE iris.catalog_play_list (
-	catalog VARCHAR(20) NOT NULL REFERENCES iris._catalog,
-	ordinal INTEGER NOT NULL,
-	play_list VARCHAR(20) NOT NULL REFERENCES iris._play_list
-);
-ALTER TABLE iris.catalog_play_list ADD PRIMARY KEY (catalog, ordinal);
 
 CREATE TABLE event.camera_switch_event (
 	event_id SERIAL PRIMARY KEY,
@@ -2767,7 +2743,7 @@ CREATE TABLE iris.sign_config (
     monochrome_foreground INTEGER NOT NULL,
     monochrome_background INTEGER NOT NULL,
     color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
-    default_font VARCHAR(16) REFERENCES iris.font,
+    default_font INTEGER NOT NULL,
     module_width INTEGER,
     module_height INTEGER
 );
@@ -2821,9 +2797,12 @@ GRANT SELECT ON word_view TO PUBLIC;
 COPY iris.word (name, abbr, allowed) FROM stdin;
 ACCESS	ACCS	t
 AHEAD	AHD	t
-ALTERNATE	ALT	t
+ALL	ALL	t
+ALTERNATE	OTHER	t
+ANIMAL	ANML	t
 AT		t
 BLOCKED	BLKD	t
+BOTH	BTH	t
 BRIDGE	BRDG	t
 CANNOT	CANT	t
 CENTER	CNTR	t
@@ -2832,14 +2811,24 @@ CLOSED	CLSD	t
 CONGESTED	CONG	t
 CONGESTION	CONG	t
 CONSTRUCTION	CONST	t
+CRASH	CRSH	t
 CROSSING	X-ING	t
+DEBRIS	DEBRIS	t
+DELAYS	DELAY	t
 DOWNTOWN	DWNTN	t
 EAST	E	t
+EMERGENCY	EMRGNCY	t
 ENTRANCE	ENT	t
+EVENT	EVNT	t
+EXIT	EXIT	t
 FAILURE	FAIL	t
+FLASH	FLSH	t
 FLOODING	FLOOD	t
 FRONTAGE	FRNTG	t
+GRASS	GRSS	t
+ICE	ICE	t
 IN		t
+INCIDENT	INCDNT	t
 LANE	LN	t
 LANES	LNS	t
 LEFT	LFT	t
@@ -2848,29 +2837,37 @@ MILE	MI	t
 MILES	MI	t
 MINIMUM	MIN	t
 NORTH	N	t
-ON		t
+ON	ON	t
+OTHER	ALT	t
 OVERSIZED	OVRSZ	t
 PARKING	PKNG	t
 PAVEMENT	PVMT	t
 PEDESTRIAN	PED	t
 PREPARE	PREP	t
 QUALITY	QLTY	t
+RAMP	RMP	t
+REMOVAL	RMVL	t
 RIGHT	RT	t
 ROAD	RD	t
 ROUTE	RTE	t
+ROUTES	ROUTE	t
 SERVICE	SERV	t
 SHOULDER	SHLDR	t
 SINGLE	SNGL	t
 SLIPPERY	SLIP	t
+SNOW	SNW	t
 SOUTH	S	t
 SPEED	SPD	t
+STALL	STLL	t
 STALLED	STALL	t
 TEMPORARY	TEMP	t
+TEST	TST	t
 TRAFFIC	TRAF	t
 VEHICLE	VEH	t
 VEHICLES	VEHS	t
 WARNING	WARN	t
 WEST	W	t
+WORK	WRK	t
 \.
 
 CREATE TABLE iris.graphic (
@@ -2910,8 +2907,6 @@ CREATE TABLE iris._dms (
     notes VARCHAR(128) NOT NULL,
     gps VARCHAR(20) REFERENCES iris._gps,
     static_graphic VARCHAR(20) REFERENCES iris.graphic,
-    purpose INTEGER NOT NULL REFERENCES iris.device_purpose,
-    hidden BOOLEAN NOT NULL,
     beacon VARCHAR(20) REFERENCES iris._beacon,
     sign_config VARCHAR(16) REFERENCES iris.sign_config,
     sign_detail VARCHAR(12) REFERENCES iris.sign_detail,
@@ -2958,7 +2953,7 @@ CREATE TRIGGER dms_table_notify_trig
 
 CREATE VIEW iris.dms AS
     SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
-           purpose, hidden, beacon, preset, sign_config, sign_detail,
+           beacon, preset, sign_config, sign_detail,
            msg_user, msg_sched, msg_current, expire_time, status, stuck_pixels
     FROM iris._dms d
     JOIN iris.controller_io cio ON d.name = cio.name
@@ -2972,12 +2967,12 @@ BEGIN
     INSERT INTO iris._device_preset (name, preset)
          VALUES (NEW.name, NEW.preset);
     INSERT INTO iris._dms (
-        name, geo_loc, notes, gps, static_graphic, purpose, hidden, beacon,
+        name, geo_loc, notes, gps, static_graphic, beacon,
         sign_config, sign_detail, msg_user, msg_sched, msg_current,
         expire_time, status, stuck_pixels
     ) VALUES (
         NEW.name, NEW.geo_loc, NEW.notes, NEW.gps, NEW.static_graphic,
-        NEW.purpose, NEW.hidden, NEW.beacon, NEW.sign_config, NEW.sign_detail,
+        NEW.beacon, NEW.sign_config, NEW.sign_detail,
         NEW.msg_user, NEW.msg_sched, NEW.msg_current, NEW.expire_time,
         NEW.status, NEW.stuck_pixels
     );
@@ -3004,8 +2999,6 @@ BEGIN
            notes = NEW.notes,
            gps = NEW.gps,
            static_graphic = NEW.static_graphic,
-           purpose = NEW.purpose,
-           hidden = NEW.hidden,
            beacon = NEW.beacon,
            sign_config = NEW.sign_config,
            sign_detail = NEW.sign_detail,
@@ -3030,16 +3023,15 @@ CREATE TRIGGER dms_delete_trig
 
 CREATE VIEW dms_view AS
     SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.gps,
-           d.static_graphic, dp.description AS purpose, d.hidden, d.beacon,
-           p.camera, p.preset_num, d.sign_config, d.sign_detail,
-           default_font, msg_user, msg_sched, msg_current, expire_time,
+           d.sign_config, d.sign_detail, d.static_graphic, d.beacon,
+           p.camera, p.preset_num, default_font,
+           msg_user, msg_sched, msg_current, expire_time,
            status, stuck_pixels,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street,
            l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location
     FROM iris.dms d
     LEFT JOIN iris.camera_preset p ON d.preset = p.name
     LEFT JOIN geo_loc_view l ON d.geo_loc = l.name
-    LEFT JOIN iris.device_purpose dp ON d.purpose = dp.id
     LEFT JOIN iris.sign_config sc ON d.sign_config = sc.name;
 GRANT SELECT ON dms_view TO PUBLIC;
 
@@ -3053,18 +3045,37 @@ CREATE VIEW dms_message_view AS
     LEFT JOIN iris.sign_message sm ON d.msg_current = sm.name;
 GRANT SELECT ON dms_message_view TO PUBLIC;
 
-CREATE TABLE iris.dms_hashtag (
-    dms VARCHAR(20) NOT NULL REFERENCES iris._dms,
-    hashtag VARCHAR(16) NOT NULL,
+CREATE VIEW iris.dms_hashtag AS
+    SELECT name AS dms, hashtag FROM iris.hashtag WHERE resource_n = 'dms';
 
-    CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$')
-);
-ALTER TABLE iris.dms_hashtag ADD PRIMARY KEY (dms, hashtag);
+CREATE FUNCTION iris.dms_hashtag_insert() RETURNS TRIGGER AS
+    $dms_hashtag_insert$
+BEGIN
+    INSERT INTO iris.hashtag (resource_n, name, hashtag)
+         VALUES ('dms', NEW.dms, NEW.hashtag);
+    RETURN NEW;
+END;
+$dms_hashtag_insert$ LANGUAGE plpgsql;
 
-CREATE VIEW dms_hashtag_view AS
-    SELECT dms, hashtag
-    FROM iris.dms_hashtag;
-GRANT SELECT ON dms_hashtag_view TO PUBLIC;
+CREATE TRIGGER dms_hashtag_insert_trig
+    INSTEAD OF INSERT ON iris.dms_hashtag
+    FOR EACH ROW EXECUTE PROCEDURE iris.dms_hashtag_insert();
+
+CREATE FUNCTION iris.dms_hashtag_delete() RETURNS TRIGGER AS
+    $dms_hashtag_delete$
+BEGIN
+    DELETE FROM iris.hashtag WHERE resource_n = 'dms' AND name = OLD.dms;
+    IF FOUND THEN
+        RETURN OLD;
+    ELSE
+        RETURN NULL;
+    END IF;
+END;
+$dms_hashtag_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER dms_hashtag_delete_trig
+    INSTEAD OF DELETE ON iris.dms_hashtag
+    FOR EACH ROW EXECUTE PROCEDURE iris.dms_hashtag_delete();
 
 CREATE TABLE iris.msg_pattern (
     name VARCHAR(20) PRIMARY KEY,
@@ -3083,6 +3094,10 @@ COPY iris.msg_pattern (name, multi, flash_beacon, compose_hashtag) FROM stdin;
 .2_PAGE	[np]	f	#Small
 \.
 
+CREATE TRIGGER msg_pattern_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.msg_pattern
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+
 CREATE VIEW msg_pattern_view AS
     SELECT name, multi, flash_beacon, compose_hashtag
     FROM iris.msg_pattern;
@@ -3100,6 +3115,10 @@ CREATE TABLE iris.msg_line (
     CONSTRAINT msg_line_line CHECK ((line >= 1) AND (line <= 12)),
     CONSTRAINT msg_line_rank CHECK ((rank >= 1) AND (rank <= 99))
 );
+
+CREATE TRIGGER msg_line_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.msg_line
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW msg_line_view AS
     SELECT name, msg_pattern, restrict_hashtag, line, multi, rank

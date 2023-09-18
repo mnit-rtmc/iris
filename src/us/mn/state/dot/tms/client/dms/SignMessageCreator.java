@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.utils.HexString;
 
 /**
  * This is a utility class to create sign messages.
@@ -36,10 +37,10 @@ public class SignMessageCreator {
 	static private final int INCIDENT_SRC =
 		SignMsgSource.operator.bit() | SignMsgSource.incident.bit();
 
-	/** The maximum number of new sign message names which can be created
-	 * before the TypeCache must be updated.  Creating new objects is
-	 * done asynchronously. */
-	static private final int MAX_IN_PROCESS_NAMES = 8;
+	/** Create a SignMessage name */
+	static private String createName(int hash) {
+		return "usr_" + HexString.format(hash, 8);
+	}
 
 	/** Sign message type cache */
 	private final TypeCache<SignMessage> sign_messages;
@@ -49,9 +50,6 @@ public class SignMessageCreator {
 
 	/** User name */
 	private final String user;
-
-	/** Unique ID for sign message naming */
-	private int uid = 0;
 
 	/** Create a new sign message creator */
 	public SignMessageCreator(Session s) {
@@ -123,8 +121,10 @@ public class SignMessageCreator {
 			fb, mp, dur);
 		if (sm != null)
 			return sm;
-		String name = createName();
-		return (name != null)
+		int hash = SignMessageHelper.hash(sc, inc, ms, owner, fb, mp,
+			dur);
+		String name = createName(hash);
+		return canAddSignMessage(name)
 		      ? createMsg(name, sc, inc, ms, owner, fb, mp, dur)
 		      : null;
 	}
@@ -162,37 +162,6 @@ public class SignMessageCreator {
 			return sm;
 		else
 			return null;
-	}
-
-	/** Create a sign message name */
-	private String createName() {
-		String name = createUniqueSignMessageName();
-		return canAddSignMessage(name) ? name : null;
-	}
-
-	/** Create a SignMessage name.  The form of the name is prefix + hash
-	 * of user name with uid appended. */
-	private String createUniqueSignMessageName() {
-		// NOTE: uid needs to persist between calls so that calling
-		// this method twice in a row doesn't return the same name
-		final int uid_max = sign_messages.size() + MAX_IN_PROCESS_NAMES;
-		for (int i = 0; i < uid_max; i++) {
-			final int _uid = (uid + i) % uid_max + 1;
-			String n = createName(_uid);
-			if (sign_messages.lookupObject(n) == null) {
-				uid = _uid;
-				return n;
-			}
-		}
-		assert false;
-		return null;
-	}
-
-	/** Create a SignMessage name.
-	 * @param i ID of name.
-	 * @return Name of SignMessage. */
-	private String createName(int i) {
-		return "user_" + Integer.toHexString((user + i).hashCode());
 	}
 
 	/** Check if the user can add the named sign message */

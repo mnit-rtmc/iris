@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,13 +12,14 @@
 //
 use crate::controller::Controller;
 use crate::error::Result;
+use crate::fetch::Uri;
 use crate::resource::{
     disabled_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
-use std::borrow::{Borrow, Cow};
 use std::fmt;
+use std::iter::{empty, once};
 use wasm_bindgen::JsValue;
 
 /// Lane Use Indications
@@ -72,37 +73,40 @@ const LANE_USE_INDICATION_URI: &str = "/iris/lane_use_indication";
 impl AncillaryData for LcsIndicationAnc {
     type Primary = LcsIndication;
 
-    /// Get next ancillary URI
-    fn next_uri(&self, view: View, pri: &LcsIndication) -> Option<Cow<str>> {
-        match (view, &self.indications, &self.controller, &pri.controller()) {
-            (_, None, _, _) => Some(LANE_USE_INDICATION_URI.into()),
-            (View::Status(_), _, None, Some(ctrl)) => {
-                Some(format!("/iris/api/controller/{}", &ctrl).into())
+    /// Get URI iterator
+    fn uri_iter(
+        &self,
+        pri: &LcsIndication,
+        view: View,
+    ) -> Box<dyn Iterator<Item = Uri>> {
+        match (view, &pri.controller()) {
+            (View::Status(_), Some(ctrl)) => Box::new(
+                [
+                    LANE_USE_INDICATION_URI.into(),
+                    format!("/iris/api/controller/{ctrl}").into(),
+                ]
+                .into_iter(),
+            ),
+            (View::Status(_) | View::Search | View::Compact, _) => {
+                Box::new(once(LANE_USE_INDICATION_URI.into()))
             }
-            _ => None,
+            _ => Box::new(empty()),
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
-        view: View,
-        pri: &LcsIndication,
-        json: JsValue,
-    ) -> Result<()> {
-        if let Some(uri) = self.next_uri(view, pri) {
-            match uri.borrow() {
-                LANE_USE_INDICATION_URI => {
-                    self.indications =
-                        Some(serde_wasm_bindgen::from_value(json)?);
-                }
-                _ => {
-                    self.controller =
-                        Some(serde_wasm_bindgen::from_value(json)?)
-                }
-            }
+        _pri: &LcsIndication,
+        uri: Uri,
+        data: JsValue,
+    ) -> Result<bool> {
+        if uri.as_str() == LANE_USE_INDICATION_URI {
+            self.indications = Some(serde_wasm_bindgen::from_value(data)?);
+        } else {
+            self.controller = Some(serde_wasm_bindgen::from_value(data)?);
         }
-        Ok(())
+        Ok(false)
     }
 }
 

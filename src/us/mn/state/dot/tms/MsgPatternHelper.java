@@ -73,8 +73,8 @@ public class MsgPatternHelper extends BaseHelper {
 		Iterator<MsgPattern> it = iterator();
 		while (it.hasNext()) {
 			MsgPattern pat = it.next();
-			String cht = pat.getComposeHashtag();
-			if (cht != null && isValidMulti(pat)) {
+			if (isValidMulti(pat)) {
+				String cht = pat.getComposeHashtag();
 				if (DMSHelper.hasHashtag(dms, cht))
 					pats.add(pat);
 			}
@@ -141,55 +141,128 @@ public class MsgPatternHelper extends BaseHelper {
 		return cfgs;
 	}
 
-	/** Check if a message pattern has associated lines */
-	static public boolean hasLines(MsgPattern pat) {
+	/** Get the count of lines associated with a message pattern */
+	static public int lineCount(MsgPattern pat) {
+		int n_lines = 0;
 		Iterator<MsgLine> it = MsgLineHelper.iterator();
 		while (it.hasNext()) {
 			MsgLine ml = it.next();
 			if (ml.getMsgPattern() == pat)
+				n_lines = Math.max(n_lines, ml.getLine());
+		}
+		return n_lines;
+	}
+
+	/** Get full text rectangle for a sign */
+	static private TextRect fullTextRect(DMS dms) {
+		return (dms != null)
+		      ? SignConfigHelper.textRect(dms.getSignConfig())
+		      : null;
+	}
+
+	/** Split lines of a message based on a pattern.
+	 * @return Fillable message lines, or null on error. */
+	static private List<String> splitLines(MsgPattern pat, DMS dms,
+		String ms)
+	{
+		if (pat == null)
+			return null;
+		TextRect tr = fullTextRect(dms);
+		if (tr == null)
+			return null;
+		String pat_ms = pat.getMulti();
+		List<String> lines = tr.splitLines(pat_ms, ms);
+		// validate that filling the rectangle produces the same msg
+		String ms2 = new MultiString(tr.fill(pat_ms, lines))
+			.stripTrailingWhitespaceTags();
+		return ms2.equals(ms) ? lines : null;
+	}
+
+	/** Validate text lines for a message pattern.
+	 * @return Empty string (wrong pattern), validation error message,
+	 *         or null on success. */
+	static public String validateLines(MsgPattern pat, DMS dms,
+		String ms)
+	{
+		List<String> lines = splitLines(pat, dms, ms);
+		if (lines == null)
+			return "";
+		List<MsgLine> msg_lines =
+			MsgLineHelper.findAllLines(pat, dms);
+		short num = 0;
+		for (String line: lines) {
+			num++;
+			if (line.isEmpty())
+				continue;
+			if (!validateLine(msg_lines, num, line))
+				return "FREE-FORM NOT PERMITTED: " + line;
+		}
+		return null;
+	}
+
+	/** Validate one message line */
+	static private boolean validateLine(List<MsgLine> msg_lines,
+		short num, String line)
+	{
+		for (MsgLine ml: msg_lines) {
+			if (ml.getLine() == num && line.equals(ml.getMulti()))
 				return true;
 		}
 		return false;
 	}
 
-	/** Validate text lines for a message pattern */
-	static public boolean validateLines(MsgPattern pat, SignConfig sc,
+	/** Validate text words for a message pattern.
+	 * @return Empty string (wrong pattern), validation error message,
+	 *         or null on success. */
+	static public String validateWords(MsgPattern pat, DMS dms,
 		String ms)
 	{
-		if (sc == null || pat == null)
-			return false;
-		String pat_ms = pat.getMulti();
-		TextRect tr = SignConfigHelper.textRect(sc);
-		List<String> lines = tr.splitLines(pat_ms, ms);
-		short num = 0;
-		for (String line: lines) {
-			num++;
-			if ((!line.isEmpty()) &&
-			    (!MsgLineHelper.match(pat, num, line)))
-				return false;
-		}
-		return ms.equals(tr.fill(pat_ms, lines));
-	}
-
-	/** Validate text words for a message pattern */
-	static public String validateWords(MsgPattern pat, SignConfig sc,
-		String ms)
-	{
-		if (sc == null || pat == null)
-			return "NULL VALUE";
-		StringBuilder sb = new StringBuilder();
-		TextRect tr = SignConfigHelper.textRect(sc);
-		List<String> lines = tr.splitLines(pat.getMulti(), ms);
+		List<String> lines = splitLines(pat, dms, ms);
+		if (lines == null)
+			return "";
 		for (String line: lines) {
 			for (String word: line.split(" ")) {
 				word = word.trim();
-				if (WordHelper.isBanned(word)) {
-					if (sb.length() > 0)
-						sb.append(", ");
-					sb.append(word);
+				if (WordHelper.isBanned(word))
+					return "BANNED WORD: " + word;
+			}
+		}
+		return null;
+	}
+
+	/** Make list of text rectangles for each line in a pattern */
+	static public List<TextRect> lineTextRects(MsgPattern pat, DMS dms) {
+		if (pat == null)
+			return null;
+		TextRect full_rect = fullTextRect(dms);
+		if (full_rect == null)
+			return null;
+		ArrayList<TextRect> rects = new ArrayList<TextRect>();
+		rects.add(null); // line 0 is invalid
+		String pat_ms = pat.getMulti();
+		for (TextRect tr: full_rect.find(pat_ms)) {
+			for (int i = 0; i < tr.getLineCount(); i++)
+				rects.add(tr);
+		}
+		return rects;
+	}
+
+	/** Find a substitute pattern with associated message lines */
+	static public MsgPattern findSubstitute(MsgPattern pat, DMS dms,
+		int n_lines)
+	{
+		Iterator<MsgPattern> it = iterator();
+		while (it.hasNext()) {
+			MsgPattern mp = it.next();
+			if (mp != pat && isValidMulti(mp)) {
+				String cht = mp.getComposeHashtag();
+				if (DMSHelper.hasHashtag(dms, cht) &&
+				    lineCount(mp) == n_lines)
+				{
+					return mp;
 				}
 			}
 		}
-		return (sb.length() > 0) ? sb.toString() : null;
+		return null;
 	}
 }

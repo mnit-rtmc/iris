@@ -5,7 +5,8 @@ Select `View ➔ Message Signs ➔ Sign Configuration` menu item
 [DMS] sign configuration is queried from a [controller] when communication is
 established.
 
-## Resources
+<details>
+<summary>API Resources</summary>
 
 * `iris/sign_config`
 * `iris/api/sign_config/{name}`
@@ -16,6 +17,8 @@ Attribute [permissions]:
 |--------------|---------|
 | Read Only    | name, face\_width, face\_height, border\_horiz, border\_vert, pitch\_horiz, pitch\_vert, pixel\_width, pixel\_height, char\_width, char\_height, monochrome\_foreground, monochrome\_background, color\_scheme |
 | 🔧 Configure | default\_font, module\_width, module\_height |
+
+</details>
 
 **Face width** and **height** are the dimensions of the full face of the
 sign, in milimeters.

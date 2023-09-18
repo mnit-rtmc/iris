@@ -6,8 +6,28 @@ resources can be JSON files or .gif images.
 ## Design
 
 It connects to a PostgreSQL database and listens for notifications, which
-happen when table records are changed.  When a notification is received, the
-appropriate resource is updated and written to a file.
+are sent by trigger functions when records are changed.  When a notification
+is received, the appropriate resource is updated and written to a file.
+
+The notification CHANNEL is the same as a table name, and the PAYLOAD is
+either blank or the updated column.
+
+CHANNEL                    | PAYLOAD
+---------------------------|--------------------------------
+`camera`                   | `video_loss`, `publish ` + name
+`comm_link`                | `connected`
+`controller`               | `setup`, `fail_time`
+`detector`                 | `auto_fail`
+`dms`                      | `msg_user`, `msg_sched`, `msg_current`, `expire_time`, `status`, `stuck_pixels`
+`parking_area`             | `time_stamp`
+`r_node`                   | name
+`road`                     | name
+`road_class`               | id
+`tag_reader`               | `settings`
+`weather_sensor`           | `settings`, `sample`
+hashtag.resource\_n        | `hashtags`
+geo\_loc.resource\_n       | `geo_loc`
+controller\_io.resource\_n | `controller_io`
 
 ## Building
 

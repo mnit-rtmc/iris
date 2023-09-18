@@ -69,7 +69,7 @@ public class SignPixelPager {
 
 	/** Create a new sign pixel pager.
 	 * @param pnl SignPixelPanel.
-	 @ @param rb Raster builder.
+	 * @param rb Raster builder.
 	 * @param rg Array of raster graphics, one per page.
 	 * @param ms MULTI string. */
 	public SignPixelPager(SignPixelPanel pnl, RasterBuilder rb, String ms,

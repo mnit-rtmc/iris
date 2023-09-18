@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@ impl FlowStream {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &FlowStreamAnc) -> String {
         let disabled = disabled_attr(self.controller.is_some());
-        let comm_state = anc.comm_state(self);
-        format!("<div class='end{disabled}'>{comm_state} {self}</div>")
+        let item_state = anc.item_state(self);
+        format!("<div class='end{disabled}'>{self} {item_state}</div>")
     }
 
     /// Convert to Status HTML

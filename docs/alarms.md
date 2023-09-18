@@ -9,7 +9,8 @@ failure, high temperature, low voltage, _etc_.
 An alarm can be created for controllers using a [protocol] that generates
 alarms, such as [MnDOT-170].
 
-## Resources
+<details>
+<summary>API Resources</summary>
 
 * `iris/api/alarm`
 * `iris/api/alarm/{name}`
@@ -20,6 +21,8 @@ Attribute [permissions]:
 |--------------|-------------------------|---------------|
 | Read Only    | name, state             | trigger\_time |
 | 🔧 Configure | description, controller | pin           |
+
+</details>
 
 ## Events
 

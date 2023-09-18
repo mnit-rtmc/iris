@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2023  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,13 +13,14 @@
 use crate::commconfig::CommConfig;
 use crate::controller::Controller;
 use crate::error::Result;
+use crate::fetch::Uri;
 use crate::resource::{
     disabled_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use serde::{Deserialize, Serialize};
-use std::borrow::{Borrow, Cow};
 use std::fmt;
+use std::iter::once;
 use wasm_bindgen::JsValue;
 
 /// Comm link
@@ -46,40 +47,40 @@ const COMM_CONFIG_URI: &str = "/iris/api/comm_config";
 impl AncillaryData for CommLinkAnc {
     type Primary = CommLink;
 
-    /// Get next ancillary URI
-    fn next_uri(&self, view: View, _pri: &CommLink) -> Option<Cow<str>> {
-        match (view, &self.controllers, &self.comm_configs) {
-            (View::Status(_), None, _) => Some(CONTROLLER_URI.into()),
-            (View::Status(_) | View::Edit | View::Search, _, None) => {
-                Some(COMM_CONFIG_URI.into())
-            }
-            _ => None,
+    /// Get ancillary URI iterator
+    fn uri_iter(
+        &self,
+        _pri: &CommLink,
+        view: View,
+    ) -> Box<dyn Iterator<Item = Uri>> {
+        match view {
+            View::Status(_) => Box::new(
+                [CONTROLLER_URI.into(), COMM_CONFIG_URI.into()].into_iter(),
+            ),
+            _ => Box::new(once(COMM_CONFIG_URI.into())),
         }
     }
 
-    /// Put ancillary JSON data
-    fn set_json(
+    /// Put ancillary data
+    fn set_data(
         &mut self,
-        view: View,
         pri: &CommLink,
-        json: JsValue,
-    ) -> Result<()> {
-        if let Some(uri) = self.next_uri(view, pri) {
-            match uri.borrow() {
-                CONTROLLER_URI => {
-                    let mut controllers: Vec<Controller> =
-                        serde_wasm_bindgen::from_value(json)?;
-                    controllers
-                        .retain(|c| c.comm_link.as_deref() == Some(&pri.name));
-                    self.controllers = Some(controllers);
-                }
-                _ => {
-                    self.comm_configs =
-                        Some(serde_wasm_bindgen::from_value(json)?);
-                }
+        uri: Uri,
+        data: JsValue,
+    ) -> Result<bool> {
+        match uri.as_str() {
+            CONTROLLER_URI => {
+                let mut controllers: Vec<Controller> =
+                    serde_wasm_bindgen::from_value(data)?;
+                controllers
+                    .retain(|c| c.comm_link.as_deref() == Some(&pri.name));
+                self.controllers = Some(controllers);
+            }
+            _ => {
+                self.comm_configs = Some(serde_wasm_bindgen::from_value(data)?);
             }
         }
-        Ok(())
+        Ok(false)
     }
 }
 
