@@ -490,6 +490,7 @@ dependencies = [
 name = "bulb"
 version = "5.46.2"
 dependencies = [
+ "base64 0.21.3",
  "console_error_panic_hook",
  "humantime",
  "mag",

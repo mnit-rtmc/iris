@@ -18,6 +18,7 @@ use crate::resource::{
     AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use ntcip::dms::font::{ifnt, FontTable};
 use rendzina::SignConfig;
 use serde::{Deserialize, Serialize};
@@ -271,6 +272,11 @@ impl DmsAnc {
             ItemStates::default().with(ItemState::Fault, "message unknown"),
         )
     }
+
+    /// Find a sign config
+    fn sign_config(&self, cfg: Option<&str>) -> Option<&SignConfig> {
+        cfg.and_then(|cfg| self.configs.iter().find(|c| c.name == cfg))
+    }
 }
 
 /// All hashtags for dedicated purpose
@@ -375,8 +381,8 @@ impl Dms {
         status.push_str("<div class='end'>");
         status.push_str(&self.item_states(anc).to_html());
         status.push_str("</div>");
-        if !anc.compose_patterns.is_empty() {
-            status.push_str(&self.compose_patterns(anc));
+        if let Some(pats) = &self.compose_patterns(anc) {
+            status.push_str(pats);
         }
         if config {
             status.push_str("<div class='row'>");
@@ -389,7 +395,19 @@ impl Dms {
     }
 
     /// Build compose pattern HTML
-    fn compose_patterns(&self, anc: &DmsAnc) -> String {
+    fn compose_patterns(&self, anc: &DmsAnc) -> Option<String> {
+        if !anc.compose_patterns.is_empty() {
+            return None;
+        }
+        let Some(cfg) = anc.sign_config(self.sign_config.as_deref()) else {
+            return None;
+        };
+        let dms = ntcip::dms::Dms::builder()
+            .with_font_definition(anc.fonts.clone())
+            .with_sign_cfg(cfg.sign_cfg())
+            .with_vms_cfg(cfg.vms_cfg())
+            .with_multi_cfg(cfg.multi_cfg())
+            .build();
         let mut html = String::new();
         html.push_str("<div class='fill'>");
         html.push_str("<select id='pattern'>");
@@ -397,13 +415,15 @@ impl Dms {
             html.push_str("<option value='");
             html.push_str(&pat.name);
             html.push_str("'>");
-            // FIXME: render as gif
-            html.push_str(&pat.multi);
-            html.push_str("</option>");
+            let mut buf = Vec::with_capacity(4096);
+            rendzina::render(&mut buf, &dms, &pat.multi).unwrap();
+            html.push_str("<img src='data:image/gif;base64,");
+            b64enc.encode_string(buf, &mut html);
+            html.push_str("'/></option>");
         }
         html.push_str("</select>");
         html.push_str("</div>");
-        html
+        Some(html)
     }
 
     /// Convert to Edit HTML
