@@ -177,7 +177,9 @@ impl MsgData {
             .with_vms_cfg(cfg.vms_cfg())
             .with_multi_cfg(cfg.multi_cfg())
             .build();
-        if let Err(e) = rendzina::render(writer, &self.dms, &msg.multi) {
+        if let Err(e) =
+            rendzina::render(writer, &self.dms, &msg.multi, None, None)
+        {
             log::warn!("{:?}, multi={} {e:?}", file.path(), msg.multi);
             file.cancel()?;
             return Ok(());
