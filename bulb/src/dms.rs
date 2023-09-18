@@ -412,17 +412,19 @@ impl Dms {
         html.push_str("<div class='fill'>");
         html.push_str("<select id='pattern'>");
         for pat in &anc.compose_patterns {
-            html.push_str("<option value='");
+            html.push_str("<option>");
             html.push_str(&pat.name);
-            html.push_str("'>");
+            html.push_str("</option>");
+        }
+        html.push_str("</select>");
+        if let Some(pat) = anc.compose_patterns.iter().next() {
             let mut buf = Vec::with_capacity(4096);
-            rendzina::render(&mut buf, &dms, &pat.multi, Some(225), Some(50))
+            rendzina::render(&mut buf, &dms, &pat.multi, Some(240), Some(60))
                 .unwrap();
             html.push_str("<img src='data:image/gif;base64,");
             b64enc.encode_string(buf, &mut html);
-            html.push_str("'/></option>");
+            html.push_str("'/>");
         }
-        html.push_str("</select>");
         html.push_str("</div>");
         Some(html)
     }
