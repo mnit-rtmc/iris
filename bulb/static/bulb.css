@@ -323,6 +323,11 @@ button.go_link {
   padding: 0.05rem 0;
   z-index: 1; /* required for ob_delete::before slider pseudo-element */
 }
+.column {
+  display: flex;
+  flex-direction: column;
+  padding: 0.05rem;
+}
 .start {
   align-self: start;
   justify-content: start;
