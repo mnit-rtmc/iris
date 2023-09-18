@@ -396,7 +396,7 @@ impl Dms {
 
     /// Build compose pattern HTML
     fn compose_patterns(&self, anc: &DmsAnc) -> Option<String> {
-        if !anc.compose_patterns.is_empty() {
+        if anc.compose_patterns.is_empty() {
             return None;
         }
         let Some(cfg) = anc.sign_config(self.sign_config.as_deref()) else {
@@ -416,7 +416,8 @@ impl Dms {
             html.push_str(&pat.name);
             html.push_str("'>");
             let mut buf = Vec::with_capacity(4096);
-            rendzina::render(&mut buf, &dms, &pat.multi).unwrap();
+            rendzina::render(&mut buf, &dms, &pat.multi, Some(225), Some(50))
+                .unwrap();
             html.push_str("<img src='data:image/gif;base64,");
             b64enc.encode_string(buf, &mut html);
             html.push_str("'/></option>");

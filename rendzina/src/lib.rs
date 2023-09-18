@@ -168,8 +168,18 @@ pub fn load_graphic<R: Read>(reader: R, number: u8) -> Result<Graphic> {
 }
 
 /// Render a sign message to a .gif file
-pub fn render<W: Write>(mut writer: W, dms: &Dms, multi: &str) -> Result<()> {
-    let (width, height) = face_size(dms);
+pub fn render<W: Write>(
+    mut writer: W,
+    dms: &Dms,
+    multi: &str,
+    max_width: Option<u16>,
+    max_height: Option<u16>,
+) -> Result<()> {
+    let (width, height) = face_size(
+        dms,
+        max_width.unwrap_or(PIX_WIDTH),
+        max_height.unwrap_or(PIX_HEIGHT),
+    );
     let mut steps = Vec::new();
     for page in dms.render_pages(multi) {
         let Page {
@@ -188,11 +198,7 @@ pub fn render<W: Write>(mut writer: W, dms: &Dms, multi: &str) -> Result<()> {
     }
     let mut enc = Encoder::new(&mut writer).into_step_enc();
     let len = steps.len();
-    enc = if len > 1 {
-        enc.with_loop_count(0)
-    } else {
-        enc
-    };
+    enc = if len > 1 { enc.with_loop_count(0) } else { enc };
     for step in steps {
         if len < 2 {
             enc.encode_step(&step.with_delay_time_cs(None))?;
@@ -204,25 +210,25 @@ pub fn render<W: Write>(mut writer: W, dms: &Dms, multi: &str) -> Result<()> {
 }
 
 /// Calculate size to render DMS "face"
-fn face_size(dms: &Dms) -> (u16, u16) {
+fn face_size(dms: &Dms, max_width: u16, max_height: u16) -> (u16, u16) {
     let fw = dms.face_width_mm();
     let fh = dms.face_height_mm();
     if fw > 0.0 && fh > 0.0 {
-        let sx = f32::from(PIX_WIDTH) / fw;
-        let sy = f32::from(PIX_HEIGHT) / fh;
+        let sx = f32::from(max_width) / fw;
+        let sy = f32::from(max_height) / fh;
         if sx > sy {
             let w = (fw * sy).round() as u16;
             // Bump up to next even value
             let w = (w + 1) & 0b11111111_11111110;
-            (w, PIX_HEIGHT)
+            (w, max_height)
         } else {
             let h = (fh * sx).round() as u16;
             // Bump up to next even value
             let h = (h + 1) & 0b11111111_11111110;
-            (PIX_WIDTH, h)
+            (max_width, h)
         }
     } else {
-        (PIX_WIDTH, PIX_HEIGHT)
+        (max_width, max_height)
     }
 }
 

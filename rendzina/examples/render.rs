@@ -30,19 +30,18 @@ const MULTI: &'static str = "\
 [cr1,38,150,1,255,255,255]\
 [cf255,255,255]\
 [tr70,8,80,30]\
-[fo3]\
+[fo8]\
 [jl2]100[jl4]$0.50[nl8]\
 [jl2]94[jl4]$0.75\
 [tr1,44,150,10]\
-[jl3]HOV 2+ FREE\
-[fo13]";
+[jl3]HOV 2+ FREE";
 
 fn main() {
     let configs = SignConfig::load_all(SIGN_CFGS.as_bytes()).unwrap();
     let mut fonts = FontTable::default();
     fonts
         .push(
-            load_font(&include_bytes!("../../fonts/08_full.ifnt")[..]).unwrap(),
+            load_font(&include_bytes!("../../fonts/F08.ifnt")[..]).unwrap(),
         )
         .unwrap();
     let mut graphics = GraphicTable::default();
@@ -59,5 +58,5 @@ fn main() {
         .build();
     let file = File::create("render.gif").unwrap();
     let writer = BufWriter::new(file);
-    rendzina::render(writer, &dms, MULTI).unwrap();
+    rendzina::render(writer, &dms, MULTI, None, None).unwrap();
 }
