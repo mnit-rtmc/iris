@@ -20,7 +20,8 @@ use crate::resource::{
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use ntcip::dms::font::{ifnt, FontTable};
-use rendzina::SignConfig;
+use ntcip::dms::graphic::GraphicTable;
+use rendzina::{load_graphic, SignConfig};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use wasm_bindgen::JsValue;
@@ -124,6 +125,13 @@ pub struct FontName {
     pub name: String,
 }
 
+/// Graphic name
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct GraphicName {
+    pub number: u8,
+    pub name: String,
+}
+
 /// DMS ancillary data
 #[derive(Default)]
 pub struct DmsAnc {
@@ -133,12 +141,15 @@ pub struct DmsAnc {
     compose_patterns: Vec<MsgPattern>,
     fnames: Vec<FontName>,
     fonts: FontTable,
+    gnames: Vec<GraphicName>,
+    graphics: GraphicTable,
 }
 
 const SIGN_MSG_URI: &str = "/iris/sign_message";
 const SIGN_CFG_URI: &str = "/iris/sign_config";
 const MSG_PATTERN_URI: &str = "/iris/api/msg_pattern";
 const FONT_URI: &str = "/iris/font";
+const GRAPHIC_URI: &str = "/iris/graphic";
 
 impl AncillaryData for DmsAnc {
     type Primary = Dms;
@@ -158,6 +169,12 @@ impl AncillaryData for DmsAnc {
                         .with_content_type(ContentType::Text),
                 );
             }
+            for gname in &self.gnames {
+                uris.push(
+                    Uri::from(format!("/iris/gif/{}.gif", gname.name))
+                        .with_content_type(ContentType::Gif),
+                );
+            }
             return Box::new(uris.into_iter());
         }
         if let View::Compact | View::Search = view {
@@ -168,6 +185,7 @@ impl AncillaryData for DmsAnc {
             uris.push(SIGN_CFG_URI.into());
             uris.push(MSG_PATTERN_URI.into());
             uris.push(FONT_URI.into());
+            uris.push(GRAPHIC_URI.into());
         }
         Box::new(uris.into_iter().chain(self.dev.uri_iter(pri, view)))
     }
@@ -200,11 +218,26 @@ impl AncillaryData for DmsAnc {
                 self.fnames = serde_wasm_bindgen::from_value(data)?;
                 return Ok(!self.fnames.is_empty());
             }
+            GRAPHIC_URI => {
+                self.gnames = serde_wasm_bindgen::from_value(data)?;
+                return Ok(!self.gnames.is_empty());
+            }
             _ => {
                 if uri.as_str().ends_with(".ifnt") {
                     let font: String = serde_wasm_bindgen::from_value(data)?;
                     let font = ifnt::read(font.as_bytes())?;
                     self.fonts.push(font)?;
+                } else if uri.as_str().ends_with(".gif") {
+                    let graphic: Vec<u8> =
+                        serde_wasm_bindgen::from_value(data)?;
+                    if let Ok(number) = uri
+                        .as_str()
+                        .replace(|c: char| !c.is_numeric(), "")
+                        .parse::<u8>()
+                    {
+                        let graphic = load_graphic(&graphic[..], number)?;
+                        self.graphics.push(graphic)?;
+                    }
                 } else {
                     return self.dev.set_data(pri, uri, data);
                 }
@@ -418,7 +451,7 @@ impl Dms {
         html.push_str("<div id='mc_grid'>");
         if let Some(pat) = anc.compose_patterns.first() {
             let mut buf = Vec::with_capacity(4096);
-            rendzina::render(&mut buf, &dms, &pat.multi, Some(220), Some(72))
+            rendzina::render(&mut buf, &dms, &pat.multi, Some(240), Some(80))
                 .unwrap();
             html.push_str("<img id='mc_preview' src='data:image/gif;base64,");
             b64enc.encode_string(buf, &mut html);

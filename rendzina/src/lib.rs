@@ -145,7 +145,7 @@ pub fn load_graphic<R: Read>(reader: R, number: u8) -> Result<Graphic> {
     match Decoder::new(reader).into_steps().next() {
         Some(step) => {
             let step = step?;
-            let name = format!("g{number}");
+            let name = format!("G{number}");
             let raster: Raster<SBgr8> = Raster::with_raster(step.raster());
             let height = raster.height().try_into().unwrap();
             let width = raster.width().try_into().unwrap();

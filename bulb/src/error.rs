@@ -24,6 +24,10 @@ pub enum Error {
     #[error("Invalid font {0}")]
     InvalidFont(#[from] ifnt::Error),
 
+    /// Sign rendering error
+    #[error("Rendering {0}")]
+    Render(#[from] rendzina::Error),
+
     /// MULTI syntax error
     #[error("MULTI syntax error {0}")]
     MultiSyntax(#[from] SyntaxError),

@@ -22,6 +22,7 @@ use web_sys::{console, Request, RequestInit, Response};
 pub enum ContentType {
     Json,
     Text,
+    Gif,
 }
 
 impl ContentType {
@@ -30,6 +31,7 @@ impl ContentType {
         match self {
             ContentType::Json => "application/json",
             ContentType::Text => "text/plain",
+            ContentType::Gif => "image/gif",
         }
     }
 }
@@ -98,15 +100,14 @@ where
     let resp: Response = resp.dyn_into().unwrap_throw();
     resp_status(resp.status())?;
     let data = match uri.content_type {
-        ContentType::Json => resp.json().map_err(|e| {
-            console::log_1(&e);
-            Error::FetchRequest()
-        })?,
-        ContentType::Text => resp.text().map_err(|e| {
-            console::log_1(&e);
-            Error::FetchRequest()
-        })?,
-    };
+        ContentType::Json => resp.json(),
+        ContentType::Text => resp.text(),
+        ContentType::Gif => resp.blob(),
+    }
+    .map_err(|e| {
+        console::log_1(&e);
+        Error::FetchRequest()
+    })?;
     JsFuture::from(data).await.map_err(|e| {
         console::log_1(&e);
         Error::FetchRequest()
