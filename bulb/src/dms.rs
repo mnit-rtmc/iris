@@ -26,10 +26,10 @@ use std::fmt;
 use wasm_bindgen::JsValue;
 
 /// Send button
-const SEND_BUTTON: &str = "<button id='ob_send' type='button'>Send</button>";
+const SEND_BUTTON: &str = "<button id='mc_send' type='button'>Send</button>";
 
 /// Clear button
-const CLEAR_BUTTON: &str = "<button id='ob_clear' type='button'>Clear</button>";
+const CLEAR_BUTTON: &str = "<button id='mc_clear' type='button'>Clear</button>";
 
 /// Photocell status
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -415,37 +415,35 @@ impl Dms {
             .with_multi_cfg(cfg.multi_cfg())
             .build();
         let mut html = String::new();
-        html.push_str("<div class='row'>");
-        html.push_str("<div class='column'>");
-        if let Some(pat) = anc.compose_patterns.iter().next() {
+        html.push_str("<div id='mc_grid'>");
+        if let Some(pat) = anc.compose_patterns.first() {
             let mut buf = Vec::with_capacity(4096);
-            rendzina::render(&mut buf, &dms, &pat.multi, Some(240), Some(60))
+            rendzina::render(&mut buf, &dms, &pat.multi, Some(220), Some(60))
                 .unwrap();
-            html.push_str("<img src='data:image/gif;base64,");
+            html.push_str("<img id='mc_preview' src='data:image/gif;base64,");
             b64enc.encode_string(buf, &mut html);
             html.push_str("'/>");
         }
-        html.push_str("<select id='pattern'>");
+        html.push_str("<select id='mc_pattern'>");
         for pat in &anc.compose_patterns {
             html.push_str("<option>");
             html.push_str(&pat.name);
             html.push_str("</option>");
         }
         html.push_str("</select>");
-        html.push_str("</div>");
-        html.push_str("<div class='column'>");
-        html.push_str("<select id='line0'>");
+        html.push_str("<div id='mc_lines' class='column'>");
+        html.push_str("<select id='mc_line0'>");
         html.push_str("<option>1</option>");
         html.push_str("</select>");
-        html.push_str("<select id='line1'>");
+        html.push_str("<select id='mc_line1'>");
         html.push_str("<option>2</option>");
         html.push_str("</select>");
-        html.push_str("<select id='line2'>");
+        html.push_str("<select id='mc_line2'>");
         html.push_str("<option>3</option>");
         html.push_str("</select>");
+        html.push_str("</div>");
         html.push_str(SEND_BUTTON);
         html.push_str(CLEAR_BUTTON);
-        html.push_str("</div>");
         html.push_str("</div>");
         Some(html)
     }

@@ -326,8 +326,33 @@ button.go_link {
 .column {
   display: flex;
   flex-direction: column;
-  padding: 0.05rem;
+  padding: 0.1rem;
 }
+#mc_grid {
+  display: grid;
+  margin: 0.1rem;
+  gap: 0.1rem;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-areas:
+    "pv" "pv" "ln" "ln"
+    "pt" "pt" "bs" "bc";
+}
+#mc_preview {
+  grid-area: pv;
+}
+#mc_pattern {
+  grid-area: pt;
+}
+#mc_lines {
+  grid-area: ln;
+}
+#mc_send {
+  grid-area: bs;
+}
+#mc_clear {
+  grid-area: bc;
+}
+
 .start {
   align-self: start;
   justify-content: start;
