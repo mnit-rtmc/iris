@@ -28,8 +28,8 @@ use wasm_bindgen::JsValue;
 /// Send button
 const SEND_BUTTON: &str = "<button id='mc_send' type='button'>Send</button>";
 
-/// Clear button
-const CLEAR_BUTTON: &str = "<button id='mc_clear' type='button'>Clear</button>";
+/// Blank button
+const BLANK_BUTTON: &str = "<button id='mc_blank' type='button'>Blank</button>";
 
 /// Photocell status
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -418,7 +418,7 @@ impl Dms {
         html.push_str("<div id='mc_grid'>");
         if let Some(pat) = anc.compose_patterns.first() {
             let mut buf = Vec::with_capacity(4096);
-            rendzina::render(&mut buf, &dms, &pat.multi, Some(220), Some(60))
+            rendzina::render(&mut buf, &dms, &pat.multi, Some(220), Some(72))
                 .unwrap();
             html.push_str("<img id='mc_preview' src='data:image/gif;base64,");
             b64enc.encode_string(buf, &mut html);
@@ -443,7 +443,7 @@ impl Dms {
         html.push_str("</select>");
         html.push_str("</div>");
         html.push_str(SEND_BUTTON);
-        html.push_str(CLEAR_BUTTON);
+        html.push_str(BLANK_BUTTON);
         html.push_str("</div>");
         Some(html)
     }
