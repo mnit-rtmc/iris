@@ -118,6 +118,16 @@ pub struct MsgPattern {
     pub flash_beacon: Option<bool>,
 }
 
+/// Message Line
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct MsgLine {
+    pub name: String,
+    pub msg_pattern: String,
+    pub restrict_hashtag: Option<String>,
+    pub line: u16,
+    pub multi: String,
+}
+
 /// Font name
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct FontName {
@@ -139,6 +149,7 @@ pub struct DmsAnc {
     messages: Vec<SignMessage>,
     configs: Vec<SignConfig>,
     compose_patterns: Vec<MsgPattern>,
+    lines: Vec<MsgLine>,
     fnames: Vec<FontName>,
     fonts: FontTable,
     gnames: Vec<GraphicName>,
@@ -148,6 +159,7 @@ pub struct DmsAnc {
 const SIGN_MSG_URI: &str = "/iris/sign_message";
 const SIGN_CFG_URI: &str = "/iris/sign_config";
 const MSG_PATTERN_URI: &str = "/iris/api/msg_pattern";
+const MSG_LINE_URI: &str = "/iris/api/msg_line";
 const FONT_URI: &str = "/iris/font";
 const GRAPHIC_URI: &str = "/iris/graphic";
 
@@ -184,6 +196,7 @@ impl AncillaryData for DmsAnc {
             uris.push(SIGN_MSG_URI.into());
             uris.push(SIGN_CFG_URI.into());
             uris.push(MSG_PATTERN_URI.into());
+            uris.push(MSG_LINE_URI.into());
             uris.push(FONT_URI.into());
             uris.push(GRAPHIC_URI.into());
         }
@@ -213,6 +226,19 @@ impl AncillaryData for DmsAnc {
                         .is_some_and(|h| pri.has_hashtag(h))
                 });
                 self.compose_patterns = patterns;
+            }
+            MSG_LINE_URI => {
+                let mut lines: Vec<MsgLine> =
+                    serde_wasm_bindgen::from_value(data)?;
+                lines.retain(|ln| {
+                    self.has_compose_pattern(&ln.msg_pattern)
+                        && (ln.restrict_hashtag.is_none()
+                            || ln
+                                .restrict_hashtag
+                                .as_ref()
+                                .is_some_and(|h| pri.has_hashtag(h)))
+                });
+                self.lines = lines;
             }
             FONT_URI => {
                 self.fnames = serde_wasm_bindgen::from_value(data)?;
@@ -315,6 +341,30 @@ impl DmsAnc {
     /// Find a sign config
     fn sign_config(&self, cfg: Option<&str>) -> Option<&SignConfig> {
         cfg.and_then(|cfg| self.configs.iter().find(|c| c.name == cfg))
+    }
+
+    /// Check for compose pattern
+    fn has_compose_pattern(&self, pat: &str) -> bool {
+        self.compose_patterns.iter().any(|p| p.name == pat)
+    }
+
+    /// Make a line select element
+    fn make_line(&self, ln: u16) -> Option<String> {
+        if self.lines.iter().any(|l| l.line == ln) {
+            let mut html = String::new();
+            html.push_str(&format!("<select id='mc_line{ln}'>"));
+            for l in &self.lines {
+                if ln == l.line {
+                    html.push_str("<option>");
+                    html.push_str(&l.multi);
+                    html.push_str("</option>");
+                }
+            }
+            html.push_str("</select>");
+            Some(html)
+        } else {
+            None
+        }
     }
 }
 
@@ -465,15 +515,11 @@ impl Dms {
         }
         html.push_str("</select>");
         html.push_str("<div id='mc_lines' class='column'>");
-        html.push_str("<select id='mc_line0'>");
-        html.push_str("<option>1</option>");
-        html.push_str("</select>");
-        html.push_str("<select id='mc_line1'>");
-        html.push_str("<option>2</option>");
-        html.push_str("</select>");
-        html.push_str("<select id='mc_line2'>");
-        html.push_str("<option>3</option>");
-        html.push_str("</select>");
+        let mut ln = 1;
+        while let Some(line) = anc.make_line(ln) {
+            html.push_str(&line);
+            ln += 1;
+        }
         html.push_str("</div>");
         html.push_str(SEND_BUTTON);
         html.push_str(BLANK_BUTTON);
