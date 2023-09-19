@@ -328,23 +328,30 @@ button.go_link {
   flex-direction: column;
   padding: 0.1rem;
 }
+
 #mc_grid {
   display: grid;
   margin: 0.1rem;
   gap: 0.1rem;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-areas:
-    "pv" "pv" "ln" "ln"
-    "pt" "pt" "bs" "bc";
+  justify-content: space-around;
+  justify-items: center;
+  align-content: space-around;
+  align-items: center;
+  grid-template-columns: repeat(3, auto);
+  grid-template-areas: "pv ln ln"
+                       "pt bs bc";
 }
 #mc_preview {
   grid-area: pv;
+  justify-self: end;
 }
 #mc_pattern {
   grid-area: pt;
+  justify-self: end;
 }
 #mc_lines {
   grid-area: ln;
+  justify-self: start;
 }
 #mc_send {
   grid-area: bs;
