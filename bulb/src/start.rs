@@ -320,6 +320,15 @@ impl SelectedCard {
             }
         }
     }
+
+    /// Handle an input event on selected card
+    async fn handle_input(self, id: &str) -> bool {
+        let res = self.res;
+        match res.handle_input(&self.name, id).await {
+            Ok(c) => c,
+            Err(_e) => false,
+        }
+    }
 }
 
 /// Show login form shade
@@ -378,11 +387,9 @@ async fn add_sidebar() -> JsResult<()> {
     let doc = Doc(doc);
     let sidebar: HtmlElement = doc.elem("sidebar");
     sidebar.set_inner_html(SIDEBAR);
-    add_resource_event_listener(&doc.elem("sb_resource"))?;
     add_change_event_listener(&doc.elem("sb_config"))?;
-    add_input_event_listener(&doc.elem("sb_search"))?;
-    add_state_event_listener(&doc.elem("sb_state"))?;
     add_click_event_listener(&sidebar)?;
+    add_input_event_listener(&sidebar)?;
     add_transition_event_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window).unwrap_throw();
     fill_resource_select().await;
@@ -410,26 +417,6 @@ async fn fetch_access_list(config: bool) -> Result<String> {
     let json = fetch::get("/iris/api/access").await?;
     let permissions = serde_wasm_bindgen::from_value(json)?;
     Ok(permissions_html(permissions, config))
-}
-
-/// Add an "input" event listener to the resource `select` element
-fn add_resource_event_listener(elem: &HtmlSelectElement) -> JsResult<()> {
-    let closure = Closure::wrap(Box::new(|e: Event| {
-        let rname = e
-            .current_target()
-            .unwrap()
-            .dyn_into::<HtmlSelectElement>()
-            .unwrap()
-            .value();
-        handle_sb_resource_ev(rname);
-    }) as Box<dyn FnMut(_)>);
-    elem.add_event_listener_with_callback(
-        "input",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    // can't drop closure, just forget it to make JS happy
-    closure.forget();
-    Ok(())
 }
 
 /// Handle an event from "sb_resource" `select` element
@@ -464,20 +451,6 @@ async fn reload_resources() {
     search_list();
 }
 
-/// Add an "input" event listener to the item state `select` element
-fn add_state_event_listener(elem: &HtmlSelectElement) -> JsResult<()> {
-    let closure = Closure::wrap(Box::new(|_e: Event| {
-        search_list();
-    }) as Box<dyn FnMut(_)>);
-    elem.add_event_listener_with_callback(
-        "input",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    // can't drop closure, just forget it to make JS happy
-    closure.forget();
-    Ok(())
-}
-
 /// Get value to search
 fn search_value() -> String {
     let doc = Doc::get();
@@ -493,9 +466,10 @@ fn search_value() -> String {
 }
 
 /// Add an "input" event listener to an element
-fn add_input_event_listener(elem: &HtmlInputElement) -> JsResult<()> {
-    let closure = Closure::wrap(Box::new(|_e: Event| {
-        search_list();
+fn add_input_event_listener(elem: &Element) -> JsResult<()> {
+    let closure = Closure::wrap(Box::new(|e: Event| {
+        let target = e.target().unwrap().dyn_into::<Element>().unwrap();
+        handle_input_event(target);
     }) as Box<dyn Fn(_)>);
     elem.add_event_listener_with_callback(
         "input",
@@ -504,6 +478,32 @@ fn add_input_event_listener(elem: &HtmlInputElement) -> JsResult<()> {
     // can't drop closure, just forget it to make JS happy
     closure.forget();
     Ok(())
+}
+
+/// Handle an "input" event
+fn handle_input_event(target: Element) {
+    let id = target.id();
+    match id.as_str() {
+        "sb_search" | "sb_state" => search_list(),
+        "sb_resource" => {
+            handle_sb_resource_ev(
+                target.dyn_into::<HtmlSelectElement>().unwrap().value(),
+            );
+        }
+        _ => {
+            let cs = STATE.with(|rc| rc.borrow().selected_card.clone());
+            if let Some(cs) = cs {
+                spawn_local(handle_input_card(id, cs));
+            }
+        }
+    }
+}
+
+/// Handle input event with selected card
+async fn handle_input_card(id: String, cs: SelectedCard) {
+    if !cs.handle_input(&id).await {
+        console::log_1(&format!("unknown id: {id}").into());
+    }
 }
 
 /// Add a `click` event listener to an element

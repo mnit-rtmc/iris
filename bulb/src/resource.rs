@@ -611,6 +611,14 @@ impl Resource {
         }
     }
 
+    /// Handle input event for an element owned by the resource
+    pub async fn handle_input(self, name: &str, id: &str) -> Result<bool> {
+        match self {
+            Self::Dms => handle_input::<Dms>(self, name, id).await,
+            _ => Ok(false),
+        }
+    }
+
     /// Get all item states as html options
     pub fn item_state_options(self) -> &'static str {
         match self {
@@ -702,6 +710,16 @@ async fn handle_click<C: Card>(
         let uri = res.uri_name(name);
         fetch::patch(uri, &changed.into()).await?;
     }
+    Ok(true)
+}
+
+/// Handle input event for an element on a card
+async fn handle_input<C: Card>(
+    _res: Resource,
+    _name: &str,
+    _id: &str,
+) -> Result<bool> {
+    // FIXME: update card
     Ok(true)
 }
 
