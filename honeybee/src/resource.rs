@@ -500,6 +500,17 @@ const MSG_PATTERN_RES: Resource = Resource::Simple(
     ) r",
 );
 
+/// Word resource
+const WORD_RES: Resource = Resource::Simple(
+    "api/word",
+    Listen::All("word"),
+    "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
+      SELECT name, abbr, allowed \
+      FROM iris.word \
+      ORDER BY name\
+    ) r",
+);
+
 /// Incident resource
 const INCIDENT_RES: Resource = Resource::Simple(
     "incident",
@@ -946,6 +957,7 @@ const ALL: &[Resource] = &[
     GRAPHIC_RES,
     MSG_LINE_RES,
     MSG_PATTERN_RES,
+    WORD_RES,
     INCIDENT_RES,
     R_NODE_RES,
     DETECTOR_RES,

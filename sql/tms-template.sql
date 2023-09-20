@@ -2784,10 +2784,14 @@ CREATE VIEW sign_message_view AS
 GRANT SELECT ON sign_message_view TO PUBLIC;
 
 CREATE TABLE iris.word (
-	name VARCHAR(24) PRIMARY KEY,
-	abbr VARCHAR(12),
-	allowed BOOLEAN DEFAULT false NOT NULL
+    name VARCHAR(24) PRIMARY KEY,
+    abbr VARCHAR(12),
+    allowed BOOLEAN DEFAULT false NOT NULL
 );
+
+CREATE TRIGGER word_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.word
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW word_view AS
 	SELECT name, abbr, allowed
