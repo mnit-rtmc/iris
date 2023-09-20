@@ -129,6 +129,14 @@ pub struct MsgLine {
     pub multi: String,
 }
 
+/// Word (for messages)
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct Word {
+    pub name: String,
+    pub abbr: Option<String>,
+    pub allowed: bool,
+}
+
 /// Font name
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct FontName {
@@ -151,6 +159,7 @@ pub struct DmsAnc {
     configs: Vec<SignConfig>,
     compose_patterns: Vec<MsgPattern>,
     lines: Vec<MsgLine>,
+    words: Vec<Word>,
     fnames: Vec<FontName>,
     fonts: FontTable,
     gnames: Vec<GraphicName>,
@@ -161,6 +170,7 @@ const SIGN_MSG_URI: &str = "/iris/sign_message";
 const SIGN_CFG_URI: &str = "/iris/sign_config";
 const MSG_PATTERN_URI: &str = "/iris/api/msg_pattern";
 const MSG_LINE_URI: &str = "/iris/api/msg_line";
+const WORD_URI: &str = "/iris/api/word";
 const FONT_URI: &str = "/iris/font";
 const GRAPHIC_URI: &str = "/iris/graphic";
 
@@ -198,6 +208,7 @@ impl AncillaryData for DmsAnc {
             uris.push(SIGN_CFG_URI.into());
             uris.push(MSG_PATTERN_URI.into());
             uris.push(MSG_LINE_URI.into());
+            uris.push(WORD_URI.into());
             uris.push(FONT_URI.into());
             uris.push(GRAPHIC_URI.into());
         }
@@ -240,6 +251,9 @@ impl AncillaryData for DmsAnc {
                                 .is_some_and(|h| pri.has_hashtag(h)))
                 });
                 self.lines = lines;
+            }
+            WORD_URI => {
+                self.words = serde_wasm_bindgen::from_value(data)?;
             }
             FONT_URI => {
                 self.fnames = serde_wasm_bindgen::from_value(data)?;
