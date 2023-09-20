@@ -210,3 +210,9 @@ SELECT ws.name, location, geo_loc, controller, pin, site_id, alt_id, notes, \
 FROM iris.weather_sensor ws \
 LEFT JOIN geo_loc_view gl ON ws.geo_loc = gl.name \
 WHERE ws.name = $1";
+
+/// SQL query for one word
+pub const WORD: &str = "\
+SELECT name, abbr, allowed \
+FROM iris.word \
+WHERE name = $1";

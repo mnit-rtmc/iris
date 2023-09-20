@@ -274,6 +274,7 @@ async fn main() -> tide::Result<()> {
     add_routes!(route, "user", query::USER);
     add_routes!(route, "video_monitor", query::VIDEO_MONITOR);
     add_routes!(route, "weather_sensor", query::WEATHER_SENSOR);
+    add_routes!(route, "word", query::WORD);
     app.listen("127.0.0.1:3737").await?;
     Ok(())
 }
