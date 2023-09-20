@@ -21,6 +21,7 @@ use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use ntcip::dms::font::{ifnt, FontTable};
 use ntcip::dms::graphic::GraphicTable;
+use ntcip::dms::multi::join_text;
 use rendzina::{load_graphic, SignConfig};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -353,10 +354,14 @@ impl DmsAnc {
         if self.lines.iter().any(|l| l.line == ln) {
             let mut html = String::new();
             html.push_str(&format!("<select id='mc_line{ln}'>"));
+            html.push_str("<option></option>");
             for l in &self.lines {
                 if ln == l.line {
-                    html.push_str("<option>");
-                    html.push_str(&l.multi);
+                    let multi = &l.multi;
+                    html.push_str("<option value='");
+                    html.push_str(multi);
+                    html.push_str("'>");
+                    html.push_str(&join_text(multi, " "));
                     html.push_str("</option>");
                 }
             }

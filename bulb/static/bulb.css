@@ -348,10 +348,12 @@ button.go_link {
 #mc_pattern {
   grid-area: pt;
   justify-self: end;
+  font-size: smaller;
 }
 #mc_lines {
   grid-area: ln;
   justify-self: start;
+  font-size: smaller;
 }
 #mc_send {
   grid-area: bs;
