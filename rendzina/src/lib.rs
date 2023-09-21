@@ -192,17 +192,12 @@ pub fn render<W: Write>(
         palette.set_threshold_fn(palette_threshold_rgb8_256);
         let face = make_face_raster(dms, raster, width, height);
         let indexed = palette.make_indexed(face);
-        // The CARS iOS client can't read .gif files with no graphic control
-        // extension -- set DisposalMethod to Background to include it
-        let disposal = if delay_cs == 0 {
-            DisposalMethod::Background
-        } else {
-            DisposalMethod::NoAction
-        };
         steps.push(
+            // The CARS iOS client can't read .gif files with no graphic
+            // control extension -- set DisposalMethod to Keep to include it
             Step::with_indexed(indexed, palette)
                 .with_delay_time_cs(Some(delay_cs))
-                .with_disposal_method(disposal),
+                .with_disposal_method(DisposalMethod::Keep),
         );
     }
     let mut enc = Encoder::new(&mut writer).into_step_enc();
