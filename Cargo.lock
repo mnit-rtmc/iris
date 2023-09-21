@@ -961,9 +961,9 @@ dependencies = [
 
 [[package]]
 name = "gift"
-version = "0.10.4"
+version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9cf7210d535a7fa3494cd1f06d47270d923cefbed04a09728bfbe833d168db75"
+checksum = "45c14c1e7ff33f13489071f86c613b61da9f7a69191c723d16256a70cea0bb61"
 dependencies = [
  "log",
  "pix",
