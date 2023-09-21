@@ -40,9 +40,7 @@ fn main() {
     let configs = SignConfig::load_all(SIGN_CFGS.as_bytes()).unwrap();
     let mut fonts = FontTable::default();
     fonts
-        .push(
-            load_font(&include_bytes!("../../fonts/F08.ifnt")[..]).unwrap(),
-        )
+        .push(load_font(&include_bytes!("../../fonts/F08.ifnt")[..]).unwrap())
         .unwrap();
     let mut graphics = GraphicTable::default();
     graphics

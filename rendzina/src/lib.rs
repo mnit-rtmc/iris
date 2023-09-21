@@ -3,6 +3,7 @@
 //! rendzina is for rendering DMS sign messages to .gif files
 #![forbid(unsafe_code)]
 
+use gift::block::DisposalMethod;
 use gift::{Decoder, Encoder, Step};
 use ntcip::dms::config::{MultiCfg, SignCfg, VmsCfg};
 use ntcip::dms::font::{ifnt, Font};
@@ -192,8 +193,11 @@ pub fn render<W: Write>(
         let face = make_face_raster(dms, raster, width, height);
         let indexed = palette.make_indexed(face);
         steps.push(
+            // The CARS iOS client can't read .gif files with no graphic
+            // control extension -- set DisposalMethod to Keep to include it
             Step::with_indexed(indexed, palette)
-                .with_delay_time_cs(Some(delay_cs)),
+                .with_delay_time_cs(Some(delay_cs))
+                .with_disposal_method(DisposalMethod::Keep),
         );
     }
     let mut enc = Encoder::new(&mut writer).into_step_enc();

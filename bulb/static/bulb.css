@@ -344,6 +344,7 @@ button.go_link {
 #mc_preview {
   grid-area: pv;
   justify-self: end;
+  filter: opacity(80%);
 }
 #mc_pattern {
   grid-area: pt;
