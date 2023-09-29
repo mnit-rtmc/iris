@@ -15,9 +15,7 @@
 use crate::files::{AtomicFile, Cache};
 use crate::Result;
 use anyhow::Context;
-use ntcip::dms::font::FontTable;
-use ntcip::dms::graphic::GraphicTable;
-use ntcip::dms::Dms;
+use ntcip::dms::{Dms, FontTable, GraphicTable};
 use rendzina::{load_font, load_graphic, SignConfig};
 use serde_derive::Deserialize;
 use std::collections::HashMap;
@@ -65,7 +63,7 @@ struct SignMessage {
 
 /// Data needed for rendering sign messages
 struct MsgData {
-    dms: Dms,
+    dms: Dms<24, 32>,
     configs: HashMap<String, SignConfig>,
 }
 
@@ -84,7 +82,7 @@ impl SignMessage {
 }
 
 /// Load fonts from a JSON file
-fn load_fonts(dir: &Path) -> Result<FontTable> {
+fn load_fonts(dir: &Path) -> Result<FontTable<24>> {
     log::debug!("load_fonts");
     let mut path = PathBuf::new();
     path.push(dir);
@@ -97,14 +95,18 @@ fn load_fonts(dir: &Path) -> Result<FontTable> {
         let file =
             File::open(&path).with_context(|| format!("font {path:?}"))?;
         let reader = BufReader::new(file);
-        fonts.push(load_font(reader)?)?;
+        let font = load_font(reader)?;
+        if let Some(f) = fonts.lookup_mut(font.number) {
+            *f = font;
+        } else if let Some(f) = fonts.lookup_mut(0) {
+            *f = font;
+        }
     }
-    fonts.sort();
     Ok(fonts)
 }
 
 /// Load graphics from a JSON file
-fn load_graphics(dir: &Path) -> Result<GraphicTable> {
+fn load_graphics(dir: &Path) -> Result<GraphicTable<32>> {
     log::debug!("load_graphics");
     let mut path = PathBuf::new();
     path.push(dir);
@@ -125,10 +127,13 @@ fn load_graphics(dir: &Path) -> Result<GraphicTable> {
                 .with_context(|| format!("load_graphics {path:?}"))?;
             let reader = BufReader::new(file);
             let graphic = load_graphic(reader, number)?;
-            graphics.push(graphic)?;
+            if let Some(g) = graphics.lookup_mut(graphic.number) {
+                *g = graphic;
+            } else if let Some(g) = graphics.lookup_mut(0) {
+                *g = graphic;
+            }
         }
     }
-    graphics.sort();
     Ok(graphics)
 }
 
@@ -139,7 +144,7 @@ impl MsgData {
         let dms = Dms::builder()
             .with_font_definition(load_fonts(dir)?)
             .with_graphic_definition(load_graphics(dir)?)
-            .build();
+            .build()?;
         let mut path = PathBuf::new();
         path.push(dir);
         path.push("sign_config");
@@ -176,7 +181,7 @@ impl MsgData {
             .with_sign_cfg(cfg.sign_cfg())
             .with_vms_cfg(cfg.vms_cfg())
             .with_multi_cfg(cfg.multi_cfg())
-            .build();
+            .build()?;
         if let Err(e) =
             rendzina::render(writer, &self.dms, &msg.multi, None, None)
         {

@@ -6,10 +6,8 @@
 use gift::block::DisposalMethod;
 use gift::{Decoder, Encoder, Step};
 use ntcip::dms::config::{MultiCfg, SignCfg, VmsCfg};
-use ntcip::dms::font::{ifnt, Font};
-use ntcip::dms::graphic::Graphic;
 use ntcip::dms::multi::{Color, ColorScheme, JustificationPage, SyntaxError};
-use ntcip::dms::{Dms, Page};
+use ntcip::dms::{ifnt, Dms, Font, Graphic, Page, Pages};
 use pix::bgr::SBgr8;
 use pix::chan::Ch8;
 use pix::el::Pixel;
@@ -42,7 +40,7 @@ pub enum Error {
     Json(#[from] serde_json::Error),
 
     #[error("Font: {0}")]
-    Font(#[from] ifnt::Error),
+    Font(#[from] ifnt::IfntError),
 
     #[error("Syntax: {0}")]
     Syntax(#[from] SyntaxError),
@@ -171,7 +169,7 @@ pub fn load_graphic<R: Read>(reader: R, number: u8) -> Result<Graphic> {
 /// Render a sign message to a .gif file
 pub fn render<W: Write>(
     mut writer: W,
-    dms: &Dms,
+    dms: &Dms<24, 32>,
     multi: &str,
     max_width: Option<u16>,
     max_height: Option<u16>,
@@ -182,7 +180,7 @@ pub fn render<W: Write>(
         max_height.unwrap_or(PIX_HEIGHT),
     );
     let mut steps = Vec::new();
-    for page in dms.render_pages(multi) {
+    for page in Pages::new(dms, multi) {
         let Page {
             raster,
             duration_ds,
@@ -214,7 +212,7 @@ pub fn render<W: Write>(
 }
 
 /// Calculate size to render DMS "face"
-fn face_size(dms: &Dms, max_width: u16, max_height: u16) -> (u16, u16) {
+fn face_size(dms: &Dms<24, 32>, max_width: u16, max_height: u16) -> (u16, u16) {
     let fw = dms.face_width_mm();
     let fh = dms.face_height_mm();
     if fw > 0.0 && fh > 0.0 {
@@ -248,7 +246,7 @@ fn make_palette(raster: &Raster<SRgb8>) -> Palette {
 
 /// Make a raster of sign face
 fn make_face_raster(
-    dms: &Dms,
+    dms: &Dms<24, 32>,
     raster: Raster<SRgb8>,
     width: u16,
     height: u16,

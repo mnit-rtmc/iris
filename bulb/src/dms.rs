@@ -19,8 +19,7 @@ use crate::resource::{
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
-use ntcip::dms::font::{ifnt, FontTable};
-use ntcip::dms::graphic::GraphicTable;
+use ntcip::dms::{ifnt, FontTable, GraphicTable};
 use ntcip::dms::multi::join_text;
 use rendzina::{load_graphic, SignConfig};
 use serde::{Deserialize, Serialize};
@@ -161,9 +160,9 @@ pub struct DmsAnc {
     lines: Vec<MsgLine>,
     words: Vec<Word>,
     fnames: Vec<FontName>,
-    fonts: FontTable,
+    fonts: FontTable<24>,
     gnames: Vec<GraphicName>,
-    graphics: GraphicTable,
+    graphics: GraphicTable<32>,
 }
 
 const SIGN_MSG_URI: &str = "/iris/sign_message";
@@ -267,7 +266,11 @@ impl AncillaryData for DmsAnc {
                 if uri.as_str().ends_with(".ifnt") {
                     let font: String = serde_wasm_bindgen::from_value(data)?;
                     let font = ifnt::read(font.as_bytes())?;
-                    self.fonts.push(font)?;
+                    if let Some(f) = self.fonts.lookup_mut(font.number) {
+                        *f = font;
+                    } else if let Some(f) = self.fonts.lookup_mut(0) {
+                        *f = font;
+                    }
                 } else if uri.as_str().ends_with(".gif") {
                     let graphic: Vec<u8> =
                         serde_wasm_bindgen::from_value(data)?;
@@ -277,7 +280,11 @@ impl AncillaryData for DmsAnc {
                         .parse::<u8>()
                     {
                         let graphic = load_graphic(&graphic[..], number)?;
-                        self.graphics.push(graphic)?;
+                        if let Some(g) = self.graphics.lookup_mut(graphic.number) {
+                            *g = graphic;
+                        } else if let Some(g) = self.graphics.lookup_mut(0) {
+                            *g = graphic;
+                        }
                     }
                 } else {
                     return self.dev.set_data(pri, uri, data);
@@ -515,7 +522,8 @@ impl Dms {
             .with_sign_cfg(cfg.sign_cfg())
             .with_vms_cfg(cfg.vms_cfg())
             .with_multi_cfg(cfg.multi_cfg())
-            .build();
+            .build()
+            .ok()?;
         let mut html = String::new();
         html.push_str("<div id='mc_grid'>");
         if let Some(pat) = anc.compose_patterns.first() {

@@ -8,7 +8,7 @@ edition.workspace = true
 [dependencies]
 gift = "0.10"
 log = "0.4"
-ntcip = "0.7"
+ntcip = "0.8"
 pix = "0.13"
 serde = "1.0"
 serde_derive = "1.0"

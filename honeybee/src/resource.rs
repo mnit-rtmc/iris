@@ -17,9 +17,8 @@ use crate::segments::{RNode, Road, SegMsg};
 use crate::signmsg::render_all;
 use crate::Result;
 use gift::{Encoder, Step};
-use ntcip::dms::font::{ifnt, CharacterEntry, Font};
-use ntcip::dms::graphic::Graphic;
 use ntcip::dms::multi::Color;
+use ntcip::dms::{ifnt, CharacterEntry, Font, Graphic};
 use pix::{rgb::SRgb8, Palette};
 use postgres::Client;
 use serde_derive::Deserialize;
@@ -49,6 +48,7 @@ struct FontRes {
     char_spacing: u8,
     line_spacing: u8,
     glyphs: Vec<Glyph>,
+    #[allow(dead_code)]
     version_id: u16,
 }
 
@@ -86,7 +86,6 @@ impl From<FontRes> for Font {
             char_spacing: fr.char_spacing,
             line_spacing: fr.line_spacing,
             characters,
-            version_id: fr.version_id,
         }
     }
 }

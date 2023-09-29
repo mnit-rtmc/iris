@@ -11,7 +11,7 @@ base64 = "0.21"
 console_error_panic_hook = "0.1"
 humantime = "2.1"
 mag = "0.5"
-ntcip = "0.7"
+ntcip = "0.8"
 percent-encoding = "2"
 rendzina = { path = "../rendzina" }
 serde = { version = "1", features = ["derive"] }
