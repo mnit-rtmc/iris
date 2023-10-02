@@ -485,7 +485,9 @@ CREATE TABLE iris.permission (
     access_n INTEGER NOT NULL,
 
     CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$'),
-    CONSTRAINT permission_access_n CHECK (access_n >= 1 AND access_n <= 4)
+    CONSTRAINT permission_access_n CHECK (access_n >= 1 AND access_n <= 4),
+    -- hashtag cannot be applied to "View" access
+    CONSTRAINT hashtag_access_ck CHECK (hashtag IS NULL OR access_n != 1)
 );
 
 CREATE UNIQUE INDEX permission_role_resource_n_hashtag_idx
