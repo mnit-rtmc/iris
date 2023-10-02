@@ -259,6 +259,7 @@ async fn main() -> tide::Result<()> {
     add_routes!(route, "detector", query::DETECTOR);
     add_routes!(route, "dms", query::DMS);
     add_routes!(route, "flow_stream", query::FLOW_STREAM);
+    add_routes!(route, "font", query::FONT);
     add_routes!(route, "gate_arm", query::GATE_ARM);
     add_routes!(route, "gate_arm_array", query::GATE_ARM_ARRAY);
     route
@@ -266,6 +267,7 @@ async fn main() -> tide::Result<()> {
         .get(|req| sql_get("geo_loc", query::GEO_LOC, req))
         .patch(|req| sonar_object_patch("geo_loc", req));
     add_routes!(route, "gps", query::GPS);
+    add_routes!(route, "graphic", query::GRAPHIC);
     add_routes!(route, "lane_marking", query::LANE_MARKING);
     add_routes!(route, "lcs_array", query::LCS_ARRAY);
     add_routes!(route, "lcs_indication", query::LCS_INDICATION);
@@ -284,6 +286,8 @@ async fn main() -> tide::Result<()> {
         .patch(permission_patch)
         .delete(permission_delete);
     add_routes!(route, "role", query::ROLE);
+    add_routes!(route, "sign_config", query::SIGN_CONFIG);
+    add_routes!(route, "sign_detail", query::SIGN_DETAIL);
     add_routes!(route, "tag_reader", query::TAG_READER);
     add_routes!(route, "user", query::USER);
     add_routes!(route, "video_monitor", query::VIDEO_MONITOR);
