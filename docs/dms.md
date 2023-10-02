@@ -12,7 +12,7 @@ The following features are supported:
 * Querying [sign configuration]
 * Querying diagnostic information
 * Querying or sending [font]s
-* Sending [graphic images] to be displayed
+* Sending [graphic] images to be displayed
 * [Travel time] estimation
 * [Variable speed] advisories
 * [Slow traffic] warnings
@@ -35,6 +35,17 @@ Attribute [permissions]:
 | 🔧 Configure | controller                               | pin         |
 
 Checks of [free-form text] are also affected by the access level.
+
+[Dependent resources]:
+
+* [font]
+* [graphic]
+* [message line]
+* [message pattern]
+* [sign configuration]
+* [sign detail]
+* [sign message]
+* [word]
 
 </details>
 
@@ -77,7 +88,7 @@ When a DMS is selected, a few things happen:
   * only patterns containing **NO** [action tags]
 
 When an operator chooses a pattern, a series of selectors is populated with
-[message lines], depending on the [fillable text rectangles].  Any lines which
+[message line]s, depending on the [fillable text rectangles].  Any lines which
 are too wide to fit the sign are [abbreviated] as necessary.
 
 The selectors may also allow **free-form text** entry, depending on the
@@ -99,16 +110,18 @@ permission for any free-form text.
 [comm link]: comm_links.html
 [free-form text]: #composing-messages
 [dedicated purpose]: hashtags.html#dedicated-purpose
+[dependent resources]: permissions.html#dependent-resources
 [DMS actions]: action_plans.html#dms-actions
 [fillable text rectangles]: message_patterns.html#fillable-text-rectangles
 [font]: fonts.html
-[graphic images]: graphics.html
+[graphic]: graphics.html
 [hashtag]: hashtags.html
-[message lines]: message_patterns.html#message-lines
+[message line]: message_patterns.html#message-lines
 [message pattern]: message_patterns.html
 [NTCIP]: protocols.html#ntcip
 [permissions]: permissions.html
 [sign configuration]: sign_configuration.html
+[sign detail]: sign_configuration.html#sign-details
 [sign message]: sign_message.html
 [Slow traffic]: slow_warning.html
 [travel time]: travel_time.html

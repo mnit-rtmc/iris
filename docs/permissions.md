@@ -46,29 +46,10 @@ To simplify administration, some permissions grant access to related resources.
 In other words, permissions on the main resource also applies to any dependent
 resource, at the same access level.
 
-### Example: **dms** dependent resources
-
-* [font]
-* [graphic]
-* [message line]
-* [message pattern]
-* [sign configuration]
-* [sign detail]
-* [sign message]
-* [word]
-
 
 [capabilities]: user_roles.html#capabilities
-[font]: fonts.html
-[graphic]: graphics.html
 [hashtag]: hashtags.html
-[message line]: message_patterns.html#message-lines
-[message pattern]: message_patterns.html
 [privileges]: user_roles.html#privileges
 [resource]: rest_api.html#resource-types
 [restricted resource]: rest_api.html#restricted-resources
 [role]: user_roles.html#roles
-[sign configuration]: sign_configuration.html
-[sign detail]: sign_configuration.html#sign-details
-[sign message]: sign_message.html
-[word]: words.html
