@@ -86,6 +86,7 @@ fn load_fonts(dir: &Path) -> Result<FontTable<24>> {
     log::debug!("load_fonts");
     let mut path = PathBuf::new();
     path.push(dir);
+    path.push("api");
     path.push("ifnt");
     let mut cache = Cache::new(&path, "ifnt")?;
     let mut fonts = FontTable::default();
@@ -110,6 +111,7 @@ fn load_graphics(dir: &Path) -> Result<GraphicTable<32>> {
     log::debug!("load_graphics");
     let mut path = PathBuf::new();
     path.push(dir);
+    path.push("api");
     path.push("gif");
     let mut cache = Cache::new(&path, "gif")?;
     let mut graphics = GraphicTable::default();
@@ -147,6 +149,7 @@ impl MsgData {
             .build()?;
         let mut path = PathBuf::new();
         path.push(dir);
+        path.push("api");
         path.push("sign_config");
         let reader = BufReader::new(
             File::open(&path).with_context(|| format!("load {path:?}"))?,

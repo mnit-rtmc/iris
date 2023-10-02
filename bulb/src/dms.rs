@@ -19,8 +19,8 @@ use crate::resource::{
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
-use ntcip::dms::{ifnt, FontTable, GraphicTable};
 use ntcip::dms::multi::join_text;
+use ntcip::dms::{ifnt, FontTable, GraphicTable};
 use rendzina::{load_graphic, SignConfig};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -166,12 +166,12 @@ pub struct DmsAnc {
 }
 
 const SIGN_MSG_URI: &str = "/iris/sign_message";
-const SIGN_CFG_URI: &str = "/iris/sign_config";
+const SIGN_CFG_URI: &str = "/iris/api/sign_config";
 const MSG_PATTERN_URI: &str = "/iris/api/msg_pattern";
 const MSG_LINE_URI: &str = "/iris/api/msg_line";
 const WORD_URI: &str = "/iris/api/word";
-const FONT_URI: &str = "/iris/font";
-const GRAPHIC_URI: &str = "/iris/graphic";
+const FONT_URI: &str = "/iris/api/font";
+const GRAPHIC_URI: &str = "/iris/api/graphic";
 
 impl AncillaryData for DmsAnc {
     type Primary = Dms;
@@ -187,13 +187,13 @@ impl AncillaryData for DmsAnc {
         if !self.fnames.is_empty() {
             for fname in &self.fnames {
                 uris.push(
-                    Uri::from(format!("/iris/ifnt/{}.ifnt", fname.name))
+                    Uri::from(format!("/iris/api/ifnt/{}.ifnt", fname.name))
                         .with_content_type(ContentType::Text),
                 );
             }
             for gname in &self.gnames {
                 uris.push(
-                    Uri::from(format!("/iris/gif/{}.gif", gname.name))
+                    Uri::from(format!("/iris/api/gif/{}.gif", gname.name))
                         .with_content_type(ContentType::Gif),
                 );
             }
@@ -280,7 +280,9 @@ impl AncillaryData for DmsAnc {
                         .parse::<u8>()
                     {
                         let graphic = load_graphic(&graphic[..], number)?;
-                        if let Some(g) = self.graphics.lookup_mut(graphic.number) {
+                        if let Some(g) =
+                            self.graphics.lookup_mut(graphic.number)
+                        {
                             *g = graphic;
                         } else if let Some(g) = self.graphics.lookup_mut(0) {
                             *g = graphic;

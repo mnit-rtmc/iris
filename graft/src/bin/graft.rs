@@ -160,6 +160,18 @@ macro_rules! add_routes {
     };
 }
 
+/// Get associated or dependent resource name
+fn res_name(resource_n: &'static str) -> &'static str {
+    match resource_n {
+        // DMS dependent resources
+        "font" | "graphic" | "msg_line" | "msg_pattern" | "sign_config"
+        | "sign_detail" | "sign_message" | "word" => "dms",
+        // associated controller
+        "controller_io" => "controller",
+        _ => resource_n,
+    }
+}
+
 /// Lookup authorized access for a resource
 fn auth_access(
     res: &'static str,
@@ -168,7 +180,9 @@ fn auth_access(
 ) -> Result<Access> {
     let session = req.session();
     let auth: AuthMap = session.get("auth").ok_or(SonarError::Unauthorized)?;
-    let perm = req.state().permission_user_res(&auth.username, res, name)?;
+    let perm =
+        req.state()
+            .permission_user_res(&auth.username, res_name(res), name)?;
     Access::new(perm.access_n).ok_or(SonarError::Unauthorized)
 }
 
@@ -441,8 +455,7 @@ async fn sql_get_by_name(
     req: Request<State>,
 ) -> Result<String> {
     let name = req_name(&req)?;
-    auth_access(res_name(resource_n), &req, Some(&name))?
-        .check(Access::View)?;
+    auth_access(resource_n, &req, Some(&name))?.check(Access::View)?;
     spawn_blocking(move || req.state().get_by_pkey(sql, &name)).await
 }
 
@@ -467,8 +480,7 @@ async fn sql_get_array_by_name(
     req: Request<State>,
 ) -> Result<String> {
     let name = req_name(&req)?;
-    auth_access(res_name(resource_n), &req, Some(&name))?
-        .check(Access::View)?;
+    auth_access(resource_n, &req, Some(&name))?.check(Access::View)?;
     spawn_blocking(move || req.state().get_array_by_pkey(sql, &name)).await
 }
 
@@ -542,7 +554,7 @@ async fn resource_get_json(
     resource_n: &'static str,
     req: Request<State>,
 ) -> Result<(String, Body)> {
-    auth_access(res_name(resource_n), &req, None)?.check(Access::View)?;
+    auth_access(resource_n, &req, None)?.check(Access::View)?;
     let path = PathBuf::from(format!("{STATIC_PATH}/{resource_n}"));
     let etag = resource_etag(&path).await?;
     if let Some(values) = req.header("If-None-Match") {
@@ -552,14 +564,6 @@ async fn resource_get_json(
     }
     let body = Body::from_file(&path).await?;
     Ok((etag, body))
-}
-
-/// Get associated resource name
-fn res_name(resource_n: &'static str) -> &'static str {
-    match resource_n {
-        "controller_io" => "controller",
-        _ => resource_n,
-    }
 }
 
 /// Get a static file ETag

@@ -25,7 +25,7 @@ These resources are JSON arrays, fetched using http `GET` requests.
 - `iris/incident`: Currently active incidents
 - `iris/rwis`: [Road Weather Information System]
 - `iris/sign_config`: DMS [sign configuration]s
-- `iris/sign_detail`: DMS sign detail information
+- `iris/sign_detail`: DMS [sign detail] information
 - `iris/sign_message`: Active DMS [sign message]s
 - `iris/station_sample`: Vehicle detection station data
 - `iris/system_attribute_pub`: Public [system attributes]
@@ -231,6 +231,7 @@ Since `geo_loc` resources can only be created and deleted with an associated
 [Road Weather Information System]: rwis.html
 [role]: user_roles.html#roles
 [sign configuration]: sign_configuration.html
+[sign detail]: sign_configuration.html#sign-details
 [sign message]: sign_message.html
 [system attributes]: system_attributes.html
 [user]: user_roles.html

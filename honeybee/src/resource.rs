@@ -429,7 +429,7 @@ const DMS_STAT_RES: Resource = Resource::Simple(
 
 /// Font list resource
 const FONT_LIST_RES: Resource = Resource::Simple(
-    "font",
+    "api/font",
     Listen::All("font"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT f_number AS font_number, name \
@@ -456,7 +456,7 @@ const FONT_RES: Resource = Resource::Font(
 
 /// Graphic list resource
 const GRAPHIC_LIST_RES: Resource = Resource::Simple(
-    "graphic",
+    "api/graphic",
     Listen::All("graphic"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT g_number AS number, 'G' || g_number AS name \
@@ -803,7 +803,7 @@ const USER_RES: Resource = Resource::Simple(
 
 /// Sign configuration resource
 const SIGN_CONFIG_RES: Resource = Resource::Simple(
-    "sign_config",
+    "api/sign_config",
     Listen::All("sign_config"),
     "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
       SELECT name, face_width, face_height, border_horiz, border_vert, \
@@ -817,7 +817,7 @@ const SIGN_CONFIG_RES: Resource = Resource::Simple(
 
 /// Sign detail resource
 const SIGN_DETAIL_RES: Resource = Resource::Simple(
-    "sign_detail",
+    "api/sign_detail",
     Listen::All("sign_detail"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, dms_type, portable, technology, sign_access, legend, \
@@ -1167,7 +1167,7 @@ impl Resource {
     fn fetch_fonts(&self, client: &mut Client) -> Result<()> {
         log::debug!("fetch_fonts");
         let t = Instant::now();
-        let dir = Path::new("ifnt");
+        let dir = Path::new("api/ifnt");
         let mut count = 0;
         let sql = self.sql();
         for row in &client.query(sql, &[])? {
@@ -1190,7 +1190,7 @@ impl Resource {
     fn fetch_graphics(&self, client: &mut Client) -> Result<()> {
         log::debug!("fetch_graphics");
         let t = Instant::now();
-        let dir = Path::new("gif");
+        let dir = Path::new("api/gif");
         let mut count = 0;
         let sql = self.sql();
         for row in &client.query(sql, &[])? {
