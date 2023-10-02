@@ -20,7 +20,7 @@ use crate::resource::{
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use ntcip::dms::multi::join_text;
-use ntcip::dms::{ifnt, FontTable, GraphicTable};
+use ntcip::dms::{ifnt, FillablePattern, Font, FontTable, GraphicTable};
 use rendzina::{load_graphic, SignConfig};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -129,7 +129,7 @@ pub struct MsgLine {
 }
 
 /// Word (for messages)
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct Word {
     pub name: String,
     pub abbr: Option<String>,
@@ -373,23 +373,85 @@ impl DmsAnc {
     }
 
     /// Make a line select element
-    fn make_line(&self, ln: u16) -> Option<String> {
-        if self.lines.iter().any(|l| l.line == ln) {
-            let mut html = String::new();
-            html.push_str(&format!("<select id='mc_line{ln}'>"));
-            html.push_str("<option></option>");
-            for l in &self.lines {
-                if ln == l.line {
-                    let multi = &l.multi;
-                    html.push_str("<option value='");
-                    html.push_str(multi);
-                    html.push_str("'>");
-                    html.push_str(&join_text(multi, " "));
-                    html.push_str("</option>");
+    fn make_line(
+        &self,
+        pat: &MsgPattern,
+        ln: u16,
+        width: u16,
+        font: &Font,
+    ) -> String {
+        let mut html = String::new();
+        html.push_str(&format!("<select id='mc_line{ln}'>"));
+        html.push_str("<option></option>");
+        for l in &self.lines {
+            if l.msg_pattern == pat.name && ln == l.line {
+                self.append_line(&l.multi, width, font, &mut html)
+            }
+        }
+        html.push_str("</select>");
+        html
+    }
+
+    /// Append a line as an option element
+    fn append_line(
+        &self,
+        multi: &str,
+        width: u16,
+        font: &Font,
+        html: &mut String,
+    ) {
+        let mut ms = multi;
+        let mut line;
+        loop {
+            let Ok(w) = font.text_width(ms, None) else {
+                return;
+            };
+            if w <= width {
+                html.push_str("<option value='");
+                html.push_str(ms);
+                html.push_str("'>");
+                html.push_str(&join_text(ms, " "));
+                html.push_str("</option>");
+                break;
+            } else if let Some(abbrev) = self.abbreviate_text(ms) {
+                line = abbrev;
+                ms = &line[..];
+            } else {
+                break;
+            }
+        }
+    }
+
+    /// Abbreviate message text
+    fn abbreviate_text(&self, text: &str) -> Option<String> {
+        let mut abbrev = Word::default();
+        for w in text.split(' ') {
+            let sc = w.len();
+            // prefer to abbreviate longer words
+            if sc > abbrev.name.len() {
+                for word in &self.words {
+                    if word.allowed && word.name == w {
+                        if let Some(ab) = &word.abbr {
+                            if ab != w {
+                                abbrev = word.clone();
+                            }
+                        }
+                    }
                 }
             }
-            html.push_str("</select>");
-            Some(html)
+        }
+        if !abbrev.name.is_empty() {
+            let mut t = String::new();
+            for w in text.split(' ') {
+                if w == abbrev.name {
+                    t.push_str(abbrev.abbr.as_ref().unwrap());
+                } else {
+                    t.push_str(w);
+                }
+                t.push(' ');
+            }
+            t.truncate(t.len() - 1);
+            Some(t)
         } else {
             None
         }
@@ -544,10 +606,15 @@ impl Dms {
         }
         html.push_str("</select>");
         html.push_str("<div id='mc_lines' class='column'>");
-        let mut ln = 1;
-        while let Some(line) = anc.make_line(ln) {
-            html.push_str(&line);
-            ln += 1;
+        if let Some(pat) = anc.compose_patterns.first() {
+            for (i, (width, font_num)) in
+                FillablePattern::new(&dms, &pat.multi).widths().enumerate()
+            {
+                if let Some(font) = dms.font_definition().lookup(font_num) {
+                    let ln = 1 + i as u16;
+                    html.push_str(&anc.make_line(pat, ln, width, font));
+                }
+            }
         }
         html.push_str("</div>");
         html.push_str(SEND_BUTTON);
