@@ -205,6 +205,11 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     fn click_changed(&self, _id: &str) -> String {
         "".into()
     }
+
+    /// Handle input event for an element on the card
+    fn handle_input(&self, _anc: Self::Ancillary, _id: &str) {
+        // ignore by default
+    }
 }
 
 impl Resource {
@@ -715,11 +720,13 @@ async fn handle_click<C: Card>(
 
 /// Handle input event for an element on a card
 async fn handle_input<C: Card>(
-    _res: Resource,
-    _name: &str,
-    _id: &str,
+    res: Resource,
+    name: &str,
+    id: &str,
 ) -> Result<bool> {
-    // FIXME: update card
+    let pri = res.fetch_primary::<C>(name).await?;
+    let anc = fetch_ancillary(View::Status(false), &pri).await?;
+    pri.handle_input(anc, id);
     Ok(true)
 }
 

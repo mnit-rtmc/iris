@@ -17,7 +17,7 @@ use crate::item::{ItemState, ItemStates};
 use crate::resource::{
     AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, OptVal};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use ntcip::dms::multi::join_text;
 use ntcip::dms::{ifnt, FillablePattern, Font, FontTable, GraphicTable};
@@ -25,6 +25,7 @@ use rendzina::{load_graphic, SignConfig};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use wasm_bindgen::JsValue;
+use web_sys::{console, HtmlElement, HtmlSelectElement};
 
 /// Send button
 const SEND_BUTTON: &str = "<button id='mc_send' type='button'>Send</button>";
@@ -381,8 +382,9 @@ impl DmsAnc {
         font: &Font,
     ) -> String {
         let mut html = String::new();
-        html.push_str(&format!("<select id='mc_line{ln}'>"));
-        html.push_str("<option></option>");
+        html.push_str("<select id='mc_line");
+        html.push_str(&ln.to_string());
+        html.push_str("'><option></option>");
         for l in &self.lines {
             if l.msg_pattern == pat.name && ln == l.line {
                 self.append_line(&l.multi, width, font, &mut html)
@@ -701,5 +703,56 @@ impl Card for Dms {
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
         fields.into_value().to_string()
+    }
+
+    /// Handle input event for an element on the card
+    fn handle_input(&self, anc: DmsAnc, id: &str) {
+        console::log_1(&format!("input: {id}").into());
+        if id.starts_with("mc_line") {
+            let doc = Doc::get();
+            // get selected message pattern
+            let pat_name = doc.elem::<HtmlSelectElement>("mc_pattern").value();
+            let Some(pat) = anc
+                .compose_patterns
+                .iter()
+                .find(|p| p.name == pat_name) else { return; };
+            // get DMS for rendering preview
+            let Some(cfg) = anc.sign_config(self.sign_config.as_deref()) else {
+                return;
+            };
+            let sign_cfg = cfg.sign_cfg();
+            let vms_cfg = cfg.vms_cfg();
+            let multi_cfg = cfg.multi_cfg();
+            let Ok(dms) = ntcip::dms::Dms::<24, 32>::builder()
+                .with_font_definition(anc.fonts)
+                .with_sign_cfg(sign_cfg)
+                .with_vms_cfg(vms_cfg)
+                .with_multi_cfg(multi_cfg)
+                .build() else
+            {
+                return;
+            };
+            // fill pattern with selected lines
+            let mut lines = Vec::new();
+            while let Some(line) = doc.try_elem::<HtmlSelectElement>(&format!(
+                "mc_line{}",
+                lines.len() + 1
+            )) {
+                lines.push(line.value());
+            }
+            let multi = FillablePattern::new(&dms, &pat.multi)
+                .fill(lines.iter().map(|l| &l[..]));
+            // render preview image
+            let mut buf = Vec::with_capacity(4096);
+            rendzina::render(&mut buf, &dms, &multi, Some(240), Some(80))
+                .unwrap();
+            let mut html = String::new();
+            html.push_str("<img id='mc_preview' src='data:image/gif;base64,");
+            b64enc.encode_string(buf, &mut html);
+            html.push_str("'/>");
+            // update mc_preview image element
+            let preview = doc.elem::<HtmlElement>("mc_preview");
+            preview.set_outer_html(&html);
+        }
     }
 }

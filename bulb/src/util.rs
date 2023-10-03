@@ -179,14 +179,21 @@ impl Doc {
         Doc(doc)
     }
 
+    /// Try to get an element by ID and cast it
+    pub fn try_elem<E: JsCast>(&self, id: &str) -> Option<E> {
+        Some(
+            self.0
+                .get_element_by_id(id)?
+                .dyn_into::<E>()
+                .expect("Invalid element type"),
+        )
+    }
+
     /// Get an element by ID and cast it
     pub fn elem<E: JsCast>(&self, id: &str) -> E {
-        self.0
-            .get_element_by_id(id)
+        self.try_elem(id)
             .ok_or_else(|| format!("Invalid element ID: {id}"))
             .unwrap()
-            .dyn_into::<E>()
-            .expect("Invalid element type")
     }
 
     /// Get and parse a `select` element value
