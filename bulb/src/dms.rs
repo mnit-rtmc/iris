@@ -25,7 +25,7 @@ use rendzina::{load_graphic, SignConfig};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use wasm_bindgen::JsValue;
-use web_sys::{console, HtmlElement, HtmlSelectElement};
+use web_sys::{HtmlElement, HtmlSelectElement};
 
 /// Send button
 const SEND_BUTTON: &str = "<button id='mc_send' type='button'>Send</button>";
@@ -373,24 +373,33 @@ impl DmsAnc {
         self.compose_patterns.iter().any(|p| p.name == pat)
     }
 
-    /// Make a line select element
-    fn make_line(
+    /// Make line select elements
+    fn make_lines(
         &self,
-        pat: &MsgPattern,
-        ln: u16,
-        width: u16,
-        font: &Font,
+        dms: &ntcip::dms::Dms<24, 32>,
+        pat: Option<&MsgPattern>,
     ) -> String {
         let mut html = String::new();
-        html.push_str("<select id='mc_line");
-        html.push_str(&ln.to_string());
-        html.push_str("'><option></option>");
-        for l in &self.lines {
-            if l.msg_pattern == pat.name && ln == l.line {
-                self.append_line(&l.multi, width, font, &mut html)
+        html.push_str("<div id='mc_lines' class='column'>");
+        if let Some(pat) = pat {
+            for (i, (width, font_num)) in
+                FillablePattern::new(dms, &pat.multi).widths().enumerate()
+            {
+                if let Some(font) = dms.font_definition().lookup(font_num) {
+                    let ln = 1 + i as u16;
+                    html.push_str("<select id='mc_line");
+                    html.push_str(&ln.to_string());
+                    html.push_str("'><option></option>");
+                    for l in &self.lines {
+                        if l.msg_pattern == pat.name && ln == l.line {
+                            self.append_line(&l.multi, width, font, &mut html)
+                        }
+                    }
+                    html.push_str("</select>");
+                }
             }
         }
-        html.push_str("</select>");
+        html.push_str("</div>");
         html
     }
 
@@ -402,6 +411,7 @@ impl DmsAnc {
         font: &Font,
         html: &mut String,
     ) {
+        // FIXME: handle line-allowed MULTI tags
         let mut ms = multi;
         let mut line;
         loop {
@@ -592,7 +602,8 @@ impl Dms {
             .ok()?;
         let mut html = String::new();
         html.push_str("<div id='mc_grid'>");
-        if let Some(pat) = anc.compose_patterns.first() {
+        let pat = anc.compose_patterns.first();
+        if let Some(pat) = pat {
             let mut buf = Vec::with_capacity(4096);
             rendzina::render(&mut buf, &dms, &pat.multi, Some(240), Some(80))
                 .unwrap();
@@ -607,18 +618,7 @@ impl Dms {
             html.push_str("</option>");
         }
         html.push_str("</select>");
-        html.push_str("<div id='mc_lines' class='column'>");
-        if let Some(pat) = anc.compose_patterns.first() {
-            for (i, (width, font_num)) in
-                FillablePattern::new(&dms, &pat.multi).widths().enumerate()
-            {
-                if let Some(font) = dms.font_definition().lookup(font_num) {
-                    let ln = 1 + i as u16;
-                    html.push_str(&anc.make_line(pat, ln, width, font));
-                }
-            }
-        }
-        html.push_str("</div>");
+        html.push_str(&anc.make_lines(&dms, pat));
         html.push_str(SEND_BUTTON);
         html.push_str(BLANK_BUTTON);
         html.push_str("</div>");
@@ -707,52 +707,53 @@ impl Card for Dms {
 
     /// Handle input event for an element on the card
     fn handle_input(&self, anc: DmsAnc, id: &str) {
-        console::log_1(&format!("input: {id}").into());
-        if id.starts_with("mc_line") {
-            let doc = Doc::get();
-            // get selected message pattern
-            let pat_name = doc.elem::<HtmlSelectElement>("mc_pattern").value();
-            let Some(pat) = anc
-                .compose_patterns
-                .iter()
-                .find(|p| p.name == pat_name) else { return; };
-            // get DMS for rendering preview
-            let Some(cfg) = anc.sign_config(self.sign_config.as_deref()) else {
-                return;
-            };
-            let sign_cfg = cfg.sign_cfg();
-            let vms_cfg = cfg.vms_cfg();
-            let multi_cfg = cfg.multi_cfg();
-            let Ok(dms) = ntcip::dms::Dms::<24, 32>::builder()
-                .with_font_definition(anc.fonts)
-                .with_sign_cfg(sign_cfg)
-                .with_vms_cfg(vms_cfg)
-                .with_multi_cfg(multi_cfg)
-                .build() else
-            {
-                return;
-            };
-            // fill pattern with selected lines
-            let mut lines = Vec::new();
+        let doc = Doc::get();
+        // get selected message pattern
+        let pat_name = doc.elem::<HtmlSelectElement>("mc_pattern").value();
+        let Some(pat) = anc
+            .compose_patterns
+            .iter()
+            .find(|p| p.name == pat_name) else { return; };
+        // get DMS for rendering preview
+        let Some(cfg) = anc.sign_config(self.sign_config.as_deref()) else {
+            return;
+        };
+        let Ok(dms) = ntcip::dms::Dms::<24, 32>::builder()
+            .with_font_definition(anc.fonts.clone())
+            .with_sign_cfg(cfg.sign_cfg())
+            .with_vms_cfg(cfg.vms_cfg())
+            .with_multi_cfg(cfg.multi_cfg())
+            .build() else
+        {
+            return;
+        };
+        let mut lines = Vec::new();
+        // where did the input event come from?
+        if id == "mc_pattern" {
+            // update mc_lines element
+            let html = anc.make_lines(&dms, Some(pat));
+            let mc_lines = doc.elem::<HtmlElement>("mc_lines");
+            mc_lines.set_outer_html(&html);
+        } else {
+            // get selected lines
             while let Some(line) = doc.try_elem::<HtmlSelectElement>(&format!(
                 "mc_line{}",
                 lines.len() + 1
             )) {
                 lines.push(line.value());
             }
-            let multi = FillablePattern::new(&dms, &pat.multi)
-                .fill(lines.iter().map(|l| &l[..]));
-            // render preview image
-            let mut buf = Vec::with_capacity(4096);
-            rendzina::render(&mut buf, &dms, &multi, Some(240), Some(80))
-                .unwrap();
-            let mut html = String::new();
-            html.push_str("<img id='mc_preview' src='data:image/gif;base64,");
-            b64enc.encode_string(buf, &mut html);
-            html.push_str("'/>");
-            // update mc_preview image element
-            let preview = doc.elem::<HtmlElement>("mc_preview");
-            preview.set_outer_html(&html);
         }
+        let multi = FillablePattern::new(&dms, &pat.multi)
+            .fill(lines.iter().map(|l| &l[..]));
+        // render preview image
+        let mut buf = Vec::with_capacity(4096);
+        rendzina::render(&mut buf, &dms, &multi, Some(240), Some(80)).unwrap();
+        let mut html = String::new();
+        html.push_str("<img id='mc_preview' src='data:image/gif;base64,");
+        b64enc.encode_string(buf, &mut html);
+        html.push_str("'/>");
+        // update mc_preview image element
+        let preview = doc.elem::<HtmlElement>("mc_preview");
+        preview.set_outer_html(&html);
     }
 }
