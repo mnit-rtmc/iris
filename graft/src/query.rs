@@ -214,6 +214,13 @@ SELECT name, dms_type, portable, technology, sign_access, legend, \
 FROM iris.sign_detail \
 WHERE name = $1";
 
+/// SQL query for one sign message
+pub const SIGN_MSG: &str = "\
+SELECT name, sign_config, incident, multi, msg_owner, flash_beacon, \
+       msg_priority, duration \
+FROM iris.sign_message \
+WHERE name = $1";
+
 /// SQL query for one tag reader
 pub const TAG_READER: &str = "\
 SELECT t.name, location, geo_loc, controller, pin, notes, toll_zone, settings \

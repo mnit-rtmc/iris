@@ -288,6 +288,7 @@ async fn main() -> tide::Result<()> {
     add_routes!(route, "role", query::ROLE);
     add_routes!(route, "sign_config", query::SIGN_CONFIG);
     add_routes!(route, "sign_detail", query::SIGN_DETAIL);
+    add_routes!(route, "sign_message", query::SIGN_MSG);
     add_routes!(route, "tag_reader", query::TAG_READER);
     add_routes!(route, "user", query::USER);
     add_routes!(route, "video_monitor", query::VIDEO_MONITOR);
