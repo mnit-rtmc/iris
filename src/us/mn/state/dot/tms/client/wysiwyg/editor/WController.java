@@ -2578,11 +2578,10 @@ public class WController {
 	public void setFont(Font f) {
 		// set the font
 		font = f;
-		
+
 		// create the appropriate font tag token
-		WtFont fTok = new WtFont(font.getNumber(),
-				String.valueOf(font.getVersionID()));
-		
+		WtFont fTok = new WtFont(font.getNumber(), null);
+
 		// if there is a selection, get the font of the first token after
 		// if there are no tokens after, don't do anything
 		WtFont afTok = null;
@@ -2592,8 +2591,7 @@ public class WController {
 					tokensAfter.findFirstTextToken(false, false);
 			if (tc != null) {
 				WFont wf = tc.getFont();
-				afTok = new WtFont(wf.getNumber(),
-						String.valueOf(wf.getVersionID()));
+				afTok = new WtFont(wf.getNumber(), null);
 			}
 		}
 		addTextOptionToken(fTok, afTok);

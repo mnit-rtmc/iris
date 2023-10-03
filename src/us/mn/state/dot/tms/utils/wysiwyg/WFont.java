@@ -288,21 +288,4 @@ public class WFont implements Font {
 	public int getCharSpacing() {
 		return font.getCharSpacing();
 	}
-
-	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.Font#setVersionID(int)
-	 */
-	@Override
-	public void setVersionID(int v) {
-		font.setVersionID(v);
-	}
-
-	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.Font#getVersionID()
-	 */
-	@Override
-	public int getVersionID() {
-		return font.getVersionID();
-	}
-
 }

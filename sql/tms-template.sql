@@ -2512,7 +2512,6 @@ CREATE TABLE iris.font (
     width INTEGER NOT NULL,
     line_spacing INTEGER NOT NULL,
     char_spacing INTEGER NOT NULL,
-    version_id INTEGER NOT NULL
 );
 
 ALTER TABLE iris.font
@@ -2555,8 +2554,7 @@ CREATE TRIGGER font_notify_trig
     FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
 
 CREATE VIEW font_view AS
-    SELECT name, f_number, height, width, line_spacing, char_spacing,
-           version_id
+    SELECT name, f_number, height, width, line_spacing, char_spacing
     FROM iris.font;
 GRANT SELECT ON font_view TO PUBLIC;
 

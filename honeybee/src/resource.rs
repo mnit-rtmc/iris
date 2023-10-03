@@ -48,8 +48,6 @@ struct FontRes {
     char_spacing: u8,
     line_spacing: u8,
     glyphs: Vec<Glyph>,
-    #[allow(dead_code)]
-    version_id: u16,
 }
 
 /// Graphic resource
@@ -449,7 +447,7 @@ const FONT_RES: Resource = Resource::Font(
                WHERE font = ft.name \
                ORDER BY code_point \
              ) AS c) \
-           AS glyphs, version_id \
+           AS glyphs \
       FROM iris.font ft ORDER BY name\
     ) AS f",
 );
