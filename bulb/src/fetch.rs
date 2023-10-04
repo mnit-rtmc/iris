@@ -15,7 +15,7 @@ use std::borrow::{Borrow, Cow};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{console, Request, RequestInit, Response};
+use web_sys::{console, Blob, Request, RequestInit, Response};
 
 /// Fetchable content types
 #[derive(Copy, Clone, Debug)]
@@ -74,37 +74,42 @@ impl Uri {
     }
 }
 
+/// Fetch a GET response
+async fn get_response(uri: &Uri) -> std::result::Result<Response, JsValue> {
+    let window = web_sys::window().unwrap_throw();
+    let req = Request::new_with_str(uri.as_str())?;
+    req.headers().set("Accept", uri.content_type.as_str())?;
+    let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
+    Ok(resp.dyn_into::<Response>().unwrap_throw())
+}
+
 /// Fetch a GET request
 pub async fn get<U>(uri: U) -> Result<JsValue>
 where
     U: Into<Uri>,
 {
     let uri = uri.into();
-    let window = web_sys::window().unwrap_throw();
-    let req = Request::new_with_str(uri.as_str()).map_err(|e| {
+    let resp = get_response(&uri).await.map_err(|e| {
         console::log_1(&e);
         Error::FetchRequest()
     })?;
-    req.headers()
-        .set("Accept", uri.content_type.as_str())
-        .map_err(|e| {
-            console::log_1(&e);
-            Error::FetchRequest()
-        })?;
-    let resp = JsFuture::from(window.fetch_with_request(&req))
-        .await
-        .map_err(|e| {
-            console::log_1(&e);
-            Error::FetchRequest()
-        })?;
-    let resp: Response = resp.dyn_into().unwrap_throw();
     resp_status(resp.status())?;
-    let data = match uri.content_type {
-        ContentType::Json => resp.json(),
-        ContentType::Text => resp.text(),
-        ContentType::Gif => resp.blob(),
+    match uri.content_type {
+        ContentType::Json => wait_promise(resp.json()).await,
+        ContentType::Text => wait_promise(resp.text()).await,
+        ContentType::Gif => {
+            let blob = wait_promise(resp.blob()).await?;
+            let blob = blob.dyn_into::<Blob>().unwrap();
+            wait_promise(Ok(blob.array_buffer())).await
+        }
     }
-    .map_err(|e| {
+}
+
+/// Wait for a JS promise
+async fn wait_promise(
+    data: std::result::Result<js_sys::Promise, JsValue>,
+) -> Result<JsValue> {
+    let data = data.map_err(|e| {
         console::log_1(&e);
         Error::FetchRequest()
     })?;

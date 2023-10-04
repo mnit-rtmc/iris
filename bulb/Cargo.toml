@@ -10,6 +10,7 @@ crate-type = ["cdylib"]
 base64 = "0.21"
 console_error_panic_hook = "0.1"
 humantime = "2.1"
+js-sys = "0.3"
 mag = "0.5"
 ntcip = "0.8.2"
 percent-encoding = "2"
@@ -25,6 +26,7 @@ wasm-bindgen-futures = "0.4"
 version = "0.3"
 features = [
   'console',
+  'Blob',
   'Document',
   'HtmlCollection',
   'HtmlElement',

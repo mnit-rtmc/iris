@@ -494,6 +494,7 @@ dependencies = [
  "base64 0.21.4",
  "console_error_panic_hook",
  "humantime",
+ "js-sys",
  "mag",
  "ntcip",
  "percent-encoding",

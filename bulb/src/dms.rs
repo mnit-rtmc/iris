@@ -19,12 +19,13 @@ use crate::resource::{
 };
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, OptVal};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
+use js_sys::{ArrayBuffer, Uint8Array};
 use ntcip::dms::multi::join_text;
 use ntcip::dms::{ifnt, FillablePattern, Font, FontTable, GraphicTable};
 use rendzina::{load_graphic, SignConfig};
 use serde::{Deserialize, Serialize};
 use std::fmt;
-use wasm_bindgen::JsValue;
+use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{console, HtmlElement, HtmlSelectElement};
 
 /// Send button
@@ -273,8 +274,8 @@ impl AncillaryData for DmsAnc {
                         *f = font;
                     }
                 } else if uri.as_str().ends_with(".gif") {
-                    let graphic: Vec<u8> =
-                        serde_wasm_bindgen::from_value(data)?;
+                    let abuf = data.dyn_into::<ArrayBuffer>().unwrap();
+                    let graphic = Uint8Array::new(&abuf).to_vec();
                     if let Ok(number) = uri
                         .as_str()
                         .replace(|c: char| !c.is_numeric(), "")
