@@ -274,13 +274,13 @@ impl AncillaryData for DmsAnc {
                         *f = font;
                     }
                 } else if uri.as_str().ends_with(".gif") {
-                    let abuf = data.dyn_into::<ArrayBuffer>().unwrap();
-                    let graphic = Uint8Array::new(&abuf).to_vec();
                     if let Ok(number) = uri
                         .as_str()
                         .replace(|c: char| !c.is_numeric(), "")
                         .parse::<u8>()
                     {
+                        let abuf = data.dyn_into::<ArrayBuffer>().unwrap();
+                        let graphic = Uint8Array::new(&abuf).to_vec();
                         let graphic = load_graphic(&graphic[..], number)?;
                         if let Some(g) =
                             self.graphics.lookup_mut(graphic.number)
@@ -289,6 +289,11 @@ impl AncillaryData for DmsAnc {
                         } else if let Some(g) = self.graphics.lookup_mut(0) {
                             *g = graphic;
                         }
+                    } else {
+                        console::log_1(
+                            &format!("invalid graphic: {}", uri.as_str())
+                                .into(),
+                        );
                     }
                 } else {
                     return self.dev.set_data(pri, uri, data);
