@@ -282,9 +282,7 @@ impl AncillaryData for DmsAnc {
                         let abuf = data.dyn_into::<ArrayBuffer>().unwrap();
                         let graphic = Uint8Array::new(&abuf).to_vec();
                         let graphic = load_graphic(&graphic[..], number)?;
-                        if let Some(g) =
-                            self.graphics.lookup_mut(graphic.number)
-                        {
+                        if let Some(g) = self.graphics.lookup_mut(number) {
                             *g = graphic;
                         } else if let Some(g) = self.graphics.lookup_mut(0) {
                             *g = graphic;
@@ -601,6 +599,7 @@ impl Dms {
         };
         let dms = ntcip::dms::Dms::builder()
             .with_font_definition(anc.fonts.clone())
+            .with_graphic_definition(anc.graphics.clone())
             .with_sign_cfg(cfg.sign_cfg())
             .with_vms_cfg(cfg.vms_cfg())
             .with_multi_cfg(cfg.multi_cfg())
@@ -730,6 +729,7 @@ impl Card for Dms {
         };
         let dms = match ntcip::dms::Dms::<24, 32>::builder()
             .with_font_definition(anc.fonts.clone())
+            .with_graphic_definition(anc.graphics.clone())
             .with_sign_cfg(cfg.sign_cfg())
             .with_vms_cfg(cfg.vms_cfg())
             .with_multi_cfg(cfg.multi_cfg())
