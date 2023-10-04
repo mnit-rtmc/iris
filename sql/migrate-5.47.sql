@@ -26,4 +26,10 @@ CREATE VIEW font_view AS
     FROM iris.font;
 GRANT SELECT ON font_view TO PUBLIC;
 
+-- Fix error in MULTI supported tag bits
+UPDATE iris.multi_tag SET tag = 'f13' WHERE bit = 26;
+UPDATE iris.multi_tag SET tag = 'tr' WHERE bit = 27;
+UPDATE iris.multi_tag SET tag = 'cr' WHERE bit = 28;
+INSERT INTO iris.multi_tag (bit, tag) VALUES (29, 'pb');
+
 COMMIT;

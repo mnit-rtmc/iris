@@ -2662,9 +2662,10 @@ COPY iris.multi_tag (bit, tag) FROM stdin;
 23	f10
 24	f11
 25	f12
-26	tr
-27	cr
-28	pb
+26	f13
+27	tr
+28	cr
+29	pb
 \.
 
 CREATE FUNCTION iris.multi_tags(INTEGER)
