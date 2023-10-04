@@ -25,7 +25,7 @@ use rendzina::{load_graphic, SignConfig};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use wasm_bindgen::JsValue;
-use web_sys::{HtmlElement, HtmlSelectElement};
+use web_sys::{console, HtmlElement, HtmlSelectElement};
 
 /// Send button
 const SEND_BUTTON: &str = "<button id='mc_send' type='button'>Send</button>";
@@ -713,19 +713,27 @@ impl Card for Dms {
         let Some(pat) = anc
             .compose_patterns
             .iter()
-            .find(|p| p.name == pat_name) else { return; };
+            .find(|p| p.name == pat_name) else
+        {
+            console::log_1(&format!("pattern not found: {pat_name}").into());
+            return;
+        };
         // get DMS for rendering preview
         let Some(cfg) = anc.sign_config(self.sign_config.as_deref()) else {
             return;
         };
-        let Ok(dms) = ntcip::dms::Dms::<24, 32>::builder()
+        let dms = match ntcip::dms::Dms::<24, 32>::builder()
             .with_font_definition(anc.fonts.clone())
             .with_sign_cfg(cfg.sign_cfg())
             .with_vms_cfg(cfg.vms_cfg())
             .with_multi_cfg(cfg.multi_cfg())
-            .build() else
+            .build()
         {
-            return;
+            Ok(dms) => dms,
+            Err(e) => {
+                console::log_1(&format!("build DMS: {e:?}").into());
+                return;
+            }
         };
         let mut lines = Vec::new();
         // where did the input event come from?
@@ -747,7 +755,12 @@ impl Card for Dms {
             .fill(lines.iter().map(|l| &l[..]));
         // render preview image
         let mut buf = Vec::with_capacity(4096);
-        rendzina::render(&mut buf, &dms, &multi, Some(240), Some(80)).unwrap();
+        if let Err(e) =
+            rendzina::render(&mut buf, &dms, &multi, Some(240), Some(80))
+        {
+            console::log_1(&format!("render: {e:?}").into());
+            return;
+        };
         let mut html = String::new();
         html.push_str("<img id='mc_preview' src='data:image/gif;base64,");
         b64enc.encode_string(buf, &mut html);
