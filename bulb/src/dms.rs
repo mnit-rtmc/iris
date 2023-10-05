@@ -21,7 +21,7 @@ use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, OptVal};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use js_sys::{ArrayBuffer, Uint8Array};
 use ntcip::dms::multi::join_text;
-use ntcip::dms::{ifnt, FillablePattern, Font, FontTable, GraphicTable};
+use ntcip::dms::{ifnt, Font, FontTable, GraphicTable, MessagePattern};
 use rendzina::{load_graphic, SignConfig};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -387,7 +387,7 @@ impl DmsAnc {
         html.push_str("<div id='mc_lines' class='column'>");
         if let Some(pat) = pat {
             for (i, (width, font_num)) in
-                FillablePattern::new(dms, &pat.multi).widths().enumerate()
+                MessagePattern::new(dms, &pat.multi).widths().enumerate()
             {
                 if let Some(font) = dms.font_definition().lookup(font_num) {
                     let ln = 1 + i as u16;
@@ -757,7 +757,7 @@ impl Card for Dms {
                 lines.push(line.value());
             }
         }
-        let multi = FillablePattern::new(&dms, &pat.multi)
+        let multi = MessagePattern::new(&dms, &pat.multi)
             .fill(lines.iter().map(|l| &l[..]));
         // render preview image
         let mut buf = Vec::with_capacity(4096);
