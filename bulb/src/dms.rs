@@ -268,9 +268,9 @@ impl AncillaryData for DmsAnc {
                 if uri.as_str().ends_with(".ifnt") {
                     let font: String = serde_wasm_bindgen::from_value(data)?;
                     let font = ifnt::read(font.as_bytes())?;
-                    if let Some(f) = self.fonts.lookup_mut(font.number) {
+                    if let Some(f) = self.fonts.font_mut(font.number) {
                         *f = font;
-                    } else if let Some(f) = self.fonts.lookup_mut(0) {
+                    } else if let Some(f) = self.fonts.font_mut(0) {
                         *f = font;
                     }
                 } else if uri.as_str().ends_with(".gif") {
@@ -282,9 +282,9 @@ impl AncillaryData for DmsAnc {
                         let abuf = data.dyn_into::<ArrayBuffer>().unwrap();
                         let graphic = Uint8Array::new(&abuf).to_vec();
                         let graphic = load_graphic(&graphic[..], number)?;
-                        if let Some(g) = self.graphics.lookup_mut(number) {
+                        if let Some(g) = self.graphics.graphic_mut(number) {
                             *g = graphic;
-                        } else if let Some(g) = self.graphics.lookup_mut(0) {
+                        } else if let Some(g) = self.graphics.graphic_mut(0) {
                             *g = graphic;
                         }
                     } else {
@@ -386,21 +386,27 @@ impl DmsAnc {
         let mut html = String::new();
         html.push_str("<div id='mc_lines' class='column'>");
         if let Some(pat) = pat {
-            for (i, (width, font_num)) in
+            let mut rect_num = 0;
+            for (i, (width, font_num, rn)) in
                 MessagePattern::new(dms, &pat.multi).widths().enumerate()
             {
-                if let Some(font) = dms.font_definition().lookup(font_num) {
-                    let ln = 1 + i as u16;
-                    html.push_str("<select id='mc_line");
-                    html.push_str(&ln.to_string());
-                    html.push_str("'><option></option>");
+                let ln = 1 + i as u16;
+                html.push_str("<select id='mc_line");
+                html.push_str(&ln.to_string());
+                html.push('\'');
+                if rn != rect_num {
+                    html.push_str(" class='mc_line_gap'");
+                    rect_num = rn;
+                }
+                html.push_str("><option></option>");
+                if let Some(font) = dms.font_definition().font(font_num) {
                     for l in &self.lines {
                         if l.msg_pattern == pat.name && ln == l.line {
                             self.append_line(&l.multi, width, font, &mut html)
                         }
                     }
-                    html.push_str("</select>");
                 }
+                html.push_str("</select>");
             }
         }
         html.push_str("</div>");

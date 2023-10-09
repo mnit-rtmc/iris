@@ -329,6 +329,9 @@ button.go_link {
   padding: 0.1rem;
 }
 
+.mc_line_gap {
+  border-top: 2px solid #888;
+}
 #mc_grid {
   display: grid;
   margin: 0.1rem;

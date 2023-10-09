@@ -97,9 +97,9 @@ fn load_fonts(dir: &Path) -> Result<FontTable<24>> {
             File::open(&path).with_context(|| format!("font {path:?}"))?;
         let reader = BufReader::new(file);
         let font = load_font(reader)?;
-        if let Some(f) = fonts.lookup_mut(font.number) {
+        if let Some(f) = fonts.font_mut(font.number) {
             *f = font;
-        } else if let Some(f) = fonts.lookup_mut(0) {
+        } else if let Some(f) = fonts.font_mut(0) {
             *f = font;
         }
     }
@@ -129,9 +129,9 @@ fn load_graphics(dir: &Path) -> Result<GraphicTable<32>> {
                 .with_context(|| format!("load_graphics {path:?}"))?;
             let reader = BufReader::new(file);
             let graphic = load_graphic(reader, number)?;
-            if let Some(g) = graphics.lookup_mut(graphic.number) {
+            if let Some(g) = graphics.graphic_mut(graphic.number) {
                 *g = graphic;
-            } else if let Some(g) = graphics.lookup_mut(0) {
+            } else if let Some(g) = graphics.graphic_mut(0) {
                 *g = graphic;
             }
         }
