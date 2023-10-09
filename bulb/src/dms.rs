@@ -598,19 +598,29 @@ impl Dms {
     /// Build compose pattern HTML
     fn compose_patterns(&self, anc: &DmsAnc) -> Option<String> {
         if anc.compose_patterns.is_empty() {
+            console::log_1(&"patterns empty".into());
             return None;
         }
         let Some(cfg) = anc.sign_config(self.sign_config.as_deref()) else {
+            console::log_1(
+                &format!("sign_cfg not found: {:?}", &self.sign_config).into(),
+            );
             return None;
         };
-        let dms = ntcip::dms::Dms::builder()
+        let dms = match ntcip::dms::Dms::builder()
             .with_font_definition(anc.fonts.clone())
             .with_graphic_definition(anc.graphics.clone())
             .with_sign_cfg(cfg.sign_cfg())
             .with_vms_cfg(cfg.vms_cfg())
             .with_multi_cfg(cfg.multi_cfg())
-            .build()
-            .ok()?;
+            .build() 
+        {
+            Ok(dms) => dms,
+            Err(e) => {
+                console::log_1(&format!("dms build err: {e:?}").into());
+                return None;
+            }
+        };
         let mut html = String::new();
         html.push_str("<div id='mc_grid'>");
         let pat = anc.compose_patterns.first();
@@ -721,11 +731,9 @@ impl Card for Dms {
         let doc = Doc::get();
         // get selected message pattern
         let pat_name = doc.elem::<HtmlSelectElement>("mc_pattern").value();
-        let Some(pat) = anc
-            .compose_patterns
-            .iter()
-            .find(|p| p.name == pat_name) else
-        {
+        let Some(pat) =
+            anc.compose_patterns.iter().find(|p| p.name == pat_name)
+        else {
             console::log_1(&format!("pattern not found: {pat_name}").into());
             return;
         };
