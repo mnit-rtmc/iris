@@ -37,10 +37,10 @@ const MULTI: &'static str = "\
 fn main() {
     let configs = SignConfig::load_all(SIGN_CFGS.as_bytes()).unwrap();
     let mut fonts = FontTable::default();
-    let f = fonts.lookup_mut(0).unwrap();
+    let f = fonts.font_mut(0).unwrap();
     *f = load_font(&include_bytes!("../../fonts/F08.ifnt")[..]).unwrap();
     let mut graphics = GraphicTable::default();
-    let g = graphics.lookup_mut(0).unwrap();
+    let g = graphics.graphic_mut(0).unwrap();
     *g = load_graphic(&include_bytes!("g24.gif")[..], 24).unwrap();
     let config = configs.get("sc_150x56_1").unwrap();
     let dms = Dms::builder()
