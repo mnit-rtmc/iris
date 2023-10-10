@@ -620,25 +620,8 @@ impl Dms {
             console::log_1(&"patterns empty".into());
             return None;
         }
-        let Some(cfg) = anc.sign_config(self.sign_config.as_deref()) else {
-            console::log_1(
-                &format!("sign_cfg not found: {:?}", &self.sign_config).into(),
-            );
+        let Some(dms) = self.make_sign(anc) else {
             return None;
-        };
-        let dms = match ntcip::dms::Dms::builder()
-            .with_font_definition(anc.fonts.clone())
-            .with_graphic_definition(anc.graphics.clone())
-            .with_sign_cfg(cfg.sign_cfg())
-            .with_vms_cfg(cfg.vms_cfg())
-            .with_multi_cfg(cfg.multi_cfg())
-            .build()
-        {
-            Ok(dms) => dms,
-            Err(e) => {
-                console::log_1(&format!("dms build err: {e:?}").into());
-                return None;
-            }
         };
         let mut html = String::new();
         html.push_str("<div id='mc_grid'>");
@@ -680,6 +663,27 @@ impl Dms {
                      size='8' value='{pin}'>\
             </div>"
         )
+    }
+
+    /// Make an ntcip sign
+    fn make_sign(&self, anc: &DmsAnc) -> Option<ntcip::dms::Dms<24, 32>> {
+        let Some(cfg) = anc.sign_config(self.sign_config.as_deref()) else {
+            return None;
+        };
+        match ntcip::dms::Dms::builder()
+            .with_font_definition(anc.fonts.clone())
+            .with_graphic_definition(anc.graphics.clone())
+            .with_sign_cfg(cfg.sign_cfg())
+            .with_vms_cfg(cfg.vms_cfg())
+            .with_multi_cfg(cfg.multi_cfg())
+            .build()
+        {
+            Ok(dms) => Some(dms),
+            Err(e) => {
+                console::log_1(&format!("make_sign: {e:?}").into());
+                None
+            }
+        }
     }
 
     // Get selected message pattern
@@ -773,23 +777,8 @@ impl Card for Dms {
         let Some(pat) = self.selected_pattern(&anc) else {
             return;
         };
-        // get DMS for rendering preview
-        let Some(cfg) = anc.sign_config(self.sign_config.as_deref()) else {
+        let Some(dms) = self.make_sign(&anc) else {
             return;
-        };
-        let dms = match ntcip::dms::Dms::<24, 32>::builder()
-            .with_font_definition(anc.fonts.clone())
-            .with_graphic_definition(anc.graphics.clone())
-            .with_sign_cfg(cfg.sign_cfg())
-            .with_vms_cfg(cfg.vms_cfg())
-            .with_multi_cfg(cfg.multi_cfg())
-            .build()
-        {
-            Ok(dms) => dms,
-            Err(e) => {
-                console::log_1(&format!("build DMS: {e:?}").into());
-                return;
-            }
         };
         let lines = if id == "mc_pattern" {
             // update mc_lines element
