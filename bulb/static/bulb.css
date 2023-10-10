@@ -330,7 +330,7 @@ button.go_link {
 }
 
 .mc_line_gap {
-  border-top: 2px solid #888;
+  margin-top: 3px;
 }
 #mc_grid {
   display: grid;

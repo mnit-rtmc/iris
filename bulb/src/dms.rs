@@ -398,7 +398,7 @@ impl DmsAnc {
                     html.push_str(" class='mc_line_gap'");
                     rect_num = rn;
                 }
-                html.push_str("><option></option>");
+                html.push_str("><option>");
                 if let Some(font) = dms.font_definition().font(font_num) {
                     for l in &self.lines {
                         if l.msg_pattern == pat.name && ln == l.line {
@@ -433,7 +433,6 @@ impl DmsAnc {
                 html.push_str(ms);
                 html.push_str("'>");
                 html.push_str(&join_text(ms, " "));
-                html.push_str("</option>");
                 break;
             } else if let Some(abbrev) = self.abbreviate_text(ms) {
                 line = abbrev;
@@ -527,15 +526,15 @@ impl Dms {
 
     /// Get all item states as html options
     pub fn item_state_options() -> &'static str {
-        "<option value=''>all ↴</option>\
-         <option value='🔹'>🔹 available</option>\
-         <option value='🔶'>🔶 deployed</option>\
-         <option value='🕗'>🕗 planned</option>\
-         <option value='👽'>👽 external</option>\
-         <option value='🎯'>🎯 dedicated</option>\
-         <option value='⚠️'>⚠️ fault</option>\
-         <option value='🔌'>🔌 offline</option>\
-         <option value='🔻'>🔻 disabled</option>"
+        "<option value=''>all ↴\
+         <option value='🔹'>🔹 available\
+         <option value='🔶'>🔶 deployed\
+         <option value='🕗'>🕗 planned\
+         <option value='👽'>👽 external\
+         <option value='🎯'>🎯 dedicated\
+         <option value='⚠️'>⚠️ fault\
+         <option value='🔌'>🔌 offline\
+         <option value='🔻'>🔻 disabled"
     }
 
     /// Get item states
@@ -636,7 +635,6 @@ impl Dms {
         for pat in &anc.compose_patterns {
             html.push_str("<option>");
             html.push_str(&pat.name);
-            html.push_str("</option>");
         }
         html.push_str("</select>");
         html.push_str(&anc.make_lines(&dms, pat));
