@@ -482,7 +482,7 @@ const MSG_LINE_RES: Resource = Resource::Simple(
     "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
       SELECT name, msg_pattern, line, multi, restrict_hashtag \
       FROM iris.msg_line \
-      ORDER BY msg_pattern, line, rank, restrict_hashtag\
+      ORDER BY msg_pattern, line, rank, multi, restrict_hashtag\
     ) r",
 );
 
