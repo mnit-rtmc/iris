@@ -681,6 +681,30 @@ impl Dms {
             </div>"
         )
     }
+
+    // Get selected message pattern
+    fn selected_pattern<'a>(&self, anc: &'a DmsAnc) -> Option<&'a MsgPattern> {
+        let doc = Doc::get();
+        let pat_name = doc.elem::<HtmlSelectElement>("mc_pattern").value();
+        let pat = anc.compose_patterns.iter().find(|p| p.name == pat_name);
+        if pat.is_none() {
+            console::log_1(&format!("pattern not found: {pat_name}").into());
+        }
+        pat
+    }
+
+    // Get selected lines
+    fn selected_lines(&self) -> Vec<String> {
+        let doc = Doc::get();
+        let mut lines = Vec::new();
+        while let Some(line) = doc.try_elem::<HtmlSelectElement>(&format!(
+            "mc_line{}",
+            lines.len() + 1
+        )) {
+            lines.push(line.value());
+        }
+        lines
+    }
 }
 
 impl fmt::Display for Dms {
@@ -746,13 +770,7 @@ impl Card for Dms {
 
     /// Handle input event for an element on the card
     fn handle_input(&self, anc: DmsAnc, id: &str) {
-        let doc = Doc::get();
-        // get selected message pattern
-        let pat_name = doc.elem::<HtmlSelectElement>("mc_pattern").value();
-        let Some(pat) =
-            anc.compose_patterns.iter().find(|p| p.name == pat_name)
-        else {
-            console::log_1(&format!("pattern not found: {pat_name}").into());
+        let Some(pat) = self.selected_pattern(&anc) else {
             return;
         };
         // get DMS for rendering preview
@@ -773,22 +791,15 @@ impl Card for Dms {
                 return;
             }
         };
-        let mut lines = Vec::new();
-        // where did the input event come from?
-        if id == "mc_pattern" {
+        let lines = if id == "mc_pattern" {
             // update mc_lines element
             let html = anc.make_lines(&dms, Some(pat), "");
-            let mc_lines = doc.elem::<HtmlElement>("mc_lines");
+            let mc_lines = Doc::get().elem::<HtmlElement>("mc_lines");
             mc_lines.set_outer_html(&html);
+            Vec::new()
         } else {
-            // get selected lines
-            while let Some(line) = doc.try_elem::<HtmlSelectElement>(&format!(
-                "mc_line{}",
-                lines.len() + 1
-            )) {
-                lines.push(line.value());
-            }
-        }
+            self.selected_lines()
+        };
         let multi = MessagePattern::new(&dms, &pat.multi)
             .fill(lines.iter().map(|l| &l[..]));
         // render preview image
@@ -804,7 +815,7 @@ impl Card for Dms {
         b64enc.encode_string(buf, &mut html);
         html.push_str("'/>");
         // update mc_preview image element
-        let preview = doc.elem::<HtmlElement>("mc_preview");
+        let preview = Doc::get().elem::<HtmlElement>("mc_preview");
         preview.set_outer_html(&html);
     }
 }
