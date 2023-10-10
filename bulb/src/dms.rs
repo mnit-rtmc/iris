@@ -29,6 +29,9 @@ use std::iter::repeat;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{console, HtmlElement, HtmlSelectElement};
 
+/// Ntcip DMS sign
+type Sign = ntcip::dms::Dms<24, 32>;
+
 /// Send button
 const SEND_BUTTON: &str = "<button id='mc_send' type='button'>Send</button>";
 
@@ -381,15 +384,15 @@ impl DmsAnc {
     /// Make line select elements
     fn make_lines(
         &self,
-        dms: &ntcip::dms::Dms<24, 32>,
+        sign: &Sign,
         pat: Option<&MsgPattern>,
         ms_cur: &str,
     ) -> String {
         let mut html = String::new();
         html.push_str("<div id='mc_lines' class='column'>");
         if let Some(pat) = pat {
-            let widths = MessagePattern::new(dms, &pat.multi).widths();
-            let cur_lines = MessagePattern::new(dms, &pat.multi)
+            let widths = MessagePattern::new(sign, &pat.multi).widths();
+            let cur_lines = MessagePattern::new(sign, &pat.multi)
                 .lines(ms_cur)
                 .chain(repeat(""));
             let mut rect_num = 0;
@@ -405,7 +408,7 @@ impl DmsAnc {
                     rect_num = rn;
                 }
                 html.push_str("><option>");
-                if let Some(font) = dms.font_definition().font(font_num) {
+                if let Some(font) = sign.font_definition().font(font_num) {
                     for l in &self.lines {
                         if l.msg_pattern == pat.name && ln == l.line {
                             self.append_line(
@@ -620,14 +623,14 @@ impl Dms {
             console::log_1(&"patterns empty".into());
             return None;
         }
-        let Some(dms) = self.make_sign(anc) else {
+        let Some(sign) = self.make_sign(anc) else {
             return None;
         };
         let mut html = String::new();
         html.push_str("<div id='mc_grid'>");
         let pat = anc.compose_patterns.first();
         if let Some(pat) = pat {
-            render_preview(&mut html, &dms, &pat.multi);
+            render_preview(&mut html, &sign, &pat.multi);
         }
         html.push_str("<select id='mc_pattern'>");
         for pat in &anc.compose_patterns {
@@ -635,7 +638,7 @@ impl Dms {
             html.push_str(&pat.name);
         }
         html.push_str("</select>");
-        html.push_str(&anc.make_lines(&dms, pat, self.current_multi(anc)));
+        html.push_str(&anc.make_lines(&sign, pat, self.current_multi(anc)));
         html.push_str(SEND_BUTTON);
         html.push_str(BLANK_BUTTON);
         html.push_str("</div>");
@@ -661,7 +664,7 @@ impl Dms {
     }
 
     /// Make an ntcip sign
-    fn make_sign(&self, anc: &DmsAnc) -> Option<ntcip::dms::Dms<24, 32>> {
+    fn make_sign(&self, anc: &DmsAnc) -> Option<Sign> {
         let Some(cfg) = anc.sign_config(self.sign_config.as_deref()) else {
             return None;
         };
@@ -673,7 +676,7 @@ impl Dms {
             .with_multi_cfg(cfg.multi_cfg())
             .build()
         {
-            Ok(dms) => Some(dms),
+            Ok(sign) => Some(sign),
             Err(e) => {
                 console::log_1(&format!("make_sign: {e:?}").into());
                 None
@@ -772,36 +775,32 @@ impl Card for Dms {
         let Some(pat) = self.selected_pattern(&anc) else {
             return;
         };
-        let Some(dms) = self.make_sign(&anc) else {
+        let Some(sign) = self.make_sign(&anc) else {
             return;
         };
         let lines = if id == "mc_pattern" {
             // update mc_lines element
-            let html = anc.make_lines(&dms, Some(pat), "");
+            let html = anc.make_lines(&sign, Some(pat), "");
             let mc_lines = Doc::get().elem::<HtmlElement>("mc_lines");
             mc_lines.set_outer_html(&html);
             Vec::new()
         } else {
             self.selected_lines()
         };
-        let multi = MessagePattern::new(&dms, &pat.multi)
+        let multi = MessagePattern::new(&sign, &pat.multi)
             .fill(lines.iter().map(|l| &l[..]));
         // update mc_preview image element
         let mut html = String::new();
-        render_preview(&mut html, &dms, &multi);
+        render_preview(&mut html, &sign, &multi);
         let preview = Doc::get().elem::<HtmlElement>("mc_preview");
         preview.set_outer_html(&html);
     }
 }
 
 /// Render sign preview image
-fn render_preview(
-    html: &mut String,
-    dms: &ntcip::dms::Dms<24, 32>,
-    multi: &str,
-) {
+fn render_preview(html: &mut String, sign: &Sign, multi: &str) {
     let mut buf = Vec::with_capacity(4096);
-    if let Err(e) = rendzina::render(&mut buf, dms, multi, Some(240), Some(80))
+    if let Err(e) = rendzina::render(&mut buf, sign, multi, Some(240), Some(80))
     {
         console::log_1(&format!("render_preview: {e:?}").into());
         return;
