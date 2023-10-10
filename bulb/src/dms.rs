@@ -627,12 +627,7 @@ impl Dms {
         html.push_str("<div id='mc_grid'>");
         let pat = anc.compose_patterns.first();
         if let Some(pat) = pat {
-            let mut buf = Vec::with_capacity(4096);
-            rendzina::render(&mut buf, &dms, &pat.multi, Some(240), Some(80))
-                .unwrap();
-            html.push_str("<img id='mc_preview' src='data:image/gif;base64,");
-            b64enc.encode_string(buf, &mut html);
-            html.push_str("'/>");
+            render_preview(&mut html, &dms, &pat.multi);
         }
         html.push_str("<select id='mc_pattern'>");
         for pat in &anc.compose_patterns {
@@ -791,20 +786,27 @@ impl Card for Dms {
         };
         let multi = MessagePattern::new(&dms, &pat.multi)
             .fill(lines.iter().map(|l| &l[..]));
-        // render preview image
-        let mut buf = Vec::with_capacity(4096);
-        if let Err(e) =
-            rendzina::render(&mut buf, &dms, &multi, Some(240), Some(80))
-        {
-            console::log_1(&format!("render: {e:?}").into());
-            return;
-        };
-        let mut html = String::new();
-        html.push_str("<img id='mc_preview' src='data:image/gif;base64,");
-        b64enc.encode_string(buf, &mut html);
-        html.push_str("'/>");
         // update mc_preview image element
+        let mut html = String::new();
+        render_preview(&mut html, &dms, &multi);
         let preview = Doc::get().elem::<HtmlElement>("mc_preview");
         preview.set_outer_html(&html);
     }
+}
+
+/// Render sign preview image
+fn render_preview(
+    html: &mut String,
+    dms: &ntcip::dms::Dms<24, 32>,
+    multi: &str,
+) {
+    let mut buf = Vec::with_capacity(4096);
+    if let Err(e) = rendzina::render(&mut buf, dms, multi, Some(240), Some(80))
+    {
+        console::log_1(&format!("render_preview: {e:?}").into());
+        return;
+    };
+    html.push_str("<img id='mc_preview' src='data:image/gif;base64,");
+    b64enc.encode_string(buf, html);
+    html.push_str("'/>");
 }
