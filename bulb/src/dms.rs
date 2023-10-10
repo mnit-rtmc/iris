@@ -25,6 +25,7 @@ use ntcip::dms::{ifnt, Font, FontTable, GraphicTable, MessagePattern};
 use rendzina::{load_graphic, SignConfig};
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use std::iter::repeat;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{console, HtmlElement, HtmlSelectElement};
 
@@ -382,13 +383,18 @@ impl DmsAnc {
         &self,
         dms: &ntcip::dms::Dms<24, 32>,
         pat: Option<&MsgPattern>,
+        ms_cur: &str,
     ) -> String {
         let mut html = String::new();
         html.push_str("<div id='mc_lines' class='column'>");
         if let Some(pat) = pat {
+            let widths = MessagePattern::new(dms, &pat.multi).widths();
+            let cur_lines = MessagePattern::new(dms, &pat.multi)
+                .lines(ms_cur)
+                .chain(repeat(""));
             let mut rect_num = 0;
-            for (i, (width, font_num, rn)) in
-                MessagePattern::new(dms, &pat.multi).widths().enumerate()
+            for (i, ((width, font_num, rn), cur_line)) in
+                widths.zip(cur_lines).enumerate()
             {
                 let ln = 1 + i as u16;
                 html.push_str("<select id='mc_line");
@@ -402,7 +408,9 @@ impl DmsAnc {
                 if let Some(font) = dms.font_definition().font(font_num) {
                     for l in &self.lines {
                         if l.msg_pattern == pat.name && ln == l.line {
-                            self.append_line(&l.multi, width, font, &mut html)
+                            self.append_line(
+                                &l.multi, width, font, cur_line, &mut html,
+                            )
                         }
                     }
                 }
@@ -419,6 +427,7 @@ impl DmsAnc {
         multi: &str,
         width: u16,
         font: &Font,
+        cur_line: &str,
         html: &mut String,
     ) {
         // FIXME: handle line-allowed MULTI tags
@@ -431,7 +440,11 @@ impl DmsAnc {
             if w <= width {
                 html.push_str("<option value='");
                 html.push_str(ms);
-                html.push_str("'>");
+                if ms == cur_line {
+                    html.push_str("' selected>");
+                } else {
+                    html.push_str("'>");
+                }
                 html.push_str(&join_text(ms, " "));
                 break;
             } else if let Some(abbrev) = self.abbreviate_text(ms) {
@@ -493,6 +506,13 @@ const DEDICATED: &[&str] = &[
 
 impl Dms {
     pub const RESOURCE_N: &'static str = "dms";
+
+    /// Get multi of current message
+    fn current_multi<'a>(&'a self, anc: &'a DmsAnc) -> &'a str {
+        anc.sign_message(self.msg_current.as_deref())
+            .map(|m| &m.multi[..])
+            .unwrap_or("")
+    }
 
     /// Check if DMS has a given hashtag
     fn has_hashtag(&self, hashtag: &str) -> bool {
@@ -612,7 +632,7 @@ impl Dms {
             .with_sign_cfg(cfg.sign_cfg())
             .with_vms_cfg(cfg.vms_cfg())
             .with_multi_cfg(cfg.multi_cfg())
-            .build() 
+            .build()
         {
             Ok(dms) => dms,
             Err(e) => {
@@ -637,7 +657,7 @@ impl Dms {
             html.push_str(&pat.name);
         }
         html.push_str("</select>");
-        html.push_str(&anc.make_lines(&dms, pat));
+        html.push_str(&anc.make_lines(&dms, pat, self.current_multi(anc)));
         html.push_str(SEND_BUTTON);
         html.push_str(BLANK_BUTTON);
         html.push_str("</div>");
@@ -757,7 +777,7 @@ impl Card for Dms {
         // where did the input event come from?
         if id == "mc_pattern" {
             // update mc_lines element
-            let html = anc.make_lines(&dms, Some(pat));
+            let html = anc.make_lines(&dms, Some(pat), "");
             let mc_lines = doc.elem::<HtmlElement>("mc_lines");
             mc_lines.set_outer_html(&html);
         } else {

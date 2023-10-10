@@ -360,7 +360,7 @@ impl Controller {
                     HtmlStr::new(m).with_len(32),
                 )
             })
-            .unwrap_or_else(|| "".to_string());
+            .unwrap_or_default();
         let version = self
             .version()
             .map(|v| {
@@ -372,7 +372,7 @@ impl Controller {
                     HtmlStr::new(v).with_len(32),
                 )
             })
-            .unwrap_or_else(|| "".to_string());
+            .unwrap_or_default();
         let serial_num = self
             .serial_num()
             .map(|sn| {
@@ -384,7 +384,7 @@ impl Controller {
                     HtmlStr::new(sn).with_len(32),
                 )
             })
-            .unwrap_or_else(|| "".to_string());
+            .unwrap_or_default();
         let fail_time = match &self.fail_time {
             Some(fail_time) => {
                 format!(
