@@ -63,7 +63,8 @@ struct SignMessage {
 
 /// Data needed for rendering sign messages
 struct MsgData {
-    dms: Dms<24, 32>,
+    fonts: FontTable<24>,
+    graphics: GraphicTable<32>,
     configs: HashMap<String, SignConfig>,
 }
 
@@ -143,10 +144,8 @@ impl MsgData {
     /// Load message data from a file path
     fn load(dir: &Path) -> Result<Self> {
         log::debug!("MsgData::load");
-        let dms = Dms::builder()
-            .with_font_definition(load_fonts(dir)?)
-            .with_graphic_definition(load_graphics(dir)?)
-            .build()?;
+        let fonts = load_fonts(dir)?;
+        let graphics = load_graphics(dir)?;
         let mut path = PathBuf::new();
         path.push(dir);
         path.push("api");
@@ -155,7 +154,11 @@ impl MsgData {
             File::open(&path).with_context(|| format!("load {path:?}"))?,
         );
         let configs = SignConfig::load_all(reader)?;
-        Ok(MsgData { dms, configs })
+        Ok(MsgData {
+            fonts,
+            graphics,
+            configs,
+        })
     }
 
     /// Lookup a config
@@ -177,17 +180,14 @@ impl MsgData {
         let t = Instant::now();
         let writer = file.writer()?;
         let cfg = self.config(msg)?;
-        self.dms = self
-            .dms
-            .clone()
-            .into_builder()
+        let dms = Dms::builder()
+            .with_font_definition(self.fonts.clone())
+            .with_graphic_definition(self.graphics.clone())
             .with_sign_cfg(cfg.sign_cfg())
             .with_vms_cfg(cfg.vms_cfg())
             .with_multi_cfg(cfg.multi_cfg())
             .build()?;
-        if let Err(e) =
-            rendzina::render(writer, &self.dms, &msg.multi, None, None)
-        {
+        if let Err(e) = rendzina::render(writer, &dms, &msg.multi, None, None) {
             log::warn!("{:?}, multi={} {e:?}", file.path(), msg.multi);
             file.cancel()?;
             return Ok(());
