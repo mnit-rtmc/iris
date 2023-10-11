@@ -72,6 +72,42 @@ impl Uri {
     pub fn as_str(&self) -> &str {
         self.cow.borrow()
     }
+
+    /// Fetch using "GET" method
+    pub async fn get(&self) -> Result<JsValue> {
+        let resp = get_response(self).await.map_err(|e| {
+            console::log_1(&e);
+            Error::FetchRequest()
+        })?;
+        resp_status(resp.status())?;
+        match self.content_type {
+            ContentType::Json => wait_promise(resp.json()).await,
+            ContentType::Text => wait_promise(resp.text()).await,
+            ContentType::Gif => {
+                let blob = wait_promise(resp.blob()).await?;
+                let blob = blob.dyn_into::<Blob>().unwrap();
+                wait_promise(Ok(blob.array_buffer())).await
+            }
+        }
+    }
+
+    /// Fetch using "PATCH" method
+    pub async fn patch(&self, json: &JsValue) -> Result<()> {
+        let resp = perform_fetch("PATCH", self.as_str(), Some(json)).await?;
+        resp_status(resp.status())
+    }
+
+    /// Fetch using "POST" method
+    pub async fn post(&self, json: &JsValue) -> Result<()> {
+        let resp = perform_fetch("POST", self.as_str(), Some(json)).await?;
+        resp_status(resp.status())
+    }
+
+    /// Fetch using "DELETE" method
+    pub async fn delete(&self) -> Result<()> {
+        let resp = perform_fetch("DELETE", self.as_str(), None).await?;
+        resp_status(resp.status())
+    }
 }
 
 /// Fetch a GET response
@@ -81,28 +117,6 @@ async fn get_response(uri: &Uri) -> std::result::Result<Response, JsValue> {
     req.headers().set("Accept", uri.content_type.as_str())?;
     let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
     Ok(resp.dyn_into::<Response>().unwrap_throw())
-}
-
-/// Fetch a GET request
-pub async fn get<U>(uri: U) -> Result<JsValue>
-where
-    U: Into<Uri>,
-{
-    let uri = uri.into();
-    let resp = get_response(&uri).await.map_err(|e| {
-        console::log_1(&e);
-        Error::FetchRequest()
-    })?;
-    resp_status(resp.status())?;
-    match uri.content_type {
-        ContentType::Json => wait_promise(resp.json()).await,
-        ContentType::Text => wait_promise(resp.text()).await,
-        ContentType::Gif => {
-            let blob = wait_promise(resp.blob()).await?;
-            let blob = blob.dyn_into::<Blob>().unwrap();
-            wait_promise(Ok(blob.array_buffer())).await
-        }
-    }
 }
 
 /// Wait for a JS promise
@@ -154,34 +168,4 @@ fn resp_status(sc: u16) -> Result<()> {
         422 => Err(Error::FetchResponseUnprocessable()),
         _ => Err(Error::FetchResponseOther(sc)),
     }
-}
-
-/// Fetch a PATCH request
-pub async fn patch<U>(uri: U, json: &JsValue) -> Result<()>
-where
-    U: Into<Uri>,
-{
-    let uri = uri.into();
-    let resp = perform_fetch("PATCH", uri.as_str(), Some(json)).await?;
-    resp_status(resp.status())
-}
-
-/// Fetch a POST request
-pub async fn post<U>(uri: U, json: &JsValue) -> Result<()>
-where
-    U: Into<Uri>,
-{
-    let uri = uri.into();
-    let resp = perform_fetch("POST", uri.as_str(), Some(json)).await?;
-    resp_status(resp.status())
-}
-
-/// Fetch a DELETE request
-pub async fn delete<U>(uri: U) -> Result<()>
-where
-    U: Into<Uri>,
-{
-    let uri = uri.into();
-    let resp = perform_fetch("DELETE", uri.as_str(), None).await?;
-    resp_status(resp.status())
 }

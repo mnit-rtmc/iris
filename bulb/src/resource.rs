@@ -20,7 +20,7 @@ use crate::controller::Controller;
 use crate::detector::Detector;
 use crate::dms::Dms;
 use crate::error::{Error, Result};
-use crate::fetch::{self, Uri};
+use crate::fetch::Uri;
 use crate::flowstream::FlowStream;
 use crate::gatearm::GateArm;
 use crate::gatearmarray::GateArmArray;
@@ -318,8 +318,7 @@ impl Resource {
 
     /// Delete a resource by name
     pub async fn delete(self, name: &str) -> Result<()> {
-        let uri = self.uri_name(name);
-        fetch::delete(uri).await
+        Uri::from(self.uri_name(name)).delete().await
     }
 
     /// Lookup resource symbol
@@ -490,8 +489,8 @@ impl Resource {
     pub async fn save(self, name: &str) -> Result<()> {
         let changed = self.fetch_changed(name).await?;
         if !changed.is_empty() {
-            let uri = self.uri_name(name);
-            fetch::patch(uri, &changed.into()).await?;
+            let uri = Uri::from(self.uri_name(name));
+            uri.patch(&changed.into()).await?;
         }
         Ok(())
     }
@@ -545,8 +544,8 @@ impl Resource {
             Resource::Permission => Permission::create_value(&doc)?,
             _ => self.create_value(&doc)?,
         };
-        let json = value.into();
-        fetch::post(format!("/iris/api/{}", self.rname()), &json).await?;
+        let uri = Uri::from(format!("/iris/api/{}", self.rname()));
+        uri.post(&value.into()).await?;
         Ok(())
     }
 
@@ -562,8 +561,7 @@ impl Resource {
 
     /// Fetch primary JSON resource
     async fn fetch_primary<C: Card>(self, name: &str) -> Result<C> {
-        let uri = self.uri_name(name);
-        let json = fetch::get(uri).await?;
+        let json = Uri::from(self.uri_name(name)).get().await?;
         C::new(json)
     }
 
@@ -645,7 +643,7 @@ async fn fetch_list<C: Card>(
     config: bool,
 ) -> Result<String> {
     let rname = res.rname();
-    let json = fetch::get(format!("/iris/api/{rname}")).await?;
+    let json = Uri::from(format!("/iris/api/{rname}")).get().await?;
     let search = Search::new(search);
     let mut html = String::new();
     html.push_str("<ul class='cards'>");
@@ -680,7 +678,7 @@ async fn fetch_ancillary<C: Card>(view: View, pri: &C) -> Result<C::Ancillary> {
     while more {
         more = false;
         for uri in anc.uri_iter(pri, view) {
-            match fetch::get(uri.clone()).await {
+            match uri.get().await {
                 Ok(data) => {
                     if anc.set_data(pri, uri, data)? {
                         more = true;
@@ -712,8 +710,8 @@ async fn handle_click<C: Card>(
     let pri = res.fetch_primary::<C>(name).await?;
     let changed = pri.click_changed(id);
     if !changed.is_empty() {
-        let uri = res.uri_name(name);
-        fetch::patch(uri, &changed.into()).await?;
+        let uri = Uri::from(res.uri_name(name));
+        uri.patch(&changed.into()).await?;
     }
     Ok(true)
 }

@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::error::{Error, Result};
-use crate::fetch;
+use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::permission::permissions_html;
 use crate::resource::{Resource, View};
@@ -414,7 +414,7 @@ async fn fill_resource_select() {
 
 /// Fetch permission access list
 async fn fetch_access_list(config: bool) -> Result<String> {
-    let json = fetch::get("/iris/api/access").await?;
+    let json = Uri::from("/iris/api/access").get().await?;
     let permissions = serde_wasm_bindgen::from_value(json)?;
     Ok(permissions_html(permissions, config))
 }
@@ -593,9 +593,9 @@ async fn handle_login() {
         doc.input_parse::<String>("login_user"),
         doc.input_parse::<String>("login_pass"),
     ) {
+        let uri = Uri::from("/iris/api/login");
         let js = format!("{{\"username\":\"{user}\",\"password\":\"{pass}\"}}");
-        let js = js.into();
-        match fetch::post("/iris/api/login", &js).await {
+        match uri.post(&js.into()).await {
             Ok(_) => {
                 let pass = doc.elem::<HtmlInputElement>("login_pass");
                 pass.set_value("");
