@@ -813,7 +813,15 @@ impl Card for Dms {
                         let uri = Uri::from("/iris/api/sign_message");
                         let name = "usr_test1234".to_string();
                         let mut obj = Map::new();
-                        obj.insert("name".to_string(), Value::String(name));
+                        obj.insert("name".to_string(), name.into());
+                        obj.insert("sign_config".to_string(), cfg[..].into());
+                        obj.insert("multi".to_string(), ms.into());
+                        obj.insert(
+                            "msg_owner".to_string(),
+                            "IRIS; operator; testuser".into(),
+                        );
+                        obj.insert("flash_beacon".to_string(), false.into());
+                        obj.insert("msg_priority".to_string(), HIGH_1.into());
                         let val = Value::Object(obj).to_string();
                         actions.push(Action::Post(uri, val.into()));
                         // FIXME: create "PATCH" action to update msg_current
