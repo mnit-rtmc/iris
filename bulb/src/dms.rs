@@ -12,7 +12,7 @@
 //
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
-use crate::fetch::{ContentType, Uri};
+use crate::fetch::{Action, ContentType, Uri};
 use crate::item::{ItemState, ItemStates};
 use crate::resource::{
     AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
@@ -24,6 +24,7 @@ use ntcip::dms::multi::join_text;
 use ntcip::dms::{ifnt, Font, FontTable, GraphicTable, MessagePattern};
 use rendzina::{load_graphic, SignConfig};
 use serde::{Deserialize, Serialize};
+use serde_json::{Map, Value};
 use std::fmt;
 use std::iter::repeat;
 use wasm_bindgen::{JsCast, JsValue};
@@ -31,6 +32,9 @@ use web_sys::{console, HtmlElement, HtmlSelectElement};
 
 /// Ntcip DMS sign
 type Sign = ntcip::dms::Dms<24, 32>;
+
+/// High 1 message priority
+const HIGH_1: u32 = 11;
 
 /// Send button
 const SEND_BUTTON: &str = "<button id='mc_send' type='button'>Send</button>";
@@ -360,6 +364,19 @@ impl SignMessage {
 
 impl DmsAnc {
     /// Find a sign message
+    fn find_sign_msg(
+        &self,
+        cfg: &str,
+        ms: &str,
+        mp: u32,
+    ) -> Option<&SignMessage> {
+        // FIXME: check incident, flash_beacon, src and duration
+        self.messages.iter().find(|m| {
+            m.sign_config == cfg && m.multi == ms && m.msg_priority == mp
+        })
+    }
+
+    /// Get a sign message by name
     fn sign_message(&self, msg: Option<&str>) -> Option<&SignMessage> {
         msg.and_then(|msg| self.messages.iter().find(|m| m.name == msg))
     }
@@ -707,6 +724,16 @@ impl Dms {
         }
         lines
     }
+
+    /// Get selected MULTI message
+    fn selected_multi(&self, anc: &DmsAnc) -> Option<String> {
+        let pat = self.selected_pattern(anc)?;
+        let sign = self.make_sign(anc)?;
+        let lines = self.selected_lines();
+        let multi = MessagePattern::new(&sign, &pat.multi)
+            .fill(lines.iter().map(|l| &l[..]));
+        Some(multi)
+    }
 }
 
 impl fmt::Display for Dms {
@@ -768,6 +795,37 @@ impl Card for Dms {
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
         fields.into_value().to_string()
+    }
+
+    /// Handle click event for a button on the card
+    fn handle_click(&self, anc: DmsAnc, id: &str, _uri: Uri) -> Vec<Action> {
+        let mut actions = Vec::with_capacity(2);
+        let Some(cfg) = &self.sign_config else {
+            return actions;
+        };
+        if id == "mc_send" {
+            if let Some(ms) = self.selected_multi(&anc) {
+                match anc.find_sign_msg(cfg, &ms, HIGH_1) {
+                    Some(_sc) => {
+                        // FIXME: create "PATCH" action to update msg_current
+                    }
+                    None => {
+                        let uri = Uri::from("/iris/api/sign_message");
+                        let name = "usr_test1234".to_string();
+                        let mut obj = Map::new();
+                        obj.insert("name".to_string(), Value::String(name));
+                        let val = Value::Object(obj).to_string();
+                        actions.push(Action::Post(uri, val.into()));
+                        // FIXME: create "PATCH" action to update msg_current
+                    }
+                }
+            }
+        } else if id == "mc_blank" {
+            // FIXME: find existing blank sign message for this config
+            //        if new, create "POST" action to create it
+            //        then, create "PATCH" action to update msg_current
+        }
+        actions
     }
 
     /// Handle input event for an element on the card

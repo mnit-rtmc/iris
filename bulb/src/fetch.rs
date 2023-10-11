@@ -18,11 +18,26 @@ use wasm_bindgen_futures::JsFuture;
 use web_sys::{console, Blob, Request, RequestInit, Response};
 
 /// Fetchable content types
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum ContentType {
     Json,
     Text,
     Gif,
+}
+
+/// Uniform resource identifier
+#[derive(Clone, Debug)]
+pub struct Uri {
+    cow: Cow<'static, str>,
+    content_type: ContentType,
+}
+
+/// Fetch action
+pub enum Action {
+    Patch(Uri, JsValue),
+    Post(Uri, JsValue),
+    #[allow(dead_code)]
+    Delete(Uri),
 }
 
 impl ContentType {
@@ -34,13 +49,6 @@ impl ContentType {
             ContentType::Gif => "image/gif",
         }
     }
-}
-
-/// Uniform resource identifier
-#[derive(Clone, Debug)]
-pub struct Uri {
-    cow: Cow<'static, str>,
-    content_type: ContentType,
 }
 
 impl From<String> for Uri {
@@ -167,5 +175,16 @@ fn resp_status(sc: u16) -> Result<()> {
         409 => Err(Error::FetchResponseConflict()),
         422 => Err(Error::FetchResponseUnprocessable()),
         _ => Err(Error::FetchResponseOther(sc)),
+    }
+}
+
+impl Action {
+    /// Perform fetch action
+    pub async fn perform(&self) -> Result<()> {
+        match self {
+            Action::Patch(uri, val) => uri.patch(val).await,
+            Action::Post(uri, val) => uri.post(val).await,
+            Action::Delete(uri) => uri.delete().await,
+        }
     }
 }

@@ -20,7 +20,7 @@ use crate::controller::Controller;
 use crate::detector::Detector;
 use crate::dms::Dms;
 use crate::error::{Error, Result};
-use crate::fetch::Uri;
+use crate::fetch::{Action, Uri};
 use crate::flowstream::FlowStream;
 use crate::gatearm::GateArm;
 use crate::gatearmarray::GateArmArray;
@@ -202,8 +202,13 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     fn changed_fields(&self) -> String;
 
     /// Handle click event for a button on the card
-    fn click_changed(&self, _id: &str) -> String {
-        "".into()
+    fn handle_click(
+        &self,
+        _anc: Self::Ancillary,
+        _id: &str,
+        _uri: Uri,
+    ) -> Vec<Action> {
+        Vec::new()
     }
 
     /// Handle input event for an element on the card
@@ -609,7 +614,9 @@ impl Resource {
     /// Handle click event for a button owned by the resource
     pub async fn handle_click(self, name: &str, id: &str) -> Result<bool> {
         match self {
-            Self::Beacon => handle_click::<Beacon>(self, name, id).await,
+            Self::Beacon | Self::Dms => {
+                handle_click::<Beacon>(self, name, id).await
+            }
             _ => Ok(false),
         }
     }
@@ -708,10 +715,10 @@ async fn handle_click<C: Card>(
     id: &str,
 ) -> Result<bool> {
     let pri = res.fetch_primary::<C>(name).await?;
-    let changed = pri.click_changed(id);
-    if !changed.is_empty() {
-        let uri = Uri::from(res.uri_name(name));
-        uri.patch(&changed.into()).await?;
+    let anc = fetch_ancillary(View::Status(false), &pri).await?;
+    let uri = Uri::from(res.uri_name(name));
+    for action in pri.handle_click(anc, id, uri) {
+        action.perform().await?;
     }
     Ok(true)
 }

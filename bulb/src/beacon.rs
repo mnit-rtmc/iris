@@ -12,7 +12,7 @@
 //
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
-use crate::fetch::Uri;
+use crate::fetch::{Action, Uri};
 use crate::item::{ItemState, ItemStates};
 use crate::resource::{
     disabled_attr, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
@@ -285,7 +285,7 @@ impl Card for Beacon {
     }
 
     /// Handle click event for a button on the card
-    fn click_changed(&self, id: &str) -> String {
+    fn handle_click(&self, _anc: BeaconAnc, id: &str, uri: Uri) -> Vec<Action> {
         if id == "ob_flashing" {
             let mut fields = Fields::new();
             match self.state {
@@ -295,9 +295,10 @@ impl Card for Beacon {
                 4 | 5 => fields.insert_num("state", 1),
                 _ => (),
             }
-            fields.into_value().to_string()
+            let val = fields.into_value().to_string();
+            vec![Action::Patch(uri, val.into())]
         } else {
-            "".into()
+            Vec::new()
         }
     }
 }

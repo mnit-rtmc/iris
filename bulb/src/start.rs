@@ -387,10 +387,10 @@ async fn add_sidebar() -> JsResult<()> {
     let doc = Doc(doc);
     let sidebar: HtmlElement = doc.elem("sidebar");
     sidebar.set_inner_html(SIDEBAR);
-    add_change_event_listener(&doc.elem("sb_config"))?;
-    add_click_event_listener(&sidebar)?;
-    add_input_event_listener(&sidebar)?;
-    add_transition_event_listener(&doc.elem("sb_list"))?;
+    add_change_listener(&doc.elem("sb_config"))?;
+    add_click_listener(&sidebar)?;
+    add_input_listener(&sidebar)?;
+    add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window).unwrap_throw();
     fill_resource_select().await;
     Ok(())
@@ -432,7 +432,7 @@ fn handle_sb_resource_ev(rname: String) {
 }
 
 /// Add a "change" event listener to an element
-fn add_change_event_listener(elem: &HtmlInputElement) -> JsResult<()> {
+fn add_change_listener(elem: &HtmlInputElement) -> JsResult<()> {
     let closure = Closure::wrap(Box::new(|_e: Event| {
         spawn_local(reload_resources());
     }) as Box<dyn Fn(_)>);
@@ -466,10 +466,10 @@ fn search_value() -> String {
 }
 
 /// Add an "input" event listener to an element
-fn add_input_event_listener(elem: &Element) -> JsResult<()> {
+fn add_input_listener(elem: &Element) -> JsResult<()> {
     let closure = Closure::wrap(Box::new(|e: Event| {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
-        handle_input_event(target);
+        handle_input_ev(target);
     }) as Box<dyn Fn(_)>);
     elem.add_event_listener_with_callback(
         "input",
@@ -481,7 +481,7 @@ fn add_input_event_listener(elem: &Element) -> JsResult<()> {
 }
 
 /// Handle an "input" event
-fn handle_input_event(target: Element) {
+fn handle_input_ev(target: Element) {
     let id = target.id();
     match id.as_str() {
         "sb_search" | "sb_state" => search_list(),
@@ -507,7 +507,7 @@ async fn handle_input_card(id: String, cs: SelectedCard) {
 }
 
 /// Add a `click` event listener to an element
-fn add_click_event_listener(elem: &Element) -> JsResult<()> {
+fn add_click_listener(elem: &Element) -> JsResult<()> {
     let closure = Closure::wrap(Box::new(|e: Event| {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
         handle_click_ev(&target);
@@ -623,7 +623,7 @@ async fn go_resource(attrs: ButtonAttrs) {
 }
 
 /// Add transition event listener to an element
-fn add_transition_event_listener(elem: &Element) -> JsResult<()> {
+fn add_transition_listener(elem: &Element) -> JsResult<()> {
     let closure =
         Closure::wrap(Box::new(handle_transition_ev) as Box<dyn FnMut(_)>);
     elem.add_event_listener_with_callback(
