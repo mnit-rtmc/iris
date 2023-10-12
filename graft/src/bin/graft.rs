@@ -600,6 +600,16 @@ async fn sonar_object_post2(
         Some(Value::String(name)) => {
             let nm = make_name(res, name)?;
             let mut c = connection(&req).await?;
+            // first, set attributes on phantom object
+            for (key, value) in obj.iter() {
+                let key = &key[..];
+                if key != "name" {
+                    let anm = make_att(res, &nm, key)?;
+                    let value = att_value(value)?;
+                    log::debug!("{anm} = {value} (phantom)");
+                    c.update_object(&anm, &value).await?;
+                }
+            }
             log::debug!("creating {nm}");
             c.create_object(&nm).await?;
             Ok(())
