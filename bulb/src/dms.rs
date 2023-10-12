@@ -19,19 +19,23 @@ use crate::resource::{
 };
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, OptVal};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
+use fnv::FnvHasher;
 use js_sys::{ArrayBuffer, Uint8Array};
 use ntcip::dms::multi::join_text;
 use ntcip::dms::{ifnt, Font, FontTable, GraphicTable, MessagePattern};
 use rendzina::{load_graphic, SignConfig};
 use serde::{Deserialize, Serialize};
-use serde_json::{Map, Value};
 use std::fmt;
+use std::hash::{Hash, Hasher};
 use std::iter::repeat;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{console, HtmlElement, HtmlSelectElement};
 
 /// Ntcip DMS sign
 type Sign = ntcip::dms::Dms<24, 32>;
+
+/// Low 1 message priority
+const LOW_1: u32 = 1;
 
 /// High 1 message priority
 const HIGH_1: u32 = 11;
@@ -107,15 +111,17 @@ pub struct Dms {
 }
 
 /// Sign Message
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Hash, Deserialize, Serialize)]
 pub struct SignMessage {
     pub name: String,
     pub sign_config: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub incident: Option<String>,
     pub multi: String,
     pub msg_owner: String,
     pub flash_beacon: bool,
     pub msg_priority: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub duration: Option<u32>,
 }
 
@@ -735,6 +741,48 @@ impl Dms {
             .fill(lines.iter().map(|l| &l[..]));
         Some(multi)
     }
+
+    /// Create actions to handle click on "Send" button
+    fn send_actions(&self, anc: DmsAnc) -> Vec<Action> {
+        let Some(cfg) = &self.sign_config else {
+            return Vec::new();
+        };
+        let mut actions = Vec::with_capacity(2);
+        if let Some(ms) = self.selected_multi(&anc) {
+            match anc.find_sign_msg(cfg, &ms, HIGH_1) {
+                Some(_sm) => {
+                    // FIXME: create "PATCH" action to update msg_user
+                }
+                None => {
+                    let val = sign_message_post(cfg, &ms, HIGH_1);
+                    let uri = Uri::from("/iris/api/sign_message");
+                    actions.push(Action::Post(uri, val.into()));
+                    // FIXME: create "PATCH" action to update msg_user
+                }
+            }
+        }
+        actions
+    }
+
+    /// Create actions to handle click on "Blank" button
+    fn blank_actions(&self, anc: DmsAnc) -> Vec<Action> {
+        let Some(cfg) = &self.sign_config else {
+            return Vec::new();
+        };
+        let mut actions = Vec::with_capacity(2);
+        match anc.find_sign_msg(cfg, "", LOW_1) {
+            Some(_sm) => {
+                // FIXME: create "PATCH" action to update msg_user
+            }
+            None => {
+                let val = sign_message_post(cfg, "", LOW_1);
+                let uri = Uri::from("/iris/api/sign_message");
+                actions.push(Action::Post(uri, val.into()));
+                // FIXME: create "PATCH" action to update msg_user
+            }
+        }
+        actions
+    }
 }
 
 impl fmt::Display for Dms {
@@ -800,41 +848,13 @@ impl Card for Dms {
 
     /// Handle click event for a button on the card
     fn handle_click(&self, anc: DmsAnc, id: &str, _uri: Uri) -> Vec<Action> {
-        let mut actions = Vec::with_capacity(2);
-        let Some(cfg) = &self.sign_config else {
-            return actions;
-        };
         if id == "mc_send" {
-            if let Some(ms) = self.selected_multi(&anc) {
-                match anc.find_sign_msg(cfg, &ms, HIGH_1) {
-                    Some(_sc) => {
-                        // FIXME: create "PATCH" action to update msg_current
-                    }
-                    None => {
-                        let uri = Uri::from("/iris/api/sign_message");
-                        let name = "usr_test1234".to_string();
-                        let mut obj = Map::new();
-                        obj.insert("name".to_string(), name.into());
-                        obj.insert("sign_config".to_string(), cfg[..].into());
-                        obj.insert("multi".to_string(), ms.into());
-                        obj.insert(
-                            "msg_owner".to_string(),
-                            "IRIS; operator; testuser".into(),
-                        );
-                        obj.insert("flash_beacon".to_string(), false.into());
-                        obj.insert("msg_priority".to_string(), HIGH_1.into());
-                        let val = Value::Object(obj).to_string();
-                        actions.push(Action::Post(uri, val.into()));
-                        // FIXME: create "PATCH" action to update msg_current
-                    }
-                }
-            }
+            self.send_actions(anc)
         } else if id == "mc_blank" {
-            // FIXME: find existing blank sign message for this config
-            //        if new, create "POST" action to create it
-            //        then, create "PATCH" action to update msg_current
+            self.blank_actions(anc)
+        } else {
+            Vec::new()
         }
-        actions
     }
 
     /// Handle input event for an element on the card
@@ -862,6 +882,26 @@ impl Card for Dms {
         let preview = Doc::get().elem::<HtmlElement>("mc_preview");
         preview.set_outer_html(&html);
     }
+}
+
+/// Make a sign message POST string
+fn sign_message_post(cfg: &str, ms: &str, priority: u32) -> String {
+    let owner = "IRIS; operator; testuser".to_string();
+    let mut sign_message = SignMessage {
+        name: "usr_".to_string(),
+        sign_config: cfg.to_string(),
+        incident: None,
+        multi: ms.to_string(),
+        msg_owner: owner,
+        flash_beacon: false,
+        msg_priority: priority,
+        duration: None,
+    };
+    let mut hasher = FnvHasher::default();
+    sign_message.hash(&mut hasher);
+    let hash = hasher.finish() as u32;
+    sign_message.name = format!("usr_{hash:08X}");
+    serde_json::to_string(&sign_message).unwrap()
 }
 
 /// Render sign preview image

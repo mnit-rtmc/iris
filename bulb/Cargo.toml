@@ -9,6 +9,7 @@ crate-type = ["cdylib"]
 [dependencies]
 base64 = "0.21"
 console_error_panic_hook = "0.1"
+fnv = "1.0"
 humantime = "2.1"
 js-sys = "0.3"
 mag = "0.5"
