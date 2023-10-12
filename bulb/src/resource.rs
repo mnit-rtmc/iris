@@ -614,9 +614,8 @@ impl Resource {
     /// Handle click event for a button owned by the resource
     pub async fn handle_click(self, name: &str, id: &str) -> Result<bool> {
         match self {
-            Self::Beacon | Self::Dms => {
-                handle_click::<Beacon>(self, name, id).await
-            }
+            Self::Beacon => handle_click::<Beacon>(self, name, id).await,
+            Self::Dms => handle_click::<Dms>(self, name, id).await,
             _ => Ok(false),
         }
     }

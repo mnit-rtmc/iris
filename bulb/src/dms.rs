@@ -647,6 +647,7 @@ impl Dms {
         html.push_str("<div id='mc_grid'>");
         let pat = anc.compose_patterns.first();
         if let Some(pat) = pat {
+            // FIXME: if current_multi fits pattern, use it instaed
             render_preview(&mut html, &sign, &pat.multi);
         }
         html.push_str("<select id='mc_pattern'>");
