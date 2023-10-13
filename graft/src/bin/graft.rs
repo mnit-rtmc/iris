@@ -533,16 +533,14 @@ fn make_name(res: &'static str, nm: &str) -> Result<String> {
 fn make_att(res: &'static str, nm: &str, att: &str) -> Result<String> {
     if att.len() > 64 || att.contains(invalid_char) || att.contains('/') {
         Err(SonarError::InvalidName)
+    } else if res == "controller" && att == "drop_id" {
+        Ok(format!("{nm}/drop"))
+    } else if res == "sign_message" {
+        // sign_message attributes are in snake case
+        Ok(format!("{nm}/{att}"))
     } else {
-        if res == "controller" && att == "drop_id" {
-            Ok(format!("{nm}/drop"))
-        } else if res == "sign_message" {
-            // sign_message attributes are in snake case
-            Ok(format!("{nm}/{att}"))
-        } else {
-            // most IRIS attributes are in camel case (Java)
-            Ok(format!("{nm}/{}", att.to_case(Case::Camel)))
-        }
+        // most IRIS attributes are in camel case (Java)
+        Ok(format!("{nm}/{}", att.to_case(Case::Camel)))
     }
 }
 
