@@ -324,17 +324,17 @@ impl SignMessage {
 
     /// Get "system" owner
     fn system(&self) -> &str {
-        self.owner().split(';').next().unwrap_or("")
+        self.owner().split(';').next().unwrap_or("").trim()
     }
 
     /// Get "sources" owner
     fn sources(&self) -> &str {
-        self.owner().split(';').nth(1).unwrap_or("")
+        self.owner().split(';').nth(1).unwrap_or("").trim()
     }
 
     /// Get "user" owner
     fn user(&self) -> &str {
-        self.owner().split(';').nth(2).unwrap_or("")
+        self.owner().split(';').nth(2).unwrap_or("").trim()
     }
 
     /// Get item states
@@ -374,11 +374,15 @@ impl DmsAnc {
         &self,
         cfg: &str,
         ms: &str,
+        owner: &str,
         mp: u32,
     ) -> Option<&SignMessage> {
         // FIXME: check incident, flash_beacon, src and duration
         self.messages.iter().find(|m| {
-            m.sign_config == cfg && m.multi == ms && m.msg_priority == mp
+            m.sign_config == cfg
+                && m.multi == ms
+                && m.msg_owner == owner
+                && m.msg_priority == mp
         })
     }
 
@@ -524,17 +528,21 @@ impl DmsAnc {
         ms: &str,
         priority: u32,
     ) -> Vec<Action> {
-        match self.find_sign_msg(cfg, ms, priority) {
+        let Some(owner) = sign_msg_owner(priority) else {
+            return Vec::new();
+        };
+        match self.find_sign_msg(cfg, ms, &owner, priority) {
             Some(_sm) => {
                 // FIXME: create "PATCH" action to update msg_user
                 Vec::new()
             }
             None => {
                 let mut actions = Vec::with_capacity(2);
-                let val = sign_message_post(cfg, ms, priority);
-                let uri = Uri::from("/iris/api/sign_message");
-                actions.push(Action::Post(uri, val.into()));
-                // FIXME: create "PATCH" action to update msg_user
+                if let Some(val) = sign_msg_post(cfg, ms, owner, priority) {
+                    let uri = Uri::from("/iris/api/sign_message");
+                    actions.push(Action::Post(uri, val.into()));
+                    // FIXME: create "PATCH" action to update msg_user
+                }
                 actions
             }
         }
@@ -884,17 +892,25 @@ impl Card for Dms {
     }
 }
 
+/// Make sign message owner string
+fn sign_msg_owner(priority: u32) -> Option<String> {
+    crate::start::user().map(|user| {
+        let sources = if priority == LOW_1 {
+            "blank"
+        } else {
+            "operator"
+        };
+        format!("IRIS; {sources}; {user}")
+    })
+}
+
 /// Make a sign message POST string
-fn sign_message_post(cfg: &str, ms: &str, priority: u32) -> Option<String> {
-    let Some(user) = crate::start::user() else {
-        return None;
-    };
-    let sources = if priority == LOW_1 {
-        "blank"
-    } else {
-        "operator"
-    };
-    let owner = format!("IRIS; {sources}; {user}");
+fn sign_msg_post(
+    cfg: &str,
+    ms: &str,
+    owner: String,
+    priority: u32,
+) -> Option<String> {
     let mut sign_message = SignMessage {
         name: "usr_".to_string(),
         sign_config: cfg.to_string(),
