@@ -580,14 +580,14 @@ impl Dms {
          <option value='🎯'>🎯 dedicated\
          <option value='⚠️'>⚠️ fault\
          <option value='🔌'>🔌 offline\
-         <option value='🔻'>🔻 disabled"
+         <option value='▪️'>▪️ inactive"
     }
 
     /// Get item states
     fn item_states<'a>(&'a self, anc: &'a DmsAnc) -> ItemStates<'a> {
         let state = anc.dev.item_state(self);
         let mut states = match state {
-            ItemState::Disabled => return ItemState::Disabled.into(),
+            ItemState::Inactive => return ItemState::Inactive.into(),
             ItemState::Available => anc.msg_states(self.msg_current.as_deref()),
             ItemState::Offline => ItemStates::default()
                 .with(ItemState::Offline, "FIXME: since fail time"),

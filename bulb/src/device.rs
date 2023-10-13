@@ -62,7 +62,7 @@ impl<D: Device> DeviceAnc<D> {
     /// Get item state
     pub fn item_state(&self, pri: &D) -> ItemState {
         self.controller(pri)
-            .map_or(ItemState::Disabled, |c| c.item_state())
+            .map_or(ItemState::Inactive, |c| c.item_state())
     }
 }
 

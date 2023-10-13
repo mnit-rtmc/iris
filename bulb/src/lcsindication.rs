@@ -14,7 +14,7 @@ use crate::controller::Controller;
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::resource::{
-    disabled_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
+    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
@@ -120,11 +120,11 @@ impl LcsIndication {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LcsIndicationAnc) -> String {
-        let disabled = disabled_attr(self.controller.is_some());
+        let inactive = inactive_attr(self.controller.is_some());
         let indication = anc.indication(self);
         format!(
             "<div class='{NAME} end'>{self}</div>\
-            <div class='info fill{disabled}'>{indication}</div>"
+            <div class='info fill{inactive}'>{indication}</div>"
         )
     }
 

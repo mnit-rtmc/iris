@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::device::{Device, DeviceAnc};
-use crate::resource::{disabled_attr, Card, View, EDIT_BUTTON};
+use crate::resource::{inactive_attr, Card, View, EDIT_BUTTON};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -33,9 +33,9 @@ impl Gps {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &GpsAnc) -> String {
-        let disabled = disabled_attr(self.controller.is_some());
+        let inactive = inactive_attr(self.controller.is_some());
         let item_state = anc.item_state(self);
-        format!("<div class='end{disabled}'>{self} {item_state}</div>")
+        format!("<div class='end{inactive}'>{self} {item_state}</div>")
     }
 
     /// Convert to Status HTML

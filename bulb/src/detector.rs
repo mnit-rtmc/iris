@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::device::{Device, DeviceAnc};
-use crate::resource::{disabled_attr, Card, View, EDIT_BUTTON, NAME};
+use crate::resource::{inactive_attr, Card, View, EDIT_BUTTON, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -43,16 +43,16 @@ impl Detector {
     fn to_html_compact(&self, anc: &DetectorAnc) -> String {
         let item_state = anc.item_state(self);
         let label = HtmlStr::new(&self.label);
-        let enabled = self.controller.is_some()
+        let active = self.controller.is_some()
             || self
                 .label
                 .as_ref()
                 .filter(|lbl| lbl.ends_with('G'))
                 .is_some();
-        let disabled = disabled_attr(enabled);
+        let inactive = inactive_attr(active);
         format!(
             "<div class='{NAME} end'>{self} {item_state}</div>\
-            <div class='info fill{disabled}'>{label}</div>"
+            <div class='info fill{inactive}'>{label}</div>"
         )
     }
 

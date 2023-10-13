@@ -250,7 +250,7 @@ button.go_link {
 .offline {
   background-color: #444;
 }
-.disabled {
+.inactive {
   background-color: #400;
 }
 .unknown {
@@ -314,7 +314,7 @@ button.go_link {
   font-size: smaller;
   margin-top: 0.1rem;
 }
-.disabled {
+.inactive {
   text-decoration: line-through;
 }
 .row {

@@ -12,7 +12,7 @@
 //
 use crate::error::Result;
 use crate::fetch::Uri;
-use crate::resource::{disabled_attr, AncillaryData, Card, View};
+use crate::resource::{inactive_attr, AncillaryData, Card, View};
 use crate::role::Role;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use serde::{Deserialize, Serialize};
@@ -89,8 +89,8 @@ impl User {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let disabled = disabled_attr(self.enabled && self.role.is_some());
-        format!("<div class='{disabled}'>{self}</div>")
+        let inactive = inactive_attr(self.enabled && self.role.is_some());
+        format!("<div class='{inactive}'>{self}</div>")
     }
 
     /// Convert to Edit HTML

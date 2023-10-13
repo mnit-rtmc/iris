@@ -15,7 +15,7 @@ use crate::error::Result;
 use crate::fetch::{Action, Uri};
 use crate::item::{ItemState, ItemStates};
 use crate::resource::{
-    disabled_attr, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
+    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use serde::{Deserialize, Serialize};
@@ -137,11 +137,11 @@ impl Beacon {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &BeaconAnc) -> String {
         let item_states = self.item_states(anc);
-        let disabled = disabled_attr(self.controller.is_some());
+        let inactive = inactive_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
             "<div class='{NAME} end'>{self} {item_states}</div>\
-            <div class='info fill{disabled}'>{location}</div>"
+            <div class='info fill{inactive}'>{location}</div>"
         )
     }
 

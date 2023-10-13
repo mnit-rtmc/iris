@@ -636,7 +636,7 @@ impl Resource {
                 "<option value=''>all ↴</option>\
                  <option value='🔹'>🔹 available</option>\
                  <option value='🔌'>🔌 offline</option>\
-                 <option value='🔻'>🔻 disabled</option>"
+                 <option value='▪️'>▪️ inactive</option>"
             }
         }
     }
@@ -799,12 +799,12 @@ impl View {
     }
 }
 
-/// Get attribute for disabled cards
-pub fn disabled_attr(enabled: bool) -> &'static str {
-    if enabled {
+/// Get attribute for inactive cards
+pub fn inactive_attr(active: bool) -> &'static str {
+    if active {
         ""
     } else {
-        " disabled"
+        " inactive"
     }
 }
 
