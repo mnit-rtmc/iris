@@ -890,7 +890,12 @@ fn sign_message_post(cfg: &str, ms: &str, priority: u32) -> Option<String> {
     let Some(user) = crate::start::user() else {
         return None;
     };
-    let owner = format!("IRIS; operator; {user}");
+    let sources = if priority == LOW_1 {
+        "blank"
+    } else {
+        "operator"
+    };
+    let owner = format!("IRIS; {sources}; {user}");
     let mut sign_message = SignMessage {
         name: "usr_".to_string(),
         sign_config: cfg.to_string(),
