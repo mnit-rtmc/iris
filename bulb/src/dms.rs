@@ -317,6 +317,23 @@ impl AncillaryData for DmsAnc {
 }
 
 impl SignMessage {
+    /// Make a sign message
+    fn new(cfg: &str, ms: &str, owner: String, priority: u32) -> Self {
+        let mut sign_message = SignMessage {
+            name: "usr_".to_string(),
+            sign_config: cfg.to_string(),
+            multi: ms.to_string(),
+            msg_owner: owner,
+            msg_priority: priority,
+            ..Default::default()
+        };
+        let mut hasher = FnvHasher::default();
+        sign_message.hash(&mut hasher);
+        let hash = hasher.finish() as u32;
+        sign_message.name = format!("usr_{hash:08X}");
+        sign_message
+    }
+
     /// Get message owner
     fn owner(&self) -> &str {
         &self.msg_owner
@@ -370,19 +387,15 @@ impl SignMessage {
 
 impl DmsAnc {
     /// Find a sign message
-    fn find_sign_msg(
-        &self,
-        cfg: &str,
-        ms: &str,
-        owner: &str,
-        mp: u32,
-    ) -> Option<&SignMessage> {
-        // FIXME: check incident, flash_beacon, src and duration
+    fn find_sign_msg(&self, msg: &SignMessage) -> Option<&SignMessage> {
         self.messages.iter().find(|m| {
-            m.sign_config == cfg
-                && m.multi == ms
-                && m.msg_owner == owner
-                && m.msg_priority == mp
+            m.sign_config == msg.sign_config
+                && m.incident == msg.incident
+                && m.multi == msg.multi
+                && m.msg_owner == msg.msg_owner
+                && m.flash_beacon == msg.flash_beacon
+                && m.msg_priority == msg.msg_priority
+                && m.duration == msg.duration
         })
     }
 
@@ -522,23 +535,15 @@ impl DmsAnc {
     }
 
     /// Create actions to activate a sign message
-    fn sign_msg_actions(
-        self,
-        cfg: &str,
-        ms: &str,
-        priority: u32,
-    ) -> Vec<Action> {
-        let Some(owner) = sign_msg_owner(priority) else {
-            return Vec::new();
-        };
-        match self.find_sign_msg(cfg, ms, &owner, priority) {
+    fn sign_msg_actions(self, sign_msg: SignMessage) -> Vec<Action> {
+        match self.find_sign_msg(&sign_msg) {
             Some(_sm) => {
                 // FIXME: create "PATCH" action to update msg_user
                 Vec::new()
             }
             None => {
                 let mut actions = Vec::with_capacity(2);
-                if let Some(val) = sign_msg_post(cfg, ms, owner, priority) {
+                if let Ok(val) = serde_json::to_string(&sign_msg) {
                     let uri = Uri::from("/iris/api/sign_message");
                     actions.push(Action::Post(uri, val.into()));
                     // FIXME: create "PATCH" action to update msg_user
@@ -777,7 +782,11 @@ impl Dms {
     fn send_actions(&self, anc: DmsAnc) -> Vec<Action> {
         if let Some(cfg) = &self.sign_config {
             if let Some(ms) = &self.selected_multi(&anc) {
-                return anc.sign_msg_actions(cfg, ms, HIGH_1);
+                if let Some(owner) = sign_msg_owner(HIGH_1) {
+                    return anc.sign_msg_actions(SignMessage::new(
+                        cfg, ms, owner, HIGH_1,
+                    ));
+                };
             }
         }
         Vec::new()
@@ -785,9 +794,11 @@ impl Dms {
 
     /// Create actions to handle click on "Blank" button
     fn blank_actions(&self, anc: DmsAnc) -> Vec<Action> {
-        match &self.sign_config {
-            Some(cfg) => anc.sign_msg_actions(cfg, "", LOW_1),
-            None => Vec::new(),
+        match (&self.sign_config, sign_msg_owner(LOW_1)) {
+            (Some(cfg), Some(owner)) => {
+                anc.sign_msg_actions(SignMessage::new(cfg, "", owner, LOW_1))
+            }
+            _ => Vec::new(),
         }
     }
 }
@@ -902,30 +913,6 @@ fn sign_msg_owner(priority: u32) -> Option<String> {
         };
         format!("IRIS; {sources}; {user}")
     })
-}
-
-/// Make a sign message POST string
-fn sign_msg_post(
-    cfg: &str,
-    ms: &str,
-    owner: String,
-    priority: u32,
-) -> Option<String> {
-    let mut sign_message = SignMessage {
-        name: "usr_".to_string(),
-        sign_config: cfg.to_string(),
-        incident: None,
-        multi: ms.to_string(),
-        msg_owner: owner,
-        flash_beacon: false,
-        msg_priority: priority,
-        duration: None,
-    };
-    let mut hasher = FnvHasher::default();
-    sign_message.hash(&mut hasher);
-    let hash = hasher.finish() as u32;
-    sign_message.name = format!("usr_{hash:08X}");
-    serde_json::to_string(&sign_message).ok()
 }
 
 /// Render sign preview image
