@@ -110,6 +110,12 @@ pub struct Dms {
     pub stuck_pixels: Option<StuckPixels>,
 }
 
+/// Action value to patch "msg_user"
+#[derive(Debug, Serialize)]
+struct MsgUser<'a> {
+    msg_user: &'a str,
+}
+
 /// Sign Message
 #[derive(Debug, Default, Hash, Deserialize, Serialize)]
 pub struct SignMessage {
@@ -535,18 +541,27 @@ impl DmsAnc {
     }
 
     /// Create actions to activate a sign message
-    fn sign_msg_actions(self, sign_msg: SignMessage) -> Vec<Action> {
-        match self.find_sign_msg(&sign_msg) {
-            Some(_sm) => {
-                // FIXME: create "PATCH" action to update msg_user
-                Vec::new()
+    fn sign_msg_actions(self, uri: Uri, msg: SignMessage) -> Vec<Action> {
+        match self.find_sign_msg(&msg) {
+            Some(msg) => {
+                let mut actions = Vec::with_capacity(1);
+                if let Ok(val) = serde_json::to_string(&MsgUser {
+                    msg_user: &msg.name,
+                }) {
+                    actions.push(Action::Patch(uri, val.into()));
+                }
+                actions
             }
             None => {
                 let mut actions = Vec::with_capacity(2);
-                if let Ok(val) = serde_json::to_string(&sign_msg) {
-                    let uri = Uri::from("/iris/api/sign_message");
-                    actions.push(Action::Post(uri, val.into()));
-                    // FIXME: create "PATCH" action to update msg_user
+                if let Ok(val) = serde_json::to_string(&msg) {
+                    let post = Uri::from("/iris/api/sign_message");
+                    actions.push(Action::Post(post, val.into()));
+                    if let Ok(val) = serde_json::to_string(&MsgUser {
+                        msg_user: &msg.name,
+                    }) {
+                        actions.push(Action::Patch(uri, val.into()));
+                    }
                 }
                 actions
             }
@@ -779,13 +794,14 @@ impl Dms {
     }
 
     /// Create actions to handle click on "Send" button
-    fn send_actions(&self, anc: DmsAnc) -> Vec<Action> {
+    fn send_actions(&self, anc: DmsAnc, uri: Uri) -> Vec<Action> {
         if let Some(cfg) = &self.sign_config {
             if let Some(ms) = &self.selected_multi(&anc) {
                 if let Some(owner) = sign_msg_owner(HIGH_1) {
-                    return anc.sign_msg_actions(SignMessage::new(
-                        cfg, ms, owner, HIGH_1,
-                    ));
+                    return anc.sign_msg_actions(
+                        uri,
+                        SignMessage::new(cfg, ms, owner, HIGH_1),
+                    );
                 };
             }
         }
@@ -793,11 +809,10 @@ impl Dms {
     }
 
     /// Create actions to handle click on "Blank" button
-    fn blank_actions(&self, anc: DmsAnc) -> Vec<Action> {
+    fn blank_actions(&self, anc: DmsAnc, uri: Uri) -> Vec<Action> {
         match (&self.sign_config, sign_msg_owner(LOW_1)) {
-            (Some(cfg), Some(owner)) => {
-                anc.sign_msg_actions(SignMessage::new(cfg, "", owner, LOW_1))
-            }
+            (Some(cfg), Some(owner)) => anc
+                .sign_msg_actions(uri, SignMessage::new(cfg, "", owner, LOW_1)),
             _ => Vec::new(),
         }
     }
@@ -865,11 +880,11 @@ impl Card for Dms {
     }
 
     /// Handle click event for a button on the card
-    fn handle_click(&self, anc: DmsAnc, id: &str, _uri: Uri) -> Vec<Action> {
+    fn handle_click(&self, anc: DmsAnc, id: &str, uri: Uri) -> Vec<Action> {
         if id == "mc_send" {
-            self.send_actions(anc)
+            self.send_actions(anc, uri)
         } else if id == "mc_blank" {
-            self.blank_actions(anc)
+            self.blank_actions(anc, uri)
         } else {
             Vec::new()
         }
