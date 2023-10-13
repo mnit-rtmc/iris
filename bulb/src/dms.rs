@@ -516,6 +516,29 @@ impl DmsAnc {
             None
         }
     }
+
+    /// Create actions to activate a sign message
+    fn sign_msg_actions(
+        self,
+        cfg: &str,
+        ms: &str,
+        priority: u32,
+    ) -> Vec<Action> {
+        match self.find_sign_msg(cfg, ms, priority) {
+            Some(_sm) => {
+                // FIXME: create "PATCH" action to update msg_user
+                Vec::new()
+            }
+            None => {
+                let mut actions = Vec::with_capacity(2);
+                let val = sign_message_post(cfg, ms, priority);
+                let uri = Uri::from("/iris/api/sign_message");
+                actions.push(Action::Post(uri, val.into()));
+                // FIXME: create "PATCH" action to update msg_user
+                actions
+            }
+        }
+    }
 }
 
 /// All hashtags for dedicated purpose
@@ -744,44 +767,20 @@ impl Dms {
 
     /// Create actions to handle click on "Send" button
     fn send_actions(&self, anc: DmsAnc) -> Vec<Action> {
-        let Some(cfg) = &self.sign_config else {
-            return Vec::new();
-        };
-        let mut actions = Vec::with_capacity(2);
-        if let Some(ms) = self.selected_multi(&anc) {
-            match anc.find_sign_msg(cfg, &ms, HIGH_1) {
-                Some(_sm) => {
-                    // FIXME: create "PATCH" action to update msg_user
-                }
-                None => {
-                    let val = sign_message_post(cfg, &ms, HIGH_1);
-                    let uri = Uri::from("/iris/api/sign_message");
-                    actions.push(Action::Post(uri, val.into()));
-                    // FIXME: create "PATCH" action to update msg_user
-                }
+        if let Some(cfg) = &self.sign_config {
+            if let Some(ms) = &self.selected_multi(&anc) {
+                return anc.sign_msg_actions(cfg, ms, HIGH_1);
             }
         }
-        actions
+        Vec::new()
     }
 
     /// Create actions to handle click on "Blank" button
     fn blank_actions(&self, anc: DmsAnc) -> Vec<Action> {
-        let Some(cfg) = &self.sign_config else {
-            return Vec::new();
-        };
-        let mut actions = Vec::with_capacity(2);
-        match anc.find_sign_msg(cfg, "", LOW_1) {
-            Some(_sm) => {
-                // FIXME: create "PATCH" action to update msg_user
-            }
-            None => {
-                let val = sign_message_post(cfg, "", LOW_1);
-                let uri = Uri::from("/iris/api/sign_message");
-                actions.push(Action::Post(uri, val.into()));
-                // FIXME: create "PATCH" action to update msg_user
-            }
+        match &self.sign_config {
+            Some(cfg) => anc.sign_msg_actions(cfg, "", LOW_1),
+            None => Vec::new(),
         }
-        actions
     }
 }
 
