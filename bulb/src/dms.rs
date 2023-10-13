@@ -21,7 +21,7 @@ use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, OptVal};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use fnv::FnvHasher;
 use js_sys::{ArrayBuffer, Uint8Array};
-use ntcip::dms::multi::join_text;
+use ntcip::dms::multi::{join_text, trim_end_tags};
 use ntcip::dms::{ifnt, Font, FontTable, GraphicTable, MessagePattern};
 use rendzina::{load_graphic, SignConfig};
 use serde::{Deserialize, Serialize};
@@ -739,7 +739,7 @@ impl Dms {
         let lines = self.selected_lines();
         let multi = MessagePattern::new(&sign, &pat.multi)
             .fill(lines.iter().map(|l| &l[..]));
-        Some(multi)
+        Some(trim_end_tags(&multi))
     }
 
     /// Create actions to handle click on "Send" button
@@ -876,6 +876,7 @@ impl Card for Dms {
         };
         let multi = MessagePattern::new(&sign, &pat.multi)
             .fill(lines.iter().map(|l| &l[..]));
+        let multi = trim_end_tags(&multi);
         // update mc_preview image element
         let mut html = String::new();
         render_preview(&mut html, &sign, &multi);
