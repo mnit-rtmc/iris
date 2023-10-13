@@ -229,31 +229,32 @@ button.go_link {
   visibility: visible;
 }
 
-.available {
+/* item state classes for tooltip backgrounds */
+.item_available {
   background-color: #004;
 }
-.deployed {
+.item_deployed {
   background-color: #440;
 }
-.planned {
+.item_planned {
   background-color: #044;
 }
-.external {
+.item_external {
   background-color: #040;
 }
-.dedicated {
+.item_dedicated {
   background-color: #404;
 }
-.fault {
+.item_fault {
   background-color: #420;
 }
-.offline {
+.item_offline {
   background-color: #444;
 }
-.inactive {
+.item_inactive {
   background-color: #400;
 }
-.unknown {
+.item_unknown {
   background-color: #400;
 }
 

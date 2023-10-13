@@ -148,7 +148,7 @@ impl<'a> ItemStates<'a> {
             desc.push(' ');
             desc.push_str(state.description());
             if !dtl.is_empty() {
-                desc.push_str("<span class='");
+                desc.push_str("<span class='item_");
                 desc.push_str(state.description());
                 desc.push_str("'>");
                 for d in dtl.split(';') {
