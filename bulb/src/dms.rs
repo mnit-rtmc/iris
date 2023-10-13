@@ -885,8 +885,11 @@ impl Card for Dms {
 }
 
 /// Make a sign message POST string
-fn sign_message_post(cfg: &str, ms: &str, priority: u32) -> String {
-    let owner = "IRIS; operator; testuser".to_string();
+fn sign_message_post(cfg: &str, ms: &str, priority: u32) -> Option<String> {
+    let Some(user) = crate::start::user() else {
+        return None;
+    };
+    let owner = format!("IRIS; operator; {user}");
     let mut sign_message = SignMessage {
         name: "usr_".to_string(),
         sign_config: cfg.to_string(),
@@ -901,7 +904,7 @@ fn sign_message_post(cfg: &str, ms: &str, priority: u32) -> String {
     sign_message.hash(&mut hasher);
     let hash = hasher.finish() as u32;
     sign_message.name = format!("usr_{hash:08X}");
-    serde_json::to_string(&sign_message).unwrap()
+    serde_json::to_string(&sign_message).ok()
 }
 
 /// Render sign preview image

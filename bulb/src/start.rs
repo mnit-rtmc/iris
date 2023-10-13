@@ -74,6 +74,8 @@ enum DeferredAction {
 struct State {
     /// Have permissions been initialized?
     initialized: bool,
+    /// Logged-in user name
+    user: Option<String>,
     /// Deferred actions (with tick number)
     deferred: Vec<(i32, DeferredAction)>,
     /// Timer tick count
@@ -333,6 +335,7 @@ impl SelectedCard {
 
 /// Show login form shade
 fn show_login() {
+    STATE.with(|rc| rc.borrow_mut().user = None);
     Doc::get()
         .elem::<HtmlElement>(LOGIN_ID)
         .set_class_name("show");
@@ -600,6 +603,7 @@ async fn handle_login() {
                 let pass = doc.elem::<HtmlInputElement>("login_pass");
                 pass.set_value("");
                 hide_login();
+                STATE.with(|rc| rc.borrow_mut().user = Some(user));
                 if !STATE.with(|rc| rc.borrow().initialized) {
                     fill_resource_select().await;
                 }
@@ -695,4 +699,9 @@ fn tick_interval() {
     }) {
         action.perform();
     }
+}
+
+/// Get logged-in user name
+pub fn user() -> Option<String> {
+    STATE.with(|rc| rc.borrow().user.clone())
 }
