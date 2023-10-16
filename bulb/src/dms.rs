@@ -545,10 +545,8 @@ impl DmsAnc {
         match self.find_sign_msg(&msg) {
             Some(msg) => {
                 let mut actions = Vec::with_capacity(1);
-                if let Ok(val) = serde_json::to_string(&MsgUser {
-                    msg_user: &msg.name,
-                }) {
-                    actions.push(Action::Patch(uri, val.into()));
+                if let Some(action) = msg_user_action(uri, &msg.name) {
+                    actions.push(action);
                 }
                 actions
             }
@@ -557,14 +555,23 @@ impl DmsAnc {
                 if let Ok(val) = serde_json::to_string(&msg) {
                     let post = Uri::from("/iris/api/sign_message");
                     actions.push(Action::Post(post, val.into()));
-                    if let Ok(val) = serde_json::to_string(&MsgUser {
-                        msg_user: &msg.name,
-                    }) {
-                        actions.push(Action::Patch(uri, val.into()));
+                    if let Some(action) = msg_user_action(uri, &msg.name) {
+                        actions.push(action);
                     }
                 }
                 actions
             }
+        }
+    }
+}
+
+/// Create a msg_user patch action
+fn msg_user_action(uri: Uri, msg_name: &str) -> Option<Action> {
+    match serde_json::to_string(&MsgUser { msg_user: msg_name }) {
+        Ok(val) => Some(Action::Patch(uri, val.into())),
+        Err(e) => {
+            console::log_1(&format!("err: {e:?}").into());
+            None
         }
     }
 }
