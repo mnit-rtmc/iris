@@ -137,12 +137,12 @@ enum Listen {
 
 impl Listen {
     /// Get the LISTEN channel name
-    fn channel_names(&self) -> Vec<&str> {
+    fn channel_name(&self) -> Option<&str> {
         match self {
-            Listen::Nope => vec![],
-            Listen::All(n) => vec![n],
-            Listen::Include(n, _) => vec![n],
-            Listen::Exclude(n, _) => vec![n],
+            Listen::Nope => None,
+            Listen::All(n) => Some(n),
+            Listen::Include(n, _) => Some(n),
+            Listen::Exclude(n, _) => Some(n),
         }
     }
 
@@ -1235,7 +1235,7 @@ fn palette_threshold_rgb8_256(v: usize) -> SRgb8 {
 pub fn listen_all(client: &mut Client) -> Result<()> {
     let mut channels = HashSet::new();
     for res in ALL {
-        for channel in res.listen().channel_names() {
+        if let Some(channel) = res.listen().channel_name() {
             channels.insert(channel);
         }
     }
