@@ -3,6 +3,23 @@
 A font is a set of bitmapped glyphs for displaying text on a [DMS].  Fonts can
 contain only printable ASCII characters (U+0020 to U+007E).
 
+<details>
+<summary>API Resources</summary>
+
+* `iris/api/font`
+* `iris/api/ifnt/{name}.ifnt`
+
+Attribute [permissions]:
+
+| Access       | Minimal           | Full |
+|--------------|-------------------|------|
+| Read Only    | name, font_number |      |
+| 👉 Operate   |                   |      |
+| 💡 Manage    |                   |      |
+| 🔧 Configure |                   |      |
+
+</details>
+
 ## Predefined Fonts
 
 A number of fonts are included in the `/var/lib/iris/fonts` directory.  These

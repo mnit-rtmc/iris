@@ -20,8 +20,6 @@ These resources are JSON arrays, fetched using http `GET` requests.
 - `iris/detector_pub`: Vehicle detectors
 - `iris/dms_message`: Current [DMS] messages and status
 - `iris/dms_pub`: [DMS] locations and configuration
-- `iris/font`: Bitmapped fonts for DMS
-- `iris/graphic`: Graphics for DMS
 - `iris/incident`: Currently active incidents
 - `iris/rwis`: [Road Weather Information System]
 - `iris/sign_config`: DMS [sign configuration]s
