@@ -133,12 +133,6 @@ enum Listen {
     /// * channel name
     /// * payloads to exclude
     Exclude(&'static str, &'static [&'static str]),
-
-    /// Listen for all payloads on two channels.
-    ///
-    /// * first channel name
-    /// * second channel name
-    Two(&'static str, &'static str),
 }
 
 impl Listen {
@@ -149,7 +143,6 @@ impl Listen {
             Listen::All(n) => vec![n],
             Listen::Include(n, _) => vec![n],
             Listen::Exclude(n, _) => vec![n],
-            Listen::Two(n0, n1) => vec![n0, n1],
         }
     }
 
@@ -160,7 +153,6 @@ impl Listen {
             Listen::All(n) => n == &chan,
             Listen::Include(n, inc) => n == &chan && inc.contains(&payload),
             Listen::Exclude(n, exc) => n == &chan && !exc.contains(&payload),
-            Listen::Two(n0, n1) => n0 == &chan || n1 == &chan,
         }
     }
 
@@ -437,7 +429,7 @@ const FONT_LIST_RES: Resource = Resource::Simple(
 
 /// Font resource
 const FONT_RES: Resource = Resource::Font(
-    Listen::Two("font", "glyph"),
+    Listen::All("font"),
     "SELECT row_to_json(f)::text FROM (\
       SELECT f_number, name, height, width, char_spacing, line_spacing, \
              array(SELECT row_to_json(c) FROM (\
