@@ -22,8 +22,6 @@ These resources are JSON arrays, fetched using http `GET` requests.
 - `iris/dms_pub`: [DMS] locations and configuration
 - `iris/incident`: Currently active incidents
 - `iris/rwis`: [Road Weather Information System]
-- `iris/sign_config`: DMS [sign configuration]s
-- `iris/sign_detail`: DMS [sign detail] information
 - `iris/sign_message`: Active DMS [sign message]s
 - `iris/station_sample`: Vehicle detection station data
 - `iris/system_attribute_pub`: Public [system attributes]
