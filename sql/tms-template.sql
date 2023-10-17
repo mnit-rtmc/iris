@@ -116,7 +116,7 @@ $table_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER system_attribute_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.system_attribute
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 COPY iris.system_attribute (name, value) FROM stdin;
 action_plan_alert_list	
@@ -261,7 +261,7 @@ operator	t
 
 CREATE TRIGGER role_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.role
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE TABLE iris.domain (
     name VARCHAR(15) PRIMARY KEY,
@@ -289,7 +289,7 @@ admin	IRIS Administrator	+vAwDtk/0KGx9k+kIoKFgWWbd3Ku8e/FOHoZoHB65PAuNEiN2muHVav
 
 CREATE TRIGGER i_user_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.i_user
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW i_user_view AS
     SELECT name, full_name, dn, role, enabled
@@ -466,7 +466,7 @@ $resource_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER resource_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.hashtag
-    FOR EACH ROW EXECUTE PROCEDURE iris.resource_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.resource_notify();
 
 CREATE VIEW hashtag_view AS
     SELECT resource_n, name, hashtag
@@ -520,7 +520,7 @@ administrator	weather_sensor	4
 
 CREATE TRIGGER permission_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.permission
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 -- FIXME: remove after permissions are used everywhere
 CREATE TABLE iris.privilege (
@@ -881,7 +881,7 @@ CREATE TABLE iris.road (
 
 CREATE TRIGGER road_table_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.road
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW road_view AS
     SELECT name, abbrev, rcl.description AS r_class, dir.direction
@@ -932,7 +932,7 @@ CREATE TABLE iris.geo_loc (
 
 CREATE TRIGGER resource_notify_trig
     AFTER UPDATE ON iris.geo_loc
-    FOR EACH ROW EXECUTE PROCEDURE iris.resource_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.resource_notify();
 
 CREATE FUNCTION iris.geo_location(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT)
 	RETURNS TEXT AS $geo_location$
@@ -1033,7 +1033,7 @@ $r_node_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER r_node_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.r_node
-    FOR EACH ROW EXECUTE PROCEDURE iris.r_node_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.r_node_notify();
 
 CREATE FUNCTION iris.r_node_left(INTEGER, INTEGER, BOOLEAN, INTEGER)
 	RETURNS INTEGER AS $r_node_left$
@@ -1312,7 +1312,7 @@ cfg_0	NTCIP udp	11	1000	30	300	0	0
 
 CREATE TRIGGER comm_config_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.comm_config
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW comm_config_view AS
     SELECT cc.name, cc.description, cp.description AS protocol,
@@ -1349,11 +1349,11 @@ $comm_link_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER comm_link_notify_trig
     AFTER UPDATE ON iris.comm_link
-    FOR EACH ROW EXECUTE PROCEDURE iris.comm_link_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.comm_link_notify();
 
 CREATE TRIGGER comm_link_table_notify_trig
     AFTER INSERT OR DELETE ON iris.comm_link
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW comm_link_view AS
     SELECT cl.name, cl.description, uri, poll_enabled,
@@ -1374,7 +1374,7 @@ CREATE TABLE iris.modem (
 
 CREATE TRIGGER modem_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.modem
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW modem_view AS
     SELECT name, uri, config, timeout_ms, enabled
@@ -1392,7 +1392,7 @@ CREATE TABLE iris.cabinet_style (
 
 CREATE TRIGGER cabinet_style_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.cabinet_style
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW cabinet_style_view AS
     SELECT name, police_panel_pin_1, police_panel_pin_2,
@@ -1449,11 +1449,11 @@ $controller_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER controller_notify_trig
     AFTER UPDATE ON iris.controller
-    FOR EACH ROW EXECUTE PROCEDURE iris.controller_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_notify();
 
 CREATE TRIGGER controller_table_notify_trig
     AFTER INSERT OR DELETE ON iris.controller
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW controller_view AS
     SELECT c.name, drop_id, comm_link, cabinet_style, geo_loc,
@@ -1500,11 +1500,11 @@ CREATE TABLE iris.controller_io (
 
 CREATE TRIGGER controller_io_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.controller_io
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE TRIGGER resource_notify_trig
     AFTER UPDATE ON iris.controller_io
-    FOR EACH ROW EXECUTE PROCEDURE iris.resource_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.resource_notify();
 
 CREATE FUNCTION iris.controller_io_delete() RETURNS TRIGGER AS
     $controller_io_delete$
@@ -1630,11 +1630,11 @@ $camera_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER camera_notify_trig
     AFTER UPDATE ON iris._camera
-    FOR EACH ROW EXECUTE PROCEDURE iris.camera_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.camera_notify();
 
 CREATE TRIGGER camera_table_notify_trig
     AFTER INSERT OR DELETE ON iris._camera
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.camera AS
     SELECT c.name, geo_loc, controller, pin, notes, cam_num, cam_template,
@@ -1662,7 +1662,7 @@ $camera_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER camera_insert_trig
     INSTEAD OF INSERT ON iris.camera
-    FOR EACH ROW EXECUTE PROCEDURE iris.camera_insert();
+    FOR EACH ROW EXECUTE FUNCTION iris.camera_insert();
 
 CREATE FUNCTION iris.camera_update() RETURNS TRIGGER AS
     $camera_update$
@@ -1691,11 +1691,11 @@ $camera_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER camera_update_trig
     INSTEAD OF UPDATE ON iris.camera
-    FOR EACH ROW EXECUTE PROCEDURE iris.camera_update();
+    FOR EACH ROW EXECUTE FUNCTION iris.camera_update();
 
 CREATE TRIGGER camera_delete_trig
     INSTEAD OF DELETE ON iris.camera
-    FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW camera_view AS
     SELECT c.name, cam_num, c.cam_template, encoder_type, et.make, et.model,
@@ -1738,7 +1738,7 @@ $play_list_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER play_list_insert_trig
     INSTEAD OF INSERT ON iris.play_list
-    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_insert();
+    FOR EACH ROW EXECUTE FUNCTION iris.play_list_insert();
 
 CREATE FUNCTION iris.play_list_update() RETURNS TRIGGER AS
     $play_list_update$
@@ -1763,7 +1763,7 @@ $play_list_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER play_list_update_trig
     INSTEAD OF UPDATE ON iris.play_list
-    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_update();
+    FOR EACH ROW EXECUTE FUNCTION iris.play_list_update();
 
 CREATE FUNCTION iris.play_list_delete() RETURNS TRIGGER AS
     $play_list_delete$
@@ -1780,7 +1780,7 @@ $play_list_delete$ LANGUAGE plpgsql;
 
 CREATE TRIGGER play_list_delete_trig
     INSTEAD OF DELETE ON iris.play_list
-    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_delete();
+    FOR EACH ROW EXECUTE FUNCTION iris.play_list_delete();
 
 CREATE TABLE iris.play_list_camera (
     play_list VARCHAR(20) NOT NULL REFERENCES iris._play_list,
@@ -1817,7 +1817,7 @@ $catalog_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER catalog_insert_trig
     INSTEAD OF INSERT ON iris.catalog
-    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_insert();
+    FOR EACH ROW EXECUTE FUNCTION iris.catalog_insert();
 
 CREATE FUNCTION iris.catalog_update() RETURNS TRIGGER AS
     $catalog_update$
@@ -1838,7 +1838,7 @@ $catalog_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER catalog_update_trig
     INSTEAD OF UPDATE ON iris.catalog
-    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_update();
+    FOR EACH ROW EXECUTE FUNCTION iris.catalog_update();
 
 CREATE FUNCTION iris.catalog_delete() RETURNS TRIGGER AS
     $catalog_delete$
@@ -1855,7 +1855,7 @@ $catalog_delete$ LANGUAGE plpgsql;
 
 CREATE TRIGGER catalog_delete_trig
     INSTEAD OF DELETE ON iris.catalog
-    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_delete();
+    FOR EACH ROW EXECUTE FUNCTION iris.catalog_delete();
 
 CREATE TABLE iris.catalog_play_list (
     catalog VARCHAR(20) NOT NULL REFERENCES iris._catalog,
@@ -1963,7 +1963,7 @@ ALTER TABLE iris._alarm ADD CONSTRAINT _alarm_fkey
 
 CREATE TRIGGER alarm_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris._alarm
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.alarm AS
     SELECT a.name, description, controller, pin, state, trigger_time
@@ -1982,7 +1982,7 @@ $alarm_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER alarm_insert_trig
     INSTEAD OF INSERT ON iris.alarm
-    FOR EACH ROW EXECUTE PROCEDURE iris.alarm_insert();
+    FOR EACH ROW EXECUTE FUNCTION iris.alarm_insert();
 
 CREATE FUNCTION iris.alarm_update() RETURNS TRIGGER AS
     $alarm_update$
@@ -2002,11 +2002,11 @@ $alarm_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER alarm_update_trig
     INSTEAD OF UPDATE ON iris.alarm
-    FOR EACH ROW EXECUTE PROCEDURE iris.alarm_update();
+    FOR EACH ROW EXECUTE FUNCTION iris.alarm_update();
 
 CREATE TRIGGER alarm_delete_trig
     INSTEAD OF DELETE ON iris.alarm
-    FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW alarm_view AS
     SELECT a.name, a.description, a.state, a.trigger_time, a.controller, a.pin,
@@ -2080,11 +2080,11 @@ $beacon_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER beacon_notify_trig
     AFTER UPDATE ON iris._beacon
-    FOR EACH ROW EXECUTE PROCEDURE iris.beacon_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.beacon_notify();
 
 CREATE TRIGGER beacon_table_notify_trig
     AFTER INSERT OR DELETE ON iris._beacon
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.beacon AS
     SELECT b.name, geo_loc, controller, pin, notes, message, verify_pin,
@@ -2110,7 +2110,7 @@ $beacon_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER beacon_insert_trig
     INSTEAD OF INSERT ON iris.beacon
-    FOR EACH ROW EXECUTE PROCEDURE iris.beacon_insert();
+    FOR EACH ROW EXECUTE FUNCTION iris.beacon_insert();
 
 CREATE FUNCTION iris.beacon_update() RETURNS TRIGGER AS
     $beacon_update$
@@ -2136,11 +2136,11 @@ $beacon_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER beacon_update_trig
     INSTEAD OF UPDATE ON iris.beacon
-    FOR EACH ROW EXECUTE PROCEDURE iris.beacon_update();
+    FOR EACH ROW EXECUTE FUNCTION iris.beacon_update();
 
 CREATE TRIGGER beacon_delete_trig
     INSTEAD OF DELETE ON iris.beacon
-    FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW beacon_view AS
     SELECT b.name, b.notes, b.message, p.camera, p.preset_num, b.geo_loc,
@@ -2236,11 +2236,11 @@ $detector_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER detector_notify_trig
     AFTER UPDATE ON iris._detector
-    FOR EACH ROW EXECUTE PROCEDURE iris.detector_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.detector_notify();
 
 CREATE TRIGGER detector_table_notify_trig
     AFTER INSERT OR DELETE ON iris._detector
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.detector AS
     SELECT det.name, controller, pin, r_node, lane_code, lane_number,
@@ -2266,7 +2266,7 @@ $detector_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER detector_insert_trig
     INSTEAD OF INSERT ON iris.detector
-    FOR EACH ROW EXECUTE PROCEDURE iris.detector_insert();
+    FOR EACH ROW EXECUTE FUNCTION iris.detector_insert();
 
 CREATE FUNCTION iris.detector_update() RETURNS TRIGGER AS
     $detector_update$
@@ -2292,11 +2292,11 @@ $detector_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER detector_update_trig
     INSTEAD OF UPDATE ON iris.detector
-    FOR EACH ROW EXECUTE PROCEDURE iris.detector_update();
+    FOR EACH ROW EXECUTE FUNCTION iris.detector_update();
 
 CREATE TRIGGER detector_delete_trig
     INSTEAD OF DELETE ON iris.detector
-    FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE FUNCTION iris.detector_label(VARCHAR(6), VARCHAR(4), VARCHAR(6),
     VARCHAR(4), VARCHAR(2), CHAR, SMALLINT, BOOLEAN)
@@ -2414,11 +2414,11 @@ $gps_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER gps_notify_trig
     AFTER UPDATE ON iris._gps
-    FOR EACH ROW EXECUTE PROCEDURE iris.gps_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.gps_notify();
 
 CREATE TRIGGER gps_table_notify_trig
     AFTER INSERT OR DELETE ON iris._gps
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.gps AS
     SELECT g.name, controller, pin, notes, latest_poll, latest_sample, lat, lon
@@ -2439,7 +2439,7 @@ $gps_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER gps_insert_trig
     INSTEAD OF INSERT ON iris.gps
-    FOR EACH ROW EXECUTE PROCEDURE iris.gps_insert();
+    FOR EACH ROW EXECUTE FUNCTION iris.gps_insert();
 
 CREATE FUNCTION iris.gps_update() RETURNS TRIGGER AS
     $gps_update$
@@ -2461,11 +2461,11 @@ $gps_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER gps_update_trig
     INSTEAD OF UPDATE ON iris.gps
-    FOR EACH ROW EXECUTE PROCEDURE iris.gps_update();
+    FOR EACH ROW EXECUTE FUNCTION iris.gps_update();
 
 CREATE TRIGGER gps_delete_trig
     INSTEAD OF DELETE ON iris.gps
-    FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW gps_view AS
     SELECT name, controller, pin, notes, latest_poll, latest_sample, lat, lon
@@ -2517,7 +2517,7 @@ $font_ck$ LANGUAGE plpgsql;
 
 CREATE TRIGGER font_ck_trig
     BEFORE UPDATE ON iris.font
-    FOR EACH ROW EXECUTE PROCEDURE iris.font_ck();
+    FOR EACH ROW EXECUTE FUNCTION iris.font_ck();
 
 CREATE VIEW font_view AS
     SELECT name, f_number, height, width, line_spacing, char_spacing
@@ -2554,7 +2554,7 @@ $glyph_ck$ LANGUAGE plpgsql;
 
 CREATE TRIGGER glyph_ck_trig
     BEFORE INSERT OR UPDATE ON iris.glyph
-    FOR EACH ROW EXECUTE PROCEDURE iris.glyph_ck();
+    FOR EACH ROW EXECUTE FUNCTION iris.glyph_ck();
 
 CREATE VIEW glyph_view AS
     SELECT name, font, code_point, width, pixels
@@ -2680,7 +2680,7 @@ CREATE TABLE iris.sign_detail (
 
 CREATE TRIGGER sign_detail_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.sign_detail
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW sign_detail_view AS
     SELECT name, dt.description AS dms_type, portable, technology, sign_access,
@@ -2713,7 +2713,7 @@ CREATE TABLE iris.sign_config (
 
 CREATE TRIGGER sign_config_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.sign_config
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW sign_config_view AS
     SELECT name, face_width, face_height, border_horiz, border_vert,
@@ -2738,7 +2738,7 @@ CREATE TABLE iris.sign_message (
 
 CREATE TRIGGER sign_message_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.sign_message
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW sign_message_view AS
     SELECT name, sign_config, incident, multi, msg_owner, flash_beacon,
@@ -2754,7 +2754,7 @@ CREATE TABLE iris.word (
 
 CREATE TRIGGER word_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.word
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW word_view AS
 	SELECT name, abbr, allowed
@@ -2849,7 +2849,7 @@ CREATE TABLE iris.graphic (
 
 CREATE TRIGGER graphic_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.graphic
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 ALTER TABLE iris.graphic
     ADD CONSTRAINT graphic_number_ck
@@ -2904,11 +2904,11 @@ $dms_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER dms_notify_trig
     AFTER UPDATE ON iris._dms
-    FOR EACH ROW EXECUTE PROCEDURE iris.dms_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.dms_notify();
 
 CREATE TRIGGER dms_table_notify_trig
     AFTER INSERT OR DELETE ON iris._dms
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.dms AS
     SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
@@ -2941,7 +2941,7 @@ $dms_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER dms_insert_trig
     INSTEAD OF INSERT ON iris.dms
-    FOR EACH ROW EXECUTE PROCEDURE iris.dms_insert();
+    FOR EACH ROW EXECUTE FUNCTION iris.dms_insert();
 
 CREATE FUNCTION iris.dms_update() RETURNS TRIGGER AS
     $dms_update$
@@ -2974,11 +2974,11 @@ $dms_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER dms_update_trig
     INSTEAD OF UPDATE ON iris.dms
-    FOR EACH ROW EXECUTE PROCEDURE iris.dms_update();
+    FOR EACH ROW EXECUTE FUNCTION iris.dms_update();
 
 CREATE TRIGGER dms_delete_trig
     INSTEAD OF DELETE ON iris.dms
-    FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW dms_view AS
     SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.gps,
@@ -3018,7 +3018,7 @@ $dms_hashtag_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER dms_hashtag_insert_trig
     INSTEAD OF INSERT ON iris.dms_hashtag
-    FOR EACH ROW EXECUTE PROCEDURE iris.dms_hashtag_insert();
+    FOR EACH ROW EXECUTE FUNCTION iris.dms_hashtag_insert();
 
 CREATE FUNCTION iris.dms_hashtag_delete() RETURNS TRIGGER AS
     $dms_hashtag_delete$
@@ -3034,7 +3034,7 @@ $dms_hashtag_delete$ LANGUAGE plpgsql;
 
 CREATE TRIGGER dms_hashtag_delete_trig
     INSTEAD OF DELETE ON iris.dms_hashtag
-    FOR EACH ROW EXECUTE PROCEDURE iris.dms_hashtag_delete();
+    FOR EACH ROW EXECUTE FUNCTION iris.dms_hashtag_delete();
 
 CREATE TABLE iris.msg_pattern (
     name VARCHAR(20) PRIMARY KEY,
@@ -3055,7 +3055,7 @@ COPY iris.msg_pattern (name, multi, flash_beacon, compose_hashtag) FROM stdin;
 
 CREATE TRIGGER msg_pattern_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.msg_pattern
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW msg_pattern_view AS
     SELECT name, multi, flash_beacon, compose_hashtag
@@ -3077,7 +3077,7 @@ CREATE TABLE iris.msg_line (
 
 CREATE TRIGGER msg_line_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.msg_line
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW msg_line_view AS
     SELECT name, msg_pattern, restrict_hashtag, line, multi, rank
@@ -3234,11 +3234,11 @@ $gate_arm_array_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER gate_arm_array_notify_trig
     AFTER UPDATE ON iris._gate_arm_array
-    FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_array_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.gate_arm_array_notify();
 
 CREATE TRIGGER gate_arm_array_table_notify_trig
     AFTER INSERT OR DELETE ON iris._gate_arm_array
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.gate_arm_array AS
     SELECT g.name, geo_loc, controller, pin, notes, opposing, prereq, camera,
@@ -3264,7 +3264,7 @@ $gate_arm_array_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER gate_arm_array_insert_trig
     INSTEAD OF INSERT ON iris.gate_arm_array
-    FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_array_insert();
+    FOR EACH ROW EXECUTE FUNCTION iris.gate_arm_array_insert();
 
 CREATE FUNCTION iris.gate_arm_array_update() RETURNS TRIGGER AS
     $gate_arm_array_update$
@@ -3288,11 +3288,11 @@ $gate_arm_array_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER gate_arm_array_update_trig
     INSTEAD OF UPDATE ON iris.gate_arm_array
-    FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_array_update();
+    FOR EACH ROW EXECUTE FUNCTION iris.gate_arm_array_update();
 
 CREATE TRIGGER gate_arm_array_delete_trig
     INSTEAD OF DELETE ON iris.gate_arm_array
-    FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW gate_arm_array_view AS
     SELECT ga.name, ga.notes, ga.geo_loc, l.roadway, l.road_dir, l.cross_mod,
@@ -3325,7 +3325,7 @@ CREATE UNIQUE INDEX gate_arm_array_idx ON iris._gate_arm
 
 CREATE TRIGGER gate_arm_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris._gate_arm
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.gate_arm AS
     SELECT g.name, ga_array, idx, controller, pin, notes, arm_state, fault
@@ -3347,7 +3347,7 @@ $gate_arm_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER gate_arm_insert_trig
     INSTEAD OF INSERT ON iris.gate_arm
-    FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_insert();
+    FOR EACH ROW EXECUTE FUNCTION iris.gate_arm_insert();
 
 CREATE FUNCTION iris.gate_arm_update() RETURNS TRIGGER AS
     $gate_arm_update$
@@ -3368,11 +3368,11 @@ $gate_arm_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER gate_arm_update_trig
     INSTEAD OF UPDATE ON iris.gate_arm
-    FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_update();
+    FOR EACH ROW EXECUTE FUNCTION iris.gate_arm_update();
 
 CREATE TRIGGER gate_arm_delete_trig
     INSTEAD OF DELETE ON iris.gate_arm
-    FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW gate_arm_view AS
     SELECT g.name, g.ga_array, g.notes, ga.geo_loc, l.roadway, l.road_dir,
@@ -3454,7 +3454,7 @@ CREATE TABLE event.incident (
 
 CREATE TRIGGER incident_notify_trig
 	AFTER INSERT OR UPDATE OR DELETE ON event.incident
-	FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+	FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE FUNCTION event.incident_blocked_lanes(TEXT)
 	RETURNS INTEGER AS $incident_blocked_lanes$
@@ -3524,7 +3524,7 @@ $incident_update_trig$ LANGUAGE plpgsql;
 
 CREATE TRIGGER incident_update_trigger
 	AFTER INSERT OR UPDATE ON event.incident
-	FOR EACH ROW EXECUTE PROCEDURE event.incident_update_trig();
+	FOR EACH ROW EXECUTE FUNCTION event.incident_update_trig();
 
 CREATE VIEW incident_update_view AS
     SELECT iu.event_id, name, iu.event_date, ed.description, road,
@@ -3564,7 +3564,7 @@ $inc_descriptor_ck$ LANGUAGE plpgsql;
 
 CREATE TRIGGER inc_descriptor_ck_trig
     BEFORE INSERT OR UPDATE ON iris.inc_descriptor
-    FOR EACH ROW EXECUTE PROCEDURE iris.inc_descriptor_ck();
+    FOR EACH ROW EXECUTE FUNCTION iris.inc_descriptor_ck();
 
 CREATE VIEW inc_descriptor_view AS
     SELECT id.name, ed.description AS event_description, detail,
@@ -3691,7 +3691,7 @@ $inc_advice_ck$ LANGUAGE plpgsql;
 
 CREATE TRIGGER inc_advice_ck_trig
     BEFORE INSERT OR UPDATE ON iris.inc_advice
-    FOR EACH ROW EXECUTE PROCEDURE iris.inc_advice_ck();
+    FOR EACH ROW EXECUTE FUNCTION iris.inc_advice_ck();
 
 CREATE VIEW inc_advice_view AS
     SELECT a.name, imp.description AS impact, lc.description AS lane_type,
@@ -4148,7 +4148,7 @@ ALTER TABLE iris._lane_marking ADD CONSTRAINT _lane_marking_fkey
 
 CREATE TRIGGER lane_marking_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris._lane_marking
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.lane_marking AS
     SELECT m.name, geo_loc, controller, pin, notes, deployed
@@ -4168,7 +4168,7 @@ $lane_marking_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER lane_marking_insert_trig
     INSTEAD OF INSERT ON iris.lane_marking
-    FOR EACH ROW EXECUTE PROCEDURE iris.lane_marking_insert();
+    FOR EACH ROW EXECUTE FUNCTION iris.lane_marking_insert();
 
 CREATE FUNCTION iris.lane_marking_update() RETURNS TRIGGER AS
     $lane_marking_update$
@@ -4188,11 +4188,11 @@ $lane_marking_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER lane_marking_update_trig
     INSTEAD OF UPDATE ON iris.lane_marking
-    FOR EACH ROW EXECUTE PROCEDURE iris.lane_marking_update();
+    FOR EACH ROW EXECUTE FUNCTION iris.lane_marking_update();
 
 CREATE TRIGGER lane_marking_delete_trig
     INSTEAD OF DELETE ON iris.lane_marking
-    FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW lane_marking_view AS
     SELECT m.name, m.notes, m.geo_loc, l.roadway, l.road_dir, l.cross_mod,
@@ -4240,7 +4240,7 @@ ALTER TABLE iris._lcs_array ADD CONSTRAINT _lcs_array_fkey
 
 CREATE TRIGGER lcs_array_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris._lcs_array
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.lcs_array AS
     SELECT la.name, controller, pin, notes, shift, lcs_lock
@@ -4259,7 +4259,7 @@ $lcs_array_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER lcs_array_insert_trig
     INSTEAD OF INSERT ON iris.lcs_array
-    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_array_insert();
+    FOR EACH ROW EXECUTE FUNCTION iris.lcs_array_insert();
 
 CREATE FUNCTION iris.lcs_array_update() RETURNS TRIGGER AS
     $lcs_array_update$
@@ -4279,11 +4279,11 @@ $lcs_array_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER lcs_array_update_trig
     INSTEAD OF UPDATE ON iris.lcs_array
-    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_array_update();
+    FOR EACH ROW EXECUTE FUNCTION iris.lcs_array_update();
 
 CREATE TRIGGER lcs_array_delete_trig
     INSTEAD OF DELETE ON iris.lcs_array
-    FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW lcs_array_view AS
     SELECT name, shift, notes, lcs_lock
@@ -4336,7 +4336,7 @@ ALTER TABLE iris._lcs_indication ADD CONSTRAINT _lcs_indication_fkey
 
 CREATE TRIGGER lcs_indication_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris._lcs_indication
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.lcs_indication AS
     SELECT li.name, controller, pin, lcs, indication
@@ -4356,7 +4356,7 @@ $lcs_indication_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER lcs_indication_insert_trig
     INSTEAD OF INSERT ON iris.lcs_indication
-    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_indication_insert();
+    FOR EACH ROW EXECUTE FUNCTION iris.lcs_indication_insert();
 
 CREATE FUNCTION iris.lcs_indication_update() RETURNS TRIGGER AS
     $lcs_indication_update$
@@ -4375,11 +4375,11 @@ $lcs_indication_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER lcs_indication_update_trig
     INSTEAD OF UPDATE ON iris.lcs_indication
-    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_indication_update();
+    FOR EACH ROW EXECUTE FUNCTION iris.lcs_indication_update();
 
 CREATE TRIGGER lcs_indication_delete_trig
     INSTEAD OF DELETE ON iris.lcs_indication
-    FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW lcs_indication_view AS
     SELECT name, controller, pin, lcs, description AS indication
@@ -4451,11 +4451,11 @@ $parking_area_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER parking_area_notify_trig
     AFTER UPDATE ON iris.parking_area
-    FOR EACH ROW EXECUTE PROCEDURE iris.parking_area_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.parking_area_notify();
 
 CREATE TRIGGER parking_area_table_notify_trig
     AFTER INSERT OR DELETE ON iris.parking_area
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE TABLE iris.parking_area_amenities (
 	bit INTEGER PRIMARY KEY,
@@ -4591,11 +4591,11 @@ $ramp_meter_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER ramp_meter_notify_trig
     AFTER UPDATE ON iris._ramp_meter
-    FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.ramp_meter_notify();
 
 CREATE TRIGGER ramp_meter_table_notify_trig
     AFTER INSERT OR DELETE ON iris._ramp_meter
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.ramp_meter AS
     SELECT m.name, geo_loc, controller, pin, notes, meter_type, storage,
@@ -4625,7 +4625,7 @@ $ramp_meter_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER ramp_meter_insert_trig
     INSTEAD OF INSERT ON iris.ramp_meter
-    FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_insert();
+    FOR EACH ROW EXECUTE FUNCTION iris.ramp_meter_insert();
 
 CREATE FUNCTION iris.ramp_meter_update() RETURNS TRIGGER AS
     $ramp_meter_update$
@@ -4655,11 +4655,11 @@ $ramp_meter_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER ramp_meter_update_trig
     INSTEAD OF UPDATE ON iris.ramp_meter
-    FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_update();
+    FOR EACH ROW EXECUTE FUNCTION iris.ramp_meter_update();
 
 CREATE TRIGGER ramp_meter_delete_trig
     INSTEAD OF DELETE ON iris.ramp_meter
-    FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW ramp_meter_view AS
     SELECT m.name, geo_loc, controller, pin, notes,
@@ -4805,11 +4805,11 @@ $tag_reader_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER tag_reader_notify_trig
     AFTER UPDATE ON iris._tag_reader
-    FOR EACH ROW EXECUTE PROCEDURE iris.tag_reader_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.tag_reader_notify();
 
 CREATE TRIGGER tag_reader_table_notify_trig
     AFTER INSERT OR DELETE ON iris._tag_reader
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.tag_reader AS
     SELECT t.name, geo_loc, controller, pin, notes, toll_zone, settings
@@ -4831,7 +4831,7 @@ $tag_reader_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER tag_reader_insert_trig
     INSTEAD OF INSERT ON iris.tag_reader
-    FOR EACH ROW EXECUTE PROCEDURE iris.tag_reader_insert();
+    FOR EACH ROW EXECUTE FUNCTION iris.tag_reader_insert();
 
 CREATE FUNCTION iris.tag_reader_update() RETURNS TRIGGER AS
     $tag_reader_update$
@@ -4852,11 +4852,11 @@ $tag_reader_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER tag_reader_update_trig
     INSTEAD OF UPDATE ON iris.tag_reader
-    FOR EACH ROW EXECUTE PROCEDURE iris.tag_reader_update();
+    FOR EACH ROW EXECUTE FUNCTION iris.tag_reader_update();
 
 CREATE TRIGGER tag_reader_delete_trig
     INSTEAD OF DELETE ON iris.tag_reader
-    FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW tag_reader_view AS
     SELECT t.name, t.geo_loc, location, controller, pin, notes, toll_zone,
@@ -4932,7 +4932,7 @@ $tag_read_event_view_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER tag_read_event_view_update_trig
     INSTEAD OF UPDATE ON tag_read_event_view
-    FOR EACH ROW EXECUTE PROCEDURE event.tag_read_event_view_update();
+    FOR EACH ROW EXECUTE FUNCTION event.tag_read_event_view_update();
 
 CREATE TABLE event.price_message_event (
 	event_id SERIAL PRIMARY KEY,
@@ -5041,11 +5041,11 @@ $video_monitor_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER video_monitor_notify_trig
     AFTER UPDATE ON iris._video_monitor
-    FOR EACH ROW EXECUTE PROCEDURE iris.video_monitor_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.video_monitor_notify();
 
 CREATE TRIGGER video_monitor_table_notify_trig
     AFTER INSERT OR DELETE ON iris._video_monitor
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.video_monitor AS
     SELECT m.name, controller, pin, notes, group_n, mon_num, restricted,
@@ -5069,7 +5069,7 @@ $video_monitor_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER video_monitor_insert_trig
     INSTEAD OF INSERT ON iris.video_monitor
-    FOR EACH ROW EXECUTE PROCEDURE iris.video_monitor_insert();
+    FOR EACH ROW EXECUTE FUNCTION iris.video_monitor_insert();
 
 CREATE FUNCTION iris.video_monitor_update() RETURNS TRIGGER AS
     $video_monitor_update$
@@ -5092,11 +5092,11 @@ $video_monitor_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER video_monitor_update_trig
     INSTEAD OF UPDATE ON iris.video_monitor
-    FOR EACH ROW EXECUTE PROCEDURE iris.video_monitor_update();
+    FOR EACH ROW EXECUTE FUNCTION iris.video_monitor_update();
 
 CREATE TRIGGER video_monitor_delete_trig
     INSTEAD OF DELETE ON iris.video_monitor
-    FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW video_monitor_view AS
     SELECT m.name, m.notes, group_n, mon_num, restricted, monitor_style,
@@ -5137,7 +5137,7 @@ ALTER TABLE iris._flow_stream ADD CONSTRAINT _flow_stream_fkey
 
 CREATE TRIGGER flow_stream_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris._flow_stream
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.flow_stream AS
     SELECT f.name, controller, pin, restricted, loc_overlay, quality, camera,
@@ -5162,7 +5162,7 @@ $flow_stream_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER flow_stream_insert_trig
     INSTEAD OF INSERT ON iris.flow_stream
-    FOR EACH ROW EXECUTE PROCEDURE iris.flow_stream_insert();
+    FOR EACH ROW EXECUTE FUNCTION iris.flow_stream_insert();
 
 CREATE FUNCTION iris.flow_stream_update() RETURNS TRIGGER AS
     $flow_stream_update$
@@ -5187,11 +5187,11 @@ $flow_stream_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER flow_stream_update_trig
     INSTEAD OF UPDATE ON iris.flow_stream
-    FOR EACH ROW EXECUTE PROCEDURE iris.flow_stream_update();
+    FOR EACH ROW EXECUTE FUNCTION iris.flow_stream_update();
 
 CREATE TRIGGER flow_stream_delete_trig
     INSTEAD OF DELETE ON iris.flow_stream
-    FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW flow_stream_view AS
     SELECT f.name, f.controller, pin, condition, comm_link, restricted,
@@ -5236,11 +5236,11 @@ $weather_sensor_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER weather_sensor_notify_trig
     AFTER UPDATE ON iris._weather_sensor
-    FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.weather_sensor_notify();
 
 CREATE TRIGGER weather_sensor_table_notify_trig
     AFTER INSERT OR DELETE ON iris._weather_sensor
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.weather_sensor AS
     SELECT w.name, site_id, alt_id, geo_loc, controller, pin, notes, settings,
@@ -5265,7 +5265,7 @@ $weather_sensor_insert$ LANGUAGE plpgsql;
 
 CREATE TRIGGER weather_sensor_insert_trig
     INSTEAD OF INSERT ON iris.weather_sensor
-    FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_insert();
+    FOR EACH ROW EXECUTE FUNCTION iris.weather_sensor_insert();
 
 CREATE FUNCTION iris.weather_sensor_update() RETURNS TRIGGER AS
     $weather_sensor_update$
@@ -5289,11 +5289,11 @@ $weather_sensor_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER weather_sensor_update_trig
     INSTEAD OF UPDATE ON iris.weather_sensor
-    FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_update();
+    FOR EACH ROW EXECUTE FUNCTION iris.weather_sensor_update();
 
 CREATE TRIGGER weather_sensor_delete_trig
     INSTEAD OF DELETE ON iris.weather_sensor
-    FOR EACH ROW EXECUTE PROCEDURE iris.controller_io_delete();
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW weather_sensor_view AS
     SELECT w.name, site_id, alt_id, w.notes, settings, sample, sample_time,
@@ -5340,7 +5340,7 @@ $weather_sensor_sample_trig$ LANGUAGE plpgsql;
 
 CREATE TRIGGER weather_sensor_sample_trigger
     AFTER UPDATE ON iris._weather_sensor
-    FOR EACH ROW EXECUTE PROCEDURE event.weather_sensor_sample_trig();
+    FOR EACH ROW EXECUTE FUNCTION event.weather_sensor_sample_trig();
 
 CREATE VIEW weather_sensor_settings_view AS
     SELECT event_id, event_date, weather_sensor, settings

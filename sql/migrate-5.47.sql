@@ -9,7 +9,7 @@ SELECT iris.update_version('5.46.0', '5.47.0');
 -- Create trigger for word changes
 CREATE TRIGGER word_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.word
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 -- Add hashtag/access constraint
 ALTER TABLE iris.permission
@@ -51,15 +51,15 @@ $resource_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER resource_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.hashtag
-    FOR EACH ROW EXECUTE PROCEDURE iris.resource_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.resource_notify();
 
 CREATE TRIGGER resource_notify_trig
     AFTER UPDATE ON iris.geo_loc
-    FOR EACH ROW EXECUTE PROCEDURE iris.resource_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.resource_notify();
 
 CREATE TRIGGER resource_notify_trig
     AFTER UPDATE ON iris.controller_io
-    FOR EACH ROW EXECUTE PROCEDURE iris.resource_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.resource_notify();
 
 DROP TRIGGER road_class_notify_trig ON iris.road_class;
 DROP TRIGGER road_class_table_notify_trig ON iris.road_class;
@@ -74,7 +74,7 @@ DROP TRIGGER glyph_notify_trig ON iris.glyph;
 
 CREATE TRIGGER road_table_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.road
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE OR REPLACE FUNCTION iris.comm_link_notify() RETURNS TRIGGER AS
     $comm_link_notify$
@@ -214,11 +214,11 @@ $ramp_meter_notify$ LANGUAGE plpgsql;
 
 CREATE TRIGGER ramp_meter_notify_trig
     AFTER UPDATE ON iris._ramp_meter
-    FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.ramp_meter_notify();
 
 CREATE TRIGGER ramp_meter_table_notify_trig
     AFTER INSERT OR DELETE ON iris._ramp_meter
-    FOR EACH STATEMENT EXECUTE PROCEDURE iris.table_notify();
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE OR REPLACE FUNCTION iris.tag_reader_notify() RETURNS TRIGGER AS
     $tag_reader_notify$
