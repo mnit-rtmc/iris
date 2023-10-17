@@ -4,6 +4,42 @@ Video cameras with remote _pan_, _tilt_, and _zoom_ capability can be used to
 monitor freeway conditions.  The **Camera** tab can display Motion JPEG (MJPEG)
 video.  To view MPEG4 or h.264 video, the [MonStream] application is required.
 
+## Setup
+
+Select `View ➔ Video ➔ Cameras` menu item
+
+<details>
+<summary>API Resources</summary>
+
+* `iris/camera_pub`
+* `iris/api/camera`
+* `iris/api/camera/{name}`
+
+Attribute [permissions]:
+
+| Access       | Minimal              | Full                  |
+|--------------|----------------------|-----------------------|
+| Read Only    | name, location       | geo\_loc, video\_loss |
+| 👉 Operate   |                      | ptz                   |
+| 💡 Manage    | notes, publish       | streamable            |
+| 🔧 Configure | controller, cam\_num | pin, cam\_template, encoder\_type, enc\_address, enc\_port, enc\_mcast, enc\_channel
+
+</details>
+
+The **Setup** tab within a camera properties form contains attributes to
+configure the video encoder.
+
+Field             | Description
+------------------|-------------------------------------------------------
+Cam Num           | Camera number, used for [keyboards](#camera-keyboards)
+Encoder Type      | The type of video encoder
+Encoder Address   | IP address for unicast streams (or [SDP] files)
+Encoder Port      | Port number for unicast streams (overrides scheme default)
+Multicast Address | IP address for [multicast] streams
+Encoder Channel   | Channel number, for encoders which support multiple cameras
+Publish           | Flag to allow public viewing of camera video
+Streamable        | Flag to indicate whether stream is available
+
 ## Encoder Types
 
 Select `View ➔ Video ➔ Encoder Types` menu item
@@ -39,24 +75,6 @@ Latency        | Buffering latency (ms) for consuming stream
 A stream can be either _unicast_ or _multicast_, but not both.  For a multicast
 stream defined by an [SDP] file, specify the _URI scheme_ and _path_ instead of
 _multicast port_.
-
-## Setup
-
-Select `View ➔ Video ➔ Cameras` menu item
-
-The **Setup** tab within a camera properties form contains attributes to
-configure the video encoder.
-
-Field             | Description
-------------------|-------------------------------------------------------
-Cam Num           | Camera number, used for [keyboards](#camera-keyboards)
-Encoder Type      | The type of video encoder
-Encoder Address   | IP address for unicast streams (or [SDP] files)
-Encoder Port      | Port number for unicast streams (overrides scheme default)
-Multicast Address | IP address for [multicast] streams
-Encoder Channel   | Channel number, for encoders which support multiple cameras
-Publish           | Flag to allow public viewing of camera video
-Streamable        | Flag to indicate whether stream is available
 
 ## Pan Tilt and Zoom
 
@@ -142,6 +160,7 @@ Otherwise, requests will be made directly to the camera's encoder address.
 [MonStream]: video.html#monstream
 [multicast]: https://en.wikipedia.org/wiki/Multicast_address
 [Pelco-P]: protocols.html#pelcop
+[permissions]: permissions.html
 [play list]: video.html#play-lists
 [protocol]: protocols.html
 [ramp meter]: ramp_meters.html

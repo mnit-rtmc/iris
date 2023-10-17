@@ -86,15 +86,6 @@ A `Content-Type: application/json` header is included where appropriate.
 | [user]         | [cabinet_style] | [dms]    |
 |                | [modem]         |          |
 
-### `camera`
-
-| Access       | Minimal              | Full                  |
-|--------------|----------------------|-----------------------|
-| Read Only    | name, location       | geo\_loc, video\_loss |
-| 👉 Operate   |                      | ptz                   |
-| 💡 Manage    | notes, publish       | streamable            |
-| 🔧 Configure | controller, cam\_num | pin, cam\_template, encoder\_type, enc\_address, enc\_port, enc\_mcast, enc\_channel
-
 ### `detector`
 
 | Access       | Minimal     | Full                       |
