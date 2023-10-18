@@ -78,13 +78,13 @@ A `Content-Type: application/json` header is included where appropriate.
 
 ## Resource Types
 
-| Access Control | Communication   | Devices  |
-|----------------|-----------------|----------|
-| [domain]       | [comm_config]   | [alarm]  |
-| [permission]   | [comm_link]     | [beacon] |
-| [role]         | [controller]    | [camera] |
-| [user]         | [cabinet_style] | [dms]    |
-|                | [modem]         |          |
+| Access Control | Communication   | Devices      |
+|----------------|-----------------|--------------|
+| [domain]       | [comm_config]   | [alarm]      |
+| [permission]   | [comm_link]     | [beacon]     |
+| [role]         | [controller]    | [camera]     |
+| [user]         | [cabinet_style] | [dms]        |
+|                | [modem]         | [ramp_meter] |
 
 ### `detector`
 
@@ -168,15 +168,6 @@ Since `geo_loc` resources can only be created and deleted with an associated
 | Read Only    | name, lcs, indication |      |
 | 🔧 Configure | controller            | pin  |
 
-### `ramp_meter`
-
-| Access       | Minimal        | Full                             |
-|--------------|----------------|----------------------------------|
-| Read Only    | name, location | geo\_loc                         |
-| 👉 Operate   |                | m\_lock, rate                    |
-| 💡 Manage    | notes          | storage, max\_wait, algorithm, am\_target, pm\_target |
-| 🔧 Configure | controller     | pin, meter\_type, beacon, preset |
-
 ### `tag_reader`
 
 | Access       | Minimal        | Full               |
@@ -214,6 +205,7 @@ Since `geo_loc` resources can only be created and deleted with an associated
 [domain]: user_roles.html#domains
 [modem]: modem.html
 [permission]: permissions.html
+[ramp_meter]: ramp_meters.html
 [resource types]: #resource-types
 [Road Weather Information System]: rwis.html
 [role]: user_roles.html#roles

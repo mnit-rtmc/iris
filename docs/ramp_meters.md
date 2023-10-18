@@ -24,5 +24,22 @@ adaptive].
 Simple metering runs the ramp meter at a fixed release rate.  This rate is the
 target rate for the period (AM or PM).
 
+<details>
+<summary>API Resources</summary>
+
+* `iris/api/ramp_meter`
+* `iris/api/ramp_meter/{name}`
+
+Attribute [permissions]:
+
+| Access       | Minimal        | Full                             |
+|--------------|----------------|----------------------------------|
+| Read Only    | name, location | geo\_loc                         |
+| 👉 Operate   |                | m\_lock, rate                    |
+| 💡 Manage    | notes          | storage, max\_wait, algorithm, am\_target, pm\_target |
+| 🔧 Configure | controller     | pin, meter\_type, beacon, preset |
+
+</details>
+
 
 [density adaptive]: density_adaptive.html
