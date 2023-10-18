@@ -14,8 +14,8 @@ are sent on INSERT or DELETE, and when an UPDATE changes any *minimal*
 attribute.  Some channels are also notified when an associated `geo_loc`,
 `controller_io` or `hashtag` record is updated.
 
-Some tables have a second CHANNEL with `$1` appended to the name.  These are
-notified on *all* updates, with a PAYLOAD containing the __name__ of the
+Some tables have an alternate CHANNEL with `$1` appended to the name.  These
+are notified on *all* updates, with a PAYLOAD containing the __name__ of the
 updated record.
 
 CHANNEL            | `geo_loc` | `controller_io` | `hashtag` | Alternate

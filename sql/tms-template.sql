@@ -4453,7 +4453,7 @@ CREATE TABLE iris.parking_area (
 CREATE FUNCTION iris.parking_area_notify() RETURNS TRIGGER AS
     $parking_area_notify$
 BEGIN
-    IF (NEW.time_stamp IS DISTINCT FROM OLD.time_stamp) THEN
+    IF (NEW.time_stamp_static IS DISTINCT FROM OLD.time_stamp_static) THEN
         NOTIFY parking_area;
     END IF;
     PERFORM pg_notify('parking_area$1', NEW.name);

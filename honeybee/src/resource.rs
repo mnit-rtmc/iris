@@ -111,104 +111,42 @@ impl From<GraphicRes> for Graphic {
     }
 }
 
-/// Listen enum for postgres NOTIFY events
-#[derive(Debug, PartialEq, Eq, Hash)]
-enum Listen {
-    /// Do not listen
-    Nope,
-
-    /// Listen for all payloads.
-    ///
-    /// * channel name
-    All(&'static str),
-
-    /// Listen for specific payloads.
-    ///
-    /// * channel name
-    /// * payloads to include
-    Include(&'static str, &'static [&'static str]),
-
-    /// Listen while excluding payloads.
-    ///
-    /// * channel name
-    /// * payloads to exclude
-    Exclude(&'static str, &'static [&'static str]),
-}
-
-impl Listen {
-    /// Get the LISTEN channel name
-    fn channel_name(&self) -> Option<&str> {
-        match self {
-            Listen::Nope => None,
-            Listen::All(n) => Some(n),
-            Listen::Include(n, _) => Some(n),
-            Listen::Exclude(n, _) => Some(n),
-        }
-    }
-
-    /// Check if listening to a channel
-    fn is_listening(&self, chan: &str, payload: &str) -> bool {
-        match self {
-            Listen::Nope => false,
-            Listen::All(n) => n == &chan,
-            Listen::Include(n, inc) => n == &chan && inc.contains(&payload),
-            Listen::Exclude(n, exc) => n == &chan && !exc.contains(&payload),
-        }
-    }
-
-    /// Check if listening to a channel / payload
-    fn is_listening_payload(&self, chan: &str, payload: &str) -> bool {
-        if let Listen::Exclude(n, exc) = self {
-            n == &chan && exc.contains(&payload)
-        } else {
-            self.is_listening(chan, payload)
-        }
-    }
-}
-
 /// A resource which can be fetched from a database connection.
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 enum Resource {
     /// Font resource.
     ///
-    /// * Listen specification.
     /// * SQL query.
-    Font(Listen, &'static str),
+    Font(&'static str),
 
     /// Graphic resource.
     ///
-    /// * Listen specification.
     /// * SQL query.
-    Graphic(Listen, &'static str),
+    Graphic(&'static str),
 
     /// RNode resource.
-    ///
-    /// * Listen specification.
-    RNode(Listen),
+    RNode(),
 
     /// Road resource.
-    ///
-    /// * Listen specification.
-    Road(Listen),
+    Road(),
 
     /// Simple file resource.
     ///
     /// * File name.
-    /// * Listen specification.
+    /// * Listen channel.
     /// * SQL query.
-    Simple(&'static str, Listen, &'static str),
+    Simple(&'static str, Option<&'static str>, &'static str),
 
     /// Sign message resource.
     ///
-    /// * Listen specification.
     /// * SQL query.
-    SignMsg(Listen, &'static str),
+    SignMsg(&'static str),
 }
 
 /// Camera resource
 const CAMERA_RES: Resource = Resource::Simple(
     "api/camera",
-    Listen::Exclude("camera", &["video_loss"]),
+    Some("camera"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT c.name, location, controller, notes, cam_num, publish \
       FROM iris.camera c \
@@ -220,7 +158,7 @@ const CAMERA_RES: Resource = Resource::Simple(
 /// Public Camera resource
 const CAMERA_PUB_RES: Resource = Resource::Simple(
     "camera_pub",
-    Listen::Exclude("camera", &["video_loss"]),
+    Some("camera"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, publish, streamable, roadway, road_dir, cross_street, \
              location, lat, lon, ARRAY(\
@@ -238,7 +176,7 @@ const CAMERA_PUB_RES: Resource = Resource::Simple(
 /// Gate arm resource
 const GATE_ARM_RES: Resource = Resource::Simple(
     "api/gate_arm",
-    Listen::All("gate_arm"),
+    Some("gate_arm"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT g.name, location, g.controller, g.notes, g.arm_state \
       FROM iris.gate_arm g \
@@ -251,7 +189,7 @@ const GATE_ARM_RES: Resource = Resource::Simple(
 /// Gate arm array resource
 const GATE_ARM_ARRAY_RES: Resource = Resource::Simple(
     "api/gate_arm_array",
-    Listen::All("gate_arm_array"),
+    Some("gate_arm_array"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT ga.name, location, notes, arm_state, interlock \
       FROM iris.gate_arm_array ga \
@@ -263,7 +201,7 @@ const GATE_ARM_ARRAY_RES: Resource = Resource::Simple(
 /// GPS resource
 const GPS_RES: Resource = Resource::Simple(
     "api/gps",
-    Listen::Exclude("gps", &["latest_poll", "latest_sample", "lat", "lon"]),
+    Some("gps"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, controller, notes \
       FROM iris.gps \
@@ -274,7 +212,7 @@ const GPS_RES: Resource = Resource::Simple(
 /// LCS array resource
 const LCS_ARRAY_RES: Resource = Resource::Simple(
     "api/lcs_array",
-    Listen::All("lcs_array"),
+    Some("lcs_array"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, notes, lcs_lock \
       FROM iris.lcs_array \
@@ -285,7 +223,7 @@ const LCS_ARRAY_RES: Resource = Resource::Simple(
 /// LCS indication resource
 const LCS_INDICATION_RES: Resource = Resource::Simple(
     "api/lcs_indication",
-    Listen::All("lcs_indication"),
+    Some("lcs_indication"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, controller, lcs, indication \
       FROM iris.lcs_indication \
@@ -296,7 +234,7 @@ const LCS_INDICATION_RES: Resource = Resource::Simple(
 /// Ramp meter resource
 const RAMP_METER_RES: Resource = Resource::Simple(
     "api/ramp_meter",
-    Listen::All("ramp_meter"),
+    Some("ramp_meter"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT m.name, location, controller, notes \
       FROM iris.ramp_meter m \
@@ -308,7 +246,7 @@ const RAMP_METER_RES: Resource = Resource::Simple(
 /// Tag reader resource
 const TAG_READER_RES: Resource = Resource::Simple(
     "api/tag_reader",
-    Listen::All("tag_reader"),
+    Some("tag_reader"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT t.name, location, controller, notes \
       FROM iris.tag_reader t \
@@ -320,7 +258,7 @@ const TAG_READER_RES: Resource = Resource::Simple(
 /// Video monitor resource
 const VIDEO_MONITOR_RES: Resource = Resource::Simple(
     "api/video_monitor",
-    Listen::Exclude("video_monitor", &["camera"]),
+    Some("video_monitor"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, mon_num, controller, notes \
       FROM iris.video_monitor \
@@ -331,7 +269,7 @@ const VIDEO_MONITOR_RES: Resource = Resource::Simple(
 /// Flow stream resource
 const FLOW_STREAM_RES: Resource = Resource::Simple(
     "api/flow_stream",
-    Listen::Exclude("flow_stream", &["status"]),
+    Some("flow_stream"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, controller \
       FROM iris.flow_stream \
@@ -342,7 +280,7 @@ const FLOW_STREAM_RES: Resource = Resource::Simple(
 /// Detector resource
 const DETECTOR_RES: Resource = Resource::Simple(
     "api/detector",
-    Listen::Exclude("detector", &["auto_fail"]),
+    Some("detector"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, label, controller, notes \
       FROM detector_view \
@@ -354,7 +292,7 @@ const DETECTOR_RES: Resource = Resource::Simple(
 /// Public Detector resource
 const DETECTOR_PUB_RES: Resource = Resource::Simple(
     "detector_pub",
-    Listen::Exclude("detector", &["auto_fail"]),
+    Some("detector"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, r_node, cor_id, lane_number, lane_code, field_length \
       FROM detector_view\
@@ -364,7 +302,7 @@ const DETECTOR_PUB_RES: Resource = Resource::Simple(
 /// DMS resource
 const DMS_RES: Resource = Resource::Simple(
     "api/dms",
-    Listen::Exclude("dms", &["msg_user", "msg_sched", "expire_time"]),
+    Some("dms"),
     "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
       SELECT d.name, location, msg_current, \
              NULLIF(char_length(status->>'faults') > 0, false) AS has_faults, \
@@ -383,16 +321,7 @@ const DMS_RES: Resource = Resource::Simple(
 /// Public DMS resource
 const DMS_PUB_RES: Resource = Resource::Simple(
     "dms_pub",
-    Listen::Exclude(
-        "dms",
-        &[
-            "msg_user",
-            "msg_sched",
-            "msg_current",
-            "expire_time",
-            "status",
-        ],
-    ),
+    Some("dms"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, sign_config, sign_detail, roadway, road_dir, \
              cross_street, location, lat, lon \
@@ -407,7 +336,7 @@ const DMS_PUB_RES: Resource = Resource::Simple(
 ///       but required by external systems (for now)
 const DMS_STAT_RES: Resource = Resource::Simple(
     "dms_message",
-    Listen::Include("dms", &["msg_current"]),
+    Some("dms"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, msg_current, \
              replace(substring(msg_owner FROM 'IRIS; ([^;]*).*'), '+', ', ') \
@@ -420,7 +349,7 @@ const DMS_STAT_RES: Resource = Resource::Simple(
 /// Font list resource
 const FONT_LIST_RES: Resource = Resource::Simple(
     "api/font",
-    Listen::All("font"),
+    None,
     "SELECT row_to_json(r)::text FROM (\
       SELECT f_number AS font_number, name \
       FROM iris.font ORDER BY f_number\
@@ -429,7 +358,6 @@ const FONT_LIST_RES: Resource = Resource::Simple(
 
 /// Font resource
 const FONT_RES: Resource = Resource::Font(
-    Listen::All("font"),
     "SELECT row_to_json(f)::text FROM (\
       SELECT f_number, name, height, width, char_spacing, line_spacing, \
              array(SELECT row_to_json(c) FROM (\
@@ -447,7 +375,7 @@ const FONT_RES: Resource = Resource::Font(
 /// Graphic list resource
 const GRAPHIC_LIST_RES: Resource = Resource::Simple(
     "api/graphic",
-    Listen::All("graphic"),
+    None,
     "SELECT row_to_json(r)::text FROM (\
       SELECT g_number AS number, 'G' || g_number AS name \
       FROM iris.graphic \
@@ -458,7 +386,6 @@ const GRAPHIC_LIST_RES: Resource = Resource::Simple(
 
 /// Graphic resource
 const GRAPHIC_RES: Resource = Resource::Graphic(
-    Listen::All("graphic"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT g_number AS number, name, height, width, color_scheme, \
              transparent_color, replace(pixels, E'\n', '') AS bitmap \
@@ -470,7 +397,7 @@ const GRAPHIC_RES: Resource = Resource::Graphic(
 /// Message line resource
 const MSG_LINE_RES: Resource = Resource::Simple(
     "api/msg_line",
-    Listen::All("msg_line"),
+    Some("msg_line"),
     "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
       SELECT name, msg_pattern, line, multi, restrict_hashtag \
       FROM iris.msg_line \
@@ -481,7 +408,7 @@ const MSG_LINE_RES: Resource = Resource::Simple(
 /// Message pattern resource
 const MSG_PATTERN_RES: Resource = Resource::Simple(
     "api/msg_pattern",
-    Listen::All("msg_pattern"),
+    Some("msg_pattern"),
     "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
       SELECT name, multi, compose_hashtag \
       FROM iris.msg_pattern \
@@ -492,7 +419,7 @@ const MSG_PATTERN_RES: Resource = Resource::Simple(
 /// Word resource
 const WORD_RES: Resource = Resource::Simple(
     "api/word",
-    Listen::All("word"),
+    Some("word"),
     "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
       SELECT name, abbr, allowed \
       FROM iris.word \
@@ -503,7 +430,7 @@ const WORD_RES: Resource = Resource::Simple(
 /// Incident resource
 const INCIDENT_RES: Resource = Resource::Simple(
     "incident",
-    Listen::All("incident"),
+    Some("incident"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, event_date, description, road, direction, lane_type, \
              impact, confirmed, camera, detail, replaces, lat, lon \
@@ -513,15 +440,15 @@ const INCIDENT_RES: Resource = Resource::Simple(
 );
 
 /// RNode resource
-const R_NODE_RES: Resource = Resource::RNode(Listen::All("r_node"));
+const R_NODE_RES: Resource = Resource::RNode();
 
 /// Road resource
-const ROAD_RES: Resource = Resource::Road(Listen::All("road"));
+const ROAD_RES: Resource = Resource::Road();
 
 /// Alarm resource
 const ALARM_RES: Resource = Resource::Simple(
     "api/alarm",
-    Listen::Exclude("alarm", &["pin", "trigger_time"]),
+    Some("alarm"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, description, controller, state \
       FROM iris.alarm \
@@ -532,7 +459,7 @@ const ALARM_RES: Resource = Resource::Simple(
 /// Beacon state LUT resource
 const BEACON_STATE_RES: Resource = Resource::Simple(
     "beacon_state",
-    Listen::Nope,
+    None,
     "SELECT row_to_json(r)::text FROM (\
       SELECT id, description \
       FROM iris.beacon_state \
@@ -543,7 +470,7 @@ const BEACON_STATE_RES: Resource = Resource::Simple(
 /// Beacon resource
 const BEACON_RES: Resource = Resource::Simple(
     "api/beacon",
-    Listen::All("beacon"),
+    Some("beacon"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT b.name, location, controller, message, notes, state \
       FROM iris.beacon b \
@@ -555,7 +482,7 @@ const BEACON_RES: Resource = Resource::Simple(
 /// Lane marking resource
 const LANE_MARKING_RES: Resource = Resource::Simple(
     "api/lane_marking",
-    Listen::All("lane_marking"),
+    Some("lane_marking"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT m.name, location, controller, notes, deployed \
       FROM iris.lane_marking m \
@@ -567,7 +494,7 @@ const LANE_MARKING_RES: Resource = Resource::Simple(
 /// Cabinet style resource
 const CABINET_STYLE_RES: Resource = Resource::Simple(
     "api/cabinet_style",
-    Listen::All("cabinet_style"),
+    Some("cabinet_style"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name \
       FROM iris.cabinet_style \
@@ -578,7 +505,7 @@ const CABINET_STYLE_RES: Resource = Resource::Simple(
 /// Comm protocol LUT resource
 const COMM_PROTOCOL_RES: Resource = Resource::Simple(
     "comm_protocol",
-    Listen::Nope,
+    None,
     "SELECT row_to_json(r)::text FROM (\
       SELECT id, description \
       FROM iris.comm_protocol \
@@ -589,7 +516,7 @@ const COMM_PROTOCOL_RES: Resource = Resource::Simple(
 /// Comm configuration resource
 const COMM_CONFIG_RES: Resource = Resource::Simple(
     "api/comm_config",
-    Listen::All("comm_config"),
+    Some("comm_config"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, description \
       FROM iris.comm_config \
@@ -600,7 +527,7 @@ const COMM_CONFIG_RES: Resource = Resource::Simple(
 /// Comm link resource
 const COMM_LINK_RES: Resource = Resource::Simple(
     "api/comm_link",
-    Listen::All("comm_link"),
+    Some("comm_link"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, description, uri, comm_config, poll_enabled, connected \
       FROM iris.comm_link \
@@ -612,7 +539,7 @@ const COMM_LINK_RES: Resource = Resource::Simple(
 /// Controller condition LUT resource
 const CONDITION_RES: Resource = Resource::Simple(
     "condition",
-    Listen::Nope,
+    None,
     "SELECT row_to_json(r)::text FROM (\
       SELECT id, description \
       FROM iris.condition \
@@ -623,7 +550,7 @@ const CONDITION_RES: Resource = Resource::Simple(
 /// Direction LUT resource
 const DIRECTION_RES: Resource = Resource::Simple(
     "direction",
-    Listen::Nope,
+    None,
     "SELECT row_to_json(r)::text FROM (\
       SELECT id, direction, dir \
       FROM iris.direction \
@@ -634,7 +561,7 @@ const DIRECTION_RES: Resource = Resource::Simple(
 /// Roadway resource
 const ROADWAY_RES: Resource = Resource::Simple(
     "api/road",
-    Listen::All("road"),
+    Some("road$1"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, abbrev, r_class, direction \
       FROM iris.road \
@@ -645,7 +572,7 @@ const ROADWAY_RES: Resource = Resource::Simple(
 /// Road modifier LUT resource
 const ROAD_MODIFIER_RES: Resource = Resource::Simple(
     "road_modifier",
-    Listen::Nope,
+    None,
     "SELECT row_to_json(r)::text FROM (\
       SELECT id, modifier, mod AS md \
       FROM iris.road_modifier \
@@ -656,7 +583,7 @@ const ROAD_MODIFIER_RES: Resource = Resource::Simple(
 /// Gate arm interlock LUT resource
 const GATE_ARM_INTERLOCK_RES: Resource = Resource::Simple(
     "gate_arm_interlock",
-    Listen::Nope,
+    None,
     "SELECT row_to_json(r)::text FROM (\
       SELECT id, description \
       FROM iris.gate_arm_interlock \
@@ -667,7 +594,7 @@ const GATE_ARM_INTERLOCK_RES: Resource = Resource::Simple(
 /// Gate arm state LUT resource
 const GATE_ARM_STATE_RES: Resource = Resource::Simple(
     "gate_arm_state",
-    Listen::Nope,
+    None,
     "SELECT row_to_json(r)::text FROM (\
       SELECT id, description \
       FROM iris.gate_arm_state \
@@ -678,7 +605,7 @@ const GATE_ARM_STATE_RES: Resource = Resource::Simple(
 /// Lane use indication LUT resource
 const LANE_USE_INDICATION_RES: Resource = Resource::Simple(
     "lane_use_indication",
-    Listen::Nope,
+    None,
     "SELECT row_to_json(r)::text FROM (\
       SELECT id, description \
       FROM iris.lane_use_indication \
@@ -689,7 +616,7 @@ const LANE_USE_INDICATION_RES: Resource = Resource::Simple(
 /// LCS lock LUT resource
 const LCS_LOCK_RES: Resource = Resource::Simple(
     "lcs_lock",
-    Listen::Nope,
+    None,
     "SELECT row_to_json(r)::text FROM (\
       SELECT id, description \
       FROM iris.lcs_lock \
@@ -700,7 +627,7 @@ const LCS_LOCK_RES: Resource = Resource::Simple(
 /// Resource type LUT resource
 const RESOURCE_TYPE_RES: Resource = Resource::Simple(
     "resource_type",
-    Listen::Nope,
+    None,
     "SELECT to_json(r.name)::text FROM (\
       SELECT name \
       FROM iris.resource_type \
@@ -711,7 +638,7 @@ const RESOURCE_TYPE_RES: Resource = Resource::Simple(
 /// Controller resource
 const CONTROLLER_RES: Resource = Resource::Simple(
     "api/controller",
-    Listen::All("controller"),
+    Some("controller"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT c.name, location, comm_link, drop_id, cabinet_style, condition, \
              notes, setup, fail_time \
@@ -726,7 +653,7 @@ const CONTROLLER_RES: Resource = Resource::Simple(
 /// Weather sensor resource
 const WEATHER_SENSOR_RES: Resource = Resource::Simple(
     "api/weather_sensor",
-    Listen::Exclude("weather_sensor", &["pin", "settings", "sample"]),
+    Some("weather_sensor"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT ws.name, site_id, alt_id, location, controller, notes \
       FROM iris.weather_sensor ws \
@@ -738,7 +665,7 @@ const WEATHER_SENSOR_RES: Resource = Resource::Simple(
 /// RWIS resource
 const RWIS_RES: Resource = Resource::Simple(
     "rwis",
-    Listen::All("weather_sensor"),
+    Some("weather_sensor"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT ws.name, location, lat, lon, settings, sample, sample_time \
       FROM iris.weather_sensor ws \
@@ -750,7 +677,7 @@ const RWIS_RES: Resource = Resource::Simple(
 /// Modem resource
 const MODEM_RES: Resource = Resource::Simple(
     "api/modem",
-    Listen::All("modem"),
+    Some("modem"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, enabled \
       FROM iris.modem \
@@ -761,7 +688,7 @@ const MODEM_RES: Resource = Resource::Simple(
 /// Permission resource
 const PERMISSION_RES: Resource = Resource::Simple(
     "api/permission",
-    Listen::All("permission"),
+    Some("permission"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT id, role, resource_n, hashtag, access_n \
       FROM iris.permission \
@@ -772,7 +699,7 @@ const PERMISSION_RES: Resource = Resource::Simple(
 /// Role resource
 const ROLE_RES: Resource = Resource::Simple(
     "api/role",
-    Listen::All("role"),
+    Some("role"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, enabled \
       FROM iris.role \
@@ -783,7 +710,7 @@ const ROLE_RES: Resource = Resource::Simple(
 /// User resource
 const USER_RES: Resource = Resource::Simple(
     "api/user",
-    Listen::All("i_user"),
+    Some("i_user"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, full_name, role, enabled \
       FROM iris.i_user \
@@ -794,7 +721,7 @@ const USER_RES: Resource = Resource::Simple(
 /// Sign configuration resource
 const SIGN_CONFIG_RES: Resource = Resource::Simple(
     "api/sign_config",
-    Listen::All("sign_config"),
+    Some("sign_config"),
     "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
       SELECT name, face_width, face_height, border_horiz, border_vert, \
              pitch_horiz, pitch_vert, pixel_width, pixel_height, \
@@ -808,7 +735,7 @@ const SIGN_CONFIG_RES: Resource = Resource::Simple(
 /// Sign detail resource
 const SIGN_DETAIL_RES: Resource = Resource::Simple(
     "api/sign_detail",
-    Listen::All("sign_detail"),
+    Some("sign_detail"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, dms_type, portable, technology, sign_access, legend, \
              beacon_type, hardware_make, hardware_model, software_make, \
@@ -820,7 +747,6 @@ const SIGN_DETAIL_RES: Resource = Resource::Simple(
 
 /// Sign message resource
 const SIGN_MSG_RES: Resource = Resource::SignMsg(
-    Listen::All("sign_message"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT name, sign_config, incident, multi, msg_owner, flash_beacon, \
              msg_priority, duration \
@@ -832,7 +758,7 @@ const SIGN_MSG_RES: Resource = Resource::SignMsg(
 /// Public System attribute resource
 const SYSTEM_ATTRIBUTE_PUB_RES: Resource = Resource::Simple(
     "system_attribute_pub",
-    Listen::All("system_attribute"),
+    Some("system_attribute"),
     "SELECT jsonb_object_agg(name, value)::text \
       FROM iris.system_attribute \
       WHERE name LIKE 'dms\\_%' OR name LIKE 'map\\_%'",
@@ -841,7 +767,7 @@ const SYSTEM_ATTRIBUTE_PUB_RES: Resource = Resource::Simple(
 /// Static parking area resource
 const TPIMS_STAT_RES: Resource = Resource::Simple(
     "TPIMS_static",
-    Listen::Include("parking_area", &["time_stamp_static"]),
+    Some("parking_area"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT site_id AS \"siteId\", \
              to_char(time_stamp_static AT TIME ZONE 'UTC', \
@@ -865,7 +791,7 @@ const TPIMS_STAT_RES: Resource = Resource::Simple(
 /// Dynamic parking area resource
 const TPIMS_DYN_RES: Resource = Resource::Simple(
     "TPIMS_dynamic",
-    Listen::Include("parking_area", &["time_stamp"]),
+    Some("parking_area$1"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT site_id AS \"siteId\", \
              to_char(time_stamp AT TIME ZONE 'UTC', \
@@ -881,7 +807,7 @@ const TPIMS_DYN_RES: Resource = Resource::Simple(
 /// Archive parking area resource
 const TPIMS_ARCH_RES: Resource = Resource::Simple(
     "TPIMS_archive",
-    Listen::Include("parking_area", &["time_stamp"]),
+    Some("parking_area$1"),
     "SELECT row_to_json(r)::text FROM (\
       SELECT site_id AS \"siteId\",
              to_char(time_stamp AT TIME ZONE 'UTC', \
@@ -1056,26 +982,26 @@ fn fetch_one_road(
 
 impl Resource {
     /// Get the listen value
-    fn listen(&self) -> &Listen {
+    fn listen(self) -> Option<&'static str> {
         match self {
-            Resource::Font(lsn, _) => lsn,
-            Resource::Graphic(lsn, _) => lsn,
-            Resource::RNode(lsn) => lsn,
-            Resource::Road(lsn) => lsn,
+            Resource::Font(_) => None,
+            Resource::Graphic(_) => None,
+            Resource::RNode() => Some("r_node$1"),
+            Resource::Road() => Some("road$1"),
             Resource::Simple(_, lsn, _) => lsn,
-            Resource::SignMsg(lsn, _) => lsn,
+            Resource::SignMsg(_) => Some("sign_message"),
         }
     }
 
     /// Get the SQL value
-    fn sql(&self) -> &'static str {
+    fn sql(self) -> &'static str {
         match self {
-            Resource::Font(_, sql) => sql,
-            Resource::Graphic(_, sql) => sql,
-            Resource::RNode(_) => unreachable!(),
-            Resource::Road(_) => unreachable!(),
+            Resource::Font(sql) => sql,
+            Resource::Graphic(sql) => sql,
+            Resource::RNode() => unreachable!(),
+            Resource::Road() => unreachable!(),
             Resource::Simple(_, _, sql) => sql,
-            Resource::SignMsg(_, sql) => sql,
+            Resource::SignMsg(sql) => sql,
         }
     }
 
@@ -1085,18 +1011,18 @@ impl Resource {
     /// * `payload` Postgres NOTIFY payload.
     /// * `sender` Sender for segment messages.
     fn fetch(
-        &self,
+        self,
         client: &mut Client,
         payload: &str,
         sender: &Sender<SegMsg>,
     ) -> Result<()> {
         match self {
-            Resource::Font(_, _) => self.fetch_fonts(client),
-            Resource::Graphic(_, _) => self.fetch_graphics(client),
-            Resource::RNode(_) => self.fetch_nodes(client, payload, sender),
-            Resource::Road(_) => self.fetch_roads(client, payload, sender),
+            Resource::Font(_) => self.fetch_fonts(client),
+            Resource::Graphic(_) => self.fetch_graphics(client),
+            Resource::RNode() => self.fetch_nodes(client, payload, sender),
+            Resource::Road() => self.fetch_roads(client, payload, sender),
             Resource::Simple(n, _, _) => self.fetch_file(client, n),
-            Resource::SignMsg(_, _) => self.fetch_sign_msgs(client),
+            Resource::SignMsg(_) => self.fetch_sign_msgs(client),
         }
     }
 
@@ -1106,11 +1032,12 @@ impl Resource {
     /// * `payload` Postgres NOTIFY payload.
     /// * `sender` Sender for segment messages.
     fn fetch_nodes(
-        &self,
+        self,
         client: &mut Client,
         payload: &str,
         sender: &Sender<SegMsg>,
     ) -> Result<()> {
+        // empty payload is used at startup
         if payload.is_empty() {
             fetch_all_nodes(client, sender)
         } else {
@@ -1124,11 +1051,12 @@ impl Resource {
     /// * `payload` Postgres NOTIFY payload.
     /// * `sender` Sender for segment messages.
     fn fetch_roads(
-        &self,
+        self,
         client: &mut Client,
         payload: &str,
         sender: &Sender<SegMsg>,
     ) -> Result<()> {
+        // empty payload is used at startup
         if payload.is_empty() {
             fetch_all_roads(client, sender)
         } else {
@@ -1140,7 +1068,7 @@ impl Resource {
     ///
     /// * `client` The database connection.
     /// * `name` File name.
-    fn fetch_file(&self, client: &mut Client, name: &str) -> Result<()> {
+    fn fetch_file(self, client: &mut Client, name: &str) -> Result<()> {
         log::debug!("fetch_file: {:?}", name);
         let t = Instant::now();
         let dir = Path::new("");
@@ -1154,7 +1082,7 @@ impl Resource {
     }
 
     /// Fetch font resources
-    fn fetch_fonts(&self, client: &mut Client) -> Result<()> {
+    fn fetch_fonts(self, client: &mut Client) -> Result<()> {
         log::debug!("fetch_fonts");
         let t = Instant::now();
         let dir = Path::new("api/ifnt");
@@ -1177,7 +1105,7 @@ impl Resource {
     }
 
     /// Fetch graphics resource.
-    fn fetch_graphics(&self, client: &mut Client) -> Result<()> {
+    fn fetch_graphics(self, client: &mut Client) -> Result<()> {
         log::debug!("fetch_graphics");
         let t = Instant::now();
         let dir = Path::new("api/gif");
@@ -1192,7 +1120,7 @@ impl Resource {
     }
 
     /// Fetch sign messages resource.
-    fn fetch_sign_msgs(&self, client: &mut Client) -> Result<()> {
+    fn fetch_sign_msgs(self, client: &mut Client) -> Result<()> {
         self.fetch_file(client, "sign_message")?;
         // FIXME: spawn another thread for this?
         render_all(Path::new(""))
@@ -1235,8 +1163,8 @@ fn palette_threshold_rgb8_256(v: usize) -> SRgb8 {
 pub fn listen_all(client: &mut Client) -> Result<()> {
     let mut channels = HashSet::new();
     for res in ALL {
-        if let Some(channel) = res.listen().channel_name() {
-            channels.insert(channel);
+        if let Some(lsn) = res.listen() {
+            channels.insert(lsn);
         }
     }
     for channel in channels {
@@ -1262,7 +1190,7 @@ pub fn fetch_all(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
 ///
 /// * `client` The database connection.
 /// * `chan` Channel name.
-/// * `payload` Notification payload.
+/// * `payload` Postgres NOTIFY payload.
 /// * `sender` Sender for segment messages.
 pub fn notify(
     client: &mut Client,
@@ -1270,24 +1198,23 @@ pub fn notify(
     payload: &str,
     sender: &Sender<SegMsg>,
 ) -> Result<()> {
-    log::info!("notify: {}, {}", &chan, &payload);
+    log::info!("notify: {chan} {payload}");
     let mut found = false;
     for res in ALL {
-        if res.listen().is_listening(chan, payload) {
-            found = true;
-            res.fetch(client, payload, sender)?;
-        } else if res.listen().is_listening_payload(chan, payload) {
-            found = true;
+        if let Some(lsn) = res.listen() {
+            if lsn == chan {
+                found = true;
+                res.fetch(client, payload, sender)?;
+            }
         }
     }
     if !found {
-        log::warn!("unknown resource: ({}, {})", &chan, &payload);
+        log::warn!("unknown resource: {chan} {payload}");
     }
     Ok(())
 }
 
-/// Check if any resource is listening to a channel / payload
-pub fn is_listening_payload(chan: &str, payload: &str) -> bool {
-    ALL.iter()
-        .any(|res| res.listen().is_listening_payload(chan, payload))
+/// Check if any resource is listening to a channel
+pub fn is_listening(chan: &str) -> bool {
+    ALL.iter().any(|res| res.listen() == Some(chan))
 }
