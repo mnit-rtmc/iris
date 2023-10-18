@@ -1,5 +1,14 @@
 # IRIS 5.x Release Notes
 
+5.47.0 (18 Oct 2023)
+ - Finished MVP of web UI for DMS (bulb)
+ - Reworked PostgreSQL LISTEN/NOTIFY scheme
+ - Improved handling of `[tr]` MULTI tags
+ - Fixed bug in fontVersionId calculation for large fonts
+ - Fixed bug in parsing NTCIP supported MULTI tags
+ - Fixed NPE on DMS with no configuration
+ - Fixed ifnt import/export bugs
+
 5.46.0 (5 Sep 2023)
  - Changed `sign_config.default_font` to a number
  - Converted all fonts to .ifnt format
