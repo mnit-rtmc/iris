@@ -78,15 +78,13 @@ A `Content-Type: application/json` header is included where appropriate.
 
 ## Resource Types
 
-| Access Control | Communication   | Devices         |
-|----------------|-----------------|-----------------|
-| [domain]       | [comm config]   | [alarm]         |
-| [permission]   | [comm link]     | [beacon]        |
-| [role]         | [controller]    | [camera]        |
-| [user]         | [cabinet style] | [dms]           |
-|                | [modem]         | [ramp meter]    |
-|                |                 | [tag reader]    |
-|                |                 | [video monitor] |
+| Access Control | Communication   | Devices  |                 |
+|----------------|-----------------|----------|-----------------|
+| [domain]       | [comm config]   | [alarm]  | [flow stream]   |
+| [permission]   | [comm link]     | [beacon] | [ramp meter]    |
+| [role]         | [controller]    | [camera] | [tag reader]    |
+| [user]         | [cabinet style] | [dms]    | [video monitor] |
+|                | [modem]         |          |                 |
 
 ### `detector`
 
@@ -96,15 +94,6 @@ A `Content-Type: application/json` header is included where appropriate.
 | 👉 Operate   |             | field\_length, force\_fail |
 | 💡 Manage    | notes       | abandoned                  |
 | 🔧 Configure | controller  | pin, r\_node, lane\_code, lane\_number, fake |
-
-### `flow_stream`
-
-| Access       | Minimal    | Full                       |
-|--------------|------------|----------------------------|
-| Read Only    | name       | status                     |
-| 👉 Operate   |            | camera, mon\_num           |
-| 💡 Manage    |            | restricted, address, port  |
-| 🔧 Configure | controller | pin, loc\_overlay, quality |
 
 ### `gate_arm`
 
@@ -188,6 +177,7 @@ Since `geo_loc` resources can only be created and deleted with an associated
 [controller]: controllers.html
 [dms]: dms.html
 [domain]: user_roles.html#domains
+[flow stream]: flow_streams.html
 [modem]: modem.html
 [permission]: permissions.html
 [ramp meter]: ramp_meters.html
