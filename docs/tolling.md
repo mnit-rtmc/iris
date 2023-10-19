@@ -71,6 +71,22 @@ A tag reader is a sensor for in-vehicle transponders (tags).  They can be
 mounted over a tolled lane to record customer trips.  These are typically
 located just downstream of a pricing DMS.
 
+<details>
+<summary>API Resources</summary>
+
+* `iris/api/tag_reader`
+* `iris/api/tag_reader/{name}`
+
+Attribute [permissions]:
+
+| Access       | Minimal        | Full               |
+|--------------|----------------|--------------------|
+| Read Only    | name, location | geo\_loc, settings |
+| 💡 Manage    | notes          | toll\_zone         |
+| 🔧 Configure | controller     | pin                |
+
+</details>
+
 ### Tag Read Events
 
 When a tag is read, an event is logged in the `tag_read_event` database table.
@@ -85,5 +101,6 @@ These records are purged automatically when older than the value of the
 [action tag]: action_plans.html#dms-action-tags
 [DMS actions]: action_plans.html#dms-actions
 [message pattern]: message_patterns.html
+[permissions]: permissions.html
 [station]: road_topology.html#r_node-types
 [system attribute]: system_attributes.html

@@ -80,11 +80,12 @@ A `Content-Type: application/json` header is included where appropriate.
 
 | Access Control | Communication   | Devices      |
 |----------------|-----------------|--------------|
-| [domain]       | [comm_config]   | [alarm]      |
-| [permission]   | [comm_link]     | [beacon]     |
+| [domain]       | [comm config]   | [alarm]      |
+| [permission]   | [comm link]     | [beacon]     |
 | [role]         | [controller]    | [camera]     |
-| [user]         | [cabinet_style] | [dms]        |
-|                | [modem]         | [ramp_meter] |
+| [user]         | [cabinet style] | [dms]        |
+|                | [modem]         | [ramp meter] |
+|                |                 | [tag reader] |
 
 ### `detector`
 
@@ -168,14 +169,6 @@ Since `geo_loc` resources can only be created and deleted with an associated
 | Read Only    | name, lcs, indication |      |
 | 🔧 Configure | controller            | pin  |
 
-### `tag_reader`
-
-| Access       | Minimal        | Full               |
-|--------------|----------------|--------------------|
-| Read Only    | name, location | geo\_loc, settings |
-| 💡 Manage    | notes          | toll\_zone         |
-| 🔧 Configure | controller     | pin                |
-
 ### `video_monitor`
 
 | Access       | Minimal              | Full                       |
@@ -196,16 +189,16 @@ Since `geo_loc` resources can only be created and deleted with an associated
 
 [alarm]: alarms.html
 [beacon]: beacons.html
-[cabinet_style]: controllers.html#cabinet-styles
+[cabinet style]: controllers.html#cabinet-styles
 [camera]: cameras.html
-[comm_config]: comm_config.html
-[comm_link]: comm_links.html
+[comm config]: comm_config.html
+[comm link]: comm_links.html
 [controller]: controllers.html
 [dms]: dms.html
 [domain]: user_roles.html#domains
 [modem]: modem.html
 [permission]: permissions.html
-[ramp_meter]: ramp_meters.html
+[ramp meter]: ramp_meters.html
 [resource types]: #resource-types
 [Road Weather Information System]: rwis.html
 [role]: user_roles.html#roles
@@ -213,4 +206,5 @@ Since `geo_loc` resources can only be created and deleted with an associated
 [sign detail]: sign_configuration.html#sign-details
 [sign message]: sign_message.html
 [system attributes]: system_attributes.html
+[tag reader]: tolling.html#tag-readers
 [user]: user_roles.html

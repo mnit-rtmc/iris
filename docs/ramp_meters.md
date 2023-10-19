@@ -43,3 +43,4 @@ Attribute [permissions]:
 
 
 [density adaptive]: density_adaptive.html
+[permissions]: permissions.html
