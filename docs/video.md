@@ -40,6 +40,23 @@ Monitor style | [Style](#style) of title bar, _etc_
 The `monitor num` is used to identify monitors when selecting [camera]s with
 a [switching](#switching) system.
 
+<details>
+<summary>API Resources</summary>
+
+* `iris/api/video_monitor`
+* `iris/api/video_monitor/{name}`
+
+Attribute [permissions]:
+
+| Access       | Minimal              | Full                       |
+|--------------|----------------------|----------------------------|
+| Read Only    | name                 |                            |
+| 👉 Operate   |                      | camera                     |
+| 💡 Manage    | notes                | restricted, monitor\_style |
+| 🔧 Configure | mon\_num, controller | pin                        |
+
+</details>
+
 ## Style
 
 Select `View ➔ Video ➔ Monitor Styles` menu item
@@ -99,6 +116,7 @@ assigned sequence numbers, so they can be used in the same way.
 [flow streams]: flow_streams.html
 [IO pin]: controllers.html#io-pins
 [MonStream]: https://github.com/mnit-rtmc/monstream
+[permissions]: permissions.html
 [Privilege]: user_roles.html#privileges
 [protocol]: protocols.html
 [selector tool]: cameras.html#selector-tool

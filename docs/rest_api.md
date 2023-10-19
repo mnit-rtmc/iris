@@ -78,14 +78,15 @@ A `Content-Type: application/json` header is included where appropriate.
 
 ## Resource Types
 
-| Access Control | Communication   | Devices      |
-|----------------|-----------------|--------------|
-| [domain]       | [comm config]   | [alarm]      |
-| [permission]   | [comm link]     | [beacon]     |
-| [role]         | [controller]    | [camera]     |
-| [user]         | [cabinet style] | [dms]        |
-|                | [modem]         | [ramp meter] |
-|                |                 | [tag reader] |
+| Access Control | Communication   | Devices         |
+|----------------|-----------------|-----------------|
+| [domain]       | [comm config]   | [alarm]         |
+| [permission]   | [comm link]     | [beacon]        |
+| [role]         | [controller]    | [camera]        |
+| [user]         | [cabinet style] | [dms]           |
+|                | [modem]         | [ramp meter]    |
+|                |                 | [tag reader]    |
+|                |                 | [video monitor] |
 
 ### `detector`
 
@@ -169,15 +170,6 @@ Since `geo_loc` resources can only be created and deleted with an associated
 | Read Only    | name, lcs, indication |      |
 | 🔧 Configure | controller            | pin  |
 
-### `video_monitor`
-
-| Access       | Minimal              | Full                       |
-|--------------|----------------------|----------------------------|
-| Read Only    | name                 |                            |
-| 👉 Operate   |                      | camera                     |
-| 💡 Manage    | notes                | restricted, monitor\_style |
-| 🔧 Configure | mon\_num, controller | pin                        |
-
 ### `weather_sensor`
 
 | Access       | Minimal                  | Full |
@@ -208,3 +200,4 @@ Since `geo_loc` resources can only be created and deleted with an associated
 [system attributes]: system_attributes.html
 [tag reader]: tolling.html#tag-readers
 [user]: user_roles.html
+[video monitor]: video.html
