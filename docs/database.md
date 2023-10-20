@@ -14,50 +14,51 @@ record is updated:
 
 - __(G)__: `geo_loc`
 - __(C)__: `controller_io`
+- __(P)__: `device_preset`
 - __(H)__: `hashtag`
 
 Some tables have an alternate CHANNEL with `$1` appended to the name.  These
 are notified on *all* updates, with a PAYLOAD containing the __name__ of the
 updated record.
 
-CHANNEL            | (G) | (C) | (H) | Alternate
--------------------|-----|-----|-----|-----------
-`alarm`            | ❌  | ✔️   | ❌  | ❌
-`beacon`           | ✔️   | ✔️   | ❌  | `beacon$1`
-`cabinet_style`    | ❌  | ❌  | ❌  | ❌
-`camera`           | ✔️   | ✔️   | ❌  | `camera$1`
-`comm_config`      | ❌  | ❌  | ❌  | ❌
-`comm_link`        | ❌  | ❌  | ❌  | `comm_link$1`
-`controller`       | ✔️   | ❌  | ❌  | `controller$1`
-`detector`         | ❌  | ✔️   | ❌  | `detector$1`
-`dms`              | ✔️   | ✔️   | ✔️   | `dms$1`
-`flow_stream`      | ❌  | ✔️   | ❌  | ❌
-`gps`              | ✔️   | ✔️   | ❌  | `gps$1`
-`gate_arm`         | ❌  | ✔️   | ❌  | ❌
-`gate_arm_array`   | ✔️   | ✔️   | ❌  | `gate_arm_array$1`
-`graphic`          | ❌  | ❌  | ❌  | ❌
-`i_user`           | ❌  | ❌  | ❌  | ❌
-`incident`         | ❌  | ❌  | ❌  | ❌
-`lane_marking`     | ✔️   | ✔️   | ❌  | ❌
-`lcs_array`        | ❌  | ✔️   | ❌  | ❌
-`lcs_indication`   | ❌  | ✔️   | ❌  | ❌
-`modem`            | ❌  | ❌  | ❌  | ❌
-`msg_pattern`      | ❌  | ❌  | ❌  | ❌
-`msg_line`         | ❌  | ❌  | ❌  | ❌
-`parking_area`     | ✔️   | ❌  | ❌  | `parking_area$1`
-`permission`       | ❌  | ❌  | ❌  | ❌
-`ramp_meter`       | ✔️   | ✔️   | ❌  | `ramp_meter$1`
-❌                 | ✔️   | ❌  | ❌  | `r_node$1`
-❌                 | ❌  | ❌  | ❌  | `road$1`
-`role`             | ❌  | ❌  | ❌  | ❌
-`sign_config`      | ❌  | ❌  | ❌  | ❌
-`sign_detail`      | ❌  | ❌  | ❌  | ❌
-`sign_message`     | ❌  | ❌  | ❌  | ❌
-`system_attribute` | ❌  | ❌  | ❌  | ❌
-`tag_reader`       | ✔️   | ✔️   | ❌  | `tag_reader$1`
-`video_monitor`    | ❌  | ✔️   | ❌  | `video_monitor$1`
-`weather_sensor`   | ✔️   | ✔️   | ❌  | `weather_sensor$1`
-`word`             | ❌  | ❌  | ❌  | ❌
+CHANNEL            | (G) | (C) | (P) | (H) | Alternate
+-------------------|-----|-----|-----|-----|-----------
+`alarm`            | ❌  | ✔️   | ❌  | ❌  | ❌
+`beacon`           | ✔️   | ✔️   | ✔️   | ❌  | `beacon$1`
+`cabinet_style`    | ❌  | ❌  | ❌  | ❌  | ❌
+`camera`           | ✔️   | ✔️   | ❌  | ❌  | `camera$1`
+`comm_config`      | ❌  | ❌  | ❌  | ❌  | ❌
+`comm_link`        | ❌  | ❌  | ❌  | ❌  | `comm_link$1`
+`controller`       | ✔️   | ❌  | ❌  | ❌  | `controller$1`
+`detector`         | ❌  | ✔️   | ❌  | ❌  | `detector$1`
+`dms`              | ✔️   | ✔️   | ✔️   | ✔️   | `dms$1`
+`flow_stream`      | ❌  | ✔️   | ❌  | ❌  | ❌
+`gps`              | ✔️   | ✔️   | ❌  | ❌  | `gps$1`
+`gate_arm`         | ❌  | ✔️   | ❌  | ❌  | ❌
+`gate_arm_array`   | ✔️   | ✔️   | ❌  | ❌  | `gate_arm_array$1`
+`graphic`          | ❌  | ❌  | ❌  | ❌  | ❌
+`i_user`           | ❌  | ❌  | ❌  | ❌  | ❌
+`incident`         | ❌  | ❌  | ❌  | ❌  | ❌
+`lane_marking`     | ✔️   | ✔️   | ❌  | ❌  | ❌
+`lcs_array`        | ❌  | ✔️   | ❌  | ❌  | ❌
+`lcs_indication`   | ❌  | ✔️   | ❌  | ❌  | ❌
+`modem`            | ❌  | ❌  | ❌  | ❌  | ❌
+`msg_pattern`      | ❌  | ❌  | ❌  | ❌  | ❌
+`msg_line`         | ❌  | ❌  | ❌  | ❌  | ❌
+`parking_area`     | ✔️   | ❌  | ❌  | ❌  | `parking_area$1`
+`permission`       | ❌  | ❌  | ❌  | ❌  | ❌
+`ramp_meter`       | ✔️   | ✔️   | ✔️   | ❌  | `ramp_meter$1`
+❌                 | ✔️   | ❌  | ❌  | ❌  | `r_node$1`
+❌                 | ❌  | ❌  | ❌  | ❌  | `road$1`
+`role`             | ❌  | ❌  | ❌  | ❌  | ❌
+`sign_config`      | ❌  | ❌  | ❌  | ❌  | ❌
+`sign_detail`      | ❌  | ❌  | ❌  | ❌  | ❌
+`sign_message`     | ❌  | ❌  | ❌  | ❌  | ❌
+`system_attribute` | ❌  | ❌  | ❌  | ❌  | ❌
+`tag_reader`       | ✔️   | ✔️   | ❌  | ❌  | `tag_reader$1`
+`video_monitor`    | ❌  | ✔️   | ❌  | ❌  | `video_monitor$1`
+`weather_sensor`   | ✔️   | ✔️   | ❌  | ❌  | `weather_sensor$1`
+`word`             | ❌  | ❌  | ❌  | ❌  | ❌
 
 ## Backup & Restore
 

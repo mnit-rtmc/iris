@@ -1510,10 +1510,6 @@ CREATE TABLE iris.controller_io (
     UNIQUE (controller, pin)
 );
 
-CREATE TRIGGER controller_io_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.controller_io
-    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
-
 CREATE TRIGGER resource_notify_trig
     AFTER UPDATE ON iris.controller_io
     FOR EACH ROW EXECUTE FUNCTION iris.resource_notify();
@@ -1521,7 +1517,7 @@ CREATE TRIGGER resource_notify_trig
 CREATE FUNCTION iris.controller_io_delete() RETURNS TRIGGER AS
     $controller_io_delete$
 BEGIN
-    DELETE FROM iris._device_preset WHERE name = OLD.name;
+    DELETE FROM iris.device_preset WHERE name = OLD.name;
     DELETE FROM iris.controller_io WHERE name = OLD.name;
     IF FOUND THEN
         RETURN OLD;
@@ -1935,29 +1931,34 @@ CREATE VIEW camera_video_event_view AS
 GRANT SELECT ON camera_video_event_view TO PUBLIC;
 
 CREATE TABLE iris.camera_preset (
-	name VARCHAR(20) PRIMARY KEY,
-	camera VARCHAR(20) NOT NULL REFERENCES iris._camera,
-	preset_num INTEGER NOT NULL CHECK (preset_num > 0 AND preset_num <= 12),
-	direction SMALLINT REFERENCES iris.direction(id),
-	UNIQUE(camera, preset_num)
+    name VARCHAR(20) PRIMARY KEY,
+    camera VARCHAR(20) NOT NULL REFERENCES iris._camera,
+    preset_num INTEGER NOT NULL CHECK (preset_num > 0 AND preset_num <= 12),
+    direction SMALLINT REFERENCES iris.direction(id),
+    UNIQUE(camera, preset_num)
 );
 
-CREATE TABLE iris._device_preset (
-	name VARCHAR(20) PRIMARY KEY,
-	preset VARCHAR(20) UNIQUE REFERENCES iris.camera_preset(name)
+CREATE TABLE iris.device_preset (
+    name VARCHAR(20) PRIMARY KEY,
+    resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
+    preset VARCHAR(20) UNIQUE REFERENCES iris.camera_preset(name)
 );
+
+CREATE TRIGGER resource_notify_trig
+    AFTER UPDATE ON iris.device_preset
+    FOR EACH ROW EXECUTE FUNCTION iris.resource_notify();
 
 CREATE VIEW camera_preset_view AS
-	SELECT cp.name, camera, preset_num, direction, dp.name AS device
-	FROM iris.camera_preset cp
-	JOIN iris._device_preset dp ON cp.name = dp.preset;
+    SELECT cp.name, camera, preset_num, direction, p.name AS device
+    FROM iris.camera_preset cp
+    JOIN iris.device_preset p ON cp.name = p.preset;
 GRANT SELECT ON camera_preset_view TO PUBLIC;
 
 CREATE TABLE iris.camera_action (
-	name VARCHAR(30) PRIMARY KEY,
-	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	preset VARCHAR(20) NOT NULL REFERENCES iris.camera_preset,
-	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
+    name VARCHAR(30) PRIMARY KEY,
+    action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+    preset VARCHAR(20) NOT NULL REFERENCES iris.camera_preset,
+    phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
 --
@@ -2103,15 +2104,15 @@ CREATE VIEW iris.beacon AS
            ext_mode, preset, state
     FROM iris._beacon b
     JOIN iris.controller_io cio ON b.name = cio.name
-    JOIN iris._device_preset p ON b.name = p.name;
+    JOIN iris.device_preset p ON b.name = p.name;
 
 CREATE FUNCTION iris.beacon_insert() RETURNS TRIGGER AS
     $beacon_insert$
 BEGIN
     INSERT INTO iris.controller_io (name, resource_n, controller, pin)
         VALUES (NEW.name, 'beacon', NEW.controller, NEW.pin);
-    INSERT INTO iris._device_preset (name, preset)
-        VALUES (NEW.name, NEW.preset);
+    INSERT INTO iris.device_preset (name, resource_n, preset)
+        VALUES (NEW.name, 'beacon', NEW.preset);
     INSERT INTO iris._beacon (name, geo_loc, notes, message, verify_pin,
                               ext_mode, state)
         VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.message,
@@ -2131,7 +2132,7 @@ BEGIN
        SET controller = NEW.controller,
            pin = NEW.pin
      WHERE name = OLD.name;
-    UPDATE iris._device_preset
+    UPDATE iris.device_preset
        SET preset = NEW.preset
      WHERE name = OLD.name;
     UPDATE iris._beacon
@@ -2928,15 +2929,15 @@ CREATE VIEW iris.dms AS
            msg_user, msg_sched, msg_current, expire_time, status, stuck_pixels
     FROM iris._dms d
     JOIN iris.controller_io cio ON d.name = cio.name
-    JOIN iris._device_preset p ON d.name = p.name;
+    JOIN iris.device_preset p ON d.name = p.name;
 
 CREATE FUNCTION iris.dms_insert() RETURNS TRIGGER AS
     $dms_insert$
 BEGIN
     INSERT INTO iris.controller_io (name, resource_n, controller, pin)
          VALUES (NEW.name, 'dms', NEW.controller, NEW.pin);
-    INSERT INTO iris._device_preset (name, preset)
-         VALUES (NEW.name, NEW.preset);
+    INSERT INTO iris.device_preset (name, resource_n, preset)
+         VALUES (NEW.name, 'dms', NEW.preset);
     INSERT INTO iris._dms (
         name, geo_loc, notes, gps, static_graphic, beacon,
         sign_config, sign_detail, msg_user, msg_sched, msg_current,
@@ -2962,7 +2963,7 @@ BEGIN
        SET controller = NEW.controller,
            pin = NEW.pin
      WHERE name = OLD.name;
-    UPDATE iris._device_preset
+    UPDATE iris.device_preset
        SET preset = NEW.preset
      WHERE name = OLD.name;
     UPDATE iris._dms
@@ -3010,8 +3011,9 @@ CREATE VIEW dms_message_view AS
     SELECT d.name, msg_current, cc.description AS condition,
            fail_time IS NOT NULL AS failed, multi, msg_owner, flash_beacon,
            msg_priority, duration, expire_time
-    FROM iris.dms d
-    LEFT JOIN iris.controller c ON d.controller = c.name
+    FROM iris._dms d
+    LEFT JOIN iris.controller_io cio ON d.name = cio.name
+    LEFT JOIN iris.controller c ON cio.controller = c.name
     LEFT JOIN iris.condition cc ON c.condition = cc.id
     LEFT JOIN iris.sign_message sm ON d.msg_current = sm.name;
 GRANT SELECT ON dms_message_view TO PUBLIC;
@@ -4614,15 +4616,15 @@ CREATE VIEW iris.ramp_meter AS
            max_wait, algorithm, am_target, pm_target, beacon, preset, m_lock
     FROM iris._ramp_meter m
     JOIN iris.controller_io cio ON m.name = cio.name
-    JOIN iris._device_preset p ON m.name = p.name;
+    JOIN iris.device_preset p ON m.name = p.name;
 
 CREATE FUNCTION iris.ramp_meter_insert() RETURNS TRIGGER AS
     $ramp_meter_insert$
 BEGIN
     INSERT INTO iris.controller_io (name, resource_n, controller, pin)
          VALUES (NEW.name, 'ramp_meter', NEW.controller, NEW.pin);
-    INSERT INTO iris._device_preset (name, preset)
-         VALUES (NEW.name, NEW.preset);
+    INSERT INTO iris.device_preset (name, resource_n, preset)
+         VALUES (NEW.name, 'ramp_meter', NEW.preset);
     INSERT INTO iris._ramp_meter (
         name, geo_loc, notes, meter_type, storage, max_wait, algorithm,
         am_target, pm_target, beacon, m_lock
@@ -4646,7 +4648,7 @@ BEGIN
        SET controller = NEW.controller,
            pin = NEW.pin
      WHERE name = OLD.name;
-    UPDATE iris._device_preset
+    UPDATE iris.device_preset
        SET preset = NEW.preset
      WHERE name = OLD.name;
     UPDATE iris._ramp_meter
