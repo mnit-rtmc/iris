@@ -3,11 +3,12 @@
 //! rendzina is for rendering DMS sign messages to .gif files
 #![forbid(unsafe_code)]
 
+use fstr::FStr;
 use gift::block::DisposalMethod;
 use gift::{Decoder, Encoder, Step};
 use ntcip::dms::config::{MultiCfg, SignCfg, VmsCfg};
 use ntcip::dms::multi::{Color, ColorScheme, JustificationPage, SyntaxError};
-use ntcip::dms::{ifnt, Dms, Font, Graphic, Page, Pages};
+use ntcip::dms::{tfon, Dms, Font, Graphic, Page, Pages};
 use pix::bgr::SBgr8;
 use pix::chan::Ch8;
 use pix::el::Pixel;
@@ -40,7 +41,7 @@ pub enum Error {
     Json(#[from] serde_json::Error),
 
     #[error("Font: {0}")]
-    Font(#[from] ifnt::IfntError),
+    Font(#[from] tfon::Error),
 
     #[error("Syntax: {0}")]
     Syntax(#[from] SyntaxError),
@@ -133,9 +134,9 @@ fn rgb_from_i32(rgb: i32) -> (u8, u8, u8) {
     (r, g, b)
 }
 
-/// Load a font from an ifnt
+/// Load a font from a tfon file
 pub fn load_font<R: Read>(reader: R) -> Result<Font> {
-    Ok(ifnt::read(reader)?)
+    Ok(tfon::read(reader)?)
 }
 
 /// Load a graphic from a GIF
@@ -144,7 +145,7 @@ pub fn load_graphic<R: Read>(reader: R, number: u8) -> Result<Graphic> {
     match Decoder::new(reader).into_steps().next() {
         Some(step) => {
             let step = step?;
-            let name = format!("G{number}");
+            let name = FStr::from_str_lossy(&format!("G{number}"), 0);
             let raster: Raster<SBgr8> = Raster::with_raster(step.raster());
             let height = raster.height().try_into().unwrap();
             let width = raster.width().try_into().unwrap();
@@ -169,7 +170,7 @@ pub fn load_graphic<R: Read>(reader: R, number: u8) -> Result<Graphic> {
 /// Render a sign message to a .gif file
 pub fn render<W: Write>(
     mut writer: W,
-    dms: &Dms<24, 32>,
+    dms: &Dms<256, 24, 32>,
     multi: &str,
     max_width: Option<u16>,
     max_height: Option<u16>,
@@ -212,7 +213,11 @@ pub fn render<W: Write>(
 }
 
 /// Calculate size to render DMS "face"
-fn face_size(dms: &Dms<24, 32>, max_width: u16, max_height: u16) -> (u16, u16) {
+fn face_size(
+    dms: &Dms<256, 24, 32>,
+    max_width: u16,
+    max_height: u16,
+) -> (u16, u16) {
     let fw = dms.face_width_mm();
     let fh = dms.face_height_mm();
     if fw > 0.0 && fh > 0.0 {
@@ -246,7 +251,7 @@ fn make_palette(raster: &Raster<SRgb8>) -> Palette {
 
 /// Make a raster of sign face
 fn make_face_raster(
-    dms: &Dms<24, 32>,
+    dms: &Dms<256, 24, 32>,
     raster: Raster<SRgb8>,
     width: u16,
     height: u16,

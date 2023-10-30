@@ -13,7 +13,7 @@ fnv = "1.0"
 humantime = "2.1"
 js-sys = "0.3"
 mag = "0.5"
-ntcip = "0.10"
+ntcip = "0.11"
 percent-encoding = "2"
 rendzina = { path = "../rendzina" }
 serde = { version = "1", features = ["derive"] }

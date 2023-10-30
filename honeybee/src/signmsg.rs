@@ -63,7 +63,7 @@ struct SignMessage {
 
 /// Data needed for rendering sign messages
 struct MsgData {
-    fonts: FontTable<24>,
+    fonts: FontTable<256, 24>,
     graphics: GraphicTable<32>,
     configs: HashMap<String, SignConfig>,
 }
@@ -83,15 +83,15 @@ impl SignMessage {
 }
 
 /// Load fonts from a JSON file
-fn load_fonts(dir: &Path) -> Result<FontTable<24>> {
+fn load_fonts(dir: &Path) -> Result<FontTable<256, 24>> {
     log::debug!("load_fonts");
     let mut path = PathBuf::new();
     path.push(dir);
     path.push("api");
-    path.push("ifnt");
-    let mut cache = Cache::new(&path, "ifnt")?;
+    path.push("tfon");
+    let mut cache = Cache::new(&path, "tfon")?;
     let mut fonts = FontTable::default();
-    path.push("_placeholder_.ifnt");
+    path.push("_placeholder_.tfon");
     for nm in cache.drain() {
         path.set_file_name(nm);
         let file =

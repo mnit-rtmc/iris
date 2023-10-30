@@ -7,7 +7,7 @@ contain only printable ASCII characters (U+0020 to U+007E).
 <summary>API Resources</summary>
 
 * `iris/api/font`
-* `iris/api/ifnt/{name}.ifnt`
+* `iris/api/tfon/{name}.tfon`
 
 Attribute [permissions]:
 
@@ -53,11 +53,11 @@ _† Normally font number is the same as pixel height, but variations use
 
 Numbers 1-4 are reserved for **permanent** fonts used by some signs.
 
-To import a font into the IRIS database, use ifnt_import.py (in `bin`
+To import a font into the IRIS database, use tfon_import.py (in `bin`
 directory):
 
 ```
-ifnt_import.py [font file] | psql tms
+tfon_import.py [font file] | psql tms
 ```
 
 ### Non-ASCII Characters

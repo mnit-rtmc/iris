@@ -8,9 +8,10 @@ edition.workspace = true
 [dependencies]
 anyhow = "1.0"
 base64 = "0.13"
+fstr = "0.2"
 gift = "0.10"
 log = "0.4"
-ntcip = "0.10"
+ntcip = "0.11"
 pix = "0.13"
 pointy = "0.3"
 postgres = "0.19"

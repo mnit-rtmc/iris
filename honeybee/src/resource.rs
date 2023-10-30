@@ -16,9 +16,10 @@ use crate::files::AtomicFile;
 use crate::segments::{RNode, Road, SegMsg};
 use crate::signmsg::render_all;
 use crate::Result;
+use fstr::FStr;
 use gift::{Encoder, Step};
 use ntcip::dms::multi::Color;
-use ntcip::dms::{ifnt, CharacterEntry, Font, Graphic};
+use ntcip::dms::{tfon, CharacterEntry, Font, Graphic};
 use pix::{rgb::SRgb8, Palette};
 use postgres::Client;
 use serde_derive::Deserialize;
@@ -73,17 +74,21 @@ impl From<Glyph> for CharacterEntry {
     }
 }
 
-impl From<FontRes> for Font {
+impl<const C: usize> From<FontRes> for Font<C> {
     fn from(fr: FontRes) -> Self {
-        let characters =
-            fr.glyphs.into_iter().map(CharacterEntry::from).collect();
+        let mut glyphs = fr.glyphs.into_iter();
         Font {
             number: fr.f_number,
-            name: fr.name,
+            name: FStr::from_str_lossy(&fr.name, 0),
             height: fr.height,
             char_spacing: fr.char_spacing,
             line_spacing: fr.line_spacing,
-            characters,
+            characters: std::array::from_fn(|_i| {
+                match glyphs.next() {
+                    Some(glyph) => CharacterEntry::from(glyph),
+                    None => CharacterEntry::default(),
+                }
+            }),
         }
     }
 }
@@ -101,7 +106,7 @@ impl From<GraphicRes> for Graphic {
         };
         Graphic {
             number: gr.number,
-            name: gr.name,
+            name: FStr::from_str_lossy(&gr.name, 0),
             height: gr.height,
             width: gr.width,
             gtype: gr.color_scheme[..].into(),
@@ -1085,16 +1090,16 @@ impl Resource {
     fn fetch_fonts(self, client: &mut Client) -> Result<()> {
         log::debug!("fetch_fonts");
         let t = Instant::now();
-        let dir = Path::new("api/ifnt");
+        let dir = Path::new("api/tfon");
         let mut count = 0;
         let sql = self.sql();
         for row in &client.query(sql, &[])? {
             let font: FontRes = serde_json::from_str(row.get(0))?;
-            let font = Font::from(font);
-            let name = format!("{}.ifnt", font.name);
+            let font: Font<256> = font.into();
+            let name = format!("{}.tfon", font.name);
             let file = AtomicFile::new(dir, &name)?;
             let writer = file.writer()?;
-            if let Err(e) = ifnt::write(writer, &font) {
+            if let Err(e) = tfon::write(writer, &font) {
                 log::error!("fetch_fonts {name}: {e:?}");
                 let _res = file.cancel();
             }

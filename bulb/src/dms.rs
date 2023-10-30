@@ -22,7 +22,7 @@ use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use fnv::FnvHasher;
 use js_sys::{ArrayBuffer, Uint8Array};
 use ntcip::dms::multi::{join_text, trim_end_tags};
-use ntcip::dms::{ifnt, Font, FontTable, GraphicTable, MessagePattern};
+use ntcip::dms::{tfon, Font, FontTable, GraphicTable, MessagePattern};
 use rendzina::{load_graphic, SignConfig};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -32,7 +32,7 @@ use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{console, HtmlElement, HtmlSelectElement};
 
 /// Ntcip DMS sign
-type Sign = ntcip::dms::Dms<24, 32>;
+type Sign = ntcip::dms::Dms<256, 24, 32>;
 
 /// Low 1 message priority
 const LOW_1: u32 = 1;
@@ -182,7 +182,7 @@ pub struct DmsAnc {
     lines: Vec<MsgLine>,
     words: Vec<Word>,
     fnames: Vec<FontName>,
-    fonts: FontTable<24>,
+    fonts: FontTable<256, 24>,
     gnames: Vec<GraphicName>,
     graphics: GraphicTable<32>,
 }
@@ -209,7 +209,7 @@ impl AncillaryData for DmsAnc {
         if !self.fnames.is_empty() {
             for fname in &self.fnames {
                 uris.push(
-                    Uri::from(format!("/iris/api/ifnt/{}.ifnt", fname.name))
+                    Uri::from(format!("/iris/api/tfon/{}.tfon", fname.name))
                         .with_content_type(ContentType::Text),
                 );
             }
@@ -285,9 +285,9 @@ impl AncillaryData for DmsAnc {
                 return Ok(!self.gnames.is_empty());
             }
             _ => {
-                if uri.as_str().ends_with(".ifnt") {
+                if uri.as_str().ends_with(".tfon") {
                     let font: String = serde_wasm_bindgen::from_value(data)?;
-                    let font = ifnt::read(font.as_bytes())?;
+                    let font = tfon::read(font.as_bytes())?;
                     if let Some(f) = self.fonts.font_mut(font.number) {
                         *f = font;
                     } else if let Some(f) = self.fonts.font_mut(0) {

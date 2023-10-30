@@ -346,7 +346,7 @@
 		</copy>
 		<mkdir dir="${install.dir}/var/lib/iris/fonts"/>
 		<copy todir="${install.dir}/var/lib/iris/fonts">
-			<fileset file="${fonts.dir}/*.ifnt"/>
+			<fileset file="${fonts.dir}/*.tfon"/>
 		</copy>
 		<mkdir dir="${install.dir}/var/lib/iris/meter"/>
 		<mkdir dir="${install.dir}/var/lib/iris/traffic"/>

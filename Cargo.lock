@@ -917,6 +917,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "fstr"
+version = "0.2.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "216b237751771e36a50569fb4a50f58a9656d9561fcaeba45afe09633a8f8355"
+
+[[package]]
 name = "futures-channel"
 version = "0.3.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1147,6 +1153,7 @@ dependencies = [
  "anyhow",
  "base64 0.13.1",
  "env_logger 0.9.3",
+ "fstr",
  "gift",
  "log",
  "ntcip",
@@ -1388,14 +1395,16 @@ dependencies = [
 
 [[package]]
 name = "ntcip"
-version = "0.10.2"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e680c808fc574e37e03fe0a28e746872b436168f1295b45e6bf9fee6f5d3fa9d"
+checksum = "e79d4318a0c0f20a0ebd55c643d5e1f41ab6c8bb581cf0089bbd4861edf0a61c"
 dependencies = [
  "crc",
  "enumflags2",
+ "fstr",
  "log",
  "pix",
+ "tfon",
  "thiserror",
 ]
 
@@ -1801,6 +1810,7 @@ checksum = "c08c74e62047bb2de4ff487b251e4a92e24f48745648451635cec7d591162d9f"
 name = "rendzina"
 version = "5.47.0"
 dependencies = [
+ "fstr",
  "gift",
  "log",
  "ntcip",
@@ -2283,6 +2293,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6093bad37da69aab9d123a8091e4be0aa4a03e4d601ec641c327398315f62b64"
 dependencies = [
  "winapi-util",
+]
+
+[[package]]
+name = "tfon"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d46930437b38cd27f0ff4741bead8770ba2bb244839509ec057d038efec95ffd"
+dependencies = [
+ "thiserror",
 ]
 
 [[package]]
