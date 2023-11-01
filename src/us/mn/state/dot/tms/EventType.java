@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2023  Minnesota Department of Transportation
  * Copyright (C) 2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -42,8 +42,7 @@ public enum EventType {
 	GATE_ARM_OPEN(304), GATE_ARM_WARN_CLOSE(305), GATE_ARM_CLOSING(306),
 	GATE_ARM_CLOSED(307),
 	METER_EVENT(401),
-	// NOTE: BEACON_OFF_EVENT is no longer used
-	BEACON_EVENT(501), BEACON_OFF_EVENT(502),
+	BEACON_EVENT(501),
 	TAG_READ(601),
 	PRICE_DEPLOYED(651), PRICE_VERIFIED(652),
 	// NOTE: TT_NO_DATA is no longer used

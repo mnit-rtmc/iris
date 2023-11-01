@@ -310,4 +310,11 @@ $controller_io_delete$ LANGUAGE plpgsql;
 
 DROP TABLE iris._device_preset;
 
+-- Rename event: Beacon ON => Beacon STATE
+UPDATE event.event_description
+    SET description = 'Beacon STATE'
+    WHERE event_desc_id = 501;
+-- Remove Beacon OFF event
+DELETE FROM event.event_description WHERE event_desc_id = 502;
+
 COMMIT;

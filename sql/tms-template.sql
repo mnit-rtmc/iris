@@ -80,8 +80,7 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 306	Gate Arm CLOSING
 307	Gate Arm CLOSED
 401	Meter event
-501	Beacon ON
-502	Beacon OFF
+501	Beacon STATE
 601	Tag Read
 651	Price DEPLOYED
 652	Price VERIFIED
