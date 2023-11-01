@@ -317,4 +317,7 @@ UPDATE event.event_description
 -- Remove Beacon OFF event
 DELETE FROM event.event_description WHERE event_desc_id = 502;
 
+-- Remove TT_NO_DATA event
+DELETE FROM event.event_description WHERE event_desc_id = 702;
+
 COMMIT;

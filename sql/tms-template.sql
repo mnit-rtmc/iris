@@ -85,7 +85,6 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 651	Price DEPLOYED
 652	Price VERIFIED
 701	TT Link too long
-702	TT No data
 703	TT No destination data
 704	TT No origin data
 705	TT No route

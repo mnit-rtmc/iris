@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2021  Minnesota Department of Transportation
+ * Copyright (C) 2016-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,6 @@ public class TravelTimeEvent extends BaseEvent {
 	public TravelTimeEvent(EventType e, String d, String sid) {
 		super(e);
 		assert EventType.TT_LINK_TOO_LONG       == e ||
-		       EventType.TT_NO_DATA             == e ||
 		       EventType.TT_NO_DESTINATION_DATA == e ||
 		       EventType.TT_NO_ORIGIN_DATA      == e ||
 		       EventType.TT_NO_ROUTE            == e;
