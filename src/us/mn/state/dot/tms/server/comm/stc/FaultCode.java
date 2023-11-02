@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ package us.mn.state.dot.tms.server.comm.stc;
  * @author Douglas Lau
  */
 public enum FaultCode {
+	FAL_UNKNOWN			(-1),
 	FAL1_RUN_TIMEOUT		(0),
 	FAL2_PHOTO_EYE			(1),
 	FAL3_VOLTAGE_SAG		(2),
