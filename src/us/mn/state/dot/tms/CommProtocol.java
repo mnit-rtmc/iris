@@ -2,7 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2021  Minnesota Department of Transportation
  * Copyright (C) 2012-2021  Iteris Inc.
- * Copyright (C) 2015-2022  SRF Consulting Group
+ * Copyright (C) 2015-2023  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -164,7 +164,10 @@ public enum CommProtocol {
 	CAP("CAP Feed", false),
 
 	/** ClearGuide (43) */
-	CLEARGUIDE("ClearGuide", false);
+	CLEARGUIDE("ClearGuide", false),
+
+	/** GPS using Digi WR-series modem (44) */
+	GPS_DIGI_WR("GPS Digi WR", false);
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {
