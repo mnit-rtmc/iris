@@ -720,8 +720,32 @@ public class MultiString {
 		return multi.endsWith(tr[0]) ? tr[0] : null;
 	}
 
+	/** Get "combining shared" text rectangle (if any) */
+	public String combiningSharedTextRectangle() {
+		String tr = startingTextRectangle();
+		return (tr != null)
+		    && eachPageStartsWith(tr)
+		    && hasOneTextRectPerPage()
+			? tr
+			: null;
+	}
+
+	/** Check for (and return) starting text rectangle tag */
+	private String startingTextRectangle() {
+		final String[] tr = new String[] { "[TR]" };
+		parse(new MultiAdapter() {
+			@Override public void setTextRectangle(int x, int y,
+				int w, int h)
+			{
+				tr[0] = "[tr" + x + ',' + y + ',' + w + ',' +
+					h + ']';
+			}
+		});
+		return multi.startsWith(tr[0]) ? tr[0] : null;
+	}
+
 	/** Check if each page starts with the given tag */
-	public boolean eachPageStartsWith(String tag) {
+	boolean eachPageStartsWith(String tag) {
 		for (String page: getPages()) {
 			if (!page.startsWith(tag))
 				return false;
@@ -730,7 +754,7 @@ public class MultiString {
 	}
 
 	/** Check that a message has exactly one text rectangle per page */
-	public boolean hasOneTextRectPerPage() {
+	boolean hasOneTextRectPerPage() {
 		final int[] tr = new int[1];
 		parse(new MultiAdapter() {
 			@Override public void addPage() {

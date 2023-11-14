@@ -88,22 +88,22 @@ public class MsgPatternHelper extends BaseHelper {
 		return ms.isValidMulti();
 	}
 
-	/** Compare two message patterns, preferring those with a trailing
-	 * text rectangle.
+	/** Compare two message patterns, preferring those which can be
+	 * combined with a scheduled message (shared combining).
 	 * @return "Better" of the provided patterns. */
 	static public MsgPattern better(MsgPattern p0, MsgPattern p1) {
 		if (p0 == null)
 			return p1;
 		if (p1 == null)
 			return p0;
-		String t0 = new MultiString(p0.getMulti())
-			.trailingTextRectangle();
-		String t1 = new MultiString(p1.getMulti())
-			.trailingTextRectangle();
-		if (t0 == null && t1 != null)
-			return p1;
-		else if (t1 == null && t0 != null)
+		String tr0 = new MultiString(p0.getMulti())
+			.combiningSharedTextRectangle();
+		String tr1 = new MultiString(p1.getMulti())
+			.combiningSharedTextRectangle();
+		if (tr0 != null && tr1 == null)
 			return p0;
+		else if (tr0 == null && tr1 != null)
+			return p1;
 		else {
 			int l0 = p0.getMulti().length();
 			int l1 = p1.getMulti().length();
