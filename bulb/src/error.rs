@@ -10,8 +10,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use ntcip::dms::tfon;
 use ntcip::dms::multi::SyntaxError;
+use ntcip::dms::tfon;
 
 /// Bulb errors
 #[derive(Debug, thiserror::Error)]

@@ -21,10 +21,11 @@ use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, OptVal};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use fnv::FnvHasher;
 use js_sys::{ArrayBuffer, Uint8Array};
-use ntcip::dms::multi::{join_text, trim_end_tags};
+use ntcip::dms::multi::{join_text, split as multi_split, trim_end_tags};
 use ntcip::dms::{tfon, Font, FontTable, GraphicTable, MessagePattern};
 use rendzina::{load_graphic, SignConfig};
 use serde::{Deserialize, Serialize};
+use std::cmp::Ordering;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::iter::repeat;
@@ -132,7 +133,7 @@ pub struct SignMessage {
 }
 
 /// Message Pattern
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
 pub struct MsgPattern {
     pub name: String,
     pub compose_hashtag: Option<String>,
@@ -185,6 +186,69 @@ pub struct DmsAnc {
     fonts: FontTable<256, 24>,
     gnames: Vec<GraphicName>,
     graphics: GraphicTable<32>,
+}
+
+impl PartialOrd for MsgPattern {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for MsgPattern {
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self == other {
+            return Ordering::Equal;
+        }
+        // prefer patterns which can be conbined (shared)
+        let self_combine = self.can_combine_shared_second();
+        let other_combine = other.can_combine_shared_second();
+        if self_combine && !other_combine {
+            return Ordering::Less;
+        } else if other_combine && !self_combine {
+            return Ordering::Greater;
+        }
+        let len_ord = self.multi.len().cmp(&other.multi.len());
+        if len_ord != Ordering::Equal {
+            return len_ord;
+        }
+        let ms_ord = self.multi.cmp(&other.multi);
+        if ms_ord != Ordering::Equal {
+            ms_ord
+        } else {
+            self.name.cmp(&other.name)
+        }
+    }
+}
+
+impl MsgPattern {
+    // Check if pattern can combine (shared) in second position
+    fn can_combine_shared_second(&self) -> bool {
+        let mut it = multi_split(&self.multi);
+        // check that:
+        // - the first value is a text rectangle
+        // - the same text rectangle starts every page
+        // - there are no other text rectangles
+        if let Some(first) = it.next() {
+            if first.starts_with("[tr") {
+                let mut tr_this_page = true;
+                for val in it {
+                    if tr_this_page {
+                        if val.starts_with("[tr") {
+                            return false;
+                        } else if val == "[np]" {
+                            tr_this_page = false;
+                        }
+                    } else if val == first {
+                        tr_this_page = true;
+                    } else {
+                        return false;
+                    }
+                }
+                return tr_this_page;
+            }
+        }
+        false
+    }
 }
 
 const SIGN_MSG_URI: &str = "/iris/sign_message";
@@ -258,6 +322,7 @@ impl AncillaryData for DmsAnc {
                         .as_ref()
                         .is_some_and(|h| pri.has_hashtag(h))
                 });
+                patterns.sort();
                 self.compose_patterns = patterns;
             }
             MSG_LINE_URI => {
@@ -709,22 +774,42 @@ impl Dms {
         };
         let mut html = String::new();
         html.push_str("<div id='mc_grid'>");
-        let pat = anc.compose_patterns.first();
-        if let Some(pat) = pat {
-            // FIXME: if current_multi fits pattern, use it instaed
+        let pat_def = self.pattern_default(anc);
+        if let Some(pat) = pat_def {
             render_preview(&mut html, &sign, &pat.multi);
         }
         html.push_str("<select id='mc_pattern'>");
         for pat in &anc.compose_patterns {
-            html.push_str("<option>");
+            html.push_str("<option");
+            if let Some(p) = pat_def {
+                if p.name == pat.name {
+                    html.push_str(" selected");
+                }
+            }
+            html.push('>');
             html.push_str(&pat.name);
         }
         html.push_str("</select>");
-        html.push_str(&anc.make_lines(&sign, pat, self.current_multi(anc)));
+        html.push_str(&anc.make_lines(&sign, pat_def, self.current_multi(anc)));
         html.push_str(SEND_BUTTON);
         html.push_str(BLANK_BUTTON);
         html.push_str("</div>");
         Some(html)
+    }
+
+    /// Get the pattern which should be selected by default
+    fn pattern_default<'a>(&self, anc: &'a DmsAnc) -> Option<&'a MsgPattern> {
+        let multi = self.current_multi(anc);
+        let mut best: Option<&MsgPattern> = None;
+        for pat in &anc.compose_patterns {
+            if pat.multi == multi {
+                return Some(pat);
+            }
+            if best.is_none() {
+                best = Some(pat);
+            }
+        }
+        best
     }
 
     /// Convert to Edit HTML
