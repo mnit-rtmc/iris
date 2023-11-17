@@ -83,11 +83,9 @@ impl<const C: usize> From<FontRes> for Font<C> {
             height: fr.height,
             char_spacing: fr.char_spacing,
             line_spacing: fr.line_spacing,
-            characters: std::array::from_fn(|_i| {
-                match glyphs.next() {
-                    Some(glyph) => CharacterEntry::from(glyph),
-                    None => CharacterEntry::default(),
-                }
+            characters: std::array::from_fn(|_i| match glyphs.next() {
+                Some(glyph) => CharacterEntry::from(glyph),
+                None => CharacterEntry::default(),
             }),
         }
     }
