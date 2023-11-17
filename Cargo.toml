@@ -14,4 +14,7 @@ codegen-units = 1
 panic = "abort"
 strip = "symbols"
 
+[workspace.dependencies]
+ntcip = "0.12"
+
 [patch.crates-io]
