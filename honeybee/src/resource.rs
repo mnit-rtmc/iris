@@ -1094,7 +1094,7 @@ impl Resource {
         for row in &client.query(sql, &[])? {
             let font: FontRes = serde_json::from_str(row.get(0))?;
             let font: Font<256> = font.into();
-            let name = format!("{}.tfon", font.name);
+            let name = format!("{}.tfon", font.name.slice_to_terminator('\0'));
             let file = AtomicFile::new(dir, &name)?;
             let writer = file.writer()?;
             if let Err(e) = tfon::write(writer, &font) {
