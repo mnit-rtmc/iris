@@ -6,7 +6,7 @@ statements to import the font into IRIS.'''
 from sys import argv, exit
 from base64 import b64encode
 
-HEADER = """\set ON_ERROR_STOP
+HEADER = r"""\set ON_ERROR_STOP
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 """
@@ -16,7 +16,7 @@ HFONT = """INSERT INTO iris.font (
 """
 COPY = "COPY iris.glyph (name, font, code_point, width, pixels) FROM stdin;"
 COPY_GLYPH = "%s_%s\t%s\t%s\t%s\t%s"
-FOOTER = """\.
+FOOTER = r"""\.
 
 COMMIT;"""
 
@@ -81,7 +81,7 @@ def parse_glyph(name, height, width, lines):
         else:
             assert width == len(row)
         for b in row:
-            if b == 'X':
+            if b == '@':
                 bits |= bit_mask
             bit_mask >>= 1
             if bit_mask == 0:
