@@ -1296,6 +1296,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 41	Streambed
 42	CAP Feed
 43	ClearGuide
+44	GPS Digi WR
 \.
 
 CREATE TABLE iris.comm_config (

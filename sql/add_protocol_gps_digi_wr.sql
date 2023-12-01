@@ -3,6 +3,6 @@
 SET SESSION AUTHORIZATION 'tms';
 
 -- Reserve protocol value for GPS Digi WR modem
-INSERT INTO iris.comm_protocol (id, description) VALUES (44, 'GPS Digi RW');
+INSERT INTO iris.comm_protocol (id, description) VALUES (44, 'GPS Digi WR');
 
 COMMIT;
