@@ -188,6 +188,6 @@ public class LensPanel extends JPanel {
 		iris_open_btn.setEnabled(e);
 		iris_close_btn.setEnabled(e);
 		wiper_btn.setEnabled(e);
-		reset_btn.setEnabled(false); // FIXME
+		reset_btn.setEnabled(e);
 	}
 }
