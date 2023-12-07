@@ -164,7 +164,10 @@ public enum CommProtocol {
 	CAP("CAP Feed", false),
 
 	/** ClearGuide (43) */
-	CLEARGUIDE("ClearGuide", false);
+	CLEARGUIDE("ClearGuide", false),
+
+	/** ONVIF PTZ (44) */
+	ONVIF_PTZ("ONVIF PTZ");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {

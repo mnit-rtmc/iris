@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.server.comm.cap.CapPoller;
 import us.mn.state.dot.tms.server.comm.cbw.CBWPoller;
 import us.mn.state.dot.tms.server.comm.clearguide.ClearGuidePoller;
 import us.mn.state.dot.tms.server.comm.cohuptz.CohuPTZPoller;
+import us.mn.state.dot.tms.server.comm.onvifptz.OnvifPTZPoller;
 import us.mn.state.dot.tms.server.comm.dinrelay.DinRelayPoller;
 import us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller;
 import us.mn.state.dot.tms.server.comm.dr500.DR500Poller;
@@ -101,6 +102,8 @@ public class DevicePollerFactory {
 		case NTCIP_B:
 		case NTCIP_C:
 			return new NtcipPoller(link, protocol);
+		case ONVIF_PTZ:
+			return new OnvifPTZPoller(link);
 		case ORG_815:
 			return new Org815Poller(link);
 		case PELCO_D_PTZ:
