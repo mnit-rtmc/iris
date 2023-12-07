@@ -17,7 +17,7 @@ use crate::error::Result;
 use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::resource::{
-    disabled_attr, AncillaryData, Card, Resource, View, EDIT_BUTTON,
+    inactive_attr, AncillaryData, Card, Resource, View, EDIT_BUTTON,
     LOC_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select, TextArea};
@@ -278,7 +278,7 @@ impl Controller {
                 ItemState::Available
             }
         } else {
-            ItemState::Disabled
+            ItemState::Inactive
         }
     }
 
@@ -330,11 +330,11 @@ impl Controller {
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
         let item_state = self.item_state();
-        let disabled = disabled_attr(self.is_active());
+        let inactive = inactive_attr(self.is_active());
         let link_drop = HtmlStr::new(self.link_drop());
         format!(
             "<div class='{NAME} end'>{self} {item_state}</div>\
-            <div class='info fill{disabled}'>{link_drop}</div>"
+            <div class='info fill{inactive}'>{link_drop}</div>"
         )
     }
 
@@ -360,7 +360,7 @@ impl Controller {
                     HtmlStr::new(m).with_len(32),
                 )
             })
-            .unwrap_or_else(|| "".to_string());
+            .unwrap_or_default();
         let version = self
             .version()
             .map(|v| {
@@ -372,7 +372,7 @@ impl Controller {
                     HtmlStr::new(v).with_len(32),
                 )
             })
-            .unwrap_or_else(|| "".to_string());
+            .unwrap_or_default();
         let serial_num = self
             .serial_num()
             .map(|sn| {
@@ -384,7 +384,7 @@ impl Controller {
                     HtmlStr::new(sn).with_len(32),
                 )
             })
-            .unwrap_or_else(|| "".to_string());
+            .unwrap_or_default();
         let fail_time = match &self.fail_time {
             Some(fail_time) => {
                 format!(

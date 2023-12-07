@@ -48,7 +48,7 @@ This will perform the following steps:
    `/etc/iris/iris-client.properties`
 3. Create a symbolic link to the PostgreSQL JDBC driver to make it available to
    the IRIS server
-4. Create the database cluster and start the PostgreSQL server
+4. Create the [database] cluster and start the PostgreSQL server
 5. Create the `earthwyrm` databsae (for OpenStreetMap data)
 6. Create the `tms` PostgreSQL user, which IRIS uses to connect to the database
 7. Create the `tms` database and populate it using a template SQL script
@@ -130,7 +130,7 @@ software has been localized for a specific locale.
 ### Database Connection
 
 The `db.url`, `db.user` and `db.password` properties control how the IRIS server
-connects to the PostgreSQL database.  None of these properties should be
+connects to the PostgreSQL [database].  None of these properties should be
 changed, since they were configured earlier by the `iris_ctl` script.
 
 ### LDAP
@@ -181,6 +181,7 @@ login.  After [creating] and logging in with a real administrator account, the
 
 [CIDR]: https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing
 [creating]: user_roles.html
+[database]: database.html
 [Download]: http://iris.dot.state.mn.us/rpms/
 [Fedora]: http://fedoraproject.org
 [nginx]: https://nginx.org/en/

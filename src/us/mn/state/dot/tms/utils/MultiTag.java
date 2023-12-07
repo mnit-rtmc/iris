@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2022  Minnesota Department of Transportation
+ * Copyright (C) 2019-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,13 +48,14 @@ public enum MultiTag {
 	f6,  // 19: field 6 (speed -- miles per hour)
 	f7,  // 20: field 7 (day of week)
 	f8,  // 21: field 8 (day of month)
-	f9,  // 22: field 9 (year -- 2 digits)
-	f10, // 23: field 10 (year -- 4 digits)
-	f11, // 24: field 11 (local time -- 12 hour AM/PM)
-	f12, // 25: field 12 (local time -- 12 hour am/pm)
-	tr,  // 26: text rectangle
-	cr,  // 27: color rectangle
-	pb;  // 28: page background
+	f9,  // 22: field 9 (month of year)
+	f10, // 23: field 10 (year -- 2 digits)
+	f11, // 24: field 11 (year -- 4 digits)
+	f12, // 25: field 12 (local time -- 12 hour AM/PM)
+	f13, // 26: field 13 (local time -- 12 hour am/pm)
+	tr,  // 27: text rectangle
+	cr,  // 28: color rectangle
+	pb;  // 29: page background
 
 	/** Enumerated values */
 	static private final MultiTag[] VALUES = values();

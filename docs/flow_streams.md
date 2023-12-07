@@ -14,6 +14,23 @@ must exist for each streambed server.  Each flow stream must be assigned to an
 
 Select `View ➔ Video ➔ Flow Streams` menu item
 
+<details>
+<summary>API Resources</summary>
+
+* `iris/api/flow_stream`
+* `iris/api/flow_stream/{name}`
+
+Attribute [permissions]:
+
+| Access       | Minimal    | Full                       |
+|--------------|------------|----------------------------|
+| Read Only    | name       | status                     |
+| 👉 Operate   |            | camera, mon\_num           |
+| 💡 Manage    |            | restricted, address, port  |
+| 🔧 Configure | controller | pin, loc\_overlay, quality |
+
+</details>
+
 To configure a flow stream, edit the first eight fields in the table.  The
 _source_ can be a [camera] or [video monitor], but not both.
 
@@ -77,6 +94,7 @@ A static sink encoding is:
 [encoder type]: cameras.html#encoder-types
 [IO pin]: controllers.html#io-pins
 [multicast]: https://en.wikipedia.org/wiki/Multicast_address
+[permissions]: permissions.html
 [protocol]: protocols.html
 [stream]: cameras.html#streams
 [streambed]: https://github.com/mnit-rtmc/streambed

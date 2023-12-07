@@ -10,8 +10,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use ntcip::dms::font::ifnt;
 use ntcip::dms::multi::SyntaxError;
+use ntcip::dms::tfon;
 
 /// Bulb errors
 #[derive(Debug, thiserror::Error)]
@@ -22,7 +22,11 @@ pub enum Error {
 
     /// Invalid font error
     #[error("Invalid font {0}")]
-    InvalidFont(#[from] ifnt::Error),
+    InvalidFont(#[from] tfon::Error),
+
+    /// Sign rendering error
+    #[error("Rendering {0}")]
+    Render(#[from] rendzina::Error),
 
     /// MULTI syntax error
     #[error("MULTI syntax error {0}")]

@@ -99,6 +99,12 @@ SELECT name, controller, pin, restricted, loc_overlay, quality, camera, \
 FROM iris.flow_stream \
 WHERE name = $1";
 
+/// SQL query for one font
+pub const FONT: &str = "\
+SELECT f_number AS font_number, name \
+FROM iris.font \
+WHERE name = $1";
+
 /// SQL query for one gate arm
 pub const GATE_ARM: &str = "\
 SELECT g.name, location, g.ga_array, g.idx, g.controller, g.pin, g.notes, \
@@ -127,6 +133,12 @@ WHERE name = $1";
 pub const GPS: &str = "\
 SELECT name, controller, pin, notes, latest_poll, latest_sample, lat, lon \
 FROM iris.gps \
+WHERE name = $1";
+
+/// SQL query for one graphic
+pub const GRAPHIC: &str = "\
+SELECT g_number AS number, 'G' || g_number AS name \
+FROM iris.graphic \
 WHERE name = $1";
 
 /// SQL query for one lane marking
@@ -183,6 +195,32 @@ WHERE m.name = $1";
 pub const ROLE: &str = "\
 SELECT name, enabled FROM iris.role WHERE name = $1";
 
+/// SQL query for one sign configuration
+pub const SIGN_CONFIG: &str = "\
+SELECT name, face_width, face_height, border_horiz, border_vert, \
+       pitch_horiz, pitch_vert, pixel_width, pixel_height, \
+       char_width, char_height, monochrome_foreground, \
+       monochrome_background, color_scheme, default_font, \
+       module_width, module_height \
+FROM iris.sign_config \
+WHERE name = $1";
+
+/// SQL query for one sign detail
+pub const SIGN_DETAIL: &str = "\
+SELECT name, dms_type, portable, technology, sign_access, legend, \
+       beacon_type, hardware_make, hardware_model, software_make, \
+       software_model, supported_tags, max_pages, max_multi_len, \
+       beacon_activation_flag, pixel_service_flag \
+FROM iris.sign_detail \
+WHERE name = $1";
+
+/// SQL query for one sign message
+pub const SIGN_MSG: &str = "\
+SELECT name, sign_config, incident, multi, msg_owner, flash_beacon, \
+       msg_priority, duration \
+FROM iris.sign_message \
+WHERE name = $1";
+
 /// SQL query for one tag reader
 pub const TAG_READER: &str = "\
 SELECT t.name, location, geo_loc, controller, pin, notes, toll_zone, settings \
@@ -210,3 +248,9 @@ SELECT ws.name, location, geo_loc, controller, pin, site_id, alt_id, notes, \
 FROM iris.weather_sensor ws \
 LEFT JOIN geo_loc_view gl ON ws.geo_loc = gl.name \
 WHERE ws.name = $1";
+
+/// SQL query for one word
+pub const WORD: &str = "\
+SELECT name, abbr, allowed \
+FROM iris.word \
+WHERE name = $1";

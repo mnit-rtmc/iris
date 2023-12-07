@@ -23,11 +23,11 @@ Filename              | Period     | Description
 
 ## Database Event Tables
 
-There are a number of event tables in the database for logging different types
-of events.  Each of these tables has a **view** in the public DB schema.  There
-is also a **purge threshold** for each table, stored as a [system attribute].
-To disable purging older records from an event table, set the corresponding
-purge threshold to 0.
+There are a number of event tables in the [database] for logging different
+types of events.  Each of these tables has a **view** in the public DB schema.
+There is also a **purge threshold** for each table, stored as a
+[system attribute].  To disable purging older records from an event table, set
+the corresponding purge threshold to 0.
 
 View                       | Purge Threshold
 ---------------------------|----------------------
@@ -94,6 +94,7 @@ Filename               | Description
 [Canoga]: protocols.html#canoga
 [CAP]: protocols.html#cap
 [CBW]: protocols.html#cbw
+[database]: database.html
 [DIN-Relay]: protocols.html#din-relay
 [district]: installation.html#server-properties
 [DMS-XML]: protocols.html#dms-xml

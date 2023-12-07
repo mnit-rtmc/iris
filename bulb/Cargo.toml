@@ -9,9 +9,11 @@ crate-type = ["cdylib"]
 [dependencies]
 base64 = "0.21"
 console_error_panic_hook = "0.1"
+fnv = "1.0"
 humantime = "2.1"
+js-sys = "0.3"
 mag = "0.5"
-ntcip = "0.7"
+ntcip = { workspace = true }
 percent-encoding = "2"
 rendzina = { path = "../rendzina" }
 serde = { version = "1", features = ["derive"] }
@@ -25,6 +27,7 @@ wasm-bindgen-futures = "0.4"
 version = "0.3"
 features = [
   'console',
+  'Blob',
   'Document',
   'HtmlCollection',
   'HtmlElement',

@@ -47,6 +47,34 @@ public class OpQueryDMSFonts extends OpDMS {
 	static private final String FONT_FILE_DIR = 
 		DevelCfg.get("font.output.dir", "/var/lib/iris/fonts/");
 
+	/** Symbols for all ASCII + Latin 1 characters */
+	static private final String[] SYMBOL = new String[] {
+	    "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL", "BS", "HT", "LF",
+	    "VT", "FF", "CR", "SO", "SI", "DLE", "DC1", "DC2", "DC3", "DC4", "NAK",
+	    "SYN", "ETB", "CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US", "SP", "!",
+	    "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/", "0",
+	    "1", "2", "3", "4", "5", "6", "7", "8", "9", ":", ";", "<", "=", ">", "?",
+	    "@", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",
+	    "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "[", "\\", "]",
+	    "^", "_", "`", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l",
+	    "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "{",
+	    "|", "}", "~", "DEL", "PAD", "HOP", "BPH", "NBH", "IND", "NEL", "SSA",
+	    "ESA", "HTS", "HTJ", "LTS", "PLD", "PLU", "RI", "SS2", "SS3", "DCS", "PU1",
+	    "PU2", "STS", "CCH", "MW", "SPA", "EPA", "SOS", "SGCI", "SCI", "CSI", "ST",
+	    "OSC", "PM", "APC", "NBSP", "¡", "¢", "£", "¤", "¥", "¦", "§", "¨", "©",
+	    "ª", "«", "¬", "SHY", "®", "¯", "°", "±", "²", "³", "´", "µ", "¶", "·",
+	    "¸", "¹", "º", "»", "¼", "½", "¾", "¿", "À", "Á", "Â", "Ã", "Ä", "Å", "Æ",
+	    "Ç", "È", "É", "Ê", "Ë", "Ì", "Í", "Î", "Ï", "Ð", "Ñ", "Ò", "Ó", "Ô", "Õ",
+	    "Ö", "×", "Ø", "Ù", "Ú", "Û", "Ü", "Ý", "Þ", "ß", "à", "á", "â", "ã", "ä",
+	    "å", "æ", "ç", "è", "é", "ê", "ë", "ì", "í", "î", "ï", "ð", "ñ", "ò", "ó",
+	    "ô", "õ", "ö", "÷", "ø", "ù", "ú", "û", "ü", "ý", "þ", "ÿ"
+	};
+
+	/** Get a symbol for a character */
+	static private String symbol(int crow) {
+		return (crow >= 0 && crow < 256) ? SYMBOL[crow] : "";
+	}
+
 	/** Create a writer for a font file */
 	private PrintWriter createWriter(String f) throws IOException {
 		File file = new File(dir, f);
@@ -210,17 +238,15 @@ public class OpQueryDMSFonts extends OpDMS {
 			nm.append(HexString.format(version_id.getInteger(), 4));
 			if (status.getEnum() == FontStatus.permanent)
 				nm.append("-perm");
-			nm.append(".ifnt");
+			nm.append(".tfon");
 			return nm.toString();
 		}
 
 		/** Write the font header */
 		private Phase writeHeader() throws IOException {
 			PrintWriter writer = createWriter(fileName());
-			writer.println("name: " + name.getValue());
+			writer.println("font_name: " + name.getValue());
 			writer.println("font_number: " + number.getInteger());
-			writer.println("height: " + height.getInteger());
-			writer.println("width: 0");
 			writer.println("line_spacing: " +
 				line_spacing.getInteger());
 			writer.println("char_spacing: " +
@@ -280,13 +306,12 @@ public class OpQueryDMSFonts extends OpDMS {
 		/** Write character data */
 		private void writeChar() throws IOException {
 			writer.println();
-			writer.println("codepoint: " + crow + ' ' +
-				(char) crow);
+			writer.println("ch: " + crow + ' ' + symbol(crow));
 			int width = char_width.getInteger();
 			for (int y = 0; y < height; y++) {
 				for (int x = 0; x < width; x++) {
 					if (isPixelLit(x, y))
-						writer.print('X');
+						writer.print('@');
 					else
 						writer.print('.');
 				}

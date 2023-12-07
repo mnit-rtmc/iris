@@ -15,13 +15,29 @@ use std::borrow::{Borrow, Cow};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{console, Request, RequestInit, Response};
+use web_sys::{console, Blob, Request, RequestInit, Response};
 
 /// Fetchable content types
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum ContentType {
     Json,
     Text,
+    Gif,
+}
+
+/// Uniform resource identifier
+#[derive(Clone, Debug)]
+pub struct Uri {
+    cow: Cow<'static, str>,
+    content_type: ContentType,
+}
+
+/// Fetch action
+pub enum Action {
+    Patch(Uri, JsValue),
+    Post(Uri, JsValue),
+    #[allow(dead_code)]
+    Delete(Uri),
 }
 
 impl ContentType {
@@ -30,15 +46,9 @@ impl ContentType {
         match self {
             ContentType::Json => "application/json",
             ContentType::Text => "text/plain",
+            ContentType::Gif => "image/gif",
         }
     }
-}
-
-/// Uniform resource identifier
-#[derive(Clone, Debug)]
-pub struct Uri {
-    cow: Cow<'static, str>,
-    content_type: ContentType,
 }
 
 impl From<String> for Uri {
@@ -70,43 +80,61 @@ impl Uri {
     pub fn as_str(&self) -> &str {
         self.cow.borrow()
     }
+
+    /// Fetch using "GET" method
+    pub async fn get(&self) -> Result<JsValue> {
+        let resp = get_response(self).await.map_err(|e| {
+            console::log_1(&e);
+            Error::FetchRequest()
+        })?;
+        resp_status(resp.status())?;
+        match self.content_type {
+            ContentType::Json => wait_promise(resp.json()).await,
+            ContentType::Text => wait_promise(resp.text()).await,
+            ContentType::Gif => {
+                let blob = wait_promise(resp.blob()).await?;
+                let blob = blob.dyn_into::<Blob>().unwrap();
+                wait_promise(Ok(blob.array_buffer())).await
+            }
+        }
+    }
+
+    /// Fetch using "PATCH" method
+    pub async fn patch(&self, json: &JsValue) -> Result<()> {
+        let resp = perform_fetch("PATCH", self.as_str(), Some(json)).await?;
+        resp_status(resp.status())
+    }
+
+    /// Fetch using "POST" method
+    pub async fn post(&self, json: &JsValue) -> Result<()> {
+        let resp = perform_fetch("POST", self.as_str(), Some(json)).await?;
+        resp_status(resp.status())
+    }
+
+    /// Fetch using "DELETE" method
+    pub async fn delete(&self) -> Result<()> {
+        let resp = perform_fetch("DELETE", self.as_str(), None).await?;
+        resp_status(resp.status())
+    }
 }
 
-/// Fetch a GET request
-pub async fn get<U>(uri: U) -> Result<JsValue>
-where
-    U: Into<Uri>,
-{
-    let uri = uri.into();
+/// Fetch a GET response
+async fn get_response(uri: &Uri) -> std::result::Result<Response, JsValue> {
     let window = web_sys::window().unwrap_throw();
-    let req = Request::new_with_str(uri.as_str()).map_err(|e| {
+    let req = Request::new_with_str(uri.as_str())?;
+    req.headers().set("Accept", uri.content_type.as_str())?;
+    let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
+    Ok(resp.dyn_into::<Response>().unwrap_throw())
+}
+
+/// Wait for a JS promise
+async fn wait_promise(
+    data: std::result::Result<js_sys::Promise, JsValue>,
+) -> Result<JsValue> {
+    let data = data.map_err(|e| {
         console::log_1(&e);
         Error::FetchRequest()
     })?;
-    req.headers()
-        .set("Accept", uri.content_type.as_str())
-        .map_err(|e| {
-            console::log_1(&e);
-            Error::FetchRequest()
-        })?;
-    let resp = JsFuture::from(window.fetch_with_request(&req))
-        .await
-        .map_err(|e| {
-            console::log_1(&e);
-            Error::FetchRequest()
-        })?;
-    let resp: Response = resp.dyn_into().unwrap_throw();
-    resp_status(resp.status())?;
-    let data = match uri.content_type {
-        ContentType::Json => resp.json().map_err(|e| {
-            console::log_1(&e);
-            Error::FetchRequest()
-        })?,
-        ContentType::Text => resp.text().map_err(|e| {
-            console::log_1(&e);
-            Error::FetchRequest()
-        })?,
-    };
     JsFuture::from(data).await.map_err(|e| {
         console::log_1(&e);
         Error::FetchRequest()
@@ -150,32 +178,13 @@ fn resp_status(sc: u16) -> Result<()> {
     }
 }
 
-/// Fetch a PATCH request
-pub async fn patch<U>(uri: U, json: &JsValue) -> Result<()>
-where
-    U: Into<Uri>,
-{
-    let uri = uri.into();
-    let resp = perform_fetch("PATCH", uri.as_str(), Some(json)).await?;
-    resp_status(resp.status())
-}
-
-/// Fetch a POST request
-pub async fn post<U>(uri: U, json: &JsValue) -> Result<()>
-where
-    U: Into<Uri>,
-{
-    let uri = uri.into();
-    let resp = perform_fetch("POST", uri.as_str(), Some(json)).await?;
-    resp_status(resp.status())
-}
-
-/// Fetch a DELETE request
-pub async fn delete<U>(uri: U) -> Result<()>
-where
-    U: Into<Uri>,
-{
-    let uri = uri.into();
-    let resp = perform_fetch("DELETE", uri.as_str(), None).await?;
-    resp_status(resp.status())
+impl Action {
+    /// Perform fetch action
+    pub async fn perform(&self) -> Result<()> {
+        match self {
+            Action::Patch(uri, val) => uri.patch(val).await,
+            Action::Post(uri, val) => uri.post(val).await,
+            Action::Delete(uri) => uri.delete().await,
+        }
+    }
 }

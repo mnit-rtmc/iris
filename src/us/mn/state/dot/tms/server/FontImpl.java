@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,8 +36,8 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, FontImpl.class);
 		store.query("SELECT name, f_number, height, width, " +
-			"line_spacing, char_spacing, version_id FROM " +
-			"iris." + SONAR_TYPE + ";", new ResultFactory()
+			"line_spacing, char_spacing FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new FontImpl(
@@ -46,8 +46,7 @@ public class FontImpl extends BaseObjectImpl implements Font {
 					row.getInt(3),		// height
 					row.getInt(4),		// width
 					row.getInt(5),		// line_spacing
-					row.getInt(6),		// char_spacing
-					row.getInt(7)		// version_id
+					row.getInt(6)		// char_spacing
 				));
 			}
 		});
@@ -63,7 +62,6 @@ public class FontImpl extends BaseObjectImpl implements Font {
 		map.put("width", width);
 		map.put("line_spacing", lineSpacing);
 		map.put("char_spacing", charSpacing);
-		map.put("version_id", versionID);
 		return map;
 	}
 
@@ -86,16 +84,13 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	}
 
 	/** Create a new font */
-	private FontImpl(String n, int num, int h, int w, int ls, int cs,
-		int v)
-	{
+	private FontImpl(String n, int num, int h, int w, int ls, int cs) {
 		this(n);
 		f_number = num;
 		height = h;
 		width = w;
 		lineSpacing = ls;
 		charSpacing = cs;
-		versionID = v;
 	}
 
 	/** Font number */
@@ -211,28 +206,5 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	@Override
 	public int getLineSpacing() {
 		return lineSpacing;
-	}
-
-	/** Font version ID */
-	private int versionID = 0;
-
-	/** Set the font version ID */
-	@Override
-	public void setVersionID(int v) {
-		versionID = v;
-	}
-
-	/** Set the font version ID */
-	public void doSetVersionID(int v) throws TMSException {
-		if (v != versionID) {
-			store.update(this, "version_id", v);
-			setVersionID(v);
-		}
-	}
-
-	/** Get the font version ID */
-	@Override
-	public int getVersionID() {
-		return versionID;
 	}
 }

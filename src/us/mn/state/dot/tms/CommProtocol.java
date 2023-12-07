@@ -2,7 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2021  Minnesota Department of Transportation
  * Copyright (C) 2012-2021  Iteris Inc.
- * Copyright (C) 2015-2022  SRF Consulting Group
+ * Copyright (C) 2015-2023  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -166,7 +166,10 @@ public enum CommProtocol {
 	/** ClearGuide (43) */
 	CLEARGUIDE("ClearGuide", false),
 
-	/** ONVIF PTZ (44) */
+	/** GPS using Digi WR-series modem (44) */
+	GPS_DIGI_WR("GPS Digi WR", false);
+
+	/** ONVIF PTZ (45) */
 	ONVIF_PTZ("ONVIF PTZ");
 
 	/** Create a new comm protocol value */

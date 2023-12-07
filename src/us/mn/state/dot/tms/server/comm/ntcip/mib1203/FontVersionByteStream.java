@@ -40,13 +40,28 @@ public class FontVersionByteStream extends CRCStream {
 		dos.writeByte(font.getHeight());
 		dos.writeByte(font.getCharSpacing());
 		dos.writeByte(font.getLineSpacing());
-		dos.writeByte(1); // number of subsequent length octets
-		dos.writeByte(glyphs.size());
+		int size = glyphs.size();
+		if (size < 256) {
+			dos.writeByte(1); // length prefix
+			dos.writeByte(size);
+		} else {
+			dos.writeByte(2); // length prefix
+			dos.writeShort(size);
+		}
 		for (Glyph glyph: glyphs) {
 			byte[] bitmap = Base64.decode(glyph.getPixels());
 			dos.writeShort(glyph.getCodePoint());
 			dos.writeByte(glyph.getWidth());
-			dos.writeByte(bitmap.length);
+			int len = bitmap.length;
+			if (len <= 0x7F) {
+				dos.writeByte(bitmap.length);
+			} else if (len <= 0xFF) {
+				dos.writeByte(0x81); // one length octet
+				dos.writeByte(bitmap.length);
+			} else {
+				dos.writeByte(0x82); // two length octets
+				dos.writeShort(bitmap.length);
+			}
 			dos.write(bitmap);
 		}
 	}

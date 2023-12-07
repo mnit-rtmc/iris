@@ -12,18 +12,42 @@
 //
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
-use crate::fetch::{ContentType, Uri};
+use crate::fetch::{Action, ContentType, Uri};
 use crate::item::{ItemState, ItemStates};
 use crate::resource::{
     AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, OptVal};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
-use ntcip::dms::font::{ifnt, FontTable};
-use rendzina::SignConfig;
+use fnv::FnvHasher;
+use js_sys::{ArrayBuffer, Uint8Array};
+use ntcip::dms::multi::{
+    join_text, normalize as multi_normalize, split as multi_split,
+};
+use ntcip::dms::{tfon, Font, FontTable, GraphicTable, MessagePattern};
+use rendzina::{load_graphic, SignConfig};
 use serde::{Deserialize, Serialize};
+use std::cmp::Ordering;
 use std::fmt;
-use wasm_bindgen::JsValue;
+use std::hash::{Hash, Hasher};
+use std::iter::repeat;
+use wasm_bindgen::{JsCast, JsValue};
+use web_sys::{console, HtmlElement, HtmlSelectElement};
+
+/// Ntcip DMS sign
+type Sign = ntcip::dms::Dms<256, 24, 32>;
+
+/// Low 1 message priority
+const LOW_1: u32 = 1;
+
+/// High 1 message priority
+const HIGH_1: u32 = 11;
+
+/// Send button
+const SEND_BUTTON: &str = "<button id='mc_send' type='button'>Send</button>";
+
+/// Blank button
+const BLANK_BUTTON: &str = "<button id='mc_blank' type='button'>Blank</button>";
 
 /// Photocell status
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -89,21 +113,29 @@ pub struct Dms {
     pub stuck_pixels: Option<StuckPixels>,
 }
 
+/// Action value to patch "msg_user"
+#[derive(Debug, Serialize)]
+struct MsgUser<'a> {
+    msg_user: &'a str,
+}
+
 /// Sign Message
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Hash, Deserialize, Serialize)]
 pub struct SignMessage {
     pub name: String,
     pub sign_config: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub incident: Option<String>,
     pub multi: String,
     pub msg_owner: String,
     pub flash_beacon: bool,
     pub msg_priority: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub duration: Option<u32>,
 }
 
 /// Message Pattern
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
 pub struct MsgPattern {
     pub name: String,
     pub compose_hashtag: Option<String>,
@@ -111,10 +143,35 @@ pub struct MsgPattern {
     pub flash_beacon: Option<bool>,
 }
 
+/// Message Line
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct MsgLine {
+    pub name: String,
+    pub msg_pattern: String,
+    pub restrict_hashtag: Option<String>,
+    pub line: u16,
+    pub multi: String,
+}
+
+/// Word (for messages)
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+pub struct Word {
+    pub name: String,
+    pub abbr: Option<String>,
+    pub allowed: bool,
+}
+
 /// Font name
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct FontName {
     pub font_number: u8,
+    pub name: String,
+}
+
+/// Graphic name
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct GraphicName {
+    pub number: u8,
     pub name: String,
 }
 
@@ -125,14 +182,84 @@ pub struct DmsAnc {
     messages: Vec<SignMessage>,
     configs: Vec<SignConfig>,
     compose_patterns: Vec<MsgPattern>,
+    lines: Vec<MsgLine>,
+    words: Vec<Word>,
     fnames: Vec<FontName>,
-    fonts: FontTable,
+    fonts: FontTable<256, 24>,
+    gnames: Vec<GraphicName>,
+    graphics: GraphicTable<32>,
+}
+
+impl PartialOrd for MsgPattern {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for MsgPattern {
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self == other {
+            return Ordering::Equal;
+        }
+        // prefer patterns which can be conbined (shared)
+        let self_combine = self.can_combine_shared_second();
+        let other_combine = other.can_combine_shared_second();
+        if self_combine && !other_combine {
+            return Ordering::Less;
+        } else if other_combine && !self_combine {
+            return Ordering::Greater;
+        }
+        let len_ord = self.multi.len().cmp(&other.multi.len());
+        if len_ord != Ordering::Equal {
+            return len_ord;
+        }
+        let ms_ord = self.multi.cmp(&other.multi);
+        if ms_ord != Ordering::Equal {
+            ms_ord
+        } else {
+            self.name.cmp(&other.name)
+        }
+    }
+}
+
+impl MsgPattern {
+    // Check if pattern can combine (shared) in second position
+    fn can_combine_shared_second(&self) -> bool {
+        let mut it = multi_split(&self.multi);
+        // check that:
+        // - the first value is a text rectangle
+        // - the same text rectangle starts every page
+        // - there are no other text rectangles
+        if let Some(first) = it.next() {
+            if first.starts_with("[tr") {
+                let mut tr_this_page = true;
+                for val in it {
+                    if tr_this_page {
+                        if val.starts_with("[tr") {
+                            return false;
+                        } else if val == "[np]" {
+                            tr_this_page = false;
+                        }
+                    } else if val == first {
+                        tr_this_page = true;
+                    } else {
+                        return false;
+                    }
+                }
+                return tr_this_page;
+            }
+        }
+        false
+    }
 }
 
 const SIGN_MSG_URI: &str = "/iris/sign_message";
-const SIGN_CFG_URI: &str = "/iris/sign_config";
+const SIGN_CFG_URI: &str = "/iris/api/sign_config";
 const MSG_PATTERN_URI: &str = "/iris/api/msg_pattern";
-const FONT_URI: &str = "/iris/font";
+const MSG_LINE_URI: &str = "/iris/api/msg_line";
+const WORD_URI: &str = "/iris/api/word";
+const FONT_URI: &str = "/iris/api/font";
+const GRAPHIC_URI: &str = "/iris/api/graphic";
 
 impl AncillaryData for DmsAnc {
     type Primary = Dms;
@@ -148,8 +275,14 @@ impl AncillaryData for DmsAnc {
         if !self.fnames.is_empty() {
             for fname in &self.fnames {
                 uris.push(
-                    Uri::from(format!("/iris/ifnt/{}.ifnt", fname.name))
+                    Uri::from(format!("/iris/api/tfon/{}.tfon", fname.name))
                         .with_content_type(ContentType::Text),
+                );
+            }
+            for gname in &self.gnames {
+                uris.push(
+                    Uri::from(format!("/iris/api/gif/{}.gif", gname.name))
+                        .with_content_type(ContentType::Gif),
                 );
             }
             return Box::new(uris.into_iter());
@@ -161,7 +294,10 @@ impl AncillaryData for DmsAnc {
             uris.push(SIGN_MSG_URI.into());
             uris.push(SIGN_CFG_URI.into());
             uris.push(MSG_PATTERN_URI.into());
+            uris.push(MSG_LINE_URI.into());
+            uris.push(WORD_URI.into());
             uris.push(FONT_URI.into());
+            uris.push(GRAPHIC_URI.into());
         }
         Box::new(uris.into_iter().chain(self.dev.uri_iter(pri, view)))
     }
@@ -188,17 +324,62 @@ impl AncillaryData for DmsAnc {
                         .as_ref()
                         .is_some_and(|h| pri.has_hashtag(h))
                 });
+                patterns.sort();
                 self.compose_patterns = patterns;
+            }
+            MSG_LINE_URI => {
+                let mut lines: Vec<MsgLine> =
+                    serde_wasm_bindgen::from_value(data)?;
+                lines.retain(|ln| {
+                    self.has_compose_pattern(&ln.msg_pattern)
+                        && (ln.restrict_hashtag.is_none()
+                            || ln
+                                .restrict_hashtag
+                                .as_ref()
+                                .is_some_and(|h| pri.has_hashtag(h)))
+                });
+                self.lines = lines;
+            }
+            WORD_URI => {
+                self.words = serde_wasm_bindgen::from_value(data)?;
             }
             FONT_URI => {
                 self.fnames = serde_wasm_bindgen::from_value(data)?;
                 return Ok(!self.fnames.is_empty());
             }
+            GRAPHIC_URI => {
+                self.gnames = serde_wasm_bindgen::from_value(data)?;
+                return Ok(!self.gnames.is_empty());
+            }
             _ => {
-                if uri.as_str().ends_with(".ifnt") {
+                if uri.as_str().ends_with(".tfon") {
                     let font: String = serde_wasm_bindgen::from_value(data)?;
-                    let font = ifnt::read(font.as_bytes())?;
-                    self.fonts.push(font)?;
+                    let font = tfon::read(font.as_bytes())?;
+                    if let Some(f) = self.fonts.font_mut(font.number) {
+                        *f = font;
+                    } else if let Some(f) = self.fonts.font_mut(0) {
+                        *f = font;
+                    }
+                } else if uri.as_str().ends_with(".gif") {
+                    if let Ok(number) = uri
+                        .as_str()
+                        .replace(|c: char| !c.is_numeric(), "")
+                        .parse::<u8>()
+                    {
+                        let abuf = data.dyn_into::<ArrayBuffer>().unwrap();
+                        let graphic = Uint8Array::new(&abuf).to_vec();
+                        let graphic = load_graphic(&graphic[..], number)?;
+                        if let Some(g) = self.graphics.graphic_mut(number) {
+                            *g = graphic;
+                        } else if let Some(g) = self.graphics.graphic_mut(0) {
+                            *g = graphic;
+                        }
+                    } else {
+                        console::log_1(
+                            &format!("invalid graphic: {}", uri.as_str())
+                                .into(),
+                        );
+                    }
                 } else {
                     return self.dev.set_data(pri, uri, data);
                 }
@@ -209,6 +390,23 @@ impl AncillaryData for DmsAnc {
 }
 
 impl SignMessage {
+    /// Make a sign message
+    fn new(cfg: &str, ms: &str, owner: String, priority: u32) -> Self {
+        let mut sign_message = SignMessage {
+            name: "usr_".to_string(),
+            sign_config: cfg.to_string(),
+            multi: ms.to_string(),
+            msg_owner: owner,
+            msg_priority: priority,
+            ..Default::default()
+        };
+        let mut hasher = FnvHasher::default();
+        sign_message.hash(&mut hasher);
+        let hash = hasher.finish() as u32;
+        sign_message.name = format!("usr_{hash:08X}");
+        sign_message
+    }
+
     /// Get message owner
     fn owner(&self) -> &str {
         &self.msg_owner
@@ -216,17 +414,17 @@ impl SignMessage {
 
     /// Get "system" owner
     fn system(&self) -> &str {
-        self.owner().split(';').next().unwrap_or("")
+        self.owner().split(';').next().unwrap_or("").trim()
     }
 
     /// Get "sources" owner
     fn sources(&self) -> &str {
-        self.owner().split(';').nth(1).unwrap_or("")
+        self.owner().split(';').nth(1).unwrap_or("").trim()
     }
 
     /// Get "user" owner
     fn user(&self) -> &str {
-        self.owner().split(';').nth(2).unwrap_or("")
+        self.owner().split(';').nth(2).unwrap_or("").trim()
     }
 
     /// Get item states
@@ -262,6 +460,19 @@ impl SignMessage {
 
 impl DmsAnc {
     /// Find a sign message
+    fn find_sign_msg(&self, msg: &SignMessage) -> Option<&SignMessage> {
+        self.messages.iter().find(|m| {
+            m.sign_config == msg.sign_config
+                && m.incident == msg.incident
+                && m.multi == msg.multi
+                && m.msg_owner == msg.msg_owner
+                && m.flash_beacon == msg.flash_beacon
+                && m.msg_priority == msg.msg_priority
+                && m.duration == msg.duration
+        })
+    }
+
+    /// Get a sign message by name
     fn sign_message(&self, msg: Option<&str>) -> Option<&SignMessage> {
         msg.and_then(|msg| self.messages.iter().find(|m| m.name == msg))
     }
@@ -276,6 +487,159 @@ impl DmsAnc {
     /// Find a sign config
     fn sign_config(&self, cfg: Option<&str>) -> Option<&SignConfig> {
         cfg.and_then(|cfg| self.configs.iter().find(|c| c.name == cfg))
+    }
+
+    /// Check for compose pattern
+    fn has_compose_pattern(&self, pat: &str) -> bool {
+        self.compose_patterns.iter().any(|p| p.name == pat)
+    }
+
+    /// Make line select elements
+    fn make_lines(
+        &self,
+        sign: &Sign,
+        pat: Option<&MsgPattern>,
+        ms_cur: &str,
+    ) -> String {
+        let mut html = String::new();
+        html.push_str("<div id='mc_lines' class='column'>");
+        if let Some(pat) = pat {
+            let widths = MessagePattern::new(sign, &pat.multi).widths();
+            let cur_lines = MessagePattern::new(sign, &pat.multi)
+                .lines(ms_cur)
+                .chain(repeat(""));
+            let mut rect_num = 0;
+            for (i, ((width, font_num, rn), cur_line)) in
+                widths.zip(cur_lines).enumerate()
+            {
+                let ln = 1 + i as u16;
+                html.push_str("<select id='mc_line");
+                html.push_str(&ln.to_string());
+                html.push('\'');
+                if rn != rect_num {
+                    html.push_str(" class='mc_line_gap'");
+                    rect_num = rn;
+                }
+                html.push_str("><option>");
+                if let Some(font) = sign.font_definition().font(font_num) {
+                    for l in &self.lines {
+                        if l.msg_pattern == pat.name && ln == l.line {
+                            self.append_line(
+                                &l.multi, width, font, cur_line, &mut html,
+                            )
+                        }
+                    }
+                }
+                html.push_str("</select>");
+            }
+        }
+        html.push_str("</div>");
+        html
+    }
+
+    /// Append a line as an option element
+    fn append_line(
+        &self,
+        multi: &str,
+        width: u16,
+        font: &Font,
+        cur_line: &str,
+        html: &mut String,
+    ) {
+        // FIXME: handle line-allowed MULTI tags
+        let mut ms = multi;
+        let mut line;
+        loop {
+            let Ok(w) = font.text_width(ms, None) else {
+                return;
+            };
+            if w <= width {
+                html.push_str("<option value='");
+                html.push_str(ms);
+                if ms == cur_line {
+                    html.push_str("' selected>");
+                } else {
+                    html.push_str("'>");
+                }
+                html.push_str(&join_text(ms, " "));
+                break;
+            } else if let Some(abbrev) = self.abbreviate_text(ms) {
+                line = abbrev;
+                ms = &line[..];
+            } else {
+                break;
+            }
+        }
+    }
+
+    /// Abbreviate message text
+    fn abbreviate_text(&self, text: &str) -> Option<String> {
+        let mut abbrev = Word::default();
+        for w in text.split(' ') {
+            let sc = w.len();
+            // prefer to abbreviate longer words
+            if sc > abbrev.name.len() {
+                for word in &self.words {
+                    if word.allowed && word.name == w {
+                        if let Some(ab) = &word.abbr {
+                            if ab != w {
+                                abbrev = word.clone();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if !abbrev.name.is_empty() {
+            let mut t = String::new();
+            for w in text.split(' ') {
+                if w == abbrev.name {
+                    t.push_str(abbrev.abbr.as_ref().unwrap());
+                } else {
+                    t.push_str(w);
+                }
+                t.push(' ');
+            }
+            t.truncate(t.len() - 1);
+            Some(t)
+        } else {
+            None
+        }
+    }
+
+    /// Create actions to activate a sign message
+    fn sign_msg_actions(self, uri: Uri, msg: SignMessage) -> Vec<Action> {
+        match self.find_sign_msg(&msg) {
+            Some(msg) => {
+                let mut actions = Vec::with_capacity(1);
+                if let Some(action) = msg_user_action(uri, &msg.name) {
+                    actions.push(action);
+                }
+                actions
+            }
+            None => {
+                let mut actions = Vec::with_capacity(2);
+                if let Ok(val) = serde_json::to_string(&msg) {
+                    let post = Uri::from("/iris/api/sign_message");
+                    actions.push(Action::Post(post, val.into()));
+                    if let Some(action) = msg_user_action(uri, &msg.name) {
+                        actions.push(action);
+                    }
+                }
+                actions
+            }
+        }
+    }
+}
+
+/// Create a msg_user patch action
+fn msg_user_action(uri: Uri, msg_name: &str) -> Option<Action> {
+    match serde_json::to_string(&MsgUser { msg_user: msg_name }) {
+        Ok(val) => Some(Action::Patch(uri, val.into())),
+        Err(e) => {
+            console::log_1(&format!("err: {e:?}").into());
+            None
+        }
     }
 }
 
@@ -293,6 +657,13 @@ const DEDICATED: &[&str] = &[
 
 impl Dms {
     pub const RESOURCE_N: &'static str = "dms";
+
+    /// Get multi of current message
+    fn current_multi<'a>(&'a self, anc: &'a DmsAnc) -> &'a str {
+        anc.sign_message(self.msg_current.as_deref())
+            .map(|m| &m.multi[..])
+            .unwrap_or("")
+    }
 
     /// Check if DMS has a given hashtag
     fn has_hashtag(&self, hashtag: &str) -> bool {
@@ -326,22 +697,22 @@ impl Dms {
 
     /// Get all item states as html options
     pub fn item_state_options() -> &'static str {
-        "<option value=''>all ↴</option>\
-         <option value='🔹'>🔹 available</option>\
-         <option value='🔶'>🔶 deployed</option>\
-         <option value='🕗'>🕗 planned</option>\
-         <option value='👽'>👽 external</option>\
-         <option value='🎯'>🎯 dedicated</option>\
-         <option value='⚠️'>⚠️ fault</option>\
-         <option value='🔌'>🔌 offline</option>\
-         <option value='🔻'>🔻 disabled</option>"
+        "<option value=''>all ↴\
+         <option value='🔹'>🔹 available\
+         <option value='🔶'>🔶 deployed\
+         <option value='🕗'>🕗 planned\
+         <option value='👽'>👽 external\
+         <option value='🎯'>🎯 dedicated\
+         <option value='⚠️'>⚠️ fault\
+         <option value='🔌'>🔌 offline\
+         <option value='▪️'>▪️ inactive"
     }
 
     /// Get item states
     fn item_states<'a>(&'a self, anc: &'a DmsAnc) -> ItemStates<'a> {
         let state = anc.dev.item_state(self);
         let mut states = match state {
-            ItemState::Disabled => return ItemState::Disabled.into(),
+            ItemState::Inactive => return ItemState::Inactive.into(),
             ItemState::Available => anc.msg_states(self.msg_current.as_deref()),
             ItemState::Offline => ItemStates::default()
                 .with(ItemState::Offline, "FIXME: since fail time"),
@@ -396,34 +767,51 @@ impl Dms {
 
     /// Build compose pattern HTML
     fn compose_patterns(&self, anc: &DmsAnc) -> Option<String> {
-        if !anc.compose_patterns.is_empty() {
+        if anc.compose_patterns.is_empty() {
+            console::log_1(&"patterns empty".into());
             return None;
         }
-        let Some(cfg) = anc.sign_config(self.sign_config.as_deref()) else {
+        let Some(sign) = self.make_sign(anc) else {
             return None;
         };
-        let dms = ntcip::dms::Dms::builder()
-            .with_font_definition(anc.fonts.clone())
-            .with_sign_cfg(cfg.sign_cfg())
-            .with_vms_cfg(cfg.vms_cfg())
-            .with_multi_cfg(cfg.multi_cfg())
-            .build();
         let mut html = String::new();
-        html.push_str("<div class='fill'>");
-        html.push_str("<select id='pattern'>");
+        html.push_str("<div id='mc_grid'>");
+        let pat_def = self.pattern_default(anc);
+        if let Some(pat) = pat_def {
+            render_preview(&mut html, &sign, &pat.multi);
+        }
+        html.push_str("<select id='mc_pattern'>");
         for pat in &anc.compose_patterns {
-            html.push_str("<option value='");
+            html.push_str("<option");
+            if let Some(p) = pat_def {
+                if p.name == pat.name {
+                    html.push_str(" selected");
+                }
+            }
+            html.push('>');
             html.push_str(&pat.name);
-            html.push_str("'>");
-            let mut buf = Vec::with_capacity(4096);
-            rendzina::render(&mut buf, &dms, &pat.multi).unwrap();
-            html.push_str("<img src='data:image/gif;base64,");
-            b64enc.encode_string(buf, &mut html);
-            html.push_str("'/></option>");
         }
         html.push_str("</select>");
+        html.push_str(&anc.make_lines(&sign, pat_def, self.current_multi(anc)));
+        html.push_str(SEND_BUTTON);
+        html.push_str(BLANK_BUTTON);
         html.push_str("</div>");
         Some(html)
+    }
+
+    /// Get the pattern which should be selected by default
+    fn pattern_default<'a>(&self, anc: &'a DmsAnc) -> Option<&'a MsgPattern> {
+        let multi = self.current_multi(anc);
+        let mut best: Option<&MsgPattern> = None;
+        for pat in &anc.compose_patterns {
+            if pat.multi == multi {
+                return Some(pat);
+            }
+            if best.is_none() {
+                best = Some(pat);
+            }
+        }
+        best
     }
 
     /// Convert to Edit HTML
@@ -442,6 +830,85 @@ impl Dms {
                      size='8' value='{pin}'>\
             </div>"
         )
+    }
+
+    /// Make an ntcip sign
+    fn make_sign(&self, anc: &DmsAnc) -> Option<Sign> {
+        let Some(cfg) = anc.sign_config(self.sign_config.as_deref()) else {
+            return None;
+        };
+        match ntcip::dms::Dms::builder()
+            .with_font_definition(anc.fonts.clone())
+            .with_graphic_definition(anc.graphics.clone())
+            .with_sign_cfg(cfg.sign_cfg())
+            .with_vms_cfg(cfg.vms_cfg())
+            .with_multi_cfg(cfg.multi_cfg())
+            .build()
+        {
+            Ok(sign) => Some(sign),
+            Err(e) => {
+                console::log_1(&format!("make_sign: {e:?}").into());
+                None
+            }
+        }
+    }
+
+    // Get selected message pattern
+    fn selected_pattern<'a>(&self, anc: &'a DmsAnc) -> Option<&'a MsgPattern> {
+        let doc = Doc::get();
+        let pat_name = doc.elem::<HtmlSelectElement>("mc_pattern").value();
+        let pat = anc.compose_patterns.iter().find(|p| p.name == pat_name);
+        if pat.is_none() {
+            console::log_1(&format!("pattern not found: {pat_name}").into());
+        }
+        pat
+    }
+
+    // Get selected lines
+    fn selected_lines(&self) -> Vec<String> {
+        let doc = Doc::get();
+        let mut lines = Vec::new();
+        while let Some(line) = doc.try_elem::<HtmlSelectElement>(&format!(
+            "mc_line{}",
+            lines.len() + 1
+        )) {
+            lines.push(line.value());
+        }
+        lines
+    }
+
+    /// Get selected MULTI message
+    fn selected_multi(&self, anc: &DmsAnc) -> Option<String> {
+        let pat = self.selected_pattern(anc)?;
+        let sign = self.make_sign(anc)?;
+        let lines = self.selected_lines();
+        let multi = MessagePattern::new(&sign, &pat.multi)
+            .fill(lines.iter().map(|l| &l[..]));
+        Some(multi_normalize(&multi))
+    }
+
+    /// Create actions to handle click on "Send" button
+    fn send_actions(&self, anc: DmsAnc, uri: Uri) -> Vec<Action> {
+        if let Some(cfg) = &self.sign_config {
+            if let Some(ms) = &self.selected_multi(&anc) {
+                if let Some(owner) = sign_msg_owner(HIGH_1) {
+                    return anc.sign_msg_actions(
+                        uri,
+                        SignMessage::new(cfg, ms, owner, HIGH_1),
+                    );
+                };
+            }
+        }
+        Vec::new()
+    }
+
+    /// Create actions to handle click on "Blank" button
+    fn blank_actions(&self, anc: DmsAnc, uri: Uri) -> Vec<Action> {
+        match (&self.sign_config, sign_msg_owner(LOW_1)) {
+            (Some(cfg), Some(owner)) => anc
+                .sign_msg_actions(uri, SignMessage::new(cfg, "", owner, LOW_1)),
+            _ => Vec::new(),
+        }
     }
 }
 
@@ -505,4 +972,67 @@ impl Card for Dms {
         fields.changed_input("pin", self.pin);
         fields.into_value().to_string()
     }
+
+    /// Handle click event for a button on the card
+    fn handle_click(&self, anc: DmsAnc, id: &str, uri: Uri) -> Vec<Action> {
+        if id == "mc_send" {
+            self.send_actions(anc, uri)
+        } else if id == "mc_blank" {
+            self.blank_actions(anc, uri)
+        } else {
+            Vec::new()
+        }
+    }
+
+    /// Handle input event for an element on the card
+    fn handle_input(&self, anc: DmsAnc, id: &str) {
+        let Some(pat) = self.selected_pattern(&anc) else {
+            return;
+        };
+        let Some(sign) = self.make_sign(&anc) else {
+            return;
+        };
+        let lines = if id == "mc_pattern" {
+            // update mc_lines element
+            let html = anc.make_lines(&sign, Some(pat), "");
+            let mc_lines = Doc::get().elem::<HtmlElement>("mc_lines");
+            mc_lines.set_outer_html(&html);
+            Vec::new()
+        } else {
+            self.selected_lines()
+        };
+        let multi = MessagePattern::new(&sign, &pat.multi)
+            .fill(lines.iter().map(|l| &l[..]));
+        let multi = multi_normalize(&multi);
+        // update mc_preview image element
+        let mut html = String::new();
+        render_preview(&mut html, &sign, &multi);
+        let preview = Doc::get().elem::<HtmlElement>("mc_preview");
+        preview.set_outer_html(&html);
+    }
+}
+
+/// Make sign message owner string
+fn sign_msg_owner(priority: u32) -> Option<String> {
+    crate::start::user().map(|user| {
+        let sources = if priority == LOW_1 {
+            "blank"
+        } else {
+            "operator"
+        };
+        format!("IRIS; {sources}; {user}")
+    })
+}
+
+/// Render sign preview image
+fn render_preview(html: &mut String, sign: &Sign, multi: &str) {
+    let mut buf = Vec::with_capacity(4096);
+    if let Err(e) = rendzina::render(&mut buf, sign, multi, Some(240), Some(80))
+    {
+        console::log_1(&format!("render_preview: {e:?}").into());
+        return;
+    };
+    html.push_str("<img id='mc_preview' src='data:image/gif;base64,");
+    b64enc.encode_string(buf, html);
+    html.push_str("'/>");
 }

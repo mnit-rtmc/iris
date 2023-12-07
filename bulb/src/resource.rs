@@ -20,7 +20,7 @@ use crate::controller::Controller;
 use crate::detector::Detector;
 use crate::dms::Dms;
 use crate::error::{Error, Result};
-use crate::fetch::{self, Uri};
+use crate::fetch::{Action, Uri};
 use crate::flowstream::FlowStream;
 use crate::gatearm::GateArm;
 use crate::gatearmarray::GateArmArray;
@@ -202,8 +202,18 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     fn changed_fields(&self) -> String;
 
     /// Handle click event for a button on the card
-    fn click_changed(&self, _id: &str) -> String {
-        "".into()
+    fn handle_click(
+        &self,
+        _anc: Self::Ancillary,
+        _id: &str,
+        _uri: Uri,
+    ) -> Vec<Action> {
+        Vec::new()
+    }
+
+    /// Handle input event for an element on the card
+    fn handle_input(&self, _anc: Self::Ancillary, _id: &str) {
+        // ignore by default
     }
 }
 
@@ -313,8 +323,7 @@ impl Resource {
 
     /// Delete a resource by name
     pub async fn delete(self, name: &str) -> Result<()> {
-        let uri = self.uri_name(name);
-        fetch::delete(uri).await
+        Uri::from(self.uri_name(name)).delete().await
     }
 
     /// Lookup resource symbol
@@ -485,8 +494,8 @@ impl Resource {
     pub async fn save(self, name: &str) -> Result<()> {
         let changed = self.fetch_changed(name).await?;
         if !changed.is_empty() {
-            let uri = self.uri_name(name);
-            fetch::patch(uri, &changed.into()).await?;
+            let uri = Uri::from(self.uri_name(name));
+            uri.patch(&changed.into()).await?;
         }
         Ok(())
     }
@@ -540,8 +549,8 @@ impl Resource {
             Resource::Permission => Permission::create_value(&doc)?,
             _ => self.create_value(&doc)?,
         };
-        let json = value.into();
-        fetch::post(format!("/iris/api/{}", self.rname()), &json).await?;
+        let uri = Uri::from(format!("/iris/api/{}", self.rname()));
+        uri.post(&value.into()).await?;
         Ok(())
     }
 
@@ -557,8 +566,7 @@ impl Resource {
 
     /// Fetch primary JSON resource
     async fn fetch_primary<C: Card>(self, name: &str) -> Result<C> {
-        let uri = self.uri_name(name);
-        let json = fetch::get(uri).await?;
+        let json = Uri::from(self.uri_name(name)).get().await?;
         C::new(json)
     }
 
@@ -607,6 +615,15 @@ impl Resource {
     pub async fn handle_click(self, name: &str, id: &str) -> Result<bool> {
         match self {
             Self::Beacon => handle_click::<Beacon>(self, name, id).await,
+            Self::Dms => handle_click::<Dms>(self, name, id).await,
+            _ => Ok(false),
+        }
+    }
+
+    /// Handle input event for an element owned by the resource
+    pub async fn handle_input(self, name: &str, id: &str) -> Result<bool> {
+        match self {
+            Self::Dms => handle_input::<Dms>(self, name, id).await,
             _ => Ok(false),
         }
     }
@@ -619,7 +636,7 @@ impl Resource {
                 "<option value=''>all ↴</option>\
                  <option value='🔹'>🔹 available</option>\
                  <option value='🔌'>🔌 offline</option>\
-                 <option value='🔻'>🔻 disabled</option>"
+                 <option value='▪️'>▪️ inactive</option>"
             }
         }
     }
@@ -632,7 +649,7 @@ async fn fetch_list<C: Card>(
     config: bool,
 ) -> Result<String> {
     let rname = res.rname();
-    let json = fetch::get(format!("/iris/api/{rname}")).await?;
+    let json = Uri::from(format!("/iris/api/{rname}")).get().await?;
     let search = Search::new(search);
     let mut html = String::new();
     html.push_str("<ul class='cards'>");
@@ -667,7 +684,7 @@ async fn fetch_ancillary<C: Card>(view: View, pri: &C) -> Result<C::Ancillary> {
     while more {
         more = false;
         for uri in anc.uri_iter(pri, view) {
-            match fetch::get(uri.clone()).await {
+            match uri.get().await {
                 Ok(data) => {
                     if anc.set_data(pri, uri, data)? {
                         more = true;
@@ -697,11 +714,23 @@ async fn handle_click<C: Card>(
     id: &str,
 ) -> Result<bool> {
     let pri = res.fetch_primary::<C>(name).await?;
-    let changed = pri.click_changed(id);
-    if !changed.is_empty() {
-        let uri = res.uri_name(name);
-        fetch::patch(uri, &changed.into()).await?;
+    let anc = fetch_ancillary(View::Status(false), &pri).await?;
+    let uri = Uri::from(res.uri_name(name));
+    for action in pri.handle_click(anc, id, uri) {
+        action.perform().await?;
     }
+    Ok(true)
+}
+
+/// Handle input event for an element on a card
+async fn handle_input<C: Card>(
+    res: Resource,
+    name: &str,
+    id: &str,
+) -> Result<bool> {
+    let pri = res.fetch_primary::<C>(name).await?;
+    let anc = fetch_ancillary(View::Status(false), &pri).await?;
+    pri.handle_input(anc, id);
     Ok(true)
 }
 
@@ -770,12 +799,12 @@ impl View {
     }
 }
 
-/// Get attribute for disabled cards
-pub fn disabled_attr(enabled: bool) -> &'static str {
-    if enabled {
+/// Get attribute for inactive cards
+pub fn inactive_attr(active: bool) -> &'static str {
+    if active {
         ""
     } else {
-        " disabled"
+        " inactive"
     }
 }
 

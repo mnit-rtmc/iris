@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::resource::{disabled_attr, AncillaryData, Card, View};
+use crate::resource::{inactive_attr, AncillaryData, Card, View};
 use crate::util::{ContainsLower, Fields, Input};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -35,8 +35,8 @@ impl Role {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let disabled = disabled_attr(self.enabled);
-        format!("<div class='fill{disabled}'>{self}</div>")
+        let inactive = inactive_attr(self.enabled);
+        format!("<div class='fill{inactive}'>{self}</div>")
     }
 
     /// Convert to Edit HTML

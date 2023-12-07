@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,10 +57,4 @@ public interface Font extends SonarObject {
 
 	/** Get the default horizontal spacing between characters (pixels) */
 	int getCharSpacing();
-
-	/** Set the font version ID (NTCIP function) */
-	void setVersionID(int v);
-
-	/** Get the font version ID (NTCIP function) */
-	int getVersionID();
 }

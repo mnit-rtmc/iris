@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::device::{Device, DeviceAnc};
-use crate::resource::{disabled_attr, Card, View, EDIT_BUTTON, NAME};
+use crate::resource::{inactive_attr, Card, View, EDIT_BUTTON, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -34,11 +34,11 @@ impl VideoMonitor {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &VideoMonitorAnc) -> String {
         let item_state = anc.item_state(self);
-        let disabled = disabled_attr(self.controller.is_some());
+        let inactive = inactive_attr(self.controller.is_some());
         let mon_num = self.mon_num;
         format!(
             "<div class='{NAME} end'>{self} {item_state}</div>\
-            <div class='info fill{disabled}'>{mon_num}</div>"
+            <div class='info fill{inactive}'>{mon_num}</div>"
         )
     }
 

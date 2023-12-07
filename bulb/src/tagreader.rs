@@ -12,7 +12,7 @@
 //
 use crate::device::{Device, DeviceAnc};
 use crate::resource::{
-    disabled_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
+    inactive_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
@@ -105,10 +105,10 @@ impl TagReader {
     fn to_html_compact(&self, anc: &TagReaderAnc) -> String {
         let item_state = anc.item_state(self);
         let location = HtmlStr::new(&self.location).with_len(32);
-        let disabled = disabled_attr(self.controller.is_some());
+        let inactive = inactive_attr(self.controller.is_some());
         format!(
             "<div class='{NAME} end'>{self} {item_state}</div>\
-            <div class='info fill{disabled}'>{location}</div>"
+            <div class='info fill{inactive}'>{location}</div>"
         )
     }
 

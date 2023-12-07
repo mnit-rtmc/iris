@@ -15,9 +15,7 @@
 use crate::files::{AtomicFile, Cache};
 use crate::Result;
 use anyhow::Context;
-use ntcip::dms::font::FontTable;
-use ntcip::dms::graphic::GraphicTable;
-use ntcip::dms::Dms;
+use ntcip::dms::{Dms, FontTable, GraphicTable};
 use rendzina::{load_font, load_graphic, SignConfig};
 use serde_derive::Deserialize;
 use std::collections::HashMap;
@@ -65,7 +63,8 @@ struct SignMessage {
 
 /// Data needed for rendering sign messages
 struct MsgData {
-    dms: Dms,
+    fonts: FontTable<256, 24>,
+    graphics: GraphicTable<32>,
     configs: HashMap<String, SignConfig>,
 }
 
@@ -84,30 +83,36 @@ impl SignMessage {
 }
 
 /// Load fonts from a JSON file
-fn load_fonts(dir: &Path) -> Result<FontTable> {
+fn load_fonts(dir: &Path) -> Result<FontTable<256, 24>> {
     log::debug!("load_fonts");
     let mut path = PathBuf::new();
     path.push(dir);
-    path.push("ifnt");
-    let mut cache = Cache::new(&path, "ifnt")?;
+    path.push("api");
+    path.push("tfon");
+    let mut cache = Cache::new(&path, "tfon")?;
     let mut fonts = FontTable::default();
-    path.push("_placeholder_.ifnt");
+    path.push("_placeholder_.tfon");
     for nm in cache.drain() {
         path.set_file_name(nm);
         let file =
             File::open(&path).with_context(|| format!("font {path:?}"))?;
         let reader = BufReader::new(file);
-        fonts.push(load_font(reader)?)?;
+        let font = load_font(reader)?;
+        if let Some(f) = fonts.font_mut(font.number) {
+            *f = font;
+        } else if let Some(f) = fonts.font_mut(0) {
+            *f = font;
+        }
     }
-    fonts.sort();
     Ok(fonts)
 }
 
 /// Load graphics from a JSON file
-fn load_graphics(dir: &Path) -> Result<GraphicTable> {
+fn load_graphics(dir: &Path) -> Result<GraphicTable<32>> {
     log::debug!("load_graphics");
     let mut path = PathBuf::new();
     path.push(dir);
+    path.push("api");
     path.push("gif");
     let mut cache = Cache::new(&path, "gif")?;
     let mut graphics = GraphicTable::default();
@@ -125,10 +130,13 @@ fn load_graphics(dir: &Path) -> Result<GraphicTable> {
                 .with_context(|| format!("load_graphics {path:?}"))?;
             let reader = BufReader::new(file);
             let graphic = load_graphic(reader, number)?;
-            graphics.push(graphic)?;
+            if let Some(g) = graphics.graphic_mut(graphic.number) {
+                *g = graphic;
+            } else if let Some(g) = graphics.graphic_mut(0) {
+                *g = graphic;
+            }
         }
     }
-    graphics.sort();
     Ok(graphics)
 }
 
@@ -136,18 +144,21 @@ impl MsgData {
     /// Load message data from a file path
     fn load(dir: &Path) -> Result<Self> {
         log::debug!("MsgData::load");
-        let dms = Dms::builder()
-            .with_font_definition(load_fonts(dir)?)
-            .with_graphic_definition(load_graphics(dir)?)
-            .build();
+        let fonts = load_fonts(dir)?;
+        let graphics = load_graphics(dir)?;
         let mut path = PathBuf::new();
         path.push(dir);
+        path.push("api");
         path.push("sign_config");
         let reader = BufReader::new(
             File::open(&path).with_context(|| format!("load {path:?}"))?,
         );
         let configs = SignConfig::load_all(reader)?;
-        Ok(MsgData { dms, configs })
+        Ok(MsgData {
+            fonts,
+            graphics,
+            configs,
+        })
     }
 
     /// Lookup a config
@@ -169,15 +180,14 @@ impl MsgData {
         let t = Instant::now();
         let writer = file.writer()?;
         let cfg = self.config(msg)?;
-        self.dms = self
-            .dms
-            .clone()
-            .into_builder()
+        let dms = Dms::builder()
+            .with_font_definition(self.fonts.clone())
+            .with_graphic_definition(self.graphics.clone())
             .with_sign_cfg(cfg.sign_cfg())
             .with_vms_cfg(cfg.vms_cfg())
             .with_multi_cfg(cfg.multi_cfg())
-            .build();
-        if let Err(e) = rendzina::render(writer, &self.dms, &msg.multi) {
+            .build()?;
+        if let Err(e) = rendzina::render(writer, &dms, &msg.multi, None, None) {
             log::warn!("{:?}, multi={} {e:?}", file.path(), msg.multi);
             file.cancel()?;
             return Ok(());

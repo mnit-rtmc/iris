@@ -83,7 +83,7 @@ Field     | Description
 ----------|----------------------------------------------------
 Type      | Object type selected from a list of available types
 Object    | A regular expression to match object names.
-Group     | Used to divide objects into related groups.  This is an experimental feature intended to replace the **object** field.  NOTE: Write access only.
+Group     | Used to divide objects into related groups.  NOTE: Write access only.
 Attribute | Write access to a specific attribute of an object type can be specified with this field.
 Write     | When this checkbox is checked, write access is granted.  Otherwise, the privilege grants read access.  To be granted write access, a role must also have read access to the object type.
 

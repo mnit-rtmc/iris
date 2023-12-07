@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2022  Minnesota Department of Transportation
+ * Copyright (C) 2004-2023  Minnesota Department of Transportation
  * Copyright (C) 2022       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.TMSException;

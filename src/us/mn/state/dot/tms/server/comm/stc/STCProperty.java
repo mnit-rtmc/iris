@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2018  Minnesota Department of Transportation
+ * Copyright (C) 2013-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -163,6 +163,13 @@ abstract public class STCProperty extends ControllerProperty {
 		throws IOException
 	{
 		return parseAsciiHex(new String(body, pos, 2, ASCII));
+	}
+
+	/** Parse a 3-digit ASCII-hex value */
+	static protected int parseAsciiHex3(byte[] body, int pos)
+		throws IOException
+	{
+		return parseAsciiHex(new String(body, pos, 3, ASCII));
 	}
 
 	/** Parse a 6-digit ASCII-hex value */

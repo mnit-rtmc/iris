@@ -1,5 +1,21 @@
 # IRIS 5.x Release Notes
 
+5.48.0 (20 Nov 2023)
+ - Fixed parsing of gate arm fault codes when multiple faults are present
+ - Improved default message pattern selection for DMS message composer
+   (java + web UI)
+ - Added DB notifications for camera preset updates
+ - Replaced DMS fonts with "tfon" format files
+
+5.47.0 (18 Oct 2023)
+ - Finished MVP of web UI for DMS (bulb)
+ - Reworked PostgreSQL LISTEN/NOTIFY scheme
+ - Improved handling of `[tr]` MULTI tags
+ - Fixed bug in fontVersionId calculation for large fonts
+ - Fixed bug in parsing NTCIP supported MULTI tags
+ - Fixed NPE on DMS with no configuration
+ - Fixed ifnt import/export bugs
+
 5.46.0 (5 Sep 2023)
  - Changed `sign_config.default_font` to a number
  - Converted all fonts to .ifnt format

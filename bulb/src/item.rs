@@ -29,8 +29,8 @@ pub enum ItemState {
     Fault,
     /// Communication offline
     Offline,
-    /// Disabled by administrator
-    Disabled,
+    /// Inactive (deactivated)
+    Inactive,
     /// State not known
     Unknown,
 }
@@ -58,7 +58,7 @@ impl ItemState {
             "🎯" => Some(Self::Dedicated),
             "⚠️" => Some(Self::Fault),
             "🔌" => Some(Self::Offline),
-            "🔻" => Some(Self::Disabled),
+            "▪️" => Some(Self::Inactive),
             "❓" => Some(Self::Unknown),
             _ => None,
         }
@@ -74,7 +74,7 @@ impl ItemState {
             Self::Dedicated => "🎯",
             Self::Fault => "⚠️",
             Self::Offline => "🔌",
-            Self::Disabled => "🔻",
+            Self::Inactive => "▪️",
             Self::Unknown => "❓",
         }
     }
@@ -89,7 +89,7 @@ impl ItemState {
             Self::Dedicated => "dedicated",
             Self::Fault => "fault",
             Self::Offline => "offline",
-            Self::Disabled => "disabled",
+            Self::Inactive => "inactive",
             Self::Unknown => "unknown",
         }
     }
@@ -148,7 +148,7 @@ impl<'a> ItemStates<'a> {
             desc.push(' ');
             desc.push_str(state.description());
             if !dtl.is_empty() {
-                desc.push_str("<span class='");
+                desc.push_str("<span class='item_");
                 desc.push_str(state.description());
                 desc.push_str("'>");
                 for d in dtl.split(';') {

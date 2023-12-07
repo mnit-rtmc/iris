@@ -20,12 +20,8 @@ These resources are JSON arrays, fetched using http `GET` requests.
 - `iris/detector_pub`: Vehicle detectors
 - `iris/dms_message`: Current [DMS] messages and status
 - `iris/dms_pub`: [DMS] locations and configuration
-- `iris/font`: Bitmapped fonts for DMS
-- `iris/graphic`: Graphics for DMS
 - `iris/incident`: Currently active incidents
 - `iris/rwis`: [Road Weather Information System]
-- `iris/sign_config`: DMS [sign configuration]s
-- `iris/sign_detail`: DMS sign detail information
 - `iris/sign_message`: Active DMS [sign message]s
 - `iris/station_sample`: Vehicle detection station data
 - `iris/system_attribute_pub`: Public [system attributes]
@@ -82,22 +78,13 @@ A `Content-Type: application/json` header is included where appropriate.
 
 ## Resource Types
 
-| Access Control | Communication   | Devices  |
-|----------------|-----------------|----------|
-| [domain]       | [comm_config]   | [alarm]  |
-| [permission]   | [comm_link]     | [beacon] |
-| [role]         | [controller]    | [camera] |
-| [user]         | [cabinet_style] | [dms]    |
-|                | [modem]         |          |
-
-### `camera`
-
-| Access       | Minimal              | Full                  |
-|--------------|----------------------|-----------------------|
-| Read Only    | name, location       | geo\_loc, video\_loss |
-| 👉 Operate   |                      | ptz                   |
-| 💡 Manage    | notes, publish       | streamable            |
-| 🔧 Configure | controller, cam\_num | pin, cam\_template, encoder\_type, enc\_address, enc\_port, enc\_mcast, enc\_channel
+| Access Control | Communication   | Devices  |                 |
+|----------------|-----------------|----------|-----------------|
+| [domain]       | [comm config]   | [alarm]  | [flow stream]   |
+| [permission]   | [comm link]     | [beacon] | [ramp meter]    |
+| [role]         | [controller]    | [camera] | [tag reader]    |
+| [user]         | [cabinet style] | [dms]    | [video monitor] |
+|                | [modem]         |          |                 |
 
 ### `detector`
 
@@ -107,15 +94,6 @@ A `Content-Type: application/json` header is included where appropriate.
 | 👉 Operate   |             | field\_length, force\_fail |
 | 💡 Manage    | notes       | abandoned                  |
 | 🔧 Configure | controller  | pin, r\_node, lane\_code, lane\_number, fake |
-
-### `flow_stream`
-
-| Access       | Minimal    | Full                       |
-|--------------|------------|----------------------------|
-| Read Only    | name       | status                     |
-| 👉 Operate   |            | camera, mon\_num           |
-| 💡 Manage    |            | restricted, address, port  |
-| 🔧 Configure | controller | pin, loc\_overlay, quality |
 
 ### `gate_arm`
 
@@ -181,32 +159,6 @@ Since `geo_loc` resources can only be created and deleted with an associated
 | Read Only    | name, lcs, indication |      |
 | 🔧 Configure | controller            | pin  |
 
-### `ramp_meter`
-
-| Access       | Minimal        | Full                             |
-|--------------|----------------|----------------------------------|
-| Read Only    | name, location | geo\_loc                         |
-| 👉 Operate   |                | m\_lock, rate                    |
-| 💡 Manage    | notes          | storage, max\_wait, algorithm, am\_target, pm\_target |
-| 🔧 Configure | controller     | pin, meter\_type, beacon, preset |
-
-### `tag_reader`
-
-| Access       | Minimal        | Full               |
-|--------------|----------------|--------------------|
-| Read Only    | name, location | geo\_loc, settings |
-| 💡 Manage    | notes          | toll\_zone         |
-| 🔧 Configure | controller     | pin                |
-
-### `video_monitor`
-
-| Access       | Minimal              | Full                       |
-|--------------|----------------------|----------------------------|
-| Read Only    | name                 |                            |
-| 👉 Operate   |                      | camera                     |
-| 💡 Manage    | notes                | restricted, monitor\_style |
-| 🔧 Configure | mon\_num, controller | pin                        |
-
 ### `weather_sensor`
 
 | Access       | Minimal                  | Full |
@@ -218,19 +170,24 @@ Since `geo_loc` resources can only be created and deleted with an associated
 
 [alarm]: alarms.html
 [beacon]: beacons.html
-[cabinet_style]: controllers.html#cabinet-styles
+[cabinet style]: controllers.html#cabinet-styles
 [camera]: cameras.html
-[comm_config]: comm_config.html
-[comm_link]: comm_links.html
+[comm config]: comm_config.html
+[comm link]: comm_links.html
 [controller]: controllers.html
 [dms]: dms.html
 [domain]: user_roles.html#domains
+[flow stream]: flow_streams.html
 [modem]: modem.html
 [permission]: permissions.html
+[ramp meter]: ramp_meters.html
 [resource types]: #resource-types
 [Road Weather Information System]: rwis.html
 [role]: user_roles.html#roles
 [sign configuration]: sign_configuration.html
+[sign detail]: sign_configuration.html#sign-details
 [sign message]: sign_message.html
 [system attributes]: system_attributes.html
+[tag reader]: tolling.html#tag-readers
 [user]: user_roles.html
+[video monitor]: video.html

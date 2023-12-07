@@ -160,6 +160,18 @@ macro_rules! add_routes {
     };
 }
 
+/// Get associated or dependent resource name
+fn res_name(resource_n: &'static str) -> &'static str {
+    match resource_n {
+        // DMS dependent resources
+        "font" | "graphic" | "msg_line" | "msg_pattern" | "sign_config"
+        | "sign_detail" | "sign_message" | "word" => "dms",
+        // associated controller
+        "controller_io" => "controller",
+        _ => resource_n,
+    }
+}
+
 /// Lookup authorized access for a resource
 fn auth_access(
     res: &'static str,
@@ -168,7 +180,9 @@ fn auth_access(
 ) -> Result<Access> {
     let session = req.session();
     let auth: AuthMap = session.get("auth").ok_or(SonarError::Unauthorized)?;
-    let perm = req.state().permission_user_res(&auth.username, res, name)?;
+    let perm =
+        req.state()
+            .permission_user_res(&auth.username, res_name(res), name)?;
     Access::new(perm.access_n).ok_or(SonarError::Unauthorized)
 }
 
@@ -245,6 +259,7 @@ async fn main() -> tide::Result<()> {
     add_routes!(route, "detector", query::DETECTOR);
     add_routes!(route, "dms", query::DMS);
     add_routes!(route, "flow_stream", query::FLOW_STREAM);
+    add_routes!(route, "font", query::FONT);
     add_routes!(route, "gate_arm", query::GATE_ARM);
     add_routes!(route, "gate_arm_array", query::GATE_ARM_ARRAY);
     route
@@ -252,6 +267,7 @@ async fn main() -> tide::Result<()> {
         .get(|req| sql_get("geo_loc", query::GEO_LOC, req))
         .patch(|req| sonar_object_patch("geo_loc", req));
     add_routes!(route, "gps", query::GPS);
+    add_routes!(route, "graphic", query::GRAPHIC);
     add_routes!(route, "lane_marking", query::LANE_MARKING);
     add_routes!(route, "lcs_array", query::LCS_ARRAY);
     add_routes!(route, "lcs_indication", query::LCS_INDICATION);
@@ -270,10 +286,14 @@ async fn main() -> tide::Result<()> {
         .patch(permission_patch)
         .delete(permission_delete);
     add_routes!(route, "role", query::ROLE);
+    add_routes!(route, "sign_config", query::SIGN_CONFIG);
+    add_routes!(route, "sign_detail", query::SIGN_DETAIL);
+    add_routes!(route, "sign_message", query::SIGN_MSG);
     add_routes!(route, "tag_reader", query::TAG_READER);
     add_routes!(route, "user", query::USER);
     add_routes!(route, "video_monitor", query::VIDEO_MONITOR);
     add_routes!(route, "weather_sensor", query::WEATHER_SENSOR);
+    add_routes!(route, "word", query::WORD);
     app.listen("127.0.0.1:3737").await?;
     Ok(())
 }
@@ -440,8 +460,7 @@ async fn sql_get_by_name(
     req: Request<State>,
 ) -> Result<String> {
     let name = req_name(&req)?;
-    auth_access(res_name(resource_n), &req, Some(&name))?
-        .check(Access::View)?;
+    auth_access(resource_n, &req, Some(&name))?.check(Access::View)?;
     spawn_blocking(move || req.state().get_by_pkey(sql, &name)).await
 }
 
@@ -466,8 +485,7 @@ async fn sql_get_array_by_name(
     req: Request<State>,
 ) -> Result<String> {
     let name = req_name(&req)?;
-    auth_access(res_name(resource_n), &req, Some(&name))?
-        .check(Access::View)?;
+    auth_access(resource_n, &req, Some(&name))?.check(Access::View)?;
     spawn_blocking(move || req.state().get_array_by_pkey(sql, &name)).await
 }
 
@@ -515,13 +533,14 @@ fn make_name(res: &'static str, nm: &str) -> Result<String> {
 fn make_att(res: &'static str, nm: &str, att: &str) -> Result<String> {
     if att.len() > 64 || att.contains(invalid_char) || att.contains('/') {
         Err(SonarError::InvalidName)
-    } else {
-        let att = if res == "controller" && att == "drop_id" {
-            "drop".to_string()
-        } else {
-            att.to_case(Case::Camel)
-        };
+    } else if res == "controller" && att == "drop_id" {
+        Ok(format!("{nm}/drop"))
+    } else if res == "sign_message" {
+        // sign_message attributes are in snake case
         Ok(format!("{nm}/{att}"))
+    } else {
+        // most IRIS attributes are in camel case (Java)
+        Ok(format!("{nm}/{}", att.to_case(Case::Camel)))
     }
 }
 
@@ -541,7 +560,7 @@ async fn resource_get_json(
     resource_n: &'static str,
     req: Request<State>,
 ) -> Result<(String, Body)> {
-    auth_access(res_name(resource_n), &req, None)?.check(Access::View)?;
+    auth_access(resource_n, &req, None)?.check(Access::View)?;
     let path = PathBuf::from(format!("{STATIC_PATH}/{resource_n}"));
     let etag = resource_etag(&path).await?;
     if let Some(values) = req.header("If-None-Match") {
@@ -551,14 +570,6 @@ async fn resource_get_json(
     }
     let body = Body::from_file(&path).await?;
     Ok((etag, body))
-}
-
-/// Get associated resource name
-fn res_name(resource_n: &'static str) -> &'static str {
-    match resource_n {
-        "controller_io" => "controller",
-        _ => resource_n,
-    }
 }
 
 /// Get a static file ETag
@@ -590,6 +601,16 @@ async fn sonar_object_post2(
         Some(Value::String(name)) => {
             let nm = make_name(res, name)?;
             let mut c = connection(&req).await?;
+            // first, set attributes on phantom object
+            for (key, value) in obj.iter() {
+                let key = &key[..];
+                if key != "name" {
+                    let anm = make_att(res, &nm, key)?;
+                    let value = att_value(value)?;
+                    log::debug!("{anm} = {value} (phantom)");
+                    c.update_object(&anm, &value).await?;
+                }
+            }
             log::debug!("creating {nm}");
             c.create_object(&nm).await?;
             Ok(())

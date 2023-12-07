@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2023  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,17 +69,32 @@ public class FaultProperty extends STCProperty {
 		if (len < 3)
 			throw new ParsingException("TOO FEW BYTES:" + len);
 		int n_faults = parseAsciiHex2(msg, OFF_COUNT);
-		if (len != (3 + n_faults * 2))
-			throw new ParsingException("INVALID FAULT LEN:" + len);
 		FaultCode[] fc = new FaultCode[n_faults];
+		int j = OFF_FAULT;
+		// NOTE: there is no reliable method to parse these codes,
+		//       since they may be 2 or 3 digits
 		for (int i = 0; i < n_faults; i++) {
-			int j = OFF_FAULT + i * 2;
-			int v = parseAsciiHex2(msg, j);
-			FaultCode c = FaultCode.fromValue(v);
-			if (c != null)
-				fc[i] = c;
-			else
-				throw new ParsingException("INVALID FAULT:" +v);
+			// check for a 2-digit fault code
+			if (j + 2 <= msg.length) {
+				int v = parseAsciiHex2(msg, j);
+				FaultCode c = FaultCode.fromValue(v);
+				if (c != null) {
+					fc[i] = c;
+					j += 2;
+					continue;
+				}
+			}
+			// check for a 3-digit fault code
+			if (j + 3 <= msg.length) {
+				int v = parseAsciiHex3(msg, j);
+				FaultCode c = FaultCode.fromValue(v);
+				if (c != null) {
+					fc[i] = c;
+					j += 3;
+					continue;
+				}
+			}
+			fc[i] = FaultCode.FAL_UNKNOWN;
 		}
 		faults = fc;
 	}

@@ -15,7 +15,7 @@ use crate::controller::Controller;
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::resource::{
-    disabled_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
+    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use serde::{Deserialize, Serialize};
@@ -146,26 +146,26 @@ impl CommLink {
             (true, true, true) => "online 👍",
             (true, false, false) => "🔌",
             (true, false, true) => "offline 🔌",
-            (false, _, false) => "🔻",
-            (false, _, true) => "disabled 🔻",
+            (false, _, false) => "▪️",
+            (false, _, true) => "inactive ▪️",
         }
     }
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let connected = self.connected(false);
-        let disabled = disabled_attr(self.poll_enabled);
+        let inactive = inactive_attr(self.poll_enabled);
         let description = HtmlStr::new(&self.description);
         format!(
             "<div class='{NAME} end'>{connected} {self}</div>\
-            <div class='info fill{disabled}'>{description}</div>"
+            <div class='info fill{inactive}'>{description}</div>"
         )
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &CommLinkAnc) -> String {
         let connected = self.connected(true);
-        let disabled = disabled_attr(self.poll_enabled);
+        let inactive = inactive_attr(self.poll_enabled);
         let description = HtmlStr::new(&self.description);
         let comm_config = anc.comm_config_desc(self);
         let config = HtmlStr::new(comm_config);
@@ -173,7 +173,7 @@ impl CommLink {
         format!(
             "<div class='row'>\
               <span>{connected}</span>\
-              <span class='info end{disabled}'>{description}</span>\
+              <span class='info end{inactive}'>{description}</span>\
             </div>\
             <div class='row'>\
               <span>{config}</span>\

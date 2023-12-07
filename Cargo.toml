@@ -3,7 +3,7 @@ members = ["honeybee", "graft", "mayfly", "bulb", "rendzina"]
 resolver = "2"
 
 [workspace.package]
-version = "5.46.2"
+version = "5.48.0"
 edition = "2021"
 
 [profile.web]
@@ -13,5 +13,8 @@ lto = true
 codegen-units = 1
 panic = "abort"
 strip = "symbols"
+
+[workspace.dependencies]
+ntcip = "0.12"
 
 [patch.crates-io]

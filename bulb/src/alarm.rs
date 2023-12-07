@@ -12,7 +12,7 @@
 //
 use crate::device::{Device, DeviceAnc};
 use crate::item::ItemState;
-use crate::resource::{disabled_attr, Card, View, EDIT_BUTTON, NAME};
+use crate::resource::{inactive_attr, Card, View, EDIT_BUTTON, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -51,12 +51,12 @@ impl Alarm {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &AlarmAnc) -> String {
-        let disabled = disabled_attr(self.controller.is_some());
+        let inactive = inactive_attr(self.controller.is_some());
         let item_state = self.item_state(anc);
         let description = HtmlStr::new(&self.description);
         format!(
             "<div class='{NAME} end'>{self} {item_state}</div>\
-            <div class='info fill{disabled}'>{description}</div>"
+            <div class='info fill{inactive}'>{description}</div>"
         )
     }
 

@@ -229,31 +229,32 @@ button.go_link {
   visibility: visible;
 }
 
-.available {
+/* item state classes for tooltip backgrounds */
+.item_available {
   background-color: #004;
 }
-.deployed {
+.item_deployed {
   background-color: #440;
 }
-.planned {
+.item_planned {
   background-color: #044;
 }
-.external {
+.item_external {
   background-color: #040;
 }
-.dedicated {
+.item_dedicated {
   background-color: #404;
 }
-.fault {
+.item_fault {
   background-color: #420;
 }
-.offline {
+.item_offline {
   background-color: #444;
 }
-.disabled {
+.item_inactive {
   background-color: #400;
 }
-.unknown {
+.item_unknown {
   background-color: #400;
 }
 
@@ -314,7 +315,7 @@ button.go_link {
   font-size: smaller;
   margin-top: 0.1rem;
 }
-.disabled {
+.inactive {
   text-decoration: line-through;
 }
 .row {
@@ -323,6 +324,49 @@ button.go_link {
   padding: 0.05rem 0;
   z-index: 1; /* required for ob_delete::before slider pseudo-element */
 }
+.column {
+  display: flex;
+  flex-direction: column;
+  padding: 0.1rem;
+}
+
+.mc_line_gap {
+  margin-top: 3px;
+}
+#mc_grid {
+  display: grid;
+  margin: 0.1rem;
+  gap: 0.1rem;
+  justify-content: space-around;
+  justify-items: center;
+  align-content: space-around;
+  align-items: center;
+  grid-template-columns: repeat(3, auto);
+  grid-template-areas: "pv ln ln"
+                       "pt bs bc";
+}
+#mc_preview {
+  grid-area: pv;
+  justify-self: end;
+  filter: opacity(80%);
+}
+#mc_pattern {
+  grid-area: pt;
+  justify-self: end;
+  font-size: smaller;
+}
+#mc_lines {
+  grid-area: ln;
+  justify-self: start;
+  font-size: smaller;
+}
+#mc_send {
+  grid-area: bs;
+}
+#mc_clear {
+  grid-area: bc;
+}
+
 .start {
   align-self: start;
   justify-content: start;

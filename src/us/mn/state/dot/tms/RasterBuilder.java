@@ -263,7 +263,6 @@ public class RasterBuilder {
 			return false;
 		String tr = first.trailingTextRectangle();
 		return (tr != null)
-			&& second.eachPageStartsWith(tr)
-			&& second.hasOneTextRectPerPage();
+		     && tr.equals(second.combiningSharedTextRectangle());
 	}
 }

@@ -3,12 +3,12 @@
 //! rendzina is for rendering DMS sign messages to .gif files
 #![forbid(unsafe_code)]
 
+use fstr::FStr;
+use gift::block::DisposalMethod;
 use gift::{Decoder, Encoder, Step};
 use ntcip::dms::config::{MultiCfg, SignCfg, VmsCfg};
-use ntcip::dms::font::{ifnt, Font};
-use ntcip::dms::graphic::Graphic;
 use ntcip::dms::multi::{Color, ColorScheme, JustificationPage, SyntaxError};
-use ntcip::dms::{Dms, Page};
+use ntcip::dms::{tfon, Dms, Font, Graphic, Page, Pages};
 use pix::bgr::SBgr8;
 use pix::chan::Ch8;
 use pix::el::Pixel;
@@ -41,7 +41,7 @@ pub enum Error {
     Json(#[from] serde_json::Error),
 
     #[error("Font: {0}")]
-    Font(#[from] ifnt::Error),
+    Font(#[from] tfon::Error),
 
     #[error("Syntax: {0}")]
     Syntax(#[from] SyntaxError),
@@ -134,9 +134,9 @@ fn rgb_from_i32(rgb: i32) -> (u8, u8, u8) {
     (r, g, b)
 }
 
-/// Load a font from an ifnt
+/// Load a font from a tfon file
 pub fn load_font<R: Read>(reader: R) -> Result<Font> {
-    Ok(ifnt::read(reader)?)
+    Ok(tfon::read(reader)?)
 }
 
 /// Load a graphic from a GIF
@@ -145,7 +145,7 @@ pub fn load_graphic<R: Read>(reader: R, number: u8) -> Result<Graphic> {
     match Decoder::new(reader).into_steps().next() {
         Some(step) => {
             let step = step?;
-            let name = format!("g{number}");
+            let name = FStr::from_str_lossy(&format!("G{number}"), 0);
             let raster: Raster<SBgr8> = Raster::with_raster(step.raster());
             let height = raster.height().try_into().unwrap();
             let width = raster.width().try_into().unwrap();
@@ -168,10 +168,20 @@ pub fn load_graphic<R: Read>(reader: R, number: u8) -> Result<Graphic> {
 }
 
 /// Render a sign message to a .gif file
-pub fn render<W: Write>(mut writer: W, dms: &Dms, multi: &str) -> Result<()> {
-    let (width, height) = face_size(dms);
+pub fn render<W: Write>(
+    mut writer: W,
+    dms: &Dms<256, 24, 32>,
+    multi: &str,
+    max_width: Option<u16>,
+    max_height: Option<u16>,
+) -> Result<()> {
+    let (width, height) = face_size(
+        dms,
+        max_width.unwrap_or(PIX_WIDTH),
+        max_height.unwrap_or(PIX_HEIGHT),
+    );
     let mut steps = Vec::new();
-    for page in dms.render_pages(multi) {
+    for page in Pages::new(dms, multi) {
         let Page {
             raster,
             duration_ds,
@@ -182,17 +192,16 @@ pub fn render<W: Write>(mut writer: W, dms: &Dms, multi: &str) -> Result<()> {
         let face = make_face_raster(dms, raster, width, height);
         let indexed = palette.make_indexed(face);
         steps.push(
+            // The CARS iOS client can't read .gif files with no graphic
+            // control extension -- set DisposalMethod to Keep to include it
             Step::with_indexed(indexed, palette)
-                .with_delay_time_cs(Some(delay_cs)),
+                .with_delay_time_cs(Some(delay_cs))
+                .with_disposal_method(DisposalMethod::Keep),
         );
     }
     let mut enc = Encoder::new(&mut writer).into_step_enc();
     let len = steps.len();
-    enc = if len > 1 {
-        enc.with_loop_count(0)
-    } else {
-        enc
-    };
+    enc = if len > 1 { enc.with_loop_count(0) } else { enc };
     for step in steps {
         if len < 2 {
             enc.encode_step(&step.with_delay_time_cs(None))?;
@@ -204,25 +213,29 @@ pub fn render<W: Write>(mut writer: W, dms: &Dms, multi: &str) -> Result<()> {
 }
 
 /// Calculate size to render DMS "face"
-fn face_size(dms: &Dms) -> (u16, u16) {
+fn face_size(
+    dms: &Dms<256, 24, 32>,
+    max_width: u16,
+    max_height: u16,
+) -> (u16, u16) {
     let fw = dms.face_width_mm();
     let fh = dms.face_height_mm();
     if fw > 0.0 && fh > 0.0 {
-        let sx = f32::from(PIX_WIDTH) / fw;
-        let sy = f32::from(PIX_HEIGHT) / fh;
+        let sx = f32::from(max_width) / fw;
+        let sy = f32::from(max_height) / fh;
         if sx > sy {
             let w = (fw * sy).round() as u16;
             // Bump up to next even value
             let w = (w + 1) & 0b11111111_11111110;
-            (w, PIX_HEIGHT)
+            (w, max_height)
         } else {
             let h = (fh * sx).round() as u16;
             // Bump up to next even value
             let h = (h + 1) & 0b11111111_11111110;
-            (PIX_WIDTH, h)
+            (max_width, h)
         }
     } else {
-        (PIX_WIDTH, PIX_HEIGHT)
+        (max_width, max_height)
     }
 }
 
@@ -238,7 +251,7 @@ fn make_palette(raster: &Raster<SRgb8>) -> Palette {
 
 /// Make a raster of sign face
 fn make_face_raster(
-    dms: &Dms,
+    dms: &Dms<256, 24, 32>,
     raster: Raster<SRgb8>,
     width: u16,
     height: u16,

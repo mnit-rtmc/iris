@@ -6,9 +6,10 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
+fstr = "0.2"
 gift = "0.10"
 log = "0.4"
-ntcip = "0.7"
+ntcip = { workspace = true }
 pix = "0.13"
 serde = "1.0"
 serde_derive = "1.0"

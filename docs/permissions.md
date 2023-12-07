@@ -22,7 +22,7 @@ access only.
 
 [Role] is the user role associated with the permissions.
 
-[Resource] is the `type` part of the URI.
+[Resource] is the `{type}` part of a [restricted resource] to be accessed.
 
 [Hashtag] restricts the permission to resources which have the assigned tag.
 Permissions containing hashtags are only checked for updates to existing
@@ -40,9 +40,16 @@ There are 4 **access** levels, with increasing permissiveness:
 When checks are performed, the **highest** access level of matching permissions
 is used.
 
+## Dependent Resources
+
+To simplify administration, some permissions grant access to related resources.
+In other words, permissions on the main resource also applies to any dependent
+resource, at the same access level.
+
 
 [capabilities]: user_roles.html#capabilities
 [hashtag]: hashtags.html
 [privileges]: user_roles.html#privileges
 [resource]: rest_api.html#resource-types
+[restricted resource]: rest_api.html#restricted-resources
 [role]: user_roles.html#roles
