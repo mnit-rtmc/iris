@@ -46,6 +46,7 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 		super(link, HTTP, ONVIF_LOG);
 	}
 
+	// TODO: uncomment as implemented
 	static private OnvifProp createDeviceReqProp(DeviceRequest r) {
 		PTZCommandProp prop = new PTZCommandProp("imaging");
 		switch (r) {

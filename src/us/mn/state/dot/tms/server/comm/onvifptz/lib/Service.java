@@ -52,6 +52,10 @@ public abstract class Service {
 	protected String password;
 	protected boolean authenticate;
 
+	/**
+	 * Get the base document that all other services add to; creates the header
+	 * and body, and adds relevant namespace attributes.
+	 */
 	protected Document getBaseDocument() {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db;
@@ -77,9 +81,7 @@ public abstract class Service {
 		return d;
 	}
 
-	/**
-	 * Generates a random 16-byte string for use as a nonce in password digest
-	 */
+	/** Generates a random 16-byte string for use as a nonce in password digest */
 	private static String getNonce() {
 		Random random = new SecureRandom();
 		StringBuilder nonce = new StringBuilder();
@@ -92,12 +94,18 @@ public abstract class Service {
 		return nonce.toString();
 	}
 
+	/** Returns the current UTC time for use in password digest */
 	private static String getUTCTime() {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 		return sdf.format(new Date());
 	}
 
+	/**
+	 * Add the security headers to the document, using WS-Security specification
+	 *
+	 * @param doc the document for which to add headers
+	 */
 	protected Document addSecurityHeaderDocument(Document doc) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 		Element env = (Element) doc.getElementsByTagName("SOAP-ENV:Envelope").item(0);
 		env.setAttribute("xmlns:wsse",
@@ -145,6 +153,13 @@ public abstract class Service {
 		return doc;
 	}
 
+	/**
+	 * Sends an XML message to the handler URL, specified in the service fields;
+	 * adds authentication headers if specified.
+	 *
+	 * @param doc the XML DOM Document to send
+	 * @return the response from the device, as a String
+	 */
 	public String sendRequestDocument(Document doc) {
 		String resp = "";
 		try {

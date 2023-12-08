@@ -45,17 +45,6 @@ public class PTZCommandProp extends OnvifProp {
 		public final String cmd;
 	}
 
-	///** Map a [-1.0,1.0] float value to an [-100,100] integer value. */
-	//static private String mapPTZ(float v) {
-	//	int mapped = Math.round(v * 100);
-	//	// sanity:
-	//	if (mapped < -100)
-	//		mapped = -100;
-	//	if (mapped > 100)
-	//		mapped =  100;
-	//	return Integer.toString(mapped);
-	//}
-
 	/** Logger method */
 	private void log(String s) {
 		OnvifPTZPoller.slog("PTZCommandProp:" + s);
@@ -114,6 +103,8 @@ public class PTZCommandProp extends OnvifProp {
 		service = ptz;
 	}
 
+	//TODO: implement focus and iris commands below
+
 	///** Add a focus param */
 	//public void addFocus(int f) {
 	//	
@@ -132,11 +123,9 @@ public class PTZCommandProp extends OnvifProp {
 
 	///** Add an auto-focus param */
 	//public void addAutoFocus(boolean on) {
-	//	addParam(Param.AUTO_FOCUS.cmd, on ? "on" : "off");
 	//}
 
 	///** Add an auto-iris param */
 	//public void addAutoIris(boolean on) {
-	//	addParam(Param.AUTO_IRIS.cmd, on ? "on" : "off");
 	//}
 }

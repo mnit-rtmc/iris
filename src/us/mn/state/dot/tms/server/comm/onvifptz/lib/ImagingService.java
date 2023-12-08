@@ -36,6 +36,7 @@ public class ImagingService extends Service {
 		return new ImagingService(imagingServiceAddress, u, p);
 	}
 
+	/** Document builder function for GetOptions */
 	public Document getOptionsDocument(String vToken) {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -50,11 +51,17 @@ public class ImagingService extends Service {
 		return doc;
 	}
 
+	/**
+	 * Gets the valid ranges for relevant imaging parameters
+	 *
+	 * @param vToken reference token to the relevant video source
+	 */
 	public String getOptions(String vToken) {
 		Document doc = getOptionsDocument(vToken);
 		return sendRequestDocument(doc);
 	}
 
+	/** Document builder function for GetImagingSettings */
 	public Document getImagingSettingsDocument(String vToken) {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -69,11 +76,20 @@ public class ImagingService extends Service {
 		return doc;
 	}
 
+	/**
+	 * Gets the imaging configuration for the requested video source
+	 *
+	 * @param vToken reference token to the relevant video source
+	 */
 	public String getImagingSettings(String vToken) {
 		Document doc = getImagingSettingsDocument(vToken);
 		return sendRequestDocument(doc);
 	}
 
+	/**
+	 * Document builder function for SetImagingSettings, as used by focus and
+	 * iris requests.
+	 */
 	public Document setImagingSettingsDocument(String vToken, String setting, String value) {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -101,7 +117,7 @@ public class ImagingService extends Service {
 				focus.appendChild(autoFocusMode);
 				if (!"auto".equalsIgnoreCase(value)) {
 					autoFocusMode.appendChild(doc.createTextNode("MANUAL"));
-					// only allows options for autofocus
+					// only allows options for autofocus; use Move to set lens
 				} else {
 					autoFocusMode.appendChild(doc.createTextNode("AUTO"));
 				}
@@ -135,23 +151,32 @@ public class ImagingService extends Service {
 				break;
 		}
 
-		//Element forcePersistence = doc.createElement("wsdl:ForcePersistence");
-		//forcePersistence.appendChild(doc.createTextNode("true");
-		//setImagingSettings.appendChild(forcePersistence);
-
 		return doc;
 	}
 
+	/**
+	 * Sets the focus configuration (auto, manual)
+	 *
+	 * @param vToken reference token to the relevant video source
+	 * @param value  value to set focus mode; "auto" or "manual"
+	 */
 	public String setFocus(String vToken, String value) {
 		Document doc = setImagingSettingsDocument(vToken, "focus", value);
 		return sendRequestDocument(doc);
 	}
 
+	/**
+	 * Sets the iris attenuation
+	 *
+	 * @param vToken reference token to the relevant video source
+	 * @param value  the requested iris attenuation; "auto", "manual", or a float
+	 */
 	public String setIris(String vToken, String value) {
 		Document doc = setImagingSettingsDocument(vToken, "iris", value);
 		return sendRequestDocument(doc);
 	}
 
+	/** Document builder function for GetMoveOptions */
 	public Document getMoveOptionsDocument(String vToken) {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -166,15 +191,22 @@ public class ImagingService extends Service {
 		return doc;
 	}
 
+	/**
+	 * Gets the move options for the focus lens
+	 *
+	 * @param vToken reference token to the relevant video source
+	 */
 	public String getMoveOptions(String vToken) {
 		Document doc = getMoveOptionsDocument(vToken);
 		return sendRequestDocument(doc);
 	}
 
+	/** Document builder function for Move request; uses default mode (relative). */
 	public Document getMoveDocument(String vToken, float distance) {
 		return getMoveDocument(vToken, distance, "");
 	}
 
+	/** Document builder function for Move request; takes move mode as a parameter. */
 	public Document getMoveDocument(String vToken, float distance, String mode) {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -220,11 +252,18 @@ public class ImagingService extends Service {
 		return doc;
 	}
 
+	/**
+	 * Moves the focus lens
+	 *
+	 * @param vToken   reference token to the relevant video source
+	 * @param distance the requested move distance
+	 */
 	public String moveFocus(String vToken, float distance) {
 		Document doc = getMoveDocument(vToken, distance);
 		return sendRequestDocument(doc);
 	}
 
+	/** Document builder function for GetStatus */
 	public Document getStatusDocument(String vToken) {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -239,11 +278,17 @@ public class ImagingService extends Service {
 		return doc;
 	}
 
+	/**
+	 * Gets the current status (position, MoveStatus, extension) of the focus lens
+	 *
+	 * @param vToken reference token to the relevant video source
+	 */
 	public String getStatus(String vToken) {
 		Document doc = getStatusDocument(vToken);
 		return sendRequestDocument(doc);
 	}
 
+	/** Document builder function for Stop */
 	public Document getStopDocument(String vToken) {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -258,6 +303,11 @@ public class ImagingService extends Service {
 		return doc;
 	}
 
+	/**
+	 * Stops all manual focus movements of the lens
+	 *
+	 * @param vToken reference token to the relevant video source
+	 */
 	public String stop(String vToken) {
 		Document doc = getStopDocument(vToken);
 		return sendRequestDocument(doc);

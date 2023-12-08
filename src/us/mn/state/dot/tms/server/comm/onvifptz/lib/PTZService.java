@@ -36,6 +36,7 @@ public class PTZService extends Service {
 		return new PTZService(ptzServiceAddress, u, p);
 	}
 
+	/** Document builder function for GetConfigurations */
 	public Document getConfigurationsDocument() {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -46,11 +47,13 @@ public class PTZService extends Service {
 		return doc;
 	}
 
+	/** Gets the list of existing PTZ configurations and their constraints on the device */
 	public String getConfigurations() {
 		Document doc = getConfigurationsDocument();
 		return sendRequestDocument(doc);
 	}
 
+	/** Document builder function for GetConfigurationOptions */
 	public Document getConfigurationOptionsDocument(String cToken) {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -65,11 +68,18 @@ public class PTZService extends Service {
 		return doc;
 	}
 
+	/**
+	 * Gets the list of supported coordinate systems and range limitations
+	 * of a configuration
+	 *
+	 * @param cToken reference token to the relevant PTZ configuration
+	 */
 	public String getConfigurationOptions(String cToken) {
 		Document doc = getConfigurationOptionsDocument(cToken);
 		return sendRequestDocument(doc);
 	}
 
+	/** Document builder function for GetNodes */
 	public Document getNodesDocument() {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -80,11 +90,13 @@ public class PTZService extends Service {
 		return doc;
 	}
 
+	/** Gets the descriptions of available PTZ nodes */
 	public String getNodes() {
 		Document doc = getNodesDocument();
 		return sendRequestDocument(doc);
 	}
 
+	/** Document builder function for GetNode */
 	public Document getNodeDocument(String nToken) {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -99,12 +111,17 @@ public class PTZService extends Service {
 		return doc;
 	}
 
+	/**
+	 * Gets information about a specific PTZ node
+	 *
+	 * @param nToken reference token to the relevant PTZ node
+	 */
 	public String getNode(String nToken) {
 		Document doc = getNodeDocument(nToken);
 		return sendRequestDocument(doc);
 	}
 
-
+	/** Document builder function for ContinuousMove */
 	public Document getContinuousMoveDocument(float xVel, float yVel, float zVel) {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -133,11 +150,19 @@ public class PTZService extends Service {
 		return doc;
 	}
 
+	/**
+	 * Sends a continuous move operation to the PTZ node; currently uses hard-coded MediaProfile token
+	 *
+	 * @param x the x value (pan speed) of the move [-1.0, 1.0]
+	 * @param y the y value (tilt speed) of the move [-1.0, 1.0]
+	 * @param z the zoom speed of the move [-1.0, 1.0]
+	 */
 	public String continuousMove(float x, float y, float z) {
 		Document doc = getContinuousMoveDocument(x, y, z);
 		return sendRequestDocument(doc);
 	}
 
+	/** Document builder function for RelativeMove */
 	public Document getRelativeMoveDocument(float x, float y, float z) {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -166,11 +191,19 @@ public class PTZService extends Service {
 		return doc;
 	}
 
+	/**
+	 * Sends a relative move operation to the PTZ node; currently uses hard-coded MediaProfile token
+	 *
+	 * @param x the x value (pan) of the move [-1.0, 1.0]
+	 * @param y the y value (tilt) of the move [-1.0, 1.0]
+	 * @param z the zoom of the move [-1.0, 1.0]
+	 */
 	public String relativeMove(float x, float y, float z) {
 		Document doc = getRelativeMoveDocument(x, y, z);
 		return sendRequestDocument(doc);
 	}
 
+	/** Document builder function for GetPresets */
 	public Document getPresetsDocument() {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -185,11 +218,16 @@ public class PTZService extends Service {
 		return doc;
 	}
 
+	/**
+	 * Gets the list of PTZ presets for the PTZNode of the selected
+	 * MediaProfile; currently uses hardcoded profile token.
+	 */
 	public String getPresets() {
 		Document doc = getPresetsDocument();
 		return sendRequestDocument(doc);
 	}
 
+	/** Document builder function for GotoPreset */
 	public Document gotoPresetDocument(String pToken) {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -208,11 +246,18 @@ public class PTZService extends Service {
 		return doc;
 	}
 
+	/**
+	 * Point the camera in a saved preset direction for the PTZNode of
+	 * selected MediaProfile; currently uses hardcoded profile token.
+	 *
+	 * @param pToken reference token to the saved PTZ preset
+	 */
 	public String gotoPreset(String pToken) {
 		Document doc = gotoPresetDocument(pToken);
 		return sendRequestDocument(doc);
 	}
 
+	/** Document builder function for SetPreset */
 	public Document setPresetDocument(String pToken) {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -231,11 +276,20 @@ public class PTZService extends Service {
 		return doc;
 	}
 
+	/**
+	 * Saves the current position to a preset; currently uses hardcoded
+	 * MediaProfile token.
+	 *
+	 * Calling this will overwrite if an existing preset has a matching token.
+	 *
+	 * @param pToken unique reference token for the PTZ preset
+	 */
 	public String setPreset(String pToken) {
 		Document doc = setPresetDocument(pToken);
 		return sendRequestDocument(doc);
 	}
 
+	/** Document builder function for Stop */
 	public Document getStopDocument() {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -258,11 +312,17 @@ public class PTZService extends Service {
 		return doc;
 	}
 
+	/** Stops all ongoing PTZ movements */
 	public String stop() {
 		Document doc = getStopDocument();
 		return sendRequestDocument(doc);
 	}
 
+	/**
+	 * Document builder function for SendAuxiliaryCommand
+	 *
+	 * Relevant for wiper and other extra functions
+	 */
 	public Document getAuxiliaryCommandDocument(String command, String state) {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -281,6 +341,11 @@ public class PTZService extends Service {
 		return doc;
 	}
 
+	/**
+	 * Calls SendAuxiliaryCommand, setting the wiper value
+	 *
+	 * @param state the requested state ("On", "Off") of the wiper
+	 */
 	public String setWiper(String state) {
 		authenticate = true;
 		Document doc = getAuxiliaryCommandDocument("Wiper", state);

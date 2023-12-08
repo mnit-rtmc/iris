@@ -36,6 +36,7 @@ public class MediaService extends Service {
 		return new MediaService(mediaServiceAddress, u, p);
 	}
 
+	/** Document builder function for GetProfiles */
 	public Document getProfilesDocument() {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -46,11 +47,13 @@ public class MediaService extends Service {
 		return doc;
 	}
 
+	/** Gets the list of media profiles for the device */
 	public String getProfiles() {
 		Document doc = getProfilesDocument();
 		return sendRequestDocument(doc);
 	}
 
+	/** Document builder function for GetVideoSources */
 	public Document getVideoSourcesDocument() {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -61,6 +64,7 @@ public class MediaService extends Service {
 		return doc;
 	}
 
+	/** Gets the list of available physical video inputs for the device */
 	public String getVideoSources() {
 		Document doc = getVideoSourcesDocument();
 		return sendRequestDocument(doc);

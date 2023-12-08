@@ -36,6 +36,7 @@ public class DeviceService extends Service {
 		return new DeviceService(deviceServiceAddress, u, p);
 	}
 
+	/** Document builder function for GetServices */
 	public Document getServicesDocument() {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -50,11 +51,13 @@ public class DeviceService extends Service {
 		return doc;
 	}
 
+	/** Get information about services on the device, including service capabilities */
 	public String getServices() {
 		Document doc = getServicesDocument();
 		return sendRequestDocument(doc);
 	}
 
+	/** Document builder function for GetScopes */
 	public Document getScopesDocument() {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -65,12 +68,14 @@ public class DeviceService extends Service {
 		return doc;
 	}
 
+	/** Get the scope parameters of the device */
 	public String getScopes() {
 		authenticate = true;
 		Document doc = getScopesDocument();
 		return sendRequestDocument(doc);
 	}
 
+	/** Document builder function for GetServiceCapabilities */
 	public Document getServiceCapabilitiesDocument() {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
@@ -81,30 +86,13 @@ public class DeviceService extends Service {
 		return doc;
 	}
 
+	/** Get the capabilities of the device service */
 	public String getServiceCapabilities() {
 		Document doc = getServiceCapabilitiesDocument();
 		return sendRequestDocument(doc);
 	}
 
-	public Document getCapabilitiesDocument(String cat) {
-		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
-
-		Element getCapabilities = doc.createElement("wsdl:GetCapabilities");
-		body.appendChild(getCapabilities);
-
-		Element category = doc.createElement("wsdl:Category");
-		getCapabilities.appendChild(category);
-		category.appendChild(doc.createTextNode(cat));
-
-		return doc;
-	}
-
-	public String getCapabilities(String category) {
-		Document doc = getCapabilitiesDocument(category);
-		return sendRequestDocument(doc);
-	}
-
+	/** Document builder function for SendAuxiliaryCommand */
 	public Document getAuxiliaryCommandDocument(String command, String state) {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
