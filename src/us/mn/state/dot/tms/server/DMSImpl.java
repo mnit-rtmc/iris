@@ -623,8 +623,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			}
 			checkMsgUser(sm);
 			validateMsg(sm);
-			store.update(this, "msg_user", sm);
-			setMsgUser(sm);
+			// only retain non-blank user messages
+			SignMessage smu = SignMessageHelper.isBlank(sm)
+				? null
+				: sm;
+			store.update(this, "msg_user", smu);
+			setMsgUser(smu);
 			sm = getMsgValidated();
 			sendMsg(sm);
 		}
