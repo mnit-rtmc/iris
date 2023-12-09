@@ -167,7 +167,10 @@ public enum CommProtocol {
 	CLEARGUIDE("ClearGuide", false),
 
 	/** GPS using Digi WR-series modem (44) */
-	GPS_DIGI_WR("GPS Digi WR", false);
+	GPS_DIGI_WR("GPS Digi WR", false),
+
+	/** ONVIF PTZ (45) */
+	ONVIF_PTZ("ONVIF PTZ");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {
