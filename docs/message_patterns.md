@@ -20,7 +20,7 @@ Attribute [permissions]:
 
 | Access       | Minimal          | Full          |
 |--------------|------------------|---------------|
-| Read Only    | name             |               |
+| 👁️  View      | name             |               |
 | 👉 Operate   |                  |               |
 | 💡 Manage    | compose\_hashtag | flash\_beacon |
 | 🔧 Configure | multi            |               |
@@ -63,7 +63,7 @@ Attribute [permissions]:
 
 | Access       | Minimal                   | Full |
 |--------------|---------------------------|------|
-| Read Only    | name                      |      |
+| 👁️  View      | name                      |      |
 | 👉 Operate   |                           |      |
 | 💡 Manage    | restrict\_hashtag         | rank |
 | 🔧 Configure | msg\_pattern, line, multi |      |

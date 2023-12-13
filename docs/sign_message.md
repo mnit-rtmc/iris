@@ -14,9 +14,9 @@ after being unused for a few minutes.
 
 Attribute [permissions]:
 
-| Access       | Minimal     |
-|--------------|-------------|
-| Read Only    | name, sign\_config, incident, multi, msg\_owner, flash\_beacon, msg\_priority, duration |
+| Access  | Minimal     |
+|---------|-------------|
+| 👁️  View | name, sign\_config, incident, multi, msg\_owner, flash\_beacon, msg\_priority, duration |
 
 </details>
 

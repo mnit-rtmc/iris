@@ -90,7 +90,7 @@ A `Content-Type: application/json` header is included where appropriate.
 
 | Access       | Minimal     | Full                       |
 |--------------|-------------|----------------------------|
-| Read Only    | name, label | auto\_fail                 |
+| 👁️  View      | name, label | auto\_fail                 |
 | 👉 Operate   |             | field\_length, force\_fail |
 | 💡 Manage    | notes       | abandoned                  |
 | 🔧 Configure | controller  | pin, r\_node, lane\_code, lane\_number, fake |
@@ -99,7 +99,7 @@ A `Content-Type: application/json` header is included where appropriate.
 
 | Access       | Minimal                    | Full                  |
 |--------------|----------------------------|-----------------------|
-| Read Only    | name, location, arm\_state | ga\_array, idx, fault |
+| 👁️  View      | name, location, arm\_state | ga\_array, idx, fault |
 | 💡 Manage    | notes                      |                       |
 | 🔧 Configure | controller                 | pin                   |
 
@@ -107,7 +107,7 @@ A `Content-Type: application/json` header is included where appropriate.
 
 | Access       | Minimal                   | Full     |
 |--------------|---------------------------|----------|
-| Read Only    | name, location, interlock | geo\_loc |
+| 👁️  View      | name, location, interlock | geo\_loc |
 | 👉 Operate   | arm\_state                |          |
 | 💡 Manage    | notes                     |          |
 | 🔧 Configure |                           | opposing, prereq, camera, approach, action\_plan |
@@ -123,14 +123,14 @@ Since `geo_loc` resources can only be created and deleted with an associated
 
 | Access       | Minimal          | Full        |
 |--------------|------------------|-------------|
-| Read Only    | name             | resource\_n |
+| 👁️  View      | name             | resource\_n |
 | 🔧 Configure | roadway, road\_dir, cross\_street, cross\_dir, cross\_mod, landmark | lat, lon |
 
 ### `gps`
 
 | Access       | Minimal    | Full                                   |
 |--------------|------------|----------------------------------------|
-| Read Only    | name       | latest\_poll, latest\_sample, lat, lon |
+| 👁️  View      | name       | latest\_poll, latest\_sample, lat, lon |
 | 💡 Manage    | notes      |                                        |
 | 🔧 Configure | controller | pin                                    |
 
@@ -138,7 +138,7 @@ Since `geo_loc` resources can only be created and deleted with an associated
 
 | Access       | Minimal        | Full     |
 |--------------|----------------|----------|
-| Read Only    | name, location | geo\_loc |
+| 👁️  View      | name, location | geo\_loc |
 | 👉 Operate   | deployed       |          |
 | 💡 Manage    | notes          |          |
 | 🔧 Configure | controller     | pin      |

@@ -34,7 +34,7 @@ Attribute [permissions]:
 
 | Access       | Minimal        | Full                             |
 |--------------|----------------|----------------------------------|
-| Read Only    | name, location | geo\_loc                         |
+| 👁️  View      | name, location | geo\_loc                         |
 | 👉 Operate   |                | m\_lock, rate                    |
 | 💡 Manage    | notes          | storage, max\_wait, algorithm, am\_target, pm\_target |
 | 🔧 Configure | controller     | pin, meter\_type, beacon, preset |

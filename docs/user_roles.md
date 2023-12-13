@@ -17,7 +17,7 @@ is checked against the stored password hash for the account.
 
 | Access       | Minimal          |
 |--------------|------------------|
-| Read Only    | name             |
+| 👁️  View      | name             |
 | 💡 Manage    | enabled          |
 | 🔧 Configure | full\_name, role |
 
@@ -48,7 +48,7 @@ make further changes will be lost immediately.**
 
 | Access       | Minimal    |
 |--------------|------------|
-| Read Only    | name       |
+| 👁️  View      | name       |
 | 💡 Manage    | enabled    |
 
 </details>

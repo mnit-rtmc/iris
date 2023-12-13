@@ -22,10 +22,12 @@ Attribute [permissions]:
 
 | Access       | Minimal                              | Full     |
 |--------------|--------------------------------------|----------|
-| Read Only    | name, location, setup, fail\_time    | geo\_loc |
-| 👉 Operate   |                                      | download, device\_req |
+| 👁️  View      | name, location, setup, fail\_time    | geo\_loc |
+| 👉 Operate   |                                      | download †, device\_req † |
 | 💡 Manage    | condition, notes                     |          |
 | 🔧 Configure | comm\_link, drop\_id, cabinet\_style | password |
+
+† _Write only_
 
 </details>
 
@@ -94,7 +96,7 @@ Controllers can have an associated cabinet style, used for MnDOT-170 and Natch
 
 | Access       | Minimal    | Full |
 |--------------|------------|------|
-| Read Only    | name       |      |
+| 👁️  View      | name       |      |
 | 🔧 Configure |            | police\_panel\_pin\_1, police\_panel\_pin\_2, watchdog\_reset\_pin\_1, watchdog\_reset\_pin\_2, dip |
 
 </details>

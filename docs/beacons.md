@@ -22,7 +22,7 @@ Attribute [permissions]:
 
 | Access       | Minimal        | Full                        |
 |--------------|----------------|-----------------------------|
-| Read Only    | name, location | geo\_loc                    |
+| 👁️  View      | name, location | geo\_loc                    |
 | 👉 Operate   | state          |                             |
 | 💡 Manage    | message, notes | preset                      |
 | 🔧 Configure | controller     | pin, verify\_pin, ext\_mode |

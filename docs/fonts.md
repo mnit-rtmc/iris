@@ -11,12 +11,9 @@ contain only printable ASCII characters (U+0020 to U+007E).
 
 Attribute [permissions]:
 
-| Access       | Minimal           | Full |
-|--------------|-------------------|------|
-| Read Only    | name, font_number |      |
-| 👉 Operate   |                   |      |
-| 💡 Manage    |                   |      |
-| 🔧 Configure |                   |      |
+| Access  | Minimal           | Full |
+|---------|-------------------|------|
+| 👁️  View | name, font_number |      |
 
 </details>
 

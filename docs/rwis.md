@@ -119,4 +119,4 @@ Key                           | Value
 
 [NTCIP]: protocols.html#ntcip
 [ORG-815]: protocols.html#org815
-[permission]: permissions.html
+[permissions]: permissions.html

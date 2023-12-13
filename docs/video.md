@@ -50,7 +50,7 @@ Attribute [permissions]:
 
 | Access       | Minimal              | Full                       |
 |--------------|----------------------|----------------------------|
-| Read Only    | name                 |                            |
+| 👁️  View      | name                 |                            |
 | 👉 Operate   |                      | camera                     |
 | 💡 Manage    | notes                | restricted, monitor\_style |
 | 🔧 Configure | mon\_num, controller | pin                        |

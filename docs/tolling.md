@@ -81,7 +81,7 @@ Attribute [permissions]:
 
 | Access       | Minimal        | Full               |
 |--------------|----------------|--------------------|
-| Read Only    | name, location | geo\_loc, settings |
+| 👁️  View      | name, location | geo\_loc, settings |
 | 💡 Manage    | notes          | toll\_zone         |
 | 🔧 Configure | controller     | pin                |
 
