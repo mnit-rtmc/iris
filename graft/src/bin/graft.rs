@@ -39,6 +39,8 @@ const STATIC_PATH: &str = "/var/www/html/iris/api";
 /// Slice of (type/attribute) tuples requiring Operate or higher permission
 const OPERATE: &[(&str, &str)] = &[
     ("beacon", "flashing"),
+    ("camera", "ptz"),
+    ("camera", "recall_preset"),
     ("controller", "download"),
     ("controller", "device_req"),
     ("detector", "field_length"),
@@ -51,6 +53,7 @@ const MANAGE: &[(&str, &str)] = &[
     ("beacon", "message"),
     ("beacon", "notes"),
     ("beacon", "preset"),
+    ("camera", "store_preset"),
     ("comm_config", "timeout_ms"),
     ("comm_config", "idle_disconnect_sec"),
     ("comm_config", "no_response_disconnect_sec"),

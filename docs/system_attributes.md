@@ -31,7 +31,6 @@ System Attribute                 | Description
 `camera_num_blank`               | [Camera] number reserved for blanking [video monitors]
 `camera_out_of_service_url`      | Location of PNG image to display for out of service [camera]s
 `camera_sequence_dwell_sec`      | Dwell time for [camera] sequences
-`camera_preset_store_enable`     | Enable preset-store button in the [camera] preset control panel
 `camera_ptz_blind`               | Allow [camera] controls to be used even when not currently streaming to the IRIS client
 `camera_stream_controls_enable`  | Enable [camera] stream control panel (stop, play, etc.)
 `camera_switch_event_purge_days` | Number of days after which [camera] switch events will be purged
