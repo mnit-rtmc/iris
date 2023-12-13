@@ -110,6 +110,7 @@ pub struct Dms {
     pub msg_user: Option<String>,
     pub geo_loc: Option<String>,
     pub status: Option<SignStatus>,
+    pub expire_time: Option<String>,
     pub stuck_pixels: Option<StuckPixels>,
 }
 

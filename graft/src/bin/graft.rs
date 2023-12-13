@@ -45,6 +45,7 @@ const OPERATE: &[(&str, &str)] = &[
     ("controller", "device_req"),
     ("detector", "field_length"),
     ("detector", "force_fail"),
+    ("dms", "msg_user"),
     ("lane_marking", "deployed"),
 ];
 
@@ -62,6 +63,7 @@ const MANAGE: &[(&str, &str)] = &[
     ("controller", "notes"),
     ("detector", "abandoned"),
     ("detector", "notes"),
+    ("dms", "device_req"),
     ("lane_marking", "notes"),
     ("modem", "enabled"),
     ("modem", "timeout_ms"),
@@ -78,6 +80,7 @@ const PATCH_FIRST_PASS: &[(&str, &str)] = &[
     ("beacon", "pin"),
     ("beacon", "verify_pin"),
     ("detector", "pin"),
+    ("dms", "pin"),
     ("lane_marking", "pin"),
     ("ramp_meter", "pin"),
     ("weather_sensor", "pin"),
