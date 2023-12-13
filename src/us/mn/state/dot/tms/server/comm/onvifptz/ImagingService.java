@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.onvifptz.lib;
+package us.mn.state.dot.tms.server.comm.onvifptz;
 
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
@@ -201,11 +201,6 @@ public class ImagingService extends Service {
 		return sendRequestDocument(doc);
 	}
 
-	/** Document builder function for Move request; uses default mode (relative). */
-	public Document getMoveDocument(String vToken, float distance) {
-		return getMoveDocument(vToken, distance, "");
-	}
-
 	/** Document builder function for Move request; takes move mode as a parameter. */
 	public Document getMoveDocument(String vToken, float distance, String mode) {
 		Document doc = getBaseDocument();
@@ -257,10 +252,21 @@ public class ImagingService extends Service {
 	 *
 	 * @param vToken   reference token to the relevant video source
 	 * @param distance the requested move distance
+	 * @param mode     mode to send to device ("continuous", "absolute", "relative")
+	 */
+	public String moveFocus(String vToken, float distance, String mode) {
+		Document doc = getMoveDocument(vToken, distance, mode);
+		return sendRequestDocument(doc);
+	}
+
+	/**
+	 * Moves the focus lens
+	 *
+	 * @param vToken   reference token to the relevant video source
+	 * @param distance the requested move distance
 	 */
 	public String moveFocus(String vToken, float distance) {
-		Document doc = getMoveDocument(vToken, distance);
-		return sendRequestDocument(doc);
+		return moveFocus(vToken, distance, "continuous");
 	}
 
 	/** Document builder function for GetStatus */

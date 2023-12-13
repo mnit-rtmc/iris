@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2023  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,8 +17,6 @@ package us.mn.state.dot.tms.server.comm.onvifptz;
 
 import java.security.NoSuchAlgorithmException;
 import java.io.UnsupportedEncodingException;
-
-import us.mn.state.dot.tms.server.comm.onvifptz.lib.*;
 
 /**
  * PTZ command property.
@@ -105,10 +103,19 @@ public class PTZCommandProp extends OnvifProp {
 
 	//TODO: implement focus and iris commands below
 
-	///** Add a focus param */
-	//public void addFocus(int f) {
-	//	
-	//}
+	/** Add a focus param  */
+	public void addFocus(int f) {
+		log("Final URL to ImagingService: " + url + service_path);
+		ImagingService img = ImagingService.getImagingService(url + service_path, "admin", "admin");
+		if (f == 0)
+			message = img.getStopDocument("Visible Camera");
+		else
+			message = img.getMoveDocument("Visible Camera", f, "continuous");
+		log("Message from ImagingService: " + DOMUtils.getString(message));
+
+		// set service field for sending from OnvifProp
+		service = img;
+	}
 
 	///** Add an iris param */
 	//public void addIris(int i) {
@@ -121,11 +128,27 @@ public class PTZCommandProp extends OnvifProp {
 	//	service = imaging;
 	//}
 
-	///** Add an auto-focus param */
-	//public void addAutoFocus(boolean on) {
-	//}
+	/** Add an auto-focus param */
+	public void addAutoFocus(boolean on) {
+		log("Final URL to ImagingService: " + url + service_path);
+		ImagingService img = ImagingService.getImagingService(url + service_path, "admin", "admin");
+		String f = on ? "Auto" : "Manual";
+		message = img.setImagingSettingsDocument("Visible Camera", "focus", f);
+		log("Message from ImagingService: " + DOMUtils.getString(message));
 
-	///** Add an auto-iris param */
-	//public void addAutoIris(boolean on) {
-	//}
+		// set service field for sending from OnvifProp
+		service = img;
+	}
+
+	/** Add an auto-iris param */
+	public void addAutoIris(boolean on) {
+		log("Final URL to ImagingService: " + url + service_path);
+		ImagingService img = ImagingService.getImagingService(url + service_path, "admin", "admin");
+		String i = on ? "Auto" : "Manual";
+		message = img.setImagingSettingsDocument("Visible Camera", "iris", i);
+		log("Message from ImagingService: " + DOMUtils.getString(message));
+
+		// set service field for sending from OnvifProp
+		service = img;
+	}
 }
