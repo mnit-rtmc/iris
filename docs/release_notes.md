@@ -3,7 +3,7 @@
 5.49.0 (13 Dec 2023)
  - Fixed blank DMS `msg_user` issue with logging
  - Added basic ONVIF PTZ driver
- - Re-enable DMS reset button
+ - Re-enable camera reset button
  - Remove `camera_preset_store_enable` system attribute
  - Reserved protocol number for GPS Digi WR
 
