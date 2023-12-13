@@ -78,13 +78,13 @@ A `Content-Type: application/json` header is included where appropriate.
 
 ## Resource Types
 
-| Access Control | Communication   | Devices  |                 |
-|----------------|-----------------|----------|-----------------|
-| [domain]       | [comm config]   | [alarm]  | [flow stream]   |
-| [permission]   | [comm link]     | [beacon] | [ramp meter]    |
-| [role]         | [controller]    | [camera] | [tag reader]    |
-| [user]         | [cabinet style] | [dms]    | [video monitor] |
-|                | [modem]         |          |                 |
+| Access Control | Communication   | Devices  |                  |
+|----------------|-----------------|----------|------------------|
+| [domain]       | [comm config]   | [alarm]  | [flow stream]    |
+| [permission]   | [comm link]     | [beacon] | [ramp meter]     |
+| [role]         | [controller]    | [camera] | [tag reader]     |
+| [user]         | [cabinet style] | [dms]    | [video monitor]  |
+|                | [modem]         |          | [weather sensor] |
 
 ### `detector`
 
@@ -183,3 +183,4 @@ Since `geo_loc` resources can only be created and deleted with an associated
 [tag reader]: tolling.html#tag-readers
 [user]: user_roles.html
 [video monitor]: video.html
+[weather sensor]: rwis.html
