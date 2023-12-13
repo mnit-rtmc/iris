@@ -13,7 +13,7 @@ access only.
 
 | Access       | Minimal                               |
 |--------------|---------------------------------------|
-| Read Only    | id                                    |
+| 👁️  View      | id                                    |
 | 🔧 Configure | role, resource\_n, hashtag, access\_n |
 
 </details>

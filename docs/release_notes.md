@@ -1,5 +1,12 @@
 # IRIS 5.x Release Notes
 
+5.49.0 (13 Dec 2023)
+ - Fixed blank DMS `msg_user` issue with logging
+ - Added basic ONVIF PTZ driver
+ - Re-enable camera reset button
+ - Remove `camera_preset_store_enable` system attribute
+ - Reserved protocol number for GPS Digi WR
+
 5.48.0 (20 Nov 2023)
  - Fixed parsing of gate arm fault codes when multiple faults are present
  - Improved default message pattern selection for DMS message composer

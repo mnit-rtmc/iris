@@ -24,7 +24,7 @@ Attribute [permissions]:
 
 | Access       | Minimal    | Full                       |
 |--------------|------------|----------------------------|
-| Read Only    | name       | status                     |
+| 👁️  View      | name       | status                     |
 | 👉 Operate   |            | camera, mon\_num           |
 | 💡 Manage    |            | restricted, address, port  |
 | 🔧 Configure | controller | pin, loc\_overlay, quality |

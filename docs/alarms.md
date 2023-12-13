@@ -19,7 +19,7 @@ Attribute [permissions]:
 
 | Access       | Minimal                 | Full          |
 |--------------|-------------------------|---------------|
-| Read Only    | name, state             | trigger\_time |
+| 👁️  View      | name, state             | trigger\_time |
 | 🔧 Configure | description, controller | pin           |
 
 </details>

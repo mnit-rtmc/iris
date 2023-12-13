@@ -132,7 +132,6 @@ camera_kbd_panasonic_enable	false
 camera_num_blank	999
 camera_out_of_service_url	
 camera_sequence_dwell_sec	5
-camera_preset_store_enable	false
 camera_ptz_blind	true
 camera_stream_controls_enable	false
 camera_switch_event_purge_days	30
@@ -145,7 +144,7 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.48.0
+database_version	5.49.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_secs	60
@@ -1297,6 +1296,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 42	CAP Feed
 43	ClearGuide
 44	GPS Digi WR
+45	ONVIF PTZ
 \.
 
 CREATE TABLE iris.comm_config (

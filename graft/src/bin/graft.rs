@@ -39,10 +39,13 @@ const STATIC_PATH: &str = "/var/www/html/iris/api";
 /// Slice of (type/attribute) tuples requiring Operate or higher permission
 const OPERATE: &[(&str, &str)] = &[
     ("beacon", "flashing"),
+    ("camera", "ptz"),
+    ("camera", "recall_preset"),
     ("controller", "download"),
     ("controller", "device_req"),
     ("detector", "field_length"),
     ("detector", "force_fail"),
+    ("dms", "msg_user"),
     ("lane_marking", "deployed"),
 ];
 
@@ -51,6 +54,7 @@ const MANAGE: &[(&str, &str)] = &[
     ("beacon", "message"),
     ("beacon", "notes"),
     ("beacon", "preset"),
+    ("camera", "store_preset"),
     ("comm_config", "timeout_ms"),
     ("comm_config", "idle_disconnect_sec"),
     ("comm_config", "no_response_disconnect_sec"),
@@ -59,6 +63,7 @@ const MANAGE: &[(&str, &str)] = &[
     ("controller", "notes"),
     ("detector", "abandoned"),
     ("detector", "notes"),
+    ("dms", "device_req"),
     ("lane_marking", "notes"),
     ("modem", "enabled"),
     ("modem", "timeout_ms"),
@@ -75,6 +80,7 @@ const PATCH_FIRST_PASS: &[(&str, &str)] = &[
     ("beacon", "pin"),
     ("beacon", "verify_pin"),
     ("detector", "pin"),
+    ("dms", "pin"),
     ("lane_marking", "pin"),
     ("ramp_meter", "pin"),
     ("weather_sensor", "pin"),

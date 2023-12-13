@@ -15,7 +15,7 @@ Attribute [permissions]:
 
 | Access       | Minimal     | Full |
 |--------------|-------------|------|
-| Read Only    | name        |      |
+| 👁️  View      | name        |      |
 | 💡 Manage    |             | timeout\_ms, idle\_disconnect\_sec, no\_response\_disconnect\_sec |
 | 🔧 Configure | description | protocol, poll\_period\_sec, long\_poll\_period\_sec |
 

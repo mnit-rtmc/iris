@@ -572,7 +572,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	/** Set the camera template */
 	@Override
 	public void setCameraTemplate(CameraTemplate ct) {
-		this.cam_template = ct;
+		cam_template = ct;
 	}
 
 	/** Set the camera template */

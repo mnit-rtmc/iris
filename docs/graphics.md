@@ -13,12 +13,9 @@ pictographs, interstate shields or other signs.
 
 Attribute [permissions]:
 
-| Access       | Minimal      | Full |
-|--------------|--------------|------|
-| Read Only    | name, number |      |
-| 👉 Operate   |              |      |
-| 💡 Manage    |              |      |
-| 🔧 Configure |              |      |
+| Access  | Minimal      | Full |
+|---------|--------------|------|
+| 👁️  View | name, number |      |
 
 </details>
 

@@ -6,7 +6,39 @@ A _lane-use control sign_ (LCS) is a sign which is mounted over a single lane of
 traffic (typically one for each lane).  It can display a set of **indications**
 which either permit or restrict use of that lane.
 
+<details>
+<summary>API Resources</summary>
+
+* `iris/api/lcs_array`
+* `iris/api/lcs_array/{name}`
+
+Attribute [permissions]:
+
+| Access       | Minimal    | Full  |
+|--------------|------------|-------|
+| 👁️  View      | name       |       |
+| 👉 Operate   | lcs\_lock  |       |
+| 💡 Manage    | notes      |       |
+| 🔧 Configure |            | shift |
+
+</details>
+
 ## Indications
+
+<details>
+<summary>API Resources</summary>
+
+* `iris/api/lcs_indication`
+* `iris/api/lcs_indication/{name}`
+
+Attribute [permissions]:
+
+| Access       | Minimal               | Full |
+|--------------|-----------------------|------|
+| 👁️  View      | name, lcs, indication |      |
+| 🔧 Configure | controller            | pin  |
+
+</details>
 
 These are some typical lane-use indications:
 
@@ -53,4 +85,5 @@ well as the DMS which represents the LCS.
 [hashtag]: hashtags.html
 [IO pin]: controllers.html#io-pins
 [message pattern]: message_patterns.html
+[permissions]: permissions.html
 [variable speed advisories]: vsa.html

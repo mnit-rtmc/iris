@@ -92,7 +92,7 @@ public interface Camera extends Device {
 
 	/** Set the camera template */
 	void setCameraTemplate(CameraTemplate ct);
-	
+
 	/** Get the camera template */
 	CameraTemplate getCameraTemplate();
 }

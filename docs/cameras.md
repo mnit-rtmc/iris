@@ -17,12 +17,14 @@ Select `View ➔ Video ➔ Cameras` menu item
 
 Attribute [permissions]:
 
-| Access       | Minimal              | Full                  |
-|--------------|----------------------|-----------------------|
-| Read Only    | name, location       | geo\_loc, video\_loss |
-| 👉 Operate   |                      | ptz                   |
-| 💡 Manage    | notes, publish       | streamable            |
+| Access       | Minimal              | Full                        |
+|--------------|----------------------|-----------------------------|
+| 👁️  View      | name, location       | geo\_loc, video\_loss       |
+| 👉 Operate   |                      | ptz †, recall\_preset †     |
+| 💡 Manage    | notes, publish       | streamable, store\_preset † |
 | 🔧 Configure | controller, cam\_num | pin, cam\_template, encoder\_type, enc\_address, enc\_port, enc\_mcast, enc\_channel
+
+† _Write only_
 
 </details>
 
