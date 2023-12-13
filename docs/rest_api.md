@@ -78,13 +78,13 @@ A `Content-Type: application/json` header is included where appropriate.
 
 ## Resource Types
 
-| Access Control | Communication   | Devices  |                  |
-|----------------|-----------------|----------|------------------|
-| [domain]       | [comm config]   | [alarm]  | [flow stream]    |
-| [permission]   | [comm link]     | [beacon] | [ramp meter]     |
-| [role]         | [controller]    | [camera] | [tag reader]     |
-| [user]         | [cabinet style] | [dms]    | [video monitor]  |
-|                | [modem]         |          | [weather sensor] |
+| Access Control | Communication   | Devices       |                  |
+|----------------|-----------------|---------------|------------------|
+| [domain]       | [comm config]   | [alarm]       | [lcs]            |
+| [permission]   | [comm link]     | [beacon]      | [ramp meter]     |
+| [role]         | [controller]    | [camera]      | [tag reader]     |
+| [user]         | [cabinet style] | [dms]         | [video monitor]  |
+|                | [modem]         | [flow stream] | [weather sensor] |
 
 ### `detector`
 
@@ -143,22 +143,6 @@ Since `geo_loc` resources can only be created and deleted with an associated
 | 💡 Manage    | notes          |          |
 | 🔧 Configure | controller     | pin      |
 
-### `lcs_array`
-
-| Access       | Minimal    | Full  |
-|--------------|------------|-------|
-| Read Only    | name       |       |
-| 👉 Operate   | lcs\_lock  |       |
-| 💡 Manage    | notes      |       |
-| 🔧 Configure |            | shift |
-
-### `lcs_indication`
-
-| Access       | Minimal               | Full |
-|--------------|-----------------------|------|
-| Read Only    | name, lcs, indication |      |
-| 🔧 Configure | controller            | pin  |
-
 
 [alarm]: alarms.html
 [beacon]: beacons.html
@@ -170,6 +154,7 @@ Since `geo_loc` resources can only be created and deleted with an associated
 [dms]: dms.html
 [domain]: user_roles.html#domains
 [flow stream]: flow_streams.html
+[lcs]: lcs.html
 [modem]: modem.html
 [permission]: permissions.html
 [ramp meter]: ramp_meters.html
