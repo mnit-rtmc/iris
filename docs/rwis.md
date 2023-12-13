@@ -4,7 +4,24 @@ Road Weather Information Systems, or **RWIS** can sense data such as
 precipitation rate, road surface temperature, wind speed, etc.  The [NTCIP]
 and [Org-815] protocols can collect RWIS data.
 
-## JSON Data
+<details>
+<summary>API Resources</summary>
+
+* `iris/rwis` (see below)
+* `iris/api/weather_sensor`
+* `iris/api/weather_sensor/{name}`
+
+Attribute [permissions]:
+
+| Access       | Minimal                  | Full |
+|--------------|--------------------------|------|
+| 👁️  View      | name, location           | geo\_loc, settings, sample, sample\_time |
+| 💡 Manage    | site\_id, alt\_id, notes |      |
+| 🔧 Configure | controller               | pin  |
+
+</details>
+
+## Public JSON Data
 
 The `iris/rwis` endpoint produces a JSON document containing an array of all
 weather sensor objects.
@@ -97,8 +114,9 @@ Key                           | Value
 `total_radiation`             | Total from collection period (watts / m²)
 `total_radiation_period`      | Total radiation period (seconds)
 
-_† Wind direction in degrees clockwise from due north_.
+† _Wind direction in degrees clockwise from due north_.
 
 
 [NTCIP]: protocols.html#ntcip
 [ORG-815]: protocols.html#org815
+[permission]: permissions.html

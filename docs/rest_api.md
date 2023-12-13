@@ -159,14 +159,6 @@ Since `geo_loc` resources can only be created and deleted with an associated
 | Read Only    | name, lcs, indication |      |
 | 🔧 Configure | controller            | pin  |
 
-### `weather_sensor`
-
-| Access       | Minimal                  | Full |
-|--------------|--------------------------|------|
-| Read Only    | name, location           | geo\_loc, settings, sample, sample\_time |
-| 💡 Manage    | site\_id, alt\_id, notes |      |
-| 🔧 Configure | controller               | pin  |
-
 
 [alarm]: alarms.html
 [beacon]: beacons.html
