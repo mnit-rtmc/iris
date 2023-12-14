@@ -85,6 +85,7 @@ A `Content-Type: application/json` header is included where appropriate.
 | [role]         | [controller]    | [camera]      | [tag reader]     |
 | [user]         | [cabinet style] | [dms]         | [video monitor]  |
 |                | [modem]         | [flow stream] | [weather sensor] |
+|                |                 | [gate arm]    |                  |
 
 ### `detector`
 
@@ -94,23 +95,6 @@ A `Content-Type: application/json` header is included where appropriate.
 | 👉 Operate   |             | field\_length, force\_fail |
 | 💡 Manage    | notes       | abandoned                  |
 | 🔧 Configure | controller  | pin, r\_node, lane\_code, lane\_number, fake |
-
-### `gate_arm`
-
-| Access       | Minimal                    | Full                  |
-|--------------|----------------------------|-----------------------|
-| 👁️  View      | name, location, arm\_state | ga\_array, idx, fault |
-| 💡 Manage    | notes                      |                       |
-| 🔧 Configure | controller                 | pin                   |
-
-### `gate_arm_array`
-
-| Access       | Minimal                   | Full     |
-|--------------|---------------------------|----------|
-| 👁️  View      | name, location, interlock | geo\_loc |
-| 👉 Operate   | arm\_state                |          |
-| 💡 Manage    | notes                     |          |
-| 🔧 Configure |                           | opposing, prereq, camera, approach, action\_plan |
 
 ### `geo_loc`
 
@@ -154,6 +138,7 @@ Since `geo_loc` resources can only be created and deleted with an associated
 [dms]: dms.html
 [domain]: user_roles.html#domains
 [flow stream]: flow_streams.html
+[gate arm]: gate_arms.html
 [lcs]: lcs.html
 [modem]: modem.html
 [permission]: permissions.html

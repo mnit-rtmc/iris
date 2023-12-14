@@ -21,6 +21,7 @@ The following features are supported:
 <details>
 <summary>API Resources</summary>
 
+* `iris/dms_message`
 * `iris/dms_pub`
 * `iris/api/dms`
 * `iris/api/dms/{name}`

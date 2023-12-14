@@ -172,6 +172,8 @@ fn res_name(resource_n: &'static str) -> &'static str {
         // DMS dependent resources
         "font" | "graphic" | "msg_line" | "msg_pattern" | "sign_config"
         | "sign_detail" | "sign_message" | "word" => "dms",
+        // Gate arm dependent resources
+        "gate_arm_array" => "gate_arm",
         // associated controller
         "controller_io" => "controller",
         _ => resource_n,

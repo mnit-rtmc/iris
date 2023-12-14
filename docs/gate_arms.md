@@ -5,8 +5,47 @@ Select `View ➔ Gate Arm Arrays` menu item
 Gate arms are traffic control devices which restrict access to a section of
 roadway.  They are commonly used for on-ramps or reversible lanes.
 
-They are grouped into arrays of 1-8 arms.  *Opening* or *closing* an array
+<details>
+<summary>API Resources</summary>
+
+* `iris/gate_arm_interlock`
+* `iris/gate_arm_state`
+* `iris/api/gate_arm`
+* `iris/api/gate_arm/{name}`
+
+Attribute [permissions]:
+
+| Access       | Minimal                    | Full                  |
+|--------------|----------------------------|-----------------------|
+| 👁️  View      | name, location, arm\_state | ga\_array, idx, fault |
+| 💡 Manage    | notes                      |                       |
+| 🔧 Configure | controller                 | pin                   |
+
+[Dependent resources]:
+
+* Gate arm arrays (see below)
+
+</details>
+
+They are grouped into **arrays** of 1-8 arms.  _Opening_ or _closing_ an array
 controls **all** associated arms.
+
+<details>
+<summary>API Resources</summary>
+
+* `iris/api/gate_arm_array`
+* `iris/api/gate_arm_array/{name}`
+
+Attribute [permissions]:
+
+| Access       | Minimal                   | Full     |
+|--------------|---------------------------|----------|
+| 👁️  View      | name, location, interlock | geo\_loc |
+| 👉 Operate   | arm\_state                |          |
+| 💡 Manage    | notes                     |          |
+| 🔧 Configure |                           | opposing, prereq, camera, approach, action\_plan |
+
+</details>
 
 ## Verification Cameras
 
@@ -109,7 +148,9 @@ filesystem at `/var/lib/iris/gate_arm_enable` (using the touch command).
 [CIDR]: https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing
 [comm link]: comm_links.html
 [controller]: controllers.html
+[dependent resources]: permissions.html#dependent-resources
 [DMS actions]: action_plans.html#dms-actions
+[permissions]: permissions.html
 [phase]: action_plans.html#plan-phases
 [system attribute]: system_attributes.html
 [warning action plan]: #warning-action-plan

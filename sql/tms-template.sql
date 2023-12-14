@@ -498,7 +498,6 @@ administrator	detector	4
 administrator	dms	4
 administrator	flow_stream	4
 administrator	gate_arm	4
-administrator	gate_arm_array	4
 administrator	geo_loc	4
 administrator	gps	4
 administrator	lane_marking	4
