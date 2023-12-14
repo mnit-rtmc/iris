@@ -92,21 +92,13 @@ Most devices also have an associated [geo loc] resource.
 [Dependent resources]
 
 <details>
-<summary>
-
-[camera]
-
-</summary>
+<summary>camera</summary>
 
 * [flow stream]
 
 </details>
 <details>
-<summary>
-
-[dms]
-
-</summary>
+<summary>dms</summary>
 
 * [font]
 * [graphic]
@@ -119,21 +111,13 @@ Most devices also have an associated [geo loc] resource.
 
 </details>
 <details>
-<summary>
-
-[gate arm]
-
-</summary>
+<summary>gate arm</summary>
 
 * [gate arm array]
 
 </details>
 <details>
-<summary>
-
-[LCS]
-
-</summary>
+<summary>lcs</summary>
 
 * [LCS array]
 * [LCS indication]
