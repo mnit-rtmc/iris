@@ -169,6 +169,8 @@ macro_rules! add_routes {
 /// Get associated or dependent resource name
 fn res_name(resource_n: &'static str) -> &'static str {
     match resource_n {
+        // Camera dependent resources
+        "flow_stream" => "camera",
         // DMS dependent resources
         "font" | "graphic" | "msg_line" | "msg_pattern" | "sign_config"
         | "sign_detail" | "sign_message" | "word" => "dms",

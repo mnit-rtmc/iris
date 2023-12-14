@@ -78,45 +78,16 @@ A `Content-Type: application/json` header is included where appropriate.
 
 ## Resource Types
 
-| Access Control | Communication   | Devices       |                  |
-|----------------|-----------------|---------------|------------------|
-| [domain]       | [comm config]   | [alarm]       | [lcs]            |
-| [permission]   | [comm link]     | [beacon]      | [ramp meter]     |
-| [role]         | [controller]    | [camera]      | [tag reader]     |
-| [user]         | [cabinet style] | [dms]         | [video monitor]  |
-|                | [modem]         | [flow stream] | [weather sensor] |
-|                |                 | [gate arm]    |                  |
+| Access Control | Communication   | Devices    |                  |
+|----------------|-----------------|------------|------------------|
+| [domain]       | [comm config]   | [alarm]    | [gps]            |
+| [permission]   | [comm link]     | [beacon]   | [lcs]            |
+| [role]         | [controller]    | [camera]   | [ramp meter]     |
+| [user]         | [cabinet style] | [detector] | [tag reader]     |
+|                | [modem]         | [dms]      | [video monitor]  |
+|                |                 | [gate arm] | [weather sensor] |
 
-### `detector`
-
-| Access       | Minimal     | Full                       |
-|--------------|-------------|----------------------------|
-| 👁️  View      | name, label | auto\_fail                 |
-| 👉 Operate   |             | field\_length, force\_fail |
-| 💡 Manage    | notes       | abandoned                  |
-| 🔧 Configure | controller  | pin, r\_node, lane\_code, lane\_number, fake |
-
-### `geo_loc`
-
-Since `geo_loc` resources can only be created and deleted with an associated
-`resource_n`, there are only two valid endpoints:
-
-- `GET iris/api/geo_loc/{name}`: Get a single object as JSON, with *minimal*
-  and *full* attributes
-- `PATCH iris/api/geo_loc/{name}`: Update attributes of one object, with JSON
-
-| Access       | Minimal          | Full        |
-|--------------|------------------|-------------|
-| 👁️  View      | name             | resource\_n |
-| 🔧 Configure | roadway, road\_dir, cross\_street, cross\_dir, cross\_mod, landmark | lat, lon |
-
-### `gps`
-
-| Access       | Minimal    | Full                                   |
-|--------------|------------|----------------------------------------|
-| 👁️  View      | name       | latest\_poll, latest\_sample, lat, lon |
-| 💡 Manage    | notes      |                                        |
-| 🔧 Configure | controller | pin                                    |
+Most devices also have an associated [geo loc] resource.
 
 
 [alarm]: alarms.html
@@ -126,10 +97,12 @@ Since `geo_loc` resources can only be created and deleted with an associated
 [comm config]: comm_config.html
 [comm link]: comm_links.html
 [controller]: controllers.html
+[detector]: vehicle_detection.html
 [dms]: dms.html
 [domain]: user_roles.html#domains
-[flow stream]: flow_streams.html
 [gate arm]: gate_arms.html
+[geo loc]: geo_loc.html
+[gps]: gps.html
 [lcs]: lcs.html
 [modem]: modem.html
 [permission]: permissions.html
@@ -137,8 +110,6 @@ Since `geo_loc` resources can only be created and deleted with an associated
 [resource types]: #resource-types
 [Road Weather Information System]: rwis.html
 [role]: user_roles.html#roles
-[sign configuration]: sign_configuration.html
-[sign detail]: sign_configuration.html#sign-details
 [sign message]: sign_message.html
 [system attributes]: system_attributes.html
 [tag reader]: tolling.html#tag-readers

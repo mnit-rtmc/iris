@@ -24,6 +24,10 @@ Select `View ➔ Video ➔ Cameras` menu item
 
 † _Write only_
 
+[Dependent resources]:
+
+* [flow stream]
+
 </details>
 
 The **Setup** tab within a camera properties form contains attributes to
@@ -154,6 +158,7 @@ Otherwise, requests will be made directly to the camera's encoder address.
 
 [comm link]: comm_links.html
 [controller]: controllers.html
+[dependent resources]: permissions.html#dependent-resources
 [DMS]: dms.html
 [flow stream]: flow_streams.html
 [iris-client.properties]: client_properties.html

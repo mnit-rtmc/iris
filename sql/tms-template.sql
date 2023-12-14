@@ -496,7 +496,6 @@ administrator	comm_link	4
 administrator	controller	4
 administrator	detector	4
 administrator	dms	4
-administrator	flow_stream	4
 administrator	gate_arm	4
 administrator	geo_loc	4
 administrator	gps	4

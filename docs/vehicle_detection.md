@@ -16,6 +16,22 @@ Every 30 seconds, the most recent collected data from all online detectors is
 written to files.  An [XML file] called `det_sample.xml.gz` and a JSON file
 called `station_sample` are generated.
 
+<details>
+<summary>API Resources</summary>
+
+* `iris/detector_pub`
+* `iris/api/detector` (minimal)
+* `iris/api/detector/{name}` (full)
+
+| Access       | Minimal     | Full                       |
+|--------------|-------------|----------------------------|
+| 👁️  View      | name, label | auto\_fail                 |
+| 👉 Operate   |             | field\_length, force\_fail |
+| 💡 Manage    | notes       | abandoned                  |
+| 🔧 Configure | controller  | pin, r\_node, lane\_code, lane\_number, fake |
+
+</details>
+
 ## Traffic Data
 
 Detectors can collect several different types of data:
