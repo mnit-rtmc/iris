@@ -25,8 +25,10 @@ roadway.  They are commonly used for on-ramps or reversible lanes.
 
 </details>
 
-They are grouped into **arrays** of 1-8 arms.  _Opening_ or _closing_ an array
-controls **all** associated arms.
+## Arrays
+
+Gate arms are grouped into **arrays** of 1-8 arms.  _Opening_ or _closing_ an
+array controls **all** associated arms.
 
 <details>
 <summary>API Resources</summary>

@@ -25,6 +25,8 @@ which either permit or restrict use of that lane.
 
 </details>
 
+## Arrays
+
 LCS are grouped into **arrays**, with one over each lane.
 
 <details>
@@ -95,7 +97,7 @@ these [indications](#indications):
 Each _indication_ must be assigned to a separate [IO pin] on a [controller], as
 well as the DMS which represents the LCS.
 
-## Lane Marking
+## Lane Markings
 
 A lane marking is an in-pavement LED which can dynamically change lane
 striping.
