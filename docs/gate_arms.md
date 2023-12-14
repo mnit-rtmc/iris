@@ -8,12 +8,10 @@ roadway.  They are commonly used for on-ramps or reversible lanes.
 <details>
 <summary>API Resources</summary>
 
-* `iris/gate_arm_interlock`
-* `iris/gate_arm_state`
-* `iris/api/gate_arm`
-* `iris/api/gate_arm/{name}`
-
-Attribute [permissions]:
+* `iris/gate_arm_interlock` (lookup table)
+* `iris/gate_arm_state` (lookup table)
+* `iris/api/gate_arm` (minimal)
+* `iris/api/gate_arm/{name}` (full)
 
 | Access       | Minimal                    | Full                  |
 |--------------|----------------------------|-----------------------|
@@ -33,10 +31,8 @@ controls **all** associated arms.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/gate_arm_array`
-* `iris/api/gate_arm_array/{name}`
-
-Attribute [permissions]:
+* `iris/api/gate_arm_array` (minimal)
+* `iris/api/gate_arm_array/{name}` (full)
 
 | Access       | Minimal                   | Full     |
 |--------------|---------------------------|----------|
@@ -150,7 +146,6 @@ filesystem at `/var/lib/iris/gate_arm_enable` (using the touch command).
 [controller]: controllers.html
 [dependent resources]: permissions.html#dependent-resources
 [DMS actions]: action_plans.html#dms-actions
-[permissions]: permissions.html
 [phase]: action_plans.html#plan-phases
 [system attribute]: system_attributes.html
 [warning action plan]: #warning-action-plan

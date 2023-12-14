@@ -13,10 +13,8 @@ with a sign config.  They can be:
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/msg_pattern`
-* `iris/api/msg_pattern/{name}`
-
-Attribute [permissions]:
+* `iris/api/msg_pattern` (minimal)
+* `iris/api/msg_pattern/{name}` (full)
 
 | Access       | Minimal          | Full          |
 |--------------|------------------|---------------|
@@ -56,10 +54,8 @@ same number of lines in their text rectangles.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/msg_line`
-* `iris/api/msg_line/{name}`
-
-Attribute [permissions]:
+* `iris/api/msg_line` (minimal)
+* `iris/api/msg_line/{name}` (full)
 
 | Access       | Minimal                   | Full |
 |--------------|---------------------------|------|
@@ -128,5 +124,4 @@ of the operator message.
 [DMS action]: action_plans.html#dms-actions
 [hashtag]: hashtags.html
 [MULTI]: multi.html
-[permissions]: permissions.html
 [WYSIWYG]: wysiwyg.html

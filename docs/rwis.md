@@ -8,10 +8,8 @@ and [Org-815] protocols can collect RWIS data.
 <summary>API Resources</summary>
 
 * `iris/rwis` (see below)
-* `iris/api/weather_sensor`
-* `iris/api/weather_sensor/{name}`
-
-Attribute [permissions]:
+* `iris/api/weather_sensor` (minimal)
+* `iris/api/weather_sensor/{name}` (full)
 
 | Access       | Minimal                  | Full |
 |--------------|--------------------------|------|
@@ -119,4 +117,3 @@ Key                           | Value
 
 [NTCIP]: protocols.html#ntcip
 [ORG-815]: protocols.html#org815
-[permissions]: permissions.html

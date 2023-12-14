@@ -8,11 +8,9 @@ after being unused for a few minutes.
 <details>
 <summary>API Resources</summary>
 
-* `iris/sign_message`
+* `iris/sign_message` (minimal)
 * `iris/img/{name}.gif`
 * `iris/api/sign_message` (`POST`)
-
-Attribute [permissions]:
 
 | Access  | Minimal     |
 |---------|-------------|
@@ -58,5 +56,4 @@ the `low_sys` priority.  Messages sent by external systems are assigned to
 [DMS actions]: action_plans.html#dms-actions
 [graphics]: graphics.html
 [MULTI]: multi.html
-[permissions]: permissions.html
 [sign configuration]: sign_configuration.html

@@ -500,9 +500,7 @@ administrator	flow_stream	4
 administrator	gate_arm	4
 administrator	geo_loc	4
 administrator	gps	4
-administrator	lane_marking	4
-administrator	lcs_array	4
-administrator	lcs_indication	4
+administrator	lcs	4
 administrator	modem	4
 administrator	permission	4
 administrator	ramp_meter	4

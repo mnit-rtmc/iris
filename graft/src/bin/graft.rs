@@ -174,6 +174,8 @@ fn res_name(resource_n: &'static str) -> &'static str {
         | "sign_detail" | "sign_message" | "word" => "dms",
         // Gate arm dependent resources
         "gate_arm_array" => "gate_arm",
+        // LCS dependent resources
+        "lcs_array" | "lcs_indication" | "lane_marking" => "lcs",
         // associated controller
         "controller_io" => "controller",
         _ => resource_n,

@@ -6,7 +6,7 @@ The REST API is provided by the `honeybee` and `graft` services.
 
 Data requests are split into *public* and *restricted* paths:
 
-- `iris/`: Public data (no authentication)
+- `iris/`: Public resources / lookup tables (no authentication)
 - `iris/img/`: Public sign images (no authentication)
 - `iris/api/`: Restricted data (needs session authentication)
 - `iris/api/login`: Authentication endpoint
@@ -117,15 +117,6 @@ Since `geo_loc` resources can only be created and deleted with an associated
 | 👁️  View      | name       | latest\_poll, latest\_sample, lat, lon |
 | 💡 Manage    | notes      |                                        |
 | 🔧 Configure | controller | pin                                    |
-
-### `lane_marking`
-
-| Access       | Minimal        | Full     |
-|--------------|----------------|----------|
-| 👁️  View      | name, location | geo\_loc |
-| 👉 Operate   | deployed       |          |
-| 💡 Manage    | notes          |          |
-| 🔧 Configure | controller     | pin      |
 
 
 [alarm]: alarms.html

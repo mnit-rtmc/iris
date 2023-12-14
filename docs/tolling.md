@@ -74,10 +74,8 @@ located just downstream of a pricing DMS.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/tag_reader`
-* `iris/api/tag_reader/{name}`
-
-Attribute [permissions]:
+* `iris/api/tag_reader` (minimal)
+* `iris/api/tag_reader/{name}` (full)
 
 | Access       | Minimal        | Full               |
 |--------------|----------------|--------------------|
@@ -101,6 +99,5 @@ These records are purged automatically when older than the value of the
 [action tag]: action_plans.html#dms-action-tags
 [DMS actions]: action_plans.html#dms-actions
 [message pattern]: message_patterns.html
-[permissions]: permissions.html
 [station]: road_topology.html#r_node-types
 [system attribute]: system_attributes.html

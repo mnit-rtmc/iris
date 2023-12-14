@@ -6,14 +6,12 @@ contain only printable ASCII characters (U+0020 to U+007E).
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/font`
+* `iris/api/font` (minimal)
 * `iris/api/tfon/{name}.tfon`
 
-Attribute [permissions]:
-
-| Access  | Minimal           | Full |
-|---------|-------------------|------|
-| 👁️  View | name, font_number |      |
+| Access  | Minimal           |
+|---------|-------------------|
+| 👁️  View | name, font_number |
 
 </details>
 

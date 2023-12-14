@@ -9,10 +9,8 @@ phone number instead of IP address.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/modem`
-* `iris/api/modem/{name}`
-
-Attribute [permissions]:
+* `iris/api/modem` (minimal)
+* `iris/api/modem/{name}` (full)
 
 | Access       | Minimal    | Full        |
 |--------------|------------|-------------|
@@ -24,4 +22,3 @@ Attribute [permissions]:
 
 
 [comm link]: comm_links.html
-[permissions]: permissions.html

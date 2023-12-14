@@ -9,10 +9,29 @@ which either permit or restrict use of that lane.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/lcs_array`
-* `iris/api/lcs_array/{name}`
+* `iris/lane_use_indication` (lookup table)
+* `iris/lcs_lock` (lookup table)
+* `iris/api/lcs` (minimal)
 
-Attribute [permissions]:
+| Access       | Minimal               |
+|--------------|-----------------------|
+| 👁️  View      | name, lcs_array, lane |
+
+[Dependent resources]:
+
+* LCS arrays (see below)
+* LCS indications (see below)
+* Lane marking (see below)
+
+</details>
+
+LCS are grouped into **arrays**, with one over each lane.
+
+<details>
+<summary>API Resources</summary>
+
+* `iris/api/lcs_array` (minimal)
+* `iris/api/lcs_array/{name}` (full)
 
 | Access       | Minimal    | Full  |
 |--------------|------------|-------|
@@ -28,10 +47,8 @@ Attribute [permissions]:
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/lcs_indication`
-* `iris/api/lcs_indication/{name}`
-
-Attribute [permissions]:
+* `iris/api/lcs_indication` (minimal)
+* `iris/api/lcs_indication/{name}` (full)
 
 | Access       | Minimal               | Full |
 |--------------|-----------------------|------|
@@ -78,12 +95,32 @@ these [indications](#indications):
 Each _indication_ must be assigned to a separate [IO pin] on a [controller], as
 well as the DMS which represents the LCS.
 
+## Lane Marking
+
+A lane marking is an in-pavement LED which can dynamically change lane
+striping.
+
+<details>
+<summary>API Resources</summary>
+
+* `iris/api/lane_marking` (minimal)
+* `iris/api/lane_marking/{name}` (full)
+
+| Access       | Minimal        | Full     |
+|--------------|----------------|----------|
+| 👁️  View      | name, location | geo\_loc |
+| 👉 Operate   | deployed       |          |
+| 💡 Manage    | notes          |          |
+| 🔧 Configure | controller     | pin      |
+
+</details>
+
 
 [controller]: controllers.html
+[dependent resources]: permissions.html#dependent-resources
 [DMS]: dms.html
 [graphic image]: graphics.html
 [hashtag]: hashtags.html
 [IO pin]: controllers.html#io-pins
 [message pattern]: message_patterns.html
-[permissions]: permissions.html
 [variable speed advisories]: vsa.html

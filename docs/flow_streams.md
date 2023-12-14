@@ -17,10 +17,8 @@ Select `View ➔ Video ➔ Flow Streams` menu item
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/flow_stream`
-* `iris/api/flow_stream/{name}`
-
-Attribute [permissions]:
+* `iris/api/flow_stream` (minimal)
+* `iris/api/flow_stream/{name}` (full)
 
 | Access       | Minimal    | Full                       |
 |--------------|------------|----------------------------|
@@ -94,7 +92,6 @@ A static sink encoding is:
 [encoder type]: cameras.html#encoder-types
 [IO pin]: controllers.html#io-pins
 [multicast]: https://en.wikipedia.org/wiki/Multicast_address
-[permissions]: permissions.html
 [protocol]: protocols.html
 [stream]: cameras.html#streams
 [streambed]: https://github.com/mnit-rtmc/streambed

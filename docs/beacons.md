@@ -15,10 +15,8 @@ Beacons can be connected to controllers using one of these protocols:
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/beacon`
-* `iris/api/beacon/{name}`
-
-Attribute [permissions]:
+* `iris/api/beacon` (minimal)
+* `iris/api/beacon/{name}` (full)
 
 | Access       | Minimal        | Full                        |
 |--------------|----------------|-----------------------------|
@@ -81,6 +79,5 @@ the value of the `beacon_event_purge_days` [system attribute].
 [MnDOT-170]: protocols.html#mndot-170
 [Natch]: protocols.html#natch
 [NTCIP]: protocols.html#ntcip
-[permissions]: permissions.html
 [remote]: dms.html#setup
 [system attribute]: system_attributes.html

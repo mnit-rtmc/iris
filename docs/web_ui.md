@@ -36,14 +36,14 @@ implemented.
   - [X] Generate GIF images for DMS
   - [ ] Generate DMS map layer in earthwyrm DB
 * graft
-  - [ ] Add endpoints for controlling DMS
+  - [X] Add endpoints for controlling DMS
   - [ ] Verify user's domain on login
   - [ ] Send SSE for update notifications
   - [ ] Write full installation documentation
 * bulb
-  - [ ] Tooltips
-  - [ ] UI for DMS viewing / control
-  - [ ] Generate DMS previews and insert into img element using data URI
+  - [X] Tooltips
+  - [X] UI for DMS viewing / control
+  - [X] Generate DMS previews and insert into img element using data URI
   - [ ] Connect to graft for SSE
   - [ ] Write full installation documentation
 

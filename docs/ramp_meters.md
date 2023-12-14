@@ -27,10 +27,8 @@ target rate for the period (AM or PM).
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/ramp_meter`
-* `iris/api/ramp_meter/{name}`
-
-Attribute [permissions]:
+* `iris/api/ramp_meter` (minimal)
+* `iris/api/ramp_meter/{name}` (full)
 
 | Access       | Minimal        | Full                             |
 |--------------|----------------|----------------------------------|
@@ -43,4 +41,3 @@ Attribute [permissions]:
 
 
 [density adaptive]: density_adaptive.html
-[permissions]: permissions.html
