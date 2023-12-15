@@ -12,10 +12,8 @@ alarms, such as [MnDOT-170].
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/alarm`
-* `iris/api/alarm/{name}`
-
-Attribute [permissions]:
+* `iris/api/alarm` (minimal)
+* `iris/api/alarm/{name}` (full)
 
 | Access       | Minimal                 | Full          |
 |--------------|-------------------------|---------------|
@@ -33,6 +31,5 @@ purged automatically when older than the value of the `alarm_event_purge_days`
 
 
 [MnDOT-170]: protocols.html#mndot-170
-[permissions]: permissions.html
 [protocol]: protocols.html
 [system attribute]: system_attributes.html

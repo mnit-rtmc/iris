@@ -496,14 +496,10 @@ administrator	comm_link	4
 administrator	controller	4
 administrator	detector	4
 administrator	dms	4
-administrator	flow_stream	4
 administrator	gate_arm	4
-administrator	gate_arm_array	4
 administrator	geo_loc	4
 administrator	gps	4
-administrator	lane_marking	4
-administrator	lcs_array	4
-administrator	lcs_indication	4
+administrator	lcs	4
 administrator	modem	4
 administrator	permission	4
 administrator	ramp_meter	4
@@ -2501,16 +2497,16 @@ ALTER TABLE iris.font
     CHECK (f_number > 0 AND f_number <= 255);
 ALTER TABLE iris.font
     ADD CONSTRAINT font_height_ck
-    CHECK (height > 0 AND height <= 30);
+    CHECK (height > 0 AND height <= 32);
 ALTER TABLE iris.font
     ADD CONSTRAINT font_width_ck
-    CHECK (width >= 0 AND width <= 12);
+    CHECK (width >= 0 AND width <= 32);
 ALTER TABLE iris.font
     ADD CONSTRAINT font_line_sp_ck
-    CHECK (line_spacing >= 0 AND line_spacing <= 9);
+    CHECK (line_spacing >= 0 AND line_spacing <= 16);
 ALTER TABLE iris.font
     ADD CONSTRAINT font_char_sp_ck
-    CHECK (char_spacing >= 0 AND char_spacing <= 6);
+    CHECK (char_spacing >= 0 AND char_spacing <= 8);
 
 CREATE FUNCTION iris.font_ck() RETURNS TRIGGER AS
     $font_ck$

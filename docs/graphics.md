@@ -8,14 +8,12 @@ pictographs, interstate shields or other signs.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/graphic`
+* `iris/api/graphic` (minimal)
 * `iris/api/gif/{name}.gif`
 
-Attribute [permissions]:
-
-| Access  | Minimal      | Full |
-|---------|--------------|------|
-| 👁️  View | name, number |      |
+| Access  | Minimal      |
+|---------|--------------|
+| 👁️  View | name, number |
 
 </details>
 

@@ -43,10 +43,8 @@ a [switching](#switching) system.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/video_monitor`
-* `iris/api/video_monitor/{name}`
-
-Attribute [permissions]:
+* `iris/api/video_monitor` (minimal)
+* `iris/api/video_monitor/{name}` (full)
 
 | Access       | Minimal              | Full                       |
 |--------------|----------------------|----------------------------|
@@ -116,7 +114,6 @@ assigned sequence numbers, so they can be used in the same way.
 [flow streams]: flow_streams.html
 [IO pin]: controllers.html#io-pins
 [MonStream]: https://github.com/mnit-rtmc/monstream
-[permissions]: permissions.html
 [Privilege]: user_roles.html#privileges
 [protocol]: protocols.html
 [selector tool]: cameras.html#selector-tool

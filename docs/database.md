@@ -5,7 +5,8 @@ data.
 
 ## Notifications
 
-Notifications are sent by trigger functions when records are changed.
+Notifications are sent by trigger functions when records are changed.  They
+are used to implement the [REST API].
 
 The CHANNEL matches the name of a table.  After INSERT or DELETE, and when an
 UPDATE changes any *minimal* attribute, a notification is sent to that CHANNEL
@@ -122,5 +123,6 @@ downgrade is required, the database should be restored from a backup and the
 IRIS rpm should be reinstalled.
 
 
-[semver]: https://semver.org
 [PostgreSQL]: http://www.postgresql.org
+[REST API]: rest_api.html
+[semver]: https://semver.org

@@ -4,6 +4,20 @@ A portable [DMS] can have an associated GPS (global positioning system)
 receiver.  This allows the sign to be tracked and automatically updated with
 the nearest roadway and direction.
 
+<details>
+<summary>API Resources</summary>
+
+* `iris/api/gps` (minimal)
+* `iris/api/gps/{name}` (full)
+
+| Access       | Minimal    | Full                                   |
+|--------------|------------|----------------------------------------|
+| 👁️  View      | name       | latest\_poll, latest\_sample, lat, lon |
+| 💡 Manage    | notes      |                                        |
+| 🔧 Configure | controller | pin                                    |
+
+</details>
+
 To create a GPS device, select the DMS and open its `Properties` form.  On the
 `Location`, there are controls for configuring the associated GPS.  Once the
 GPS is enabled, it must be associated with a controller.  Its name will be the

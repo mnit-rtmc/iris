@@ -6,7 +6,7 @@ The REST API is provided by the `honeybee` and `graft` services.
 
 Data requests are split into *public* and *restricted* paths:
 
-- `iris/`: Public data (no authentication)
+- `iris/`: Public resources / lookup tables (no authentication)
 - `iris/img/`: Public sign images (no authentication)
 - `iris/api/`: Restricted data (needs session authentication)
 - `iris/api/login`: Authentication endpoint
@@ -78,70 +78,52 @@ A `Content-Type: application/json` header is included where appropriate.
 
 ## Resource Types
 
-| Access Control | Communication   | Devices       |                  |
-|----------------|-----------------|---------------|------------------|
-| [domain]       | [comm config]   | [alarm]       | [lcs]            |
-| [permission]   | [comm link]     | [beacon]      | [ramp meter]     |
-| [role]         | [controller]    | [camera]      | [tag reader]     |
-| [user]         | [cabinet style] | [dms]         | [video monitor]  |
-|                | [modem]         | [flow stream] | [weather sensor] |
+| Access Control | Communication   | Devices    |                  |
+|----------------|-----------------|------------|------------------|
+| [domain]       | [comm config]   | [alarm]    | [gps]            |
+| [permission]   | [comm link]     | [beacon]   | [lcs]            |
+| [role]         | [controller]    | [camera]   | [ramp meter]     |
+| [user]         | [cabinet style] | [detector] | [tag reader]     |
+|                | [modem]         | [dms]      | [video monitor]  |
+|                |                 | [gate arm] | [weather sensor] |
 
-### `detector`
+Most devices also have an associated [geo loc] resource.
 
-| Access       | Minimal     | Full                       |
-|--------------|-------------|----------------------------|
-| 👁️  View      | name, label | auto\_fail                 |
-| 👉 Operate   |             | field\_length, force\_fail |
-| 💡 Manage    | notes       | abandoned                  |
-| 🔧 Configure | controller  | pin, r\_node, lane\_code, lane\_number, fake |
+[Dependent resources]
 
-### `gate_arm`
+<details>
+<summary>camera</summary>
 
-| Access       | Minimal                    | Full                  |
-|--------------|----------------------------|-----------------------|
-| 👁️  View      | name, location, arm\_state | ga\_array, idx, fault |
-| 💡 Manage    | notes                      |                       |
-| 🔧 Configure | controller                 | pin                   |
+* [flow stream]
 
-### `gate_arm_array`
+</details>
+<details>
+<summary>dms</summary>
 
-| Access       | Minimal                   | Full     |
-|--------------|---------------------------|----------|
-| 👁️  View      | name, location, interlock | geo\_loc |
-| 👉 Operate   | arm\_state                |          |
-| 💡 Manage    | notes                     |          |
-| 🔧 Configure |                           | opposing, prereq, camera, approach, action\_plan |
+* [font]
+* [graphic]
+* [message line]
+* [message pattern]
+* [sign configuration]
+* [sign detail]
+* [sign message]
+* [word]
 
-### `geo_loc`
+</details>
+<details>
+<summary>gate arm</summary>
 
-Since `geo_loc` resources can only be created and deleted with an associated
-`resource_n`, there are only two valid endpoints:
+* [gate arm array]
 
-- `GET iris/api/geo_loc/{name}`: Get a single object as JSON, with *minimal*
-  and *full* attributes
-- `PATCH iris/api/geo_loc/{name}`: Update attributes of one object, with JSON
+</details>
+<details>
+<summary>lcs</summary>
 
-| Access       | Minimal          | Full        |
-|--------------|------------------|-------------|
-| 👁️  View      | name             | resource\_n |
-| 🔧 Configure | roadway, road\_dir, cross\_street, cross\_dir, cross\_mod, landmark | lat, lon |
+* [LCS array]
+* [LCS indication]
+* [Lane marking]
 
-### `gps`
-
-| Access       | Minimal    | Full                                   |
-|--------------|------------|----------------------------------------|
-| 👁️  View      | name       | latest\_poll, latest\_sample, lat, lon |
-| 💡 Manage    | notes      |                                        |
-| 🔧 Configure | controller | pin                                    |
-
-### `lane_marking`
-
-| Access       | Minimal        | Full     |
-|--------------|----------------|----------|
-| 👁️  View      | name, location | geo\_loc |
-| 👉 Operate   | deployed       |          |
-| 💡 Manage    | notes          |          |
-| 🔧 Configure | controller     | pin      |
+</details>
 
 
 [alarm]: alarms.html
@@ -151,10 +133,23 @@ Since `geo_loc` resources can only be created and deleted with an associated
 [comm config]: comm_config.html
 [comm link]: comm_links.html
 [controller]: controllers.html
+[dependent resources]: permissions.html#dependent-resources
+[detector]: vehicle_detection.html
 [dms]: dms.html
 [domain]: user_roles.html#domains
 [flow stream]: flow_streams.html
+[font]: fonts.html
+[gate arm]: gate_arms.html
+[gate arm array]: gate_arms.html#arrays
+[geo loc]: geo_loc.html
+[gps]: gps.html
+[graphic]: graphics.html
+[lane marking]: lcs.html#lane-markings
 [lcs]: lcs.html
+[lcs array]: lcs.html#arrays
+[lcs indication]: lcs.html#indications
+[message line]: message_patterns.html#message-lines
+[message pattern]: message_patterns.html
 [modem]: modem.html
 [permission]: permissions.html
 [ramp meter]: ramp_meters.html
@@ -169,3 +164,4 @@ Since `geo_loc` resources can only be created and deleted with an associated
 [user]: user_roles.html
 [video monitor]: video.html
 [weather sensor]: rwis.html
+[word]: words.html

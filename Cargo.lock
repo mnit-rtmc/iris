@@ -1463,9 +1463,9 @@ dependencies = [
 
 [[package]]
 name = "ntcip"
-version = "0.12.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "37769bccbe07281fa52fb8ccf16df54e9e828f36a595801f1f826fc48c66092a"
+checksum = "fb7ef7e4bea8ed87cd220ab07aa46280d91d8444b810d217792e1c2eab1bc0e3"
 dependencies = [
  "crc",
  "enumflags2",

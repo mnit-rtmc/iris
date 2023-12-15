@@ -12,10 +12,8 @@ Select `View ➔ Video ➔ Cameras` menu item
 <summary>API Resources</summary>
 
 * `iris/camera_pub`
-* `iris/api/camera`
-* `iris/api/camera/{name}`
-
-Attribute [permissions]:
+* `iris/api/camera` (minimal)
+* `iris/api/camera/{name}` (full)
 
 | Access       | Minimal              | Full                        |
 |--------------|----------------------|-----------------------------|
@@ -25,6 +23,10 @@ Attribute [permissions]:
 | 🔧 Configure | controller, cam\_num | pin, cam\_template, encoder\_type, enc\_address, enc\_port, enc\_mcast, enc\_channel
 
 † _Write only_
+
+[Dependent resources]:
+
+* [flow stream]
 
 </details>
 
@@ -156,13 +158,13 @@ Otherwise, requests will be made directly to the camera's encoder address.
 
 [comm link]: comm_links.html
 [controller]: controllers.html
+[dependent resources]: permissions.html#dependent-resources
 [DMS]: dms.html
 [flow stream]: flow_streams.html
 [iris-client.properties]: client_properties.html
 [MonStream]: video.html#monstream
 [multicast]: https://en.wikipedia.org/wiki/Multicast_address
 [Pelco-P]: protocols.html#pelcop
-[permissions]: permissions.html
 [play list]: video.html#play-lists
 [protocol]: protocols.html
 [ramp meter]: ramp_meters.html

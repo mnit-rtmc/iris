@@ -8,10 +8,8 @@ established.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/sign_config`
-* `iris/api/sign_config/{name}`
-
-Attribute [permissions]:
+* `iris/api/sign_config` (minimal)
+* `iris/api/sign_config/{name}` (full)
 
 | Access       | Minimal |
 |--------------|---------|
@@ -43,9 +41,7 @@ communication is established.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/sign_detail`
-
-Attribute [permissions]:
+* `iris/api/sign_detail` (minimal)
 
 | Access  | Minimal |
 |---------|---------|
@@ -57,5 +53,4 @@ Attribute [permissions]:
 [controller]: controllers.html
 [DMS]: dms.html
 [font]: fonts.html
-[permissions]: permissions.html
 [sign message]: sign_message.html

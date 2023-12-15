@@ -8,10 +8,8 @@ A comm configuration is a set of properties which is shared among multiple
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/comm_config`
-* `iris/api/comm_config/{name}`
-
-Attribute [permissions]:
+* `iris/api/comm_config` (minimal)
+* `iris/api/comm_config/{name}` (full)
 
 | Access       | Minimal     | Full |
 |--------------|-------------|------|
@@ -49,5 +47,4 @@ disables this feature.
 [comm link]: comm_links.html
 [controller]: controllers.html
 [device]: controllers.html#devices
-[permissions]: permissions.html
 [protocol]: protocols.html

@@ -8,10 +8,8 @@ A **comm link** is a network connection to field [device]s or external system
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/comm_link`
-* `iris/api/comm_link/{name}`
-
-Attribute [permissions]:
+* `iris/api/comm_link` (minimal)
+* `iris/api/comm_link/{name}` (full)
 
 | Access       | Minimal                        |
 |--------------|--------------------------------|
@@ -43,4 +41,3 @@ links.
 [device]: controllers.html#devices
 [modem]: modem.html
 [pelco-d]: protocols.html#pelco-d
-[permissions]: permissions.html

@@ -21,11 +21,10 @@ The following features are supported:
 <details>
 <summary>API Resources</summary>
 
+* `iris/dms_message`
 * `iris/dms_pub`
-* `iris/api/dms`
-* `iris/api/dms/{name}`
-
-Attribute [permissions]:
+* `iris/api/dms` (minimal)
+* `iris/api/dms/{name}` (full)
 
 | Access       | Minimal                                  | Full          |
 |--------------|------------------------------------------|---------------|
@@ -103,7 +102,7 @@ permision access level of the user:
 The message preview is updated as the user composes the message.  When the
 **Send** button is pressed, a [sign message] is created and set as the operator
 message.  The server then performs a validation check ensuring the user has
-permission for any free-form text.
+[permissions] for any free-form text.
 
 
 [abbreviated]: words.html#abbreviation

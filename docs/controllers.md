@@ -11,14 +11,12 @@ In either case, a controller is required for any communication to a device.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/controller`
-* `iris/api/controller/{name}`
+* `iris/api/controller` (minimal)
+* `iris/api/controller/{name}` (full)
 * `iris/api/controller_io/{name}`
 
 The read-only `controller_io` resource returns an array of objects consisting
 of `pin`, `name` and `resource_n` of associated [devices](#devices).
-
-Attribute [permissions]:
 
 | Access       | Minimal                              | Full     |
 |--------------|--------------------------------------|----------|
@@ -112,7 +110,6 @@ Controllers can have an associated cabinet style, used for MnDOT-170 and Natch
 [gate arms]: gate_arms.html
 [GPS]: gps.html
 [lane-use control signs]: lcs.html
-[permissions]: permissions.html
 [protocol]: protocols.html
 [NTCIP]: protocols.html#ntcip
 [ramp meters]: ramp_meters.html
