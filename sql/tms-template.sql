@@ -2497,16 +2497,16 @@ ALTER TABLE iris.font
     CHECK (f_number > 0 AND f_number <= 255);
 ALTER TABLE iris.font
     ADD CONSTRAINT font_height_ck
-    CHECK (height > 0 AND height <= 30);
+    CHECK (height > 0 AND height <= 32);
 ALTER TABLE iris.font
     ADD CONSTRAINT font_width_ck
-    CHECK (width >= 0 AND width <= 12);
+    CHECK (width >= 0 AND width <= 32);
 ALTER TABLE iris.font
     ADD CONSTRAINT font_line_sp_ck
-    CHECK (line_spacing >= 0 AND line_spacing <= 9);
+    CHECK (line_spacing >= 0 AND line_spacing <= 16);
 ALTER TABLE iris.font
     ADD CONSTRAINT font_char_sp_ck
-    CHECK (char_spacing >= 0 AND char_spacing <= 6);
+    CHECK (char_spacing >= 0 AND char_spacing <= 8);
 
 CREATE FUNCTION iris.font_ck() RETURNS TRIGGER AS
     $font_ck$
