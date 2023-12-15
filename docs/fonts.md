@@ -1,7 +1,6 @@
 # Fonts
 
-A font is a set of bitmapped glyphs for displaying text on a [DMS].  Fonts can
-contain only printable ASCII characters (U+0020 to U+007E).
+A font is a set of bitmapped glyphs for displaying text on a [DMS].
 
 <details>
 <summary>API Resources</summary>
@@ -17,8 +16,39 @@ contain only printable ASCII characters (U+0020 to U+007E).
 
 ## Importing
 
-To import a font into the IRIS database, use tfon_import.py (in `bin`
-directory):
+Fonts must be imported into the IRIS database.  First, they must be in `tfon`
+format, which looks like this:
+
+```text
+font_name: tfon example
+font_number: 2
+char_spacing: 1
+line_spacing: 3
+
+ch: 52 4
+...@@@.
+..@.@@.
+.@..@@.
+@...@@.
+@@@@@@@
+....@@.
+....@@.
+
+ch: 65 A
+.@@@@.
+@@..@@
+@@..@@
+@@@@@@
+@@..@@
+@@..@@
+@@..@@
+```
+
+Many [predefined fonts](#predefined-fonts) are included with IRIS.
+Alternatively, existing fonts in the popular [BDF] format can be converted to
+`tfon` with the [fontu] utility.
+
+To import a font, use tfon_import.py (in `bin` directory):
 
 ```
 tfon_import.py [font file] | psql tms
@@ -108,5 +138,7 @@ Pressing `Send Settings` will cause all necessary fonts to be sent to the sign.
 the `/var/lib/iris/fonts/{sign_name}` directory.
 
 
+[BDF]: https://en.wikipedia.org/wiki/Glyph_Bitmap_Distribution_Format
 [DMS]: dms.html
+[fontu]: https://github.com/DougLau/tfon/tree/main/fontu
 [REST API]: rest_api.html
