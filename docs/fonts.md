@@ -44,9 +44,9 @@ ch: 65 A
 @@..@@
 ```
 
-Many [predefined fonts](#predefined-fonts) are included with IRIS.
-Alternatively, existing fonts in the popular [BDF] format can be converted to
-`tfon` with the [fontu] utility.
+Many fonts are [included](#predefined-fonts) with IRIS.  Alternatively,
+existing fonts in the popular [BDF] format can be converted to `tfon` using
+the [fontu] utility.
 
 To import a font, use tfon_import.py (in `bin` directory):
 
