@@ -247,10 +247,10 @@ public class OpQueryDMSFonts extends OpDMS {
 			PrintWriter writer = createWriter(fileName());
 			writer.println("font_name: " + name.getValue());
 			writer.println("font_number: " + number.getInteger());
-			writer.println("line_spacing: " +
-				line_spacing.getInteger());
 			writer.println("char_spacing: " +
 				char_spacing.getInteger());
+			writer.println("line_spacing: " +
+				line_spacing.getInteger());
 			return nextCharacter(writer, height.getInteger(),
 				row, 0);
 		}
