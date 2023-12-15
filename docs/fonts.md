@@ -15,6 +15,18 @@ contain only printable ASCII characters (U+0020 to U+007E).
 
 </details>
 
+## Importing
+
+To import a font into the IRIS database, use tfon_import.py (in `bin`
+directory):
+
+```
+tfon_import.py [font file] | psql tms
+```
+
+Also, each font file must be copied to the `/var/www/html/iris/api/tfon/`
+directory to make it available in the [REST API].
+
 ## Predefined Fonts
 
 A number of fonts are included in the `/var/lib/iris/fonts` directory.  These
@@ -43,17 +55,10 @@ Name    | Number | Description
 `F24`   | 24     | 24 px height
 `F26`   | 26     | 26 px height
 
-_† Normally font number is the same as pixel height, but variations use
+† _Normally font number is the same as pixel height, but variations use
 1xx or 2xx._
 
 Numbers 1-4 are reserved for **permanent** fonts used by some signs.
-
-To import a font into the IRIS database, use tfon_import.py (in `bin`
-directory):
-
-```
-tfon_import.py [font file] | psql tms
-```
 
 ### Non-ASCII Characters
 
@@ -104,3 +109,4 @@ the `/var/lib/iris/fonts/{sign_name}` directory.
 
 
 [DMS]: dms.html
+[REST API]: rest_api.html
