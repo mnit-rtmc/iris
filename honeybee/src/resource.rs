@@ -19,7 +19,7 @@ use crate::Result;
 use fstr::FStr;
 use gift::{Encoder, Step};
 use ntcip::dms::multi::Color;
-use ntcip::dms::{tfon, CharacterEntry, Font, Graphic};
+use ntcip::dms::Graphic;
 use pix::{rgb::SRgb8, Palette};
 use postgres::Client;
 use serde_derive::Deserialize;
@@ -28,28 +28,6 @@ use std::io::Write;
 use std::path::Path;
 use std::sync::mpsc::Sender;
 use std::time::Instant;
-
-/// Glyph from font
-#[derive(Deserialize)]
-struct Glyph {
-    code_point: u16,
-    width: u8,
-    #[serde(with = "super::base64")]
-    bitmap: Vec<u8>,
-}
-
-/// Font resource
-#[derive(Deserialize)]
-struct FontRes {
-    f_number: u8,
-    name: String,
-    height: u8,
-    #[allow(dead_code)]
-    width: u8,
-    char_spacing: u8,
-    line_spacing: u8,
-    glyphs: Vec<Glyph>,
-}
 
 /// Graphic resource
 #[derive(Deserialize)]
@@ -62,33 +40,6 @@ struct GraphicRes {
     transparent_color: Option<i32>,
     #[serde(with = "super::base64")]
     bitmap: Vec<u8>,
-}
-
-impl From<Glyph> for CharacterEntry {
-    fn from(gl: Glyph) -> Self {
-        CharacterEntry {
-            number: gl.code_point,
-            width: gl.width,
-            bitmap: gl.bitmap,
-        }
-    }
-}
-
-impl<const C: usize> From<FontRes> for Font<C> {
-    fn from(fr: FontRes) -> Self {
-        let mut glyphs = fr.glyphs.into_iter();
-        Font {
-            number: fr.f_number,
-            name: FStr::from_str_lossy(&fr.name, 0),
-            height: fr.height,
-            char_spacing: fr.char_spacing,
-            line_spacing: fr.line_spacing,
-            characters: std::array::from_fn(|_i| match glyphs.next() {
-                Some(glyph) => CharacterEntry::from(glyph),
-                None => CharacterEntry::default(),
-            }),
-        }
-    }
 }
 
 impl From<GraphicRes> for Graphic {
@@ -117,11 +68,6 @@ impl From<GraphicRes> for Graphic {
 /// A resource which can be fetched from a database connection.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 enum Resource {
-    /// Font resource.
-    ///
-    /// * SQL query.
-    Font(&'static str),
-
     /// Graphic resource.
     ///
     /// * SQL query.
@@ -357,22 +303,6 @@ const FONT_LIST_RES: Resource = Resource::Simple(
       SELECT f_number AS font_number, name \
       FROM iris.font ORDER BY f_number\
     ) r",
-);
-
-/// Font resource
-const FONT_RES: Resource = Resource::Font(
-    "SELECT row_to_json(f)::text FROM (\
-      SELECT f_number, name, height, width, char_spacing, line_spacing, \
-             array(SELECT row_to_json(c) FROM (\
-               SELECT code_point, width, \
-                      replace(pixels, E'\n', '') AS bitmap \
-               FROM iris.glyph \
-               WHERE font = ft.name \
-               ORDER BY code_point \
-             ) AS c) \
-           AS glyphs \
-      FROM iris.font ft ORDER BY name\
-    ) AS f",
 );
 
 /// Graphic list resource
@@ -870,7 +800,6 @@ const ALL: &[Resource] = &[
     DMS_PUB_RES,
     DMS_STAT_RES,
     FONT_LIST_RES,
-    FONT_RES,
     GRAPHIC_LIST_RES,
     GRAPHIC_RES,
     MSG_LINE_RES,
@@ -987,7 +916,6 @@ impl Resource {
     /// Get the listen value
     fn listen(self) -> Option<&'static str> {
         match self {
-            Resource::Font(_) => None,
             Resource::Graphic(_) => None,
             Resource::RNode() => Some("r_node$1"),
             Resource::Road() => Some("road$1"),
@@ -999,7 +927,6 @@ impl Resource {
     /// Get the SQL value
     fn sql(self) -> &'static str {
         match self {
-            Resource::Font(sql) => sql,
             Resource::Graphic(sql) => sql,
             Resource::RNode() => unreachable!(),
             Resource::Road() => unreachable!(),
@@ -1020,7 +947,6 @@ impl Resource {
         sender: &Sender<SegMsg>,
     ) -> Result<()> {
         match self {
-            Resource::Font(_) => self.fetch_fonts(client),
             Resource::Graphic(_) => self.fetch_graphics(client),
             Resource::RNode() => self.fetch_nodes(client, payload, sender),
             Resource::Road() => self.fetch_roads(client, payload, sender),
@@ -1081,29 +1007,6 @@ impl Resource {
         let count = fetch_simple(client, sql, writer)?;
         drop(file);
         log::info!("{}: wrote {} rows in {:?}", name, count, t.elapsed());
-        Ok(())
-    }
-
-    /// Fetch font resources
-    fn fetch_fonts(self, client: &mut Client) -> Result<()> {
-        log::debug!("fetch_fonts");
-        let t = Instant::now();
-        let dir = Path::new("api/tfon");
-        let mut count = 0;
-        let sql = self.sql();
-        for row in &client.query(sql, &[])? {
-            let font: FontRes = serde_json::from_str(row.get(0))?;
-            let font: Font<256> = font.into();
-            let name = format!("{}.tfon", font.name.slice_to_terminator('\0'));
-            let file = AtomicFile::new(dir, &name)?;
-            let writer = file.writer()?;
-            if let Err(e) = tfon::write(writer, &font) {
-                log::error!("fetch_fonts {name}: {e:?}");
-                let _res = file.cancel();
-            }
-            count += 1;
-        }
-        log::info!("fetch_fonts: wrote {count} rows in {:?}", t.elapsed());
         Ok(())
     }
 
