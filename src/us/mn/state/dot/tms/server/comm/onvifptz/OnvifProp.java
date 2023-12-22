@@ -70,12 +70,11 @@ abstract public class OnvifProp extends ControllerProperty {
 			return "No cmd specified";
 		}
 
-		// create each service
-		// TODO: generalize service paths? (device service specified by ONVIF standard)
+		// create each service (device service binding specified by ONVIF standard)
 		DeviceService dev = DeviceService.getDeviceService(url + "/onvif/device_service", user, pass);
-		PTZService ptz = PTZService.getPTZService(url + ":80/onvif/ptz", user, pass);
-		MediaService media = MediaService.getMediaService(url + ":80/onvif/media", user, pass);
-		ImagingService img = ImagingService.getImagingService(url + ":80/onvif/imaging", user, pass);
+		PTZService ptz = PTZService.getPTZService(dev.getPTZBinding(), user, pass);
+		MediaService media = MediaService.getMediaService(dev.getMediaBinding(), user, pass);
+		ImagingService img = ImagingService.getImagingService(dev.getImagingBinding(), user, pass);
 
 		String mediaProfile = null, videoSource = null;
 		int mediaWidth = 0, videoWidth = 0;  // to find maximum values

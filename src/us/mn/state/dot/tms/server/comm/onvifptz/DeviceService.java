@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.onvifptz;
 
 import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -54,6 +55,39 @@ public class DeviceService extends Service {
 	public String getServices() {
 		Document doc = getServicesDocument();
 		return sendRequestDocument(doc);
+	}
+
+	/** Gets a service address by its namespace */
+	public String getServiceAddr(String namespace) {
+		String servicesRes = getServices();
+		Document servicesDoc = DOMUtils.getDocument(servicesRes);
+
+		NodeList services = servicesDoc.getElementsByTagNameNS("*", "Service");
+		for (int i = 0; i < services.getLength(); i++) {
+			Element service = (Element) services.item(i);
+			Element ns = (Element) service.getElementsByTagNameNS("*", "Namespace").item(0);
+
+			if (ns.getTextContent().equalsIgnoreCase(namespace)) {
+				Element addr = (Element) service.getElementsByTagNameNS("*", "XAddr").item(0);
+				return addr.getTextContent();
+			}
+		}
+		return null;
+	}
+
+	/** Get the PTZ binding address */
+	public String getPTZBinding() {
+		return getServiceAddr("http://www.onvif.org/ver20/ptz/wsdl");
+	}
+
+	/** Get the media binding address */
+	public String getMediaBinding() {
+		return getServiceAddr("http://www.onvif.org/ver10/media/wsdl");
+	}
+
+	/** Get the imaging binding address */
+	public String getImagingBinding() {
+		return getServiceAddr("http://www.onvif.org/ver20/imaging/wsdl");
 	}
 
 	/** Document builder function for GetScopes */
