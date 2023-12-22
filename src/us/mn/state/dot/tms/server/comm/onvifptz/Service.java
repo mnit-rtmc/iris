@@ -50,7 +50,6 @@ public abstract class Service {
 	protected String namespace;
 	protected String username;
 	protected String password;
-	protected boolean authenticate;
 
 	/** Logger method */
 	protected void log(String s) {
@@ -174,7 +173,7 @@ public abstract class Service {
 			connection.setDoOutput(true);
 			connection.setRequestProperty("Content-Type", "application/soap+xml; charset=utf-8");
 
-			if (authenticate && !"".equals(username)) {
+			if (!"".equals(username)) {
 				addSecurityHeaderDocument(doc);
 			} else {
 				log("Sending unauthenticated request...");

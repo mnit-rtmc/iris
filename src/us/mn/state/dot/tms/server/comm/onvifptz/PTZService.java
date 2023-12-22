@@ -29,7 +29,6 @@ public class PTZService extends Service {
 		namespace = "http://www.onvif.org/ver20/ptz/wsdl";
 		username = u;
 		password = p;
-		authenticate = true;
 	}
 
 	public static PTZService getPTZService(String ptzServiceAddress, String u, String p) {
@@ -350,7 +349,6 @@ public class PTZService extends Service {
 	 * @param state        the requested state ("On", "Off") of the wiper
 	 */
 	public String setWiper(String profileToken, String state) {
-		authenticate = true;
 		Document doc = getAuxiliaryCommandDocument(profileToken, "Wiper", state);
 		return sendRequestDocument(doc);
 	}

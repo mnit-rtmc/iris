@@ -29,7 +29,6 @@ public class MediaService extends Service {
 		namespace = "http://www.onvif.org/ver10/media/wsdl";
 		username = u;
 		password = p;
-		authenticate = true;
 	}
 
 	public static MediaService getMediaService(String mediaServiceAddress, String u, String p) {

@@ -29,7 +29,6 @@ public class DeviceService extends Service {
 		namespace = "http://www.onvif.org/ver10/device/wsdl";
 		username = u;
 		password = p;
-		authenticate = false;
 	}
 
 	public static DeviceService getDeviceService(String deviceServiceAddress, String u, String p) {
@@ -70,7 +69,6 @@ public class DeviceService extends Service {
 
 	/** Get the scope parameters of the device */
 	public String getScopes() {
-		authenticate = true;
 		Document doc = getScopesDocument();
 		return sendRequestDocument(doc);
 	}

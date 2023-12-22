@@ -29,7 +29,6 @@ public class ImagingService extends Service {
 		namespace = "http://www.onvif.org/ver20/imaging/wsdl";
 		username = u;
 		password = p;
-		authenticate = true;
 	}
 
 	public static ImagingService getImagingService(String imagingServiceAddress, String u, String p) {
