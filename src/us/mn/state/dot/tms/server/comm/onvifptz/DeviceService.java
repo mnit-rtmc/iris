@@ -106,4 +106,20 @@ public class DeviceService extends Service {
 
 		return doc;
 	}
+
+	public Document getSystemRebootDocument() {
+		Document doc = getBaseDocument();
+		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+
+		Element systemRebootElem = doc.createElement("wsdl:SystemReboot");
+		body.appendChild(systemRebootElem);
+
+		return doc;
+	}
+
+	/** Reboots the device */
+	public String systemReboot() {
+		Document doc = getSystemRebootDocument();
+		return sendRequestDocument(doc);
+	}
 }

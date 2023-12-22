@@ -181,6 +181,7 @@ public abstract class Service {
 			}
 
 			String soapRequest = DOMUtils.getString(doc);
+			log("\nSending soapRequest to " + endpoint + ":\n" + soapRequest);
 
 			try (OutputStream os = connection.getOutputStream()) {
 				byte[] input = soapRequest.getBytes("utf-8");

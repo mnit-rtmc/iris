@@ -66,10 +66,9 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 		case CAMERA_IRIS_OPEN:
 			prop.addIris(-1);
 			return prop;
-		// unnecessary, only absolute iris command in ONVIF:
-		//case CAMERA_IRIS_STOP:
-		//	prop.addIris(0);
-		//	return prop;
+		case CAMERA_IRIS_STOP:
+			prop.addIris(0);
+			return prop;
 		case CAMERA_FOCUS_MANUAL:
 			prop.addAutoFocus(false);
 			return prop;
@@ -86,21 +85,43 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 			prop.addWiperOneshot();
 			return prop;
 		case RESET_DEVICE:
-			// TODO: determine meaning
-			// for now, set focus/iris to auto
-			prop.addAutoIrisAndFocus();
+			prop.addReboot();
 			return prop;
 		default:
 			return null;
 		}
 	}
 
+	/** Gets a base prop from camera's password field and requested service type */
+	private PTZCommandProp getBaseProp(CameraImpl c, String type) {
+		String userpass = c.getController().getPassword();
+		PTZCommandProp prop;
+
+		if (userpass == null)
+			// don't set null user or password; use empty string instead
+			prop = new PTZCommandProp(type, "", "");
+		else if (userpass.split(":").length < 2)
+			// if only one value, assume password to match label in client UI
+			prop = new PTZCommandProp(type, "", userpass);
+		else {
+			// otherwise, not null and has two values -> use them
+			String[] loginArr = userpass.split(":");
+			prop = new PTZCommandProp(type, loginArr[0], loginArr[1]);
+		}
+
+		// set url; preface with http:// if missing
+		String url = c.getController().getCommLink().getUri();
+		if (!url.contains("http://"))
+			url = "http://" + url;
+		prop.setUrl(url);
+
+		return prop;
+	}
+
 	/** Send a PTZ camera move command */
 	@Override
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
-		PTZCommandProp prop = new PTZCommandProp("ptz");
-		String url = c.getController().getCommLink().getUri();
-		prop.setUrl(url);
+		PTZCommandProp prop = getBaseProp(c, "ptz");
 		prop.addPanTiltZoom(p, t, z);
 		addOp(new OpOnvifPTZ(c, prop));
 	}
@@ -108,9 +129,7 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 	/** Send a "store camera preset" command */
 	@Override
 	public void sendStorePreset(CameraImpl c, int preset) {
-		PTZCommandProp prop = new PTZCommandProp("ptz");
-		String url = c.getController().getCommLink().getUri();
-		prop.setUrl(url);
+		PTZCommandProp prop = getBaseProp(c, "ptz");
 		prop.addStorePreset(preset);
 		addOp(new OpOnvifPTZ(c, prop));
 	}
@@ -118,9 +137,7 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 	/** Send a "recall camera preset" command */
 	@Override
 	public void sendRecallPreset(CameraImpl c, int preset) {
-		PTZCommandProp prop = new PTZCommandProp("ptz");
-		String url = c.getController().getCommLink().getUri();
-		prop.setUrl(url);
+		PTZCommandProp prop = getBaseProp(c, "ptz");
 		prop.addRecallPreset(preset);
 		addOp(new OpOnvifPTZ(c, prop));
 	}
@@ -130,12 +147,10 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 	 * @param dr Device request to send. */
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest dr) {
-		PTZCommandProp prop = new PTZCommandProp("imaging");
+		PTZCommandProp prop = getBaseProp(c, "imaging");
 		if (dr == DeviceRequest.CAMERA_WIPER_ONESHOT)
-			prop = new PTZCommandProp("ptz");
+			prop = getBaseProp(c, "ptz");
 
-		String url = c.getController().getCommLink().getUri();
-		prop.setUrl(url);
 		prop = createDeviceReqProp(prop, dr);
 		if (prop != null)
 			addOp(new OpOnvifPTZ(c, prop));
