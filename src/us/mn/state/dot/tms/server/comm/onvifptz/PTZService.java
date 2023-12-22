@@ -351,4 +351,13 @@ public class PTZService extends Service {
 		Document doc = getAuxiliaryCommandDocument("Wiper", state);
 		return sendRequestDocument(doc);
 	}
+
+	/**
+	 * Sets the wiper on and off immediately to emulate a single wiper action
+	 */
+	public String wiperOneshot() {
+		String onResponse = setWiper("On");
+		String offResponse = setWiper("Off");
+		return onResponse + offResponse;
+	}
 }

@@ -27,27 +27,6 @@ import java.io.UnsupportedEncodingException;
  */
 public class PTZCommandProp extends OnvifProp {
 
-	/** PTZ command params */
-	private enum Param {
-		PAN_TILT	("continuouspantiltmove"),
-		ZOOM		("continuouszoommove"),
-		RECALL_PRESET	("gotoserverpresetno"),
-		FOCUS		("continuousfocusmove"),
-		IRIS		("continuousirismove"),
-		AUTO_FOCUS	("autofocus"),
-		AUTO_IRIS	("autoiris");
-
-		private Param(String c) {
-			cmd = c;
-		}
-		public final String cmd;
-	}
-
-	/** Logger method */
-	private void log(String s) {
-		OnvifPTZPoller.slog("PTZCommandProp:" + s);
-	}
-
 	/** Create a new PTZ command property */
 	public PTZCommandProp(String service) {
 		switch (service) {
@@ -79,7 +58,7 @@ public class PTZCommandProp extends OnvifProp {
 		service = ptz;
 	}
 
-	/** Add a store preset param */
+	/** Sets message to store preset */
 	public void addStorePreset(int p) {
 		log("Final URL to PTZService: " + url + service_path);
 		PTZService ptz = PTZService.getPTZService(url + service_path, "admin", "admin");
@@ -90,7 +69,7 @@ public class PTZCommandProp extends OnvifProp {
 		service = ptz;
 	}
 
-	/** Add a recall preset param */
+	/** Sets message to recall preset */
 	public void addRecallPreset(int p) {
 		log("Final URL to PTZService: " + url + service_path);
 		PTZService ptz = PTZService.getPTZService(url + service_path, "admin", "admin");
@@ -101,9 +80,7 @@ public class PTZCommandProp extends OnvifProp {
 		service = ptz;
 	}
 
-	//TODO: implement focus and iris commands below
-
-	/** Add a focus param  */
+	/** Sets message to move the focus */
 	public void addFocus(int f) {
 		log("Final URL to ImagingService: " + url + service_path);
 		ImagingService img = ImagingService.getImagingService(url + service_path, "admin", "admin");
@@ -117,18 +94,32 @@ public class PTZCommandProp extends OnvifProp {
 		service = img;
 	}
 
-	///** Add an iris param */
-	//public void addIris(int i) {
-	//	log("Final URL to ImagingService: " + url + service_path);
-	//	ImagingService imaging = ImagingService.getImagingService(url + service_path, "admin", "admin");
-	//	message = setImagingSettingsDocument(vToken, "iris", i);
-	//	log("Message from ImagingService: " + message);
+	/** Sets callback cmd to iris */
+	public void addIris(int i) {
+		log("Final URL to ImagingService: " + url + service_path);
+		ImagingService img = ImagingService.getImagingService(url + service_path, "admin", "admin");
 
-	//	// set service field for sending from OnvifProp
-	//	service = imaging;
-	//}
+		// set cmd to use in sendSoap callback
+		cmd = "iris";
+		val = String.valueOf(i);
 
-	/** Add an auto-focus param */
+		// set service field for sending from OnvifProp
+		service = img;
+	}
+
+	/** Sets callback cmd to wiper oneshot */
+	public void addWiperOneshot() {
+		log("Final URL to PTZService: " + url + service_path);
+		PTZService ptz = PTZService.getPTZService(url + service_path, "admin", "admin");
+
+		// set cmd to use in sendSoap callback
+		cmd = "wiper";
+
+		// set service field for sending from OnvifProp
+		service = ptz;
+	}
+
+	/** Sets message to auto focus */
 	public void addAutoFocus(boolean on) {
 		log("Final URL to ImagingService: " + url + service_path);
 		ImagingService img = ImagingService.getImagingService(url + service_path, "admin", "admin");
@@ -140,13 +131,25 @@ public class PTZCommandProp extends OnvifProp {
 		service = img;
 	}
 
-	/** Add an auto-iris param */
+	/** Sets message to auto iris */
 	public void addAutoIris(boolean on) {
 		log("Final URL to ImagingService: " + url + service_path);
 		ImagingService img = ImagingService.getImagingService(url + service_path, "admin", "admin");
 		String i = on ? "Auto" : "Manual";
 		message = img.setImagingSettingsDocument("Visible Camera", "iris", i);
 		log("Message from ImagingService: " + DOMUtils.getString(message));
+
+		// set service field for sending from OnvifProp
+		service = img;
+	}
+
+	/** Sets callback cmd to both iris and focus to auto */
+	public void addAutoIrisAndFocus() {
+		log("Final URL to ImagingService: " + url + service_path);
+		ImagingService img = ImagingService.getImagingService(url + service_path, "admin", "admin");
+
+		// set cmd to use in sendSoap callback
+		cmd = "autoirisfocus";
 
 		// set service field for sending from OnvifProp
 		service = img;

@@ -43,9 +43,20 @@ abstract public class OnvifProp extends ControllerProperty {
 	/** SOAP Message */
 	Document message;
 
+	/** SOAP command for multi-step operation */
+	String cmd;
+
+	/** Value for multi-step operation */
+	String val;
+
 	/** Create a new Onvif property */
 	protected OnvifProp() {
 		service_path = "";
+	}
+
+	/** Logger method */
+	protected void log(String s) {
+		OnvifPTZPoller.slog("PTZCommandProp:" + s);
 	}
 
 	/** Get as a string */
@@ -68,12 +79,31 @@ abstract public class OnvifProp extends ControllerProperty {
 
 	/** Send the SOAP message */
 	public String sendSoap() {
-		if (service != null && message != null)
-			return service.sendRequestDocument(message);
-		else if (service == null)
+		if (service == null)
 			return "Error sending SOAP message - null service";
-		else
-			return "Error sending SOAP message - null message";
+
+		// if multi-step operation, send specified ops within Service class
+		if (cmd != null) {
+			switch (cmd) {
+				case "iris":
+					if (val == null)
+						return "Error sending iris increment message - null value";
+					return ((ImagingService) service).incrementIris("Visible Camera", val);
+				case "wiper":
+					return ((PTZService) service).wiperOneshot();
+				case "autoirisfocus":
+					String irisString = ((ImagingService) service).setIris("Visible Camera", "auto");
+					String focusString = ((ImagingService) service).setFocus("Visible Camera", "auto");
+					return irisString + focusString;
+				default:
+					return "Unexpected cmd";
+			}
+		}
+
+		// if single-step operation, message is already set, so send it
+		if (message == null)
+			return "Error sending SOAP message - null/invalid cmd and message";
+		return service.sendRequestDocument(message);
 	}
 
 	/** Encode a STORE request */

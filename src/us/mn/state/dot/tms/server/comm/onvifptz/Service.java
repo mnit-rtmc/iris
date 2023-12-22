@@ -52,6 +52,11 @@ public abstract class Service {
 	protected String password;
 	protected boolean authenticate;
 
+	/** Logger method */
+	protected void log(String s) {
+		OnvifPTZPoller.slog("PTZCommandProp:" + s);
+	}
+
 	/**
 	 * Get the base document that all other services add to; creates the header
 	 * and body, and adds relevant namespace attributes.
@@ -172,11 +177,10 @@ public abstract class Service {
 			if (authenticate && !"".equals(username)) {
 				addSecurityHeaderDocument(doc);
 			} else {
-				System.out.println("Sending unauthenticated request...");
+				log("Sending unauthenticated request...");
 			}
 
 			String soapRequest = DOMUtils.getString(doc);
-			System.out.println("Final SOAP request:\n" + soapRequest);
 
 			try (OutputStream os = connection.getOutputStream()) {
 				byte[] input = soapRequest.getBytes("utf-8");

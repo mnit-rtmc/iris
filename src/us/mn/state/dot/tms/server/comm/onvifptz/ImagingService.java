@@ -176,6 +176,33 @@ public class ImagingService extends Service {
 		return sendRequestDocument(doc);
 	}
 
+	/**
+	 * Gets the iris attenuation
+	 *
+	 * @param vToken reference token to the relevant video source
+	 *
+	 * @return float value of iris
+	 */
+	public float getIris(String vToken) {
+		String docString = getImagingSettings(vToken);
+		Document doc = DOMUtils.getDocument(docString);
+		if (doc == null) return 0;
+
+		Element iris = (Element) doc.getElementsByTagName("tt:Iris").item(0);
+		return Float.parseFloat(iris.getTextContent());
+	}
+
+	/**
+	 * Increments the iris attenuation by retrieving and setting it (absolute)
+	 *
+	 * @param vToken reference token to the relevant video source
+	 * @param value  the requested iris attenuation; "auto", "manual", or a float
+	 */
+	public String incrementIris(String vToken, String value) {
+		float newIris = getIris(vToken) + Float.parseFloat(value);
+		return setIris(vToken, String.valueOf(newIris));
+	}
+
 	/** Document builder function for GetMoveOptions */
 	public Document getMoveOptionsDocument(String vToken) {
 		Document doc = getBaseDocument();

@@ -46,7 +46,6 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 		super(link, HTTP, ONVIF_LOG);
 	}
 
-	// TODO: uncomment as implemented
 	static private PTZCommandProp createDeviceReqProp(PTZCommandProp prop, DeviceRequest r) {
 		if (prop == null) return null;
 
@@ -60,12 +59,13 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 		case CAMERA_FOCUS_STOP:
 			prop.addFocus(0);
 			return prop;
-		//case CAMERA_IRIS_CLOSE:
-		//	prop.addIris(-1);
-		//	return prop;
-		//case CAMERA_IRIS_OPEN:
-		//	prop.addIris(1);
-		//	return prop;
+		// 0dB is completely open, >0 is more closed
+		case CAMERA_IRIS_CLOSE:
+			prop.addIris(1);
+			return prop;
+		case CAMERA_IRIS_OPEN:
+			prop.addIris(-1);
+			return prop;
 		// unnecessary, only absolute iris command in ONVIF:
 		//case CAMERA_IRIS_STOP:
 		//	prop.addIris(0);
@@ -82,10 +82,14 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 		case CAMERA_IRIS_AUTO:
 			prop.addAutoIris(true);
 			return prop;
-		case RESET_DEVICE:
 		case CAMERA_WIPER_ONESHOT:
-			// FIXME: create SerialWriteProp
-			return null;
+			prop.addWiperOneshot();
+			return prop;
+		case RESET_DEVICE:
+			// TODO: determine meaning
+			// for now, set focus/iris to auto
+			prop.addAutoIrisAndFocus();
+			return prop;
 		default:
 			return null;
 		}
@@ -127,6 +131,9 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest dr) {
 		PTZCommandProp prop = new PTZCommandProp("imaging");
+		if (dr == DeviceRequest.CAMERA_WIPER_ONESHOT)
+			prop = new PTZCommandProp("ptz");
+
 		String url = c.getController().getCommLink().getUri();
 		prop.setUrl(url);
 		prop = createDeviceReqProp(prop, dr);
