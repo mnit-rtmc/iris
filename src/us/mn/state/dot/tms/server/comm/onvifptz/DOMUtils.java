@@ -57,7 +57,9 @@ public class DOMUtils {
 	public static Document getDocument(String s) {
 		Document doc = null;
 		try {
-			DocumentBuilder db = DocumentBuilderFactory.newNSInstance().newDocumentBuilder();
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			dbf.setNamespaceAware(true);
+			DocumentBuilder db = dbf.newDocumentBuilder();
 			InputSource is = new InputSource();
 			is.setCharacterStream(new StringReader(s));
 			doc = db.parse(is);
