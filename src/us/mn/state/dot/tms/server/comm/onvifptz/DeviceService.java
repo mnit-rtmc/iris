@@ -12,9 +12,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.onvifptz.lib;
+package us.mn.state.dot.tms.server.comm.onvifptz;
 
 import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -29,7 +30,6 @@ public class DeviceService extends Service {
 		namespace = "http://www.onvif.org/ver10/device/wsdl";
 		username = u;
 		password = p;
-		authenticate = false;
 	}
 
 	public static DeviceService getDeviceService(String deviceServiceAddress, String u, String p) {
@@ -57,6 +57,39 @@ public class DeviceService extends Service {
 		return sendRequestDocument(doc);
 	}
 
+	/** Gets a service address by its namespace */
+	public String getServiceAddr(String namespace) {
+		String servicesRes = getServices();
+		Document servicesDoc = DOMUtils.getDocument(servicesRes);
+
+		NodeList services = servicesDoc.getElementsByTagNameNS("*", "Service");
+		for (int i = 0; i < services.getLength(); i++) {
+			Element service = (Element) services.item(i);
+			Element ns = (Element) service.getElementsByTagNameNS("*", "Namespace").item(0);
+
+			if (ns.getTextContent().equalsIgnoreCase(namespace)) {
+				Element addr = (Element) service.getElementsByTagNameNS("*", "XAddr").item(0);
+				return addr.getTextContent();
+			}
+		}
+		return null;
+	}
+
+	/** Get the PTZ binding address */
+	public String getPTZBinding() {
+		return getServiceAddr("http://www.onvif.org/ver20/ptz/wsdl");
+	}
+
+	/** Get the media binding address */
+	public String getMediaBinding() {
+		return getServiceAddr("http://www.onvif.org/ver10/media/wsdl");
+	}
+
+	/** Get the imaging binding address */
+	public String getImagingBinding() {
+		return getServiceAddr("http://www.onvif.org/ver20/imaging/wsdl");
+	}
+
 	/** Document builder function for GetScopes */
 	public Document getScopesDocument() {
 		Document doc = getBaseDocument();
@@ -70,7 +103,6 @@ public class DeviceService extends Service {
 
 	/** Get the scope parameters of the device */
 	public String getScopes() {
-		authenticate = true;
 		Document doc = getScopesDocument();
 		return sendRequestDocument(doc);
 	}
@@ -105,5 +137,21 @@ public class DeviceService extends Service {
 		auxiliaryCommand.appendChild(doc.createTextNode("tt:" + command + "|" + state));
 
 		return doc;
+	}
+
+	public Document getSystemRebootDocument() {
+		Document doc = getBaseDocument();
+		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+
+		Element systemRebootElem = doc.createElement("wsdl:SystemReboot");
+		body.appendChild(systemRebootElem);
+
+		return doc;
+	}
+
+	/** Reboots the device */
+	public String systemReboot() {
+		Document doc = getSystemRebootDocument();
+		return sendRequestDocument(doc);
 	}
 }

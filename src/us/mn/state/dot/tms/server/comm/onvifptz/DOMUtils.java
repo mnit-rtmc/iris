@@ -12,14 +12,20 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.onvifptz.lib;
+package us.mn.state.dot.tms.server.comm.onvifptz;
 
 import java.io.*;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
 
 import org.w3c.dom.Node;
+import org.w3c.dom.Document;
+
+import org.xml.sax.InputSource;
 
 /**
  * Class for XML document utilities
@@ -45,5 +51,23 @@ public class DOMUtils {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	/** Gets Document from string */
+	public static Document getDocument(String s) {
+		Document doc = null;
+		try {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			dbf.setNamespaceAware(true);
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			InputSource is = new InputSource();
+			is.setCharacterStream(new StringReader(s));
+			doc = db.parse(is);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		return doc;
 	}
 }

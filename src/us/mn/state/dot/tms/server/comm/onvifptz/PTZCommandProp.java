@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2023  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,6 @@ package us.mn.state.dot.tms.server.comm.onvifptz;
 import java.security.NoSuchAlgorithmException;
 import java.io.UnsupportedEncodingException;
 
-import us.mn.state.dot.tms.server.comm.onvifptz.lib.*;
-
 /**
  * PTZ command property.
  *
@@ -29,103 +27,84 @@ import us.mn.state.dot.tms.server.comm.onvifptz.lib.*;
  */
 public class PTZCommandProp extends OnvifProp {
 
-	/** PTZ command params */
-	private enum Param {
-		PAN_TILT	("continuouspantiltmove"),
-		ZOOM		("continuouszoommove"),
-		RECALL_PRESET	("gotoserverpresetno"),
-		FOCUS		("continuousfocusmove"),
-		IRIS		("continuousirismove"),
-		AUTO_FOCUS	("autofocus"),
-		AUTO_IRIS	("autoiris");
-
-		private Param(String c) {
-			cmd = c;
-		}
-		public final String cmd;
-	}
-
-	/** Logger method */
-	private void log(String s) {
-		OnvifPTZPoller.slog("PTZCommandProp:" + s);
-	}
-
 	/** Create a new PTZ command property */
-	public PTZCommandProp(String service) {
-		switch (service) {
-			case "device":
-				service_path = "/onvif/device_service";
-				break;
-			case "media":
-				service_path = ":80/onvif/media";
-				break;
-			case "ptz":
-				service_path = ":80/onvif/ptz";
-				break;
-			case "imaging":
-				service_path = ":80/onvif/imaging";
-				break;
-			default:
-				service_path = "/onvif/device_service";
-		}
+	public PTZCommandProp(String service, String u, String p) {
+		super();
+		user = u;
+		pass = p;
 	}
 
-	/** Set message to PanTiltZoom SOAP message */
+	/** Adds ptz command to callback */
 	public void addPanTiltZoom(float p, float t, float z) {
-		log("Final URL to PTZService: " + url + service_path);
-		PTZService ptz = PTZService.getPTZService(url + service_path, "admin", "admin");
-		message = ptz.getContinuousMoveDocument(p, t, z);
-		log("Message from PTZService: " + DOMUtils.getString(message));
-
-		// set service field for sending from OnvifProp
-		service = ptz;
+		cmds.add(new String[] {
+			"ptz",
+			String.valueOf(p),
+			String.valueOf(t),
+			String.valueOf(z)
+		});
 	}
 
-	/** Add a store preset param */
+	/** Sets message to store preset */
 	public void addStorePreset(int p) {
-		log("Final URL to PTZService: " + url + service_path);
-		PTZService ptz = PTZService.getPTZService(url + service_path, "admin", "admin");
-		message = ptz.setPresetDocument(String.valueOf(p));
-		log("Message from PTZService: " + DOMUtils.getString(message));
-
-		// set service field for sending from OnvifProp
-		service = ptz;
+		cmds.add(new String[] {
+			"storepreset",
+			String.valueOf(p)
+		});
 	}
 
-	/** Add a recall preset param */
+	/** Sets message to recall preset */
 	public void addRecallPreset(int p) {
-		log("Final URL to PTZService: " + url + service_path);
-		PTZService ptz = PTZService.getPTZService(url + service_path, "admin", "admin");
-		message = ptz.gotoPresetDocument(String.valueOf(p));
-		log("Message from PTZService: " + DOMUtils.getString(message));
-
-		// set service field for sending from OnvifProp
-		service = ptz;
+		cmds.add(new String[] {
+			"recallpreset",
+			String.valueOf(p)
+		});
 	}
 
-	//TODO: implement focus and iris commands below
+	/** Sets message to move the focus */
+	public void addFocus(int f) {
+		cmds.add(new String[] {
+			"movefocus",
+			String.valueOf(f)
+		});
+	}
 
-	///** Add a focus param */
-	//public void addFocus(int f) {
-	//	
-	//}
+	/** Adds iris command to callback */
+	public void addIris(int i) {
+		cmds.add(new String[] {
+			"iris",
+			String.valueOf(i)
+		});
+	}
 
-	///** Add an iris param */
-	//public void addIris(int i) {
-	//	log("Final URL to ImagingService: " + url + service_path);
-	//	ImagingService imaging = ImagingService.getImagingService(url + service_path, "admin", "admin");
-	//	message = setImagingSettingsDocument(vToken, "iris", i);
-	//	log("Message from ImagingService: " + message);
+	/** Adds wiper oneshot to callback */
+	public void addWiperOneshot() {
+		cmds.add(new String[] { "wiper" });
+	}
 
-	//	// set service field for sending from OnvifProp
-	//	service = imaging;
-	//}
+	/** Adds reboot to callback */
+	public void addReboot() {
+		cmds.add(new String[] { "reboot" });
+	}
 
-	///** Add an auto-focus param */
-	//public void addAutoFocus(boolean on) {
-	//}
+	/** Sets message to auto focus */
+	public void addAutoFocus(boolean on) {
+		cmds.add(new String[] {
+			"autofocus",
+			on ? "Auto" : "Manual"
+		});
+	}
 
-	///** Add an auto-iris param */
-	//public void addAutoIris(boolean on) {
-	//}
+	/** Sets message to auto iris */
+	public void addAutoIris(boolean on) {
+		cmds.add(new String[] {
+			"autoiris",
+			on ? "Auto" : "Manual"
+		});
+	}
+
+	/** Appends autoiris and autofocus to callback */
+	public void addAutoIrisAndFocus() {
+		cmds.add(new String[] { "autoiris", "Auto" });
+		cmds.add(new String[] { "autofocus", "Auto" });
+	}
 }

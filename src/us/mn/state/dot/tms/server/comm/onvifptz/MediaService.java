@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.onvifptz.lib;
+package us.mn.state.dot.tms.server.comm.onvifptz;
 
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
@@ -29,7 +29,6 @@ public class MediaService extends Service {
 		namespace = "http://www.onvif.org/ver10/media/wsdl";
 		username = u;
 		password = p;
-		authenticate = true;
 	}
 
 	public static MediaService getMediaService(String mediaServiceAddress, String u, String p) {

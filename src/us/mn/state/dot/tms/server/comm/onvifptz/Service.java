@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.onvifptz.lib;
+package us.mn.state.dot.tms.server.comm.onvifptz;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -50,7 +50,11 @@ public abstract class Service {
 	protected String namespace;
 	protected String username;
 	protected String password;
-	protected boolean authenticate;
+
+	/** Logger method */
+	protected void log(String s) {
+		OnvifPTZPoller.slog("PTZCommandProp:" + s);
+	}
 
 	/**
 	 * Get the base document that all other services add to; creates the header
@@ -169,14 +173,14 @@ public abstract class Service {
 			connection.setDoOutput(true);
 			connection.setRequestProperty("Content-Type", "application/soap+xml; charset=utf-8");
 
-			if (authenticate && !"".equals(username)) {
+			if (!"".equals(username)) {
 				addSecurityHeaderDocument(doc);
 			} else {
-				System.out.println("Sending unauthenticated request...");
+				log("Sending unauthenticated request...");
 			}
 
 			String soapRequest = DOMUtils.getString(doc);
-			System.out.println("Final SOAP request:\n" + soapRequest);
+			log("\nSending soapRequest to " + endpoint + ":\n" + soapRequest);
 
 			try (OutputStream os = connection.getOutputStream()) {
 				byte[] input = soapRequest.getBytes("utf-8");
