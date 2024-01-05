@@ -648,12 +648,12 @@ public class OpSendDMSMessage extends OpDMS {
 
 	/** Set the comm loss and power recovery msgs */
 	private void setCommAndPower() {
-		comm_msg.setMemoryType(DmsMessageMemoryType.changeable);
-		comm_msg.setNumber(msg_num);
-		comm_msg.setCrc(message_crc);
-		long_msg.setMemoryType(DmsMessageMemoryType.changeable);
-		long_msg.setNumber(msg_num);
-		long_msg.setCrc(message_crc);
+		comm_msg.setMemoryType(DmsMessageMemoryType.currentBuffer);
+		comm_msg.setNumber(1);
+		comm_msg.setCrc(0);
+		long_msg.setMemoryType(DmsMessageMemoryType.currentBuffer);
+		long_msg.setNumber(1);
+		long_msg.setCrc(0);
 	}
 
 	/** Set the comm loss and power recovery msgs to blank */
