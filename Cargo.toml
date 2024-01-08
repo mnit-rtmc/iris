@@ -3,7 +3,7 @@ members = ["honeybee", "graft", "mayfly", "bulb", "rendzina"]
 resolver = "2"
 
 [workspace.package]
-version = "5.49.0"
+version = "5.49.1"
 edition = "2021"
 
 [profile.web]
