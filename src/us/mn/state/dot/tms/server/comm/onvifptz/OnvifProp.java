@@ -83,22 +83,22 @@ abstract public class OnvifProp extends ControllerProperty {
 		Document getProfilesRes = DOMUtils.getDocument(media.getProfiles());
 
 		if (getProfilesRes != null) {
-			NodeList profiles = getProfilesRes.getElementsByTagName("trt:Profiles");
+			NodeList profiles = getProfilesRes.getElementsByTagNameNS("*", "Profiles");
 			for (int i = 0; i < profiles.getLength(); i++) {
 				int mx = 0, vx = 0;
 				Element profile = (Element) profiles.item(i);
 
 				// get the video source and its width
-				Element videoConfig = (Element) profile.getElementsByTagName("tt:VideoSourceConfiguration").item(0);
+				Element videoConfig = (Element) profile.getElementsByTagNameNS("*", "VideoSourceConfiguration").item(0);
 				if (videoConfig == null) continue;  // we want a profile with a video source
-				Element sourceToken = (Element) videoConfig.getElementsByTagName("tt:SourceToken").item(0);
-				Element bounds = (Element) videoConfig.getElementsByTagName("tt:Bounds").item(0);
+				Element sourceToken = (Element) videoConfig.getElementsByTagNameNS("*", "SourceToken").item(0);
+				Element bounds = (Element) videoConfig.getElementsByTagNameNS("*", "Bounds").item(0);
 				vx = Integer.parseInt(bounds.getAttribute("width"));
 
 				// get the video encoder and its width, if applicable; only for better profile selection
-				Element encoderConfig = (Element) profile.getElementsByTagName("tt:VideoEncoderConfiguration").item(0);
+				Element encoderConfig = (Element) profile.getElementsByTagNameNS("*", "VideoEncoderConfiguration").item(0);
 				if (encoderConfig != null) {
-					Element widthElem = (Element) encoderConfig.getElementsByTagName("tt:Width").item(0);
+					Element widthElem = (Element) encoderConfig.getElementsByTagNameNS("*", "Width").item(0);
 					mx = Integer.parseInt(widthElem.getTextContent());
 				}
 

@@ -187,7 +187,7 @@ public class ImagingService extends Service {
 		Document doc = DOMUtils.getDocument(docString);
 		if (doc == null) return 0;
 
-		Element iris = (Element) doc.getElementsByTagName("tt:Iris").item(0);
+		Element iris = (Element) doc.getElementsByTagNameNS("*", "Iris").item(0);
 		return Float.parseFloat(iris.getTextContent());
 	}
 
