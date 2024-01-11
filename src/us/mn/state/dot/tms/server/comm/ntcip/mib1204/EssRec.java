@@ -133,8 +133,19 @@ public class EssRec {
 		storePrecip(ws);
 		storePavement(ws);
 		storeSubSurface(ws);
+		storeRadiation(ws);
 		long st = TimeSteward.currentTimeMillis();
 		ws.setStampNotify(st);
+	}
+	
+	/** Store the radiation sensor data */
+	private void storeRadiation(WeatherSensorImpl ws) {
+		ws.setTotalRadiationNotify(rad_values.total_radiation.getRadiation());
+		ws.setTotalRadiationPeriodNotify(rad_values.getTotalRadiationPeriod());
+		ws.setInstantaneousTerrestrialNotify(rad_values.instantaneous_terrestrial.getRadiation());
+		ws.setInstantaneousSolarNotify(rad_values.instantaneous_solar.getRadiation());
+		ws.setSolarRadiationNotify(rad_values.getSolarRadiation());
+		ws.setTotalSunNotify(rad_values.getTotalSun());
 	}
 
 	/** Get JSON representation */

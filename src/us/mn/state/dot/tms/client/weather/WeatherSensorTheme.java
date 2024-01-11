@@ -88,6 +88,19 @@ public class WeatherSensorTheme extends ProxyTheme<WeatherSensor> {
 			Temperature.create(p.getSurfTemp()));
 		ttb.addLine("Subsurface temperature", 
 			Temperature.create(p.getSubSurfTemp()));
+		ttb.addLine("Total radiation",
+				p.getTotalRadiation(), "W/m^2");
+		ttb.addLine("Total sun",
+				p.getTotalSun(), "minutes");
+		ttb.addLine("Instantaneous Terrestrial",
+				p.getInstantaneousTerrestrial(), "W/m^2");
+		ttb.addLine("Instantaneous Solar",
+				p.getInstantaneousSolar(), "W/m^2");
+		ttb.addLine("Total Radiation Period",
+				p.getTotalRadiationPeriod(), "seconds");
+		ttb.addLine("Solar Radiation",
+				p.getSolarRadiation(), "J/m^2");
+		
 		ttb.addLine("Time", 
 			formatDateString(p.getStamp()));
 		ttb.setLast();
