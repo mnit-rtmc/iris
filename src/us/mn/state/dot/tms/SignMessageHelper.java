@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2023  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  * Copyright (C) 2021  Iteris Inc.
  *
@@ -220,7 +220,7 @@ public class SignMessageHelper extends BaseHelper {
 	/** Check if a message is scheduled and has indefinite duration.
 	 * This should only be true for messages from "sticky" DMS actions.
 	 * @param sm The sign message. */
-	static public boolean isScheduledIndefinite(SignMessage sm) {
+	static public boolean isScheduledSticky(SignMessage sm) {
 		int bits = sourceBits(sm);
 		return SignMsgSource.schedule.checkBit(bits) &&
 		      (sm.getDuration() == null) &&
