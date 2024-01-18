@@ -20,6 +20,7 @@ import java.awt.geom.AffineTransform;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.client.ToolTipBuilder;
 import us.mn.state.dot.tms.client.map.MapObject;
 import us.mn.state.dot.tms.client.map.Style;
 import us.mn.state.dot.tms.client.map.Symbol;
@@ -99,5 +100,23 @@ public class DmsTheme extends ProxyTheme<DMS> {
 				return PARKING_SYMBOL;
 		}
 		return null;
+	}
+
+	/** Get tooltip text for the given map object.
+	 * @return String or null for none */
+	@Override
+	public String getTip(MapObject o) {
+		DMS p = manager.findProxy(o);
+		if(p == null)
+			return null;
+		ToolTipBuilder ttb = new ToolTipBuilder();
+		ttb.addLine(manager.getDescription(p));
+		// TODO move tip text to i18n
+		ttb.addLine("Message",
+			p.getMsgCurrent().getMulti());
+		ttb.addLine("Message owner",
+				p.getMsgCurrent().getMsgOwner());
+		ttb.setLast();
+		return ttb.get();
 	}
 }
