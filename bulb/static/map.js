@@ -44,7 +44,7 @@ function make_styles() {
         fill: true,
         fillOpacity: 0.2,
         weight: 0.1,
-        color: '#000000',
+        color: '#000',
         opacity: 0.6,
     };
     let water = {
@@ -64,7 +64,15 @@ function make_styles() {
         fillOpacity: 0.6,
         fillColor: "#88cc88",
         weight: 0.1,
-        color: '#000000',
+        color: '#000',
+        opacity: 0.6,
+    };
+    let cemetery = {
+        fill: true,
+        fillOpacity: 0.6,
+        fillColor: "#aaccaa",
+        weight: 0.1,
+        color: '#000',
         opacity: 0.6,
     };
     let building = {
@@ -85,7 +93,19 @@ function make_styles() {
         fillOpacity: 0.6,
         fillColor: "#cca",
         stroke: false,
+    };
+    let paths = {
+        color: '#000',
+        opacity: 0.5,
         weight: 1,
+        dashArray: "1 3",
+    };
+    let railways = {
+        color: '#642',
+        opacity: 0.6,
+        weight: 2.5,
+        lineCap: "butt",
+        dashArray: "1 1.5",
     };
     return {
         county: Object.assign(boundary, { fillColor: '#f8f4f2' }),
@@ -94,17 +114,18 @@ function make_styles() {
         river: water,
         water: water,
         pond: water,
-        basin: water,
         wetland: wetland,
         leisure: leisure,
+        cemetery: cemetery,
         retail: retail,
-        motorway: { color: "#ffd9a9", weight: 5 },
+        motorway: { color: "#ffd9a9", weight: 3 },
         trunk: { color: "#ffe0a9" },
         primary: { color: "#ffeaa9" },
         secondary: { color: "#fff4a9" },
-        tertiary: { color: "#ffffa9", weight: 2 },
-        roads: { color: "#eee", weight: 1.5 },
-        paths: { color: "#333", weight: 1, dashArray: "1 3" },
+        tertiary: { color: "#ffffa9" },
+        roads: { color: "#eee", weight: 2 },
+        paths: paths,
+        railways: railways,
         building: building,
         parking: parking,
         segments: segment_style,
