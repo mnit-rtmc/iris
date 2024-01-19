@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2024  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,14 +17,20 @@ package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Color;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.WeatherSensor;
+import us.mn.state.dot.tms.client.ToolTipBuilder;
+import us.mn.state.dot.tms.client.map.MapObject;
 import us.mn.state.dot.tms.client.map.Style;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
+import us.mn.state.dot.tms.units.Temperature;
 
 /**
  * Camera theme provides styles for cameras.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public class CameraTheme extends ProxyTheme<Camera> {
 
@@ -67,4 +74,22 @@ public class CameraTheme extends ProxyTheme<Camera> {
 		addStyle(ACTIVE);
 		addStyle(ALL);
 	}
+
+	/** Get tooltip text for the given map object */
+	@Override
+	public String getTip(MapObject o) {
+		Camera p = manager.findProxy(o);
+		if (p == null)
+			return null;
+		String desc = manager.getDescription(p);
+		String ptzInfo = CameraHelper.getPtzInfo(p);
+		if (ptzInfo == null)
+			return desc;
+		ToolTipBuilder ttb = new ToolTipBuilder();
+		ttb.addLine(desc);
+		ttb.setLast();
+		ttb.addLine(ptzInfo);
+		return ttb.get();
+	}
+
 }

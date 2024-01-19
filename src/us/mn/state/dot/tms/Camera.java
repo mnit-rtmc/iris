@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2022-2024  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +19,7 @@ package us.mn.state.dot.tms;
  * Camera for monitoring roadway conditions.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public interface Camera extends Device {
 
@@ -95,4 +97,19 @@ public interface Camera extends Device {
 
 	/** Get the camera template */
 	CameraTemplate getCameraTemplate();
+
+	/** Save the current SONAR username as the
+	 *  most recent PTZ user and the current 
+	 *  Epoch timestamp as the PTZ timestamp. */
+	void savePtzInfo();
+
+	/** Get name of last user to attempt a camera motion
+	 *  (PTZ or camera preset-recall).
+	 *  Returns empty string if no attempt has been made. */
+	String getPtzUser();
+
+	/** Get Epoch timestamp when latest camera motion
+	 *  (PTZ or camera preset-recall) was attempted.
+	 *  Returns zero if no attempt has been made. */
+	long getPtzTimestamp();
 }
