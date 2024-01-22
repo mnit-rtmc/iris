@@ -487,6 +487,7 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
 fn handle_input_ev(target: Element) {
     let id = target.id();
     match id.as_str() {
+        "sb_fullscreen" => Doc::get().request_fullscreen(),
         "sb_search" | "sb_state" => search_list(),
         "sb_resource" => {
             handle_sb_resource_ev(
@@ -546,9 +547,6 @@ fn handle_button_click_ev(target: &Element) {
     let id = target.id();
     if id == "ob_login" {
         spawn_local(handle_login());
-        return;
-    } else if id == "sb_fullscreen" {
-        Doc::get().request_fullscreen();
         return;
     }
     let cs = STATE.with(|rc| rc.borrow().selected_card.clone());
