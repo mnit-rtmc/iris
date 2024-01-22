@@ -229,9 +229,17 @@ impl Doc {
             .ok()
     }
 
-    /// Request the document body to be full screen
-    pub fn request_fullscreen(&self) {
-        self.0.body().unwrap_throw().request_fullscreen().unwrap_throw();
+    /// Request the document to toggle full screen
+    pub fn toggle_fullscreen(&self) {
+        if self.0.fullscreen_element().is_none() {
+            self.0
+                .document_element()
+                .unwrap_throw()
+                .request_fullscreen()
+                .unwrap_throw();
+        } else {
+            self.0.exit_fullscreen();
+        }
     }
 }
 
