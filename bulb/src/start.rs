@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -546,6 +546,9 @@ fn handle_button_click_ev(target: &Element) {
     let id = target.id();
     if id == "ob_login" {
         spawn_local(handle_login());
+        return;
+    } else if id == "sb_fullscreen" {
+        Doc::get().request_fullscreen();
         return;
     }
     let cs = STATE.with(|rc| rc.borrow().selected_card.clone());
