@@ -1,6 +1,6 @@
 // segments.rs
 //
-// Copyright (C) 2019-2023  Minnesota Department of Transportation
+// Copyright (C) 2019-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,9 +14,9 @@
 //
 use crate::fetcher::create_client;
 use crate::files::AtomicFile;
-use crate::geo::{WebMercatorPos, Wgs84Pos};
 use crate::Result;
-use pointy::{Float, Pt};
+use mvt::{WebMercatorPos, Wgs84Pos};
+use pointy::Pt;
 use postgis::ewkb::{LineString, Point, Polygon};
 use postgres::types::ToSql;
 use postgres::{Client, Row, Statement, Transaction};
@@ -617,13 +617,13 @@ impl<'a> Segments<'a> {
     fn create_way(&self, poly: &[(Pt<f64>, Pt<f64>)]) -> Polygon {
         let mut points = vec![];
         for (vtx, _) in poly {
-            points.push(Point::new(vtx.x(), vtx.y(), None));
+            points.push(Point::new(vtx.x, vtx.y, None));
         }
         for (_, vtx) in poly.iter().rev() {
-            points.push(Point::new(vtx.x(), vtx.y(), None));
+            points.push(Point::new(vtx.x, vtx.y, None));
         }
         if let Some((vtx, _)) = poly.iter().next() {
-            points.push(Point::new(vtx.x(), vtx.y(), None));
+            points.push(Point::new(vtx.x, vtx.y, None));
         }
         let mut linestring = LineString::new();
         linestring.points = points;
@@ -649,7 +649,7 @@ fn road_class_zoom(r_class: i16, zoom: i32) -> bool {
 }
 
 /// Create normal vectors for a slice of points
-fn create_norms<T: Float>(pts: &[Pt<T>]) -> Vec<Pt<T>> {
+fn create_norms(pts: &[Pt<f64>]) -> Vec<Pt<f64>> {
     let mut norms = vec![];
     for i in 0..pts.len() {
         let upstream = vector_upstream(pts, i);
@@ -666,7 +666,7 @@ fn create_norms<T: Float>(pts: &[Pt<T>]) -> Vec<Pt<T>> {
 }
 
 /// Get vector from upstream point to current point
-fn vector_upstream<T: Float>(pts: &[Pt<T>], i: usize) -> Option<Pt<T>> {
+fn vector_upstream(pts: &[Pt<f64>], i: usize) -> Option<Pt<f64>> {
     let current = pts[i];
     for up in pts[0..i].iter().rev() {
         if *up != current {
@@ -677,7 +677,7 @@ fn vector_upstream<T: Float>(pts: &[Pt<T>], i: usize) -> Option<Pt<T>> {
 }
 
 /// Get vector from current point to downstream point
-fn vector_downstream<T: Float>(pts: &[Pt<T>], i: usize) -> Option<Pt<T>> {
+fn vector_downstream(pts: &[Pt<f64>], i: usize) -> Option<Pt<f64>> {
     let current = pts[i];
     for down in pts[i + 1..].iter() {
         if *down != current {

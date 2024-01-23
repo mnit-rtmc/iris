@@ -11,9 +11,10 @@ base64 = "0.13"
 fstr = "0.2"
 gift = "0.10"
 log = "0.4"
+mvt = "0.9"
 ntcip = { workspace = true }
 pix = "0.13"
-pointy = "0.3"
+pointy = "0.6"
 postgres = "0.19"
 postgis = "0.9"
 rendzina = { path = "../rendzina" }
