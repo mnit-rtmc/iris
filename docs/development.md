@@ -106,4 +106,4 @@ their operands by a space.
 [Bug reports]: https://github.com/mnit-rtmc/iris/issues
 [Fedora]: http://fedoraproject.org
 [pull request]: https://github.com/mnit-rtmc/iris/pulls
-[web-based user interface]: web_ui.html
+[web-based user interface]: https://github.com/mnit-rtmc/iris/issues/101
