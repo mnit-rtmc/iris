@@ -58,8 +58,10 @@ public class DeviceService extends Service {
 	}
 
 	/** Gets a service address by its namespace */
-	public String getServiceAddr(String namespace) {
-		String servicesRes = getServices();
+	public String getServiceAddr(String namespace, String servicesRes) {
+		if (servicesRes == null || servicesRes.isEmpty()) {
+			servicesRes = getServices();
+		}
 		Document servicesDoc = DOMUtils.getDocument(servicesRes);
 
 		NodeList services = servicesDoc.getElementsByTagNameNS("*", "Service");
@@ -76,18 +78,18 @@ public class DeviceService extends Service {
 	}
 
 	/** Get the PTZ binding address */
-	public String getPTZBinding() {
-		return getServiceAddr("http://www.onvif.org/ver20/ptz/wsdl");
+	public String getPTZBinding(String services) {
+		return getServiceAddr("http://www.onvif.org/ver20/ptz/wsdl", services);
 	}
 
 	/** Get the media binding address */
-	public String getMediaBinding() {
-		return getServiceAddr("http://www.onvif.org/ver10/media/wsdl");
+	public String getMediaBinding(String services) {
+		return getServiceAddr("http://www.onvif.org/ver10/media/wsdl", services);
 	}
 
 	/** Get the imaging binding address */
-	public String getImagingBinding() {
-		return getServiceAddr("http://www.onvif.org/ver20/imaging/wsdl");
+	public String getImagingBinding(String services) {
+		return getServiceAddr("http://www.onvif.org/ver20/imaging/wsdl", services);
 	}
 
 	/** Document builder function for GetScopes */

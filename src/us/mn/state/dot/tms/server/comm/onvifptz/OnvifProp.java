@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.ArrayList;
 
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
@@ -49,11 +48,6 @@ abstract public class OnvifProp extends ControllerProperty {
 	 */
 	List<String[]> cmds;
 
-	/** Create a new Onvif property */
-	protected OnvifProp() {
-		cmds = new ArrayList<String[]>();
-	}
-
 	/** Logger method */
 	protected void log(String s) {
 		OnvifPTZPoller.slog("PTZCommandProp:" + s);
@@ -72,12 +66,14 @@ abstract public class OnvifProp extends ControllerProperty {
 
 		// create each service (device service binding specified by ONVIF standard)
 		DeviceService dev = DeviceService.getDeviceService(url + "/onvif/device_service", user, pass);
-		PTZService ptz = PTZService.getPTZService(dev.getPTZBinding(), user, pass);
-		MediaService media = MediaService.getMediaService(dev.getMediaBinding(), user, pass);
-		ImagingService img = ImagingService.getImagingService(dev.getImagingBinding(), user, pass);
+		// only need to get services once, then read all bindings from that
+		String services = dev.getServices();
+		PTZService ptz = PTZService.getPTZService(dev.getPTZBinding(services), user, pass);
+		MediaService media = MediaService.getMediaService(dev.getMediaBinding(services), user, pass);
+		ImagingService img = ImagingService.getImagingService(dev.getImagingBinding(services), user, pass);
 
 		String mediaProfile = null, videoSource = null;
-		int mediaWidth = 0, videoWidth = 0;  // to find maximum values
+		int mediaWidth = 0, videoWidth = 0;  // to find largest source
 
 		// Should contain all necessary tokens
 		Document getProfilesRes = DOMUtils.getDocument(media.getProfiles());
