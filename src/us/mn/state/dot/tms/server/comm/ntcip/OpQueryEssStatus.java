@@ -326,12 +326,13 @@ public class OpQueryEssStatus extends OpEss {
 
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			// Note: this object was introduced in V2
+			// Note: these objects were introduced in V2
 			mess.add(pr.ice_or_water_depth);
-			// Note: essSurfaceConductivityV2 could be polled here
+			mess.add(pr.surface_conductivity_v2);
 			try {
 				mess.queryProps();
 				logQuery(pr.ice_or_water_depth);
+				logQuery(pr.surface_conductivity_v2);
 				return new QueryPavementRowV4(pr);
 			}
 			catch (NoSuchName e) {

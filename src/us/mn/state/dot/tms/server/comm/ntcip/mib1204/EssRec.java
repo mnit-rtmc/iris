@@ -109,6 +109,7 @@ public class EssRec {
 				? ss.toString()
 				: SurfaceStatus.undefined.toString());
 			ws.setSurfFreezeTempNotify(row.getFreezePointC());
+			ws.setSurfCondV2Notify(row.getSurfCondV2());
 		} else {
 			ws.setPvmtSurfTempNotify(null);
 			ws.setSurfTempNotify(null);
