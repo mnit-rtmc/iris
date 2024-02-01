@@ -1,6 +1,6 @@
 // sonar.rs
 //
-// Copyright (C) 2021-2023  Minnesota Department of Transportation
+// Copyright (C) 2021-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,23 +12,23 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use async_std::io;
-use async_std::net::{TcpStream, ToSocketAddrs};
-use async_std::prelude::*;
-use async_tls::{client::TlsStream, TlsConnector};
-use log::{info, warn};
-use rustls::{
-    Certificate, ClientConfig, RootCertStore, ServerCertVerified,
-    ServerCertVerifier, TLSError,
+use rustls::client::danger::{
+    HandshakeSignatureValid, ServerCertVerified, ServerCertVerifier,
 };
+use rustls::pki_types::{CertificateDer, ServerName, UnixTime};
+use rustls::{DigitallySignedStruct, SignatureScheme};
+use std::net::ToSocketAddrs;
 use std::sync::Arc;
 use std::time::Duration;
-use thiserror::Error;
-use webpki::DNSNameRef;
+use tokio::io::{self, AsyncReadExt, AsyncWriteExt, ErrorKind};
+use tokio::net::TcpStream;
+use tokio::time::timeout;
+use tokio_rustls::client::TlsStream;
+use tokio_rustls::TlsConnector;
 
 /// Sonar protocol error
-#[derive(Debug, Error)]
-pub enum SonarError {
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
     /// Unexpected response to a message
     #[error("unexpected response")]
     UnexpectedResponse,
@@ -36,18 +36,6 @@ pub enum SonarError {
     /// Unexpected message received
     #[error("unexpected message")]
     UnexpectedMessage,
-
-    /// Not modified
-    #[error("not modified")]
-    NotModified,
-
-    /// Invalid JSON error
-    #[error("Invalid JSON")]
-    InvalidJson,
-
-    /// Invalid name (too long, invalid characters)
-    #[error("invalid name")]
-    InvalidName,
 
     /// Invalid value (invalid characters, etc)
     #[error("invalid value")]
@@ -65,38 +53,76 @@ pub enum SonarError {
     #[error("not found")]
     NotFound,
 
-    /// Unauthorized
-    #[error("unauthorized")]
-    Unauthorized,
+    /// Timed out
+    #[error("timed out")]
+    TimedOut,
 
     /// I/O error
     #[error("I/O {0}")]
     IO(#[from] std::io::Error),
-
-    /// Serde JSON error
-    #[error("Serialization error")]
-    SerdeJson(#[from] serde_json::Error),
-
-    /// Postgres error
-    #[error("Postgres {0}")]
-    Postgres(#[from] postgres::Error),
-
-    /// R2D2 error
-    #[error("R2D2 {0}")]
-    R2d2(#[from] r2d2::Error),
-
-    /// System time error
-    #[error("Invalid time {0}")]
-    SystemTime(#[from] std::time::SystemTimeError),
 }
 
 /// Sonar result
-pub type Result<T> = std::result::Result<T, SonarError>;
+pub type Result<T> = std::result::Result<T, Error>;
 
 /// TLS certificate verifier for IRIS server
+#[derive(Debug)]
 struct Verifier {}
 
-impl SonarError {
+impl ServerCertVerifier for Verifier {
+    fn verify_server_cert(
+        &self,
+        _: &CertificateDer,
+        _: &[CertificateDer],
+        _: &ServerName,
+        _: &[u8],
+        _: UnixTime,
+    ) -> std::result::Result<ServerCertVerified, rustls::Error> {
+        // NOTE: we are *NOT* checking the server cert here!  This is only
+        //       secure when graft is running on the same host as IRIS.
+        Ok(ServerCertVerified::assertion())
+    }
+
+    fn verify_tls12_signature(
+        &self,
+        _: &[u8],
+        _: &CertificateDer<'_>,
+        _: &DigitallySignedStruct,
+    ) -> std::result::Result<HandshakeSignatureValid, rustls::Error> {
+        Ok(HandshakeSignatureValid::assertion())
+    }
+
+    fn verify_tls13_signature(
+        &self,
+        _: &[u8],
+        _: &CertificateDer<'_>,
+        _: &DigitallySignedStruct,
+    ) -> std::result::Result<HandshakeSignatureValid, rustls::Error> {
+        Ok(HandshakeSignatureValid::assertion())
+    }
+
+    fn supported_verify_schemes(&self) -> Vec<SignatureScheme> {
+        use SignatureScheme::*;
+        [
+            RSA_PKCS1_SHA1,
+            RSA_PKCS1_SHA256,
+            ECDSA_NISTP256_SHA256,
+            RSA_PKCS1_SHA384,
+            ECDSA_NISTP384_SHA384,
+            RSA_PKCS1_SHA512,
+            ECDSA_NISTP521_SHA512,
+            RSA_PSS_SHA256,
+            RSA_PSS_SHA384,
+            RSA_PSS_SHA512,
+            ED25519,
+            ED448,
+        ]
+        .into()
+    }
+}
+
+impl Error {
+    /// Parse a SHOW message received from server
     fn parse_show(msg: &str) -> Self {
         // gross, but no point in changing SHOW messages now!
         let msg = msg.to_lowercase();
@@ -122,30 +148,16 @@ impl SonarError {
         {
             Self::Conflict
         } else {
-            warn!("SHOW {}", msg);
+            log::warn!("SHOW {}", msg);
             Self::UnexpectedMessage
         }
-    }
-}
-
-impl ServerCertVerifier for Verifier {
-    fn verify_server_cert(
-        &self,
-        _: &RootCertStore,
-        _: &[Certificate],
-        _: DNSNameRef,
-        _: &[u8],
-    ) -> std::result::Result<ServerCertVerified, TLSError> {
-        // NOTE: we are *NOT* checking the server cert here!  This is only
-        //       secure when graft is running on the same host as IRIS.
-        Ok(ServerCertVerified::assertion())
     }
 }
 
 /// Sonar message
 #[allow(dead_code)]
 #[derive(Debug)]
-pub enum Message<'a> {
+enum Message<'a> {
     /// Client login request
     Login(&'a str, &'a str),
 
@@ -179,10 +191,15 @@ pub enum Message<'a> {
 
 /// Connection to a sonar server
 pub struct Connection {
+    /// TLS encrypted stream
     tls_stream: TlsStream<TcpStream>,
+    /// Network timeout
     timeout: Duration,
-    buf: Vec<u8>,
+    /// Received data buffer
+    rx_buf: Vec<u8>,
+    /// Offset into buffer
     offset: usize,
+    /// Count of bytes in buffer
     count: usize,
 }
 
@@ -286,20 +303,25 @@ impl Connection {
     /// Create a new connection to a sonar server
     pub async fn new(host: &str, port: u16) -> Result<Self> {
         let addr = (host, port)
-            .to_socket_addrs()
-            .await?
+            .to_socket_addrs()?
             .next()
-            .ok_or_else(|| io::Error::from(io::ErrorKind::NotFound))?;
+            .ok_or_else(|| io::Error::from(ErrorKind::NotFound))?;
         let tcp_stream = TcpStream::connect(&addr).await?;
-        let mut cfg = ClientConfig::new();
-        cfg.dangerous()
-            .set_certificate_verifier(Arc::new(Verifier {}));
+        let cfg = rustls::ClientConfig::builder()
+            .dangerous()
+            .with_custom_certificate_verifier(Arc::new(Verifier {}))
+            .with_no_client_auth();
         let connector = TlsConnector::from(Arc::new(cfg));
-        let tls_stream = connector.connect(host, tcp_stream).await?;
+        let domain = ServerName::try_from(host)
+            .map_err(|_| {
+                io::Error::new(io::ErrorKind::InvalidInput, "invalid dnsname")
+            })?
+            .to_owned();
+        let tls_stream = connector.connect(domain, tcp_stream).await?;
         Ok(Connection {
             tls_stream,
             timeout: Duration::from_secs(5),
-            buf: vec![0; 32768],
+            rx_buf: vec![0; 32_768],
             offset: 0,
             count: 0,
         })
@@ -307,12 +329,14 @@ impl Connection {
 
     /// Send a message to the server
     pub async fn send(&mut self, req: &[u8]) -> Result<()> {
-        io::timeout(self.timeout, self.tls_stream.write_all(req)).await?;
-        Ok(())
+        match timeout(self.timeout, self.tls_stream.write_all(req)).await {
+            Ok(res) => Ok(res?),
+            Err(_e) => Err(Error::TimedOut),
+        }
     }
 
     /// Receive a message from the server
-    pub async fn recv<F>(&mut self, mut callback: F) -> Result<()>
+    async fn recv<F>(&mut self, mut callback: F) -> Result<()>
     where
         F: FnMut(Message) -> Result<()>,
     {
@@ -323,28 +347,29 @@ impl Connection {
                     self.consume(c);
                     return r;
                 }
-                None => io::timeout(self.timeout, self.read()).await?,
+                None => match timeout(self.timeout, self.read()).await {
+                    Ok(res) => res?,
+                    Err(_e) => return Err(Error::TimedOut),
+                },
             }
         }
     }
 
     /// Check for an error message from the server
     async fn check_error(&mut self, ms: u64) -> Result<()> {
-        match io::timeout(Duration::from_millis(ms), self.read()).await {
-            Err(ref e) if e.kind() == io::ErrorKind::TimedOut => Ok(()),
-            Err(e) => Err(e),
-            Ok(()) => Ok(()),
-        }?;
+        if let Ok(res) = timeout(Duration::from_millis(ms), self.read()).await {
+            res?;
+        }
         match Message::decode(self.received()) {
-            Some((Message::Show(txt), _)) => Err(SonarError::parse_show(txt)),
-            Some((_res, _c)) => Err(SonarError::UnexpectedResponse),
+            Some((Message::Show(txt), _)) => Err(Error::parse_show(txt)),
+            Some((_res, _c)) => Err(Error::UnexpectedResponse),
             None => Ok(()),
         }
     }
 
     /// Get buffer of received data
     fn received(&self) -> &[u8] {
-        &self.buf[self.offset..self.offset + self.count]
+        &self.rx_buf[self.offset..self.offset + self.count]
     }
 
     /// Consume buffered data
@@ -361,7 +386,7 @@ impl Connection {
     /// Read data from the server
     async fn read(&mut self) -> io::Result<()> {
         let offset = self.offset;
-        self.count += self.tls_stream.read(&mut self.buf[offset..]).await?;
+        self.count += self.tls_stream.read(&mut self.rx_buf[offset..]).await?;
         Ok(())
     }
 
@@ -373,8 +398,8 @@ impl Connection {
         self.send(&buf[..]).await?;
         self.recv(|m| match m {
             Message::Type("") => Ok(()),
-            Message::Show(txt) => Err(SonarError::parse_show(txt)),
-            _ => Err(SonarError::UnexpectedMessage),
+            Message::Show(txt) => Err(Error::parse_show(txt)),
+            _ => Err(Error::UnexpectedMessage),
         })
         .await?;
         self.recv(|m| match m {
@@ -382,10 +407,10 @@ impl Connection {
                 msg.push_str(txt);
                 Ok(())
             }
-            _ => Err(SonarError::UnexpectedMessage),
+            _ => Err(Error::UnexpectedMessage),
         })
         .await?;
-        info!("Logged in from {}", msg);
+        log::info!("Logged in from {}", msg);
         Ok(msg)
     }
 
@@ -443,8 +468,8 @@ impl Connection {
                     done = true;
                     Ok(())
                 }
-                Message::Show(msg) => Err(SonarError::parse_show(msg)),
-                _ => Err(SonarError::UnexpectedMessage),
+                Message::Show(msg) => Err(Error::parse_show(msg)),
+                _ => Err(Error::UnexpectedMessage),
             })
             .await?;
         }

@@ -1,6 +1,6 @@
 // state.rs
 //
-// Copyright (C) 2021-2023  Minnesota Department of Transportation
+// Copyright (C) 2021-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,16 +12,16 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::error::Result;
 use crate::query::PERMISSION;
-use crate::sonar::{Result, SonarError};
-use postgres::row::Row;
-use postgres::types::ToSql;
-use postgres::NoTls;
-use r2d2::Pool;
-use r2d2_postgres::PostgresConnectionManager;
+use crate::sonar::Error as SonarError;
+use bb8::Pool;
+use bb8_postgres::PostgresConnectionManager;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
+use tokio_postgres::types::ToSql;
+use tokio_postgres::{NoTls, Row};
 
 /// Permission
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -38,7 +38,7 @@ type PostgresPool = Pool<PostgresConnectionManager<NoTls>>;
 
 /// Application state for postgres
 #[derive(Clone)]
-pub struct State {
+pub struct AppState {
     /// Db connection pool
     pool: PostgresPool,
 }
@@ -56,13 +56,14 @@ impl Permission {
 }
 
 /// Make postgres pool
-fn make_pool() -> Result<PostgresPool> {
+async fn make_pool() -> Result<PostgresPool> {
     let username = whoami::username();
     // Format path for unix domain socket -- not worth using percent_encode
     let uds = format!("postgres://{username}@%2Frun%2Fpostgresql/tms");
     let config = uds.parse()?;
     let manager = PostgresConnectionManager::new(config, NoTls);
-    Ok(r2d2::Pool::new(manager)?)
+    let pool = Pool::builder().build(manager).await?;
+    Ok(pool)
 }
 
 /// Create one permission
@@ -126,46 +127,53 @@ AND (\
 ORDER BY access_n DESC \
 LIMIT 1";
 
-impl State {
+impl AppState {
     /// Create new postgres application state
-    pub fn new() -> Result<Self> {
-        let pool = make_pool()?;
-        Ok(State { pool })
+    pub async fn new() -> Result<Self> {
+        let pool = make_pool().await?;
+        Ok(AppState { pool })
     }
 
     /// Get permission by ID
-    pub fn permission(&self, id: i32) -> Result<Permission> {
-        let mut client = self.pool.get()?;
+    pub async fn permission(&self, id: i32) -> Result<Permission> {
+        let client = self.pool.get().await?;
         let row = client
             .query_one(PERMISSION, &[&id])
+            .await
             .map_err(|_e| SonarError::NotFound)?;
         Ok(Permission::from_row(row))
     }
 
     /// Create a permission
-    pub fn permission_post(&self, role: &str, resource_n: &str) -> Result<()> {
+    pub async fn permission_post(
+        &self,
+        role: &str,
+        resource_n: &str,
+    ) -> Result<()> {
         let access_n = 1; // View is a good default
-        let mut client = self.pool.get()?;
+        let client = self.pool.get().await?;
         let rows = client
             .execute(INSERT_PERM, &[&role, &resource_n, &access_n])
+            .await
             .map_err(|_e| SonarError::InvalidValue)?;
         if rows == 1 {
             Ok(())
         } else {
-            Err(SonarError::InvalidValue)
+            Err(SonarError::InvalidValue.into())
         }
     }
 
     /// Patch permission
-    pub fn permission_patch(
+    pub async fn permission_patch(
         &self,
         id: i32,
         mut obj: Map<String, Value>,
     ) -> Result<()> {
-        let mut client = self.pool.get()?;
-        let mut transaction = client.transaction()?;
+        let mut client = self.pool.get().await?;
+        let transaction = client.transaction().await?;
         let row = transaction
             .query_one(PERMISSION, &[&id])
+            .await
             .map_err(|_e| SonarError::NotFound)?;
         let Permission {
             id,
@@ -195,54 +203,60 @@ impl State {
                 UPDATE_PERM,
                 &[&id, &role, &resource_n, &hashtag, &access_n],
             )
+            .await
             .map_err(|_e| SonarError::Conflict)?;
         if rows == 1 {
-            transaction.commit()?;
+            transaction.commit().await?;
             Ok(())
         } else {
-            Err(SonarError::Conflict)
+            Err(SonarError::Conflict.into())
         }
     }
 
     /// Delete permission by ID
-    pub fn permission_delete(&self, id: i32) -> Result<()> {
-        let mut client = self.pool.get()?;
-        let rows = client.execute(DELETE_PERM, &[&id])?;
+    pub async fn permission_delete(&self, id: i32) -> Result<()> {
+        let client = self.pool.get().await?;
+        let rows = client.execute(DELETE_PERM, &[&id]).await?;
         if rows == 1 {
             Ok(())
         } else {
-            Err(SonarError::NotFound)
+            Err(SonarError::NotFound.into())
         }
     }
 
     /// Get permissions for a user
-    pub fn permissions_user(&self, user: &str) -> Result<Vec<Permission>> {
-        let mut perms = vec![];
-        let mut client = self.pool.get()?;
-        for row in client.query(QUERY_ACCESS, &[&user])? {
+    pub async fn permissions_user(
+        &self,
+        user: &str,
+    ) -> Result<Vec<Permission>> {
+        let mut perms = Vec::new();
+        let client = self.pool.get().await?;
+        for row in client.query(QUERY_ACCESS, &[&user]).await? {
             perms.push(Permission::from_row(row));
         }
         Ok(perms)
     }
 
     /// Get user permission for a resource
-    pub fn permission_user_res(
+    pub async fn permission_user_res(
         &self,
         user: &str,
         res: &str,
         name: Option<&str>,
     ) -> Result<Permission> {
-        let mut client = self.pool.get()?;
+        let client = self.pool.get().await?;
         match name {
             Some(name) => {
                 let row = client
                     .query_one(QUERY_PERMISSION_NAMED, &[&user, &res, &name])
+                    .await
                     .map_err(|_e| SonarError::Forbidden)?;
                 Ok(Permission::from_row(row))
             }
             None => {
                 let row = client
                     .query_one(QUERY_PERMISSION, &[&user, &res])
+                    .await
                     .map_err(|_e| SonarError::Forbidden)?;
                 Ok(Permission::from_row(row))
             }
@@ -250,30 +264,32 @@ impl State {
     }
 
     /// Query one row by primary key
-    pub fn get_by_pkey<PK: ToSql + Sync>(
+    pub async fn get_by_pkey<PK: ToSql + Sync>(
         &self,
         sql: &'static str,
         pkey: PK,
     ) -> Result<String> {
-        let mut client = self.pool.get()?;
+        let client = self.pool.get().await?;
         let query = format!("SELECT row_to_json(r)::text FROM ({sql}) r");
         let row = client
             .query_one(&query, &[&pkey])
+            .await
             .map_err(|_e| SonarError::NotFound)?;
         Ok(row.get::<usize, String>(0))
     }
 
     /// Query rows as an array by primary key
-    pub fn get_array_by_pkey<PK: ToSql + Sync>(
+    pub async fn get_array_by_pkey<PK: ToSql + Sync>(
         &self,
         sql: &'static str,
         pkey: PK,
     ) -> Result<String> {
-        let mut client = self.pool.get()?;
+        let client = self.pool.get().await?;
         let query =
             format!("SELECT COALESCE(json_agg(r), '[]')::text FROM ({sql}) r");
         let row = client
             .query_one(&query, &[&pkey])
+            .await
             .map_err(|_e| SonarError::NotFound)?;
         Ok(row.get::<usize, String>(0))
     }

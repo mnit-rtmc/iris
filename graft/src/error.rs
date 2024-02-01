@@ -1,4 +1,4 @@
-// lib.rs
+// error.rs
 //
 // Copyright (C) 2021-2024  Minnesota Department of Transportation
 //
@@ -12,9 +12,30 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-#![forbid(unsafe_code)]
+use crate::sonar::Error as SonarError;
 
-pub mod error;
-pub mod query;
-pub mod sonar;
-pub mod state;
+/// Graft error
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    /// Sonar error
+    #[error("Sonar {0}")]
+    Sonar(#[from] SonarError),
+
+    /// Postgres error
+    #[error("Postgres {0}")]
+    Postgres(#[from] tokio_postgres::Error),
+
+    /// BB8 run error
+    #[error("BB8 run error")]
+    Bb8,
+}
+
+impl<E> From<bb8::RunError<E>> for Error {
+    fn from(_err: bb8::RunError<E>) -> Self {
+        // FIXME: do the needful
+        Self::Bb8
+    }
+}
+
+/// Graft result
+pub type Result<T> = std::result::Result<T, Error>;
