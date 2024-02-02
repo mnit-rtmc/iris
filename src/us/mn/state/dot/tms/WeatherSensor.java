@@ -112,6 +112,9 @@ public interface WeatherSensor extends Device {
 	/** Get the subsurface temperature (null for missing) */
 	Integer getSubSurfTemp();
 
+	/** Get surface conductivity (V2) (null for missing) */
+	Integer getSurfCondV2();
+
 	/** Get the latest sample time stamp */
 	Long getStamp();
 }
