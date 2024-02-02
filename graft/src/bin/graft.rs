@@ -38,6 +38,7 @@ use serde_json::Value;
 use std::fmt;
 use std::io;
 use std::time::SystemTime;
+use tokio::net::TcpListener;
 
 /// Path for static files
 const STATIC_PATH: &str = "/var/www/html/iris/api";
@@ -203,7 +204,8 @@ async fn main() -> Result<()> {
         .merge(sonar_object_patch(state.clone()))
         .merge(sonar_object_delete(state.clone()));
     let app = Router::new().nest("/iris/api", app);
-    app.listen("127.0.0.1:3737").await?;
+    let listener = TcpListener::bind("127.0.0.1:3737").await?;
+    axum::serve(listener, app).await?;
     Ok(())
 }
 

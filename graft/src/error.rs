@@ -26,6 +26,10 @@ pub enum Error {
     #[error("Sonar {0}")]
     Sonar(#[from] SonarError),
 
+    /// IO error
+    #[error("IO {0}")]
+    Io(#[from] std::io::Error),
+
     /// Postgres error
     #[error("Postgres {0}")]
     Postgres(#[from] tokio_postgres::Error),
@@ -47,6 +51,7 @@ impl From<Error> for StatusCode {
         match err {
             Error::Unauthorized => StatusCode::UNAUTHORIZED,
             Error::Sonar(e) => e.into(),
+            Error::Io(_e) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Postgres(_e) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Bb8 => StatusCode::INTERNAL_SERVER_ERROR,
         }
