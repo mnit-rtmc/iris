@@ -12,6 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use http::StatusCode;
 use rustls::client::danger::{
     HandshakeSignatureValid, ServerCertVerified, ServerCertVerifier,
 };
@@ -29,13 +30,9 @@ use tokio_rustls::TlsConnector;
 /// Sonar protocol error
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    /// Unexpected response to a message
+    /// Unexpected response received
     #[error("unexpected response")]
     UnexpectedResponse,
-
-    /// Unexpected message received
-    #[error("unexpected message")]
-    UnexpectedMessage,
 
     /// Invalid value (invalid characters, etc)
     #[error("invalid value")]
@@ -60,6 +57,28 @@ pub enum Error {
     /// I/O error
     #[error("I/O {0}")]
     IO(#[from] std::io::Error),
+}
+
+impl From<Error> for StatusCode {
+    fn from(e: Error) -> Self {
+        match e {
+            Error::UnexpectedResponse => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::InvalidValue => StatusCode::BAD_REQUEST,
+            Error::Conflict => StatusCode::CONFLICT,
+            Error::Forbidden => StatusCode::FORBIDDEN,
+            Error::NotFound => StatusCode::NOT_FOUND,
+            Error::TimedOut => StatusCode::GATEWAY_TIMEOUT,
+            Error::IO(e) => {
+                if e.kind() == io::ErrorKind::NotFound {
+                    StatusCode::NOT_FOUND
+                } else if e.kind() == io::ErrorKind::TimedOut {
+                    StatusCode::GATEWAY_TIMEOUT
+                } else {
+                    StatusCode::INTERNAL_SERVER_ERROR
+                }
+            }
+        }
+    }
 }
 
 /// Sonar result
@@ -149,7 +168,7 @@ impl Error {
             Self::Conflict
         } else {
             log::warn!("SHOW {}", msg);
-            Self::UnexpectedMessage
+            Self::UnexpectedResponse
         }
     }
 }
@@ -399,7 +418,7 @@ impl Connection {
         self.recv(|m| match m {
             Message::Type("") => Ok(()),
             Message::Show(txt) => Err(Error::parse_show(txt)),
-            _ => Err(Error::UnexpectedMessage),
+            _ => Err(Error::UnexpectedResponse),
         })
         .await?;
         self.recv(|m| match m {
@@ -407,7 +426,7 @@ impl Connection {
                 msg.push_str(txt);
                 Ok(())
             }
-            _ => Err(Error::UnexpectedMessage),
+            _ => Err(Error::UnexpectedResponse),
         })
         .await?;
         log::info!("Logged in from {}", msg);
@@ -469,7 +488,7 @@ impl Connection {
                     Ok(())
                 }
                 Message::Show(msg) => Err(Error::parse_show(msg)),
-                _ => Err(Error::UnexpectedMessage),
+                _ => Err(Error::UnexpectedResponse),
             })
             .await?;
         }

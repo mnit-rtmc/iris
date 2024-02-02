@@ -25,7 +25,7 @@ use axum::{
 use convert_case::{Case, Casing};
 use core::time::Duration;
 use graft::query;
-use graft::sonar::{Connection, Result, Error as SonarError};
+use graft::sonar::{self, Connection};
 use graft::state::AppState;
 use http::header::HeaderName;
 use percent_encoding::percent_decode_str;
@@ -33,49 +33,12 @@ use rand::Rng;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
+use std::fmt;
 use std::io;
 use std::time::SystemTime;
 
 /// Path for static files
 const STATIC_PATH: &str = "/var/www/html/iris/api";
-
-/// Slice of (type/attribute) tuples requiring Operate or higher permission
-const OPERATE: &[(&str, &str)] = &[
-    ("beacon", "flashing"),
-    ("camera", "ptz"),
-    ("camera", "recall_preset"),
-    ("controller", "download"),
-    ("controller", "device_req"),
-    ("detector", "field_length"),
-    ("detector", "force_fail"),
-    ("dms", "msg_user"),
-    ("lane_marking", "deployed"),
-];
-
-/// Slice of (type/attribute) tuples requiring Manage or higher permission
-const MANAGE: &[(&str, &str)] = &[
-    ("beacon", "message"),
-    ("beacon", "notes"),
-    ("beacon", "preset"),
-    ("camera", "store_preset"),
-    ("comm_config", "timeout_ms"),
-    ("comm_config", "idle_disconnect_sec"),
-    ("comm_config", "no_response_disconnect_sec"),
-    ("comm_link", "poll_enabled"),
-    ("controller", "condition"),
-    ("controller", "notes"),
-    ("detector", "abandoned"),
-    ("detector", "notes"),
-    ("dms", "device_req"),
-    ("lane_marking", "notes"),
-    ("modem", "enabled"),
-    ("modem", "timeout_ms"),
-    ("role", "enabled"),
-    ("user", "enabled"),
-    ("weather_sensor", "site_id"),
-    ("weather_sensor", "alt_id"),
-    ("weather_sensor", "notes"),
-];
 
 /// Check for type/key pairs in PATCH first pass
 const PATCH_FIRST_PASS: &[(&str, &str)] = &[
@@ -107,98 +70,282 @@ struct AuthMap {
     password: String,
 }
 
-/// Sonar resource
-#[derive(Debug, Deserialize)]
-struct Resource {
-    type_n: String,
-    obj_n: Option<String>,
+/// Resource type
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum ResType {
+    Alarm,
+    Beacon,
+    CabinetStyle,
+    Camera,
+    CommConfig,
+    CommLink,
+    Controller,
+    ControllerIo,
+    Detector,
+    Dms,
+    FlowStream,
+    Font,
+    GateArm,
+    GateArmArray,
+    GeoLoc,
+    Gps,
+    Graphic,
+    LaneMarking,
+    Lcs,
+    LcsArray,
+    LcsIndication,
+    Modem,
+    MsgLine,
+    MsgPattern,
+    Permission,
+    RampMeter,
+    Role,
+    SignConfig,
+    SignDetail,
+    SignMessage,
+    TagReader,
+    User,
+    VideoMonitor,
+    WeatherSensor,
+    Word,
 }
 
-/// Trait to get HTTP status code from an error
-trait ErrorStatus {
-    fn status_code(&self) -> StatusCode;
-}
-
-impl ErrorStatus for io::Error {
-    fn status_code(&self) -> StatusCode {
-        if self.kind() == io::ErrorKind::NotFound {
-            StatusCode::NotFound
-        } else if self.kind() == io::ErrorKind::TimedOut {
-            StatusCode::GatewayTimeout
-        } else {
-            StatusCode::InternalServerError
-        }
-    }
-}
-
-impl ErrorStatus for SonarError {
-    fn status_code(&self) -> StatusCode {
+impl ResType {
+    /// Get resource type name
+    const fn type_n(self) -> &'static str {
+        use ResType::*;
         match self {
-            Self::NotModified => StatusCode::NotModified,
-            Self::InvalidName => StatusCode::BadRequest,
-            Self::InvalidJson => StatusCode::BadRequest,
-            Self::Unauthorized => StatusCode::Unauthorized,
-            Self::Forbidden => StatusCode::Forbidden,
-            Self::NotFound => StatusCode::NotFound,
-            Self::Conflict => StatusCode::Conflict,
-            Self::InvalidValue => StatusCode::UnprocessableEntity,
-            Self::IO(e) => e.status_code(),
-            _ => StatusCode::InternalServerError,
+            Alarm => "alarm",
+            Beacon => "beacon",
+            CabinetStyle => "cabinet_style",
+            Camera => "camera",
+            CommConfig => "comm_config",
+            CommLink => "comm_link",
+            Controller => "controller",
+            ControllerIo => "controller_io",
+            Detector => "detector",
+            Dms => "dms",
+            FlowStream => "flow_stream",
+            Font => "font",
+            GateArm => "gate_arm",
+            GateArmArray => "gate_arm_array",
+            GeoLoc => "geo_loc",
+            Gps => "gps",
+            Graphic => "graphic",
+            LaneMarking => "lane_marking",
+            Lcs => "lcs",
+            LcsArray => "lcs_array",
+            LcsIndication => "lcs_indication",
+            Modem => "modem",
+            MsgLine => "msg_line",
+            MsgPattern => "msg_pattern",
+            Permission => "permission",
+            RampMeter => "ramp_meter",
+            Role => "role",
+            SignConfig => "sign_config",
+            SignDetail => "sign_detail",
+            SignMessage => "sign_message",
+            TagReader => "tag_reader",
+            User => "user",
+            VideoMonitor => "video_monitor",
+            WeatherSensor => "weather_sensor",
+            Word => "word",
+        }
+    }
+
+    /// Get verifier resource type
+    fn verifier(&self) -> Self {
+        use ResType::*;
+        match self {
+            // Camera resources
+            FlowStream => Camera,
+            // DMS resources
+            Font | Graphic | MsgLine | MsgPattern | SignConfig | SignDetail
+            | SignMessage | Word => Dms,
+            // Gate arm resources
+            GateArmArray => GateArm,
+            // LCS resources
+            LcsArray | LcsIndication | LaneMarking => Lcs,
+            // associated controller
+            ControllerIo => Controller,
+            _ => self,
+        }
+    }
+
+    /// Get SQL query string
+    fn sql_query(self) -> &'static str {
+        use ResType::*;
+        match self {
+            Alarm => query::ALARM,
+            Beacon => query::BEACON,
+            CabinetStyle => query::CABINET_STYLE,
+            Camera => query::CAMERA,
+            CommConfig => query::COMM_CONFIG,
+            CommLink => query::COMM_LINK,
+            Controller => query::CONTROLLER,
+            ControllerIo => query::CONTROLLER_IO,
+            Detector => query::DETECTOR,
+            Dms => query::DMS,
+            FlowStream => query::FLOW_STREAM,
+            Font => query::FONT,
+            GateArm => query::GATE_ARM,
+            GateArmArray => query::GATE_ARM_ARRAY,
+            GeoLoc => query::GEO_LOC,
+            Gps => query::GPS,
+            Graphic => query::GRAPHIC,
+            LaneMarking => query::LANE_MARKING,
+            Lcs => "", // FIXME
+            LcsArray => query::LCS_ARRAY,
+            LcsIndication => query::LCS_INDICATION,
+            Modem => query::MODEM,
+            MsgLine => query::MSG_LINE,
+            MsgPattern => query::MSG_PATTERN,
+            Permission => query::PERMISSION,
+            RampMeter => query::RAMP_METER,
+            Role => query::ROLE,
+            SignConfig => query::SIGN_CONFIG,
+            SignDetail => query::SIGN_DETAIL,
+            SignMessage => query::SIGN_MSG,
+            TagReader => query::TAG_READER,
+            User => query::USER,
+            VideoMonitor => query::VIDEO_MONITOR,
+            WeatherSensor => query::WEATHER_SENSOR,
+            Word => query::WORD,
+        }
+    }
+
+    /// Get required access to update an attribute
+    fn access_attr(self, att: &str) -> Access {
+        use ResType::*;
+        match (self, att) {
+            (Beacon, "flashing")
+            | (Camera, "ptz")
+            | (Camera, "recall_preset")
+            | (Controller, "download")
+            | (Controller, "device_req")
+            | (Detector, "field_length")
+            | (Detector, "force_fail")
+            | (Dms, "msg_user")
+            | (LaneMarking, "deployed") => Access::Operate,
+            (Beacon, "message")
+            | (Beacon, "notes")
+            | (Beacon, "preset")
+            | (Camera, "store_preset")
+            | (CommConfig, "timeout_ms")
+            | (CommConfig, "idle_disconnect_sec")
+            | (CommConfig, "no_response_disconnect_sec")
+            | (CommLink, "poll_enabled")
+            | (Controller, "condition")
+            | (Controller, "notes")
+            | (Detector, "abandoned")
+            | (Detector, "notes")
+            | (Dms, "device_req")
+            | (LaneMarking, "notes")
+            | (Modem, "enabled")
+            | (Modem, "timeout_ms")
+            | (Role, "enabled")
+            | (User, "enabled")
+            | (WeatherSensor, "site_id")
+            | (WeatherSensor, "alt_id")
+            | (WeatherSensor, "notes") => Access::Manage,
+            _ => Access::Configure,
         }
     }
 }
+
+/// Graft error
+#[derive(Debug, thiserror::Error)]
+enum Error {
+    /// Unauthorized request
+    #[error("Unauthorized")]
+    Unauthorized,
+
+    /// Resource not modified
+    #[error("Not modified")]
+    NotModified,
+
+    /// Sonar error
+    #[error("Sonar {0}")]
+    Sonar(#[from] graft::sonar::Error),
+}
+
+impl From<Error> for StatusCode {
+    fn from(e: Error) -> Self {
+        match e {
+            Error::Unauthorized => StatusCode::UNAUTHORIZED,
+            Error::NotModified => StatusCode::NOT_MODIFIED,
+            Error::Sonar(e) => e.into(),
+        }
+    }
+}
+
+/// Graft result
+type Result<T> = std::result::Result<T, Error>;
 
 /// No-header response result
 type Resp0 = std::result::Result<StatusCode, StatusCode>;
 
 /// Single-header response result
-type Resp1<'a> = std::result::Result<((HeaderName, &'static str), &'a str), StatusCode>;
+type Resp1 =
+    std::result::Result<((HeaderName, &'static str), String), StatusCode>;
 
 fn html_resp(html: &str) -> Resp1 {
-    Ok((
-        (header::CONTENT_TYPE, "text/html"),
-        html,
-    ))
+    Ok(((header::CONTENT_TYPE, "text/html"), html.to_string()))
 }
 
-fn json_resp(json: &str) -> Resp1 {
-    Ok((
-        (header::CONTENT_TYPE, "application/json"),
-        json,
-    ))
+fn json_resp(json: Value) -> Resp1 {
+    Ok(((header::CONTENT_TYPE, "application/json"), json.to_string()))
 }
 
+/// Sonar resource
+#[derive(Debug)]
+struct Resource {
+    res_type: ResType,
+    obj_n: Option<String>,
+}
 
-impl std::fmt::Display for Resource {
-    
+impl fmt::Display for Resource {
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+    ) -> std::result::Result<(), fmt::Error> {
+        match self.obj_n {
+            Some(obj_n) => write!(f, "{}/{obj_n}", self.res_type),
+            None => write!(f, "{}", self.res_type),
+        }
+    }
 }
 
 impl Resource {
-    /// Get associated or dependent type name
-    fn type_name(&self) -> &str {
-        match self.type_n {
-            // Camera dependent resources
-            "flow_stream" => "camera",
-            // DMS dependent resources
-            "font" | "graphic" | "msg_line" | "msg_pattern" | "sign_config"
-            | "sign_detail" | "sign_message" | "word" => "dms",
-            // Gate arm dependent resources
-            "gate_arm_array" => "gate_arm",
-            // LCS dependent resources
-            "lcs_array" | "lcs_indication" | "lane_marking" => "lcs",
-            // associated controller
-            "controller_io" => "controller",
-            _ => self.type_n,
-        }
+    /// Create a resource from a type
+    const fn from_type(res_type: ResType) -> Self {
+        Resource { res_type }
+    }
+
+    /// Create a new resource
+    fn new(type_n: String) -> Result<Self> {
+        let res_type = ResType::try_from(type_n)
+            .map_err(|_e| sonar::Error::InvalidValue)?;
+        Ok(Resource {
+            res_type,
+            obj_n: None,
+        })
+    }
+
+    /// Add object name
+    fn obj(mut self, obj_n: String) -> Self {
+        self.obj_n = Some(obj_n);
+        self
     }
 
     /// Get object name
     fn obj_name(&self) -> Result<String> {
         let name = percent_decode_str(self.obj_n)
             .decode_utf8()
-            .or(Err(SonarError::InvalidName))?;
-        if name.len() > 64 || name.contains(invalid_char) || name.contains('/') {
-            Err(SonarError::InvalidName)
+            .or(Err(sonar::Error::InvalidValue))?;
+        if name.len() > 64 || name.contains(invalid_char) || name.contains('/')
+        {
+            Err(sonar::Error::InvalidValue)?
         } else {
             Ok(name.to_string())
         }
@@ -207,73 +354,31 @@ impl Resource {
     /// Make a Sonar name (with validation)
     fn make_name(&self, nm: &str) -> Result<String> {
         if nm.len() > 64 || nm.contains(invalid_char) || nm.contains('/') {
-            Err(SonarError::InvalidName)
+            Err(sonar::Error::InvalidValue)?
         } else {
-            Ok(format!("{}/{nm}", self.type_n))
+            Ok(format!("{}/{nm}", self.res_type.type_name()))
         }
     }
 
     /// Lookup authorized access for a resource
-    fn auth_access(&self, state: &AppState) -> Result<Access> {
+    async fn auth_access(
+        &self,
+        state: &AppState,
+        access: Access,
+    ) -> Result<Access> {
         let name = self.obj_name()?;
         let session = state.session();
-        let auth: AuthMap = session.get("auth").ok_or(SonarError::Unauthorized)?;
-        let perm = state.permission_user_res(&auth.username, self.type_name(), name)?;
-        Access::new(perm.access_n).ok_or(SonarError::Unauthorized)
-    }
-
-    /// Get SQL query string
-    fn sql_query(&self) -> &'static str {
-        match self.type_n {
-            "alarm" => query::ALARM,
-            "beacon" => query::BEACON,
-            "cabinet_style" => query::CABINET_STYLE,
-            "camera" => query::CAMERA,
-            "comm_config" => query::COMM_CONFIG,
-            "comm_link" => query::COMM_LINK,
-            "controller" => query::CONTROLLER,
-            "controller_io" => query::CONTROLLER_IO,
-            "detector" => query::DETECTOR,
-            "dms" => query::DMS,
-            "flow_stream" => query::FLOW_STREAM,
-            "font" => query::FONT,
-            "gate_arm" => query::GATE_ARM,
-            "gate_arm_array" => query::GATE_ARM_ARRAY,
-            "geo_loc" => query::GEO_LOC,
-            "gps" => query::GPS,
-            "graphic" => query::GRAPHIC,
-            "lane_marking" => query::LANE_MARKING,
-            "lcs_array" => query::LCS_ARRAY,
-            "lcs_indication" => query::LCS_INDICATION,
-            "modem" => query::MODEM,
-            "msg_line" => query::MSG_LINE,
-            "msg_pattern" => query::MSG_PATTERN,
-            "ramp_meter" => query::RAMP_METER,
-            "role" => query::ROLE,
-            "sign_config" => query::SIGN_CONFIG,
-            "sign_detail" => query::SIGN_DETAIL,
-            "sign_message" => query::SIGN_MSG,
-            "tag_reader" => query::TAG_READER,
-            "user" => query::USER,
-            "video_monitor" => query::VIDEO_MONITOR,
-            "weather_sensor" => query::WEATHER_SENSOR,
-            "word" => query::WORD,
-        }
+        let auth: AuthMap = session.get("auth").ok_or(Error::Unauthorized)?;
+        let perm = state
+            .permission_user_res(&auth.username, self.type_name(), name)
+            .await?;
+        let acc = Access::new(perm.access_n).ok_or(Error::Unauthorized)?;
+        acc.check(access)?;
+        Ok(acc)
     }
 }
 
 impl Access {
-    /// Get required access from type/att pair
-    fn from_type_key(tp_att: &(&'static str, &str)) -> Self {
-        if OPERATE.contains(tp_att) {
-            Access::Operate
-        } else if MANAGE.contains(tp_att) {
-            Access::Manage
-        } else {
-            Access::Configure
-        }
-    }
-
     /// Create access from level
     const fn new(level: i32) -> Option<Self> {
         match level {
@@ -300,7 +405,7 @@ impl Access {
         if self.level() >= rhs.level() {
             Ok(())
         } else {
-            Err(SonarError::Forbidden)
+            Err(graft::sonar::Error::Forbidden)?
         }
     }
 }
@@ -322,7 +427,7 @@ async fn main() -> Result<()> {
     let app = Router::new()
         .merge(login_post())
         .merge(access_get())
-        .route("/permission", post(permission_post))
+        .merge(permission_post(state.clone()))
         .route(
             "/permission/:id",
             get(permission_get)
@@ -330,14 +435,8 @@ async fn main() -> Result<()> {
                 .delete(permission_delete),
         )
         .merge(resource_file_get(state.clone()))
-        .merge(sonar_post)
-        .route(
-            "/controller_io/:name",
-            get(|req| {
-                sql_get_array("controller_io", query::CONTROLLER_IO, req)
-            }),
-        )
-        .merge(sql_record_get)
+        .merge(sonar_post(state.clone()))
+        .merge(sql_record_get(state.clone()))
         .merge(sonar_object_patch(state.clone()))
         .merge(sonar_object_delete(state.clone()));
     let app = Router::new().nest("/iris/api", app);
@@ -356,10 +455,10 @@ impl AuthMap {
 
 /// Handle `POST` to login page
 fn login_post() -> Router {
-    async fn handler<'a>(
+    async fn handler(
         Json(auth): Json<AuthMap>,
         State(state): State<AppState>,
-    ) -> Resp1<'a> {
+    ) -> Resp1 {
         log::info!("POST /login");
         auth.authenticate().await?;
         let session = state.session_mut();
@@ -372,49 +471,58 @@ fn login_post() -> Router {
 
 /// `GET` access permissions
 fn access_get() -> Router {
-    async fn handler<'a>(
-        State(state): State<AppState>,
-    ) -> Resp1<'a> {
+    async fn handler(State(state): State<AppState>) -> Resp1 {
         log::info!("GET /access");
         let session = state.session();
-        let auth: AuthMap = session.get("auth").ok_or(SonarError::Unauthorized)?;
+        let auth: AuthMap = session.get("auth").ok_or(Error::Unauthorized)?;
         let perms = state.permissions_user(&auth.username).await?;
-        let body = serde_json::to_value(perms)?.to_string();
-        json_resp(body)
+        match serde_json::to_value(perms) {
+            Ok(body) => json_resp(body),
+            Err(e) => Err(StatusCode::BAD_REQUEST),
+        }
     }
     Router::new().route("/login", post(handler))
 }
 
 /// `POST` one permission record
-async fn permission_post(
-    Json(obj): Json<Map<String, Value>>,
-    State(state): State<AppState>,
-) -> impl IntoResponse {
-    log::info!("POST /permission");
-    auth_access("permission", &state, None)?.check(Access::Configure)?;
-    let role = obj.get("role");
-    let resource_n = obj.get("resource_n");
-    if let (Some(Value::String(role)), Some(Value::String(resource_n))) =
-        (role, resource_n)
-    {
-        let role = role.to_string();
-        let resource_n = resource_n.to_string();
-        return state.permission_post(&role, &resource_n).await;
-        //StatusCode::Created
+fn permission_post(state: AppState) -> Router {
+    async fn handler(
+        Json(obj): Json<Map<String, Value>>,
+        State(state): State<AppState>,
+    ) -> Resp0 {
+        let res = Resource::from_type(ResType::Permission);
+        log::info!("POST {res}");
+        res.auth_access(&state, Access::Configure).await?;
+        let role = obj.get("role");
+        let resource_n = obj.get("resource_n");
+        if let (Some(Value::String(role)), Some(Value::String(resource_n))) =
+            (role, resource_n)
+        {
+            let role = role.to_string();
+            let resource_n = resource_n.to_string();
+            state.permission_post(&role, &resource_n).await;
+            return Ok(StatusCode::CREATED);
+        }
+        Err(graft::sonar::Error::InvalidValue)?
     }
-    Err(SonarError::InvalidName)
+    Router::new()
+        .route("/permission", post(handler))
+        .with_state(state)
 }
 
 /// `GET` one permission record
 async fn permission_get(
     AxumPath(id): AxumPath<i32>,
     State(state): State<AppState>,
-) -> impl IntoResponse {
-    log::info!("GET /permission/{id}");
-    auth_access("permission", &state, None)?.check(Access::View)?;
+) -> Resp1 {
+    let res = Resource::from_type(ResType::Permission).obj(id.to_string());
+    log::info!("GET {res}");
+    res.auth_access(&state, Access::View).await?;
     let perm = state.permission(id).await?;
-    let body = serde_json::to_value(perm)?.to_string()?;
-    ((header::CONTENT_TYPE, "application/json"), body)
+    match serde_json::to_value(perm) {
+        Ok(body) => json_resp(body),
+        Err(e) => Err(StatusCode::BAD_REQUEST),
+    }
 }
 
 /// `PATCH` one permission record
@@ -422,60 +530,56 @@ async fn permission_patch(
     AxumPath(id): AxumPath<i32>,
     Json(obj): Json<Map<String, Value>>,
     State(state): State<AppState>,
-) -> impl IntoResponse {
-    log::info!("PATCH /permission/{id}");
-    auth_access("permission", &req, None)?.check(Access::Configure)?;
+) -> Resp0 {
+    let res = Resource::from_type(ResType::Permission).obj(id.to_string());
+    log::info!("PATCH {res}");
+    res.auth_access(&state, Access::Configure).await?;
     state.permission_patch(id, obj).await?;
-    StatusCode::NoContent
+    Ok(StatusCode::NO_CONTENT)
 }
 
 /// `DELETE` one permission record
 async fn permission_delete(
     AxumPath(id): AxumPath<i32>,
     State(state): State<AppState>,
-) -> impl IntoResponse {
-    log::info!("DELETE /permission/{id}");
-    auth_access("permission", &req, None)?.check(Access::Configure)?;
+) -> Resp0 {
+    let res = Resource::from_type(ResType::Permission).obj(id.to_string());
+    log::info!("DELETE {res}");
+    res.auth_access(&state, Access::Configure).await?;
     state.permission_delete(id).await?;
-    StatusCode::NoContent
+    Ok(StatusCode::NO_CONTENT)
 }
 
 /// `GET` one SQL record as JSON
-fn sql_record_get() -> Router {
+fn sql_record_get(state: AppState) -> Router {
     async fn handler(
-        AxumPath(res): AxumPath<Resource>,
+        AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
         State(state): State<AppState>,
-    ) -> impl IntoResponse {
+    ) -> Resp1 {
+        let res = Resource::new(type_n)?.obj(obj_n);
         log::info!("GET {res}");
-        res.auth_access(&req)?.check(Access::View)?;
+        res.auth_access(&state, Access::View).await?;
         let sql = res.sql_query();
         let name = res.obj_name()?;
-        let body = state.get_by_pkey(sql, &name).await;
-        ((header::CONTENT_TYPE, "application/json"), body)
+        let body = if res.res_type == ResType::ControllerIo {
+            state.get_array_by_pkey(sql, &name).await
+        } else {
+            state.get_by_pkey(sql, &name).await
+        };
+        json_resp(body)
     }
-    Router::new().route("/:type_n/:obj_n", get(handler))
-}
-
-/// `GET` array of SQL records as JSON
-async fn sql_get_array(
-    AxumPath(res): AxumPath<Resource>,
-    State(state): State<AppState>,
-) -> impl IntoResponse {
-    log::info!("GET {res}");
-    res.auth_access(&state)?.check(Access::View)?;
-    let sql = res.sql_query();
-    let name = res.obj_name()?;
-    let body = state.get_array_by_pkey(sql, &name).await;
-    ((header::CONTENT_TYPE, "application/json"), body)
+    Router::new()
+        .route("/:type_n/:obj_n", get(handler))
+        .with_state(state)
 }
 
 /// IRIS host name
 const HOST: &str = "localhost.localdomain";
 
 /// Create a Sonar connection for a request
-async fn connection(req: &Request<State>) -> Result<Connection> {
-    let session = req.session();
-    let auth: AuthMap = session.get("auth").ok_or(SonarError::Unauthorized)?;
+async fn connection(state: &AppState) -> Result<Connection> {
+    let session = state.session();
+    let auth: AuthMap = session.get("auth").ok_or(Error::Unauthorized)?;
     auth.authenticate().await
 }
 
@@ -490,7 +594,7 @@ fn invalid_char(c: char) -> bool {
 /// Make a Sonar attribute (with validation)
 fn make_att(res: &'static str, nm: &str, att: &str) -> Result<String> {
     if att.len() > 64 || att.contains(invalid_char) || att.contains('/') {
-        Err(SonarError::InvalidName)
+        Err(graft::sonar::Error::InvalidValue)?
     } else if res == "controller" && att == "drop_id" {
         Ok(format!("{nm}/drop"))
     } else if res == "sign_message" {
@@ -505,16 +609,17 @@ fn make_att(res: &'static str, nm: &str, att: &str) -> Result<String> {
 /// `GET` a file resource
 fn resource_file_get(state: AppState) -> Router {
     async fn handler(
-        AxumPath(res): AxumPath<Resource>,
+        AxumPath(type_n): AxumPath<String>,
         State(state): State<AppState>,
     ) -> impl IntoResponse {
+        let res = Resource::new(type_n)?;
         log::info!("GET {res}");
-        res.auth_access(&state)?.check(Access::View)?;
+        res.auth_access(&state, Access::View).await?;
         let path = PathBuf::from(res.to_string());
         let etag = resource_etag(&path).await?;
         if let Some(values) = req.header("If-None-Match") {
             if values.iter().any(|v| v == &etag) {
-                return Err(SonarError::NotModified);
+                return Err(sonar::Error::NotModified);
             }
         }
         let body = Body::from_file(&path).await?;
@@ -527,7 +632,9 @@ fn resource_file_get(state: AppState) -> Router {
             body,
         )
     }
-    Router::new().route("/:type_n", get(handler)).with_state(state)
+    Router::new()
+        .route("/:type_n", get(handler))
+        .with_state(state)
 }
 
 /// Get a static file ETag
@@ -539,18 +646,19 @@ async fn resource_etag(path: &Path) -> Result<String> {
 }
 
 /// Create a Sonar object from a `POST` request
-fn sonar_post() -> Router {
+fn sonar_post(state: AppState) -> Router {
     async fn handler(
-        AxumPath(res): AxumPath<Resource>,
+        AxumPath(type_n): AxumPath<String>,
         Json(obj): Json<Map<String, Value>>,
         State(state): State<AppState>,
-    ) -> impl IntoResponse {
+    ) -> Resp0 {
+        let res = Resource::new(type_n)?;
         log::info!("POST {res}");
-        res.auth_access(&state)?.check(Access::Configure)?;
+        res.auth_access(&state, Access::Configure).await?;
         match obj.get("name") {
             Some(Value::String(name)) => {
                 let nm = res.make_name(name)?;
-                let mut c = connection(&req).await?;
+                let mut c = connection(&state).await?;
                 // first, set attributes on phantom object
                 for (key, value) in obj.iter() {
                     let key = &key[..];
@@ -563,12 +671,14 @@ fn sonar_post() -> Router {
                 }
                 log::debug!("creating {nm}");
                 c.create_object(&nm).await?;
-                StatusCode::Created
+                Ok(StatusCode::CREATED)
             }
-            _ => Err(SonarError::InvalidName),
+            _ => Err(sonar::Error::InvalidValue),
         }
     }
-    Router::new().route("/:type_n", post(handler))
+    Router::new()
+        .route("/:type_n", post(handler))
+        .with_state(state)
 }
 
 /// Get Sonar attribute value
@@ -576,7 +686,7 @@ fn att_value(value: &Value) -> Result<String> {
     match value {
         Value::String(value) => {
             if value.contains(invalid_char) {
-                Err(SonarError::InvalidValue)
+                Err(sonar::Error::InvalidValue)?
             } else {
                 Ok(value.to_string())
             }
@@ -584,26 +694,26 @@ fn att_value(value: &Value) -> Result<String> {
         Value::Bool(value) => Ok(value.to_string()),
         Value::Number(value) => Ok(value.to_string()),
         Value::Null => Ok("\0".to_string()),
-        _ => Err(SonarError::InvalidValue),
+        _ => Err(sonar::Error::InvalidValue)?,
     }
 }
 
 /// Update a Sonar object from a `PATCH` request
 fn sonar_object_patch(state: AppState) -> Router {
     async fn handler(
-        AxumPath(res): AxumPath<Resource>,
+        AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
         Json(obj): Json<Map<String, Value>>,
         State(state): State<AppState>,
     ) -> Resp0 {
+        let res = Resource::new(type_n)?.obj(obj_n);
         log::info!("PATCH {res}");
-        let access = res.auth_access(&state)?;
         // *At least* Operate access needed (further checks below)
-        access.check(Access::Operate)?;
+        let access = res.auth_access(&state, Access::Operate).await?;
         for key in obj.keys() {
             let key = &key[..];
-            access.check(Access::from_type_key(&(res, key)))?;
+            access.check(res.res_type.access_attr(key))?;
         }
-        let mut c = connection(&req).await?;
+        let mut c = connection(&state).await?;
         let name = res.obj_name()?;
         let nm = format!("{res}/{name}");
         // first pass
@@ -626,25 +736,29 @@ fn sonar_object_patch(state: AppState) -> Router {
                 c.update_object(&anm, &value).await?;
             }
         }
-        Ok(StatusCode::NoContent)
+        Ok(StatusCode::NO_CONTENT)
     }
-    Router::new().route("/:type_n/:obj_n", patch(handler)).with_state(state)
+    Router::new()
+        .route("/:type_n/:obj_n", patch(handler))
+        .with_state(state)
 }
 
 /// Remove a Sonar object from a `DELETE` request
 fn sonar_object_delete(state: AppState) -> Router {
     async fn handler(
-        AxumPath(res): AxumPath<Resource>,
+        AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
         State(state): State<AppState>,
     ) -> Resp0 {
+        let res = Resource::new(type_n)?.obj(obj_n);
         log::info!("DELETE {res}");
-        let access = res.auth_access(&state)?;
-        access.check(Access::Configure)?;
+        res.auth_access(&state, Access::Configure).await?;
         let name = res.obj_name()?;
         let nm = res.to_string();
-        let mut c = connection(&req).await?;
+        let mut c = connection(&state).await?;
         c.remove_object(&nm).await?;
-        Ok(StatusCode::Accepted)
+        Ok(StatusCode::ACCEPTED)
     }
-    Router::new().route("/:type_n/:obj_n", delete(handler)).with_state(state)
+    Router::new()
+        .route("/:type_n/:obj_n", delete(handler))
+        .with_state(state)
 }
