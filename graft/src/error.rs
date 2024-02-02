@@ -13,10 +13,15 @@
 // GNU General Public License for more details.
 //
 use crate::sonar::Error as SonarError;
+use http::StatusCode;
 
 /// Graft error
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    /// Unauthorized request
+    #[error("Unauthorized")]
+    Unauthorized,
+
     /// Sonar error
     #[error("Sonar {0}")]
     Sonar(#[from] SonarError),
@@ -25,8 +30,8 @@ pub enum Error {
     #[error("Postgres {0}")]
     Postgres(#[from] tokio_postgres::Error),
 
-    /// BB8 run error
-    #[error("BB8 run error")]
+    /// Bb8 run error
+    #[error("Bb8 run error")]
     Bb8,
 }
 
@@ -34,6 +39,17 @@ impl<E> From<bb8::RunError<E>> for Error {
     fn from(_err: bb8::RunError<E>) -> Self {
         // FIXME: do the needful
         Self::Bb8
+    }
+}
+
+impl From<Error> for StatusCode {
+    fn from(err: Error) -> Self {
+        match err {
+            Error::Unauthorized => StatusCode::UNAUTHORIZED,
+            Error::Sonar(e) => e.into(),
+            Error::Postgres(_e) => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::Bb8 => StatusCode::INTERNAL_SERVER_ERROR,
+        }
     }
 }
 

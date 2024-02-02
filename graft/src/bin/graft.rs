@@ -25,6 +25,7 @@ use axum::{
 use convert_case::{Case, Casing};
 use core::time::Duration;
 use graft::access::Access;
+use graft::error::{Error, Result};
 use graft::restype::ResType;
 use graft::sonar::{self, Connection};
 use graft::state::AppState;
@@ -49,30 +50,6 @@ struct AuthMap {
     /// Sonar password
     password: String,
 }
-
-/// Graft error
-#[derive(Debug, thiserror::Error)]
-enum Error {
-    /// Unauthorized request
-    #[error("Unauthorized")]
-    Unauthorized,
-
-    /// Sonar error
-    #[error("Sonar {0}")]
-    Sonar(#[from] graft::sonar::Error),
-}
-
-impl From<Error> for StatusCode {
-    fn from(e: Error) -> Self {
-        match e {
-            Error::Unauthorized => StatusCode::UNAUTHORIZED,
-            Error::Sonar(e) => e.into(),
-        }
-    }
-}
-
-/// Graft result
-type Result<T> = std::result::Result<T, Error>;
 
 /// No-header response result
 type Resp0 = std::result::Result<StatusCode, StatusCode>;
@@ -101,7 +78,10 @@ fn json_resp(json: Value) -> Resp1 {
 /// Sonar resource
 #[derive(Debug)]
 struct Resource {
+    /// Resource type
     res_type: ResType,
+
+    /// Object name
     obj_n: Option<String>,
 }
 
@@ -164,6 +144,21 @@ impl Resource {
         }
     }
 
+    /// Make a Sonar attribute (with validation)
+    fn make_att(&self, nm: &str, att: &str) -> Result<String> {
+        if att.len() > 64 || att.contains(invalid_char) || att.contains('/') {
+            Err(sonar::Error::InvalidValue)?
+        } else if self.res_type == ResType::Controller && att == "drop_id" {
+            Ok(format!("{nm}/drop"))
+        } else if self.res_type == ResType::SignMessage {
+            // sign_message attributes are in snake case
+            Ok(format!("{nm}/{att}"))
+        } else {
+            // most IRIS attributes are in camel case (Java)
+            Ok(format!("{nm}/{}", att.to_case(Case::Camel)))
+        }
+    }
+
     /// Lookup authorized access for a resource
     async fn auth_access(
         &self,
@@ -188,7 +183,7 @@ async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
     let state = AppState::new().await?;
     /*
-    FIXME
+    FIXME: use axum-login / tower-sessions
     app.with(
         SessionMiddleware::new(
             MemoryStore::new(),
@@ -275,7 +270,7 @@ fn permission_post(state: AppState) -> Router {
             state.permission_post(&role, &resource_n).await;
             return Ok(StatusCode::CREATED);
         }
-        Err(graft::sonar::Error::InvalidValue)?
+        Err(sonar::Error::InvalidValue)?
     }
     Router::new()
         .route("/permission", post(handler))
@@ -295,7 +290,7 @@ fn permission_router(state: AppState) -> Router {
         let perm = state.permission(id).await?;
         match serde_json::to_value(perm) {
             Ok(body) => json_resp(body),
-            Err(e) => Err(StatusCode::BAD_REQUEST),
+            Err(_e) => Err(StatusCode::BAD_REQUEST),
         }
     }
 
@@ -350,7 +345,7 @@ fn sql_record_get(state: AppState) -> Router {
         }?;
         match serde_json::to_value(body) {
             Ok(body) => json_resp(body),
-            Err(e) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+            Err(_e) => Err(StatusCode::INTERNAL_SERVER_ERROR),
         }
     }
     Router::new()
@@ -374,21 +369,6 @@ const INVALID_CHARS: &[char] = &['\0', '\u{001e}', '\u{001f}'];
 /// Check if a character in a Sonar name is invalid
 fn invalid_char(c: char) -> bool {
     INVALID_CHARS.contains(&c)
-}
-
-/// Make a Sonar attribute (with validation)
-fn make_att(res: &'static str, nm: &str, att: &str) -> Result<String> {
-    if att.len() > 64 || att.contains(invalid_char) || att.contains('/') {
-        Err(graft::sonar::Error::InvalidValue)?
-    } else if res == "controller" && att == "drop_id" {
-        Ok(format!("{nm}/drop"))
-    } else if res == "sign_message" {
-        // sign_message attributes are in snake case
-        Ok(format!("{nm}/{att}"))
-    } else {
-        // most IRIS attributes are in camel case (Java)
-        Ok(format!("{nm}/{}", att.to_case(Case::Camel)))
-    }
 }
 
 /// `GET` a file resource
@@ -448,7 +428,7 @@ fn sonar_post(state: AppState) -> Router {
                 for (key, value) in obj.iter() {
                     let key = &key[..];
                     if key != "name" {
-                        let anm = make_att(res, &nm, key)?;
+                        let anm = res.make_att(&nm, key)?;
                         let value = att_value(value)?;
                         log::debug!("{anm} = {value} (phantom)");
                         c.update_object(&anm, &value).await?;
@@ -505,7 +485,7 @@ fn sonar_object_patch(state: AppState) -> Router {
         for (key, value) in obj.iter() {
             let key = &key[..];
             if res.res_type.patch_first_pass(key) {
-                let anm = make_att(res, &nm, key)?;
+                let anm = res.make_att(&nm, key)?;
                 let value = att_value(value)?;
                 log::debug!("{anm} = {value}");
                 c.update_object(&anm, &value).await?;
@@ -515,7 +495,7 @@ fn sonar_object_patch(state: AppState) -> Router {
         for (key, value) in obj.iter() {
             let key = &key[..];
             if !res.res_type.patch_first_pass(key) {
-                let anm = make_att(res, &nm, key)?;
+                let anm = res.make_att(&nm, key)?;
                 let value = att_value(value)?;
                 log::debug!("{} = {}", anm, &value);
                 c.update_object(&anm, &value).await?;
