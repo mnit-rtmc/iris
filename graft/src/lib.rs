@@ -14,7 +14,9 @@
 //
 #![forbid(unsafe_code)]
 
+pub mod access;
 pub mod error;
 pub mod query;
+pub mod restype;
 pub mod sonar;
 pub mod state;
