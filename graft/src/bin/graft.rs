@@ -57,10 +57,6 @@ enum Error {
     #[error("Unauthorized")]
     Unauthorized,
 
-    /// Resource not modified
-    #[error("Not modified")]
-    NotModified,
-
     /// Sonar error
     #[error("Sonar {0}")]
     Sonar(#[from] graft::sonar::Error),
@@ -70,7 +66,6 @@ impl From<Error> for StatusCode {
     fn from(e: Error) -> Self {
         match e {
             Error::Unauthorized => StatusCode::UNAUTHORIZED,
-            Error::NotModified => StatusCode::NOT_MODIFIED,
             Error::Sonar(e) => e.into(),
         }
     }
@@ -84,14 +79,23 @@ type Resp0 = std::result::Result<StatusCode, StatusCode>;
 
 /// Single-header response result
 type Resp1 =
-    std::result::Result<((HeaderName, &'static str), String), StatusCode>;
+    std::result::Result<([(HeaderName, &'static str); 1], String), StatusCode>;
 
+/// Two-header response result
+type Resp2 =
+    std::result::Result<([(HeaderName, &'static str); 2], String), StatusCode>;
+
+/// Create an HTML response
 fn html_resp(html: &str) -> Resp1 {
-    Ok(((header::CONTENT_TYPE, "text/html"), html.to_string()))
+    Ok(([(header::CONTENT_TYPE, "text/html")], html.to_string()))
 }
 
+/// Create a JSON response
 fn json_resp(json: Value) -> Resp1 {
-    Ok(((header::CONTENT_TYPE, "application/json"), json.to_string()))
+    Ok((
+        [(header::CONTENT_TYPE, "application/json")],
+        json.to_string(),
+    ))
 }
 
 /// Sonar resource
@@ -106,9 +110,10 @@ impl fmt::Display for Resource {
         &self,
         f: &mut fmt::Formatter<'_>,
     ) -> std::result::Result<(), fmt::Error> {
+        let type_n = self.res_type.type_n();
         match self.obj_n {
-            Some(obj_n) => write!(f, "{}/{obj_n}", self.res_type),
-            None => write!(f, "{}", self.res_type),
+            Some(obj_n) => write!(f, "{type_n}/{obj_n}"),
+            None => write!(f, "{type_n}"),
         }
     }
 }
@@ -116,7 +121,10 @@ impl fmt::Display for Resource {
 impl Resource {
     /// Create a resource from a type
     const fn from_type(res_type: ResType) -> Self {
-        Resource { res_type }
+        Resource {
+            res_type,
+            obj_n: None,
+        }
     }
 
     /// Create a new resource
@@ -152,7 +160,7 @@ impl Resource {
         if nm.len() > 64 || nm.contains(invalid_char) || nm.contains('/') {
             Err(sonar::Error::InvalidValue)?
         } else {
-            Ok(format!("{}/{nm}", self.res_type.type_name()))
+            Ok(format!("{}/{nm}", self.res_type.type_n()))
         }
     }
 
@@ -166,7 +174,7 @@ impl Resource {
         let session = state.session();
         let auth: AuthMap = session.get("auth").ok_or(Error::Unauthorized)?;
         let perm = state
-            .permission_user_res(&auth.username, self.type_name(), name)
+            .permission_user_res(&auth.username, self.res_type.type_n(), name)
             .await?;
         let acc = Access::new(perm.access_n).ok_or(Error::Unauthorized)?;
         acc.check(access)?;
@@ -190,15 +198,10 @@ async fn main() -> Result<()> {
         .with_session_ttl(Some(Duration::from_secs(8 * 60 * 60))),
     );*/
     let app = Router::new()
-        .merge(login_post())
-        .merge(access_get())
+        .merge(login_post(state.clone()))
+        .merge(access_get(state.clone()))
         .merge(permission_post(state.clone()))
-        .route(
-            "/permission/:id",
-            get(permission_get)
-                .patch(permission_patch)
-                .delete(permission_delete),
-        )
+        .merge(permission_router(state.clone()))
         .merge(resource_file_get(state.clone()))
         .merge(sonar_post(state.clone()))
         .merge(sql_record_get(state.clone()))
@@ -219,10 +222,10 @@ impl AuthMap {
 }
 
 /// Handle `POST` to login page
-fn login_post() -> Router {
+fn login_post(state: AppState) -> Router {
     async fn handler(
-        Json(auth): Json<AuthMap>,
         State(state): State<AppState>,
+        Json(auth): Json<AuthMap>,
     ) -> Resp1 {
         log::info!("POST /login");
         auth.authenticate().await?;
@@ -231,11 +234,13 @@ fn login_post() -> Router {
         session.insert("auth", auth)?;
         html_resp("<html>Authenticated</html>")
     }
-    Router::new().route("/login", post(handler))
+    Router::new()
+        .route("/login", post(handler))
+        .with_state(state)
 }
 
 /// `GET` access permissions
-fn access_get() -> Router {
+fn access_get(state: AppState) -> Router {
     async fn handler(State(state): State<AppState>) -> Resp1 {
         log::info!("GET /access");
         let session = state.session();
@@ -246,14 +251,16 @@ fn access_get() -> Router {
             Err(e) => Err(StatusCode::BAD_REQUEST),
         }
     }
-    Router::new().route("/login", post(handler))
+    Router::new()
+        .route("/access", get(handler))
+        .with_state(state)
 }
 
 /// `POST` one permission record
 fn permission_post(state: AppState) -> Router {
     async fn handler(
-        Json(obj): Json<Map<String, Value>>,
         State(state): State<AppState>,
+        Json(obj): Json<Map<String, Value>>,
     ) -> Resp0 {
         let res = Resource::from_type(ResType::Permission);
         log::info!("POST {res}");
@@ -275,44 +282,54 @@ fn permission_post(state: AppState) -> Router {
         .with_state(state)
 }
 
-/// `GET` one permission record
-async fn permission_get(
-    AxumPath(id): AxumPath<i32>,
-    State(state): State<AppState>,
-) -> Resp1 {
-    let res = Resource::from_type(ResType::Permission).obj(id.to_string());
-    log::info!("GET {res}");
-    res.auth_access(&state, Access::View).await?;
-    let perm = state.permission(id).await?;
-    match serde_json::to_value(perm) {
-        Ok(body) => json_resp(body),
-        Err(e) => Err(StatusCode::BAD_REQUEST),
+/// Router for permission
+fn permission_router(state: AppState) -> Router {
+    /// Handle `GET` request
+    async fn handle_get(
+        AxumPath(id): AxumPath<i32>,
+        State(state): State<AppState>,
+    ) -> Resp1 {
+        let res = Resource::from_type(ResType::Permission).obj(id.to_string());
+        log::info!("GET {res}");
+        res.auth_access(&state, Access::View).await?;
+        let perm = state.permission(id).await?;
+        match serde_json::to_value(perm) {
+            Ok(body) => json_resp(body),
+            Err(e) => Err(StatusCode::BAD_REQUEST),
+        }
     }
-}
 
-/// `PATCH` one permission record
-async fn permission_patch(
-    AxumPath(id): AxumPath<i32>,
-    Json(obj): Json<Map<String, Value>>,
-    State(state): State<AppState>,
-) -> Resp0 {
-    let res = Resource::from_type(ResType::Permission).obj(id.to_string());
-    log::info!("PATCH {res}");
-    res.auth_access(&state, Access::Configure).await?;
-    state.permission_patch(id, obj).await?;
-    Ok(StatusCode::NO_CONTENT)
-}
+    /// Handle `PATCH` request
+    async fn handle_patch(
+        AxumPath(id): AxumPath<i32>,
+        State(state): State<AppState>,
+        Json(obj): Json<Map<String, Value>>,
+    ) -> Resp0 {
+        let res = Resource::from_type(ResType::Permission).obj(id.to_string());
+        log::info!("PATCH {res}");
+        res.auth_access(&state, Access::Configure).await?;
+        state.permission_patch(id, obj).await?;
+        Ok(StatusCode::NO_CONTENT)
+    }
 
-/// `DELETE` one permission record
-async fn permission_delete(
-    AxumPath(id): AxumPath<i32>,
-    State(state): State<AppState>,
-) -> Resp0 {
-    let res = Resource::from_type(ResType::Permission).obj(id.to_string());
-    log::info!("DELETE {res}");
-    res.auth_access(&state, Access::Configure).await?;
-    state.permission_delete(id).await?;
-    Ok(StatusCode::NO_CONTENT)
+    /// Handle `DELETE` request
+    async fn handle_delete(
+        AxumPath(id): AxumPath<i32>,
+        State(state): State<AppState>,
+    ) -> Resp0 {
+        let res = Resource::from_type(ResType::Permission).obj(id.to_string());
+        log::info!("DELETE {res}");
+        res.auth_access(&state, Access::Configure).await?;
+        state.permission_delete(id).await?;
+        Ok(StatusCode::NO_CONTENT)
+    }
+
+    Router::new()
+        .route(
+            "/permission/:id",
+            get(handle_get).patch(handle_patch).delete(handle_delete),
+        )
+        .with_state(state)
 }
 
 /// `GET` one SQL record as JSON
@@ -330,8 +347,11 @@ fn sql_record_get(state: AppState) -> Router {
             state.get_array_by_pkey(sql, &name).await
         } else {
             state.get_by_pkey(sql, &name).await
-        };
-        json_resp(body)
+        }?;
+        match serde_json::to_value(body) {
+            Ok(body) => json_resp(body),
+            Err(e) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        }
     }
     Router::new()
         .route("/:type_n/:obj_n", get(handler))
@@ -376,7 +396,7 @@ fn resource_file_get(state: AppState) -> Router {
     async fn handler(
         AxumPath(type_n): AxumPath<&str>,
         State(state): State<AppState>,
-    ) -> impl IntoResponse {
+    ) -> Resp2 {
         let res = Resource::new(type_n)?;
         log::info!("GET {res}");
         res.auth_access(&state, Access::View).await?;
@@ -384,18 +404,18 @@ fn resource_file_get(state: AppState) -> Router {
         let etag = resource_etag(&path).await?;
         if let Some(values) = req.header("If-None-Match") {
             if values.iter().any(|v| v == &etag) {
-                return Err(sonar::Error::NotModified);
+                return Err(StatusCode::NOT_MODIFIED);
             }
         }
         let body = Body::from_file(&path).await?;
         // FIXME: use tower ServeFile instead (if ETag changed)
-        (
+        Ok((
             [
-                (header::ETAG, etag),
+                (header::ETAG, &etag),
                 (header::CONTENT_TYPE, "application/json"),
             ],
             body,
-        )
+        ))
     }
     Router::new()
         .route("/:type_n", get(handler))
@@ -414,8 +434,8 @@ async fn resource_etag(path: &Path) -> Result<String> {
 fn sonar_post(state: AppState) -> Router {
     async fn handler(
         AxumPath(type_n): AxumPath<&str>,
-        Json(obj): Json<Map<String, Value>>,
         State(state): State<AppState>,
+        Json(obj): Json<Map<String, Value>>,
     ) -> Resp0 {
         let res = Resource::new(type_n)?;
         log::info!("POST {res}");
@@ -438,7 +458,7 @@ fn sonar_post(state: AppState) -> Router {
                 c.create_object(&nm).await?;
                 Ok(StatusCode::CREATED)
             }
-            _ => Err(sonar::Error::InvalidValue),
+            _ => Err(sonar::Error::InvalidValue)?,
         }
     }
     Router::new()
@@ -467,8 +487,8 @@ fn att_value(value: &Value) -> Result<String> {
 fn sonar_object_patch(state: AppState) -> Router {
     async fn handler(
         AxumPath((type_n, obj_n)): AxumPath<(&str, String)>,
-        Json(obj): Json<Map<String, Value>>,
         State(state): State<AppState>,
+        Json(obj): Json<Map<String, Value>>,
     ) -> Resp0 {
         let res = Resource::new(type_n)?.obj(obj_n);
         log::info!("PATCH {res}");

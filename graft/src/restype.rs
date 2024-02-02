@@ -259,14 +259,14 @@ impl ResType {
     pub fn patch_first_pass(self, att: &str) -> bool {
         use ResType::*;
         match (self, att) {
-            (Alarm, "pin") |
-            (Beacon, "pin") |
-            (Beacon, "verify_pin") |
-            (Detector, "pin") |
-            (Dms, "pin") |
-            (LaneMarking, "pin") |
-            (RampMeter, "pin") |
-            (WeatherSensor, "pin") => true,
+            (Alarm, "pin")
+            | (Beacon, "pin")
+            | (Beacon, "verify_pin")
+            | (Detector, "pin")
+            | (Dms, "pin")
+            | (LaneMarking, "pin")
+            | (RampMeter, "pin")
+            | (WeatherSensor, "pin") => true,
             _ => false,
         }
     }
