@@ -76,9 +76,6 @@ impl From<Error> for StatusCode {
     }
 }
 
-/// Sonar result
-pub type Result<T> = std::result::Result<T, Error>;
-
 impl Error {
     /// Parse a SHOW message received from server
     fn parse_show(msg: &str) -> Self {
@@ -111,6 +108,9 @@ impl Error {
         }
     }
 }
+
+/// Sonar result
+pub type Result<T> = std::result::Result<T, Error>;
 
 /// Sonar message
 #[allow(dead_code)]
@@ -145,20 +145,6 @@ enum Message<'a> {
 
     /// Server show message
     Show(&'a str),
-}
-
-/// Connection to a sonar server
-pub struct Connection {
-    /// TLS encrypted stream
-    tls_stream: TlsStream<TcpStream>,
-    /// Network timeout
-    timeout: Duration,
-    /// Received data buffer
-    rx_buf: Vec<u8>,
-    /// Offset into buffer
-    offset: usize,
-    /// Count of bytes in buffer
-    count: usize,
 }
 
 impl<'a> Message<'a> {
@@ -255,6 +241,20 @@ impl<'a> Message<'a> {
         }
         buf.push(b'\x1E');
     }
+}
+
+/// Connection to a sonar server
+pub struct Connection {
+    /// TLS encrypted stream
+    tls_stream: TlsStream<TcpStream>,
+    /// Network timeout
+    timeout: Duration,
+    /// Received data buffer
+    rx_buf: Vec<u8>,
+    /// Offset into buffer
+    offset: usize,
+    /// Count of bytes in buffer
+    count: usize,
 }
 
 impl Connection {
