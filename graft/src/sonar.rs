@@ -12,9 +12,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::restype::ResType;
 use crate::tls;
+use convert_case::{Case, Casing};
 use http::StatusCode;
+use percent_encoding::percent_decode_str;
 use rustls::pki_types::ServerName;
+use std::fmt;
 use std::net::ToSocketAddrs;
 use std::time::Duration;
 use tokio::io::{self, AsyncReadExt, AsyncWriteExt, ErrorKind};
@@ -111,6 +115,94 @@ impl Error {
 
 /// Sonar result
 pub type Result<T> = std::result::Result<T, Error>;
+
+/// Invalid characters for SONAR names
+const INVALID_CHARS: &[char] = &['\0', '/', '\u{001e}', '\u{001f}'];
+
+/// Check if a character in a Sonar name is invalid
+fn invalid_char(c: char) -> bool {
+    INVALID_CHARS.contains(&c)
+}
+
+/// Sonar type / object name
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Name {
+    /// Resource type
+    pub res_type: ResType,
+
+    /// Full name (type / object)
+    name: String,
+}
+
+impl From<ResType> for Name {
+    fn from(res_type: ResType) -> Self {
+        Name {
+            res_type,
+            name: res_type.as_str().to_string(),
+        }
+    }
+}
+
+impl fmt::Display for Name {
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+    ) -> std::result::Result<(), fmt::Error> {
+        write!(f, "{}", self.name)
+    }
+}
+
+impl Name {
+    /// Create a new name
+    pub fn new(type_n: &str) -> Result<Self> {
+        Ok(Name::from(ResType::try_from(type_n)?))
+    }
+
+    /// Set object name (with validation, not percent-encoded)
+    pub fn obj_raw(mut self, obj_n: &str) -> Result<Self> {
+        if obj_n.len() > 64 || obj_n.contains(invalid_char) {
+            Err(Error::InvalidValue)?
+        } else {
+            let type_n = self.type_n();
+            self.name = format!("{type_n}/{obj_n}");
+            Ok(self)
+        }
+    }
+
+    /// Set object name from percent-encoded value
+    pub fn obj(self, obj_n: &str) -> Result<Self> {
+        self.obj_raw(
+            &percent_decode_str(obj_n)
+                .decode_utf8()
+                .or(Err(Error::InvalidValue))?,
+        )
+    }
+
+    /// Get resource type name
+    pub fn type_n(&self) -> &'static str {
+        self.res_type.as_str()
+    }
+
+    /// Get object name
+    pub fn object_n(&self) -> Result<&str> {
+        self.name.splitn(2, '/').nth(1).ok_or(Error::InvalidValue)
+    }
+
+    /// Make a Sonar attribute (with validation)
+    pub fn attr(&self, att: &str) -> Result<String> {
+        if att.len() > 64 || att.contains(invalid_char) {
+            Err(Error::InvalidValue)?
+        } else if self.res_type == ResType::Controller && att == "drop_id" {
+            Ok(format!("{self}/drop"))
+        } else if self.res_type == ResType::SignMessage {
+            // sign_message attributes are in snake case
+            Ok(format!("{self}/{att}"))
+        } else {
+            // most IRIS attributes are in camel case (Java)
+            Ok(format!("{self}/{}", att.to_case(Case::Camel)))
+        }
+    }
+}
 
 /// Sonar message
 #[allow(dead_code)]

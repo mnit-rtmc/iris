@@ -61,7 +61,7 @@ impl TryFrom<&str> for ResType {
 
     fn try_from(type_n: &str) -> std::result::Result<Self, Error> {
         for variant in Self::iter() {
-            if variant.type_n() == type_n {
+            if variant.as_str() == type_n {
                 return Ok(variant);
             }
         }
@@ -114,8 +114,8 @@ impl ResType {
         .cloned()
     }
 
-    /// Get resource type name
-    pub const fn type_n(self) -> &'static str {
+    /// Get name as string slice
+    pub const fn as_str(self) -> &'static str {
         use ResType::*;
         match self {
             Alarm => "alarm",

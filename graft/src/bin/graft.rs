@@ -22,15 +22,13 @@ use axum::{
     routing::{delete, get, patch, post},
     Router,
 };
-use convert_case::{Case, Casing};
 use core::time::Duration;
 use graft::access::Access;
 use graft::error::{Error, Result};
 use graft::restype::ResType;
-use graft::sonar::{self, Connection};
+use graft::sonar::{self, Connection, Name};
 use graft::state::AppState;
 use http::header::HeaderName;
-use percent_encoding::percent_decode_str;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
@@ -76,101 +74,14 @@ fn json_resp(json: Value) -> Resp1 {
     ))
 }
 
-/// Sonar resource
-#[derive(Debug)]
-struct Resource {
-    /// Resource type
-    res_type: ResType,
-
-    /// Object name
-    obj_n: Option<String>,
-}
-
-impl fmt::Display for Resource {
-    fn fmt(
-        &self,
-        f: &mut fmt::Formatter<'_>,
-    ) -> std::result::Result<(), fmt::Error> {
-        let type_n = self.res_type.type_n();
-        match self.obj_n {
-            Some(obj_n) => write!(f, "{type_n}/{obj_n}"),
-            None => write!(f, "{type_n}"),
-        }
-    }
-}
-
-impl Resource {
-    /// Create a resource from a type
-    const fn from_type(res_type: ResType) -> Self {
-        Resource {
-            res_type,
-            obj_n: None,
-        }
-    }
-
-    /// Create a new resource
-    fn new(type_n: &str) -> Result<Self> {
-        let res_type = ResType::try_from(type_n)?;
-        Ok(Resource {
-            res_type,
-            obj_n: None,
-        })
-    }
-
-    /// Add object name
-    fn obj(mut self, obj_n: String) -> Self {
-        self.obj_n = Some(obj_n);
-        self
-    }
-
-    /// Get object name
-    fn obj_name(&self) -> Result<String> {
-        let name = percent_decode_str(self.obj_n)
-            .decode_utf8()
-            .or(Err(sonar::Error::InvalidValue))?;
-        if name.len() > 64 || name.contains(invalid_char) || name.contains('/')
-        {
-            Err(sonar::Error::InvalidValue)?
-        } else {
-            Ok(name.to_string())
-        }
-    }
-
-    /// Make a Sonar name (with validation)
-    fn make_name(&self, nm: &str) -> Result<String> {
-        if nm.len() > 64 || nm.contains(invalid_char) || nm.contains('/') {
-            Err(sonar::Error::InvalidValue)?
-        } else {
-            Ok(format!("{}/{nm}", self.res_type.type_n()))
-        }
-    }
-
-    /// Make a Sonar attribute (with validation)
-    fn make_att(&self, nm: &str, att: &str) -> Result<String> {
-        if att.len() > 64 || att.contains(invalid_char) || att.contains('/') {
-            Err(sonar::Error::InvalidValue)?
-        } else if self.res_type == ResType::Controller && att == "drop_id" {
-            Ok(format!("{nm}/drop"))
-        } else if self.res_type == ResType::SignMessage {
-            // sign_message attributes are in snake case
-            Ok(format!("{nm}/{att}"))
-        } else {
-            // most IRIS attributes are in camel case (Java)
-            Ok(format!("{nm}/{}", att.to_case(Case::Camel)))
-        }
-    }
-
-    /// Lookup authorized access for a resource
-    async fn auth_access(
-        &self,
-        state: &AppState,
-        access: Access,
-    ) -> Result<Access> {
-        let name = self.obj_name()?;
-        let session = state.session();
+impl AppState {
+    /// Lookup authorized access for a name
+    async fn auth_access(&self, name: &Name, access: Access) -> Result<Access> {
+        let oname = name.object_n()?;
+        let session = self.session();
         let auth: AuthMap = session.get("auth").ok_or(Error::Unauthorized)?;
-        let perm = state
-            .permission_user_res(&auth.username, self.res_type.type_n(), name)
+        let perm = self
+            .permission_user_res(&auth.username, name.type_n(), oname)
             .await?;
         let acc = Access::new(perm.access_n).ok_or(Error::Unauthorized)?;
         acc.check(access)?;
@@ -257,13 +168,13 @@ fn access_get(state: AppState) -> Router {
 fn permission_post(state: AppState) -> Router {
     async fn handler(
         State(state): State<AppState>,
-        Json(obj): Json<Map<String, Value>>,
+        Json(attrs): Json<Map<String, Value>>,
     ) -> Resp0 {
-        let res = Resource::from_type(ResType::Permission);
-        log::info!("POST {res}");
-        res.auth_access(&state, Access::Configure).await?;
-        let role = obj.get("role");
-        let resource_n = obj.get("resource_n");
+        let nm = Name::from_type(ResType::Permission);
+        log::info!("POST {nm}");
+        nm.auth_access(&state, Access::Configure).await?;
+        let role = attrs.get("role");
+        let resource_n = attrs.get("resource_n");
         if let (Some(Value::String(role)), Some(Value::String(resource_n))) =
             (role, resource_n)
         {
@@ -286,9 +197,9 @@ fn permission_router(state: AppState) -> Router {
         AxumPath(id): AxumPath<i32>,
         State(state): State<AppState>,
     ) -> Resp1 {
-        let res = Resource::from_type(ResType::Permission).obj(id.to_string());
-        log::info!("GET {res}");
-        res.auth_access(&state, Access::View).await?;
+        let nm = Name::from_type(ResType::Permission).obj(id.to_string())?;
+        log::info!("GET {nm}");
+        nm.auth_access(&state, Access::View).await?;
         let perm = state.permission(id).await?;
         match serde_json::to_value(perm) {
             Ok(body) => json_resp(body),
@@ -300,12 +211,12 @@ fn permission_router(state: AppState) -> Router {
     async fn handle_patch(
         AxumPath(id): AxumPath<i32>,
         State(state): State<AppState>,
-        Json(obj): Json<Map<String, Value>>,
+        Json(attrs): Json<Map<String, Value>>,
     ) -> Resp0 {
-        let res = Resource::from_type(ResType::Permission).obj(id.to_string());
-        log::info!("PATCH {res}");
-        res.auth_access(&state, Access::Configure).await?;
-        state.permission_patch(id, obj).await?;
+        let nm = Name::from_type(ResType::Permission).obj(id.to_string())?;
+        log::info!("PATCH {nm}");
+        nm.auth_access(&state, Access::Configure).await?;
+        state.permission_patch(id, attrs).await?;
         Ok(StatusCode::NO_CONTENT)
     }
 
@@ -314,9 +225,9 @@ fn permission_router(state: AppState) -> Router {
         AxumPath(id): AxumPath<i32>,
         State(state): State<AppState>,
     ) -> Resp0 {
-        let res = Resource::from_type(ResType::Permission).obj(id.to_string());
-        log::info!("DELETE {res}");
-        res.auth_access(&state, Access::Configure).await?;
+        let nm = Name::from_type(ResType::Permission).obj(id.to_string())?;
+        log::info!("DELETE {nm}");
+        nm.auth_access(&state, Access::Configure).await?;
         state.permission_delete(id).await?;
         Ok(StatusCode::NO_CONTENT)
     }
@@ -335,12 +246,12 @@ fn sql_record_get(state: AppState) -> Router {
         AxumPath((type_n, obj_n)): AxumPath<(&str, String)>,
         State(state): State<AppState>,
     ) -> Resp1 {
-        let res = Resource::new(type_n)?.obj(obj_n);
-        log::info!("GET {res}");
-        res.auth_access(&state, Access::View).await?;
-        let sql = res.res_type.sql_query();
-        let name = res.obj_name()?;
-        let body = if res.res_type == ResType::ControllerIo {
+        let nm = Name::new(type_n)?.obj(obj_n)?;
+        log::info!("GET {nm}");
+        nm.auth_access(&state, Access::View).await?;
+        let sql = nm.res_type.sql_query();
+        let name = nm.object_n()?;
+        let body = if nm.res_type == ResType::ControllerIo {
             state.get_array_by_pkey(sql, &name).await
         } else {
             state.get_by_pkey(sql, &name).await
@@ -379,10 +290,10 @@ fn resource_file_get(state: AppState) -> Router {
         AxumPath(type_n): AxumPath<&str>,
         State(state): State<AppState>,
     ) -> Resp2 {
-        let res = Resource::new(type_n)?;
-        log::info!("GET {res}");
-        res.auth_access(&state, Access::View).await?;
-        let path = PathBuf::from(res.to_string());
+        let nm = Name::new(type_n)?;
+        log::info!("GET {nm}");
+        nm.auth_access(&state, Access::View).await?;
+        let path = PathBuf::from(nm.to_string());
         let etag = resource_etag(&path).await?;
         if let Some(values) = req.header("If-None-Match") {
             if values.iter().any(|v| v == &etag) {
@@ -417,27 +328,27 @@ fn sonar_post(state: AppState) -> Router {
     async fn handler(
         AxumPath(type_n): AxumPath<&str>,
         State(state): State<AppState>,
-        Json(obj): Json<Map<String, Value>>,
+        Json(attrs): Json<Map<String, Value>>,
     ) -> Resp0 {
-        let res = Resource::new(type_n)?;
-        log::info!("POST {res}");
-        res.auth_access(&state, Access::Configure).await?;
-        match obj.get("name") {
+        let nm = Name::new(type_n)?;
+        log::info!("POST {nm}");
+        nm.auth_access(&state, Access::Configure).await?;
+        match attrs.get("name") {
             Some(Value::String(name)) => {
-                let nm = res.make_name(name)?;
+                let name = nm.obj_raw(name)?;
                 let mut c = connection(&state).await?;
                 // first, set attributes on phantom object
-                for (key, value) in obj.iter() {
-                    let key = &key[..];
-                    if key != "name" {
-                        let anm = res.make_att(&nm, key)?;
+                for (key, value) in attrs.iter() {
+                    let attr = &key[..];
+                    if attr != "name" {
+                        let anm = name.attr(attr)?;
                         let value = att_value(value)?;
                         log::debug!("{anm} = {value} (phantom)");
                         c.update_object(&anm, &value).await?;
                     }
                 }
-                log::debug!("creating {nm}");
-                c.create_object(&nm).await?;
+                log::debug!("creating {name}");
+                c.create_object(&name).await?;
                 Ok(StatusCode::CREATED)
             }
             _ => Err(sonar::Error::InvalidValue)?,
@@ -470,34 +381,32 @@ fn sonar_object_patch(state: AppState) -> Router {
     async fn handler(
         AxumPath((type_n, obj_n)): AxumPath<(&str, String)>,
         State(state): State<AppState>,
-        Json(obj): Json<Map<String, Value>>,
+        Json(attrs): Json<Map<String, Value>>,
     ) -> Resp0 {
-        let res = Resource::new(type_n)?.obj(obj_n);
-        log::info!("PATCH {res}");
+        let nm = Name::new(type_n)?.obj(obj_n)?;
+        log::info!("PATCH {nm}");
         // *At least* Operate access needed (further checks below)
-        let access = res.auth_access(&state, Access::Operate).await?;
-        for key in obj.keys() {
+        let access = nm.auth_access(&state, Access::Operate).await?;
+        for key in attrs.keys() {
             let key = &key[..];
-            access.check(res.res_type.access_attr(key))?;
+            access.check(nm.res_type.access_attr(key))?;
         }
         let mut c = connection(&state).await?;
-        let name = res.obj_name()?;
-        let nm = format!("{res}/{name}");
         // first pass
-        for (key, value) in obj.iter() {
-            let key = &key[..];
-            if res.res_type.patch_first_pass(key) {
-                let anm = res.make_att(&nm, key)?;
+        for (key, value) in attrs.iter() {
+            let attr = &key[..];
+            if nm.res_type.patch_first_pass(attr) {
+                let anm = nm.attr(attr)?;
                 let value = att_value(value)?;
                 log::debug!("{anm} = {value}");
                 c.update_object(&anm, &value).await?;
             }
         }
         // second pass
-        for (key, value) in obj.iter() {
-            let key = &key[..];
-            if !res.res_type.patch_first_pass(key) {
-                let anm = res.make_att(&nm, key)?;
+        for (key, value) in attrs.iter() {
+            let attr = &key[..];
+            if !nm.res_type.patch_first_pass(attr) {
+                let anm = nm.attr(attr)?;
                 let value = att_value(value)?;
                 log::debug!("{} = {}", anm, &value);
                 c.update_object(&anm, &value).await?;
@@ -516,13 +425,11 @@ fn sonar_object_delete(state: AppState) -> Router {
         AxumPath((type_n, obj_n)): AxumPath<(&str, String)>,
         State(state): State<AppState>,
     ) -> Resp0 {
-        let res = Resource::new(type_n)?.obj(obj_n);
-        log::info!("DELETE {res}");
-        res.auth_access(&state, Access::Configure).await?;
-        let name = res.obj_name()?;
-        let nm = res.to_string();
+        let nm = Name::new(type_n)?.obj(obj_n)?;
+        log::info!("DELETE {nm}");
+        nm.auth_access(&state, Access::Configure).await?;
         let mut c = connection(&state).await?;
-        c.remove_object(&nm).await?;
+        c.remove_object(nm.to_str()).await?;
         Ok(StatusCode::ACCEPTED)
     }
     Router::new()
