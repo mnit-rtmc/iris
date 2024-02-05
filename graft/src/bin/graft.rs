@@ -41,15 +41,6 @@ use tokio::net::TcpListener;
 /// Path for static files
 const STATIC_PATH: &str = "/var/www/html/iris/api";
 
-/// Authentication information
-#[derive(Debug, Deserialize, Serialize)]
-struct AuthMap {
-    /// Sonar username
-    username: String,
-    /// Sonar password
-    password: String,
-}
-
 /// No-header response result
 type Resp0 = std::result::Result<StatusCode, StatusCode>;
 
@@ -72,21 +63,6 @@ fn json_resp(json: Value) -> Resp1 {
         [(header::CONTENT_TYPE, "application/json")],
         json.to_string(),
     ))
-}
-
-impl AppState {
-    /// Lookup authorized access for a name
-    async fn auth_access(&self, name: &Name, access: Access) -> Result<Access> {
-        let oname = name.object_n()?;
-        let session = self.session();
-        let auth: AuthMap = session.get("auth").ok_or(Error::Unauthorized)?;
-        let perm = self
-            .permission_user_res(&auth.username, name.type_n(), oname)
-            .await?;
-        let acc = Access::new(perm.access_n).ok_or(Error::Unauthorized)?;
-        acc.check(access)?;
-        Ok(acc)
-    }
 }
 
 /// Main entry point
@@ -120,26 +96,16 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-impl AuthMap {
-    /// Authenticate with IRIS server
-    async fn authenticate(&self) -> Result<Connection> {
-        let mut c = Connection::new(HOST, 1037).await?;
-        c.login(&self.username, &self.password).await?;
-        Ok(c)
-    }
-}
-
 /// Handle `POST` to login page
 fn login_post(state: AppState) -> Router {
     async fn handler(
         State(state): State<AppState>,
-        Json(auth): Json<AuthMap>,
+        Json(cred): Json<Credentials>,
     ) -> Resp1 {
         log::info!("POST /login");
-        auth.authenticate().await?;
+        cred.authenticate().await?;
         let session = state.session_mut();
-        // serialization error should never happen; unwrap OK
-        session.insert("auth", auth)?;
+        session.insert("cred", cred)?;
         html_resp("<html>Authenticated</html>")
     }
     Router::new()
@@ -152,8 +118,9 @@ fn access_get(state: AppState) -> Router {
     async fn handler(State(state): State<AppState>) -> Resp1 {
         log::info!("GET /access");
         let session = state.session();
-        let auth: AuthMap = session.get("auth").ok_or(Error::Unauthorized)?;
-        let perms = state.permissions_user(&auth.username).await?;
+        let cred: Credentials =
+            session.get("cred").ok_or(Error::Unauthorized)?;
+        let perms = state.permissions_user(&cred.username).await?;
         match serde_json::to_value(perms) {
             Ok(body) => json_resp(body),
             Err(e) => Err(StatusCode::BAD_REQUEST),
@@ -172,7 +139,7 @@ fn permission_post(state: AppState) -> Router {
     ) -> Resp0 {
         let nm = Name::from_type(ResType::Permission);
         log::info!("POST {nm}");
-        nm.auth_access(&state, Access::Configure).await?;
+        state.name_access(&nm, Access::Configure).await?;
         let role = attrs.get("role");
         let resource_n = attrs.get("resource_n");
         if let (Some(Value::String(role)), Some(Value::String(resource_n))) =
@@ -199,7 +166,7 @@ fn permission_router(state: AppState) -> Router {
     ) -> Resp1 {
         let nm = Name::from_type(ResType::Permission).obj(id.to_string())?;
         log::info!("GET {nm}");
-        nm.auth_access(&state, Access::View).await?;
+        state.name_access(&nm, Access::View).await?;
         let perm = state.permission(id).await?;
         match serde_json::to_value(perm) {
             Ok(body) => json_resp(body),
@@ -215,7 +182,7 @@ fn permission_router(state: AppState) -> Router {
     ) -> Resp0 {
         let nm = Name::from_type(ResType::Permission).obj(id.to_string())?;
         log::info!("PATCH {nm}");
-        nm.auth_access(&state, Access::Configure).await?;
+        state.name_access(&nm, Access::Configure).await?;
         state.permission_patch(id, attrs).await?;
         Ok(StatusCode::NO_CONTENT)
     }
@@ -227,7 +194,7 @@ fn permission_router(state: AppState) -> Router {
     ) -> Resp0 {
         let nm = Name::from_type(ResType::Permission).obj(id.to_string())?;
         log::info!("DELETE {nm}");
-        nm.auth_access(&state, Access::Configure).await?;
+        state.name_access(&nm, Access::Configure).await?;
         state.permission_delete(id).await?;
         Ok(StatusCode::NO_CONTENT)
     }
@@ -248,9 +215,9 @@ fn sql_record_get(state: AppState) -> Router {
     ) -> Resp1 {
         let nm = Name::new(type_n)?.obj(obj_n)?;
         log::info!("GET {nm}");
-        nm.auth_access(&state, Access::View).await?;
+        state.name_access(&nm, Access::View).await?;
         let sql = nm.res_type.sql_query();
-        let name = nm.object_n()?;
+        let name = nm.object_n().ok_or(Error::InvalidValue)?;
         let body = if nm.res_type == ResType::ControllerIo {
             state.get_array_by_pkey(sql, &name).await
         } else {
@@ -264,16 +231,6 @@ fn sql_record_get(state: AppState) -> Router {
     Router::new()
         .route("/:type_n/:obj_n", get(handler))
         .with_state(state)
-}
-
-/// IRIS host name
-const HOST: &str = "localhost.localdomain";
-
-/// Create a Sonar connection for a request
-async fn connection(state: &AppState) -> Result<Connection> {
-    let session = state.session();
-    let auth: AuthMap = session.get("auth").ok_or(Error::Unauthorized)?;
-    auth.authenticate().await
 }
 
 /// Invalid characters for SONAR names
@@ -292,7 +249,7 @@ fn resource_file_get(state: AppState) -> Router {
     ) -> Resp2 {
         let nm = Name::new(type_n)?;
         log::info!("GET {nm}");
-        nm.auth_access(&state, Access::View).await?;
+        state.name_access(&nm, Access::View).await?;
         let path = PathBuf::from(nm.to_string());
         let etag = resource_etag(&path).await?;
         if let Some(values) = req.header("If-None-Match") {
@@ -332,11 +289,11 @@ fn sonar_post(state: AppState) -> Router {
     ) -> Resp0 {
         let nm = Name::new(type_n)?;
         log::info!("POST {nm}");
-        nm.auth_access(&state, Access::Configure).await?;
+        state.name_access(&nm, Access::Configure).await?;
         match attrs.get("name") {
             Some(Value::String(name)) => {
                 let name = nm.obj_raw(name)?;
-                let mut c = connection(&state).await?;
+                let mut c = state.connection().await?;
                 // first, set attributes on phantom object
                 for (key, value) in attrs.iter() {
                     let attr = &key[..];
@@ -386,12 +343,12 @@ fn sonar_object_patch(state: AppState) -> Router {
         let nm = Name::new(type_n)?.obj(obj_n)?;
         log::info!("PATCH {nm}");
         // *At least* Operate access needed (further checks below)
-        let access = nm.auth_access(&state, Access::Operate).await?;
+        let access = state.name_access(&nm, Access::Operate).await?;
         for key in attrs.keys() {
             let key = &key[..];
             access.check(nm.res_type.access_attr(key))?;
         }
-        let mut c = connection(&state).await?;
+        let mut c = state.connection().await?;
         // first pass
         for (key, value) in attrs.iter() {
             let attr = &key[..];
@@ -427,8 +384,8 @@ fn sonar_object_delete(state: AppState) -> Router {
     ) -> Resp0 {
         let nm = Name::new(type_n)?.obj(obj_n)?;
         log::info!("DELETE {nm}");
-        nm.auth_access(&state, Access::Configure).await?;
-        let mut c = connection(&state).await?;
+        state.name_access(&nm, Access::Configure).await?;
+        let mut c = state.connection().await?;
         c.remove_object(nm.to_str()).await?;
         Ok(StatusCode::ACCEPTED)
     }

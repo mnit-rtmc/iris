@@ -12,9 +12,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::error::Result;
+use crate::access::Access;
+use crate::error::{Error, Result};
 use crate::query::PERMISSION;
-use crate::sonar::Error as SonarError;
+use crate::sonar::{Connection, Error as SonarError, Name};
 use bb8::Pool;
 use bb8_postgres::PostgresConnectionManager;
 use serde::{Deserialize, Serialize};
@@ -23,47 +24,25 @@ use serde_json::Value;
 use tokio_postgres::types::ToSql;
 use tokio_postgres::{NoTls, Row};
 
-/// Permission
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Permission {
-    pub id: i32,
-    pub role: String,
-    pub resource_n: String,
-    pub hashtag: Option<String>,
-    pub access_n: i32,
+/// IRIS host name
+const HOST: &str = "localhost.localdomain";
+
+/// Authentication credentials
+#[derive(Debug, Deserialize, Serialize)]
+struct Credentials {
+    /// Sonar username
+    username: String,
+    /// Sonar password
+    password: String,
 }
 
-/// Db connection pool
-type PostgresPool = Pool<PostgresConnectionManager<NoTls>>;
-
-/// Application state for postgres
-#[derive(Clone)]
-pub struct AppState {
-    /// Db connection pool
-    pool: PostgresPool,
-}
-
-impl Permission {
-    fn from_row(row: Row) -> Self {
-        Permission {
-            id: row.get(0),
-            role: row.get(1),
-            resource_n: row.get(2),
-            hashtag: row.get(3),
-            access_n: row.get(4),
-        }
+impl Credentials {
+    /// Authenticate with IRIS server
+    pub async fn authenticate(&self) -> Result<Connection> {
+        let mut c = Connection::new(HOST, 1037).await?;
+        c.login(&self.username, &self.password).await?;
+        Ok(c)
     }
-}
-
-/// Make postgres pool
-async fn make_pool() -> Result<PostgresPool> {
-    let username = whoami::username();
-    // Format path for unix domain socket -- not worth using percent_encode
-    let uds = format!("postgres://{username}@%2Frun%2Fpostgresql/tms");
-    let config = uds.parse()?;
-    let manager = PostgresConnectionManager::new(config, NoTls);
-    let pool = Pool::builder().build(manager).await?;
-    Ok(pool)
 }
 
 /// Create one permission
@@ -126,6 +105,49 @@ AND (\
 ) \
 ORDER BY access_n DESC \
 LIMIT 1";
+
+/// Permission
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Permission {
+    pub id: i32,
+    pub role: String,
+    pub resource_n: String,
+    pub hashtag: Option<String>,
+    pub access_n: i32,
+}
+
+impl Permission {
+    fn from_row(row: Row) -> Self {
+        Permission {
+            id: row.get(0),
+            role: row.get(1),
+            resource_n: row.get(2),
+            hashtag: row.get(3),
+            access_n: row.get(4),
+        }
+    }
+}
+
+/// Db connection pool
+type PostgresPool = Pool<PostgresConnectionManager<NoTls>>;
+
+/// Make postgres pool
+async fn make_pool() -> Result<PostgresPool> {
+    let username = whoami::username();
+    // Format path for unix domain socket -- not worth using percent_encode
+    let uds = format!("postgres://{username}@%2Frun%2Fpostgresql/tms");
+    let config = uds.parse()?;
+    let manager = PostgresConnectionManager::new(config, NoTls);
+    let pool = Pool::builder().build(manager).await?;
+    Ok(pool)
+}
+
+/// Application state for postgres
+#[derive(Clone)]
+pub struct AppState {
+    /// Db connection pool
+    pool: PostgresPool,
+}
 
 impl AppState {
     /// Create new postgres application state
@@ -292,5 +314,31 @@ impl AppState {
             .await
             .map_err(|_e| SonarError::NotFound)?;
         Ok(row.get::<usize, String>(0))
+    }
+
+    /// Lookup access for a name
+    pub async fn name_access(
+        &self,
+        name: &Name,
+        access: Access,
+    ) -> Result<Access> {
+        let oname = name.object_n();
+        let session = self.session();
+        let cred: Credentials =
+            session.get("cred").ok_or(Error::Unauthorized)?;
+        let perm = self
+            .permission_user_res(&cred.username, name.type_n(), oname)
+            .await?;
+        let acc = Access::new(perm.access_n).ok_or(Error::Unauthorized)?;
+        acc.check(access)?;
+        Ok(acc)
+    }
+
+    /// Create a Sonar connection for a request
+    pub async fn connection(&self) -> Result<Connection> {
+        let session = self.session();
+        let cred: Credentials =
+            session.get("cred").ok_or(Error::Unauthorized)?;
+        cred.authenticate().await
     }
 }

@@ -184,8 +184,8 @@ impl Name {
     }
 
     /// Get object name
-    pub fn object_n(&self) -> Result<&str> {
-        self.name.splitn(2, '/').nth(1).ok_or(Error::InvalidValue)
+    pub fn object_n(&self) -> Option<&str> {
+        self.name.splitn(2, '/').nth(1)
     }
 
     /// Make a Sonar attribute (with validation)
