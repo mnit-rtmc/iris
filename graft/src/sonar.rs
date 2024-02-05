@@ -130,15 +130,15 @@ pub struct Name {
     /// Resource type
     pub res_type: ResType,
 
-    /// Full name (type / object)
-    name: String,
+    /// Object name
+    obj_name: Option<String>,
 }
 
 impl From<ResType> for Name {
     fn from(res_type: ResType) -> Self {
         Name {
             res_type,
-            name: res_type.as_str().to_string(),
+            obj_name: None,
         }
     }
 }
@@ -148,7 +148,11 @@ impl fmt::Display for Name {
         &self,
         f: &mut fmt::Formatter<'_>,
     ) -> std::result::Result<(), fmt::Error> {
-        write!(f, "{}", self.name)
+        let type_n = self.type_n();
+        match &self.obj_name {
+            Some(obj_n) => write!(f, "{type_n}/{obj_n}"),
+            None => write!(f, "{type_n}"),
+        }
     }
 }
 
@@ -158,24 +162,19 @@ impl Name {
         Ok(Name::from(ResType::try_from(type_n)?))
     }
 
-    /// Set object name (with validation, not percent-encoded)
-    pub fn obj_raw(mut self, obj_n: &str) -> Result<Self> {
+    /// Set object name
+    ///
+    /// Name is validated and decoded from percent-encoded form
+    pub fn obj(self, obj_n: &str) -> Result<Self> {
+        let obj_n = &percent_decode_str(obj_n)
+            .decode_utf8()
+            .or(Err(Error::InvalidValue))?;
         if obj_n.len() > 64 || obj_n.contains(invalid_char) {
             Err(Error::InvalidValue)?
         } else {
-            let type_n = self.type_n();
-            self.name = format!("{type_n}/{obj_n}");
+            self.obj_name = Some(obj_n.to_string());
             Ok(self)
         }
-    }
-
-    /// Set object name from percent-encoded value
-    pub fn obj(self, obj_n: &str) -> Result<Self> {
-        self.obj_raw(
-            &percent_decode_str(obj_n)
-                .decode_utf8()
-                .or(Err(Error::InvalidValue))?,
-        )
     }
 
     /// Get resource type name
@@ -185,7 +184,7 @@ impl Name {
 
     /// Get object name
     pub fn object_n(&self) -> Option<&str> {
-        self.name.splitn(2, '/').nth(1)
+        self.obj_name.as_deref()
     }
 
     /// Make a Sonar attribute (with validation)

@@ -292,7 +292,7 @@ fn sonar_post(state: AppState) -> Router {
         state.name_access(&nm, Access::Configure).await?;
         match attrs.get("name") {
             Some(Value::String(name)) => {
-                let name = nm.obj_raw(name)?;
+                let name = nm.obj(name)?;
                 let mut c = state.connection().await?;
                 // first, set attributes on phantom object
                 for (key, value) in attrs.iter() {
