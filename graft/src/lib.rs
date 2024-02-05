@@ -20,3 +20,4 @@ pub mod query;
 pub mod restype;
 pub mod sonar;
 pub mod state;
+pub mod tls;
