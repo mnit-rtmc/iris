@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
@@ -55,6 +56,16 @@ abstract public class OnvifProp extends ControllerProperty {
 
 	public void setUrl(String u) {
 		url = u;
+	}
+
+	/** Override to queue ONVIF ops while previous ones on a camera finish */
+	@Override
+	public boolean equals(Object o) {
+		if ((!(o instanceof OnvifProp)) || getClass() != o.getClass())
+			return false;
+
+		OnvifProp op = (OnvifProp) o;
+		return Objects.equals(cmds, op.cmds) && Objects.equals(url, op.url);
 	}
 
 	/** Build and send the SOAP messages */
