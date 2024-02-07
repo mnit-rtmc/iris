@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -390,7 +390,7 @@ async fn add_sidebar() -> JsResult<()> {
     let doc = Doc(doc);
     let sidebar: HtmlElement = doc.elem("sidebar");
     sidebar.set_inner_html(SIDEBAR);
-    add_change_listener(&doc.elem("sb_config"))?;
+    add_change_listener(&sidebar)?;
     add_click_listener(&sidebar)?;
     add_input_listener(&sidebar)?;
     add_transition_listener(&doc.elem("sb_list"))?;
@@ -435,9 +435,10 @@ fn handle_sb_resource_ev(rname: String) {
 }
 
 /// Add a "change" event listener to an element
-fn add_change_listener(elem: &HtmlInputElement) -> JsResult<()> {
-    let closure = Closure::wrap(Box::new(|_e: Event| {
-        spawn_local(reload_resources());
+fn add_change_listener(elem: &Element) -> JsResult<()> {
+    let closure = Closure::wrap(Box::new(|e: Event| {
+        let target = e.target().unwrap().dyn_into::<Element>().unwrap();
+        handle_change_ev(target);
     }) as Box<dyn Fn(_)>);
     elem.add_event_listener_with_callback(
         "change",
@@ -446,6 +447,16 @@ fn add_change_listener(elem: &HtmlInputElement) -> JsResult<()> {
     // can't drop closure, just forget it to make JS happy
     closure.forget();
     Ok(())
+}
+
+/// Handle a "change" event
+fn handle_change_ev(target: Element) {
+    let id = target.id();
+    match id.as_str() {
+        "sb_config" => spawn_local(reload_resources()),
+        "sb_fullscreen" => Doc::get().toggle_fullscreen(),
+        _ => (),
+    }
 }
 
 /// Reload resource select element

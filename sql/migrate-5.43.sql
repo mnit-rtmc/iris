@@ -56,12 +56,20 @@ CREATE VIEW hashtag_view AS
 GRANT SELECT ON hashtag_view TO PUBLIC;
 
 -- Remove invalid characters from hashtags
+UPDATE iris.dms_hashtag
+    SET hashtag = translate(hashtag, '-_', '');
+UPDATE iris.msg_pattern
+    SET compose_hashtag = translate(compose_hashtag, '-_', '');
 UPDATE iris.msg_line
     SET restrict_hashtag = translate(restrict_hashtag, '-_', '');
 UPDATE iris.dms_action
     SET dms_hashtag = translate(dms_hashtag, '-_', '');
+UPDATE iris.alert_config
+    SET dms_hashtag = translate(dms_hashtag, '-_', '');
 UPDATE cap.alert_info
     SET all_hashtag = translate(all_hashtag, '-_', '');
+UPDATE iris.lane_use_multi
+    SET dms_hashtag = translate(dms_hashtag, '-_', '');
 
 -- Add hashtag check constraints
 ALTER TABLE iris.dms_hashtag ADD

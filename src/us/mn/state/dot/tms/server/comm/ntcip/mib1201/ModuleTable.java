@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2022  Minnesota Department of Transportation
+ * Copyright (C) 2022-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,14 +99,13 @@ public class ModuleTable {
 		return tr;
 	}
 
-	/** Get software version (last software module in table) */
+	/** Get software version (first software module in table) */
 	private String getVersion() {
-		String v = null;
 		for (Row row : table_rows) {
 			if (row.m_type.getEnum() == ModuleType.software)
-				v = trimTruncate(row.version);
+				return trimTruncate(row.version);
 		}
-		return v;
+		return null;
 	}
 
 	/** Get JSON representation */

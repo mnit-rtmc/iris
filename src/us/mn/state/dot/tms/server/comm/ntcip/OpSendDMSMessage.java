@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -631,8 +631,8 @@ public class OpSendDMSMessage extends OpDMS {
 			//       stupid sign bug.  It may no longer be needed.
 			ASN1Integer time = dmsMessageTimeRemaining.makeInt();
 			time.setInteger(getDuration());
-			if (SignMessageHelper.isScheduledIndefinite(message))
-				setCommAndPower();
+			if (SignMessageHelper.isScheduledSticky(message))
+				setCommAndPowerSticky();
 			else
 				setCommAndPowerBlank();
 			mess.add(time);
@@ -646,8 +646,8 @@ public class OpSendDMSMessage extends OpDMS {
 		}
 	}
 
-	/** Set the comm loss and power recovery msgs */
-	private void setCommAndPower() {
+	/** Set "sticky" comm loss and power recovery msgs */
+	private void setCommAndPowerSticky() {
 		comm_msg.setMemoryType(DmsMessageMemoryType.changeable);
 		comm_msg.setNumber(msg_num);
 		comm_msg.setCrc(message_crc);

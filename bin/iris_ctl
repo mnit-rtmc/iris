@@ -2,7 +2,7 @@
 #
 # /usr/bin/iris_ctl -- Script for initializing and updating IRIS
 #
-# Copyright (C) 2012-2023  Minnesota Department of Transportation
+# Copyright (C) 2012-2024  Minnesota Department of Transportation
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -78,12 +78,6 @@ function init_db() {
 	systemctl start postgresql.service
 }
 
-function create_earthwyrm_database() {
-	echo "Creating earthwyrm database"
-	create_db="createdb earthwyrm; psql earthwyrm -c 'CREATE EXTENSION postgis;'"
-	su --login postgres -c "$create_db"
-}
-
 function create_tms_user() {
 	echo "Creating the tms db user"
 	tms_pwd=`head -c8 < /dev/random | base64`
@@ -148,7 +142,6 @@ case "$1" in
 		update_client_properties
 		create_keystores
 		init_db
-		create_earthwyrm_database
 		create_tms_user
 		create_tms_database
 		configure_selinux

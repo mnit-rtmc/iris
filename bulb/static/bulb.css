@@ -1,5 +1,5 @@
 body {
-  background-color: #dde;
+  background-color: #ccc;
   font-family: "Overpass";
 }
 label {
@@ -108,7 +108,7 @@ button.go_link {
   justify-content: flex-start;
   user-select: none;
   flex: 0 1 100%;
-  margin: 0;
+  margin: 0.2rem;
   background-image: url(iris.svg);
   background-repeat: no-repeat;
   background-position: center;

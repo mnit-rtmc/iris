@@ -16,7 +16,7 @@ cargo build --release
 
 ## Installation
 
-NOTE: The `tms` and `earthwyrm` databases must be set up prior to this step.
+NOTE: The `tms` database must be set up prior to this step.
 
 As root:
 ```

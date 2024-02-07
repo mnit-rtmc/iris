@@ -49,11 +49,10 @@ This will perform the following steps:
 3. Create a symbolic link to the PostgreSQL JDBC driver to make it available to
    the IRIS server
 4. Create the [database] cluster and start the PostgreSQL server
-5. Create the `earthwyrm` databsae (for OpenStreetMap data)
-6. Create the `tms` PostgreSQL user, which IRIS uses to connect to the database
-7. Create the `tms` database and populate it using a template SQL script
-8. Configure the nginx (web server) and IRIS services to start automatically
-9. Create symbolic links to the current IRIS software version
+5. Create the `tms` PostgreSQL user, which IRIS uses to connect to the database
+6. Create the `tms` database and populate it using a template SQL script
+7. Configure the nginx (web server) and IRIS services to start automatically
+8. Create symbolic links to the current IRIS software version
 
 The command should finish with the following message:
 ```

@@ -9,7 +9,8 @@ edition.workspace = true
 anyhow = "1.0"
 async-std = { version="1.8", features=["attributes", "tokio1"] }
 convert_case = "0.5"
-log = "0.4"
+env_logger = { workspace = true }
+log = { workspace = true }
 percent-encoding = "2"
 postgres = "0.19"
 r2d2 = "0.8"
@@ -28,8 +29,3 @@ whoami = "1"
 version = "0.11"
 default-features = false
 features = ["client"]
-
-[dependencies.env_logger]
-version = "0.9"
-default-features = false
-features = ["atty"]

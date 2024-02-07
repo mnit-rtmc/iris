@@ -1,120 +1,161 @@
 # Example earthwyrm configuration for IRIS
+#
+# Socket address and port to bind server
 bind_address: 127.0.0.1:3030
-document_root: /var/local/earthwyrm
+
+# Tile properties
+#
+# Tile extent; width and height in pixels
 tile_extent: 256
-edge_extent: 6
-query_limit: 500000
+# Extent outside tile edges (pixels)
+edge_extent: 8
 
-table: polygon
-  db_table: planet_osm_polygon
-  id_column: osm_id
-  geom_column: way
-  geom_type: polygon
-
-table: line
-  db_table: planet_osm_line
-  id_column: osm_id
-  geom_column: way
-  geom_type: linestring
-
-table: roads
-  db_table: planet_osm_roads
-  id_column: osm_id
-  geom_column: way
-  geom_type: linestring
-
-table: point
-  db_table: planet_osm_point
-  id_column: osm_id
-  geom_column: way
-  geom_type: point
-
-table: segments
-  db_table: segments
-  id_column: sid
-  zoom_column: zoom
-  geom_column: way
-  geom_type: polygon
-
+# Layer groups are collections of MVT files containing related layers.
+#   - name: Base URI path name
 layer_group: tile
+  # Layer definition
+  #
+  # name: Name of layer
+  #
+  # source: Data source:
+  #       - osm (openstreetmap.org)
+  #       - json
+  #
+  # geom_type: Type of geometry (point, linestring or polygon)
+  #
+  # zoom: Zoom level, in one of three formats:
+  #     - exact (ex. 5)
+  #     - range (ex. 8-12)
+  #     - minimum (ex. 10+)
+  #
+  # tags: Whitespace separated patterns for the layer -- all must match for a
+  #       feature to be included.  Each pattern consists of up to 4 parts:
+  #       rule, tag, equality, and value(s).  The only required part is the tag.
+  #
+  #       Rule: controls how the tag/values are matched/included:
+  #           . (period): match tag/values and include them in the layer
+  #           ? (question mark): do not match tag, but include in layer
+  #           $ (dollar): do not match tag, but include in the layer, as `sint`
+  #           (empty): match tag/values, but do not include them in layer
+  #       Tag: see https://wiki.openstreetmap.org/wiki/Tags
+  #       Equality: how to process values (must be paired with value list)
+  #           = (equal): value must be equal to an item in value list
+  #           != (not equal): value must be not equal to an item in list
+  #       Value(s): list of values, separated by | (vertical bar).  The null
+  #           value may be specified with _ (underscore).
+  #
+  #       Examples:
+  #           tag=value
+  #           tag=value1|value2
+  #           tag!=value
+  #           tag!=value|_
+  #           tag              (same as tag!=_)
+  #           .tag             (same as .tag!=_)
+  #           ?tag             (same as ?tag!=_)
+  #
   layer: county
-    table: polygon
+    source: osm
+    geom_type: polygon
     zoom: 4-14
-    tags: boundary=administrative admin_level=6 ?population
+    tags: $osm_id ?name ?population type=boundary boundary=administrative admin_level=6
   layer: city
-    table: polygon
+    source: osm
+    geom_type: polygon
     zoom: 10+
-    tags: boundary=administrative admin_level=8 ?population
+    tags: $osm_id ?name ?population type=boundary boundary=administrative admin_level=8
   layer: leisure
-    table: polygon
+    source: osm
+    geom_type: polygon
     zoom: 13+
-    tags: leisure
+    tags: $osm_id ?name leisure
+  layer: cemetery
+    source: osm
+    geom_type: polygon
+    zoom: 13+
+    tags: $osm_id ?name landuse=cemetery
   layer: lake
-    table: polygon
+    source: osm
+    geom_type: polygon
     zoom: 5+
-    tags: natural=water water=lake|oxbow
+    tags: $osm_id ?name natural=water water=harbour|lagoon|lake|oxbow
   layer: river
-    table: polygon
-    zoom: 5+
-    tags: natural=water water=river
-  layer: water
-    table: polygon
-    zoom: 12+
-    tags: natural=water water!=lake|oxbow|river|pond
+    source: osm
+    geom_type: polygon
+    zoom: 6+
+    tags: $osm_id ?name natural=water water=canal|rapids|river
   layer: pond
-    table: polygon
+    source: osm
+    geom_type: polygon
+    zoom: 12+
+    tags: $osm_id ?name natural=water water=basin|pond|reservoir
+  layer: water
+    source: osm
+    geom_type: polygon
     zoom: 14+
-    tags: natural=water water=pond
-  layer: basin
-    table: polygon
-    zoom: 14+
-    tags: landuse=basin
+    tags: $osm_id ?name natural=water water!=basin|canal|harbour|lagoon|lake|oxbow|pond|rapids|reservoir|river
   layer: wetland
-    table: polygon
+    source: osm
+    geom_type: polygon
     zoom: 12+
-    tags: natural=wetland
+    tags: $osm_id ?name natural=wetland
   layer: retail
-    table: polygon
+    source: osm
+    geom_type: polygon
     zoom: 14+
-    tags: landuse=retail
-  layer: motorway
-    table: roads
-    zoom: 8+
-    tags: highway=motorway|motorway_link ?ref
-  layer: trunk
-    table: roads
-    zoom: 9+
-    tags: highway=trunk|trunk_link ?ref
-  layer: primary
-    table: roads
-    zoom: 10+
-    tags: highway=primary|primary_link ?ref
-  layer: secondary
-    table: roads
-    zoom: 12+
-    tags: highway=secondary|secondary_link ?ref
-  layer: tertiary
-    table: line
-    zoom: 13+
-    tags: highway=tertiary|tertiary_link ?ref
-  layer: roads
-    table: line
-    zoom: 14+
-    tags: highway=unclassified|residential|living_street|service|road ?ref
-  layer: paths
-    table: line
-    zoom: 15+
-    tags: highway=pedestrian|footway|track|bridleway|steps|corridor|cycleway|path
+    tags: $osm_id ?name landuse=retail
   layer: parking
-    table: polygon
+    source: osm
+    geom_type: polygon
     zoom: 15+
-    tags: amenity=parking
+    tags: $osm_id ?name amenity=parking
   layer: building
-    table: polygon
+    source: osm
+    geom_type: polygon
     zoom: 15+
-    tags: building
+    tags: $osm_id ?name building
+  layer: motorway
+    source: osm
+    geom_type: linestring
+    zoom: 8+
+    tags: $osm_id ?name ?ref highway=motorway|motorway_link
+  layer: trunk
+    source: osm
+    geom_type: linestring
+    zoom: 9+
+    tags: $osm_id ?name ?ref highway=trunk|trunk_link
+  layer: primary
+    source: osm
+    geom_type: linestring
+    zoom: 10+
+    tags: $osm_id ?name ?ref highway=primary|primary_link
+  layer: secondary
+    source: osm
+    geom_type: linestring
+    zoom: 12+
+    tags: $osm_id ?name ?ref highway=secondary|secondary_link
+  layer: tertiary
+    source: osm
+    geom_type: linestring
+    zoom: 13+
+    tags: $osm_id ?name ?ref highway=tertiary|tertiary_link
+  layer: roads
+    source: osm
+    geom_type: linestring
+    zoom: 14+
+    tags: $osm_id ?name ?ref highway=unclassified|residential|living_street|service|road
+  layer: railways
+    source: osm
+    geom_type: linestring
+    zoom: 15+
+    tags: $osm_id ?name railway
+  layer: paths
+    source: osm
+    geom_type: linestring
+    zoom: 16+
+    tags: $osm_id ?name highway=pedestrian|footway|track|bridleway|steps|corridor|cycleway|path
 layer_group: tms
   layer: segments
-    table: segments
+    source: json
+    geom_type: polygon
     zoom: 9-18
     tags: ?station

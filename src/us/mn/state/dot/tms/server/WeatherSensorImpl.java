@@ -644,6 +644,23 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		}
 	}
 
+	/** Surface conductivity (V2) (null for missing) */
+	private transient Integer surface_conductivity_v2;
+
+	/** Get surface conductivity (V2) (null for missing) */
+	@Override
+	public Integer getSurfCondV2() {
+		return surface_conductivity_v2;
+	}
+
+	/** Set surface conductivity (V2) (null for missing) */
+	public void setSurfCondV2Notify(Integer v) {
+		if (!objectEquals(v, surface_conductivity_v2)) {
+			surface_conductivity_v2 = v;
+			notifyAttribute("surfCondV2");
+		}
+	}
+
 	/** Settings (JSON) read from sensors */
 	private String settings;
 

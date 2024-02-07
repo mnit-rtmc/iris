@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2023  Minnesota Department of Transportation
+ * Copyright (C) 2019-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ public class Json {
 			sb.append('"');
 			sb.append(key);
 			sb.append("\":\"");
-			sb.append(value);
+			sb.append(value.toString().replace("\"", "\\\""));
 			sb.append("\",");
 			return sb.toString();
 		} else
@@ -63,19 +63,6 @@ public class Json {
 			if (sb.charAt(sb.length() - 1) == ',')
 				sb.setLength(sb.length() - 1);
 			sb.append("],");
-			return sb.toString();
-		} else
-			return "";
-	}
-
-	/** Make a JSON key/sub object for a JSON type */
-	static public String sub(String key, String value) {
-		if (value != null) {
-			StringBuilder sb = new StringBuilder();
-			sb.append('"');
-			sb.append(key);
-			sb.append("\":");
-			sb.append(value);
 			return sb.toString();
 		} else
 			return "";

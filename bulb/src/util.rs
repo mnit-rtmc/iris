@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -227,6 +227,19 @@ impl Doc {
             .trim()
             .parse()
             .ok()
+    }
+
+    /// Request the document to toggle full screen
+    pub fn toggle_fullscreen(&self) {
+        if self.0.fullscreen_element().is_none() {
+            self.0
+                .document_element()
+                .unwrap_throw()
+                .request_fullscreen()
+                .unwrap_throw();
+        } else {
+            self.0.exit_fullscreen();
+        }
     }
 }
 
