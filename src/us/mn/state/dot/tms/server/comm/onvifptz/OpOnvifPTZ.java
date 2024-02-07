@@ -16,6 +16,8 @@
 package us.mn.state.dot.tms.server.comm.onvifptz;
 
 import java.io.IOException;
+import java.util.Objects;
+
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
@@ -47,6 +49,19 @@ public class OpOnvifPTZ extends OpDevice<OnvifProp> {
 	/** Create the second phase of the operation */
 	protected Phase<OnvifProp> phaseTwo() {
 		return new SendProp();
+	}
+
+	/** Override to queue ONVIF ops while previous ones on a camera finish */
+	@Override
+	public boolean equals(Object o) {
+		if ((!(o instanceof OpOnvifPTZ)) || getClass() != o.getClass())
+			return false;
+
+		OpOnvifPTZ op = (OpOnvifPTZ) o;
+		return o == this || (
+			   op.device == device &&
+			   Objects.equals(op.prop, prop)
+			);
 	}
 
 	/** Send property */

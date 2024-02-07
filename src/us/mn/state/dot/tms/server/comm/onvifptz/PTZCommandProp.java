@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.onvifptz;
 
 import java.security.NoSuchAlgorithmException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 
 /**
  * PTZ command property.
@@ -28,8 +29,8 @@ import java.io.UnsupportedEncodingException;
 public class PTZCommandProp extends OnvifProp {
 
 	/** Create a new PTZ command property */
-	public PTZCommandProp(String service, String u, String p) {
-		super();
+	public PTZCommandProp(String u, String p) {
+		cmds = new ArrayList<String[]>();
 		user = u;
 		pass = p;
 	}
@@ -48,7 +49,7 @@ public class PTZCommandProp extends OnvifProp {
 	public void addStorePreset(int p) {
 		cmds.add(new String[] {
 			"storepreset",
-			String.valueOf(p)
+			"Preset" + p
 		});
 	}
 
@@ -56,7 +57,7 @@ public class PTZCommandProp extends OnvifProp {
 	public void addRecallPreset(int p) {
 		cmds.add(new String[] {
 			"recallpreset",
-			String.valueOf(p)
+			"Preset" + p
 		});
 	}
 

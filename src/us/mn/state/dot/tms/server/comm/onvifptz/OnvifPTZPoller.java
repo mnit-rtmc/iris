@@ -92,21 +92,21 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 		}
 	}
 
-	/** Gets a base prop from camera's password field and requested service type */
-	private PTZCommandProp getBaseProp(CameraImpl c, String type) {
+	/** Gets a base prop with login info from camera's password field */
+	private PTZCommandProp getBaseProp(CameraImpl c) {
 		String userpass = c.getController().getPassword();
 		PTZCommandProp prop;
 
 		if (userpass == null)
 			// don't set null user or password; use empty string instead
-			prop = new PTZCommandProp(type, "", "");
+			prop = new PTZCommandProp("", "");
 		else if (userpass.split(":").length < 2)
 			// if only one value, assume password to match label in client UI
-			prop = new PTZCommandProp(type, "", userpass);
+			prop = new PTZCommandProp("", userpass);
 		else {
 			// otherwise, not null and has two values -> use them
 			String[] loginArr = userpass.split(":");
-			prop = new PTZCommandProp(type, loginArr[0], loginArr[1]);
+			prop = new PTZCommandProp(loginArr[0], loginArr[1]);
 		}
 
 		// set url; preface with http:// if missing
@@ -121,7 +121,8 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 	/** Send a PTZ camera move command */
 	@Override
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
-		PTZCommandProp prop = getBaseProp(c, "ptz");
+		log("In sendPTZ: " + p + ", " + t + ", " + z);
+		PTZCommandProp prop = getBaseProp(c);
 		prop.addPanTiltZoom(p, t, z);
 		addOp(new OpOnvifPTZ(c, prop));
 	}
@@ -129,7 +130,7 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 	/** Send a "store camera preset" command */
 	@Override
 	public void sendStorePreset(CameraImpl c, int preset) {
-		PTZCommandProp prop = getBaseProp(c, "ptz");
+		PTZCommandProp prop = getBaseProp(c);
 		prop.addStorePreset(preset);
 		addOp(new OpOnvifPTZ(c, prop));
 	}
@@ -137,7 +138,7 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 	/** Send a "recall camera preset" command */
 	@Override
 	public void sendRecallPreset(CameraImpl c, int preset) {
-		PTZCommandProp prop = getBaseProp(c, "ptz");
+		PTZCommandProp prop = getBaseProp(c);
 		prop.addRecallPreset(preset);
 		addOp(new OpOnvifPTZ(c, prop));
 	}
@@ -147,11 +148,8 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 	 * @param dr Device request to send. */
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest dr) {
-		PTZCommandProp prop = getBaseProp(c, "imaging");
-		if (dr == DeviceRequest.CAMERA_WIPER_ONESHOT)
-			prop = getBaseProp(c, "ptz");
-
-		prop = createDeviceReqProp(prop, dr);
+		PTZCommandProp prop = getBaseProp(c);
+		createDeviceReqProp(prop, dr);
 		if (prop != null)
 			addOp(new OpOnvifPTZ(c, prop));
 	}
