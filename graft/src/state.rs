@@ -28,7 +28,7 @@ use tokio_postgres::{NoTls, Row};
 const HOST: &str = "localhost.localdomain";
 
 /// Authentication credentials
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 struct Credentials {
     /// Sonar username
     username: String,
@@ -84,8 +84,8 @@ AND u.name = $1 \
 AND p.resource_n = $2 \
 AND p.hashtag IS NULL";
 
-/// Query permission for a user / resource / name
-const QUERY_PERMISSION_NAMED: &str = "\
+/// Query permission for a user / resource / object name
+const QUERY_PERMISSION_OBJ: &str = "\
 SELECT p.id, p.role, p.resource_n, p.hashtag, p.access_n \
 FROM iris.permission p \
 JOIN iris.role r ON p.role = r.name \
@@ -107,7 +107,7 @@ ORDER BY access_n DESC \
 LIMIT 1";
 
 /// Permission
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct Permission {
     pub id: i32,
     pub role: String,
@@ -259,25 +259,25 @@ impl AppState {
         Ok(perms)
     }
 
-    /// Get user permission for a resource
-    pub async fn permission_user_res(
+    /// Get user permission for a Sonar name
+    async fn permission_user_res(
         &self,
         user: &str,
-        res: &str,
-        name: Option<&str>,
+        name: &Name,
     ) -> Result<Permission> {
         let client = self.pool.get().await?;
-        match name {
-            Some(name) => {
+        let type_n = name.type_n();
+        match name.object_n() {
+            Some(obj_n) => {
                 let row = client
-                    .query_one(QUERY_PERMISSION_NAMED, &[&user, &res, &name])
+                    .query_one(QUERY_PERMISSION_OBJ, &[&user, &type_n, &obj_n])
                     .await
                     .map_err(|_e| SonarError::Forbidden)?;
                 Ok(Permission::from_row(row))
             }
             None => {
                 let row = client
-                    .query_one(QUERY_PERMISSION, &[&user, &res])
+                    .query_one(QUERY_PERMISSION, &[&user, &type_n])
                     .await
                     .map_err(|_e| SonarError::Forbidden)?;
                 Ok(Permission::from_row(row))
@@ -322,13 +322,10 @@ impl AppState {
         name: &Name,
         access: Access,
     ) -> Result<Access> {
-        let oname = name.object_n();
         let session = self.session();
         let cred: Credentials =
             session.get("cred").ok_or(Error::Unauthorized)?;
-        let perm = self
-            .permission_user_res(&cred.username, name.type_n(), oname)
-            .await?;
+        let perm = self.permission_user_res(&cred.username, name).await?;
         let acc = Access::new(perm.access_n).ok_or(Error::Unauthorized)?;
         acc.check(access)?;
         Ok(acc)

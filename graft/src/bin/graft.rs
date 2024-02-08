@@ -345,8 +345,8 @@ fn sonar_object_patch(state: AppState) -> Router {
         // *At least* Operate access needed (further checks below)
         let access = state.name_access(&nm, Access::Operate).await?;
         for key in attrs.keys() {
-            let key = &key[..];
-            access.check(nm.res_type.access_attr(key))?;
+            let attr = &key[..];
+            access.check(nm.res_type.access_attr(attr))?;
         }
         let mut c = state.connection().await?;
         // first pass
