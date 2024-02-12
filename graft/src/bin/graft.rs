@@ -20,15 +20,19 @@ use axum::{
     routing::{delete, get, patch, post},
     Router,
 };
+use axum_extra::TypedHeader;
 use graft::access::Access;
-use graft::error::Result;
+use graft::error::{Error, Result};
 use graft::restype::ResType;
 use graft::sonar::{self, Name};
 use graft::state::{AppState, Credentials};
+use headers::{ETag, IfNoneMatch};
 use http::header::HeaderName;
 use serde_json::map::Map;
 use serde_json::Value;
+use std::time::SystemTime;
 use time::Duration;
+use tokio::fs::metadata;
 use tokio::net::TcpListener;
 use tower_sessions::{Expiry, Session, SessionManagerLayer};
 use tower_sessions_moka_store::MokaStore;
@@ -249,21 +253,20 @@ fn resource_file_get(state: AppState) -> Router {
     async fn handler(
         session: Session,
         State(state): State<AppState>,
+        TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
         AxumPath(type_n): AxumPath<String>,
     ) -> Resp2 {
         let nm = Name::new(&type_n)?;
         log::info!("GET {nm}");
         let cred = Credentials::load(&session).await?;
         state.name_access(cred.user(), &nm, Access::View).await?;
-        todo!()
-        /*
-        let path = PathBuf::from(nm.to_string());
-        let etag = resource_etag(&path).await?;
-        if let Some(values) = req.header("If-None-Match") {
-            if values.iter().any(|v| v == &etag) {
-                return Err(StatusCode::NOT_MODIFIED);
-            }
+        let etag = resource_etag(&nm.to_string()).await?;
+        if if_none_match.precondition_passes(&etag) {
+            Err(StatusCode::NOT_MODIFIED)
+        } else {
+            todo!()
         }
+        /*
         let body = Body::from_file(&path).await?;
         // FIXME: use tower ServeFile instead (if ETag changed)
         Ok((
@@ -279,14 +282,16 @@ fn resource_file_get(state: AppState) -> Router {
         .with_state(state)
 }
 
-/*
 /// Get a static file ETag
-async fn resource_etag(path: &Path) -> Result<String> {
+async fn resource_etag(path: &str) -> Result<ETag> {
     let meta = metadata(path).await?;
     let modified = meta.modified()?;
     let dur = modified.duration_since(SystemTime::UNIX_EPOCH)?.as_millis();
-    Ok(format!("{dur:x}"))
-}*/
+    let etag = format!("{dur:x}")
+        .parse::<ETag>()
+        .map_err(|_e| Error::InvalidETag)?;
+    Ok(etag)
+}
 
 /// Create a Sonar object from a `POST` request
 fn sonar_post(state: AppState) -> Router {

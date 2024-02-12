@@ -14,6 +14,7 @@
 //
 use crate::sonar::Error as SonarError;
 use http::StatusCode;
+use std::time::SystemTimeError;
 
 /// Graft error
 #[derive(Debug, thiserror::Error)]
@@ -21,6 +22,14 @@ pub enum Error {
     /// Unauthorized request
     #[error("Unauthorized")]
     Unauthorized,
+
+    /// Invalid ETag error
+    #[error("Invalid ETag")]
+    InvalidETag,
+
+    /// System time error
+    #[error("Time {0}")]
+    SystemTime(#[from] SystemTimeError),
 
     /// Sonar error
     #[error("Sonar {0}")]
@@ -54,10 +63,7 @@ impl From<Error> for StatusCode {
         match err {
             Error::Unauthorized => StatusCode::UNAUTHORIZED,
             Error::Sonar(e) => e.into(),
-            Error::Io(_e) => StatusCode::INTERNAL_SERVER_ERROR,
-            Error::Postgres(_e) => StatusCode::INTERNAL_SERVER_ERROR,
-            Error::Session(_e) => StatusCode::INTERNAL_SERVER_ERROR,
-            Error::Bb8(_e) => StatusCode::INTERNAL_SERVER_ERROR,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }

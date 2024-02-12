@@ -12,6 +12,7 @@ bb8 = "0.8"
 bb8-postgres = "0.8"
 convert_case = "0.5"
 env_logger = { workspace = true }
+headers = "0.4"
 http = "1"
 log = { workspace = true }
 percent-encoding = "2"
@@ -27,7 +28,11 @@ tower-sessions = "0.10"
 tower-sessions-moka-store = "0.10"
 whoami = "1"
 
+[dependencies.axum-extra]
+version = "0.9"
+features = ["typed-header"]
+
 [dependencies.tokio]
 version = "1.0"
 default-features = false
-features = ["io-util", "macros", "net", "rt-multi-thread", "time"]
+features = ["fs", "io-util", "macros", "net", "rt-multi-thread", "time"]
