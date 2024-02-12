@@ -40,13 +40,12 @@ pub enum Error {
 
     /// Bb8 run error
     #[error("Bb8 run error")]
-    Bb8,
+    Bb8(String),
 }
 
-impl<E> From<bb8::RunError<E>> for Error {
-    fn from(_err: bb8::RunError<E>) -> Self {
-        // FIXME: do the needful
-        Self::Bb8
+impl<E: std::fmt::Debug> From<bb8::RunError<E>> for Error {
+    fn from(err: bb8::RunError<E>) -> Self {
+        Self::Bb8(format!("{err:?}"))
     }
 }
 
@@ -58,7 +57,7 @@ impl From<Error> for StatusCode {
             Error::Io(_e) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Postgres(_e) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Session(_e) => StatusCode::INTERNAL_SERVER_ERROR,
-            Error::Bb8 => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::Bb8(_e) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }
