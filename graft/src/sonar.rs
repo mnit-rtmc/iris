@@ -165,7 +165,7 @@ impl Name {
     /// Set object name
     ///
     /// Name is validated and decoded from percent-encoded form
-    pub fn obj(self, obj_n: &str) -> Result<Self> {
+    pub fn obj(mut self, obj_n: &str) -> Result<Self> {
         let obj_n = &percent_decode_str(obj_n)
             .decode_utf8()
             .or(Err(Error::InvalidValue))?;

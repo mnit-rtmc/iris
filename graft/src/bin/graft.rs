@@ -15,31 +15,23 @@
 #![forbid(unsafe_code)]
 
 use axum::{
-    body::Body,
     extract::{Json, Path as AxumPath, State},
     http::{header, StatusCode},
-    response::IntoResponse,
     routing::{delete, get, patch, post},
     Router,
 };
-use core::time::Duration;
 use graft::access::Access;
 use graft::error::{Error, Result};
 use graft::restype::ResType;
-use graft::sonar::{self, Connection, Name};
-use graft::state::AppState;
+use graft::sonar::{self, Name};
+use graft::state::{AppState, Credentials};
 use http::header::HeaderName;
-use rand::Rng;
-use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
-use std::fmt;
-use std::io;
-use std::time::SystemTime;
+use time::Duration;
 use tokio::net::TcpListener;
-
-/// Path for static files
-const STATIC_PATH: &str = "/var/www/html/iris/api";
+use tower_sessions::{Expiry, Session, SessionManagerLayer};
+use tower_sessions_moka_store::MokaStore;
 
 /// No-header response result
 type Resp0 = std::result::Result<StatusCode, StatusCode>;
@@ -70,16 +62,10 @@ fn json_resp(json: Value) -> Resp1 {
 async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
     let state = AppState::new().await?;
-    /*
-    FIXME: use axum-login / tower-sessions
-    app.with(
-        SessionMiddleware::new(
-            MemoryStore::new(),
-            &rand::thread_rng().gen::<[u8; 32]>(),
-        )
-        .with_cookie_name("graft")
-        .with_session_ttl(Some(Duration::from_secs(8 * 60 * 60))),
-    );*/
+    let store = MokaStore::new(Some(100));
+    let session_layer = SessionManagerLayer::new(store)
+        .with_name("graft")
+        .with_expiry(Expiry::OnInactivity(Duration::hours(4)));
     let app = Router::new()
         .merge(login_post(state.clone()))
         .merge(access_get(state.clone()))
@@ -89,7 +75,8 @@ async fn main() -> Result<()> {
         .merge(sonar_post(state.clone()))
         .merge(sql_record_get(state.clone()))
         .merge(sonar_object_patch(state.clone()))
-        .merge(sonar_object_delete(state.clone()));
+        .merge(sonar_object_delete(state.clone()))
+        .layer(session_layer);
     let app = Router::new().nest("/iris/api", app);
     let listener = TcpListener::bind("127.0.0.1:3737").await?;
     axum::serve(listener, app).await?;
@@ -98,14 +85,12 @@ async fn main() -> Result<()> {
 
 /// Handle `POST` to login page
 fn login_post(state: AppState) -> Router {
-    async fn handler(
-        State(state): State<AppState>,
-        Json(cred): Json<Credentials>,
-    ) -> Resp1 {
+    async fn handler(session: Session, Json(cred): Json<Credentials>) -> Resp1 {
         log::info!("POST /login");
         cred.authenticate().await?;
-        let session = state.session_mut();
-        session.insert("cred", cred)?;
+        cred.store(&session)
+            .await
+            .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
         html_resp("<html>Authenticated</html>")
     }
     Router::new()
@@ -115,15 +100,13 @@ fn login_post(state: AppState) -> Router {
 
 /// `GET` access permissions
 fn access_get(state: AppState) -> Router {
-    async fn handler(State(state): State<AppState>) -> Resp1 {
+    async fn handler(session: Session, State(state): State<AppState>) -> Resp1 {
         log::info!("GET /access");
-        let session = state.session();
-        let cred: Credentials =
-            session.get("cred").ok_or(Error::Unauthorized)?;
-        let perms = state.permissions_user(&cred.username).await?;
+        let cred = Credentials::load(&session).await?;
+        let perms = state.permissions_user(cred.user()).await?;
         match serde_json::to_value(perms) {
             Ok(body) => json_resp(body),
-            Err(e) => Err(StatusCode::BAD_REQUEST),
+            Err(_e) => Err(StatusCode::BAD_REQUEST),
         }
     }
     Router::new()
@@ -134,12 +117,16 @@ fn access_get(state: AppState) -> Router {
 /// `POST` one permission record
 fn permission_post(state: AppState) -> Router {
     async fn handler(
+        session: Session,
         State(state): State<AppState>,
         Json(attrs): Json<Map<String, Value>>,
     ) -> Resp0 {
-        let nm = Name::from_type(ResType::Permission);
+        let nm = Name::from(ResType::Permission);
         log::info!("POST {nm}");
-        state.name_access(&nm, Access::Configure).await?;
+        let cred = Credentials::load(&session).await?;
+        state
+            .name_access(cred.user(), &nm, Access::Configure)
+            .await?;
         let role = attrs.get("role");
         let resource_n = attrs.get("resource_n");
         if let (Some(Value::String(role)), Some(Value::String(resource_n))) =
@@ -147,7 +134,7 @@ fn permission_post(state: AppState) -> Router {
         {
             let role = role.to_string();
             let resource_n = resource_n.to_string();
-            state.permission_post(&role, &resource_n).await;
+            state.permission_post(&role, &resource_n).await?;
             return Ok(StatusCode::CREATED);
         }
         Err(sonar::Error::InvalidValue)?
@@ -161,12 +148,14 @@ fn permission_post(state: AppState) -> Router {
 fn permission_router(state: AppState) -> Router {
     /// Handle `GET` request
     async fn handle_get(
-        AxumPath(id): AxumPath<i32>,
+        session: Session,
         State(state): State<AppState>,
+        AxumPath(id): AxumPath<i32>,
     ) -> Resp1 {
-        let nm = Name::from_type(ResType::Permission).obj(id.to_string())?;
+        let nm = Name::from(ResType::Permission).obj(&id.to_string())?;
         log::info!("GET {nm}");
-        state.name_access(&nm, Access::View).await?;
+        let cred = Credentials::load(&session).await?;
+        state.name_access(cred.user(), &nm, Access::View).await?;
         let perm = state.permission(id).await?;
         match serde_json::to_value(perm) {
             Ok(body) => json_resp(body),
@@ -176,25 +165,33 @@ fn permission_router(state: AppState) -> Router {
 
     /// Handle `PATCH` request
     async fn handle_patch(
-        AxumPath(id): AxumPath<i32>,
+        session: Session,
         State(state): State<AppState>,
+        AxumPath(id): AxumPath<i32>,
         Json(attrs): Json<Map<String, Value>>,
     ) -> Resp0 {
-        let nm = Name::from_type(ResType::Permission).obj(id.to_string())?;
+        let nm = Name::from(ResType::Permission).obj(&id.to_string())?;
         log::info!("PATCH {nm}");
-        state.name_access(&nm, Access::Configure).await?;
+        let cred = Credentials::load(&session).await?;
+        state
+            .name_access(cred.user(), &nm, Access::Configure)
+            .await?;
         state.permission_patch(id, attrs).await?;
         Ok(StatusCode::NO_CONTENT)
     }
 
     /// Handle `DELETE` request
     async fn handle_delete(
-        AxumPath(id): AxumPath<i32>,
+        session: Session,
         State(state): State<AppState>,
+        AxumPath(id): AxumPath<i32>,
     ) -> Resp0 {
-        let nm = Name::from_type(ResType::Permission).obj(id.to_string())?;
+        let nm = Name::from(ResType::Permission).obj(&id.to_string())?;
         log::info!("DELETE {nm}");
-        state.name_access(&nm, Access::Configure).await?;
+        let cred = Credentials::load(&session).await?;
+        state
+            .name_access(cred.user(), &nm, Access::Configure)
+            .await?;
         state.permission_delete(id).await?;
         Ok(StatusCode::NO_CONTENT)
     }
@@ -210,14 +207,16 @@ fn permission_router(state: AppState) -> Router {
 /// `GET` one SQL record as JSON
 fn sql_record_get(state: AppState) -> Router {
     async fn handler(
-        AxumPath((type_n, obj_n)): AxumPath<(&str, String)>,
+        session: Session,
         State(state): State<AppState>,
+        AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
     ) -> Resp1 {
-        let nm = Name::new(type_n)?.obj(obj_n)?;
+        let nm = Name::new(&type_n)?.obj(&obj_n)?;
         log::info!("GET {nm}");
-        state.name_access(&nm, Access::View).await?;
+        let cred = Credentials::load(&session).await?;
+        state.name_access(cred.user(), &nm, Access::View).await?;
         let sql = nm.res_type.sql_query();
-        let name = nm.object_n().ok_or(Error::InvalidValue)?;
+        let name = nm.object_n().ok_or(StatusCode::BAD_REQUEST)?;
         let body = if nm.res_type == ResType::ControllerIo {
             state.get_array_by_pkey(sql, &name).await
         } else {
@@ -244,12 +243,16 @@ fn invalid_char(c: char) -> bool {
 /// `GET` a file resource
 fn resource_file_get(state: AppState) -> Router {
     async fn handler(
-        AxumPath(type_n): AxumPath<&str>,
+        session: Session,
         State(state): State<AppState>,
+        AxumPath(type_n): AxumPath<String>,
     ) -> Resp2 {
-        let nm = Name::new(type_n)?;
+        let nm = Name::new(&type_n)?;
         log::info!("GET {nm}");
-        state.name_access(&nm, Access::View).await?;
+        let cred = Credentials::load(&session).await?;
+        state.name_access(cred.user(), &nm, Access::View).await?;
+        todo!()
+        /*
         let path = PathBuf::from(nm.to_string());
         let etag = resource_etag(&path).await?;
         if let Some(values) = req.header("If-None-Match") {
@@ -265,35 +268,40 @@ fn resource_file_get(state: AppState) -> Router {
                 (header::CONTENT_TYPE, "application/json"),
             ],
             body,
-        ))
+        ))*/
     }
     Router::new()
         .route("/:type_n", get(handler))
         .with_state(state)
 }
 
+/*
 /// Get a static file ETag
 async fn resource_etag(path: &Path) -> Result<String> {
     let meta = metadata(path).await?;
     let modified = meta.modified()?;
     let dur = modified.duration_since(SystemTime::UNIX_EPOCH)?.as_millis();
     Ok(format!("{dur:x}"))
-}
+}*/
 
 /// Create a Sonar object from a `POST` request
 fn sonar_post(state: AppState) -> Router {
     async fn handler(
-        AxumPath(type_n): AxumPath<&str>,
+        session: Session,
+        AxumPath(type_n): AxumPath<String>,
         State(state): State<AppState>,
         Json(attrs): Json<Map<String, Value>>,
     ) -> Resp0 {
-        let nm = Name::new(type_n)?;
+        let nm = Name::new(&type_n)?;
         log::info!("POST {nm}");
-        state.name_access(&nm, Access::Configure).await?;
+        let cred = Credentials::load(&session).await?;
+        state
+            .name_access(cred.user(), &nm, Access::Configure)
+            .await?;
         match attrs.get("name") {
             Some(Value::String(name)) => {
                 let name = nm.obj(name)?;
-                let mut c = state.connection().await?;
+                let mut c = cred.authenticate().await?;
                 // first, set attributes on phantom object
                 for (key, value) in attrs.iter() {
                     let attr = &key[..];
@@ -305,7 +313,7 @@ fn sonar_post(state: AppState) -> Router {
                     }
                 }
                 log::debug!("creating {name}");
-                c.create_object(&name).await?;
+                c.create_object(&name.to_string()).await?;
                 Ok(StatusCode::CREATED)
             }
             _ => Err(sonar::Error::InvalidValue)?,
@@ -336,19 +344,22 @@ fn att_value(value: &Value) -> Result<String> {
 /// Update a Sonar object from a `PATCH` request
 fn sonar_object_patch(state: AppState) -> Router {
     async fn handler(
-        AxumPath((type_n, obj_n)): AxumPath<(&str, String)>,
+        session: Session,
         State(state): State<AppState>,
+        AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
         Json(attrs): Json<Map<String, Value>>,
     ) -> Resp0 {
-        let nm = Name::new(type_n)?.obj(obj_n)?;
+        let nm = Name::new(&type_n)?.obj(&obj_n)?;
         log::info!("PATCH {nm}");
+        let cred = Credentials::load(&session).await?;
         // *At least* Operate access needed (further checks below)
-        let access = state.name_access(&nm, Access::Operate).await?;
+        let access =
+            state.name_access(cred.user(), &nm, Access::Operate).await?;
         for key in attrs.keys() {
             let attr = &key[..];
             access.check(nm.res_type.access_attr(attr))?;
         }
-        let mut c = state.connection().await?;
+        let mut c = cred.authenticate().await?;
         // first pass
         for (key, value) in attrs.iter() {
             let attr = &key[..];
@@ -379,14 +390,18 @@ fn sonar_object_patch(state: AppState) -> Router {
 /// Remove a Sonar object from a `DELETE` request
 fn sonar_object_delete(state: AppState) -> Router {
     async fn handler(
-        AxumPath((type_n, obj_n)): AxumPath<(&str, String)>,
+        session: Session,
         State(state): State<AppState>,
+        AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
     ) -> Resp0 {
-        let nm = Name::new(type_n)?.obj(obj_n)?;
+        let nm = Name::new(&type_n)?.obj(&obj_n)?;
         log::info!("DELETE {nm}");
-        state.name_access(&nm, Access::Configure).await?;
-        let mut c = state.connection().await?;
-        c.remove_object(nm.to_str()).await?;
+        let cred = Credentials::load(&session).await?;
+        state
+            .name_access(cred.user(), &nm, Access::Configure)
+            .await?;
+        let mut c = cred.authenticate().await?;
+        c.remove_object(&nm.to_string()).await?;
         Ok(StatusCode::ACCEPTED)
     }
     Router::new()

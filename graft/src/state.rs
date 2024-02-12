@@ -23,13 +23,16 @@ use serde_json::map::Map;
 use serde_json::Value;
 use tokio_postgres::types::ToSql;
 use tokio_postgres::{NoTls, Row};
+use tower_sessions::Session;
 
 /// IRIS host name
 const HOST: &str = "localhost.localdomain";
 
+const CRED_KEY: &str = "cred";
+
 /// Authentication credentials
-#[derive(Clone, Debug, Deserialize, Serialize)]
-struct Credentials {
+#[derive(Clone, Debug, Eq, PartialEq, Deserialize, Serialize)]
+pub struct Credentials {
     /// Sonar username
     username: String,
     /// Sonar password
@@ -37,6 +40,21 @@ struct Credentials {
 }
 
 impl Credentials {
+    /// Load credentials from session
+    pub async fn load(session: &Session) -> Result<Self> {
+        session.get(CRED_KEY).await?.ok_or(Error::Unauthorized)
+    }
+
+    /// Store credentials in session
+    pub async fn store(&self, session: &Session) -> Result<()> {
+        Ok(session.insert(CRED_KEY, self).await?)
+    }
+
+    /// Get user name as string slice
+    pub fn user(&self) -> &str {
+        &self.username
+    }
+
     /// Authenticate with IRIS server
     pub async fn authenticate(&self) -> Result<Connection> {
         let mut c = Connection::new(HOST, 1037).await?;
@@ -319,23 +337,13 @@ impl AppState {
     /// Lookup access for a name
     pub async fn name_access(
         &self,
+        user: &str,
         name: &Name,
         access: Access,
     ) -> Result<Access> {
-        let session = self.session();
-        let cred: Credentials =
-            session.get("cred").ok_or(Error::Unauthorized)?;
-        let perm = self.permission_user_res(&cred.username, name).await?;
+        let perm = self.permission_user_res(user, name).await?;
         let acc = Access::new(perm.access_n).ok_or(Error::Unauthorized)?;
         acc.check(access)?;
         Ok(acc)
-    }
-
-    /// Create a Sonar connection for a request
-    pub async fn connection(&self) -> Result<Connection> {
-        let session = self.session();
-        let cred: Credentials =
-            session.get("cred").ok_or(Error::Unauthorized)?;
-        cred.authenticate().await
     }
 }

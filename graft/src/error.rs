@@ -34,6 +34,10 @@ pub enum Error {
     #[error("Postgres {0}")]
     Postgres(#[from] tokio_postgres::Error),
 
+    /// Tower sessions
+    #[error("Session {0}")]
+    Session(#[from] tower_sessions::session::Error),
+
     /// Bb8 run error
     #[error("Bb8 run error")]
     Bb8,
@@ -53,6 +57,7 @@ impl From<Error> for StatusCode {
             Error::Sonar(e) => e.into(),
             Error::Io(_e) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Postgres(_e) => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::Session(_e) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Bb8 => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
