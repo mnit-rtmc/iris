@@ -87,6 +87,10 @@ async fn main() -> Result<()> {
 fn login_post(state: AppState) -> Router {
     async fn handler(session: Session, Json(cred): Json<Credentials>) -> Resp1 {
         log::info!("POST /login");
+        session
+            .cycle_id()
+            .await
+            .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
         cred.authenticate().await?;
         cred.store(&session)
             .await
