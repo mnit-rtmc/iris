@@ -15,6 +15,7 @@
 #![forbid(unsafe_code)]
 
 use axum::{
+    body::Body,
     extract::{Json, Path as AxumPath, State},
     http::{header, StatusCode},
     routing::{delete, get, patch, post},
@@ -34,6 +35,7 @@ use std::time::SystemTime;
 use time::Duration;
 use tokio::fs::metadata;
 use tokio::net::TcpListener;
+use tokio_util::io::ReaderStream;
 use tower_sessions::{Expiry, Session, SessionManagerLayer};
 use tower_sessions_moka_store::MokaStore;
 
@@ -45,8 +47,7 @@ type Resp1 =
     std::result::Result<([(HeaderName, &'static str); 1], String), StatusCode>;
 
 /// Two-header response result
-type Resp2 =
-    std::result::Result<([(HeaderName, &'static str); 2], String), StatusCode>;
+type Resp2 = std::result::Result<([(HeaderName, String); 2], Body), StatusCode>;
 
 /// Create an HTML response
 fn html_resp(html: &str) -> Resp1 {
@@ -260,22 +261,25 @@ fn resource_file_get(state: AppState) -> Router {
         log::info!("GET {nm}");
         let cred = Credentials::load(&session).await?;
         state.name_access(cred.user(), &nm, Access::View).await?;
-        let etag = resource_etag(&nm.to_string()).await?;
-        if if_none_match.precondition_passes(&etag) {
+        let fname = nm.to_string();
+        let etag = resource_etag(&fname).await?;
+        let tag = etag.parse::<ETag>().map_err(|_e| Error::InvalidETag)?;
+        if if_none_match.precondition_passes(&tag) {
             Err(StatusCode::NOT_MODIFIED)
         } else {
-            todo!()
+            let file = match tokio::fs::File::open(fname).await {
+                Ok(file) => file,
+                Err(_err) => return Err(StatusCode::NOT_FOUND),
+            };
+            let stream = ReaderStream::new(file);
+            Ok((
+                [
+                    (header::ETAG, etag),
+                    (header::CONTENT_TYPE, "application/json".to_string()),
+                ],
+                Body::from_stream(stream),
+            ))
         }
-        /*
-        let body = Body::from_file(&path).await?;
-        // FIXME: use tower ServeFile instead (if ETag changed)
-        Ok((
-            [
-                (header::ETAG, &etag),
-                (header::CONTENT_TYPE, "application/json"),
-            ],
-            body,
-        ))*/
     }
     Router::new()
         .route("/:type_n", get(handler))
@@ -283,14 +287,11 @@ fn resource_file_get(state: AppState) -> Router {
 }
 
 /// Get a static file ETag
-async fn resource_etag(path: &str) -> Result<ETag> {
+async fn resource_etag(path: &str) -> Result<String> {
     let meta = metadata(path).await?;
     let modified = meta.modified()?;
     let dur = modified.duration_since(SystemTime::UNIX_EPOCH)?.as_millis();
-    let etag = format!("{dur:x}")
-        .parse::<ETag>()
-        .map_err(|_e| Error::InvalidETag)?;
-    Ok(etag)
+    Ok(format!("{dur:x}"))
 }
 
 /// Create a Sonar object from a `POST` request
