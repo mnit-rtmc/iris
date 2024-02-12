@@ -21,7 +21,7 @@ use axum::{
     Router,
 };
 use graft::access::Access;
-use graft::error::{Error, Result};
+use graft::error::Result;
 use graft::restype::ResType;
 use graft::sonar::{self, Name};
 use graft::state::{AppState, Credentials};

@@ -28,6 +28,7 @@ use tower_sessions::Session;
 /// IRIS host name
 const HOST: &str = "localhost.localdomain";
 
+/// Session key for credentials
 const CRED_KEY: &str = "cred";
 
 /// Authentication credentials

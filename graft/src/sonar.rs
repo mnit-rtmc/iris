@@ -55,7 +55,7 @@ pub enum Error {
 
     /// I/O error
     #[error("I/O {0}")]
-    IO(#[from] std::io::Error),
+    Io(#[from] std::io::Error),
 }
 
 impl From<Error> for StatusCode {
@@ -67,7 +67,7 @@ impl From<Error> for StatusCode {
             Error::Forbidden => StatusCode::FORBIDDEN,
             Error::NotFound => StatusCode::NOT_FOUND,
             Error::TimedOut => StatusCode::GATEWAY_TIMEOUT,
-            Error::IO(e) => {
+            Error::Io(e) => {
                 if e.kind() == io::ErrorKind::NotFound {
                     StatusCode::NOT_FOUND
                 } else if e.kind() == io::ErrorKind::TimedOut {
