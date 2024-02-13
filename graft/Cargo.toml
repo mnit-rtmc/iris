@@ -7,7 +7,6 @@ edition.workspace = true
 
 [dependencies]
 anyhow = "1.0"
-axum = "0.7"
 bb8 = "0.8"
 bb8-postgres = "0.8"
 convert_case = "0.5"
@@ -28,6 +27,10 @@ tokio-util = "0.7"
 tower-sessions = "0.10"
 tower-sessions-moka-store = "0.10"
 whoami = "1"
+
+[dependencies.axum]
+version = "0.7"
+features = ["http2"]
 
 [dependencies.axum-extra]
 version = "0.9"

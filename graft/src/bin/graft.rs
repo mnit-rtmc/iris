@@ -258,15 +258,15 @@ fn resource_file_get(state: AppState) -> Router {
         AxumPath(type_n): AxumPath<String>,
     ) -> Resp2 {
         let nm = Name::new(&type_n)?;
-        log::info!("GET {nm}");
+        log::info!("GET /{nm}");
         let cred = Credentials::load(&session).await?;
         state.name_access(cred.user(), &nm, Access::View).await?;
-        let fname = nm.to_string();
+        let fname = format!("api/{type_n}");
         let etag = resource_etag(&fname).await?;
+        log::trace!("ETag: {etag}");
         let tag = etag.parse::<ETag>().map_err(|_e| Error::InvalidETag)?;
         if if_none_match.precondition_passes(&tag) {
-            Err(StatusCode::NOT_MODIFIED)
-        } else {
+            log::trace!("opening {fname}");
             let file = match tokio::fs::File::open(fname).await {
                 Ok(file) => file,
                 Err(_err) => return Err(StatusCode::NOT_FOUND),
@@ -279,6 +279,8 @@ fn resource_file_get(state: AppState) -> Router {
                 ],
                 Body::from_stream(stream),
             ))
+        } else {
+            Err(StatusCode::NOT_MODIFIED)
         }
     }
     Router::new()
@@ -291,7 +293,7 @@ async fn resource_etag(path: &str) -> Result<String> {
     let meta = metadata(path).await?;
     let modified = meta.modified()?;
     let dur = modified.duration_since(SystemTime::UNIX_EPOCH)?.as_millis();
-    Ok(format!("{dur:x}"))
+    Ok(format!("\"{dur:x}\""))
 }
 
 /// Create a Sonar object from a `POST` request
