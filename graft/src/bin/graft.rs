@@ -55,11 +55,8 @@ fn html_resp(html: &str) -> Resp1 {
 }
 
 /// Create a JSON response
-fn json_resp(json: Value) -> Resp1 {
-    Ok((
-        [(header::CONTENT_TYPE, "application/json")],
-        json.to_string(),
-    ))
+fn json_resp(json: String) -> Resp1 {
+    Ok(([(header::CONTENT_TYPE, "application/json")], json))
 }
 
 /// Main entry point
@@ -91,7 +88,7 @@ async fn main() -> Result<()> {
 /// Handle `POST` to login page
 fn login_post(state: AppState) -> Router {
     async fn handler(session: Session, Json(cred): Json<Credentials>) -> Resp1 {
-        log::info!("POST /login");
+        log::info!("POST login");
         session
             .cycle_id()
             .await
@@ -110,11 +107,11 @@ fn login_post(state: AppState) -> Router {
 /// `GET` access permissions
 fn access_get(state: AppState) -> Router {
     async fn handler(session: Session, State(state): State<AppState>) -> Resp1 {
-        log::info!("GET /access");
+        log::info!("GET access");
         let cred = Credentials::load(&session).await?;
         let perms = state.permissions_user(cred.user()).await?;
         match serde_json::to_value(perms) {
-            Ok(body) => json_resp(body),
+            Ok(body) => json_resp(body.to_string()),
             Err(_e) => Err(StatusCode::BAD_REQUEST),
         }
     }
@@ -167,7 +164,7 @@ fn permission_router(state: AppState) -> Router {
         state.name_access(cred.user(), &nm, Access::View).await?;
         let perm = state.permission(id).await?;
         match serde_json::to_value(perm) {
-            Ok(body) => json_resp(body),
+            Ok(body) => json_resp(body.to_string()),
             Err(_e) => Err(StatusCode::BAD_REQUEST),
         }
     }
@@ -231,10 +228,7 @@ fn sql_record_get(state: AppState) -> Router {
         } else {
             state.get_by_pkey(sql, &name).await
         }?;
-        match serde_json::to_value(body) {
-            Ok(body) => json_resp(body),
-            Err(_e) => Err(StatusCode::INTERNAL_SERVER_ERROR),
-        }
+        json_resp(body)
     }
     Router::new()
         .route("/:type_n/:obj_n", get(handler))
@@ -258,7 +252,7 @@ fn resource_file_get(state: AppState) -> Router {
         AxumPath(type_n): AxumPath<String>,
     ) -> Resp2 {
         let nm = Name::new(&type_n)?;
-        log::info!("GET /{nm}");
+        log::info!("GET {nm}");
         let cred = Credentials::load(&session).await?;
         state.name_access(cred.user(), &nm, Access::View).await?;
         let fname = format!("api/{type_n}");
