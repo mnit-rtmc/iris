@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
@@ -24,13 +25,8 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  */
 public interface SamplePoller {
 
-	/** Reset controller.
-	 * @param c Controller to poll. */
-	void resetController(ControllerImpl c);
-
-	/** Send sample settings to a controller.
-	 * @param c Controller to poll. */
-	void sendSettings(ControllerImpl c);
+	/** Send a device request */
+	void sendRequest(ControllerImpl c, DeviceRequest r);
 
 	/** Query sample data.
 	 * @param c Controller to poll.

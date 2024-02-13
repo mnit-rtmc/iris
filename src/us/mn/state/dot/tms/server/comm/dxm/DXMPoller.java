@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2022  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.dxm;
 
 import us.mn.state.dot.tms.CommLink;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.BasePoller;
 import us.mn.state.dot.tms.server.comm.Operation;
@@ -42,13 +43,12 @@ public class DXMPoller extends BasePoller implements SamplePoller {
 		addOp(op);
 	}
 
-	/** Perform a controller reset */
+	/** Send device request to a controller.
+	 * @param c Controller to poll. */
 	@Override
-	public void resetController(ControllerImpl c) { }
-
-	/** Send sample settings to a controller */
-	@Override
-	public void sendSettings(ControllerImpl c) { }
+	public void sendRequest(ControllerImpl c, DeviceRequest r) {
+		// nothing to do?
+	}
 
 	/** Query sample data.
 	 * @param c Controller to poll.

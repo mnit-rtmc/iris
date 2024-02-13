@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021-2022  Minnesota Department of Transportation
+ * Copyright (C) 2021-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,33 +93,41 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 		}
 	}
 
-	/** Perform a controller reset */
+	/** Send detection request to a controller.
+	 * @param c Controller to poll. */
 	@Override
-	public void resetController(ControllerImpl c) {
-		createOp("system.command.op", c, new OpSystemCommand(counter),
-			PriorityLevel.SETTINGS);
-	}
-
-	/** Send settings to a controller */
-	@Override
-	public void sendSettings(ControllerImpl c) {
-		createOp("clock.status.op", c, new OpClockStatus(counter),
-			PriorityLevel.SETTINGS);
-		createOp("system.attribute.op", c,
-			new OpSystemAttributes(counter),
-			PriorityLevel.SETTINGS);
-		createOp("detector.op.configure", c,
-			new OpDetectorConfigure(counter, 0),
-			PriorityLevel.SETTINGS);
-		createOp("firmware.version.op", c,
-			new OpFirmwareVersion(counter),
-			PriorityLevel.SETTINGS);
-		RampMeterImpl meter1 = lookupMeter(c, METER_1_PIN);
-		if (meter1 != null)
-			sendRequest(meter1, DeviceRequest.SEND_SETTINGS);
-		RampMeterImpl meter2 = lookupMeter(c, METER_2_PIN);
-		if (meter2 != null)
-			sendRequest(meter2, DeviceRequest.SEND_SETTINGS);
+	public void sendRequest(ControllerImpl c, DeviceRequest r) {
+		switch (r) {
+		case RESET_DEVICE:
+			createOp("system.command.op", c,
+				new OpSystemCommand(counter),
+				PriorityLevel.SETTINGS);
+			break;
+		case SEND_SETTINGS:
+			createOp("clock.status.op", c,
+				new OpClockStatus(counter),
+				PriorityLevel.SETTINGS);
+			createOp("system.attribute.op", c,
+				new OpSystemAttributes(counter),
+				PriorityLevel.SETTINGS);
+			createOp("detector.op.configure", c,
+				new OpDetectorConfigure(counter, 0),
+				PriorityLevel.SETTINGS);
+			createOp("firmware.version.op", c,
+				new OpFirmwareVersion(counter),
+				PriorityLevel.SETTINGS);
+			RampMeterImpl meter1 = lookupMeter(c, METER_1_PIN);
+			if (meter1 != null) {
+				sendRequest(meter1,
+				DeviceRequest.SEND_SETTINGS);
+			}
+			RampMeterImpl meter2 = lookupMeter(c, METER_2_PIN);
+			if (meter2 != null) {
+				sendRequest(meter2,
+				DeviceRequest.SEND_SETTINGS);
+			}
+			break;
+		}
 	}
 
 	/** Query sample data.

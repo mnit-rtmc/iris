@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  * Copyright (C) 2017-2021  Iteris Inc.
  *
@@ -190,17 +190,10 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 		addOp(new OpSendLCSIndications(lcs_array, ind, o));
 	}
 
-	/** Reset controller.
+	/** Send detection request to a controller.
 	 * @param c Controller to poll. */
 	@Override
-	public void resetController(ControllerImpl c) {
-		// FIXME
-	}
-
-	/** Send sample settings to a controller.
-	 * @param c Controller to poll. */
-	@Override
-	public void sendSettings(ControllerImpl c) {
+	public void sendRequest(ControllerImpl c, DeviceRequest r) {
 		// FIXME
 	}
 

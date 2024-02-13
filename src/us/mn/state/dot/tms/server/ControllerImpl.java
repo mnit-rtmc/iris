@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1079,20 +1079,21 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Perform a controller download (reset) */
 	@Override
 	public void setDownload(boolean reset) {
+		DeviceRequest req = (reset)
+			? DeviceRequest.RESET_DEVICE
+			: DeviceRequest.SEND_SETTINGS;
 		SamplePoller sp = getSamplePoller();
-		if (sp != null) {
-			if (reset)
-				sp.resetController(this);
-			else
-				sp.sendSettings(this);
-		}
-		requestDevices(DeviceRequest.SEND_SETTINGS);
-		// Only send settings to the "first" video monitor
-		// on the controller (lowest pin number)
-		VideoMonitorImpl vm = getFirstVideoMonitor();
-		if (vm != null) {
-			int dr = DeviceRequest.SEND_SETTINGS.ordinal();
-			vm.setDeviceRequest(dr);
+		if (sp != null)
+			sp.sendRequest(this, req);
+		else {
+			requestDevices(req);
+			// Only send settings to the "first" video monitor
+			// on the controller (lowest pin number)
+			VideoMonitorImpl vm = getFirstVideoMonitor();
+			if (vm != null) {
+				int dr = req.ordinal();
+				vm.setDeviceRequest(dr);
+			}
 		}
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,16 +59,20 @@ public class MndotPoller extends ThreadedPoller<MndotProperty>
 		protocol = cp;
 	}
 
-	/** Perform a controller reset */
+	/** Send device request to a controller.
+	 * @param c Controller to poll. */
 	@Override
-	public void resetController(ControllerImpl c) {
-		addOp(new OpReset170(c));
-	}
-
-	/** Send sample settings to a controller */
-	@Override
-	public void sendSettings(ControllerImpl c) {
-		addOp(new OpSendSampleSettings(c));
+	public void sendRequest(ControllerImpl c, DeviceRequest r) {
+		switch (r) {
+		case RESET_DEVICE:
+			addOp(new OpReset170(c));
+			break;
+		case SEND_SETTINGS:
+			addOp(new OpSendSampleSettings(c));
+			break;
+		default:
+			break;
+		}
 	}
 
 	/** Respond to a download request from a controller */
