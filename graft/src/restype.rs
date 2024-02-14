@@ -156,8 +156,8 @@ impl ResType {
         }
     }
 
-    /// Get verifier resource type
-    pub const fn verifier(self) -> Self {
+    /// Get dependent resource type
+    pub const fn dependent(self) -> Self {
         use ResType::*;
         match self {
             // Camera resources

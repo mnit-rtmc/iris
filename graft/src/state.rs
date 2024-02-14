@@ -103,8 +103,8 @@ AND u.name = $1 \
 AND p.resource_n = $2 \
 AND p.hashtag IS NULL";
 
-/// Query permission for a user / resource / object name
-const QUERY_PERMISSION_OBJ: &str = "\
+/// Query permission for a user / resource / hashtag
+const QUERY_PERMISSION_TAG: &str = "\
 SELECT p.id, p.role, p.resource_n, p.hashtag, p.access_n \
 FROM iris.permission p \
 JOIN iris.role r ON p.role = r.name \
@@ -285,11 +285,11 @@ impl AppState {
         name: &Name,
     ) -> Result<Permission> {
         let client = self.pool.get().await?;
-        let type_n = name.type_n();
+        let type_n = name.res_type.dependent().as_str();
         match name.object_n() {
-            Some(obj_n) => {
+            Some(tag) => {
                 let row = client
-                    .query_one(QUERY_PERMISSION_OBJ, &[&user, &type_n, &obj_n])
+                    .query_one(QUERY_PERMISSION_TAG, &[&user, &type_n, &tag])
                     .await
                     .map_err(|_e| SonarError::Forbidden)?;
                 Ok(Permission::from_row(row))

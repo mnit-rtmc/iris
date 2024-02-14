@@ -89,42 +89,6 @@ A `Content-Type: application/json` header is included where appropriate.
 
 Most devices also have an associated [geo loc] resource.
 
-[Dependent resources]
-
-<details>
-<summary>camera</summary>
-
-* [flow stream]
-
-</details>
-<details>
-<summary>dms</summary>
-
-* [font]
-* [graphic]
-* [message line]
-* [message pattern]
-* [sign configuration]
-* [sign detail]
-* [sign message]
-* [word]
-
-</details>
-<details>
-<summary>gate arm</summary>
-
-* [gate arm array]
-
-</details>
-<details>
-<summary>lcs</summary>
-
-* [LCS array]
-* [LCS indication]
-* [Lane marking]
-
-</details>
-
 
 [alarm]: alarms.html
 [beacon]: beacons.html
@@ -137,31 +101,19 @@ Most devices also have an associated [geo loc] resource.
 [detector]: vehicle_detection.html
 [dms]: dms.html
 [domain]: user_roles.html#domains
-[flow stream]: flow_streams.html
-[font]: fonts.html
 [gate arm]: gate_arms.html
-[gate arm array]: gate_arms.html#arrays
 [geo loc]: geo_loc.html
 [gps]: gps.html
-[graphic]: graphics.html
-[lane marking]: lcs.html#lane-markings
 [lcs]: lcs.html
-[lcs array]: lcs.html#arrays
-[lcs indication]: lcs.html#indications
-[message line]: message_patterns.html#message-lines
-[message pattern]: message_patterns.html
 [modem]: modem.html
 [permission]: permissions.html
 [ramp meter]: ramp_meters.html
 [resource types]: #resource-types
 [Road Weather Information System]: rwis.html
 [role]: user_roles.html#roles
-[sign configuration]: sign_configuration.html
-[sign detail]: sign_configuration.html#sign-details
 [sign message]: sign_message.html
 [system attributes]: system_attributes.html
 [tag reader]: tolling.html#tag-readers
 [user]: user_roles.html
 [video monitor]: video.html
 [weather sensor]: rwis.html
-[word]: words.html
