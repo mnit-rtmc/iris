@@ -1,6 +1,6 @@
 // resource.rs
 //
-// Copyright (C) 2018-2023  Minnesota Department of Transportation
+// Copyright (C) 2018-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ use ntcip::dms::multi::Color;
 use ntcip::dms::Graphic;
 use pix::{rgb::SRgb8, Palette};
 use postgres::Client;
-use serde_derive::Deserialize;
+use serde::Deserialize;
 use std::collections::HashSet;
 use std::io::Write;
 use std::path::Path;

@@ -9,15 +9,13 @@ edition.workspace = true
 anyhow = "1.0"
 bb8 = "0.8"
 bb8-postgres = "0.8"
-convert_case = "0.5"
+convert_case = "0.6"
 env_logger = { workspace = true }
 headers = "0.4"
 http = "1"
 log = { workspace = true }
 percent-encoding = "2"
-rand = "0.8"
 rustls = "0.22"
-serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "1"
 time = "0.3"
@@ -35,6 +33,10 @@ features = ["http2"]
 [dependencies.axum-extra]
 version = "0.9"
 features = ["typed-header"]
+
+[dependencies.serde]
+version = "1"
+features = ["derive"]
 
 [dependencies.tokio]
 version = "1.0"

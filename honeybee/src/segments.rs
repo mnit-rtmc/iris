@@ -18,8 +18,7 @@ use mvt::{WebMercatorPos, Wgs84Pos};
 use pointy::Pt;
 use postgis::ewkb::{LineString, Point, Polygon};
 use postgres::Row;
-use serde::Serializer;
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 use std::cmp::Ordering;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
@@ -415,9 +414,7 @@ impl Corridor {
     }
 
     /// Create segments for all zoom levels
-    fn create_segments(
-        &self,
-    ) -> Result<()> {
+    fn create_segments(&self) -> Result<()> {
         let pts = self.create_points();
         log::info!("{}: {} points", self.cor_id, pts.len());
         if !pts.is_empty() {
@@ -535,9 +532,7 @@ impl<'a> Segments<'a> {
     }
 
     /// Create segments for all zoom levels
-    fn create_all(
-        &self,
-    ) -> Result<()> {
+    fn create_all(&self) -> Result<()> {
         for zoom in 0..=18 {
             if road_class_zoom(self.cor.r_class, zoom) {
                 self.create_segments_zoom(zoom)?;
@@ -547,10 +542,7 @@ impl<'a> Segments<'a> {
     }
 
     /// Create segments for one zoom level
-    fn create_segments_zoom(
-        &self,
-        zoom: i32,
-    ) -> crate::Result<()> {
+    fn create_segments_zoom(&self, zoom: i32) -> crate::Result<()> {
         let o_scale = self.scale_zoom(OUTER_SCALE, zoom);
         let i_scale = self.scale_zoom(BASE_SCALE, zoom);
         let mut poly = Vec::<(Pt<f64>, Pt<f64>)>::with_capacity(16);
