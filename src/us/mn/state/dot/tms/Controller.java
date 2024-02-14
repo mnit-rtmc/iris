@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,9 +104,6 @@ public interface Controller extends SonarObject {
 	/** Get the failed operation count */
 	int getFailedOps();
 
-	/** Clear the counters and error status */
-	void setCounters(boolean clear);
-
-	/** Perform a controller download (reset) */
-	void setDownload(boolean reset);
+	/** Request a device operation (send settings, etc.) */
+	void setDeviceRequest(int r);
 }

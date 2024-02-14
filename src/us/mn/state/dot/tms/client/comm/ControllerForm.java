@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -40,6 +40,7 @@ import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.CtrlCondition;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
@@ -177,21 +178,24 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Clear error status action */
 	private final IAction clear_err = new IAction("controller.error.clear"){
 		protected void doActionPerformed(ActionEvent e) {
-			proxy.setCounters(true);
+			proxy.setDeviceRequest(
+				DeviceRequest.RESET_STATUS.ordinal());
 		}
 	};
 
 	/** Send settings action */
 	private final IAction settings = new IAction("device.send.settings") {
 		protected void doActionPerformed(ActionEvent e) {
-			proxy.setDownload(false);
+			proxy.setDeviceRequest(
+				DeviceRequest.SEND_SETTINGS.ordinal());
 		}
 	};
 
 	/** Reset action */
 	private final IAction reset = new IAction("controller.reset") {
 		protected void doActionPerformed(ActionEvent e) {
-			proxy.setDownload(true);
+			proxy.setDeviceRequest(
+				DeviceRequest.RESET_DEVICE.ordinal());
 		}
 	};
 

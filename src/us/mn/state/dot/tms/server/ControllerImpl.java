@@ -933,8 +933,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Clear the counters and error status */
-	@Override
-	public void setCounters(boolean clear) {
+	private void clearCounters() {
 		setMaintNotify("");
 		setErrorStatus("");
 		if (timeoutErr != 0) {
@@ -1076,12 +1075,14 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return (dp instanceof SamplePoller) ? (SamplePoller) dp : null;
 	}
 
-	/** Perform a controller download (reset) */
+	/** Request a device operation */
 	@Override
-	public void setDownload(boolean reset) {
-		DeviceRequest req = (reset)
-			? DeviceRequest.RESET_DEVICE
-			: DeviceRequest.SEND_SETTINGS;
+	public void setDeviceRequest(int r) {
+		if (DeviceRequest.RESET_STATUS.ordinal() == r) {
+			clearCounters();
+			return;
+		}
+		DeviceRequest req = DeviceRequest.fromOrdinal(r);
 		SamplePoller sp = getSamplePoller();
 		if (sp != null)
 			sp.sendRequest(this, req);

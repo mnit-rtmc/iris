@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
+import us.mn.state.dot.tms.DeviceRequest;
 
 /**
  * Job to send settings to all field controllers.
@@ -51,7 +52,8 @@ public class SendSettingsJob extends Job {
 		Iterator<Controller> it = ControllerHelper.iterator();
 		while (it.hasNext()) {
 			Controller c = it.next();
-			c.setDownload(false);
+			c.setDeviceRequest(
+				DeviceRequest.SEND_SETTINGS.ordinal());
 		}
 		requestCameraStop();
 	}
