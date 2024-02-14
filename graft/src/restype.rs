@@ -224,7 +224,6 @@ impl ResType {
             (Beacon, "flashing")
             | (Camera, "ptz")
             | (Camera, "recall_preset")
-            | (Controller, "download")
             | (Controller, "device_req")
             | (Detector, "field_length")
             | (Detector, "force_fail")

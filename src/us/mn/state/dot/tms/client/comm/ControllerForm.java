@@ -270,8 +270,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Can a controller request be made */
 	private boolean canRequest() {
-		return isWritePermitted("counters") &&
-		       isWritePermitted("download");
+		return isWritePermitted("deviceRequest");
 	}
 
 	/** Create the jobs for the setup panel */

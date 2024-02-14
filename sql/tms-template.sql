@@ -589,8 +589,7 @@ PRV_0041	comm_admin	cabinet_style		t
 PRV_0043	comm_admin	controller		t
 PRV_0044	comm_admin	alarm		t
 PRV_0045	comm_control	controller	condition	t
-PRV_0046	comm_control	controller	download	t
-PRV_0047	comm_control	controller	counters	t
+PRV_0046	comm_control	controller	deviceRequest	t
 PRV_004B	comm_tab	comm_config		f
 PRV_0048	comm_tab	comm_link		f
 PRV_0049	comm_tab	modem		f
