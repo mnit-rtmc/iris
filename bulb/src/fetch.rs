@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@ use std::borrow::{Borrow, Cow};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{console, Blob, Request, RequestInit, Response};
+use web_sys::{console, Blob, Headers, Request, RequestInit, Response};
 
 /// Fetchable content types
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -148,9 +148,20 @@ async fn perform_fetch(
     json: Option<&JsValue>,
 ) -> Result<Response> {
     let window = web_sys::window().unwrap_throw();
+    let headers = Headers::new().unwrap_throw();
+    if json.is_some() {
+        headers
+            .set("Content-Type", "application/json")
+            .unwrap_throw();
+    } else {
+        headers.set("Content-Type", "text/plain").unwrap_throw();
+    }
     let req = Request::new_with_str_and_init(
         uri,
-        RequestInit::new().method(method).body(json),
+        RequestInit::new()
+            .method(method)
+            .body(json)
+            .headers(&headers),
     )
     .map_err(|e| {
         console::log_1(&e);

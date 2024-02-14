@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2022  Minnesota Department of Transportation
+ * Copyright (C) 2015-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.dr500;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.CommLink;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
@@ -38,16 +39,20 @@ public class DR500Poller extends ThreadedPoller<DR500Property>
 		super(link, TCP, DR500_LOG);
 	}
 
-	/** Perform a controller reset */
+	/** Send device request to a controller.
+	 * @param c Controller to poll. */
 	@Override
-	public void resetController(ControllerImpl c) {
-		addOp(new OpSendSensorSettings(c));
-	}
-
-	/** Send sample settings to a controller */
-	@Override
-	public void sendSettings(ControllerImpl c) {
-		addOp(new OpSendSensorSettings(c));
+	public void sendRequest(ControllerImpl c, DeviceRequest r) {
+		switch (r) {
+		case RESET_DEVICE:
+			addOp(new OpSendSensorSettings(c));
+			break;
+		case SEND_SETTINGS:
+			addOp(new OpSendSensorSettings(c));
+			break;
+		default:
+			break;
+		}
 	}
 
 	/** Send settings to a controller */

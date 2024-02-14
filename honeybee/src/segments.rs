@@ -12,14 +12,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::fetcher::create_client;
 use crate::files::AtomicFile;
 use crate::Result;
 use mvt::{WebMercatorPos, Wgs84Pos};
 use pointy::Pt;
 use postgis::ewkb::{LineString, Point, Polygon};
-use postgres::types::ToSql;
-use postgres::{Client, Row, Statement, Transaction};
+use postgres::Row;
 use serde::Serializer;
 use serde_derive::{Deserialize, Serialize};
 use std::cmp::Ordering;
@@ -155,6 +153,7 @@ struct Corridor {
 }
 
 /// Segments for a corridor
+#[allow(unused)]
 struct Segments<'a> {
     /// Corridor ref
     cor: &'a Corridor,
@@ -170,8 +169,6 @@ struct Segments<'a> {
 
 /// State of all segments
 struct SegmentState {
-    /// Postgres DB client
-    client: Client,
     /// Mapping of roads
     roads: HashMap<String, Road>,
     /// Mapping of node names to corridor IDs
@@ -420,14 +417,12 @@ impl Corridor {
     /// Create segments for all zoom levels
     fn create_segments(
         &self,
-        trans: &mut Transaction,
-        statement: &Statement,
     ) -> Result<()> {
         let pts = self.create_points();
         log::info!("{}: {} points", self.cor_id, pts.len());
         if !pts.is_empty() {
             let segments = Segments::new(self, pts);
-            segments.create_all(trans, statement)?;
+            segments.create_all()?;
         }
         Ok(())
     }
@@ -542,14 +537,10 @@ impl<'a> Segments<'a> {
     /// Create segments for all zoom levels
     fn create_all(
         &self,
-        trans: &mut Transaction,
-        statement: &Statement,
     ) -> Result<()> {
-        let params: [&(dyn ToSql + Sync); 1] = [&self.cor_name];
-        trans.execute("DELETE FROM segments WHERE name = $1", &params)?;
         for zoom in 0..=18 {
             if road_class_zoom(self.cor.r_class, zoom) {
-                self.create_segments_zoom(trans, statement, zoom)?;
+                self.create_segments_zoom(zoom)?;
             }
         }
         Ok(())
@@ -558,8 +549,6 @@ impl<'a> Segments<'a> {
     /// Create segments for one zoom level
     fn create_segments_zoom(
         &self,
-        trans: &mut Transaction,
-        statement: &Statement,
         zoom: i32,
     ) -> crate::Result<()> {
         let o_scale = self.scale_zoom(OUTER_SCALE, zoom);
@@ -567,8 +556,8 @@ impl<'a> Segments<'a> {
         let mut poly = Vec::<(Pt<f64>, Pt<f64>)>::with_capacity(16);
         let mut seg_meter = 0.0; // meter point for the current segment
         let mut p_meter = 0.0; // meter point for the previous point
-        let mut sid = self.cor.base_sid;
-        let mut station_id = None;
+        let mut _sid = self.cor.base_sid;
+        let mut _station_id = None;
         let nodes = &self.cor.nodes[..];
         for (node, (pt, (norm, meter))) in nodes.iter().zip(
             self.pts
@@ -584,15 +573,13 @@ impl<'a> Segments<'a> {
                     poly.push((outer, inner));
                 }
                 if poly.len() > 1 {
-                    let way = self.create_way(&poly);
-                    let params: [&(dyn ToSql + Sync); 5] =
-                        [&sid, &self.cor_name, &station_id, &zoom, &way];
-                    trans.execute(statement, &params)?;
-                    sid += 1;
+                    let _way = self.create_way(&poly);
+                    // FIXME: write way to loam
+                    _sid += 1;
                 }
                 poly.clear();
                 seg_meter = *meter;
-                station_id = node.station_id.clone();
+                _station_id = node.station_id.clone();
             }
             if !node.is_common() {
                 poly.push((outer, inner));
@@ -600,10 +587,8 @@ impl<'a> Segments<'a> {
             p_meter = *meter;
         }
         if poly.len() > 1 {
-            let way = self.create_way(&poly);
-            let params: [&(dyn ToSql + Sync); 5] =
-                [&sid, &self.cor_name, &station_id, &zoom, &way];
-            trans.execute(statement, &params[..])?;
+            let _way = self.create_way(&poly);
+            // FIXME: write way to loam
         }
         Ok(())
     }
@@ -688,15 +673,9 @@ fn vector_downstream(pts: &[Pt<f64>], i: usize) -> Option<Pt<f64>> {
 }
 
 impl SegmentState {
-    /// SQL to insert one segment row
-    const SQL_INSERT: &'static str = "INSERT INTO \
-        segments (sid, name, station, zoom, way) \
-        VALUES ($1, $2, $3, $4, $5)";
-
     /// Create a new segment state
-    fn new(client: Client) -> Self {
+    fn new() -> Self {
         SegmentState {
-            client,
             roads: HashMap::default(),
             corridors: HashMap::default(),
             node_cors: HashMap::default(),
@@ -789,14 +768,12 @@ impl SegmentState {
     fn set_ordered(&mut self, ordered: bool) -> Result<()> {
         self.ordered = ordered;
         if ordered {
-            let mut trans = self.client.transaction()?;
-            let statement = trans.prepare(SegmentState::SQL_INSERT)?;
             for cor in self.corridors.values_mut() {
                 cor.order_nodes();
-                cor.create_segments(&mut trans, &statement)?;
+                cor.create_segments()?;
                 cor.write_file()?;
             }
-            trans.commit()?;
+            // FIXME: write segment loam layer
         }
         Ok(())
     }
@@ -808,17 +785,15 @@ impl SegmentState {
         self.roads.insert(name.clone(), road);
         if self.ordered {
             let scale = self.scale(&name);
-            let mut trans = self.client.transaction()?;
-            let statement = trans.prepare(SegmentState::SQL_INSERT)?;
             for cor in self.corridors.values_mut() {
                 if cor.cor_id.roadway == name {
                     cor.scale = scale;
                     cor.order_nodes();
-                    cor.create_segments(&mut trans, &statement)?;
+                    cor.create_segments()?;
                     cor.write_file()?;
                 }
             }
-            trans.commit()?;
+            // FIXME: write segment loam layer
         }
         Ok(())
     }
@@ -826,8 +801,7 @@ impl SegmentState {
 
 /// Receive segment messages and update corridor segments
 pub fn receive_nodes(receiver: Receiver<SegMsg>) -> Result<()> {
-    let client = create_client("earthwyrm")?;
-    let mut state = SegmentState::new(client);
+    let mut state = SegmentState::new();
     loop {
         match receiver.recv()? {
             SegMsg::UpdateRoad(road) => state.update_road(road)?,

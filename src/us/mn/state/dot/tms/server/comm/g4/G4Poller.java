@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2012  Iteris Inc.
- * Copyright (C) 2012-2022  Minnesota Department of Transportation
+ * Copyright (C) 2012-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.util.HashMap;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.server.comm.ThreadedPoller;
@@ -49,16 +50,20 @@ public class G4Poller extends ThreadedPoller<G4Property>
 		protocol = cp;
 	}
 
-	/** Perform a controller reset */
+	/** Send device request to a controller.
+	 * @param c Controller to poll. */
 	@Override
-	public void resetController(ControllerImpl c) {
-		addOp(new OpSendSensorSettings(c, protocol, true));
-	}
-
-	/** Send sample settings to a controller. */
-	@Override
-	public void sendSettings(ControllerImpl c) {
-		addOp(new OpSendSensorSettings(c, protocol, false));
+	public void sendRequest(ControllerImpl c, DeviceRequest r) {
+		switch (r) {
+		case RESET_DEVICE:
+			addOp(new OpSendSensorSettings(c, protocol, true));
+			break;
+		case SEND_SETTINGS:
+			addOp(new OpSendSensorSettings(c, protocol, false));
+			break;
+		default:
+			break;
+		}
 	}
 
 	/** Query sample data.

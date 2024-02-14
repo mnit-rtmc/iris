@@ -1,6 +1,6 @@
 // sonar.rs
 //
-// Copyright (C) 2021-2023  Minnesota Department of Transportation
+// Copyright (C) 2021-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,42 +12,26 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use async_std::io;
-use async_std::net::{TcpStream, ToSocketAddrs};
-use async_std::prelude::*;
-use async_tls::{client::TlsStream, TlsConnector};
-use log::{info, warn};
-use rustls::{
-    Certificate, ClientConfig, RootCertStore, ServerCertVerified,
-    ServerCertVerifier, TLSError,
-};
-use std::sync::Arc;
+use crate::restype::ResType;
+use crate::tls;
+use convert_case::{Case, Casing};
+use http::StatusCode;
+use percent_encoding::percent_decode_str;
+use rustls::pki_types::ServerName;
+use std::fmt;
+use std::net::ToSocketAddrs;
 use std::time::Duration;
-use thiserror::Error;
-use webpki::DNSNameRef;
+use tokio::io::{self, AsyncReadExt, AsyncWriteExt, ErrorKind};
+use tokio::net::TcpStream;
+use tokio::time::timeout;
+use tokio_rustls::client::TlsStream;
 
 /// Sonar protocol error
-#[derive(Debug, Error)]
-pub enum SonarError {
-    /// Unexpected response to a message
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    /// Unexpected response received
     #[error("unexpected response")]
     UnexpectedResponse,
-
-    /// Unexpected message received
-    #[error("unexpected message")]
-    UnexpectedMessage,
-
-    /// Not modified
-    #[error("not modified")]
-    NotModified,
-
-    /// Invalid JSON error
-    #[error("Invalid JSON")]
-    InvalidJson,
-
-    /// Invalid name (too long, invalid characters)
-    #[error("invalid name")]
-    InvalidName,
 
     /// Invalid value (invalid characters, etc)
     #[error("invalid value")]
@@ -65,38 +49,39 @@ pub enum SonarError {
     #[error("not found")]
     NotFound,
 
-    /// Unauthorized
-    #[error("unauthorized")]
-    Unauthorized,
+    /// Timed out
+    #[error("timed out")]
+    TimedOut,
 
     /// I/O error
     #[error("I/O {0}")]
-    IO(#[from] std::io::Error),
-
-    /// Serde JSON error
-    #[error("Serialization error")]
-    SerdeJson(#[from] serde_json::Error),
-
-    /// Postgres error
-    #[error("Postgres {0}")]
-    Postgres(#[from] postgres::Error),
-
-    /// R2D2 error
-    #[error("R2D2 {0}")]
-    R2d2(#[from] r2d2::Error),
-
-    /// System time error
-    #[error("Invalid time {0}")]
-    SystemTime(#[from] std::time::SystemTimeError),
+    Io(#[from] std::io::Error),
 }
 
-/// Sonar result
-pub type Result<T> = std::result::Result<T, SonarError>;
+impl From<Error> for StatusCode {
+    fn from(e: Error) -> Self {
+        match e {
+            Error::UnexpectedResponse => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::InvalidValue => StatusCode::BAD_REQUEST,
+            Error::Conflict => StatusCode::CONFLICT,
+            Error::Forbidden => StatusCode::FORBIDDEN,
+            Error::NotFound => StatusCode::NOT_FOUND,
+            Error::TimedOut => StatusCode::GATEWAY_TIMEOUT,
+            Error::Io(e) => {
+                if e.kind() == io::ErrorKind::NotFound {
+                    StatusCode::NOT_FOUND
+                } else if e.kind() == io::ErrorKind::TimedOut {
+                    StatusCode::GATEWAY_TIMEOUT
+                } else {
+                    StatusCode::INTERNAL_SERVER_ERROR
+                }
+            }
+        }
+    }
+}
 
-/// TLS certificate verifier for IRIS server
-struct Verifier {}
-
-impl SonarError {
+impl Error {
+    /// Parse a SHOW message received from server
     fn parse_show(msg: &str) -> Self {
         // gross, but no point in changing SHOW messages now!
         let msg = msg.to_lowercase();
@@ -122,30 +107,106 @@ impl SonarError {
         {
             Self::Conflict
         } else {
-            warn!("SHOW {}", msg);
-            Self::UnexpectedMessage
+            log::warn!("SHOW {}", msg);
+            Self::UnexpectedResponse
         }
     }
 }
 
-impl ServerCertVerifier for Verifier {
-    fn verify_server_cert(
+/// Sonar result
+pub type Result<T> = std::result::Result<T, Error>;
+
+/// Invalid characters for SONAR names
+const INVALID_CHARS: &[char] = &['\0', '/', '\u{001e}', '\u{001f}'];
+
+/// Check if a character in a Sonar name is invalid
+fn invalid_char(c: char) -> bool {
+    INVALID_CHARS.contains(&c)
+}
+
+/// Sonar type / object name
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Name {
+    /// Resource type
+    pub res_type: ResType,
+
+    /// Object name
+    obj_name: Option<String>,
+}
+
+impl From<ResType> for Name {
+    fn from(res_type: ResType) -> Self {
+        Name {
+            res_type,
+            obj_name: None,
+        }
+    }
+}
+
+impl fmt::Display for Name {
+    fn fmt(
         &self,
-        _: &RootCertStore,
-        _: &[Certificate],
-        _: DNSNameRef,
-        _: &[u8],
-    ) -> std::result::Result<ServerCertVerified, TLSError> {
-        // NOTE: we are *NOT* checking the server cert here!  This is only
-        //       secure when graft is running on the same host as IRIS.
-        Ok(ServerCertVerified::assertion())
+        f: &mut fmt::Formatter<'_>,
+    ) -> std::result::Result<(), fmt::Error> {
+        let type_n = self.type_n();
+        match &self.obj_name {
+            Some(obj_n) => write!(f, "{type_n}/{obj_n}"),
+            None => write!(f, "{type_n}"),
+        }
+    }
+}
+
+impl Name {
+    /// Create a new name
+    pub fn new(type_n: &str) -> Result<Self> {
+        Ok(Name::from(ResType::try_from(type_n)?))
+    }
+
+    /// Set object name
+    ///
+    /// Name is validated and decoded from percent-encoded form
+    pub fn obj(mut self, obj_n: &str) -> Result<Self> {
+        let obj_n = &percent_decode_str(obj_n)
+            .decode_utf8()
+            .or(Err(Error::InvalidValue))?;
+        if obj_n.len() > 64 || obj_n.contains(invalid_char) {
+            Err(Error::InvalidValue)?
+        } else {
+            self.obj_name = Some(obj_n.to_string());
+            Ok(self)
+        }
+    }
+
+    /// Get resource type name
+    pub fn type_n(&self) -> &'static str {
+        self.res_type.as_str()
+    }
+
+    /// Get object name
+    pub fn object_n(&self) -> Option<&str> {
+        self.obj_name.as_deref()
+    }
+
+    /// Make a Sonar attribute (with validation)
+    pub fn attr(&self, att: &str) -> Result<String> {
+        if att.len() > 64 || att.contains(invalid_char) {
+            Err(Error::InvalidValue)?
+        } else if self.res_type == ResType::Controller && att == "drop_id" {
+            Ok(format!("{self}/drop"))
+        } else if self.res_type == ResType::SignMessage {
+            // sign_message attributes are in snake case
+            Ok(format!("{self}/{att}"))
+        } else {
+            // most IRIS attributes are in camel case (Java)
+            Ok(format!("{self}/{}", att.to_case(Case::Camel)))
+        }
     }
 }
 
 /// Sonar message
 #[allow(dead_code)]
 #[derive(Debug)]
-pub enum Message<'a> {
+enum Message<'a> {
     /// Client login request
     Login(&'a str, &'a str),
 
@@ -175,15 +236,6 @@ pub enum Message<'a> {
 
     /// Server show message
     Show(&'a str),
-}
-
-/// Connection to a sonar server
-pub struct Connection {
-    tls_stream: TlsStream<TcpStream>,
-    timeout: Duration,
-    buf: Vec<u8>,
-    offset: usize,
-    count: usize,
 }
 
 impl<'a> Message<'a> {
@@ -282,24 +334,39 @@ impl<'a> Message<'a> {
     }
 }
 
+/// Connection to a sonar server
+pub struct Connection {
+    /// TLS encrypted stream
+    tls_stream: TlsStream<TcpStream>,
+    /// Network timeout
+    timeout: Duration,
+    /// Received data buffer
+    rx_buf: Vec<u8>,
+    /// Offset into buffer
+    offset: usize,
+    /// Count of bytes in buffer
+    count: usize,
+}
+
 impl Connection {
     /// Create a new connection to a sonar server
     pub async fn new(host: &str, port: u16) -> Result<Self> {
         let addr = (host, port)
-            .to_socket_addrs()
-            .await?
+            .to_socket_addrs()?
             .next()
-            .ok_or_else(|| io::Error::from(io::ErrorKind::NotFound))?;
+            .ok_or_else(|| io::Error::from(ErrorKind::NotFound))?;
         let tcp_stream = TcpStream::connect(&addr).await?;
-        let mut cfg = ClientConfig::new();
-        cfg.dangerous()
-            .set_certificate_verifier(Arc::new(Verifier {}));
-        let connector = TlsConnector::from(Arc::new(cfg));
-        let tls_stream = connector.connect(host, tcp_stream).await?;
+        let connector = tls::connector();
+        let domain = ServerName::try_from(host)
+            .map_err(|_| {
+                io::Error::new(io::ErrorKind::InvalidInput, "invalid dnsname")
+            })?
+            .to_owned();
+        let tls_stream = connector.connect(domain, tcp_stream).await?;
         Ok(Connection {
             tls_stream,
             timeout: Duration::from_secs(5),
-            buf: vec![0; 32768],
+            rx_buf: vec![0; 32_768],
             offset: 0,
             count: 0,
         })
@@ -307,12 +374,14 @@ impl Connection {
 
     /// Send a message to the server
     pub async fn send(&mut self, req: &[u8]) -> Result<()> {
-        io::timeout(self.timeout, self.tls_stream.write_all(req)).await?;
-        Ok(())
+        match timeout(self.timeout, self.tls_stream.write_all(req)).await {
+            Ok(res) => Ok(res?),
+            Err(_e) => Err(Error::TimedOut),
+        }
     }
 
     /// Receive a message from the server
-    pub async fn recv<F>(&mut self, mut callback: F) -> Result<()>
+    async fn recv<F>(&mut self, mut callback: F) -> Result<()>
     where
         F: FnMut(Message) -> Result<()>,
     {
@@ -323,28 +392,29 @@ impl Connection {
                     self.consume(c);
                     return r;
                 }
-                None => io::timeout(self.timeout, self.read()).await?,
+                None => match timeout(self.timeout, self.read()).await {
+                    Ok(res) => res?,
+                    Err(_e) => return Err(Error::TimedOut),
+                },
             }
         }
     }
 
     /// Check for an error message from the server
     async fn check_error(&mut self, ms: u64) -> Result<()> {
-        match io::timeout(Duration::from_millis(ms), self.read()).await {
-            Err(ref e) if e.kind() == io::ErrorKind::TimedOut => Ok(()),
-            Err(e) => Err(e),
-            Ok(()) => Ok(()),
-        }?;
+        if let Ok(res) = timeout(Duration::from_millis(ms), self.read()).await {
+            res?;
+        }
         match Message::decode(self.received()) {
-            Some((Message::Show(txt), _)) => Err(SonarError::parse_show(txt)),
-            Some((_res, _c)) => Err(SonarError::UnexpectedResponse),
+            Some((Message::Show(txt), _)) => Err(Error::parse_show(txt)),
+            Some((_res, _c)) => Err(Error::UnexpectedResponse),
             None => Ok(()),
         }
     }
 
     /// Get buffer of received data
     fn received(&self) -> &[u8] {
-        &self.buf[self.offset..self.offset + self.count]
+        &self.rx_buf[self.offset..self.offset + self.count]
     }
 
     /// Consume buffered data
@@ -361,7 +431,7 @@ impl Connection {
     /// Read data from the server
     async fn read(&mut self) -> io::Result<()> {
         let offset = self.offset;
-        self.count += self.tls_stream.read(&mut self.buf[offset..]).await?;
+        self.count += self.tls_stream.read(&mut self.rx_buf[offset..]).await?;
         Ok(())
     }
 
@@ -373,8 +443,8 @@ impl Connection {
         self.send(&buf[..]).await?;
         self.recv(|m| match m {
             Message::Type("") => Ok(()),
-            Message::Show(txt) => Err(SonarError::parse_show(txt)),
-            _ => Err(SonarError::UnexpectedMessage),
+            Message::Show(txt) => Err(Error::parse_show(txt)),
+            _ => Err(Error::UnexpectedResponse),
         })
         .await?;
         self.recv(|m| match m {
@@ -382,10 +452,10 @@ impl Connection {
                 msg.push_str(txt);
                 Ok(())
             }
-            _ => Err(SonarError::UnexpectedMessage),
+            _ => Err(Error::UnexpectedResponse),
         })
         .await?;
-        info!("Logged in from {}", msg);
+        log::info!("Logged in from {}", msg);
         Ok(msg)
     }
 
@@ -443,8 +513,8 @@ impl Connection {
                     done = true;
                     Ok(())
                 }
-                Message::Show(msg) => Err(SonarError::parse_show(msg)),
-                _ => Err(SonarError::UnexpectedMessage),
+                Message::Show(msg) => Err(Error::parse_show(msg)),
+                _ => Err(Error::UnexpectedResponse),
             })
             .await?;
         }

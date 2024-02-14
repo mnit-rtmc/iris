@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2018  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  * Copyright (C) 2014       AHMCT, University of California
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
@@ -38,7 +38,7 @@ public enum DeviceRequest {
 	BRIGHTNESS_TOO_DIM,
 	BRIGHTNESS_TOO_BRIGHT,
 	RESET_DEVICE,
-	RESET_MODEM,
+	RESET_STATUS,
 	QUERY_GPS_LOCATION,
 	DISABLE_SYSTEM,
 	CAMERA_FOCUS_STOP,

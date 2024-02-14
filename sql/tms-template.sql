@@ -144,7 +144,7 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.49.0
+database_version	5.50.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_secs	60
@@ -589,8 +589,7 @@ PRV_0041	comm_admin	cabinet_style		t
 PRV_0043	comm_admin	controller		t
 PRV_0044	comm_admin	alarm		t
 PRV_0045	comm_control	controller	condition	t
-PRV_0046	comm_control	controller	download	t
-PRV_0047	comm_control	controller	counters	t
+PRV_0046	comm_control	controller	deviceRequest	t
 PRV_004B	comm_tab	comm_config		f
 PRV_0048	comm_tab	comm_link		f
 PRV_0049	comm_tab	modem		f

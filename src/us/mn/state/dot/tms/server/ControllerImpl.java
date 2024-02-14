@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -933,8 +933,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Clear the counters and error status */
-	@Override
-	public void setCounters(boolean clear) {
+	private void clearCounters() {
 		setMaintNotify("");
 		setErrorStatus("");
 		if (timeoutErr != 0) {
@@ -1076,23 +1075,26 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return (dp instanceof SamplePoller) ? (SamplePoller) dp : null;
 	}
 
-	/** Perform a controller download (reset) */
+	/** Request a device operation */
 	@Override
-	public void setDownload(boolean reset) {
-		SamplePoller sp = getSamplePoller();
-		if (sp != null) {
-			if (reset)
-				sp.resetController(this);
-			else
-				sp.sendSettings(this);
+	public void setDeviceRequest(int r) {
+		if (DeviceRequest.RESET_STATUS.ordinal() == r) {
+			clearCounters();
+			return;
 		}
-		requestDevices(DeviceRequest.SEND_SETTINGS);
-		// Only send settings to the "first" video monitor
-		// on the controller (lowest pin number)
-		VideoMonitorImpl vm = getFirstVideoMonitor();
-		if (vm != null) {
-			int dr = DeviceRequest.SEND_SETTINGS.ordinal();
-			vm.setDeviceRequest(dr);
+		DeviceRequest req = DeviceRequest.fromOrdinal(r);
+		SamplePoller sp = getSamplePoller();
+		if (sp != null)
+			sp.sendRequest(this, req);
+		else {
+			requestDevices(req);
+			// Only send settings to the "first" video monitor
+			// on the controller (lowest pin number)
+			VideoMonitorImpl vm = getFirstVideoMonitor();
+			if (vm != null) {
+				int dr = req.ordinal();
+				vm.setDeviceRequest(dr);
+			}
 		}
 	}
 
