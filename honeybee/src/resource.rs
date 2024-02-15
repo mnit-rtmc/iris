@@ -1,6 +1,6 @@
 // resource.rs
 //
-// Copyright (C) 2018-2023  Minnesota Department of Transportation
+// Copyright (C) 2018-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,63 +16,16 @@ use crate::files::AtomicFile;
 use crate::segments::{RNode, Road, SegMsg};
 use crate::signmsg::render_all;
 use crate::Result;
-use fstr::FStr;
-use gift::{Encoder, Step};
-use ntcip::dms::multi::Color;
-use ntcip::dms::Graphic;
-use pix::{rgb::SRgb8, Palette};
 use postgres::Client;
-use serde_derive::Deserialize;
 use std::collections::HashSet;
 use std::io::Write;
 use std::path::Path;
 use std::sync::mpsc::Sender;
 use std::time::Instant;
 
-/// Graphic resource
-#[derive(Deserialize)]
-struct GraphicRes {
-    number: u8,
-    name: String,
-    height: u8,
-    width: u16,
-    color_scheme: String,
-    transparent_color: Option<i32>,
-    #[serde(with = "super::base64")]
-    bitmap: Vec<u8>,
-}
-
-impl From<GraphicRes> for Graphic {
-    fn from(gr: GraphicRes) -> Self {
-        let transparent_color = match gr.transparent_color {
-            Some(tc) => {
-                let red = (tc >> 16) as u8;
-                let green = (tc >> 8) as u8;
-                let blue = tc as u8;
-                Some(Color::Rgb(red, green, blue))
-            }
-            _ => None,
-        };
-        Graphic {
-            number: gr.number,
-            name: FStr::from_str_lossy(&gr.name, 0),
-            height: gr.height,
-            width: gr.width,
-            gtype: gr.color_scheme[..].into(),
-            transparent_color,
-            bitmap: gr.bitmap,
-        }
-    }
-}
-
 /// A resource which can be fetched from a database connection.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 enum Resource {
-    /// Graphic resource.
-    ///
-    /// * SQL query.
-    Graphic(&'static str),
-
     /// RNode resource.
     RNode(),
 
@@ -314,16 +267,6 @@ const GRAPHIC_LIST_RES: Resource = Resource::Simple(
       FROM iris.graphic \
       WHERE g_number < 256 \
       ORDER BY number\
-    ) r",
-);
-
-/// Graphic resource
-const GRAPHIC_RES: Resource = Resource::Graphic(
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT g_number AS number, name, height, width, color_scheme, \
-             transparent_color, replace(pixels, E'\n', '') AS bitmap \
-      FROM graphic_view \
-      WHERE g_number < 256\
     ) r",
 );
 
@@ -801,7 +744,6 @@ const ALL: &[Resource] = &[
     DMS_STAT_RES,
     FONT_LIST_RES,
     GRAPHIC_LIST_RES,
-    GRAPHIC_RES,
     MSG_LINE_RES,
     MSG_PATTERN_RES,
     WORD_RES,
@@ -916,7 +858,6 @@ impl Resource {
     /// Get the listen value
     fn listen(self) -> Option<&'static str> {
         match self {
-            Resource::Graphic(_) => None,
             Resource::RNode() => Some("r_node$1"),
             Resource::Road() => Some("road$1"),
             Resource::Simple(_, lsn, _) => lsn,
@@ -927,7 +868,6 @@ impl Resource {
     /// Get the SQL value
     fn sql(self) -> &'static str {
         match self {
-            Resource::Graphic(sql) => sql,
             Resource::RNode() => unreachable!(),
             Resource::Road() => unreachable!(),
             Resource::Simple(_, _, sql) => sql,
@@ -947,7 +887,6 @@ impl Resource {
         sender: &Sender<SegMsg>,
     ) -> Result<()> {
         match self {
-            Resource::Graphic(_) => self.fetch_graphics(client),
             Resource::RNode() => self.fetch_nodes(client, payload, sender),
             Resource::Road() => self.fetch_roads(client, payload, sender),
             Resource::Simple(n, _, _) => self.fetch_file(client, n),
@@ -1010,57 +949,12 @@ impl Resource {
         Ok(())
     }
 
-    /// Fetch graphics resource.
-    fn fetch_graphics(self, client: &mut Client) -> Result<()> {
-        log::debug!("fetch_graphics");
-        let t = Instant::now();
-        let dir = Path::new("api/gif");
-        let mut count = 0;
-        let sql = self.sql();
-        for row in &client.query(sql, &[])? {
-            write_graphic(dir, serde_json::from_str(row.get(0))?)?;
-            count += 1;
-        }
-        log::info!("fetch_graphics: wrote {count} rows in {:?}", t.elapsed());
-        Ok(())
-    }
-
     /// Fetch sign messages resource.
     fn fetch_sign_msgs(self, client: &mut Client) -> Result<()> {
         self.fetch_file(client, "sign_message")?;
         // FIXME: spawn another thread for this?
         render_all(Path::new(""))
     }
-}
-
-/// Write a graphic image to a file
-fn write_graphic(dir: &Path, graphic: GraphicRes) -> Result<()> {
-    let graphic = Graphic::from(graphic);
-    let name = format!("G{}.gif", graphic.number);
-    let raster = graphic.to_raster();
-    let mut palette = Palette::new(256);
-    if let Some(Color::Rgb(red, green, blue)) = graphic.transparent_color {
-        palette.set_entry(SRgb8::new(red, green, blue));
-        log::debug!("write_graphic: {name}, transparent {red},{green},{blue}");
-    }
-    palette.set_threshold_fn(palette_threshold_rgb8_256);
-    let indexed = palette.make_indexed(raster);
-    log::debug!("write_graphic: {name}, {}", palette.len());
-    let file = AtomicFile::new(dir, &name)?;
-    let mut writer = file.writer()?;
-    let mut enc = Encoder::new(&mut writer).into_step_enc();
-    let step = Step::with_indexed(indexed, palette).with_transparent_color(
-        // transparent color always palette index 0
-        graphic.transparent_color.map(|_| 0),
-    );
-    enc.encode_step(&step)?;
-    Ok(())
-}
-
-/// Get the difference threshold for SRgb8 with 256 capacity palette
-fn palette_threshold_rgb8_256(v: usize) -> SRgb8 {
-    let val = (v & 0xFF) as u8;
-    SRgb8::new(val >> 5, val >> 5, val >> 4)
 }
 
 /// Listen for notifications on all channels we need to monitor.
