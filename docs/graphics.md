@@ -23,13 +23,16 @@ image editor such as [GIMP] or Microsoft Paint for this purpose.
 
 Requirements:
 
+- Image file name: `G`{graphic number}`.gif`
 - 1-bit monochrome or 24-bit color
-- PNG or GIF image format
 - Width between 1 and 240 pixels
 - Height between 1 and 144 pixels
 
-To import a graphic, enable [edit mode] and press the **Create** button.
-Select the image in the file picker.
+Store graphics in `/var/www/html/iris/api/gif/` to make available in the
+[REST API].
+
+To import a graphic into the database, enable [edit mode] and press the
+**Create** button.  Select the image in the file picker.
 
 A single **Transparent Color** can be selected to be fully transparent - alpha
 transparency is not supported. 
@@ -50,5 +53,6 @@ sign's function.
 [edit mode]: user_interface.html#edit-mode
 [GIMP]: https://www.gimp.org/
 [MULTI]: multi.html
+[REST API]: rest_api.html
 [sign message]: sign_message.html
 [static sign]: dms.html#setup

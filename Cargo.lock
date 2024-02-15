@@ -1469,21 +1469,16 @@ name = "honeybee"
 version = "5.50.1"
 dependencies = [
  "anyhow",
- "base64 0.13.1",
  "env_logger",
- "fstr",
- "gift",
  "log",
  "mvt",
  "ntcip",
- "pix",
  "pointy",
  "postgis",
  "postgres",
  "rendzina",
  "serde",
  "serde_json",
- "thiserror",
  "whoami",
 ]
 

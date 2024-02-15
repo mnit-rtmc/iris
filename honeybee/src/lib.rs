@@ -17,7 +17,6 @@
 /// Result type
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
-mod base64;
 pub mod fetcher;
 mod files;
 mod resource;
