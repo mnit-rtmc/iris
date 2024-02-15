@@ -409,6 +409,7 @@ async fn fill_resource_select() {
             sb_resource.set_inner_html(&perm);
             STATE.with(|rc| rc.borrow_mut().initialized = true);
         }
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
         Err(e) => {
             console::log_1(&format!("fill_resource_select: {e:?}").into());
         }
