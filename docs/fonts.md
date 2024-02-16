@@ -62,28 +62,28 @@ directory to make it available in the [REST API].
 A number of fonts are included in the `/var/lib/iris/fonts` directory.  These
 fonts are designed to have a similar visual style.
 
-Name    | Number | Height | Notes        | 3-Line Height
---------|--------|--------|--------------|--------------
-`F07-C` | 5      | 7 px   | 5 px width   | —
-`F07`   | 7      | 7 px   |              | 27 px
-`F08`   | 8      | 8 px   |              | 28 px
-`F09`   | 9      | 9 px   |              | 31 px
-`F09-L` | 109 †  | 9 px   | 1 px spacing | —
-`F10`   | 10     | 10 px  |              | 36 px
-`F11`   | 11     | 11 px  |              | 39 px
-`F12`   | 12     | 12 px  |              | 42 px
-`F12-A` | 112 †  | 12 px  | all-ASCII    | —
-`F12-B` | 212 †  | 12 px  | **bold**     | —
-`F13`   | 13     | 13 px  |              | 47 px
-`F14`   | 14     | 14 px  |              | 50 px
-`F14-A` | 114 †  | 14 px  | all-ASCII    | —
-`F15`   | 15     | 15 px  |              | 53 px
-`F16`   | 16     | 16 px  |              | 56 px
-`F18`   | 18     | 18 px  |              | 64 px
-`F20`   | 20     | 20 px  |              | 72 px
-`F22`   | 22     | 22 px  |              | 80 px
-`F24`   | 24     | 24 px  |              | 88 px
-`F26`   | 26     | 26 px  |              | 94 px
+Name    | Number | Height | Line Spacing | 3-Lines | Notes
+--------|--------|--------|--------------|---------|-----------
+`F07-C` | 5      | 7 px   | —            | —       | 5 px width
+`F07`   | 7      | 7 px   | 3 px         | 27 px   |
+`F08`   | 8      | 8 px   | 2 px         | 28 px   |
+`F09`   | 9      | 9 px   | 2 px         | 31 px   |
+`F09-L` | 109 †  | 9 px   | —            | —       | 1 px char spacing
+`F10`   | 10     | 10 px  | 3 px         | 36 px   |
+`F11`   | 11     | 11 px  | 3 px         | 39 px   |
+`F12`   | 12     | 12 px  | 3 px         | 42 px   |
+`F12-A` | 112 †  | 12 px  | _(2 px)_     | —       | full ASCII
+`F12-B` | 212 †  | 12 px  | _(4 px)_     | —       | **bold**
+`F13`   | 13     | 13 px  | 4 px         | 47 px   |
+`F14`   | 14     | 14 px  | 4 px         | 50 px   |
+`F14-A` | 114 †  | 14 px  | _(6 px)_     | —       | full ASCII
+`F15`   | 15     | 15 px  | 4 px         | 53 px   |
+`F16`   | 16     | 16 px  | 4 px         | 56 px   |
+`F18`   | 18     | 18 px  | 5 px         | 64 px   |
+`F20`   | 20     | 20 px  | 6 px         | 72 px   |
+`F22`   | 22     | 22 px  | 7 px         | 80 px   |
+`F24`   | 24     | 24 px  | 8 px         | 88 px   |
+`F26`   | 26     | 26 px  | 8 px         | 94 px   |
 
 † _Normally font number is the same as pixel height, but variations use
 1xx or 2xx._
