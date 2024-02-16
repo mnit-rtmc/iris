@@ -81,6 +81,7 @@ Name    | Number | Height | Notes      | 3-Line Height
 `F16`   | 16     | 16 px  |            | 56 px
 `F18`   | 18     | 18 px  |            | 64 px
 `F20`   | 20     | 20 px  |            | 72 px
+`F22`   | 22     | 22 px  |            | 80 px
 `F24`   | 24     | 24 px  |            | 88 px
 `F26`   | 26     | 26 px  |            | 94 px
 
