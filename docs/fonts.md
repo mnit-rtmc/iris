@@ -66,7 +66,6 @@ Name    | Number | Description
 --------|--------|-----------------------------------------
 `F07`   | 7      | 7 px height
 `F07-C` | 5      | 7 px height, 5 px width character-matrix
-`F07-L` | 107 †  | 7 px height line-matrix
 `F08`   | 8      | 8 px height
 `F09`   | 9      | 9 px height
 `F09-L` | 109 †  | 9 px height line-matrix
@@ -98,7 +97,7 @@ surrogates for arrows, diamonds, etc:
 | Character     | Code Point | ASCII | Fonts
 |---------------|------------|-------|----------------------
 | <sup>ND</sup> | 38         | &     | `F14-A`
-| ◊             | 42         | *     | `F07`, `F07-L`, `F26`
+| ◊             | 42         | *     | `F07`, `F26`
 | ↖             | 94         | ^     | `F14-A`
 | █             | 96         | \`    | `F14-A`
 | ↙             | 123        | {     | `F07`, `F14-A`
