@@ -67,8 +67,7 @@ Name    | Number | Height | Line Spacing | 3-Lines | Notes
 `F07-C` | 5      | 7 px   | —            | —       | 5 px width
 `F07`   | 7      | 7 px   | 3 px         | 27 px   |
 `F08`   | 8      | 8 px   | 2 px         | 28 px   |
-`F09`   | 9      | 9 px   | 2 px         | 31 px   |
-`F09-L` | 109 †  | 9 px   | —            | —       | 1 px char spacing
+`F09`   | 9      | 9 px   | 3 px         | 33 px   |
 `F10`   | 10     | 10 px  | 3 px         | 36 px   |
 `F11`   | 11     | 11 px  | 3 px         | 39 px   |
 `F12`   | 12     | 12 px  | 3 px         | 42 px   |
