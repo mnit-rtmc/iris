@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontFinder;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
+import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -101,6 +102,11 @@ public class OpSendDMSFonts extends OpDMS {
 
 	/** Flag for version 2 or later (with support for fontStatus) */
 	private boolean version2;
+
+	/** Check if sign is full-matrix */
+	private boolean isFullMatrix() {
+		return SignConfigHelper.isFullMatrix(dms.getSignConfig());
+	}
 
 	/** Create a new operation to send fonts to a DMS */
 	public OpSendDMSFonts(DMSImpl d) {
@@ -340,7 +346,7 @@ public class OpSendDMSFonts extends OpDMS {
 		/** Compare the font version ID */
 		private boolean isVersionIDCorrect(int v) throws IOException {
 			FontVersionByteStream fv = new FontVersionByteStream(
-				frow.font, frow.f_num);
+				frow.font, frow.f_num, isFullMatrix());
 			return v == fv.getCrcSwapped();
 		}
 	}
@@ -524,7 +530,12 @@ public class OpSendDMSFonts extends OpDMS {
 			name.setString(frow.font.getName());
 			height.setInteger(frow.font.getHeight());
 			char_spacing.setInteger(frow.font.getCharSpacing());
-			line_spacing.setInteger(frow.font.getLineSpacing());
+			// char- or line-matrix signs "shall ignore" line spacing,
+			// except when they're buggy and we must work around it
+			line_spacing.setInteger(isFullMatrix()
+				? frow.font.getLineSpacing()
+				: 0
+			);
 			mess.add(number);
 			mess.add(name);
 			mess.add(height);

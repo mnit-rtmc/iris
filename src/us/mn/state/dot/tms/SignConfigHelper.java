@@ -89,13 +89,13 @@ public class SignConfigHelper extends BaseHelper {
 	}
 
 	/** Check for character-matrix sign */
-	static private boolean isCharMatrix(SignConfig sc) {
-		return sc.getCharWidth() > 0;
+	static public boolean isCharMatrix(SignConfig sc) {
+		return (sc != null) && (sc.getCharWidth() > 0);
 	}
 
 	/** Check for full-matrix sign */
-	static private boolean isFullMatrix(SignConfig sc) {
-		return sc.getCharHeight() <= 0;
+	static public boolean isFullMatrix(SignConfig sc) {
+		return (sc != null) && (sc.getCharHeight() <= 0);
 	}
 
 	/** Get a set of all signs in with a sign config */
