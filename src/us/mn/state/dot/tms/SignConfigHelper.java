@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2023  Minnesota Department of Transportation
+ * Copyright (C) 2016-2024  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -88,44 +88,9 @@ public class SignConfigHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Check if a font is usable for a sign configuration */
-	static public boolean isFontUsable(SignConfig sc, Font f) {
-		return isFontWidthUsable(sc, f) &&  isFontHeightUsable(sc, f);
-	}
-
-	/** Check if a font width is usable for a sign configuration. */
-	static private boolean isFontWidthUsable(SignConfig sc, Font f) {
-		if (f.getWidth() > sc.getPixelWidth())
-			return false;
-		if (isCharMatrix(sc)) {
-			// char-matrix signs must match font width
-			// and must not have character spacing
-			return f.getWidth() == sc.getCharWidth()
-			    && f.getCharSpacing() == 0;
-		} else {
-			// line- or full-matrix signs must have char spacing
-			return f.getCharSpacing() > 0;
-		}
-	}
-
 	/** Check for character-matrix sign */
 	static private boolean isCharMatrix(SignConfig sc) {
 		return sc.getCharWidth() > 0;
-	}
-
-	/** Check if a font height is usable */
-	static private boolean isFontHeightUsable(SignConfig sc, Font f) {
-		if (f.getHeight() > sc.getPixelHeight())
-			return false;
-		if (isFullMatrix(sc)) {
-			// full-matrix signs must have line spacing
-			return f.getLineSpacing() > 0;
-		} else {
-			// char- or line-matrix signs must match font height
-			// and must not have line spacing
-			return f.getHeight() == sc.getCharHeight()
-			    && f.getLineSpacing() == 0;
-		}
 	}
 
 	/** Check for full-matrix sign */
