@@ -62,27 +62,27 @@ directory to make it available in the [REST API].
 A number of fonts are included in the `/var/lib/iris/fonts` directory.  These
 fonts are designed to have a similar visual style.
 
-Name    | Number | Description
---------|--------|-----------------------------------------
-`F07`   | 7      | 7 px height
-`F07-C` | 5      | 7 px height, 5 px width character-matrix
-`F08`   | 8      | 8 px height
-`F09`   | 9      | 9 px height
-`F09-L` | 109 †  | 9 px height line-matrix
-`F10`   | 10     | 10 px height
-`F11`   | 11     | 11 px height
-`F12`   | 12     | 12 px height
-`F12-A` | 112 †  | 12 px height all-ASCII (9 height caps)
-`F12-B` | 212 †  | 12 px height bold
-`F13`   | 13     | 13 px height
-`F14`   | 14     | 14 px height
-`F14-A` | 114 †  | 14 px height all-ASCII
-`F15`   | 15     | 15 px height
-`F16`   | 16     | 16 px height
-`F18`   | 18     | 18 px height
-`F20`   | 20     | 20 px height
-`F24`   | 24     | 24 px height
-`F26`   | 26     | 26 px height
+Name    | Number | Height | Notes      | 3-Line Height
+--------|--------|--------|------------|--------------
+`F07`   | 7      | 7 px   |            | 27 px
+`F07-C` | 5      | 7 px   | 5 px width | N/A
+`F08`   | 8      | 8 px   |            | 28 px
+`F09`   | 9      | 9 px   |            | 31 px
+`F09-L` | 9      | 9 px   | 1 px ch-sp | N/A
+`F10`   | 10     | 10 px  |            | 36 px
+`F11`   | 11     | 11 px  |            | 39 px
+`F12`   | 12     | 12 px  |            | 42 px
+`F12-A` | 112 †  | 12 px  | all-ASCII  | N/A
+`F12-B` | 212 †  | 12 px  | **bold**   | N/A
+`F13`   | 13     | 13 px  |            | 47 px
+`F14`   | 14     | 14 px  |            | 50 px
+`F14-A` | 114 †  | 14 px  | all-ASCII  | N/A
+`F15`   | 15     | 15 px  |            | 53 px
+`F16`   | 16     | 16 px  |            | 56 px
+`F18`   | 18     | 18 px  |            | 64 px
+`F20`   | 20     | 20 px  |            | 72 px
+`F24`   | 24     | 24 px  |            | 88 px
+`F26`   | 26     | 26 px  |            | 94 px
 
 † _Normally font number is the same as pixel height, but variations use
 1xx or 2xx._
