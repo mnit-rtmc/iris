@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.onvifptz;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 /**
  * Service for ONVIF PTZ messages
@@ -247,6 +248,22 @@ public class PTZService extends Service {
 	}
 
 	/**
+	 * Checks if a PTZ preset exists
+	 * @param profileToken reference to the media profile
+	 * @param pToken       reference token to the saved PTZ preset
+	 */
+	public boolean presetExists(String profileToken, String pToken) {
+		Document presets = DOMUtils.getDocument(getPresets(profileToken));
+
+		NodeList presetList = presets.getElementsByTagNameNS("*", "Preset");
+		for (int i = 0; i < presetList.getLength(); i++) {
+			if (pToken.equals(((Element) presetList.item(i)).getAttribute("token")))
+				return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Point the camera in a saved preset direction for the PTZNode of
 	 * selected MediaProfile
 	 *
@@ -254,6 +271,8 @@ public class PTZService extends Service {
 	 * @param pToken       reference token to the saved PTZ preset
 	 */
 	public String gotoPreset(String profileToken, String pToken) {
+		if (!presetExists(profileToken, pToken))
+			return null;
 		Document doc = gotoPresetDocument(profileToken, pToken);
 		return sendRequestDocument(doc);
 	}
