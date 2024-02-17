@@ -14,53 +14,7 @@ A font is a set of bitmapped glyphs for displaying text on a [DMS].
 
 </details>
 
-## Importing
-
-Fonts must be imported into the IRIS database.  First, they must be in `tfon`
-format, which looks like this:
-
-```text
-font_name: tfon example
-font_number: 2
-char_spacing: 1
-line_spacing: 3
-
-ch: 52 4
-...@@@.
-..@.@@.
-.@..@@.
-@...@@.
-@@@@@@@
-....@@.
-....@@.
-
-ch: 65 A
-.@@@@.
-@@..@@
-@@..@@
-@@@@@@
-@@..@@
-@@..@@
-@@..@@
-```
-
-Many fonts are [included](#predefined-fonts) with IRIS.  Alternatively,
-existing fonts in the popular [BDF] format can be converted to `tfon` using
-the [fontu] utility.
-
-To import a font, use tfon_import.py (in `bin` directory):
-
-```
-tfon_import.py [font file] | psql tms
-```
-
-Also, each font file must be copied to the `/var/www/html/iris/api/tfon/`
-directory to make it available in the [REST API].
-
-## Predefined Fonts
-
-A number of fonts are included in the `/var/lib/iris/fonts` directory.  These
-fonts are designed to have a similar visual style.
+A number of fonts are included in the `/var/lib/iris/fonts` directory:
 
 Name    | Number | Height | Line Spacing | 3-Lines | Notes
 --------|--------|--------|--------------|---------|-----------
@@ -128,6 +82,50 @@ Upper-case only fonts are recommended for larger pixel pitch, but fonts with
 lower-case characters can be used if pitch is below 50 mm.  If a message
 containing lower-case characters is used with an upper-case only font, it will
 be converted to upper-case.
+
+## Importing
+
+Fonts in `tfon` format can be imported into the IRIS database using
+`tfon_import.py` (in the `bin` directory):
+
+```
+tfon_import.py [font file] | psql tms
+```
+
+Also, each font file must be copied to the `/var/www/html/iris/api/tfon/`
+directory to make it available in the [REST API].
+
+### `tfon` Format
+
+Existing fonts in the popular [BDF] format can be converted to `tfon` using
+the [fontu] utility.
+
+The `tfon` format looks like this:
+
+```text
+font_name: tfon example
+font_number: 2
+char_spacing: 1
+line_spacing: 3
+
+ch: 52 4
+...@@@.
+..@.@@.
+.@..@@.
+@...@@.
+@@@@@@@
+....@@.
+....@@.
+
+ch: 65 A
+.@@@@.
+@@..@@
+@@..@@
+@@@@@@
+@@..@@
+@@..@@
+@@..@@
+```
 
 ## Send and Query Fonts
 
