@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
@@ -600,9 +601,11 @@ public class OpSendDMSFonts extends OpDMS {
 			try {
 				mess.storeProps();
 			}
-			catch (NoSuchName ex) {
+			catch (ControllerException ex) {
 				// Note: SESA char matrix signs respond with
 				//       NoSuchName when setting characterWidth
+				System.err.println("AddCharacter " +
+					code_point + ", " + ex.getMessage());
 			}
 			count++;
 			if (count % 20 == 0 && !controller.isFailed())
