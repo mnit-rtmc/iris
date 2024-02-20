@@ -55,8 +55,7 @@ surrogates for arrows, diamonds, etc:
 | ↖             | 94         | ^     | `F14-A`
 | █             | 96         | \`    | `F14-A`
 | ↙             | 123        | {     | `F07`, `F14-A`
-| ↓             | 125        | }     | `F07`
-| ↘             | 125        | }     | `F14-A`
+| ↘             | 125        | }     | `F07`, `F14-A`
 
 ## Choosing Fonts
 
