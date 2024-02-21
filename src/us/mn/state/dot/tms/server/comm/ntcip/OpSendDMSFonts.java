@@ -604,8 +604,9 @@ public class OpSendDMSFonts extends OpDMS {
 			catch (ControllerException ex) {
 				// Note: SESA char matrix signs respond with
 				//       NoSuchName when setting characterWidth
-				System.err.println("AddCharacter " +
-					code_point + ", " + ex.getMessage());
+				System.err.println("DMS " + dms.getName() +
+					", AddCharacter " + code_point + ", " +
+					ex.getMessage());
 			}
 			count++;
 			if (count % 20 == 0 && !controller.isFailed())
