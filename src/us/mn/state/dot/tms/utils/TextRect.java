@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2022-2023  Minnesota Department of Transportation
+ * Copyright (C) 2022-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,18 +37,20 @@ public class TextRect {
 	public final int ry;
 	public final int width;
 	public final int height;
+	public final int c_height;
 	public final int font_num;
 
 	/** Glyph width cache */
 	private HashMap<Integer, Integer> glyph_widths;
 
 	/** Create a new text rectangle */
-	public TextRect(int pn, int x, int y, int w, int h, int fn) {
+	public TextRect(int pn, int x, int y, int w, int h, int ch, int fn) {
 		page_number = pn;
 		rx = x;
 		ry = y;
 		width = w;
 		height = h;
+		c_height = ch;
 		font_num = fn;
 	}
 
@@ -70,8 +72,8 @@ public class TextRect {
 	/** Get the number of lines of text on the rectangle */
 	public int getLineCount() {
 		// color scheme doesn't matter here
-		RasterBuilder rb = new RasterBuilder(width, height, 0, 0,
-			font_num, ColorScheme.COLOR_24_BIT);
+		RasterBuilder rb = new RasterBuilder(width, height,
+			0, c_height, font_num, ColorScheme.COLOR_24_BIT);
 		return rb.getLineCount();
 	}
 
@@ -91,7 +93,7 @@ public class TextRect {
 		}
 		private TextRect pageRect() {
 			return new TextRect(page, rx, ry, width, height,
-				font_cur);
+				c_height, font_cur);
 		}
 		void startRect(TextRect tr) {
 			if (fillable)
@@ -124,7 +126,8 @@ public class TextRect {
 				h = height - (y - 1);
 			if (rect.equals(page_rect))
 				fillable = false;
-			startRect(new TextRect(page, x, y, w, h, font_cur));
+			startRect(new TextRect(page, x, y, w, h, c_height,
+				font_cur));
 		}
 	}
 
@@ -155,7 +158,7 @@ public class TextRect {
 			lines = lns.iterator();
 			font_cur = font_num;
 			fillRect(new TextRect(page, rx, ry, width, height,
-				font_cur));
+				c_height, font_cur));
 		}
 
 		private void fillRect(TextRect tr) {
@@ -182,7 +185,7 @@ public class TextRect {
 			super.addPage();
 			page++;
 			fillRect(new TextRect(page, rx, ry, width, height,
-				font_cur));
+				c_height, font_cur));
 		}
 		@Override public void setTextRectangle(int x, int y,
 			int w, int h)
@@ -192,7 +195,8 @@ public class TextRect {
 				w = width - (x - 1);
 			if (h == 0)
 				h = height - (y - 1);
-			fillRect(new TextRect(page, x, y, w, h, font_cur));
+			fillRect(new TextRect(page, x, y, w, h, c_height,
+				font_cur));
 		}
 		@Override public void addFeed(String fid) {
 			// strip feed tags

@@ -131,8 +131,10 @@ public class SignConfigHelper extends BaseHelper {
 		if (sc != null) {
 			int width = sc.getPixelWidth();
 			int height = sc.getPixelHeight();
+			int c_height = sc.getCharHeight();
 			int fn = sc.getDefaultFont();
-			return new TextRect(1, 1, 1, width, height, fn);
+			return new TextRect(1, 1, 1, width, height, c_height,
+				fn);
 		} else
 			return null;
 	}
