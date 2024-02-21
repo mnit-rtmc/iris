@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2023  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -75,7 +75,7 @@ public class RasterBuilder {
 	}
 
 	/** Get the optimal line height (pixels) */
-	public int getLineHeightPixels() {
+	private int getLineHeightPixels() {
 		if (c_height > 0)
 			return c_height;
 		Font f = FontHelper.find(default_font);
@@ -83,7 +83,7 @@ public class RasterBuilder {
 	}
 
 	/** Get the optimal line spacing (pixels) */
-	public int getLineSpacingPixels() {
+	private int getLineSpacingPixels() {
 		if (c_height > 0)
 			return 0;
 		Font f = FontHelper.find(default_font);

@@ -1,7 +1,7 @@
-font_name: F09                                                             
+font_name: F09
 font_number: 9
 char_spacing: 2
-line_spacing: 2
+line_spacing: 3
 
 ch: 32 SP
 .

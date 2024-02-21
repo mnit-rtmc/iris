@@ -1,5 +1,9 @@
 [build]
 target = "wasm32-unknown-unknown"
+# Increase stack size to 2 MiB (for FontTable / GraphicTable)
+rustflags = [
+  "-C", "link-args=-z stack-size=2097152",
+]
 
 [target.wasm32-unknown-unknown]
 runner = "wasm-server-runner"

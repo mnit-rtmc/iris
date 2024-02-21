@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2023  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,14 +32,21 @@ import us.mn.state.dot.tms.utils.Base64;
 public class FontVersionByteStream extends CRCStream {
 
 	/** Create a new FontVersionByteStream */
-	public FontVersionByteStream(Font font, int f_num) throws IOException {
+	public FontVersionByteStream(Font font, int f_num, boolean full_matrix)
+		throws IOException
+	{
 		Collection<Glyph> glyphs =
 			FontHelper.lookupGlyphs(font).values();
 		DataOutputStream dos = new DataOutputStream(this);
 		dos.writeByte(f_num);
 		dos.writeByte(font.getHeight());
 		dos.writeByte(font.getCharSpacing());
-		dos.writeByte(font.getLineSpacing());
+		// char- or line-matrix signs "shall ignore" line spacing,
+		// except when they're buggy and we must work around it
+		dos.writeByte(full_matrix
+			? font.getLineSpacing()
+			: 0
+		);
 		int size = glyphs.size();
 		if (size < 256) {
 			dos.writeByte(1); // length prefix

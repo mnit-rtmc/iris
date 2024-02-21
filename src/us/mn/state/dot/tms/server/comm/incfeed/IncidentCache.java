@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2022  Minnesota Department of Transportation
+ * Copyright (C) 2016-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -178,8 +178,6 @@ public class IncidentCache {
 		catch (SonarException e) {
 			// Probably a cleared incident with the same name
 			inc_log.log("Incident not created: " + e.getMessage());
-			System.err.println("createIncidentNotify @ " +
-				new Date() + ": " + e.getMessage());
 			return false;
 		}
 	}
