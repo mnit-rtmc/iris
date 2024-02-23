@@ -1466,6 +1466,9 @@ name = "honeybee"
 version = "5.50.2"
 dependencies = [
  "anyhow",
+ "async-trait",
+ "bb8",
+ "bb8-postgres",
  "env_logger",
  "log",
  "mvt",
@@ -1476,6 +1479,9 @@ dependencies = [
  "rendzina",
  "serde",
  "serde_json",
+ "thiserror",
+ "tokio",
+ "tokio-postgres",
  "whoami",
 ]
 

@@ -1,6 +1,6 @@
 // honeybee.rs
 //
-// Copyright (C) 2018-2020  Minnesota Department of Transportation
+// Copyright (C) 2018-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,8 +16,10 @@
 
 use honeybee::{fetcher, Result};
 
-fn main() -> Result<()> {
+/// Main entry point
+#[tokio::main]
+async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
-    fetcher::start()?;
+    fetcher::start().await?;
     Ok(())
 }
