@@ -20,13 +20,12 @@ use postgres::{Client, NoTls};
 use std::collections::HashSet;
 use std::env;
 use std::sync::mpsc::Sender;
-use std::thread;
 use std::time::Duration;
 
 /// Start receiving notifications and fetching resources.
 pub async fn start() -> Result<()> {
     let (sender, receiver) = std::sync::mpsc::channel();
-    thread::spawn(move || receive_nodes(receiver).unwrap());
+    tokio::spawn(async move { receive_nodes(receiver) });
     let mut client = create_client("tms")?;
     resource::listen_all(&mut client)?;
     resource::query_all(&mut client, &sender).await?;
