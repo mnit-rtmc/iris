@@ -25,7 +25,7 @@ use std::time::Duration;
 /// Start receiving notifications and fetching resources.
 pub async fn start() -> Result<()> {
     let (sender, receiver) = std::sync::mpsc::channel();
-    tokio::spawn(async move { receive_nodes(receiver) });
+    tokio::spawn(async move { receive_nodes(receiver).await });
     let mut client = create_client("tms")?;
     resource::listen_all(&mut client)?;
     resource::query_all(&mut client, &sender).await?;

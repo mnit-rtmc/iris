@@ -87,7 +87,7 @@ impl Database {
     }
 
     /// Get database connection
-    pub async fn connection<M>(&self) -> Result<PooledConnection<Manager>> {
+    pub async fn connection(&self) -> Result<PooledConnection<Manager>> {
         Ok(self.pool.get().await?)
     }
 }
