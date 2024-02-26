@@ -12,38 +12,15 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::error::{Error, Result};
 use crate::files::{AtomicFile, Cache};
-use crate::Result;
 use ntcip::dms::{Dms, FontTable, GraphicTable};
 use rendzina::{load_font, load_graphic, SignConfig};
 use serde::Deserialize;
 use std::collections::HashMap;
-use std::fmt;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 use tokio::io::AsyncWriteExt;
-
-/// Unknown resource error
-#[derive(Debug)]
-pub struct UnknownResourceError(String);
-
-impl fmt::Display for UnknownResourceError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Unknown resource: {}", self.0)
-    }
-}
-
-impl std::error::Error for UnknownResourceError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        None
-    }
-}
-
-impl UnknownResourceError {
-    fn new(msg: String) -> Box<Self> {
-        Box::new(UnknownResourceError(msg))
-    }
-}
 
 /// Sign message
 #[allow(unused)]
@@ -156,7 +133,7 @@ impl MsgData {
         let cfg = &msg.sign_config;
         match self.configs.get(cfg) {
             Some(c) => Ok(c),
-            None => Err(UnknownResourceError::new(format!("Config: {cfg}"))),
+            None => Err(Error::UnknownResource(format!("Config: {cfg}"))),
         }
     }
 
@@ -188,7 +165,7 @@ impl MsgData {
             Ok(()) => Ok(()),
             Err(e) => {
                 let _ = file.rollback().await;
-                Err(Box::new(e))
+                Err(e)?
             }
         }
     }

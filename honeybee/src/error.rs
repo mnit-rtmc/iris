@@ -40,7 +40,33 @@ pub enum Error {
     /// Bb8 run error
     #[error("Bb8 run error")]
     Bb8(String),
+
+    /// Unknown resource
+    #[error("Unknown resource {0}")]
+    UnknownResource(String),
+
+    /// Rendzina error
+    #[error("Rendzina {0}")]
+    Rendzina(#[from] rendzina::Error),
+
+    /// NTCIP sign error
+    #[error("NTCIP {0}")]
+    Sign(#[from] ntcip::dms::SignError),
+
+    /// Serde JSON
+    #[error("Json {0}")]
+    Json(#[from] serde_json::Error),
+
+    /// Send error
+    #[error("Send {0}")]
+    Send(#[from] SendError),
+
+    /// Recv error
+    #[error("Recv {0}")]
+    Recv(#[from] std::sync::mpsc::RecvError),
 }
+
+type SendError = std::sync::mpsc::SendError<crate::segments::SegMsg>;
 
 impl<E: std::fmt::Debug> From<bb8::RunError<E>> for Error {
     fn from(err: bb8::RunError<E>) -> Self {

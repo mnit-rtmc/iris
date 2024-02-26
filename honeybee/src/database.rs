@@ -12,7 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::error::{Error, Result};
+use crate::error::Result;
 use async_trait::async_trait;
 use bb8::{CustomizeConnection, Pool, PooledConnection};
 use bb8_postgres::PostgresConnectionManager;

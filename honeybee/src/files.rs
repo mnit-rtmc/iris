@@ -2,7 +2,7 @@
 //
 // Copyright (C) 2023-2024  Minnesota Department of Transportation
 //
-use crate::Result;
+use crate::error::Result;
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use tokio::fs::{create_dir_all, read_dir, remove_file, rename, File};

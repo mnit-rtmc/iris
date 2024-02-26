@@ -14,9 +14,6 @@
 //
 #![forbid(unsafe_code)]
 
-/// Result type
-pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
-
 mod database;
 mod error;
 pub mod fetcher;
@@ -24,3 +21,5 @@ mod files;
 mod resource;
 mod segments;
 mod signmsg;
+
+pub use error::{Error, Result};

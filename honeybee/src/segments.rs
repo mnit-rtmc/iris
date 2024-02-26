@@ -12,8 +12,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::error::Result;
 use crate::files::AtomicFile;
-use crate::Result;
 use mvt::{WebMercatorPos, Wgs84Pos};
 use pointy::Pt;
 use postgis::ewkb::{LineString, Point, Polygon};
@@ -544,7 +544,7 @@ impl<'a> Segments<'a> {
     }
 
     /// Create segments for one zoom level
-    fn create_segments_zoom(&self, zoom: i32) -> crate::Result<()> {
+    fn create_segments_zoom(&self, zoom: i32) -> Result<()> {
         let o_scale = self.scale_zoom(OUTER_SCALE, zoom);
         let i_scale = self.scale_zoom(BASE_SCALE, zoom);
         let mut poly = Vec::<(Pt<f64>, Pt<f64>)>::with_capacity(16);

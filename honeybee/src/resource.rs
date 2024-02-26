@@ -12,10 +12,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::error::Result;
 use crate::files::AtomicFile;
 use crate::segments::{RNode, Road, SegMsg};
 use crate::signmsg::render_all;
-use crate::Result;
 use postgres::Client;
 use std::collections::HashSet;
 use std::path::Path;
