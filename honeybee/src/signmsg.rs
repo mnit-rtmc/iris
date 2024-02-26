@@ -14,14 +14,11 @@
 //
 use crate::files::{AtomicFile, Cache};
 use crate::Result;
-use anyhow::Context;
 use ntcip::dms::{Dms, FontTable, GraphicTable};
 use rendzina::{load_font, load_graphic, SignConfig};
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::fmt;
-use std::fs::File;
-use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 use tokio::io::AsyncWriteExt;
@@ -71,21 +68,19 @@ struct MsgData {
 
 impl SignMessage {
     /// Load sign messages from a JSON file
-    fn load_all(dir: &Path) -> Result<Vec<SignMessage>> {
-        log::debug!("SignMessage::load_all");
+    async fn load_all(dir: &Path) -> Result<Vec<SignMessage>> {
+        log::trace!("SignMessage::load_all");
         let mut path = PathBuf::new();
         path.push(dir);
         path.push("sign_message");
-        let file =
-            File::open(&path).with_context(|| format!("load_all {path:?}"))?;
-        let reader = BufReader::new(file);
-        Ok(serde_json::from_reader(reader)?)
+        let buf = tokio::fs::read(path).await?;
+        Ok(serde_json::from_slice(&buf)?)
     }
 }
 
 /// Load fonts from a JSON file
 async fn load_fonts(dir: &Path) -> Result<FontTable<256, 24>> {
-    log::debug!("load_fonts");
+    log::trace!("load_fonts");
     let mut path = PathBuf::new();
     path.push(dir);
     path.push("api");
@@ -95,10 +90,8 @@ async fn load_fonts(dir: &Path) -> Result<FontTable<256, 24>> {
     path.push("_placeholder_.tfon");
     for nm in cache.drain() {
         path.set_file_name(nm);
-        let file =
-            File::open(&path).with_context(|| format!("font {path:?}"))?;
-        let reader = BufReader::new(file);
-        let font = load_font(reader)?;
+        let buf = tokio::fs::read(&path).await?;
+        let font = load_font(&*buf)?;
         if let Some(f) = fonts.font_mut(font.number) {
             *f = font;
         } else if let Some(f) = fonts.font_mut(0) {
@@ -110,7 +103,7 @@ async fn load_fonts(dir: &Path) -> Result<FontTable<256, 24>> {
 
 /// Load graphics from a JSON file
 async fn load_graphics(dir: &Path) -> Result<GraphicTable<32>> {
-    log::debug!("load_graphics");
+    log::trace!("load_graphics");
     let mut path = PathBuf::new();
     path.push(dir);
     path.push("api");
@@ -127,10 +120,8 @@ async fn load_graphics(dir: &Path) -> Result<GraphicTable<32>> {
             .parse::<u8>()
         {
             path.set_file_name(&nm);
-            let file = File::open(&path)
-                .with_context(|| format!("load_graphics {path:?}"))?;
-            let reader = BufReader::new(file);
-            let graphic = load_graphic(reader, number)?;
+            let buf = tokio::fs::read(&path).await?;
+            let graphic = load_graphic(&*buf, number)?;
             if let Some(g) = graphics.graphic_mut(graphic.number) {
                 *g = graphic;
             } else if let Some(g) = graphics.graphic_mut(0) {
@@ -144,17 +135,15 @@ async fn load_graphics(dir: &Path) -> Result<GraphicTable<32>> {
 impl MsgData {
     /// Load message data from a file path
     async fn load(dir: &Path) -> Result<Self> {
-        log::debug!("MsgData::load");
+        log::trace!("MsgData::load");
         let fonts = load_fonts(dir).await?;
         let graphics = load_graphics(dir).await?;
         let mut path = PathBuf::new();
         path.push(dir);
         path.push("api");
         path.push("sign_config");
-        let reader = BufReader::new(
-            File::open(&path).with_context(|| format!("load {path:?}"))?,
-        );
-        let configs = SignConfig::load_all(reader)?;
+        let buf = tokio::fs::read(&path).await?;
+        let configs = SignConfig::load_all(&*buf)?;
         Ok(MsgData {
             fonts,
             graphics,
@@ -177,7 +166,7 @@ impl MsgData {
         msg: &SignMessage,
         file: AtomicFile,
     ) -> Result<()> {
-        log::debug!("render_sign_msg: {:?}", file.path());
+        log::trace!("render_sign_msg: {:?}", file.path());
         let t = Instant::now();
         let cfg = self.config(msg)?;
         let dms = Dms::builder()
@@ -214,7 +203,7 @@ pub async fn render_all(dir: &Path) -> Result<()> {
     path.push(dir);
     path.push("img");
     let mut cache = Cache::new(path.as_path(), "gif").await?;
-    for sign_msg in SignMessage::load_all(dir)? {
+    for sign_msg in SignMessage::load_all(dir).await? {
         let mut name = sign_msg.name.clone();
         name.push_str(".gif");
         if cache.contains(&name) {
