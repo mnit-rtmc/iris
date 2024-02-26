@@ -17,7 +17,6 @@ use crate::files::AtomicFile;
 use mvt::{WebMercatorPos, Wgs84Pos};
 use pointy::Pt;
 use postgis::ewkb::{LineString, Point, Polygon};
-use postgres::Row;
 use serde::{Deserialize, Serialize, Serializer};
 use std::cmp::Ordering;
 use std::collections::hash_map::DefaultHasher;
@@ -27,6 +26,7 @@ use std::hash::{Hash, Hasher};
 use std::path::Path;
 use std::sync::mpsc::Receiver;
 use tokio::io::AsyncWriteExt;
+use tokio_postgres::Row;
 
 /// Base segment scale factor
 const BASE_SCALE: f64 = 1.0 / 6.0;

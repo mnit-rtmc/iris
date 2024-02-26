@@ -12,57 +12,24 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::database::Database;
 use crate::error::Result;
 use crate::resource;
 use crate::segments::{receive_nodes, SegMsg};
-use postgres::fallible_iterator::FallibleIterator;
-use postgres::{Client, NoTls};
 use std::collections::HashSet;
-use std::env;
 use std::sync::mpsc::Sender;
 use std::time::Duration;
+use tokio_postgres::Client;
 
 /// Start receiving notifications and fetching resources.
 pub async fn start() -> Result<()> {
     let (sender, receiver) = std::sync::mpsc::channel();
     tokio::spawn(async move { receive_nodes(receiver).await });
-    let mut client = create_client("tms")?;
-    resource::listen_all(&mut client)?;
+    let db = Database::new("tms").await?;
+    let mut client = db.connection().await?;
+    resource::listen_all(&mut client).await?;
     resource::query_all(&mut client, &sender).await?;
     notify_loop(&mut client, sender).await
-}
-
-/// Create database client
-pub fn create_client(db: &str) -> Result<Client> {
-    let username = whoami::username();
-    // Format path for unix domain socket -- not worth using percent_encode
-    let uds = format!("postgres://{username}@%2Frun%2Fpostgresql/{db}");
-    let mut client = Client::connect(&uds, NoTls)?;
-    // The postgres crate sets the session time zone to UTC.
-    // We need to set it back to LOCAL time zone, so that row_to_json
-    // can format properly (for incidents, etc).  Unfortunately,
-    // the LOCAL and DEFAULT zones are also reset to UTC, so the PGTZ
-    // environment variable must be used for this purpose.
-    if let Some(tz) = time_zone() {
-        let time_zone = format!("SET TIME ZONE '{tz}'");
-        client.execute(&time_zone[..], &[])?;
-    }
-    Ok(client)
-}
-
-/// Postgres time zone environment variable name
-const PGTZ: &str = "PGTZ";
-
-/// Get time zone name for database client
-fn time_zone() -> Option<String> {
-    match env::var(PGTZ) {
-        Ok(tz) => Some(tz),
-        Err(env::VarError::NotPresent) => None,
-        Err(env::VarError::NotUnicode(_)) => {
-            log::error!("{} env var is not unicode!", PGTZ);
-            None
-        }
-    }
 }
 
 /// Receive PostgreSQL notifications, and fetch needed resources.

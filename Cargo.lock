@@ -1465,7 +1465,6 @@ dependencies = [
 name = "honeybee"
 version = "5.50.2"
 dependencies = [
- "anyhow",
  "async-trait",
  "bb8",
  "bb8-postgres",
@@ -1475,7 +1474,6 @@ dependencies = [
  "ntcip",
  "pointy",
  "postgis",
- "postgres",
  "rendzina",
  "serde",
  "serde_json",
@@ -2073,20 +2071,6 @@ dependencies = [
  "byteorder",
  "bytes",
  "postgres-types",
-]
-
-[[package]]
-name = "postgres"
-version = "0.19.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7915b33ed60abc46040cbcaa25ffa1c7ec240668e0477c4f3070786f5916d451"
-dependencies = [
- "bytes",
- "fallible-iterator",
- "futures-util",
- "log",
- "tokio",
- "tokio-postgres",
 ]
 
 [[package]]

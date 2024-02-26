@@ -6,7 +6,6 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-anyhow = "1.0"
 async-trait = "0.1"
 bb8 = { workspace = true }
 bb8-postgres = { workspace = true }
@@ -15,7 +14,6 @@ log = { workspace = true }
 mvt = "0.9"
 ntcip = { workspace = true }
 pointy = "0.6"
-postgres = "0.19"
 postgis = "0.9"
 rendzina = { path = "../rendzina" }
 serde = { workspace = true }
