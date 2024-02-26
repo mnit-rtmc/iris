@@ -18,12 +18,12 @@ use crate::signmsg::render_all;
 use crate::Result;
 use postgres::Client;
 use std::collections::HashSet;
-use std::io::Write;
 use std::path::Path;
 use std::sync::mpsc::Sender;
 use std::time::Instant;
+use tokio::io::{AsyncWrite, AsyncWriteExt};
 
-/// A resource which can be fetched from a database connection.
+/// A resource which can be queried from a database connection.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 enum Resource {
     /// RNode resource.
@@ -759,40 +759,43 @@ const ALL: &[Resource] = &[
     TPIMS_ARCH_RES,
 ];
 
-/// Fetch a simple resource.
+/// Query a simple resource.
 ///
 /// * `client` The database connection.
 /// * `sql` SQL query.
 /// * `w` Writer to output resource.
-fn fetch_simple<W: Write>(
+async fn query_simple<W>(
     client: &mut Client,
     sql: &str,
     mut w: W,
-) -> Result<u32> {
+) -> Result<u32>
+where
+    W: AsyncWrite + Unpin,
+{
     let mut c = 0;
-    w.write_all(b"[")?;
+    w.write_all(b"[").await?;
     for row in &client.query(sql, &[])? {
         if c > 0 {
-            w.write_all(b",")?;
+            w.write_all(b",").await?;
         }
-        w.write_all(b"\n")?;
+        w.write_all(b"\n").await?;
         let j: String = row.get(0);
-        w.write_all(j.as_bytes())?;
+        w.write_all(j.as_bytes()).await?;
         c += 1;
     }
     if c > 0 {
-        w.write_all(b"\n")?;
+        w.write_all(b"\n").await?;
     }
-    w.write_all(b"]\n")?;
+    w.write_all(b"]\n").await?;
     Ok(c)
 }
 
-/// Fetch all r_nodes.
+/// Query all r_nodes.
 ///
 /// * `client` The database connection.
 /// * `sender` Sender for segment messages.
-fn fetch_all_nodes(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
-    log::debug!("fetch_all_nodes");
+fn query_all_nodes(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
+    log::trace!("query_all_nodes");
     sender.send(SegMsg::Order(false))?;
     for row in &client.query(RNode::SQL_ALL, &[])? {
         sender.send(SegMsg::UpdateNode(RNode::from_row(row)))?;
@@ -801,17 +804,17 @@ fn fetch_all_nodes(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
     Ok(())
 }
 
-/// Fetch one r_node.
+/// Query one r_node.
 ///
 /// * `client` The database connection.
 /// * `name` RNode name.
 /// * `sender` Sender for segment messages.
-fn fetch_one_node(
+fn query_one_node(
     client: &mut Client,
     name: &str,
     sender: &Sender<SegMsg>,
 ) -> Result<()> {
-    log::debug!("fetch_one_node: {}", name);
+    log::trace!("query_one_node: {name}");
     let rows = &client.query(RNode::SQL_ONE, &[&name])?;
     if rows.len() == 1 {
         for row in rows.iter() {
@@ -824,29 +827,29 @@ fn fetch_one_node(
     Ok(())
 }
 
-/// Fetch all roads.
+/// Query all roads.
 ///
 /// * `client` The database connection.
 /// * `sender` Sender for segment messages.
-fn fetch_all_roads(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
-    log::debug!("fetch_all_roads");
+fn query_all_roads(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
+    log::trace!("query_all_roads");
     for row in &client.query(Road::SQL_ALL, &[])? {
         sender.send(SegMsg::UpdateRoad(Road::from_row(row)))?;
     }
     Ok(())
 }
 
-/// Fetch one road.
+/// Query one road.
 ///
 /// * `client` The database connection.
 /// * `name` Road name.
 /// * `sender` Sender for segment messages.
-fn fetch_one_road(
+fn query_one_road(
     client: &mut Client,
     name: &str,
     sender: &Sender<SegMsg>,
 ) -> Result<()> {
-    log::debug!("fetch_one_road: {}", name);
+    log::trace!("query_one_road: {name}");
     let rows = &client.query(Road::SQL_ONE, &[&name])?;
     if let Some(row) = rows.iter().next() {
         sender.send(SegMsg::UpdateRoad(Road::from_row(row)))?;
@@ -875,31 +878,31 @@ impl Resource {
         }
     }
 
-    /// Fetch the resource from a connection.
+    /// Query the resource from a connection.
     ///
     /// * `client` The database connection.
     /// * `payload` Postgres NOTIFY payload.
     /// * `sender` Sender for segment messages.
-    fn fetch(
+    async fn query(
         self,
         client: &mut Client,
         payload: &str,
         sender: &Sender<SegMsg>,
     ) -> Result<()> {
         match self {
-            Resource::RNode() => self.fetch_nodes(client, payload, sender),
-            Resource::Road() => self.fetch_roads(client, payload, sender),
-            Resource::Simple(n, _, _) => self.fetch_file(client, n),
-            Resource::SignMsg(_) => self.fetch_sign_msgs(client),
+            Resource::RNode() => self.query_nodes(client, payload, sender),
+            Resource::Road() => self.query_roads(client, payload, sender),
+            Resource::Simple(n, _, _) => self.query_file(client, n).await,
+            Resource::SignMsg(_) => self.query_sign_msgs(client).await,
         }
     }
 
-    /// Fetch r_node resource from a connection.
+    /// Query r_node resource from a connection.
     ///
     /// * `client` The database connection.
     /// * `payload` Postgres NOTIFY payload.
     /// * `sender` Sender for segment messages.
-    fn fetch_nodes(
+    fn query_nodes(
         self,
         client: &mut Client,
         payload: &str,
@@ -907,18 +910,18 @@ impl Resource {
     ) -> Result<()> {
         // empty payload is used at startup
         if payload.is_empty() {
-            fetch_all_nodes(client, sender)
+            query_all_nodes(client, sender)
         } else {
-            fetch_one_node(client, payload, sender)
+            query_one_node(client, payload, sender)
         }
     }
 
-    /// Fetch road resource from a connection.
+    /// Query road resource from a connection.
     ///
     /// * `client` The database connection.
     /// * `payload` Postgres NOTIFY payload.
     /// * `sender` Sender for segment messages.
-    fn fetch_roads(
+    fn query_roads(
         self,
         client: &mut Client,
         payload: &str,
@@ -926,34 +929,34 @@ impl Resource {
     ) -> Result<()> {
         // empty payload is used at startup
         if payload.is_empty() {
-            fetch_all_roads(client, sender)
+            query_all_roads(client, sender)
         } else {
-            fetch_one_road(client, payload, sender)
+            query_one_road(client, payload, sender)
         }
     }
 
-    /// Fetch a file resource from a connection.
+    /// Query a file resource from a connection.
     ///
     /// * `client` The database connection.
     /// * `name` File name.
-    fn fetch_file(self, client: &mut Client, name: &str) -> Result<()> {
-        log::debug!("fetch_file: {:?}", name);
+    async fn query_file(self, client: &mut Client, name: &str) -> Result<()> {
+        log::trace!("query_file: {name:?}");
         let t = Instant::now();
         let dir = Path::new("");
-        let file = AtomicFile::new(dir, name)?;
-        let writer = file.writer()?;
+        let file = AtomicFile::new(dir, name).await?;
+        let writer = file.writer().await?;
         let sql = self.sql();
-        let count = fetch_simple(client, sql, writer)?;
-        drop(file);
-        log::info!("{}: wrote {} rows in {:?}", name, count, t.elapsed());
+        let count = query_simple(client, sql, writer).await?;
+        file.commit().await?;
+        log::info!("{name}: wrote {count} rows in {:?}", t.elapsed());
         Ok(())
     }
 
-    /// Fetch sign messages resource.
-    fn fetch_sign_msgs(self, client: &mut Client) -> Result<()> {
-        self.fetch_file(client, "sign_message")?;
+    /// Query sign messages resource.
+    async fn query_sign_msgs(self, client: &mut Client) -> Result<()> {
+        self.query_file(client, "sign_message").await?;
         // FIXME: spawn another thread for this?
-        render_all(Path::new(""))
+        render_all(Path::new("")).await
     }
 }
 
@@ -974,14 +977,17 @@ pub fn listen_all(client: &mut Client) -> Result<()> {
     Ok(())
 }
 
-/// Fetch all resources.
+/// Query all resources.
 ///
 /// * `client` The database connection.
 /// * `sender` Sender for segment messages.
-pub fn fetch_all(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
+pub async fn query_all(
+    client: &mut Client,
+    sender: &Sender<SegMsg>,
+) -> Result<()> {
     for res in ALL {
-        log::debug!("fetch_all: {res:?}");
-        res.fetch(client, "", sender)?;
+        log::trace!("query_all: {res:?}");
+        res.query(client, "", sender).await?;
     }
     Ok(())
 }
@@ -992,7 +998,7 @@ pub fn fetch_all(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
 /// * `chan` Channel name.
 /// * `payload` Postgres NOTIFY payload.
 /// * `sender` Sender for segment messages.
-pub fn notify(
+pub async fn notify(
     client: &mut Client,
     chan: &str,
     payload: &str,
@@ -1004,7 +1010,7 @@ pub fn notify(
         if let Some(lsn) = res.listen() {
             if lsn == chan {
                 found = true;
-                res.fetch(client, payload, sender)?;
+                res.query(client, payload, sender).await?;
             }
         }
     }

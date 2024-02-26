@@ -506,12 +506,15 @@ impl Corridor {
 
     /// Write corridor nodes to a file
     fn write_file(&self) -> Result<()> {
+        todo!();
+        /*
         let dir = Path::new("corridors");
         let cor_name =
             format!("{}_{}", self.cor_id.abbrev, self.cor_id.travel_dir);
         let file = AtomicFile::new(dir, &cor_name)?;
         let writer = file.writer()?;
         serde_json::to_writer(writer, &self.nodes)?;
+        */
         Ok(())
     }
 }

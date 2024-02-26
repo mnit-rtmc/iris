@@ -1,6 +1,6 @@
 // fetcher.rs
 //
-// Copyright (C) 2018-2023  Minnesota Department of Transportation
+// Copyright (C) 2018-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,13 +24,13 @@ use std::thread;
 use std::time::Duration;
 
 /// Start receiving notifications and fetching resources.
-pub fn start() -> Result<()> {
+pub async fn start() -> Result<()> {
     let (sender, receiver) = std::sync::mpsc::channel();
     thread::spawn(move || receive_nodes(receiver).unwrap());
     let mut client = create_client("tms")?;
     resource::listen_all(&mut client)?;
-    resource::fetch_all(&mut client, &sender)?;
-    notify_loop(&mut client, sender)
+    resource::query_all(&mut client, &sender).await?;
+    notify_loop(&mut client, sender).await
 }
 
 /// Create database client
@@ -72,12 +72,15 @@ fn time_zone() -> Option<String> {
 ///
 /// * `client` The database connection.
 /// * `sender` Sender for segment messages.
-fn notify_loop(client: &mut Client, sender: Sender<SegMsg>) -> Result<()> {
+async fn notify_loop(
+    client: &mut Client,
+    sender: Sender<SegMsg>,
+) -> Result<()> {
     loop {
         let mut nots = pending_notifications(client)?;
         for (channel, payload) in nots.drain() {
             log::debug!("notify on {channel}");
-            resource::notify(client, &channel, &payload, &sender)?;
+            resource::notify(client, &channel, &payload, &sender).await?;
         }
     }
 }

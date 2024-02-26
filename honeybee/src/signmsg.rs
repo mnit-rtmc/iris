@@ -24,6 +24,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
+use tokio::io::AsyncWriteExt;
 
 /// Unknown resource error
 #[derive(Debug)]
@@ -83,13 +84,13 @@ impl SignMessage {
 }
 
 /// Load fonts from a JSON file
-fn load_fonts(dir: &Path) -> Result<FontTable<256, 24>> {
+async fn load_fonts(dir: &Path) -> Result<FontTable<256, 24>> {
     log::debug!("load_fonts");
     let mut path = PathBuf::new();
     path.push(dir);
     path.push("api");
     path.push("tfon");
-    let mut cache = Cache::new(&path, "tfon")?;
+    let mut cache = Cache::new(&path, "tfon").await?;
     let mut fonts = FontTable::default();
     path.push("_placeholder_.tfon");
     for nm in cache.drain() {
@@ -108,13 +109,13 @@ fn load_fonts(dir: &Path) -> Result<FontTable<256, 24>> {
 }
 
 /// Load graphics from a JSON file
-fn load_graphics(dir: &Path) -> Result<GraphicTable<32>> {
+async fn load_graphics(dir: &Path) -> Result<GraphicTable<32>> {
     log::debug!("load_graphics");
     let mut path = PathBuf::new();
     path.push(dir);
     path.push("api");
     path.push("gif");
-    let mut cache = Cache::new(&path, "gif")?;
+    let mut cache = Cache::new(&path, "gif").await?;
     let mut graphics = GraphicTable::default();
     path.push("_placeholder_.gif");
     for nm in cache.drain() {
@@ -142,10 +143,10 @@ fn load_graphics(dir: &Path) -> Result<GraphicTable<32>> {
 
 impl MsgData {
     /// Load message data from a file path
-    fn load(dir: &Path) -> Result<Self> {
+    async fn load(dir: &Path) -> Result<Self> {
         log::debug!("MsgData::load");
-        let fonts = load_fonts(dir)?;
-        let graphics = load_graphics(dir)?;
+        let fonts = load_fonts(dir).await?;
+        let graphics = load_graphics(dir).await?;
         let mut path = PathBuf::new();
         path.push(dir);
         path.push("api");
@@ -171,14 +172,13 @@ impl MsgData {
     }
 
     /// Render sign message .gif
-    fn render_sign_msg(
+    async fn render_sign_msg(
         &mut self,
         msg: &SignMessage,
         file: AtomicFile,
     ) -> Result<()> {
         log::debug!("render_sign_msg: {:?}", file.path());
         let t = Instant::now();
-        let writer = file.writer()?;
         let cfg = self.config(msg)?;
         let dms = Dms::builder()
             .with_font_definition(self.fonts.clone())
@@ -187,33 +187,41 @@ impl MsgData {
             .with_vms_cfg(cfg.vms_cfg())
             .with_multi_cfg(cfg.multi_cfg())
             .build()?;
-        if let Err(e) = rendzina::render(writer, &dms, &msg.multi, None, None) {
+        let mut buf = Vec::with_capacity(1024);
+        if let Err(e) = rendzina::render(&mut buf, &dms, &msg.multi, None, None)
+        {
             log::warn!("{:?}, multi={} {e:?}", file.path(), msg.multi);
-            file.cancel()?;
             return Ok(());
         };
         log::info!("{:?} rendered in {:?}", file.path(), t.elapsed());
-        Ok(())
+        let mut writer = file.writer().await?;
+        match writer.write_all(&mut buf).await {
+            Ok(()) => Ok(()),
+            Err(e) => {
+                let _ = file.rollback().await;
+                Err(Box::new(e))
+            }
+        }
     }
 }
 
 /// Fetch all sign messages.
 ///
 /// * `dir` Output file directory.
-pub fn render_all(dir: &Path) -> Result<()> {
-    let mut msg_data = MsgData::load(dir)?;
+pub async fn render_all(dir: &Path) -> Result<()> {
+    let mut msg_data = MsgData::load(dir).await?;
     let mut path = PathBuf::new();
     path.push(dir);
     path.push("img");
-    let mut cache = Cache::new(path.as_path(), "gif")?;
+    let mut cache = Cache::new(path.as_path(), "gif").await?;
     for sign_msg in SignMessage::load_all(dir)? {
         let mut name = sign_msg.name.clone();
         name.push_str(".gif");
         if cache.contains(&name) {
             cache.keep(&name);
         } else {
-            let file = cache.file(&name)?;
-            msg_data.render_sign_msg(&sign_msg, file)?;
+            let file = cache.file(&name).await?;
+            msg_data.render_sign_msg(&sign_msg, file).await?;
         }
     }
     Ok(())

@@ -1,13 +1,12 @@
 // files.rs
 //
-// Copyright (C) 2023  Minnesota Department of Transportation
+// Copyright (C) 2023-2024  Minnesota Department of Transportation
 //
 use crate::Result;
-use anyhow::Context;
 use std::collections::HashSet;
-use std::fs::{create_dir_all, read_dir, remove_file, rename, File};
-use std::io::BufWriter;
 use std::path::{Path, PathBuf};
+use tokio::fs::{create_dir_all, read_dir, remove_file, rename, File};
+use tokio::io::BufWriter;
 
 /// Make a PathBuf for a backup file
 fn backup_path(path: &Path) -> PathBuf {
@@ -31,14 +30,14 @@ pub struct Cache {
 
 impl AtomicFile {
     /// Create a new atomic file
-    pub fn new(dir: &Path, name: &str) -> Result<Self> {
+    pub async fn new(dir: &Path, name: &str) -> Result<Self> {
         let mut path = dir.to_path_buf();
         path.push(name);
-        log::debug!("AtomicFile::new {path:?}");
+        log::trace!("AtomicFile::new {path:?}");
         // Use parent in case name contains path separators
         if let Some(dir) = path.parent() {
             if !dir.is_dir() {
-                create_dir_all(dir).context("create: {dir:?}")?;
+                create_dir_all(dir).await?;
             }
         }
         Ok(AtomicFile { path })
@@ -50,39 +49,36 @@ impl AtomicFile {
     }
 
     /// Create the file and get writer
-    pub fn writer(&self) -> Result<BufWriter<File>> {
+    pub async fn writer(&self) -> Result<BufWriter<File>> {
         let path = backup_path(&self.path);
-        Ok(BufWriter::new(
-            File::create(&path).with_context(|| format!("create: {path:?}"))?,
-        ))
+        Ok(BufWriter::new(File::create(&path).await?))
     }
 
-    /// Cancel writing file
-    pub fn cancel(&self) -> Result<()> {
+    /// Commit file change
+    pub async fn commit(self) -> Result<()> {
         let path = backup_path(&self.path);
-        remove_file(path).context("remove: {path:?}")?;
+        log::trace!("AtomicFile::commit: {path:?}");
+        rename(path, &self.path).await?;
         Ok(())
     }
-}
 
-impl Drop for AtomicFile {
-    fn drop(&mut self) {
+    /// Rollback writing file
+    pub async fn rollback(self) -> Result<()> {
         let path = backup_path(&self.path);
-        log::debug!("AtomicFile::drop: {path:?}");
-        if let Err(e) = rename(path, &self.path) {
-            log::error!("AtomicFile::drop rename: {e:?}");
-        }
+        log::trace!("AtomicFile::rollback: {path:?}");
+        remove_file(path).await?;
+        Ok(())
     }
 }
 
 impl Cache {
     /// Lookup a listing of files with a given extension
-    fn read_dir(dir: &Path, ext: &str) -> Result<HashSet<PathBuf>> {
+    async fn read_dir(dir: &Path, ext: &str) -> Result<HashSet<PathBuf>> {
         let mut files = HashSet::new();
         if dir.is_dir() {
-            for f in read_dir(dir)? {
-                let f = f?;
-                if f.file_type()?.is_file() {
+            let mut rd = read_dir(dir).await?;
+            while let Some(f) = rd.next_entry().await? {
+                if f.file_type().await?.is_file() {
                     let p = PathBuf::from(f.file_name());
                     if let Some(e) = p.extension() {
                         if e == ext {
@@ -96,8 +92,8 @@ impl Cache {
     }
 
     /// Create a set of files
-    pub fn new(dir: &Path, ext: &str) -> Result<Self> {
-        let files = Cache::read_dir(dir, ext)?;
+    pub async fn new(dir: &Path, ext: &str) -> Result<Self> {
+        let files = Cache::read_dir(dir, ext).await?;
         let dir = dir.into();
         Ok(Cache { dir, files })
     }
@@ -118,19 +114,18 @@ impl Cache {
     }
 
     /// Create a cached file
-    pub fn file(&self, name: &str) -> Result<AtomicFile> {
-        AtomicFile::new(&self.dir, name)
+    pub async fn file(&self, name: &str) -> Result<AtomicFile> {
+        AtomicFile::new(&self.dir, name).await
     }
-}
 
-impl Drop for Cache {
-    fn drop(&mut self) {
+    /// Clear the cache
+    pub async fn clear(mut self) {
         for name in self.files.drain() {
-            log::debug!("Cache::drop: {name:?}");
+            log::trace!("Cache::clear: {name:?}");
             let mut path = self.dir.clone();
             path.push(name);
-            if let Err(e) = remove_file(&path) {
-                log::error!("Cache::drop: {e:?}");
+            if let Err(e) = remove_file(&path).await {
+                log::error!("Cache::clear: {e:?}");
             }
         }
     }
