@@ -83,7 +83,7 @@ be converted to upper-case.
 
 ## Importing
 
-Fonts in `tfon` format can be imported into the IRIS database using
+Fonts in [tfon] format can be imported into the IRIS database using
 `tfon_import.py` (in the `bin` directory):
 
 ```
@@ -92,38 +92,6 @@ tfon_import.py [font file] | psql tms
 
 Also, each font file must be copied to the `/var/www/html/iris/api/tfon/`
 directory to make it available in the [REST API].
-
-### `tfon` Format
-
-Existing fonts in the popular [BDF] format can be converted to `tfon` using
-the [fontu] utility.
-
-The `tfon` format looks like this:
-
-```text
-font_name: tfon example
-font_number: 2
-char_spacing: 1
-line_spacing: 3
-
-ch: 52 4
-...@@@.
-..@.@@.
-.@..@@.
-@...@@.
-@@@@@@@
-....@@.
-....@@.
-
-ch: 65 A
-.@@@@.
-@@..@@
-@@..@@
-@@@@@@
-@@..@@
-@@..@@
-@@..@@
-```
 
 ## Send and Query Fonts
 
@@ -137,3 +105,4 @@ the `/var/lib/iris/fonts/{sign_name}` directory.
 [DMS]: dms.html
 [fontu]: https://github.com/DougLau/tfon/tree/main/fontu
 [REST API]: rest_api.html
+[tfon]: https://github.com/DougLau/tfon/tree/main/tfon
