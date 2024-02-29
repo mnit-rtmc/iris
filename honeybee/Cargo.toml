@@ -6,10 +6,12 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
+async-stream = "0.3"
 async-trait = "0.1"
 bb8 = { workspace = true }
 bb8-postgres = { workspace = true }
 env_logger = { workspace = true }
+futures = { version = "0.3", default_features = false }
 log = { workspace = true }
 mvt = "0.9"
 ntcip = { workspace = true }

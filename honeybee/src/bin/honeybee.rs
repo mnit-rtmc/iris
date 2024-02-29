@@ -14,12 +14,13 @@
 //
 #![forbid(unsafe_code)]
 
-use honeybee::{fetcher, Result};
+use honeybee::{listener, Result};
 
 /// Main entry point
 #[tokio::main]
 async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
-    fetcher::start().await?;
+    let db = Database::new("tms").await?;
+    listener::notification_stream(&db).await?;
     Ok(())
 }

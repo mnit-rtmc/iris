@@ -24,8 +24,8 @@ use std::collections::HashMap;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::path::Path;
-use std::sync::mpsc::Receiver;
 use tokio::io::AsyncWriteExt;
+use tokio::sync::mpsc::UnboundedReceiver;
 use tokio_postgres::Row;
 
 /// Base segment scale factor
@@ -794,10 +794,10 @@ impl SegmentState {
 }
 
 /// Receive segment messages and update corridor segments
-pub async fn receive_nodes(receiver: Receiver<SegMsg>) -> Result<()> {
+pub async fn receive_nodes(receiver: UnboundedReceiver<SegMsg>) -> Result<()> {
     let mut state = SegmentState::new();
     loop {
-        match receiver.recv()? {
+        match receiver.recv().await? {
             SegMsg::UpdateRoad(road) => state.update_road(road).await?,
             SegMsg::UpdateNode(node) => state.update_node(node),
             SegMsg::RemoveNode(name) => state.remove_node(&name),

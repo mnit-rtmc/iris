@@ -60,13 +60,9 @@ pub enum Error {
     /// Send error
     #[error("Send {0}")]
     Send(#[from] SendError),
-
-    /// Recv error
-    #[error("Recv {0}")]
-    Recv(#[from] std::sync::mpsc::RecvError),
 }
 
-type SendError = std::sync::mpsc::SendError<crate::segments::SegMsg>;
+type SendError = tokio::sync::mpsc::error::SendError<crate::segments::SegMsg>;
 
 impl<E: std::fmt::Debug> From<bb8::RunError<E>> for Error {
     fn from(err: bb8::RunError<E>) -> Self {

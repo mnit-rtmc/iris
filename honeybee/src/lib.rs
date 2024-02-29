@@ -16,8 +16,8 @@
 
 mod database;
 mod error;
-pub mod fetcher;
 mod files;
+pub mod listener;
 mod resource;
 mod segments;
 mod signmsg;

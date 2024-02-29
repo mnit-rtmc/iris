@@ -18,9 +18,9 @@ use crate::segments::{RNode, Road, SegMsg};
 use crate::signmsg::render_all;
 use std::collections::HashSet;
 use std::path::Path;
-use std::sync::mpsc::Sender;
 use std::time::Instant;
 use tokio::io::{AsyncWrite, AsyncWriteExt};
+use tokio::sync::mpsc::UnboundedSender;
 use tokio_postgres::Client;
 
 /// A resource which can be queried from a database connection.
@@ -796,7 +796,7 @@ where
 /// * `sender` Sender for segment messages.
 async fn query_all_nodes(
     client: &mut Client,
-    sender: &Sender<SegMsg>,
+    sender: &UnboundedSender<SegMsg>,
 ) -> Result<()> {
     log::trace!("query_all_nodes");
     sender.send(SegMsg::Order(false))?;
@@ -815,7 +815,7 @@ async fn query_all_nodes(
 async fn query_one_node(
     client: &mut Client,
     name: &str,
-    sender: &Sender<SegMsg>,
+    sender: &UnboundedSender<SegMsg>,
 ) -> Result<()> {
     log::trace!("query_one_node: {name}");
     let rows = &client.query(RNode::SQL_ONE, &[&name]).await?;
@@ -836,7 +836,7 @@ async fn query_one_node(
 /// * `sender` Sender for segment messages.
 async fn query_all_roads(
     client: &mut Client,
-    sender: &Sender<SegMsg>,
+    sender: &UnboundedSender<SegMsg>,
 ) -> Result<()> {
     log::trace!("query_all_roads");
     for row in &client.query(Road::SQL_ALL, &[]).await? {
@@ -853,7 +853,7 @@ async fn query_all_roads(
 async fn query_one_road(
     client: &mut Client,
     name: &str,
-    sender: &Sender<SegMsg>,
+    sender: &UnboundedSender<SegMsg>,
 ) -> Result<()> {
     log::trace!("query_one_road: {name}");
     let rows = &client.query(Road::SQL_ONE, &[&name]).await?;
@@ -893,7 +893,7 @@ impl Resource {
         self,
         client: &mut Client,
         payload: &str,
-        sender: &Sender<SegMsg>,
+        sender: &UnboundedSender<SegMsg>,
     ) -> Result<()> {
         match self {
             Resource::RNode() => {
@@ -914,7 +914,7 @@ impl Resource {
         self,
         client: &mut Client,
         payload: &str,
-        sender: &Sender<SegMsg>,
+        sender: &UnboundedSender<SegMsg>,
     ) -> Result<()> {
         // empty payload is used at startup
         if payload.is_empty() {
@@ -933,7 +933,7 @@ impl Resource {
         self,
         client: &mut Client,
         payload: &str,
-        sender: &Sender<SegMsg>,
+        sender: &UnboundedSender<SegMsg>,
     ) -> Result<()> {
         // empty payload is used at startup
         if payload.is_empty() {
@@ -968,31 +968,22 @@ impl Resource {
     }
 }
 
-/// Listen for notifications on all channels we need to monitor.
-///
-/// * `client` Database connection.
-pub async fn listen_all(client: &mut Client) -> Result<()> {
+/// Get a set of all resource channels to listen
+pub fn channels_all() -> impl Iterator<Item = &'static str> {
     let mut channels = HashSet::new();
     for res in ALL {
         if let Some(lsn) = res.listen() {
             channels.insert(lsn);
         }
     }
-    for channel in channels {
-        let listen = format!("LISTEN {channel}");
-        client.execute(&listen[..], &[]).await?;
-    }
-    Ok(())
+    channels.into_iter()
 }
 
 /// Query all resources.
 ///
 /// * `client` The database connection.
 /// * `sender` Sender for segment messages.
-pub async fn query_all(
-    client: &mut Client,
-    sender: &Sender<SegMsg>,
-) -> Result<()> {
+pub async fn query_all(client: &mut Client) -> Result<()> {
     for res in ALL {
         log::trace!("query_all: {res:?}");
         res.query(client, "", sender).await?;
@@ -1010,7 +1001,7 @@ pub async fn notify(
     client: &mut Client,
     chan: &str,
     payload: &str,
-    sender: &Sender<SegMsg>,
+    sender: &UnboundedSender<SegMsg>,
 ) -> Result<()> {
     log::info!("notify: {chan} {payload}");
     let mut found = false;

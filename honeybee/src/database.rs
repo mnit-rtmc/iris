@@ -102,7 +102,7 @@ impl Database {
         Ok(self.pool.get().await?)
     }
 
-    /// Get a dedicated client/connection, no managed by the pool
+    /// Get a dedicated client/connection, not managed by the pool
     pub async fn dedicated_client(
         &self,
     ) -> Result<(Client, Connection<Socket, NoTlsStream>)> {
