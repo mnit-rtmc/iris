@@ -16,7 +16,6 @@ use crate::error::Result;
 use crate::files::AtomicFile;
 use crate::segments::{RNode, Road, SegMsg};
 use crate::signmsg::render_all;
-use std::collections::HashSet;
 use std::path::Path;
 use std::time::Instant;
 use tokio::io::{AsyncWrite, AsyncWriteExt};
@@ -25,7 +24,7 @@ use tokio_postgres::Client;
 
 /// A resource which can be queried from a database connection.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-enum Resource {
+pub enum Resource {
     /// RNode resource.
     RNode(),
 
@@ -699,66 +698,6 @@ const TPIMS_ARCH_RES: Resource = Resource::Simple(
       FROM parking_area_view\
     ) r",
 );
-
-/// All defined resources
-const ALL: &[Resource] = &[
-    SYSTEM_ATTRIBUTE_PUB_RES, // System attributes must be loaded first
-    ROAD_RES,                 // Roads must be loaded before R_Nodes
-    ALARM_RES,
-    BEACON_STATE_RES,
-    BEACON_RES,
-    LANE_MARKING_RES,
-    CABINET_STYLE_RES,
-    COMM_PROTOCOL_RES,
-    COMM_CONFIG_RES,
-    COMM_LINK_RES,
-    CONDITION_RES,
-    DIRECTION_RES,
-    ROADWAY_RES,
-    ROAD_MODIFIER_RES,
-    GATE_ARM_INTERLOCK_RES,
-    GATE_ARM_STATE_RES,
-    LANE_USE_INDICATION_RES,
-    LCS_LOCK_RES,
-    RESOURCE_TYPE_RES,
-    CONTROLLER_RES,
-    WEATHER_SENSOR_RES,
-    RWIS_RES,
-    MODEM_RES,
-    PERMISSION_RES,
-    ROLE_RES,
-    USER_RES,
-    CAMERA_RES,
-    CAMERA_PUB_RES,
-    GATE_ARM_RES,
-    GATE_ARM_ARRAY_RES,
-    GPS_RES,
-    LCS_ARRAY_RES,
-    LCS_INDICATION_RES,
-    RAMP_METER_RES,
-    TAG_READER_RES,
-    VIDEO_MONITOR_RES,
-    FLOW_STREAM_RES,
-    DMS_RES,
-    DMS_PUB_RES,
-    DMS_STAT_RES,
-    FONT_LIST_RES,
-    GRAPHIC_LIST_RES,
-    MSG_LINE_RES,
-    MSG_PATTERN_RES,
-    WORD_RES,
-    INCIDENT_RES,
-    R_NODE_RES,
-    DETECTOR_RES,
-    DETECTOR_PUB_RES,
-    SIGN_CONFIG_RES,
-    SIGN_DETAIL_RES,
-    SIGN_MSG_RES,
-    TPIMS_STAT_RES,
-    TPIMS_DYN_RES,
-    TPIMS_ARCH_RES,
-];
-
 /// Query a simple resource.
 ///
 /// * `client` The database connection.
@@ -864,8 +803,71 @@ async fn query_one_road(
 }
 
 impl Resource {
+    /// Get iterator of all resource type variants
+    pub fn iter() -> impl Iterator<Item = Resource> {
+        [
+            SYSTEM_ATTRIBUTE_PUB_RES, // System attributes must be loaded first
+            ROAD_RES,                 // Roads must be loaded before R_Nodes
+            ALARM_RES,
+            BEACON_STATE_RES,
+            BEACON_RES,
+            LANE_MARKING_RES,
+            CABINET_STYLE_RES,
+            COMM_PROTOCOL_RES,
+            COMM_CONFIG_RES,
+            COMM_LINK_RES,
+            CONDITION_RES,
+            DIRECTION_RES,
+            ROADWAY_RES,
+            ROAD_MODIFIER_RES,
+            GATE_ARM_INTERLOCK_RES,
+            GATE_ARM_STATE_RES,
+            LANE_USE_INDICATION_RES,
+            LCS_LOCK_RES,
+            RESOURCE_TYPE_RES,
+            CONTROLLER_RES,
+            WEATHER_SENSOR_RES,
+            RWIS_RES,
+            MODEM_RES,
+            PERMISSION_RES,
+            ROLE_RES,
+            USER_RES,
+            CAMERA_RES,
+            CAMERA_PUB_RES,
+            GATE_ARM_RES,
+            GATE_ARM_ARRAY_RES,
+            GPS_RES,
+            LCS_ARRAY_RES,
+            LCS_INDICATION_RES,
+            RAMP_METER_RES,
+            TAG_READER_RES,
+            VIDEO_MONITOR_RES,
+            FLOW_STREAM_RES,
+            DMS_RES,
+            DMS_PUB_RES,
+            DMS_STAT_RES,
+            FONT_LIST_RES,
+            GRAPHIC_LIST_RES,
+            MSG_LINE_RES,
+            MSG_PATTERN_RES,
+            WORD_RES,
+            INCIDENT_RES,
+            R_NODE_RES,
+            DETECTOR_RES,
+            DETECTOR_PUB_RES,
+            SIGN_CONFIG_RES,
+            SIGN_DETAIL_RES,
+            SIGN_MSG_RES,
+            TPIMS_STAT_RES,
+            TPIMS_DYN_RES,
+            TPIMS_ARCH_RES,
+        ]
+        .iter()
+        .cloned()
+    }
+
     /// Get the listen value
-    fn listen(self) -> Option<&'static str> {
+    pub fn listen(self) -> Option<&'static str> {
         match self {
             Resource::RNode() => Some("r_node$1"),
             Resource::Road() => Some("road$1"),
@@ -968,23 +970,12 @@ impl Resource {
     }
 }
 
-/// Get a set of all resource channels to listen
-pub fn channels_all() -> impl Iterator<Item = &'static str> {
-    let mut channels = HashSet::new();
-    for res in ALL {
-        if let Some(lsn) = res.listen() {
-            channels.insert(lsn);
-        }
-    }
-    channels.into_iter()
-}
-
 /// Query all resources.
 ///
 /// * `client` The database connection.
 /// * `sender` Sender for segment messages.
 pub async fn query_all(client: &mut Client) -> Result<()> {
-    for res in ALL {
+    for res in Resource::iter() {
         log::trace!("query_all: {res:?}");
         res.query(client, "", sender).await?;
     }
@@ -1005,7 +996,7 @@ pub async fn notify(
 ) -> Result<()> {
     log::info!("notify: {chan} {payload}");
     let mut found = false;
-    for res in ALL {
+    for res in Resource::iter() {
         if let Some(lsn) = res.listen() {
             if lsn == chan {
                 found = true;
@@ -1021,5 +1012,5 @@ pub async fn notify(
 
 /// Check if any resource is listening to a channel
 pub fn is_listening(chan: &str) -> bool {
-    ALL.iter().any(|res| res.listen() == Some(chan))
+    Resource::iter().any(|res| res.listen() == Some(chan))
 }

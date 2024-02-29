@@ -14,8 +14,9 @@
 //
 use crate::database::Database;
 use crate::error::Result;
-use crate::resource::channels_all;
+use crate::resource::Resource;
 use futures::Stream;
+use std::collections::HashSet;
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
@@ -41,17 +42,17 @@ impl Future for NotificationHandler {
                 log::warn!("DB notification stream ended");
                 Poll::Ready(())
             }
-            Poll::Ready(Some(Ok(AsyncMessage::Notice(n)))) => {
-                log::warn!("DB notice: {n}");
-                Poll::Pending
-            }
             Poll::Ready(Some(Ok(AsyncMessage::Notification(n)))) => {
                 self.tx.send(n);
                 Poll::Ready(())
             }
+            Poll::Ready(Some(Ok(AsyncMessage::Notice(n)))) => {
+                log::warn!("DB notice: {n}");
+                Poll::Ready(())
+            }
             Poll::Ready(Some(Ok(_))) => {
                 log::warn!("DB AsyncMessage unknown");
-                Poll::Pending
+                Poll::Ready(())
             }
             Poll::Ready(Some(Err(e))) => {
                 log::error!("DB error");
@@ -67,9 +68,14 @@ pub async fn notification_stream(
 ) -> Result<impl Stream<Item = Notification>> {
     let (client, conn) = db.dedicated_client().await?;
     let (tx, mut rx) = unbounded_channel();
-    for chan in channels_all() {
-        let listen = format!("LISTEN {chan}");
-        client.execute(&listen, &[]).await?;
+    let mut channels = HashSet::new();
+    for res in Resource::iter() {
+        if let Some(chan) = res.listen() {
+            if channels.insert(chan) {
+                let listen = format!("LISTEN {chan}");
+                client.execute(&listen, &[]).await?;
+            }
+        }
         // FIXME: add notification to sender for query_all
     }
     tokio::spawn(NotificationHandler { conn, tx });
