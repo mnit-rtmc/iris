@@ -804,10 +804,15 @@ async fn query_one_road(
 
 impl Resource {
     /// Get iterator of all resource type variants
+    ///
+    /// The order is determined by dependencies, but maybe(?) not important
+    /// any more:
+    /// 1. System attributes are loaded first
+    /// 2. Roads are loaded before R_Nodes
     pub fn iter() -> impl Iterator<Item = Resource> {
         [
-            SYSTEM_ATTRIBUTE_PUB_RES, // System attributes must be loaded first
-            ROAD_RES,                 // Roads must be loaded before R_Nodes
+            SYSTEM_ATTRIBUTE_PUB_RES,
+            ROAD_RES,
             ALARM_RES,
             BEACON_STATE_RES,
             BEACON_RES,
