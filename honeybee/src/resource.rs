@@ -779,7 +779,7 @@ async fn query_all_roads(
 ) -> Result<()> {
     log::trace!("query_all_roads");
     for row in &client.query(Road::SQL_ALL, &[]).await? {
-        segments.update_road(Road::from_row(row));
+        segments.update_road(Road::from_row(row)).await?;
     }
     Ok(())
 }
@@ -797,7 +797,7 @@ async fn query_one_road(
     log::trace!("query_one_road: {name}");
     let rows = &client.query(Road::SQL_ONE, &[&name]).await?;
     if let Some(row) = rows.iter().next() {
-        segments.update_road(Road::from_row(row));
+        segments.update_road(Road::from_row(row)).await?;
     }
     Ok(())
 }
