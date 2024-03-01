@@ -45,7 +45,7 @@ impl TryFrom<Notification> for NotifyEvent {
                 return Ok(NotifyEvent { res_type, name });
             }
         }
-        Err(Error::UnknownResource(format!("{}", not.channel())))
+        Err(Error::UnknownResource(not.channel().to_string()))
     }
 }
 

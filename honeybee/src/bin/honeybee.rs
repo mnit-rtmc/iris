@@ -14,8 +14,8 @@
 //
 #![forbid(unsafe_code)]
 
-use honeybee::{listener, Database, Result, SegmentState};
 use futures::stream::StreamExt;
+use honeybee::{listener, Database, Result, SegmentState};
 
 /// Main entry point
 #[tokio::main]
@@ -25,6 +25,7 @@ async fn main() -> Result<()> {
     let mut stream = listener::notify_events(&db).await?;
     let mut state = SegmentState::new();
     while let Some(not) = stream.next().await {
+        // FIXME
         todo!()
     }
     Ok(())

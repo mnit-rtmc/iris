@@ -155,6 +155,7 @@ struct Segments<'a> {
 }
 
 /// State of all segments
+#[derive(Default)]
 pub struct SegmentState {
     /// Mapping of roads
     roads: HashMap<String, Road>,
@@ -656,12 +657,7 @@ fn vector_downstream(pts: &[Pt<f64>], i: usize) -> Option<Pt<f64>> {
 impl SegmentState {
     /// Create a new segment state
     pub fn new() -> Self {
-        SegmentState {
-            roads: HashMap::default(),
-            corridors: HashMap::default(),
-            node_cors: HashMap::default(),
-            ordered: false,
-        }
+        Self::default()
     }
 
     /// Get road class

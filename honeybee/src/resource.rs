@@ -972,7 +972,6 @@ impl Resource {
     /// Query sign messages resource.
     async fn query_sign_msgs(self, client: &mut Client) -> Result<()> {
         self.query_file(client, "sign_message").await?;
-        // FIXME: spawn another thread for this?
         render_all(Path::new("")).await
     }
 }

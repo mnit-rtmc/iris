@@ -201,19 +201,19 @@ impl ResType {
     /// Check if resource type is a lookup table
     pub const fn is_lut(self) -> bool {
         use ResType::*;
-        match self {
-            BeaconState => true,
-            CommProtocol => true,
-            Condition => true,
-            Direction => true,
-            GateArmInterlock => true,
-            GateArmState => true,
-            LaneUseIndication => true,
-            LcsLock => true,
-            ResourceType => true,
-            Rnode => true,
-            RoadModifier => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            BeaconState
+                | CommProtocol
+                | Condition
+                | Direction
+                | GateArmInterlock
+                | GateArmState
+                | LaneUseIndication
+                | LcsLock
+                | ResourceType
+                | Rnode
+                | RoadModifier
+        )
     }
 }
