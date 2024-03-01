@@ -72,7 +72,7 @@ public abstract class Service {
 
 		Document d = db.newDocument();
 		d.setXmlStandalone(true);
-		Element envelope = d.createElementNS("http://schemas.xmlsoap.org/soap/envelope/", "SOAP-ENV:Envelope");
+		Element envelope = d.createElementNS("http://www.w3.org/2003/05/soap-envelope", "SOAP-ENV:Envelope");
 		envelope.setAttribute("xmlns:wsdl", namespace);
 		envelope.setAttribute("xmlns:tt", "http://www.onvif.org/ver10/schema");
 		d.appendChild(envelope);
