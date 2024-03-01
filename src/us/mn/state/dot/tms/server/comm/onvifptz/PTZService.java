@@ -264,6 +264,24 @@ public class PTZService extends Service {
 	}
 
 	/**
+	 * Returns the token of the first preset with a given name, or null
+	 * @param profileToken reference to the media profile
+	 * @param pName        name of the saved PTZ preset
+	 */
+	public String getPresetToken(String profileToken, String pName) {
+		Document presets = DOMUtils.getDocument(getPresets(profileToken));
+
+		NodeList presetList = presets.getElementsByTagNameNS("*", "Preset");
+		for (int i = 0; i < presetList.getLength(); i++) {
+			String n = ((Element) presetList.item(i)).getElementsByTagNameNS("*", "Name")
+					.item(0).getTextContent();
+			if (pName.equals(n))
+				return ((Element) presetList.item(i)).getAttribute("token");
+		}
+		return null;
+	}
+
+	/**
 	 * Point the camera in a saved preset direction for the PTZNode of
 	 * selected MediaProfile
 	 *
@@ -277,8 +295,38 @@ public class PTZService extends Service {
 		return sendRequestDocument(doc);
 	}
 
+	/** Document builder function for RemovePreset */
+	public Document removePresetDocument(String profToken, String pToken) {
+		Document doc = getBaseDocument();
+		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+
+		Element removePresetElement = doc.createElement("wsdl:RemovePreset");
+		body.appendChild(removePresetElement);
+
+		Element profileToken = doc.createElement("wsdl:ProfileToken");
+		profileToken.appendChild(doc.createTextNode(profToken));
+		removePresetElement.appendChild(profileToken);
+
+		Element presetToken = doc.createElement("wsdl:PresetToken");
+		presetToken.appendChild(doc.createTextNode(pToken));
+		removePresetElement.appendChild(presetToken);
+
+		return doc;
+	}
+
+	/**
+	 * Removes the preset designated by pToken
+	 *
+	 * @param profileToken reference to the media profile
+	 * @param pToken       unique reference token for the PTZ preset
+	 */
+	public String removePreset(String profileToken, String pToken) {
+		Document doc = removePresetDocument(profileToken, pToken);
+		return sendRequestDocument(doc);
+	}
+
 	/** Document builder function for SetPreset */
-	public Document setPresetDocument(String profToken, String pToken) {
+	public Document setPresetDocument(String profToken, String pToken, String pName) {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
 
@@ -293,20 +341,34 @@ public class PTZService extends Service {
 		presetToken.appendChild(doc.createTextNode(pToken));
 		setPresetElement.appendChild(presetToken);
 
+		Element presetName = doc.createElement("wsdl:PresetName");
+		presetName.appendChild(doc.createTextNode(pName));
+		setPresetElement.appendChild(presetName);
+
 		return doc;
 	}
 
 	/**
 	 * Saves the current position to a preset
 	 *
-	 * Calling this will overwrite if an existing preset has a matching token.
+	 * Calling this will overwrite all existing presets with matching
+	 * tokens and/or names
 	 *
 	 * @param profileToken reference to the media profile
 	 * @param pToken       unique reference token for the PTZ preset
+	 * @param pName        name for PTZ preset
 	 */
+	public String setPreset(String profileToken, String pToken, String pName) {
+		// won't save if other preset uses pName already
+		String removeResp = removePreset(profileToken, getPresetToken(profileToken, pName));
+
+		Document doc = setPresetDocument(profileToken, pToken, pName);
+		return removeResp + "\n" + sendRequestDocument(doc);
+	}
+
+	/** Saves current position to a preset - uses token as default name */
 	public String setPreset(String profileToken, String pToken) {
-		Document doc = setPresetDocument(profileToken, pToken);
-		return sendRequestDocument(doc);
+		return setPreset(profileToken, pToken, pToken);
 	}
 
 	/** Document builder function for Stop */
