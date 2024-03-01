@@ -14,13 +14,18 @@
 //
 #![forbid(unsafe_code)]
 
-use honeybee::{listener, Result};
+use honeybee::{listener, Database, Result, SegmentState};
+use futures::stream::StreamExt;
 
 /// Main entry point
 #[tokio::main]
 async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
     let db = Database::new("tms").await?;
-    listener::notification_stream(&db).await?;
+    let mut stream = listener::notify_events(&db).await?;
+    let mut state = SegmentState::new();
+    while let Some(not) = stream.next().await {
+        todo!()
+    }
     Ok(())
 }

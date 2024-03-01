@@ -56,13 +56,7 @@ pub enum Error {
     /// Serde JSON
     #[error("Json {0}")]
     Json(#[from] serde_json::Error),
-
-    /// Send error
-    #[error("Send {0}")]
-    Send(#[from] SendError),
 }
-
-type SendError = tokio::sync::mpsc::error::SendError<crate::segments::SegMsg>;
 
 impl<E: std::fmt::Debug> From<bb8::RunError<E>> for Error {
     fn from(err: bb8::RunError<E>) -> Self {

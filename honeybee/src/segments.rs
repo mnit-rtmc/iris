@@ -25,7 +25,6 @@ use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::path::Path;
 use tokio::io::AsyncWriteExt;
-use tokio::sync::mpsc::UnboundedReceiver;
 use tokio_postgres::Row;
 
 /// Base segment scale factor
@@ -77,18 +76,6 @@ pub struct RNode {
     active: bool,
     station_id: Option<String>,
     speed_limit: i32,
-}
-
-/// Segment notification message
-pub enum SegMsg {
-    /// Update (or add) a Road
-    UpdateRoad(Road),
-    /// Update (or add) an RNode
-    UpdateNode(RNode),
-    /// Remove an RNode
-    RemoveNode(String),
-    /// Enable/disable ordering for all RNodes
-    Order(bool),
 }
 
 /// General direction of travel
@@ -168,7 +155,7 @@ struct Segments<'a> {
 }
 
 /// State of all segments
-struct SegmentState {
+pub struct SegmentState {
     /// Mapping of roads
     roads: HashMap<String, Road>,
     /// Mapping of node names to corridor IDs
@@ -452,7 +439,7 @@ impl Corridor {
     /// Add a node to corridor
     fn add_node(&mut self, node: RNode, ordered: bool) {
         log::trace!(
-            "add_node {} to {} ({} + 1)",
+            "Corridor::add_node {} to {} ({} + 1)",
             &node.name,
             &self.cor_id,
             self.nodes.len()
@@ -467,7 +454,7 @@ impl Corridor {
     /// Update a node
     fn update_node(&mut self, node: RNode, ordered: bool) {
         log::trace!(
-            "update_node {} to {} ({})",
+            "Corridor::update_node {} to {} ({})",
             &node.name,
             &self.cor_id,
             self.nodes.len()
@@ -489,7 +476,7 @@ impl Corridor {
     /// Remove a node
     fn remove_node(&mut self, name: &str, ordered: bool) {
         log::trace!(
-            "remove_node {name} from {} ({} - 1)",
+            "Corridor::remove_node {name} from {} ({} - 1)",
             &self.cor_id,
             self.nodes.len()
         );
@@ -668,7 +655,7 @@ fn vector_downstream(pts: &[Pt<f64>], i: usize) -> Option<Pt<f64>> {
 
 impl SegmentState {
     /// Create a new segment state
-    fn new() -> Self {
+    pub fn new() -> Self {
         SegmentState {
             roads: HashMap::default(),
             corridors: HashMap::default(),
@@ -691,7 +678,7 @@ impl SegmentState {
     }
 
     /// Update (or add) a node
-    fn update_node(&mut self, node: RNode) {
+    pub fn update_node(&mut self, node: RNode) {
         match node.cor_id(&self.roads) {
             Some(ref cor_id) => {
                 match self.node_cors.insert(node.name.clone(), cor_id.clone()) {
@@ -751,7 +738,7 @@ impl SegmentState {
     }
 
     /// Remove a node
-    fn remove_node(&mut self, name: &str) {
+    pub fn remove_node(&mut self, name: &str) {
         match self.node_cors.remove(name) {
             Some(ref cid) => self.remove_corridor_node(cid, name),
             None => log::error!("corridor not found for node: {}", name),
@@ -759,7 +746,7 @@ impl SegmentState {
     }
 
     /// Order all corridors
-    async fn set_ordered(&mut self, ordered: bool) -> Result<()> {
+    pub async fn set_ordered(&mut self, ordered: bool) -> Result<()> {
         self.ordered = ordered;
         if ordered {
             for cor in self.corridors.values_mut() {
@@ -773,7 +760,7 @@ impl SegmentState {
     }
 
     /// Update a road class or scale
-    async fn update_road(&mut self, road: Road) -> Result<()> {
+    pub async fn update_road(&mut self, road: Road) -> Result<()> {
         log::trace!("update_road {}", road.name);
         let name = road.name.clone();
         self.roads.insert(name.clone(), road);
@@ -790,19 +777,5 @@ impl SegmentState {
             // FIXME: write segment loam layer
         }
         Ok(())
-    }
-}
-
-/// Receive segment messages and update corridor segments
-pub async fn receive_nodes(receiver: UnboundedReceiver<SegMsg>) -> Result<()> {
-    let mut state = SegmentState::new();
-    loop {
-        match receiver.recv().await? {
-            SegMsg::UpdateRoad(road) => state.update_road(road).await?,
-            SegMsg::UpdateNode(node) => state.update_node(node),
-            SegMsg::RemoveNode(name) => state.remove_node(&name),
-            SegMsg::Order(ordered) => state.set_ordered(ordered).await?,
-        }
-        log::debug!("total corridors: {}", state.corridors.len());
     }
 }

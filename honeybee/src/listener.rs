@@ -13,8 +13,9 @@
 // GNU General Public License for more details.
 //
 use crate::database::Database;
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::resource::Resource;
+use crate::restype::ResType;
 use futures::Stream;
 use std::collections::HashSet;
 use std::future::Future;
@@ -24,18 +25,42 @@ use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 use tokio_postgres::tls::NoTlsStream;
 use tokio_postgres::{AsyncMessage, Connection, Notification, Socket};
 
+/// DB notify event
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct NotifyEvent {
+    /// Resource type
+    pub res_type: ResType,
+    /// Resource name
+    pub name: Option<String>,
+}
+
+impl TryFrom<Notification> for NotifyEvent {
+    type Error = Error;
+
+    fn try_from(not: Notification) -> Result<Self> {
+        for res_type in ResType::iter() {
+            if not.channel() == res_type.as_str() {
+                let name = (!not.payload().is_empty())
+                    .then(|| not.payload().to_string());
+                return Ok(NotifyEvent { res_type, name });
+            }
+        }
+        Err(Error::UnknownResource(format!("{}", not.channel())))
+    }
+}
+
 /// DB notification handler
 struct NotificationHandler {
     /// DB connection
     conn: Connection<Socket, NoTlsStream>,
-    /// Notification sender
-    tx: UnboundedSender<Notification>,
+    /// Notify event sender
+    tx: UnboundedSender<NotifyEvent>,
 }
 
 impl Future for NotificationHandler {
     type Output = ();
 
-    fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
         match self.conn.poll_message(cx) {
             Poll::Pending => Poll::Pending,
             Poll::Ready(None) => {
@@ -43,8 +68,18 @@ impl Future for NotificationHandler {
                 Poll::Ready(())
             }
             Poll::Ready(Some(Ok(AsyncMessage::Notification(n)))) => {
-                self.tx.send(n);
-                Poll::Ready(())
+                match NotifyEvent::try_from(n) {
+                    Ok(ne) => {
+                        if let Err(e) = self.tx.send(ne) {
+                            log::warn!("Send notification: {e}");
+                        }
+                        Poll::Ready(())
+                    }
+                    Err(e) => {
+                        log::warn!("Notification: {e}");
+                        Poll::Ready(())
+                    }
+                }
             }
             Poll::Ready(Some(Ok(AsyncMessage::Notice(n)))) => {
                 log::warn!("DB notice: {n}");
@@ -62,10 +97,10 @@ impl Future for NotificationHandler {
     }
 }
 
-/// Create stream to listen for DB notifications
-pub async fn notification_stream(
+/// Create stream to listen for DB notify events
+pub async fn notify_events(
     db: &Database,
-) -> Result<impl Stream<Item = Notification>> {
+) -> Result<impl Stream<Item = NotifyEvent> + Unpin> {
     let (client, conn) = db.dedicated_client().await?;
     let (tx, mut rx) = unbounded_channel();
     let mut channels = HashSet::new();
@@ -80,9 +115,9 @@ pub async fn notification_stream(
     }
     tokio::spawn(NotificationHandler { conn, tx });
     // create a stream from channel receiver
-    Ok(async_stream::stream! {
+    Ok(Box::pin(async_stream::stream! {
         while let Some(not) = rx.recv().await {
             yield not;
         }
-    })
+    }))
 }

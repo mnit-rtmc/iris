@@ -19,7 +19,10 @@ mod error;
 mod files;
 pub mod listener;
 mod resource;
+mod restype;
 mod segments;
 mod signmsg;
 
+pub use database::Database;
 pub use error::{Error, Result};
+pub use segments::SegmentState;
