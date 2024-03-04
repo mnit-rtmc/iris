@@ -110,7 +110,10 @@ pub async fn notify_events(
                 let listen = format!("LISTEN {chan}");
                 client.execute(&listen, &[]).await?;
                 if let Ok(res_type) = ResType::try_from(chan) {
-                    let ne = NotifyEvent { res_type, name: None };
+                    let ne = NotifyEvent {
+                        res_type,
+                        name: None,
+                    };
                     if let Err(e) = tx.send(ne) {
                         log::warn!("Send notification: {e}");
                     }

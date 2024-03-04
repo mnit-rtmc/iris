@@ -15,6 +15,7 @@
 use crate::error::Result;
 use crate::files::AtomicFile;
 use crate::query;
+use crate::restype::ResType;
 use crate::segments::{RNode, Road, SegmentState};
 use crate::signmsg::render_all;
 use std::path::Path;
@@ -63,9 +64,9 @@ pub enum Resource {
     ParkingAreaDyn,
     ParkingAreaArch,
     Permission,
-    Rnode,
     RampMeter,
     ResourceType,
+    Rnode,
     Road,
     RoadFull,
     RoadModifier,
@@ -87,11 +88,7 @@ pub enum Resource {
 /// * `client` The database connection.
 /// * `sql` SQL query.
 /// * `w` Writer to output resource.
-async fn query_json<W>(
-    client: &mut Client,
-    sql: &str,
-    mut w: W,
-) -> Result<u32>
+async fn query_json<W>(client: &mut Client, sql: &str, mut w: W) -> Result<u32>
 where
     W: AsyncWrite + Unpin,
 {
@@ -229,9 +226,9 @@ impl Resource {
             ParkingAreaDyn,
             ParkingAreaArch,
             Permission,
-            Rnode,
             RampMeter,
             ResourceType,
+            Rnode,
             Road,
             RoadFull,
             RoadModifier,
@@ -249,6 +246,62 @@ impl Resource {
         ]
         .iter()
         .cloned()
+    }
+
+    /// Get the resource type
+    const fn res_type(self) -> ResType {
+        use Resource::*;
+        match self {
+            Alarm => ResType::Alarm,
+            Beacon => ResType::Beacon,
+            BeaconState => ResType::BeaconState,
+            CabinetStyle => ResType::CabinetStyle,
+            Camera | CameraPub => ResType::Camera,
+            CommConfig => ResType::CommConfig,
+            CommLink => ResType::CommLink,
+            CommProtocol => ResType::CommProtocol,
+            Condition => ResType::Condition,
+            Controller => ResType::Controller,
+            Detector | DetectorPub => ResType::Detector,
+            Direction => ResType::Direction,
+            Dms | DmsPub | DmsStat => ResType::Dms,
+            FlowStream => ResType::FlowStream,
+            FontList => ResType::Font,
+            GateArm => ResType::GateArm,
+            GateArmArray => ResType::GateArmArray,
+            GateArmInterlock => ResType::GateArmInterlock,
+            GateArmState => ResType::GateArmState,
+            Gps => ResType::Gps,
+            GraphicList => ResType::Graphic,
+            Incident => ResType::Incident,
+            LaneMarking => ResType::LaneMarking,
+            LaneUseIndication => ResType::LaneUseIndication,
+            LcsArray => ResType::LcsArray,
+            LcsIndication => ResType::LcsIndication,
+            LcsLock => ResType::LcsLock,
+            Modem => ResType::Modem,
+            MsgLine => ResType::MsgLine,
+            MsgPattern => ResType::MsgPattern,
+            ParkingAreaPub | ParkingAreaDyn | ParkingAreaArch => {
+                ResType::ParkingArea
+            }
+            Permission => ResType::Permission,
+            RampMeter => ResType::RampMeter,
+            ResourceType => ResType::ResourceType,
+            Rnode => ResType::Rnode,
+            Road | RoadFull => ResType::Road,
+            RoadModifier => ResType::RoadModifier,
+            Role => ResType::Role,
+            SignConfig => ResType::SignConfig,
+            SignDetail => ResType::SignDetail,
+            SignMessage => ResType::SignMessage,
+            SystemAttributePub => ResType::SystemAttribute,
+            TagReader => ResType::TagReader,
+            User => ResType::User,
+            VideoMonitor => ResType::VideoMonitor,
+            WeatherSensor | WeatherSensorPub => ResType::WeatherSensor,
+            Word => ResType::Word,
+        }
     }
 
     /// Get the resource path
@@ -293,9 +346,9 @@ impl Resource {
             ParkingAreaDyn => "TPIMS_dynamic",
             ParkingAreaArch => "TPIMS_archive",
             Permission => "api/permission",
-            Rnode => unreachable!(),
             RampMeter => "api/ramp_meter",
             ResourceType => "resource_type",
+            Rnode => unreachable!(),
             Road => "api/road",
             RoadFull => unreachable!(),
             RoadModifier => "road_modifier",
@@ -340,8 +393,8 @@ impl Resource {
             ParkingAreaPub => Some("parking_area"),
             ParkingAreaDyn | ParkingAreaArch => Some("parking_area$1"),
             Permission => Some("permission"),
-            Rnode => Some("r_node$1"),
             RampMeter => Some("ramp_meter"),
+            Rnode => Some("r_node$1"),
             Road | RoadFull => Some("road$1"),
             Role => Some("role"),
             SignConfig => Some("sign_config"),
@@ -399,9 +452,9 @@ impl Resource {
             ParkingAreaDyn => query::PARKING_AREA_DYN,
             ParkingAreaArch => query::PARKING_AREA_ARCH,
             Permission => query::PERMISSION_ALL,
-            Rnode => query::RNODE_FULL,
             RampMeter => query::RAMP_METER_ALL,
             ResourceType => query::RESOURCE_TYPE_LUT,
+            Rnode => query::RNODE_FULL,
             Road => query::ROAD_ALL,
             RoadFull => query::ROAD_FULL,
             RoadModifier => query::ROAD_MODIFIER_LUT,
