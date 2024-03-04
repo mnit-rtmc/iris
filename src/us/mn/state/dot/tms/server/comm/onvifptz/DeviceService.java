@@ -44,10 +44,6 @@ public class DeviceService extends Service {
 		Element getServices = doc.createElement("wsdl:GetServices");
 		body.appendChild(getServices);
 
-		Element includeCapability = doc.createElement("wsdl:IncludeCapability");
-		getServices.appendChild(includeCapability);
-		includeCapability.appendChild(doc.createTextNode("true"));
-
 		return doc;
 	}
 
