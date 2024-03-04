@@ -460,7 +460,7 @@ async fn query_all_nodes(
 ) -> Result<()> {
     log::trace!("query_all_nodes");
     segments.set_ordered(false).await?;
-    for row in &client.query(RNode::SQL_ALL, &[]).await? {
+    for row in &client.query(query::RNODE_ALL_FULL, &[]).await? {
         segments.update_node(RNode::from_row(row));
     }
     segments.set_ordered(true).await?;
@@ -478,7 +478,7 @@ async fn query_one_node(
     segments: &mut SegmentState,
 ) -> Result<()> {
     log::trace!("query_one_node: {name}");
-    let rows = &client.query(RNode::SQL_ONE, &[&name]).await?;
+    let rows = &client.query(query::RNODE_ONE, &[&name]).await?;
     if rows.len() == 1 {
         for row in rows.iter() {
             segments.update_node(RNode::from_row(row));
@@ -499,7 +499,7 @@ async fn query_all_roads(
     segments: &mut SegmentState,
 ) -> Result<()> {
     log::trace!("query_all_roads");
-    for row in &client.query(Road::SQL_ALL, &[]).await? {
+    for row in &client.query(query::ROAD_ALL_FULL, &[]).await? {
         segments.update_road(Road::from_row(row)).await?;
     }
     Ok(())
@@ -516,7 +516,7 @@ async fn query_one_road(
     segments: &mut SegmentState,
 ) -> Result<()> {
     log::trace!("query_one_road: {name}");
-    let rows = &client.query(Road::SQL_ONE, &[&name]).await?;
+    let rows = &client.query(query::ROAD_ONE, &[&name]).await?;
     if let Some(row) = rows.iter().next() {
         segments.update_road(Road::from_row(row)).await?;
     }

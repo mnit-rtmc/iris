@@ -186,19 +186,6 @@ impl fmt::Display for CorridorId {
 }
 
 impl RNode {
-    /// SQL query for all RNodes
-    pub const SQL_ALL: &'static str =
-        "SELECT name, roadway, road_dir, location, lat, lon, transition, \
-                lanes, shift, active, station_id, speed_limit \
-        FROM r_node_view";
-
-    /// SQL query for one RNode
-    pub const SQL_ONE: &'static str =
-        "SELECT name, roadway, road_dir, location, lat, lon, transition, \
-                lanes, shift, active, station_id, speed_limit \
-        FROM r_node_view n \
-        WHERE n.name = $1";
-
     /// Create an RNode from a result Row
     pub fn from_row(row: &Row) -> Self {
         RNode {
@@ -274,19 +261,6 @@ impl RNode {
 }
 
 impl Road {
-    /// SQL query for all Roads
-    pub const SQL_ALL: &'static str =
-        "SELECT name, abbrev, r_class, direction, scale \
-        FROM iris.road \
-        JOIN iris.road_class ON r_class = id";
-
-    /// SQL query for one Road
-    pub const SQL_ONE: &'static str =
-        "SELECT name, abbrev, r_class, direction, scale \
-        FROM iris.road \
-        JOIN iris.road_class ON r_class = id \
-        WHERE name = $1";
-
     /// Create a Road from a result Row
     pub fn from_row(row: &Row) -> Self {
         Road {
