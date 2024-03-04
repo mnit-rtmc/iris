@@ -370,43 +370,10 @@ impl Resource {
     pub const fn listen(self) -> Option<&'static str> {
         use Resource::*;
         match self {
-            Alarm => Some("alarm"),
-            Beacon => Some("beacon"),
-            CabinetStyle => Some("cabinet_style"),
-            Camera | CameraPub => Some("camera"),
-            CommConfig => Some("comm_config"),
-            CommLink => Some("comm_link"),
-            Controller => Some("controller"),
-            Detector | DetectorPub => Some("detector"),
-            Dms | DmsPub | DmsStat => Some("dms"),
-            FlowStream => Some("flow_stream"),
-            GateArm => Some("gate_arm"),
-            GateArmArray => Some("gate_arm_array"),
-            Gps => Some("gps"),
-            Incident => Some("incident"),
-            LaneMarking => Some("lane_marking"),
-            LcsArray => Some("lcs_array"),
-            LcsIndication => Some("lcs_indication"),
-            Modem => Some("modem"),
-            MsgLine => Some("msg_line"),
-            MsgPattern => Some("msg_pattern"),
-            ParkingAreaPub => Some("parking_area"),
-            ParkingAreaDyn | ParkingAreaArch => Some("parking_area$1"),
-            Permission => Some("permission"),
-            RampMeter => Some("ramp_meter"),
-            Rnode => Some("r_node$1"),
-            Road | RoadFull => Some("road$1"),
-            Role => Some("role"),
-            SignConfig => Some("sign_config"),
-            SignDetail => Some("sign_detail"),
-            SignMessage => Some("sign_message"),
-            SystemAttributePub => Some("system_attribute"),
-            TagReader => Some("tag_reader"),
-            User => Some("i_user"),
-            VideoMonitor => Some("video_monitor"),
-            WeatherSensor | WeatherSensorPub => Some("weather_sensor"),
-            Word => Some("word"),
-            _ => None,
+            ParkingAreaDyn | ParkingAreaArch | Rnode | Road | RoadFull => {
+                self.res_type().listen_full()
+            }
+            _ => self.res_type().listen_min(),
         }
     }
 

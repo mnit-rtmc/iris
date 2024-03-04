@@ -38,12 +38,10 @@ impl TryFrom<Notification> for NotifyEvent {
     type Error = Error;
 
     fn try_from(not: Notification) -> Result<Self> {
-        for res_type in ResType::iter() {
-            if not.channel() == res_type.as_str() {
-                let name = (!not.payload().is_empty())
-                    .then(|| not.payload().to_string());
-                return Ok(NotifyEvent { res_type, name });
-            }
+        if let Ok(res_type) = ResType::try_from(not.channel()) {
+            let name = (!not.payload().is_empty())
+                .then(|| not.payload().to_string());
+            return Ok(NotifyEvent { res_type, name });
         }
         Err(Error::UnknownResource(not.channel().to_string()))
     }

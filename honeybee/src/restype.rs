@@ -73,8 +73,15 @@ impl TryFrom<&str> for ResType {
 
     fn try_from(type_n: &str) -> Result<Self, Self::Error> {
         for variant in Self::iter() {
-            if variant.as_str() == type_n {
-                return Ok(variant);
+            if let Some(chan) = variant.listen_min() {
+                if chan == type_n {
+                    return Ok(variant);
+                }
+            }
+            if let Some(chan) = variant.listen_full() {
+                if chan == type_n {
+                    return Ok(variant);
+                }
             }
         }
         Err(())
@@ -141,60 +148,66 @@ impl ResType {
         .cloned()
     }
 
-    /// Get resource type as string slice
-    pub const fn as_str(self) -> &'static str {
+    /// Get the channel to listen for minimal attributes
+    pub const fn listen_min(self) -> Option<&'static str> {
         use ResType::*;
         match self {
-            Alarm => "alarm",
-            Beacon => "beacon",
-            BeaconState => "beacon_state",
-            CabinetStyle => "cabinet_style",
-            Camera => "camera",
-            CommConfig => "comm_config",
-            CommLink => "comm_link",
-            CommProtocol => "comm_protocol",
-            Condition => "condition",
-            Controller => "controller",
-            ControllerIo => "controller_io",
-            Detector => "detector",
-            Direction => "direction",
-            Dms => "dms",
-            FlowStream => "flow_stream",
-            Font => "font",
-            GateArm => "gate_arm",
-            GateArmArray => "gate_arm_array",
-            GateArmInterlock => "gate_arm_interlock",
-            GateArmState => "gate_arm_state",
-            GeoLoc => "geo_loc",
-            Gps => "gps",
-            Graphic => "graphic",
-            Incident => "incident",
-            LaneMarking => "lane_marking",
-            LaneUseIndication => "lane_use_indication",
-            Lcs => "lcs",
-            LcsArray => "lcs_array",
-            LcsIndication => "lcs_indication",
-            LcsLock => "lcs_lock",
-            Modem => "modem",
-            MsgLine => "msg_line",
-            MsgPattern => "msg_pattern",
-            ParkingArea => "parking_area",
-            Permission => "permission",
-            RampMeter => "ramp_meter",
-            ResourceType => "resource_type",
-            Rnode => "r_node",
-            Road => "road",
-            RoadModifier => "road_modifier",
-            Role => "role",
-            SignConfig => "sign_config",
-            SignDetail => "sign_detail",
-            SignMessage => "sign_message",
-            SystemAttribute => "system_attribute",
-            TagReader => "tag_reader",
-            User => "user",
-            VideoMonitor => "video_monitor",
-            WeatherSensor => "weather_sensor",
-            Word => "word",
+            Alarm => Some("alarm"),
+            Beacon => Some("beacon"),
+            CabinetStyle => Some("cabinet_style"),
+            Camera => Some("camera"),
+            CommConfig => Some("comm_config"),
+            CommLink => Some("comm_link"),
+            Controller => Some("controller"),
+            Detector => Some("detector"),
+            Dms => Some("dms"),
+            FlowStream => Some("flow_stream"),
+            GateArm => Some("gate_arm"),
+            GateArmArray => Some("gate_arm_array"),
+            Gps => Some("gps"),
+            Incident => Some("incident"),
+            LaneMarking => Some("lane_marking"),
+            LcsArray => Some("lcs_array"),
+            LcsIndication => Some("lcs_indication"),
+            Modem => Some("modem"),
+            MsgLine => Some("msg_line"),
+            MsgPattern => Some("msg_pattern"),
+            ParkingArea => Some("parking_area"),
+            Permission => Some("permission"),
+            RampMeter => Some("ramp_meter"),
+            Role => Some("role"),
+            SignConfig => Some("sign_config"),
+            SignDetail => Some("sign_detail"),
+            SignMessage => Some("sign_message"),
+            SystemAttribute => Some("system_attribute"),
+            TagReader => Some("tag_reader"),
+            User => Some("i_user"),
+            VideoMonitor => Some("video_monitor"),
+            WeatherSensor => Some("weather_sensor"),
+            Word => Some("word"),
+            _ => None,
+        }
+    }
+
+    /// Get the channel to listen for full attributes
+    pub const fn listen_full(self) -> Option<&'static str> {
+        use ResType::*;
+        match self {
+            Beacon => Some("beacon$1"),
+            Camera => Some("camera$1"),
+            CommLink => Some("comm_link$1"),
+            Controller => Some("controller$1"),
+            Detector => Some("detector$1"),
+            Dms => Some("dms$1"),
+            GateArmArray => Some("gate_arm_array$1"),
+            ParkingArea => Some("parking_area$1"),
+            RampMeter => Some("ramp_meter$1"),
+            Rnode => Some("r_node$1"),
+            Road => Some("road$1"),
+            TagReader => Some("tag_reader$1"),
+            VideoMonitor => Some("video_monitor$1"),
+            WeatherSensor => Some("weather_sensor$1"),
+            _ => None,
         }
     }
 
