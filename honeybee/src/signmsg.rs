@@ -171,10 +171,11 @@ impl MsgData {
     }
 }
 
-/// Fetch all sign messages.
+/// Render all sign messages.
 ///
 /// * `dir` Output file directory.
-pub async fn render_all(dir: &Path) -> Result<()> {
+pub async fn render_all() -> Result<()> {
+    let dir = Path::new("");
     let mut msg_data = MsgData::load(dir).await?;
     let mut path = PathBuf::new();
     path.push(dir);

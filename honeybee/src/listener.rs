@@ -109,9 +109,14 @@ pub async fn notify_events(
             if channels.insert(chan) {
                 let listen = format!("LISTEN {chan}");
                 client.execute(&listen, &[]).await?;
+                if let Ok(res_type) = ResType::try_from(chan) {
+                    let ne = NotifyEvent { res_type, name: None };
+                    if let Err(e) = tx.send(ne) {
+                        log::warn!("Send notification: {e}");
+                    }
+                }
             }
         }
-        // FIXME: add notification to sender for query_all
     }
     tokio::spawn(NotificationHandler { conn, tx });
     // create a stream from channel receiver

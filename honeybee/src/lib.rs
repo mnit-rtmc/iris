@@ -18,6 +18,7 @@ mod database;
 mod error;
 mod files;
 pub mod listener;
+mod query;
 mod resource;
 mod restype;
 mod segments;
