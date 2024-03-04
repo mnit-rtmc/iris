@@ -395,7 +395,7 @@ SELECT to_json(r.name)::text FROM (\
 ) r";
 
 /// SQL query for all Rnodes (full)
-pub const RNODE_ALL_FULL: &str = "\
+pub const RNODE_FULL: &str = "\
 SELECT name, roadway, road_dir, location, lat, lon, transition, \
        lanes, shift, active, station_id, speed_limit \
 FROM r_node_view";
@@ -416,7 +416,7 @@ SELECT row_to_json(r)::text FROM (\
 ) r";
 
 /// SQL query for all roads (full)
-pub const ROAD_ALL_FULL: &str = "\
+pub const ROAD_FULL: &str = "\
 SELECT name, abbrev, r_class, direction, scale \
 FROM iris.road \
 JOIN iris.road_class ON r_class = id";
