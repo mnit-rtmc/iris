@@ -282,7 +282,7 @@ impl Corridor {
         scale: f64,
     ) -> Self {
         log::trace!("Corridor::new {cor_id}");
-        let nodes = vec![];
+        let nodes = Vec::new();
         let count = 0;
         Corridor {
             cor_id,
@@ -396,9 +396,36 @@ impl Corridor {
             .collect()
     }
 
+    /// Create normal vectors for a slice of points
+    fn create_norms(&self, pts: &[Pt<f64>]) -> Vec<Pt<f64>> {
+        let mut norms = Vec::with_capacity(pts.len());
+        for i in 0..pts.len() {
+            let upstream = vector_upstream(pts, i);
+            let downstream = vector_downstream(pts, i);
+            let v0 = match (upstream, downstream) {
+                (Some(up), Some(down)) => (up + down).normalize(),
+                (Some(up), None) => up,
+                (None, Some(down)) => down,
+                (None, None) => self.travel_dir(),
+            };
+            norms.push(v0.left());
+        }
+        norms
+    }
+
+    /// Get corridor travel direction
+    fn travel_dir(&self) -> Pt<f64> {
+        match self.cor_id.travel_dir {
+            TravelDir::Nb => Pt::new(0.0, 1.0),
+            TravelDir::Sb => Pt::new(0.0, -1.0),
+            TravelDir::Eb => Pt::new(1.0, 0.0),
+            TravelDir::Wb => Pt::new(-1.0, 0.0),
+        }
+    }
+
     /// Create meter-points for corridor nodes
     fn create_meterpoints(&self) -> Vec<f64> {
-        let mut meters = vec![];
+        let mut meters = Vec::new();
         let mut meter = 0.0;
         let mut ppos: Option<Wgs84Pos> = None;
         for pos in self.nodes.iter().filter_map(|n| n.pos()) {
@@ -484,7 +511,7 @@ impl<'a> Segments<'a> {
     /// Create corridor segments
     fn new(cor: &'a Corridor, pts: Vec<Pt<f64>>) -> Self {
         let cor_name = cor.cor_id.to_string();
-        let norms = create_norms(&pts);
+        let norms = cor.create_norms(&pts);
         let meters = cor.create_meterpoints();
         Segments {
             cor,
@@ -556,7 +583,7 @@ impl<'a> Segments<'a> {
 
     /// Create polygon for way column
     fn create_way(&self, poly: &[(Pt<f64>, Pt<f64>)]) -> Polygon {
-        let mut points = vec![];
+        let mut points = Vec::new();
         for (vtx, _) in poly {
             points.push(Point::new(vtx.x, vtx.y, None));
         }
@@ -587,23 +614,6 @@ fn road_class_zoom(r_class: i16, zoom: i32) -> bool {
         7 => zoom >= 13, // CD ROAD
         _ => false,
     }
-}
-
-/// Create normal vectors for a slice of points
-fn create_norms(pts: &[Pt<f64>]) -> Vec<Pt<f64>> {
-    let mut norms = vec![];
-    for i in 0..pts.len() {
-        let upstream = vector_upstream(pts, i);
-        let downstream = vector_downstream(pts, i);
-        let v0 = match (upstream, downstream) {
-            (Some(up), Some(down)) => (up + down).normalize(),
-            (Some(up), None) => up,
-            (None, Some(down)) => down,
-            (None, None) => todo!("use corridor direction"),
-        };
-        norms.push(v0.left());
-    }
-    norms
 }
 
 /// Get vector from upstream point to current point

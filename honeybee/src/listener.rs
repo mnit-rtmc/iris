@@ -107,9 +107,11 @@ pub async fn notify_events(
     let (client, conn) = db.dedicated_client().await?;
     let (tx, mut rx) = unbounded_channel();
     let mut channels = HashSet::new();
+    tokio::spawn(NotificationHandler { conn, tx: tx.clone() });
     for res in Resource::iter() {
         if let Some(chan) = res.listen() {
             if channels.insert(chan) {
+                log::debug!("LISTEN to '{chan}' for {res:?}");
                 let listen = format!("LISTEN {chan}");
                 client.execute(&listen, &[]).await?;
                 let ne = NotifyEvent {
@@ -122,7 +124,6 @@ pub async fn notify_events(
             }
         }
     }
-    tokio::spawn(NotificationHandler { conn, tx });
     // create a stream from channel receiver
     Ok(Box::pin(async_stream::stream! {
         while let Some(not) = rx.recv().await {
