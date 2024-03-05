@@ -15,6 +15,7 @@
 use crate::database::Database;
 use crate::error::Result;
 use crate::resource::Resource;
+use crate::restype::ResType;
 use futures::Stream;
 use std::collections::HashSet;
 use std::fmt;
@@ -100,6 +101,17 @@ impl Future for NotificationHandler {
     }
 }
 
+/// Send a notify event
+fn send_event(tx: &UnboundedSender<NotifyEvent>, chan: &str) {
+    let ne = NotifyEvent {
+        channel: chan.to_string(),
+        name: None,
+    };
+    if let Err(e) = tx.send(ne) {
+        log::warn!("Send notification: {e}");
+    }
+}
+
 /// Create stream to listen for DB notify events
 pub async fn notify_events(
     db: &Database,
@@ -107,19 +119,20 @@ pub async fn notify_events(
     let (client, conn) = db.dedicated_client().await?;
     let (tx, mut rx) = unbounded_channel();
     let mut channels = HashSet::new();
-    tokio::spawn(NotificationHandler { conn, tx: tx.clone() });
+    tokio::spawn(NotificationHandler {
+        conn,
+        tx: tx.clone(),
+    });
     for res in Resource::iter() {
         if let Some(chan) = res.listen() {
             if channels.insert(chan) {
-                log::debug!("LISTEN to '{chan}' for {res:?}");
-                let listen = format!("LISTEN {chan}");
-                client.execute(&listen, &[]).await?;
-                let ne = NotifyEvent {
-                    channel: chan.to_string(),
-                    name: None,
-                };
-                if let Err(e) = tx.send(ne) {
-                    log::warn!("Send notification: {e}");
+                if let Ok(res_type) = ResType::try_from(chan) {
+                    if res_type.lut_channel().is_none() {
+                        log::debug!("LISTEN to '{chan}' for {res:?}");
+                        let listen = format!("LISTEN {chan}");
+                        client.execute(&listen, &[]).await?;
+                    }
+                    send_event(&tx, chan);
                 }
             }
         }

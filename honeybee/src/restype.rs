@@ -83,6 +83,11 @@ impl TryFrom<&str> for ResType {
                     return Ok(variant);
                 }
             }
+            if let Some(chan) = variant.lut_channel() {
+                if chan == type_n {
+                    return Ok(variant);
+                }
+            }
         }
         Err(())
     }
@@ -207,6 +212,26 @@ impl ResType {
             TagReader => Some("tag_reader$1"),
             VideoMonitor => Some("video_monitor$1"),
             WeatherSensor => Some("weather_sensor$1"),
+            _ => None,
+        }
+    }
+
+    /// Get "channel" for LUT resources (no postgres NOTIFY)
+    pub const fn lut_channel(self) -> Option<&'static str> {
+        use ResType::*;
+        match self {
+            BeaconState => Some("beacon_state"),
+            CommProtocol => Some("comm_protocol"),
+            Condition => Some("condition"),
+            Direction => Some("direction"),
+            Font => Some("font"),
+            GateArmInterlock => Some("gate_arm_interlock"),
+            GateArmState => Some("gate_arm_state"),
+            Graphic => Some("graphic"),
+            LaneUseIndication => Some("lane_use_indication"),
+            LcsLock => Some("lcs_lock"),
+            ResourceType => Some("resource_type"),
+            RoadModifier => Some("road_modifier"),
             _ => None,
         }
     }
