@@ -179,11 +179,9 @@ pub async fn render_all() -> Result<()> {
         name.push_str(".gif");
         if cache.contains(&name) {
             cache.keep(&name);
-        } else {
-            if let Some(buf) = msg_data.render_sign_msg(&sign_msg, &name)? {
-                let file = cache.file(&name).await?;
-                file.write_buf(&buf).await?;
-            }
+        } else if let Some(buf) = msg_data.render_sign_msg(&sign_msg, &name)? {
+            let file = cache.file(&name).await?;
+            file.write_buf(&buf).await?;
         }
     }
     cache.clear().await;

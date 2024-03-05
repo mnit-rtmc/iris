@@ -72,18 +72,11 @@ impl Future for NotificationHandler {
                 Poll::Ready(())
             }
             Poll::Ready(Some(Ok(AsyncMessage::Notification(n)))) => {
-                match NotifyEvent::try_from(n) {
-                    Ok(ne) => {
-                        if let Err(e) = self.tx.send(ne) {
-                            log::warn!("Send notification: {e}");
-                        }
-                        Poll::Ready(())
-                    }
-                    Err(e) => {
-                        log::warn!("Notification: {e}");
-                        Poll::Ready(())
-                    }
+                let ne = NotifyEvent::from(n);
+                if let Err(e) = self.tx.send(ne) {
+                    log::warn!("Send notification: {e}");
                 }
+                Poll::Ready(())
             }
             Poll::Ready(Some(Ok(AsyncMessage::Notice(n)))) => {
                 log::warn!("DB notice: {n}");

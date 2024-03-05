@@ -24,7 +24,6 @@ use std::collections::HashMap;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::path::Path;
-use tokio::io::AsyncWriteExt;
 use tokio_postgres::Row;
 
 /// Base segment scale factor
@@ -501,17 +500,7 @@ impl Corridor {
         log::trace!("write_file {cor_name}");
         let json = serde_json::to_vec(&self.nodes)?;
         let file = AtomicFile::new(dir, &cor_name).await?;
-        let mut writer = file.writer().await?;
-        match writer.write_all(&json).await {
-            Ok(()) => {
-                writer.flush().await?;
-                file.commit().await
-            }
-            Err(e) => {
-                let _ = file.rollback().await?;
-                Err(e)?
-            }
-        }
+        file.write_buf(&json).await
     }
 }
 
