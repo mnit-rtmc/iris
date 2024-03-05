@@ -19,6 +19,7 @@ use crate::query;
 use crate::restype::ResType;
 use crate::segments::{RNode, Road, SegmentState};
 use crate::signmsg::render_all;
+use futures::{pin_mut, TryStreamExt};
 use std::path::Path;
 use std::time::Instant;
 use tokio::io::{AsyncWrite, AsyncWriteExt};
@@ -437,7 +438,7 @@ impl Resource {
 
 /// Query a JSON resource.
 ///
-/// * `client` The database connection.
+/// * `client` Database connection.
 /// * `sql` SQL query.
 /// * `w` Writer to output resource.
 async fn query_json<W>(client: &mut Client, sql: &str, mut w: W) -> Result<u32>
@@ -446,19 +447,23 @@ where
 {
     let mut c = 0;
     w.write_all(b"[").await?;
-    for row in &client.query(sql, &[]).await? {
-        if c > 0 {
-            w.write_all(b",").await?;
+    let params: &[&str] = &[];
+    let it = client.query_raw(sql, params).await?;
+    pin_mut!(it);
+    while let Some(row) = it.try_next().await? {
+        match c {
+            0 => w.write_all(b"\n").await?,
+            _ => w.write_all(b",\n").await?,
         }
-        w.write_all(b"\n").await?;
         let j: String = row.get(0);
         w.write_all(j.as_bytes()).await?;
         c += 1;
     }
-    if c > 0 {
-        w.write_all(b"\n").await?;
+    match c {
+        0 => w.write_all(b"]\n").await?,
+        _ => w.write_all(b"\n]\n").await?,
     }
-    w.write_all(b"]\n").await?;
+    w.flush().await?;
     Ok(c)
 }
 
