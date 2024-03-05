@@ -14,6 +14,7 @@
 //
 use crate::error::Result;
 use crate::files::AtomicFile;
+use crate::listener::NotifyEvent;
 use crate::query;
 use crate::restype::ResType;
 use crate::segments::{RNode, Road, SegmentState};
@@ -81,106 +82,6 @@ pub enum Resource {
     WeatherSensor,
     WeatherSensorPub,
     Word,
-}
-
-/// Query a JSON resource.
-///
-/// * `client` The database connection.
-/// * `sql` SQL query.
-/// * `w` Writer to output resource.
-async fn query_json<W>(client: &mut Client, sql: &str, mut w: W) -> Result<u32>
-where
-    W: AsyncWrite + Unpin,
-{
-    let mut c = 0;
-    w.write_all(b"[").await?;
-    for row in &client.query(sql, &[]).await? {
-        if c > 0 {
-            w.write_all(b",").await?;
-        }
-        w.write_all(b"\n").await?;
-        let j: String = row.get(0);
-        w.write_all(j.as_bytes()).await?;
-        c += 1;
-    }
-    if c > 0 {
-        w.write_all(b"\n").await?;
-    }
-    w.write_all(b"]\n").await?;
-    Ok(c)
-}
-
-/// Query all r_nodes.
-///
-/// * `client` The database connection.
-/// * `segments` Segment state.
-async fn query_all_nodes(
-    client: &mut Client,
-    segments: &mut SegmentState,
-) -> Result<()> {
-    log::trace!("query_all_nodes");
-    segments.set_ordered(false).await?;
-    for row in &client.query(query::RNODE_FULL, &[]).await? {
-        segments.update_node(RNode::from_row(row));
-    }
-    segments.set_ordered(true).await?;
-    Ok(())
-}
-
-/// Query one r_node.
-///
-/// * `client` The database connection.
-/// * `name` RNode name.
-/// * `segments` Segment state.
-async fn query_one_node(
-    client: &mut Client,
-    name: &str,
-    segments: &mut SegmentState,
-) -> Result<()> {
-    log::trace!("query_one_node: {name}");
-    let rows = &client.query(query::RNODE_ONE, &[&name]).await?;
-    if rows.len() == 1 {
-        for row in rows.iter() {
-            segments.update_node(RNode::from_row(row));
-        }
-    } else {
-        assert!(rows.is_empty());
-        segments.remove_node(name);
-    }
-    Ok(())
-}
-
-/// Query all roads.
-///
-/// * `client` The database connection.
-/// * `segments` Segment state.
-async fn query_all_roads(
-    client: &mut Client,
-    segments: &mut SegmentState,
-) -> Result<()> {
-    log::trace!("query_all_roads");
-    for row in &client.query(query::ROAD_FULL, &[]).await? {
-        segments.update_road(Road::from_row(row)).await?;
-    }
-    Ok(())
-}
-
-/// Query one road.
-///
-/// * `client` The database connection.
-/// * `name` Road name.
-/// * `segments` Segment state.
-async fn query_one_road(
-    client: &mut Client,
-    name: &str,
-    segments: &mut SegmentState,
-) -> Result<()> {
-    log::trace!("query_one_road: {name}");
-    let rows = &client.query(query::ROAD_ONE, &[&name]).await?;
-    if let Some(row) = rows.iter().next() {
-        segments.update_road(Road::from_row(row)).await?;
-    }
-    Ok(())
 }
 
 impl Resource {
@@ -439,65 +340,78 @@ impl Resource {
         }
     }
 
-    /// Query the resource from a connection.
+    /// Handle a notification event.
+    ///
+    /// * `client` Database connection.
+    /// * `segments` Segment state.
+    /// * `ne` Notify event.
+    pub async fn notify(
+        client: &mut Client,
+        segments: &mut SegmentState,
+        ne: NotifyEvent,
+    ) -> Result<()> {
+        log::info!("Resource::notify: {ne}");
+        let mut found = false;
+        for res in Resource::iter() {
+            if let Some(chan) = res.listen() {
+                if ne.channel == chan {
+                    found = true;
+                    match &ne.name {
+                        Some(name) => {
+                            res.query_one(client, segments, name).await?
+                        }
+                        None => res.query_all(client, segments).await?,
+                    }
+                }
+            }
+        }
+        if !found {
+            log::warn!("unknown resource: {ne}");
+        }
+        Ok(())
+    }
+
+    /// Query one record of the resource.
     ///
     /// * `client` The database connection.
-    /// * `payload` Postgres NOTIFY payload.
     /// * `segments` Segment state.
-    async fn query(
+    /// * `name` Resource name.
+    async fn query_one(
         self,
         client: &mut Client,
-        payload: &str,
+        segments: &mut SegmentState,
+        name: &str,
+    ) -> Result<()> {
+        use Resource::*;
+        match self {
+            Rnode => query_one_node(client, segments, name).await,
+            Road => query_one_road(client, segments, name).await,
+            _ => {
+                // FIXME: log something
+                Ok(())
+            }
+        }
+    }
+
+    /// Query all records of the resource.
+    ///
+    /// * `client` The database connection.
+    /// * `segments` Segment state.
+    async fn query_all(
+        self,
+        client: &mut Client,
         segments: &mut SegmentState,
     ) -> Result<()> {
         use Resource::*;
         match self {
-            Rnode => self.query_nodes(client, payload, segments).await,
-            Road => self.query_roads(client, payload, segments).await,
+            Rnode => query_all_nodes(client, segments).await,
+            Road => query_all_roads(client, segments).await,
             SignMessage => self.query_sign_msgs(client).await,
             _ => self.query_file(client, self.path()).await,
         }
     }
 
-    /// Query r_node resource from a connection.
-    ///
-    /// * `client` The database connection.
-    /// * `payload` Postgres NOTIFY payload.
-    /// * `segments` Segment state.
-    async fn query_nodes(
-        self,
-        client: &mut Client,
-        payload: &str,
-        segments: &mut SegmentState,
-    ) -> Result<()> {
-        // empty payload is used at startup
-        if payload.is_empty() {
-            query_all_nodes(client, segments).await
-        } else {
-            query_one_node(client, payload, segments).await
-        }
-    }
-
-    /// Query road resource from a connection.
-    ///
-    /// * `client` The database connection.
-    /// * `payload` Postgres NOTIFY payload.
-    /// * `segments` Segment state.
-    async fn query_roads(
-        self,
-        client: &mut Client,
-        payload: &str,
-        segments: &mut SegmentState,
-    ) -> Result<()> {
-        // empty payload is used at startup
-        if payload.is_empty() {
-            query_all_roads(client, segments).await
-        } else {
-            query_one_road(client, payload, segments).await
-        }
-    }
-
-    /// Query a file resource from a connection.
+    /// Query a file resource.
     ///
     /// * `client` The database connection.
     /// * `name` File name.
@@ -521,35 +435,102 @@ impl Resource {
     }
 }
 
-/// Handle a channel notification.
+/// Query a JSON resource.
 ///
 /// * `client` The database connection.
-/// * `chan` Channel name.
-/// * `payload` Postgres NOTIFY payload.
+/// * `sql` SQL query.
+/// * `w` Writer to output resource.
+async fn query_json<W>(client: &mut Client, sql: &str, mut w: W) -> Result<u32>
+where
+    W: AsyncWrite + Unpin,
+{
+    let mut c = 0;
+    w.write_all(b"[").await?;
+    for row in &client.query(sql, &[]).await? {
+        if c > 0 {
+            w.write_all(b",").await?;
+        }
+        w.write_all(b"\n").await?;
+        let j: String = row.get(0);
+        w.write_all(j.as_bytes()).await?;
+        c += 1;
+    }
+    if c > 0 {
+        w.write_all(b"\n").await?;
+    }
+    w.write_all(b"]\n").await?;
+    Ok(c)
+}
+
+/// Query all r_nodes.
+///
+/// * `client` Database connection.
 /// * `segments` Segment state.
-pub async fn notify(
+async fn query_all_nodes(
     client: &mut Client,
-    chan: &str,
-    payload: &str,
     segments: &mut SegmentState,
 ) -> Result<()> {
-    log::info!("notify: {chan} {payload}");
-    let mut found = false;
-    for res in Resource::iter() {
-        if let Some(lsn) = res.listen() {
-            if lsn == chan {
-                found = true;
-                res.query(client, payload, segments).await?;
-            }
-        }
+    log::trace!("query_all_nodes");
+    segments.set_ordered(false).await?;
+    for row in &client.query(query::RNODE_FULL, &[]).await? {
+        segments.update_node(RNode::from_row(row));
     }
-    if !found {
-        log::warn!("unknown resource: {chan} {payload}");
+    segments.set_ordered(true).await?;
+    Ok(())
+}
+
+/// Query one r_node.
+///
+/// * `client` Database connection.
+/// * `segments` Segment state.
+/// * `name` RNode name.
+async fn query_one_node(
+    client: &mut Client,
+    segments: &mut SegmentState,
+    name: &str,
+) -> Result<()> {
+    log::trace!("query_one_node: {name}");
+    let rows = &client.query(query::RNODE_ONE, &[&name]).await?;
+    if rows.len() == 1 {
+        for row in rows.iter() {
+            segments.update_node(RNode::from_row(row));
+        }
+    } else {
+        assert!(rows.is_empty());
+        segments.remove_node(name);
     }
     Ok(())
 }
 
-/// Check if any resource is listening to a channel
-pub fn is_listening(chan: &str) -> bool {
-    Resource::iter().any(|res| res.listen() == Some(chan))
+/// Query all roads.
+///
+/// * `client` Database connection.
+/// * `segments` Segment state.
+async fn query_all_roads(
+    client: &mut Client,
+    segments: &mut SegmentState,
+) -> Result<()> {
+    log::trace!("query_all_roads");
+    for row in &client.query(query::ROAD_FULL, &[]).await? {
+        segments.update_road(Road::from_row(row)).await?;
+    }
+    Ok(())
+}
+
+/// Query one road.
+///
+/// * `client` Database connection.
+/// * `segments` Segment state.
+/// * `name` Road name.
+async fn query_one_road(
+    client: &mut Client,
+    segments: &mut SegmentState,
+    name: &str,
+) -> Result<()> {
+    log::trace!("query_one_road: {name}");
+    let rows = &client.query(query::ROAD_ONE, &[&name]).await?;
+    if let Some(row) = rows.iter().next() {
+        segments.update_road(Road::from_row(row)).await?;
+    }
+    Ok(())
 }

@@ -26,4 +26,5 @@ mod signmsg;
 
 pub use database::Database;
 pub use error::{Error, Result};
+pub use resource::Resource;
 pub use segments::SegmentState;

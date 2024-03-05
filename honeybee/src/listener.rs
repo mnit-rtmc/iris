@@ -13,11 +13,11 @@
 // GNU General Public License for more details.
 //
 use crate::database::Database;
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::resource::Resource;
-use crate::restype::ResType;
 use futures::Stream;
 use std::collections::HashSet;
+use std::fmt;
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
@@ -28,22 +28,27 @@ use tokio_postgres::{AsyncMessage, Connection, Notification, Socket};
 /// DB notify event
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct NotifyEvent {
-    /// Resource type
-    pub res_type: ResType,
+    /// Notification channel
+    pub channel: String,
     /// Resource name
     pub name: Option<String>,
 }
 
-impl TryFrom<Notification> for NotifyEvent {
-    type Error = Error;
-
-    fn try_from(not: Notification) -> Result<Self> {
-        if let Ok(res_type) = ResType::try_from(not.channel()) {
-            let name =
-                (!not.payload().is_empty()).then(|| not.payload().to_string());
-            return Ok(NotifyEvent { res_type, name });
+impl fmt::Display for NotifyEvent {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match &self.name {
+            Some(name) => write!(f, "{} {}", self.channel, name),
+            None => write!(f, "{} (None)", self.channel),
         }
-        Err(Error::UnknownResource(not.channel().to_string()))
+    }
+}
+
+impl From<Notification> for NotifyEvent {
+    fn from(not: Notification) -> Self {
+        let channel = not.channel().to_string();
+        let name =
+            (!not.payload().is_empty()).then(|| not.payload().to_string());
+        NotifyEvent { channel, name }
     }
 }
 
@@ -107,14 +112,12 @@ pub async fn notify_events(
             if channels.insert(chan) {
                 let listen = format!("LISTEN {chan}");
                 client.execute(&listen, &[]).await?;
-                if let Ok(res_type) = ResType::try_from(chan) {
-                    let ne = NotifyEvent {
-                        res_type,
-                        name: None,
-                    };
-                    if let Err(e) = tx.send(ne) {
-                        log::warn!("Send notification: {e}");
-                    }
+                let ne = NotifyEvent {
+                    channel: chan.to_string(),
+                    name: None,
+                };
+                if let Err(e) = tx.send(ne) {
+                    log::warn!("Send notification: {e}");
                 }
             }
         }
