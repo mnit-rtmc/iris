@@ -124,6 +124,8 @@ pub async fn notify_events(
             }
         }
     }
+    // leak client so that it's not dropped
+    Box::leak(Box::new(client));
     // create a stream from channel receiver
     Ok(Box::pin(async_stream::stream! {
         while let Some(not) = rx.recv().await {
