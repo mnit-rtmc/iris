@@ -162,7 +162,10 @@ impl MsgData {
         log::info!("{:?} rendered in {:?}", file.path(), t.elapsed());
         let mut writer = file.writer().await?;
         match writer.write_all(&buf).await {
-            Ok(()) => Ok(()),
+            Ok(()) => {
+                writer.flush().await?;
+                file.commit().await
+            }
             Err(e) => {
                 let _ = file.rollback().await;
                 Err(e)?

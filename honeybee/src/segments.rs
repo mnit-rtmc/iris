@@ -502,8 +502,16 @@ impl Corridor {
         let json = serde_json::to_vec(&self.nodes)?;
         let file = AtomicFile::new(dir, &cor_name).await?;
         let mut writer = file.writer().await?;
-        writer.write_all(&json).await?;
-        Ok(())
+        match writer.write_all(&json).await {
+            Ok(()) => {
+                writer.flush().await?;
+                file.commit().await
+            }
+            Err(e) => {
+                let _ = file.rollback().await?;
+                Err(e)?
+            }
+        }
     }
 }
 
