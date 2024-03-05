@@ -18,7 +18,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Objects;
 
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -43,11 +43,11 @@ abstract public class OnvifProp extends ControllerProperty {
 	String user, pass;
 
 	/**
-	 * List of commands for multi-step operation
+	 * Command string for use in callback sendSoap()
 	 *
 	 * String[] is { "OpName", "param1", ... }
 	 */
-	List<String[]> cmds;
+	String[] cmd;
 
 	/** Logger method */
 	protected void log(String s) {
@@ -65,13 +65,13 @@ abstract public class OnvifProp extends ControllerProperty {
 			return false;
 
 		OnvifProp op = (OnvifProp) o;
-		return Objects.equals(cmds, op.cmds) && Objects.equals(url, op.url);
+		return Arrays.equals(cmd, op.cmd) && Objects.equals(url, op.url);
 	}
 
 	/** Build and send the SOAP messages */
 	public String sendSoap() {
 		// if no cmd items, nothing to do
-		if (cmds.size() < 1) {
+		if (cmd == null || cmd.length == 0) {
 			return "No cmd specified";
 		}
 
@@ -131,76 +131,82 @@ abstract public class OnvifProp extends ControllerProperty {
 
 		// if multi-step operations, send each operation
 		StringBuilder sb = new StringBuilder();
-		for (String[] c : cmds) {
-			switch (c[0]) {
-				case "ptz":
-					if (c.length < 4) {
-						sb.append("Error sending ptz message - missing pan, tilt, and/or zoom");
-						break;
-					}
-					sb.append(ptz.continuousMove(mediaProfile, Float.parseFloat(c[1]), Float.parseFloat(c[2]), Float.parseFloat(c[3])));
+		switch (cmd[0]) {
+			case "ptz":
+				if (cmd.length < 4) {
+					sb.append("Error sending ptz message - missing pan, tilt, and/or zoom");
 					break;
-				case "storepreset":
-					if (c.length < 2) {
-						sb.append("Error storing preset - missing name");
-						break;
-					}
-					if (c.length < 3)
-						sb.append(ptz.setPreset(mediaProfile, c[1]));
-					else
-						sb.append(ptz.setPreset(mediaProfile, c[1], c[2]));
+				}
+				sb.append(ptz.continuousMove(mediaProfile, Float.parseFloat(cmd[1]), Float.parseFloat(cmd[2]), Float.parseFloat(cmd[3])));
+				break;
+			case "storepreset":
+				if (cmd.length < 2) {
+					sb.append("Error storing preset - missing name");
 					break;
-				case "recallpreset":
-					if (c.length < 2) {
-						sb.append("Error recalling preset - missing name");
-						break;
-					}
-					sb.append(ptz.gotoPreset(mediaProfile, c[1]));
+				}
+				if (cmd.length < 3)
+					sb.append(ptz.setPreset(mediaProfile, cmd[1]));
+				else
+					sb.append(ptz.setPreset(mediaProfile, cmd[1], cmd[2]));
+				break;
+			case "recallpreset":
+				if (cmd.length < 2) {
+					sb.append("Error recalling preset - missing name");
 					break;
-				case "movefocus":
-					if (c.length < 2) {
-						sb.append("Error moving focus - missing amount");
-						break;
-					}
-					if (c[1].equals("0") || c[1].equals("0.0"))
-						sb.append(img.stop(videoSource));
-					else
-						sb.append(img.moveFocus(videoSource, Float.parseFloat(c[1])));
+				}
+				sb.append(ptz.gotoPreset(mediaProfile, cmd[1]));
+				break;
+			case "movefocus":
+				if (cmd.length < 2) {
+					sb.append("Error moving focus - missing amount");
 					break;
-				case "iris":
-					if (c.length < 2) {
-						sb.append("Error sending iris increment message - no value given");
-						break;
-					}
-					sb.append(img.incrementIris(videoSource, c[1]));
+				}
+				if (cmd[1].equals("0") || cmd[1].equals("0.0"))
+					sb.append(img.stop(videoSource));
+				else
+					sb.append(img.moveFocus(videoSource, Float.parseFloat(cmd[1])));
+				break;
+			case "iris":
+				if (cmd.length < 2) {
+					sb.append("Error sending iris increment message - no value given");
 					break;
-				case "wiper":
-					sb.append(ptz.wiperOneshot(mediaProfile));
+				}
+				sb.append(img.incrementIris(videoSource, cmd[1]));
+				break;
+			case "wiper":
+				sb.append(ptz.wiperOneshot(mediaProfile));
+				break;
+			case "autofocus":
+				if (cmd.length < 2) {
+					sb.append("Error sending autofocus message - no value given");
 					break;
-				case "autofocus":
-					if (c.length < 2) {
-						sb.append("Error sending autofocus message - no value given");
-						break;
-					}
-					sb.append(img.setFocus(videoSource, c[1]));
+				}
+				sb.append(img.setFocus(videoSource, cmd[1]));
+				break;
+			case "autoiris":
+				if (cmd.length < 2) {
+					sb.append("Error sending auto iris message - no value given");
 					break;
-				case "autoiris":
-					if (c.length < 2) {
-						sb.append("Error sending auto iris message - no value given");
-						break;
-					}
-					sb.append(img.setIris(videoSource, c[1]));
+				}
+				sb.append(img.setIris(videoSource, cmd[1]));
+				break;
+			case "autoirisfocus":
+				if (cmd.length < 2) {
+					sb.append("Error sending auto iris/focus message = no value given");
 					break;
-				case "reboot":
-					sb.append(dev.systemReboot());
-					break;
-				default:
-					sb.append("Unexpected cmd");
-					break;
-			}
-
-			sb.append("\n");
+				}
+				sb.append(img.setFocus(videoSource, cmd[1]));
+				sb.append(img.setIris(videoSource, cmd[1]));
+				break;
+			case "reboot":
+				sb.append(dev.systemReboot());
+				break;
+			default:
+				sb.append("Unexpected cmd");
+				break;
 		}
+
+		sb.append("\n");
 
 		return sb.toString();
 	}
