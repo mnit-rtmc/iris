@@ -85,7 +85,7 @@ pub enum Resource {
 }
 
 impl Resource {
-    /// Get iterator of all resource type variants
+    /// Get iterator of all resource variants
     pub fn iter() -> impl Iterator<Item = Resource> {
         use Resource::*;
         [
@@ -385,7 +385,7 @@ impl Resource {
         use Resource::*;
         match self {
             Rnode => query_one_node(client, segments, name).await,
-            Road => query_one_road(client, segments, name).await,
+            RoadFull => query_one_road(client, segments, name).await,
             _ => {
                 // FIXME: log something
                 Ok(())
@@ -405,7 +405,7 @@ impl Resource {
         use Resource::*;
         match self {
             Rnode => query_all_nodes(client, segments).await,
-            Road => query_all_roads(client, segments).await,
+            RoadFull => query_all_roads(client, segments).await,
             SignMessage => self.query_sign_msgs(client).await,
             _ => self.query_file(client, self.path()).await,
         }
