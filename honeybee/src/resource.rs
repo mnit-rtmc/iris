@@ -393,7 +393,7 @@ impl Resource {
             Rnode => query_one_node(client, segments, name).await,
             RoadFull => query_one_road(client, segments, name).await,
             _ => {
-                // FIXME: log something
+                log::warn!("query_one: {self:?} {name}");
                 Ok(())
             }
         }

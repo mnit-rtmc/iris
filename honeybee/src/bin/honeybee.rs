@@ -25,7 +25,7 @@ async fn main() -> Result<()> {
     let mut stream = listener::notify_events(&db).await?;
     let mut state = SegmentState::new();
     while let Some(ne) = stream.next().await {
-        // FIXME: add 300 ms delay...
+        // FIXME: add short delay (200 ms?)
         let mut client = db.client().await?;
         Resource::notify(&mut client, &mut state, ne).await?;
     }
