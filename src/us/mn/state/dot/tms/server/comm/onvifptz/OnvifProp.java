@@ -145,7 +145,10 @@ abstract public class OnvifProp extends ControllerProperty {
 						sb.append("Error storing preset - missing name");
 						break;
 					}
-					sb.append(ptz.setPreset(mediaProfile, c[1]));
+					if (c.length < 3)
+						sb.append(ptz.setPreset(mediaProfile, c[1]));
+					else
+						sb.append(ptz.setPreset(mediaProfile, c[1], c[2]));
 					break;
 				case "recallpreset":
 					if (c.length < 2) {

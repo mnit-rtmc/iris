@@ -45,10 +45,11 @@ public class PTZCommandProp extends OnvifProp {
 		});
 	}
 
-	/** Sets message to store preset */
+	/** Sets message to store preset { storepreset, token, name } */
 	public void addStorePreset(int p) {
 		cmds.add(new String[] {
 			"storepreset",
+			String.valueOf(p),
 			"Preset" + p
 		});
 	}
@@ -57,7 +58,7 @@ public class PTZCommandProp extends OnvifProp {
 	public void addRecallPreset(int p) {
 		cmds.add(new String[] {
 			"recallpreset",
-			"Preset" + p
+			String.valueOf(p)
 		});
 	}
 
