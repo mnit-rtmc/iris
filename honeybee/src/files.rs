@@ -6,7 +6,7 @@ use crate::error::Result;
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use tokio::fs::{create_dir_all, read_dir, remove_file, rename, File};
-use tokio::io::BufWriter;
+use tokio::io::{AsyncWriteExt, BufWriter};
 
 /// Make a PathBuf for a backup file
 fn backup_path(path: &Path) -> PathBuf {
@@ -44,6 +44,7 @@ impl AtomicFile {
     }
 
     /// Get file path
+    #[allow(unused)]
     pub fn path(&self) -> &Path {
         &self.path
     }
@@ -68,6 +69,21 @@ impl AtomicFile {
         log::trace!("AtomicFile::rollback: {path:?}");
         remove_file(path).await?;
         Ok(())
+    }
+
+    /// Write a buffer to the file
+    pub async fn write_buf(self, buf: &[u8]) -> Result<()> {
+        let mut writer = self.writer().await?;
+        match writer.write_all(buf).await {
+            Ok(()) => {
+                writer.flush().await?;
+                self.commit().await
+            }
+            Err(e) => {
+                let _ = self.rollback().await;
+                Err(e)?
+            }
+        }
     }
 }
 

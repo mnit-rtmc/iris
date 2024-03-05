@@ -13,14 +13,13 @@
 // GNU General Public License for more details.
 //
 use crate::error::{Error, Result};
-use crate::files::{AtomicFile, Cache};
+use crate::files::Cache;
 use ntcip::dms::{Dms, FontTable, GraphicTable};
 use rendzina::{load_font, load_graphic, SignConfig};
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
-use tokio::io::AsyncWriteExt;
 
 /// Sign message
 #[allow(unused)]
@@ -138,12 +137,12 @@ impl MsgData {
     }
 
     /// Render sign message .gif
-    async fn render_sign_msg(
-        &mut self,
+    fn render_sign_msg(
+        &self,
         msg: &SignMessage,
-        file: AtomicFile,
-    ) -> Result<()> {
-        log::trace!("render_sign_msg: {:?}", file.path());
+        name: &str,
+    ) -> Result<Option<Vec<u8>>> {
+        log::trace!("render_sign_msg: {name}");
         let t = Instant::now();
         let cfg = self.config(msg)?;
         let dms = Dms::builder()
@@ -156,21 +155,11 @@ impl MsgData {
         let mut buf = Vec::with_capacity(1024);
         if let Err(e) = rendzina::render(&mut buf, &dms, &msg.multi, None, None)
         {
-            log::warn!("{:?}, multi={} {e:?}", file.path(), msg.multi);
-            return Ok(());
+            log::warn!("{name}, {e:?} multi={}", msg.multi);
+            return Ok(None);
         };
-        log::info!("{:?} rendered in {:?}", file.path(), t.elapsed());
-        let mut writer = file.writer().await?;
-        match writer.write_all(&buf).await {
-            Ok(()) => {
-                writer.flush().await?;
-                file.commit().await
-            }
-            Err(e) => {
-                let _ = file.rollback().await;
-                Err(e)?
-            }
-        }
+        log::info!("{name} rendered in {:?}", t.elapsed());
+        Ok(Some(buf))
     }
 }
 
@@ -180,7 +169,7 @@ impl MsgData {
 pub async fn render_all() -> Result<()> {
     log::trace!("render_all");
     let dir = Path::new("");
-    let mut msg_data = MsgData::load(dir).await?;
+    let msg_data = MsgData::load(dir).await?;
     let mut path = PathBuf::new();
     path.push(dir);
     path.push("img");
@@ -191,9 +180,12 @@ pub async fn render_all() -> Result<()> {
         if cache.contains(&name) {
             cache.keep(&name);
         } else {
-            let file = cache.file(&name).await?;
-            msg_data.render_sign_msg(&sign_msg, file).await?;
+            if let Some(buf) = msg_data.render_sign_msg(&sign_msg, &name)? {
+                let file = cache.file(&name).await?;
+                file.write_buf(&buf).await?;
+            }
         }
     }
+    cache.clear().await;
     Ok(())
 }
