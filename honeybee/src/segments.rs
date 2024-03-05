@@ -489,7 +489,7 @@ impl Corridor {
                     self.order_nodes();
                 }
             }
-            None => log::error!("remove_node: {} not found", name),
+            None => log::error!("remove_node: {name} not found"),
         }
     }
 
@@ -709,11 +709,11 @@ impl SegmentState {
             Some(cor) => {
                 cor.remove_node(name, self.ordered);
                 if cor.nodes.is_empty() {
-                    log::debug!("removing corridor: {:?}", cid);
+                    log::debug!("removing corridor: {cid:?}");
                     self.corridors.remove(cid);
                 }
             }
-            None => log::error!("corridor ID not found {:?}", cid),
+            None => log::error!("corridor ID not found {cid:?}"),
         }
     }
 
@@ -721,7 +721,7 @@ impl SegmentState {
     fn update_corridor_node(&mut self, cid: &CorridorId, node: RNode) {
         match self.corridors.get_mut(cid) {
             Some(cor) => cor.update_node(node, self.ordered),
-            None => log::error!("corridor ID not found {:?}", cid),
+            None => log::error!("corridor ID not found {cid:?}"),
         }
     }
 
@@ -729,7 +729,7 @@ impl SegmentState {
     pub fn remove_node(&mut self, name: &str) {
         match self.node_cors.remove(name) {
             Some(ref cid) => self.remove_corridor_node(cid, name),
-            None => log::error!("corridor not found for node: {}", name),
+            None => log::error!("corridor not found for node: {name}"),
         }
     }
 

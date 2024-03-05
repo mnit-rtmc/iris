@@ -57,11 +57,11 @@ impl SignMessage {
 
 /// Load fonts from a JSON file
 async fn load_fonts(dir: &Path) -> Result<FontTable<256, 24>> {
-    log::trace!("load_fonts");
     let mut path = PathBuf::new();
     path.push(dir);
     path.push("api");
     path.push("tfon");
+    log::trace!("load_fonts {path:?}");
     let mut cache = Cache::new(&path, "tfon").await?;
     let mut fonts = FontTable::default();
     path.push("_placeholder_.tfon");
@@ -178,6 +178,7 @@ impl MsgData {
 ///
 /// * `dir` Output file directory.
 pub async fn render_all() -> Result<()> {
+    log::trace!("render_all");
     let dir = Path::new("");
     let mut msg_data = MsgData::load(dir).await?;
     let mut path = PathBuf::new();
