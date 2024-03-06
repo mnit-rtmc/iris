@@ -14,11 +14,17 @@
 //
 #![forbid(unsafe_code)]
 
-/// Result type
-pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
-
-pub mod fetcher;
+mod database;
+mod error;
 mod files;
+pub mod listener;
+mod query;
 mod resource;
+mod restype;
 mod segments;
 mod signmsg;
+
+pub use database::Database;
+pub use error::{Error, Result};
+pub use resource::Resource;
+pub use segments::SegmentState;

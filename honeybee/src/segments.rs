@@ -12,12 +12,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::error::Result;
 use crate::files::AtomicFile;
-use crate::Result;
 use mvt::{WebMercatorPos, Wgs84Pos};
 use pointy::Pt;
 use postgis::ewkb::{LineString, Point, Polygon};
-use postgres::Row;
 use serde::{Deserialize, Serialize, Serializer};
 use std::cmp::Ordering;
 use std::collections::hash_map::DefaultHasher;
@@ -25,7 +24,7 @@ use std::collections::HashMap;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::path::Path;
-use std::sync::mpsc::Receiver;
+use tokio_postgres::Row;
 
 /// Base segment scale factor
 const BASE_SCALE: f64 = 1.0 / 6.0;
@@ -78,18 +77,6 @@ pub struct RNode {
     speed_limit: i32,
 }
 
-/// Segment notification message
-pub enum SegMsg {
-    /// Update (or add) a Road
-    UpdateRoad(Road),
-    /// Update (or add) an RNode
-    UpdateNode(RNode),
-    /// Remove an RNode
-    RemoveNode(String),
-    /// Enable/disable ordering for all RNodes
-    Order(bool),
-}
-
 /// General direction of travel
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 enum TravelDir {
@@ -120,8 +107,6 @@ impl TravelDir {
 struct CorridorId {
     /// Name of corridor roadway
     roadway: String,
-    /// Corridor road abbreviation
-    abbrev: String,
     /// Travel direction of corridor
     travel_dir: TravelDir,
 }
@@ -167,7 +152,8 @@ struct Segments<'a> {
 }
 
 /// State of all segments
-struct SegmentState {
+#[derive(Default)]
+pub struct SegmentState {
     /// Mapping of roads
     roads: HashMap<String, Road>,
     /// Mapping of node names to corridor IDs
@@ -197,19 +183,6 @@ impl fmt::Display for CorridorId {
 }
 
 impl RNode {
-    /// SQL query for all RNodes
-    pub const SQL_ALL: &'static str =
-        "SELECT name, roadway, road_dir, location, lat, lon, transition, \
-                lanes, shift, active, station_id, speed_limit \
-        FROM r_node_view";
-
-    /// SQL query for one RNode
-    pub const SQL_ONE: &'static str =
-        "SELECT name, roadway, road_dir, location, lat, lon, transition, \
-                lanes, shift, active, station_id, speed_limit \
-        FROM r_node_view n \
-        WHERE n.name = $1";
-
     /// Create an RNode from a result Row
     pub fn from_row(row: &Row) -> Self {
         RNode {
@@ -228,18 +201,13 @@ impl RNode {
         }
     }
 
-    /// Get the corridor ID
-    fn cor_id(&self, roads: &HashMap<String, Road>) -> Option<CorridorId> {
+    /// Get the RNode corridor ID
+    fn cor_id(&self) -> Option<CorridorId> {
         match (&self.roadway, &self.road_dir) {
             (Some(roadway), Some(road_dir)) => {
                 let roadway = roadway.clone();
-                let abbrev = roads
-                    .get(&roadway)
-                    .map(|r| r.abbrev.clone())
-                    .unwrap_or_else(|| "".to_owned());
                 TravelDir::from_str(road_dir).map(|travel_dir| CorridorId {
                     roadway,
-                    abbrev,
                     travel_dir,
                 })
             }
@@ -285,19 +253,6 @@ impl RNode {
 }
 
 impl Road {
-    /// SQL query for all Roads
-    pub const SQL_ALL: &'static str =
-        "SELECT name, abbrev, r_class, direction, scale \
-        FROM iris.road \
-        JOIN iris.road_class ON r_class = id";
-
-    /// SQL query for one Road
-    pub const SQL_ONE: &'static str =
-        "SELECT name, abbrev, r_class, direction, scale \
-        FROM iris.road \
-        JOIN iris.road_class ON r_class = id \
-        WHERE name = $1";
-
     /// Create a Road from a result Row
     pub fn from_row(row: &Row) -> Self {
         Road {
@@ -318,8 +273,8 @@ impl Corridor {
         r_class: i16,
         scale: f64,
     ) -> Self {
-        log::debug!("Corridor::new {}", &cor_id);
-        let nodes = vec![];
+        log::trace!("Corridor::new {cor_id}");
+        let nodes = Vec::new();
         let count = 0;
         Corridor {
             cor_id,
@@ -405,7 +360,7 @@ impl Corridor {
             }
             None => 0,
         };
-        log::debug!(
+        log::trace!(
             "order_nodes: {}, count: {} of {}",
             self.cor_id,
             self.count,
@@ -433,9 +388,36 @@ impl Corridor {
             .collect()
     }
 
+    /// Create normal vectors for a slice of points
+    fn create_norms(&self, pts: &[Pt<f64>]) -> Vec<Pt<f64>> {
+        let mut norms = Vec::with_capacity(pts.len());
+        for i in 0..pts.len() {
+            let upstream = vector_upstream(pts, i);
+            let downstream = vector_downstream(pts, i);
+            let v0 = match (upstream, downstream) {
+                (Some(up), Some(down)) => (up + down).normalize(),
+                (Some(up), None) => up,
+                (None, Some(down)) => down,
+                (None, None) => self.travel_dir(),
+            };
+            norms.push(v0.left());
+        }
+        norms
+    }
+
+    /// Get corridor travel direction
+    fn travel_dir(&self) -> Pt<f64> {
+        match self.cor_id.travel_dir {
+            TravelDir::Nb => Pt::new(0.0, 1.0),
+            TravelDir::Sb => Pt::new(0.0, -1.0),
+            TravelDir::Eb => Pt::new(1.0, 0.0),
+            TravelDir::Wb => Pt::new(-1.0, 0.0),
+        }
+    }
+
     /// Create meter-points for corridor nodes
     fn create_meterpoints(&self) -> Vec<f64> {
-        let mut meters = vec![];
+        let mut meters = Vec::new();
         let mut meter = 0.0;
         let mut ppos: Option<Wgs84Pos> = None;
         for pos in self.nodes.iter().filter_map(|n| n.pos()) {
@@ -450,8 +432,8 @@ impl Corridor {
 
     /// Add a node to corridor
     fn add_node(&mut self, node: RNode, ordered: bool) {
-        log::debug!(
-            "add_node {} to {} ({} + 1)",
+        log::trace!(
+            "Corridor::add_node {} to {} ({} + 1)",
             &node.name,
             &self.cor_id,
             self.nodes.len()
@@ -465,8 +447,8 @@ impl Corridor {
 
     /// Update a node
     fn update_node(&mut self, node: RNode, ordered: bool) {
-        log::debug!(
-            "update_node {} to {} ({})",
+        log::trace!(
+            "Corridor::update_node {} to {} ({})",
             &node.name,
             &self.cor_id,
             self.nodes.len()
@@ -487,9 +469,8 @@ impl Corridor {
 
     /// Remove a node
     fn remove_node(&mut self, name: &str, ordered: bool) {
-        log::debug!(
-            "remove_node {} from {} ({} - 1)",
-            &name,
+        log::trace!(
+            "Corridor::remove_node {name} from {} ({} - 1)",
             &self.cor_id,
             self.nodes.len()
         );
@@ -500,19 +481,26 @@ impl Corridor {
                     self.order_nodes();
                 }
             }
-            None => log::error!("remove_node: {} not found", name),
+            None => log::error!("remove_node: {name} not found"),
         }
     }
 
     /// Write corridor nodes to a file
-    fn write_file(&self) -> Result<()> {
+    async fn write_file(&self, roads: &HashMap<String, Road>) -> Result<()> {
+        let abbrev = roads
+            .get(&self.cor_id.roadway)
+            .map(|r| r.abbrev.clone())
+            .unwrap_or_else(|| "".to_owned());
+        if abbrev.is_empty() {
+            log::warn!("write_file no 'abbrev' for {}", self.cor_id.roadway);
+            return Ok(());
+        }
+        let cor_name = format!("{}_{}", abbrev, self.cor_id.travel_dir);
+        log::trace!("write_file {cor_name}");
+        let json = serde_json::to_vec(&self.nodes)?;
         let dir = Path::new("corridors");
-        let cor_name =
-            format!("{}_{}", self.cor_id.abbrev, self.cor_id.travel_dir);
-        let file = AtomicFile::new(dir, &cor_name)?;
-        let writer = file.writer()?;
-        serde_json::to_writer(writer, &self.nodes)?;
-        Ok(())
+        let file = AtomicFile::new(dir, &cor_name).await?;
+        file.write_buf(&json).await
     }
 }
 
@@ -520,7 +508,7 @@ impl<'a> Segments<'a> {
     /// Create corridor segments
     fn new(cor: &'a Corridor, pts: Vec<Pt<f64>>) -> Self {
         let cor_name = cor.cor_id.to_string();
-        let norms = create_norms(&pts);
+        let norms = cor.create_norms(&pts);
         let meters = cor.create_meterpoints();
         Segments {
             cor,
@@ -542,7 +530,7 @@ impl<'a> Segments<'a> {
     }
 
     /// Create segments for one zoom level
-    fn create_segments_zoom(&self, zoom: i32) -> crate::Result<()> {
+    fn create_segments_zoom(&self, zoom: i32) -> Result<()> {
         let o_scale = self.scale_zoom(OUTER_SCALE, zoom);
         let i_scale = self.scale_zoom(BASE_SCALE, zoom);
         let mut poly = Vec::<(Pt<f64>, Pt<f64>)>::with_capacity(16);
@@ -592,7 +580,7 @@ impl<'a> Segments<'a> {
 
     /// Create polygon for way column
     fn create_way(&self, poly: &[(Pt<f64>, Pt<f64>)]) -> Polygon {
-        let mut points = vec![];
+        let mut points = Vec::new();
         for (vtx, _) in poly {
             points.push(Point::new(vtx.x, vtx.y, None));
         }
@@ -625,23 +613,6 @@ fn road_class_zoom(r_class: i16, zoom: i32) -> bool {
     }
 }
 
-/// Create normal vectors for a slice of points
-fn create_norms(pts: &[Pt<f64>]) -> Vec<Pt<f64>> {
-    let mut norms = vec![];
-    for i in 0..pts.len() {
-        let upstream = vector_upstream(pts, i);
-        let downstream = vector_downstream(pts, i);
-        let v0 = match (upstream, downstream) {
-            (Some(up), Some(down)) => (up + down).normalize(),
-            (Some(up), None) => up,
-            (None, Some(down)) => down,
-            (None, None) => todo!("use corridor direction"),
-        };
-        norms.push(v0.left());
-    }
-    norms
-}
-
 /// Get vector from upstream point to current point
 fn vector_upstream(pts: &[Pt<f64>], i: usize) -> Option<Pt<f64>> {
     let current = pts[i];
@@ -666,13 +637,8 @@ fn vector_downstream(pts: &[Pt<f64>], i: usize) -> Option<Pt<f64>> {
 
 impl SegmentState {
     /// Create a new segment state
-    fn new() -> Self {
-        SegmentState {
-            roads: HashMap::default(),
-            corridors: HashMap::default(),
-            node_cors: HashMap::default(),
-            ordered: false,
-        }
+    pub fn new() -> Self {
+        Self::default()
     }
 
     /// Get road class
@@ -689,8 +655,8 @@ impl SegmentState {
     }
 
     /// Update (or add) a node
-    fn update_node(&mut self, node: RNode) {
-        match node.cor_id(&self.roads) {
+    pub fn update_node(&mut self, node: RNode) {
+        match node.cor_id() {
             Some(ref cor_id) => {
                 match self.node_cors.insert(node.name.clone(), cor_id.clone()) {
                     None => self.add_corridor_node(cor_id, node),
@@ -732,11 +698,11 @@ impl SegmentState {
             Some(cor) => {
                 cor.remove_node(name, self.ordered);
                 if cor.nodes.is_empty() {
-                    log::debug!("removing corridor: {:?}", cid);
+                    log::debug!("removing corridor: {cid:?}");
                     self.corridors.remove(cid);
                 }
             }
-            None => log::error!("corridor ID not found {:?}", cid),
+            None => log::error!("corridor ID not found {cid:?}"),
         }
     }
 
@@ -744,26 +710,26 @@ impl SegmentState {
     fn update_corridor_node(&mut self, cid: &CorridorId, node: RNode) {
         match self.corridors.get_mut(cid) {
             Some(cor) => cor.update_node(node, self.ordered),
-            None => log::error!("corridor ID not found {:?}", cid),
+            None => log::error!("corridor ID not found {cid:?}"),
         }
     }
 
     /// Remove a node
-    fn remove_node(&mut self, name: &str) {
+    pub fn remove_node(&mut self, name: &str) {
         match self.node_cors.remove(name) {
             Some(ref cid) => self.remove_corridor_node(cid, name),
-            None => log::error!("corridor not found for node: {}", name),
+            None => log::error!("corridor not found for node: {name}"),
         }
     }
 
     /// Order all corridors
-    fn set_ordered(&mut self, ordered: bool) -> Result<()> {
+    pub async fn set_ordered(&mut self, ordered: bool) -> Result<()> {
         self.ordered = ordered;
         if ordered {
             for cor in self.corridors.values_mut() {
                 cor.order_nodes();
                 cor.create_segments()?;
-                cor.write_file()?;
+                cor.write_file(&self.roads).await?;
             }
             // FIXME: write segment loam layer
         }
@@ -771,8 +737,8 @@ impl SegmentState {
     }
 
     /// Update a road class or scale
-    fn update_road(&mut self, road: Road) -> Result<()> {
-        log::debug!("update_road {}", road.name);
+    pub async fn update_road(&mut self, road: Road) -> Result<()> {
+        log::trace!("update_road {}", road.name);
         let name = road.name.clone();
         self.roads.insert(name.clone(), road);
         if self.ordered {
@@ -782,25 +748,11 @@ impl SegmentState {
                     cor.scale = scale;
                     cor.order_nodes();
                     cor.create_segments()?;
-                    cor.write_file()?;
+                    cor.write_file(&self.roads).await?;
                 }
             }
             // FIXME: write segment loam layer
         }
         Ok(())
-    }
-}
-
-/// Receive segment messages and update corridor segments
-pub fn receive_nodes(receiver: Receiver<SegMsg>) -> Result<()> {
-    let mut state = SegmentState::new();
-    loop {
-        match receiver.recv()? {
-            SegMsg::UpdateRoad(road) => state.update_road(road)?,
-            SegMsg::UpdateNode(node) => state.update_node(node),
-            SegMsg::RemoveNode(name) => state.remove_node(&name),
-            SegMsg::Order(ordered) => state.set_ordered(ordered)?,
-        }
-        log::debug!("total corridors: {}", state.corridors.len());
     }
 }

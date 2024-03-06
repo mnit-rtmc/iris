@@ -12,1009 +12,549 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::error::Result;
 use crate::files::AtomicFile;
-use crate::segments::{RNode, Road, SegMsg};
+use crate::listener::NotifyEvent;
+use crate::query;
+use crate::restype::ResType;
+use crate::segments::{RNode, Road, SegmentState};
 use crate::signmsg::render_all;
-use crate::Result;
-use postgres::Client;
-use std::collections::HashSet;
-use std::io::Write;
+use futures::{pin_mut, TryStreamExt};
 use std::path::Path;
-use std::sync::mpsc::Sender;
 use std::time::Instant;
+use tokio::io::{AsyncWrite, AsyncWriteExt};
+use tokio_postgres::Client;
 
-/// A resource which can be fetched from a database connection.
+/// A resource which can be queried from a database connection.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-enum Resource {
-    /// RNode resource.
-    RNode(),
-
-    /// Road resource.
-    Road(),
-
-    /// Simple file resource.
-    ///
-    /// * File name.
-    /// * Listen channel.
-    /// * SQL query.
-    Simple(&'static str, Option<&'static str>, &'static str),
-
-    /// Sign message resource.
-    ///
-    /// * SQL query.
-    SignMsg(&'static str),
-}
-
-/// Camera resource
-const CAMERA_RES: Resource = Resource::Simple(
-    "api/camera",
-    Some("camera"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT c.name, location, controller, notes, cam_num, publish \
-      FROM iris.camera c \
-      LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
-      ORDER BY cam_num, c.name\
-    ) r",
-);
-
-/// Public Camera resource
-const CAMERA_PUB_RES: Resource = Resource::Simple(
-    "camera_pub",
-    Some("camera"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, publish, streamable, roadway, road_dir, cross_street, \
-             location, lat, lon, ARRAY(\
-               SELECT view_num \
-               FROM iris.encoder_stream \
-               WHERE encoder_type = c.encoder_type \
-               AND view_num IS NOT NULL \
-               ORDER BY view_num\
-             ) AS views \
-      FROM camera_view c \
-      ORDER BY name\
-    ) r",
-);
-
-/// Gate arm resource
-const GATE_ARM_RES: Resource = Resource::Simple(
-    "api/gate_arm",
-    Some("gate_arm"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT g.name, location, g.controller, g.notes, g.arm_state \
-      FROM iris.gate_arm g \
-      LEFT JOIN iris.gate_arm_array ga ON g.ga_array = ga.name \
-      LEFT JOIN geo_loc_view gl ON ga.geo_loc = gl.name \
-      ORDER BY name\
-    ) r",
-);
-
-/// Gate arm array resource
-const GATE_ARM_ARRAY_RES: Resource = Resource::Simple(
-    "api/gate_arm_array",
-    Some("gate_arm_array"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT ga.name, location, notes, arm_state, interlock \
-      FROM iris.gate_arm_array ga \
-      LEFT JOIN geo_loc_view gl ON ga.geo_loc = gl.name \
-      ORDER BY ga.name\
-    ) r",
-);
-
-/// GPS resource
-const GPS_RES: Resource = Resource::Simple(
-    "api/gps",
-    Some("gps"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, controller, notes \
-      FROM iris.gps \
-      ORDER BY name\
-    ) r",
-);
-
-/// LCS array resource
-const LCS_ARRAY_RES: Resource = Resource::Simple(
-    "api/lcs_array",
-    Some("lcs_array"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, notes, lcs_lock \
-      FROM iris.lcs_array \
-      ORDER BY name\
-    ) r",
-);
-
-/// LCS indication resource
-const LCS_INDICATION_RES: Resource = Resource::Simple(
-    "api/lcs_indication",
-    Some("lcs_indication"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, controller, lcs, indication \
-      FROM iris.lcs_indication \
-      ORDER BY name\
-    ) r",
-);
-
-/// Ramp meter resource
-const RAMP_METER_RES: Resource = Resource::Simple(
-    "api/ramp_meter",
-    Some("ramp_meter"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT m.name, location, controller, notes \
-      FROM iris.ramp_meter m \
-      LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
-      ORDER BY m.name\
-    ) r",
-);
-
-/// Tag reader resource
-const TAG_READER_RES: Resource = Resource::Simple(
-    "api/tag_reader",
-    Some("tag_reader"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT t.name, location, controller, notes \
-      FROM iris.tag_reader t \
-      LEFT JOIN geo_loc_view gl ON t.geo_loc = gl.name \
-      ORDER BY t.name\
-    ) r",
-);
-
-/// Video monitor resource
-const VIDEO_MONITOR_RES: Resource = Resource::Simple(
-    "api/video_monitor",
-    Some("video_monitor"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, mon_num, controller, notes \
-      FROM iris.video_monitor \
-      ORDER BY mon_num, name\
-    ) r",
-);
-
-/// Flow stream resource
-const FLOW_STREAM_RES: Resource = Resource::Simple(
-    "api/flow_stream",
-    Some("flow_stream"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, controller \
-      FROM iris.flow_stream \
-      ORDER BY name\
-    ) r",
-);
-
-/// Detector resource
-const DETECTOR_RES: Resource = Resource::Simple(
-    "api/detector",
-    Some("detector"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, label, controller, notes \
-      FROM detector_view \
-      ORDER BY regexp_replace(name, '[0-9]', '', 'g'), \
-              (regexp_replace(name, '[^0-9]', '', 'g') || '0')::INTEGER\
-    ) r",
-);
-
-/// Public Detector resource
-const DETECTOR_PUB_RES: Resource = Resource::Simple(
-    "detector_pub",
-    Some("detector"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, r_node, cor_id, lane_number, lane_code, field_length \
-      FROM detector_view\
-    ) r",
-);
-
-/// DMS resource
-const DMS_RES: Resource = Resource::Simple(
-    "api/dms",
-    Some("dms"),
-    "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
-      SELECT d.name, location, msg_current, \
-             NULLIF(char_length(status->>'faults') > 0, false) AS has_faults, \
-             NULLIF(notes, '') AS notes, hashtags, controller \
-      FROM iris.dms d \
-      LEFT JOIN geo_loc_view gl ON d.geo_loc = gl.name \
-      LEFT JOIN (\
-        SELECT dms, string_agg(hashtag, ' ' ORDER BY hashtag) AS hashtags \
-        FROM iris.dms_hashtag \
-        GROUP BY dms\
-      ) h ON d.name = h.dms \
-      ORDER BY d.name\
-    ) r",
-);
-
-/// Public DMS resource
-const DMS_PUB_RES: Resource = Resource::Simple(
-    "dms_pub",
-    Some("dms"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, sign_config, sign_detail, roadway, road_dir, \
-             cross_street, location, lat, lon \
-      FROM dms_view \
-      ORDER BY name\
-    ) r",
-);
-
-/// DMS status resource
-///
-/// NOTE: the `sources` attribute is deprecated,
-///       but required by external systems (for now)
-const DMS_STAT_RES: Resource = Resource::Simple(
-    "dms_message",
-    Some("dms"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, msg_current, \
-             replace(substring(msg_owner FROM 'IRIS; ([^;]*).*'), '+', ', ') \
-             AS sources, failed, duration, expire_time \
-      FROM dms_message_view WHERE condition = 'Active' \
-      ORDER BY name\
-    ) r",
-);
-
-/// Font list resource
-const FONT_LIST_RES: Resource = Resource::Simple(
-    "api/font",
-    None,
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT f_number AS font_number, name \
-      FROM iris.font ORDER BY f_number\
-    ) r",
-);
-
-/// Graphic list resource
-const GRAPHIC_LIST_RES: Resource = Resource::Simple(
-    "api/graphic",
-    None,
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT g_number AS number, 'G' || g_number AS name \
-      FROM iris.graphic \
-      WHERE g_number < 256 \
-      ORDER BY number\
-    ) r",
-);
-
-/// Message line resource
-const MSG_LINE_RES: Resource = Resource::Simple(
-    "api/msg_line",
-    Some("msg_line"),
-    "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
-      SELECT name, msg_pattern, line, multi, restrict_hashtag \
-      FROM iris.msg_line \
-      ORDER BY msg_pattern, line, rank, multi, restrict_hashtag\
-    ) r",
-);
-
-/// Message pattern resource
-const MSG_PATTERN_RES: Resource = Resource::Simple(
-    "api/msg_pattern",
-    Some("msg_pattern"),
-    "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
-      SELECT name, multi, compose_hashtag \
-      FROM iris.msg_pattern \
-      ORDER BY name\
-    ) r",
-);
-
-/// Word resource
-const WORD_RES: Resource = Resource::Simple(
-    "api/word",
-    Some("word"),
-    "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
-      SELECT name, abbr, allowed \
-      FROM iris.word \
-      ORDER BY name\
-    ) r",
-);
-
-/// Incident resource
-const INCIDENT_RES: Resource = Resource::Simple(
-    "incident",
-    Some("incident"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, event_date, description, road, direction, lane_type, \
-             impact, confirmed, camera, detail, replaces, lat, lon \
-      FROM incident_view \
-      WHERE cleared = false\
-    ) r",
-);
-
-/// RNode resource
-const R_NODE_RES: Resource = Resource::RNode();
-
-/// Road resource
-const ROAD_RES: Resource = Resource::Road();
-
-/// Alarm resource
-const ALARM_RES: Resource = Resource::Simple(
-    "api/alarm",
-    Some("alarm"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, description, controller, state \
-      FROM iris.alarm \
-      ORDER BY description\
-    ) r",
-);
-
-/// Beacon state LUT resource
-const BEACON_STATE_RES: Resource = Resource::Simple(
-    "beacon_state",
-    None,
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT id, description \
-      FROM iris.beacon_state \
-      ORDER BY id\
-    ) r",
-);
-
-/// Beacon resource
-const BEACON_RES: Resource = Resource::Simple(
-    "api/beacon",
-    Some("beacon"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT b.name, location, controller, message, notes, state \
-      FROM iris.beacon b \
-      LEFT JOIN geo_loc_view gl ON b.geo_loc = gl.name \
-      ORDER BY name\
-    ) r",
-);
-
-/// Lane marking resource
-const LANE_MARKING_RES: Resource = Resource::Simple(
-    "api/lane_marking",
-    Some("lane_marking"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT m.name, location, controller, notes, deployed \
-      FROM iris.lane_marking m \
-      LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
-      ORDER BY name\
-    ) r",
-);
-
-/// Cabinet style resource
-const CABINET_STYLE_RES: Resource = Resource::Simple(
-    "api/cabinet_style",
-    Some("cabinet_style"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name \
-      FROM iris.cabinet_style \
-      ORDER BY name\
-    ) r",
-);
-
-/// Comm protocol LUT resource
-const COMM_PROTOCOL_RES: Resource = Resource::Simple(
-    "comm_protocol",
-    None,
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT id, description \
-      FROM iris.comm_protocol \
-      ORDER BY description\
-    ) r",
-);
-
-/// Comm configuration resource
-const COMM_CONFIG_RES: Resource = Resource::Simple(
-    "api/comm_config",
-    Some("comm_config"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, description \
-      FROM iris.comm_config \
-      ORDER BY description\
-    ) r",
-);
-
-/// Comm link resource
-const COMM_LINK_RES: Resource = Resource::Simple(
-    "api/comm_link",
-    Some("comm_link"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, description, uri, comm_config, poll_enabled, connected \
-      FROM iris.comm_link \
-      ORDER BY regexp_replace(name, '[0-9]', '', 'g'), \
-              (regexp_replace(name, '[^0-9]', '', 'g') || '0')::INTEGER\
-    ) r",
-);
-
-/// Controller condition LUT resource
-const CONDITION_RES: Resource = Resource::Simple(
-    "condition",
-    None,
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT id, description \
-      FROM iris.condition \
-      ORDER BY description\
-    ) r",
-);
-
-/// Direction LUT resource
-const DIRECTION_RES: Resource = Resource::Simple(
-    "direction",
-    None,
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT id, direction, dir \
-      FROM iris.direction \
-      ORDER BY id\
-    ) r",
-);
-
-/// Roadway resource
-const ROADWAY_RES: Resource = Resource::Simple(
-    "api/road",
-    Some("road$1"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, abbrev, r_class, direction \
-      FROM iris.road \
-      ORDER BY name\
-    ) r",
-);
-
-/// Road modifier LUT resource
-const ROAD_MODIFIER_RES: Resource = Resource::Simple(
-    "road_modifier",
-    None,
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT id, modifier, mod AS md \
-      FROM iris.road_modifier \
-      ORDER BY id\
-    ) r",
-);
-
-/// Gate arm interlock LUT resource
-const GATE_ARM_INTERLOCK_RES: Resource = Resource::Simple(
-    "gate_arm_interlock",
-    None,
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT id, description \
-      FROM iris.gate_arm_interlock \
-      ORDER BY id\
-    ) r",
-);
-
-/// Gate arm state LUT resource
-const GATE_ARM_STATE_RES: Resource = Resource::Simple(
-    "gate_arm_state",
-    None,
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT id, description \
-      FROM iris.gate_arm_state \
-      ORDER BY id\
-    ) r",
-);
-
-/// Lane use indication LUT resource
-const LANE_USE_INDICATION_RES: Resource = Resource::Simple(
-    "lane_use_indication",
-    None,
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT id, description \
-      FROM iris.lane_use_indication \
-      ORDER BY id\
-    ) r",
-);
-
-/// LCS lock LUT resource
-const LCS_LOCK_RES: Resource = Resource::Simple(
-    "lcs_lock",
-    None,
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT id, description \
-      FROM iris.lcs_lock \
-      ORDER BY id\
-    ) r",
-);
-
-/// Resource type LUT resource
-const RESOURCE_TYPE_RES: Resource = Resource::Simple(
-    "resource_type",
-    None,
-    "SELECT to_json(r.name)::text FROM (\
-      SELECT name \
-      FROM iris.resource_type \
-      ORDER BY name\
-    ) r",
-);
-
-/// Controller resource
-const CONTROLLER_RES: Resource = Resource::Simple(
-    "api/controller",
-    Some("controller"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT c.name, location, comm_link, drop_id, cabinet_style, condition, \
-             notes, setup, fail_time \
-      FROM iris.controller c \
-      LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
-      ORDER BY COALESCE(regexp_replace(comm_link, '[0-9]', '', 'g'), ''), \
-              (regexp_replace(comm_link, '[^0-9]', '', 'g') || '0')::INTEGER, \
-               drop_id\
-    ) r",
-);
-
-/// Weather sensor resource
-const WEATHER_SENSOR_RES: Resource = Resource::Simple(
-    "api/weather_sensor",
-    Some("weather_sensor"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT ws.name, site_id, alt_id, location, controller, notes \
-      FROM iris.weather_sensor ws \
-      LEFT JOIN geo_loc_view gl ON ws.geo_loc = gl.name \
-      ORDER BY name\
-    ) r",
-);
-
-/// RWIS resource
-const RWIS_RES: Resource = Resource::Simple(
-    "rwis",
-    Some("weather_sensor"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT ws.name, location, lat, lon, settings, sample, sample_time \
-      FROM iris.weather_sensor ws \
-      LEFT JOIN geo_loc_view gl ON ws.geo_loc = gl.name \
-      ORDER BY name\
-    ) r",
-);
-
-/// Modem resource
-const MODEM_RES: Resource = Resource::Simple(
-    "api/modem",
-    Some("modem"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, enabled \
-      FROM iris.modem \
-      ORDER BY name\
-    ) r",
-);
-
-/// Permission resource
-const PERMISSION_RES: Resource = Resource::Simple(
-    "api/permission",
-    Some("permission"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT id, role, resource_n, hashtag, access_n \
-      FROM iris.permission \
-      ORDER BY role, resource_n, id\
-    ) r",
-);
-
-/// Role resource
-const ROLE_RES: Resource = Resource::Simple(
-    "api/role",
-    Some("role"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, enabled \
-      FROM iris.role \
-      ORDER BY name\
-    ) r",
-);
-
-/// User resource
-const USER_RES: Resource = Resource::Simple(
-    "api/user",
-    Some("i_user"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, full_name, role, enabled \
-      FROM iris.i_user \
-      ORDER BY name\
-    ) r",
-);
-
-/// Sign configuration resource
-const SIGN_CONFIG_RES: Resource = Resource::Simple(
-    "api/sign_config",
-    Some("sign_config"),
-    "SELECT json_strip_nulls(row_to_json(r))::text FROM (\
-      SELECT name, face_width, face_height, border_horiz, border_vert, \
-             pitch_horiz, pitch_vert, pixel_width, pixel_height, \
-             char_width, char_height, monochrome_foreground, \
-             monochrome_background, color_scheme, default_font, \
-             module_width, module_height \
-      FROM sign_config_view\
-    ) r",
-);
-
-/// Sign detail resource
-const SIGN_DETAIL_RES: Resource = Resource::Simple(
-    "api/sign_detail",
-    Some("sign_detail"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, dms_type, portable, technology, sign_access, legend, \
-             beacon_type, hardware_make, hardware_model, software_make, \
-             software_model, supported_tags, max_pages, max_multi_len, \
-             beacon_activation_flag, pixel_service_flag \
-      FROM sign_detail_view\
-    ) r",
-);
-
-/// Sign message resource
-const SIGN_MSG_RES: Resource = Resource::SignMsg(
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT name, sign_config, incident, multi, msg_owner, flash_beacon, \
-             msg_priority, duration \
-      FROM sign_message_view \
-      ORDER BY name\
-    ) r",
-);
-
-/// Public System attribute resource
-const SYSTEM_ATTRIBUTE_PUB_RES: Resource = Resource::Simple(
-    "system_attribute_pub",
-    Some("system_attribute"),
-    "SELECT jsonb_object_agg(name, value)::text \
-      FROM iris.system_attribute \
-      WHERE name LIKE 'dms\\_%' OR name LIKE 'map\\_%'",
-);
-
-/// Static parking area resource
-const TPIMS_STAT_RES: Resource = Resource::Simple(
-    "TPIMS_static",
-    Some("parking_area"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT site_id AS \"siteId\", \
-             to_char(time_stamp_static AT TIME ZONE 'UTC', \
-                     'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
-             relevant_highway AS \"relevantHighway\", \
-             reference_post AS \"referencePost\", exit_id AS \"exitID\", \
-             road_dir AS \"directionOfTravel\", facility_name AS name, \
-             json_build_object('latitude', lat, 'longitude', lon, \
-             'streetAdr', street_adr, 'city', city, 'state', state, \
-             'zip', zip, 'timeZone', time_zone) AS location, \
-             ownership, capacity, \
-             string_to_array(amenities, ', ') AS amenities, \
-             array_remove(ARRAY[camera_image_base_url || camera_1, \
-             camera_image_base_url || camera_2, \
-             camera_image_base_url || camera_3], NULL) AS images, \
-             ARRAY[]::text[] AS logos \
-      FROM parking_area_view\
-    ) r",
-);
-
-/// Dynamic parking area resource
-const TPIMS_DYN_RES: Resource = Resource::Simple(
-    "TPIMS_dynamic",
-    Some("parking_area$1"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT site_id AS \"siteId\", \
-             to_char(time_stamp AT TIME ZONE 'UTC', \
-                     'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
-             to_char(time_stamp_static AT TIME ZONE 'UTC', \
-                     'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStampStatic\", \
-             reported_available AS \"reportedAvailable\", \
-             trend, open, trust_data AS \"trustData\", capacity \
-      FROM parking_area_view\
-    ) r",
-);
-
-/// Archive parking area resource
-const TPIMS_ARCH_RES: Resource = Resource::Simple(
-    "TPIMS_archive",
-    Some("parking_area$1"),
-    "SELECT row_to_json(r)::text FROM (\
-      SELECT site_id AS \"siteId\",
-             to_char(time_stamp AT TIME ZONE 'UTC', \
-                     'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
-             to_char(time_stamp_static AT TIME ZONE 'UTC', \
-                     'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStampStatic\", \
-             reported_available AS \"reportedAvailable\", \
-             trend, open, trust_data AS \"trustData\", capacity, \
-             last_verification_check AS \"lastVerificationCheck\", \
-             verification_check_amplitude AS \"verificationCheckAmplitude\", \
-             low_threshold AS \"lowThreshold\", \
-             true_available AS \"trueAvailable\" \
-      FROM parking_area_view\
-    ) r",
-);
-
-/// All defined resources
-const ALL: &[Resource] = &[
-    SYSTEM_ATTRIBUTE_PUB_RES, // System attributes must be loaded first
-    ROAD_RES,                 // Roads must be loaded before R_Nodes
-    ALARM_RES,
-    BEACON_STATE_RES,
-    BEACON_RES,
-    LANE_MARKING_RES,
-    CABINET_STYLE_RES,
-    COMM_PROTOCOL_RES,
-    COMM_CONFIG_RES,
-    COMM_LINK_RES,
-    CONDITION_RES,
-    DIRECTION_RES,
-    ROADWAY_RES,
-    ROAD_MODIFIER_RES,
-    GATE_ARM_INTERLOCK_RES,
-    GATE_ARM_STATE_RES,
-    LANE_USE_INDICATION_RES,
-    LCS_LOCK_RES,
-    RESOURCE_TYPE_RES,
-    CONTROLLER_RES,
-    WEATHER_SENSOR_RES,
-    RWIS_RES,
-    MODEM_RES,
-    PERMISSION_RES,
-    ROLE_RES,
-    USER_RES,
-    CAMERA_RES,
-    CAMERA_PUB_RES,
-    GATE_ARM_RES,
-    GATE_ARM_ARRAY_RES,
-    GPS_RES,
-    LCS_ARRAY_RES,
-    LCS_INDICATION_RES,
-    RAMP_METER_RES,
-    TAG_READER_RES,
-    VIDEO_MONITOR_RES,
-    FLOW_STREAM_RES,
-    DMS_RES,
-    DMS_PUB_RES,
-    DMS_STAT_RES,
-    FONT_LIST_RES,
-    GRAPHIC_LIST_RES,
-    MSG_LINE_RES,
-    MSG_PATTERN_RES,
-    WORD_RES,
-    INCIDENT_RES,
-    R_NODE_RES,
-    DETECTOR_RES,
-    DETECTOR_PUB_RES,
-    SIGN_CONFIG_RES,
-    SIGN_DETAIL_RES,
-    SIGN_MSG_RES,
-    TPIMS_STAT_RES,
-    TPIMS_DYN_RES,
-    TPIMS_ARCH_RES,
-];
-
-/// Fetch a simple resource.
-///
-/// * `client` The database connection.
-/// * `sql` SQL query.
-/// * `w` Writer to output resource.
-fn fetch_simple<W: Write>(
-    client: &mut Client,
-    sql: &str,
-    mut w: W,
-) -> Result<u32> {
-    let mut c = 0;
-    w.write_all(b"[")?;
-    for row in &client.query(sql, &[])? {
-        if c > 0 {
-            w.write_all(b",")?;
-        }
-        w.write_all(b"\n")?;
-        let j: String = row.get(0);
-        w.write_all(j.as_bytes())?;
-        c += 1;
-    }
-    if c > 0 {
-        w.write_all(b"\n")?;
-    }
-    w.write_all(b"]\n")?;
-    Ok(c)
-}
-
-/// Fetch all r_nodes.
-///
-/// * `client` The database connection.
-/// * `sender` Sender for segment messages.
-fn fetch_all_nodes(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
-    log::debug!("fetch_all_nodes");
-    sender.send(SegMsg::Order(false))?;
-    for row in &client.query(RNode::SQL_ALL, &[])? {
-        sender.send(SegMsg::UpdateNode(RNode::from_row(row)))?;
-    }
-    sender.send(SegMsg::Order(true))?;
-    Ok(())
-}
-
-/// Fetch one r_node.
-///
-/// * `client` The database connection.
-/// * `name` RNode name.
-/// * `sender` Sender for segment messages.
-fn fetch_one_node(
-    client: &mut Client,
-    name: &str,
-    sender: &Sender<SegMsg>,
-) -> Result<()> {
-    log::debug!("fetch_one_node: {}", name);
-    let rows = &client.query(RNode::SQL_ONE, &[&name])?;
-    if rows.len() == 1 {
-        for row in rows.iter() {
-            sender.send(SegMsg::UpdateNode(RNode::from_row(row)))?;
-        }
-    } else {
-        assert!(rows.is_empty());
-        sender.send(SegMsg::RemoveNode(name.to_string()))?;
-    }
-    Ok(())
-}
-
-/// Fetch all roads.
-///
-/// * `client` The database connection.
-/// * `sender` Sender for segment messages.
-fn fetch_all_roads(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
-    log::debug!("fetch_all_roads");
-    for row in &client.query(Road::SQL_ALL, &[])? {
-        sender.send(SegMsg::UpdateRoad(Road::from_row(row)))?;
-    }
-    Ok(())
-}
-
-/// Fetch one road.
-///
-/// * `client` The database connection.
-/// * `name` Road name.
-/// * `sender` Sender for segment messages.
-fn fetch_one_road(
-    client: &mut Client,
-    name: &str,
-    sender: &Sender<SegMsg>,
-) -> Result<()> {
-    log::debug!("fetch_one_road: {}", name);
-    let rows = &client.query(Road::SQL_ONE, &[&name])?;
-    if let Some(row) = rows.iter().next() {
-        sender.send(SegMsg::UpdateRoad(Road::from_row(row)))?;
-    }
-    Ok(())
+pub enum Resource {
+    Alarm,
+    Beacon,
+    BeaconState,
+    CabinetStyle,
+    Camera,
+    CameraPub,
+    CommConfig,
+    CommLink,
+    CommProtocol,
+    Condition,
+    Controller,
+    Detector,
+    DetectorPub,
+    Direction,
+    Dms,
+    DmsPub,
+    DmsStat,
+    FlowStream,
+    Font,
+    GateArm,
+    GateArmArray,
+    GateArmInterlock,
+    GateArmState,
+    Gps,
+    Graphic,
+    Incident,
+    LaneMarking,
+    LaneUseIndication,
+    LcsArray,
+    LcsIndication,
+    LcsLock,
+    Modem,
+    MsgLine,
+    MsgPattern,
+    ParkingAreaPub,
+    ParkingAreaDyn,
+    ParkingAreaArch,
+    Permission,
+    RampMeter,
+    ResourceType,
+    Rnode,
+    Road,
+    RoadFull,
+    RoadModifier,
+    Role,
+    SignConfig,
+    SignDetail,
+    SignMessage,
+    SystemAttributePub,
+    TagReader,
+    User,
+    VideoMonitor,
+    WeatherSensor,
+    WeatherSensorPub,
+    Word,
 }
 
 impl Resource {
-    /// Get the listen value
-    fn listen(self) -> Option<&'static str> {
+    /// Get iterator of all resource variants
+    pub fn iter() -> impl Iterator<Item = Resource> {
+        use Resource::*;
+        [
+            Alarm,
+            Beacon,
+            BeaconState,
+            CabinetStyle,
+            Camera,
+            CameraPub,
+            CommConfig,
+            CommLink,
+            CommProtocol,
+            Condition,
+            Controller,
+            Detector,
+            DetectorPub,
+            Direction,
+            Dms,
+            DmsPub,
+            DmsStat,
+            FlowStream,
+            Font,
+            GateArm,
+            GateArmArray,
+            GateArmInterlock,
+            GateArmState,
+            Gps,
+            Graphic,
+            Incident,
+            LaneMarking,
+            LaneUseIndication,
+            LcsArray,
+            LcsIndication,
+            LcsLock,
+            Modem,
+            MsgLine,
+            MsgPattern,
+            ParkingAreaPub,
+            ParkingAreaDyn,
+            ParkingAreaArch,
+            Permission,
+            RampMeter,
+            ResourceType,
+            Rnode,
+            Road,
+            RoadFull,
+            RoadModifier,
+            Role,
+            SignConfig,
+            SignDetail,
+            SignMessage,
+            SystemAttributePub,
+            TagReader,
+            User,
+            VideoMonitor,
+            WeatherSensor,
+            WeatherSensorPub,
+            Word,
+        ]
+        .iter()
+        .cloned()
+    }
+
+    /// Get the resource type
+    const fn res_type(self) -> ResType {
+        use Resource::*;
         match self {
-            Resource::RNode() => Some("r_node$1"),
-            Resource::Road() => Some("road$1"),
-            Resource::Simple(_, lsn, _) => lsn,
-            Resource::SignMsg(_) => Some("sign_message"),
+            Alarm => ResType::Alarm,
+            Beacon => ResType::Beacon,
+            BeaconState => ResType::BeaconState,
+            CabinetStyle => ResType::CabinetStyle,
+            Camera | CameraPub => ResType::Camera,
+            CommConfig => ResType::CommConfig,
+            CommLink => ResType::CommLink,
+            CommProtocol => ResType::CommProtocol,
+            Condition => ResType::Condition,
+            Controller => ResType::Controller,
+            Detector | DetectorPub => ResType::Detector,
+            Direction => ResType::Direction,
+            Dms | DmsPub | DmsStat => ResType::Dms,
+            FlowStream => ResType::FlowStream,
+            Font => ResType::Font,
+            GateArm => ResType::GateArm,
+            GateArmArray => ResType::GateArmArray,
+            GateArmInterlock => ResType::GateArmInterlock,
+            GateArmState => ResType::GateArmState,
+            Gps => ResType::Gps,
+            Graphic => ResType::Graphic,
+            Incident => ResType::Incident,
+            LaneMarking => ResType::LaneMarking,
+            LaneUseIndication => ResType::LaneUseIndication,
+            LcsArray => ResType::LcsArray,
+            LcsIndication => ResType::LcsIndication,
+            LcsLock => ResType::LcsLock,
+            Modem => ResType::Modem,
+            MsgLine => ResType::MsgLine,
+            MsgPattern => ResType::MsgPattern,
+            ParkingAreaPub | ParkingAreaDyn | ParkingAreaArch => {
+                ResType::ParkingArea
+            }
+            Permission => ResType::Permission,
+            RampMeter => ResType::RampMeter,
+            ResourceType => ResType::ResourceType,
+            Rnode => ResType::Rnode,
+            Road | RoadFull => ResType::Road,
+            RoadModifier => ResType::RoadModifier,
+            Role => ResType::Role,
+            SignConfig => ResType::SignConfig,
+            SignDetail => ResType::SignDetail,
+            SignMessage => ResType::SignMessage,
+            SystemAttributePub => ResType::SystemAttribute,
+            TagReader => ResType::TagReader,
+            User => ResType::User,
+            VideoMonitor => ResType::VideoMonitor,
+            WeatherSensor | WeatherSensorPub => ResType::WeatherSensor,
+            Word => ResType::Word,
         }
     }
 
-    /// Get the SQL value
-    fn sql(self) -> &'static str {
+    /// Get the resource path
+    const fn path(self) -> &'static str {
+        use Resource::*;
         match self {
-            Resource::RNode() => unreachable!(),
-            Resource::Road() => unreachable!(),
-            Resource::Simple(_, _, sql) => sql,
-            Resource::SignMsg(sql) => sql,
+            Alarm => "api/alarm",
+            Beacon => "api/beacon",
+            BeaconState => "beacon_state",
+            CabinetStyle => "api/cabinet_style",
+            Camera => "api/camera",
+            CameraPub => "camera_pub",
+            CommConfig => "api/comm_config",
+            CommLink => "api/comm_link",
+            CommProtocol => "comm_protocol",
+            Condition => "condition",
+            Controller => "api/controller",
+            Detector => "api/detector",
+            DetectorPub => "detector_pub",
+            Direction => "direction",
+            Dms => "api/dms",
+            DmsPub => "dms_pub",
+            DmsStat => "dms_message",
+            FlowStream => "api/flow_stream",
+            Font => "api/font",
+            GateArm => "api/gate_arm",
+            GateArmArray => "api/gate_arm_array",
+            GateArmInterlock => "gate_arm_interlock",
+            GateArmState => "gate_arm_state",
+            Gps => "api/gps",
+            Graphic => "api/graphic",
+            Incident => "incident",
+            LaneMarking => "api/lane_marking",
+            LaneUseIndication => "lane_use_indication",
+            LcsArray => "api/lcs_array",
+            LcsIndication => "api/lcs_indication",
+            LcsLock => "lcs_lock",
+            Modem => "api/modem",
+            MsgLine => "api/msg_line",
+            MsgPattern => "api/msg_pattern",
+            ParkingAreaPub => "TPIMS_static",
+            ParkingAreaDyn => "TPIMS_dynamic",
+            ParkingAreaArch => "TPIMS_archive",
+            Permission => "api/permission",
+            RampMeter => "api/ramp_meter",
+            ResourceType => "resource_type",
+            Rnode => unreachable!(),
+            Road => "api/road",
+            RoadFull => unreachable!(),
+            RoadModifier => "road_modifier",
+            Role => "api/role",
+            SignConfig => "api/sign_config",
+            SignDetail => "api/sign_detail",
+            SignMessage => "sign_message",
+            SystemAttributePub => "system_attribute_pub",
+            TagReader => "api/tag_reader",
+            User => "api/user",
+            VideoMonitor => "api/video_monitor",
+            WeatherSensor => "api/weather_sensor",
+            WeatherSensorPub => "rwis",
+            Word => "api/word",
         }
     }
 
-    /// Fetch the resource from a connection.
-    ///
-    /// * `client` The database connection.
-    /// * `payload` Postgres NOTIFY payload.
-    /// * `sender` Sender for segment messages.
-    fn fetch(
-        self,
-        client: &mut Client,
-        payload: &str,
-        sender: &Sender<SegMsg>,
-    ) -> Result<()> {
+    /// Get the listen channel
+    pub const fn listen(self) -> Option<&'static str> {
+        use Resource::*;
         match self {
-            Resource::RNode() => self.fetch_nodes(client, payload, sender),
-            Resource::Road() => self.fetch_roads(client, payload, sender),
-            Resource::Simple(n, _, _) => self.fetch_file(client, n),
-            Resource::SignMsg(_) => self.fetch_sign_msgs(client),
+            ParkingAreaDyn | ParkingAreaArch | Rnode | Road | RoadFull => {
+                self.res_type().listen_full()
+            }
+            BeaconState | CommProtocol | Condition | Direction | Font
+            | GateArmInterlock | GateArmState | Graphic | LaneUseIndication
+            | LcsLock | ResourceType | RoadModifier => {
+                self.res_type().lut_channel()
+            }
+            _ => self.res_type().listen_min(),
         }
     }
 
-    /// Fetch r_node resource from a connection.
+    /// Get the SQL to query all
+    const fn all_sql(self) -> &'static str {
+        use Resource::*;
+        match self {
+            Alarm => query::ALARM_ALL,
+            Beacon => query::BEACON_ALL,
+            BeaconState => query::BEACON_STATE_LUT,
+            CabinetStyle => query::CABINET_STYLE_ALL,
+            Camera => query::CAMERA_ALL,
+            CameraPub => query::CAMERA_PUB,
+            CommConfig => query::COMM_CONFIG_ALL,
+            CommLink => query::COMM_LINK_ALL,
+            CommProtocol => query::COMM_PROTOCOL_LUT,
+            Condition => query::CONDITION_LUT,
+            Controller => query::CONTROLLER_ALL,
+            Detector => query::DETECTOR_ALL,
+            DetectorPub => query::DETECTOR_PUB,
+            Direction => query::DIRECTION_LUT,
+            Dms => query::DMS_ALL,
+            DmsPub => query::DMS_PUB,
+            DmsStat => query::DMS_STATUS,
+            FlowStream => query::FLOW_STREAM_ALL,
+            Font => query::FONT_ALL,
+            GateArm => query::GATE_ARM_ALL,
+            GateArmArray => query::GATE_ARM_ARRAY_ALL,
+            GateArmInterlock => query::GATE_ARM_INTERLOCK_LUT,
+            GateArmState => query::GATE_ARM_STATE_LUT,
+            Gps => query::GPS_ALL,
+            Graphic => query::GRAPHIC_ALL,
+            Incident => query::INCIDENT_PUB,
+            LaneMarking => query::LANE_MARKING_ALL,
+            LaneUseIndication => query::LANE_USE_INDICATION_LUT,
+            LcsArray => query::LCS_ARRAY_ALL,
+            LcsIndication => query::LCS_INDICATION_ALL,
+            LcsLock => query::LCS_LOCK_LUT,
+            Modem => query::MODEM_ALL,
+            MsgLine => query::MSG_LINE_ALL,
+            MsgPattern => query::MSG_PATTERN_ALL,
+            ParkingAreaPub => query::PARKING_AREA_PUB,
+            ParkingAreaDyn => query::PARKING_AREA_DYN,
+            ParkingAreaArch => query::PARKING_AREA_ARCH,
+            Permission => query::PERMISSION_ALL,
+            RampMeter => query::RAMP_METER_ALL,
+            ResourceType => query::RESOURCE_TYPE_LUT,
+            Rnode => query::RNODE_FULL,
+            Road => query::ROAD_ALL,
+            RoadFull => query::ROAD_FULL,
+            RoadModifier => query::ROAD_MODIFIER_LUT,
+            Role => query::ROLE_ALL,
+            SignConfig => query::SIGN_CONFIG_ALL,
+            SignDetail => query::SIGN_DETAIL_ALL,
+            SignMessage => query::SIGN_MSG_PUB,
+            SystemAttributePub => query::SYSTEM_ATTRIBUTE_PUB,
+            TagReader => query::TAG_READER_ALL,
+            User => query::USER_ALL,
+            VideoMonitor => query::VIDEO_MONITOR_ALL,
+            WeatherSensor => query::WEATHER_SENSOR_ALL,
+            WeatherSensorPub => query::WEATHER_SENSOR_PUB,
+            Word => query::WORD_ALL,
+        }
+    }
+
+    /// Check if all_sql produces JSON
+    const fn all_sql_json(self) -> bool {
+        use Resource::*;
+        match self {
+            Dms | MsgLine | MsgPattern | ResourceType | Rnode | SignConfig
+            | SystemAttributePub | Word => false,
+            _ => true,
+        }
+    }
+
+    /// Handle a notification event.
     ///
-    /// * `client` The database connection.
-    /// * `payload` Postgres NOTIFY payload.
-    /// * `sender` Sender for segment messages.
-    fn fetch_nodes(
-        self,
+    /// * `client` Database connection.
+    /// * `segments` Segment state.
+    /// * `ne` Notify event.
+    pub async fn notify(
         client: &mut Client,
-        payload: &str,
-        sender: &Sender<SegMsg>,
+        segments: &mut SegmentState,
+        ne: NotifyEvent,
     ) -> Result<()> {
-        // empty payload is used at startup
-        if payload.is_empty() {
-            fetch_all_nodes(client, sender)
-        } else {
-            fetch_one_node(client, payload, sender)
+        log::info!("Resource::notify: {ne}");
+        let mut found = false;
+        for res in Resource::iter() {
+            if let Some(chan) = res.listen() {
+                if ne.channel == chan {
+                    found = true;
+                    match &ne.name {
+                        Some(name) => {
+                            res.query_one(client, segments, name).await?
+                        }
+                        None => res.query_all(client, segments).await?,
+                    }
+                }
+            }
         }
-    }
-
-    /// Fetch road resource from a connection.
-    ///
-    /// * `client` The database connection.
-    /// * `payload` Postgres NOTIFY payload.
-    /// * `sender` Sender for segment messages.
-    fn fetch_roads(
-        self,
-        client: &mut Client,
-        payload: &str,
-        sender: &Sender<SegMsg>,
-    ) -> Result<()> {
-        // empty payload is used at startup
-        if payload.is_empty() {
-            fetch_all_roads(client, sender)
-        } else {
-            fetch_one_road(client, payload, sender)
+        if !found {
+            log::warn!("unknown resource: {ne}");
         }
-    }
-
-    /// Fetch a file resource from a connection.
-    ///
-    /// * `client` The database connection.
-    /// * `name` File name.
-    fn fetch_file(self, client: &mut Client, name: &str) -> Result<()> {
-        log::debug!("fetch_file: {:?}", name);
-        let t = Instant::now();
-        let dir = Path::new("");
-        let file = AtomicFile::new(dir, name)?;
-        let writer = file.writer()?;
-        let sql = self.sql();
-        let count = fetch_simple(client, sql, writer)?;
-        drop(file);
-        log::info!("{}: wrote {} rows in {:?}", name, count, t.elapsed());
         Ok(())
     }
 
-    /// Fetch sign messages resource.
-    fn fetch_sign_msgs(self, client: &mut Client) -> Result<()> {
-        self.fetch_file(client, "sign_message")?;
-        // FIXME: spawn another thread for this?
-        render_all(Path::new(""))
-    }
-}
-
-/// Listen for notifications on all channels we need to monitor.
-///
-/// * `client` Database connection.
-pub fn listen_all(client: &mut Client) -> Result<()> {
-    let mut channels = HashSet::new();
-    for res in ALL {
-        if let Some(lsn) = res.listen() {
-            channels.insert(lsn);
-        }
-    }
-    for channel in channels {
-        let listen = format!("LISTEN {channel}");
-        client.execute(&listen[..], &[])?;
-    }
-    Ok(())
-}
-
-/// Fetch all resources.
-///
-/// * `client` The database connection.
-/// * `sender` Sender for segment messages.
-pub fn fetch_all(client: &mut Client, sender: &Sender<SegMsg>) -> Result<()> {
-    for res in ALL {
-        log::debug!("fetch_all: {res:?}");
-        res.fetch(client, "", sender)?;
-    }
-    Ok(())
-}
-
-/// Handle a channel notification.
-///
-/// * `client` The database connection.
-/// * `chan` Channel name.
-/// * `payload` Postgres NOTIFY payload.
-/// * `sender` Sender for segment messages.
-pub fn notify(
-    client: &mut Client,
-    chan: &str,
-    payload: &str,
-    sender: &Sender<SegMsg>,
-) -> Result<()> {
-    log::info!("notify: {chan} {payload}");
-    let mut found = false;
-    for res in ALL {
-        if let Some(lsn) = res.listen() {
-            if lsn == chan {
-                found = true;
-                res.fetch(client, payload, sender)?;
+    /// Query one record of the resource.
+    ///
+    /// * `client` The database connection.
+    /// * `segments` Segment state.
+    /// * `name` Resource name.
+    async fn query_one(
+        self,
+        client: &mut Client,
+        segments: &mut SegmentState,
+        name: &str,
+    ) -> Result<()> {
+        use Resource::*;
+        match self {
+            Rnode => query_one_node(client, segments, name).await,
+            RoadFull => query_one_road(client, segments, name).await,
+            _ => {
+                log::warn!("query_one: {self:?} {name}");
+                Ok(())
             }
         }
     }
-    if !found {
-        log::warn!("unknown resource: {chan} {payload}");
+
+    /// Query all records of the resource.
+    ///
+    /// * `client` The database connection.
+    /// * `segments` Segment state.
+    async fn query_all(
+        self,
+        client: &mut Client,
+        segments: &mut SegmentState,
+    ) -> Result<()> {
+        use Resource::*;
+        match self {
+            Rnode => query_all_nodes(client, segments).await,
+            RoadFull => query_all_roads(client, segments).await,
+            SignMessage => self.query_sign_msgs(client).await,
+            _ => self.query_file(client, self.path()).await,
+        }
+    }
+
+    /// Query a file resource.
+    ///
+    /// * `client` The database connection.
+    /// * `name` File name.
+    async fn query_file(self, client: &mut Client, name: &str) -> Result<()> {
+        log::trace!("query_file: {name:?}");
+        let t = Instant::now();
+        let dir = Path::new("");
+        let file = AtomicFile::new(dir, name).await?;
+        let writer = file.writer().await?;
+        let sql = if self.all_sql_json() {
+            format!("SELECT row_to_json(r)::text FROM ({}) r", self.all_sql())
+        } else {
+            self.all_sql().to_string()
+        };
+        let count = query_json(client, &sql, writer).await?;
+        file.commit().await?;
+        log::info!("{name}: wrote {count} rows in {:?}", t.elapsed());
+        Ok(())
+    }
+
+    /// Query sign messages resource.
+    async fn query_sign_msgs(self, client: &mut Client) -> Result<()> {
+        self.query_file(client, self.path()).await?;
+        render_all().await
+    }
+}
+
+/// Query a JSON resource.
+///
+/// * `client` Database connection.
+/// * `sql` SQL query.
+/// * `w` Writer to output resource.
+async fn query_json<W>(client: &mut Client, sql: &str, mut w: W) -> Result<u32>
+where
+    W: AsyncWrite + Unpin,
+{
+    let mut c = 0;
+    w.write_all(b"[").await?;
+    let params: &[&str] = &[];
+    let it = client.query_raw(sql, params).await?;
+    pin_mut!(it);
+    while let Some(row) = it.try_next().await? {
+        match c {
+            0 => w.write_all(b"\n").await?,
+            _ => w.write_all(b",\n").await?,
+        }
+        let j: String = row.get(0);
+        w.write_all(j.as_bytes()).await?;
+        c += 1;
+    }
+    match c {
+        0 => w.write_all(b"]\n").await?,
+        _ => w.write_all(b"\n]\n").await?,
+    }
+    w.flush().await?;
+    Ok(c)
+}
+
+/// Query all r_nodes.
+///
+/// * `client` Database connection.
+/// * `segments` Segment state.
+async fn query_all_nodes(
+    client: &mut Client,
+    segments: &mut SegmentState,
+) -> Result<()> {
+    log::trace!("query_all_nodes");
+    segments.set_ordered(false).await?;
+    for row in &client.query(query::RNODE_FULL, &[]).await? {
+        segments.update_node(RNode::from_row(row));
+    }
+    segments.set_ordered(true).await?;
+    Ok(())
+}
+
+/// Query one r_node.
+///
+/// * `client` Database connection.
+/// * `segments` Segment state.
+/// * `name` RNode name.
+async fn query_one_node(
+    client: &mut Client,
+    segments: &mut SegmentState,
+    name: &str,
+) -> Result<()> {
+    log::trace!("query_one_node: {name}");
+    let rows = &client.query(query::RNODE_ONE, &[&name]).await?;
+    if rows.len() == 1 {
+        for row in rows.iter() {
+            segments.update_node(RNode::from_row(row));
+        }
+    } else {
+        assert!(rows.is_empty());
+        segments.remove_node(name);
     }
     Ok(())
 }
 
-/// Check if any resource is listening to a channel
-pub fn is_listening(chan: &str) -> bool {
-    ALL.iter().any(|res| res.listen() == Some(chan))
+/// Query all roads.
+///
+/// * `client` Database connection.
+/// * `segments` Segment state.
+async fn query_all_roads(
+    client: &mut Client,
+    segments: &mut SegmentState,
+) -> Result<()> {
+    log::trace!("query_all_roads");
+    for row in &client.query(query::ROAD_FULL, &[]).await? {
+        segments.update_road(Road::from_row(row)).await?;
+    }
+    Ok(())
+}
+
+/// Query one road.
+///
+/// * `client` Database connection.
+/// * `segments` Segment state.
+/// * `name` Road name.
+async fn query_one_road(
+    client: &mut Client,
+    segments: &mut SegmentState,
+    name: &str,
+) -> Result<()> {
+    log::trace!("query_one_road: {name}");
+    let rows = &client.query(query::ROAD_ONE, &[&name]).await?;
+    if let Some(row) = rows.iter().next() {
+        segments.update_road(Road::from_row(row)).await?;
+    }
+    Ok(())
 }

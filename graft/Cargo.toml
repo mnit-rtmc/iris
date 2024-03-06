@@ -7,8 +7,8 @@ edition.workspace = true
 
 [dependencies]
 anyhow = "1.0"
-bb8 = "0.8"
-bb8-postgres = "0.8"
+bb8 = { workspace = true }
+bb8-postgres = { workspace = true }
 convert_case = "0.6"
 env_logger = { workspace = true }
 headers = "0.4"
@@ -16,10 +16,12 @@ http = "1"
 log = { workspace = true }
 percent-encoding = "2"
 rustls = "0.22"
+serde = { workspace = true }
 serde_json = "1"
-thiserror = "1"
+thiserror = { workspace = true }
 time = "0.3"
-tokio-postgres = "0.7"
+tokio = { workspace = true }
+tokio-postgres = { workspace = true }
 tokio-rustls = "0.25"
 tokio-util = "0.7"
 tower-sessions = "0.10"
@@ -33,12 +35,3 @@ features = ["http2"]
 [dependencies.axum-extra]
 version = "0.9"
 features = ["typed-header"]
-
-[dependencies.serde]
-version = "1"
-features = ["derive"]
-
-[dependencies.tokio]
-version = "1.0"
-default-features = false
-features = ["fs", "io-util", "macros", "net", "rt-multi-thread", "time"]
