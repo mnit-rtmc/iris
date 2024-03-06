@@ -346,6 +346,16 @@ impl Resource {
         }
     }
 
+    /// Check if all_sql produces JSON
+    const fn all_sql_json(self) -> bool {
+        use Resource::*;
+        match self {
+            Dms | MsgLine | MsgPattern | ResourceType | Rnode | SignConfig
+            | SystemAttributePub | Word => false,
+            _ => true,
+        }
+    }
+
     /// Handle a notification event.
     ///
     /// * `client` Database connection.
@@ -427,8 +437,12 @@ impl Resource {
         let dir = Path::new("");
         let file = AtomicFile::new(dir, name).await?;
         let writer = file.writer().await?;
-        let sql = self.all_sql();
-        let count = query_json(client, sql, writer).await?;
+        let sql = if self.all_sql_json() {
+            format!("SELECT row_to_json(r)::text FROM ({}) r", self.all_sql())
+        } else {
+            self.all_sql().to_string()
+        };
+        let count = query_json(client, &sql, writer).await?;
         file.commit().await?;
         log::info!("{name}: wrote {count} rows in {:?}", t.elapsed());
         Ok(())
