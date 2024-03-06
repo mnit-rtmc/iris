@@ -29,5 +29,6 @@ async fn main() -> Result<()> {
         let mut client = db.client().await?;
         Resource::notify(&mut client, &mut state, ne).await?;
     }
+    log::warn!("Notification stream ended");
     Ok(())
 }

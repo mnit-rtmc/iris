@@ -61,34 +61,49 @@ struct NotificationHandler {
     tx: UnboundedSender<NotifyEvent>,
 }
 
+/// Run notification handler
+async fn run_handler(
+    conn: Connection<Socket, NoTlsStream>,
+    tx: UnboundedSender<NotifyEvent>,
+) {
+    let mut handler = NotificationHandler {
+        conn,
+        tx: tx.clone(),
+    };
+    while let true = (&mut handler).await {
+        log::trace!("run_handler iteration");
+    }
+    log::warn!("run_handler stopped");
+}
+
 impl Future for NotificationHandler {
-    type Output = ();
+    type Output = bool;
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
         match self.conn.poll_message(cx) {
             Poll::Pending => Poll::Pending,
             Poll::Ready(None) => {
                 log::warn!("DB notification stream ended");
-                Poll::Ready(())
+                Poll::Ready(false)
             }
             Poll::Ready(Some(Ok(AsyncMessage::Notification(n)))) => {
                 let ne = NotifyEvent::from(n);
                 if let Err(e) = self.tx.send(ne) {
                     log::warn!("Send notification: {e}");
                 }
-                Poll::Ready(())
+                Poll::Ready(true)
             }
             Poll::Ready(Some(Ok(AsyncMessage::Notice(n)))) => {
                 log::warn!("DB notice: {n}");
-                Poll::Ready(())
+                Poll::Pending
             }
             Poll::Ready(Some(Ok(_))) => {
                 log::warn!("DB AsyncMessage unknown");
-                Poll::Ready(())
+                Poll::Pending
             }
             Poll::Ready(Some(Err(e))) => {
-                log::error!("DB error");
-                panic!("{e}")
+                log::error!("DB error: {e}");
+                Poll::Ready(false)
             }
         }
     }
@@ -112,10 +127,7 @@ pub async fn notify_events(
     let (client, conn) = db.dedicated_client().await?;
     let (tx, mut rx) = unbounded_channel();
     let mut channels = HashSet::new();
-    tokio::spawn(NotificationHandler {
-        conn,
-        tx: tx.clone(),
-    });
+    tokio::spawn(run_handler(conn, tx.clone()));
     for res in Resource::iter() {
         if let Some(chan) = res.listen() {
             if channels.insert(chan) {
