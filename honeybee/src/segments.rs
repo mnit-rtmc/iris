@@ -107,8 +107,6 @@ impl TravelDir {
 struct CorridorId {
     /// Name of corridor roadway
     roadway: String,
-    /// Corridor road abbreviation
-    abbrev: String,
     /// Travel direction of corridor
     travel_dir: TravelDir,
 }
@@ -203,18 +201,13 @@ impl RNode {
         }
     }
 
-    /// Get the corridor ID
-    fn cor_id(&self, roads: &HashMap<String, Road>) -> Option<CorridorId> {
+    /// Get the RNode corridor ID
+    fn cor_id(&self) -> Option<CorridorId> {
         match (&self.roadway, &self.road_dir) {
             (Some(roadway), Some(road_dir)) => {
                 let roadway = roadway.clone();
-                let abbrev = roads
-                    .get(&roadway)
-                    .map(|r| r.abbrev.clone())
-                    .unwrap_or_else(|| "".to_owned());
                 TravelDir::from_str(road_dir).map(|travel_dir| CorridorId {
                     roadway,
-                    abbrev,
                     travel_dir,
                 })
             }
@@ -493,12 +486,19 @@ impl Corridor {
     }
 
     /// Write corridor nodes to a file
-    async fn write_file(&self) -> Result<()> {
-        let dir = Path::new("corridors");
-        let cor_name =
-            format!("{}_{}", self.cor_id.abbrev, self.cor_id.travel_dir);
+    async fn write_file(&self, roads: &HashMap<String, Road>) -> Result<()> {
+        let abbrev = roads
+            .get(&self.cor_id.roadway)
+            .map(|r| r.abbrev.clone())
+            .unwrap_or_else(|| "".to_owned());
+        if abbrev.is_empty() {
+            log::warn!("write_file no 'abbrev' for {}", self.cor_id.roadway);
+            return Ok(());
+        }
+        let cor_name = format!("{}_{}", abbrev, self.cor_id.travel_dir);
         log::trace!("write_file {cor_name}");
         let json = serde_json::to_vec(&self.nodes)?;
+        let dir = Path::new("corridors");
         let file = AtomicFile::new(dir, &cor_name).await?;
         file.write_buf(&json).await
     }
@@ -656,7 +656,7 @@ impl SegmentState {
 
     /// Update (or add) a node
     pub fn update_node(&mut self, node: RNode) {
-        match node.cor_id(&self.roads) {
+        match node.cor_id() {
             Some(ref cor_id) => {
                 match self.node_cors.insert(node.name.clone(), cor_id.clone()) {
                     None => self.add_corridor_node(cor_id, node),
@@ -729,7 +729,7 @@ impl SegmentState {
             for cor in self.corridors.values_mut() {
                 cor.order_nodes();
                 cor.create_segments()?;
-                cor.write_file().await?;
+                cor.write_file(&self.roads).await?;
             }
             // FIXME: write segment loam layer
         }
@@ -748,7 +748,7 @@ impl SegmentState {
                     cor.scale = scale;
                     cor.order_nodes();
                     cor.create_segments()?;
-                    cor.write_file().await?;
+                    cor.write_file(&self.roads).await?;
                 }
             }
             // FIXME: write segment loam layer
