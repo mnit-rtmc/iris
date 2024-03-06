@@ -24,3 +24,7 @@ thiserror = { workspace = true }
 tokio = { workspace = true }
 tokio-postgres = { workspace = true }
 whoami = "1"
+
+[dependencies.tokio-stream]
+version = "0.1"
+features = ["time"]

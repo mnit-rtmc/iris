@@ -27,7 +27,7 @@ use tokio_postgres::tls::NoTlsStream;
 use tokio_postgres::{AsyncMessage, Connection, Notification, Socket};
 
 /// DB notify event
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct NotifyEvent {
     /// Notification channel
     pub channel: String,

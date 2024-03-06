@@ -14,20 +14,36 @@
 //
 #![forbid(unsafe_code)]
 
-use futures::stream::StreamExt;
 use honeybee::{listener, Database, Resource, Result, SegmentState};
+use std::collections::HashSet;
+use std::time::Duration;
+use tokio_stream::StreamExt;
 
 /// Main entry point
 #[tokio::main]
 async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
     let db = Database::new("tms").await?;
-    let mut stream = listener::notify_events(&db).await?;
     let mut state = SegmentState::new();
-    while let Some(ne) = stream.next().await {
-        // FIXME: add short delay (200 ms?)
-        let mut client = db.client().await?;
-        Resource::notify(&mut client, &mut state, ne).await?;
+    let mut events = HashSet::new();
+    let stream = listener::notify_events(&db).await?;
+    let stream = stream.timeout(Duration::from_millis(250));
+    tokio::pin!(stream);
+    loop {
+        match stream.next().await {
+            None => break,
+            Some(Ok(ne)) => {
+                // hold event until timeout passes
+                events.insert(ne);
+            }
+            Some(Err(_)) => {
+                // timeout has passed, deliver all events
+                let mut client = db.client().await?;
+                for ne in events.drain() {
+                    Resource::notify(&mut client, &mut state, ne).await?;
+                }
+            }
+        }
     }
     log::warn!("Notification stream ended");
     Ok(())
