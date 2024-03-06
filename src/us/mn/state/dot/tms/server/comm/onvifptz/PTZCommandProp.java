@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.server.comm.onvifptz;
 import java.security.NoSuchAlgorithmException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.text.DecimalFormat;
 
 /**
  * PTZ command property.
@@ -30,83 +31,106 @@ public class PTZCommandProp extends OnvifProp {
 
 	/** Create a new PTZ command property */
 	public PTZCommandProp(String u, String p) {
-		cmds = new ArrayList<String[]>();
 		user = u;
 		pass = p;
 	}
 
+	/** Snaps components x and y to the nearest eighth of a circle */
+	private static double[] snapAngle(float x, float y) {
+		double angle = Math.atan2(y, x);
+
+		// circle divided into eighths
+		double division = 2 * Math.PI / 8;
+
+		double snappedAngle = Math.round(angle / division) * division;
+
+		// create a deadzone outside the unit circle
+		// otherwise, x or y can be greater than 1 even when originally <=1
+		double length = Math.min(1, Math.sqrt(x * x + y * y));
+		double snappedX = length * Math.cos(snappedAngle);
+		double snappedY = length * Math.sin(snappedAngle);
+
+		return new double[] { snappedX, snappedY };
+	}
+
 	/** Adds ptz command to callback */
 	public void addPanTiltZoom(float p, float t, float z) {
-		cmds.add(new String[] {
+		double[] snappedPanTilt = snapAngle(p, t);
+		DecimalFormat df = new DecimalFormat("0.#");
+		String roundedP = df.format(snappedPanTilt[0]);
+		String roundedT = df.format(snappedPanTilt[1]);
+		String roundedZ = df.format(z);
+
+		log("Queueing PTZ: " + roundedP + ", " + roundedT + ", " + roundedZ);
+		cmd = new String[] {
 			"ptz",
-			String.valueOf(p),
-			String.valueOf(t),
-			String.valueOf(z)
-		});
+			roundedP,
+			roundedT,
+			roundedZ,
+		};
 	}
 
 	/** Sets message to store preset { storepreset, token, name } */
 	public void addStorePreset(int p) {
-		cmds.add(new String[] {
+		cmd = new String[] {
 			"storepreset",
 			String.valueOf(p),
 			"Preset" + p
-		});
+		};
 	}
 
 	/** Sets message to recall preset */
 	public void addRecallPreset(int p) {
-		cmds.add(new String[] {
+		cmd = new String[] {
 			"recallpreset",
 			String.valueOf(p)
-		});
+		};
 	}
 
 	/** Sets message to move the focus */
 	public void addFocus(int f) {
-		cmds.add(new String[] {
+		cmd = new String[] {
 			"movefocus",
 			String.valueOf(f)
-		});
+		};
 	}
 
 	/** Adds iris command to callback */
 	public void addIris(int i) {
-		cmds.add(new String[] {
+		cmd = new String[] {
 			"iris",
 			String.valueOf(i)
-		});
+		};
 	}
 
 	/** Adds wiper oneshot to callback */
 	public void addWiperOneshot() {
-		cmds.add(new String[] { "wiper" });
+		cmd = new String[] { "wiper" };
 	}
 
 	/** Adds reboot to callback */
 	public void addReboot() {
-		cmds.add(new String[] { "reboot" });
+		cmd = new String[] { "reboot" };
 	}
 
 	/** Sets message to auto focus */
 	public void addAutoFocus(boolean on) {
-		cmds.add(new String[] {
+		cmd = new String[] {
 			"autofocus",
 			on ? "Auto" : "Manual"
-		});
+		};
 	}
 
 	/** Sets message to auto iris */
 	public void addAutoIris(boolean on) {
-		cmds.add(new String[] {
+		cmd = new String[] {
 			"autoiris",
 			on ? "Auto" : "Manual"
-		});
+		};
 	}
 
-	/** Appends autoiris and autofocus to callback */
+	/** Adds autoiris and autofocus to callback */
 	public void addAutoIrisAndFocus() {
-		cmds.add(new String[] { "autoiris", "Auto" });
-		cmds.add(new String[] { "autofocus", "Auto" });
+		cmd = new String[] { "autoirisfocus", "Auto" };
 	}
 }
