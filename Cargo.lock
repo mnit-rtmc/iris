@@ -646,7 +646,7 @@ dependencies = [
 
 [[package]]
 name = "bulb"
-version = "5.50.2"
+version = "5.50.3"
 dependencies = [
  "base64 0.21.7",
  "console_error_panic_hook",
@@ -1362,7 +1362,7 @@ dependencies = [
 
 [[package]]
 name = "graft"
-version = "5.50.2"
+version = "5.50.3"
 dependencies = [
  "anyhow",
  "axum",
@@ -1485,7 +1485,7 @@ dependencies = [
 
 [[package]]
 name = "honeybee"
-version = "5.50.2"
+version = "5.50.3"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -1776,7 +1776,7 @@ checksum = "0e7465ac9959cc2b1404e8e2367b43684a6d13790fe23056cc8c6c5a6b7bcb94"
 
 [[package]]
 name = "mayfly"
-version = "5.50.2"
+version = "5.50.3"
 dependencies = [
  "argh",
  "async-std",
@@ -2300,7 +2300,7 @@ dependencies = [
 
 [[package]]
 name = "rendzina"
-version = "5.50.2"
+version = "5.50.3"
 dependencies = [
  "fstr",
  "gift",
