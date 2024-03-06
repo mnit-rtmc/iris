@@ -12,40 +12,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::files::{AtomicFile, Cache};
-use crate::Result;
-use anyhow::Context;
+use crate::error::{Error, Result};
+use crate::files::Cache;
 use ntcip::dms::{Dms, FontTable, GraphicTable};
 use rendzina::{load_font, load_graphic, SignConfig};
 use serde::Deserialize;
 use std::collections::HashMap;
-use std::fmt;
-use std::fs::File;
-use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
-
-/// Unknown resource error
-#[derive(Debug)]
-pub struct UnknownResourceError(String);
-
-impl fmt::Display for UnknownResourceError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Unknown resource: {}", self.0)
-    }
-}
-
-impl std::error::Error for UnknownResourceError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        None
-    }
-}
-
-impl UnknownResourceError {
-    fn new(msg: String) -> Box<Self> {
-        Box::new(UnknownResourceError(msg))
-    }
-}
 
 /// Sign message
 #[allow(unused)]
@@ -70,34 +44,30 @@ struct MsgData {
 
 impl SignMessage {
     /// Load sign messages from a JSON file
-    fn load_all(dir: &Path) -> Result<Vec<SignMessage>> {
-        log::debug!("SignMessage::load_all");
+    async fn load_all(dir: &Path) -> Result<Vec<SignMessage>> {
+        log::trace!("SignMessage::load_all");
         let mut path = PathBuf::new();
         path.push(dir);
         path.push("sign_message");
-        let file =
-            File::open(&path).with_context(|| format!("load_all {path:?}"))?;
-        let reader = BufReader::new(file);
-        Ok(serde_json::from_reader(reader)?)
+        let buf = tokio::fs::read(path).await?;
+        Ok(serde_json::from_slice(&buf)?)
     }
 }
 
 /// Load fonts from a JSON file
-fn load_fonts(dir: &Path) -> Result<FontTable<256, 24>> {
-    log::debug!("load_fonts");
+async fn load_fonts(dir: &Path) -> Result<FontTable<256, 24>> {
     let mut path = PathBuf::new();
     path.push(dir);
     path.push("api");
     path.push("tfon");
-    let mut cache = Cache::new(&path, "tfon")?;
+    log::trace!("load_fonts {path:?}");
+    let mut cache = Cache::new(&path, "tfon").await?;
     let mut fonts = FontTable::default();
     path.push("_placeholder_.tfon");
     for nm in cache.drain() {
         path.set_file_name(nm);
-        let file =
-            File::open(&path).with_context(|| format!("font {path:?}"))?;
-        let reader = BufReader::new(file);
-        let font = load_font(reader)?;
+        let buf = tokio::fs::read(&path).await?;
+        let font = load_font(&*buf)?;
         if let Some(f) = fonts.font_mut(font.number) {
             *f = font;
         } else if let Some(f) = fonts.font_mut(0) {
@@ -108,13 +78,13 @@ fn load_fonts(dir: &Path) -> Result<FontTable<256, 24>> {
 }
 
 /// Load graphics from a JSON file
-fn load_graphics(dir: &Path) -> Result<GraphicTable<32>> {
-    log::debug!("load_graphics");
+async fn load_graphics(dir: &Path) -> Result<GraphicTable<32>> {
+    log::trace!("load_graphics");
     let mut path = PathBuf::new();
     path.push(dir);
     path.push("api");
     path.push("gif");
-    let mut cache = Cache::new(&path, "gif")?;
+    let mut cache = Cache::new(&path, "gif").await?;
     let mut graphics = GraphicTable::default();
     path.push("_placeholder_.gif");
     for nm in cache.drain() {
@@ -126,10 +96,8 @@ fn load_graphics(dir: &Path) -> Result<GraphicTable<32>> {
             .parse::<u8>()
         {
             path.set_file_name(&nm);
-            let file = File::open(&path)
-                .with_context(|| format!("load_graphics {path:?}"))?;
-            let reader = BufReader::new(file);
-            let graphic = load_graphic(reader, number)?;
+            let buf = tokio::fs::read(&path).await?;
+            let graphic = load_graphic(&*buf, number)?;
             if let Some(g) = graphics.graphic_mut(graphic.number) {
                 *g = graphic;
             } else if let Some(g) = graphics.graphic_mut(0) {
@@ -142,18 +110,16 @@ fn load_graphics(dir: &Path) -> Result<GraphicTable<32>> {
 
 impl MsgData {
     /// Load message data from a file path
-    fn load(dir: &Path) -> Result<Self> {
-        log::debug!("MsgData::load");
-        let fonts = load_fonts(dir)?;
-        let graphics = load_graphics(dir)?;
+    async fn load(dir: &Path) -> Result<Self> {
+        log::trace!("MsgData::load");
+        let fonts = load_fonts(dir).await?;
+        let graphics = load_graphics(dir).await?;
         let mut path = PathBuf::new();
         path.push(dir);
         path.push("api");
         path.push("sign_config");
-        let reader = BufReader::new(
-            File::open(&path).with_context(|| format!("load {path:?}"))?,
-        );
-        let configs = SignConfig::load_all(reader)?;
+        let buf = tokio::fs::read(&path).await?;
+        let configs = SignConfig::load_all(&*buf)?;
         Ok(MsgData {
             fonts,
             graphics,
@@ -166,19 +132,18 @@ impl MsgData {
         let cfg = &msg.sign_config;
         match self.configs.get(cfg) {
             Some(c) => Ok(c),
-            None => Err(UnknownResourceError::new(format!("Config: {cfg}"))),
+            None => Err(Error::UnknownResource(format!("Config: {cfg}"))),
         }
     }
 
     /// Render sign message .gif
     fn render_sign_msg(
-        &mut self,
+        &self,
         msg: &SignMessage,
-        file: AtomicFile,
-    ) -> Result<()> {
-        log::debug!("render_sign_msg: {:?}", file.path());
+        name: &str,
+    ) -> Result<Option<Vec<u8>>> {
+        log::trace!("render_sign_msg: {name}");
         let t = Instant::now();
-        let writer = file.writer()?;
         let cfg = self.config(msg)?;
         let dms = Dms::builder()
             .with_font_definition(self.fonts.clone())
@@ -187,34 +152,38 @@ impl MsgData {
             .with_vms_cfg(cfg.vms_cfg())
             .with_multi_cfg(cfg.multi_cfg())
             .build()?;
-        if let Err(e) = rendzina::render(writer, &dms, &msg.multi, None, None) {
-            log::warn!("{:?}, multi={} {e:?}", file.path(), msg.multi);
-            file.cancel()?;
-            return Ok(());
+        let mut buf = Vec::with_capacity(1024);
+        if let Err(e) = rendzina::render(&mut buf, &dms, &msg.multi, None, None)
+        {
+            log::warn!("{name}, {e:?} multi={}", msg.multi);
+            return Ok(None);
         };
-        log::info!("{:?} rendered in {:?}", file.path(), t.elapsed());
-        Ok(())
+        log::info!("{name} rendered in {:?}", t.elapsed());
+        Ok(Some(buf))
     }
 }
 
-/// Fetch all sign messages.
+/// Render all sign messages.
 ///
 /// * `dir` Output file directory.
-pub fn render_all(dir: &Path) -> Result<()> {
-    let mut msg_data = MsgData::load(dir)?;
+pub async fn render_all() -> Result<()> {
+    log::trace!("render_all");
+    let dir = Path::new("");
+    let msg_data = MsgData::load(dir).await?;
     let mut path = PathBuf::new();
     path.push(dir);
     path.push("img");
-    let mut cache = Cache::new(path.as_path(), "gif")?;
-    for sign_msg in SignMessage::load_all(dir)? {
+    let mut cache = Cache::new(path.as_path(), "gif").await?;
+    for sign_msg in SignMessage::load_all(dir).await? {
         let mut name = sign_msg.name.clone();
         name.push_str(".gif");
         if cache.contains(&name) {
             cache.keep(&name);
-        } else {
-            let file = cache.file(&name)?;
-            msg_data.render_sign_msg(&sign_msg, file)?;
+        } else if let Some(buf) = msg_data.render_sign_msg(&sign_msg, &name)? {
+            let file = cache.file(&name).await?;
+            file.write_buf(&buf).await?;
         }
     }
+    cache.clear().await;
     Ok(())
 }
