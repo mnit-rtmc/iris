@@ -181,6 +181,7 @@ public abstract class Service {
 			}
 
 			String soapRequest = DOMUtils.getString(doc);
+			if (soapRequest == null) return "Could not convert document to string";
 			log("\nSending soapRequest to " + endpoint + ":\n" + soapRequest);
 
 			try (OutputStream os = connection.getOutputStream()) {

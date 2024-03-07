@@ -127,6 +127,8 @@ abstract public class OnvifProp extends ControllerProperty {
 			log("Set media profile: " + mediaProfile);
 		if (videoSource != null)
 			log("Set video source: " + videoSource);
+		if (mediaProfile == null || videoSource == null)
+			return "Could not retrieve profile tokens";
 
 		// if multi-step operations, send each operation
 		StringBuilder sb = new StringBuilder();
