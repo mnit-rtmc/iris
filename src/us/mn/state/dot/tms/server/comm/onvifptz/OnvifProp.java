@@ -88,39 +88,38 @@ abstract public class OnvifProp extends ControllerProperty {
 
 		// Should contain all necessary tokens
 		Document getProfilesRes = DOMUtils.getDocument(media.getProfiles());
+		if (getProfilesRes == null) return "Error parsing ONVIF media profiles response";
 
-		if (getProfilesRes != null) {
-			NodeList profiles = getProfilesRes.getElementsByTagNameNS("*", "Profiles");
-			for (int i = 0; i < profiles.getLength(); i++) {
-				int mx = 0, vx = 0;
-				Element profile = (Element) profiles.item(i);
+		NodeList profiles = getProfilesRes.getElementsByTagNameNS("*", "Profiles");
+		for (int i = 0; i < profiles.getLength(); i++) {
+			int mx = 0, vx = 0;
+			Element profile = (Element) profiles.item(i);
 
-				// get the video source and its width
-				Element videoConfig = (Element) profile.getElementsByTagNameNS("*", "VideoSourceConfiguration").item(0);
-				if (videoConfig == null) continue;  // we want a profile with a video source
-				Element sourceToken = (Element) videoConfig.getElementsByTagNameNS("*", "SourceToken").item(0);
-				Element bounds = (Element) videoConfig.getElementsByTagNameNS("*", "Bounds").item(0);
-				vx = Integer.parseInt(bounds.getAttribute("width"));
+			// get the video source and its width
+			Element videoConfig = (Element) profile.getElementsByTagNameNS("*", "VideoSourceConfiguration").item(0);
+			if (videoConfig == null) continue;  // we want a profile with a video source
+			Element sourceToken = (Element) videoConfig.getElementsByTagNameNS("*", "SourceToken").item(0);
+			Element bounds = (Element) videoConfig.getElementsByTagNameNS("*", "Bounds").item(0);
+			vx = Integer.parseInt(bounds.getAttribute("width"));
 
-				// get the video encoder and its width, if applicable; only for better profile selection
-				Element encoderConfig = (Element) profile.getElementsByTagNameNS("*", "VideoEncoderConfiguration").item(0);
-				if (encoderConfig != null) {
-					Element widthElem = (Element) encoderConfig.getElementsByTagNameNS("*", "Width").item(0);
-					mx = Integer.parseInt(widthElem.getTextContent());
-				}
+			// get the video encoder and its width, if applicable; only for better profile selection
+			Element encoderConfig = (Element) profile.getElementsByTagNameNS("*", "VideoEncoderConfiguration").item(0);
+			if (encoderConfig != null) {
+				Element widthElem = (Element) encoderConfig.getElementsByTagNameNS("*", "Width").item(0);
+				mx = Integer.parseInt(widthElem.getTextContent());
+			}
 
-				// if video source bigger than current, replace
-				if (vx >= videoWidth) {
-					log("Video width larger. Setting videoSource...");
-					videoSource = sourceToken.getTextContent();
-					videoWidth = vx;
-				}
-				// replace media profile only if it's larger and the attached source is no smaller
-				if (mx >= mediaWidth && vx >= videoWidth) {
-					log("Both widths larger. Setting mediaProfile...");
-					mediaProfile = profile.getAttribute("token");
-					mediaWidth = mx;
-				}
+			// if video source bigger than current, replace
+			if (vx >= videoWidth) {
+				log("Video width larger. Setting videoSource...");
+				videoSource = sourceToken.getTextContent();
+				videoWidth = vx;
+			}
+			// replace media profile only if it's larger and the attached source is no smaller
+			if (mx >= mediaWidth && vx >= videoWidth) {
+				log("Both widths larger. Setting mediaProfile...");
+				mediaProfile = profile.getAttribute("token");
+				mediaWidth = mx;
 			}
 		}
 

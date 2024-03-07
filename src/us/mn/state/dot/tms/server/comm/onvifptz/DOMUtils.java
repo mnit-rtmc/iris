@@ -55,6 +55,8 @@ public class DOMUtils {
 
 	/** Gets Document from string */
 	public static Document getDocument(String s) {
+		if (s == null) return null;
+
 		Document doc = null;
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();

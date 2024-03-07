@@ -254,6 +254,10 @@ public class PTZService extends Service {
 	 */
 	public boolean presetExists(String profileToken, String pToken) {
 		Document presets = DOMUtils.getDocument(getPresets(profileToken));
+		if (presets == null) {
+			log("Error parsing presets response");
+			return false;
+		}
 
 		NodeList presetList = presets.getElementsByTagNameNS("*", "Preset");
 		for (int i = 0; i < presetList.getLength(); i++) {
@@ -270,6 +274,10 @@ public class PTZService extends Service {
 	 */
 	public String getPresetToken(String profileToken, String pName) {
 		Document presets = DOMUtils.getDocument(getPresets(profileToken));
+		if (presets == null) {
+			log("Error parsing presets response");
+			return null;
+		}
 
 		NodeList presetList = presets.getElementsByTagNameNS("*", "Preset");
 		for (int i = 0; i < presetList.getLength(); i++) {
@@ -360,10 +368,13 @@ public class PTZService extends Service {
 	 */
 	public String setPreset(String profileToken, String pToken, String pName) {
 		// won't save if other preset uses pName already
-		String removeResp = removePreset(profileToken, getPresetToken(profileToken, pName));
+		String presetToken = getPresetToken(profileToken, pName);
+		String removeResp = "";
+		if (presetToken != null)
+			removeResp = removePreset(profileToken, presetToken);
 
 		Document doc = setPresetDocument(profileToken, pToken, pName);
-		return removeResp + "\n" + sendRequestDocument(doc);
+		return (removeResp + "\n" + sendRequestDocument(doc)).trim();
 	}
 
 	/** Saves current position to a preset - uses token as default name */
