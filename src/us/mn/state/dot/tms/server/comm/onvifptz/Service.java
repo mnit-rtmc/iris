@@ -165,6 +165,7 @@ public abstract class Service {
 	 * @return the response from the device, as a String
 	 */
 	public String sendRequestDocument(Document doc) {
+		if (endpoint == null) return "No service endpoint specified";
 		String resp = "";
 		try {
 			URL url = new URL(endpoint);
@@ -180,6 +181,7 @@ public abstract class Service {
 			}
 
 			String soapRequest = DOMUtils.getString(doc);
+			if (soapRequest == null) return "Could not convert document to string";
 			log("\nSending soapRequest to " + endpoint + ":\n" + soapRequest);
 
 			try (OutputStream os = connection.getOutputStream()) {

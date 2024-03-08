@@ -59,6 +59,7 @@ public class DeviceService extends Service {
 			servicesRes = getServices();
 		}
 		Document servicesDoc = DOMUtils.getDocument(servicesRes);
+		if (servicesDoc == null) return null;
 
 		NodeList services = servicesDoc.getElementsByTagNameNS("*", "Service");
 		for (int i = 0; i < services.getLength(); i++) {
