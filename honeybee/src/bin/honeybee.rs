@@ -14,9 +14,10 @@
 //
 #![forbid(unsafe_code)]
 
-use honeybee::{listener, Database, Resource, Result, SegmentState};
+use honeybee::{listener, router, Database, Resource, Result, SegmentState};
 use std::collections::HashSet;
 use std::time::Duration;
+use tokio::net::TcpListener;
 use tokio_stream::StreamExt;
 
 /// Main entry point
@@ -24,6 +25,7 @@ use tokio_stream::StreamExt;
 async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
     let db = Database::new("tms").await?;
+    tokio::spawn(serve_routes(db.clone()));
     let mut state = SegmentState::new();
     let mut events = HashSet::new();
     let stream = listener::notify_events(&db).await?;
@@ -46,5 +48,14 @@ async fn main() -> Result<()> {
         }
     }
     log::warn!("Notification stream ended");
+    Ok(())
+}
+
+/// Serve routes
+async fn serve_routes(db: Database) -> Result<()> {
+    let app = router::build(db).await?;
+    let listener = TcpListener::bind("127.0.0.1:3737").await?;
+    axum::serve(listener, app).await?;
+    log::warn!("Axum serve ended");
     Ok(())
 }

@@ -159,7 +159,10 @@ impl fmt::Display for Name {
 impl Name {
     /// Create a new name
     pub fn new(type_n: &str) -> Result<Self> {
-        Ok(Name::from(ResType::try_from(type_n)?))
+        match ResType::try_from(type_n) {
+            Ok(res_type) => Ok(Name::from(res_type)),
+            Err(_) => Err(Error::InvalidValue),
+        }
     }
 
     /// Set object name

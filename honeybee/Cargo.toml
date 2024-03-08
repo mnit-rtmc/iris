@@ -1,6 +1,6 @@
 [package]
 name = "honeybee"
-description = "Server for publishing IRIS data as JSON / GIF"
+description = "REST API backend for IRIS"
 license = "GPL-2.0-or-later"
 version.workspace = true
 edition.workspace = true
@@ -10,21 +10,42 @@ async-stream = "0.3"
 async-trait = "0.1"
 bb8 = { workspace = true }
 bb8-postgres = { workspace = true }
+convert_case = "0.6"
 env_logger = { workspace = true }
 futures = { version = "0.3", default_features = false }
+headers = "0.4"
+http = "1"
 log = { workspace = true }
 mvt = "0.9"
 ntcip = { workspace = true }
+percent-encoding = "2"
 pointy = "0.6"
 postgis = "0.9"
 rendzina = { path = "../rendzina" }
+rustls = "0.22"
 serde = { workspace = true }
 serde_json = "1"
 thiserror = { workspace = true }
+time = "0.3"
 tokio = { workspace = true }
 tokio-postgres = { workspace = true }
+tokio-rustls = "0.25"
+tokio-util = "0.7"
+tower-sessions = "0.10"
+tower-sessions-moka-store = "0.10"
 whoami = "1"
+
+[dependencies.axum]
+version = "0.7"
+features = ["http2"]
+
+[dependencies.axum-extra]
+version = "0.9"
+features = ["typed-header"]
 
 [dependencies.tokio-stream]
 version = "0.1"
 features = ["time"]
+
+[dev-dependencies]
+anyhow = "1.0"
