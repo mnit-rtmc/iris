@@ -1361,35 +1361,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "graft"
-version = "5.50.3"
-dependencies = [
- "anyhow",
- "axum",
- "axum-extra",
- "bb8",
- "bb8-postgres",
- "convert_case",
- "env_logger",
- "headers",
- "http",
- "log",
- "percent-encoding",
- "rustls",
- "serde",
- "serde_json",
- "thiserror",
- "time 0.3.34",
- "tokio",
- "tokio-postgres",
- "tokio-rustls",
- "tokio-util",
- "tower-sessions",
- "tower-sessions-moka-store",
- "whoami",
-]
-
-[[package]]
 name = "h2"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1487,24 +1458,37 @@ dependencies = [
 name = "honeybee"
 version = "5.50.3"
 dependencies = [
+ "anyhow",
  "async-stream",
  "async-trait",
+ "axum",
+ "axum-extra",
  "bb8",
  "bb8-postgres",
+ "convert_case",
  "env_logger",
  "futures",
+ "headers",
+ "http",
  "log",
  "mvt",
  "ntcip",
+ "percent-encoding",
  "pointy",
  "postgis",
  "rendzina",
+ "rustls",
  "serde",
  "serde_json",
  "thiserror",
+ "time 0.3.34",
  "tokio",
  "tokio-postgres",
+ "tokio-rustls",
  "tokio-stream",
+ "tokio-util",
+ "tower-sessions",
+ "tower-sessions-moka-store",
  "whoami",
 ]
 

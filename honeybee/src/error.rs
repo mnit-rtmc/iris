@@ -12,6 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use http::StatusCode;
 use std::time::SystemTimeError;
 
 /// Honeybee error
@@ -29,6 +30,10 @@ pub enum Error {
     #[error("Time {0}")]
     SystemTime(#[from] SystemTimeError),
 
+    /// Sonar error
+    #[error("Sonar {0}")]
+    Sonar(#[from] crate::sonar::Error),
+
     /// IO error
     #[error("IO {0}")]
     Io(#[from] std::io::Error),
@@ -40,6 +45,10 @@ pub enum Error {
     /// Bb8 run error
     #[error("Bb8 run error")]
     Bb8(String),
+
+    /// Tower sessions
+    #[error("Session {0}")]
+    Session(#[from] tower_sessions::session::Error),
 
     /// Unknown resource
     #[error("Unknown resource {0}")]
@@ -61,6 +70,16 @@ pub enum Error {
 impl<E: std::fmt::Debug> From<bb8::RunError<E>> for Error {
     fn from(err: bb8::RunError<E>) -> Self {
         Self::Bb8(format!("{err:?}"))
+    }
+}
+
+impl From<Error> for StatusCode {
+    fn from(err: Error) -> Self {
+        match err {
+            Error::Unauthorized => StatusCode::UNAUTHORIZED,
+            Error::Sonar(e) => e.into(),
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
+        }
     }
 }
 

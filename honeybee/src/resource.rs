@@ -402,6 +402,9 @@ impl Resource {
         match self {
             Rnode => query_one_node(client, segments, name).await,
             RoadFull => query_one_road(client, segments, name).await,
+            ParkingAreaDyn | ParkingAreaArch => {
+                self.query_file(client, self.path()).await
+            }
             _ => {
                 log::warn!("query_one: {self:?} {name}");
                 Ok(())
