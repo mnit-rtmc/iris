@@ -6,19 +6,19 @@ It uses the PostgreSQL LISTEN/NOTIFY mechanism to handle [notifications].
 
 ## Requests
 
-Protected request routes must include a session cookie called `honeybee` which
-is authenticated with a valid IRIS `username` and `password`.  This can be
-created by using `POST` on the `/login` route.
+Protected routes must include a session cookie called `honeybee` which is
+authenticated with a valid IRIS `username` and `password`.  This can be
+created by using `POST` on the `iris/api/login` route.
 
-For each supported *type*, these requests are available:
+For each supported resource type, *res*, these requests are available:
 
-Route              | Verb     | Function
--------------------|----------|------------------------
-`/`*type*          | `GET`    | Get all objects of type
-`/`*type*          | `POST`   | Create new object
-`/`*type*`/`*name* | `GET`    | Get one object
-`/`*type*`/`*name* | `PATCH`  | Update attributes of one object
-`/`*type*`/`*name* | `DELETE` | Delete one object
+Route                     | Verb     | Function
+--------------------------|----------|------------------------
+`iris/api/`*res*          | `GET`    | Get all objects of type
+`iris/api/`*res*          | `POST`   | Create new object
+`iris/api/`*res*`/`*name* | `GET`    | Get one object
+`iris/api/`*res*`/`*name* | `PATCH`  | Update attributes of one object
+`iris/api/`*res*`/`*name* | `DELETE` | Delete one object
 
 ## Building
 
