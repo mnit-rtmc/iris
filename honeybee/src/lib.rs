@@ -13,16 +13,23 @@
 // GNU General Public License for more details.
 //
 #![forbid(unsafe_code)]
+#![allow(clippy::match_like_matches_macro)]
 
+mod access;
+mod cred;
 mod database;
 mod error;
 mod files;
 pub mod listener;
+mod permission;
 mod query;
 mod resource;
 mod restype;
+pub mod router;
 mod segments;
 mod signmsg;
+pub mod sonar;
+mod tls;
 
 pub use database::Database;
 pub use error::{Error, Result};

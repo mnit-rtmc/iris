@@ -1,5 +1,5 @@
 use anyhow::Result;
-use graft::sonar;
+use honeybee::sonar;
 
 const HOST: &str = &"localhost.localdomain";
 

@@ -1,6 +1,6 @@
 # REST API
 
-The REST API is provided by the `honeybee` and `graft` services.
+The REST API is provided by the `honeybee` service.
 
 ## Requests
 
