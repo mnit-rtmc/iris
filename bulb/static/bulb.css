@@ -1,5 +1,5 @@
 body {
-  background-color: #ccc;
+  background-color: #bbb;
   font-family: "Overpass";
 }
 label {
@@ -103,15 +103,43 @@ button.go_link {
 }
 #sidebar {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
   user-select: none;
   flex: 0 1 100%;
   margin: 0.2rem;
   background-image: url(iris.svg);
   background-repeat: no-repeat;
   background-position: center;
+}
+#sb_div {
+  width: 100%;
+  display: grid;
+  gap: 0.1rem;
+  grid-template-columns: repeat(4, auto);
+  grid-template-areas: "resource resource config fullscreen"
+                       "search   state    state  refresh"
+                       "list     list     list   list";
+}
+#sb_label {
+  grid-area: resource;
+}
+#sb_config {
+  grid-area: config;
+}
+#sb_fullscreen {
+  grid-area: fullscreen;
+}
+#sb_search {
+  grid-area: search;
+}
+#sb_state {
+  grid-area: state;
+}
+#sb_refresh {
+  grid-area: refresh;
+}
+#sb_list {
+  grid-area: list;
+  overflow-y: auto;
 }
 
 @media screen and (min-width: 36rem) {
@@ -122,17 +150,6 @@ button.go_link {
   #sidebar {
     flex: 2 0 40%;
   }
-}
-
-.sb_div {
-  display: inline;
-  margin: 0.1rem;
-}
-
-#sb_list {
-  flex: 0 1 100%;
-  margin: 0.1rem;
-  overflow-y: auto;
 }
 
 #ob_close {
@@ -263,7 +280,7 @@ button.go_link {
   flex-wrap: wrap;
   justify-content: space-between;
   list-style: none;
-  padding: 0.2rem;
+  padding: 0;
   margin: 0;
 }
 .card {
