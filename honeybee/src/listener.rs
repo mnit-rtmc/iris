@@ -25,6 +25,7 @@ use std::task::{Context, Poll};
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 use tokio_postgres::tls::NoTlsStream;
 use tokio_postgres::{AsyncMessage, Connection, Notification, Socket};
+use tokio_stream::wrappers::UnboundedReceiverStream;
 
 /// DB notify event
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -125,7 +126,7 @@ pub async fn notify_events(
     db: &Database,
 ) -> Result<impl Stream<Item = NotifyEvent> + Unpin> {
     let (client, conn) = db.dedicated_client().await?;
-    let (tx, mut rx) = unbounded_channel();
+    let (tx, rx) = unbounded_channel();
     let mut channels = HashSet::new();
     tokio::spawn(run_handler(conn, tx.clone()));
     for res in Resource::iter() {
@@ -145,9 +146,5 @@ pub async fn notify_events(
     // leak client so that it's not dropped
     Box::leak(Box::new(client));
     // create a stream from channel receiver
-    Ok(Box::pin(async_stream::stream! {
-        while let Some(not) = rx.recv().await {
-            yield not;
-        }
-    }))
+    Ok(Box::pin(UnboundedReceiverStream::new(rx)))
 }
