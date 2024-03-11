@@ -1,5 +1,5 @@
 body {
-  background-color: #ccc;
+  background-color: #bbb;
   font-family: "Overpass";
 }
 label {
@@ -103,15 +103,41 @@ button.go_link {
 }
 #sidebar {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+  display: grid;
+  grid-template-columns: repeat(5, auto);
+  grid-template-areas: "label  resource resource config fullscreen"
+                       "search search   state    state  refresh";
+                       "list   list     list     list   list";
   user-select: none;
   flex: 0 1 100%;
   margin: 0.2rem;
   background-image: url(iris.svg);
   background-repeat: no-repeat;
   background-position: center;
+}
+#sb_label {
+  grid-area: label;
+}
+#sb_resource {
+  grid-area: resource;
+}
+#sb_config {
+  grid-area: config;
+}
+#sb_fullscreen {
+  grid-area: fullscreen;
+}
+#sb_search {
+  grid-area: search;
+}
+#sb_state {
+  grid-area: state;
+}
+#sb_refresh {
+  grid-area: refresh;
+}
+#sb_list {
+  grid-area: list;
 }
 
 @media screen and (min-width: 36rem) {

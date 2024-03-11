@@ -40,12 +40,20 @@ function density_color(density) {
 }
 
 function make_styles() {
-    let boundary = {
+    let county = {
         fill: true,
-        fillOpacity: 0.2,
+        fillColor: "#bbb",
+        fillOpacity: 1,
         weight: 0.1,
         color: '#000',
-        opacity: 0.6,
+        dashArray: "1 2",
+    };
+    let city = {
+        fill: true,
+        fillColor: "#bbb",
+        fillOpacity: 1,
+        weight: 0.15,
+        color: '#000',
     };
     let water = {
         fill: true,
@@ -108,8 +116,8 @@ function make_styles() {
         dashArray: "1 1.5",
     };
     return {
-        county: Object.assign(boundary, { fillColor: '#f8f4f2' }),
-        city: Object.assign(boundary, { fillColor: '#f1eee8' }),
+        county: county,
+        city: city,
         lake: water,
         river: water,
         water: water,
