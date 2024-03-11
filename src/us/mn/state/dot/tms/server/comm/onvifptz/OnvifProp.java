@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2023  Minnesota Department of Transportation
+ * Copyright (C) 2016-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ abstract public class OnvifProp extends ControllerProperty {
 	}
 
 	/** Build and send the SOAP messages */
-	public String sendSoap() {
+	public String sendSoap() throws IOException {
 		// if no cmd items, nothing to do
 		if (cmd == null || cmd.length == 0) {
 			return "No cmd specified";
