@@ -103,17 +103,25 @@ button.go_link {
 }
 #sidebar {
   position: relative;
-  display: grid;
-  grid-template-columns: repeat(5, auto);
-  grid-template-areas: "label  resource resource config fullscreen"
-                       "search search   state    state  refresh";
-                       "list   list     list     list   list";
   user-select: none;
   flex: 0 1 100%;
   margin: 0.2rem;
   background-image: url(iris.svg);
   background-repeat: no-repeat;
   background-position: center;
+}
+#sb_div {
+  width: 100%;
+  display: grid;
+  gap: 0.1rem;
+  justify-content: space-around;
+  justify-items: center;
+  align-content: space-around;
+  align-items: center;
+  grid-template-columns: repeat(5, auto);
+  grid-template-areas: "label  resource resource config fullscreen"
+                       "search search   state    state  refresh";
+                       "list   list     list     list   list";
 }
 #sb_label {
   grid-area: label;
@@ -138,6 +146,8 @@ button.go_link {
 }
 #sb_list {
   grid-area: list;
+  flex: 0 1 100%;
+  overflow-y: auto;
 }
 
 @media screen and (min-width: 36rem) {
@@ -148,17 +158,6 @@ button.go_link {
   #sidebar {
     flex: 2 0 40%;
   }
-}
-
-.sb_div {
-  display: inline;
-  margin: 0.1rem;
-}
-
-#sb_list {
-  flex: 0 1 100%;
-  margin: 0.1rem;
-  overflow-y: auto;
 }
 
 #ob_close {
@@ -289,7 +288,7 @@ button.go_link {
   flex-wrap: wrap;
   justify-content: space-between;
   list-style: none;
-  padding: 0.2rem;
+  padding: 0;
   margin: 0;
 }
 .card {
