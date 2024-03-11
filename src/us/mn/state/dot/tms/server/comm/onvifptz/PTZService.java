@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2023  Minnesota Department of Transportation
+ * Copyright (C) 2016-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.onvifptz;
 
+import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -48,7 +49,7 @@ public class PTZService extends Service {
 	}
 
 	/** Gets the list of existing PTZ configurations and their constraints on the device */
-	public String getConfigurations() {
+	public String getConfigurations() throws IOException {
 		Document doc = getConfigurationsDocument();
 		return sendRequestDocument(doc);
 	}
@@ -74,7 +75,7 @@ public class PTZService extends Service {
 	 *
 	 * @param cToken reference token to the relevant PTZ configuration
 	 */
-	public String getConfigurationOptions(String cToken) {
+	public String getConfigurationOptions(String cToken) throws IOException {
 		Document doc = getConfigurationOptionsDocument(cToken);
 		return sendRequestDocument(doc);
 	}
@@ -91,7 +92,7 @@ public class PTZService extends Service {
 	}
 
 	/** Gets the descriptions of available PTZ nodes */
-	public String getNodes() {
+	public String getNodes() throws IOException {
 		Document doc = getNodesDocument();
 		return sendRequestDocument(doc);
 	}
@@ -116,7 +117,7 @@ public class PTZService extends Service {
 	 *
 	 * @param nToken reference token to the relevant PTZ node
 	 */
-	public String getNode(String nToken) {
+	public String getNode(String nToken) throws IOException {
 		Document doc = getNodeDocument(nToken);
 		return sendRequestDocument(doc);
 	}
@@ -158,7 +159,9 @@ public class PTZService extends Service {
 	 * @param y       the y value (tilt speed) of the move [-1.0, 1.0]
 	 * @param z       the zoom speed of the move [-1.0, 1.0]
 	 */
-	public String continuousMove(String profile, float x, float y, float z) {
+	public String continuousMove(String profile, float x, float y, float z)
+		throws IOException
+	{
 		Document doc = getContinuousMoveDocument(profile, x, y, z);
 		return sendRequestDocument(doc);
 	}
@@ -199,7 +202,9 @@ public class PTZService extends Service {
 	 * @param y the y value (tilt) of the move [-1.0, 1.0]
 	 * @param z the zoom of the move [-1.0, 1.0]
 	 */
-	public String relativeMove(String profile, float x, float y, float z) {
+	public String relativeMove(String profile, float x, float y, float z)
+		throws IOException
+	{
 		Document doc = getRelativeMoveDocument(profile, x, y, z);
 		return sendRequestDocument(doc);
 	}
@@ -223,7 +228,7 @@ public class PTZService extends Service {
 	 * Gets the list of PTZ presets for the PTZNode of the selected
 	 * MediaProfile; currently uses hardcoded profile token.
 	 */
-	public String getPresets(String profile) {
+	public String getPresets(String profile) throws IOException {
 		Document doc = getPresetsDocument(profile);
 		return sendRequestDocument(doc);
 	}
@@ -252,7 +257,9 @@ public class PTZService extends Service {
 	 * @param profileToken reference to the media profile
 	 * @param pToken       reference token to the saved PTZ preset
 	 */
-	public boolean presetExists(String profileToken, String pToken) {
+	public boolean presetExists(String profileToken, String pToken)
+		throws IOException
+	{
 		Document presets = DOMUtils.getDocument(getPresets(profileToken));
 		if (presets == null) {
 			log("Error parsing presets response");
@@ -272,7 +279,9 @@ public class PTZService extends Service {
 	 * @param profileToken reference to the media profile
 	 * @param pName        name of the saved PTZ preset
 	 */
-	public String getPresetToken(String profileToken, String pName) {
+	public String getPresetToken(String profileToken, String pName)
+		throws IOException
+	{
 		Document presets = DOMUtils.getDocument(getPresets(profileToken));
 		if (presets == null) {
 			log("Error parsing presets response");
@@ -296,7 +305,9 @@ public class PTZService extends Service {
 	 * @param profileToken reference to the media profile
 	 * @param pToken       reference token to the saved PTZ preset
 	 */
-	public String gotoPreset(String profileToken, String pToken) {
+	public String gotoPreset(String profileToken, String pToken)
+		throws IOException
+	{
 		if (!presetExists(profileToken, pToken))
 			return null;
 		Document doc = gotoPresetDocument(profileToken, pToken);
@@ -328,7 +339,9 @@ public class PTZService extends Service {
 	 * @param profileToken reference to the media profile
 	 * @param pToken       unique reference token for the PTZ preset
 	 */
-	public String removePreset(String profileToken, String pToken) {
+	public String removePreset(String profileToken, String pToken)
+		throws IOException
+	{
 		Document doc = removePresetDocument(profileToken, pToken);
 		return sendRequestDocument(doc);
 	}
@@ -366,7 +379,9 @@ public class PTZService extends Service {
 	 * @param pToken       unique reference token for the PTZ preset
 	 * @param pName        name for PTZ preset
 	 */
-	public String setPreset(String profileToken, String pToken, String pName) {
+	public String setPreset(String profileToken, String pToken, String pName)
+		throws IOException
+	{
 		// won't save if other preset uses pName already
 		String presetToken = getPresetToken(profileToken, pName);
 		String removeResp = "";
@@ -378,7 +393,9 @@ public class PTZService extends Service {
 	}
 
 	/** Saves current position to a preset - uses token as default name */
-	public String setPreset(String profileToken, String pToken) {
+	public String setPreset(String profileToken, String pToken)
+		throws IOException
+	{
 		return setPreset(profileToken, pToken, pToken);
 	}
 
@@ -406,7 +423,7 @@ public class PTZService extends Service {
 	}
 
 	/** Stops all ongoing PTZ movements */
-	public String stop(String profile) {
+	public String stop(String profile) throws IOException {
 		Document doc = getStopDocument(profile);
 		return sendRequestDocument(doc);
 	}
@@ -440,7 +457,9 @@ public class PTZService extends Service {
 	 * @param profileToken reference to the media profile
 	 * @param state        the requested state ("On", "Off") of the wiper
 	 */
-	public String setWiper(String profileToken, String state) {
+	public String setWiper(String profileToken, String state)
+		throws IOException
+	{
 		Document doc = getAuxiliaryCommandDocument(profileToken, "Wiper", state);
 		return sendRequestDocument(doc);
 	}
@@ -448,7 +467,7 @@ public class PTZService extends Service {
 	/**
 	 * Sets the wiper on and off immediately to emulate a single wiper action
 	 */
-	public String wiperOneshot(String profileToken) {
+	public String wiperOneshot(String profileToken) throws IOException {
 		String onResponse = setWiper(profileToken, "On");
 		String offResponse = setWiper(profileToken, "Off");
 		return onResponse + offResponse;

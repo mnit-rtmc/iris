@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2023  Minnesota Department of Transportation
+ * Copyright (C) 2016-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.onvifptz;
 
+import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Document;
@@ -48,13 +49,15 @@ public class DeviceService extends Service {
 	}
 
 	/** Get information about services on the device, including service capabilities */
-	public String getServices() {
+	public String getServices() throws IOException {
 		Document doc = getServicesDocument();
 		return sendRequestDocument(doc);
 	}
 
 	/** Gets a service address by its namespace */
-	public String getServiceAddr(String namespace, String servicesRes) {
+	public String getServiceAddr(String namespace, String servicesRes)
+		throws IOException
+	{
 		if (servicesRes == null || servicesRes.isEmpty()) {
 			servicesRes = getServices();
 		}
@@ -75,17 +78,17 @@ public class DeviceService extends Service {
 	}
 
 	/** Get the PTZ binding address */
-	public String getPTZBinding(String services) {
+	public String getPTZBinding(String services) throws IOException {
 		return getServiceAddr("http://www.onvif.org/ver20/ptz/wsdl", services);
 	}
 
 	/** Get the media binding address */
-	public String getMediaBinding(String services) {
+	public String getMediaBinding(String services) throws IOException {
 		return getServiceAddr("http://www.onvif.org/ver10/media/wsdl", services);
 	}
 
 	/** Get the imaging binding address */
-	public String getImagingBinding(String services) {
+	public String getImagingBinding(String services) throws IOException {
 		return getServiceAddr("http://www.onvif.org/ver20/imaging/wsdl", services);
 	}
 
@@ -101,7 +104,7 @@ public class DeviceService extends Service {
 	}
 
 	/** Get the scope parameters of the device */
-	public String getScopes() {
+	public String getScopes() throws IOException {
 		Document doc = getScopesDocument();
 		return sendRequestDocument(doc);
 	}
@@ -118,7 +121,7 @@ public class DeviceService extends Service {
 	}
 
 	/** Get the capabilities of the device service */
-	public String getServiceCapabilities() {
+	public String getServiceCapabilities() throws IOException {
 		Document doc = getServiceCapabilitiesDocument();
 		return sendRequestDocument(doc);
 	}
@@ -149,7 +152,7 @@ public class DeviceService extends Service {
 	}
 
 	/** Reboots the device */
-	public String systemReboot() {
+	public String systemReboot() throws IOException {
 		Document doc = getSystemRebootDocument();
 		return sendRequestDocument(doc);
 	}

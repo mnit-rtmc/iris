@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2023  Minnesota Department of Transportation
+ * Copyright (C) 2016-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ public abstract class Service {
 		try {
 			db = dbf.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
+			log("getBaseDocument: " + e.getMessage());
 			return null;
 		}
 
@@ -164,51 +164,54 @@ public abstract class Service {
 	 * @param doc the XML DOM Document to send
 	 * @return the response from the device, as a String
 	 */
-	public String sendRequestDocument(Document doc) {
+	public String sendRequestDocument(Document doc) throws IOException {
 		if (endpoint == null) return "No service endpoint specified";
 		String resp = "";
-		try {
-			URL url = new URL(endpoint);
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestMethod("POST");
-			connection.setDoOutput(true);
-			connection.setRequestProperty("Content-Type", "application/soap+xml; charset=utf-8");
 
-			if (!"".equals(username)) {
+		URL url = new URL(endpoint);
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		connection.setRequestMethod("POST");
+		connection.setDoOutput(true);
+		connection.setRequestProperty("Content-Type", "application/soap+xml; charset=utf-8");
+
+		if (!"".equals(username)) {
+			try {
 				addSecurityHeaderDocument(doc);
-			} else {
-				log("Sending unauthenticated request...");
 			}
-
-			String soapRequest = DOMUtils.getString(doc);
-			if (soapRequest == null) return "Could not convert document to string";
-			log("\nSending soapRequest to " + endpoint + ":\n" + soapRequest);
-
-			try (OutputStream os = connection.getOutputStream()) {
-				byte[] input = soapRequest.getBytes("utf-8");
-				os.write(input, 0, input.length);
+			catch (Exception e) {
+				log("sendRequestDocument: " + e.getMessage());
+				return "Could not add security header";
 			}
-
-			int responseCode = connection.getResponseCode();
-			if (responseCode == HttpURLConnection.HTTP_OK) {
-				try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-					String inputLine;
-					StringBuilder response = new StringBuilder();
-					while ((inputLine = in.readLine()) != null) {
-						response.append(inputLine);
-					}
-
-					// Process the response here (XML parsing, etc.)
-					resp = response.toString();
-				}
-			} else {
-				resp = "Request failed. Response code: " + responseCode;
-			}
-
-			connection.disconnect();
-		} catch (Exception e) {
-			e.printStackTrace();
+		} else {
+			log("Sending unauthenticated request...");
 		}
+
+		String soapRequest = DOMUtils.getString(doc);
+		if (soapRequest == null) return "Could not convert document to string";
+		log("\nSending soapRequest to " + endpoint + ":\n" + soapRequest);
+
+		try (OutputStream os = connection.getOutputStream()) {
+			byte[] input = soapRequest.getBytes("utf-8");
+			os.write(input, 0, input.length);
+		}
+
+		int responseCode = connection.getResponseCode();
+		if (responseCode == HttpURLConnection.HTTP_OK) {
+			try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+				String inputLine;
+				StringBuilder response = new StringBuilder();
+				while ((inputLine = in.readLine()) != null) {
+					response.append(inputLine);
+				}
+				// Process the response here (XML parsing, etc.)
+				resp = response.toString();
+			}
+		} else {
+			resp = "Request failed. Response code: " + responseCode;
+		}
+
+		connection.disconnect();
+
 		return resp;
 	}
 }
