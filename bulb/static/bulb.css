@@ -114,13 +114,9 @@ button.go_link {
   width: 100%;
   display: grid;
   gap: 0.1rem;
-  justify-content: space-around;
-  justify-items: center;
-  align-content: space-around;
-  align-items: center;
   grid-template-columns: repeat(5, auto);
   grid-template-areas: "label  resource resource config fullscreen"
-                       "search search   state    state  refresh";
+                       "search search   state    state  refresh"
                        "list   list     list     list   list";
 }
 #sb_label {
@@ -146,7 +142,6 @@ button.go_link {
 }
 #sb_list {
   grid-area: list;
-  flex: 0 1 100%;
   overflow-y: auto;
 }
 
