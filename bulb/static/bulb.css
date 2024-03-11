@@ -114,15 +114,12 @@ button.go_link {
   width: 100%;
   display: grid;
   gap: 0.1rem;
-  grid-template-columns: repeat(5, auto);
-  grid-template-areas: "label  resource resource config fullscreen"
-                       "search search   state    state  refresh"
-                       "list   list     list     list   list";
+  grid-template-columns: repeat(4, auto);
+  grid-template-areas: "resource resource config fullscreen"
+                       "search   state    state  refresh"
+                       "list     list     list   list";
 }
 #sb_label {
-  grid-area: label;
-}
-#sb_resource {
   grid-area: resource;
 }
 #sb_config {
