@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2023  Minnesota Department of Transportation
+ * Copyright (C) 2016-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.onvifptz;
 
+import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -47,7 +48,7 @@ public class MediaService extends Service {
 	}
 
 	/** Gets the list of media profiles for the device */
-	public String getProfiles() {
+	public String getProfiles() throws IOException {
 		Document doc = getProfilesDocument();
 		return sendRequestDocument(doc);
 	}
@@ -64,7 +65,7 @@ public class MediaService extends Service {
 	}
 
 	/** Gets the list of available physical video inputs for the device */
-	public String getVideoSources() {
+	public String getVideoSources() throws IOException {
 		Document doc = getVideoSourcesDocument();
 		return sendRequestDocument(doc);
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2023  Minnesota Department of Transportation
+ * Copyright (C) 2016-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import java.io.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
@@ -26,6 +27,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Document;
 
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * Class for XML document utilities
@@ -48,13 +50,14 @@ public class DOMUtils {
 
 			return w.toString();
 		} catch (TransformerException e) {
-			e.printStackTrace();
+			OnvifPTZPoller.slog("DOMUtils.getString: " +
+				e.getMessage());
 		}
 		return null;
 	}
 
 	/** Gets Document from string */
-	public static Document getDocument(String s) {
+	public static Document getDocument(String s) throws IOException {
 		if (s == null) return null;
 
 		Document doc = null;
@@ -65,8 +68,10 @@ public class DOMUtils {
 			InputSource is = new InputSource();
 			is.setCharacterStream(new StringReader(s));
 			doc = db.parse(is);
-		} catch (Exception e) {
-			e.printStackTrace();
+		}
+		catch (ParserConfigurationException | SAXException e) {
+			OnvifPTZPoller.slog("DOMUtils.getDocument: " +
+				e.getMessage());
 			return null;
 		}
 
