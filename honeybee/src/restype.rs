@@ -77,8 +77,8 @@ impl TryFrom<&str> for ResType {
         Self::iter()
             .find(|rt| {
                 rt.lut_channel().is_some_and(|ch| ch == type_n)
-                    || rt.listen_min().is_some_and(|ch| ch == type_n)
-                    || rt.listen_full().is_some_and(|ch| ch == type_n)
+                    || rt.listen_pri().is_some_and(|ch| ch == type_n)
+                    || rt.listen_sec().is_some_and(|ch| ch == type_n)
             })
             .ok_or(())
     }
@@ -164,8 +164,8 @@ impl ResType {
         }
     }
 
-    /// Get the channel to listen for minimal attributes
-    pub const fn listen_min(self) -> Option<&'static str> {
+    /// Get the primary channel to listen for attributes
+    pub const fn listen_pri(self) -> Option<&'static str> {
         use ResType::*;
         match self {
             Alarm => Some("alarm"),
@@ -205,8 +205,8 @@ impl ResType {
         }
     }
 
-    /// Get the channel to listen for full attributes
-    pub const fn listen_full(self) -> Option<&'static str> {
+    /// Get the secondary channel to listen for attributes
+    pub const fn listen_sec(self) -> Option<&'static str> {
         use ResType::*;
         match self {
             Beacon => Some("beacon$1"),
@@ -230,7 +230,7 @@ impl ResType {
     /// Get name as string slice
     pub fn as_str(self) -> &'static str {
         self.lut_channel()
-            .or(self.listen_min().or(self.listen_full()))
+            .or(self.listen_pri().or(self.listen_sec()))
             .unwrap()
     }
 

@@ -12,10 +12,10 @@ alarms, such as [MnDOT-170].
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/alarm` (minimal)
-* `iris/api/alarm/{name}` (full)
+* `iris/api/alarm` (primary)
+* `iris/api/alarm/{name}`
 
-| Access       | Minimal                 | Full          |
+| Access       | Primary                 | Secondary     |
 |--------------|-------------------------|---------------|
 | 👁️  View      | name, state             | trigger\_time |
 | 🔧 Configure | description, controller | pin           |

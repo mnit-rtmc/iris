@@ -8,10 +8,10 @@ pictographs, interstate shields or other signs.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/graphic` (minimal)
+* `iris/api/graphic` (primary)
 * `iris/api/gif/{name}.gif`
 
-| Access  | Minimal      |
+| Access  | Primary      |
 |---------|--------------|
 | 👁️  View | name, number |
 

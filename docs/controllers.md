@@ -11,14 +11,14 @@ In either case, a controller is required for any communication to a device.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/controller` (minimal)
-* `iris/api/controller/{name}` (full)
+* `iris/api/controller` (primary)
+* `iris/api/controller/{name}`
 * `iris/api/controller_io/{name}`
 
 The read-only `controller_io` resource returns an array of objects consisting
 of `pin`, `name` and `resource_n` of associated [devices](#devices).
 
-| Access       | Minimal                              | Full          |
+| Access       | Primary                              | Secondary     |
 |--------------|--------------------------------------|---------------|
 | 👁️  View      | name, location, setup, fail\_time    | geo\_loc      |
 | 👉 Operate   |                                      | device\_req † |
@@ -92,9 +92,9 @@ Controllers can have an associated cabinet style, used for MnDOT-170 and Natch
 * `iris/api/cabinet_style`
 * `iris/api/cabinet_style/{name}`
 
-| Access       | Minimal    | Full |
-|--------------|------------|------|
-| 👁️  View      | name       |      |
+| Access       | Primary    | Secondary |
+|--------------|------------|-----------|
+| 👁️  View      | name       |           |
 | 🔧 Configure |            | police\_panel\_pin\_1, police\_panel\_pin\_2, watchdog\_reset\_pin\_1, watchdog\_reset\_pin\_2, dip |
 
 </details>

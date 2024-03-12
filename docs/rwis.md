@@ -8,14 +8,14 @@ and [Org-815] protocols can collect RWIS data.
 <summary>API Resources</summary>
 
 * `iris/rwis` (see below)
-* `iris/api/weather_sensor` (minimal)
-* `iris/api/weather_sensor/{name}` (full)
+* `iris/api/weather_sensor` (primary)
+* `iris/api/weather_sensor/{name}`
 
-| Access       | Minimal                  | Full |
-|--------------|--------------------------|------|
+| Access       | Primary                  | Secondary |
+|--------------|--------------------------|-----------|
 | 👁️  View      | name, location           | geo\_loc, settings, sample, sample\_time |
-| 💡 Manage    | site\_id, alt\_id, notes |      |
-| 🔧 Configure | controller               | pin  |
+| 💡 Manage    | site\_id, alt\_id, notes |           |
+| 🔧 Configure | controller               | pin       |
 
 </details>
 

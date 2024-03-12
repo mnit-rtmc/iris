@@ -5,10 +5,10 @@ A font is a set of bitmapped glyphs for displaying text on a [DMS].
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/font` (minimal)
+* `iris/api/font` (primary)
 * `iris/api/tfon/{name}.tfon`
 
-| Access  | Minimal           |
+| Access  | Primary           |
 |---------|-------------------|
 | 👁️  View | name, font_number |
 

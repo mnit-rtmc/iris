@@ -8,10 +8,10 @@ established.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/sign_config` (minimal)
-* `iris/api/sign_config/{name}` (full)
+* `iris/api/sign_config` (primary)
+* `iris/api/sign_config/{name}`
 
-| Access       | Minimal |
+| Access       | Primary |
 |--------------|---------|
 | 👁️  View      | name, face\_width, face\_height, border\_horiz, border\_vert, pitch\_horiz, pitch\_vert, pixel\_width, pixel\_height, char\_width, char\_height, monochrome\_foreground, monochrome\_background, color\_scheme |
 | 🔧 Configure | default\_font, module\_width, module\_height |
@@ -41,9 +41,9 @@ communication is established.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/sign_detail` (minimal)
+* `iris/api/sign_detail` (primary)
 
-| Access  | Minimal |
+| Access  | Primary |
 |---------|---------|
 | 👁️  View | name, dms\_type, portable, technology, sign\_access, legend, beacon\_type, hardware\_make, hardware\_model, software\_make, software\_model, supported\_tags, max\_pages, max\_multi\_len, beacon\_activation\_flag, pixel\_service\_flag |
 

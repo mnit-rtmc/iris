@@ -23,10 +23,10 @@ The following features are supported:
 
 * `iris/dms_message`
 * `iris/dms_pub`
-* `iris/api/dms` (minimal)
-* `iris/api/dms/{name}` (full)
+* `iris/api/dms` (primary)
+* `iris/api/dms/{name}`
 
-| Access       | Minimal                                  | Full          |
+| Access       | Primary                                  | Secondary     |
 |--------------|------------------------------------------|---------------|
 | 👁️  View      | name, location, msg\_current, has_faults | sign\_config, sign\_detail, geo\_loc, msg\_sched, expire\_time, status, stuck\_pixels |
 | 👉 Operate   |                                          | msg\_user     |

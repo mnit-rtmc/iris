@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -689,7 +689,7 @@ impl Dms {
                     return Some(faults);
                 }
             }
-            // full attribute doesn't match minimal has_faults?!
+            // secondary attribute doesn't match primary has_faults?!
             Some("has_faults")
         } else {
             None

@@ -273,14 +273,14 @@ impl Resource {
         use Resource::*;
         match self {
             ParkingAreaDyn | ParkingAreaArch | Rnode | Road | RoadFull => {
-                self.res_type().listen_full()
+                self.res_type().listen_sec()
             }
             BeaconState | CommProtocol | Condition | Direction | Font
             | GateArmInterlock | GateArmState | Graphic | LaneUseIndication
             | LcsLock | ResourceType | RoadModifier => {
                 self.res_type().lut_channel()
             }
-            _ => self.res_type().listen_min(),
+            _ => self.res_type().listen_pri(),
         }
     }
 

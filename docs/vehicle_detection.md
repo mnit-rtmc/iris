@@ -20,10 +20,10 @@ called `station_sample` are generated.
 <summary>API Resources</summary>
 
 * `iris/detector_pub`
-* `iris/api/detector` (minimal)
-* `iris/api/detector/{name}` (full)
+* `iris/api/detector` (primary)
+* `iris/api/detector/{name}`
 
-| Access       | Minimal     | Full                       |
+| Access       | Primary     | Secondary                  |
 |--------------|-------------|----------------------------|
 | 👁️  View      | name, label | auto\_fail                 |
 | 👉 Operate   |             | field\_length, force\_fail |

@@ -64,11 +64,11 @@ roles which do not have any access to the [permission], [role] and [user] types.
 Restricted resources can be accessed using standard http methods:
 
 - `GET iris/api/{type}`: Get a JSON array of all objects of `{type}`, with only
-  *minimal* attributes -- those needed for searching and displaying compact
+  *primary* attributes -- those needed for searching and displaying compact
   cards.  The response also contains an ETag header, derived from the file's
   *modified* metadata, encoded in hexadecimal.
-- `GET iris/api/{type}/{name}`: Get a single object as JSON, with *minimal* and
-  *full* attributes
+- `GET iris/api/{type}/{name}`: Get a single object as JSON, with *primary* and
+  *secondary* attributes
 - `POST iris/api/{type}`: Create a new object of the `{type}`.  Body contains
                           required attributes as JSON
 - `PATCH iris/api/{type}/{name}`: Update attributes of one object, with JSON

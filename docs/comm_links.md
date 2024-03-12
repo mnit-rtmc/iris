@@ -8,10 +8,10 @@ A **comm link** is a network connection to field [device]s or external system
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/comm_link` (minimal)
-* `iris/api/comm_link/{name}` (full)
+* `iris/api/comm_link` (primary)
+* `iris/api/comm_link/{name}`
 
-| Access       | Minimal                        |
+| Access       | Primary                        |
 |--------------|--------------------------------|
 | 👁️  View      | name, connected                |
 | 💡 Manage    | poll\_enabled                  |
