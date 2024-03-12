@@ -20,6 +20,7 @@ called `station_sample` are generated.
 <summary>API Resources</summary>
 
 * `iris/detector_pub`
+* `iris/station_sample`: collected station data for most recent period
 * `iris/api/detector` (primary)
 * `iris/api/detector/{name}`
 
@@ -127,7 +128,7 @@ RTMS [G4] vlog         | N/A             | [vlog]
 [NTCIP]                | 0-255 sec       | Count, Occupancy
 
 For protocols which allow the binning intereval to be adjusted, it will be set
-to the poll [period] of the [comm config].
+to the [poll period] of the [comm config].
 
 ## Auto Fail
 
@@ -352,7 +353,7 @@ _missing_.
 [Natch]: protocols.html#natch
 [NTCIP]: protocols.html#ntcip
 [Parking area]: parking_areas.html
-[period]: protocols.html#poll-period
+[poll period]: comm_config.html#setup
 [protocols]: protocols.html
 [r_node]: road_topology.html#r_nodes
 [Ramp metering]: ramp_meters.html

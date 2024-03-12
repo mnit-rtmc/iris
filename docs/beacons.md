@@ -15,6 +15,7 @@ Beacons can be connected to controllers using one of these protocols:
 <details>
 <summary>API Resources</summary>
 
+* `iris/beacon_state` (lookup table)
 * `iris/api/beacon` (primary)
 * `iris/api/beacon/{name}`
 
