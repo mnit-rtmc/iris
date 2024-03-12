@@ -8,19 +8,19 @@ data.
 Notifications are sent by trigger functions when records are changed.  They
 are used to implement the [REST API].
 
-The CHANNEL matches the name of a table.  After INSERT or DELETE, and when an
-UPDATE changes any *primary* attribute, a notification is sent to that CHANNEL
-(with an empty PAYLOAD).  Some channels are also notified when an associated
-record is updated:
+The *primary* CHANNEL matches the name of a table.  After INSERT or DELETE,
+and when an UPDATE changes any *primary* attribute, a notification is sent to
+that CHANNEL (with an empty PAYLOAD).  Some channels are also notified when an
+associated record is updated:
 
 - __(G)__: `geo_loc`
 - __(C)__: `controller_io`
 - __(P)__: `device_preset`
 - __(H)__: `hashtag`
 
-Some tables have a secondary CHANNEL with `$1` appended to the name.  These
-are notified on *secondary* and *primary* updates, with a PAYLOAD containing
-the __name__ of the updated record.
+Some tables have a *secondary* CHANNEL with `$1` appended to the name.  These
+are notified on *secondary* __and__ *primary* attribute updates, with a PAYLOAD
+containing the __name__ of the updated record.
 
 *Primary* CHANNEL  | (G) | (C) | (P) | (H) | *Secondary* CHANNEL (+*primary*)
 -------------------|-----|-----|-----|-----|---------------------------------
