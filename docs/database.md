@@ -5,13 +5,13 @@ data.
 
 ## Notifications
 
-Notifications are sent by trigger functions when records are changed.  They
-are used to implement the [REST API].
+Database notifications are sent by trigger functions when records are changed.
+The [honeybee] server listens for them as part of the [REST API].
 
 The *primary channel* matches the name of a table.  After `INSERT` or `DELETE`,
-and when an `UPDATE` changes any *primary* attribute, a notification is sent to
-that channel (with an empty payload).  Associated tables with foreign-key
-references also cause notifications on `UPDATE`:
+and when an `UPDATE` changes any *primary* attribute, a notification is sent
+(with an empty payload).  Associated tables with foreign-key references also
+trigger notifications on `UPDATE`:
 
 - `geo_loc` __(G)__
 - `controller_io` __(C)__
@@ -123,6 +123,7 @@ downgrade is required, the database should be restored from a backup and the
 IRIS rpm should be reinstalled.
 
 
+[honeybee]: https://github.com/mnit-rtmc/iris/tree/master/honeybee
 [PostgreSQL]: http://www.postgresql.org
 [REST API]: rest_api.html
 [semver]: https://semver.org
