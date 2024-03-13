@@ -10,13 +10,13 @@ are used to implement the [REST API].
 
 The *primary channel* matches the name of a table.  After `INSERT` or `DELETE`,
 and when an `UPDATE` changes any *primary* attribute, a notification is sent to
-that channel (with an empty payload).  Some channels are also notified when an
-associated record is updated:
+that channel (with an empty payload).  Associated tables with foreign-key
+references also cause notifications on `UPDATE`:
 
-- __(G)__: `geo_loc`
-- __(C)__: `controller_io`
-- __(P)__: `device_preset`
-- __(H)__: `hashtag`
+- `geo_loc` __(G)__
+- `controller_io` __(C)__
+- `device_preset` __(P)__
+- `hashtag` __(H)__
 
 Some tables have a *secondary channel* with `$1` appended to the name.  These
 are notified on *secondary* __and__ *primary* attribute updates, with a payload
