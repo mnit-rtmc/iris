@@ -104,6 +104,9 @@ pub struct Dms {
     pub has_faults: Option<bool>,
     // full attributes
     pub pin: Option<u32>,
+    pub static_graphic: Option<String>,
+    pub beacon: Option<String>,
+    pub preset: Option<String>,
     pub sign_config: Option<String>,
     pub sign_detail: Option<String>,
     pub msg_sched: Option<String>,

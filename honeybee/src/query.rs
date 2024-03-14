@@ -196,7 +196,7 @@ SELECT json_strip_nulls(row_to_json(r))::text FROM (\
 /// SQL query for one DMS (secondary)
 pub const DMS_ONE: &str = "\
   SELECT d.name, location, geo_loc, controller, pin, notes, hashtags, \
-         sign_config, sign_detail, status, \
+         static_graphic, beacon, preset, sign_config, sign_detail, status, \
          char_length(status->>'faults') > 0 AS has_faults, \
          msg_user, msg_sched, msg_current, expire_time, stuck_pixels \
   FROM iris.dms d \
