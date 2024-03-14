@@ -77,8 +77,7 @@ impl TryFrom<&str> for ResType {
         Self::iter()
             .find(|rt| {
                 rt.lut_channel().is_some_and(|ch| ch == type_n)
-                    || rt.listen_pri().is_some_and(|ch| ch == type_n)
-                    || rt.listen_sec().is_some_and(|ch| ch == type_n)
+                    || rt.listen().is_some_and(|ch| ch == type_n)
             })
             .ok_or(())
     }
@@ -164,8 +163,8 @@ impl ResType {
         }
     }
 
-    /// Get the primary channel to listen for attributes
-    pub const fn listen_pri(self) -> Option<&'static str> {
+    /// Get the channel to listen for attributes
+    pub const fn listen(self) -> Option<&'static str> {
         use ResType::*;
         match self {
             Alarm => Some("alarm"),
@@ -191,6 +190,8 @@ impl ResType {
             ParkingArea => Some("parking_area"),
             Permission => Some("permission"),
             RampMeter => Some("ramp_meter"),
+            Rnode => Some("r_node"),
+            Road => Some("road"),
             Role => Some("role"),
             SignConfig => Some("sign_config"),
             SignDetail => Some("sign_detail"),
@@ -205,33 +206,9 @@ impl ResType {
         }
     }
 
-    /// Get the secondary channel to listen for attributes
-    pub const fn listen_sec(self) -> Option<&'static str> {
-        use ResType::*;
-        match self {
-            Beacon => Some("beacon$1"),
-            Camera => Some("camera$1"),
-            CommLink => Some("comm_link$1"),
-            Controller => Some("controller$1"),
-            Detector => Some("detector$1"),
-            Dms => Some("dms$1"),
-            GateArmArray => Some("gate_arm_array$1"),
-            ParkingArea => Some("parking_area$1"),
-            RampMeter => Some("ramp_meter$1"),
-            Rnode => Some("r_node$1"),
-            Road => Some("road$1"),
-            TagReader => Some("tag_reader$1"),
-            VideoMonitor => Some("video_monitor$1"),
-            WeatherSensor => Some("weather_sensor$1"),
-            _ => None,
-        }
-    }
-
     /// Get name as string slice
     pub fn as_str(self) -> &'static str {
-        self.lut_channel()
-            .or(self.listen_pri().or(self.listen_sec()))
-            .unwrap()
+        self.lut_channel().or(self.listen()).unwrap()
     }
 
     /// Get the SQL query one record

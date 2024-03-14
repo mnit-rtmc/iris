@@ -110,7 +110,7 @@ impl Future for NotificationHandler {
     }
 }
 
-/// Send a notify event
+/// Send initial notify event
 fn send_event(tx: &UnboundedSender<NotifyEvent>, chan: &str) {
     let ne = NotifyEvent {
         channel: chan.to_string(),

@@ -272,15 +272,12 @@ impl Resource {
     pub const fn listen(self) -> Option<&'static str> {
         use Resource::*;
         match self {
-            ParkingAreaDyn | ParkingAreaArch | Rnode | Road | RoadFull => {
-                self.res_type().listen_sec()
-            }
             BeaconState | CommProtocol | Condition | Direction | Font
             | GateArmInterlock | GateArmState | Graphic | LaneUseIndication
             | LcsLock | ResourceType | RoadModifier => {
                 self.res_type().lut_channel()
             }
-            _ => self.res_type().listen_pri(),
+            _ => self.res_type().listen(),
         }
     }
 
@@ -398,6 +395,7 @@ impl Resource {
         segments: &mut SegmentState,
         name: &str,
     ) -> Result<()> {
+        log::trace!("query_one: {self:?} {name}");
         use Resource::*;
         match self {
             Rnode => query_one_node(client, segments, name).await,
@@ -406,7 +404,7 @@ impl Resource {
                 self.query_file(client, self.path()).await
             }
             _ => {
-                log::warn!("query_one: {self:?} {name}");
+                // TODO: send SSE message
                 Ok(())
             }
         }
