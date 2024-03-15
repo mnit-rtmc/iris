@@ -15,6 +15,7 @@
 use crate::access::Access;
 use crate::cred::Credentials;
 use crate::error::{Error, Result};
+use crate::listener::NotifyEvent;
 use crate::permission;
 use crate::restype::ResType;
 use crate::sonar::{self, Error as SonarError, Name};
@@ -32,10 +33,21 @@ use serde_json::Value;
 use std::time::SystemTime;
 use time::Duration;
 use tokio::fs::metadata;
+use tokio::sync::broadcast::Sender;
 use tokio_postgres::types::ToSql;
 use tokio_util::io::ReaderStream;
 use tower_sessions::{Expiry, Session, SessionManagerLayer};
 use tower_sessions_moka_store::MokaStore;
+
+/// Session key for channels
+const CHANNELS_KEY: &str = "channels";
+
+/// Honeybee server state
+#[derive(Clone)]
+pub struct Honey {
+    pub db: Database,
+    pub sender: Sender<NotifyEvent>,
+}
 
 /// No-header response result
 type Resp0 = std::result::Result<StatusCode, StatusCode>;
@@ -57,28 +69,45 @@ fn json_resp(json: String) -> Resp1 {
     Ok(([(header::CONTENT_TYPE, "application/json")], json))
 }
 
-/// Build app router
-pub async fn build(db: Database) -> Result<Router> {
-    let store = MokaStore::new(Some(100));
-    let session_layer = SessionManagerLayer::new(store)
-        .with_name("honeybee")
-        .with_expiry(Expiry::OnInactivity(Duration::hours(4)));
-    let app = Router::new()
-        .merge(login_post(db.clone()))
-        .merge(access_get(db.clone()))
-        .merge(permission_post(db.clone()))
-        .merge(permission_router(db.clone()))
-        .merge(resource_file_get(db.clone()))
-        .merge(sonar_post(db.clone()))
-        .merge(sql_record_get(db.clone()))
-        .merge(sonar_object_patch(db.clone()))
-        .merge(sonar_object_delete(db.clone()))
-        .layer(session_layer);
-    Ok(Router::new().nest("/iris/api", app))
+impl Honey {
+    /// Build app router
+    pub async fn build_router(&self) -> Result<Router> {
+        let store = MokaStore::new(Some(100));
+        let session_layer = SessionManagerLayer::new(store)
+            .with_name("honeybee")
+            .with_expiry(Expiry::OnInactivity(Duration::hours(4)));
+        let app = Router::new()
+            .merge(login_post(self.clone()))
+            .merge(access_get(self.clone()))
+            .merge(notify_post(self.clone()))
+            .merge(notify_get(self.clone()))
+            .merge(permission_post(self.clone()))
+            .merge(permission_router(self.clone()))
+            .merge(resource_file_get(self.clone()))
+            .merge(sonar_post(self.clone()))
+            .merge(sql_record_get(self.clone()))
+            .merge(sonar_object_patch(self.clone()))
+            .merge(sonar_object_delete(self.clone()))
+            .layer(session_layer);
+        Ok(Router::new().nest("/iris/api", app))
+    }
+
+    /// Lookup access for a name
+    async fn name_access(
+        &self,
+        user: &str,
+        name: &Name,
+        access: Access,
+    ) -> Result<Access> {
+        let perm = permission::get_by_name(&self.db, user, name).await?;
+        let acc = Access::new(perm.access_n).ok_or(Error::Unauthorized)?;
+        acc.check(access)?;
+        Ok(acc)
+    }
 }
 
 /// Handle `POST` to login page
-fn login_post(db: Database) -> Router {
+fn login_post(honey: Honey) -> Router {
     async fn handler(session: Session, Json(cred): Json<Credentials>) -> Resp1 {
         log::info!("POST login");
         session
@@ -91,34 +120,101 @@ fn login_post(db: Database) -> Router {
             .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
         html_resp("<html>Authenticated</html>")
     }
-    Router::new().route("/login", post(handler)).with_state(db)
+    Router::new()
+        .route("/login", post(handler))
+        .with_state(honey)
 }
 
 /// `GET` access permissions
-fn access_get(db: Database) -> Router {
-    async fn handler(session: Session, State(db): State<Database>) -> Resp1 {
+fn access_get(honey: Honey) -> Router {
+    async fn handler(session: Session, State(honey): State<Honey>) -> Resp1 {
         log::info!("GET access");
         let cred = Credentials::load(&session).await?;
-        let perms = permission::get_by_user(&db, cred.user()).await?;
+        let perms = permission::get_by_user(&honey.db, cred.user()).await?;
         match serde_json::to_value(perms) {
             Ok(body) => json_resp(body.to_string()),
             Err(_e) => Err(StatusCode::BAD_REQUEST),
         }
     }
-    Router::new().route("/access", get(handler)).with_state(db)
+    Router::new()
+        .route("/access", get(handler))
+        .with_state(honey)
+}
+
+/// Handle `POST` to notify page
+fn notify_post(honey: Honey) -> Router {
+    async fn handler(
+        session: Session,
+        State(honey): State<Honey>,
+        Json(channels): Json<Vec<String>>,
+    ) -> Resp1 {
+        log::info!("POST notify");
+        check_view_channels(&honey, &session, &channels).await?;
+        match session.insert(CHANNELS_KEY, channels).await {
+            Ok(()) => html_resp("<html>Ok</html>"),
+            Err(_e) => Err(StatusCode::BAD_REQUEST),
+        }
+    }
+    Router::new()
+        .route("/notify", post(handler))
+        .with_state(honey)
+}
+
+/// `GET` notify events (sse)
+fn notify_get(honey: Honey) -> Router {
+    async fn handler(session: Session, State(honey): State<Honey>) -> Resp1 {
+        log::info!("GET notify");
+        let channels: Vec<String> = match session.get(CHANNELS_KEY).await {
+            Ok(Some(channels)) => channels,
+            _ => Err(StatusCode::BAD_REQUEST)?,
+        };
+        check_view_channels(&honey, &session, &channels).await?;
+        // FIXME: make SSE response
+        Err(StatusCode::BAD_REQUEST)
+    }
+    Router::new()
+        .route("/notify", get(handler))
+        .with_state(honey)
+}
+
+/// Check that the user has view access to selected channels
+async fn check_view_channels(
+    honey: &Honey,
+    session: &Session,
+    channels: &[String],
+) -> Result<()> {
+    let cred = Credentials::load(session).await?;
+    let user = cred.user();
+    for chan in channels {
+        let nm = try_name_from_channel(chan)?;
+        honey.name_access(user, &nm, Access::View).await?;
+    }
+    Ok(())
+}
+
+/// Try to make a sonar name from a notify channel
+fn try_name_from_channel(chan: &str) -> Result<Name> {
+    if let Some((type_n, obj_n)) = chan.split_once('$') {
+        let nm = Name::new(type_n)?;
+        Ok(nm.obj(obj_n)?)
+    } else {
+        Ok(Name::new(chan)?)
+    }
 }
 
 /// `POST` one permission record
-fn permission_post(db: Database) -> Router {
+fn permission_post(honey: Honey) -> Router {
     async fn handler(
         session: Session,
-        State(db): State<Database>,
+        State(honey): State<Honey>,
         Json(attrs): Json<Map<String, Value>>,
     ) -> Resp0 {
         let nm = Name::from(ResType::Permission);
         log::info!("POST {nm}");
         let cred = Credentials::load(&session).await?;
-        name_access(&db, cred.user(), &nm, Access::Configure).await?;
+        honey
+            .name_access(cred.user(), &nm, Access::Configure)
+            .await?;
         let role = attrs.get("role");
         let resource_n = attrs.get("resource_n");
         if let (Some(Value::String(role)), Some(Value::String(resource_n))) =
@@ -126,42 +222,29 @@ fn permission_post(db: Database) -> Router {
         {
             let role = role.to_string();
             let resource_n = resource_n.to_string();
-            permission::post_role_res(&db, &role, &resource_n).await?;
+            permission::post_role_res(&honey.db, &role, &resource_n).await?;
             return Ok(StatusCode::CREATED);
         }
         Err(sonar::Error::InvalidValue)?
     }
     Router::new()
         .route("/permission", post(handler))
-        .with_state(db)
-}
-
-/// Lookup access for a name
-async fn name_access(
-    db: &Database,
-    user: &str,
-    name: &Name,
-    access: Access,
-) -> Result<Access> {
-    let perm = permission::get_by_name(db, user, name).await?;
-    let acc = Access::new(perm.access_n).ok_or(Error::Unauthorized)?;
-    acc.check(access)?;
-    Ok(acc)
+        .with_state(honey)
 }
 
 /// Router for permission
-fn permission_router(db: Database) -> Router {
+fn permission_router(honey: Honey) -> Router {
     /// Handle `GET` request
     async fn handle_get(
         session: Session,
-        State(db): State<Database>,
+        State(honey): State<Honey>,
         AxumPath(id): AxumPath<i32>,
     ) -> Resp1 {
         let nm = Name::from(ResType::Permission).obj(&id.to_string())?;
         log::info!("GET {nm}");
         let cred = Credentials::load(&session).await?;
-        name_access(&db, cred.user(), &nm, Access::View).await?;
-        let perm = permission::get_by_id(&db, id).await?;
+        honey.name_access(cred.user(), &nm, Access::View).await?;
+        let perm = permission::get_by_id(&honey.db, id).await?;
         match serde_json::to_value(perm) {
             Ok(body) => json_resp(body.to_string()),
             Err(_e) => Err(StatusCode::BAD_REQUEST),
@@ -171,29 +254,33 @@ fn permission_router(db: Database) -> Router {
     /// Handle `PATCH` request
     async fn handle_patch(
         session: Session,
-        State(db): State<Database>,
+        State(honey): State<Honey>,
         AxumPath(id): AxumPath<i32>,
         Json(attrs): Json<Map<String, Value>>,
     ) -> Resp0 {
         let nm = Name::from(ResType::Permission).obj(&id.to_string())?;
         log::info!("PATCH {nm}");
         let cred = Credentials::load(&session).await?;
-        name_access(&db, cred.user(), &nm, Access::Configure).await?;
-        permission::patch_by_id(&db, id, attrs).await?;
+        honey
+            .name_access(cred.user(), &nm, Access::Configure)
+            .await?;
+        permission::patch_by_id(&honey.db, id, attrs).await?;
         Ok(StatusCode::NO_CONTENT)
     }
 
     /// Handle `DELETE` request
     async fn handle_delete(
         session: Session,
-        State(db): State<Database>,
+        State(honey): State<Honey>,
         AxumPath(id): AxumPath<i32>,
     ) -> Resp0 {
         let nm = Name::from(ResType::Permission).obj(&id.to_string())?;
         log::info!("DELETE {nm}");
         let cred = Credentials::load(&session).await?;
-        name_access(&db, cred.user(), &nm, Access::Configure).await?;
-        permission::delete_by_id(&db, id).await?;
+        honey
+            .name_access(cred.user(), &nm, Access::Configure)
+            .await?;
+        permission::delete_by_id(&honey.db, id).await?;
         Ok(StatusCode::NO_CONTENT)
     }
 
@@ -202,32 +289,32 @@ fn permission_router(db: Database) -> Router {
             "/permission/:id",
             get(handle_get).patch(handle_patch).delete(handle_delete),
         )
-        .with_state(db)
+        .with_state(honey)
 }
 
 /// `GET` one SQL record as JSON
-fn sql_record_get(db: Database) -> Router {
+fn sql_record_get(honey: Honey) -> Router {
     async fn handler(
         session: Session,
-        State(db): State<Database>,
+        State(honey): State<Honey>,
         AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
     ) -> Resp1 {
         let nm = Name::new(&type_n)?.obj(&obj_n)?;
         log::info!("GET {nm}");
         let cred = Credentials::load(&session).await?;
-        name_access(&db, cred.user(), &nm, Access::View).await?;
+        honey.name_access(cred.user(), &nm, Access::View).await?;
         let sql = nm.res_type.one_sql();
         let name = nm.object_n().ok_or(StatusCode::BAD_REQUEST)?;
         let body = if nm.res_type == ResType::ControllerIo {
-            get_array_by_pkey(&db, sql, &name).await
+            get_array_by_pkey(&honey.db, sql, &name).await
         } else {
-            get_by_pkey(&db, sql, &name).await
+            get_by_pkey(&honey.db, sql, &name).await
         }?;
         json_resp(body)
     }
     Router::new()
         .route("/:type_n/:obj_n", get(handler))
-        .with_state(db)
+        .with_state(honey)
 }
 
 /// Query one row by primary key
@@ -270,17 +357,17 @@ fn invalid_char(c: char) -> bool {
 }
 
 /// `GET` a file resource
-fn resource_file_get(db: Database) -> Router {
+fn resource_file_get(honey: Honey) -> Router {
     async fn handler(
         session: Session,
-        State(db): State<Database>,
+        State(honey): State<Honey>,
         TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
         AxumPath(type_n): AxumPath<String>,
     ) -> Resp2 {
         let nm = Name::new(&type_n)?;
         log::info!("GET {nm}");
         let cred = Credentials::load(&session).await?;
-        name_access(&db, cred.user(), &nm, Access::View).await?;
+        honey.name_access(cred.user(), &nm, Access::View).await?;
         let fname = format!("api/{type_n}");
         let etag = resource_etag(&fname).await?;
         log::trace!("ETag: {etag}");
@@ -303,7 +390,9 @@ fn resource_file_get(db: Database) -> Router {
             Err(StatusCode::NOT_MODIFIED)
         }
     }
-    Router::new().route("/:type_n", get(handler)).with_state(db)
+    Router::new()
+        .route("/:type_n", get(handler))
+        .with_state(honey)
 }
 
 /// Get a static file ETag
@@ -315,17 +404,19 @@ async fn resource_etag(path: &str) -> Result<String> {
 }
 
 /// Create a Sonar object from a `POST` request
-fn sonar_post(db: Database) -> Router {
+fn sonar_post(honey: Honey) -> Router {
     async fn handler(
         session: Session,
         AxumPath(type_n): AxumPath<String>,
-        State(db): State<Database>,
+        State(honey): State<Honey>,
         Json(attrs): Json<Map<String, Value>>,
     ) -> Resp0 {
         let nm = Name::new(&type_n)?;
         log::info!("POST {nm}");
         let cred = Credentials::load(&session).await?;
-        name_access(&db, cred.user(), &nm, Access::Configure).await?;
+        honey
+            .name_access(cred.user(), &nm, Access::Configure)
+            .await?;
         match attrs.get("name") {
             Some(Value::String(name)) => {
                 let name = nm.obj(name)?;
@@ -349,7 +440,7 @@ fn sonar_post(db: Database) -> Router {
     }
     Router::new()
         .route("/:type_n", post(handler))
-        .with_state(db)
+        .with_state(honey)
 }
 
 /// Get Sonar attribute value
@@ -370,10 +461,10 @@ fn att_value(value: &Value) -> Result<String> {
 }
 
 /// Update a Sonar object from a `PATCH` request
-fn sonar_object_patch(db: Database) -> Router {
+fn sonar_object_patch(honey: Honey) -> Router {
     async fn handler(
         session: Session,
-        State(db): State<Database>,
+        State(honey): State<Honey>,
         AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
         Json(attrs): Json<Map<String, Value>>,
     ) -> Resp0 {
@@ -382,7 +473,7 @@ fn sonar_object_patch(db: Database) -> Router {
         let cred = Credentials::load(&session).await?;
         // *At least* Operate access needed (further checks below)
         let access =
-            name_access(&db, cred.user(), &nm, Access::Operate).await?;
+            honey.name_access(cred.user(), &nm, Access::Operate).await?;
         for key in attrs.keys() {
             let attr = &key[..];
             access.check(nm.res_type.access_attr(attr))?;
@@ -412,25 +503,27 @@ fn sonar_object_patch(db: Database) -> Router {
     }
     Router::new()
         .route("/:type_n/:obj_n", patch(handler))
-        .with_state(db)
+        .with_state(honey)
 }
 
 /// Remove a Sonar object from a `DELETE` request
-fn sonar_object_delete(db: Database) -> Router {
+fn sonar_object_delete(honey: Honey) -> Router {
     async fn handler(
         session: Session,
-        State(db): State<Database>,
+        State(honey): State<Honey>,
         AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
     ) -> Resp0 {
         let nm = Name::new(&type_n)?.obj(&obj_n)?;
         log::info!("DELETE {nm}");
         let cred = Credentials::load(&session).await?;
-        name_access(&db, cred.user(), &nm, Access::Configure).await?;
+        honey
+            .name_access(cred.user(), &nm, Access::Configure)
+            .await?;
         let mut c = cred.authenticate().await?;
         c.remove_object(&nm.to_string()).await?;
         Ok(StatusCode::ACCEPTED)
     }
     Router::new()
         .route("/:type_n/:obj_n", delete(handler))
-        .with_state(db)
+        .with_state(honey)
 }

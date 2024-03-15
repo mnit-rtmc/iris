@@ -361,7 +361,7 @@ impl Resource {
     pub async fn notify(
         client: &mut Client,
         segments: &mut SegmentState,
-        ne: NotifyEvent,
+        ne: &NotifyEvent,
     ) -> Result<()> {
         log::info!("Resource::notify: {ne}");
         let mut found = false;
@@ -403,10 +403,7 @@ impl Resource {
             ParkingAreaDyn | ParkingAreaArch => {
                 self.query_file(client, self.path()).await
             }
-            _ => {
-                // TODO: send SSE message
-                Ok(())
-            }
+            _ => Ok(()),
         }
     }
 

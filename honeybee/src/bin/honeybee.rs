@@ -14,10 +14,13 @@
 //
 #![forbid(unsafe_code)]
 
-use honeybee::{listener, router, Database, Resource, Result, SegmentState};
+use honeybee::{
+    notify_events, Database, Honey, Resource, Result, SegmentState,
+};
 use std::collections::HashSet;
 use std::time::Duration;
 use tokio::net::TcpListener;
+use tokio::sync::broadcast::Sender;
 use tokio_stream::StreamExt;
 
 /// Main entry point
@@ -25,10 +28,15 @@ use tokio_stream::StreamExt;
 async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
     let db = Database::new("tms").await?;
-    tokio::spawn(serve_routes(db.clone()));
+    let sender = Sender::new(16);
+    let honey = Honey {
+        db: db.clone(),
+        sender: sender.clone(),
+    };
+    tokio::spawn(serve_routes(honey));
     let mut state = SegmentState::new();
     let mut events = HashSet::new();
-    let stream = listener::notify_events(&db).await?;
+    let stream = notify_events(&db).await?;
     let stream = stream.timeout(Duration::from_millis(250));
     tokio::pin!(stream);
     loop {
@@ -42,7 +50,12 @@ async fn main() -> Result<()> {
                 // timeout has passed, deliver all events
                 let mut client = db.client().await?;
                 for ne in events.drain() {
-                    Resource::notify(&mut client, &mut state, ne).await?;
+                    Resource::notify(&mut client, &mut state, &ne).await?;
+                    log::debug!("Notify SSE {ne}");
+                    match sender.send(ne) {
+                        Ok(count) => log::debug!("recv: {count}"),
+                        Err(_err) => log::debug!("recv: 0 e"),
+                    }
                 }
             }
         }
@@ -52,8 +65,8 @@ async fn main() -> Result<()> {
 }
 
 /// Serve routes
-async fn serve_routes(db: Database) -> Result<()> {
-    let app = router::build(db).await?;
+async fn serve_routes(honey: Honey) -> Result<()> {
+    let app = honey.build_router().await?;
     let listener = TcpListener::bind("127.0.0.1:3737").await?;
     axum::serve(listener, app).await?;
     log::warn!("Axum serve ended");
