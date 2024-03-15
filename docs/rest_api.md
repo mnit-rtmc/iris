@@ -11,7 +11,7 @@ Data requests are split into *public* and *restricted* paths:
 - `iris/api/`: Restricted data (needs session authentication)
 - `iris/api/login`: Authentication endpoint
 - `iris/api/access`: User's access [permission]s
-- `iris/api/notify`: Event notification endpoint
+- `iris/api/notify`: [Event notification](#event-notification) endpoint
 
 ## Public Resources
 
@@ -90,7 +90,7 @@ A `Content-Type: application/json` header is included where appropriate.
 
 Most devices also have an associated [geo loc] resource.
 
-## Event Notifications
+## Event Notification
 
 Clients can subscribe to [channels] by sending a `POST iris/api/notify`, with
 a JSON array containing channels of interest.  To get notifications for a
@@ -104,7 +104,7 @@ Using [SSE], a client can receive notifications by sending a
 [beacon]: beacons.html
 [cabinet style]: controllers.html#cabinet-styles
 [camera]: cameras.html
-[channels]: https://mnit-rtmc.github.io/iris/database.html#notifications
+[channels]: https://mnit-rtmc.github.io/iris/database.html#channels
 [comm config]: comm_config.html
 [comm link]: comm_links.html
 [controller]: controllers.html

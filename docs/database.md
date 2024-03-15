@@ -3,7 +3,7 @@
 IRIS uses a [PostgreSQL] database for storage of configuration and event data.
 On [initialization], the `tms` database is created from an SQL script.
 
-## Notifications
+## Channels
 
 Database [notifications] are sent by trigger functions when records are
 changed.  The [honeybee] server listens for them as part of the [REST API].
