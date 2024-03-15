@@ -87,25 +87,25 @@ public interface WeatherSensor extends Device {
 
 	/** Get precipitation accumulation for 1h in mm (null for missing) */
 	Integer getPrecipOneHour();
-	
+
 	/**Get total sun in terms of minutes */
 	Integer getTotalSun();
-	
+
 	/**Get total radiation period in terms of seconds */
 	Integer getTotalRadiationPeriod();
-	
+
 	/**Get solar radiation in terms of J/m^2 */
 	Integer getSolarRadiation();
-	
+
 	/** Get instantaneous terrestrial radiation in terms of W/m^2 */
 	Integer getInstantaneousTerrestrial();
-	
+
 	/** Get instantaneous solar radiation in terms of W/m^2 */
 	Integer getInstantaneousSolar();
-	
+
 	/** Get total radiation in terms of  W/m^2 */
 	Integer getTotalRadiation();
-	
+
 	/** Get visibility in meters (null for missing) */
 	Integer getVisibility();
 

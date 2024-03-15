@@ -100,10 +100,9 @@ public class WeatherSensorTheme extends ProxyTheme<WeatherSensor> {
 				p.getTotalRadiationPeriod(), "seconds");
 		ttb.addLine("Solar Radiation",
 				p.getSolarRadiation(), "J/m^2");
-		
-		ttb.addLine("Time", 
-			formatDateString(p.getStamp()));
 		ttb.setLast();
+		ttb.addLine("Time",
+			formatDateString(p.getStamp()));
 		return ttb.get();
 	}
 

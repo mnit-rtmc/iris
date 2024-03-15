@@ -669,7 +669,6 @@ public class SonarState extends Client {
 		populateReadable(weather_sensors);
 		if (canRead(WeatherSensor.SONAR_TYPE)) {
 			weather_sensors.ignoreAttribute("operation");
-			weather_sensors.ignoreAttribute("stamp");
 		}
 		populateReadable(tag_readers);
 		if (canRead(TagReader.SONAR_TYPE))

@@ -137,7 +137,7 @@ public class EssRec {
 		long st = TimeSteward.currentTimeMillis();
 		ws.setStampNotify(st);
 	}
-	
+
 	/** Store the radiation sensor data */
 	private void storeRadiation(WeatherSensorImpl ws) {
 		ws.setTotalRadiationNotify(rad_values.total_radiation.getRadiation());
