@@ -18,6 +18,7 @@ use convert_case::{Case, Casing};
 use http::StatusCode;
 use percent_encoding::percent_decode_str;
 use rustls::pki_types::ServerName;
+use serde_json::Value;
 use std::fmt;
 use std::net::ToSocketAddrs;
 use std::time::Duration;
@@ -116,12 +117,14 @@ impl Error {
 /// Sonar result
 pub type Result<T> = std::result::Result<T, Error>;
 
-/// Invalid characters for SONAR names
-const INVALID_CHARS: &[char] = &['\0', '/', '\u{001e}', '\u{001f}'];
+/// Check if a character in a name is invalid
+fn name_invalid_char(c: char) -> bool {
+    ['\0', '/', '\u{001e}', '\u{001f}'].contains(&c)
+}
 
-/// Check if a character in a Sonar name is invalid
-fn invalid_char(c: char) -> bool {
-    INVALID_CHARS.contains(&c)
+/// Check if a character in an attribute value is invalid
+fn attr_invalid_char(c: char) -> bool {
+    ['\0', '\u{001e}', '\u{001f}'].contains(&c)
 }
 
 /// Sonar type / object name
@@ -172,7 +175,7 @@ impl Name {
         let obj_n = &percent_decode_str(obj_n)
             .decode_utf8()
             .or(Err(Error::InvalidValue))?;
-        if obj_n.len() > 64 || obj_n.contains(invalid_char) {
+        if obj_n.len() > 64 || obj_n.contains(name_invalid_char) {
             Err(Error::InvalidValue)?
         } else {
             self.obj_name = Some(obj_n.to_string());
@@ -190,9 +193,9 @@ impl Name {
         self.obj_name.as_deref()
     }
 
-    /// Make a Sonar attribute (with validation)
-    pub fn attr(&self, att: &str) -> Result<String> {
-        if att.len() > 64 || att.contains(invalid_char) {
+    /// Make an attribute name (with validation)
+    pub fn attr_n(&self, att: &str) -> Result<String> {
+        if att.len() > 64 || att.contains(name_invalid_char) {
             Err(Error::InvalidValue)?
         } else if self.res_type == ResType::Controller && att == "drop_id" {
             Ok(format!("{self}/drop"))
@@ -203,6 +206,23 @@ impl Name {
             // most IRIS attributes are in camel case (Java)
             Ok(format!("{self}/{}", att.to_case(Case::Camel)))
         }
+    }
+}
+
+/// Get attribute from a JSON value
+pub fn attr_json(value: &Value) -> Result<String> {
+    match value {
+        Value::String(value) => {
+            if value.contains(attr_invalid_char) {
+                Err(Error::InvalidValue)?
+            } else {
+                Ok(value.to_string())
+            }
+        }
+        Value::Bool(value) => Ok(value.to_string()),
+        Value::Number(value) => Ok(value.to_string()),
+        Value::Null => Ok("\0".to_string()),
+        _ => Err(Error::InvalidValue)?,
     }
 }
 

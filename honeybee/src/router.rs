@@ -18,7 +18,7 @@ use crate::error::{Error, Result};
 use crate::listener::NotifyEvent;
 use crate::permission;
 use crate::restype::ResType;
-use crate::sonar::{self, Error as SonarError, Name};
+use crate::sonar::{self, attr_json, Error as SonarError, Name};
 use crate::Database;
 use axum::body::Body;
 use axum::extract::{Json, Path as AxumPath, State};
@@ -104,6 +104,21 @@ impl Honey {
         acc.check(access)?;
         Ok(acc)
     }
+
+    /// Check that the user has view access to selected channels
+    async fn check_view_channels(
+        &self,
+        session: &Session,
+        channels: &[String],
+    ) -> Result<()> {
+        let cred = Credentials::load(session).await?;
+        let user = cred.user();
+        for chan in channels {
+            let nm = try_name_from_channel(chan)?;
+            self.name_access(user, &nm, Access::View).await?;
+        }
+        Ok(())
+    }
 }
 
 /// Handle `POST` to login page
@@ -149,7 +164,7 @@ fn notify_post(honey: Honey) -> Router {
         Json(channels): Json<Vec<String>>,
     ) -> Resp1 {
         log::info!("POST notify");
-        check_view_channels(&honey, &session, &channels).await?;
+        honey.check_view_channels(&session, &channels).await?;
         match session.insert(CHANNELS_KEY, channels).await {
             Ok(()) => html_resp("<html>Ok</html>"),
             Err(_e) => Err(StatusCode::BAD_REQUEST),
@@ -168,28 +183,16 @@ fn notify_get(honey: Honey) -> Router {
             Ok(Some(channels)) => channels,
             _ => Err(StatusCode::BAD_REQUEST)?,
         };
-        check_view_channels(&honey, &session, &channels).await?;
+        if channels.is_empty() {
+            return Err(StatusCode::BAD_REQUEST);
+        }
+        honey.check_view_channels(&session, &channels).await?;
         // FIXME: make SSE response
         Err(StatusCode::BAD_REQUEST)
     }
     Router::new()
         .route("/notify", get(handler))
         .with_state(honey)
-}
-
-/// Check that the user has view access to selected channels
-async fn check_view_channels(
-    honey: &Honey,
-    session: &Session,
-    channels: &[String],
-) -> Result<()> {
-    let cred = Credentials::load(session).await?;
-    let user = cred.user();
-    for chan in channels {
-        let nm = try_name_from_channel(chan)?;
-        honey.name_access(user, &nm, Access::View).await?;
-    }
-    Ok(())
 }
 
 /// Try to make a sonar name from a notify channel
@@ -348,14 +351,6 @@ async fn get_array_by_pkey<PK: ToSql + Sync>(
     Ok(row.get::<usize, String>(0))
 }
 
-/// Invalid characters for SONAR names
-const INVALID_CHARS: &[char] = &['\0', '\u{001e}', '\u{001f}'];
-
-/// Check if a character in a Sonar name is invalid
-fn invalid_char(c: char) -> bool {
-    INVALID_CHARS.contains(&c)
-}
-
 /// `GET` a file resource
 fn resource_file_get(honey: Honey) -> Router {
     async fn handler(
@@ -425,8 +420,8 @@ fn sonar_post(honey: Honey) -> Router {
                 for (key, value) in attrs.iter() {
                     let attr = &key[..];
                     if attr != "name" {
-                        let anm = name.attr(attr)?;
-                        let value = att_value(value)?;
+                        let anm = name.attr_n(attr)?;
+                        let value = attr_json(value)?;
                         log::debug!("{anm} = {value} (phantom)");
                         c.update_object(&anm, &value).await?;
                     }
@@ -441,23 +436,6 @@ fn sonar_post(honey: Honey) -> Router {
     Router::new()
         .route("/:type_n", post(handler))
         .with_state(honey)
-}
-
-/// Get Sonar attribute value
-fn att_value(value: &Value) -> Result<String> {
-    match value {
-        Value::String(value) => {
-            if value.contains(invalid_char) {
-                Err(sonar::Error::InvalidValue)?
-            } else {
-                Ok(value.to_string())
-            }
-        }
-        Value::Bool(value) => Ok(value.to_string()),
-        Value::Number(value) => Ok(value.to_string()),
-        Value::Null => Ok("\0".to_string()),
-        _ => Err(sonar::Error::InvalidValue)?,
-    }
 }
 
 /// Update a Sonar object from a `PATCH` request
@@ -483,8 +461,8 @@ fn sonar_object_patch(honey: Honey) -> Router {
         for (key, value) in attrs.iter() {
             let attr = &key[..];
             if nm.res_type.patch_first_pass(attr) {
-                let anm = nm.attr(attr)?;
-                let value = att_value(value)?;
+                let anm = nm.attr_n(attr)?;
+                let value = attr_json(value)?;
                 log::debug!("{anm} = {value}");
                 c.update_object(&anm, &value).await?;
             }
@@ -493,8 +471,8 @@ fn sonar_object_patch(honey: Honey) -> Router {
         for (key, value) in attrs.iter() {
             let attr = &key[..];
             if !nm.res_type.patch_first_pass(attr) {
-                let anm = nm.attr(attr)?;
-                let value = att_value(value)?;
+                let anm = nm.attr_n(attr)?;
+                let value = attr_json(value)?;
                 log::debug!("{} = {}", anm, &value);
                 c.update_object(&anm, &value).await?;
             }
