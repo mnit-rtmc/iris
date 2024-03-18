@@ -20,7 +20,6 @@ use honeybee::{
 use std::collections::HashSet;
 use std::time::Duration;
 use tokio::net::TcpListener;
-use tokio::sync::broadcast::Sender;
 use tokio_stream::StreamExt;
 
 /// Main entry point
@@ -28,12 +27,8 @@ use tokio_stream::StreamExt;
 async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
     let db = Database::new("tms").await?;
-    let sender = Sender::new(16);
-    let honey = Honey {
-        db: db.clone(),
-        sender: sender.clone(),
-    };
-    tokio::spawn(serve_routes(honey));
+    let honey = Honey::new(&db);
+    tokio::spawn(serve_routes(honey.clone()));
     let mut state = SegmentState::new();
     let mut events = HashSet::new();
     let stream = notify_events(&db).await?;
@@ -42,20 +37,17 @@ async fn main() -> Result<()> {
     loop {
         match stream.next().await {
             None => break,
-            Some(Ok(ne)) => {
+            Some(Ok(nm)) => {
                 // hold event until timeout passes
-                events.insert(ne);
+                events.insert(nm);
             }
             Some(Err(_)) => {
                 // timeout has passed, deliver all events
                 let mut client = db.client().await?;
-                for ne in events.drain() {
-                    Resource::notify(&mut client, &mut state, &ne).await?;
-                    log::debug!("Notify SSE {ne}");
-                    match sender.send(ne) {
-                        Ok(count) => log::debug!("recv: {count}"),
-                        Err(_err) => log::debug!("recv: 0 e"),
-                    }
+                for nm in events.drain() {
+                    Resource::notify(&mut client, &mut state, &nm).await?;
+                    let hon = honey.clone();
+                    tokio::spawn(async move { hon.notify_sse(nm).await });
                 }
             }
         }

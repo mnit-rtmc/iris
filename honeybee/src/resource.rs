@@ -14,11 +14,11 @@
 //
 use crate::error::Result;
 use crate::files::AtomicFile;
-use crate::listener::NotifyEvent;
 use crate::query;
 use crate::restype::ResType;
 use crate::segments::{RNode, Road, SegmentState};
 use crate::signmsg::render_all;
+use crate::sonar::Name;
 use futures::{pin_mut, TryStreamExt};
 use std::path::Path;
 use std::time::Instant;
@@ -357,29 +357,22 @@ impl Resource {
     ///
     /// * `client` Database connection.
     /// * `segments` Segment state.
-    /// * `ne` Notify event.
+    /// * `nm` Notify event name.
     pub async fn notify(
         client: &mut Client,
         segments: &mut SegmentState,
-        ne: &NotifyEvent,
+        nm: &Name,
     ) -> Result<()> {
-        log::info!("Resource::notify: {ne}");
-        let mut found = false;
+        log::info!("Resource::notify: {nm}");
         for res in Resource::iter() {
-            if let Some(chan) = res.listen() {
-                if ne.channel == chan {
-                    found = true;
-                    match &ne.name {
-                        Some(name) => {
-                            res.query_one(client, segments, name).await?
-                        }
-                        None => res.query_all(client, segments).await?,
+            if nm.res_type == res.res_type() {
+                match nm.object_n() {
+                    Some(obj_n) => {
+                        res.query_one(client, segments, obj_n).await?
                     }
+                    None => res.query_all(client, segments).await?,
                 }
             }
-        }
-        if !found {
-            log::warn!("unknown resource: {ne}");
         }
         Ok(())
     }
@@ -393,13 +386,13 @@ impl Resource {
         self,
         client: &mut Client,
         segments: &mut SegmentState,
-        name: &str,
+        obj_n: &str,
     ) -> Result<()> {
-        log::trace!("query_one: {self:?} {name}");
+        log::trace!("query_one: {self:?} {obj_n}");
         use Resource::*;
         match self {
-            Rnode => query_one_node(client, segments, name).await,
-            RoadFull => query_one_road(client, segments, name).await,
+            Rnode => query_one_node(client, segments, obj_n).await,
+            RoadFull => query_one_road(client, segments, obj_n).await,
             ParkingAreaDyn | ParkingAreaArch => {
                 self.query_file(client, self.path()).await
             }

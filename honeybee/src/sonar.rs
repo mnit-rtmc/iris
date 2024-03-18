@@ -128,7 +128,7 @@ fn attr_invalid_char(c: char) -> bool {
 }
 
 /// Sonar type / object name
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Name {
     /// Resource type
     pub res_type: ResType,

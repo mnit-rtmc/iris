@@ -33,7 +33,7 @@ mod tls;
 
 pub use database::Database;
 pub use error::{Error, Result};
-pub use listener::{notify_events, NotifyEvent};
+pub use listener::notify_events;
 pub use resource::Resource;
 pub use router::Honey;
 pub use segments::SegmentState;

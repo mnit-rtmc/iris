@@ -15,57 +15,29 @@
 use crate::database::Database;
 use crate::error::Result;
 use crate::resource::Resource;
-use crate::restype::ResType;
+use crate::sonar::Name;
 use futures::Stream;
 use std::collections::HashSet;
-use std::fmt;
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 use tokio_postgres::tls::NoTlsStream;
-use tokio_postgres::{AsyncMessage, Connection, Notification, Socket};
+use tokio_postgres::{AsyncMessage, Connection, Socket};
 use tokio_stream::wrappers::UnboundedReceiverStream;
-
-/// DB notify event
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub struct NotifyEvent {
-    /// Notification channel
-    pub channel: String,
-    /// Resource name
-    pub name: Option<String>,
-}
-
-impl fmt::Display for NotifyEvent {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match &self.name {
-            Some(name) => write!(f, "{} {}", self.channel, name),
-            None => write!(f, "{} (None)", self.channel),
-        }
-    }
-}
-
-impl From<Notification> for NotifyEvent {
-    fn from(not: Notification) -> Self {
-        let channel = not.channel().to_string();
-        let name =
-            (!not.payload().is_empty()).then(|| not.payload().to_string());
-        NotifyEvent { channel, name }
-    }
-}
 
 /// DB notification handler
 struct NotificationHandler {
     /// DB connection
     conn: Connection<Socket, NoTlsStream>,
     /// Notify event sender
-    tx: UnboundedSender<NotifyEvent>,
+    tx: UnboundedSender<Name>,
 }
 
 /// Run notification handler
 async fn run_handler(
     conn: Connection<Socket, NoTlsStream>,
-    tx: UnboundedSender<NotifyEvent>,
+    tx: UnboundedSender<Name>,
 ) {
     let mut handler = NotificationHandler {
         conn,
@@ -88,9 +60,28 @@ impl Future for NotificationHandler {
                 Poll::Ready(false)
             }
             Poll::Ready(Some(Ok(AsyncMessage::Notification(n)))) => {
-                let ne = NotifyEvent::from(n);
-                if let Err(e) = self.tx.send(ne) {
-                    log::warn!("Send notification: {e}");
+                log::debug!("Notification: {} {}", n.channel(), n.payload());
+                match Name::new(n.channel()) {
+                    Ok(nm) => {
+                        let obj_n = n.payload();
+                        let nm = if obj_n.is_empty() {
+                            nm
+                        } else {
+                            match nm.clone().obj(obj_n) {
+                                Ok(nm) => nm,
+                                Err(_e) => {
+                                    log::warn!("Invalid payload: {obj_n}");
+                                    nm
+                                }
+                            }
+                        };
+                        if let Err(e) = self.tx.send(nm) {
+                            log::warn!("Send notification: {e}");
+                        }
+                    }
+                    Err(_) => {
+                        log::warn!("Unknown channel: {}", n.channel());
+                    }
                 }
                 Poll::Ready(true)
             }
@@ -111,12 +102,8 @@ impl Future for NotificationHandler {
 }
 
 /// Send initial notify event
-fn send_event(tx: &UnboundedSender<NotifyEvent>, chan: &str) {
-    let ne = NotifyEvent {
-        channel: chan.to_string(),
-        name: None,
-    };
-    if let Err(e) = tx.send(ne) {
+fn send_event(tx: &UnboundedSender<Name>, nm: Name) {
+    if let Err(e) = tx.send(nm) {
         log::warn!("Send notification: {e}");
     }
 }
@@ -124,7 +111,7 @@ fn send_event(tx: &UnboundedSender<NotifyEvent>, chan: &str) {
 /// Create stream to listen for DB notify events
 pub async fn notify_events(
     db: &Database,
-) -> Result<impl Stream<Item = NotifyEvent> + Unpin> {
+) -> Result<impl Stream<Item = Name> + Unpin> {
     let (client, conn) = db.dedicated_client().await?;
     let (tx, rx) = unbounded_channel();
     let mut channels = HashSet::new();
@@ -132,13 +119,13 @@ pub async fn notify_events(
     for res in Resource::iter() {
         if let Some(chan) = res.listen() {
             if channels.insert(chan) {
-                if let Ok(res_type) = ResType::try_from(chan) {
-                    if res_type.lut_channel().is_none() {
+                if let Ok(nm) = Name::new(chan) {
+                    if nm.res_type.lut_channel().is_none() {
                         log::debug!("LISTEN to '{chan}' for {res:?}");
                         let listen = format!("LISTEN {chan}");
                         client.execute(&listen, &[]).await?;
                     }
-                    send_event(&tx, chan);
+                    send_event(&tx, nm);
                 }
             }
         }

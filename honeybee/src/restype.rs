@@ -16,7 +16,7 @@ use crate::access::Access;
 use crate::query;
 
 /// Resource types
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum ResType {
     Alarm,
     Beacon,

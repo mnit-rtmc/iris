@@ -15,7 +15,6 @@
 use crate::access::Access;
 use crate::cred::Credentials;
 use crate::error::{Error, Result};
-use crate::listener::NotifyEvent;
 use crate::permission;
 use crate::restype::ResType;
 use crate::sonar::{self, attr_json, Error as SonarError, Name};
@@ -23,6 +22,8 @@ use crate::Database;
 use axum::body::Body;
 use axum::extract::{Json, Path as AxumPath, State};
 use axum::http::{header, StatusCode};
+use axum::response::sse::{Event, KeepAlive};
+use axum::response::Sse;
 use axum::routing::{delete, get, patch, post};
 use axum::Router;
 use axum_extra::TypedHeader;
@@ -30,23 +31,40 @@ use headers::{ETag, IfNoneMatch};
 use http::header::HeaderName;
 use serde_json::map::Map;
 use serde_json::Value;
+use std::collections::HashMap;
+use std::convert::Infallible;
+use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
 use time::Duration;
 use tokio::fs::metadata;
-use tokio::sync::broadcast::Sender;
+use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 use tokio_postgres::types::ToSql;
+use tokio_stream::wrappers::UnboundedReceiverStream;
+use tokio_stream::Stream;
 use tokio_util::io::ReaderStream;
+use tower_sessions::session::Id;
 use tower_sessions::{Expiry, Session, SessionManagerLayer};
 use tower_sessions_moka_store::MokaStore;
 
-/// Session key for channels
-const CHANNELS_KEY: &str = "channels";
+/// SSE event result
+type EventResult = std::result::Result<Event, Infallible>;
+
+/// Client SSE notifier
+#[derive(Default)]
+struct SseNotifier {
+    /// Listening channel names
+    channels: Vec<Name>,
+    /// Sse stream sender
+    tx: Option<UnboundedSender<EventResult>>,
+}
 
 /// Honeybee server state
 #[derive(Clone)]
 pub struct Honey {
-    pub db: Database,
-    pub sender: Sender<NotifyEvent>,
+    /// Database connection pool
+    db: Database,
+    /// Sse notifiers for each session
+    notifiers: Arc<Mutex<HashMap<Id, SseNotifier>>>,
 }
 
 /// No-header response result
@@ -69,7 +87,34 @@ fn json_resp(json: String) -> Resp1 {
     Ok(([(header::CONTENT_TYPE, "application/json")], json))
 }
 
+impl SseNotifier {
+    /// Check if notifier is listening to a channel
+    fn is_listening(&self, nm: &Name) -> bool {
+        for chan in &self.channels {
+            if nm.res_type == chan.res_type {
+                match (nm.object_n(), chan.object_n()) {
+                    (Some(nn), Some(cn)) => {
+                        if nn == cn {
+                            return true;
+                        }
+                    }
+                    (None, _) => return true,
+                    _ => (),
+                }
+            }
+        }
+        false
+    }
+}
+
 impl Honey {
+    /// Create honey state
+    pub fn new(db: &Database) -> Self {
+        let db = db.clone();
+        let notifiers = Arc::new(Mutex::new(HashMap::new()));
+        Honey { db, notifiers }
+    }
+
     /// Build app router
     pub async fn build_router(&self) -> Result<Router> {
         let store = MokaStore::new(Some(100));
@@ -109,15 +154,69 @@ impl Honey {
     async fn check_view_channels(
         &self,
         session: &Session,
-        channels: &[String],
+        channels: &[Name],
     ) -> Result<()> {
         let cred = Credentials::load(session).await?;
         let user = cred.user();
-        for chan in channels {
-            let nm = try_name_from_channel(chan)?;
+        for nm in channels {
             self.name_access(user, &nm, Access::View).await?;
         }
         Ok(())
+    }
+
+    /// Store channel names for a session Id
+    fn store_channels(&self, id: Id, names: Vec<Name>) {
+        let mut map = self.notifiers.lock().unwrap();
+        match map.get_mut(&id) {
+            Some(notifier) => {
+                notifier.channels = names;
+            }
+            None => {
+                let notifier = SseNotifier {
+                    channels: names,
+                    tx: None,
+                };
+                map.insert(id, notifier);
+            }
+        }
+    }
+
+    /// Store SSE sender for a session Id
+    fn store_sender(&self, id: Id, tx: UnboundedSender<EventResult>) {
+        let mut map = self.notifiers.lock().unwrap();
+        match map.get_mut(&id) {
+            Some(notifier) => {
+                log::warn!("SSE event sender exists {id}");
+                notifier.tx = Some(tx);
+            }
+            None => {
+                let notifier = SseNotifier {
+                    channels: Vec::new(),
+                    tx: Some(tx),
+                };
+                map.insert(id, notifier);
+            }
+        }
+    }
+
+    /// Notify all SSE listeners
+    pub async fn notify_sse(&self, nm: Name) {
+        log::debug!("Notify SSE {nm}");
+        let mut map = self.notifiers.lock().unwrap();
+        for (id, notifier) in map.iter_mut() {
+            log::debug!("checking {nm} for {id}");
+            if let Some(tx) = &notifier.tx {
+                if notifier.is_listening(&nm) {
+                    log::trace!("sending notification {nm}");
+                    let ev = Event::default().data(nm.to_string());
+                    if let Err(e) = tx.send(Ok(ev)) {
+                        log::warn!("Send notification: {e}");
+                        notifier.tx = None;
+                    }
+                }
+            }
+            // FIXME: purge channels from expired sessions
+        }
     }
 }
 
@@ -164,45 +263,55 @@ fn notify_post(honey: Honey) -> Router {
         Json(channels): Json<Vec<String>>,
     ) -> Resp1 {
         log::info!("POST notify");
-        honey.check_view_channels(&session, &channels).await?;
-        match session.insert(CHANNELS_KEY, channels).await {
-            Ok(()) => html_resp("<html>Ok</html>"),
-            Err(_e) => Err(StatusCode::BAD_REQUEST),
-        }
+        let names = try_names_from_channels(&channels)?;
+        honey.check_view_channels(&session, &names).await?;
+        let id = session.id().unwrap_or_default();
+        honey.store_channels(id, names);
+        html_resp("<html>Ok</html>")
     }
     Router::new()
         .route("/notify", post(handler))
         .with_state(honey)
 }
 
+/// Try to make a sonar names from notify channels
+fn try_names_from_channels(channels: &[String]) -> Result<Vec<Name>> {
+    if channels.len() > 8 {
+        log::info!("Too many notification channels");
+        Err(SonarError::InvalidValue)?;
+    }
+    let mut names = Vec::with_capacity(channels.len());
+    for chan in channels {
+        let nm = if let Some((type_n, obj_n)) = chan.split_once('$') {
+            Name::new(type_n)?.obj(obj_n)?
+        } else {
+            Name::new(chan)?
+        };
+        names.push(nm);
+    }
+    Ok(names)
+}
+
 /// `GET` notify events (sse)
 fn notify_get(honey: Honey) -> Router {
-    async fn handler(session: Session, State(honey): State<Honey>) -> Resp1 {
+    async fn handler(
+        session: Session,
+        State(honey): State<Honey>,
+    ) -> Sse<impl Stream<Item = EventResult>> {
         log::info!("GET notify");
-        let channels: Vec<String> = match session.get(CHANNELS_KEY).await {
-            Ok(Some(channels)) => channels,
-            _ => Err(StatusCode::BAD_REQUEST)?,
-        };
-        if channels.is_empty() {
-            return Err(StatusCode::BAD_REQUEST);
-        }
-        honey.check_view_channels(&session, &channels).await?;
-        // FIXME: make SSE response
-        Err(StatusCode::BAD_REQUEST)
+        let id = session.id().unwrap_or_default();
+        let (tx, rx) = unbounded_channel();
+        honey.store_sender(id, tx);
+        let stream = UnboundedReceiverStream::new(rx);
+        Sse::new(stream).keep_alive(
+            KeepAlive::new()
+                .interval(std::time::Duration::from_secs(60))
+                .text("keep alive"),
+        )
     }
     Router::new()
         .route("/notify", get(handler))
         .with_state(honey)
-}
-
-/// Try to make a sonar name from a notify channel
-fn try_name_from_channel(chan: &str) -> Result<Name> {
-    if let Some((type_n, obj_n)) = chan.split_once('$') {
-        let nm = Name::new(type_n)?;
-        Ok(nm.obj(obj_n)?)
-    } else {
-        Ok(Name::new(chan)?)
-    }
 }
 
 /// `POST` one permission record
