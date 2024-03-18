@@ -14,7 +14,7 @@ A font is a set of bitmapped glyphs for displaying text on a [DMS].
 
 </details>
 
-A number of fonts are included in the `/var/lib/iris/fonts` directory:
+A number of fonts are included in the `/var/lib/iris/tfon` directory:
 
 Name    | Number | Height | Line Spacing | 3-Lines | Notes
 --------|--------|--------|--------------|---------|-----------
@@ -98,7 +98,7 @@ directory to make it available in the [REST API].
 The status tab of the DMS properties dialog contains two settings buttons.
 Pressing `Send Settings` will cause all necessary fonts to be sent to the sign.
 `Query Settings` will read all fonts currently on the sign, and store them in
-the `/var/lib/iris/fonts/{sign_name}` directory.
+the `/var/lib/iris/tfon/{sign_name}` directory.
 
 
 [BDF]: https://en.wikipedia.org/wiki/Glyph_Bitmap_Distribution_Format

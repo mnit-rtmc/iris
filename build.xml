@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- ant build file for IRIS project
-     Copyright (C) 2007-2023  Minnesota Department of Transportation
+     Copyright (C) 2007-2024  Minnesota Department of Transportation
 
      This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 	<!-- Base directory configuration -->
 	<property name="src.dir" value="src"/>
 	<property name="etc.dir" value="etc"/>
-	<property name="fonts.dir" value="fonts"/>
+	<property name="fonts.dir" value="tfon"/>
 	<property name="images.dir" value="images"/>
 	<property name="bin.dir" value="bin"/>
 	<property name="lib.dir" value="lib"/>
@@ -344,8 +344,8 @@
 			<fileset file="${sql.dir}/tms-template.sql"/>
 			<fileset file="${sql.dir}/migrate-*.sql"/>
 		</copy>
-		<mkdir dir="${install.dir}/var/lib/iris/fonts"/>
-		<copy todir="${install.dir}/var/lib/iris/fonts">
+		<mkdir dir="${install.dir}/var/lib/iris/tfon"/>
+		<copy todir="${install.dir}/var/lib/iris/tfon">
 			<fileset file="${fonts.dir}/*.tfon"/>
 		</copy>
 		<mkdir dir="${install.dir}/var/lib/iris/meter"/>
