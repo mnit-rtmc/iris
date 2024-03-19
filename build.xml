@@ -352,11 +352,7 @@
 		<mkdir dir="${install.dir}/var/lib/iris/meter"/>
 		<mkdir dir="${install.dir}/var/lib/iris/traffic"/>
 		<mkdir dir="${install.dir}/var/lib/iris/web"/>
-		<mkdir dir="${install.dir}/var/lib/iris/web/api"/>
-		<mkdir dir="${install.dir}/var/lib/iris/web/api/gif"/>
-		<mkdir dir="${install.dir}/var/lib/iris/web/api/tfon"/>
 		<mkdir dir="${install.dir}/var/lib/iris/web/bulb"/>
-		<mkdir dir="${install.dir}/var/lib/iris/web/img"/>
 		<mkdir dir="${install.dir}/var/log/iris"/>
 
 		<copy todir="${install.dir}/var/lib/iris/web">

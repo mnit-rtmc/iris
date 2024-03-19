@@ -122,17 +122,17 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %dir %attr(0755,nginx,nginx) /var/cache/nginx/earthwyrm-iris
 
 # /var/lib/iris
-%dir %attr(3775,tms,tms) /var/lib/iris
-%dir %attr(3775,tms,tms) /var/lib/iris/backup
-%dir %attr(3775,tms,tms) /var/lib/iris/meter
+%dir %attr(0775,tms,tms) /var/lib/iris
+%dir %attr(0775,tms,tms) /var/lib/iris/backup
+%dir %attr(0775,tms,tms) /var/lib/iris/meter
 %dir %attr(0755,tms,tms) /var/lib/iris/sql
 %attr(0444,tms,tms) /var/lib/iris/sql/*.sql
-%dir %attr(3755,tms,tms) /var/lib/iris/tfon
+%dir %attr(0755,tms,tms) /var/lib/iris/tfon
 %attr(0444,tms,tms) /var/lib/iris/tfon/*.tfon
-%dir %attr(3775,tms,tms) /var/lib/iris/traffic
-%dir %attr(3775,tms,tms) /var/lib/iris/web
+%dir %attr(0775,tms,tms) /var/lib/iris/traffic
+%dir %attr(0775,tms,tms) /var/lib/iris/web
 %attr(0444,tms,tms) /var/lib/iris/web/index.html
-%dir %attr(3775,tms,tms) /var/lib/iris/web/bulb
+%dir %attr(0775,tms,tms) /var/lib/iris/web/bulb
 %attr(0444,tms,tms) /var/lib/iris/web/bulb/*
 
 # /var/log/iris
