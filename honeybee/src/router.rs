@@ -301,7 +301,7 @@ fn img_dir_get() -> Router {
         let fname = format!("img/{fname}");
         file_stream(&fname, "image/gif", if_none_match).await
     }
-    Router::new().route("img/:fname", get(handler))
+    Router::new().route("/img/:fname", get(handler))
 }
 
 /// `GET` file from tfon directory
