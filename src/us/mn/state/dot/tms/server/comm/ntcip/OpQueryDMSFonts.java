@@ -45,7 +45,7 @@ public class OpQueryDMSFonts extends OpDMS {
 
 	/** Directory to store font files */
 	static private final String FONT_FILE_DIR = 
-		DevelCfg.get("font.output.dir", "/var/lib/iris/tfon/");
+		DevelCfg.get("font.output.dir", "/var/lib/iris/web/api/tfon");
 
 	/** Symbols for all ASCII + Latin 1 characters */
 	static private final String[] SYMBOL = new String[] {
