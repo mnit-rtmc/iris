@@ -14,7 +14,6 @@
 //
 #![forbid(unsafe_code)]
 
-use axum::Router;
 use honeybee::{
     notify_events, Database, Honey, Resource, Result, SegmentState,
 };
@@ -59,7 +58,7 @@ async fn main() -> Result<()> {
 
 /// Serve routes
 async fn serve_routes(honey: Honey) -> Result<()> {
-    let app = Router::new().nest("/iris", honey.route_root()?);
+    let app = honey.route_root()?;
     let listener = TcpListener::bind("127.0.0.1:3737").await?;
     axum::serve(listener, app).await?;
     log::warn!("Axum serve ended");

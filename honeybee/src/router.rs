@@ -115,8 +115,15 @@ impl Honey {
         Honey { db, notifiers }
     }
 
-    /// Build iris route
+    /// Build root route
     pub fn route_root(&self) -> Result<Router> {
+        Ok(Router::new()
+            .merge(root_get())
+            .nest("/iris", self.route_iris()?))
+    }
+
+    /// Build iris route
+    fn route_iris(&self) -> Result<Router> {
         Ok(Router::new()
             .merge(index_get())
             .merge(public_dir_get())
@@ -268,17 +275,21 @@ async fn file_etag(path: &str) -> Result<String> {
     Ok(format!("\"{dur:x}\""))
 }
 
+/// Handler for index page
+async fn index_handler(
+    TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
+) -> Resp3 {
+    file_stream("index.html", "text/html; charset=utf-8", if_none_match).await
+}
+
+/// Build route for index html
+fn root_get() -> Router {
+    Router::new().route("/iris/", get(index_handler))
+}
+
 /// Build route for index html
 fn index_get() -> Router {
-    async fn handler(
-        TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
-    ) -> Resp3 {
-        file_stream("index.html", "text/html; charset=utf-8", if_none_match)
-            .await
-    }
-    Router::new()
-        .route("/", get(handler))
-        .route("/index.html", get(handler))
+    Router::new().route("/index.html", get(index_handler))
 }
 
 /// `GET` JSON file from public directory
