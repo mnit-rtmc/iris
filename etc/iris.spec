@@ -123,22 +123,23 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 
 # /var/lib/iris
 %dir %attr(3775,tms,tms) /var/lib/iris
-%dir %attr(0755,root,root) /var/lib/iris/sql
-%attr(0444,root,root) /var/lib/iris/sql/*.sql
+%dir %attr(3775,tms,tms) /var/lib/iris/backup
 %dir %attr(3775,tms,tms) /var/lib/iris/meter
+%dir %attr(0755,tms,tms) /var/lib/iris/sql
+%attr(0444,tms,tms) /var/lib/iris/sql/*.sql
 %dir %attr(3755,tms,tms) /var/lib/iris/tfon
 %attr(0444,tms,tms) /var/lib/iris/tfon/*.tfon
 %dir %attr(3775,tms,tms) /var/lib/iris/traffic
-%dir %attr(3775,tms,tms) /var/lib/iris/backup
+%dir %attr(3775,tms,tms) /var/lib/iris/web
+%attr(0444,tms,tms) /var/lib/iris/web/index.html
+%dir %attr(3775,tms,tms) /var/lib/iris/web/bulb
+%attr(0444,tms,tms) /var/lib/iris/web/bulb/*
 
 # /var/log/iris
 %dir %attr(3775,tms,tms) /var/log/iris
 
 # /var/www/html/
 %attr(0644,root,root) /var/www/html/index.html
-%dir %attr(3775,tms,tms) /var/www/html/iris
-%dir %attr(3775,tms,tms) /var/www/html/iris/bulb
-%dir %attr(3775,tms,tms) /var/www/html/iris/img
 %dir %attr(3775,tms,tms) /var/www/html/iris_xml
 %dir %attr(3775,tms,tms) /var/www/html/iris-gstreamer
 

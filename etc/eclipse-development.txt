@@ -44,8 +44,8 @@
 ; (If these folders don't exist, the DevelCfg code
 ; will automatically create them.)
 ;log.output.dir  = ./var/log/iris/
-;json.output.dir = ./var/www/html/iris/
 ;font.output.dir = ./var/lib/iris/tfon/
+;json.output.dir = ./var/lib/iris/web/
 ;xml.output.dir  = ./var/www/html/iris_xml/
 
 ; Specifiy a different location for the gate_arm_enable file.

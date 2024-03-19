@@ -90,7 +90,7 @@ Fonts in [tfon] format can be imported into the IRIS database using
 tfon_import.py [font file] | psql tms
 ```
 
-Also, each font file must be copied to the `/var/www/html/iris/api/tfon/`
+Also, each font file must be copied to the `/var/lib/iris/web/api/tfon/`
 directory to make it available in the [REST API].
 
 ## Send and Query Fonts

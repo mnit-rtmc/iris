@@ -5,7 +5,7 @@ StartLimitIntervalSec=0
 [Service]
 Environment=RUST_LOG=warn
 Environment=PGTZ=US/Central
-WorkingDirectory=/var/www/html/iris/
+WorkingDirectory=/var/lib/iris/web/
 ExecStart=/usr/local/bin/honeybee
 Restart=always
 RestartSec=2
