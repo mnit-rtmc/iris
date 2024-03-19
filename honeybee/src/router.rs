@@ -74,8 +74,8 @@ type Resp0 = std::result::Result<StatusCode, StatusCode>;
 type Resp1 =
     std::result::Result<([(HeaderName, &'static str); 1], String), StatusCode>;
 
-/// Two-header response result
-type Resp2 = std::result::Result<([(HeaderName, String); 2], Body), StatusCode>;
+/// Three-header response result
+type Resp3 = std::result::Result<([(HeaderName, String); 3], Body), StatusCode>;
 
 /// Create an HTML response
 fn html_resp(html: &str) -> Resp1 {
@@ -115,13 +115,24 @@ impl Honey {
         Honey { db, notifiers }
     }
 
-    /// Build app router
-    pub async fn build_router(&self) -> Result<Router> {
+    /// Build iris route
+    pub fn route_root(&self) -> Result<Router> {
+        Ok(Router::new()
+            .merge(index_get())
+            .merge(public_dir_get())
+            .merge(img_dir_get())
+            .nest("/api", self.route_api()))
+    }
+
+    /// Build authenticated api route
+    fn route_api(&self) -> Router {
         let store = MokaStore::new(Some(100));
         let session_layer = SessionManagerLayer::new(store)
             .with_name("honeybee")
             .with_expiry(Expiry::OnInactivity(Duration::hours(4)));
-        let app = Router::new()
+        Router::new()
+            .merge(tfon_dir_get())
+            .merge(gif_dir_get())
             .merge(login_post(self.clone()))
             .merge(access_get(self.clone()))
             .merge(notify_post(self.clone()))
@@ -133,8 +144,7 @@ impl Honey {
             .merge(sql_record_get(self.clone()))
             .merge(sonar_object_patch(self.clone()))
             .merge(sonar_object_delete(self.clone()))
-            .layer(session_layer);
-        Ok(Router::new().nest("/iris/api", app))
+            .layer(session_layer)
     }
 
     /// Lookup access for a name
@@ -159,7 +169,7 @@ impl Honey {
         let cred = Credentials::load(session).await?;
         let user = cred.user();
         for nm in channels {
-            self.name_access(user, &nm, Access::View).await?;
+            self.name_access(user, nm, Access::View).await?;
         }
         Ok(())
     }
@@ -218,6 +228,104 @@ impl Honey {
             // FIXME: purge channels from expired sessions
         }
     }
+}
+
+/// Build a stream from a file
+async fn file_stream(
+    fname: &str,
+    content_type: &'static str,
+    if_none_match: IfNoneMatch,
+) -> Resp3 {
+    log::info!("GET {fname}");
+    let etag = file_etag(fname).await?;
+    log::trace!("ETag: {etag} ({fname})");
+    let tag = etag.parse::<ETag>().map_err(|_e| Error::InvalidETag)?;
+    if if_none_match.precondition_passes(&tag) {
+        log::trace!("opening {fname}");
+        let file = match tokio::fs::File::open(fname).await {
+            Ok(file) => file,
+            Err(_err) => return Err(StatusCode::NOT_FOUND),
+        };
+        let stream = ReaderStream::new(file);
+        Ok((
+            [
+                (header::ETAG, etag),
+                (header::CACHE_CONTROL, "no-cache".to_string()),
+                (header::CONTENT_TYPE, content_type.to_string()),
+            ],
+            Body::from_stream(stream),
+        ))
+    } else {
+        Err(StatusCode::NOT_MODIFIED)
+    }
+}
+
+/// Get a static file ETag
+async fn file_etag(path: &str) -> Result<String> {
+    let meta = metadata(path).await?;
+    let modified = meta.modified()?;
+    let dur = modified.duration_since(SystemTime::UNIX_EPOCH)?.as_millis();
+    Ok(format!("\"{dur:x}\""))
+}
+
+/// Build route for index html
+fn index_get() -> Router {
+    async fn handler(
+        TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
+    ) -> Resp3 {
+        file_stream("index.html", "text/html; charset=utf-8", if_none_match)
+            .await
+    }
+    Router::new()
+        .route("/", get(handler))
+        .route("/index.html", get(handler))
+}
+
+/// `GET` JSON file from public directory
+fn public_dir_get() -> Router {
+    async fn handler(
+        TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
+        AxumPath(fname): AxumPath<String>,
+    ) -> Resp3 {
+        file_stream(&fname, "application/json", if_none_match).await
+    }
+    Router::new().route("/:fname", get(handler))
+}
+
+/// `GET` file from sign img directory
+fn img_dir_get() -> Router {
+    async fn handler(
+        TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
+        AxumPath(fname): AxumPath<String>,
+    ) -> Resp3 {
+        let fname = format!("img/{fname}");
+        file_stream(&fname, "image/gif", if_none_match).await
+    }
+    Router::new().route("img/:fname", get(handler))
+}
+
+/// `GET` file from tfon directory
+fn tfon_dir_get() -> Router {
+    async fn handler(
+        TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
+        AxumPath(fname): AxumPath<String>,
+    ) -> Resp3 {
+        let fname = format!("api/tfon/{fname}");
+        file_stream(&fname, "text/plain", if_none_match).await
+    }
+    Router::new().route("/tfon/:fname", get(handler))
+}
+
+/// `GET` file from gif directory
+fn gif_dir_get() -> Router {
+    async fn handler(
+        TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
+        AxumPath(fname): AxumPath<String>,
+    ) -> Resp3 {
+        let fname = format!("api/gif/{fname}");
+        file_stream(&fname, "image/gif", if_none_match).await
+    }
+    Router::new().route("/gif/:fname", get(handler))
 }
 
 /// Handle `POST` to login page
@@ -467,44 +575,16 @@ fn resource_file_get(honey: Honey) -> Router {
         State(honey): State<Honey>,
         TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
         AxumPath(type_n): AxumPath<String>,
-    ) -> Resp2 {
+    ) -> Resp3 {
         let nm = Name::new(&type_n)?;
-        log::info!("GET {nm}");
         let cred = Credentials::load(&session).await?;
         honey.name_access(cred.user(), &nm, Access::View).await?;
         let fname = format!("api/{type_n}");
-        let etag = resource_etag(&fname).await?;
-        log::trace!("ETag: {etag}");
-        let tag = etag.parse::<ETag>().map_err(|_e| Error::InvalidETag)?;
-        if if_none_match.precondition_passes(&tag) {
-            log::trace!("opening {fname}");
-            let file = match tokio::fs::File::open(fname).await {
-                Ok(file) => file,
-                Err(_err) => return Err(StatusCode::NOT_FOUND),
-            };
-            let stream = ReaderStream::new(file);
-            Ok((
-                [
-                    (header::ETAG, etag),
-                    (header::CONTENT_TYPE, "application/json".to_string()),
-                ],
-                Body::from_stream(stream),
-            ))
-        } else {
-            Err(StatusCode::NOT_MODIFIED)
-        }
+        file_stream(&fname, "application/json", if_none_match).await
     }
     Router::new()
         .route("/:type_n", get(handler))
         .with_state(honey)
-}
-
-/// Get a static file ETag
-async fn resource_etag(path: &str) -> Result<String> {
-    let meta = metadata(path).await?;
-    let modified = meta.modified()?;
-    let dur = modified.duration_since(SystemTime::UNIX_EPOCH)?.as_millis();
-    Ok(format!("\"{dur:x}\""))
 }
 
 /// Create a Sonar object from a `POST` request
