@@ -20,7 +20,13 @@ Route                     | Verb     | Function
 `iris/api/`*res*`/`*name* | `PATCH`  | Update attributes of one object
 `iris/api/`*res*`/`*name* | `DELETE` | Delete one object
 
-## Building
+## Install
+
+1. Install the current stable [Rust].
+2. Install the [IRIS] package (this creates the `tms` user/database and the
+   `/var/lib/iris/web/` working directory)
+
+Then, build honeybee:
 
 ```sh
 git clone https://github.com/mnit-rtmc/iris.git
@@ -28,26 +34,15 @@ cd iris/honeybee/
 cargo build --release
 ```
 
-## Installation
+If located outside of the `US/Central` timezone, edit the `honeybee.service`
+file and change the line starting with `Environment=PGTZ=`.
 
-Prior to installing honeybee, IRIS must be [installed] to create the `tms`
-user/database and the `/var/lib/iris/web/` working directory.
-
-As root:
+Then, as root:
 ```sh
 cp ./target/release/honeybee /usr/local/bin
 cp honeybee.service /etc/systemd/system
 systemctl enable honeybee.service
 systemctl start honeybee.service
-```
-
-If located outside of the `US/Central` timezone, edit the `honeybee.service`
-file and change the line starting with `Environment=PGTZ=`.  NOTE: after
-editing the file, run these commands as root:
-
-```sh
-systemctl daemon-reload
-systemctl restart honeybee.service
 ```
 
 ## Security
@@ -58,5 +53,6 @@ the server certificate.  This configuration is only secure when both `honeybee`
 and IRIS are running on the same host.
 
 
-[installed]: https://mnit-rtmc.github.io/iris/installation.html
+[iris]: https://mnit-rtmc.github.io/iris/installation.html
 [notifications]: https://mnit-rtmc.github.io/iris/database.html#notifications
+[rust]: https://www.rust-lang.org/tools/install
