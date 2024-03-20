@@ -5,6 +5,7 @@
  - Simplified Postgres LISTEN/NOTIFY scheme
  - honeybee: working dir `/var/www/html/iris` => `/var/lib/iris/web`
  - honeybee: serve all needed files (don't rely on nginx)
+ - Merged graft into honeybee service
 
 5.50.0 (13 Feb 2024)
  - Fix ONVIF control queueing
