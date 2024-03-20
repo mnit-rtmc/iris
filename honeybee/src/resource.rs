@@ -393,7 +393,7 @@ impl Resource {
         match self {
             Rnode => query_one_node(client, segments, obj_n).await,
             RoadFull => query_one_road(client, segments, obj_n).await,
-            ParkingAreaDyn | ParkingAreaArch => {
+            DmsStat | ParkingAreaDyn | ParkingAreaArch | WeatherSensorPub => {
                 self.query_file(client, self.path()).await
             }
             _ => Ok(()),
