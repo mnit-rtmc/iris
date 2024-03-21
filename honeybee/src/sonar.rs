@@ -14,7 +14,7 @@
 //
 use crate::restype::ResType;
 use crate::tls;
-use convert_case::{Case, Casing};
+use heck::ToLowerCamelCase;
 use http::StatusCode;
 use percent_encoding::percent_decode_str;
 use rustls::pki_types::ServerName;
@@ -204,7 +204,7 @@ impl Name {
             Ok(format!("{self}/{att}"))
         } else {
             // most IRIS attributes are in camel case (Java)
-            Ok(format!("{self}/{}", att.to_case(Case::Camel)))
+            Ok(format!("{self}/{}", att.to_lower_camel_case()))
         }
     }
 }
