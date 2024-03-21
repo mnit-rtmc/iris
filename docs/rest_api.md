@@ -97,7 +97,7 @@ a JSON array containing channels of interest.  To get notifications for a
 single object, append `$`_name_ to the channel name.
 
 Using [SSE], a client can receive notifications by sending a
-`GET iris/api/notify` request (EventSource).
+`GET iris/api/notify` request, with [EventSource].
 
 
 [alarm]: alarms.html
@@ -113,6 +113,7 @@ Using [SSE], a client can receive notifications by sending a
 [dms]: dms.html
 [domain]: user_roles.html#domains
 [etag]: https://en.wikipedia.org/wiki/HTTP_ETag
+[EventSource]: https://developer.mozilla.org/en-US/docs/Web/API/EventSource
 [gate arm]: gate_arms.html
 [geo loc]: geo_loc.html
 [gps]: gps.html
