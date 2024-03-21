@@ -66,7 +66,7 @@ Restricted resources can be accessed using standard http methods:
 
 - `GET iris/api/{type}`: Get a JSON array of all objects of `{type}`, with only
   *primary* attributes -- those needed for searching and displaying compact
-  cards.  The response also contains an ETag header, derived from the file's
+  cards.  The response also contains an [ETag] header, derived from the file's
   *modified* metadata, encoded in hexadecimal.
 - `GET iris/api/{type}/{name}`: Get a single object as JSON, with *primary* and
   *secondary* attributes
@@ -112,6 +112,7 @@ Using [SSE], a client can receive notifications by sending a
 [detector]: vehicle_detection.html
 [dms]: dms.html
 [domain]: user_roles.html#domains
+[etag]: https://en.wikipedia.org/wiki/HTTP_ETag
 [gate arm]: gate_arms.html
 [geo loc]: geo_loc.html
 [gps]: gps.html
