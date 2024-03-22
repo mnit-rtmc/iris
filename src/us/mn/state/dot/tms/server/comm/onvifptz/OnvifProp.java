@@ -77,11 +77,11 @@ abstract public class OnvifProp extends ControllerProperty {
 
 		// create each service (device service binding specified by ONVIF standard)
 		DeviceService dev = DeviceService.getDeviceService(url + "/onvif/device_service", user, pass);
-		// only need to get services once, then read all bindings from that
-		String services = dev.getServices();
-		PTZService ptz = PTZService.getPTZService(dev.getPTZBinding(services), user, pass);
-		MediaService media = MediaService.getMediaService(dev.getMediaBinding(services), user, pass);
-		ImagingService img = ImagingService.getImagingService(dev.getImagingBinding(services), user, pass);
+		// only need to get capabilities once, then read all bindings from that
+		String capabilities = dev.getCapabilities();
+		PTZService ptz = PTZService.getPTZService(dev.getPTZBinding(capabilities), user, pass);
+		MediaService media = MediaService.getMediaService(dev.getMediaBinding(capabilities), user, pass);
+		ImagingService img = ImagingService.getImagingService(dev.getImagingBinding(capabilities), user, pass);
 
 		String mediaProfile = null, videoSource = null;
 		int mediaWidth = 0, videoWidth = 0;  // to find largest source

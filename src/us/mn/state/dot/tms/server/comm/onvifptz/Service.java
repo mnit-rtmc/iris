@@ -26,6 +26,7 @@ import java.util.Random;
 import java.util.Base64;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 import java.text.SimpleDateFormat;
 
 import javax.xml.namespace.QName;
@@ -197,17 +198,15 @@ public abstract class Service {
 
 		int responseCode = connection.getResponseCode();
 		if (responseCode == HttpURLConnection.HTTP_OK) {
-			try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-				String inputLine;
-				StringBuilder response = new StringBuilder();
-				while ((inputLine = in.readLine()) != null) {
-					response.append(inputLine);
-				}
-				// Process the response here (XML parsing, etc.)
-				resp = response.toString();
-			}
+			BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			resp = in.lines().collect(Collectors.joining("\n"));
+			log("Request succeeded, code: " + responseCode + " Response:\n" + resp);
+			in.close();
 		} else {
-			resp = "Request failed. Response code: " + responseCode;
+			BufferedReader err = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+			resp = "Request failed. Response code: " + responseCode + " Response:\n"
+				+ err.lines().collect(Collectors.joining("\n"));
+			err.close();
 		}
 
 		connection.disconnect();
