@@ -55,41 +55,33 @@ public class DeviceService extends Service {
 	}
 
 	/** Gets a service address by its namespace */
-	public String getServiceAddr(String namespace, String servicesRes)
+	public String getServiceAddr(String name, String capabilitiesRes)
 		throws IOException
 	{
-		if (servicesRes == null || servicesRes.isEmpty()) {
-			servicesRes = getServices();
+		if (capabilitiesRes == null || capabilitiesRes.isEmpty()) {
+			capabilitiesRes = getCapabilities();
 		}
-		Document servicesDoc = DOMUtils.getDocument(servicesRes);
-		if (servicesDoc == null) return null;
+		Document capabilitiesDoc = DOMUtils.getDocument(capabilitiesRes);
+		if (capabilitiesDoc == null) return null;
 
-		NodeList services = servicesDoc.getElementsByTagNameNS("*", "Service");
-		for (int i = 0; i < services.getLength(); i++) {
-			Element service = (Element) services.item(i);
-			Element ns = (Element) service.getElementsByTagNameNS("*", "Namespace").item(0);
-
-			if (ns.getTextContent().equalsIgnoreCase(namespace)) {
-				Element addr = (Element) service.getElementsByTagNameNS("*", "XAddr").item(0);
-				return addr.getTextContent();
-			}
-		}
-		return null;
+		Element capabilities = (Element) capabilitiesDoc.getElementsByTagNameNS("*", "Capabilities").item(0);
+		Element service = (Element) capabilities.getElementsByTagNameNS("*", name).item(0);
+		return ((Element) service.getElementsByTagNameNS("*", "XAddr").item(0)).getTextContent();
 	}
 
 	/** Get the PTZ binding address */
-	public String getPTZBinding(String services) throws IOException {
-		return getServiceAddr("http://www.onvif.org/ver20/ptz/wsdl", services);
+	public String getPTZBinding(String capabilities) throws IOException {
+		return getServiceAddr("PTZ", capabilities);
 	}
 
 	/** Get the media binding address */
-	public String getMediaBinding(String services) throws IOException {
-		return getServiceAddr("http://www.onvif.org/ver10/media/wsdl", services);
+	public String getMediaBinding(String capabilities) throws IOException {
+		return getServiceAddr("Media", capabilities);
 	}
 
 	/** Get the imaging binding address */
-	public String getImagingBinding(String services) throws IOException {
-		return getServiceAddr("http://www.onvif.org/ver20/imaging/wsdl", services);
+	public String getImagingBinding(String capabilities) throws IOException {
+		return getServiceAddr("Imaging", capabilities);
 	}
 
 	/** Document builder function for GetScopes */
@@ -123,6 +115,23 @@ public class DeviceService extends Service {
 	/** Get the capabilities of the device service */
 	public String getServiceCapabilities() throws IOException {
 		Document doc = getServiceCapabilitiesDocument();
+		return sendRequestDocument(doc);
+	}
+
+	/** Document builder function for GetCapabilities */
+	public Document getCapabilitiesDocument() {
+		Document doc = getBaseDocument();
+		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+
+		Element getCapabilities = doc.createElement("wsdl:GetCapabilities");
+		body.appendChild(getCapabilities);
+
+		return doc;
+	}
+
+	/** Get the capabilities of the device */
+	public String getCapabilities() throws IOException {
+		Document doc = getCapabilitiesDocument();
 		return sendRequestDocument(doc);
 	}
 
