@@ -54,7 +54,7 @@ public abstract class Service {
 
 	/** Logger method */
 	protected void log(String s) {
-		System.out.println("PTZCommandProp:" + s);
+		OnvifPTZPoller.slog("PTZCommandProp:" + s);
 	}
 
 	/**
@@ -200,7 +200,7 @@ public abstract class Service {
 		if (responseCode == HttpURLConnection.HTTP_OK) {
 			BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			resp = in.lines().collect(Collectors.joining("\n"));
-			System.out.println("Request succeeded, code: " + responseCode + " Response:\n" + resp);
+			log("Request succeeded, code: " + responseCode + " Response:\n" + resp);
 			in.close();
 		} else {
 			BufferedReader err = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
