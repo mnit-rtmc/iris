@@ -54,7 +54,7 @@ public class DeviceService extends Service {
 		return sendRequestDocument(doc);
 	}
 
-	/** Gets a service address by its namespace */
+	/** Gets a service address by its name */
 	public String getServiceAddr(String name, String capabilitiesRes)
 		throws IOException
 	{
