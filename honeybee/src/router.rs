@@ -395,7 +395,7 @@ fn notify_post(honey: Honey) -> Router {
 
 /// Try to make a sonar names from notify channels
 fn try_names_from_channels(channels: &[String]) -> Result<Vec<Name>> {
-    if channels.len() > 8 {
+    if channels.len() > 32 {
         log::info!("Too many notification channels");
         Err(SonarError::InvalidValue)?;
     }
