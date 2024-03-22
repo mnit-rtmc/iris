@@ -27,10 +27,10 @@ target rate for the period (AM or PM).
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/ramp_meter` (minimal)
-* `iris/api/ramp_meter/{name}` (full)
+* `iris/api/ramp_meter` (primary)
+* `iris/api/ramp_meter/{name}`
 
-| Access       | Minimal        | Full                             |
+| Access       | Primary        | Secondary                        |
 |--------------|----------------|----------------------------------|
 | 👁️  View      | name, location | geo\_loc                         |
 | 👉 Operate   |                | m\_lock, rate                    |

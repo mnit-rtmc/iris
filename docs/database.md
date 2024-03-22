@@ -1,65 +1,70 @@
 # Database
 
-IRIS uses the [PostgreSQL] database for storage of configuration and event
-data.
+IRIS uses a [PostgreSQL] database for storage of configuration and event data.
+On [initialization], the `tms` database is created from an SQL script.
 
-## Notifications
+## Channels
 
-Notifications are sent by trigger functions when records are changed.  They
-are used to implement the [REST API].
+Database [notifications] are sent by trigger functions when records are
+changed.  The [honeybee] server listens for them as part of the [REST API].
 
-The CHANNEL matches the name of a table.  After INSERT or DELETE, and when an
-UPDATE changes any *minimal* attribute, a notification is sent to that CHANNEL
-(with an empty PAYLOAD).  Some channels are also notified when an associated
-record is updated:
+A *channel* name matches the name of a table.  A notification will be sent to
+that channel after `INSERT`, `DELETE`, or `UPDATE` on the table or an
+*associated table* with a matching foreign key.
 
-- __(G)__: `geo_loc`
-- __(C)__: `controller_io`
-- __(P)__: `device_preset`
-- __(H)__: `hashtag`
+Associated tables:
 
-Some tables have an alternate CHANNEL with `$1` appended to the name.  These
-are notified on *all* updates, with a PAYLOAD containing the __name__ of the
-updated record.
+- `geo_loc` __(G)__
+- `controller_io` __(C)__
+- `device_preset` __(P)__
+- `hashtag` __(H)__
 
-CHANNEL            | (G) | (C) | (P) | (H) | Alternate
--------------------|-----|-----|-----|-----|-----------
-`alarm`            | ❌  | ✔️   | ❌  | ❌  | ❌
-`beacon`           | ✔️   | ✔️   | ✔️   | ❌  | `beacon$1`
-`cabinet_style`    | ❌  | ❌  | ❌  | ❌  | ❌
-`camera`           | ✔️   | ✔️   | ❌  | ❌  | `camera$1`
-`comm_config`      | ❌  | ❌  | ❌  | ❌  | ❌
-`comm_link`        | ❌  | ❌  | ❌  | ❌  | `comm_link$1`
-`controller`       | ✔️   | ❌  | ❌  | ❌  | `controller$1`
-`detector`         | ❌  | ✔️   | ❌  | ❌  | `detector$1`
-`dms`              | ✔️   | ✔️   | ✔️   | ✔️   | `dms$1`
-`flow_stream`      | ❌  | ✔️   | ❌  | ❌  | ❌
-`gps`              | ✔️   | ✔️   | ❌  | ❌  | `gps$1`
-`gate_arm`         | ❌  | ✔️   | ❌  | ❌  | ❌
-`gate_arm_array`   | ✔️   | ✔️   | ❌  | ❌  | `gate_arm_array$1`
-`graphic`          | ❌  | ❌  | ❌  | ❌  | ❌
-`i_user`           | ❌  | ❌  | ❌  | ❌  | ❌
-`incident`         | ❌  | ❌  | ❌  | ❌  | ❌
-`lane_marking`     | ✔️   | ✔️   | ❌  | ❌  | ❌
-`lcs_array`        | ❌  | ✔️   | ❌  | ❌  | ❌
-`lcs_indication`   | ❌  | ✔️   | ❌  | ❌  | ❌
-`modem`            | ❌  | ❌  | ❌  | ❌  | ❌
-`msg_pattern`      | ❌  | ❌  | ❌  | ❌  | ❌
-`msg_line`         | ❌  | ❌  | ❌  | ❌  | ❌
-`parking_area`     | ✔️   | ❌  | ❌  | ❌  | `parking_area$1`
-`permission`       | ❌  | ❌  | ❌  | ❌  | ❌
-`ramp_meter`       | ✔️   | ✔️   | ✔️   | ❌  | `ramp_meter$1`
-❌                 | ✔️   | ❌  | ❌  | ❌  | `r_node$1`
-❌                 | ❌  | ❌  | ❌  | ❌  | `road$1`
-`role`             | ❌  | ❌  | ❌  | ❌  | ❌
-`sign_config`      | ❌  | ❌  | ❌  | ❌  | ❌
-`sign_detail`      | ❌  | ❌  | ❌  | ❌  | ❌
-`sign_message`     | ❌  | ❌  | ❌  | ❌  | ❌
-`system_attribute` | ❌  | ❌  | ❌  | ❌  | ❌
-`tag_reader`       | ✔️   | ✔️   | ❌  | ❌  | `tag_reader$1`
-`video_monitor`    | ❌  | ✔️   | ❌  | ❌  | `video_monitor$1`
-`weather_sensor`   | ✔️   | ✔️   | ❌  | ❌  | `weather_sensor$1`
-`word`             | ❌  | ❌  | ❌  | ❌  | ❌
+The notification payload will either be the object/record name of the changed
+row, or an empty string (blank).  A blank payload requires a full resource
+update, and is caused by one of these conditions:
+
+- `INSERT` / `DELETE` caused a row to be added/removed
+- `UPDATE` changed any *primary* attribute
+- `UPDATE` of an associated table changed any *primary* attribute
+
+*Notify Channel*   | (G) | (C) | (P) | (H)
+-------------------|-----|-----|-----|----
+`alarm`            | ❌  | ✔️   | ❌  | ❌
+`beacon`           | ✔️   | ✔️   | ✔️   | ❌
+`cabinet_style`    | ❌  | ❌  | ❌  | ❌
+`camera`           | ✔️   | ✔️   | ❌  | ❌
+`comm_config`      | ❌  | ❌  | ❌  | ❌
+`comm_link`        | ❌  | ❌  | ❌  | ❌
+`controller`       | ✔️   | ❌  | ❌  | ❌
+`detector`         | ❌  | ✔️   | ❌  | ❌
+`dms`              | ✔️   | ✔️   | ✔️   | ✔️ 
+`flow_stream`      | ❌  | ✔️   | ❌  | ❌
+`gps`              | ✔️   | ✔️   | ❌  | ❌
+`gate_arm`         | ❌  | ✔️   | ❌  | ❌
+`gate_arm_array`   | ✔️   | ✔️   | ❌  | ❌
+`graphic`          | ❌  | ❌  | ❌  | ❌
+`i_user`           | ❌  | ❌  | ❌  | ❌
+`incident`         | ❌  | ❌  | ❌  | ❌
+`lane_marking`     | ✔️   | ✔️   | ❌  | ❌
+`lcs_array`        | ❌  | ✔️   | ❌  | ❌
+`lcs_indication`   | ❌  | ✔️   | ❌  | ❌
+`modem`            | ❌  | ❌  | ❌  | ❌
+`msg_pattern`      | ❌  | ❌  | ❌  | ❌
+`msg_line`         | ❌  | ❌  | ❌  | ❌
+`parking_area`     | ✔️   | ❌  | ❌  | ❌
+`permission`       | ❌  | ❌  | ❌  | ❌
+`ramp_meter`       | ✔️   | ✔️   | ✔️   | ❌
+`r_node`           | ✔️   | ❌  | ❌  | ❌
+`road`             | ❌  | ❌  | ❌  | ❌
+`role`             | ❌  | ❌  | ❌  | ❌
+`sign_config`      | ❌  | ❌  | ❌  | ❌
+`sign_detail`      | ❌  | ❌  | ❌  | ❌
+`sign_message`     | ❌  | ❌  | ❌  | ❌
+`system_attribute` | ❌  | ❌  | ❌  | ❌
+`tag_reader`       | ✔️   | ✔️   | ❌  | ❌
+`video_monitor`    | ❌  | ✔️   | ❌  | ❌
+`weather_sensor`   | ✔️   | ✔️   | ❌  | ❌
+`word`             | ❌  | ❌  | ❌  | ❌
 
 ## Backup & Restore
 
@@ -123,6 +128,9 @@ downgrade is required, the database should be restored from a backup and the
 IRIS rpm should be reinstalled.
 
 
+[honeybee]: https://github.com/mnit-rtmc/iris/tree/master/honeybee
+[initialization]: installation.html#initialization
+[notifications]: https://www.postgresql.org/docs/current/sql-notify.html
 [PostgreSQL]: http://www.postgresql.org
 [REST API]: rest_api.html
 [semver]: https://semver.org

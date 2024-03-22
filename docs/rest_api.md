@@ -11,6 +11,7 @@ Data requests are split into *public* and *restricted* paths:
 - `iris/api/`: Restricted data (needs session authentication)
 - `iris/api/login`: Authentication endpoint
 - `iris/api/access`: User's access [permission]s
+- `iris/api/notify`: [Event notification](#event-notification) endpoint
 
 ## Public Resources
 
@@ -64,11 +65,11 @@ roles which do not have any access to the [permission], [role] and [user] types.
 Restricted resources can be accessed using standard http methods:
 
 - `GET iris/api/{type}`: Get a JSON array of all objects of `{type}`, with only
-  *minimal* attributes -- those needed for searching and displaying compact
-  cards.  The response also contains an ETag header, derived from the file's
+  *primary* attributes -- those needed for searching and displaying compact
+  cards.  The response also contains an [ETag] header, derived from the file's
   *modified* metadata, encoded in hexadecimal.
-- `GET iris/api/{type}/{name}`: Get a single object as JSON, with *minimal* and
-  *full* attributes
+- `GET iris/api/{type}/{name}`: Get a single object as JSON, with *primary* and
+  *secondary* attributes
 - `POST iris/api/{type}`: Create a new object of the `{type}`.  Body contains
                           required attributes as JSON
 - `PATCH iris/api/{type}/{name}`: Update attributes of one object, with JSON
@@ -89,11 +90,21 @@ A `Content-Type: application/json` header is included where appropriate.
 
 Most devices also have an associated [geo loc] resource.
 
+## Event Notification
+
+Clients can subscribe to [channels] by sending a `POST iris/api/notify`, with
+a JSON array containing channels of interest.  To get notifications for a
+single object, append `$`_name_ to the channel name.
+
+Using [SSE], a client can receive notifications by sending a
+`GET iris/api/notify` request, with [EventSource].
+
 
 [alarm]: alarms.html
 [beacon]: beacons.html
 [cabinet style]: controllers.html#cabinet-styles
 [camera]: cameras.html
+[channels]: https://mnit-rtmc.github.io/iris/database.html#channels
 [comm config]: comm_config.html
 [comm link]: comm_links.html
 [controller]: controllers.html
@@ -101,6 +112,8 @@ Most devices also have an associated [geo loc] resource.
 [detector]: vehicle_detection.html
 [dms]: dms.html
 [domain]: user_roles.html#domains
+[etag]: https://en.wikipedia.org/wiki/HTTP_ETag
+[EventSource]: https://developer.mozilla.org/en-US/docs/Web/API/EventSource
 [gate arm]: gate_arms.html
 [geo loc]: geo_loc.html
 [gps]: gps.html
@@ -113,6 +126,7 @@ Most devices also have an associated [geo loc] resource.
 [Road Weather Information System]: rwis.html
 [role]: user_roles.html#roles
 [sign message]: sign_message.html
+[SSE]: https://en.wikipedia.org/wiki/Server-sent_events
 [system attributes]: system_attributes.html
 [tag reader]: tolling.html#tag-readers
 [user]: user_roles.html

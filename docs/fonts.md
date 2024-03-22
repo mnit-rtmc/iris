@@ -5,16 +5,16 @@ A font is a set of bitmapped glyphs for displaying text on a [DMS].
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/font` (minimal)
+* `iris/api/font` (primary)
 * `iris/api/tfon/{name}.tfon`
 
-| Access  | Minimal           |
+| Access  | Primary           |
 |---------|-------------------|
 | 👁️  View | name, font_number |
 
 </details>
 
-A number of fonts are included in the `/var/lib/iris/fonts` directory:
+A number of fonts are included in the `/var/lib/iris/tfon` directory:
 
 Name    | Number | Height | Line Spacing | 3-Lines | Notes
 --------|--------|--------|--------------|---------|-----------
@@ -90,7 +90,7 @@ Fonts in [tfon] format can be imported into the IRIS database using
 tfon_import.py [font file] | psql tms
 ```
 
-Also, each font file must be copied to the `/var/www/html/iris/api/tfon/`
+Also, each font file must be copied to the `/var/lib/iris/web/api/tfon/`
 directory to make it available in the [REST API].
 
 ## Send and Query Fonts
@@ -98,7 +98,7 @@ directory to make it available in the [REST API].
 The status tab of the DMS properties dialog contains two settings buttons.
 Pressing `Send Settings` will cause all necessary fonts to be sent to the sign.
 `Query Settings` will read all fonts currently on the sign, and store them in
-the `/var/lib/iris/fonts/{sign_name}` directory.
+the `/var/lib/iris/tfon/{sign_name}` directory.
 
 
 [BDF]: https://en.wikipedia.org/wiki/Glyph_Bitmap_Distribution_Format

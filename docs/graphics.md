@@ -8,10 +8,10 @@ pictographs, interstate shields or other signs.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/graphic` (minimal)
+* `iris/api/graphic` (primary)
 * `iris/api/gif/{name}.gif`
 
-| Access  | Minimal      |
+| Access  | Primary      |
 |---------|--------------|
 | 👁️  View | name, number |
 
@@ -28,7 +28,7 @@ Requirements:
 - Width between 1 and 240 pixels
 - Height between 1 and 144 pixels
 
-Store graphics in `/var/www/html/iris/api/gif/` to make available in the
+Store graphics in `/var/lib/iris/web/api/gif/` to make available in the
 [REST API].
 
 To import a graphic into the database, enable [edit mode] and press the

@@ -15,7 +15,7 @@ is checked against the stored password hash for the account.
 * `iris/api/user`
 * `iris/api/user/{name}`
 
-| Access       | Minimal          |
+| Access       | Primary          |
 |--------------|------------------|
 | 👁️  View      | name             |
 | 💡 Manage    | enabled          |
@@ -46,7 +46,7 @@ make further changes will be lost immediately.**
 * `iris/api/role`
 * `iris/api/role/{name}`
 
-| Access       | Minimal    |
+| Access       | Primary    |
 |--------------|------------|
 | 👁️  View      | name       |
 | 💡 Manage    | enabled    |

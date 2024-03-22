@@ -103,6 +103,8 @@ button.go_link {
 }
 #sidebar {
   position: relative;
+  display: flex;
+  flex-direction: column;
   user-select: none;
   flex: 0 1 100%;
   margin: 0.2rem;
@@ -116,8 +118,7 @@ button.go_link {
   gap: 0.1rem;
   grid-template-columns: repeat(4, auto);
   grid-template-areas: "resource resource config fullscreen"
-                       "search   state    state  refresh"
-                       "list     list     list   list";
+                       "search   state    state  refresh";
 }
 #sb_label {
   grid-area: resource;
@@ -138,7 +139,8 @@ button.go_link {
   grid-area: refresh;
 }
 #sb_list {
-  grid-area: list;
+  flex: 0 1 100%;
+  margin-top: 0.1rem;
   overflow-y: auto;
 }
 

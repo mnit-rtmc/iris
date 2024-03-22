@@ -74,10 +74,10 @@ located just downstream of a pricing DMS.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/tag_reader` (minimal)
-* `iris/api/tag_reader/{name}` (full)
+* `iris/api/tag_reader` (primary)
+* `iris/api/tag_reader/{name}`
 
-| Access       | Minimal        | Full               |
+| Access       | Primary        | Secondary          |
 |--------------|----------------|--------------------|
 | 👁️  View      | name, location | geo\_loc, settings |
 | 💡 Manage    | notes          | toll\_zone         |

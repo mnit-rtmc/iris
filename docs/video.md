@@ -43,10 +43,10 @@ a [switching](#switching) system.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/video_monitor` (minimal)
-* `iris/api/video_monitor/{name}` (full)
+* `iris/api/video_monitor` (primary)
+* `iris/api/video_monitor/{name}`
 
-| Access       | Minimal              | Full                       |
+| Access       | Primary              | Secondary                  |
 |--------------|----------------------|----------------------------|
 | 👁️  View      | name                 |                            |
 | 👉 Operate   |                      | camera                     |

@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -104,6 +104,9 @@ pub struct Dms {
     pub has_faults: Option<bool>,
     // full attributes
     pub pin: Option<u32>,
+    pub static_graphic: Option<String>,
+    pub beacon: Option<String>,
+    pub preset: Option<String>,
     pub sign_config: Option<String>,
     pub sign_detail: Option<String>,
     pub msg_sched: Option<String>,
@@ -689,7 +692,7 @@ impl Dms {
                     return Some(faults);
                 }
             }
-            // full attribute doesn't match minimal has_faults?!
+            // secondary attribute doesn't match primary has_faults?!
             Some("has_faults")
         } else {
             None
@@ -772,9 +775,7 @@ impl Dms {
             console::log_1(&"patterns empty".into());
             return None;
         }
-        let Some(sign) = self.make_sign(anc) else {
-            return None;
-        };
+        let sign = self.make_sign(anc)?;
         let mut html = String::new();
         html.push_str("<div id='mc_grid'>");
         let pat_def = self.pattern_default(anc);
@@ -835,9 +836,7 @@ impl Dms {
 
     /// Make an ntcip sign
     fn make_sign(&self, anc: &DmsAnc) -> Option<Sign> {
-        let Some(cfg) = anc.sign_config(self.sign_config.as_deref()) else {
-            return None;
-        };
+        let cfg = anc.sign_config(self.sign_config.as_deref())?;
         match ntcip::dms::Dms::builder()
             .with_font_definition(anc.fonts.clone())
             .with_graphic_definition(anc.graphics.clone())

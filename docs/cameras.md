@@ -12,10 +12,10 @@ Select `View ➔ Video ➔ Cameras` menu item
 <summary>API Resources</summary>
 
 * `iris/camera_pub`
-* `iris/api/camera` (minimal)
-* `iris/api/camera/{name}` (full)
+* `iris/api/camera` (primary)
+* `iris/api/camera/{name}`
 
-| Access       | Minimal              | Full                        |
+| Access       | Primary              | Secondary                   |
 |--------------|----------------------|-----------------------------|
 | 👁️  View      | name, location       | geo\_loc, video\_loss       |
 | 👉 Operate   |                      | ptz †, recall\_preset †     |

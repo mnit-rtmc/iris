@@ -29,7 +29,7 @@ dnf install iris-{major}.{minor}.{micro}-{build}.noarch.rpm
 This will install dependencies not already installed, including [OpenJDK],
 [PostgreSQL] and [nginx].
 
-## Initialize IRIS
+## Initialization
 
 Next, you must initialize the IRIS server installation.  Run the following
 command (as root):

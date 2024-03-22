@@ -1,5 +1,12 @@
 # IRIS 5.x Release Notes
 
+5.51.0 (19 Mar 2024)
+ - honeybee: Add SSE push notifications
+ - Simplified Postgres LISTEN/NOTIFY scheme
+ - honeybee: working dir `/var/www/html/iris` => `/var/lib/iris/web`
+ - honeybee: serve all needed files (don't rely on nginx)
+ - Merged graft into honeybee service
+
 5.50.0 (13 Feb 2024)
  - Fix ONVIF control queueing
  - Escape quotes in JSON values (RWIS locations)

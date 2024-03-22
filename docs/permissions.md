@@ -11,7 +11,7 @@ access only.
 * `iris/api/permission/{id}`
 * `iris/api/access`
 
-| Access       | Minimal                               |
+| Access       | Primary                               |
 |--------------|---------------------------------------|
 | 👁️  View      | id                                    |
 | 🔧 Configure | role, resource\_n, hashtag, access\_n |

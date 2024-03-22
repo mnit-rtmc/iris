@@ -1,6 +1,6 @@
 // query.rs
 //
-// Copyright (c) 2019-2023  Minnesota Department of Transportation
+// Copyright (c) 2019-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ use async_std::fs::{read_dir, File};
 use async_std::io::ReadExt;
 use async_std::path::{Path, PathBuf};
 use async_std::stream::StreamExt;
-use chrono::{Duration, Local, NaiveDate};
+use chrono::{Local, NaiveDate, TimeDelta};
 use serde::Deserialize;
 use std::collections::HashSet;
 use std::io::Read as _;
@@ -229,7 +229,7 @@ const MAX_AGE_SEC: u64 = 100 * 7 * 24 * 60 * 60;
 fn max_age(date: &str) -> Option<u64> {
     if let Ok(date) = parse_date(date) {
         let today = Local::now().date_naive();
-        if today > date + Duration::days(2) {
+        if today > date + TimeDelta::try_days(2).unwrap() {
             Some(MAX_AGE_SEC)
         } else {
             Some(30)

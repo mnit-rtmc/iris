@@ -13,10 +13,10 @@ with a sign config.  They can be:
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/msg_pattern` (minimal)
-* `iris/api/msg_pattern/{name}` (full)
+* `iris/api/msg_pattern` (primary)
+* `iris/api/msg_pattern/{name}`
 
-| Access       | Minimal          | Full          |
+| Access       | Primary          | Secondary     |
 |--------------|------------------|---------------|
 | 👁️  View      | name             |               |
 | 👉 Operate   |                  |               |
@@ -54,15 +54,15 @@ same number of lines in their text rectangles.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/msg_line` (minimal)
-* `iris/api/msg_line/{name}` (full)
+* `iris/api/msg_line` (primary)
+* `iris/api/msg_line/{name}`
 
-| Access       | Minimal                   | Full |
-|--------------|---------------------------|------|
-| 👁️  View      | name                      |      |
-| 👉 Operate   |                           |      |
-| 💡 Manage    | restrict\_hashtag         | rank |
-| 🔧 Configure | msg\_pattern, line, multi |      |
+| Access       | Primary                   | Secondary |
+|--------------|---------------------------|-----------|
+| 👁️  View      | name                      |           |
+| 👉 Operate   |                           |           |
+| 💡 Manage    | restrict\_hashtag         | rank      |
+| 🔧 Configure | msg\_pattern, line, multi |           |
 
 </details>
 

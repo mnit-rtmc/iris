@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2023  Minnesota Department of Transportation
+ * Copyright (C) 2016-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  */
 public class PrivilegePanel extends ProxyTablePanel<Privilege> {
 
-	/** All sonar type names (FIXME: use iris.sonar_type DB table) */
+	/** All sonar type names (FIXME: use iris.resource_type DB table) */
 	static public final String[] ALL_TYPES = {
 		"action_plan",
 		"alarm",

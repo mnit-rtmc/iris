@@ -8,12 +8,12 @@ A comm configuration is a set of properties which is shared among multiple
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/comm_config` (minimal)
-* `iris/api/comm_config/{name}` (full)
+* `iris/api/comm_config` (primary)
+* `iris/api/comm_config/{name}`
 
-| Access       | Minimal     | Full |
-|--------------|-------------|------|
-| 👁️  View      | name        |      |
+| Access       | Primary     | Secondary |
+|--------------|-------------|-----------|
+| 👁️  View      | name        |           |
 | 💡 Manage    |             | timeout\_ms, idle\_disconnect\_sec, no\_response\_disconnect\_sec |
 | 🔧 Configure | description | protocol, poll\_period\_sec, long\_poll\_period\_sec |
 

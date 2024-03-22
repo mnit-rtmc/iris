@@ -10,10 +10,10 @@ roadway.  They are commonly used for on-ramps or reversible lanes.
 
 * `iris/gate_arm_interlock` (lookup table)
 * `iris/gate_arm_state` (lookup table)
-* `iris/api/gate_arm` (minimal)
-* `iris/api/gate_arm/{name}` (full)
+* `iris/api/gate_arm` (primary)
+* `iris/api/gate_arm/{name}`
 
-| Access       | Minimal                    | Full                  |
+| Access       | Primary                    | Secondary             |
 |--------------|----------------------------|-----------------------|
 | 👁️  View      | name, location, arm\_state | ga\_array, idx, fault |
 | 💡 Manage    | notes                      |                       |
@@ -33,14 +33,14 @@ array controls **all** associated arms.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/gate_arm_array` (minimal)
-* `iris/api/gate_arm_array/{name}` (full)
+* `iris/api/gate_arm_array` (primary)
+* `iris/api/gate_arm_array/{name}`
 
-| Access       | Minimal                   | Full     |
-|--------------|---------------------------|----------|
-| 👁️  View      | name, location, interlock | geo\_loc |
-| 👉 Operate   | arm\_state                |          |
-| 💡 Manage    | notes                     |          |
+| Access       | Primary                   | Secondary |
+|--------------|---------------------------|-----------|
+| 👁️  View      | name, location, interlock | geo\_loc  |
+| 👉 Operate   | arm\_state                |           |
+| 💡 Manage    | notes                     |           |
 | 🔧 Configure |                           | opposing, prereq, camera, approach, action\_plan |
 
 </details>

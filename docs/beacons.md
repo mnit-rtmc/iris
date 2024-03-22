@@ -15,10 +15,11 @@ Beacons can be connected to controllers using one of these protocols:
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/beacon` (minimal)
-* `iris/api/beacon/{name}` (full)
+* `iris/beacon_state` (lookup table)
+* `iris/api/beacon` (primary)
+* `iris/api/beacon/{name}`
 
-| Access       | Minimal        | Full                        |
+| Access       | Primary        | Secondary                   |
 |--------------|----------------|-----------------------------|
 | 👁️  View      | name, location | geo\_loc                    |
 | 👉 Operate   | state          |                             |

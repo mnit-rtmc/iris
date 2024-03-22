@@ -144,7 +144,7 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.50.0
+database_version	5.51.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_secs	60
@@ -449,21 +449,17 @@ CREATE TABLE iris.hashtag (
 );
 ALTER TABLE iris.hashtag ADD PRIMARY KEY (resource_n, name, hashtag);
 
-CREATE FUNCTION iris.resource_notify() RETURNS TRIGGER AS
-    $resource_notify$
+CREATE FUNCTION iris.hashtag_notify() RETURNS TRIGGER AS
+    $hashtag_notify$
 BEGIN
-    IF (TG_OP = 'DELETE') THEN
-        PERFORM pg_notify(OLD.resource_n, '');
-    ELSE
-        PERFORM pg_notify(NEW.resource_n, '');
-    END IF;
+    PERFORM pg_notify(OLD.resource_n, '');
     RETURN NULL; -- AFTER trigger return is ignored
 END;
-$resource_notify$ LANGUAGE plpgsql;
+$hashtag_notify$ LANGUAGE plpgsql;
 
-CREATE TRIGGER resource_notify_trig
+CREATE TRIGGER hashtag_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.hashtag
-    FOR EACH ROW EXECUTE FUNCTION iris.resource_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.hashtag_notify();
 
 CREATE VIEW hashtag_view AS
     SELECT resource_n, name, hashtag
@@ -875,9 +871,9 @@ CREATE FUNCTION iris.road_notify() RETURNS TRIGGER AS
     $road_notify$
 BEGIN
     IF (TG_OP = 'DELETE') THEN
-        PERFORM pg_notify('road$1', OLD.name);
+        PERFORM pg_notify('road', OLD.name);
     ELSE
-        PERFORM pg_notify('road$1', NEW.name);
+        PERFORM pg_notify('road', NEW.name);
     END IF;
     RETURN NULL; -- AFTER trigger return is ignored
 END;
@@ -934,9 +930,29 @@ CREATE TABLE iris.geo_loc (
     lon double precision
 );
 
-CREATE TRIGGER resource_notify_trig
+CREATE FUNCTION iris.geo_loc_notify() RETURNS TRIGGER AS
+    $geo_loc_notify$
+BEGIN
+    IF (NEW.roadway IS DISTINCT FROM OLD.roadway) OR
+       (NEW.road_dir IS DISTINCT FROM OLD.road_dir) OR
+       (NEW.cross_street IS DISTINCT FROM OLD.cross_street) OR
+       (NEW.cross_dir IS DISTINCT FROM OLD.cross_dir) OR
+       (NEW.cross_mod IS DISTINCT FROM OLD.cross_mod) OR
+       (NEW.landmark IS DISTINCT FROM OLD.landmark)
+    THEN
+        PERFORM pg_notify(NEW.resource_n, '');
+    ELSIF (NEW.lat IS DISTINCT FROM OLD.lat) OR
+          (NEW.lon IS DISTINCT FROM OLD.lon)
+    THEN
+        PERFORM pg_notify(NEW.resource_n, NEW.name);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$geo_loc_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER geo_loc_notify_trig
     AFTER UPDATE ON iris.geo_loc
-    FOR EACH ROW EXECUTE FUNCTION iris.resource_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.geo_loc_notify();
 
 CREATE FUNCTION iris.geo_location(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT)
 	RETURNS TEXT AS $geo_location$
@@ -1027,9 +1043,9 @@ CREATE FUNCTION iris.r_node_notify() RETURNS TRIGGER AS
     $r_node_notify$
 BEGIN
     IF (TG_OP = 'DELETE') THEN
-        PERFORM pg_notify('r_node$1', OLD.name);
+        PERFORM pg_notify('r_node', OLD.name);
     ELSE
-        PERFORM pg_notify('r_node$1', NEW.name);
+        PERFORM pg_notify('r_node', NEW.name);
     END IF;
     RETURN NULL; -- AFTER trigger return is ignored
 END;
@@ -1340,15 +1356,8 @@ CREATE TABLE iris.comm_link (
 CREATE FUNCTION iris.comm_link_notify() RETURNS TRIGGER AS
     $comm_link_notify$
 BEGIN
-    IF (NEW.description IS DISTINCT FROM OLD.description) OR
-       (NEW.uri IS DISTINCT FROM OLD.uri) OR
-       (NEW.poll_enabled IS DISTINCT FROM OLD.poll_enabled) OR
-       (NEW.comm_config IS DISTINCT FROM OLD.comm_config) OR
-       (NEW.connected IS DISTINCT FROM OLD.connected)
-    THEN
-        NOTIFY comm_link;
-    END IF;
-    PERFORM pg_notify('comm_link$1', NEW.name);
+    -- all attributes are primary
+    NOTIFY comm_link;
     RETURN NULL; -- AFTER trigger return is ignored
 END;
 $comm_link_notify$ LANGUAGE plpgsql;
@@ -1447,8 +1456,9 @@ BEGIN
        (NEW.fail_time IS DISTINCT FROM OLD.fail_time)
     THEN
         NOTIFY controller;
+    ELSE
+        PERFORM pg_notify('controller', NEW.name);
     END IF;
-    PERFORM pg_notify('controller$1', NEW.name);
     RETURN NULL; -- AFTER trigger return is ignored
 END;
 $controller_notify$ LANGUAGE plpgsql;
@@ -1504,9 +1514,22 @@ CREATE TABLE iris.controller_io (
     UNIQUE (controller, pin)
 );
 
-CREATE TRIGGER resource_notify_trig
+CREATE FUNCTION iris.controller_io_notify() RETURNS TRIGGER AS
+    $controller_io_notify$
+BEGIN
+    -- controller is primary; pin is secondary
+    IF (NEW.controller IS DISTINCT FROM OLD.controller) THEN
+        PERFORM pg_notify(NEW.resource_n, '');
+    ELSIF (NEW.pin IS DISTINCT FROM OLD.pin) THEN
+        PERFORM pg_notify(NEW.resource_n, NEW.name);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$controller_io_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER controller_io_notify_trig
     AFTER UPDATE ON iris.controller_io
-    FOR EACH ROW EXECUTE FUNCTION iris.resource_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_notify();
 
 CREATE FUNCTION iris.controller_io_delete() RETURNS TRIGGER AS
     $controller_io_delete$
@@ -1624,8 +1647,9 @@ BEGIN
        (NEW.publish IS DISTINCT FROM OLD.publish)
     THEN
         NOTIFY camera;
+    ELSE
+        PERFORM pg_notify('camera', NEW.name);
     END IF;
-    PERFORM pg_notify('camera$1', NEW.name);
     RETURN NULL; -- AFTER trigger return is ignored
 END;
 $camera_notify$ LANGUAGE plpgsql;
@@ -1938,9 +1962,19 @@ CREATE TABLE iris.device_preset (
     preset VARCHAR(20) UNIQUE REFERENCES iris.camera_preset(name)
 );
 
-CREATE TRIGGER resource_notify_trig
+CREATE FUNCTION iris.device_preset_notify() RETURNS TRIGGER AS
+    $device_preset_notify$
+BEGIN
+    IF (NEW.preset IS DISTINCT FROM OLD.preset) THEN
+        PERFORM pg_notify(NEW.resource_n, NEW.name);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$device_preset_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER device_preset_notify_trig
     AFTER UPDATE ON iris.device_preset
-    FOR EACH ROW EXECUTE FUNCTION iris.resource_notify();
+    FOR EACH ROW EXECUTE FUNCTION iris.device_preset_notify();
 
 CREATE VIEW camera_preset_view AS
     SELECT cp.name, camera, preset_num, direction, p.name AS device
@@ -2079,8 +2113,9 @@ BEGIN
        (NEW.state IS DISTINCT FROM OLD.state)
     THEN
         NOTIFY beacon;
+    ELSE
+        PERFORM pg_notify('beacon', NEW.name);
     END IF;
-    PERFORM pg_notify('beacon$1', NEW.name);
     RETURN NULL; -- AFTER trigger return is ignored
 END;
 $beacon_notify$ LANGUAGE plpgsql;
@@ -2233,10 +2268,16 @@ ALTER TABLE iris._detector ADD CONSTRAINT _detector_fkey
 CREATE FUNCTION iris.detector_notify() RETURNS TRIGGER AS
     $detector_notify$
 BEGIN
-    IF (NEW.notes IS DISTINCT FROM OLD.notes) THEN
+    -- lane_code, lane_number and abandoned are secondary, but affect label
+    IF (NEW.notes IS DISTINCT FROM OLD.notes) OR
+       (NEW.lane_code IS DISTINCT FROM OLD.lane_code) OR
+       (NEW.lane_number IS DISTINCT FROM OLD.lane_number) OR
+       (NEW.abandoned IS DISTINCT FROM OLD.abandoned)
+    THEN
         NOTIFY detector;
+    ELSE
+        PERFORM pg_notify('detector', NEW.name);
     END IF;
-    PERFORM pg_notify('detector$1', NEW.name);
     RETURN NULL; -- AFTER trigger return is ignored
 END;
 $detector_notify$ LANGUAGE plpgsql;
@@ -2413,8 +2454,9 @@ CREATE FUNCTION iris.gps_notify() RETURNS TRIGGER AS
 BEGIN
     IF (NEW.notes IS DISTINCT FROM OLD.notes) THEN
         NOTIFY gps;
+    ELSE
+        PERFORM pg_notify('gps', NEW.name);
     END IF;
-    PERFORM pg_notify('gps$1', NEW.name);
     RETURN NULL; -- AFTER trigger return is ignored
 END;
 $gps_notify$ LANGUAGE plpgsql;
@@ -2898,13 +2940,15 @@ ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
 CREATE FUNCTION iris.dms_notify() RETURNS TRIGGER AS
     $dms_notify$
 BEGIN
+    -- has_faults is derived from status (secondary attribute)
     IF (NEW.notes IS DISTINCT FROM OLD.notes) OR
        (NEW.msg_current IS DISTINCT FROM OLD.msg_current) OR
        (NEW.status IS DISTINCT FROM OLD.status)
     THEN
         NOTIFY dms;
+    ELSE
+        PERFORM pg_notify('dms', NEW.name);
     END IF;
-    PERFORM pg_notify('dms$1', NEW.name);
     RETURN NULL; -- AFTER trigger return is ignored
 END;
 $dms_notify$ LANGUAGE plpgsql;
@@ -3234,8 +3278,9 @@ BEGIN
        (NEW.interlock IS DISTINCT FROM OLD.interlock)
     THEN
         NOTIFY gate_arm_array;
+    ELSE
+        PERFORM pg_notify('gate_arm_array', NEW.name);
     END IF;
-    PERFORM pg_notify('gate_arm_array$1', NEW.name);
     RETURN NULL; -- AFTER trigger return is ignored
 END;
 $gate_arm_array_notify$ LANGUAGE plpgsql;
@@ -4451,8 +4496,9 @@ CREATE FUNCTION iris.parking_area_notify() RETURNS TRIGGER AS
 BEGIN
     IF (NEW.time_stamp_static IS DISTINCT FROM OLD.time_stamp_static) THEN
         NOTIFY parking_area;
+    ELSE
+        PERFORM pg_notify('parking_area', NEW.name);
     END IF;
-    PERFORM pg_notify('parking_area$1', NEW.name);
     RETURN NULL; -- AFTER trigger return is ignored
 END;
 $parking_area_notify$ LANGUAGE plpgsql;
@@ -4591,8 +4637,9 @@ CREATE FUNCTION iris.ramp_meter_notify() RETURNS TRIGGER AS
 BEGIN
     IF (NEW.notes IS DISTINCT FROM OLD.notes) THEN
         NOTIFY ramp_meter;
+    ELSE
+        PERFORM pg_notify('ramp_meter', NEW.name);
     END IF;
-    PERFORM pg_notify('ramp_meter$1', NEW.name);
     RETURN NULL; -- AFTER trigger return is ignored
 END;
 $ramp_meter_notify$ LANGUAGE plpgsql;
@@ -4805,8 +4852,9 @@ CREATE FUNCTION iris.tag_reader_notify() RETURNS TRIGGER AS
 BEGIN
     IF (NEW.notes IS DISTINCT FROM OLD.notes) THEN
         NOTIFY tag_reader;
+    ELSE
+        PERFORM pg_notify('tag_reader', NEW.name);
     END IF;
-    PERFORM pg_notify('tag_reader$1', NEW.name);
     RETURN NULL; -- AFTER trigger return is ignored
 END;
 $tag_reader_notify$ LANGUAGE plpgsql;
@@ -5041,8 +5089,9 @@ BEGIN
        (NEW.notes IS DISTINCT FROM OLD.notes)
     THEN
         NOTIFY video_monitor;
+    ELSE
+        PERFORM pg_notify('video_monitor', NEW.name);
     END IF;
-    PERFORM pg_notify('video_monitor$1', NEW.name);
     RETURN NULL; -- AFTER trigger return is ignored
 END;
 $video_monitor_notify$ LANGUAGE plpgsql;
@@ -5236,8 +5285,9 @@ BEGIN
        (NEW.notes IS DISTINCT FROM OLD.notes)
     THEN
         NOTIFY weather_sensor;
+    ELSE
+        PERFORM pg_notify('weather_sensor', NEW.name);
     END IF;
-    PERFORM pg_notify('weather_sensor$1', NEW.name);
     RETURN NULL; -- AFTER trigger return is ignored
 END;
 $weather_sensor_notify$ LANGUAGE plpgsql;

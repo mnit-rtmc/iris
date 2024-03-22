@@ -8,11 +8,11 @@ after being unused for a few minutes.
 <details>
 <summary>API Resources</summary>
 
-* `iris/sign_message` (minimal)
+* `iris/sign_message` (primary)
 * `iris/img/{name}.gif`
 * `iris/api/sign_message` (`POST`)
 
-| Access  | Minimal     |
+| Access  | Primary     |
 |---------|-------------|
 | 👁️  View | name, sign\_config, incident, multi, msg\_owner, flash\_beacon, msg\_priority, duration |
 

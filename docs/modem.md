@@ -9,10 +9,10 @@ phone number instead of IP address.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/modem` (minimal)
-* `iris/api/modem/{name}` (full)
+* `iris/api/modem` (primary)
+* `iris/api/modem/{name}`
 
-| Access       | Minimal    | Full        |
+| Access       | Primary    | Secondary   |
 |--------------|------------|-------------|
 | 👁️  View      | name       |             |
 | 💡 Manage    | enabled    | timeout\_ms |

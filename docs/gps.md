@@ -7,10 +7,10 @@ the nearest roadway and direction.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/gps` (minimal)
-* `iris/api/gps/{name}` (full)
+* `iris/api/gps` (primary)
+* `iris/api/gps/{name}`
 
-| Access       | Minimal    | Full                                   |
+| Access       | Primary    | Secondary                              |
 |--------------|------------|----------------------------------------|
 | 👁️  View      | name       | latest\_poll, latest\_sample, lat, lon |
 | 💡 Manage    | notes      |                                        |

@@ -17,10 +17,10 @@ Select `View ➔ Video ➔ Flow Streams` menu item
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/flow_stream` (minimal)
-* `iris/api/flow_stream/{name}` (full)
+* `iris/api/flow_stream` (primary)
+* `iris/api/flow_stream/{name}`
 
-| Access       | Minimal    | Full                       |
+| Access       | Primary    | Secondary                  |
 |--------------|------------|----------------------------|
 | 👁️  View      | name       | status                     |
 | 👉 Operate   |            | camera, mon\_num           |

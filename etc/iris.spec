@@ -4,7 +4,7 @@
 #     and Douglas Lau
 #
 # IRIS -- Intelligent Roadway Information System
-# Copyright (C) 2009-2023  Minnesota Department of Transportation
+# Copyright (C) 2009-2024  Minnesota Department of Transportation
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -122,23 +122,24 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %dir %attr(0755,nginx,nginx) /var/cache/nginx/earthwyrm-iris
 
 # /var/lib/iris
-%dir %attr(3775,tms,tms) /var/lib/iris
-%dir %attr(0755,root,root) /var/lib/iris/sql
-%attr(0444,root,root) /var/lib/iris/sql/*.sql
-%dir %attr(3755,tms,tms) /var/lib/iris/fonts
-%attr(0444,root,root) /var/lib/iris/fonts/*.tfon
-%dir %attr(3775,tms,tms) /var/lib/iris/meter
-%dir %attr(3775,tms,tms) /var/lib/iris/traffic
-%dir %attr(3775,tms,tms) /var/lib/iris/backup
+%dir %attr(0775,tms,tms) /var/lib/iris
+%dir %attr(0775,tms,tms) /var/lib/iris/backup
+%dir %attr(0775,tms,tms) /var/lib/iris/meter
+%dir %attr(0755,tms,tms) /var/lib/iris/sql
+%attr(0444,tms,tms) /var/lib/iris/sql/*.sql
+%dir %attr(0755,tms,tms) /var/lib/iris/tfon
+%attr(0444,tms,tms) /var/lib/iris/tfon/*.tfon
+%dir %attr(0775,tms,tms) /var/lib/iris/traffic
+%dir %attr(0775,tms,tms) /var/lib/iris/web
+%attr(0444,tms,tms) /var/lib/iris/web/index.html
+%dir %attr(0775,tms,tms) /var/lib/iris/web/bulb
+%attr(0444,tms,tms) /var/lib/iris/web/bulb/*
 
 # /var/log/iris
 %dir %attr(3775,tms,tms) /var/log/iris
 
 # /var/www/html/
 %attr(0644,root,root) /var/www/html/index.html
-%dir %attr(3775,tms,tms) /var/www/html/iris
-%dir %attr(3775,tms,tms) /var/www/html/iris/bulb
-%dir %attr(3775,tms,tms) /var/www/html/iris/img
 %dir %attr(3775,tms,tms) /var/www/html/iris_xml
 %dir %attr(3775,tms,tms) /var/www/html/iris-gstreamer
 

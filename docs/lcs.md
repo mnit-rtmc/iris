@@ -11,9 +11,9 @@ which either permit or restrict use of that lane.
 
 * `iris/lane_use_indication` (lookup table)
 * `iris/lcs_lock` (lookup table)
-* `iris/api/lcs` (minimal)
+* `iris/api/lcs` (primary)
 
-| Access       | Minimal               |
+| Access       | Primary               |
 |--------------|-----------------------|
 | 👁️  View      | name, lcs_array, lane |
 
@@ -32,15 +32,15 @@ LCS are grouped into **arrays**, with one over each lane.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/lcs_array` (minimal)
-* `iris/api/lcs_array/{name}` (full)
+* `iris/api/lcs_array` (primary)
+* `iris/api/lcs_array/{name}`
 
-| Access       | Minimal    | Full  |
-|--------------|------------|-------|
-| 👁️  View      | name       |       |
-| 👉 Operate   | lcs\_lock  |       |
-| 💡 Manage    | notes      |       |
-| 🔧 Configure |            | shift |
+| Access       | Primary    | Secondary |
+|--------------|------------|-----------|
+| 👁️  View      | name       |           |
+| 👉 Operate   | lcs\_lock  |           |
+| 💡 Manage    | notes      |           |
+| 🔧 Configure |            | shift     |
 
 </details>
 
@@ -49,13 +49,13 @@ LCS are grouped into **arrays**, with one over each lane.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/lcs_indication` (minimal)
-* `iris/api/lcs_indication/{name}` (full)
+* `iris/api/lcs_indication` (primary)
+* `iris/api/lcs_indication/{name}`
 
-| Access       | Minimal               | Full |
-|--------------|-----------------------|------|
-| 👁️  View      | name, lcs, indication |      |
-| 🔧 Configure | controller            | pin  |
+| Access       | Primary               | Secondary |
+|--------------|-----------------------|-----------|
+| 👁️  View      | name, lcs, indication |           |
+| 🔧 Configure | controller            | pin       |
 
 </details>
 
@@ -105,15 +105,15 @@ striping.
 <details>
 <summary>API Resources</summary>
 
-* `iris/api/lane_marking` (minimal)
-* `iris/api/lane_marking/{name}` (full)
+* `iris/api/lane_marking` (primary)
+* `iris/api/lane_marking/{name}`
 
-| Access       | Minimal        | Full     |
-|--------------|----------------|----------|
-| 👁️  View      | name, location | geo\_loc |
-| 👉 Operate   | deployed       |          |
-| 💡 Manage    | notes          |          |
-| 🔧 Configure | controller     | pin      |
+| Access       | Primary        | Secondary |
+|--------------|----------------|-----------|
+| 👁️  View      | name, location | geo\_loc  |
+| 👉 Operate   | deployed       |           |
+| 💡 Manage    | notes          |           |
+| 🔧 Configure | controller     | pin       |
 
 </details>
 
