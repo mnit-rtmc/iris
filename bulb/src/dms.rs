@@ -775,9 +775,7 @@ impl Dms {
             console::log_1(&"patterns empty".into());
             return None;
         }
-        let Some(sign) = self.make_sign(anc) else {
-            return None;
-        };
+        let sign = self.make_sign(anc)?;
         let mut html = String::new();
         html.push_str("<div id='mc_grid'>");
         let pat_def = self.pattern_default(anc);
@@ -838,9 +836,7 @@ impl Dms {
 
     /// Make an ntcip sign
     fn make_sign(&self, anc: &DmsAnc) -> Option<Sign> {
-        let Some(cfg) = anc.sign_config(self.sign_config.as_deref()) else {
-            return None;
-        };
+        let cfg = anc.sign_config(self.sign_config.as_deref())?;
         match ntcip::dms::Dms::builder()
             .with_font_definition(anc.fonts.clone())
             .with_graphic_definition(anc.graphics.clone())

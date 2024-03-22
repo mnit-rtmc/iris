@@ -43,7 +43,7 @@ async fn run_handler(
         conn,
         tx: tx.clone(),
     };
-    while let true = (&mut handler).await {
+    while (&mut handler).await {
         log::trace!("run_handler iteration");
     }
     log::warn!("run_handler stopped");
