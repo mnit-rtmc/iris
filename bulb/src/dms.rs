@@ -279,13 +279,13 @@ impl AncillaryData for DmsAnc {
         if !self.fnames.is_empty() {
             for fname in &self.fnames {
                 uris.push(
-                    Uri::from(format!("/iris/api/tfon/{}.tfon", fname.name))
+                    Uri::from(format!("/iris/tfon/{}.tfon", fname.name))
                         .with_content_type(ContentType::Text),
                 );
             }
             for gname in &self.gnames {
                 uris.push(
-                    Uri::from(format!("/iris/api/gif/{}.gif", gname.name))
+                    Uri::from(format!("/iris/gif/{}.gif", gname.name))
                         .with_content_type(ContentType::Gif),
                 );
             }

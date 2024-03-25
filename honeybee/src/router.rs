@@ -127,7 +127,10 @@ impl Honey {
         Ok(Router::new()
             .merge(index_get())
             .merge(public_dir_get())
+            .merge(lut_dir_get())
             .merge(img_dir_get())
+            .merge(gif_dir_get())
+            .merge(tfon_dir_get())
             .nest("/api", self.route_api()))
     }
 
@@ -138,8 +141,6 @@ impl Honey {
             .with_name("honeybee")
             .with_expiry(Expiry::OnInactivity(Duration::hours(4)));
         Router::new()
-            .merge(tfon_dir_get())
-            .merge(gif_dir_get())
             .merge(login_post(self.clone()))
             .merge(access_get(self.clone()))
             .merge(notify_post(self.clone()))
@@ -303,6 +304,18 @@ fn public_dir_get() -> Router {
     Router::new().route("/:fname", get(handler))
 }
 
+/// `GET` JSON file from LUT directory
+fn lut_dir_get() -> Router {
+    async fn handler(
+        TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
+        AxumPath(fname): AxumPath<String>,
+    ) -> Resp3 {
+        let fname = format!("lut/{fname}");
+        file_stream(&fname, "application/json", if_none_match).await
+    }
+    Router::new().route("/lut/:fname", get(handler))
+}
+
 /// `GET` file from sign img directory
 fn img_dir_get() -> Router {
     async fn handler(
@@ -321,7 +334,7 @@ fn tfon_dir_get() -> Router {
         TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
         AxumPath(fname): AxumPath<String>,
     ) -> Resp3 {
-        let fname = format!("api/tfon/{fname}");
+        let fname = format!("tfon/{fname}");
         file_stream(&fname, "text/plain", if_none_match).await
     }
     Router::new().route("/tfon/:fname", get(handler))
@@ -333,7 +346,7 @@ fn gif_dir_get() -> Router {
         TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
         AxumPath(fname): AxumPath<String>,
     ) -> Resp3 {
-        let fname = format!("api/gif/{fname}");
+        let fname = format!("gif/{fname}");
         file_stream(&fname, "image/gif", if_none_match).await
     }
     Router::new().route("/gif/:fname", get(handler))
