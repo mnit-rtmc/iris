@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ pub struct BeaconAnc {
     states: Option<Vec<BeaconState>>,
 }
 
-const BEACON_STATE_URI: &str = "/iris/beacon_state";
+const BEACON_STATE_URI: &str = "/iris/lut/beacon_state";
 
 impl AncillaryData for BeaconAnc {
     type Primary = Beacon;

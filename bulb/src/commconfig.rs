@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -149,7 +149,7 @@ impl AncillaryData for CommConfigAnc {
         view: View,
     ) -> Box<dyn Iterator<Item = Uri>> {
         match view {
-            View::Edit => Box::new(once("/iris/comm_protocol".into())),
+            View::Edit => Box::new(once("/iris/lut/comm_protocol".into())),
             _ => Box::new(empty()),
         }
     }

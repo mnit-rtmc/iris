@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@ pub struct ControllerAnc {
     pub controller_io: Option<Vec<ControllerIo>>,
 }
 
-const CONDITION_URI: &str = "/iris/condition";
+const CONDITION_URI: &str = "/iris/lut/condition";
 const COMM_LINK_URI: &str = "/iris/api/comm_link";
 const COMM_CONFIG_URI: &str = "/iris/api/comm_config";
 const CABINET_STYLE_URI: &str = "/iris/api/cabinet_style";

@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ impl LcsArrayAnc {
     }
 }
 
-const LCS_LOCK_URI: &str = "/iris/lcs_lock";
+const LCS_LOCK_URI: &str = "/iris/lut/lcs_lock";
 
 impl AncillaryData for LcsArrayAnc {
     type Primary = LcsArray;
