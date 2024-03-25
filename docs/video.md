@@ -41,7 +41,7 @@ The `monitor num` is used to identify monitors when selecting [camera]s with
 a [switching](#switching) system.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/video_monitor` (primary)
 * `iris/api/video_monitor/{name}`

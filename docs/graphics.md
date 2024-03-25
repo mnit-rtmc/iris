@@ -6,7 +6,7 @@ Graphic images can be displayed on [DMS] [sign message]s.  These can be warning
 pictographs, interstate shields or other signs.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/graphic` (primary)
 * `iris/api/gif/{name}.gif`

@@ -72,7 +72,7 @@ mounted over a tolled lane to record customer trips.  These are typically
 located just downstream of a pricing DMS.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/tag_reader` (primary)
 * `iris/api/tag_reader/{name}`

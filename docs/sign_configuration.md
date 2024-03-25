@@ -6,7 +6,7 @@ Select `View ➔ Message Signs ➔ Sign Configuration` menu item
 established.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/sign_config` (primary)
 * `iris/api/sign_config/{name}`
@@ -39,7 +39,7 @@ Sign details are additional parameters queried from a [controller] when
 communication is established.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/sign_detail` (primary)
 

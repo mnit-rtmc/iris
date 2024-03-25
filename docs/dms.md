@@ -19,7 +19,7 @@ The following features are supported:
 * Free-form text entry with banned [word] checks
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/dms_message`
 * `iris/dms_pub`

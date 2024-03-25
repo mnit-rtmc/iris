@@ -6,7 +6,7 @@ and also when [DMS actions] are scheduled.  They are deleted automatically
 after being unused for a few minutes.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/sign_message` (primary)
 * `iris/img/{name}.gif`

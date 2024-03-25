@@ -5,7 +5,7 @@ receiver.  This allows the sign to be tracked and automatically updated with
 the nearest roadway and direction.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/gps` (primary)
 * `iris/api/gps/{name}`

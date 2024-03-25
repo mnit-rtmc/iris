@@ -13,7 +13,7 @@ Beacons can be connected to controllers using one of these protocols:
 - [Natch]
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/beacon_state` (lookup table)
 * `iris/api/beacon` (primary)

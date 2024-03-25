@@ -10,7 +10,7 @@ An alarm can be created for controllers using a [protocol] that generates
 alarms, such as [MnDOT-170].
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/alarm` (primary)
 * `iris/api/alarm/{name}`

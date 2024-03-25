@@ -11,7 +11,7 @@ with a sign config.  They can be:
 * Scheduled by [DMS action]s as part of an [action plan]
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/msg_pattern` (primary)
 * `iris/api/msg_pattern/{name}`
@@ -52,7 +52,7 @@ pattern will be chosen to provide them instead.  Both patterns must have the
 same number of lines in their text rectangles.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/msg_line` (primary)
 * `iris/api/msg_line/{name}`

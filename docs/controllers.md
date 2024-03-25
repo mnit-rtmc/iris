@@ -9,7 +9,7 @@ to devices, and other times the controller may be embedded within the device.
 In either case, a controller is required for any communication to a device.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/controller` (primary)
 * `iris/api/controller/{name}`
@@ -87,7 +87,7 @@ Controllers can have an associated cabinet style, used for MnDOT-170 and Natch
 [protocol]s.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/cabinet_style`
 * `iris/api/cabinet_style/{name}`

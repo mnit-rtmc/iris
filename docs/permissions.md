@@ -5,7 +5,7 @@
 access only.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/permission`
 * `iris/api/permission/{id}`

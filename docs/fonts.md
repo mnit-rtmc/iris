@@ -3,7 +3,7 @@
 A font is a set of bitmapped glyphs for displaying text on a [DMS].
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/font` (primary)
 * `iris/api/tfon/{name}.tfon`
