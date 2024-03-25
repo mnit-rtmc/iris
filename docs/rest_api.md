@@ -19,14 +19,14 @@ These are JSON arrays, fetched using http `GET` requests:
 - `detector_pub`  Vehicle [detector]s
 - `dms_message`  [DMS] messages and status
 - `dms_pub`  [DMS] locations and configuration
-- `incident`  Active incidents
+- `incident`  Active [incident]s
 - `rwis`  [Road Weather Information System]
 - `sign_message`  Active DMS [sign message]s
-- `station_sample`  Vehicle detection station data
+- `station_sample`  Vehicle [detector] station data
 - `system_attribute_pub`  Public [system attributes]
-- `TPIMS_archive`  Truck parking archive data
-- `TPIMS_dynamic`  Truck parking dynamic data
-- `TPIMS_static`  Truck parking static data
+- `TPIMS_archive`  Truck [parking] archive data
+- `TPIMS_dynamic`  Truck [parking] dynamic data
+- `TPIMS_static`  Truck [parking] static data
 
 ### Restricted Resources: `iris/api/`
 
@@ -44,7 +44,7 @@ Restricted resources can be accessed using standard http methods.  Access to
 these is restricted by session authentication.
 
 - `GET iris/api/{type}`: Get a JSON array of all objects of `{type}`, with only
-  *primary* attributes -- those needed for searching and displaying compact
+  *primary* attributes — those needed for searching and displaying compact
   cards.  The response also contains an [ETag] header, derived from the file's
   *modified* metadata, encoded in hexadecimal.
 - `GET iris/api/{type}/{name}`: Get a single object as JSON, with *primary* and
@@ -87,10 +87,10 @@ These are static resources which may only change on IRIS updates:
 - `comm_protocol`  Communication protocols
 - `condition`  [Controller] conditions
 - `direction`  Travel directions
-- `gate_arm_interlock`  Gate arm interlocks
-- `gate_arm_state`  Gate arm states
-- `lane_use_indication`  Lane use indications
-- `lcs_lock`  LCS lock codes
+- `gate_arm_interlock`  [Gate arm] interlocks
+- `gate_arm_state`  [Gate arm] states
+- `lane_use_indication`  [LCS] lane use indications
+- `lcs_lock`  [LCS] lock codes
 - `resource_type`  [Resource types] available in `iris/api/`
 - `road_modifier`  Road modifiers
 
@@ -119,8 +119,10 @@ These are static resources which may only change on IRIS updates:
 [gps]: gps.html
 [graphics]: graphics.html
 [honeybee]: https://github.com/mnit-rtmc/iris/tree/master/honeybee
+[incident]: incidents.html
 [lcs]: lcs.html
 [modem]: modem.html
+[parking]: parking_areas.html
 [permission]: permissions.html
 [ramp meter]: ramp_meters.html
 [resource types]: #resource-types
