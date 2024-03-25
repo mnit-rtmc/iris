@@ -1,10 +1,43 @@
 # Tolling
 
 High-occupancy / toll (HOT) lanes can be operated through IRIS.  Functions
-include calculating tolls in real time based on density, displaying prices on
-DMS, and logging vehicle transponder (tag) information.  Customer accounts and
-billing are not supported; those features must be provided by an external
-system.
+include logging vehicle transponder (tag) information, calculating tolls in
+real time, and displaying prices on [DMS].
+
+Customer accounts and billing are not supported; those features must be
+provided by an external system.
+
+## Tag Readers
+
+Select `View ➔ Lane Use ➔ Tag Readers` menu item
+
+A tag reader is a sensor for in-vehicle transponders (tags).  They can be
+mounted over a tolled lane to record customer trips.  These are typically
+located just downstream of a pricing DMS.
+
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/tag_reader` (primary)
+* `iris/api/tag_reader/{name}`
+
+| Access       | Primary        | Secondary          |
+|--------------|----------------|--------------------|
+| 👁️  View      | name, location | geo\_loc, settings |
+| 💡 Manage    | notes          | toll\_zone         |
+| 🔧 Configure | controller     | pin                |
+
+</details>
+
+### Tag Read Events
+
+When a tag is read, an event is logged in the `tag_read_event` database table.
+The event includes the **date and time**, **tag ID**, **toll zone** and
+**tollway**.  This can be combined with the price message events to build a list
+of trips for each tag ID.  This information can be used to bill customers.
+
+These records are purged automatically when older than the value of the
+`tag_read_event_purge_days` [system attribute].
 
 ## Toll Zones
 
@@ -63,40 +96,9 @@ the displayed price is logged.  For _open_ or _closed_, a price of 0 is logged.
 These records are purged automatically when older than the value of the
 `price_message_event_purge_days` [system attribute].
 
-## Tag Readers
-
-Select `View ➔ Lane Use ➔ Tag Readers` menu item
-
-A tag reader is a sensor for in-vehicle transponders (tags).  They can be
-mounted over a tolled lane to record customer trips.  These are typically
-located just downstream of a pricing DMS.
-
-<details>
-<summary>API Resources 🕵️ </summary>
-
-* `iris/api/tag_reader` (primary)
-* `iris/api/tag_reader/{name}`
-
-| Access       | Primary        | Secondary          |
-|--------------|----------------|--------------------|
-| 👁️  View      | name, location | geo\_loc, settings |
-| 💡 Manage    | notes          | toll\_zone         |
-| 🔧 Configure | controller     | pin                |
-
-</details>
-
-### Tag Read Events
-
-When a tag is read, an event is logged in the `tag_read_event` database table.
-The event includes the **date and time**, **tag ID**, **toll zone** and
-**tollway**.  This can be combined with the price message events to build a list
-of trips for each tag ID.  This information can be used to bill customers.
-
-These records are purged automatically when older than the value of the
-`tag_read_event_purge_days` [system attribute].
-
 
 [action tag]: action_plans.html#dms-action-tags
+[DMS]: dms.html
 [DMS actions]: action_plans.html#dms-actions
 [message pattern]: message_patterns.html
 [station]: road_topology.html#r_node-types
