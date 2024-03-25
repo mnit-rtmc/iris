@@ -84,7 +84,7 @@ messages as animated GIFs.
 These are static resources which may only change on IRIS updates:
 
 - `beacon_state`  [Beacon] states
-- `comm_protocol`  Communication protocols
+- `comm_protocol`  Communication [protocols]
 - `condition`  [Controller] conditions
 - `direction`  Travel directions
 - `gate_arm_interlock`  [Gate arm] interlocks
@@ -124,6 +124,7 @@ These are static resources which may only change on IRIS updates:
 [modem]: modem.html
 [parking]: parking_areas.html
 [permission]: permissions.html
+[protocols]: protocols.html
 [ramp meter]: ramp_meters.html
 [resource types]: #resource-types
 [Road Weather Information System]: rwis.html
