@@ -82,7 +82,7 @@ resource, at the same access level.
 [message pattern]: message_patterns.html
 [privileges]: user_roles.html#privileges
 [resource]: rest_api.html#resource-types
-[restricted resource]: rest_api.html#restricted-resources
+[restricted resource]: rest_api.html#restricted-resources-codeirisapicode
 [role]: user_roles.html#roles
 [sign configuration]: sign_configuration.html
 [sign detail]: sign_configuration.html#sign-details

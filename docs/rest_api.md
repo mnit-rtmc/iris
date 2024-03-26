@@ -40,8 +40,8 @@ These are JSON arrays, fetched using http `GET` requests:
   append `$`_name_ to the channel name.  Using [SSE], a client can receive
   notifications by sending a `GET iris/api/notify` request, with [EventSource].
 
-Restricted resources can be accessed using standard http methods.  Access to
-these is restricted by session authentication.
+These resources can be accessed using standard http methods.  Access is
+restricted by session authentication and [permission] authorization.
 
 - `GET iris/api/{type}`: Get a JSON array of all objects of `{type}`, with only
   *primary* attributes — those needed for searching and displaying compact
@@ -69,9 +69,9 @@ A `Content-Type: application/json` header is included where appropriate.
 
 Most devices also have an associated [geo loc] resource.
 
-### Static Graphics: `iris/gif/`
+### Graphics: `iris/gif/`
 
-[Graphics] which can be used in sign messages are stored here.
+These are static [graphics] which can be used in [sign message]s.
 
 ### Sign Images: `iris/img/`
 
@@ -94,9 +94,9 @@ These are static resources which may only change on IRIS updates:
 - `resource_type`  [Resource types] available in `iris/api/`
 - `road_modifier`  Road modifiers
 
-### Static Fonts: `iris/tfon/`
+### Fonts: `iris/tfon/`
 
-[Font]s which can be used in sign messages are stored here.
+These are static [font]s which can be used in [sign message]s.
 
 
 [alarm]: alarms.html
