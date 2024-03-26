@@ -390,6 +390,7 @@ async fn add_sidebar() -> JsResult<()> {
     let doc = Doc(doc);
     let sidebar: HtmlElement = doc.elem("sidebar");
     sidebar.set_inner_html(SIDEBAR);
+    add_fullscreenchange_listener(&sidebar)?;
     add_change_listener(&sidebar)?;
     add_click_listener(&sidebar)?;
     add_input_listener(&sidebar)?;
@@ -423,23 +424,12 @@ async fn fetch_access_list(config: bool) -> Result<String> {
     Ok(permissions_html(permissions, config))
 }
 
-/// Handle an event from "sb_resource" `select` element
-fn handle_sb_resource_ev(rname: String) {
-    let doc = Doc::get();
-    let search = doc.elem::<HtmlInputElement>("sb_search");
-    search.set_value("");
-    let value = search_value();
-    let res = Resource::from_name(&rname);
-    let sb_state = doc.elem::<HtmlSelectElement>("sb_state");
-    sb_state.set_inner_html(res.item_state_options());
-    spawn_local(populate_list(res, value));
-}
-
-/// Add a "change" event listener to an element
-fn add_change_listener(elem: &Element) -> JsResult<()> {
-    let closure = Closure::wrap(Box::new(|e: Event| {
-        let target = e.target().unwrap().dyn_into::<Element>().unwrap();
-        handle_change_ev(target);
+/// Add a "fullscreenchange" event listener to an element
+fn add_fullscreenchange_listener(elem: &Element) -> JsResult<()> {
+    let closure = Closure::wrap(Box::new(|_e: Event| {
+        let doc = Doc::get();
+        let btn = doc.elem::<HtmlInputElement>("sb_fullscreen");
+        btn.set_checked(doc.is_fullscreen());
     }) as Box<dyn Fn(_)>);
     elem.add_event_listener_with_callback(
         "change",
@@ -450,14 +440,24 @@ fn add_change_listener(elem: &Element) -> JsResult<()> {
     Ok(())
 }
 
-/// Handle a "change" event
-fn handle_change_ev(target: Element) {
-    let id = target.id();
-    match id.as_str() {
-        "sb_config" => spawn_local(reload_resources()),
-        "sb_fullscreen" => Doc::get().toggle_fullscreen(),
-        _ => (),
-    }
+/// Add a "change" event listener to an element
+fn add_change_listener(elem: &Element) -> JsResult<()> {
+    let closure = Closure::wrap(Box::new(|e: Event| {
+        let target = e.target().unwrap().dyn_into::<Element>().unwrap();
+        let id = target.id();
+        match id.as_str() {
+            "sb_config" => spawn_local(reload_resources()),
+            "sb_fullscreen" => Doc::get().toggle_fullscreen(),
+            _ => (),
+        }
+    }) as Box<dyn Fn(_)>);
+    elem.add_event_listener_with_callback(
+        "change",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    // can't drop closure, just forget it to make JS happy
+    closure.forget();
+    Ok(())
 }
 
 /// Reload resource select element
@@ -484,7 +484,21 @@ fn search_value() -> String {
 fn add_input_listener(elem: &Element) -> JsResult<()> {
     let closure = Closure::wrap(Box::new(|e: Event| {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
-        handle_input_ev(target);
+        let id = target.id();
+        match id.as_str() {
+            "sb_search" | "sb_state" => search_list(),
+            "sb_resource" => {
+                handle_sb_resource_ev(
+                    target.dyn_into::<HtmlSelectElement>().unwrap().value(),
+                );
+            }
+            _ => {
+                let cs = STATE.with(|rc| rc.borrow().selected_card.clone());
+                if let Some(cs) = cs {
+                    spawn_local(handle_input_card(id, cs));
+                }
+            }
+        }
     }) as Box<dyn Fn(_)>);
     elem.add_event_listener_with_callback(
         "input",
@@ -495,23 +509,16 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
     Ok(())
 }
 
-/// Handle an "input" event
-fn handle_input_ev(target: Element) {
-    let id = target.id();
-    match id.as_str() {
-        "sb_search" | "sb_state" => search_list(),
-        "sb_resource" => {
-            handle_sb_resource_ev(
-                target.dyn_into::<HtmlSelectElement>().unwrap().value(),
-            );
-        }
-        _ => {
-            let cs = STATE.with(|rc| rc.borrow().selected_card.clone());
-            if let Some(cs) = cs {
-                spawn_local(handle_input_card(id, cs));
-            }
-        }
-    }
+/// Handle an event from "sb_resource" `select` element
+fn handle_sb_resource_ev(rname: String) {
+    let doc = Doc::get();
+    let search = doc.elem::<HtmlInputElement>("sb_search");
+    search.set_value("");
+    let value = search_value();
+    let res = Resource::from_name(&rname);
+    let sb_state = doc.elem::<HtmlSelectElement>("sb_state");
+    sb_state.set_inner_html(res.item_state_options());
+    spawn_local(populate_list(res, value));
 }
 
 /// Handle input event with selected card
@@ -525,7 +532,19 @@ async fn handle_input_card(id: String, cs: SelectedCard) {
 fn add_click_listener(elem: &Element) -> JsResult<()> {
     let closure = Closure::wrap(Box::new(|e: Event| {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
-        handle_click_ev(&target);
+        if target.is_instance_of::<HtmlButtonElement>() {
+            handle_button_click_ev(&target);
+        } else if let Some(card) = target.closest(".card").unwrap_throw() {
+            if let Some(id) = card.get_attribute("id") {
+                if let Some(name) = card.get_attribute("name") {
+                    let doc = Doc::get();
+                    if let Some(rname) = doc.select_parse::<String>("sb_resource") {
+                        let res = Resource::from_name(&rname);
+                        spawn_local(click_card(res, id, name));
+                    }
+                }
+            }
+        }
     }) as Box<dyn FnMut(_)>);
     elem.add_event_listener_with_callback(
         "click",
@@ -534,23 +553,6 @@ fn add_click_listener(elem: &Element) -> JsResult<()> {
     // can't drop closure, just forget it to make JS happy
     closure.forget();
     Ok(())
-}
-
-/// Handle a `click` event from a target element
-fn handle_click_ev(target: &Element) {
-    if target.is_instance_of::<HtmlButtonElement>() {
-        handle_button_click_ev(target);
-    } else if let Some(card) = target.closest(".card").unwrap_throw() {
-        if let Some(id) = card.get_attribute("id") {
-            if let Some(name) = card.get_attribute("name") {
-                let doc = Doc::get();
-                if let Some(rname) = doc.select_parse::<String>("sb_resource") {
-                    let res = Resource::from_name(&rname);
-                    spawn_local(click_card(res, id, name));
-                }
-            }
-        }
-    }
 }
 
 /// Handle a `click` event with a button target
