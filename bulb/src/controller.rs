@@ -99,15 +99,19 @@ impl AncillaryData for ControllerAnc {
                 ]
                 .into_iter(),
             ),
-            View::Status(_) => Box::new(
-                [
-                    CONDITION_URI.into(),
-                    COMM_LINK_URI.into(),
-                    COMM_CONFIG_URI.into(),
-                    format!("/iris/api/controller_io/{}", &pri.name).into(),
-                ]
-                .into_iter(),
-            ),
+            View::Status(_) => {
+                let mut uri = Uri::from("/iris/api/controller_io/");
+                uri.push(&pri.name);
+                Box::new(
+                    [
+                        CONDITION_URI.into(),
+                        COMM_LINK_URI.into(),
+                        COMM_CONFIG_URI.into(),
+                        uri,
+                    ]
+                    .into_iter(),
+                )
+            }
             View::Edit => Box::new(
                 [CONDITION_URI.into(), CABINET_STYLE_URI.into()].into_iter(),
             ),

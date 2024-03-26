@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,7 +38,6 @@ use crate::user::User;
 use crate::util::{Doc, HtmlStr};
 use crate::videomonitor::VideoMonitor;
 use crate::weathersensor::WeatherSensor;
-use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::de::DeserializeOwned;
 use serde_json::map::Map;
 use serde_json::Value;
@@ -314,16 +313,23 @@ impl Resource {
         }
     }
 
+    /// Get the URI of a resource
+    fn uri(self) -> Uri {
+        let mut uri = Uri::from("/iris/api/");
+        uri.push(self.rname());
+        uri
+    }
+
     /// Get the URI of an object
-    fn uri_name(self, name: &str) -> String {
-        let rname = self.rname();
-        let name = utf8_percent_encode(name, NON_ALPHANUMERIC);
-        format!("/iris/api/{rname}/{name}")
+    fn uri_name(self, name: &str) -> Uri {
+        let mut uri = self.uri();
+        uri.push(name);
+        uri
     }
 
     /// Delete a resource by name
     pub async fn delete(self, name: &str) -> Result<()> {
-        Uri::from(self.uri_name(name)).delete().await
+        self.uri_name(name).delete().await
     }
 
     /// Lookup resource symbol
@@ -494,8 +500,7 @@ impl Resource {
     pub async fn save(self, name: &str) -> Result<()> {
         let changed = self.fetch_changed(name).await?;
         if !changed.is_empty() {
-            let uri = Uri::from(self.uri_name(name));
-            uri.patch(&changed.into()).await?;
+            self.uri_name(name).patch(&changed.into()).await?;
         }
         Ok(())
     }
@@ -549,8 +554,7 @@ impl Resource {
             Resource::Permission => Permission::create_value(&doc)?,
             _ => self.create_value(&doc)?,
         };
-        let uri = Uri::from(format!("/iris/api/{}", self.rname()));
-        uri.post(&value.into()).await?;
+        self.uri().post(&value.into()).await?;
         Ok(())
     }
 
@@ -566,7 +570,7 @@ impl Resource {
 
     /// Fetch primary JSON resource
     async fn fetch_primary<C: Card>(self, name: &str) -> Result<C> {
-        let json = Uri::from(self.uri_name(name)).get().await?;
+        let json = self.uri_name(name).get().await?;
         C::new(json)
     }
 
@@ -649,7 +653,7 @@ async fn fetch_list<C: Card>(
     config: bool,
 ) -> Result<String> {
     let rname = res.rname();
-    let json = Uri::from(format!("/iris/api/{rname}")).get().await?;
+    let json = res.uri().get().await?;
     let search = Search::new(search);
     let mut html = String::new();
     html.push_str("<ul class='cards'>");
@@ -715,7 +719,7 @@ async fn handle_click<C: Card>(
 ) -> Result<bool> {
     let pri = res.fetch_primary::<C>(name).await?;
     let anc = fetch_ancillary(View::Status(false), &pri).await?;
-    let uri = Uri::from(res.uri_name(name));
+    let uri = res.uri_name(name);
     for action in pri.handle_click(anc, id, uri) {
         action.perform().await?;
     }

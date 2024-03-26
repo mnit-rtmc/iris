@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::error::{Error, Result};
+use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use std::borrow::{Borrow, Cow};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -28,7 +29,7 @@ pub enum ContentType {
 /// Uniform resource identifier
 #[derive(Clone, Debug)]
 pub struct Uri {
-    cow: Cow<'static, str>,
+    path: Cow<'static, str>,
     content_type: ContentType,
 }
 
@@ -51,19 +52,10 @@ impl ContentType {
     }
 }
 
-impl From<String> for Uri {
-    fn from(s: String) -> Self {
-        Uri {
-            cow: Cow::Owned(s),
-            content_type: ContentType::Json,
-        }
-    }
-}
-
 impl From<&'static str> for Uri {
     fn from(s: &'static str) -> Self {
         Uri {
-            cow: Cow::Borrowed(s),
+            path: Cow::Borrowed(s),
             content_type: ContentType::Json,
         }
     }
@@ -76,9 +68,32 @@ impl Uri {
         self
     }
 
+    /// Extend Uri with path (will be percent-encoded)
+    pub fn push(&mut self, path: &str) {
+        let mut p = String::new();
+        p.push_str(self.path.borrow());
+        if !p.ends_with('/') {
+            p.push('/');
+        }
+        let path = utf8_percent_encode(path, NON_ALPHANUMERIC);
+        p.push_str(&path.to_string());
+        self.path = Cow::Owned(p);
+    }
+
+    /// Add extension to Uri path
+    pub fn add_extension(&mut self, ext: &'static str) {
+        let mut p = String::new();
+        p.push_str(self.path.borrow());
+        if !ext.starts_with('.') {
+            p.push('.');
+        }
+        p.push_str(ext);
+        self.path = Cow::Owned(p);
+    }
+
     /// Get URI as string slice
     pub fn as_str(&self) -> &str {
-        self.cow.borrow()
+        self.path.borrow()
     }
 
     /// Fetch using "GET" method

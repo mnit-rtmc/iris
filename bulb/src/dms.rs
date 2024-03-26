@@ -172,23 +172,11 @@ pub struct FontName {
     pub name: String,
 }
 
-impl fmt::Display for FontName {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 /// Graphic name
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct GraphicName {
     pub number: u8,
     pub name: String,
-}
-
-impl fmt::Display for GraphicName {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
 }
 
 /// DMS ancillary data
@@ -290,16 +278,18 @@ impl AncillaryData for DmsAnc {
         // Have we been here before?
         if !self.fnames.is_empty() {
             for fname in &self.fnames {
-                uris.push(
-                    Uri::from(format!("/iris/tfon/{fname}.tfon"))
-                        .with_content_type(ContentType::Text),
-                );
+                let mut uri = Uri::from("/iris/tfon/")
+                    .with_content_type(ContentType::Text);
+                uri.push(&fname.name);
+                uri.add_extension(".tfon");
+                uris.push(uri);
             }
             for gname in &self.gnames {
-                uris.push(
-                    Uri::from(format!("/iris/gif/{gname}.gif"))
-                        .with_content_type(ContentType::Gif),
-                );
+                let mut uri =
+                    Uri::from("/iris/gif/").with_content_type(ContentType::Gif);
+                uri.push(&gname.name);
+                uri.add_extension(".gif");
+                uris.push(uri);
             }
             return Box::new(uris.into_iter());
         }

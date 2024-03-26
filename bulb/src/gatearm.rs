@@ -95,7 +95,9 @@ impl AncillaryData for GateArmAnc {
     ) -> Box<dyn Iterator<Item = Uri>> {
         match (view, &pri.controller()) {
             (View::Status(_), Some(ctrl)) => {
-                Box::new(once(format!("/iris/api/controller/{ctrl}").into()))
+                let mut uri = Uri::from("/iris/api/controller/");
+                uri.push(ctrl);
+                Box::new(once(uri))
             }
             _ => Box::new(once(GATE_ARM_STATE_URI.into())),
         }
