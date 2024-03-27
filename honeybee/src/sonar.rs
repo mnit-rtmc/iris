@@ -210,7 +210,7 @@ impl Name {
 }
 
 /// Get attribute from a JSON value
-pub fn attr_json(value: &Value) -> Result<String> {
+fn attr_json(value: &Value) -> Result<String> {
     match value {
         Value::String(value) => {
             if value.contains(attr_invalid_char) {
@@ -461,7 +461,7 @@ impl Connection {
     /// Login to the server
     pub async fn login(&mut self, name: &str, pword: &str) -> Result<String> {
         let mut msg = String::new();
-        let mut buf = vec![];
+        let mut buf = Vec::with_capacity(32);
         Message::Login(name, pword).encode(&mut buf);
         self.send(&buf[..]).await?;
         self.recv(|m| match m {
@@ -484,7 +484,7 @@ impl Connection {
 
     /// Create an object
     pub async fn create_object(&mut self, nm: &str) -> Result<()> {
-        let mut buf = vec![];
+        let mut buf = Vec::with_capacity(32);
         Message::Object(nm).encode(&mut buf);
         self.check_error(10).await?;
         self.send(&buf[..]).await?;
@@ -493,9 +493,14 @@ impl Connection {
     }
 
     /// Update an object
-    pub async fn update_object(&mut self, nm: &str, a: &str) -> Result<()> {
-        let mut buf = vec![];
-        Message::Attribute(nm, a).encode(&mut buf);
+    pub async fn update_object(
+        &mut self,
+        nm: &str,
+        value: &Value,
+    ) -> Result<()> {
+        let mut buf = Vec::with_capacity(32);
+        let value = attr_json(value)?;
+        Message::Attribute(nm, &value).encode(&mut buf);
         self.check_error(10).await?;
         self.send(&buf[..]).await?;
         self.check_error(100).await?;
@@ -504,7 +509,7 @@ impl Connection {
 
     /// Remove an object
     pub async fn remove_object(&mut self, nm: &str) -> Result<()> {
-        let mut buf = vec![];
+        let mut buf = Vec::with_capacity(32);
         Message::Remove(nm).encode(&mut buf);
         self.check_error(10).await?;
         self.send(&buf[..]).await?;
@@ -521,7 +526,7 @@ impl Connection {
     where
         F: FnMut(&str, &str) -> Result<()>,
     {
-        let mut buf = vec![];
+        let mut buf = Vec::with_capacity(32);
         Message::Enumerate(nm).encode(&mut buf);
         self.check_error(10).await?;
         self.send(&buf[..]).await?;

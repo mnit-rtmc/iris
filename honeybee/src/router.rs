@@ -17,7 +17,7 @@ use crate::cred::Credentials;
 use crate::error::{Error, Result};
 use crate::permission;
 use crate::restype::ResType;
-use crate::sonar::{attr_json, Error as SonarError, Name};
+use crate::sonar::{Error as SonarError, Name};
 use crate::Database;
 use axum::body::Body;
 use axum::extract::{Json, Path as AxumPath, State};
@@ -522,9 +522,8 @@ fn other_resource(honey: Honey) -> Router {
                     let attr = &key[..];
                     if attr != "name" {
                         let anm = name.attr_n(attr)?;
-                        let value = attr_json(value)?;
                         log::debug!("{anm} = {value} (phantom)");
-                        c.update_object(&anm, &value).await?;
+                        c.update_object(&anm, value).await?;
                     }
                 }
                 log::debug!("creating {name}");
@@ -645,9 +644,8 @@ fn other_object(honey: Honey) -> Router {
             let attr = &key[..];
             if nm.res_type.patch_first_pass(attr) {
                 let anm = nm.attr_n(attr)?;
-                let value = attr_json(value)?;
                 log::debug!("{anm} = {value}");
-                c.update_object(&anm, &value).await?;
+                c.update_object(&anm, value).await?;
             }
         }
         // second pass
@@ -655,9 +653,8 @@ fn other_object(honey: Honey) -> Router {
             let attr = &key[..];
             if !nm.res_type.patch_first_pass(attr) {
                 let anm = nm.attr_n(attr)?;
-                let value = attr_json(value)?;
-                log::debug!("{} = {}", anm, &value);
-                c.update_object(&anm, &value).await?;
+                log::debug!("{anm} = {value}");
+                c.update_object(&anm, value).await?;
             }
         }
         Ok(StatusCode::NO_CONTENT)
