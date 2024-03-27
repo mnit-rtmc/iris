@@ -263,7 +263,7 @@ enum Message<'a> {
 
 impl<'a> Message<'a> {
     /// Decode message in a buffer
-    pub fn decode(buf: &'a [u8]) -> Option<(Self, usize)> {
+    fn decode(buf: &'a [u8]) -> Option<(Self, usize)> {
         if let Some(rec_sep) = buf.iter().position(|b| *b == b'\x1E') {
             if let Some(msg) = Self::decode_one(&buf[..rec_sep]) {
                 return Some((msg, rec_sep));
@@ -307,7 +307,7 @@ impl<'a> Message<'a> {
     }
 
     /// Encode the message to a buffer
-    pub fn encode(&'a self, buf: &mut Vec<u8>) {
+    fn encode(&'a self, buf: &mut Vec<u8>) {
         match self {
             Message::Login(name, pword) => {
                 buf.push(b'l');
@@ -396,7 +396,7 @@ impl Connection {
     }
 
     /// Send a message to the server
-    pub async fn send(&mut self, req: &[u8]) -> Result<()> {
+    async fn send(&mut self, req: &[u8]) -> Result<()> {
         match timeout(self.timeout, self.tls_stream.write_all(req)).await {
             Ok(res) => Ok(res?),
             Err(_e) => Err(Error::TimedOut),
