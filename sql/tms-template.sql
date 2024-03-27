@@ -2708,6 +2708,9 @@ BEGIN
 END;
 $multi_tags_str$ LANGUAGE plpgsql SECURITY DEFINER;
 
+ALTER FUNCTION iris.multi_tags_str(INTEGER)
+    SET search_path = pg_catalog, pg_temp;
+
 CREATE TABLE iris.sign_detail (
 	name VARCHAR(12) PRIMARY KEY,
 	dms_type INTEGER NOT NULL REFERENCES iris.dms_type,
