@@ -74,12 +74,7 @@ impl TryFrom<&str> for ResType {
     type Error = ();
 
     fn try_from(type_n: &str) -> Result<Self, Self::Error> {
-        Self::iter()
-            .find(|rt| {
-                rt.lut_channel().is_some_and(|ch| ch == type_n)
-                    || rt.listen().is_some_and(|ch| ch == type_n)
-            })
-            .ok_or(())
+        Self::iter().find(|rt| rt.as_str() == type_n).ok_or(())
     }
 }
 
@@ -143,22 +138,70 @@ impl ResType {
         .cloned()
     }
 
+    /// Get name as string slice
+    pub const fn as_str(self) -> &'static str {
+        use ResType::*;
+        match self {
+            Alarm => "alarm",
+            Beacon => "beacon",
+            BeaconState => "beacon_state",
+            CabinetStyle => "cabinet_style",
+            Camera => "camera",
+            CommConfig => "comm_config",
+            CommLink => "comm_link",
+            CommProtocol => "comm_protocol",
+            Condition => "condition",
+            Controller => "controller",
+            ControllerIo => "controller_io",
+            Detector => "detector",
+            Direction => "direction",
+            Dms => "dms",
+            FlowStream => "flow_stream",
+            Font => "font",
+            GateArm => "gate_arm",
+            GateArmInterlock => "gate_arm_interlock",
+            GateArmState => "gate_arm_state",
+            GateArmArray => "gate_arm_array",
+            GeoLoc => "geo_loc",
+            Gps => "gps",
+            Graphic => "graphic",
+            Incident => "incident",
+            LaneUseIndication => "lane_use_indication",
+            LaneMarking => "lane_marking",
+            Lcs => "lcs",
+            LcsArray => "lcs_array",
+            LcsIndication => "lcs_indication",
+            LcsLock => "lcs_lock",
+            Modem => "modem",
+            MsgLine => "msg_line",
+            MsgPattern => "msg_pattern",
+            ParkingArea => "parking_area",
+            Permission => "permission",
+            RampMeter => "ramp_meter",
+            ResourceType => "resource_type",
+            Rnode => "r_node",
+            Road => "road",
+            RoadModifier => "road_modifier",
+            Role => "role",
+            SignConfig => "sign_config",
+            SignDetail => "sign_detail",
+            SignMessage => "sign_message",
+            SystemAttribute => "system_attribute",
+            TagReader => "tag_reader",
+            User => "user_id",
+            VideoMonitor => "video_monitor",
+            WeatherSensor => "weather_sensor",
+            Word => "word",
+        }
+    }
+
     /// Get "channel" for LUT resources (no postgres NOTIFY)
     pub const fn lut_channel(self) -> Option<&'static str> {
         use ResType::*;
         match self {
-            BeaconState => Some("beacon_state"),
-            CommProtocol => Some("comm_protocol"),
-            Condition => Some("condition"),
-            Direction => Some("direction"),
-            Font => Some("font"),
-            GateArmInterlock => Some("gate_arm_interlock"),
-            GateArmState => Some("gate_arm_state"),
-            Graphic => Some("graphic"),
-            LaneUseIndication => Some("lane_use_indication"),
-            LcsLock => Some("lcs_lock"),
-            ResourceType => Some("resource_type"),
-            RoadModifier => Some("road_modifier"),
+            BeaconState | CommProtocol | Condition | Direction | Font
+            | GateArmInterlock | GateArmState | Graphic | LaneUseIndication
+            | LcsLock | ResourceType | RoadModifier => Some(self.as_str()),
             _ => None,
         }
     }
@@ -167,51 +210,14 @@ impl ResType {
     pub const fn listen(self) -> Option<&'static str> {
         use ResType::*;
         match self {
-            Alarm => Some("alarm"),
-            Beacon => Some("beacon"),
-            CabinetStyle => Some("cabinet_style"),
-            Camera => Some("camera"),
-            CommConfig => Some("comm_config"),
-            CommLink => Some("comm_link"),
-            Controller => Some("controller"),
-            Detector => Some("detector"),
-            Dms => Some("dms"),
-            FlowStream => Some("flow_stream"),
-            GateArm => Some("gate_arm"),
-            GateArmArray => Some("gate_arm_array"),
-            Gps => Some("gps"),
-            Incident => Some("incident"),
-            LaneMarking => Some("lane_marking"),
-            LcsArray => Some("lcs_array"),
-            LcsIndication => Some("lcs_indication"),
-            Modem => Some("modem"),
-            MsgLine => Some("msg_line"),
-            MsgPattern => Some("msg_pattern"),
-            ParkingArea => Some("parking_area"),
-            Permission => Some("permission"),
-            RampMeter => Some("ramp_meter"),
-            Rnode => Some("r_node"),
-            Road => Some("road"),
-            Role => Some("role"),
-            SignConfig => Some("sign_config"),
-            SignDetail => Some("sign_detail"),
-            SignMessage => Some("sign_message"),
-            SystemAttribute => Some("system_attribute"),
-            TagReader => Some("tag_reader"),
-            User => Some("user_id"),
-            VideoMonitor => Some("video_monitor"),
-            WeatherSensor => Some("weather_sensor"),
-            Word => Some("word"),
+            Alarm | Beacon | CabinetStyle | Camera | CommConfig | CommLink
+            | Controller | Detector | Dms | FlowStream | GateArm
+            | GateArmArray | Gps | Incident | LaneMarking | LcsArray
+            | LcsIndication | Modem | MsgLine | MsgPattern | ParkingArea
+            | Permission | RampMeter | Rnode | Road | Role | SignConfig
+            | SignDetail | SignMessage | SystemAttribute | TagReader | User
+            | VideoMonitor | WeatherSensor | Word => Some(self.as_str()),
             _ => None,
-        }
-    }
-
-    /// Get name as string slice
-    pub fn as_str(self) -> &'static str {
-        match self {
-            ControllerIo => "controller_io",
-            Lcs => "lcs",
-            _ => self.lut_channel().or(self.listen()).unwrap(),
         }
     }
 
