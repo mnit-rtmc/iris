@@ -74,4 +74,58 @@ BEGIN
 END;
 $camera_notify$ LANGUAGE plpgsql;
 
+-- Make device notes nullable
+ALTER TABLE iris._camera ALTER COLUMN notes DROP NOT NULL;
+ALTER TABLE iris._beacon ALTER COLUMN notes DROP NOT NULL;
+ALTER TABLE iris._dms ALTER COLUMN notes DROP NOT NULL;
+ALTER TABLE iris._gate_arm_array ALTER COLUMN notes DROP NOT NULL;
+ALTER TABLE iris._gate_arm ALTER COLUMN notes DROP NOT NULL;
+ALTER TABLE iris._lane_marking ALTER COLUMN notes DROP NOT NULL;
+ALTER TABLE iris._ramp_meter ALTER COLUMN notes DROP NOT NULL;
+ALTER TABLE iris._tag_reader ALTER COLUMN notes DROP NOT NULL;
+ALTER TABLE iris._video_monitor ALTER COLUMN notes DROP NOT NULL;
+ALTER TABLE iris._weather_sensor ALTER COLUMN notes DROP NOT NULL;
+
+DROP VIEW lcs_array_view;
+DROP VIEW iris.lcs_array;
+
+ALTER TABLE iris._lcs_array ALTER COLUMN notes DROP NOT NULL;
+ALTER TABLE iris._lcs_array ALTER COLUMN notes TYPE VARCHAR(128);
+
+CREATE VIEW iris.lcs_array AS
+    SELECT la.name, controller, pin, notes, shift, lcs_lock
+    FROM iris._lcs_array la JOIN iris.controller_io cio ON la.name = cio.name;
+
+CREATE TRIGGER lcs_array_insert_trig
+    INSTEAD OF INSERT ON iris.lcs_array
+    FOR EACH ROW EXECUTE FUNCTION iris.lcs_array_insert();
+
+CREATE TRIGGER lcs_array_update_trig
+    INSTEAD OF UPDATE ON iris.lcs_array
+    FOR EACH ROW EXECUTE FUNCTION iris.lcs_array_update();
+
+CREATE TRIGGER lcs_array_delete_trig
+    INSTEAD OF DELETE ON iris.lcs_array
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
+
+CREATE VIEW lcs_array_view AS
+    SELECT name, shift, notes, lcs_lock
+    FROM iris.lcs_array;
+GRANT SELECT ON lcs_array_view TO PUBLIC;
+
+-- Set blank device notes to NULL
+UPDATE iris._camera SET notes = NULL WHERE notes = '';
+UPDATE iris._beacon SET notes = NULL WHERE notes = '';
+UPDATE iris._detector SET notes = NULL WHERE notes = '';
+UPDATE iris._dms SET notes = NULL WHERE notes = '';
+UPDATE iris._gate_arm_array SET notes = NULL WHERE notes = '';
+UPDATE iris._gate_arm SET notes = NULL WHERE notes = '';
+UPDATE iris._gps SET notes = NULL WHERE notes = '';
+UPDATE iris._lane_marking SET notes = NULL WHERE notes = '';
+UPDATE iris._lcs_array SET notes = NULL WHERE notes = '';
+UPDATE iris._ramp_meter SET notes = NULL WHERE notes = '';
+UPDATE iris._tag_reader SET notes = NULL WHERE notes = '';
+UPDATE iris._video_monitor SET notes = NULL WHERE notes = '';
+UPDATE iris._weather_sensor SET notes = NULL WHERE notes = '';
+
 COMMIT;

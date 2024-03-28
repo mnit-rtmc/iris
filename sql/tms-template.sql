@@ -1623,7 +1623,7 @@ CREATE TABLE iris.camera_template (
 CREATE TABLE iris._camera (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-    notes VARCHAR(256) NOT NULL,
+    notes VARCHAR(256),
     cam_num INTEGER UNIQUE,
     cam_template VARCHAR(20) REFERENCES iris.camera_template,
     encoder_type VARCHAR(8) REFERENCES iris.encoder_type,
@@ -2099,7 +2099,7 @@ CREATE TABLE iris._beacon (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
     message VARCHAR(128) NOT NULL,
-    notes VARCHAR(128) NOT NULL,
+    notes VARCHAR(128),
     verify_pin INTEGER,
     ext_mode BOOLEAN NOT NULL,
     state INTEGER NOT NULL REFERENCES iris.beacon_state
@@ -2926,7 +2926,7 @@ GRANT SELECT ON graphic_view TO PUBLIC;
 CREATE TABLE iris._dms (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
-    notes VARCHAR(128) NOT NULL,
+    notes VARCHAR(128),
     gps VARCHAR(20) REFERENCES iris._gps,
     static_graphic VARCHAR(20) REFERENCES iris.graphic,
     beacon VARCHAR(20) REFERENCES iris._beacon,
@@ -3261,7 +3261,7 @@ COPY iris.gate_arm_interlock(id, description) FROM stdin;
 CREATE TABLE iris._gate_arm_array (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
-    notes VARCHAR(64) NOT NULL,
+    notes VARCHAR(64),
     opposing BOOLEAN NOT NULL,
     prereq VARCHAR(20) REFERENCES iris._gate_arm_array,
     camera VARCHAR(20) REFERENCES iris._camera,
@@ -3371,7 +3371,7 @@ CREATE TABLE iris._gate_arm (
     name VARCHAR(20) PRIMARY KEY,
     ga_array VARCHAR(20) NOT NULL REFERENCES iris._gate_arm_array,
     idx INTEGER NOT NULL,
-    notes VARCHAR(32) NOT NULL,
+    notes VARCHAR(32),
     arm_state INTEGER NOT NULL REFERENCES iris.gate_arm_state,
     fault VARCHAR(32)
 );
@@ -4198,7 +4198,7 @@ CREATE TABLE cap.alert_info (
 CREATE TABLE iris._lane_marking (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-    notes VARCHAR(64) NOT NULL,
+    notes VARCHAR(64),
     deployed BOOLEAN NOT NULL
 );
 
@@ -4287,7 +4287,7 @@ COPY iris.lcs_lock (id, description) FROM stdin;
 
 CREATE TABLE iris._lcs_array (
     name VARCHAR(20) PRIMARY KEY,
-    notes text NOT NULL,
+    notes VARCHAR(128),
     shift INTEGER NOT NULL,
     lcs_lock INTEGER REFERENCES iris.lcs_lock(id)
 );
@@ -4624,7 +4624,7 @@ COPY iris.meter_lock (id, description) FROM stdin;
 CREATE TABLE iris._ramp_meter (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-    notes VARCHAR(128) NOT NULL,
+    notes VARCHAR(128),
     meter_type INTEGER NOT NULL REFERENCES iris.meter_type(id),
     storage INTEGER NOT NULL,
     max_wait INTEGER NOT NULL,
@@ -4845,7 +4845,7 @@ GRANT SELECT ON toll_zone_view TO PUBLIC;
 CREATE TABLE iris._tag_reader (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-    notes VARCHAR(64) NOT NULL,
+    notes VARCHAR(64),
     toll_zone VARCHAR(20) REFERENCES iris.toll_zone(name),
     settings JSONB
 );
@@ -5077,7 +5077,7 @@ GRANT SELECT ON monitor_style_view TO PUBLIC;
 
 CREATE TABLE iris._video_monitor (
     name VARCHAR(12) PRIMARY KEY,
-    notes VARCHAR(32) NOT NULL,
+    notes VARCHAR(32),
     group_n VARCHAR(16),
     mon_num INTEGER NOT NULL,
     restricted BOOLEAN NOT NULL,
@@ -5274,7 +5274,7 @@ CREATE TABLE iris._weather_sensor (
     site_id VARCHAR(20),
     alt_id VARCHAR(20),
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-    notes VARCHAR(64) NOT NULL,
+    notes VARCHAR(64),
     settings JSONB,
     sample JSONB,
     sample_time TIMESTAMP WITH time zone
