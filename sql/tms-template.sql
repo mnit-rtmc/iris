@@ -396,6 +396,7 @@ geo_loc
 glyph
 gps
 graphic
+i_user
 inc_advice
 inc_descriptor
 incident
@@ -432,7 +433,6 @@ system_attribute
 tag_reader
 time_action
 toll_zone
-user
 video_monitor
 vid_src_template
 weather_sensor
@@ -502,7 +502,7 @@ administrator	ramp_meter	4
 administrator	road	4
 administrator	role	4
 administrator	tag_reader	4
-administrator	user	4
+administrator	i_user	4
 administrator	video_monitor	4
 administrator	weather_sensor	4
 \.
@@ -523,7 +523,7 @@ CREATE TABLE iris.privilege (
 );
 
 COPY iris.privilege (name, capability, type_n, attr_n, write) FROM stdin;
-PRV_0001	base	user		f
+PRV_0001	base	i_user		f
 PRV_0002	base	role		f
 PRV_000A	base	domain		f
 PRV_0003	base	capability		f
@@ -535,7 +535,7 @@ PRV_0008	base	road		f
 PRV_000B	base	road_affix		f
 PRV_0009	base	geo_loc		f
 PRV_0011	base	controller		f
-PRV_0012	base_admin	user		t
+PRV_0012	base_admin	i_user		t
 PRV_0013	base_admin	role		t
 PRV_001A	base_admin	domain		t
 PRV_0014	base_admin	privilege		t
@@ -703,7 +703,7 @@ PRV_0153	report_admin	rpt_conduit		f
 \.
 
 COPY iris.privilege (name, capability, type_n, group_n, write) FROM stdin;
-PRV_003D	camera_tab	play_list	user	t
+PRV_003D	camera_tab	play_list	i_user	t
 \.
 
 -- FIXME: remove after permissions are used everywhere

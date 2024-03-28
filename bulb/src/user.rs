@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ impl UserAnc {
 }
 
 impl User {
-    pub const RESOURCE_N: &'static str = "user";
+    pub const RESOURCE_N: &'static str = "i_user";
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
