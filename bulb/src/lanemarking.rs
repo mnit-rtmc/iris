@@ -23,7 +23,7 @@ use std::fmt;
 pub struct LaneMarking {
     pub name: String,
     pub location: Option<String>,
-    pub notes: String,
+    pub notes: Option<String>,
     pub controller: Option<String>,
     pub deployed: bool,
     // secondary attributes

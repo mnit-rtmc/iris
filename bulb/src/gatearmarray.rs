@@ -34,7 +34,7 @@ pub struct GateArmState {
 pub struct GateArmArray {
     pub name: String,
     pub location: Option<String>,
-    pub notes: String,
+    pub notes: Option<String>,
     pub arm_state: u32,
     pub interlock: u32,
     // secondary attributes

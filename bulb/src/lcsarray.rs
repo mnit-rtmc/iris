@@ -30,7 +30,7 @@ pub struct LcsLock {
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct LcsArray {
     pub name: String,
-    pub notes: String,
+    pub notes: Option<String>,
     pub lcs_lock: Option<u32>,
     // secondary attributes
     pub shift: Option<u32>,

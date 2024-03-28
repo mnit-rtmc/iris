@@ -58,7 +58,7 @@ pub struct Controller {
     pub drop_id: u16,
     pub cabinet_style: Option<String>,
     pub condition: u32,
-    pub notes: String,
+    pub notes: Option<String>,
     pub setup: Option<Setup>,
     pub fail_time: Option<String>,
     // secondary attributes

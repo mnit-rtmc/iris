@@ -381,6 +381,15 @@ impl TextArea<&String> for Fields {
     }
 }
 
+impl TextArea<&Option<String>> for Fields {
+    fn changed_text_area(&mut self, id: &str, val: &Option<String>) {
+        let parsed = self.doc.text_area_parse::<String>(id);
+        if &parsed != val {
+            self.insert(id, OptVal(parsed).into());
+        }
+    }
+}
+
 impl Select<&String> for Fields {
     fn changed_select(&mut self, id: &str, val: &String) {
         if let Some(parsed) = self.doc.select_parse::<String>(id) {

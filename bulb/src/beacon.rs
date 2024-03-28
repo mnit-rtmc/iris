@@ -36,7 +36,7 @@ pub struct Beacon {
     pub name: String,
     pub location: Option<String>,
     pub message: String,
-    pub notes: String,
+    pub notes: Option<String>,
     pub controller: Option<String>,
     pub state: u32,
     // secondary attributes

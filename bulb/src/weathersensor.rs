@@ -135,7 +135,7 @@ pub struct WeatherSensor {
     pub location: Option<String>,
     pub site_id: Option<String>,
     pub alt_id: Option<String>,
-    pub notes: String,
+    pub notes: Option<String>,
     pub geo_loc: Option<String>,
     pub controller: Option<String>,
     // secondary attributes
