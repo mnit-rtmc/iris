@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -218,7 +218,8 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		notes_txt.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				proxy.setNotes(notes_txt.getText());
+				String n = notes_txt.getText().trim();
+				proxy.setNotes((n.length() > 0) ? n : null);
 			}
 		});
 	}
@@ -335,8 +336,10 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	protected void doUpdateAttribute(String a) {
 		if (a == null || a.equals("shift"))
 			shift_spn.setValue(proxy.getShift());
-		if (a == null || a.equals("notes"))
-			notes_txt.setText(proxy.getNotes());
+		if (a == null || a.equals("notes")) {
+			String n = proxy.getNotes();
+			notes_txt.setText((n != null) ? n : "");
+		}
 		if (a == null || a.equals("lcsLock")) {
 			lock_cbx.setAction(null);
 			Integer lk = proxy.getLcsLock();

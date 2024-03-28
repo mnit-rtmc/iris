@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -56,7 +56,7 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 
 	/** Create a new device */
 	protected DeviceImpl(String n) throws TMSException, SonarException {
-		this(n, null, 0, "");
+		this(n, null, 0, null);
 	}
 
 	/** Initialize the transient fields */

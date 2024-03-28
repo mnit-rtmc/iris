@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting
  *
  * This program is free software; you can redistribute it and/or modify
@@ -116,7 +116,8 @@ public class PropLocation extends LocationPanel {
 		notes_txt.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				dms.setNotes(notes_txt.getText());
+				String n = notes_txt.getText().trim();
+				dms.setNotes((n.length() > 0) ? n : null);
 			}
 		});
 	}
@@ -134,8 +135,10 @@ public class PropLocation extends LocationPanel {
 	public void updateAttribute(String a) {
 		if (a == null || a.equals("controller"))
 			controller.setEnabled(dms.getController() != null);
-		if (a == null || a.equals("notes"))
-			notes_txt.setText(dms.getNotes());
+		if (a == null || a.equals("notes")) {
+			String n = dms.getNotes();
+			notes_txt.setText((n != null) ? n : "");
+		}
 		if (a == null || a.equals("preset"))
 			preset_act.updateSelected();
 	}

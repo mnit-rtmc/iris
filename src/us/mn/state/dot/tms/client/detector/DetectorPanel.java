@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2022  Minnesota Department of Transportation
+ * Copyright (C) 2010-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -250,7 +250,7 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 	private void setNotes(String n) {
 		Detector det = detector;
 		if (det != null)
-			det.setNotes(n);
+			det.setNotes((n.length() > 0) ? n : null);
 	}
 
 	/** Show the controller form for a detector */
@@ -328,8 +328,10 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 			field_spn.setValue(d.getFieldLength());
 		if (a == null || a.equals("fake"))
 			fake_txt.setText(d.getFake());
-		if (a == null || a.equals("notes"))
-			note_txt.setText(d.getNotes());
+		if (a == null || a.equals("notes")) {
+			String n = d.getNotes();
+			note_txt.setText((n != null) ? n : "");
+		}
 	}
 
 	/** Clear all attributes (from ProxyView). */
