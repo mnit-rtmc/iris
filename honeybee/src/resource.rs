@@ -347,8 +347,7 @@ impl Resource {
     const fn all_sql_json(self) -> bool {
         use Resource::*;
         match self {
-            Dms | MsgLine | MsgPattern | ResourceType | Rnode | SignConfig
-            | SystemAttributePub | Word => false,
+            ResourceType | SystemAttributePub => false,
             _ => true,
         }
     }
@@ -428,10 +427,13 @@ impl Resource {
         let dir = Path::new("");
         let file = AtomicFile::new(dir, name).await?;
         let writer = file.writer().await?;
+        let sql = self.all_sql();
         let sql = if self.all_sql_json() {
-            format!("SELECT row_to_json(r)::text FROM ({}) r", self.all_sql())
+            format!(
+                "SELECT json_strip_nulls(row_to_json(r))::text FROM ({sql}) r"
+            )
         } else {
-            self.all_sql().to_string()
+            sql.to_string()
         };
         let count = query_json(client, &sql, writer).await?;
         file.commit().await?;

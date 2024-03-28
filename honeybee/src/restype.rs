@@ -208,7 +208,11 @@ impl ResType {
 
     /// Get name as string slice
     pub fn as_str(self) -> &'static str {
-        self.lut_channel().or(self.listen()).unwrap()
+        match self {
+            ControllerIo => "controller_io",
+            Lcs => "lcs",
+            _ => self.lut_channel().or(self.listen()).unwrap(),
+        }
     }
 
     /// Get the SQL query one record
