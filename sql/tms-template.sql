@@ -992,8 +992,8 @@ CREATE VIEW geo_loc_view AS
 GRANT SELECT ON geo_loc_view TO PUBLIC;
 
 CREATE TABLE iris.r_node_type (
-	n_type INTEGER PRIMARY KEY,
-	name VARCHAR(12) NOT NULL
+    n_type INTEGER PRIMARY KEY,
+    name VARCHAR(12) NOT NULL
 );
 
 COPY iris.r_node_type (n_type, name) FROM stdin;
@@ -1006,8 +1006,8 @@ COPY iris.r_node_type (n_type, name) FROM stdin;
 \.
 
 CREATE TABLE iris.r_node_transition (
-	n_transition INTEGER PRIMARY KEY,
-	name VARCHAR(12) NOT NULL
+    n_transition INTEGER PRIMARY KEY,
+    name VARCHAR(12) NOT NULL
 );
 
 COPY iris.r_node_transition (n_transition, name) FROM stdin;
@@ -1022,19 +1022,19 @@ COPY iris.r_node_transition (n_transition, name) FROM stdin;
 \.
 
 CREATE TABLE iris.r_node (
-	name VARCHAR(10) PRIMARY KEY,
-	geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
-	node_type INTEGER NOT NULL REFERENCES iris.r_node_type,
-	pickable BOOLEAN NOT NULL,
-	above BOOLEAN NOT NULL,
-	transition INTEGER NOT NULL REFERENCES iris.r_node_transition,
-	lanes INTEGER NOT NULL,
-	attach_side BOOLEAN NOT NULL,
-	shift INTEGER NOT NULL,
-	active BOOLEAN NOT NULL,
-	station_id VARCHAR(10),
-	speed_limit INTEGER NOT NULL,
-	notes text NOT NULL
+    name VARCHAR(10) PRIMARY KEY,
+    geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
+    node_type INTEGER NOT NULL REFERENCES iris.r_node_type,
+    pickable BOOLEAN NOT NULL,
+    above BOOLEAN NOT NULL,
+    transition INTEGER NOT NULL REFERENCES iris.r_node_transition,
+    lanes INTEGER NOT NULL,
+    attach_side BOOLEAN NOT NULL,
+    shift INTEGER NOT NULL,
+    active BOOLEAN NOT NULL,
+    station_id VARCHAR(10),
+    speed_limit INTEGER NOT NULL,
+    notes VARCHAR(160)
 );
 
 CREATE UNIQUE INDEX r_node_station_idx ON iris.r_node USING btree (station_id);
@@ -1056,57 +1056,57 @@ CREATE TRIGGER r_node_notify_trig
     FOR EACH ROW EXECUTE FUNCTION iris.r_node_notify();
 
 CREATE FUNCTION iris.r_node_left(INTEGER, INTEGER, BOOLEAN, INTEGER)
-	RETURNS INTEGER AS $r_node_left$
+    RETURNS INTEGER AS $r_node_left$
 DECLARE
-	node_type ALIAS FOR $1;
-	lanes ALIAS FOR $2;
-	attach_side ALIAS FOR $3;
-	shift ALIAS FOR $4;
+    node_type ALIAS FOR $1;
+    lanes ALIAS FOR $2;
+    attach_side ALIAS FOR $3;
+    shift ALIAS FOR $4;
 BEGIN
-	IF attach_side = TRUE THEN
-		RETURN shift;
-	END IF;
-	IF node_type = 0 THEN
-		RETURN shift - lanes;
-	END IF;
-	RETURN shift;
+    IF attach_side = TRUE THEN
+        RETURN shift;
+    END IF;
+    IF node_type = 0 THEN
+        RETURN shift - lanes;
+    END IF;
+    RETURN shift;
 END;
 $r_node_left$ LANGUAGE plpgsql;
 
 CREATE FUNCTION iris.r_node_right(INTEGER, INTEGER, BOOLEAN, INTEGER)
-	RETURNS INTEGER AS $r_node_right$
+    RETURNS INTEGER AS $r_node_right$
 DECLARE
-	node_type ALIAS FOR $1;
-	lanes ALIAS FOR $2;
-	attach_side ALIAS FOR $3;
-	shift ALIAS FOR $4;
+    node_type ALIAS FOR $1;
+    lanes ALIAS FOR $2;
+    attach_side ALIAS FOR $3;
+    shift ALIAS FOR $4;
 BEGIN
-	IF attach_side = FALSE THEN
-		RETURN shift;
-	END IF;
-	IF node_type = 0 THEN
-		RETURN shift + lanes;
-	END IF;
-	RETURN shift;
+    IF attach_side = FALSE THEN
+        RETURN shift;
+    END IF;
+    IF node_type = 0 THEN
+        RETURN shift + lanes;
+    END IF;
+    RETURN shift;
 END;
 $r_node_right$ LANGUAGE plpgsql;
 
 ALTER TABLE iris.r_node ADD CONSTRAINT left_edge_ck
-	CHECK (iris.r_node_left(node_type, lanes, attach_side, shift) >= 1);
+    CHECK (iris.r_node_left(node_type, lanes, attach_side, shift) >= 1);
 ALTER TABLE iris.r_node ADD CONSTRAINT right_edge_ck
-	CHECK (iris.r_node_right(node_type, lanes, attach_side, shift) <= 9);
+    CHECK (iris.r_node_right(node_type, lanes, attach_side, shift) <= 9);
 
 CREATE VIEW r_node_view AS
-	SELECT n.name, n.geo_loc,
-	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	       l.landmark, l.lat, l.lon, l.corridor, l.location,
-	       nt.name AS node_type, n.pickable, n.above, tr.name AS transition,
-	       n.lanes, n.attach_side, n.shift, n.active,
-	       n.station_id, n.speed_limit, n.notes
-	FROM iris.r_node n
-	JOIN geo_loc_view l ON n.geo_loc = l.name
-	JOIN iris.r_node_type nt ON n.node_type = nt.n_type
-	JOIN iris.r_node_transition tr ON n.transition = tr.n_transition;
+    SELECT n.name, n.geo_loc,
+           l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+           l.landmark, l.lat, l.lon, l.corridor, l.location,
+           nt.name AS node_type, n.pickable, n.above, tr.name AS transition,
+           n.lanes, n.attach_side, n.shift, n.active,
+           n.station_id, n.speed_limit, n.notes
+    FROM iris.r_node n
+    JOIN geo_loc_view l ON n.geo_loc = l.name
+    JOIN iris.r_node_type nt ON n.node_type = nt.n_type
+    JOIN iris.r_node_transition tr ON n.transition = tr.n_transition;
 GRANT SELECT ON r_node_view TO PUBLIC;
 
 CREATE VIEW roadway_station_view AS

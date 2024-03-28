@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2021  Minnesota Department of Transportation
+ * Copyright (C) 2007-2024  Minnesota Department of Transportation
  * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -143,7 +143,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	/** Create a new r_node */
 	public R_NodeImpl(String n) {
 		super(n);
-		notes = "";
+		notes = null;
 		active = true;
 	}
 
