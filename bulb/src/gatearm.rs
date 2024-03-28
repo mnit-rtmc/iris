@@ -37,7 +37,7 @@ pub struct GateArm {
     pub controller: Option<String>,
     pub notes: String,
     pub arm_state: u32,
-    // full attributes
+    // secondary attributes
     pub pin: Option<u32>,
 }
 

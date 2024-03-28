@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ pub struct Detector {
     pub label: Option<String>,
     pub notes: Option<String>,
     pub controller: Option<String>,
-    // full attributes
+    // secondary attributes
     pub pin: Option<u32>,
     pub lane_code: Option<String>,
     pub lane_number: Option<u16>,

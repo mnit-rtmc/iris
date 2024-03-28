@@ -124,7 +124,7 @@ pub struct Protocol {
 pub struct CommConfig {
     pub name: String,
     pub description: String,
-    // full attributes
+    // secondary attributes
     pub protocol: Option<u32>,
     pub timeout_ms: Option<u32>,
     pub poll_period_sec: Option<u32>,

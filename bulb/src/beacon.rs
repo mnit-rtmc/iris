@@ -39,7 +39,7 @@ pub struct Beacon {
     pub notes: String,
     pub controller: Option<String>,
     pub state: u32,
-    // full attributes
+    // secondary attributes
     pub geo_loc: Option<String>,
     pub pin: Option<u32>,
     pub verify_pin: Option<u32>,

@@ -61,7 +61,7 @@ pub struct Controller {
     pub notes: String,
     pub setup: Option<Setup>,
     pub fail_time: Option<String>,
-    // full attributes
+    // secondary attributes
     pub geo_loc: Option<String>,
     pub password: Option<String>,
 }

@@ -102,7 +102,7 @@ pub struct Dms {
     pub hashtags: Option<String>,
     pub msg_current: Option<String>,
     pub has_faults: Option<bool>,
-    // full attributes
+    // secondary attributes
     pub pin: Option<u32>,
     pub static_graphic: Option<String>,
     pub beacon: Option<String>,

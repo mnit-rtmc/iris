@@ -32,7 +32,7 @@ pub struct LcsArray {
     pub name: String,
     pub notes: String,
     pub lcs_lock: Option<u32>,
-    // full attributes
+    // secondary attributes
     pub shift: Option<u32>,
 }
 

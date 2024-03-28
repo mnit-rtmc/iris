@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ pub struct GateArmArray {
     pub notes: String,
     pub arm_state: u32,
     pub interlock: u32,
-    // full attributes
+    // secondary attributes
     pub geo_loc: Option<String>,
 }
 

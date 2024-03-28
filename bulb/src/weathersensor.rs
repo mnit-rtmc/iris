@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -138,7 +138,7 @@ pub struct WeatherSensor {
     pub notes: String,
     pub geo_loc: Option<String>,
     pub controller: Option<String>,
-    // full attributes
+    // secondary attributes
     pub pin: Option<u32>,
     pub settings: Option<WeatherSettings>,
     pub sample: Option<WeatherData>,

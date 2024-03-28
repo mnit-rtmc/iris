@@ -56,7 +56,7 @@ pub struct GeoLoc {
     pub landmark: Option<String>,
     pub lat: Option<f64>,
     pub lon: Option<f64>,
-    // full attributes
+    // secondary attributes
     pub resource_n: Option<String>,
 }
 
