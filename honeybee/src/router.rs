@@ -241,15 +241,14 @@ async fn file_stream(
     if_none_match: IfNoneMatch,
 ) -> Resp3 {
     log::info!("GET {fname}");
-    let etag = file_etag(fname).await?;
+    let etag = file_etag(fname).await.map_err(|_e| SonarError::NotFound)?;
     log::trace!("ETag: {etag} ({fname})");
     let tag = etag.parse::<ETag>().map_err(|_e| Error::InvalidETag)?;
     if if_none_match.precondition_passes(&tag) {
         log::trace!("opening {fname}");
-        let file = match tokio::fs::File::open(fname).await {
-            Ok(file) => file,
-            Err(_err) => return Err(StatusCode::NOT_FOUND),
-        };
+        let file = tokio::fs::File::open(fname)
+            .await
+            .map_err(|_e| StatusCode::NOT_FOUND)?;
         let stream = ReaderStream::new(file);
         Ok((
             [
