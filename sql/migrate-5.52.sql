@@ -55,4 +55,23 @@ INSERT INTO iris.user_id_domain (user_id, domain) (
 DROP TABLE iris.i_user_domain;
 DROP TABLE iris.i_user;
 
+-- Add camera_publish channel
+CREATE OR REPLACE FUNCTION iris.camera_notify() RETURNS TRIGGER AS
+    $camera_notify$
+BEGIN
+    IF (NEW.notes IS DISTINCT FROM OLD.notes) OR
+       (NEW.cam_num IS DISTINCT FROM OLD.cam_num) OR
+       (NEW.publish IS DISTINCT FROM OLD.publish)
+    THEN
+        NOTIFY camera;
+    ELSE
+        PERFORM pg_notify('camera', NEW.name);
+    END IF;
+    IF (NEW.publish IS DISTINCT FROM OLD.publish) THEN
+        PERFORM pg_notify('camera_publish', NEW.name);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$camera_notify$ LANGUAGE plpgsql;
+
 COMMIT;

@@ -1650,6 +1650,9 @@ BEGIN
     ELSE
         PERFORM pg_notify('camera', NEW.name);
     END IF;
+    IF (NEW.publish IS DISTINCT FROM OLD.publish) THEN
+        PERFORM pg_notify('camera_publish', NEW.name);
+    END IF;
     RETURN NULL; -- AFTER trigger return is ignored
 END;
 $camera_notify$ LANGUAGE plpgsql;

@@ -33,6 +33,7 @@ update, and is caused by one of these conditions:
 `beacon`           | ✔️   | ✔️   | ✔️   | ❌
 `cabinet_style`    | ❌  | ❌  | ❌  | ❌
 `camera`           | ✔️   | ✔️   | ❌  | ❌
+`camera_publish` † | ❌  | ❌  | ❌  | ❌
 `comm_config`      | ❌  | ❌  | ❌  | ❌
 `comm_link`        | ❌  | ❌  | ❌  | ❌
 `controller`       | ✔️   | ❌  | ❌  | ❌
@@ -65,6 +66,8 @@ update, and is caused by one of these conditions:
 `video_monitor`    | ❌  | ✔️   | ❌  | ❌
 `weather_sensor`   | ✔️   | ✔️   | ❌  | ❌
 `word`             | ❌  | ❌  | ❌  | ❌
+
+† _`UPDATE` to 'publish' attribute only, with name payload_
 
 ## Backup & Restore
 
