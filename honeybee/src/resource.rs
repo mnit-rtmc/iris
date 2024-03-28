@@ -260,7 +260,7 @@ impl Resource {
             SignMessage => "sign_message",
             SystemAttributePub => "system_attribute_pub",
             TagReader => "api/tag_reader",
-            User => "api/i_user",
+            User => "api/user_id",
             VideoMonitor => "api/video_monitor",
             WeatherSensor => "api/weather_sensor",
             WeatherSensorPub => "rwis",

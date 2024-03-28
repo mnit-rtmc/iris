@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2021  Minnesota Department of Transportation
+ * Copyright (C) 2007-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,10 +55,10 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		throws TMSException
 	{
 		store = c;
-		mapping = new TableMapping(store, "iris", "i_user",
+		mapping = new TableMapping(store, "iris", "user_id",
 			Domain.SONAR_TYPE);
 		store.query("SELECT name, full_name, password, dn, role, " +
-			"enabled FROM iris.i_user;", new ResultFactory()
+			"enabled FROM iris.user_id;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				ns.addObject(new IrisUserImpl(ns, row));
@@ -93,7 +93,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 	/** Get the database table name */
 	@Override
 	public String getTable() {
-		return "iris.i_user";
+		return "iris.user_id";
 	}
 
 	/** Create a new IRIS user */

@@ -198,7 +198,7 @@ impl ResType {
             SignMessage => Some("sign_message"),
             SystemAttribute => Some("system_attribute"),
             TagReader => Some("tag_reader"),
-            User => Some("i_user"),
+            User => Some("user_id"),
             VideoMonitor => Some("video_monitor"),
             WeatherSensor => Some("weather_sensor"),
             Word => Some("word"),

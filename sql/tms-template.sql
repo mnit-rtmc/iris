@@ -271,7 +271,7 @@ any_ipv4	0.0.0.0/0	t
 any_ipv6	::0/0	t
 \.
 
-CREATE TABLE iris.i_user (
+CREATE TABLE iris.user_id (
     name VARCHAR(15) PRIMARY KEY,
     full_name VARCHAR(31) NOT NULL,
     password VARCHAR(64) NOT NULL,
@@ -280,26 +280,26 @@ CREATE TABLE iris.i_user (
     enabled BOOLEAN NOT NULL
 );
 
-COPY iris.i_user (name, full_name, password, dn, role, enabled) FROM stdin;
+COPY iris.user_id (name, full_name, password, dn, role, enabled) FROM stdin;
 admin	IRIS Administrator	+vAwDtk/0KGx9k+kIoKFgWWbd3Ku8e/FOHoZoHB65PAuNEiN2muHVavP0fztOi4=		administrator	t
 \.
 
-CREATE TRIGGER i_user_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.i_user
+CREATE TRIGGER user_id_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.user_id
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
-CREATE VIEW i_user_view AS
+CREATE VIEW user_id_view AS
     SELECT name, full_name, dn, role, enabled
-    FROM iris.i_user;
-GRANT SELECT ON i_user_view TO PUBLIC;
+    FROM iris.user_id;
+GRANT SELECT ON user_id_view TO PUBLIC;
 
-CREATE TABLE iris.i_user_domain (
-    i_user VARCHAR(15) NOT NULL REFERENCES iris.i_user,
+CREATE TABLE iris.user_id_domain (
+    user_id VARCHAR(15) NOT NULL REFERENCES iris.user_id,
     domain VARCHAR(15) NOT NULL REFERENCES iris.domain
 );
-ALTER TABLE iris.i_user_domain ADD PRIMARY KEY (i_user, domain);
+ALTER TABLE iris.user_id_domain ADD PRIMARY KEY (user_id, domain);
 
-COPY iris.i_user_domain (i_user, domain) FROM stdin;
+COPY iris.user_id_domain (user_id, domain) FROM stdin;
 admin	any_ipv4
 admin	any_ipv6
 \.
@@ -396,7 +396,6 @@ geo_loc
 glyph
 gps
 graphic
-i_user
 inc_advice
 inc_descriptor
 incident
@@ -433,6 +432,7 @@ system_attribute
 tag_reader
 time_action
 toll_zone
+user_id
 video_monitor
 vid_src_template
 weather_sensor
@@ -502,7 +502,7 @@ administrator	ramp_meter	4
 administrator	road	4
 administrator	role	4
 administrator	tag_reader	4
-administrator	i_user	4
+administrator	user_id	4
 administrator	video_monitor	4
 administrator	weather_sensor	4
 \.
@@ -523,7 +523,7 @@ CREATE TABLE iris.privilege (
 );
 
 COPY iris.privilege (name, capability, type_n, attr_n, write) FROM stdin;
-PRV_0001	base	i_user		f
+PRV_0001	base	user_id		f
 PRV_0002	base	role		f
 PRV_000A	base	domain		f
 PRV_0003	base	capability		f
@@ -535,7 +535,7 @@ PRV_0008	base	road		f
 PRV_000B	base	road_affix		f
 PRV_0009	base	geo_loc		f
 PRV_0011	base	controller		f
-PRV_0012	base_admin	i_user		t
+PRV_0012	base_admin	user_id		t
 PRV_0013	base_admin	role		t
 PRV_001A	base_admin	domain		t
 PRV_0014	base_admin	privilege		t
@@ -703,7 +703,7 @@ PRV_0153	report_admin	rpt_conduit		f
 \.
 
 COPY iris.privilege (name, capability, type_n, group_n, write) FROM stdin;
-PRV_003D	camera_tab	play_list	i_user	t
+PRV_003D	camera_tab	play_list	user_id	t
 \.
 
 -- FIXME: remove after permissions are used everywhere

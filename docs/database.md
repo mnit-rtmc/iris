@@ -43,7 +43,6 @@ update, and is caused by one of these conditions:
 `gate_arm`         | ❌  | ✔️   | ❌  | ❌
 `gate_arm_array`   | ✔️   | ✔️   | ❌  | ❌
 `graphic`          | ❌  | ❌  | ❌  | ❌
-`i_user`           | ❌  | ❌  | ❌  | ❌
 `incident`         | ❌  | ❌  | ❌  | ❌
 `lane_marking`     | ✔️   | ✔️   | ❌  | ❌
 `lcs_array`        | ❌  | ✔️   | ❌  | ❌
@@ -62,6 +61,7 @@ update, and is caused by one of these conditions:
 `sign_message`     | ❌  | ❌  | ❌  | ❌
 `system_attribute` | ❌  | ❌  | ❌  | ❌
 `tag_reader`       | ✔️   | ✔️   | ❌  | ❌
+`user_id`          | ❌  | ❌  | ❌  | ❌
 `video_monitor`    | ❌  | ✔️   | ❌  | ❌
 `weather_sensor`   | ✔️   | ✔️   | ❌  | ❌
 `word`             | ❌  | ❌  | ❌  | ❌

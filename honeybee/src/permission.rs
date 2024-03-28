@@ -41,7 +41,7 @@ const DELETE_ONE: &str = "\
 /// Query access permissions for a user
 const ACCESS_BY_USER: &str = "\
   SELECT p.id, p.role, p.resource_n, p.hashtag, p.access_n \
-  FROM iris.i_user u \
+  FROM iris.user_id u \
   JOIN iris.role r ON u.role = r.name \
   JOIN iris.permission p ON p.role = r.name \
   WHERE u.enabled = true \
@@ -54,7 +54,7 @@ const QUERY_PERMISSION: &str = "\
   SELECT p.id, p.role, p.resource_n, p.hashtag, p.access_n \
   FROM iris.permission p \
   JOIN iris.role r ON p.role = r.name \
-  JOIN iris.i_user u ON u.role = r.name \
+  JOIN iris.user_id u ON u.role = r.name \
   WHERE r.enabled = true \
     AND u.enabled = true \
     AND u.name = $1 \
@@ -66,7 +66,7 @@ const QUERY_PERMISSION_TAG: &str = "\
   SELECT p.id, p.role, p.resource_n, p.hashtag, p.access_n \
   FROM iris.permission p \
   JOIN iris.role r ON p.role = r.name \
-  JOIN iris.i_user u ON u.role = r.name \
+  JOIN iris.user_id u ON u.role = r.name \
   WHERE r.enabled = true \
     AND u.enabled = true \
     AND u.name = $1 \

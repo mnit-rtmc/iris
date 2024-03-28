@@ -631,13 +631,13 @@ pub const TAG_READER_ONE: &str = "\
 /// SQL query for all users (primary)
 pub const USER_ALL: &str = "\
   SELECT name, full_name, role, enabled \
-  FROM iris.i_user \
+  FROM iris.user_id \
   ORDER BY name";
 
 /// SQL query for one user (secondary)
 pub const USER_ONE: &str = "\
   SELECT name, full_name, role, enabled \
-  FROM iris.i_user \
+  FROM iris.user_id \
   WHERE name = $1";
 
 /// SQL query for all video monitors (primary)
