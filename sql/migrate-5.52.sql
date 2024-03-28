@@ -148,4 +148,8 @@ CREATE VIEW r_node_view AS
     JOIN iris.r_node_transition tr ON n.transition = tr.n_transition;
 GRANT SELECT ON r_node_view TO PUBLIC;
 
+-- Make controller notes nullable
+ALTER TABLE iris.controller ALTER COLUMN notes DROP NOT NULL;
+UPDATE iris.controller SET notes = NULL WHERE notes = '';
+
 COMMIT;

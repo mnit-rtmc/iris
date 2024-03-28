@@ -378,7 +378,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Administrator notes for this controller */
-	private String notes = "";
+	private String notes = null;
 
 	/** Set the administrator notes */
 	@Override
@@ -1155,8 +1155,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 		w.write(createAttribute("location",
 			ControllerHelper.getLocation(this)));
-		if (getNotes().length() > 0)
-			w.write(createAttribute("notes", getNotes()));
+		w.write(createAttribute("notes", getNotes()));
 		w.write("/>\n");
 	}
 }

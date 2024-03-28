@@ -1435,7 +1435,7 @@ CREATE TABLE iris.controller (
     cabinet_style VARCHAR(20) REFERENCES iris.cabinet_style(name),
     geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
     condition INTEGER NOT NULL REFERENCES iris.condition,
-    notes VARCHAR(128) NOT NULL,
+    notes VARCHAR(128),
     password VARCHAR(32),
     setup JSONB,
     fail_time TIMESTAMP WITH time zone
