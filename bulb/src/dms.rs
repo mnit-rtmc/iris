@@ -781,9 +781,8 @@ impl Dms {
         let mut html = String::new();
         html.push_str("<div id='mc_grid'>");
         let pat_def = self.pattern_default(anc);
-        if let Some(pat) = pat_def {
-            render_preview(&mut html, &sign, &pat.multi);
-        }
+        let multi = pat_def.map(|pat| &pat.multi[..]).unwrap_or("");
+        render_preview(&mut html, &sign, multi);
         html.push_str("<select id='mc_pattern'>");
         for pat in &anc.compose_patterns {
             html.push_str("<option");
@@ -1028,13 +1027,17 @@ fn sign_msg_owner(priority: u32) -> Option<String> {
 
 /// Render sign preview image
 fn render_preview(html: &mut String, sign: &Sign, multi: &str) {
+    html.push_str("<img id='mc_preview' width='240' height='80' ");
     let mut buf = Vec::with_capacity(4096);
-    if let Err(e) = rendzina::render(&mut buf, sign, multi, Some(240), Some(80))
-    {
-        console::log_1(&format!("render_preview: {e:?}").into());
-        return;
-    };
-    html.push_str("<img id='mc_preview' src='data:image/gif;base64,");
-    b64enc.encode_string(buf, html);
-    html.push_str("'/>");
+    match rendzina::render(&mut buf, sign, multi, Some(240), Some(80)) {
+        Ok(()) => {
+            html.push_str("src='data:image/gif;base64,");
+            b64enc.encode_string(buf, html);
+            html.push_str("'/>");
+        }
+        Err(e) => {
+            console::log_1(&format!("render_preview: {e:?}").into());
+            html.push_str("src=''/>");
+        }
+    }
 }
