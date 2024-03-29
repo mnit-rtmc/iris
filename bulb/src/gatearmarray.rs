@@ -61,7 +61,7 @@ impl GateArmArrayAnc {
     }
 }
 
-const GATE_ARM_STATE_URI: &str = "/iris/gate_arm_state";
+const GATE_ARM_STATE_URI: &str = "/iris/lut/gate_arm_state";
 
 impl AncillaryData for GateArmArrayAnc {
     type Primary = GateArmArray;

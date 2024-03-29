@@ -694,9 +694,9 @@ async fn fetch_ancillary<C: Card>(view: View, pri: &C) -> Result<C::Ancillary> {
                         more = true;
                     }
                 }
-                Err(Error::FetchResponseForbidden()) => {
-                    // Oops, we don't have permission to read ancillary data
-                    break;
+                Err(Error::FetchResponseNotFound())
+                | Err(Error::FetchResponseForbidden()) => {
+                    // Ok, move on to the next one
                 }
                 Err(e) => return Err(e),
             }

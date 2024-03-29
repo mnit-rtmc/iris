@@ -538,7 +538,9 @@ fn add_click_listener(elem: &Element) -> JsResult<()> {
             if let Some(id) = card.get_attribute("id") {
                 if let Some(name) = card.get_attribute("name") {
                     let doc = Doc::get();
-                    if let Some(rname) = doc.select_parse::<String>("sb_resource") {
+                    if let Some(rname) =
+                        doc.select_parse::<String>("sb_resource")
+                    {
                         let res = Resource::from_name(&rname);
                         spawn_local(click_card(res, id, name));
                     }
