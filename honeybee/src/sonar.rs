@@ -357,8 +357,8 @@ impl<'a> Message<'a> {
     }
 }
 
-/// Connection to a sonar server
-pub struct Connection {
+/// Messenger to a sonar server
+pub struct Messenger {
     /// TLS encrypted stream
     tls_stream: TlsStream<TcpStream>,
     /// Network timeout
@@ -371,8 +371,8 @@ pub struct Connection {
     count: usize,
 }
 
-impl Connection {
-    /// Create a new connection to a sonar server
+impl Messenger {
+    /// Create a new messenger to a sonar server
     pub async fn new(host: &str, port: u16) -> Result<Self> {
         let addr = (host, port)
             .to_socket_addrs()?
@@ -386,7 +386,7 @@ impl Connection {
             })?
             .to_owned();
         let tls_stream = connector.connect(domain, tcp_stream).await?;
-        Ok(Connection {
+        Ok(Messenger {
             tls_stream,
             timeout: Duration::from_secs(5),
             rx_buf: vec![0; 32_768],

@@ -13,7 +13,7 @@
 // GNU General Public License for more details.
 //
 use crate::error::{Error, Result};
-use crate::sonar::Connection;
+use crate::sonar::Messenger;
 use serde::{Deserialize, Serialize};
 use tower_sessions::Session;
 
@@ -49,8 +49,8 @@ impl Credentials {
     }
 
     /// Authenticate with IRIS server
-    pub async fn authenticate(&self) -> Result<Connection> {
-        let mut c = Connection::new(HOST, 1037).await?;
+    pub async fn authenticate(&self) -> Result<Messenger> {
+        let mut c = Messenger::new(HOST, 1037).await?;
         c.login(&self.username, &self.password).await?;
         Ok(c)
     }
