@@ -523,18 +523,19 @@ fn other_resource(honey: Honey) -> Router {
         match attrs.get("name") {
             Some(Value::String(name)) => {
                 let name = nm.obj(name)?;
-                let mut c = cred.authenticate().await?;
-                // first, set attributes on phantom object
-                for (key, value) in attrs.iter() {
-                    let attr = &key[..];
-                    if attr != "name" {
-                        let anm = name.attr_n(attr)?;
-                        log::debug!("{anm} = {value} (phantom)");
-                        c.update_object(&anm, value).await?;
+                if let Some(mut msn) = cred.authenticate().await? {
+                    // first, set attributes on phantom object
+                    for (key, value) in attrs.iter() {
+                        let attr = &key[..];
+                        if attr != "name" {
+                            let anm = name.attr_n(attr)?;
+                            log::debug!("{anm} = {value} (phantom)");
+                            msn.update_object(&anm, value).await?;
+                        }
                     }
+                    log::debug!("creating {name}");
+                    msn.create_object(&name.to_string()).await?;
                 }
-                log::debug!("creating {name}");
-                c.create_object(&name.to_string()).await?;
                 Ok(StatusCode::CREATED)
             }
             _ => Err(SonarError::InvalidValue)?,
@@ -645,23 +646,24 @@ fn other_object(honey: Honey) -> Router {
             let attr = &key[..];
             access.check(nm.res_type.access_attr(attr))?;
         }
-        let mut c = cred.authenticate().await?;
-        // first pass
-        for (key, value) in attrs.iter() {
-            let attr = &key[..];
-            if nm.res_type.patch_first_pass(attr) {
-                let anm = nm.attr_n(attr)?;
-                log::debug!("{anm} = {value}");
-                c.update_object(&anm, value).await?;
+        if let Some(mut msn) = cred.authenticate().await? {
+            // first pass
+            for (key, value) in attrs.iter() {
+                let attr = &key[..];
+                if nm.res_type.patch_first_pass(attr) {
+                    let anm = nm.attr_n(attr)?;
+                    log::debug!("{anm} = {value}");
+                    msn.update_object(&anm, value).await?;
+                }
             }
-        }
-        // second pass
-        for (key, value) in attrs.iter() {
-            let attr = &key[..];
-            if !nm.res_type.patch_first_pass(attr) {
-                let anm = nm.attr_n(attr)?;
-                log::debug!("{anm} = {value}");
-                c.update_object(&anm, value).await?;
+            // second pass
+            for (key, value) in attrs.iter() {
+                let attr = &key[..];
+                if !nm.res_type.patch_first_pass(attr) {
+                    let anm = nm.attr_n(attr)?;
+                    log::debug!("{anm} = {value}");
+                    msn.update_object(&anm, value).await?;
+                }
             }
         }
         Ok(StatusCode::NO_CONTENT)
@@ -679,8 +681,9 @@ fn other_object(honey: Honey) -> Router {
         honey
             .name_access(cred.user(), &nm, Access::Configure)
             .await?;
-        let mut c = cred.authenticate().await?;
-        c.remove_object(&nm.to_string()).await?;
+        if let Some(mut msn) = cred.authenticate().await? {
+            msn.remove_object(&nm.to_string()).await?;
+        }
         Ok(StatusCode::ACCEPTED)
     }
 

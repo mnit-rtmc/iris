@@ -17,6 +17,9 @@ use crate::sonar::Messenger;
 use serde::{Deserialize, Serialize};
 use tower_sessions::Session;
 
+/// Switch to bypass sonar connection (debug mode)
+const BYPASS_SONAR: bool = false;
+
 /// IRIS host name
 const HOST: &str = "localhost.localdomain";
 
@@ -49,9 +52,13 @@ impl Credentials {
     }
 
     /// Authenticate with IRIS server
-    pub async fn authenticate(&self) -> Result<Messenger> {
-        let mut c = Messenger::new(HOST, 1037).await?;
-        c.login(&self.username, &self.password).await?;
-        Ok(c)
+    pub async fn authenticate(&self) -> Result<Option<Messenger>> {
+        if BYPASS_SONAR {
+            Ok(None)
+        } else {
+            let mut msn = Messenger::new(HOST, 1037).await?;
+            msn.login(&self.username, &self.password).await?;
+            Ok(Some(msn))
+        }
     }
 }
