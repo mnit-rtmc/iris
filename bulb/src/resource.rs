@@ -91,6 +91,7 @@ pub enum Resource {
     GeoLoc,
     Gps,
     LaneMarking,
+    Lcs,
     LcsArray,
     LcsIndication,
     Modem,
@@ -267,6 +268,7 @@ impl Resource {
             Self::GeoLoc => GeoLoc::RESOURCE_N,
             Self::Gps => Gps::RESOURCE_N,
             Self::LaneMarking => LaneMarking::RESOURCE_N,
+            Self::Lcs => "lcs",
             Self::LcsArray => LcsArray::RESOURCE_N,
             Self::LcsIndication => LcsIndication::RESOURCE_N,
             Self::Modem => Modem::RESOURCE_N,
@@ -299,6 +301,7 @@ impl Resource {
             Self::GeoLoc => "🗺️ Location",
             Self::Gps => "🌐 Gps",
             Self::LaneMarking => "⛙ Lane Marking",
+            Self::Lcs => unimplemented!(),
             Self::LcsArray => "🡇🡇 LCS Array",
             Self::LcsIndication => "🡇 LCS Indication",
             Self::Modem => "🖀 Modem",
@@ -310,6 +313,21 @@ impl Resource {
             Self::VideoMonitor => "📺 Video Monitor",
             Self::WeatherSensor => "🌦️ Weather Sensor",
             Self::Unknown => "❓ Unknown",
+        }
+    }
+
+    /// Get dependent resource type
+    pub const fn dependent(self) -> Self {
+        use Resource::*;
+        // FIXME: copied from honeybee's restype.rs
+        match self {
+            // Camera resources
+            FlowStream => Camera,
+            // Gate arm resources
+            GateArmArray => GateArm,
+            // LCS resources
+            LcsArray | LcsIndication | LaneMarking => Lcs,
+            _ => self,
         }
     }
 

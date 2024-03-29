@@ -198,7 +198,7 @@ pub fn permissions_html(access: Vec<Permission>, config: bool) -> String {
 
 /// Add option to access select
 fn add_option(res: Resource, perm: &Permission, html: &mut String) {
-    if perm.resource_n == res.rname() {
+    if perm.resource_n == res.dependent().rname() {
         html.push_str("<option value='");
         html.push_str(res.rname());
         html.push_str("'>");
