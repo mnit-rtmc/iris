@@ -158,6 +158,7 @@ impl Honey {
         name: &Name,
         access: Access,
     ) -> Result<Access> {
+        log::debug!("name_access {user} {name}");
         let perm = permission::get_by_name(&self.db, user, name).await?;
         let acc = Access::new(perm.access_n).ok_or(Error::Unauthorized)?;
         acc.check(access)?;
@@ -240,7 +241,7 @@ async fn file_stream(
     content_type: &'static str,
     if_none_match: IfNoneMatch,
 ) -> Resp3 {
-    log::info!("GET {fname}");
+    log::debug!("file_stream {fname}");
     let etag = file_etag(fname).await.map_err(|_e| SonarError::NotFound)?;
     log::trace!("ETag: {etag} ({fname})");
     let tag = etag.parse::<ETag>().map_err(|_e| Error::InvalidETag)?;
@@ -294,6 +295,7 @@ fn public_dir_get() -> Router {
         TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
         AxumPath(fname): AxumPath<String>,
     ) -> Resp3 {
+        log::info!("GET {fname}");
         file_stream(&fname, "application/json", if_none_match).await
     }
     Router::new().route("/:fname", get(handler))
@@ -306,6 +308,7 @@ fn lut_dir_get() -> Router {
         AxumPath(fname): AxumPath<String>,
     ) -> Resp3 {
         let fname = format!("lut/{fname}");
+        log::info!("GET {fname}");
         file_stream(&fname, "application/json", if_none_match).await
     }
     Router::new().route("/lut/:fname", get(handler))
@@ -318,6 +321,7 @@ fn img_dir_get() -> Router {
         AxumPath(fname): AxumPath<String>,
     ) -> Resp3 {
         let fname = format!("img/{fname}");
+        log::info!("GET {fname}");
         file_stream(&fname, "image/gif", if_none_match).await
     }
     Router::new().route("/img/:fname", get(handler))
@@ -330,6 +334,7 @@ fn tfon_dir_get() -> Router {
         AxumPath(fname): AxumPath<String>,
     ) -> Resp3 {
         let fname = format!("tfon/{fname}");
+        log::info!("GET {fname}");
         file_stream(&fname, "text/plain", if_none_match).await
     }
     Router::new().route("/tfon/:fname", get(handler))
@@ -342,6 +347,7 @@ fn gif_dir_get() -> Router {
         AxumPath(fname): AxumPath<String>,
     ) -> Resp3 {
         let fname = format!("gif/{fname}");
+        log::info!("GET {fname}");
         file_stream(&fname, "image/gif", if_none_match).await
     }
     Router::new().route("/gif/:fname", get(handler))
@@ -446,6 +452,7 @@ fn permission_resource(honey: Honey) -> Router {
         State(honey): State<Honey>,
         TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
     ) -> Resp3 {
+        log::info!("GET api/permission");
         let nm = Name::from(ResType::Permission);
         let cred = Credentials::load(&session).await?;
         honey.name_access(cred.user(), &nm, Access::View).await?;
@@ -492,6 +499,7 @@ fn other_resource(honey: Honey) -> Router {
         TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
         AxumPath(type_n): AxumPath<String>,
     ) -> Resp3 {
+        log::info!("GET api/{type_n}");
         let nm = Name::new(&type_n)?;
         let cred = Credentials::load(&session).await?;
         honey.name_access(cred.user(), &nm, Access::View).await?;
