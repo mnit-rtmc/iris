@@ -25,7 +25,6 @@ mod listener;
 mod permission;
 mod query;
 mod resource;
-mod restype;
 mod segments;
 mod signmsg;
 pub mod sonar;

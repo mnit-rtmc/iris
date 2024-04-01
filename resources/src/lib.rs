@@ -1,4 +1,4 @@
-// restype.rs
+// lib.rs
 //
 // Copyright (C) 2024  Minnesota Department of Transportation
 //
@@ -12,12 +12,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::access::Access;
-use crate::query;
 
-/// Resource types
+/// Enumeration of resource types
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub enum ResType {
+pub enum Res {
     Alarm,
     Beacon,
     BeaconState,
@@ -70,7 +68,7 @@ pub enum ResType {
     Word,
 }
 
-impl TryFrom<&str> for ResType {
+impl TryFrom<&str> for Res {
     type Error = ();
 
     fn try_from(type_n: &str) -> Result<Self, Self::Error> {
@@ -78,10 +76,10 @@ impl TryFrom<&str> for ResType {
     }
 }
 
-impl ResType {
-    /// Get iterator of all resource type variants
-    pub fn iter() -> impl Iterator<Item = ResType> {
-        use ResType::*;
+impl Res {
+    /// Get iterator of all resource variants
+    pub fn iter() -> impl Iterator<Item = Res> {
+        use Res::*;
         [
             Alarm,
             Beacon,
@@ -138,9 +136,9 @@ impl ResType {
         .cloned()
     }
 
-    /// Get name as string slice
+    /// Get resource name as string slice
     pub const fn as_str(self) -> &'static str {
-        use ResType::*;
+        use Res::*;
         match self {
             Alarm => "alarm",
             Beacon => "beacon",
@@ -195,20 +193,22 @@ impl ResType {
         }
     }
 
-    /// Get "channel" for LUT resources (no postgres NOTIFY)
-    pub const fn lut_channel(self) -> Option<&'static str> {
-        use ResType::*;
+    /// Check if resource is a look-up table
+    pub const fn is_lut(self) -> bool {
+        use Res::*;
+        #[allow(clippy::match_like_matches_macro)]
         match self {
             BeaconState | CommProtocol | Condition | Direction | Font
             | GateArmInterlock | GateArmState | Graphic | LaneUseIndication
-            | LcsLock | ResourceType | RoadModifier => Some(self.as_str()),
-            _ => None,
+            | LcsLock | ResourceType | RoadModifier => true,
+            _ => false,
         }
     }
 
-    /// Get the channel to listen for attributes
-    pub const fn listen(self) -> Option<&'static str> {
-        use ResType::*;
+    /// Check if resource has a notification channel
+    pub const fn has_channel(self) -> bool {
+        use Res::*;
+        #[allow(clippy::match_like_matches_macro)]
         match self {
             Alarm | Beacon | CabinetStyle | Camera | CommConfig | CommLink
             | Controller | Detector | Dms | FlowStream | GateArm
@@ -216,56 +216,14 @@ impl ResType {
             | LcsIndication | Modem | MsgLine | MsgPattern | ParkingArea
             | Permission | RampMeter | Rnode | Road | Role | SignConfig
             | SignDetail | SignMessage | SystemAttribute | TagReader | User
-            | VideoMonitor | WeatherSensor | Word => Some(self.as_str()),
-            _ => None,
+            | VideoMonitor | WeatherSensor | Word => true,
+            _ => false,
         }
     }
 
-    /// Get the SQL query one record
-    pub const fn one_sql(self) -> &'static str {
-        use ResType::*;
-        match self {
-            Alarm => query::ALARM_ONE,
-            Beacon => query::BEACON_ONE,
-            CabinetStyle => query::CABINET_STYLE_ONE,
-            Camera => query::CAMERA_ONE,
-            CommConfig => query::COMM_CONFIG_ONE,
-            CommLink => query::COMM_LINK_ONE,
-            Controller => query::CONTROLLER_ONE,
-            ControllerIo => query::CONTROLLER_IO_ONE,
-            Detector => query::DETECTOR_ONE,
-            Dms => query::DMS_ONE,
-            FlowStream => query::FLOW_STREAM_ONE,
-            Font => query::FONT_ONE,
-            GateArm => query::GATE_ARM_ONE,
-            GateArmArray => query::GATE_ARM_ARRAY_ONE,
-            GeoLoc => query::GEO_LOC_ONE,
-            Gps => query::GPS_ONE,
-            Graphic => query::GRAPHIC_ONE,
-            LaneMarking => query::LANE_MARKING_ONE,
-            LcsArray => query::LCS_ARRAY_ONE,
-            LcsIndication => query::LCS_INDICATION_ONE,
-            Modem => query::MODEM_ONE,
-            MsgLine => query::MSG_LINE_ONE,
-            MsgPattern => query::MSG_PATTERN_ONE,
-            Permission => query::PERMISSION_ONE,
-            RampMeter => query::RAMP_METER_ONE,
-            Role => query::ROLE_ONE,
-            SignConfig => query::SIGN_CONFIG_ONE,
-            SignDetail => query::SIGN_DETAIL_ONE,
-            SignMessage => query::SIGN_MSG_ONE,
-            TagReader => query::TAG_READER_ONE,
-            User => query::USER_ONE,
-            VideoMonitor => query::VIDEO_MONITOR_ONE,
-            WeatherSensor => query::WEATHER_SENSOR_ONE,
-            Word => query::WORD_ONE,
-            _ => unimplemented!(),
-        }
-    }
-
-    /// Get dependent resource type
+    /// Get dependent resource for permission checks
     pub const fn dependent(self) -> Self {
-        use ResType::*;
+        use Res::*;
         match self {
             // Camera resources
             FlowStream => Camera,
@@ -279,59 +237,6 @@ impl ResType {
             // associated controller
             ControllerIo => Controller,
             _ => self,
-        }
-    }
-
-    /// Get required access to update an attribute
-    pub fn access_attr(self, att: &str) -> Access {
-        use ResType::*;
-        match (self, att) {
-            (Beacon, "flashing")
-            | (Camera, "ptz")
-            | (Camera, "recall_preset")
-            | (Controller, "device_req")
-            | (Detector, "field_length")
-            | (Detector, "force_fail")
-            | (Dms, "msg_user")
-            | (LaneMarking, "deployed") => Access::Operate,
-            (Beacon, "message")
-            | (Beacon, "notes")
-            | (Beacon, "preset")
-            | (Camera, "store_preset")
-            | (CommConfig, "timeout_ms")
-            | (CommConfig, "idle_disconnect_sec")
-            | (CommConfig, "no_response_disconnect_sec")
-            | (CommLink, "poll_enabled")
-            | (Controller, "condition")
-            | (Controller, "notes")
-            | (Detector, "abandoned")
-            | (Detector, "notes")
-            | (Dms, "device_req")
-            | (LaneMarking, "notes")
-            | (Modem, "enabled")
-            | (Modem, "timeout_ms")
-            | (Role, "enabled")
-            | (User, "enabled")
-            | (WeatherSensor, "site_id")
-            | (WeatherSensor, "alt_id")
-            | (WeatherSensor, "notes") => Access::Manage,
-            _ => Access::Configure,
-        }
-    }
-
-    /// Check if resource type / attribute should be patched first
-    pub fn patch_first_pass(self, att: &str) -> bool {
-        use ResType::*;
-        match (self, att) {
-            (Alarm, "pin")
-            | (Beacon, "pin")
-            | (Beacon, "verify_pin")
-            | (Detector, "pin")
-            | (Dms, "pin")
-            | (LaneMarking, "pin")
-            | (RampMeter, "pin")
-            | (WeatherSensor, "pin") => true,
-            _ => false,
         }
     }
 }

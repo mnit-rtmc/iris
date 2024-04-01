@@ -16,7 +16,7 @@ use crate::access::Access;
 use crate::cred::Credentials;
 use crate::error::{Error, Result};
 use crate::permission;
-use crate::restype::ResType;
+use crate::query;
 use crate::sonar::{Error as SonarError, Name};
 use crate::Database;
 use axum::body::Body;
@@ -29,6 +29,7 @@ use axum::Router;
 use axum_extra::TypedHeader;
 use headers::{ETag, IfNoneMatch};
 use http::header::HeaderName;
+use resources::Res;
 use serde_json::map::Map;
 use serde_json::Value;
 use std::collections::HashMap;
@@ -453,7 +454,7 @@ fn permission_resource(honey: Honey) -> Router {
         TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
     ) -> Resp3 {
         log::info!("GET api/permission");
-        let nm = Name::from(ResType::Permission);
+        let nm = Name::from(Res::Permission);
         let cred = Credentials::load(&session).await?;
         honey.name_access(cred.user(), &nm, Access::View).await?;
         let fname = format!("api/{nm}");
@@ -466,7 +467,7 @@ fn permission_resource(honey: Honey) -> Router {
         State(honey): State<Honey>,
         Json(attrs): Json<Map<String, Value>>,
     ) -> Resp0 {
-        let nm = Name::from(ResType::Permission);
+        let nm = Name::from(Res::Permission);
         log::info!("POST {nm}");
         let cred = Credentials::load(&session).await?;
         honey
@@ -555,7 +556,7 @@ fn permission_object(honey: Honey) -> Router {
         State(honey): State<Honey>,
         AxumPath(id): AxumPath<i32>,
     ) -> Resp1 {
-        let nm = Name::from(ResType::Permission).obj(&id.to_string())?;
+        let nm = Name::from(Res::Permission).obj(&id.to_string())?;
         log::info!("GET {nm}");
         let cred = Credentials::load(&session).await?;
         honey.name_access(cred.user(), &nm, Access::View).await?;
@@ -573,7 +574,7 @@ fn permission_object(honey: Honey) -> Router {
         AxumPath(id): AxumPath<i32>,
         Json(attrs): Json<Map<String, Value>>,
     ) -> Resp0 {
-        let nm = Name::from(ResType::Permission).obj(&id.to_string())?;
+        let nm = Name::from(Res::Permission).obj(&id.to_string())?;
         log::info!("PATCH {nm}");
         let cred = Credentials::load(&session).await?;
         honey
@@ -589,7 +590,7 @@ fn permission_object(honey: Honey) -> Router {
         State(honey): State<Honey>,
         AxumPath(id): AxumPath<i32>,
     ) -> Resp0 {
-        let nm = Name::from(ResType::Permission).obj(&id.to_string())?;
+        let nm = Name::from(Res::Permission).obj(&id.to_string())?;
         log::info!("DELETE {nm}");
         let cred = Credentials::load(&session).await?;
         honey
@@ -619,9 +620,9 @@ fn other_object(honey: Honey) -> Router {
         log::info!("GET {nm}");
         let cred = Credentials::load(&session).await?;
         honey.name_access(cred.user(), &nm, Access::View).await?;
-        let sql = nm.res_type.one_sql();
+        let sql = one_sql(nm.res_type);
         let name = nm.object_n().ok_or(StatusCode::BAD_REQUEST)?;
-        let body = if nm.res_type == ResType::ControllerIo {
+        let body = if nm.res_type == Res::ControllerIo {
             get_array_by_pkey(&honey.db, sql, &name).await
         } else {
             get_by_pkey(&honey.db, sql, &name).await
@@ -644,13 +645,13 @@ fn other_object(honey: Honey) -> Router {
             honey.name_access(cred.user(), &nm, Access::Operate).await?;
         for key in attrs.keys() {
             let attr = &key[..];
-            access.check(nm.res_type.access_attr(attr))?;
+            access.check(access_attr(nm.res_type, attr))?;
         }
         if let Some(mut msn) = cred.authenticate().await? {
             // first pass
             for (key, value) in attrs.iter() {
                 let attr = &key[..];
-                if nm.res_type.patch_first_pass(attr) {
+                if patch_first_pass(nm.res_type, attr) {
                     let anm = nm.attr_n(attr)?;
                     log::debug!("{anm} = {value}");
                     msn.update_object(&anm, value).await?;
@@ -659,7 +660,7 @@ fn other_object(honey: Honey) -> Router {
             // second pass
             for (key, value) in attrs.iter() {
                 let attr = &key[..];
-                if !nm.res_type.patch_first_pass(attr) {
+                if !patch_first_pass(nm.res_type, attr) {
                     let anm = nm.attr_n(attr)?;
                     log::debug!("{anm} = {value}");
                     msn.update_object(&anm, value).await?;
@@ -693,6 +694,101 @@ fn other_object(honey: Honey) -> Router {
             get(handle_get).patch(handle_patch).delete(handle_delete),
         )
         .with_state(honey)
+}
+
+/// Get the SQL query one record of a given resource type
+const fn one_sql(res: Res) -> &'static str {
+    use Res::*;
+    match res {
+        Alarm => query::ALARM_ONE,
+        Beacon => query::BEACON_ONE,
+        CabinetStyle => query::CABINET_STYLE_ONE,
+        Camera => query::CAMERA_ONE,
+        CommConfig => query::COMM_CONFIG_ONE,
+        CommLink => query::COMM_LINK_ONE,
+        Controller => query::CONTROLLER_ONE,
+        ControllerIo => query::CONTROLLER_IO_ONE,
+        Detector => query::DETECTOR_ONE,
+        Dms => query::DMS_ONE,
+        FlowStream => query::FLOW_STREAM_ONE,
+        Font => query::FONT_ONE,
+        GateArm => query::GATE_ARM_ONE,
+        GateArmArray => query::GATE_ARM_ARRAY_ONE,
+        GeoLoc => query::GEO_LOC_ONE,
+        Gps => query::GPS_ONE,
+        Graphic => query::GRAPHIC_ONE,
+        LaneMarking => query::LANE_MARKING_ONE,
+        LcsArray => query::LCS_ARRAY_ONE,
+        LcsIndication => query::LCS_INDICATION_ONE,
+        Modem => query::MODEM_ONE,
+        MsgLine => query::MSG_LINE_ONE,
+        MsgPattern => query::MSG_PATTERN_ONE,
+        Permission => query::PERMISSION_ONE,
+        RampMeter => query::RAMP_METER_ONE,
+        Role => query::ROLE_ONE,
+        SignConfig => query::SIGN_CONFIG_ONE,
+        SignDetail => query::SIGN_DETAIL_ONE,
+        SignMessage => query::SIGN_MSG_ONE,
+        TagReader => query::TAG_READER_ONE,
+        User => query::USER_ONE,
+        VideoMonitor => query::VIDEO_MONITOR_ONE,
+        WeatherSensor => query::WEATHER_SENSOR_ONE,
+        Word => query::WORD_ONE,
+        _ => unimplemented!(),
+    }
+}
+
+/// Get required access to update an attribute
+fn access_attr(res: Res, att: &str) -> Access {
+    use Res::*;
+    match (res, att) {
+        (Beacon, "flashing")
+        | (Camera, "ptz")
+        | (Camera, "recall_preset")
+        | (Controller, "device_req")
+        | (Detector, "field_length")
+        | (Detector, "force_fail")
+        | (Dms, "msg_user")
+        | (LaneMarking, "deployed") => Access::Operate,
+        (Beacon, "message")
+        | (Beacon, "notes")
+        | (Beacon, "preset")
+        | (Camera, "store_preset")
+        | (CommConfig, "timeout_ms")
+        | (CommConfig, "idle_disconnect_sec")
+        | (CommConfig, "no_response_disconnect_sec")
+        | (CommLink, "poll_enabled")
+        | (Controller, "condition")
+        | (Controller, "notes")
+        | (Detector, "abandoned")
+        | (Detector, "notes")
+        | (Dms, "device_req")
+        | (LaneMarking, "notes")
+        | (Modem, "enabled")
+        | (Modem, "timeout_ms")
+        | (Role, "enabled")
+        | (User, "enabled")
+        | (WeatherSensor, "site_id")
+        | (WeatherSensor, "alt_id")
+        | (WeatherSensor, "notes") => Access::Manage,
+        _ => Access::Configure,
+    }
+}
+
+/// Check if resource type / attribute should be patched first
+fn patch_first_pass(res: Res, att: &str) -> bool {
+    use Res::*;
+    match (res, att) {
+        (Alarm, "pin")
+        | (Beacon, "pin")
+        | (Beacon, "verify_pin")
+        | (Detector, "pin")
+        | (Dms, "pin")
+        | (LaneMarking, "pin")
+        | (RampMeter, "pin")
+        | (WeatherSensor, "pin") => true,
+        _ => false,
+    }
 }
 
 /// Query one row by primary key

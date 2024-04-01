@@ -15,11 +15,11 @@
 use crate::error::Result;
 use crate::files::AtomicFile;
 use crate::query;
-use crate::restype::ResType;
 use crate::segments::{RNode, Road, SegmentState};
 use crate::signmsg::render_all;
 use crate::sonar::Name;
 use futures::{pin_mut, TryStreamExt};
+use resources::Res;
 use std::path::Path;
 use std::time::Instant;
 use tokio::io::{AsyncWrite, AsyncWriteExt};
@@ -151,58 +151,58 @@ impl Resource {
     }
 
     /// Get the resource type
-    const fn res_type(self) -> ResType {
+    const fn res_type(self) -> Res {
         use Resource::*;
         match self {
-            Alarm => ResType::Alarm,
-            Beacon => ResType::Beacon,
-            BeaconState => ResType::BeaconState,
-            CabinetStyle => ResType::CabinetStyle,
-            Camera | CameraPub => ResType::Camera,
-            CommConfig => ResType::CommConfig,
-            CommLink => ResType::CommLink,
-            CommProtocol => ResType::CommProtocol,
-            Condition => ResType::Condition,
-            Controller => ResType::Controller,
-            Detector | DetectorPub => ResType::Detector,
-            Direction => ResType::Direction,
-            Dms | DmsPub | DmsStat => ResType::Dms,
-            FlowStream => ResType::FlowStream,
-            Font => ResType::Font,
-            GateArm => ResType::GateArm,
-            GateArmArray => ResType::GateArmArray,
-            GateArmInterlock => ResType::GateArmInterlock,
-            GateArmState => ResType::GateArmState,
-            Gps => ResType::Gps,
-            Graphic => ResType::Graphic,
-            Incident => ResType::Incident,
-            LaneMarking => ResType::LaneMarking,
-            LaneUseIndication => ResType::LaneUseIndication,
-            LcsArray => ResType::LcsArray,
-            LcsIndication => ResType::LcsIndication,
-            LcsLock => ResType::LcsLock,
-            Modem => ResType::Modem,
-            MsgLine => ResType::MsgLine,
-            MsgPattern => ResType::MsgPattern,
+            Alarm => Res::Alarm,
+            Beacon => Res::Beacon,
+            BeaconState => Res::BeaconState,
+            CabinetStyle => Res::CabinetStyle,
+            Camera | CameraPub => Res::Camera,
+            CommConfig => Res::CommConfig,
+            CommLink => Res::CommLink,
+            CommProtocol => Res::CommProtocol,
+            Condition => Res::Condition,
+            Controller => Res::Controller,
+            Detector | DetectorPub => Res::Detector,
+            Direction => Res::Direction,
+            Dms | DmsPub | DmsStat => Res::Dms,
+            FlowStream => Res::FlowStream,
+            Font => Res::Font,
+            GateArm => Res::GateArm,
+            GateArmArray => Res::GateArmArray,
+            GateArmInterlock => Res::GateArmInterlock,
+            GateArmState => Res::GateArmState,
+            Gps => Res::Gps,
+            Graphic => Res::Graphic,
+            Incident => Res::Incident,
+            LaneMarking => Res::LaneMarking,
+            LaneUseIndication => Res::LaneUseIndication,
+            LcsArray => Res::LcsArray,
+            LcsIndication => Res::LcsIndication,
+            LcsLock => Res::LcsLock,
+            Modem => Res::Modem,
+            MsgLine => Res::MsgLine,
+            MsgPattern => Res::MsgPattern,
             ParkingAreaPub | ParkingAreaDyn | ParkingAreaArch => {
-                ResType::ParkingArea
+                Res::ParkingArea
             }
-            Permission => ResType::Permission,
-            RampMeter => ResType::RampMeter,
-            ResourceType => ResType::ResourceType,
-            Rnode => ResType::Rnode,
-            Road | RoadFull => ResType::Road,
-            RoadModifier => ResType::RoadModifier,
-            Role => ResType::Role,
-            SignConfig => ResType::SignConfig,
-            SignDetail => ResType::SignDetail,
-            SignMessage => ResType::SignMessage,
-            SystemAttributePub => ResType::SystemAttribute,
-            TagReader => ResType::TagReader,
-            User => ResType::User,
-            VideoMonitor => ResType::VideoMonitor,
-            WeatherSensor | WeatherSensorPub => ResType::WeatherSensor,
-            Word => ResType::Word,
+            Permission => Res::Permission,
+            RampMeter => Res::RampMeter,
+            ResourceType => Res::ResourceType,
+            Rnode => Res::Rnode,
+            Road | RoadFull => Res::Road,
+            RoadModifier => Res::RoadModifier,
+            Role => Res::Role,
+            SignConfig => Res::SignConfig,
+            SignDetail => Res::SignDetail,
+            SignMessage => Res::SignMessage,
+            SystemAttributePub => Res::SystemAttribute,
+            TagReader => Res::TagReader,
+            User => Res::User,
+            VideoMonitor => Res::VideoMonitor,
+            WeatherSensor | WeatherSensorPub => Res::WeatherSensor,
+            Word => Res::Word,
         }
     }
 
@@ -270,14 +270,11 @@ impl Resource {
 
     /// Get the listen channel
     pub const fn listen(self) -> Option<&'static str> {
-        use Resource::*;
-        match self {
-            BeaconState | CommProtocol | Condition | Direction | Font
-            | GateArmInterlock | GateArmState | Graphic | LaneUseIndication
-            | LcsLock | ResourceType | RoadModifier => {
-                self.res_type().lut_channel()
-            }
-            _ => self.res_type().listen(),
+        let res = self.res_type();
+        if res.is_lut() || res.has_channel() {
+            Some(res.as_str())
+        } else {
+            None
         }
     }
 

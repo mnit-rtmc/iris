@@ -1,5 +1,5 @@
 [workspace]
-members = ["honeybee", "mayfly", "bulb", "rendzina"]
+members = ["honeybee", "mayfly", "bulb", "rendzina", "resources"]
 resolver = "2"
 
 [workspace.package]

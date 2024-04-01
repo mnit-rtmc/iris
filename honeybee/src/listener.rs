@@ -120,7 +120,7 @@ pub async fn notify_events(
         if let Some(chan) = res.listen() {
             if channels.insert(chan) {
                 if let Ok(nm) = Name::new(chan) {
-                    if nm.res_type.lut_channel().is_none() {
+                    if !nm.res_type.is_lut() {
                         log::debug!("LISTEN to '{chan}' for {res:?}");
                         let listen = format!("LISTEN {chan}");
                         client.execute(&listen, &[]).await?;

@@ -12,11 +12,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::restype::ResType;
 use crate::tls;
 use heck::ToLowerCamelCase;
 use http::StatusCode;
 use percent_encoding::percent_decode_str;
+use resources::Res;
 use rustls::pki_types::ServerName;
 use serde_json::Value;
 use std::fmt;
@@ -131,14 +131,14 @@ fn attr_invalid_char(c: char) -> bool {
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Name {
     /// Resource type
-    pub res_type: ResType,
+    pub res_type: Res,
 
     /// Object name
     obj_name: Option<String>,
 }
 
-impl From<ResType> for Name {
-    fn from(res_type: ResType) -> Self {
+impl From<Res> for Name {
+    fn from(res_type: Res) -> Self {
         Name {
             res_type,
             obj_name: None,
@@ -162,7 +162,7 @@ impl fmt::Display for Name {
 impl Name {
     /// Create a new name
     pub fn new(type_n: &str) -> Result<Self> {
-        match ResType::try_from(type_n) {
+        match Res::try_from(type_n) {
             Ok(res_type) => Ok(Name::from(res_type)),
             Err(_) => Err(Error::InvalidValue),
         }
@@ -197,9 +197,9 @@ impl Name {
     pub fn attr_n(&self, att: &str) -> Result<String> {
         if att.len() > 64 || att.contains(name_invalid_char) {
             Err(Error::InvalidValue)?
-        } else if self.res_type == ResType::Controller && att == "drop_id" {
+        } else if self.res_type == Res::Controller && att == "drop_id" {
             Ok(format!("{self}/drop"))
-        } else if self.res_type == ResType::SignMessage {
+        } else if self.res_type == Res::SignMessage {
             // sign_message attributes are in snake case
             Ok(format!("{self}/{att}"))
         } else {
