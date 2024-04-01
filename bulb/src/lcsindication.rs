@@ -109,8 +109,6 @@ impl AncillaryData for LcsIndicationAnc {
 }
 
 impl LcsIndication {
-    pub const RESOURCE_N: &'static str = "lcs_indication";
-
     /// Get controller
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()

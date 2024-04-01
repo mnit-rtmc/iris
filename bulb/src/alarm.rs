@@ -32,8 +32,6 @@ pub struct Alarm {
 type AlarmAnc = DeviceAnc<Alarm>;
 
 impl Alarm {
-    pub const RESOURCE_N: &'static str = "alarm";
-
     /// Get the item state
     fn item_state(&self, anc: &AlarmAnc) -> ItemState {
         let item_state = anc.item_state(self);

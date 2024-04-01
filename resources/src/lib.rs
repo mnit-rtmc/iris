@@ -12,6 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use std::fmt;
 
 /// Enumeration of resource types
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -68,11 +69,17 @@ pub enum Res {
     Word,
 }
 
+impl fmt::Display for Res {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
 impl TryFrom<&str> for Res {
     type Error = ();
 
     fn try_from(type_n: &str) -> Result<Self, Self::Error> {
-        Self::iter().find(|rt| rt.as_str() == type_n).ok_or(())
+        Self::iter().find(|res| res.as_str() == type_n).ok_or(())
     }
 }
 
@@ -157,9 +164,9 @@ impl Res {
             FlowStream => "flow_stream",
             Font => "font",
             GateArm => "gate_arm",
+            GateArmArray => "gate_arm_array",
             GateArmInterlock => "gate_arm_interlock",
             GateArmState => "gate_arm_state",
-            GateArmArray => "gate_arm_array",
             GeoLoc => "geo_loc",
             Gps => "gps",
             Graphic => "graphic",
@@ -190,6 +197,39 @@ impl Res {
             VideoMonitor => "video_monitor",
             WeatherSensor => "weather_sensor",
             Word => "word",
+        }
+    }
+
+    /// Get resource symbol as a string slice
+    pub const fn symbol(self) -> &'static str {
+        use Res::*;
+        match self {
+            Alarm => "📢",
+            Beacon => "🔆",
+            CabinetStyle => "🗄️ ",
+            Camera => "🎥",
+            CommConfig => "📡",
+            CommLink => "🔗",
+            Controller => "🎛️ ",
+            Detector => "🚗⬚",
+            Dms => "⬛",
+            FlowStream => "🎞️ ",
+            GateArm => "⫬",
+            GateArmArray => "⫭⫬",
+            GeoLoc => "🗺️ ",
+            Gps => "🌐",
+            LaneMarking => "⛙",
+            LcsArray => "🡇🡇 ",
+            LcsIndication => "🡇 ",
+            Modem => "🖀 ",
+            Permission => "🗝️ ",
+            RampMeter => "🚦",
+            Role => "💪",
+            TagReader => "🏷️ ",
+            User => "👤",
+            VideoMonitor => "📺",
+            WeatherSensor => "🌦️ ",
+            _ => "❓",
         }
     }
 

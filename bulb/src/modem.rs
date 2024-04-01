@@ -34,8 +34,6 @@ impl AncillaryData for ModemAnc {
 }
 
 impl Modem {
-    pub const RESOURCE_N: &'static str = "modem";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let inactive = inactive_attr(self.enabled);

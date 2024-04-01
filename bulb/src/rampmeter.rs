@@ -32,8 +32,6 @@ pub struct RampMeter {
 type RampMeterAnc = DeviceAnc<RampMeter>;
 
 impl RampMeter {
-    pub const RESOURCE_N: &'static str = "ramp_meter";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &RampMeterAnc) -> String {
         let item_state = anc.item_state(self);

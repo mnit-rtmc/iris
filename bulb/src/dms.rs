@@ -662,8 +662,6 @@ const DEDICATED: &[&str] = &[
 ];
 
 impl Dms {
-    pub const RESOURCE_N: &'static str = "dms";
-
     /// Get multi of current message
     fn current_multi<'a>(&'a self, anc: &'a DmsAnc) -> &'a str {
         anc.sign_message(self.msg_current.as_deref())

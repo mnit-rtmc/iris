@@ -99,8 +99,6 @@ pub struct TagReader {
 type TagReaderAnc = DeviceAnc<TagReader>;
 
 impl TagReader {
-    pub const RESOURCE_N: &'static str = "tag_reader";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &TagReaderAnc) -> String {
         let item_state = anc.item_state(self);

@@ -16,6 +16,7 @@ use crate::item::ItemState;
 use crate::permission::permissions_html;
 use crate::resource::{Resource, View};
 use crate::util::Doc;
+use resources::Res;
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -146,25 +147,30 @@ impl DeferredAction {
 fn search_list() {
     let doc = Doc::get();
     if let Some(rname) = doc.select_parse::<String>("sb_resource") {
-        let res = Resource::from_name(&rname);
+        let res = Resource::try_from(rname.as_str()).ok();
         let value = search_value();
         spawn_local(populate_list(res, value));
     }
 }
 
 /// Populate `sb_list` with `res` card types
-async fn populate_list(res: Resource, search: String) {
+async fn populate_list(res: Option<Resource>, search: String) {
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
         state.selected_card.take()
     });
     let doc = Doc::get();
     let sb_list = doc.elem::<Element>("sb_list");
-    let config = doc.input_bool("sb_config");
-    match res.fetch_list(&search, config).await {
-        Ok(cards) => sb_list.set_inner_html(&cards),
-        Err(Error::FetchResponseUnauthorized()) => show_login(),
-        Err(e) => show_toast(&format!("View failed: {e}")),
+    match res {
+        Some(res) => {
+            let config = doc.input_bool("sb_config");
+            match res.fetch_list(&search, config).await {
+                Ok(cards) => sb_list.set_inner_html(&cards),
+                Err(Error::FetchResponseUnauthorized()) => show_login(),
+                Err(e) => show_toast(&format!("View failed: {e}")),
+            }
+        }
+        None => sb_list.set_inner_html(""),
     }
 }
 
@@ -209,10 +215,11 @@ impl SelectedCard {
 
     /// Get card element ID
     fn id(&self) -> String {
+        let res = Res::from(self.res);
         if self.view.is_create() {
-            format!("{}_", self.res.rname())
+            format!("{res}_")
         } else {
-            format!("{}_{}", self.res.rname(), &self.name)
+            format!("{res}_{}", &self.name)
         }
     }
 
@@ -515,9 +522,12 @@ fn handle_sb_resource_ev(rname: String) {
     let search = doc.elem::<HtmlInputElement>("sb_search");
     search.set_value("");
     let value = search_value();
-    let res = Resource::from_name(&rname);
+    let res = Resource::try_from(rname.as_str()).ok();
     let sb_state = doc.elem::<HtmlSelectElement>("sb_state");
-    sb_state.set_inner_html(res.item_state_options());
+    match res {
+        Some(res) => sb_state.set_inner_html(res.item_state_options()),
+        None => sb_state.set_inner_html(""),
+    }
     spawn_local(populate_list(res, value));
 }
 
@@ -541,8 +551,9 @@ fn add_click_listener(elem: &Element) -> JsResult<()> {
                     if let Some(rname) =
                         doc.select_parse::<String>("sb_resource")
                     {
-                        let res = Resource::from_name(&rname);
-                        spawn_local(click_card(res, id, name));
+                        if let Ok(res) = Resource::try_from(rname.as_str()) {
+                            spawn_local(click_card(res, id, name));
+                        }
                     }
                 }
             }
@@ -637,7 +648,7 @@ async fn go_resource(attrs: ButtonAttrs) {
         sb_resource.set_value(&rname);
         let search = doc.elem::<HtmlInputElement>("sb_search");
         search.set_value(&link);
-        let res = Resource::from_name(&rname);
+        let res = Resource::try_from(rname.as_str()).ok();
         populate_list(res, link).await;
     }
 }

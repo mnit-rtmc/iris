@@ -83,8 +83,6 @@ impl AncillaryData for LcsArrayAnc {
 }
 
 impl LcsArray {
-    pub const RESOURCE_N: &'static str = "lcs_array";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LcsArrayAnc) -> String {
         let lock = anc.lock(self);

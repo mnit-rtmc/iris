@@ -187,8 +187,6 @@ impl GeoLocAnc {
 }
 
 impl GeoLoc {
-    pub const RESOURCE_N: &'static str = "geo_loc";
-
     /// Convert to Edit HTML
     fn to_html_edit(&self, anc: &GeoLocAnc) -> String {
         let roadway = anc.roads_html("roadway", self.roadway.as_deref());

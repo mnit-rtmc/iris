@@ -37,8 +37,6 @@ pub struct Detector {
 type DetectorAnc = DeviceAnc<Detector>;
 
 impl Detector {
-    pub const RESOURCE_N: &'static str = "detector";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &DetectorAnc) -> String {
         let item_state = anc.item_state(self);

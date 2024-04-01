@@ -137,8 +137,6 @@ impl fmt::Display for CommLink {
 }
 
 impl CommLink {
-    pub const RESOURCE_N: &'static str = "comm_link";
-
     /// Get connected state to display
     fn connected(&self, long: bool) -> &'static str {
         match (self.poll_enabled, self.connected, long) {

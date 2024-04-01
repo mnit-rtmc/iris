@@ -147,10 +147,7 @@ impl From<Res> for Name {
 }
 
 impl fmt::Display for Name {
-    fn fmt(
-        &self,
-        f: &mut fmt::Formatter<'_>,
-    ) -> std::result::Result<(), fmt::Error> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let type_n = self.type_n();
         match &self.obj_name {
             Some(obj_n) => write!(f, "{type_n}/{obj_n}"),

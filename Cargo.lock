@@ -636,6 +636,7 @@ dependencies = [
  "ntcip",
  "percent-encoding",
  "rendzina",
+ "resources",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",

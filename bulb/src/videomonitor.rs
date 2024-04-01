@@ -29,8 +29,6 @@ pub struct VideoMonitor {
 type VideoMonitorAnc = DeviceAnc<VideoMonitor>;
 
 impl VideoMonitor {
-    pub const RESOURCE_N: &'static str = "video_monitor";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &VideoMonitorAnc) -> String {
         let item_state = anc.item_state(self);

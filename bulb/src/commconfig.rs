@@ -192,8 +192,6 @@ impl CommConfigAnc {
 }
 
 impl CommConfig {
-    pub const RESOURCE_N: &'static str = "comm_config";
-
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
         let description = HtmlStr::new(&self.description);

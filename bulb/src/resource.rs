@@ -38,6 +38,7 @@ use crate::user::User;
 use crate::util::{Doc, HtmlStr};
 use crate::videomonitor::VideoMonitor;
 use crate::weathersensor::WeatherSensor;
+use resources::Res;
 use serde::de::DeserializeOwned;
 use serde_json::map::Map;
 use serde_json::Value;
@@ -102,7 +103,6 @@ pub enum Resource {
     User,
     VideoMonitor,
     WeatherSensor,
-    Unknown,
 }
 
 /// Card View
@@ -217,73 +217,93 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     }
 }
 
-impl Resource {
-    /// Lookup a resource by name
-    pub fn from_name(res: &str) -> Self {
+impl TryFrom<&str> for Resource {
+    type Error = ();
+
+    fn try_from(resource_n: &str) -> std::result::Result<Self, Self::Error> {
+        Self::iter()
+            .find(|res| Res::from(*res).as_str() == resource_n)
+            .ok_or(())
+    }
+}
+
+impl From<Resource> for Res {
+    fn from(res: Resource) -> Self {
+        use Resource::*;
         match res {
-            Alarm::RESOURCE_N => Self::Alarm,
-            Beacon::RESOURCE_N => Self::Beacon,
-            CabinetStyle::RESOURCE_N => Self::CabinetStyle,
-            Camera::RESOURCE_N => Self::Camera,
-            CommConfig::RESOURCE_N => Self::CommConfig,
-            CommLink::RESOURCE_N => Self::CommLink,
-            Controller::RESOURCE_N => Self::Controller,
-            Detector::RESOURCE_N => Self::Detector,
-            Dms::RESOURCE_N => Self::Dms,
-            FlowStream::RESOURCE_N => Self::FlowStream,
-            GateArm::RESOURCE_N => Self::GateArm,
-            GateArmArray::RESOURCE_N => Self::GateArmArray,
-            GeoLoc::RESOURCE_N => Self::GeoLoc,
-            Gps::RESOURCE_N => Self::Gps,
-            LaneMarking::RESOURCE_N => Self::LaneMarking,
-            LcsArray::RESOURCE_N => Self::LcsArray,
-            LcsIndication::RESOURCE_N => Self::LcsIndication,
-            Modem::RESOURCE_N => Self::Modem,
-            Permission::RESOURCE_N => Self::Permission,
-            RampMeter::RESOURCE_N => Self::RampMeter,
-            Role::RESOURCE_N => Self::Role,
-            TagReader::RESOURCE_N => Self::TagReader,
-            User::RESOURCE_N => Self::User,
-            VideoMonitor::RESOURCE_N => Self::VideoMonitor,
-            WeatherSensor::RESOURCE_N => Self::WeatherSensor,
-            _ => Self::Unknown,
+            Alarm => Res::Alarm,
+            Beacon => Res::Beacon,
+            CabinetStyle => Res::CabinetStyle,
+            Camera => Res::Camera,
+            CommConfig => Res::CommConfig,
+            CommLink => Res::CommLink,
+            Controller => Res::Controller,
+            Detector => Res::Detector,
+            Dms => Res::Dms,
+            FlowStream => Res::FlowStream,
+            GateArm => Res::GateArm,
+            GateArmArray => Res::GateArmArray,
+            GeoLoc => Res::GeoLoc,
+            Gps => Res::Gps,
+            LaneMarking => Res::LaneMarking,
+            Lcs => Res::Lcs,
+            LcsArray => Res::LcsArray,
+            LcsIndication => Res::LcsIndication,
+            Modem => Res::Modem,
+            Permission => Res::Permission,
+            RampMeter => Res::RampMeter,
+            Role => Res::Role,
+            TagReader => Res::TagReader,
+            User => Res::User,
+            VideoMonitor => Res::VideoMonitor,
+            WeatherSensor => Res::WeatherSensor,
         }
     }
+}
 
-    /// Get resource name
-    pub const fn rname(self) -> &'static str {
-        match self {
-            Self::Alarm => Alarm::RESOURCE_N,
-            Self::Beacon => Beacon::RESOURCE_N,
-            Self::CabinetStyle => CabinetStyle::RESOURCE_N,
-            Self::Camera => Camera::RESOURCE_N,
-            Self::CommConfig => CommConfig::RESOURCE_N,
-            Self::CommLink => CommLink::RESOURCE_N,
-            Self::Controller => Controller::RESOURCE_N,
-            Self::Detector => Detector::RESOURCE_N,
-            Self::Dms => Dms::RESOURCE_N,
-            Self::FlowStream => FlowStream::RESOURCE_N,
-            Self::GateArm => GateArm::RESOURCE_N,
-            Self::GateArmArray => GateArmArray::RESOURCE_N,
-            Self::GeoLoc => GeoLoc::RESOURCE_N,
-            Self::Gps => Gps::RESOURCE_N,
-            Self::LaneMarking => LaneMarking::RESOURCE_N,
-            Self::Lcs => "lcs",
-            Self::LcsArray => LcsArray::RESOURCE_N,
-            Self::LcsIndication => LcsIndication::RESOURCE_N,
-            Self::Modem => Modem::RESOURCE_N,
-            Self::Permission => Permission::RESOURCE_N,
-            Self::RampMeter => RampMeter::RESOURCE_N,
-            Self::Role => Role::RESOURCE_N,
-            Self::TagReader => TagReader::RESOURCE_N,
-            Self::User => User::RESOURCE_N,
-            Self::VideoMonitor => VideoMonitor::RESOURCE_N,
-            Self::WeatherSensor => WeatherSensor::RESOURCE_N,
-            Self::Unknown => "",
-        }
+impl fmt::Display for Resource {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.dname())
+    }
+}
+
+impl Resource {
+    /// Get iterator of all resource variants
+    pub fn iter() -> impl Iterator<Item = Self> {
+        use Resource::*;
+        [
+            Alarm,
+            Beacon,
+            CabinetStyle,
+            Camera,
+            CommConfig,
+            CommLink,
+            Controller,
+            Detector,
+            Dms,
+            FlowStream,
+            GateArm,
+            GateArmArray,
+            GeoLoc,
+            Gps,
+            LaneMarking,
+            Lcs,
+            LcsArray,
+            LcsIndication,
+            Modem,
+            Permission,
+            RampMeter,
+            Role,
+            TagReader,
+            User,
+            VideoMonitor,
+            WeatherSensor,
+        ]
+        .iter()
+        .cloned()
     }
 
-    /// Lookup display name
+    /// Get display name
     pub const fn dname(self) -> &'static str {
         match self {
             Self::Alarm => "📢 Alarm",
@@ -312,29 +332,13 @@ impl Resource {
             Self::User => "👤 User",
             Self::VideoMonitor => "📺 Video Monitor",
             Self::WeatherSensor => "🌦️ Weather Sensor",
-            Self::Unknown => "❓ Unknown",
-        }
-    }
-
-    /// Get dependent resource type
-    pub const fn dependent(self) -> Self {
-        use Resource::*;
-        // FIXME: copied from honeybee's restype.rs
-        match self {
-            // Camera resources
-            FlowStream => Camera,
-            // Gate arm resources
-            GateArmArray => GateArm,
-            // LCS resources
-            LcsArray | LcsIndication | LaneMarking => Lcs,
-            _ => self,
         }
     }
 
     /// Get the URI of a resource
     fn uri(self) -> Uri {
         let mut uri = Uri::from("/iris/api/");
-        uri.push(self.rname());
+        uri.push(Res::from(self).as_str());
         uri
     }
 
@@ -352,7 +356,7 @@ impl Resource {
 
     /// Lookup resource symbol
     pub fn symbol(self) -> &'static str {
-        self.dname().split_whitespace().next().unwrap()
+        Res::from(self).symbol()
     }
 
     /// Fetch card list for a resource type
@@ -426,7 +430,7 @@ impl Resource {
             View::CreateCompact => Ok(CREATE_COMPACT.into()),
             View::Create => {
                 let html = self.card_view(View::Create, name).await?;
-                Ok(html_card_create(self.dname(), &html))
+                Ok(html_card_create(self, &html))
             }
             View::Compact => self.card_view(View::Compact, name).await,
             View::Location => match self.fetch_geo_loc(name).await? {
@@ -439,7 +443,7 @@ impl Resource {
             }
             _ => {
                 let html = self.card_view(View::Edit, name).await?;
-                Ok(html_card_edit(self.dname(), name, &html, DEL_BUTTON))
+                Ok(html_card_edit(self, name, &html, DEL_BUTTON))
             }
         }
     }
@@ -620,11 +624,10 @@ impl Resource {
 
     /// Build a status card
     fn html_card_status(self, name: &str, status: &str) -> String {
-        let dname = self.dname();
         let name = HtmlStr::new(name);
         format!(
             "<div class='row'>\
-              <span class='{TITLE}'>{dname}</span>\
+              <span class='{TITLE}'>{self}</span>\
               <span class='{TITLE}'>Status</span>\
               <span class='{NAME}'>{name}</span>\
               {CLOSE_BUTTON}\
@@ -670,7 +673,7 @@ async fn fetch_list<C: Card>(
     search: &str,
     config: bool,
 ) -> Result<String> {
-    let rname = res.rname();
+    let rname = Res::from(res).as_str();
     let json = res.uri().get().await?;
     let search = Search::new(search);
     let mut html = String::new();
@@ -774,7 +777,7 @@ async fn card_view<C: Card>(
 /// Fetch a Location card
 async fn card_location(name: &str) -> Result<String> {
     let html = Resource::GeoLoc.card_view(View::Edit, name).await?;
-    Ok(html_card_edit(Resource::GeoLoc.dname(), name, &html, ""))
+    Ok(html_card_edit(Resource::GeoLoc, name, &html, ""))
 }
 
 impl Search {
@@ -831,10 +834,10 @@ pub fn inactive_attr(active: bool) -> &'static str {
 }
 
 /// Build a create card
-fn html_card_create(dname: &'static str, create: &str) -> String {
+fn html_card_create(res: Resource, create: &str) -> String {
     format!(
         "<div class='row'>\
-          <span class='{TITLE}'>{dname}</span>\
+          <span class='{TITLE}'>{res}</span>\
           <span class='{TITLE}'>Create</span>\
           <span class='{NAME}'>🆕</span>\
           {CLOSE_BUTTON}\
@@ -848,7 +851,7 @@ fn html_card_create(dname: &'static str, create: &str) -> String {
 
 /// Build an edit card
 fn html_card_edit(
-    dname: &'static str,
+    res: Resource,
     name: &str,
     edit: &str,
     delete: &'static str,
@@ -856,7 +859,7 @@ fn html_card_edit(
     let name = HtmlStr::new(name);
     format!(
         "<div class='row'>\
-          <span class='{TITLE}'>{dname}</span>\
+          <span class='{TITLE}'>{res}</span>\
           <span class='{TITLE}'>Edit</span>\
           <span class='{NAME}'>{name}</span>\
           {CLOSE_BUTTON}\

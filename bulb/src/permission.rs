@@ -15,6 +15,7 @@ use crate::fetch::Uri;
 use crate::resource::{AncillaryData, Card, Resource, View, NAME};
 use crate::role::Role;
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, Select};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use std::fmt;
@@ -198,9 +199,10 @@ pub fn permissions_html(access: Vec<Permission>, config: bool) -> String {
 
 /// Add option to access select
 fn add_option(res: Resource, perm: &Permission, html: &mut String) {
-    if perm.resource_n == res.dependent().rname() {
+    let r = Res::from(res);
+    if perm.resource_n == r.dependent().as_str() {
         html.push_str("<option value='");
-        html.push_str(res.rname());
+        html.push_str(r.as_str());
         html.push_str("'>");
         html.push_str(res.dname());
         html.push_str("</option>");
@@ -208,8 +210,6 @@ fn add_option(res: Resource, perm: &Permission, html: &mut String) {
 }
 
 impl Permission {
-    pub const RESOURCE_N: &'static str = "permission";
-
     /// Get value to create a new object
     pub fn create_value(doc: &Doc) -> Result<String> {
         let role = doc.select_parse::<String>("role");

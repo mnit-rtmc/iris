@@ -96,8 +96,6 @@ const CLASS_FLASHING: &str = "flashing";
 const CLASS_NOT_FLASHING: &str = "not-flashing";
 
 impl Beacon {
-    pub const RESOURCE_N: &'static str = "beacon";
-
     /// Check if beacon is flashing
     fn flashing(&self) -> bool {
         // 4: FLASHING, 6: FAULT_STUCK_ON, 7: FLASHING_EXT

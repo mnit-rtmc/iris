@@ -33,8 +33,6 @@ pub struct Camera {
 type CameraAnc = DeviceAnc<Camera>;
 
 impl Camera {
-    pub const RESOURCE_N: &'static str = "camera";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &CameraAnc) -> String {
         let item_state = anc.item_state(self);

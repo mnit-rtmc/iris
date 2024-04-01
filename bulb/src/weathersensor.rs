@@ -685,8 +685,6 @@ fn sub_surface_html(
 }
 
 impl WeatherSensor {
-    pub const RESOURCE_N: &'static str = "weather_sensor";
-
     /// Get sample as HTML
     fn sample_html(&self) -> String {
         match &self.sample {

@@ -29,8 +29,6 @@ pub struct Gps {
 type GpsAnc = DeviceAnc<Gps>;
 
 impl Gps {
-    pub const RESOURCE_N: &'static str = "gps";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &GpsAnc) -> String {
         let inactive = inactive_attr(self.controller.is_some());

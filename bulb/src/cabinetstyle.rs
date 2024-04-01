@@ -35,8 +35,6 @@ impl AncillaryData for CabinetStyleAnc {
 }
 
 impl CabinetStyle {
-    pub const RESOURCE_N: &'static str = "cabinet_style";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         format!("<div>{self}</div>")

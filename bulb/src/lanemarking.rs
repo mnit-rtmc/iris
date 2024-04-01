@@ -34,8 +34,6 @@ pub struct LaneMarking {
 type LaneMarkingAnc = DeviceAnc<LaneMarking>;
 
 impl LaneMarking {
-    pub const RESOURCE_N: &'static str = "lane_marking";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LaneMarkingAnc) -> String {
         let item_state = anc.item_state(self);

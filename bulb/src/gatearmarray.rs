@@ -93,8 +93,6 @@ impl AncillaryData for GateArmArrayAnc {
 }
 
 impl GateArmArray {
-    pub const RESOURCE_N: &'static str = "gate_arm_array";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let warn = warn_state(self.arm_state);

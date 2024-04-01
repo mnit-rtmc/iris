@@ -28,8 +28,6 @@ pub struct FlowStream {
 type FlowStreamAnc = DeviceAnc<FlowStream>;
 
 impl FlowStream {
-    pub const RESOURCE_N: &'static str = "flow_stream";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &FlowStreamAnc) -> String {
         let inactive = inactive_attr(self.controller.is_some());

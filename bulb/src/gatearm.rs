@@ -120,8 +120,6 @@ impl AncillaryData for GateArmAnc {
 }
 
 impl GateArm {
-    pub const RESOURCE_N: &'static str = "gate_arm";
-
     /// Get controller
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
