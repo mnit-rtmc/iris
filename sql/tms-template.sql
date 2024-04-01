@@ -452,7 +452,11 @@ ALTER TABLE iris.hashtag ADD PRIMARY KEY (resource_n, name, hashtag);
 CREATE FUNCTION iris.hashtag_notify() RETURNS TRIGGER AS
     $hashtag_notify$
 BEGIN
-    PERFORM pg_notify(OLD.resource_n, '');
+    IF (TG_OP = 'DELETE') THEN
+        PERFORM pg_notify(OLD.resource_n, '');
+    ELSE
+        PERFORM pg_notify(NEW.resource_n, '');
+    END IF;
     RETURN NULL; -- AFTER trigger return is ignored
 END;
 $hashtag_notify$ LANGUAGE plpgsql;

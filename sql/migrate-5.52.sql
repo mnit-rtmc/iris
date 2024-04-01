@@ -152,4 +152,17 @@ GRANT SELECT ON r_node_view TO PUBLIC;
 ALTER TABLE iris.controller ALTER COLUMN notes DROP NOT NULL;
 UPDATE iris.controller SET notes = NULL WHERE notes = '';
 
+-- Fix problem with hashtag_notify trigger
+CREATE OR REPLACE FUNCTION iris.hashtag_notify() RETURNS TRIGGER AS
+    $hashtag_notify$
+BEGIN
+    IF (TG_OP = 'DELETE') THEN
+        PERFORM pg_notify(OLD.resource_n, '');
+    ELSE
+        PERFORM pg_notify(NEW.resource_n, '');
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$hashtag_notify$ LANGUAGE plpgsql;
+
 COMMIT;
