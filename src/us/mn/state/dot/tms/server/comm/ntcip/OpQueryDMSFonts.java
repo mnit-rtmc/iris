@@ -325,7 +325,10 @@ public class OpQueryDMSFonts extends OpDMS {
 			int off = pos / 8;
 			int bit = 7 - (pos & 7); // 0b0111
 			byte[] bitmap = char_bitmap.getByteValue();
-			return (bitmap[off] >> bit & 1) != 0;
+			// NOTE: length check required --
+			//       sometimes width / bitmap don't match
+			return (off < bitmap.length)
+			    && (bitmap[off] >> bit & 1) != 0;
 		}
 	}
 }
