@@ -661,6 +661,108 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		}
 	}
 
+	/** Total sun int in terms of minutes */
+	private transient Integer total_sun;
+
+	/** Get total sun int in terms of minutes */
+	@Override
+	public Integer getTotalSun() {
+		return total_sun;
+	}
+
+	/** Set total sun int in terms of minutes */
+	public void setTotalSunNotify(Integer ts) {
+		if (!objectEquals(ts, total_sun)) {
+			total_sun = ts;
+			notifyAttribute("totalSun");
+		}
+	}
+
+	/** instantaneousSolar int in terms of W/m^2 */
+	private transient Integer instantaneous_solar;
+
+	/** Get instantaneousSolar int in terms of W/m^2 */
+	@Override
+	public Integer getInstantaneousSolar() {
+		return instantaneous_solar;
+	}
+
+	/** Set instantaneousSolar int in terms of W/m^2 */
+	public void setInstantaneousSolarNotify(Integer is) {
+		if (!objectEquals(is, instantaneous_solar)) {
+			instantaneous_solar = is;
+			notifyAttribute("instantaneousSolar");
+		}
+	}
+
+	/** instantaneousTerrestrial object in terms of W/m^2 */
+	private transient Integer instantaneous_terrestrial;
+
+	/** Get instantaneousTerrestrial object in terms of W/m^2 */
+	@Override
+	public Integer getInstantaneousTerrestrial() {
+		return instantaneous_terrestrial;
+	}
+
+	/** Set instantaneousTerrestrial object in terms of W/m^2 */
+	public void setInstantaneousTerrestrialNotify(Integer it) {
+		if (!objectEquals(it, instantaneous_terrestrial)) {
+			instantaneous_terrestrial = it;
+			notifyAttribute("instantaneousTerrestrial");
+		}
+	}
+
+	/** total radiation object in terms of W/m^2 */
+	private transient Integer total_radiation;
+
+	/** Get total radiation object in terms of W/m^2 */
+	@Override
+	public Integer getTotalRadiation() {
+		return total_radiation;
+	}
+
+	/** Set total radiation object in terms of W/m^2 */
+	public void setTotalRadiationNotify(Integer tr) {
+		if (!objectEquals(tr, total_radiation)) {
+			total_radiation = tr;
+			notifyAttribute("totalRadiation");
+		}
+	}
+
+	/** total radiation period int in terms of seconds */
+	private transient Integer total_radiation_period;
+
+	/** Get total radiation period int in terms of seconds */
+	@Override
+	public Integer getTotalRadiationPeriod() {
+		return total_radiation_period;
+	}
+
+	/** Set total radiation period int in terms of seconds */
+	public void setTotalRadiationPeriodNotify(Integer trp) {
+		if (!objectEquals(trp, total_radiation_period)) {
+			total_radiation_period = trp;
+			notifyAttribute("totalRadiationPeriod");
+		}
+	}
+
+	/** total solar radiation period int in terms of J/m^2 */
+	private transient Integer solar_radiation;
+
+	/** Get total solar radiation period int in terms of J/m^2 */
+	@Override
+	public Integer getSolarRadiation() {
+		return solar_radiation;
+	}
+
+	/** Set total solar radiation period int in terms of J/m^2 */
+	public void setSolarRadiationNotify(Integer sr) {
+		if (!objectEquals(sr, solar_radiation)) {
+			solar_radiation = sr;
+			notifyAttribute("solarRadiation");
+		}
+	}
+
 	/** Settings (JSON) read from sensors */
 	private String settings;
 
@@ -831,4 +933,5 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		w.write(createAttribute("time_stamp", getStampString()));
 		w.write("/>\n");
 	}
+
 }
