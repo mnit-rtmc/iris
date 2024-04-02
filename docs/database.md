@@ -67,7 +67,7 @@ update, and is caused by one of these conditions:
 `weather_sensor`   | ✔️   | ✔️   |     |
 `word`             |     |     |     |
 
-† _`UPDATE` to 'publish' attribute only, with name payload_
+† _Notifies only on `UPDATE` to 'publish' attribute, with camera name payload_
 
 ## Backup & Restore
 
