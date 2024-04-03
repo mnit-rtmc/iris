@@ -645,7 +645,7 @@ fn other_object(honey: Honey) -> Router {
             honey.name_access(cred.user(), &nm, Access::Operate).await?;
         for key in attrs.keys() {
             let attr = &key[..];
-            access.check(access_attr(nm.res_type, attr))?;
+            access.check(Access::from((nm.res_type, attr)))?;
         }
         if let Some(mut msn) = cred.authenticate().await? {
             // first pass
@@ -735,43 +735,6 @@ const fn one_sql(res: Res) -> &'static str {
         WeatherSensor => query::WEATHER_SENSOR_ONE,
         Word => query::WORD_ONE,
         _ => unimplemented!(),
-    }
-}
-
-/// Get required access to update an attribute
-fn access_attr(res: Res, att: &str) -> Access {
-    use Res::*;
-    match (res, att) {
-        (Beacon, "flashing")
-        | (Camera, "ptz")
-        | (Camera, "recall_preset")
-        | (Controller, "device_req")
-        | (Detector, "field_length")
-        | (Detector, "force_fail")
-        | (Dms, "msg_user")
-        | (LaneMarking, "deployed") => Access::Operate,
-        (Beacon, "message")
-        | (Beacon, "notes")
-        | (Beacon, "preset")
-        | (Camera, "store_preset")
-        | (CommConfig, "timeout_ms")
-        | (CommConfig, "idle_disconnect_sec")
-        | (CommConfig, "no_response_disconnect_sec")
-        | (CommLink, "poll_enabled")
-        | (Controller, "condition")
-        | (Controller, "notes")
-        | (Detector, "abandoned")
-        | (Detector, "notes")
-        | (Dms, "device_req")
-        | (LaneMarking, "notes")
-        | (Modem, "enabled")
-        | (Modem, "timeout_ms")
-        | (Role, "enabled")
-        | (User, "enabled")
-        | (WeatherSensor, "site_id")
-        | (WeatherSensor, "alt_id")
-        | (WeatherSensor, "notes") => Access::Manage,
-        _ => Access::Configure,
     }
 }
 
