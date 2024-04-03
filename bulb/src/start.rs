@@ -521,13 +521,13 @@ fn handle_sb_resource_ev(rname: String) {
     let doc = Doc::get();
     let search = doc.elem::<HtmlInputElement>("sb_search");
     search.set_value("");
-    let value = search_value();
     let res = Resource::try_from(rname.as_str()).ok();
     let sb_state = doc.elem::<HtmlSelectElement>("sb_state");
     match res {
         Some(res) => sb_state.set_inner_html(res.item_state_options()),
         None => sb_state.set_inner_html(""),
     }
+    let value = search_value();
     spawn_local(populate_list(res, value));
 }
 
