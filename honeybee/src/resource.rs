@@ -485,11 +485,11 @@ async fn query_all_nodes(
     segments: &mut SegmentState,
 ) -> Result<()> {
     log::trace!("query_all_nodes");
-    segments.set_ordered(false).await?;
     for row in &client.query(query::RNODE_FULL, &[]).await? {
         segments.update_node(RNode::from_row(row));
     }
-    segments.set_ordered(true).await?;
+    segments.set_has_nodes(true);
+    segments.write_all().await?;
     Ok(())
 }
 
@@ -513,6 +513,7 @@ async fn query_one_node(
         assert!(rows.is_empty());
         segments.remove_node(name);
     }
+    segments.write_all().await?;
     Ok(())
 }
 
@@ -526,8 +527,10 @@ async fn query_all_roads(
 ) -> Result<()> {
     log::trace!("query_all_roads");
     for row in &client.query(query::ROAD_FULL, &[]).await? {
-        segments.update_road(Road::from_row(row)).await?;
+        segments.update_road(Road::from_row(row));
     }
+    segments.set_has_roads(true);
+    segments.write_all().await?;
     Ok(())
 }
 
@@ -544,7 +547,8 @@ async fn query_one_road(
     log::trace!("query_one_road: {name}");
     let rows = &client.query(query::ROAD_ONE, &[&name]).await?;
     if let Some(row) = rows.iter().next() {
-        segments.update_road(Road::from_row(row)).await?;
+        segments.update_road(Road::from_row(row));
     }
+    segments.write_all().await?;
     Ok(())
 }
