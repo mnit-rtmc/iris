@@ -36,7 +36,6 @@ use std::collections::HashMap;
 use std::convert::Infallible;
 use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
-use time::Duration;
 use tokio::fs::metadata;
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 use tokio_postgres::types::ToSql;
@@ -47,16 +46,21 @@ use tower_sessions::session::Id;
 use tower_sessions::{Expiry, Session, SessionManagerLayer};
 use tower_sessions_moka_store::MokaStore;
 
+/// Expiration for notifier activity
+const EXPIRATION: std::time::Duration =
+    std::time::Duration::from_secs(4 * 3600);
+
 /// SSE event result
 type EventResult = std::result::Result<Event, Infallible>;
 
 /// Client SSE notifier
-#[derive(Default)]
 struct SseNotifier {
     /// Listening channel names
     channels: Vec<Name>,
     /// Sse stream sender
     tx: Option<UnboundedSender<EventResult>>,
+    /// Previous activity time
+    activity: SystemTime,
 }
 
 /// Honeybee server state
@@ -140,7 +144,7 @@ impl Honey {
         let store = MokaStore::new(Some(100));
         let session_layer = SessionManagerLayer::new(store)
             .with_name("honeybee")
-            .with_expiry(Expiry::OnInactivity(Duration::hours(4)));
+            .with_expiry(Expiry::OnInactivity(time::Duration::hours(4)));
         Router::new()
             .merge(login_post(self.clone()))
             .merge(access_get(self.clone()))
@@ -191,6 +195,7 @@ impl Honey {
                 let notifier = SseNotifier {
                     channels: names,
                     tx: None,
+                    activity: SystemTime::now(),
                 };
                 map.insert(id, notifier);
             }
@@ -202,13 +207,16 @@ impl Honey {
         let mut map = self.notifiers.lock().unwrap();
         match map.get_mut(&id) {
             Some(notifier) => {
-                log::warn!("SSE event sender exists {id}");
+                if notifier.tx.is_some() {
+                    log::warn!("SSE event sender exists {id}");
+                }
                 notifier.tx = Some(tx);
             }
             None => {
                 let notifier = SseNotifier {
                     channels: Vec::new(),
                     tx: Some(tx),
+                    activity: SystemTime::now(),
                 };
                 map.insert(id, notifier);
             }
@@ -223,6 +231,7 @@ impl Honey {
             log::debug!("checking {nm} for {id}");
             if let Some(tx) = &notifier.tx {
                 if notifier.is_listening(&nm) {
+                    notifier.activity = SystemTime::now();
                     log::trace!("sending notification {nm}");
                     let ev = Event::default().data(nm.to_string());
                     if let Err(e) = tx.send(Ok(ev)) {
@@ -231,8 +240,15 @@ impl Honey {
                     }
                 }
             }
-            // FIXME: purge channels from expired sessions
         }
+        // Expire notifiers with no recent activity
+        let now = SystemTime::now();
+        map.retain(|_id, notifier| {
+            match now.duration_since(notifier.activity) {
+                Ok(dur) => dur < EXPIRATION,
+                Err(_e) => false,
+            }
+        });
     }
 }
 
