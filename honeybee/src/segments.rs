@@ -65,14 +65,21 @@ pub struct RNode {
     #[serde(skip_serializing)]
     road_dir: Option<String>,
     location: Option<String>,
-    #[serde(serialize_with = "serialize_latlon")]
+    #[serde(
+        serialize_with = "serialize_latlon",
+        skip_serializing_if = "Option::is_none"
+    )]
     lat: Option<f64>,
-    #[serde(serialize_with = "serialize_latlon")]
+    #[serde(
+        serialize_with = "serialize_latlon",
+        skip_serializing_if = "Option::is_none"
+    )]
     lon: Option<f64>,
     transition: String,
     lanes: i32,
     shift: i32,
     active: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
     station_id: Option<String>,
     speed_limit: i32,
 }
