@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.geo.Position;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
@@ -607,10 +608,12 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	 *  most recent PTZ user and the current 
 	 *  Epoch timestamp as the PTZ timestamp. */
 	public void savePtzInfo() {
-		ptz_user      = getProcUser();
-		ptz_timestamp = java.time.Instant.now().getEpochSecond();
-		notifyAttribute("ptzUser");
-		notifyAttribute("ptzTimestamp");
+		if (SystemAttrEnum.CAMERA_LATEST_PTZ_ENABLE.getBoolean()) {
+			ptz_user      = getProcUser();
+			ptz_timestamp = java.time.Instant.now().getEpochSecond();
+			notifyAttribute("ptzUser");
+			notifyAttribute("ptzTimestamp");
+		}
 	}
 
 	/** Get name of last user to attempt a camera motion
