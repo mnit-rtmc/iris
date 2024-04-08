@@ -19,12 +19,10 @@ import java.awt.Color;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.ToolTipBuilder;
 import us.mn.state.dot.tms.client.map.MapObject;
 import us.mn.state.dot.tms.client.map.Style;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.units.Temperature;
 
 /**
  * Camera theme provides styles for cameras.
