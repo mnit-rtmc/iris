@@ -205,10 +205,11 @@ impl Honey {
     /// Store SSE sender for a session Id
     fn store_sender(&self, id: Id, tx: UnboundedSender<EventResult>) {
         let mut map = self.notifiers.lock().unwrap();
+        log::debug!("Adding SSE sender for {id}");
         match map.get_mut(&id) {
             Some(notifier) => {
                 if notifier.tx.is_some() {
-                    log::warn!("SSE event sender exists {id}");
+                    log::warn!("SSE sender exists {id}");
                 }
                 notifier.tx = Some(tx);
             }
@@ -232,10 +233,10 @@ impl Honey {
             if let Some(tx) = &notifier.tx {
                 if notifier.is_listening(&nm) {
                     notifier.activity = SystemTime::now();
-                    log::trace!("sending notification {nm}");
+                    log::debug!("SSE notify: {nm} to {id}");
                     let ev = Event::default().data(nm.to_string());
                     if let Err(e) = tx.send(Ok(ev)) {
-                        log::warn!("Send notification: {e}");
+                        log::warn!("SSE notification: {e}");
                         notifier.tx = None;
                     }
                 }
