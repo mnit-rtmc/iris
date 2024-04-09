@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2020  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
+ * Copyright (C) 2024       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +30,7 @@ import us.mn.state.dot.tms.units.Distance;
  *
  * @author Douglas Lau
  * @author Travis Swanston
+ * @author John L. Stanley - SRF Consulting
  */
 public class CameraHelper extends BaseHelper {
 
@@ -402,5 +404,26 @@ public class CameraHelper extends BaseHelper {
 		return (es != null)
 		      ? Encoding.fromOrdinal(es.getEncoding())
 		      : Encoding.UNKNOWN;
+	}
+	
+	/** Generate string with camera's latest PTZ user
+	 *  and h:m:s time since latest PTZ motion. */
+	static public String getPtzInfo(Camera cam) {
+		// TODO move tip text to i18n
+		if (!SystemAttrEnum.CAMERA_LATEST_PTZ_ENABLE.getBoolean())
+			return null; // "Latest PTZ" function is disabled...
+		if (cam == null)
+			return null; // sanity check
+		String ptzUser      = cam.getPtzUser();
+		long   ptzTimestamp = cam.getPtzTimestamp();
+		if (ptzTimestamp == 0)
+			return "Latest PTZ: none";
+		long now = java.time.Instant.now().getEpochSecond();
+		long sec = now - ptzTimestamp;
+		long hr  = sec / 3600;
+		sec     %= 3600;
+		long min = sec / 60;
+		sec     %= 60;
+		return String.format("Latest PTZ: %s (%d:%02d:%02d hms)", ptzUser, hr, min, sec);
 	}
 }
