@@ -16,15 +16,16 @@ use crate::item::ItemState;
 use crate::permission::permissions_html;
 use crate::resource::{Resource, View};
 use crate::util::Doc;
+use js_sys::JsString;
 use resources::Res;
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{
-    console, Element, Event, HtmlButtonElement, HtmlElement, HtmlInputElement,
-    HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
-    ScrollLogicalPosition, TransitionEvent, Window,
+    console, Element, Event, EventSource, HtmlButtonElement, HtmlElement,
+    HtmlInputElement, HtmlSelectElement, MessageEvent, ScrollBehavior,
+    ScrollIntoViewOptions, ScrollLogicalPosition, TransitionEvent, Window,
 };
 
 /// JavaScript result
@@ -402,7 +403,8 @@ async fn add_sidebar() -> JsResult<()> {
     add_click_listener(&sidebar)?;
     add_input_listener(&sidebar)?;
     add_transition_listener(&doc.elem("sb_list"))?;
-    add_interval_callback(&window).unwrap_throw();
+    add_interval_callback(&window)?;
+    add_eventsource_listener().await?;
     fill_resource_select().await;
     Ok(())
 }
@@ -529,6 +531,21 @@ fn handle_sb_resource_ev(rname: String) {
     }
     let value = search_value();
     spawn_local(populate_list(res, value));
+    spawn_local(post_notify(rname));
+}
+
+/// POST selected resource name to notify endpoint
+async fn post_notify(rname: String) {
+    let uri = Uri::from("/iris/api/notify");
+    let js = format!("[\"{rname}\"]");
+    match uri.post(&js.into()).await {
+        Ok(_) => {
+            console::log_1(&format!("/iris/api/notify POST {rname}").into())
+        }
+        Err(e) => {
+            console::log_1(&format!("/iris/api/notify POST failed {e}").into());
+        }
+    }
 }
 
 /// Handle input event with selected card
@@ -726,6 +743,21 @@ fn tick_interval() {
     }) {
         action.perform();
     }
+}
+
+/// Add event source listener for notifications
+async fn add_eventsource_listener() -> JsResult<()> {
+    let es = EventSource::new("/iris/api/notify")?;
+    let onmessage = Closure::wrap(Box::new(|me: MessageEvent| {
+        if let Ok(payload) = me.data().dyn_into::<JsString>() {
+            console::log_1(&format!("payload: {payload:?}").into())
+            // TODO: update resource cards
+        }
+    }) as Box<dyn FnMut(MessageEvent)>);
+    es.set_onmessage(Some(onmessage.as_ref().unchecked_ref()));
+    // can't drop closure, just forget it to make JS happy
+    onmessage.forget();
+    Ok(())
 }
 
 /// Get logged-in user name
