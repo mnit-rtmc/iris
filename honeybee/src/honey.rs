@@ -121,22 +121,22 @@ impl Honey {
     }
 
     /// Build root route
-    pub fn route_root(&self) -> Result<Router> {
-        Ok(Router::new()
+    pub fn route_root(&self) -> Router {
+        Router::new()
             .merge(root_get())
-            .nest("/iris", self.route_iris()?))
+            .nest("/iris", self.route_iris())
     }
 
     /// Build iris route
-    fn route_iris(&self) -> Result<Router> {
-        Ok(Router::new()
+    fn route_iris(&self) -> Router {
+        Router::new()
             .merge(index_get())
             .merge(public_dir_get())
             .merge(lut_dir_get())
             .merge(img_dir_get())
             .merge(gif_dir_get())
             .merge(tfon_dir_get())
-            .nest("/api", self.route_api()))
+            .nest("/api", self.route_api())
     }
 
     /// Build authenticated api route
