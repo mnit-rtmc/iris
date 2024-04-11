@@ -209,7 +209,7 @@ impl Honey {
         match map.get_mut(&id) {
             Some(notifier) => {
                 if notifier.tx.is_some() {
-                    log::warn!("SSE sender exists {id}");
+                    log::info!("SSE sender exists {id}");
                 }
                 notifier.tx = Some(tx);
             }

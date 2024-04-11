@@ -404,7 +404,7 @@ async fn add_sidebar() -> JsResult<()> {
     add_input_listener(&sidebar)?;
     add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window)?;
-    add_eventsource_listener().await?;
+    add_eventsource_listener()?;
     fill_resource_select().await;
     Ok(())
 }
@@ -746,7 +746,7 @@ fn tick_interval() {
 }
 
 /// Add event source listener for notifications
-async fn add_eventsource_listener() -> JsResult<()> {
+fn add_eventsource_listener() -> JsResult<()> {
     let es = EventSource::new("/iris/api/notify")?;
     let onmessage = Closure::wrap(Box::new(|me: MessageEvent| {
         if let Ok(payload) = me.data().dyn_into::<JsString>() {
