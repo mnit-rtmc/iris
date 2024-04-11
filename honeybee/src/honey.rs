@@ -242,8 +242,13 @@ impl Honey {
                 }
             }
         }
-        // Expire notifiers with no recent activity
+    }
+
+    // Purge notifiers with no recent activity
+    pub fn purge_expired(&self) {
+        log::debug!("purge_expired");
         let now = SystemTime::now();
+        let mut map = self.notifiers.lock().unwrap();
         map.retain(|_id, notifier| {
             match now.duration_since(notifier.activity) {
                 Ok(dur) => dur < EXPIRATION,

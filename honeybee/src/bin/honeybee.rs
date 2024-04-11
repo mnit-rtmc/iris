@@ -29,6 +29,7 @@ async fn main() -> Result<()> {
     let db = Database::new("tms").await?;
     let honey = Honey::new(&db);
     tokio::spawn(serve_routes(honey.clone()));
+    tokio::spawn(check_expired(honey.clone()));
     let mut state = SegmentState::new();
     let mut events = HashSet::new();
     let stream = notify_events(&db).await?;
@@ -54,6 +55,15 @@ async fn main() -> Result<()> {
     }
     log::warn!("Notification stream ended");
     Ok(())
+}
+
+/// Check for expired notifiers
+async fn check_expired(honey: Honey) {
+    let min = std::time::Duration::from_secs(60);
+    loop {
+        tokio::time::sleep(min).await;
+        honey.purge_expired();
+    }
 }
 
 /// Serve routes
