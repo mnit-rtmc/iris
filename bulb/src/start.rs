@@ -14,7 +14,9 @@ use crate::error::{Error, Result};
 use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::permission::permissions_html;
-use crate::resource::{fetch_cards_res, save_card_res, Resource, View};
+use crate::resource::{
+    delete_card_res, fetch_cards_res, save_card_res, Resource, View,
+};
 use crate::util::Doc;
 use js_sys::JsString;
 use resources::Res;
@@ -312,7 +314,7 @@ impl SelectedCard {
     /// Delete selected card / object
     async fn res_delete(self) {
         let res = self.res;
-        match res.delete(&self.name).await {
+        match delete_card_res(res.into(), &self.name).await {
             Ok(_) => DeferredAction::SearchList.schedule(1000),
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(e) => show_toast(&format!("Delete failed: {e}")),

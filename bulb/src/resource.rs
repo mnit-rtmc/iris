@@ -371,18 +371,6 @@ impl Resource {
         uri
     }
 
-    /// Get the URI of an object
-    fn uri_name(self, name: &str) -> Uri {
-        let mut uri = self.uri();
-        uri.push(name);
-        uri
-    }
-
-    /// Delete a resource by name
-    pub async fn delete(self, name: &str) -> Result<()> {
-        self.uri_name(name).delete().await
-    }
-
     /// Lookup resource symbol
     pub fn symbol(self) -> &'static str {
         Res::from(self).symbol()
@@ -555,6 +543,14 @@ fn create_value(doc: &Doc) -> Result<String> {
         return Ok(Value::Object(obj).to_string());
     }
     Err(Error::NameMissing())
+}
+
+/// Delete a resource by name
+pub async fn delete_card_res(res: Res, name: &str) -> Result<()> {
+    let mut uri = Uri::from("/iris/api/");
+    uri.push(res.as_str());
+    uri.push(name);
+    uri.delete().await
 }
 
 /// Fetch JSON resource array list
