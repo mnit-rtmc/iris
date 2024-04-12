@@ -508,66 +508,15 @@ impl Resource {
         )
     }
 
-    /// Save changed fields on card
-    pub async fn save(self, name: &str) -> Result<()> {
-        let changed = self.fetch_changed(name).await?;
-        if !changed.is_empty() {
-            self.uri_name(name).patch(&changed.into()).await?;
-        }
-        Ok(())
-    }
-
-    /// Fetch changed fields from an Edit view
-    async fn fetch_changed(self, name: &str) -> Result<String> {
-        match self {
-            Self::Alarm => fetch_changed::<Alarm>(name).await,
-            Self::Beacon => fetch_changed::<Beacon>(name).await,
-            Self::CabinetStyle => fetch_changed::<CabinetStyle>(name).await,
-            Self::Camera => fetch_changed::<Camera>(name).await,
-            Self::CommConfig => fetch_changed::<CommConfig>(name).await,
-            Self::CommLink => fetch_changed::<CommLink>(name).await,
-            Self::Controller => fetch_changed::<Controller>(name).await,
-            Self::Detector => fetch_changed::<Detector>(name).await,
-            Self::Dms => fetch_changed::<Dms>(name).await,
-            Self::FlowStream => fetch_changed::<FlowStream>(name).await,
-            Self::GateArm => fetch_changed::<GateArm>(name).await,
-            Self::GateArmArray => fetch_changed::<GateArmArray>(name).await,
-            Self::GeoLoc => fetch_changed::<GeoLoc>(name).await,
-            Self::Gps => fetch_changed::<Gps>(name).await,
-            Self::LaneMarking => fetch_changed::<LaneMarking>(name).await,
-            Self::LcsArray => fetch_changed::<LcsArray>(name).await,
-            Self::LcsIndication => fetch_changed::<LcsIndication>(name).await,
-            Self::Modem => fetch_changed::<Modem>(name).await,
-            Self::Permission => fetch_changed::<Permission>(name).await,
-            Self::RampMeter => fetch_changed::<RampMeter>(name).await,
-            Self::Role => fetch_changed::<Role>(name).await,
-            Self::TagReader => fetch_changed::<TagReader>(name).await,
-            Self::User => fetch_changed::<User>(name).await,
-            Self::VideoMonitor => fetch_changed::<VideoMonitor>(name).await,
-            Self::WeatherSensor => fetch_changed::<WeatherSensor>(name).await,
-            _ => unreachable!(),
-        }
-    }
-
     /// Create a new object
     pub async fn create_and_post(self) -> Result<()> {
         let doc = Doc::get();
         let value = match self {
             Resource::Permission => Permission::create_value(&doc)?,
-            _ => self.create_value(&doc)?,
+            _ => create_value(&doc)?,
         };
         self.uri().post(&value.into()).await?;
         Ok(())
-    }
-
-    /// Create a name value
-    fn create_value(self, doc: &Doc) -> Result<String> {
-        if let Some(name) = doc.input_option_string("create_name") {
-            let mut obj = Map::new();
-            obj.insert("name".to_string(), Value::String(name));
-            return Ok(Value::Object(obj).to_string());
-        }
-        Err(Error::NameMissing())
     }
 
     /// Fetch geo location name (if any)
@@ -641,6 +590,16 @@ impl Resource {
     }
 }
 
+/// Create a name value
+fn create_value(doc: &Doc) -> Result<String> {
+    if let Some(name) = doc.input_option_string("create_name") {
+        let mut obj = Map::new();
+        obj.insert("name".to_string(), Value::String(name));
+        return Ok(Value::Object(obj).to_string());
+    }
+    Err(Error::NameMissing())
+}
+
 /// Fetch JSON resource array list
 async fn fetch_list<C: Card>() -> Result<(Vec<C>, C::Ancillary)> {
     let json = C::uri().get().await?;
@@ -708,10 +667,46 @@ async fn fetch_primary<C: Card>(name: &str) -> Result<C> {
     C::new(json)
 }
 
+/// Save changed fields on card
+pub async fn save_card_res(res: Res, name: &str) -> Result<()> {
+    match res {
+        Res::Alarm => save_card::<Alarm>(name).await,
+        Res::Beacon => save_card::<Beacon>(name).await,
+        Res::CabinetStyle => save_card::<CabinetStyle>(name).await,
+        Res::Camera => save_card::<Camera>(name).await,
+        Res::CommConfig => save_card::<CommConfig>(name).await,
+        Res::CommLink => save_card::<CommLink>(name).await,
+        Res::Controller => save_card::<Controller>(name).await,
+        Res::Detector => save_card::<Detector>(name).await,
+        Res::Dms => save_card::<Dms>(name).await,
+        Res::FlowStream => save_card::<FlowStream>(name).await,
+        Res::GateArm => save_card::<GateArm>(name).await,
+        Res::GateArmArray => save_card::<GateArmArray>(name).await,
+        Res::GeoLoc => save_card::<GeoLoc>(name).await,
+        Res::Gps => save_card::<Gps>(name).await,
+        Res::LaneMarking => save_card::<LaneMarking>(name).await,
+        Res::LcsArray => save_card::<LcsArray>(name).await,
+        Res::LcsIndication => save_card::<LcsIndication>(name).await,
+        Res::Modem => save_card::<Modem>(name).await,
+        Res::Permission => save_card::<Permission>(name).await,
+        Res::RampMeter => save_card::<RampMeter>(name).await,
+        Res::Role => save_card::<Role>(name).await,
+        Res::TagReader => save_card::<TagReader>(name).await,
+        Res::User => save_card::<User>(name).await,
+        Res::VideoMonitor => save_card::<VideoMonitor>(name).await,
+        Res::WeatherSensor => save_card::<WeatherSensor>(name).await,
+        _ => unreachable!(),
+    }
+}
+
 /// Fetch changed fields from an Edit view
-async fn fetch_changed<C: Card>(name: &str) -> Result<String> {
+async fn save_card<C: Card>(name: &str) -> Result<()> {
     let pri = fetch_primary::<C>(name).await?;
-    Ok(pri.changed_fields())
+    let changed = pri.changed_fields();
+    if !changed.is_empty() {
+        C::uri_name(name).patch(&changed.into()).await?;
+    }
+    Ok(())
 }
 
 /// Handle click event for a button on a card

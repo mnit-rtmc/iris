@@ -14,7 +14,7 @@ use crate::error::{Error, Result};
 use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::permission::permissions_html;
-use crate::resource::{Resource, View};
+use crate::resource::{save_card_res, Resource, View};
 use crate::util::Doc;
 use js_sys::JsString;
 use resources::Res;
@@ -282,7 +282,7 @@ impl SelectedCard {
     /// Save changed fields on Edit card
     async fn res_save_edit(self) {
         let res = self.res;
-        match res.save(&self.name).await {
+        match save_card_res(res.into(), &self.name).await {
             Ok(_) => self.replace_card(View::Edit.compact()).await,
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(Error::FetchResponseNotFound()) => {
@@ -298,7 +298,7 @@ impl SelectedCard {
         let res = self.res;
         let geo_loc = res.fetch_geo_loc(&self.name).await;
         let result = match geo_loc {
-            Ok(Some(geo_loc)) => Resource::GeoLoc.save(&geo_loc).await,
+            Ok(Some(geo_loc)) => save_card_res(Res::GeoLoc, &geo_loc).await,
             Ok(None) => Ok(()),
             Err(e) => Err(e),
         };
