@@ -12,6 +12,7 @@
 //
 use crate::resource::{inactive_attr, AncillaryData, Card, View};
 use crate::util::{ContainsLower, Fields, Input};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -60,6 +61,11 @@ impl Card for Role {
 
     /// Display name
     const DNAME: &'static str = "💪 Role";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::Role
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

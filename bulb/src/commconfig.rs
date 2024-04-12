@@ -14,6 +14,7 @@ use crate::error::Result;
 use crate::fetch::Uri;
 use crate::resource::{AncillaryData, Card, View, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::iter::{empty, once};
@@ -258,6 +259,11 @@ impl Card for CommConfig {
 
     /// Display name
     const DNAME: &'static str = "📡 Comm Config";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::CommConfig
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

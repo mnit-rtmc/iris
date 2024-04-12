@@ -273,6 +273,11 @@ impl Card for Permission {
     /// Display name
     const DNAME: &'static str = "🗝️ Permission";
 
+    /// Get the resource
+    fn res() -> Res {
+        Res::Permission
+    }
+
     /// Set the name
     fn with_name(self, _name: &str) -> Self {
         self

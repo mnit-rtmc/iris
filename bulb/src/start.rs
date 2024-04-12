@@ -138,14 +138,14 @@ impl DeferredAction {
     /// Perform the action
     fn perform(self) {
         match self {
-            Self::SearchList => search_list(),
+            Self::SearchList => search_resource_list(),
             Self::HideToast => hide_toast(),
         }
     }
 }
 
-/// Search list using the value from "sb_search"
-fn search_list() {
+/// Search resource list using the value from "sb_search"
+fn search_resource_list() {
     let doc = Doc::get();
     if let Some(rname) = doc.select_parse::<String>("sb_resource") {
         let res = Resource::try_from(rname.as_str()).ok();
@@ -165,7 +165,7 @@ async fn populate_list(res: Option<Resource>, search: String) {
     match res {
         Some(res) => {
             let config = doc.input_bool("sb_config");
-            match res.fetch_list(&search, config).await {
+            match res.fetch_cards(&search, config).await {
                 Ok(cards) => sb_list.set_inner_html(&cards),
                 Err(Error::FetchResponseUnauthorized()) => show_login(),
                 Err(e) => show_toast(&format!("View failed: {e}")),
@@ -472,7 +472,7 @@ fn add_change_listener(elem: &Element) -> JsResult<()> {
 /// Reload resource select element
 async fn reload_resources() {
     fill_resource_select().await;
-    search_list();
+    search_resource_list();
 }
 
 /// Get value to search
@@ -495,7 +495,7 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
         let id = target.id();
         match id.as_str() {
-            "sb_search" | "sb_state" => search_list(),
+            "sb_search" | "sb_state" => search_resource_list(),
             "sb_resource" => {
                 handle_sb_resource_ev(
                     target.dyn_into::<HtmlSelectElement>().unwrap().value(),
@@ -690,7 +690,7 @@ fn add_transition_listener(elem: &Element) -> JsResult<()> {
     Ok(())
 }
 
-/// Handle a `transition*` event from "sb_list" child element
+/// Handle a `transition*` event from `sb_list` child element
 fn handle_transition_ev(ev: Event) {
     if let Some(target) = ev.target() {
         if let Ok(target) = target.dyn_into::<Element>() {
@@ -750,14 +750,21 @@ fn add_eventsource_listener() -> JsResult<()> {
     let es = EventSource::new("/iris/api/notify")?;
     let onmessage = Closure::wrap(Box::new(|me: MessageEvent| {
         if let Ok(payload) = me.data().dyn_into::<JsString>() {
-            console::log_1(&format!("payload: {payload:?}").into())
-            // TODO: update resource cards
+            update_resource_cards(payload);
         }
     }) as Box<dyn FnMut(MessageEvent)>);
     es.set_onmessage(Some(onmessage.as_ref().unchecked_ref()));
     // can't drop closure, just forget it to make JS happy
     onmessage.forget();
     Ok(())
+}
+
+/// Update resource cards in `sb_list`
+fn update_resource_cards(payload: JsString) {
+    console::log_1(&format!("payload: {payload:?}").into());
+    // TODO: fetch updated list for resource
+    // TODO: update existing resource cards
+    search_resource_list();
 }
 
 /// Get logged-in user name

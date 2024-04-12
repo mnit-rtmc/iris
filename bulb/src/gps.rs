@@ -13,6 +13,7 @@
 use crate::device::{Device, DeviceAnc};
 use crate::resource::{inactive_attr, Card, View, EDIT_BUTTON};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -84,6 +85,11 @@ impl Card for Gps {
 
     /// Display name
     const DNAME: &'static str = "🌐 Gps";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::Gps
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

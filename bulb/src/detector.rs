@@ -13,6 +13,7 @@
 use crate::device::{Device, DeviceAnc};
 use crate::resource::{inactive_attr, Card, View, EDIT_BUTTON, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -106,6 +107,11 @@ impl Card for Detector {
 
     /// Display name
     const DNAME: &'static str = "🚗⬚ Detector";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::Detector
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

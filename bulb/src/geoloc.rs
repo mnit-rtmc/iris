@@ -14,6 +14,7 @@ use crate::error::Result;
 use crate::fetch::Uri;
 use crate::resource::{AncillaryData, Card, View};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::iter::empty;
@@ -240,6 +241,11 @@ impl Card for GeoLoc {
 
     /// Display name
     const DNAME: &'static str = "🗺️ Location";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::GeoLoc
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

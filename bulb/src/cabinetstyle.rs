@@ -12,6 +12,7 @@
 //
 use crate::resource::{AncillaryData, Card, View};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -88,6 +89,11 @@ impl Card for CabinetStyle {
 
     /// Display name
     const DNAME: &'static str = "🗄️ Cabinet Style";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::CabinetStyle
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

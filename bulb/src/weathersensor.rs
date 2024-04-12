@@ -19,6 +19,7 @@ use humantime::format_duration;
 use mag::length::{m, mm};
 use mag::temp::DegC;
 use mag::time::s;
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::time::Duration;
@@ -795,6 +796,11 @@ impl Card for WeatherSensor {
 
     /// Display name
     const DNAME: &'static str = "🌦️ Weather Sensor";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::WeatherSensor
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

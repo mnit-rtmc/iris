@@ -12,6 +12,7 @@
 //
 use crate::resource::{inactive_attr, AncillaryData, Card, View};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -79,6 +80,11 @@ impl Card for Modem {
 
     /// Display name
     const DNAME: &'static str = "🖀 Modem";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::Modem
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

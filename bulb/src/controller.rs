@@ -479,6 +479,11 @@ impl Card for Controller {
     /// Display name
     const DNAME: &'static str = "🎛️ Controller";
 
+    /// Get the resource
+    fn res() -> Res {
+        Res::Controller
+    }
+
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();

@@ -26,6 +26,7 @@ use ntcip::dms::multi::{
 };
 use ntcip::dms::{tfon, Font, FontTable, GraphicTable, MessagePattern};
 use rendzina::{load_graphic, SignConfig};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::fmt;
@@ -929,6 +930,11 @@ impl Card for Dms {
 
     /// Display name
     const DNAME: &'static str = "⬛ Dms";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::Dms
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

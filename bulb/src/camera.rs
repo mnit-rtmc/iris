@@ -15,6 +15,7 @@ use crate::resource::{
     inactive_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -105,6 +106,11 @@ impl Card for Camera {
 
     /// Display name
     const DNAME: &'static str = "🎥 Camera";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::Camera
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

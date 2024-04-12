@@ -18,6 +18,7 @@ use crate::resource::{
     inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::iter::once;
@@ -216,6 +217,11 @@ impl Card for CommLink {
 
     /// Display name
     const DNAME: &'static str = "🔗 Comm Link";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::CommLink
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

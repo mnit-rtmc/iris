@@ -165,6 +165,23 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     /// Display name
     const DNAME: &'static str;
 
+    /// Get the resource
+    fn res() -> Res;
+
+    /// Get the list URI
+    fn uri() -> Uri {
+        let mut uri = Uri::from("/iris/api/");
+        uri.push(Self::res().as_str());
+        uri
+    }
+
+    /// Get the URI of an object
+    fn uri_name(name: &str) -> Uri {
+        let mut uri = Self::uri();
+        uri.push(name);
+        uri
+    }
+
     /// Create from a JSON value
     fn new(json: JsValue) -> Result<Self> {
         Ok(serde_wasm_bindgen::from_value(json)?)
@@ -363,65 +380,47 @@ impl Resource {
     }
 
     /// Fetch card list for a resource type
-    pub async fn fetch_list(
+    pub async fn fetch_cards(
         self,
         search: &str,
         config: bool,
     ) -> Result<String> {
         match self {
-            Self::Alarm => fetch_list::<Alarm>(self, search, config).await,
-            Self::Beacon => fetch_list::<Beacon>(self, search, config).await,
+            Self::Alarm => fetch_cards::<Alarm>(search, config).await,
+            Self::Beacon => fetch_cards::<Beacon>(search, config).await,
             Self::CabinetStyle => {
-                fetch_list::<CabinetStyle>(self, search, config).await
+                fetch_cards::<CabinetStyle>(search, config).await
             }
-            Self::Camera => fetch_list::<Camera>(self, search, config).await,
-            Self::CommConfig => {
-                fetch_list::<CommConfig>(self, search, config).await
-            }
-            Self::CommLink => {
-                fetch_list::<CommLink>(self, search, config).await
-            }
-            Self::Controller => {
-                fetch_list::<Controller>(self, search, config).await
-            }
-            Self::Detector => {
-                fetch_list::<Detector>(self, search, config).await
-            }
-            Self::Dms => fetch_list::<Dms>(self, search, config).await,
-            Self::FlowStream => {
-                fetch_list::<FlowStream>(self, search, config).await
-            }
-            Self::GateArm => fetch_list::<GateArm>(self, search, config).await,
+            Self::Camera => fetch_cards::<Camera>(search, config).await,
+            Self::CommConfig => fetch_cards::<CommConfig>(search, config).await,
+            Self::CommLink => fetch_cards::<CommLink>(search, config).await,
+            Self::Controller => fetch_cards::<Controller>(search, config).await,
+            Self::Detector => fetch_cards::<Detector>(search, config).await,
+            Self::Dms => fetch_cards::<Dms>(search, config).await,
+            Self::FlowStream => fetch_cards::<FlowStream>(search, config).await,
+            Self::GateArm => fetch_cards::<GateArm>(search, config).await,
             Self::GateArmArray => {
-                fetch_list::<GateArmArray>(self, search, config).await
+                fetch_cards::<GateArmArray>(search, config).await
             }
-            Self::Gps => fetch_list::<Gps>(self, search, config).await,
+            Self::Gps => fetch_cards::<Gps>(search, config).await,
             Self::LaneMarking => {
-                fetch_list::<LaneMarking>(self, search, config).await
+                fetch_cards::<LaneMarking>(search, config).await
             }
-            Self::LcsArray => {
-                fetch_list::<LcsArray>(self, search, config).await
-            }
+            Self::LcsArray => fetch_cards::<LcsArray>(search, config).await,
             Self::LcsIndication => {
-                fetch_list::<LcsIndication>(self, search, config).await
+                fetch_cards::<LcsIndication>(search, config).await
             }
-            Self::Modem => fetch_list::<Modem>(self, search, config).await,
-            Self::Permission => {
-                fetch_list::<Permission>(self, search, config).await
-            }
-            Self::RampMeter => {
-                fetch_list::<RampMeter>(self, search, config).await
-            }
-            Self::Role => fetch_list::<Role>(self, search, config).await,
-            Self::TagReader => {
-                fetch_list::<TagReader>(self, search, config).await
-            }
-            Self::User => fetch_list::<User>(self, search, config).await,
+            Self::Modem => fetch_cards::<Modem>(search, config).await,
+            Self::Permission => fetch_cards::<Permission>(search, config).await,
+            Self::RampMeter => fetch_cards::<RampMeter>(search, config).await,
+            Self::Role => fetch_cards::<Role>(search, config).await,
+            Self::TagReader => fetch_cards::<TagReader>(search, config).await,
+            Self::User => fetch_cards::<User>(search, config).await,
             Self::VideoMonitor => {
-                fetch_list::<VideoMonitor>(self, search, config).await
+                fetch_cards::<VideoMonitor>(search, config).await
             }
             Self::WeatherSensor => {
-                fetch_list::<WeatherSensor>(self, search, config).await
+                fetch_cards::<WeatherSensor>(search, config).await
             }
             _ => Ok("".into()),
         }
@@ -595,7 +594,7 @@ impl Resource {
 
     /// Fetch primary JSON resource
     async fn fetch_primary<C: Card>(self, name: &str) -> Result<C> {
-        let json = self.uri_name(name).get().await?;
+        let json = C::uri_name(name).get().await?;
         C::new(json)
     }
 
@@ -670,18 +669,23 @@ impl Resource {
     }
 }
 
-/// Fetch JSON array and build card list
-async fn fetch_list<C: Card>(
-    res: Resource,
-    search: &str,
-    config: bool,
-) -> Result<String> {
-    let rname = Res::from(res).as_str();
-    let json = res.uri().get().await?;
+/// Fetch JSON resource array list
+async fn fetch_list<C: Card>() -> Result<(Vec<C>, C::Ancillary)> {
+    let json = C::uri().get().await?;
+    let obs = serde_wasm_bindgen::from_value(json)?;
+    // Use default value for ancillary data lookup
+    let pri = C::default();
+    let anc = fetch_ancillary(View::Search, &pri).await?;
+    Ok((obs, anc))
+}
+
+/// Fetch card list as HTML
+async fn fetch_cards<C: Card>(search: &str, config: bool) -> Result<String> {
+    let (obs, anc) = fetch_list().await?;
+    let rname = C::res().as_str();
     let search = Search::new(search);
     let mut html = String::new();
     html.push_str("<ul class='cards'>");
-    let obs: Vec<_> = serde_wasm_bindgen::from_value(json)?;
     if config {
         let next_name = C::next_name(&obs);
         // the "Create" card has id "{rname}_" and next available name
@@ -691,9 +695,6 @@ async fn fetch_list<C: Card>(
             </li>"
         ));
     }
-    // Use default value for ancillary data lookup
-    let pri = C::default();
-    let anc = fetch_ancillary(View::Search, &pri).await?;
     for pri in obs.iter().filter(|pri| search.is_match(*pri, &anc)) {
         html.push_str(&format!(
             "<li id='{rname}_{pri}' name='{pri}' class='card'>"
@@ -743,7 +744,7 @@ async fn handle_click<C: Card>(
 ) -> Result<bool> {
     let pri = res.fetch_primary::<C>(name).await?;
     let anc = fetch_ancillary(View::Status(false), &pri).await?;
-    let uri = res.uri_name(name);
+    let uri = C::uri_name(name);
     for action in pri.handle_click(anc, id, uri) {
         action.perform().await?;
     }

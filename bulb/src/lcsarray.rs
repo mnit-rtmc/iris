@@ -14,6 +14,7 @@ use crate::error::Result;
 use crate::fetch::Uri;
 use crate::resource::{AncillaryData, Card, View, EDIT_BUTTON, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::iter::once;
@@ -126,6 +127,11 @@ impl Card for LcsArray {
 
     /// Display name
     const DNAME: &'static str = "🡇🡇 LCS Array";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::LcsArray
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

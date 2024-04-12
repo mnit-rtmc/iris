@@ -15,6 +15,7 @@ use crate::fetch::Uri;
 use crate::resource::{inactive_attr, AncillaryData, Card, View};
 use crate::role::Role;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::iter::{empty, once};
@@ -125,6 +126,11 @@ impl Card for User {
 
     /// Display name
     const DNAME: &'static str = "👤 User";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::User
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

@@ -13,6 +13,7 @@
 use crate::device::{Device, DeviceAnc};
 use crate::resource::{inactive_attr, Card, View, EDIT_BUTTON};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -83,6 +84,11 @@ impl Card for FlowStream {
 
     /// Display name
     const DNAME: &'static str = "🎞️ Flow Stream";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::FlowStream
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

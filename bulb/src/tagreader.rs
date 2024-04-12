@@ -15,6 +15,7 @@ use crate::resource::{
     inactive_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -163,6 +164,11 @@ impl Card for TagReader {
 
     /// Display name
     const DNAME: &'static str = "🏷️ Tag Reader";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::TagReader
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
