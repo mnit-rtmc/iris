@@ -14,7 +14,7 @@ use crate::error::{Error, Result};
 use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::permission::permissions_html;
-use crate::resource::{save_card_res, Resource, View};
+use crate::resource::{fetch_cards_res, save_card_res, Resource, View};
 use crate::util::Doc;
 use js_sys::JsString;
 use resources::Res;
@@ -165,7 +165,7 @@ async fn populate_list(res: Option<Resource>, search: String) {
     match res {
         Some(res) => {
             let config = doc.input_bool("sb_config");
-            match res.fetch_cards(&search, config).await {
+            match fetch_cards_res(res.into(), &search, config).await {
                 Ok(cards) => sb_list.set_inner_html(&cards),
                 Err(Error::FetchResponseUnauthorized()) => show_login(),
                 Err(e) => show_toast(&format!("View failed: {e}")),

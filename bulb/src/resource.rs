@@ -379,53 +379,6 @@ impl Resource {
         Res::from(self).symbol()
     }
 
-    /// Fetch card list for a resource type
-    pub async fn fetch_cards(
-        self,
-        search: &str,
-        config: bool,
-    ) -> Result<String> {
-        match self {
-            Self::Alarm => fetch_cards::<Alarm>(search, config).await,
-            Self::Beacon => fetch_cards::<Beacon>(search, config).await,
-            Self::CabinetStyle => {
-                fetch_cards::<CabinetStyle>(search, config).await
-            }
-            Self::Camera => fetch_cards::<Camera>(search, config).await,
-            Self::CommConfig => fetch_cards::<CommConfig>(search, config).await,
-            Self::CommLink => fetch_cards::<CommLink>(search, config).await,
-            Self::Controller => fetch_cards::<Controller>(search, config).await,
-            Self::Detector => fetch_cards::<Detector>(search, config).await,
-            Self::Dms => fetch_cards::<Dms>(search, config).await,
-            Self::FlowStream => fetch_cards::<FlowStream>(search, config).await,
-            Self::GateArm => fetch_cards::<GateArm>(search, config).await,
-            Self::GateArmArray => {
-                fetch_cards::<GateArmArray>(search, config).await
-            }
-            Self::Gps => fetch_cards::<Gps>(search, config).await,
-            Self::LaneMarking => {
-                fetch_cards::<LaneMarking>(search, config).await
-            }
-            Self::LcsArray => fetch_cards::<LcsArray>(search, config).await,
-            Self::LcsIndication => {
-                fetch_cards::<LcsIndication>(search, config).await
-            }
-            Self::Modem => fetch_cards::<Modem>(search, config).await,
-            Self::Permission => fetch_cards::<Permission>(search, config).await,
-            Self::RampMeter => fetch_cards::<RampMeter>(search, config).await,
-            Self::Role => fetch_cards::<Role>(search, config).await,
-            Self::TagReader => fetch_cards::<TagReader>(search, config).await,
-            Self::User => fetch_cards::<User>(search, config).await,
-            Self::VideoMonitor => {
-                fetch_cards::<VideoMonitor>(search, config).await
-            }
-            Self::WeatherSensor => {
-                fetch_cards::<WeatherSensor>(search, config).await
-            }
-            _ => Ok("".into()),
-        }
-    }
-
     /// Fetch a card for a given view
     pub async fn fetch_card(self, name: &str, view: View) -> Result<String> {
         match view {
@@ -608,6 +561,45 @@ async fn fetch_list<C: Card>() -> Result<(Vec<C>, C::Ancillary)> {
     let pri = C::default();
     let anc = fetch_ancillary(View::Search, &pri).await?;
     Ok((obs, anc))
+}
+
+/// Fetch card list for a resource type
+pub async fn fetch_cards_res(
+    res: Res,
+    search: &str,
+    config: bool,
+) -> Result<String> {
+    match res {
+        Res::Alarm => fetch_cards::<Alarm>(search, config).await,
+        Res::Beacon => fetch_cards::<Beacon>(search, config).await,
+        Res::CabinetStyle => fetch_cards::<CabinetStyle>(search, config).await,
+        Res::Camera => fetch_cards::<Camera>(search, config).await,
+        Res::CommConfig => fetch_cards::<CommConfig>(search, config).await,
+        Res::CommLink => fetch_cards::<CommLink>(search, config).await,
+        Res::Controller => fetch_cards::<Controller>(search, config).await,
+        Res::Detector => fetch_cards::<Detector>(search, config).await,
+        Res::Dms => fetch_cards::<Dms>(search, config).await,
+        Res::FlowStream => fetch_cards::<FlowStream>(search, config).await,
+        Res::GateArm => fetch_cards::<GateArm>(search, config).await,
+        Res::GateArmArray => fetch_cards::<GateArmArray>(search, config).await,
+        Res::Gps => fetch_cards::<Gps>(search, config).await,
+        Res::LaneMarking => fetch_cards::<LaneMarking>(search, config).await,
+        Res::LcsArray => fetch_cards::<LcsArray>(search, config).await,
+        Res::LcsIndication => {
+            fetch_cards::<LcsIndication>(search, config).await
+        }
+        Res::Modem => fetch_cards::<Modem>(search, config).await,
+        Res::Permission => fetch_cards::<Permission>(search, config).await,
+        Res::RampMeter => fetch_cards::<RampMeter>(search, config).await,
+        Res::Role => fetch_cards::<Role>(search, config).await,
+        Res::TagReader => fetch_cards::<TagReader>(search, config).await,
+        Res::User => fetch_cards::<User>(search, config).await,
+        Res::VideoMonitor => fetch_cards::<VideoMonitor>(search, config).await,
+        Res::WeatherSensor => {
+            fetch_cards::<WeatherSensor>(search, config).await
+        }
+        _ => Ok("".into()),
+    }
 }
 
 /// Fetch card list as HTML
