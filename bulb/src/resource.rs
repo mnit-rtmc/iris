@@ -453,43 +453,31 @@ impl Resource {
     /// Fetch a card view
     async fn card_view(self, view: View, name: &str) -> Result<String> {
         match self {
-            Self::Alarm => card_view::<Alarm>(self, view, name).await,
-            Self::Beacon => card_view::<Beacon>(self, view, name).await,
-            Self::CabinetStyle => {
-                card_view::<CabinetStyle>(self, view, name).await
-            }
-            Self::Camera => card_view::<Camera>(self, view, name).await,
-            Self::CommConfig => card_view::<CommConfig>(self, view, name).await,
-            Self::CommLink => card_view::<CommLink>(self, view, name).await,
-            Self::Controller => card_view::<Controller>(self, view, name).await,
-            Self::Detector => card_view::<Detector>(self, view, name).await,
-            Self::Dms => card_view::<Dms>(self, view, name).await,
-            Self::FlowStream => card_view::<FlowStream>(self, view, name).await,
-            Self::GateArm => card_view::<GateArm>(self, view, name).await,
-            Self::GateArmArray => {
-                card_view::<GateArmArray>(self, view, name).await
-            }
-            Self::GeoLoc => card_view::<GeoLoc>(self, view, name).await,
-            Self::Gps => card_view::<Gps>(self, view, name).await,
-            Self::LaneMarking => {
-                card_view::<LaneMarking>(self, view, name).await
-            }
-            Self::LcsArray => card_view::<LcsArray>(self, view, name).await,
-            Self::LcsIndication => {
-                card_view::<LcsIndication>(self, view, name).await
-            }
-            Self::Modem => card_view::<Modem>(self, view, name).await,
-            Self::Permission => card_view::<Permission>(self, view, name).await,
-            Self::RampMeter => card_view::<RampMeter>(self, view, name).await,
-            Self::Role => card_view::<Role>(self, view, name).await,
-            Self::TagReader => card_view::<TagReader>(self, view, name).await,
-            Self::User => card_view::<User>(self, view, name).await,
-            Self::VideoMonitor => {
-                card_view::<VideoMonitor>(self, view, name).await
-            }
-            Self::WeatherSensor => {
-                card_view::<WeatherSensor>(self, view, name).await
-            }
+            Self::Alarm => card_view::<Alarm>(view, name).await,
+            Self::Beacon => card_view::<Beacon>(view, name).await,
+            Self::CabinetStyle => card_view::<CabinetStyle>(view, name).await,
+            Self::Camera => card_view::<Camera>(view, name).await,
+            Self::CommConfig => card_view::<CommConfig>(view, name).await,
+            Self::CommLink => card_view::<CommLink>(view, name).await,
+            Self::Controller => card_view::<Controller>(view, name).await,
+            Self::Detector => card_view::<Detector>(view, name).await,
+            Self::Dms => card_view::<Dms>(view, name).await,
+            Self::FlowStream => card_view::<FlowStream>(view, name).await,
+            Self::GateArm => card_view::<GateArm>(view, name).await,
+            Self::GateArmArray => card_view::<GateArmArray>(view, name).await,
+            Self::GeoLoc => card_view::<GeoLoc>(view, name).await,
+            Self::Gps => card_view::<Gps>(view, name).await,
+            Self::LaneMarking => card_view::<LaneMarking>(view, name).await,
+            Self::LcsArray => card_view::<LcsArray>(view, name).await,
+            Self::LcsIndication => card_view::<LcsIndication>(view, name).await,
+            Self::Modem => card_view::<Modem>(view, name).await,
+            Self::Permission => card_view::<Permission>(view, name).await,
+            Self::RampMeter => card_view::<RampMeter>(view, name).await,
+            Self::Role => card_view::<Role>(view, name).await,
+            Self::TagReader => card_view::<TagReader>(view, name).await,
+            Self::User => card_view::<User>(view, name).await,
+            Self::VideoMonitor => card_view::<VideoMonitor>(view, name).await,
+            Self::WeatherSensor => card_view::<WeatherSensor>(view, name).await,
             _ => unreachable!(),
         }
     }
@@ -532,41 +520,31 @@ impl Resource {
     /// Fetch changed fields from an Edit view
     async fn fetch_changed(self, name: &str) -> Result<String> {
         match self {
-            Self::Alarm => fetch_changed::<Alarm>(self, name).await,
-            Self::Beacon => fetch_changed::<Beacon>(self, name).await,
-            Self::CabinetStyle => {
-                fetch_changed::<CabinetStyle>(self, name).await
-            }
-            Self::Camera => fetch_changed::<Camera>(self, name).await,
-            Self::CommConfig => fetch_changed::<CommConfig>(self, name).await,
-            Self::CommLink => fetch_changed::<CommLink>(self, name).await,
-            Self::Controller => fetch_changed::<Controller>(self, name).await,
-            Self::Detector => fetch_changed::<Detector>(self, name).await,
-            Self::Dms => fetch_changed::<Dms>(self, name).await,
-            Self::FlowStream => fetch_changed::<FlowStream>(self, name).await,
-            Self::GateArm => fetch_changed::<GateArm>(self, name).await,
-            Self::GateArmArray => {
-                fetch_changed::<GateArmArray>(self, name).await
-            }
-            Self::GeoLoc => fetch_changed::<GeoLoc>(self, name).await,
-            Self::Gps => fetch_changed::<Gps>(self, name).await,
-            Self::LaneMarking => fetch_changed::<LaneMarking>(self, name).await,
-            Self::LcsArray => fetch_changed::<LcsArray>(self, name).await,
-            Self::LcsIndication => {
-                fetch_changed::<LcsIndication>(self, name).await
-            }
-            Self::Modem => fetch_changed::<Modem>(self, name).await,
-            Self::Permission => fetch_changed::<Permission>(self, name).await,
-            Self::RampMeter => fetch_changed::<RampMeter>(self, name).await,
-            Self::Role => fetch_changed::<Role>(self, name).await,
-            Self::TagReader => fetch_changed::<TagReader>(self, name).await,
-            Self::User => fetch_changed::<User>(self, name).await,
-            Self::VideoMonitor => {
-                fetch_changed::<VideoMonitor>(self, name).await
-            }
-            Self::WeatherSensor => {
-                fetch_changed::<WeatherSensor>(self, name).await
-            }
+            Self::Alarm => fetch_changed::<Alarm>(name).await,
+            Self::Beacon => fetch_changed::<Beacon>(name).await,
+            Self::CabinetStyle => fetch_changed::<CabinetStyle>(name).await,
+            Self::Camera => fetch_changed::<Camera>(name).await,
+            Self::CommConfig => fetch_changed::<CommConfig>(name).await,
+            Self::CommLink => fetch_changed::<CommLink>(name).await,
+            Self::Controller => fetch_changed::<Controller>(name).await,
+            Self::Detector => fetch_changed::<Detector>(name).await,
+            Self::Dms => fetch_changed::<Dms>(name).await,
+            Self::FlowStream => fetch_changed::<FlowStream>(name).await,
+            Self::GateArm => fetch_changed::<GateArm>(name).await,
+            Self::GateArmArray => fetch_changed::<GateArmArray>(name).await,
+            Self::GeoLoc => fetch_changed::<GeoLoc>(name).await,
+            Self::Gps => fetch_changed::<Gps>(name).await,
+            Self::LaneMarking => fetch_changed::<LaneMarking>(name).await,
+            Self::LcsArray => fetch_changed::<LcsArray>(name).await,
+            Self::LcsIndication => fetch_changed::<LcsIndication>(name).await,
+            Self::Modem => fetch_changed::<Modem>(name).await,
+            Self::Permission => fetch_changed::<Permission>(name).await,
+            Self::RampMeter => fetch_changed::<RampMeter>(name).await,
+            Self::Role => fetch_changed::<Role>(name).await,
+            Self::TagReader => fetch_changed::<TagReader>(name).await,
+            Self::User => fetch_changed::<User>(name).await,
+            Self::VideoMonitor => fetch_changed::<VideoMonitor>(name).await,
+            Self::WeatherSensor => fetch_changed::<WeatherSensor>(name).await,
             _ => unreachable!(),
         }
     }
@@ -592,12 +570,6 @@ impl Resource {
         Err(Error::NameMissing())
     }
 
-    /// Fetch primary JSON resource
-    async fn fetch_primary<C: Card>(self, name: &str) -> Result<C> {
-        let json = C::uri_name(name).get().await?;
-        C::new(json)
-    }
-
     /// Fetch geo location name (if any)
     pub async fn fetch_geo_loc(self, name: &str) -> Result<Option<String>> {
         match self {
@@ -617,7 +589,7 @@ impl Resource {
 
     /// Fetch geo location name
     async fn geo_loc<C: Card>(self, name: &str) -> Result<Option<String>> {
-        let pri = self.fetch_primary::<C>(name).await?;
+        let pri = fetch_primary::<C>(name).await?;
         match pri.geo_loc() {
             Some(geo_loc) => Ok(Some(geo_loc.to_string())),
             None => Ok(None),
@@ -641,8 +613,8 @@ impl Resource {
     /// Handle click event for a button owned by the resource
     pub async fn handle_click(self, name: &str, id: &str) -> Result<bool> {
         match self {
-            Self::Beacon => handle_click::<Beacon>(self, name, id).await,
-            Self::Dms => handle_click::<Dms>(self, name, id).await,
+            Self::Beacon => handle_click::<Beacon>(name, id).await,
+            Self::Dms => handle_click::<Dms>(name, id).await,
             _ => Ok(false),
         }
     }
@@ -650,7 +622,7 @@ impl Resource {
     /// Handle input event for an element owned by the resource
     pub async fn handle_input(self, name: &str, id: &str) -> Result<bool> {
         match self {
-            Self::Dms => handle_input::<Dms>(self, name, id).await,
+            Self::Dms => handle_input::<Dms>(name, id).await,
             _ => Ok(false),
         }
     }
@@ -730,19 +702,21 @@ async fn fetch_ancillary<C: Card>(view: View, pri: &C) -> Result<C::Ancillary> {
     Ok(anc)
 }
 
+/// Fetch primary JSON resource
+async fn fetch_primary<C: Card>(name: &str) -> Result<C> {
+    let json = C::uri_name(name).get().await?;
+    C::new(json)
+}
+
 /// Fetch changed fields from an Edit view
-async fn fetch_changed<C: Card>(res: Resource, name: &str) -> Result<String> {
-    let pri = res.fetch_primary::<C>(name).await?;
+async fn fetch_changed<C: Card>(name: &str) -> Result<String> {
+    let pri = fetch_primary::<C>(name).await?;
     Ok(pri.changed_fields())
 }
 
 /// Handle click event for a button on a card
-async fn handle_click<C: Card>(
-    res: Resource,
-    name: &str,
-    id: &str,
-) -> Result<bool> {
-    let pri = res.fetch_primary::<C>(name).await?;
+async fn handle_click<C: Card>(name: &str, id: &str) -> Result<bool> {
+    let pri = fetch_primary::<C>(name).await?;
     let anc = fetch_ancillary(View::Status(false), &pri).await?;
     let uri = C::uri_name(name);
     for action in pri.handle_click(anc, id, uri) {
@@ -752,27 +726,19 @@ async fn handle_click<C: Card>(
 }
 
 /// Handle input event for an element on a card
-async fn handle_input<C: Card>(
-    res: Resource,
-    name: &str,
-    id: &str,
-) -> Result<bool> {
-    let pri = res.fetch_primary::<C>(name).await?;
+async fn handle_input<C: Card>(name: &str, id: &str) -> Result<bool> {
+    let pri = fetch_primary::<C>(name).await?;
     let anc = fetch_ancillary(View::Status(false), &pri).await?;
     pri.handle_input(anc, id);
     Ok(true)
 }
 
 /// Fetch a card view
-async fn card_view<C: Card>(
-    res: Resource,
-    view: View,
-    name: &str,
-) -> Result<String> {
+async fn card_view<C: Card>(view: View, name: &str) -> Result<String> {
     let pri = if view == View::Create {
         C::default().with_name(name)
     } else {
-        res.fetch_primary::<C>(name).await?
+        fetch_primary::<C>(name).await?
     };
     let anc = fetch_ancillary(view, &pri).await?;
     Ok(pri.to_html(view, &anc))

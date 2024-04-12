@@ -10,11 +10,33 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::alarm::Alarm;
+use crate::beacon::Beacon;
+use crate::cabinetstyle::CabinetStyle;
+use crate::camera::Camera;
+use crate::commconfig::CommConfig;
+use crate::commlink::CommLink;
+use crate::controller::Controller;
+use crate::detector::Detector;
+use crate::dms::Dms;
 use crate::error::{Error, Result};
 use crate::fetch::Uri;
-use crate::resource::{AncillaryData, Card, Resource, View, NAME};
+use crate::flowstream::FlowStream;
+use crate::gatearm::GateArm;
+use crate::gatearmarray::GateArmArray;
+use crate::gps::Gps;
+use crate::lanemarking::LaneMarking;
+use crate::lcsarray::LcsArray;
+use crate::lcsindication::LcsIndication;
+use crate::modem::Modem;
+use crate::rampmeter::RampMeter;
+use crate::resource::{AncillaryData, Card, View, NAME};
 use crate::role::Role;
+use crate::tagreader::TagReader;
+use crate::user::User;
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, Select};
+use crate::videomonitor::VideoMonitor;
+use crate::weathersensor::WeatherSensor;
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
@@ -155,56 +177,56 @@ pub fn permissions_html(access: Vec<Permission>, config: bool) -> String {
     for perm in &access {
         if perm.hashtag.is_none() {
             if config {
-                add_option(Resource::Alarm, perm, &mut html);
+                add_option::<Alarm>(perm, &mut html);
             }
-            add_option(Resource::Beacon, perm, &mut html);
+            add_option::<Beacon>(perm, &mut html);
             if config {
-                add_option(Resource::CabinetStyle, perm, &mut html);
+                add_option::<CabinetStyle>(perm, &mut html);
             }
-            add_option(Resource::Camera, perm, &mut html);
+            add_option::<Camera>(perm, &mut html);
             if config {
-                add_option(Resource::CommConfig, perm, &mut html);
-                add_option(Resource::CommLink, perm, &mut html);
-                add_option(Resource::Controller, perm, &mut html);
-                add_option(Resource::Detector, perm, &mut html);
+                add_option::<CommConfig>(perm, &mut html);
+                add_option::<CommLink>(perm, &mut html);
+                add_option::<Controller>(perm, &mut html);
+                add_option::<Detector>(perm, &mut html);
             }
-            add_option(Resource::Dms, perm, &mut html);
+            add_option::<Dms>(perm, &mut html);
             if config {
-                add_option(Resource::FlowStream, perm, &mut html);
-                add_option(Resource::GateArm, perm, &mut html);
+                add_option::<FlowStream>(perm, &mut html);
+                add_option::<GateArm>(perm, &mut html);
             }
-            add_option(Resource::GateArmArray, perm, &mut html);
+            add_option::<GateArmArray>(perm, &mut html);
             if config {
-                add_option(Resource::Gps, perm, &mut html);
+                add_option::<Gps>(perm, &mut html);
             }
-            add_option(Resource::LaneMarking, perm, &mut html);
-            add_option(Resource::LcsArray, perm, &mut html);
+            add_option::<LaneMarking>(perm, &mut html);
+            add_option::<LcsArray>(perm, &mut html);
             if config {
-                add_option(Resource::LcsIndication, perm, &mut html);
-                add_option(Resource::Modem, perm, &mut html);
-                add_option(Resource::Permission, perm, &mut html);
+                add_option::<LcsIndication>(perm, &mut html);
+                add_option::<Modem>(perm, &mut html);
+                add_option::<Permission>(perm, &mut html);
             }
-            add_option(Resource::RampMeter, perm, &mut html);
+            add_option::<RampMeter>(perm, &mut html);
             if config {
-                add_option(Resource::Role, perm, &mut html);
-                add_option(Resource::TagReader, perm, &mut html);
-                add_option(Resource::User, perm, &mut html);
+                add_option::<Role>(perm, &mut html);
+                add_option::<TagReader>(perm, &mut html);
+                add_option::<User>(perm, &mut html);
             }
-            add_option(Resource::VideoMonitor, perm, &mut html);
-            add_option(Resource::WeatherSensor, perm, &mut html);
+            add_option::<VideoMonitor>(perm, &mut html);
+            add_option::<WeatherSensor>(perm, &mut html);
         }
     }
     html
 }
 
 /// Add option to access select
-fn add_option(res: Resource, perm: &Permission, html: &mut String) {
-    let r = Res::from(res);
-    if perm.resource_n == r.dependent().as_str() {
+fn add_option<C: Card>(perm: &Permission, html: &mut String) {
+    let res = C::res();
+    if perm.resource_n == res.dependent().as_str() {
         html.push_str("<option value='");
-        html.push_str(r.as_str());
+        html.push_str(res.as_str());
         html.push_str("'>");
-        html.push_str(res.dname());
+        html.push_str(C::DNAME);
         html.push_str("</option>");
     }
 }
