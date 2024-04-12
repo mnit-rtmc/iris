@@ -123,6 +123,9 @@ impl fmt::Display for User {
 impl Card for User {
     type Ancillary = UserAnc;
 
+    /// Display name
+    const DNAME: &'static str = "👤 User";
+
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();

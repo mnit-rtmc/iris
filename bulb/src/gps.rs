@@ -82,6 +82,9 @@ impl Device for Gps {
 impl Card for Gps {
     type Ancillary = GpsAnc;
 
+    /// Display name
+    const DNAME: &'static str = "🌐 Gps";
+
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();

@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -76,6 +76,9 @@ impl fmt::Display for Modem {
 
 impl Card for Modem {
     type Ancillary = ModemAnc;
+
+    /// Display name
+    const DNAME: &'static str = "🖀 Modem";
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

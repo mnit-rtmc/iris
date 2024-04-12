@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -57,6 +57,9 @@ impl fmt::Display for Role {
 
 impl Card for Role {
     type Ancillary = RoleAnc;
+
+    /// Display name
+    const DNAME: &'static str = "💪 Role";
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

@@ -104,6 +104,9 @@ impl Device for Detector {
 impl Card for Detector {
     type Ancillary = DetectorAnc;
 
+    /// Display name
+    const DNAME: &'static str = "🚗⬚ Detector";
+
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();

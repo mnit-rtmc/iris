@@ -103,6 +103,9 @@ impl Device for Camera {
 impl Card for Camera {
     type Ancillary = CameraAnc;
 
+    /// Display name
+    const DNAME: &'static str = "🎥 Camera";
+
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();

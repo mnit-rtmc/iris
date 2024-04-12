@@ -162,6 +162,9 @@ pub trait AncillaryData {
 pub trait Card: Default + fmt::Display + DeserializeOwned {
     type Ancillary: AncillaryData<Primary = Self> + Default;
 
+    /// Display name
+    const DNAME: &'static str;
+
     /// Create from a JSON value
     fn new(json: JsValue) -> Result<Self> {
         Ok(serde_wasm_bindgen::from_value(json)?)
@@ -306,32 +309,32 @@ impl Resource {
     /// Get display name
     pub const fn dname(self) -> &'static str {
         match self {
-            Self::Alarm => "📢 Alarm",
-            Self::Beacon => "🔆 Beacon",
-            Self::CabinetStyle => "🗄️ Cabinet Style",
-            Self::Camera => "🎥 Camera",
-            Self::CommConfig => "📡 Comm Config",
-            Self::CommLink => "🔗 Comm Link",
-            Self::Controller => "🎛️ Controller",
-            Self::Detector => "🚗⬚ Detector",
-            Self::Dms => "⬛ Dms",
-            Self::FlowStream => "🎞️ Flow Stream",
-            Self::GateArm => "⫬ Gate Arm",
-            Self::GateArmArray => "⫭⫬ Gate Arm Array",
-            Self::GeoLoc => "🗺️ Location",
-            Self::Gps => "🌐 Gps",
-            Self::LaneMarking => "⛙ Lane Marking",
+            Self::Alarm => Alarm::DNAME,
+            Self::Beacon => Beacon::DNAME,
+            Self::CabinetStyle => CabinetStyle::DNAME,
+            Self::Camera => Camera::DNAME,
+            Self::CommConfig => CommConfig::DNAME,
+            Self::CommLink => CommLink::DNAME,
+            Self::Controller => Controller::DNAME,
+            Self::Detector => Detector::DNAME,
+            Self::Dms => Dms::DNAME,
+            Self::FlowStream => FlowStream::DNAME,
+            Self::GateArm => GateArm::DNAME,
+            Self::GateArmArray => GateArmArray::DNAME,
+            Self::GeoLoc => GeoLoc::DNAME,
+            Self::Gps => Gps::DNAME,
+            Self::LaneMarking => LaneMarking::DNAME,
             Self::Lcs => unimplemented!(),
-            Self::LcsArray => "🡇🡇 LCS Array",
-            Self::LcsIndication => "🡇 LCS Indication",
-            Self::Modem => "🖀 Modem",
-            Self::Permission => "🗝️ Permission",
-            Self::RampMeter => "🚦 Ramp Meter",
-            Self::Role => "💪 Role",
-            Self::TagReader => "🏷️ Tag Reader",
-            Self::User => "👤 User",
-            Self::VideoMonitor => "📺 Video Monitor",
-            Self::WeatherSensor => "🌦️ Weather Sensor",
+            Self::LcsArray => LcsArray::DNAME,
+            Self::LcsIndication => LcsIndication::DNAME,
+            Self::Modem => Modem::DNAME,
+            Self::Permission => Permission::DNAME,
+            Self::RampMeter => RampMeter::DNAME,
+            Self::Role => Role::DNAME,
+            Self::TagReader => TagReader::DNAME,
+            Self::User => User::DNAME,
+            Self::VideoMonitor => VideoMonitor::DNAME,
+            Self::WeatherSensor => WeatherSensor::DNAME,
         }
     }
 

@@ -238,6 +238,9 @@ impl fmt::Display for GeoLoc {
 impl Card for GeoLoc {
     type Ancillary = GeoLocAnc;
 
+    /// Display name
+    const DNAME: &'static str = "🗺️ Location";
+
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();

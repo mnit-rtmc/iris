@@ -102,6 +102,9 @@ impl Device for LaneMarking {
 impl Card for LaneMarking {
     type Ancillary = LaneMarkingAnc;
 
+    /// Display name
+    const DNAME: &'static str = "⛙ Lane Marking";
+
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();

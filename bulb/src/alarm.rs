@@ -122,6 +122,9 @@ impl Device for Alarm {
 impl Card for Alarm {
     type Ancillary = AlarmAnc;
 
+    /// Display name
+    const DNAME: &'static str = "📢 Alarm";
+
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();

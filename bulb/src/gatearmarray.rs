@@ -137,6 +137,9 @@ impl fmt::Display for GateArmArray {
 impl Card for GateArmArray {
     type Ancillary = GateArmArrayAnc;
 
+    /// Display name
+    const DNAME: &'static str = "⫭⫬ Gate Arm Array";
+
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();

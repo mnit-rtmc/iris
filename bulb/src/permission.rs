@@ -270,6 +270,9 @@ impl fmt::Display for Permission {
 impl Card for Permission {
     type Ancillary = PermissionAnc;
 
+    /// Display name
+    const DNAME: &'static str = "🗝️ Permission";
+
     /// Set the name
     fn with_name(self, _name: &str) -> Self {
         self
