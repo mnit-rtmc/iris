@@ -700,19 +700,6 @@ impl Dms {
         }
     }
 
-    /// Get all item states as html options
-    pub fn item_state_options() -> &'static str {
-        "<option value=''>all ↴\
-         <option value='🔹'>🔹 available\
-         <option value='🔶'>🔶 deployed\
-         <option value='🕗'>🕗 planned\
-         <option value='👽'>👽 external\
-         <option value='🎯'>🎯 dedicated\
-         <option value='⚠️'>⚠️ fault\
-         <option value='🔌'>🔌 offline\
-         <option value='▪️'>▪️ inactive"
-    }
-
     /// Get item states
     fn item_states<'a>(&'a self, anc: &'a DmsAnc) -> ItemStates<'a> {
         let state = anc.dev.item_state(self);
@@ -930,6 +917,17 @@ impl Card for Dms {
 
     /// Display name
     const DNAME: &'static str = "⬛ Dms";
+
+    /// All item states as html options
+    const ITEM_STATE_OPTIONS: &'static str = "<option value=''>all ↴\
+         <option value='🔹'>🔹 available\
+         <option value='🔶'>🔶 deployed\
+         <option value='🕗'>🕗 planned\
+         <option value='👽'>👽 external\
+         <option value='🎯'>🎯 dedicated\
+         <option value='⚠️'>⚠️ fault\
+         <option value='🔌'>🔌 offline\
+         <option value='▪️'>▪️ inactive";
 
     /// Get the resource
     fn res() -> Res {

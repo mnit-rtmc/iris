@@ -158,12 +158,21 @@ pub trait AncillaryData {
     }
 }
 
+/// Default item states as html options
+const ITEM_STATE_OPTIONS: &'static str = "<option value=''>all ↴</option>\
+     <option value='🔹'>🔹 available</option>\
+     <option value='🔌'>🔌 offline</option>\
+     <option value='▪️'>▪️ inactive</option>";
+
 /// A card view of a resource
 pub trait Card: Default + fmt::Display + DeserializeOwned {
     type Ancillary: AncillaryData<Primary = Self> + Default;
 
     /// Display name
     const DNAME: &'static str;
+
+    /// All item states as html options
+    const ITEM_STATE_OPTIONS: &'static str = ITEM_STATE_OPTIONS;
 
     /// Get the resource
     fn res() -> Res;
@@ -532,13 +541,8 @@ impl Resource {
     /// Get all item states as html options
     pub fn item_state_options(self) -> &'static str {
         match self {
-            Self::Dms => Dms::item_state_options(),
-            _ => {
-                "<option value=''>all ↴</option>\
-                 <option value='🔹'>🔹 available</option>\
-                 <option value='🔌'>🔌 offline</option>\
-                 <option value='▪️'>▪️ inactive</option>"
-            }
+            Self::Dms => Dms::ITEM_STATE_OPTIONS,
+            _ => ITEM_STATE_OPTIONS,
         }
     }
 }
