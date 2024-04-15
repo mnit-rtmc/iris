@@ -16,7 +16,8 @@ use crate::item::ItemState;
 use crate::permission::permissions_html;
 use crate::resource::{
     create_and_post, delete_card_res, fetch_card, fetch_cards_res,
-    fetch_geo_loc, save_card_res, Resource, View,
+    fetch_geo_loc, handle_click_res, handle_input_res, item_state_options,
+    save_card_res, Resource, View,
 };
 use crate::util::Doc;
 use js_sys::JsString;
@@ -324,8 +325,8 @@ impl SelectedCard {
 
     /// Handle a button click on selected card
     async fn handle_click(self, attrs: &ButtonAttrs) -> bool {
-        let res = self.res;
-        match res.handle_click(&self.name, &attrs.id).await {
+        let res = Res::from(self.res);
+        match handle_click_res(res, &self.name, &attrs.id).await {
             Ok(c) => c,
             Err(e) => {
                 show_toast(&format!("Click failed: {e}"));
@@ -336,8 +337,8 @@ impl SelectedCard {
 
     /// Handle an input event on selected card
     async fn handle_input(self, id: &str) -> bool {
-        let res = self.res;
-        match res.handle_input(&self.name, id).await {
+        let res = Res::from(self.res);
+        match handle_input_res(res, &self.name, id).await {
             Ok(c) => c,
             Err(_e) => false,
         }
@@ -529,7 +530,9 @@ fn handle_sb_resource_ev(rname: String) {
     let res = Resource::try_from(rname.as_str()).ok();
     let sb_state = doc.elem::<HtmlSelectElement>("sb_state");
     match res {
-        Some(res) => sb_state.set_inner_html(res.item_state_options()),
+        Some(res) => {
+            sb_state.set_inner_html(item_state_options(Res::from(res)))
+        }
         None => sb_state.set_inner_html(""),
     }
     let value = search_value();

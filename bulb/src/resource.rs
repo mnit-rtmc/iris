@@ -318,30 +318,13 @@ impl Resource {
         .iter()
         .cloned()
     }
+}
 
-    /// Handle click event for a button owned by the resource
-    pub async fn handle_click(self, name: &str, id: &str) -> Result<bool> {
-        match self {
-            Self::Beacon => handle_click::<Beacon>(name, id).await,
-            Self::Dms => handle_click::<Dms>(name, id).await,
-            _ => Ok(false),
-        }
-    }
-
-    /// Handle input event for an element owned by the resource
-    pub async fn handle_input(self, name: &str, id: &str) -> Result<bool> {
-        match self {
-            Self::Dms => handle_input::<Dms>(name, id).await,
-            _ => Ok(false),
-        }
-    }
-
-    /// Get all item states as html options
-    pub fn item_state_options(self) -> &'static str {
-        match self {
-            Self::Dms => Dms::ITEM_STATE_OPTIONS,
-            _ => ITEM_STATE_OPTIONS,
-        }
+/// Get all item states as html options
+pub fn item_state_options(res: Res) -> &'static str {
+    match res {
+        Res::Dms => Dms::ITEM_STATE_OPTIONS,
+        _ => ITEM_STATE_OPTIONS,
     }
 }
 
@@ -647,6 +630,15 @@ async fn save_card<C: Card>(name: &str) -> Result<()> {
     Ok(())
 }
 
+/// Handle click event for a button owned by the resource
+pub async fn handle_click_res(res: Res, name: &str, id: &str) -> Result<bool> {
+    match res {
+        Res::Beacon => handle_click::<Beacon>(name, id).await,
+        Res::Dms => handle_click::<Dms>(name, id).await,
+        _ => Ok(false),
+    }
+}
+
 /// Handle click event for a button on a card
 async fn handle_click<C: Card>(name: &str, id: &str) -> Result<bool> {
     let pri = fetch_primary::<C>(name).await?;
@@ -656,6 +648,14 @@ async fn handle_click<C: Card>(name: &str, id: &str) -> Result<bool> {
         action.perform().await?;
     }
     Ok(true)
+}
+
+/// Handle input event for an element owned by the resource
+pub async fn handle_input_res(res: Res, name: &str, id: &str) -> Result<bool> {
+    match res {
+        Res::Dms => handle_input::<Dms>(name, id).await,
+        _ => Ok(false),
+    }
 }
 
 /// Handle input event for an element on a card
