@@ -177,16 +177,9 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     /// Get the resource
     fn res() -> Res;
 
-    /// Get the list URI
-    fn uri() -> Uri {
-        let mut uri = Uri::from("/iris/api/");
-        uri.push(Self::res().as_str());
-        uri
-    }
-
     /// Get the URI of an object
     fn uri_name(name: &str) -> Uri {
-        let mut uri = Self::uri();
+        let mut uri = res_uri(Self::res());
         uri.push(name);
         uri
     }
@@ -364,18 +357,6 @@ impl Resource {
         }
     }
 
-    /// Get the URI of a resource
-    fn uri(self) -> Uri {
-        let mut uri = Uri::from("/iris/api/");
-        uri.push(Res::from(self).as_str());
-        uri
-    }
-
-    /// Lookup resource symbol
-    pub fn symbol(self) -> &'static str {
-        Res::from(self).symbol()
-    }
-
     /// Fetch a card for a given view
     pub async fn fetch_card(self, name: &str, view: View) -> Result<String> {
         match view {
@@ -458,17 +439,6 @@ impl Resource {
         )
     }
 
-    /// Create a new object
-    pub async fn create_and_post(self) -> Result<()> {
-        let doc = Doc::get();
-        let value = match self {
-            Resource::Permission => Permission::create_value(&doc)?,
-            _ => create_value(&doc)?,
-        };
-        self.uri().post(&value.into()).await?;
-        Ok(())
-    }
-
     /// Fetch geo location name (if any)
     pub async fn fetch_geo_loc(self, name: &str) -> Result<Option<String>> {
         match self {
@@ -535,6 +505,24 @@ impl Resource {
     }
 }
 
+/// Get the URI of a resource
+fn res_uri(res: Res) -> Uri {
+    let mut uri = Uri::from("/iris/api/");
+    uri.push(res.as_str());
+    uri
+}
+
+/// Create a new object
+pub async fn create_and_post(res: Res) -> Result<()> {
+    let doc = Doc::get();
+    let value = match res {
+        Res::Permission => Permission::create_value(&doc)?,
+        _ => create_value(&doc)?,
+    };
+    res_uri(res).post(&value.into()).await?;
+    Ok(())
+}
+
 /// Create a name value
 fn create_value(doc: &Doc) -> Result<String> {
     if let Some(name) = doc.input_option_string("create_name") {
@@ -547,15 +535,14 @@ fn create_value(doc: &Doc) -> Result<String> {
 
 /// Delete a resource by name
 pub async fn delete_card_res(res: Res, name: &str) -> Result<()> {
-    let mut uri = Uri::from("/iris/api/");
-    uri.push(res.as_str());
+    let mut uri = res_uri(res);
     uri.push(name);
     uri.delete().await
 }
 
 /// Fetch JSON resource array list
 async fn fetch_list<C: Card>() -> Result<(Vec<C>, C::Ancillary)> {
-    let json = C::uri().get().await?;
+    let json = res_uri(C::res()).get().await?;
     let obs = serde_wasm_bindgen::from_value(json)?;
     // Use default value for ancillary data lookup
     let pri = C::default();

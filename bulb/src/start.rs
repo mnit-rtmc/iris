@@ -15,7 +15,8 @@ use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::permission::permissions_html;
 use crate::resource::{
-    delete_card_res, fetch_cards_res, save_card_res, Resource, View,
+    create_and_post, delete_card_res, fetch_cards_res, save_card_res, Resource,
+    View,
 };
 use crate::util::Doc;
 use js_sys::JsString;
@@ -270,8 +271,8 @@ impl SelectedCard {
 
     /// Create a new object from card
     async fn res_create(self) {
-        let res = self.res;
-        match res.create_and_post().await {
+        let res = Res::from(self.res);
+        match create_and_post(res).await {
             Ok(_) => {
                 self.replace_card(View::Create.compact()).await;
                 DeferredAction::SearchList.schedule(1500);
