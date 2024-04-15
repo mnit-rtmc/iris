@@ -15,8 +15,8 @@ use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::permission::permissions_html;
 use crate::resource::{
-    create_and_post, delete_card_res, fetch_cards_res, save_card_res, Resource,
-    View,
+    create_and_post, delete_card_res, fetch_card, fetch_cards_res,
+    fetch_geo_loc, save_card_res, Resource, View,
 };
 use crate::util::Doc;
 use js_sys::JsString;
@@ -232,8 +232,8 @@ impl SelectedCard {
         let id = self.id();
         let doc = Doc::get();
         let elem = doc.elem::<HtmlElement>(&id);
-        let res = self.res;
-        match res.fetch_card(&self.name, v).await {
+        let res = Res::from(self.res);
+        match fetch_card(res, &self.name, v).await {
             Ok(html) => replace_card_html(&elem, v, &html),
             Err(Error::FetchResponseUnauthorized()) => {
                 show_login();
@@ -298,8 +298,8 @@ impl SelectedCard {
 
     /// Save changed fields on Location card
     async fn res_save_loc(self) {
-        let res = self.res;
-        let geo_loc = res.fetch_geo_loc(&self.name).await;
+        let res = Res::from(self.res);
+        let geo_loc = fetch_geo_loc(res, &self.name).await;
         let result = match geo_loc {
             Ok(Some(geo_loc)) => save_card_res(Res::GeoLoc, &geo_loc).await,
             Ok(None) => Ok(()),

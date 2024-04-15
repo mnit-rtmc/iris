@@ -283,12 +283,6 @@ impl From<Resource> for Res {
     }
 }
 
-impl fmt::Display for Resource {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.dname())
-    }
-}
-
 impl Resource {
     /// Get iterator of all resource variants
     pub fn iter() -> impl Iterator<Item = Self> {
@@ -323,160 +317,6 @@ impl Resource {
         ]
         .iter()
         .cloned()
-    }
-
-    /// Get display name
-    pub const fn dname(self) -> &'static str {
-        match self {
-            Self::Alarm => Alarm::DNAME,
-            Self::Beacon => Beacon::DNAME,
-            Self::CabinetStyle => CabinetStyle::DNAME,
-            Self::Camera => Camera::DNAME,
-            Self::CommConfig => CommConfig::DNAME,
-            Self::CommLink => CommLink::DNAME,
-            Self::Controller => Controller::DNAME,
-            Self::Detector => Detector::DNAME,
-            Self::Dms => Dms::DNAME,
-            Self::FlowStream => FlowStream::DNAME,
-            Self::GateArm => GateArm::DNAME,
-            Self::GateArmArray => GateArmArray::DNAME,
-            Self::GeoLoc => GeoLoc::DNAME,
-            Self::Gps => Gps::DNAME,
-            Self::LaneMarking => LaneMarking::DNAME,
-            Self::Lcs => unimplemented!(),
-            Self::LcsArray => LcsArray::DNAME,
-            Self::LcsIndication => LcsIndication::DNAME,
-            Self::Modem => Modem::DNAME,
-            Self::Permission => Permission::DNAME,
-            Self::RampMeter => RampMeter::DNAME,
-            Self::Role => Role::DNAME,
-            Self::TagReader => TagReader::DNAME,
-            Self::User => User::DNAME,
-            Self::VideoMonitor => VideoMonitor::DNAME,
-            Self::WeatherSensor => WeatherSensor::DNAME,
-        }
-    }
-
-    /// Fetch a card for a given view
-    pub async fn fetch_card(self, name: &str, view: View) -> Result<String> {
-        match view {
-            View::CreateCompact => Ok(CREATE_COMPACT.into()),
-            View::Create => {
-                let html = self.card_view(View::Create, name).await?;
-                Ok(html_card_create(self, &html))
-            }
-            View::Compact => self.card_view(View::Compact, name).await,
-            View::Location => match self.fetch_geo_loc(name).await? {
-                Some(geo_loc) => card_location(&geo_loc).await,
-                None => unreachable!(),
-            },
-            View::Status(config) if self.has_status() => {
-                let html = self.card_view(View::Status(config), name).await?;
-                Ok(self.html_card_status(name, &html))
-            }
-            _ => {
-                let html = self.card_view(View::Edit, name).await?;
-                Ok(html_card_edit(self, name, &html, DEL_BUTTON))
-            }
-        }
-    }
-
-    /// Fetch a card view
-    async fn card_view(self, view: View, name: &str) -> Result<String> {
-        match self {
-            Self::Alarm => card_view::<Alarm>(view, name).await,
-            Self::Beacon => card_view::<Beacon>(view, name).await,
-            Self::CabinetStyle => card_view::<CabinetStyle>(view, name).await,
-            Self::Camera => card_view::<Camera>(view, name).await,
-            Self::CommConfig => card_view::<CommConfig>(view, name).await,
-            Self::CommLink => card_view::<CommLink>(view, name).await,
-            Self::Controller => card_view::<Controller>(view, name).await,
-            Self::Detector => card_view::<Detector>(view, name).await,
-            Self::Dms => card_view::<Dms>(view, name).await,
-            Self::FlowStream => card_view::<FlowStream>(view, name).await,
-            Self::GateArm => card_view::<GateArm>(view, name).await,
-            Self::GateArmArray => card_view::<GateArmArray>(view, name).await,
-            Self::GeoLoc => card_view::<GeoLoc>(view, name).await,
-            Self::Gps => card_view::<Gps>(view, name).await,
-            Self::LaneMarking => card_view::<LaneMarking>(view, name).await,
-            Self::LcsArray => card_view::<LcsArray>(view, name).await,
-            Self::LcsIndication => card_view::<LcsIndication>(view, name).await,
-            Self::Modem => card_view::<Modem>(view, name).await,
-            Self::Permission => card_view::<Permission>(view, name).await,
-            Self::RampMeter => card_view::<RampMeter>(view, name).await,
-            Self::Role => card_view::<Role>(view, name).await,
-            Self::TagReader => card_view::<TagReader>(view, name).await,
-            Self::User => card_view::<User>(view, name).await,
-            Self::VideoMonitor => card_view::<VideoMonitor>(view, name).await,
-            Self::WeatherSensor => card_view::<WeatherSensor>(view, name).await,
-            _ => unreachable!(),
-        }
-    }
-
-    /// Check if a resource has a Status view
-    fn has_status(self) -> bool {
-        matches!(
-            self,
-            Self::Alarm
-                | Self::Beacon
-                | Self::Camera
-                | Self::CommLink
-                | Self::Controller
-                | Self::Detector
-                | Self::Dms
-                | Self::FlowStream
-                | Self::GateArm
-                | Self::GateArmArray
-                | Self::GeoLoc
-                | Self::Gps
-                | Self::LaneMarking
-                | Self::LcsArray
-                | Self::LcsIndication
-                | Self::RampMeter
-                | Self::TagReader
-                | Self::VideoMonitor
-                | Self::WeatherSensor
-        )
-    }
-
-    /// Fetch geo location name (if any)
-    pub async fn fetch_geo_loc(self, name: &str) -> Result<Option<String>> {
-        match self {
-            Self::Beacon => self.geo_loc::<Beacon>(name).await,
-            Self::Camera => self.geo_loc::<Camera>(name).await,
-            Self::Controller => self.geo_loc::<Controller>(name).await,
-            Self::Dms => self.geo_loc::<Dms>(name).await,
-            Self::GateArmArray => self.geo_loc::<GateArmArray>(name).await,
-            Self::GeoLoc => Ok(Some(name.into())),
-            Self::LaneMarking => self.geo_loc::<LaneMarking>(name).await,
-            Self::RampMeter => self.geo_loc::<RampMeter>(name).await,
-            Self::TagReader => self.geo_loc::<TagReader>(name).await,
-            Self::WeatherSensor => self.geo_loc::<WeatherSensor>(name).await,
-            _ => Ok(None),
-        }
-    }
-
-    /// Fetch geo location name
-    async fn geo_loc<C: Card>(self, name: &str) -> Result<Option<String>> {
-        let pri = fetch_primary::<C>(name).await?;
-        match pri.geo_loc() {
-            Some(geo_loc) => Ok(Some(geo_loc.to_string())),
-            None => Ok(None),
-        }
-    }
-
-    /// Build a status card
-    fn html_card_status(self, name: &str, status: &str) -> String {
-        let name = HtmlStr::new(name);
-        format!(
-            "<div class='row'>\
-              <span class='{TITLE}'>{self}</span>\
-              <span class='{TITLE}'>Status</span>\
-              <span class='{NAME}'>{name}</span>\
-              {CLOSE_BUTTON}\
-            </div>\
-            {status}"
-        )
     }
 
     /// Handle click event for a button owned by the resource
@@ -646,6 +486,125 @@ async fn fetch_primary<C: Card>(name: &str) -> Result<C> {
     C::new(json)
 }
 
+/// Fetch a card for a given view
+pub async fn fetch_card(res: Res, name: &str, view: View) -> Result<String> {
+    match view {
+        View::CreateCompact => Ok(CREATE_COMPACT.into()),
+        View::Create => {
+            let html = card_view_res(res, View::Create, name).await?;
+            Ok(html_card_create(res, &html))
+        }
+        View::Compact => card_view_res(res, View::Compact, name).await,
+        View::Location => match fetch_geo_loc(res, name).await? {
+            Some(geo_loc) => card_location(&geo_loc).await,
+            None => unreachable!(),
+        },
+        View::Status(config) if has_status(res) => {
+            let html = card_view_res(res, View::Status(config), name).await?;
+            Ok(html_card_status(res, name, &html))
+        }
+        _ => {
+            let html = card_view_res(res, View::Edit, name).await?;
+            Ok(html_card_edit(res, name, &html, DEL_BUTTON))
+        }
+    }
+}
+
+/// Check if a resource has a Status view
+fn has_status(res: Res) -> bool {
+    matches!(
+        res,
+        Res::Alarm
+            | Res::Beacon
+            | Res::Camera
+            | Res::CommLink
+            | Res::Controller
+            | Res::Detector
+            | Res::Dms
+            | Res::FlowStream
+            | Res::GateArm
+            | Res::GateArmArray
+            | Res::GeoLoc
+            | Res::Gps
+            | Res::LaneMarking
+            | Res::LcsArray
+            | Res::LcsIndication
+            | Res::RampMeter
+            | Res::TagReader
+            | Res::VideoMonitor
+            | Res::WeatherSensor
+    )
+}
+
+/// Fetch geo location name (if any)
+pub async fn fetch_geo_loc(res: Res, name: &str) -> Result<Option<String>> {
+    match res {
+        Res::Beacon => geo_loc::<Beacon>(name).await,
+        Res::Camera => geo_loc::<Camera>(name).await,
+        Res::Controller => geo_loc::<Controller>(name).await,
+        Res::Dms => geo_loc::<Dms>(name).await,
+        Res::GateArmArray => geo_loc::<GateArmArray>(name).await,
+        Res::GeoLoc => Ok(Some(name.into())),
+        Res::LaneMarking => geo_loc::<LaneMarking>(name).await,
+        Res::RampMeter => geo_loc::<RampMeter>(name).await,
+        Res::TagReader => geo_loc::<TagReader>(name).await,
+        Res::WeatherSensor => geo_loc::<WeatherSensor>(name).await,
+        _ => Ok(None),
+    }
+}
+
+/// Fetch geo location name
+async fn geo_loc<C: Card>(name: &str) -> Result<Option<String>> {
+    let pri = fetch_primary::<C>(name).await?;
+    match pri.geo_loc() {
+        Some(geo_loc) => Ok(Some(geo_loc.to_string())),
+        None => Ok(None),
+    }
+}
+
+/// Fetch a card view
+async fn card_view_res(res: Res, view: View, name: &str) -> Result<String> {
+    match res {
+        Res::Alarm => card_view::<Alarm>(view, name).await,
+        Res::Beacon => card_view::<Beacon>(view, name).await,
+        Res::CabinetStyle => card_view::<CabinetStyle>(view, name).await,
+        Res::Camera => card_view::<Camera>(view, name).await,
+        Res::CommConfig => card_view::<CommConfig>(view, name).await,
+        Res::CommLink => card_view::<CommLink>(view, name).await,
+        Res::Controller => card_view::<Controller>(view, name).await,
+        Res::Detector => card_view::<Detector>(view, name).await,
+        Res::Dms => card_view::<Dms>(view, name).await,
+        Res::FlowStream => card_view::<FlowStream>(view, name).await,
+        Res::GateArm => card_view::<GateArm>(view, name).await,
+        Res::GateArmArray => card_view::<GateArmArray>(view, name).await,
+        Res::GeoLoc => card_view::<GeoLoc>(view, name).await,
+        Res::Gps => card_view::<Gps>(view, name).await,
+        Res::LaneMarking => card_view::<LaneMarking>(view, name).await,
+        Res::LcsArray => card_view::<LcsArray>(view, name).await,
+        Res::LcsIndication => card_view::<LcsIndication>(view, name).await,
+        Res::Modem => card_view::<Modem>(view, name).await,
+        Res::Permission => card_view::<Permission>(view, name).await,
+        Res::RampMeter => card_view::<RampMeter>(view, name).await,
+        Res::Role => card_view::<Role>(view, name).await,
+        Res::TagReader => card_view::<TagReader>(view, name).await,
+        Res::User => card_view::<User>(view, name).await,
+        Res::VideoMonitor => card_view::<VideoMonitor>(view, name).await,
+        Res::WeatherSensor => card_view::<WeatherSensor>(view, name).await,
+        _ => unreachable!(),
+    }
+}
+
+/// Fetch a card view
+async fn card_view<C: Card>(view: View, name: &str) -> Result<String> {
+    let pri = if view == View::Create {
+        C::default().with_name(name)
+    } else {
+        fetch_primary::<C>(name).await?
+    };
+    let anc = fetch_ancillary(view, &pri).await?;
+    Ok(pri.to_html(view, &anc))
+}
+
 /// Save changed fields on card
 pub async fn save_card_res(res: Res, name: &str) -> Result<()> {
     match res {
@@ -707,21 +666,10 @@ async fn handle_input<C: Card>(name: &str, id: &str) -> Result<bool> {
     Ok(true)
 }
 
-/// Fetch a card view
-async fn card_view<C: Card>(view: View, name: &str) -> Result<String> {
-    let pri = if view == View::Create {
-        C::default().with_name(name)
-    } else {
-        fetch_primary::<C>(name).await?
-    };
-    let anc = fetch_ancillary(view, &pri).await?;
-    Ok(pri.to_html(view, &anc))
-}
-
 /// Fetch a Location card
 async fn card_location(name: &str) -> Result<String> {
-    let html = Resource::GeoLoc.card_view(View::Edit, name).await?;
-    Ok(html_card_edit(Resource::GeoLoc, name, &html, ""))
+    let html = card_view_res(Res::GeoLoc, View::Edit, name).await?;
+    Ok(html_card_edit(Res::GeoLoc, name, &html, ""))
 }
 
 impl Search {
@@ -777,11 +725,44 @@ pub fn inactive_attr(active: bool) -> &'static str {
     }
 }
 
+/// Get resource display
+const fn display_res(res: Res) -> &'static str {
+    match res {
+        Res::Alarm => Alarm::DNAME,
+        Res::Beacon => Beacon::DNAME,
+        Res::CabinetStyle => CabinetStyle::DNAME,
+        Res::Camera => Camera::DNAME,
+        Res::CommConfig => CommConfig::DNAME,
+        Res::CommLink => CommLink::DNAME,
+        Res::Controller => Controller::DNAME,
+        Res::Detector => Detector::DNAME,
+        Res::Dms => Dms::DNAME,
+        Res::FlowStream => FlowStream::DNAME,
+        Res::GateArm => GateArm::DNAME,
+        Res::GateArmArray => GateArmArray::DNAME,
+        Res::GeoLoc => GeoLoc::DNAME,
+        Res::Gps => Gps::DNAME,
+        Res::LaneMarking => LaneMarking::DNAME,
+        Res::LcsArray => LcsArray::DNAME,
+        Res::LcsIndication => LcsIndication::DNAME,
+        Res::Modem => Modem::DNAME,
+        Res::Permission => Permission::DNAME,
+        Res::RampMeter => RampMeter::DNAME,
+        Res::Role => Role::DNAME,
+        Res::TagReader => TagReader::DNAME,
+        Res::User => User::DNAME,
+        Res::VideoMonitor => VideoMonitor::DNAME,
+        Res::WeatherSensor => WeatherSensor::DNAME,
+        _ => unimplemented!(),
+    }
+}
+
 /// Build a create card
-fn html_card_create(res: Resource, create: &str) -> String {
+fn html_card_create(res: Res, create: &str) -> String {
+    let display = display_res(res);
     format!(
         "<div class='row'>\
-          <span class='{TITLE}'>{res}</span>\
+          <span class='{TITLE}'>{display}</span>\
           <span class='{TITLE}'>Create</span>\
           <span class='{NAME}'>🆕</span>\
           {CLOSE_BUTTON}\
@@ -795,15 +776,16 @@ fn html_card_create(res: Resource, create: &str) -> String {
 
 /// Build an edit card
 fn html_card_edit(
-    res: Resource,
+    res: Res,
     name: &str,
     edit: &str,
     delete: &'static str,
 ) -> String {
+    let display = display_res(res);
     let name = HtmlStr::new(name);
     format!(
         "<div class='row'>\
-          <span class='{TITLE}'>{res}</span>\
+          <span class='{TITLE}'>{display}</span>\
           <span class='{TITLE}'>Edit</span>\
           <span class='{NAME}'>{name}</span>\
           {CLOSE_BUTTON}\
@@ -814,5 +796,20 @@ fn html_card_edit(
           {delete}\
           {SAVE_BUTTON}\
         </div>"
+    )
+}
+
+/// Build a status card
+fn html_card_status(res: Res, name: &str, status: &str) -> String {
+    let display = display_res(res);
+    let name = HtmlStr::new(name);
+    format!(
+        "<div class='row'>\
+          <span class='{TITLE}'>{display}</span>\
+          <span class='{TITLE}'>Status</span>\
+          <span class='{NAME}'>{name}</span>\
+          {CLOSE_BUTTON}\
+        </div>\
+        {status}"
     )
 }
