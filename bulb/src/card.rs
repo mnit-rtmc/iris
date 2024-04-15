@@ -56,14 +56,14 @@ pub const NAME: &str = "ob_name";
 const CREATE_COMPACT: &str = "<span class='create'>Create 🆕</span>";
 
 /// Close button
-pub const CLOSE_BUTTON: &str = "<button id='ob_close' type='button'>X</button>";
+const CLOSE_BUTTON: &str = "<button id='ob_close' type='button'>X</button>";
 
 /// Location button
 pub const LOC_BUTTON: &str =
     "<button id='ob_loc' type='button'>🗺️ Location</button>";
 
 /// Delete button
-pub const DEL_BUTTON: &str =
+const DEL_BUTTON: &str =
     "<button id='ob_delete' type='button'>🗑️ Delete</button>";
 
 /// Edit button
@@ -71,8 +71,7 @@ pub const EDIT_BUTTON: &str =
     "<button id='ob_edit' type='button'>📝 Edit</button>";
 
 /// Save button
-pub const SAVE_BUTTON: &str =
-    "<button id='ob_save' type='button'>🖍️ Save</button>";
+const SAVE_BUTTON: &str = "<button id='ob_save' type='button'>🖍️ Save</button>";
 
 /// Card View
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -93,6 +92,27 @@ pub enum View {
     Search,
 }
 
+impl View {
+    /// Is the view compact?
+    pub fn is_compact(self) -> bool {
+        matches!(self, View::Compact | View::CreateCompact)
+    }
+
+    /// Is the view a create view?
+    pub fn is_create(self) -> bool {
+        matches!(self, View::Create | View::CreateCompact)
+    }
+
+    /// Get compact view
+    pub fn compact(self) -> Self {
+        if self.is_create() {
+            View::CreateCompact
+        } else {
+            View::Compact
+        }
+    }
+}
+
 /// Search term
 enum Search {
     /// Empty search (matches anything)
@@ -101,6 +121,29 @@ enum Search {
     Normal(String),
     /// Exact (multi-word) search
     Exact(String),
+}
+
+impl Search {
+    /// Create a new search term
+    fn new(se: &str) -> Self {
+        let se = se.to_lowercase();
+        if se.is_empty() {
+            Search::Empty()
+        } else if se.starts_with('"') && se.ends_with('"') {
+            Search::Exact(se.trim_matches('"').to_string())
+        } else {
+            Search::Normal(se)
+        }
+    }
+
+    /// Test if a card matches the search
+    fn is_match<C: Card>(&self, pri: &C, anc: &C::Ancillary) -> bool {
+        match self {
+            Search::Empty() => true,
+            Search::Normal(se) => se.split(' ').all(|s| pri.is_match(s, anc)),
+            Search::Exact(se) => pri.is_match(se, anc),
+        }
+    }
 }
 
 /// Ancillary card view data
@@ -128,7 +171,7 @@ pub trait AncillaryData {
 }
 
 /// Default item states as html options
-const ITEM_STATE_OPTIONS: &'static str = "<option value=''>all ↴</option>\
+const ITEM_STATES: &'static str = "<option value=''>all ↴</option>\
      <option value='🔹'>🔹 available</option>\
      <option value='🔌'>🔌 offline</option>\
      <option value='▪️'>▪️ inactive</option>";
@@ -141,14 +184,14 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     const DNAME: &'static str;
 
     /// All item states as html options
-    const ITEM_STATE_OPTIONS: &'static str = ITEM_STATE_OPTIONS;
+    const ITEM_STATES: &'static str = ITEM_STATES;
 
     /// Get the resource
     fn res() -> Res;
 
     /// Get the URI of an object
     fn uri_name(name: &str) -> Uri {
-        let mut uri = res_uri(Self::res());
+        let mut uri = uri_res(Self::res());
         uri.push(name);
         uri
     }
@@ -209,15 +252,15 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
 }
 
 /// Get all item states as html options
-pub fn item_state_options(res: Res) -> &'static str {
+pub fn item_states(res: Res) -> &'static str {
     match res {
-        Res::Dms => Dms::ITEM_STATE_OPTIONS,
-        _ => ITEM_STATE_OPTIONS,
+        Res::Dms => Dms::ITEM_STATES,
+        _ => ITEM_STATES,
     }
 }
 
 /// Get the URI of a resource
-fn res_uri(res: Res) -> Uri {
+fn uri_res(res: Res) -> Uri {
     let mut uri = Uri::from("/iris/api/");
     uri.push(res.as_str());
     uri
@@ -230,7 +273,7 @@ pub async fn create_and_post(res: Res) -> Result<()> {
         Res::Permission => Permission::create_value(&doc)?,
         _ => create_value(&doc)?,
     };
-    res_uri(res).post(&value.into()).await?;
+    uri_res(res).post(&value.into()).await?;
     Ok(())
 }
 
@@ -245,63 +288,49 @@ fn create_value(doc: &Doc) -> Result<String> {
 }
 
 /// Delete a resource by name
-pub async fn delete_card_res(res: Res, name: &str) -> Result<()> {
-    let mut uri = res_uri(res);
+pub async fn delete_one(res: Res, name: &str) -> Result<()> {
+    let mut uri = uri_res(res);
     uri.push(name);
     uri.delete().await
 }
 
-/// Fetch JSON resource array list
-async fn fetch_list<C: Card>() -> Result<(Vec<C>, C::Ancillary)> {
-    let json = res_uri(C::res()).get().await?;
-    let obs = serde_wasm_bindgen::from_value(json)?;
-    // Use default value for ancillary data lookup
-    let pri = C::default();
-    let anc = fetch_ancillary(View::Search, &pri).await?;
-    Ok((obs, anc))
-}
-
-/// Fetch card list for a resource type
-pub async fn fetch_cards_res(
-    res: Res,
-    search: &str,
-    config: bool,
-) -> Result<String> {
+/// Fetch all cards for a resource type
+pub async fn fetch_all(res: Res, search: &str, config: bool) -> Result<String> {
     match res {
-        Res::Alarm => fetch_cards::<Alarm>(search, config).await,
-        Res::Beacon => fetch_cards::<Beacon>(search, config).await,
-        Res::CabinetStyle => fetch_cards::<CabinetStyle>(search, config).await,
-        Res::Camera => fetch_cards::<Camera>(search, config).await,
-        Res::CommConfig => fetch_cards::<CommConfig>(search, config).await,
-        Res::CommLink => fetch_cards::<CommLink>(search, config).await,
-        Res::Controller => fetch_cards::<Controller>(search, config).await,
-        Res::Detector => fetch_cards::<Detector>(search, config).await,
-        Res::Dms => fetch_cards::<Dms>(search, config).await,
-        Res::FlowStream => fetch_cards::<FlowStream>(search, config).await,
-        Res::GateArm => fetch_cards::<GateArm>(search, config).await,
-        Res::GateArmArray => fetch_cards::<GateArmArray>(search, config).await,
-        Res::Gps => fetch_cards::<Gps>(search, config).await,
-        Res::LaneMarking => fetch_cards::<LaneMarking>(search, config).await,
-        Res::LcsArray => fetch_cards::<LcsArray>(search, config).await,
+        Res::Alarm => fetch_all_x::<Alarm>(search, config).await,
+        Res::Beacon => fetch_all_x::<Beacon>(search, config).await,
+        Res::CabinetStyle => fetch_all_x::<CabinetStyle>(search, config).await,
+        Res::Camera => fetch_all_x::<Camera>(search, config).await,
+        Res::CommConfig => fetch_all_x::<CommConfig>(search, config).await,
+        Res::CommLink => fetch_all_x::<CommLink>(search, config).await,
+        Res::Controller => fetch_all_x::<Controller>(search, config).await,
+        Res::Detector => fetch_all_x::<Detector>(search, config).await,
+        Res::Dms => fetch_all_x::<Dms>(search, config).await,
+        Res::FlowStream => fetch_all_x::<FlowStream>(search, config).await,
+        Res::GateArm => fetch_all_x::<GateArm>(search, config).await,
+        Res::GateArmArray => fetch_all_x::<GateArmArray>(search, config).await,
+        Res::Gps => fetch_all_x::<Gps>(search, config).await,
+        Res::LaneMarking => fetch_all_x::<LaneMarking>(search, config).await,
+        Res::LcsArray => fetch_all_x::<LcsArray>(search, config).await,
         Res::LcsIndication => {
-            fetch_cards::<LcsIndication>(search, config).await
+            fetch_all_x::<LcsIndication>(search, config).await
         }
-        Res::Modem => fetch_cards::<Modem>(search, config).await,
-        Res::Permission => fetch_cards::<Permission>(search, config).await,
-        Res::RampMeter => fetch_cards::<RampMeter>(search, config).await,
-        Res::Role => fetch_cards::<Role>(search, config).await,
-        Res::TagReader => fetch_cards::<TagReader>(search, config).await,
-        Res::User => fetch_cards::<User>(search, config).await,
-        Res::VideoMonitor => fetch_cards::<VideoMonitor>(search, config).await,
+        Res::Modem => fetch_all_x::<Modem>(search, config).await,
+        Res::Permission => fetch_all_x::<Permission>(search, config).await,
+        Res::RampMeter => fetch_all_x::<RampMeter>(search, config).await,
+        Res::Role => fetch_all_x::<Role>(search, config).await,
+        Res::TagReader => fetch_all_x::<TagReader>(search, config).await,
+        Res::User => fetch_all_x::<User>(search, config).await,
+        Res::VideoMonitor => fetch_all_x::<VideoMonitor>(search, config).await,
         Res::WeatherSensor => {
-            fetch_cards::<WeatherSensor>(search, config).await
+            fetch_all_x::<WeatherSensor>(search, config).await
         }
         _ => Ok("".into()),
     }
 }
 
-/// Fetch card list as HTML
-async fn fetch_cards<C: Card>(search: &str, config: bool) -> Result<String> {
+/// Fetch all cards as HTML
+async fn fetch_all_x<C: Card>(search: &str, config: bool) -> Result<String> {
     let (obs, anc) = fetch_list().await?;
     let rname = C::res().as_str();
     let search = Search::new(search);
@@ -325,6 +354,16 @@ async fn fetch_cards<C: Card>(search: &str, config: bool) -> Result<String> {
     }
     html.push_str("</ul>");
     Ok(html)
+}
+
+/// Fetch JSON resource array list
+async fn fetch_list<C: Card>() -> Result<(Vec<C>, C::Ancillary)> {
+    let json = uri_res(C::res()).get().await?;
+    let obs = serde_wasm_bindgen::from_value(json)?;
+    // Use default value for ancillary data lookup
+    let pri = C::default();
+    let anc = fetch_ancillary(View::Search, &pri).await?;
+    Ok((obs, anc))
 }
 
 /// Fetch ancillary data
@@ -351,31 +390,25 @@ async fn fetch_ancillary<C: Card>(view: View, pri: &C) -> Result<C::Ancillary> {
     Ok(anc)
 }
 
-/// Fetch primary JSON resource
-async fn fetch_primary<C: Card>(name: &str) -> Result<C> {
-    let json = C::uri_name(name).get().await?;
-    C::new(json)
-}
-
 /// Fetch a card for a given view
-pub async fn fetch_card(res: Res, name: &str, view: View) -> Result<String> {
+pub async fn fetch_one(res: Res, name: &str, view: View) -> Result<String> {
     match view {
         View::CreateCompact => Ok(CREATE_COMPACT.into()),
         View::Create => {
-            let html = card_view_res(res, View::Create, name).await?;
+            let html = fetch_one_res(res, View::Create, name).await?;
             Ok(html_card_create(res, &html))
         }
-        View::Compact => card_view_res(res, View::Compact, name).await,
+        View::Compact => fetch_one_res(res, View::Compact, name).await,
         View::Location => match fetch_geo_loc(res, name).await? {
             Some(geo_loc) => card_location(&geo_loc).await,
             None => unreachable!(),
         },
         View::Status(config) if has_status(res) => {
-            let html = card_view_res(res, View::Status(config), name).await?;
+            let html = fetch_one_res(res, View::Status(config), name).await?;
             Ok(html_card_status(res, name, &html))
         }
         _ => {
-            let html = card_view_res(res, View::Edit, name).await?;
+            let html = fetch_one_res(res, View::Edit, name).await?;
             Ok(html_card_edit(res, name, &html, DEL_BUTTON))
         }
     }
@@ -407,6 +440,55 @@ fn has_status(res: Res) -> bool {
     )
 }
 
+/// Fetch a card view
+async fn fetch_one_res(res: Res, view: View, name: &str) -> Result<String> {
+    match res {
+        Res::Alarm => fetch_one_x::<Alarm>(view, name).await,
+        Res::Beacon => fetch_one_x::<Beacon>(view, name).await,
+        Res::CabinetStyle => fetch_one_x::<CabinetStyle>(view, name).await,
+        Res::Camera => fetch_one_x::<Camera>(view, name).await,
+        Res::CommConfig => fetch_one_x::<CommConfig>(view, name).await,
+        Res::CommLink => fetch_one_x::<CommLink>(view, name).await,
+        Res::Controller => fetch_one_x::<Controller>(view, name).await,
+        Res::Detector => fetch_one_x::<Detector>(view, name).await,
+        Res::Dms => fetch_one_x::<Dms>(view, name).await,
+        Res::FlowStream => fetch_one_x::<FlowStream>(view, name).await,
+        Res::GateArm => fetch_one_x::<GateArm>(view, name).await,
+        Res::GateArmArray => fetch_one_x::<GateArmArray>(view, name).await,
+        Res::GeoLoc => fetch_one_x::<GeoLoc>(view, name).await,
+        Res::Gps => fetch_one_x::<Gps>(view, name).await,
+        Res::LaneMarking => fetch_one_x::<LaneMarking>(view, name).await,
+        Res::LcsArray => fetch_one_x::<LcsArray>(view, name).await,
+        Res::LcsIndication => fetch_one_x::<LcsIndication>(view, name).await,
+        Res::Modem => fetch_one_x::<Modem>(view, name).await,
+        Res::Permission => fetch_one_x::<Permission>(view, name).await,
+        Res::RampMeter => fetch_one_x::<RampMeter>(view, name).await,
+        Res::Role => fetch_one_x::<Role>(view, name).await,
+        Res::TagReader => fetch_one_x::<TagReader>(view, name).await,
+        Res::User => fetch_one_x::<User>(view, name).await,
+        Res::VideoMonitor => fetch_one_x::<VideoMonitor>(view, name).await,
+        Res::WeatherSensor => fetch_one_x::<WeatherSensor>(view, name).await,
+        _ => unreachable!(),
+    }
+}
+
+/// Fetch a card view
+async fn fetch_one_x<C: Card>(view: View, name: &str) -> Result<String> {
+    let pri = if view == View::Create {
+        C::default().with_name(name)
+    } else {
+        fetch_primary::<C>(name).await?
+    };
+    let anc = fetch_ancillary(view, &pri).await?;
+    Ok(pri.to_html(view, &anc))
+}
+
+/// Fetch primary JSON resource
+async fn fetch_primary<C: Card>(name: &str) -> Result<C> {
+    let json = C::uri_name(name).get().await?;
+    C::new(json)
+}
+
 /// Fetch geo location name (if any)
 pub async fn fetch_geo_loc(res: Res, name: &str) -> Result<Option<String>> {
     match res {
@@ -433,83 +515,40 @@ async fn geo_loc<C: Card>(name: &str) -> Result<Option<String>> {
     }
 }
 
-/// Fetch a card view
-async fn card_view_res(res: Res, view: View, name: &str) -> Result<String> {
+/// Patch changed fields on card
+pub async fn patch_changed(res: Res, name: &str) -> Result<()> {
     match res {
-        Res::Alarm => card_view::<Alarm>(view, name).await,
-        Res::Beacon => card_view::<Beacon>(view, name).await,
-        Res::CabinetStyle => card_view::<CabinetStyle>(view, name).await,
-        Res::Camera => card_view::<Camera>(view, name).await,
-        Res::CommConfig => card_view::<CommConfig>(view, name).await,
-        Res::CommLink => card_view::<CommLink>(view, name).await,
-        Res::Controller => card_view::<Controller>(view, name).await,
-        Res::Detector => card_view::<Detector>(view, name).await,
-        Res::Dms => card_view::<Dms>(view, name).await,
-        Res::FlowStream => card_view::<FlowStream>(view, name).await,
-        Res::GateArm => card_view::<GateArm>(view, name).await,
-        Res::GateArmArray => card_view::<GateArmArray>(view, name).await,
-        Res::GeoLoc => card_view::<GeoLoc>(view, name).await,
-        Res::Gps => card_view::<Gps>(view, name).await,
-        Res::LaneMarking => card_view::<LaneMarking>(view, name).await,
-        Res::LcsArray => card_view::<LcsArray>(view, name).await,
-        Res::LcsIndication => card_view::<LcsIndication>(view, name).await,
-        Res::Modem => card_view::<Modem>(view, name).await,
-        Res::Permission => card_view::<Permission>(view, name).await,
-        Res::RampMeter => card_view::<RampMeter>(view, name).await,
-        Res::Role => card_view::<Role>(view, name).await,
-        Res::TagReader => card_view::<TagReader>(view, name).await,
-        Res::User => card_view::<User>(view, name).await,
-        Res::VideoMonitor => card_view::<VideoMonitor>(view, name).await,
-        Res::WeatherSensor => card_view::<WeatherSensor>(view, name).await,
+        Res::Alarm => patch_changed_x::<Alarm>(name).await,
+        Res::Beacon => patch_changed_x::<Beacon>(name).await,
+        Res::CabinetStyle => patch_changed_x::<CabinetStyle>(name).await,
+        Res::Camera => patch_changed_x::<Camera>(name).await,
+        Res::CommConfig => patch_changed_x::<CommConfig>(name).await,
+        Res::CommLink => patch_changed_x::<CommLink>(name).await,
+        Res::Controller => patch_changed_x::<Controller>(name).await,
+        Res::Detector => patch_changed_x::<Detector>(name).await,
+        Res::Dms => patch_changed_x::<Dms>(name).await,
+        Res::FlowStream => patch_changed_x::<FlowStream>(name).await,
+        Res::GateArm => patch_changed_x::<GateArm>(name).await,
+        Res::GateArmArray => patch_changed_x::<GateArmArray>(name).await,
+        Res::GeoLoc => patch_changed_x::<GeoLoc>(name).await,
+        Res::Gps => patch_changed_x::<Gps>(name).await,
+        Res::LaneMarking => patch_changed_x::<LaneMarking>(name).await,
+        Res::LcsArray => patch_changed_x::<LcsArray>(name).await,
+        Res::LcsIndication => patch_changed_x::<LcsIndication>(name).await,
+        Res::Modem => patch_changed_x::<Modem>(name).await,
+        Res::Permission => patch_changed_x::<Permission>(name).await,
+        Res::RampMeter => patch_changed_x::<RampMeter>(name).await,
+        Res::Role => patch_changed_x::<Role>(name).await,
+        Res::TagReader => patch_changed_x::<TagReader>(name).await,
+        Res::User => patch_changed_x::<User>(name).await,
+        Res::VideoMonitor => patch_changed_x::<VideoMonitor>(name).await,
+        Res::WeatherSensor => patch_changed_x::<WeatherSensor>(name).await,
         _ => unreachable!(),
     }
 }
 
-/// Fetch a card view
-async fn card_view<C: Card>(view: View, name: &str) -> Result<String> {
-    let pri = if view == View::Create {
-        C::default().with_name(name)
-    } else {
-        fetch_primary::<C>(name).await?
-    };
-    let anc = fetch_ancillary(view, &pri).await?;
-    Ok(pri.to_html(view, &anc))
-}
-
-/// Save changed fields on card
-pub async fn save_card_res(res: Res, name: &str) -> Result<()> {
-    match res {
-        Res::Alarm => save_card::<Alarm>(name).await,
-        Res::Beacon => save_card::<Beacon>(name).await,
-        Res::CabinetStyle => save_card::<CabinetStyle>(name).await,
-        Res::Camera => save_card::<Camera>(name).await,
-        Res::CommConfig => save_card::<CommConfig>(name).await,
-        Res::CommLink => save_card::<CommLink>(name).await,
-        Res::Controller => save_card::<Controller>(name).await,
-        Res::Detector => save_card::<Detector>(name).await,
-        Res::Dms => save_card::<Dms>(name).await,
-        Res::FlowStream => save_card::<FlowStream>(name).await,
-        Res::GateArm => save_card::<GateArm>(name).await,
-        Res::GateArmArray => save_card::<GateArmArray>(name).await,
-        Res::GeoLoc => save_card::<GeoLoc>(name).await,
-        Res::Gps => save_card::<Gps>(name).await,
-        Res::LaneMarking => save_card::<LaneMarking>(name).await,
-        Res::LcsArray => save_card::<LcsArray>(name).await,
-        Res::LcsIndication => save_card::<LcsIndication>(name).await,
-        Res::Modem => save_card::<Modem>(name).await,
-        Res::Permission => save_card::<Permission>(name).await,
-        Res::RampMeter => save_card::<RampMeter>(name).await,
-        Res::Role => save_card::<Role>(name).await,
-        Res::TagReader => save_card::<TagReader>(name).await,
-        Res::User => save_card::<User>(name).await,
-        Res::VideoMonitor => save_card::<VideoMonitor>(name).await,
-        Res::WeatherSensor => save_card::<WeatherSensor>(name).await,
-        _ => unreachable!(),
-    }
-}
-
-/// Fetch changed fields from an Edit view
-async fn save_card<C: Card>(name: &str) -> Result<()> {
+/// Patch changed fields from an Edit view
+async fn patch_changed_x<C: Card>(name: &str) -> Result<()> {
     let pri = fetch_primary::<C>(name).await?;
     let changed = pri.changed_fields();
     if !changed.is_empty() {
@@ -519,16 +558,16 @@ async fn save_card<C: Card>(name: &str) -> Result<()> {
 }
 
 /// Handle click event for a button owned by the resource
-pub async fn handle_click_res(res: Res, name: &str, id: &str) -> Result<bool> {
+pub async fn handle_click(res: Res, name: &str, id: &str) -> Result<bool> {
     match res {
-        Res::Beacon => handle_click::<Beacon>(name, id).await,
-        Res::Dms => handle_click::<Dms>(name, id).await,
+        Res::Beacon => handle_click_x::<Beacon>(name, id).await,
+        Res::Dms => handle_click_x::<Dms>(name, id).await,
         _ => Ok(false),
     }
 }
 
 /// Handle click event for a button on a card
-async fn handle_click<C: Card>(name: &str, id: &str) -> Result<bool> {
+async fn handle_click_x<C: Card>(name: &str, id: &str) -> Result<bool> {
     let pri = fetch_primary::<C>(name).await?;
     let anc = fetch_ancillary(View::Status(false), &pri).await?;
     let uri = C::uri_name(name);
@@ -539,15 +578,15 @@ async fn handle_click<C: Card>(name: &str, id: &str) -> Result<bool> {
 }
 
 /// Handle input event for an element owned by the resource
-pub async fn handle_input_res(res: Res, name: &str, id: &str) -> Result<bool> {
+pub async fn handle_input(res: Res, name: &str, id: &str) -> Result<bool> {
     match res {
-        Res::Dms => handle_input::<Dms>(name, id).await,
+        Res::Dms => handle_input_x::<Dms>(name, id).await,
         _ => Ok(false),
     }
 }
 
 /// Handle input event for an element on a card
-async fn handle_input<C: Card>(name: &str, id: &str) -> Result<bool> {
+async fn handle_input_x<C: Card>(name: &str, id: &str) -> Result<bool> {
     let pri = fetch_primary::<C>(name).await?;
     let anc = fetch_ancillary(View::Status(false), &pri).await?;
     pri.handle_input(anc, id);
@@ -556,61 +595,8 @@ async fn handle_input<C: Card>(name: &str, id: &str) -> Result<bool> {
 
 /// Fetch a Location card
 async fn card_location(name: &str) -> Result<String> {
-    let html = card_view_res(Res::GeoLoc, View::Edit, name).await?;
+    let html = fetch_one_res(Res::GeoLoc, View::Edit, name).await?;
     Ok(html_card_edit(Res::GeoLoc, name, &html, ""))
-}
-
-impl Search {
-    /// Create a new search term
-    fn new(se: &str) -> Self {
-        let se = se.to_lowercase();
-        if se.is_empty() {
-            Search::Empty()
-        } else if se.starts_with('"') && se.ends_with('"') {
-            Search::Exact(se.trim_matches('"').to_string())
-        } else {
-            Search::Normal(se)
-        }
-    }
-
-    /// Test if a card matches the search
-    fn is_match<C: Card>(&self, pri: &C, anc: &C::Ancillary) -> bool {
-        match self {
-            Search::Empty() => true,
-            Search::Normal(se) => se.split(' ').all(|s| pri.is_match(s, anc)),
-            Search::Exact(se) => pri.is_match(se, anc),
-        }
-    }
-}
-
-impl View {
-    /// Is the view compact?
-    pub fn is_compact(self) -> bool {
-        matches!(self, View::Compact | View::CreateCompact)
-    }
-
-    /// Is the view a create view?
-    pub fn is_create(self) -> bool {
-        matches!(self, View::Create | View::CreateCompact)
-    }
-
-    /// Get compact view
-    pub fn compact(self) -> Self {
-        if self.is_create() {
-            View::CreateCompact
-        } else {
-            View::Compact
-        }
-    }
-}
-
-/// Get attribute for inactive cards
-pub fn inactive_attr(active: bool) -> &'static str {
-    if active {
-        ""
-    } else {
-        " inactive"
-    }
 }
 
 /// Get resource display
@@ -700,4 +686,13 @@ fn html_card_status(res: Res, name: &str, status: &str) -> String {
         </div>\
         {status}"
     )
+}
+
+/// Get attribute for inactive cards
+pub fn inactive_attr(active: bool) -> &'static str {
+    if active {
+        ""
+    } else {
+        " inactive"
+    }
 }

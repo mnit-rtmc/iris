@@ -917,7 +917,7 @@ impl Card for Dms {
     const DNAME: &'static str = "⬛ Dms";
 
     /// All item states as html options
-    const ITEM_STATE_OPTIONS: &'static str = "<option value=''>all ↴\
+    const ITEM_STATES: &'static str = "<option value=''>all ↴\
          <option value='🔹'>🔹 available\
          <option value='🔶'>🔶 deployed\
          <option value='🕗'>🕗 planned\

@@ -10,11 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{
-    create_and_post, delete_card_res, fetch_card, fetch_cards_res,
-    fetch_geo_loc, handle_click_res, handle_input_res, item_state_options,
-    save_card_res, View,
-};
+use crate::card::{self, View};
 use crate::error::{Error, Result};
 use crate::fetch::Uri;
 use crate::item::ItemState;
@@ -169,7 +165,7 @@ async fn populate_list(res: Option<Res>, search: String) {
     match res {
         Some(res) => {
             let config = doc.input_bool("sb_config");
-            match fetch_cards_res(res, &search, config).await {
+            match card::fetch_all(res, &search, config).await {
                 Ok(cards) => sb_list.set_inner_html(&cards),
                 Err(Error::FetchResponseUnauthorized()) => show_login(),
                 Err(e) => show_toast(&format!("View failed: {e}")),
@@ -234,7 +230,7 @@ impl SelectedCard {
         let doc = Doc::get();
         let elem = doc.elem::<HtmlElement>(&id);
         let res = Res::from(self.res);
-        match fetch_card(res, &self.name, v).await {
+        match card::fetch_one(res, &self.name, v).await {
             Ok(html) => replace_card_html(&elem, v, &html),
             Err(Error::FetchResponseUnauthorized()) => {
                 show_login();
@@ -273,7 +269,7 @@ impl SelectedCard {
     /// Create a new object from card
     async fn res_create(self) {
         let res = Res::from(self.res);
-        match create_and_post(res).await {
+        match card::create_and_post(res).await {
             Ok(_) => {
                 self.replace_card(View::Create.compact()).await;
                 DeferredAction::SearchList.schedule(1500);
@@ -286,7 +282,7 @@ impl SelectedCard {
     /// Save changed fields on Edit card
     async fn res_save_edit(self) {
         let res = self.res;
-        match save_card_res(res.into(), &self.name).await {
+        match card::patch_changed(res, &self.name).await {
             Ok(_) => self.replace_card(View::Edit.compact()).await,
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(Error::FetchResponseNotFound()) => {
@@ -300,9 +296,11 @@ impl SelectedCard {
     /// Save changed fields on Location card
     async fn res_save_loc(self) {
         let res = Res::from(self.res);
-        let geo_loc = fetch_geo_loc(res, &self.name).await;
+        let geo_loc = card::fetch_geo_loc(res, &self.name).await;
         let result = match geo_loc {
-            Ok(Some(geo_loc)) => save_card_res(Res::GeoLoc, &geo_loc).await,
+            Ok(Some(geo_loc)) => {
+                card::patch_changed(Res::GeoLoc, &geo_loc).await
+            }
             Ok(None) => Ok(()),
             Err(e) => Err(e),
         };
@@ -316,7 +314,7 @@ impl SelectedCard {
     /// Delete selected card / object
     async fn res_delete(self) {
         let res = self.res;
-        match delete_card_res(res.into(), &self.name).await {
+        match card::delete_one(res.into(), &self.name).await {
             Ok(_) => DeferredAction::SearchList.schedule(1000),
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(e) => show_toast(&format!("Delete failed: {e}")),
@@ -326,7 +324,7 @@ impl SelectedCard {
     /// Handle a button click on selected card
     async fn handle_click(self, attrs: &ButtonAttrs) -> bool {
         let res = Res::from(self.res);
-        match handle_click_res(res, &self.name, &attrs.id).await {
+        match card::handle_click(res, &self.name, &attrs.id).await {
             Ok(c) => c,
             Err(e) => {
                 show_toast(&format!("Click failed: {e}"));
@@ -338,7 +336,7 @@ impl SelectedCard {
     /// Handle an input event on selected card
     async fn handle_input(self, id: &str) -> bool {
         let res = Res::from(self.res);
-        match handle_input_res(res, &self.name, id).await {
+        match card::handle_input(res, &self.name, id).await {
             Ok(c) => c,
             Err(_e) => false,
         }
@@ -530,7 +528,7 @@ fn handle_sb_resource_ev(rname: String) {
     let res = Res::try_from(rname.as_str()).ok();
     let sb_state = doc.elem::<HtmlSelectElement>("sb_state");
     match res {
-        Some(res) => sb_state.set_inner_html(item_state_options(res)),
+        Some(res) => sb_state.set_inner_html(card::item_states(res)),
         None => sb_state.set_inner_html(""),
     }
     let value = search_value();
