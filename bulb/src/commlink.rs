@@ -10,13 +10,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{
+    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
+};
 use crate::commconfig::CommConfig;
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::fetch::Uri;
-use crate::resource::{
-    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
-};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use resources::Res;
 use serde::{Deserialize, Serialize};

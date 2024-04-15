@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::resource::{inactive_attr, AncillaryData, Card, View};
+use crate::card::{inactive_attr, AncillaryData, Card, View};
 use crate::util::{ContainsLower, Fields, Input};
 use resources::Res;
 use serde::{Deserialize, Serialize};

@@ -10,11 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{AncillaryData, View};
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::item::ItemState;
-use crate::resource::{AncillaryData, View};
 use std::iter::{empty, once};
 use std::marker::PhantomData;
 use wasm_bindgen::JsValue;

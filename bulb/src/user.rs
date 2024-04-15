@@ -10,9 +10,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{inactive_attr, AncillaryData, Card, View};
 use crate::error::Result;
 use crate::fetch::Uri;
-use crate::resource::{inactive_attr, AncillaryData, Card, View};
 use crate::role::Role;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use resources::Res;

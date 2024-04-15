@@ -10,10 +10,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{inactive_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME};
 use crate::device::{Device, DeviceAnc};
-use crate::resource::{
-    inactive_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
-};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use humantime::format_duration;
 use mag::length::{m, mm};

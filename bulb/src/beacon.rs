@@ -10,13 +10,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{
+    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
+};
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
 use crate::fetch::{Action, Uri};
 use crate::item::{ItemState, ItemStates};
-use crate::resource::{
-    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
-};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use resources::Res;
 use serde::{Deserialize, Serialize};

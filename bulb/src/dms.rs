@@ -10,13 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME};
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
 use crate::fetch::{Action, ContentType, Uri};
 use crate::item::{ItemState, ItemStates};
-use crate::resource::{
-    AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
-};
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, OptVal};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use fnv::FnvHasher;

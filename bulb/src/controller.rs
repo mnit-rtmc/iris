@@ -11,14 +11,14 @@
 // GNU General Public License for more details.
 //
 use crate::cabinetstyle::CabinetStyle;
+use crate::card::{
+    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
+};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::item::ItemState;
-use crate::resource::{
-    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
-};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select, TextArea};
 use resources::Res;
 use serde::{Deserialize, Serialize};

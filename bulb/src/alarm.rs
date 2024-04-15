@@ -10,9 +10,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{inactive_attr, Card, View, EDIT_BUTTON, NAME};
 use crate::device::{Device, DeviceAnc};
 use crate::item::ItemState;
-use crate::resource::{inactive_attr, Card, View, EDIT_BUTTON, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};

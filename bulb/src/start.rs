@@ -10,15 +10,15 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::error::{Error, Result};
-use crate::fetch::Uri;
-use crate::item::ItemState;
-use crate::permission::permissions_html;
-use crate::resource::{
+use crate::card::{
     create_and_post, delete_card_res, fetch_card, fetch_cards_res,
     fetch_geo_loc, handle_click_res, handle_input_res, item_state_options,
     save_card_res, View,
 };
+use crate::error::{Error, Result};
+use crate::fetch::Uri;
+use crate::item::ItemState;
+use crate::permission::permissions_html;
 use crate::util::Doc;
 use js_sys::JsString;
 use resources::Res;
