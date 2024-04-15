@@ -11,10 +11,9 @@
 // GNU General Public License for more details.
 //
 use crate::card::{self, View};
-use crate::error::{Error, Result};
+use crate::error::Error;
 use crate::fetch::Uri;
 use crate::item::ItemState;
-use crate::permission::permissions_html;
 use crate::util::Doc;
 use js_sys::JsString;
 use resources::Res;
@@ -216,7 +215,7 @@ impl SelectedCard {
 
     /// Get card element ID
     fn id(&self) -> String {
-        let res = Res::from(self.res);
+        let res = self.res;
         if self.view.is_create() {
             format!("{res}_")
         } else {
@@ -229,8 +228,7 @@ impl SelectedCard {
         let id = self.id();
         let doc = Doc::get();
         let elem = doc.elem::<HtmlElement>(&id);
-        let res = Res::from(self.res);
-        match card::fetch_one(res, &self.name, v).await {
+        match card::fetch_one(self.res, &self.name, v).await {
             Ok(html) => replace_card_html(&elem, v, &html),
             Err(Error::FetchResponseUnauthorized()) => {
                 show_login();
@@ -268,8 +266,7 @@ impl SelectedCard {
 
     /// Create a new object from card
     async fn res_create(self) {
-        let res = Res::from(self.res);
-        match card::create_and_post(res).await {
+        match card::create_and_post(self.res).await {
             Ok(_) => {
                 self.replace_card(View::Create.compact()).await;
                 DeferredAction::SearchList.schedule(1500);
@@ -295,8 +292,7 @@ impl SelectedCard {
 
     /// Save changed fields on Location card
     async fn res_save_loc(self) {
-        let res = Res::from(self.res);
-        let geo_loc = card::fetch_geo_loc(res, &self.name).await;
+        let geo_loc = card::fetch_geo_loc(self.res, &self.name).await;
         let result = match geo_loc {
             Ok(Some(geo_loc)) => {
                 card::patch_changed(Res::GeoLoc, &geo_loc).await
@@ -313,8 +309,7 @@ impl SelectedCard {
 
     /// Delete selected card / object
     async fn res_delete(self) {
-        let res = self.res;
-        match card::delete_one(res.into(), &self.name).await {
+        match card::delete_one(self.res, &self.name).await {
             Ok(_) => DeferredAction::SearchList.schedule(1000),
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(e) => show_toast(&format!("Delete failed: {e}")),
@@ -323,8 +318,7 @@ impl SelectedCard {
 
     /// Handle a button click on selected card
     async fn handle_click(self, attrs: &ButtonAttrs) -> bool {
-        let res = Res::from(self.res);
-        match card::handle_click(res, &self.name, &attrs.id).await {
+        match card::handle_click(self.res, &self.name, &attrs.id).await {
             Ok(c) => c,
             Err(e) => {
                 show_toast(&format!("Click failed: {e}"));
@@ -335,8 +329,7 @@ impl SelectedCard {
 
     /// Handle an input event on selected card
     async fn handle_input(self, id: &str) -> bool {
-        let res = Res::from(self.res);
-        match card::handle_input(res, &self.name, id).await {
+        match card::handle_input(self.res, &self.name, id).await {
             Ok(c) => c,
             Err(_e) => false,
         }
@@ -415,7 +408,7 @@ async fn add_sidebar() -> JsResult<()> {
 async fn fill_resource_select() {
     let doc = Doc::get();
     let config = doc.input_bool("sb_config");
-    match fetch_access_list(config).await {
+    match card::fetch_resource(config).await {
         Ok(perm) => {
             let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
             sb_resource.set_inner_html(&perm);
@@ -426,13 +419,6 @@ async fn fill_resource_select() {
             console::log_1(&format!("fill_resource_select: {e:?}").into());
         }
     }
-}
-
-/// Fetch permission access list
-async fn fetch_access_list(config: bool) -> Result<String> {
-    let json = Uri::from("/iris/api/access").get().await?;
-    let permissions = serde_wasm_bindgen::from_value(json)?;
-    Ok(permissions_html(permissions, config))
 }
 
 /// Add a "fullscreenchange" event listener to an element

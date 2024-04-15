@@ -10,33 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::alarm::Alarm;
-use crate::beacon::Beacon;
-use crate::cabinetstyle::CabinetStyle;
-use crate::camera::Camera;
 use crate::card::{AncillaryData, Card, View, NAME};
-use crate::commconfig::CommConfig;
-use crate::commlink::CommLink;
-use crate::controller::Controller;
-use crate::detector::Detector;
-use crate::dms::Dms;
 use crate::error::{Error, Result};
 use crate::fetch::Uri;
-use crate::flowstream::FlowStream;
-use crate::gatearm::GateArm;
-use crate::gatearmarray::GateArmArray;
-use crate::gps::Gps;
-use crate::lanemarking::LaneMarking;
-use crate::lcsarray::LcsArray;
-use crate::lcsindication::LcsIndication;
-use crate::modem::Modem;
-use crate::rampmeter::RampMeter;
 use crate::role::Role;
-use crate::tagreader::TagReader;
-use crate::user::User;
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, Select};
-use crate::videomonitor::VideoMonitor;
-use crate::weathersensor::WeatherSensor;
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
@@ -169,66 +147,6 @@ fn access_html(selected: u32) -> String {
     }
     html.push_str("</select>");
     html
-}
-
-/// Build a `select` element of access permissions
-pub fn permissions_html(access: Vec<Permission>, config: bool) -> String {
-    let mut html = "<option/>".to_string();
-    for perm in &access {
-        if perm.hashtag.is_none() {
-            if config {
-                add_option::<Alarm>(perm, &mut html);
-            }
-            add_option::<Beacon>(perm, &mut html);
-            if config {
-                add_option::<CabinetStyle>(perm, &mut html);
-            }
-            add_option::<Camera>(perm, &mut html);
-            if config {
-                add_option::<CommConfig>(perm, &mut html);
-                add_option::<CommLink>(perm, &mut html);
-                add_option::<Controller>(perm, &mut html);
-                add_option::<Detector>(perm, &mut html);
-            }
-            add_option::<Dms>(perm, &mut html);
-            if config {
-                add_option::<FlowStream>(perm, &mut html);
-                add_option::<GateArm>(perm, &mut html);
-            }
-            add_option::<GateArmArray>(perm, &mut html);
-            if config {
-                add_option::<Gps>(perm, &mut html);
-            }
-            add_option::<LaneMarking>(perm, &mut html);
-            add_option::<LcsArray>(perm, &mut html);
-            if config {
-                add_option::<LcsIndication>(perm, &mut html);
-                add_option::<Modem>(perm, &mut html);
-                add_option::<Permission>(perm, &mut html);
-            }
-            add_option::<RampMeter>(perm, &mut html);
-            if config {
-                add_option::<Role>(perm, &mut html);
-                add_option::<TagReader>(perm, &mut html);
-                add_option::<User>(perm, &mut html);
-            }
-            add_option::<VideoMonitor>(perm, &mut html);
-            add_option::<WeatherSensor>(perm, &mut html);
-        }
-    }
-    html
-}
-
-/// Add option to access select
-fn add_option<C: Card>(perm: &Permission, html: &mut String) {
-    let res = C::res();
-    if perm.resource_n == res.dependent().as_str() {
-        html.push_str("<option value='");
-        html.push_str(res.as_str());
-        html.push_str("'>");
-        html.push_str(C::DNAME);
-        html.push_str("</option>");
-    }
 }
 
 impl Permission {
