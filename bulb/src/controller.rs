@@ -17,8 +17,7 @@ use crate::error::Result;
 use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::resource::{
-    inactive_attr, AncillaryData, Card, Resource, View, EDIT_BUTTON,
-    LOC_BUTTON, NAME,
+    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
 };
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select, TextArea};
 use resources::Res;
@@ -241,9 +240,8 @@ impl ControllerIo {
     /// Create a button to select the controller IO
     pub fn button_link_html(&self) -> String {
         let pin = self.pin;
-        match Resource::try_from(self.resource_n.as_str()) {
+        match Res::try_from(self.resource_n.as_str()) {
             Ok(res) => {
-                let res = Res::from(res);
                 let symbol = res.symbol();
                 let name = HtmlStr::new(&self.name);
                 format!(

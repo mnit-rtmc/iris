@@ -17,7 +17,7 @@ use crate::permission::permissions_html;
 use crate::resource::{
     create_and_post, delete_card_res, fetch_card, fetch_cards_res,
     fetch_geo_loc, handle_click_res, handle_input_res, item_state_options,
-    save_card_res, Resource, View,
+    save_card_res, View,
 };
 use crate::util::Doc;
 use js_sys::JsString;
@@ -51,7 +51,7 @@ const TICK_INTERVAL: i32 = 500;
 #[derive(Clone, Debug)]
 struct SelectedCard {
     /// Resource type
-    res: Resource,
+    res: Res,
     /// Card view
     view: View,
     /// Object name
@@ -152,14 +152,14 @@ impl DeferredAction {
 fn search_resource_list() {
     let doc = Doc::get();
     if let Some(rname) = doc.select_parse::<String>("sb_resource") {
-        let res = Resource::try_from(rname.as_str()).ok();
+        let res = Res::try_from(rname.as_str()).ok();
         let value = search_value();
         spawn_local(populate_list(res, value));
     }
 }
 
 /// Populate `sb_list` with `res` card types
-async fn populate_list(res: Option<Resource>, search: String) {
+async fn populate_list(res: Option<Res>, search: String) {
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
         state.selected_card.take()
@@ -169,7 +169,7 @@ async fn populate_list(res: Option<Resource>, search: String) {
     match res {
         Some(res) => {
             let config = doc.input_bool("sb_config");
-            match fetch_cards_res(res.into(), &search, config).await {
+            match fetch_cards_res(res, &search, config).await {
                 Ok(cards) => sb_list.set_inner_html(&cards),
                 Err(Error::FetchResponseUnauthorized()) => show_login(),
                 Err(e) => show_toast(&format!("View failed: {e}")),
@@ -180,7 +180,7 @@ async fn populate_list(res: Option<Resource>, search: String) {
 }
 
 /// Handle a card click event
-async fn click_card(res: Resource, id: String, name: String) {
+async fn click_card(res: Res, id: String, name: String) {
     deselect_card().await;
     if id.ends_with('_') {
         let cs = SelectedCard::new(res, View::Create, name);
@@ -209,7 +209,7 @@ async fn deselect_card() {
 
 impl SelectedCard {
     /// Create a new blank selected card
-    fn new(res: Resource, view: View, name: String) -> Self {
+    fn new(res: Res, view: View, name: String) -> Self {
         SelectedCard {
             res,
             view,
@@ -527,12 +527,10 @@ fn handle_sb_resource_ev(rname: String) {
     let doc = Doc::get();
     let search = doc.elem::<HtmlInputElement>("sb_search");
     search.set_value("");
-    let res = Resource::try_from(rname.as_str()).ok();
+    let res = Res::try_from(rname.as_str()).ok();
     let sb_state = doc.elem::<HtmlSelectElement>("sb_state");
     match res {
-        Some(res) => {
-            sb_state.set_inner_html(item_state_options(Res::from(res)))
-        }
+        Some(res) => sb_state.set_inner_html(item_state_options(res)),
         None => sb_state.set_inner_html(""),
     }
     let value = search_value();
@@ -574,7 +572,7 @@ fn add_click_listener(elem: &Element) -> JsResult<()> {
                     if let Some(rname) =
                         doc.select_parse::<String>("sb_resource")
                     {
-                        if let Ok(res) = Resource::try_from(rname.as_str()) {
+                        if let Ok(res) = Res::try_from(rname.as_str()) {
                             spawn_local(click_card(res, id, name));
                         }
                     }
@@ -671,7 +669,7 @@ async fn go_resource(attrs: ButtonAttrs) {
         sb_resource.set_value(&rname);
         let search = doc.elem::<HtmlInputElement>("sb_search");
         search.set_value(&link);
-        let res = Resource::try_from(rname.as_str()).ok();
+        let res = Res::try_from(rname.as_str()).ok();
         populate_list(res, link).await;
     }
 }

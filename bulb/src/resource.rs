@@ -74,37 +74,6 @@ pub const EDIT_BUTTON: &str =
 pub const SAVE_BUTTON: &str =
     "<button id='ob_save' type='button'>🖍️ Save</button>";
 
-/// Resource types
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Resource {
-    Alarm,
-    Beacon,
-    CabinetStyle,
-    Camera,
-    CommConfig,
-    CommLink,
-    Controller,
-    Detector,
-    Dms,
-    FlowStream,
-    GateArm,
-    GateArmArray,
-    GeoLoc,
-    Gps,
-    LaneMarking,
-    Lcs,
-    LcsArray,
-    LcsIndication,
-    Modem,
-    Permission,
-    RampMeter,
-    Role,
-    TagReader,
-    User,
-    VideoMonitor,
-    WeatherSensor,
-}
-
 /// Card View
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum View {
@@ -236,87 +205,6 @@ pub trait Card: Default + fmt::Display + DeserializeOwned {
     /// Handle input event for an element on the card
     fn handle_input(&self, _anc: Self::Ancillary, _id: &str) {
         // ignore by default
-    }
-}
-
-impl TryFrom<&str> for Resource {
-    type Error = ();
-
-    fn try_from(resource_n: &str) -> std::result::Result<Self, Self::Error> {
-        Self::iter()
-            .find(|res| Res::from(*res).as_str() == resource_n)
-            .ok_or(())
-    }
-}
-
-impl From<Resource> for Res {
-    fn from(res: Resource) -> Self {
-        use Resource::*;
-        match res {
-            Alarm => Res::Alarm,
-            Beacon => Res::Beacon,
-            CabinetStyle => Res::CabinetStyle,
-            Camera => Res::Camera,
-            CommConfig => Res::CommConfig,
-            CommLink => Res::CommLink,
-            Controller => Res::Controller,
-            Detector => Res::Detector,
-            Dms => Res::Dms,
-            FlowStream => Res::FlowStream,
-            GateArm => Res::GateArm,
-            GateArmArray => Res::GateArmArray,
-            GeoLoc => Res::GeoLoc,
-            Gps => Res::Gps,
-            LaneMarking => Res::LaneMarking,
-            Lcs => Res::Lcs,
-            LcsArray => Res::LcsArray,
-            LcsIndication => Res::LcsIndication,
-            Modem => Res::Modem,
-            Permission => Res::Permission,
-            RampMeter => Res::RampMeter,
-            Role => Res::Role,
-            TagReader => Res::TagReader,
-            User => Res::User,
-            VideoMonitor => Res::VideoMonitor,
-            WeatherSensor => Res::WeatherSensor,
-        }
-    }
-}
-
-impl Resource {
-    /// Get iterator of all resource variants
-    pub fn iter() -> impl Iterator<Item = Self> {
-        use Resource::*;
-        [
-            Alarm,
-            Beacon,
-            CabinetStyle,
-            Camera,
-            CommConfig,
-            CommLink,
-            Controller,
-            Detector,
-            Dms,
-            FlowStream,
-            GateArm,
-            GateArmArray,
-            GeoLoc,
-            Gps,
-            LaneMarking,
-            Lcs,
-            LcsArray,
-            LcsIndication,
-            Modem,
-            Permission,
-            RampMeter,
-            Role,
-            TagReader,
-            User,
-            VideoMonitor,
-            WeatherSensor,
-        ]
-        .iter()
-        .cloned()
     }
 }
 
