@@ -32,7 +32,7 @@ pub struct BeaconState {
 }
 
 /// Beacon
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Beacon {
     pub name: String,
     pub location: Option<String>,

@@ -177,7 +177,7 @@ const ITEM_STATES: &str = "<option value=''>all ↴</option>\
      <option value='▪️'>▪️ inactive</option>";
 
 /// A card view of a resource
-pub trait Card: Default + fmt::Display + DeserializeOwned {
+pub trait Card: Default + fmt::Display + DeserializeOwned + PartialEq {
     type Ancillary: AncillaryData<Primary = Self> + Default;
 
     /// Display name

@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 /// Cabinet Style
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct CabinetStyle {
     pub name: String,
     pub police_panel_pin_1: Option<u32>,

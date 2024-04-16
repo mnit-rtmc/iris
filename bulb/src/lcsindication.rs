@@ -31,7 +31,7 @@ pub struct LaneUseIndication {
 }
 
 /// LCS Indication
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct LcsIndication {
     pub name: String,
     pub controller: Option<String>,

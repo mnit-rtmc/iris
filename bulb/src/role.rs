@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 /// Role
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Role {
     pub name: String,
     pub enabled: bool,

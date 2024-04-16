@@ -46,7 +46,7 @@ pub struct RoadModifier {
 }
 
 /// Geo location
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct GeoLoc {
     pub name: String,
     pub roadway: Option<String>,
