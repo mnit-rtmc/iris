@@ -18,6 +18,7 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
@@ -289,12 +290,17 @@ public class PTZService extends Service {
 		}
 
 		NodeList presetList = presets.getElementsByTagNameNS("*", "Preset");
+
+		// Return token from first element with a matching preset Name
 		for (int i = 0; i < presetList.getLength(); i++) {
-			String n = ((Element) presetList.item(i)).getElementsByTagNameNS("*", "Name")
-					.item(0).getTextContent();
-			if (pName.equals(n))
+			Node name = ((Element) presetList.item(i)).getElementsByTagNameNS("*", "Name").item(0);
+			String n;
+			if (name == null || (n = name.getTextContent()) == null) continue;
+			if (n.equals(pName))
 				return ((Element) presetList.item(i)).getAttribute("token");
 		}
+
+		// No preset with given name; null token in SetPreset indicates new preset
 		return null;
 	}
 
@@ -303,13 +309,15 @@ public class PTZService extends Service {
 	 * selected MediaProfile
 	 *
 	 * @param profileToken reference to the media profile
-	 * @param pToken       reference token to the saved PTZ preset
+	 * @param pName        name of the saved PTZ preset
 	 */
-	public String gotoPreset(String profileToken, String pToken)
+	public String gotoPreset(String profileToken, String pName)
 		throws IOException
 	{
-		if (!presetExists(profileToken, pToken))
+		String pToken = getPresetToken(profileToken, pName);
+		if (pToken == null)
 			return null;
+
 		Document doc = gotoPresetDocument(profileToken, pToken);
 		return sendRequestDocument(doc);
 	}
@@ -358,9 +366,12 @@ public class PTZService extends Service {
 		profileToken.appendChild(doc.createTextNode(profToken));
 		setPresetElement.appendChild(profileToken);
 
-		Element presetToken = doc.createElement("wsdl:PresetToken");
-		presetToken.appendChild(doc.createTextNode(pToken));
-		setPresetElement.appendChild(presetToken);
+		// No token if creating new preset
+		if (pToken != null) {
+			Element presetToken = doc.createElement("wsdl:PresetToken");
+			presetToken.appendChild(doc.createTextNode(pToken));
+			setPresetElement.appendChild(presetToken);
+		}
 
 		Element presetName = doc.createElement("wsdl:PresetName");
 		presetName.appendChild(doc.createTextNode(pName));
@@ -372,31 +383,20 @@ public class PTZService extends Service {
 	/**
 	 * Saves the current position to a preset
 	 *
-	 * Calling this will overwrite all existing presets with matching
-	 * tokens and/or names
+	 * Calling this will overwrite existing preset with matching name
 	 *
 	 * @param profileToken reference to the media profile
-	 * @param pToken       unique reference token for the PTZ preset
 	 * @param pName        name for PTZ preset
 	 */
-	public String setPreset(String profileToken, String pToken, String pName)
+	public String setPreset(String profileToken, String pName)
 		throws IOException
 	{
-		// won't save if other preset uses pName already
-		String presetToken = getPresetToken(profileToken, pName);
-		String removeResp = "";
-		if (presetToken != null)
-			removeResp = removePreset(profileToken, presetToken);
+		// pToken will be null if no matching pName; indicates new preset
+		// existing pToken indicates overwrite
+		String pToken = getPresetToken(profileToken, pName);
 
 		Document doc = setPresetDocument(profileToken, pToken, pName);
-		return (removeResp + "\n" + sendRequestDocument(doc)).trim();
-	}
-
-	/** Saves current position to a preset - uses token as default name */
-	public String setPreset(String profileToken, String pToken)
-		throws IOException
-	{
-		return setPreset(profileToken, pToken, pToken);
+		return sendRequestDocument(doc);
 	}
 
 	/** Document builder function for Stop */

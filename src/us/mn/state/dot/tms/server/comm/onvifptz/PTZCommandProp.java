@@ -74,7 +74,6 @@ public class PTZCommandProp extends OnvifProp {
 	public void addStorePreset(int p) {
 		cmd = new String[] {
 			"storepreset",
-			String.valueOf(p),
 			"Preset" + p
 		};
 	}
@@ -83,7 +82,7 @@ public class PTZCommandProp extends OnvifProp {
 	public void addRecallPreset(int p) {
 		cmd = new String[] {
 			"recallpreset",
-			String.valueOf(p)
+			"Preset" + p
 		};
 	}
 
