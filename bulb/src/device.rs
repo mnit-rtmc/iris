@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,11 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{AncillaryData, View};
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::item::ItemState;
-use crate::resource::{AncillaryData, View};
 use std::iter::{empty, once};
 use std::marker::PhantomData;
 use wasm_bindgen::JsValue;
@@ -36,6 +36,7 @@ pub struct DeviceAnc<D> {
 }
 
 impl<D: Device> DeviceAnc<D> {
+    /// Find controller
     fn controller(&self, pri: &D) -> Option<&Controller> {
         if let Some(ctrl) = &self.controller {
             return Some(ctrl);
@@ -52,6 +53,7 @@ impl<D: Device> DeviceAnc<D> {
         None
     }
 
+    /// Make controller button
     pub fn controller_button(&self) -> String {
         match &self.controller {
             Some(ctrl) => ctrl.button_html(),
@@ -76,7 +78,9 @@ impl<D: Device> AncillaryData for DeviceAnc<D> {
         match (view, &pri.controller()) {
             (View::Search, _) => Box::new(once(CONTROLLER_URI.into())),
             (View::Compact | View::Status(_), Some(ctrl)) => {
-                Box::new(once(format!("/iris/api/controller/{ctrl}").into()))
+                let mut uri = Uri::from("/iris/api/controller/");
+                uri.push(ctrl);
+                Box::new(once(uri))
             }
             _ => Box::new(empty()),
         }

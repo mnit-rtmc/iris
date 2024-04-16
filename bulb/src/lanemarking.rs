@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,11 +10,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{inactive_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME};
 use crate::device::{Device, DeviceAnc};
-use crate::resource::{
-    inactive_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
-};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -23,10 +22,10 @@ use std::fmt;
 pub struct LaneMarking {
     pub name: String,
     pub location: Option<String>,
-    pub notes: String,
+    pub notes: Option<String>,
     pub controller: Option<String>,
     pub deployed: bool,
-    // full attributes
+    // secondary attributes
     pub geo_loc: Option<String>,
     pub pin: Option<u32>,
 }
@@ -34,8 +33,6 @@ pub struct LaneMarking {
 type LaneMarkingAnc = DeviceAnc<LaneMarking>;
 
 impl LaneMarking {
-    pub const RESOURCE_N: &'static str = "lane_marking";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LaneMarkingAnc) -> String {
         let item_state = anc.item_state(self);
@@ -103,6 +100,14 @@ impl Device for LaneMarking {
 
 impl Card for LaneMarking {
     type Ancillary = LaneMarkingAnc;
+
+    /// Display name
+    const DNAME: &'static str = "⛙ Lane Marking";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::LaneMarking
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

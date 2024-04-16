@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,13 +10,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{
+    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
+};
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::fetch::Uri;
-use crate::resource::{
-    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
-};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::iter::{empty, once};
@@ -36,7 +37,7 @@ pub struct LcsIndication {
     pub controller: Option<String>,
     pub lcs: String,
     pub indication: u32,
-    // full attributes
+    // secondary attributes
     pub pin: Option<u32>,
 }
 
@@ -68,7 +69,7 @@ impl LcsIndicationAnc {
     }
 }
 
-const LANE_USE_INDICATION_URI: &str = "/iris/lane_use_indication";
+const LANE_USE_INDICATION_URI: &str = "/iris/lut/lane_use_indication";
 
 impl AncillaryData for LcsIndicationAnc {
     type Primary = LcsIndication;
@@ -80,13 +81,11 @@ impl AncillaryData for LcsIndicationAnc {
         view: View,
     ) -> Box<dyn Iterator<Item = Uri>> {
         match (view, &pri.controller()) {
-            (View::Status(_), Some(ctrl)) => Box::new(
-                [
-                    LANE_USE_INDICATION_URI.into(),
-                    format!("/iris/api/controller/{ctrl}").into(),
-                ]
-                .into_iter(),
-            ),
+            (View::Status(_), Some(ctrl)) => {
+                let mut uri = Uri::from("/iris/api/controller/");
+                uri.push(ctrl);
+                Box::new([LANE_USE_INDICATION_URI.into(), uri].into_iter())
+            }
             (View::Status(_) | View::Search | View::Compact, _) => {
                 Box::new(once(LANE_USE_INDICATION_URI.into()))
             }
@@ -111,8 +110,6 @@ impl AncillaryData for LcsIndicationAnc {
 }
 
 impl LcsIndication {
-    pub const RESOURCE_N: &'static str = "lcs_indication";
-
     /// Get controller
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
@@ -166,6 +163,14 @@ impl fmt::Display for LcsIndication {
 
 impl Card for LcsIndication {
     type Ancillary = LcsIndicationAnc;
+
+    /// Display name
+    const DNAME: &'static str = "🡇 LCS Indication";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::LcsIndication
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

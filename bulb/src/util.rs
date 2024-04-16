@@ -229,16 +229,21 @@ impl Doc {
             .ok()
     }
 
+    /// Check if the document is full screen
+    pub fn is_fullscreen(&self) -> bool {
+        self.0.fullscreen_element().is_some()
+    }
+
     /// Request the document to toggle full screen
     pub fn toggle_fullscreen(&self) {
-        if self.0.fullscreen_element().is_none() {
+        if self.is_fullscreen() {
+            self.0.exit_fullscreen();
+        } else {
             self.0
                 .document_element()
                 .unwrap_throw()
                 .request_fullscreen()
                 .unwrap_throw();
-        } else {
-            self.0.exit_fullscreen();
         }
     }
 }
@@ -372,6 +377,15 @@ impl TextArea<&String> for Fields {
             if &parsed != val {
                 self.insert_str(id, &parsed);
             }
+        }
+    }
+}
+
+impl TextArea<&Option<String>> for Fields {
+    fn changed_text_area(&mut self, id: &str, val: &Option<String>) {
+        let parsed = self.doc.text_area_parse::<String>(id);
+        if &parsed != val {
+            self.insert(id, OptVal(parsed).into());
         }
     }
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,9 +10,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{inactive_attr, Card, View, EDIT_BUTTON};
 use crate::device::{Device, DeviceAnc};
-use crate::resource::{inactive_attr, Card, View, EDIT_BUTTON};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -22,15 +23,13 @@ pub struct Gps {
     pub name: String,
     pub controller: Option<String>,
     pub notes: Option<String>,
-    // full attributes
+    // secondary attributes
     pub pin: Option<u32>,
 }
 
 type GpsAnc = DeviceAnc<Gps>;
 
 impl Gps {
-    pub const RESOURCE_N: &'static str = "gps";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &GpsAnc) -> String {
         let inactive = inactive_attr(self.controller.is_some());
@@ -83,6 +82,14 @@ impl Device for Gps {
 
 impl Card for Gps {
     type Ancillary = GpsAnc;
+
+    /// Display name
+    const DNAME: &'static str = "🌐 Gps";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::Gps
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

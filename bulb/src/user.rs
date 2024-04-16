@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,11 +10,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{inactive_attr, AncillaryData, Card, View};
 use crate::error::Result;
 use crate::fetch::Uri;
-use crate::resource::{inactive_attr, AncillaryData, Card, View};
 use crate::role::Role;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::iter::{empty, once};
@@ -85,8 +86,6 @@ impl UserAnc {
 }
 
 impl User {
-    pub const RESOURCE_N: &'static str = "user";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let inactive = inactive_attr(self.enabled && self.role.is_some());
@@ -124,6 +123,14 @@ impl fmt::Display for User {
 
 impl Card for User {
     type Ancillary = UserAnc;
+
+    /// Display name
+    const DNAME: &'static str = "👤 User";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::User
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

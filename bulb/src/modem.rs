@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,8 +10,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::resource::{inactive_attr, AncillaryData, Card, View};
+use crate::card::{inactive_attr, AncillaryData, Card, View};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -34,8 +35,6 @@ impl AncillaryData for ModemAnc {
 }
 
 impl Modem {
-    pub const RESOURCE_N: &'static str = "modem";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let inactive = inactive_attr(self.enabled);
@@ -78,6 +77,14 @@ impl fmt::Display for Modem {
 
 impl Card for Modem {
     type Ancillary = ModemAnc;
+
+    /// Display name
+    const DNAME: &'static str = "🖀 Modem";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::Modem
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

@@ -5,7 +5,7 @@ precipitation rate, road surface temperature, wind speed, etc.  The [NTCIP]
 and [Org-815] protocols can collect RWIS data.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/rwis` (see below)
 * `iris/api/weather_sensor` (primary)

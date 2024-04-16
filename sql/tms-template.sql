@@ -144,7 +144,7 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.51.0
+database_version	5.52.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_secs	60
@@ -271,7 +271,7 @@ any_ipv4	0.0.0.0/0	t
 any_ipv6	::0/0	t
 \.
 
-CREATE TABLE iris.i_user (
+CREATE TABLE iris.user_id (
     name VARCHAR(15) PRIMARY KEY,
     full_name VARCHAR(31) NOT NULL,
     password VARCHAR(64) NOT NULL,
@@ -280,26 +280,26 @@ CREATE TABLE iris.i_user (
     enabled BOOLEAN NOT NULL
 );
 
-COPY iris.i_user (name, full_name, password, dn, role, enabled) FROM stdin;
+COPY iris.user_id (name, full_name, password, dn, role, enabled) FROM stdin;
 admin	IRIS Administrator	+vAwDtk/0KGx9k+kIoKFgWWbd3Ku8e/FOHoZoHB65PAuNEiN2muHVavP0fztOi4=		administrator	t
 \.
 
-CREATE TRIGGER i_user_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.i_user
+CREATE TRIGGER user_id_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.user_id
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
-CREATE VIEW i_user_view AS
+CREATE VIEW user_id_view AS
     SELECT name, full_name, dn, role, enabled
-    FROM iris.i_user;
-GRANT SELECT ON i_user_view TO PUBLIC;
+    FROM iris.user_id;
+GRANT SELECT ON user_id_view TO PUBLIC;
 
-CREATE TABLE iris.i_user_domain (
-    i_user VARCHAR(15) NOT NULL REFERENCES iris.i_user,
+CREATE TABLE iris.user_id_domain (
+    user_id VARCHAR(15) NOT NULL REFERENCES iris.user_id,
     domain VARCHAR(15) NOT NULL REFERENCES iris.domain
 );
-ALTER TABLE iris.i_user_domain ADD PRIMARY KEY (i_user, domain);
+ALTER TABLE iris.user_id_domain ADD PRIMARY KEY (user_id, domain);
 
-COPY iris.i_user_domain (i_user, domain) FROM stdin;
+COPY iris.user_id_domain (user_id, domain) FROM stdin;
 admin	any_ipv4
 admin	any_ipv6
 \.
@@ -432,7 +432,7 @@ system_attribute
 tag_reader
 time_action
 toll_zone
-user
+user_id
 video_monitor
 vid_src_template
 weather_sensor
@@ -452,7 +452,11 @@ ALTER TABLE iris.hashtag ADD PRIMARY KEY (resource_n, name, hashtag);
 CREATE FUNCTION iris.hashtag_notify() RETURNS TRIGGER AS
     $hashtag_notify$
 BEGIN
-    PERFORM pg_notify(OLD.resource_n, '');
+    IF (TG_OP = 'DELETE') THEN
+        PERFORM pg_notify(OLD.resource_n, '');
+    ELSE
+        PERFORM pg_notify(NEW.resource_n, '');
+    END IF;
     RETURN NULL; -- AFTER trigger return is ignored
 END;
 $hashtag_notify$ LANGUAGE plpgsql;
@@ -502,7 +506,7 @@ administrator	ramp_meter	4
 administrator	road	4
 administrator	role	4
 administrator	tag_reader	4
-administrator	user	4
+administrator	user_id	4
 administrator	video_monitor	4
 administrator	weather_sensor	4
 \.
@@ -523,7 +527,7 @@ CREATE TABLE iris.privilege (
 );
 
 COPY iris.privilege (name, capability, type_n, attr_n, write) FROM stdin;
-PRV_0001	base	user		f
+PRV_0001	base	user_id		f
 PRV_0002	base	role		f
 PRV_000A	base	domain		f
 PRV_0003	base	capability		f
@@ -535,7 +539,7 @@ PRV_0008	base	road		f
 PRV_000B	base	road_affix		f
 PRV_0009	base	geo_loc		f
 PRV_0011	base	controller		f
-PRV_0012	base_admin	user		t
+PRV_0012	base_admin	user_id		t
 PRV_0013	base_admin	role		t
 PRV_001A	base_admin	domain		t
 PRV_0014	base_admin	privilege		t
@@ -703,7 +707,7 @@ PRV_0153	report_admin	rpt_conduit		f
 \.
 
 COPY iris.privilege (name, capability, type_n, group_n, write) FROM stdin;
-PRV_003D	camera_tab	play_list	user	t
+PRV_003D	camera_tab	play_list	user_id	t
 \.
 
 -- FIXME: remove after permissions are used everywhere
@@ -992,8 +996,8 @@ CREATE VIEW geo_loc_view AS
 GRANT SELECT ON geo_loc_view TO PUBLIC;
 
 CREATE TABLE iris.r_node_type (
-	n_type INTEGER PRIMARY KEY,
-	name VARCHAR(12) NOT NULL
+    n_type INTEGER PRIMARY KEY,
+    name VARCHAR(12) NOT NULL
 );
 
 COPY iris.r_node_type (n_type, name) FROM stdin;
@@ -1006,8 +1010,8 @@ COPY iris.r_node_type (n_type, name) FROM stdin;
 \.
 
 CREATE TABLE iris.r_node_transition (
-	n_transition INTEGER PRIMARY KEY,
-	name VARCHAR(12) NOT NULL
+    n_transition INTEGER PRIMARY KEY,
+    name VARCHAR(12) NOT NULL
 );
 
 COPY iris.r_node_transition (n_transition, name) FROM stdin;
@@ -1022,19 +1026,19 @@ COPY iris.r_node_transition (n_transition, name) FROM stdin;
 \.
 
 CREATE TABLE iris.r_node (
-	name VARCHAR(10) PRIMARY KEY,
-	geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
-	node_type INTEGER NOT NULL REFERENCES iris.r_node_type,
-	pickable BOOLEAN NOT NULL,
-	above BOOLEAN NOT NULL,
-	transition INTEGER NOT NULL REFERENCES iris.r_node_transition,
-	lanes INTEGER NOT NULL,
-	attach_side BOOLEAN NOT NULL,
-	shift INTEGER NOT NULL,
-	active BOOLEAN NOT NULL,
-	station_id VARCHAR(10),
-	speed_limit INTEGER NOT NULL,
-	notes text NOT NULL
+    name VARCHAR(10) PRIMARY KEY,
+    geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
+    node_type INTEGER NOT NULL REFERENCES iris.r_node_type,
+    pickable BOOLEAN NOT NULL,
+    above BOOLEAN NOT NULL,
+    transition INTEGER NOT NULL REFERENCES iris.r_node_transition,
+    lanes INTEGER NOT NULL,
+    attach_side BOOLEAN NOT NULL,
+    shift INTEGER NOT NULL,
+    active BOOLEAN NOT NULL,
+    station_id VARCHAR(10),
+    speed_limit INTEGER NOT NULL,
+    notes VARCHAR(160)
 );
 
 CREATE UNIQUE INDEX r_node_station_idx ON iris.r_node USING btree (station_id);
@@ -1056,57 +1060,57 @@ CREATE TRIGGER r_node_notify_trig
     FOR EACH ROW EXECUTE FUNCTION iris.r_node_notify();
 
 CREATE FUNCTION iris.r_node_left(INTEGER, INTEGER, BOOLEAN, INTEGER)
-	RETURNS INTEGER AS $r_node_left$
+    RETURNS INTEGER AS $r_node_left$
 DECLARE
-	node_type ALIAS FOR $1;
-	lanes ALIAS FOR $2;
-	attach_side ALIAS FOR $3;
-	shift ALIAS FOR $4;
+    node_type ALIAS FOR $1;
+    lanes ALIAS FOR $2;
+    attach_side ALIAS FOR $3;
+    shift ALIAS FOR $4;
 BEGIN
-	IF attach_side = TRUE THEN
-		RETURN shift;
-	END IF;
-	IF node_type = 0 THEN
-		RETURN shift - lanes;
-	END IF;
-	RETURN shift;
+    IF attach_side = TRUE THEN
+        RETURN shift;
+    END IF;
+    IF node_type = 0 THEN
+        RETURN shift - lanes;
+    END IF;
+    RETURN shift;
 END;
 $r_node_left$ LANGUAGE plpgsql;
 
 CREATE FUNCTION iris.r_node_right(INTEGER, INTEGER, BOOLEAN, INTEGER)
-	RETURNS INTEGER AS $r_node_right$
+    RETURNS INTEGER AS $r_node_right$
 DECLARE
-	node_type ALIAS FOR $1;
-	lanes ALIAS FOR $2;
-	attach_side ALIAS FOR $3;
-	shift ALIAS FOR $4;
+    node_type ALIAS FOR $1;
+    lanes ALIAS FOR $2;
+    attach_side ALIAS FOR $3;
+    shift ALIAS FOR $4;
 BEGIN
-	IF attach_side = FALSE THEN
-		RETURN shift;
-	END IF;
-	IF node_type = 0 THEN
-		RETURN shift + lanes;
-	END IF;
-	RETURN shift;
+    IF attach_side = FALSE THEN
+        RETURN shift;
+    END IF;
+    IF node_type = 0 THEN
+        RETURN shift + lanes;
+    END IF;
+    RETURN shift;
 END;
 $r_node_right$ LANGUAGE plpgsql;
 
 ALTER TABLE iris.r_node ADD CONSTRAINT left_edge_ck
-	CHECK (iris.r_node_left(node_type, lanes, attach_side, shift) >= 1);
+    CHECK (iris.r_node_left(node_type, lanes, attach_side, shift) >= 1);
 ALTER TABLE iris.r_node ADD CONSTRAINT right_edge_ck
-	CHECK (iris.r_node_right(node_type, lanes, attach_side, shift) <= 9);
+    CHECK (iris.r_node_right(node_type, lanes, attach_side, shift) <= 9);
 
 CREATE VIEW r_node_view AS
-	SELECT n.name, n.geo_loc,
-	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	       l.landmark, l.lat, l.lon, l.corridor, l.location,
-	       nt.name AS node_type, n.pickable, n.above, tr.name AS transition,
-	       n.lanes, n.attach_side, n.shift, n.active,
-	       n.station_id, n.speed_limit, n.notes
-	FROM iris.r_node n
-	JOIN geo_loc_view l ON n.geo_loc = l.name
-	JOIN iris.r_node_type nt ON n.node_type = nt.n_type
-	JOIN iris.r_node_transition tr ON n.transition = tr.n_transition;
+    SELECT n.name, n.geo_loc,
+           l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+           l.landmark, l.lat, l.lon, l.corridor, l.location,
+           nt.name AS node_type, n.pickable, n.above, tr.name AS transition,
+           n.lanes, n.attach_side, n.shift, n.active,
+           n.station_id, n.speed_limit, n.notes
+    FROM iris.r_node n
+    JOIN geo_loc_view l ON n.geo_loc = l.name
+    JOIN iris.r_node_type nt ON n.node_type = nt.n_type
+    JOIN iris.r_node_transition tr ON n.transition = tr.n_transition;
 GRANT SELECT ON r_node_view TO PUBLIC;
 
 CREATE VIEW roadway_station_view AS
@@ -1435,7 +1439,7 @@ CREATE TABLE iris.controller (
     cabinet_style VARCHAR(20) REFERENCES iris.cabinet_style(name),
     geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
     condition INTEGER NOT NULL REFERENCES iris.condition,
-    notes VARCHAR(128) NOT NULL,
+    notes VARCHAR(128),
     password VARCHAR(32),
     setup JSONB,
     fail_time TIMESTAMP WITH time zone
@@ -1623,7 +1627,7 @@ CREATE TABLE iris.camera_template (
 CREATE TABLE iris._camera (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-    notes VARCHAR(256) NOT NULL,
+    notes VARCHAR(256),
     cam_num INTEGER UNIQUE,
     cam_template VARCHAR(20) REFERENCES iris.camera_template,
     encoder_type VARCHAR(8) REFERENCES iris.encoder_type,
@@ -1649,6 +1653,9 @@ BEGIN
         NOTIFY camera;
     ELSE
         PERFORM pg_notify('camera', NEW.name);
+    END IF;
+    IF (NEW.publish IS DISTINCT FROM OLD.publish) THEN
+        PERFORM pg_notify('camera_publish', NEW.name);
     END IF;
     RETURN NULL; -- AFTER trigger return is ignored
 END;
@@ -2096,7 +2103,7 @@ CREATE TABLE iris._beacon (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
     message VARCHAR(128) NOT NULL,
-    notes VARCHAR(128) NOT NULL,
+    notes VARCHAR(128),
     verify_pin INTEGER,
     ext_mode BOOLEAN NOT NULL,
     state INTEGER NOT NULL REFERENCES iris.beacon_state
@@ -2708,6 +2715,9 @@ BEGIN
 END;
 $multi_tags_str$ LANGUAGE plpgsql SECURITY DEFINER;
 
+ALTER FUNCTION iris.multi_tags_str(INTEGER)
+    SET search_path = pg_catalog, pg_temp;
+
 CREATE TABLE iris.sign_detail (
 	name VARCHAR(12) PRIMARY KEY,
 	dms_type INTEGER NOT NULL REFERENCES iris.dms_type,
@@ -2920,7 +2930,7 @@ GRANT SELECT ON graphic_view TO PUBLIC;
 CREATE TABLE iris._dms (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
-    notes VARCHAR(128) NOT NULL,
+    notes VARCHAR(128),
     gps VARCHAR(20) REFERENCES iris._gps,
     static_graphic VARCHAR(20) REFERENCES iris.graphic,
     beacon VARCHAR(20) REFERENCES iris._beacon,
@@ -3255,7 +3265,7 @@ COPY iris.gate_arm_interlock(id, description) FROM stdin;
 CREATE TABLE iris._gate_arm_array (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
-    notes VARCHAR(64) NOT NULL,
+    notes VARCHAR(64),
     opposing BOOLEAN NOT NULL,
     prereq VARCHAR(20) REFERENCES iris._gate_arm_array,
     camera VARCHAR(20) REFERENCES iris._camera,
@@ -3365,7 +3375,7 @@ CREATE TABLE iris._gate_arm (
     name VARCHAR(20) PRIMARY KEY,
     ga_array VARCHAR(20) NOT NULL REFERENCES iris._gate_arm_array,
     idx INTEGER NOT NULL,
-    notes VARCHAR(32) NOT NULL,
+    notes VARCHAR(32),
     arm_state INTEGER NOT NULL REFERENCES iris.gate_arm_state,
     fault VARCHAR(32)
 );
@@ -4192,7 +4202,7 @@ CREATE TABLE cap.alert_info (
 CREATE TABLE iris._lane_marking (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-    notes VARCHAR(64) NOT NULL,
+    notes VARCHAR(64),
     deployed BOOLEAN NOT NULL
 );
 
@@ -4281,7 +4291,7 @@ COPY iris.lcs_lock (id, description) FROM stdin;
 
 CREATE TABLE iris._lcs_array (
     name VARCHAR(20) PRIMARY KEY,
-    notes text NOT NULL,
+    notes VARCHAR(128),
     shift INTEGER NOT NULL,
     lcs_lock INTEGER REFERENCES iris.lcs_lock(id)
 );
@@ -4618,7 +4628,7 @@ COPY iris.meter_lock (id, description) FROM stdin;
 CREATE TABLE iris._ramp_meter (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-    notes VARCHAR(128) NOT NULL,
+    notes VARCHAR(128),
     meter_type INTEGER NOT NULL REFERENCES iris.meter_type(id),
     storage INTEGER NOT NULL,
     max_wait INTEGER NOT NULL,
@@ -4839,7 +4849,7 @@ GRANT SELECT ON toll_zone_view TO PUBLIC;
 CREATE TABLE iris._tag_reader (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-    notes VARCHAR(64) NOT NULL,
+    notes VARCHAR(64),
     toll_zone VARCHAR(20) REFERENCES iris.toll_zone(name),
     settings JSONB
 );
@@ -5071,7 +5081,7 @@ GRANT SELECT ON monitor_style_view TO PUBLIC;
 
 CREATE TABLE iris._video_monitor (
     name VARCHAR(12) PRIMARY KEY,
-    notes VARCHAR(32) NOT NULL,
+    notes VARCHAR(32),
     group_n VARCHAR(16),
     mon_num INTEGER NOT NULL,
     restricted BOOLEAN NOT NULL,
@@ -5268,7 +5278,7 @@ CREATE TABLE iris._weather_sensor (
     site_id VARCHAR(20),
     alt_id VARCHAR(20),
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-    notes VARCHAR(64) NOT NULL,
+    notes VARCHAR(64),
     settings JSONB,
     sample JSONB,
     sample_time TIMESTAMP WITH time zone

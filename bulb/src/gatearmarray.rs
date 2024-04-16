@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,13 +10,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME};
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::gatearm::warn_state;
-use crate::resource::{
-    AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
-};
 use crate::util::{ContainsLower, Fields, HtmlStr};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::iter::{empty, once};
@@ -34,10 +33,10 @@ pub struct GateArmState {
 pub struct GateArmArray {
     pub name: String,
     pub location: Option<String>,
-    pub notes: String,
+    pub notes: Option<String>,
     pub arm_state: u32,
     pub interlock: u32,
-    // full attributes
+    // secondary attributes
     pub geo_loc: Option<String>,
 }
 
@@ -61,7 +60,7 @@ impl GateArmArrayAnc {
     }
 }
 
-const GATE_ARM_STATE_URI: &str = "/iris/gate_arm_state";
+const GATE_ARM_STATE_URI: &str = "/iris/lut/gate_arm_state";
 
 impl AncillaryData for GateArmArrayAnc {
     type Primary = GateArmArray;
@@ -93,8 +92,6 @@ impl AncillaryData for GateArmArrayAnc {
 }
 
 impl GateArmArray {
-    pub const RESOURCE_N: &'static str = "gate_arm_array";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let warn = warn_state(self.arm_state);
@@ -138,6 +135,14 @@ impl fmt::Display for GateArmArray {
 
 impl Card for GateArmArray {
     type Ancillary = GateArmArrayAnc;
+
+    /// Display name
+    const DNAME: &'static str = "⫭⫬ Gate Arm Array";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::GateArmArray
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,9 +10,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{inactive_attr, Card, View, EDIT_BUTTON, NAME};
 use crate::device::{Device, DeviceAnc};
-use crate::resource::{inactive_attr, Card, View, EDIT_BUTTON, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -22,15 +23,13 @@ pub struct VideoMonitor {
     pub name: String,
     pub mon_num: u32,
     pub controller: Option<String>,
-    // full attributes
+    // secondary attributes
     pub pin: Option<u32>,
 }
 
 type VideoMonitorAnc = DeviceAnc<VideoMonitor>;
 
 impl VideoMonitor {
-    pub const RESOURCE_N: &'static str = "video_monitor";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &VideoMonitorAnc) -> String {
         let item_state = anc.item_state(self);
@@ -93,6 +92,14 @@ impl Device for VideoMonitor {
 
 impl Card for VideoMonitor {
     type Ancillary = VideoMonitorAnc;
+
+    /// Display name
+    const DNAME: &'static str = "📺 Video Monitor";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::VideoMonitor
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

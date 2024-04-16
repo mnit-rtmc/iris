@@ -1,9 +1,9 @@
 [workspace]
-members = ["honeybee", "mayfly", "bulb", "rendzina"]
+members = ["honeybee", "mayfly", "bulb", "rendzina", "resources"]
 resolver = "2"
 
 [workspace.package]
-version = "5.51.0"
+version = "5.52.0"
 edition = "2021"
 
 [workspace.dependencies]

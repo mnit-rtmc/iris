@@ -7,7 +7,7 @@ traffic (typically one for each lane).  It can display a set of **indications**
 which either permit or restrict use of that lane.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/lane_use_indication` (lookup table)
 * `iris/lcs_lock` (lookup table)
@@ -30,7 +30,7 @@ which either permit or restrict use of that lane.
 LCS are grouped into **arrays**, with one over each lane.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/lcs_array` (primary)
 * `iris/api/lcs_array/{name}`
@@ -47,7 +47,7 @@ LCS are grouped into **arrays**, with one over each lane.
 ## Indications
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/lcs_indication` (primary)
 * `iris/api/lcs_indication/{name}`
@@ -103,7 +103,7 @@ A lane marking is an in-pavement LED which can dynamically change lane
 striping.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/lane_marking` (primary)
 * `iris/api/lane_marking/{name}`

@@ -10,13 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME};
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
 use crate::fetch::{Action, ContentType, Uri};
 use crate::item::{ItemState, ItemStates};
-use crate::resource::{
-    AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
-};
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, OptVal};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use fnv::FnvHasher;
@@ -26,6 +24,7 @@ use ntcip::dms::multi::{
 };
 use ntcip::dms::{tfon, Font, FontTable, GraphicTable, MessagePattern};
 use rendzina::{load_graphic, SignConfig};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::fmt;
@@ -102,7 +101,7 @@ pub struct Dms {
     pub hashtags: Option<String>,
     pub msg_current: Option<String>,
     pub has_faults: Option<bool>,
-    // full attributes
+    // secondary attributes
     pub pin: Option<u32>,
     pub static_graphic: Option<String>,
     pub beacon: Option<String>,
@@ -278,16 +277,18 @@ impl AncillaryData for DmsAnc {
         // Have we been here before?
         if !self.fnames.is_empty() {
             for fname in &self.fnames {
-                uris.push(
-                    Uri::from(format!("/iris/api/tfon/{}.tfon", fname.name))
-                        .with_content_type(ContentType::Text),
-                );
+                let mut uri = Uri::from("/iris/tfon/")
+                    .with_content_type(ContentType::Text);
+                uri.push(&fname.name);
+                uri.add_extension(".tfon");
+                uris.push(uri);
             }
             for gname in &self.gnames {
-                uris.push(
-                    Uri::from(format!("/iris/api/gif/{}.gif", gname.name))
-                        .with_content_type(ContentType::Gif),
-                );
+                let mut uri =
+                    Uri::from("/iris/gif/").with_content_type(ContentType::Gif);
+                uri.push(&gname.name);
+                uri.add_extension(".gif");
+                uris.push(uri);
             }
             return Box::new(uris.into_iter());
         }
@@ -660,8 +661,6 @@ const DEDICATED: &[&str] = &[
 ];
 
 impl Dms {
-    pub const RESOURCE_N: &'static str = "dms";
-
     /// Get multi of current message
     fn current_multi<'a>(&'a self, anc: &'a DmsAnc) -> &'a str {
         anc.sign_message(self.msg_current.as_deref())
@@ -697,19 +696,6 @@ impl Dms {
         } else {
             None
         }
-    }
-
-    /// Get all item states as html options
-    pub fn item_state_options() -> &'static str {
-        "<option value=''>all ↴\
-         <option value='🔹'>🔹 available\
-         <option value='🔶'>🔶 deployed\
-         <option value='🕗'>🕗 planned\
-         <option value='👽'>👽 external\
-         <option value='🎯'>🎯 dedicated\
-         <option value='⚠️'>⚠️ fault\
-         <option value='🔌'>🔌 offline\
-         <option value='▪️'>▪️ inactive"
     }
 
     /// Get item states
@@ -779,9 +765,8 @@ impl Dms {
         let mut html = String::new();
         html.push_str("<div id='mc_grid'>");
         let pat_def = self.pattern_default(anc);
-        if let Some(pat) = pat_def {
-            render_preview(&mut html, &sign, &pat.multi);
-        }
+        let multi = pat_def.map(|pat| &pat.multi[..]).unwrap_or("");
+        render_preview(&mut html, &sign, multi);
         html.push_str("<select id='mc_pattern'>");
         for pat in &anc.compose_patterns {
             html.push_str("<option");
@@ -928,6 +913,25 @@ impl Device for Dms {
 impl Card for Dms {
     type Ancillary = DmsAnc;
 
+    /// Display name
+    const DNAME: &'static str = "⬛ Dms";
+
+    /// All item states as html options
+    const ITEM_STATES: &'static str = "<option value=''>all ↴\
+         <option value='🔹'>🔹 available\
+         <option value='🔶'>🔶 deployed\
+         <option value='🕗'>🕗 planned\
+         <option value='👽'>👽 external\
+         <option value='🎯'>🎯 dedicated\
+         <option value='⚠️'>⚠️ fault\
+         <option value='🔌'>🔌 offline\
+         <option value='▪️'>▪️ inactive";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::Dms
+    }
+
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
@@ -1026,13 +1030,17 @@ fn sign_msg_owner(priority: u32) -> Option<String> {
 
 /// Render sign preview image
 fn render_preview(html: &mut String, sign: &Sign, multi: &str) {
+    html.push_str("<img id='mc_preview' width='240' height='80' ");
     let mut buf = Vec::with_capacity(4096);
-    if let Err(e) = rendzina::render(&mut buf, sign, multi, Some(240), Some(80))
-    {
-        console::log_1(&format!("render_preview: {e:?}").into());
-        return;
-    };
-    html.push_str("<img id='mc_preview' src='data:image/gif;base64,");
-    b64enc.encode_string(buf, html);
-    html.push_str("'/>");
+    match rendzina::render(&mut buf, sign, multi, Some(240), Some(80)) {
+        Ok(()) => {
+            html.push_str("src='data:image/gif;base64,");
+            b64enc.encode_string(buf, html);
+            html.push_str("'/>");
+        }
+        Err(e) => {
+            console::log_1(&format!("render_preview: {e:?}").into());
+            html.push_str("src=''/>");
+        }
+    }
 }

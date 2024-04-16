@@ -6,7 +6,7 @@ A comm configuration is a set of properties which is shared among multiple
 [comm link]s.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/comm_config` (primary)
 * `iris/api/comm_config/{name}`

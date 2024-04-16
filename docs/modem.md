@@ -7,7 +7,7 @@ Modems can be used to connect [comm link]s to a *plain-old telephone system*
 phone number instead of IP address.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/modem` (primary)
 * `iris/api/modem/{name}`

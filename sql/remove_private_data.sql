@@ -58,17 +58,17 @@ UPDATE iris.system_attribute SET value = '' WHERE name = 'work_request_url';
 UPDATE iris.system_attribute SET value = '' WHERE name LIKE 'subnet_target_%';
 UPDATE iris.system_attribute SET value = '' WHERE name LIKE 'camera_%_url';
 
-DELETE FROM iris.i_user_domain;
-DELETE FROM iris.i_user;
+DELETE FROM iris.user_id_domain;
+DELETE FROM iris.user_id;
 DELETE FROM iris.domain WHERE name NOT LIKE 'any_%';
 DELETE FROM iris.role_capability
     WHERE role NOT IN ('administrator', 'operator');
 DELETE FROM iris.role WHERE name NOT IN ('administrator', 'operator');
 
-INSERT INTO iris.i_user (name, full_name, password, dn, role, enabled)
+INSERT INTO iris.user_id (name, full_name, password, dn, role, enabled)
   VALUES('admin', 'IRIS Administrator', '+vAwDtk/0KGx9k+kIoKFgWWbd3Ku8e/FOHoZoHB65PAuNEiN2muHVavP0fztOi4=', '', 'administrator', 't');
 
-INSERT INTO iris.i_user_domain (i_user, domain)
+INSERT INTO iris.user_id_domain (user_id, domain)
   VALUES ('admin', 'any_ipv4'), ('admin', 'any_ipv6');
 
 INSERT INTO iris.map_extent (name, lat, lon, zoom)

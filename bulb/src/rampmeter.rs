@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,11 +10,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{inactive_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME};
 use crate::device::{Device, DeviceAnc};
-use crate::resource::{
-    inactive_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
-};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -24,7 +23,7 @@ pub struct RampMeter {
     pub name: String,
     pub location: Option<String>,
     pub controller: Option<String>,
-    // full attributes
+    // secondary attributes
     pub geo_loc: Option<String>,
     pub pin: Option<u32>,
 }
@@ -32,8 +31,6 @@ pub struct RampMeter {
 type RampMeterAnc = DeviceAnc<RampMeter>;
 
 impl RampMeter {
-    pub const RESOURCE_N: &'static str = "ramp_meter";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &RampMeterAnc) -> String {
         let item_state = anc.item_state(self);
@@ -97,6 +94,14 @@ impl Device for RampMeter {
 
 impl Card for RampMeter {
     type Ancillary = RampMeterAnc;
+
+    /// Display name
+    const DNAME: &'static str = "🚦 Ramp Meter";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::RampMeter
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -11,16 +11,16 @@
 // GNU General Public License for more details.
 //
 use crate::cabinetstyle::CabinetStyle;
+use crate::card::{
+    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
+};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::item::ItemState;
-use crate::resource::{
-    inactive_attr, AncillaryData, Card, Resource, View, EDIT_BUTTON,
-    LOC_BUTTON, NAME,
-};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select, TextArea};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::iter::empty;
@@ -58,10 +58,10 @@ pub struct Controller {
     pub drop_id: u16,
     pub cabinet_style: Option<String>,
     pub condition: u32,
-    pub notes: String,
+    pub notes: Option<String>,
     pub setup: Option<Setup>,
     pub fail_time: Option<String>,
-    // full attributes
+    // secondary attributes
     pub geo_loc: Option<String>,
     pub password: Option<String>,
 }
@@ -76,7 +76,7 @@ pub struct ControllerAnc {
     pub controller_io: Option<Vec<ControllerIo>>,
 }
 
-const CONDITION_URI: &str = "/iris/condition";
+const CONDITION_URI: &str = "/iris/lut/condition";
 const COMM_LINK_URI: &str = "/iris/api/comm_link";
 const COMM_CONFIG_URI: &str = "/iris/api/comm_config";
 const CABINET_STYLE_URI: &str = "/iris/api/cabinet_style";
@@ -99,15 +99,19 @@ impl AncillaryData for ControllerAnc {
                 ]
                 .into_iter(),
             ),
-            View::Status(_) => Box::new(
-                [
-                    CONDITION_URI.into(),
-                    COMM_LINK_URI.into(),
-                    COMM_CONFIG_URI.into(),
-                    format!("/iris/api/controller_io/{}", &pri.name).into(),
-                ]
-                .into_iter(),
-            ),
+            View::Status(_) => {
+                let mut uri = Uri::from("/iris/api/controller_io/");
+                uri.push(&pri.name);
+                Box::new(
+                    [
+                        CONDITION_URI.into(),
+                        COMM_LINK_URI.into(),
+                        COMM_CONFIG_URI.into(),
+                        uri,
+                    ]
+                    .into_iter(),
+                )
+            }
             View::Edit => Box::new(
                 [CONDITION_URI.into(), CABINET_STYLE_URI.into()].into_iter(),
             ),
@@ -236,21 +240,24 @@ impl ControllerIo {
     /// Create a button to select the controller IO
     pub fn button_link_html(&self) -> String {
         let pin = self.pin;
-        let res = Resource::from_name(&self.resource_n);
-        let symbol = res.symbol();
-        let rname = res.rname();
-        let name = HtmlStr::new(&self.name);
-        format!(
-            "<li class='row'>\
-              <span>#{pin}</span>\
-              <span>{symbol} \
-                <button type='button' class='go_link' \
-                        data-link='{name}' data-type='{rname}'>\
-                        {name}\
-                </button>\
-              </span>\
-            </li>"
-        )
+        match Res::try_from(self.resource_n.as_str()) {
+            Ok(res) => {
+                let symbol = res.symbol();
+                let name = HtmlStr::new(&self.name);
+                format!(
+                    "<li class='row'>\
+                      <span>#{pin}</span>\
+                      <span>{symbol} \
+                        <button type='button' class='go_link' \
+                                data-link='{name}' data-type='{res}'>\
+                                {name}\
+                        </button>\
+                      </span>\
+                    </li>"
+                )
+            }
+            _ => String::new(),
+        }
     }
 }
 
@@ -261,8 +268,6 @@ impl fmt::Display for Controller {
 }
 
 impl Controller {
-    pub const RESOURCE_N: &'static str = "controller";
-
     /// Is controller active?
     pub fn is_active(&self) -> bool {
         // condition 1 is "Active"
@@ -305,11 +310,11 @@ impl Controller {
 
     /// Create a button to select the controller
     pub fn button_html(&self) -> String {
-        let rname = Resource::Controller.rname();
+        let res = Res::Controller;
         let link_drop = HtmlStr::new(self.link_drop());
         format!(
             "<button type='button' class='go_link' \
-                     data-link='{link_drop}' data-type='{rname}'>\
+                     data-link='{link_drop}' data-type='{res}'>\
                      {link_drop}\
             </button>"
         )
@@ -340,7 +345,7 @@ impl Controller {
 
     /// Convert to status HTML
     fn to_html_status(&self, anc: &ControllerAnc) -> String {
-        let rname = Resource::CommLink.rname();
+        let res = Res::CommLink;
         let condition = anc.condition(self);
         let item_state = self.item_state();
         let item_desc = item_state.description();
@@ -401,7 +406,7 @@ impl Controller {
               <span>{item_state} {item_desc}</span>\
               <span>\
                 <button type='button' class='go_link' \
-                        data-link='{comm_link}' data-type='{rname}'>\
+                        data-link='{comm_link}' data-type='{res}'>\
                   {comm_link}\
                 </button>\
                 :{drop_id}\
@@ -468,6 +473,14 @@ impl Controller {
 
 impl Card for Controller {
     type Ancillary = ControllerAnc;
+
+    /// Display name
+    const DNAME: &'static str = "🎛️ Controller";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::Controller
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

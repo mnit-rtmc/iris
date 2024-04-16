@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2020  SRF Consulting Group
+ * Copyright (C) 2019-2024  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -36,6 +37,7 @@ import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JToolTip;
 import javax.swing.KeyStroke;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.AncestorEvent;
@@ -46,6 +48,7 @@ import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.VideoRequest.Size;
@@ -431,7 +434,20 @@ public class VidPanel extends JPanel implements FocusListener {
 		}
 	};
 
-	/** Add top label line */
+	/** Substitute camera-name label to show PtzInfo tooltip */
+	private class CameraNameLabel extends JLabel {
+		@Override
+		public String getToolTipText(MouseEvent evt) {
+			Camera cam = camera;
+			if (cam == null)
+				return null;
+			String txt = CameraHelper.getPtzInfo(camera);
+			setToolTipText(txt);
+			return txt;
+		}
+	}
+
+	/** Add top label (camera-name) line */
 	private void addTopLabel(String txt) {
 		Color nameColorBG;
 		Color nameColorFG = Color.BLACK;
@@ -445,8 +461,9 @@ public class VidPanel extends JPanel implements FocusListener {
 					: Color.LIGHT_GRAY;
 		if (pausePanel)
 			nameColorFG = Color.WHITE;
-		add(createLabel(txt, nameColorFG, nameColorBG),
-			BorderLayout.NORTH);
+		JLabel lbl = new CameraNameLabel();
+		configureLabel(lbl, txt, nameColorFG, nameColorBG);
+		add(lbl, BorderLayout.NORTH);
 	}
 
 	private void addVideo(JComponent vidcomp) {
@@ -462,18 +479,17 @@ public class VidPanel extends JPanel implements FocusListener {
 
 	/** Add bottom label line, with optional colors */
 	private void addBottomLabel(String txt, Color fgColor, Color bgColor) {
-		add(createLabel(txt, fgColor, bgColor), BorderLayout.SOUTH);
+		JLabel lbl = new JLabel();
+		configureLabel(lbl, txt, fgColor, bgColor);
+		add(lbl, BorderLayout.SOUTH);
 	}
 
-	/** Create a label */
-	private JLabel createLabel(String txt) {
-		return createLabel(txt, null, null);
-	}
-
-	/** Create a label.
+	/** Configure a label.
 	 * (Adds a tool-tip if the text is wider than the label */
-	private JLabel createLabel(String txt, Color fgColor, Color bgColor) {
-		JLabel lbl = new JLabel(txt);
+	private JLabel configureLabel(
+			JLabel lbl, String txt,
+			Color fgColor, Color bgColor) {
+		lbl.setText(txt);
 		lbl.setHorizontalAlignment(JLabel.CENTER);
 		FontMetrics lblFontMetrics = lbl.getFontMetrics(lbl.getFont());
 		if (fgColor != null)

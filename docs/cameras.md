@@ -9,7 +9,7 @@ video.  To view MPEG4 or h.264 video, the [MonStream] application is required.
 Select `View ➔ Video ➔ Cameras` menu item
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/camera_pub`
 * `iris/api/camera` (primary)

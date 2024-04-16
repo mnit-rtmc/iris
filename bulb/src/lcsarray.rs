@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,10 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{AncillaryData, Card, View, EDIT_BUTTON, NAME};
 use crate::error::Result;
 use crate::fetch::Uri;
-use crate::resource::{AncillaryData, Card, View, EDIT_BUTTON, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::iter::once;
@@ -30,9 +31,9 @@ pub struct LcsLock {
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct LcsArray {
     pub name: String,
-    pub notes: String,
+    pub notes: Option<String>,
     pub lcs_lock: Option<u32>,
-    // full attributes
+    // secondary attributes
     pub shift: Option<u32>,
 }
 
@@ -56,7 +57,7 @@ impl LcsArrayAnc {
     }
 }
 
-const LCS_LOCK_URI: &str = "/iris/lcs_lock";
+const LCS_LOCK_URI: &str = "/iris/lut/lcs_lock";
 
 impl AncillaryData for LcsArrayAnc {
     type Primary = LcsArray;
@@ -83,8 +84,6 @@ impl AncillaryData for LcsArrayAnc {
 }
 
 impl LcsArray {
-    pub const RESOURCE_N: &'static str = "lcs_array";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LcsArrayAnc) -> String {
         let lock = anc.lock(self);
@@ -125,6 +124,14 @@ impl fmt::Display for LcsArray {
 
 impl Card for LcsArray {
     type Ancillary = LcsArrayAnc;
+
+    /// Display name
+    const DNAME: &'static str = "🡇🡇 LCS Array";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::LcsArray
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

@@ -6,10 +6,10 @@ Graphic images can be displayed on [DMS] [sign message]s.  These can be warning
 pictographs, interstate shields or other signs.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/graphic` (primary)
-* `iris/api/gif/{name}.gif`
+* `iris/gif/{name}.gif`
 
 | Access  | Primary      |
 |---------|--------------|
@@ -28,8 +28,7 @@ Requirements:
 - Width between 1 and 240 pixels
 - Height between 1 and 144 pixels
 
-Store graphics in `/var/lib/iris/web/api/gif/` to make available in the
-[REST API].
+Store graphics in `/var/lib/iris/web/gif/` to make available in the [REST API].
 
 To import a graphic into the database, enable [edit mode] and press the
 **Create** button.  Select the image in the file picker.

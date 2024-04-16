@@ -29,42 +29,45 @@ update, and is caused by one of these conditions:
 
 *Notify Channel*   | (G) | (C) | (P) | (H)
 -------------------|-----|-----|-----|----
-`alarm`            | ❌  | ✔️   | ❌  | ❌
-`beacon`           | ✔️   | ✔️   | ✔️   | ❌
-`cabinet_style`    | ❌  | ❌  | ❌  | ❌
-`camera`           | ✔️   | ✔️   | ❌  | ❌
-`comm_config`      | ❌  | ❌  | ❌  | ❌
-`comm_link`        | ❌  | ❌  | ❌  | ❌
-`controller`       | ✔️   | ❌  | ❌  | ❌
-`detector`         | ❌  | ✔️   | ❌  | ❌
+`alarm`            |     | ✔️   |     |
+`beacon`           | ✔️   | ✔️   | ✔️   |
+`cabinet_style`    |     |     |     |
+`camera`           | ✔️   | ✔️   |     |
+`camera_publish` † |     |     |     |
+`comm_config`      |     |     |     |
+`comm_link`        |     |     |     |
+`controller`       | ✔️   |     |     |
+`detector`         |     | ✔️   |     |
 `dms`              | ✔️   | ✔️   | ✔️   | ✔️ 
-`flow_stream`      | ❌  | ✔️   | ❌  | ❌
-`gps`              | ✔️   | ✔️   | ❌  | ❌
-`gate_arm`         | ❌  | ✔️   | ❌  | ❌
-`gate_arm_array`   | ✔️   | ✔️   | ❌  | ❌
-`graphic`          | ❌  | ❌  | ❌  | ❌
-`i_user`           | ❌  | ❌  | ❌  | ❌
-`incident`         | ❌  | ❌  | ❌  | ❌
-`lane_marking`     | ✔️   | ✔️   | ❌  | ❌
-`lcs_array`        | ❌  | ✔️   | ❌  | ❌
-`lcs_indication`   | ❌  | ✔️   | ❌  | ❌
-`modem`            | ❌  | ❌  | ❌  | ❌
-`msg_pattern`      | ❌  | ❌  | ❌  | ❌
-`msg_line`         | ❌  | ❌  | ❌  | ❌
-`parking_area`     | ✔️   | ❌  | ❌  | ❌
-`permission`       | ❌  | ❌  | ❌  | ❌
-`ramp_meter`       | ✔️   | ✔️   | ✔️   | ❌
-`r_node`           | ✔️   | ❌  | ❌  | ❌
-`road`             | ❌  | ❌  | ❌  | ❌
-`role`             | ❌  | ❌  | ❌  | ❌
-`sign_config`      | ❌  | ❌  | ❌  | ❌
-`sign_detail`      | ❌  | ❌  | ❌  | ❌
-`sign_message`     | ❌  | ❌  | ❌  | ❌
-`system_attribute` | ❌  | ❌  | ❌  | ❌
-`tag_reader`       | ✔️   | ✔️   | ❌  | ❌
-`video_monitor`    | ❌  | ✔️   | ❌  | ❌
-`weather_sensor`   | ✔️   | ✔️   | ❌  | ❌
-`word`             | ❌  | ❌  | ❌  | ❌
+`flow_stream`      |     | ✔️   |     |
+`gps`              | ✔️   | ✔️   |     |
+`gate_arm`         |     | ✔️   |     |
+`gate_arm_array`   | ✔️   | ✔️   |     |
+`graphic`          |     |     |     |
+`incident`         |     |     |     |
+`lane_marking`     | ✔️   | ✔️   |     |
+`lcs_array`        |     | ✔️   |     |
+`lcs_indication`   |     | ✔️   |     |
+`modem`            |     |     |     |
+`msg_pattern`      |     |     |     |
+`msg_line`         |     |     |     |
+`parking_area`     | ✔️   |     |     |
+`permission`       |     |     |     |
+`ramp_meter`       | ✔️   | ✔️   | ✔️   |
+`r_node`           | ✔️   |     |     |
+`road`             |     |     |     |
+`role`             |     |     |     |
+`sign_config`      |     |     |     |
+`sign_detail`      |     |     |     |
+`sign_message`     |     |     |     |
+`system_attribute` |     |     |     |
+`tag_reader`       | ✔️   | ✔️   |     |
+`user_id`          |     |     |     |
+`video_monitor`    |     | ✔️   |     |
+`weather_sensor`   | ✔️   | ✔️   |     |
+`word`             |     |     |     |
+
+† _Notifies only on `UPDATE` to 'publish' attribute, with camera name payload_
 
 ## Backup & Restore
 

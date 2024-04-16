@@ -1,5 +1,15 @@
 # IRIS 5.x Release Notes
 
+5.52.0 (2 Apr 2024)
+ - Improve ONVIF compatibility
+ - Added 'camera_publish' notification channel
+ - sql: Renamed i_user to user_id (also i_user_view => user_id_view)
+ - sql: Make notes nullable (controller, r_node, all devices)
+ - Fixed rare exception when querying fonts from signs
+ - Fixed nginx caching problem
+ - honeybee: Fixed routing problems
+ - honeybee: Rearranged directories
+
 5.51.0 (19 Mar 2024)
  - honeybee: Add SSE push notifications
  - Simplified Postgres LISTEN/NOTIFY scheme

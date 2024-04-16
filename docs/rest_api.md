@@ -2,70 +2,49 @@
 
 The REST API is provided by the [honeybee] service.
 
-## Requests
+```text
+iris/
+├── api/
+├── gif/
+├── img/
+├── lut/
+└── tfon/
+```
 
-Data requests are split into *public* and *restricted* paths:
+### Public Resources: `iris/`
 
-- `iris/`: Public resources / lookup tables (no authentication)
-- `iris/img/`: Public sign images (no authentication)
-- `iris/api/`: Restricted data (needs session authentication)
-- `iris/api/login`: Authentication endpoint
-- `iris/api/access`: User's access [permission]s
-- `iris/api/notify`: [Event notification](#event-notification) endpoint
+These are JSON arrays, fetched using http `GET` requests:
 
-## Public Resources
+- `camera_pub`  [Camera] locations and configuration
+- `detector_pub`  Vehicle [detector]s
+- `dms_message`  [DMS] messages and status
+- `dms_pub`  [DMS] locations and configuration
+- `incident`  Active [incident]s
+- `rwis`  [Road Weather Information System]
+- `sign_message`  Active DMS [sign message]s
+- `station_sample`  Vehicle [detector] station data
+- `system_attribute_pub`  Public [system attributes]
+- `TPIMS_archive`  Truck [parking] archive data
+- `TPIMS_dynamic`  Truck [parking] dynamic data
+- `TPIMS_static`  Truck [parking] static data
 
-These resources are JSON arrays, fetched using http `GET` requests.
+### Restricted Resources: `iris/api/`
 
-- `iris/camera_pub`: [Camera] locations and configuration
-- `iris/detector_pub`: Vehicle detectors
-- `iris/dms_message`: Current [DMS] messages and status
-- `iris/dms_pub`: [DMS] locations and configuration
-- `iris/incident`: Currently active incidents
-- `iris/rwis`: [Road Weather Information System]
-- `iris/sign_message`: Active DMS [sign message]s
-- `iris/station_sample`: Vehicle detection station data
-- `iris/system_attribute_pub`: Public [system attributes]
-- `iris/TPIMS_archive`: Truck parking archive data
-- `iris/TPIMS_dynamic`: Truck parking dynamic data
-- `iris/TPIMS_static`: Truck parking static data
+- `login`  Authentication endpoint — `POST iris/api/login` with a JSON object
+  containing `username` and `password` values.  A session cookie is created
+  for subsequent restricted requests.
+- `access`  Access [permission]s — `GET iris/api/access` returns a JSON array
+  of [permission] records associated with the authenticated user's role.
+- `notify`  Notification endpoint — `POST iris/api/notify` with a JSON array
+  containing [channels] of interest.  To get notifications for a single object,
+  append `$`_name_ to the channel name.  Using [SSE], a client can receive
+  notifications by sending a `GET iris/api/notify` request, with [EventSource].
 
-### Lookup Tables
-
-These resources are static, and may only change on IRIS updates:
-
-- `iris/beacon_state`: [Beacon] states
-- `iris/comm_protocol`: Communication protocols
-- `iris/condition`: [Controller] conditions
-- `iris/direction`: Travel directions
-- `iris/gate_arm_interlock`: Gate arm interlocks
-- `iris/gate_arm_state`: Gate arm states
-- `iris/lane_use_indication`: Lane use indications
-- `iris/lcs_lock`: LCS lock codes
-- `iris/resource_type`: [Resource types] available in `iris/api/`
-- `iris/road_modifier`: Road modifiers
-
-### Sign Images
-
-The resources in `iris/img/` are GIF images of active [sign message]s from
-`sign_message`.
-
-## Login and Access
-
-Authentication uses a `POST iris/api/login` request with a JSON object
-containing `username` and `password` values.  This returns a session cookie
-which can be used for subsequent restricted requests.
-
-A `GET iris/api/access` request returns a JSON array of [permission] records
-associated with the authenticated user's role.  This endpoint is required for
-roles which do not have any access to the [permission], [role] and [user] types.
-
-## Restricted Resources
-
-Restricted resources can be accessed using standard http methods:
+These resources can be accessed using standard http methods.  Access is
+restricted by session authentication and [permission] authorization.
 
 - `GET iris/api/{type}`: Get a JSON array of all objects of `{type}`, with only
-  *primary* attributes -- those needed for searching and displaying compact
+  *primary* attributes — those needed for searching and displaying compact
   cards.  The response also contains an [ETag] header, derived from the file's
   *modified* metadata, encoded in hexadecimal.
 - `GET iris/api/{type}/{name}`: Get a single object as JSON, with *primary* and
@@ -77,7 +56,7 @@ Restricted resources can be accessed using standard http methods:
 
 A `Content-Type: application/json` header is included where appropriate.
 
-## Resource Types
+#### Resource Types
 
 | Access Control | Communication   | Devices    |                  |
 |----------------|-----------------|------------|------------------|
@@ -90,14 +69,34 @@ A `Content-Type: application/json` header is included where appropriate.
 
 Most devices also have an associated [geo loc] resource.
 
-## Event Notification
+### Graphics: `iris/gif/`
 
-Clients can subscribe to [channels] by sending a `POST iris/api/notify`, with
-a JSON array containing channels of interest.  To get notifications for a
-single object, append `$`_name_ to the channel name.
+These are static [graphics] which can be used in [sign message]s.
 
-Using [SSE], a client can receive notifications by sending a
-`GET iris/api/notify` request, with [EventSource].
+### Sign Images: `iris/img/`
+
+These are public GIF images of active [sign message]s from `iris/sign_message`.
+They are rendered to appear as the entire face of a sign, with multi-page
+messages as animated GIFs.
+
+### Lookup Tables: `iris/lut/`
+
+These are static resources which may only change on IRIS updates:
+
+- `beacon_state`  [Beacon] states
+- `comm_protocol`  Communication [protocols]
+- `condition`  [Controller] conditions
+- `direction`  Travel directions
+- `gate_arm_interlock`  [Gate arm] interlocks
+- `gate_arm_state`  [Gate arm] states
+- `lane_use_indication`  [LCS] lane use indications
+- `lcs_lock`  [LCS] lock codes
+- `resource_type`  [Resource types] available in `iris/api/`
+- `road_modifier`  Road modifiers
+
+### Fonts: `iris/tfon/`
+
+These are static [font]s which can be used in [sign message]s.
 
 
 [alarm]: alarms.html
@@ -114,13 +113,18 @@ Using [SSE], a client can receive notifications by sending a
 [domain]: user_roles.html#domains
 [etag]: https://en.wikipedia.org/wiki/HTTP_ETag
 [EventSource]: https://developer.mozilla.org/en-US/docs/Web/API/EventSource
+[font]: fonts.html
 [gate arm]: gate_arms.html
 [geo loc]: geo_loc.html
 [gps]: gps.html
+[graphics]: graphics.html
 [honeybee]: https://github.com/mnit-rtmc/iris/tree/master/honeybee
+[incident]: incidents.html
 [lcs]: lcs.html
 [modem]: modem.html
+[parking]: parking_areas.html
 [permission]: permissions.html
+[protocols]: protocols.html
 [ramp meter]: ramp_meters.html
 [resource types]: #resource-types
 [Road Weather Information System]: rwis.html

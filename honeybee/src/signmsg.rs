@@ -58,7 +58,6 @@ impl SignMessage {
 async fn load_fonts(dir: &Path) -> Result<FontTable<256, 24>> {
     let mut path = PathBuf::new();
     path.push(dir);
-    path.push("api");
     path.push("tfon");
     log::trace!("load_fonts {path:?}");
     let mut cache = Cache::new(&path, "tfon").await?;
@@ -82,7 +81,6 @@ async fn load_graphics(dir: &Path) -> Result<GraphicTable<32>> {
     log::trace!("load_graphics");
     let mut path = PathBuf::new();
     path.push(dir);
-    path.push("api");
     path.push("gif");
     let mut cache = Cache::new(&path, "gif").await?;
     let mut graphics = GraphicTable::default();

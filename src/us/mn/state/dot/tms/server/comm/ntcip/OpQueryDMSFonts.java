@@ -45,7 +45,7 @@ public class OpQueryDMSFonts extends OpDMS {
 
 	/** Directory to store font files */
 	static private final String FONT_FILE_DIR = 
-		DevelCfg.get("font.output.dir", "/var/lib/iris/web/api/tfon");
+		DevelCfg.get("font.output.dir", "/var/lib/iris/web/tfon");
 
 	/** Symbols for all ASCII + Latin 1 characters */
 	static private final String[] SYMBOL = new String[] {
@@ -325,7 +325,10 @@ public class OpQueryDMSFonts extends OpDMS {
 			int off = pos / 8;
 			int bit = 7 - (pos & 7); // 0b0111
 			byte[] bitmap = char_bitmap.getByteValue();
-			return (bitmap[off] >> bit & 1) != 0;
+			// NOTE: length check required --
+			//       sometimes width / bitmap don't match
+			return (off < bitmap.length)
+			    && (bitmap[off] >> bit & 1) != 0;
 		}
 	}
 }

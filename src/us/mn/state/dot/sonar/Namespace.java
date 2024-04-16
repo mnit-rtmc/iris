@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2019  Minnesota Department of Transportation
+ * Copyright (C) 2006-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -203,7 +203,7 @@ abstract public class Namespace {
 	 * @param u User to check.
 	 * @return true If user has read privileges. */
 	public boolean canRead(Name name, User u) {
-		return checkPriv(name, u, false);
+		return (u != null) && checkPriv(name, u, false);
 	}
 
 	/** Check if a user has write privileges.
@@ -211,7 +211,7 @@ abstract public class Namespace {
 	 * @param u User to check.
 	 * @return true If user has write privileges. */
 	public boolean canWrite(Name name, User u) {
-		return checkPriv(name, u, true);
+		return (u != null) && checkPriv(name, u, true);
 	}
 
 	/** Check if a user has privileges.

@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,15 +10,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{inactive_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME};
 use crate::device::{Device, DeviceAnc};
-use crate::resource::{
-    inactive_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
-};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use humantime::format_duration;
 use mag::length::{m, mm};
 use mag::temp::DegC;
 use mag::time::s;
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::time::Duration;
@@ -135,10 +134,10 @@ pub struct WeatherSensor {
     pub location: Option<String>,
     pub site_id: Option<String>,
     pub alt_id: Option<String>,
-    pub notes: String,
+    pub notes: Option<String>,
     pub geo_loc: Option<String>,
     pub controller: Option<String>,
-    // full attributes
+    // secondary attributes
     pub pin: Option<u32>,
     pub settings: Option<WeatherSettings>,
     pub sample: Option<WeatherData>,
@@ -685,8 +684,6 @@ fn sub_surface_html(
 }
 
 impl WeatherSensor {
-    pub const RESOURCE_N: &'static str = "weather_sensor";
-
     /// Get sample as HTML
     fn sample_html(&self) -> String {
         match &self.sample {
@@ -794,6 +791,14 @@ impl Device for WeatherSensor {
 
 impl Card for WeatherSensor {
     type Ancillary = WeatherSensorAnc;
+
+    /// Display name
+    const DNAME: &'static str = "🌦️ Weather Sensor";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::WeatherSensor
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

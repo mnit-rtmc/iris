@@ -179,10 +179,9 @@ pub const DIRECTION_LUT: &str = "\
 
 /// SQL query for all DMS (primary)
 pub const DMS_ALL: &str = "\
-SELECT json_strip_nulls(row_to_json(r))::text FROM (\
   SELECT d.name, location, msg_current, \
          NULLIF(char_length(status->>'faults') > 0, false) AS has_faults, \
-         NULLIF(notes, '') AS notes, hashtags, controller \
+         notes, hashtags, controller \
   FROM iris.dms d \
   LEFT JOIN geo_loc_view gl ON d.geo_loc = gl.name \
   LEFT JOIN (\
@@ -190,8 +189,7 @@ SELECT json_strip_nulls(row_to_json(r))::text FROM (\
     FROM iris.dms_hashtag \
     GROUP BY dms\
   ) h ON d.name = h.dms \
-  ORDER BY d.name\
-) r";
+  ORDER BY d.name";
 
 /// SQL query for one DMS (secondary)
 pub const DMS_ONE: &str = "\
@@ -398,11 +396,9 @@ pub const MODEM_ONE: &str = "\
 
 /// SQL query for all message lines (primary)
 pub const MSG_LINE_ALL: &str = "\
-SELECT json_strip_nulls(row_to_json(r))::text FROM (\
   SELECT name, msg_pattern, line, multi, restrict_hashtag \
   FROM iris.msg_line \
-  ORDER BY msg_pattern, line, rank, multi, restrict_hashtag\
-) r";
+  ORDER BY msg_pattern, line, rank, multi, restrict_hashtag";
 
 /// SQL query for one message line (secondary)
 pub const MSG_LINE_ONE: &str = "\
@@ -412,11 +408,9 @@ pub const MSG_LINE_ONE: &str = "\
 
 /// SQL query for all message patterns (primary)
 pub const MSG_PATTERN_ALL: &str = "\
-SELECT json_strip_nulls(row_to_json(r))::text FROM (\
   SELECT name, multi, compose_hashtag \
   FROM iris.msg_pattern \
-  ORDER BY name\
-) r";
+  ORDER BY name";
 
 /// SQL query for one message pattern (secondary)
 pub const MSG_PATTERN_ONE: &str = "\
@@ -557,14 +551,12 @@ pub const ROLE_ONE: &str = "\
 
 /// SQL query for all sign configs (primary)
 pub const SIGN_CONFIG_ALL: &str = "\
-SELECT json_strip_nulls(row_to_json(r))::text FROM (\
   SELECT name, face_width, face_height, border_horiz, border_vert, \
          pitch_horiz, pitch_vert, pixel_width, pixel_height, \
          char_width, char_height, monochrome_foreground, \
          monochrome_background, color_scheme, default_font, \
          module_width, module_height \
-  FROM sign_config_view\
-) r";
+  FROM sign_config_view";
 
 /// SQL query for one sign configuration (secondary)
 pub const SIGN_CONFIG_ONE: &str = "\
@@ -631,13 +623,13 @@ pub const TAG_READER_ONE: &str = "\
 /// SQL query for all users (primary)
 pub const USER_ALL: &str = "\
   SELECT name, full_name, role, enabled \
-  FROM iris.i_user \
+  FROM iris.user_id \
   ORDER BY name";
 
 /// SQL query for one user (secondary)
 pub const USER_ONE: &str = "\
   SELECT name, full_name, role, enabled \
-  FROM iris.i_user \
+  FROM iris.user_id \
   WHERE name = $1";
 
 /// SQL query for all video monitors (primary)
@@ -677,11 +669,9 @@ pub const WEATHER_SENSOR_PUB: &str = "\
 
 /// SQL query for all words (primary)
 pub const WORD_ALL: &str = "\
-SELECT json_strip_nulls(row_to_json(r))::text FROM (\
   SELECT name, abbr, allowed \
   FROM iris.word \
-  ORDER BY name\
-) r";
+  ORDER BY name";
 
 /// SQL query for one word (secondary)
 pub const WORD_ONE: &str = "\

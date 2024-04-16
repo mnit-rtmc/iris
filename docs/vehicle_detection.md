@@ -17,7 +17,7 @@ written to files.  An [XML file] called `det_sample.xml.gz` and a JSON file
 called `station_sample` are generated.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/detector_pub`
 * `iris/station_sample`: collected station data for most recent period

@@ -1,4 +1,4 @@
-// Copyright (C) 2022  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,8 +10,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::resource::{AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card, View};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -35,8 +36,6 @@ impl AncillaryData for CabinetStyleAnc {
 }
 
 impl CabinetStyle {
-    pub const RESOURCE_N: &'static str = "cabinet_style";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         format!("<div>{self}</div>")
@@ -87,6 +86,14 @@ impl fmt::Display for CabinetStyle {
 
 impl Card for CabinetStyle {
     type Ancillary = CabinetStyleAnc;
+
+    /// Display name
+    const DNAME: &'static str = "🗄️ Cabinet Style";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::CabinetStyle
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

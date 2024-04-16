@@ -294,7 +294,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		notes_txt.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				proxy.setNotes(notes_txt.getText());
+				String n = notes_txt.getText().trim();
+				proxy.setNotes((n.length() > 0) ? n : null);
 			}
 		});
 	}
@@ -379,8 +380,10 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 			drop_spn.setValue(proxy.getDrop());
 		if (a == null || a.equals("cabinetStyle"))
 			cab_style_act.updateSelected();
-		if (a == null || a.equals("notes"))
-			notes_txt.setText(proxy.getNotes());
+		if (a == null || a.equals("notes")) {
+			String n = proxy.getNotes();
+			notes_txt.setText((n != null) ? n : "");
+		}
 		if (a == null || a.equals("condition"))
 			condition_act.updateSelected();
 		if (a == null || a.equals("setup")) {

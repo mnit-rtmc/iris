@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,13 +10,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{
+    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
+};
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::fetch::Uri;
-use crate::resource::{
-    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
-};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::iter::once;
@@ -35,9 +36,9 @@ pub struct GateArm {
     pub name: String,
     pub location: Option<String>,
     pub controller: Option<String>,
-    pub notes: String,
+    pub notes: Option<String>,
     pub arm_state: u32,
-    // full attributes
+    // secondary attributes
     pub pin: Option<u32>,
 }
 
@@ -82,7 +83,7 @@ impl GateArmAnc {
     }
 }
 
-const GATE_ARM_STATE_URI: &str = "/iris/gate_arm_state";
+const GATE_ARM_STATE_URI: &str = "/iris/lut/gate_arm_state";
 
 impl AncillaryData for GateArmAnc {
     type Primary = GateArm;
@@ -95,7 +96,9 @@ impl AncillaryData for GateArmAnc {
     ) -> Box<dyn Iterator<Item = Uri>> {
         match (view, &pri.controller()) {
             (View::Status(_), Some(ctrl)) => {
-                Box::new(once(format!("/iris/api/controller/{ctrl}").into()))
+                let mut uri = Uri::from("/iris/api/controller/");
+                uri.push(ctrl);
+                Box::new(once(uri))
             }
             _ => Box::new(once(GATE_ARM_STATE_URI.into())),
         }
@@ -118,8 +121,6 @@ impl AncillaryData for GateArmAnc {
 }
 
 impl GateArm {
-    pub const RESOURCE_N: &'static str = "gate_arm";
-
     /// Get controller
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
@@ -179,6 +180,14 @@ impl fmt::Display for GateArm {
 
 impl Card for GateArm {
     type Ancillary = GateArmAnc;
+
+    /// Display name
+    const DNAME: &'static str = "⫬ Gate Arm";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::GateArm
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

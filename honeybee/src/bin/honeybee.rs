@@ -29,10 +29,11 @@ async fn main() -> Result<()> {
     let db = Database::new("tms").await?;
     let honey = Honey::new(&db);
     tokio::spawn(serve_routes(honey.clone()));
+    tokio::spawn(check_expired(honey.clone()));
     let mut state = SegmentState::new();
     let mut events = HashSet::new();
     let stream = notify_events(&db).await?;
-    let stream = stream.timeout(Duration::from_millis(250));
+    let stream = stream.timeout(Duration::from_millis(300));
     tokio::pin!(stream);
     loop {
         match stream.next().await {
@@ -56,9 +57,18 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
+/// Check for expired notifiers
+async fn check_expired(honey: Honey) {
+    let min = std::time::Duration::from_secs(60);
+    loop {
+        tokio::time::sleep(min).await;
+        honey.purge_expired();
+    }
+}
+
 /// Serve routes
 async fn serve_routes(honey: Honey) -> Result<()> {
-    let app = honey.route_root()?;
+    let app = honey.route_root();
     let listener = TcpListener::bind("127.0.0.1:3737").await?;
     axum::serve(listener, app).await?;
     log::warn!("Axum serve ended");

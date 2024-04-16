@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,10 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
 use crate::fetch::Uri;
-use crate::resource::{AncillaryData, Card, View};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::iter::empty;
@@ -56,7 +57,7 @@ pub struct GeoLoc {
     pub landmark: Option<String>,
     pub lat: Option<f64>,
     pub lon: Option<f64>,
-    // full attributes
+    // secondary attributes
     pub resource_n: Option<String>,
 }
 
@@ -69,8 +70,8 @@ pub struct GeoLocAnc {
 }
 
 const ROAD_URI: &str = "/iris/api/road";
-const DIRECTION_URI: &str = "/iris/direction";
-const ROAD_MODIFIER_URI: &str = "/iris/road_modifier";
+const DIRECTION_URI: &str = "/iris/lut/direction";
+const ROAD_MODIFIER_URI: &str = "/iris/lut/road_modifier";
 
 impl AncillaryData for GeoLocAnc {
     type Primary = GeoLoc;
@@ -187,8 +188,6 @@ impl GeoLocAnc {
 }
 
 impl GeoLoc {
-    pub const RESOURCE_N: &'static str = "geo_loc";
-
     /// Convert to Edit HTML
     fn to_html_edit(&self, anc: &GeoLocAnc) -> String {
         let roadway = anc.roads_html("roadway", self.roadway.as_deref());
@@ -239,6 +238,14 @@ impl fmt::Display for GeoLoc {
 
 impl Card for GeoLoc {
     type Ancillary = GeoLocAnc;
+
+    /// Display name
+    const DNAME: &'static str = "🗺️ Location";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::GeoLoc
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

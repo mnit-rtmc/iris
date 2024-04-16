@@ -15,7 +15,7 @@ must exist for each streambed server.  Each flow stream must be assigned to an
 Select `View ➔ Video ➔ Flow Streams` menu item
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/flow_stream` (primary)
 * `iris/api/flow_stream/{name}`

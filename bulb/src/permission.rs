@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,11 +10,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{AncillaryData, Card, View, NAME};
 use crate::error::{Error, Result};
 use crate::fetch::Uri;
-use crate::resource::{AncillaryData, Card, Resource, View, NAME};
 use crate::role::Role;
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, Select};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use std::fmt;
@@ -38,7 +39,7 @@ pub struct PermissionAnc {
     pub roles: Option<Vec<Role>>,
 }
 
-const RESOURCE_TYPE_URI: &str = "/iris/resource_type";
+const RESOURCE_TYPE_URI: &str = "/iris/lut/resource_type";
 const ROLE_URI: &str = "/iris/api/role";
 
 impl AncillaryData for PermissionAnc {
@@ -148,68 +149,7 @@ fn access_html(selected: u32) -> String {
     html
 }
 
-/// Build a `select` element of access permissions
-pub fn permissions_html(access: Vec<Permission>, config: bool) -> String {
-    let mut html = "<option/>".to_string();
-    for perm in &access {
-        if perm.hashtag.is_none() {
-            if config {
-                add_option(Resource::Alarm, perm, &mut html);
-            }
-            add_option(Resource::Beacon, perm, &mut html);
-            if config {
-                add_option(Resource::CabinetStyle, perm, &mut html);
-            }
-            add_option(Resource::Camera, perm, &mut html);
-            if config {
-                add_option(Resource::CommConfig, perm, &mut html);
-                add_option(Resource::CommLink, perm, &mut html);
-                add_option(Resource::Controller, perm, &mut html);
-                add_option(Resource::Detector, perm, &mut html);
-            }
-            add_option(Resource::Dms, perm, &mut html);
-            if config {
-                add_option(Resource::FlowStream, perm, &mut html);
-                add_option(Resource::GateArm, perm, &mut html);
-            }
-            add_option(Resource::GateArmArray, perm, &mut html);
-            if config {
-                add_option(Resource::Gps, perm, &mut html);
-            }
-            add_option(Resource::LaneMarking, perm, &mut html);
-            add_option(Resource::LcsArray, perm, &mut html);
-            if config {
-                add_option(Resource::LcsIndication, perm, &mut html);
-                add_option(Resource::Modem, perm, &mut html);
-                add_option(Resource::Permission, perm, &mut html);
-            }
-            add_option(Resource::RampMeter, perm, &mut html);
-            if config {
-                add_option(Resource::Role, perm, &mut html);
-                add_option(Resource::TagReader, perm, &mut html);
-                add_option(Resource::User, perm, &mut html);
-            }
-            add_option(Resource::VideoMonitor, perm, &mut html);
-            add_option(Resource::WeatherSensor, perm, &mut html);
-        }
-    }
-    html
-}
-
-/// Add option to access select
-fn add_option(res: Resource, perm: &Permission, html: &mut String) {
-    if perm.resource_n == res.rname() {
-        html.push_str("<option value='");
-        html.push_str(res.rname());
-        html.push_str("'>");
-        html.push_str(res.dname());
-        html.push_str("</option>");
-    }
-}
-
 impl Permission {
-    pub const RESOURCE_N: &'static str = "permission";
-
     /// Get value to create a new object
     pub fn create_value(doc: &Doc) -> Result<String> {
         let role = doc.select_parse::<String>("role");
@@ -269,6 +209,14 @@ impl fmt::Display for Permission {
 
 impl Card for Permission {
     type Ancillary = PermissionAnc;
+
+    /// Display name
+    const DNAME: &'static str = "🗝️ Permission";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::Permission
+    }
 
     /// Set the name
     fn with_name(self, _name: &str) -> Self {

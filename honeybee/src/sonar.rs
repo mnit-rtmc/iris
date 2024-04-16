@@ -12,11 +12,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::restype::ResType;
 use crate::tls;
 use heck::ToLowerCamelCase;
 use http::StatusCode;
 use percent_encoding::percent_decode_str;
+use resources::Res;
 use rustls::pki_types::ServerName;
 use serde_json::Value;
 use std::fmt;
@@ -131,14 +131,14 @@ fn attr_invalid_char(c: char) -> bool {
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Name {
     /// Resource type
-    pub res_type: ResType,
+    pub res_type: Res,
 
     /// Object name
     obj_name: Option<String>,
 }
 
-impl From<ResType> for Name {
-    fn from(res_type: ResType) -> Self {
+impl From<Res> for Name {
+    fn from(res_type: Res) -> Self {
         Name {
             res_type,
             obj_name: None,
@@ -147,10 +147,7 @@ impl From<ResType> for Name {
 }
 
 impl fmt::Display for Name {
-    fn fmt(
-        &self,
-        f: &mut fmt::Formatter<'_>,
-    ) -> std::result::Result<(), fmt::Error> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let type_n = self.type_n();
         match &self.obj_name {
             Some(obj_n) => write!(f, "{type_n}/{obj_n}"),
@@ -162,7 +159,7 @@ impl fmt::Display for Name {
 impl Name {
     /// Create a new name
     pub fn new(type_n: &str) -> Result<Self> {
-        match ResType::try_from(type_n) {
+        match Res::try_from(type_n) {
             Ok(res_type) => Ok(Name::from(res_type)),
             Err(_) => Err(Error::InvalidValue),
         }
@@ -197,9 +194,9 @@ impl Name {
     pub fn attr_n(&self, att: &str) -> Result<String> {
         if att.len() > 64 || att.contains(name_invalid_char) {
             Err(Error::InvalidValue)?
-        } else if self.res_type == ResType::Controller && att == "drop_id" {
+        } else if self.res_type == Res::Controller && att == "drop_id" {
             Ok(format!("{self}/drop"))
-        } else if self.res_type == ResType::SignMessage {
+        } else if self.res_type == Res::SignMessage {
             // sign_message attributes are in snake case
             Ok(format!("{self}/{att}"))
         } else {
@@ -210,7 +207,7 @@ impl Name {
 }
 
 /// Get attribute from a JSON value
-pub fn attr_json(value: &Value) -> Result<String> {
+fn attr_json(value: &Value) -> Result<String> {
     match value {
         Value::String(value) => {
             if value.contains(attr_invalid_char) {
@@ -263,7 +260,7 @@ enum Message<'a> {
 
 impl<'a> Message<'a> {
     /// Decode message in a buffer
-    pub fn decode(buf: &'a [u8]) -> Option<(Self, usize)> {
+    fn decode(buf: &'a [u8]) -> Option<(Self, usize)> {
         if let Some(rec_sep) = buf.iter().position(|b| *b == b'\x1E') {
             if let Some(msg) = Self::decode_one(&buf[..rec_sep]) {
                 return Some((msg, rec_sep));
@@ -307,7 +304,7 @@ impl<'a> Message<'a> {
     }
 
     /// Encode the message to a buffer
-    pub fn encode(&'a self, buf: &mut Vec<u8>) {
+    fn encode(&'a self, buf: &mut Vec<u8>) {
         match self {
             Message::Login(name, pword) => {
                 buf.push(b'l');
@@ -357,8 +354,8 @@ impl<'a> Message<'a> {
     }
 }
 
-/// Connection to a sonar server
-pub struct Connection {
+/// Messenger to a sonar server
+pub struct Messenger {
     /// TLS encrypted stream
     tls_stream: TlsStream<TcpStream>,
     /// Network timeout
@@ -371,8 +368,8 @@ pub struct Connection {
     count: usize,
 }
 
-impl Connection {
-    /// Create a new connection to a sonar server
+impl Messenger {
+    /// Create a new messenger to a sonar server
     pub async fn new(host: &str, port: u16) -> Result<Self> {
         let addr = (host, port)
             .to_socket_addrs()?
@@ -386,7 +383,7 @@ impl Connection {
             })?
             .to_owned();
         let tls_stream = connector.connect(domain, tcp_stream).await?;
-        Ok(Connection {
+        Ok(Messenger {
             tls_stream,
             timeout: Duration::from_secs(5),
             rx_buf: vec![0; 32_768],
@@ -396,7 +393,7 @@ impl Connection {
     }
 
     /// Send a message to the server
-    pub async fn send(&mut self, req: &[u8]) -> Result<()> {
+    async fn send(&mut self, req: &[u8]) -> Result<()> {
         match timeout(self.timeout, self.tls_stream.write_all(req)).await {
             Ok(res) => Ok(res?),
             Err(_e) => Err(Error::TimedOut),
@@ -461,7 +458,7 @@ impl Connection {
     /// Login to the server
     pub async fn login(&mut self, name: &str, pword: &str) -> Result<String> {
         let mut msg = String::new();
-        let mut buf = vec![];
+        let mut buf = Vec::with_capacity(32);
         Message::Login(name, pword).encode(&mut buf);
         self.send(&buf[..]).await?;
         self.recv(|m| match m {
@@ -484,7 +481,7 @@ impl Connection {
 
     /// Create an object
     pub async fn create_object(&mut self, nm: &str) -> Result<()> {
-        let mut buf = vec![];
+        let mut buf = Vec::with_capacity(32);
         Message::Object(nm).encode(&mut buf);
         self.check_error(10).await?;
         self.send(&buf[..]).await?;
@@ -493,9 +490,14 @@ impl Connection {
     }
 
     /// Update an object
-    pub async fn update_object(&mut self, nm: &str, a: &str) -> Result<()> {
-        let mut buf = vec![];
-        Message::Attribute(nm, a).encode(&mut buf);
+    pub async fn update_object(
+        &mut self,
+        nm: &str,
+        value: &Value,
+    ) -> Result<()> {
+        let mut buf = Vec::with_capacity(32);
+        let value = attr_json(value)?;
+        Message::Attribute(nm, &value).encode(&mut buf);
         self.check_error(10).await?;
         self.send(&buf[..]).await?;
         self.check_error(100).await?;
@@ -504,7 +506,7 @@ impl Connection {
 
     /// Remove an object
     pub async fn remove_object(&mut self, nm: &str) -> Result<()> {
-        let mut buf = vec![];
+        let mut buf = Vec::with_capacity(32);
         Message::Remove(nm).encode(&mut buf);
         self.check_error(10).await?;
         self.send(&buf[..]).await?;
@@ -521,7 +523,7 @@ impl Connection {
     where
         F: FnMut(&str, &str) -> Result<()>,
     {
-        let mut buf = vec![];
+        let mut buf = Vec::with_capacity(32);
         Message::Enumerate(nm).encode(&mut buf);
         self.check_error(10).await?;
         self.send(&buf[..]).await?;

@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,14 +10,15 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{
+    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
+};
 use crate::commconfig::CommConfig;
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::fetch::Uri;
-use crate::resource::{
-    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
-};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::iter::once;
@@ -137,8 +138,6 @@ impl fmt::Display for CommLink {
 }
 
 impl CommLink {
-    pub const RESOURCE_N: &'static str = "comm_link";
-
     /// Get connected state to display
     fn connected(&self, long: bool) -> &'static str {
         match (self.poll_enabled, self.connected, long) {
@@ -215,6 +214,14 @@ impl CommLink {
 
 impl Card for CommLink {
     type Ancillary = CommLinkAnc;
+
+    /// Display name
+    const DNAME: &'static str = "🔗 Comm Link";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::CommLink
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

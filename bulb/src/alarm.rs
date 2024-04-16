@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,10 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{inactive_attr, Card, View, EDIT_BUTTON, NAME};
 use crate::device::{Device, DeviceAnc};
 use crate::item::ItemState;
-use crate::resource::{inactive_attr, Card, View, EDIT_BUTTON, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -24,7 +25,7 @@ pub struct Alarm {
     pub description: String,
     pub controller: Option<String>,
     pub state: bool,
-    // full attributes
+    // secondary attributes
     pub pin: Option<u32>,
     pub trigger_time: Option<String>,
 }
@@ -32,8 +33,6 @@ pub struct Alarm {
 type AlarmAnc = DeviceAnc<Alarm>;
 
 impl Alarm {
-    pub const RESOURCE_N: &'static str = "alarm";
-
     /// Get the item state
     fn item_state(&self, anc: &AlarmAnc) -> ItemState {
         let item_state = anc.item_state(self);
@@ -123,6 +122,14 @@ impl Device for Alarm {
 
 impl Card for Alarm {
     type Ancillary = AlarmAnc;
+
+    /// Display name
+    const DNAME: &'static str = "📢 Alarm";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::Alarm
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

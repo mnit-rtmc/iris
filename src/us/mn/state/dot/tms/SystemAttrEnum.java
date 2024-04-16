@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2023  Minnesota Department of Transportation
  * Copyright (C) 2009-2015  AHMCT, University of California
  * Copyright (C) 2012-2021  Iteris Inc.
- * Copyright (C) 2015-2020  SRF Consulting Group
+ * Copyright (C) 2015-2024  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ public enum SystemAttrEnum {
 	CAMERA_CONSTRUCTION_URL(String.class),
 	CAMERA_IMAGE_BASE_URL(String.class),
 	CAMERA_KBD_PANASONIC_ENABLE(false),
+	CAMERA_LATEST_PTZ_ENABLE(false),
 	CAMERA_NUM_BLANK(999, 0, 9999),
 	CAMERA_OUT_OF_SERVICE_URL(String.class),
 	CAMERA_SEQUENCE_DWELL_SEC(5, 1, 300),
@@ -63,6 +64,7 @@ public enum SystemAttrEnum {
 	DMS_COMM_LOSS_ENABLE(true),
 	DMS_GPS_JITTER_M(100, 0, 2000),
 	DMS_LAMP_TEST_TIMEOUT_SECS(30, 5, 90),
+	DMS_MESSAGE_TOOLTIP_ENABLE(false),
 	DMS_PAGE_ON_MAX_SECS(10.0f, 0f, 100f, Change.RESTART_CLIENT),
 	DMS_PAGE_ON_MIN_SECS(0.5f, 0f, 100f, Change.RESTART_CLIENT),
 	DMS_PIXEL_OFF_LIMIT(2, 1),

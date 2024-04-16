@@ -12,7 +12,7 @@ body {
   justify-content: space-between;
   padding-bottom: 1rem;
   color: #ffeedd;
-  background: #283028;
+  background-color: #283028;
   background: linear-gradient(#283028, #1c201c);
   background-attachment: fixed !important;
 }
@@ -88,35 +88,39 @@ code {
 }
 
 p > code {
-  background: #1c1c20;
+  background-color: #1c1c20;
 }
 
 pre {
   padding: 0.5rem 1rem;
-  background: #c0a020;
+  background-color: #c8690c;
   border-radius: 0.4rem;
-  border: solid black;
+  border: solid white;
   overflow-x: auto;
 }
 
 pre code {
   font-weight: bold;
-  color: black;
+  color: white;
 }
 
 table {
   border: solid white;
   border-collapse: collapse;
-  background: #408050;
+  background-color: #408050;
   color: white;
   text-align: left;
 }
 
 table tr:nth-child(odd) td {
-  background: #3c784a;
+  background-color: #3c784a;
 }
 
 th {
+  background-color: #c8690c;
+  position: sticky;
+  top: 0;
+  z-index: 10;
   font-size: 1.1rem;
   padding: 0.1rem 0.5rem 0.1rem 0.6rem;
 }

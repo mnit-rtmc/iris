@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,8 +10,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::resource::{inactive_attr, AncillaryData, Card, View};
+use crate::card::{inactive_attr, AncillaryData, Card, View};
 use crate::util::{ContainsLower, Fields, Input};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -31,8 +32,6 @@ impl AncillaryData for RoleAnc {
 }
 
 impl Role {
-    pub const RESOURCE_N: &'static str = "role";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let inactive = inactive_attr(self.enabled);
@@ -59,6 +58,14 @@ impl fmt::Display for Role {
 
 impl Card for Role {
     type Ancillary = RoleAnc;
+
+    /// Display name
+    const DNAME: &'static str = "💪 Role";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::Role
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

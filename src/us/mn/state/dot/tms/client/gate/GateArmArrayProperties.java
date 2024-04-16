@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2021  Minnesota Department of Transportation
+ * Copyright (C) 2013-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -227,7 +227,8 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		notes_txt.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				proxy.setNotes(notes_txt.getText());
+				String n = notes_txt.getText().trim();
+				proxy.setNotes((n.length() > 0) ? n : null);
 			}
 		});
 	}
@@ -288,8 +289,10 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	/** Update one attribute on the form */
 	@Override
 	protected void doUpdateAttribute(String a) {
-		if (a == null || a.equals("notes"))
-			notes_txt.setText(proxy.getNotes());
+		if (a == null || a.equals("notes")) {
+			String n = proxy.getNotes();
+			notes_txt.setText((n != null) ? n : "");
+		}
 		if (a == null || a.equals("camera"))
 			camera_act.updateSelected();
 		if (a == null || a.equals("approach"))

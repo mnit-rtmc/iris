@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,9 +10,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{inactive_attr, Card, View, EDIT_BUTTON};
 use crate::device::{Device, DeviceAnc};
-use crate::resource::{inactive_attr, Card, View, EDIT_BUTTON};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -21,15 +22,13 @@ use std::fmt;
 pub struct FlowStream {
     pub name: String,
     pub controller: Option<String>,
-    // full attributes
+    // secondary attributes
     pub pin: Option<u32>,
 }
 
 type FlowStreamAnc = DeviceAnc<FlowStream>;
 
 impl FlowStream {
-    pub const RESOURCE_N: &'static str = "flow_stream";
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &FlowStreamAnc) -> String {
         let inactive = inactive_attr(self.controller.is_some());
@@ -82,6 +81,14 @@ impl Device for FlowStream {
 
 impl Card for FlowStream {
     type Ancillary = FlowStreamAnc;
+
+    /// Display name
+    const DNAME: &'static str = "🎞️ Flow Stream";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::FlowStream
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

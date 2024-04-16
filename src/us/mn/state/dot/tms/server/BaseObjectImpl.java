@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2023  Minnesota Department of Transportation
+ * Copyright (C) 2007-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -558,7 +558,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		final int[] access = { 0 };
 		store.query("SELECT max(access_n) " +
 			"FROM iris.permission p " +
-			"JOIN iris.i_user u ON u.role = p.role " +
+			"JOIN iris.user_id u ON u.role = p.role " +
 			"WHERE p.resource_n = '" + res + "' " +
 			"AND u.name = '" + user + "' " +
 			"AND (" +

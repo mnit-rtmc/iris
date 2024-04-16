@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,14 +10,15 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{
+    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
+};
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
 use crate::fetch::{Action, Uri};
 use crate::item::{ItemState, ItemStates};
-use crate::resource::{
-    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
-};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::iter::once;
@@ -36,10 +37,10 @@ pub struct Beacon {
     pub name: String,
     pub location: Option<String>,
     pub message: String,
-    pub notes: String,
+    pub notes: Option<String>,
     pub controller: Option<String>,
     pub state: u32,
-    // full attributes
+    // secondary attributes
     pub geo_loc: Option<String>,
     pub pin: Option<u32>,
     pub verify_pin: Option<u32>,
@@ -53,7 +54,7 @@ pub struct BeaconAnc {
     states: Option<Vec<BeaconState>>,
 }
 
-const BEACON_STATE_URI: &str = "/iris/beacon_state";
+const BEACON_STATE_URI: &str = "/iris/lut/beacon_state";
 
 impl AncillaryData for BeaconAnc {
     type Primary = Beacon;
@@ -96,8 +97,6 @@ const CLASS_FLASHING: &str = "flashing";
 const CLASS_NOT_FLASHING: &str = "not-flashing";
 
 impl Beacon {
-    pub const RESOURCE_N: &'static str = "beacon";
-
     /// Check if beacon is flashing
     fn flashing(&self) -> bool {
         // 4: FLASHING, 6: FAULT_STUCK_ON, 7: FLASHING_EXT
@@ -240,6 +239,14 @@ impl Device for Beacon {
 
 impl Card for Beacon {
     type Ancillary = BeaconAnc;
+
+    /// Display name
+    const DNAME: &'static str = "🔆 Beacon";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::Beacon
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

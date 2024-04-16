@@ -15,11 +15,11 @@
 use crate::error::Result;
 use crate::files::AtomicFile;
 use crate::query;
-use crate::restype::ResType;
 use crate::segments::{RNode, Road, SegmentState};
 use crate::signmsg::render_all;
 use crate::sonar::Name;
 use futures::{pin_mut, TryStreamExt};
+use resources::Res;
 use std::path::Path;
 use std::time::Instant;
 use tokio::io::{AsyncWrite, AsyncWriteExt};
@@ -151,58 +151,58 @@ impl Resource {
     }
 
     /// Get the resource type
-    const fn res_type(self) -> ResType {
+    const fn res_type(self) -> Res {
         use Resource::*;
         match self {
-            Alarm => ResType::Alarm,
-            Beacon => ResType::Beacon,
-            BeaconState => ResType::BeaconState,
-            CabinetStyle => ResType::CabinetStyle,
-            Camera | CameraPub => ResType::Camera,
-            CommConfig => ResType::CommConfig,
-            CommLink => ResType::CommLink,
-            CommProtocol => ResType::CommProtocol,
-            Condition => ResType::Condition,
-            Controller => ResType::Controller,
-            Detector | DetectorPub => ResType::Detector,
-            Direction => ResType::Direction,
-            Dms | DmsPub | DmsStat => ResType::Dms,
-            FlowStream => ResType::FlowStream,
-            Font => ResType::Font,
-            GateArm => ResType::GateArm,
-            GateArmArray => ResType::GateArmArray,
-            GateArmInterlock => ResType::GateArmInterlock,
-            GateArmState => ResType::GateArmState,
-            Gps => ResType::Gps,
-            Graphic => ResType::Graphic,
-            Incident => ResType::Incident,
-            LaneMarking => ResType::LaneMarking,
-            LaneUseIndication => ResType::LaneUseIndication,
-            LcsArray => ResType::LcsArray,
-            LcsIndication => ResType::LcsIndication,
-            LcsLock => ResType::LcsLock,
-            Modem => ResType::Modem,
-            MsgLine => ResType::MsgLine,
-            MsgPattern => ResType::MsgPattern,
+            Alarm => Res::Alarm,
+            Beacon => Res::Beacon,
+            BeaconState => Res::BeaconState,
+            CabinetStyle => Res::CabinetStyle,
+            Camera | CameraPub => Res::Camera,
+            CommConfig => Res::CommConfig,
+            CommLink => Res::CommLink,
+            CommProtocol => Res::CommProtocol,
+            Condition => Res::Condition,
+            Controller => Res::Controller,
+            Detector | DetectorPub => Res::Detector,
+            Direction => Res::Direction,
+            Dms | DmsPub | DmsStat => Res::Dms,
+            FlowStream => Res::FlowStream,
+            Font => Res::Font,
+            GateArm => Res::GateArm,
+            GateArmArray => Res::GateArmArray,
+            GateArmInterlock => Res::GateArmInterlock,
+            GateArmState => Res::GateArmState,
+            Gps => Res::Gps,
+            Graphic => Res::Graphic,
+            Incident => Res::Incident,
+            LaneMarking => Res::LaneMarking,
+            LaneUseIndication => Res::LaneUseIndication,
+            LcsArray => Res::LcsArray,
+            LcsIndication => Res::LcsIndication,
+            LcsLock => Res::LcsLock,
+            Modem => Res::Modem,
+            MsgLine => Res::MsgLine,
+            MsgPattern => Res::MsgPattern,
             ParkingAreaPub | ParkingAreaDyn | ParkingAreaArch => {
-                ResType::ParkingArea
+                Res::ParkingArea
             }
-            Permission => ResType::Permission,
-            RampMeter => ResType::RampMeter,
-            ResourceType => ResType::ResourceType,
-            Rnode => ResType::Rnode,
-            Road | RoadFull => ResType::Road,
-            RoadModifier => ResType::RoadModifier,
-            Role => ResType::Role,
-            SignConfig => ResType::SignConfig,
-            SignDetail => ResType::SignDetail,
-            SignMessage => ResType::SignMessage,
-            SystemAttributePub => ResType::SystemAttribute,
-            TagReader => ResType::TagReader,
-            User => ResType::User,
-            VideoMonitor => ResType::VideoMonitor,
-            WeatherSensor | WeatherSensorPub => ResType::WeatherSensor,
-            Word => ResType::Word,
+            Permission => Res::Permission,
+            RampMeter => Res::RampMeter,
+            ResourceType => Res::ResourceType,
+            Rnode => Res::Rnode,
+            Road | RoadFull => Res::Road,
+            RoadModifier => Res::RoadModifier,
+            Role => Res::Role,
+            SignConfig => Res::SignConfig,
+            SignDetail => Res::SignDetail,
+            SignMessage => Res::SignMessage,
+            SystemAttributePub => Res::SystemAttribute,
+            TagReader => Res::TagReader,
+            User => Res::User,
+            VideoMonitor => Res::VideoMonitor,
+            WeatherSensor | WeatherSensorPub => Res::WeatherSensor,
+            Word => Res::Word,
         }
     }
 
@@ -212,18 +212,18 @@ impl Resource {
         match self {
             Alarm => "api/alarm",
             Beacon => "api/beacon",
-            BeaconState => "beacon_state",
+            BeaconState => "lut/beacon_state",
             CabinetStyle => "api/cabinet_style",
             Camera => "api/camera",
             CameraPub => "camera_pub",
             CommConfig => "api/comm_config",
             CommLink => "api/comm_link",
-            CommProtocol => "comm_protocol",
-            Condition => "condition",
+            CommProtocol => "lut/comm_protocol",
+            Condition => "lut/condition",
             Controller => "api/controller",
             Detector => "api/detector",
             DetectorPub => "detector_pub",
-            Direction => "direction",
+            Direction => "lut/direction",
             Dms => "api/dms",
             DmsPub => "dms_pub",
             DmsStat => "dms_message",
@@ -231,16 +231,16 @@ impl Resource {
             Font => "api/font",
             GateArm => "api/gate_arm",
             GateArmArray => "api/gate_arm_array",
-            GateArmInterlock => "gate_arm_interlock",
-            GateArmState => "gate_arm_state",
+            GateArmInterlock => "lut/gate_arm_interlock",
+            GateArmState => "lut/gate_arm_state",
             Gps => "api/gps",
             Graphic => "api/graphic",
             Incident => "incident",
             LaneMarking => "api/lane_marking",
-            LaneUseIndication => "lane_use_indication",
+            LaneUseIndication => "lut/lane_use_indication",
             LcsArray => "api/lcs_array",
             LcsIndication => "api/lcs_indication",
-            LcsLock => "lcs_lock",
+            LcsLock => "lut/lcs_lock",
             Modem => "api/modem",
             MsgLine => "api/msg_line",
             MsgPattern => "api/msg_pattern",
@@ -249,18 +249,18 @@ impl Resource {
             ParkingAreaArch => "TPIMS_archive",
             Permission => "api/permission",
             RampMeter => "api/ramp_meter",
-            ResourceType => "resource_type",
+            ResourceType => "lut/resource_type",
             Rnode => unreachable!(),
             Road => "api/road",
             RoadFull => unreachable!(),
-            RoadModifier => "road_modifier",
+            RoadModifier => "lut/road_modifier",
             Role => "api/role",
             SignConfig => "api/sign_config",
             SignDetail => "api/sign_detail",
             SignMessage => "sign_message",
             SystemAttributePub => "system_attribute_pub",
             TagReader => "api/tag_reader",
-            User => "api/user",
+            User => "api/user_id",
             VideoMonitor => "api/video_monitor",
             WeatherSensor => "api/weather_sensor",
             WeatherSensorPub => "rwis",
@@ -270,14 +270,11 @@ impl Resource {
 
     /// Get the listen channel
     pub const fn listen(self) -> Option<&'static str> {
-        use Resource::*;
-        match self {
-            BeaconState | CommProtocol | Condition | Direction | Font
-            | GateArmInterlock | GateArmState | Graphic | LaneUseIndication
-            | LcsLock | ResourceType | RoadModifier => {
-                self.res_type().lut_channel()
-            }
-            _ => self.res_type().listen(),
+        let res = self.res_type();
+        if res.is_lut() || res.has_channel() {
+            Some(res.as_str())
+        } else {
+            None
         }
     }
 
@@ -347,8 +344,7 @@ impl Resource {
     const fn all_sql_json(self) -> bool {
         use Resource::*;
         match self {
-            Dms | MsgLine | MsgPattern | ResourceType | Rnode | SignConfig
-            | SystemAttributePub | Word => false,
+            ResourceType | SystemAttributePub => false,
             _ => true,
         }
     }
@@ -428,10 +424,13 @@ impl Resource {
         let dir = Path::new("");
         let file = AtomicFile::new(dir, name).await?;
         let writer = file.writer().await?;
+        let sql = self.all_sql();
         let sql = if self.all_sql_json() {
-            format!("SELECT row_to_json(r)::text FROM ({}) r", self.all_sql())
+            format!(
+                "SELECT json_strip_nulls(row_to_json(r))::text FROM ({sql}) r"
+            )
         } else {
-            self.all_sql().to_string()
+            sql.to_string()
         };
         let count = query_json(client, &sql, writer).await?;
         file.commit().await?;
@@ -486,11 +485,11 @@ async fn query_all_nodes(
     segments: &mut SegmentState,
 ) -> Result<()> {
     log::trace!("query_all_nodes");
-    segments.set_ordered(false).await?;
     for row in &client.query(query::RNODE_FULL, &[]).await? {
         segments.update_node(RNode::from_row(row));
     }
-    segments.set_ordered(true).await?;
+    segments.set_has_nodes(true);
+    segments.write_all().await?;
     Ok(())
 }
 
@@ -514,6 +513,7 @@ async fn query_one_node(
         assert!(rows.is_empty());
         segments.remove_node(name);
     }
+    segments.write_all().await?;
     Ok(())
 }
 
@@ -527,8 +527,10 @@ async fn query_all_roads(
 ) -> Result<()> {
     log::trace!("query_all_roads");
     for row in &client.query(query::ROAD_FULL, &[]).await? {
-        segments.update_road(Road::from_row(row)).await?;
+        segments.update_road(Road::from_row(row));
     }
+    segments.set_has_roads(true);
+    segments.write_all().await?;
     Ok(())
 }
 
@@ -545,7 +547,8 @@ async fn query_one_road(
     log::trace!("query_one_road: {name}");
     let rows = &client.query(query::ROAD_ONE, &[&name]).await?;
     if let Some(row) = rows.iter().next() {
-        segments.update_road(Road::from_row(row)).await?;
+        segments.update_road(Road::from_row(row));
     }
+    segments.write_all().await?;
     Ok(())
 }

@@ -25,7 +25,7 @@ Simple metering runs the ramp meter at a fixed release rate.  This rate is the
 target rate for the period (AM or PM).
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/ramp_meter` (primary)
 * `iris/api/ramp_meter/{name}`

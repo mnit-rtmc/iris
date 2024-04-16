@@ -10,7 +10,7 @@ then authentication is performed using [LDAP].  Otherwise, the supplied password
 is checked against the stored password hash for the account.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/user`
 * `iris/api/user/{name}`
@@ -41,7 +41,7 @@ Other _roles_ can be created to allow different capability sets, as needed.
 make further changes will be lost immediately.**
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/role`
 * `iris/api/role/{name}`

@@ -1,7 +1,8 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2023  Minnesota Department of Transportation
- * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2014       AHMCT, University of California
+ * Copyright (C) 2022-2024  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,13 +27,13 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraTemplate;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.geo.Position;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
@@ -46,6 +47,7 @@ import us.mn.state.dot.tms.server.event.CameraVideoEvent;
  * @author Douglas Lau
  * @author Tim Johnson
  * @author Travis Swanston
+ * @author John L. Stanley - SRF Consulting
  */
 public class CameraImpl extends DeviceImpl implements Camera {
 
@@ -489,6 +491,8 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		if (cp != null) {
 			last_preset = INVALID_PRESET;
 			cp.sendPTZ(this, p, t, z);
+			if ((p != 0.0) || (t != 0.0) || (z != 0.0))
+				savePtzInfo();
 		}
 	}
 
@@ -512,6 +516,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		if (cp != null) {
 			last_preset = preset;
 			cp.sendRecallPreset(this, preset);
+			savePtzInfo();
 		}
 	}
 
@@ -587,5 +592,41 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	@Override
 	public CameraTemplate getCameraTemplate() {
 		return cam_template;
+	}
+
+	/** Username of last user to attempt a PTZ or
+	 *  preset-recall operation.
+	 *  Resets at every server restart. */
+	private String ptz_user = "";
+
+	/** Timestamp (Epoch seconds) of last attempted 
+	 *  PTZ or preset-recall operation.
+	 *  Resets at every server restart. */
+	private long ptz_timestamp = 0;
+
+	/** Save the current SONAR username as the
+	 *  most recent PTZ user and the current 
+	 *  Epoch timestamp as the PTZ timestamp. */
+	public void savePtzInfo() {
+		if (SystemAttrEnum.CAMERA_LATEST_PTZ_ENABLE.getBoolean()) {
+			ptz_user      = getProcUser();
+			ptz_timestamp = java.time.Instant.now().getEpochSecond();
+			notifyAttribute("ptzUser");
+			notifyAttribute("ptzTimestamp");
+		}
+	}
+
+	/** Get name of last user to attempt a camera motion
+	 *  (PTZ or camera preset-recall).
+	 *  Returns empty string if no attempt has been made. */
+	public String getPtzUser() {
+		return ptz_user;
+	}
+
+	/** Get Epoch timestamp when latest camera motion
+	 *  (PTZ or camera preset-recall) was attempted.
+	 *  Returns zero if no attempt has been made. */
+	public long getPtzTimestamp() {
+		return ptz_timestamp;
 	}
 }

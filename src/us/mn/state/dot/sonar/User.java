@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2018  Minnesota Department of Transportation
+ * Copyright (C) 2006-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ package us.mn.state.dot.sonar;
 public interface User extends SonarObject {
 
 	/** SONAR type name */
-	String SONAR_TYPE = "user";
+	String SONAR_TYPE = "user_id";
 
 	/** Set the user's full name */
 	void setFullName(String n);

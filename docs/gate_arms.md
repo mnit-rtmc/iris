@@ -6,7 +6,7 @@ Gate arms are traffic control devices which restrict access to a section of
 roadway.  They are commonly used for on-ramps or reversible lanes.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/gate_arm_interlock` (lookup table)
 * `iris/gate_arm_state` (lookup table)
@@ -31,7 +31,7 @@ Gate arms are grouped into **arrays** of 1-8 arms.  _Opening_ or _closing_ an
 array controls **all** associated arms.
 
 <details>
-<summary>API Resources</summary>
+<summary>API Resources 🕵️ </summary>
 
 * `iris/api/gate_arm_array` (primary)
 * `iris/api/gate_arm_array/{name}`

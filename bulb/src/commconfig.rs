@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,10 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{AncillaryData, Card, View, NAME};
 use crate::error::Result;
 use crate::fetch::Uri;
-use crate::resource::{AncillaryData, Card, View, NAME};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
+use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::iter::{empty, once};
@@ -124,7 +125,7 @@ pub struct Protocol {
 pub struct CommConfig {
     pub name: String,
     pub description: String,
-    // full attributes
+    // secondary attributes
     pub protocol: Option<u32>,
     pub timeout_ms: Option<u32>,
     pub poll_period_sec: Option<u32>,
@@ -149,7 +150,7 @@ impl AncillaryData for CommConfigAnc {
         view: View,
     ) -> Box<dyn Iterator<Item = Uri>> {
         match view {
-            View::Edit => Box::new(once("/iris/comm_protocol".into())),
+            View::Edit => Box::new(once("/iris/lut/comm_protocol".into())),
             _ => Box::new(empty()),
         }
     }
@@ -192,8 +193,6 @@ impl CommConfigAnc {
 }
 
 impl CommConfig {
-    pub const RESOURCE_N: &'static str = "comm_config";
-
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
         let description = HtmlStr::new(&self.description);
@@ -257,6 +256,14 @@ impl fmt::Display for CommConfig {
 
 impl Card for CommConfig {
     type Ancillary = CommConfigAnc;
+
+    /// Display name
+    const DNAME: &'static str = "📡 Comm Config";
+
+    /// Get the resource
+    fn res() -> Res {
+        Res::CommConfig
+    }
 
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {

@@ -65,14 +65,21 @@ pub struct RNode {
     #[serde(skip_serializing)]
     road_dir: Option<String>,
     location: Option<String>,
-    #[serde(serialize_with = "serialize_latlon")]
+    #[serde(
+        serialize_with = "serialize_latlon",
+        skip_serializing_if = "Option::is_none"
+    )]
     lat: Option<f64>,
-    #[serde(serialize_with = "serialize_latlon")]
+    #[serde(
+        serialize_with = "serialize_latlon",
+        skip_serializing_if = "Option::is_none"
+    )]
     lon: Option<f64>,
     transition: String,
     lanes: i32,
     shift: i32,
     active: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
     station_id: Option<String>,
     speed_limit: i32,
 }
@@ -130,10 +137,12 @@ struct Corridor {
     r_class: i16,
     /// Road class scale
     scale: f64,
-    /// Nodes ordered by corridor direction
+    /// All nodes in corridor
     nodes: Vec<RNode>,
     /// Valid node count
     count: usize,
+    /// Scale changed or nodes out-of-order
+    dirty: bool,
 }
 
 /// Segments for a corridor
@@ -160,8 +169,10 @@ pub struct SegmentState {
     node_cors: HashMap<String, CorridorId>,
     /// Mapping of corridor IDs to Corridors
     corridors: HashMap<CorridorId, Corridor>,
-    /// Ordered flag
-    ordered: bool,
+    /// Flag indicating r_nodes are complete
+    has_nodes: bool,
+    /// Flag indicating roads are complete
+    has_roads: bool,
 }
 
 impl fmt::Display for TravelDir {
@@ -274,15 +285,14 @@ impl Corridor {
         scale: f64,
     ) -> Self {
         log::trace!("Corridor::new {cor_id}");
-        let nodes = Vec::new();
-        let count = 0;
         Corridor {
             cor_id,
             base_sid,
             r_class,
             scale,
-            nodes,
-            count,
+            nodes: Vec::new(),
+            count: 0,
+            dirty: true,
         }
     }
 
@@ -431,44 +441,43 @@ impl Corridor {
     }
 
     /// Add a node to corridor
-    fn add_node(&mut self, node: RNode, ordered: bool) {
+    fn add_node(&mut self, node: RNode) {
         log::trace!(
             "Corridor::add_node {} to {} ({} + 1)",
             &node.name,
             &self.cor_id,
             self.nodes.len()
         );
-        let order = ordered && node.is_valid();
-        self.nodes.push(node);
-        if order {
-            self.order_nodes();
+        if node.is_valid() {
+            self.dirty = true;
         }
+        self.nodes.push(node);
     }
 
     /// Update a node
-    fn update_node(&mut self, node: RNode, ordered: bool) {
+    fn update_node(&mut self, node: RNode) {
         log::trace!(
             "Corridor::update_node {} to {} ({})",
             &node.name,
             &self.cor_id,
             self.nodes.len()
         );
-        let valid_after = node.is_valid();
-        let mut valid_before = false;
+        if node.is_valid() {
+            self.dirty = true;
+        }
         match self.nodes.iter_mut().find(|n| n.name == node.name) {
             Some(n) => {
-                valid_before = n.is_valid();
+                if n.is_valid() {
+                    self.dirty = true;
+                }
                 *n = node;
             }
             None => log::error!("update_node: {} not found", node.name),
         }
-        if ordered && (valid_before || valid_after) {
-            self.order_nodes();
-        }
     }
 
     /// Remove a node
-    fn remove_node(&mut self, name: &str, ordered: bool) {
+    fn remove_node(&mut self, name: &str) {
         log::trace!(
             "Corridor::remove_node {name} from {} ({} - 1)",
             &self.cor_id,
@@ -477,8 +486,8 @@ impl Corridor {
         match self.nodes.iter().position(|n| n.name == name) {
             Some(idx) => {
                 let node = self.nodes.remove(idx);
-                if ordered && node.is_valid() {
-                    self.order_nodes();
+                if node.is_valid() {
+                    self.dirty = true;
                 }
             }
             None => log::error!("remove_node: {name} not found"),
@@ -654,41 +663,61 @@ impl SegmentState {
             .unwrap_or(BASE_SCALE)
     }
 
+    /// Check if corridors and segments should be written
+    fn should_write(&self) -> bool {
+        self.has_nodes && self.has_roads
+    }
+
+    /// Set has_nodes flag
+    pub fn set_has_nodes(&mut self, has_nodes: bool) {
+        self.has_nodes = has_nodes;
+    }
+
+    /// Set has_roads flag
+    pub fn set_has_roads(&mut self, has_roads: bool) {
+        self.has_roads = has_roads;
+    }
+
     /// Update (or add) a node
     pub fn update_node(&mut self, node: RNode) {
-        match node.cor_id() {
-            Some(ref cor_id) => {
-                match self.node_cors.insert(node.name.clone(), cor_id.clone()) {
-                    None => self.add_corridor_node(cor_id, node),
-                    Some(ref cid) if cid != cor_id => {
-                        self.remove_corridor_node(cid, &node.name);
-                        self.add_corridor_node(cor_id, node);
-                    }
-                    Some(_) => self.update_corridor_node(cor_id, node),
-                }
+        let Some(ref cor_id) = node.cor_id() else {
+            log::debug!("ignoring node: {}", &node.name);
+            return;
+        };
+        match self.node_cors.insert(node.name.clone(), cor_id.clone()) {
+            None => self.add_corridor_node(cor_id, node),
+            Some(ref cid) if cid != cor_id => {
+                self.remove_corridor_node(cid, &node.name);
+                self.add_corridor_node(cor_id, node);
             }
-            _ => log::debug!("ignoring node: {}", &node.name),
+            Some(_) => self.update_corridor_node(cor_id, node),
+        }
+    }
+
+    /// Remove a node
+    pub fn remove_node(&mut self, name: &str) {
+        match self.node_cors.remove(name) {
+            Some(ref cid) => self.remove_corridor_node(cid, name),
+            None => log::error!("corridor not found for node: {name}"),
         }
     }
 
     /// Add a node to corridor
     fn add_corridor_node(&mut self, cid: &CorridorId, node: RNode) {
-        match self.corridors.get_mut(cid) {
-            Some(cor) => cor.add_node(node, self.ordered),
-            None => {
-                // Leaflet doesn't like it when we use the high bits...
-                let base_sid = 0xFFFF_FFFF_FFFF & {
-                    let mut hasher = DefaultHasher::new();
-                    cid.hash(&mut hasher);
-                    hasher.finish()
-                } as i64;
-                let r_class = self.r_class(&cid.roadway);
-                let scale = self.scale(&cid.roadway);
-                let mut cor =
-                    Corridor::new(cid.clone(), base_sid, r_class, scale);
-                cor.add_node(node, self.ordered);
-                self.corridors.insert(cid.clone(), cor);
-            }
+        if !self.corridors.contains_key(cid) {
+            // Leaflet doesn't like it when we use the high bits...
+            let base_sid = 0xFFFF_FFFF_FFFF & {
+                let mut hasher = DefaultHasher::new();
+                cid.hash(&mut hasher);
+                hasher.finish()
+            } as i64;
+            let r_class = self.r_class(&cid.roadway);
+            let scale = self.scale(&cid.roadway);
+            let cor = Corridor::new(cid.clone(), base_sid, r_class, scale);
+            self.corridors.insert(cid.clone(), cor);
+        }
+        if let Some(cor) = self.corridors.get_mut(cid) {
+            cor.add_node(node);
         }
     }
 
@@ -696,7 +725,7 @@ impl SegmentState {
     fn remove_corridor_node(&mut self, cid: &CorridorId, name: &str) {
         match self.corridors.get_mut(cid) {
             Some(cor) => {
-                cor.remove_node(name, self.ordered);
+                cor.remove_node(name);
                 if cor.nodes.is_empty() {
                     log::debug!("removing corridor: {cid:?}");
                     self.corridors.remove(cid);
@@ -709,49 +738,45 @@ impl SegmentState {
     /// Update a node on a corridor
     fn update_corridor_node(&mut self, cid: &CorridorId, node: RNode) {
         match self.corridors.get_mut(cid) {
-            Some(cor) => cor.update_node(node, self.ordered),
+            Some(cor) => cor.update_node(node),
             None => log::error!("corridor ID not found {cid:?}"),
         }
     }
 
-    /// Remove a node
-    pub fn remove_node(&mut self, name: &str) {
-        match self.node_cors.remove(name) {
-            Some(ref cid) => self.remove_corridor_node(cid, name),
-            None => log::error!("corridor not found for node: {name}"),
-        }
-    }
-
-    /// Order all corridors
-    pub async fn set_ordered(&mut self, ordered: bool) -> Result<()> {
-        self.ordered = ordered;
-        if ordered {
-            for cor in self.corridors.values_mut() {
-                cor.order_nodes();
-                cor.create_segments()?;
-                cor.write_file(&self.roads).await?;
-            }
-            // FIXME: write segment loam layer
-        }
-        Ok(())
-    }
-
     /// Update a road class or scale
-    pub async fn update_road(&mut self, road: Road) -> Result<()> {
+    pub fn update_road(&mut self, road: Road) {
         log::trace!("update_road {}", road.name);
         let name = road.name.clone();
         self.roads.insert(name.clone(), road);
-        if self.ordered {
-            let scale = self.scale(&name);
+        let r_class = self.r_class(&name);
+        let scale = self.scale(&name);
+        for cor in self.corridors.values_mut() {
+            if cor.cor_id.roadway == name
+                && (r_class != cor.r_class || scale != cor.scale)
+            {
+                cor.r_class = r_class;
+                cor.scale = scale;
+                cor.dirty = true;
+            }
+        }
+    }
+
+    /// Write all corridors and segments
+    pub async fn write_all(&mut self) -> Result<()> {
+        if self.should_write() {
+            let mut was_dirty = false;
             for cor in self.corridors.values_mut() {
-                if cor.cor_id.roadway == name {
-                    cor.scale = scale;
+                if cor.dirty {
+                    was_dirty = true;
                     cor.order_nodes();
                     cor.create_segments()?;
                     cor.write_file(&self.roads).await?;
+                    cor.dirty = false;
                 }
             }
-            // FIXME: write segment loam layer
+            if was_dirty {
+                // FIXME: write segment loam layer
+            }
         }
         Ok(())
     }
