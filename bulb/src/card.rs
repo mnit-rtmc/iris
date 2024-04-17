@@ -371,7 +371,8 @@ impl CardList {
     /// Fetch card list for a resource type
     pub async fn fetch(res: Res) -> Result<Self> {
         let json = uri_res(res).get().await?;
-        let json = json.as_string().unwrap_or_default();
+        let json: Value = serde_wasm_bindgen::from_value(json)?;
+        let json = json.to_string();
         Ok(CardList { res, json })
     }
 
