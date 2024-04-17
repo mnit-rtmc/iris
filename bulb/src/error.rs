@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -63,6 +63,10 @@ pub enum Error {
     /// Parse error
     #[error("Parse error")]
     Parse(),
+
+    /// Serde JSON error
+    #[error("Serialization error")]
+    SerdeJson(#[from] serde_json::Error),
 
     /// Serde wasm-bindgen error
     #[error("Serialization error")]

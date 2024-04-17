@@ -10,8 +10,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{self, View};
-use crate::error::Error;
+use crate::card::{self, CardList, View};
+use crate::error::{Error, Result};
 use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::util::Doc;
@@ -143,7 +143,7 @@ impl DeferredAction {
     }
 }
 
-/// Search resource list using the value from "sb_search"
+/// Search resource list using the value from `sb_search`
 fn search_resource_list() {
     let doc = Doc::get();
     if let Some(rname) = doc.select_parse::<String>("sb_resource") {
@@ -151,6 +151,20 @@ fn search_resource_list() {
         let value = search_value();
         spawn_local(populate_list(res, value));
     }
+}
+
+/// Get value to search
+fn search_value() -> String {
+    let doc = Doc::get();
+    let search = doc.elem::<HtmlInputElement>("sb_search");
+    let mut value = search.value();
+    if let Some(istate) = doc.select_parse::<String>("sb_state") {
+        if ItemState::from_code(&istate).is_some() {
+            value.push(' ');
+            value.push_str(&istate);
+        }
+    }
+    value
 }
 
 /// Populate `sb_list` with `res` card types
@@ -164,7 +178,7 @@ async fn populate_list(res: Option<Res>, search: String) {
     match res {
         Some(res) => {
             let config = doc.input_bool("sb_config");
-            match card::fetch_all(res, &search, config).await {
+            match build_list(res, &search, config).await {
                 Ok(cards) => sb_list.set_inner_html(&cards),
                 Err(Error::FetchResponseUnauthorized()) => show_login(),
                 Err(e) => show_toast(&format!("View failed: {e}")),
@@ -172,6 +186,15 @@ async fn populate_list(res: Option<Res>, search: String) {
         }
         None => sb_list.set_inner_html(""),
     }
+}
+
+/// Fetch and build a list of cards for a resource
+async fn build_list(res: Res, search: &str, config: bool) -> Result<String> {
+    let cards = CardList::fetch(res).await?;
+    let cards = cards.filter(search).await?;
+    // FIXME: store card list in STATE
+    let cards = cards.to_html(config).await?;
+    Ok(cards)
 }
 
 /// Handle a card click event
@@ -463,20 +486,6 @@ async fn reload_resources() {
     search_resource_list();
 }
 
-/// Get value to search
-fn search_value() -> String {
-    let doc = Doc::get();
-    let search = doc.elem::<HtmlInputElement>("sb_search");
-    let mut value = search.value();
-    if let Some(istate) = doc.select_parse::<String>("sb_state") {
-        if ItemState::from_code(&istate).is_some() {
-            value.push(' ');
-            value.push_str(&istate);
-        }
-    }
-    value
-}
-
 /// Add an "input" event listener to an element
 fn add_input_listener(elem: &Element) -> JsResult<()> {
     let closure = Closure::wrap(Box::new(|e: Event| {
@@ -506,7 +515,7 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
     Ok(())
 }
 
-/// Handle an event from "sb_resource" `select` element
+/// Handle an event from `sb_resource` select element
 fn handle_sb_resource_ev(rname: String) {
     let doc = Doc::get();
     let search = doc.elem::<HtmlInputElement>("sb_search");

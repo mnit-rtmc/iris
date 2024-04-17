@@ -40,6 +40,7 @@ use crate::videomonitor::VideoMonitor;
 use crate::weathersensor::WeatherSensor;
 use resources::Res;
 use serde::de::DeserializeOwned;
+use serde::Serialize;
 use serde_json::map::Map;
 use serde_json::Value;
 use std::fmt;
@@ -177,7 +178,9 @@ const ITEM_STATES: &str = "<option value=''>all ↴</option>\
      <option value='▪️'>▪️ inactive</option>";
 
 /// A card view of a resource
-pub trait Card: Default + fmt::Display + DeserializeOwned + PartialEq {
+pub trait Card:
+    Default + fmt::Display + DeserializeOwned + Serialize + PartialEq
+{
     type Ancillary: AncillaryData<Primary = Self> + Default;
 
     /// Display name
@@ -356,76 +359,127 @@ fn add_option<C: Card>(perm: &Permission, html: &mut String) {
     }
 }
 
-/// Fetch all cards for a resource type
-pub async fn fetch_all(res: Res, search: &str, config: bool) -> Result<String> {
-    match res {
-        Res::Alarm => fetch_all_x::<Alarm>(search, config).await,
-        Res::Beacon => fetch_all_x::<Beacon>(search, config).await,
-        Res::CabinetStyle => fetch_all_x::<CabinetStyle>(search, config).await,
-        Res::Camera => fetch_all_x::<Camera>(search, config).await,
-        Res::CommConfig => fetch_all_x::<CommConfig>(search, config).await,
-        Res::CommLink => fetch_all_x::<CommLink>(search, config).await,
-        Res::Controller => fetch_all_x::<Controller>(search, config).await,
-        Res::Detector => fetch_all_x::<Detector>(search, config).await,
-        Res::Dms => fetch_all_x::<Dms>(search, config).await,
-        Res::FlowStream => fetch_all_x::<FlowStream>(search, config).await,
-        Res::GateArm => fetch_all_x::<GateArm>(search, config).await,
-        Res::GateArmArray => fetch_all_x::<GateArmArray>(search, config).await,
-        Res::Gps => fetch_all_x::<Gps>(search, config).await,
-        Res::LaneMarking => fetch_all_x::<LaneMarking>(search, config).await,
-        Res::LcsArray => fetch_all_x::<LcsArray>(search, config).await,
-        Res::LcsIndication => {
-            fetch_all_x::<LcsIndication>(search, config).await
-        }
-        Res::Modem => fetch_all_x::<Modem>(search, config).await,
-        Res::Permission => fetch_all_x::<Permission>(search, config).await,
-        Res::RampMeter => fetch_all_x::<RampMeter>(search, config).await,
-        Res::Role => fetch_all_x::<Role>(search, config).await,
-        Res::TagReader => fetch_all_x::<TagReader>(search, config).await,
-        Res::User => fetch_all_x::<User>(search, config).await,
-        Res::VideoMonitor => fetch_all_x::<VideoMonitor>(search, config).await,
-        Res::WeatherSensor => {
-            fetch_all_x::<WeatherSensor>(search, config).await
-        }
-        _ => Ok("".into()),
-    }
+/// Card list for one resource type
+pub struct CardList {
+    /// Resource type
+    res: Res,
+    /// JSON list of cards
+    json: String,
 }
 
-/// Fetch all cards as HTML
-async fn fetch_all_x<C: Card>(search: &str, config: bool) -> Result<String> {
-    let (obs, anc) = fetch_list().await?;
-    let rname = C::res().as_str();
-    let search = Search::new(search);
-    let mut html = String::new();
-    html.push_str("<ul class='cards'>");
-    if config {
-        let next_name = C::next_name(&obs);
-        // the "Create" card has id "{rname}_" and next available name
-        html.push_str(&format!(
-            "<li id='{rname}_' name='{next_name}' class='card'>\
-                {CREATE_COMPACT}\
-            </li>"
-        ));
+impl CardList {
+    /// Fetch card list for a resource type
+    pub async fn fetch(res: Res) -> Result<Self> {
+        let json = uri_res(res).get().await?;
+        let json = json.as_string().unwrap_or_default();
+        Ok(CardList { res, json })
     }
-    for pri in obs.iter().filter(|pri| search.is_match(*pri, &anc)) {
-        html.push_str(&format!(
-            "<li id='{rname}_{pri}' name='{pri}' class='card'>"
-        ));
-        html.push_str(&pri.to_html(View::Compact, &anc));
-        html.push_str("</li>");
-    }
-    html.push_str("</ul>");
-    Ok(html)
-}
 
-/// Fetch JSON resource array list
-async fn fetch_list<C: Card>() -> Result<(Vec<C>, C::Ancillary)> {
-    let json = uri_res(C::res()).get().await?;
-    let obs = serde_wasm_bindgen::from_value(json)?;
-    // Use default value for ancillary data lookup
-    let pri = C::default();
-    let anc = fetch_ancillary(View::Search, &pri).await?;
-    Ok((obs, anc))
+    /// Filter card list with a search term
+    pub async fn filter(&self, search: &str) -> Result<Self> {
+        match self.res {
+            Res::Alarm => self.filter_x::<Alarm>(search).await,
+            Res::Beacon => self.filter_x::<Beacon>(search).await,
+            Res::CabinetStyle => self.filter_x::<CabinetStyle>(search).await,
+            Res::Camera => self.filter_x::<Camera>(search).await,
+            Res::CommConfig => self.filter_x::<CommConfig>(search).await,
+            Res::CommLink => self.filter_x::<CommLink>(search).await,
+            Res::Controller => self.filter_x::<Controller>(search).await,
+            Res::Detector => self.filter_x::<Detector>(search).await,
+            Res::Dms => self.filter_x::<Dms>(search).await,
+            Res::FlowStream => self.filter_x::<FlowStream>(search).await,
+            Res::GateArm => self.filter_x::<GateArm>(search).await,
+            Res::GateArmArray => self.filter_x::<GateArmArray>(search).await,
+            Res::Gps => self.filter_x::<Gps>(search).await,
+            Res::LaneMarking => self.filter_x::<LaneMarking>(search).await,
+            Res::LcsArray => self.filter_x::<LcsArray>(search).await,
+            Res::LcsIndication => self.filter_x::<LcsIndication>(search).await,
+            Res::Modem => self.filter_x::<Modem>(search).await,
+            Res::Permission => self.filter_x::<Permission>(search).await,
+            Res::RampMeter => self.filter_x::<RampMeter>(search).await,
+            Res::Role => self.filter_x::<Role>(search).await,
+            Res::TagReader => self.filter_x::<TagReader>(search).await,
+            Res::User => self.filter_x::<User>(search).await,
+            Res::VideoMonitor => self.filter_x::<VideoMonitor>(search).await,
+            Res::WeatherSensor => self.filter_x::<WeatherSensor>(search).await,
+            _ => unreachable!(),
+        }
+    }
+
+    /// Filter card list with a search term
+    async fn filter_x<C: Card>(&self, search: &str) -> Result<Self> {
+        let mut cards: Vec<C> = serde_json::from_str(&self.json)?;
+        // Use default value for ancillary data lookup
+        let pri = C::default();
+        let anc = fetch_ancillary(View::Search, &pri).await?;
+        let search = Search::new(search);
+        cards.retain(|pri| search.is_match(pri, &anc));
+        let json = serde_json::to_string(&cards)?;
+        Ok(CardList {
+            res: self.res,
+            json,
+        })
+    }
+
+    /// Convert card list to HTML view
+    pub async fn to_html(&self, config: bool) -> Result<String> {
+        match self.res {
+            Res::Alarm => self.to_html_x::<Alarm>(config).await,
+            Res::Beacon => self.to_html_x::<Beacon>(config).await,
+            Res::CabinetStyle => self.to_html_x::<CabinetStyle>(config).await,
+            Res::Camera => self.to_html_x::<Camera>(config).await,
+            Res::CommConfig => self.to_html_x::<CommConfig>(config).await,
+            Res::CommLink => self.to_html_x::<CommLink>(config).await,
+            Res::Controller => self.to_html_x::<Controller>(config).await,
+            Res::Detector => self.to_html_x::<Detector>(config).await,
+            Res::Dms => self.to_html_x::<Dms>(config).await,
+            Res::FlowStream => self.to_html_x::<FlowStream>(config).await,
+            Res::GateArm => self.to_html_x::<GateArm>(config).await,
+            Res::GateArmArray => self.to_html_x::<GateArmArray>(config).await,
+            Res::Gps => self.to_html_x::<Gps>(config).await,
+            Res::LaneMarking => self.to_html_x::<LaneMarking>(config).await,
+            Res::LcsArray => self.to_html_x::<LcsArray>(config).await,
+            Res::LcsIndication => self.to_html_x::<LcsIndication>(config).await,
+            Res::Modem => self.to_html_x::<Modem>(config).await,
+            Res::Permission => self.to_html_x::<Permission>(config).await,
+            Res::RampMeter => self.to_html_x::<RampMeter>(config).await,
+            Res::Role => self.to_html_x::<Role>(config).await,
+            Res::TagReader => self.to_html_x::<TagReader>(config).await,
+            Res::User => self.to_html_x::<User>(config).await,
+            Res::VideoMonitor => self.to_html_x::<VideoMonitor>(config).await,
+            Res::WeatherSensor => self.to_html_x::<WeatherSensor>(config).await,
+            _ => unreachable!(),
+        }
+    }
+
+    /// Convert card list to HTML view
+    async fn to_html_x<C: Card>(&self, config: bool) -> Result<String> {
+        let cards: Vec<C> = serde_json::from_str(&self.json)?;
+        // Use default value for ancillary data lookup
+        let pri = C::default();
+        let anc = fetch_ancillary(View::Search, &pri).await?;
+        let rname = C::res().as_str();
+        let mut html = String::new();
+        html.push_str("<ul class='cards'>");
+        if config {
+            let next_name = C::next_name(&cards);
+            // the "Create" card has id "{rname}_" and next available name
+            html.push_str(&format!(
+                "<li id='{rname}_' name='{next_name}' class='card'>\
+                    {CREATE_COMPACT}\
+                </li>"
+            ));
+        }
+        for pri in cards {
+            html.push_str(&format!(
+                "<li id='{rname}_{pri}' name='{pri}' class='card'>"
+            ));
+            html.push_str(&pri.to_html(View::Compact, &anc));
+            html.push_str("</li>");
+        }
+        html.push_str("</ul>");
+        Ok(html)
+    }
 }
 
 /// Fetch ancillary data
