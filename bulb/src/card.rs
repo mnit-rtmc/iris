@@ -360,6 +360,7 @@ fn add_option<C: Card>(perm: &Permission, html: &mut String) {
 }
 
 /// Card list for one resource type
+#[derive(Clone)]
 pub struct CardList {
     /// Resource type
     res: Res,

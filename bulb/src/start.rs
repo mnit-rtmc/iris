@@ -72,7 +72,7 @@ enum DeferredAction {
 
 /// Global app state
 #[derive(Default)]
-struct State {
+struct AppState {
     /// Have permissions been initialized?
     initialized: bool,
     /// Logged-in user name
@@ -83,13 +83,15 @@ struct State {
     tick: i32,
     /// Selected card
     selected_card: Option<SelectedCard>,
+    /// Card list
+    cards: Option<CardList>,
 }
 
 thread_local! {
-    static STATE: RefCell<State> = RefCell::new(State::default());
+    static STATE: RefCell<AppState> = RefCell::new(AppState::default());
 }
 
-impl State {
+impl AppState {
     /// Add ticks to current tick count
     fn plus_ticks(&self, t: i32) -> i32 {
         if let Some(t) = self.tick.checked_add(t) {
@@ -123,6 +125,45 @@ impl State {
         self.deferred
             .retain(|(_, a)| *a != DeferredAction::SearchList)
     }
+}
+
+/// Get selected card from global app state
+fn selected_card() -> Option<SelectedCard> {
+    STATE.with(|rc| rc.borrow().selected_card.clone())
+}
+
+/// Set delete action enabled/disabled
+fn set_delete_enabled(enabled: bool) {
+    STATE.with(|rc| {
+        let mut state = rc.borrow_mut();
+        if let Some(selected_card) = &mut state.selected_card {
+            selected_card.delete_enabled = enabled;
+        }
+    });
+}
+
+/// Set card list in global app state
+fn set_card_list(cards: Option<CardList>) {
+    STATE.with(|rc| {
+        let mut state = rc.borrow_mut();
+        state.selected_card.take();
+        state.cards = cards;
+    });
+}
+
+/// Get card list from global app state
+fn card_list() -> Option<CardList> {
+    STATE.with(|rc| rc.borrow().cards.clone())
+}
+
+/// Set logged-in user name in global app state
+fn set_user(user: Option<String>) {
+    STATE.with(|rc| rc.borrow_mut().user = user);
+}
+
+/// Get logged-in user name from global app state
+pub fn user() -> Option<String> {
+    STATE.with(|rc| rc.borrow().user.clone())
 }
 
 impl DeferredAction {
@@ -169,32 +210,43 @@ fn search_value() -> String {
 
 /// Populate `sb_list` with `res` card types
 async fn populate_list(res: Option<Res>, search: String) {
-    STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        state.selected_card.take()
-    });
-    let doc = Doc::get();
-    let sb_list = doc.elem::<Element>("sb_list");
-    match res {
-        Some(res) => {
-            let config = doc.input_bool("sb_config");
-            match build_list(res, &search, config).await {
-                Ok(cards) => sb_list.set_inner_html(&cards),
-                Err(Error::FetchResponseUnauthorized()) => show_login(),
-                Err(e) => show_toast(&format!("View failed: {e}")),
-            }
-        }
-        None => sb_list.set_inner_html(""),
+    match populate_list_x(res, &search).await {
+        Ok(_) => (),
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(e) => show_toast(&format!("View failed: {e}")),
     }
 }
 
-/// Fetch and build a list of cards for a resource
-async fn build_list(res: Res, search: &str, config: bool) -> Result<String> {
-    let cards = CardList::fetch(res).await?;
-    let cards = cards.filter(search).await?;
-    // FIXME: store card list in STATE
-    let cards = cards.to_html(config).await?;
-    Ok(cards)
+/// Populate `sb_list` with `res` card types
+async fn populate_list_x(res: Option<Res>, search: &str) -> Result<()> {
+    set_card_list(None);
+    let cards = fetch_list(res).await?;
+    set_card_list(cards);
+    let doc = Doc::get();
+    let sb_list = doc.elem::<Element>("sb_list");
+    let config = doc.input_bool("sb_config");
+    let html = build_list(search, config).await?;
+    sb_list.set_inner_html(&html);
+    Ok(())
+}
+
+/// Fetch a list of cards for a resource
+async fn fetch_list(res: Option<Res>) -> Result<Option<CardList>> {
+    match res {
+        Some(res) => Ok(Some(CardList::fetch(res).await?)),
+        None => Ok(None),
+    }
+}
+
+/// Build a filtered list of cards for a resource
+async fn build_list(search: &str, config: bool) -> Result<String> {
+    match card_list() {
+        Some(cards) => {
+            cards.filter(search).await?;
+            Ok(cards.to_html(config).await?)
+        }
+        None => Ok(String::new()),
+    }
 }
 
 /// Handle a card click event
@@ -361,7 +413,7 @@ impl SelectedCard {
 
 /// Show login form shade
 fn show_login() {
-    STATE.with(|rc| rc.borrow_mut().user = None);
+    set_user(None);
     Doc::get()
         .elem::<HtmlElement>(LOGIN_ID)
         .set_class_name("show");
@@ -499,7 +551,7 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
                 );
             }
             _ => {
-                let cs = STATE.with(|rc| rc.borrow().selected_card.clone());
+                let cs = selected_card();
                 if let Some(cs) = cs {
                     spawn_local(handle_input_card(id, cs));
                 }
@@ -589,7 +641,7 @@ fn handle_button_click_ev(target: &Element) {
         spawn_local(handle_login());
         return;
     }
-    let cs = STATE.with(|rc| rc.borrow().selected_card.clone());
+    let cs = selected_card();
     if let Some(cs) = cs {
         let attrs = ButtonAttrs {
             id,
@@ -644,7 +696,7 @@ async fn handle_login() {
                 let pass = doc.elem::<HtmlInputElement>("login_pass");
                 pass.set_value("");
                 hide_login();
-                STATE.with(|rc| rc.borrow_mut().user = Some(user));
+                set_user(Some(user));
                 if !STATE.with(|rc| rc.borrow().initialized) {
                     fill_resource_select().await;
                 }
@@ -701,16 +753,6 @@ fn handle_transition_ev(ev: Event) {
     }
 }
 
-/// Set delete action enabled/disabled
-fn set_delete_enabled(enabled: bool) {
-    STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        if let Some(selected_card) = &mut state.selected_card {
-            selected_card.delete_enabled = enabled;
-        }
-    });
-}
-
 /// Add callback for regular interval checks
 fn add_interval_callback(window: &Window) -> JsResult<()> {
     let closure = Closure::wrap(Box::new(|| {
@@ -762,9 +804,4 @@ fn update_resource_cards(payload: JsString) {
     // TODO: fetch updated list for resource
     // TODO: update existing resource cards
     search_resource_list();
-}
-
-/// Get logged-in user name
-pub fn user() -> Option<String> {
-    STATE.with(|rc| rc.borrow().user.clone())
 }
