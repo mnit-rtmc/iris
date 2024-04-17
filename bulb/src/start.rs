@@ -247,15 +247,15 @@ async fn populate_card_list_x() -> Result<()> {
 /// Get value to search
 fn search_value() -> String {
     let doc = Doc::get();
-    let search = doc.elem::<HtmlInputElement>("sb_search");
-    let mut value = search.value();
+    let sb_search = doc.elem::<HtmlInputElement>("sb_search");
+    let mut search = sb_search.value();
     if let Some(istate) = doc.select_parse::<String>("sb_state") {
         if ItemState::from_code(&istate).is_some() {
-            value.push(' ');
-            value.push_str(&istate);
+            search.push(' ');
+            search.push_str(&istate);
         }
     }
-    value
+    search
 }
 
 /// Build a filtered list of cards for a resource
@@ -548,11 +548,21 @@ fn add_change_listener(elem: &Element) -> JsResult<()> {
 /// Reload resource select element
 async fn reload_resources() {
     fill_resource_select().await;
+    let doc = Doc::get();
+    let sb_search = doc.elem::<HtmlInputElement>("sb_search");
+    sb_search.set_value("");
     handle_resource_change("".into()).await;
 }
 
 /// Handle change to selected resource type
 async fn handle_resource_change(rname: String) {
+    let doc = Doc::get();
+    let res = Res::try_from(rname.as_str()).ok();
+    let sb_state = doc.elem::<HtmlSelectElement>("sb_state");
+    match res {
+        Some(res) => sb_state.set_inner_html(card::item_states(res)),
+        None => sb_state.set_inner_html(""),
+    }
     fetch_card_list().await;
     populate_card_list().await;
     post_notify(rname).await;
@@ -590,14 +600,8 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
 /// Handle an event from `sb_resource` select element
 fn handle_sb_resource_ev(rname: String) {
     let doc = Doc::get();
-    let search = doc.elem::<HtmlInputElement>("sb_search");
-    search.set_value("");
-    let res = Res::try_from(rname.as_str()).ok();
-    let sb_state = doc.elem::<HtmlSelectElement>("sb_state");
-    match res {
-        Some(res) => sb_state.set_inner_html(card::item_states(res)),
-        None => sb_state.set_inner_html(""),
-    }
+    let sb_search = doc.elem::<HtmlInputElement>("sb_search");
+    sb_search.set_value("");
     spawn_local(handle_resource_change(rname));
 }
 
@@ -734,8 +738,8 @@ async fn go_resource(attrs: ButtonAttrs) {
     if let (Some(link), Some(rname)) = (attrs.data_link, attrs.data_type) {
         let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
         sb_resource.set_value(&rname);
-        let search = doc.elem::<HtmlInputElement>("sb_search");
-        search.set_value(&link);
+        let sb_search = doc.elem::<HtmlInputElement>("sb_search");
+        sb_search.set_value(&link);
         handle_resource_change(rname).await;
     }
 }
