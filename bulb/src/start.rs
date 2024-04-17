@@ -196,12 +196,52 @@ impl DeferredAction {
 
 /// Search resource list using the value from `sb_search`
 fn search_resource_list() {
+    spawn_local(populate_card_list());
+}
+
+/// Fetch card list with selected resource type
+async fn fetch_card_list() {
+    match fetch_card_list_x().await {
+        Ok(_) => (),
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(e) => show_toast(&format!("View failed: {e}")),
+    }
+}
+
+/// Fetch card list with selected resource type
+async fn fetch_card_list_x() -> Result<()> {
+    set_selected_card(None);
+    set_card_list(None);
     let doc = Doc::get();
     if let Some(rname) = doc.select_parse::<String>("sb_resource") {
         let res = Res::try_from(rname.as_str()).ok();
-        let value = search_value();
-        spawn_local(populate_list(res, value));
+        let cards = match res {
+            Some(res) => Some(CardList::fetch(res).await?),
+            None => None,
+        };
+        set_card_list(cards);
     }
+    Ok(())
+}
+
+/// Populate `sb_list` with selected resource type
+async fn populate_card_list() {
+    match populate_card_list_x().await {
+        Ok(_) => (),
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(e) => show_toast(&format!("View failed: {e}")),
+    }
+}
+
+/// Populate `sb_list` with selected resource type
+async fn populate_card_list_x() -> Result<()> {
+    let search = search_value();
+    let doc = Doc::get();
+    let config = doc.input_bool("sb_config");
+    let html = build_list(&search, config).await?;
+    let sb_list = doc.elem::<Element>("sb_list");
+    sb_list.set_inner_html(&html);
+    Ok(())
 }
 
 /// Get value to search
@@ -218,42 +258,11 @@ fn search_value() -> String {
     value
 }
 
-/// Populate `sb_list` with `res` card types
-async fn populate_list(res: Option<Res>, search: String) {
-    match populate_list_x(res, &search).await {
-        Ok(_) => (),
-        Err(Error::FetchResponseUnauthorized()) => show_login(),
-        Err(e) => show_toast(&format!("View failed: {e}")),
-    }
-}
-
-/// Populate `sb_list` with `res` card types
-async fn populate_list_x(res: Option<Res>, search: &str) -> Result<()> {
-    set_selected_card(None);
-    set_card_list(None);
-    let cards = fetch_list(res).await?;
-    set_card_list(cards);
-    let doc = Doc::get();
-    let sb_list = doc.elem::<Element>("sb_list");
-    let config = doc.input_bool("sb_config");
-    let html = build_list(search, config).await?;
-    sb_list.set_inner_html(&html);
-    Ok(())
-}
-
-/// Fetch a list of cards for a resource
-async fn fetch_list(res: Option<Res>) -> Result<Option<CardList>> {
-    match res {
-        Some(res) => Ok(Some(CardList::fetch(res).await?)),
-        None => Ok(None),
-    }
-}
-
 /// Build a filtered list of cards for a resource
 async fn build_list(search: &str, config: bool) -> Result<String> {
     match card_list() {
         Some(cards) => {
-            cards.filter(search).await?;
+            let cards = cards.filter(search).await?;
             Ok(cards.to_html(config).await?)
         }
         None => Ok(String::new()),
@@ -539,7 +548,14 @@ fn add_change_listener(elem: &Element) -> JsResult<()> {
 /// Reload resource select element
 async fn reload_resources() {
     fill_resource_select().await;
-    search_resource_list();
+    handle_resource_change("".into()).await;
+}
+
+/// Handle change to selected resource type
+async fn handle_resource_change(rname: String) {
+    fetch_card_list().await;
+    populate_card_list().await;
+    post_notify(rname).await;
 }
 
 /// Add an "input" event listener to an element
@@ -582,16 +598,18 @@ fn handle_sb_resource_ev(rname: String) {
         Some(res) => sb_state.set_inner_html(card::item_states(res)),
         None => sb_state.set_inner_html(""),
     }
-    let value = search_value();
-    spawn_local(populate_list(res, value));
-    spawn_local(post_notify(rname));
+    spawn_local(handle_resource_change(rname));
 }
 
 /// POST selected resource name to notify endpoint
 async fn post_notify(rname: String) {
     let uri = Uri::from("/iris/api/notify");
-    let js = format!("[\"{rname}\"]");
-    match uri.post(&js.into()).await {
+    let json = if rname.is_empty() {
+        "[]".to_string()
+    } else {
+        format!("[\"{rname}\"]")
+    };
+    match uri.post(&json.into()).await {
         Ok(_) => {
             console::log_1(&format!("/iris/api/notify POST {rname}").into())
         }
@@ -718,8 +736,7 @@ async fn go_resource(attrs: ButtonAttrs) {
         sb_resource.set_value(&rname);
         let search = doc.elem::<HtmlInputElement>("sb_search");
         search.set_value(&link);
-        let res = Res::try_from(rname.as_str()).ok();
-        populate_list(res, link).await;
+        handle_resource_change(rname).await;
     }
 }
 
