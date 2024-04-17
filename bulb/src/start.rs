@@ -127,6 +127,17 @@ impl AppState {
     }
 }
 
+/// Set selected card to global app state
+fn set_selected_card(card: Option<SelectedCard>) -> Option<SelectedCard> {
+    STATE.with(|rc| {
+        let mut state = rc.borrow_mut();
+        let cs = state.selected_card.take();
+        state.selected_card = card;
+        state.clear_searches();
+        cs
+    })
+}
+
 /// Get selected card from global app state
 fn selected_card() -> Option<SelectedCard> {
     STATE.with(|rc| rc.borrow().selected_card.clone())
@@ -146,7 +157,6 @@ fn set_delete_enabled(enabled: bool) {
 fn set_card_list(cards: Option<CardList>) {
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
-        state.selected_card.take();
         state.cards = cards;
     });
 }
@@ -219,6 +229,7 @@ async fn populate_list(res: Option<Res>, search: String) {
 
 /// Populate `sb_list` with `res` card types
 async fn populate_list_x(res: Option<Res>, search: &str) -> Result<()> {
+    set_selected_card(None);
     set_card_list(None);
     let cards = fetch_list(res).await?;
     set_card_list(cards);
@@ -264,10 +275,7 @@ async fn click_card(res: Res, id: String, name: String) {
 
 /// Deselect the selected card
 async fn deselect_card() {
-    let cs = STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        state.selected_card.take()
-    });
+    let cs = set_selected_card(None);
     if let Some(cs) = cs {
         let v = cs.view;
         if !v.is_compact() {
@@ -316,16 +324,12 @@ impl SelectedCard {
                 return;
             }
         }
-        STATE.with(|rc| {
-            let mut state = rc.borrow_mut();
-            if v.is_compact() {
-                state.selected_card.take();
-            } else {
-                self.view = v;
-                state.selected_card.replace(self);
-                state.clear_searches();
-            }
-        });
+        if v.is_compact() {
+            set_selected_card(None);
+        } else {
+            self.view = v;
+            set_selected_card(Some(self));
+        }
     }
 
     /// Save changed fields
