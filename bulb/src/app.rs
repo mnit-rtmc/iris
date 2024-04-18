@@ -50,6 +50,18 @@ impl SelectedCard {
             format!("{res}_{}", &self.name)
         }
     }
+
+    /// Set the card view to compact
+    pub fn compact(mut self) -> Self {
+        self.view = self.view.compact();
+        self
+    }
+
+    /// Set the card view
+    pub fn view(mut self, v: View) -> Self {
+        self.view = v;
+        self
+    }
 }
 
 /// Deferred actions (called on set_interval)

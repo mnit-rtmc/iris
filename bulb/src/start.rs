@@ -132,7 +132,7 @@ impl SelectedCard {
     async fn res_create(self) {
         match card::create_and_post(self.res).await {
             Ok(_) => {
-                replace_card(self, View::Create.compact()).await;
+                replace_card(self.view(View::CreateCompact)).await;
                 app::defer_action(DeferredAction::SearchList, 1500);
             }
             Err(Error::FetchResponseUnauthorized()) => show_login(),
@@ -144,7 +144,7 @@ impl SelectedCard {
     async fn res_save_edit(self) {
         let res = self.res;
         match card::patch_changed(res, &self.name).await {
-            Ok(_) => replace_card(self, View::Edit.compact()).await,
+            Ok(_) => replace_card(self.view(View::Compact)).await,
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(Error::FetchResponseNotFound()) => {
                 // Card list out-of-date; refresh with search
@@ -165,7 +165,7 @@ impl SelectedCard {
             Err(e) => Err(e),
         };
         match result {
-            Ok(_) => replace_card(self, View::Location.compact()).await,
+            Ok(_) => replace_card(self.view(View::Compact)).await,
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(e) => show_toast(&format!("Save failed: {e}")),
         }
@@ -201,9 +201,9 @@ impl SelectedCard {
 }
 
 /// Replace the selected card element with another card type
-async fn replace_card(mut cs: SelectedCard, v: View) {
-    match card::fetch_one(cs.res, &cs.name, v).await {
-        Ok(html) => replace_card_html(cs.id(), v, &html),
+async fn replace_card(cs: SelectedCard) {
+    match card::fetch_one(cs.res, &cs.name, cs.view).await {
+        Ok(html) => replace_card_html(cs.id(), cs.view, &html),
         Err(Error::FetchResponseUnauthorized()) => {
             show_login();
             return;
@@ -215,10 +215,9 @@ async fn replace_card(mut cs: SelectedCard, v: View) {
             return;
         }
     }
-    if v.is_compact() {
+    if cs.view.is_compact() {
         app::set_selected_card(None);
     } else {
-        cs.view = v;
         app::set_selected_card(Some(cs));
     }
 }
@@ -480,16 +479,15 @@ fn handle_button_click_ev(target: &Element) {
 async fn handle_button_card(attrs: ButtonAttrs, cs: SelectedCard) {
     match attrs.id.as_str() {
         "ob_close" => {
-            let v = cs.view.compact();
-            replace_card(cs, v).await;
+            replace_card(cs.compact()).await;
         }
         "ob_delete" => {
             if cs.delete_enabled {
                 cs.res_delete().await;
             }
         }
-        "ob_edit" => replace_card(cs, View::Edit).await,
-        "ob_loc" => replace_card(cs, View::Location).await,
+        "ob_edit" => replace_card(cs.view(View::Edit)).await,
+        "ob_loc" => replace_card(cs.view(View::Location)).await,
         "ob_save" => cs.save_changed().await,
         _ => {
             if attrs.class_name == "go_link" {
@@ -523,11 +521,11 @@ async fn click_card(res: Res, id: String, name: String) {
     // FIXME: check if id is the same
     if id.ends_with('_') {
         let cs = SelectedCard::new(res, View::Create, name);
-        replace_card(cs, View::Create).await;
+        replace_card(cs.view(View::Create)).await;
     } else {
         let config = Doc::get().input_bool("sb_config");
         let cs = SelectedCard::new(res, View::Status(config), name);
-        replace_card(cs, View::Status(config)).await;
+        replace_card(cs.view(View::Status(config))).await;
     }
 }
 
@@ -535,10 +533,8 @@ async fn click_card(res: Res, id: String, name: String) {
 async fn deselect_card() {
     let cs = app::set_selected_card(None);
     if let Some(cs) = cs {
-        let v = cs.view;
-        if !v.is_compact() {
-            let v = v.compact();
-            replace_card(cs, v).await;
+        if !cs.view.is_compact() {
+            replace_card(cs.compact()).await;
         }
     }
 }
