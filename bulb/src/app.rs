@@ -97,7 +97,8 @@ pub fn set_selected_card(card: Option<SelectedCard>) -> Option<SelectedCard> {
         let cs = state.selected_card.take();
         state.selected_card = card;
         // clear any deferred search actions
-        state.deferred
+        state
+            .deferred
             .retain(|(_, a)| *a != DeferredAction::SearchList);
         cs
     })

@@ -758,7 +758,7 @@ impl Dms {
     /// Build compose pattern HTML
     fn compose_patterns(&self, anc: &DmsAnc) -> Option<String> {
         if anc.compose_patterns.is_empty() {
-            console::log_1(&"patterns empty".into());
+            console::log_1(&"No compose patterns!".into());
             return None;
         }
         let sign = self.make_sign(anc)?;

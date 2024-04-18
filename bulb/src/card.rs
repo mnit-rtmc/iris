@@ -370,7 +370,6 @@ pub struct CardList {
 
 impl CardList {
     /// Fetch card list for a resource type
-    #[must_use]
     pub async fn fetch(res: Res) -> Result<Self> {
         let json = uri_res(res).get().await?;
         let json: Value = serde_wasm_bindgen::from_value(json)?;
@@ -379,7 +378,6 @@ impl CardList {
     }
 
     /// Filter card list with a search term
-    #[must_use]
     pub async fn filter(&self, search: &str) -> Result<Self> {
         match self.res {
             Res::Alarm => self.filter_x::<Alarm>(search).await,
@@ -426,7 +424,6 @@ impl CardList {
     }
 
     /// Convert card list to HTML view
-    #[must_use]
     pub async fn to_html(&self, config: bool) -> Result<String> {
         match self.res {
             Res::Alarm => self.to_html_x::<Alarm>(config).await,
