@@ -33,12 +33,6 @@ pub type JsResult<T> = std::result::Result<T, JsValue>;
 /// Page sidebar
 const SIDEBAR: &str = include_str!("sidebar.html");
 
-/// ID of toast element
-const TOAST_ID: &str = "sb_toast";
-
-/// ID of login shade
-const LOGIN_ID: &str = "sb_login";
-
 /// Button attributes
 struct ButtonAttrs {
     id: String,
@@ -261,19 +255,19 @@ impl SelectedCard {
 fn show_login() {
     app::set_user(None);
     Doc::get()
-        .elem::<HtmlElement>(LOGIN_ID)
+        .elem::<HtmlElement>("sb_login")
         .set_class_name("show");
 }
 
 /// Hide login form shade
 fn hide_login() {
-    Doc::get().elem::<HtmlElement>(LOGIN_ID).set_class_name("");
+    Doc::get().elem::<HtmlElement>("sb_login").set_class_name("");
 }
 
 /// Show a toast message
 fn show_toast(msg: &str) {
     console::log_1(&format!("toast: {msg}").into());
-    let t = Doc::get().elem::<HtmlElement>(TOAST_ID);
+    let t = Doc::get().elem::<HtmlElement>("sb_toast");
     t.set_inner_html(msg);
     t.set_class_name("show");
     app::defer_action(DeferredAction::HideToast, 3000);
@@ -281,7 +275,7 @@ fn show_toast(msg: &str) {
 
 /// Hide toast
 fn hide_toast() {
-    Doc::get().elem::<HtmlElement>(TOAST_ID).set_class_name("");
+    Doc::get().elem::<HtmlElement>("sb_toast").set_class_name("");
 }
 
 /// Replace a card with provieded HTML
@@ -407,6 +401,7 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
         let id = target.id();
         match id.as_str() {
+            "sb_config" => (),
             "sb_search" | "sb_state" => search_resource_list(),
             "sb_resource" => {
                 handle_sb_resource_ev(
@@ -496,19 +491,21 @@ fn add_click_listener(elem: &Element) -> JsResult<()> {
 /// Handle a `click` event with a button target
 fn handle_button_click_ev(target: &Element) {
     let id = target.id();
-    if id == "ob_login" {
-        spawn_local(handle_login());
-        return;
-    }
-    let cs = app::selected_card();
-    if let Some(cs) = cs {
-        let attrs = ButtonAttrs {
-            id,
-            class_name: target.class_name(),
-            data_link: target.get_attribute("data-link"),
-            data_type: target.get_attribute("data-type"),
-        };
-        spawn_local(handle_button_card(attrs, cs));
+    match id.as_str() {
+        "ob_login" => spawn_local(handle_login()),
+        "sb_refresh" => spawn_local(handle_refresh()),
+        _ => {
+            let cs = app::selected_card();
+            if let Some(cs) = cs {
+                let attrs = ButtonAttrs {
+                    id,
+                    class_name: target.class_name(),
+                    data_link: target.get_attribute("data-link"),
+                    data_type: target.get_attribute("data-type"),
+                };
+                spawn_local(handle_button_card(attrs, cs));
+            }
+        }
     }
 }
 
@@ -575,6 +572,12 @@ async fn go_resource(attrs: ButtonAttrs) {
         sb_search.set_value(&link);
         handle_resource_change(rname).await;
     }
+}
+
+/// Handle refresh button click
+async fn handle_refresh() {
+    fetch_card_list().await;
+    populate_card_list().await;
 }
 
 /// Add transition event listener to an element
