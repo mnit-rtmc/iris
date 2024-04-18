@@ -116,90 +116,6 @@ async fn build_list(search: &str, config: bool) -> Result<String> {
     }
 }
 
-impl SelectedCard {
-    /// Save changed fields
-    async fn save_changed(self) {
-        let v = self.view;
-        match v {
-            View::Create => self.res_create().await,
-            View::Edit | View::Status(_) => self.res_save_edit().await,
-            View::Location => self.res_save_loc().await,
-            _ => (),
-        }
-    }
-
-    /// Create a new object from card
-    async fn res_create(self) {
-        match card::create_and_post(self.res).await {
-            Ok(_) => {
-                replace_card(self.view(View::CreateCompact)).await;
-                app::defer_action(DeferredAction::SearchList, 1500);
-            }
-            Err(Error::FetchResponseUnauthorized()) => show_login(),
-            Err(e) => show_toast(&format!("Create failed: {e}")),
-        }
-    }
-
-    /// Save changed fields on Edit card
-    async fn res_save_edit(self) {
-        let res = self.res;
-        match card::patch_changed(res, &self.name).await {
-            Ok(_) => replace_card(self.view(View::Compact)).await,
-            Err(Error::FetchResponseUnauthorized()) => show_login(),
-            Err(Error::FetchResponseNotFound()) => {
-                // Card list out-of-date; refresh with search
-                app::defer_action(DeferredAction::SearchList, 200);
-            }
-            Err(e) => show_toast(&format!("Save failed: {e}")),
-        }
-    }
-
-    /// Save changed fields on Location card
-    async fn res_save_loc(self) {
-        let geo_loc = card::fetch_geo_loc(self.res, &self.name).await;
-        let result = match geo_loc {
-            Ok(Some(geo_loc)) => {
-                card::patch_changed(Res::GeoLoc, &geo_loc).await
-            }
-            Ok(None) => Ok(()),
-            Err(e) => Err(e),
-        };
-        match result {
-            Ok(_) => replace_card(self.view(View::Compact)).await,
-            Err(Error::FetchResponseUnauthorized()) => show_login(),
-            Err(e) => show_toast(&format!("Save failed: {e}")),
-        }
-    }
-
-    /// Delete selected card / object
-    async fn res_delete(self) {
-        match card::delete_one(self.res, &self.name).await {
-            Ok(_) => app::defer_action(DeferredAction::SearchList, 1000),
-            Err(Error::FetchResponseUnauthorized()) => show_login(),
-            Err(e) => show_toast(&format!("Delete failed: {e}")),
-        }
-    }
-
-    /// Handle a button click on selected card
-    async fn handle_click(self, attrs: &ButtonAttrs) -> bool {
-        match card::handle_click(self.res, &self.name, &attrs.id).await {
-            Ok(c) => c,
-            Err(e) => {
-                show_toast(&format!("Click failed: {e}"));
-                false
-            }
-        }
-    }
-
-    /// Handle an input event on selected card
-    async fn handle_input(self, id: &str) -> bool {
-        match card::handle_input(self.res, &self.name, id).await {
-            Ok(c) => c,
-            Err(_e) => false,
-        }
-    }
-}
-
 /// Replace the selected card element with another card type
 async fn replace_card(cs: SelectedCard) {
     match card::fetch_one(cs.res, &cs.name, cs.view).await {
@@ -209,9 +125,9 @@ async fn replace_card(cs: SelectedCard) {
             return;
         }
         Err(e) => {
-            show_toast(&format!("Fetch failed: {e}"));
-            // Card list may be out-of-date; refresh with search
-            app::defer_action(DeferredAction::SearchList, 200);
+            show_toast(&format!("fetch failed: {e}"));
+            // Card list may be out-of-date; refresh
+            app::defer_action(DeferredAction::RefreshList, 200);
             return;
         }
     }
@@ -388,7 +304,7 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
             _ => {
                 let cs = app::selected_card();
                 if let Some(cs) = cs {
-                    spawn_local(handle_input_card(id, cs));
+                    spawn_local(handle_input(cs, id));
                 }
             }
         }
@@ -428,10 +344,13 @@ async fn post_notify(rname: String) {
     }
 }
 
-/// Handle input event with selected card
-async fn handle_input_card(id: String, cs: SelectedCard) {
-    if !cs.handle_input(&id).await {
-        console::log_1(&format!("unknown id: {id}").into());
+/// Handle an input event on selected card
+async fn handle_input(cs: SelectedCard, id: String) {
+    match card::handle_input(cs.res, &cs.name, &id).await {
+        Ok(c) if c => (),
+        _ => {
+            console::log_1(&format!("unknown id: {id}").into());
+        }
     }
 }
 
@@ -478,26 +397,83 @@ fn handle_button_click_ev(target: &Element) {
 /// Handle button click event with selected card
 async fn handle_button_card(attrs: ButtonAttrs, cs: SelectedCard) {
     match attrs.id.as_str() {
-        "ob_close" => {
-            replace_card(cs.compact()).await;
-        }
-        "ob_delete" => {
-            if cs.delete_enabled {
-                cs.res_delete().await;
-            }
-        }
+        "ob_close" => replace_card(cs.compact()).await,
+        "ob_delete" => handle_delete(cs).await,
         "ob_edit" => replace_card(cs.view(View::Edit)).await,
         "ob_loc" => replace_card(cs.view(View::Location)).await,
-        "ob_save" => cs.save_changed().await,
+        "ob_save" => handle_save(cs).await,
         _ => {
             if attrs.class_name == "go_link" {
                 go_resource(attrs).await;
-            } else if !cs.handle_click(&attrs).await {
-                console::log_1(
-                    &format!("unknown button: {}", &attrs.id).into(),
-                );
+            } else {
+                handle_click(cs, &attrs.id).await;
             }
         }
+    }
+}
+
+/// Handle delete button click
+async fn handle_delete(cs: SelectedCard) {
+    if cs.delete_enabled {
+        match card::delete_one(cs.res, &cs.name).await {
+            Ok(_) => app::defer_action(DeferredAction::RefreshList, 1000),
+            Err(Error::FetchResponseUnauthorized()) => show_login(),
+            Err(e) => show_toast(&format!("Delete failed: {e}")),
+        }
+    }
+}
+
+/// Handle save button click
+async fn handle_save(cs: SelectedCard) {
+    let rs = match cs.view {
+        View::Create => save_create(cs).await,
+        View::Edit | View::Status(_) => save_edit(cs).await,
+        View::Location => save_location(cs).await,
+        _ => Ok(()),
+    };
+    match rs {
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(Error::FetchResponseNotFound()) => {
+            // Card list out-of-date; refresh
+            app::defer_action(DeferredAction::RefreshList, 200);
+        }
+        Err(e) => show_toast(&format!("Save failed: {e}")),
+        _ => (),
+    }
+}
+
+/// Save a create view card
+async fn save_create(cs: SelectedCard) -> Result<()> {
+    card::create_and_post(cs.res).await?;
+    replace_card(cs.view(View::CreateCompact)).await;
+    app::defer_action(DeferredAction::RefreshList, 1500);
+    Ok(())
+}
+
+/// Save an edit view card
+async fn save_edit(cs: SelectedCard) -> Result<()> {
+    card::patch_changed(cs.res, &cs.name).await?;
+    replace_card(cs.view(View::Compact)).await;
+    Ok(())
+}
+
+/// Save a location view card
+async fn save_location(cs: SelectedCard) -> Result<()> {
+    if let Some(geo_loc) = card::fetch_geo_loc(cs.res, &cs.name).await? {
+        card::patch_changed(Res::GeoLoc, &geo_loc).await?;
+        replace_card(cs.view(View::Compact)).await;
+    }
+    Ok(())
+}
+
+/// Handle a button click on selected card
+async fn handle_click(cs: SelectedCard, id: &str) {
+    match card::handle_click(cs.res, &cs.name, id).await {
+        Ok(c) if !c => {
+            console::log_1(&format!("unknown button: {id}").into());
+        }
+        Ok(_c) => (),
+        Err(e) => show_toast(&format!("click failed: {e}")),
     }
 }
 
@@ -635,7 +611,7 @@ fn tick_interval() {
     app::tick_tock();
     while let Some(action) = app::next_action() {
         match action {
-            DeferredAction::SearchList => search_resource_list(),
+            DeferredAction::RefreshList => spawn_local(handle_refresh()),
             DeferredAction::HideToast => hide_toast(),
         }
     }

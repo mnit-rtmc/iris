@@ -67,7 +67,9 @@ impl SelectedCard {
 /// Deferred actions (called on set_interval)
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum DeferredAction {
-    SearchList,
+    /// Refresh resource list
+    RefreshList,
+    /// Hide the toast popup
     HideToast,
 }
 
@@ -108,10 +110,10 @@ pub fn set_selected_card(card: Option<SelectedCard>) -> Option<SelectedCard> {
         let mut state = rc.borrow_mut();
         let cs = state.selected_card.take();
         state.selected_card = card;
-        // clear any deferred search actions
+        // clear any deferred refresh actions
         state
             .deferred
-            .retain(|(_, a)| *a != DeferredAction::SearchList);
+            .retain(|(_, a)| *a != DeferredAction::RefreshList);
         cs
     })
 }
@@ -158,6 +160,10 @@ pub fn user() -> Option<String> {
 pub fn defer_action(action: DeferredAction, timeout_ms: i32) {
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
+        // don't defer more than one refresh list action
+        state
+            .deferred
+            .retain(|(_, a)| *a != DeferredAction::RefreshList);
         let delay = (timeout_ms + TICK_INTERVAL - 1) / TICK_INTERVAL;
         let tick = state.tick.saturating_add(delay);
         state.deferred.push((tick, action));
