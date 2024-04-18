@@ -10,6 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::app::{self, DeferredAction, SelectedCard};
 use crate::card::{self, CardList, View};
 use crate::error::{Error, Result};
 use crate::fetch::Uri;
@@ -17,7 +18,6 @@ use crate::item::ItemState;
 use crate::util::Doc;
 use js_sys::JsString;
 use resources::Res;
-use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
@@ -39,159 +39,12 @@ const TOAST_ID: &str = "sb_toast";
 /// ID of login shade
 const LOGIN_ID: &str = "sb_login";
 
-/// Interval (ms) between ticks for deferred actions
-const TICK_INTERVAL: i32 = 500;
-
-/// Selected card state
-#[derive(Clone, Debug)]
-struct SelectedCard {
-    /// Resource type
-    res: Res,
-    /// Card view
-    view: View,
-    /// Object name
-    name: String,
-    /// Delete action enabled (slider transition finished)
-    delete_enabled: bool,
-}
-
 /// Button attributes
 struct ButtonAttrs {
     id: String,
     class_name: String,
     data_link: Option<String>,
     data_type: Option<String>,
-}
-
-/// Deferred actions (called on set_interval)
-#[derive(Clone, Copy, Debug, PartialEq)]
-enum DeferredAction {
-    SearchList,
-    HideToast,
-}
-
-/// Global app state
-#[derive(Default)]
-struct AppState {
-    /// Have permissions been initialized?
-    initialized: bool,
-    /// Logged-in user name
-    user: Option<String>,
-    /// Deferred actions (with tick number)
-    deferred: Vec<(i32, DeferredAction)>,
-    /// Timer tick count
-    tick: i32,
-    /// Selected card
-    selected_card: Option<SelectedCard>,
-    /// Card list
-    cards: Option<CardList>,
-}
-
-thread_local! {
-    static STATE: RefCell<AppState> = RefCell::new(AppState::default());
-}
-
-impl AppState {
-    /// Add ticks to current tick count
-    fn plus_ticks(&self, t: i32) -> i32 {
-        if let Some(t) = self.tick.checked_add(t) {
-            t
-        } else {
-            0
-        }
-    }
-
-    /// Schedule a deferred action
-    fn schedule(&mut self, action: DeferredAction, timeout_ms: i32) {
-        let tick =
-            self.plus_ticks((timeout_ms + TICK_INTERVAL - 1) / TICK_INTERVAL);
-        self.deferred.push((tick, action));
-    }
-
-    /// Get a deferred action
-    fn action(&mut self) -> Option<DeferredAction> {
-        for i in 0..self.deferred.len() {
-            let (tick, action) = self.deferred[i];
-            if tick <= self.tick {
-                self.deferred.swap_remove(i);
-                return Some(action);
-            }
-        }
-        None
-    }
-
-    /// Clear deferred search actions
-    fn clear_searches(&mut self) {
-        self.deferred
-            .retain(|(_, a)| *a != DeferredAction::SearchList)
-    }
-}
-
-/// Set selected card to global app state
-fn set_selected_card(card: Option<SelectedCard>) -> Option<SelectedCard> {
-    STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        let cs = state.selected_card.take();
-        state.selected_card = card;
-        state.clear_searches();
-        cs
-    })
-}
-
-/// Get selected card from global app state
-fn selected_card() -> Option<SelectedCard> {
-    STATE.with(|rc| rc.borrow().selected_card.clone())
-}
-
-/// Set delete action enabled/disabled
-fn set_delete_enabled(enabled: bool) {
-    STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        if let Some(selected_card) = &mut state.selected_card {
-            selected_card.delete_enabled = enabled;
-        }
-    });
-}
-
-/// Set card list in global app state
-fn set_card_list(cards: Option<CardList>) {
-    STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        state.cards = cards;
-    });
-}
-
-/// Get card list from global app state
-fn card_list() -> Option<CardList> {
-    STATE.with(|rc| rc.borrow().cards.clone())
-}
-
-/// Set logged-in user name in global app state
-fn set_user(user: Option<String>) {
-    STATE.with(|rc| rc.borrow_mut().user = user);
-}
-
-/// Get logged-in user name from global app state
-pub fn user() -> Option<String> {
-    STATE.with(|rc| rc.borrow().user.clone())
-}
-
-impl DeferredAction {
-    /// Schedule with timeout
-    fn schedule(self, timeout_ms: i32) {
-        STATE.with(|rc| {
-            let mut state = rc.borrow_mut();
-            state.schedule(self, timeout_ms);
-        });
-    }
-
-    /// Perform the action
-    fn perform(self) {
-        match self {
-            Self::SearchList => search_resource_list(),
-            Self::HideToast => hide_toast(),
-        }
-    }
 }
 
 /// Search resource list using the value from `sb_search`
@@ -210,8 +63,8 @@ async fn fetch_card_list() {
 
 /// Fetch card list with selected resource type
 async fn fetch_card_list_x() -> Result<()> {
-    set_selected_card(None);
-    set_card_list(None);
+    app::set_selected_card(None);
+    app::set_card_list(None);
     let doc = Doc::get();
     if let Some(rname) = doc.select_parse::<String>("sb_resource") {
         let res = Res::try_from(rname.as_str()).ok();
@@ -219,7 +72,7 @@ async fn fetch_card_list_x() -> Result<()> {
             Some(res) => Some(CardList::fetch(res).await?),
             None => None,
         };
-        set_card_list(cards);
+        app::set_card_list(cards);
     }
     Ok(())
 }
@@ -260,7 +113,7 @@ fn search_value() -> String {
 
 /// Build a filtered list of cards for a resource
 async fn build_list(search: &str, config: bool) -> Result<String> {
-    match card_list() {
+    match app::card_list() {
         Some(cards) => {
             let cards = cards.filter(search).await?;
             Ok(cards.to_html(config).await?)
@@ -284,7 +137,7 @@ async fn click_card(res: Res, id: String, name: String) {
 
 /// Deselect the selected card
 async fn deselect_card() {
-    let cs = set_selected_card(None);
+    let cs = app::set_selected_card(None);
     if let Some(cs) = cs {
         let v = cs.view;
         if !v.is_compact() {
@@ -295,26 +148,6 @@ async fn deselect_card() {
 }
 
 impl SelectedCard {
-    /// Create a new blank selected card
-    fn new(res: Res, view: View, name: String) -> Self {
-        SelectedCard {
-            res,
-            view,
-            name,
-            delete_enabled: false,
-        }
-    }
-
-    /// Get card element ID
-    fn id(&self) -> String {
-        let res = self.res;
-        if self.view.is_create() {
-            format!("{res}_")
-        } else {
-            format!("{res}_{}", &self.name)
-        }
-    }
-
     /// Replace a card element with another card type
     async fn replace_card(mut self, v: View) {
         let id = self.id();
@@ -329,15 +162,15 @@ impl SelectedCard {
             Err(e) => {
                 show_toast(&format!("Fetch failed: {e}"));
                 // Card list may be out-of-date; refresh with search
-                DeferredAction::SearchList.schedule(200);
+                app::defer_action(DeferredAction::SearchList, 200);
                 return;
             }
         }
         if v.is_compact() {
-            set_selected_card(None);
+            app::set_selected_card(None);
         } else {
             self.view = v;
-            set_selected_card(Some(self));
+            app::set_selected_card(Some(self));
         }
     }
 
@@ -357,7 +190,7 @@ impl SelectedCard {
         match card::create_and_post(self.res).await {
             Ok(_) => {
                 self.replace_card(View::Create.compact()).await;
-                DeferredAction::SearchList.schedule(1500);
+                app::defer_action(DeferredAction::SearchList, 1500);
             }
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(e) => show_toast(&format!("Create failed: {e}")),
@@ -372,7 +205,7 @@ impl SelectedCard {
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(Error::FetchResponseNotFound()) => {
                 // Card list out-of-date; refresh with search
-                DeferredAction::SearchList.schedule(200);
+                app::defer_action(DeferredAction::SearchList, 200);
             }
             Err(e) => show_toast(&format!("Save failed: {e}")),
         }
@@ -398,7 +231,7 @@ impl SelectedCard {
     /// Delete selected card / object
     async fn res_delete(self) {
         match card::delete_one(self.res, &self.name).await {
-            Ok(_) => DeferredAction::SearchList.schedule(1000),
+            Ok(_) => app::defer_action(DeferredAction::SearchList, 1000),
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(e) => show_toast(&format!("Delete failed: {e}")),
         }
@@ -426,7 +259,7 @@ impl SelectedCard {
 
 /// Show login form shade
 fn show_login() {
-    set_user(None);
+    app::set_user(None);
     Doc::get()
         .elem::<HtmlElement>(LOGIN_ID)
         .set_class_name("show");
@@ -443,7 +276,7 @@ fn show_toast(msg: &str) {
     let t = Doc::get().elem::<HtmlElement>(TOAST_ID);
     t.set_inner_html(msg);
     t.set_class_name("show");
-    DeferredAction::HideToast.schedule(3000);
+    app::defer_action(DeferredAction::HideToast, 3000);
 }
 
 /// Hide toast
@@ -500,7 +333,7 @@ async fn fill_resource_select() {
         Ok(perm) => {
             let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
             sb_resource.set_inner_html(&perm);
-            STATE.with(|rc| rc.borrow_mut().initialized = true);
+            app::set_initialized();
         }
         Err(Error::FetchResponseUnauthorized()) => show_login(),
         Err(e) => {
@@ -581,7 +414,7 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
                 );
             }
             _ => {
-                let cs = selected_card();
+                let cs = app::selected_card();
                 if let Some(cs) = cs {
                     spawn_local(handle_input_card(id, cs));
                 }
@@ -667,7 +500,7 @@ fn handle_button_click_ev(target: &Element) {
         spawn_local(handle_login());
         return;
     }
-    let cs = selected_card();
+    let cs = app::selected_card();
     if let Some(cs) = cs {
         let attrs = ButtonAttrs {
             id,
@@ -722,8 +555,8 @@ async fn handle_login() {
                 let pass = doc.elem::<HtmlInputElement>("login_pass");
                 pass.set_value("");
                 hide_login();
-                set_user(Some(user));
-                if !STATE.with(|rc| rc.borrow().initialized) {
+                app::set_user(Some(user));
+                if !app::initialized() {
                     fill_resource_select().await;
                 }
             }
@@ -771,7 +604,7 @@ fn handle_transition_ev(ev: Event) {
             if let Ok(ev) = ev.dyn_into::<TransitionEvent>() {
                 // delete slider is a "left" property transition
                 if target.id() == "ob_delete" && ev.property_name() == "left" {
-                    set_delete_enabled(&ev.type_() == "transitionend");
+                    app::set_delete_enabled(&ev.type_() == "transitionend");
                 }
             }
         }
@@ -785,7 +618,7 @@ fn add_interval_callback(window: &Window) -> JsResult<()> {
     }) as Box<dyn Fn()>);
     window.set_interval_with_callback_and_timeout_and_arguments_0(
         closure.as_ref().unchecked_ref(),
-        TICK_INTERVAL,
+        app::TICK_INTERVAL,
     )?;
     closure.forget();
     Ok(())
@@ -793,19 +626,12 @@ fn add_interval_callback(window: &Window) -> JsResult<()> {
 
 /// Process a tick interval
 fn tick_interval() {
-    STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        // don't need to count ticks if nothing's deferred
-        if state.deferred.is_empty() {
-            return;
+    app::tick_tock();
+    while let Some(action) = app::next_action() {
+        match action {
+            DeferredAction::SearchList => search_resource_list(),
+            DeferredAction::HideToast => hide_toast(),
         }
-        state.tick = state.plus_ticks(1);
-    });
-    while let Some(action) = STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        state.action()
-    }) {
-        action.perform();
     }
 }
 

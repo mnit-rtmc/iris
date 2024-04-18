@@ -1018,7 +1018,7 @@ impl Card for Dms {
 
 /// Make sign message owner string
 fn sign_msg_owner(priority: u32) -> Option<String> {
-    crate::start::user().map(|user| {
+    crate::app::user().map(|user| {
         let sources = if priority == LOW_1 {
             "blank"
         } else {

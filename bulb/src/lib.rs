@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 mod alarm;
+mod app;
 mod beacon;
 mod cabinetstyle;
 mod camera;
