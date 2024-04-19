@@ -158,13 +158,13 @@ async fn reload_resources() {
     let doc = Doc::get();
     let sb_search = doc.elem::<HtmlInputElement>("sb_search");
     sb_search.set_value("");
-    handle_resource_change("".into()).await;
+    handle_resource_change().await;
 }
 
 /// Handle change to selected resource type
-async fn handle_resource_change(rname: String) {
+async fn handle_resource_change() {
+    let res = resource_value();
     let doc = Doc::get();
-    let res = Res::try_from(rname.as_str()).ok();
     let sb_state = doc.elem::<HtmlSelectElement>("sb_state");
     match res {
         Some(res) => sb_state.set_inner_html(card::item_states(res)),
@@ -172,6 +172,7 @@ async fn handle_resource_change(rname: String) {
     }
     fetch_card_list().await;
     populate_card_list().await;
+    let rname = res.map_or("", |res| res.as_str());
     post_notify(rname).await;
 }
 
@@ -187,16 +188,21 @@ async fn fetch_card_list() {
 /// Fetch card list with selected resource type
 async fn fetch_card_list_x() -> Result<()> {
     app::set_card_list(None);
-    let doc = Doc::get();
-    if let Some(rname) = doc.select_parse::<String>("sb_resource") {
-        let res = Res::try_from(rname.as_str()).ok();
-        let cards = match res {
-            Some(res) => Some(CardList::fetch(res).await?),
-            None => None,
-        };
-        app::set_card_list(cards);
-    }
+    let cards = match resource_value() {
+        Some(res) => Some(CardList::fetch(res).await?),
+        None => None,
+    };
+    app::set_card_list(cards);
     Ok(())
+}
+
+/// Get the selected resource value
+fn resource_value() -> Option<Res> {
+    let doc = Doc::get();
+    match doc.select_parse::<String>("sb_resource") {
+        Some(rname) => Res::try_from(rname.as_str()).ok(),
+        None => None,
+    }
 }
 
 /// Populate `sb_list` with selected resource type
@@ -253,11 +259,7 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
         match id.as_str() {
             "sb_config" => (),
             "sb_search" | "sb_state" => search_resource_list(),
-            "sb_resource" => {
-                handle_sb_resource_ev(
-                    target.dyn_into::<HtmlSelectElement>().unwrap().value(),
-                );
-            }
+            "sb_resource" => handle_sb_resource_ev(),
             _ => {
                 let cv = app::selected_card();
                 if let Some(cv) = cv {
@@ -281,15 +283,15 @@ fn search_resource_list() {
 }
 
 /// Handle an event from `sb_resource` select element
-fn handle_sb_resource_ev(rname: String) {
+fn handle_sb_resource_ev() {
     let doc = Doc::get();
     let sb_search = doc.elem::<HtmlInputElement>("sb_search");
     sb_search.set_value("");
-    spawn_local(handle_resource_change(rname));
+    spawn_local(handle_resource_change());
 }
 
 /// POST selected resource name to notify endpoint
-async fn post_notify(rname: String) {
+async fn post_notify(rname: &str) {
     let uri = Uri::from("/iris/api/notify");
     let json = if rname.is_empty() {
         "[]".to_string()
@@ -480,11 +482,8 @@ async fn handle_button_cv(cv: CardView, id: &str) {
 fn handle_card_click_ev(card: &Element) {
     if let Some(id) = card.get_attribute("id") {
         if let Some(name) = card.get_attribute("name") {
-            let doc = Doc::get();
-            if let Some(rname) = doc.select_parse::<String>("sb_resource") {
-                if let Ok(res) = Res::try_from(rname.as_str()) {
-                    spawn_local(click_card(res, name, id));
-                }
+            if let Some(res) = resource_value() {
+                spawn_local(click_card(res, name, id));
             }
         }
     }
@@ -546,7 +545,7 @@ async fn go_resource(attrs: ButtonAttrs) {
         sb_resource.set_value(&rname);
         let sb_search = doc.elem::<HtmlInputElement>("sb_search");
         sb_search.set_value(&link);
-        handle_resource_change(rname).await;
+        handle_resource_change().await;
     }
 }
 
