@@ -155,8 +155,7 @@ fn add_change_listener(elem: &Element) -> JsResult<()> {
 /// Reload resource select element
 async fn reload_resources() {
     fill_resource_select().await;
-    let doc = Doc::get();
-    let sb_search = doc.elem::<HtmlInputElement>("sb_search");
+    let sb_search = Doc::get().elem::<HtmlInputElement>("sb_search");
     sb_search.set_value("");
     handle_resource_change().await;
 }
@@ -164,8 +163,7 @@ async fn reload_resources() {
 /// Handle change to selected resource type
 async fn handle_resource_change() {
     let res = resource_value();
-    let doc = Doc::get();
-    let sb_state = doc.elem::<HtmlSelectElement>("sb_state");
+    let sb_state = Doc::get().elem::<HtmlSelectElement>("sb_state");
     match res {
         Some(res) => sb_state.set_inner_html(card::item_states(res)),
         None => sb_state.set_inner_html(""),
@@ -198,8 +196,7 @@ async fn fetch_card_list_x() -> Result<()> {
 
 /// Get the selected resource value
 fn resource_value() -> Option<Res> {
-    let doc = Doc::get();
-    match doc.select_parse::<String>("sb_resource") {
+    match Doc::get().select_parse::<String>("sb_resource") {
         Some(rname) => Res::try_from(rname.as_str()).ok(),
         None => None,
     }
@@ -284,8 +281,7 @@ fn search_resource_list() {
 
 /// Handle an event from `sb_resource` select element
 fn handle_sb_resource_ev() {
-    let doc = Doc::get();
-    let sb_search = doc.elem::<HtmlInputElement>("sb_search");
+    let sb_search = Doc::get().elem::<HtmlInputElement>("sb_search");
     sb_search.set_value("");
     spawn_local(handle_resource_change());
 }
@@ -398,8 +394,7 @@ async fn replace_card(cv: CardView) {
 
 /// Replace a card with provieded HTML
 fn replace_card_html(cv: &CardView, html: &str) {
-    let doc = Doc::get();
-    let elem = doc.elem::<HtmlElement>(&cv.id());
+    let elem = Doc::get().elem::<HtmlElement>(&cv.id());
     elem.set_inner_html(html);
     if cv.view.is_compact() {
         elem.set_class_name("card");
