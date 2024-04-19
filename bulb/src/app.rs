@@ -10,59 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{CardList, View};
-use resources::Res;
+use crate::card::{CardList, CardView};
 use std::cell::RefCell;
 
 /// Interval (ms) between ticks for deferred actions
 pub const TICK_INTERVAL: i32 = 500;
-
-/// Selected card state
-#[derive(Clone, Debug)]
-pub struct SelectedCard {
-    /// Resource type
-    pub res: Res,
-    /// Card view
-    pub view: View,
-    /// Object name
-    pub name: String,
-    /// Delete action enabled (slider transition finished)
-    pub delete_enabled: bool,
-}
-
-impl SelectedCard {
-    /// Create a new blank selected card
-    pub fn new(res: Res, view: View, name: String) -> Self {
-        SelectedCard {
-            res,
-            view,
-            name,
-            delete_enabled: false,
-        }
-    }
-
-    /// Get card element ID
-    pub fn id(&self) -> String {
-        let res = self.res;
-        if self.view.is_create() {
-            format!("{res}_")
-        } else {
-            format!("{res}_{}", &self.name)
-        }
-    }
-
-    /// Set the card view to compact
-    pub fn compact(mut self) -> Self {
-        self.view = self.view.compact();
-        self
-    }
-
-    /// Set the card view
-    pub fn view(mut self, v: View) -> Self {
-        self.view = v;
-        self
-    }
-}
 
 /// Deferred actions (called on set_interval)
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -78,14 +30,16 @@ pub enum DeferredAction {
 struct AppState {
     /// Have permissions been initialized?
     initialized: bool,
+    /// Delete action enabled (slider transition finished)
+    delete_enabled: bool,
     /// Logged-in user name
     user: Option<String>,
     /// Deferred actions (with tick number)
     deferred: Vec<(i32, DeferredAction)>,
     /// Timer tick count
     tick: i32,
-    /// Selected card
-    selected_card: Option<SelectedCard>,
+    /// Selected card view
+    selected_card: Option<CardView>,
     /// Card list
     cards: Option<CardList>,
 }
@@ -105,7 +59,7 @@ pub fn initialized() -> bool {
 }
 
 /// Set selected card to global app state
-pub fn set_selected_card(card: Option<SelectedCard>) -> Option<SelectedCard> {
+pub fn set_selected_card(card: Option<CardView>) -> Option<CardView> {
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
         let cs = state.selected_card.take();
@@ -114,23 +68,24 @@ pub fn set_selected_card(card: Option<SelectedCard>) -> Option<SelectedCard> {
         state
             .deferred
             .retain(|(_, a)| *a != DeferredAction::RefreshList);
+        state.delete_enabled = false;
         cs
     })
 }
 
 /// Get selected card from global app state
-pub fn selected_card() -> Option<SelectedCard> {
+pub fn selected_card() -> Option<CardView> {
     STATE.with(|rc| rc.borrow().selected_card.clone())
 }
 
-/// Set delete action enabled/disabled
+/// Set delete enabled/disabled in global app state
 pub fn set_delete_enabled(enabled: bool) {
-    STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        if let Some(selected_card) = &mut state.selected_card {
-            selected_card.delete_enabled = enabled;
-        }
-    });
+    STATE.with(|rc| rc.borrow_mut().delete_enabled = enabled);
+}
+
+/// Get delete enabled from global app state
+pub fn delete_enabled() -> bool {
+    STATE.with(|rc| rc.borrow().delete_enabled)
 }
 
 /// Set card list in global app state
