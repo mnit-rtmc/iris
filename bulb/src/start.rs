@@ -294,13 +294,8 @@ async fn post_notify(rname: &str) {
     } else {
         format!("[\"{rname}\"]")
     };
-    match uri.post(&json.into()).await {
-        Ok(_) => {
-            console::log_1(&format!("/iris/api/notify POST {rname}").into())
-        }
-        Err(e) => {
-            console::log_1(&format!("/iris/api/notify POST failed {e}").into());
-        }
+    if let Err(e) = uri.post(&json.into()).await {
+        console::log_1(&format!("/iris/api/notify POST failed {e}").into());
     }
 }
 
@@ -608,9 +603,19 @@ fn tick_interval() {
 /// Add event source listener for notifications
 fn add_eventsource_listener() -> JsResult<()> {
     let es = EventSource::new("/iris/api/notify")?;
-    let onmessage: Closure<dyn Fn(_)> = Closure::new(|me: MessageEvent| {
-        if let Ok(payload) = me.data().dyn_into::<JsString>() {
-            update_resource_cards(payload);
+    let onopen: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
+        console::log_1(&JsValue::from_str("SSE connected"));
+    });
+    es.set_onopen(Some(onopen.as_ref().unchecked_ref()));
+    onopen.forget();
+    let onerror: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
+        console::log_1(&JsValue::from_str("SSE disconnected"));
+    });
+    es.set_onerror(Some(onerror.as_ref().unchecked_ref()));
+    onerror.forget();
+    let onmessage: Closure<dyn Fn(_)> = Closure::new(|e: MessageEvent| {
+        if let Ok(payload) = e.data().dyn_into::<JsString>() {
+            update_resource_cards(&String::from(payload));
         }
     });
     es.set_onmessage(Some(onmessage.as_ref().unchecked_ref()));
@@ -620,8 +625,17 @@ fn add_eventsource_listener() -> JsResult<()> {
 }
 
 /// Update resource cards in `sb_list`
-fn update_resource_cards(payload: JsString) {
-    console::log_1(&format!("payload: {payload:?}").into());
+fn update_resource_cards(payload: &str) {
+    console::log_1(&format!("payload: {payload}").into());
+    let rname = resource_value().map_or("", |res| res.as_str());
+    let (chan, _name) = match payload.split_once('$') {
+        Some((a, b)) => (a, Some(b)),
+        None => (payload, None),
+    };
+    if chan != rname {
+        console::log_1(&format!("unknown channel: {chan}").into());
+        return;
+    }
     // TODO: fetch updated list for resource
     // TODO: update existing resource cards
     search_resource_list();
