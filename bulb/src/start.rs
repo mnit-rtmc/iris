@@ -41,119 +41,6 @@ struct ButtonAttrs {
     data_type: Option<String>,
 }
 
-/// Search resource list using the value from `sb_search`
-fn search_resource_list() {
-    spawn_local(populate_card_list());
-}
-
-/// Fetch card list with selected resource type
-async fn fetch_card_list() {
-    match fetch_card_list_x().await {
-        Ok(_) => (),
-        Err(Error::FetchResponseUnauthorized()) => show_login(),
-        Err(e) => show_toast(&format!("View failed: {e}")),
-    }
-}
-
-/// Fetch card list with selected resource type
-async fn fetch_card_list_x() -> Result<()> {
-    app::set_selected_card(None);
-    app::set_card_list(None);
-    let doc = Doc::get();
-    if let Some(rname) = doc.select_parse::<String>("sb_resource") {
-        let res = Res::try_from(rname.as_str()).ok();
-        let cards = match res {
-            Some(res) => Some(CardList::fetch(res).await?),
-            None => None,
-        };
-        app::set_card_list(cards);
-    }
-    Ok(())
-}
-
-/// Populate `sb_list` with selected resource type
-async fn populate_card_list() {
-    match populate_card_list_x().await {
-        Ok(_) => (),
-        Err(Error::FetchResponseUnauthorized()) => show_login(),
-        Err(e) => show_toast(&format!("View failed: {e}")),
-    }
-}
-
-/// Populate `sb_list` with selected resource type
-async fn populate_card_list_x() -> Result<()> {
-    let search = search_value();
-    let doc = Doc::get();
-    let config = doc.input_bool("sb_config");
-    let html = build_list(&search, config).await?;
-    let sb_list = doc.elem::<Element>("sb_list");
-    sb_list.set_inner_html(&html);
-    Ok(())
-}
-
-/// Get value to search
-fn search_value() -> String {
-    let doc = Doc::get();
-    let sb_search = doc.elem::<HtmlInputElement>("sb_search");
-    let mut search = sb_search.value();
-    if let Some(istate) = doc.select_parse::<String>("sb_state") {
-        if ItemState::from_code(&istate).is_some() {
-            search.push(' ');
-            search.push_str(&istate);
-        }
-    }
-    search
-}
-
-/// Build a filtered list of cards for a resource
-async fn build_list(search: &str, config: bool) -> Result<String> {
-    match app::card_list() {
-        Some(cards) => {
-            let cards = cards.filter(search).await?;
-            Ok(cards.to_html(config).await?)
-        }
-        None => Ok(String::new()),
-    }
-}
-
-/// Replace the selected card element with another card type
-async fn replace_card(cv: CardView) {
-    match card::fetch_one(&cv).await {
-        Ok(html) => replace_card_html(&cv, &html),
-        Err(Error::FetchResponseUnauthorized()) => {
-            show_login();
-            return;
-        }
-        Err(e) => {
-            show_toast(&format!("fetch failed: {e}"));
-            // Card list may be out-of-date; refresh
-            app::defer_action(DeferredAction::RefreshList, 200);
-            return;
-        }
-    }
-    if cv.view.is_compact() {
-        app::set_selected_card(None);
-    } else {
-        app::set_selected_card(Some(cv));
-    }
-}
-
-/// Replace a card with provieded HTML
-fn replace_card_html(cv: &CardView, html: &str) {
-    let doc = Doc::get();
-    let elem = doc.elem::<HtmlElement>(&cv.id());
-    elem.set_inner_html(html);
-    if cv.view.is_compact() {
-        elem.set_class_name("card");
-    } else {
-        elem.set_class_name("form");
-        let mut opt = ScrollIntoViewOptions::new();
-        opt.behavior(ScrollBehavior::Smooth)
-            .block(ScrollLogicalPosition::Nearest);
-        elem.scroll_into_view_with_scroll_into_view_options(&opt);
-    }
-}
-
 /// Show login form shade
 fn show_login() {
     app::set_user(None);
@@ -288,6 +175,76 @@ async fn handle_resource_change(rname: String) {
     post_notify(rname).await;
 }
 
+/// Fetch card list with selected resource type
+async fn fetch_card_list() {
+    match fetch_card_list_x().await {
+        Ok(_) => (),
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(e) => show_toast(&format!("View failed: {e}")),
+    }
+}
+
+/// Fetch card list with selected resource type
+async fn fetch_card_list_x() -> Result<()> {
+    app::set_selected_card(None);
+    app::set_card_list(None);
+    let doc = Doc::get();
+    if let Some(rname) = doc.select_parse::<String>("sb_resource") {
+        let res = Res::try_from(rname.as_str()).ok();
+        let cards = match res {
+            Some(res) => Some(CardList::fetch(res).await?),
+            None => None,
+        };
+        app::set_card_list(cards);
+    }
+    Ok(())
+}
+
+/// Populate `sb_list` with selected resource type
+async fn populate_card_list() {
+    match populate_card_list_x().await {
+        Ok(_) => (),
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(e) => show_toast(&format!("View failed: {e}")),
+    }
+}
+
+/// Populate `sb_list` with selected resource type
+async fn populate_card_list_x() -> Result<()> {
+    let search = search_value();
+    let doc = Doc::get();
+    let config = doc.input_bool("sb_config");
+    let html = build_list(&search, config).await?;
+    let sb_list = doc.elem::<Element>("sb_list");
+    sb_list.set_inner_html(&html);
+    Ok(())
+}
+
+/// Get value to search
+fn search_value() -> String {
+    let doc = Doc::get();
+    let sb_search = doc.elem::<HtmlInputElement>("sb_search");
+    let mut search = sb_search.value();
+    if let Some(istate) = doc.select_parse::<String>("sb_state") {
+        if ItemState::from_code(&istate).is_some() {
+            search.push(' ');
+            search.push_str(&istate);
+        }
+    }
+    search
+}
+
+/// Build a filtered list of cards for a resource
+async fn build_list(search: &str, config: bool) -> Result<String> {
+    match app::card_list() {
+        Some(cards) => {
+            let cards = cards.filter(search).await?;
+            Ok(cards.to_html(config).await?)
+        }
+        None => Ok(String::new()),
+    }
+}
+
 /// Add an "input" event listener to an element
 fn add_input_listener(elem: &Element) -> JsResult<()> {
     let closure = Closure::wrap(Box::new(|e: Event| {
@@ -316,6 +273,11 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
     // can't drop closure, just forget it to make JS happy
     closure.forget();
     Ok(())
+}
+
+/// Search resource list using the value from `sb_search`
+fn search_resource_list() {
+    spawn_local(populate_card_list());
 }
 
 /// Handle an event from `sb_resource` select element
@@ -409,6 +371,42 @@ async fn handle_button_card(cv: CardView, attrs: ButtonAttrs) {
                 handle_button_cv(cv, &attrs.id).await;
             }
         }
+    }
+}
+
+/// Replace the selected card element with another card type
+async fn replace_card(cv: CardView) {
+    match card::fetch_one(&cv).await {
+        Ok(html) => {
+            replace_card_html(&cv, &html);
+            if cv.view.is_compact() {
+                app::set_selected_card(None);
+            } else {
+                app::set_selected_card(Some(cv));
+            }
+        }
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(e) => {
+            show_toast(&format!("fetch failed: {e}"));
+            // Card list may be out-of-date; refresh
+            app::defer_action(DeferredAction::RefreshList, 200);
+        }
+    }
+}
+
+/// Replace a card with provieded HTML
+fn replace_card_html(cv: &CardView, html: &str) {
+    let doc = Doc::get();
+    let elem = doc.elem::<HtmlElement>(&cv.id());
+    elem.set_inner_html(html);
+    if cv.view.is_compact() {
+        elem.set_class_name("card");
+    } else {
+        elem.set_class_name("form");
+        let mut opt = ScrollIntoViewOptions::new();
+        opt.behavior(ScrollBehavior::Smooth)
+            .block(ScrollLogicalPosition::Nearest);
+        elem.scroll_into_view_with_scroll_into_view_options(&opt);
     }
 }
 
