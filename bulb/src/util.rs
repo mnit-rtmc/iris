@@ -193,7 +193,7 @@ impl Doc {
     pub fn elem<E: JsCast>(&self, id: &str) -> E {
         self.try_elem(id)
             .ok_or_else(|| format!("Invalid element ID: {id}"))
-            .unwrap()
+            .unwrap_throw()
     }
 
     /// Get and parse a `select` element value

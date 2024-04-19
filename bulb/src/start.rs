@@ -186,7 +186,6 @@ async fn fetch_card_list() {
 
 /// Fetch card list with selected resource type
 async fn fetch_card_list_x() -> Result<()> {
-    app::set_selected_card(None);
     app::set_card_list(None);
     let doc = Doc::get();
     if let Some(rname) = doc.select_parse::<String>("sb_resource") {
@@ -211,6 +210,7 @@ async fn populate_card_list() {
 
 /// Populate `sb_list` with selected resource type
 async fn populate_card_list_x() -> Result<()> {
+    app::set_selected_card(None);
     let search = search_value();
     let doc = Doc::get();
     let config = doc.input_bool("sb_config");
