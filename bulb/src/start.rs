@@ -118,11 +118,11 @@ async fn fill_resource_select() {
 
 /// Add a "fullscreenchange" event listener to an element
 fn add_fullscreenchange_listener(elem: &Element) -> JsResult<()> {
-    let closure = Closure::wrap(Box::new(|_e: Event| {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
         let doc = Doc::get();
         let btn = doc.elem::<HtmlInputElement>("sb_fullscreen");
         btn.set_checked(doc.is_fullscreen());
-    }) as Box<dyn Fn(_)>);
+    });
     elem.add_event_listener_with_callback(
         "change",
         closure.as_ref().unchecked_ref(),
@@ -134,7 +134,7 @@ fn add_fullscreenchange_listener(elem: &Element) -> JsResult<()> {
 
 /// Add a "change" event listener to an element
 fn add_change_listener(elem: &Element) -> JsResult<()> {
-    let closure = Closure::wrap(Box::new(|e: Event| {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
         let id = target.id();
         match id.as_str() {
@@ -142,7 +142,7 @@ fn add_change_listener(elem: &Element) -> JsResult<()> {
             "sb_fullscreen" => Doc::get().toggle_fullscreen(),
             _ => (),
         }
-    }) as Box<dyn Fn(_)>);
+    });
     elem.add_event_listener_with_callback(
         "change",
         closure.as_ref().unchecked_ref(),
@@ -250,7 +250,7 @@ async fn build_list(search: &str, config: bool) -> Result<String> {
 
 /// Add an "input" event listener to an element
 fn add_input_listener(elem: &Element) -> JsResult<()> {
-    let closure = Closure::wrap(Box::new(|e: Event| {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
         let id = target.id();
         match id.as_str() {
@@ -264,7 +264,7 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
                 }
             }
         }
-    }) as Box<dyn Fn(_)>);
+    });
     elem.add_event_listener_with_callback(
         "input",
         closure.as_ref().unchecked_ref(),
@@ -316,14 +316,14 @@ async fn handle_input(cv: CardView, id: String) {
 
 /// Add a `click` event listener to an element
 fn add_click_listener(elem: &Element) -> JsResult<()> {
-    let closure = Closure::wrap(Box::new(|e: Event| {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
         if target.is_instance_of::<HtmlButtonElement>() {
             handle_button_click_ev(&target);
         } else if let Some(card) = target.closest(".card").unwrap_throw() {
             handle_card_click_ev(&card);
         }
-    }) as Box<dyn FnMut(_)>);
+    });
     elem.add_event_listener_with_callback(
         "click",
         closure.as_ref().unchecked_ref(),
@@ -552,8 +552,7 @@ async fn handle_refresh() {
 
 /// Add transition event listener to an element
 fn add_transition_listener(elem: &Element) -> JsResult<()> {
-    let closure =
-        Closure::wrap(Box::new(handle_transition_ev) as Box<dyn FnMut(_)>);
+    let closure: Closure<dyn Fn(_)> = Closure::new(handle_transition_ev);
     elem.add_event_listener_with_callback(
         "transitionstart",
         closure.as_ref().unchecked_ref(),
@@ -586,9 +585,7 @@ fn handle_transition_ev(ev: Event) {
 
 /// Add callback for regular interval checks
 fn add_interval_callback(window: &Window) -> JsResult<()> {
-    let closure = Closure::wrap(Box::new(|| {
-        tick_interval();
-    }) as Box<dyn Fn()>);
+    let closure: Closure<dyn Fn()> = Closure::new(tick_interval);
     window.set_interval_with_callback_and_timeout_and_arguments_0(
         closure.as_ref().unchecked_ref(),
         app::TICK_INTERVAL,
@@ -611,11 +608,11 @@ fn tick_interval() {
 /// Add event source listener for notifications
 fn add_eventsource_listener() -> JsResult<()> {
     let es = EventSource::new("/iris/api/notify")?;
-    let onmessage = Closure::wrap(Box::new(|me: MessageEvent| {
+    let onmessage: Closure<dyn Fn(_)> = Closure::new(|me: MessageEvent| {
         if let Ok(payload) = me.data().dyn_into::<JsString>() {
             update_resource_cards(payload);
         }
-    }) as Box<dyn FnMut(MessageEvent)>);
+    });
     es.set_onmessage(Some(onmessage.as_ref().unchecked_ref()));
     // can't drop closure, just forget it to make JS happy
     onmessage.forget();
