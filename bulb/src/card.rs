@@ -74,7 +74,7 @@ pub const EDIT_BUTTON: &str =
 /// Save button
 const SAVE_BUTTON: &str = "<button id='ob_save' type='button'>🖍️ Save</button>";
 
-/// Card View
+/// Card element view
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum View {
     /// Compact Create view
@@ -126,12 +126,12 @@ pub struct CardView {
 }
 
 impl CardView {
-    /// Create a new card ID
+    /// Create a new card view
     pub fn new(res: Res, name: String, view: View) -> Self {
         CardView { res, name, view }
     }
 
-    /// Get element ID of card
+    /// Get HTML element ID of card
     pub fn id(&self) -> String {
         let res = self.res;
         if self.view.is_create() {
@@ -141,13 +141,13 @@ impl CardView {
         }
     }
 
-    /// Set the card view to compact
+    /// Set the view to compact
     pub fn compact(mut self) -> Self {
         self.view = self.view.compact();
         self
     }
 
-    /// Set the card view
+    /// Set the view
     pub fn view(mut self, v: View) -> Self {
         self.view = v;
         self
