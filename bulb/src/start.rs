@@ -94,7 +94,7 @@ async fn add_sidebar() -> JsResult<()> {
     add_input_listener(&sidebar)?;
     add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window)?;
-    add_eventsource_listener()?;
+    add_eventsource_listener();
     fill_resource_select().await;
     Ok(())
 }
@@ -596,20 +596,30 @@ fn tick_interval() {
         match action {
             DeferredAction::RefreshList => spawn_local(handle_refresh()),
             DeferredAction::HideToast => hide_toast(),
+            DeferredAction::SetRefreshText(txt) => set_refresh_text(txt),
         }
     }
 }
 
 /// Add event source listener for notifications
-fn add_eventsource_listener() -> JsResult<()> {
-    let es = EventSource::new("/iris/api/notify")?;
+fn add_eventsource_listener() {
+    let es = match EventSource::new("/iris/api/notify") {
+        Ok(es) => es,
+        Err(e) => {
+            set_refresh_text("⭮ ⚪");
+            console::log_1(&format!("SSE /iris/api/notify: {e:?}").into());
+            // FIXME: defer an action to try again in a couple seconds
+            return;
+        }
+    };
+    set_refresh_text("⭮ ⚫");
     let onopen: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
-        console::log_1(&JsValue::from_str("SSE connected"));
+        set_refresh_text("⭮ 🟢");
     });
     es.set_onopen(Some(onopen.as_ref().unchecked_ref()));
     onopen.forget();
     let onerror: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
-        console::log_1(&JsValue::from_str("SSE disconnected"));
+        set_refresh_text("⚫ ⭮ ");
     });
     es.set_onerror(Some(onerror.as_ref().unchecked_ref()));
     onerror.forget();
@@ -621,7 +631,12 @@ fn add_eventsource_listener() -> JsResult<()> {
     es.set_onmessage(Some(onmessage.as_ref().unchecked_ref()));
     // can't drop closure, just forget it to make JS happy
     onmessage.forget();
-    Ok(())
+}
+
+/// Set refresh button text
+fn set_refresh_text(txt: &str) {
+    let sb_refresh = Doc::get().elem::<Element>("sb_refresh");
+    sb_refresh.set_inner_html(txt);
 }
 
 /// Update resource cards in `sb_list`
@@ -636,6 +651,8 @@ fn update_resource_cards(payload: &str) {
         console::log_1(&format!("unknown channel: {chan}").into());
         return;
     }
+    set_refresh_text("⭮ 🟡");
+    app::defer_action(DeferredAction::SetRefreshText("⭮ 🟢"), 500);
     // TODO: fetch updated list for resource
     // TODO: update existing resource cards
     search_resource_list();

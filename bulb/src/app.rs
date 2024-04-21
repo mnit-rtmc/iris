@@ -23,6 +23,8 @@ pub enum DeferredAction {
     RefreshList,
     /// Hide the toast popup
     HideToast,
+    /// Set refresh text
+    SetRefreshText(&'static str),
 }
 
 /// Global app state
@@ -64,7 +66,7 @@ pub fn set_selected_card(card: Option<CardView>) -> Option<CardView> {
         let mut state = rc.borrow_mut();
         let cs = state.selected_card.take();
         state.selected_card = card;
-        // clear any deferred refresh actions
+        // purge all deferred refresh list actions
         state
             .deferred
             .retain(|(_, a)| *a != DeferredAction::RefreshList);
