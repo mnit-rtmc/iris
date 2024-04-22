@@ -287,7 +287,9 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
 
 /// Update `sb_list` with search result
 async fn search_card_list() {
-    // FIXME: compare old/new hidden values, and update
+    // NOTE: we _could_ compare hidden items between old/new lists
+    //       and update HTML elements using set_attribute / set_class_name,
+    //       but this is fast enough and doesn't cause any UI problems
     populate_card_list().await;
 }
 
