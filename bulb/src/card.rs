@@ -300,11 +300,12 @@ pub trait Card:
 }
 
 /// Get all item states as html options
-pub fn item_states(res: Res) -> &'static str {
+pub fn item_states(res: Option<Res>) -> &'static str {
     match res {
-        Res::Beacon => Beacon::ITEM_STATES,
-        Res::Dms => Dms::ITEM_STATES,
-        _ => ITEM_STATES,
+        Some(Res::Beacon) => Beacon::ITEM_STATES,
+        Some(Res::Dms) => Dms::ITEM_STATES,
+        Some(_) => ITEM_STATES,
+        None => "",
     }
 }
 

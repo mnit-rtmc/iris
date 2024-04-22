@@ -164,10 +164,7 @@ async fn reload_resources() {
 async fn handle_resource_change() {
     let res = resource_value();
     let sb_state = Doc::get().elem::<HtmlSelectElement>("sb_state");
-    match res {
-        Some(res) => sb_state.set_inner_html(card::item_states(res)),
-        None => sb_state.set_inner_html(""),
-    }
+    sb_state.set_inner_html(card::item_states(res));
     let cards = res.map(|res| CardList::new(res));
     app::card_list(cards);
     fetch_card_list().await;
@@ -218,7 +215,7 @@ async fn populate_card_list_x() -> Result<()> {
     let search = search_value();
     let doc = Doc::get();
     let config = doc.input_bool("sb_config");
-    let html = build_list(&search, config).await?;
+    let html = build_card_list(&search, config).await?;
     let sb_list = doc.elem::<Element>("sb_list");
     sb_list.set_inner_html(&html);
     Ok(())
@@ -239,7 +236,7 @@ fn search_value() -> String {
 }
 
 /// Build a filtered list of cards for a resource
-async fn build_list(search: &str, config: bool) -> Result<String> {
+async fn build_card_list(search: &str, config: bool) -> Result<String> {
     match app::card_list(None) {
         Some(mut cards) => {
             cards.filter(search).await?;
