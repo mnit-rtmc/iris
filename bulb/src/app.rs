@@ -19,10 +19,10 @@ pub const TICK_INTERVAL: i32 = 500;
 /// Deferred actions (called on set_interval)
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum DeferredAction {
-    /// Refresh resource list
-    RefreshList,
     /// Hide the toast popup
     HideToast,
+    /// Refresh resource list
+    RefreshList,
     /// Set refresh text
     SetRefreshText(&'static str),
 }
@@ -90,17 +90,14 @@ pub fn delete_enabled() -> bool {
     STATE.with(|rc| rc.borrow().delete_enabled)
 }
 
-/// Set card list in global app state
-pub fn set_card_list(cards: Option<CardList>) {
+/// Get/set card list in global app state
+pub fn card_list(cards: Option<CardList>) -> Option<CardList> {
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
+        let old_cards = state.cards.take();
         state.cards = cards;
-    });
-}
-
-/// Get card list from global app state
-pub fn card_list() -> Option<CardList> {
-    STATE.with(|rc| rc.borrow().cards.clone())
+        old_cards
+    })
 }
 
 /// Set logged-in user name in global app state

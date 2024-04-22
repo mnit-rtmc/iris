@@ -168,13 +168,15 @@ async fn handle_resource_change() {
         Some(res) => sb_state.set_inner_html(card::item_states(res)),
         None => sb_state.set_inner_html(""),
     }
+    let cards = res.map(|res| CardList::new(res));
+    app::card_list(cards);
     fetch_card_list().await;
     populate_card_list().await;
     let rname = res.map_or("", |res| res.as_str());
     post_notify(rname).await;
 }
 
-/// Fetch card list with selected resource type
+/// Fetch card list for selected resource type
 async fn fetch_card_list() {
     match fetch_card_list_x().await {
         Ok(_) => (),
@@ -183,14 +185,13 @@ async fn fetch_card_list() {
     }
 }
 
-/// Fetch card list with selected resource type
+/// Fetch card list for selected resource type
 async fn fetch_card_list_x() -> Result<()> {
-    app::set_card_list(None);
-    let cards = match resource_value() {
-        Some(res) => Some(CardList::fetch(res).await?),
-        None => None,
-    };
-    app::set_card_list(cards);
+    let mut cards = app::card_list(None);
+    if let Some(cards) = &mut cards {
+        cards.fetch().await?;
+    }
+    app::card_list(cards);
     Ok(())
 }
 
@@ -239,13 +240,21 @@ fn search_value() -> String {
 
 /// Build a filtered list of cards for a resource
 async fn build_list(search: &str, config: bool) -> Result<String> {
-    match app::card_list() {
-        Some(cards) => {
-            let cards = cards.filter(search).await?;
-            Ok(cards.to_html(config).await?)
+    match app::card_list(None) {
+        Some(mut cards) => {
+            cards.filter(search).await?;
+            let html = cards.to_html(config).await?;
+            app::card_list(Some(cards));
+            Ok(html)
         }
         None => Ok(String::new()),
     }
+}
+
+/// Update `sb_list` with changed cards
+async fn update_card_list() {
+    // FIXME: update HTML elements instead
+    populate_card_list().await;
 }
 
 /// Add an "input" event listener to an element
@@ -255,7 +264,7 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
         let id = target.id();
         match id.as_str() {
             "sb_config" => (),
-            "sb_search" | "sb_state" => search_resource_list(),
+            "sb_search" | "sb_state" => spawn_local(update_card_list()),
             "sb_resource" => handle_sb_resource_ev(),
             _ => {
                 let cv = app::selected_card();
@@ -272,11 +281,6 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
     // can't drop closure, just forget it to make JS happy
     closure.forget();
     Ok(())
-}
-
-/// Search resource list using the value from `sb_search`
-fn search_resource_list() {
-    spawn_local(populate_card_list());
 }
 
 /// Handle an event from `sb_resource` select element
@@ -625,7 +629,7 @@ fn add_eventsource_listener() {
     onerror.forget();
     let onmessage: Closure<dyn Fn(_)> = Closure::new(|e: MessageEvent| {
         if let Ok(payload) = e.data().dyn_into::<JsString>() {
-            update_resource_cards(&String::from(payload));
+            spawn_local(handle_notify(String::from(payload)));
         }
     });
     es.set_onmessage(Some(onmessage.as_ref().unchecked_ref()));
@@ -639,13 +643,13 @@ fn set_refresh_text(txt: &str) {
     sb_refresh.set_inner_html(txt);
 }
 
-/// Update resource cards in `sb_list`
-fn update_resource_cards(payload: &str) {
+/// Handle SSE notify from server
+async fn handle_notify(payload: String) {
     console::log_1(&format!("payload: {payload}").into());
     let rname = resource_value().map_or("", |res| res.as_str());
     let (chan, _name) = match payload.split_once('$') {
         Some((a, b)) => (a, Some(b)),
-        None => (payload, None),
+        None => (payload.as_str(), None),
     };
     if chan != rname {
         console::log_1(&format!("unknown channel: {chan}").into());
@@ -653,7 +657,6 @@ fn update_resource_cards(payload: &str) {
     }
     set_refresh_text("⭮ 🟡");
     app::defer_action(DeferredAction::SetRefreshText("⭮ 🟢"), 500);
-    // TODO: fetch updated list for resource
-    // TODO: update existing resource cards
-    search_resource_list();
+    fetch_card_list().await;
+    update_card_list().await;
 }

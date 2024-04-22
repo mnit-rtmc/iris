@@ -252,6 +252,11 @@ pub trait Card:
         "".into()
     }
 
+    /// Get the card ID
+    fn id(&self) -> String {
+        format!("{}_{self}", Self::res())
+    }
+
     /// Get geo location name
     fn geo_loc(&self) -> Option<&str> {
         None
@@ -401,25 +406,42 @@ fn add_option<C: Card>(perm: &Permission, html: &mut String) {
 }
 
 /// Card list for one resource type
+///
+/// | Cause    | Initiator | Fetch | List     | SSE  |
+/// |----------|-----------|-------|----------|------|
+/// | Resource | User      | Yes   | Populate | POST |
+/// | Refresh  | User      | Yes   | Populate |      |
+/// | Search   | User      | No    | Update   |      |
+/// | Notify   | System    | Yes   | Update   |      |
+///
 #[derive(Clone)]
 pub struct CardList {
     /// Resource type
     res: Res,
     /// JSON list of cards
     json: String,
+    /// Hidden card IDs
+    hidden: Vec<String>,
 }
 
 impl CardList {
-    /// Fetch card list for a resource type
-    pub async fn fetch(res: Res) -> Result<Self> {
-        let json = uri_res(res).get().await?;
+    /// Create a new card list
+    pub fn new(res: Res) -> Self {
+        let json = String::new();
+        let hidden = Vec::new();
+        CardList { res, json, hidden }
+    }
+
+    /// Fetch card list
+    pub async fn fetch(&mut self) -> Result<()> {
+        let json = uri_res(self.res).get().await?;
         let json: Value = serde_wasm_bindgen::from_value(json)?;
-        let json = json.to_string();
-        Ok(CardList { res, json })
+        self.json = json.to_string();
+        Ok(())
     }
 
     /// Filter card list with a search term
-    pub async fn filter(&self, search: &str) -> Result<Self> {
+    pub async fn filter(&mut self, search: &str) -> Result<()> {
         match self.res {
             Res::Alarm => self.filter_x::<Alarm>(search).await,
             Res::Beacon => self.filter_x::<Beacon>(search).await,
@@ -450,18 +472,16 @@ impl CardList {
     }
 
     /// Filter card list with a search term
-    async fn filter_x<C: Card>(&self, search: &str) -> Result<Self> {
+    async fn filter_x<C: Card>(&mut self, search: &str) -> Result<()> {
         let mut cards: Vec<C> = serde_json::from_str(&self.json)?;
         // Use default value for ancillary data lookup
         let pri = C::default();
         let anc = fetch_ancillary(View::Search, &pri).await?;
         let search = Search::new(search);
-        cards.retain(|pri| search.is_match(pri, &anc));
-        let json = serde_json::to_string(&cards)?;
-        Ok(CardList {
-            res: self.res,
-            json,
-        })
+        cards.retain(|pri| !search.is_match(pri, &anc));
+        let hidden = cards.into_iter().map(|c| c.id()).collect();
+        self.hidden = hidden;
+        Ok(())
     }
 
     /// Convert card list to HTML view
@@ -514,8 +534,13 @@ impl CardList {
             ));
         }
         for pri in cards {
+            let hidden = if self.hidden.contains(&pri.id()) {
+                "hidden"
+            } else {
+                "class='card'"
+            };
             html.push_str(&format!(
-                "<li id='{rname}_{pri}' name='{pri}' class='card'>"
+                "<li id='{rname}_{pri}' name='{pri}' {hidden}>"
             ));
             html.push_str(&pri.to_html(View::Compact, &anc));
             html.push_str("</li>");
