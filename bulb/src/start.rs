@@ -168,8 +168,16 @@ async fn handle_resource_change() {
     sb_state.set_inner_html(card::item_states(res));
     fetch_card_list().await;
     populate_card_list().await;
+    let uri = Uri::from("/iris/api/notify");
     let rname = res.map_or("", |res| res.as_str());
-    post_notify(rname).await;
+    let json = if rname.is_empty() {
+        "[]".to_string()
+    } else {
+        format!("[\"{rname}\"]")
+    };
+    if let Err(e) = uri.post(&json.into()).await {
+        console::log_1(&format!("/iris/api/notify POST: {e}").into());
+    }
 }
 
 /// Fetch card list for selected resource type
@@ -251,12 +259,6 @@ async fn build_card_list(search: &str, config: bool) -> Result<String> {
     }
 }
 
-/// Update `sb_list` with changed cards
-async fn update_card_list() {
-    // FIXME: update HTML elements instead
-    populate_card_list().await;
-}
-
 /// Add an "input" event listener to an element
 fn add_input_listener(elem: &Element) -> JsResult<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
@@ -264,7 +266,7 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
         let id = target.id();
         match id.as_str() {
             "sb_config" => (),
-            "sb_search" | "sb_state" => spawn_local(update_card_list()),
+            "sb_search" | "sb_state" => spawn_local(search_card_list()),
             "sb_resource" => handle_sb_resource_ev(),
             _ => {
                 let cv = app::selected_card();
@@ -283,24 +285,17 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
     Ok(())
 }
 
+/// Update `sb_list` with search result
+async fn search_card_list() {
+    // FIXME: compare old/new hidden values, and update
+    populate_card_list().await;
+}
+
 /// Handle an event from `sb_resource` select element
 fn handle_sb_resource_ev() {
     let sb_search = Doc::get().elem::<HtmlInputElement>("sb_search");
     sb_search.set_value("");
     spawn_local(handle_resource_change());
-}
-
-/// POST selected resource name to notify endpoint
-async fn post_notify(rname: &str) {
-    let uri = Uri::from("/iris/api/notify");
-    let json = if rname.is_empty() {
-        "[]".to_string()
-    } else {
-        format!("[\"{rname}\"]")
-    };
-    if let Err(e) = uri.post(&json.into()).await {
-        console::log_1(&format!("/iris/api/notify POST failed {e}").into());
-    }
 }
 
 /// Handle an input event on selected card
@@ -659,4 +654,10 @@ async fn handle_notify(payload: String) {
     app::defer_action(DeferredAction::SetRefreshText("⭮ 🟢"), 500);
     fetch_card_list().await;
     update_card_list().await;
+}
+
+/// Update `sb_list` with changed result
+async fn update_card_list() {
+    // FIXME: compare old/new hidden values, and update
+    populate_card_list().await;
 }
