@@ -670,6 +670,7 @@ async fn update_card_list() {
     fetch_card_list().await;
     match update_card_list_x(json).await {
         Ok(_) => (),
+        Err(Error::CardMismatch()) => populate_card_list().await,
         Err(Error::FetchResponseUnauthorized()) => show_login(),
         Err(e) => show_toast(&format!("View failed: {e}")),
     }

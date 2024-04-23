@@ -595,19 +595,30 @@ impl CardList {
     async fn changed<C: Card>(
         &self,
         json: String,
-        _cv: &Option<CardView>,
+        cv: &Option<CardView>,
     ) -> Result<Vec<(String, String)>> {
         // Use default value for ancillary data lookup
         let pri = C::default();
         let anc = fetch_ancillary(View::Search, &pri).await?;
-        let old = serde_json::from_str::<Vec<C>>(&json)?.into_iter();
-        let new = serde_json::from_str::<Vec<C>>(&self.json)?.into_iter();
-        // FIXME: use cv for selected card view
-        let values = old
-            .zip(new)
-            .filter(|(oc, nc)| oc != nc)
-            .map(|(_oc, nc)| (nc.id(), nc.to_html(View::Compact, &anc)))
-            .collect();
+        let cards0 = serde_json::from_str::<Vec<C>>(&json)?.into_iter();
+        let cards1 = serde_json::from_str::<Vec<C>>(&self.json)?.into_iter();
+        let mut values = Vec::new();
+        for (c0, c1) in cards0.zip(cards1) {
+            let id0 = c0.id();
+            let id1 = c1.id();
+            if id0 != id1 {
+                return Err(Error::CardMismatch());
+            }
+            if c0 != c1 {
+                let mut view = View::Compact;
+                if let Some(cv) = cv {
+                    if id1 == cv.id() {
+                        view = cv.view;
+                    }
+                }
+                values.push((id1, c1.to_html(view, &anc)));
+            }
+        }
         Ok(values)
     }
 }

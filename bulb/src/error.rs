@@ -64,6 +64,10 @@ pub enum Error {
     #[error("Parse error")]
     Parse(),
 
+    /// Card mismatch (added / deleted)
+    #[error("card mismatch")]
+    CardMismatch(),
+
     /// Serde JSON error
     #[error("Serialization error")]
     SerdeJson(#[from] serde_json::Error),
