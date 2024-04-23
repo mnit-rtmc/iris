@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 /// Modem
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Modem {
     pub name: String,
     pub uri: Option<String>,

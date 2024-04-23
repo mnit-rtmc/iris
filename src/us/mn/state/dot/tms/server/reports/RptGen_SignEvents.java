@@ -84,7 +84,7 @@ public class RptGen_SignEvents extends RptGen {
 			sWhere = addWhere(sWhere, "device_id in ('" + str_device_list + "')");
 
 		// run query and gather results
-		store.query("SELECT event_date, description, device_id, multi, owner "
+		store.query("SELECT event_date, description, device_id, multi, msg_owner "
 				+ "FROM public.sign_event_view"
 				+ sWhere
 				+ " ORDER BY event_date, device_id;",

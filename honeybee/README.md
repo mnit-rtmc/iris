@@ -25,6 +25,9 @@ Route                     | Verb     | Function
 1. Install the current stable [Rust].
 2. Install the [IRIS] package (this creates the `tms` user/database and the
    `/var/lib/iris/web/` working directory)
+3. Modify /var/lib/pgsql/data/pg_hba.conf for peer connection:
+   `local  all  all  peer`
+4. Restart postgresql server
 
 Then, build honeybee:
 

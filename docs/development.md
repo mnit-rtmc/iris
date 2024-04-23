@@ -102,6 +102,8 @@ their operands by a space.
 
 **November 2014** — Adopted by Wyoming Department of Transportation
 
+**September 2020** — Work begins on Web-based UI
+
 
 [Bug reports]: https://github.com/mnit-rtmc/iris/issues
 [Fedora]: http://fedoraproject.org

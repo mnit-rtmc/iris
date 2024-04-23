@@ -182,7 +182,6 @@ public class RptConduitImpl extends BaseObjectImpl
 	public void doStore() throws TMSException {
 		// suppress the following operation
 //		store.create(this);
-		System.out.println("doStore: "+name);
 	}
 
 	/** Destroy an object */
@@ -190,6 +189,5 @@ public class RptConduitImpl extends BaseObjectImpl
 	public void doDestroy() throws TMSException {
 		// suppress the following operation
 //		store.destroy(this);
-		System.out.println("doDestroy: "+name);
 	}
 }

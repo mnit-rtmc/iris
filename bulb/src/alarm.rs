@@ -19,7 +19,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 /// Alarm
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Alarm {
     pub name: String,
     pub description: String,

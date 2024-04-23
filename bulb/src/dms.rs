@@ -49,7 +49,7 @@ const SEND_BUTTON: &str = "<button id='mc_send' type='button'>Send</button>";
 const BLANK_BUTTON: &str = "<button id='mc_blank' type='button'>Blank</button>";
 
 /// Photocell status
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Photocell {
     description: String,
     error: Option<String>,
@@ -57,7 +57,7 @@ pub struct Photocell {
 }
 
 /// Power supply status
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct PowerSupply {
     description: String,
     supply_type: String,
@@ -67,7 +67,7 @@ pub struct PowerSupply {
 }
 
 /// Sign status
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct SignStatus {
     faults: Option<String>,
     photocells: Option<Vec<Photocell>>,
@@ -85,14 +85,14 @@ pub struct SignStatus {
 }
 
 /// Stuck pixel bitmaps (Base64-encoded)
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct StuckPixels {
     off: Option<String>,
     on: Option<String>,
 }
 
 /// Dms
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Dms {
     pub name: String,
     pub location: Option<String>,
@@ -758,7 +758,7 @@ impl Dms {
     /// Build compose pattern HTML
     fn compose_patterns(&self, anc: &DmsAnc) -> Option<String> {
         if anc.compose_patterns.is_empty() {
-            console::log_1(&"patterns empty".into());
+            console::log_1(&"No compose patterns!".into());
             return None;
         }
         let sign = self.make_sign(anc)?;
@@ -1018,7 +1018,7 @@ impl Card for Dms {
 
 /// Make sign message owner string
 fn sign_msg_owner(priority: u32) -> Option<String> {
-    crate::start::user().map(|user| {
+    crate::app::user().map(|user| {
         let sources = if priority == LOW_1 {
             "blank"
         } else {

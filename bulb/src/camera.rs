@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 /// Camera
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Camera {
     pub name: String,
     pub cam_num: Option<u32>,

@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 /// Video Monitor
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct VideoMonitor {
     pub name: String,
     pub mon_num: u32,

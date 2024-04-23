@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 /// GPS
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Gps {
     pub name: String,
     pub controller: Option<String>,

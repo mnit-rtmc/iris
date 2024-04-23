@@ -42,7 +42,7 @@ pub struct ControllerIo {
 }
 
 /// Optional setup data
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Setup {
     pub model: Option<String>,
     pub serial_num: Option<String>,
@@ -50,7 +50,7 @@ pub struct Setup {
 }
 
 /// Controller
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Controller {
     pub name: String,
     pub location: Option<String>,

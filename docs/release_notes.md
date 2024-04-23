@@ -1,5 +1,12 @@
 # IRIS 5.x Release Notes
 
+5.53.0 (23 Apr 2024)
+ - Implemented SSE notifications from honeybee to web UI (bulb)
+ - Refactored web UI code
+ - Fixed ONVIF set preset bug
+ - Fixed problem with DMS reporter
+ - Add tooltips for DMS / camera / weather sensor
+
 5.52.0 (2 Apr 2024)
  - Improve ONVIF compatibility
  - Added 'camera_publish' notification channel

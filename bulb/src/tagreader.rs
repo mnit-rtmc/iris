@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 /// RF Control
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum RfControl {
     Sense,
@@ -26,7 +26,7 @@ pub enum RfControl {
 }
 
 /// Synchronization Mode
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum SyncMode {
     Slave,
@@ -36,7 +36,7 @@ pub enum SyncMode {
 }
 
 /// Antenna Channel
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum AntennaChannel {
     Channel0,
@@ -47,7 +47,7 @@ pub enum AntennaChannel {
 }
 
 /// Source
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum Source {
     Downlink,
@@ -55,7 +55,7 @@ pub enum Source {
 }
 
 /// Protocol Settings
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct ProtocolSettings {
     rf_atten_downlink_db: Option<u32>,
     rf_atten_uplink_db: Option<u32>,
@@ -67,7 +67,7 @@ pub struct ProtocolSettings {
 }
 
 /// Tag Reader Settings
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct TagReaderSettings {
     ack_timeout: Option<u32>,
     rf_control: Option<RfControl>,
@@ -84,7 +84,7 @@ pub struct TagReaderSettings {
 }
 
 /// Tag Reader
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct TagReader {
     pub name: String,
     pub location: Option<String>,

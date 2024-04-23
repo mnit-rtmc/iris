@@ -23,7 +23,7 @@ use std::iter::empty;
 use wasm_bindgen::JsValue;
 
 /// Permission
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Permission {
     pub id: u32,
     pub role: String,

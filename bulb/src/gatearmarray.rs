@@ -22,6 +22,8 @@ use std::iter::{empty, once};
 use wasm_bindgen::JsValue;
 
 /// Gate arm states
+///
+/// FIXME: share with gatearm module
 #[derive(Debug, Deserialize, Serialize)]
 pub struct GateArmState {
     pub id: u32,
@@ -29,7 +31,7 @@ pub struct GateArmState {
 }
 
 /// Gate Arm Array
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct GateArmArray {
     pub name: String,
     pub location: Option<String>,

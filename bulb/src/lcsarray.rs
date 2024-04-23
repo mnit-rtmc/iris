@@ -28,7 +28,7 @@ pub struct LcsLock {
 }
 
 /// LCS Array
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct LcsArray {
     pub name: String,
     pub notes: Option<String>,

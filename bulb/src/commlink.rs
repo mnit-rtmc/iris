@@ -25,7 +25,7 @@ use std::iter::once;
 use wasm_bindgen::JsValue;
 
 /// Comm link
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct CommLink {
     pub name: String,
     pub description: String,

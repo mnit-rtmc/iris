@@ -129,10 +129,11 @@ camera_blank_url
 camera_construction_url	
 camera_image_base_url	
 camera_kbd_panasonic_enable	false
+camera_latest_ptz_enable	false
 camera_num_blank	999
 camera_out_of_service_url	
-camera_sequence_dwell_sec	5
 camera_ptz_blind	true
+camera_sequence_dwell_sec	5
 camera_stream_controls_enable	false
 camera_switch_event_purge_days	30
 camera_video_event_purge_days	14
@@ -144,13 +145,14 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.52.0
+database_version	5.53.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_secs	60
 dms_comm_loss_enable	true
 dms_gps_jitter_m	100
 dms_lamp_test_timeout_secs	30
+dms_message_tooltip_enable	false
 dms_page_on_max_secs	10.0
 dms_page_on_min_secs	0.5
 dms_pixel_off_limit	2
@@ -2953,7 +2955,8 @@ BEGIN
     -- has_faults is derived from status (secondary attribute)
     IF (NEW.notes IS DISTINCT FROM OLD.notes) OR
        (NEW.msg_current IS DISTINCT FROM OLD.msg_current) OR
-       (NEW.status IS DISTINCT FROM OLD.status)
+       ((NEW.status->>'faults' IS NOT NULL) IS DISTINCT FROM
+        (OLD.status->>'faults' IS NOT NULL))
     THEN
         NOTIFY dms;
     ELSE

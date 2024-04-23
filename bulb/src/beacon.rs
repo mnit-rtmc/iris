@@ -10,9 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{
-    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
-};
+use crate::card::{AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME};
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
 use crate::fetch::{Action, Uri};
@@ -32,7 +30,7 @@ pub struct BeaconState {
 }
 
 /// Beacon
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Beacon {
     pub name: String,
     pub location: Option<String>,
@@ -117,6 +115,8 @@ impl Beacon {
                     .with(ItemState::External, "external flashing"),
                 _ => ItemState::Unknown.into(),
             },
+            ItemState::Offline => ItemStates::default()
+                .with(ItemState::Offline, "FIXME: since fail time"),
             _ => state.into(),
         }
     }
@@ -136,11 +136,24 @@ impl Beacon {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &BeaconAnc) -> String {
         let item_states = self.item_states(anc);
-        let inactive = inactive_attr(self.controller.is_some());
-        let location = HtmlStr::new(&self.location).with_len(32);
+        let flashing = if self.flashing() {
+            CLASS_FLASHING
+        } else {
+            CLASS_NOT_FLASHING
+        };
+        let message = HtmlStr::new(&self.message);
         format!(
             "<div class='{NAME} end'>{self} {item_states}</div>\
-            <div class='info fill{inactive}'>{location}</div>"
+            <div class='beacon-container row center'>\
+              <button id='ob_flashing' disabled></button>\
+              <label for='ob_flashing' class='beacon-disabled'>\
+                <span class='{flashing}'>🔆</span>\
+              </label>\
+              <span class='beacon-sign tiny'>{message}</span>\
+              <label for='ob_flashing' class='beacon-disabled'>\
+                <span class='{flashing} flash-delayed'>🔆</span>\
+              </label>\
+            </div>"
         )
     }
 
@@ -242,6 +255,15 @@ impl Card for Beacon {
 
     /// Display name
     const DNAME: &'static str = "🔆 Beacon";
+
+    /// All item states as html options
+    const ITEM_STATES: &'static str = "<option value=''>all ↴\
+         <option value='🔹'>🔹 available\
+         <option value='🔶'>🔶 deployed\
+         <option value='👽'>👽 external\
+         <option value='⚠️'>⚠️ fault\
+         <option value='🔌'>🔌 offline\
+         <option value='▪️'>▪️ inactive";
 
     /// Get the resource
     fn res() -> Res {

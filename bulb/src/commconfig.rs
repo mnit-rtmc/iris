@@ -121,7 +121,7 @@ pub struct Protocol {
 }
 
 /// Comm configuration
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct CommConfig {
     pub name: String,
     pub description: String,

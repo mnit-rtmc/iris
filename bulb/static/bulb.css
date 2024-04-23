@@ -4,7 +4,7 @@ body {
 }
 label {
   text-indent: 0.4rem;
-  margin-right: 0.1rem;
+  margin: 0.1rem;
 }
 span {
   margin-left: 0.1rem;
@@ -32,9 +32,12 @@ button,
 input,
 select,
 textarea {
-  font-family: inherit;
   font-size: 100%;
-  margin: 0;
+  margin: 0.1rem;
+}
+
+imput {
+  padding: 0.2rem;
 }
 
 button {
@@ -43,7 +46,7 @@ button {
   border: 1px solid #888;
   border-radius: 0.2rem;
   padding: 0.1rem 0.2rem;
-  background: none;
+  background-color: #eee;
   color: black;
   cursor: pointer;
 }
@@ -71,8 +74,8 @@ button.go_link {
   font-size: 80%;
   border: 1px solid #888;
   border-radius: 0.2rem;
-  padding: 0.1rem 0.1rem 0 0.1rem;
-  margin: 0.1rem 0;
+  padding: 0.3rem;
+  text-indent: 0;
   color: black;
   cursor: pointer;
 }
@@ -107,39 +110,21 @@ button.go_link {
   flex-direction: column;
   user-select: none;
   flex: 0 1 100%;
+  justify-content: start;
   margin: 0.2rem;
   background-image: url(iris.svg);
   background-repeat: no-repeat;
   background-position: center;
 }
-#sb_div {
-  width: 100%;
-  display: grid;
-  gap: 0.1rem;
-  grid-template-columns: repeat(4, auto);
-  grid-template-areas: "resource resource config fullscreen"
-                       "search   state    state  refresh";
+.sb_row {
+  flex: 0 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
-#sb_label {
-  grid-area: resource;
-}
-#sb_config {
-  grid-area: config;
-}
-#sb_fullscreen {
-  grid-area: fullscreen;
-}
-#sb_search {
-  grid-area: search;
-}
-#sb_state {
-  grid-area: state;
-}
-#sb_refresh {
-  grid-area: refresh;
-}
+
 #sb_list {
-  flex: 0 1 100%;
+  flex: 1 0;
   margin-top: 0.1rem;
   overflow-y: auto;
 }
@@ -432,7 +417,15 @@ button.go_link {
   background-color: black;
   text-indent: 0;
   padding: 0.15rem 0.1rem 0 0.1rem;
-  border-radius: 0.2rem;
+  border-radius: 0.4rem;
+  border: 1px solid black;
+}
+.beacon-disabled {
+  align-self: start;
+  background-color: black;
+  text-indent: 0;
+  padding: 0.15rem 0.1rem 0 0.1rem;
+  border-radius: 0.4rem;
   border: 1px solid black;
 }
 .not-flashing {
@@ -457,4 +450,7 @@ button.go_link {
   padding: 0.2rem;
   border: 1px solid black;
   border-radius: 0.2rem;
+}
+.tiny {
+  font-size: xx-small;
 }

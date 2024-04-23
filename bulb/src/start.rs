@@ -10,14 +10,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{self, View};
-use crate::error::Error;
+use crate::app::{self, DeferredAction};
+use crate::card::{self, CardList, CardView, View};
+use crate::error::{Error, Result};
 use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::util::Doc;
 use js_sys::JsString;
 use resources::Res;
-use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
@@ -33,28 +33,6 @@ pub type JsResult<T> = std::result::Result<T, JsValue>;
 /// Page sidebar
 const SIDEBAR: &str = include_str!("sidebar.html");
 
-/// ID of toast element
-const TOAST_ID: &str = "sb_toast";
-
-/// ID of login shade
-const LOGIN_ID: &str = "sb_login";
-
-/// Interval (ms) between ticks for deferred actions
-const TICK_INTERVAL: i32 = 500;
-
-/// Selected card state
-#[derive(Clone, Debug)]
-struct SelectedCard {
-    /// Resource type
-    res: Res,
-    /// Card view
-    view: View,
-    /// Object name
-    name: String,
-    /// Delete action enabled (slider transition finished)
-    delete_enabled: bool,
-}
-
 /// Button attributes
 struct ButtonAttrs {
     id: String,
@@ -63,318 +41,35 @@ struct ButtonAttrs {
     data_type: Option<String>,
 }
 
-/// Deferred actions (called on set_interval)
-#[derive(Clone, Copy, Debug, PartialEq)]
-enum DeferredAction {
-    SearchList,
-    HideToast,
-}
-
-/// Global app state
-#[derive(Default)]
-struct State {
-    /// Have permissions been initialized?
-    initialized: bool,
-    /// Logged-in user name
-    user: Option<String>,
-    /// Deferred actions (with tick number)
-    deferred: Vec<(i32, DeferredAction)>,
-    /// Timer tick count
-    tick: i32,
-    /// Selected card
-    selected_card: Option<SelectedCard>,
-}
-
-thread_local! {
-    static STATE: RefCell<State> = RefCell::new(State::default());
-}
-
-impl State {
-    /// Add ticks to current tick count
-    fn plus_ticks(&self, t: i32) -> i32 {
-        if let Some(t) = self.tick.checked_add(t) {
-            t
-        } else {
-            0
-        }
-    }
-
-    /// Schedule a deferred action
-    fn schedule(&mut self, action: DeferredAction, timeout_ms: i32) {
-        let tick =
-            self.plus_ticks((timeout_ms + TICK_INTERVAL - 1) / TICK_INTERVAL);
-        self.deferred.push((tick, action));
-    }
-
-    /// Get a deferred action
-    fn action(&mut self) -> Option<DeferredAction> {
-        for i in 0..self.deferred.len() {
-            let (tick, action) = self.deferred[i];
-            if tick <= self.tick {
-                self.deferred.swap_remove(i);
-                return Some(action);
-            }
-        }
-        None
-    }
-
-    /// Clear deferred search actions
-    fn clear_searches(&mut self) {
-        self.deferred
-            .retain(|(_, a)| *a != DeferredAction::SearchList)
-    }
-}
-
-impl DeferredAction {
-    /// Schedule with timeout
-    fn schedule(self, timeout_ms: i32) {
-        STATE.with(|rc| {
-            let mut state = rc.borrow_mut();
-            state.schedule(self, timeout_ms);
-        });
-    }
-
-    /// Perform the action
-    fn perform(self) {
-        match self {
-            Self::SearchList => search_resource_list(),
-            Self::HideToast => hide_toast(),
-        }
-    }
-}
-
-/// Search resource list using the value from "sb_search"
-fn search_resource_list() {
-    let doc = Doc::get();
-    if let Some(rname) = doc.select_parse::<String>("sb_resource") {
-        let res = Res::try_from(rname.as_str()).ok();
-        let value = search_value();
-        spawn_local(populate_list(res, value));
-    }
-}
-
-/// Populate `sb_list` with `res` card types
-async fn populate_list(res: Option<Res>, search: String) {
-    STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        state.selected_card.take()
-    });
-    let doc = Doc::get();
-    let sb_list = doc.elem::<Element>("sb_list");
-    match res {
-        Some(res) => {
-            let config = doc.input_bool("sb_config");
-            match card::fetch_all(res, &search, config).await {
-                Ok(cards) => sb_list.set_inner_html(&cards),
-                Err(Error::FetchResponseUnauthorized()) => show_login(),
-                Err(e) => show_toast(&format!("View failed: {e}")),
-            }
-        }
-        None => sb_list.set_inner_html(""),
-    }
-}
-
-/// Handle a card click event
-async fn click_card(res: Res, id: String, name: String) {
-    deselect_card().await;
-    if id.ends_with('_') {
-        let cs = SelectedCard::new(res, View::Create, name);
-        cs.replace_card(View::Create).await;
-    } else {
-        let config = Doc::get().input_bool("sb_config");
-        let cs = SelectedCard::new(res, View::Status(config), name);
-        cs.replace_card(View::Status(config)).await;
-    }
-}
-
-/// Deselect the selected card
-async fn deselect_card() {
-    let cs = STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        state.selected_card.take()
-    });
-    if let Some(cs) = cs {
-        let v = cs.view;
-        if !v.is_compact() {
-            let v = v.compact();
-            cs.replace_card(v).await;
-        }
-    }
-}
-
-impl SelectedCard {
-    /// Create a new blank selected card
-    fn new(res: Res, view: View, name: String) -> Self {
-        SelectedCard {
-            res,
-            view,
-            name,
-            delete_enabled: false,
-        }
-    }
-
-    /// Get card element ID
-    fn id(&self) -> String {
-        let res = self.res;
-        if self.view.is_create() {
-            format!("{res}_")
-        } else {
-            format!("{res}_{}", &self.name)
-        }
-    }
-
-    /// Replace a card element with another card type
-    async fn replace_card(mut self, v: View) {
-        let id = self.id();
-        let doc = Doc::get();
-        let elem = doc.elem::<HtmlElement>(&id);
-        match card::fetch_one(self.res, &self.name, v).await {
-            Ok(html) => replace_card_html(&elem, v, &html),
-            Err(Error::FetchResponseUnauthorized()) => {
-                show_login();
-                return;
-            }
-            Err(e) => {
-                show_toast(&format!("Fetch failed: {e}"));
-                // Card list may be out-of-date; refresh with search
-                DeferredAction::SearchList.schedule(200);
-                return;
-            }
-        }
-        STATE.with(|rc| {
-            let mut state = rc.borrow_mut();
-            if v.is_compact() {
-                state.selected_card.take();
-            } else {
-                self.view = v;
-                state.selected_card.replace(self);
-                state.clear_searches();
-            }
-        });
-    }
-
-    /// Save changed fields
-    async fn save_changed(self) {
-        let v = self.view;
-        match v {
-            View::Create => self.res_create().await,
-            View::Edit | View::Status(_) => self.res_save_edit().await,
-            View::Location => self.res_save_loc().await,
-            _ => (),
-        }
-    }
-
-    /// Create a new object from card
-    async fn res_create(self) {
-        match card::create_and_post(self.res).await {
-            Ok(_) => {
-                self.replace_card(View::Create.compact()).await;
-                DeferredAction::SearchList.schedule(1500);
-            }
-            Err(Error::FetchResponseUnauthorized()) => show_login(),
-            Err(e) => show_toast(&format!("Create failed: {e}")),
-        }
-    }
-
-    /// Save changed fields on Edit card
-    async fn res_save_edit(self) {
-        let res = self.res;
-        match card::patch_changed(res, &self.name).await {
-            Ok(_) => self.replace_card(View::Edit.compact()).await,
-            Err(Error::FetchResponseUnauthorized()) => show_login(),
-            Err(Error::FetchResponseNotFound()) => {
-                // Card list out-of-date; refresh with search
-                DeferredAction::SearchList.schedule(200);
-            }
-            Err(e) => show_toast(&format!("Save failed: {e}")),
-        }
-    }
-
-    /// Save changed fields on Location card
-    async fn res_save_loc(self) {
-        let geo_loc = card::fetch_geo_loc(self.res, &self.name).await;
-        let result = match geo_loc {
-            Ok(Some(geo_loc)) => {
-                card::patch_changed(Res::GeoLoc, &geo_loc).await
-            }
-            Ok(None) => Ok(()),
-            Err(e) => Err(e),
-        };
-        match result {
-            Ok(_) => self.replace_card(View::Location.compact()).await,
-            Err(Error::FetchResponseUnauthorized()) => show_login(),
-            Err(e) => show_toast(&format!("Save failed: {e}")),
-        }
-    }
-
-    /// Delete selected card / object
-    async fn res_delete(self) {
-        match card::delete_one(self.res, &self.name).await {
-            Ok(_) => DeferredAction::SearchList.schedule(1000),
-            Err(Error::FetchResponseUnauthorized()) => show_login(),
-            Err(e) => show_toast(&format!("Delete failed: {e}")),
-        }
-    }
-
-    /// Handle a button click on selected card
-    async fn handle_click(self, attrs: &ButtonAttrs) -> bool {
-        match card::handle_click(self.res, &self.name, &attrs.id).await {
-            Ok(c) => c,
-            Err(e) => {
-                show_toast(&format!("Click failed: {e}"));
-                false
-            }
-        }
-    }
-
-    /// Handle an input event on selected card
-    async fn handle_input(self, id: &str) -> bool {
-        match card::handle_input(self.res, &self.name, id).await {
-            Ok(c) => c,
-            Err(_e) => false,
-        }
-    }
-}
-
 /// Show login form shade
 fn show_login() {
-    STATE.with(|rc| rc.borrow_mut().user = None);
+    app::set_user(None);
     Doc::get()
-        .elem::<HtmlElement>(LOGIN_ID)
+        .elem::<HtmlElement>("sb_login")
         .set_class_name("show");
 }
 
 /// Hide login form shade
 fn hide_login() {
-    Doc::get().elem::<HtmlElement>(LOGIN_ID).set_class_name("");
+    Doc::get()
+        .elem::<HtmlElement>("sb_login")
+        .set_class_name("");
 }
 
 /// Show a toast message
 fn show_toast(msg: &str) {
     console::log_1(&format!("toast: {msg}").into());
-    let t = Doc::get().elem::<HtmlElement>(TOAST_ID);
+    let t = Doc::get().elem::<HtmlElement>("sb_toast");
     t.set_inner_html(msg);
     t.set_class_name("show");
-    DeferredAction::HideToast.schedule(3000);
+    app::defer_action(DeferredAction::HideToast, 3000);
 }
 
 /// Hide toast
 fn hide_toast() {
-    Doc::get().elem::<HtmlElement>(TOAST_ID).set_class_name("");
-}
-
-/// Replace a card with provieded HTML
-fn replace_card_html(elem: &HtmlElement, v: View, html: &str) {
-    elem.set_inner_html(html);
-    if v.is_compact() {
-        elem.set_class_name("card");
-    } else {
-        elem.set_class_name("form");
-        let mut opt = ScrollIntoViewOptions::new();
-        opt.behavior(ScrollBehavior::Smooth)
-            .block(ScrollLogicalPosition::Nearest);
-        elem.scroll_into_view_with_scroll_into_view_options(&opt);
-    }
+    Doc::get()
+        .elem::<HtmlElement>("sb_toast")
+        .set_class_name("");
 }
 
 /// Application starting function
@@ -399,7 +94,7 @@ async fn add_sidebar() -> JsResult<()> {
     add_input_listener(&sidebar)?;
     add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window)?;
-    add_eventsource_listener()?;
+    add_eventsource_listener();
     fill_resource_select().await;
     Ok(())
 }
@@ -412,7 +107,7 @@ async fn fill_resource_select() {
         Ok(perm) => {
             let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
             sb_resource.set_inner_html(&perm);
-            STATE.with(|rc| rc.borrow_mut().initialized = true);
+            app::set_initialized();
         }
         Err(Error::FetchResponseUnauthorized()) => show_login(),
         Err(e) => {
@@ -423,11 +118,11 @@ async fn fill_resource_select() {
 
 /// Add a "fullscreenchange" event listener to an element
 fn add_fullscreenchange_listener(elem: &Element) -> JsResult<()> {
-    let closure = Closure::wrap(Box::new(|_e: Event| {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
         let doc = Doc::get();
         let btn = doc.elem::<HtmlInputElement>("sb_fullscreen");
         btn.set_checked(doc.is_fullscreen());
-    }) as Box<dyn Fn(_)>);
+    });
     elem.add_event_listener_with_callback(
         "change",
         closure.as_ref().unchecked_ref(),
@@ -439,7 +134,7 @@ fn add_fullscreenchange_listener(elem: &Element) -> JsResult<()> {
 
 /// Add a "change" event listener to an element
 fn add_change_listener(elem: &Element) -> JsResult<()> {
-    let closure = Closure::wrap(Box::new(|e: Event| {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
         let id = target.id();
         match id.as_str() {
@@ -447,7 +142,7 @@ fn add_change_listener(elem: &Element) -> JsResult<()> {
             "sb_fullscreen" => Doc::get().toggle_fullscreen(),
             _ => (),
         }
-    }) as Box<dyn Fn(_)>);
+    });
     elem.add_event_listener_with_callback(
         "change",
         closure.as_ref().unchecked_ref(),
@@ -460,43 +155,127 @@ fn add_change_listener(elem: &Element) -> JsResult<()> {
 /// Reload resource select element
 async fn reload_resources() {
     fill_resource_select().await;
-    search_resource_list();
+    let sb_search = Doc::get().elem::<HtmlInputElement>("sb_search");
+    sb_search.set_value("");
+    handle_resource_change().await;
+}
+
+/// Handle change to selected resource type
+async fn handle_resource_change() {
+    let res = resource_value();
+    app::card_list(None);
+    let sb_state = Doc::get().elem::<HtmlSelectElement>("sb_state");
+    sb_state.set_inner_html(card::item_states(res));
+    fetch_card_list().await;
+    populate_card_list().await;
+    let uri = Uri::from("/iris/api/notify");
+    let rname = res.map_or("", |res| res.as_str());
+    let json = if rname.is_empty() {
+        "[]".to_string()
+    } else {
+        format!("[\"{rname}\"]")
+    };
+    if let Err(e) = uri.post(&json.into()).await {
+        console::log_1(&format!("/iris/api/notify POST: {e}").into());
+    }
+}
+
+/// Fetch card list for selected resource type
+async fn fetch_card_list() {
+    match fetch_card_list_x().await {
+        Ok(_) => (),
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(e) => show_toast(&format!("View failed: {e}")),
+    }
+}
+
+/// Fetch card list for selected resource type
+async fn fetch_card_list_x() -> Result<()> {
+    let mut cards = app::card_list(None);
+    if cards.is_none() {
+        let res = resource_value();
+        cards = res.map(CardList::new);
+    }
+    if let Some(cards) = &mut cards {
+        cards.fetch().await?;
+    }
+    app::card_list(cards);
+    Ok(())
+}
+
+/// Get the selected resource value
+fn resource_value() -> Option<Res> {
+    match Doc::get().select_parse::<String>("sb_resource") {
+        Some(rname) => Res::try_from(rname.as_str()).ok(),
+        None => None,
+    }
+}
+
+/// Populate `sb_list` with selected resource type
+async fn populate_card_list() {
+    match populate_card_list_x().await {
+        Ok(_) => (),
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(e) => show_toast(&format!("View failed: {e}")),
+    }
+}
+
+/// Populate `sb_list` with selected resource type
+async fn populate_card_list_x() -> Result<()> {
+    app::set_selected_card(None);
+    let search = search_value();
+    let doc = Doc::get();
+    let config = doc.input_bool("sb_config");
+    let html = build_card_list(&search, config).await?;
+    let sb_list = doc.elem::<Element>("sb_list");
+    sb_list.set_inner_html(&html);
+    Ok(())
 }
 
 /// Get value to search
 fn search_value() -> String {
     let doc = Doc::get();
-    let search = doc.elem::<HtmlInputElement>("sb_search");
-    let mut value = search.value();
+    let sb_search = doc.elem::<HtmlInputElement>("sb_search");
+    let mut search = sb_search.value();
     if let Some(istate) = doc.select_parse::<String>("sb_state") {
         if ItemState::from_code(&istate).is_some() {
-            value.push(' ');
-            value.push_str(&istate);
+            search.push(' ');
+            search.push_str(&istate);
         }
     }
-    value
+    search
+}
+
+/// Build a filtered list of cards for a resource
+async fn build_card_list(search: &str, config: bool) -> Result<String> {
+    match app::card_list(None) {
+        Some(mut cards) => {
+            cards.filter(search).await?;
+            let html = cards.to_html(config).await?;
+            app::card_list(Some(cards));
+            Ok(html)
+        }
+        None => Ok(String::new()),
+    }
 }
 
 /// Add an "input" event listener to an element
 fn add_input_listener(elem: &Element) -> JsResult<()> {
-    let closure = Closure::wrap(Box::new(|e: Event| {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
         let id = target.id();
         match id.as_str() {
-            "sb_search" | "sb_state" => search_resource_list(),
-            "sb_resource" => {
-                handle_sb_resource_ev(
-                    target.dyn_into::<HtmlSelectElement>().unwrap().value(),
-                );
-            }
+            "sb_config" => (),
+            "sb_search" | "sb_state" => spawn_local(search_card_list()),
+            "sb_resource" => handle_sb_resource_ev(),
             _ => {
-                let cs = STATE.with(|rc| rc.borrow().selected_card.clone());
-                if let Some(cs) = cs {
-                    spawn_local(handle_input_card(id, cs));
+                let cv = app::selected_card();
+                if let Some(cv) = cv {
+                    spawn_local(handle_input(cv, id));
                 }
             }
         }
-    }) as Box<dyn Fn(_)>);
+    });
     elem.add_event_listener_with_callback(
         "input",
         closure.as_ref().unchecked_ref(),
@@ -506,64 +285,41 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
     Ok(())
 }
 
-/// Handle an event from "sb_resource" `select` element
-fn handle_sb_resource_ev(rname: String) {
-    let doc = Doc::get();
-    let search = doc.elem::<HtmlInputElement>("sb_search");
-    search.set_value("");
-    let res = Res::try_from(rname.as_str()).ok();
-    let sb_state = doc.elem::<HtmlSelectElement>("sb_state");
-    match res {
-        Some(res) => sb_state.set_inner_html(card::item_states(res)),
-        None => sb_state.set_inner_html(""),
-    }
-    let value = search_value();
-    spawn_local(populate_list(res, value));
-    spawn_local(post_notify(rname));
+/// Update `sb_list` with search result
+async fn search_card_list() {
+    // NOTE: we _could_ compare hidden items between old/new lists
+    //       and update HTML elements using set_attribute / set_class_name,
+    //       but this is fast enough and doesn't cause any UI problems
+    populate_card_list().await;
 }
 
-/// POST selected resource name to notify endpoint
-async fn post_notify(rname: String) {
-    let uri = Uri::from("/iris/api/notify");
-    let js = format!("[\"{rname}\"]");
-    match uri.post(&js.into()).await {
-        Ok(_) => {
-            console::log_1(&format!("/iris/api/notify POST {rname}").into())
-        }
-        Err(e) => {
-            console::log_1(&format!("/iris/api/notify POST failed {e}").into());
-        }
-    }
+/// Handle an event from `sb_resource` select element
+fn handle_sb_resource_ev() {
+    let sb_search = Doc::get().elem::<HtmlInputElement>("sb_search");
+    sb_search.set_value("");
+    spawn_local(handle_resource_change());
 }
 
-/// Handle input event with selected card
-async fn handle_input_card(id: String, cs: SelectedCard) {
-    if !cs.handle_input(&id).await {
-        console::log_1(&format!("unknown id: {id}").into());
+/// Handle an input event on selected card
+async fn handle_input(cv: CardView, id: String) {
+    match card::handle_input(&cv, &id).await {
+        Ok(c) if c => (),
+        _ => {
+            console::log_1(&format!("unknown id: {id}").into());
+        }
     }
 }
 
 /// Add a `click` event listener to an element
 fn add_click_listener(elem: &Element) -> JsResult<()> {
-    let closure = Closure::wrap(Box::new(|e: Event| {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
         if target.is_instance_of::<HtmlButtonElement>() {
             handle_button_click_ev(&target);
         } else if let Some(card) = target.closest(".card").unwrap_throw() {
-            if let Some(id) = card.get_attribute("id") {
-                if let Some(name) = card.get_attribute("name") {
-                    let doc = Doc::get();
-                    if let Some(rname) =
-                        doc.select_parse::<String>("sb_resource")
-                    {
-                        if let Ok(res) = Res::try_from(rname.as_str()) {
-                            spawn_local(click_card(res, id, name));
-                        }
-                    }
-                }
-            }
+            handle_card_click_ev(&card);
         }
-    }) as Box<dyn FnMut(_)>);
+    });
     elem.add_event_listener_with_callback(
         "click",
         closure.as_ref().unchecked_ref(),
@@ -576,45 +332,174 @@ fn add_click_listener(elem: &Element) -> JsResult<()> {
 /// Handle a `click` event with a button target
 fn handle_button_click_ev(target: &Element) {
     let id = target.id();
-    if id == "ob_login" {
-        spawn_local(handle_login());
-        return;
-    }
-    let cs = STATE.with(|rc| rc.borrow().selected_card.clone());
-    if let Some(cs) = cs {
-        let attrs = ButtonAttrs {
-            id,
-            class_name: target.class_name(),
-            data_link: target.get_attribute("data-link"),
-            data_type: target.get_attribute("data-type"),
-        };
-        spawn_local(handle_button_card(attrs, cs));
+    match id.as_str() {
+        "ob_login" => spawn_local(handle_login()),
+        "sb_refresh" => spawn_local(handle_refresh()),
+        _ => {
+            let cv = app::selected_card();
+            if let Some(cv) = cv {
+                let attrs = ButtonAttrs {
+                    id,
+                    class_name: target.class_name(),
+                    data_link: target.get_attribute("data-link"),
+                    data_type: target.get_attribute("data-type"),
+                };
+                spawn_local(handle_button_card(cv, attrs));
+            }
+        }
     }
 }
 
 /// Handle button click event with selected card
-async fn handle_button_card(attrs: ButtonAttrs, cs: SelectedCard) {
+async fn handle_button_card(cv: CardView, attrs: ButtonAttrs) {
     match attrs.id.as_str() {
-        "ob_close" => {
-            let v = cs.view.compact();
-            cs.replace_card(v).await;
-        }
-        "ob_delete" => {
-            if cs.delete_enabled {
-                cs.res_delete().await;
-            }
-        }
-        "ob_edit" => cs.replace_card(View::Edit).await,
-        "ob_loc" => cs.replace_card(View::Location).await,
-        "ob_save" => cs.save_changed().await,
+        "ob_close" => replace_card(cv.compact()).await,
+        "ob_delete" => handle_delete(cv).await,
+        "ob_edit" => replace_card(cv.view(View::Edit)).await,
+        "ob_loc" => replace_card(cv.view(View::Location)).await,
+        "ob_save" => handle_save(cv).await,
         _ => {
             if attrs.class_name == "go_link" {
                 go_resource(attrs).await;
-            } else if !cs.handle_click(&attrs).await {
-                console::log_1(
-                    &format!("unknown button: {}", &attrs.id).into(),
-                );
+            } else {
+                handle_button_cv(cv, &attrs.id).await;
             }
+        }
+    }
+}
+
+/// Replace the selected card element with another card type
+async fn replace_card(cv: CardView) {
+    match card::fetch_one(&cv).await {
+        Ok(html) => {
+            replace_card_html(&cv, &html);
+            if cv.view.is_compact() {
+                app::set_selected_card(None);
+            } else {
+                app::set_selected_card(Some(cv));
+            }
+        }
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(e) => {
+            show_toast(&format!("fetch failed: {e}"));
+            // Card list may be out-of-date; refresh
+            app::defer_action(DeferredAction::RefreshList, 200);
+        }
+    }
+}
+
+/// Replace a card with provieded HTML
+fn replace_card_html(cv: &CardView, html: &str) {
+    let Some(elem) = Doc::get().try_elem::<HtmlElement>(&cv.id()) else {
+        return;
+    };
+    elem.set_inner_html(html);
+    if cv.view.is_compact() {
+        elem.set_class_name("card");
+    } else {
+        elem.set_class_name("form");
+        let mut opt = ScrollIntoViewOptions::new();
+        opt.behavior(ScrollBehavior::Smooth)
+            .block(ScrollLogicalPosition::Nearest);
+        elem.scroll_into_view_with_scroll_into_view_options(&opt);
+    }
+}
+
+/// Handle delete button click
+async fn handle_delete(cv: CardView) {
+    if app::delete_enabled() {
+        match card::delete_one(&cv).await {
+            Ok(_) => app::defer_action(DeferredAction::RefreshList, 1000),
+            Err(Error::FetchResponseUnauthorized()) => show_login(),
+            Err(e) => show_toast(&format!("Delete failed: {e}")),
+        }
+    }
+}
+
+/// Handle save button click
+async fn handle_save(cv: CardView) {
+    let rs = match cv.view {
+        View::Create => save_create(cv).await,
+        View::Edit | View::Status(_) => save_edit(cv).await,
+        View::Location => save_location(cv).await,
+        _ => Ok(()),
+    };
+    match rs {
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(Error::FetchResponseNotFound()) => {
+            // Card list out-of-date; refresh
+            app::defer_action(DeferredAction::RefreshList, 200);
+        }
+        Err(e) => show_toast(&format!("Save failed: {e}")),
+        _ => (),
+    }
+}
+
+/// Save a create view card
+async fn save_create(cv: CardView) -> Result<()> {
+    card::create_and_post(cv.res).await?;
+    replace_card(cv.view(View::CreateCompact)).await;
+    app::defer_action(DeferredAction::RefreshList, 1500);
+    Ok(())
+}
+
+/// Save an edit view card
+async fn save_edit(cv: CardView) -> Result<()> {
+    card::patch_changed(&cv).await?;
+    replace_card(cv.view(View::Compact)).await;
+    Ok(())
+}
+
+/// Save a location view card
+async fn save_location(cv: CardView) -> Result<()> {
+    if let Some(geo_loc) = card::fetch_geo_loc(&cv).await? {
+        let lv = CardView::new(Res::GeoLoc, geo_loc, cv.view);
+        card::patch_changed(&lv).await?;
+        replace_card(cv.view(View::Compact)).await;
+    }
+    Ok(())
+}
+
+/// Handle a button click on selected card
+async fn handle_button_cv(cv: CardView, id: &str) {
+    match card::handle_click(&cv, id).await {
+        Ok(c) if !c => {
+            console::log_1(&format!("unknown button: {id}").into());
+        }
+        Ok(_c) => (),
+        Err(e) => show_toast(&format!("click failed: {e}")),
+    }
+}
+
+/// Handle a `click` event within a card element
+fn handle_card_click_ev(card: &Element) {
+    if let Some(id) = card.get_attribute("id") {
+        if let Some(name) = card.get_attribute("name") {
+            if let Some(res) = resource_value() {
+                spawn_local(click_card(res, name, id));
+            }
+        }
+    }
+}
+
+/// Handle a card click event
+async fn click_card(res: Res, name: String, id: String) {
+    deselect_card().await;
+    // FIXME: check if id are the same for old/new cards
+    let config = Doc::get().input_bool("sb_config");
+    let mut cv = CardView::new(res, name, View::Status(config));
+    if id.ends_with('_') {
+        cv = cv.view(View::Create);
+    }
+    replace_card(cv).await;
+}
+
+/// Deselect the currently selected card
+async fn deselect_card() {
+    let cv = app::set_selected_card(None);
+    if let Some(cv) = cv {
+        if !cv.view.is_compact() {
+            replace_card(cv.compact()).await;
         }
     }
 }
@@ -635,8 +520,8 @@ async fn handle_login() {
                 let pass = doc.elem::<HtmlInputElement>("login_pass");
                 pass.set_value("");
                 hide_login();
-                STATE.with(|rc| rc.borrow_mut().user = Some(user));
-                if !STATE.with(|rc| rc.borrow().initialized) {
+                app::set_user(Some(user));
+                if !app::initialized() {
                     fill_resource_select().await;
                 }
             }
@@ -651,17 +536,21 @@ async fn go_resource(attrs: ButtonAttrs) {
     if let (Some(link), Some(rname)) = (attrs.data_link, attrs.data_type) {
         let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
         sb_resource.set_value(&rname);
-        let search = doc.elem::<HtmlInputElement>("sb_search");
-        search.set_value(&link);
-        let res = Res::try_from(rname.as_str()).ok();
-        populate_list(res, link).await;
+        let sb_search = doc.elem::<HtmlInputElement>("sb_search");
+        sb_search.set_value(&link);
+        handle_resource_change().await;
     }
+}
+
+/// Handle refresh button click
+async fn handle_refresh() {
+    fetch_card_list().await;
+    populate_card_list().await;
 }
 
 /// Add transition event listener to an element
 fn add_transition_listener(elem: &Element) -> JsResult<()> {
-    let closure =
-        Closure::wrap(Box::new(handle_transition_ev) as Box<dyn FnMut(_)>);
+    let closure: Closure<dyn Fn(_)> = Closure::new(handle_transition_ev);
     elem.add_event_listener_with_callback(
         "transitionstart",
         closure.as_ref().unchecked_ref(),
@@ -685,31 +574,19 @@ fn handle_transition_ev(ev: Event) {
             if let Ok(ev) = ev.dyn_into::<TransitionEvent>() {
                 // delete slider is a "left" property transition
                 if target.id() == "ob_delete" && ev.property_name() == "left" {
-                    set_delete_enabled(&ev.type_() == "transitionend");
+                    app::set_delete_enabled(&ev.type_() == "transitionend");
                 }
             }
         }
     }
 }
 
-/// Set delete action enabled/disabled
-fn set_delete_enabled(enabled: bool) {
-    STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        if let Some(selected_card) = &mut state.selected_card {
-            selected_card.delete_enabled = enabled;
-        }
-    });
-}
-
 /// Add callback for regular interval checks
 fn add_interval_callback(window: &Window) -> JsResult<()> {
-    let closure = Closure::wrap(Box::new(|| {
-        tick_interval();
-    }) as Box<dyn Fn()>);
+    let closure: Closure<dyn Fn()> = Closure::new(tick_interval);
     window.set_interval_with_callback_and_timeout_and_arguments_0(
         closure.as_ref().unchecked_ref(),
-        TICK_INTERVAL,
+        app::TICK_INTERVAL,
     )?;
     closure.forget();
     Ok(())
@@ -717,45 +594,99 @@ fn add_interval_callback(window: &Window) -> JsResult<()> {
 
 /// Process a tick interval
 fn tick_interval() {
-    STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        // don't need to count ticks if nothing's deferred
-        if state.deferred.is_empty() {
-            return;
+    app::tick_tock();
+    while let Some(action) = app::next_action() {
+        match action {
+            DeferredAction::RefreshList => spawn_local(handle_refresh()),
+            DeferredAction::HideToast => hide_toast(),
+            DeferredAction::SetRefreshText(txt) => set_refresh_text(txt),
         }
-        state.tick = state.plus_ticks(1);
-    });
-    while let Some(action) = STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        state.action()
-    }) {
-        action.perform();
     }
 }
 
 /// Add event source listener for notifications
-fn add_eventsource_listener() -> JsResult<()> {
-    let es = EventSource::new("/iris/api/notify")?;
-    let onmessage = Closure::wrap(Box::new(|me: MessageEvent| {
-        if let Ok(payload) = me.data().dyn_into::<JsString>() {
-            update_resource_cards(payload);
+fn add_eventsource_listener() {
+    let es = match EventSource::new("/iris/api/notify") {
+        Ok(es) => es,
+        Err(e) => {
+            set_refresh_text("⭮ ⚪");
+            console::log_1(&format!("SSE /iris/api/notify: {e:?}").into());
+            // FIXME: defer an action to try again in a couple seconds
+            return;
         }
-    }) as Box<dyn FnMut(MessageEvent)>);
+    };
+    set_refresh_text("⭮ ⚫");
+    let onopen: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
+        set_refresh_text("⭮ 🟢");
+    });
+    es.set_onopen(Some(onopen.as_ref().unchecked_ref()));
+    onopen.forget();
+    let onerror: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
+        set_refresh_text("⚫ ⭮ ");
+    });
+    es.set_onerror(Some(onerror.as_ref().unchecked_ref()));
+    onerror.forget();
+    let onmessage: Closure<dyn Fn(_)> = Closure::new(|e: MessageEvent| {
+        if let Ok(payload) = e.data().dyn_into::<JsString>() {
+            spawn_local(handle_notify(String::from(payload)));
+        }
+    });
     es.set_onmessage(Some(onmessage.as_ref().unchecked_ref()));
     // can't drop closure, just forget it to make JS happy
     onmessage.forget();
+}
+
+/// Set refresh button text
+fn set_refresh_text(txt: &str) {
+    let sb_refresh = Doc::get().elem::<Element>("sb_refresh");
+    sb_refresh.set_inner_html(txt);
+}
+
+/// Handle SSE notify from server
+async fn handle_notify(payload: String) {
+    console::log_1(&format!("payload: {payload}").into());
+    let rname = resource_value().map_or("", |res| res.as_str());
+    let (chan, _name) = match payload.split_once('$') {
+        Some((a, b)) => (a, Some(b)),
+        None => (payload.as_str(), None),
+    };
+    if chan != rname {
+        console::log_1(&format!("unknown channel: {chan}").into());
+        return;
+    }
+    set_refresh_text("⭮ 🟡");
+    app::defer_action(DeferredAction::SetRefreshText("⭮ 🟢"), 500);
+    update_card_list().await;
+}
+
+/// Update `sb_list` with changed result
+async fn update_card_list() {
+    let Some(mut cards) = app::card_list(None) else {
+        handle_refresh().await;
+        return;
+    };
+    let json = cards.json();
+    app::card_list(Some(cards));
+    fetch_card_list().await;
+    match update_card_list_x(json).await {
+        Ok(_) => (),
+        Err(Error::CardMismatch()) => populate_card_list().await,
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(e) => show_toast(&format!("View failed: {e}")),
+    }
+}
+
+/// Update `sb_list` with changed result
+async fn update_card_list_x(json: String) -> Result<()> {
+    let cards = app::card_list(None).unwrap();
+    let cv = app::selected_card();
+    for (id, html) in cards.changed_vec(json, &cv).await? {
+        console::log_1(&format!("changed: {id}").into());
+        if let Some(elem) = Doc::get().try_elem::<HtmlElement>(&id) {
+            elem.set_inner_html(&html);
+            // TODO: change class / hidden attr
+        };
+    }
+    app::card_list(Some(cards));
     Ok(())
-}
-
-/// Update resource cards in `sb_list`
-fn update_resource_cards(payload: JsString) {
-    console::log_1(&format!("payload: {payload:?}").into());
-    // TODO: fetch updated list for resource
-    // TODO: update existing resource cards
-    search_resource_list();
-}
-
-/// Get logged-in user name
-pub fn user() -> Option<String> {
-    STATE.with(|rc| rc.borrow().user.clone())
 }

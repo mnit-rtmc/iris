@@ -22,7 +22,7 @@ use std::iter::{empty, once};
 use wasm_bindgen::JsValue;
 
 /// User
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct User {
     pub name: String,
     pub full_name: String,
