@@ -2955,7 +2955,8 @@ BEGIN
     -- has_faults is derived from status (secondary attribute)
     IF (NEW.notes IS DISTINCT FROM OLD.notes) OR
        (NEW.msg_current IS DISTINCT FROM OLD.msg_current) OR
-       (NEW.status IS DISTINCT FROM OLD.status)
+       ((NEW.status->>'faults' IS NOT NULL) IS DISTINCT FROM
+        (OLD.status->>'faults' IS NOT NULL))
     THEN
         NOTIFY dms;
     ELSE

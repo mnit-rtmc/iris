@@ -18,4 +18,22 @@ INSERT INTO iris.system_attribute (name, value)
 INSERT INTO iris.system_attribute (name, value)
     VALUES ('dms_message_tooltip_enable', 'false');
 
+-- Don't notify DMS for all status updates (just faults)
+CREATE OR REPLACE FUNCTION iris.dms_notify() RETURNS TRIGGER AS
+    $dms_notify$
+BEGIN
+    -- has_faults is derived from status (secondary attribute)
+    IF (NEW.notes IS DISTINCT FROM OLD.notes) OR
+       (NEW.msg_current IS DISTINCT FROM OLD.msg_current) OR
+       ((NEW.status->>'faults' IS NOT NULL) IS DISTINCT FROM
+        (OLD.status->>'faults' IS NOT NULL))
+    THEN
+        NOTIFY dms;
+    ELSE
+        PERFORM pg_notify('dms', NEW.name);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$dms_notify$ LANGUAGE plpgsql;
+
 COMMIT;
