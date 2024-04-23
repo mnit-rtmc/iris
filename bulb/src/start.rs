@@ -287,9 +287,8 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
 
 /// Update `sb_list` with search result
 async fn search_card_list() {
-    // NOTE: we _could_ compare hidden items between old/new lists
-    //       and update HTML elements using set_attribute / set_class_name,
-    //       but this is fast enough and doesn't cause any UI problems
+    // FIXME: compare hidden items between old/new lists and
+    //        update HTML elements using set_attribute / set_class_name
     populate_card_list().await;
 }
 
@@ -684,9 +683,9 @@ async fn update_card_list_x(json: String) -> Result<()> {
         console::log_1(&format!("changed: {id}").into());
         if let Some(elem) = Doc::get().try_elem::<HtmlElement>(&id) {
             elem.set_inner_html(&html);
-            // TODO: change class / hidden attr
         };
     }
     app::card_list(Some(cards));
+    // FIXME: use search_card_list to change class / hidden attr
     Ok(())
 }
