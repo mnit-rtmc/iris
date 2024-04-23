@@ -194,7 +194,7 @@ async fn fetch_card_list_x() -> Result<()> {
     let mut cards = app::card_list(None);
     if cards.is_none() {
         let res = resource_value();
-        cards = res.map(|res| CardList::new(res));
+        cards = res.map(CardList::new);
     }
     if let Some(cards) = &mut cards {
         cards.fetch().await?;
