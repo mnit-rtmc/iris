@@ -390,7 +390,9 @@ async fn replace_card(cv: CardView) {
 
 /// Replace a card with provieded HTML
 fn replace_card_html(cv: &CardView, html: &str) {
-    let elem = Doc::get().elem::<HtmlElement>(&cv.id());
+    let Some(elem) = Doc::get().try_elem::<HtmlElement>(&cv.id()) else {
+        return;
+    };
     elem.set_inner_html(html);
     if cv.view.is_compact() {
         elem.set_class_name("card");
@@ -654,12 +656,36 @@ async fn handle_notify(payload: String) {
     }
     set_refresh_text("⭮ 🟡");
     app::defer_action(DeferredAction::SetRefreshText("⭮ 🟢"), 500);
-    fetch_card_list().await;
     update_card_list().await;
 }
 
 /// Update `sb_list` with changed result
 async fn update_card_list() {
-    // FIXME: compare old/new hidden values, and update
-    populate_card_list().await;
+    let Some(mut cards) = app::card_list(None) else {
+        handle_refresh().await;
+        return;
+    };
+    let json = cards.json();
+    app::card_list(Some(cards));
+    fetch_card_list().await;
+    match update_card_list_x(json).await {
+        Ok(_) => (),
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(e) => show_toast(&format!("View failed: {e}")),
+    }
+}
+
+/// Update `sb_list` with changed result
+async fn update_card_list_x(json: String) -> Result<()> {
+    let cards = app::card_list(None).unwrap();
+    let cv = app::selected_card();
+    for (id, html) in cards.changed_vec(json, &cv).await? {
+        console::log_1(&format!("changed: {id}").into());
+        if let Some(elem) = Doc::get().try_elem::<HtmlElement>(&id) {
+            elem.set_inner_html(&html);
+            // TODO: change class / hidden attr
+        };
+    }
+    app::card_list(Some(cards));
+    Ok(())
 }

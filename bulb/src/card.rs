@@ -433,6 +433,11 @@ impl CardList {
         CardList { res, json, hidden }
     }
 
+    /// Take current JSON value
+    pub fn json(&mut self) -> String {
+        std::mem::take(&mut self.json)
+    }
+
     /// Fetch card list
     pub async fn fetch(&mut self) -> Result<()> {
         let json = uri_res(self.res).get().await?;
@@ -474,14 +479,15 @@ impl CardList {
 
     /// Filter card list with a search term
     async fn filter_x<C: Card>(&mut self, search: &str) -> Result<()> {
-        let mut cards: Vec<C> = serde_json::from_str(&self.json)?;
         // Use default value for ancillary data lookup
         let pri = C::default();
         let anc = fetch_ancillary(View::Search, &pri).await?;
         let search = Search::new(search);
-        cards.retain(|pri| !search.is_match(pri, &anc));
-        let hidden = cards.into_iter().map(|c| c.id()).collect();
-        self.hidden = hidden;
+        self.hidden = serde_json::from_str::<Vec<C>>(&self.json)?
+            .into_iter()
+            .filter(|pri| !search.is_match(pri, &anc))
+            .map(|c| c.id())
+            .collect();
         Ok(())
     }
 
@@ -548,6 +554,61 @@ impl CardList {
         }
         html.push_str("</ul>");
         Ok(html)
+    }
+
+    /// Get a Vec of changed cards
+    pub async fn changed_vec(
+        &self,
+        json: String,
+        cv: &Option<CardView>,
+    ) -> Result<Vec<(String, String)>> {
+        match self.res {
+            Res::Alarm => self.changed::<Alarm>(json, cv).await,
+            Res::Beacon => self.changed::<Beacon>(json, cv).await,
+            Res::CabinetStyle => self.changed::<CabinetStyle>(json, cv).await,
+            Res::Camera => self.changed::<Camera>(json, cv).await,
+            Res::CommConfig => self.changed::<CommConfig>(json, cv).await,
+            Res::CommLink => self.changed::<CommLink>(json, cv).await,
+            Res::Controller => self.changed::<Controller>(json, cv).await,
+            Res::Detector => self.changed::<Detector>(json, cv).await,
+            Res::Dms => self.changed::<Dms>(json, cv).await,
+            Res::FlowStream => self.changed::<FlowStream>(json, cv).await,
+            Res::GateArm => self.changed::<GateArm>(json, cv).await,
+            Res::GateArmArray => self.changed::<GateArmArray>(json, cv).await,
+            Res::Gps => self.changed::<Gps>(json, cv).await,
+            Res::LaneMarking => self.changed::<LaneMarking>(json, cv).await,
+            Res::LcsArray => self.changed::<LcsArray>(json, cv).await,
+            Res::LcsIndication => self.changed::<LcsIndication>(json, cv).await,
+            Res::Modem => self.changed::<Modem>(json, cv).await,
+            Res::Permission => self.changed::<Permission>(json, cv).await,
+            Res::RampMeter => self.changed::<RampMeter>(json, cv).await,
+            Res::Role => self.changed::<Role>(json, cv).await,
+            Res::TagReader => self.changed::<TagReader>(json, cv).await,
+            Res::User => self.changed::<User>(json, cv).await,
+            Res::VideoMonitor => self.changed::<VideoMonitor>(json, cv).await,
+            Res::WeatherSensor => self.changed::<WeatherSensor>(json, cv).await,
+            _ => unreachable!(),
+        }
+    }
+
+    /// Make a Vec of changed cards
+    async fn changed<C: Card>(
+        &self,
+        json: String,
+        _cv: &Option<CardView>,
+    ) -> Result<Vec<(String, String)>> {
+        // Use default value for ancillary data lookup
+        let pri = C::default();
+        let anc = fetch_ancillary(View::Search, &pri).await?;
+        let old = serde_json::from_str::<Vec<C>>(&json)?.into_iter();
+        let new = serde_json::from_str::<Vec<C>>(&self.json)?.into_iter();
+        // FIXME: use cv for selected card view
+        let values = old
+            .zip(new)
+            .filter(|(oc, nc)| oc != nc)
+            .map(|(_oc, nc)| (nc.id(), nc.to_html(View::Compact, &anc)))
+            .collect();
+        Ok(values)
     }
 }
 
