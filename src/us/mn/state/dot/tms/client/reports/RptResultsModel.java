@@ -125,7 +125,7 @@ public class RptResultsModel extends AbstractTableModel {
 			"report.field.datetime"));
 		m.addColumn(createColumn(COL_DEV_NAME, 120+5,
 			"report.field.device"));
-		m.addColumn(createColumn(COL_USER,     80 +5,
+		m.addColumn(createColumn(COL_USER,     120+5,
 			"report.field.user"));
 		m.addColumn(createColumn(COL_DESCRIPTION, desc_col_width,
 			"report.field.description"));
