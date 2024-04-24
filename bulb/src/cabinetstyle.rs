@@ -110,9 +110,8 @@ impl Card for CabinetStyle {
     fn to_html(&self, view: View, anc: &CabinetStyleAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(),
             View::Edit => self.to_html_edit(),
-            _ => unreachable!(),
+            _ => self.to_html_compact(),
         }
     }
 
