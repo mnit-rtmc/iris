@@ -223,10 +223,10 @@ async fn populate_card_list() {
 /// Populate `sb_list` with selected resource type
 async fn populate_card_list_x() -> Result<()> {
     app::set_selected_card(None);
-    let search = search_value();
     let doc = Doc::get();
     let config = doc.input_bool("sb_config");
-    let html = build_card_list(&search, config).await?;
+    let search = search_value();
+    let html = build_card_list(config, &search).await?;
     let sb_list = doc.elem::<Element>("sb_list");
     sb_list.set_inner_html(&html);
     Ok(())
@@ -247,11 +247,12 @@ fn search_value() -> String {
 }
 
 /// Build a filtered list of cards for a resource
-async fn build_card_list(search: &str, config: bool) -> Result<String> {
+async fn build_card_list(config: bool, search: &str) -> Result<String> {
     match app::card_list(None) {
         Some(mut cards) => {
-            cards.filter(search).await?;
-            let html = cards.to_html(config).await?;
+            cards.config(config);
+            cards.search(search);
+            let html = cards.make_html().await?;
             app::card_list(Some(cards));
             Ok(html)
         }
@@ -285,11 +286,34 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
     Ok(())
 }
 
-/// Update `sb_list` with search result
+/// Search card list for matching cards
 async fn search_card_list() {
-    // FIXME: compare hidden items between old/new lists and
-    //        update HTML elements using set_attribute / set_class_name
-    populate_card_list().await;
+    let config = Doc::get().input_bool("sb_config");
+    let search = search_value();
+    match search_card_list_x(config, &search).await {
+        Ok(_) => (),
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(e) => show_toast(&format!("View failed: {e}")),
+    }
+}
+
+/// Search card list for matching cards
+async fn search_card_list_x(config: bool, search: &str) -> Result<()> {
+    match app::card_list(None) {
+        Some(mut cards) => {
+            cards.config(config);
+            cards.search(search);
+            for cv in cards.view_change().await? {
+                if let Some(elem) = Doc::get().try_elem::<HtmlElement>(&cv.id())
+                {
+                    elem.set_class_name(cv.view.class_name());
+                }
+            }
+            app::card_list(Some(cards));
+        }
+        None => populate_card_list().await,
+    }
+    Ok(())
 }
 
 /// Handle an event from `sb_resource` select element
@@ -315,7 +339,9 @@ fn add_click_listener(elem: &Element) -> JsResult<()> {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
         if target.is_instance_of::<HtmlButtonElement>() {
             handle_button_click_ev(&target);
-        } else if let Some(card) = target.closest(".card").unwrap_throw() {
+        } else if let Some(card) =
+            target.closest(".card-compact").unwrap_throw()
+        {
             handle_card_click_ev(&card);
         }
     });
@@ -372,10 +398,10 @@ async fn replace_card(cv: CardView) {
     match card::fetch_one(&cv).await {
         Ok(html) => {
             replace_card_html(&cv, &html);
-            if cv.view.is_compact() {
-                app::set_selected_card(None);
-            } else {
+            if cv.view.is_form() {
                 app::set_selected_card(Some(cv));
+            } else {
+                app::set_selected_card(None);
             }
         }
         Err(Error::FetchResponseUnauthorized()) => show_login(),
@@ -393,10 +419,8 @@ fn replace_card_html(cv: &CardView, html: &str) {
         return;
     };
     elem.set_inner_html(html);
-    if cv.view.is_compact() {
-        elem.set_class_name("card");
-    } else {
-        elem.set_class_name("form");
+    elem.set_class_name(cv.view.class_name());
+    if cv.view.is_form() {
         let mut opt = ScrollIntoViewOptions::new();
         opt.behavior(ScrollBehavior::Smooth)
             .block(ScrollLogicalPosition::Nearest);
@@ -497,7 +521,7 @@ async fn click_card(res: Res, name: String, id: String) {
 async fn deselect_card() {
     let cv = app::set_selected_card(None);
     if let Some(cv) = cv {
-        if !cv.view.is_compact() {
+        if cv.view.is_form() {
             replace_card(cv.compact()).await;
         }
     }
@@ -686,6 +710,6 @@ async fn update_card_list_x(json: String) -> Result<()> {
         };
     }
     app::card_list(Some(cards));
-    // FIXME: use search_card_list to change class / hidden attr
+    search_card_list().await;
     Ok(())
 }
