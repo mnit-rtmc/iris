@@ -430,7 +430,10 @@ fn replace_card_html(cv: &CardView, html: &str) {
 async fn handle_delete(cv: CardView) {
     if app::delete_enabled() {
         match card::delete_one(&cv).await {
-            Ok(_) => app::defer_action(DeferredAction::RefreshList, 1000),
+            Ok(_) => {
+                // NOTE: with SSE notify, this shouldn't be needed
+                app::defer_action(DeferredAction::RefreshList, 1000);
+            }
             Err(Error::FetchResponseUnauthorized()) => show_login(),
             Err(e) => show_toast(&format!("Delete failed: {e}")),
         }
@@ -460,6 +463,7 @@ async fn handle_save(cv: CardView) {
 async fn save_create(cv: CardView) -> Result<()> {
     card::create_and_post(cv.res).await?;
     replace_card(cv.view(View::CreateCompact)).await;
+    // NOTE: with SSE notify, this shouldn't be needed
     app::defer_action(DeferredAction::RefreshList, 1500);
     Ok(())
 }

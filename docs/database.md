@@ -40,9 +40,9 @@ update, and is caused by one of these conditions:
 `detector`         |     | ✔️   |     |
 `dms`              | ✔️   | ✔️   | ✔️   | ✔️ 
 `flow_stream`      |     | ✔️   |     |
-`gps`              | ✔️   | ✔️   |     |
 `gate_arm`         |     | ✔️   |     |
 `gate_arm_array`   | ✔️   | ✔️   |     |
+`gps`              | ✔️   | ✔️   |     |
 `graphic`          |     |     |     |
 `incident`         |     |     |     |
 `lane_marking`     | ✔️   | ✔️   |     |
