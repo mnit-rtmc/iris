@@ -194,7 +194,8 @@ async fn fetch_card_list_x() -> Result<()> {
     let mut cards = app::card_list(None);
     if cards.is_none() {
         let res = resource_value();
-        cards = res.map(CardList::new);
+        let config = Doc::get().input_bool("sb_config");
+        cards = res.map(|res| CardList::new(res).config(config));
     }
     if let Some(cards) = &mut cards {
         cards.fetch().await?;
@@ -224,9 +225,8 @@ async fn populate_card_list() {
 async fn populate_card_list_x() -> Result<()> {
     app::set_selected_card(None);
     let doc = Doc::get();
-    let config = doc.input_bool("sb_config");
     let search = search_value();
-    let html = build_card_list(config, &search).await?;
+    let html = build_card_list(&search).await?;
     let sb_list = doc.elem::<Element>("sb_list");
     sb_list.set_inner_html(&html);
     Ok(())
@@ -247,10 +247,9 @@ fn search_value() -> String {
 }
 
 /// Build a filtered list of cards for a resource
-async fn build_card_list(config: bool, search: &str) -> Result<String> {
+async fn build_card_list(search: &str) -> Result<String> {
     match app::card_list(None) {
         Some(mut cards) => {
-            cards.config(config);
             cards.search(search);
             let html = cards.make_html().await?;
             app::card_list(Some(cards));
@@ -288,9 +287,8 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
 
 /// Search card list for matching cards
 async fn search_card_list() {
-    let config = Doc::get().input_bool("sb_config");
     let search = search_value();
-    match search_card_list_x(config, &search).await {
+    match search_card_list_x(&search).await {
         Ok(_) => (),
         Err(Error::FetchResponseUnauthorized()) => show_login(),
         Err(e) => show_toast(&format!("View failed: {e}")),
@@ -298,10 +296,9 @@ async fn search_card_list() {
 }
 
 /// Search card list for matching cards
-async fn search_card_list_x(config: bool, search: &str) -> Result<()> {
+async fn search_card_list_x(search: &str) -> Result<()> {
     match app::card_list(None) {
         Some(mut cards) => {
-            cards.config(config);
             cards.search(search);
             for cv in cards.view_change().await? {
                 if let Some(elem) = Doc::get().try_elem::<HtmlElement>(&cv.id())

@@ -460,9 +460,10 @@ impl CardList {
         }
     }
 
-    /// Set config flag
-    pub fn config(&mut self, config: bool) {
+    /// Set config mode
+    pub fn config(mut self, config: bool) -> Self {
         self.config = config;
+        self
     }
 
     /// Set search term
