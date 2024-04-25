@@ -299,12 +299,12 @@ pub trait Card:
     fn changed_fields(&self) -> String;
 
     /// Handle click event for a button on the card
-    fn handle_click(&self, _anc: Self::Ancillary, _id: &str) -> Vec<Action> {
+    fn handle_click(&self, _anc: Self::Ancillary, _id: String) -> Vec<Action> {
         Vec::new()
     }
 
     /// Handle input event for an element on the card
-    fn handle_input(&self, _anc: Self::Ancillary, _id: &str) {
+    fn handle_input(&self, _anc: Self::Ancillary, _id: String) {
         // ignore by default
     }
 }
@@ -339,12 +339,14 @@ pub async fn create_and_post(res: Res) -> Result<()> {
 
 /// Create a name value
 fn create_value(doc: &Doc) -> Result<String> {
-    if let Some(name) = doc.input_option_string("create_name") {
-        let mut obj = Map::new();
-        obj.insert("name".to_string(), Value::String(name));
-        return Ok(Value::Object(obj).to_string());
+    match doc.input_option_string("create_name") {
+        Some(name) => {
+            let mut obj = Map::new();
+            obj.insert("name".to_string(), Value::String(name));
+            Ok(Value::Object(obj).to_string())
+        }
+        None => Err(Error::ElemIdNotFound(String::from("create_name"))),
     }
-    Err(Error::NameMissing())
 }
 
 /// Delete a resource by name
@@ -865,38 +867,38 @@ async fn patch_changed_x<C: Card>(cv: &CardView) -> Result<()> {
 }
 
 /// Handle click event for a button owned by the resource
-pub async fn handle_click(cv: &CardView, id: &str) -> Result<bool> {
+pub async fn handle_click(cv: &CardView, id: String) -> Result<()> {
     match cv.res {
         Res::Beacon => handle_click_x::<Beacon>(cv, id).await,
         Res::Dms => handle_click_x::<Dms>(cv, id).await,
-        _ => Ok(false),
+        _ => Ok(()),
     }
 }
 
 /// Handle click event for a button on a card
-async fn handle_click_x<C: Card>(cv: &CardView, id: &str) -> Result<bool> {
+async fn handle_click_x<C: Card>(cv: &CardView, id: String) -> Result<()> {
     let pri = fetch_primary::<C>(&cv.name).await?;
     let anc = fetch_ancillary(View::Status(false), &pri).await?;
     for action in pri.handle_click(anc, id) {
         action.perform().await?;
     }
-    Ok(true)
+    Ok(())
 }
 
 /// Handle input event for an element owned by the resource
-pub async fn handle_input(cv: &CardView, id: &str) -> Result<bool> {
+pub async fn handle_input(cv: &CardView, id: String) -> Result<()> {
     match cv.res {
         Res::Dms => handle_input_x::<Dms>(&cv.name, id).await,
-        _ => Ok(false),
+        _ => Ok(()),
     }
 }
 
 /// Handle input event for an element on a card
-async fn handle_input_x<C: Card>(name: &str, id: &str) -> Result<bool> {
+async fn handle_input_x<C: Card>(name: &str, id: String) -> Result<()> {
     let pri = fetch_primary::<C>(name).await?;
     let anc = fetch_ancillary(View::Status(false), &pri).await?;
     pri.handle_input(anc, id);
-    Ok(true)
+    Ok(())
 }
 
 /// Fetch a Location card

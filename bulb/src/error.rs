@@ -56,9 +56,9 @@ pub enum Error {
     #[error("Status code {0}")]
     FetchResponseOther(u16),
 
-    /// Name missing
-    #[error("Name missing")]
-    NameMissing(),
+    /// Element ID not found
+    #[error("Elem id {0} not found")]
+    ElemIdNotFound(String),
 
     /// Parse error
     #[error("Parse error")]

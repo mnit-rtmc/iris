@@ -979,10 +979,10 @@ impl Card for Dms {
     }
 
     /// Handle click event for a button on the card
-    fn handle_click(&self, anc: DmsAnc, id: &str) -> Vec<Action> {
-        if id == "mc_send" {
+    fn handle_click(&self, anc: DmsAnc, id: String) -> Vec<Action> {
+        if &id == "mc_send" {
             self.send_actions(anc)
-        } else if id == "mc_blank" {
+        } else if &id == "mc_blank" {
             self.blank_actions(anc)
         } else {
             Vec::new()
@@ -990,14 +990,14 @@ impl Card for Dms {
     }
 
     /// Handle input event for an element on the card
-    fn handle_input(&self, anc: DmsAnc, id: &str) {
+    fn handle_input(&self, anc: DmsAnc, id: String) {
         let Some(pat) = self.selected_pattern(&anc) else {
             return;
         };
         let Some(sign) = self.make_sign(&anc) else {
             return;
         };
-        let lines = if id == "mc_pattern" {
+        let lines = if &id == "mc_pattern" {
             // update mc_lines element
             let html = anc.make_lines(&sign, Some(pat), "");
             let mc_lines = Doc::get().elem::<HtmlElement>("mc_lines");

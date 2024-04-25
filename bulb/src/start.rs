@@ -321,9 +321,9 @@ fn handle_sb_resource_ev() {
 async fn handle_input(id: String) {
     let cv = app::selected_card();
     if let Some(cv) = cv {
-        match card::handle_input(&cv, &id).await {
-            Ok(c) if c => (),
-            _ => console::log_1(&format!("unknown id: {id}").into()),
+        match card::handle_input(&cv, id).await {
+            Ok(_) => (),
+            Err(e) => show_toast(&format!("input failed: {e}")),
         }
     }
 }
@@ -381,7 +381,7 @@ async fn handle_button_card(attrs: ButtonAttrs) {
                 if attrs.class_name == "go_link" {
                     go_resource(attrs).await;
                 } else {
-                    handle_button_cv(cv, &attrs.id).await;
+                    handle_button_cv(cv, attrs.id).await;
                 }
             }
         }
@@ -483,12 +483,9 @@ async fn save_location(cv: CardView) -> Result<()> {
 }
 
 /// Handle a button click on selected card
-async fn handle_button_cv(cv: CardView, id: &str) {
+async fn handle_button_cv(cv: CardView, id: String) {
     match card::handle_click(&cv, id).await {
-        Ok(c) if !c => {
-            console::log_1(&format!("unknown button: {id}").into());
-        }
-        Ok(_c) => (),
+        Ok(_) => (),
         Err(e) => show_toast(&format!("click failed: {e}")),
     }
 }

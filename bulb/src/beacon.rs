@@ -313,8 +313,8 @@ impl Card for Beacon {
     }
 
     /// Handle click event for a button on the card
-    fn handle_click(&self, _anc: BeaconAnc, id: &str) -> Vec<Action> {
-        if id == "ob_flashing" {
+    fn handle_click(&self, _anc: BeaconAnc, id: String) -> Vec<Action> {
+        if &id == "ob_flashing" {
             let mut fields = Fields::new();
             match self.state {
                 // DARK (2) => FLASHING_REQ (3)
