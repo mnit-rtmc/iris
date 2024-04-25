@@ -268,12 +268,7 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
             "sb_config" => (),
             "sb_search" | "sb_state" => spawn_local(search_card_list()),
             "sb_resource" => handle_sb_resource_ev(),
-            _ => {
-                let cv = app::selected_card();
-                if let Some(cv) = cv {
-                    spawn_local(handle_input(cv, id));
-                }
-            }
+            _ => spawn_local(handle_input(id)),
         }
     });
     elem.add_event_listener_with_callback(
@@ -287,6 +282,7 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
 
 /// Search card list for matching cards
 async fn search_card_list() {
+    deselect_card().await;
     match search_card_list_x().await {
         Ok(_) => (),
         Err(Error::FetchResponseUnauthorized()) => show_login(),
@@ -321,12 +317,13 @@ fn handle_sb_resource_ev() {
     spawn_local(handle_resource_change());
 }
 
-/// Handle an input event on selected card
-async fn handle_input(cv: CardView, id: String) {
-    match card::handle_input(&cv, &id).await {
-        Ok(c) if c => (),
-        _ => {
-            console::log_1(&format!("unknown id: {id}").into());
+/// Handle an input event on the selected card
+async fn handle_input(id: String) {
+    let cv = app::selected_card();
+    if let Some(cv) = cv {
+        match card::handle_input(&cv, &id).await {
+            Ok(c) if c => (),
+            _ => console::log_1(&format!("unknown id: {id}").into()),
         }
     }
 }
