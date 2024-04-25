@@ -287,8 +287,7 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
 
 /// Search card list for matching cards
 async fn search_card_list() {
-    let search = search_value();
-    match search_card_list_x(&search).await {
+    match search_card_list_x().await {
         Ok(_) => (),
         Err(Error::FetchResponseUnauthorized()) => show_login(),
         Err(e) => show_toast(&format!("View failed: {e}")),
@@ -296,19 +295,21 @@ async fn search_card_list() {
 }
 
 /// Search card list for matching cards
-async fn search_card_list_x(search: &str) -> Result<()> {
+async fn search_card_list_x() -> Result<()> {
     match app::card_list(None) {
         Some(mut cards) => {
-            cards.search(search);
+            let search = search_value();
+            cards.search(&search);
+            let doc = Doc::get();
             for cv in cards.view_change().await? {
-                if let Some(elem) = Doc::get().try_elem::<HtmlElement>(&cv.id())
-                {
+                let id = cv.id();
+                if let Some(elem) = doc.try_elem::<Element>(&id) {
                     elem.set_class_name(cv.view.class_name());
                 }
             }
             app::card_list(Some(cards));
         }
-        None => populate_card_list().await,
+        None => console::log_1(&"search failed - no card list".into()),
     }
     Ok(())
 }
