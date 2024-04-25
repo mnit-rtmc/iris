@@ -667,7 +667,6 @@ fn set_refresh_text(txt: &str) {
 
 /// Handle SSE notify from server
 async fn handle_notify(payload: String) {
-    console::log_1(&format!("payload: {payload}").into());
     let rname = resource_value().map_or("", |res| res.as_str());
     let (chan, _name) = match payload.split_once('$') {
         Some((a, b)) => (a, Some(b)),
