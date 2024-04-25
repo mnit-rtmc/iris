@@ -299,12 +299,7 @@ pub trait Card:
     fn changed_fields(&self) -> String;
 
     /// Handle click event for a button on the card
-    fn handle_click(
-        &self,
-        _anc: Self::Ancillary,
-        _id: &str,
-        _uri: Uri,
-    ) -> Vec<Action> {
+    fn handle_click(&self, _anc: Self::Ancillary, _id: &str) -> Vec<Action> {
         Vec::new()
     }
 
@@ -882,8 +877,7 @@ pub async fn handle_click(cv: &CardView, id: &str) -> Result<bool> {
 async fn handle_click_x<C: Card>(cv: &CardView, id: &str) -> Result<bool> {
     let pri = fetch_primary::<C>(&cv.name).await?;
     let anc = fetch_ancillary(View::Status(false), &pri).await?;
-    let uri = C::uri_name(&cv.name);
-    for action in pri.handle_click(anc, id, uri) {
+    for action in pri.handle_click(anc, id) {
         action.perform().await?;
     }
     Ok(true)

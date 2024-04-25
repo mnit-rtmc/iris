@@ -356,33 +356,33 @@ fn handle_button_click_ev(target: &Element) {
         "ob_login" => spawn_local(handle_login()),
         "sb_refresh" => spawn_local(handle_refresh()),
         _ => {
-            let cv = app::selected_card();
-            if let Some(cv) = cv {
-                let attrs = ButtonAttrs {
-                    id,
-                    class_name: target.class_name(),
-                    data_link: target.get_attribute("data-link"),
-                    data_type: target.get_attribute("data-type"),
-                };
-                spawn_local(handle_button_card(cv, attrs));
-            }
+            let attrs = ButtonAttrs {
+                id,
+                class_name: target.class_name(),
+                data_link: target.get_attribute("data-link"),
+                data_type: target.get_attribute("data-type"),
+            };
+            spawn_local(handle_button_card(attrs));
         }
     }
 }
 
 /// Handle button click event with selected card
-async fn handle_button_card(cv: CardView, attrs: ButtonAttrs) {
-    match attrs.id.as_str() {
-        "ob_close" => replace_card(cv.compact()).await,
-        "ob_delete" => handle_delete(cv).await,
-        "ob_edit" => replace_card(cv.view(View::Edit)).await,
-        "ob_loc" => replace_card(cv.view(View::Location)).await,
-        "ob_save" => handle_save(cv).await,
-        _ => {
-            if attrs.class_name == "go_link" {
-                go_resource(attrs).await;
-            } else {
-                handle_button_cv(cv, &attrs.id).await;
+async fn handle_button_card(attrs: ButtonAttrs) {
+    let cv = app::selected_card();
+    if let Some(cv) = cv {
+        match attrs.id.as_str() {
+            "ob_close" => replace_card(cv.compact()).await,
+            "ob_delete" => handle_delete(cv).await,
+            "ob_edit" => replace_card(cv.view(View::Edit)).await,
+            "ob_loc" => replace_card(cv.view(View::Location)).await,
+            "ob_save" => handle_save(cv).await,
+            _ => {
+                if attrs.class_name == "go_link" {
+                    go_resource(attrs).await;
+                } else {
+                    handle_button_cv(cv, &attrs.id).await;
+                }
             }
         }
     }

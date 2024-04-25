@@ -873,12 +873,12 @@ impl Dms {
     }
 
     /// Create actions to handle click on "Send" button
-    fn send_actions(&self, anc: DmsAnc, uri: Uri) -> Vec<Action> {
+    fn send_actions(&self, anc: DmsAnc) -> Vec<Action> {
         if let Some(cfg) = &self.sign_config {
             if let Some(ms) = &self.selected_multi(&anc) {
                 if let Some(owner) = sign_msg_owner(HIGH_1) {
                     return anc.sign_msg_actions(
-                        uri,
+                        Dms::uri_name(&self.name),
                         SignMessage::new(cfg, ms, owner, HIGH_1),
                     );
                 };
@@ -888,10 +888,12 @@ impl Dms {
     }
 
     /// Create actions to handle click on "Blank" button
-    fn blank_actions(&self, anc: DmsAnc, uri: Uri) -> Vec<Action> {
+    fn blank_actions(&self, anc: DmsAnc) -> Vec<Action> {
         match (&self.sign_config, sign_msg_owner(LOW_1)) {
-            (Some(cfg), Some(owner)) => anc
-                .sign_msg_actions(uri, SignMessage::new(cfg, "", owner, LOW_1)),
+            (Some(cfg), Some(owner)) => anc.sign_msg_actions(
+                Dms::uri_name(&self.name),
+                SignMessage::new(cfg, "", owner, LOW_1),
+            ),
             _ => Vec::new(),
         }
     }
@@ -977,11 +979,11 @@ impl Card for Dms {
     }
 
     /// Handle click event for a button on the card
-    fn handle_click(&self, anc: DmsAnc, id: &str, uri: Uri) -> Vec<Action> {
+    fn handle_click(&self, anc: DmsAnc, id: &str) -> Vec<Action> {
         if id == "mc_send" {
-            self.send_actions(anc, uri)
+            self.send_actions(anc)
         } else if id == "mc_blank" {
-            self.blank_actions(anc, uri)
+            self.blank_actions(anc)
         } else {
             Vec::new()
         }

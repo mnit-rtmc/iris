@@ -313,7 +313,7 @@ impl Card for Beacon {
     }
 
     /// Handle click event for a button on the card
-    fn handle_click(&self, _anc: BeaconAnc, id: &str, uri: Uri) -> Vec<Action> {
+    fn handle_click(&self, _anc: BeaconAnc, id: &str) -> Vec<Action> {
         if id == "ob_flashing" {
             let mut fields = Fields::new();
             match self.state {
@@ -323,6 +323,7 @@ impl Card for Beacon {
                 4 | 5 => fields.insert_num("state", 1),
                 _ => (),
             }
+            let uri = Beacon::uri_name(&self.name);
             let val = fields.into_value().to_string();
             vec![Action::Patch(uri, val.into())]
         } else {
