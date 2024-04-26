@@ -217,7 +217,6 @@ fn resource_value() -> Option<Res> {
 
 /// Populate `sb_list` with selected resource type
 async fn populate_card_list() -> Result<()> {
-    app::set_selected_card(None);
     let doc = Doc::get();
     let search = search_value();
     let html = build_card_list(&search).await?;
@@ -260,11 +259,9 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
         let id = target.id();
         match id.as_str() {
             "sb_config" => (),
-            "sb_search" | "sb_state" => {
-                spawn_local(do_future(search_card_list()))
-            }
+            "sb_search" | "sb_state" => spawn_local(do_future(handle_search())),
             "sb_resource" => handle_sb_resource_ev(),
-            _ => spawn_local(handle_input(id)),
+            _ => spawn_local(do_future(handle_input(id))),
         }
     });
     elem.add_event_listener_with_callback(
@@ -276,9 +273,16 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
     Ok(())
 }
 
+/// Handle search input
+async fn handle_search() -> Result<()> {
+    if let Some(cv) = app::set_form(None) {
+        replace_card(cv.compact()).await?
+    }
+    search_card_list().await
+}
+
 /// Search card list for matching cards
 async fn search_card_list() -> Result<()> {
-    deselect_card().await;
     match app::card_list(None) {
         Some(mut cards) => {
             let search = search_value();
@@ -305,14 +309,11 @@ fn handle_sb_resource_ev() {
 }
 
 /// Handle an input event on the selected card
-async fn handle_input(id: String) {
-    let cv = app::selected_card();
-    if let Some(cv) = cv {
-        match card::handle_input(&cv, id).await {
-            Ok(_) => (),
-            Err(e) => show_toast(&format!("input failed: {e}")),
-        }
+async fn handle_input(id: String) -> Result<()> {
+    if let Some(cv) = app::form() {
+        card::handle_input(&cv, id).await?;
     }
+    Ok(())
 }
 
 /// Add a `click` event listener to an element
@@ -354,8 +355,7 @@ fn handle_button_click_ev(target: &Element) {
 
 /// Handle button click event with selected card
 async fn handle_button_card(attrs: ButtonAttrs) {
-    let cv = app::selected_card();
-    if let Some(cv) = cv {
+    if let Some(cv) = app::form() {
         match attrs.id.as_str() {
             "ob_close" => do_future(replace_card(cv.compact())).await,
             "ob_delete" => do_future(handle_delete(cv)).await,
@@ -378,9 +378,9 @@ async fn replace_card(cv: CardView) -> Result<()> {
     let html = card::fetch_one(&cv).await?;
     replace_card_html(&cv, &html);
     if cv.view.is_form() {
-        app::set_selected_card(Some(cv));
+        app::set_form(Some(cv));
     } else {
-        app::set_selected_card(None);
+        app::set_form(None);
     }
     Ok(())
 }
@@ -458,32 +458,24 @@ fn handle_card_click_ev(card: &Element) {
     if let Some(id) = card.get_attribute("id") {
         if let Some(name) = card.get_attribute("name") {
             if let Some(res) = resource_value() {
-                spawn_local(click_card(res, name, id));
+                spawn_local(do_future(click_card(res, name, id)));
             }
         }
     }
 }
 
 /// Handle a card click event
-async fn click_card(res: Res, name: String, id: String) {
-    deselect_card().await;
+async fn click_card(res: Res, name: String, id: String) -> Result<()> {
+    if let Some(cv) = app::set_form(None) {
+        replace_card(cv.compact()).await?;
+    }
     // FIXME: check if id are the same for old/new cards
     let config = Doc::get().input_bool("sb_config");
     let mut cv = CardView::new(res, name, View::Status(config));
     if id.ends_with('_') {
         cv = cv.view(View::Create);
     }
-    do_future(replace_card(cv)).await;
-}
-
-/// Deselect the currently selected card
-async fn deselect_card() {
-    let cv = app::set_selected_card(None);
-    if let Some(cv) = cv {
-        if cv.view.is_form() {
-            do_future(replace_card(cv.compact())).await;
-        }
-    }
+    replace_card(cv).await
 }
 
 /// Handle login button press
@@ -649,8 +641,8 @@ async fn update_card_list() -> Result<()> {
     let json = cards.json();
     app::card_list(Some(cards));
     fetch_card_list().await?;
+    let cv = app::form();
     let cards = app::card_list(None).unwrap();
-    let cv = app::selected_card();
     for (id, html) in cards.changed_vec(json, &cv).await? {
         console::log_1(&format!("changed: {id}").into());
         if let Some(elem) = Doc::get().try_elem::<HtmlElement>(&id) {

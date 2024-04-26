@@ -40,8 +40,6 @@ struct AppState {
     deferred: Vec<(i32, DeferredAction)>,
     /// Timer tick count
     tick: i32,
-    /// Selected card view
-    selected_card: Option<CardView>,
     /// Card list
     cards: Option<CardList>,
 }
@@ -60,12 +58,16 @@ pub fn initialized() -> bool {
     STATE.with(|rc| rc.borrow().initialized)
 }
 
-/// Set selected card to global app state
-pub fn set_selected_card(card: Option<CardView>) -> Option<CardView> {
+/// Set form card to global app state
+pub fn set_form(card: Option<CardView>) -> Option<CardView> {
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
-        let cs = state.selected_card.take();
-        state.selected_card = card;
+        let mut cs = None;
+        let cards = state.cards.take();
+        if let Some(mut cards) = cards {
+            cs = cards.set_form(card);
+            state.cards = Some(cards);
+        }
         // purge all deferred refresh list actions
         state
             .deferred
@@ -75,9 +77,9 @@ pub fn set_selected_card(card: Option<CardView>) -> Option<CardView> {
     })
 }
 
-/// Get selected card from global app state
-pub fn selected_card() -> Option<CardView> {
-    STATE.with(|rc| rc.borrow().selected_card.clone())
+/// Get form card from global app state
+pub fn form() -> Option<CardView> {
+    STATE.with(|rc| rc.borrow().cards.as_ref().and_then(|cards| cards.form()))
 }
 
 /// Set delete enabled/disabled in global app state

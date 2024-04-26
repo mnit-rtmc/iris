@@ -129,7 +129,7 @@ impl View {
 }
 
 /// Card view
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct CardView {
     /// Resource type
     pub res: Res,
@@ -438,7 +438,7 @@ pub struct CardList {
     /// JSON list of cards
     json: String,
     /// Views in order of JSON list
-    views: Vec<View>,
+    views: Vec<CardView>,
 }
 
 impl CardList {
@@ -471,6 +471,28 @@ impl CardList {
     /// Take current JSON value
     pub fn json(&mut self) -> String {
         std::mem::take(&mut self.json)
+    }
+
+    /// Get form card (if any)
+    pub fn form(&self) -> Option<CardView> {
+        self.views.iter().find(|cv| cv.view.is_form()).cloned()
+    }
+
+    /// Set form card
+    pub fn set_form(&mut self, cv: Option<CardView>) -> Option<CardView> {
+        let mut ov = None;
+        for vv in &mut self.views {
+            if vv.view.is_form() {
+                ov = Some(vv.clone());
+                vv.view = vv.view.compact();
+            }
+            if let Some(cv) = &cv {
+                if vv.name == cv.name {
+                    vv.view = cv.view;
+                }
+            }
+        }
+        ov
     }
 
     /// Fetch card list
@@ -538,9 +560,9 @@ impl CardList {
             } else {
                 View::Hidden
             };
-            self.views.push(view);
-            let cn = view.class_name();
             let name = pri.to_string();
+            self.views.push(CardView::new(C::res(), name.clone(), view));
+            let cn = view.class_name();
             html.push_str(&format!(
                 "<li id='{rname}_{name}' name='{name}' class='{cn}'>"
             ));
@@ -589,20 +611,26 @@ impl CardList {
         let anc = fetch_ancillary(View::Search, &pri).await?;
         let mut changes = Vec::new();
         let mut views = Vec::with_capacity(self.views.len());
-        let mut old_views = self.views.iter();
+        let mut old_views = self.views.drain(..);
         for pri in serde_json::from_str::<Vec<C>>(&self.json)? {
-            let view = if self.search.is_match(&pri, &anc) {
+            let name = pri.to_string();
+            let vv = old_views.next().unwrap_or(
+                CardView::new(C::res(), name.clone(), View::Compact)
+            );
+            let view = if vv.view.is_form() {
+                vv.view
+            } else if self.search.is_match(&pri, &anc) {
                 View::Compact
             } else {
                 View::Hidden
             };
-            let v = old_views.next().unwrap_or(&View::Compact);
-            if *v != view {
-                let name = pri.to_string();
-                changes.push(CardView::new(C::res(), name, view));
+            let cv = CardView::new(C::res(), name, view);
+            if vv != cv {
+                changes.push(cv.clone());
             }
-            views.push(view);
+            views.push(cv);
         }
+        drop(old_views);
         self.views = views;
         Ok(changes)
     }
