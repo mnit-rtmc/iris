@@ -729,7 +729,7 @@ async fn fetch_ancillary<C: Card>(view: View, pri: &C) -> Result<C::Ancillary> {
 pub async fn fetch_one(cv: &CardView) -> Result<String> {
     let html = match cv.view {
         View::CreateCompact => CREATE_COMPACT.into(),
-        View::Create | View::Compact | View::Hidden => {
+        View::Hidden | View::Create | View::Compact => {
             fetch_one_res(cv).await?
         }
         View::Status(_config) if has_status(cv.res) => {
@@ -737,7 +737,7 @@ pub async fn fetch_one(cv: &CardView) -> Result<String> {
         }
         View::Location => match fetch_geo_loc(cv).await? {
             Some(geo_loc) => {
-                let cv = CardView::new(Res::GeoLoc, geo_loc.into(), View::Edit);
+                let cv = CardView::new(Res::GeoLoc, geo_loc, View::Edit);
                 fetch_one_res(&cv).await?
             }
             None => return Err(Error::CardMismatch()),
@@ -751,13 +751,13 @@ pub async fn fetch_one(cv: &CardView) -> Result<String> {
 fn make_html(cv: &CardView, html: &str) -> String {
     match cv.view {
         View::CreateCompact => CREATE_COMPACT.into(),
-        View::Create => html_card_create(cv.res, &html),
-        View::Compact | View::Hidden => html.into(),
-        View::Location => html_card_edit(Res::GeoLoc, &cv.name, &html, ""),
+        View::Create => html_card_create(cv.res, html),
+        View::Hidden | View::Compact => html.into(),
+        View::Location => html_card_edit(Res::GeoLoc, &cv.name, html, ""),
         View::Status(_config) if has_status(cv.res) => {
-            html_card_status(cv.res, &cv.name, &html)
+            html_card_status(cv.res, &cv.name, html)
         }
-        _ => html_card_edit(cv.res, &cv.name, &html, DEL_BUTTON),
+        _ => html_card_edit(cv.res, &cv.name, html, DEL_BUTTON),
     }
 }
 

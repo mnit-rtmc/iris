@@ -292,7 +292,7 @@ impl AncillaryData for DmsAnc {
             }
             return Box::new(uris.into_iter());
         }
-        if let View::Compact | View::Search = view {
+        if let View::Compact | View::Search | View::Hidden = view {
             uris.push(SIGN_MSG_URI.into());
         }
         if let View::Status(_) = view {
