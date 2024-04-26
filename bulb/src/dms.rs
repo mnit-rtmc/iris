@@ -20,7 +20,7 @@ use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use fnv::FnvHasher;
 use js_sys::{ArrayBuffer, Uint8Array};
 use ntcip::dms::multi::{
-    join_text, normalize as multi_normalize, split as multi_split,
+    is_blank, join_text, normalize as multi_normalize, split as multi_split,
 };
 use ntcip::dms::{tfon, Font, FontTable, GraphicTable, MessagePattern};
 use rendzina::{load_graphic, SignConfig};
@@ -434,9 +434,10 @@ impl SignMessage {
 
     /// Get item states
     fn item_states(&self) -> ItemStates {
+        let blank = is_blank(&self.multi);
         let sources = self.sources();
         let mut states = ItemStates::default();
-        if sources.contains("blank") {
+        if sources.contains("blank") || blank {
             states = states.with(ItemState::Available, "");
         }
         if sources.contains("operator") {
@@ -448,7 +449,7 @@ impl SignMessage {
         if sources.contains("external") {
             states = states.with(ItemState::External, "");
         }
-        if sources.is_empty() {
+        if sources.is_empty() && !blank {
             states = states.with(ItemState::External, self.system());
         }
         states
