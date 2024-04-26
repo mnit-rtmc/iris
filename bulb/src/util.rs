@@ -185,14 +185,22 @@ impl Doc {
             self.0
                 .get_element_by_id(id)?
                 .dyn_into::<E>()
-                .expect("Invalid element type"),
+                .inspect_err(|_| {
+                    let e = "Invalid element type";
+                    web_sys::console::log_1(&format!("{e}: {id}").into());
+                })
+                .unwrap_throw(),
         )
     }
 
     /// Get an element by ID and cast it
     pub fn elem<E: JsCast>(&self, id: &str) -> E {
         self.try_elem(id)
-            .ok_or_else(|| format!("Invalid element ID: {id}"))
+            .ok_or_else(|| {
+                let e = "Invalid element ID";
+                web_sys::console::log_1(&format!("{e}: {id}").into());
+                e
+            })
             .unwrap_throw()
     }
 
