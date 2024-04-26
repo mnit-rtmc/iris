@@ -641,9 +641,8 @@ async fn update_card_list() -> Result<()> {
     let json = cards.json();
     app::card_list(Some(cards));
     fetch_card_list().await?;
-    let cv = app::form();
     let cards = app::card_list(None).unwrap();
-    for (id, html) in cards.changed_vec(json, &cv).await? {
+    for (id, html) in cards.changed_vec(json).await? {
         console::log_1(&format!("changed: {id}").into());
         if let Some(elem) = Doc::get().try_elem::<HtmlElement>(&id) {
             elem.set_inner_html(&html);
