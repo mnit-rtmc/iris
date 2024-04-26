@@ -868,6 +868,9 @@ async fn patch_changed_x<C: Card>(cv: &CardView) -> Result<()> {
 
 /// Handle click event for a button owned by the resource
 pub async fn handle_click(cv: &CardView, id: String) -> Result<()> {
+    let View::Status(_) = cv.view else {
+        return Ok(());
+    };
     match cv.res {
         Res::Beacon => handle_click_x::<Beacon>(cv, id).await,
         Res::Dms => handle_click_x::<Dms>(cv, id).await,
@@ -887,6 +890,9 @@ async fn handle_click_x<C: Card>(cv: &CardView, id: String) -> Result<()> {
 
 /// Handle input event for an element owned by the resource
 pub async fn handle_input(cv: &CardView, id: String) -> Result<()> {
+    let View::Status(_) = cv.view else {
+        return Ok(());
+    };
     match cv.res {
         Res::Dms => handle_input_x::<Dms>(&cv.name, id).await,
         _ => Ok(()),
