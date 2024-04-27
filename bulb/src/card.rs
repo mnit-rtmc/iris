@@ -639,10 +639,7 @@ impl CardList {
     }
 
     /// Get a Vec of changed cards
-    pub async fn changed_vec(
-        &self,
-        json: String,
-    ) -> Result<Vec<(String, String)>> {
+    pub async fn changed_vec(&self, json: String) -> Result<Vec<CardView>> {
         match self.res {
             Res::Alarm => self.changed::<Alarm>(json).await,
             Res::Beacon => self.changed::<Beacon>(json).await,
@@ -673,10 +670,7 @@ impl CardList {
     }
 
     /// Make a Vec of changed cards
-    async fn changed<C: Card>(
-        &self,
-        json: String,
-    ) -> Result<Vec<(String, String)>> {
+    async fn changed<C: Card>(&self, json: String) -> Result<Vec<CardView>> {
         // Use default value for ancillary data lookup
         let cards0 = serde_json::from_str::<Vec<C>>(&json)?.into_iter();
         let cards1 = serde_json::from_str::<Vec<C>>(&self.json)?.into_iter();
@@ -690,11 +684,14 @@ impl CardList {
                 return Err(Error::CardMismatch());
             }
             if c0 != c1 {
-                let ccv =
-                    CardView::new(C::res(), c1.to_string(), View::Compact);
-                let cv = cv.unwrap_or(&ccv);
-                let html = fetch_one(cv).await?;
-                values.push((id1, html));
+                match cv {
+                    Some(cv) => values.push(cv.clone()),
+                    None => values.push(CardView::new(
+                        C::res(),
+                        c1.to_string(),
+                        View::Compact,
+                    )),
+                }
             }
         }
         Ok(values)

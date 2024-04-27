@@ -642,10 +642,13 @@ async fn update_card_list() -> Result<()> {
     app::card_list(Some(cards));
     fetch_card_list().await?;
     let cards = app::card_list(None).unwrap();
-    for (id, html) in cards.changed_vec(json).await? {
+    for cv in cards.changed_vec(json).await? {
+        let id = cv.id();
         console::log_1(&format!("changed: {id}").into());
         if let Some(elem) = Doc::get().try_elem::<HtmlElement>(&id) {
+            let html = card::fetch_one(&cv).await?;
             elem.set_inner_html(&html);
+            elem.set_class_name(cv.view.class_name());
         };
     }
     app::card_list(Some(cards));
