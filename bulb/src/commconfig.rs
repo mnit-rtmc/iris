@@ -195,9 +195,10 @@ impl CommConfigAnc {
 impl CommConfig {
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
+        let name = HtmlStr::new(self.name());
         let description = HtmlStr::new(&self.description);
         format!(
-            "<div class='{NAME} end'>{self}</div>\
+            "<div class='{NAME} end'>{name}</div>\
             <div class='info fill'>{description}</div>"
         )
     }
@@ -248,12 +249,6 @@ impl CommConfig {
     }
 }
 
-impl fmt::Display for CommConfig {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl Card for CommConfig {
     type Ancillary = CommConfigAnc;
 
@@ -263,6 +258,11 @@ impl Card for CommConfig {
     /// Get the resource
     fn res() -> Res {
         Res::CommConfig
+    }
+
+    /// Get the name
+    fn name(&self) -> &str {
+        &self.name
     }
 
     /// Set the name

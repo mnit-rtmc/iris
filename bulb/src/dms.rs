@@ -27,7 +27,6 @@ use rendzina::{load_graphic, SignConfig};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
-use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::iter::repeat;
 use wasm_bindgen::{JsCast, JsValue};
@@ -720,9 +719,10 @@ impl Dms {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &DmsAnc) -> String {
+        let name = HtmlStr::new(self.name());
         let item_states = self.item_states(anc);
         let mut html =
-            format!("<div class='{NAME} end'>{self} {item_states}</div>");
+            format!("<div class='{NAME} end'>{name} {item_states}</div>");
         if let Some(msg_current) = &self.msg_current {
             html.push_str("<img class='message' src='/iris/img/");
             html.push_str(msg_current);
@@ -759,7 +759,9 @@ impl Dms {
     /// Build compose pattern HTML
     fn compose_patterns(&self, anc: &DmsAnc) -> Option<String> {
         if anc.compose_patterns.is_empty() {
-            console::log_1(&format!("{self}: No compose patterns").into());
+            console::log_1(
+                &format!("{}: No compose patterns", self.name).into(),
+            );
             return None;
         }
         let sign = self.make_sign(anc)?;
@@ -900,12 +902,6 @@ impl Dms {
     }
 }
 
-impl fmt::Display for Dms {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl Device for Dms {
     /// Get controller
     fn controller(&self) -> Option<&str> {
@@ -933,6 +929,11 @@ impl Card for Dms {
     /// Get the resource
     fn res() -> Res {
         Res::Dms
+    }
+
+    /// Get the name
+    fn name(&self) -> &str {
+        &self.name
     }
 
     /// Set the name

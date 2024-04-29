@@ -17,7 +17,6 @@ use crate::gatearm::warn_state;
 use crate::util::{ContainsLower, Fields, HtmlStr};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
 use std::iter::{empty, once};
 use wasm_bindgen::JsValue;
 
@@ -96,10 +95,11 @@ impl AncillaryData for GateArmArrayAnc {
 impl GateArmArray {
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
+        let name = HtmlStr::new(self.name());
         let warn = warn_state(self.arm_state);
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='{NAME} end'>{self} {warn}</div>\
+            "<div class='{NAME} end'>{name} {warn}</div>\
             <div class='info fill'>{location}</div>"
         )
     }
@@ -129,12 +129,6 @@ impl GateArmArray {
     }
 }
 
-impl fmt::Display for GateArmArray {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl Card for GateArmArray {
     type Ancillary = GateArmArrayAnc;
 
@@ -144,6 +138,11 @@ impl Card for GateArmArray {
     /// Get the resource
     fn res() -> Res {
         Res::GateArmArray
+    }
+
+    /// Get the name
+    fn name(&self) -> &str {
+        &self.name
     }
 
     /// Set the name

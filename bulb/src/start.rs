@@ -438,7 +438,7 @@ async fn save_edit(cv: CardView) -> Result<()> {
 /// Save a location view card
 async fn save_location(cv: CardView) -> Result<()> {
     if let Some(geo_loc) = card::fetch_geo_loc(&cv).await? {
-        let lv = CardView::new(Res::GeoLoc, geo_loc, cv.view);
+        let lv = CardView::new(Res::GeoLoc, &geo_loc, cv.view);
         card::patch_changed(&lv).await?;
         replace_card(cv.view(View::Compact)).await?;
     }
@@ -471,7 +471,7 @@ async fn click_card(res: Res, name: String, id: String) -> Result<()> {
     }
     // FIXME: check if id are the same for old/new cards
     let config = Doc::get().input_bool("sb_config");
-    let mut cv = CardView::new(res, name, View::Status(config));
+    let mut cv = CardView::new(res, &name, View::Status(config));
     if id.ends_with('_') {
         cv = cv.view(View::Create);
     }

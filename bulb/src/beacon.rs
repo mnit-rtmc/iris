@@ -18,7 +18,6 @@ use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
 use std::iter::once;
 use wasm_bindgen::JsValue;
 
@@ -84,12 +83,6 @@ impl AncillaryData for BeaconAnc {
     }
 }
 
-impl fmt::Display for Beacon {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 /// Flashing state class names
 const CLASS_FLASHING: &str = "flashing";
 const CLASS_NOT_FLASHING: &str = "not-flashing";
@@ -135,6 +128,7 @@ impl Beacon {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &BeaconAnc) -> String {
+        let name = HtmlStr::new(self.name());
         let item_states = self.item_states(anc);
         let flashing = if self.flashing() {
             CLASS_FLASHING
@@ -143,7 +137,7 @@ impl Beacon {
         };
         let message = HtmlStr::new(&self.message);
         format!(
-            "<div class='{NAME} end'>{self} {item_states}</div>\
+            "<div class='{NAME} end'>{name} {item_states}</div>\
             <div class='beacon-container row center'>\
               <button id='ob_flashing' disabled></button>\
               <label for='ob_flashing' class='beacon-disabled'>\
@@ -268,6 +262,11 @@ impl Card for Beacon {
     /// Get the resource
     fn res() -> Res {
         Res::Beacon
+    }
+
+    /// Get the name
+    fn name(&self) -> &str {
+        &self.name
     }
 
     /// Set the name

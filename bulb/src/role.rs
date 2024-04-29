@@ -14,7 +14,6 @@ use crate::card::{inactive_attr, AncillaryData, Card, View};
 use crate::util::{ContainsLower, Fields, Input};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
 
 /// Role
 #[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
@@ -34,8 +33,9 @@ impl AncillaryData for RoleAnc {
 impl Role {
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
+        let name = self.name();
         let inactive = inactive_attr(self.enabled);
-        format!("<div class='fill{inactive}'>{self}</div>")
+        format!("<div class='fill{inactive}'>{name}</div>")
     }
 
     /// Convert to Edit HTML
@@ -50,12 +50,6 @@ impl Role {
     }
 }
 
-impl fmt::Display for Role {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.name)
-    }
-}
-
 impl Card for Role {
     type Ancillary = RoleAnc;
 
@@ -65,6 +59,11 @@ impl Card for Role {
     /// Get the resource
     fn res() -> Res {
         Res::Role
+    }
+
+    /// Get the name
+    fn name(&self) -> &str {
+        &self.name
     }
 
     /// Set the name

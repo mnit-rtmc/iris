@@ -43,7 +43,6 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 use serde_json::map::Map;
 use serde_json::Value;
-use std::fmt;
 use std::iter::empty;
 use wasm_bindgen::JsValue;
 
@@ -141,7 +140,8 @@ pub struct CardView {
 
 impl CardView {
     /// Create a new card view
-    pub fn new(res: Res, name: String, view: View) -> Self {
+    pub fn new(res: Res, name: &str, view: View) -> Self {
+        let name = name.to_string();
         CardView { res, name, view }
     }
 
@@ -233,9 +233,7 @@ const ITEM_STATES: &str = "<option value=''>all ↴</option>\
      <option value='▪️'>▪️ inactive</option>";
 
 /// A card view of a resource
-pub trait Card:
-    Default + fmt::Display + DeserializeOwned + Serialize + PartialEq
-{
+pub trait Card: Default + DeserializeOwned + Serialize + PartialEq {
     type Ancillary: AncillaryData<Primary = Self> + Default;
 
     /// Display name
@@ -259,6 +257,9 @@ pub trait Card:
         Ok(serde_wasm_bindgen::from_value(json)?)
     }
 
+    /// Get the name
+    fn name(&self) -> &str;
+
     /// Set the name
     fn with_name(self, name: &str) -> Self;
 
@@ -267,9 +268,11 @@ pub trait Card:
         "".into()
     }
 
-    /// Get the card ID
+    /// Get the card element ID
     fn id(&self) -> String {
-        format!("{}_{self}", Self::res())
+        let res = Self::res();
+        let name = HtmlStr::new(self.name());
+        format!("{res}_{name}")
     }
 
     /// Get geo location name
@@ -284,10 +287,11 @@ pub trait Card:
 
     /// Convert to Create HTML
     fn to_html_create(&self, _anc: &Self::Ancillary) -> String {
+        let name = HtmlStr::new(self.name());
         format!(
             "<div class='row'>\
               <label for='create_name'>Name</label>\
-              <input id='create_name' maxlength='24' size='24' value='{self}'>\
+              <input id='create_name' maxlength='24' size='24' value='{name}'>\
             </div>"
         )
     }
@@ -560,8 +564,8 @@ impl CardList {
             } else {
                 View::Hidden
             };
-            let name = pri.to_string();
-            let cv = CardView::new(C::res(), name.clone(), view);
+            let name = pri.name();
+            let cv = CardView::new(C::res(), name, view);
             let cn = view.class_name();
             html.push_str(&format!(
                 "<li id='{rname}_{name}' name='{name}' class='{cn}'>"
@@ -614,10 +618,9 @@ impl CardList {
         let mut views = Vec::with_capacity(self.views.len());
         let mut old_views = self.views.drain(..);
         for pri in serde_json::from_str::<Vec<C>>(&self.json)? {
-            let name = pri.to_string();
             let vv = old_views.next().unwrap_or(CardView::new(
                 C::res(),
-                name.clone(),
+                pri.name(),
                 View::Compact,
             ));
             let view = if vv.view.is_form() {
@@ -627,7 +630,7 @@ impl CardList {
             } else {
                 View::Hidden
             };
-            let cv = CardView::new(C::res(), name, view);
+            let cv = CardView::new(C::res(), pri.name(), view);
             if vv != cv {
                 changes.push(cv.clone());
             }
@@ -678,9 +681,7 @@ impl CardList {
         let mut views = self.views.iter();
         for (c0, c1) in cards0.zip(cards1) {
             let cv = views.next();
-            let id0 = c0.id();
-            let id1 = c1.id();
-            if id0 != id1 {
+            if c0.name() != c1.name() {
                 return Err(Error::CardMismatch());
             }
             if c0 != c1 {
@@ -688,7 +689,7 @@ impl CardList {
                     Some(cv) => values.push(cv.clone()),
                     None => values.push(CardView::new(
                         C::res(),
-                        c1.to_string(),
+                        c1.name(),
                         View::Compact,
                     )),
                 }
@@ -734,7 +735,7 @@ pub async fn fetch_one(cv: &CardView) -> Result<String> {
         }
         View::Location => match fetch_geo_loc(cv).await? {
             Some(geo_loc) => {
-                let cv = CardView::new(Res::GeoLoc, geo_loc, View::Edit);
+                let cv = CardView::new(Res::GeoLoc, &geo_loc, View::Edit);
                 fetch_one_res(&cv).await?
             }
             None => return Err(Error::CardMismatch()),

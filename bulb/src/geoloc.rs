@@ -16,7 +16,6 @@ use crate::fetch::Uri;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
 use std::iter::empty;
 use wasm_bindgen::JsValue;
 
@@ -230,12 +229,6 @@ impl GeoLoc {
     }
 }
 
-impl fmt::Display for GeoLoc {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl Card for GeoLoc {
     type Ancillary = GeoLocAnc;
 
@@ -245,6 +238,11 @@ impl Card for GeoLoc {
     /// Get the resource
     fn res() -> Res {
         Res::GeoLoc
+    }
+
+    /// Get the name
+    fn name(&self) -> &str {
+        &self.name
     }
 
     /// Set the name

@@ -22,7 +22,6 @@ use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select, TextArea};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
 use std::iter::empty;
 use wasm_bindgen::JsValue;
 
@@ -261,12 +260,6 @@ impl ControllerIo {
     }
 }
 
-impl fmt::Display for Controller {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl Controller {
     /// Is controller active?
     pub fn is_active(&self) -> bool {
@@ -334,11 +327,12 @@ impl Controller {
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
+        let name = HtmlStr::new(self.name());
         let item_state = self.item_state();
         let inactive = inactive_attr(self.is_active());
         let link_drop = HtmlStr::new(self.link_drop());
         format!(
-            "<div class='{NAME} end'>{self} {item_state}</div>\
+            "<div class='{NAME} end'>{name} {item_state}</div>\
             <div class='info fill{inactive}'>{link_drop}</div>"
         )
     }
@@ -480,6 +474,11 @@ impl Card for Controller {
     /// Get the resource
     fn res() -> Res {
         Res::Controller
+    }
+
+    /// Get the name
+    fn name(&self) -> &str {
+        &self.name
     }
 
     /// Set the name

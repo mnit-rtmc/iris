@@ -16,7 +16,6 @@ use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
 
 /// Alarm
 #[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
@@ -50,11 +49,12 @@ impl Alarm {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &AlarmAnc) -> String {
+        let name = HtmlStr::new(self.name());
         let inactive = inactive_attr(self.controller.is_some());
         let item_state = self.item_state(anc);
         let description = HtmlStr::new(&self.description);
         format!(
-            "<div class='{NAME} end'>{self} {item_state}</div>\
+            "<div class='{NAME} end'>{name} {item_state}</div>\
             <div class='info fill{inactive}'>{description}</div>"
         )
     }
@@ -107,12 +107,6 @@ impl Alarm {
     }
 }
 
-impl fmt::Display for Alarm {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl Device for Alarm {
     /// Get controller
     fn controller(&self) -> Option<&str> {
@@ -129,6 +123,11 @@ impl Card for Alarm {
     /// Get the resource
     fn res() -> Res {
         Res::Alarm
+    }
+
+    /// Get the name
+    fn name(&self) -> &str {
+        &self.name
     }
 
     /// Set the name

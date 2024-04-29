@@ -20,7 +20,6 @@ use crate::fetch::Uri;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
 use std::iter::once;
 use wasm_bindgen::JsValue;
 
@@ -131,12 +130,6 @@ impl CommLinkAnc {
     }
 }
 
-impl fmt::Display for CommLink {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl CommLink {
     /// Get connected state to display
     fn connected(&self, long: bool) -> &'static str {
@@ -152,11 +145,12 @@ impl CommLink {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
+        let name = HtmlStr::new(self.name());
         let connected = self.connected(false);
         let inactive = inactive_attr(self.poll_enabled);
         let description = HtmlStr::new(&self.description);
         format!(
-            "<div class='{NAME} end'>{connected} {self}</div>\
+            "<div class='{NAME} end'>{connected} {name}</div>\
             <div class='info fill{inactive}'>{description}</div>"
         )
     }
@@ -221,6 +215,11 @@ impl Card for CommLink {
     /// Get the resource
     fn res() -> Res {
         Res::CommLink
+    }
+
+    /// Get the name
+    fn name(&self) -> &str {
+        &self.name
     }
 
     /// Set the name

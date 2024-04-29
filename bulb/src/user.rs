@@ -17,7 +17,6 @@ use crate::role::Role;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
 use std::iter::{empty, once};
 use wasm_bindgen::JsValue;
 
@@ -88,8 +87,9 @@ impl UserAnc {
 impl User {
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
+        let name = HtmlStr::new(self.name());
         let inactive = inactive_attr(self.enabled && self.role.is_some());
-        format!("<div class='{inactive}'>{self}</div>")
+        format!("<div class='{inactive}'>{name}</div>")
     }
 
     /// Convert to Edit HTML
@@ -115,12 +115,6 @@ impl User {
     }
 }
 
-impl fmt::Display for User {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.name)
-    }
-}
-
 impl Card for User {
     type Ancillary = UserAnc;
 
@@ -130,6 +124,11 @@ impl Card for User {
     /// Get the resource
     fn res() -> Res {
         Res::User
+    }
+
+    /// Get the name
+    fn name(&self) -> &str {
+        &self.name
     }
 
     /// Set the name

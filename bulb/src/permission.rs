@@ -18,7 +18,6 @@ use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, Select};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
-use std::fmt;
 use std::iter::empty;
 use wasm_bindgen::JsValue;
 
@@ -165,11 +164,12 @@ impl Permission {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
+        let id = self.id;
         let role = HtmlStr::new(&self.role);
         let access = access_str(self.access_n, false);
         let resource = HtmlStr::new(&self.resource_n);
         format!(
-            "<div class='{NAME} end'>{role} {access} {self}</div>\
+            "<div class='{NAME} end'>{role} {access} {id}</div>\
             <div class='info fill'>{resource}</div>"
         )
     }
@@ -201,12 +201,6 @@ impl Permission {
     }
 }
 
-impl fmt::Display for Permission {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.id)
-    }
-}
-
 impl Card for Permission {
     type Ancillary = PermissionAnc;
 
@@ -216,6 +210,11 @@ impl Card for Permission {
     /// Get the resource
     fn res() -> Res {
         Res::Permission
+    }
+
+    /// Get the name
+    fn name(&self) -> &str {
+        "_fake_name_"
     }
 
     /// Set the name

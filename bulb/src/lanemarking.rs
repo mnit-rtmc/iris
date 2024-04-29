@@ -15,7 +15,6 @@ use crate::device::{Device, DeviceAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
 
 /// Lane Marking
 #[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
@@ -35,11 +34,12 @@ type LaneMarkingAnc = DeviceAnc<LaneMarking>;
 impl LaneMarking {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LaneMarkingAnc) -> String {
+        let name = HtmlStr::new(self.name());
         let item_state = anc.item_state(self);
         let inactive = inactive_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='{NAME} end'>{self} {item_state}</div>\
+            "<div class='{NAME} end'>{name} {item_state}</div>\
             <div class='info fill{inactive}'>{location}</div>"
         )
     }
@@ -85,12 +85,6 @@ impl LaneMarking {
     }
 }
 
-impl fmt::Display for LaneMarking {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl Device for LaneMarking {
     /// Get controller
     fn controller(&self) -> Option<&str> {
@@ -107,6 +101,11 @@ impl Card for LaneMarking {
     /// Get the resource
     fn res() -> Res {
         Res::LaneMarking
+    }
+
+    /// Get the name
+    fn name(&self) -> &str {
+        &self.name
     }
 
     /// Set the name

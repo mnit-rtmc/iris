@@ -15,7 +15,6 @@ use crate::device::{Device, DeviceAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
 
 /// Flow Stream
 #[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
@@ -31,9 +30,10 @@ type FlowStreamAnc = DeviceAnc<FlowStream>;
 impl FlowStream {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &FlowStreamAnc) -> String {
+        let name = HtmlStr::new(self.name());
         let inactive = inactive_attr(self.controller.is_some());
         let item_state = anc.item_state(self);
-        format!("<div class='end{inactive}'>{self} {item_state}</div>")
+        format!("<div class='end{inactive}'>{name} {item_state}</div>")
     }
 
     /// Convert to Status HTML
@@ -66,12 +66,6 @@ impl FlowStream {
     }
 }
 
-impl fmt::Display for FlowStream {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl Device for FlowStream {
     /// Get controller
     fn controller(&self) -> Option<&str> {
@@ -88,6 +82,11 @@ impl Card for FlowStream {
     /// Get the resource
     fn res() -> Res {
         Res::FlowStream
+    }
+
+    /// Get the name
+    fn name(&self) -> &str {
+        &self.name
     }
 
     /// Set the name

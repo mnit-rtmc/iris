@@ -15,7 +15,6 @@ use crate::device::{Device, DeviceAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
 
 /// RF Control
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
@@ -100,11 +99,12 @@ type TagReaderAnc = DeviceAnc<TagReader>;
 impl TagReader {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &TagReaderAnc) -> String {
+        let name = HtmlStr::new(self.name());
         let item_state = anc.item_state(self);
         let location = HtmlStr::new(&self.location).with_len(32);
         let inactive = inactive_attr(self.controller.is_some());
         format!(
-            "<div class='{NAME} end'>{self} {item_state}</div>\
+            "<div class='{NAME} end'>{name} {item_state}</div>\
             <div class='info fill{inactive}'>{location}</div>"
         )
     }
@@ -144,12 +144,6 @@ impl TagReader {
     }
 }
 
-impl fmt::Display for TagReader {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl Device for TagReader {
     /// Get controller
     fn controller(&self) -> Option<&str> {
@@ -166,6 +160,11 @@ impl Card for TagReader {
     /// Get the resource
     fn res() -> Res {
         Res::TagReader
+    }
+
+    /// Get the name
+    fn name(&self) -> &str {
+        &self.name
     }
 
     /// Set the name

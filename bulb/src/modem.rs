@@ -14,7 +14,6 @@ use crate::card::{inactive_attr, AncillaryData, Card, View};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
 
 /// Modem
 #[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
@@ -37,8 +36,9 @@ impl AncillaryData for ModemAnc {
 impl Modem {
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
+        let name = HtmlStr::new(self.name());
         let inactive = inactive_attr(self.enabled);
-        format!("<div class='{inactive}'>{self}</div>")
+        format!("<div class='{inactive}'>{name}</div>")
     }
 
     /// Convert to Edit HTML
@@ -69,12 +69,6 @@ impl Modem {
     }
 }
 
-impl fmt::Display for Modem {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl Card for Modem {
     type Ancillary = ModemAnc;
 
@@ -84,6 +78,11 @@ impl Card for Modem {
     /// Get the resource
     fn res() -> Res {
         Res::Modem
+    }
+
+    /// Get the name
+    fn name(&self) -> &str {
+        &self.name
     }
 
     /// Set the name

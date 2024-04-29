@@ -16,7 +16,6 @@ use crate::fetch::Uri;
 use crate::util::{ContainsLower, Fields, HtmlStr};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
 use std::iter::once;
 use wasm_bindgen::JsValue;
 
@@ -86,10 +85,11 @@ impl AncillaryData for LcsArrayAnc {
 impl LcsArray {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LcsArrayAnc) -> String {
+        let name = HtmlStr::new(self.name());
         let lock = anc.lock(self);
         format!(
             "<span>{lock}</span>\
-            <span class='{NAME}'>{self}</span>"
+            <span class='{NAME}'>{name}</span>"
         )
     }
 
@@ -116,12 +116,6 @@ impl LcsArray {
     }
 }
 
-impl fmt::Display for LcsArray {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl Card for LcsArray {
     type Ancillary = LcsArrayAnc;
 
@@ -131,6 +125,11 @@ impl Card for LcsArray {
     /// Get the resource
     fn res() -> Res {
         Res::LcsArray
+    }
+
+    /// Get the name
+    fn name(&self) -> &str {
+        &self.name
     }
 
     /// Set the name

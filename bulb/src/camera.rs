@@ -15,7 +15,6 @@ use crate::device::{Device, DeviceAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
 
 /// Camera
 #[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
@@ -34,11 +33,12 @@ type CameraAnc = DeviceAnc<Camera>;
 impl Camera {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &CameraAnc) -> String {
+        let name = HtmlStr::new(self.name());
         let item_state = anc.item_state(self);
         let location = HtmlStr::new(&self.location).with_len(32);
         let inactive = inactive_attr(self.controller.is_some());
         format!(
-            "<div class='{NAME} end'>🕹️ {self} {item_state}</div>\
+            "<div class='{NAME} end'>🕹️ {name} {item_state}</div>\
             <div class='info fill{inactive}'>{location}</div>"
         )
     }
@@ -86,12 +86,6 @@ impl Camera {
     }
 }
 
-impl fmt::Display for Camera {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl Device for Camera {
     /// Get controller
     fn controller(&self) -> Option<&str> {
@@ -108,6 +102,11 @@ impl Card for Camera {
     /// Get the resource
     fn res() -> Res {
         Res::Camera
+    }
+
+    /// Get the name
+    fn name(&self) -> &str {
+        &self.name
     }
 
     /// Set the name
