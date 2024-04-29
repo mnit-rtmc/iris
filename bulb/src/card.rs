@@ -642,7 +642,10 @@ impl CardList {
     }
 
     /// Get a Vec of changed cards
-    pub async fn changed_vec(&self, json: String) -> Result<Vec<CardView>> {
+    pub async fn changed_vec(
+        &self,
+        json: String,
+    ) -> Result<Vec<(CardView, String)>> {
         match self.res {
             Res::Alarm => self.changed::<Alarm>(json).await,
             Res::Beacon => self.changed::<Beacon>(json).await,
@@ -673,10 +676,14 @@ impl CardList {
     }
 
     /// Make a Vec of changed cards
-    async fn changed<C: Card>(&self, json: String) -> Result<Vec<CardView>> {
+    async fn changed<C: Card>(
+        &self,
+        json: String,
+    ) -> Result<Vec<(CardView, String)>> {
         // Use default value for ancillary data lookup
         let cards0 = serde_json::from_str::<Vec<C>>(&json)?.into_iter();
         let cards1 = serde_json::from_str::<Vec<C>>(&self.json)?.into_iter();
+        let anc = fetch_ancillary(View::Search, &C::default()).await?;
         let mut values = Vec::new();
         let mut views = self.views.iter();
         for (c0, c1) in cards0.zip(cards1) {
@@ -685,14 +692,16 @@ impl CardList {
                 return Err(Error::CardMismatch());
             }
             if c0 != c1 {
-                match cv {
-                    Some(cv) => values.push(cv.clone()),
-                    None => values.push(CardView::new(
-                        C::res(),
-                        c1.name(),
-                        View::Compact,
-                    )),
-                }
+                let cv = match cv {
+                    Some(cv) => cv.clone(),
+                    None => CardView::new(C::res(), c1.name(), View::Compact),
+                };
+                let html = if cv.view.is_form() {
+                    make_html(&cv, &fetch_one_x::<C>(&cv).await?)
+                } else {
+                    c1.to_html(cv.view, &anc)
+                };
+                values.push((cv, html));
             }
         }
         Ok(values)
