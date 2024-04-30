@@ -31,6 +31,14 @@ pub enum ItemState {
     Offline,
     /// Inactive (deactivated)
     Inactive,
+    /// View (permission)
+    View,
+    /// Operate (permission)
+    Operate,
+    /// Manage (permission)
+    Manage,
+    /// Configure (permission)
+    Configure,
     /// State not known
     Unknown,
 }
@@ -59,6 +67,10 @@ impl ItemState {
             "⚠️" => Some(Self::Fault),
             "🔌" => Some(Self::Offline),
             "▪️" => Some(Self::Inactive),
+            "👁️" => Some(Self::View),
+            "👉" => Some(Self::Operate),
+            "💡" => Some(Self::Manage),
+            "🔧" => Some(Self::Configure),
             "❓" => Some(Self::Unknown),
             _ => None,
         }
@@ -75,6 +87,10 @@ impl ItemState {
             Self::Fault => "⚠️",
             Self::Offline => "🔌",
             Self::Inactive => "▪️",
+            Self::View => "👁️",
+            Self::Operate => "👉",
+            Self::Manage => "💡",
+            Self::Configure => "🔧",
             Self::Unknown => "❓",
         }
     }
@@ -90,6 +106,10 @@ impl ItemState {
             Self::Fault => "fault",
             Self::Offline => "offline",
             Self::Inactive => "inactive",
+            Self::View => "view",
+            Self::Operate => "operate",
+            Self::Manage => "manage",
+            Self::Configure => "configure",
             Self::Unknown => "unknown",
         }
     }
