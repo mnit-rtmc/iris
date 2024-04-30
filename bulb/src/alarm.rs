@@ -16,6 +16,7 @@ use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 
 /// Alarm
 #[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
@@ -126,8 +127,8 @@ impl Card for Alarm {
     }
 
     /// Get the name
-    fn name(&self) -> &str {
-        &self.name
+    fn name(&self) -> Cow<str> {
+        Cow::Borrowed(&self.name)
     }
 
     /// Set the name

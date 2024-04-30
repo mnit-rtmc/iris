@@ -12,6 +12,7 @@
 //
 use serde_json::map::Map;
 use serde_json::{Number, Value};
+use std::borrow::Cow;
 use std::fmt;
 use std::str::FromStr;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
@@ -144,6 +145,12 @@ impl<S> HtmlStr<S> {
 impl fmt::Display for HtmlStr<&str> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.fmt_encode(self.val, f)
+    }
+}
+
+impl fmt::Display for HtmlStr<Cow<'_, str>> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.fmt_encode(&self.val, f)
     }
 }
 

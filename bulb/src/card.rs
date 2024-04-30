@@ -43,6 +43,7 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 use serde_json::map::Map;
 use serde_json::Value;
+use std::borrow::Cow;
 use std::iter::empty;
 use wasm_bindgen::JsValue;
 
@@ -140,8 +141,8 @@ pub struct CardView {
 
 impl CardView {
     /// Create a new card view
-    pub fn new(res: Res, name: &str, view: View) -> Self {
-        let name = name.to_string();
+    pub fn new<N: Into<String>>(res: Res, name: N, view: View) -> Self {
+        let name = name.into();
         CardView { res, name, view }
     }
 
@@ -258,7 +259,7 @@ pub trait Card: Default + DeserializeOwned + Serialize + PartialEq {
     }
 
     /// Get the name
-    fn name(&self) -> &str;
+    fn name(&self) -> Cow<str>;
 
     /// Set the name
     fn with_name(self, name: &str) -> Self;
@@ -564,9 +565,9 @@ impl CardList {
             } else {
                 View::Hidden
             };
-            let name = pri.name();
-            let cv = CardView::new(C::res(), name, view);
+            let cv = CardView::new(C::res(), pri.name(), view);
             let cn = view.class_name();
+            let name = pri.name();
             html.push_str(&format!(
                 "<li id='{rname}_{name}' name='{name}' class='{cn}'>"
             ));

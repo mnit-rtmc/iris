@@ -18,6 +18,7 @@ use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, Select};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
+use std::borrow::Cow;
 use std::iter::empty;
 use wasm_bindgen::JsValue;
 
@@ -213,8 +214,8 @@ impl Card for Permission {
     }
 
     /// Get the name
-    fn name(&self) -> &str {
-        "_fake_name_"
+    fn name(&self) -> Cow<str> {
+        Cow::Owned(self.id.to_string())
     }
 
     /// Set the name

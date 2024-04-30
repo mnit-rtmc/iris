@@ -26,6 +26,7 @@ use ntcip::dms::{tfon, Font, FontTable, GraphicTable, MessagePattern};
 use rendzina::{load_graphic, SignConfig};
 use resources::Res;
 use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 use std::iter::repeat;
@@ -932,8 +933,8 @@ impl Card for Dms {
     }
 
     /// Get the name
-    fn name(&self) -> &str {
-        &self.name
+    fn name(&self) -> Cow<str> {
+        Cow::Borrowed(&self.name)
     }
 
     /// Set the name

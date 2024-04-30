@@ -20,6 +20,7 @@ use crate::fetch::Uri;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use resources::Res;
 use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 use std::iter::once;
 use wasm_bindgen::JsValue;
 
@@ -218,8 +219,8 @@ impl Card for CommLink {
     }
 
     /// Get the name
-    fn name(&self) -> &str {
-        &self.name
+    fn name(&self) -> Cow<str> {
+        Cow::Borrowed(&self.name)
     }
 
     /// Set the name
