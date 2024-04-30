@@ -275,7 +275,7 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
 
 /// Handle search input
 async fn handle_search() -> Result<()> {
-    if let Some(cv) = app::set_form(None) {
+    if let Some(cv) = app::form() {
         replace_card(cv.compact()).await?
     }
     search_card_list().await
@@ -308,7 +308,7 @@ fn handle_sb_resource_ev() {
     spawn_local(handle_resource_change());
 }
 
-/// Handle an input event on the selected card
+/// Handle an input event on a form card
 async fn handle_input(id: String) -> Result<()> {
     if let Some(cv) = app::form() {
         card::handle_input(&cv, id).await?;
@@ -353,7 +353,7 @@ fn handle_button_click_ev(target: &Element) {
     }
 }
 
-/// Handle button click event with selected card
+/// Handle button click event on a form card
 async fn handle_button_card(attrs: ButtonAttrs) {
     if let Some(cv) = app::form() {
         match attrs.id.as_str() {
@@ -373,21 +373,18 @@ async fn handle_button_card(attrs: ButtonAttrs) {
     }
 }
 
-/// Replace the selected card element with another card type
+/// Replace a card view element with another view
 async fn replace_card(cv: CardView) -> Result<()> {
     let html = card::fetch_one(&cv).await?;
     replace_card_html(&cv, &html);
-    if cv.view.is_form() {
-        app::set_form(Some(cv));
-    } else {
-        app::set_form(None);
-    }
+    app::set_view(cv);
     Ok(())
 }
 
 /// Replace a card with provieded HTML
 fn replace_card_html(cv: &CardView, html: &str) {
     let Some(elem) = Doc::get().try_elem::<HtmlElement>(&cv.id()) else {
+        console::log_1(&format!("replace_card_html: {}", cv.id()).into());
         return;
     };
     elem.set_inner_html(html);
@@ -445,7 +442,7 @@ async fn save_location(cv: CardView) -> Result<()> {
     Ok(())
 }
 
-/// Handle a button click on selected card
+/// Handle a button click on a form card
 async fn handle_button_cv(cv: CardView, id: String) {
     match card::handle_click(&cv, id).await {
         Ok(_) => (),
@@ -466,7 +463,7 @@ fn handle_card_click_ev(card: &Element) {
 
 /// Handle a card click event
 async fn click_card(res: Res, name: String, id: String) -> Result<()> {
-    if let Some(cv) = app::set_form(None) {
+    if let Some(cv) = app::form() {
         replace_card(cv.compact()).await?;
     }
     // FIXME: check if id are the same for old/new cards
@@ -643,12 +640,7 @@ async fn update_card_list() -> Result<()> {
     fetch_card_list().await?;
     let cards = app::card_list(None).unwrap();
     for (cv, html) in cards.changed_vec(json).await? {
-        let id = cv.id();
-        console::log_1(&format!("changed: {id}").into());
-        if let Some(elem) = Doc::get().try_elem::<HtmlElement>(&id) {
-            elem.set_inner_html(&html);
-            elem.set_class_name(cv.view.class_name());
-        };
+        replace_card_html(&cv, &html);
     }
     app::card_list(Some(cards));
     search_card_list().await

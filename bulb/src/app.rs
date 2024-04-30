@@ -58,14 +58,13 @@ pub fn initialized() -> bool {
     STATE.with(|rc| rc.borrow().initialized)
 }
 
-/// Set form card to global app state
-pub fn set_form(card: Option<CardView>) -> Option<CardView> {
+/// Set card view to global app state
+pub fn set_view(cv: CardView) {
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
-        let mut cs = None;
         let cards = state.cards.take();
         if let Some(mut cards) = cards {
-            cs = cards.set_form(card);
+            cards.set_view(cv);
             state.cards = Some(cards);
         }
         // purge all deferred refresh list actions
@@ -73,7 +72,6 @@ pub fn set_form(card: Option<CardView>) -> Option<CardView> {
             .deferred
             .retain(|(_, a)| *a != DeferredAction::RefreshList);
         state.delete_enabled = false;
-        cs
     })
 }
 

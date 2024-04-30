@@ -113,17 +113,11 @@ impl View {
         )
     }
 
-    /// Is the view a create view?
-    pub fn is_create(self) -> bool {
-        matches!(self, View::Create | View::CreateCompact)
-    }
-
     /// Get compact view
     pub fn compact(self) -> Self {
-        if self.is_create() {
-            View::CreateCompact
-        } else {
-            View::Compact
+        match self {
+            View::Create => View::CreateCompact,
+            _ => View::Compact,
         }
     }
 }
@@ -149,11 +143,7 @@ impl CardView {
     /// Get HTML element ID of card
     pub fn id(&self) -> String {
         let res = self.res;
-        if self.view.is_create() {
-            format!("{res}_")
-        } else {
-            format!("{res}_{}", &self.name)
-        }
+        format!("{res}_{}", &self.name)
     }
 
     /// Set the view to compact
@@ -484,21 +474,14 @@ impl CardList {
         self.views.iter().find(|cv| cv.view.is_form()).cloned()
     }
 
-    /// Set form card
-    pub fn set_form(&mut self, cv: Option<CardView>) -> Option<CardView> {
-        let mut ov = None;
+    /// Set card view
+    pub fn set_view(&mut self, cv: CardView) {
         for vv in &mut self.views {
-            if vv.view.is_form() {
-                ov = Some(vv.clone());
-                vv.view = vv.view.compact();
-            }
-            if let Some(cv) = &cv {
-                if vv.name == cv.name {
-                    vv.view = cv.view;
-                }
+            if vv.name == cv.name {
+                vv.view = cv.view;
+                break;
             }
         }
-        ov
     }
 
     /// Fetch card list
@@ -547,9 +530,12 @@ impl CardList {
         let pri = C::default();
         let anc = fetch_ancillary(View::Search, &pri).await?;
         let rname = C::res().as_str();
+        self.views.clear();
         let mut html = String::new();
         html.push_str("<ul class='cards'>");
         if self.config {
+            self.views
+                .push(CardView::new(C::res(), "", View::CreateCompact));
             let cn = View::CreateCompact.class_name();
             let next_name = C::next_name(&cards);
             // the "Create" card has id "{rname}_" and next available name
@@ -559,7 +545,6 @@ impl CardList {
                 </li>"
             ));
         }
-        self.views.clear();
         for pri in cards {
             let view = if self.search.is_match(&pri, &anc) {
                 View::Compact
@@ -619,6 +604,11 @@ impl CardList {
         let mut changes = Vec::new();
         let mut views = Vec::with_capacity(self.views.len());
         let mut old_views = self.views.drain(..);
+        if self.config {
+            if let Some(cv) = old_views.next() {
+                views.push(cv);
+            }
+        }
         for pri in serde_json::from_str::<Vec<C>>(&self.json)? {
             let vv = old_views.next().unwrap_or(CardView::new(
                 C::res(),
@@ -688,6 +678,10 @@ impl CardList {
         let anc = fetch_ancillary(View::Search, &C::default()).await?;
         let mut values = Vec::new();
         let mut views = self.views.iter();
+        if self.config {
+            // skip "Create" card
+            views.next();
+        }
         for (c0, c1) in cards0.zip(cards1) {
             let cv = views.next();
             if c0.name() != c1.name() {
