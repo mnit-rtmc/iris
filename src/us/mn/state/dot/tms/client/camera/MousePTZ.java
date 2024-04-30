@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2013-2014  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
+ * Copyright (C) 2024       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,15 +16,24 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.awt.AWTException;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.HeadlessException;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.PointerInfo;
+import java.awt.Robot;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+
 import us.mn.state.dot.tms.client.widget.Icons;
 
 /**
@@ -31,6 +41,7 @@ import us.mn.state.dot.tms.client.widget.Icons;
  *
  * @author Douglas Lau
  * @author Travis Swanston
+ * @author John L. Stanley - SRF Consulting
  */
 public class MousePTZ {
 
@@ -185,8 +196,33 @@ public class MousePTZ {
 		c.addMouseMotionListener(mouser);
 		c.addMouseWheelListener(mouser);
 		component = c;
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				jiggleMouse();
+			}
+		});
 	}
 
+	/** Mouse-cursor isn't updated until the mouse
+	 *  is moved.  This method jiggles the mouse
+	 *  to trigger a mouseMoved(...) event. */
+	static public void jiggleMouse() {
+		try {
+			PointerInfo a = MouseInfo.getPointerInfo();
+			Point b = a.getLocation();
+			int x = (int) b.getX();
+			int y = (int) b.getY();
+			Robot r = new Robot();
+			// This is only needed if we're pointing 
+			// IN the video panel, so we don't need
+			// to move in all 8 cardinal directions.
+			r.mouseMove(x, y + 1);
+			r.mouseMove(x, y);
+		} catch (AWTException | HeadlessException | SecurityException ex) {
+			// Nothing we can do if any of these happen...
+		}
+	}
+	
 	/** Dispose of the mouse PTZ handler */
 	public void dispose() {
 		component.removeMouseListener(mouser);
@@ -197,12 +233,9 @@ public class MousePTZ {
 
 	/** Get the appropriate cursor */
 	private Cursor getCursor(MouseEvent e) {
-		if ((!cam_ptz.isControlEnabled())
-			|| (!cam_ptz.isCameraSelected()))
-		{
-			return Cursor.getPredefinedCursor(
-				Cursor.DEFAULT_CURSOR);
-		}
+		if (!cam_ptz.isControlEnabled()
+		 || !cam_ptz.isCameraSelected())
+			return null;
 		int x = e.getX();
 		int y = e.getY();
 		if(x < dead_left) {
