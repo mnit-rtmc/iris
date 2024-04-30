@@ -92,21 +92,32 @@ public class VidPanel extends JPanel implements FocusListener {
 	/** Mouse PTZ control */
 	private MousePTZ mouse_ptz;
 
-	/** Label that holds the video component */
+	/** Panel that holds the video component */
 	private final JPanel videoHolder;
 
-	/** streaming control values */
-	private boolean autostart = true;
-	private boolean failover = true;
-	private int     connectFailSec = 10;
-	private int     lostTimeoutSec = 10;
-	private boolean autoReconnect = true;
-	private int     reconnectTimeoutSec = 10;
+	/** Automatically start streaming? */
+	static private boolean autostart = true;
+	
+	/** If a connection attempt fails, do we want to
+	 *  automatically try the next available stream? */
+	static private boolean failover = true;
+	
+	/** Wait this long before skipping to next available
+	 *  stream (or failing the connection attempt). */
+	static private int     maxConnectSec = 10;
+
+	/** Wait this long for video to restart until trying to reconnect */
+	static private int     lostVideoSec = 10;
+	
+	/** Do we want to automatically reconnect? */
+	static private boolean autoReconnect = true;
+
+	/** Wait this long for a reconnect until retrying. */
+	static private int     maxReconnectSec = 10;
 
 	static private final Color LIGHT_BLUE = new Color(128, 128, 255);
 
-	// Panel status monitor
-
+	// Panel status
 	static private enum PanelStatus {
 		IDLE,      // idle state when first created
 		SCANNING,  // scanning for a viable stream
@@ -122,7 +133,8 @@ public class VidPanel extends JPanel implements FocusListener {
 	private boolean pausePanel = false;
 	private boolean streamError = false;
 
-	private int timeoutSec = 0;
+	/** How long has it been since we received a video frame. */
+	private int videoGapSec = 0;
 
 	private boolean repeatStatusMonitor = false;
 
@@ -138,12 +150,12 @@ public class VidPanel extends JPanel implements FocusListener {
 				case SCANNING:
 					// see if current stream starts in a reasonable time
 					if (frames > 0) {
-						timeoutSec = 0;
+						videoGapSec = 0;
 						panelStatus = PanelStatus.VIEWING;
 					}
-					else if (++timeoutSec >= connectFailSec) {
+					else if (++videoGapSec >= maxConnectSec) {
 						if (failover) {
-							timeoutSec = 0;
+							videoGapSec = 0;
 							if (startNextStream())
 								return;
 						}
@@ -154,12 +166,12 @@ public class VidPanel extends JPanel implements FocusListener {
 				case VIEWING:
 					// see if we're receiving frames regularly
 					if (frames > 0) {
-						timeoutSec = 0;
+						videoGapSec = 0;
 					}
-					else if (++timeoutSec >= lostTimeoutSec) {
+					else if (++videoGapSec >= lostVideoSec) {
 						if (autoReconnect) {
 							panelStatus = PanelStatus.RECONNECT;
-							timeoutSec = 0;
+							videoGapSec = 0;
 							startCurrentStream();
 						}
 						else {
@@ -171,11 +183,11 @@ public class VidPanel extends JPanel implements FocusListener {
 				case RECONNECT:
 					// trying to reconnect
 					if (frames > 0) {
-						timeoutSec = 0;
+						videoGapSec = 0;
 						panelStatus = PanelStatus.VIEWING;
 					}
-					else if (++timeoutSec >= reconnectTimeoutSec) {
-						timeoutSec = 0;
+					else if (++videoGapSec >= maxReconnectSec) {
+						videoGapSec = 0;
 						startCurrentStream();
 					}
 			}
@@ -205,7 +217,7 @@ public class VidPanel extends JPanel implements FocusListener {
 		repeatStatusMonitor = false;
 		PANEL_UPDATE.removeJob(statusMonitor);
 		panelStatus = PanelStatus.IDLE;
-		timeoutSec = 0;
+		videoGapSec = 0;
 	}
 
 	/** Create fixed-size video panel */
@@ -330,7 +342,7 @@ public class VidPanel extends JPanel implements FocusListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			panelStatus = PanelStatus.SCANNING;
-			timeoutSec = 0;
+			videoGapSec = 0;
 			startCurrentStream();
 		}
 	};
@@ -554,24 +566,7 @@ public class VidPanel extends JPanel implements FocusListener {
 		releaseStream();
 		camera = cam;
 
-		autostart = getCamTempBool(
-				null,
-				SystemAttrEnum.VID_CONNECT_AUTOSTART);
-		failover = getCamTempBool(
-				null,
-				SystemAttrEnum.VID_CONNECT_FAIL_NEXT_SOURCE);
-		connectFailSec = getCamTempInt(
-				null,
-				SystemAttrEnum.VID_CONNECT_FAIL_SEC);
-		lostTimeoutSec = getCamTempInt(
-				null,
-				SystemAttrEnum.VID_LOST_TIMEOUT_SEC);
-		autoReconnect = getCamTempBool(
-				null,
-				SystemAttrEnum.VID_RECONNECT_AUTO);
-		reconnectTimeoutSec = getCamTempInt(
-				null,
-				SystemAttrEnum.VID_RECONNECT_TIMEOUT_SEC);
+		readSystemAttributes();
 
 		Session s = Session.getCurrent();
 		streamReqList = VidStreamReq.getVidStreamReqs(camera);
@@ -592,6 +587,15 @@ public class VidPanel extends JPanel implements FocusListener {
 		}
 		startStatusMonitor();
 		return ret;
+	}
+
+	static private void readSystemAttributes() {
+		autostart       = SystemAttrEnum.VID_CONNECT_AUTOSTART.getBoolean();
+		failover        = SystemAttrEnum.VID_CONNECT_FAIL_NEXT_SOURCE.getBoolean();
+		maxConnectSec   = SystemAttrEnum.VID_CONNECT_FAIL_SEC.getInt();
+		lostVideoSec    = SystemAttrEnum.VID_LOST_TIMEOUT_SEC.getInt();
+		autoReconnect   = SystemAttrEnum.VID_RECONNECT_AUTO.getBoolean();
+		maxReconnectSec = SystemAttrEnum.VID_RECONNECT_TIMEOUT_SEC.getInt();
 	}
 
 	/** Create a mouse PTZ */
