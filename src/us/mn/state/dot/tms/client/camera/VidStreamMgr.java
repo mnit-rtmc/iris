@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2020  SRF Consulting Group
+ * Copyright (C) 2019-2024  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -133,7 +133,6 @@ public abstract class VidStreamMgr {
 	public void queueStopStream() {
 		STREAM_SCHED.removeJob(jobStartStream);
 		if (isStreaming()) {
-			System.out.println("VidStreamMgr.queueStopStream()");
 			STREAM_SCHED.addJob(jobStopStream);
 		}
 	}
@@ -142,7 +141,6 @@ public abstract class VidStreamMgr {
 	  * (Called from the STREAM_SCHED thread.) */
 	private final Job jobStopStream = new Job() {
 		public void perform() {
-			System.out.println("VidStreamMgr.jobStopStream.perform()");
 			doStopStream();
 		}
 	};
@@ -192,7 +190,6 @@ public abstract class VidStreamMgr {
 	protected void clearErrorMsg() {
 		if (sCurErrMsg == null)
 			return;
-		System.out.println("== VidStreamMgr.clearErrorMsg()");
 		sCurErrMsg = null;
 		videoPanel.queueUpdatePanel();
 	}
@@ -200,7 +197,6 @@ public abstract class VidStreamMgr {
 	/** Set a stream error message.
 	 * (Latches first reported error.) */
 	protected void setErrorMsg(String errMsg) {
-		System.out.println("== VidStreamMgr.setErrorMsg(\""+errMsg+"\")");
 		if ((sCurErrMsg != null)
 		 || (errMsg == null)
 		 || errMsg.isEmpty())
@@ -214,7 +210,6 @@ public abstract class VidStreamMgr {
 	 * Uses the defaultMsg if the exception has no message. */
 	protected void setErrorMsg(Exception ex, String defaultMsg) {
 		String errMsg = ex.getMessage();
-		System.out.println("== VidStreamMgr.setErrorMsg2(\""+errMsg+"\")");
 		if ((errMsg == null) || errMsg.isEmpty())
 			errMsg = defaultMsg;
 		setErrorMsg(errMsg);
