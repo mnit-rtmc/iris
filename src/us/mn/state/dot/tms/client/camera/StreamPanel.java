@@ -2,7 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2002-2020  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
- * Copyright (C) 2022-2023  SRF Consulting Group
+ * Copyright (C) 2022-2024  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -258,13 +258,13 @@ public class StreamPanel extends JPanel {
 	private void requestStream(Camera c) {
 		screen_pnl.setCamera(c);
 		handleStateChange();
-		timer.start();
+		if (c != null)
+			timer.start();
 	}
 
 	/** Clear the video stream */
 	private void clearStream() {
-		screen_pnl.releaseStream();
-		screen_pnl.stopStatusMonitor();
+		screen_pnl.stopStream();
 		handleStateChange();
 	}
 
