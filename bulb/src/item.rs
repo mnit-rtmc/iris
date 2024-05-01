@@ -39,6 +39,16 @@ pub enum ItemState {
     Manage,
     /// Configure (permission)
     Configure,
+    /// Opening (gate arm)
+    Opening,
+    /// Open (gate arm)
+    Open,
+    /// Warn close (gate arm)
+    WarnClose,
+    /// Closing (gate arm)
+    Closing,
+    /// Closed (gate arm)
+    Closed,
     /// State not known
     Unknown,
 }
@@ -71,6 +81,11 @@ impl ItemState {
             "👉" => Some(Self::Operate),
             "💡" => Some(Self::Manage),
             "🔧" => Some(Self::Configure),
+            "↗️" => Some(Self::Opening),
+            "✔️" => Some(Self::Open),
+            "‼️" => Some(Self::WarnClose),
+            "↘️" => Some(Self::Closing),
+            "⛔" => Some(Self::Closed),
             "❓" => Some(Self::Unknown),
             _ => None,
         }
@@ -91,6 +106,11 @@ impl ItemState {
             Self::Operate => "👉",
             Self::Manage => "💡",
             Self::Configure => "🔧",
+            Self::Opening => "↗️",
+            Self::Open => "✔️",
+            Self::WarnClose => "‼️",
+            Self::Closing => "↘️",
+            Self::Closed => "⛔",
             Self::Unknown => "❓",
         }
     }
@@ -110,6 +130,11 @@ impl ItemState {
             Self::Operate => "operate",
             Self::Manage => "manage",
             Self::Configure => "configure",
+            Self::Opening => "opening",
+            Self::Open => "open",
+            Self::WarnClose => "warn closing",
+            Self::Closing => "closing",
+            Self::Closed => "closed",
             Self::Unknown => "unknown",
         }
     }
