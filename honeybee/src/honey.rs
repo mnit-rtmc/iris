@@ -24,7 +24,7 @@ use axum::extract::{Json, Path as AxumPath, State};
 use axum::http::{header, StatusCode};
 use axum::response::sse::{Event, KeepAlive};
 use axum::response::Sse;
-use axum::routing::{get, post};
+use axum::routing::get;
 use axum::Router;
 use axum_extra::TypedHeader;
 use headers::{ETag, IfNoneMatch};
@@ -388,7 +388,22 @@ fn gif_dir_get() -> Router {
 
 /// Handle `POST` to login page
 fn login_post(honey: Honey) -> Router {
-    async fn handler(session: Session, Json(cred): Json<Credentials>) -> Resp1 {
+    /// Handle `GET` request
+    async fn handle_get(session: Session) -> Resp2 {
+        log::info!("GET login");
+        let cred = Credentials::load(&session).await?;
+        let mut resp = String::new();
+        resp.push('"');
+        resp.push_str(cred.user());
+        resp.push('"');
+        json_resp(resp)
+    }
+
+    /// Handle `POST` request
+    async fn handle_post(
+        session: Session,
+        Json(cred): Json<Credentials>,
+    ) -> Resp1 {
         log::info!("POST login");
         session
             .cycle_id()
@@ -400,8 +415,9 @@ fn login_post(honey: Honey) -> Router {
             .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
         html_resp("<html>Authenticated</html>")
     }
+
     Router::new()
-        .route("/login", post(handler))
+        .route("/login", get(handle_get).post(handle_post))
         .with_state(honey)
 }
 
