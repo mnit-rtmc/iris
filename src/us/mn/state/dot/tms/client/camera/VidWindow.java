@@ -30,7 +30,10 @@ import us.mn.state.dot.tms.client.widget.AbstractForm;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
- * A JPanel that can display a video stream. It includes a status label.
+ * Main class for IRIS-client popout video windows.
+ * 
+ * This is a resizeable JPanel that holds a VidPanel for 
+ * video and a few other controls.
  *
  * Derived from the StreamPanel class.
  *
@@ -120,6 +123,20 @@ public class VidWindow extends AbstractForm {
 		videoPanel.setCamera(c);
 	}
 
+	/** Restart streaming current camera. */
+	public void restartStreaming() {
+		VidPanel vp = videoPanel;
+		if (vp != null)
+			vp.restartStream();
+	}
+	
+	/** Stop streaming current camera. */
+	public void stopStreaming() {
+		VidPanel vp = videoPanel;
+		if (vp != null)
+			vp.stopStream();
+	}
+	
 	/** Are we currently streaming? */
 	public boolean isStreaming() {
 		VidPanel vp = videoPanel;

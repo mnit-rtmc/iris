@@ -402,29 +402,50 @@ public class VidPanel extends JPanel implements FocusListener {
 
 	/** Setup key bindings on the panel */
 	private void setupKeyBindings() {
+		//FIXME:  Right-ALT key doesn't catch ALT_DOWN_MASK keystrokes.
+		// So RightAlt + (F5, F6, left-arrow, and right-arrow) don't work.
 		InputMap im = getInputMap(
 				JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		ActionMap am = getActionMap();
 
-		/* Ctrl + Right Arrow - Start next stream */
+		/* Alt+RightArrow - Start next stream */
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT,
 				KeyEvent.ALT_DOWN_MASK), "startNextStream");
 		am.put("startNextStream", startNextStreamAction);
 
-		/* Ctrl + Left Arrow - Start previous stream */
+		/* Alt+LeftArrow - Start previous stream */
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT,
 				KeyEvent.ALT_DOWN_MASK), "startPreviousStream");
 		am.put("startPreviousStream", startPreviousStreamAction);
 
-		/* Ctrl + F5 - Restart stream */
+		/* F5 or Alt+F5 - Restart stream */
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F5,
 				KeyEvent.ALT_DOWN_MASK), "restartStream");
-		am.put("restartStream", restartStream);
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0),
+				"restartStream");
+		am.put("restartStream", restartStreamAction);
 
-		/* Ctrl + Space - Pause stream */
-		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_SLASH,
-				KeyEvent.ALT_DOWN_MASK), "pauseStream");
-		am.put("pauseStream", pauseStream);
+		/* F6 or Alt+F6 - Stop stream */
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F6,
+				KeyEvent.ALT_DOWN_MASK), "stopStream");
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0),
+				"stopStream");
+		am.put("stopStream", stopStreamAction);
+
+		/* Shift+F5 - Restart all open layout streams */
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F5,
+				KeyEvent.SHIFT_DOWN_MASK), "restartOpenStreams");
+		am.put("restartOpenStreams", restartOpenStreamsAction);
+
+		/* Shift+F6 - Stop all open layout streams */
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F6,
+				KeyEvent.SHIFT_DOWN_MASK), "stopOpenStreams");
+		am.put("stopOpenStreams", stopOpenStreamsAction);
+
+//		/* Alt + forward-slash - Pause stream */
+//		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_SLASH,
+//				KeyEvent.ALT_DOWN_MASK), "pauseStream");
+//		am.put("pauseStream", pauseStreamAction);
 	}
 
 	private Action startNextStreamAction = new AbstractAction() {
@@ -442,38 +463,34 @@ public class VidPanel extends JPanel implements FocusListener {
 	};
 
 	/** Restart the stream that is currently playing. */
-	private Action restartStream = new AbstractAction() {
+	private Action restartStreamAction = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			panelStatus = PanelStatus.SCANNING;
-			videoGapSec = 0;
-			startCurrentStream();
+			restartStream();
 		}
 	};
 
-	/** Pause the video playing in the panel. */
-	private Action pauseStream = new AbstractAction() {
+	/** Stop the stream that is currently playing. */
+	private Action stopStreamAction = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			pausePanel = !pausePanel;
-			if (pausePanel)
-				stopStream();
-			else
-				switch (panelStatus) {
-					case FAILED:
-					case STOPPED:
-						break; // do nothing
-					case SCANNING:
-						if (streamError)
-							startNextStream();
-						else
-							startCurrentStream();
-						break;
-					case RECONNECT:
-					case VIEWING:
-						startCurrentStream();
-				}
-			queueUpdatePanel();
+			setStatus(PanelStatus.STOPPED);
+		}
+	};
+
+	/** Restart all open layout streams. */
+	private Action restartOpenStreamsAction = new AbstractAction() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			StreamControlPanel.restartOpenLayouts();
+		}
+	};
+
+	/** Stop all open layout streams. */
+	private Action stopOpenStreamsAction = new AbstractAction() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			StreamControlPanel.stopOpenLayouts();
 		}
 	};
 
