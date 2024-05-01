@@ -880,11 +880,14 @@ impl Dms {
     fn send_actions(&self, anc: DmsAnc) -> Vec<Action> {
         if let Some(cfg) = &self.sign_config {
             if let Some(ms) = &self.selected_multi(&anc) {
-                if let Some(owner) = sign_msg_owner(HIGH_1) {
-                    return anc.sign_msg_actions(
-                        Dms::uri_name(&self.name),
-                        SignMessage::new(cfg, ms, owner, HIGH_1),
-                    );
+                match sign_msg_owner(HIGH_1) {
+                    Some(owner) => {
+                        return anc.sign_msg_actions(
+                            Dms::uri_name(&self.name),
+                            SignMessage::new(cfg, ms, owner, HIGH_1),
+                        );
+                    }
+                    None => console::log_1(&"no app user!".into()),
                 };
             }
         }

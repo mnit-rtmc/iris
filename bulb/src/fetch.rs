@@ -34,6 +34,7 @@ pub struct Uri {
 }
 
 /// Fetch action
+#[derive(Debug)]
 pub enum Action {
     Patch(Uri, JsValue),
     Post(Uri, JsValue),

@@ -96,7 +96,23 @@ async fn add_sidebar() -> JsResult<()> {
     add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window)?;
     add_eventsource_listener();
-    do_future(fill_sb_resource()).await;
+    do_future(finish_init()).await;
+    Ok(())
+}
+
+/// Finish initialization
+async fn finish_init() -> Result<()> {
+    let user = Uri::from("/iris/api/login").get().await?;
+    match user.as_string() {
+        Some(user) => {
+            app::set_user(Some(user));
+            if !app::initialized() {
+                fill_sb_resource().await?;
+                app::set_initialized();
+            }
+        }
+        None => console::log_1(&format!("invalid user: {user:?}").into()),
+    }
     Ok(())
 }
 
@@ -107,7 +123,6 @@ async fn fill_sb_resource() -> Result<()> {
     let perm = card::fetch_resource(config).await?;
     let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
     sb_resource.set_inner_html(&perm);
-    app::set_initialized();
     Ok(())
 }
 
@@ -491,10 +506,7 @@ async fn handle_login() {
                 let pass = doc.elem::<HtmlInputElement>("login_pass");
                 pass.set_value("");
                 hide_login();
-                app::set_user(Some(user));
-                if !app::initialized() {
-                    do_future(fill_sb_resource()).await;
-                }
+                do_future(finish_init()).await;
             }
             Err(e) => show_toast(&format!("Login failed: {e}")),
         }
