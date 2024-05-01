@@ -308,6 +308,8 @@ pub trait Card: Default + DeserializeOwned + Serialize + PartialEq {
 pub fn item_states(res: Option<Res>) -> &'static str {
     match res {
         Some(Res::Beacon) => Beacon::ITEM_STATES,
+        Some(Res::CabinetStyle) => "",
+        Some(Res::CommConfig) => "",
         Some(Res::Dms) => Dms::ITEM_STATES,
         Some(Res::GateArm | Res::GateArmArray) => GateArm::ITEM_STATES,
         Some(Res::Permission) => Permission::ITEM_STATES,
