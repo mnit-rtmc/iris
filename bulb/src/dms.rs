@@ -20,14 +20,14 @@ use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use fnv::FnvHasher;
 use js_sys::{ArrayBuffer, Uint8Array};
 use ntcip::dms::multi::{
-    join_text, normalize as multi_normalize, split as multi_split,
+    is_blank, join_text, normalize as multi_normalize, split as multi_split,
 };
 use ntcip::dms::{tfon, Font, FontTable, GraphicTable, MessagePattern};
 use rendzina::{load_graphic, SignConfig};
 use resources::Res;
 use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 use std::cmp::Ordering;
-use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::iter::repeat;
 use wasm_bindgen::{JsCast, JsValue};
@@ -292,7 +292,7 @@ impl AncillaryData for DmsAnc {
             }
             return Box::new(uris.into_iter());
         }
-        if let View::Compact | View::Search = view {
+        if let View::Compact | View::Search | View::Hidden = view {
             uris.push(SIGN_MSG_URI.into());
         }
         if let View::Status(_) = view {
@@ -434,9 +434,10 @@ impl SignMessage {
 
     /// Get item states
     fn item_states(&self) -> ItemStates {
+        let blank = is_blank(&self.multi);
         let sources = self.sources();
         let mut states = ItemStates::default();
-        if sources.contains("blank") {
+        if sources.contains("blank") || blank {
             states = states.with(ItemState::Available, "");
         }
         if sources.contains("operator") {
@@ -448,7 +449,7 @@ impl SignMessage {
         if sources.contains("external") {
             states = states.with(ItemState::External, "");
         }
-        if sources.is_empty() {
+        if sources.is_empty() && !blank {
             states = states.with(ItemState::External, self.system());
         }
         states
@@ -719,9 +720,10 @@ impl Dms {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &DmsAnc) -> String {
+        let name = HtmlStr::new(self.name());
         let item_states = self.item_states(anc);
         let mut html =
-            format!("<div class='{NAME} end'>{self} {item_states}</div>");
+            format!("<div class='{NAME} end'>{name} {item_states}</div>");
         if let Some(msg_current) = &self.msg_current {
             html.push_str("<img class='message' src='/iris/img/");
             html.push_str(msg_current);
@@ -758,7 +760,9 @@ impl Dms {
     /// Build compose pattern HTML
     fn compose_patterns(&self, anc: &DmsAnc) -> Option<String> {
         if anc.compose_patterns.is_empty() {
-            console::log_1(&"No compose patterns!".into());
+            console::log_1(
+                &format!("{}: No compose patterns", self.name).into(),
+            );
             return None;
         }
         let sign = self.make_sign(anc)?;
@@ -873,12 +877,12 @@ impl Dms {
     }
 
     /// Create actions to handle click on "Send" button
-    fn send_actions(&self, anc: DmsAnc, uri: Uri) -> Vec<Action> {
+    fn send_actions(&self, anc: DmsAnc) -> Vec<Action> {
         if let Some(cfg) = &self.sign_config {
             if let Some(ms) = &self.selected_multi(&anc) {
                 if let Some(owner) = sign_msg_owner(HIGH_1) {
                     return anc.sign_msg_actions(
-                        uri,
+                        Dms::uri_name(&self.name),
                         SignMessage::new(cfg, ms, owner, HIGH_1),
                     );
                 };
@@ -888,18 +892,14 @@ impl Dms {
     }
 
     /// Create actions to handle click on "Blank" button
-    fn blank_actions(&self, anc: DmsAnc, uri: Uri) -> Vec<Action> {
+    fn blank_actions(&self, anc: DmsAnc) -> Vec<Action> {
         match (&self.sign_config, sign_msg_owner(LOW_1)) {
-            (Some(cfg), Some(owner)) => anc
-                .sign_msg_actions(uri, SignMessage::new(cfg, "", owner, LOW_1)),
+            (Some(cfg), Some(owner)) => anc.sign_msg_actions(
+                Dms::uri_name(&self.name),
+                SignMessage::new(cfg, "", owner, LOW_1),
+            ),
             _ => Vec::new(),
         }
-    }
-}
-
-impl fmt::Display for Dms {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
     }
 }
 
@@ -932,6 +932,11 @@ impl Card for Dms {
         Res::Dms
     }
 
+    /// Get the name
+    fn name(&self) -> Cow<str> {
+        Cow::Borrowed(&self.name)
+    }
+
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
@@ -962,10 +967,9 @@ impl Card for Dms {
     fn to_html(&self, view: View, anc: &DmsAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(anc),
             View::Status(config) => self.to_html_status(anc, config),
             View::Edit => self.to_html_edit(),
-            _ => unreachable!(),
+            _ => self.to_html_compact(anc),
         }
     }
 
@@ -978,25 +982,25 @@ impl Card for Dms {
     }
 
     /// Handle click event for a button on the card
-    fn handle_click(&self, anc: DmsAnc, id: &str, uri: Uri) -> Vec<Action> {
-        if id == "mc_send" {
-            self.send_actions(anc, uri)
-        } else if id == "mc_blank" {
-            self.blank_actions(anc, uri)
+    fn handle_click(&self, anc: DmsAnc, id: String) -> Vec<Action> {
+        if &id == "mc_send" {
+            self.send_actions(anc)
+        } else if &id == "mc_blank" {
+            self.blank_actions(anc)
         } else {
             Vec::new()
         }
     }
 
     /// Handle input event for an element on the card
-    fn handle_input(&self, anc: DmsAnc, id: &str) {
+    fn handle_input(&self, anc: DmsAnc, id: String) {
         let Some(pat) = self.selected_pattern(&anc) else {
             return;
         };
         let Some(sign) = self.make_sign(&anc) else {
             return;
         };
-        let lines = if id == "mc_pattern" {
+        let lines = if &id == "mc_pattern" {
             // update mc_lines element
             let html = anc.make_lines(&sign, Some(pat), "");
             let mc_lines = Doc::get().elem::<HtmlElement>("mc_lines");

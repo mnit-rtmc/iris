@@ -22,7 +22,7 @@ use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select, TextArea};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
+use std::borrow::Cow;
 use std::iter::empty;
 use wasm_bindgen::JsValue;
 
@@ -261,12 +261,6 @@ impl ControllerIo {
     }
 }
 
-impl fmt::Display for Controller {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl Controller {
     /// Is controller active?
     pub fn is_active(&self) -> bool {
@@ -334,11 +328,12 @@ impl Controller {
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
+        let name = HtmlStr::new(self.name());
         let item_state = self.item_state();
         let inactive = inactive_attr(self.is_active());
         let link_drop = HtmlStr::new(self.link_drop());
         format!(
-            "<div class='{NAME} end'>{self} {item_state}</div>\
+            "<div class='{NAME} end'>{name} {item_state}</div>\
             <div class='info fill{inactive}'>{link_drop}</div>"
         )
     }
@@ -482,6 +477,11 @@ impl Card for Controller {
         Res::Controller
     }
 
+    /// Get the name
+    fn name(&self) -> Cow<str> {
+        Cow::Borrowed(&self.name)
+    }
+
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
@@ -523,10 +523,9 @@ impl Card for Controller {
     fn to_html(&self, view: View, anc: &ControllerAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(),
             View::Status(_) => self.to_html_status(anc),
             View::Edit => self.to_html_edit(anc),
-            _ => unreachable!(),
+            _ => self.to_html_compact(),
         }
     }
 

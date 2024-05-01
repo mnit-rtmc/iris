@@ -14,7 +14,7 @@ use crate::card::{AncillaryData, Card, View};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
+use std::borrow::Cow;
 
 /// Cabinet Style
 #[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
@@ -38,7 +38,8 @@ impl AncillaryData for CabinetStyleAnc {
 impl CabinetStyle {
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        format!("<div>{self}</div>")
+        let name = HtmlStr::new(self.name());
+        format!("<div>{name}</div>")
     }
 
     /// Convert to Edit HTML
@@ -78,12 +79,6 @@ impl CabinetStyle {
     }
 }
 
-impl fmt::Display for CabinetStyle {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl Card for CabinetStyle {
     type Ancillary = CabinetStyleAnc;
 
@@ -93,6 +88,11 @@ impl Card for CabinetStyle {
     /// Get the resource
     fn res() -> Res {
         Res::CabinetStyle
+    }
+
+    /// Get the name
+    fn name(&self) -> Cow<str> {
+        Cow::Borrowed(&self.name)
     }
 
     /// Set the name
@@ -110,9 +110,8 @@ impl Card for CabinetStyle {
     fn to_html(&self, view: View, anc: &CabinetStyleAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(),
             View::Edit => self.to_html_edit(),
-            _ => unreachable!(),
+            _ => self.to_html_compact(),
         }
     }
 

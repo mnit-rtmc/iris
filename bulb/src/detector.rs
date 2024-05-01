@@ -15,7 +15,7 @@ use crate::device::{Device, DeviceAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
+use std::borrow::Cow;
 
 /// Detector
 #[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
@@ -40,6 +40,7 @@ type DetectorAnc = DeviceAnc<Detector>;
 impl Detector {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &DetectorAnc) -> String {
+        let name = HtmlStr::new(self.name());
         let item_state = anc.item_state(self);
         let label = HtmlStr::new(&self.label);
         let active = self.controller.is_some()
@@ -50,7 +51,7 @@ impl Detector {
                 .is_some();
         let inactive = inactive_attr(active);
         format!(
-            "<div class='{NAME} end'>{self} {item_state}</div>\
+            "<div class='{NAME} end'>{name} {item_state}</div>\
             <div class='info fill{inactive}'>{label}</div>"
         )
     }
@@ -89,12 +90,6 @@ impl Detector {
     }
 }
 
-impl fmt::Display for Detector {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl Device for Detector {
     /// Get controller
     fn controller(&self) -> Option<&str> {
@@ -111,6 +106,11 @@ impl Card for Detector {
     /// Get the resource
     fn res() -> Res {
         Res::Detector
+    }
+
+    /// Get the name
+    fn name(&self) -> Cow<str> {
+        Cow::Borrowed(&self.name)
     }
 
     /// Set the name
@@ -130,10 +130,9 @@ impl Card for Detector {
     fn to_html(&self, view: View, anc: &DetectorAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(anc),
             View::Status(_) => self.to_html_status(anc),
             View::Edit => self.to_html_edit(),
-            _ => unreachable!(),
+            _ => self.to_html_compact(anc),
         }
     }
 

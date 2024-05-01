@@ -10,15 +10,16 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{inactive_attr, AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card, View, NAME};
 use crate::error::Result;
 use crate::fetch::Uri;
+use crate::item::ItemState;
 use crate::role::Role;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
-use std::iter::{empty, once};
+use std::borrow::Cow;
+use std::iter::once;
 use wasm_bindgen::JsValue;
 
 /// User
@@ -43,12 +44,9 @@ impl AncillaryData for UserAnc {
     fn uri_iter(
         &self,
         _pri: &User,
-        view: View,
+        _view: View,
     ) -> Box<dyn Iterator<Item = Uri>> {
-        match view {
-            View::Edit => Box::new(once("/iris/api/role".into())),
-            _ => Box::new(empty()),
-        }
+        Box::new(once("/iris/api/role".into()))
     }
 
     /// Put ancillary data
@@ -64,6 +62,18 @@ impl AncillaryData for UserAnc {
 }
 
 impl UserAnc {
+    /// Get item state
+    fn item_state(&self, role: &str) -> ItemState {
+        if let Some(roles) = &self.roles {
+            for r in roles {
+                if r.name == role {
+                    return r.item_state();
+                }
+            }
+        }
+        ItemState::Inactive
+    }
+
     /// Create an HTML `select` element of roles
     fn roles_html(&self, pri: &User) -> String {
         let mut html = String::new();
@@ -86,10 +96,21 @@ impl UserAnc {
 }
 
 impl User {
+    /// Get item state
+    fn item_state(&self, anc: &UserAnc) -> ItemState {
+        if self.enabled {
+            if let Some(role) = &self.role {
+                return anc.item_state(role);
+            }
+        }
+        ItemState::Inactive
+    }
+
     /// Convert to Compact HTML
-    fn to_html_compact(&self) -> String {
-        let inactive = inactive_attr(self.enabled && self.role.is_some());
-        format!("<div class='{inactive}'>{self}</div>")
+    fn to_html_compact(&self, anc: &UserAnc) -> String {
+        let name = HtmlStr::new(self.name());
+        let item_state = self.item_state(anc);
+        format!("<div class='{NAME} end'>{name} {item_state}</div>")
     }
 
     /// Convert to Edit HTML
@@ -115,21 +136,25 @@ impl User {
     }
 }
 
-impl fmt::Display for User {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.name)
-    }
-}
-
 impl Card for User {
     type Ancillary = UserAnc;
 
     /// Display name
     const DNAME: &'static str = "👤 User";
 
+    /// All item states as html options
+    const ITEM_STATES: &'static str = "<option value=''>all ↴\
+         <option value='🔹'>🔹 available\
+         <option value='▪️'>▪️ inactive";
+
     /// Get the resource
     fn res() -> Res {
         Res::User
+    }
+
+    /// Get the name
+    fn name(&self) -> Cow<str> {
+        Cow::Borrowed(&self.name)
     }
 
     /// Set the name
@@ -139,19 +164,19 @@ impl Card for User {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &UserAnc) -> bool {
+    fn is_match(&self, search: &str, anc: &UserAnc) -> bool {
         self.name.contains(search)
             || self.full_name.contains_lower(search)
             || self.role.contains_lower(search)
+            || self.item_state(anc).is_match(search)
     }
 
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &UserAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(),
             View::Edit => self.to_html_edit(anc),
-            _ => unreachable!(),
+            _ => self.to_html_compact(anc),
         }
     }
 

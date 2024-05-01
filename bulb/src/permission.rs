@@ -13,12 +13,13 @@
 use crate::card::{AncillaryData, Card, View, NAME};
 use crate::error::{Error, Result};
 use crate::fetch::Uri;
+use crate::item::ItemState;
 use crate::role::Role;
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, Select};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
-use std::fmt;
+use std::borrow::Cow;
 use std::iter::empty;
 use wasm_bindgen::JsValue;
 
@@ -115,18 +116,14 @@ impl PermissionAnc {
     }
 }
 
-/// Get access to display
-fn access_str(access_n: u32, long: bool) -> &'static str {
-    match (access_n, long) {
-        (1, false) => "👁️",
-        (1, true) => "👁️ view",
-        (2, false) => "👉",
-        (2, true) => "👉 operate",
-        (3, false) => "💡",
-        (3, true) => "💡 manage",
-        (4, false) => "🔧",
-        (4, true) => "🔧 configure",
-        _ => "❓",
+/// Get item state for an access value
+fn item_state(access_n: u32) -> ItemState {
+    match access_n {
+        1 => ItemState::View,
+        2 => ItemState::Operate,
+        3 => ItemState::Manage,
+        4 => ItemState::Configure,
+        _ => ItemState::Unknown,
     }
 }
 
@@ -142,7 +139,10 @@ fn access_html(selected: u32) -> String {
             html.push_str(" selected");
         }
         html.push('>');
-        html.push_str(access_str(access_n, true));
+        let item = item_state(access_n);
+        html.push_str(item.code());
+        html.push(' ');
+        html.push_str(item.description());
         html.push_str("</option>");
     }
     html.push_str("</select>");
@@ -165,11 +165,12 @@ impl Permission {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
+        let id = self.id;
         let role = HtmlStr::new(&self.role);
-        let access = access_str(self.access_n, false);
+        let access = item_state(self.access_n);
         let resource = HtmlStr::new(&self.resource_n);
         format!(
-            "<div class='{NAME} end'>{role} {access} {self}</div>\
+            "<div class='{NAME} end'>{role} {access} {id}</div>\
             <div class='info fill'>{resource}</div>"
         )
     }
@@ -201,21 +202,27 @@ impl Permission {
     }
 }
 
-impl fmt::Display for Permission {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.id)
-    }
-}
-
 impl Card for Permission {
     type Ancillary = PermissionAnc;
 
     /// Display name
     const DNAME: &'static str = "🗝️ Permission";
 
+    /// All item states as html options
+    const ITEM_STATES: &'static str = "<option value=''>all ↴\
+         <option value='👁️'>👁️ view\
+         <option value='👉'>👉 operate\
+         <option value='💡'>💡 manage\
+         <option value='🔧'>🔧 configure";
+
     /// Get the resource
     fn res() -> Res {
         Res::Permission
+    }
+
+    /// Get the name
+    fn name(&self) -> Cow<str> {
+        Cow::Owned(self.id.to_string())
     }
 
     /// Set the name
@@ -226,7 +233,7 @@ impl Card for Permission {
     /// Check if a search string matches
     fn is_match(&self, search: &str, _anc: &PermissionAnc) -> bool {
         self.id.to_string().contains(search)
-            || access_str(self.access_n, true).contains(search)
+            || item_state(self.access_n).is_match(search)
             || self.role.contains_lower(search)
             || self.resource_n.contains(search)
     }
@@ -251,9 +258,8 @@ impl Card for Permission {
     fn to_html(&self, view: View, anc: &PermissionAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(),
             View::Edit => self.to_html_edit(anc),
-            _ => unreachable!(),
+            _ => self.to_html_compact(),
         }
     }
 

@@ -13,11 +13,11 @@
 use crate::card::{AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME};
 use crate::error::Result;
 use crate::fetch::Uri;
-use crate::gatearm::warn_state;
+use crate::gatearm::item_state;
 use crate::util::{ContainsLower, Fields, HtmlStr};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
+use std::borrow::Cow;
 use std::iter::{empty, once};
 use wasm_bindgen::JsValue;
 
@@ -46,20 +46,6 @@ pub struct GateArmArray {
 #[derive(Debug, Default)]
 pub struct GateArmArrayAnc {
     pub states: Option<Vec<GateArmState>>,
-}
-
-impl GateArmArrayAnc {
-    /// Get arm state description
-    fn arm_state(&self, pri: &GateArmArray) -> &str {
-        if let Some(states) = &self.states {
-            for state in states {
-                if pri.arm_state == state.id {
-                    return &state.description;
-                }
-            }
-        }
-        ""
-    }
 }
 
 const GATE_ARM_STATE_URI: &str = "/iris/lut/gate_arm_state";
@@ -96,22 +82,23 @@ impl AncillaryData for GateArmArrayAnc {
 impl GateArmArray {
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let warn = warn_state(self.arm_state);
+        let name = HtmlStr::new(self.name());
+        let item = item_state(self.arm_state);
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='{NAME} end'>{self} {warn}</div>\
+            "<div class='{NAME} end'>{name} {item}</div>\
             <div class='info fill'>{location}</div>"
         )
     }
 
     /// Convert to Status HTML
-    fn to_html_status(&self, anc: &GateArmArrayAnc, config: bool) -> String {
+    fn to_html_status(&self, _anc: &GateArmArrayAnc, config: bool) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
-        let warn = warn_state(self.arm_state);
-        let arm_state = HtmlStr::new(anc.arm_state(self));
+        let item = item_state(self.arm_state);
+        let desc = item.description();
         let mut status = format!(
             "<div class='info'>{location}</div>\
-            <div class='info'>{warn} {arm_state}</div>"
+            <div class='info'>{item} {desc}</div>"
         );
         if config {
             status.push_str("<div class='row'>");
@@ -129,12 +116,6 @@ impl GateArmArray {
     }
 }
 
-impl fmt::Display for GateArmArray {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl Card for GateArmArray {
     type Ancillary = GateArmArrayAnc;
 
@@ -144,6 +125,11 @@ impl Card for GateArmArray {
     /// Get the resource
     fn res() -> Res {
         Res::GateArmArray
+    }
+
+    /// Get the name
+    fn name(&self) -> Cow<str> {
+        Cow::Borrowed(&self.name)
     }
 
     /// Set the name
@@ -158,20 +144,19 @@ impl Card for GateArmArray {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, anc: &GateArmArrayAnc) -> bool {
+    fn is_match(&self, search: &str, _anc: &GateArmArrayAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || anc.arm_state(self).contains(search)
+            || item_state(self.arm_state).is_match(search)
     }
 
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &GateArmArrayAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(),
             View::Status(config) => self.to_html_status(anc, config),
             View::Edit => self.to_html_edit(),
-            _ => unreachable!(),
+            _ => self.to_html_compact(),
         }
     }
 

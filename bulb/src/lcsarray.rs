@@ -16,7 +16,7 @@ use crate::fetch::Uri;
 use crate::util::{ContainsLower, Fields, HtmlStr};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
+use std::borrow::Cow;
 use std::iter::once;
 use wasm_bindgen::JsValue;
 
@@ -86,10 +86,11 @@ impl AncillaryData for LcsArrayAnc {
 impl LcsArray {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LcsArrayAnc) -> String {
+        let name = HtmlStr::new(self.name());
         let lock = anc.lock(self);
         format!(
             "<span>{lock}</span>\
-            <span class='{NAME}'>{self}</span>"
+            <span class='{NAME}'>{name}</span>"
         )
     }
 
@@ -116,12 +117,6 @@ impl LcsArray {
     }
 }
 
-impl fmt::Display for LcsArray {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl Card for LcsArray {
     type Ancillary = LcsArrayAnc;
 
@@ -131,6 +126,11 @@ impl Card for LcsArray {
     /// Get the resource
     fn res() -> Res {
         Res::LcsArray
+    }
+
+    /// Get the name
+    fn name(&self) -> Cow<str> {
+        Cow::Borrowed(&self.name)
     }
 
     /// Set the name
@@ -148,10 +148,9 @@ impl Card for LcsArray {
     fn to_html(&self, view: View, anc: &LcsArrayAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(anc),
             View::Status(config) => self.to_html_status(anc, config),
             View::Edit => self.to_html_edit(),
-            _ => unreachable!(),
+            _ => self.to_html_compact(anc),
         }
     }
 

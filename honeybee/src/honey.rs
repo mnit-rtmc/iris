@@ -79,6 +79,10 @@ type Resp0 = std::result::Result<StatusCode, StatusCode>;
 type Resp1 =
     std::result::Result<([(HeaderName, &'static str); 1], String), StatusCode>;
 
+/// Two-header response result
+type Resp2 =
+    std::result::Result<([(HeaderName, &'static str); 2], String), StatusCode>;
+
 /// Three-header response result
 type Resp3 = std::result::Result<([(HeaderName, String); 3], Body), StatusCode>;
 
@@ -88,8 +92,14 @@ fn html_resp(html: &str) -> Resp1 {
 }
 
 /// Create a JSON response
-fn json_resp(json: String) -> Resp1 {
-    Ok(([(header::CONTENT_TYPE, "application/json")], json))
+fn json_resp(json: String) -> Resp2 {
+    Ok((
+        [
+            (header::CACHE_CONTROL, "private, no-store"),
+            (header::CONTENT_TYPE, "application/json"),
+        ],
+        json,
+    ))
 }
 
 impl SseNotifier {
@@ -397,7 +407,7 @@ fn login_post(honey: Honey) -> Router {
 
 /// `GET` access permissions
 fn access_get(honey: Honey) -> Router {
-    async fn handler(session: Session, State(honey): State<Honey>) -> Resp1 {
+    async fn handler(session: Session, State(honey): State<Honey>) -> Resp2 {
         log::info!("GET access");
         let cred = Credentials::load(&session).await?;
         let perms = permission::get_by_user(&honey.db, cred.user()).await?;
@@ -577,7 +587,7 @@ fn permission_object(honey: Honey) -> Router {
         session: Session,
         State(honey): State<Honey>,
         AxumPath(id): AxumPath<i32>,
-    ) -> Resp1 {
+    ) -> Resp2 {
         let nm = Name::from(Res::Permission).obj(&id.to_string())?;
         log::info!("GET {nm}");
         let cred = Credentials::load(&session).await?;
@@ -637,7 +647,7 @@ fn other_object(honey: Honey) -> Router {
         session: Session,
         State(honey): State<Honey>,
         AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
-    ) -> Resp1 {
+    ) -> Resp2 {
         let nm = Name::new(&type_n)?.obj(&obj_n)?;
         log::info!("GET {nm}");
         let cred = Credentials::load(&session).await?;

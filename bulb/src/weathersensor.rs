@@ -19,7 +19,7 @@ use mag::temp::DegC;
 use mag::time::s;
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
+use std::borrow::Cow;
 use std::time::Duration;
 
 /// Display Units
@@ -694,11 +694,12 @@ impl WeatherSensor {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &WeatherSensorAnc) -> String {
+        let name = HtmlStr::new(self.name());
         let item_state = anc.item_state(self);
         let inactive = inactive_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='{NAME} end'>{self} {item_state}</div>\
+            "<div class='{NAME} end'>{name} {item_state}</div>\
             <div class='info fill{inactive}'>{location}</div>"
         )
     }
@@ -776,12 +777,6 @@ impl WeatherSensor {
     }
 }
 
-impl fmt::Display for WeatherSensor {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl Device for WeatherSensor {
     /// Get controller
     fn controller(&self) -> Option<&str> {
@@ -798,6 +793,11 @@ impl Card for WeatherSensor {
     /// Get the resource
     fn res() -> Res {
         Res::WeatherSensor
+    }
+
+    /// Get the name
+    fn name(&self) -> Cow<str> {
+        Cow::Borrowed(&self.name)
     }
 
     /// Set the name
@@ -825,10 +825,9 @@ impl Card for WeatherSensor {
     fn to_html(&self, view: View, anc: &WeatherSensorAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(anc),
             View::Status(config) => self.to_html_status(anc, config),
             View::Edit => self.to_html_edit(),
-            _ => unreachable!(),
+            _ => self.to_html_compact(anc),
         }
     }
 

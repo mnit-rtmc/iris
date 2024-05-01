@@ -18,7 +18,7 @@ use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
+use std::borrow::Cow;
 use std::iter::once;
 use wasm_bindgen::JsValue;
 
@@ -84,12 +84,6 @@ impl AncillaryData for BeaconAnc {
     }
 }
 
-impl fmt::Display for Beacon {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 /// Flashing state class names
 const CLASS_FLASHING: &str = "flashing";
 const CLASS_NOT_FLASHING: &str = "not-flashing";
@@ -135,6 +129,7 @@ impl Beacon {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &BeaconAnc) -> String {
+        let name = HtmlStr::new(self.name());
         let item_states = self.item_states(anc);
         let flashing = if self.flashing() {
             CLASS_FLASHING
@@ -143,7 +138,7 @@ impl Beacon {
         };
         let message = HtmlStr::new(&self.message);
         format!(
-            "<div class='{NAME} end'>{self} {item_states}</div>\
+            "<div class='{NAME} end'>{name} {item_states}</div>\
             <div class='beacon-container row center'>\
               <button id='ob_flashing' disabled></button>\
               <label for='ob_flashing' class='beacon-disabled'>\
@@ -270,6 +265,11 @@ impl Card for Beacon {
         Res::Beacon
     }
 
+    /// Get the name
+    fn name(&self) -> Cow<str> {
+        Cow::Borrowed(&self.name)
+    }
+
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
@@ -294,10 +294,9 @@ impl Card for Beacon {
     fn to_html(&self, view: View, anc: &BeaconAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(anc),
             View::Status(config) => self.to_html_status(anc, config),
             View::Edit => self.to_html_edit(),
-            _ => unreachable!(),
+            _ => self.to_html_compact(anc),
         }
     }
 
@@ -314,8 +313,8 @@ impl Card for Beacon {
     }
 
     /// Handle click event for a button on the card
-    fn handle_click(&self, _anc: BeaconAnc, id: &str, uri: Uri) -> Vec<Action> {
-        if id == "ob_flashing" {
+    fn handle_click(&self, _anc: BeaconAnc, id: String) -> Vec<Action> {
+        if &id == "ob_flashing" {
             let mut fields = Fields::new();
             match self.state {
                 // DARK (2) => FLASHING_REQ (3)
@@ -324,6 +323,7 @@ impl Card for Beacon {
                 4 | 5 => fields.insert_num("state", 1),
                 _ => (),
             }
+            let uri = Beacon::uri_name(&self.name);
             let val = fields.into_value().to_string();
             vec![Action::Patch(uri, val.into())]
         } else {

@@ -17,10 +17,11 @@ use crate::commconfig::CommConfig;
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::fetch::Uri;
+use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
+use std::borrow::Cow;
 use std::iter::once;
 use wasm_bindgen::JsValue;
 
@@ -131,39 +132,32 @@ impl CommLinkAnc {
     }
 }
 
-impl fmt::Display for CommLink {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl CommLink {
-    /// Get connected state to display
-    fn connected(&self, long: bool) -> &'static str {
-        match (self.poll_enabled, self.connected, long) {
-            (true, true, false) => "👍",
-            (true, true, true) => "online 👍",
-            (true, false, false) => "🔌",
-            (true, false, true) => "offline 🔌",
-            (false, _, false) => "▪️",
-            (false, _, true) => "inactive ▪️",
+    /// Get item state
+    fn item_state(&self) -> ItemState {
+        match (self.poll_enabled, self.connected) {
+            (true, true) => ItemState::Available,
+            (true, false) => ItemState::Offline,
+            _ => ItemState::Inactive,
         }
     }
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let connected = self.connected(false);
+        let name = HtmlStr::new(self.name());
+        let item_state = self.item_state();
         let inactive = inactive_attr(self.poll_enabled);
         let description = HtmlStr::new(&self.description);
         format!(
-            "<div class='{NAME} end'>{connected} {self}</div>\
+            "<div class='{NAME} end'>{name} {item_state}</div>\
             <div class='info fill{inactive}'>{description}</div>"
         )
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &CommLinkAnc) -> String {
-        let connected = self.connected(true);
+        let item_state = self.item_state();
+        let desc = item_state.description();
         let inactive = inactive_attr(self.poll_enabled);
         let description = HtmlStr::new(&self.description);
         let comm_config = anc.comm_config_desc(self);
@@ -171,7 +165,7 @@ impl CommLink {
         let controllers = anc.controllers_html();
         format!(
             "<div class='row'>\
-              <span>{connected}</span>\
+              <span>{item_state} {desc}</span>\
               <span class='info end{inactive}'>{description}</span>\
             </div>\
             <div class='row'>\
@@ -223,6 +217,11 @@ impl Card for CommLink {
         Res::CommLink
     }
 
+    /// Get the name
+    fn name(&self) -> Cow<str> {
+        Cow::Borrowed(&self.name)
+    }
+
     /// Set the name
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
@@ -235,17 +234,16 @@ impl Card for CommLink {
             || self.name.contains_lower(search)
             || anc.comm_config_desc(self).contains_lower(search)
             || self.uri.contains_lower(search)
-            || self.connected(true).contains(search)
+            || self.item_state().is_match(search)
     }
 
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &CommLinkAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(),
             View::Status(_) => self.to_html_status(anc),
             View::Edit => self.to_html_edit(anc),
-            _ => unreachable!(),
+            _ => self.to_html_compact(),
         }
     }
 

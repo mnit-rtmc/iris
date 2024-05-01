@@ -16,10 +16,11 @@ use crate::card::{
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::fetch::Uri;
+use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use std::fmt;
+use std::borrow::Cow;
 use std::iter::once;
 use wasm_bindgen::JsValue;
 
@@ -49,16 +50,16 @@ pub struct GateArmAnc {
     pub states: Option<Vec<GateArmState>>,
 }
 
-/// Get arm warn state
-pub fn warn_state(arm_state: u32) -> &'static str {
+/// Get gate arm item state
+pub fn item_state(arm_state: u32) -> ItemState {
     match arm_state {
-        1 => "‼️",    // fault
-        2 => "⚠️",    // opening
-        3 => "✔️",    // open
-        4 => "⚠️",    // warn_close
-        5 => "⚠️ ⛔", // closing
-        6 => "⛔",   // closed
-        _ => "❓",   // unknown
+        1 => ItemState::Fault,
+        2 => ItemState::Opening,
+        3 => ItemState::Open,
+        4 => ItemState::WarnClose,
+        5 => ItemState::Closing,
+        6 => ItemState::Closed,
+        _ => ItemState::Unknown,
     }
 }
 
@@ -68,18 +69,6 @@ impl GateArmAnc {
             Some(ctrl) => ctrl.button_html(),
             None => "<span></span>".into(),
         }
-    }
-
-    /// Get arm state description
-    fn arm_state(&self, pri: &GateArm) -> &str {
-        if let Some(states) = &self.states {
-            for state in states {
-                if pri.arm_state == state.id {
-                    return &state.description;
-                }
-            }
-        }
-        ""
     }
 }
 
@@ -128,11 +117,12 @@ impl GateArm {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let warn = warn_state(self.arm_state);
+        let name = HtmlStr::new(self.name());
+        let item = item_state(self.arm_state);
         let inactive = inactive_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='{NAME} end'>{self} {warn}</div>\
+            "<div class='{NAME} end'>{name} {item}</div>\
             <div class='info fill{inactive}'>{location}</div>"
         )
     }
@@ -140,12 +130,12 @@ impl GateArm {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &GateArmAnc) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
-        let warn = warn_state(self.arm_state);
-        let arm_state = HtmlStr::new(anc.arm_state(self));
+        let item = item_state(self.arm_state);
+        let desc = item.description();
         let ctrl_button = anc.controller_button();
         format!(
             "<div class='info'>{location}</div>\
-            <div>{warn} {arm_state}</div>\
+            <div>{item} {desc}</div>\
             <div class='row'>\
               {ctrl_button}\
               {EDIT_BUTTON}\
@@ -172,21 +162,31 @@ impl GateArm {
     }
 }
 
-impl fmt::Display for GateArm {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", HtmlStr::new(&self.name))
-    }
-}
-
 impl Card for GateArm {
     type Ancillary = GateArmAnc;
 
     /// Display name
     const DNAME: &'static str = "⫬ Gate Arm";
 
+    /// All item states as html options
+    const ITEM_STATES: &'static str = "<option value=''>all ↴\
+         <option value='↗️'>↗️ opening\
+         <option value='✔️'>✔️ open\
+         <option value='‼️'>‼️ warn close\
+         <option value='↘️'>↘️ closing\
+         <option value='⛔'>⛔ closed\
+         <option value='⚠️'>⚠️ fault\
+         <option value='🔌'>🔌 offline\
+         <option value='▪️'>▪️ inactive";
+
     /// Get the resource
     fn res() -> Res {
         Res::GateArm
+    }
+
+    /// Get the name
+    fn name(&self) -> Cow<str> {
+        Cow::Borrowed(&self.name)
     }
 
     /// Set the name
@@ -196,18 +196,18 @@ impl Card for GateArm {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, anc: &GateArmAnc) -> bool {
-        self.name.contains_lower(search) || anc.arm_state(self).contains(search)
+    fn is_match(&self, search: &str, _anc: &GateArmAnc) -> bool {
+        self.name.contains_lower(search)
+            || item_state(self.arm_state).is_match(search)
     }
 
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &GateArmAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Compact => self.to_html_compact(),
             View::Status(_) => self.to_html_status(anc),
             View::Edit => self.to_html_edit(),
-            _ => unreachable!(),
+            _ => self.to_html_compact(),
         }
     }
 
