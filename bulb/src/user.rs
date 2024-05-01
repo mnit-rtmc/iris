@@ -66,8 +66,8 @@ impl UserAnc {
     fn item_state(&self, role: &str) -> ItemState {
         if let Some(roles) = &self.roles {
             for r in roles {
-                if r.name == role && r.enabled {
-                    return ItemState::Available;
+                if r.name == role {
+                    return r.item_state();
                 }
             }
         }

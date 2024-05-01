@@ -10,7 +10,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{inactive_attr, AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card, View, NAME};
+use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, Input};
 use resources::Res;
 use serde::{Deserialize, Serialize};
@@ -32,11 +33,20 @@ impl AncillaryData for RoleAnc {
 }
 
 impl Role {
+    /// Get item state
+    pub fn item_state(&self) -> ItemState {
+        if self.enabled {
+            ItemState::Available
+        } else {
+            ItemState::Inactive
+        }
+    }
+
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let name = self.name();
-        let inactive = inactive_attr(self.enabled);
-        format!("<div class='fill{inactive}'>{name}</div>")
+        let item_state = self.item_state();
+        format!("<div class='{NAME} end'>{name} {item_state}</div>")
     }
 
     /// Convert to Edit HTML
@@ -57,6 +67,11 @@ impl Card for Role {
     /// Display name
     const DNAME: &'static str = "💪 Role";
 
+    /// All item states as html options
+    const ITEM_STATES: &'static str = "<option value=''>all ↴\
+         <option value='🔹'>🔹 available\
+         <option value='▪️'>▪️ inactive";
+
     /// Get the resource
     fn res() -> Res {
         Res::Role
@@ -75,7 +90,7 @@ impl Card for Role {
 
     /// Check if a search string matches
     fn is_match(&self, search: &str, _anc: &RoleAnc) -> bool {
-        self.name.contains_lower(search)
+        self.name.contains_lower(search) || self.item_state().is_match(search)
     }
 
     /// Convert to HTML view

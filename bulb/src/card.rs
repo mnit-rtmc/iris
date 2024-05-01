@@ -310,6 +310,7 @@ pub fn item_states(res: Option<Res>) -> &'static str {
         Some(Res::Beacon) => Beacon::ITEM_STATES,
         Some(Res::Dms) => Dms::ITEM_STATES,
         Some(Res::Permission) => Permission::ITEM_STATES,
+        Some(Res::Role) => Role::ITEM_STATES,
         Some(Res::User) => User::ITEM_STATES,
         Some(_) => ITEM_STATES,
         None => "",
