@@ -17,6 +17,7 @@ use crate::commconfig::CommConfig;
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::fetch::Uri;
+use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use resources::Res;
 use serde::{Deserialize, Serialize};
@@ -132,33 +133,31 @@ impl CommLinkAnc {
 }
 
 impl CommLink {
-    /// Get connected state to display
-    fn connected(&self, long: bool) -> &'static str {
-        match (self.poll_enabled, self.connected, long) {
-            (true, true, false) => "👍",
-            (true, true, true) => "online 👍",
-            (true, false, false) => "🔌",
-            (true, false, true) => "offline 🔌",
-            (false, _, false) => "▪️",
-            (false, _, true) => "inactive ▪️",
+    /// Get item state
+    fn item_state(&self) -> ItemState {
+        match (self.poll_enabled, self.connected) {
+            (true, true) => ItemState::Available,
+            (true, false) => ItemState::Offline,
+            _ => ItemState::Inactive,
         }
     }
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let name = HtmlStr::new(self.name());
-        let connected = self.connected(false);
+        let item_state = self.item_state();
         let inactive = inactive_attr(self.poll_enabled);
         let description = HtmlStr::new(&self.description);
         format!(
-            "<div class='{NAME} end'>{connected} {name}</div>\
+            "<div class='{NAME} end'>{name} {item_state}</div>\
             <div class='info fill{inactive}'>{description}</div>"
         )
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &CommLinkAnc) -> String {
-        let connected = self.connected(true);
+        let item_state = self.item_state();
+        let desc = item_state.description();
         let inactive = inactive_attr(self.poll_enabled);
         let description = HtmlStr::new(&self.description);
         let comm_config = anc.comm_config_desc(self);
@@ -166,7 +165,7 @@ impl CommLink {
         let controllers = anc.controllers_html();
         format!(
             "<div class='row'>\
-              <span>{connected}</span>\
+              <span>{item_state} {desc}</span>\
               <span class='info end{inactive}'>{description}</span>\
             </div>\
             <div class='row'>\
@@ -235,7 +234,7 @@ impl Card for CommLink {
             || self.name.contains_lower(search)
             || anc.comm_config_desc(self).contains_lower(search)
             || self.uri.contains_lower(search)
-            || self.connected(true).contains(search)
+            || self.item_state().is_match(search)
     }
 
     /// Convert to HTML view
