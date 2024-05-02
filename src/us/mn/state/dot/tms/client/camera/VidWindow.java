@@ -2,7 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2002-2020  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
- * Copyright (C) 2020 SRF Consulting Group
+ * Copyright (C) 2020-2024  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -100,8 +100,10 @@ public class VidWindow extends AbstractForm {
 		videoPanel = new VidPanel(sz, strm_num);
 		add(videoPanel, BorderLayout.CENTER);
 
-		if (ctrl)
+		if (ctrl) {
 			add(new PopoutCamControlPanel(cam_ptz), BorderLayout.SOUTH);
+			videoPanel.initPopoutTooltip();
+		}
 
 		setPreferredSize(UI.dimension(pdm.width, pdm.height));
 		setMinimumSize(UI.dimension(pdm.width, pdm.height));
