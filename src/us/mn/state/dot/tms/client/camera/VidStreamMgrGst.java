@@ -50,7 +50,8 @@ import org.freedesktop.gstreamer.elements.AppSink;
 /**
  * Stream manager for a GStreamer stream.
  *
- * @author John L. Stanley - SRF Consulting Group
+ * @author John L. Stanley - SRF Consulting
+ * @author Gordon Parikh   - SRF Consulting
  */
 public class VidStreamMgrGst extends VidStreamMgr {
 
@@ -274,12 +275,17 @@ public class VidStreamMgrGst extends VidStreamMgr {
 		}
 	}
 
+	private static boolean gstVersionPrinted = false;
+	
 	/** Try to initialize GStreamer */
 	static private boolean initGst() {
 		try {
 			Gst.init("StreamMgrGst");
-			System.out.println("GStreamer " +
-				Gst.getVersionString() + " installed");
+			if (!gstVersionPrinted) {
+				System.out.println(Gst.getVersionString()
+						+ " installed");
+				gstVersionPrinted = true;
+			}
 			return true;
 		} catch (GstException | UnsatisfiedLinkError ex) {
 			System.out.println("GStreamer not available: "
