@@ -158,7 +158,7 @@ impl Honey {
         let store = MokaStore::new(Some(100));
         let session_layer = SessionManagerLayer::new(store)
             .with_name("honeybee")
-            .with_expiry(Expiry::OnInactivity(time::Duration::hours(4)));
+            .with_expiry(Expiry::OnInactivity(time::Duration::hours(9)));
         Router::new()
             .merge(login_post(self.clone()))
             .merge(access_get(self.clone()))
