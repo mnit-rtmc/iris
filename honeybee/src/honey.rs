@@ -83,6 +83,10 @@ type Resp1 =
 type Resp2 =
     std::result::Result<([(HeaderName, &'static str); 2], String), StatusCode>;
 
+/// Two-header response result
+type Resp2b =
+    std::result::Result<([(HeaderName, &'static str); 2], Body), StatusCode>;
+
 /// Three-header response result
 type Resp3 = std::result::Result<([(HeaderName, String); 3], Body), StatusCode>;
 
@@ -268,13 +272,27 @@ impl Honey {
     }
 }
 
-/// Build a stream from a file
-async fn file_stream(
+/// Build a stream from a file (with max-age 1 day)
+async fn file_stream(fname: &str, content_type: &'static str) -> Resp2b {
+    let file = tokio::fs::File::open(fname)
+        .await
+        .map_err(|_e| StatusCode::NOT_FOUND)?;
+    let stream = ReaderStream::new(file);
+    Ok((
+        [
+            (header::CACHE_CONTROL, "max-age=86400"),
+            (header::CONTENT_TYPE, content_type),
+        ],
+        Body::from_stream(stream),
+    ))
+}
+
+/// Build a stream from a file (and calculate ETag)
+async fn file_stream_etag(
     fname: &str,
     content_type: &'static str,
     if_none_match: IfNoneMatch,
 ) -> Resp3 {
-    log::debug!("file_stream {fname}");
     let etag = file_etag(fname).await.map_err(|_e| SonarError::NotFound)?;
     log::trace!("ETag: {etag} ({fname})");
     let tag = etag.parse::<ETag>().map_err(|_e| Error::InvalidETag)?;
@@ -309,7 +327,8 @@ async fn file_etag(path: &str) -> Result<String> {
 async fn index_handler(
     TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
 ) -> Resp3 {
-    file_stream("index.html", "text/html; charset=utf-8", if_none_match).await
+    file_stream_etag("index.html", "text/html; charset=utf-8", if_none_match)
+        .await
 }
 
 /// Build route for index html
@@ -329,59 +348,47 @@ fn public_dir_get() -> Router {
         AxumPath(fname): AxumPath<String>,
     ) -> Resp3 {
         log::info!("GET {fname}");
-        file_stream(&fname, "application/json", if_none_match).await
+        file_stream_etag(&fname, "application/json", if_none_match).await
     }
     Router::new().route("/:fname", get(handler))
 }
 
 /// `GET` JSON file from LUT directory
 fn lut_dir_get() -> Router {
-    async fn handler(
-        TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
-        AxumPath(fname): AxumPath<String>,
-    ) -> Resp3 {
+    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2b {
         let fname = format!("lut/{fname}");
         log::info!("GET {fname}");
-        file_stream(&fname, "application/json", if_none_match).await
+        file_stream(&fname, "application/json").await
     }
     Router::new().route("/lut/:fname", get(handler))
 }
 
 /// `GET` file from sign img directory
 fn img_dir_get() -> Router {
-    async fn handler(
-        TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
-        AxumPath(fname): AxumPath<String>,
-    ) -> Resp3 {
+    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2b {
         let fname = format!("img/{fname}");
         log::info!("GET {fname}");
-        file_stream(&fname, "image/gif", if_none_match).await
+        file_stream(&fname, "image/gif").await
     }
     Router::new().route("/img/:fname", get(handler))
 }
 
 /// `GET` file from tfon directory
 fn tfon_dir_get() -> Router {
-    async fn handler(
-        TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
-        AxumPath(fname): AxumPath<String>,
-    ) -> Resp3 {
+    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2b {
         let fname = format!("tfon/{fname}");
         log::info!("GET {fname}");
-        file_stream(&fname, "text/plain", if_none_match).await
+        file_stream(&fname, "text/plain").await
     }
     Router::new().route("/tfon/:fname", get(handler))
 }
 
 /// `GET` file from gif directory
 fn gif_dir_get() -> Router {
-    async fn handler(
-        TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
-        AxumPath(fname): AxumPath<String>,
-    ) -> Resp3 {
+    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2b {
         let fname = format!("gif/{fname}");
         log::info!("GET {fname}");
-        file_stream(&fname, "image/gif", if_none_match).await
+        file_stream(&fname, "image/gif").await
     }
     Router::new().route("/gif/:fname", get(handler))
 }
@@ -506,7 +513,7 @@ fn permission_resource(honey: Honey) -> Router {
         let cred = Credentials::load(&session).await?;
         honey.name_access(cred.user(), &nm, Access::View).await?;
         let fname = format!("api/{nm}");
-        file_stream(&fname, "application/json", if_none_match).await
+        file_stream_etag(&fname, "application/json", if_none_match).await
     }
 
     /// Handle `POST` request
@@ -553,7 +560,7 @@ fn other_resource(honey: Honey) -> Router {
         let cred = Credentials::load(&session).await?;
         honey.name_access(cred.user(), &nm, Access::View).await?;
         let fname = format!("api/{type_n}");
-        file_stream(&fname, "application/json", if_none_match).await
+        file_stream_etag(&fname, "application/json", if_none_match).await
     }
 
     /// Handle `POST` request
