@@ -601,7 +601,7 @@ fn add_eventsource_listener() {
     };
     set_refresh_text("⭮ ⚫");
     let onopen: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
-        set_refresh_text("⭮ 🟤");
+        set_refresh_text("⭮ 🟡");
     });
     es.set_onopen(Some(onopen.as_ref().unchecked_ref()));
     onopen.forget();
