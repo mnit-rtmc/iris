@@ -21,6 +21,8 @@ pub const TICK_INTERVAL: i32 = 500;
 pub enum DeferredAction {
     /// Hide the toast popup
     HideToast,
+    /// Make SSE event source
+    MakeEventSource,
     /// Refresh resource list
     RefreshList,
     /// Set refresh text

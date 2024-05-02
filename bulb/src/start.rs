@@ -580,8 +580,9 @@ fn tick_interval() {
     app::tick_tock();
     while let Some(action) = app::next_action() {
         match action {
-            DeferredAction::RefreshList => spawn_local(handle_refresh()),
             DeferredAction::HideToast => hide_toast(),
+            DeferredAction::MakeEventSource => add_eventsource_listener(),
+            DeferredAction::RefreshList => spawn_local(handle_refresh()),
             DeferredAction::SetRefreshText(txt) => set_refresh_text(txt),
         }
     }
@@ -594,13 +595,13 @@ fn add_eventsource_listener() {
         Err(e) => {
             set_refresh_text("⭮ ⚪");
             console::log_1(&format!("SSE /iris/api/notify: {e:?}").into());
-            // FIXME: defer an action to try again in a couple seconds
+            app::defer_action(DeferredAction::MakeEventSource, 5000);
             return;
         }
     };
     set_refresh_text("⭮ ⚫");
     let onopen: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
-        set_refresh_text("⭮ 🟢");
+        set_refresh_text("⭮ 🟤");
     });
     es.set_onopen(Some(onopen.as_ref().unchecked_ref()));
     onopen.forget();
@@ -610,6 +611,7 @@ fn add_eventsource_listener() {
     es.set_onerror(Some(onerror.as_ref().unchecked_ref()));
     onerror.forget();
     let onmessage: Closure<dyn Fn(_)> = Closure::new(|e: MessageEvent| {
+        set_refresh_text("⭮ 🟢");
         if let Ok(payload) = e.data().dyn_into::<JsString>() {
             spawn_local(handle_notify(String::from(payload)));
         }
