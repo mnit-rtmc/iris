@@ -315,22 +315,24 @@ impl WeatherData {
         html
     }
 
+    /// Get the average air temperature
+    fn temperature_avg(&self) -> Option<f32> {
+        match &self.temperature_sensor {
+            Some(sensors) => sensors
+                .iter()
+                .filter_map(|at| at.air_temp.and_then(|t| Some((t, 1))))
+                .reduce(|acc, (t, c)| (t + acc.0, c + acc.1))
+                .and_then(|(total, count)| Some(total / count as f32)),
+            None => None,
+        }
+    }
+
     /// Get temperature data as HTML
     fn temperature_html(&self) -> String {
         let mut html = String::new();
         html.push_str("<details><summary>🌡️ ");
-        if let Some(temperature_sensor) = &self.temperature_sensor {
-            let n_temps = temperature_sensor
-                .iter()
-                .filter(|at| at.air_temp.is_some())
-                .count();
-            if n_temps > 0 {
-                let total = temperature_sensor
-                    .iter()
-                    .filter_map(|at| at.air_temp)
-                    .sum::<f32>();
-                html.push_str(&format_temp(total / n_temps as f32));
-            }
+        if let Some(avg) = self.temperature_avg() {
+            html.push_str(&format_temp(avg));
         }
         html.push_str("</summary><ul>");
         if let Some(sensor) = &self.temperature_sensor {
