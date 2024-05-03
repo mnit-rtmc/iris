@@ -259,13 +259,6 @@ pub trait Card: Default + DeserializeOwned + Serialize + PartialEq {
         "".into()
     }
 
-    /// Get the card element ID
-    fn id(&self) -> String {
-        let res = Self::res();
-        let name = HtmlStr::new(self.name());
-        format!("{res}_{name}")
-    }
-
     /// Get geo location name
     fn geo_loc(&self) -> Option<&str> {
         None

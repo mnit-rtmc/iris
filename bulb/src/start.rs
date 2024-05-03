@@ -337,8 +337,8 @@ fn add_click_listener(elem: &Element) -> JsResult<()> {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
         if target.is_instance_of::<HtmlButtonElement>() {
             handle_button_click_ev(&target);
-        } else if let Ok(Some(card)) = target.closest(".card-compact") {
-            handle_card_click_ev(&card);
+        } else if let Ok(Some(cc)) = target.closest(".card-compact") {
+            handle_card_click_ev(&cc);
         }
     });
     elem.add_event_listener_with_callback(
@@ -416,8 +416,6 @@ fn replace_card_html(cv: &CardView, html: &str) {
 async fn handle_delete(cv: CardView) -> Result<()> {
     if app::delete_enabled() {
         card::delete_one(&cv).await?;
-        // NOTE: with SSE notify, this shouldn't be needed
-        app::defer_action(DeferredAction::RefreshList, 1000);
     }
     Ok(())
 }
@@ -436,8 +434,6 @@ async fn handle_save(cv: CardView) -> Result<()> {
 async fn save_create(cv: CardView) -> Result<()> {
     card::create_and_post(cv.res).await?;
     replace_card(cv.view(View::CreateCompact)).await?;
-    // NOTE: with SSE notify, this shouldn't be needed
-    app::defer_action(DeferredAction::RefreshList, 1500);
     Ok(())
 }
 
@@ -466,9 +462,9 @@ async fn handle_button_cv(cv: CardView, id: String) {
 }
 
 /// Handle a `click` event within a card element
-fn handle_card_click_ev(card: &Element) {
-    if let Some(id) = card.get_attribute("id") {
-        if let Some(name) = card.get_attribute("name") {
+fn handle_card_click_ev(elem: &Element) {
+    if let Some(id) = elem.get_attribute("id") {
+        if let Some(name) = elem.get_attribute("name") {
             if let Some(res) = resource_value() {
                 spawn_local(do_future(click_card(res, name, id)));
             }
@@ -639,7 +635,7 @@ async fn handle_notify(payload: String) {
         return;
     }
     set_refresh_text("⭮ 🟡");
-    app::defer_action(DeferredAction::SetRefreshText("⭮ 🟢"), 500);
+    app::defer_action(DeferredAction::SetRefreshText("⭮ 🟢"), 600);
     do_future(update_card_list()).await;
 }
 
