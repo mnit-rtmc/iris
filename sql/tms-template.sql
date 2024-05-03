@@ -961,40 +961,40 @@ CREATE TRIGGER geo_loc_notify_trig
     FOR EACH ROW EXECUTE FUNCTION iris.geo_loc_notify();
 
 CREATE FUNCTION iris.geo_location(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT)
-	RETURNS TEXT AS $geo_location$
+    RETURNS TEXT AS $geo_location$
 DECLARE
-	roadway ALIAS FOR $1;
-	road_dir ALIAS FOR $2;
-	cross_mod ALIAS FOR $3;
-	cross_street ALIAS FOR $4;
-	cross_dir ALIAS FOR $5;
-	landmark ALIAS FOR $6;
-	corridor TEXT;
-	xloc TEXT;
-	lmrk TEXT;
+    roadway ALIAS FOR $1;
+    road_dir ALIAS FOR $2;
+    cross_mod ALIAS FOR $3;
+    cross_street ALIAS FOR $4;
+    cross_dir ALIAS FOR $5;
+    landmark ALIAS FOR $6;
+    corridor TEXT;
+    xloc TEXT;
+    lmrk TEXT;
 BEGIN
-	corridor = trim(roadway || concat(' ', road_dir));
-	xloc = trim(concat(cross_mod, ' ') || cross_street
-	    || concat(' ', cross_dir));
-	lmrk = replace('(' || landmark || ')', '()', '');
-	RETURN NULLIF(trim(concat(corridor, ' ' || xloc, ' ' || lmrk)), '');
+    corridor = trim(roadway || concat(' ', road_dir));
+    xloc = trim(concat(cross_mod, ' ') || cross_street
+        || concat(' ', cross_dir));
+    lmrk = replace('(' || landmark || ')', '()', '');
+    RETURN NULLIF(trim(concat(corridor, ' ' || xloc, ' ' || lmrk)), '');
 END;
 $geo_location$ LANGUAGE plpgsql;
 
 CREATE VIEW geo_loc_view AS
-	SELECT l.name, r.abbrev AS rd, l.roadway, r_dir.direction AS road_dir,
-	       r_dir.dir AS rdir, m.modifier AS cross_mod, m.mod AS xmod,
-	       c.abbrev as xst, l.cross_street, c_dir.direction AS cross_dir,
-	       l.landmark, l.lat, l.lon,
-	       trim(l.roadway || concat(' ', r_dir.direction)) AS corridor,
-	       iris.geo_location(l.roadway, r_dir.direction, m.modifier,
-	       l.cross_street, c_dir.direction, l.landmark) AS location
-	FROM iris.geo_loc l
-	LEFT JOIN iris.road r ON l.roadway = r.name
-	LEFT JOIN iris.road_modifier m ON l.cross_mod = m.id
-	LEFT JOIN iris.road c ON l.cross_street = c.name
-	LEFT JOIN iris.direction r_dir ON l.road_dir = r_dir.id
-	LEFT JOIN iris.direction c_dir ON l.cross_dir = c_dir.id;
+    SELECT l.name, r.abbrev AS rd, l.roadway, r_dir.direction AS road_dir,
+           r_dir.dir AS rdir, m.modifier AS cross_mod, m.mod AS xmod,
+           c.abbrev as xst, l.cross_street, c_dir.direction AS cross_dir,
+           l.landmark, l.lat, l.lon,
+           trim(l.roadway || concat(' ', r_dir.direction)) AS corridor,
+           iris.geo_location(l.roadway, r_dir.direction, m.modifier,
+           l.cross_street, c_dir.direction, l.landmark) AS location
+    FROM iris.geo_loc l
+    LEFT JOIN iris.road r ON l.roadway = r.name
+    LEFT JOIN iris.road_modifier m ON l.cross_mod = m.id
+    LEFT JOIN iris.road c ON l.cross_street = c.name
+    LEFT JOIN iris.direction r_dir ON l.road_dir = r_dir.id
+    LEFT JOIN iris.direction c_dir ON l.cross_dir = c_dir.id;
 GRANT SELECT ON geo_loc_view TO PUBLIC;
 
 CREATE TABLE iris.r_node_type (
