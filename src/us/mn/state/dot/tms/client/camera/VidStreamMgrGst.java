@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2020  SRF Consulting Group
- * Copyright (C) 2020  Minnesota Department of Transportation
+ * Copyright (C) 2019-2024  SRF Consulting Group
+ * Copyright (C) 2020       Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,8 @@ import org.freedesktop.gstreamer.elements.AppSink;
 /**
  * Stream manager for a GStreamer stream.
  *
- * @author John L. Stanley - SRF Consulting Group
+ * @author John L. Stanley - SRF Consulting
+ * @author Gordon Parikh   - SRF Consulting
  */
 public class VidStreamMgrGst extends VidStreamMgr {
 
@@ -274,12 +275,17 @@ public class VidStreamMgrGst extends VidStreamMgr {
 		}
 	}
 
+	private static boolean gstVersionPrinted = false;
+	
 	/** Try to initialize GStreamer */
 	static private boolean initGst() {
 		try {
 			Gst.init("StreamMgrGst");
-			System.out.println("GStreamer " +
-				Gst.getVersionString() + " installed");
+			if (!gstVersionPrinted) {
+				System.out.println(Gst.getVersionString()
+						+ " installed");
+				gstVersionPrinted = true;
+			}
 			return true;
 		} catch (GstException | UnsatisfiedLinkError ex) {
 			System.out.println("GStreamer not available: "
@@ -391,15 +397,11 @@ public class VidStreamMgrGst extends VidStreamMgr {
 //			pipe.debugToDotFile(Bin.DebugGraphDetails.SHOW_ALL,
 //					getDOTFileName());
 			pipe = null;
-			if (appsink == null)
-				System.out.println("appsink is null");
-			else {
+			if (appsink != null) {
 				appsink.disconnect((AppSink.NEW_SAMPLE) appsinkListener);
 				appsink.disconnect((AppSink.EOS)        appsinkListener);
 			}
-			if (bus == null)
-				System.out.println("bus is null");
-			else {
+			if (bus != null) {
 				bus.disconnect((Bus.ERROR)  busListener);
 				bus.disconnect((Bus.WARNING)busListener);
 				bus.disconnect((Bus.INFO)   busListener);
@@ -409,7 +411,6 @@ public class VidStreamMgrGst extends VidStreamMgr {
 			try {
 				p.setState(State.NULL);
 				p.getState();
-				System.out.println("CloseStream finished");
 			}
 			catch (java.lang.IllegalStateException e) {
 				e.printStackTrace();
@@ -438,7 +439,6 @@ public class VidStreamMgrGst extends VidStreamMgr {
 		public void eos(AppSink elem) {
 			if (bStreaming) {
 				streamingStopped();
-				System.out.println("### EOS");
 				bStreaming = false;
 			}
 		}
