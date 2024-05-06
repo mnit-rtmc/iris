@@ -34,6 +34,7 @@ const OUTER_SCALE: f64 = 16.0 / 6.0;
 
 /// Road definition
 #[allow(unused)]
+#[derive(Clone)]
 pub struct Road {
     name: String,
     abbrev: String,
@@ -57,7 +58,7 @@ where
 }
 
 /// Roadway node
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct RNode {
     name: String,
     #[serde(skip_serializing)]
@@ -128,6 +129,7 @@ struct CorridorId {
 /// previous, using haversine distance.
 ///
 /// Invalid nodes (not active or missing lat/lon) are placed at the end.
+#[derive(Clone)]
 struct Corridor {
     /// Corridor ID
     cor_id: CorridorId,
@@ -143,6 +145,29 @@ struct Corridor {
     count: usize,
     /// Scale changed or nodes out-of-order
     dirty: bool,
+}
+
+/// Geo location
+#[derive(Debug, Default, PartialEq)]
+pub struct GeoLoc {
+    name: String,
+    roadway: Option<String>,
+    road_dir: i16,
+    lat: Option<f64>,
+    lon: Option<f64>,
+}
+
+impl GeoLoc {
+    /// Create a GeoLoc from a result Row
+    pub fn from_row(row: Row) -> Self {
+        GeoLoc {
+            name: row.get(0),
+            roadway: row.get(1),
+            road_dir: row.get(2),
+            lat: row.get(3),
+            lon: row.get(4),
+        }
+    }
 }
 
 /// Segments for a corridor
@@ -161,7 +186,7 @@ struct Segments<'a> {
 }
 
 /// State of all segments
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct SegmentState {
     /// Mapping of roads
     roads: HashMap<String, Road>,
@@ -778,6 +803,17 @@ impl SegmentState {
                 // FIXME: write segment loam layer
             }
         }
+        Ok(())
+    }
+
+    /// Write location markers to loam files
+    ///
+    /// * `locs` Geo locations.
+    pub fn write_loc_markers(&self, locs: &[GeoLoc]) -> Result<()> {
+        for loc in locs {
+            log::trace!("write_loc_markers: {loc:?}");
+        }
+        // FIXME: write loam layers
         Ok(())
     }
 }

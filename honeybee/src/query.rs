@@ -293,6 +293,12 @@ pub const GATE_ARM_STATE_LUT: &str = "\
   FROM iris.gate_arm_state \
   ORDER BY id";
 
+/// SQL query for geo location markers
+pub const GEO_LOC_MARKER: &str = "\
+  SELECT name, roadway, road_dir, lat, lon \
+  FROM iris.geo_loc \
+  WHERE resource_n = $1";
+
 /// SQL query for one geo location (secondary)
 pub const GEO_LOC_ONE: &str = "\
   SELECT name, resource_n, roadway, road_dir, cross_street, cross_dir, \

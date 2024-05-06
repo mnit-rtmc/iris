@@ -15,7 +15,7 @@
 use crate::error::Result;
 use crate::files::AtomicFile;
 use crate::query;
-use crate::segments::{RNode, Road, SegmentState};
+use crate::segments::{GeoLoc, RNode, Road, SegmentState};
 use crate::signmsg::render_all;
 use crate::sonar::Name;
 use futures::{pin_mut, TryStreamExt};
@@ -410,6 +410,7 @@ impl Resource {
             Rnode => query_all_nodes(client, segments).await,
             RoadFull => query_all_roads(client, segments).await,
             SignMessage => self.query_sign_msgs(client).await,
+            Dms => self.query_dms(client, segments).await,
             _ => self.query_file(client, self.path()).await,
         }
     }
@@ -442,6 +443,38 @@ impl Resource {
     async fn query_sign_msgs(self, client: &mut Client) -> Result<()> {
         self.query_file(client, self.path()).await?;
         render_all().await
+    }
+
+    /// Query DMS resource.
+    ///
+    /// * `client` The database connection.
+    /// * `segments` Segment state.
+    async fn query_dms(
+        self,
+        client: &mut Client,
+        segments: &SegmentState,
+    ) -> Result<()> {
+        self.query_file(client, self.path()).await?;
+        let locs = self.query_locs(client).await?;
+        // NOTE: this is not very efficient
+        let segments = segments.clone();
+        tokio::task::spawn_blocking(move || segments.write_loc_markers(&locs))
+            .await?
+    }
+
+    /// Query geo locations for the resource.
+    ///
+    /// * `client` The database connection.
+    async fn query_locs(self, client: &mut Client) -> Result<Vec<GeoLoc>> {
+        log::trace!("query_markers: {}", self.res_type().as_str());
+        let params = &[self.res_type().as_str()];
+        let it = client.query_raw(query::GEO_LOC_MARKER, params).await?;
+        pin_mut!(it);
+        let mut locs = Vec::new();
+        while let Some(row) = it.try_next().await? {
+            locs.push(GeoLoc::from_row(row));
+        }
+        Ok(locs)
     }
 }
 
