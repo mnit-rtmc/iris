@@ -46,6 +46,10 @@ pub enum Error {
     #[error("Join {0}")]
     Join(#[from] tokio::task::JoinError),
 
+    /// Loam error
+    #[error("Loam {0}")]
+    Loam(#[from] loam::Error),
+
     /// Bb8 run error
     #[error("Bb8 run error")]
     Bb8(String),

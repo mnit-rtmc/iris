@@ -1393,6 +1393,7 @@ dependencies = [
  "headers",
  "heck",
  "http",
+ "loam",
  "log",
  "mvt",
  "ntcip",
@@ -1401,6 +1402,7 @@ dependencies = [
  "postgis",
  "rendzina",
  "resources",
+ "rosewood",
  "rustls",
  "serde",
  "serde_json",
@@ -1650,6 +1652,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "01cda141df6706de531b6c46c3a33ecca755538219bd484262fa09410c13539c"
 
 [[package]]
+name = "loam"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b9d5261c2f19f2ccae84b9b44c413829a15d0a59dc0118a6da994fe22bbfdc4c"
+dependencies = [
+ "bincode",
+ "memmap2",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
 name = "lock_api"
 version = "0.4.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1712,6 +1726,15 @@ name = "memchr"
 version = "2.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6c8640c5d730cb13ebd907d8d04b52f55ac9a2eec55b440c8892f40d56c76c1d"
+
+[[package]]
+name = "memmap2"
+version = "0.9.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fe751422e4a8caa417e13c3ea66452215d7d63e19e604f4980461212f3ae1322"
+dependencies = [
+ "libc",
+]
 
 [[package]]
 name = "mime"
@@ -1952,6 +1975,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0da621c0f2ec6aca88545b90ed862dee7ee364e9a8c17b234b9469e3f340ff70"
 dependencies = [
  "num-traits",
+ "serde",
 ]
 
 [[package]]
@@ -2228,6 +2252,19 @@ dependencies = [
  "spin",
  "untrusted",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "rosewood"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "081ea3c837ba8e99dc64e70cff18f8bf2b792150109dc454285907ccea3a2edf"
+dependencies = [
+ "loam",
+ "log",
+ "pointy",
+ "serde",
+ "thiserror",
 ]
 
 [[package]]

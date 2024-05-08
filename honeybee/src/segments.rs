@@ -17,13 +17,15 @@ use crate::files::AtomicFile;
 use mvt::{WebMercatorPos, Wgs84Pos};
 use pointy::Pt;
 use postgis::ewkb::{LineString, Point, Polygon};
+use resources::Res;
+use rosewood::{gis, BulkWriter};
 use serde::{Deserialize, Serialize, Serializer};
 use std::cmp::Ordering;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::fmt;
 use std::hash::{Hash, Hasher};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use tokio_postgres::Row;
 
 /// Base segment scale factor
@@ -31,6 +33,9 @@ const BASE_SCALE: f64 = 1.0 / 6.0;
 
 /// Outer segment scale factor
 const OUTER_SCALE: f64 = 16.0 / 6.0;
+
+/// Tag values, in order specified by tag pattern rule
+type Values = Vec<Option<String>>;
 
 /// Road definition
 #[allow(unused)]
@@ -167,6 +172,31 @@ impl GeoLoc {
             lat: row.get(3),
             lon: row.get(4),
         }
+    }
+
+    /// Get the lat/lon of the location
+    fn latlon(&self) -> Option<(f64, f64)> {
+        match (self.lat, self.lon) {
+            (Some(lat), Some(lon)) => Some((lat, lon)),
+            _ => None,
+        }
+    }
+
+    /// Get the location
+    fn pos(&self) -> Option<Wgs84Pos> {
+        self.latlon().map(|(lat, lon)| Wgs84Pos::new(lat, lon))
+    }
+
+    /// Get the location point
+    fn point(&self) -> Option<Pt<f64>> {
+        self.pos().map(|pos| Pt::from(WebMercatorPos::from(pos)))
+    }
+
+    /// Get tag values
+    fn values(&self) -> Values {
+        let mut values = Vec::with_capacity(1);
+        values.push(Some(self.name.clone()));
+        values
     }
 }
 
@@ -529,7 +559,7 @@ impl Corridor {
             log::warn!("write_file no 'abbrev' for {}", self.cor_id.roadway);
             return Ok(());
         }
-        let cor_name = format!("{}_{}", abbrev, self.cor_id.travel_dir);
+        let cor_name = format!("{abbrev}_{}", self.cor_id.travel_dir);
         log::trace!("write_file {cor_name}");
         let json = serde_json::to_vec(&self.nodes)?;
         let dir = Path::new("corridors");
@@ -809,11 +839,31 @@ impl SegmentState {
     /// Write location markers to loam files
     ///
     /// * `locs` Geo locations.
-    pub fn write_loc_markers(&self, locs: &[GeoLoc]) -> Result<()> {
-        for loc in locs {
-            log::trace!("write_loc_markers: {loc:?}");
+    pub fn write_loc_markers(&self, res: Res, locs: &[GeoLoc]) -> Result<()> {
+        let dir = Path::new("/var/local/earthwyrm/loam");
+        for zoom in 12..=18 {
+            let mut loam = PathBuf::from(dir);
+            loam.push(format!("{}_{zoom}.loam", res.as_str()));
+            let mut writer = BulkWriter::new(loam)?;
+            for loc in locs {
+                if let Some(pt) = loc.point() {
+                    let values = loc.values();
+                    let mut polygon = gis::Polygons::new(values);
+                    // FIXME: make resource-specific marker
+                    let mut pts = Vec::with_capacity(3);
+                    pts.push(pt);
+                    let pt = Pt::from((pt.x + 50.0, pt.y));
+                    pts.push(pt);
+                    let pt = Pt::from((pt.x, pt.y + 50.0));
+                    pts.push(pt);
+                    let pt = Pt::from((pt.x - 50.0, pt.y - 50.0));
+                    pts.push(pt);
+                    polygon.push_outer(pts);
+                    writer.push(&polygon)?;
+                }
+            }
+            writer.finish()?;
         }
-        // FIXME: write loam layers
         Ok(())
     }
 }

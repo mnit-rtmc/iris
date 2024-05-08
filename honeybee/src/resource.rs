@@ -458,15 +458,17 @@ impl Resource {
         let locs = self.query_locs(client).await?;
         // NOTE: this is not very efficient
         let segments = segments.clone();
-        tokio::task::spawn_blocking(move || segments.write_loc_markers(&locs))
-            .await?
+        tokio::task::spawn_blocking(move || {
+            segments.write_loc_markers(self.res_type(), &locs)
+        })
+        .await?
     }
 
     /// Query geo locations for the resource.
     ///
     /// * `client` The database connection.
     async fn query_locs(self, client: &mut Client) -> Result<Vec<GeoLoc>> {
-        log::trace!("query_markers: {}", self.res_type().as_str());
+        log::trace!("query_locs: {}", self.res_type().as_str());
         let params = &[self.res_type().as_str()];
         let it = client.query_raw(query::GEO_LOC_MARKER, params).await?;
         pin_mut!(it);
