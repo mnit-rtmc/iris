@@ -39,6 +39,16 @@ function density_color(density) {
     return "#666";
 }
 
+function dms_style(properties, zoom) {
+    // FIXME: use item_style provided by bulb code
+    return {
+        fill: true,
+        fillOpacity: 1.0,
+        fillColor: "#66f",
+        stroke: false,
+    };
+}
+
 function make_styles() {
     let county = {
         fill: true,
@@ -102,13 +112,13 @@ function make_styles() {
         fillColor: "#cca",
         stroke: false,
     };
-    let paths = {
+    let path = {
         color: '#000',
         opacity: 0.5,
         weight: 1,
         dashArray: "1 3",
     };
-    let railways = {
+    let railway = {
         color: '#642',
         opacity: 0.6,
         weight: 2.5,
@@ -131,12 +141,19 @@ function make_styles() {
         primary: { color: "#ffeaa9" },
         secondary: { color: "#fff4a9" },
         tertiary: { color: "#ffffa9" },
-        roads: { color: "#eee", weight: 2 },
-        paths: paths,
-        railways: railways,
+        road: { color: "#eee", weight: 2 },
+        path: path,
+        railway: railway,
         building: building,
         parking: parking,
-        segments: segment_style,
+        segment: segment_style,
+        dms_12: dms_style,
+        dms_13: dms_style,
+        dms_14: dms_style,
+        dms_15: dms_style,
+        dms_16: dms_style,
+        dms_17: dms_style,
+        dms_18: dms_style,
     };
 }
 
@@ -159,9 +176,7 @@ function init_map() {
         renderFactory: L.svg.tile,
         interactive: true,
         vectorTileLayerStyles: make_styles(),
-        getFeatureId: function(feat) {
-            return feat.properties.osm_id || feat.properties.sid;
-        },
+        getFeatureId: layer_id,
         attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
         maxNativeZoom: 18,
     };
@@ -169,20 +184,20 @@ function init_map() {
     var osm_layers = L.vectorGrid.protobuf(osm_url, options);
     var tms_layers = L.vectorGrid.protobuf(tms_url, options);
     function on_click(e) {
-        let osm_id = e.layer.properties.osm_id || e.layer.properties.sid;
-        let change = (typeof osm_id != "undefined") && (osm_id != highlight);
+        let fid = layer_id(e.layer);
+        let change = (typeof fid != "undefined") && (fid != highlight);
         if (highlight) {
             osm_layers.resetFeatureStyle(highlight);
             tms_layers.resetFeatureStyle(highlight);
             highlight = null;
         }
         if (change) {
-            highlight = osm_id;
+            highlight = fid;
             osm_layers.setFeatureStyle(highlight, highlight_style);
             tms_layers.setFeatureStyle(highlight, highlight_style);
-            let label = event_label(e);
+            let label = layer_label(e.layer);
             if (label) {
-                L.popup({ closeButton: false})
+                L.popup({ closeButton: false })
                  .setContent(label)
                  .setLatLng(e.latlng)
                  .openOn(map);
@@ -198,12 +213,18 @@ function init_map() {
     tms_layers.addTo(map);
 }
 
-function event_label(e) {
+function layer_id(layer) {
+    return layer.properties.osm_id ||
+        layer.properties.sid ||
+        layer.properties.name;
+}
+
+function layer_label(layer) {
     let label = null;
-    let name = e.layer.properties.name || e.layer.properties.ref;
+    let name = layer.properties.name || layer.properties.ref;
     if (name) {
         label = name;
-        let station = e.layer.properties.station;
+        let station = layer.properties.station;
         if (station) {
             label = "<b>" + station + "</b> " + label;
             if (stat_sample) {

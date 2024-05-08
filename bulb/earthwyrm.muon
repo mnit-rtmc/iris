@@ -13,13 +13,12 @@ edge_extent: 8
 # Layer groups are collections of MVT files containing related layers.
 #   - name: Base URI path name
 layer_group: tile
+  # osm (openstreetmap.org) data source (true/false)
+  osm: true
+  #
   # Layer definition
   #
   # name: Name of layer
-  #
-  # source: Data source:
-  #       - osm (openstreetmap.org)
-  #       - json
   #
   # geom_type: Type of geometry (point, linestring or polygon)
   #
@@ -54,108 +53,116 @@ layer_group: tile
   #           ?tag             (same as ?tag!=_)
   #
   layer: county
-    source: osm
     geom_type: polygon
     zoom: 4-14
     tags: $osm_id ?name ?population type=boundary boundary=administrative admin_level=6
   layer: city
-    source: osm
     geom_type: polygon
     zoom: 10+
     tags: $osm_id ?name ?population type=boundary boundary=administrative admin_level=8
   layer: leisure
-    source: osm
     geom_type: polygon
     zoom: 13+
     tags: $osm_id ?name leisure
   layer: cemetery
-    source: osm
     geom_type: polygon
     zoom: 13+
     tags: $osm_id ?name landuse=cemetery
   layer: lake
-    source: osm
     geom_type: polygon
     zoom: 5+
     tags: $osm_id ?name natural=water water=harbour|lagoon|lake|oxbow
   layer: river
-    source: osm
     geom_type: polygon
     zoom: 6+
     tags: $osm_id ?name natural=water water=canal|rapids|river
   layer: pond
-    source: osm
     geom_type: polygon
     zoom: 12+
     tags: $osm_id ?name natural=water water=basin|pond|reservoir
   layer: water
-    source: osm
     geom_type: polygon
     zoom: 14+
     tags: $osm_id ?name natural=water water!=basin|canal|harbour|lagoon|lake|oxbow|pond|rapids|reservoir|river
   layer: wetland
-    source: osm
     geom_type: polygon
     zoom: 12+
     tags: $osm_id ?name natural=wetland
   layer: retail
-    source: osm
     geom_type: polygon
     zoom: 14+
     tags: $osm_id ?name landuse=retail
   layer: parking
-    source: osm
     geom_type: polygon
     zoom: 15+
     tags: $osm_id ?name amenity=parking
   layer: building
-    source: osm
     geom_type: polygon
     zoom: 15+
     tags: $osm_id ?name building
   layer: motorway
-    source: osm
     geom_type: linestring
     zoom: 8+
     tags: $osm_id ?name ?ref highway=motorway|motorway_link
   layer: trunk
-    source: osm
     geom_type: linestring
     zoom: 9+
     tags: $osm_id ?name ?ref highway=trunk|trunk_link
   layer: primary
-    source: osm
     geom_type: linestring
     zoom: 10+
     tags: $osm_id ?name ?ref highway=primary|primary_link
   layer: secondary
-    source: osm
     geom_type: linestring
     zoom: 12+
     tags: $osm_id ?name ?ref highway=secondary|secondary_link
   layer: tertiary
-    source: osm
     geom_type: linestring
     zoom: 13+
     tags: $osm_id ?name ?ref highway=tertiary|tertiary_link
-  layer: roads
-    source: osm
+  layer: road
     geom_type: linestring
     zoom: 14+
     tags: $osm_id ?name ?ref highway=unclassified|residential|living_street|service|road
-  layer: railways
-    source: osm
+  layer: railway
     geom_type: linestring
     zoom: 15+
     tags: $osm_id ?name railway
-  layer: paths
-    source: osm
+  layer: path
     geom_type: linestring
     zoom: 16+
     tags: $osm_id ?name highway=pedestrian|footway|track|bridleway|steps|corridor|cycleway|path
 layer_group: tms
-  layer: segments
-    source: json
+  osm: false
+  #layer: segment
+  #  geom_type: polygon
+  #  zoom: 9-18
+  #  tags: ?station
+  layer: dms_12
     geom_type: polygon
-    zoom: 9-18
-    tags: ?station
+    zoom: 12
+    tags: ?name
+  layer: dms_13
+    geom_type: polygon
+    zoom: 13
+    tags: ?name
+  layer: dms_14
+    geom_type: polygon
+    zoom: 14
+    tags: ?name
+  layer: dms_15
+    geom_type: polygon
+    zoom: 15
+    tags: ?name
+  layer: dms_16
+    geom_type: polygon
+    zoom: 16
+    tags: ?name
+  layer: dms_17
+    geom_type: polygon
+    zoom: 17
+    tags: ?name
+  layer: dms_18
+    geom_type: polygon
+    zoom: 18
+    tags: ?name
