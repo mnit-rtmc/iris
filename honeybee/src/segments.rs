@@ -16,9 +16,9 @@ use crate::error::Result;
 use crate::files::AtomicFile;
 use mvt::{WebMercatorPos, Wgs84Pos};
 use pointy::Pt;
-use postgis::ewkb::{LineString, Point, Polygon};
 use resources::Res;
-use rosewood::{gis, BulkWriter};
+use rosewood::gis::Polygons;
+use rosewood::BulkWriter;
 use serde::{Deserialize, Serialize, Serializer};
 use std::cmp::Ordering;
 use std::collections::hash_map::DefaultHasher;
@@ -115,7 +115,7 @@ enum TravelDir {
 
 /// Corridor ID
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-struct CorridorId {
+pub struct CorridorId {
     /// Name of corridor roadway
     roadway: String,
     /// Travel direction of corridor
@@ -148,18 +148,24 @@ struct Corridor {
     count: usize,
     /// Scale changed or nodes out-of-order
     dirty: bool,
-}
-
-/// Segments for a corridor
-struct Segments<'a> {
-    /// Corridor ref
-    cor: &'a Corridor,
     /// All points on corridor
     pts: Vec<Pt<f64>>,
     /// Normal vectors for all points
     norms: Vec<Pt<f64>>,
     /// Meter distance for all points
     meters: Vec<f64>,
+}
+
+/// Segment outline builder
+struct Segment {
+    /// SID (for leaflet)
+    sid: i64,
+    /// Segment name
+    name: Option<String>,
+    /// Meter point on corridor
+    meter: f64,
+    /// Outer / inner points
+    points: Vec<(Pt<f64>, Pt<f64>)>,
 }
 
 /// State of all segments
@@ -345,6 +351,9 @@ impl Corridor {
             nodes: Vec::new(),
             count: 0,
             dirty: true,
+            pts: Vec::new(),
+            meters: Vec::new(),
+            norms: Vec::new(),
         }
     }
 
@@ -430,15 +439,15 @@ impl Corridor {
         );
     }
 
-    /// Create segments for all zoom levels
-    fn create_segments(&self) -> Result<()> {
+    /// Create points and normals
+    fn create_points_and_norms(&mut self) {
         let pts = self.create_points();
         log::info!("{}: {} points", self.cor_id, pts.len());
         if !pts.is_empty() {
-            let segments = Segments::new(self, pts);
-            segments.create_all()?;
+            self.pts = pts;
+            self.norms = self.create_norms();
+            self.meters = self.create_meterpoints();
         }
-        Ok(())
     }
 
     /// Create points for corridor nodes
@@ -451,11 +460,11 @@ impl Corridor {
     }
 
     /// Create normal vectors for a slice of points
-    fn create_norms(&self, pts: &[Pt<f64>]) -> Vec<Pt<f64>> {
-        let mut norms = Vec::with_capacity(pts.len());
-        for i in 0..pts.len() {
-            let upstream = vector_upstream(pts, i);
-            let downstream = vector_downstream(pts, i);
+    fn create_norms(&self) -> Vec<Pt<f64>> {
+        let mut norms = Vec::with_capacity(self.pts.len());
+        for i in 0..self.pts.len() {
+            let upstream = vector_upstream(&self.pts, i);
+            let downstream = vector_downstream(&self.pts, i);
             let v0 = match (upstream, downstream) {
                 (Some(up), Some(down)) => (up + down).normalize(),
                 (Some(up), None) => up,
@@ -563,98 +572,95 @@ impl Corridor {
         let file = AtomicFile::new(dir, &cor_name).await?;
         file.write_buf(&json).await
     }
-}
 
-impl<'a> Segments<'a> {
-    /// Create corridor segments
-    fn new(cor: &'a Corridor, pts: Vec<Pt<f64>>) -> Self {
-        let norms = cor.create_norms(&pts);
-        let meters = cor.create_meterpoints();
-        Segments {
-            cor,
-            pts,
-            norms,
-            meters,
-        }
-    }
-
-    /// Create segments for all zoom levels
-    fn create_all(&self) -> Result<()> {
-        for zoom in 0..=18 {
-            if road_class_zoom(self.cor.r_class, zoom) {
-                self.create_segments_zoom(zoom)?;
-            }
-        }
-        Ok(())
-    }
-
-    /// Create segments for one zoom level
-    fn create_segments_zoom(&self, zoom: i32) -> Result<()> {
+    /// Write segment layer for one zoom level
+    fn write_segments(
+        &self,
+        writer: &mut BulkWriter<Values, f64, Polygons<f64, Values>>,
+        zoom: i32,
+    ) -> Result<()> {
         let o_scale = self.scale_zoom(OUTER_SCALE, zoom);
         let i_scale = self.scale_zoom(BASE_SCALE, zoom);
-        let mut poly = Vec::<(Pt<f64>, Pt<f64>)>::with_capacity(16);
-        let mut seg_meter = 0.0; // meter point for the current segment
+        let mut seg = Segment::new(self.base_sid);
         let mut p_meter = 0.0; // meter point for the previous point
-        let mut _sid = self.cor.base_sid;
-        let mut _station_id = None;
-        let nodes = &self.cor.nodes[..];
+        let nodes = &self.nodes[..];
         for (node, (pt, (norm, meter))) in nodes.iter().zip(
             self.pts
                 .iter()
                 .zip(self.norms.iter().zip(self.meters.iter())),
         ) {
             // FIXME: use `map_segment_max_meters` system attribute
-            let too_long = *meter >= seg_meter + 2500.0;
+            let too_long = *meter >= seg.meter + 2500.0;
             let outer = *pt + *norm * o_scale;
             let inner = *pt + *norm * i_scale;
             if node.is_break() || too_long {
                 if *meter < p_meter + 2500.0 {
-                    poly.push((outer, inner));
+                    seg.points.push((outer, inner));
                 }
-                if poly.len() > 1 {
-                    let _way = self.create_way(&poly);
-                    // FIXME: write way to loam
-                    _sid += 1;
+                if seg.points.len() > 1 {
+                    let polygon = seg.outline();
+                    writer.push(&polygon)?;
                 }
-                poly.clear();
-                seg_meter = *meter;
-                _station_id = node.station_id.clone();
+                seg.advance(node.station_id.clone(), *meter);
             }
             if !node.is_common() {
-                poly.push((outer, inner));
+                seg.points.push((outer, inner));
             }
             p_meter = *meter;
         }
-        if poly.len() > 1 {
-            let _way = self.create_way(&poly);
-            // FIXME: write way to loam
+        if seg.points.len() > 1 {
+            let polygon = seg.outline();
+            writer.push(&polygon)?;
         }
         Ok(())
     }
 
     /// Scale a vector normal with zoom level
     fn scale_zoom(&self, scale: f64, zoom: i32) -> f64 {
-        self.cor.scale * scale * f64::from(1 << (16 - 16.min(10.max(zoom))))
+        self.scale * scale * f64::from(1 << (16 - 16.min(10.max(zoom))))
+    }
+}
+
+impl Segment {
+    /// Create a new segment
+    fn new(sid: i64) -> Self {
+        let name = None;
+        let meter = 0.0;
+        let points = Vec::<(Pt<f64>, Pt<f64>)>::with_capacity(16);
+        Segment {
+            sid,
+            name,
+            meter,
+            points,
+        }
     }
 
-    /// Create polygon for way column
-    fn create_way(&self, poly: &[(Pt<f64>, Pt<f64>)]) -> Polygon {
-        let mut points = Vec::new();
-        for (vtx, _) in poly {
-            points.push(Point::new(vtx.x, vtx.y, None));
+    /// Advance to next segment
+    fn advance(&mut self, name: Option<String>, meter: f64) {
+        self.sid += 1;
+        self.name = name;
+        self.meter = meter;
+        self.points.clear();
+    }
+
+    /// Create outline polygon
+    fn outline(&self) -> Polygons<f64, Values> {
+        let mut pts = Vec::with_capacity(2 * self.points.len() + 1);
+        for (vtx, _) in self.points.iter() {
+            pts.push(Pt::from(vtx));
         }
-        for (_, vtx) in poly.iter().rev() {
-            points.push(Point::new(vtx.x, vtx.y, None));
+        for (_, vtx) in self.points.iter().rev() {
+            pts.push(Pt::from(vtx));
         }
-        if let Some((vtx, _)) = poly.iter().next() {
-            points.push(Point::new(vtx.x, vtx.y, None));
+        if let Some((vtx, _)) = self.points.iter().next() {
+            pts.push(Pt::from(vtx));
         }
-        let mut linestring = LineString::new();
-        linestring.points = points;
-        let mut way = Polygon::new();
-        way.rings.push(linestring);
-        way.srid = Some(3857);
-        way
+        let mut values = Vec::with_capacity(2);
+        values.push(Some(self.sid.to_string()));
+        values.push(self.name.clone());
+        let mut polygon = Polygons::new(values);
+        polygon.push_outer(pts);
+        polygon
     }
 }
 
@@ -811,21 +817,48 @@ impl SegmentState {
         }
     }
 
-    /// Write all corridors and segments
-    pub async fn write_all(&mut self) -> Result<()> {
+    /// Arrange all corridors
+    pub fn arrange_corridors(&mut self) -> Vec<CorridorId> {
+        let mut cors = Vec::new();
         if self.should_write() {
-            let mut was_dirty = false;
             for cor in self.corridors.values_mut() {
                 if cor.dirty {
-                    was_dirty = true;
+                    cors.push(cor.cor_id.clone());
                     cor.order_nodes();
-                    cor.create_segments()?;
-                    cor.write_file(&self.roads).await?;
+                    cor.create_points_and_norms();
                     cor.dirty = false;
                 }
             }
-            if was_dirty {
-                // FIXME: write segment loam layer
+        }
+        cors
+    }
+
+    /// Write a corridor file
+    pub async fn write_corridor(&self, cid: CorridorId) -> Result<()> {
+        if let Some(cor) = self.corridors.get(&cid) {
+            cor.write_file(&self.roads).await?;
+        }
+        Ok(())
+    }
+
+    /// Write segments to loam files
+    pub fn write_segments(&self) -> Result<()> {
+        let dir = Path::new("/var/local/earthwyrm/loam");
+        for zoom in 0..=18 {
+            let mut loam = PathBuf::from(dir);
+            loam.push(format!("segment_{zoom}.loam"));
+            let mut empty = true;
+            let mut writer = BulkWriter::new(loam)?;
+            for cor in self.corridors.values() {
+                if road_class_zoom(cor.r_class, zoom) {
+                    cor.write_segments(&mut writer, zoom)?;
+                    empty = false;
+                }
+            }
+            if empty {
+                writer.cancel()?;
+            } else {
+                writer.finish()?;
             }
         }
         Ok(())
@@ -844,7 +877,7 @@ impl SegmentState {
             for loc in locs {
                 if let Some(pt) = loc.point() {
                     let values = loc.values();
-                    let mut polygon = gis::Polygons::new(values);
+                    let mut polygon = Polygons::new(values);
                     polygon.push_outer(dms_marker(pt, sz));
                     writer.push(&polygon)?;
                 }

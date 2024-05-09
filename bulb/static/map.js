@@ -44,7 +44,7 @@ function dms_style(properties, zoom) {
     return {
         fill: true,
         fillOpacity: 1.0,
-        fillColor: "#66f",
+        fillColor: "#88f",
         stroke: false,
     };
 }
@@ -146,7 +146,16 @@ function make_styles() {
         railway: railway,
         building: building,
         parking: parking,
-        segment: segment_style,
+        segment_9: segment_style,
+        segment_10: segment_style,
+        segment_11: segment_style,
+        segment_12: segment_style,
+        segment_13: segment_style,
+        segment_14: segment_style,
+        segment_15: segment_style,
+        segment_16: segment_style,
+        segment_17: segment_style,
+        segment_18: segment_style,
         dms_12: dms_style,
         dms_13: dms_style,
         dms_14: dms_style,

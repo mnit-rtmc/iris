@@ -20,7 +20,6 @@ mvt = "0.9"
 ntcip = { workspace = true }
 percent-encoding = "2"
 pointy = "0.6"
-postgis = "0.9"
 rendzina = { path = "../rendzina" }
 resources = { path = "../resources" }
 rosewood = "0.3"

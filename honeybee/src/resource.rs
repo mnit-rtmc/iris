@@ -524,7 +524,7 @@ async fn query_all_nodes(
         segments.update_node(RNode::from_row(row));
     }
     segments.set_has_nodes(true);
-    segments.write_all().await?;
+    write_segments(segments).await?;
     Ok(())
 }
 
@@ -548,7 +548,7 @@ async fn query_one_node(
         assert!(rows.is_empty());
         segments.remove_node(name);
     }
-    segments.write_all().await?;
+    write_segments(segments).await?;
     Ok(())
 }
 
@@ -565,7 +565,7 @@ async fn query_all_roads(
         segments.update_road(Road::from_row(row));
     }
     segments.set_has_roads(true);
-    segments.write_all().await?;
+    write_segments(segments).await?;
     Ok(())
 }
 
@@ -584,6 +584,20 @@ async fn query_one_road(
     if let Some(row) = rows.iter().next() {
         segments.update_road(Road::from_row(row));
     }
-    segments.write_all().await?;
+    write_segments(segments).await?;
     Ok(())
+}
+
+/// Write segments and corridors
+async fn write_segments(segments: &mut SegmentState) -> Result<()> {
+    let mut corridors = segments.arrange_corridors();
+    if corridors.is_empty() {
+        return Ok(());
+    }
+    for cor in corridors.drain(..) {
+        segments.write_corridor(cor).await?;
+    }
+    // NOTE: this is not very efficient
+    let segments = segments.clone();
+    tokio::task::spawn_blocking(move || segments.write_segments()).await?
 }

@@ -1399,7 +1399,6 @@ dependencies = [
  "ntcip",
  "percent-encoding",
  "pointy",
- "postgis",
  "rendzina",
  "resources",
  "rosewood",
@@ -2018,17 +2017,6 @@ dependencies = [
  "cpuid-bool",
  "opaque-debug",
  "universal-hash",
-]
-
-[[package]]
-name = "postgis"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b52406590b7a682cadd0f0339c43905eb323568e84a2e97e855ef92645e0ec09"
-dependencies = [
- "byteorder",
- "bytes",
- "postgres-types",
 ]
 
 [[package]]
