@@ -90,6 +90,16 @@ pub struct RNode {
     speed_limit: i32,
 }
 
+/// Geo location
+#[derive(Debug, Default, PartialEq)]
+pub struct GeoLoc {
+    name: String,
+    roadway: Option<String>,
+    road_dir: i16,
+    lat: Option<f64>,
+    lon: Option<f64>,
+}
+
 /// General direction of travel
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 enum TravelDir {
@@ -101,18 +111,6 @@ enum TravelDir {
     Eb,
     /// Westbound
     Wb,
-}
-
-impl TravelDir {
-    fn from_str(dir: &str) -> Option<Self> {
-        match dir {
-            "NB" => Some(TravelDir::Nb),
-            "SB" => Some(TravelDir::Sb),
-            "EB" => Some(TravelDir::Eb),
-            "WB" => Some(TravelDir::Wb),
-            _ => None,
-        }
-    }
 }
 
 /// Corridor ID
@@ -152,61 +150,10 @@ struct Corridor {
     dirty: bool,
 }
 
-/// Geo location
-#[derive(Debug, Default, PartialEq)]
-pub struct GeoLoc {
-    name: String,
-    roadway: Option<String>,
-    road_dir: i16,
-    lat: Option<f64>,
-    lon: Option<f64>,
-}
-
-impl GeoLoc {
-    /// Create a GeoLoc from a result Row
-    pub fn from_row(row: Row) -> Self {
-        GeoLoc {
-            name: row.get(0),
-            roadway: row.get(1),
-            road_dir: row.get(2),
-            lat: row.get(3),
-            lon: row.get(4),
-        }
-    }
-
-    /// Get the lat/lon of the location
-    fn latlon(&self) -> Option<(f64, f64)> {
-        match (self.lat, self.lon) {
-            (Some(lat), Some(lon)) => Some((lat, lon)),
-            _ => None,
-        }
-    }
-
-    /// Get the location
-    fn pos(&self) -> Option<Wgs84Pos> {
-        self.latlon().map(|(lat, lon)| Wgs84Pos::new(lat, lon))
-    }
-
-    /// Get the location point
-    fn point(&self) -> Option<Pt<f64>> {
-        self.pos().map(|pos| Pt::from(WebMercatorPos::from(pos)))
-    }
-
-    /// Get tag values
-    fn values(&self) -> Values {
-        let mut values = Vec::with_capacity(1);
-        values.push(Some(self.name.clone()));
-        values
-    }
-}
-
 /// Segments for a corridor
-#[allow(unused)]
 struct Segments<'a> {
     /// Corridor ref
     cor: &'a Corridor,
-    /// Name of corridor
-    cor_name: String,
     /// All points on corridor
     pts: Vec<Pt<f64>>,
     /// Normal vectors for all points
@@ -242,9 +189,34 @@ impl fmt::Display for TravelDir {
     }
 }
 
+impl TravelDir {
+    fn from_str(dir: &str) -> Option<Self> {
+        match dir {
+            "NB" => Some(TravelDir::Nb),
+            "SB" => Some(TravelDir::Sb),
+            "EB" => Some(TravelDir::Eb),
+            "WB" => Some(TravelDir::Wb),
+            _ => None,
+        }
+    }
+}
+
 impl fmt::Display for CorridorId {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{} {}", self.roadway, self.travel_dir)
+    }
+}
+
+impl Road {
+    /// Create a Road from a result Row
+    pub fn from_row(row: &Row) -> Self {
+        Road {
+            name: row.get(0),
+            abbrev: row.get(1),
+            r_class: row.get(2),
+            direction: row.get(3),
+            scale: row.get(4),
+        }
     }
 }
 
@@ -318,16 +290,41 @@ impl RNode {
     }
 }
 
-impl Road {
-    /// Create a Road from a result Row
-    pub fn from_row(row: &Row) -> Self {
-        Road {
+impl GeoLoc {
+    /// Create a GeoLoc from a result Row
+    pub fn from_row(row: Row) -> Self {
+        GeoLoc {
             name: row.get(0),
-            abbrev: row.get(1),
-            r_class: row.get(2),
-            direction: row.get(3),
-            scale: row.get(4),
+            roadway: row.get(1),
+            road_dir: row.get(2),
+            lat: row.get(3),
+            lon: row.get(4),
         }
+    }
+
+    /// Get the lat/lon of the location
+    fn latlon(&self) -> Option<(f64, f64)> {
+        match (self.lat, self.lon) {
+            (Some(lat), Some(lon)) => Some((lat, lon)),
+            _ => None,
+        }
+    }
+
+    /// Get the location
+    fn pos(&self) -> Option<Wgs84Pos> {
+        self.latlon().map(|(lat, lon)| Wgs84Pos::new(lat, lon))
+    }
+
+    /// Get the location point
+    fn point(&self) -> Option<Pt<f64>> {
+        self.pos().map(|pos| Pt::from(WebMercatorPos::from(pos)))
+    }
+
+    /// Get tag values
+    fn values(&self) -> Values {
+        let mut values = Vec::with_capacity(1);
+        values.push(Some(self.name.clone()));
+        values
     }
 }
 
@@ -571,12 +568,10 @@ impl Corridor {
 impl<'a> Segments<'a> {
     /// Create corridor segments
     fn new(cor: &'a Corridor, pts: Vec<Pt<f64>>) -> Self {
-        let cor_name = cor.cor_id.to_string();
         let norms = cor.create_norms(&pts);
         let meters = cor.create_meterpoints();
         Segments {
             cor,
-            cor_name,
             pts,
             norms,
             meters,
