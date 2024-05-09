@@ -842,6 +842,7 @@ impl SegmentState {
     pub fn write_loc_markers(&self, res: Res, locs: &[GeoLoc]) -> Result<()> {
         let dir = Path::new("/var/local/earthwyrm/loam");
         for zoom in 12..=18 {
+            let sz = 3_000_000.0 * zoom_scale(zoom);
             let mut loam = PathBuf::from(dir);
             loam.push(format!("{}_{zoom}.loam", res.as_str()));
             let mut writer = BulkWriter::new(loam)?;
@@ -849,16 +850,7 @@ impl SegmentState {
                 if let Some(pt) = loc.point() {
                     let values = loc.values();
                     let mut polygon = gis::Polygons::new(values);
-                    // FIXME: make resource-specific marker
-                    let mut pts = Vec::with_capacity(3);
-                    pts.push(pt);
-                    let pt = Pt::from((pt.x + 50.0, pt.y));
-                    pts.push(pt);
-                    let pt = Pt::from((pt.x, pt.y + 50.0));
-                    pts.push(pt);
-                    let pt = Pt::from((pt.x - 50.0, pt.y - 50.0));
-                    pts.push(pt);
-                    polygon.push_outer(pts);
+                    polygon.push_outer(dms_marker(pt, sz));
                     writer.push(&polygon)?;
                 }
             }
@@ -866,4 +858,35 @@ impl SegmentState {
         }
         Ok(())
     }
+}
+
+/// Calculate scale at one zoom level
+fn zoom_scale(zoom: u32) -> f64 {
+    1.0 / f64::from(1 << zoom)
+}
+
+/// Make DMS marker
+fn dms_marker(pt: Pt<f64>, sz: f64) -> Vec<Pt<f64>> {
+    let x1 = pt.x + sz / 5.0;
+    let x2 = pt.x + sz * 2.0 / 5.0;
+    let x3 = pt.x + sz * 3.0 / 5.0;
+    let x4 = pt.x + sz * 4.0 / 5.0;
+    let x5 = pt.x + sz;
+    let y1 = pt.y + sz / 5.0;
+    let y3 = pt.y + sz * 3.0 / 5.0;
+    let mut pts = Vec::with_capacity(13);
+    pts.push(pt);
+    pts.push(Pt::from((x5, pt.y)));
+    pts.push(Pt::from((x5, y1)));
+    pts.push(Pt::from((x4, y1)));
+    pts.push(Pt::from((x4, y3)));
+    pts.push(Pt::from((x3, y3)));
+    pts.push(Pt::from((x3, y1)));
+    pts.push(Pt::from((x2, y1)));
+    pts.push(Pt::from((x2, y3)));
+    pts.push(Pt::from((x1, y3)));
+    pts.push(Pt::from((x1, y1)));
+    pts.push(Pt::from((pt.x, y1)));
+    pts.push(pt);
+    pts
 }
