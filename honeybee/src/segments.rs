@@ -94,7 +94,7 @@ pub struct RNode {
 }
 
 /// Geo location
-#[derive(Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct GeoLoc {
     name: String,
     roadway: Option<String>,
@@ -180,6 +180,8 @@ pub struct SegmentState {
     has_nodes: bool,
     /// Flag indicating roads are complete
     has_roads: bool,
+    /// Location markers to write
+    markers: HashMap<Res, Vec<GeoLoc>>,
 }
 
 impl fmt::Display for TravelDir {
@@ -770,7 +772,7 @@ impl SegmentState {
     }
 
     /// Check if corridors and segments should be written
-    fn should_write(&self) -> bool {
+    fn can_arrange(&self) -> bool {
         self.has_nodes && self.has_roads
     }
 
@@ -864,7 +866,7 @@ impl SegmentState {
     /// Arrange all corridors
     pub fn arrange_corridors(&mut self) -> Vec<CorridorId> {
         let mut cors = Vec::new();
-        if self.should_write() {
+        if self.can_arrange() {
             for cor in self.corridors.values_mut() {
                 if cor.is_dirty() {
                     cors.push(cor.cor_id.clone());
@@ -906,26 +908,41 @@ impl SegmentState {
         Ok(())
     }
 
-    /// Write location markers to loam files
+    /// Add location markers to write loam files
     ///
+    /// * `res` Resource type.
     /// * `locs` Geo locations.
-    pub fn write_loc_markers(&self, res: Res, locs: &[GeoLoc]) -> Result<()> {
+    pub fn add_loc_markers(&mut self, res: Res, locs: Vec<GeoLoc>) {
+        self.markers.insert(res, locs);
+    }
+
+    /// Clear location markers
+    pub fn clear_markers(&mut self) {
+        if self.can_arrange() {
+            self.markers.clear();
+        }
+    }
+
+    /// Write location markers to loam files
+    pub fn write_loc_markers(&self) -> Result<()> {
         let dir = Path::new(LOAM_PATH);
-        for zoom in 12..=18 {
-            let sz = 1_000_000.0 * zoom_scale(zoom);
-            let mut loam = PathBuf::from(dir);
-            loam.push(format!("{}_{zoom}.loam", res.as_str()));
-            let mut writer = BulkWriter::new(loam)?;
-            for loc in locs {
-                if let Some(pt) = loc.point() {
-                    let norm = self.loc_normal(loc);
-                    let values = loc.values();
-                    let mut polygon = Polygons::new(values);
-                    polygon.push_outer(dms_marker(pt, norm, sz));
-                    writer.push(&polygon)?;
+        for (res, locs) in self.markers.iter() {
+            for zoom in 12..=18 {
+                let sz = 800_000.0 * zoom_scale(zoom);
+                let mut loam = PathBuf::from(dir);
+                loam.push(format!("{}_{zoom}.loam", res.as_str()));
+                let mut writer = BulkWriter::new(loam)?;
+                for loc in locs {
+                    if let Some(pt) = loc.point() {
+                        let norm = self.loc_normal(loc);
+                        let values = loc.values();
+                        let mut polygon = Polygons::new(values);
+                        polygon.push_outer(dms_marker(pt, norm, sz));
+                        writer.push(&polygon)?;
+                    }
                 }
+                writer.finish()?;
             }
-            writer.finish()?;
         }
         Ok(())
     }

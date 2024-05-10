@@ -89,66 +89,62 @@ impl Resource {
     /// Get iterator of all resource variants
     pub fn iter() -> impl Iterator<Item = Resource> {
         use Resource::*;
-        // NOTE: ordered by dependency
         [
-            // LUT resources
-            BeaconState,
-            CommProtocol,
-            Condition,
-            Direction,
-            GateArmInterlock,
-            GateArmState,
-            LaneUseIndication,
-            LcsLock,
-            ResourceType,
-            RoadModifier,
-            SystemAttributePub,
-            // Ancillary resources
-            CabinetStyle,
-            CommConfig,
-            Font,
-            Gps,
-            Graphic,
-            Modem,
-            MsgLine,
-            MsgPattern,
-            Role,
-            SignConfig,
-            SignDetail,
-            User,
-            Word,
-            Permission,
-            Road,
-            RoadFull,
-            Rnode,
-            SignMessage,
-            // Full resources
             Alarm,
             Beacon,
+            BeaconState,
+            CabinetStyle,
             Camera,
             CameraPub,
+            CommConfig,
             CommLink,
+            CommProtocol,
+            Condition,
             Controller,
             Detector,
             DetectorPub,
+            Direction,
             Dms,
             DmsPub,
             DmsStat,
             FlowStream,
+            Font,
             GateArm,
             GateArmArray,
+            GateArmInterlock,
+            GateArmState,
+            Gps,
+            Graphic,
             Incident,
             LaneMarking,
+            LaneUseIndication,
             LcsArray,
             LcsIndication,
+            LcsLock,
+            Modem,
+            MsgLine,
+            MsgPattern,
             ParkingAreaPub,
             ParkingAreaDyn,
             ParkingAreaArch,
+            Permission,
             RampMeter,
+            ResourceType,
+            Rnode,
+            Road,
+            RoadFull,
+            RoadModifier,
+            Role,
+            SignConfig,
+            SignDetail,
+            SignMessage,
+            SystemAttributePub,
             TagReader,
+            User,
             VideoMonitor,
             WeatherSensor,
             WeatherSensorPub,
+            Word,
         ]
         .iter()
         .cloned()
@@ -456,16 +452,15 @@ impl Resource {
     async fn query_dms(
         self,
         client: &mut Client,
-        segments: &SegmentState,
+        segments: &mut SegmentState,
     ) -> Result<()> {
         self.query_file(client, self.path()).await?;
         let locs = self.query_locs(client).await?;
+        segments.add_loc_markers(self.res_type(), locs);
         // NOTE: this is not very efficient
-        let segments = segments.clone();
-        tokio::task::spawn_blocking(move || {
-            segments.write_loc_markers(self.res_type(), &locs)
-        })
-        .await?
+        let segs = segments.clone();
+        segments.clear_markers();
+        tokio::task::spawn_blocking(move || segs.write_loc_markers()).await?
     }
 
     /// Query geo locations for the resource.
@@ -602,6 +597,11 @@ async fn write_segments(segments: &mut SegmentState) -> Result<()> {
         segments.write_corridor(cor).await?;
     }
     // NOTE: this is not very efficient
-    let segments = segments.clone();
-    tokio::task::spawn_blocking(move || segments.write_segments()).await?
+    let segs = segments.clone();
+    segments.clear_markers();
+    tokio::task::spawn_blocking(move || {
+        segs.write_segments()?;
+        segs.write_loc_markers()
+    })
+    .await?
 }

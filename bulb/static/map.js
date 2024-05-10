@@ -43,9 +43,11 @@ function dms_style(properties, zoom) {
     // FIXME: use item_style provided by bulb code
     return {
         fill: true,
-        fillOpacity: 1.0,
-        fillColor: "#88f",
-        stroke: false,
+        fillOpacity: 0.8,
+        fillColor: "#fcf",
+        weight: 0.5,
+        opacity: 0.5,
+        color: "#000",
     };
 }
 
