@@ -15,7 +15,7 @@
 use crate::error::Result;
 use crate::files::AtomicFile;
 use mvt::{WebMercatorPos, Wgs84Pos};
-use pointy::Pt;
+use pointy::{Pt, Transform};
 use resources::Res;
 use rosewood::gis::Polygons;
 use rosewood::BulkWriter;
@@ -27,6 +27,9 @@ use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::path::{Path, PathBuf};
 use tokio_postgres::Row;
+
+/// Path to store .loam files
+const LOAM_PATH: &str = "/var/local/earthwyrm/loam";
 
 /// Base segment scale factor
 const BASE_SCALE: f64 = 1.0 / 6.0;
@@ -132,7 +135,7 @@ pub struct CorridorId {
 /// previous, using haversine distance.
 ///
 /// Invalid nodes (not active or missing lat/lon) are placed at the end.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct Corridor {
     /// Corridor ID
     cor_id: CorridorId,
@@ -144,7 +147,7 @@ struct Corridor {
     scale: f64,
     /// All nodes in corridor
     nodes: Vec<RNode>,
-    /// All points on corridor
+    /// All points on corridor (WebMercator)
     pts: Vec<Pt<f64>>,
     /// Normal vectors for all points
     norms: Vec<Pt<f64>>,
@@ -192,6 +195,16 @@ impl fmt::Display for TravelDir {
 }
 
 impl TravelDir {
+    fn from_i16(dir: i16) -> Option<Self> {
+        match dir {
+            1 => Some(TravelDir::Nb),
+            2 => Some(TravelDir::Sb),
+            3 => Some(TravelDir::Eb),
+            4 => Some(TravelDir::Wb),
+            _ => None,
+        }
+    }
+
     fn from_str(dir: &str) -> Option<Self> {
         match dir {
             "NB" => Some(TravelDir::Nb),
@@ -199,6 +212,26 @@ impl TravelDir {
             "EB" => Some(TravelDir::Eb),
             "WB" => Some(TravelDir::Wb),
             _ => None,
+        }
+    }
+}
+
+impl From<TravelDir> for Pt<f64> {
+    fn from(td: TravelDir) -> Self {
+        match td {
+            TravelDir::Nb => Pt::new(0.0, 1.0),
+            TravelDir::Sb => Pt::new(0.0, -1.0),
+            TravelDir::Eb => Pt::new(1.0, 0.0),
+            TravelDir::Wb => Pt::new(-1.0, 0.0),
+        }
+    }
+}
+
+impl From<(&str, TravelDir)> for CorridorId {
+    fn from((roadway, travel_dir): (&str, TravelDir)) -> Self {
+        CorridorId {
+            roadway: roadway.to_string(),
+            travel_dir,
         }
     }
 }
@@ -244,13 +277,8 @@ impl RNode {
     /// Get the RNode corridor ID
     fn cor_id(&self) -> Option<CorridorId> {
         match (&self.roadway, &self.road_dir) {
-            (Some(roadway), Some(road_dir)) => {
-                let roadway = roadway.clone();
-                TravelDir::from_str(road_dir).map(|travel_dir| CorridorId {
-                    roadway,
-                    travel_dir,
-                })
-            }
+            (Some(roadway), Some(rd)) => TravelDir::from_str(rd)
+                .map(|td| CorridorId::from((roadway.as_str(), td))),
             _ => None,
         }
     }
@@ -304,6 +332,16 @@ impl GeoLoc {
         }
     }
 
+    /// Get the corridor ID
+    fn cor_id(&self) -> Option<CorridorId> {
+        match (&self.roadway, TravelDir::from_i16(self.road_dir)) {
+            (Some(roadway), Some(td)) => {
+                Some(CorridorId::from((roadway.as_str(), td)))
+            }
+            _ => None,
+        }
+    }
+
     /// Get the lat/lon of the location
     fn latlon(&self) -> Option<(f64, f64)> {
         match (self.lat, self.lon) {
@@ -345,8 +383,8 @@ impl Corridor {
             scale,
             nodes: Vec::new(),
             pts: Vec::new(),
-            meters: Vec::new(),
             norms: Vec::new(),
+            meters: Vec::new(),
         }
     }
 
@@ -358,8 +396,8 @@ impl Corridor {
     /// Make "dirty" (require arranging)
     fn make_dirty(&mut self) {
         self.pts.clear();
-        self.meters.clear();
         self.norms.clear();
+        self.meters.clear();
     }
 
     /// Compare lat/lon positions in corridor direction
@@ -481,12 +519,7 @@ impl Corridor {
 
     /// Get corridor travel direction
     fn travel_dir(&self) -> Pt<f64> {
-        match self.cor_id.travel_dir {
-            TravelDir::Nb => Pt::new(0.0, 1.0),
-            TravelDir::Sb => Pt::new(0.0, -1.0),
-            TravelDir::Eb => Pt::new(1.0, 0.0),
-            TravelDir::Wb => Pt::new(-1.0, 0.0),
-        }
+        Pt::from(self.cor_id.travel_dir)
     }
 
     /// Create meter-points for corridor nodes
@@ -619,6 +652,24 @@ impl Corridor {
     /// Scale a vector normal with zoom level
     fn scale_zoom(&self, scale: f64, zoom: i32) -> f64 {
         self.scale * scale * f64::from(1 << (16 - 16.min(10.max(zoom))))
+    }
+
+    /// Calculate normal vector for a corridor location
+    fn loc_normal(&self, loc: &GeoLoc) -> f64 {
+        let mut norm = Pt::from(TravelDir::Nb).right().angle();
+        let Some(pos) = loc.pos() else {
+            return norm;
+        };
+        let mut dist_m = 2_000.0; // 2 km
+        for (pt, n) in self.pts.iter().zip(&self.norms) {
+            let pt = Wgs84Pos::from(WebMercatorPos::new(pt.x, pt.y));
+            let dist = pt.distance_haversine(&pos);
+            if dist < dist_m {
+                dist_m = dist;
+                norm = n.angle();
+            }
+        }
+        norm
     }
 }
 
@@ -834,7 +885,7 @@ impl SegmentState {
 
     /// Write segments to loam files
     pub fn write_segments(&self) -> Result<()> {
-        let dir = Path::new("/var/local/earthwyrm/loam");
+        let dir = Path::new(LOAM_PATH);
         for zoom in 0..=18 {
             let mut loam = PathBuf::from(dir);
             loam.push(format!("segment_{zoom}.loam"));
@@ -859,23 +910,34 @@ impl SegmentState {
     ///
     /// * `locs` Geo locations.
     pub fn write_loc_markers(&self, res: Res, locs: &[GeoLoc]) -> Result<()> {
-        let dir = Path::new("/var/local/earthwyrm/loam");
+        let dir = Path::new(LOAM_PATH);
         for zoom in 12..=18 {
-            let sz = 3_000_000.0 * zoom_scale(zoom);
+            let sz = 1_000_000.0 * zoom_scale(zoom);
             let mut loam = PathBuf::from(dir);
             loam.push(format!("{}_{zoom}.loam", res.as_str()));
             let mut writer = BulkWriter::new(loam)?;
             for loc in locs {
                 if let Some(pt) = loc.point() {
+                    let norm = self.loc_normal(loc);
                     let values = loc.values();
                     let mut polygon = Polygons::new(values);
-                    polygon.push_outer(dms_marker(pt, sz));
+                    polygon.push_outer(dms_marker(pt, norm, sz));
                     writer.push(&polygon)?;
                 }
             }
             writer.finish()?;
         }
         Ok(())
+    }
+
+    /// Calculate normal vector for a location
+    fn loc_normal(&self, loc: &GeoLoc) -> f64 {
+        if let Some(cid) = loc.cor_id() {
+            if let Some(cor) = self.corridors.get(&cid) {
+                return cor.loc_normal(loc);
+            }
+        };
+        Pt::from(TravelDir::Nb).right().angle()
     }
 }
 
@@ -885,27 +947,23 @@ fn zoom_scale(zoom: u32) -> f64 {
 }
 
 /// Make DMS marker
-fn dms_marker(pt: Pt<f64>, sz: f64) -> Vec<Pt<f64>> {
-    let x1 = pt.x + sz / 5.0;
-    let x2 = pt.x + sz * 2.0 / 5.0;
-    let x3 = pt.x + sz * 3.0 / 5.0;
-    let x4 = pt.x + sz * 4.0 / 5.0;
-    let x5 = pt.x + sz;
-    let y1 = pt.y + sz / 5.0;
-    let y3 = pt.y + sz * 3.0 / 5.0;
+fn dms_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
+    let t = Transform::with_scale(sz, sz)
+        .rotate(norm)
+        .translate(pt.x, pt.y);
     vec![
-        pt,
-        Pt::from((x5, pt.y)),
-        Pt::from((x5, y1)),
-        Pt::from((x4, y1)),
-        Pt::from((x4, y3)),
-        Pt::from((x3, y3)),
-        Pt::from((x3, y1)),
-        Pt::from((x2, y1)),
-        Pt::from((x2, y3)),
-        Pt::from((x1, y3)),
-        Pt::from((x1, y1)),
-        Pt::from((pt.x, y1)),
-        pt,
+        Pt::from((0.0, 0.0)) * t,
+        Pt::from((5.0, 0.0)) * t,
+        Pt::from((5.0, 1.0)) * t,
+        Pt::from((4.0, 1.0)) * t,
+        Pt::from((4.0, 3.0)) * t,
+        Pt::from((3.0, 3.0)) * t,
+        Pt::from((3.0, 1.0)) * t,
+        Pt::from((2.0, 1.0)) * t,
+        Pt::from((2.0, 3.0)) * t,
+        Pt::from((1.0, 3.0)) * t,
+        Pt::from((1.0, 1.0)) * t,
+        Pt::from((0.0, 1.0)) * t,
+        Pt::from((0.0, 0.0)) * t,
     ]
 }
