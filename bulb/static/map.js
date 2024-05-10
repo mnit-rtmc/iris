@@ -44,7 +44,7 @@ function dms_style(properties, zoom) {
     return {
         fill: true,
         fillOpacity: 0.8,
-        fillColor: "#fcf",
+        fillColor: "#979",
         weight: 0.5,
         opacity: 0.5,
         color: "#000",
