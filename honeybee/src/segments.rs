@@ -144,10 +144,6 @@ struct Corridor {
     scale: f64,
     /// All nodes in corridor
     nodes: Vec<RNode>,
-    /// Valid node count
-    count: usize,
-    /// Scale changed or nodes out-of-order
-    dirty: bool,
     /// All points on corridor
     pts: Vec<Pt<f64>>,
     /// Normal vectors for all points
@@ -328,33 +324,42 @@ impl GeoLoc {
 
     /// Get tag values
     fn values(&self) -> Values {
-        let mut values = Vec::with_capacity(1);
-        values.push(Some(self.name.clone()));
-        values
+        vec![Some(self.name.clone())]
     }
 }
 
 impl Corridor {
     /// Create a new corridor
-    fn new(
-        cor_id: CorridorId,
-        base_sid: i64,
-        r_class: i16,
-        scale: f64,
-    ) -> Self {
+    fn new(cor_id: CorridorId, r_class: i16, scale: f64) -> Self {
         log::trace!("Corridor::new {cor_id}");
+        // Leaflet doesn't like it when we use the high bits...
+        let base_sid = 0xFFFF_FFFF_FFFF & {
+            let mut hasher = DefaultHasher::new();
+            cor_id.hash(&mut hasher);
+            hasher.finish()
+        } as i64;
         Corridor {
             cor_id,
             base_sid,
             r_class,
             scale,
             nodes: Vec::new(),
-            count: 0,
-            dirty: true,
             pts: Vec::new(),
             meters: Vec::new(),
             norms: Vec::new(),
         }
+    }
+
+    /// Check if "dirty" (needs arranging)
+    fn is_dirty(&self) -> bool {
+        self.pts.is_empty()
+    }
+
+    /// Make "dirty" (require arranging)
+    fn make_dirty(&mut self) {
+        self.pts.clear();
+        self.meters.clear();
+        self.norms.clear();
     }
 
     /// Compare lat/lon positions in corridor direction
@@ -412,9 +417,17 @@ impl Corridor {
         idx_dist.map(|(i, _d)| i)
     }
 
+    /// Arrange nodes, points and normals
+    fn arrange(&mut self) {
+        self.order_nodes();
+        self.create_points();
+        self.create_norms();
+        self.create_meterpoints();
+    }
+
     /// Order all nodes
     fn order_nodes(&mut self) {
-        self.count = match self.first_node() {
+        let count = match self.first_node() {
             Some(i) => {
                 if i > 0 {
                     self.nodes.swap(0, i);
@@ -432,35 +445,25 @@ impl Corridor {
             None => 0,
         };
         log::trace!(
-            "order_nodes: {}, count: {} of {}",
+            "order_nodes: {}, count: {count} of {}",
             self.cor_id,
-            self.count,
             self.nodes.len(),
         );
     }
 
-    /// Create points and normals
-    fn create_points_and_norms(&mut self) {
-        let pts = self.create_points();
-        log::info!("{}: {} points", self.cor_id, pts.len());
-        if !pts.is_empty() {
-            self.pts = pts;
-            self.norms = self.create_norms();
-            self.meters = self.create_meterpoints();
-        }
-    }
-
     /// Create points for corridor nodes
-    fn create_points(&self) -> Vec<Pt<f64>> {
-        self.nodes
+    fn create_points(&mut self) {
+        self.pts = self
+            .nodes
             .iter()
             .filter_map(|n| n.pos())
             .map(|p| Pt::from(WebMercatorPos::from(p)))
-            .collect()
+            .collect();
+        log::info!("{}: {} points", self.cor_id, self.pts.len());
     }
 
-    /// Create normal vectors for a slice of points
-    fn create_norms(&self) -> Vec<Pt<f64>> {
+    /// Create normal vectors for corridor points
+    fn create_norms(&mut self) {
         let mut norms = Vec::with_capacity(self.pts.len());
         for i in 0..self.pts.len() {
             let upstream = vector_upstream(&self.pts, i);
@@ -473,7 +476,7 @@ impl Corridor {
             };
             norms.push(v0.left());
         }
-        norms
+        self.norms = norms;
     }
 
     /// Get corridor travel direction
@@ -487,8 +490,8 @@ impl Corridor {
     }
 
     /// Create meter-points for corridor nodes
-    fn create_meterpoints(&self) -> Vec<f64> {
-        let mut meters = Vec::new();
+    fn create_meterpoints(&mut self) {
+        let mut meters = Vec::with_capacity(self.pts.len());
         let mut meter = 0.0;
         let mut ppos: Option<Wgs84Pos> = None;
         for pos in self.nodes.iter().filter_map(|n| n.pos()) {
@@ -498,7 +501,7 @@ impl Corridor {
             meters.push(meter);
             ppos = Some(pos);
         }
-        meters
+        self.meters = meters;
     }
 
     /// Add a node to corridor
@@ -510,7 +513,7 @@ impl Corridor {
             self.nodes.len()
         );
         if node.is_valid() {
-            self.dirty = true;
+            self.make_dirty();
         }
         self.nodes.push(node);
     }
@@ -523,17 +526,15 @@ impl Corridor {
             &self.cor_id,
             self.nodes.len()
         );
-        if node.is_valid() {
-            self.dirty = true;
-        }
-        match self.nodes.iter_mut().find(|n| n.name == node.name) {
-            Some(n) => {
-                if n.is_valid() {
-                    self.dirty = true;
-                }
-                *n = node;
-            }
-            None => log::error!("update_node: {} not found", node.name),
+        let Some(n) = self.nodes.iter_mut().find(|n| n.name == node.name)
+        else {
+            log::error!("update_node: {} not found", node.name);
+            return;
+        };
+        let dirty = n.is_valid() || node.is_valid();
+        *n = node;
+        if dirty {
+            self.make_dirty();
         }
     }
 
@@ -548,7 +549,7 @@ impl Corridor {
             Some(idx) => {
                 let node = self.nodes.remove(idx);
                 if node.is_valid() {
-                    self.dirty = true;
+                    self.make_dirty();
                 }
             }
             None => log::error!("remove_node: {name} not found"),
@@ -652,12 +653,10 @@ impl Segment {
         for (_, vtx) in self.points.iter().rev() {
             pts.push(Pt::from(vtx));
         }
-        if let Some((vtx, _)) = self.points.iter().next() {
+        if let Some((vtx, _)) = self.points.first() {
             pts.push(Pt::from(vtx));
         }
-        let mut values = Vec::with_capacity(2);
-        values.push(Some(self.sid.to_string()));
-        values.push(self.name.clone());
+        let values = vec![Some(self.sid.to_string()), self.name.clone()];
         let mut polygon = Polygons::new(values);
         polygon.push_outer(pts);
         polygon
@@ -761,15 +760,9 @@ impl SegmentState {
     /// Add a node to corridor
     fn add_corridor_node(&mut self, cid: &CorridorId, node: RNode) {
         if !self.corridors.contains_key(cid) {
-            // Leaflet doesn't like it when we use the high bits...
-            let base_sid = 0xFFFF_FFFF_FFFF & {
-                let mut hasher = DefaultHasher::new();
-                cid.hash(&mut hasher);
-                hasher.finish()
-            } as i64;
             let r_class = self.r_class(&cid.roadway);
             let scale = self.scale(&cid.roadway);
-            let cor = Corridor::new(cid.clone(), base_sid, r_class, scale);
+            let cor = Corridor::new(cid.clone(), r_class, scale);
             self.corridors.insert(cid.clone(), cor);
         }
         if let Some(cor) = self.corridors.get_mut(cid) {
@@ -812,7 +805,7 @@ impl SegmentState {
             {
                 cor.r_class = r_class;
                 cor.scale = scale;
-                cor.dirty = true;
+                cor.make_dirty();
             }
         }
     }
@@ -822,11 +815,9 @@ impl SegmentState {
         let mut cors = Vec::new();
         if self.should_write() {
             for cor in self.corridors.values_mut() {
-                if cor.dirty {
+                if cor.is_dirty() {
                     cors.push(cor.cor_id.clone());
-                    cor.order_nodes();
-                    cor.create_points_and_norms();
-                    cor.dirty = false;
+                    cor.arrange();
                 }
             }
         }
@@ -902,19 +893,19 @@ fn dms_marker(pt: Pt<f64>, sz: f64) -> Vec<Pt<f64>> {
     let x5 = pt.x + sz;
     let y1 = pt.y + sz / 5.0;
     let y3 = pt.y + sz * 3.0 / 5.0;
-    let mut pts = Vec::with_capacity(13);
-    pts.push(pt);
-    pts.push(Pt::from((x5, pt.y)));
-    pts.push(Pt::from((x5, y1)));
-    pts.push(Pt::from((x4, y1)));
-    pts.push(Pt::from((x4, y3)));
-    pts.push(Pt::from((x3, y3)));
-    pts.push(Pt::from((x3, y1)));
-    pts.push(Pt::from((x2, y1)));
-    pts.push(Pt::from((x2, y3)));
-    pts.push(Pt::from((x1, y3)));
-    pts.push(Pt::from((x1, y1)));
-    pts.push(Pt::from((pt.x, y1)));
-    pts.push(pt);
-    pts
+    vec![
+        pt,
+        Pt::from((x5, pt.y)),
+        Pt::from((x5, y1)),
+        Pt::from((x4, y1)),
+        Pt::from((x4, y3)),
+        Pt::from((x3, y3)),
+        Pt::from((x3, y1)),
+        Pt::from((x2, y1)),
+        Pt::from((x2, y3)),
+        Pt::from((x1, y3)),
+        Pt::from((x1, y1)),
+        Pt::from((pt.x, y1)),
+        pt,
+    ]
 }
