@@ -320,9 +320,9 @@ impl WeatherData {
         match &self.temperature_sensor {
             Some(sensors) => sensors
                 .iter()
-                .filter_map(|at| at.air_temp.and_then(|t| Some((t, 1))))
+                .filter_map(|at| at.air_temp.map(|t| (t, 1)))
                 .reduce(|acc, (t, c)| (t + acc.0, c + acc.1))
-                .and_then(|(total, count)| Some(total / count as f32)),
+                .map(|(total, count)| total / count as f32),
             None => None,
         }
     }
