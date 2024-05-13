@@ -923,7 +923,7 @@ impl Card for Dms {
     const ITEM_STATES: &'static str = "<option value=''>all ↴\
          <option value='🔹'>🔹 available\
          <option value='🔶'>🔶 deployed\
-         <option value='🕗'>🕗 planned\
+         <option value='🗓️'>🗓️ planned\
          <option value='👽'>👽 external\
          <option value='🎯'>🎯 dedicated\
          <option value='⚠️'>⚠️ fault\

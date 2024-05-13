@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2023  Minnesota Department of Transportation
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ impl ItemState {
         match code {
             "🔹" => Some(Self::Available),
             "🔶" => Some(Self::Deployed),
-            "🕗" => Some(Self::Planned),
+            "🗓️" => Some(Self::Planned),
             "👽" => Some(Self::External),
             "🎯" => Some(Self::Dedicated),
             "⚠️" => Some(Self::Fault),
@@ -96,7 +96,7 @@ impl ItemState {
         match self {
             Self::Available => "🔹",
             Self::Deployed => "🔶",
-            Self::Planned => "🕗",
+            Self::Planned => "🗓️",
             Self::External => "👽",
             Self::Dedicated => "🎯",
             Self::Fault => "⚠️",
