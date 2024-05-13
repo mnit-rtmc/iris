@@ -51,7 +51,7 @@ function dms_style(properties, zoom) {
     };
 }
 
-function make_styles() {
+function osm_styles() {
     let county = {
         fill: true,
         fillColor: "#bbb",
@@ -148,6 +148,11 @@ function make_styles() {
         railway: railway,
         building: building,
         parking: parking,
+    };
+}
+
+function tms_styles() {
+    return {
         segment_9: segment_style,
         segment_10: segment_style,
         segment_11: segment_style,
@@ -173,39 +178,45 @@ function init_map() {
         center: [45, -93],
         zoom: 12,
     });
+    map.attributionControl.setPrefix("");
     const osm_url = "/tile/{z}/{x}/{y}.mvt";
     const tms_url = "/tms/{z}/{x}/{y}.mvt";
-    const highlight_style = {
-        fill: true,
-        fillColor: 'red',
-        fillOpacity: 0.1,
-        radius: 6,
-        color: 'red',
-        opacity: 0.1,
-    };
-    let options = {
+    var options = {
         renderFactory: L.svg.tile,
         interactive: true,
-        vectorTileLayerStyles: make_styles(),
-        getFeatureId: layer_id,
-        attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+        vectorTileLayerStyles: osm_styles(),
+        getFeatureId: osm_layer_id,
+        attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
         maxNativeZoom: 18,
     };
-    var highlight;
     var osm_layers = L.vectorGrid.protobuf(osm_url, options);
+    var options = {
+        renderFactory: L.svg.tile,
+        interactive: true,
+        vectorTileLayerStyles: tms_styles(),
+        getFeatureId: tms_layer_id,
+        attribution: '',
+        maxNativeZoom: 18,
+    };
     var tms_layers = L.vectorGrid.protobuf(tms_url, options);
-    function on_click(e) {
-        let fid = layer_id(e.layer);
-        let change = (typeof fid != "undefined") && (fid != highlight);
-        if (highlight) {
-            osm_layers.resetFeatureStyle(highlight);
-            tms_layers.resetFeatureStyle(highlight);
-            highlight = null;
+    var osm_select;
+    function osm_on_click(e) {
+        let fid = osm_layer_id(e.layer);
+        let change = (typeof fid != "undefined") && (fid != osm_select);
+        if (osm_select) {
+            osm_layers.resetFeatureStyle(osm_select);
+            osm_select = null;
         }
         if (change) {
-            highlight = fid;
-            osm_layers.setFeatureStyle(highlight, highlight_style);
-            tms_layers.setFeatureStyle(highlight, highlight_style);
+            osm_select = fid;
+            osm_layers.setFeatureStyle(osm_select, {
+                fill: true,
+                fillColor: 'red',
+                fillOpacity: 0.1,
+                radius: 6,
+                color: 'red',
+                opacity: 0.1,
+            });
             let label = layer_label(e.layer);
             if (label) {
                 L.popup({ closeButton: false })
@@ -218,16 +229,44 @@ function init_map() {
         }
         L.DomEvent.stop(e);
     }
-    osm_layers.on('click', on_click);
-    tms_layers.on('click', on_click);
+    osm_layers.on('click', osm_on_click);
+    var tms_select;
+    function tms_on_click(e) {
+        let fid = tms_layer_id(e.layer);
+        if (tms_select) {
+            tms_layers.resetFeatureStyle(tms_select);
+            tms_select = null;
+        }
+        if (fid) {
+            tms_layers.setFeatureStyle(fid, {
+                fill: true,
+                fillOpacity: 0.8,
+                fillColor: "#4aa",
+                color: 'white',
+                weight: 2,
+            });
+            tms_select = fid;
+        }
+        const ev = new CustomEvent("tmsevent", {
+            detail: fid,
+            bubbles: true,
+            cancelable: true,
+            composed: false,
+        });
+        document.querySelector('#mapid').dispatchEvent(ev);
+        L.DomEvent.stop(e);
+    }
+    tms_layers.on('click', tms_on_click);
     osm_layers.addTo(map);
     tms_layers.addTo(map);
 }
 
-function layer_id(layer) {
-    return layer.properties.osm_id ||
-        layer.properties.sid ||
-        layer.properties.name;
+function osm_layer_id(layer) {
+    return layer.properties.osm_id || layer.properties.name;
+}
+
+function tms_layer_id(layer) {
+    return layer.properties.sid || layer.properties.name;
 }
 
 function layer_label(layer) {

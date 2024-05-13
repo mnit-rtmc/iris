@@ -23,9 +23,10 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{
-    console, Element, Event, EventSource, HtmlButtonElement, HtmlElement,
-    HtmlInputElement, HtmlSelectElement, MessageEvent, ScrollBehavior,
-    ScrollIntoViewOptions, ScrollLogicalPosition, TransitionEvent, Window,
+    console, CustomEvent, Element, Event, EventSource, HtmlButtonElement,
+    HtmlElement, HtmlInputElement, HtmlSelectElement, MessageEvent,
+    ScrollBehavior, ScrollIntoViewOptions, ScrollLogicalPosition,
+    TransitionEvent, Window,
 };
 
 /// JavaScript result
@@ -95,6 +96,8 @@ async fn add_sidebar() -> JsResult<()> {
     add_input_listener(&sidebar)?;
     add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window)?;
+    let mapid: HtmlElement = doc.elem("mapid");
+    add_map_click_listener(&mapid)?;
     add_eventsource_listener();
     do_future(finish_init()).await;
     Ok(())
@@ -582,6 +585,33 @@ fn tick_interval() {
             DeferredAction::SetRefreshText(txt) => set_refresh_text(txt),
         }
     }
+}
+
+/// Add a `click` event listener to the map element
+fn add_map_click_listener(elem: &Element) -> JsResult<()> {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: CustomEvent| {
+        if let Ok(name) = e.detail().dyn_into::<JsString>() {
+            let name = String::from(name);
+            console::log_1(&format!("tmsevent: {name}").into());
+            if let Some(res) = resource_value() {
+                spawn_local(do_future(select_card_map(res, name)));
+            }
+        }
+    });
+    elem.add_event_listener_with_callback(
+        "tmsevent",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    // can't drop closure, just forget it to make JS happy
+    closure.forget();
+    Ok(())
+}
+
+/// Select a card from a map marker click
+async fn select_card_map(res: Res, name: String) -> Result<()> {
+    let id = format!("{res}_{name}");
+    click_card(res, name, id).await?;
+    search_card_list().await
 }
 
 /// Add event source listener for notifications
