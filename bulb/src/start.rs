@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::app::{self, DeferredAction};
+use crate::app::{self, DeferredAction, NotifyState};
 use crate::card::{self, CardList, CardView, View};
 use crate::error::{Error, Result};
 use crate::fetch::Uri;
@@ -582,7 +582,7 @@ fn tick_interval() {
             DeferredAction::HideToast => hide_toast(),
             DeferredAction::MakeEventSource => add_eventsource_listener(),
             DeferredAction::RefreshList => spawn_local(handle_refresh()),
-            DeferredAction::SetRefreshText(txt) => set_refresh_text(txt),
+            DeferredAction::SetNotifyState(ns) => set_notify_state(ns),
         }
     }
 }
@@ -619,25 +619,25 @@ fn add_eventsource_listener() {
     let es = match EventSource::new("/iris/api/notify") {
         Ok(es) => es,
         Err(e) => {
-            set_refresh_text("⭮ ⚪");
+            set_notify_state(NotifyState::Starting);
             console::log_1(&format!("SSE /iris/api/notify: {e:?}").into());
             app::defer_action(DeferredAction::MakeEventSource, 5000);
             return;
         }
     };
-    set_refresh_text("⭮ ⚫");
+    set_notify_state(NotifyState::Offline);
     let onopen: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
-        set_refresh_text("⭮ 🟡");
+        set_notify_state(NotifyState::Updating);
     });
     es.set_onopen(Some(onopen.as_ref().unchecked_ref()));
     onopen.forget();
     let onerror: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
-        set_refresh_text("⚫ ⭮ ");
+        set_notify_state(NotifyState::Offline);
     });
     es.set_onerror(Some(onerror.as_ref().unchecked_ref()));
     onerror.forget();
     let onmessage: Closure<dyn Fn(_)> = Closure::new(|e: MessageEvent| {
-        set_refresh_text("⭮ 🟢");
+        set_notify_state(NotifyState::Good);
         if let Ok(payload) = e.data().dyn_into::<JsString>() {
             spawn_local(handle_notify(String::from(payload)));
         }
@@ -648,9 +648,9 @@ fn add_eventsource_listener() {
 }
 
 /// Set refresh button text
-fn set_refresh_text(txt: &str) {
+fn set_notify_state(ns: NotifyState) {
     let sb_refresh = Doc::get().elem::<Element>("sb_refresh");
-    sb_refresh.set_inner_html(txt);
+    sb_refresh.set_inner_html(ns.as_str());
 }
 
 /// Handle SSE notify from server
@@ -664,8 +664,8 @@ async fn handle_notify(payload: String) {
         console::log_1(&format!("unknown channel: {chan}").into());
         return;
     }
-    set_refresh_text("⭮ 🟡");
-    app::defer_action(DeferredAction::SetRefreshText("⭮ 🟢"), 600);
+    set_notify_state(NotifyState::Updating);
+    app::defer_action(DeferredAction::SetNotifyState(NotifyState::Good), 600);
     do_future(update_card_list()).await;
 }
 
