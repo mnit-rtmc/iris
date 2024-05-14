@@ -3,9 +3,9 @@ var stat_sample = null;
 function segment_style(properties, zoom) {
     let opacity = 0.8;
     let color = "#666";
-    if (properties.station) {
+    if (properties.station_id) {
         if (stat_sample) {
-            let sample = stat_sample.samples[properties.station];
+            let sample = stat_sample.samples[properties.station_id];
             if (sample) {
                 let flow = sample[0];
                 let speed = sample[1];
@@ -266,7 +266,7 @@ function osm_layer_id(layer) {
 }
 
 function tms_layer_id(layer) {
-    return layer.properties.sid || layer.properties.name;
+    return layer.properties.tms_id || layer.properties.name;
 }
 
 function layer_label(layer) {
@@ -274,11 +274,11 @@ function layer_label(layer) {
     let name = layer.properties.name || layer.properties.ref;
     if (name) {
         label = name;
-        let station = layer.properties.station;
-        if (station) {
-            label = "<b>" + station + "</b> " + label;
+        let station_id = layer.properties.station_id;
+        if (station_id) {
+            label = "<b>" + station_id + "</b> " + label;
             if (stat_sample) {
-                let sample = stat_sample.samples[station];
+                let sample = stat_sample.samples[station_id];
                 if (sample) {
                     let flow = sample[0];
                     if (flow)

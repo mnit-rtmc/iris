@@ -137,43 +137,43 @@ layer_group: tms
   layer: segment_9
     geom_type: polygon
     zoom: 9
-    tags: $sid ?station
+    tags: $tms_id ?station_id
   layer: segment_10
     geom_type: polygon
     zoom: 10
-    tags: $sid ?station
+    tags: $tms_id ?station_id
   layer: segment_11
     geom_type: polygon
     zoom: 11
-    tags: $sid ?station
+    tags: $tms_id ?station_id
   layer: segment_12
     geom_type: polygon
     zoom: 12
-    tags: $sid ?station
+    tags: $tms_id ?station_id
   layer: segment_13
     geom_type: polygon
     zoom: 13
-    tags: $sid ?station
+    tags: $tms_id ?station_id
   layer: segment_14
     geom_type: polygon
     zoom: 14
-    tags: $sid ?station
+    tags: $tms_id ?station_id
   layer: segment_15
     geom_type: polygon
     zoom: 15
-    tags: $sid ?station
+    tags: $tms_id ?station_id
   layer: segment_16
     geom_type: polygon
     zoom: 16
-    tags: $sid ?station
+    tags: $tms_id ?station_id
   layer: segment_17
     geom_type: polygon
     zoom: 17
-    tags: $sid ?station
+    tags: $tms_id ?station_id
   layer: segment_18
     geom_type: polygon
     zoom: 18
-    tags: $sid ?station
+    tags: $tms_id ?station_id
   layer: dms_12
     geom_type: polygon
     zoom: 12
