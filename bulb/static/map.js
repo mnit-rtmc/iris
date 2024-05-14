@@ -20,61 +20,61 @@ function osm_styles() {
     };
     let water = {
         fill: true,
-        fillOpacity: 0.8,
         fillColor: "#b5d0d0",
+        fillOpacity: 0.8,
         stroke: false,
     };
     let wetland = {
         fill: true,
-        fillOpacity: 0.8,
         fillColor: "#b8d0bd",
+        fillOpacity: 0.8,
         stroke: false,
     };
     let leisure = {
         fill: true,
-        fillOpacity: 0.6,
         fillColor: "#88cc88",
+        fillOpacity: 0.6,
         weight: 0.1,
         color: '#000',
         opacity: 0.6,
     };
     let cemetery = {
         fill: true,
-        fillOpacity: 0.6,
         fillColor: "#aaccaa",
+        fillOpacity: 0.6,
         weight: 0.1,
         color: '#000',
         opacity: 0.6,
     };
     let building = {
         fill: true,
-        fillOpacity: 0.7,
         fillColor: "#bca9a9",
+        fillOpacity: 0.7,
         weight: 0.7,
         color: "#baa",
     };
     let retail = {
         fill: true,
-        fillOpacity: 0.25,
         fillColor: "#b99",
+        fillOpacity: 0.25,
         stroke: false,
     };
     let parking = {
         fill: true,
-        fillOpacity: 0.6,
         fillColor: "#cca",
+        fillOpacity: 0.6,
         stroke: false,
     };
     let path = {
+        weight: 1,
         color: '#000',
         opacity: 0.5,
-        weight: 1,
         dashArray: "1 3",
     };
     let railway = {
+        weight: 2.5,
         color: '#642',
         opacity: 0.6,
-        weight: 2.5,
         lineCap: "butt",
         dashArray: "1 1.5",
     };
@@ -89,12 +89,12 @@ function osm_styles() {
         leisure: leisure,
         cemetery: cemetery,
         retail: retail,
-        motorway: { color: "#ffd9a9", weight: 3 },
+        motorway: { weight: 3, color: "#ffd9a9" },
         trunk: { color: "#ffe0a9" },
         primary: { color: "#ffeaa9" },
         secondary: { color: "#fff4a9" },
         tertiary: { color: "#ffffa9" },
-        road: { color: "#eee", weight: 2 },
+        road: { weight: 2, color: "#eee" },
         path: path,
         railway: railway,
         building: building,
@@ -129,12 +129,12 @@ function tms_styles() {
 function tms_style(properties) {
     let style = {
         fill: true,
-        fillOpacity: 0.8,
         fillColor: "#666",
+        fillOpacity: 0.8,
         stroke: true,
         weight: 0.5,
-        opacity: 0.5,
         color: "#000",
+        opacity: 0.5,
     };
     if (properties.name) {
         // FIXME: use item_style provided by bulb code
@@ -148,8 +148,8 @@ function tms_style(properties) {
                 let flow = sample[0];
                 let speed = sample[1];
                 let density = (flow && speed) ? Math.round(flow / speed) : null;
-                style.fillOpacity = 1;
                 style.fillColor = density_color(density);
+                style.fillOpacity = 1;
             }
         }
         return style;
@@ -216,9 +216,9 @@ function init_map() {
                 fill: true,
                 fillColor: 'red',
                 fillOpacity: 0.1,
-                radius: 6,
                 color: 'red',
                 opacity: 0.1,
+                radius: 6,
             });
             let label = osm_layer_label(e.layer);
             if (label) {
@@ -246,8 +246,9 @@ function init_map() {
         if (change) {
             tms_select = fid;
             let style = tms_style(e.layer.properties);
-            style.color = 'white';
             style.weight = 2;
+            style.color = 'white';
+            style.opacity = 1,
             tms_layers.setFeatureStyle(fid, style);
             let label = tms_layer_label(e.layer);
             if (label) {
