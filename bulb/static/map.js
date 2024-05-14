@@ -1,56 +1,7 @@
 var stat_sample = null;
+var tooltip = null;
 
-function segment_style(properties, zoom) {
-    let opacity = 0.8;
-    let color = "#666";
-    if (properties.station_id) {
-        if (stat_sample) {
-            let sample = stat_sample.samples[properties.station_id];
-            if (sample) {
-                let flow = sample[0];
-                let speed = sample[1];
-                let density = (flow && speed) ? Math.round(flow / speed) : null;
-                opacity = 1;
-                color = density_color(density);
-            }
-        }
-    }
-    return {
-        fill: true,
-        fillOpacity: opacity,
-        fillColor: color,
-        stroke: false,
-    };
-}
-
-function density_color(density) {
-    if (density) {
-        if (density < 30) {
-            return "#292";
-        }
-        if (density < 50) {
-            return "#fc0";
-        }
-        if (density < 200) {
-            return "#d00";
-        }
-        return "#c0f";
-    }
-    return "#666";
-}
-
-function dms_style(properties, zoom) {
-    // FIXME: use item_style provided by bulb code
-    return {
-        fill: true,
-        fillOpacity: 0.8,
-        fillColor: "#4aa",
-        weight: 0.5,
-        opacity: 0.5,
-        color: "#000",
-    };
-}
-
+// Get styles for OSM layers
 function osm_styles() {
     let county = {
         fill: true,
@@ -151,28 +102,78 @@ function osm_styles() {
     };
 }
 
+// Get styles for TMS layers
 function tms_styles() {
     return {
-        segment_9: segment_style,
-        segment_10: segment_style,
-        segment_11: segment_style,
-        segment_12: segment_style,
-        segment_13: segment_style,
-        segment_14: segment_style,
-        segment_15: segment_style,
-        segment_16: segment_style,
-        segment_17: segment_style,
-        segment_18: segment_style,
-        dms_12: dms_style,
-        dms_13: dms_style,
-        dms_14: dms_style,
-        dms_15: dms_style,
-        dms_16: dms_style,
-        dms_17: dms_style,
-        dms_18: dms_style,
+        segment_9: tms_style,
+        segment_10: tms_style,
+        segment_11: tms_style,
+        segment_12: tms_style,
+        segment_13: tms_style,
+        segment_14: tms_style,
+        segment_15: tms_style,
+        segment_16: tms_style,
+        segment_17: tms_style,
+        segment_18: tms_style,
+        dms_12: tms_style,
+        dms_13: tms_style,
+        dms_14: tms_style,
+        dms_15: tms_style,
+        dms_16: tms_style,
+        dms_17: tms_style,
+        dms_18: tms_style,
     };
 }
 
+// Get style for a TMS feature
+function tms_style(properties) {
+    let style = {
+        fill: true,
+        fillOpacity: 0.8,
+        fillColor: "#666",
+        stroke: true,
+        weight: 0.5,
+        opacity: 0.5,
+        color: "#000",
+    };
+    if (properties.name) {
+        // FIXME: use item_style provided by bulb code
+        style.fillColor = "#4aa";
+        return style;
+    } else {
+        let station_id = properties.station_id;
+        if (station_id && stat_sample) {
+            let sample = stat_sample.samples[station_id];
+            if (sample) {
+                let flow = sample[0];
+                let speed = sample[1];
+                let density = (flow && speed) ? Math.round(flow / speed) : null;
+                style.fillOpacity = 1;
+                style.fillColor = density_color(density);
+            }
+        }
+        return style;
+    }
+}
+
+// Get color based on density (veh/mi)
+function density_color(density) {
+    if (density) {
+        if (density < 30) {
+            return "#292";
+        }
+        if (density < 50) {
+            return "#fc0";
+        }
+        if (density < 200) {
+            return "#d00";
+        }
+        return "#c0f";
+    }
+    return "#666";
+}
+
+// Initialize leaflet map
 function init_map() {
     var map = L.map('mapid', {
         center: [45, -93],
@@ -181,26 +182,28 @@ function init_map() {
     map.attributionControl.setPrefix("");
     const osm_url = "/tile/{z}/{x}/{y}.mvt";
     const tms_url = "/tms/{z}/{x}/{y}.mvt";
-    var options = {
+    let osm_layers = L.vectorGrid.protobuf(osm_url, {
         renderFactory: L.svg.tile,
         interactive: true,
         vectorTileLayerStyles: osm_styles(),
         getFeatureId: osm_layer_id,
         attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
         maxNativeZoom: 18,
-    };
-    var osm_layers = L.vectorGrid.protobuf(osm_url, options);
-    var options = {
+    });
+    let tms_layers = L.vectorGrid.protobuf(tms_url, {
         renderFactory: L.svg.tile,
         interactive: true,
         vectorTileLayerStyles: tms_styles(),
         getFeatureId: tms_layer_id,
         attribution: '',
         maxNativeZoom: 18,
-    };
-    var tms_layers = L.vectorGrid.protobuf(tms_url, options);
+    });
     var osm_select;
     function osm_on_click(e) {
+        if (tooltip) {
+            tooltip.close();
+            tooltip = null;
+        }
         let fid = osm_layer_id(e.layer);
         let change = (typeof fid != "undefined") && (fid != osm_select);
         if (osm_select) {
@@ -217,35 +220,42 @@ function init_map() {
                 color: 'red',
                 opacity: 0.1,
             });
-            let label = layer_label(e.layer);
+            let label = osm_layer_label(e.layer);
             if (label) {
-                L.popup({ closeButton: false })
-                 .setContent(label)
-                 .setLatLng(e.latlng)
-                 .openOn(map);
+                tooltip = L.tooltip()
+                           .setContent(label)
+                           .setLatLng(e.latlng)
+                           .openOn(map);
             };
-        } else {
-            map.closePopup();
         }
         L.DomEvent.stop(e);
     }
     osm_layers.on('click', osm_on_click);
     var tms_select;
     function tms_on_click(e) {
+        if (tooltip) {
+            tooltip.close();
+            tooltip = null;
+        }
         let fid = tms_layer_id(e.layer);
+        let change = (typeof fid != "undefined") && (fid != tms_select);
         if (tms_select) {
             tms_layers.resetFeatureStyle(tms_select);
             tms_select = null;
         }
-        if (fid) {
-            tms_layers.setFeatureStyle(fid, {
-                fill: true,
-                fillOpacity: 0.8,
-                fillColor: "#4aa",
-                color: 'white',
-                weight: 2,
-            });
+        if (change) {
             tms_select = fid;
+            let style = tms_style(e.layer.properties);
+            style.color = 'white';
+            style.weight = 2;
+            tms_layers.setFeatureStyle(fid, style);
+            let label = tms_layer_label(e.layer);
+            if (label) {
+                tooltip = L.tooltip()
+                           .setContent(label)
+                           .setLatLng(e.latlng)
+                           .openOn(map);
+            };
         }
         const ev = new CustomEvent("tmsevent", {
             detail: fid,
@@ -259,43 +269,54 @@ function init_map() {
     tms_layers.on('click', tms_on_click);
     osm_layers.addTo(map);
     tms_layers.addTo(map);
+    map.on('zoomstart', function () {
+        if (tooltip) {
+            tooltip.close();
+            tooltip = null;
+        }
+    });
 }
 
+// Get OSM layer feature ID
 function osm_layer_id(layer) {
-    return layer.properties.osm_id || layer.properties.name;
+    return layer.properties.osm_id;
 }
 
+// Get OSM layer feature label
+function osm_layer_label(layer) {
+    return layer.properties.name || layer.properties.ref;
+}
+
+// Get TMS layer feature ID
 function tms_layer_id(layer) {
     return layer.properties.tms_id || layer.properties.name;
 }
 
-function layer_label(layer) {
-    let label = null;
-    let name = layer.properties.name || layer.properties.ref;
-    if (name) {
-        label = name;
-        let station_id = layer.properties.station_id;
-        if (station_id) {
-            label = "<b>" + station_id + "</b> " + label;
-            if (stat_sample) {
-                let sample = stat_sample.samples[station_id];
-                if (sample) {
-                    let flow = sample[0];
-                    if (flow)
-                        label += "<br>&nbsp;<b>" + flow + "</b> veh/h";
-                    let speed = sample[1];
-                    if (speed)
-                        label += "<br>&nbsp;<b>" + speed + "</b> mi/h";
-                    let density = (flow && speed)
-                                ? Math.round(flow / speed)
-                                : null;
-                    if (density)
-                        label += "<br>&nbsp;<b>" + density + "</b> veh/lane·mi";
-                }
+// Get TMS layer feature label
+function tms_layer_label(layer) {
+    let station_id = layer.properties.station_id;
+    if (station_id) {
+        let label = "<b>" + station_id + "</b>";
+        if (stat_sample) {
+            let sample = stat_sample.samples[station_id];
+            if (sample) {
+                let flow = sample[0];
+                if (flow)
+                    label += "<br>&nbsp;<b>" + flow + "</b> veh/h";
+                let speed = sample[1];
+                if (speed)
+                    label += "<br>&nbsp;<b>" + speed + "</b> mi/h";
+                let density = (flow && speed)
+                            ? Math.round(flow / speed)
+                            : null;
+                if (density)
+                    label += "<br>&nbsp;<b>" + density + "</b> veh/lane·mi";
             }
         }
+        return label;
+    } else {
+        return layer.properties.name;
     }
-    return label;
 }
 
 window.onload = init_map;
