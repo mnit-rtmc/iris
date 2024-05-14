@@ -55,7 +55,7 @@ impl Access {
         }
     }
 
-    /// Get access required to update (PATCH) a resource/attribute
+    /// Get access required to PATCH a resource/attribute
     pub fn required_patch(res: Res, att: &str) -> Self {
         if required_patch_operate(res, att) {
             Access::Operate
@@ -66,7 +66,7 @@ impl Access {
         }
     }
 
-    /// Get access required to create (POST) a resource/attribute
+    /// Get access required to POST a resource
     pub fn required_post(res: Res) -> Self {
         if required_post_operate(res) {
             Access::Operate
@@ -78,7 +78,7 @@ impl Access {
     }
 }
 
-/// Check if Operate access is required to update (PATCH) a resource/attribute
+/// Check if Operate access is required to PATCH a resource/attribute
 fn required_patch_operate(res: Res, att: &str) -> bool {
     use Res::*;
     match (res, att) {
@@ -97,7 +97,7 @@ fn required_patch_operate(res: Res, att: &str) -> bool {
     }
 }
 
-/// Check if Manage access is required to update (PATCH) a resource/attribute
+/// Check if Manage access is required to PATCH a resource/attribute
 fn required_patch_manage(res: Res, att: &str) -> bool {
     use Res::*;
     match (res, att) {
@@ -138,7 +138,7 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
     }
 }
 
-/// Check if Operate access is required to create (POST) a resource
+/// Check if Operate access is required to POST a resource
 fn required_post_operate(res: Res) -> bool {
     use Res::*;
     match res {
@@ -147,7 +147,7 @@ fn required_post_operate(res: Res) -> bool {
     }
 }
 
-/// Check if Manage access is required to create (POST) a resource
+/// Check if Manage access is required to POST a resource
 fn required_post_manage(_res: Res) -> bool {
     false
 }
