@@ -573,9 +573,8 @@ fn other_resource(honey: Honey) -> Router {
         let nm = Name::new(&type_n)?;
         log::info!("POST {nm}");
         let cred = Credentials::load(&session).await?;
-        honey
-            .name_access(cred.user(), &nm, Access::Configure)
-            .await?;
+        let required = Access::required_post(nm.res_type);
+        honey.name_access(cred.user(), &nm, required).await?;
         match attrs.get("name") {
             Some(Value::String(name)) => {
                 let name = nm.obj(name)?;
@@ -700,7 +699,8 @@ fn other_object(honey: Honey) -> Router {
             honey.name_access(cred.user(), &nm, Access::Operate).await?;
         for key in attrs.keys() {
             let attr = &key[..];
-            access.check(Access::from((nm.res_type, attr)))?;
+            let required = Access::required_patch(nm.res_type, attr);
+            access.check(required)?;
         }
         if let Some(mut msn) = cred.authenticate().await? {
             // first pass

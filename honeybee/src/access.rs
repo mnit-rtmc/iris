@@ -54,14 +54,23 @@ impl Access {
             Err(Error::Forbidden)
         }
     }
-}
 
-/// Get access needed to update a resource/attribute
-impl From<(Res, &str)> for Access {
-    fn from((res, att): (Res, &str)) -> Self {
-        if required_operate(res, att) {
+    /// Get access required to update (PATCH) a resource/attribute
+    pub fn required_patch(res: Res, att: &str) -> Self {
+        if required_patch_operate(res, att) {
             Access::Operate
-        } else if required_manage(res, att) {
+        } else if required_patch_manage(res, att) {
+            Access::Manage
+        } else {
+            Access::Configure
+        }
+    }
+
+    /// Get access required to create (POST) a resource/attribute
+    pub fn required_post(res: Res) -> Self {
+        if required_post_operate(res) {
+            Access::Operate
+        } else if required_post_manage(res) {
             Access::Manage
         } else {
             Access::Configure
@@ -69,8 +78,8 @@ impl From<(Res, &str)> for Access {
     }
 }
 
-/// Check if Operate access is required to update a resource/attribute
-fn required_operate(res: Res, att: &str) -> bool {
+/// Check if Operate access is required to update (PATCH) a resource/attribute
+fn required_patch_operate(res: Res, att: &str) -> bool {
     use Res::*;
     match (res, att) {
         (Beacon, "state")
@@ -88,8 +97,8 @@ fn required_operate(res: Res, att: &str) -> bool {
     }
 }
 
-/// Check if Manage access is required to update a resource/attribute
-fn required_manage(res: Res, att: &str) -> bool {
+/// Check if Manage access is required to update (PATCH) a resource/attribute
+fn required_patch_manage(res: Res, att: &str) -> bool {
     use Res::*;
     match (res, att) {
         (Beacon, "message")
@@ -127,4 +136,18 @@ fn required_manage(res: Res, att: &str) -> bool {
         | (WeatherSensor, "notes") => true,
         _ => false,
     }
+}
+
+/// Check if Operate access is required to create (POST) a resource
+fn required_post_operate(res: Res) -> bool {
+    use Res::*;
+    match res {
+        SignMessage => true,
+        _ => false,
+    }
+}
+
+/// Check if Manage access is required to create (POST) a resource
+fn required_post_manage(_res: Res) -> bool {
+    false
 }
