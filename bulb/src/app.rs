@@ -41,6 +41,8 @@ impl NotifyState {
 /// Deferred actions (called on set_interval)
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum DeferredAction {
+    /// Fetch station data
+    FetchStationData,
     /// Hide the toast popup
     HideToast,
     /// Make SSE event source

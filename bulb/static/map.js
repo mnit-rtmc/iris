@@ -4,6 +4,9 @@ var map;
 // Current displayed tooltip
 var tooltip = null;
 
+/// TMS layers
+var tms_layers = null;
+
 // Current station sample data
 var stat_sample = null;
 
@@ -196,7 +199,7 @@ function init_map() {
         attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
         maxNativeZoom: 18,
     });
-    let tms_layers = L.vectorGrid.protobuf(tms_url, {
+    tms_layers = L.vectorGrid.protobuf(tms_url, {
         renderFactory: L.svg.tile,
         interactive: true,
         vectorTileLayerStyles: tms_styles(),
@@ -327,13 +330,3 @@ function tms_layer_label(layer) {
 }
 
 window.onload = init_map;
-
-fetch('/iris/station_sample')
-.then(response => response.json())
-.then(result => {
-    stat_sample = result;
-    console.log('station_sample: ', stat_sample.time_stamp);
-})
-.catch(error => {
-    console.error('Error fetching station_sample: ', error);
-});

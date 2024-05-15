@@ -35,6 +35,13 @@ pub type JsResult<T> = std::result::Result<T, JsValue>;
 /// Page sidebar
 const SIDEBAR: &str = include_str!("sidebar.html");
 
+/// JavaScript imports
+#[wasm_bindgen(module = "/static/glue.js")]
+extern "C" {
+    /// Update station sample data
+    fn update_stat_data(sample: &JsValue);
+}
+
 /// Button attributes
 struct ButtonAttrs {
     id: String,
@@ -100,6 +107,7 @@ async fn add_sidebar() -> JsResult<()> {
     add_map_click_listener(&mapid)?;
     add_eventsource_listener();
     do_future(finish_init()).await;
+    fetch_station_data();
     Ok(())
 }
 
@@ -579,12 +587,26 @@ fn tick_interval() {
     app::tick_tock();
     while let Some(action) = app::next_action() {
         match action {
+            DeferredAction::FetchStationData => fetch_station_data(),
             DeferredAction::HideToast => hide_toast(),
             DeferredAction::MakeEventSource => add_eventsource_listener(),
             DeferredAction::RefreshList => spawn_local(handle_refresh()),
             DeferredAction::SetNotifyState(ns) => set_notify_state(ns),
         }
     }
+}
+
+/// Fetch station sample data
+fn fetch_station_data() {
+    app::defer_action(DeferredAction::FetchStationData, 30_000);
+    spawn_local(do_future(do_fetch_station_data()));
+}
+
+/// Actually fetch station sample data
+async fn do_fetch_station_data() -> Result<()> {
+    let stat = Uri::from("/iris/station_sample").get().await?;
+    update_stat_data(&stat);
+    Ok(())
 }
 
 /// Add a `click` event listener to the map element
