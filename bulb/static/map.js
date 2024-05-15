@@ -1,5 +1,11 @@
-var stat_sample = null;
+// The Leaflet map
+var map;
+
+// Current displayed tooltip
 var tooltip = null;
+
+// Current station sample data
+var stat_sample = null;
 
 // Get styles for OSM layers
 function osm_styles() {
@@ -175,7 +181,7 @@ function density_color(density) {
 
 // Initialize leaflet map
 function init_map() {
-    var map = L.map('mapid', {
+    map = L.map('mapid', {
         center: [45, -93],
         zoom: 12,
     });
@@ -257,15 +263,15 @@ function init_map() {
                            .setLatLng(e.latlng)
                            .openOn(map);
             };
+            const ev = new CustomEvent("tmsevent", {
+                detail: fid,
+                bubbles: true,
+                cancelable: true,
+                composed: false,
+            });
+            document.querySelector('#mapid').dispatchEvent(ev);
+            L.DomEvent.stop(e);
         }
-        const ev = new CustomEvent("tmsevent", {
-            detail: fid,
-            bubbles: true,
-            cancelable: true,
-            composed: false,
-        });
-        document.querySelector('#mapid').dispatchEvent(ev);
-        L.DomEvent.stop(e);
     }
     tms_layers.on('click', tms_on_click);
     osm_layers.addTo(map);

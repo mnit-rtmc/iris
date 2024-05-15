@@ -589,14 +589,17 @@ fn tick_interval() {
 
 /// Add a `click` event listener to the map element
 fn add_map_click_listener(elem: &Element) -> JsResult<()> {
-    let closure: Closure<dyn Fn(_)> = Closure::new(|e: CustomEvent| {
-        if let Ok(name) = e.detail().dyn_into::<JsString>() {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|ce: CustomEvent| match ce
+        .detail()
+        .dyn_into::<JsString>()
+    {
+        Ok(name) => {
             let name = String::from(name);
-            console::log_1(&format!("tmsevent: {name}").into());
             if let Some(res) = resource_value() {
                 spawn_local(do_future(select_card_map(res, name)));
             }
         }
+        Err(e) => console::log_1(&format!("tmsevent: {e:?}").into()),
     });
     elem.add_event_listener_with_callback(
         "tmsevent",
