@@ -359,87 +359,97 @@ parking_tab	t
 \.
 
 CREATE TABLE iris.resource_type (
-    name VARCHAR(16) PRIMARY KEY
+    name VARCHAR(16) PRIMARY KEY,
+    base BOOLEAN NOT NULL
 );
 
-COPY iris.resource_type (name) FROM stdin;
-action_plan
-alarm
-alert_config
-alert_info
-alert_message
-beacon
-beacon_action
-cabinet_style
-camera
-camera_action
-camera_preset
-camera_template
-cam_vid_src_ord
-capability
-catalog
-comm_config
-comm_link
-connection
-controller
-day_matcher
-day_plan
-detector
-dms
-dms_action
-domain
-encoder_stream
-encoder_type
-flow_stream
-font
-gate_arm
-gate_arm_array
-geo_loc
-glyph
-gps
-graphic
-inc_advice
-inc_descriptor
-incident
-incident_detail
-inc_locator
-lane_action
-lane_marking
-lane_use_multi
-lcs
-lcs_array
-lcs_indication
-map_extent
-meter_action
-modem
-monitor_style
-msg_pattern
-msg_line
-parking_area
-permission
-plan_phase
-play_list
-privilege
-ramp_meter
-r_node
-road
-road_affix
-role
-rpt_conduit
-sign_config
-sign_detail
-sign_message
-station
-system_attribute
-tag_reader
-time_action
-toll_zone
-user_id
-video_monitor
-vid_src_template
-weather_sensor
-word
+COPY iris.resource_type (name, base) FROM stdin;
+action_plan	t
+alarm	f
+alert_config	t
+alert_info	f
+alert_message	f
+beacon	t
+beacon_action	f
+cabinet_style	f
+camera	t
+camera_action	f
+camera_preset	f
+camera_template	f
+cam_vid_src_ord	f
+capability	f
+catalog	f
+comm_config	f
+comm_link	f
+connection	f
+controller	t
+day_matcher	f
+day_plan	f
+detector	t
+dms	t
+dms_action	f
+domain	f
+encoder_stream	f
+encoder_type	f
+flow_stream	f
+font	f
+gate_arm	t
+gate_arm_array	f
+geo_loc	f
+glyph	f
+gps	f
+graphic	f
+inc_advice	f
+inc_descriptor	f
+incident	t
+incident_detail	f
+inc_locator	f
+lane_action	f
+lane_marking	f
+lane_use_multi	f
+lcs	t
+lcs_array	f
+lcs_indication	f
+map_extent	f
+meter_action	f
+modem	f
+monitor_style	f
+msg_pattern	f
+msg_line	f
+parking_area	t
+permission	t
+plan_phase	f
+play_list	f
+privilege	f
+ramp_meter	t
+r_node	f
+road	f
+road_affix	f
+role	f
+rpt_conduit	f
+sign_config	f
+sign_detail	f
+sign_message	f
+station	f
+system_attribute	t
+tag_reader	f
+time_action	f
+toll_zone	t
+user_id	f
+video_monitor	f
+vid_src_template	f
+weather_sensor	t
+word	f
 \.
+
+CREATE FUNCTION iris.resource_is_base(VARCHAR(16)) RETURNS BOOLEAN AS
+    $resource_is_base$
+SELECT EXISTS (
+    SELECT 1
+    FROM iris.resource_type
+    WHERE name = $1 AND base = true
+);
+$resource_is_base$ LANGUAGE sql;
 
 CREATE TABLE iris.hashtag (
     resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
@@ -481,6 +491,7 @@ CREATE TABLE iris.permission (
 
     CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$'),
     CONSTRAINT permission_access_n CHECK (access_n >= 1 AND access_n <= 4),
+    CONSTRAINT base_resource_ck CHECK (iris.resource_is_base(resource_n)),
     -- hashtag cannot be applied to "View" access
     CONSTRAINT hashtag_access_ck CHECK (hashtag IS NULL OR access_n != 1)
 );
@@ -489,27 +500,21 @@ CREATE UNIQUE INDEX permission_role_resource_n_hashtag_idx
     ON iris.permission (role, resource_n, COALESCE(hashtag, ''));
 
 COPY iris.permission (role, resource_n, access_n) FROM stdin;
-administrator	alarm	4
+administrator	action_plan	4
+administrator	alert_config	4
 administrator	beacon	4
-administrator	cabinet_style	4
 administrator	camera	4
-administrator	comm_config	4
-administrator	comm_link	4
 administrator	controller	4
 administrator	detector	4
 administrator	dms	4
 administrator	gate_arm	4
-administrator	geo_loc	4
-administrator	gps	4
+administrator	incident	4
 administrator	lcs	4
-administrator	modem	4
+administrator	parking_area	4
 administrator	permission	4
 administrator	ramp_meter	4
-administrator	road	4
-administrator	role	4
-administrator	tag_reader	4
-administrator	user_id	4
-administrator	video_monitor	4
+administrator	system_attribute	4
+administrator	toll_zone	4
 administrator	weather_sensor	4
 \.
 

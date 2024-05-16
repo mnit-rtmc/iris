@@ -108,7 +108,6 @@ These are static [font]s which can be used in [sign message]s.
 [comm config]: comm_config.html
 [comm link]: comm_links.html
 [controller]: controllers.html
-[dependent resources]: permissions.html#dependent-resources
 [detector]: vehicle_detection.html
 [dms]: dms.html
 [domain]: user_roles.html#domains

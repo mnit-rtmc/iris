@@ -209,7 +209,7 @@ pub async fn get_by_name(
     name: &Name,
 ) -> Result<Permission> {
     let client = db.client().await?;
-    let type_n = name.res_type.dependent().as_str();
+    let type_n = name.res_type.base().as_str();
     match name.object_n() {
         Some(tag) => {
             let row = client

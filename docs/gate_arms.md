@@ -19,10 +19,6 @@ roadway.  They are commonly used for on-ramps or reversible lanes.
 | 💡 Manage    | notes                      |                       |
 | 🔧 Configure | controller                 | pin                   |
 
-[Dependent resources]:
-
-* Gate arm arrays (see below)
-
 </details>
 
 ## Arrays
@@ -146,7 +142,6 @@ filesystem at `/var/lib/iris/gate_arm_enable` (using the touch command).
 [CIDR]: https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing
 [comm link]: comm_links.html
 [controller]: controllers.html
-[dependent resources]: permissions.html#dependent-resources
 [DMS actions]: action_plans.html#dms-actions
 [phase]: action_plans.html#plan-phases
 [system attribute]: system_attributes.html

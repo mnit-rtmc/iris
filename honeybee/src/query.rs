@@ -499,11 +499,9 @@ pub const RAMP_METER_ONE: &str = "\
 
 /// SQL query for resource types (LUT)
 pub const RESOURCE_TYPE_LUT: &str = "\
-SELECT to_json(r.name)::text FROM (\
-  SELECT name \
+  SELECT name, base \
   FROM iris.resource_type \
-  ORDER BY name\
-) r";
+  ORDER BY name";
 
 /// SQL query for all Rnodes (secondary)
 pub const RNODE_FULL: &str = "\

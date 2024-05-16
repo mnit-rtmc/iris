@@ -403,7 +403,7 @@ pub async fn fetch_resource(config: bool) -> Result<String> {
 /// Add option to access select
 fn add_option<C: Card>(perm: &Permission, html: &mut String) {
     let res = C::res();
-    if perm.resource_n == res.dependent().as_str() {
+    if perm.resource_n == res.base().as_str() {
         html.push_str("<option value='");
         html.push_str(res.as_str());
         html.push_str("'>");

@@ -344,7 +344,7 @@ impl Resource {
     const fn all_sql_json(self) -> bool {
         use Resource::*;
         match self {
-            ResourceType | SystemAttributePub => false,
+            SystemAttributePub => false,
             _ => true,
         }
     }
