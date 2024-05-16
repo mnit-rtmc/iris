@@ -92,7 +92,7 @@ impl PermissionAnc {
             for resource_type in resource_types {
                 if resource_type.base {
                     html.push_str("<option");
-                    if &pri.resource_n == &resource_type.name {
+                    if pri.resource_n == resource_type.name {
                         html.push_str(" selected");
                     }
                     html.push('>');

@@ -355,60 +355,60 @@ pub async fn fetch_resource(config: bool) -> Result<String> {
     let json = Uri::from("/iris/api/access").get().await?;
     let access: Vec<Permission> = serde_wasm_bindgen::from_value(json)?;
     let mut html = "<option/>".to_string();
-    for perm in &access {
-        if perm.hashtag.is_none() {
-            if config {
-                add_option::<Alarm>(perm, &mut html);
-            }
-            add_option::<Beacon>(perm, &mut html);
-            if config {
-                add_option::<CabinetStyle>(perm, &mut html);
-            }
-            add_option::<Camera>(perm, &mut html);
-            if config {
-                add_option::<CommConfig>(perm, &mut html);
-                add_option::<CommLink>(perm, &mut html);
-                add_option::<Controller>(perm, &mut html);
-                add_option::<Detector>(perm, &mut html);
-            }
-            add_option::<Dms>(perm, &mut html);
-            if config {
-                add_option::<FlowStream>(perm, &mut html);
-                add_option::<GateArm>(perm, &mut html);
-            }
-            add_option::<GateArmArray>(perm, &mut html);
-            if config {
-                add_option::<Gps>(perm, &mut html);
-            }
-            add_option::<LaneMarking>(perm, &mut html);
-            add_option::<LcsArray>(perm, &mut html);
-            if config {
-                add_option::<LcsIndication>(perm, &mut html);
-                add_option::<Modem>(perm, &mut html);
-                add_option::<Permission>(perm, &mut html);
-            }
-            add_option::<RampMeter>(perm, &mut html);
-            if config {
-                add_option::<Role>(perm, &mut html);
-                add_option::<TagReader>(perm, &mut html);
-                add_option::<User>(perm, &mut html);
-            }
-            add_option::<VideoMonitor>(perm, &mut html);
-            add_option::<WeatherSensor>(perm, &mut html);
-        }
+    if config {
+        add_option::<Alarm>(&access, &mut html);
     }
+    add_option::<Beacon>(&access, &mut html);
+    if config {
+        add_option::<CabinetStyle>(&access, &mut html);
+    }
+    add_option::<Camera>(&access, &mut html);
+    if config {
+        add_option::<CommConfig>(&access, &mut html);
+        add_option::<CommLink>(&access, &mut html);
+        add_option::<Controller>(&access, &mut html);
+        add_option::<Detector>(&access, &mut html);
+    }
+    add_option::<Dms>(&access, &mut html);
+    if config {
+        add_option::<FlowStream>(&access, &mut html);
+        add_option::<GateArm>(&access, &mut html);
+    }
+    add_option::<GateArmArray>(&access, &mut html);
+    if config {
+        add_option::<Gps>(&access, &mut html);
+    }
+    add_option::<LaneMarking>(&access, &mut html);
+    add_option::<LcsArray>(&access, &mut html);
+    if config {
+        add_option::<LcsIndication>(&access, &mut html);
+        add_option::<Modem>(&access, &mut html);
+        add_option::<Permission>(&access, &mut html);
+    }
+    add_option::<RampMeter>(&access, &mut html);
+    if config {
+        add_option::<Role>(&access, &mut html);
+        add_option::<TagReader>(&access, &mut html);
+        add_option::<User>(&access, &mut html);
+    }
+    add_option::<VideoMonitor>(&access, &mut html);
+    add_option::<WeatherSensor>(&access, &mut html);
     Ok(html)
 }
 
 /// Add option to access select
-fn add_option<C: Card>(perm: &Permission, html: &mut String) {
-    let res = C::res();
-    if perm.resource_n == res.base().as_str() {
-        html.push_str("<option value='");
-        html.push_str(res.as_str());
-        html.push_str("'>");
-        html.push_str(C::DNAME);
-        html.push_str("</option>");
+fn add_option<C: Card>(access: &[Permission], html: &mut String) {
+    for perm in access {
+        if perm.hashtag.is_none() {
+            let res = C::res();
+            if perm.resource_n == res.base().as_str() {
+                html.push_str("<option value='");
+                html.push_str(res.as_str());
+                html.push_str("'>");
+                html.push_str(C::DNAME);
+                html.push_str("</option>");
+            }
+        }
     }
 }
 
