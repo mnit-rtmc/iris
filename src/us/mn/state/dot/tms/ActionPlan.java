@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,6 +52,12 @@ public interface ActionPlan extends SonarObject {
 
 	/** Get the sticky flag */
 	boolean getSticky();
+
+	/** Set ignore auto-fail flag */
+	void setIgnoreAutoFail(boolean ig);
+
+	/** Get ignore auto-fail flag */
+	boolean getIgnoreAutoFail();
 
 	/** Set the active status */
 	void setActive(boolean a);

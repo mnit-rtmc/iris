@@ -38,4 +38,16 @@ DELETE FROM iris.permission WHERE resource_n NOT IN (
 ALTER TABLE iris.permission ADD CONSTRAINT base_resource_ck
     CHECK (iris.resource_is_base(resource_n));
 
+-- Add ignore_auto_fail to action_plan
+DROP VIEW action_plan_view;
+ALTER TABLE iris.action_plan ADD COLUMN ignore_auto_fail BOOLEAN;
+UPDATE iris.action_plan SET ignore_auto_fail = false;
+ALTER TABLE iris.action_plan ALTER COLUMN ignore_auto_fail SET NOT NULL;
+
+CREATE VIEW action_plan_view AS
+    SELECT name, description, group_n, sync_actions, sticky, ignore_auto_fail,
+           active, default_phase, phase
+    FROM iris.action_plan;
+GRANT SELECT ON action_plan_view TO PUBLIC;
+
 COMMIT;

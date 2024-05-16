@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2023  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  * Copyright (C) 2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -66,8 +66,8 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		namespace.registerType(SONAR_TYPE, ActionPlanImpl.class,
 			GROUP_CHECKER);
 		store.query("SELECT name, description, group_n, sync_actions, "+
-			"sticky, active, default_phase, phase FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+			"sticky, ignore_auto_fail, active, default_phase, " +
+			"phase FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new ActionPlanImpl(row));
@@ -84,6 +84,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		map.put("group_n", group_n);
 		map.put("sync_actions", sync_actions);
 		map.put("sticky", sticky);
+		map.put("ignore_auto_fail", ignore_auto_fail);
 		map.put("active", active);
 		map.put("default_phase", default_phase);
 		map.put("phase", phase);
@@ -115,29 +116,31 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		     row.getString(3),  // group_n
 		     row.getBoolean(4), // sync_actions
 		     row.getBoolean(5), // sticky
-		     row.getBoolean(6), // active
-		     row.getString(7),  // default_phase
-		     row.getString(8)   // phase
+		     row.getBoolean(6), // ignore_auto_fail
+		     row.getBoolean(7), // active
+		     row.getString(8),  // default_phase
+		     row.getString(9)   // phase
 		);
 	}
 
 	/** Create an action plan */
 	private ActionPlanImpl(String n, String dsc, String gn, boolean sa,
-		boolean st, boolean a, String dp, String p)
+		boolean st, boolean ig, boolean a, String dp, String p)
 	{
-		this(n, dsc, gn, sa, st, a, lookupPlanPhase(dp),
+		this(n, dsc, gn, sa, st, ig, a, lookupPlanPhase(dp),
 		     lookupPlanPhase(p));
 	}
 
 	/** Create an action plan */
 	public ActionPlanImpl(String n, String dsc, String gn, boolean sa,
-		boolean st, boolean a, PlanPhase dp, PlanPhase p)
+		boolean st, boolean ig, boolean a, PlanPhase dp, PlanPhase p)
 	{
 		this(n);
 		description = dsc;
 		group_n = gn;
 		sync_actions = sa;
 		sticky = st;
+		ignore_auto_fail = ig;
 		active = a;
 		default_phase = dp;
 		phase = p;
@@ -233,6 +236,29 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	@Override
 	public boolean getSticky() {
 		return sticky;
+	}
+
+	/** Ignore auto-fail flag */
+	private boolean ignore_auto_fail;
+
+	/** Set ignore auto-fail flag */
+	@Override
+	public void setIgnoreAutoFail(boolean ig) {
+		ignore_auto_fail = ig;
+	}
+
+	/** Set ignore auto-fail flag */
+	public void doSetIgnoreAutoFail(boolean ig) throws TMSException {
+		if (ig != ignore_auto_fail) {
+			store.update(this, "ignore_auto_fail", ig);
+			setIgnoreAutoFail(ig);
+		}
+	}
+
+	/** Get ignore auto-fail flag */
+	@Override
+	public boolean getIgnoreAutoFail() {
+		return ignore_auto_fail;
 	}
 
 	/** Active status */

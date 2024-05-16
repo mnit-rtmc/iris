@@ -1219,14 +1219,15 @@ CREATE TABLE iris.action_plan (
     group_n VARCHAR(16),
     sync_actions BOOLEAN NOT NULL,
     sticky BOOLEAN NOT NULL,
+    ignore_auto_fail BOOLEAN NOT NULL,
     active BOOLEAN NOT NULL,
     default_phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
     phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
 CREATE VIEW action_plan_view AS
-    SELECT name, description, group_n, sync_actions, sticky, active,
-           default_phase, phase
+    SELECT name, description, group_n, sync_actions, sticky, ignore_auto_fail,
+           active, default_phase, phase
     FROM iris.action_plan;
 GRANT SELECT ON action_plan_view TO PUBLIC;
 

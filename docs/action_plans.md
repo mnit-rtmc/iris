@@ -14,10 +14,12 @@ Each phase can be associated with any number of [DMS](#dms-actions),
 [beacon](#beacon-actions) actions.  Advanced plans can have many phases, each
 with separate actions.
 
-If **Sync Actions** is selected, the phase can only be changed if all associated
-devices are online.  If **Sticky** is selected, messages sent with
-[DMS actions](#dms-actions) will be configured to persist even if communication
-or power is lost.
+- **Sync Actions**: if selected, the phase can only be changed if all associated
+  devices are online.
+- **Sticky**: if selected, messages sent with [DMS actions](#dms-actions) will
+  be configured to persist even if communication or power is lost.
+- **Ignore Auto-Fail**: if selected, [DMS action](#dms-actions) messages will
+  ignore detector auto-fail (`[exit` *…* `]` or `[slow` *…* `]` only)
 
 ## Plan Phases
 
