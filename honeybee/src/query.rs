@@ -632,7 +632,7 @@ pub const USER_ALL: &str = "\
 
 /// SQL query for one user (secondary)
 pub const USER_ONE: &str = "\
-  SELECT name, full_name, role, enabled \
+  SELECT name, full_name, dn, role, enabled \
   FROM iris.user_id \
   WHERE name = $1";
 

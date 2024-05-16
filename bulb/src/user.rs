@@ -29,6 +29,8 @@ pub struct User {
     pub full_name: String,
     pub role: Option<String>,
     pub enabled: bool,
+    // secondary attributes
+    pub dn: Option<String>,
 }
 
 /// Ancillary user data
@@ -116,6 +118,7 @@ impl User {
     /// Convert to Edit HTML
     fn to_html_edit(&self, anc: &UserAnc) -> String {
         let full_name = HtmlStr::new(&self.full_name);
+        let dn = HtmlStr::new(&self.dn);
         let role = anc.roles_html(self);
         let enabled = if self.enabled { " checked" } else { "" };
         format!(
@@ -123,6 +126,10 @@ impl User {
                <label for='full_name'>Full Name</label>\
                <input id='full_name' maxlength='31' size='20' \
                       value='{full_name}'>\
+            </div>\
+            <div class='row'>\
+               <label for='dn'>Dn</label>\
+               <input id='dn' maxlength='128' size='32' value='{dn}'>\
             </div>\
             <div class='row'>\
                <label for='role'>Role</label>\
@@ -184,6 +191,7 @@ impl Card for User {
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("full_name", &self.full_name);
+        fields.changed_input("dn", &self.dn);
         fields.changed_select("role", &self.role);
         fields.changed_input("enabled", self.enabled);
         fields.into_value().to_string()
