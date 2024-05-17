@@ -792,20 +792,32 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		      : MISSING_DATA;
 	}
 
+	/** Get the occupancy for most recent period */
+	public float getOccupancy(int per_ms) {
+		return getOccupancy(per_ms, false);
+	}
+
 	/** Get the occupancy for an interval */
 	protected float getOccupancy(long stamp, int per_ms) {
-		int scn = isSampling()
+		return getOccupancy(stamp, per_ms, false);
+	}
+
+	/** Get the occupancy for most recent period */
+	public float getOccupancy(int per_ms, boolean ignore_auto_fail) {
+		long stamp = calculateEndTime(per_ms);
+		return getOccupancy(stamp, per_ms, ignore_auto_fail);
+	}
+
+	/** Get the occupancy for an interval */
+	private float getOccupancy(long stamp, int per_ms,
+		boolean ignore_auto_fail)
+	{
+		int scn = isSampling(ignore_auto_fail)
 		       ? scn_cache.getValue(stamp - per_ms, stamp)
 		       : MISSING_DATA;
 		return (scn >= 0)
 		      ? MAX_OCCUPANCY * scn * SCAN_MS / per_ms
 		      : MISSING_DATA;
-	}
-
-	/** Get the occupancy for most recent period */
-	public float getOccupancy(int per_ms) {
-		long stamp = calculateEndTime(per_ms);
-		return getOccupancy(stamp, per_ms);
 	}
 
 	/** Get a flow rate (vehicles per hour) */

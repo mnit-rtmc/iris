@@ -437,9 +437,12 @@ public class DmsActionMsg {
 	 * @param det Exit detector.
 	 * @param occ Threshold occupancy to activate warning. */
 	private String exitWarningSpan(DetectorImpl det, int occ) {
-		return (det.getOccupancy(DetectorImpl.BIN_PERIOD_MS * 3) > occ)
-		      ? EMPTY_SPAN
-		      : fail("Occupancy too low");
+		ActionPlan plan = action.getActionPlan();
+		float o = det.getOccupancy(
+			DetectorImpl.BIN_PERIOD_MS * 3,
+			plan.getIgnoreAutoFail()
+		);
+		return (o > occ) ? EMPTY_SPAN : fail("Occupancy too low");
 	}
 
 	/** Create a speed.
