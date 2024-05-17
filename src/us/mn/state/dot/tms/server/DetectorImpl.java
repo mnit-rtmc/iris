@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -665,7 +665,13 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Check if the detector is currently 'failed' */
 	@Override
 	public boolean isFailed() {
-		return force_fail || auto_fail || super.isFailed();
+		return isFailed(false);
+	}
+
+	/** Check if the detector is currently 'failed' */
+	private boolean isFailed(boolean ignore_auto_fail) {
+		return force_fail || super.isFailed() ||
+		      (auto_fail && !ignore_auto_fail);
 	}
 
 	/** Get the active status */
@@ -677,8 +683,13 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Check if the detector is currently sampling data */
 	public boolean isSampling() {
+		return isSampling(false);
+	}
+
+	/** Check if the detector is currently sampling data */
+	private boolean isSampling(boolean ignore_auto_fail) {
 		return (LaneCode.fromCode(lane_code) == LaneCode.GREEN) ||
-		       (isActive() && !isFailed());
+		       (isActive() && !isFailed(ignore_auto_fail));
 	}
 
 	/** Average detector field length (feet) */
@@ -868,6 +879,13 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			return speed;
 		else
 			return getSpeedFake(stamp, per_ms);
+	}
+
+	/** Get recorded speed (miles per hour) */
+	public float getSpeed(long stamp, int per_ms, boolean ignore_auto_fail) {
+		return isSampling(ignore_auto_fail)
+		     ? getSpeed(stamp, per_ms)
+		     : MISSING_DATA;
 	}
 
 	/** Get the raw (non-faked) speed (MPH) */

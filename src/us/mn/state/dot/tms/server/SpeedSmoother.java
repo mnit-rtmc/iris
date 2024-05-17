@@ -91,9 +91,14 @@ public class SpeedSmoother {
 		speeds[0] = (s > 0) ? s : MISSING_DATA;
 	}
 
-	/** Get smoothed value using speed ranking */
-	public float speedRankedValue(int limit) {
-		return average(speedBins(), limit);
+	/** Get smoothed value using the given ranking mode */
+	public float value(RankMode mode, int limit) {
+		switch (mode) {
+		case SPEED:
+			return average(speedBins(), limit);
+		default:
+			return average(n_bins, limit);
+		}
 	}
 
 	/** Get the number of rolling bins for a set of speeds */
@@ -121,11 +126,6 @@ public class SpeedSmoother {
 			}
 		}
 		return (count > 0) ? total / count : MISSING_DATA;
-	}
-
-	/** Get smoothed value using density ranking */
-	public float densityRankedValue(int limit) {
-		return average(n_bins, limit);
 	}
 
 	/** Set density (updating 30-second bin count) */

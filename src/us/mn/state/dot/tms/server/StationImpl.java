@@ -188,26 +188,38 @@ public class StationImpl implements Station, VehicleSampler {
 	/** Rolling station speeds */
 	private final SpeedSmoother speeds = new SpeedSmoother();
 
+	/** Rolling station speeds (ignoring auto-fail) */
+	private final SpeedSmoother speeds_ig = new SpeedSmoother();
 
 	/** Low station speeds */
 	private final SpeedSmoother speeds_low = new SpeedSmoother();
 
-	/** Get smoothed speed using density ranking */
-	public float getRollingAverageSpeed() {
-		int limit = getSpeedLimit();
-		return speeds.densityRankedValue(limit + 10);
+	/** Get smoothed speed using density rank mode */
+	public float getSpeedAvg(int limit_adj) {
+		return getSpeedAvg(RankMode.DENSITY, limit_adj);
 	}
 
-	/** Get smoothed speed using speed ranking */
-	public float getSmoothedAverageSpeed() {
+	/** Get smoothed speed using the given rank mode */
+	private float getSpeedAvg(RankMode mode, int limit_adj) {
 		int limit = getSpeedLimit();
-		return speeds.speedRankedValue(limit);
+		return speeds.value(mode, limit + limit_adj);
 	}
 
-	/** Get smoothed low speed using speed ranking */
-	public float getSmoothedLowSpeed() {
+	/** Get smoothed speed using the given rank mode */
+	public float getSpeedAvg(RankMode mode) {
+		return getSpeedAvg(mode, 0);
+	}
+
+	/** Get smoothed speed (ignoring auto-fail) using density rank mode */
+	public float getSpeedAvgIg(int limit_adj) {
 		int limit = getSpeedLimit();
-		return speeds_low.speedRankedValue(limit);
+		return speeds_ig.value(RankMode.DENSITY, limit + limit_adj);
+	}
+
+	/** Get smoothed low speed using speed rank mode */
+	public float getSpeedLow() {
+		int limit = getSpeedLimit();
+		return speeds_low.value(RankMode.SPEED, limit);
 	}
 
 	/** Calculate the current station data */
@@ -220,6 +232,8 @@ public class StationImpl implements Station, VehicleSampler {
 		float t_speed = 0;
 		int n_speed = 0;
 		float low = MISSING_DATA;
+		float t_speed_ig = 0; /* ignore auto-fail */
+		int n_speed_ig = 0; /* ignore auto-fail */
 		for (DetectorImpl det: r_node.getDetectors()) {
 			if (!isValidStation(det))
 				continue;
@@ -241,11 +255,18 @@ public class StationImpl implements Station, VehicleSampler {
 				    ? f
 				    : Math.min(f, low);
 			}
+			f = det.getSpeed(stamp, per_ms, true);
+			if (f > 0) {
+				t_speed_ig += f;
+				n_speed_ig++;
+			}
 		}
 		occupancy = average(t_occ, n_occ);
 		density = average(t_density, n_density);
 		speed = average(t_speed, n_speed);
 		speeds.push(speed);
+		float speed_ig = average(t_speed_ig, n_speed_ig);
+		speeds_ig.push(speed_ig);
 		speeds_low.push(low);
 	}
 
@@ -353,8 +374,8 @@ public class StationImpl implements Station, VehicleSampler {
 	 * @param d Distance to previous station (miles).
 	 * @return acceleration in mphph */
 	private Float calculateAcceleration(StationImpl sp, float d) {
-		float u = getRollingAverageSpeed();
-		float up = sp.getRollingAverageSpeed();
+		float u = getSpeedAvg(10);
+		float up = sp.getSpeedAvg(10);
 		return calculateAcceleration(u, up, d);
 	}
 
@@ -383,7 +404,7 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Test if station speed is below the breakdown speed */
 	private boolean isBelowBreakdownSpeed() {
-		float s = getRollingAverageSpeed();
+		float s = getSpeedAvg(10);
 		return s > 0 && s < VSA_BREAKDOWN_SPEED_MPH;
 	}
 
@@ -401,7 +422,7 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Test if station speed is below the bottleneck id speed */
 	private boolean isBelowBottleneckSpeed() {
-		float s = getRollingAverageSpeed();
+		float s = getSpeedAvg(10);
 		return s > 0 &&
 		       s < SystemAttrEnum.VSA_BOTTLENECK_ID_MPH.getInt();
 	}
@@ -436,7 +457,7 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Test if station speed is above the bottleneck id speed */
 	private boolean isAboveBottleneckSpeed() {
-		return getRollingAverageSpeed() >
+		return getSpeedAvg(10) >
 			SystemAttrEnum.VSA_BOTTLENECK_ID_MPH.getInt();
 	}
 
@@ -498,7 +519,7 @@ public class StationImpl implements Station, VehicleSampler {
 	public void debug() {
 		if (BOTTLENECK_LOG.isOpen()) {
 			BOTTLENECK_LOG.log(name +
-				", spd: " + getRollingAverageSpeed() +
+				", spd: " + getSpeedAvg(10) +
 				", acc: " + acceleration +
 				", n_can: " + n_candidate +
 				", bneck: " + bottleneck);
@@ -520,7 +541,7 @@ public class StationImpl implements Station, VehicleSampler {
 	/** Get the upstream bottleneck distance */
 	private float getUpstreamDistance() {
 		float lim = getSpeedLimit();
-		float sp = getRollingAverageSpeed();
+		float sp = getSpeedAvg(10);
 		if (sp > 0 && sp < lim) {
 			int acc = -getControlThreshold();
 			return (lim * lim - sp * sp) / (2 * acc);
