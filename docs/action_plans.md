@@ -19,7 +19,7 @@ with separate actions.
 - **Sticky**: if selected, messages sent with [DMS actions](#dms-actions) will
   be configured to persist even if communication or power is lost.
 - **Ignore Auto-Fail**: if selected, [DMS action](#dms-actions) messages will
-  ignore detector auto-fail (`[exit` *…* `]` or `[slow` *…* `]` only)
+  ignore detector [auto-fail] (`[exit` *…* `]` or `[slow` *…* `]` only)
 
 ## Plan Phases
 
@@ -169,6 +169,7 @@ Whenever an action plan phase changes, a time-stamped record is added to the
 than the value of the `action_plan_event_purge_days` [system attribute].
 
 
+[auto-fail]: vehicle_detection.html#auto-fail
 [beacon]: beacons.html
 [camera]: cameras.html
 [ClearGuide]: clearguide.html

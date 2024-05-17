@@ -130,7 +130,7 @@ RTMS [G4] vlog         | N/A             | [vlog]
 For protocols which allow the binning intereval to be adjusted, it will be set
 to the [poll period] of the [comm config].
 
-## Auto Fail
+## Auto-Fail
 
 Traffic data is continuously checked for five common failure conditions.  When
 one of these first occurs and every hour that it persists, an event is logged in
