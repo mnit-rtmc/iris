@@ -52,7 +52,7 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 				return ap.getName();
 			}
 		});
-		cols.add(new ProxyColumn<ActionPlan>("device.description", 380){
+		cols.add(new ProxyColumn<ActionPlan>("device.description", 370){
 			public Object getValueAt(ActionPlan ap) {
 				return ap.getDescription();
 			}
@@ -65,7 +65,7 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 			}
 		});
 		cols.add(new ProxyColumn<ActionPlan>("action.plan.group",
-			160)
+			120)
 		{
 			public Object getValueAt(ActionPlan ap) {
 				return ap.getGroupN();
@@ -107,7 +107,7 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 			}
 		});
 		cols.add(new ProxyColumn<ActionPlan>(
-			"action.plan.ignore.auto.fail", 80, Boolean.class)
+			"action.plan.ignore.auto.fail", 140, Boolean.class)
 		{
 			public Object getValueAt(ActionPlan ap) {
 				return ap.getIgnoreAutoFail();
