@@ -127,6 +127,7 @@ function tms_styles() {
         segment_16: tms_style,
         segment_17: tms_style,
         segment_18: tms_style,
+        dms_11: tms_style,
         dms_12: tms_style,
         dms_13: tms_style,
         dms_14: tms_style,

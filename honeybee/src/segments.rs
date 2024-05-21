@@ -928,7 +928,7 @@ impl SegmentState {
     pub fn write_loc_markers(&self) -> Result<()> {
         let dir = Path::new(LOAM_PATH);
         for (res, locs) in self.markers.iter() {
-            for zoom in 12..=18 {
+            for zoom in 11..=18 {
                 let sz = 800_000.0 * zoom_scale(zoom);
                 let mut loam = PathBuf::from(dir);
                 loam.push(format!("{}_{zoom}.loam", res.as_str()));
