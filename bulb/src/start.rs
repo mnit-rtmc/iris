@@ -38,8 +38,10 @@ const SIDEBAR: &str = include_str!("sidebar.html");
 /// JavaScript imports
 #[wasm_bindgen(module = "/static/glue.js")]
 extern "C" {
-    /// Update station sample data
-    fn update_stat_data(sample: &JsValue);
+    /// Update station data
+    fn update_stat_sample(data: &JsValue);
+    // Update TMS main item states
+    fn update_item_states(data: &JsValue);
 }
 
 /// Button attributes
@@ -107,7 +109,7 @@ async fn add_sidebar() -> JsResult<()> {
     add_map_click_listener(&mapid)?;
     add_eventsource_listener();
     do_future(finish_init()).await;
-    fetch_station_data();
+    fetch_station_sample();
     Ok(())
 }
 
@@ -271,6 +273,7 @@ async fn build_card_list(search: &str) -> Result<String> {
         Some(mut cards) => {
             cards.search(search);
             let html = cards.make_html().await?;
+            update_item_states(&JsValue::from_str(cards.states_main()));
             app::card_list(Some(cards));
             Ok(html)
         }
@@ -587,7 +590,7 @@ fn tick_interval() {
     app::tick_tock();
     while let Some(action) = app::next_action() {
         match action {
-            DeferredAction::FetchStationData => fetch_station_data(),
+            DeferredAction::FetchStationData => fetch_station_sample(),
             DeferredAction::HideToast => hide_toast(),
             DeferredAction::MakeEventSource => add_eventsource_listener(),
             DeferredAction::RefreshList => spawn_local(handle_refresh()),
@@ -597,15 +600,15 @@ fn tick_interval() {
 }
 
 /// Fetch station sample data
-fn fetch_station_data() {
+fn fetch_station_sample() {
     app::defer_action(DeferredAction::FetchStationData, 30_000);
-    spawn_local(do_future(do_fetch_station_data()));
+    spawn_local(do_future(do_fetch_station_sample()));
 }
 
 /// Actually fetch station sample data
-async fn do_fetch_station_data() -> Result<()> {
+async fn do_fetch_station_sample() -> Result<()> {
     let stat = Uri::from("/iris/station_sample").get().await?;
-    update_stat_data(&stat);
+    update_stat_sample(&stat);
     Ok(())
 }
 

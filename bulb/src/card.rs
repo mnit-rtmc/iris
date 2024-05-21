@@ -26,6 +26,7 @@ use crate::gatearm::GateArm;
 use crate::gatearmarray::GateArmArray;
 use crate::geoloc::GeoLoc;
 use crate::gps::Gps;
+use crate::item::ItemState;
 use crate::lanemarking::LaneMarking;
 use crate::lcsarray::LcsArray;
 use crate::lcsindication::LcsIndication;
@@ -264,6 +265,11 @@ pub trait Card: Default + DeserializeOwned + Serialize + PartialEq {
         None
     }
 
+    /// Get the main item state
+    fn item_state_main(&self, _anc: &Self::Ancillary) -> ItemState {
+        ItemState::Unknown
+    }
+
     /// Check if a search string matches
     fn is_match(&self, _search: &str, _anc: &Self::Ancillary) -> bool {
         false
@@ -433,6 +439,8 @@ pub struct CardList {
     json: String,
     /// Views in order of JSON list
     views: Vec<CardView>,
+    /// Main item states for all cards, as a JSON map
+    states_main: String,
 }
 
 impl CardList {
@@ -442,12 +450,14 @@ impl CardList {
         let search = Search::Empty();
         let json = String::new();
         let views = Vec::new();
+        let states_main = String::new();
         CardList {
             res,
             config,
             search,
             json,
             views,
+            states_main,
         }
     }
 
@@ -465,6 +475,11 @@ impl CardList {
     /// Take current JSON value
     pub fn json(&mut self) -> String {
         std::mem::take(&mut self.json)
+    }
+
+    /// Get main item states
+    pub fn states_main(&self) -> &str {
+        &self.states_main
     }
 
     /// Get form card (if any)
@@ -529,6 +544,8 @@ impl CardList {
         let anc = fetch_ancillary(View::Search, &pri).await?;
         let rname = C::res().as_str();
         self.views.clear();
+        let mut states = String::new();
+        states.push('{');
         let mut html = String::new();
         html.push_str("<ul class='cards'>");
         if self.config {
@@ -558,8 +575,18 @@ impl CardList {
             html.push_str(&pri.to_html(view, &anc));
             html.push_str("</li>");
             self.views.push(cv);
+            if states.len() > 1 {
+                states.push(',');
+            }
+            states.push('"');
+            states.push_str(&name);
+            states.push_str("\":\"");
+            states.push_str(pri.item_state_main(&anc).code());
+            states.push('"');
         }
         html.push_str("</ul>");
+        states.push('}');
+        self.states_main = states;
         Ok(html)
     }
 

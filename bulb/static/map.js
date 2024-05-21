@@ -10,6 +10,9 @@ var tms_layers = null;
 // Current station sample data
 var stat_sample = null;
 
+// Current TMS main item states
+var item_states = null;
+
 // Get styles for OSM layers
 function osm_styles() {
     let county = {
@@ -146,8 +149,16 @@ function tms_style(properties) {
         opacity: 0.5,
     };
     if (properties.name) {
-        // FIXME: use item_style provided by bulb code
-        style.fillColor = "#4aa";
+        if (item_states) {
+            let state = item_states[properties.name];
+            if (state) {
+                return item_style(state);
+            }
+        }
+        let style = {
+            fill: false,
+            stroke: false,
+        };
         return style;
     } else {
         let station_id = properties.station_id;
@@ -162,6 +173,38 @@ function tms_style(properties) {
             }
         }
         return style;
+    }
+}
+
+// Get style based on item state
+function item_style(state) {
+    let style = {
+        fill: true,
+        fillColor: "#666",
+        fillOpacity: 0.8,
+        stroke: true,
+        weight: 0.5,
+        color: "#000",
+        opacity: 0.5,
+    };
+    switch (state) {
+        case '🔹':
+            style.fillColor = "#55acee";
+            return style;
+        case '🔶':
+            style.fillColor = "#e78e0b";
+            return style;
+        case '🗓️':
+        case '👽':
+            style.fillColor = "#ffca81";
+            style.fillOpacity = 0.5;
+            return style;
+        case '🔌':
+            return style;
+        default:
+            style.stroke = false;
+            style.fill = false;
+            return style;
     }
 }
 

@@ -951,6 +951,26 @@ impl Card for Dms {
         self.geo_loc.as_deref()
     }
 
+    /// Get the main item state
+    fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
+        let item_states = self.item_states(anc);
+        if item_states.is_match(ItemState::Inactive.code()) {
+            ItemState::Inactive
+        } else if item_states.is_match(ItemState::Offline.code()) {
+            ItemState::Offline
+        } else if item_states.is_match(ItemState::Dedicated.code()) {
+            ItemState::Dedicated
+        } else if item_states.is_match(ItemState::Deployed.code()) {
+            ItemState::Deployed
+        } else if item_states.is_match(ItemState::Planned.code()) {
+            ItemState::Planned
+        } else if item_states.is_match(ItemState::External.code()) {
+            ItemState::External
+        } else {
+            ItemState::Available
+        }
+    }
+
     /// Check if a search string matches
     fn is_match(&self, search: &str, anc: &DmsAnc) -> bool {
         self.name.contains_lower(search)
