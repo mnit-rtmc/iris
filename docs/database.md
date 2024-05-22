@@ -87,7 +87,7 @@ database).  Then, run the following commands (as tms user):
 ```
 dropdb tms
 createdb tms
-zcat tms-20190827.sql.gz | pgsql tms
+zcat tms-20190827.sql.gz | psql tms
 ```
 
 ## IRIS Upgrades

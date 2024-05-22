@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2023  Minnesota Department of Transportation
+ * Copyright (C) 2013-2024  Minnesota Department of Transportation
  * Copyright (C) 2021-2022  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -437,9 +437,12 @@ public class DmsActionMsg {
 	 * @param det Exit detector.
 	 * @param occ Threshold occupancy to activate warning. */
 	private String exitWarningSpan(DetectorImpl det, int occ) {
-		return (det.getOccupancy(DetectorImpl.BIN_PERIOD_MS * 3) > occ)
-		      ? EMPTY_SPAN
-		      : fail("Occupancy too low");
+		ActionPlan plan = action.getActionPlan();
+		float o = det.getOccupancy(
+			DetectorImpl.BIN_PERIOD_MS * 3,
+			plan.getIgnoreAutoFail()
+		);
+		return (o > occ) ? EMPTY_SPAN : fail("Occupancy too low");
 	}
 
 	/** Create a speed.
@@ -496,7 +499,9 @@ public class DmsActionMsg {
 	private String slowWarningSpan(Speed spd, Distance dist, String mode,
 		Corridor cor, float m)
 	{
-		BackupFinder bf = new BackupFinder(spd, dist, m);
+		ActionPlan plan = action.getActionPlan();
+		boolean ig = plan.getIgnoreAutoFail();
+		BackupFinder bf = new BackupFinder(spd, dist, m, ig);
 		cor.findStation(bf);
 		if (!bf.isBackedUp())
 			return fail("No backup found");

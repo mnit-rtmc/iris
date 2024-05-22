@@ -37,17 +37,6 @@ The following features are supported:
 
 Checks of [free-form text] are also affected by the access level.
 
-[Dependent resources]:
-
-* [font]
-* [graphic]
-* [message line]
-* [message pattern]
-* [sign configuration]
-* [sign detail]
-* [sign message]
-* [word]
-
 </details>
 
 ## Setup
@@ -111,7 +100,6 @@ message.  The server then performs a validation check ensuring the user has
 [comm link]: comm_links.html
 [free-form text]: #composing-messages
 [dedicated purpose]: hashtags.html#dedicated-purpose
-[dependent resources]: permissions.html#dependent-resources
 [DMS actions]: action_plans.html#dms-actions
 [fillable text rectangles]: message_patterns.html#fillable-text-rectangles
 [font]: fonts.html
@@ -122,7 +110,6 @@ message.  The server then performs a validation check ensuring the user has
 [NTCIP]: protocols.html#ntcip
 [permissions]: permissions.html
 [sign configuration]: sign_configuration.html
-[sign detail]: sign_configuration.html#sign-details
 [sign message]: sign_message.html
 [Slow traffic]: slow_warning.html
 [travel time]: travel_time.html

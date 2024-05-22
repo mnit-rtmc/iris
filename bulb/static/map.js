@@ -1,45 +1,20 @@
+// The Leaflet map
+var map;
+
+// Current displayed tooltip
+var tooltip = null;
+
+/// TMS layers
+var tms_layers = null;
+
+// Current station sample data
 var stat_sample = null;
 
-function segment_style(properties, zoom) {
-    let opacity = 0.8;
-    let color = "#666";
-    if (properties.station) {
-        if (stat_sample) {
-            let sample = stat_sample.samples[properties.station];
-            if (sample) {
-                let flow = sample[0];
-                let speed = sample[1];
-                let density = (flow && speed) ? Math.round(flow / speed) : null;
-                opacity = 1;
-                color = density_color(density);
-            }
-        }
-    }
-    return {
-        fill: true,
-        fillOpacity: opacity,
-        fillColor: color,
-        stroke: false,
-    };
-}
+// Current TMS main item states
+var item_states = null;
 
-function density_color(density) {
-    if (density) {
-        if (density < 30) {
-            return "#292";
-        }
-        if (density < 50) {
-            return "#fc0";
-        }
-        if (density < 200) {
-            return "#d00";
-        }
-        return "#c0f";
-    }
-    return "#666";
-}
-
-function make_styles() {
+// Get styles for OSM layers
+function osm_styles() {
     let county = {
         fill: true,
         fillColor: "#bbb",
@@ -57,61 +32,61 @@ function make_styles() {
     };
     let water = {
         fill: true,
-        fillOpacity: 0.8,
         fillColor: "#b5d0d0",
+        fillOpacity: 0.8,
         stroke: false,
     };
     let wetland = {
         fill: true,
-        fillOpacity: 0.8,
         fillColor: "#b8d0bd",
+        fillOpacity: 0.8,
         stroke: false,
     };
     let leisure = {
         fill: true,
-        fillOpacity: 0.6,
         fillColor: "#88cc88",
+        fillOpacity: 0.6,
         weight: 0.1,
         color: '#000',
         opacity: 0.6,
     };
     let cemetery = {
         fill: true,
-        fillOpacity: 0.6,
         fillColor: "#aaccaa",
+        fillOpacity: 0.6,
         weight: 0.1,
         color: '#000',
         opacity: 0.6,
     };
     let building = {
         fill: true,
-        fillOpacity: 0.7,
         fillColor: "#bca9a9",
+        fillOpacity: 0.7,
         weight: 0.7,
         color: "#baa",
     };
     let retail = {
         fill: true,
-        fillOpacity: 0.25,
         fillColor: "#b99",
+        fillOpacity: 0.25,
         stroke: false,
     };
     let parking = {
         fill: true,
-        fillOpacity: 0.6,
         fillColor: "#cca",
+        fillOpacity: 0.6,
         stroke: false,
     };
-    let paths = {
+    let path = {
+        weight: 1,
         color: '#000',
         opacity: 0.5,
-        weight: 1,
         dashArray: "1 3",
     };
-    let railways = {
+    let railway = {
+        weight: 2.5,
         color: '#642',
         opacity: 0.6,
-        weight: 2.5,
         lineCap: "butt",
         dashArray: "1 1.5",
     };
@@ -126,115 +101,276 @@ function make_styles() {
         leisure: leisure,
         cemetery: cemetery,
         retail: retail,
-        motorway: { color: "#ffd9a9", weight: 3 },
+        motorway: { weight: 3, color: "#ffd9a9" },
         trunk: { color: "#ffe0a9" },
         primary: { color: "#ffeaa9" },
         secondary: { color: "#fff4a9" },
         tertiary: { color: "#ffffa9" },
-        roads: { color: "#eee", weight: 2 },
-        paths: paths,
-        railways: railways,
+        road: { weight: 2, color: "#eee" },
+        path: path,
+        railway: railway,
         building: building,
         parking: parking,
-        segments: segment_style,
     };
 }
 
+// Get styles for TMS layers
+function tms_styles() {
+    return {
+        segment_9: tms_style,
+        segment_10: tms_style,
+        segment_11: tms_style,
+        segment_12: tms_style,
+        segment_13: tms_style,
+        segment_14: tms_style,
+        segment_15: tms_style,
+        segment_16: tms_style,
+        segment_17: tms_style,
+        segment_18: tms_style,
+        dms_11: tms_style,
+        dms_12: tms_style,
+        dms_13: tms_style,
+        dms_14: tms_style,
+        dms_15: tms_style,
+        dms_16: tms_style,
+        dms_17: tms_style,
+        dms_18: tms_style,
+    };
+}
+
+// Get style for a TMS feature
+function tms_style(properties) {
+    let style = {
+        fill: true,
+        fillColor: "#666",
+        fillOpacity: 0.8,
+        stroke: true,
+        weight: 0.5,
+        color: "#000",
+        opacity: 0.5,
+    };
+    if (properties.name) {
+        if (item_states) {
+            let state = item_states[properties.name];
+            if (state) {
+                return item_style(state);
+            }
+        }
+        let style = {
+            fill: false,
+            stroke: false,
+        };
+        return style;
+    } else {
+        let station_id = properties.station_id;
+        if (station_id && stat_sample) {
+            let sample = stat_sample.samples[station_id];
+            if (sample) {
+                let flow = sample[0];
+                let speed = sample[1];
+                let density = (flow && speed) ? Math.round(flow / speed) : null;
+                style.fillColor = density_color(density);
+                style.fillOpacity = 1;
+            }
+        }
+        return style;
+    }
+}
+
+// Get style based on item state
+function item_style(state) {
+    let style = {
+        fill: true,
+        fillColor: "#666",
+        fillOpacity: 0.8,
+        stroke: true,
+        weight: 0.5,
+        color: "#000",
+        opacity: 0.5,
+    };
+    switch (state) {
+        case '🔹':
+            style.fillColor = "#55acee";
+            return style;
+        case '🔶':
+            style.fillColor = "#e78e0b";
+            return style;
+        case '🗓️':
+        case '👽':
+            style.fillColor = "#ffca81";
+            style.fillOpacity = 0.5;
+            return style;
+        case '🔌':
+            return style;
+        default:
+            style.stroke = false;
+            style.fill = false;
+            return style;
+    }
+}
+
+// Get color based on density (veh/mi)
+function density_color(density) {
+    if (density) {
+        if (density < 30) {
+            return "#292";
+        }
+        if (density < 50) {
+            return "#fc0";
+        }
+        if (density < 200) {
+            return "#d00";
+        }
+        return "#c0f";
+    }
+    return "#666";
+}
+
+// Initialize leaflet map
 function init_map() {
-    var map = L.map('mapid', {
+    map = L.map('mapid', {
         center: [45, -93],
         zoom: 12,
     });
+    map.attributionControl.setPrefix("");
     const osm_url = "/tile/{z}/{x}/{y}.mvt";
     const tms_url = "/tms/{z}/{x}/{y}.mvt";
-    const highlight_style = {
-        fill: true,
-        fillColor: 'red',
-        fillOpacity: 0.1,
-        radius: 6,
-        color: 'red',
-        opacity: 0.1,
-    };
-    let options = {
+    let osm_layers = L.vectorGrid.protobuf(osm_url, {
         renderFactory: L.svg.tile,
         interactive: true,
-        vectorTileLayerStyles: make_styles(),
-        getFeatureId: function(feat) {
-            return feat.properties.osm_id || feat.properties.sid;
-        },
-        attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+        vectorTileLayerStyles: osm_styles(),
+        getFeatureId: osm_layer_id,
+        attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
         maxNativeZoom: 18,
-    };
-    var highlight;
-    var osm_layers = L.vectorGrid.protobuf(osm_url, options);
-    var tms_layers = L.vectorGrid.protobuf(tms_url, options);
-    function on_click(e) {
-        let osm_id = e.layer.properties.osm_id || e.layer.properties.sid;
-        let change = (typeof osm_id != "undefined") && (osm_id != highlight);
-        if (highlight) {
-            osm_layers.resetFeatureStyle(highlight);
-            tms_layers.resetFeatureStyle(highlight);
-            highlight = null;
+    });
+    tms_layers = L.vectorGrid.protobuf(tms_url, {
+        renderFactory: L.svg.tile,
+        interactive: true,
+        vectorTileLayerStyles: tms_styles(),
+        getFeatureId: tms_layer_id,
+        attribution: '',
+        maxNativeZoom: 18,
+    });
+    var osm_select;
+    function osm_on_click(e) {
+        if (tooltip) {
+            tooltip.close();
+            tooltip = null;
+        }
+        let fid = osm_layer_id(e.layer);
+        let change = (typeof fid != "undefined") && (fid != osm_select);
+        if (osm_select) {
+            osm_layers.resetFeatureStyle(osm_select);
+            osm_select = null;
         }
         if (change) {
-            highlight = osm_id;
-            osm_layers.setFeatureStyle(highlight, highlight_style);
-            tms_layers.setFeatureStyle(highlight, highlight_style);
-            let label = event_label(e);
+            osm_select = fid;
+            osm_layers.setFeatureStyle(osm_select, {
+                fill: true,
+                fillColor: 'red',
+                fillOpacity: 0.1,
+                color: 'red',
+                opacity: 0.1,
+                radius: 6,
+            });
+            let label = osm_layer_label(e.layer);
             if (label) {
-                L.popup({ closeButton: false})
-                 .setContent(label)
-                 .setLatLng(e.latlng)
-                 .openOn(map);
+                tooltip = L.tooltip()
+                           .setContent(label)
+                           .setLatLng(e.latlng)
+                           .openOn(map);
             };
-        } else {
-            map.closePopup();
         }
         L.DomEvent.stop(e);
     }
-    osm_layers.on('click', on_click);
-    tms_layers.on('click', on_click);
-    osm_layers.addTo(map);
-    tms_layers.addTo(map);
-}
-
-function event_label(e) {
-    let label = null;
-    let name = e.layer.properties.name || e.layer.properties.ref;
-    if (name) {
-        label = name;
-        let station = e.layer.properties.station;
-        if (station) {
-            label = "<b>" + station + "</b> " + label;
-            if (stat_sample) {
-                let sample = stat_sample.samples[station];
-                if (sample) {
-                    let flow = sample[0];
-                    if (flow)
-                        label += "<br>&nbsp;<b>" + flow + "</b> veh/h";
-                    let speed = sample[1];
-                    if (speed)
-                        label += "<br>&nbsp;<b>" + speed + "</b> mi/h";
-                    let density = (flow && speed)
-                                ? Math.round(flow / speed)
-                                : null;
-                    if (density)
-                        label += "<br>&nbsp;<b>" + density + "</b> veh/lane·mi";
-                }
-            }
+    osm_layers.on('click', osm_on_click);
+    var tms_select;
+    function tms_on_click(e) {
+        if (tooltip) {
+            tooltip.close();
+            tooltip = null;
+        }
+        let fid = tms_layer_id(e.layer);
+        let change = (typeof fid != "undefined") && (fid != tms_select);
+        if (tms_select) {
+            tms_layers.resetFeatureStyle(tms_select);
+            tms_select = null;
+        }
+        if (change) {
+            tms_select = fid;
+            let style = tms_style(e.layer.properties);
+            style.weight = 2;
+            style.color = 'white';
+            style.opacity = 1,
+            tms_layers.setFeatureStyle(fid, style);
+            let label = tms_layer_label(e.layer);
+            if (label) {
+                tooltip = L.tooltip()
+                           .setContent(label)
+                           .setLatLng(e.latlng)
+                           .openOn(map);
+            };
+            const ev = new CustomEvent("tmsevent", {
+                detail: fid,
+                bubbles: true,
+                cancelable: true,
+                composed: false,
+            });
+            document.querySelector('#mapid').dispatchEvent(ev);
+            L.DomEvent.stop(e);
         }
     }
-    return label;
+    tms_layers.on('click', tms_on_click);
+    osm_layers.addTo(map);
+    tms_layers.addTo(map);
+    map.on('zoomstart', function () {
+        if (tooltip) {
+            tooltip.close();
+            tooltip = null;
+        }
+    });
+}
+
+// Get OSM layer feature ID
+function osm_layer_id(layer) {
+    return layer.properties.osm_id;
+}
+
+// Get OSM layer feature label
+function osm_layer_label(layer) {
+    return layer.properties.name || layer.properties.ref;
+}
+
+// Get TMS layer feature ID
+function tms_layer_id(layer) {
+    return layer.properties.tms_id || layer.properties.name;
+}
+
+// Get TMS layer feature label
+function tms_layer_label(layer) {
+    let station_id = layer.properties.station_id;
+    if (station_id) {
+        let label = "<b>" + station_id + "</b>";
+        if (stat_sample) {
+            let sample = stat_sample.samples[station_id];
+            if (sample) {
+                let flow = sample[0];
+                if (flow)
+                    label += "<br>&nbsp;<b>" + flow + "</b> veh/h";
+                let speed = sample[1];
+                if (speed)
+                    label += "<br>&nbsp;<b>" + speed + "</b> mi/h";
+                let density = (flow && speed)
+                            ? Math.round(flow / speed)
+                            : null;
+                if (density)
+                    label += "<br>&nbsp;<b>" + density + "</b> veh/lane·mi";
+            }
+        }
+        return label;
+    } else {
+        return layer.properties.name;
+    }
 }
 
 window.onload = init_map;
-
-fetch('/iris/station_sample')
-.then(response => response.json())
-.then(result => {
-    stat_sample = result;
-    console.log('station_sample: ', stat_sample.time_stamp);
-})
-.catch(error => {
-    console.error('Error fetching station_sample: ', error);
-});

@@ -1,5 +1,12 @@
 # IRIS 5.x Release Notes
 
+5.54.0 (21 May 2024)
+ - Various enhancements to honeybee / bulb for Web UI
+ - Add "ignore_auto_fail" to action plans
+ - Add configurable video stream timeout
+ - Add landmark support for detector labels
+ - Simplify permission checks to 16 "base" resources
+
 5.53.0 (23 Apr 2024)
  - Implemented SSE notifications from honeybee to web UI (bulb)
  - Refactored web UI code

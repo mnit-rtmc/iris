@@ -120,7 +120,22 @@ button.go_link {
   flex: 0 1;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: flex-end;
+}
+/* Align widgets at top on sidebar */
+.sb_row > * {
+  margin-left: auto;
+}
+label:has(+ #sb_resource) {
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-left: 0;
+}
+#sb_resource {
+  margin-left: 0.1rem;
+}
+#sb_search {
+  margin-left: 0;
 }
 
 #sb_list {

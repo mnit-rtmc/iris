@@ -33,10 +33,17 @@ pub struct Permission {
     pub access_n: u32,
 }
 
+/// Resource Type
+#[derive(Debug, Default, Deserialize, Serialize)]
+pub struct ResourceType {
+    pub name: String,
+    pub base: bool,
+}
+
 /// Ancillary permission data
 #[derive(Debug, Default)]
 pub struct PermissionAnc {
-    pub resource_types: Option<Vec<String>>,
+    pub resource_types: Option<Vec<ResourceType>>,
     pub roles: Option<Vec<Role>>,
 }
 
@@ -83,13 +90,15 @@ impl PermissionAnc {
         html.push_str("<select id='resource_n'>");
         if let Some(resource_types) = &self.resource_types {
             for resource_type in resource_types {
-                html.push_str("<option");
-                if &pri.resource_n == resource_type {
-                    html.push_str(" selected");
+                if resource_type.base {
+                    html.push_str("<option");
+                    if pri.resource_n == resource_type.name {
+                        html.push_str(" selected");
+                    }
+                    html.push('>');
+                    html.push_str(&resource_type.name);
+                    html.push_str("</option>");
                 }
-                html.push('>');
-                html.push_str(resource_type);
-                html.push_str("</option>");
             }
         }
         html.push_str("</select>");

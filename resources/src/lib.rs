@@ -261,12 +261,16 @@ impl Res {
         }
     }
 
-    /// Get dependent resource for permission checks
-    pub const fn dependent(self) -> Self {
+    /// Get base resource for permission checks
+    pub const fn base(self) -> Self {
         use Res::*;
         match self {
             // Camera resources
-            FlowStream => Camera,
+            FlowStream | VideoMonitor => Camera,
+            // Controller resources
+            Alarm | CommLink | ControllerIo | Modem => Controller,
+            // Detector resources
+            Rnode | Road => Detector,
             // DMS resources
             Font | Graphic | MsgLine | MsgPattern | SignConfig | SignDetail
             | SignMessage | Word => Dms,
@@ -274,8 +278,11 @@ impl Res {
             GateArmArray => GateArm,
             // LCS resources
             LcsArray | LcsIndication | LaneMarking => Lcs,
-            // associated controller
-            ControllerIo => Controller,
+            // Permission resources
+            User | Role => Permission,
+            // System attribute resources
+            CabinetStyle | CommConfig => SystemAttribute,
+            // Others
             _ => self,
         }
     }

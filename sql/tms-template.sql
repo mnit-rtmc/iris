@@ -145,7 +145,7 @@ client_event_purge_days	0
 client_units_si	true
 comm_event_enable	true
 comm_event_purge_days	14
-database_version	5.53.0
+database_version	5.54.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_secs	60
@@ -359,87 +359,97 @@ parking_tab	t
 \.
 
 CREATE TABLE iris.resource_type (
-    name VARCHAR(16) PRIMARY KEY
+    name VARCHAR(16) PRIMARY KEY,
+    base BOOLEAN NOT NULL
 );
 
-COPY iris.resource_type (name) FROM stdin;
-action_plan
-alarm
-alert_config
-alert_info
-alert_message
-beacon
-beacon_action
-cabinet_style
-camera
-camera_action
-camera_preset
-camera_template
-cam_vid_src_ord
-capability
-catalog
-comm_config
-comm_link
-connection
-controller
-day_matcher
-day_plan
-detector
-dms
-dms_action
-domain
-encoder_stream
-encoder_type
-flow_stream
-font
-gate_arm
-gate_arm_array
-geo_loc
-glyph
-gps
-graphic
-inc_advice
-inc_descriptor
-incident
-incident_detail
-inc_locator
-lane_action
-lane_marking
-lane_use_multi
-lcs
-lcs_array
-lcs_indication
-map_extent
-meter_action
-modem
-monitor_style
-msg_pattern
-msg_line
-parking_area
-permission
-plan_phase
-play_list
-privilege
-ramp_meter
-r_node
-road
-road_affix
-role
-rpt_conduit
-sign_config
-sign_detail
-sign_message
-station
-system_attribute
-tag_reader
-time_action
-toll_zone
-user_id
-video_monitor
-vid_src_template
-weather_sensor
-word
+COPY iris.resource_type (name, base) FROM stdin;
+action_plan	t
+alarm	f
+alert_config	t
+alert_info	f
+alert_message	f
+beacon	t
+beacon_action	f
+cabinet_style	f
+camera	t
+camera_action	f
+camera_preset	f
+camera_template	f
+cam_vid_src_ord	f
+capability	f
+catalog	f
+comm_config	f
+comm_link	f
+connection	f
+controller	t
+day_matcher	f
+day_plan	f
+detector	t
+dms	t
+dms_action	f
+domain	f
+encoder_stream	f
+encoder_type	f
+flow_stream	f
+font	f
+gate_arm	t
+gate_arm_array	f
+geo_loc	f
+glyph	f
+gps	f
+graphic	f
+inc_advice	f
+inc_descriptor	f
+incident	t
+incident_detail	f
+inc_locator	f
+lane_action	f
+lane_marking	f
+lane_use_multi	f
+lcs	t
+lcs_array	f
+lcs_indication	f
+map_extent	f
+meter_action	f
+modem	f
+monitor_style	f
+msg_pattern	f
+msg_line	f
+parking_area	t
+permission	t
+plan_phase	f
+play_list	f
+privilege	f
+ramp_meter	t
+r_node	f
+road	f
+road_affix	f
+role	f
+rpt_conduit	f
+sign_config	f
+sign_detail	f
+sign_message	f
+station	f
+system_attribute	t
+tag_reader	f
+time_action	f
+toll_zone	t
+user_id	f
+video_monitor	f
+vid_src_template	f
+weather_sensor	t
+word	f
 \.
+
+CREATE FUNCTION iris.resource_is_base(VARCHAR(16)) RETURNS BOOLEAN AS
+    $resource_is_base$
+SELECT EXISTS (
+    SELECT 1
+    FROM iris.resource_type
+    WHERE name = $1 AND base = true
+);
+$resource_is_base$ LANGUAGE sql;
 
 CREATE TABLE iris.hashtag (
     resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
@@ -481,6 +491,7 @@ CREATE TABLE iris.permission (
 
     CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$'),
     CONSTRAINT permission_access_n CHECK (access_n >= 1 AND access_n <= 4),
+    CONSTRAINT base_resource_ck CHECK (iris.resource_is_base(resource_n)),
     -- hashtag cannot be applied to "View" access
     CONSTRAINT hashtag_access_ck CHECK (hashtag IS NULL OR access_n != 1)
 );
@@ -489,27 +500,21 @@ CREATE UNIQUE INDEX permission_role_resource_n_hashtag_idx
     ON iris.permission (role, resource_n, COALESCE(hashtag, ''));
 
 COPY iris.permission (role, resource_n, access_n) FROM stdin;
-administrator	alarm	4
+administrator	action_plan	4
+administrator	alert_config	4
 administrator	beacon	4
-administrator	cabinet_style	4
 administrator	camera	4
-administrator	comm_config	4
-administrator	comm_link	4
 administrator	controller	4
 administrator	detector	4
 administrator	dms	4
 administrator	gate_arm	4
-administrator	geo_loc	4
-administrator	gps	4
+administrator	incident	4
 administrator	lcs	4
-administrator	modem	4
+administrator	parking_area	4
 administrator	permission	4
 administrator	ramp_meter	4
-administrator	road	4
-administrator	role	4
-administrator	tag_reader	4
-administrator	user_id	4
-administrator	video_monitor	4
+administrator	system_attribute	4
+administrator	toll_zone	4
 administrator	weather_sensor	4
 \.
 
@@ -961,40 +966,40 @@ CREATE TRIGGER geo_loc_notify_trig
     FOR EACH ROW EXECUTE FUNCTION iris.geo_loc_notify();
 
 CREATE FUNCTION iris.geo_location(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT)
-	RETURNS TEXT AS $geo_location$
+    RETURNS TEXT AS $geo_location$
 DECLARE
-	roadway ALIAS FOR $1;
-	road_dir ALIAS FOR $2;
-	cross_mod ALIAS FOR $3;
-	cross_street ALIAS FOR $4;
-	cross_dir ALIAS FOR $5;
-	landmark ALIAS FOR $6;
-	corridor TEXT;
-	xloc TEXT;
-	lmrk TEXT;
+    roadway ALIAS FOR $1;
+    road_dir ALIAS FOR $2;
+    cross_mod ALIAS FOR $3;
+    cross_street ALIAS FOR $4;
+    cross_dir ALIAS FOR $5;
+    landmark ALIAS FOR $6;
+    corridor TEXT;
+    xloc TEXT;
+    lmrk TEXT;
 BEGIN
-	corridor = trim(roadway || concat(' ', road_dir));
-	xloc = trim(concat(cross_mod, ' ') || cross_street
-	    || concat(' ', cross_dir));
-	lmrk = replace('(' || landmark || ')', '()', '');
-	RETURN NULLIF(trim(concat(corridor, ' ' || xloc, ' ' || lmrk)), '');
+    corridor = trim(roadway || concat(' ', road_dir));
+    xloc = trim(concat(cross_mod, ' ') || cross_street
+        || concat(' ', cross_dir));
+    lmrk = replace('(' || landmark || ')', '()', '');
+    RETURN NULLIF(trim(concat(corridor, ' ' || xloc, ' ' || lmrk)), '');
 END;
 $geo_location$ LANGUAGE plpgsql;
 
 CREATE VIEW geo_loc_view AS
-	SELECT l.name, r.abbrev AS rd, l.roadway, r_dir.direction AS road_dir,
-	       r_dir.dir AS rdir, m.modifier AS cross_mod, m.mod AS xmod,
-	       c.abbrev as xst, l.cross_street, c_dir.direction AS cross_dir,
-	       l.landmark, l.lat, l.lon,
-	       trim(l.roadway || concat(' ', r_dir.direction)) AS corridor,
-	       iris.geo_location(l.roadway, r_dir.direction, m.modifier,
-	       l.cross_street, c_dir.direction, l.landmark) AS location
-	FROM iris.geo_loc l
-	LEFT JOIN iris.road r ON l.roadway = r.name
-	LEFT JOIN iris.road_modifier m ON l.cross_mod = m.id
-	LEFT JOIN iris.road c ON l.cross_street = c.name
-	LEFT JOIN iris.direction r_dir ON l.road_dir = r_dir.id
-	LEFT JOIN iris.direction c_dir ON l.cross_dir = c_dir.id;
+    SELECT l.name, r.abbrev AS rd, l.roadway, r_dir.direction AS road_dir,
+           r_dir.dir AS rdir, m.modifier AS cross_mod, m.mod AS xmod,
+           c.abbrev as xst, l.cross_street, c_dir.direction AS cross_dir,
+           l.landmark, l.lat, l.lon,
+           trim(l.roadway || concat(' ', r_dir.direction)) AS corridor,
+           iris.geo_location(l.roadway, r_dir.direction, m.modifier,
+           l.cross_street, c_dir.direction, l.landmark) AS location
+    FROM iris.geo_loc l
+    LEFT JOIN iris.road r ON l.roadway = r.name
+    LEFT JOIN iris.road_modifier m ON l.cross_mod = m.id
+    LEFT JOIN iris.road c ON l.cross_street = c.name
+    LEFT JOIN iris.direction r_dir ON l.road_dir = r_dir.id
+    LEFT JOIN iris.direction c_dir ON l.cross_dir = c_dir.id;
 GRANT SELECT ON geo_loc_view TO PUBLIC;
 
 CREATE TABLE iris.r_node_type (
@@ -1214,14 +1219,15 @@ CREATE TABLE iris.action_plan (
     group_n VARCHAR(16),
     sync_actions BOOLEAN NOT NULL,
     sticky BOOLEAN NOT NULL,
+    ignore_auto_fail BOOLEAN NOT NULL,
     active BOOLEAN NOT NULL,
     default_phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
     phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
 CREATE VIEW action_plan_view AS
-    SELECT name, description, group_n, sync_actions, sticky, active,
-           default_phase, phase
+    SELECT name, description, group_n, sync_actions, sticky, ignore_auto_fail,
+           active, default_phase, phase
     FROM iris.action_plan;
 GRANT SELECT ON action_plan_view TO PUBLIC;
 
@@ -2355,47 +2361,80 @@ CREATE TRIGGER detector_delete_trig
     INSTEAD OF DELETE ON iris.detector
     FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
-CREATE FUNCTION iris.detector_label(VARCHAR(6), VARCHAR(4), VARCHAR(6),
-    VARCHAR(4), VARCHAR(2), CHAR, SMALLINT, BOOLEAN)
-    RETURNS TEXT AS $detector_label$
+CREATE FUNCTION iris.landmark_abbrev(VARCHAR(24)) RETURNS TEXT
+    AS $landmark_abbrev$
 DECLARE
-    rd ALIAS FOR $1;
-    rdir ALIAS FOR $2;
-    xst ALIAS FOR $3;
-    xdir ALIAS FOR $4;
-    xmod ALIAS FOR $5;
-    lcode ALIAS FOR $6;
-    lane_number ALIAS FOR $7;
-    abandoned ALIAS FOR $8;
-    xmd VARCHAR(2);
+    lmrk TEXT;
+    lmrk2 TEXT;
+BEGIN
+    lmrk = initcap($1);
+    -- Replace common words
+    lmrk = replace(lmrk, 'Of ', '');
+    lmrk = replace(lmrk, 'Miles', 'MI');
+    lmrk = replace(lmrk, 'Mile', 'MI');
+    -- Remove whitespace and non-printable characters
+    lmrk = regexp_replace(lmrk, '[^[:graph:]]', '', 'g');
+    IF length(lmrk) > 6 THEN
+        -- Remove lower-case vowels
+        lmrk = regexp_replace(lmrk, '[aeiouy]', '', 'g');
+    END IF;
+    IF length(lmrk) > 6 THEN
+        -- Remove all punctuation
+        lmrk = regexp_replace(lmrk, '[[:punct:]]', '', 'g');
+    END IF;
+    lmrk2 = lmrk;
+    IF length(lmrk) > 6 THEN
+        -- Remove letters
+        lmrk = regexp_replace(lmrk, '[[:alpha:]]', '', 'g');
+    END IF;
+    IF length(lmrk) > 0 THEN
+        RETURN left(lmrk, 6);
+    ELSE
+        RETURN left(lmrk2, 6);
+    END IF;
+END;
+$landmark_abbrev$ LANGUAGE plpgsql;
+
+CREATE FUNCTION iris.root_lbl(rd VARCHAR(6), rdir VARCHAR(4), xst VARCHAR(6),
+    xdir VARCHAR(4), xmod VARCHAR(2), lmark VARCHAR(24)) RETURNS TEXT AS
+$$
+    SELECT rd || '/' || COALESCE(
+        xdir || replace(xmod, '@', '') || xst,
+        iris.landmark_abbrev(lmark)
+    ) || rdir;
+$$ LANGUAGE sql;
+
+CREATE FUNCTION iris.detector_label(TEXT, CHAR, SMALLINT, BOOLEAN) RETURNS TEXT
+    AS $detector_label$
+DECLARE
+    root ALIAS FOR $1;
+    lcode ALIAS FOR $2;
+    lane_number ALIAS FOR $3;
+    abandoned ALIAS FOR $4;
     lnum VARCHAR(2);
     suffix VARCHAR(5);
 BEGIN
-    IF rd IS NULL OR xst IS NULL THEN
-        RETURN 'FUTURE';
-    END IF;
     lnum = '';
     IF lane_number > 0 THEN
         lnum = TO_CHAR(lane_number, 'FM9');
-    END IF;
-    xmd = '';
-    IF xmod != '@' THEN
-        xmd = xmod;
     END IF;
     suffix = '';
     IF abandoned THEN
         suffix = '-ABND';
     END IF;
-    RETURN rd || '/' || xdir || xmd || xst || rdir || lcode || lnum ||
-           suffix;
+    RETURN COALESCE(
+        root || lcode || lnum || suffix,
+        'FUTURE'
+    );
 END;
 $detector_label$ LANGUAGE plpgsql;
 
 CREATE VIEW detector_label_view AS
     SELECT d.name AS det_id,
-           iris.detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
-                               d.lane_code, d.lane_number, d.abandoned)
-           AS label
+           iris.detector_label(
+               iris.root_lbl(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod, l.landmark),
+               d.lane_code, d.lane_number, d.abandoned
+           ) AS label, rnd.geo_loc
     FROM iris.detector d
     LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
     LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name;
@@ -2411,16 +2450,14 @@ CREATE TABLE event.detector_event (
 
 CREATE VIEW detector_view AS
     SELECT d.name, d.r_node, d.controller, c.comm_link, c.drop_id, d.pin,
-           iris.detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
-           d.lane_code, d.lane_number, d.abandoned) AS label,
-           rnd.geo_loc, l.rd || '_' || l.road_dir AS cor_id,
+           dl.label, dl.geo_loc, l.rd || '_' || l.road_dir AS cor_id,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
            d.lane_number, d.field_length, lc.description AS lane_type,
            d.lane_code, d.abandoned, d.force_fail, d.auto_fail, c.condition,
            d.fake, d.notes
     FROM iris.detector d
-    LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
-    LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name
+    LEFT JOIN detector_label_view dl ON d.name = dl.det_id
+    LEFT JOIN geo_loc_view l ON dl.geo_loc = l.name
     LEFT JOIN iris.lane_code lc ON d.lane_code = lc.lcode
     LEFT JOIN controller_view c ON d.controller = c.name;
 GRANT SELECT ON detector_view TO PUBLIC;

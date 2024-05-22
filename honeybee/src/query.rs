@@ -293,6 +293,12 @@ pub const GATE_ARM_STATE_LUT: &str = "\
   FROM iris.gate_arm_state \
   ORDER BY id";
 
+/// SQL query for geo location markers
+pub const GEO_LOC_MARKER: &str = "\
+  SELECT name, roadway, road_dir, lat, lon \
+  FROM iris.geo_loc \
+  WHERE resource_n = $1";
+
 /// SQL query for one geo location (secondary)
 pub const GEO_LOC_ONE: &str = "\
   SELECT name, resource_n, roadway, road_dir, cross_street, cross_dir, \
@@ -493,11 +499,9 @@ pub const RAMP_METER_ONE: &str = "\
 
 /// SQL query for resource types (LUT)
 pub const RESOURCE_TYPE_LUT: &str = "\
-SELECT to_json(r.name)::text FROM (\
-  SELECT name \
+  SELECT name, base \
   FROM iris.resource_type \
-  ORDER BY name\
-) r";
+  ORDER BY name";
 
 /// SQL query for all Rnodes (secondary)
 pub const RNODE_FULL: &str = "\
@@ -628,7 +632,7 @@ pub const USER_ALL: &str = "\
 
 /// SQL query for one user (secondary)
 pub const USER_ONE: &str = "\
-  SELECT name, full_name, role, enabled \
+  SELECT name, full_name, dn, role, enabled \
   FROM iris.user_id \
   WHERE name = $1";
 

@@ -880,11 +880,14 @@ impl Dms {
     fn send_actions(&self, anc: DmsAnc) -> Vec<Action> {
         if let Some(cfg) = &self.sign_config {
             if let Some(ms) = &self.selected_multi(&anc) {
-                if let Some(owner) = sign_msg_owner(HIGH_1) {
-                    return anc.sign_msg_actions(
-                        Dms::uri_name(&self.name),
-                        SignMessage::new(cfg, ms, owner, HIGH_1),
-                    );
+                match sign_msg_owner(HIGH_1) {
+                    Some(owner) => {
+                        return anc.sign_msg_actions(
+                            Dms::uri_name(&self.name),
+                            SignMessage::new(cfg, ms, owner, HIGH_1),
+                        );
+                    }
+                    None => console::log_1(&"no app user!".into()),
                 };
             }
         }
@@ -920,7 +923,7 @@ impl Card for Dms {
     const ITEM_STATES: &'static str = "<option value=''>all ↴\
          <option value='🔹'>🔹 available\
          <option value='🔶'>🔶 deployed\
-         <option value='🕗'>🕗 planned\
+         <option value='🗓️'>🗓️ planned\
          <option value='👽'>👽 external\
          <option value='🎯'>🎯 dedicated\
          <option value='⚠️'>⚠️ fault\
@@ -946,6 +949,26 @@ impl Card for Dms {
     /// Get geo location name
     fn geo_loc(&self) -> Option<&str> {
         self.geo_loc.as_deref()
+    }
+
+    /// Get the main item state
+    fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
+        let item_states = self.item_states(anc);
+        if item_states.is_match(ItemState::Inactive.code()) {
+            ItemState::Inactive
+        } else if item_states.is_match(ItemState::Dedicated.code()) {
+            ItemState::Dedicated
+        } else if item_states.is_match(ItemState::Offline.code()) {
+            ItemState::Offline
+        } else if item_states.is_match(ItemState::Deployed.code()) {
+            ItemState::Deployed
+        } else if item_states.is_match(ItemState::Planned.code()) {
+            ItemState::Planned
+        } else if item_states.is_match(ItemState::External.code()) {
+            ItemState::External
+        } else {
+            ItemState::Available
+        }
     }
 
     /// Check if a search string matches

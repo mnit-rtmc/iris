@@ -17,12 +17,6 @@ which either permit or restrict use of that lane.
 |--------------|-----------------------|
 | 👁️  View      | name, lcs_array, lane |
 
-[Dependent resources]:
-
-* LCS arrays (see below)
-* LCS indications (see below)
-* Lane marking (see below)
-
 </details>
 
 ## Arrays
@@ -119,7 +113,6 @@ striping.
 
 
 [controller]: controllers.html
-[dependent resources]: permissions.html#dependent-resources
 [DMS]: dms.html
 [graphic image]: graphics.html
 [hashtag]: hashtags.html

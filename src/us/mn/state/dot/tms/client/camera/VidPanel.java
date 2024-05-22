@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.camera;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.event.ActionEvent;
@@ -52,6 +53,7 @@ import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.VideoRequest.Size;
+import us.mn.state.dot.tms.utils.I18N;
 
 /** JPanel that shows video.
  *
@@ -59,8 +61,9 @@ import us.mn.state.dot.tms.client.camera.VideoRequest.Size;
  *   Switching between cameras.
  *   Switching between available streams for the current camera.
  *   Manages camera name label at top of panel.
- *   Manages status/error label at bottom of panel.
+ *   Manages status/timer/error label at bottom of panel.
  *   Manages MousePTZ link for panel.
+ *   Optional: Streaming timeouts, if enabled.
  *
  * @author John L. Stanley - SRF Consulting
  */
@@ -92,120 +95,236 @@ public class VidPanel extends JPanel implements FocusListener {
 	/** Mouse PTZ control */
 	private MousePTZ mouse_ptz;
 
-	/** Label that holds the video component */
+	/** Panel that holds the video component */
 	private final JPanel videoHolder;
 
-	/** streaming control values */
-	private boolean autostart = true;
-	private boolean failover = true;
-	private int     connectFailSec = 10;
-	private int     lostTimeoutSec = 10;
-	private boolean autoReconnect = true;
-	private int     reconnectTimeoutSec = 10;
+	/** Automatically start streaming? */
+	static private boolean autostart = true;
+	
+	/** If a connection attempt fails, do we want to
+	 *  automatically try the next available stream? */
+	static private boolean failover = true;
+	
+	/** Wait this long before skipping to next available
+	 *  stream (or failing the connection attempt). */
+	static private int     maxConnectSec = 10;
+
+	/** Wait this long for video to restart until trying to reconnect */
+	static private int     lostVideoSec = 10;
+	
+	/** Do we want to automatically reconnect? */
+	static private boolean autoReconnect = true;
+
+	/** Wait this long for a reconnect until retrying. */
+	static private int     maxReconnectSec = 10;
+
+	/** Expire a stream after this many seconds */
+	static private int     maxDurationSec = 0;
 
 	static private final Color LIGHT_BLUE = new Color(128, 128, 255);
+	static private final Color MILD_GREEN = new Color(20, 138, 20);
+
+	static private final int MINUTE_SEC = 60;
+	static private final int HOUR_SEC   = 60 * 60;
+	static private final int DAY_SEC    = 60 * 60 * 24;
 
 	// Panel status monitor
 
 	static private enum PanelStatus {
-		IDLE,      // idle state when first created
+		STOPPED,   // blank panel when first created and when stopped
 		SCANNING,  // scanning for a viable stream
 		VIEWING,   // watching a stream
 		FAILED,    // initial scan of streams all failed
 		RECONNECT, // auto-reconnecting after a lost stream
+		EXPIRED,   // duration timer has expired
 	}
-	// STOPPED and FAILED are similar, but they
+	// STOPPED, FAILED, and EXPIRED are similar, but they
 	// put different messages in the status line.
 
-	PanelStatus panelStatus = PanelStatus.IDLE;
+	PanelStatus panelStatus = PanelStatus.STOPPED;
 
 	private boolean pausePanel = false;
+
 	private boolean streamError = false;
 
-	private int timeoutSec = 0;
+	/** How long has it been since we received a video frame. */
+	private int videoGapSec = 0;
 
-	private boolean repeatStatusMonitor = false;
+	/** How long has current VIEWING-state stream been running? */
+	private int videoDurationSec = 0;
 
-	/** Status monitor job called once per second */
-	private final Job statusMonitor = new Job(Calendar.SECOND, 1) {
+	private String pauseMsg = null;
+
+	/** Set new panel status.
+	 *  (May be same as current status.) */
+	private synchronized boolean setStatus(PanelStatus ps, String pm) {
+		boolean ret = true;
+		// start new panel status
+		pauseMsg = null;
+		panelStatus = ps;
+		switch (panelStatus) {
+			case STOPPED:
+			case FAILED:
+			case EXPIRED:
+				releaseStreamMgr();
+				stopStatusMonitor();
+				break;
+			case SCANNING:
+			case RECONNECT:
+				readSystemAttributes();
+				startStatusMonitor();
+				ret = startCurrentStream();
+				break;
+			case VIEWING:
+				if (mouse_ptz == null)
+					startMousePTZ();  // turn mouse PTZ on
+				break;
+			default:
+				// do nothing
+				break;
+		}
+		pauseMsg = pm;
+		videoGapSec = 0;
+		queueUpdatePanel();
+		return ret;
+	}
+
+	private boolean setStatus(PanelStatus ps) {
+		return setStatus(ps, null);
+	}
+	
+	/** Current status monitor job */
+	private StatusMonitor statusMonitor = null;
+
+	/** Status monitor job, called once per second */
+	private class StatusMonitor extends Job {
+		StatusMonitor() {
+			super(Calendar.SECOND, 1);
+		}
+
+		@SuppressWarnings("incomplete-switch")
 		public void perform2() {
-			int frames = getReceivedFrameCount();
-			switch (panelStatus) {
-				case IDLE:
-				case FAILED:
-					// do nothing
-					break;
-				case SCANNING:
-					// see if current stream starts in a reasonable time
-					if (frames > 0) {
-						timeoutSec = 0;
-						panelStatus = PanelStatus.VIEWING;
+			try {
+				if (videoDurationSec < Integer.MAX_VALUE)
+					++videoDurationSec;
+				if ((panelStatus == PanelStatus.VIEWING)
+				 && (mouse_ptz == null))
+					startMousePTZ();  // turn mouse PTZ on
+				if (mouse_ptz == null) {
+					// if mouse_ptz isn't controlling the mouse cursor...
+					Cursor c1 = videoHolder.getCursor();
+					Cursor c2 = c1;
+					switch (panelStatus) {
+						case SCANNING:
+						case RECONNECT:
+							c2 = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR);
+							break;
+						case VIEWING:
+							c2 = c1;
+							break;
+						case FAILED:
+						case EXPIRED:
+						case STOPPED:
+							c2 = null;
 					}
-					else if (++timeoutSec >= connectFailSec) {
-						if (failover) {
-							timeoutSec = 0;
-							if (startNextStream())
-								return;
+					if (c1 != c2)
+						videoHolder.setCursor(c2);
+				}
+				switch (panelStatus) {
+					case VIEWING:
+					case RECONNECT:
+					case SCANNING:
+						// Check for gap in receiving video frames
+						if (getReceivedFrameCount() > 0) {
+							videoGapSec = 0;
+							if (panelStatus != PanelStatus.VIEWING)
+								setStatus(PanelStatus.VIEWING);
 						}
-						panelStatus = PanelStatus.FAILED;
-						stopStream();
-					}
-					break;
-				case VIEWING:
-					// see if we're receiving frames regularly
-					if (frames > 0) {
-						timeoutSec = 0;
-					}
-					else if (++timeoutSec >= lostTimeoutSec) {
-						if (autoReconnect) {
-							panelStatus = PanelStatus.RECONNECT;
-							timeoutSec = 0;
-							startCurrentStream();
+						else
+							++videoGapSec;
+				}
+				// Process status-specific tests...
+				switch (panelStatus) {
+					case SCANNING:
+						// Did the video stream start soon enough?
+						if (videoGapSec >= maxConnectSec) {
+							if (failover) {
+								videoGapSec = 0;
+								if (startNextStream()) {
+									// If stream-timeout is enabled and
+									// all streams failed to connect, stop.
+									if ((maxDurationSec != 0) && (streamReqNum == 0))
+										setStatus(PanelStatus.FAILED, "All Video Sources Failed");
+									return;
+								}
+							}
+							setStatus(PanelStatus.FAILED);
 						}
-						else {
-							panelStatus = PanelStatus.FAILED;
-							stopStream();
+						break;
+					case VIEWING:
+						// Did the video stream fail?
+						if (videoGapSec >= lostVideoSec) {
+							if (autoReconnect)
+								setStatus(PanelStatus.RECONNECT);
+							else
+								setStatus(PanelStatus.FAILED);
+							break;
 						}
-					}
-					break;
-				case RECONNECT:
-					// trying to reconnect
-					if (frames > 0) {
-						timeoutSec = 0;
-						panelStatus = PanelStatus.VIEWING;
-					}
-					else if (++timeoutSec >= reconnectTimeoutSec) {
-						timeoutSec = 0;
-						startCurrentStream();
-					}
+						// Has the video stream been running too long?
+						if (maxDurationSec != 0) { // Infinite max-duration == 0
+							if (videoDurationSec >= maxDurationSec)
+								setStatus(PanelStatus.EXPIRED, "Stream Expired");
+							else
+								updateBottomLabel();
+						}
+						break;
+					case RECONNECT:
+						// Did the video stream reconnect soon enough?
+						if (videoGapSec >= maxReconnectSec) {
+							if (autoReconnect)
+								setStatus(PanelStatus.RECONNECT);
+							else
+								setStatus(PanelStatus.FAILED);
+						}
+				}
+			}
+			catch (Exception ex) {
+				ex.printStackTrace();
 			}
 		}
 
 		@Override
 		public void perform() {
-			if (repeatStatusMonitor)
-				perform2();
-			queueUpdatePanel();
+			try {
+				if (statusMonitor == this)
+					perform2();
+				else
+					PANEL_UPDATE.removeJob(this);
+			}
+			catch (Exception ex) {
+				ex.printStackTrace();
+			}
 		}
 
 		/** Check if this is a repeating job */
 		@Override
 		public boolean isRepeating() {
-			return repeatStatusMonitor;
+			return statusMonitor == this;
 		}
 	};
 
 	/** Start status monitor */
 	private void startStatusMonitor() {
-		repeatStatusMonitor = true;
+		statusMonitor = new StatusMonitor();
 		PANEL_UPDATE.addJob(statusMonitor);
 	}
 
-	public void stopStatusMonitor() {
-		repeatStatusMonitor = false;
-		PANEL_UPDATE.removeJob(statusMonitor);
-		panelStatus = PanelStatus.IDLE;
-		timeoutSec = 0;
+	/** Stop status monitor */
+	void stopStatusMonitor() {
+		StatusMonitor old = statusMonitor;
+		statusMonitor = null;
+		PANEL_UPDATE.removeJob(old);
+		videoGapSec = 0;
 	}
 
 	/** Create fixed-size video panel */
@@ -224,7 +343,7 @@ public class VidPanel extends JPanel implements FocusListener {
 		streamReqNum = strm_num;
 	}
 
-	/** Create fixed-size video panel */
+	/** Create resizeable video panel */
 	public VidPanel(int width, int height) {
 		setLayout(new BorderLayout());
 		setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
@@ -251,16 +370,14 @@ public class VidPanel extends JPanel implements FocusListener {
 		addAncestorListener(new AncestorListener() {
 			@Override
 			public void ancestorAdded(AncestorEvent event) {
-				startStatusMonitor();
-				if (autostart)
+				if (panelStatus == PanelStatus.VIEWING)
 					startCurrentStream();
 			}
 			@Override
 			public void ancestorMoved(AncestorEvent event) {}
 			@Override
 			public void ancestorRemoved(AncestorEvent event) {
-				stopStatusMonitor();
-				releaseStream();
+				releaseStreamMgr();
 			}
 		});
 
@@ -286,29 +403,50 @@ public class VidPanel extends JPanel implements FocusListener {
 
 	/** Setup key bindings on the panel */
 	private void setupKeyBindings() {
+		//FIXME:  Right-ALT key doesn't catch ALT_DOWN_MASK keystrokes.
+		// So RightAlt + (F5, F6, left-arrow, and right-arrow) don't work.
 		InputMap im = getInputMap(
 				JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		ActionMap am = getActionMap();
 
-		/* Ctrl + Right Arrow - Start next stream */
+		/* Alt+RightArrow - Start next stream */
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT,
 				KeyEvent.ALT_DOWN_MASK), "startNextStream");
 		am.put("startNextStream", startNextStreamAction);
 
-		/* Ctrl + Left Arrow - Start previous stream */
+		/* Alt+LeftArrow - Start previous stream */
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT,
 				KeyEvent.ALT_DOWN_MASK), "startPreviousStream");
 		am.put("startPreviousStream", startPreviousStreamAction);
 
-		/* Ctrl + F5 - Restart stream */
+		/* F5 or Alt+F5 - Restart stream */
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F5,
 				KeyEvent.ALT_DOWN_MASK), "restartStream");
-		am.put("restartStream", restartStream);
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0),
+				"restartStream");
+		am.put("restartStream", restartStreamAction);
 
-		/* Ctrl + Space - Pause stream */
-		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_SLASH,
-				KeyEvent.ALT_DOWN_MASK), "pauseStream");
-		am.put("pauseStream", pauseStream);
+		/* F6 or Alt+F6 - Stop stream */
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F6,
+				KeyEvent.ALT_DOWN_MASK), "stopStream");
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0),
+				"stopStream");
+		am.put("stopStream", stopStreamAction);
+
+		/* Shift+F5 - Restart all open layout streams */
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F5,
+				KeyEvent.SHIFT_DOWN_MASK), "restartOpenStreams");
+		am.put("restartOpenStreams", restartOpenStreamsAction);
+
+		/* Shift+F6 - Stop all open layout streams */
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F6,
+				KeyEvent.SHIFT_DOWN_MASK), "stopOpenStreams");
+		am.put("stopOpenStreams", stopOpenStreamsAction);
+
+//		/* Alt + forward-slash - Pause stream */
+//		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_SLASH,
+//				KeyEvent.ALT_DOWN_MASK), "pauseStream");
+//		am.put("pauseStream", pauseStreamAction);
 	}
 
 	private Action startNextStreamAction = new AbstractAction() {
@@ -326,42 +464,38 @@ public class VidPanel extends JPanel implements FocusListener {
 	};
 
 	/** Restart the stream that is currently playing. */
-	private Action restartStream = new AbstractAction() {
+	private Action restartStreamAction = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			panelStatus = PanelStatus.SCANNING;
-			timeoutSec = 0;
-			startCurrentStream();
+			restartStream();
 		}
 	};
 
-	/** Pause the video playing in the panel. */
-	private Action pauseStream = new AbstractAction() {
+	/** Stop the stream that is currently playing. */
+	private Action stopStreamAction = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			pausePanel = !pausePanel;
-			if (pausePanel)
-				stopStream();
-			else
-				switch (panelStatus) {
-					case FAILED:
-					case IDLE:
-						break; // do nothing
-					case SCANNING:
-						if (streamError)
-							startNextStream();
-						else
-							startCurrentStream();
-						break;
-					case RECONNECT:
-					case VIEWING:
-						startCurrentStream();
-				}
-			queueUpdatePanel();
+			setStatus(PanelStatus.STOPPED);
 		}
 	};
 
-	public Dimension getVideoDimension() {
+	/** Restart all open layout streams. */
+	private Action restartOpenStreamsAction = new AbstractAction() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			StreamControlPanel.restartOpenLayouts();
+		}
+	};
+
+	/** Stop all open layout streams. */
+	private Action stopOpenStreamsAction = new AbstractAction() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			StreamControlPanel.stopOpenLayouts();
+		}
+	};
+
+	Dimension getVideoDimension() {
 		return videoDimension;
 	}
 
@@ -370,11 +504,11 @@ public class VidPanel extends JPanel implements FocusListener {
 	}
 
 	//-------------------------------------------
-	// The updatePanel job is run 0.1 seconds
+	// The updatePanelJob job is run 0.1 seconds
 	// after queueUpdatePanel() is called.  If
 	// it's called more than once, the 0.1 sec
 	// delay is reset, allowing several things
-	// to be changed with only 1 updatePanel.
+	// to be changed with only 1 updatePanelJob.
 
 	static private boolean isNothing(String str) {
 		return ((str == null) || str.isEmpty());
@@ -384,12 +518,26 @@ public class VidPanel extends JPanel implements FocusListener {
 	static protected final Scheduler
 		PANEL_UPDATE = new Scheduler("VideoPanels");
 
-	/** job to rebuild the panel */
-	private final Job updatePanel = new Job(100) {
+	/** current job to rebuild the panel */
+	private UpdatePanelJob updatePanelJob = 
+			new UpdatePanelJob();
+
+	private JLabel bottomLabel;
+
+	private String bottomLableText;
+
+	/** job class that rebuilds the panel */
+	class UpdatePanelJob extends Job {
+
+		public UpdatePanelJob() {
+			super(100);
+		}
+
 		public void perform() {
 			Camera     cam;
 			VidStreamMgr smgr;
 			removeAll();
+			String bottomMsg = "";
 			synchronized (this) {
 				cam  = camera;
 				smgr = streamMgr;
@@ -398,7 +546,6 @@ public class VidPanel extends JPanel implements FocusListener {
 				// no camera selected
 				addTopLabel("");
 				addVideo(placeholderComponent);
-				addBottomLabel("");
 			}
 			else {
 				// camera selected
@@ -406,7 +553,6 @@ public class VidPanel extends JPanel implements FocusListener {
 				if (smgr == null) {
 					// no stream manager
 					addVideo(placeholderComponent);
-					addBottomLabel("");
 				}
 				else {
 					// stream manager available
@@ -416,21 +562,37 @@ public class VidPanel extends JPanel implements FocusListener {
 					String msg = smgr.getErrorMsg();
 					streamError = !isNothing(msg);
 					if (streamError)
-						addBottomLabel(lbl+": "+msg,
-								Color.BLACK,
-								Color.ORANGE);
-					else {
+						bottomMsg = lbl+": "+msg;
+					else if (panelStatus != PanelStatus.VIEWING) {
 						msg = smgr.getStatus();
 						if (isNothing(msg))
-							addBottomLabel(lbl);
+							bottomMsg = lbl;
 						else
-							addBottomLabel(lbl+": "+msg);
+							bottomMsg = lbl+": "+msg;
 					}
+					else
+						bottomMsg = lbl;
+				}
+				if (!isNothing(pauseMsg)) {
+					streamError = false;
+					bottomMsg = pauseMsg;
 				}
 			}
+			boolean bHardFail = (panelStatus == PanelStatus.FAILED) && (pauseMsg != null);
+			if (bHardFail)
+				addBottomLabel(bottomMsg, Color.ORANGE, Color.GRAY);
+			else if (streamError)
+				addBottomLabel(bottomMsg, Color.BLACK, Color.ORANGE);
+			else
+				addBottomLabel(bottomMsg);
 			revalidate();
 			repaint();
 			queueFireChangeListeners();
+		}
+
+		@Override
+		public boolean isRepeating() {
+			return false;
 		}
 	};
 
@@ -462,7 +624,7 @@ public class VidPanel extends JPanel implements FocusListener {
 		if (pausePanel)
 			nameColorFG = Color.WHITE;
 		JLabel lbl = new CameraNameLabel();
-		configureLabel(lbl, txt, nameColorFG, nameColorBG);
+		configureLabel(lbl, txt, nameColorFG, nameColorBG, nameColorFG);
 		add(lbl, BorderLayout.NORTH);
 	}
 
@@ -480,18 +642,55 @@ public class VidPanel extends JPanel implements FocusListener {
 	/** Add bottom label line, with optional colors */
 	private void addBottomLabel(String txt, Color fgColor, Color bgColor) {
 		JLabel lbl = new JLabel();
-		configureLabel(lbl, txt, fgColor, bgColor);
+		bottomLabel = lbl;
+		bottomLableText = txt;
+		configureLabel(lbl, "", fgColor, bgColor, MILD_GREEN);
 		add(lbl, BorderLayout.SOUTH);
+		if (panelStatus != PanelStatus.VIEWING)
+			bottomLabel.setText(bottomLableText);
+		else
+			updateBottomLabel();
+	}
+	
+	/** Update text in bottom label including time-remaining count-down timer */
+	private void updateBottomLabel() {
+		if ((bottomLabel == null) || (bottomLableText == null))
+			return;
+		if (maxDurationSec == 0) {
+			bottomLabel.setText(bottomLableText);
+			return;
+		}
+		int sec = maxDurationSec - videoDurationSec;
+		String str;
+		float f;
+		if (sec >= DAY_SEC) {
+			f = (float)sec / DAY_SEC;
+			str =  String.format("%.0f+ days remaining", f);
+		}
+		else if (sec >= HOUR_SEC) {
+			f = (float)sec / HOUR_SEC;
+			str =  String.format("%.1f+ hours remaining", f);
+		}
+		else if (sec >= MINUTE_SEC) {
+			f = (float)sec / MINUTE_SEC;
+			str =  String.format("%.1f+ minutes remaining", f);
+		}
+		else {
+			str =  String.format("%d seconds remaining", sec);
+		}
+		bottomLabel.setText("<html>"+bottomLableText+"&nbsp;&nbsp;&nbsp;<small>"+str);
 	}
 
 	/** Configure a label.
 	 * (Adds a tool-tip if the text is wider than the label */
 	private JLabel configureLabel(
 			JLabel lbl, String txt,
-			Color fgColor, Color bgColor) {
+			Color fgColor, Color bgColor, Color expiredColor) {
 		lbl.setText(txt);
 		lbl.setHorizontalAlignment(JLabel.CENTER);
 		FontMetrics lblFontMetrics = lbl.getFontMetrics(lbl.getFont());
+		if (panelStatus == PanelStatus.EXPIRED)
+			fgColor = expiredColor;
 		if (fgColor != null)
 			lbl.setForeground(fgColor);
 		if (bgColor != null) {
@@ -508,9 +707,12 @@ public class VidPanel extends JPanel implements FocusListener {
 		return lbl;
 	}
 
-	public void queueUpdatePanel() {
-		PANEL_UPDATE.removeJob(updatePanel);
-		PANEL_UPDATE.addJob(updatePanel);
+	public synchronized void queueUpdatePanel() {
+		UpdatePanelJob up = updatePanelJob;
+		if (up != null)
+			PANEL_UPDATE.removeJob(up);
+		updatePanelJob = new UpdatePanelJob();
+		PANEL_UPDATE.addJob(updatePanelJob);
 	}
 
 	public void focusGained(FocusEvent fe) {
@@ -524,26 +726,6 @@ public class VidPanel extends JPanel implements FocusListener {
 	//-------------------------------------------
 	// Methods to set camera and manage streaming
 
-	/** Get Boolean value from cameraTemplate
-	 *  or a boolean from SystemAttrEnum value
-	 *  if the CameraTemplate Boolean is null.
-	 */
-	private boolean getCamTempBool(Boolean camBool, SystemAttrEnum deflt) {
-		if (camBool != null)
-			return camBool.booleanValue();
-		return deflt.getBoolean();
-	}
-
-	/** Get Integer value from cameraTemplate
-	 *  or an int from SystemAttrEnum value
-	 *  if the CameraTemplate Integer is null.
-	 */
-	private int getCamTempInt(Integer camInt, SystemAttrEnum deflt) {
-		if (camInt != null)
-			return camInt;
-		return deflt.getInt();
-	}
-
 	/** Set camera, initialize sreqList,
 	 *  and start playing first stream.
 	 *
@@ -551,49 +733,35 @@ public class VidPanel extends JPanel implements FocusListener {
 	 * @return true if stream available, false if none available.
 	 */
 	public boolean setCamera(Camera cam) {
-		releaseStream();
+		releaseStreamMgr();
 		camera = cam;
 
-		autostart = getCamTempBool(
-				null,
-				SystemAttrEnum.VID_CONNECT_AUTOSTART);
-		failover = getCamTempBool(
-				null,
-				SystemAttrEnum.VID_CONNECT_FAIL_NEXT_SOURCE);
-		connectFailSec = getCamTempInt(
-				null,
-				SystemAttrEnum.VID_CONNECT_FAIL_SEC);
-		lostTimeoutSec = getCamTempInt(
-				null,
-				SystemAttrEnum.VID_LOST_TIMEOUT_SEC);
-		autoReconnect = getCamTempBool(
-				null,
-				SystemAttrEnum.VID_RECONNECT_AUTO);
-		reconnectTimeoutSec = getCamTempInt(
-				null,
-				SystemAttrEnum.VID_RECONNECT_TIMEOUT_SEC);
+		readSystemAttributes();
 
 		Session s = Session.getCurrent();
 		streamReqList = VidStreamReq.getVidStreamReqs(camera);
 		streamReqNum = 0;
 		cam_ptz = new CameraPTZ(s);
 		cam_ptz.setCamera(cam);
-		if (mouse_ptz != null)
-			mouse_ptz.dispose();
-		videoDimension = videoHolder.getSize();
-		mouse_ptz = createMousePTZ(cam_ptz, videoDimension, videoHolder);
 		boolean ret = !streamReqList.isEmpty();
-		panelStatus = PanelStatus.IDLE;
+		panelStatus = PanelStatus.STOPPED;
 		if (autostart) {
-			if (playStream(streamReqNum)) {
-				panelStatus = PanelStatus.SCANNING;
-				ret = true;
-			}
+			videoDurationSec = 0;
+			ret = setStatus(PanelStatus.SCANNING);
 		}
-		startStatusMonitor();
 		return ret;
 	}
 
+	static private void readSystemAttributes() {
+		autostart       = SystemAttrEnum.VID_CONNECT_AUTOSTART.getBoolean();
+		failover        = SystemAttrEnum.VID_CONNECT_FAIL_NEXT_SOURCE.getBoolean();
+		maxConnectSec   = SystemAttrEnum.VID_CONNECT_FAIL_SEC.getInt();
+		lostVideoSec    = SystemAttrEnum.VID_LOST_TIMEOUT_SEC.getInt();
+		autoReconnect   = SystemAttrEnum.VID_RECONNECT_AUTO.getBoolean();
+		maxReconnectSec = SystemAttrEnum.VID_RECONNECT_TIMEOUT_SEC.getInt();
+		maxDurationSec  = SystemAttrEnum.VID_MAX_DURATION_SEC.getInt();
+	}
+	
 	/** Create a mouse PTZ */
 	static private MousePTZ createMousePTZ(CameraPTZ cam_ptz,
 			Dimension sz,
@@ -604,12 +772,26 @@ public class VidPanel extends JPanel implements FocusListener {
 		      : null;
 	}
 
+	private void startMousePTZ() {
+		if (mouse_ptz == null) {
+			videoDimension = videoHolder.getSize();
+			mouse_ptz = createMousePTZ(cam_ptz, videoDimension, videoHolder);
+		}
+	}
+	
+	private void stopMousePTZ() {
+		if (mouse_ptz != null) {
+			mouse_ptz.dispose();
+			mouse_ptz = null;
+		}
+	}
+	
 	/** Start/restart playing stream number n.
 	 * Automatically wraps at both ends of
-	 * request list.  Returns false if
-	 * stream not available. */
+	 * request list.  Returns false if no
+	 * stream is available. */
 	private boolean playStream(int snum) {
-		releaseStream();
+		releaseStreamMgr();
 		List<VidStreamReq> srl = streamReqList;
 		int len = (srl == null) ? 0 : srl.size();
 		if (len == 0) {
@@ -622,59 +804,64 @@ public class VidPanel extends JPanel implements FocusListener {
 		else if (snum >= len)
 			snum = 0;
 		streamReqNum = snum;
-		streamMgr = createStreamMgr(srl.get(snum));
-		streamMgr.queueStartStream();
+		startStreamMgr(srl.get(snum));
 		queueUpdatePanel();
 		return true;
 	}
 
 	/** Start playing previous stream */
-	public boolean startPreviousStream() {
+	private boolean startPreviousStream() {
 		return playStream(streamReqNum - 1);
 	}
 
-	/** Start/restart playing current stream */
-	public boolean startCurrentStream() {
+	/** Start or restart playing current stream */
+	private boolean startCurrentStream() {
 		return playStream(streamReqNum);
 	}
 
 	/** Start playing next stream */
-	public boolean startNextStream() {
+	private boolean startNextStream() {
 		return playStream(streamReqNum + 1);
 	}
 
 	/** Stop playing current stream.
-	 *  (Leaves last frame and status on screen.) */
+	 * (Blanks the video portion of the panel.) */
 	public void stopStream() {
-		VidStreamMgr vmOld = streamMgr;
-		if (vmOld != null) {
-			vmOld.queueStopStream();
-			queueUpdatePanel();
-		}
+		setStatus(PanelStatus.STOPPED);
+	}
+
+	/** Restart playing current stream. */
+	public void restartStream() {
+		videoDurationSec = 0;
+		setStatus(PanelStatus.SCANNING);
 	}
 
 	/** Release the current stream manager
 	 * (Blanks the video portion of the panel.) */
-	public void releaseStream() {
+	void releaseStreamMgr() {
+		stopMousePTZ();
+		videoHolder.setCursor(null);
 		VidStreamMgr vmOld = streamMgr;
 		if (vmOld != null) {
 			vmOld.queueStopStream();
 			streamMgr = null;
-			queueUpdatePanel();
 		}
+		queueUpdatePanel();
 	}
 
-	//-------------------------------------------
-
-	/** Create a StreamMgr from a StreamReq */
-	private VidStreamMgr createStreamMgr(VidStreamReq sreq) {
+	/** Start a StreamMgr from a StreamReq */
+	private void startStreamMgr(VidStreamReq sreq) {
+		releaseStreamMgr();
 		if (sreq == null)
-			return null;
+			return;
 		if (sreq.isGst())
-			return new VidStreamMgrGst(this, sreq);
+			streamMgr = new VidStreamMgrGst(this, sreq);
 		else if (sreq.isMJPEG())
-			return new VidStreamMgrMJPEG(this, sreq);
-		return null;
+			streamMgr = new VidStreamMgrMJPEG(this, sreq);
+		else
+			return;  // Should never happen..
+		streamMgr.queueStartStream();
+		queueUpdatePanel();
 	}
 
 	/**
@@ -727,5 +914,11 @@ public class VidPanel extends JPanel implements FocusListener {
 	private void queueFireChangeListeners() {
 		PANEL_UPDATE.removeJob(fireChangeListenersJob);
 		PANEL_UPDATE.addJob(fireChangeListenersJob);
+	}
+
+	/** Initialize popout-panel tooltip for blank no-video background */
+	public void initPopoutTooltip() {
+		String ttt = I18N.get("vid.blank.tooltip");
+		placeholderComponent.setToolTipText(ttt);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -231,7 +231,9 @@ public class OpQueryDMSMessage extends OpDMS {
 	private void setMsgCurrent(SignMessage sm) {
 		if (sm != null)
 			dms.setMsgCurrentNotify(sm);
-		else
+		else {
+			System.err.println("setMsgCurrent null: " + dms);
 			setErrorStatus("MSG RENDER FAILED");
+		}
 	}
 }

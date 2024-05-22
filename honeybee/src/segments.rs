@@ -15,16 +15,21 @@
 use crate::error::Result;
 use crate::files::AtomicFile;
 use mvt::{WebMercatorPos, Wgs84Pos};
-use pointy::Pt;
-use postgis::ewkb::{LineString, Point, Polygon};
+use pointy::{Pt, Transform};
+use resources::Res;
+use rosewood::gis::Polygons;
+use rosewood::BulkWriter;
 use serde::{Deserialize, Serialize, Serializer};
 use std::cmp::Ordering;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::fmt;
 use std::hash::{Hash, Hasher};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use tokio_postgres::Row;
+
+/// Path to store .loam files
+const LOAM_PATH: &str = "/var/local/earthwyrm/loam";
 
 /// Base segment scale factor
 const BASE_SCALE: f64 = 1.0 / 6.0;
@@ -32,8 +37,12 @@ const BASE_SCALE: f64 = 1.0 / 6.0;
 /// Outer segment scale factor
 const OUTER_SCALE: f64 = 16.0 / 6.0;
 
+/// Tag values, in order specified by tag pattern rule
+type Values = Vec<Option<String>>;
+
 /// Road definition
 #[allow(unused)]
+#[derive(Clone)]
 pub struct Road {
     name: String,
     abbrev: String,
@@ -57,7 +66,7 @@ where
 }
 
 /// Roadway node
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct RNode {
     name: String,
     #[serde(skip_serializing)]
@@ -84,6 +93,16 @@ pub struct RNode {
     speed_limit: i32,
 }
 
+/// Geo location
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct GeoLoc {
+    name: String,
+    roadway: Option<String>,
+    road_dir: i16,
+    lat: Option<f64>,
+    lon: Option<f64>,
+}
+
 /// General direction of travel
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 enum TravelDir {
@@ -97,21 +116,9 @@ enum TravelDir {
     Wb,
 }
 
-impl TravelDir {
-    fn from_str(dir: &str) -> Option<Self> {
-        match dir {
-            "NB" => Some(TravelDir::Nb),
-            "SB" => Some(TravelDir::Sb),
-            "EB" => Some(TravelDir::Eb),
-            "WB" => Some(TravelDir::Wb),
-            _ => None,
-        }
-    }
-}
-
 /// Corridor ID
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-struct CorridorId {
+pub struct CorridorId {
     /// Name of corridor roadway
     roadway: String,
     /// Travel direction of corridor
@@ -128,31 +135,19 @@ struct CorridorId {
 /// previous, using haversine distance.
 ///
 /// Invalid nodes (not active or missing lat/lon) are placed at the end.
+#[derive(Clone, Debug)]
 struct Corridor {
     /// Corridor ID
     cor_id: CorridorId,
-    /// Base SID
-    base_sid: i64,
+    /// Base TMS ID
+    base_tms_id: i64,
     /// Road class ordinal
     r_class: i16,
     /// Road class scale
     scale: f64,
     /// All nodes in corridor
     nodes: Vec<RNode>,
-    /// Valid node count
-    count: usize,
-    /// Scale changed or nodes out-of-order
-    dirty: bool,
-}
-
-/// Segments for a corridor
-#[allow(unused)]
-struct Segments<'a> {
-    /// Corridor ref
-    cor: &'a Corridor,
-    /// Name of corridor
-    cor_name: String,
-    /// All points on corridor
+    /// All points on corridor (WebMercator)
     pts: Vec<Pt<f64>>,
     /// Normal vectors for all points
     norms: Vec<Pt<f64>>,
@@ -160,8 +155,20 @@ struct Segments<'a> {
     meters: Vec<f64>,
 }
 
+/// Segment outline builder
+struct Segment {
+    /// Traffic management system ID (for leaflet)
+    tms_id: i64,
+    /// Station ID
+    station_id: Option<String>,
+    /// Meter point on corridor
+    meter: f64,
+    /// Outer / inner points
+    points: Vec<(Pt<f64>, Pt<f64>)>,
+}
+
 /// State of all segments
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct SegmentState {
     /// Mapping of roads
     roads: HashMap<String, Road>,
@@ -173,6 +180,8 @@ pub struct SegmentState {
     has_nodes: bool,
     /// Flag indicating roads are complete
     has_roads: bool,
+    /// Location markers to write
+    markers: HashMap<Res, Vec<GeoLoc>>,
 }
 
 impl fmt::Display for TravelDir {
@@ -187,9 +196,64 @@ impl fmt::Display for TravelDir {
     }
 }
 
+impl TravelDir {
+    fn from_i16(dir: i16) -> Option<Self> {
+        match dir {
+            1 => Some(TravelDir::Nb),
+            2 => Some(TravelDir::Sb),
+            3 => Some(TravelDir::Eb),
+            4 => Some(TravelDir::Wb),
+            _ => None,
+        }
+    }
+
+    fn from_str(dir: &str) -> Option<Self> {
+        match dir {
+            "NB" => Some(TravelDir::Nb),
+            "SB" => Some(TravelDir::Sb),
+            "EB" => Some(TravelDir::Eb),
+            "WB" => Some(TravelDir::Wb),
+            _ => None,
+        }
+    }
+}
+
+impl From<TravelDir> for Pt<f64> {
+    fn from(td: TravelDir) -> Self {
+        match td {
+            TravelDir::Nb => Pt::new(0.0, 1.0),
+            TravelDir::Sb => Pt::new(0.0, -1.0),
+            TravelDir::Eb => Pt::new(1.0, 0.0),
+            TravelDir::Wb => Pt::new(-1.0, 0.0),
+        }
+    }
+}
+
+impl From<(&str, TravelDir)> for CorridorId {
+    fn from((roadway, travel_dir): (&str, TravelDir)) -> Self {
+        CorridorId {
+            roadway: roadway.to_string(),
+            travel_dir,
+        }
+    }
+}
+
 impl fmt::Display for CorridorId {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{} {}", self.roadway, self.travel_dir)
+    }
+}
+
+impl Road {
+    /// Create a Road from a result Row
+    pub fn from_row(row: &Row) -> Self {
+        Road {
+            name: row.get(0),
+            abbrev: row.get(1),
+            r_class: row.get(2),
+            direction: row.get(3),
+            scale: row.get(4),
+        }
     }
 }
 
@@ -215,13 +279,8 @@ impl RNode {
     /// Get the RNode corridor ID
     fn cor_id(&self) -> Option<CorridorId> {
         match (&self.roadway, &self.road_dir) {
-            (Some(roadway), Some(road_dir)) => {
-                let roadway = roadway.clone();
-                TravelDir::from_str(road_dir).map(|travel_dir| CorridorId {
-                    roadway,
-                    travel_dir,
-                })
-            }
+            (Some(roadway), Some(rd)) => TravelDir::from_str(rd)
+                .map(|td| CorridorId::from((roadway.as_str(), td))),
             _ => None,
         }
     }
@@ -263,37 +322,84 @@ impl RNode {
     }
 }
 
-impl Road {
-    /// Create a Road from a result Row
-    pub fn from_row(row: &Row) -> Self {
-        Road {
+impl GeoLoc {
+    /// Create a GeoLoc from a result Row
+    pub fn from_row(row: Row) -> Self {
+        GeoLoc {
             name: row.get(0),
-            abbrev: row.get(1),
-            r_class: row.get(2),
-            direction: row.get(3),
-            scale: row.get(4),
+            roadway: row.get(1),
+            road_dir: row.get(2),
+            lat: row.get(3),
+            lon: row.get(4),
         }
+    }
+
+    /// Get the corridor ID
+    fn cor_id(&self) -> Option<CorridorId> {
+        match (&self.roadway, TravelDir::from_i16(self.road_dir)) {
+            (Some(roadway), Some(td)) => {
+                Some(CorridorId::from((roadway.as_str(), td)))
+            }
+            _ => None,
+        }
+    }
+
+    /// Get the lat/lon of the location
+    fn latlon(&self) -> Option<(f64, f64)> {
+        match (self.lat, self.lon) {
+            (Some(lat), Some(lon)) => Some((lat, lon)),
+            _ => None,
+        }
+    }
+
+    /// Get the location
+    fn pos(&self) -> Option<Wgs84Pos> {
+        self.latlon().map(|(lat, lon)| Wgs84Pos::new(lat, lon))
+    }
+
+    /// Get the location point
+    fn point(&self) -> Option<Pt<f64>> {
+        self.pos().map(|pos| Pt::from(WebMercatorPos::from(pos)))
+    }
+
+    /// Get tag values
+    fn values(&self) -> Values {
+        vec![Some(self.name.clone())]
     }
 }
 
 impl Corridor {
     /// Create a new corridor
-    fn new(
-        cor_id: CorridorId,
-        base_sid: i64,
-        r_class: i16,
-        scale: f64,
-    ) -> Self {
+    fn new(cor_id: CorridorId, r_class: i16, scale: f64) -> Self {
         log::trace!("Corridor::new {cor_id}");
+        // Leaflet doesn't like it when we use the high bits...
+        let base_tms_id = 0xFFFF_FFFF_FFFF & {
+            let mut hasher = DefaultHasher::new();
+            cor_id.hash(&mut hasher);
+            hasher.finish()
+        } as i64;
         Corridor {
             cor_id,
-            base_sid,
+            base_tms_id,
             r_class,
             scale,
             nodes: Vec::new(),
-            count: 0,
-            dirty: true,
+            pts: Vec::new(),
+            norms: Vec::new(),
+            meters: Vec::new(),
         }
+    }
+
+    /// Check if "dirty" (needs arranging)
+    fn is_dirty(&self) -> bool {
+        self.pts.is_empty()
+    }
+
+    /// Make "dirty" (require arranging)
+    fn make_dirty(&mut self) {
+        self.pts.clear();
+        self.norms.clear();
+        self.meters.clear();
     }
 
     /// Compare lat/lon positions in corridor direction
@@ -351,9 +457,17 @@ impl Corridor {
         idx_dist.map(|(i, _d)| i)
     }
 
+    /// Arrange nodes, points and normals
+    fn arrange(&mut self) {
+        self.order_nodes();
+        self.create_points();
+        self.create_norms();
+        self.create_meterpoints();
+    }
+
     /// Order all nodes
     fn order_nodes(&mut self) {
-        self.count = match self.first_node() {
+        let count = match self.first_node() {
             Some(i) => {
                 if i > 0 {
                     self.nodes.swap(0, i);
@@ -371,39 +485,29 @@ impl Corridor {
             None => 0,
         };
         log::trace!(
-            "order_nodes: {}, count: {} of {}",
+            "order_nodes: {}, count: {count} of {}",
             self.cor_id,
-            self.count,
             self.nodes.len(),
         );
     }
 
-    /// Create segments for all zoom levels
-    fn create_segments(&self) -> Result<()> {
-        let pts = self.create_points();
-        log::info!("{}: {} points", self.cor_id, pts.len());
-        if !pts.is_empty() {
-            let segments = Segments::new(self, pts);
-            segments.create_all()?;
-        }
-        Ok(())
-    }
-
     /// Create points for corridor nodes
-    fn create_points(&self) -> Vec<Pt<f64>> {
-        self.nodes
+    fn create_points(&mut self) {
+        self.pts = self
+            .nodes
             .iter()
             .filter_map(|n| n.pos())
             .map(|p| Pt::from(WebMercatorPos::from(p)))
-            .collect()
+            .collect();
+        log::info!("{}: {} points", self.cor_id, self.pts.len());
     }
 
-    /// Create normal vectors for a slice of points
-    fn create_norms(&self, pts: &[Pt<f64>]) -> Vec<Pt<f64>> {
-        let mut norms = Vec::with_capacity(pts.len());
-        for i in 0..pts.len() {
-            let upstream = vector_upstream(pts, i);
-            let downstream = vector_downstream(pts, i);
+    /// Create normal vectors for corridor points
+    fn create_norms(&mut self) {
+        let mut norms = Vec::with_capacity(self.pts.len());
+        for i in 0..self.pts.len() {
+            let upstream = vector_upstream(&self.pts, i);
+            let downstream = vector_downstream(&self.pts, i);
             let v0 = match (upstream, downstream) {
                 (Some(up), Some(down)) => (up + down).normalize(),
                 (Some(up), None) => up,
@@ -412,22 +516,17 @@ impl Corridor {
             };
             norms.push(v0.left());
         }
-        norms
+        self.norms = norms;
     }
 
     /// Get corridor travel direction
     fn travel_dir(&self) -> Pt<f64> {
-        match self.cor_id.travel_dir {
-            TravelDir::Nb => Pt::new(0.0, 1.0),
-            TravelDir::Sb => Pt::new(0.0, -1.0),
-            TravelDir::Eb => Pt::new(1.0, 0.0),
-            TravelDir::Wb => Pt::new(-1.0, 0.0),
-        }
+        Pt::from(self.cor_id.travel_dir)
     }
 
     /// Create meter-points for corridor nodes
-    fn create_meterpoints(&self) -> Vec<f64> {
-        let mut meters = Vec::new();
+    fn create_meterpoints(&mut self) {
+        let mut meters = Vec::with_capacity(self.pts.len());
         let mut meter = 0.0;
         let mut ppos: Option<Wgs84Pos> = None;
         for pos in self.nodes.iter().filter_map(|n| n.pos()) {
@@ -437,7 +536,7 @@ impl Corridor {
             meters.push(meter);
             ppos = Some(pos);
         }
-        meters
+        self.meters = meters;
     }
 
     /// Add a node to corridor
@@ -449,7 +548,7 @@ impl Corridor {
             self.nodes.len()
         );
         if node.is_valid() {
-            self.dirty = true;
+            self.make_dirty();
         }
         self.nodes.push(node);
     }
@@ -462,17 +561,15 @@ impl Corridor {
             &self.cor_id,
             self.nodes.len()
         );
-        if node.is_valid() {
-            self.dirty = true;
-        }
-        match self.nodes.iter_mut().find(|n| n.name == node.name) {
-            Some(n) => {
-                if n.is_valid() {
-                    self.dirty = true;
-                }
-                *n = node;
-            }
-            None => log::error!("update_node: {} not found", node.name),
+        let Some(n) = self.nodes.iter_mut().find(|n| n.name == node.name)
+        else {
+            log::error!("update_node: {} not found", node.name);
+            return;
+        };
+        let dirty = n.is_valid() || node.is_valid();
+        *n = node;
+        if dirty {
+            self.make_dirty();
         }
     }
 
@@ -487,7 +584,7 @@ impl Corridor {
             Some(idx) => {
                 let node = self.nodes.remove(idx);
                 if node.is_valid() {
-                    self.dirty = true;
+                    self.make_dirty();
                 }
             }
             None => log::error!("remove_node: {name} not found"),
@@ -504,107 +601,119 @@ impl Corridor {
             log::warn!("write_file no 'abbrev' for {}", self.cor_id.roadway);
             return Ok(());
         }
-        let cor_name = format!("{}_{}", abbrev, self.cor_id.travel_dir);
+        let cor_name = format!("{abbrev}_{}", self.cor_id.travel_dir);
         log::trace!("write_file {cor_name}");
         let json = serde_json::to_vec(&self.nodes)?;
         let dir = Path::new("corridors");
         let file = AtomicFile::new(dir, &cor_name).await?;
         file.write_buf(&json).await
     }
-}
 
-impl<'a> Segments<'a> {
-    /// Create corridor segments
-    fn new(cor: &'a Corridor, pts: Vec<Pt<f64>>) -> Self {
-        let cor_name = cor.cor_id.to_string();
-        let norms = cor.create_norms(&pts);
-        let meters = cor.create_meterpoints();
-        Segments {
-            cor,
-            cor_name,
-            pts,
-            norms,
-            meters,
-        }
-    }
-
-    /// Create segments for all zoom levels
-    fn create_all(&self) -> Result<()> {
-        for zoom in 0..=18 {
-            if road_class_zoom(self.cor.r_class, zoom) {
-                self.create_segments_zoom(zoom)?;
-            }
-        }
-        Ok(())
-    }
-
-    /// Create segments for one zoom level
-    fn create_segments_zoom(&self, zoom: i32) -> Result<()> {
+    /// Write segment layer for one zoom level
+    fn write_segments(
+        &self,
+        writer: &mut BulkWriter<Values, f64, Polygons<f64, Values>>,
+        zoom: i32,
+    ) -> Result<()> {
         let o_scale = self.scale_zoom(OUTER_SCALE, zoom);
         let i_scale = self.scale_zoom(BASE_SCALE, zoom);
-        let mut poly = Vec::<(Pt<f64>, Pt<f64>)>::with_capacity(16);
-        let mut seg_meter = 0.0; // meter point for the current segment
+        let mut seg = Segment::new(self.base_tms_id);
         let mut p_meter = 0.0; // meter point for the previous point
-        let mut _sid = self.cor.base_sid;
-        let mut _station_id = None;
-        let nodes = &self.cor.nodes[..];
+        let nodes = &self.nodes[..];
         for (node, (pt, (norm, meter))) in nodes.iter().zip(
             self.pts
                 .iter()
                 .zip(self.norms.iter().zip(self.meters.iter())),
         ) {
             // FIXME: use `map_segment_max_meters` system attribute
-            let too_long = *meter >= seg_meter + 2500.0;
+            let too_long = *meter >= seg.meter + 2500.0;
             let outer = *pt + *norm * o_scale;
             let inner = *pt + *norm * i_scale;
             if node.is_break() || too_long {
                 if *meter < p_meter + 2500.0 {
-                    poly.push((outer, inner));
+                    seg.points.push((outer, inner));
                 }
-                if poly.len() > 1 {
-                    let _way = self.create_way(&poly);
-                    // FIXME: write way to loam
-                    _sid += 1;
+                if seg.points.len() > 1 {
+                    let polygon = seg.outline();
+                    writer.push(&polygon)?;
                 }
-                poly.clear();
-                seg_meter = *meter;
-                _station_id = node.station_id.clone();
+                seg.advance(node.station_id.clone(), *meter);
             }
             if !node.is_common() {
-                poly.push((outer, inner));
+                seg.points.push((outer, inner));
             }
             p_meter = *meter;
         }
-        if poly.len() > 1 {
-            let _way = self.create_way(&poly);
-            // FIXME: write way to loam
+        if seg.points.len() > 1 {
+            let polygon = seg.outline();
+            writer.push(&polygon)?;
         }
         Ok(())
     }
 
     /// Scale a vector normal with zoom level
     fn scale_zoom(&self, scale: f64, zoom: i32) -> f64 {
-        self.cor.scale * scale * f64::from(1 << (16 - 16.min(10.max(zoom))))
+        self.scale * scale * f64::from(1 << (16 - 16.min(10.max(zoom))))
     }
 
-    /// Create polygon for way column
-    fn create_way(&self, poly: &[(Pt<f64>, Pt<f64>)]) -> Polygon {
-        let mut points = Vec::new();
-        for (vtx, _) in poly {
-            points.push(Point::new(vtx.x, vtx.y, None));
+    /// Calculate normal vector for a corridor location
+    fn loc_normal(&self, loc: &GeoLoc) -> f64 {
+        let mut norm = Pt::from(TravelDir::Nb).right().angle();
+        let Some(pos) = loc.pos() else {
+            return norm;
+        };
+        let mut dist_m = 2_000.0; // 2 km
+        for (pt, n) in self.pts.iter().zip(&self.norms) {
+            let pt = Wgs84Pos::from(WebMercatorPos::new(pt.x, pt.y));
+            let dist = pt.distance_haversine(&pos);
+            if dist < dist_m {
+                dist_m = dist;
+                norm = n.angle();
+            }
         }
-        for (_, vtx) in poly.iter().rev() {
-            points.push(Point::new(vtx.x, vtx.y, None));
+        norm
+    }
+}
+
+impl Segment {
+    /// Create a new segment
+    fn new(tms_id: i64) -> Self {
+        let station_id = None;
+        let meter = 0.0;
+        let points = Vec::<(Pt<f64>, Pt<f64>)>::with_capacity(16);
+        Segment {
+            tms_id,
+            station_id,
+            meter,
+            points,
         }
-        if let Some((vtx, _)) = poly.iter().next() {
-            points.push(Point::new(vtx.x, vtx.y, None));
+    }
+
+    /// Advance to next segment
+    fn advance(&mut self, station_id: Option<String>, meter: f64) {
+        self.tms_id += 1;
+        self.station_id = station_id;
+        self.meter = meter;
+        self.points.clear();
+    }
+
+    /// Create outline polygon
+    fn outline(&self) -> Polygons<f64, Values> {
+        let mut pts = Vec::with_capacity(2 * self.points.len() + 1);
+        for (vtx, _) in self.points.iter() {
+            pts.push(Pt::from(vtx));
         }
-        let mut linestring = LineString::new();
-        linestring.points = points;
-        let mut way = Polygon::new();
-        way.rings.push(linestring);
-        way.srid = Some(3857);
-        way
+        for (_, vtx) in self.points.iter().rev() {
+            pts.push(Pt::from(vtx));
+        }
+        if let Some((vtx, _)) = self.points.first() {
+            pts.push(Pt::from(vtx));
+        }
+        let values =
+            vec![Some(self.tms_id.to_string()), self.station_id.clone()];
+        let mut polygon = Polygons::new(values);
+        polygon.push_outer(pts);
+        polygon
     }
 }
 
@@ -664,7 +773,7 @@ impl SegmentState {
     }
 
     /// Check if corridors and segments should be written
-    fn should_write(&self) -> bool {
+    fn can_arrange(&self) -> bool {
         self.has_nodes && self.has_roads
     }
 
@@ -705,15 +814,9 @@ impl SegmentState {
     /// Add a node to corridor
     fn add_corridor_node(&mut self, cid: &CorridorId, node: RNode) {
         if !self.corridors.contains_key(cid) {
-            // Leaflet doesn't like it when we use the high bits...
-            let base_sid = 0xFFFF_FFFF_FFFF & {
-                let mut hasher = DefaultHasher::new();
-                cid.hash(&mut hasher);
-                hasher.finish()
-            } as i64;
             let r_class = self.r_class(&cid.roadway);
             let scale = self.scale(&cid.roadway);
-            let cor = Corridor::new(cid.clone(), base_sid, r_class, scale);
+            let cor = Corridor::new(cid.clone(), r_class, scale);
             self.corridors.insert(cid.clone(), cor);
         }
         if let Some(cor) = self.corridors.get_mut(cid) {
@@ -756,28 +859,129 @@ impl SegmentState {
             {
                 cor.r_class = r_class;
                 cor.scale = scale;
-                cor.dirty = true;
+                cor.make_dirty();
             }
         }
     }
 
-    /// Write all corridors and segments
-    pub async fn write_all(&mut self) -> Result<()> {
-        if self.should_write() {
-            let mut was_dirty = false;
+    /// Arrange all corridors
+    pub fn arrange_corridors(&mut self) -> Vec<CorridorId> {
+        let mut cors = Vec::new();
+        if self.can_arrange() {
             for cor in self.corridors.values_mut() {
-                if cor.dirty {
-                    was_dirty = true;
-                    cor.order_nodes();
-                    cor.create_segments()?;
-                    cor.write_file(&self.roads).await?;
-                    cor.dirty = false;
+                if cor.is_dirty() {
+                    cors.push(cor.cor_id.clone());
+                    cor.arrange();
                 }
             }
-            if was_dirty {
-                // FIXME: write segment loam layer
+        }
+        cors
+    }
+
+    /// Write a corridor file
+    pub async fn write_corridor(&self, cid: CorridorId) -> Result<()> {
+        if let Some(cor) = self.corridors.get(&cid) {
+            cor.write_file(&self.roads).await?;
+        }
+        Ok(())
+    }
+
+    /// Write segments to loam files
+    pub fn write_segments(&self) -> Result<()> {
+        let dir = Path::new(LOAM_PATH);
+        for zoom in 0..=18 {
+            let mut loam = PathBuf::from(dir);
+            loam.push(format!("segment_{zoom}.loam"));
+            let mut empty = true;
+            let mut writer = BulkWriter::new(loam)?;
+            for cor in self.corridors.values() {
+                if road_class_zoom(cor.r_class, zoom) {
+                    cor.write_segments(&mut writer, zoom)?;
+                    empty = false;
+                }
+            }
+            if empty {
+                writer.cancel()?;
+            } else {
+                writer.finish()?;
             }
         }
         Ok(())
     }
+
+    /// Add location markers to write loam files
+    ///
+    /// * `res` Resource type.
+    /// * `locs` Geo locations.
+    pub fn add_loc_markers(&mut self, res: Res, locs: Vec<GeoLoc>) {
+        self.markers.insert(res, locs);
+    }
+
+    /// Clear location markers
+    pub fn clear_markers(&mut self) {
+        if self.can_arrange() {
+            self.markers.clear();
+        }
+    }
+
+    /// Write location markers to loam files
+    pub fn write_loc_markers(&self) -> Result<()> {
+        let dir = Path::new(LOAM_PATH);
+        for (res, locs) in self.markers.iter() {
+            for zoom in 11..=18 {
+                let sz = 800_000.0 * zoom_scale(zoom);
+                let mut loam = PathBuf::from(dir);
+                loam.push(format!("{}_{zoom}.loam", res.as_str()));
+                let mut writer = BulkWriter::new(loam)?;
+                for loc in locs {
+                    if let Some(pt) = loc.point() {
+                        let norm = self.loc_normal(loc);
+                        let values = loc.values();
+                        let mut polygon = Polygons::new(values);
+                        polygon.push_outer(dms_marker(pt, norm, sz));
+                        writer.push(&polygon)?;
+                    }
+                }
+                writer.finish()?;
+            }
+        }
+        Ok(())
+    }
+
+    /// Calculate normal vector for a location
+    fn loc_normal(&self, loc: &GeoLoc) -> f64 {
+        if let Some(cid) = loc.cor_id() {
+            if let Some(cor) = self.corridors.get(&cid) {
+                return cor.loc_normal(loc);
+            }
+        };
+        Pt::from(TravelDir::Nb).right().angle()
+    }
+}
+
+/// Calculate scale at one zoom level
+fn zoom_scale(zoom: u32) -> f64 {
+    1.0 / f64::from(1 << zoom)
+}
+
+/// Make DMS marker
+fn dms_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
+    let t = Transform::with_scale(sz, sz)
+        .rotate(norm)
+        .translate(pt.x, pt.y);
+    vec![
+        Pt::from((0.0, 0.0)) * t,
+        Pt::from((5.0, 0.0)) * t,
+        Pt::from((5.0, 1.0)) * t,
+        Pt::from((4.0, 1.0)) * t,
+        Pt::from((4.0, 3.0)) * t,
+        Pt::from((3.0, 3.0)) * t,
+        Pt::from((3.0, 1.0)) * t,
+        Pt::from((2.0, 1.0)) * t,
+        Pt::from((2.0, 3.0)) * t,
+        Pt::from((1.0, 3.0)) * t,
+        Pt::from((1.0, 1.0)) * t,
+        Pt::from((0.0, 1.0)) * t,
+        Pt::from((0.0, 0.0)) * t,
+    ]
 }

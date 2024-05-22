@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::app::{self, DeferredAction};
+use crate::app::{self, DeferredAction, NotifyState};
 use crate::card::{self, CardList, CardView, View};
 use crate::error::{Error, Result};
 use crate::fetch::Uri;
@@ -23,9 +23,10 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{
-    console, Element, Event, EventSource, HtmlButtonElement, HtmlElement,
-    HtmlInputElement, HtmlSelectElement, MessageEvent, ScrollBehavior,
-    ScrollIntoViewOptions, ScrollLogicalPosition, TransitionEvent, Window,
+    console, CustomEvent, Element, Event, EventSource, HtmlButtonElement,
+    HtmlElement, HtmlInputElement, HtmlSelectElement, MessageEvent,
+    ScrollBehavior, ScrollIntoViewOptions, ScrollLogicalPosition,
+    TransitionEvent, Window,
 };
 
 /// JavaScript result
@@ -33,6 +34,15 @@ pub type JsResult<T> = std::result::Result<T, JsValue>;
 
 /// Page sidebar
 const SIDEBAR: &str = include_str!("sidebar.html");
+
+/// JavaScript imports
+#[wasm_bindgen(module = "/static/glue.js")]
+extern "C" {
+    /// Update station data
+    fn update_stat_sample(data: &JsValue);
+    // Update TMS main item states
+    fn update_item_states(data: &JsValue);
+}
 
 /// Button attributes
 struct ButtonAttrs {
@@ -95,8 +105,27 @@ async fn add_sidebar() -> JsResult<()> {
     add_input_listener(&sidebar)?;
     add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window)?;
+    let mapid: HtmlElement = doc.elem("mapid");
+    add_map_click_listener(&mapid)?;
     add_eventsource_listener();
-    do_future(fill_sb_resource()).await;
+    do_future(finish_init()).await;
+    fetch_station_sample();
+    Ok(())
+}
+
+/// Finish initialization
+async fn finish_init() -> Result<()> {
+    let user = Uri::from("/iris/api/login").get().await?;
+    match user.as_string() {
+        Some(user) => {
+            app::set_user(Some(user));
+            if !app::initialized() {
+                fill_sb_resource().await?;
+                app::set_initialized();
+            }
+        }
+        None => console::log_1(&format!("invalid user: {user:?}").into()),
+    }
     Ok(())
 }
 
@@ -107,7 +136,6 @@ async fn fill_sb_resource() -> Result<()> {
     let perm = card::fetch_resource(config).await?;
     let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
     sb_resource.set_inner_html(&perm);
-    app::set_initialized();
     Ok(())
 }
 
@@ -245,6 +273,7 @@ async fn build_card_list(search: &str) -> Result<String> {
         Some(mut cards) => {
             cards.search(search);
             let html = cards.make_html().await?;
+            update_item_states(&JsValue::from_str(cards.states_main()));
             app::card_list(Some(cards));
             Ok(html)
         }
@@ -322,8 +351,8 @@ fn add_click_listener(elem: &Element) -> JsResult<()> {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
         if target.is_instance_of::<HtmlButtonElement>() {
             handle_button_click_ev(&target);
-        } else if let Ok(Some(card)) = target.closest(".card-compact") {
-            handle_card_click_ev(&card);
+        } else if let Ok(Some(cc)) = target.closest(".card-compact") {
+            handle_card_click_ev(&cc);
         }
     });
     elem.add_event_listener_with_callback(
@@ -401,8 +430,6 @@ fn replace_card_html(cv: &CardView, html: &str) {
 async fn handle_delete(cv: CardView) -> Result<()> {
     if app::delete_enabled() {
         card::delete_one(&cv).await?;
-        // NOTE: with SSE notify, this shouldn't be needed
-        app::defer_action(DeferredAction::RefreshList, 1000);
     }
     Ok(())
 }
@@ -421,8 +448,6 @@ async fn handle_save(cv: CardView) -> Result<()> {
 async fn save_create(cv: CardView) -> Result<()> {
     card::create_and_post(cv.res).await?;
     replace_card(cv.view(View::CreateCompact)).await?;
-    // NOTE: with SSE notify, this shouldn't be needed
-    app::defer_action(DeferredAction::RefreshList, 1500);
     Ok(())
 }
 
@@ -451,9 +476,9 @@ async fn handle_button_cv(cv: CardView, id: String) {
 }
 
 /// Handle a `click` event within a card element
-fn handle_card_click_ev(card: &Element) {
-    if let Some(id) = card.get_attribute("id") {
-        if let Some(name) = card.get_attribute("name") {
+fn handle_card_click_ev(elem: &Element) {
+    if let Some(id) = elem.get_attribute("id") {
+        if let Some(name) = elem.get_attribute("name") {
             if let Some(res) = resource_value() {
                 spawn_local(do_future(click_card(res, name, id)));
             }
@@ -491,10 +516,7 @@ async fn handle_login() {
                 let pass = doc.elem::<HtmlInputElement>("login_pass");
                 pass.set_value("");
                 hide_login();
-                app::set_user(Some(user));
-                if !app::initialized() {
-                    do_future(fill_sb_resource()).await;
-                }
+                do_future(finish_init()).await;
             }
             Err(e) => show_toast(&format!("Login failed: {e}")),
         }
@@ -568,11 +590,56 @@ fn tick_interval() {
     app::tick_tock();
     while let Some(action) = app::next_action() {
         match action {
-            DeferredAction::RefreshList => spawn_local(handle_refresh()),
+            DeferredAction::FetchStationData => fetch_station_sample(),
             DeferredAction::HideToast => hide_toast(),
-            DeferredAction::SetRefreshText(txt) => set_refresh_text(txt),
+            DeferredAction::MakeEventSource => add_eventsource_listener(),
+            DeferredAction::RefreshList => spawn_local(handle_refresh()),
+            DeferredAction::SetNotifyState(ns) => set_notify_state(ns),
         }
     }
+}
+
+/// Fetch station sample data
+fn fetch_station_sample() {
+    app::defer_action(DeferredAction::FetchStationData, 30_000);
+    spawn_local(do_future(do_fetch_station_sample()));
+}
+
+/// Actually fetch station sample data
+async fn do_fetch_station_sample() -> Result<()> {
+    let stat = Uri::from("/iris/station_sample").get().await?;
+    update_stat_sample(&stat);
+    Ok(())
+}
+
+/// Add a `click` event listener to the map element
+fn add_map_click_listener(elem: &Element) -> JsResult<()> {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|ce: CustomEvent| match ce
+        .detail()
+        .dyn_into::<JsString>()
+    {
+        Ok(name) => {
+            let name = String::from(name);
+            if let Some(res) = resource_value() {
+                spawn_local(do_future(select_card_map(res, name)));
+            }
+        }
+        Err(e) => console::log_1(&format!("tmsevent: {e:?}").into()),
+    });
+    elem.add_event_listener_with_callback(
+        "tmsevent",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    // can't drop closure, just forget it to make JS happy
+    closure.forget();
+    Ok(())
+}
+
+/// Select a card from a map marker click
+async fn select_card_map(res: Res, name: String) -> Result<()> {
+    let id = format!("{res}_{name}");
+    click_card(res, name, id).await?;
+    search_card_list().await
 }
 
 /// Add event source listener for notifications
@@ -580,24 +647,25 @@ fn add_eventsource_listener() {
     let es = match EventSource::new("/iris/api/notify") {
         Ok(es) => es,
         Err(e) => {
-            set_refresh_text("⭮ ⚪");
+            set_notify_state(NotifyState::Starting);
             console::log_1(&format!("SSE /iris/api/notify: {e:?}").into());
-            // FIXME: defer an action to try again in a couple seconds
+            app::defer_action(DeferredAction::MakeEventSource, 5000);
             return;
         }
     };
-    set_refresh_text("⭮ ⚫");
+    set_notify_state(NotifyState::Offline);
     let onopen: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
-        set_refresh_text("⭮ 🟢");
+        set_notify_state(NotifyState::Updating);
     });
     es.set_onopen(Some(onopen.as_ref().unchecked_ref()));
     onopen.forget();
     let onerror: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
-        set_refresh_text("⚫ ⭮ ");
+        set_notify_state(NotifyState::Offline);
     });
     es.set_onerror(Some(onerror.as_ref().unchecked_ref()));
     onerror.forget();
     let onmessage: Closure<dyn Fn(_)> = Closure::new(|e: MessageEvent| {
+        set_notify_state(NotifyState::Good);
         if let Ok(payload) = e.data().dyn_into::<JsString>() {
             spawn_local(handle_notify(String::from(payload)));
         }
@@ -608,9 +676,9 @@ fn add_eventsource_listener() {
 }
 
 /// Set refresh button text
-fn set_refresh_text(txt: &str) {
+fn set_notify_state(ns: NotifyState) {
     let sb_refresh = Doc::get().elem::<Element>("sb_refresh");
-    sb_refresh.set_inner_html(txt);
+    sb_refresh.set_inner_html(ns.as_str());
 }
 
 /// Handle SSE notify from server
@@ -624,8 +692,8 @@ async fn handle_notify(payload: String) {
         console::log_1(&format!("unknown channel: {chan}").into());
         return;
     }
-    set_refresh_text("⭮ 🟡");
-    app::defer_action(DeferredAction::SetRefreshText("⭮ 🟢"), 500);
+    set_notify_state(NotifyState::Updating);
+    app::defer_action(DeferredAction::SetNotifyState(NotifyState::Good), 600);
     do_future(update_card_list()).await;
 }
 

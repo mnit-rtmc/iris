@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,12 +44,6 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	/** Sign msg debug log */
 	static private final DebugLog MSG_LOG = new DebugLog("sign_msg");
 
-	/** Log an error */
-	static private void logErr(String msg) {
-		if (MSG_LOG.isOpen())
-			MSG_LOG.log(msg);
-	}
-
 	/** Create a unique sign message name */
 	static private String createUniqueName(SignConfig sc, String inc,
 		String ms, String owner, boolean fb, SignMsgPriority mp,
@@ -91,7 +85,8 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 			// processor does not store the sign message within 30
 			// seconds.  It *shouldn't* happen, but there may be
 			// a rare bug which triggers it.
-			logErr("createNotify: " + e.getMessage());
+			System.err.println("SignMessageImpl: " + ms);
+			System.err.println("findOrCreate: " + e.getMessage());
 			return null;
 		}
 	}

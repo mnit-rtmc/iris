@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021-2023  Minnesota Department of Transportation
+ * Copyright (C) 2021-2024  Minnesota Department of Transportation
  * Copyright (C) 2020  SRF Consulting Group, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -541,7 +541,7 @@ public class AlertData {
 		PlanPhase phase = PlanPhaseHelper.lookup(lookupCurrentPhase(
 			cfg));
 		ActionPlanImpl plan = new ActionPlanImpl(pname, dsc, "alert",
-			false, false, cfg.getAutoDeploy(), undep, phase);
+			false, false, false, cfg.getAutoDeploy(), undep, phase);
 		log("created plan " + pname);
 		plan.notifyCreate();
 		createTimeActions(cfg, plan);

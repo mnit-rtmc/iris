@@ -26,6 +26,7 @@ use crate::gatearm::GateArm;
 use crate::gatearmarray::GateArmArray;
 use crate::geoloc::GeoLoc;
 use crate::gps::Gps;
+use crate::item::ItemState;
 use crate::lanemarking::LaneMarking;
 use crate::lcsarray::LcsArray;
 use crate::lcsindication::LcsIndication;
@@ -259,16 +260,14 @@ pub trait Card: Default + DeserializeOwned + Serialize + PartialEq {
         "".into()
     }
 
-    /// Get the card element ID
-    fn id(&self) -> String {
-        let res = Self::res();
-        let name = HtmlStr::new(self.name());
-        format!("{res}_{name}")
-    }
-
     /// Get geo location name
     fn geo_loc(&self) -> Option<&str> {
         None
+    }
+
+    /// Get the main item state
+    fn item_state_main(&self, _anc: &Self::Ancillary) -> ItemState {
+        ItemState::Unknown
     }
 
     /// Check if a search string matches
@@ -362,60 +361,60 @@ pub async fn fetch_resource(config: bool) -> Result<String> {
     let json = Uri::from("/iris/api/access").get().await?;
     let access: Vec<Permission> = serde_wasm_bindgen::from_value(json)?;
     let mut html = "<option/>".to_string();
-    for perm in &access {
-        if perm.hashtag.is_none() {
-            if config {
-                add_option::<Alarm>(perm, &mut html);
-            }
-            add_option::<Beacon>(perm, &mut html);
-            if config {
-                add_option::<CabinetStyle>(perm, &mut html);
-            }
-            add_option::<Camera>(perm, &mut html);
-            if config {
-                add_option::<CommConfig>(perm, &mut html);
-                add_option::<CommLink>(perm, &mut html);
-                add_option::<Controller>(perm, &mut html);
-                add_option::<Detector>(perm, &mut html);
-            }
-            add_option::<Dms>(perm, &mut html);
-            if config {
-                add_option::<FlowStream>(perm, &mut html);
-                add_option::<GateArm>(perm, &mut html);
-            }
-            add_option::<GateArmArray>(perm, &mut html);
-            if config {
-                add_option::<Gps>(perm, &mut html);
-            }
-            add_option::<LaneMarking>(perm, &mut html);
-            add_option::<LcsArray>(perm, &mut html);
-            if config {
-                add_option::<LcsIndication>(perm, &mut html);
-                add_option::<Modem>(perm, &mut html);
-                add_option::<Permission>(perm, &mut html);
-            }
-            add_option::<RampMeter>(perm, &mut html);
-            if config {
-                add_option::<Role>(perm, &mut html);
-                add_option::<TagReader>(perm, &mut html);
-                add_option::<User>(perm, &mut html);
-            }
-            add_option::<VideoMonitor>(perm, &mut html);
-            add_option::<WeatherSensor>(perm, &mut html);
-        }
+    if config {
+        add_option::<Alarm>(&access, &mut html);
     }
+    add_option::<Beacon>(&access, &mut html);
+    if config {
+        add_option::<CabinetStyle>(&access, &mut html);
+    }
+    add_option::<Camera>(&access, &mut html);
+    if config {
+        add_option::<CommConfig>(&access, &mut html);
+        add_option::<CommLink>(&access, &mut html);
+        add_option::<Controller>(&access, &mut html);
+        add_option::<Detector>(&access, &mut html);
+    }
+    add_option::<Dms>(&access, &mut html);
+    if config {
+        add_option::<FlowStream>(&access, &mut html);
+        add_option::<GateArm>(&access, &mut html);
+    }
+    add_option::<GateArmArray>(&access, &mut html);
+    if config {
+        add_option::<Gps>(&access, &mut html);
+    }
+    add_option::<LaneMarking>(&access, &mut html);
+    add_option::<LcsArray>(&access, &mut html);
+    if config {
+        add_option::<LcsIndication>(&access, &mut html);
+        add_option::<Modem>(&access, &mut html);
+        add_option::<Permission>(&access, &mut html);
+    }
+    add_option::<RampMeter>(&access, &mut html);
+    if config {
+        add_option::<Role>(&access, &mut html);
+        add_option::<TagReader>(&access, &mut html);
+        add_option::<User>(&access, &mut html);
+    }
+    add_option::<VideoMonitor>(&access, &mut html);
+    add_option::<WeatherSensor>(&access, &mut html);
     Ok(html)
 }
 
 /// Add option to access select
-fn add_option<C: Card>(perm: &Permission, html: &mut String) {
-    let res = C::res();
-    if perm.resource_n == res.dependent().as_str() {
-        html.push_str("<option value='");
-        html.push_str(res.as_str());
-        html.push_str("'>");
-        html.push_str(C::DNAME);
-        html.push_str("</option>");
+fn add_option<C: Card>(access: &[Permission], html: &mut String) {
+    for perm in access {
+        if perm.hashtag.is_none() {
+            let res = C::res();
+            if perm.resource_n == res.base().as_str() {
+                html.push_str("<option value='");
+                html.push_str(res.as_str());
+                html.push_str("'>");
+                html.push_str(C::DNAME);
+                html.push_str("</option>");
+            }
+        }
     }
 }
 
@@ -440,6 +439,8 @@ pub struct CardList {
     json: String,
     /// Views in order of JSON list
     views: Vec<CardView>,
+    /// Main item states for all cards, as a JSON map
+    states_main: String,
 }
 
 impl CardList {
@@ -449,12 +450,14 @@ impl CardList {
         let search = Search::Empty();
         let json = String::new();
         let views = Vec::new();
+        let states_main = String::new();
         CardList {
             res,
             config,
             search,
             json,
             views,
+            states_main,
         }
     }
 
@@ -472,6 +475,11 @@ impl CardList {
     /// Take current JSON value
     pub fn json(&mut self) -> String {
         std::mem::take(&mut self.json)
+    }
+
+    /// Get main item states
+    pub fn states_main(&self) -> &str {
+        &self.states_main
     }
 
     /// Get form card (if any)
@@ -536,6 +544,8 @@ impl CardList {
         let anc = fetch_ancillary(View::Search, &pri).await?;
         let rname = C::res().as_str();
         self.views.clear();
+        let mut states = String::new();
+        states.push('{');
         let mut html = String::new();
         html.push_str("<ul class='cards'>");
         if self.config {
@@ -565,8 +575,18 @@ impl CardList {
             html.push_str(&pri.to_html(view, &anc));
             html.push_str("</li>");
             self.views.push(cv);
+            if states.len() > 1 {
+                states.push(',');
+            }
+            states.push('"');
+            states.push_str(&name);
+            states.push_str("\":\"");
+            states.push_str(pri.item_state_main(&anc).code());
+            states.push('"');
         }
         html.push_str("</ul>");
+        states.push('}');
+        self.states_main = states;
         Ok(html)
     }
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -665,7 +665,13 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Check if the detector is currently 'failed' */
 	@Override
 	public boolean isFailed() {
-		return force_fail || auto_fail || super.isFailed();
+		return isFailed(false);
+	}
+
+	/** Check if the detector is currently 'failed' */
+	private boolean isFailed(boolean ignore_auto_fail) {
+		return force_fail || super.isFailed() ||
+		      (auto_fail && !ignore_auto_fail);
 	}
 
 	/** Get the active status */
@@ -677,8 +683,13 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Check if the detector is currently sampling data */
 	public boolean isSampling() {
+		return isSampling(false);
+	}
+
+	/** Check if the detector is currently sampling data */
+	private boolean isSampling(boolean ignore_auto_fail) {
 		return (LaneCode.fromCode(lane_code) == LaneCode.GREEN) ||
-		       (isActive() && !isFailed());
+		       (isActive() && !isFailed(ignore_auto_fail));
 	}
 
 	/** Average detector field length (feet) */
@@ -781,20 +792,32 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		      : MISSING_DATA;
 	}
 
+	/** Get the occupancy for most recent period */
+	public float getOccupancy(int per_ms) {
+		return getOccupancy(per_ms, false);
+	}
+
 	/** Get the occupancy for an interval */
 	protected float getOccupancy(long stamp, int per_ms) {
-		int scn = isSampling()
+		return getOccupancy(stamp, per_ms, false);
+	}
+
+	/** Get the occupancy for most recent period */
+	public float getOccupancy(int per_ms, boolean ignore_auto_fail) {
+		long stamp = calculateEndTime(per_ms);
+		return getOccupancy(stamp, per_ms, ignore_auto_fail);
+	}
+
+	/** Get the occupancy for an interval */
+	private float getOccupancy(long stamp, int per_ms,
+		boolean ignore_auto_fail)
+	{
+		int scn = isSampling(ignore_auto_fail)
 		       ? scn_cache.getValue(stamp - per_ms, stamp)
 		       : MISSING_DATA;
 		return (scn >= 0)
 		      ? MAX_OCCUPANCY * scn * SCAN_MS / per_ms
 		      : MISSING_DATA;
-	}
-
-	/** Get the occupancy for most recent period */
-	public float getOccupancy(int per_ms) {
-		long stamp = calculateEndTime(per_ms);
-		return getOccupancy(stamp, per_ms);
 	}
 
 	/** Get a flow rate (vehicles per hour) */
@@ -868,6 +891,13 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			return speed;
 		else
 			return getSpeedFake(stamp, per_ms);
+	}
+
+	/** Get recorded speed (miles per hour) */
+	public float getSpeed(long stamp, int per_ms, boolean ignore_auto_fail) {
+		return isSampling(ignore_auto_fail)
+		     ? getSpeed(stamp, per_ms)
+		     : MISSING_DATA;
 	}
 
 	/** Get the raw (non-faked) speed (MPH) */

@@ -15,7 +15,7 @@
 use crate::error::Result;
 use crate::files::AtomicFile;
 use crate::query;
-use crate::segments::{RNode, Road, SegmentState};
+use crate::segments::{GeoLoc, RNode, Road, SegmentState};
 use crate::signmsg::render_all;
 use crate::sonar::Name;
 use futures::{pin_mut, TryStreamExt};
@@ -344,7 +344,7 @@ impl Resource {
     const fn all_sql_json(self) -> bool {
         use Resource::*;
         match self {
-            ResourceType | SystemAttributePub => false,
+            SystemAttributePub => false,
             _ => true,
         }
     }
@@ -410,6 +410,7 @@ impl Resource {
             Rnode => query_all_nodes(client, segments).await,
             RoadFull => query_all_roads(client, segments).await,
             SignMessage => self.query_sign_msgs(client).await,
+            Dms => self.query_dms(client, segments).await,
             _ => self.query_file(client, self.path()).await,
         }
     }
@@ -442,6 +443,39 @@ impl Resource {
     async fn query_sign_msgs(self, client: &mut Client) -> Result<()> {
         self.query_file(client, self.path()).await?;
         render_all().await
+    }
+
+    /// Query DMS resource.
+    ///
+    /// * `client` The database connection.
+    /// * `segments` Segment state.
+    async fn query_dms(
+        self,
+        client: &mut Client,
+        segments: &mut SegmentState,
+    ) -> Result<()> {
+        self.query_file(client, self.path()).await?;
+        let locs = self.query_locs(client).await?;
+        segments.add_loc_markers(self.res_type(), locs);
+        // NOTE: this is not very efficient
+        let segs = segments.clone();
+        segments.clear_markers();
+        tokio::task::spawn_blocking(move || segs.write_loc_markers()).await?
+    }
+
+    /// Query geo locations for the resource.
+    ///
+    /// * `client` The database connection.
+    async fn query_locs(self, client: &mut Client) -> Result<Vec<GeoLoc>> {
+        log::trace!("query_locs: {}", self.res_type().as_str());
+        let params = &[self.res_type().as_str()];
+        let it = client.query_raw(query::GEO_LOC_MARKER, params).await?;
+        pin_mut!(it);
+        let mut locs = Vec::new();
+        while let Some(row) = it.try_next().await? {
+            locs.push(GeoLoc::from_row(row));
+        }
+        Ok(locs)
     }
 }
 
@@ -489,7 +523,7 @@ async fn query_all_nodes(
         segments.update_node(RNode::from_row(row));
     }
     segments.set_has_nodes(true);
-    segments.write_all().await?;
+    write_segments(segments).await?;
     Ok(())
 }
 
@@ -513,7 +547,7 @@ async fn query_one_node(
         assert!(rows.is_empty());
         segments.remove_node(name);
     }
-    segments.write_all().await?;
+    write_segments(segments).await?;
     Ok(())
 }
 
@@ -530,7 +564,7 @@ async fn query_all_roads(
         segments.update_road(Road::from_row(row));
     }
     segments.set_has_roads(true);
-    segments.write_all().await?;
+    write_segments(segments).await?;
     Ok(())
 }
 
@@ -549,6 +583,25 @@ async fn query_one_road(
     if let Some(row) = rows.iter().next() {
         segments.update_road(Road::from_row(row));
     }
-    segments.write_all().await?;
+    write_segments(segments).await?;
     Ok(())
+}
+
+/// Write segments and corridors
+async fn write_segments(segments: &mut SegmentState) -> Result<()> {
+    let mut corridors = segments.arrange_corridors();
+    if corridors.is_empty() {
+        return Ok(());
+    }
+    for cor in corridors.drain(..) {
+        segments.write_corridor(cor).await?;
+    }
+    // NOTE: this is not very efficient
+    let segs = segments.clone();
+    segments.clear_markers();
+    tokio::task::spawn_blocking(move || {
+        segs.write_segments()?;
+        segs.write_loc_markers()
+    })
+    .await?
 }

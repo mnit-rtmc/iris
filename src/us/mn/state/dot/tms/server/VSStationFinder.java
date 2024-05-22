@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -94,9 +94,9 @@ public class VSStationFinder implements Corridor.StationFinder {
 
 	/** Calculate the advisory speed */
 	public Float calculateSpeedAdvisory() {
-		if(vss != null && vss_mp != null) {
-			float spd = vss.getRollingAverageSpeed();
-			if(spd > 0)
+		if (vss != null && vss_mp != null) {
+			float spd = vss.getSpeedAvg(10);
+			if (spd > 0)
 				return calculateSpeedAdvisory(spd, vss_mp - ma);
 		}
 		return null;
@@ -129,14 +129,14 @@ public class VSStationFinder implements Corridor.StationFinder {
 
 	/** Get the speed */
 	private Float getSpeed() {
-		if(su != null && sd != null) {
-			float u0 = su.getRollingAverageSpeed();
-			float u1 = sd.getRollingAverageSpeed();
-			if(u0 > 0 && u1 > 0)
+		if (su != null && sd != null) {
+			float u0 = su.getSpeedAvg(10);
+			float u1 = sd.getSpeedAvg(10);
+			if (u0 > 0 && u1 > 0)
 				return Math.min(u0, u1);
-			if(u0 > 0)
+			if (u0 > 0)
 				return u0;
-			if(u1 > 0)
+			if (u1 > 0)
 				return u1;
 		}
 		return null;

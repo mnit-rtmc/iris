@@ -44,6 +44,7 @@ Then, as root:
 ```sh
 cp ./target/release/honeybee /usr/local/bin
 cp honeybee.service /etc/systemd/system
+usermod -a -G earthwyrm tms
 systemctl enable honeybee.service
 systemctl start honeybee.service
 ```

@@ -12,14 +12,14 @@ is checked against the stored password hash for the account.
 <details>
 <summary>API Resources 🕵️ </summary>
 
-* `iris/api/user`
-* `iris/api/user/{name}`
+* `iris/api/user_id`
+* `iris/api/user_id/{name}`
 
-| Access       | Primary          |
-|--------------|------------------|
-| 👁️  View      | name             |
-| 💡 Manage    | enabled          |
-| 🔧 Configure | full\_name, role |
+| Access       | Primary          | Secondary |
+|--------------|------------------|-----------|
+| 👁️  View      | name             |           |
+| 💡 Manage    | enabled          |           |
+| 🔧 Configure | full\_name, role | dn        |
 
 </details>
 

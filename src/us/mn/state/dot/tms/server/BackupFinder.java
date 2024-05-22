@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2018  Minnesota Department of Transportation
+ * Copyright (C) 2013-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,9 @@ public class BackupFinder implements Corridor.StationFinder {
 	/** Mile point to start search */
 	private final float start_mp;
 
+	/** Flag to ignore auto-fail on detectors */
+	private final boolean ignore_auto_fail;
+
 	/** Milepoint at backup station */
 	private Float back_mp;
 
@@ -51,11 +54,13 @@ public class BackupFinder implements Corridor.StationFinder {
 	/** Create a new backup finder.
 	 * @param as Speed threshold to indicate backup.
 	 * @param bd Distance limit to backup.
-	 * @param m Milepoint to start from. */
-	public BackupFinder(Speed as, Distance bd, float m) {
+	 * @param m Milepoint to start from.
+	 * @param ig Ignore auto-fail. */
+	public BackupFinder(Speed as, Distance bd, float m, boolean ig) {
 		spd_thresh = as;
 		blimit = bd;
 		start_mp = m;
+		ignore_auto_fail = ig;
 	}
 
 	/** Check for mainline backup at a station.  From StationFinder.check.
@@ -64,7 +69,9 @@ public class BackupFinder implements Corridor.StationFinder {
 	 * @return true to stop checking (never). */
 	@Override
 	public boolean check(float m, StationImpl s) {
-		float spd = s.getRollingAverageSpeed();
+		float spd = (ignore_auto_fail)
+		          ? s.getSpeedAvgIg(10)
+		          : s.getSpeedAvg(10);
 		if (spd > 0 && spd < spd_thresh.round(MPH)) {
 			if (isNearUpstream(m))
 				back_upstream = true;

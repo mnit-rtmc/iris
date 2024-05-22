@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,14 +46,13 @@ public class DetectorHelper extends BaseHelper {
 		return (n != null) ? n.getGeoLoc() : null;
 	}
 
-	/** Get the detector label */
+	/** Get detector label */
 	static public String getLabel(Detector det) {
-		if (LaneCode.PARKING.lcode.equals(det.getLaneCode()))
-			return getParkingLabel(det);
+		String root = GeoLocHelper.getRootLabel(getGeoLoc(det));
+		if (root.equals(GeoLocHelper.FUTURE))
+			return root;
 		StringBuilder b = new StringBuilder();
-		b.append(GeoLocHelper.getRootLabel(getGeoLoc(det)));
-		if (b.toString().equals(GeoLocHelper.FUTURE))
-			return b.toString();
+		b.append(root);
 		b.append(det.getLaneCode());
 		int l_num = det.getLaneNumber();
 		if (l_num > 0)
@@ -62,23 +61,6 @@ public class DetectorHelper extends BaseHelper {
 			b.append("-ABND");
 		return b.toString();
 	}
-
-	/** Get detector label for a parking detector */
-	static private String getParkingLabel(Detector det) {
-		StringBuilder b = new StringBuilder();
-		b.append(GeoLocHelper.getParkingRoot(getGeoLoc(det)));
-		int l_num = det.getLaneNumber();
-		if (l_num <= PARKING_LANE.length)
-			b.append(PARKING_LANE[l_num]);
-		if (det.getAbandoned())
-			b.append("-ABND");
-		return b.toString();
-	}
-
-	/** Parking lane codes (head-front, head-rear, tail-front, tail-rear) */
-	static private final String PARKING_LANE[] = {
-		"", "hf", "hr", "tf", "tr"
-	};
 
 	/** Test if a detector is active */
 	static public boolean isActive(Detector d) {

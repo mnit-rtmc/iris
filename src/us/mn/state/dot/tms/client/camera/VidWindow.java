@@ -2,7 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2002-2020  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
- * Copyright (C) 2020 SRF Consulting Group
+ * Copyright (C) 2020-2024  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,10 @@ import us.mn.state.dot.tms.client.widget.AbstractForm;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
- * A JPanel that can display a video stream. It includes a status label.
+ * Main class for IRIS-client popout video windows.
+ * 
+ * This is a resizeable JPanel that holds a VidPanel for 
+ * video and a few other controls.
  *
  * Derived from the StreamPanel class.
  *
@@ -97,8 +100,10 @@ public class VidWindow extends AbstractForm {
 		videoPanel = new VidPanel(sz, strm_num);
 		add(videoPanel, BorderLayout.CENTER);
 
-		if (ctrl)
+		if (ctrl) {
 			add(new PopoutCamControlPanel(cam_ptz), BorderLayout.SOUTH);
+			videoPanel.initPopoutTooltip();
+		}
 
 		setPreferredSize(UI.dimension(pdm.width, pdm.height));
 		setMinimumSize(UI.dimension(pdm.width, pdm.height));
@@ -120,6 +125,20 @@ public class VidWindow extends AbstractForm {
 		videoPanel.setCamera(c);
 	}
 
+	/** Restart streaming current camera. */
+	public void restartStreaming() {
+		VidPanel vp = videoPanel;
+		if (vp != null)
+			vp.restartStream();
+	}
+	
+	/** Stop streaming current camera. */
+	public void stopStreaming() {
+		VidPanel vp = videoPanel;
+		if (vp != null)
+			vp.stopStream();
+	}
+	
 	/** Are we currently streaming? */
 	public boolean isStreaming() {
 		VidPanel vp = videoPanel;

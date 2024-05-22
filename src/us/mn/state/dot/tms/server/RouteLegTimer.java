@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2020  Minnesota Department of Transportation
+ * Copyright (C) 2007-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -117,8 +117,8 @@ public class RouteLegTimer {
 		leg.corridor.findStation(new Corridor.StationFinder() {
 			public boolean check(float m, StationImpl s) {
 				if (isWithinTrip(m)) {
-					float a = s.getSmoothedAverageSpeed();
-					float l = s.getSmoothedLowSpeed();
+					float a = s.getSpeedAvg(RankMode.SPEED);
+					float l = s.getSpeedLow();
 					if (a > 0 && l > 0) {
 						s_data.add(new StationData(
 							s.getName(), m, a, l));

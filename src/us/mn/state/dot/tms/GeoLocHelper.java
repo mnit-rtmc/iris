@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2020  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -290,23 +290,64 @@ public class GeoLocHelper extends BaseHelper {
 		if (loc == null)
 			return FUTURE;
 		Road roadway = loc.getRoadway();
-		Road cross = loc.getCrossStreet();
-		if (roadway == null || cross == null)
+		if (roadway == null)
 			return FUTURE;
-		Direction rd = Direction.fromOrdinal(loc.getRoadDir());
-		Direction cd = Direction.fromOrdinal(loc.getCrossDir());
-		LocModifier cm = LocModifier.fromOrdinal(loc.getCrossMod());
 		StringBuilder b = new StringBuilder();
 		b.append(roadway.getAbbrev());
 		b.append("/");
-		b.append(cd.abbrev);
-		b.append(cm.abbrev);
-		b.append(cross.getAbbrev());
+		String xlabel = getCrossLabel(loc);
+		if (xlabel != null)
+			b.append(xlabel);
+		else {
+			String lmark = getLandmarkLabel(loc);
+			if (lmark != null)
+				b.append(lmark);
+			else
+				return FUTURE;
+		}
+		Direction rd = Direction.fromOrdinal(loc.getRoadDir());
 		b.append(rd.det_dir);
 		return b.toString();
 	}
 
-	/** Get a detailed label (for a detector or a station) */
+	/** Get cross-street label */
+	static private String getCrossLabel(GeoLoc loc) {
+		Road cross = loc.getCrossStreet();
+		if (cross == null)
+			return null;
+		Direction cd = Direction.fromOrdinal(loc.getCrossDir());
+		LocModifier cm = LocModifier.fromOrdinal(loc.getCrossMod());
+		return cd.abbrev + cm.abbrev + cross.getAbbrev();
+	}
+
+	/** Get landmark label */
+	static private String getLandmarkLabel(GeoLoc loc) {
+		String lm = loc.getLandmark().trim().toLowerCase();
+		StringBuilder b = new StringBuilder();
+		for (String word: lm.split("\\s+")) {
+			if (word.equals("mile") || word.equals("miles"))
+				b.append("MI");
+			else if (word.length() > 0 && !word.equals("of")) {
+				b.append(Character.toUpperCase(word.charAt(0)));
+				b.append(word.substring(1));
+			}
+		}
+		lm = b.toString();
+		if (lm.length() > 6)
+			lm = lm.replaceAll("[aeiouy]", "");
+		if (lm.length() > 6)
+			lm = lm.replaceAll("\\p{Punct}", "");
+		if (lm.length() > 6) {
+			String lm2 = lm.replaceAll("\\p{Alpha}", "");
+			int len = Math.min(lm2.length(), 6);
+			if (len > 0)
+				return lm2.substring(0, len);
+		}
+		int len = Math.min(lm.length(), 6);
+		return lm.substring(0, len);
+	}
+
+	/** Get a detailed label (for a station) */
 	static public String getDetailedLabel(GeoLoc loc) {
 		if (loc == null)
 			return FUTURE;
@@ -326,29 +367,6 @@ public class GeoLocHelper extends BaseHelper {
 		b.append(" ");
 		b.append(cross.getName());
 		b.append(cd.abbrev);
-		return b.toString();
-	}
-
-	/** Get the root label for a parking detector */
-	static public String getParkingRoot(GeoLoc loc) {
-		if (loc == null)
-			return FUTURE;
-		Road roadway = loc.getRoadway();
-		if (roadway == null)
-			return FUTURE;
-		Direction rd = Direction.fromOrdinal(loc.getRoadDir());
-		String lm = loc.getLandmark();
-		StringBuilder b = new StringBuilder();
-		b.append(roadway.getAbbrev());
-		b.append("/");
-		if (lm != null) {
-			for (int i = 0; i < lm.length(); i++) {
-				char c = lm.charAt(i);
-				if (Character.isDigit(c))
-					b.append(c);
-			}
-		}
-		b.append(rd.det_dir);
 		return b.toString();
 	}
 

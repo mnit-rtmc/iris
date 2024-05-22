@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2020  Minnesota Department of Transportation
+ * Copyright (C) 2007-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,7 +104,7 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 			new TreeMap<Float, StationImpl>();
 		findStation(new StationFinder() {
 			public boolean check(float m, StationImpl s) {
-				if (s.getRollingAverageSpeed() > 0) {
+				if (s.getSpeedAvg(10) > 0) {
 					s.calculateBottleneck(m, upstream);
 					upstream.put(m, s);
 				} else

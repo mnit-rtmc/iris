@@ -42,7 +42,7 @@ System Attribute                 | Description
 `comm_event_enable`              | Enable logging communication events to database
 `comm_event_purge_days`          | Number of days after which communication events will be purged
 `database_version`               | IRIS database version; developer attribute.  **Do not change**.
-`detector_auto_fail_enable`      | Enable "auto fail" of traffic detectors with suspicious data
+`detector_auto_fail_enable`      | Enable [auto-fail] of traffic detectors with suspicious data
 `detector_event_purge_days`      | Number of days after which detector events will be purged
 `dms_comm_loss_enable`           | Enable blanking [DMS] after communication time out
 `dms_gps_jitter_m`               | Threshold (m) for GPS change to update [DMS] location
@@ -115,6 +115,7 @@ System Attribute                 | Description
 
 [action plan]: action_plans.html
 [alarm]: alarms.html
+[auto-fail]: vehicle_detection.html#auto-fail
 [beacon]: beacons.html
 [camera]: cameras.html
 [DMS]: dms.html
