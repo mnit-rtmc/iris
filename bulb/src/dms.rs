@@ -956,10 +956,10 @@ impl Card for Dms {
         let item_states = self.item_states(anc);
         if item_states.is_match(ItemState::Inactive.code()) {
             ItemState::Inactive
-        } else if item_states.is_match(ItemState::Offline.code()) {
-            ItemState::Offline
         } else if item_states.is_match(ItemState::Dedicated.code()) {
             ItemState::Dedicated
+        } else if item_states.is_match(ItemState::Offline.code()) {
+            ItemState::Offline
         } else if item_states.is_match(ItemState::Deployed.code()) {
             ItemState::Deployed
         } else if item_states.is_match(ItemState::Planned.code()) {
