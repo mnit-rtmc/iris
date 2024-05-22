@@ -1125,9 +1125,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return isMsgSource(getMsgCurrent(), SignMsgSource.external);
 	}
 
-	/** Test if the current message source contains "alert" */
+	/** Test if the current message source contains "alert" or "rwis" */
 	private boolean isMsgAlert() {
-		return isMsgSource(getMsgCurrent(), SignMsgSource.alert);
+		return isMsgSource(getMsgCurrent(), SignMsgSource.alert)
+		    || isMsgSource(getMsgCurrent(), SignMsgSource.rwis);
 	}
 
 	/** Test if the current message has beacon flashing */

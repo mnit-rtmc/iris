@@ -40,7 +40,8 @@ public enum SignMsgSource {
 	speed_advisory, // 15 speed advisory with [vsa] tag
 	standby,        // 16 standby message with [standby] tag
 	tolling,        // 17 tolling with [tz...] tag
-	travel_time;    // 18 travel time with [tt...] tag
+	travel_time,    // 18 travel time with [tt...] tag
+	rwis;           // 19 RWIS subsystem
 
 	/** Values array */
 	static private final SignMsgSource[] VALUES = values();
