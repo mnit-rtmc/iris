@@ -322,7 +322,10 @@ public class GeoLocHelper extends BaseHelper {
 
 	/** Get landmark label */
 	static private String getLandmarkLabel(GeoLoc loc) {
-		String lm = loc.getLandmark().trim().toLowerCase();
+		String lm = loc.getLandmark();
+		if (lm == null)
+			return null;
+		lm = lm.trim().toLowerCase();
 		StringBuilder b = new StringBuilder();
 		for (String word: lm.split("\\s+")) {
 			if (word.equals("mile") || word.equals("miles"))
