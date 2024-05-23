@@ -384,6 +384,7 @@
 
 		<copy todir="${install.dir}/etc/nginx/default.d">
 			<fileset file="${build.etc}/nginx-iris.conf"/>
+			<fileset file="${build.etc}/nginx-rest.conf"/>
 		</copy>
 
 		<copy todir="${install.dir}/var/www/html/${dist.client}">
