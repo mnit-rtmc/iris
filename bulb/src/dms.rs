@@ -31,7 +31,7 @@ use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 use std::iter::repeat;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{console, HtmlElement, HtmlSelectElement};
+use web_sys::{console, HtmlElement, HtmlInputElement, HtmlSelectElement};
 
 /// Ntcip DMS sign
 type Sign = ntcip::dms::Dms<256, 24, 32>;
@@ -543,14 +543,19 @@ impl DmsAnc {
             widths.zip(cur_lines).enumerate()
         {
             let ln = 1 + i as u16;
-            html.push_str("<select id='mc_line");
-            html.push_str(&ln.to_string());
+            let line = ln.to_string();
+            html.push_str("<input id='mc_line");
+            html.push_str(&line);
+            html.push_str("' list='mc_choice");
+            html.push_str(&line);
             html.push('\'');
             if rn != rect_num {
                 html.push_str(" class='mc_line_gap'");
                 rect_num = rn;
             }
-            html.push_str("><option>");
+            html.push_str("><datalist id='mc_choice");
+            html.push_str(&line);
+            html.push_str("'>");
             if let Some(font) = sign.font_definition().font(font_num) {
                 for ml in self.pat_lines(pat) {
                     if ml.line == ln {
@@ -560,7 +565,7 @@ impl DmsAnc {
                     }
                 }
             }
-            html.push_str("</select>");
+            html.push_str("</datalist>");
         }
         html
     }
@@ -909,7 +914,7 @@ impl Dms {
     fn selected_lines(&self) -> Vec<String> {
         let doc = Doc::get();
         let mut lines = Vec::new();
-        while let Some(line) = doc.try_elem::<HtmlSelectElement>(&format!(
+        while let Some(line) = doc.try_elem::<HtmlInputElement>(&format!(
             "mc_line{}",
             lines.len() + 1
         )) {
