@@ -38,4 +38,10 @@ $parking_area_amenities$ LANGUAGE plpgsql SECURITY DEFINER;
 ALTER FUNCTION iris.parking_area_amenities(INTEGER)
     SET search_path = pg_catalog, pg_temp;
 
+ALTER TABLE iris.permission
+    DROP CONSTRAINT base_resource_ck;
+ALTER TABLE iris.permission
+    ADD CONSTRAINT base_resource_ck
+        CHECK (iris.resource_is_base(resource_n)) NOT VALID;
+
 COMMIT;
