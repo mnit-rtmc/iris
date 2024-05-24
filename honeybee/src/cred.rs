@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 use tower_sessions::Session;
 
 /// Switch to bypass sonar connection (debug mode)
-const BYPASS_SONAR: bool = true;
+const BYPASS_SONAR: bool = false;
 
 /// IRIS host name
 const HOST: &str = "localhost.localdomain";
