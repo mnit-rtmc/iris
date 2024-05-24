@@ -706,10 +706,11 @@ async fn update_card_list() -> Result<()> {
     let json = cards.json();
     app::card_list(Some(cards));
     fetch_card_list().await?;
-    let cards = app::card_list(None).unwrap();
+    let mut cards = app::card_list(None).unwrap();
     for (cv, html) in cards.changed_vec(json).await? {
         replace_card_html(&cv, &html);
     }
+    update_item_states(&JsValue::from_str(cards.states_main()));
     app::card_list(Some(cards));
     search_card_list().await
 }
