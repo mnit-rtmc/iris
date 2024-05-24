@@ -510,37 +510,89 @@ impl DmsAnc {
         let mut html = String::new();
         html.push_str("<div id='mc_lines' class='column'>");
         if let Some(pat) = pat {
-            let widths = MessagePattern::new(sign, &pat.multi).widths();
-            let cur_lines = MessagePattern::new(sign, &pat.multi)
-                .lines(ms_cur)
-                .chain(repeat(""));
-            let mut rect_num = 0;
-            for (i, ((width, font_num, rn), cur_line)) in
-                widths.zip(cur_lines).enumerate()
-            {
-                let ln = 1 + i as u16;
-                html.push_str("<select id='mc_line");
-                html.push_str(&ln.to_string());
-                html.push('\'');
-                if rn != rect_num {
-                    html.push_str(" class='mc_line_gap'");
-                    rect_num = rn;
-                }
-                html.push_str("><option>");
-                if let Some(font) = sign.font_definition().font(font_num) {
-                    for l in &self.lines {
-                        if l.msg_pattern == pat.name && ln == l.line {
-                            self.append_line(
-                                &l.multi, width, font, cur_line, &mut html,
-                            )
-                        }
-                    }
-                }
-                html.push_str("</select>");
-            }
+            html.push_str(&self.make_lines_div(sign, pat, ms_cur));
         }
         html.push_str("</div>");
         html
+    }
+
+    /// Make line select elements
+    fn make_lines_div(
+        &self,
+        sign: &Sign,
+        pat: &MsgPattern,
+        ms_cur: &str,
+    ) -> String {
+        // NOTE: this prevents lifetime from escaping
+        let mut pat = pat;
+        let mut html = String::new();
+        let widths = MessagePattern::new(sign, &pat.multi).widths();
+        let cur_lines = MessagePattern::new(sign, &pat.multi)
+            .lines(ms_cur)
+            .chain(repeat(""));
+        if self.pat_lines(pat).count() == 0 {
+            let n_lines =
+                MessagePattern::new(sign, &pat.multi).widths().count();
+            match self.find_substitute(pat, n_lines) {
+                Some(sub) => pat = sub,
+                None => return html,
+            }
+        }
+        let mut rect_num = 0;
+        for (i, ((width, font_num, rn), cur_line)) in
+            widths.zip(cur_lines).enumerate()
+        {
+            let ln = 1 + i as u16;
+            html.push_str("<select id='mc_line");
+            html.push_str(&ln.to_string());
+            html.push('\'');
+            if rn != rect_num {
+                html.push_str(" class='mc_line_gap'");
+                rect_num = rn;
+            }
+            html.push_str("><option>");
+            if let Some(font) = sign.font_definition().font(font_num) {
+                for ml in self.pat_lines(pat) {
+                    if ml.line == ln {
+                        self.append_line(
+                            &ml.multi, width, font, cur_line, &mut html,
+                        )
+                    }
+                }
+            }
+            html.push_str("</select>");
+        }
+        html
+    }
+
+    /// Find a substitute message pattern
+    fn find_substitute(
+        &self,
+        pat: &MsgPattern,
+        n_lines: usize,
+    ) -> Option<&MsgPattern> {
+        for mp in &self.compose_patterns {
+            if mp != pat && self.max_line(mp) == n_lines {
+                return Some(mp);
+            }
+        }
+        None
+    }
+
+    /// Get max line number of a pattern
+    fn max_line(&self, pat: &MsgPattern) -> usize {
+        self.pat_lines(pat)
+            .map(|ml| usize::from(ml.line))
+            .max()
+            .unwrap_or_default()
+    }
+
+    /// Get iterator of lines in a message pattern
+    fn pat_lines<'a>(
+        &'a self,
+        pat: &'a MsgPattern,
+    ) -> impl Iterator<Item = &'a MsgLine> {
+        self.lines.iter().filter(|ml| ml.msg_pattern == pat.name)
     }
 
     /// Append a line as an option element
