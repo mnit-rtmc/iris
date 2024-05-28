@@ -36,6 +36,12 @@ public class LDAPSocketFactory extends SocketFactory {
 	}
 
 	/** Create a socket */
+	public Socket createSocket() throws IOException
+	{
+		return FACTORY.createSocket();
+	}
+
+	/** Create a socket */
 	public Socket createSocket(InetAddress host, int port)
 		throws IOException
 	{
