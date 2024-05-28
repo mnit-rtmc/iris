@@ -540,12 +540,9 @@ impl CardList {
     async fn make_html_x<C: Card>(&mut self) -> Result<String> {
         let cards: Vec<C> = serde_json::from_str(&self.json)?;
         // Use default value for ancillary data lookup
-        let pri = C::default();
-        let anc = fetch_ancillary(View::Search, &pri).await?;
+        let anc = fetch_ancillary(View::Search, &C::default()).await?;
         let rname = C::res().as_str();
         self.views.clear();
-        let mut states = String::new();
-        states.push('{');
         let mut html = String::new();
         html.push_str("<ul class='cards'>");
         if self.config {
@@ -560,8 +557,8 @@ impl CardList {
                 </li>"
             ));
         }
-        for pri in cards {
-            let view = if self.search.is_match(&pri, &anc) {
+        for pri in &cards {
+            let view = if self.search.is_match(pri, &anc) {
                 View::Compact
             } else {
                 View::Hidden
@@ -575,18 +572,9 @@ impl CardList {
             html.push_str(&pri.to_html(view, &anc));
             html.push_str("</li>");
             self.views.push(cv);
-            if states.len() > 1 {
-                states.push(',');
-            }
-            states.push('"');
-            states.push_str(&name);
-            states.push_str("\":\"");
-            states.push_str(pri.item_state_main(&anc).code());
-            states.push('"');
         }
         html.push_str("</ul>");
-        states.push('}');
-        self.states_main = states;
+        self.states_main = build_item_states(&cards, &anc);
         Ok(html)
     }
 
@@ -624,8 +612,7 @@ impl CardList {
     /// Get a list of cards whose view has changed
     async fn view_change_x<C: Card>(&mut self) -> Result<Vec<CardView>> {
         // Use default value for ancillary data lookup
-        let pri = C::default();
-        let anc = fetch_ancillary(View::Search, &pri).await?;
+        let anc = fetch_ancillary(View::Search, &C::default()).await?;
         let mut changes = Vec::new();
         let mut views = Vec::with_capacity(self.views.len());
         let mut old_views = self.views.drain(..);
@@ -660,7 +647,7 @@ impl CardList {
 
     /// Get a Vec of changed cards
     pub async fn changed_vec(
-        &self,
+        &mut self,
         json: String,
     ) -> Result<Vec<(CardView, String)>> {
         match self.res {
@@ -694,12 +681,12 @@ impl CardList {
 
     /// Make a Vec of changed cards
     async fn changed<C: Card>(
-        &self,
+        &mut self,
         json: String,
     ) -> Result<Vec<(CardView, String)>> {
         // Use default value for ancillary data lookup
         let cards0 = serde_json::from_str::<Vec<C>>(&json)?.into_iter();
-        let cards1 = serde_json::from_str::<Vec<C>>(&self.json)?.into_iter();
+        let cards1 = serde_json::from_str::<Vec<C>>(&self.json)?;
         let anc = fetch_ancillary(View::Search, &C::default()).await?;
         let mut values = Vec::new();
         let mut views = self.views.iter();
@@ -707,12 +694,12 @@ impl CardList {
             // skip "Create" card
             views.next();
         }
-        for (c0, c1) in cards0.zip(cards1) {
+        for (c0, c1) in cards0.zip(&cards1) {
             let cv = views.next();
             if c0.name() != c1.name() {
                 return Err(Error::CardMismatch());
             }
-            if c0 != c1 {
+            if c0 != *c1 {
                 let cv = match cv {
                     Some(cv) => cv.clone(),
                     None => CardView::new(C::res(), c1.name(), View::Compact),
@@ -725,6 +712,7 @@ impl CardList {
                 values.push((cv, html));
             }
         }
+        self.states_main = build_item_states(&cards1, &anc);
         Ok(values)
     }
 }
@@ -751,6 +739,24 @@ async fn fetch_ancillary<C: Card>(view: View, pri: &C) -> Result<C::Ancillary> {
         }
     }
     Ok(anc)
+}
+
+/// Build item states JSON object
+fn build_item_states<C: Card>(cards: &[C], anc: &C::Ancillary) -> String {
+    let mut states = String::new();
+    states.push('{');
+    for pri in cards {
+        if states.len() > 1 {
+            states.push(',');
+        }
+        states.push('"');
+        states.push_str(&pri.name());
+        states.push_str("\":\"");
+        states.push_str(pri.item_state_main(anc).code());
+        states.push('"');
+    }
+    states.push('}');
+    states
 }
 
 /// Fetch a card for a given view

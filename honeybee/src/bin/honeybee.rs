@@ -14,6 +14,7 @@
 //
 #![forbid(unsafe_code)]
 
+use argh::FromArgs;
 use honeybee::{
     notify_events, Database, Honey, Resource, Result, SegmentState,
 };
@@ -22,12 +23,21 @@ use std::time::Duration;
 use tokio::net::TcpListener;
 use tokio_stream::StreamExt;
 
+/// Command-line arguments
+#[derive(FromArgs)]
+struct Args {
+    /// debug mode (bypass sonar connection)
+    #[argh(switch, short = 'd')]
+    debug: bool,
+}
+
 /// Main entry point
 #[tokio::main]
 async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
+    let args: Args = argh::from_env();
     let db = Database::new("tms").await?;
-    let honey = Honey::new(&db);
+    let honey = Honey::new(args.debug, &db);
     tokio::spawn(serve_routes(honey.clone()));
     tokio::spawn(check_expired(honey.clone()));
     let mut state = SegmentState::new();

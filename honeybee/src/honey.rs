@@ -17,7 +17,7 @@ use crate::cred::Credentials;
 use crate::error::{Error, Result};
 use crate::permission;
 use crate::query;
-use crate::sonar::{Error as SonarError, Name};
+use crate::sonar::{Error as SonarError, Messenger, Name};
 use crate::Database;
 use axum::body::Body;
 use axum::extract::{Json, Path as AxumPath, State};
@@ -46,6 +46,9 @@ use tower_sessions::session::Id;
 use tower_sessions::{Expiry, Session, SessionManagerLayer};
 use tower_sessions_moka_store::MokaStore;
 
+/// Sonar host name for IRIS
+const SONAR_HOST: &str = "localhost.localdomain";
+
 /// Expiration for notifier activity
 const EXPIRATION: std::time::Duration =
     std::time::Duration::from_secs(4 * 3600);
@@ -66,6 +69,8 @@ struct SseNotifier {
 /// Honeybee server state
 #[derive(Clone)]
 pub struct Honey {
+    /// Debug mode (bypass sonar communication)
+    debug: bool,
     /// Database connection pool
     db: Database,
     /// Sse notifiers for each session
@@ -128,10 +133,28 @@ impl SseNotifier {
 
 impl Honey {
     /// Create honey state
-    pub fn new(db: &Database) -> Self {
+    pub fn new(debug: bool, db: &Database) -> Self {
         let db = db.clone();
         let notifiers = Arc::new(Mutex::new(HashMap::new()));
-        Honey { db, notifiers }
+        Honey {
+            debug,
+            db,
+            notifiers,
+        }
+    }
+
+    /// Authenticate with IRIS server
+    pub async fn authenticate(
+        &self,
+        cred: Credentials,
+    ) -> Result<Option<Messenger>> {
+        if self.debug {
+            Ok(None)
+        } else {
+            let mut msn = Messenger::new(SONAR_HOST, 1037).await?;
+            msn.login(cred.user(), cred.password()).await?;
+            Ok(Some(msn))
+        }
     }
 
     /// Build root route
@@ -409,6 +432,7 @@ fn login_post(honey: Honey) -> Router {
     /// Handle `POST` request
     async fn handle_post(
         session: Session,
+        State(honey): State<Honey>,
         Json(cred): Json<Credentials>,
     ) -> Resp1 {
         log::info!("POST login");
@@ -416,7 +440,7 @@ fn login_post(honey: Honey) -> Router {
             .cycle_id()
             .await
             .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
-        cred.authenticate().await?;
+        honey.authenticate(cred.clone()).await?;
         cred.store(&session)
             .await
             .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
@@ -578,7 +602,7 @@ fn other_resource(honey: Honey) -> Router {
         match attrs.get("name") {
             Some(Value::String(name)) => {
                 let name = nm.obj(name)?;
-                if let Some(mut msn) = cred.authenticate().await? {
+                if let Some(mut msn) = honey.authenticate(cred).await? {
                     // first, set attributes on phantom object
                     for (key, value) in attrs.iter() {
                         let attr = &key[..];
@@ -702,7 +726,7 @@ fn other_object(honey: Honey) -> Router {
             let required = Access::required_patch(nm.res_type, attr);
             access.check(required)?;
         }
-        if let Some(mut msn) = cred.authenticate().await? {
+        if let Some(mut msn) = honey.authenticate(cred).await? {
             // first pass
             for (key, value) in attrs.iter() {
                 let attr = &key[..];
@@ -737,7 +761,7 @@ fn other_object(honey: Honey) -> Router {
         honey
             .name_access(cred.user(), &nm, Access::Configure)
             .await?;
-        if let Some(mut msn) = cred.authenticate().await? {
+        if let Some(mut msn) = honey.authenticate(cred).await? {
             msn.remove_object(&nm.to_string()).await?;
         }
         Ok(StatusCode::ACCEPTED)

@@ -491,10 +491,13 @@ CREATE TABLE iris.permission (
 
     CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$'),
     CONSTRAINT permission_access_n CHECK (access_n >= 1 AND access_n <= 4),
-    CONSTRAINT base_resource_ck CHECK (iris.resource_is_base(resource_n)),
     -- hashtag cannot be applied to "View" access
     CONSTRAINT hashtag_access_ck CHECK (hashtag IS NULL OR access_n != 1)
 );
+
+ALTER TABLE iris.permission
+    ADD CONSTRAINT base_resource_ck
+        CHECK (iris.resource_is_base(resource_n)) NOT VALID;
 
 CREATE UNIQUE INDEX permission_role_resource_n_hashtag_idx
     ON iris.permission (role, resource_n, COALESCE(hashtag, ''));
@@ -2402,7 +2405,12 @@ $$
         xdir || replace(xmod, '@', '') || xst,
         iris.landmark_abbrev(lmark)
     ) || rdir;
-$$ LANGUAGE sql;
+$$ LANGUAGE sql SECURITY DEFINER;
+
+ALTER FUNCTION iris.root_lbl(VARCHAR(6), VARCHAR(4), VARCHAR(6), VARCHAR(4),
+    VARCHAR(2), VARCHAR(24)
+)
+    SET search_path = pg_catalog, pg_temp;
 
 CREATE FUNCTION iris.detector_label(TEXT, CHAR, SMALLINT, BOOLEAN) RETURNS TEXT
     AS $detector_label$
@@ -4588,19 +4596,22 @@ COPY iris.parking_area_amenities (bit, amenity) FROM stdin;
 \.
 
 CREATE FUNCTION iris.parking_area_amenities(INTEGER)
-	RETURNS SETOF iris.parking_area_amenities AS $parking_area_amenities$
+    RETURNS SETOF iris.parking_area_amenities AS $parking_area_amenities$
 DECLARE
-	ms RECORD;
-	b INTEGER;
+    ms RECORD;
+    b INTEGER;
 BEGIN
-	FOR ms IN SELECT bit, amenity FROM iris.parking_area_amenities LOOP
-		b = 1 << ms.bit;
-		IF ($1 & b) = b THEN
-			RETURN NEXT ms;
-		END IF;
-	END LOOP;
+    FOR ms IN SELECT bit, amenity FROM iris.parking_area_amenities LOOP
+        b = 1 << ms.bit;
+        IF ($1 & b) = b THEN
+            RETURN NEXT ms;
+        END IF;
+    END LOOP;
 END;
-$parking_area_amenities$ LANGUAGE plpgsql;
+$parking_area_amenities$ LANGUAGE plpgsql SECURITY DEFINER;
+
+ALTER FUNCTION iris.parking_area_amenities(INTEGER)
+    SET search_path = pg_catalog, pg_temp;
 
 CREATE VIEW parking_area_view AS
 	SELECT pa.name, site_id, time_stamp_static, relevant_highway,
