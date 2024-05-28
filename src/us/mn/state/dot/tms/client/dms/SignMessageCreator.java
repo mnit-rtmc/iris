@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2023  Minnesota Department of Transportation
- * Copyright (C) 2020       SRF Consulting Group
+ * Copyright (C) 2020-2024  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,8 @@ import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.utils.HexString;
+import us.mn.state.dot.tms.utils.wysiwyg.WMessage;
+import us.mn.state.dot.tms.utils.wysiwyg.WTokenType;
 
 /**
  * This is a utility class to create sign messages.
@@ -116,6 +118,12 @@ public class SignMessageCreator {
 	private SignMessage createMsg(SignConfig sc, String inc, String ms,
 		boolean fb, SignMsgPriority mp, int src, Integer dur)
 	{
+		WMessage wmsg = new WMessage(ms);
+		if (wmsg.removeAll(WTokenType.standby)) {
+			ms = wmsg.toString();
+			mp = SignMsgPriority.low_1;
+			src |= SignMsgSource.standby.bit();
+		}
 		String owner = SignMessageHelper.makeMsgOwner(src, user);
 		SignMessage sm = SignMessageHelper.find(sc, inc, ms, owner,
 			fb, mp, dur);
