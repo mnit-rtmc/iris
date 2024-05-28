@@ -1381,6 +1381,7 @@ name = "honeybee"
 version = "5.54.1"
 dependencies = [
  "anyhow",
+ "argh",
  "async-trait",
  "axum",
  "axum-extra",
