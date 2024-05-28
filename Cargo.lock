@@ -624,6 +624,7 @@ name = "bulb"
 version = "5.54.1"
 dependencies = [
  "base64 0.21.7",
+ "chrono",
  "console_error_panic_hook",
  "fnv",
  "humantime",

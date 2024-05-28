@@ -752,7 +752,7 @@ fn build_item_states<C: Card>(cards: &[C], anc: &C::Ancillary) -> String {
         states.push('"');
         states.push_str(&pri.name());
         states.push_str("\":\"");
-        states.push_str(pri.item_state_main(&anc).code());
+        states.push_str(pri.item_state_main(anc).code());
         states.push('"');
     }
     states.push('}');

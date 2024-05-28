@@ -17,6 +17,7 @@ use crate::fetch::{Action, ContentType, Uri};
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, OptVal};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
+use chrono::DateTime;
 use fnv::FnvHasher;
 use js_sys::{ArrayBuffer, Uint8Array};
 use ntcip::dms::multi::{
@@ -576,12 +577,9 @@ impl DmsAnc {
         pat: &MsgPattern,
         n_lines: usize,
     ) -> Option<&MsgPattern> {
-        for mp in &self.compose_patterns {
-            if mp != pat && self.max_line(mp) == n_lines {
-                return Some(mp);
-            }
-        }
-        None
+        self.compose_patterns
+            .iter()
+            .find(|&mp| mp != pat && self.max_line(mp) == n_lines)
     }
 
     /// Get max line number of a pattern
@@ -798,8 +796,20 @@ impl Dms {
             status.push_str(msg_current);
             status.push_str(".gif'>");
         }
-        status.push_str("<div class='end'>");
+        status.push_str("<div class='row fill'>");
+        status.push_str("<span class='start'>");
+        if let Some(expire_time) = &self.expire_time {
+            match DateTime::parse_from_rfc3339(expire_time) {
+                Ok(dt) => {
+                    status.push_str(&format!("⏲️ {}", &dt.format("%H:%M")))
+                }
+                _ => status.push_str("expires"),
+            }
+        }
+        status.push_str("</span>");
+        status.push_str("<span class='end'>");
         status.push_str(&self.item_states(anc).to_html());
+        status.push_str("</span>");
         status.push_str("</div>");
         if let Some(pats) = &self.compose_patterns(anc) {
             status.push_str(pats);
