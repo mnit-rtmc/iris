@@ -17,11 +17,15 @@
 package us.mn.state.dot.tms;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
@@ -517,5 +521,127 @@ public class DMSHelper extends BaseHelper {
 				err = e;
 		}
 		return err;
+	}
+
+	/** Get distance in meters between a WeatherSensor and a DMS.
+	 *  Returns null if distance is unknown. */
+	static public Integer calcDistanceMeters(WeatherSensor ws, DMS dms) {
+		if ((ws == null) || (dms == null))
+			return null;
+		GeoLoc g1 = ws.getGeoLoc();
+		GeoLoc g2 = dms.getGeoLoc();
+		Distance d = GeoLocHelper.distanceTo(g1, g2);
+		return (d == null) ? null : d.round(Distance.Units.METERS);
+	}
+
+	/** Find the WeatherSensor that's closest to the DMS.
+	 * @param dms
+	 * @param bAny If true, returns the closest
+	 * weather sensor, regardless of distance.
+	 * If false, returns the closest weather sensor
+	 * less than RWIS_AUTO_MAX_M meters away. 
+	 * @return A two-Object-array containing the
+	 *  WeatherSensor and the distance to that
+	 *  WeatherSensor in meters as an Integer.
+	 *  If no WeatherSensor qualifies, returns
+	 *  a two Object array containing nulls. 
+	 */
+	public static Object[] findClosestWeatherSensor(DMS dms, boolean bAny) {
+		Object[] retVals = new Object[2];
+		retVals[0] = null;
+		retVals[1] = null;
+		int cd;
+		if (bAny)
+			cd = Integer.MAX_VALUE;
+		else
+			cd = SystemAttrEnum.RWIS_AUTO_MAX_M.getInt() + 1;
+		WeatherSensor closestWs = null;
+		WeatherSensor ws;
+		Integer closestDist = cd;
+		Integer dist;
+		Iterator<WeatherSensor> it = WeatherSensorHelper.iterator();
+		while (it.hasNext()) {
+			ws = it.next();
+			if (WeatherSensorHelper.isSampleExpired(ws)) {
+				//FIXME:  Don't skip if we have test data for this WeatherSensor.
+				continue; // Skip those where sample has expired.
+			}
+			dist = calcDistanceMeters(ws, dms);
+			if ((dist == null) || (dist > closestDist))
+				continue;
+			if (dist < closestDist) {
+				closestDist = dist;
+				closestWs   = ws;
+			}
+		}
+		if (closestWs != null) {
+			retVals[0] = closestWs;
+			retVals[1] = closestDist;
+		}
+		return retVals;
+	}
+
+	public static Object[] findClosestWeatherSensor(DMS dms) {
+		return findClosestWeatherSensor(dms, false);
+	}
+		
+	/** Convert WeatherSensorOverride string (semicolon
+	 * separated list of WeatherSensor names) into an
+	 * ArrayList of WeatherSensors.
+	 * 
+	 * Throws TMSException if one of the listed
+	 * WeatherSensors doesn't exist.
+	 * Otherwise, returns an ArrayList of WeatherSensors.
+	 * @param wsNames
+	 * @return ArrayList of WeatherSensors
+	 * @throws TMSException
+	 */
+	static public ArrayList<WeatherSensor> parseWeatherSensorList(String wsNames) throws TMSException {
+		ArrayList<WeatherSensor> wsList = new ArrayList<WeatherSensor>();
+		if ((wsNames == null) || wsNames.isEmpty())
+			return wsList;
+		wsNames = wsNames.trim();
+		if (wsNames.isEmpty())
+			return wsList;
+		String[] wsNamesArray = wsNames.split(";");
+		Arrays.parallelSetAll(wsNamesArray, (i) -> wsNamesArray[i].trim());
+		WeatherSensor ws;
+		for (String name : wsNamesArray) {
+			if (name.isEmpty())
+				continue;
+			ws = WeatherSensorHelper.lookup(name);
+			if (ws == null)
+				throw new ChangeVetoException("Unknown WeatherSensor name: "+name);
+			wsList.add(ws);
+		}
+		return wsList;
+	}
+	
+	/** Get array-list of WeatherSensors associated
+	 *  with a DMS.  Returns empty list if no
+	 *  WeatherSensors are associated. */
+	static public ArrayList<WeatherSensor> getAssociatedWeatherSensors(DMS dms) {
+		ArrayList<WeatherSensor> wsList = new ArrayList<WeatherSensor>();
+		if (dms == null)
+			return wsList;
+		WeatherSensor ws;
+		String wsOverride = dms.getWeatherSensorOverride().trim();
+		if ((wsOverride != null) && !wsOverride.isEmpty()) {
+			// Get WeatherSensor name(s) from dms.weatherSensorOverride...
+			try {
+				wsList = parseWeatherSensorList(wsOverride);
+			} catch (TMSException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else {
+			// Find closest WeatherSensor...
+			Object[] o = findClosestWeatherSensor(dms);
+			WeatherSensor closestEss  = (WeatherSensor) o[0];
+			if (closestEss != null)
+				wsList.add(closestEss);
+		}
+		return wsList;
 	}
 }
