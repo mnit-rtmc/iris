@@ -41,6 +41,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Setup panel */
 	private final PropSetup setup_pnl;
 
+	/** RWIS panel */
+	private final PropRwis rwis_pnl;
+
 	/** Status panel */
 	private final PropStatus status_pnl;
 
@@ -60,6 +63,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		op_pnl = new PropOp(sign);
 		location_pnl = new PropLocation(s, sign);
 		setup_pnl = new PropSetup(s, sign);
+		rwis_pnl = new PropRwis(s, sign);
 		status_pnl = new PropStatus(s, sign);
 		pixel_pnl = new PropPixels(s, sign);
 		bright_pnl = new PropBrightness(s, sign);
@@ -78,6 +82,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		op_pnl.initialize();
 		location_pnl.initialize();
 		setup_pnl.initialize();
+		rwis_pnl.initialize();
 		status_pnl.initialize();
 		pixel_pnl.initialize();
 		bright_pnl.initialize();
@@ -85,6 +90,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), location_pnl);
 		tab.add(I18N.get("device.setup"), setup_pnl);
+		tab.add(I18N.get("dms.rwis"), rwis_pnl);
 		tab.add(I18N.get("device.status"), status_pnl);
 		tab.add(I18N.get("dms.pixels"), pixel_pnl);
 		tab.add(I18N.get("dms.brightness"), bright_pnl);
@@ -99,6 +105,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected void dispose() {
 		location_pnl.dispose();
 		setup_pnl.dispose();
+		rwis_pnl.dispose();
 		op_pnl.dispose();
 		super.dispose();
 	}
@@ -108,6 +115,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected void updateEditMode() {
 		location_pnl.updateEditMode();
 		setup_pnl.updateEditMode();
+		rwis_pnl.updateEditMode();
 	}
 
 	/** Update one attribute on the form */
@@ -116,6 +124,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		op_pnl.updateAttribute(a);
 		location_pnl.updateAttribute(a);
 		setup_pnl.updateAttribute(a);
+		rwis_pnl.updateAttribute(a);
 		status_pnl.updateAttribute(a);
 		pixel_pnl.updateAttribute(a);
 		bright_pnl.updateAttribute(a);
