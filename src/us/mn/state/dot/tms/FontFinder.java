@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2023  Minnesota Department of Transportation
+ * Copyright (C) 2011-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ public class FontFinder {
 		while (it.hasNext()) {
 			MsgPattern pat = it.next();
 			String cht = pat.getComposeHashtag();
-			if (DMSHelper.hasHashtag(dms, cht))
+			if (HashtagHelper.hasHashtag(dms, cht))
 				findFontTags(pat.getMulti());
 		}
 	}
@@ -81,7 +81,7 @@ public class FontFinder {
 			MsgPattern pat = da.getMsgPattern();
 			if (pat != null) {
 				String ht = da.getDmsHashtag();
-				if (DMSHelper.hasHashtag(dms, ht))
+				if (HashtagHelper.hasHashtag(dms, ht))
 					findFontTags(pat.getMulti());
 			}
 		}

@@ -19,6 +19,7 @@ import java.util.Iterator;
 import javax.swing.SwingWorker;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.HashtagHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.SignConfig;
@@ -61,7 +62,7 @@ public class WMsgSelectorSignProcess extends
 		while (pit.hasNext()) {
 			MsgPattern pat = pit.next();
 			String cht = pat.getComposeHashtag();
-			if (DMSHelper.hasHashtag(dms, cht))
+			if (HashtagHelper.hasHashtag(dms, cht))
 				plist.add(pat);
 		}
 		return plist;

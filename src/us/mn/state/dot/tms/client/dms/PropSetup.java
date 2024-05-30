@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2023  Minnesota Department of Transportation
+ * Copyright (C) 2019-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,8 +25,8 @@ import javax.swing.JComboBox;
 import javax.swing.JTextArea;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.HashtagHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -104,7 +104,7 @@ public class PropSetup extends IPanel {
 		hashtag_txt.addFocusListener(new FocusAdapter() {
 			@Override public void focusLost(FocusEvent e) {
 				String ht = hashtag_txt.getText();
-				String[] tags = DMSHelper.makeHashtags(
+				String[] tags = HashtagHelper.makeHashtags(
 					ht.split(" ")
 				);
 				dms.setHashtags(tags);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2023  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  * Copyright (C) 2021  Iteris Inc.
  *
@@ -51,84 +51,9 @@ public class DMSHelper extends BaseHelper {
 			DMS.SONAR_TYPE));
 	}
 
-	/** Normalize a hashtag value */
-	static public String normalizeHashtag(String ht) {
-		if (ht != null) {
-			ht = ht.trim();
-			return ht.matches("#[A-Za-z0-9]+") ? ht : null;
-		} else
-			return null;
-	}
-
-	/** Make an ordered array of hashtags */
-	static public String[] makeHashtags(String[] ht) {
-		TreeSet<String> tags = new TreeSet<String>();
-		for (String tag: ht) {
-			tag = normalizeHashtag(tag);
-			if (tag != null)
-				tags.add(tag);
-		}
-		return tags.toArray(new String[0]);
-	}
-
-	/** Hashtag filter iterator */
-	static public class DmsHashtagIterator implements Iterator<DMS> {
-		private final String hashtag;
-		private final Iterator<DMS> wrapped;
-		private DMS next;
-		public DmsHashtagIterator(String ht, Iterator<DMS> it) {
-			hashtag = ht;
-			wrapped = it;
-			next = null;
-		}
-		@Override public boolean hasNext() {
-			while (next == null && wrapped.hasNext()) {
-				next = wrapped.next();
-				if (hasHashtag(next, hashtag))
-					return true;
-				next = null;
-			}
-			return (next != null);
-		}
-		@Override public DMS next() {
-			DMS n = next;
-			next = null;
-			return n;
-		}
-		@Override public void remove() {
-			throw new UnsupportedOperationException();
-		}
-	}
-
-	/** Get a DMS iterator for a given hashtag */
-	static public Iterator<DMS> hashtagIterator(String ht) {
-		return new DmsHashtagIterator(ht, iterator());
-	}
-
-	/** Find all DMS with a given hashtag */
-	static public Set<DMS> findAllTagged(String ht) {
-		TreeSet<DMS> signs = new TreeSet<DMS>(
-			new NumericAlphaComparator<DMS>());
-		Iterator<DMS> it = hashtagIterator(ht);
-		while (it.hasNext())
-			signs.add(it.next());
-		return signs;
-	}
-
-	/** Check if a DMS has a hashtag */
-	static public boolean hasHashtag(DMS dms, String hashtag) {
-		if (hashtag != null) {
-			for (String tag: dms.getHashtags()) {
-				if (hashtag.equalsIgnoreCase(tag))
-					return true;
-			}
-		}
-		return false;
-	}
-
 	/** Check if a DMS is hidden (#Hidden hashtag) */
 	static public boolean isHidden(DMS dms) {
-		return hasHashtag(dms, "#Hidden");
+		return HashtagHelper.hasHashtag(dms, "#Hidden");
 	}
 
 	/** Reserved hashtags for dedicated-purpose signs */

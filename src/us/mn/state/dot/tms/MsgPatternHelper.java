@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2023  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ public class MsgPatternHelper extends BaseHelper {
 			MsgPattern pat = it.next();
 			if (isValidMulti(pat)) {
 				String cht = pat.getComposeHashtag();
-				if (DMSHelper.hasHashtag(dms, cht))
+				if (HashtagHelper.hasHashtag(dms, cht))
 					pats.add(pat);
 			}
 		}
@@ -128,10 +128,14 @@ public class MsgPatternHelper extends BaseHelper {
 		hashtags.addAll(LaneUseMultiHelper.findHashtags(pat));
 		hashtags.addAll(DmsActionHelper.findHashtags(pat));
 		for (String ht: hashtags) {
-			for (DMS dms: DMSHelper.findAllTagged(ht)) {
-				SignConfig sc = dms.getSignConfig();
-				if (sc != null && !cfgs.contains(sc))
-					cfgs.add(sc);
+			Iterator<DMS> it = DMSHelper.iterator();
+			while (it.hasNext()) {
+				DMS dms = it.next();
+				if (HashtagHelper.hasHashtag(dms, ht)) {
+					SignConfig sc = dms.getSignConfig();
+					if (sc != null && !cfgs.contains(sc))
+						cfgs.add(sc);
+				}
 			}
 		}
 		for (SignConfig sc: AlertMessageHelper.findSignConfigs(pat)) {
@@ -256,7 +260,7 @@ public class MsgPatternHelper extends BaseHelper {
 			MsgPattern mp = it.next();
 			if (mp != pat && isValidMulti(mp)) {
 				String cht = mp.getComposeHashtag();
-				if (DMSHelper.hasHashtag(dms, cht) &&
+				if (HashtagHelper.hasHashtag(dms, cht) &&
 				    lineCount(mp) == n_lines)
 				{
 					return mp;

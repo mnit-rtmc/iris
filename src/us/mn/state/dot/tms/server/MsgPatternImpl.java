@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2023  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.HashtagHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.utils.MultiString;
@@ -177,7 +177,7 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
 
 	/** Set the hashtag for composing with the pattern */
 	public void doSetComposeHashtag(String cht) throws TMSException {
-		String ht = DMSHelper.normalizeHashtag(cht);
+		String ht = HashtagHelper.normalize(cht);
 		if (!objectEquals(ht, cht))
 			throw new ChangeVetoException("Bad hashtag");
 		if (!objectEquals(cht, compose_hashtag)) {

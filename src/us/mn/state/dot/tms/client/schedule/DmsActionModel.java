@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2023  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DmsAction;
-import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.HashtagHelper;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.PlanPhaseHelper;
@@ -84,7 +84,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				return canWrite(da);
 			}
 			public void setValueAt(DmsAction da, Object value) {
-				String ht = DMSHelper.normalizeHashtag(
+				String ht = HashtagHelper.normalize(
 					value.toString());
 				if (ht != null)
 					da.setDmsHashtag(ht);
@@ -196,7 +196,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	/** Create an object with a hashtag */
 	@Override
 	public void createObject(String hashtag) {
-		String ht = DMSHelper.normalizeHashtag(hashtag);
+		String ht = HashtagHelper.normalize(hashtag);
 		if (ht != null && ht.equals(hashtag))
 			create(hashtag);
 		else

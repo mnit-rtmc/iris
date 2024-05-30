@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2023  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ public class LaneUseMultiHelper extends BaseHelper {
 			LaneUseMulti lum = it.next();
 			if (lum.getIndication() == ind) {
 				String ht = lum.getDmsHashtag();
-				if (DMSHelper.hasHashtag(dms, ht))
+				if (HashtagHelper.hasHashtag(dms, ht))
 					return lum;
 			}
 		}

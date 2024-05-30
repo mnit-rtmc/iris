@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2008-2009  AHMCT, University of California
  * Copyright (C) 2012-2021  Iteris Inc.
  * Copyright (C) 2016-2020  SRF Consulting Group
@@ -48,6 +48,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Gps;
 import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.HashtagHelper;
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LCS;
@@ -364,7 +365,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public synchronized void doSetHashtags(String[] ht)
 		throws TMSException
 	{
-		String[] ht2 = DMSHelper.makeHashtags(ht);
+		String[] ht2 = HashtagHelper.makeHashtags(ht);
 		if (!Arrays.equals(ht, ht2))
 			throw new ChangeVetoException("BAD HASHTAGS");
 		if (!Arrays.equals(ht, hashtags)) {
@@ -379,7 +380,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Add a hashtag to the DMS */
 	public synchronized void addHashtagNotify(String aht) {
-		aht = DMSHelper.normalizeHashtag(aht);
+		aht = HashtagHelper.normalize(aht);
 		if (aht == null)
 			return;
 		TreeSet<String> ht_set = new TreeSet<String>(
