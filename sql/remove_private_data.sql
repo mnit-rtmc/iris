@@ -39,11 +39,11 @@ DELETE FROM event.weather_sensor_settings;
 UPDATE iris.comm_link SET uri = '';
 UPDATE iris.modem SET uri = '';
 UPDATE iris.controller SET password = NULL;
-UPDATE iris.video_monitor SET notes = '';
+UPDATE iris.video_monitor SET notes = NULL;
 UPDATE iris.camera SET enc_address = NULL;
 UPDATE iris.camera SET enc_mcast = NULL;
 UPDATE iris.camera SET enc_channel = NULL;
-UPDATE iris.camera SET notes = '';
+UPDATE iris.camera SET notes = NULL;
 UPDATE iris.vid_src_template SET config = '';
 
 -- DELETE FROM iris.sign_message;
