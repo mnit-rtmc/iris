@@ -18,8 +18,8 @@ Select `View ➔ Video ➔ Cameras` menu item
 | Access       | Primary              | Secondary                   |
 |--------------|----------------------|-----------------------------|
 | 👁️  View      | name, location       | geo\_loc, video\_loss       |
-| 👉 Operate   |                      | ptz †, recall\_preset †     |
-| 💡 Manage    | notes, publish       | streamable, store\_preset † |
+| 👉 Operate   | publish              | ptz †, recall\_preset †     |
+| 💡 Manage    | notes, hashtags      | streamable, store\_preset † |
 | 🔧 Configure | controller, cam\_num | pin, cam\_template, encoder\_type, enc\_address, enc\_port, enc\_mcast, enc\_channel
 
 † _Write only_

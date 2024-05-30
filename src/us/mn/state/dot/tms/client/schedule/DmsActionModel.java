@@ -74,9 +74,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	protected ArrayList<ProxyColumn<DmsAction>> createColumns() {
 		ArrayList<ProxyColumn<DmsAction>> cols =
 			new ArrayList<ProxyColumn<DmsAction>>(4);
-		cols.add(new ProxyColumn<DmsAction>("action.plan.hashtag",
-			120)
-		{
+		cols.add(new ProxyColumn<DmsAction>("hashtag", 120) {
 			public Object getValueAt(DmsAction da) {
 				return da.getDmsHashtag();
 			}
@@ -89,7 +87,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				if (ht != null)
 					da.setDmsHashtag(ht);
 				else
-					showHint("dms.hashtag.invalid.hint");
+					showHint("hashtag.invalid.hint");
 			}
 		});
 		cols.add(new ProxyColumn<DmsAction>("action.plan.phase", 100) {
@@ -200,7 +198,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		if (ht != null && ht.equals(hashtag))
 			create(hashtag);
 		else
-			showHint("dms.hashtag.invalid.hint");
+			showHint("hashtag.invalid.hint");
 	}
 
 	/** Create a new DMS action */

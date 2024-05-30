@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2022  Minnesota Department of Transportation
+ * Copyright (C) 2014-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,15 +20,16 @@ import java.awt.event.FocusEvent;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JSpinner;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraTemplate;
 import us.mn.state.dot.tms.EncoderType;
+import us.mn.state.dot.tms.HashtagHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -121,6 +122,9 @@ public class PropSetup extends IPanel {
 		}
 	});
 
+	/** Hashtag text area */
+	private final JTextArea hashtag_txt = new JTextArea(6, 32);
+
 	/** User session */
 	private final Session session;
 
@@ -164,6 +168,8 @@ public class PropSetup extends IPanel {
 		add(publish_chk, Stretch.LAST);
 		add("camera.streamable");
 		add(streamable_chk, Stretch.LAST);
+		add("hashtags");
+		add(hashtag_txt, Stretch.LAST);
 		createJobs();
 	}
 
@@ -209,6 +215,15 @@ public class PropSetup extends IPanel {
 				camera.setEncChannel(null);
 			}
 		});
+		hashtag_txt.addFocusListener(new FocusAdapter() {
+			@Override public void focusLost(FocusEvent e) {
+				String ht = hashtag_txt.getText();
+				String[] tags = HashtagHelper.makeHashtags(
+					ht.split(" ")
+				);
+				camera.setHashtags(tags);
+			}
+		});
 	}
 	
 	/** Update the edit mode */
@@ -222,6 +237,7 @@ public class PropSetup extends IPanel {
 		enc_chn_spn.setEnabled(canWrite("encChannel"));
 		publish_chk.setEnabled(canWrite("publish"));
 		streamable_chk.setEnabled(canWrite("streamable"));
+		hashtag_txt.setEnabled(canWrite("hashtags"));
 	}
 
 	/** Update one attribute on the form tab */
@@ -232,6 +248,8 @@ public class PropSetup extends IPanel {
 		}
 		if (a == null || a.equals("encoderType"))
 			enc_type_act.updateSelected();
+		if (a == null || a.equals("cameraTemplate"))
+			cam_tmplt_act.updateSelected();
 		if (a == null || a.equals("encAddress")) {
 			String ep = camera.getEncAddress();
 			enc_address_txt.setText((ep != null) ? ep : "");
@@ -252,8 +270,14 @@ public class PropSetup extends IPanel {
 			publish_chk.setSelected(camera.getPublish());
 		if (a == null || a.equals("streamable"))
 			streamable_chk.setSelected(camera.getStreamable());
-		if (a == null || a.equals("cameraTemplate"))
-			cam_tmplt_act.updateSelected();
+		if (null == a || a.equals("hashtags")) {
+			String[] hashtags = camera.getHashtags();
+			System.err.println("#Tags " + hashtags);
+			String ht = (hashtags != null)
+				? String.join(" ", hashtags)
+				: "";
+			hashtag_txt.setText(ht);
+		}
 	}
 
 	/** Check if the user can write an attribute */

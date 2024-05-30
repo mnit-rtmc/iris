@@ -65,7 +65,7 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 	protected ArrayList<ProxyColumn<MsgLine>> createColumns() {
 		ArrayList<ProxyColumn<MsgLine>> cols =
 			new ArrayList<ProxyColumn<MsgLine>>(4);
-		cols.add(new ProxyColumn<MsgLine>("dms.hashtag", 72) {
+		cols.add(new ProxyColumn<MsgLine>("hashtag", 72) {
 			public Object getValueAt(MsgLine ml) {
 				return ml.getRestrictHashtag();
 			}

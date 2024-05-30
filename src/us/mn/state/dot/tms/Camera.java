@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2022-2024  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@ package us.mn.state.dot.tms;
  * @author Douglas Lau
  * @author John L. Stanley - SRF Consulting
  */
-public interface Camera extends Device {
+public interface Camera extends Device, Taggable {
 
 	/** Minimum camera number */
 	int CAM_NUM_MIN = 1;
@@ -82,6 +82,12 @@ public interface Camera extends Device {
 
 	/** Get streamable flag */
 	boolean getStreamable();
+
+	/** Set the hashtags */
+	void setHashtags(String[] ht);
+
+	/** Get the hashtags */
+	String[] getHashtags();
 
 	/** Command the camera to pan, tilt or zoom */
 	void setPtz(Float[] ptz);

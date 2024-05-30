@@ -44,4 +44,45 @@ ALTER TABLE iris.permission
     ADD CONSTRAINT base_resource_ck
         CHECK (iris.resource_is_base(resource_n)) NOT VALID;
 
+-- Add camera_hashtag view
+CREATE VIEW iris.camera_hashtag AS
+    SELECT name AS camera, hashtag
+        FROM iris.hashtag
+        WHERE resource_n = 'camera';
+
+CREATE FUNCTION iris.camera_hashtag_insert() RETURNS TRIGGER AS
+    $camera_hashtag_insert$
+BEGIN
+    INSERT INTO iris.hashtag (resource_n, name, hashtag)
+         VALUES ('camera', NEW.camera, NEW.hashtag);
+    RETURN NEW;
+END;
+$camera_hashtag_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER camera_hashtag_insert_trig
+    INSTEAD OF INSERT ON iris.camera_hashtag
+    FOR EACH ROW EXECUTE FUNCTION iris.camera_hashtag_insert();
+
+CREATE FUNCTION iris.camera_hashtag_delete() RETURNS TRIGGER AS
+    $camera_hashtag_delete$
+BEGIN
+    DELETE FROM iris.hashtag WHERE resource_n = 'camera' AND name = OLD.camera;
+    IF FOUND THEN
+        RETURN OLD;
+    ELSE
+        RETURN NULL;
+    END IF;
+END;
+$camera_hashtag_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER camera_hashtag_delete_trig
+    INSTEAD OF DELETE ON iris.camera_hashtag
+    FOR EACH ROW EXECUTE FUNCTION iris.camera_hashtag_delete();
+
+-- Populate camera_hashtag with streamable cameras
+INSERT INTO iris.camera_hashtag (camera, hashtag)
+    SELECT name, '#LiveStream' FROM iris.camera WHERE streamable = 't';
+INSERT INTO iris.camera_hashtag (camera, hashtag)
+    SELECT name, '#Recorded' FROM iris.camera WHERE streamable = 't';
+
 COMMIT;

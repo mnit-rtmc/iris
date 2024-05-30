@@ -1754,6 +1754,40 @@ CREATE VIEW camera_view AS
     LEFT JOIN controller_view ctr ON c.controller = ctr.name;
 GRANT SELECT ON camera_view TO PUBLIC;
 
+CREATE VIEW iris.camera_hashtag AS
+    SELECT name AS camera, hashtag
+        FROM iris.hashtag
+        WHERE resource_n = 'camera';
+
+CREATE FUNCTION iris.camera_hashtag_insert() RETURNS TRIGGER AS
+    $camera_hashtag_insert$
+BEGIN
+    INSERT INTO iris.hashtag (resource_n, name, hashtag)
+         VALUES ('camera', NEW.camera, NEW.hashtag);
+    RETURN NEW;
+END;
+$camera_hashtag_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER camera_hashtag_insert_trig
+    INSTEAD OF INSERT ON iris.camera_hashtag
+    FOR EACH ROW EXECUTE FUNCTION iris.camera_hashtag_insert();
+
+CREATE FUNCTION iris.camera_hashtag_delete() RETURNS TRIGGER AS
+    $camera_hashtag_delete$
+BEGIN
+    DELETE FROM iris.hashtag WHERE resource_n = 'camera' AND name = OLD.camera;
+    IF FOUND THEN
+        RETURN OLD;
+    ELSE
+        RETURN NULL;
+    END IF;
+END;
+$camera_hashtag_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER camera_hashtag_delete_trig
+    INSTEAD OF DELETE ON iris.camera_hashtag
+    FOR EACH ROW EXECUTE FUNCTION iris.camera_hashtag_delete();
+
 CREATE TABLE iris._cam_sequence (
     seq_num INTEGER PRIMARY KEY
 );

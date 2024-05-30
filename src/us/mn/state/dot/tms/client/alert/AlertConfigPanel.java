@@ -600,7 +600,7 @@ public class AlertConfigPanel extends IPanel {
 		add(bfr_spn);
 		add("alert.after_period_hours");
 		add(aft_spn, Stretch.LAST);
-		add("alert.hashtag");
+		add("hashtag");
 		add(hashtag_txt, Stretch.LAST);
 		add(msg_panel, Stretch.FULL);
 		createJobs();

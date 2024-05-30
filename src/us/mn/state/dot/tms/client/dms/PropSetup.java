@@ -115,7 +115,7 @@ public class PropSetup extends IPanel {
 		graphic_cbx.setModel(graphic_mdl);
 		graphic_cbx.setAction(graphic_act);
 		graphic_cbx.setRenderer(new GraphicListCellRenderer());
-		add("dms.hashtags");
+		add("hashtags");
 		add(hashtag_txt, Stretch.LAST);
 		add("dms.beacon.rem");
 		add(beacon_cbx, Stretch.LAST);
