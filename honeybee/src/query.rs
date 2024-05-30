@@ -61,24 +61,34 @@ pub const CABINET_STYLE_ONE: &str = "\
 
 /// SQL query for all cameras (primary)
 pub const CAMERA_ALL: &str = "\
-  SELECT c.name, location, controller, notes, cam_num, publish \
+  SELECT c.name, location, controller, notes, hashtags, cam_num, publish \
   FROM iris.camera c \
   LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
+  LEFT JOIN (\
+    SELECT camera, string_agg(hashtag, ' ' ORDER BY hashtag) AS hashtags \
+    FROM iris.camera_hashtag \
+    GROUP BY camera\
+  ) h ON c.name = h.camera \
   ORDER BY cam_num, c.name";
 
 /// SQL query for one camera (secondary)
 pub const CAMERA_ONE: &str = "\
   SELECT c.name, location, geo_loc, controller, pin, notes, cam_num, publish, \
-         streamable, cam_template, encoder_type, enc_address, enc_port, \
+         hashtags, cam_template, encoder_type, enc_address, enc_port, \
          enc_mcast, enc_channel, video_loss \
   FROM iris.camera c \
   LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
+  LEFT JOIN (\
+    SELECT camera, string_agg(hashtag, ' ' ORDER BY hashtag) AS hashtags \
+    FROM iris.camera_hashtag \
+    GROUP BY camera\
+  ) h ON c.name = h.camera \
   WHERE c.name = $1";
 
 /// SQL query for all cameras (public)
 pub const CAMERA_PUB: &str = "\
-  SELECT name, publish, streamable, roadway, road_dir, cross_street, \
-         location, lat, lon, ARRAY(\
+  SELECT name, publish, streamable, hashtags, roadway, road_dir, \
+         cross_street, location, lat, lon, ARRAY(\
            SELECT view_num \
            FROM iris.encoder_stream \
            WHERE encoder_type = c.encoder_type \
@@ -86,6 +96,11 @@ pub const CAMERA_PUB: &str = "\
            ORDER BY view_num\
          ) AS views \
   FROM camera_view c \
+  LEFT JOIN (\
+    SELECT camera, string_agg(hashtag, ' ' ORDER BY hashtag) AS hashtags \
+    FROM iris.camera_hashtag \
+    GROUP BY camera\
+  ) h ON c.name = h.camera \
   ORDER BY name";
 
 /// SQL query for all comm configs (primary)

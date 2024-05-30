@@ -1635,6 +1635,7 @@ CREATE TABLE iris.camera_template (
 	label text
 );
 
+-- FIXME: remove streamable
 CREATE TABLE iris._camera (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),

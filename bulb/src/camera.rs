@@ -24,6 +24,7 @@ pub struct Camera {
     pub cam_num: Option<u32>,
     pub location: Option<String>,
     pub controller: Option<String>,
+    pub hashtags: Option<String>,
     // secondary attributes
     pub geo_loc: Option<String>,
     pub pin: Option<u32>,
@@ -32,6 +33,16 @@ pub struct Camera {
 type CameraAnc = DeviceAnc<Camera>;
 
 impl Camera {
+    /// Check if camera has a given hashtag
+    fn has_hashtag(&self, hashtag: &str) -> bool {
+        match &self.hashtags {
+            Some(hashtags) => {
+                hashtags.split(' ').any(|h| hashtag.eq_ignore_ascii_case(h))
+            }
+            None => false,
+        }
+    }
+
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &CameraAnc) -> String {
         let name = HtmlStr::new(self.name());
@@ -125,6 +136,7 @@ impl Card for Camera {
     fn is_match(&self, search: &str, anc: &CameraAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
+            || self.has_hashtag(search)
             || anc.item_state(self).is_match(search)
     }
 
