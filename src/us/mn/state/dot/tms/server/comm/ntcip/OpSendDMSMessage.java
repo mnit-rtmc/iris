@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
@@ -631,14 +632,39 @@ public class OpSendDMSMessage extends OpDMS {
 			//       stupid sign bug.  It may no longer be needed.
 			ASN1Integer time = dmsMessageTimeRemaining.makeInt();
 			time.setInteger(getDuration());
-			if (SignMessageHelper.isScheduledSticky(message))
-				setCommAndPowerSticky();
-			else
-				setCommAndPowerBlank();
+			DmsMessageMemoryType memory = SignMessageHelper
+				.isScheduledSticky(message)
+			       ? DmsMessageMemoryType.currentBuffer
+			       : DmsMessageMemoryType.blank;
+			setCommAndPower(memory);
 			mess.add(time);
 			mess.add(comm_msg);
 			mess.add(long_msg);
 			logStore(time);
+			logStore(comm_msg);
+			logStore(long_msg);
+			try {
+				mess.storeProps();
+			}
+			catch (ControllerException e) {
+				System.err.println("SetLossMsgs: " +
+					e.getMessage() + ", " + dms.getName());
+				if (DmsMessageMemoryType.currentBuffer == memory)
+					return new SetLossMsgsV1();
+			}
+			return null;
+		}
+	}
+
+	/** Phase to set the comm and power loss messages (V1) */
+	protected class SetLossMsgsV1 extends Phase {
+
+		/** Set the comm and power loss messages */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			setCommAndPower(DmsMessageMemoryType.changeable);
+			mess.add(comm_msg);
+			mess.add(long_msg);
 			logStore(comm_msg);
 			logStore(long_msg);
 			mess.storeProps();
@@ -646,24 +672,15 @@ public class OpSendDMSMessage extends OpDMS {
 		}
 	}
 
-	/** Set "sticky" comm loss and power recovery msgs */
-	private void setCommAndPowerSticky() {
-		comm_msg.setMemoryType(DmsMessageMemoryType.changeable);
-		comm_msg.setNumber(msg_num);
-		comm_msg.setCrc(message_crc);
-		long_msg.setMemoryType(DmsMessageMemoryType.changeable);
-		long_msg.setNumber(msg_num);
-		long_msg.setCrc(message_crc);
-	}
-
-	/** Set the comm loss and power recovery msgs to blank */
-	private void setCommAndPowerBlank() {
-		comm_msg.setMemoryType(DmsMessageMemoryType.blank);
-		comm_msg.setNumber(1);
-		comm_msg.setCrc(0);
-		long_msg.setMemoryType(DmsMessageMemoryType.blank);
-		long_msg.setNumber(1);
-		long_msg.setCrc(0);
+	/** Set the comm loss and power recovery msgs */
+	private void setCommAndPower(DmsMessageMemoryType memory) {
+		boolean changeable = (DmsMessageMemoryType.changeable == memory);
+		comm_msg.setMemoryType(memory);
+		comm_msg.setNumber(changeable ? msg_num : 1);
+		comm_msg.setCrc(changeable ? message_crc : 0);
+		long_msg.setMemoryType(memory);
+		long_msg.setNumber(changeable ? msg_num : 1);
+		long_msg.setCrc(changeable ? message_crc: 0);
 	}
 
 	/** Cleanup the operation */
