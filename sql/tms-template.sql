@@ -227,21 +227,21 @@ work_request_url
 
 -- Helper function to check and update database version from migrate scripts
 CREATE FUNCTION iris.update_version(TEXT, TEXT) RETURNS TEXT AS
-	$update_version$
+    $update_version$
 DECLARE
-	ver_prev ALIAS FOR $1;
-	ver_new ALIAS FOR $2;
-	ver_db TEXT;
+    ver_prev ALIAS FOR $1;
+    ver_new ALIAS FOR $2;
+    ver_db TEXT;
 BEGIN
-	SELECT value INTO ver_db FROM iris.system_attribute
-		WHERE name = 'database_version';
-	IF ver_db != ver_prev THEN
-		RAISE EXCEPTION 'Cannot migrate database -- wrong version: %',
-			ver_db;
-	END IF;
-	UPDATE iris.system_attribute SET value = ver_new
-		WHERE name = 'database_version';
-	RETURN ver_new;
+    SELECT value INTO ver_db FROM iris.system_attribute
+        WHERE name = 'database_version';
+    IF ver_db != ver_prev THEN
+        RAISE EXCEPTION 'Cannot migrate database -- wrong version: %',
+            ver_db;
+    END IF;
+    UPDATE iris.system_attribute SET value = ver_new
+        WHERE name = 'database_version';
+    RETURN ver_new;
 END;
 $update_version$ language plpgsql;
 
@@ -249,8 +249,8 @@ $update_version$ language plpgsql;
 -- Roles, Domains, Users, Capabilities and Privileges
 --
 CREATE TABLE iris.role (
-	name VARCHAR(15) PRIMARY KEY,
-	enabled BOOLEAN NOT NULL
+    name VARCHAR(15) PRIMARY KEY,
+    enabled BOOLEAN NOT NULL
 );
 
 COPY iris.role (name, enabled) FROM stdin;
@@ -308,8 +308,8 @@ admin	any_ipv6
 
 -- FIXME: remove after permissions are used everywhere
 CREATE TABLE iris.capability (
-	name VARCHAR(16) PRIMARY KEY,
-	enabled BOOLEAN NOT NULL
+    name VARCHAR(16) PRIMARY KEY,
+    enabled BOOLEAN NOT NULL
 );
 
 COPY iris.capability (name, enabled) FROM stdin;
@@ -722,8 +722,8 @@ PRV_003D	camera_tab	play_list	user_id	t
 
 -- FIXME: remove after permissions are used everywhere
 CREATE TABLE iris.role_capability (
-	role VARCHAR(15) NOT NULL REFERENCES iris.role,
-	capability VARCHAR(16) NOT NULL REFERENCES iris.capability
+    role VARCHAR(15) NOT NULL REFERENCES iris.role,
+    capability VARCHAR(16) NOT NULL REFERENCES iris.capability
 );
 ALTER TABLE iris.role_capability ADD PRIMARY KEY (role, capability);
 
@@ -794,29 +794,29 @@ operator	toll_tab
 
 -- FIXME: remove after permissions are used everywhere
 CREATE VIEW role_privilege_view AS
-	SELECT role, role_capability.capability, type_n, obj_n, group_n, attr_n,
-	       write
-	FROM iris.role
-	JOIN iris.role_capability ON role.name = role_capability.role
-	JOIN iris.capability ON role_capability.capability = capability.name
-	JOIN iris.privilege ON privilege.capability = capability.name
-	WHERE role.enabled = 't' AND capability.enabled = 't';
+    SELECT role, role_capability.capability, type_n, obj_n, group_n, attr_n,
+           write
+    FROM iris.role
+    JOIN iris.role_capability ON role.name = role_capability.role
+    JOIN iris.capability ON role_capability.capability = capability.name
+    JOIN iris.privilege ON privilege.capability = capability.name
+    WHERE role.enabled = 't' AND capability.enabled = 't';
 GRANT SELECT ON role_privilege_view TO PUBLIC;
 
 CREATE TABLE event.client_event (
-	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	event_desc_id integer NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	host_port VARCHAR(64) NOT NULL,
-	iris_user VARCHAR(15)
+    event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_desc_id integer NOT NULL
+        REFERENCES event.event_description(event_desc_id),
+    host_port VARCHAR(64) NOT NULL,
+    iris_user VARCHAR(15)
 );
 
 CREATE VIEW client_event_view AS
-	SELECT e.event_id, e.event_date, ed.description, e.host_port,
-	       e.iris_user
-	FROM event.client_event e
-	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+    SELECT e.event_id, e.event_date, ed.description, e.host_port,
+           e.iris_user
+    FROM event.client_event e
+    JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
 GRANT SELECT ON client_event_view TO PUBLIC;
 
 --
