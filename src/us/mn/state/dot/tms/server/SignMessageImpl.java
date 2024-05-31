@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.SignConfig;
@@ -80,13 +81,29 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 			sm.notifyCreate();
 			return sm;
 		}
+		catch (NamespaceError e) {
+			System.err.println("SignMessageImpl: (" + ms + ")");
+			System.err.println("findOrCreate NamespaceError: " +
+				e.getMessage());
+			// Probably a "Name already exists" error
+			// How does this happen?  We just checked and didn't
+			// find the message.  Let's try one more time!
+			esm = SignMessageHelper.find(sc, inc, ms, owner, fb,
+				mp, dur);
+			if (esm != null)
+				System.err.println("found: " + esm.getName());
+			else
+				System.err.println("still not found -- WTF!");
+			return esm;
+		}
 		catch (SonarException e) {
+			System.err.println("SignMessageImpl: (" + ms + ")");
+			System.err.println("findOrCreate SonarException: " +
+				e.getMessage());
 			// This can pretty much only happen when the SONAR task
 			// processor does not store the sign message within 30
 			// seconds.  It *shouldn't* happen, but there may be
 			// a rare bug which triggers it.
-			System.err.println("SignMessageImpl: " + ms);
-			System.err.println("findOrCreate: " + e.getMessage());
 			return null;
 		}
 	}
