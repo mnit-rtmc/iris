@@ -2801,22 +2801,22 @@ ALTER FUNCTION iris.multi_tags_str(INTEGER)
     SET search_path = pg_catalog, pg_temp;
 
 CREATE TABLE iris.sign_detail (
-	name VARCHAR(12) PRIMARY KEY,
-	dms_type INTEGER NOT NULL REFERENCES iris.dms_type,
-	portable BOOLEAN NOT NULL,
-	technology VARCHAR(12) NOT NULL,
-	sign_access VARCHAR(12) NOT NULL,
-	legend VARCHAR(12) NOT NULL,
-	beacon_type VARCHAR(32) NOT NULL,
-	hardware_make VARCHAR(32) NOT NULL,
-	hardware_model VARCHAR(32) NOT NULL,
-	software_make VARCHAR(32) NOT NULL,
-	software_model VARCHAR(32) NOT NULL,
-	supported_tags INTEGER NOT NULL,
-	max_pages INTEGER NOT NULL,
-	max_multi_len INTEGER NOT NULL,
-	beacon_activation_flag BOOLEAN NOT NULL,
-	pixel_service_flag BOOLEAN NOT NULL
+    name VARCHAR(12) PRIMARY KEY,
+    dms_type INTEGER NOT NULL REFERENCES iris.dms_type,
+    portable BOOLEAN NOT NULL,
+    technology VARCHAR(12) NOT NULL,
+    sign_access VARCHAR(12) NOT NULL,
+    legend VARCHAR(12) NOT NULL,
+    beacon_type VARCHAR(32) NOT NULL,
+    hardware_make VARCHAR(32) NOT NULL,
+    hardware_model VARCHAR(32) NOT NULL,
+    software_make VARCHAR(32) NOT NULL,
+    software_model VARCHAR(32) NOT NULL,
+    supported_tags INTEGER NOT NULL,
+    max_pages INTEGER NOT NULL,
+    max_multi_len INTEGER NOT NULL,
+    beacon_activation_flag BOOLEAN NOT NULL,
+    pixel_service_flag BOOLEAN NOT NULL
 );
 
 CREATE TRIGGER sign_detail_notify_trig
@@ -2898,8 +2898,8 @@ CREATE TRIGGER word_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW word_view AS
-	SELECT name, abbr, allowed
-	FROM iris.word;
+    SELECT name, abbr, allowed
+    FROM iris.word;
 GRANT SELECT ON word_view TO PUBLIC;
 
 COPY iris.word (name, abbr, allowed) FROM stdin;
