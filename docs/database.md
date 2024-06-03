@@ -18,6 +18,7 @@ Associated tables:
 - `controller_io` __(C)__
 - `device_preset` __(P)__
 - `hashtag` __(H)__
+- `user_id_domain` __(D)__
 
 The notification payload will either be the object/record name of the changed
 row, or an empty string (blank).  A blank payload requires a full resource
@@ -27,45 +28,46 @@ update, and is caused by one of these conditions:
 - `UPDATE` changed any *primary* attribute
 - `UPDATE` of an associated table changed any *primary* attribute
 
-*Notify Channel*   | (G) | (C) | (P) | (H)
--------------------|-----|-----|-----|----
-`alarm`            |     | ✔️   |     |
-`beacon`           | ✔️   | ✔️   | ✔️   |
-`cabinet_style`    |     |     |     |
-`camera`           | ✔️   | ✔️   |     |
-`camera_publish` † |     |     |     |
-`comm_config`      |     |     |     |
-`comm_link`        |     |     |     |
-`controller`       | ✔️   |     |     |
-`detector`         |     | ✔️   |     |
-`dms`              | ✔️   | ✔️   | ✔️   | ✔️ 
-`flow_stream`      |     | ✔️   |     |
-`gate_arm`         |     | ✔️   |     |
-`gate_arm_array`   | ✔️   | ✔️   |     |
-`gps`              | ✔️   | ✔️   |     |
-`graphic`          |     |     |     |
-`incident`         |     |     |     |
-`lane_marking`     | ✔️   | ✔️   |     |
-`lcs_array`        |     | ✔️   |     |
-`lcs_indication`   |     | ✔️   |     |
-`modem`            |     |     |     |
-`msg_pattern`      |     |     |     |
-`msg_line`         |     |     |     |
-`parking_area`     | ✔️   |     |     |
-`permission`       |     |     |     |
-`ramp_meter`       | ✔️   | ✔️   | ✔️   |
-`r_node`           | ✔️   |     |     |
-`road`             |     |     |     |
-`role`             |     |     |     |
-`sign_config`      |     |     |     |
-`sign_detail`      |     |     |     |
-`sign_message`     |     |     |     |
-`system_attribute` |     |     |     |
-`tag_reader`       | ✔️   | ✔️   |     |
-`user_id`          |     |     |     |
-`video_monitor`    |     | ✔️   |     |
-`weather_sensor`   | ✔️   | ✔️   |     |
-`word`             |     |     |     |
+*Notify Channel*   | (G) | (C) | (P) | (H) | (D)
+-------------------|-----|-----|-----|-----|-----
+`alarm`            |     | ✔️   |     |     |
+`beacon`           | ✔️   | ✔️   | ✔️   |     |
+`cabinet_style`    |     |     |     |     |
+`camera`           | ✔️   | ✔️   |     | ✔️   |
+`camera_publish` † |     |     |     |     |
+`comm_config`      |     |     |     |     |
+`comm_link`        |     |     |     |     |
+`controller`       | ✔️   |     |     |     |
+`detector`         |     | ✔️   |     |     |
+`dms`              | ✔️   | ✔️   | ✔️   | ✔️   |
+`domain`           |     |     |     |     |
+`flow_stream`      |     | ✔️   |     |     |
+`gate_arm`         |     | ✔️   |     |     |
+`gate_arm_array`   | ✔️   | ✔️   |     |     |
+`gps`              | ✔️   | ✔️   |     |     |
+`graphic`          |     |     |     |     |
+`incident`         |     |     |     |     |
+`lane_marking`     | ✔️   | ✔️   |     |     |
+`lcs_array`        |     | ✔️   |     |     |
+`lcs_indication`   |     | ✔️   |     |     |
+`modem`            |     |     |     |     |
+`msg_pattern`      |     |     |     |     |
+`msg_line`         |     |     |     |     |
+`parking_area`     | ✔️   |     |     |     |
+`permission`       |     |     |     |     |
+`ramp_meter`       | ✔️   | ✔️   | ✔️   |     |
+`r_node`           | ✔️   |     |     |     |
+`road`             |     |     |     |     |
+`role`             |     |     |     |     |
+`sign_config`      |     |     |     |     |
+`sign_detail`      |     |     |     |     |
+`sign_message`     |     |     |     |     |
+`system_attribute` |     |     |     |     |
+`tag_reader`       | ✔️   | ✔️   |     |     |
+`user_id`          |     |     |     |     | ✔️ 
+`video_monitor`    |     | ✔️   |     |     |
+`weather_sensor`   | ✔️   | ✔️   |     |     |
+`word`             |     |     |     |     |
 
 † _Notifies only on `UPDATE` to 'publish' attribute, with camera name payload_
 

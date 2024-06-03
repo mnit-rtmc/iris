@@ -268,6 +268,10 @@ CREATE TABLE iris.domain (
     enabled BOOLEAN NOT NULL
 );
 
+CREATE TRIGGER domain_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.domain
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
 COPY iris.domain (name, cidr, enabled) FROM stdin;
 any_ipv4	0.0.0.0/0	t
 any_ipv6	::0/0	t
@@ -300,6 +304,22 @@ CREATE TABLE iris.user_id_domain (
     domain VARCHAR(15) NOT NULL REFERENCES iris.domain
 );
 ALTER TABLE iris.user_id_domain ADD PRIMARY KEY (user_id, domain);
+
+CREATE FUNCTION iris.user_domain_notify() RETURNS TRIGGER AS
+    $user_domain_notify$
+BEGIN
+    IF (TG_OP = 'DELETE') THEN
+        PERFORM pg_notify('user_id', OLD.user_id);
+    ELSE
+        PERFORM pg_notify('user_id', NEW.user_id);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$user_domain_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER user_domain_notify_trig
+    AFTER INSERT OR DELETE ON iris.user_id_domain
+    FOR EACH ROW EXECUTE FUNCTION iris.user_domain_notify();
 
 COPY iris.user_id_domain (user_id, domain) FROM stdin;
 admin	any_ipv4

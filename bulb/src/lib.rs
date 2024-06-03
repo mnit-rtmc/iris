@@ -22,6 +22,7 @@ mod controller;
 mod detector;
 mod device;
 mod dms;
+mod domain;
 mod error;
 mod fetch;
 mod flowstream;

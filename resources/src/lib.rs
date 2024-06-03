@@ -31,6 +31,7 @@ pub enum Res {
     Detector,
     Direction,
     Dms,
+    Domain,
     FlowStream,
     Font,
     GateArm,
@@ -102,6 +103,7 @@ impl Res {
             Detector,
             Direction,
             Dms,
+            Domain,
             FlowStream,
             Font,
             GateArm,
@@ -161,6 +163,7 @@ impl Res {
             Detector => "detector",
             Direction => "direction",
             Dms => "dms",
+            Domain => "domain",
             FlowStream => "flow_stream",
             Font => "font",
             GateArm => "gate_arm",
@@ -213,6 +216,7 @@ impl Res {
             Controller => "🎛️ ",
             Detector => "🚗⬚",
             Dms => "⬛",
+            Domain => "🖧 ",
             FlowStream => "🎞️ ",
             GateArm => "⫬",
             GateArmArray => "⫭⫬",
@@ -251,7 +255,7 @@ impl Res {
         #[allow(clippy::match_like_matches_macro)]
         match self {
             Alarm | Beacon | CabinetStyle | Camera | CommConfig | CommLink
-            | Controller | Detector | Dms | FlowStream | GateArm
+            | Controller | Detector | Dms | Domain | FlowStream | GateArm
             | GateArmArray | Gps | Incident | LaneMarking | LcsArray
             | LcsIndication | Modem | MsgLine | MsgPattern | ParkingArea
             | Permission | RampMeter | Rnode | Road | Role | SignConfig
@@ -279,7 +283,7 @@ impl Res {
             // LCS resources
             LcsArray | LcsIndication | LaneMarking => Lcs,
             // Permission resources
-            User | Role => Permission,
+            Domain | User | Role => Permission,
             // System attribute resources
             CabinetStyle | CommConfig => SystemAttribute,
             // Others

@@ -789,6 +789,7 @@ const fn one_sql(res: Res) -> &'static str {
         ControllerIo => query::CONTROLLER_IO_ONE,
         Detector => query::DETECTOR_ONE,
         Dms => query::DMS_ONE,
+        Domain => query::DOMAIN_ONE,
         FlowStream => query::FLOW_STREAM_ONE,
         Font => query::FONT_ONE,
         GateArm => query::GATE_ARM_ONE,

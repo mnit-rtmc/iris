@@ -15,11 +15,11 @@ is checked against the stored password hash for the account.
 * `iris/api/user_id`
 * `iris/api/user_id/{name}`
 
-| Access       | Primary          | Secondary |
-|--------------|------------------|-----------|
-| 👁️  View      | name             |           |
-| 💡 Manage    | enabled          |           |
-| 🔧 Configure | full\_name, role | dn        |
+| Access       | Primary          | Secondary   |
+|--------------|------------------|-------------|
+| 👁️  View      | name             |             |
+| 💡 Manage    | enabled          |             |
+| 🔧 Configure | full\_name, role | dn, domains |
 
 </details>
 
@@ -28,6 +28,20 @@ is checked against the stored password hash for the account.
 A network _domain_ uses [CIDR] to restrict the IP addresses from which a _user_
 can connect to IRIS.  To log in, a _user_ must be assigned to a matching
 _enabled_ domain.
+
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/domain`
+* `iris/api/domain/{name}`
+
+| Access       | Primary | Secondary |
+|--------------|---------|-----------|
+| 👁️  View      | name    |           |
+| 💡 Manage    | enabled |           |
+| 🔧 Configure |         | cidr      |
+
+</details>
 
 ## Roles
 

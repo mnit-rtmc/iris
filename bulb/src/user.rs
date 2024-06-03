@@ -31,6 +31,7 @@ pub struct User {
     pub enabled: bool,
     // secondary attributes
     pub dn: Option<String>,
+    pub domains: Option<Vec<String>>,
 }
 
 /// Ancillary user data

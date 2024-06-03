@@ -19,6 +19,7 @@ use crate::commlink::CommLink;
 use crate::controller::Controller;
 use crate::detector::Detector;
 use crate::dms::Dms;
+use crate::domain::Domain;
 use crate::error::{Error, Result};
 use crate::fetch::{Action, Uri};
 use crate::flowstream::FlowStream;
@@ -310,6 +311,7 @@ pub fn item_states(res: Option<Res>) -> &'static str {
         Some(Res::CabinetStyle) => "",
         Some(Res::CommConfig) => "",
         Some(Res::Dms) => Dms::ITEM_STATES,
+        Some(Res::Domain) => Domain::ITEM_STATES,
         Some(Res::GateArm | Res::GateArmArray) => GateArm::ITEM_STATES,
         Some(Res::Permission) => Permission::ITEM_STATES,
         Some(Res::Role) => Role::ITEM_STATES,
@@ -377,6 +379,7 @@ pub async fn fetch_resource(config: bool) -> Result<String> {
     }
     add_option::<Dms>(&access, &mut html);
     if config {
+        add_option::<Domain>(&access, &mut html);
         add_option::<FlowStream>(&access, &mut html);
         add_option::<GateArm>(&access, &mut html);
     }
@@ -517,6 +520,7 @@ impl CardList {
             Res::Controller => self.make_html_x::<Controller>().await,
             Res::Detector => self.make_html_x::<Detector>().await,
             Res::Dms => self.make_html_x::<Dms>().await,
+            Res::Domain => self.make_html_x::<Domain>().await,
             Res::FlowStream => self.make_html_x::<FlowStream>().await,
             Res::GateArm => self.make_html_x::<GateArm>().await,
             Res::GateArmArray => self.make_html_x::<GateArmArray>().await,
@@ -590,6 +594,7 @@ impl CardList {
             Res::Controller => self.view_change_x::<Controller>().await,
             Res::Detector => self.view_change_x::<Detector>().await,
             Res::Dms => self.view_change_x::<Dms>().await,
+            Res::Domain => self.view_change_x::<Domain>().await,
             Res::FlowStream => self.view_change_x::<FlowStream>().await,
             Res::GateArm => self.view_change_x::<GateArm>().await,
             Res::GateArmArray => self.view_change_x::<GateArmArray>().await,
@@ -660,6 +665,7 @@ impl CardList {
             Res::Controller => self.changed::<Controller>(json).await,
             Res::Detector => self.changed::<Detector>(json).await,
             Res::Dms => self.changed::<Dms>(json).await,
+            Res::Domain => self.changed::<Domain>(json).await,
             Res::FlowStream => self.changed::<FlowStream>(json).await,
             Res::GateArm => self.changed::<GateArm>(json).await,
             Res::GateArmArray => self.changed::<GateArmArray>(json).await,
@@ -833,6 +839,7 @@ async fn fetch_one_res(cv: &CardView) -> Result<String> {
         Res::Controller => fetch_one_x::<Controller>(cv).await,
         Res::Detector => fetch_one_x::<Detector>(cv).await,
         Res::Dms => fetch_one_x::<Dms>(cv).await,
+        Res::Domain => fetch_one_x::<Domain>(cv).await,
         Res::FlowStream => fetch_one_x::<FlowStream>(cv).await,
         Res::GateArm => fetch_one_x::<GateArm>(cv).await,
         Res::GateArmArray => fetch_one_x::<GateArmArray>(cv).await,
@@ -908,6 +915,7 @@ pub async fn patch_changed(cv: &CardView) -> Result<()> {
         Res::Controller => patch_changed_x::<Controller>(cv).await,
         Res::Detector => patch_changed_x::<Detector>(cv).await,
         Res::Dms => patch_changed_x::<Dms>(cv).await,
+        Res::Domain => patch_changed_x::<Domain>(cv).await,
         Res::FlowStream => patch_changed_x::<FlowStream>(cv).await,
         Res::GateArm => patch_changed_x::<GateArm>(cv).await,
         Res::GateArmArray => patch_changed_x::<GateArmArray>(cv).await,
@@ -991,6 +999,7 @@ const fn display_res(res: Res) -> &'static str {
         Res::Controller => Controller::DNAME,
         Res::Detector => Detector::DNAME,
         Res::Dms => Dms::DNAME,
+        Res::Domain => Domain::DNAME,
         Res::FlowStream => FlowStream::DNAME,
         Res::GateArm => GateArm::DNAME,
         Res::GateArmArray => GateArmArray::DNAME,

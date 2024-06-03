@@ -85,4 +85,26 @@ INSERT INTO iris.camera_hashtag (camera, hashtag)
 INSERT INTO iris.camera_hashtag (camera, hashtag)
     SELECT name, '#Recorded' FROM iris.camera WHERE streamable = 't';
 
+-- Add domain notify trigger
+CREATE TRIGGER domain_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.domain
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+-- Add user domain notify trigger
+CREATE FUNCTION iris.user_domain_notify() RETURNS TRIGGER AS
+    $user_domain_notify$
+BEGIN
+    IF (TG_OP = 'DELETE') THEN
+        PERFORM pg_notify('user_id', OLD.user_id);
+    ELSE
+        PERFORM pg_notify('user_id', NEW.user_id);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$user_domain_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER user_domain_notify_trig
+    AFTER INSERT OR DELETE ON iris.user_id_domain
+    FOR EACH ROW EXECUTE FUNCTION iris.user_domain_notify();
+
 COMMIT;

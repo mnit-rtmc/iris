@@ -239,6 +239,18 @@ pub const DMS_STATUS: &str = "\
   FROM dms_message_view WHERE condition = 'Active' \
   ORDER BY name";
 
+/// SQL query for all domains (primary)
+pub const DOMAIN_ALL: &str = "\
+  SELECT name, enabled \
+  FROM iris.domain \
+  ORDER BY name";
+
+/// SQL query for one domain (secondary)
+pub const DOMAIN_ONE: &str = "\
+  SELECT name, enabled, cidr \
+  FROM iris.domain \
+  WHERE name = $1";
+
 /// SQL query for all flow streams (primary)
 pub const FLOW_STREAM_ALL: &str = "\
   SELECT name, controller \
@@ -647,8 +659,13 @@ pub const USER_ALL: &str = "\
 
 /// SQL query for one user (secondary)
 pub const USER_ONE: &str = "\
-  SELECT name, full_name, dn, role, enabled \
-  FROM iris.user_id \
+  SELECT name, full_name, dn, role, enabled, ARRAY(\
+           SELECT domain \
+           FROM iris.user_id_domain \
+           WHERE user_id = u.name \
+           ORDER BY domain\
+         ) AS domains \
+  FROM iris.user_id u \
   WHERE name = $1";
 
 /// SQL query for all video monitors (primary)
