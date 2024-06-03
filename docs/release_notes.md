@@ -1,5 +1,14 @@
 # IRIS 5.x Release Notes
 
+5.55.0 (3 Jun 2024)
+ - Add hashtag support for camera devices
+ - Add "domain" resource to REST API
+ - Minor improvements to Web UI
+ - Fixed some SQL bugs from previous migrate script
+ - Fixed NTCIP "zombie" message problem
+ - Fixed problem with LDAPS for SONAR authentication
+ - Fixed "ignore_auto_fail" speed calculation
+
 5.54.0 (21 May 2024)
  - Various enhancements to honeybee / bulb for Web UI
  - Add "ignore_auto_fail" to action plans
