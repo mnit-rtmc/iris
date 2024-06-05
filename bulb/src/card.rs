@@ -975,6 +975,7 @@ pub async fn handle_input(cv: &CardView, id: String) -> Result<()> {
     };
     match cv.res {
         Res::Dms => handle_input_x::<Dms>(&cv.name, id).await,
+        Res::Domain => handle_input_x::<Domain>(&cv.name, id).await,
         _ => Ok(()),
     }
 }

@@ -40,6 +40,10 @@ imput {
   padding: 0.2rem;
 }
 
+.invalid {
+  border-color: red;
+}
+
 button {
   appearance: none;
   display: inline-block;
@@ -55,6 +59,9 @@ button:hover {
 }
 button:active {
   background-color: #bbb;
+}
+button:disabled {
+  background-color: #888;
 }
 button.go_link {
   font-size: smaller;

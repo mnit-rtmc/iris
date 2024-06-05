@@ -624,6 +624,7 @@ version = "5.55.0"
 dependencies = [
  "base64 0.21.7",
  "chrono",
+ "cidr",
  "console_error_panic_hook",
  "fnv",
  "humantime",
@@ -692,6 +693,12 @@ dependencies = [
  "wasm-bindgen",
  "windows-targets 0.52.5",
 ]
+
+[[package]]
+name = "cidr"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8d18b093eba54c9aaa1e3784d4361eb2ba944cf7d0a932a830132238f483e8d8"
 
 [[package]]
 name = "cipher"

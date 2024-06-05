@@ -12,10 +12,13 @@
 //
 use crate::card::{AncillaryData, Card, View, NAME};
 use crate::item::ItemState;
-use crate::util::{ContainsLower, Fields, HtmlStr, Input};
+use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input};
+use cidr::IpCidr;
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
+use std::str::FromStr;
+use web_sys::{HtmlButtonElement, HtmlInputElement};
 
 /// Domain
 #[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
@@ -58,7 +61,7 @@ impl Domain {
         format!(
             "<div class='row'>\
                <label for='cidr'>CIDR</label>\
-               <input id='cidr' maxlength='64' size='32' value='{cidr}'>\
+               <input id='cidr' maxlength='64' size='28' value='{cidr}'>\
             </div>\
             <div class='row'>\
               <label for='enabled'>Enabled</label>\
@@ -115,5 +118,27 @@ impl Card for Domain {
         fields.changed_input("cidr", &self.cidr);
         fields.changed_input("enabled", self.enabled);
         fields.into_value().to_string()
+    }
+
+    /// Handle input event for an element on the card
+    fn handle_input(&self, _anc: DomainAnc, id: String) {
+        if &id == "cidr" {
+            let doc = Doc::get();
+            let cidr = doc.elem::<HtmlInputElement>("cidr");
+            let ob_save = doc.elem::<HtmlButtonElement>("ob_save");
+            match IpCidr::from_str(&cidr.value()) {
+                Ok(_) => {
+                    cidr.set_custom_validity("");
+                    cidr.set_class_name("");
+                    ob_save.set_disabled(false);
+                }
+                Err(e) => {
+                    cidr.set_custom_validity(&e.to_string());
+                    cidr.set_class_name("invalid");
+                    ob_save.set_disabled(true);
+                }
+            }
+            cidr.report_validity();
+        }
     }
 }
