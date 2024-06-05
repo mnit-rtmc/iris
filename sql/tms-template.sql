@@ -275,6 +275,7 @@ CREATE TRIGGER domain_notify_trig
 COPY iris.domain (name, cidr, enabled) FROM stdin;
 any_ipv4	0.0.0.0/0	t
 any_ipv6	::0/0	t
+local_ipv6	::1/128	t
 \.
 
 CREATE TABLE iris.user_id (
