@@ -47,7 +47,7 @@ pub enum Error {
     Join(#[from] tokio::task::JoinError),
 
     /// Loam error
-    #[error("Loam {0}")]
+    #[error("failed to read/write loam file: {0}")]
     Loam(#[from] loam::Error),
 
     /// Bb8 run error
