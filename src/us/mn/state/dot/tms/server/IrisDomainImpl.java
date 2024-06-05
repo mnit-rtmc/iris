@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2021  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -96,7 +96,7 @@ public class IrisDomainImpl extends DomainImpl implements Storable,
 		return getName().compareTo(o.getName());
 	}
 
-	/** Test if the role equals another domain */
+	/** Test if the domain equals another domain */
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof IrisDomainImpl)
