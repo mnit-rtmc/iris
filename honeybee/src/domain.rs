@@ -65,5 +65,6 @@ pub async fn check_user_addr(
             return Ok(());
         }
     }
+    log::info!("User {user} forbidden from addr {addr} (bad domain)");
     Err(Error::Forbidden)
 }

@@ -108,7 +108,7 @@ impl Error {
         {
             Self::Conflict
         } else {
-            log::warn!("SHOW {}", msg);
+            log::warn!("SHOW {msg}");
             Self::UnexpectedResponse
         }
     }
@@ -475,7 +475,7 @@ impl Messenger {
             _ => Err(Error::UnexpectedResponse),
         })
         .await?;
-        log::info!("Logged in from {}", msg);
+        log::info!("Logged in from {msg}");
         Ok(msg)
     }
 
