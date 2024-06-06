@@ -183,7 +183,7 @@ impl Honey {
             .with_name("honeybee")
             .with_expiry(Expiry::OnInactivity(time::Duration::hours(9)));
         Router::new()
-            .merge(login_post(self.clone()))
+            .merge(login_resource(self.clone()))
             .merge(access_get(self.clone()))
             .merge(notify_resource(self.clone()))
             .merge(permission_resource(self.clone()))
@@ -416,8 +416,8 @@ fn gif_dir_get() -> Router {
     Router::new().route("/gif/:fname", get(handler))
 }
 
-/// Handle `POST` to login page
-fn login_post(honey: Honey) -> Router {
+/// Router for login resource
+fn login_resource(honey: Honey) -> Router {
     /// Handle `GET` request
     async fn handle_get(session: Session) -> Resp2 {
         log::info!("GET login");
