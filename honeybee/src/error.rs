@@ -18,9 +18,13 @@ use std::time::SystemTimeError;
 /// Honeybee error
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    /// Unauthorized request
-    #[error("Unauthorized")]
-    Unauthorized,
+    /// Unauthenticated request
+    #[error("Unauthenticated")]
+    Unauthenticated,
+
+    /// Forbidden request
+    #[error("Forbidden")]
+    Forbidden,
 
     /// Invalid ETag error
     #[error("Invalid ETag")]
@@ -84,7 +88,8 @@ impl<E: std::fmt::Debug> From<bb8::RunError<E>> for Error {
 impl From<Error> for StatusCode {
     fn from(err: Error) -> Self {
         match err {
-            Error::Unauthorized => StatusCode::UNAUTHORIZED,
+            Error::Unauthenticated => StatusCode::UNAUTHORIZED,
+            Error::Forbidden => StatusCode::FORBIDDEN,
             Error::Sonar(e) => e.into(),
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }

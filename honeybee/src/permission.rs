@@ -13,7 +13,7 @@
 // GNU General Public License for more details.
 //
 use crate::database::Database;
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::query;
 use crate::sonar::{Error as SonarError, Name};
 use serde::{Deserialize, Serialize};
@@ -215,14 +215,14 @@ pub async fn get_by_name(
             let row = client
                 .query_one(QUERY_PERMISSION_TAG, &[&user, &type_n, &tag])
                 .await
-                .map_err(|_e| SonarError::Forbidden)?;
+                .map_err(|_e| Error::Forbidden)?;
             Ok(Permission::from_row(row))
         }
         None => {
             let row = client
                 .query_one(QUERY_PERMISSION, &[&user, &type_n])
                 .await
-                .map_err(|_e| SonarError::Forbidden)?;
+                .map_err(|_e| Error::Forbidden)?;
             Ok(Permission::from_row(row))
         }
     }

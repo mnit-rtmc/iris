@@ -202,7 +202,7 @@ impl Honey {
     ) -> Result<Access> {
         log::debug!("name_access {user} {name}");
         let perm = permission::get_by_name(&self.db, user, name).await?;
-        let acc = Access::new(perm.access_n).ok_or(Error::Unauthorized)?;
+        let acc = Access::new(perm.access_n).ok_or(Error::Forbidden)?;
         acc.check(access)?;
         Ok(acc)
     }

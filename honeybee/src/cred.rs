@@ -31,7 +31,7 @@ pub struct Credentials {
 impl Credentials {
     /// Load credentials from session
     pub async fn load(session: &Session) -> Result<Self> {
-        session.get(CRED_KEY).await?.ok_or(Error::Unauthorized)
+        session.get(CRED_KEY).await?.ok_or(Error::Unauthenticated)
     }
 
     /// Store credentials in session
