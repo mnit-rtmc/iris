@@ -18,6 +18,7 @@
 mod access;
 mod cred;
 mod database;
+mod domain;
 mod error;
 mod files;
 mod honey;

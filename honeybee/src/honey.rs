@@ -14,13 +14,14 @@
 //
 use crate::access::Access;
 use crate::cred::Credentials;
+use crate::domain;
 use crate::error::{Error, Result};
 use crate::permission;
 use crate::query;
 use crate::sonar::{Error as SonarError, Messenger, Name};
 use crate::Database;
 use axum::body::Body;
-use axum::extract::{Json, Path as AxumPath, State};
+use axum::extract::{ConnectInfo, Json, Path as AxumPath, State};
 use axum::http::{header, StatusCode};
 use axum::response::sse::{Event, KeepAlive};
 use axum::response::Sse;
@@ -34,6 +35,7 @@ use serde_json::map::Map;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::convert::Infallible;
+use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
 use tokio::fs::metadata;
@@ -432,15 +434,18 @@ fn login_resource(honey: Honey) -> Router {
     /// Handle `POST` request
     async fn handle_post(
         session: Session,
+        ConnectInfo(addr): ConnectInfo<SocketAddr>,
         State(honey): State<Honey>,
         Json(cred): Json<Credentials>,
     ) -> Resp1 {
-        log::info!("POST login");
+        log::info!("POST login from {addr}");
         session
             .cycle_id()
             .await
             .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
         honey.authenticate(cred.clone()).await?;
+        // TODO: use axum_client_ip to check domain for all XFF IPs
+        domain::check_user_addr(&honey.db, cred.user(), addr).await?;
         cred.store(&session)
             .await
             .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;

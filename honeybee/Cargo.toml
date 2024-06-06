@@ -10,6 +10,7 @@ argh = "0.1"
 async-trait = "0.1"
 bb8 = { workspace = true }
 bb8-postgres = { workspace = true }
+cidr = { workspace = true }
 env_logger = { workspace = true }
 futures = { version = "0.3", default_features = false }
 headers = "0.4"

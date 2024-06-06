@@ -1367,6 +1367,7 @@ dependencies = [
  "axum-extra",
  "bb8",
  "bb8-postgres",
+ "cidr",
  "env_logger",
  "futures",
  "headers",
