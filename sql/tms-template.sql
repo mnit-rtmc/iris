@@ -826,7 +826,7 @@ GRANT SELECT ON role_privilege_view TO PUBLIC;
 
 CREATE TABLE event.client_event (
     event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
     event_desc_id integer NOT NULL
         REFERENCES event.event_description(event_desc_id),
     host_port VARCHAR(64) NOT NULL,
@@ -1275,7 +1275,7 @@ GRANT SELECT ON time_action_view TO PUBLIC;
 
 CREATE TABLE event.action_plan_event (
     event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
     event_desc_id INTEGER NOT NULL
         REFERENCES event.event_description(event_desc_id),
     action_plan VARCHAR(16) NOT NULL,
@@ -1522,24 +1522,24 @@ CREATE VIEW controller_loc_view AS
 GRANT SELECT ON controller_loc_view TO PUBLIC;
 
 CREATE TABLE event.comm_event (
-	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	controller VARCHAR(20) NOT NULL REFERENCES iris.controller(name)
-		ON DELETE CASCADE,
-	device_id VARCHAR(20)
+    event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc_id INTEGER NOT NULL
+        REFERENCES event.event_description(event_desc_id),
+    controller VARCHAR(20) NOT NULL REFERENCES iris.controller(name)
+        ON DELETE CASCADE,
+    device_id VARCHAR(20)
 );
 
 -- DELETE of iris.controller *very* slow without this index
 CREATE INDEX ON event.comm_event (controller);
 
 CREATE VIEW comm_event_view AS
-	SELECT e.event_id, e.event_date, ed.description, e.controller,
-	       c.comm_link, c.drop_id
-	FROM event.comm_event e
-	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
-	LEFT JOIN iris.controller c ON e.controller = c.name;
+    SELECT e.event_id, e.event_date, ed.description, e.controller,
+           c.comm_link, c.drop_id
+    FROM event.comm_event e
+    JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
+    LEFT JOIN iris.controller c ON e.controller = c.name;
 GRANT SELECT ON comm_event_view TO PUBLIC;
 
 CREATE TABLE iris.controller_io (
@@ -1988,38 +1988,38 @@ CREATE TABLE iris.cam_vid_src_ord (
 );
 
 CREATE TABLE event.camera_switch_event (
-	event_id SERIAL PRIMARY KEY,
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	monitor_id VARCHAR(12),
-	camera_id VARCHAR(20),
-	source VARCHAR(20)
+    event_id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc_id INTEGER NOT NULL
+        REFERENCES event.event_description(event_desc_id),
+    monitor_id VARCHAR(12),
+    camera_id VARCHAR(20),
+    source VARCHAR(20)
 );
 
 CREATE VIEW camera_switch_event_view AS
-	SELECT event_id, event_date, event_description.description, monitor_id,
-	       camera_id, source
-	FROM event.camera_switch_event
-	JOIN event.event_description
-	ON camera_switch_event.event_desc_id = event_description.event_desc_id;
+    SELECT event_id, event_date, event_description.description, monitor_id,
+           camera_id, source
+    FROM event.camera_switch_event
+    JOIN event.event_description
+    ON camera_switch_event.event_desc_id = event_description.event_desc_id;
 GRANT SELECT ON camera_switch_event_view TO PUBLIC;
 
 CREATE TABLE event.camera_video_event (
-	event_id SERIAL PRIMARY KEY,
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	camera_id VARCHAR(20),
-	monitor_id VARCHAR(12)
+    event_id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc_id INTEGER NOT NULL
+        REFERENCES event.event_description(event_desc_id),
+    camera_id VARCHAR(20),
+    monitor_id VARCHAR(12)
 );
 
 CREATE VIEW camera_video_event_view AS
-	SELECT event_id, event_date, event_description.description, camera_id,
-	       monitor_id
-	FROM event.camera_video_event
-	JOIN event.event_description
-	ON camera_video_event.event_desc_id = event_description.event_desc_id;
+    SELECT event_id, event_date, event_description.description, camera_id,
+           monitor_id
+    FROM event.camera_video_event
+    JOIN event.event_description
+    ON camera_video_event.event_desc_id = event_description.event_desc_id;
 GRANT SELECT ON camera_video_event_view TO PUBLIC;
 
 CREATE TABLE iris.camera_preset (
@@ -2131,12 +2131,12 @@ CREATE VIEW alarm_view AS
 GRANT SELECT ON alarm_view TO PUBLIC;
 
 CREATE TABLE event.alarm_event (
-	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	alarm VARCHAR(20) NOT NULL REFERENCES iris._alarm(name)
-		ON DELETE CASCADE
+    event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc_id INTEGER NOT NULL
+        REFERENCES event.event_description(event_desc_id),
+    alarm VARCHAR(20) NOT NULL REFERENCES iris._alarm(name)
+        ON DELETE CASCADE
 );
 
 CREATE VIEW alarm_event_view AS
@@ -2280,7 +2280,7 @@ CREATE TABLE iris.beacon_action (
 
 CREATE TABLE event.beacon_event (
     event_id SERIAL PRIMARY KEY,
-    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
     beacon VARCHAR(20) NOT NULL REFERENCES iris._beacon ON DELETE CASCADE,
     state INTEGER NOT NULL REFERENCES iris.beacon_state
 );
@@ -2506,7 +2506,7 @@ GRANT SELECT ON detector_label_view TO PUBLIC;
 
 CREATE TABLE event.detector_event (
     event_id INTEGER DEFAULT nextval('event.event_id_seq') NOT NULL,
-    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
     event_desc_id INTEGER NOT NULL
         REFERENCES event.event_description(event_desc_id),
     device_id VARCHAR(20) REFERENCES iris._detector(name) ON DELETE CASCADE
@@ -3268,7 +3268,7 @@ GRANT SELECT ON dms_action_view TO PUBLIC;
 
 CREATE TABLE event.sign_event (
     event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
     event_desc_id INTEGER NOT NULL
         REFERENCES event.event_description(event_desc_id),
     device_id VARCHAR(20),
@@ -3308,31 +3308,31 @@ CREATE VIEW recent_sign_event_view AS
 GRANT SELECT ON recent_sign_event_view TO PUBLIC;
 
 CREATE TABLE event.travel_time_event (
-	event_id SERIAL PRIMARY KEY,
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	device_id VARCHAR(20),
-	station_id VARCHAR(10)
+    event_id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc_id INTEGER NOT NULL
+        REFERENCES event.event_description(event_desc_id),
+    device_id VARCHAR(20),
+    station_id VARCHAR(10)
 );
 
 CREATE VIEW travel_time_event_view AS
-	SELECT event_id, event_date, event_description.description, device_id,
-	       station_id
-	FROM event.travel_time_event
-	JOIN event.event_description
-	ON travel_time_event.event_desc_id = event_description.event_desc_id;
+    SELECT event_id, event_date, event_description.description, device_id,
+           station_id
+    FROM event.travel_time_event
+    JOIN event.event_description
+    ON travel_time_event.event_desc_id = event_description.event_desc_id;
 GRANT SELECT ON travel_time_event_view TO PUBLIC;
 
 CREATE TABLE event.brightness_sample (
-	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	dms VARCHAR(20) NOT NULL REFERENCES iris._dms(name)
-		ON DELETE CASCADE,
-	photocell INTEGER NOT NULL,
-	output INTEGER NOT NULL
+    event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc_id INTEGER NOT NULL
+        REFERENCES event.event_description(event_desc_id),
+    dms VARCHAR(20) NOT NULL REFERENCES iris._dms(name)
+        ON DELETE CASCADE,
+    photocell INTEGER NOT NULL,
+    output INTEGER NOT NULL
 );
 
 --
@@ -3556,7 +3556,7 @@ GRANT SELECT ON gate_arm_view TO PUBLIC;
 
 CREATE TABLE event.gate_arm_event (
     event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
     event_desc_id INTEGER NOT NULL
         REFERENCES event.event_description(event_desc_id),
     device_id VARCHAR(20),
@@ -3604,7 +3604,7 @@ CREATE TABLE event.incident (
     event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
     name VARCHAR(16) NOT NULL UNIQUE,
     replaces VARCHAR(16) REFERENCES event.incident(name),
-    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
     event_desc_id INTEGER NOT NULL
         REFERENCES event.event_description(event_desc_id),
     detail VARCHAR(8) REFERENCES event.incident_detail(name),
@@ -3671,12 +3671,12 @@ CREATE VIEW incident_view AS
 GRANT SELECT ON incident_view TO PUBLIC;
 
 CREATE TABLE event.incident_update (
-	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	incident VARCHAR(16) NOT NULL REFERENCES event.incident(name),
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	impact VARCHAR(20) NOT NULL,
-	cleared BOOLEAN NOT NULL,
-	confirmed BOOLEAN NOT NULL
+    event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+    incident VARCHAR(16) NOT NULL REFERENCES event.incident(name),
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    impact VARCHAR(20) NOT NULL,
+    cleared BOOLEAN NOT NULL,
+    confirmed BOOLEAN NOT NULL
 );
 
 CREATE FUNCTION event.incident_update_trig() RETURNS TRIGGER AS
@@ -3690,8 +3690,8 @@ END;
 $incident_update_trig$ LANGUAGE plpgsql;
 
 CREATE TRIGGER incident_update_trigger
-	AFTER INSERT OR UPDATE ON event.incident
-	FOR EACH ROW EXECUTE FUNCTION event.incident_update_trig();
+    AFTER INSERT OR UPDATE ON event.incident
+    FOR EACH ROW EXECUTE FUNCTION event.incident_update_trig();
 
 CREATE VIEW incident_update_view AS
     SELECT iu.event_id, name, iu.event_date, ed.description, road,
@@ -4903,7 +4903,7 @@ COPY event.meter_limit_control (id, description) FROM stdin;
 
 CREATE TABLE event.meter_event (
     event_id SERIAL PRIMARY KEY,
-    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
     event_desc_id INTEGER NOT NULL
         REFERENCES event.event_description(event_desc_id),
     ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter
@@ -5063,7 +5063,7 @@ COPY event.tag_type (id, description) FROM stdin;
 
 CREATE TABLE event.tag_read_event (
     event_id SERIAL PRIMARY KEY,
-    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
     event_desc_id INTEGER NOT NULL
         REFERENCES event.event_description(event_desc_id),
     tag_type INTEGER NOT NULL REFERENCES event.tag_type,
@@ -5108,25 +5108,25 @@ CREATE TRIGGER tag_read_event_view_update_trig
     FOR EACH ROW EXECUTE FUNCTION event.tag_read_event_view_update();
 
 CREATE TABLE event.price_message_event (
-	event_id SERIAL PRIMARY KEY,
-	event_date TIMESTAMP WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	device_id VARCHAR(20) NOT NULL,
-	toll_zone VARCHAR(20) NOT NULL,
-	price NUMERIC(4,2) NOT NULL,
-	detector VARCHAR(20)
+    event_id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc_id INTEGER NOT NULL
+        REFERENCES event.event_description(event_desc_id),
+    device_id VARCHAR(20) NOT NULL,
+    toll_zone VARCHAR(20) NOT NULL,
+    price NUMERIC(4,2) NOT NULL,
+    detector VARCHAR(20)
 );
 
 CREATE INDEX ON event.price_message_event(event_date);
 CREATE INDEX ON event.price_message_event(device_id);
 
 CREATE VIEW price_message_event_view AS
-	SELECT event_id, event_date, event_description.description,
-	       device_id, toll_zone, detector, price
-	FROM event.price_message_event
-	JOIN event.event_description
-	ON price_message_event.event_desc_id = event_description.event_desc_id;
+    SELECT event_id, event_date, event_description.description,
+           device_id, toll_zone, detector, price
+    FROM event.price_message_event
+    JOIN event.event_description
+    ON price_message_event.event_desc_id = event_description.event_desc_id;
 GRANT SELECT ON price_message_event_view TO PUBLIC;
 
 CREATE VIEW iris.msg_pattern_priced AS
@@ -5482,14 +5482,14 @@ GRANT SELECT ON weather_sensor_view TO PUBLIC;
 
 CREATE TABLE event.weather_sensor_settings (
     event_id SERIAL PRIMARY KEY,
-    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
     weather_sensor VARCHAR(20) NOT NULL,
     settings JSONB
 );
 
 CREATE TABLE event.weather_sensor_sample (
     event_id SERIAL PRIMARY KEY,
-    event_date TIMESTAMP WITH time zone NOT NULL,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
     weather_sensor VARCHAR(20) NOT NULL,
     sample JSONB
 );
