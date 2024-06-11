@@ -16,9 +16,11 @@ use crate::access::Access;
 use crate::cred::Credentials;
 use crate::domain;
 use crate::error::{Error, Result};
+use crate::event::{self, EventTp};
 use crate::permission;
 use crate::query;
 use crate::sonar::{Error as SonarError, Messenger, Name};
+use crate::xff::XForwardedFor;
 use crate::Database;
 use axum::body::Body;
 use axum::extract::{ConnectInfo, Json, Path as AxumPath, State};
@@ -435,6 +437,7 @@ fn login_resource(honey: Honey) -> Router {
     async fn handle_post(
         session: Session,
         ConnectInfo(addr): ConnectInfo<SocketAddr>,
+        XForwardedFor(xff): XForwardedFor,
         State(honey): State<Honey>,
         Json(cred): Json<Credentials>,
     ) -> Resp1 {
@@ -444,8 +447,36 @@ fn login_resource(honey: Honey) -> Router {
             .await
             .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
         honey.authenticate(cred.clone()).await?;
-        // TODO: use axum_client_ip to check domain for all XFF IPs
-        domain::check_user_addr(&honey.db, cred.user(), addr).await?;
+        let user = cred.user();
+        let domains = domain::query_by_user(&honey.db, user).await?;
+        match domain::any_contains(&domains, addr.ip()) {
+            Ok(true) => (),
+            _ => {
+                event::insert_client(
+                    &honey.db,
+                    EventTp::FailDomain,
+                    &addr.to_string(),
+                    user,
+                )
+                .await?;
+                return Err(Error::Forbidden)?;
+            }
+        }
+        for addr in xff {
+            match domain::any_contains(&domains, addr) {
+                Ok(true) => (),
+                _ => {
+                    event::insert_client(
+                        &honey.db,
+                        EventTp::FailDomainXff,
+                        &addr.to_string(),
+                        user,
+                    )
+                    .await?;
+                    return Err(Error::Forbidden)?;
+                }
+            }
+        }
         cred.store(&session)
             .await
             .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;

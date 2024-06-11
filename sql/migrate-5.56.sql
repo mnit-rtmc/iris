@@ -26,4 +26,8 @@ ALTER TABLE event.price_message_event ALTER COLUMN event_date SET DEFAULT NOW();
 ALTER TABLE event.weather_sensor_settings ALTER COLUMN event_date SET DEFAULT NOW();
 ALTER TABLE event.weather_sensor_sample ALTER COLUMN event_date SET DEFAULT NOW();
 
+-- Add exent ID for DOMAIN FAIL X-Forwarded-For
+INSERT INTO event.event_description (event_desc_id, description)
+    VALUES (208, 'Client FAIL DOMAIN XFF');
+
 COMMIT;

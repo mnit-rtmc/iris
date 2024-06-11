@@ -16,7 +16,7 @@ use crate::database::Database;
 use crate::error::{Error, Result};
 use cidr::IpCidr;
 use serde::{Deserialize, Serialize};
-use std::net::SocketAddr;
+use std::net::IpAddr;
 use std::str::FromStr;
 use tokio_postgres::Row;
 
@@ -37,6 +37,7 @@ pub struct Domain {
 }
 
 impl Domain {
+    /// Get Domain from a row
     fn from_row(row: Row) -> Self {
         Domain {
             name: row.get(0),
@@ -45,26 +46,32 @@ impl Domain {
         }
     }
 
-    /// Parse domain CIDR
-    fn cidr(&self) -> Result<IpCidr> {
-        IpCidr::from_str(&self.cidr).map_err(|_e| Error::Forbidden)
+    /// Check if domain contains an address
+    pub fn contains(&self, addr: IpAddr) -> Result<bool> {
+        let cidr =
+            IpCidr::from_str(&self.cidr).map_err(|_e| Error::Forbidden)?;
+        Ok(cidr.contains(&addr))
     }
 }
 
-/// Check a user / address for a valid domain
-pub async fn check_user_addr(
-    db: &Database,
-    user: &str,
-    addr: SocketAddr,
-) -> Result<()> {
+/// Query valid domains by user
+pub async fn query_by_user(db: &Database, user: &str) -> Result<Vec<Domain>> {
+    let mut domains = Vec::new();
     let client = db.client().await?;
     for row in client.query(QUERY_BY_USER, &[&user]).await? {
-        let domain = Domain::from_row(row);
-        let cidr = domain.cidr().map_err(|_e| Error::Forbidden)?;
-        if cidr.contains(&addr.ip()) {
-            return Ok(());
+        domains.push(Domain::from_row(row));
+    }
+    Ok(domains)
+}
+
+/// Check if any domain contains an address
+pub fn any_contains(domains: &[Domain], addr: IpAddr) -> Result<bool> {
+    let mut res = false;
+    for d in domains {
+        // NOTE: check all domains in case one is not valid
+        if d.contains(addr)? {
+            res = true;
         }
     }
-    log::info!("User {user} forbidden from addr {addr} (bad domain)");
-    Err(Error::Forbidden)
+    Ok(res)
 }

@@ -72,6 +72,7 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 205	Client CHANGE PASSWORD
 206	Client FAIL PASSWORD
 207	Client FAIL DOMAIN
+208	Client FAIL DOMAIN XFF
 301	Gate Arm UNKNOWN
 302	Gate Arm FAULT
 303	Gate Arm OPENING
