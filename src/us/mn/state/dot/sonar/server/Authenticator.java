@@ -124,7 +124,7 @@ public class Authenticator {
 	private boolean checkDomain(Domain d, InetAddress addr) {
 		try {
 			return d.getEnabled()
-			    && new CidrBlock(d.getCIDR()).matches(addr);
+			    && new CidrBlock(d.getBlock()).matches(addr);
 		}
 		catch (IllegalArgumentException e) {
 			return false;

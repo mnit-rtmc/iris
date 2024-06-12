@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,11 +24,11 @@ public interface Domain extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "domain";
 
-	/** Set the CIDR */
-	void setCIDR(String c);
+	/** Set the CIDR block */
+	void setBlock(String b);
 
-	/** Get the CIDR */
-	String getCIDR();
+	/** Get the CIDR block */
+	String getBlock();
 
 	/** Set the enabled flag */
 	void setEnabled(boolean e);

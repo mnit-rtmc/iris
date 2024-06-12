@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,19 +49,19 @@ public class DomainImpl implements Domain {
 		name = n;
 	}
 
-	/** CIDR (Classless Inter-Domain Routing) address */
-	private String cidr;
+	/** CIDR (Classless Inter-Domain Routing) block */
+	private String block;
 
-	/** Set the CIDR */
+	/** Set the CIDR block */
 	@Override
-	public void setCIDR(String c) {
-		cidr = c;
+	public void setBlock(String b) {
+		block = b;
 	}
 
-	/** Get the CIDR */
+	/** Get the CIDR block */
 	@Override
-	public String getCIDR() {
-		return cidr;
+	public String getBlock() {
+		return block;
 	}
 
 	/** Enabled flag */

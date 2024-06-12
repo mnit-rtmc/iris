@@ -30,4 +30,10 @@ ALTER TABLE event.weather_sensor_sample ALTER COLUMN event_date SET DEFAULT NOW(
 INSERT INTO event.event_description (event_desc_id, description)
     VALUES (208, 'Client FAIL DOMAIN XFF');
 
+-- Rename domain "cidr" => "block" (and change to CIDR type)
+ALTER TABLE iris.domain ADD COLUMN block CIDR;
+UPDATE iris.domain SET block = cidr::CIDR;
+ALTER TABLE iris.domain ALTER COLUMN block SET NOT NULL;
+ALTER TABLE iris.domain DROP COLUMN cidr;
+
 COMMIT;

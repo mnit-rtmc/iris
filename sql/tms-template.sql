@@ -265,7 +265,7 @@ CREATE TRIGGER role_notify_trig
 
 CREATE TABLE iris.domain (
     name VARCHAR(15) PRIMARY KEY,
-    cidr VARCHAR(64) NOT NULL,
+    block CIDR NOT NULL,
     enabled BOOLEAN NOT NULL
 );
 
@@ -273,7 +273,7 @@ CREATE TRIGGER domain_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.domain
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
-COPY iris.domain (name, cidr, enabled) FROM stdin;
+COPY iris.domain (name, block, enabled) FROM stdin;
 any_ipv4	0.0.0.0/0	t
 any_ipv6	::0/0	t
 local_ipv6	::1/128	t

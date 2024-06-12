@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,16 +46,16 @@ public class DomainModel extends ProxyTableModel<Domain> {
 				return d.getName();
 			}
 		});
-		cols.add(new ProxyColumn<Domain>("domain.cidr", 240) {
+		cols.add(new ProxyColumn<Domain>("domain.block", 240) {
 			public Object getValueAt(Domain d) {
-				return d.getCIDR();
+				return d.getBlock();
 			}
 			public boolean isEditable(Domain d) {
 				return canWrite(d);
 			}
 			public void setValueAt(Domain d, Object value) {
-				String v = value.toString().trim();
-				d.setCIDR(v);
+				String b = value.toString().trim();
+				d.setBlock(b);
 			}
 		});
 		cols.add(new ProxyColumn<Domain>("domain.enabled", 60,
@@ -84,7 +84,7 @@ public class DomainModel extends ProxyTableModel<Domain> {
 	@Override
 	public void createObject(String name) {
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
-		attrs.put("cidr", "");
+		attrs.put("block", "0.0.0.0/0");
 		descriptor.cache.createObject(name, attrs);
 	}
 }
