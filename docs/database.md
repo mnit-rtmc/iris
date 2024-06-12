@@ -18,7 +18,7 @@ Associated tables:
 - `controller_io` __(C)__
 - `device_preset` __(P)__
 - `hashtag` __(H)__
-- `user_id_domain` __(D)__
+- `role_domain` __(D)__
 
 The notification payload will either be the object/record name of the changed
 row, or an empty string (blank).  A blank payload requires a full resource
@@ -58,13 +58,13 @@ update, and is caused by one of these conditions:
 `ramp_meter`       | ✔️   | ✔️   | ✔️   |     |
 `r_node`           | ✔️   |     |     |     |
 `road`             |     |     |     |     |
-`role`             |     |     |     |     |
+`role`             |     |     |     |     | ✔️ 
 `sign_config`      |     |     |     |     |
 `sign_detail`      |     |     |     |     |
 `sign_message`     |     |     |     |     |
 `system_attribute` |     |     |     |     |
 `tag_reader`       | ✔️   | ✔️   |     |     |
-`user_id`          |     |     |     |     | ✔️ 
+`user_id`          |     |     |     |     |
 `video_monitor`    |     | ✔️   |     |     |
 `weather_sensor`   | ✔️   | ✔️   |     |     |
 `word`             |     |     |     |     |

@@ -110,7 +110,7 @@ These are static [font]s which can be used in [sign message]s.
 [controller]: controllers.html
 [detector]: vehicle_detection.html
 [dms]: dms.html
-[domain]: user_roles.html#domains
+[domain]: roles.html#domains
 [etag]: https://en.wikipedia.org/wiki/HTTP_ETag
 [EventSource]: https://developer.mozilla.org/en-US/docs/Web/API/EventSource
 [font]: fonts.html
@@ -128,11 +128,11 @@ These are static [font]s which can be used in [sign message]s.
 [ramp meter]: ramp_meters.html
 [resource types]: #resource-types
 [Road Weather Information System]: rwis.html
-[role]: user_roles.html#roles
+[role]: roles.html#roles
 [sign message]: sign_message.html
 [SSE]: https://en.wikipedia.org/wiki/Server-sent_events
 [system attributes]: system_attributes.html
 [tag reader]: tolling.html#tag-readers
-[user]: user_roles.html
+[user]: roles.html
 [video monitor]: video.html
 [weather sensor]: rwis.html

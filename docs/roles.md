@@ -1,6 +1,6 @@
-# User Roles
+# Roles
 
-Select `View ➔ System ➔ Users and Roles` menu item
+Select `View ➔ System ➔ Roles` menu item
 
 IRIS contains a set of user accounts which are allowed to access the system.
 Each account must be assigned to a specific [role](#roles).  During login, the
@@ -15,11 +15,11 @@ is checked against the stored password hash for the account.
 * `iris/api/user_id`
 * `iris/api/user_id/{name}`
 
-| Access       | Primary          | Secondary   |
-|--------------|------------------|-------------|
-| 👁️  View      | name             |             |
-| 💡 Manage    | enabled          |             |
-| 🔧 Configure | full\_name, role | dn, domains |
+| Access       | Primary          | Secondary |
+|--------------|------------------|-----------|
+| 👁️  View      | name             |           |
+| 💡 Manage    | enabled          |           |
+| 🔧 Configure | full\_name, role | dn        |
 
 </details>
 
@@ -60,10 +60,11 @@ make further changes will be lost immediately.**
 * `iris/api/role`
 * `iris/api/role/{name}`
 
-| Access       | Primary    |
-|--------------|------------|
-| 👁️  View      | name       |
-| 💡 Manage    | enabled    |
+| Access       | Primary    | Secondary |
+|--------------|------------|-----------|
+| 👁️  View      | name       |           |
+| 💡 Manage    | enabled    |           |
+| 🔧 Configure |            | domains   |
 
 </details>
 
@@ -113,6 +114,7 @@ Whenever certain client events occur, a time-stamped record is added to the
 * AUTHENTICATE
 * FAIL AUTHENTICATION
 * FAIL DOMAIN
+* FAIL DOMAIN XFF
 * CHANGE PASSWORD
 
 These records are purged automatically when older than the value of the

@@ -60,9 +60,9 @@ dialogs.
 
 
 [selector tool]: cameras.html#selector-tool
-[capabilities]: user_roles.html#capabilities
+[capabilities]: roles.html#capabilities
 [device]: controllers.html#devices
 [LDAP]: installation.html#ldap
 [map extents]: mapping.html#map-extents
-[role]: user_roles.html
+[role]: roles.html
 [traffic layer]: vehicle_detection.html#traffic-layer

@@ -78,7 +78,7 @@ These include:
 
 [alarm]: alarms.html
 [camera]: cameras.html
-[capabilities]: user_roles.html#capabilities
+[capabilities]: roles.html#capabilities
 [controller]: controllers.html
 [dms]: dms.html
 [flow stream]: flow_streams.html
@@ -94,10 +94,10 @@ These include:
 [lcs indication]: lcs.html#indications
 [message line]: message_patterns.html#message-lines
 [message pattern]: message_patterns.html
-[privileges]: user_roles.html#privileges
+[privileges]: roles.html#privileges
 [resource]: rest_api.html#resource-types
 [restricted resource]: rest_api.html#restricted-resources-codeirisapicode
-[role]: user_roles.html#roles
+[role]: roles.html#roles
 [sign configuration]: sign_configuration.html
 [sign detail]: sign_configuration.html#sign-details
 [sign message]: sign_message.html
