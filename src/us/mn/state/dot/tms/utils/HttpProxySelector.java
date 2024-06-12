@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2018  Minnesota Department of Transportation
+ * Copyright (C) 2007-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
-import us.mn.state.dot.sonar.CIDRAddress;
+import us.mn.state.dot.sonar.CidrBlock;
 
 /**
  * Proxy selector for HTTP clients.
@@ -96,14 +96,14 @@ public class HttpProxySelector extends ProxySelector {
 	/** List of proxy authentication data */
 	private final HashMap<String, PasswordAuthentication> auths;
 
-	/** Whitelist of CIDR addresses to skip proxy */
-	private final List<CIDRAddress> whitelist;
+	/** Allow list of CIDR blocks to skip proxy */
+	private final List<CidrBlock> allow_list;
 
 	/** Create a new HTTP proxy selector */
 	public HttpProxySelector(Properties props) {
 		proxies = createProxyList(props);
 		auths = createAuths(props);
-		whitelist = createProxyWhitelist(props);
+		allow_list = createProxyAllowList(props);
 	}
 
 	/** Create a Proxy list from a set of properties */
@@ -140,9 +140,9 @@ public class HttpProxySelector extends ProxySelector {
 		return a;
 	}
 
-	/** Create a whitelist of CIDR addresses to skip proxy */
-	private List<CIDRAddress> createProxyWhitelist(Properties props) {
-		return CIDRAddress.parseList(props.getProperty(
+	/** Create an allow list of CIDR blocks to skip proxy */
+	private List<CidrBlock> createProxyAllowList(Properties props) {
+		return CidrBlock.parseList(props.getProperty(
 			"http.proxy.whitelist"));
 	}
 
@@ -167,8 +167,8 @@ public class HttpProxySelector extends ProxySelector {
 		String host = uri.getHost();
 		try {
 			InetAddress addr = InetAddress.getByName(host);
-			for (CIDRAddress cidr: whitelist) {
-				if (cidr.matches(addr))
+			for (CidrBlock block: allow_list) {
+				if (block.matches(addr))
 					return false;
 			}
 			return isProxyPort(uri.getPort());

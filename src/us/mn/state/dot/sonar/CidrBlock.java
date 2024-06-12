@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2018  Minnesota Department of Transportation
+ * Copyright (C) 2013-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,18 +20,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * CIDR (Classless Inter-Domain Routing) Address.
+ * CIDR (Classless Inter-Domain Routing) block.
  *
  * @author Douglas Lau
  */
-public class CIDRAddress {
+public class CidrBlock {
 
-	/** Parse a delimited list of CIDR addresses */
-	static public List<CIDRAddress> parseList(String p) {
-		ArrayList<CIDRAddress> l = new ArrayList<CIDRAddress>();
+	/** Parse a delimited list of CIDR blocks */
+	static public List<CidrBlock> parseList(String p) {
+		ArrayList<CidrBlock> l = new ArrayList<CidrBlock>();
 		if (p != null) {
 			for (String c: p.split("[ \t,]+")) {
-				l.add(new CIDRAddress(c));
+				l.add(new CidrBlock(c));
 			}
 		}
 		return l;
@@ -43,8 +43,8 @@ public class CIDRAddress {
 	/** Prefix bits */
 	private final Integer prefix_bits;
 
-	/** Create a new CIDR address */
-	public CIDRAddress(String a) throws IllegalArgumentException {
+	/** Create a new CIDR block */
+	public CidrBlock(String a) throws IllegalArgumentException {
 		String[] p = a.split("/");
 		if (p.length > 0 && p.length < 3) {
 			prefix_address = p[0];

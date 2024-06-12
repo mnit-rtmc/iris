@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -100,7 +100,7 @@ public class MainServer {
 			store = createStore(props);
 			BaseEvent.store = store;
 			I18N.initialize(props);
-			WhitelistNamespace ns = createNamespace(props);
+			AllowListNamespace ns = createNamespace(props);
 			IrisCapabilityImpl.lookup(store, ns);
 			IrisPrivilegeImpl.lookup(store, ns);
 			IrisRoleImpl.lookup(store, ns);
@@ -192,10 +192,10 @@ public class MainServer {
 	}
 
 	/** Create the server namespace */
-	static private WhitelistNamespace createNamespace(Properties props)
+	static private AllowListNamespace createNamespace(Properties props)
 		throws UnknownHostException, NumberFormatException
 	{
-		WhitelistNamespace ns = new WhitelistNamespace(props);
+		AllowListNamespace ns = new AllowListNamespace(props);
 		// FIXME: static namespace hacks
 		BaseHelper.namespace = ns;
 		ns.registerType(Station.SONAR_TYPE, StationImpl.class);

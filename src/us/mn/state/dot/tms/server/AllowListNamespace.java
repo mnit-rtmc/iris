@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2018  Minnesota Department of Transportation
+ * Copyright (C) 2013-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,45 +17,45 @@ package us.mn.state.dot.tms.server;
 import java.net.InetAddress;
 import java.util.List;
 import java.util.Properties;
-import us.mn.state.dot.sonar.CIDRAddress;
+import us.mn.state.dot.sonar.CidrBlock;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.GateArmArray;
 
 /**
- * A namespace which checks client IP addresses against a whitelist.
+ * A namespace which checks client IP addresses against an allow list.
  *
  * @author Douglas Lau
  */
-public class WhitelistNamespace extends ServerNamespace {
+public class AllowListNamespace extends ServerNamespace {
 
 	/** Check if type is checked */
 	static private boolean isTypeChecked(String t) {
 		return GateArmArray.SONAR_TYPE.equals(t);
 	}
 
-	/** Whitelist of CIDR addresses */
-	private final List<CIDRAddress> whitelist;
+	/** Allow list of CIDR blocks */
+	private final List<CidrBlock> allow_list;
 
-	/** Create the whitelist namespace */
-	public WhitelistNamespace(Properties props)
+	/** Create the allow list namespace */
+	public AllowListNamespace(Properties props)
 		throws IllegalArgumentException
 	{
-		whitelist = CIDRAddress.parseList(props.getProperty(
+		allow_list = CidrBlock.parseList(props.getProperty(
 			"gate.arm.whitelist"));
 	}
 
-	/** Check if address is in whitelist */
+	/** Check if address is in allow list */
 	private boolean checkList(InetAddress a) {
-		for (CIDRAddress cidr: whitelist) {
-			if (cidr.matches(a))
+		for (CidrBlock block: allow_list) {
+			if (block.matches(a))
 				return true;
 		}
 		return false;
 	}
 
-	/** Check name and whitelist */
+	/** Check name and allow list */
 	private boolean checkList(Name name, InetAddress a) {
 		return (!isTypeChecked(name.getTypePart())) || checkList(a);
 	}
