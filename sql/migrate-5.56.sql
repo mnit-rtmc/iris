@@ -36,4 +36,35 @@ UPDATE iris.domain SET block = cidr::CIDR;
 ALTER TABLE iris.domain ALTER COLUMN block SET NOT NULL;
 ALTER TABLE iris.domain DROP COLUMN cidr;
 
+-- Replace user_domain with role_domain
+CREATE TABLE iris.role_domain (
+    role VARCHAR(15) NOT NULL REFERENCES iris.role,
+    domain VARCHAR(15) NOT NULL REFERENCES iris.domain
+);
+ALTER TABLE iris.role_domain ADD PRIMARY KEY (role, domain);
+
+INSERT INTO iris.role_domain (role, domain)
+    SELECT DISTINCT role, domain
+        FROM iris.user_id_domain ud
+        JOIN iris.user_id u ON ud.user_id = u.name;
+
+CREATE FUNCTION iris.role_domain_notify() RETURNS TRIGGER AS
+    $role_domain_notify$
+BEGIN
+    IF (TG_OP = 'DELETE') THEN
+        PERFORM pg_notify('role', OLD.role);
+    ELSE
+        PERFORM pg_notify('role', NEW.role);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$role_domain_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER role_domain_notify_trig
+    AFTER INSERT OR DELETE ON iris.role_domain
+    FOR EACH ROW EXECUTE FUNCTION iris.role_domain_notify();
+
+DROP TABLE iris.user_id_domain;
+DROP FUNCTION iris.user_domain_notify();
+
 COMMIT;

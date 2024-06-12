@@ -247,22 +247,8 @@ END;
 $update_version$ language plpgsql;
 
 --
--- Roles, Domains, Users, Capabilities and Privileges
+-- Domains, Roles, Users, Capabilities and Privileges
 --
-CREATE TABLE iris.role (
-    name VARCHAR(15) PRIMARY KEY,
-    enabled BOOLEAN NOT NULL
-);
-
-COPY iris.role (name, enabled) FROM stdin;
-administrator	t
-operator	t
-\.
-
-CREATE TRIGGER role_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.role
-    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
-
 CREATE TABLE iris.domain (
     name VARCHAR(15) PRIMARY KEY,
     block CIDR NOT NULL,
@@ -277,6 +263,47 @@ COPY iris.domain (name, block, enabled) FROM stdin;
 any_ipv4	0.0.0.0/0	t
 any_ipv6	::0/0	t
 local_ipv6	::1/128	t
+\.
+
+CREATE TABLE iris.role (
+    name VARCHAR(15) PRIMARY KEY,
+    enabled BOOLEAN NOT NULL
+);
+
+COPY iris.role (name, enabled) FROM stdin;
+administrator	t
+operator	t
+\.
+
+CREATE TRIGGER role_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.role
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+CREATE TABLE iris.role_domain (
+    role VARCHAR(15) NOT NULL REFERENCES iris.role,
+    domain VARCHAR(15) NOT NULL REFERENCES iris.domain
+);
+ALTER TABLE iris.role_domain ADD PRIMARY KEY (role, domain);
+
+CREATE FUNCTION iris.role_domain_notify() RETURNS TRIGGER AS
+    $role_domain_notify$
+BEGIN
+    IF (TG_OP = 'DELETE') THEN
+        PERFORM pg_notify('role', OLD.role);
+    ELSE
+        PERFORM pg_notify('role', NEW.role);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$role_domain_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER role_domain_notify_trig
+    AFTER INSERT OR DELETE ON iris.role_domain
+    FOR EACH ROW EXECUTE FUNCTION iris.role_domain_notify();
+
+COPY iris.role_domain (role, domain) FROM stdin;
+administrator	any_ipv4
+administrator	any_ipv6
 \.
 
 CREATE TABLE iris.user_id (
@@ -300,33 +327,6 @@ CREATE VIEW user_id_view AS
     SELECT name, full_name, dn, role, enabled
     FROM iris.user_id;
 GRANT SELECT ON user_id_view TO PUBLIC;
-
-CREATE TABLE iris.user_id_domain (
-    user_id VARCHAR(15) NOT NULL REFERENCES iris.user_id,
-    domain VARCHAR(15) NOT NULL REFERENCES iris.domain
-);
-ALTER TABLE iris.user_id_domain ADD PRIMARY KEY (user_id, domain);
-
-CREATE FUNCTION iris.user_domain_notify() RETURNS TRIGGER AS
-    $user_domain_notify$
-BEGIN
-    IF (TG_OP = 'DELETE') THEN
-        PERFORM pg_notify('user_id', OLD.user_id);
-    ELSE
-        PERFORM pg_notify('user_id', NEW.user_id);
-    END IF;
-    RETURN NULL; -- AFTER trigger return is ignored
-END;
-$user_domain_notify$ LANGUAGE plpgsql;
-
-CREATE TRIGGER user_domain_notify_trig
-    AFTER INSERT OR DELETE ON iris.user_id_domain
-    FOR EACH ROW EXECUTE FUNCTION iris.user_domain_notify();
-
-COPY iris.user_id_domain (user_id, domain) FROM stdin;
-admin	any_ipv4
-admin	any_ipv6
-\.
 
 -- FIXME: remove after permissions are used everywhere
 CREATE TABLE iris.capability (
