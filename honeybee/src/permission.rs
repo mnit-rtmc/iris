@@ -15,7 +15,7 @@
 use crate::database::Database;
 use crate::error::{Error, Result};
 use crate::query;
-use crate::sonar::{Error as SonarError, Name};
+use crate::sonar::Name;
 use serde::{Deserialize, Serialize};
 use serde_json::map::Map;
 use serde_json::Value;
@@ -111,7 +111,7 @@ pub async fn get_by_id(db: &Database, id: i32) -> Result<Permission> {
     let row = client
         .query_one(query::PERMISSION_ONE, &[&id])
         .await
-        .map_err(|_e| SonarError::NotFound)?;
+        .map_err(|_e| Error::NotFound)?;
     Ok(Permission::from_row(row))
 }
 
@@ -136,11 +136,11 @@ pub async fn post_role_res(
     let rows = client
         .execute(INSERT_ONE, &[&role, &resource_n, &access_n])
         .await
-        .map_err(|_e| SonarError::InvalidValue)?;
+        .map_err(|_e| Error::InvalidValue)?;
     if rows == 1 {
         Ok(())
     } else {
-        Err(SonarError::InvalidValue.into())
+        Err(Error::InvalidValue)
     }
 }
 
@@ -155,7 +155,7 @@ pub async fn patch_by_id(
     let row = transaction
         .query_one(query::PERMISSION_ONE, &[&id])
         .await
-        .map_err(|_e| SonarError::NotFound)?;
+        .map_err(|_e| Error::NotFound)?;
     let Permission {
         id,
         mut role,
@@ -182,12 +182,12 @@ pub async fn patch_by_id(
     let rows = transaction
         .execute(UPDATE_ONE, &[&id, &role, &resource_n, &hashtag, &access_n])
         .await
-        .map_err(|_e| SonarError::Conflict)?;
+        .map_err(|_e| Error::Conflict)?;
     if rows == 1 {
         transaction.commit().await?;
         Ok(())
     } else {
-        Err(SonarError::Conflict.into())
+        Err(Error::Conflict)
     }
 }
 
@@ -198,7 +198,7 @@ pub async fn delete_by_id(db: &Database, id: i32) -> Result<()> {
     if rows == 1 {
         Ok(())
     } else {
-        Err(SonarError::NotFound.into())
+        Err(Error::NotFound)
     }
 }
 

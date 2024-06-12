@@ -19,7 +19,7 @@ use crate::error::{Error, Result};
 use crate::event::{self, EventTp};
 use crate::permission;
 use crate::query;
-use crate::sonar::{Error as SonarError, Messenger, Name};
+use crate::sonar::{Messenger, Name};
 use crate::xff::XForwardedFor;
 use crate::Database;
 use axum::body::Body;
@@ -320,7 +320,7 @@ async fn file_stream_etag(
     content_type: &'static str,
     if_none_match: IfNoneMatch,
 ) -> Resp3 {
-    let etag = file_etag(fname).await.map_err(|_e| SonarError::NotFound)?;
+    let etag = file_etag(fname).await.map_err(|_e| Error::NotFound)?;
     log::trace!("ETag: {etag} ({fname})");
     let tag = etag.parse::<ETag>().map_err(|_e| Error::InvalidETag)?;
     if if_none_match.precondition_passes(&tag) {
@@ -508,7 +508,7 @@ fn access_get(honey: Honey) -> Router {
 fn try_names_from_channels(channels: &[String]) -> Result<Vec<Name>> {
     if channels.len() > 32 {
         log::info!("Too many notification channels");
-        Err(SonarError::InvalidValue)?;
+        Err(Error::InvalidValue)?;
     }
     let mut names = Vec::with_capacity(channels.len());
     for chan in channels {
@@ -598,7 +598,7 @@ fn permission_resource(honey: Honey) -> Router {
             permission::post_role_res(&honey.db, &role, &resource_n).await?;
             return Ok(StatusCode::CREATED);
         }
-        Err(SonarError::InvalidValue)?
+        Err(Error::InvalidValue)?
     }
 
     Router::new()
@@ -653,7 +653,7 @@ fn other_resource(honey: Honey) -> Router {
                 }
                 Ok(StatusCode::CREATED)
             }
-            _ => Err(SonarError::InvalidValue)?,
+            _ => Err(Error::InvalidValue)?,
         }
     }
 
@@ -881,7 +881,7 @@ async fn get_by_pkey<PK: ToSql + Sync>(
     let row = client
         .query_one(&query, &[&pkey])
         .await
-        .map_err(|_e| SonarError::NotFound)?;
+        .map_err(|_e| Error::NotFound)?;
     Ok(row.get::<usize, String>(0))
 }
 
@@ -897,6 +897,6 @@ async fn get_array_by_pkey<PK: ToSql + Sync>(
     let row = client
         .query_one(&query, &[&pkey])
         .await
-        .map_err(|_e| SonarError::NotFound)?;
+        .map_err(|_e| Error::NotFound)?;
     Ok(row.get::<usize, String>(0))
 }

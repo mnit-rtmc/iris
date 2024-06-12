@@ -12,9 +12,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::error::{Error, Result};
 use crate::tls;
 use heck::ToLowerCamelCase;
-use http::StatusCode;
 use percent_encoding::percent_decode_str;
 use resources::Res;
 use rustls::pki_types::ServerName;
@@ -22,100 +22,41 @@ use serde_json::Value;
 use std::fmt;
 use std::net::ToSocketAddrs;
 use std::time::Duration;
-use tokio::io::{self, AsyncReadExt, AsyncWriteExt, ErrorKind};
+use tokio::io::{self, AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
 use tokio::time::timeout;
 use tokio_rustls::client::TlsStream;
 
-/// Sonar protocol error
-#[derive(Debug, thiserror::Error)]
-pub enum Error {
-    /// Unexpected response received
-    #[error("unexpected response")]
-    UnexpectedResponse,
-
-    /// Invalid value (invalid characters, etc)
-    #[error("invalid value")]
-    InvalidValue,
-
-    /// Conflict (name already exists)
-    #[error("name conflict")]
-    Conflict,
-
-    /// Forbidden (permission denied)
-    #[error("forbidden")]
-    Forbidden,
-
-    /// Not found
-    #[error("not found")]
-    NotFound,
-
-    /// Timed out
-    #[error("timed out")]
-    TimedOut,
-
-    /// I/O error
-    #[error("I/O {0}")]
-    Io(#[from] std::io::Error),
-}
-
-impl From<Error> for StatusCode {
-    fn from(e: Error) -> Self {
-        match e {
-            Error::UnexpectedResponse => StatusCode::INTERNAL_SERVER_ERROR,
-            Error::InvalidValue => StatusCode::BAD_REQUEST,
-            Error::Conflict => StatusCode::CONFLICT,
-            Error::Forbidden => StatusCode::FORBIDDEN,
-            Error::NotFound => StatusCode::NOT_FOUND,
-            Error::TimedOut => StatusCode::GATEWAY_TIMEOUT,
-            Error::Io(e) => {
-                if e.kind() == io::ErrorKind::NotFound {
-                    StatusCode::NOT_FOUND
-                } else if e.kind() == io::ErrorKind::TimedOut {
-                    StatusCode::GATEWAY_TIMEOUT
-                } else {
-                    StatusCode::INTERNAL_SERVER_ERROR
-                }
-            }
-        }
+/// Parse a SHOW message received from server
+fn parse_show(msg: &str) -> Error {
+    // gross, but no point in changing SHOW messages now!
+    let msg = msg.to_lowercase();
+    if msg.starts_with("permission") {
+        Error::Forbidden
+    } else if msg.starts_with("invalid name") {
+        // this should really have been "Unknown name", not "Invalid name"
+        Error::NotFound
+    } else if msg.starts_with("invalid")
+        || msg.starts_with("bad")
+        || msg.starts_with("must not" /* contain upper-case ... */)
+    {
+        Error::InvalidValue
+    } else if msg.starts_with("name already exists")
+        || msg.starts_with("must be removed")
+        || msg.starts_with("cannot")
+        || msg.starts_with("already")
+        || msg.starts_with("unavailable pin")
+           // SQL constraint on delete
+        || msg.contains("foreign key")
+           // "Drop X exists"
+        || msg.contains("exists")
+    {
+        Error::Conflict
+    } else {
+        log::warn!("SHOW {msg}");
+        Error::UnexpectedResponse
     }
 }
-
-impl Error {
-    /// Parse a SHOW message received from server
-    fn parse_show(msg: &str) -> Self {
-        // gross, but no point in changing SHOW messages now!
-        let msg = msg.to_lowercase();
-        if msg.starts_with("permission") {
-            Self::Forbidden
-        } else if msg.starts_with("invalid name") {
-            // this should really have been "Unknown name", not "Invalid name"
-            Self::NotFound
-        } else if msg.starts_with("invalid")
-            || msg.starts_with("bad")
-            || msg.starts_with("must not" /* contain upper-case ... */)
-        {
-            Self::InvalidValue
-        } else if msg.starts_with("name already exists")
-            || msg.starts_with("must be removed")
-            || msg.starts_with("cannot")
-            || msg.starts_with("already")
-            || msg.starts_with("unavailable pin")
-               // SQL constraint on delete
-            || msg.contains("foreign key")
-               // "Drop X exists"
-            || msg.contains("exists")
-        {
-            Self::Conflict
-        } else {
-            log::warn!("SHOW {msg}");
-            Self::UnexpectedResponse
-        }
-    }
-}
-
-/// Sonar result
-pub type Result<T> = std::result::Result<T, Error>;
 
 /// Check if a character in a name is invalid
 fn name_invalid_char(c: char) -> bool {
@@ -374,7 +315,7 @@ impl Messenger {
         let addr = (host, port)
             .to_socket_addrs()?
             .next()
-            .ok_or_else(|| io::Error::from(ErrorKind::NotFound))?;
+            .ok_or_else(|| Error::NotFound)?;
         let tcp_stream = TcpStream::connect(&addr).await?;
         let connector = tls::connector();
         let domain = ServerName::try_from(host)
@@ -426,7 +367,7 @@ impl Messenger {
             res?;
         }
         match Message::decode(self.received()) {
-            Some((Message::Show(txt), _)) => Err(Error::parse_show(txt)),
+            Some((Message::Show(txt), _)) => Err(parse_show(txt)),
             Some((_res, _c)) => Err(Error::UnexpectedResponse),
             None => Ok(()),
         }
@@ -463,7 +404,7 @@ impl Messenger {
         self.send(&buf[..]).await?;
         self.recv(|m| match m {
             Message::Type("") => Ok(()),
-            Message::Show(txt) => Err(Error::parse_show(txt)),
+            Message::Show(txt) => Err(parse_show(txt)),
             _ => Err(Error::UnexpectedResponse),
         })
         .await?;
@@ -538,7 +479,7 @@ impl Messenger {
                     done = true;
                     Ok(())
                 }
-                Message::Show(msg) => Err(Error::parse_show(msg)),
+                Message::Show(msg) => Err(parse_show(msg)),
                 _ => Err(Error::UnexpectedResponse),
             })
             .await?;

@@ -13,8 +13,7 @@
 // GNU General Public License for more details.
 //
 use crate::database::Database;
-use crate::error::Result;
-use crate::sonar::Error as SonarError;
+use crate::error::{Error, Result};
 
 /// Event types
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -50,10 +49,10 @@ pub async fn insert_client(
     let rows = client
         .execute(INSERT_CLIENT, &[&event_tp.id(), &host_port, &iris_user])
         .await
-        .map_err(|_e| SonarError::InvalidValue)?;
+        .map_err(|_e| Error::InvalidValue)?;
     if rows == 1 {
         Ok(())
     } else {
-        Err(SonarError::InvalidValue.into())
+        Err(Error::InvalidValue)
     }
 }

@@ -12,7 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::sonar::Error;
+use crate::error::{Error, Result};
 use resources::Res;
 
 /// Access for permission records
@@ -47,7 +47,7 @@ impl Access {
     }
 
     /// Check for access to a resource
-    pub const fn check(self, rhs: Self) -> Result<(), Error> {
+    pub const fn check(self, rhs: Self) -> Result<()> {
         if self.level() >= rhs.level() {
             Ok(())
         } else {

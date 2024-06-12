@@ -14,6 +14,7 @@
 //
 use http::StatusCode;
 use std::time::SystemTimeError;
+use tokio::io::ErrorKind;
 
 /// Honeybee error
 #[derive(Debug, thiserror::Error)]
@@ -22,9 +23,29 @@ pub enum Error {
     #[error("Unauthenticated")]
     Unauthenticated,
 
-    /// Forbidden request
+    /// Forbidden (permission denied)
     #[error("Forbidden")]
     Forbidden,
+
+    /// Unexpected sonar response received
+    #[error("unexpected sonar response")]
+    UnexpectedResponse,
+
+    /// Not found
+    #[error("not found")]
+    NotFound,
+
+    /// Conflict (name already exists)
+    #[error("name conflict")]
+    Conflict,
+
+    /// Invalid value (invalid characters, etc)
+    #[error("invalid value")]
+    InvalidValue,
+
+    /// Timed out
+    #[error("timed out")]
+    TimedOut,
 
     /// Invalid ETag error
     #[error("Invalid ETag")]
@@ -33,10 +54,6 @@ pub enum Error {
     /// System time error
     #[error("Time {0}")]
     SystemTime(#[from] SystemTimeError),
-
-    /// Sonar error
-    #[error("Sonar {0}")]
-    Sonar(#[from] crate::sonar::Error),
 
     /// IO error
     #[error("IO {0}")]
@@ -90,7 +107,18 @@ impl From<Error> for StatusCode {
         match err {
             Error::Unauthenticated => StatusCode::UNAUTHORIZED,
             Error::Forbidden => StatusCode::FORBIDDEN,
-            Error::Sonar(e) => e.into(),
+            Error::UnexpectedResponse => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::NotFound => StatusCode::NOT_FOUND,
+            Error::Conflict => StatusCode::CONFLICT,
+            Error::InvalidValue => StatusCode::BAD_REQUEST,
+            Error::TimedOut => StatusCode::GATEWAY_TIMEOUT,
+            Error::Io(e) => {
+                if e.kind() == ErrorKind::TimedOut {
+                    StatusCode::GATEWAY_TIMEOUT
+                } else {
+                    StatusCode::INTERNAL_SERVER_ERROR
+                }
+            }
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
