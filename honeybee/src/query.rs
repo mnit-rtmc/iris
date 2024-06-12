@@ -247,7 +247,7 @@ pub const DOMAIN_ALL: &str = "\
 
 /// SQL query for one domain (secondary)
 pub const DOMAIN_ONE: &str = "\
-  SELECT name, enabled, cidr \
+  SELECT name, enabled, block \
   FROM iris.domain \
   WHERE name = $1";
 

@@ -10,7 +10,6 @@ edition = "2021"
 bb8 = "0.8"
 bb8-postgres = "0.8"
 chrono = "0.4"
-cidr = "0.2"
 env_logger = { version = "0.11", default_features = false }
 log = "0.4"
 ntcip = "0.12"
@@ -25,6 +24,10 @@ features = ["derive"]
 version = "1.0"
 default-features = false
 features = ["fs", "io-util", "macros", "net", "rt-multi-thread", "time"]
+
+[workspace.dependencies.cidr]
+version = "0.2"
+features = ["serde"]
 
 [patch.crates-io]
 

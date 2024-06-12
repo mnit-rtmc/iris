@@ -13,16 +13,15 @@
 // GNU General Public License for more details.
 //
 use crate::database::Database;
-use crate::error::{Error, Result};
+use crate::error::Result;
 use cidr::IpCidr;
 use serde::{Deserialize, Serialize};
 use std::net::IpAddr;
-use std::str::FromStr;
 use tokio_postgres::Row;
 
 /// Query domains for a user
 const QUERY_BY_USER: &str = "\
-  SELECT name, cidr, enabled \
+  SELECT name, block, enabled \
   FROM iris.domain d \
   JOIN iris.user_id_domain ud ON ud.domain = d.name \
   WHERE d.enabled = true \
@@ -32,7 +31,7 @@ const QUERY_BY_USER: &str = "\
 #[derive(Clone, Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct Domain {
     pub name: String,
-    pub cidr: String,
+    pub block: IpCidr,
     pub enabled: bool,
 }
 
@@ -41,16 +40,14 @@ impl Domain {
     fn from_row(row: Row) -> Self {
         Domain {
             name: row.get(0),
-            cidr: row.get(1),
+            block: row.get(1),
             enabled: row.get(2),
         }
     }
 
     /// Check if domain contains an address
     pub fn contains(&self, addr: IpAddr) -> Result<bool> {
-        let cidr =
-            IpCidr::from_str(&self.cidr).map_err(|_e| Error::Forbidden)?;
-        Ok(cidr.contains(&addr))
+        Ok(self.block.contains(&addr))
     }
 }
 

@@ -39,7 +39,7 @@ _enabled_ domain.
 |--------------|---------|-----------|
 | 👁️  View      | name    |           |
 | 💡 Manage    | enabled |           |
-| 🔧 Configure |         | cidr      |
+| 🔧 Configure |         | block     |
 
 </details>
 

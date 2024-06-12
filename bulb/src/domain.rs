@@ -26,7 +26,7 @@ pub struct Domain {
     pub name: String,
     pub enabled: bool,
     // secondary
-    pub cidr: Option<String>,
+    pub block: Option<String>,
 }
 
 /// Ancillary domain data
@@ -56,12 +56,12 @@ impl Domain {
 
     /// Convert to Edit HTML
     fn to_html_edit(&self) -> String {
-        let cidr = HtmlStr::new(&self.cidr);
+        let block = HtmlStr::new(&self.block);
         let enabled = if self.enabled { " checked" } else { "" };
         format!(
             "<div class='row'>\
-               <label for='cidr'>CIDR</label>\
-               <input id='cidr' maxlength='64' size='28' value='{cidr}'>\
+               <label for='block'>Block (CIDR)</label>\
+               <input id='block' maxlength='42' size='24' value='{block}'>\
             </div>\
             <div class='row'>\
               <label for='enabled'>Enabled</label>\
@@ -115,30 +115,30 @@ impl Card for Domain {
     /// Get changed fields from Edit form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
-        fields.changed_input("cidr", &self.cidr);
+        fields.changed_input("block", &self.block);
         fields.changed_input("enabled", self.enabled);
         fields.into_value().to_string()
     }
 
     /// Handle input event for an element on the card
     fn handle_input(&self, _anc: DomainAnc, id: String) {
-        if &id == "cidr" {
+        if &id == "block" {
             let doc = Doc::get();
-            let cidr = doc.elem::<HtmlInputElement>("cidr");
+            let block = doc.elem::<HtmlInputElement>("block");
             let ob_save = doc.elem::<HtmlButtonElement>("ob_save");
-            match IpCidr::from_str(&cidr.value()) {
+            match IpCidr::from_str(&block.value()) {
                 Ok(_) => {
-                    cidr.set_custom_validity("");
-                    cidr.set_class_name("");
+                    block.set_custom_validity("");
+                    block.set_class_name("");
                     ob_save.set_disabled(false);
                 }
                 Err(e) => {
-                    cidr.set_custom_validity(&e.to_string());
-                    cidr.set_class_name("invalid");
+                    block.set_custom_validity(&e.to_string());
+                    block.set_class_name("invalid");
                     ob_save.set_disabled(true);
                 }
             }
-            cidr.report_validity();
+            block.report_validity();
         }
     }
 }
