@@ -46,7 +46,7 @@ public class DomainModel extends ProxyTableModel<Domain> {
 				return d.getName();
 			}
 		});
-		cols.add(new ProxyColumn<Domain>("domain.block", 240) {
+		cols.add(new ProxyColumn<Domain>("domain.block", 200) {
 			public Object getValueAt(Domain d) {
 				return d.getBlock();
 			}

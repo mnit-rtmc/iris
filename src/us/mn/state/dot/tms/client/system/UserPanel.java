@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2019  Minnesota Department of Transportation
+ * Copyright (C) 2012-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import us.mn.state.dot.sonar.Domain;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -52,7 +51,7 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 		}
 		protected final void doActionPerformed(ActionEvent e) {
 			User u = user;
-			if(u != null)
+			if (u != null)
 				do_perform(u);
 		}
 		abstract protected void do_perform(User u);
@@ -101,9 +100,6 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 	/** Role combo box */
 	private final JComboBox<Role> role_cbx;
 
-	/** Domain table panel */
-	private final ProxyTablePanel<Domain> dom_pnl;
-
 	/** Role action */
 	private final UAction role_act = new UAction("role") {
 		protected void do_perform(User u) {
@@ -133,15 +129,12 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 		r_list = new ProxyListModel<Role>(s.getSonarState().getRoles());
 		role_mdl = new IComboBoxModel<Role>(r_list);
 		role_cbx = new JComboBox<Role>(role_mdl);
-		dom_pnl = new ProxyTablePanel<Domain>(
-			new UserDomainModel(s, null));
 	}
 
 	/** Initialize the panel */
 	@Override
 	public void initialize() {
 		super.initialize();
-		dom_pnl.initialize();
 		add("user.name.full");
 		add(f_name_txt, Stretch.LAST);
 		add("user.password");
@@ -153,7 +146,6 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 		add(role_cbx, Stretch.LAST);
 		add("user.enabled");
 		add(enabled_chk, Stretch.LAST);
-		add(dom_pnl, Stretch.FULL);
 		createJobs();
 		watcher.initialize();
 		r_list.initialize();
@@ -165,7 +157,6 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 	@Override
 	public void dispose() {
 		session.removeEditModeListener(edit_lsnr);
-		dom_pnl.dispose();
 		r_list.dispose();
 		watcher.dispose();
 		super.dispose();
@@ -229,7 +220,6 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 		if (a == null) {
 			user = u;
 			updateEditMode();
-			selectUser(u);
 		}
 		if (a == null || a.equals("fullName"))
 			f_name_txt.setText(u.getFullName());
@@ -244,11 +234,6 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 		repaint();
 	}
 
-	/** Change the selected user */
-	private void selectUser(User u) {
-		dom_pnl.setModel(new UserDomainModel(session, u));
-	}
-
 	/** Clear all attributes (from ProxyView). */
 	@Override
 	public void clear() {
@@ -259,6 +244,5 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 		dn_txt.setText("");
 		role_mdl.setSelectedItem(null);
 		enabled_chk.setSelected(false);
-		selectUser(null);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,4 +35,10 @@ public interface Role extends SonarObject {
 
 	/** Get the enabled flag */
 	boolean getEnabled();
+
+	/** Set the allowed login domains */
+	void setDomains(Domain[] d);
+
+	/** Get the allowed login domains */
+	Domain[] getDomains();
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2021  Minnesota Department of Transportation
+ * Copyright (C) 2007-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import java.util.TreeSet;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.sonar.Capability;
+import us.mn.state.dot.sonar.Domain;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.RoleImpl;
 
@@ -36,15 +37,20 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 	static private SQLConnection store;
 
 	/** Role/Capability table mapping */
-	static private TableMapping mapping;
+	static private TableMapping cap_map;
+
+	/** Role/Domain table mapping */
+	static private TableMapping dom_map;
 
 	/** Lookup all the roles */
 	static public void lookup(SQLConnection c, final ServerNamespace ns)
 		throws TMSException
 	{
 		store = c;
-		mapping = new TableMapping(store, "iris", SONAR_TYPE,
+		cap_map = new TableMapping(store, "iris", SONAR_TYPE,
 			Capability.SONAR_TYPE);
+		dom_map = new TableMapping(store, "iris", SONAR_TYPE,
+			Domain.SONAR_TYPE);
 		store.query("SELECT name, enabled FROM iris." + SONAR_TYPE +
 			";", new ResultFactory()
 		{
@@ -88,14 +94,35 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 	{
 		this(n);
 		enabled = e;
-		TreeSet<IrisCapabilityImpl> caps =
+		setCapabilities(lookupCapabilities(ns));
+		setDomains(lookupDomains(ns));
+	}
+
+	/** Lookup all the capabilities for a role */
+	private IrisCapabilityImpl[] lookupCapabilities(ServerNamespace ns)
+		throws TMSException
+	{
+		TreeSet<IrisCapabilityImpl> cset =
 			new TreeSet<IrisCapabilityImpl>();
-		for (String o: mapping.lookup(this)) {
+		for (String o: cap_map.lookup(this)) {
 			Object c = ns.lookupObject("capability", o);
 			if (c instanceof IrisCapabilityImpl)
-				caps.add((IrisCapabilityImpl) c);
+				cset.add((IrisCapabilityImpl) c);
 		}
-		capabilities = caps.toArray(new IrisCapabilityImpl[0]);
+		return cset.toArray(new IrisCapabilityImpl[0]);
+	}
+
+	/** Lookup all the domains for a user */
+	private IrisDomainImpl[] lookupDomains(ServerNamespace ns)
+		throws TMSException
+	{
+		TreeSet<IrisDomainImpl> dset = new TreeSet<IrisDomainImpl>();
+		for (String o: dom_map.lookup(this)) {
+			Object d = ns.lookupObject(Domain.SONAR_TYPE, o);
+			if (d instanceof IrisDomainImpl)
+				dset.add((IrisDomainImpl) d);
+		}
+		return dset.toArray(new IrisDomainImpl[0]);
 	}
 
 	/** Compare to another role */
@@ -142,6 +169,14 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 		store.destroy(this);
 	}
 
+	/** Set the enabled flag */
+	public void doSetEnabled(boolean e) throws TMSException {
+		if (e != enabled) {
+			store.update(this, "enabled", e);
+			setEnabled(e);
+		}
+	}
+
 	/** Set the capabilities assigned to the role */
 	public void doSetCapabilities(Capability[] caps) throws TMSException {
 		TreeSet<Storable> cset = new TreeSet<Storable>();
@@ -151,15 +186,20 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 			else
 				throw new ChangeVetoException("Bad capability");
 		}
-		mapping.update(this, cset);
+		cap_map.update(this, cset);
 		setCapabilities(caps);
 	}
 
-	/** Set the enabled flag */
-	public void doSetEnabled(boolean e) throws TMSException {
-		if (e != enabled) {
-			store.update(this, "enabled", e);
-			setEnabled(e);
+	/** Set the domains assigned to the user */
+	public void doSetDomains(Domain[] doms) throws TMSException {
+		TreeSet<Storable> dset = new TreeSet<Storable>();
+		for (Domain d: doms) {
+			if (d instanceof IrisDomainImpl)
+				dset.add((IrisDomainImpl) d);
+			else
+				throw new ChangeVetoException("Bad domain");
 		}
+		dom_map.update(this, dset);
+		setDomains(doms);
 	}
 }

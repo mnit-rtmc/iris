@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2018  Minnesota Department of Transportation
+ * Copyright (C) 2007-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,17 +43,17 @@ public class UserRoleForm extends AbstractForm {
 		       s.isWritePermitted(Domain.SONAR_TYPE);
 	}
 
-	/** User tab panel */
-	private final UserTabPanel u_panel;
-
 	/** Role panel */
 	private final RolePanel r_panel;
 
-	/** Capability panel */
-	private final CapabilityPanel cap_panel;
-
 	/** Domain panel */
 	private final DomainPanel d_panel;
+
+	/** User tab panel */
+	private final UserTabPanel u_panel;
+
+	/** Capability panel */
+	private final CapabilityPanel cap_panel;
 
 	/** Connection panel */
 	private final ProxyTablePanel<Connection> c_panel;
@@ -65,10 +65,10 @@ public class UserRoleForm extends AbstractForm {
 	public UserRoleForm(Session s) {
 		super(I18N.get("user.menu"));
 		setHelpPageName("help.userroleform");
-		u_panel = new UserTabPanel(s);
 		r_panel = new RolePanel(s);
-		cap_panel = new CapabilityPanel(s);
 		d_panel = new DomainPanel(s);
+		u_panel = new UserTabPanel(s);
+		cap_panel = new CapabilityPanel(s);
 		c_panel = new ProxyTablePanel<Connection>(
 			new ConnectionModel(s));
 	}
@@ -77,15 +77,15 @@ public class UserRoleForm extends AbstractForm {
 	@Override
 	protected void initialize() {
 		super.initialize();
-		u_panel.initialize();
 		r_panel.initialize();
-		cap_panel.initialize();
 		d_panel.initialize();
+		u_panel.initialize();
+		cap_panel.initialize();
 		c_panel.initialize();
-		tab.add(I18N.get("user.plural"), u_panel);
 		tab.add(I18N.get("role.plural"), r_panel);
-		tab.add(I18N.get("capability.plural"), cap_panel);
 		tab.add(I18N.get("domain.plural"), d_panel);
+		tab.add(I18N.get("user.plural"), u_panel);
+		tab.add(I18N.get("capability.plural"), cap_panel);
 		tab.add(I18N.get("connection.plural"), c_panel);
 		add(tab);
 	}
@@ -93,10 +93,10 @@ public class UserRoleForm extends AbstractForm {
 	/** Dispose of the form */
 	@Override
 	protected void dispose() {
-		u_panel.dispose();
 		r_panel.dispose();
-		cap_panel.dispose();
 		d_panel.dispose();
+		u_panel.dispose();
+		cap_panel.dispose();
 		c_panel.dispose();
 		super.dispose();
 	}

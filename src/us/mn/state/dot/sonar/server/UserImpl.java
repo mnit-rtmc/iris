@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2018  Minnesota Department of Transportation
+ * Copyright (C) 2006-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.sonar.server;
 
-import java.util.ArrayList;
-import us.mn.state.dot.sonar.Domain;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
 
@@ -112,26 +110,6 @@ public class UserImpl implements User {
 	@Override
 	public Role getRole() {
 		return role;
-	}
-
-	/** Allowed login domains */
-	private DomainImpl[] domains = new DomainImpl[0];
-
-	/** Set the allowed login domains */
-	@Override
-	public void setDomains(Domain[] ds) {
-		ArrayList<DomainImpl> list = new ArrayList<DomainImpl>();
-		for (Domain d : ds) {
-			if (d instanceof DomainImpl)
-				list.add((DomainImpl) d);
-		}
-		domains = list.toArray(new DomainImpl[0]);
-	}
-
-	/** Get the allowed login domains */
-	@Override
-	public Domain[] getDomains() {
-		return domains;
 	}
 
 	/** Enabled flag */

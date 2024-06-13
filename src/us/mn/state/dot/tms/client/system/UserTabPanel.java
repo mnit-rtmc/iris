@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ public class UserTabPanel extends JPanel {
 	/** Create a new user tab panel */
 	public UserTabPanel(Session s) {
 		setBorder(UI.border);
-		utab_pnl = new ProxyTablePanel<User>(new UserModel(s)) {
+		utab_pnl = new ProxyTablePanel<User>(new UserTabModel(s)) {
 			protected void selectProxy() {
 				selectUser();
 				super.selectProxy();
