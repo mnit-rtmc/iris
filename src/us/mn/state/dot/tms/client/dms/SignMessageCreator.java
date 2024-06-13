@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2023  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  * Copyright (C) 2020       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -36,11 +36,6 @@ public class SignMessageCreator {
 	/** Message source bits for incident messages */
 	static private final int INCIDENT_SRC =
 		SignMsgSource.operator.bit() | SignMsgSource.incident.bit();
-
-	/** Create a SignMessage name */
-	static private String createName(int hash) {
-		return "usr_" + HexString.format(hash, 8);
-	}
 
 	/** Sign message type cache */
 	private final TypeCache<SignMessage> sign_messages;
@@ -117,15 +112,13 @@ public class SignMessageCreator {
 		boolean fb, SignMsgPriority mp, int src, Integer dur)
 	{
 		String owner = SignMessageHelper.makeMsgOwner(src, user);
-		SignMessage sm = SignMessageHelper.find(sc, inc, ms, owner,
-			fb, mp, dur);
+		String nm = "usr_" + SignMessageHelper.makeHash(sc, inc, ms,
+			owner, fb, mp, dur);
+		SignMessage sm = SignMessageHelper.lookup(nm);
 		if (sm != null)
 			return sm;
-		int hash = SignMessageHelper.hash(sc, inc, ms, owner, fb, mp,
-			dur);
-		String name = createName(hash);
-		return canAddSignMessage(name)
-		      ? createMsg(name, sc, inc, ms, owner, fb, mp, dur)
+		return canAddSignMessage(nm)
+		      ? createMsg(nm, sc, inc, ms, owner, fb, mp, dur)
 		      : null;
 	}
 
@@ -171,6 +164,6 @@ public class SignMessageCreator {
 
 	/** Check if the user can create a sign message */
 	public boolean canCreate() {
-		return canAddSignMessage(createName(0));
+		return canAddSignMessage("usr_00000000");
 	}
 }

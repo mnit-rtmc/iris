@@ -18,6 +18,7 @@ package us.mn.state.dot.tms;
 
 import java.util.Iterator;
 import java.util.Objects;
+import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -76,7 +77,7 @@ public class SignMessageHelper extends BaseHelper {
 		return (owner.length > 2) ? owner[2].trim() : "";
 	}
 
-	/** Find a sign message with matching attributes.
+	/** Make a name hash based on sign message attributes.
 	 * @param sc Sign configuration.
 	 * @param inc Associated incident (original name).
 	 * @param ms MULTI string.
@@ -84,25 +85,14 @@ public class SignMessageHelper extends BaseHelper {
 	 * @param fb Flash beacon flag.
 	 * @param mp Message priority.
 	 * @param dur Duration (null for indefinite).
-	 * @return Matching sign message, or null if not found. */
-	static public SignMessage find(SignConfig sc, String inc, String ms,
-		String owner, boolean fb, SignMsgPriority mp, Integer dur)
+	 * @return Hash code of sign message. */
+	static public String makeHash(SignConfig sc, String inc,
+		String ms, String owner, boolean fb, SignMsgPriority mp,
+		Integer dur)
 	{
-		// FIXME: use hash to implement this
-		int mpi = mp.ordinal();
-		Iterator<SignMessage> it = iterator();
-		while (it.hasNext()) {
-			SignMessage sm = it.next();
-			if (objectEquals(sc, sm.getSignConfig()) &&
-			    objectEquals(inc, sm.getIncident()) &&
-			    ms.equals(sm.getMulti()) &&
-			    objectEquals(owner, sm.getMsgOwner()) &&
-			    fb == sm.getFlashBeacon() &&
-			    mpi == sm.getMsgPriority() &&
-			    objectEquals(dur, sm.getDuration()))
-				return sm;
-		}
-		return null;
+		int hash = Objects.hash(sc.getName(), inc, ms, owner, fb, mp,
+			dur);
+		return HexString.format(hash, 8);
 	}
 
 	/** Check if a sign message is blank */
@@ -242,20 +232,5 @@ public class SignMessageHelper extends BaseHelper {
 		return (!isBlank(sm)) &&
 		       (sm.getDuration() != null) &&
 		       SignMsgSource.operator.checkBit(sourceBits(sm));
-	}
-
-	/** Make a hash code given sign message attributes.
-	 * @param sc Sign configuration.
-	 * @param inc Associated incident (original name).
-	 * @param ms MULTI string.
-	 * @param owner Message owner.
-	 * @param fb Flash beacon flag.
-	 * @param mp Message priority.
-	 * @param dur Duration (null for indefinite).
-	 * @return Matching sign message, or null if not found. */
-	static public int hash(SignConfig sc, String inc, String ms,
-		String owner, boolean fb, SignMsgPriority mp, Integer dur)
-	{
-		return Objects.hash(sc.getName(), inc, ms, owner, fb, mp, dur);
 	}
 }

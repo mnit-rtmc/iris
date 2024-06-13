@@ -140,7 +140,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 
 	/** Compare two (possibly-null) objects for equality */
 	static protected boolean objectEquals(Object o0, Object o1) {
-		return (o0 != null) ? o0.equals(o1) : o1 == null;
+		return BaseHelper.objectEquals(o0, o1);
 	}
 
 	/** Lookup a sonar object */
