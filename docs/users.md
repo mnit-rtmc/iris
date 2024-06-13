@@ -1,13 +1,25 @@
-# Roles
+# Users
 
-Select `View ➔ System ➔ Roles` menu item
+Select `View ➔ System ➔ Users` menu item
 
-IRIS contains a set of user accounts which are allowed to access the system.
-Each account must be assigned to a specific [role](#roles).  During login, the
-_user_ account is checked for validity.  For a successful login, the _user_ and
-_role_ must both be enabled.  If the _user_ has a **distinguished name** (dn),
-then authentication is performed using [LDAP].  Otherwise, the supplied password
-is checked against the stored password hash for the account.
+User authentication is determined by [user ID](#user-ids), [role](#roles),
+and [domains](#domains).
+
+## User IDs
+
+A user must have an ID to log in to IRIS.  The user's permissions are
+determined by their [role](#roles).
+
+If the user has a **distinguished name** (dn), then authentication is
+performed using [LDAP].  Otherwise, the supplied password is checked against
+the stored password hash for the account.
+
+In addition to the password, these checks are performed:
+ - The user must be enabled
+ - The role must be enabled
+ - The connection IP must be within an enabled domain for the role
+ - (Web UI) All IPs in the `X-Forwarded-For` HTTP header must be within enabled
+   domains
 
 <details>
 <summary>API Resources 🕵️ </summary>
@@ -20,26 +32,6 @@ is checked against the stored password hash for the account.
 | 👁️  View      | name             |           |
 | 💡 Manage    | enabled          |           |
 | 🔧 Configure | full\_name, role | dn        |
-
-</details>
-
-## Domains
-
-A network _domain_ uses [CIDR] to restrict the IP addresses from which a _user_
-can connect to IRIS.  To log in, a _user_ must be assigned to a matching
-_enabled_ domain.
-
-<details>
-<summary>API Resources 🕵️ </summary>
-
-* `iris/api/domain`
-* `iris/api/domain/{name}`
-
-| Access       | Primary | Secondary |
-|--------------|---------|-----------|
-| 👁️  View      | name    |           |
-| 💡 Manage    | enabled |           |
-| 🔧 Configure |         | block     |
 
 </details>
 
@@ -65,6 +57,25 @@ make further changes will be lost immediately.**
 | 👁️  View      | name       |           |
 | 💡 Manage    | enabled    |           |
 | 🔧 Configure |            | domains   |
+
+</details>
+
+## Domains
+
+A network _domain_ uses [CIDR] to restrict the IP addresses from which a _user_
+can connect to IRIS.
+
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/domain`
+* `iris/api/domain/{name}`
+
+| Access       | Primary | Secondary |
+|--------------|---------|-----------|
+| 👁️  View      | name    |           |
+| 💡 Manage    | enabled |           |
+| 🔧 Configure |         | block     |
 
 </details>
 
