@@ -84,5 +84,5 @@ Notes:
    appearing on signs
 
 
-[edit mode]: user_interface.html#edit-mode
+[edit mode]: ui.html#edit-mode
 [message pattern]: message_patterns.html

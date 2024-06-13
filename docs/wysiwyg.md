@@ -339,7 +339,7 @@ Keys                             | Function
 
 [action tag]: action_plans.html#dms-action-tags
 [DMS]: dms.html
-[edit mode]: user_interface.html#edit-mode
+[edit mode]: ui.html#edit-mode
 [font]: fonts.html
 [graphic images]: graphics.html
 [MULTI]: multi.html
