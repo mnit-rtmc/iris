@@ -576,8 +576,13 @@ pub const ROLE_ALL: &str = "\
 
 /// SQL query for one role (secondary)
 pub const ROLE_ONE: &str = "\
-  SELECT name, enabled \
-  FROM iris.role \
+  SELECT name, enabled, ARRAY(\
+           SELECT domain \
+           FROM iris.role_domain \
+           WHERE role = r.name \
+           ORDER BY domain\
+         ) AS domains \
+  FROM iris.role r \
   WHERE name = $1";
 
 /// SQL query for all sign configs (primary)
@@ -659,13 +664,8 @@ pub const USER_ALL: &str = "\
 
 /// SQL query for one user (secondary)
 pub const USER_ONE: &str = "\
-  SELECT name, full_name, dn, role, enabled, ARRAY(\
-           SELECT domain \
-           FROM iris.user_id_domain \
-           WHERE user_id = u.name \
-           ORDER BY domain\
-         ) AS domains \
-  FROM iris.user_id u \
+  SELECT name, full_name, dn, role, enabled \
+  FROM iris.user_id \
   WHERE name = $1";
 
 /// SQL query for all video monitors (primary)

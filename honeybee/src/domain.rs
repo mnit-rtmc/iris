@@ -21,11 +21,14 @@ use tokio_postgres::Row;
 
 /// Query domains for a user
 const QUERY_BY_USER: &str = "\
-  SELECT name, block, enabled \
+  SELECT d.name, block, d.enabled \
   FROM iris.domain d \
-  JOIN iris.user_id_domain ud ON ud.domain = d.name \
+  JOIN iris.role_domain rd ON rd.domain = d.name \
+  JOIN iris.user_id u ON u.role = rd.role \
+  JOIN iris.role r ON r.name = u.role \
   WHERE d.enabled = true \
-    AND ud.user_id = $1";
+    AND r.enabled = true \
+    AND u.name = $1";
 
 /// Domain
 #[derive(Clone, Debug, Eq, PartialEq, Deserialize, Serialize)]

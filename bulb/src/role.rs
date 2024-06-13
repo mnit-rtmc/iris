@@ -22,6 +22,8 @@ use std::borrow::Cow;
 pub struct Role {
     pub name: String,
     pub enabled: bool,
+    // secondary attributes
+    pub domains: Option<Vec<String>>,
 }
 
 /// Ancillary role data
