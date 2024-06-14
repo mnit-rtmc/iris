@@ -10,9 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{
-    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
-};
+use crate::card::{inactive_attr, AncillaryData, Card, View, EDIT_BUTTON};
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::fetch::Uri;
@@ -122,7 +120,7 @@ impl GateArm {
         let inactive = inactive_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='{NAME} end'>{name} {item}</div>\
+            "<div class='title row'>{name} {item}</div>\
             <div class='info fill{inactive}'>{location}</div>"
         )
     }

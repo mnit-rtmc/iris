@@ -46,14 +46,8 @@ use serde::Serialize;
 use serde_json::map::Map;
 use serde_json::Value;
 use std::borrow::Cow;
-use std::iter::empty;
+use std::iter::{empty, repeat};
 use wasm_bindgen::JsValue;
-
-/// CSS class for titles
-const TITLE: &str = "title";
-
-/// CSS class for names
-pub const NAME: &str = "ob_name";
 
 /// Compact "Create" card
 const CREATE_COMPACT: &str = "<span class='create'>Create 🆕</span>";
@@ -988,54 +982,15 @@ async fn handle_input_x<C: Card>(name: &str, id: String) -> Result<()> {
     Ok(())
 }
 
-/// Get resource display
-const fn display_res(res: Res) -> &'static str {
-    match res {
-        Res::Alarm => Alarm::DNAME,
-        Res::Beacon => Beacon::DNAME,
-        Res::CabinetStyle => CabinetStyle::DNAME,
-        Res::Camera => Camera::DNAME,
-        Res::CommConfig => CommConfig::DNAME,
-        Res::CommLink => CommLink::DNAME,
-        Res::Controller => Controller::DNAME,
-        Res::Detector => Detector::DNAME,
-        Res::Dms => Dms::DNAME,
-        Res::Domain => Domain::DNAME,
-        Res::FlowStream => FlowStream::DNAME,
-        Res::GateArm => GateArm::DNAME,
-        Res::GateArmArray => GateArmArray::DNAME,
-        Res::GeoLoc => GeoLoc::DNAME,
-        Res::Gps => Gps::DNAME,
-        Res::LaneMarking => LaneMarking::DNAME,
-        Res::LcsArray => LcsArray::DNAME,
-        Res::LcsIndication => LcsIndication::DNAME,
-        Res::Modem => Modem::DNAME,
-        Res::Permission => Permission::DNAME,
-        Res::RampMeter => RampMeter::DNAME,
-        Res::Role => Role::DNAME,
-        Res::TagReader => TagReader::DNAME,
-        Res::User => User::DNAME,
-        Res::VideoMonitor => VideoMonitor::DNAME,
-        Res::WeatherSensor => WeatherSensor::DNAME,
-        _ => unimplemented!(),
-    }
-}
-
 /// Build a create card
 fn html_card_create(res: Res, create: &str) -> String {
-    let display = display_res(res);
-    format!(
-        "<div class='row'>\
-          <span class='{TITLE}'>{display}</span>\
-          <span class='{TITLE}'>Create</span>\
-          <span class='{NAME}'>🆕</span>\
-          {CLOSE_BUTTON}\
-        </div>\
-        {create}
-        <div class='row end'>\
-          {SAVE_BUTTON}\
-        </div>"
-    )
+    let name = format!("{} 🆕", res.symbol());
+    let mut html = html_title_row(&[&name, "Create", CLOSE_BUTTON], &[]);
+    html.push_str(create);
+    html.push_str("<div class='row end'>");
+    html.push_str(SAVE_BUTTON);
+    html.push_str("</div>");
+    html
 }
 
 /// Build an edit card
@@ -1045,37 +1000,40 @@ fn html_card_edit(
     edit: &str,
     delete: &'static str,
 ) -> String {
-    let display = display_res(res);
-    let name = HtmlStr::new(name);
-    format!(
-        "<div class='row'>\
-          <span class='{TITLE}'>{display}</span>\
-          <span class='{TITLE}'>Edit</span>\
-          <span class='{NAME}'>{name}</span>\
-          {CLOSE_BUTTON}\
-        </div>\
-        {edit}\
-        <div class='row'>\
-          <span></span>\
-          {delete}\
-          {SAVE_BUTTON}\
-        </div>"
-    )
+    let name = format!("{} {}", res.symbol(), HtmlStr::new(name));
+    let mut html = html_title_row(&[&name, "Edit", CLOSE_BUTTON], &[]);
+    html.push_str(edit);
+    html.push_str("<div class='row'><span></span>");
+    html.push_str(delete);
+    html.push_str(SAVE_BUTTON);
+    html.push_str("</div>");
+    html
 }
 
 /// Build a status card
 fn html_card_status(res: Res, name: &str, status: &str) -> String {
-    let display = display_res(res);
-    let name = HtmlStr::new(name);
-    format!(
-        "<div class='row'>\
-          <span class='{TITLE}'>{display}</span>\
-          <span class='{TITLE}'>Status</span>\
-          <span class='{NAME}'>{name}</span>\
-          {CLOSE_BUTTON}\
-        </div>\
-        {status}"
-    )
+    let name = format!("{} {}", res.symbol(), HtmlStr::new(name));
+    let mut html = html_title_row(&[&name, CLOSE_BUTTON], &[]);
+    html.push_str(status);
+    html
+}
+
+/// Build an HTML title row (div) from a slice of spans
+pub fn html_title_row(spans: &[&str], cls: &[&str]) -> String {
+    let mut row = String::from("<div class='title row'>");
+    for (span, c) in spans.iter().zip(cls.iter().chain(repeat(&""))) {
+        if !c.is_empty() {
+            row.push_str("<span class='");
+            row.push_str(c);
+            row.push_str("'>");
+        } else {
+            row.push_str("<span>");
+        }
+        row.push_str(span);
+        row.push_str("</span>");
+    }
+    row.push_str("</div>");
+    row
 }
 
 /// Get attribute for inactive cards

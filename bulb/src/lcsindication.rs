@@ -10,9 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{
-    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
-};
+use crate::card::{inactive_attr, AncillaryData, Card, View, EDIT_BUTTON};
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::fetch::Uri;
@@ -121,7 +119,7 @@ impl LcsIndication {
         let inactive = inactive_attr(self.controller.is_some());
         let indication = anc.indication(self);
         format!(
-            "<div class='{NAME} end'>{name}</div>\
+            "<div class='title row'>{name}</div>\
             <div class='info fill{inactive}'>{indication}</div>"
         )
     }

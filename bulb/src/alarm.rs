@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{inactive_attr, Card, View, EDIT_BUTTON, NAME};
+use crate::card::{inactive_attr, Card, View, EDIT_BUTTON};
 use crate::device::{Device, DeviceAnc};
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
@@ -55,7 +55,7 @@ impl Alarm {
         let item_state = self.item_state(anc);
         let description = HtmlStr::new(&self.description);
         format!(
-            "<div class='{NAME} end'>{name} {item_state}</div>\
+            "<div class='title row'>{name} {item_state}</div>\
             <div class='info fill{inactive}'>{description}</div>"
         )
     }

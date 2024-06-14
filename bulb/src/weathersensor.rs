@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{inactive_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME};
+use crate::card::{inactive_attr, Card, View, EDIT_BUTTON, LOC_BUTTON};
 use crate::device::{Device, DeviceAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use humantime::format_duration;
@@ -701,7 +701,7 @@ impl WeatherSensor {
         let inactive = inactive_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='{NAME} end'>{name} {item_state}</div>\
+            "<div class='title row'>{name} {item_state}</div>\
             <div class='info fill{inactive}'>{location}</div>"
         )
     }

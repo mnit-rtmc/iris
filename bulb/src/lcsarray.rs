@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card, View, EDIT_BUTTON, NAME};
+use crate::card::{AncillaryData, Card, View, EDIT_BUTTON};
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::util::{ContainsLower, Fields, HtmlStr};
@@ -89,8 +89,10 @@ impl LcsArray {
         let name = HtmlStr::new(self.name());
         let lock = anc.lock(self);
         format!(
-            "<span>{lock}</span>\
-            <span class='{NAME}'>{name}</span>"
+            "<div class='title row'>\
+              <span>{name}</span>\
+              <span>{lock}</span>\
+            </div>"
         )
     }
 

@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card, View, NAME};
+use crate::card::{AncillaryData, Card, View};
 use crate::error::{Error, Result};
 use crate::fetch::Uri;
 use crate::item::ItemState;
@@ -179,7 +179,7 @@ impl Permission {
         let access = item_state(self.access_n);
         let resource = HtmlStr::new(&self.resource_n);
         format!(
-            "<div class='{NAME} end'>{role} {access} {id}</div>\
+            "<div class='title row'>{role} {access} {id}</div>\
             <div class='info fill'>{resource}</div>"
         )
     }

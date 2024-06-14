@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME};
+use crate::card::{AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON};
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::gatearm::item_state;
@@ -86,7 +86,7 @@ impl GateArmArray {
         let item = item_state(self.arm_state);
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='{NAME} end'>{name} {item}</div>\
+            "<div class='title row'>{name} {item}</div>\
             <div class='info fill'>{location}</div>"
         )
     }

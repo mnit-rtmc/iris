@@ -12,7 +12,7 @@
 //
 use crate::cabinetstyle::CabinetStyle;
 use crate::card::{
-    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
+    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON,
 };
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
@@ -333,7 +333,7 @@ impl Controller {
         let inactive = inactive_attr(self.is_active());
         let link_drop = HtmlStr::new(self.link_drop());
         format!(
-            "<div class='{NAME} end'>{name} {item_state}</div>\
+            "<div class='title row'>{name} {item_state}</div>\
             <div class='info fill{inactive}'>{link_drop}</div>"
         )
     }

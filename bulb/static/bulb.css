@@ -326,10 +326,7 @@ label:has(+ #sb_resource) {
 }
 .title {
   font-weight: bold;
-}
-.ob_name {
-  font-weight: bold;
-  font-size: 70%;
+  font-size: smaller;
 }
 .info {
   font-style: italic;
@@ -338,6 +335,10 @@ label:has(+ #sb_resource) {
   text-overflow: ellipsis;
   /* padding keeps italic text from overflowing */
   padding-right: 0.05rem;
+}
+.highlight {
+  color: #862;
+  background-color: #fff;
 }
 .create {
   font-style: italic;

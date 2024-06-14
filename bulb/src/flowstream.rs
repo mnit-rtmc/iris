@@ -34,7 +34,7 @@ impl FlowStream {
         let name = HtmlStr::new(self.name());
         let inactive = inactive_attr(self.controller.is_some());
         let item_state = anc.item_state(self);
-        format!("<div class='end{inactive}'>{name} {item_state}</div>")
+        format!("<div class='title row{inactive}'>{name} {item_state}</div>")
     }
 
     /// Convert to Status HTML

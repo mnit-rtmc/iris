@@ -10,9 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{
-    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, NAME,
-};
+use crate::card::{inactive_attr, AncillaryData, Card, View, EDIT_BUTTON};
 use crate::commconfig::CommConfig;
 use crate::controller::Controller;
 use crate::error::Result;
@@ -149,7 +147,7 @@ impl CommLink {
         let inactive = inactive_attr(self.poll_enabled);
         let description = HtmlStr::new(&self.description);
         format!(
-            "<div class='{NAME} end'>{name} {item_state}</div>\
+            "<div class='title row'>{name} {item_state}</div>\
             <div class='info fill{inactive}'>{description}</div>"
         )
     }

@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card, View, NAME};
+use crate::card::{AncillaryData, Card, View};
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, Input};
 use resources::Res;
@@ -48,7 +48,7 @@ impl Role {
     fn to_html_compact(&self) -> String {
         let name = self.name();
         let item_state = self.item_state();
-        format!("<div class='{NAME} end'>{name} {item_state}</div>")
+        format!("<div class='title row'>{name} {item_state}</div>")
     }
 
     /// Convert to Edit HTML

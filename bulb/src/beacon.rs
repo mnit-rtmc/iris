@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME};
+use crate::card::{AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON};
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
 use crate::fetch::{Action, Uri};
@@ -138,7 +138,7 @@ impl Beacon {
         };
         let message = HtmlStr::new(&self.message);
         format!(
-            "<div class='{NAME} end'>{name} {item_states}</div>\
+            "<div class='title row'>{name} {item_states}</div>\
             <div class='beacon-container row center'>\
               <button id='ob_flashing' disabled></button>\
               <label for='ob_flashing' class='beacon-disabled'>\

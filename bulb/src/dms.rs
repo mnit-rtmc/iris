@@ -10,7 +10,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME};
+use crate::card::{
+    html_title_row, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON,
+};
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
 use crate::fetch::{Action, ContentType, Uri};
@@ -724,6 +726,13 @@ impl Dms {
             .unwrap_or("")
     }
 
+    /// Get user of current message
+    fn current_user<'a>(&'a self, anc: &'a DmsAnc) -> &'a str {
+        anc.sign_message(self.msg_current.as_deref())
+            .map(|m| m.user())
+            .unwrap_or("")
+    }
+
     /// Check if DMS has a given hashtag
     fn has_hashtag(&self, hashtag: &str) -> bool {
         match &self.hashtags {
@@ -777,8 +786,13 @@ impl Dms {
     fn to_html_compact(&self, anc: &DmsAnc) -> String {
         let name = HtmlStr::new(self.name());
         let item_states = self.item_states(anc);
-        let mut html =
-            format!("<div class='{NAME} end'>{name} {item_states}</div>");
+        let nm = format!("{name} {item_states}");
+        let user = self.current_user(anc);
+        let cls = match crate::app::user() {
+            Some(u) if u == user => "info highlight",
+            _ => "info",
+        };
+        let mut html = html_title_row(&[&nm, user], &["", cls]);
         if let Some(msg_current) = &self.msg_current {
             html.push_str("<img class='message' src='/iris/img/");
             html.push_str(msg_current);

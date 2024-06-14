@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card, View, NAME};
+use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
@@ -199,7 +199,7 @@ impl CommConfig {
         let name = HtmlStr::new(self.name());
         let description = HtmlStr::new(&self.description);
         format!(
-            "<div class='{NAME} end'>{name}</div>\
+            "<div class='title row'>{name}</div>\
             <div class='info fill'>{description}</div>"
         )
     }
