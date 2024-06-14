@@ -475,7 +475,6 @@ $resource_is_base$ LANGUAGE sql;
 
 CREATE TABLE iris.hashtag (
     resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
-    -- FIXME: replace with int ID
     name VARCHAR(20) NOT NULL,
     hashtag VARCHAR(16) NOT NULL,
 
@@ -845,9 +844,9 @@ GRANT SELECT ON client_event_view TO PUBLIC;
 -- Direction, Road, Geo Location, R_Node, Map Extent
 --
 CREATE TABLE iris.direction (
-	id SMALLINT PRIMARY KEY,
-	direction VARCHAR(4) NOT NULL,
-	dir VARCHAR(4) NOT NULL
+    id SMALLINT PRIMARY KEY,
+    direction VARCHAR(4) NOT NULL,
+    dir VARCHAR(4) NOT NULL
 );
 
 COPY iris.direction (id, direction, dir) FROM stdin;
@@ -861,10 +860,10 @@ COPY iris.direction (id, direction, dir) FROM stdin;
 \.
 
 CREATE TABLE iris.road_class (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(12) NOT NULL,
-	grade CHAR NOT NULL,
-	scale REAL NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(12) NOT NULL,
+    grade CHAR NOT NULL,
+    scale REAL NOT NULL
 );
 
 COPY iris.road_class (id, description, grade, scale) FROM stdin;
@@ -879,9 +878,9 @@ COPY iris.road_class (id, description, grade, scale) FROM stdin;
 \.
 
 CREATE TABLE iris.road_modifier (
-	id SMALLINT PRIMARY KEY,
-	modifier text NOT NULL,
-	mod VARCHAR(2) NOT NULL
+    id SMALLINT PRIMARY KEY,
+    modifier TEXT NOT NULL,
+    mod VARCHAR(2) NOT NULL
 );
 
 COPY iris.road_modifier (id, modifier, mod) FROM stdin;
@@ -927,10 +926,10 @@ CREATE VIEW road_view AS
 GRANT SELECT ON road_view TO PUBLIC;
 
 CREATE TABLE iris.road_affix (
-	name VARCHAR(12) PRIMARY KEY,
-	prefix BOOLEAN NOT NULL,
-	fixup VARCHAR(12),
-	allow_retain BOOLEAN NOT NULL
+    name VARCHAR(12) PRIMARY KEY,
+    prefix BOOLEAN NOT NULL,
+    fixup VARCHAR(12),
+    allow_retain BOOLEAN NOT NULL
 );
 
 COPY iris.road_affix (name, prefix, fixup, allow_retain) FROM stdin;
@@ -1146,17 +1145,17 @@ CREATE VIEW r_node_view AS
 GRANT SELECT ON r_node_view TO PUBLIC;
 
 CREATE VIEW roadway_station_view AS
-	SELECT station_id, roadway, road_dir, cross_mod, cross_street, active,
-	       speed_limit
-	FROM iris.r_node r, geo_loc_view l
-	WHERE r.geo_loc = l.name AND station_id IS NOT NULL;
+    SELECT station_id, roadway, road_dir, cross_mod, cross_street, active,
+           speed_limit
+    FROM iris.r_node r, geo_loc_view l
+    WHERE r.geo_loc = l.name AND station_id IS NOT NULL;
 GRANT SELECT ON roadway_station_view TO PUBLIC;
 
 CREATE TABLE iris.map_extent (
-	name VARCHAR(20) PRIMARY KEY,
-	lat real NOT NULL,
-	lon real NOT NULL,
-	zoom INTEGER NOT NULL
+    name VARCHAR(20) PRIMARY KEY,
+    lat real NOT NULL,
+    lon real NOT NULL,
+    zoom INTEGER NOT NULL
 );
 
 --
