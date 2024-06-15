@@ -150,12 +150,9 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %dir %{_clientdir}/images
 %dir %{_clientdir}/lib
 %{_clientdir}/index.html
-%{_clientdir}/mail.jnlp
 %{_clientdir}/iris-client.jnlp
 %{_clientdir}/images/iris.png
 %{_clientdir}/images/iris_icon.png
-%{_clientdir}/lib/javax.activation.jar
-%{_clientdir}/lib/mail.jar
 %{_clientdir}/lib/jna-@@JNA.VERSION@@.jar
 %{_clientdir}/lib/jna-platform-@@JNA.VERSION@@.jar
 %{_clientdir}/lib/gst1-java-core-@@GST.JAVA.VERSION@@.jar
