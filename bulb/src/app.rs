@@ -22,6 +22,7 @@ pub enum NotifyState {
     Starting,
     Offline,
     Updating,
+    GoodUpdating,
     Good,
 }
 
@@ -32,8 +33,16 @@ impl NotifyState {
         match self {
             Self::Starting => "⭮ ⚪",
             Self::Offline => "⭮ ⚫",
-            Self::Updating => "⭮ 🟡",
+            Self::Updating | Self::GoodUpdating => "⭮ 🟡",
             Self::Good => "⭮ 🟢",
+        }
+    }
+
+    /// Get button disabled value for a state
+    pub const fn disabled(self) -> bool {
+        match self {
+            Self::GoodUpdating | Self::Good => true,
+            _ => false,
         }
     }
 }

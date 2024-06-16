@@ -677,8 +677,9 @@ fn add_eventsource_listener() {
 
 /// Set refresh button text
 fn set_notify_state(ns: NotifyState) {
-    let sb_refresh = Doc::get().elem::<Element>("sb_refresh");
+    let sb_refresh = Doc::get().elem::<HtmlButtonElement>("sb_refresh");
     sb_refresh.set_inner_html(ns.as_str());
+    sb_refresh.set_disabled(ns.disabled());
 }
 
 /// Handle SSE notify from server
@@ -692,7 +693,7 @@ async fn handle_notify(payload: String) {
         console::log_1(&format!("unknown channel: {chan}").into());
         return;
     }
-    set_notify_state(NotifyState::Updating);
+    set_notify_state(NotifyState::GoodUpdating);
     app::defer_action(DeferredAction::SetNotifyState(NotifyState::Good), 600);
     do_future(update_card_list()).await;
 }
