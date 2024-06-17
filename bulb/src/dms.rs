@@ -1047,7 +1047,7 @@ impl Card for Dms {
     /// All item states as html options
     const ITEM_STATES: &'static str = "<option value=''>all ↴\
          <option value='🔹'>🔹 available\
-         <option value='🔶'>🔶 deployed\
+         <option value='🔶' selected>🔶 deployed\
          <option value='🗓️'>🗓️ planned\
          <option value='👽'>👽 external\
          <option value='🎯'>🎯 dedicated\
