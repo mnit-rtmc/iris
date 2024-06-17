@@ -303,7 +303,10 @@ label:has(+ #sb_resource) {
   white-space: nowrap;
   overflow: hidden;
   box-sizing: border-box;
-  padding: 0.1rem 0.2rem;
+  padding-top: 0.1rem;
+  padding-bottom: 0;
+  padding-left: 0.2rem;
+  padding-right: 0.2rem;
   margin: 0.1rem;
   background-color: #eee;
   border-radius: 0.1rem;
@@ -330,6 +333,7 @@ label:has(+ #sb_resource) {
 }
 .info {
   font-style: italic;
+  font-size: smaller;
   color: #448;
   overflow: hidden;
   text-overflow: ellipsis;
