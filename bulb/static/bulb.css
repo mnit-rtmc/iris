@@ -336,10 +336,6 @@ label:has(+ #sb_resource) {
   /* padding keeps italic text from overflowing */
   padding-right: 0.05rem;
 }
-.highlight {
-  color: #862;
-  background-color: #fff;
-}
 .create {
   font-style: italic;
   font-size: smaller;

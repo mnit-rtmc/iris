@@ -816,11 +816,17 @@ impl Dms {
         let item_states = self.item_states(anc);
         let nm = format!("{name} {item_states}");
         let user = self.current_user(anc);
-        let cls = match crate::app::user() {
-            Some(u) if u == user => "info highlight",
-            _ => "info",
+        let user = match crate::app::user() {
+            Some(u) if u == user => format!("👤 {user}"),
+            _ => {
+                if user != "AUTO" {
+                    user.to_string()
+                } else {
+                    "".to_string()
+                }
+            }
         };
-        let mut html = html_title_row(&[&nm, user], &["", cls]);
+        let mut html = html_title_row(&[&nm, &user], &["", "info"]);
         if let Some(msg_current) = &self.msg_current {
             html.push_str("<img class='message' src='/iris/img/");
             html.push_str(msg_current);
