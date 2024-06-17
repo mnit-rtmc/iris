@@ -832,38 +832,36 @@ impl Dms {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &DmsAnc, config: bool) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
-        let mut status = format!("<div class='info fill'>{location}</div>");
+        let mut html = format!("<div class='info fill'>{location}</div>");
         if let Some(msg_current) = &self.msg_current {
-            status.push_str("<img class='message' src='/iris/img/");
-            status.push_str(msg_current);
-            status.push_str(".gif'>");
+            html.push_str("<img class='message' src='/iris/img/");
+            html.push_str(msg_current);
+            html.push_str(".gif'>");
         }
-        status.push_str("<div class='row fill'>");
-        status.push_str("<span class='start'>");
+        html.push_str("<div class='row fill'>");
+        html.push_str("<span class='start'>");
         if let Some(expire_time) = &self.expire_time {
             match DateTime::parse_from_rfc3339(expire_time) {
-                Ok(dt) => {
-                    status.push_str(&format!("⏲️ {}", &dt.format("%H:%M")))
-                }
-                _ => status.push_str("expires"),
+                Ok(dt) => html.push_str(&format!("⏲️ {}", &dt.format("%H:%M"))),
+                _ => html.push_str("expires"),
             }
         }
-        status.push_str("</span>");
-        status.push_str("<span class='end'>");
-        status.push_str(&self.item_states(anc).to_html());
-        status.push_str("</span>");
-        status.push_str("</div>");
+        html.push_str("</span>");
+        html.push_str("<span class='end'>");
+        html.push_str(&self.item_states(anc).to_html());
+        html.push_str("</span>");
+        html.push_str("</div>");
         if let Some(pats) = &self.compose_patterns(anc) {
-            status.push_str(pats);
+            html.push_str(pats);
         }
         if config {
-            status.push_str("<div class='row'>");
-            status.push_str(&anc.dev.controller_button());
-            status.push_str(LOC_BUTTON);
-            status.push_str(EDIT_BUTTON);
-            status.push_str("</div>");
+            html.push_str("<div class='row'>");
+            html.push_str(&anc.dev.controller_button());
+            html.push_str(LOC_BUTTON);
+            html.push_str(EDIT_BUTTON);
+            html.push_str("</div>");
         }
-        status
+        html
     }
 
     /// Build compose pattern HTML
