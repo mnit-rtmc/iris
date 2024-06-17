@@ -163,7 +163,7 @@ impl Beacon {
         };
         let beacon_state = self.beacon_state(anc);
         let message = HtmlStr::new(&self.message);
-        let mut status = format!(
+        let mut html = format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
             </div>\
@@ -183,13 +183,13 @@ impl Beacon {
             </div>"
         );
         if config {
-            status.push_str("<div class='row'>");
-            status.push_str(&anc.dev.controller_button());
-            status.push_str(LOC_BUTTON);
-            status.push_str(EDIT_BUTTON);
-            status.push_str("</div>");
+            html.push_str("<div class='row'>");
+            html.push_str(&anc.dev.controller_button());
+            html.push_str(LOC_BUTTON);
+            html.push_str(EDIT_BUTTON);
+            html.push_str("</div>");
         }
-        status
+        html
     }
 
     /// Convert to Edit HTML

@@ -45,18 +45,18 @@ impl VideoMonitor {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &VideoMonitorAnc, config: bool) -> String {
         let mon_num = self.mon_num;
-        let mut status = format!(
+        let mut html = format!(
             "<div class='row'>\
               <span class='info'>{mon_num}</span>\
             </div>"
         );
         if config {
-            status.push_str("<div class='row'>");
-            status.push_str(&anc.controller_button());
-            status.push_str(EDIT_BUTTON);
-            status.push_str("</div>");
+            html.push_str("<div class='row'>");
+            html.push_str(&anc.controller_button());
+            html.push_str(EDIT_BUTTON);
+            html.push_str("</div>");
         }
-        status
+        html
     }
 
     /// Convert to Edit HTML

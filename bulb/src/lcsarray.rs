@@ -99,18 +99,18 @@ impl LcsArray {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &LcsArrayAnc, config: bool) -> String {
         let lock = anc.lock(self);
-        let mut status = format!(
+        let mut html = format!(
             "<div class='row'>\
               <span class='info'>{lock}</span>\
             </div>"
         );
         if config {
-            status.push_str("<div class='row'>");
-            status.push_str("<span></span>");
-            status.push_str(EDIT_BUTTON);
-            status.push_str("</div>");
+            html.push_str("<div class='row'>");
+            html.push_str("<span></span>");
+            html.push_str(EDIT_BUTTON);
+            html.push_str("</div>");
         }
-        status
+        html
     }
 
     /// Convert to Edit HTML

@@ -96,18 +96,18 @@ impl GateArmArray {
         let location = HtmlStr::new(&self.location).with_len(64);
         let item = item_state(self.arm_state);
         let desc = item.description();
-        let mut status = format!(
+        let mut html = format!(
             "<div class='info'>{location}</div>\
             <div class='info'>{item} {desc}</div>"
         );
         if config {
-            status.push_str("<div class='row'>");
-            status.push_str("<span></span>");
-            status.push_str(LOC_BUTTON);
-            status.push_str(EDIT_BUTTON);
-            status.push_str("</div>");
+            html.push_str("<div class='row'>");
+            html.push_str("<span></span>");
+            html.push_str(LOC_BUTTON);
+            html.push_str(EDIT_BUTTON);
+            html.push_str("</div>");
         }
-        status
+        html
     }
 
     /// Convert to Edit HTML

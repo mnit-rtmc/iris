@@ -713,7 +713,7 @@ impl WeatherSensor {
         let alt_id = HtmlStr::new(&self.alt_id);
         let item_state = anc.item_state(self);
         let item_desc = item_state.description();
-        let mut status = format!(
+        let mut html = format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
             </div>\
@@ -724,22 +724,22 @@ impl WeatherSensor {
             <span>{item_state} {item_desc}</span>"
         );
         if let Some(sample_time) = &self.sample_time {
-            status.push_str(&format!(
+            html.push_str(&format!(
                 "<div class='row'>\
                   <span>Obs</span>\
                   <span class='info'>{sample_time}</span>\
                 </div>"
             ));
         }
-        status.push_str(&self.sample_html());
+        html.push_str(&self.sample_html());
         if config {
-            status.push_str("<div class='row'>");
-            status.push_str(&anc.controller_button());
-            status.push_str(LOC_BUTTON);
-            status.push_str(EDIT_BUTTON);
-            status.push_str("</div>");
+            html.push_str("<div class='row'>");
+            html.push_str(&anc.controller_button());
+            html.push_str(LOC_BUTTON);
+            html.push_str(EDIT_BUTTON);
+            html.push_str("</div>");
         }
-        status
+        html
     }
 
     /// Convert to Edit HTML

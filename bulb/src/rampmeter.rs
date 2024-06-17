@@ -46,19 +46,19 @@ impl RampMeter {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &RampMeterAnc, config: bool) -> String {
         let location = HtmlStr::new(&self.location).with_len(64);
-        let mut status = format!(
+        let mut html = format!(
             "<div class='row'>\
               <span class='info'>{location}</span>\
             </div>"
         );
         if config {
-            status.push_str("<div class='row'>");
-            status.push_str(&anc.controller_button());
-            status.push_str(LOC_BUTTON);
-            status.push_str(EDIT_BUTTON);
-            status.push_str("</div>");
+            html.push_str("<div class='row'>");
+            html.push_str(&anc.controller_button());
+            html.push_str(LOC_BUTTON);
+            html.push_str(EDIT_BUTTON);
+            html.push_str("</div>");
         }
-        status
+        html
     }
 
     /// Convert to Edit HTML
