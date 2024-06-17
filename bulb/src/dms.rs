@@ -478,7 +478,7 @@ impl SignMessage {
             states = states.with(ItemState::Planned, self.user());
         }
         if sources.contains("external") {
-            states = states.with(ItemState::External, "");
+            states = states.with(ItemState::External, sources);
         }
         if sources.is_empty() && !blank {
             states = states.with(ItemState::External, self.system());
