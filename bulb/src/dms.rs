@@ -45,6 +45,27 @@ const LOW_1: u32 = 1;
 /// High 1 message priority
 const HIGH_1: u32 = 11;
 
+/// Expire select element
+const EXPIRE_SELECT: &str = "<select id='mc_expire'>\
+<option value=''>⏲️ \
+<option value='5'>5 m\
+<option value='10'>10 m\
+<option value='15'>15 m\
+<option value='30'>30 m\
+<option value='60'>60 m\
+<option value='90'>90 m\
+<option value='120'>2 h\
+<option value='180'>3 h\
+<option value='240'>4 h\
+<option value='300'>5 h\
+<option value='360'>6 h\
+<option value='480'>8 h\
+<option value='600'>10 h\
+<option value='720'>12 h\
+<option value='960'>16 h\
+<option value='1440'>24 h\
+</select>";
+
 /// Send button
 const SEND_BUTTON: &str = "<button id='mc_send' type='button'>Send</button>";
 
@@ -399,13 +420,20 @@ impl AncillaryData for DmsAnc {
 
 impl SignMessage {
     /// Make a sign message
-    fn new(cfg: &str, ms: &str, owner: String, priority: u32) -> Self {
+    fn new(
+        cfg: &str,
+        ms: &str,
+        owner: String,
+        priority: u32,
+        duration: Option<u32>,
+    ) -> Self {
         let mut sign_message = SignMessage {
             name: "usr_".to_string(),
             sign_config: cfg.to_string(),
             multi: ms.to_string(),
             msg_owner: owner,
             msg_priority: priority,
+            duration,
             ..Default::default()
         };
         let mut hasher = FnvHasher::default();
@@ -865,6 +893,7 @@ impl Dms {
         }
         html.push_str("</select>");
         html.push_str(&anc.make_lines(&sign, pat_def, self.current_multi(anc)));
+        html.push_str(EXPIRE_SELECT);
         html.push_str(SEND_BUTTON);
         html.push_str(BLANK_BUTTON);
         html.push_str("</div>");
@@ -957,15 +986,21 @@ impl Dms {
         Some(multi_normalize(&multi))
     }
 
+    /// Get selected message duration
+    fn selected_duration(&self) -> Option<u32> {
+        Doc::get().select_parse::<u32>("mc_expire")
+    }
+
     /// Create actions to handle click on "Send" button
     fn send_actions(&self, anc: DmsAnc) -> Vec<Action> {
         if let Some(cfg) = &self.sign_config {
             if let Some(ms) = &self.selected_multi(&anc) {
                 match sign_msg_owner(HIGH_1) {
                     Some(owner) => {
+                        let duration = self.selected_duration();
                         return anc.sign_msg_actions(
                             Dms::uri_name(&self.name),
-                            SignMessage::new(cfg, ms, owner, HIGH_1),
+                            SignMessage::new(cfg, ms, owner, HIGH_1, duration),
                         );
                     }
                     None => console::log_1(&"no app user!".into()),
@@ -980,7 +1015,7 @@ impl Dms {
         match (&self.sign_config, sign_msg_owner(LOW_1)) {
             (Some(cfg), Some(owner)) => anc.sign_msg_actions(
                 Dms::uri_name(&self.name),
-                SignMessage::new(cfg, "", owner, LOW_1),
+                SignMessage::new(cfg, "", owner, LOW_1, None),
             ),
             _ => Vec::new(),
         }

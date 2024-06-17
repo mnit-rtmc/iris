@@ -371,9 +371,9 @@ label:has(+ #sb_resource) {
   justify-items: center;
   align-content: space-around;
   align-items: center;
-  grid-template-columns: repeat(3, auto);
-  grid-template-areas: "pv ln ln"
-                       "pt bs bc";
+  grid-template-columns: repeat(4, auto);
+  grid-template-areas: "pv ln ln ln"
+                       "pt bx bs bc";
 }
 #mc_preview {
   grid-area: pv;
@@ -389,6 +389,9 @@ label:has(+ #sb_resource) {
   grid-area: ln;
   justify-self: start;
   font-size: smaller;
+}
+#mc_expire {
+  grid-area: bx;
 }
 #mc_send {
   grid-area: bs;
