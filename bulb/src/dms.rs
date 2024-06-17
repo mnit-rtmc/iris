@@ -826,20 +826,20 @@ impl Dms {
             html.push_str(msg_current);
             html.push_str(".gif'>");
         }
+        html.push_str("<div class='info fill'>");
+        html.push_str(&HtmlStr::new(&self.location).with_len(64).to_string());
+        html.push_str("</div>");
         html
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &DmsAnc, config: bool) -> String {
-        let location = HtmlStr::new(&self.location).with_len(64);
-        let mut html = format!("<div class='info fill'>{location}</div>");
-        if let Some(msg_current) = &self.msg_current {
-            html.push_str("<img class='message' src='/iris/img/");
-            html.push_str(msg_current);
-            html.push_str(".gif'>");
-        }
+        let mut html = String::new();
         html.push_str("<div class='row fill'>");
-        html.push_str("<span class='start'>");
+        html.push_str("<span>");
+        html.push_str(&self.item_states(anc).to_html());
+        html.push_str("</span>");
+        html.push_str("<span>");
         if let Some(expire_time) = &self.expire_time {
             match DateTime::parse_from_rfc3339(expire_time) {
                 Ok(dt) => html.push_str(&format!("⏲️ {}", &dt.format("%H:%M"))),
@@ -847,9 +847,14 @@ impl Dms {
             }
         }
         html.push_str("</span>");
-        html.push_str("<span class='end'>");
-        html.push_str(&self.item_states(anc).to_html());
-        html.push_str("</span>");
+        html.push_str("</div>");
+        if let Some(msg_current) = &self.msg_current {
+            html.push_str("<img class='message' src='/iris/img/");
+            html.push_str(msg_current);
+            html.push_str(".gif'>");
+        }
+        html.push_str("<div class='info fill'>");
+        html.push_str(&HtmlStr::new(&self.location).with_len(64).to_string());
         html.push_str("</div>");
         if let Some(pats) = &self.compose_patterns(anc) {
             html.push_str(pats);
