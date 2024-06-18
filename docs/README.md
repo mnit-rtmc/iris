@@ -28,4 +28,4 @@ integrate into an existing authentication system.
 [database]: database.html
 [GPL]: http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 [Java]: http://www.java.com
-[nginx]: https://nginx.org/en/
+[nginx]: nginx.html

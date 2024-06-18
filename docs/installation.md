@@ -183,6 +183,6 @@ login.  After creating and logging in with a real administrator [account], the
 [database]: database.html
 [Download]: http://iris.dot.state.mn.us/rpms/
 [Fedora]: http://fedoraproject.org
-[nginx]: https://nginx.org/en/
+[nginx]: nginx.html
 [OpenJDK]: http://openjdk.java.net
 [PostgreSQL]: http://www.postgresql.org
