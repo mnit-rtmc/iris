@@ -705,7 +705,7 @@ impl CardList {
                     None => CardView::new(C::res(), c1.name(), View::Compact),
                 };
                 let html = if cv.view.is_form() {
-                    make_html(&cv, &fetch_one_x::<C>(&cv).await?)
+                    build_html(&cv, &fetch_one_x::<C>(&cv).await?)
                 } else {
                     c1.to_html(cv.view, &anc)
                 };
@@ -763,10 +763,7 @@ fn build_item_states<C: Card>(cards: &[C], anc: &C::Ancillary) -> String {
 pub async fn fetch_one(cv: &CardView) -> Result<String> {
     let html = match cv.view {
         View::CreateCompact => CREATE_COMPACT.into(),
-        View::Hidden | View::Create | View::Compact => {
-            fetch_one_res(cv).await?
-        }
-        View::Status(_config) if has_status(cv.res) => {
+        View::Hidden | View::Create | View::Compact | View::Status(_) => {
             fetch_one_res(cv).await?
         }
         View::Location => match fetch_geo_loc(cv).await? {
@@ -778,25 +775,23 @@ pub async fn fetch_one(cv: &CardView) -> Result<String> {
         },
         _ => fetch_one_res(&cv.clone().view(View::Edit)).await?,
     };
-    Ok(make_html(cv, &html))
+    Ok(build_html(cv, &html))
 }
 
-/// Make HTML for a card
-fn make_html(cv: &CardView, html: &str) -> String {
+/// Build HTML for a card
+fn build_html(cv: &CardView, html: &str) -> String {
     match cv.view {
         View::CreateCompact => CREATE_COMPACT.into(),
         View::Create => html_card_create(cv.res, html),
         View::Hidden | View::Compact => html.into(),
         View::Location => html_card_edit(Res::GeoLoc, &cv.name, html, ""),
-        View::Status(_config) if has_status(cv.res) => {
-            html_card_status(cv.res, &cv.name, html)
-        }
+        View::Status(_config) => html_card_status(cv.res, &cv.name, html),
         _ => html_card_edit(cv.res, &cv.name, html, DEL_BUTTON),
     }
 }
 
 /// Check if a resource has a Status view
-fn has_status(res: Res) -> bool {
+pub fn has_status(res: Res) -> bool {
     matches!(
         res,
         Res::Alarm

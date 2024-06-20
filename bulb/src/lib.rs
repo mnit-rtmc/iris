@@ -10,6 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+#![allow(clippy::match_like_matches_macro)]
 mod alarm;
 mod app;
 mod beacon;
