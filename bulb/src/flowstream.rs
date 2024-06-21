@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{inactive_attr, Card, View, EDIT_BUTTON};
+use crate::card::{inactive_attr, Card, View};
 use crate::device::{Device, DeviceAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
@@ -37,23 +37,17 @@ impl FlowStream {
         format!("<div class='title row{inactive}'>{name} {item_state}</div>")
     }
 
-    /// Convert to Status HTML
-    fn to_html_status(&self, anc: &FlowStreamAnc) -> String {
-        let ctrl_button = anc.controller_button();
-        format!(
-            "<div class='row'>\
-              {ctrl_button}\
-              {EDIT_BUTTON}\
-            </div>"
-        )
-    }
-
-    /// Convert to Edit HTML
-    fn to_html_edit(&self) -> String {
+    /// Convert to Setup HTML
+    fn to_html_setup(&self, anc: &FlowStreamAnc) -> String {
+        let title = self.title(View::Setup);
+        let ctl_btn = anc.controller_button();
         let controller = HtmlStr::new(&self.controller);
         let pin = OptVal(self.pin);
+        let footer = self.footer(true);
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
+              {ctl_btn}\
                <label for='controller'>Controller</label>\
                <input id='controller' maxlength='20' size='20' \
                       value='{controller}'>\
@@ -62,7 +56,8 @@ impl FlowStream {
                <label for='pin'>Pin</label>\
                <input id='pin' type='number' min='1' max='104' \
                       size='8' value='{pin}'>\
-             </div>"
+             </div>\
+             {footer}"
         )
     }
 }
@@ -105,13 +100,12 @@ impl Card for FlowStream {
     fn to_html(&self, view: View, anc: &FlowStreamAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status(_) => self.to_html_status(anc),
-            View::Edit => self.to_html_edit(),
+            View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("controller", &self.controller);

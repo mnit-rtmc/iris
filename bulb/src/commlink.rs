@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{inactive_attr, AncillaryData, Card, View, EDIT_BUTTON};
+use crate::card::{inactive_attr, AncillaryData, Card, View};
 use crate::commconfig::CommConfig;
 use crate::controller::Controller;
 use crate::error::Result;
@@ -54,7 +54,7 @@ impl AncillaryData for CommLinkAnc {
         view: View,
     ) -> Box<dyn Iterator<Item = Uri>> {
         match view {
-            View::Status(_) => Box::new(
+            View::Status => Box::new(
                 [CONTROLLER_URI.into(), COMM_CONFIG_URI.into()].into_iter(),
             ),
             _ => Box::new(once(COMM_CONFIG_URI.into())),
@@ -154,6 +154,7 @@ impl CommLink {
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &CommLinkAnc) -> String {
+        let title = self.title(View::Status);
         let item_state = self.item_state();
         let desc = item_state.description();
         let inactive = inactive_attr(self.poll_enabled);
@@ -162,28 +163,29 @@ impl CommLink {
         let config = HtmlStr::new(comm_config);
         let controllers = anc.controllers_html();
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
               <span>{item_state} {desc}</span>\
               <span class='info end{inactive}'>{description}</span>\
             </div>\
             <div class='row'>\
               <span>{config}</span>\
             </div>\
-            {controllers}\
-            <div class='row end'>\
-              {EDIT_BUTTON}\
-            </div>"
+            {controllers}"
         )
     }
 
-    /// Convert to Edit HTML
-    fn to_html_edit(&self, anc: &CommLinkAnc) -> String {
+    /// Convert to Setup HTML
+    fn to_html_setup(&self, anc: &CommLinkAnc) -> String {
+        let title = self.title(View::Setup);
         let description = HtmlStr::new(&self.description);
         let uri = HtmlStr::new(&self.uri);
         let enabled = if self.poll_enabled { " checked" } else { "" };
         let comm_configs = anc.comm_configs_html(self);
+        let footer = self.footer(true);
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
               <label for='description'>Description</label>\
               <input id='description' maxlength='32' size='24' \
                      value='{description}'>\
@@ -199,7 +201,8 @@ impl CommLink {
             <div class='row'>\
               <label for='poll_enabled'>Poll Enabled</label>\
               <input id='poll_enabled' type='checkbox'{enabled}>\
-            </div>"
+            </div>\
+            {footer}"
         )
     }
 }
@@ -239,13 +242,13 @@ impl Card for CommLink {
     fn to_html(&self, view: View, anc: &CommLinkAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status(_) => self.to_html_status(anc),
-            View::Edit => self.to_html_edit(anc),
+            View::Status => self.to_html_status(anc),
+            View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(),
         }
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("description", &self.description);

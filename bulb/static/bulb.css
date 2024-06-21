@@ -161,11 +161,6 @@ label:has(+ #sb_resource) {
   }
 }
 
-#ob_close {
-  margin: none;
-  padding: none;
-}
-
 /* Delete button sliding "confirmation" animation */
 #ob_delete {
   position: relative; /* add position context for ::before pseudo-element */

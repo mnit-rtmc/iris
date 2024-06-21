@@ -10,9 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{
-    html_title_row, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON,
-};
+use crate::card::{html_title_row, AncillaryData, Card, View};
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
 use crate::fetch::{Action, ContentType, Uri};
@@ -319,7 +317,7 @@ impl AncillaryData for DmsAnc {
         if let View::Compact | View::Search | View::Hidden = view {
             uris.push(SIGN_MSG_URI.into());
         }
-        if let View::Status(_) = view {
+        if let View::Status = view {
             uris.push(SIGN_MSG_URI.into());
             uris.push(SIGN_CFG_URI.into());
             uris.push(MSG_PATTERN_URI.into());
@@ -815,17 +813,7 @@ impl Dms {
         let name = HtmlStr::new(self.name());
         let item_states = self.item_states(anc);
         let nm = format!("{name} {item_states}");
-        let user = self.current_user(anc);
-        let user = match crate::app::user() {
-            Some(u) if u == user => format!("👤 {user}"),
-            _ => {
-                if user != "AUTO" {
-                    user.to_string()
-                } else {
-                    "".to_string()
-                }
-            }
-        };
+        let user = self.user(anc);
         let mut html = html_title_row(&[&nm, &user], &["", "info"]);
         if let Some(msg_current) = &self.msg_current {
             html.push_str("<img class='message' src='/iris/img/");
@@ -838,9 +826,24 @@ impl Dms {
         html
     }
 
+    /// Get user to display
+    fn user(&self, anc: &DmsAnc) -> String {
+        let user = self.current_user(anc);
+        match crate::app::user() {
+            Some(u) if u == user => format!("👤 {user}"),
+            _ => {
+                if user != "AUTO" {
+                    user.to_string()
+                } else {
+                    "".to_string()
+                }
+            }
+        }
+    }
+
     /// Convert to Status HTML
-    fn to_html_status(&self, anc: &DmsAnc, config: bool) -> String {
-        let mut html = String::new();
+    fn to_html_status(&self, anc: &DmsAnc) -> String {
+        let mut html = self.title(View::Status);
         html.push_str("<div class='row fill'>");
         html.push_str("<span>");
         html.push_str(&self.item_states(anc).to_html());
@@ -864,13 +867,6 @@ impl Dms {
         html.push_str("</div>");
         if let Some(pats) = &self.compose_patterns(anc) {
             html.push_str(pats);
-        }
-        if config {
-            html.push_str("<div class='row'>");
-            html.push_str(&anc.dev.controller_button());
-            html.push_str(LOC_BUTTON);
-            html.push_str(EDIT_BUTTON);
-            html.push_str("</div>");
         }
         html
     }
@@ -924,12 +920,17 @@ impl Dms {
         best
     }
 
-    /// Convert to Edit HTML
-    fn to_html_edit(&self) -> String {
+    /// Convert to Setup HTML
+    fn to_html_setup(&self, anc: &DmsAnc) -> String {
+        let title = self.title(View::Setup);
+        let ctl_btn = anc.dev.controller_button();
         let controller = HtmlStr::new(&self.controller);
         let pin = OptVal(self.pin);
+        let footer = self.footer(true);
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
+              {ctl_btn}\
               <label for='controller'>Controller</label>\
               <input id='controller' maxlength='20' size='20' \
                      value='{controller}'>\
@@ -938,7 +939,8 @@ impl Dms {
               <label for='pin'>Pin</label>\
               <input id='pin' type='number' min='1' max='104' \
                      size='8' value='{pin}'>\
-            </div>"
+            </div>\
+            {footer}"
         )
     }
 
@@ -1115,13 +1117,13 @@ impl Card for Dms {
     fn to_html(&self, view: View, anc: &DmsAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status(config) => self.to_html_status(anc, config),
-            View::Edit => self.to_html_edit(),
+            View::Status => self.to_html_status(anc),
+            View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("controller", &self.controller);

@@ -263,7 +263,7 @@ impl Doc {
     }
 }
 
-/// Mapping of fields on an Edit view
+/// Mapping of fields on an Setup view
 pub struct Fields {
     doc: Doc,
     obj: Map<String, Value>,

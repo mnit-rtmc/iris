@@ -151,7 +151,7 @@ impl AncillaryData for CommConfigAnc {
         view: View,
     ) -> Box<dyn Iterator<Item = Uri>> {
         match view {
-            View::Edit => Box::new(once("/iris/lut/comm_protocol".into())),
+            View::Setup => Box::new(once("/iris/lut/comm_protocol".into())),
             _ => Box::new(empty()),
         }
     }
@@ -204,8 +204,9 @@ impl CommConfig {
         )
     }
 
-    /// Convert to edit HTML
-    fn to_html_edit(&self, anc: &CommConfigAnc) -> String {
+    /// Convert to Setup HTML
+    fn to_html_setup(&self, anc: &CommConfigAnc) -> String {
+        let title = self.title(View::Setup);
         let description = HtmlStr::new(&self.description);
         let protocols = anc.protocols_html(self);
         let timeout_ms = OptVal(self.timeout_ms);
@@ -215,8 +216,10 @@ impl CommConfig {
         let idle_periods = period_options(PERIODS, self.idle_disconnect_sec);
         let no_resp_periods =
             period_options(PERIODS, self.no_response_disconnect_sec);
+        let footer = self.footer(true);
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
               <label for='description'>Description</label>\
               <input id='description' maxlength='20' size='20' \
                      value='{description}'>\
@@ -245,7 +248,8 @@ impl CommConfig {
             <div class='row'>\
               <label for='no_response_disconnect_sec'>No Response Disconnect</label>\
               <select id='no_response_disconnect_sec'>{no_resp_periods}</select>\
-            </div>"
+            </div>\
+            {footer}"
         )
     }
 }
@@ -282,7 +286,7 @@ impl Card for CommConfig {
     fn to_html(&self, view: View, anc: &CommConfigAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Edit => self.to_html_edit(anc),
+            View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(),
         }
     }
@@ -300,7 +304,7 @@ impl Card for CommConfig {
         format!("cfg_{num}")
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("description", &self.description);

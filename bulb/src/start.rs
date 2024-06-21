@@ -290,6 +290,7 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
             "sb_config" => (),
             "sb_search" | "sb_state" => spawn_local(do_future(handle_search())),
             "sb_resource" => handle_sb_resource_ev(),
+            "ob_view" => handle_ob_view_ev(),
             _ => spawn_local(do_future(handle_input(id))),
         }
     });
@@ -335,6 +336,23 @@ fn handle_sb_resource_ev() {
     let sb_search = Doc::get().elem::<HtmlInputElement>("sb_search");
     sb_search.set_value("");
     spawn_local(handle_resource_change());
+}
+
+/// Handle an event from `ob_view` select element
+fn handle_ob_view_ev() {
+    if let Some(cv) = app::form() {
+        if let Some(view) = ob_view_value() {
+            spawn_local(do_future(replace_card(cv.view(view))));
+        }
+    }
+}
+
+/// Get the selected view value
+fn ob_view_value() -> Option<View> {
+    match Doc::get().select_parse::<String>("ob_view") {
+        Some(view) => View::try_from(view.as_str()).ok(),
+        None => None,
+    }
 }
 
 /// Handle an input event on a form card
@@ -386,10 +404,7 @@ fn handle_button_click_ev(target: &Element) {
 async fn handle_button_card(attrs: ButtonAttrs) {
     if let Some(cv) = app::form() {
         match attrs.id.as_str() {
-            "ob_close" => do_future(replace_card(cv.compact())).await,
             "ob_delete" => do_future(handle_delete(cv)).await,
-            "ob_edit" => do_future(replace_card(cv.view(View::Edit))).await,
-            "ob_loc" => do_future(replace_card(cv.view(View::Location))).await,
             "ob_save" => do_future(handle_save(cv)).await,
             _ => {
                 if attrs.class_name == "go_link" {
@@ -438,7 +453,7 @@ async fn handle_delete(cv: CardView) -> Result<()> {
 async fn handle_save(cv: CardView) -> Result<()> {
     match cv.view {
         View::Create => save_create(cv).await,
-        View::Edit | View::Status(_) => save_edit(cv).await,
+        View::Setup => save_setup(cv).await,
         View::Location => save_location(cv).await,
         _ => Ok(()),
     }
@@ -451,8 +466,8 @@ async fn save_create(cv: CardView) -> Result<()> {
     Ok(())
 }
 
-/// Save an edit view card
-async fn save_edit(cv: CardView) -> Result<()> {
+/// Save changed values on setup card
+async fn save_setup(cv: CardView) -> Result<()> {
     card::patch_changed(&cv).await?;
     replace_card(cv.view(View::Compact)).await
 }
@@ -492,11 +507,12 @@ async fn click_card(res: Res, name: String, id: String) -> Result<()> {
         replace_card(cv.compact()).await?;
     }
     // FIXME: check if id are the same for old/new cards
-    let view = if card::has_status(res) {
-        let config = Doc::get().input_bool("sb_config");
-        View::Status(config)
+    let view = if card::res_views(res).contains(&View::Status) {
+        View::Status
+    } else if card::res_views(res).contains(&View::Setup) {
+        View::Setup
     } else {
-        View::Edit
+        View::Compact
     };
     let mut cv = CardView::new(res, &name, view);
     if id.ends_with('_') {

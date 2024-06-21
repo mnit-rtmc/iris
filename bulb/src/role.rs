@@ -51,14 +51,18 @@ impl Role {
         format!("<div class='title row'>{name} {item_state}</div>")
     }
 
-    /// Convert to Edit HTML
-    fn to_html_edit(&self) -> String {
+    /// Convert to Setup HTML
+    fn to_html_setup(&self) -> String {
+        let title = self.title(View::Setup);
         let enabled = if self.enabled { " checked" } else { "" };
+        let footer = self.footer(true);
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
               <label for='enabled'>Enabled</label>\
               <input id='enabled' type='checkbox'{enabled}>\
-            </div>"
+            </div>\
+            {footer}"
         )
     }
 }
@@ -99,12 +103,12 @@ impl Card for Role {
     fn to_html(&self, view: View, anc: &RoleAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Edit => self.to_html_edit(),
+            View::Setup => self.to_html_setup(),
             _ => self.to_html_compact(),
         }
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("enabled", self.enabled);

@@ -77,7 +77,7 @@ impl<D: Device> AncillaryData for DeviceAnc<D> {
     fn uri_iter(&self, pri: &D, view: View) -> Box<dyn Iterator<Item = Uri>> {
         match (view, &pri.controller()) {
             (View::Search, _) => Box::new(once(CONTROLLER_URI.into())),
-            (View::Hidden | View::Compact | View::Status(_), Some(ctrl)) => {
+            (View::Hidden | View::Compact | View::Status, Some(ctrl)) => {
                 let mut uri = Uri::from("/iris/api/controller/");
                 uri.push(ctrl);
                 Box::new(once(uri))

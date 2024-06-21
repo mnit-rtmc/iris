@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{inactive_attr, AncillaryData, Card, View, EDIT_BUTTON};
+use crate::card::{inactive_attr, AncillaryData, Card, View};
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::fetch::Uri;
@@ -79,12 +79,12 @@ impl AncillaryData for LcsIndicationAnc {
         view: View,
     ) -> Box<dyn Iterator<Item = Uri>> {
         match (view, &pri.controller()) {
-            (View::Status(_), Some(ctrl)) => {
+            (View::Status, Some(ctrl)) => {
                 let mut uri = Uri::from("/iris/api/controller/");
                 uri.push(ctrl);
                 Box::new([LANE_USE_INDICATION_URI.into(), uri].into_iter())
             }
-            (View::Status(_) | View::Search | View::Compact, _) => {
+            (View::Status | View::Search | View::Compact, _) => {
                 Box::new(once(LANE_USE_INDICATION_URI.into()))
             }
             _ => Box::new(empty()),
@@ -124,23 +124,16 @@ impl LcsIndication {
         )
     }
 
-    /// Convert to Status HTML
-    fn to_html_status(&self, anc: &LcsIndicationAnc) -> String {
-        let ctrl_button = anc.controller_button();
-        format!(
-            "<div class='row'>\
-              {ctrl_button}\
-              {EDIT_BUTTON}\
-            </div>"
-        )
-    }
-
-    /// Convert to Edit HTML
-    fn to_html_edit(&self) -> String {
+    /// Convert to Setup HTML
+    fn to_html_setup(&self, anc: &LcsIndicationAnc) -> String {
+        let title = self.title(View::Setup);
+        let ctl_btn = anc.controller_button();
         let controller = HtmlStr::new(&self.controller);
         let pin = OptVal(self.pin);
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
+               {ctl_btn}\
                <label for='controller'>Controller</label>\
                <input id='controller' maxlength='20' size='20' \
                       value='{controller}'>\
@@ -186,13 +179,12 @@ impl Card for LcsIndication {
     fn to_html(&self, view: View, anc: &LcsIndicationAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status(_) => self.to_html_status(anc),
-            View::Edit => self.to_html_edit(),
+            View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("controller", &self.controller);

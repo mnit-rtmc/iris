@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{inactive_attr, AncillaryData, Card, View, EDIT_BUTTON};
+use crate::card::{inactive_attr, AncillaryData, Card, View};
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::fetch::Uri;
@@ -82,7 +82,7 @@ impl AncillaryData for GateArmAnc {
         view: View,
     ) -> Box<dyn Iterator<Item = Uri>> {
         match (view, &pri.controller()) {
-            (View::Status(_), Some(ctrl)) => {
+            (View::Status, Some(ctrl)) => {
                 let mut uri = Uri::from("/iris/api/controller/");
                 uri.push(ctrl);
                 Box::new(once(uri))
@@ -126,27 +126,29 @@ impl GateArm {
     }
 
     /// Convert to Status HTML
-    fn to_html_status(&self, anc: &GateArmAnc) -> String {
+    fn to_html_status(&self) -> String {
+        let title = self.title(View::Status);
         let location = HtmlStr::new(&self.location).with_len(64);
         let item = item_state(self.arm_state);
         let desc = item.description();
-        let ctrl_button = anc.controller_button();
         format!(
-            "<div class='info'>{location}</div>\
-            <div>{item} {desc}</div>\
-            <div class='row'>\
-              {ctrl_button}\
-              {EDIT_BUTTON}\
-            </div>"
+            "{title}\
+            <div class='info'>{location}</div>\
+            <div>{item} {desc}</div>"
         )
     }
 
-    /// Convert to Edit HTML
-    fn to_html_edit(&self) -> String {
+    /// Convert to Setup HTML
+    fn to_html_setup(&self, anc: &GateArmAnc) -> String {
+        let title = self.title(View::Setup);
+        let ctl_btn = anc.controller_button();
         let controller = HtmlStr::new(&self.controller);
         let pin = OptVal(self.pin);
+        let footer = self.footer(true);
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
+              {ctl_btn}\
                <label for='controller'>Controller</label>\
                <input id='controller' maxlength='20' size='20' \
                       value='{controller}'>\
@@ -155,7 +157,8 @@ impl GateArm {
                <label for='pin'>Pin</label>\
                <input id='pin' type='number' min='1' max='104' \
                       size='8' value='{pin}'>\
-             </div>"
+             </div>\
+             {footer}"
         )
     }
 }
@@ -203,13 +206,13 @@ impl Card for GateArm {
     fn to_html(&self, view: View, anc: &GateArmAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status(_) => self.to_html_status(anc),
-            View::Edit => self.to_html_edit(),
+            View::Status => self.to_html_status(),
+            View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(),
         }
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("controller", &self.controller);

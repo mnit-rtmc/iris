@@ -60,7 +60,7 @@ impl AncillaryData for PermissionAnc {
         view: View,
     ) -> Box<dyn Iterator<Item = Uri>> {
         match view {
-            View::Create | View::Edit => Box::new(
+            View::Create | View::Setup => Box::new(
                 [RESOURCE_TYPE_URI.into(), ROLE_URI.into()].into_iter(),
             ),
             _ => Box::new(empty()),
@@ -184,14 +184,17 @@ impl Permission {
         )
     }
 
-    /// Convert to Edit HTML
-    fn to_html_edit(&self, anc: &PermissionAnc) -> String {
+    /// Convert to Setup HTML
+    fn to_html_setup(&self, anc: &PermissionAnc) -> String {
+        let title = self.title(View::Setup);
         let role = anc.roles_html(self);
         let resource = anc.resource_types_html(self);
         let hashtag = HtmlStr::new(&self.hashtag);
         let access = access_html(self.access_n);
+        let footer = self.footer(true);
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
                <label for='role'>Role</label>\
                {role}\
             </div>\
@@ -206,7 +209,8 @@ impl Permission {
             <div class='row'>\
               <label for='access_n'>Access</label>\
               {access}\
-            </div>"
+            </div>\
+            {footer}"
         )
     }
 }
@@ -267,12 +271,12 @@ impl Card for Permission {
     fn to_html(&self, view: View, anc: &PermissionAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Edit => self.to_html_edit(anc),
+            View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(),
         }
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_select("role", &self.role);

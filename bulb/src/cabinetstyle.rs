@@ -42,15 +42,18 @@ impl CabinetStyle {
         format!("<div>{name}</div>")
     }
 
-    /// Convert to Edit HTML
-    fn to_html_edit(&self) -> String {
+    /// Convert to Setup HTML
+    fn to_html_setup(&self) -> String {
+        let title = self.title(View::Setup);
         let police_panel_pin_1 = OptVal(self.police_panel_pin_1);
         let police_panel_pin_2 = OptVal(self.police_panel_pin_2);
         let watchdog_reset_pin_1 = OptVal(self.watchdog_reset_pin_1);
         let watchdog_reset_pin_2 = OptVal(self.watchdog_reset_pin_2);
         let dip = OptVal(self.dip);
+        let footer = self.footer(true);
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
               <label for='police_panel_pin_1'>Police Panel Pin 1</label>\
               <input id='police_panel_pin_1' type='number' min='1' max='104' \
                      size='8' value='{police_panel_pin_1}'>\
@@ -74,7 +77,8 @@ impl CabinetStyle {
               <label for='dip'>Dip</label>\
               <input id='dip' type='number' min='0' max='255' \
                      size='8' value='{dip}'>\
-            </div>"
+            </div>\
+            {footer}"
         )
     }
 }
@@ -110,12 +114,12 @@ impl Card for CabinetStyle {
     fn to_html(&self, view: View, anc: &CabinetStyleAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Edit => self.to_html_edit(),
+            View::Setup => self.to_html_setup(),
             _ => self.to_html_compact(),
         }
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("police_panel_pin_1", self.police_panel_pin_1);

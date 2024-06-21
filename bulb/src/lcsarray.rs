@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card, View, EDIT_BUTTON};
+use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::util::{ContainsLower, Fields, HtmlStr};
@@ -97,25 +97,15 @@ impl LcsArray {
     }
 
     /// Convert to Status HTML
-    fn to_html_status(&self, anc: &LcsArrayAnc, config: bool) -> String {
+    fn to_html_status(&self, anc: &LcsArrayAnc) -> String {
+        let title = self.title(View::Status);
         let lock = anc.lock(self);
-        let mut html = format!(
-            "<div class='row'>\
+        format!(
+            "{title}\
+            <div class='row'>\
               <span class='info'>{lock}</span>\
             </div>"
-        );
-        if config {
-            html.push_str("<div class='row'>");
-            html.push_str("<span></span>");
-            html.push_str(EDIT_BUTTON);
-            html.push_str("</div>");
-        }
-        html
-    }
-
-    /// Convert to Edit HTML
-    fn to_html_edit(&self) -> String {
-        String::new()
+        )
     }
 }
 
@@ -150,13 +140,12 @@ impl Card for LcsArray {
     fn to_html(&self, view: View, anc: &LcsArrayAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status(config) => self.to_html_status(anc, config),
-            View::Edit => self.to_html_edit(),
+            View::Status => self.to_html_status(anc),
             _ => self.to_html_compact(anc),
         }
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let fields = Fields::new();
         fields.into_value().to_string()
