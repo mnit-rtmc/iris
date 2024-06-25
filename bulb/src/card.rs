@@ -995,7 +995,7 @@ async fn patch_changed_x<C: Card>(cv: &CardView) -> Result<()> {
 
 /// Handle click event for a button owned by the resource
 pub async fn handle_click(cv: &CardView, id: String) -> Result<()> {
-    if cv.view != View::Status {
+    if cv.view != View::Status && cv.view != View::Request {
         return Ok(());
     }
     match cv.res {
@@ -1008,7 +1008,7 @@ pub async fn handle_click(cv: &CardView, id: String) -> Result<()> {
 /// Handle click event for a button on a card
 async fn handle_click_x<C: Card>(cv: &CardView, id: String) -> Result<()> {
     let pri = fetch_primary::<C>(&cv.name).await?;
-    let anc = fetch_ancillary(View::Status, &pri).await?;
+    let anc = fetch_ancillary(cv.view, &pri).await?;
     for action in pri.handle_click(anc, id) {
         action.perform().await?;
     }

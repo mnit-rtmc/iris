@@ -19,6 +19,46 @@ use std::iter::{empty, once};
 use std::marker::PhantomData;
 use wasm_bindgen::JsValue;
 
+/// Device requests
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[allow(dead_code)]
+pub enum DeviceReq {
+    NoRequest,
+    QueryConfiguration,
+    QuerySettings,
+    SendSettings,
+    QueryMessage,
+    QueryStatus,
+    QueryPixelFailures,
+    TestPixels,
+    TestFans,
+    TestLamps,
+    BrightnessGood,
+    BrightnessTooDim,
+    BrightnessTooBright,
+    ResetDevice,
+    ResetStatus,
+    QueryGpsLocation,
+    DisableSystem,
+    CameraFocusStop,
+    CameraFocusNear,
+    CameraFocusFar,
+    CameraFocusManual,
+    CameraFocusAuto,
+    CameraIrisStop,
+    CameraIrisClose,
+    CameraIrisOpen,
+    CameraIrisManual,
+    CameraIrisAuto,
+    CameraWiperOneShot,
+    CameraWasher,
+    CameraPowerOn,
+    CameraPowerOff,
+    CameraMenuOpen,
+    CameraMenuEnter,
+    CameraMenuCancel,
+}
+
 /// Device resource for controller IO
 pub trait Device {
     /// Get controller

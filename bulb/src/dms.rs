@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{html_title_row, AncillaryData, Card, View};
-use crate::device::{Device, DeviceAnc};
+use crate::device::{Device, DeviceAnc, DeviceReq};
 use crate::error::Result;
 use crate::fetch::{Action, ContentType, Uri};
 use crate::item::{ItemState, ItemStates};
@@ -961,24 +961,31 @@ impl Dms {
             "{title}\
             <div class='row'>\
               <span>Current Message</span>\
-              <button id='rq_message' type='button'>Query</button>\
+              <button id='rq_msg_query' type='button'>Query</button>\
             </div>\
             <div class='row'>\
               <span>Current Status</span>\
-              <button id='rq_status' type='button'>Query</button>\
+              <button id='rq_status_query' type='button'>Query</button>\
+            </div>\
+            <div class='row'>\
+              <span>Pixel Errors</span>\
+              <span>\
+                <button id='rq_pixel_test' type='button'>Test</button>\
+                <button id='rq_pixel_query' type='button'>Query</button>\
+              </span>\
             </div>\
             <div class='row'>\
               <span>Settings</span>\
               <span>\
-                <button id='rq_send_settings' type='button'>Send</button>\
-                <button id='rq_query_settings' type='button'>Query</button>\
+                <button id='rq_settings_send' type='button'>Send</button>\
+                <button id='rq_settings_query' type='button'>Query</button>\
               </span>\
             </div>\
             <div class='row'>\
               <span>Configuration</span>\
               <span>\
-                <button id='rq_reset' type='button'>Reset</button>\
-                <button id='rq_config' type='button'>Query</button>\
+                <button id='rq_config_reset' type='button'>Reset</button>\
+                <button id='rq_config_query' type='button'>Query</button>\
               </span>\
             </div>\
             <div class='row'>\
@@ -1076,6 +1083,17 @@ impl Dms {
             ),
             _ => Vec::new(),
         }
+    }
+
+    /// Create action to handle click on a device request button
+    fn device_req(&self, req: DeviceReq) -> Vec<Action> {
+        let uri = Dms::uri_name(&self.name);
+        let mut fields = Fields::new();
+        fields.insert_num("device_req", req as u32);
+        let value = fields.into_value().to_string();
+        let mut actions = Vec::with_capacity(1);
+        actions.push(Action::Patch(uri, value.into()));
+        actions
     }
 }
 
@@ -1181,12 +1199,18 @@ impl Card for Dms {
 
     /// Handle click event for a button on the card
     fn handle_click(&self, anc: DmsAnc, id: String) -> Vec<Action> {
-        if &id == "mc_send" {
-            self.send_actions(anc)
-        } else if &id == "mc_blank" {
-            self.blank_actions(anc)
-        } else {
-            Vec::new()
+        match id.as_str() {
+            "mc_send" => self.send_actions(anc),
+            "mc_blank" => self.blank_actions(anc),
+            "rq_msg_query" => self.device_req(DeviceReq::QueryMessage),
+            "rq_status_query" => self.device_req(DeviceReq::QueryStatus),
+            "rq_pixel_test" => self.device_req(DeviceReq::TestPixels),
+            "rq_pixel_query" => self.device_req(DeviceReq::QueryPixelFailures),
+            "rq_settings_send" => self.device_req(DeviceReq::SendSettings),
+            "rq_settings_query" => self.device_req(DeviceReq::QuerySettings),
+            "rq_config_reset" => self.device_req(DeviceReq::ResetDevice),
+            "rq_config_query" => self.device_req(DeviceReq::QueryConfiguration),
+            _ => Vec::new(),
         }
     }
 
