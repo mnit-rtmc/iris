@@ -952,6 +952,44 @@ impl Dms {
         )
     }
 
+    /// Convert to Request HTML
+    fn to_html_request(&self, _anc: &DmsAnc) -> String {
+        let title = self.title(View::Request);
+        let name = HtmlStr::new(self.name());
+        let work = "http://example.com"; // FIXME
+        format!(
+            "{title}\
+            <div class='row'>\
+              <span>Current Message</span>\
+              <button id='rq_message' type='button'>Query</button>\
+            </div>\
+            <div class='row'>\
+              <span>Current Status</span>\
+              <button id='rq_status' type='button'>Query</button>\
+            </div>\
+            <div class='row'>\
+              <span>Settings</span>\
+              <span>\
+                <button id='rq_send_settings' type='button'>Send</button>\
+                <button id='rq_query_settings' type='button'>Query</button>\
+              </span>\
+            </div>\
+            <div class='row'>\
+              <span>Configuration</span>\
+              <span>\
+                <button id='rq_reset' type='button'>Reset</button>\
+                <button id='rq_config' type='button'>Query</button>\
+              </span>\
+            </div>\
+            <div class='row'>\
+              <span>Work Request</span>
+              <a href='{work}' target='_blank' rel='noopener noreferrer'>\
+                🔗 {name}\
+              </a>\
+            </div>"
+        )
+    }
+
     /// Make an ntcip sign
     fn make_sign(&self, anc: &DmsAnc) -> Option<Sign> {
         let cfg = anc.sign_config(self.sign_config.as_deref())?;
@@ -1127,6 +1165,7 @@ impl Card for Dms {
             View::Create => self.to_html_create(anc),
             View::Status => self.to_html_status(anc),
             View::Setup => self.to_html_setup(anc),
+            View::Request => self.to_html_request(anc),
             _ => self.to_html_compact(anc),
         }
     }

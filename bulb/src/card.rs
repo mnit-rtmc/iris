@@ -60,6 +60,8 @@ const SAVE_BUTTON: &str = "<button id='ob_save' type='button'>🖍️ Save</butt
 pub enum View {
     /// Hidden view
     Hidden,
+    /// Search view
+    Search,
     /// Compact Create view
     CreateCompact,
     /// Create view
@@ -72,8 +74,8 @@ pub enum View {
     Setup,
     /// Location view
     Location,
-    /// Search view
-    Search,
+    /// Request view
+    Request,
 }
 
 impl View {
@@ -88,10 +90,17 @@ impl View {
 
     /// Is the view a form?
     pub fn is_form(self) -> bool {
-        matches!(
-            self,
-            View::Create | View::Status | View::Setup | View::Location
-        )
+        match self {
+            View::Hidden
+            | View::Search
+            | View::CreateCompact
+            | View::Compact => false,
+            View::Create
+            | View::Status
+            | View::Setup
+            | View::Location
+            | View::Request => true,
+        }
     }
 
     /// Get compact view
@@ -107,13 +116,14 @@ impl View {
         use View::*;
         match self {
             Hidden => "Hidden",
+            Search => "Search",
             CreateCompact => "Create compact",
             Create => "🆕 Create",
             Compact => "Compact",
             Status => "Status",
             Setup => "📝 Setup",
             Location => "🗺️ Location",
-            Search => "Search",
+            Request => "🙏 Request",
         }
     }
 }
@@ -125,13 +135,14 @@ impl TryFrom<&str> for View {
         use View::*;
         match type_n {
             v if v == Hidden.as_str() => Ok(Hidden),
+            v if v == Search.as_str() => Ok(Search),
             v if v == CreateCompact.as_str() => Ok(CreateCompact),
             v if v == Create.as_str() => Ok(Create),
             v if v == Compact.as_str() => Ok(Compact),
             v if v == Status.as_str() => Ok(Status),
             v if v == Setup.as_str() => Ok(Setup),
             v if v == Location.as_str() => Ok(Location),
-            v if v == Search.as_str() => Ok(Search),
+            v if v == Request.as_str() => Ok(Request),
             _ => Err(()),
         }
     }
@@ -385,9 +396,16 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::User => &[View::Compact, View::Setup],
         Res::GateArmArray => &[View::Compact, View::Status, View::Location],
         Res::LcsArray => &[View::Compact, View::Status],
-        Res::Controller | Res::Dms | Res::RampMeter | Res::WeatherSensor => {
+        Res::Controller | Res::RampMeter | Res::WeatherSensor => {
             &[View::Compact, View::Status, View::Setup, View::Location]
         }
+        Res::Dms => &[
+            View::Compact,
+            View::Status,
+            View::Setup,
+            View::Location,
+            View::Request,
+        ],
         _ => &[View::Compact, View::Status, View::Setup],
     }
 }
