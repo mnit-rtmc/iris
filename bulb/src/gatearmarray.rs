@@ -60,7 +60,7 @@ impl AncillaryData for GateArmArrayAnc {
         view: View,
     ) -> Box<dyn Iterator<Item = Uri>> {
         match view {
-            View::Search | View::Status => {
+            View::Search | View::Control => {
                 Box::new(once(GATE_ARM_STATE_URI.into()))
             }
             _ => Box::new(empty()),
@@ -91,9 +91,9 @@ impl GateArmArray {
         )
     }
 
-    /// Convert to Status HTML
-    fn to_html_status(&self) -> String {
-        let title = self.title(View::Status);
+    /// Convert to Control HTML
+    fn to_html_control(&self) -> String {
+        let title = self.title(View::Control);
         let location = HtmlStr::new(&self.location).with_len(64);
         let item = item_state(self.arm_state);
         let desc = item.description();
@@ -143,7 +143,7 @@ impl Card for GateArmArray {
     fn to_html(&self, view: View, anc: &GateArmArrayAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status => self.to_html_status(),
+            View::Control => self.to_html_control(),
             _ => self.to_html_compact(),
         }
     }

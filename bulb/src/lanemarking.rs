@@ -45,18 +45,6 @@ impl LaneMarking {
         )
     }
 
-    /// Convert to Status HTML
-    fn to_html_status(&self) -> String {
-        let title = self.title(View::Status);
-        let location = HtmlStr::new(&self.location).with_len(64);
-        format!(
-            "{title}\
-            <div class='row'>\
-              <span class='info'>{location}</span>\
-            </div>"
-        )
-    }
-
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &LaneMarkingAnc) -> String {
         let title = self.title(View::Setup);
@@ -131,7 +119,6 @@ impl Card for LaneMarking {
     fn to_html(&self, view: View, anc: &LaneMarkingAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status => self.to_html_status(),
             View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }

@@ -96,9 +96,9 @@ impl LcsArray {
         )
     }
 
-    /// Convert to Status HTML
-    fn to_html_status(&self, anc: &LcsArrayAnc) -> String {
-        let title = self.title(View::Status);
+    /// Convert to Control HTML
+    fn to_html_control(&self, anc: &LcsArrayAnc) -> String {
+        let title = self.title(View::Control);
         let lock = anc.lock(self);
         format!(
             "{title}\
@@ -140,7 +140,7 @@ impl Card for LcsArray {
     fn to_html(&self, view: View, anc: &LcsArrayAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status => self.to_html_status(anc),
+            View::Control => self.to_html_control(anc),
             _ => self.to_html_compact(anc),
         }
     }

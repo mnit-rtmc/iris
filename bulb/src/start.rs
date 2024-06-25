@@ -507,13 +507,11 @@ async fn click_card(res: Res, name: String, id: String) -> Result<()> {
         replace_card(cv.compact()).await?;
     }
     // FIXME: check if id are the same for old/new cards
-    let view = if card::res_views(res).contains(&View::Status) {
-        View::Status
-    } else if card::res_views(res).contains(&View::Setup) {
-        View::Setup
-    } else {
-        View::Compact
-    };
+    let view = *card::res_views(res)
+        .iter()
+        .skip(1)
+        .next()
+        .unwrap_or(&View::Compact);
     let mut cv = CardView::new(res, &name, view);
     if id.ends_with('_') {
         cv = cv.view(View::Create);

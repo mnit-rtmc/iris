@@ -319,7 +319,7 @@ impl AncillaryData for DmsAnc {
         if let View::Compact | View::Search | View::Hidden = view {
             uris.push(SIGN_MSG_URI.into());
         }
-        if let View::Status = view {
+        if let View::Control = view {
             uris.push(SIGN_MSG_URI.into());
             uris.push(SIGN_CFG_URI.into());
             uris.push(MSG_PATTERN_URI.into());
@@ -843,9 +843,9 @@ impl Dms {
         }
     }
 
-    /// Convert to Status HTML
-    fn to_html_status(&self, anc: &DmsAnc) -> String {
-        let mut html = self.title(View::Status);
+    /// Convert to Control HTML
+    fn to_html_control(&self, anc: &DmsAnc) -> String {
+        let mut html = self.title(View::Control);
         html.push_str("<div class='row fill'>");
         html.push_str("<span>");
         html.push_str(&self.item_states(anc).to_html());
@@ -1181,7 +1181,7 @@ impl Card for Dms {
     fn to_html(&self, view: View, anc: &DmsAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status => self.to_html_status(anc),
+            View::Control => self.to_html_control(anc),
             View::Setup => self.to_html_setup(anc),
             View::Request => self.to_html_request(anc),
             _ => self.to_html_compact(anc),

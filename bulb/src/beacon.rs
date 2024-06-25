@@ -152,9 +152,9 @@ impl Beacon {
         )
     }
 
-    /// Convert to Status HTML
-    fn to_html_status(&self, anc: &BeaconAnc) -> String {
-        let title = self.title(View::Status);
+    /// Convert to Control HTML
+    fn to_html_control(&self, anc: &BeaconAnc) -> String {
+        let title = self.title(View::Control);
         let location = HtmlStr::new(&self.location).with_len(64);
         let item_states = self.item_states(anc).to_html();
         let flashing = if self.flashing() {
@@ -294,7 +294,7 @@ impl Card for Beacon {
     fn to_html(&self, view: View, anc: &BeaconAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status => self.to_html_status(anc),
+            View::Control => self.to_html_control(anc),
             View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }

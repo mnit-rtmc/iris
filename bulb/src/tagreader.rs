@@ -110,9 +110,9 @@ impl TagReader {
         )
     }
 
-    /// Convert to Status HTML
-    fn to_html_status(&self) -> String {
-        let title = self.title(View::Status);
+    /// Convert to Control HTML
+    fn to_html_control(&self) -> String {
+        let title = self.title(View::Control);
         let location = HtmlStr::new(&self.location).with_len(64);
         format!(
             "{title}\
@@ -190,7 +190,7 @@ impl Card for TagReader {
     fn to_html(&self, view: View, anc: &TagReaderAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status => self.to_html_status(),
+            View::Control => self.to_html_control(),
             View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }

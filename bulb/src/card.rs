@@ -68,8 +68,8 @@ pub enum View {
     Create,
     /// Compact view
     Compact,
-    /// Status view
-    Status,
+    /// Control view
+    Control,
     /// Setup view
     Setup,
     /// Location view
@@ -96,7 +96,7 @@ impl View {
             | View::CreateCompact
             | View::Compact => false,
             View::Create
-            | View::Status
+            | View::Control
             | View::Setup
             | View::Location
             | View::Request => true,
@@ -119,8 +119,8 @@ impl View {
             Search => "Search",
             CreateCompact => "Create compact",
             Create => "🆕 Create",
-            Compact => "Compact",
-            Status => "Status",
+            Compact => "⌄ Compact",
+            Control => "🕹️ Control",
             Setup => "📝 Setup",
             Location => "🗺️ Location",
             Request => "🙏 Request",
@@ -139,7 +139,7 @@ impl TryFrom<&str> for View {
             v if v == CreateCompact.as_str() => Ok(CreateCompact),
             v if v == Create.as_str() => Ok(Create),
             v if v == Compact.as_str() => Ok(Compact),
-            v if v == Status.as_str() => Ok(Status),
+            v if v == Control.as_str() => Ok(Control),
             v if v == Setup.as_str() => Ok(Setup),
             v if v == Location.as_str() => Ok(Location),
             v if v == Request.as_str() => Ok(Request),
@@ -389,24 +389,25 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::FlowStream
         | Res::GeoLoc
         | Res::Gps
+        | Res::LaneMarking
         | Res::LcsIndication
         | Res::Modem
         | Res::Permission
         | Res::Role
         | Res::User => &[View::Compact, View::Setup],
-        Res::GateArmArray => &[View::Compact, View::Status, View::Location],
-        Res::LcsArray => &[View::Compact, View::Status],
+        Res::GateArmArray => &[View::Compact, View::Control, View::Location],
+        Res::LcsArray => &[View::Compact, View::Control],
         Res::Controller | Res::RampMeter | Res::WeatherSensor => {
-            &[View::Compact, View::Status, View::Setup, View::Location]
+            &[View::Compact, View::Control, View::Setup, View::Location]
         }
         Res::Dms => &[
             View::Compact,
-            View::Status,
+            View::Control,
             View::Setup,
             View::Location,
             View::Request,
         ],
-        _ => &[View::Compact, View::Status, View::Setup],
+        _ => &[View::Compact, View::Control, View::Setup],
     }
 }
 
@@ -995,7 +996,7 @@ async fn patch_changed_x<C: Card>(cv: &CardView) -> Result<()> {
 
 /// Handle click event for a button owned by the resource
 pub async fn handle_click(cv: &CardView, id: String) -> Result<()> {
-    if cv.view != View::Status && cv.view != View::Request {
+    if cv.view != View::Control && cv.view != View::Request {
         return Ok(());
     }
     match cv.res {
@@ -1017,7 +1018,7 @@ async fn handle_click_x<C: Card>(cv: &CardView, id: String) -> Result<()> {
 
 /// Handle input event for an element owned by the resource
 pub async fn handle_input(cv: &CardView, id: String) -> Result<()> {
-    if cv.view != View::Status {
+    if cv.view != View::Control {
         return Ok(());
     }
     match cv.res {
@@ -1030,7 +1031,7 @@ pub async fn handle_input(cv: &CardView, id: String) -> Result<()> {
 /// Handle input event for an element on a card
 async fn handle_input_x<C: Card>(name: &str, id: String) -> Result<()> {
     let pri = fetch_primary::<C>(name).await?;
-    let anc = fetch_ancillary(View::Status, &pri).await?;
+    let anc = fetch_ancillary(View::Control, &pri).await?;
     pri.handle_input(anc, id);
     Ok(())
 }

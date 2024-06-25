@@ -118,7 +118,7 @@ impl<D: Device> AncillaryData for DeviceAnc<D> {
         match (view, &pri.controller()) {
             (View::Search, _) => Box::new(once(CONTROLLER_URI.into())),
             (
-                View::Hidden | View::Compact | View::Status | View::Setup,
+                View::Hidden | View::Compact | View::Control | View::Setup,
                 Some(ctrl),
             ) => {
                 let mut uri = Uri::from("/iris/api/controller/");

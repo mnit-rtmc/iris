@@ -97,7 +97,7 @@ impl AncillaryData for ControllerAnc {
                 ]
                 .into_iter(),
             ),
-            View::Status => {
+            View::Control => {
                 let mut uri = Uri::from("/iris/api/controller_io/");
                 uri.push(&pri.name);
                 Box::new(
@@ -336,9 +336,9 @@ impl Controller {
         )
     }
 
-    /// Convert to status HTML
-    fn to_html_status(&self, anc: &ControllerAnc) -> String {
-        let title = self.title(View::Status);
+    /// Convert to Control HTML
+    fn to_html_control(&self, anc: &ControllerAnc) -> String {
+        let title = self.title(View::Control);
         let res = Res::CommLink;
         let condition = anc.condition(self);
         let item_state = self.item_state();
@@ -522,7 +522,7 @@ impl Card for Controller {
     fn to_html(&self, view: View, anc: &ControllerAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status => self.to_html_status(anc),
+            View::Control => self.to_html_control(anc),
             View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(),
         }

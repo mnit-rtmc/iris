@@ -79,12 +79,12 @@ impl AncillaryData for LcsIndicationAnc {
         view: View,
     ) -> Box<dyn Iterator<Item = Uri>> {
         match (view, &pri.controller()) {
-            (View::Status, Some(ctrl)) => {
+            (View::Control, Some(ctrl)) => {
                 let mut uri = Uri::from("/iris/api/controller/");
                 uri.push(ctrl);
                 Box::new([LANE_USE_INDICATION_URI.into(), uri].into_iter())
             }
-            (View::Status | View::Search | View::Compact, _) => {
+            (View::Control | View::Search | View::Compact, _) => {
                 Box::new(once(LANE_USE_INDICATION_URI.into()))
             }
             _ => Box::new(empty()),
