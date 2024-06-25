@@ -120,13 +120,15 @@ class StationManager {
 		writer.write("\"period\":30,\n");
 		writer.write("\"samples\":{\n");
 		Iterator<Station> it = StationHelper.iterator();
+		boolean first = true;
 		while (it.hasNext()) {
 			Station s = it.next();
 			if (s instanceof StationImpl) {
 				StationImpl si = (StationImpl) s;
-				if (si.writeSampleJson(stamp, per_ms, writer)) {
-					if (it.hasNext())
-						writer.write(',');
+				if (si.writeSampleJson(stamp, per_ms, writer,
+					first))
+				{
+					first = false;
 					writer.write('\n');
 				}
 			}
