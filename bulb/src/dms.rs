@@ -15,7 +15,9 @@ use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
 use crate::fetch::{Action, ContentType, Uri};
 use crate::item::{ItemState, ItemStates};
-use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, OptVal};
+use crate::util::{
+    ContainsLower, Doc, Fields, HtmlStr, Input, OptVal, TextArea,
+};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use chrono::DateTime;
 use fnv::FnvHasher;
@@ -923,12 +925,18 @@ impl Dms {
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &DmsAnc) -> String {
         let title = self.title(View::Setup);
+        let notes = HtmlStr::new(&self.notes);
         let ctl_btn = anc.dev.controller_button();
         let controller = HtmlStr::new(&self.controller);
         let pin = OptVal(self.pin);
         let footer = self.footer(true);
         format!(
             "{title}\
+            <div class='row'>\
+              <label for='notes'>Notes</label>\
+              <textarea id='notes' maxlength='128' rows='2' \
+                        cols='24'>{notes}</textarea>\
+            </div>\
             <div class='row'>\
               {ctl_btn}\
               <label for='controller'>Controller</label>\
@@ -1126,6 +1134,7 @@ impl Card for Dms {
     /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
+        fields.changed_text_area("notes", &self.notes);
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
         fields.into_value().to_string()
