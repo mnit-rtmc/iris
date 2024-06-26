@@ -23,7 +23,7 @@ use crate::sonar::{Messenger, Name};
 use crate::xff::XForwardedFor;
 use crate::Database;
 use axum::body::Body;
-use axum::extract::{ConnectInfo, Json, Path as AxumPath, State};
+use axum::extract::{ConnectInfo, Json, Path as AxumPath, Query, State};
 use axum::http::{header, StatusCode};
 use axum::response::sse::{Event, KeepAlive};
 use axum::response::Sse;
@@ -33,6 +33,7 @@ use axum_extra::TypedHeader;
 use headers::{ETag, IfNoneMatch};
 use http::header::HeaderName;
 use resources::Res;
+use serde::Deserialize;
 use serde_json::map::Map;
 use serde_json::Value;
 use std::collections::HashMap;
@@ -722,6 +723,13 @@ fn permission_object(honey: Honey) -> Router {
         .with_state(honey)
 }
 
+/// Query parameters
+#[derive(Debug, Deserialize)]
+struct QueryParams {
+    /// Associatied resource (for GeoLoc)
+    res: String,
+}
+
 /// Router for other objects
 fn other_object(honey: Honey) -> Router {
     /// Handle `GET` request
@@ -729,19 +737,39 @@ fn other_object(honey: Honey) -> Router {
         session: Session,
         State(honey): State<Honey>,
         AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
+        params: Option<Query<QueryParams>>,
     ) -> Resp2 {
         let nm = Name::new(&type_n)?.obj(&obj_n)?;
-        log::info!("GET {nm}");
-        let cred = Credentials::load(&session).await?;
-        honey.name_access(cred.user(), &nm, Access::View).await?;
+        log::info!("GET {nm} {params:?}");
         let sql = one_sql(nm.res_type);
         let name = nm.object_n().ok_or(StatusCode::BAD_REQUEST)?;
-        let body = if nm.res_type == Res::ControllerIo {
-            get_array_by_pkey(&honey.db, sql, &name).await
-        } else {
-            get_by_pkey(&honey.db, sql, &name).await
-        }?;
-        json_resp(body)
+        let cred = Credentials::load(&session).await?;
+        match (nm.res_type, params) {
+            (Res::GeoLoc, Some(p)) => {
+                // Use associated res parameter for access check
+                let res = &p.res;
+                let nm = Name::new(res)?.obj(&obj_n)?;
+                honey.name_access(cred.user(), &nm, Access::View).await?;
+                let body = get_by_pkey2(&honey.db, sql, &name, res).await?;
+                json_resp(body)
+            }
+            (Res::GeoLoc, None) => {
+                return Err(StatusCode::BAD_REQUEST);
+            }
+            (_, Some(_p)) => {
+                return Err(StatusCode::BAD_REQUEST);
+            }
+            (Res::ControllerIo, _) => {
+                honey.name_access(cred.user(), &nm, Access::View).await?;
+                let body = get_array_by_pkey(&honey.db, sql, &name).await?;
+                json_resp(body)
+            }
+            _ => {
+                honey.name_access(cred.user(), &nm, Access::View).await?;
+                let body = get_by_pkey(&honey.db, sql, &name).await?;
+                json_resp(body)
+            }
+        }
     }
 
     /// Handle `PATCH` request
@@ -880,6 +908,22 @@ async fn get_by_pkey<PK: ToSql + Sync>(
     let query = format!("SELECT row_to_json(r)::text FROM ({sql}) r");
     let row = client
         .query_one(&query, &[&pkey])
+        .await
+        .map_err(|_e| Error::NotFound)?;
+    Ok(row.get::<usize, String>(0))
+}
+
+/// Query one row by primary key, with an additional param
+async fn get_by_pkey2<PK: ToSql + Sync, P2: ToSql + Sync>(
+    db: &Database,
+    sql: &'static str,
+    pkey: PK,
+    p2: P2,
+) -> Result<String> {
+    let client = db.client().await?;
+    let query = format!("SELECT row_to_json(r)::text FROM ({sql}) r");
+    let row = client
+        .query_one(&query, &[&pkey, &p2])
         .await
         .map_err(|_e| Error::NotFound)?;
     Ok(row.get::<usize, String>(0))

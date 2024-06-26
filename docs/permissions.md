@@ -52,7 +52,7 @@ resource, at the same access level.
 | alert config       |                                                |
 | beacon             |                                                |
 | [camera]           | catalog, [flow stream], monitor style, play list, [video monitor] |
-| [controller]       | [alarm], [comm link], [controller io], [modem] |
+| [controller]       | [alarm], [comm link], [controller io], gps, [modem] |
 | [detector]         | [r_node], [road], station                      |
 | [dms]              | [font], [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
 | [gate arm]         | [gate arm array]                               |

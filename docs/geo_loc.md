@@ -6,11 +6,30 @@ geographical feature.
 `geo_loc` resources are created and deleted automatically with an associated
 `resource_n`.  This means there are only two valid API endpoints:
 
-- `GET iris/api/geo_loc/{name}`: Get a single object as JSON, with *primary*
-  and *secondary* attributes
-- `PATCH iris/api/geo_loc/{name}`: Update attributes of one object, with JSON
+- `GET iris/api/geo_loc/{name}?res={res}`: Get a single object as JSON, with
+  the given associated resource type.
+- `PATCH iris/api/geo_loc/{name}?res={res}`: Update attributes of one object,
+  with JSON
 
-| Access       | Primary          | Secondary   |
-|--------------|------------------|-------------|
-| 👁️  View      | name             | resource\_n |
-| 🔧 Configure | roadway, road\_dir, cross\_street, cross\_dir, cross\_mod, landmark | lat, lon |
+| Access       | Primary           |
+|--------------|-------------------|
+| 👁️  View      | name, resource\_n |
+| 🔧 Configure | roadway, road\_dir, cross\_street, cross\_dir, cross\_mod, landmark, lat, lon |
+
+The `res={res}` query parameter is used for permission checks, and must match
+the value in the `geo_loc` record.  `{res}` can be one of these values:
+
+| res              | Base Resource |
+|------------------|---------------|
+| alarm            | controller    |
+| beacon           |               |
+| camera           |               |
+| controller       |               |
+| dms              |               |
+| gate\_arm\_array | gate\_arm     |
+| gps              | controller    |
+| parking\_area    |               |
+| ramp\_meter      |               |
+| r\_node          | detector      |
+| tag\_reader      | toll\_zone    |
+| weather\_sensor  |               |

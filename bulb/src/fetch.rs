@@ -92,6 +92,18 @@ impl Uri {
         self.path = Cow::Owned(p);
     }
 
+    /// Extend Uri with query param/value (will be percent-encoded)
+    pub fn query(&mut self, param: &str, value: &str) {
+        let mut p = String::new();
+        p.push_str(self.path.borrow());
+        p.push('?');
+        p.push_str(param);
+        p.push('=');
+        let value = utf8_percent_encode(value, NON_ALPHANUMERIC);
+        p.push_str(&value.to_string());
+        self.path = Cow::Owned(p);
+    }
+
     /// Get URI as string slice
     pub fn as_str(&self) -> &str {
         self.path.borrow()

@@ -326,12 +326,12 @@ pub const GEO_LOC_MARKER: &str = "\
   FROM iris.geo_loc \
   WHERE resource_n = $1";
 
-/// SQL query for one geo location (secondary)
+/// SQL query for one geo location
 pub const GEO_LOC_ONE: &str = "\
   SELECT name, resource_n, roadway, road_dir, cross_street, cross_dir, \
          cross_mod, landmark, lat, lon \
   FROM iris.geo_loc \
-  WHERE name = $1";
+  WHERE name = $1 AND resource_n = $2";
 
 /// SQL query for all GPS (primary)
 pub const GPS_ALL: &str = "\

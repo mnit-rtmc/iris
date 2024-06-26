@@ -475,7 +475,7 @@ async fn save_setup(cv: CardView) -> Result<()> {
 /// Save a location view card
 async fn save_location(cv: CardView) -> Result<()> {
     if let Some(geo_loc) = card::fetch_geo_loc(&cv).await? {
-        let lv = CardView::new(Res::GeoLoc, &geo_loc, cv.view);
+        let lv = CardView::new(Res::GeoLoc, &geo_loc, View::Location);
         card::patch_changed(&lv).await?;
         replace_card(cv.view(View::Compact)).await?;
     }

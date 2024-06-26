@@ -162,13 +162,26 @@ pub struct CardView {
     pub name: String,
     /// Card view
     pub view: View,
+    /// Associated resource
+    pub assoc: Option<Res>,
 }
 
 impl CardView {
     /// Create a new card view
     pub fn new<N: Into<String>>(res: Res, name: N, view: View) -> Self {
         let name = name.into();
-        CardView { res, name, view }
+        CardView {
+            res,
+            name,
+            view,
+            assoc: None,
+        }
+    }
+
+    /// Set associated resource type
+    pub fn with_assoc(mut self, assoc: Res) -> Self {
+        self.assoc = Some(assoc);
+        self
     }
 
     /// Get HTML element ID of card
@@ -319,7 +332,7 @@ pub trait Card: Default + DeserializeOwned + Serialize + PartialEq {
     /// Convert to HTML view
     fn to_html(&self, view: View, _anc: &Self::Ancillary) -> String;
 
-    /// Get changed fields from Setup form
+    /// Get changed fields from Setup / Location form
     fn changed_fields(&self) -> String;
 
     /// Handle click event for a button on the card
@@ -392,7 +405,6 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::CommConfig
         | Res::Domain
         | Res::FlowStream
-        | Res::GeoLoc
         | Res::Gps
         | Res::LaneMarking
         | Res::LcsIndication
@@ -402,7 +414,7 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::User => &[View::Compact, View::Setup],
         Res::GateArmArray => &[View::Compact, View::Control, View::Location],
         Res::LcsArray => &[View::Compact, View::Control],
-        Res::RampMeter => {
+        Res::Beacon | Res::Camera | Res::RampMeter => {
             &[View::Compact, View::Control, View::Setup, View::Location]
         }
         Res::Dms => &[
@@ -420,6 +432,7 @@ pub fn res_views(res: Res) -> &'static [View] {
         Res::Controller | Res::WeatherSensor => {
             &[View::Compact, View::Status, View::Setup, View::Location]
         }
+        Res::GeoLoc => &[View::Compact, View::Location],
         _ => &[View::Compact, View::Control, View::Setup],
     }
 }
@@ -878,7 +891,8 @@ pub async fn fetch_one(cv: &CardView) -> Result<String> {
         View::CreateCompact => CREATE_COMPACT.to_string(),
         View::Location => match fetch_geo_loc(cv).await? {
             Some(geo_loc) => {
-                let cv = CardView::new(Res::GeoLoc, &geo_loc, View::Location);
+                let cv = CardView::new(Res::GeoLoc, &geo_loc, View::Location)
+                    .with_assoc(cv.res);
                 fetch_one_res(&cv).await?
             }
             None => return Err(Error::CardMismatch()),
@@ -926,15 +940,19 @@ async fn fetch_one_x<C: Card>(cv: &CardView) -> Result<String> {
     let pri = if cv.view == View::Create {
         C::default().with_name(&cv.name)
     } else {
-        fetch_primary::<C>(&cv.name).await?
+        fetch_primary::<C>(cv).await?
     };
     let anc = fetch_ancillary(cv.view, &pri).await?;
     Ok(pri.to_html(cv.view, &anc))
 }
 
 /// Fetch primary JSON resource
-async fn fetch_primary<C: Card>(name: &str) -> Result<C> {
-    let json = C::uri_name(name).get().await?;
+async fn fetch_primary<C: Card>(cv: &CardView) -> Result<C> {
+    let mut uri = C::uri_name(&cv.name);
+    if let Some(assoc) = &cv.assoc {
+        uri.query("res", assoc.as_str());
+    }
+    let json = uri.get().await?;
     C::new(json)
 }
 
@@ -957,7 +975,7 @@ pub async fn fetch_geo_loc(cv: &CardView) -> Result<Option<String>> {
 
 /// Fetch geo location name
 async fn geo_loc<C: Card>(cv: &CardView) -> Result<Option<String>> {
-    let pri = fetch_primary::<C>(&cv.name).await?;
+    let pri = fetch_primary::<C>(cv).await?;
     match pri.geo_loc() {
         Some(geo_loc) => Ok(Some(geo_loc.to_string())),
         None => Ok(None),
@@ -997,9 +1015,9 @@ pub async fn patch_changed(cv: &CardView) -> Result<()> {
     }
 }
 
-/// Patch changed fields from an Setup view
+/// Patch changed fields from a Setup or Location view
 async fn patch_changed_x<C: Card>(cv: &CardView) -> Result<()> {
-    let pri = fetch_primary::<C>(&cv.name).await?;
+    let pri = fetch_primary::<C>(cv).await?;
     let changed = pri.changed_fields();
     if !changed.is_empty() {
         C::uri_name(&cv.name).patch(&changed.into()).await?;
@@ -1021,7 +1039,7 @@ pub async fn handle_click(cv: &CardView, id: String) -> Result<()> {
 
 /// Handle click event for a button on a card
 async fn handle_click_x<C: Card>(cv: &CardView, id: String) -> Result<()> {
-    let pri = fetch_primary::<C>(&cv.name).await?;
+    let pri = fetch_primary::<C>(cv).await?;
     let anc = fetch_ancillary(cv.view, &pri).await?;
     for action in pri.handle_click(anc, id) {
         action.perform().await?;
@@ -1035,15 +1053,15 @@ pub async fn handle_input(cv: &CardView, id: String) -> Result<()> {
         return Ok(());
     }
     match cv.res {
-        Res::Dms => handle_input_x::<Dms>(&cv.name, id).await,
-        Res::Domain => handle_input_x::<Domain>(&cv.name, id).await,
+        Res::Dms => handle_input_x::<Dms>(cv, id).await,
+        Res::Domain => handle_input_x::<Domain>(cv, id).await,
         _ => Ok(()),
     }
 }
 
 /// Handle input event for an element on a card
-async fn handle_input_x<C: Card>(name: &str, id: String) -> Result<()> {
-    let pri = fetch_primary::<C>(name).await?;
+async fn handle_input_x<C: Card>(cv: &CardView, id: String) -> Result<()> {
+    let pri = fetch_primary::<C>(cv).await?;
     let anc = fetch_ancillary(View::Control, &pri).await?;
     pri.handle_input(anc, id);
     Ok(())
