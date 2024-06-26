@@ -3575,8 +3575,8 @@ GRANT SELECT ON gate_arm_event_view TO PUBLIC;
 -- Incidents
 --
 CREATE TABLE event.incident_detail (
-	name VARCHAR(8) PRIMARY KEY,
-	description VARCHAR(32) NOT NULL
+    name VARCHAR(8) PRIMARY KEY,
+    description VARCHAR(32) NOT NULL
 );
 
 COPY event.incident_detail (name, description) FROM stdin;
@@ -3620,41 +3620,41 @@ CREATE TABLE event.incident (
 );
 
 CREATE TRIGGER incident_notify_trig
-	AFTER INSERT OR UPDATE OR DELETE ON event.incident
-	FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+    AFTER INSERT OR UPDATE OR DELETE ON event.incident
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE FUNCTION event.incident_blocked_lanes(TEXT)
-	RETURNS INTEGER AS $incident_blocked_lanes$
+    RETURNS INTEGER AS $incident_blocked_lanes$
 DECLARE
-	impact ALIAS FOR $1;
-	imp TEXT;
-	lanes INTEGER;
+    impact ALIAS FOR $1;
+    imp TEXT;
+    lanes INTEGER;
 BEGIN
-	lanes = length(impact) - 2;
-	IF lanes > 0 THEN
-		imp = substring(impact FROM 2 FOR lanes);
-		RETURN lanes - length(replace(imp, '!', ''));
-	ELSE
-		RETURN 0;
-	END IF;
+    lanes = length(impact) - 2;
+    IF lanes > 0 THEN
+        imp = substring(impact FROM 2 FOR lanes);
+        RETURN lanes - length(replace(imp, '!', ''));
+    ELSE
+        RETURN 0;
+    END IF;
 END;
 $incident_blocked_lanes$ LANGUAGE plpgsql;
 
 CREATE FUNCTION event.incident_blocked_shoulders(TEXT)
-	RETURNS INTEGER AS $incident_blocked_shoulders$
+    RETURNS INTEGER AS $incident_blocked_shoulders$
 DECLARE
-	impact ALIAS FOR $1;
-	len INTEGER;
-	imp TEXT;
+    impact ALIAS FOR $1;
+    len INTEGER;
+    imp TEXT;
 BEGIN
-	len = length(impact);
-	IF len > 2 THEN
-		imp = substring(impact FROM 1 FOR 1) ||
-		      substring(impact FROM len FOR 1);
-		RETURN 2 - length(replace(imp, '!', ''));
-	ELSE
-		RETURN 0;
-	END IF;
+    len = length(impact);
+    IF len > 2 THEN
+        imp = substring(impact FROM 1 FOR 1) ||
+              substring(impact FROM len FOR 1);
+        RETURN 2 - length(replace(imp, '!', ''));
+    ELSE
+        RETURN 0;
+    END IF;
 END;
 $incident_blocked_shoulders$ LANGUAGE plpgsql;
 
@@ -3767,8 +3767,8 @@ idsc_00022	24	\N	X	ROAD WORK ON RAMP
 \.
 
 CREATE TABLE iris.inc_impact (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(24) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(24) NOT NULL
 );
 
 COPY iris.inc_impact (id, description) FROM stdin;
@@ -3790,8 +3790,8 @@ COPY iris.inc_impact (id, description) FROM stdin;
 \.
 
 CREATE TABLE iris.inc_range (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(10) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(10) NOT NULL
 );
 
 COPY iris.inc_range (id, description) FROM stdin;
@@ -3802,17 +3802,17 @@ COPY iris.inc_range (id, description) FROM stdin;
 \.
 
 CREATE TABLE iris.inc_locator (
-	name VARCHAR(10) PRIMARY KEY,
-	range INTEGER NOT NULL REFERENCES iris.inc_range(id),
-	branched BOOLEAN NOT NULL,
-	picked BOOLEAN NOT NULL,
-	multi VARCHAR(64) NOT NULL
+    name VARCHAR(10) PRIMARY KEY,
+    range INTEGER NOT NULL REFERENCES iris.inc_range(id),
+    branched BOOLEAN NOT NULL,
+    picked BOOLEAN NOT NULL,
+    multi VARCHAR(64) NOT NULL
 );
 
 CREATE VIEW inc_locator_view AS
-	SELECT il.name, rng.description AS range, branched, picked, multi
-	FROM iris.inc_locator il
-	LEFT JOIN iris.inc_range rng ON il.range = rng.id;
+    SELECT il.name, rng.description AS range, branched, picked, multi
+    FROM iris.inc_locator il
+    LEFT JOIN iris.inc_range rng ON il.range = rng.id;
 GRANT SELECT ON inc_locator_view TO PUBLIC;
 
 COPY iris.inc_locator (name, range, branched, picked, multi) FROM stdin;
