@@ -299,7 +299,7 @@ public class StationImpl implements Station, VehicleSampler {
 		int f = getFlow(stamp, per_ms);
 		int s = Math.round(getSpeed(stamp, per_ms));
 		if (f > MISSING_DATA || s > 0) {
-			if (first)
+			if (!first)
 				writer.write(',');
 			writeSampleJson(f, s, writer);
 			return true;
@@ -311,7 +311,7 @@ public class StationImpl implements Station, VehicleSampler {
 	private void writeSampleJson(int f, int s, Writer writer)
 		throws IOException
 	{
-		writer.write('"');
+		writer.write("\n\"");
 		writer.write(name);
 		writer.write("\":[");
 		writer.write((f > MISSING_DATA) ? String.valueOf(f) : "null");

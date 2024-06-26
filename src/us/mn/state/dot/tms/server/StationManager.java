@@ -118,7 +118,7 @@ class StationManager {
 		writer.write(RFC3339.format(new Date(stamp)));
 		writer.write("\",\n");
 		writer.write("\"period\":30,\n");
-		writer.write("\"samples\":{\n");
+		writer.write("\"samples\":{");
 		Iterator<Station> it = StationHelper.iterator();
 		boolean first = true;
 		while (it.hasNext()) {
@@ -129,11 +129,10 @@ class StationManager {
 					first))
 				{
 					first = false;
-					writer.write('\n');
 				}
 			}
 		}
-		writer.write("}\n");
+		writer.write("\n}\n");
 		writer.write("}\n");
 	}
 
