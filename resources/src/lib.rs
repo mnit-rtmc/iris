@@ -42,6 +42,9 @@ pub enum Res {
     Gps,
     Graphic,
     Incident,
+    IncAdvice,
+    IncDescriptor,
+    IncLocator,
     LaneMarking,
     LaneUseIndication,
     Lcs,
@@ -114,6 +117,9 @@ impl Res {
             Gps,
             Graphic,
             Incident,
+            IncAdvice,
+            IncDescriptor,
+            IncLocator,
             LaneMarking,
             LaneUseIndication,
             Lcs,
@@ -174,6 +180,9 @@ impl Res {
             Gps => "gps",
             Graphic => "graphic",
             Incident => "incident",
+            IncAdvice => "inc_advice",
+            IncDescriptor => "inc_descriptor",
+            IncLocator => "inc_locator",
             LaneUseIndication => "lane_use_indication",
             LaneMarking => "lane_marking",
             Lcs => "lcs",
@@ -222,6 +231,7 @@ impl Res {
             GateArmArray => "⫭⫬",
             GeoLoc => "🗺️ ",
             Gps => "🌐",
+            Incident => "🚨",
             LaneMarking => "⛙",
             LcsArray => "🡇🡇 ",
             LcsIndication => "🡇 ",
@@ -280,6 +290,8 @@ impl Res {
             | SignMessage | Word => Dms,
             // Gate arm resources
             GateArmArray => GateArm,
+            // Incident resources
+            IncAdvice | IncDescriptor | IncLocator => Incident,
             // LCS resources
             LcsArray | LcsIndication | LaneMarking => Lcs,
             // Permission resources
