@@ -480,6 +480,9 @@ impl SignMessage {
         if sources.contains("external") {
             states = states.with(ItemState::External, sources);
         }
+        if sources.contains("incident") {
+            states = states.with(ItemState::Incident, "");
+        }
         if sources.is_empty() && !blank {
             states = states.with(ItemState::External, self.system());
         }
@@ -1110,6 +1113,7 @@ impl Card for Dms {
          <option value='🔹'>🔹 available\
          <option value='🔶' selected>🔶 deployed\
          <option value='🗓️'>🗓️ planned\
+         <option value='🚨'>🚨 incident\
          <option value='👽'>👽 external\
          <option value='🎯'>🎯 dedicated\
          <option value='⚠️'>⚠️ fault\
