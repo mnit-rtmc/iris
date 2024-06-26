@@ -82,7 +82,7 @@ impl AncillaryData for GateArmAnc {
         view: View,
     ) -> Box<dyn Iterator<Item = Uri>> {
         match (view, &pri.controller()) {
-            (View::Control, Some(ctrl)) => {
+            (View::Status, Some(ctrl)) => {
                 let mut uri = Uri::from("/iris/api/controller/");
                 uri.push(ctrl);
                 Box::new(once(uri))
@@ -125,9 +125,9 @@ impl GateArm {
         )
     }
 
-    /// Convert to Control HTML
-    fn to_html_control(&self) -> String {
-        let title = self.title(View::Control);
+    /// Convert to Status HTML
+    fn to_html_status(&self) -> String {
+        let title = self.title(View::Status);
         let location = HtmlStr::new(&self.location).with_len(64);
         let item = item_state(self.arm_state);
         let desc = item.description();
@@ -206,7 +206,7 @@ impl Card for GateArm {
     fn to_html(&self, view: View, anc: &GateArmAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Control => self.to_html_control(),
+            View::Status => self.to_html_status(),
             View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(),
         }

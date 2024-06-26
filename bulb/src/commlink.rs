@@ -54,7 +54,7 @@ impl AncillaryData for CommLinkAnc {
         view: View,
     ) -> Box<dyn Iterator<Item = Uri>> {
         match view {
-            View::Control => Box::new(
+            View::Status => Box::new(
                 [CONTROLLER_URI.into(), COMM_CONFIG_URI.into()].into_iter(),
             ),
             _ => Box::new(once(COMM_CONFIG_URI.into())),
@@ -152,9 +152,9 @@ impl CommLink {
         )
     }
 
-    /// Convert to Control HTML
-    fn to_html_control(&self, anc: &CommLinkAnc) -> String {
-        let title = self.title(View::Control);
+    /// Convert to Status HTML
+    fn to_html_status(&self, anc: &CommLinkAnc) -> String {
+        let title = self.title(View::Status);
         let item_state = self.item_state();
         let desc = item_state.description();
         let inactive = inactive_attr(self.poll_enabled);
@@ -242,7 +242,7 @@ impl Card for CommLink {
     fn to_html(&self, view: View, anc: &CommLinkAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Control => self.to_html_control(anc),
+            View::Status => self.to_html_status(anc),
             View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(),
         }

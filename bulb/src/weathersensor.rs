@@ -706,9 +706,9 @@ impl WeatherSensor {
         )
     }
 
-    /// Convert to Control HTML
-    fn to_html_control(&self, anc: &WeatherSensorAnc) -> String {
-        let title = self.title(View::Control);
+    /// Convert to Status HTML
+    fn to_html_status(&self, anc: &WeatherSensorAnc) -> String {
+        let title = self.title(View::Status);
         let location = HtmlStr::new(&self.location).with_len(64);
         let site_id = HtmlStr::new(&self.site_id);
         let alt_id = HtmlStr::new(&self.alt_id);
@@ -822,7 +822,7 @@ impl Card for WeatherSensor {
     fn to_html(&self, view: View, anc: &WeatherSensorAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Control => self.to_html_control(anc),
+            View::Status => self.to_html_status(anc),
             View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }

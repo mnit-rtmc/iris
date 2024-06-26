@@ -42,9 +42,9 @@ impl VideoMonitor {
         )
     }
 
-    /// Convert to Control HTML
-    fn to_html_control(&self) -> String {
-        let title = self.title(View::Control);
+    /// Convert to Status HTML
+    fn to_html_status(&self) -> String {
+        let title = self.title(View::Status);
         let mon_num = self.mon_num;
         format!(
             "{title}\
@@ -113,7 +113,7 @@ impl Card for VideoMonitor {
     fn to_html(&self, view: View, anc: &VideoMonitorAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Control => self.to_html_control(),
+            View::Status => self.to_html_status(),
             View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }

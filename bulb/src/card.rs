@@ -72,6 +72,8 @@ pub enum View {
     Control,
     /// Setup view
     Setup,
+    /// Status view
+    Status,
     /// Location view
     Location,
     /// Request view
@@ -98,6 +100,7 @@ impl View {
             View::Create
             | View::Control
             | View::Setup
+            | View::Status
             | View::Location
             | View::Request => true,
         }
@@ -122,6 +125,7 @@ impl View {
             Compact => "⌄ Compact",
             Control => "🕹️ Control",
             Setup => "📝 Setup",
+            Status => "☑️ Status",
             Location => "🗺️ Location",
             Request => "🙏 Request",
         }
@@ -141,6 +145,7 @@ impl TryFrom<&str> for View {
             v if v == Compact.as_str() => Ok(Compact),
             v if v == Control.as_str() => Ok(Control),
             v if v == Setup.as_str() => Ok(Setup),
+            v if v == Status.as_str() => Ok(Status),
             v if v == Location.as_str() => Ok(Location),
             v if v == Request.as_str() => Ok(Request),
             _ => Err(()),
@@ -397,7 +402,7 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::User => &[View::Compact, View::Setup],
         Res::GateArmArray => &[View::Compact, View::Control, View::Location],
         Res::LcsArray => &[View::Compact, View::Control],
-        Res::Controller | Res::RampMeter | Res::WeatherSensor => {
+        Res::RampMeter => {
             &[View::Compact, View::Control, View::Setup, View::Location]
         }
         Res::Dms => &[
@@ -407,6 +412,14 @@ pub fn res_views(res: Res) -> &'static [View] {
             View::Location,
             View::Request,
         ],
+        Res::Alarm
+        | Res::CommLink
+        | Res::Detector
+        | Res::GateArm
+        | Res::VideoMonitor => &[View::Compact, View::Status, View::Setup],
+        Res::Controller | Res::WeatherSensor => {
+            &[View::Compact, View::Status, View::Setup, View::Location]
+        }
         _ => &[View::Compact, View::Control, View::Setup],
     }
 }

@@ -60,9 +60,9 @@ impl Alarm {
         )
     }
 
-    /// Convert to Control HTML
-    fn to_html_control(&self, anc: &AlarmAnc) -> String {
-        let title = self.title(View::Control);
+    /// Convert to Status HTML
+    fn to_html_status(&self, anc: &AlarmAnc) -> String {
+        let title = self.title(View::Status);
         let description = HtmlStr::new(&self.description);
         let item_state = self.item_state(anc);
         let item_desc = item_state.description();
@@ -143,7 +143,7 @@ impl Card for Alarm {
     fn to_html(&self, view: View, anc: &AlarmAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Control => self.to_html_control(anc),
+            View::Status => self.to_html_status(anc),
             View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }
