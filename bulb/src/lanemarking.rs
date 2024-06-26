@@ -49,8 +49,7 @@ impl LaneMarking {
     fn to_html_setup(&self, anc: &LaneMarkingAnc) -> String {
         let title = self.title(View::Setup);
         let notes = HtmlStr::new(&self.notes);
-        let ctl_btn = anc.controller_button();
-        let controller = HtmlStr::new(&self.controller);
+        let controller = anc.controller_html();
         let pin = OptVal(self.pin);
         format!(
             "{title}\
@@ -59,12 +58,7 @@ impl LaneMarking {
               <textarea id='notes' maxlength='128' rows='2' \
                         cols='24'>{notes}</textarea>\
             </div>\
-            <div class='row'>\
-              {ctl_btn}\
-              <label for='controller'>Controller</label>\
-              <input id='controller' maxlength='20' size='20' \
-                     value='{controller}'>\
-            </div>\
+            {controller}\
             <div class='row'>\
               <label for='pin'>Pin</label>\
               <input id='pin' type='number' min='1' max='104' \

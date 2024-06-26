@@ -125,17 +125,11 @@ impl TagReader {
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &TagReaderAnc) -> String {
         let title = self.title(View::Setup);
-        let ctl_btn = anc.controller_button();
-        let controller = HtmlStr::new(&self.controller);
+        let controller = anc.controller_html();
         let pin = OptVal(self.pin);
         format!(
             "{title}\
-            <div class='row'>\
-              {ctl_btn}\
-              <label for='controller'>Controller</label>\
-              <input id='controller' maxlength='20' size='20' \
-                     value='{controller}'>\
-            </div>\
+            {controller}\
             <div class='row'>\
               <label for='pin'>Pin</label>\
               <input id='pin' type='number' min='1' max='104' \

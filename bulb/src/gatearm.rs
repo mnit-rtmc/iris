@@ -148,17 +148,17 @@ impl GateArm {
         format!(
             "{title}\
             <div class='row'>\
+              <label for='controller'>Controller</label>\
+              <input id='controller' maxlength='20' size='20' \
+                     value='{controller}'>\
               {ctl_btn}\
-               <label for='controller'>Controller</label>\
-               <input id='controller' maxlength='20' size='20' \
-                      value='{controller}'>\
-             </div>\
-             <div class='row'>\
-               <label for='pin'>Pin</label>\
-               <input id='pin' type='number' min='1' max='104' \
-                      size='8' value='{pin}'>\
-             </div>\
-             {footer}"
+            </div>\
+            <div class='row'>\
+              <label for='pin'>Pin</label>\
+              <input id='pin' type='number' min='1' max='104' \
+                     size='8' value='{pin}'>\
+            </div>\
+            {footer}"
         )
     }
 }

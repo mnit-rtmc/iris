@@ -743,8 +743,7 @@ impl WeatherSensor {
         let site_id = HtmlStr::new(&self.site_id);
         let alt_id = HtmlStr::new(&self.alt_id);
         let notes = HtmlStr::new(&self.notes);
-        let ctl_btn = anc.controller_button();
-        let controller = HtmlStr::new(&self.controller);
+        let controller = anc.controller_html();
         let pin = OptVal(self.pin);
         let footer = self.footer(true);
         format!(
@@ -764,12 +763,7 @@ impl WeatherSensor {
               <textarea id='notes' maxlength='64' rows='2' \
                         cols='26'>{notes}</textarea>\
             </div>\
-            <div class='row'>\
-              {ctl_btn}\
-              <label for='controller'>Controller</label>\
-              <input id='controller' maxlength='20' size='20' \
-                     value='{controller}'>\
-            </div>\
+            {controller}\
             <div class='row'>\
               <label for='pin'>Pin</label>\
               <input id='pin' type='number' min='1' max='104' \

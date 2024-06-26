@@ -133,10 +133,10 @@ impl LcsIndication {
         format!(
             "{title}\
             <div class='row'>\
-               {ctl_btn}\
                <label for='controller'>Controller</label>\
                <input id='controller' maxlength='20' size='20' \
                       value='{controller}'>\
+               {ctl_btn}\
              </div>\
              <div class='row'>\
                <label for='pin'>Pin</label>\
