@@ -17,19 +17,22 @@ geographical feature.
 | 🔧 Configure | roadway, road\_dir, cross\_street, cross\_dir, cross\_mod, landmark, lat, lon |
 
 The `res={res}` query parameter is used for permission checks, and must match
-the value in the `geo_loc` record.  `{res}` can be one of these values:
+the value of `resource_n` in the record.  It can be one of these values:
 
-| res              | Base Resource |
-|------------------|---------------|
-| alarm            | controller    |
-| beacon           |               |
-| camera           |               |
-| controller       |               |
-| dms              |               |
-| gate\_arm\_array | gate\_arm     |
-| gps              | controller    |
-| parking\_area    |               |
-| ramp\_meter      |               |
-| r\_node          | detector      |
-| tag\_reader      | toll\_zone    |
-| weather\_sensor  |               |
+| Resource         | [Base Resource] |
+|------------------|-----------------|
+| alarm            | controller      |
+| beacon           |                 |
+| camera           |                 |
+| controller       |                 |
+| dms              |                 |
+| gate\_arm\_array | gate\_arm       |
+| gps              | controller      |
+| parking\_area    |                 |
+| ramp\_meter      |                 |
+| r\_node          | detector        |
+| tag\_reader      | toll\_zone      |
+| weather\_sensor  |                 |
+
+
+[base resource]: permissions.html#base-resources
