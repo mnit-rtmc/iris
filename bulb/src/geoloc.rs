@@ -49,6 +49,7 @@ pub struct RoadModifier {
 #[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct GeoLoc {
     pub name: String,
+    pub resource_n: String,
     pub roadway: Option<String>,
     pub road_dir: u16,
     pub cross_street: Option<String>,
@@ -57,8 +58,6 @@ pub struct GeoLoc {
     pub landmark: Option<String>,
     pub lat: Option<f64>,
     pub lon: Option<f64>,
-    // secondary attributes
-    pub resource_n: Option<String>,
 }
 
 /// Ancillary location data
