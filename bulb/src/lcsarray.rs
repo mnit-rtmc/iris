@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card, View, EDIT_BUTTON, NAME};
+use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::util::{ContainsLower, Fields, HtmlStr};
@@ -89,31 +89,23 @@ impl LcsArray {
         let name = HtmlStr::new(self.name());
         let lock = anc.lock(self);
         format!(
-            "<span>{lock}</span>\
-            <span class='{NAME}'>{name}</span>"
+            "<div class='title row'>\
+              <span>{name}</span>\
+              <span>{lock}</span>\
+            </div>"
         )
     }
 
-    /// Convert to Status HTML
-    fn to_html_status(&self, anc: &LcsArrayAnc, config: bool) -> String {
+    /// Convert to Control HTML
+    fn to_html_control(&self, anc: &LcsArrayAnc) -> String {
+        let title = self.title(View::Control);
         let lock = anc.lock(self);
-        let mut status = format!(
-            "<div class='row'>\
+        format!(
+            "{title}\
+            <div class='row'>\
               <span class='info'>{lock}</span>\
             </div>"
-        );
-        if config {
-            status.push_str("<div class='row'>");
-            status.push_str("<span></span>");
-            status.push_str(EDIT_BUTTON);
-            status.push_str("</div>");
-        }
-        status
-    }
-
-    /// Convert to Edit HTML
-    fn to_html_edit(&self) -> String {
-        String::new()
+        )
     }
 }
 
@@ -148,13 +140,12 @@ impl Card for LcsArray {
     fn to_html(&self, view: View, anc: &LcsArrayAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status(config) => self.to_html_status(anc, config),
-            View::Edit => self.to_html_edit(),
+            View::Control => self.to_html_control(anc),
             _ => self.to_html_compact(anc),
         }
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let fields = Fields::new();
         fields.into_value().to_string()

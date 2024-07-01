@@ -32,6 +32,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.HashtagHelper;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneActionHelper;
 import us.mn.state.dot.tms.LaneMarking;
@@ -406,11 +407,13 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Check if a DMS action is deployable */
 	private boolean isDeployable(DmsAction da) {
 		String dht = da.getDmsHashtag();
-		Iterator<DMS> it = DMSHelper.hashtagIterator(dht);
+		Iterator<DMS> it = DMSHelper.iterator();
 		while (it.hasNext()) {
-			DMS dms = it.next();
-			if (dms instanceof DMSImpl) {
-				if (((DMSImpl) dms).hasError())
+			DMS d = it.next();
+			if (d instanceof DMSImpl) {
+				DMSImpl dms = (DMSImpl) d;
+				if (HashtagHelper.hasHashtag(d, dht) &&
+				    dms.hasError())
 					return false;
 			}
 		}

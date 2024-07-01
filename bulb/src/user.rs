@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card, View, NAME};
+use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::item::ItemState;
@@ -112,17 +112,20 @@ impl User {
     fn to_html_compact(&self, anc: &UserAnc) -> String {
         let name = HtmlStr::new(self.name());
         let item_state = self.item_state(anc);
-        format!("<div class='{NAME} end'>{name} {item_state}</div>")
+        format!("<div class='title row'>{name} {item_state}</div>")
     }
 
-    /// Convert to Edit HTML
-    fn to_html_edit(&self, anc: &UserAnc) -> String {
+    /// Convert to Setup HTML
+    fn to_html_setup(&self, anc: &UserAnc) -> String {
+        let title = self.title(View::Setup);
         let full_name = HtmlStr::new(&self.full_name);
         let dn = HtmlStr::new(&self.dn);
         let role = anc.roles_html(self);
         let enabled = if self.enabled { " checked" } else { "" };
+        let footer = self.footer(true);
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
                <label for='full_name'>Full Name</label>\
                <input id='full_name' maxlength='31' size='20' \
                       value='{full_name}'>\
@@ -138,7 +141,8 @@ impl User {
             <div class='row'>\
               <label for='enabled'>Enabled</label>\
               <input id='enabled' type='checkbox'{enabled}>\
-            </div>"
+            </div>\
+            {footer}"
         )
     }
 }
@@ -182,12 +186,12 @@ impl Card for User {
     fn to_html(&self, view: View, anc: &UserAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Edit => self.to_html_edit(anc),
+            View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("full_name", &self.full_name);

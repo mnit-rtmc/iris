@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021-2023  Minnesota Department of Transportation
+ * Copyright (C) 2021-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.AlertConfig;
 import us.mn.state.dot.tms.AlertMessage;
 import us.mn.state.dot.tms.CapEvent;
-import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.HashtagHelper;
 import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
@@ -69,7 +69,7 @@ public class AlertConfigPanel extends IPanel {
 
 	/** Check a hashtag */
 	static private String checkHashtag(Object value) {
-		return DMSHelper.normalizeHashtag(value.toString());
+		return HashtagHelper.normalize(value.toString());
 	}
 
 	/** AlertConfig action */
@@ -600,7 +600,7 @@ public class AlertConfigPanel extends IPanel {
 		add(bfr_spn);
 		add("alert.after_period_hours");
 		add(aft_spn, Stretch.LAST);
-		add("alert.hashtag");
+		add("hashtag");
 		add(hashtag_txt, Stretch.LAST);
 		add(msg_panel, Stretch.FULL);
 		createJobs();

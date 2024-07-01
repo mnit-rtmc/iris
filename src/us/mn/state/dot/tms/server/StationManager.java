@@ -118,20 +118,21 @@ class StationManager {
 		writer.write(RFC3339.format(new Date(stamp)));
 		writer.write("\",\n");
 		writer.write("\"period\":30,\n");
-		writer.write("\"samples\":{\n");
+		writer.write("\"samples\":{");
 		Iterator<Station> it = StationHelper.iterator();
+		boolean first = true;
 		while (it.hasNext()) {
 			Station s = it.next();
 			if (s instanceof StationImpl) {
 				StationImpl si = (StationImpl) s;
-				if (si.writeSampleJson(stamp, per_ms, writer)) {
-					if (it.hasNext())
-						writer.write(',');
-					writer.write('\n');
+				if (si.writeSampleJson(stamp, per_ms, writer,
+					first))
+				{
+					first = false;
 				}
 			}
 		}
-		writer.write("}\n");
+		writer.write("\n}\n");
 		writer.write("}\n");
 	}
 

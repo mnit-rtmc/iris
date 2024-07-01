@@ -45,12 +45,6 @@ public interface User extends SonarObject {
 	/** Get the role */
 	Role getRole();
 
-	/** Set the allowed login domains */
-	void setDomains(Domain[] d);
-
-	/** Get the allowed login domains */
-	Domain[] getDomains();
-
 	/** Set the enabled flag */
 	void setEnabled(boolean e);
 

@@ -293,12 +293,14 @@ public class StationImpl implements Station, VehicleSampler {
 	}
 
 	/** Write the current sample as a JSON object */
-	public boolean writeSampleJson(long stamp, int per_ms, Writer writer)
-		throws IOException
+	public boolean writeSampleJson(long stamp, int per_ms, Writer writer,
+		boolean first) throws IOException
 	{
 		int f = getFlow(stamp, per_ms);
 		int s = Math.round(getSpeed(stamp, per_ms));
 		if (f > MISSING_DATA || s > 0) {
+			if (!first)
+				writer.write(',');
 			writeSampleJson(f, s, writer);
 			return true;
 		} else
@@ -309,7 +311,7 @@ public class StationImpl implements Station, VehicleSampler {
 	private void writeSampleJson(int f, int s, Writer writer)
 		throws IOException
 	{
-		writer.write('"');
+		writer.write("\n\"");
 		writer.write(name);
 		writer.write("\":[");
 		writer.write((f > MISSING_DATA) ? String.valueOf(f) : "null");

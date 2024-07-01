@@ -14,13 +14,38 @@
 //
 use http::StatusCode;
 use std::time::SystemTimeError;
+use tokio::io::ErrorKind;
 
 /// Honeybee error
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    /// Unauthorized request
-    #[error("Unauthorized")]
-    Unauthorized,
+    /// Unauthenticated request
+    #[error("Unauthenticated")]
+    Unauthenticated,
+
+    /// Forbidden (permission denied)
+    #[error("Forbidden")]
+    Forbidden,
+
+    /// Unexpected sonar response received
+    #[error("unexpected sonar response")]
+    UnexpectedResponse,
+
+    /// Not found
+    #[error("not found")]
+    NotFound,
+
+    /// Conflict (name already exists)
+    #[error("name conflict")]
+    Conflict,
+
+    /// Invalid value (invalid characters, etc)
+    #[error("invalid value")]
+    InvalidValue,
+
+    /// Timed out
+    #[error("timed out")]
+    TimedOut,
 
     /// Invalid ETag error
     #[error("Invalid ETag")]
@@ -29,10 +54,6 @@ pub enum Error {
     /// System time error
     #[error("Time {0}")]
     SystemTime(#[from] SystemTimeError),
-
-    /// Sonar error
-    #[error("Sonar {0}")]
-    Sonar(#[from] crate::sonar::Error),
 
     /// IO error
     #[error("IO {0}")]
@@ -47,7 +68,7 @@ pub enum Error {
     Join(#[from] tokio::task::JoinError),
 
     /// Loam error
-    #[error("Loam {0}")]
+    #[error("failed to read/write loam file: {0}")]
     Loam(#[from] loam::Error),
 
     /// Bb8 run error
@@ -84,8 +105,20 @@ impl<E: std::fmt::Debug> From<bb8::RunError<E>> for Error {
 impl From<Error> for StatusCode {
     fn from(err: Error) -> Self {
         match err {
-            Error::Unauthorized => StatusCode::UNAUTHORIZED,
-            Error::Sonar(e) => e.into(),
+            Error::Unauthenticated => StatusCode::UNAUTHORIZED,
+            Error::Forbidden => StatusCode::FORBIDDEN,
+            Error::UnexpectedResponse => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::NotFound => StatusCode::NOT_FOUND,
+            Error::Conflict => StatusCode::CONFLICT,
+            Error::InvalidValue => StatusCode::BAD_REQUEST,
+            Error::TimedOut => StatusCode::GATEWAY_TIMEOUT,
+            Error::Io(e) => {
+                if e.kind() == ErrorKind::TimedOut {
+                    StatusCode::GATEWAY_TIMEOUT
+                } else {
+                    StatusCode::INTERNAL_SERVER_ERROR
+                }
+            }
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

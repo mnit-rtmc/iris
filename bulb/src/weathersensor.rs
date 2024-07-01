@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{inactive_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME};
+use crate::card::{inactive_attr, Card, View};
 use crate::device::{Device, DeviceAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use humantime::format_duration;
@@ -701,20 +701,22 @@ impl WeatherSensor {
         let inactive = inactive_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='{NAME} end'>{name} {item_state}</div>\
+            "<div class='title row'>{name} {item_state}</div>\
             <div class='info fill{inactive}'>{location}</div>"
         )
     }
 
     /// Convert to Status HTML
-    fn to_html_status(&self, anc: &WeatherSensorAnc, config: bool) -> String {
+    fn to_html_status(&self, anc: &WeatherSensorAnc) -> String {
+        let title = self.title(View::Status);
         let location = HtmlStr::new(&self.location).with_len(64);
         let site_id = HtmlStr::new(&self.site_id);
         let alt_id = HtmlStr::new(&self.alt_id);
         let item_state = anc.item_state(self);
         let item_desc = item_state.description();
-        let mut status = format!(
-            "<div class='row'>\
+        let mut html = format!(
+            "{title}\
+            <div class='row'>\
               <span class='info'>{location}</span>\
             </div>\
             <div class='row'>\
@@ -724,33 +726,29 @@ impl WeatherSensor {
             <span>{item_state} {item_desc}</span>"
         );
         if let Some(sample_time) = &self.sample_time {
-            status.push_str(&format!(
+            html.push_str(&format!(
                 "<div class='row'>\
                   <span>Obs</span>\
                   <span class='info'>{sample_time}</span>\
                 </div>"
             ));
         }
-        status.push_str(&self.sample_html());
-        if config {
-            status.push_str("<div class='row'>");
-            status.push_str(&anc.controller_button());
-            status.push_str(LOC_BUTTON);
-            status.push_str(EDIT_BUTTON);
-            status.push_str("</div>");
-        }
-        status
+        html.push_str(&self.sample_html());
+        html
     }
 
-    /// Convert to Edit HTML
-    fn to_html_edit(&self) -> String {
+    /// Convert to Setup HTML
+    fn to_html_setup(&self, anc: &WeatherSensorAnc) -> String {
+        let title = self.title(View::Setup);
         let site_id = HtmlStr::new(&self.site_id);
         let alt_id = HtmlStr::new(&self.alt_id);
         let notes = HtmlStr::new(&self.notes);
-        let controller = HtmlStr::new(&self.controller);
+        let controller = anc.controller_html();
         let pin = OptVal(self.pin);
+        let footer = self.footer(true);
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
               <label for='site_id'>Site ID</label>\
               <input id='site_id' maxlength='20' size='20' \
                      value='{site_id}'>\
@@ -765,16 +763,13 @@ impl WeatherSensor {
               <textarea id='notes' maxlength='64' rows='2' \
                         cols='26'>{notes}</textarea>\
             </div>\
-            <div class='row'>\
-              <label for='controller'>Controller</label>\
-              <input id='controller' maxlength='20' size='20' \
-                     value='{controller}'>\
-            </div>\
+            {controller}\
             <div class='row'>\
               <label for='pin'>Pin</label>\
               <input id='pin' type='number' min='1' max='104' \
                      size='8' value='{pin}'>\
-            </div>"
+            </div>\
+            {footer}"
         )
     }
 }
@@ -827,13 +822,13 @@ impl Card for WeatherSensor {
     fn to_html(&self, view: View, anc: &WeatherSensorAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status(config) => self.to_html_status(anc, config),
-            View::Edit => self.to_html_edit(),
+            View::Status => self.to_html_status(anc),
+            View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("site_id", &self.site_id);

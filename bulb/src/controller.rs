@@ -11,9 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::cabinetstyle::CabinetStyle;
-use crate::card::{
-    inactive_attr, AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME,
-};
+use crate::card::{inactive_attr, AncillaryData, Card, View};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::error::Result;
@@ -99,7 +97,7 @@ impl AncillaryData for ControllerAnc {
                 ]
                 .into_iter(),
             ),
-            View::Status(_) => {
+            View::Status => {
                 let mut uri = Uri::from("/iris/api/controller_io/");
                 uri.push(&pri.name);
                 Box::new(
@@ -112,7 +110,7 @@ impl AncillaryData for ControllerAnc {
                     .into_iter(),
                 )
             }
-            View::Edit => Box::new(
+            View::Setup => Box::new(
                 [CONDITION_URI.into(), CABINET_STYLE_URI.into()].into_iter(),
             ),
             _ => Box::new(empty()),
@@ -333,13 +331,14 @@ impl Controller {
         let inactive = inactive_attr(self.is_active());
         let link_drop = HtmlStr::new(self.link_drop());
         format!(
-            "<div class='{NAME} end'>{name} {item_state}</div>\
+            "<div class='title row'>{name} {item_state}</div>\
             <div class='info fill{inactive}'>{link_drop}</div>"
         )
     }
 
-    /// Convert to status HTML
+    /// Convert to Status HTML
     fn to_html_status(&self, anc: &ControllerAnc) -> String {
+        let title = self.title(View::Status);
         let res = Res::CommLink;
         let condition = anc.condition(self);
         let item_state = self.item_state();
@@ -396,7 +395,8 @@ impl Controller {
         };
         let io_pins = anc.io_pins_html();
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
               <span>{condition}</span>\
               <span>{item_state} {item_desc}</span>\
               <span>\
@@ -416,25 +416,23 @@ impl Controller {
             {version}\
             {serial_num}\
             <div class='row'>{fail_time}</div>\
-            {io_pins}\
-            <div class='row'>\
-              <span></span>\
-              {LOC_BUTTON}\
-              {EDIT_BUTTON}\
-            </div>"
+            {io_pins}"
         )
     }
 
-    /// Convert to edit HTML
-    fn to_html_edit(&self, anc: &ControllerAnc) -> String {
+    /// Convert to Setup HTML
+    fn to_html_setup(&self, anc: &ControllerAnc) -> String {
+        let title = self.title(View::Setup);
         let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
         let cabinet_styles = anc.cabinet_styles_html(self);
         let conditions = anc.conditions_html(self);
         let notes = HtmlStr::new(&self.notes);
         let password = HtmlStr::new(&self.password);
+        let footer = self.footer(true);
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
               <label for='comm_link'>Comm Link</label>\
               <input id='comm_link' maxlength='20' size='20' \
                      value='{comm_link}'>\
@@ -461,7 +459,8 @@ impl Controller {
               <label for='password'>Password</label>\
               <input id='password' maxlength='32' size='26' \
                      value='{password}'>\
-            </div>"
+            </div>\
+            {footer}"
         )
     }
 }
@@ -523,13 +522,13 @@ impl Card for Controller {
     fn to_html(&self, view: View, anc: &ControllerAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status(_) => self.to_html_status(anc),
-            View::Edit => self.to_html_edit(anc),
+            View::Status => self.to_html_status(anc),
+            View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(),
         }
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("comm_link", &self.comm_link);

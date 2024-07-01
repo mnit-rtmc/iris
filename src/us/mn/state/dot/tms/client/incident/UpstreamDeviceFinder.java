@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2023  Minnesota Department of Transportation
+ * Copyright (C) 2019-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.HashtagHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.IncImpact;
@@ -199,7 +200,7 @@ public class UpstreamDeviceFinder {
 	private boolean isTollingDeployable(DMS dms, UpstreamDevice ed,
 		boolean branched)
 	{
-		if (!DMSHelper.hasHashtag(dms, "#Tolling"))
+		if (!HashtagHelper.hasHashtag(dms, "#Tolling"))
 			return false;
 		if (branched)
 			return false;

@@ -787,7 +787,14 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Get vehicle count */
 	@Override
 	public int getVehCount(long stamp, int per_ms) {
-		return isSampling()
+		return getVehCount(stamp, per_ms, false);
+	}
+
+	/** Get vehicle count */
+	private int getVehCount(long stamp, int per_ms,
+		boolean ignore_auto_fail)
+	{
+		return isSampling(ignore_auto_fail)
 		      ? veh_cache.getValue(stamp - per_ms, stamp)
 		      : MISSING_DATA;
 	}
@@ -829,7 +836,14 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Get a raw (non-faked) flow rate (vehicles per hour) */
 	protected int getFlowRaw(long stamp, int per_ms) {
-		int v = getVehCount(stamp, per_ms);
+		return getFlowRaw(stamp, per_ms, false);
+	}
+
+	/** Get a raw (non-faked) flow rate (vehicles per hour) */
+	private int getFlowRaw(long stamp, int per_ms,
+		boolean ignore_auto_fail)
+	{
+		int v = getVehCount(stamp, per_ms, ignore_auto_fail);
 		float ph = new Interval(per_ms, MILLISECONDS).per(HOUR);
 		return (v >= 0) ? Math.round(v * ph) : MISSING_DATA;
 	}
@@ -850,7 +864,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Get the current raw (non-faked) density (vehicles per mile) */
 	protected float getDensityRaw(long stamp, int per_ms) {
 		float k = getDensityFromFlowSpeed(stamp, per_ms);
-		return (k >= 0) ? k : getDensityFromOccupancy(stamp, per_ms);
+		return (k >= 0)
+		      ? k
+		      : getDensityFromOccupancy(stamp, per_ms, false);
 	}
 
 	/** Get the density from flow and speed (vehicles per mile) */
@@ -865,8 +881,10 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	}
 
 	/** Get the density from occupancy (vehicles per mile) */
-	private float getDensityFromOccupancy(long stamp, int per_ms) {
-		float occ = getOccupancy(stamp, per_ms);
+	private float getDensityFromOccupancy(long stamp, int per_ms,
+		boolean ignore_auto_fail)
+	{
+		float occ = getOccupancy(stamp, per_ms, ignore_auto_fail);
 		if (occ >= 0 && field_length > 0) {
 			Distance fl = new Distance(field_length, FEET);
 			return occ / (fl.asFloat(MILES) * MAX_OCCUPANCY);
@@ -883,36 +901,44 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Get recorded speed (miles per hour) */
 	@Override
 	public float getSpeed(long stamp, int per_ms) {
-		float speed = getSpeedRaw(stamp, per_ms);
+		return getSpeed(stamp, per_ms, false);
+	}
+
+	/** Get recorded speed (miles per hour) */
+	public float getSpeed(long stamp, int per_ms, boolean ignore_auto_fail) {
+		float speed = getSpeedRaw(stamp, per_ms, ignore_auto_fail);
 		if (speed > 0)
 			return speed;
-		speed = getSpeedEstimate(stamp, per_ms);
+		speed = getSpeedEstimate(stamp, per_ms, ignore_auto_fail);
 		if (speed > 0)
 			return speed;
 		else
 			return getSpeedFake(stamp, per_ms);
 	}
 
-	/** Get recorded speed (miles per hour) */
-	public float getSpeed(long stamp, int per_ms, boolean ignore_auto_fail) {
-		return isSampling(ignore_auto_fail)
-		     ? getSpeed(stamp, per_ms)
-		     : MISSING_DATA;
+	/** Get the raw (non-faked) speed (MPH) */
+	protected float getSpeedRaw(long stamp, int per_ms) {
+		return getSpeedRaw(stamp, per_ms, false);
 	}
 
 	/** Get the raw (non-faked) speed (MPH) */
-	protected float getSpeedRaw(long stamp, int per_ms) {
-		return isSampling()
+	private float getSpeedRaw(long stamp, int per_ms,
+		boolean ignore_auto_fail)
+	{
+		return isSampling(ignore_auto_fail)
 		      ? spd_cache.getValue(stamp - per_ms, stamp)
 		      : MISSING_DATA;
 	}
 
 	/** Get speed estimate based on flow / density */
-	private float getSpeedEstimate(long stamp, int per_ms) {
-		int flow = getFlowRaw(stamp, per_ms);
+	private float getSpeedEstimate(long stamp, int per_ms,
+		boolean ignore_auto_fail)
+	{
+		int flow = getFlowRaw(stamp, per_ms, ignore_auto_fail);
 		if (flow <= 0)
 			return MISSING_DATA;
-		float density = getDensityFromOccupancy(stamp, per_ms);
+		float density = getDensityFromOccupancy(stamp, per_ms,
+			ignore_auto_fail);
 		if (density <= DENSITY_THRESHOLD)
 			return MISSING_DATA;
 		return flow / density;

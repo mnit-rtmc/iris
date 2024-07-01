@@ -185,7 +185,6 @@ UPDATE iris.privilege SET type_n = 'msg_pattern'
 CREATE TABLE iris.msg_pattern (
     name VARCHAR(20) PRIMARY KEY,
     sign_config VARCHAR(16) REFERENCES iris.sign_config,
-    -- FIXME: replace sign_group with hashtag
     sign_group VARCHAR(20) REFERENCES iris.sign_group,
     multi VARCHAR(1024) NOT NULL
 );

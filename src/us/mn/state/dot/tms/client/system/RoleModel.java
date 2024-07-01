@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2017  Minnesota Department of Transportation
+ * Copyright (C) 2007-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ public class RoleModel extends ProxyTableModel<Role> {
 	protected ArrayList<ProxyColumn<Role>> createColumns() {
 		ArrayList<ProxyColumn<Role>> cols =
 			new ArrayList<ProxyColumn<Role>>(2);
-		cols.add(new ProxyColumn<Role>("role.name", 160) {
+		cols.add(new ProxyColumn<Role>("role.name", 120) {
 			public Object getValueAt(Role r) {
 				return r.getName();
 			}

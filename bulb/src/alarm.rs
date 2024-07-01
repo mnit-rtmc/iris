@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{inactive_attr, Card, View, EDIT_BUTTON, NAME};
+use crate::card::{inactive_attr, Card, View};
 use crate::device::{Device, DeviceAnc};
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
@@ -55,55 +55,50 @@ impl Alarm {
         let item_state = self.item_state(anc);
         let description = HtmlStr::new(&self.description);
         format!(
-            "<div class='{NAME} end'>{name} {item_state}</div>\
+            "<div class='title row'>{name} {item_state}</div>\
             <div class='info fill{inactive}'>{description}</div>"
         )
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &AlarmAnc) -> String {
+        let title = self.title(View::Status);
         let description = HtmlStr::new(&self.description);
         let item_state = self.item_state(anc);
         let item_desc = item_state.description();
         let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
-        let ctrl_button = anc.controller_button();
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
               <span class='info full'>{description}</span>\
               <span class='full'>{item_state} {item_desc}</span>\
             </div>\
             <div class='row'>\
               <span>Triggered</span>\
               <span class='info'>{trigger_time}</span>\
-            </div>\
-            <div class='row'>\
-              {ctrl_button}\
-              {EDIT_BUTTON}\
             </div>"
         )
     }
 
-    /// Convert to Edit HTML
-    fn to_html_edit(&self) -> String {
+    /// Convert to Setup HTML
+    fn to_html_setup(&self, anc: &AlarmAnc) -> String {
+        let title = self.title(View::Setup);
         let description = HtmlStr::new(&self.description);
-        let controller = HtmlStr::new(&self.controller);
+        let controller = anc.controller_html();
         let pin = OptVal(self.pin);
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
               <label for='description'>Description</label>\
               <input id='description' maxlength='24' size='24' \
                      value='{description}'>\
-             </div>\
-             <div class='row'>\
-               <label for='controller'>Controller</label>\
-               <input id='controller' maxlength='20' size='20' \
-                      value='{controller}'>\
-             </div>\
-             <div class='row'>\
-               <label for='pin'>Pin</label>\
-               <input id='pin' type='number' min='1' max='104' \
-                      size='8' value='{pin}'>\
-             </div>"
+            </div>\
+            {controller}\
+            <div class='row'>\
+              <label for='pin'>Pin</label>\
+              <input id='pin' type='number' min='1' max='104' \
+                     size='8' value='{pin}'>\
+            </div>"
         )
     }
 }
@@ -148,13 +143,13 @@ impl Card for Alarm {
     fn to_html(&self, view: View, anc: &AlarmAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status(_) => self.to_html_status(anc),
-            View::Edit => self.to_html_edit(),
+            View::Status => self.to_html_status(anc),
+            View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("description", &self.description);

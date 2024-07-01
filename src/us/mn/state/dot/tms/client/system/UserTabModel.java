@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2018  Minnesota Department of Transportation
+ * Copyright (C) 2007-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  *
  * @author Douglas Lau
  */
-public class UserModel extends ProxyTableModel<User> {
+public class UserTabModel extends ProxyTableModel<User> {
 
 	/** Create a proxy descriptor */
 	static public ProxyDescriptor<User> descriptor(Session s) {
@@ -49,7 +49,7 @@ public class UserModel extends ProxyTableModel<User> {
 	}
 
 	/** Create a new user table model */
-	public UserModel(Session s) {
+	public UserTabModel(Session s) {
 		super(s, descriptor(s), 16);
 	}
 

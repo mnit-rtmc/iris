@@ -52,14 +52,14 @@ resource, at the same access level.
 | alert config       |                                                |
 | beacon             |                                                |
 | [camera]           | catalog, [flow stream], monitor style, play list, [video monitor] |
-| [controller]       | [alarm], [comm link], [controller io], [modem] |
-| [detector]         | [rnode], [road], station                       |
+| [controller]       | [alarm], [comm link], [controller io], gps, [modem] |
+| [detector]         | [r_node], [road], station                      |
 | [dms]              | [font], [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
 | [gate arm]         | [gate arm array]                               |
 | incident           | inc_advice, inc_descriptor, inc_locator        |
 | [lcs]              | [lcs array], [lcs indication], [lane marking]  |
 | parking area       |                                                |
-| [permission]       | [domain], [role], [user id]                    |
+| permission         | [domain], [role], [user id]                    |
 | ramp meter         |                                                |
 | [system attribute] | [cabinet style], [comm config]                 |
 | [toll zone]        | [tag reader]                                   |
@@ -77,10 +77,16 @@ These include:
 
 
 [alarm]: alarms.html
+[cabinet style]: controllers.html#cabinet-styles
 [camera]: cameras.html
-[capabilities]: user_roles.html#capabilities
+[capabilities]: users.html#capabilities
+[comm config]: comm_config.html
+[comm link]: comm_links.html
 [controller]: controllers.html
+[controller io]: controllers.html#io-pins
+[detector]: vehicle_detection.html
 [dms]: dms.html
+[domain]: users.html#domains
 [flow stream]: flow_streams.html
 [font]: fonts.html
 [gate arm]: gate_arms.html
@@ -94,12 +100,19 @@ These include:
 [lcs indication]: lcs.html#indications
 [message line]: message_patterns.html#message-lines
 [message pattern]: message_patterns.html
-[privileges]: user_roles.html#privileges
+[modem]: modem.html
+[privileges]: users.html#privileges
+[r_node]: road_topology.html#r_nodes
 [resource]: rest_api.html#resource-types
 [restricted resource]: rest_api.html#restricted-resources-codeirisapicode
-[role]: user_roles.html#roles
+[road]: road_topology.html#roads
+[role]: users.html#roles
 [sign configuration]: sign_configuration.html
 [sign detail]: sign_configuration.html#sign-details
 [sign message]: sign_message.html
+[system attribute]: system_attributes.html
+[tag reader]: tolling.html#tag-readers
+[toll zone]: tolling.html#toll-zones
+[user id]: users.html#user-ids
 [video monitor]: video.html
 [word]: words.html

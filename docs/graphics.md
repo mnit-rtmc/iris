@@ -49,7 +49,7 @@ sign's function.
 
 
 [DMS]: dms.html
-[edit mode]: user_interface.html#edit-mode
+[edit mode]: ui.html#edit-mode
 [GIMP]: https://www.gimp.org/
 [MULTI]: multi.html
 [REST API]: rest_api.html

@@ -31,6 +31,7 @@ pub enum Res {
     Detector,
     Direction,
     Dms,
+    Domain,
     FlowStream,
     Font,
     GateArm,
@@ -41,6 +42,9 @@ pub enum Res {
     Gps,
     Graphic,
     Incident,
+    IncAdvice,
+    IncDescriptor,
+    IncLocator,
     LaneMarking,
     LaneUseIndication,
     Lcs,
@@ -102,6 +106,7 @@ impl Res {
             Detector,
             Direction,
             Dms,
+            Domain,
             FlowStream,
             Font,
             GateArm,
@@ -112,6 +117,9 @@ impl Res {
             Gps,
             Graphic,
             Incident,
+            IncAdvice,
+            IncDescriptor,
+            IncLocator,
             LaneMarking,
             LaneUseIndication,
             Lcs,
@@ -161,6 +169,7 @@ impl Res {
             Detector => "detector",
             Direction => "direction",
             Dms => "dms",
+            Domain => "domain",
             FlowStream => "flow_stream",
             Font => "font",
             GateArm => "gate_arm",
@@ -171,6 +180,9 @@ impl Res {
             Gps => "gps",
             Graphic => "graphic",
             Incident => "incident",
+            IncAdvice => "inc_advice",
+            IncDescriptor => "inc_descriptor",
+            IncLocator => "inc_locator",
             LaneUseIndication => "lane_use_indication",
             LaneMarking => "lane_marking",
             Lcs => "lcs",
@@ -213,11 +225,13 @@ impl Res {
             Controller => "🎛️ ",
             Detector => "🚗⬚",
             Dms => "⬛",
+            Domain => "🖧 ",
             FlowStream => "🎞️ ",
             GateArm => "⫬",
             GateArmArray => "⫭⫬",
             GeoLoc => "🗺️ ",
             Gps => "🌐",
+            Incident => "🚨",
             LaneMarking => "⛙",
             LcsArray => "🡇🡇 ",
             LcsIndication => "🡇 ",
@@ -251,7 +265,7 @@ impl Res {
         #[allow(clippy::match_like_matches_macro)]
         match self {
             Alarm | Beacon | CabinetStyle | Camera | CommConfig | CommLink
-            | Controller | Detector | Dms | FlowStream | GateArm
+            | Controller | Detector | Dms | Domain | FlowStream | GateArm
             | GateArmArray | Gps | Incident | LaneMarking | LcsArray
             | LcsIndication | Modem | MsgLine | MsgPattern | ParkingArea
             | Permission | RampMeter | Rnode | Road | Role | SignConfig
@@ -276,10 +290,12 @@ impl Res {
             | SignMessage | Word => Dms,
             // Gate arm resources
             GateArmArray => GateArm,
+            // Incident resources
+            IncAdvice | IncDescriptor | IncLocator => Incident,
             // LCS resources
             LcsArray | LcsIndication | LaneMarking => Lcs,
             // Permission resources
-            User | Role => Permission,
+            Domain | User | Role => Permission,
             // System attribute resources
             CabinetStyle | CommConfig => SystemAttribute,
             // Others

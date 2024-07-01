@@ -44,4 +44,67 @@ ALTER TABLE iris.permission
     ADD CONSTRAINT base_resource_ck
         CHECK (iris.resource_is_base(resource_n)) NOT VALID;
 
+-- Add camera_hashtag view
+CREATE VIEW iris.camera_hashtag AS
+    SELECT name AS camera, hashtag
+        FROM iris.hashtag
+        WHERE resource_n = 'camera';
+
+CREATE FUNCTION iris.camera_hashtag_insert() RETURNS TRIGGER AS
+    $camera_hashtag_insert$
+BEGIN
+    INSERT INTO iris.hashtag (resource_n, name, hashtag)
+         VALUES ('camera', NEW.camera, NEW.hashtag);
+    RETURN NEW;
+END;
+$camera_hashtag_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER camera_hashtag_insert_trig
+    INSTEAD OF INSERT ON iris.camera_hashtag
+    FOR EACH ROW EXECUTE FUNCTION iris.camera_hashtag_insert();
+
+CREATE FUNCTION iris.camera_hashtag_delete() RETURNS TRIGGER AS
+    $camera_hashtag_delete$
+BEGIN
+    DELETE FROM iris.hashtag WHERE resource_n = 'camera' AND name = OLD.camera;
+    IF FOUND THEN
+        RETURN OLD;
+    ELSE
+        RETURN NULL;
+    END IF;
+END;
+$camera_hashtag_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER camera_hashtag_delete_trig
+    INSTEAD OF DELETE ON iris.camera_hashtag
+    FOR EACH ROW EXECUTE FUNCTION iris.camera_hashtag_delete();
+
+-- Populate camera_hashtag with streamable cameras
+INSERT INTO iris.camera_hashtag (camera, hashtag)
+    SELECT name, '#LiveStream' FROM iris.camera WHERE streamable = 't';
+INSERT INTO iris.camera_hashtag (camera, hashtag)
+    SELECT name, '#Recorded' FROM iris.camera WHERE streamable = 't';
+
+-- Add domain notify trigger
+CREATE TRIGGER domain_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.domain
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+-- Add user domain notify trigger
+CREATE FUNCTION iris.user_domain_notify() RETURNS TRIGGER AS
+    $user_domain_notify$
+BEGIN
+    IF (TG_OP = 'DELETE') THEN
+        PERFORM pg_notify('user_id', OLD.user_id);
+    ELSE
+        PERFORM pg_notify('user_id', NEW.user_id);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$user_domain_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER user_domain_notify_trig
+    AFTER INSERT OR DELETE ON iris.user_id_domain
+    FOR EACH ROW EXECUTE FUNCTION iris.user_domain_notify();
+
 COMMIT;

@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME};
+use crate::card::{AncillaryData, Card, View};
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
 use crate::fetch::{Action, Uri};
@@ -138,7 +138,7 @@ impl Beacon {
         };
         let message = HtmlStr::new(&self.message);
         format!(
-            "<div class='{NAME} end'>{name} {item_states}</div>\
+            "<div class='title row'>{name} {item_states}</div>\
             <div class='beacon-container row center'>\
               <button id='ob_flashing' disabled></button>\
               <label for='ob_flashing' class='beacon-disabled'>\
@@ -152,8 +152,9 @@ impl Beacon {
         )
     }
 
-    /// Convert to Status HTML
-    fn to_html_status(&self, anc: &BeaconAnc, config: bool) -> String {
+    /// Convert to Control HTML
+    fn to_html_control(&self, anc: &BeaconAnc) -> String {
+        let title = self.title(View::Control);
         let location = HtmlStr::new(&self.location).with_len(64);
         let item_states = self.item_states(anc).to_html();
         let flashing = if self.flashing() {
@@ -163,8 +164,9 @@ impl Beacon {
         };
         let beacon_state = self.beacon_state(anc);
         let message = HtmlStr::new(&self.message);
-        let mut status = format!(
-            "<div class='row'>\
+        format!(
+            "{title}\
+            <div class='row'>\
               <span class='info'>{location}</span>\
             </div>\
             <div class='row'>{item_states}</div>\
@@ -181,22 +183,15 @@ impl Beacon {
             <div class='row center'>\
               <span>{beacon_state}</span>\
             </div>"
-        );
-        if config {
-            status.push_str("<div class='row'>");
-            status.push_str(&anc.dev.controller_button());
-            status.push_str(LOC_BUTTON);
-            status.push_str(EDIT_BUTTON);
-            status.push_str("</div>");
-        }
-        status
+        )
     }
 
-    /// Convert to Edit HTML
-    fn to_html_edit(&self) -> String {
+    /// Convert to Setup HTML
+    fn to_html_setup(&self, anc: &BeaconAnc) -> String {
+        let title = self.title(View::Setup);
         let message = HtmlStr::new(&self.message);
         let notes = HtmlStr::new(&self.notes);
-        let controller = HtmlStr::new(&self.controller);
+        let controller = anc.dev.controller_html();
         let pin = OptVal(self.pin);
         let verify_pin = OptVal(self.verify_pin);
         let ext_mode = if self.ext_mode.unwrap_or(false) {
@@ -204,8 +199,10 @@ impl Beacon {
         } else {
             ""
         };
+        let footer = self.footer(true);
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
               <label for='message'>Message</label>\
               <textarea id='message' maxlength='128' rows='3' \
                         cols='24'>{message}</textarea>\
@@ -215,11 +212,7 @@ impl Beacon {
               <textarea id='notes' maxlength='128' rows='2' \
                         cols='24'>{notes}</textarea>\
             </div>\
-            <div class='row'>\
-              <label for='controller'>Controller</label>\
-              <input id='controller' maxlength='20' size='20' \
-                     value='{controller}'>\
-            </div>\
+            {controller}\
             <div class='row'>\
               <label for='pin'>Pin</label>\
               <input id='pin' type='number' min='1' max='104' \
@@ -233,7 +226,8 @@ impl Beacon {
             <div class='row'>\
               <label for='ext_mode'>Ext Mode</label>\
               <input id='ext_mode' type='checkbox'{ext_mode}>\
-            </div>"
+            </div>\
+            {footer}"
         )
     }
 }
@@ -294,13 +288,13 @@ impl Card for Beacon {
     fn to_html(&self, view: View, anc: &BeaconAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status(config) => self.to_html_status(anc, config),
-            View::Edit => self.to_html_edit(),
+            View::Control => self.to_html_control(anc),
+            View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_text_area("message", &self.message);

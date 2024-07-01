@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2023  Minnesota Department of Transportation
+ * Copyright (C) 2005-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.HashtagHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgLine;
 import us.mn.state.dot.tms.client.Session;
@@ -65,7 +65,7 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 	protected ArrayList<ProxyColumn<MsgLine>> createColumns() {
 		ArrayList<ProxyColumn<MsgLine>> cols =
 			new ArrayList<ProxyColumn<MsgLine>>(4);
-		cols.add(new ProxyColumn<MsgLine>("dms.hashtag", 72) {
+		cols.add(new ProxyColumn<MsgLine>("hashtag", 72) {
 			public Object getValueAt(MsgLine ml) {
 				return ml.getRestrictHashtag();
 			}
@@ -74,7 +74,7 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 			}
 			public void setValueAt(MsgLine ml, Object value) {
 				selected = ml.getName();
-				String ht = DMSHelper.normalizeHashtag(
+				String ht = HashtagHelper.normalize(
 					value.toString());
 				ml.setRestrictHashtag(ht);
 			}

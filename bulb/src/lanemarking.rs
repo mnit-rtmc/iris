@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{inactive_attr, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME};
+use crate::card::{inactive_attr, Card, View};
 use crate::device::{Device, DeviceAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use resources::Res;
@@ -40,43 +40,25 @@ impl LaneMarking {
         let inactive = inactive_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='{NAME} end'>{name} {item_state}</div>\
+            "<div class='title row'>{name} {item_state}</div>\
             <div class='info fill{inactive}'>{location}</div>"
         )
     }
 
-    /// Convert to Status HTML
-    fn to_html_status(&self, anc: &LaneMarkingAnc) -> String {
-        let location = HtmlStr::new(&self.location).with_len(64);
-        let ctrl_button = anc.controller_button();
-        format!(
-            "<div class='row'>\
-              <span class='info'>{location}</span>\
-            </div>\
-            <div class='row'>\
-              {ctrl_button}\
-              {LOC_BUTTON}\
-              {EDIT_BUTTON}\
-            </div>"
-        )
-    }
-
-    /// Convert to Edit HTML
-    fn to_html_edit(&self) -> String {
+    /// Convert to Setup HTML
+    fn to_html_setup(&self, anc: &LaneMarkingAnc) -> String {
+        let title = self.title(View::Setup);
         let notes = HtmlStr::new(&self.notes);
-        let controller = HtmlStr::new(&self.controller);
+        let controller = anc.controller_html();
         let pin = OptVal(self.pin);
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
               <label for='notes'>Notes</label>\
               <textarea id='notes' maxlength='128' rows='2' \
                         cols='24'>{notes}</textarea>\
             </div>\
-            <div class='row'>\
-              <label for='controller'>Controller</label>\
-              <input id='controller' maxlength='20' size='20' \
-                     value='{controller}'>\
-            </div>\
+            {controller}\
             <div class='row'>\
               <label for='pin'>Pin</label>\
               <input id='pin' type='number' min='1' max='104' \
@@ -131,13 +113,12 @@ impl Card for LaneMarking {
     fn to_html(&self, view: View, anc: &LaneMarkingAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status(_) => self.to_html_status(anc),
-            View::Edit => self.to_html_edit(),
+            View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_text_area("notes", &self.notes);

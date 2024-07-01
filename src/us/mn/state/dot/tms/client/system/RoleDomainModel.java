@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,18 +17,18 @@ package us.mn.state.dot.tms.client.system;
 import java.util.ArrayList;
 import java.util.TreeSet;
 import us.mn.state.dot.sonar.Domain;
-import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
- * Table model for domains assigned to IRIS users.
+ * Table model for domains assigned to IRIS roles.
  *
  * @author Douglas Lau
  */
-public class UserDomainModel extends ProxyTableModel<Domain> {
+public class RoleDomainModel extends ProxyTableModel<Domain> {
 
 	/** Create a proxy descriptor */
 	static public ProxyDescriptor<Domain> descriptor(Session s) {
@@ -57,7 +57,7 @@ public class UserDomainModel extends ProxyTableModel<Domain> {
 				return isAssigned(d);
 			}
 			public boolean isEditable(Domain d) {
-				return canWrite(user, "domains");
+				return canWrite(role, "domains");
 			}
 			public void setValueAt(Domain d, Object value) {
 				if (value instanceof Boolean)
@@ -67,10 +67,10 @@ public class UserDomainModel extends ProxyTableModel<Domain> {
 		return cols;
 	}
 
-	/** Check if the given domain is assigned to the user */
+	/** Check if the given domain is assigned to the role */
 	private boolean isAssigned(Domain dom) {
-		if (user != null) {
-			for (Domain d: user.getDomains())
+		if (role != null) {
+			for (Domain d: role.getDomains())
 				if (d == dom)
 					return true;
 		}
@@ -79,40 +79,40 @@ public class UserDomainModel extends ProxyTableModel<Domain> {
 
 	/** Assign or unassign the specified domain */
 	private void setAssigned(Domain d, boolean a) {
-		if (user != null) {
-			Domain[] doms = user.getDomains();
+		if (role != null) {
+			Domain[] doms = role.getDomains();
 			if (a)
 				doms = addDomain(doms, d);
 			else
 				doms = removeDomain(doms, d);
-			user.setDomains(doms);
+			role.setDomains(doms);
 		}
 	}
 
-	/** User for associated domains */
-	private final User user;
+	/** Role for associated domains */
+	private final Role role;
 
-	/** Create a new user-domain table model */
-	public UserDomainModel(Session s, User r) {
+	/** Create a new role-domain table model */
+	public RoleDomainModel(Session s, Role r) {
 		super(s, descriptor(s), 16);
-		user = r;
+		role = r;
 	}
 
 	/** Add a domain to an array of domains */
 	private Domain[] addDomain(Domain[] doms, Domain dom) {
-		TreeSet<Domain> ds = new TreeSet<Domain>(comparator());
+		TreeSet<Domain> dset = new TreeSet<Domain>(comparator());
 		for (Domain d: doms)
-			ds.add(d);
-		ds.add(dom);
-		return ds.toArray(new Domain[0]);
+			dset.add(d);
+		dset.add(dom);
+		return dset.toArray(new Domain[0]);
 	}
 
 	/** Remove a domain from an array of domains */
 	private Domain[] removeDomain(Domain[] doms, Domain dom) {
-		TreeSet<Domain> ds = new TreeSet<Domain>(comparator());
+		TreeSet<Domain> dset = new TreeSet<Domain>(comparator());
 		for (Domain d: doms)
-			ds.add(d);
-		ds.remove(dom);
-		return ds.toArray(new Domain[0]);
+			dset.add(d);
+		dset.remove(dom);
+		return dset.toArray(new Domain[0]);
 	}
 }

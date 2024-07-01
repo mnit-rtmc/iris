@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2023  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
+import us.mn.state.dot.tms.HashtagHelper;
 
 /**
  * Job to perform DMS actions.
@@ -68,11 +69,14 @@ public class DmsActionJob extends Job {
 	/** Perform a DMS action */
 	private void performDmsAction(DmsAction da) {
 		String ht = da.getDmsHashtag();
-		Iterator<DMS> it = DMSHelper.hashtagIterator(ht);
+		Iterator<DMS> it = DMSHelper.iterator();
 		while (it.hasNext()) {
-			DMS dms = it.next();
-			if (dms instanceof DMSImpl)
-				checkAction(da, (DMSImpl) dms);
+			DMS d = it.next();
+			if (d instanceof DMSImpl) {
+				DMSImpl dms = (DMSImpl) d;
+				if (HashtagHelper.hasHashtag(dms, ht))
+					checkAction(da, dms);
+			}
 		}
 	}
 

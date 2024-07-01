@@ -40,6 +40,10 @@ imput {
   padding: 0.2rem;
 }
 
+.invalid {
+  border-color: red;
+}
+
 button {
   appearance: none;
   display: inline-block;
@@ -55,6 +59,9 @@ button:hover {
 }
 button:active {
   background-color: #bbb;
+}
+button:disabled {
+  background-color: #888;
 }
 button.go_link {
   font-size: smaller;
@@ -154,11 +161,6 @@ label:has(+ #sb_resource) {
   }
 }
 
-#ob_close {
-  margin: none;
-  padding: none;
-}
-
 /* Delete button sliding "confirmation" animation */
 #ob_delete {
   position: relative; /* add position context for ::before pseudo-element */
@@ -238,7 +240,7 @@ label:has(+ #sb_resource) {
   z-index: 1;
   position: absolute;
   bottom: 100%;
-  right: 0;
+  left: 0;
   padding: 0.5rem;
   border-radius: 0.2rem;
   color: #fff;
@@ -296,7 +298,10 @@ label:has(+ #sb_resource) {
   white-space: nowrap;
   overflow: hidden;
   box-sizing: border-box;
-  padding: 0.1rem 0.2rem;
+  padding-top: 0.1rem;
+  padding-bottom: 0;
+  padding-left: 0.2rem;
+  padding-right: 0.2rem;
   margin: 0.1rem;
   background-color: #eee;
   border-radius: 0.1rem;
@@ -319,13 +324,11 @@ label:has(+ #sb_resource) {
 }
 .title {
   font-weight: bold;
-}
-.ob_name {
-  font-weight: bold;
-  font-size: 70%;
+  font-size: smaller;
 }
 .info {
   font-style: italic;
+  font-size: smaller;
   color: #448;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -363,9 +366,9 @@ label:has(+ #sb_resource) {
   justify-items: center;
   align-content: space-around;
   align-items: center;
-  grid-template-columns: repeat(3, auto);
-  grid-template-areas: "pv ln ln"
-                       "pt bs bc";
+  grid-template-columns: repeat(4, auto);
+  grid-template-areas: "pv ln ln ln"
+                       "pt bx bs bc";
 }
 #mc_preview {
   grid-area: pv;
@@ -381,6 +384,9 @@ label:has(+ #sb_resource) {
   grid-area: ln;
   justify-self: start;
   font-size: smaller;
+}
+#mc_expire {
+  grid-area: bx;
 }
 #mc_send {
   grid-area: bs;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2023  Minnesota Department of Transportation
+ * Copyright (C) 2011-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ public class MsgLineHelper extends BaseHelper {
 	static private boolean checkLine(MsgLine ml, MsgPattern pat, DMS dms) {
 		if (ml.getMsgPattern() == pat) {
 			String rht = ml.getRestrictHashtag();
-			return (rht == null || DMSHelper.hasHashtag(dms, rht));
+			return (rht == null || HashtagHelper.hasHashtag(dms, rht));
 		}
 		return false;
 	}

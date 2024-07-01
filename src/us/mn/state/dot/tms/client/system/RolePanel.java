@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.system;
 import javax.swing.GroupLayout;
 import javax.swing.JPanel;
 import us.mn.state.dot.sonar.Capability;
+import us.mn.state.dot.sonar.Domain;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
@@ -35,6 +36,9 @@ public class RolePanel extends JPanel {
 	/** Role table panel */
 	private final ProxyTablePanel<Role> role_pnl;
 
+	/** Domain table panel */
+	private final ProxyTablePanel<Domain> dom_pnl;
+
 	/** Capability table panel */
 	private final ProxyTablePanel<Capability> cap_pnl;
 
@@ -45,8 +49,9 @@ public class RolePanel extends JPanel {
 		RoleModel r_mdl = new RoleModel(s) {
 			protected void proxyChangedSwing(Role r) {
 				super.proxyChangedSwing(r);
-				/* Repaint the capability panel when the
+				/* Repaint other panels when the
 				 * role capabilities are changed. */
+				dom_pnl.repaint();
 				cap_pnl.repaint();
 			}
 		};
@@ -56,6 +61,8 @@ public class RolePanel extends JPanel {
 				super.selectProxy();
 			}
 		};
+		dom_pnl = new ProxyTablePanel<Domain>(
+			new RoleDomainModel(s, null));
 		cap_pnl = new ProxyTablePanel<Capability>(
 			new RoleCapabilityModel(s, null));
 	}
@@ -63,6 +70,7 @@ public class RolePanel extends JPanel {
 	/** Initializze the panel */
 	public void initialize() {
 		role_pnl.initialize();
+		dom_pnl.initialize();
 		cap_pnl.initialize();
 		layoutPanel();
 	}
@@ -83,6 +91,8 @@ public class RolePanel extends JPanel {
 		GroupLayout.SequentialGroup hg = gl.createSequentialGroup();
 		hg.addComponent(role_pnl);
 		hg.addGap(UI.hgap);
+		hg.addComponent(dom_pnl);
+		hg.addGap(UI.hgap);
 		hg.addComponent(cap_pnl);
 		return hg;
 	}
@@ -91,6 +101,7 @@ public class RolePanel extends JPanel {
 	private GroupLayout.Group createVerticalGroup(GroupLayout gl) {
 		GroupLayout.ParallelGroup vg = gl.createParallelGroup();
 		vg.addComponent(role_pnl);
+		vg.addComponent(dom_pnl);
 		vg.addComponent(cap_pnl);
 		return vg;
 	}
@@ -98,6 +109,7 @@ public class RolePanel extends JPanel {
 	/** Dispose of the panel */
 	public void dispose() {
 		role_pnl.dispose();
+		dom_pnl.dispose();
 		cap_pnl.dispose();
 		removeAll();
 	}
@@ -105,6 +117,7 @@ public class RolePanel extends JPanel {
 	/** Change the selected role */
 	private void selectRole() {
 		Role r = role_pnl.getSelectedProxy();
+		dom_pnl.setModel(new RoleDomainModel(session, r));
 		cap_pnl.setModel(new RoleCapabilityModel(session, r));
 	}
 }

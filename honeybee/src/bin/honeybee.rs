@@ -19,6 +19,7 @@ use honeybee::{
     notify_events, Database, Honey, Resource, Result, SegmentState,
 };
 use std::collections::HashSet;
+use std::net::SocketAddr;
 use std::time::Duration;
 use tokio::net::TcpListener;
 use tokio_stream::StreamExt;
@@ -78,7 +79,9 @@ async fn check_expired(honey: Honey) {
 
 /// Serve routes
 async fn serve_routes(honey: Honey) -> Result<()> {
-    let app = honey.route_root();
+    let app = honey
+        .route_root()
+        .into_make_service_with_connect_info::<SocketAddr>();
     let listener = TcpListener::bind("127.0.0.1:3737").await?;
     axum::serve(listener, app).await?;
     log::warn!("Axum serve ended");

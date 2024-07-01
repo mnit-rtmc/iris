@@ -14,13 +14,16 @@
 //
 use crate::access::Access;
 use crate::cred::Credentials;
+use crate::domain;
 use crate::error::{Error, Result};
+use crate::event::{self, EventTp};
 use crate::permission;
 use crate::query;
-use crate::sonar::{Error as SonarError, Messenger, Name};
+use crate::sonar::{Messenger, Name};
+use crate::xff::XForwardedFor;
 use crate::Database;
 use axum::body::Body;
-use axum::extract::{Json, Path as AxumPath, State};
+use axum::extract::{ConnectInfo, Json, Path as AxumPath, Query, State};
 use axum::http::{header, StatusCode};
 use axum::response::sse::{Event, KeepAlive};
 use axum::response::Sse;
@@ -30,10 +33,12 @@ use axum_extra::TypedHeader;
 use headers::{ETag, IfNoneMatch};
 use http::header::HeaderName;
 use resources::Res;
+use serde::Deserialize;
 use serde_json::map::Map;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::convert::Infallible;
+use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
 use tokio::fs::metadata;
@@ -183,7 +188,7 @@ impl Honey {
             .with_name("honeybee")
             .with_expiry(Expiry::OnInactivity(time::Duration::hours(9)));
         Router::new()
-            .merge(login_post(self.clone()))
+            .merge(login_resource(self.clone()))
             .merge(access_get(self.clone()))
             .merge(notify_resource(self.clone()))
             .merge(permission_resource(self.clone()))
@@ -202,7 +207,7 @@ impl Honey {
     ) -> Result<Access> {
         log::debug!("name_access {user} {name}");
         let perm = permission::get_by_name(&self.db, user, name).await?;
-        let acc = Access::new(perm.access_n).ok_or(Error::Unauthorized)?;
+        let acc = Access::new(perm.access_n).ok_or(Error::Forbidden)?;
         acc.check(access)?;
         Ok(acc)
     }
@@ -316,7 +321,7 @@ async fn file_stream_etag(
     content_type: &'static str,
     if_none_match: IfNoneMatch,
 ) -> Resp3 {
-    let etag = file_etag(fname).await.map_err(|_e| SonarError::NotFound)?;
+    let etag = file_etag(fname).await.map_err(|_e| Error::NotFound)?;
     log::trace!("ETag: {etag} ({fname})");
     let tag = etag.parse::<ETag>().map_err(|_e| Error::InvalidETag)?;
     if if_none_match.precondition_passes(&tag) {
@@ -416,8 +421,8 @@ fn gif_dir_get() -> Router {
     Router::new().route("/gif/:fname", get(handler))
 }
 
-/// Handle `POST` to login page
-fn login_post(honey: Honey) -> Router {
+/// Router for login resource
+fn login_resource(honey: Honey) -> Router {
     /// Handle `GET` request
     async fn handle_get(session: Session) -> Resp2 {
         log::info!("GET login");
@@ -432,15 +437,47 @@ fn login_post(honey: Honey) -> Router {
     /// Handle `POST` request
     async fn handle_post(
         session: Session,
+        ConnectInfo(addr): ConnectInfo<SocketAddr>,
+        XForwardedFor(xff): XForwardedFor,
         State(honey): State<Honey>,
         Json(cred): Json<Credentials>,
     ) -> Resp1 {
-        log::info!("POST login");
+        log::info!("POST login from {addr}");
         session
             .cycle_id()
             .await
             .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
         honey.authenticate(cred.clone()).await?;
+        let user = cred.user();
+        let domains = domain::query_by_user(&honey.db, user).await?;
+        match domain::any_contains(&domains, addr.ip()) {
+            Ok(true) => (),
+            _ => {
+                event::insert_client(
+                    &honey.db,
+                    EventTp::FailDomain,
+                    &addr.to_string(),
+                    user,
+                )
+                .await?;
+                return Err(Error::Forbidden)?;
+            }
+        }
+        for addr in xff {
+            match domain::any_contains(&domains, addr) {
+                Ok(true) => (),
+                _ => {
+                    event::insert_client(
+                        &honey.db,
+                        EventTp::FailDomainXff,
+                        &addr.to_string(),
+                        user,
+                    )
+                    .await?;
+                    return Err(Error::Forbidden)?;
+                }
+            }
+        }
         cred.store(&session)
             .await
             .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
@@ -472,7 +509,7 @@ fn access_get(honey: Honey) -> Router {
 fn try_names_from_channels(channels: &[String]) -> Result<Vec<Name>> {
     if channels.len() > 32 {
         log::info!("Too many notification channels");
-        Err(SonarError::InvalidValue)?;
+        Err(Error::InvalidValue)?;
     }
     let mut names = Vec::with_capacity(channels.len());
     for chan in channels {
@@ -562,7 +599,7 @@ fn permission_resource(honey: Honey) -> Router {
             permission::post_role_res(&honey.db, &role, &resource_n).await?;
             return Ok(StatusCode::CREATED);
         }
-        Err(SonarError::InvalidValue)?
+        Err(Error::InvalidValue)?
     }
 
     Router::new()
@@ -617,7 +654,7 @@ fn other_resource(honey: Honey) -> Router {
                 }
                 Ok(StatusCode::CREATED)
             }
-            _ => Err(SonarError::InvalidValue)?,
+            _ => Err(Error::InvalidValue)?,
         }
     }
 
@@ -686,6 +723,13 @@ fn permission_object(honey: Honey) -> Router {
         .with_state(honey)
 }
 
+/// Query parameters
+#[derive(Debug, Deserialize)]
+struct QueryParams {
+    /// Associatied resource (for GeoLoc)
+    res: String,
+}
+
 /// Router for other objects
 fn other_object(honey: Honey) -> Router {
     /// Handle `GET` request
@@ -693,19 +737,39 @@ fn other_object(honey: Honey) -> Router {
         session: Session,
         State(honey): State<Honey>,
         AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
+        params: Option<Query<QueryParams>>,
     ) -> Resp2 {
         let nm = Name::new(&type_n)?.obj(&obj_n)?;
-        log::info!("GET {nm}");
-        let cred = Credentials::load(&session).await?;
-        honey.name_access(cred.user(), &nm, Access::View).await?;
+        log::info!("GET {nm} {params:?}");
         let sql = one_sql(nm.res_type);
         let name = nm.object_n().ok_or(StatusCode::BAD_REQUEST)?;
-        let body = if nm.res_type == Res::ControllerIo {
-            get_array_by_pkey(&honey.db, sql, &name).await
-        } else {
-            get_by_pkey(&honey.db, sql, &name).await
-        }?;
-        json_resp(body)
+        let cred = Credentials::load(&session).await?;
+        match (nm.res_type, params) {
+            (Res::GeoLoc, Some(p)) => {
+                // Use associated res parameter for access check
+                let res = &p.res;
+                let nm = Name::new(res)?.obj(&obj_n)?;
+                honey.name_access(cred.user(), &nm, Access::View).await?;
+                let body = get_by_pkey2(&honey.db, sql, &name, res).await?;
+                json_resp(body)
+            }
+            (Res::GeoLoc, None) => {
+                return Err(StatusCode::BAD_REQUEST);
+            }
+            (_, Some(_p)) => {
+                return Err(StatusCode::BAD_REQUEST);
+            }
+            (Res::ControllerIo, _) => {
+                honey.name_access(cred.user(), &nm, Access::View).await?;
+                let body = get_array_by_pkey(&honey.db, sql, &name).await?;
+                json_resp(body)
+            }
+            _ => {
+                honey.name_access(cred.user(), &nm, Access::View).await?;
+                let body = get_by_pkey(&honey.db, sql, &name).await?;
+                json_resp(body)
+            }
+        }
     }
 
     /// Handle `PATCH` request
@@ -789,6 +853,7 @@ const fn one_sql(res: Res) -> &'static str {
         ControllerIo => query::CONTROLLER_IO_ONE,
         Detector => query::DETECTOR_ONE,
         Dms => query::DMS_ONE,
+        Domain => query::DOMAIN_ONE,
         FlowStream => query::FLOW_STREAM_ONE,
         Font => query::FONT_ONE,
         GateArm => query::GATE_ARM_ONE,
@@ -844,7 +909,23 @@ async fn get_by_pkey<PK: ToSql + Sync>(
     let row = client
         .query_one(&query, &[&pkey])
         .await
-        .map_err(|_e| SonarError::NotFound)?;
+        .map_err(|_e| Error::NotFound)?;
+    Ok(row.get::<usize, String>(0))
+}
+
+/// Query one row by primary key, with an additional param
+async fn get_by_pkey2<PK: ToSql + Sync, P2: ToSql + Sync>(
+    db: &Database,
+    sql: &'static str,
+    pkey: PK,
+    p2: P2,
+) -> Result<String> {
+    let client = db.client().await?;
+    let query = format!("SELECT row_to_json(r)::text FROM ({sql}) r");
+    let row = client
+        .query_one(&query, &[&pkey, &p2])
+        .await
+        .map_err(|_e| Error::NotFound)?;
     Ok(row.get::<usize, String>(0))
 }
 
@@ -860,6 +941,6 @@ async fn get_array_by_pkey<PK: ToSql + Sync>(
     let row = client
         .query_one(&query, &[&pkey])
         .await
-        .map_err(|_e| SonarError::NotFound)?;
+        .map_err(|_e| Error::NotFound)?;
     Ok(row.get::<usize, String>(0))
 }

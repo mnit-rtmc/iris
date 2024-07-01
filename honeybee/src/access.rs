@@ -12,7 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::sonar::Error;
+use crate::error::{Error, Result};
 use resources::Res;
 
 /// Access for permission records
@@ -47,7 +47,7 @@ impl Access {
     }
 
     /// Check for access to a resource
-    pub const fn check(self, rhs: Self) -> Result<(), Error> {
+    pub const fn check(self, rhs: Self) -> Result<()> {
         if self.level() >= rhs.level() {
             Ok(())
         } else {
@@ -84,6 +84,7 @@ fn required_patch_operate(res: Res, att: &str) -> bool {
     match (res, att) {
         (Beacon, "state")
         | (Camera, "ptz")
+        | (Camera, "publish")
         | (Camera, "recall_preset")
         | (Controller, "device_req")
         | (Detector, "field_length")
@@ -105,8 +106,6 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
         | (Beacon, "notes")
         | (Beacon, "preset")
         | (Camera, "notes")
-        | (Camera, "publish")
-        | (Camera, "streamable")
         | (Camera, "store_preset")
         | (CommConfig, "timeout_ms")
         | (CommConfig, "idle_disconnect_sec")

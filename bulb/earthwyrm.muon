@@ -7,8 +7,6 @@ bind_address: 127.0.0.1:3030
 #
 # Tile extent; width and height in pixels
 tile_extent: 256
-# Extent outside tile edges (pixels)
-edge_extent: 8
 
 # Layer groups are collections of MVT files containing related layers.
 #   - name: Base URI path name

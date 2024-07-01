@@ -174,15 +174,15 @@ From a client computer with Java installed, point your web browser at
 launch the IRIS client Web Start application and log in.
 
 Enter `admin` as the username and `atms_242` as the password for the initial
-login.  After [creating] and logging in with a real administrator account, the
+login.  After creating and logging in with a real administrator [account], the
 `admin` user account should be disabled.
 
 
+[account]: users.html
 [CIDR]: https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing
-[creating]: user_roles.html
 [database]: database.html
 [Download]: http://iris.dot.state.mn.us/rpms/
 [Fedora]: http://fedoraproject.org
-[nginx]: https://nginx.org/en/
+[nginx]: nginx.html
 [OpenJDK]: http://openjdk.java.net
 [PostgreSQL]: http://www.postgresql.org

@@ -61,24 +61,34 @@ pub const CABINET_STYLE_ONE: &str = "\
 
 /// SQL query for all cameras (primary)
 pub const CAMERA_ALL: &str = "\
-  SELECT c.name, location, controller, notes, cam_num, publish \
+  SELECT c.name, location, controller, notes, hashtags, cam_num, publish \
   FROM iris.camera c \
   LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
+  LEFT JOIN (\
+    SELECT camera, string_agg(hashtag, ' ' ORDER BY hashtag) AS hashtags \
+    FROM iris.camera_hashtag \
+    GROUP BY camera\
+  ) h ON c.name = h.camera \
   ORDER BY cam_num, c.name";
 
 /// SQL query for one camera (secondary)
 pub const CAMERA_ONE: &str = "\
   SELECT c.name, location, geo_loc, controller, pin, notes, cam_num, publish, \
-         streamable, cam_template, encoder_type, enc_address, enc_port, \
+         hashtags, cam_template, encoder_type, enc_address, enc_port, \
          enc_mcast, enc_channel, video_loss \
   FROM iris.camera c \
   LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
+  LEFT JOIN (\
+    SELECT camera, string_agg(hashtag, ' ' ORDER BY hashtag) AS hashtags \
+    FROM iris.camera_hashtag \
+    GROUP BY camera\
+  ) h ON c.name = h.camera \
   WHERE c.name = $1";
 
 /// SQL query for all cameras (public)
 pub const CAMERA_PUB: &str = "\
-  SELECT name, publish, streamable, roadway, road_dir, cross_street, \
-         location, lat, lon, ARRAY(\
+  SELECT name, publish, streamable, hashtags, roadway, road_dir, \
+         cross_street, location, lat, lon, ARRAY(\
            SELECT view_num \
            FROM iris.encoder_stream \
            WHERE encoder_type = c.encoder_type \
@@ -86,6 +96,11 @@ pub const CAMERA_PUB: &str = "\
            ORDER BY view_num\
          ) AS views \
   FROM camera_view c \
+  LEFT JOIN (\
+    SELECT camera, string_agg(hashtag, ' ' ORDER BY hashtag) AS hashtags \
+    FROM iris.camera_hashtag \
+    GROUP BY camera\
+  ) h ON c.name = h.camera \
   ORDER BY name";
 
 /// SQL query for all comm configs (primary)
@@ -224,6 +239,18 @@ pub const DMS_STATUS: &str = "\
   FROM dms_message_view WHERE condition = 'Active' \
   ORDER BY name";
 
+/// SQL query for all domains (primary)
+pub const DOMAIN_ALL: &str = "\
+  SELECT name, enabled \
+  FROM iris.domain \
+  ORDER BY name";
+
+/// SQL query for one domain (secondary)
+pub const DOMAIN_ONE: &str = "\
+  SELECT name, enabled, block \
+  FROM iris.domain \
+  WHERE name = $1";
+
 /// SQL query for all flow streams (primary)
 pub const FLOW_STREAM_ALL: &str = "\
   SELECT name, controller \
@@ -299,12 +326,12 @@ pub const GEO_LOC_MARKER: &str = "\
   FROM iris.geo_loc \
   WHERE resource_n = $1";
 
-/// SQL query for one geo location (secondary)
+/// SQL query for one geo location
 pub const GEO_LOC_ONE: &str = "\
   SELECT name, resource_n, roadway, road_dir, cross_street, cross_dir, \
          cross_mod, landmark, lat, lon \
   FROM iris.geo_loc \
-  WHERE name = $1";
+  WHERE name = $1 AND resource_n = $2";
 
 /// SQL query for all GPS (primary)
 pub const GPS_ALL: &str = "\
@@ -549,8 +576,13 @@ pub const ROLE_ALL: &str = "\
 
 /// SQL query for one role (secondary)
 pub const ROLE_ONE: &str = "\
-  SELECT name, enabled \
-  FROM iris.role \
+  SELECT name, enabled, ARRAY(\
+           SELECT domain \
+           FROM iris.role_domain \
+           WHERE role = r.name \
+           ORDER BY domain\
+         ) AS domains \
+  FROM iris.role r \
   WHERE name = $1";
 
 /// SQL query for all sign configs (primary)

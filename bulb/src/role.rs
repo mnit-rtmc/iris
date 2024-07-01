@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card, View, NAME};
+use crate::card::{AncillaryData, Card, View};
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, Input};
 use resources::Res;
@@ -22,6 +22,8 @@ use std::borrow::Cow;
 pub struct Role {
     pub name: String,
     pub enabled: bool,
+    // secondary attributes
+    pub domains: Option<Vec<String>>,
 }
 
 /// Ancillary role data
@@ -46,17 +48,21 @@ impl Role {
     fn to_html_compact(&self) -> String {
         let name = self.name();
         let item_state = self.item_state();
-        format!("<div class='{NAME} end'>{name} {item_state}</div>")
+        format!("<div class='title row'>{name} {item_state}</div>")
     }
 
-    /// Convert to Edit HTML
-    fn to_html_edit(&self) -> String {
+    /// Convert to Setup HTML
+    fn to_html_setup(&self) -> String {
+        let title = self.title(View::Setup);
         let enabled = if self.enabled { " checked" } else { "" };
+        let footer = self.footer(true);
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
               <label for='enabled'>Enabled</label>\
               <input id='enabled' type='checkbox'{enabled}>\
-            </div>"
+            </div>\
+            {footer}"
         )
     }
 }
@@ -97,12 +103,12 @@ impl Card for Role {
     fn to_html(&self, view: View, anc: &RoleAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Edit => self.to_html_edit(),
+            View::Setup => self.to_html_setup(),
             _ => self.to_html_compact(),
         }
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("enabled", self.enabled);

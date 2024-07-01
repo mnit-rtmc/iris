@@ -42,14 +42,16 @@ impl Modem {
         format!("<div class='{inactive}'>{name}</div>")
     }
 
-    /// Convert to Edit HTML
-    fn to_html_edit(&self) -> String {
+    /// Convert to Setup HTML
+    fn to_html_setup(&self) -> String {
+        let title = self.title(View::Setup);
         let uri = HtmlStr::new(&self.uri);
         let config = HtmlStr::new(&self.config);
         let timeout_ms = OptVal(self.timeout_ms);
         let enabled = if self.enabled { " checked" } else { "" };
         format!(
-            "<div class='row'>\
+            "{title}\
+            <div class='row'>\
               <label for='uri'>URI</label>\
               <input id='uri' maxlength='64' size='30' value='{uri}'>\
             </div>\
@@ -101,12 +103,12 @@ impl Card for Modem {
     fn to_html(&self, view: View, anc: &ModemAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Edit => self.to_html_edit(),
+            View::Setup => self.to_html_setup(),
             _ => self.to_html_compact(),
         }
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("uri", &self.uri);

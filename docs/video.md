@@ -114,7 +114,7 @@ assigned sequence numbers, so they can be used in the same way.
 [flow streams]: flow_streams.html
 [IO pin]: controllers.html#io-pins
 [MonStream]: https://github.com/mnit-rtmc/monstream
-[Privilege]: user_roles.html#privileges
+[Privilege]: users.html#privileges
 [protocol]: protocols.html
 [selector tool]: cameras.html#selector-tool
 [system attribute]: system_attributes.html

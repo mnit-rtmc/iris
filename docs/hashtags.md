@@ -4,8 +4,6 @@ A **hashtag** is the `#` character, followed by a string of letters and/or
 numbers.  They can be used for grouping resources into districts or other
 categories.
 
-[DMS] resource uses:
-
 - [Message patterns] can have a **compose** hashtag
 - [Message lines] can have a **restrict** hashtag
 - [DMS actions] use hashtags to select affected signs
@@ -15,8 +13,16 @@ categories.
 
 ## Dedicated Purpose
 
-Devices can be marked for a dedicated purpose by using one of these reserved
-hashtags:
+Devices can be marked for a dedicated purpose by using _reserved hashtags_.
+
+### Camera
+
+Hashtag     | Purpose
+------------|----------------------
+#LiveStream | Live-stream available
+#Recorded   | Recorded stream
+
+### DMS
 
 Hashtag     | Purpose
 ------------|---------------------------
@@ -32,7 +38,6 @@ Hashtag     | Purpose
 
 [alert configurations]: alerts.html#dms-hashtags
 [alert messages]: alerts.html#alert-messages
-[DMS]: dms.html
 [DMS actions]: action_plans.html#dms-actions
 [lane-use]: lcs.html
 [lane-use MULTI]: lcs.html#lane-use-multi

@@ -21,6 +21,8 @@ pub enum ItemState {
     Deployed,
     /// Deployed by plan / schedule
     Planned,
+    /// Deployed for incident
+    Incident,
     /// Deployed by external system
     External,
     /// Dedicated purpose
@@ -72,6 +74,7 @@ impl ItemState {
             "🔹" => Some(Self::Available),
             "🔶" => Some(Self::Deployed),
             "🗓️" => Some(Self::Planned),
+            "🚨" => Some(Self::Incident),
             "👽" => Some(Self::External),
             "🎯" => Some(Self::Dedicated),
             "⚠️" => Some(Self::Fault),
@@ -97,6 +100,7 @@ impl ItemState {
             Self::Available => "🔹",
             Self::Deployed => "🔶",
             Self::Planned => "🗓️",
+            Self::Incident => "🚨",
             Self::External => "👽",
             Self::Dedicated => "🎯",
             Self::Fault => "⚠️",
@@ -121,6 +125,7 @@ impl ItemState {
             Self::Available => "available",
             Self::Deployed => "deployed",
             Self::Planned => "planned",
+            Self::Incident => "incident",
             Self::External => "external",
             Self::Dedicated => "dedicated",
             Self::Fault => "fault",

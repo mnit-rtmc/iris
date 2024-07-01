@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2019  Minnesota Department of Transportation
+ * Copyright (C) 2006-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,9 @@ import java.util.LinkedList;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Work;
 import us.mn.state.dot.sched.Worker;
-import us.mn.state.dot.sonar.CIDRAddress;
+import us.mn.state.dot.sonar.CidrBlock;
 import us.mn.state.dot.sonar.Domain;
+import us.mn.state.dot.sonar.Role;
 
 /**
  * Simple class to authenticate a user with an LDAP server.
@@ -111,10 +112,13 @@ public class Authenticator {
 	/** Check if user is connecting from an allowed domain */
 	private boolean checkDomain(ConnectionImpl c, UserImpl user) {
 		if (c != null && user != null) {
-			InetAddress addr = c.getAddress();
-			for (Domain d : user.getDomains()) {
-				if (checkDomain(d, addr))
-					return true;
+			Role role = user.getRole();
+			if (role != null && role.getEnabled()) {
+				InetAddress addr = c.getAddress();
+				for (Domain d : role.getDomains()) {
+					if (checkDomain(d, addr))
+						return true;
+				}
 			}
 		}
 		return false;
@@ -124,7 +128,7 @@ public class Authenticator {
 	private boolean checkDomain(Domain d, InetAddress addr) {
 		try {
 			return d.getEnabled()
-			    && new CIDRAddress(d.getCIDR()).matches(addr);
+			    && new CidrBlock(d.getBlock()).matches(addr);
 		}
 		catch (IllegalArgumentException e) {
 			return false;

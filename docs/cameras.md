@@ -18,8 +18,8 @@ Select `View ➔ Video ➔ Cameras` menu item
 | Access       | Primary              | Secondary                   |
 |--------------|----------------------|-----------------------------|
 | 👁️  View      | name, location       | geo\_loc, video\_loss       |
-| 👉 Operate   |                      | ptz †, recall\_preset †     |
-| 💡 Manage    | notes, publish       | streamable, store\_preset † |
+| 👉 Operate   | publish              | ptz †, recall\_preset †     |
+| 💡 Manage    | notes, hashtags      | streamable, store\_preset † |
 | 🔧 Configure | controller, cam\_num | pin, cam\_template, encoder\_type, enc\_address, enc\_port, enc\_mcast, enc\_channel
 
 † _Write only_
@@ -39,6 +39,7 @@ Multicast Address | IP address for [multicast] streams
 Encoder Channel   | Channel number, for encoders which support multiple cameras
 Publish           | Flag to allow public viewing of camera video
 Streamable        | Flag to indicate whether stream is available
+Hashtags          | Space-separated list of [hashtag]s for the camera
 
 ## Encoder Types
 
@@ -156,6 +157,7 @@ Otherwise, requests will be made directly to the camera's encoder address.
 [controller]: controllers.html
 [DMS]: dms.html
 [flow stream]: flow_streams.html
+[hashtag]: hashtags.html
 [iris-client.properties]: client_properties.html
 [MonStream]: video.html#monstream
 [multicast]: https://en.wikipedia.org/wiki/Multicast_address

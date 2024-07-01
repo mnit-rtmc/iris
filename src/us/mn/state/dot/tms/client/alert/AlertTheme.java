@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
- * Copyright (C) 2021-2023  Minnesota Department of Transportation
+ * Copyright (C) 2021-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.HashtagHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.DMSManager;
@@ -247,9 +248,12 @@ public class AlertTheme extends ProxyTheme<AlertInfo> {
 		if (st == AlertState.PENDING) {
 			// draw DMS with alert All hashtag, then active
 			// (in that order so the styles look right)
-			Iterator<DMS> it = DMSHelper.hashtagIterator(aht);
-			while (it.hasNext())
-				drawDms(g, it.next(), dmsAvailableStyle, t);
+			Iterator<DMS> it = DMSHelper.iterator();
+			while (it.hasNext()) {
+				DMS d = it.next();
+				if (HashtagHelper.hasHashtag(d, aht))
+					drawDms(g, d, dmsAvailableStyle, t);
+			}
 			it = active.iterator();
 			while (it.hasNext())
 				drawDms(g, it.next(), dmsDeployedStyle, t);

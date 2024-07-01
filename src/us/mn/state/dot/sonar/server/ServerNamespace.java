@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2017  Minnesota Department of Transportation
+ * Copyright (C) 2006-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -273,7 +273,7 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Check if a user has read privileges.  This can be overridden by a
-	 * subclass to check a whitelist of addresses.
+	 * subclass to check an allow list of CIDR blocks.
 	 * @param name Name to check.
 	 * @param u User to check.
 	 * @param a Inet address of connection.
@@ -283,7 +283,7 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Check if a user has write privileges.  This can be overridden by a
-	 * subclass to check a whitelist of addresses.
+	 * subclass to check an allow list of CIDR blocks.
 	 * @param name Name to check.
 	 * @param u User to check.
 	 * @param a Inet address of connection.

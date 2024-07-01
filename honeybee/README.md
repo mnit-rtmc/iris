@@ -42,9 +42,9 @@ file and change the line starting with `Environment=PGTZ=`.
 
 Then, as root:
 ```sh
+usermod -a -G earthwyrm tms
 cp ./target/release/honeybee /usr/local/bin
 cp honeybee.service /etc/systemd/system
-usermod -a -G earthwyrm tms
 systemctl enable honeybee.service
 systemctl start honeybee.service
 ```

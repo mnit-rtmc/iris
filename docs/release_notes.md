@@ -1,5 +1,24 @@
 # IRIS 5.x Release Notes
 
+5.56.0 (27 Jun 2024)
+ - Improved consistency of web UI "cards"
+ - Add Dms "Request" card (web UI)
+ - Replaced "user_id_domain" relation with "role_domain"
+ - Check domains on login to REST API
+ - Fixed "MSG RENDER FAILED" on sign message expiration
+ - Fixed invalid JSON (station_sample)
+ - Minor SQL cleanups
+ - Removed mail.jar dependency from Java client
+
+5.55.0 (3 Jun 2024)
+ - Add hashtag support for camera devices
+ - Add "domain" resource to REST API
+ - Minor improvements to Web UI
+ - Fixed some SQL bugs from previous migrate script
+ - Fixed NTCIP "zombie" message problem
+ - Fixed problem with LDAPS for SONAR authentication
+ - Fixed "ignore_auto_fail" speed calculation
+
 5.54.0 (21 May 2024)
  - Various enhancements to honeybee / bulb for Web UI
  - Add "ignore_auto_fail" to action plans

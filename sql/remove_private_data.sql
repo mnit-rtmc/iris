@@ -39,11 +39,11 @@ DELETE FROM event.weather_sensor_settings;
 UPDATE iris.comm_link SET uri = '';
 UPDATE iris.modem SET uri = '';
 UPDATE iris.controller SET password = NULL;
-UPDATE iris.video_monitor SET notes = '';
+UPDATE iris.video_monitor SET notes = NULL;
 UPDATE iris.camera SET enc_address = NULL;
 UPDATE iris.camera SET enc_mcast = NULL;
 UPDATE iris.camera SET enc_channel = NULL;
-UPDATE iris.camera SET notes = '';
+UPDATE iris.camera SET notes = NULL;
 UPDATE iris.vid_src_template SET config = '';
 
 -- DELETE FROM iris.sign_message;
@@ -60,7 +60,8 @@ UPDATE iris.system_attribute SET value = '' WHERE name LIKE 'camera_%_url';
 
 DELETE FROM iris.user_id_domain;
 DELETE FROM iris.user_id;
-DELETE FROM iris.domain WHERE name NOT LIKE 'any_%';
+DELETE FROM iris.domain
+    WHERE name NOT LIKE 'any_%' AND name NOT LIKE 'local_%';
 DELETE FROM iris.role_capability
     WHERE role NOT IN ('administrator', 'operator');
 DELETE FROM iris.role WHERE name NOT IN ('administrator', 'operator');

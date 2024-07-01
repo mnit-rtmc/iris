@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2021  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ public class IrisDomainImpl extends DomainImpl implements Storable,
 		throws TMSException
 	{
 		store = c;
-		store.query("SELECT name, cidr, enabled FROM iris." +
+		store.query("SELECT name, block, enabled FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -54,7 +54,7 @@ public class IrisDomainImpl extends DomainImpl implements Storable,
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", getName());
-		map.put("cidr", getCIDR());
+		map.put("block", getBlock());
 		map.put("enabled", getEnabled());
 		return map;
 	}
@@ -78,15 +78,15 @@ public class IrisDomainImpl extends DomainImpl implements Storable,
 	/** Create an IRIS domain from database lookup */
 	private IrisDomainImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name
-		     row.getString(2),  // CIDR
+		     row.getString(2),  // block
 		     row.getBoolean(3)  // enabled
 		);
 	}
 
 	/** Create an IRIS domain from database lookup */
-	private IrisDomainImpl(String n, String c, boolean e) {
+	private IrisDomainImpl(String n, String b, boolean e) {
 		this(n);
-		setCIDR(c);
+		setBlock(b);
 		setEnabled(e);
 	}
 
@@ -96,7 +96,7 @@ public class IrisDomainImpl extends DomainImpl implements Storable,
 		return getName().compareTo(o.getName());
 	}
 
-	/** Test if the role equals another domain */
+	/** Test if the domain equals another domain */
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof IrisDomainImpl)
@@ -134,11 +134,11 @@ public class IrisDomainImpl extends DomainImpl implements Storable,
 		store.destroy(this);
 	}
 
-	/** Set the CIDR */
-	public void doSetCIDR(String c) throws TMSException {
-		if (!c.equals(getCIDR())) {
-			store.update(this, "cidr", c);
-			setCIDR(c);
+	/** Set the CIDR block */
+	public void doSetBlock(String b) throws TMSException {
+		if (!b.equals(getBlock())) {
+			store.update(this, "block", b);
+			setBlock(b);
 		}
 	}
 

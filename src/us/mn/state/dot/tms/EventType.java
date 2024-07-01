@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2023  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  * Copyright (C) 2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,7 +37,7 @@ public enum EventType {
 	CLIENT_CONNECT(201), CLIENT_AUTHENTICATE(202),
 	CLIENT_FAIL_AUTHENTICATION(203), CLIENT_DISCONNECT(204),
 	CLIENT_CHANGE_PASSWORD(205), CLIENT_FAIL_PASSWORD(206),
-	CLIENT_FAIL_DOMAIN(207),
+	CLIENT_FAIL_DOMAIN(207), CLIENT_FAIL_DOMAIN_XFF(208),
 	GATE_ARM_UNKNOWN(301), GATE_ARM_FAULT(302), GATE_ARM_OPENING(303),
 	GATE_ARM_OPEN(304), GATE_ARM_WARN_CLOSE(305), GATE_ARM_CLOSING(306),
 	GATE_ARM_CLOSED(307),

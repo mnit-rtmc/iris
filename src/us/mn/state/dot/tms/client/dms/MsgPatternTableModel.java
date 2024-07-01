@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2023  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.util.ArrayList;
-import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.HashtagHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -58,7 +58,7 @@ public class MsgPatternTableModel extends ProxyTableModel<MsgPattern> {
 				return canWrite(pat);
 			}
 			public void setValueAt(MsgPattern pat, Object value) {
-				String cht = DMSHelper.normalizeHashtag(
+				String cht = HashtagHelper.normalize(
 					value.toString());
 				pat.setComposeHashtag(cht);
 			}

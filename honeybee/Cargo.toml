@@ -10,8 +10,9 @@ argh = "0.1"
 async-trait = "0.1"
 bb8 = { workspace = true }
 bb8-postgres = { workspace = true }
+cidr = { workspace = true }
 env_logger = { workspace = true }
-futures = { version = "0.3", default_features = false }
+futures = { version = "0.3", default-features = false }
 headers = "0.4"
 heck = "0.5"
 http = "1"
@@ -48,6 +49,10 @@ features = ["typed-header"]
 [dependencies.tokio-stream]
 version = "0.1"
 features = ["time"]
+
+[dependencies.postgres-types]
+version = "0.2"
+features = ["with-cidr-0_2"]
 
 [dev-dependencies]
 anyhow = "1.0"

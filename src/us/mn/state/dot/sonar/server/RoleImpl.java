@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2017  Minnesota Department of Transportation
+ * Copyright (C) 2006-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,13 @@
  */
 package us.mn.state.dot.sonar.server;
 
+import java.util.ArrayList;
 import us.mn.state.dot.sonar.Capability;
+import us.mn.state.dot.sonar.Domain;
 import us.mn.state.dot.sonar.Role;
 
 /**
- * A role is a set of privileges for the SONAR namespace.
+ * A role is a set of permissions for the SONAR namespace.
  *
  * @author Douglas Lau
  */
@@ -81,5 +83,25 @@ public class RoleImpl implements Role {
 	@Override
 	public Capability[] getCapabilities() {
 		return capabilities;
+	}
+
+	/** Allowed login domains */
+	private DomainImpl[] domains = new DomainImpl[0];
+
+	/** Set the allowed login domains */
+	@Override
+	public void setDomains(Domain[] ds) {
+		ArrayList<DomainImpl> list = new ArrayList<DomainImpl>();
+		for (Domain d : ds) {
+			if (d instanceof DomainImpl)
+				list.add((DomainImpl) d);
+		}
+		domains = list.toArray(new DomainImpl[0]);
+	}
+
+	/** Get the allowed login domains */
+	@Override
+	public Domain[] getDomains() {
+		return domains;
 	}
 }

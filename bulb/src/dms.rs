@@ -10,12 +10,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card, View, EDIT_BUTTON, LOC_BUTTON, NAME};
-use crate::device::{Device, DeviceAnc};
+use crate::card::{html_title_row, AncillaryData, Card, View};
+use crate::device::{Device, DeviceAnc, DeviceReq};
 use crate::error::Result;
 use crate::fetch::{Action, ContentType, Uri};
 use crate::item::{ItemState, ItemStates};
-use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, OptVal};
+use crate::util::{
+    ContainsLower, Doc, Fields, HtmlStr, Input, OptVal, TextArea,
+};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use chrono::DateTime;
 use fnv::FnvHasher;
@@ -42,6 +44,27 @@ const LOW_1: u32 = 1;
 
 /// High 1 message priority
 const HIGH_1: u32 = 11;
+
+/// Expire select element
+const EXPIRE_SELECT: &str = "<select id='mc_expire'>\
+<option value=''>⏲️ \
+<option value='5'>5 m\
+<option value='10'>10 m\
+<option value='15'>15 m\
+<option value='30'>30 m\
+<option value='60'>60 m\
+<option value='90'>90 m\
+<option value='120'>2 h\
+<option value='180'>3 h\
+<option value='240'>4 h\
+<option value='300'>5 h\
+<option value='360'>6 h\
+<option value='480'>8 h\
+<option value='600'>10 h\
+<option value='720'>12 h\
+<option value='960'>16 h\
+<option value='1440'>24 h\
+</select>";
 
 /// Send button
 const SEND_BUTTON: &str = "<button id='mc_send' type='button'>Send</button>";
@@ -296,7 +319,7 @@ impl AncillaryData for DmsAnc {
         if let View::Compact | View::Search | View::Hidden = view {
             uris.push(SIGN_MSG_URI.into());
         }
-        if let View::Status(_) = view {
+        if let View::Control = view {
             uris.push(SIGN_MSG_URI.into());
             uris.push(SIGN_CFG_URI.into());
             uris.push(MSG_PATTERN_URI.into());
@@ -397,13 +420,20 @@ impl AncillaryData for DmsAnc {
 
 impl SignMessage {
     /// Make a sign message
-    fn new(cfg: &str, ms: &str, owner: String, priority: u32) -> Self {
+    fn new(
+        cfg: &str,
+        ms: &str,
+        owner: String,
+        priority: u32,
+        duration: Option<u32>,
+    ) -> Self {
         let mut sign_message = SignMessage {
             name: "usr_".to_string(),
             sign_config: cfg.to_string(),
             multi: ms.to_string(),
             msg_owner: owner,
             msg_priority: priority,
+            duration,
             ..Default::default()
         };
         let mut hasher = FnvHasher::default();
@@ -448,7 +478,10 @@ impl SignMessage {
             states = states.with(ItemState::Planned, self.user());
         }
         if sources.contains("external") {
-            states = states.with(ItemState::External, "");
+            states = states.with(ItemState::External, sources);
+        }
+        if sources.contains("incident") {
+            states = states.with(ItemState::Incident, "");
         }
         if sources.is_empty() && !blank {
             states = states.with(ItemState::External, self.system());
@@ -724,6 +757,13 @@ impl Dms {
             .unwrap_or("")
     }
 
+    /// Get user of current message
+    fn current_user<'a>(&'a self, anc: &'a DmsAnc) -> &'a str {
+        anc.sign_message(self.msg_current.as_deref())
+            .map(|m| m.user())
+            .unwrap_or("")
+    }
+
     /// Check if DMS has a given hashtag
     fn has_hashtag(&self, hashtag: &str) -> bool {
         match &self.hashtags {
@@ -777,51 +817,63 @@ impl Dms {
     fn to_html_compact(&self, anc: &DmsAnc) -> String {
         let name = HtmlStr::new(self.name());
         let item_states = self.item_states(anc);
-        let mut html =
-            format!("<div class='{NAME} end'>{name} {item_states}</div>");
+        let nm = format!("{name} {item_states}");
+        let user = self.user(anc);
+        let mut html = html_title_row(&[&nm, &user], &["", "info"]);
         if let Some(msg_current) = &self.msg_current {
             html.push_str("<img class='message' src='/iris/img/");
             html.push_str(msg_current);
             html.push_str(".gif'>");
         }
+        html.push_str("<div class='info fill'>");
+        html.push_str(&HtmlStr::new(&self.location).with_len(64).to_string());
+        html.push_str("</div>");
         html
     }
 
-    /// Convert to Status HTML
-    fn to_html_status(&self, anc: &DmsAnc, config: bool) -> String {
-        let location = HtmlStr::new(&self.location).with_len(64);
-        let mut status = format!("<div class='info fill'>{location}</div>");
-        if let Some(msg_current) = &self.msg_current {
-            status.push_str("<img class='message' src='/iris/img/");
-            status.push_str(msg_current);
-            status.push_str(".gif'>");
-        }
-        status.push_str("<div class='row fill'>");
-        status.push_str("<span class='start'>");
-        if let Some(expire_time) = &self.expire_time {
-            match DateTime::parse_from_rfc3339(expire_time) {
-                Ok(dt) => {
-                    status.push_str(&format!("⏲️ {}", &dt.format("%H:%M")))
+    /// Get user to display
+    fn user(&self, anc: &DmsAnc) -> String {
+        let user = self.current_user(anc);
+        match crate::app::user() {
+            Some(u) if u == user => format!("👤 {user}"),
+            _ => {
+                if user != "AUTO" {
+                    user.to_string()
+                } else {
+                    "".to_string()
                 }
-                _ => status.push_str("expires"),
             }
         }
-        status.push_str("</span>");
-        status.push_str("<span class='end'>");
-        status.push_str(&self.item_states(anc).to_html());
-        status.push_str("</span>");
-        status.push_str("</div>");
+    }
+
+    /// Convert to Control HTML
+    fn to_html_control(&self, anc: &DmsAnc) -> String {
+        let mut html = self.title(View::Control);
+        html.push_str("<div class='row fill'>");
+        html.push_str("<span>");
+        html.push_str(&self.item_states(anc).to_html());
+        html.push_str("</span>");
+        html.push_str("<span>");
+        if let Some(expire_time) = &self.expire_time {
+            match DateTime::parse_from_rfc3339(expire_time) {
+                Ok(dt) => html.push_str(&format!("⏲️ {}", &dt.format("%H:%M"))),
+                _ => html.push_str("expires"),
+            }
+        }
+        html.push_str("</span>");
+        html.push_str("</div>");
+        if let Some(msg_current) = &self.msg_current {
+            html.push_str("<img class='message' src='/iris/img/");
+            html.push_str(msg_current);
+            html.push_str(".gif'>");
+        }
+        html.push_str("<div class='info fill'>");
+        html.push_str(&HtmlStr::new(&self.location).with_len(64).to_string());
+        html.push_str("</div>");
         if let Some(pats) = &self.compose_patterns(anc) {
-            status.push_str(pats);
+            html.push_str(pats);
         }
-        if config {
-            status.push_str("<div class='row'>");
-            status.push_str(&anc.dev.controller_button());
-            status.push_str(LOC_BUTTON);
-            status.push_str(EDIT_BUTTON);
-            status.push_str("</div>");
-        }
-        status
+        html
     }
 
     /// Build compose pattern HTML
@@ -851,6 +903,7 @@ impl Dms {
         }
         html.push_str("</select>");
         html.push_str(&anc.make_lines(&sign, pat_def, self.current_multi(anc)));
+        html.push_str(EXPIRE_SELECT);
         html.push_str(SEND_BUTTON);
         html.push_str(BLANK_BUTTON);
         html.push_str("</div>");
@@ -872,20 +925,71 @@ impl Dms {
         best
     }
 
-    /// Convert to Edit HTML
-    fn to_html_edit(&self) -> String {
-        let controller = HtmlStr::new(&self.controller);
+    /// Convert to Setup HTML
+    fn to_html_setup(&self, anc: &DmsAnc) -> String {
+        let title = self.title(View::Setup);
+        let notes = HtmlStr::new(&self.notes);
+        let controller = anc.dev.controller_html();
         let pin = OptVal(self.pin);
+        let footer = self.footer(true);
         format!(
-            "<div class='row'>\
-              <label for='controller'>Controller</label>\
-              <input id='controller' maxlength='20' size='20' \
-                     value='{controller}'>\
+            "{title}\
+            <div class='row'>\
+              <label for='notes'>Notes</label>\
+              <textarea id='notes' maxlength='128' rows='2' \
+                        cols='24'>{notes}</textarea>\
             </div>\
+            {controller}\
             <div class='row'>\
               <label for='pin'>Pin</label>\
               <input id='pin' type='number' min='1' max='104' \
                      size='8' value='{pin}'>\
+            </div>\
+            {footer}"
+        )
+    }
+
+    /// Convert to Request HTML
+    fn to_html_request(&self, _anc: &DmsAnc) -> String {
+        let title = self.title(View::Request);
+        let name = HtmlStr::new(self.name());
+        let work = "http://example.com"; // FIXME
+        format!(
+            "{title}\
+            <div class='row'>\
+              <span>Current Message</span>\
+              <button id='rq_msg_query' type='button'>Query</button>\
+            </div>\
+            <div class='row'>\
+              <span>Current Status</span>\
+              <button id='rq_status_query' type='button'>Query</button>\
+            </div>\
+            <div class='row'>\
+              <span>Pixel Errors</span>\
+              <span>\
+                <button id='rq_pixel_test' type='button'>Test</button>\
+                <button id='rq_pixel_query' type='button'>Query</button>\
+              </span>\
+            </div>\
+            <div class='row'>\
+              <span>Settings</span>\
+              <span>\
+                <button id='rq_settings_send' type='button'>Send</button>\
+                <button id='rq_settings_query' type='button'>Query</button>\
+              </span>\
+            </div>\
+            <div class='row'>\
+              <span>Configuration</span>\
+              <span>\
+                <button id='rq_config_reset' type='button'>Reset</button>\
+                <button id='rq_config_query' type='button'>Query</button>\
+              </span>\
+            </div>\
+            <div class='row'>\
+              <span>Work Request</span>
+              <a href='{work}' target='_blank' rel='noopener noreferrer'>\
+                🔗 {name}\
+              </a>\
             </div>"
         )
     }
@@ -943,15 +1047,21 @@ impl Dms {
         Some(multi_normalize(&multi))
     }
 
+    /// Get selected message duration
+    fn selected_duration(&self) -> Option<u32> {
+        Doc::get().select_parse::<u32>("mc_expire")
+    }
+
     /// Create actions to handle click on "Send" button
     fn send_actions(&self, anc: DmsAnc) -> Vec<Action> {
         if let Some(cfg) = &self.sign_config {
             if let Some(ms) = &self.selected_multi(&anc) {
                 match sign_msg_owner(HIGH_1) {
                     Some(owner) => {
+                        let duration = self.selected_duration();
                         return anc.sign_msg_actions(
                             Dms::uri_name(&self.name),
-                            SignMessage::new(cfg, ms, owner, HIGH_1),
+                            SignMessage::new(cfg, ms, owner, HIGH_1, duration),
                         );
                     }
                     None => console::log_1(&"no app user!".into()),
@@ -966,10 +1076,22 @@ impl Dms {
         match (&self.sign_config, sign_msg_owner(LOW_1)) {
             (Some(cfg), Some(owner)) => anc.sign_msg_actions(
                 Dms::uri_name(&self.name),
-                SignMessage::new(cfg, "", owner, LOW_1),
+                SignMessage::new(cfg, "", owner, LOW_1, None),
             ),
             _ => Vec::new(),
         }
+    }
+
+    /// Create action to handle click on a device request button
+    #[allow(clippy::vec_init_then_push)]
+    fn device_req(&self, req: DeviceReq) -> Vec<Action> {
+        let uri = Dms::uri_name(&self.name);
+        let mut fields = Fields::new();
+        fields.insert_num("device_req", req as u32);
+        let value = fields.into_value().to_string();
+        let mut actions = Vec::with_capacity(1);
+        actions.push(Action::Patch(uri, value.into()));
+        actions
     }
 }
 
@@ -989,8 +1111,9 @@ impl Card for Dms {
     /// All item states as html options
     const ITEM_STATES: &'static str = "<option value=''>all ↴\
          <option value='🔹'>🔹 available\
-         <option value='🔶'>🔶 deployed\
+         <option value='🔶' selected>🔶 deployed\
          <option value='🗓️'>🗓️ planned\
+         <option value='🚨'>🚨 incident\
          <option value='👽'>👽 external\
          <option value='🎯'>🎯 dedicated\
          <option value='⚠️'>⚠️ fault\
@@ -1057,15 +1180,17 @@ impl Card for Dms {
     fn to_html(&self, view: View, anc: &DmsAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status(config) => self.to_html_status(anc, config),
-            View::Edit => self.to_html_edit(),
+            View::Control => self.to_html_control(anc),
+            View::Setup => self.to_html_setup(anc),
+            View::Request => self.to_html_request(anc),
             _ => self.to_html_compact(anc),
         }
     }
 
-    /// Get changed fields from Edit form
+    /// Get changed fields from Setup form
     fn changed_fields(&self) -> String {
         let mut fields = Fields::new();
+        fields.changed_text_area("notes", &self.notes);
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
         fields.into_value().to_string()
@@ -1073,12 +1198,18 @@ impl Card for Dms {
 
     /// Handle click event for a button on the card
     fn handle_click(&self, anc: DmsAnc, id: String) -> Vec<Action> {
-        if &id == "mc_send" {
-            self.send_actions(anc)
-        } else if &id == "mc_blank" {
-            self.blank_actions(anc)
-        } else {
-            Vec::new()
+        match id.as_str() {
+            "mc_send" => self.send_actions(anc),
+            "mc_blank" => self.blank_actions(anc),
+            "rq_msg_query" => self.device_req(DeviceReq::QueryMessage),
+            "rq_status_query" => self.device_req(DeviceReq::QueryStatus),
+            "rq_pixel_test" => self.device_req(DeviceReq::TestPixels),
+            "rq_pixel_query" => self.device_req(DeviceReq::QueryPixelFailures),
+            "rq_settings_send" => self.device_req(DeviceReq::SendSettings),
+            "rq_settings_query" => self.device_req(DeviceReq::QuerySettings),
+            "rq_config_reset" => self.device_req(DeviceReq::ResetDevice),
+            "rq_config_query" => self.device_req(DeviceReq::QueryConfiguration),
+            _ => Vec::new(),
         }
     }
 

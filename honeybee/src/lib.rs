@@ -18,7 +18,9 @@
 mod access;
 mod cred;
 mod database;
+mod domain;
 mod error;
+mod event;
 mod files;
 mod honey;
 mod listener;
@@ -29,6 +31,7 @@ mod segments;
 mod signmsg;
 pub mod sonar;
 mod tls;
+mod xff;
 
 pub use database::Database;
 pub use error::{Error, Result};

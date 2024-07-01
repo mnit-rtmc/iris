@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2014       AHMCT, University of California
  * Copyright (C) 2022-2024  SRF Consulting Group
  *
@@ -20,8 +20,10 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeSet;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Camera;
@@ -32,6 +34,7 @@ import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.HashtagHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
@@ -51,6 +54,9 @@ import us.mn.state.dot.tms.server.event.CameraVideoEvent;
  */
 public class CameraImpl extends DeviceImpl implements Camera {
 
+	/** Camera / hashtag mapping */
+	static private TagMapping mapping;
+
 	/** Invalid preset number */
 	static private final int INVALID_PRESET = -1;
 
@@ -65,6 +71,8 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	/** Load all the cameras */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, CameraImpl.class);
+		mapping = new TagMapping(store, "iris", SONAR_TYPE,
+			"hashtag");
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"cam_num, encoder_type, enc_address, enc_port, " +
 			"enc_mcast, enc_channel, publish, streamable, " +
@@ -121,7 +129,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	}
 
 	/** Create a camera */
-	private CameraImpl(ResultSet row) throws SQLException {
+	private CameraImpl(ResultSet row) throws TMSException, SQLException {
 		this(row.getString(1),           // name
 		     row.getString(2),           // geo_loc
 		     row.getString(3),           // controller
@@ -141,25 +149,15 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	}
 
 	/** Create a camera */
-	private CameraImpl(String n, String l, String c, int p, String nt,
-		Integer cn, String et, String ea, Integer ep, String em,
-		Integer ec, boolean pb, boolean st, boolean vl, String ct)
-	{
-		this(n, lookupGeoLoc(l), lookupController(c), p, nt, cn,
-		     lookupEncoderType(et), ea, ep, em, ec, pb, st, vl,
-		     lookupCameraTemplate(ct));
-	}
-
-	/** Create a camera */
-	private CameraImpl(String n, GeoLocImpl l, ControllerImpl c, int p,
-		String nt, Integer cn, EncoderType et, String ea, Integer ep,
+	private CameraImpl(String n, String l, String c, int p,
+		String nt, Integer cn, String et, String ea, Integer ep,
 		String em, Integer ec, boolean pb, boolean st, boolean vl,
-		CameraTemplate ct)
+		String ct) throws TMSException
 	{
-		super(n, c, p, nt);
-		geo_loc = l;
+		super(n, lookupController(c), p, nt);
+		geo_loc = lookupGeoLoc(l);
 		cam_num = cn;
-		encoder_type = et;
+		encoder_type = lookupEncoderType(et);
 		enc_address = ea;
 		enc_port = ep;
 		enc_mcast = em;
@@ -167,8 +165,17 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		publish = pb;
 		streamable = st;
 		video_loss = vl;
-		cam_template = ct;
+		cam_template = lookupCameraTemplate(ct);
+		hashtags = lookupHashtagMapping();
 		initTransients();
+	}
+
+	/** Lookup mapping of hashtags */
+	private String[] lookupHashtagMapping() throws TMSException {
+		TreeSet<String> ht_set = new TreeSet<String>();
+		for (String ht: mapping.lookup(this))
+			ht_set.add(ht);
+		return ht_set.toArray(new String[0]);
 	}
 
 	/** Destroy an object */
@@ -374,6 +381,59 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	@Override
 	public boolean getStreamable() {
 		return streamable;
+	}
+
+	/** Hashtags for the camera */
+	private String[] hashtags = new String[0];
+
+	/** Set the hashtags assigned to the camera */
+	@Override
+	public void setHashtags(String[] ht) {
+		hashtags = ht;
+	}
+
+	/** Set the hashtags assigned to the camera */
+	public synchronized void doSetHashtags(String[] ht)
+		throws TMSException
+	{
+		String[] ht2 = HashtagHelper.makeHashtags(ht);
+		if (!Arrays.equals(ht, ht2))
+			throw new ChangeVetoException("BAD HASHTAGS");
+		if (!Arrays.equals(ht, hashtags)) {
+			TreeSet<String> ht_set = new TreeSet<String>(
+				Arrays.asList(ht)
+			);
+			mapping.update(this, ht_set);
+			setHashtags(ht);
+			updateStyles();
+		}
+	}
+
+	/** Add a hashtag to the camera */
+	public synchronized void addHashtagNotify(String aht) {
+		aht = HashtagHelper.normalize(aht);
+		if (aht == null)
+			return;
+		TreeSet<String> ht_set = new TreeSet<String>(
+			Arrays.asList(hashtags)
+		);
+		if (ht_set.add(aht)) {
+			try {
+				mapping.update(this, ht_set);
+				hashtags = ht_set.toArray(new String[0]);
+				notifyAttribute("hashtags");
+				updateStyles();
+			}
+			catch (TMSException e) {
+				logError("hashtags map: " + e.getMessage());
+			}
+		}
+	}
+
+	/** Get the hashtags assigned to the camera */
+	@Override
+	public String[] getHashtags() {
+		return hashtags;
 	}
 
 	/** Flag to indicate video loss */

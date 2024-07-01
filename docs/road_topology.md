@@ -131,7 +131,7 @@ associated with an r_node.
 
 [detectors]: vehicle_detection.html
 [DMS]: dms.html
-[edit mode]: user_interface.html#edit-mode
+[edit mode]: ui.html#edit-mode
 [incident locator]: incident_dms.html#locator
 [traffic layer]: vehicle_detection.html#traffic-layer
 [travel time]: travel_time.html

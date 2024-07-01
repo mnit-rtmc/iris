@@ -289,8 +289,6 @@
 		<mkdir dir="${dist.client}/lib"/>
 		<copy todir="${dist.client}/lib">
 			<fileset dir="${lib.dir}">
-				<include name="javax.activation.jar"/>
-				<include name="mail.jar"/>
 				<include name="jna-${jna_version}.jar"/>
 				<include name="jna-platform-${jna_version}.jar"/>
 				<include name="gst1-java-core-${gst_java_version}.jar"/>
