@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.BaseEvent;
+import us.mn.state.dot.tms.server.rwis.RwisProcess;
 import us.mn.state.dot.tms.server.comm.cux50.CUx50;
 import us.mn.state.dot.tms.server.comm.cux50.PrServer;
 import us.mn.state.dot.tms.utils.DevelCfg;
@@ -115,6 +116,7 @@ public class MainServer {
 			server.addProvider(auth_provider);
 			System.err.println("IRIS Server active");
 			server.join();
+			RwisProcess.startProcess();
 		}
 		catch (Exception e) {
 			e.printStackTrace();

@@ -183,6 +183,11 @@ public class PavementSensorsTable {
 			return pavement_temp.getTempC();
 		}
 
+		/** Get pavement friction as Integer or null on error */
+		public Integer getPvmtFriction() {
+			return (friction != null) ? friction.getPercent() : null;
+		}
+
 		/** Get pavement sensor error or null if OK */
 		public PavementSensorError getPavementSensorError() {
 			PavementSensorError pse = sensor_error.getEnum();

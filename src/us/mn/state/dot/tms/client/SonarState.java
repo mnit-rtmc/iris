@@ -59,6 +59,7 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.RoadAffix;
 import us.mn.state.dot.tms.RptConduit;
+import us.mn.state.dot.tms.RwisSign;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.TimeAction;
@@ -222,6 +223,23 @@ public class SonarState extends Client {
 	/** Get the beacon list model */
 	public ProxyListModel<Beacon> getBeaconModel() {
 		return beacon_model;
+	}
+
+	/** Cache of RwisSigns */
+	private final TypeCache<RwisSign> rwis_signs =
+		new TypeCache<RwisSign>(RwisSign.class, this);
+
+	/** Get the RwisSign cache */
+	public TypeCache<RwisSign> getRwisSigns() {
+		return rwis_signs;
+	}
+
+	/** RwisSign proxy list model */
+	private final ProxyListModel<RwisSign> rwis_sign_model;
+
+	/** Get the RwisSign list model */
+	public ProxyListModel<RwisSign> getRwisSignModel() {
+		return rwis_sign_model;
 	}
 
 	/** Cache of ramp meters */
@@ -577,6 +595,8 @@ public class SonarState extends Client {
 		plan_model.initialize();
 		beacon_model = new ProxyListModel<Beacon>(beacons);
 		beacon_model.initialize();
+		rwis_sign_model = new ProxyListModel<RwisSign>(rwis_signs);
+		rwis_sign_model.initialize();
 		// FIXME: this is an ugly hack
 		BaseHelper.namespace = getNamespace();
 	}
@@ -669,6 +689,7 @@ public class SonarState extends Client {
 		populateReadable(weather_sensors);
 		if (canRead(WeatherSensor.SONAR_TYPE)) {
 			weather_sensors.ignoreAttribute("operation");
+			weather_sensors.ignoreAttribute("stamp");
 		}
 		populateReadable(tag_readers);
 		if (canRead(TagReader.SONAR_TYPE))
@@ -697,6 +718,7 @@ public class SonarState extends Client {
 		populateReadable(alert_configs);
 		populateReadable(alert_messages);
 		populateReadable(alert_infos);
+		populateReadable(rwis_signs);
 	}
 
 	/** Look up the specified connection */

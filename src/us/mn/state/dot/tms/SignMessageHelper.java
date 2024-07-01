@@ -233,4 +233,26 @@ public class SignMessageHelper extends BaseHelper {
 		       (sm.getDuration() != null) &&
 		       SignMsgSource.operator.checkBit(sourceBits(sm));
 	}
+
+	/** Check if a message came from RWIS subsystem.
+	 * @param sm The sign message. */
+	static public boolean isRwis(SignMessage sm) {
+		return (!isBlank(sm)) &&
+				SignMsgSource.rwis.checkBit(sourceBits(sm));
+	}
+
+	/** Make a hash code given sign message attributes.
+	 * @param sc Sign configuration.
+	 * @param inc Associated incident (original name).
+	 * @param ms MULTI string.
+	 * @param owner Message owner.
+	 * @param fb Flash beacon flag.
+	 * @param mp Message priority.
+	 * @param dur Duration (null for indefinite).
+	 * @return Matching sign message, or null if not found. */
+	static public int hash(SignConfig sc, String inc, String ms,
+		String owner, boolean fb, SignMsgPriority mp, Integer dur)
+	{
+		return Objects.hash(sc.getName(), inc, ms, owner, fb, mp, dur);
+	}
 }

@@ -3,6 +3,7 @@
  * Copyright (C) 2010-2022  Minnesota Department of Transportation
  * Copyright (C) 2011  AHMCT, University of California
  * Copyright (C) 2017-2021  Iteris Inc.
+ * Copyright (C) 2024       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +23,7 @@ package us.mn.state.dot.tms;
  *
  * @author Douglas Lau
  * @author Michael Darter
+ * @author John L. Stanley - SRF Consulting
  */
 public interface WeatherSensor extends Device {
 
@@ -135,4 +137,7 @@ public interface WeatherSensor extends Device {
 
 	/** Get the latest sample time stamp */
 	Long getStamp();
+
+	/** Get pavement friction (null for missing) */
+	Integer getPvmtFriction();
 }

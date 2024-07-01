@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010-2022  Minnesota Department of Transportation
  * Copyright (C) 2017-2021  Iteris Inc.
+ * Copyright (C) 2023-2024  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,21 +16,24 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.WeatherSensor;
-import us.mn.state.dot.tms.WeatherSensorHelper;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.utils.SString;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
@@ -49,6 +53,8 @@ import us.mn.state.dot.tms.server.comm.WeatherPoller;
  *
  * @author Douglas Lau
  * @author Michael Darter
+ * @author Gordon Parikh
+ * @author John L. Stanley
  */
 public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 
@@ -321,7 +327,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	/** Get the max wind gust speed in KPH (null if missing) */
 	@Override
 	public Integer getMaxWindGustSpeed() {
-		return max_wind_gust_speed;
+		return getTestOverride("max.wind.gust.speed", max_wind_gust_speed);
 	}
 
 	/** Set the max wind gust speed in KPH
@@ -531,7 +537,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	/** Get visibility in meters (null for missing) */
 	@Override
 	public Integer getVisibility() {
-		return visibility_m;
+		return getTestOverride("visibility.m", visibility_m);
 	}
 
 	/** Set visibility in meters (null for missing) */
@@ -582,7 +588,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	/** Get surface temperature (null for missing) */
 	@Override
 	public Integer getSurfTemp() {
-		return surf_temp;
+		return getTestOverride("surf.temp", surf_temp);
 	}
 
 	/** Set surface temperature (null for missing) */
@@ -641,6 +647,23 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		if (!objectEquals(v, subsurf_temp)) {
 			subsurf_temp = v;
 			notifyAttribute("subSurfTemp");
+		}
+	}
+
+	/** Pavement friction (null for missing) */
+	private transient Integer pvmt_friction;
+
+	/** Get pavement friction (null for missing) */
+	@Override
+	public Integer getPvmtFriction() {
+		return getTestOverride("pvmt.friction", pvmt_friction);
+	}
+
+	/** Set pavement friction (null for missing) */
+	public void setPvmtFrictionNotify(Integer v) {
+		if (!objectEquals(v, pvmt_friction)) {
+			pvmt_friction = v;
+			notifyAttribute("pvmtFriction");
 		}
 	}
 
@@ -934,4 +957,76 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		w.write("/>\n");
 	}
 
+	/** Name of test properties file */
+	static final String testFilename = "./ess_test.properties";
+	
+	/** Loaded copy of test properties */
+	static private Properties testProp = null;
+	
+	/** Map of prefix values for each device in test file*/
+	static private HashMap<String,String> testPrefix =
+			new HashMap<String,String>();
+	
+	/** Load ESS test properties.
+	 * Called at start of each ESS update cycle. 
+	 * This initially deletes the test file.
+	 * On subsequent calls, it loads the test file.
+	 * (So only a test properties file created
+	 *  while the system is running has any effect.) */
+	static public void loadTestProperties() {
+		try {
+			// On first call, delete test properties file...
+			if (testProp == null) { 
+				testProp = new Properties();
+				File testFile = new File(testFilename);
+				if (testFile.exists())
+					testFile.delete();
+				return;
+			}
+			// On subsequent calls, load test properties file...
+			testPrefix.clear();
+			testProp.clear();
+			try (InputStream in =
+					new FileInputStream(testFilename)) {
+				testProp.load(in);
+			} catch (FileNotFoundException ex) {
+				return;
+			}
+			// Save key-prefix for each device name...
+			for (String key: testProp.stringPropertyNames()) {
+				if (key.matches("device\\d+\\.name")) {
+					String devName = testProp.getProperty(key);
+					String prefix = key.split("\\.")[0];
+					testPrefix.put(devName, prefix);
+				}
+			}
+		} catch (IOException|SecurityException ex) {
+			System.err.println("ESS test file error:");
+			ex.printStackTrace();
+			// Next two lines disables test mode for this cycle.
+			testPrefix.clear();
+			testProp.clear();
+		}
+	}
+
+	/** Get test override value */
+	private Integer getTestOverride(String sensorName, Integer iDefault) {
+		String prefix = testPrefix.get(getName());
+		if (prefix != null) {
+			String key = prefix + "." + sensorName;
+			String sValue = (String) testProp.get(key);
+			if (!SString.isBlank(sValue)) {
+				if (sValue.equals("null"))
+					return null;
+				try {
+					return Integer.valueOf(sValue);
+				}
+				catch (NumberFormatException ex) {
+					System.err.println("ESS test value error: "+key+"="+sValue);
+					ex.printStackTrace();
+				}
+			}
+		}
+		return iDefault;
+	}
 }
