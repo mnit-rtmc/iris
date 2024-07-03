@@ -57,12 +57,11 @@ public interface DMS extends Device, Taggable {
 	/** Get verification camera preset */
 	CameraPreset getPreset();
 
-	/** Set RWIS WeatherSensor override 
-	 * @throws TMSException */
-	void setWeatherSensorOverride(String ess);
+	/** Set the RWIS sensors configured for the sign */
+	void setWeatherSensors(WeatherSensor[] ess);
 
-	/** Get RWIS WeatherSensor override */
-	String getWeatherSensorOverride();
+	/** Get the RWIS sensors configured for the sign */
+	WeatherSensor[] getWeatherSensors();
 
 	/** Get the sign configuration */
 	SignConfig getSignConfig();

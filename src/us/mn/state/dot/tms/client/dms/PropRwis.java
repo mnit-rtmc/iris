@@ -18,17 +18,20 @@ import java.awt.Color;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.ArrayList;
-
+import java.util.Iterator;
+import java.util.TreeSet;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
-
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.WeatherSensor;
+import us.mn.state.dot.tms.WeatherSensorHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
@@ -40,15 +43,77 @@ import us.mn.state.dot.tms.units.Distance.Units;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * PropRwis is a DMS properties panel for displaying
- * and editing DMS-specific RWIS configuration info
- * (mainly weather_sensor_override) on a DMS properties
- * form.
+ * PropRwis is a DMS properties panel for displaying and editing DMS-specific
+ * RWIS configuration info (mainly weather sensors) on a DMS properties form.
  *
  * @author John L. Stanley - SRF Consulting
  */
 @SuppressWarnings("serial")
 public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
+
+	/** Get distance in meters between a WeatherSensor and a DMS.
+	 *  Returns null if distance is unknown. */
+	static private Integer calcDistanceMeters(WeatherSensor ws, DMS dms) {
+		if ((ws == null) || (dms == null))
+			return null;
+		GeoLoc g1 = ws.getGeoLoc();
+		GeoLoc g2 = dms.getGeoLoc();
+		Distance d = GeoLocHelper.distanceTo(g1, g2);
+		return (d == null) ? null : d.round(Distance.Units.METERS);
+	}
+
+	/** Parse whitespace-separated list of WeatherSensor names */
+	static private WeatherSensor[] parseWeatherSensors(String names)
+		throws TMSException
+	{
+		TreeSet<WeatherSensor> ws_set = new TreeSet<WeatherSensor>();
+		if (names != null) {
+			for (String n : names.trim().split(" ")) {
+				if (n.trim().isEmpty())
+					continue;
+				WeatherSensor ws = WeatherSensorHelper.lookup(n);
+				if (ws != null)
+					ws_set.add(ws);
+				else {
+					throw new ChangeVetoException(
+						"Unknown WeatherSensor: " + n);
+				}
+			}
+		}
+		return ws_set.toArray(new WeatherSensor[0]);
+	}
+
+	/** Find the WeatherSensor that's closest to the DMS.
+	 * @return A two-Object-array containing the WeatherSensor
+	 *         and the distance to that WeatherSensor in meters.
+	 *         If no WeatherSensor qualifies, return a two Object array
+	 *         containing nulls. */
+	static private Object[] findClosestWeatherSensor(DMS dms) {
+		Object[] retVals = new Object[2];
+		retVals[0] = null;
+		retVals[1] = null;
+		int cd = Integer.MAX_VALUE;
+		WeatherSensor closestWs = null;
+		WeatherSensor ws;
+		Integer closestDist = cd;
+		Integer dist;
+		Iterator<WeatherSensor> it = WeatherSensorHelper.iterator();
+		while (it.hasNext()) {
+			ws = it.next();
+			dist = calcDistanceMeters(ws, dms);
+			if ((dist == null) || (dist > closestDist))
+				continue;
+			if (dist < closestDist) {
+				closestDist = dist;
+				closestWs   = ws;
+			}
+		}
+		if (closestWs != null) {
+			retVals[0] = closestWs;
+			retVals[1] = closestDist;
+		}
+		return retVals;
+	}
 
 	/** RWIS enabled label */
 	private final JLabel rwisSystem_lbl = new JLabel();
@@ -56,18 +121,14 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 	/** RWIS hashtags label */
 	private final JLabel hashtagsFound_lbl = new JLabel();
 
-	/** WeatherSensors associated with DMS label */
-	private final JLabel wsFound_lbl = new JLabel();
-
 	/** Closest WeatherSensor label */
 	private final JLabel closest_lbl = new JLabel();
-	
+
 	/** Distance label */
 	private final JLabel distance_lbl = new JLabel();
 
-	/** WeatherSensorOverride text area */
-	private final JTextArea weatherSensorOverride_txt = new JTextArea(3, 25);
-//	private final JTextArea weatherSensorOverride_txt = new JTextArea(2, 37);
+	/** RWIS weather sensors text area */
+	private final JTextArea weather_sensor_txt = new JTextArea(3, 32);
 
 	/** Warning */
 	private final JLabel warn_lbl = new JLabel(" ");
@@ -94,50 +155,35 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 	@Override
 	public void initialize() {
 		super.initialize();
-		weatherSensorOverride_txt.addFocusListener(new FocusAdapter() {
+		weather_sensor_txt.addFocusListener(new FocusAdapter() {
 			@Override public void focusLost(FocusEvent e) {
-				String wso = weatherSensorOverride_txt.getText();
-				DialogHandler handler = new DialogHandler();
-				ArrayList<WeatherSensor> wsList;
+				String ws = weather_sensor_txt.getText();
 				try {
-					wsList = DMSHelper.parseWeatherSensorList(wso);
-				} catch (TMSException e2) {
-					handler.handle(e2);
-					return;
+					WeatherSensor[] sensors =
+						parseWeatherSensors(ws);
+					dms.setWeatherSensors(sensors);
+					updateGui();
 				}
-				if (wsList.isEmpty())
-					wso = "";
-				dms.setWeatherSensorOverride(wso);
-				updateGui();
+				catch (TMSException e2) {
+					DialogHandler handler = new DialogHandler();
+					handler.handle(e2);
+				}
 			}
 		});
 		add("dms.rwis.system");
 		add(rwisSystem_lbl, Stretch.LAST);
 		add("dms.rwis.hashtags");
 		add(hashtagsFound_lbl, Stretch.LAST);
-		add("dms.rwis.sensors");
-		add(wsFound_lbl, Stretch.LAST);
-		add(new JLabel(" "), Stretch.CENTER);
-//		add(new JLabel(" "), Stretch.CENTER);
 		add("dms.rwis.closest");
 		add(closest_lbl, Stretch.LAST);
 		add("dms.rwis.distance");
 		add(distance_lbl, Stretch.LAST);
 		add(new JLabel(" "), Stretch.CENTER);
-
-//		add(new JLabel(" "));
-		add("dms.rwis.override");
-//		add(new JLabel("<html><small><super>(Semicolon separated list of WeatherSensor names.)"), Stretch.LAST);
-//		add("dms.rwis.override.tip", Stretch.LAST);
-
-//		add("dms.rwis.override");
-		add(weatherSensorOverride_txt, Stretch.LAST);
-//		add(weatherSensorOverride_txt, Stretch.CENTER);
-
+		add("dms.rwis.sensors");
+		add(weather_sensor_txt, Stretch.LAST);
 		add(new JLabel(" "), Stretch.CENTER);
 		add(new JLabel(" "), Stretch.CENTER);
 		add(warn_lbl, Stretch.CENTER);
-		
 		// keep an eye on the sign's location
 		watcher.setProxy(dms.getGeoLoc());
 	}
@@ -147,9 +193,9 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 		if (count == 0)
 			lbl.setText("none");
 		else
-			lbl.setText(""+count);
+			lbl.setText("" + count);
 	}
-	
+
 	/** Update all text and labels */
 	public void updateGui() {
 		boolean bRwisEnabled;
@@ -160,62 +206,40 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 		int hashtagCnt = hashtagList.size();
 		setLabelCount(hashtagsFound_lbl, hashtagCnt);
 
-		ArrayList<WeatherSensor> sensorList;
-		sensorList = DMSHelper.getAssociatedWeatherSensors(dms);
-		int wsCnt = sensorList.size();
-		setLabelCount(wsFound_lbl, wsCnt);
-		
-		Object o[] = DMSHelper.findClosestWeatherSensor(dms, true);
-		WeatherSensor ws = (WeatherSensor)o[0];
-		Integer       d  = (Integer)      o[1];
+		Object[] o = findClosestWeatherSensor(dms);
+		WeatherSensor ws = (WeatherSensor) o[0];
+		Integer       d  = (Integer)       o[1];
 		if (ws != null) {
 			Distance dist = Distance.create(d, Units.METERS);
 			closest_lbl.setText(ws.getName());
-			boolean useSI = SystemAttrEnum.CLIENT_UNITS_SI.getBoolean();
+			boolean useSI =
+				SystemAttrEnum.CLIENT_UNITS_SI.getBoolean();
 			Units u = useSI ? Units.KILOMETERS : Units.MILES;
 			String dStr = dist.convert(u).toString();
 			if (d > SystemAttrEnum.RWIS_AUTO_MAX_M.getInt())
 				dStr += "  " + I18N.get("dms.rwis.out.of.range");
 			distance_lbl.setText(dStr);
-		}
-		else {
+		} else {
 			closest_lbl.setText(I18N.get("dms.rwis.none.defined"));
 			distance_lbl.setText("");
 		}
 
 		boolean bHashtags = !hashtagList.isEmpty(); // found hashtags?
-		boolean bSensors  = !sensorList.isEmpty();  // found sensors? (distance OR override)
-		boolean bReady    = bHashtags && bSensors;  // is DMS ready to run RWIS?
+		boolean bReady    = bHashtags;  // is DMS ready to run RWIS?
 		hashtagsFound_lbl.setForeground(Color.black);
-		wsFound_lbl.setForeground(Color.black);
 		warn_lbl.setForeground(Color.black);
 		String warn = " ";
 		if (bHashtags) {
-			if (bSensors) {
-				// found hashtags and sensors
-				if (bRwisEnabled)
-					warn = I18N.get("dms.rwis.enabled");
-				else
-					warn = I18N.get("dms.rwis.ready");
-			}
-			else {
-				// found hashtags but no sensors
-				warn = I18N.get("dms.rwis.no.sensors");
-				wsFound_lbl.setForeground(Color.red);
-				warn_lbl.setForeground(Color.red);
-			}
-		}
-		else {
-			if (bSensors) {
-				// found sensors, but no hashtags
-				hashtagsFound_lbl.setForeground(Color.red);
-				warn = I18N.get("dms.rwis.no.hashtags");
-				warn_lbl.setForeground(Color.red);
-			}
-			else {
-				// didn't find hashtags or sensors
-				warn = I18N.get("dms.rwis.disabled");
-			}
+			// found hashtags and sensors
+			if (bRwisEnabled)
+				warn = I18N.get("dms.rwis.enabled");
+			else
+				warn = I18N.get("dms.rwis.ready");
+		} else {
+			// found sensors, but no hashtags
+			hashtagsFound_lbl.setForeground(Color.red);
+			warn = I18N.get("dms.rwis.no.hashtags");
+			warn_lbl.setForeground(Color.red);
 		}
 		warn_lbl.setText(warn);
 		repaint();
@@ -223,16 +247,19 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 
 	/** Update the edit mode */
 	public void updateEditMode() {
-		weatherSensorOverride_txt.setEnabled(canWrite("weatherSensorOverride"));
+		weather_sensor_txt.setEnabled(canWrite("weatherSensors"));
 	}
 
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
-		if (null == a || a.equals("weatherSensorOverride")) {
-			String eo = dms.getWeatherSensorOverride();
-			if (eo == null)
-				eo = "";
-			weatherSensorOverride_txt.setText(eo);
+		if (null == a || a.equals("weatherSensors")) {
+			StringBuilder names = new StringBuilder();
+			for (WeatherSensor ws: dms.getWeatherSensors()) {
+				if (!names.isEmpty())
+					names.append(' ');
+				names.append(ws.getName());
+			}
+			weather_sensor_txt.setText(names.toString());
 			updateGui();
 		}
 	}

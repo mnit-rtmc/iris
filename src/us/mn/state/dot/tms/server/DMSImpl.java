@@ -66,6 +66,7 @@ import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.WeatherSensor;
+import us.mn.state.dot.tms.WeatherSensorHelper;
 import us.mn.state.dot.tms.geo.Position;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
@@ -86,7 +87,10 @@ import us.mn.state.dot.tms.utils.MultiString;
 public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** DMS / hashtag mapping */
-	static private TagMapping mapping;
+	static private TagMapping tag_map;
+
+	/** DMS / weather sensor mapping */
+	static private TableMapping ess_map;
 
 	/** Test if a sign message is from a specified source */
 	static private boolean isMsgSource(SignMessage sm, SignMsgSource src) {
@@ -121,13 +125,15 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Load all the DMS */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
-		mapping = new TagMapping(store, "iris", SONAR_TYPE,
+		tag_map = new TagMapping(store, "iris", SONAR_TYPE,
 			"hashtag");
+		ess_map = new TableMapping(store, "iris", SONAR_TYPE,
+			WeatherSensor.SONAR_TYPE);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"gps, static_graphic, beacon, preset, sign_config, " +
 			"sign_detail, msg_user, msg_sched, msg_current, " +
-			"expire_time, status, stuck_pixels, weather_sensor_override " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+			"expire_time, status, stuck_pixels FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DMSImpl(row));
@@ -168,7 +174,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("expire_time", asTimestamp(expire_time));
 		map.put("status", status);
 		map.put("stuck_pixels", stuck_pixels);
-		map.put("weather_sensor_override", weather_sensor_override);
 		return map;
 	}
 
@@ -219,8 +224,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		     row.getString(14),    // msg_current
 		     row.getTimestamp(15), // expire_time
 		     row.getString(16),    // status
-		     row.getString(17),    // stuck_pixels
-		     row.getString(18)     // weather_sensor_override
+		     row.getString(17)     // stuck_pixels
 		);
 	}
 
@@ -228,7 +232,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private DMSImpl(String n, String loc, String c, int p, String nt,
 		String g, String sg, String b, String cp, String sc,
 		String sd, String mu, String ms, String mc, Date et,
-		String st, String sp, String wso) throws TMSException
+		String st, String sp) throws TMSException
 	{
 		super(n, lookupController(c), p, nt);
 		geo_loc = lookupGeoLoc(loc);
@@ -245,16 +249,28 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		status = st;
 		stuck_pixels = sp;
 		hashtags = lookupHashtagMapping();
-		weather_sensor_override = wso;
+		weather_sensors = lookupEssMapping();
 		initTransients();
 	}
 
 	/** Lookup mapping of hashtags */
 	private String[] lookupHashtagMapping() throws TMSException {
 		TreeSet<String> ht_set = new TreeSet<String>();
-		for (String ht: mapping.lookup(this))
+		for (String ht: tag_map.lookup(this))
 			ht_set.add(ht);
 		return ht_set.toArray(new String[0]);
+	}
+
+	/** Lookup mapping of RWIS sensors configured to the sign */
+	private WeatherSensorImpl[] lookupEssMapping() throws TMSException {
+		TreeSet<WeatherSensorImpl> ws_set =
+			new TreeSet<WeatherSensorImpl>();
+		for (String o: ess_map.lookup(this)) {
+			WeatherSensor ws = WeatherSensorHelper.lookup(o);
+			if (ws instanceof WeatherSensorImpl)
+				ws_set.add((WeatherSensorImpl) ws);
+		}
+		return ws_set.toArray(new WeatherSensorImpl[0]);
 	}
 
 	/** Destroy an object */
@@ -376,7 +392,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			TreeSet<String> ht_set = new TreeSet<String>(
 				Arrays.asList(ht)
 			);
-			mapping.update(this, ht_set);
+			tag_map.update(this, ht_set);
 			setHashtags(ht);
 			updateStyles();
 		}
@@ -392,7 +408,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		);
 		if (ht_set.add(aht)) {
 			try {
-				mapping.update(this, ht_set);
+				tag_map.update(this, ht_set);
 				hashtags = ht_set.toArray(new String[0]);
 				notifyAttribute("hashtags");
 				updateStyles();
@@ -470,50 +486,53 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
-	/** WeatherSensor Override value */
-	String weather_sensor_override;
-
-	/** Get RWIS WeatherSensor override */
-	@Override
-	public String getWeatherSensorOverride() {
-		return weather_sensor_override;
-	}
-	
-	/** Set RWIS WeatherSensor override
-	 * (A string with a semicolon-separated list of weather sensor names.) */
-	@Override
-	public void setWeatherSensorOverride(String wso) {
-		weather_sensor_override = wso;
-	}
-
-	/** Set the WeatherSensor override */
-	public void doSetWeatherSensorOverride(String wso) throws TMSException {
-		if (!objectEquals(wso, weather_sensor_override)) {
-			DMSHelper.parseWeatherSensorList(wso); // <-- tests for valid override
-			store.update(this, "weather_sensor_override", wso);
-			setWeatherSensorOverride(wso);
-			notifyAttribute("weatherSensorOverride");
-		}
-	}
-
-	/** Set the WeatherSensor override */
-	public void setWeatherSensorOverrideNotify(String wso) throws TMSException {
-		if (!objectEquals(wso, weather_sensor_override)) {
-			try {
-				store.update(this, "weather_sensor_override", wso);
-				status = wso;
-				notifyAttribute("weatherSensorOverride");
-			}
-			catch (TMSException e) {
-				logError("weather_sensor_override: " + e.getMessage());
-			}
-		}
-	}
-
 	/** Get verification camera preset */
 	@Override
 	public CameraPreset getPreset() {
 		return preset;
+	}
+
+	/** RWIS sensors configured to the sign */
+	private WeatherSensorImpl[] weather_sensors = new WeatherSensorImpl[0];
+
+	/** Set the RWIS sensors configured to the sign */
+	@Override
+	public void setWeatherSensors(WeatherSensor[] ess) {
+		weather_sensors = makeWeatherSensorArray(ess);
+	}
+
+	/** Make an ordered array of weather sensors */
+	private WeatherSensorImpl[] makeWeatherSensorArray(
+		WeatherSensor[] ess)
+	{
+		TreeSet<WeatherSensorImpl> ws_set =
+			new TreeSet<WeatherSensorImpl>();
+		for (WeatherSensor ws: ess) {
+			if (ws instanceof WeatherSensorImpl)
+				ws_set.add((WeatherSensorImpl) ws);
+		}
+		return ws_set.toArray(new WeatherSensorImpl[0]);
+	}
+
+	/** Set the RWIS sensors configured to the sign */
+	public void doSetWeatherSensors(WeatherSensor[] ess)
+		throws TMSException
+	{
+		TreeSet<Storable> ws_set = new TreeSet<Storable>();
+		for (WeatherSensor ws: ess) {
+			if (ws instanceof WeatherSensorImpl)
+				ws_set.add((WeatherSensorImpl) ws);
+			else
+				throw new ChangeVetoException("Invalid ESS");
+		}
+		ess_map.update(this, ws_set);
+		setWeatherSensors(ess);
+	}
+
+	/** Get the RWIS sensors configured to the sign */
+	@Override
+	public WeatherSensor[] getWeatherSensors() {
+		return weather_sensors;
 	}
 
 	/** Sign configuration */

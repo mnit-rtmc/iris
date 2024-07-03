@@ -5480,6 +5480,17 @@ CREATE VIEW weather_sensor_view AS
     LEFT JOIN controller_view ctr ON w.controller = ctr.name;
 GRANT SELECT ON weather_sensor_view TO PUBLIC;
 
+CREATE TABLE iris.dms_weather_sensor (
+    dms VARCHAR(20) NOT NULL REFERENCES iris._dms,
+    weather_sensor VARCHAR(20) NOT NULL REFERENCES iris._weather_sensor
+);
+ALTER TABLE iris.dms_weather_sensor ADD PRIMARY KEY (dms, weather_sensor);
+
+CREATE VIEW dms_weather_sensor_view AS
+    SELECT dms, weather_sensor
+    FROM iris.dms_weather_sensor;
+GRANT SELECT ON dms_weather_sensor_view TO PUBLIC;
+
 CREATE TABLE event.weather_sensor_settings (
     event_id SERIAL PRIMARY KEY,
     event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,

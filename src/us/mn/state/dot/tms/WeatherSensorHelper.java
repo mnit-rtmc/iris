@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2019  Minnesota Department of Transportation
+ * Copyright (C) 2010-2024  Minnesota Department of Transportation
  * Copyright (C) 2011  AHMCT, University of California
  * Copyright (C) 2017  Iteris Inc.
  *
@@ -19,7 +19,6 @@ package us.mn.state.dot.tms;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-
 import us.mn.state.dot.sched.TimeSteward;
 
 /**
@@ -105,7 +104,7 @@ public class WeatherSensorHelper extends BaseHelper {
 
 	/** Get the sensor observation age limit (secs).
 	 * @return The sensor observation age limit. Valid observations have
-	 *	   an age less than or equal to this value. Zero indicates 
+	 *	   an age less than or equal to this value.  Zero indicates
 	 *	   observations never expire. */
 	static public int getObsAgeLimitSecs() {
 		return SystemAttrEnum.RWIS_OBS_AGE_LIMIT_SECS.getInt();
@@ -133,7 +132,7 @@ public class WeatherSensorHelper extends BaseHelper {
 		} else
 			return "";
 	}
-	
+
 	/** Get a sorted map of values to be shown in device tool-tip */
 	//FIXME: Rewrite when we get a more robust RWIS implementation 
 	public Map<String, Object> getTooltipMap(WeatherSensor ws) {
@@ -144,5 +143,4 @@ public class WeatherSensorHelper extends BaseHelper {
 		map.put("PvmtFriction", ws.getPvmtFriction());
 		return map;
 	}
-
 }

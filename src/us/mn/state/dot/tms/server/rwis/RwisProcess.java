@@ -220,7 +220,7 @@ public class RwisProcess extends Thread {
 			// Collect RWIS conditions from ESS associated with the DMS
 			RwisConditionSet dmsConditions = new RwisConditionSet();
 			if (bRwisEnabled) {
-				ArrayList<WeatherSensor> wsArray = DMSHelper.getAssociatedWeatherSensors(dms);
+				WeatherSensor[] wsArray = dms.getWeatherSensors();
 				for (WeatherSensor ws: wsArray) {
 					bDmsHasWeatherSensors = true;
 					String essName = ws.getName();
@@ -360,8 +360,8 @@ public class RwisProcess extends Thread {
 	static public boolean isRwisSign(DMS dms) {
 		if (dms == null)
 			return false;
-		ArrayList<WeatherSensor> wsArray = DMSHelper.getAssociatedWeatherSensors(dms);
-		if (wsArray.isEmpty())
+		WeatherSensor[] wsArray = dms.getWeatherSensors();
+		if (wsArray.length == 0)
 			return false;
 		for (String tag: dms.getHashtags())
 			if (tag.startsWith("#RWIS"))
