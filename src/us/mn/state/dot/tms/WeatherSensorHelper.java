@@ -17,6 +17,9 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
+
 import us.mn.state.dot.sched.TimeSteward;
 
 /**
@@ -130,4 +133,16 @@ public class WeatherSensorHelper extends BaseHelper {
 		} else
 			return "";
 	}
+	
+	/** Get a sorted map of values to be shown in device tool-tip */
+	//FIXME: Rewrite when we get a more robust RWIS implementation 
+	public Map<String, Object> getTooltipMap(WeatherSensor ws) {
+		Map<String, Object> map = new TreeMap<String, Object>();
+		map.put("MaxWindGustSpeed", ws.getMaxWindGustSpeed());
+		map.put("Visibility", ws.getVisibility());
+		map.put("SurfTemp", ws.getSurfTemp());
+		map.put("PvmtFriction", ws.getPvmtFriction());
+		return map;
+	}
+
 }

@@ -123,6 +123,8 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		AlertConfigImpl.loadAll();
 		AlertMessageImpl.loadAll();
 		AlertInfoImpl.loadAll();
+		RwisConditionImpl.loadAll();
+		RwisSignImpl.loadAll();
 	}
 
 	/** Get the time as a time stamp */
