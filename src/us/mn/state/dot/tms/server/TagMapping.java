@@ -76,7 +76,7 @@ public class TagMapping {
 
 	/** Create the start of an SQL insert statement */
 	private String createInsertStart(String key) {
-		return "INSERT INTO " + name + "(" + table + "," + tag +")"+
+		return "INSERT INTO " + name + "(" + table + "," + tag + ")" +
 		      " VALUES ('" + key + "','";
 	}
 
