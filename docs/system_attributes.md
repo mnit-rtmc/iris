@@ -85,6 +85,13 @@ System Attribute                 | Description
 `route_max_legs`                 | Maximum number of corridors for route finding
 `route_max_miles`                | Maximum distance (miles) for route finding
 `rwis_obs_age_limit_secs`        | Weather sensor observations with an age (in secs) greater than this value will be ignored
+`rwis_slippery_1_percent`        | Friction threshold for slippery 1 condition
+`rwis_slippery_2_degrees`        | Temperature threshold for slippery 2 condition
+`rwis_slippery_3_percent`        | Friction threshold for slippery 3 condition
+`rwis_windy_1_kph`               | Gust speed threshold for windy 1 condition
+`rwis_windy_2_kph`               | Gust speed threshold for windy 2 condition
+`rwis_visibility_1_m`            | Visibility threshold for visibility 1 condition
+`rwis_visibility_2_m`            | Visibility threshold for visibility 2 condition
 `sample_archive_enable`          | Enable archiving of sample data
 `sign_event_purge_days`          | Number of days after which sign events will be purged
 `speed_limit_default_mph`        | Default roadway speed limit

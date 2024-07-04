@@ -37,15 +37,15 @@ There are four weather data fields used for condition calculations:
 
 These [system attributes] can be used to adjust thresholds for RWIS conditions.
 
-Attribute Name      | Field          | Default Threshold
---------------------|----------------|------------------
-`rwis_slippery_1`   | `friction`     | 70
-`rwis_slippery_2`   | `surface_temp` | 0
-`rwis_slippery_3`   | `friction`     | 60
-`rwis_windy_1`      | `wind_gust`    | 64
-`rwis_windy_2`      | `wind_gust`    | 96
-`rwis_visibility_1` | `visibility`   | 1609
-`rwis_visibility_2` | `visibility`   | 402
+Attribute Name            | Field          | Default Threshold
+--------------------------|----------------|------------------
+`rwis_slippery_1_percent` | `friction`     | 70
+`rwis_slippery_2_degrees` | `surface_temp` | 0
+`rwis_slippery_3_percent` | `friction`     | 60
+`rwis_windy_1_kph`        | `wind_gust`    | 64
+`rwis_windy_2_kph`        | `wind_gust`    | 96
+`rwis_visibility_1_m`     | `visibility`   | 1609
+`rwis_visibility_2_m`     | `visibility`   | 402
 
 ## DMS Weather Sensors
 
