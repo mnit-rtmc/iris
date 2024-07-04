@@ -216,8 +216,6 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 				SystemAttrEnum.CLIENT_UNITS_SI.getBoolean();
 			Units u = useSI ? Units.KILOMETERS : Units.MILES;
 			String dStr = dist.convert(u).toString();
-			if (d > SystemAttrEnum.RWIS_AUTO_MAX_M.getInt())
-				dStr += "  " + I18N.get("dms.rwis.out.of.range");
 			distance_lbl.setText(dStr);
 		} else {
 			closest_lbl.setText(I18N.get("dms.rwis.none.defined"));

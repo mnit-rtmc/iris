@@ -33,7 +33,6 @@ INSERT INTO iris.msg_pattern (name, multi, flash_beacon, compose_hashtag) VALUES
     ('RWIS_7_IceDetected', 'ICE[nl]DETECTED[np]REDUCE[nl]SPEED', false, NULL);
 
 INSERT INTO iris.system_attribute (name, value) VALUES
-    ('rwis_auto_max_m', '805'),
     ('rwis_cycle_sec', '-1'),
     ('rwis_msg_priority', '9');
 
