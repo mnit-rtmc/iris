@@ -50,6 +50,7 @@ Tag              | Description
 `[exit` *…* `]`  | [Exit ramp backup]
 `[feed` *…* `]`  | [Msg-Feed] message
 `[pa` *…* `]`    | [Parking area] availability
+`[rwis_` *…* `]` | [RWIS] weather conditions
 `[slow` *…* `]`  | [Slow traffic] warning
 `[standby]`      | Standby messages
 `[ta` *…* `]`    | Scheduled [time actions](#time-action-tag)
@@ -184,6 +185,7 @@ than the value of the `action_plan_event_purge_days` [system attribute].
 [Parking area]: parking_areas.html
 [preset]: cameras.html#presets
 [ramp meter]: ramp_meters.html
+[rwis]: rwis.html
 [Slow traffic]: slow_warning.html
 [Variable speed advisory]: vsa.html
 [Toll zone]: tolling.html
