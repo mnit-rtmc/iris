@@ -190,10 +190,7 @@ operation_retry_threshold	3
 price_message_event_purge_days	0
 route_max_legs	8
 route_max_miles	16
-rwis_high_wind_speed_kph	40
-rwis_low_visibility_distance_m	152
 rwis_obs_age_limit_secs	240
-rwis_max_valid_wind_speed_kph	282
 sample_archive_enable	true
 sign_event_purge_days	0
 speed_limit_min_mph	45

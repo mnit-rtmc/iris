@@ -46,52 +46,8 @@ public class WeatherSensorHelper extends BaseHelper {
 			WeatherSensor.SONAR_TYPE));
 	}
 
-	/** Test if the sensor has triggered an AWS state (e.g. high wind) */
-	static public boolean isAwsState(WeatherSensor proxy) {
-		return isHighWind(proxy) || isLowVisibility(proxy);
-	}
-
-	/** Get the high wind limit in kph */
-	static public int getHighWindLimitKph() {
-		return SystemAttrEnum.RWIS_HIGH_WIND_SPEED_KPH.getInt();
-	}
-
-	/** Is wind speed high? */
-	static public boolean isHighWind(WeatherSensor ws) {
-		if (isSampleExpired(ws))
-			return false;
-		Integer s = ws.getWindSpeed();
-		if (s == null)
-			return false;
-		int t = getHighWindLimitKph();
-		int m = getMaxValidWindSpeedKph();
-		if (m <= 0)
-			return s > t;
-		else
-			return s > t && s <= m;
-	}
-
-	/** Get the low visibility limit in meters */
-	static public int getLowVisLimitMeters() {
-		return SystemAttrEnum.RWIS_LOW_VISIBILITY_DISTANCE_M.getInt();
-	}
-
-	/** Is visibility low? */
-	static public boolean isLowVisibility(WeatherSensor ws) {
-		if (isSampleExpired(ws))
-			return false;
-		Integer v = ws.getVisibility();
-		return v != null && v < getLowVisLimitMeters();
-	}
-
-	/** Get the maximum valid wind speed (kph).
-	 * @return Max valid wind speed (kph) or 0 for no maximum. */
-	static public int getMaxValidWindSpeedKph() {
-		return SystemAttrEnum.RWIS_MAX_VALID_WIND_SPEED_KPH.getInt();
-	}
-
 	/** Check if the sample data has expired */
-	static public boolean isSampleExpired(WeatherSensor ws) {
+	static private boolean isSampleExpired(WeatherSensor ws) {
 		if (ws != null) {
 			Long st = ws.getStamp();
 			if (st == null)
@@ -106,7 +62,7 @@ public class WeatherSensorHelper extends BaseHelper {
 	 * @return The sensor observation age limit. Valid observations have
 	 *	   an age less than or equal to this value.  Zero indicates
 	 *	   observations never expire. */
-	static public int getObsAgeLimitSecs() {
+	static private int getObsAgeLimitSecs() {
 		return SystemAttrEnum.RWIS_OBS_AGE_LIMIT_SECS.getInt();
 	}
 

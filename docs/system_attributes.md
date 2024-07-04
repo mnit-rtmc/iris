@@ -84,10 +84,7 @@ System Attribute                 | Description
 `price_message_event_purge_days` | Number of days after which price message events will be purged
 `route_max_legs`                 | Maximum number of corridors for route finding
 `route_max_miles`                | Maximum distance (miles) for route finding
-`rwis_high_wind_speed_kph`       | Wind speed (kph) greater than this value triggers the high wind condition
-`rwis_low_visibility_distance_m` | Visibility (meters) less than this value triggers the low visibility condition
 `rwis_obs_age_limit_secs`        | Weather sensor observations with an age (in secs) greater than this value will be ignored
-`rwis_max_valid_wind_speed_kph`  | Maximum valid wind speed (kph).  Use 0 to indicate no maximum
 `sample_archive_enable`          | Enable archiving of sample data
 `sign_event_purge_days`          | Number of days after which sign events will be purged
 `speed_limit_default_mph`        | Default roadway speed limit
