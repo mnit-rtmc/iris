@@ -45,7 +45,7 @@ Beacon   | `beacon_tab`
 Toll     | `tag_reader_tab`
 Plan     | `plan_tab`
 Comm     | `comm_tab`
-RWIS     | `sensor_tab`
+Weather  | `sensor_tab`
 
 ## Session Menu
 

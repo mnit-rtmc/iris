@@ -1,8 +1,8 @@
-# Road Weather Information Systems
+# Weather Sensors
 
-Road Weather Information Systems, or **RWIS** can sense data such as
-precipitation rate, road surface temperature, wind speed, etc.  The [NTCIP]
-and [Org-815] protocols can collect RWIS data.
+Weather sensors can collect data such as precipitation rate, road surface
+temperature, wind speed, etc.  The [NTCIP] and [Org-815] protocols can collect
+this data.
 
 <details>
 <summary>API Resources 🕵️ </summary>

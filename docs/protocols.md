@@ -208,7 +208,7 @@ Protocol_ is supported for several different [device] types:
 
 * [DMS] — _NTCIP 1203_
 * [LCS], using _DMS_ for lane control
-* [RWIS] — _NTCIP 1204_
+* [weather sensor] — _NTCIP 1204_ environmental sensor station (ESS)
 * [vehicle detection] — _NTCIP 1202_
 * [GPS] — _NTCIP 1204_
 
@@ -222,10 +222,10 @@ Variant   | Default Scheme | Multi-Drop
 
 ## Org815
 
-The `org815` protocol can be used to collect [rwis] data from an Org-815
-precipitation sensor.  The _default scheme_ is `tcp`.  _Multi-drop_ is not
-supported.  One device can be associated with each [controller], using [IO pin]
-1.
+The `org815` protocol can be used to collect [weather sensor] data from an
+Org-815 precipitation sensor.  The _default scheme_ is `tcp`.  _Multi-drop_ is
+not supported.  One device can be associated with each [controller], using
+[IO pin] 1.
 
 ## Pelco D
 
@@ -317,10 +317,10 @@ camera can be associated with each [controller], using [IO pin] 1.
 [PTZ]: cameras.html#pan-tilt-and-zoom
 [ramp meters]: ramp_meters.html
 [RFC 3339]: https://tools.ietf.org/html/rfc3339#section-5.6
-[RWIS]: rwis.html
 [streambed]: https://github.com/mnit-rtmc/streambed
 [system attribute]: system_attributes.html
 [tag readers]: tolling.html#tag-readers
 [vehicle detection]: vehicle_detection.html
 [vehicle logging]: vehicle_detection.html#vehicle-logging
 [video monitors]: video.html
+[weather sensor]: weather_sensors.html

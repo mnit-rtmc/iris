@@ -67,10 +67,10 @@ include:
 * [GPS]
 * [lane-use control signs] — LCS
 * [ramp meters]
-* [road weather information systems]
 * [tag readers]
 * [vehicle detection systems]
 * [video monitors]
+* [weather sensors]
 
 The controller must also be associated with a [comm link] which communicates
 using an appropriate protocol for the device.
@@ -113,8 +113,8 @@ Controllers can have an associated cabinet style, used for MnDOT-170 and Natch
 [protocol]: protocols.html
 [NTCIP]: protocols.html#ntcip
 [ramp meters]: ramp_meters.html
-[road weather information systems]: rwis.html
 [SierraGX]: protocols.html#sierragx
 [tag readers]: tolling.html#tag-readers
 [vehicle detection systems]: vehicle_detection.html
 [video monitors]: video.html
+[weather sensors]: weather_sensors.html

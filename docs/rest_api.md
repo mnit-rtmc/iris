@@ -20,7 +20,7 @@ These are JSON arrays, fetched using http `GET` requests:
 - `dms_message`  [DMS] messages and status
 - `dms_pub`  [DMS] locations and configuration
 - `incident`  Active [incident]s
-- `rwis`  [Road Weather Information System]
+- `rwis`  Public [weather sensor] data
 - `sign_message`  Active DMS [sign message]s
 - `station_sample`  Vehicle [detector] station data
 - `system_attribute_pub`  Public [system attributes]
@@ -127,7 +127,6 @@ These are static [font]s which can be used in [sign message]s.
 [protocols]: protocols.html
 [ramp meter]: ramp_meters.html
 [resource types]: #resource-types
-[Road Weather Information System]: rwis.html
 [role]: users.html#roles
 [sign message]: sign_message.html
 [SSE]: https://en.wikipedia.org/wiki/Server-sent_events
@@ -135,4 +134,4 @@ These are static [font]s which can be used in [sign message]s.
 [tag reader]: tolling.html#tag-readers
 [user]: users.html
 [video monitor]: video.html
-[weather sensor]: rwis.html
+[weather sensor]: weather_sensors.html
