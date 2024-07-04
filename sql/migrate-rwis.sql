@@ -36,4 +36,9 @@ INSERT INTO iris.system_attribute (name, value) VALUES
     ('rwis_cycle_sec', '-1'),
     ('rwis_msg_priority', '9');
 
+-- Delete system attributes for old unfinished RWIS code
+DELETE FROM iris.system_attribute WHERE name = 'rwis_high_wind_speed_kph';
+DELETE FROM iris.system_attribute WHERE name = 'rwis_low_visibility_distance_m';
+DELETE FROM iris.system_attribute WHERE name = 'rwis_max_valid_wind_speed_kph';
+
 COMMIT;
