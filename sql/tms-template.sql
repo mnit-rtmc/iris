@@ -191,6 +191,13 @@ price_message_event_purge_days	0
 route_max_legs	8
 route_max_miles	16
 rwis_obs_age_limit_secs	900
+rwis_slippery_1_percent	70
+rwis_slippery_2_degrees	0
+rwis_slippery_3_percent	60
+rwis_windy_1_kph	64
+rwis_windy_2_kph	96
+rwis_visibility_1_m	1609
+rwis_visibility_2_m	402
 sample_archive_enable	true
 sign_event_purge_days	0
 speed_limit_min_mph	45
@@ -3214,6 +3221,13 @@ COPY iris.msg_pattern (name, multi, flash_beacon, compose_hashtag) FROM stdin;
 .3_LINE		f	#ThreeLine
 .4_LINE		f	#FourLine
 .2_PAGE	[np]	f	#Small
+RWIS_slippery_1	SLIPPERY[nl]ROAD[nl]DETECTED[np]USE[nl]CAUTION	f	\N
+RWIS_slippery_2	SLIPPERY[nl]ROAD[nl]DETECTED[np]REDUCE[nl]SPEED	f	\N
+RWIS_slippery_3	ICE[nl]DETECTED[np]REDUCE[nl]SPEED	f	\N
+RWIS_windy_1	WIND GST[nl]>40 MPH[nl]DETECTED[np]USE[nl]CAUTION	f	\N
+RWIS_windy_2	WIND GST[nl]>60 MPH[nl]DETECTED[np]REDUCE[nl]SPEED	f	\N
+RWIS_visibility_1	REDUCED[nl]VISBLITY[nl]DETECTED[np]USE[nl]CAUTION	f	\N
+RWIS_visibility_2	LOW[nl]VISBLITY[nl]DETECTED[np]REDUCE[nl]SPEED	f	\N
 \.
 
 CREATE TRIGGER msg_pattern_notify_trig

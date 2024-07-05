@@ -34,4 +34,14 @@ DELETE FROM iris.system_attribute WHERE name = 'rwis_max_valid_wind_speed_kph';
 UPDATE iris.system_attribute SET value = '900'
     WHERE name = 'rwis_obs_age_limit_secs';
 
+-- Add RWIS threshold attributes
+INSERT INTO iris.system_attribute (name, value) VALUES
+    ('rwis_slippery_1_percent', '70'),
+    ('rwis_slippery_2_degrees', '0'),
+    ('rwis_slippery_3_percent', '60'),
+    ('rwis_windy_1_kph', '64'),
+    ('rwis_windy_2_kph', '96'),
+    ('rwis_visibility_1_m', '1609'),
+    ('rwis_visibility_2_m', '402');
+
 COMMIT;

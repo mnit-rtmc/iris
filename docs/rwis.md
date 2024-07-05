@@ -47,6 +47,9 @@ Attribute Name            | Field          | Default Threshold
 `rwis_visibility_1_m`     | `visibility`   | 1609
 `rwis_visibility_2_m`     | `visibility`   | 402
 
+Also, the `rwis_obs_age_limit_secs` determines the maximum valid age for a
+weather sensor observation.
+
 ## DMS Weather Sensors
 
 An RWIS action tag can use data from one or more weather sensors.  Each DMS can

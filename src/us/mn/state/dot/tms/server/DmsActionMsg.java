@@ -496,12 +496,15 @@ public class DmsActionMsg {
 		if (sensors.isEmpty())
 			return fail("No current weather data");
 		int lv = 0;
-		if (sensors.isFrictionLt(70))
-			lv++;
-		if (level >= 2 && sensors.isSurfaceTempLt(0))
-			lv++;
-		if (level >= 3 && sensors.isFrictionLt(60))
-			lv++;
+		if (sensors.isFrictionLt(
+			SystemAttrEnum.RWIS_SLIPPERY_1_PERCENT.getInt()
+		)) lv++;
+		if (level >= 2 && sensors.isSurfaceTempLt(
+			SystemAttrEnum.RWIS_SLIPPERY_2_DEGREES.getInt()
+		)) lv++;
+		if (level >= 3 && sensors.isFrictionLt(
+			SystemAttrEnum.RWIS_SLIPPERY_3_PERCENT.getInt()
+		)) lv++;
 		return (lv == level)
 		      ? EMPTY_SPAN
 		      : fail("Condition not slippery " + level);
@@ -514,10 +517,12 @@ public class DmsActionMsg {
 		if (sensors.isEmpty())
 			return fail("No current weather data");
 		int lv = 0;
-		if (sensors.isWindGustGt(64))
-			lv++;
-		if (level >= 2 && sensors.isWindGustGt(96))
-			lv++;
+		if (sensors.isWindGustGt(
+			SystemAttrEnum.RWIS_WINDY_1_KPH.getInt()
+		)) lv++;
+		if (level >= 2 && sensors.isWindGustGt(
+			SystemAttrEnum.RWIS_WINDY_2_KPH.getInt()
+		)) lv++;
 		return (lv == level)
 		      ? EMPTY_SPAN
 		      : fail("Condition not windy " + level);
@@ -530,10 +535,12 @@ public class DmsActionMsg {
 		if (sensors.isEmpty())
 			return fail("No current weather data");
 		int lv = 0;
-		if (sensors.isVisibilityLt(1609))
-			lv++;
-		if (level >= 2 && sensors.isVisibilityLt(402))
-			lv++;
+		if (sensors.isVisibilityLt(
+			SystemAttrEnum.RWIS_VISIBILITY_1_M.getInt()
+		)) lv++;
+		if (level >= 2 && sensors.isVisibilityLt(
+			SystemAttrEnum.RWIS_VISIBILITY_2_M.getInt()
+		)) lv++;
 		return (lv == level)
 		      ? EMPTY_SPAN
 		      : fail("Condition not visibility " + level);
