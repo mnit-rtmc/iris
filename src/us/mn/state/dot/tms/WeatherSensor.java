@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2022  Minnesota Department of Transportation
+ * Copyright (C) 2010-2024  Minnesota Department of Transportation
  * Copyright (C) 2011  AHMCT, University of California
  * Copyright (C) 2017-2021  Iteris Inc.
  * Copyright (C) 2024       SRF Consulting Group
@@ -132,12 +132,12 @@ public interface WeatherSensor extends Device {
 	/** Get the subsurface temperature (null for missing) */
 	Integer getSubSurfTemp();
 
+	/** Get pavement friction (null for missing) */
+	Integer getPvmtFriction();
+
 	/** Get surface conductivity (V2) (null for missing) */
 	Integer getSurfCondV2();
 
 	/** Get the latest sample time stamp */
 	Long getStamp();
-
-	/** Get pavement friction (null for missing) */
-	Integer getPvmtFriction();
 }

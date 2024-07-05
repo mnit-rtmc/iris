@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017  Iteris Inc.
- * Copyright (C) 2019-2022  Minnesota Department of Transportation
+ * Copyright (C) 2019-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -109,8 +109,8 @@ public class EssRec {
 				? ss.toString()
 				: SurfaceStatus.undefined.toString());
 			ws.setSurfFreezeTempNotify(row.getFreezePointC());
-			ws.setSurfCondV2Notify(row.getSurfCondV2());
 			ws.setPvmtFrictionNotify(row.getPvmtFriction());
+			ws.setSurfCondV2Notify(row.getSurfCondV2());
 		} else {
 			ws.setPvmtSurfTempNotify(null);
 			ws.setSurfTempNotify(null);
