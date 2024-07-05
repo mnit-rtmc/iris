@@ -51,8 +51,9 @@ import us.mn.state.dot.tms.server.comm.WeatherPoller;
  * @author Gordon Parikh
  * @author John L. Stanley
  */
-public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
-
+public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor,
+	Comparable<WeatherSensorImpl>
+{
 	/** Sample period for weather sensors (seconds) */
 	static private final int SAMPLE_PERIOD_SEC = 60;
 
@@ -104,6 +105,12 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
+	}
+
+	/** Compare to another weather sensor */
+	@Override
+	public int compareTo(WeatherSensorImpl o) {
+		return name.compareTo(o.name);
 	}
 
 	/** Create a weather sensor */

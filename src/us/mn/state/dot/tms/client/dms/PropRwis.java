@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.Iterator;
-import java.util.TreeSet;
+import java.util.TreeMap;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -64,21 +64,22 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 	static private WeatherSensor[] parseWeatherSensors(String names)
 		throws TMSException
 	{
-		TreeSet<WeatherSensor> ws_set = new TreeSet<WeatherSensor>();
+		TreeMap<String, WeatherSensor> ws_map =
+			new TreeMap<String, WeatherSensor>();
 		if (names != null) {
 			for (String n : names.trim().split(" ")) {
 				if (n.trim().isEmpty())
 					continue;
 				WeatherSensor ws = WeatherSensorHelper.lookup(n);
 				if (ws != null)
-					ws_set.add(ws);
+					ws_map.put(n, ws);
 				else {
 					throw new ChangeVetoException(
 						"Unknown WeatherSensor: " + n);
 				}
 			}
 		}
-		return ws_set.toArray(new WeatherSensor[0]);
+		return ws_map.values().toArray(new WeatherSensor[0]);
 	}
 
 	/** Find the WeatherSensor that's closest to the DMS.
