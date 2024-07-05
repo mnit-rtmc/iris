@@ -190,7 +190,7 @@ operation_retry_threshold	3
 price_message_event_purge_days	0
 route_max_legs	8
 route_max_miles	16
-rwis_obs_age_limit_secs	240
+rwis_obs_age_limit_secs	900
 sample_archive_enable	true
 sign_event_purge_days	0
 speed_limit_min_mph	45

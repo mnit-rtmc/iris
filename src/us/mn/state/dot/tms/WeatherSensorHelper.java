@@ -47,7 +47,7 @@ public class WeatherSensorHelper extends BaseHelper {
 	}
 
 	/** Check if the sample data has expired */
-	static private boolean isSampleExpired(WeatherSensor ws) {
+	static public boolean isSampleExpired(WeatherSensor ws) {
 		if (ws != null) {
 			Long st = ws.getStamp();
 			if (st == null)

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2021  Minnesota Department of Transportation
+ * Copyright (C) 2006-2024  Minnesota Department of Transportation
  * Copyright (C) 2019-2020  SRF Consulting Group
  * Copyright (C) 2021  Iteris Inc.
  *
@@ -421,6 +421,18 @@ public class MultiBuilder implements Multi {
 			}
 			multi.append("]");
 		}
+	}
+
+	/** Add RWIS condition warning.
+	 * @param condition Weather condition.
+	 * @param level Warning level. */
+	@Override
+	public void addRwis(String condition, int level) {
+		multi.append("[rwis_");
+		multi.append(condition);
+		multi.append(',');
+		multi.append(level);
+		multi.append("]");
 	}
 
 	/** Add a time action substitution field.

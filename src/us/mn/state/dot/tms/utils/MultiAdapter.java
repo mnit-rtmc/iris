@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  * Copyright (C) 2019-2020  SRF Consulting Group
  * Copyright (C) 2021  Iteris Inc.
  *
@@ -160,6 +160,12 @@ public class MultiAdapter implements Multi {
 	 * @param c_txt Text for closed area. */
 	@Override
 	public void addParking(String pid, String l_txt, String c_txt) {}
+
+	/** Add RWIS condition warning.
+	 * @param condition Weather condition.
+	 * @param level Warning level. */
+	@Override
+	public void addRwis(String condition, int level) {}
 
 	/** Add a slow traffic warning.
 	 * @param spd Highest speed to activate warning.

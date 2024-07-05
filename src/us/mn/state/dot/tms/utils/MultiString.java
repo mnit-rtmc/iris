@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2023  Minnesota Department of Transportation
+ * Copyright (C) 2006-2024  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  * Copyright (C) 2019-2020  SRF Consulting Group
  * Copyright (C) 2021  Iteris Inc.
@@ -92,6 +92,8 @@ public class MultiString {
 		@Override
 		public void addParking(String pid, String l_txt, String c_txt){}
 		@Override
+		public void addRwis(String condition, int level) {}
+		@Override
 		public void addSlowWarning(int spd, int dist, String mode) {}
 		@Override
 		public void addStandby() {}
@@ -167,6 +169,8 @@ public class MultiString {
 			parseLocator(tag.substring(3), cb);
 		else if (ltag.startsWith("pa"))
 			parseParking(tag, cb);
+		else if (ltag.startsWith("rwis_"))
+			parseRwis(tag.substring(5), cb);
 		else if (ltag.startsWith("slow"))
 			parseSlowWarning(tag.substring(4), cb);
 		else if (ltag.startsWith("standby"))
@@ -416,6 +420,24 @@ public class MultiString {
 		cb.addParking(pid, l_txt, c_txt);
 	}
 
+	/** Parse RWIS tag [rwis_condition,level].
+	 * @param tag RWIS condition tag.
+	 * @param cb Callback to set tag. */
+	static private void parseRwis(String tag, Multi cb) {
+		String[] args = tag.split(",", 2);
+		if (args.length == 2) {
+			String condition = args[0];
+			if (condition.equals("slippery") ||
+			    condition.equals("windy") ||
+			    condition.equals("visibility"))
+			{
+				Integer level = parseInt(args, 1);
+				if (level != null)
+					cb.addRwis(condition, level);
+			}
+		}
+	}
+
 	/** Parse time action tag [tadir,format].
 	 *  @param tag Time action tag.
 	 *  @param cb Callback to set tag.  */
@@ -542,6 +564,10 @@ public class MultiString {
 			}
 			@Override
 			public void addParking(String p, String lt, String ct) {
+				valid[0] = false;
+			}
+			@Override
+			public void addRwis(String condition, int level) {
 				valid[0] = false;
 			}
 			@Override

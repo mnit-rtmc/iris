@@ -47,6 +47,8 @@ import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.TollZoneHelper;
+import us.mn.state.dot.tms.WeatherSensor;
+import us.mn.state.dot.tms.WeatherSensorHelper;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import us.mn.state.dot.tms.server.event.PriceMessageEvent;
 import us.mn.state.dot.tms.server.event.TravelTimeEvent;
@@ -132,6 +134,57 @@ public class DmsActionMsg {
 			min = mn;
 			min_final = mn_final;
 			slow = sl;
+		}
+	}
+
+	/** Active RWIS Weather Sensor collection */
+	static private class ActiveSensors {
+		private final ArrayList<WeatherSensor> sensors =
+			new ArrayList<WeatherSensor>();
+		private ActiveSensors(WeatherSensor[] sensors) {
+			for (WeatherSensor ws: sensors) {
+				if (!WeatherSensorHelper.isSampleExpired(ws))
+					this.sensors.add(ws);
+			}
+		}
+		private boolean isEmpty() {
+			return sensors.isEmpty();
+		}
+		/** Check if pavement friction is less than a threshold */
+		private boolean isFrictionLt(int threshold) {
+			for (WeatherSensor ws : sensors) {
+				Integer f = ws.getPvmtFriction();
+				if (f != null && f < threshold)
+					return true;
+			}
+			return false;
+		}
+		/** Check if surface temperature is less than a threshold */
+		private boolean isSurfaceTempLt(int threshold) {
+			for (WeatherSensor ws : sensors) {
+				Integer t = ws.getSurfTemp();
+				if (t != null && t < threshold)
+					return true;
+			}
+			return false;
+		}
+		/** Check if wind gusts are greather than a threshold */
+		private boolean isWindGustGt(int threshold) {
+			for (WeatherSensor ws : sensors) {
+				Integer s = ws.getMaxWindGustSpeed();
+				if (s != null && s > threshold)
+					return true;
+			}
+			return false;
+		}
+		/** Check if visibility is less than a threshold */
+		private boolean isVisibilityLt(int threshold) {
+			for (WeatherSensor ws : sensors) {
+				Integer v = ws.getVisibility();
+				if (v != null && v < threshold)
+					return true;
+			}
+			return false;
 		}
 	}
 
@@ -266,6 +319,9 @@ public class DmsActionMsg {
 			String dms, int rid, int tsp, String mode, int ridx)
 		{
 			addSpan(clearGuideSpan(dms, rid, tsp, mode, ridx));
+		}
+		@Override public void addRwis(String condition, int level) {
+			addSpan(rwisSpan(condition, level));
 		}
 		@Override public void addSlowWarning(int spd, int dist,
 			String mode)
@@ -411,6 +467,76 @@ public class DmsActionMsg {
 			return fail("Speed too high");
 		else
 			return Integer.toString(sa);
+	}
+
+	/** Make an RWIS warning span.
+	 * @param condition Weather condition.
+	 * @param level Warning level. */
+	private String rwisSpan(String condition, int level) {
+		addSource(SignMsgSource.rwis);
+		if (condition.equals("slippery"))
+			return rwisSlipperySpan(level);
+		else if (condition.equals("windy"))
+			return rwisWindySpan(level);
+		else if (condition.equals("visibility"))
+			return rwisVisibilitySpan(level);
+		else
+			return fail("Invalid condition: " + condition);
+	}
+
+	/** Get active RWIS weather sensors */
+	private ActiveSensors activeSensors() {
+		return new ActiveSensors(dms.getWeatherSensors());
+	}
+
+	/** Make an RWIS slippery condition span.
+	 * @param level Warning level. */
+	private String rwisSlipperySpan(final int level) {
+		ActiveSensors sensors = activeSensors();
+		if (sensors.isEmpty())
+			return fail("No current weather data");
+		int lv = 0;
+		if (sensors.isFrictionLt(70))
+			lv++;
+		if (level >= 2 && sensors.isSurfaceTempLt(0))
+			lv++;
+		if (level >= 3 && sensors.isFrictionLt(60))
+			lv++;
+		return (lv == level)
+		      ? EMPTY_SPAN
+		      : fail("Condition not slippery " + level);
+	}
+
+	/** Make an RWIS windy condition span.
+	 * @param level Warning level. */
+	private String rwisWindySpan(int level) {
+		ActiveSensors sensors = activeSensors();
+		if (sensors.isEmpty())
+			return fail("No current weather data");
+		int lv = 0;
+		if (sensors.isWindGustGt(64))
+			lv++;
+		if (level >= 2 && sensors.isWindGustGt(96))
+			lv++;
+		return (lv == level)
+		      ? EMPTY_SPAN
+		      : fail("Condition not windy " + level);
+	}
+
+	/** Make an RWIS visibility condition span.
+	 * @param level Warning level. */
+	private String rwisVisibilitySpan(int level) {
+		ActiveSensors sensors = activeSensors();
+		if (sensors.isEmpty())
+			return fail("No current weather data");
+		int lv = 0;
+		if (sensors.isVisibilityLt(1609))
+			lv++;
+		if (level >= 2 && sensors.isVisibilityLt(402))
+			lv++;
+		return (lv == level)
+		      ? EMPTY_SPAN
+		      : fail("Condition not visibility " + level);
 	}
 
 	/** Add a slow traffic warning.

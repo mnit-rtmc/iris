@@ -41,4 +41,8 @@ DELETE FROM iris.system_attribute WHERE name = 'rwis_high_wind_speed_kph';
 DELETE FROM iris.system_attribute WHERE name = 'rwis_low_visibility_distance_m';
 DELETE FROM iris.system_attribute WHERE name = 'rwis_max_valid_wind_speed_kph';
 
+-- Increase RWIS observation age limit to 15 minutes
+UPDATE iris.system_attribute SET value = '900'
+    WHERE name = 'rwis_obs_age_limit_secs';
+
 COMMIT;

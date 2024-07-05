@@ -127,12 +127,17 @@ public enum WTokenType {
 //	 * @param dist Distance to search for slow traffic (1/10 mile).
 //	 * @param mode Tag replacement mode (none, dist or speed). */
 	slowWarning(             "Slow Warning"),
-//
+
 //	/** Add an exit backup warning.
 //	 * @param did Detector ID.
 //	 * @param occ Occupancy threshold */
 	exitWarning(             "Exit Warning"),
-//
+
+	/** Add an RWIS condition warning.
+	 * @param condition Weather condition.
+	 * @param level Warning level */
+	rwisCondition(           "RWIS Condition"),
+
 //	/** Add a feed message */
 	feedMsg(                 "Feed Message"),
 //
@@ -155,7 +160,7 @@ public enum WTokenType {
 	//=== Standby-message token ===
 
 	standby(                 "Standby Message"),
-	
+
 	//-------------------------------------
 	//=== Special WYSIWYG-editor tokens ===
 
