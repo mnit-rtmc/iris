@@ -200,7 +200,7 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 		if (null == a || a.equals("weatherSensors")) {
 			StringBuilder names = new StringBuilder();
 			for (WeatherSensor ws: dms.getWeatherSensors()) {
-				if (!names.isEmpty())
+				if (names.length() > 0)
 					names.append(' ');
 				names.append(ws.getName());
 			}

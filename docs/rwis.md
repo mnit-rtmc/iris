@@ -28,7 +28,7 @@ Condition    | Level | Field Threshold †    | Meaning
 
 ## Weather Fields
 
-There are four weather data fields used for condition calculations:
+There are five weather data fields used for condition calculations:
 
 1. `friction`: pavement friction coefficient in percent
 2. `surface_temp`: temperature in degrees celcius
