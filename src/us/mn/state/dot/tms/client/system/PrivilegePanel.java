@@ -94,8 +94,6 @@ public class PrivilegePanel extends ProxyTablePanel<Privilege> {
 		"road_affix",
 		"role",
 		"rpt_conduit",
-//		"rwis_condition",  <-- placeholder
-		"rwis_sign",
 		"sign_config",
 		"sign_detail",
 		"sign_message",

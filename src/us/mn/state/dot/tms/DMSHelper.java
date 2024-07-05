@@ -17,14 +17,11 @@
 package us.mn.state.dot.tms;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 import org.json.JSONException;
 import org.json.JSONObject;
-import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;

@@ -15,26 +15,15 @@ CREATE VIEW dms_weather_sensor_view AS
     FROM iris.dms_weather_sensor;
 GRANT SELECT ON dms_weather_sensor_view TO PUBLIC;
 
--- Add rwis_sign table
-CREATE TABLE iris.rwis_sign (
-    name VARCHAR(32) PRIMARY KEY,
-    rwis_conditions VARCHAR(256) NOT NULL DEFAULT '',
-    msg_pattern VARCHAR(32)
-);
-
 -- Add basic PDMS RWIS message patterns
-INSERT INTO iris.msg_pattern (name, multi, flash_beacon, compose_hashtag) VALUES
-    ('RWIS_1_Slippery', 'SLIPPERY[nl]ROAD[nl]DETECTED[np]USE[nl]CAUTION', false, NULL),
-    ('RWIS_2_ReducedVisib', 'REDUCED[nl]VISBLITY[nl]DETECTED[np]USE[nl]CAUTION', false, NULL),
-    ('RWIS_3_Wind40mph', 'WIND GST[nl]>40 MPH[nl]DETECTED[np]USE[nl]CAUTION', false, NULL),
-    ('RWIS_4_Wind60mph', 'WIND GST[nl]>60 MPH[nl]DETECTED[np]REDUCE[nl]SPEED', false, NULL),
-    ('RWIS_5_VerySlippery', 'SLIPPERY[nl]ROAD[nl]DETECTED[np]REDUCE[nl]SPEED', false, NULL),
-    ('RWIS_6_LowVisib', 'LOW[nl]VISBLITY[nl]DETECTED[np]REDUCE[nl]SPEED', false, NULL),
-    ('RWIS_7_IceDetected', 'ICE[nl]DETECTED[np]REDUCE[nl]SPEED', false, NULL);
-
-INSERT INTO iris.system_attribute (name, value) VALUES
-    ('rwis_cycle_sec', '-1'),
-    ('rwis_msg_priority', '9');
+INSERT INTO iris.msg_pattern (name, multi, flash_beacon) VALUES
+    ('RWIS_slippery_1', 'SLIPPERY[nl]ROAD[nl]DETECTED[np]USE[nl]CAUTION', false),
+    ('RWIS_slippery_2', 'SLIPPERY[nl]ROAD[nl]DETECTED[np]REDUCE[nl]SPEED', false),
+    ('RWIS_slippery_3', 'ICE[nl]DETECTED[np]REDUCE[nl]SPEED', false),
+    ('RWIS_windy_1', 'WIND GST[nl]>40 MPH[nl]DETECTED[np]USE[nl]CAUTION', false),
+    ('RWIS_windy_2', 'WIND GST[nl]>60 MPH[nl]DETECTED[np]REDUCE[nl]SPEED', false),
+    ('RWIS_visibility_1', 'REDUCED[nl]VISBLITY[nl]DETECTED[np]USE[nl]CAUTION', false),
+    ('RWIS_visibility_2', 'LOW[nl]VISBLITY[nl]DETECTED[np]REDUCE[nl]SPEED', false);
 
 -- Delete system attributes for old unfinished RWIS code
 DELETE FROM iris.system_attribute WHERE name = 'rwis_high_wind_speed_kph';

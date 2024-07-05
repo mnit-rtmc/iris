@@ -14,10 +14,8 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.awt.Color;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeSet;
 import javax.swing.JLabel;
@@ -115,12 +113,6 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 		return retVals;
 	}
 
-	/** RWIS enabled label */
-	private final JLabel rwisSystem_lbl = new JLabel();
-
-	/** RWIS hashtags label */
-	private final JLabel hashtagsFound_lbl = new JLabel();
-
 	/** Closest WeatherSensor label */
 	private final JLabel closest_lbl = new JLabel();
 
@@ -129,9 +121,6 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 
 	/** RWIS weather sensors text area */
 	private final JTextArea weather_sensor_txt = new JTextArea(3, 32);
-
-	/** Warning */
-	private final JLabel warn_lbl = new JLabel(" ");
 
 	/** User session */
 	private final Session session;
@@ -170,10 +159,6 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 				}
 			}
 		});
-		add("dms.rwis.system");
-		add(rwisSystem_lbl, Stretch.LAST);
-		add("dms.rwis.hashtags");
-		add(hashtagsFound_lbl, Stretch.LAST);
 		add("dms.rwis.closest");
 		add(closest_lbl, Stretch.LAST);
 		add("dms.rwis.distance");
@@ -181,31 +166,12 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 		add(new JLabel(" "), Stretch.CENTER);
 		add("dms.rwis.sensors");
 		add(weather_sensor_txt, Stretch.LAST);
-		add(new JLabel(" "), Stretch.CENTER);
-		add(new JLabel(" "), Stretch.CENTER);
-		add(warn_lbl, Stretch.CENTER);
 		// keep an eye on the sign's location
 		watcher.setProxy(dms.getGeoLoc());
 	}
 
-	/** Set label count */
-	private void setLabelCount(JLabel lbl, Integer count) {
-		if (count == 0)
-			lbl.setText("none");
-		else
-			lbl.setText("" + count);
-	}
-
 	/** Update all text and labels */
 	public void updateGui() {
-		boolean bRwisEnabled;
-		bRwisEnabled = (SystemAttrEnum.RWIS_CYCLE_SEC.getInt() > 0); 
-		rwisSystem_lbl.setText(bRwisEnabled ? "ENABLED" : "disabled");
-
-		ArrayList<String> hashtagList = getRwisHashtags();
-		int hashtagCnt = hashtagList.size();
-		setLabelCount(hashtagsFound_lbl, hashtagCnt);
-
 		Object[] o = findClosestWeatherSensor(dms);
 		WeatherSensor ws = (WeatherSensor) o[0];
 		Integer       d  = (Integer)       o[1];
@@ -221,25 +187,6 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 			closest_lbl.setText(I18N.get("dms.rwis.none.defined"));
 			distance_lbl.setText("");
 		}
-
-		boolean bHashtags = !hashtagList.isEmpty(); // found hashtags?
-		boolean bReady    = bHashtags;  // is DMS ready to run RWIS?
-		hashtagsFound_lbl.setForeground(Color.black);
-		warn_lbl.setForeground(Color.black);
-		String warn = " ";
-		if (bHashtags) {
-			// found hashtags and sensors
-			if (bRwisEnabled)
-				warn = I18N.get("dms.rwis.enabled");
-			else
-				warn = I18N.get("dms.rwis.ready");
-		} else {
-			// found sensors, but no hashtags
-			hashtagsFound_lbl.setForeground(Color.red);
-			warn = I18N.get("dms.rwis.no.hashtags");
-			warn_lbl.setForeground(Color.red);
-		}
-		warn_lbl.setText(warn);
 		repaint();
 	}
 
@@ -286,17 +233,4 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 	/** Clear all attributes (from ProxyView). */
 	@Override
 	public void clear() {}
-
-	/** Get array of RWIS hashtag strings 
-	 * (without leading '#').
-	 *  Returns empty array if no RWIS hashtags
-	 *  are associated with the sign. */
-	public ArrayList<String> getRwisHashtags() {
-		ArrayList<String> tagList = new ArrayList<String>();
-		if (dms != null)
-			for (String tag: dms.getHashtags())
-				if (tag.startsWith("#RWIS"))
-					tagList.add(tag.substring(1));
-		return tagList;
-	}
 }
