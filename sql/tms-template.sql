@@ -198,6 +198,8 @@ rwis_windy_1_kph	64
 rwis_windy_2_kph	96
 rwis_visibility_1_m	1609
 rwis_visibility_2_m	402
+rwis_flooding_1_mm	6
+rwis_flooding_2_mm	8
 sample_archive_enable	true
 sign_event_purge_days	0
 speed_limit_min_mph	45
@@ -3228,6 +3230,8 @@ RWIS_windy_1	WIND GST[nl]>40 MPH[nl]DETECTED[np]USE[nl]CAUTION	f	\N
 RWIS_windy_2	WIND GST[nl]>60 MPH[nl]DETECTED[np]REDUCE[nl]SPEED	f	\N
 RWIS_visibility_1	REDUCED[nl]VISBLITY[nl]DETECTED[np]USE[nl]CAUTION	f	\N
 RWIS_visibility_2	LOW[nl]VISBLITY[nl]DETECTED[np]REDUCE[nl]SPEED	f	\N
+RWIS_flooding_1	FLOODING[nl]POSSIBLE[np]USE[nl]CAUTION	f	\N
+RWIS_flooding_2	FLASH[nl]FLOODING[np]USE[nl]CAUTION	f	\N
 \.
 
 CREATE TRIGGER msg_pattern_notify_trig

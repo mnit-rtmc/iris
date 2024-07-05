@@ -429,7 +429,8 @@ public class MultiString {
 			String condition = args[0];
 			if (condition.equals("slippery") ||
 			    condition.equals("windy") ||
-			    condition.equals("visibility"))
+			    condition.equals("visibility") ||
+			    condition.equals("flooding"))
 			{
 				Integer level = parseInt(args, 1);
 				if (level != null)

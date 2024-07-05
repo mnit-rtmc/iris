@@ -186,6 +186,15 @@ public class DmsActionMsg {
 			}
 			return false;
 		}
+		/** Check if precipitation is greater than a threshold */
+		private boolean isPrecipGt(int threshold) {
+			for (WeatherSensor ws : sensors) {
+				Integer p = ws.getPrecipOneHour();
+				if (p != null && p > threshold)
+					return true;
+			}
+			return false;
+		}
 	}
 
 	/** DMS action */
@@ -480,6 +489,8 @@ public class DmsActionMsg {
 			return rwisWindySpan(level);
 		else if (condition.equals("visibility"))
 			return rwisVisibilitySpan(level);
+		else if (condition.equals("flooding"))
+			return rwisFloodingSpan(level);
 		else
 			return fail("Invalid condition: " + condition);
 	}
@@ -544,6 +555,24 @@ public class DmsActionMsg {
 		return (lv == level)
 		      ? EMPTY_SPAN
 		      : fail("Condition not visibility " + level);
+	}
+
+	/** Make an RWIS flooding condition span.
+	 * @param level Warning level. */
+	private String rwisFloodingSpan(int level) {
+		ActiveSensors sensors = activeSensors();
+		if (sensors.isEmpty())
+			return fail("No current weather data");
+		int lv = 0;
+		if (sensors.isPrecipGt(
+			SystemAttrEnum.RWIS_FLOODING_1_MM.getInt()
+		)) lv++;
+		if (level >= 2 && sensors.isPrecipGt(
+			SystemAttrEnum.RWIS_FLOODING_2_MM.getInt()
+		)) lv++;
+		return (lv == level)
+		      ? EMPTY_SPAN
+		      : fail("Condition not flooding " + level);
 	}
 
 	/** Add a slow traffic warning.

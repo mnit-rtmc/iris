@@ -21,6 +21,8 @@ Condition    | Level | Field Threshold †    | Meaning
 `windy`      | 2     | + `wind_gust` > 96   | HIGH WINDS
 `visibility` | 1     | `visibility` < 1609  | REDUCED VISIBILITY
 `visibility` | 2     | + `visibility` < 402 | LOW VISIBILITY
+`flooding`   | 1     | `precip` > 6         | FLOODING POSSIBLE
+`flooding`   | 2     | + `precip` > 8       | FLASH FLOODING
 
 † *Thresholds configurable with [system attributes](#system-attributes)*
 
@@ -32,6 +34,7 @@ There are four weather data fields used for condition calculations:
 2. `surface_temp`: temperature in degrees celcius
 3. `wind_gust`: gusting wind speed in kilometers per hour (kph)
 4. `visibility`: distance in meters (m)
+5. `precip`: one hour precipitation accumulation (mm)
 
 ## System Attributes
 
@@ -46,6 +49,8 @@ Attribute Name            | Field          | Default Threshold
 `rwis_windy_2_kph`        | `wind_gust`    | 96
 `rwis_visibility_1_m`     | `visibility`   | 1609
 `rwis_visibility_2_m`     | `visibility`   | 402
+`rwis_flooding_1_mm`      | `precip`       | 6
+`rwis_flooding_2_mm`      | `precip`       | 8
 
 Also, the `rwis_obs_age_limit_secs` determines the maximum valid age for a
 weather sensor observation.

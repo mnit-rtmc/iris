@@ -90,8 +90,10 @@ System Attribute                 | Description
 `rwis_slippery_3_percent`        | Friction threshold for slippery 3 condition
 `rwis_windy_1_kph`               | Gust speed threshold for windy 1 condition
 `rwis_windy_2_kph`               | Gust speed threshold for windy 2 condition
-`rwis_visibility_1_m`            | Visibility threshold for visibility 1 condition
-`rwis_visibility_2_m`            | Visibility threshold for visibility 2 condition
+`rwis_visibility_1_m`            | Distance threshold for visibility 1 condition
+`rwis_visibility_2_m`            | Distance threshold for visibility 2 condition
+`rwis_flooding_1_mm`             | Accumulation threshold for flooding 1 condition
+`rwis_flooding_2_mm`             | Accumulation threshold for flooding 2 condition
 `sample_archive_enable`          | Enable archiving of sample data
 `sign_event_purge_days`          | Number of days after which sign events will be purged
 `speed_limit_default_mph`        | Default roadway speed limit
