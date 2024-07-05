@@ -117,6 +117,7 @@ public class EssRec {
 			ws.setPvmtSurfStatusNotify(null);
 			ws.setSurfFreezeTempNotify(null);
 			ws.setPvmtFrictionNotify(null);
+			ws.setSurfCondV2Notify(null);
 		}
 	}
 
