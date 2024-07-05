@@ -3223,15 +3223,15 @@ COPY iris.msg_pattern (name, multi, flash_beacon, compose_hashtag) FROM stdin;
 .3_LINE		f	#ThreeLine
 .4_LINE		f	#FourLine
 .2_PAGE	[np]	f	#Small
-RWIS_slippery_1	SLIPPERY[nl]ROAD[nl]DETECTED[np]USE[nl]CAUTION	f	\N
-RWIS_slippery_2	SLIPPERY[nl]ROAD[nl]DETECTED[np]REDUCE[nl]SPEED	f	\N
-RWIS_slippery_3	ICE[nl]DETECTED[np]REDUCE[nl]SPEED	f	\N
-RWIS_windy_1	WIND GST[nl]>40 MPH[nl]DETECTED[np]USE[nl]CAUTION	f	\N
-RWIS_windy_2	WIND GST[nl]>60 MPH[nl]DETECTED[np]REDUCE[nl]SPEED	f	\N
-RWIS_visibility_1	REDUCED[nl]VISBLITY[nl]DETECTED[np]USE[nl]CAUTION	f	\N
-RWIS_visibility_2	LOW[nl]VISBLITY[nl]DETECTED[np]REDUCE[nl]SPEED	f	\N
-RWIS_flooding_1	FLOODING[nl]POSSIBLE[np]USE[nl]CAUTION	f	\N
-RWIS_flooding_2	FLASH[nl]FLOODING[np]USE[nl]CAUTION	f	\N
+RWIS_slippery_1	[rwis_slippery,1]SLIPPERY[nl]ROAD[nl]DETECTED[np]USE[nl]CAUTION	f	\N
+RWIS_slippery_2	[rwis_slippery,2]SLIPPERY[nl]ROAD[nl]DETECTED[np]REDUCE[nl]SPEED	f	\N
+RWIS_slippery_3	[rwis_slippery,3]ICE[nl]DETECTED[np]REDUCE[nl]SPEED	f	\N
+RWIS_windy_1	[rwis_windy,1]WIND GST[nl]>40 MPH[nl]DETECTED[np]USE[nl]CAUTION	f	\N
+RWIS_windy_2	[rwis_windy,2]WIND GST[nl]>60 MPH[nl]DETECTED[np]REDUCE[nl]SPEED	f	\N
+RWIS_visibility_1	[rwis_visibility,1]REDUCED[nl]VISBLITY[nl]DETECTED[np]USE[nl]CAUTION	f	\N
+RWIS_visibility_2	[rwis_visibility,2]LOW[nl]VISBLITY[nl]DETECTED[np]REDUCE[nl]SPEED	f	\N
+RWIS_flooding_1	[rwis_flooding,1]FLOODING[nl]POSSIBLE[np]USE[nl]CAUTION	f	\N
+RWIS_flooding_2	[rwis_flooding,2]FLASH[nl]FLOODING[np]USE[nl]CAUTION	f	\N
 \.
 
 CREATE TRIGGER msg_pattern_notify_trig
