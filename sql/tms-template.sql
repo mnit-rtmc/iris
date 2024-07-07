@@ -1595,8 +1595,8 @@ GRANT SELECT ON controller_io_view TO PUBLIC;
 -- Cameras, Encoders, Play Lists, Catalogs, Presets
 --
 CREATE TABLE iris.encoding (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(20) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(20) NOT NULL
 );
 
 COPY iris.encoding (id, description) FROM stdin;
@@ -1610,8 +1610,8 @@ COPY iris.encoding (id, description) FROM stdin;
 \.
 
 CREATE TABLE iris.encoding_quality (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(20) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(20) NOT NULL
 );
 
 COPY iris.encoding_quality (id, description) FROM stdin;
@@ -1621,45 +1621,45 @@ COPY iris.encoding_quality (id, description) FROM stdin;
 \.
 
 CREATE TABLE iris.encoder_type (
-	name VARCHAR(8) PRIMARY KEY,
-	make VARCHAR(16) NOT NULL,
-	model VARCHAR(16) NOT NULL,
-	config VARCHAR(8) NOT NULL,
-	UNIQUE(make, model, config)
+    name VARCHAR(8) PRIMARY KEY,
+    make VARCHAR(16) NOT NULL,
+    model VARCHAR(16) NOT NULL,
+    config VARCHAR(8) NOT NULL,
+    UNIQUE(make, model, config)
 );
 
 CREATE TABLE iris.encoder_stream (
-	name VARCHAR(8) PRIMARY KEY,
-	encoder_type VARCHAR(8) NOT NULL REFERENCES iris.encoder_type,
-	view_num INTEGER CHECK (view_num > 0 AND view_num <= 12),
-	flow_stream BOOLEAN NOT NULL,
-	encoding INTEGER NOT NULL REFERENCES iris.encoding,
-	quality INTEGER NOT NULL REFERENCES iris.encoding_quality,
-	uri_scheme VARCHAR(8),
-	uri_path VARCHAR(64),
-	mcast_port INTEGER CHECK (mcast_port > 0 AND mcast_port <= 65535),
-	latency INTEGER NOT NULL,
-	UNIQUE(encoder_type, mcast_port)
+    name VARCHAR(8) PRIMARY KEY,
+    encoder_type VARCHAR(8) NOT NULL REFERENCES iris.encoder_type,
+    view_num INTEGER CHECK (view_num > 0 AND view_num <= 12),
+    flow_stream BOOLEAN NOT NULL,
+    encoding INTEGER NOT NULL REFERENCES iris.encoding,
+    quality INTEGER NOT NULL REFERENCES iris.encoding_quality,
+    uri_scheme VARCHAR(8),
+    uri_path VARCHAR(64),
+    mcast_port INTEGER CHECK (mcast_port > 0 AND mcast_port <= 65535),
+    latency INTEGER NOT NULL,
+    UNIQUE(encoder_type, mcast_port)
 );
 
 ALTER TABLE iris.encoder_stream
-	ADD CONSTRAINT unicast_or_multicast_ck
-	CHECK ((uri_scheme IS NULL AND uri_path IS NULL) OR mcast_port IS NULL);
+    ADD CONSTRAINT unicast_or_multicast_ck
+    CHECK ((uri_scheme IS NULL AND uri_path IS NULL) OR mcast_port IS NULL);
 
 CREATE VIEW encoder_stream_view AS
-	SELECT es.name, encoder_type, make, model, config, view_num,flow_stream,
-	       enc.description AS encoding, eq.description AS quality,
-	       uri_scheme, uri_path, mcast_port, latency
-	FROM iris.encoder_stream es
-	LEFT JOIN iris.encoder_type et ON es.encoder_type = et.name
-	LEFT JOIN iris.encoding enc ON es.encoding = enc.id
-	LEFT JOIN iris.encoding_quality eq ON es.quality = eq.id;
+    SELECT es.name, encoder_type, make, model, config, view_num,flow_stream,
+           enc.description AS encoding, eq.description AS quality,
+           uri_scheme, uri_path, mcast_port, latency
+    FROM iris.encoder_stream es
+    LEFT JOIN iris.encoder_type et ON es.encoder_type = et.name
+    LEFT JOIN iris.encoding enc ON es.encoding = enc.id
+    LEFT JOIN iris.encoding_quality eq ON es.quality = eq.id;
 GRANT SELECT ON encoder_stream_view TO PUBLIC;
 
 CREATE TABLE iris.camera_template (
-	name VARCHAR(20) PRIMARY KEY,
-	notes text,
-	label text
+    name VARCHAR(20) PRIMARY KEY,
+    notes text,
+    label text
 );
 
 -- FIXME: remove streamable
@@ -1971,26 +1971,26 @@ CREATE TABLE iris.catalog_play_list (
 ALTER TABLE iris.catalog_play_list ADD PRIMARY KEY (catalog, ordinal);
 
 CREATE TABLE iris.vid_src_template (
-	name VARCHAR(20) PRIMARY KEY,
-	label text,
-	config text,
-	default_port INTEGER,
-	subnets text,
-	latency INTEGER,
-	encoder VARCHAR(64),
-	scheme text,
-	codec text,
-	rez_width INTEGER,
-	rez_height INTEGER,
-	multicast BOOLEAN,
-	notes text
+    name VARCHAR(20) PRIMARY KEY,
+    label text,
+    config text,
+    default_port INTEGER,
+    subnets text,
+    latency INTEGER,
+    encoder VARCHAR(64),
+    scheme text,
+    codec text,
+    rez_width INTEGER,
+    rez_height INTEGER,
+    multicast BOOLEAN,
+    notes text
 );
 
 CREATE TABLE iris.cam_vid_src_ord (
-	name VARCHAR(24) PRIMARY KEY,
-	camera_template VARCHAR(20) REFERENCES iris.camera_template,
-	src_order INTEGER,
-	src_template VARCHAR(20) REFERENCES iris.vid_src_template
+    name VARCHAR(24) PRIMARY KEY,
+    camera_template VARCHAR(20) REFERENCES iris.camera_template,
+    src_order INTEGER,
+    src_template VARCHAR(20) REFERENCES iris.vid_src_template
 );
 
 CREATE TABLE event.camera_switch_event (
