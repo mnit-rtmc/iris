@@ -3,6 +3,8 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
+SELECT iris.update_version('5.56.0', '5.57.0');
+
 -- Add dms / weather sensor relation
 CREATE TABLE iris.dms_weather_sensor (
     dms VARCHAR(20) NOT NULL REFERENCES iris._dms,
