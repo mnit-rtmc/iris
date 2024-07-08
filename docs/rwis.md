@@ -61,6 +61,14 @@ An RWIS action tag can use data from one or more weather sensors.  Each DMS can
 have its own set of sensors configured.  A sign with no associated weather
 sensors will not activate messages from RWIS action tags.
 
+## Testing Condition Levels
+
+The weather sensor properties form has buttons to test RWIS message automation.
+If the "Level 1" button is pressed, then all RWIS conditions from that weather
+sensor will report level 1 conditions.  Similarly, the "Level 2" button causes
+each condition to report level 2.  The testing mode will clear automatically
+the next time the sensor records an observation.
+
 
 [action tag]: action_plans.html#dms-action-tags
 [DMS]: dms.html

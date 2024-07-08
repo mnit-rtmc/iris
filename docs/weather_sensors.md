@@ -11,11 +11,13 @@ this data.
 * `iris/api/weather_sensor` (primary)
 * `iris/api/weather_sensor/{name}`
 
-| Access       | Primary                  | Secondary |
-|--------------|--------------------------|-----------|
+| Access       | Primary                  | Secondary     |
+|--------------|--------------------------|---------------|
 | 👁️  View      | name, location           | geo\_loc, settings, sample, sample\_time |
-| 💡 Manage    | site\_id, alt\_id, notes |           |
-| 🔧 Configure | controller               | pin       |
+| 💡 Manage    | site\_id, alt\_id, notes | device\_req † |
+| 🔧 Configure | controller               | pin           |
+
+† _Write only_
 
 </details>
 

@@ -23,6 +23,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
@@ -55,6 +56,26 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 	private final IAction controller = new IAction("controller") {
 		protected void doActionPerformed(ActionEvent e) {
 			controllerPressed();
+		}
+	};
+
+	/** Test RWIS level 1 action */
+	private final IAction test_rwis_1_act = new IAction(
+		"weather_sensor.test.rwis.1")
+	{
+		protected void doActionPerformed(ActionEvent e) {
+			proxy.setDeviceRequest(DeviceRequest.
+				TEST_RWIS_1.ordinal());
+		}
+	};
+
+	/** Test RWIS level 2 action */
+	private final IAction test_rwis_2_act = new IAction(
+		"weather_sensor.test.rwis.2")
+	{
+		protected void doActionPerformed(ActionEvent e) {
+			proxy.setDeviceRequest(DeviceRequest.
+				TEST_RWIS_2.ordinal());
 		}
 	};
 
@@ -96,6 +117,9 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 		loc_pnl.add(alt_id_txt, Stretch.FULL);
 		loc_pnl.add("device.notes");
 		loc_pnl.add(notes_txt, Stretch.FULL);
+		loc_pnl.add("weather_sensor.test.rwis");
+		loc_pnl.add(new JButton(test_rwis_1_act));
+		loc_pnl.add(new JButton(test_rwis_2_act), Stretch.FULL);
 		loc_pnl.add(new JButton(controller), Stretch.RIGHT);
 		loc_pnl.setGeoLoc(proxy.getGeoLoc());
 		return loc_pnl;
@@ -127,7 +151,7 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 	/** Controller lookup button pressed */
 	private void controllerPressed() {
 		Controller c = proxy.getController();
-		if(c != null)
+		if (c != null)
 			showForm(new ControllerForm(session, c));
 	}
 
