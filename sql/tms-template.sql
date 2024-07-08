@@ -3997,8 +3997,8 @@ iadv_00106	13		1	\N	\N	IN RIGHT SHOULDER
 -- Alerts
 --
 CREATE TABLE cap.status (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(10) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(10) NOT NULL
 );
 
 COPY cap.status (id, description) FROM stdin;
@@ -4011,8 +4011,8 @@ COPY cap.status (id, description) FROM stdin;
 \.
 
 CREATE TABLE cap.msg_type (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(10) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(10) NOT NULL
 );
 
 COPY cap.msg_type (id, description) FROM stdin;
@@ -4025,8 +4025,8 @@ COPY cap.msg_type (id, description) FROM stdin;
 \.
 
 CREATE TABLE cap.scope (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(10) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(10) NOT NULL
 );
 
 COPY cap.scope (id, description) FROM stdin;
@@ -4037,8 +4037,8 @@ COPY cap.scope (id, description) FROM stdin;
 \.
 
 CREATE TABLE cap.category (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(10) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(10) NOT NULL
 );
 
 COPY cap.category (id, description) FROM stdin;
@@ -4057,8 +4057,8 @@ COPY cap.category (id, description) FROM stdin;
 \.
 
 CREATE TABLE cap.event (
-	code VARCHAR(3) PRIMARY KEY,
-	description VARCHAR(32) NOT NULL
+    code VARCHAR(3) PRIMARY KEY,
+    description VARCHAR(32) NOT NULL
 );
 
 COPY cap.event (code, description) FROM stdin;
@@ -4163,8 +4163,8 @@ WWY	Winter Weather Advisory
 \.
 
 CREATE TABLE cap.response_type (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(10) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(10) NOT NULL
 );
 
 COPY cap.response_type (id, description) FROM stdin;
@@ -4180,8 +4180,8 @@ COPY cap.response_type (id, description) FROM stdin;
 \.
 
 CREATE TABLE cap.urgency (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(10) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(10) NOT NULL
 );
 
 COPY cap.urgency (id, description) FROM stdin;
@@ -4193,8 +4193,8 @@ COPY cap.urgency (id, description) FROM stdin;
 \.
 
 CREATE TABLE cap.severity (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(10) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(10) NOT NULL
 );
 
 COPY cap.severity(id, description) FROM stdin;
@@ -4206,8 +4206,8 @@ COPY cap.severity(id, description) FROM stdin;
 \.
 
 CREATE TABLE cap.certainty (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(10) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(10) NOT NULL
 );
 
 COPY cap.certainty(id, description) FROM stdin;
@@ -4588,36 +4588,36 @@ GRANT SELECT ON lane_use_multi_view TO PUBLIC;
 -- Parking Areas
 --
 CREATE TABLE iris.parking_area (
-	name VARCHAR(20) PRIMARY KEY,
-	geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
-	preset_1 VARCHAR(20) REFERENCES iris.camera_preset(name),
-	preset_2 VARCHAR(20) REFERENCES iris.camera_preset(name),
-	preset_3 VARCHAR(20) REFERENCES iris.camera_preset(name),
-	-- static site data
-	site_id VARCHAR(25) UNIQUE,
-	time_stamp_static TIMESTAMP WITH time zone,
-	relevant_highway VARCHAR(10),
-	reference_post VARCHAR(10),
-	exit_id VARCHAR(10),
-	facility_name VARCHAR(30),
-	street_adr VARCHAR(30),
-	city VARCHAR(30),
-	state VARCHAR(2),
-	zip VARCHAR(10),
-	time_zone VARCHAR(10),
-	ownership VARCHAR(2),
-	capacity INTEGER,
-	low_threshold INTEGER,
-	amenities INTEGER,
-	-- dynamic site data
-	time_stamp TIMESTAMP WITH time zone,
-	reported_available VARCHAR(8),
-	true_available INTEGER,
-	trend VARCHAR(8),
-	open BOOLEAN,
-	trust_data BOOLEAN,
-	last_verification_check TIMESTAMP WITH time zone,
-	verification_check_amplitude INTEGER
+    name VARCHAR(20) PRIMARY KEY,
+    geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
+    preset_1 VARCHAR(20) REFERENCES iris.camera_preset(name),
+    preset_2 VARCHAR(20) REFERENCES iris.camera_preset(name),
+    preset_3 VARCHAR(20) REFERENCES iris.camera_preset(name),
+    -- static site data
+    site_id VARCHAR(25) UNIQUE,
+    time_stamp_static TIMESTAMP WITH time zone,
+    relevant_highway VARCHAR(10),
+    reference_post VARCHAR(10),
+    exit_id VARCHAR(10),
+    facility_name VARCHAR(30),
+    street_adr VARCHAR(30),
+    city VARCHAR(30),
+    state VARCHAR(2),
+    zip VARCHAR(10),
+    time_zone VARCHAR(10),
+    ownership VARCHAR(2),
+    capacity INTEGER,
+    low_threshold INTEGER,
+    amenities INTEGER,
+    -- dynamic site data
+    time_stamp TIMESTAMP WITH time zone,
+    reported_available VARCHAR(8),
+    true_available INTEGER,
+    trend VARCHAR(8),
+    open BOOLEAN,
+    trust_data BOOLEAN,
+    last_verification_check TIMESTAMP WITH time zone,
+    verification_check_amplitude INTEGER
 );
 
 CREATE FUNCTION iris.parking_area_notify() RETURNS TRIGGER AS
@@ -4641,11 +4641,11 @@ CREATE TRIGGER parking_area_table_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE TABLE iris.parking_area_amenities (
-	bit INTEGER PRIMARY KEY,
-	amenity VARCHAR(32) NOT NULL
+    bit INTEGER PRIMARY KEY,
+    amenity VARCHAR(32) NOT NULL
 );
 ALTER TABLE iris.parking_area_amenities ADD CONSTRAINT amenity_bit_ck
-	CHECK (bit >= 0 AND bit < 32);
+    CHECK (bit >= 0 AND bit < 32);
 
 COPY iris.parking_area_amenities (bit, amenity) FROM stdin;
 0	Flush toilet
@@ -4685,25 +4685,25 @@ ALTER FUNCTION iris.parking_area_amenities(INTEGER)
     SET search_path = pg_catalog, pg_temp;
 
 CREATE VIEW parking_area_view AS
-	SELECT pa.name, site_id, time_stamp_static, relevant_highway,
-	       reference_post, exit_id, facility_name, street_adr, city, state,
-	       zip, time_zone, ownership, capacity, low_threshold,
-	       (SELECT string_agg(a.amenity, ', ') FROM
-	        (SELECT bit, amenity FROM iris.parking_area_amenities(amenities)
-	         ORDER BY bit) AS a) AS amenities,
-	       time_stamp, reported_available, true_available, trend, open,
-	       trust_data, last_verification_check, verification_check_amplitude,
-	       p1.camera AS camera_1, p2.camera AS camera_2,
-	       p3.camera AS camera_3,
-	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	       l.landmark, l.lat, l.lon, l.corridor, l.location,
-	       sa.value AS camera_image_base_url
-	FROM iris.parking_area pa
-	LEFT JOIN iris.camera_preset p1 ON preset_1 = p1.name
-	LEFT JOIN iris.camera_preset p2 ON preset_2 = p2.name
-	LEFT JOIN iris.camera_preset p3 ON preset_3 = p3.name
-	LEFT JOIN geo_loc_view l ON pa.geo_loc = l.name
-	LEFT JOIN iris.system_attribute sa ON sa.name = 'camera_image_base_url';
+    SELECT pa.name, site_id, time_stamp_static, relevant_highway,
+           reference_post, exit_id, facility_name, street_adr, city, state,
+           zip, time_zone, ownership, capacity, low_threshold,
+           (SELECT string_agg(a.amenity, ', ') FROM
+            (SELECT bit, amenity FROM iris.parking_area_amenities(amenities)
+             ORDER BY bit) AS a) AS amenities,
+           time_stamp, reported_available, true_available, trend, open,
+           trust_data, last_verification_check, verification_check_amplitude,
+           p1.camera AS camera_1, p2.camera AS camera_2,
+           p3.camera AS camera_3,
+           l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+           l.landmark, l.lat, l.lon, l.corridor, l.location,
+           sa.value AS camera_image_base_url
+    FROM iris.parking_area pa
+    LEFT JOIN iris.camera_preset p1 ON preset_1 = p1.name
+    LEFT JOIN iris.camera_preset p2 ON preset_2 = p2.name
+    LEFT JOIN iris.camera_preset p3 ON preset_3 = p3.name
+    LEFT JOIN geo_loc_view l ON pa.geo_loc = l.name
+    LEFT JOIN iris.system_attribute sa ON sa.name = 'camera_image_base_url';
 GRANT SELECT ON parking_area_view TO PUBLIC;
 
 --
@@ -5185,20 +5185,20 @@ GRANT SELECT ON dms_toll_zone_view TO PUBLIC;
 -- Video Monitors
 --
 CREATE TABLE iris.monitor_style (
-	name VARCHAR(24) PRIMARY KEY,
-	force_aspect BOOLEAN NOT NULL,
-	accent VARCHAR(8) NOT NULL,
-	font_sz INTEGER NOT NULL,
-	title_bar BOOLEAN NOT NULL,
-	auto_expand BOOLEAN NOT NULL,
-	hgap INTEGER NOT NULL,
-	vgap INTEGER NOT NULL
+    name VARCHAR(24) PRIMARY KEY,
+    force_aspect BOOLEAN NOT NULL,
+    accent VARCHAR(8) NOT NULL,
+    font_sz INTEGER NOT NULL,
+    title_bar BOOLEAN NOT NULL,
+    auto_expand BOOLEAN NOT NULL,
+    hgap INTEGER NOT NULL,
+    vgap INTEGER NOT NULL
 );
 
 CREATE VIEW monitor_style_view AS
-	SELECT name, force_aspect, accent, font_sz, title_bar, auto_expand,
-	       hgap, vgap
-	FROM iris.monitor_style;
+    SELECT name, force_aspect, accent, font_sz, title_bar, auto_expand,
+           hgap, vgap
+    FROM iris.monitor_style;
 GRANT SELECT ON monitor_style_view TO PUBLIC;
 
 CREATE TABLE iris._video_monitor (
