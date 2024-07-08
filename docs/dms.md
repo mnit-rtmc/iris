@@ -14,8 +14,9 @@ The following features are supported:
 * Querying or sending [font]s
 * Sending [graphic] images to be displayed
 * [Travel time] estimation
-* [Variable speed] advisories
+* Road weather information system ([RWIS]) messages
 * [Slow traffic] warnings
+* [Tolling] messages for congestion pricing
 * Free-form text entry with banned [word] checks
 
 <details>
@@ -109,9 +110,10 @@ message.  The server then performs a validation check ensuring the user has
 [message pattern]: message_patterns.html
 [NTCIP]: protocols.html#ntcip
 [permissions]: permissions.html
+[rwis]: rwis.html
 [sign configuration]: sign_configuration.html
 [sign message]: sign_message.html
 [Slow traffic]: slow_warning.html
+[tolling]: tolling.html
 [travel time]: travel_time.html
-[variable speed]: vsa.html
 [word]: words.html
