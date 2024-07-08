@@ -77,12 +77,6 @@ public interface Camera extends Device, Taggable {
 	/** Get flag to allow publishing camera images */
 	boolean getPublish();
 
-	/** Set streamable flag */
-	void setStreamable(boolean s);
-
-	/** Get streamable flag */
-	boolean getStreamable();
-
 	/** Set the hashtags */
 	void setHashtags(String[] ht);
 

@@ -75,8 +75,8 @@ public class CameraImpl extends DeviceImpl implements Camera {
 			"hashtag");
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"cam_num, encoder_type, enc_address, enc_port, " +
-			"enc_mcast, enc_channel, publish, streamable, " +
-			"video_loss, cam_template FROM iris." + SONAR_TYPE + ";",
+			"enc_mcast, enc_channel, publish, video_loss, " +
+			"cam_template FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -101,7 +101,6 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		map.put("enc_mcast", enc_mcast);
 		map.put("enc_channel", enc_channel);
 		map.put("publish", publish);
-		map.put("streamable", streamable);
 		map.put("video_loss", video_loss);
 		map.put("cam_template", cam_template);
 		return map;
@@ -142,17 +141,16 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		     row.getString(10),          // enc_mcast
 		     (Integer) row.getInt(11),   // enc_channel
 		     row.getBoolean(12),         // publish
-		     row.getBoolean(13),         // streamable
-		     row.getBoolean(14),         // video_loss
-		     row.getString(15)           // camera template
+		     row.getBoolean(13),         // video_loss
+		     row.getString(14)           // camera template
 		);
 	}
 
 	/** Create a camera */
 	private CameraImpl(String n, String l, String c, int p,
 		String nt, Integer cn, String et, String ea, Integer ep,
-		String em, Integer ec, boolean pb, boolean st, boolean vl,
-		String ct) throws TMSException
+		String em, Integer ec, boolean pb, boolean vl, String ct)
+		throws TMSException
 	{
 		super(n, lookupController(c), p, nt);
 		geo_loc = lookupGeoLoc(l);
@@ -163,7 +161,6 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		enc_mcast = em;
 		enc_channel = ec;
 		publish = pb;
-		streamable = st;
 		video_loss = vl;
 		cam_template = lookupCameraTemplate(ct);
 		hashtags = lookupHashtagMapping();
@@ -358,29 +355,6 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	@Override
 	public boolean getPublish() {
 		return publish;
-	}
-
-	/** Streamable flag */
-	private boolean streamable;
-
-	/** Set streamable flag */
-	@Override
-	public void setStreamable(boolean s) {
-		streamable = s;
-	}
-
-	/** Set streamable flag */
-	public void doSetStreamable(boolean s) throws TMSException {
-		if (s != streamable) {
-			store.update(this, "streamable", s);
-			setStreamable(s);
-		}
-	}
-
-	/** Get streamable flag */
-	@Override
-	public boolean getStreamable() {
-		return streamable;
 	}
 
 	/** Hashtags for the camera */

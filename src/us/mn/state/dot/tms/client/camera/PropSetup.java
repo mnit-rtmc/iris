@@ -90,37 +90,28 @@ public class PropSetup extends IPanel {
 			camera.setPublish(publish_chk.isSelected());
 		}
 	});
-	
+
 	/** Camera Template ComboBox */
-	private final JComboBox<CameraTemplate> cam_tmplt_cbx = 
-			new JComboBox<CameraTemplate>();
-	
+	private final JComboBox<CameraTemplate> cam_tmplt_cbx =
+		new JComboBox<CameraTemplate>();
+
 	/** Camera template action */
 	private final IAction cam_tmplt_act = new IAction("camera.template"){
 		protected void doActionPerformed(ActionEvent e) {
 			CameraTemplate ct = getSelectedCameraTemplate();
-		    camera.setCameraTemplate(ct);
+			camera.setCameraTemplate(ct);
 		}
 		@Override
 		protected void doUpdateSelected() {
 			cam_tmplt_cbx.setSelectedItem(camera.getCameraTemplate());
 		}
 	};
-	
+
 	/** Get the selected camera template */
 	private CameraTemplate getSelectedCameraTemplate() {
 		Object ct = cam_tmplt_cbx.getSelectedItem();
 		return (ct instanceof CameraTemplate) ? (CameraTemplate) ct : null;
 	}
-	
-
-	/** Checkbox to allow streaming camera images */
-	private final JCheckBox streamable_chk = new JCheckBox(new IAction(null)
-	{
-		protected void doActionPerformed(ActionEvent e) {
-			camera.setStreamable(streamable_chk.isSelected());
-		}
-	});
 
 	/** Hashtag text area */
 	private final JTextArea hashtag_txt = new JTextArea(6, 32);
@@ -166,8 +157,6 @@ public class PropSetup extends IPanel {
 		add(cam_tmplt_cbx, Stretch.LAST);
 		add("camera.publish");
 		add(publish_chk, Stretch.LAST);
-		add("camera.streamable");
-		add(streamable_chk, Stretch.LAST);
 		add("hashtags");
 		add(hashtag_txt, Stretch.LAST);
 		createJobs();
@@ -236,7 +225,6 @@ public class PropSetup extends IPanel {
 		enc_mcast_txt.setEnabled(canWrite("encMcast"));
 		enc_chn_spn.setEnabled(canWrite("encChannel"));
 		publish_chk.setEnabled(canWrite("publish"));
-		streamable_chk.setEnabled(canWrite("streamable"));
 		hashtag_txt.setEnabled(canWrite("hashtags"));
 	}
 
@@ -268,8 +256,6 @@ public class PropSetup extends IPanel {
 		}
 		if (a == null || a.equals("publish"))
 			publish_chk.setSelected(camera.getPublish());
-		if (a == null || a.equals("streamable"))
-			streamable_chk.setSelected(camera.getStreamable());
 		if (null == a || a.equals("hashtags")) {
 			String[] hashtags = camera.getHashtags();
 			System.err.println("#Tags " + hashtags);

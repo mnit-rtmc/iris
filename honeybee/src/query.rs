@@ -87,8 +87,8 @@ pub const CAMERA_ONE: &str = "\
 
 /// SQL query for all cameras (public)
 pub const CAMERA_PUB: &str = "\
-  SELECT name, publish, streamable, hashtags, roadway, road_dir, \
-         cross_street, location, lat, lon, ARRAY(\
+  SELECT name, publish, hashtags, roadway, road_dir, cross_street, location, \
+         lat, lon, ARRAY(\
            SELECT view_num \
            FROM iris.encoder_stream \
            WHERE encoder_type = c.encoder_type \

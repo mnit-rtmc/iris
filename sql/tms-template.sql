@@ -1662,7 +1662,6 @@ CREATE TABLE iris.camera_template (
     label text
 );
 
--- FIXME: remove streamable
 CREATE TABLE iris._camera (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
@@ -1675,7 +1674,6 @@ CREATE TABLE iris._camera (
     enc_mcast INET,
     enc_channel INTEGER CHECK (enc_channel > 0 AND enc_channel <= 16),
     publish BOOLEAN NOT NULL,
-    streamable BOOLEAN NOT NULL,
     video_loss BOOLEAN NOT NULL
 );
 
@@ -1711,7 +1709,7 @@ CREATE TRIGGER camera_table_notify_trig
 CREATE VIEW iris.camera AS
     SELECT c.name, geo_loc, controller, pin, notes, cam_num, cam_template,
            encoder_type, enc_address, enc_port, enc_mcast, enc_channel,
-           publish, streamable, video_loss
+           publish, video_loss
     FROM iris._camera c
     JOIN iris.controller_io cio ON c.name = cio.name;
 
@@ -1722,11 +1720,11 @@ BEGIN
          VALUES (NEW.name, 'camera', NEW.controller, NEW.pin);
     INSERT INTO iris._camera (
         name, geo_loc, notes, cam_num, cam_template, encoder_type, enc_address,
-        enc_port, enc_mcast, enc_channel, publish, streamable, video_loss
+        enc_port, enc_mcast, enc_channel, publish, video_loss
     ) VALUES (
         NEW.name, NEW.geo_loc, NEW.notes, NEW.cam_num, NEW.cam_template,
         NEW.encoder_type, NEW.enc_address, NEW.enc_port, NEW.enc_mcast,
-        NEW.enc_channel, NEW.publish, NEW.streamable, NEW.video_loss
+        NEW.enc_channel, NEW.publish, NEW.video_loss
     );
     RETURN NEW;
 END;
@@ -1754,7 +1752,6 @@ BEGIN
            enc_mcast = NEW.enc_mcast,
            enc_channel = NEW.enc_channel,
            publish = NEW.publish,
-           streamable = NEW.streamable,
            video_loss = NEW.video_loss
      WHERE name = OLD.name;
     RETURN NEW;
@@ -1772,7 +1769,7 @@ CREATE TRIGGER camera_delete_trig
 CREATE VIEW camera_view AS
     SELECT c.name, cam_num, c.cam_template, encoder_type, et.make, et.model,
            et.config, c.enc_address, c.enc_port, c.enc_mcast, c.enc_channel,
-           c.publish, c.streamable, c.video_loss, c.geo_loc,
+           c.publish, c.video_loss, c.geo_loc,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
            l.landmark, l.lat, l.lon, l.corridor, l.location,
            c.controller, ctr.comm_link, ctr.drop_id, ctr.condition, c.notes
