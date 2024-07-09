@@ -31,7 +31,7 @@ The following features are supported:
 |--------------|------------------------------------------|---------------|
 | 👁️  View      | name, location, msg\_current, has_faults | sign\_config, sign\_detail, geo\_loc, msg\_sched, expire\_time, status, stuck\_pixels |
 | 👉 Operate   |                                          | msg\_user     |
-| 💡 Manage    | notes, hashtags                          | preset, device\_req † |
+| 💡 Manage    | notes, hashtags                          | preset, device\_request † |
 | 🔧 Configure | controller                               | pin, static\_graphic, beacon |
 
 † _Write only_

@@ -1087,7 +1087,7 @@ impl Dms {
     fn device_req(&self, req: DeviceReq) -> Vec<Action> {
         let uri = Dms::uri_name(&self.name);
         let mut fields = Fields::new();
-        fields.insert_num("device_req", req as u32);
+        fields.insert_num("device_request", req as u32);
         let value = fields.into_value().to_string();
         let mut actions = Vec::with_capacity(1);
         actions.push(Action::Patch(uri, value.into()));

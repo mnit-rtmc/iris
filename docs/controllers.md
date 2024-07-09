@@ -18,12 +18,12 @@ In either case, a controller is required for any communication to a device.
 The read-only `controller_io` resource returns an array of objects consisting
 of `pin`, `name` and `resource_n` of associated [devices](#devices).
 
-| Access       | Primary                              | Secondary     |
-|--------------|--------------------------------------|---------------|
-| 👁️  View      | name, location, setup, fail\_time    | geo\_loc      |
-| 👉 Operate   |                                      | device\_req † |
-| 💡 Manage    | condition, notes                     |               |
-| 🔧 Configure | comm\_link, drop\_id, cabinet\_style | password      |
+| Access       | Primary                              | Secondary         |
+|--------------|--------------------------------------|-------------------|
+| 👁️  View      | name, location, setup, fail\_time    | geo\_loc          |
+| 👉 Operate   |                                      | device\_request † |
+| 💡 Manage    | condition, notes                     |                   |
+| 🔧 Configure | comm\_link, drop\_id, cabinet\_style | password          |
 
 † _Write only_
 
