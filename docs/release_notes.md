@@ -1,5 +1,11 @@
 # IRIS 5.x Release Notes
 
+5.57.0 (10 Jul 2024)
+ - Add RWIS message automation
+ - Drop "streamable" from camera table
+ - Another fix for "ignore_auto_fail" calculation
+ - Other minor fixes and updates
+
 5.56.0 (27 Jun 2024)
  - Improved consistency of web UI "cards"
  - Add Dms "Request" card (web UI)
