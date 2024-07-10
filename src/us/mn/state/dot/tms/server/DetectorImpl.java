@@ -857,23 +857,34 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Get the density (vehicles per mile) */
 	@Override
 	public float getDensity(long stamp, int per_ms) {
-		float k = getDensityRaw(stamp, per_ms);
+		return getDensity(stamp, per_ms, false);
+	}
+
+	/** Get the density (vehicles per mile) */
+	public float getDensity(long stamp, int per_ms,
+		boolean ignore_auto_fail)
+	{
+		float k = getDensityRaw(stamp, per_ms, ignore_auto_fail);
 		return (k >= 0) ? k : getDensityFake(stamp, per_ms);
 	}
 
 	/** Get the current raw (non-faked) density (vehicles per mile) */
-	protected float getDensityRaw(long stamp, int per_ms) {
-		float k = getDensityFromFlowSpeed(stamp, per_ms);
+	protected float getDensityRaw(long stamp, int per_ms,
+		boolean ignore_auto_fail)
+	{
+		float k = getDensityFromFlowSpeed(stamp, per_ms, ignore_auto_fail);
 		return (k >= 0)
 		      ? k
-		      : getDensityFromOccupancy(stamp, per_ms, false);
+		      : getDensityFromOccupancy(stamp, per_ms, ignore_auto_fail);
 	}
 
 	/** Get the density from flow and speed (vehicles per mile) */
-	private float getDensityFromFlowSpeed(long stamp, int per_ms) {
-		float speed = getSpeedRaw(stamp, per_ms);
+	private float getDensityFromFlowSpeed(long stamp, int per_ms,
+		boolean ignore_auto_fail)
+	{
+		float speed = getSpeedRaw(stamp, per_ms, ignore_auto_fail);
 		if (speed > 0) {
-			int flow = getFlowRaw(stamp, per_ms);
+			int flow = getFlowRaw(stamp, per_ms, ignore_auto_fail);
 			if (flow > MISSING_DATA)
 				return flow / speed;
 		}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2021  Minnesota Department of Transportation
+ * Copyright (C) 2002-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,7 +89,7 @@ public class FakeDetector implements VehicleSampler {
 		float t_density = 0;
 		int n_density = 0;
 		for (DetectorImpl det: dets) {
-			float k = det.getDensityRaw(stamp, per_ms);
+			float k = det.getDensityRaw(stamp, per_ms, false);
 			if (k >= 0) {
 				t_density += k;
 				n_density++;

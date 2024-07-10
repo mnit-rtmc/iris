@@ -171,6 +171,9 @@ public class StationImpl implements Station, VehicleSampler {
 		return density;
 	}
 
+	/** Current average station density, ignoring auto-fail */
+	private float density_ig = MISSING_DATA;
+
 	/** Current average station speed */
 	private float speed = MISSING_DATA;
 
@@ -225,10 +228,13 @@ public class StationImpl implements Station, VehicleSampler {
 	/** Calculate the current station data */
 	public void calculateData(long stamp, int per_ms) {
 		speeds.setDensity(density);
+		speeds_ig.setDensity(density_ig);
 		float t_occ = 0;
 		int n_occ = 0;
 		float t_density = 0;
 		int n_density = 0;
+		float t_density_ig = 0; /* ignore auto-fail */
+		int n_density_ig = 0; /* ignore auto-fail */
 		float t_speed = 0;
 		int n_speed = 0;
 		float low = MISSING_DATA;
@@ -247,6 +253,11 @@ public class StationImpl implements Station, VehicleSampler {
 				t_density += f;
 				n_density++;
 			}
+			f = det.getDensity(stamp, per_ms, true);
+			if (f != MISSING_DATA) {
+				t_density_ig += f;
+				n_density_ig++;
+			}
 			f = det.getSpeed(stamp, per_ms);
 			if (f > 0) {
 				t_speed += f;
@@ -263,6 +274,7 @@ public class StationImpl implements Station, VehicleSampler {
 		}
 		occupancy = average(t_occ, n_occ);
 		density = average(t_density, n_density);
+		density_ig = average(t_density_ig, n_density_ig);
 		speed = average(t_speed, n_speed);
 		speeds.push(speed);
 		float speed_ig = average(t_speed_ig, n_speed_ig);
