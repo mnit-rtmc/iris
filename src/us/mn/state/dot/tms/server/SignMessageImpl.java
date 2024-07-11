@@ -68,23 +68,8 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 			return null;
 		String nm = makeName(sc, inc, ms, owner, fb, mp, dur);
 		SignMessage esm = SignMessageHelper.lookup(nm);
-		if (esm != null) {
-			if (!objectEquals(sc, esm.getSignConfig()))
-				System.err.println("SignMessageImpl.sc: " + sc);
-			if (!objectEquals(inc, esm.getIncident()))
-				System.err.println("SignMessageImpl.inc: " + sc);
-			if (!ms.equals(esm.getMulti()))
-				System.err.println("SignMessageImpl.ms: " + ms);
-			if (!objectEquals(owner, esm.getMsgOwner()))
-				System.err.println("SignMessageImpl.owner: " + owner);
-			if (fb != esm.getFlashBeacon())
-				System.err.println("SignMessageImpl.fb: " + fb);
-			if (mp.ordinal() != esm.getMsgPriority())
-				System.err.println("SignMessageImpl.mp: " + mp);
-			if (!objectEquals(dur, esm.getDuration()))
-				System.err.println("SignMessageImpl.dur: " + dur);
+		if (esm != null)
 			return esm;
-		}
 		// no matching message found, create it
 		SignMessageImpl sm = new SignMessageImpl(sc, inc, ms, owner,
 			fb, mp, dur);
@@ -95,12 +80,25 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		catch (SonarException e) {
 			System.err.println("SignMessageImpl: (" + ms + ")");
 			System.err.println("findOrCreate: " + e.getMessage());
-			// This can pretty much only happen when the SONAR task
-			// processor does not store the sign message within 30
-			// seconds.  It *shouldn't* happen, but there may be
-			// a rare bug which triggers it.
-			return null;
+			// SonarException wraps the NamespaceError cause,
+			// so we have to do this ugly check...
+			if (!e.getMessage().startsWith("Name already exists")) {
+				// This can pretty much only happen when the
+				// task processor does not store the message
+				// within 30 seconds.  It *shouldn't* happen,
+				// but there may be a rare bug which triggers it.
+				return null;
+			}
 		}
+		// We got a "Name already exists" error:
+		// How does this happen?  We just checked and
+		// didn't find it.  Let's try one more time!
+		esm = SignMessageHelper.lookup(nm);
+		if (esm != null)
+			System.err.println("found: " + esm.getName());
+		else
+			System.err.println("still not found -- WTF!");
+		return esm;
 	}
 
 	/** Load all the sign messages */
