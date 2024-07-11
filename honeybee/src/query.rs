@@ -100,7 +100,7 @@ pub const CAMERA_PUB: &str = "\
   FROM camera_view c \
   LEFT JOIN (\
     SELECT camera \
-    FROM isis.camera_hashtag \
+    FROM iris.camera_hashtag \
     WHERE hashtag = '#LiveStream'\
   ) s ON c.name = s.camera \
   LEFT JOIN (\
