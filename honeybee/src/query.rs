@@ -86,9 +86,11 @@ pub const CAMERA_ONE: &str = "\
   WHERE c.name = $1";
 
 /// SQL query for all cameras (public)
+///
+/// FIXME: remove streamable when client has updated
 pub const CAMERA_PUB: &str = "\
-  SELECT name, publish, hashtags, roadway, road_dir, cross_street, location, \
-         lat, lon, ARRAY(\
+  SELECT name, publish, s.camera IS NOT NULL AS streamable, hashtags, roadway, \
+         road_dir, cross_street, location, lat, lon, ARRAY(\
            SELECT view_num \
            FROM iris.encoder_stream \
            WHERE encoder_type = c.encoder_type \
@@ -96,6 +98,11 @@ pub const CAMERA_PUB: &str = "\
            ORDER BY view_num\
          ) AS views \
   FROM camera_view c \
+  LEFT JOIN (\
+    SELECT camera \
+    FROM isis.camera_hashtag \
+    WHERE hashtag = '#LiveStream'\
+  ) s ON c.name = s.camera \
   LEFT JOIN (\
     SELECT camera, string_agg(hashtag, ' ' ORDER BY hashtag) AS hashtags \
     FROM iris.camera_hashtag \
