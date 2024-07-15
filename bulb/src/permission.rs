@@ -10,9 +10,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::error::{Error, Result};
-use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::role::Role;
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, Select};
@@ -20,7 +20,6 @@ use resources::Res;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use std::borrow::Cow;
-use std::iter::empty;
 use wasm_bindgen::JsValue;
 
 /// Permission
@@ -41,45 +40,56 @@ pub struct ResourceType {
 }
 
 /// Ancillary permission data
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct PermissionAnc {
+    assets: Vec<Asset>,
     pub resource_types: Option<Vec<ResourceType>>,
     pub roles: Option<Vec<Role>>,
 }
 
-const RESOURCE_TYPE_URI: &str = "/iris/lut/resource_type";
-const ROLE_URI: &str = "/iris/api/role";
-
 impl AncillaryData for PermissionAnc {
     type Primary = Permission;
 
-    /// Get URI iterator
-    fn uri_iter(
-        &self,
-        _pri: &Permission,
-        view: View,
-    ) -> Box<dyn Iterator<Item = Uri>> {
-        match view {
-            View::Create | View::Setup => Box::new(
-                [RESOURCE_TYPE_URI.into(), ROLE_URI.into()].into_iter(),
-            ),
-            _ => Box::new(empty()),
+    /// Construct ancillary permission data
+    fn new(_pri: &Permission, view: View) -> Self {
+        let assets = match view {
+            View::Create | View::Setup => {
+                vec![Asset::ResourceTypes, Asset::Roles]
+            }
+            _ => Vec::new(),
+        };
+        let resource_types = None;
+        let roles = None;
+        PermissionAnc {
+            assets,
+            resource_types,
+            roles,
         }
     }
 
-    /// Put ancillary data
-    fn set_data(
+    /// Get next asset to fetch
+    fn asset(&mut self) -> Option<Asset> {
+        self.assets.pop()
+    }
+
+    /// Set asset value
+    fn set_asset(
         &mut self,
         _pri: &Permission,
-        uri: Uri,
-        data: JsValue,
-    ) -> Result<bool> {
-        if uri.as_str() == RESOURCE_TYPE_URI {
-            self.resource_types = Some(serde_wasm_bindgen::from_value(data)?);
-        } else {
-            self.roles = Some(serde_wasm_bindgen::from_value(data)?);
+        asset: Asset,
+        value: JsValue,
+    ) -> Result<()> {
+        match asset {
+            Asset::ResourceTypes => {
+                self.resource_types =
+                    Some(serde_wasm_bindgen::from_value(value)?)
+            }
+            Asset::Roles => {
+                self.roles = Some(serde_wasm_bindgen::from_value(value)?)
+            }
+            _ => unreachable!(),
         }
-        Ok(false)
+        Ok(())
     }
 }
 

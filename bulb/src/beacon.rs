@@ -10,16 +10,16 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
-use crate::fetch::{Action, Uri};
+use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
-use std::iter::once;
 use wasm_bindgen::JsValue;
 
 /// Beacon States
@@ -52,35 +52,36 @@ pub struct BeaconAnc {
     states: Option<Vec<BeaconState>>,
 }
 
-const BEACON_STATE_URI: &str = "/iris/lut/beacon_state";
-
 impl AncillaryData for BeaconAnc {
     type Primary = Beacon;
 
-    /// Get ancillary URI iterator
-    fn uri_iter(
-        &self,
-        pri: &Self::Primary,
-        view: View,
-    ) -> Box<dyn Iterator<Item = Uri>> {
-        Box::new(
-            once(BEACON_STATE_URI.into()).chain(self.dev.uri_iter(pri, view)),
-        )
+    /// Construct ancillary beacon data
+    fn new(pri: &Beacon, view: View) -> Self {
+        let mut dev = DeviceAnc::new(pri, view);
+        dev.assets.push(Asset::BeaconStates);
+        let states = None;
+        BeaconAnc { dev, states }
     }
 
-    /// Set ancillary data
-    fn set_data(
+    /// Get next asset to fetch
+    fn asset(&mut self) -> Option<Asset> {
+        self.dev.assets.pop()
+    }
+
+    /// Set asset value
+    fn set_asset(
         &mut self,
-        pri: &Self::Primary,
-        uri: Uri,
-        data: JsValue,
-    ) -> Result<bool> {
-        if uri.as_str() == BEACON_STATE_URI {
-            self.states = Some(serde_wasm_bindgen::from_value(data)?);
-        } else {
-            self.dev.set_data(pri, uri, data)?;
+        pri: &Beacon,
+        asset: Asset,
+        value: JsValue,
+    ) -> Result<()> {
+        match asset {
+            Asset::BeaconStates => {
+                self.states = Some(serde_wasm_bindgen::from_value(value)?);
+            }
+            _ => self.dev.set_asset(pri, asset, value)?,
         }
-        Ok(false)
+        Ok(())
     }
 }
 

@@ -32,6 +32,11 @@ pub struct RoleAnc;
 
 impl AncillaryData for RoleAnc {
     type Primary = Role;
+
+    /// Construct ancillary role data
+    fn new(_pri: &Role, _view: View) -> Self {
+        Self::default()
+    }
 }
 
 impl Role {

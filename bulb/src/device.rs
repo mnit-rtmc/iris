@@ -10,14 +10,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::controller::Controller;
 use crate::error::Result;
-use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::util::HtmlStr;
 use std::borrow::Cow;
-use std::iter::{empty, once};
 use std::marker::PhantomData;
 use wasm_bindgen::JsValue;
 
@@ -73,6 +72,7 @@ pub trait Device {
 #[derive(Debug, Default)]
 pub struct DeviceAnc<D> {
     pri: PhantomData<D>,
+    pub assets: Vec<Asset>,
     pub controllers: Option<Vec<Controller>>,
     pub controller: Option<Controller>,
 }
@@ -127,34 +127,48 @@ impl<D: Device> DeviceAnc<D> {
     }
 }
 
-const CONTROLLER_URI: &str = "/iris/api/controller";
-
 impl<D: Device> AncillaryData for DeviceAnc<D> {
     type Primary = D;
 
-    /// Get URI iterator
-    fn uri_iter(&self, pri: &D, view: View) -> Box<dyn Iterator<Item = Uri>> {
-        match (view, &pri.controller()) {
-            (View::Search, _) => Box::new(once(CONTROLLER_URI.into())),
+    /// Construct ancillary device data
+    fn new(pri: &D, view: View) -> Self {
+        let assets = match (view, &pri.controller()) {
+            (View::Search, _) => vec![Asset::Controllers],
             (
                 View::Hidden | View::Compact | View::Control | View::Setup,
                 Some(ctrl),
-            ) => {
-                let mut uri = Uri::from("/iris/api/controller/");
-                uri.push(ctrl);
-                Box::new(once(uri))
-            }
-            _ => Box::new(empty()),
+            ) => vec![Asset::Controller(ctrl.to_string())],
+            _ => Vec::new(),
+        };
+        DeviceAnc {
+            pri: PhantomData,
+            assets,
+            controllers: None,
+            controller: None,
         }
     }
 
-    /// Put ancillary data
-    fn set_data(&mut self, _pri: &D, uri: Uri, data: JsValue) -> Result<bool> {
-        if uri.as_str() == CONTROLLER_URI {
-            self.controllers = Some(serde_wasm_bindgen::from_value(data)?);
-        } else {
-            self.controller = Some(serde_wasm_bindgen::from_value(data)?);
+    /// Get next asset to fetch
+    fn asset(&mut self) -> Option<Asset> {
+        self.assets.pop()
+    }
+
+    /// Set asset value
+    fn set_asset(
+        &mut self,
+        _pri: &D,
+        asset: Asset,
+        value: JsValue,
+    ) -> Result<()> {
+        match asset {
+            Asset::Controllers => {
+                self.controllers = Some(serde_wasm_bindgen::from_value(value)?);
+            }
+            Asset::Controller(_ctrl) => {
+                self.controller = Some(serde_wasm_bindgen::from_value(value)?);
+            }
+            _ => unreachable!(),
         }
-        Ok(false)
+        Ok(())
     }
 }

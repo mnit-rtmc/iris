@@ -35,6 +35,11 @@ pub struct DomainAnc;
 
 impl AncillaryData for DomainAnc {
     type Primary = Domain;
+
+    /// Construct ancillary domain data
+    fn new(_pri: &Domain, _view: View) -> Self {
+        Self::default()
+    }
 }
 
 impl Domain {

@@ -10,10 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::asset::Asset;
 use crate::card::{html_title_row, AncillaryData, Card, View};
 use crate::device::{Device, DeviceAnc, DeviceReq};
 use crate::error::Result;
-use crate::fetch::{Action, ContentType, Uri};
+use crate::fetch::{Action, Uri};
 use crate::item::{ItemState, ItemStates};
 use crate::util::{
     ContainsLower, Doc, Fields, HtmlStr, Input, OptVal, TextArea,
@@ -280,74 +281,61 @@ impl MsgPattern {
     }
 }
 
-const SIGN_MSG_URI: &str = "/iris/sign_message";
-const SIGN_CFG_URI: &str = "/iris/api/sign_config";
-const MSG_PATTERN_URI: &str = "/iris/api/msg_pattern";
-const MSG_LINE_URI: &str = "/iris/api/msg_line";
-const WORD_URI: &str = "/iris/api/word";
-const FONT_URI: &str = "/iris/api/font";
-const GRAPHIC_URI: &str = "/iris/api/graphic";
-
 impl AncillaryData for DmsAnc {
     type Primary = Dms;
 
-    /// Get ancillary URI iterator
-    fn uri_iter(
-        &self,
-        pri: &Self::Primary,
-        view: View,
-    ) -> Box<dyn Iterator<Item = Uri>> {
-        let mut uris = Vec::new();
-        // Have we been here before?
-        if !self.fnames.is_empty() {
-            for fname in &self.fnames {
-                let mut uri = Uri::from("/iris/tfon/")
-                    .with_content_type(ContentType::Text);
-                uri.push(&fname.name);
-                uri.add_extension(".tfon");
-                uris.push(uri);
-            }
-            for gname in &self.gnames {
-                let mut uri =
-                    Uri::from("/iris/gif/").with_content_type(ContentType::Gif);
-                uri.push(&gname.name);
-                uri.add_extension(".gif");
-                uris.push(uri);
-            }
-            return Box::new(uris.into_iter());
-        }
-        if let View::Compact | View::Search | View::Hidden = view {
-            uris.push(SIGN_MSG_URI.into());
+    /// Construct ancillary DMS data
+    fn new(pri: &Dms, view: View) -> Self {
+        let mut dev = DeviceAnc::new(pri, view);
+        if let View::Compact | View::Control | View::Search | View::Hidden =
+            view
+        {
+            dev.assets.push(Asset::SignMessages);
         }
         if let View::Control = view {
-            uris.push(SIGN_MSG_URI.into());
-            uris.push(SIGN_CFG_URI.into());
-            uris.push(MSG_PATTERN_URI.into());
-            uris.push(MSG_LINE_URI.into());
-            uris.push(WORD_URI.into());
-            uris.push(FONT_URI.into());
-            uris.push(GRAPHIC_URI.into());
+            dev.assets.push(Asset::SignConfigs);
+            dev.assets.push(Asset::MsgPatterns);
+            dev.assets.push(Asset::MsgLines);
+            dev.assets.push(Asset::Words);
+            dev.assets.push(Asset::Fonts);
+            dev.assets.push(Asset::Graphics);
         }
-        Box::new(uris.into_iter().chain(self.dev.uri_iter(pri, view)))
+        DmsAnc {
+            dev,
+            ..Default::default()
+        }
     }
 
-    /// Set ancillary data
-    fn set_data(
+    /// Get next asset to fetch
+    fn asset(&mut self) -> Option<Asset> {
+        if self.dev.assets.is_empty() {
+            for fname in self.fnames.drain(..) {
+                self.dev.assets.push(Asset::Font(fname.name));
+            }
+            for gname in self.gnames.drain(..) {
+                self.dev.assets.push(Asset::Graphic(gname.name));
+            }
+        }
+        self.dev.assets.pop()
+    }
+
+    /// Set asset value
+    fn set_asset(
         &mut self,
-        pri: &Self::Primary,
-        uri: Uri,
-        data: JsValue,
-    ) -> Result<bool> {
-        match uri.as_str() {
-            SIGN_MSG_URI => {
-                self.messages = serde_wasm_bindgen::from_value(data)?;
+        pri: &Dms,
+        asset: Asset,
+        value: JsValue,
+    ) -> Result<()> {
+        match asset {
+            Asset::SignMessages => {
+                self.messages = serde_wasm_bindgen::from_value(value)?;
             }
-            SIGN_CFG_URI => {
-                self.configs = serde_wasm_bindgen::from_value(data)?;
+            Asset::SignConfigs => {
+                self.configs = serde_wasm_bindgen::from_value(value)?;
             }
-            MSG_PATTERN_URI => {
+            Asset::MsgPatterns => {
                 let mut patterns: Vec<MsgPattern> =
-                    serde_wasm_bindgen::from_value(data)?;
+                    serde_wasm_bindgen::from_value(value)?;
                 patterns.retain(|p| {
                     p.compose_hashtag
                         .as_ref()
@@ -356,9 +344,9 @@ impl AncillaryData for DmsAnc {
                 patterns.sort();
                 self.compose_patterns = patterns;
             }
-            MSG_LINE_URI => {
+            Asset::MsgLines => {
                 let mut lines: Vec<MsgLine> =
-                    serde_wasm_bindgen::from_value(data)?;
+                    serde_wasm_bindgen::from_value(value)?;
                 lines.retain(|ln| {
                     self.has_compose_pattern(&ln.msg_pattern)
                         && (ln.restrict_hashtag.is_none()
@@ -369,52 +357,45 @@ impl AncillaryData for DmsAnc {
                 });
                 self.lines = lines;
             }
-            WORD_URI => {
-                self.words = serde_wasm_bindgen::from_value(data)?;
+            Asset::Words => {
+                self.words = serde_wasm_bindgen::from_value(value)?;
             }
-            FONT_URI => {
-                self.fnames = serde_wasm_bindgen::from_value(data)?;
-                return Ok(!self.fnames.is_empty());
+            Asset::Fonts => {
+                self.fnames = serde_wasm_bindgen::from_value(value)?;
             }
-            GRAPHIC_URI => {
-                self.gnames = serde_wasm_bindgen::from_value(data)?;
-                return Ok(!self.gnames.is_empty());
-            }
-            _ => {
-                if uri.as_str().ends_with(".tfon") {
-                    let font: String = serde_wasm_bindgen::from_value(data)?;
-                    let font = tfon::read(font.as_bytes())?;
-                    if let Some(f) = self.fonts.font_mut(font.number) {
-                        *f = font;
-                    } else if let Some(f) = self.fonts.font_mut(0) {
-                        *f = font;
-                    }
-                } else if uri.as_str().ends_with(".gif") {
-                    if let Ok(number) = uri
-                        .as_str()
-                        .replace(|c: char| !c.is_numeric(), "")
-                        .parse::<u8>()
-                    {
-                        let abuf = data.dyn_into::<ArrayBuffer>().unwrap();
-                        let graphic = Uint8Array::new(&abuf).to_vec();
-                        let graphic = load_graphic(&graphic[..], number)?;
-                        if let Some(g) = self.graphics.graphic_mut(number) {
-                            *g = graphic;
-                        } else if let Some(g) = self.graphics.graphic_mut(0) {
-                            *g = graphic;
-                        }
-                    } else {
-                        console::log_1(
-                            &format!("invalid graphic: {}", uri.as_str())
-                                .into(),
-                        );
-                    }
-                } else {
-                    return self.dev.set_data(pri, uri, data);
+            Asset::Font(_nm) => {
+                let font: String = serde_wasm_bindgen::from_value(value)?;
+                let font = tfon::read(font.as_bytes())?;
+                if let Some(f) = self.fonts.font_mut(font.number) {
+                    *f = font;
+                } else if let Some(f) = self.fonts.font_mut(0) {
+                    *f = font;
                 }
             }
+            Asset::Graphics => {
+                self.gnames = serde_wasm_bindgen::from_value(value)?;
+            }
+            Asset::Graphic(nm) => {
+                if let Ok(number) = nm
+                    .as_str()
+                    .replace(|c: char| !c.is_numeric(), "")
+                    .parse::<u8>()
+                {
+                    let abuf = value.dyn_into::<ArrayBuffer>().unwrap();
+                    let graphic = Uint8Array::new(&abuf).to_vec();
+                    let graphic = load_graphic(&graphic[..], number)?;
+                    if let Some(g) = self.graphics.graphic_mut(number) {
+                        *g = graphic;
+                    } else if let Some(g) = self.graphics.graphic_mut(0) {
+                        *g = graphic;
+                    }
+                } else {
+                    console::log_1(&format!("invalid graphic: {nm}").into());
+                }
+            }
+            _ => self.dev.set_asset(pri, asset, value)?,
         }
-        Ok(false)
+        Ok(())
     }
 }
 

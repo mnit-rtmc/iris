@@ -33,6 +33,11 @@ pub struct CabinetStyleAnc;
 
 impl AncillaryData for CabinetStyleAnc {
     type Primary = CabinetStyle;
+
+    /// Construct ancillary cabinet style data
+    fn new(_pri: &CabinetStyle, _view: View) -> Self {
+        Self::default()
+    }
 }
 
 impl CabinetStyle {

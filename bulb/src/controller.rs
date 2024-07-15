@@ -10,18 +10,17 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::asset::Asset;
 use crate::cabinetstyle::CabinetStyle;
 use crate::card::{inactive_attr, AncillaryData, Card, View};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::error::Result;
-use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select, TextArea};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
-use std::iter::empty;
 use wasm_bindgen::JsValue;
 
 /// Controller conditions
@@ -67,6 +66,7 @@ pub struct Controller {
 /// Ancillary controller data
 #[derive(Debug, Default)]
 pub struct ControllerAnc {
+    assets: Vec<Asset>,
     pub conditions: Option<Vec<Condition>>,
     pub cabinet_styles: Option<Vec<CabinetStyle>>,
     pub comm_links: Option<Vec<CommLink>>,
@@ -74,76 +74,64 @@ pub struct ControllerAnc {
     pub controller_io: Option<Vec<ControllerIo>>,
 }
 
-const CONDITION_URI: &str = "/iris/lut/condition";
-const COMM_LINK_URI: &str = "/iris/api/comm_link";
-const COMM_CONFIG_URI: &str = "/iris/api/comm_config";
-const CABINET_STYLE_URI: &str = "/iris/api/cabinet_style";
-
 impl AncillaryData for ControllerAnc {
     type Primary = Controller;
 
-    /// Get URI iterator
-    fn uri_iter(
-        &self,
-        pri: &Controller,
-        view: View,
-    ) -> Box<dyn Iterator<Item = Uri>> {
-        match view {
-            View::Search => Box::new(
-                [
-                    CONDITION_URI.into(),
-                    COMM_LINK_URI.into(),
-                    COMM_CONFIG_URI.into(),
-                ]
-                .into_iter(),
-            ),
-            View::Status => {
-                let mut uri = Uri::from("/iris/api/controller_io/");
-                uri.push(&pri.name);
-                Box::new(
-                    [
-                        CONDITION_URI.into(),
-                        COMM_LINK_URI.into(),
-                        COMM_CONFIG_URI.into(),
-                        uri,
-                    ]
-                    .into_iter(),
-                )
+    /// Construct ancillary controller data
+    fn new(pri: &Controller, view: View) -> Self {
+        let assets = match view {
+            View::Search => {
+                vec![Asset::Conditions, Asset::CommLinks, Asset::CommConfigs]
             }
-            View::Setup => Box::new(
-                [CONDITION_URI.into(), CABINET_STYLE_URI.into()].into_iter(),
-            ),
-            _ => Box::new(empty()),
+            View::Status => vec![
+                Asset::Conditions,
+                Asset::CommLinks,
+                Asset::CommConfigs,
+                Asset::ControllerIo(pri.name.to_string()),
+            ],
+            View::Setup => vec![Asset::Conditions, Asset::CabinetStyles],
+            _ => Vec::new(),
+        };
+        ControllerAnc {
+            assets,
+            ..Default::default()
         }
     }
 
-    /// Put ancillary data
-    fn set_data(
+    /// Get next asset to fetch
+    fn asset(&mut self) -> Option<Asset> {
+        self.assets.pop()
+    }
+
+    /// Set asset value
+    fn set_asset(
         &mut self,
         _pri: &Controller,
-        uri: Uri,
-        data: JsValue,
-    ) -> Result<bool> {
-        match uri.as_str() {
-            CONDITION_URI => {
-                self.conditions = Some(serde_wasm_bindgen::from_value(data)?);
-            }
-            COMM_LINK_URI => {
-                self.comm_links = Some(serde_wasm_bindgen::from_value(data)?);
-            }
-            COMM_CONFIG_URI => {
-                self.comm_configs = Some(serde_wasm_bindgen::from_value(data)?);
-            }
-            CABINET_STYLE_URI => {
+        asset: Asset,
+        value: JsValue,
+    ) -> Result<()> {
+        match asset {
+            Asset::CabinetStyles => {
                 self.cabinet_styles =
-                    Some(serde_wasm_bindgen::from_value(data)?);
+                    Some(serde_wasm_bindgen::from_value(value)?);
             }
-            _ => {
+            Asset::CommConfigs => {
+                self.comm_configs =
+                    Some(serde_wasm_bindgen::from_value(value)?);
+            }
+            Asset::CommLinks => {
+                self.comm_links = Some(serde_wasm_bindgen::from_value(value)?);
+            }
+            Asset::Conditions => {
+                self.conditions = Some(serde_wasm_bindgen::from_value(value)?);
+            }
+            Asset::ControllerIo(_ctrl) => {
                 self.controller_io =
-                    Some(serde_wasm_bindgen::from_value(data)?);
+                    Some(serde_wasm_bindgen::from_value(value)?);
             }
+            _ => unreachable!(),
         }
-        Ok(false)
+        Ok(())
     }
 }
 

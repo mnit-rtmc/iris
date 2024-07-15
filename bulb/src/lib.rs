@@ -13,6 +13,7 @@
 #![allow(clippy::match_like_matches_macro)]
 mod alarm;
 mod app;
+mod asset;
 mod beacon;
 mod cabinetstyle;
 mod camera;

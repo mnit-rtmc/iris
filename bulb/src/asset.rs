@@ -1,0 +1,111 @@
+// Copyright (C) 2022-2024  Minnesota Department of Transportation
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+use crate::error::{Error, Result};
+use crate::fetch::{ContentType, Uri};
+use wasm_bindgen::JsValue;
+
+/// Fetchable assets for ancillary card data
+#[derive(Clone, Debug, PartialEq)]
+pub enum Asset {
+    BeaconStates,
+    CabinetStyles,
+    CommConfigs,
+    CommLinks,
+    CommProtocols,
+    Conditions,
+    Controller(String),
+    ControllerIo(String),
+    Controllers,
+    Directions,
+    Font(String),
+    Fonts,
+    GateArmStates,
+    Graphic(String),
+    Graphics,
+    LaneUseIndications,
+    LcsLocks,
+    MsgLines,
+    MsgPatterns,
+    ResourceTypes,
+    RoadModifiers,
+    Roads,
+    Roles,
+    SignConfigs,
+    SignMessages,
+    Words,
+}
+
+impl Asset {
+    /// Get asset Uri
+    fn uri(&self) -> Uri {
+        use Asset::*;
+        match self {
+            BeaconStates => "/iris/lut/beacon_state".into(),
+            CabinetStyles => "/iris/api/cabinet_style".into(),
+            CommConfigs => "/iris/api/comm_config".into(),
+            CommLinks => "/iris/api/comm_link".into(),
+            CommProtocols => "/iris/lut/comm_protocol".into(),
+            Conditions => "/iris/lut/condition".into(),
+            Controller(ctrl) => {
+                let mut uri = Uri::from("/iris/api/controller/");
+                uri.push(ctrl);
+                uri
+            }
+            ControllerIo(ctrl) => {
+                let mut uri = Uri::from("/iris/api/controller_io/");
+                uri.push(ctrl);
+                uri
+            }
+            Controllers => "/iris/api/controller".into(),
+            Directions => "/iris/lut/direction".into(),
+            Font(nm) => {
+                let mut uri = Uri::from("/iris/tfon/")
+                    .with_content_type(ContentType::Text);
+                uri.push(&nm);
+                uri.add_extension(".tfon");
+                uri
+            }
+            Fonts => "/iris/api/font".into(),
+            GateArmStates => "/iris/lut/gate_arm_state".into(),
+            Graphic(nm) => {
+                let mut uri =
+                    Uri::from("/iris/gif/").with_content_type(ContentType::Gif);
+                uri.push(&nm);
+                uri.add_extension(".gif");
+                uri
+            }
+            Graphics => "/iris/api/graphic".into(),
+            LaneUseIndications => "/iris/lut/lane_use_indication".into(),
+            LcsLocks => "/iris/lut/lcs_lock".into(),
+            MsgLines => "/iris/api/msg_line".into(),
+            MsgPatterns => "/iris/api/msg_pattern".into(),
+            ResourceTypes => "/iris/lut/resource_type".into(),
+            RoadModifiers => "/iris/lut/road_modifier".into(),
+            Roads => "/iris/api/road".into(),
+            Roles => "/iris/api/role".into(),
+            SignConfigs => "/iris/api/sign_config".into(),
+            SignMessages => "/iris/sign_message".into(),
+            Words => "/iris/api/word".into(),
+        }
+    }
+
+    /// Fetch the asset value
+    pub async fn fetch(self) -> Result<Option<(Self, JsValue)>> {
+        match self.uri().get().await {
+            Ok(value) => Ok(Some((self, value))),
+            Err(Error::FetchResponseNotFound())
+            | Err(Error::FetchResponseForbidden()) => Ok(None),
+            Err(e) => Err(e),
+        }
+    }
+}

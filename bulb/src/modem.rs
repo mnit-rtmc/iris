@@ -32,6 +32,11 @@ pub struct ModemAnc;
 
 impl AncillaryData for ModemAnc {
     type Primary = Modem;
+
+    /// Construct ancillary modem data
+    fn new(_pri: &Modem, _view: View) -> Self {
+        Self::default()
+    }
 }
 
 impl Modem {

@@ -10,17 +10,16 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::asset::Asset;
 use crate::card::{inactive_attr, AncillaryData, Card, View};
 use crate::commconfig::CommConfig;
 use crate::controller::Controller;
 use crate::error::Result;
-use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
-use std::iter::once;
 use wasm_bindgen::JsValue;
 
 /// Comm link
@@ -37,50 +36,58 @@ pub struct CommLink {
 /// Ancillary comm link data
 #[derive(Debug, Default)]
 pub struct CommLinkAnc {
+    assets: Vec<Asset>,
     pub controllers: Option<Vec<Controller>>,
     pub comm_configs: Option<Vec<CommConfig>>,
 }
 
-const CONTROLLER_URI: &str = "/iris/api/controller";
-const COMM_CONFIG_URI: &str = "/iris/api/comm_config";
-
 impl AncillaryData for CommLinkAnc {
     type Primary = CommLink;
 
-    /// Get ancillary URI iterator
-    fn uri_iter(
-        &self,
-        _pri: &CommLink,
-        view: View,
-    ) -> Box<dyn Iterator<Item = Uri>> {
-        match view {
-            View::Status => Box::new(
-                [CONTROLLER_URI.into(), COMM_CONFIG_URI.into()].into_iter(),
-            ),
-            _ => Box::new(once(COMM_CONFIG_URI.into())),
+    /// Construct ancillary comm link data
+    fn new(_pri: &CommLink, view: View) -> Self {
+        let assets = match view {
+            View::Status => {
+                vec![Asset::Controllers, Asset::CommConfigs]
+            }
+            _ => vec![Asset::CommConfigs],
+        };
+        let controllers = None;
+        let comm_configs = None;
+        CommLinkAnc {
+            assets,
+            controllers,
+            comm_configs,
         }
     }
 
-    /// Put ancillary data
-    fn set_data(
+    /// Get next asset to fetch
+    fn asset(&mut self) -> Option<Asset> {
+        self.assets.pop()
+    }
+
+    /// Set asset value
+    fn set_asset(
         &mut self,
         pri: &CommLink,
-        uri: Uri,
-        data: JsValue,
-    ) -> Result<bool> {
-        match uri.as_str() {
-            CONTROLLER_URI => {
+        asset: Asset,
+        value: JsValue,
+    ) -> Result<()> {
+        match asset {
+            Asset::Controllers => {
                 let mut controllers: Vec<Controller> =
-                    serde_wasm_bindgen::from_value(data)?;
+                    serde_wasm_bindgen::from_value(value)?;
                 controllers
                     .retain(|c| c.comm_link.as_deref() == Some(&pri.name));
                 self.controllers = Some(controllers);
             }
-            _ => {
-                self.comm_configs = Some(serde_wasm_bindgen::from_value(data)?);
+            Asset::CommConfigs => {
+                self.comm_configs =
+                    Some(serde_wasm_bindgen::from_value(value)?);
             }
+            _ => unreachable!(),
         }
-        Ok(false)
+        Ok(())
     }
 }
 

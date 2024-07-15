@@ -10,15 +10,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
-use crate::fetch::Uri;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::fmt;
-use std::iter::{empty, once};
 use wasm_bindgen::JsValue;
 
 /// Time units for period selections
@@ -138,33 +137,37 @@ pub struct CommConfig {
 /// Ancillary comm configuration
 #[derive(Debug, Default)]
 pub struct CommConfigAnc {
+    assets: Vec<Asset>,
     pub protocols: Option<Vec<Protocol>>,
 }
 
 impl AncillaryData for CommConfigAnc {
     type Primary = CommConfig;
 
-    /// Get ancillary URI iterator
-    fn uri_iter(
-        &self,
-        _pri: &CommConfig,
-        view: View,
-    ) -> Box<dyn Iterator<Item = Uri>> {
-        match view {
-            View::Setup => Box::new(once("/iris/lut/comm_protocol".into())),
-            _ => Box::new(empty()),
-        }
+    /// Construct ancillary comm config data
+    fn new(_pri: &CommConfig, view: View) -> Self {
+        let assets = match view {
+            View::Setup => vec![Asset::CommProtocols],
+            _ => Vec::new(),
+        };
+        let protocols = None;
+        CommConfigAnc { assets, protocols }
     }
 
-    /// Put ancillary data
-    fn set_data(
+    /// Get next asset to fetch
+    fn asset(&mut self) -> Option<Asset> {
+        self.assets.pop()
+    }
+
+    /// Set asset value
+    fn set_asset(
         &mut self,
         _pri: &CommConfig,
-        _uri: Uri,
-        data: JsValue,
-    ) -> Result<bool> {
-        self.protocols = Some(serde_wasm_bindgen::from_value(data)?);
-        Ok(false)
+        _asset: Asset,
+        value: JsValue,
+    ) -> Result<()> {
+        self.protocols = Some(serde_wasm_bindgen::from_value(value)?);
+        Ok(())
     }
 }
 

@@ -626,6 +626,7 @@ dependencies = [
  "cidr",
  "console_error_panic_hook",
  "fnv",
+ "futures",
  "humantime",
  "js-sys",
  "mag",

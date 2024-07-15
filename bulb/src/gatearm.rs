@@ -10,16 +10,15 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::asset::Asset;
 use crate::card::{inactive_attr, AncillaryData, Card, View};
 use crate::controller::Controller;
 use crate::error::Result;
-use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
-use std::iter::once;
 use wasm_bindgen::JsValue;
 
 /// Gate arm states
@@ -44,6 +43,7 @@ pub struct GateArm {
 /// Ancillary gate arm data
 #[derive(Debug, Default)]
 pub struct GateArmAnc {
+    assets: Vec<Asset>,
     pub controller: Option<Controller>,
     pub states: Option<Vec<GateArmState>>,
 }
@@ -70,40 +70,48 @@ impl GateArmAnc {
     }
 }
 
-const GATE_ARM_STATE_URI: &str = "/iris/lut/gate_arm_state";
-
 impl AncillaryData for GateArmAnc {
     type Primary = GateArm;
 
-    /// Get URI iterator
-    fn uri_iter(
-        &self,
-        pri: &GateArm,
-        view: View,
-    ) -> Box<dyn Iterator<Item = Uri>> {
-        match (view, &pri.controller()) {
+    /// Construct ancillary gate arm data
+    fn new(pri: &GateArm, view: View) -> Self {
+        let assets = match (view, &pri.controller()) {
             (View::Status, Some(ctrl)) => {
-                let mut uri = Uri::from("/iris/api/controller/");
-                uri.push(ctrl);
-                Box::new(once(uri))
+                vec![Asset::Controller(ctrl.to_string())]
             }
-            _ => Box::new(once(GATE_ARM_STATE_URI.into())),
+            _ => vec![Asset::GateArmStates],
+        };
+        let controller = None;
+        let states = None;
+        GateArmAnc {
+            assets,
+            controller,
+            states,
         }
     }
 
-    /// Put ancillary data
-    fn set_data(
+    /// Get next asset to fetch
+    fn asset(&mut self) -> Option<Asset> {
+        self.assets.pop()
+    }
+
+    /// Set asset value
+    fn set_asset(
         &mut self,
         _pri: &GateArm,
-        uri: Uri,
-        data: JsValue,
-    ) -> Result<bool> {
-        if uri.as_str() == GATE_ARM_STATE_URI {
-            self.states = Some(serde_wasm_bindgen::from_value(data)?);
-        } else {
-            self.controller = Some(serde_wasm_bindgen::from_value(data)?);
+        asset: Asset,
+        value: JsValue,
+    ) -> Result<()> {
+        match asset {
+            Asset::GateArmStates => {
+                self.states = Some(serde_wasm_bindgen::from_value(value)?);
+            }
+            Asset::Controller(_) => {
+                self.controller = Some(serde_wasm_bindgen::from_value(value)?);
+            }
+            _ => unreachable!(),
         }
-        Ok(false)
+        Ok(())
     }
 }
 

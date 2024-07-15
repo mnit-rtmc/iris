@@ -10,14 +10,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
-use crate::fetch::Uri;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
-use std::iter::empty;
 use wasm_bindgen::JsValue;
 
 /// Road definitions
@@ -63,57 +62,54 @@ pub struct GeoLoc {
 /// Ancillary location data
 #[derive(Debug, Default)]
 pub struct GeoLocAnc {
+    assets: Vec<Asset>,
     pub roads: Option<Vec<Road>>,
     pub directions: Option<Vec<Direction>>,
     pub modifiers: Option<Vec<RoadModifier>>,
 }
 
-const ROAD_URI: &str = "/iris/api/road";
-const DIRECTION_URI: &str = "/iris/lut/direction";
-const ROAD_MODIFIER_URI: &str = "/iris/lut/road_modifier";
-
 impl AncillaryData for GeoLocAnc {
     type Primary = GeoLoc;
 
-    /// Get URI iterator
-    fn uri_iter(
-        &self,
-        _pri: &GeoLoc,
-        view: View,
-    ) -> Box<dyn Iterator<Item = Uri>> {
-        match view {
-            View::Location => Box::new(
-                [
-                    ROAD_URI.into(),
-                    DIRECTION_URI.into(),
-                    ROAD_MODIFIER_URI.into(),
-                ]
-                .into_iter(),
-            ),
-            _ => Box::new(empty()),
+    /// Construct ancillary geoloc data
+    fn new(_pri: &GeoLoc, view: View) -> Self {
+        let assets = match view {
+            View::Location => {
+                vec![Asset::Directions, Asset::Roads, Asset::RoadModifiers]
+            }
+            _ => Vec::new(),
+        };
+        GeoLocAnc {
+            assets,
+            ..Default::default()
         }
     }
 
-    /// Put ancillary data
-    fn set_data(
+    /// Get next asset to fetch
+    fn asset(&mut self) -> Option<Asset> {
+        self.assets.pop()
+    }
+
+    /// Set asset value
+    fn set_asset(
         &mut self,
         _pri: &GeoLoc,
-        uri: Uri,
-        data: JsValue,
-    ) -> Result<bool> {
-        match uri.as_str() {
-            ROAD_URI => {
-                self.roads = Some(serde_wasm_bindgen::from_value(data)?)
+        asset: Asset,
+        value: JsValue,
+    ) -> Result<()> {
+        match asset {
+            Asset::Directions => {
+                self.directions = Some(serde_wasm_bindgen::from_value(value)?);
             }
-            DIRECTION_URI => {
-                self.directions = Some(serde_wasm_bindgen::from_value(data)?);
+            Asset::RoadModifiers => {
+                self.modifiers = Some(serde_wasm_bindgen::from_value(value)?);
             }
-            ROAD_MODIFIER_URI => {
-                self.modifiers = Some(serde_wasm_bindgen::from_value(data)?);
+            Asset::Roads => {
+                self.roads = Some(serde_wasm_bindgen::from_value(value)?);
             }
-            _ => (),
+            _ => unreachable!(),
         }
-        Ok(false)
+        Ok(())
     }
 }
 

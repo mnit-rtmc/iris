@@ -10,15 +10,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::asset::Asset;
 use crate::card::{inactive_attr, AncillaryData, Card, View};
 use crate::controller::Controller;
 use crate::error::Result;
-use crate::fetch::Uri;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
-use std::iter::{empty, once};
 use wasm_bindgen::JsValue;
 
 /// Lane Use Indications
@@ -39,11 +38,12 @@ pub struct LcsIndication {
     pub pin: Option<u32>,
 }
 
-/// Ancillary gate arm data
-#[derive(Debug, Default)]
+/// Ancillary LCS indication data
+#[derive(Debug)]
 pub struct LcsIndicationAnc {
-    pub controller: Option<Controller>,
+    assets: Vec<Asset>,
     pub indications: Option<Vec<LaneUseIndication>>,
+    pub controller: Option<Controller>,
 }
 
 impl LcsIndicationAnc {
@@ -67,43 +67,54 @@ impl LcsIndicationAnc {
     }
 }
 
-const LANE_USE_INDICATION_URI: &str = "/iris/lut/lane_use_indication";
-
 impl AncillaryData for LcsIndicationAnc {
     type Primary = LcsIndication;
 
-    /// Get URI iterator
-    fn uri_iter(
-        &self,
-        pri: &LcsIndication,
-        view: View,
-    ) -> Box<dyn Iterator<Item = Uri>> {
-        match (view, &pri.controller()) {
+    /// Construct ancillary LCS indication data
+    fn new(pri: &LcsIndication, view: View) -> Self {
+        let assets = match (view, pri.controller()) {
             (View::Control, Some(ctrl)) => {
-                let mut uri = Uri::from("/iris/api/controller/");
-                uri.push(ctrl);
-                Box::new([LANE_USE_INDICATION_URI.into(), uri].into_iter())
+                vec![
+                    Asset::LaneUseIndications,
+                    Asset::Controller(ctrl.to_string()),
+                ]
             }
             (View::Control | View::Search | View::Compact, _) => {
-                Box::new(once(LANE_USE_INDICATION_URI.into()))
+                vec![Asset::LaneUseIndications]
             }
-            _ => Box::new(empty()),
+            _ => Vec::new(),
+        };
+        let indications = None;
+        let controller = None;
+        LcsIndicationAnc {
+            assets,
+            indications,
+            controller,
         }
     }
 
-    /// Put ancillary data
-    fn set_data(
+    /// Get next asset to fetch
+    fn asset(&mut self) -> Option<Asset> {
+        self.assets.pop()
+    }
+
+    /// Set asset value
+    fn set_asset(
         &mut self,
         _pri: &LcsIndication,
-        uri: Uri,
-        data: JsValue,
-    ) -> Result<bool> {
-        if uri.as_str() == LANE_USE_INDICATION_URI {
-            self.indications = Some(serde_wasm_bindgen::from_value(data)?);
-        } else {
-            self.controller = Some(serde_wasm_bindgen::from_value(data)?);
+        asset: Asset,
+        value: JsValue,
+    ) -> Result<()> {
+        match asset {
+            Asset::LaneUseIndications => {
+                self.indications = Some(serde_wasm_bindgen::from_value(value)?);
+            }
+            Asset::Controller(_) => {
+                self.controller = Some(serde_wasm_bindgen::from_value(value)?);
+            }
+            _ => unreachable!(),
         }
-        Ok(false)
+        Ok(())
     }
 }
 

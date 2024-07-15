@@ -10,15 +10,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
-use crate::fetch::Uri;
 use crate::gatearm::item_state;
 use crate::util::{ContainsLower, Fields, HtmlStr};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
-use std::iter::{empty, once};
 use wasm_bindgen::JsValue;
 
 /// Gate arm states
@@ -45,37 +44,37 @@ pub struct GateArmArray {
 /// Ancillary gate arm array data
 #[derive(Debug, Default)]
 pub struct GateArmArrayAnc {
+    assets: Vec<Asset>,
     pub states: Option<Vec<GateArmState>>,
 }
-
-const GATE_ARM_STATE_URI: &str = "/iris/lut/gate_arm_state";
 
 impl AncillaryData for GateArmArrayAnc {
     type Primary = GateArmArray;
 
-    /// Get ancillary URI iterator
-    fn uri_iter(
-        &self,
-        _pri: &GateArmArray,
-        view: View,
-    ) -> Box<dyn Iterator<Item = Uri>> {
-        match view {
-            View::Search | View::Control => {
-                Box::new(once(GATE_ARM_STATE_URI.into()))
-            }
-            _ => Box::new(empty()),
-        }
+    /// Construct ancillary gate arm array data
+    fn new(_pri: &GateArmArray, view: View) -> Self {
+        let assets = match view {
+            View::Search | View::Control => vec![Asset::GateArmStates],
+            _ => vec![],
+        };
+        let states = None;
+        GateArmArrayAnc { assets, states }
     }
 
-    /// Put ancillary data
-    fn set_data(
+    /// Get next asset to fetch
+    fn asset(&mut self) -> Option<Asset> {
+        self.assets.pop()
+    }
+
+    /// Set asset value
+    fn set_asset(
         &mut self,
         _pri: &GateArmArray,
-        _uri: Uri,
-        data: JsValue,
-    ) -> Result<bool> {
-        self.states = Some(serde_wasm_bindgen::from_value(data)?);
-        Ok(false)
+        _asset: Asset,
+        value: JsValue,
+    ) -> Result<()> {
+        self.states = Some(serde_wasm_bindgen::from_value(value)?);
+        Ok(())
     }
 }
 

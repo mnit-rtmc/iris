@@ -10,16 +10,15 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
-use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::role::Role;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
-use std::iter::once;
 use wasm_bindgen::JsValue;
 
 /// User
@@ -34,32 +33,36 @@ pub struct User {
 }
 
 /// Ancillary user data
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct UserAnc {
+    assets: Vec<Asset>,
     pub roles: Option<Vec<Role>>,
 }
 
 impl AncillaryData for UserAnc {
     type Primary = User;
 
-    /// Get URI iterator
-    fn uri_iter(
-        &self,
-        _pri: &User,
-        _view: View,
-    ) -> Box<dyn Iterator<Item = Uri>> {
-        Box::new(once("/iris/api/role".into()))
+    /// Construct ancillary user data
+    fn new(_pri: &User, _view: View) -> Self {
+        let assets = vec![Asset::Roles];
+        let roles = None;
+        UserAnc { assets, roles }
     }
 
-    /// Put ancillary data
-    fn set_data(
+    /// Get next asset to fetch
+    fn asset(&mut self) -> Option<Asset> {
+        self.assets.pop()
+    }
+
+    /// Set asset value
+    fn set_asset(
         &mut self,
         _pri: &User,
-        _uri: Uri,
-        data: JsValue,
-    ) -> Result<bool> {
-        self.roles = Some(serde_wasm_bindgen::from_value(data)?);
-        Ok(false)
+        _asset: Asset,
+        value: JsValue,
+    ) -> Result<()> {
+        self.roles = Some(serde_wasm_bindgen::from_value(value)?);
+        Ok(())
     }
 }
 

@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::alarm::Alarm;
+use crate::asset::Asset;
 use crate::beacon::Beacon;
 use crate::cabinetstyle::CabinetStyle;
 use crate::camera::Camera;
@@ -46,7 +47,7 @@ use serde::Serialize;
 use serde_json::map::Map;
 use serde_json::Value;
 use std::borrow::Cow;
-use std::iter::{empty, repeat};
+use std::iter::repeat;
 use wasm_bindgen::JsValue;
 
 /// Compact "Create" card
@@ -241,23 +242,22 @@ impl Search {
 pub trait AncillaryData {
     type Primary;
 
-    /// Get URI iterator
-    fn uri_iter(
-        &self,
-        _pri: &Self::Primary,
-        _view: View,
-    ) -> Box<dyn Iterator<Item = Uri>> {
-        Box::new(empty())
+    /// Construct ancillary data
+    fn new(_pri: &Self::Primary, _view: View) -> Self;
+
+    /// Get next asset to fetch
+    fn asset(&mut self) -> Option<Asset> {
+        None
     }
 
-    /// Set ancillary data
-    fn set_data(
+    /// Set asset value
+    fn set_asset(
         &mut self,
         _pri: &Self::Primary,
-        _uri: Uri,
-        _data: JsValue,
-    ) -> Result<bool> {
-        Ok(false)
+        _asset: Asset,
+        _value: JsValue,
+    ) -> Result<()> {
+        Ok(())
     }
 }
 
@@ -269,7 +269,7 @@ const ITEM_STATES: &str = "<option value=''>all ↴</option>\
 
 /// A card view of a resource
 pub trait Card: Default + DeserializeOwned + Serialize + PartialEq {
-    type Ancillary: AncillaryData<Primary = Self> + Default;
+    type Ancillary: AncillaryData<Primary = Self>;
 
     /// Display name
     const DNAME: &'static str;
@@ -660,7 +660,7 @@ impl CardList {
     async fn make_html_x<C: Card>(&mut self) -> Result<String> {
         let cards: Vec<C> = serde_json::from_str(&self.json)?;
         // Use default value for ancillary data lookup
-        let anc = fetch_ancillary(View::Search, &C::default()).await?;
+        let anc = fetch_ancillary(&C::default(), View::Search).await?;
         let rname = C::res().as_str();
         self.views.clear();
         let mut html = String::new();
@@ -733,7 +733,7 @@ impl CardList {
     /// Get a list of cards whose view has changed
     async fn view_change_x<C: Card>(&mut self) -> Result<Vec<CardView>> {
         // Use default value for ancillary data lookup
-        let anc = fetch_ancillary(View::Search, &C::default()).await?;
+        let anc = fetch_ancillary(&C::default(), View::Search).await?;
         let mut changes = Vec::new();
         let mut views = Vec::with_capacity(self.views.len());
         let mut old_views = self.views.drain(..);
@@ -809,7 +809,7 @@ impl CardList {
         // Use default value for ancillary data lookup
         let cards0 = serde_json::from_str::<Vec<C>>(&json)?.into_iter();
         let cards1 = serde_json::from_str::<Vec<C>>(&self.json)?;
-        let anc = fetch_ancillary(View::Search, &C::default()).await?;
+        let anc = fetch_ancillary(&C::default(), View::Search).await?;
         let mut values = Vec::new();
         let mut views = self.views.iter();
         if self.config {
@@ -840,23 +840,21 @@ impl CardList {
 }
 
 /// Fetch ancillary data
-async fn fetch_ancillary<C: Card>(view: View, pri: &C) -> Result<C::Ancillary> {
-    let mut anc = C::Ancillary::default();
-    let mut more = true;
-    while more {
-        more = false;
-        for uri in anc.uri_iter(pri, view) {
-            match uri.get().await {
-                Ok(data) => {
-                    if anc.set_data(pri, uri, data)? {
-                        more = true;
-                    }
-                }
-                Err(Error::FetchResponseNotFound())
-                | Err(Error::FetchResponseForbidden()) => {
-                    // Ok, move on to the next one
-                }
-                Err(e) => return Err(e),
+async fn fetch_ancillary<C: Card>(pri: &C, view: View) -> Result<C::Ancillary> {
+    let mut anc = C::Ancillary::new(&pri, view);
+    loop {
+        let mut futures = Vec::new();
+        while let Some(asset) = anc.asset() {
+            futures.push(asset.fetch());
+        }
+        // no new assets needed
+        if futures.is_empty() {
+            break;
+        }
+        let values = futures::future::join_all(futures).await;
+        for res in values {
+            if let Some((asset, value)) = res? {
+                anc.set_asset(pri, asset, value)?;
             }
         }
     }
@@ -942,7 +940,7 @@ async fn fetch_one_x<C: Card>(cv: &CardView) -> Result<String> {
     } else {
         fetch_primary::<C>(cv).await?
     };
-    let anc = fetch_ancillary(cv.view, &pri).await?;
+    let anc = fetch_ancillary(&pri, cv.view).await?;
     Ok(pri.to_html(cv.view, &anc))
 }
 
@@ -1040,7 +1038,7 @@ pub async fn handle_click(cv: &CardView, id: String) -> Result<()> {
 /// Handle click event for a button on a card
 async fn handle_click_x<C: Card>(cv: &CardView, id: String) -> Result<()> {
     let pri = fetch_primary::<C>(cv).await?;
-    let anc = fetch_ancillary(cv.view, &pri).await?;
+    let anc = fetch_ancillary(&pri, cv.view).await?;
     for action in pri.handle_click(anc, id) {
         action.perform().await?;
     }
@@ -1062,7 +1060,7 @@ pub async fn handle_input(cv: &CardView, id: String) -> Result<()> {
 /// Handle input event for an element on a card
 async fn handle_input_x<C: Card>(cv: &CardView, id: String) -> Result<()> {
     let pri = fetch_primary::<C>(cv).await?;
-    let anc = fetch_ancillary(View::Control, &pri).await?;
+    let anc = fetch_ancillary(&pri, View::Control).await?;
     pri.handle_input(anc, id);
     Ok(())
 }
