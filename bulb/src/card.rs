@@ -282,13 +282,6 @@ pub trait Card: Default + DeserializeOwned + Serialize + PartialEq {
     /// Get the resource
     fn res() -> Res;
 
-    /// Get the URI of an object
-    fn uri_name(name: &str) -> Uri {
-        let mut uri = uri_res(Self::res());
-        uri.push(name);
-        uri
-    }
-
     /// Create from a JSON value
     fn new(json: JsValue) -> Result<Self> {
         Ok(serde_wasm_bindgen::from_value(json)?)
@@ -439,10 +432,17 @@ pub fn res_views(res: Res) -> &'static [View] {
     }
 }
 
-/// Get the URI of a resource
-fn uri_res(res: Res) -> Uri {
+/// Get the URI of a resource (all)
+fn uri_all(res: Res) -> Uri {
     let mut uri = Uri::from("/iris/api/");
     uri.push(res.as_str());
+    uri
+}
+
+/// Get the URI of a resource (one)
+pub fn uri_one(res: Res, name: &str) -> Uri {
+    let mut uri = uri_all(res);
+    uri.push(name);
     uri
 }
 
@@ -453,7 +453,7 @@ pub async fn create_and_post(res: Res) -> Result<()> {
         Res::Permission => Permission::create_value(&doc)?,
         _ => create_value(&doc)?,
     };
-    uri_res(res).post(&value.into()).await?;
+    uri_all(res).post(&value.into()).await?;
     Ok(())
 }
 
@@ -471,7 +471,7 @@ fn create_value(doc: &Doc) -> Result<String> {
 
 /// Delete a resource by name
 pub async fn delete_one(cv: &CardView) -> Result<()> {
-    let mut uri = uri_res(cv.res);
+    let mut uri = uri_all(cv.res);
     uri.push(&cv.name);
     uri.delete().await
 }
@@ -620,7 +620,7 @@ impl CardList {
 
     /// Fetch card list
     pub async fn fetch(&mut self) -> Result<()> {
-        let json = uri_res(self.res).get().await?;
+        let json = uri_all(self.res).get().await?;
         let json: Value = serde_wasm_bindgen::from_value(json)?;
         self.json = json.to_string();
         Ok(())
@@ -945,7 +945,7 @@ async fn fetch_one_x<C: Card>(cv: &CardView) -> Result<String> {
 
 /// Fetch primary JSON resource
 async fn fetch_primary<C: Card>(cv: &CardView) -> Result<C> {
-    let mut uri = C::uri_name(&cv.name);
+    let mut uri = uri_one(C::res(), &cv.name);
     if let Some(assoc) = &cv.assoc {
         uri.query("res", assoc.as_str());
     }
@@ -1017,7 +1017,7 @@ async fn patch_changed_x<C: Card>(cv: &CardView) -> Result<()> {
     let pri = fetch_primary::<C>(cv).await?;
     let changed = pri.changed_fields();
     if !changed.is_empty() {
-        C::uri_name(&cv.name).patch(&changed.into()).await?;
+        uri_one(C::res(), &cv.name).patch(&changed.into()).await?;
     }
     Ok(())
 }

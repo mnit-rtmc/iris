@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{html_title_row, AncillaryData, Card, View};
+use crate::card::{html_title_row, uri_one, AncillaryData, Card, View};
 use crate::device::{Device, DeviceAnc, DeviceReq};
 use crate::error::Result;
 use crate::fetch::{Action, Uri};
@@ -1041,7 +1041,7 @@ impl Dms {
                     Some(owner) => {
                         let duration = self.selected_duration();
                         return anc.sign_msg_actions(
-                            Dms::uri_name(&self.name),
+                            uri_one(Res::Dms, &self.name),
                             SignMessage::new(cfg, ms, owner, HIGH_1, duration),
                         );
                     }
@@ -1056,7 +1056,7 @@ impl Dms {
     fn blank_actions(&self, anc: DmsAnc) -> Vec<Action> {
         match (&self.sign_config, sign_msg_owner(LOW_1)) {
             (Some(cfg), Some(owner)) => anc.sign_msg_actions(
-                Dms::uri_name(&self.name),
+                uri_one(Res::Dms, &self.name),
                 SignMessage::new(cfg, "", owner, LOW_1, None),
             ),
             _ => Vec::new(),
@@ -1066,7 +1066,7 @@ impl Dms {
     /// Create action to handle click on a device request button
     #[allow(clippy::vec_init_then_push)]
     fn device_req(&self, req: DeviceReq) -> Vec<Action> {
-        let uri = Dms::uri_name(&self.name);
+        let uri = uri_one(Res::Dms, &self.name);
         let mut fields = Fields::new();
         fields.insert_num("device_request", req as u32);
         let value = fields.into_value().to_string();

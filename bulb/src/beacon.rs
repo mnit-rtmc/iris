@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, View};
+use crate::card::{uri_one, AncillaryData, Card, View};
 use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
 use crate::fetch::Action;
@@ -318,7 +318,7 @@ impl Card for Beacon {
                 4 | 5 => fields.insert_num("state", 1),
                 _ => (),
             }
-            let uri = Beacon::uri_name(&self.name);
+            let uri = uri_one(Res::Beacon, &self.name);
             let val = fields.into_value().to_string();
             vec![Action::Patch(uri, val.into())]
         } else {
