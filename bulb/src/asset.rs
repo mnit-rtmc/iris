@@ -56,14 +56,14 @@ impl Asset {
             CommLinks => "/iris/api/comm_link".into(),
             CommProtocols => "/iris/lut/comm_protocol".into(),
             Conditions => "/iris/lut/condition".into(),
-            Controller(ctrl) => {
+            Controller(nm) => {
                 let mut uri = Uri::from("/iris/api/controller/");
-                uri.push(ctrl);
+                uri.push(nm);
                 uri
             }
-            ControllerIo(ctrl) => {
+            ControllerIo(nm) => {
                 let mut uri = Uri::from("/iris/api/controller_io/");
-                uri.push(ctrl);
+                uri.push(nm);
                 uri
             }
             Controllers => "/iris/api/controller".into(),
