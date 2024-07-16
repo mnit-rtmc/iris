@@ -35,7 +35,7 @@ impl AncillaryData for RoleAnc {
 
     /// Construct ancillary role data
     fn new(_pri: &Role, _view: View) -> Self {
-        Self::default()
+        RoleAnc
     }
 }
 

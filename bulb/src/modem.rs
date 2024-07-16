@@ -35,7 +35,7 @@ impl AncillaryData for ModemAnc {
 
     /// Construct ancillary modem data
     fn new(_pri: &Modem, _view: View) -> Self {
-        Self::default()
+        ModemAnc
     }
 }
 

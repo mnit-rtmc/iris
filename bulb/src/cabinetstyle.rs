@@ -36,7 +36,7 @@ impl AncillaryData for CabinetStyleAnc {
 
     /// Construct ancillary cabinet style data
     fn new(_pri: &CabinetStyle, _view: View) -> Self {
-        Self::default()
+        CabinetStyleAnc
     }
 }
 

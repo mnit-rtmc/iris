@@ -38,7 +38,7 @@ impl AncillaryData for DomainAnc {
 
     /// Construct ancillary domain data
     fn new(_pri: &Domain, _view: View) -> Self {
-        Self::default()
+        DomainAnc
     }
 }
 

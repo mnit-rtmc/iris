@@ -843,7 +843,7 @@ impl CardList {
 
 /// Fetch ancillary data
 async fn fetch_ancillary<C: Card>(pri: &C, view: View) -> Result<C::Ancillary> {
-    let mut anc = C::Ancillary::new(&pri, view);
+    let mut anc = C::Ancillary::new(pri, view);
     let mut futures = FuturesUnordered::new();
     while let Some(asset) = anc.asset() {
         futures.push(asset.fetch());

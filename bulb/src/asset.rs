@@ -71,7 +71,7 @@ impl Asset {
             Font(nm) => {
                 let mut uri = Uri::from("/iris/tfon/")
                     .with_content_type(ContentType::Text);
-                uri.push(&nm);
+                uri.push(nm);
                 uri.add_extension(".tfon");
                 uri
             }
@@ -80,7 +80,7 @@ impl Asset {
             Graphic(nm) => {
                 let mut uri =
                     Uri::from("/iris/gif/").with_content_type(ContentType::Gif);
-                uri.push(&nm);
+                uri.push(nm);
                 uri.add_extension(".gif");
                 uri
             }
