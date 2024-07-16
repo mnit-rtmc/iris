@@ -307,7 +307,22 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		// user message to prevent it from popping up days later, after
 		// communication is restored.
 		if (!c && getFailMillis() >= COMM_FAIL_BLANK_THRESHOLD_MS)
-			setMsgUserNotify(null);
+			resetMsgUser();
+	}
+
+	/** Reset the user message and log a reset sign event */
+	private void resetMsgUser() {
+		SignMessage sm = msg_user;
+		if (sm != null) {
+			logEvent(new SignEvent(
+				EventType.DMS_MSG_RESET,
+				name,
+				sm.getMulti(),
+				sm.getMsgOwner(),
+				sm.getDuration()
+			));
+		}
+		setMsgUserNotify(null);
 	}
 
 	/** Get the configure flag.
@@ -589,7 +604,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public void resetStateNotify() {
 		setStatusNotify(null);
 		setStuckPixelsNotify(null);
-		setMsgUserNotify(null);
+		resetMsgUser();
 		setMsgSchedNotify(null);
 		setMsgCurrentNotify(null);
 	}

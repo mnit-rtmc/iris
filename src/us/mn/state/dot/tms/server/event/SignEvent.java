@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2023  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,6 +52,7 @@ public class SignEvent extends BaseEvent {
 		    || EventType.DMS_CLEARED == et
 		    || EventType.DMS_MSG_ERROR == et
 		    || EventType.DMS_PIXEL_ERROR == et
+		    || EventType.DMS_MSG_RESET == et
 		    || EventType.LCS_DEPLOYED == et
 		    || EventType.LCS_CLEARED == et;
 	}
