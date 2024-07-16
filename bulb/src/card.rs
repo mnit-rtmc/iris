@@ -41,6 +41,8 @@ use crate::user::User;
 use crate::util::{Doc, HtmlStr};
 use crate::videomonitor::VideoMonitor;
 use crate::weathersensor::WeatherSensor;
+use futures::stream::FuturesUnordered;
+use futures::StreamExt;
 use resources::Res;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
@@ -842,19 +844,16 @@ impl CardList {
 /// Fetch ancillary data
 async fn fetch_ancillary<C: Card>(pri: &C, view: View) -> Result<C::Ancillary> {
     let mut anc = C::Ancillary::new(&pri, view);
-    loop {
-        let mut futures = Vec::new();
-        while let Some(asset) = anc.asset() {
-            futures.push(asset.fetch());
-        }
-        // no new assets needed
-        if futures.is_empty() {
-            break;
-        }
-        let values = futures::future::join_all(futures).await;
-        for res in values {
-            if let Some((asset, value)) = res? {
-                anc.set_asset(pri, asset, value)?;
+    let mut futures = FuturesUnordered::new();
+    while let Some(asset) = anc.asset() {
+        futures.push(asset.fetch());
+    }
+    while let Some(res) = futures.next().await {
+        if let Some((asset, value)) = res? {
+            anc.set_asset(pri, asset, value)?;
+            // check for more new assets
+            while let Some(asset) = anc.asset() {
+                futures.push(asset.fetch());
             }
         }
     }

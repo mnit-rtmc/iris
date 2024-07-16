@@ -212,9 +212,7 @@ pub struct DmsAnc {
     compose_patterns: Vec<MsgPattern>,
     lines: Vec<MsgLine>,
     words: Vec<Word>,
-    fnames: Vec<FontName>,
     fonts: FontTable<256, 24>,
-    gnames: Vec<GraphicName>,
     graphics: GraphicTable<32>,
 }
 
@@ -307,19 +305,6 @@ impl AncillaryData for DmsAnc {
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        if self.dev.assets.is_empty() {
-            for fname in self.fnames.drain(..) {
-                self.dev.assets.push(Asset::Font(fname.name));
-            }
-            for gname in self.gnames.drain(..) {
-                self.dev.assets.push(Asset::Graphic(gname.name));
-            }
-            // This check determines if we're on the second "pass",
-            // which means that MsgPatterns has been populated
-            if !self.dev.assets.is_empty() {
-                self.dev.assets.push(Asset::MsgLines);
-            }
-        }
         self.dev.assets.pop()
     }
 
@@ -347,6 +332,8 @@ impl AncillaryData for DmsAnc {
                 });
                 patterns.sort();
                 self.compose_patterns = patterns;
+                // now that we have the patterns, let's fetch the lines
+                self.dev.assets.push(Asset::MsgLines);
             }
             Asset::MsgLines => {
                 let mut lines: Vec<MsgLine> =
@@ -366,7 +353,11 @@ impl AncillaryData for DmsAnc {
                 self.words = serde_wasm_bindgen::from_value(value)?;
             }
             Asset::Fonts => {
-                self.fnames = serde_wasm_bindgen::from_value(value)?;
+                let fnames: Vec<FontName> =
+                    serde_wasm_bindgen::from_value(value)?;
+                for fname in fnames {
+                    self.dev.assets.push(Asset::Font(fname.name));
+                }
             }
             Asset::Font(_nm) => {
                 let font: String = serde_wasm_bindgen::from_value(value)?;
@@ -378,7 +369,11 @@ impl AncillaryData for DmsAnc {
                 }
             }
             Asset::Graphics => {
-                self.gnames = serde_wasm_bindgen::from_value(value)?;
+                let gnames: Vec<GraphicName> =
+                    serde_wasm_bindgen::from_value(value)?;
+                for gname in gnames {
+                    self.dev.assets.push(Asset::Graphic(gname.name));
+                }
             }
             Asset::Graphic(nm) => {
                 if let Ok(number) = nm
