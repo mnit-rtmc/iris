@@ -295,7 +295,6 @@ impl AncillaryData for DmsAnc {
         if let View::Control = view {
             dev.assets.push(Asset::SignConfigs);
             dev.assets.push(Asset::MsgPatterns);
-            dev.assets.push(Asset::MsgLines);
             dev.assets.push(Asset::Words);
             dev.assets.push(Asset::Fonts);
             dev.assets.push(Asset::Graphics);
@@ -314,6 +313,11 @@ impl AncillaryData for DmsAnc {
             }
             for gname in self.gnames.drain(..) {
                 self.dev.assets.push(Asset::Graphic(gname.name));
+            }
+            // This check determines if we're on the second "pass",
+            // which means that MsgPatterns has been populated
+            if !self.dev.assets.is_empty() {
+                self.dev.assets.push(Asset::MsgLines);
             }
         }
         self.dev.assets.pop()
@@ -347,6 +351,7 @@ impl AncillaryData for DmsAnc {
             Asset::MsgLines => {
                 let mut lines: Vec<MsgLine> =
                     serde_wasm_bindgen::from_value(value)?;
+                // NOTE: patterns *must* be populated before this!
                 lines.retain(|ln| {
                     self.has_compose_pattern(&ln.msg_pattern)
                         && (ln.restrict_hashtag.is_none()
