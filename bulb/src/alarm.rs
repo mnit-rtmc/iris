@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{inactive_attr, Card, View};
-use crate::device::{Device, DeviceAnc};
+use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
@@ -30,7 +30,7 @@ pub struct Alarm {
     pub trigger_time: Option<String>,
 }
 
-type AlarmAnc = DeviceAnc<Alarm>;
+type AlarmAnc = ControllerIoAnc<Alarm>;
 
 impl Alarm {
     /// Get the item state
@@ -103,7 +103,7 @@ impl Alarm {
     }
 }
 
-impl Device for Alarm {
+impl ControllerIo for Alarm {
     /// Get controller
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()

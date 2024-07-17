@@ -12,7 +12,8 @@
 //
 use crate::asset::Asset;
 use crate::card::{html_title_row, uri_one, AncillaryData, Card, View};
-use crate::device::{Device, DeviceAnc, DeviceReq};
+use crate::cio::{ControllerIo, ControllerIoAnc};
+use crate::device::DeviceReq;
 use crate::error::Result;
 use crate::fetch::{Action, Uri};
 use crate::item::{ItemState, ItemStates};
@@ -206,7 +207,7 @@ pub struct GraphicName {
 /// DMS ancillary data
 #[derive(Default)]
 pub struct DmsAnc {
-    dev: DeviceAnc<Dms>,
+    cio: ControllerIoAnc<Dms>,
     messages: Vec<SignMessage>,
     configs: Vec<SignConfig>,
     compose_patterns: Vec<MsgPattern>,
@@ -284,28 +285,28 @@ impl AncillaryData for DmsAnc {
 
     /// Construct ancillary DMS data
     fn new(pri: &Dms, view: View) -> Self {
-        let mut dev = DeviceAnc::new(pri, view);
+        let mut cio = ControllerIoAnc::new(pri, view);
         if let View::Compact | View::Control | View::Search | View::Hidden =
             view
         {
-            dev.assets.push(Asset::SignMessages);
+            cio.assets.push(Asset::SignMessages);
         }
         if let View::Control = view {
-            dev.assets.push(Asset::SignConfigs);
-            dev.assets.push(Asset::MsgPatterns);
-            dev.assets.push(Asset::Words);
-            dev.assets.push(Asset::Fonts);
-            dev.assets.push(Asset::Graphics);
+            cio.assets.push(Asset::SignConfigs);
+            cio.assets.push(Asset::MsgPatterns);
+            cio.assets.push(Asset::Words);
+            cio.assets.push(Asset::Fonts);
+            cio.assets.push(Asset::Graphics);
         }
         DmsAnc {
-            dev,
+            cio,
             ..Default::default()
         }
     }
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.dev.assets.pop()
+        self.cio.assets.pop()
     }
 
     /// Set asset value
@@ -333,7 +334,7 @@ impl AncillaryData for DmsAnc {
                 patterns.sort();
                 self.compose_patterns = patterns;
                 // now that we have the patterns, let's fetch the lines
-                self.dev.assets.push(Asset::MsgLines);
+                self.cio.assets.push(Asset::MsgLines);
             }
             Asset::MsgLines => {
                 let mut lines: Vec<MsgLine> =
@@ -356,7 +357,7 @@ impl AncillaryData for DmsAnc {
                 let fnames: Vec<FontName> =
                     serde_wasm_bindgen::from_value(value)?;
                 for fname in fnames {
-                    self.dev.assets.push(Asset::Font(fname.name));
+                    self.cio.assets.push(Asset::Font(fname.name));
                 }
             }
             Asset::Font(_nm) => {
@@ -372,7 +373,7 @@ impl AncillaryData for DmsAnc {
                 let gnames: Vec<GraphicName> =
                     serde_wasm_bindgen::from_value(value)?;
                 for gname in gnames {
-                    self.dev.assets.push(Asset::Graphic(gname.name));
+                    self.cio.assets.push(Asset::Graphic(gname.name));
                 }
             }
             Asset::Graphic(nm) => {
@@ -393,7 +394,7 @@ impl AncillaryData for DmsAnc {
                     console::log_1(&format!("invalid graphic: {nm}").into());
                 }
             }
-            _ => self.dev.set_asset(pri, asset, value)?,
+            _ => self.cio.set_asset(pri, asset, value)?,
         }
         Ok(())
     }
@@ -777,7 +778,7 @@ impl Dms {
 
     /// Get item states
     fn item_states<'a>(&'a self, anc: &'a DmsAnc) -> ItemStates<'a> {
-        let state = anc.dev.item_state(self);
+        let state = anc.cio.item_state(self);
         let mut states = match state {
             ItemState::Inactive => return ItemState::Inactive.into(),
             ItemState::Available => anc.msg_states(self.msg_current.as_deref()),
@@ -910,7 +911,7 @@ impl Dms {
     fn to_html_setup(&self, anc: &DmsAnc) -> String {
         let title = self.title(View::Setup);
         let notes = HtmlStr::new(&self.notes);
-        let controller = anc.dev.controller_html();
+        let controller = anc.cio.controller_html();
         let pin = OptVal(self.pin);
         let footer = self.footer(true);
         format!(
@@ -1076,7 +1077,7 @@ impl Dms {
     }
 }
 
-impl Device for Dms {
+impl ControllerIo for Dms {
     /// Get controller
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()

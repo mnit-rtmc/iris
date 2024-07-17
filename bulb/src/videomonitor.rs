@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{inactive_attr, Card, View};
-use crate::device::{Device, DeviceAnc};
+use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};
@@ -27,7 +27,7 @@ pub struct VideoMonitor {
     pub pin: Option<u32>,
 }
 
-type VideoMonitorAnc = DeviceAnc<VideoMonitor>;
+type VideoMonitorAnc = ControllerIoAnc<VideoMonitor>;
 
 impl VideoMonitor {
     /// Convert to Compact HTML
@@ -73,7 +73,7 @@ impl VideoMonitor {
     }
 }
 
-impl Device for VideoMonitor {
+impl ControllerIo for VideoMonitor {
     /// Get controller
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()

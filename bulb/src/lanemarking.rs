@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{inactive_attr, Card, View};
-use crate::device::{Device, DeviceAnc};
+use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use resources::Res;
 use serde::{Deserialize, Serialize};
@@ -30,7 +30,7 @@ pub struct LaneMarking {
     pub pin: Option<u32>,
 }
 
-type LaneMarkingAnc = DeviceAnc<LaneMarking>;
+type LaneMarkingAnc = ControllerIoAnc<LaneMarking>;
 
 impl LaneMarking {
     /// Convert to Compact HTML
@@ -68,7 +68,7 @@ impl LaneMarking {
     }
 }
 
-impl Device for LaneMarking {
+impl ControllerIo for LaneMarking {
     /// Get controller
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()

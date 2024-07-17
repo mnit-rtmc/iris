@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{Card, View};
-use crate::device::{Device, DeviceAnc};
+use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::item::ItemStates;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
@@ -36,7 +36,7 @@ pub struct Detector {
     pub fake: Option<String>,
 }
 
-type DetectorAnc = DeviceAnc<Detector>;
+type DetectorAnc = ControllerIoAnc<Detector>;
 
 impl Detector {
     /// Convert to Compact HTML
@@ -83,7 +83,7 @@ impl Detector {
     }
 }
 
-impl Device for Detector {
+impl ControllerIo for Detector {
     /// Get controller
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()

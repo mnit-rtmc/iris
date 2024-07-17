@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{inactive_attr, Card, View};
-use crate::device::{Device, DeviceAnc};
+use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};
@@ -28,7 +28,7 @@ pub struct RampMeter {
     pub pin: Option<u32>,
 }
 
-type RampMeterAnc = DeviceAnc<RampMeter>;
+type RampMeterAnc = ControllerIoAnc<RampMeter>;
 
 impl RampMeter {
     /// Convert to Compact HTML
@@ -74,7 +74,7 @@ impl RampMeter {
     }
 }
 
-impl Device for RampMeter {
+impl ControllerIo for RampMeter {
     /// Get controller
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()

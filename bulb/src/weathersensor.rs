@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{inactive_attr, Card, View};
-use crate::device::{Device, DeviceAnc};
+use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use humantime::format_duration;
 use mag::length::{m, mm};
@@ -144,7 +144,7 @@ pub struct WeatherSensor {
     pub sample_time: Option<String>,
 }
 
-type WeatherSensorAnc = DeviceAnc<WeatherSensor>;
+type WeatherSensorAnc = ControllerIoAnc<WeatherSensor>;
 
 /// Get visibility situation string (from NTCIP 1204)
 fn vis_situation(situation: &str) -> &'static str {
@@ -774,7 +774,7 @@ impl WeatherSensor {
     }
 }
 
-impl Device for WeatherSensor {
+impl ControllerIo for WeatherSensor {
     /// Get controller
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()

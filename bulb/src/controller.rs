@@ -32,7 +32,7 @@ pub struct Condition {
 
 /// Controller IO
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ControllerIo {
+pub struct Io {
     pub pin: u32,
     pub resource_n: String,
     pub name: String,
@@ -71,7 +71,7 @@ pub struct ControllerAnc {
     pub cabinet_styles: Option<Vec<CabinetStyle>>,
     pub comm_links: Option<Vec<CommLink>>,
     pub comm_configs: Option<Vec<CommConfig>>,
-    pub controller_io: Option<Vec<ControllerIo>>,
+    pub controller_io: Option<Vec<Io>>,
 }
 
 impl AncillaryData for ControllerAnc {
@@ -222,7 +222,7 @@ impl ControllerAnc {
     }
 }
 
-impl ControllerIo {
+impl Io {
     /// Create a button to select the controller IO
     pub fn button_link_html(&self) -> String {
         let pin = self.pin;

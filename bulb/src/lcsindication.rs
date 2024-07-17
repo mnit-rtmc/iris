@@ -12,7 +12,7 @@
 //
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
-use crate::device::{Device, DeviceAnc};
+use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
@@ -42,7 +42,7 @@ pub struct LcsIndication {
 /// Ancillary LCS indication data
 #[derive(Debug)]
 pub struct LcsIndicationAnc {
-    dev: DeviceAnc<LcsIndication>,
+    cio: ControllerIoAnc<LcsIndication>,
     pub indications: Vec<LaneUseIndication>,
 }
 
@@ -63,17 +63,17 @@ impl AncillaryData for LcsIndicationAnc {
 
     /// Construct ancillary LCS indication data
     fn new(pri: &LcsIndication, view: View) -> Self {
-        let mut dev = DeviceAnc::new(pri, view);
-        dev.assets.push(Asset::LaneUseIndications);
+        let mut cio = ControllerIoAnc::new(pri, view);
+        cio.assets.push(Asset::LaneUseIndications);
         LcsIndicationAnc {
-            dev,
+            cio,
             indications: Vec::new(),
         }
     }
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.dev.assets.pop()
+        self.cio.assets.pop()
     }
 
     /// Set asset value
@@ -87,13 +87,13 @@ impl AncillaryData for LcsIndicationAnc {
             Asset::LaneUseIndications => {
                 self.indications = serde_wasm_bindgen::from_value(value)?;
             }
-            _ => self.dev.set_asset(pri, asset, value)?,
+            _ => self.cio.set_asset(pri, asset, value)?,
         }
         Ok(())
     }
 }
 
-impl Device for LcsIndication {
+impl ControllerIo for LcsIndication {
     /// Get controller
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
@@ -103,7 +103,7 @@ impl Device for LcsIndication {
 impl LcsIndication {
     /// Get item states
     fn item_states(&self, anc: &LcsIndicationAnc) -> ItemStates {
-        let state = anc.dev.item_state(self);
+        let state = anc.cio.item_state(self);
         match state {
             ItemState::Offline => ItemStates::default()
                 .with(ItemState::Offline, "FIXME: since fail time"),
@@ -125,7 +125,7 @@ impl LcsIndication {
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &LcsIndicationAnc) -> String {
         let title = self.title(View::Setup);
-        let controller = anc.dev.controller_html();
+        let controller = anc.cio.controller_html();
         let pin = OptVal(self.pin);
         format!(
             "{title}\

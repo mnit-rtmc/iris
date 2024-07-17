@@ -12,7 +12,7 @@
 //
 use crate::asset::Asset;
 use crate::card::{uri_one, AncillaryData, Card, View};
-use crate::device::{Device, DeviceAnc};
+use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
@@ -48,7 +48,7 @@ pub struct Beacon {
 /// Beacon ancillary data
 #[derive(Default)]
 pub struct BeaconAnc {
-    dev: DeviceAnc<Beacon>,
+    cio: ControllerIoAnc<Beacon>,
     states: Option<Vec<BeaconState>>,
 }
 
@@ -57,15 +57,15 @@ impl AncillaryData for BeaconAnc {
 
     /// Construct ancillary beacon data
     fn new(pri: &Beacon, view: View) -> Self {
-        let mut dev = DeviceAnc::new(pri, view);
-        dev.assets.push(Asset::BeaconStates);
+        let mut cio = ControllerIoAnc::new(pri, view);
+        cio.assets.push(Asset::BeaconStates);
         let states = None;
-        BeaconAnc { dev, states }
+        BeaconAnc { cio, states }
     }
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.dev.assets.pop()
+        self.cio.assets.pop()
     }
 
     /// Set asset value
@@ -79,7 +79,7 @@ impl AncillaryData for BeaconAnc {
             Asset::BeaconStates => {
                 self.states = Some(serde_wasm_bindgen::from_value(value)?);
             }
-            _ => self.dev.set_asset(pri, asset, value)?,
+            _ => self.cio.set_asset(pri, asset, value)?,
         }
         Ok(())
     }
@@ -98,7 +98,7 @@ impl Beacon {
 
     /// Get item states
     fn item_states(&self, anc: &BeaconAnc) -> ItemStates {
-        let state = anc.dev.item_state(self);
+        let state = anc.cio.item_state(self);
         match state {
             ItemState::Available => match self.state {
                 2 => ItemState::Available.into(),
@@ -192,7 +192,7 @@ impl Beacon {
         let title = self.title(View::Setup);
         let message = HtmlStr::new(&self.message);
         let notes = HtmlStr::new(&self.notes);
-        let controller = anc.dev.controller_html();
+        let controller = anc.cio.controller_html();
         let pin = OptVal(self.pin);
         let verify_pin = OptVal(self.verify_pin);
         let ext_mode = if self.ext_mode.unwrap_or(false) {
@@ -233,7 +233,7 @@ impl Beacon {
     }
 }
 
-impl Device for Beacon {
+impl ControllerIo for Beacon {
     /// Get controller
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()

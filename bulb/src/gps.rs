@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{inactive_attr, Card, View};
-use crate::device::{Device, DeviceAnc};
+use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};
@@ -27,7 +27,7 @@ pub struct Gps {
     pub pin: Option<u32>,
 }
 
-type GpsAnc = DeviceAnc<Gps>;
+type GpsAnc = ControllerIoAnc<Gps>;
 
 impl Gps {
     /// Convert to Compact HTML
@@ -55,7 +55,7 @@ impl Gps {
     }
 }
 
-impl Device for Gps {
+impl ControllerIo for Gps {
     /// Get controller
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()

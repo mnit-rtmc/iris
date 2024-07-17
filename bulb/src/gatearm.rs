@@ -12,7 +12,7 @@
 //
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
-use crate::device::{Device, DeviceAnc};
+use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
@@ -43,7 +43,7 @@ pub struct GateArm {
 /// Ancillary gate arm data
 #[derive(Debug, Default)]
 pub struct GateArmAnc {
-    dev: DeviceAnc<GateArm>,
+    cio: ControllerIoAnc<GateArm>,
     pub states: Option<Vec<GateArmState>>,
 }
 
@@ -65,14 +65,14 @@ impl AncillaryData for GateArmAnc {
 
     /// Construct ancillary gate arm data
     fn new(pri: &GateArm, view: View) -> Self {
-        let mut dev = DeviceAnc::new(pri, view);
-        dev.assets.push(Asset::GateArmStates);
-        GateArmAnc { dev, states: None }
+        let mut cio = ControllerIoAnc::new(pri, view);
+        cio.assets.push(Asset::GateArmStates);
+        GateArmAnc { cio, states: None }
     }
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.dev.assets.pop()
+        self.cio.assets.pop()
     }
 
     /// Set asset value
@@ -86,13 +86,13 @@ impl AncillaryData for GateArmAnc {
             Asset::GateArmStates => {
                 self.states = Some(serde_wasm_bindgen::from_value(value)?);
             }
-            _ => self.dev.set_asset(pri, asset, value)?,
+            _ => self.cio.set_asset(pri, asset, value)?,
         }
         Ok(())
     }
 }
 
-impl Device for GateArm {
+impl ControllerIo for GateArm {
     /// Get controller
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
@@ -102,7 +102,7 @@ impl Device for GateArm {
 impl GateArm {
     /// Get item states
     fn item_states(&self, anc: &GateArmAnc) -> ItemStates {
-        let state = anc.dev.item_state(self);
+        let state = anc.cio.item_state(self);
         match state {
             ItemState::Available => item_state(self.arm_state).into(),
             ItemState::Offline => ItemStates::default()
@@ -137,7 +137,7 @@ impl GateArm {
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &GateArmAnc) -> String {
         let title = self.title(View::Setup);
-        let controller = anc.dev.controller_html();
+        let controller = anc.cio.controller_html();
         let pin = OptVal(self.pin);
         let footer = self.footer(true);
         format!(

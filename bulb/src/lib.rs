@@ -18,6 +18,7 @@ mod beacon;
 mod cabinetstyle;
 mod camera;
 mod card;
+mod cio;
 mod commconfig;
 mod commlink;
 mod controller;

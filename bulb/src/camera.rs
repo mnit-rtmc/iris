@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{inactive_attr, Card, View};
-use crate::device::{Device, DeviceAnc};
+use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};
@@ -30,7 +30,7 @@ pub struct Camera {
     pub pin: Option<u32>,
 }
 
-type CameraAnc = DeviceAnc<Camera>;
+type CameraAnc = ControllerIoAnc<Camera>;
 
 impl Camera {
     /// Check if camera has a given hashtag
@@ -92,7 +92,7 @@ impl Camera {
     }
 }
 
-impl Device for Camera {
+impl ControllerIo for Camera {
     /// Get controller
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
