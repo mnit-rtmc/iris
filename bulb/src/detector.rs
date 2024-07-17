@@ -10,8 +10,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{inactive_attr, Card, View};
+use crate::card::{Card, View};
 use crate::device::{Device, DeviceAnc};
+use crate::item::ItemStates;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};
@@ -41,27 +42,22 @@ impl Detector {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &DetectorAnc) -> String {
         let name = HtmlStr::new(self.name());
-        let item_state = anc.item_state(self);
+        let item_states = ItemStates::from(anc.item_state(self));
         let label = HtmlStr::new(&self.label);
-        let active = self.controller.is_some()
-            || self
-                .label
-                .as_ref()
-                .filter(|lbl| lbl.ends_with('G'))
-                .is_some();
-        let inactive = inactive_attr(active);
         format!(
-            "<div class='title row'>{name} {item_state}</div>\
-            <div class='info fill{inactive}'>{label}</div>"
+            "<div class='title row'>{name} {item_states}</div>\
+            <div class='info fill'>{label}</div>"
         )
     }
 
     /// Convert to Status HTML
-    fn to_html_status(&self) -> String {
+    fn to_html_status(&self, anc: &DetectorAnc) -> String {
         let title = self.title(View::Status);
+        let item_states = ItemStates::from(anc.item_state(self)).to_html();
         let label = HtmlStr::new(&self.label).with_len(20);
         format!(
             "{title}\
+            <div>{item_states}</div>\
             <div class='row'>\
               <span class='info'>{label}</span>\
             </div>"
@@ -127,7 +123,7 @@ impl Card for Detector {
     fn to_html(&self, view: View, anc: &DetectorAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status => self.to_html_status(),
+            View::Status => self.to_html_status(anc),
             View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }
