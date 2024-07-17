@@ -135,7 +135,11 @@ impl<D: Device> AncillaryData for DeviceAnc<D> {
         let assets = match (view, &pri.controller()) {
             (View::Search, _) => vec![Asset::Controllers],
             (
-                View::Hidden | View::Compact | View::Control | View::Setup,
+                View::Hidden
+                | View::Compact
+                | View::Control
+                | View::Setup
+                | View::Status,
                 Some(ctrl),
             ) => vec![Asset::Controller(ctrl.to_string())],
             _ => Vec::new(),

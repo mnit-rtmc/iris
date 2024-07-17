@@ -11,10 +11,10 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{inactive_attr, AncillaryData, Card, View};
-use crate::controller::Controller;
+use crate::card::{AncillaryData, Card, View};
+use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
-use crate::item::ItemState;
+use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};
@@ -43,8 +43,7 @@ pub struct GateArm {
 /// Ancillary gate arm data
 #[derive(Debug, Default)]
 pub struct GateArmAnc {
-    assets: Vec<Asset>,
-    pub controller: Option<Controller>,
+    dev: DeviceAnc<GateArm>,
     pub states: Option<Vec<GateArmState>>,
 }
 
@@ -61,44 +60,25 @@ pub fn item_state(arm_state: u32) -> ItemState {
     }
 }
 
-impl GateArmAnc {
-    fn controller_button(&self) -> String {
-        match &self.controller {
-            Some(ctrl) => ctrl.button_html(),
-            None => "<span></span>".into(),
-        }
-    }
-}
-
 impl AncillaryData for GateArmAnc {
     type Primary = GateArm;
 
     /// Construct ancillary gate arm data
     fn new(pri: &GateArm, view: View) -> Self {
-        let assets = match (view, &pri.controller()) {
-            (View::Status, Some(ctrl)) => {
-                vec![Asset::Controller(ctrl.to_string())]
-            }
-            _ => vec![Asset::GateArmStates],
-        };
-        let controller = None;
-        let states = None;
-        GateArmAnc {
-            assets,
-            controller,
-            states,
-        }
+        let mut dev = DeviceAnc::new(pri, view);
+        dev.assets.push(Asset::GateArmStates);
+        GateArmAnc { dev, states: None }
     }
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.assets.pop()
+        self.dev.assets.pop()
     }
 
     /// Set asset value
     fn set_asset(
         &mut self,
-        _pri: &GateArm,
+        pri: &GateArm,
         asset: Asset,
         value: JsValue,
     ) -> Result<()> {
@@ -106,61 +86,63 @@ impl AncillaryData for GateArmAnc {
             Asset::GateArmStates => {
                 self.states = Some(serde_wasm_bindgen::from_value(value)?);
             }
-            Asset::Controller(_) => {
-                self.controller = Some(serde_wasm_bindgen::from_value(value)?);
-            }
-            _ => unreachable!(),
+            _ => self.dev.set_asset(pri, asset, value)?,
         }
         Ok(())
     }
 }
 
-impl GateArm {
+impl Device for GateArm {
     /// Get controller
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
     }
+}
+
+impl GateArm {
+    /// Get item states
+    fn item_states(&self, anc: &GateArmAnc) -> ItemStates {
+        let state = anc.dev.item_state(self);
+        match state {
+            ItemState::Available => item_state(self.arm_state).into(),
+            ItemState::Offline => ItemStates::default()
+                .with(ItemState::Offline, "FIXME: since fail time"),
+            _ => state.into(),
+        }
+    }
 
     /// Convert to Compact HTML
-    fn to_html_compact(&self) -> String {
+    fn to_html_compact(&self, anc: &GateArmAnc) -> String {
         let name = HtmlStr::new(self.name());
-        let item = item_state(self.arm_state);
-        let inactive = inactive_attr(self.controller.is_some());
+        let item_states = self.item_states(anc);
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='title row'>{name} {item}</div>\
-            <div class='info fill{inactive}'>{location}</div>"
+            "<div class='title row'>{name} {item_states}</div>\
+            <div class='info fill'>{location}</div>"
         )
     }
 
     /// Convert to Status HTML
-    fn to_html_status(&self) -> String {
+    fn to_html_status(&self, anc: &GateArmAnc) -> String {
         let title = self.title(View::Status);
         let location = HtmlStr::new(&self.location).with_len(64);
-        let item = item_state(self.arm_state);
-        let desc = item.description();
+        let item_states = self.item_states(anc).to_html();
         format!(
             "{title}\
-            <div class='info'>{location}</div>\
-            <div>{item} {desc}</div>"
+            <div>{item_states}</div>\
+            <div class='info'>{location}</div>"
         )
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &GateArmAnc) -> String {
         let title = self.title(View::Setup);
-        let ctl_btn = anc.controller_button();
-        let controller = HtmlStr::new(&self.controller);
+        let controller = anc.dev.controller_html();
         let pin = OptVal(self.pin);
         let footer = self.footer(true);
         format!(
             "{title}\
-            <div class='row'>\
-              <label for='controller'>Controller</label>\
-              <input id='controller' maxlength='20' size='20' \
-                     value='{controller}'>\
-              {ctl_btn}\
-            </div>\
+            {controller}\
             <div class='row'>\
               <label for='pin'>Pin</label>\
               <input id='pin' type='number' min='1' max='104' \
@@ -205,18 +187,18 @@ impl Card for GateArm {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &GateArmAnc) -> bool {
+    fn is_match(&self, search: &str, anc: &GateArmAnc) -> bool {
         self.name.contains_lower(search)
-            || item_state(self.arm_state).is_match(search)
+            || self.item_states(anc).is_match(search)
     }
 
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &GateArmAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status => self.to_html_status(),
+            View::Status => self.to_html_status(anc),
             View::Setup => self.to_html_setup(anc),
-            _ => self.to_html_compact(),
+            _ => self.to_html_compact(anc),
         }
     }
 
