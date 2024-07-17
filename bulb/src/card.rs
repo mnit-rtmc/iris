@@ -471,9 +471,7 @@ fn create_value(doc: &Doc) -> Result<String> {
 
 /// Delete a resource by name
 pub async fn delete_one(cv: &CardView) -> Result<()> {
-    let mut uri = uri_all(cv.res);
-    uri.push(&cv.name);
-    uri.delete().await
+    uri_one(cv.res, &cv.name).delete().await
 }
 
 /// Fetch `sb_resource` access list
