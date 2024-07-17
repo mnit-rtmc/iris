@@ -11,9 +11,10 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{inactive_attr, AncillaryData, Card, View};
-use crate::controller::Controller;
+use crate::card::{AncillaryData, Card, View};
+use crate::device::{Device, DeviceAnc};
 use crate::error::Result;
+use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};
@@ -41,26 +42,16 @@ pub struct LcsIndication {
 /// Ancillary LCS indication data
 #[derive(Debug)]
 pub struct LcsIndicationAnc {
-    assets: Vec<Asset>,
-    pub indications: Option<Vec<LaneUseIndication>>,
-    pub controller: Option<Controller>,
+    dev: DeviceAnc<LcsIndication>,
+    pub indications: Vec<LaneUseIndication>,
 }
 
 impl LcsIndicationAnc {
-    fn controller_button(&self) -> String {
-        match &self.controller {
-            Some(ctrl) => ctrl.button_html(),
-            None => "<span></span>".into(),
-        }
-    }
-
     /// Get indication description
     fn indication(&self, pri: &LcsIndication) -> &str {
-        if let Some(indications) = &self.indications {
-            for indication in indications {
-                if pri.indication == indication.id {
-                    return &indication.description;
-                }
+        for indication in &self.indications {
+            if pri.indication == indication.id {
+                return &indication.description;
             }
         }
         ""
@@ -72,88 +63,78 @@ impl AncillaryData for LcsIndicationAnc {
 
     /// Construct ancillary LCS indication data
     fn new(pri: &LcsIndication, view: View) -> Self {
-        let assets = match (view, pri.controller()) {
-            (View::Control, Some(ctrl)) => {
-                vec![
-                    Asset::LaneUseIndications,
-                    Asset::Controller(ctrl.to_string()),
-                ]
-            }
-            (View::Control | View::Search | View::Compact, _) => {
-                vec![Asset::LaneUseIndications]
-            }
-            _ => Vec::new(),
-        };
-        let indications = None;
-        let controller = None;
+        let mut dev = DeviceAnc::new(pri, view);
+        dev.assets.push(Asset::LaneUseIndications);
         LcsIndicationAnc {
-            assets,
-            indications,
-            controller,
+            dev,
+            indications: Vec::new(),
         }
     }
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.assets.pop()
+        self.dev.assets.pop()
     }
 
     /// Set asset value
     fn set_asset(
         &mut self,
-        _pri: &LcsIndication,
+        pri: &LcsIndication,
         asset: Asset,
         value: JsValue,
     ) -> Result<()> {
         match asset {
             Asset::LaneUseIndications => {
-                self.indications = Some(serde_wasm_bindgen::from_value(value)?);
+                self.indications = serde_wasm_bindgen::from_value(value)?;
             }
-            Asset::Controller(_) => {
-                self.controller = Some(serde_wasm_bindgen::from_value(value)?);
-            }
-            _ => unreachable!(),
+            _ => self.dev.set_asset(pri, asset, value)?,
         }
         Ok(())
     }
 }
 
-impl LcsIndication {
+impl Device for LcsIndication {
     /// Get controller
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
+    }
+}
+
+impl LcsIndication {
+    /// Get item states
+    fn item_states(&self, anc: &LcsIndicationAnc) -> ItemStates {
+        let state = anc.dev.item_state(self);
+        match state {
+            ItemState::Offline => ItemStates::default()
+                .with(ItemState::Offline, "FIXME: since fail time"),
+            _ => state.into(),
+        }
     }
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LcsIndicationAnc) -> String {
         let name = HtmlStr::new(self.name());
-        let inactive = inactive_attr(self.controller.is_some());
+        let item_states = self.item_states(anc);
         let indication = anc.indication(self);
         format!(
-            "<div class='title row'>{name}</div>\
-            <div class='info fill{inactive}'>{indication}</div>"
+            "<div class='title row'>{name} {item_states}</div>\
+            <div class='info fill'>{indication}</div>"
         )
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &LcsIndicationAnc) -> String {
         let title = self.title(View::Setup);
-        let ctl_btn = anc.controller_button();
-        let controller = HtmlStr::new(&self.controller);
+        let controller = anc.dev.controller_html();
         let pin = OptVal(self.pin);
         format!(
             "{title}\
+            {controller}\
             <div class='row'>\
-               <label for='controller'>Controller</label>\
-               <input id='controller' maxlength='20' size='20' \
-                      value='{controller}'>\
-               {ctl_btn}\
-             </div>\
-             <div class='row'>\
-               <label for='pin'>Pin</label>\
-               <input id='pin' type='number' min='1' max='104' \
-                      size='8' value='{pin}'>\
-             </div>"
+              <label for='pin'>Pin</label>\
+              <input id='pin' type='number' min='1' max='104' \
+                     size='8' value='{pin}'>\
+            </div>"
         )
     }
 }
@@ -183,6 +164,7 @@ impl Card for LcsIndication {
     /// Check if a search string matches
     fn is_match(&self, search: &str, anc: &LcsIndicationAnc) -> bool {
         self.name.contains_lower(search)
+            || self.item_states(anc).is_match(search)
             || anc.indication(self).contains(search)
     }
 
