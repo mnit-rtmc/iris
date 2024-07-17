@@ -12,6 +12,7 @@
 //
 use crate::card::{inactive_attr, Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
+use crate::item::ItemStates;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use humantime::format_duration;
 use mag::length::{m, mm};
@@ -697,11 +698,11 @@ impl WeatherSensor {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &WeatherSensorAnc) -> String {
         let name = HtmlStr::new(self.name());
-        let item_state = anc.item_state(self);
+        let item_states = ItemStates::from(anc.item_state(self));
         let inactive = inactive_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='title row'>{name} {item_state}</div>\
+            "<div class='title row'>{name} {item_states}</div>\
             <div class='info fill{inactive}'>{location}</div>"
         )
     }
@@ -709,21 +710,20 @@ impl WeatherSensor {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &WeatherSensorAnc) -> String {
         let title = self.title(View::Status);
+        let item_states = ItemStates::from(anc.item_state(self)).to_html();
         let location = HtmlStr::new(&self.location).with_len(64);
         let site_id = HtmlStr::new(&self.site_id);
         let alt_id = HtmlStr::new(&self.alt_id);
-        let item_state = anc.item_state(self);
-        let item_desc = item_state.description();
         let mut html = format!(
             "{title}\
+            <span>{item_states}</span>\
             <div class='row'>\
               <span class='info'>{location}</span>\
             </div>\
             <div class='row'>\
               <span class='info'>{site_id}</span>\
               <span class='info'>{alt_id}</span>\
-            </div>\
-            <span>{item_state} {item_desc}</span>"
+            </div>"
         );
         if let Some(sample_time) = &self.sample_time {
             html.push_str(&format!(
