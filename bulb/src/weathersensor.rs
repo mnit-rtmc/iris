@@ -742,7 +742,7 @@ impl WeatherSensor {
         let site_id = HtmlStr::new(&self.site_id);
         let alt_id = HtmlStr::new(&self.alt_id);
         let notes = HtmlStr::new(&self.notes);
-        let controller = anc.controller_html();
+        let controller = anc.controller_html(self);
         let pin = anc.pin_html(self.pin);
         let footer = self.footer(true);
         format!(

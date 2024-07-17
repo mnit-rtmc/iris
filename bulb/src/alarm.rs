@@ -84,7 +84,7 @@ impl Alarm {
     fn to_html_setup(&self, anc: &AlarmAnc) -> String {
         let title = self.title(View::Setup);
         let description = HtmlStr::new(&self.description);
-        let controller = anc.controller_html();
+        let controller = anc.controller_html(self);
         let pin = anc.pin_html(self.pin);
         format!(
             "{title}\

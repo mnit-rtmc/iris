@@ -125,7 +125,7 @@ impl LcsIndication {
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &LcsIndicationAnc) -> String {
         let title = self.title(View::Setup);
-        let controller = anc.cio.controller_html();
+        let controller = anc.cio.controller_html(self);
         let pin = anc.cio.pin_html(self.pin);
         format!("{title}{controller}{pin}")
     }

@@ -137,7 +137,7 @@ impl GateArm {
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &GateArmAnc) -> String {
         let title = self.title(View::Setup);
-        let controller = anc.cio.controller_html();
+        let controller = anc.cio.controller_html(self);
         let pin = anc.cio.pin_html(self.pin);
         let footer = self.footer(true);
         format!("{title}{controller}{pin}{footer}")

@@ -22,7 +22,7 @@ use wasm_bindgen::JsValue;
 
 /// Controller IO resource
 pub trait ControllerIo {
-    /// Get controller
+    /// Get controller name
     fn controller(&self) -> Option<&str> {
         None
     }
@@ -33,8 +33,7 @@ pub trait ControllerIo {
 pub struct ControllerIoAnc<C> {
     pri: PhantomData<C>,
     pub assets: Vec<Asset>,
-    pub controllers: Option<Vec<Controller>>,
-    pub controller: Option<Controller>,
+    controllers: Vec<Controller>,
 }
 
 impl<C> ControllerIoAnc<C>
@@ -43,14 +42,9 @@ where
 {
     /// Find controller
     fn controller(&self, pri: &C) -> Option<&Controller> {
-        if let Some(ctrl) = &self.controller {
-            return Some(ctrl);
-        }
-        if let (Some(ctrl), Some(controllers)) =
-            (pri.controller(), &self.controllers)
-        {
-            for c in controllers {
-                if c.name == ctrl {
+        if let Some(nm) = pri.controller() {
+            for c in &self.controllers {
+                if c.name == nm {
                     return Some(c);
                 }
             }
@@ -58,20 +52,11 @@ where
         None
     }
 
-    /// Make controller button
-    fn controller_button(&self) -> String {
-        match &self.controller {
-            Some(ctrl) => ctrl.button_html(),
-            None => "<span></span>".into(),
-        }
-    }
-
     /// Make controller row as HTML
-    pub fn controller_html(&self) -> String {
-        let ctl_btn = self.controller_button();
-        let controller = match &self.controller {
-            Some(c) => HtmlStr::new(c.name()),
-            None => HtmlStr::new(Cow::Borrowed("")),
+    pub fn controller_html(&self, pri: &C) -> String {
+        let (controller, ctl_btn) = match self.controller(pri) {
+            Some(c) => (HtmlStr::new(c.name()), c.button_html()),
+            None => (HtmlStr::new(Cow::Borrowed("")), "<span></span>".into()),
         };
         format!(
             "<div class='row'>\
@@ -118,15 +103,14 @@ where
                 | View::Control
                 | View::Setup
                 | View::Status,
-                Some(ctrl),
-            ) => vec![Asset::Controller(ctrl.to_string())],
+                Some(_nm),
+            ) => vec![Asset::Controllers],
             _ => Vec::new(),
         };
         ControllerIoAnc {
             pri: PhantomData,
             assets,
-            controllers: None,
-            controller: None,
+            controllers: Vec::new(),
         }
     }
 
@@ -144,10 +128,7 @@ where
     ) -> Result<()> {
         match asset {
             Asset::Controllers => {
-                self.controllers = Some(serde_wasm_bindgen::from_value(value)?);
-            }
-            Asset::Controller(_ctrl) => {
-                self.controller = Some(serde_wasm_bindgen::from_value(value)?);
+                self.controllers = serde_wasm_bindgen::from_value(value)?;
             }
             _ => unreachable!(),
         }

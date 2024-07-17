@@ -23,7 +23,6 @@ pub enum Asset {
     CommLinks,
     CommProtocols,
     Conditions,
-    Controller(String),
     ControllerIo(String),
     Controllers,
     Directions,
@@ -56,11 +55,6 @@ impl Asset {
             CommLinks => "/iris/api/comm_link".into(),
             CommProtocols => "/iris/lut/comm_protocol".into(),
             Conditions => "/iris/lut/condition".into(),
-            Controller(nm) => {
-                let mut uri = Uri::from("/iris/api/controller/");
-                uri.push(nm);
-                uri
-            }
             ControllerIo(nm) => {
                 let mut uri = Uri::from("/iris/api/controller_io/");
                 uri.push(nm);

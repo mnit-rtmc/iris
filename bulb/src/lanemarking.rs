@@ -49,7 +49,7 @@ impl LaneMarking {
     fn to_html_setup(&self, anc: &LaneMarkingAnc) -> String {
         let title = self.title(View::Setup);
         let notes = HtmlStr::new(&self.notes);
-        let controller = anc.controller_html();
+        let controller = anc.controller_html(self);
         let pin = anc.pin_html(self.pin);
         format!(
             "{title}\

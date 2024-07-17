@@ -192,7 +192,7 @@ impl Beacon {
         let title = self.title(View::Setup);
         let message = HtmlStr::new(&self.message);
         let notes = HtmlStr::new(&self.notes);
-        let controller = anc.cio.controller_html();
+        let controller = anc.cio.controller_html(self);
         let pin = anc.cio.pin_html(self.pin);
         let verify_pin = OptVal(self.verify_pin);
         let ext_mode = if self.ext_mode.unwrap_or(false) {

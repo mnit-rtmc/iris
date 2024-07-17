@@ -58,7 +58,7 @@ impl RampMeter {
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &RampMeterAnc) -> String {
         let title = self.title(View::Setup);
-        let controller = anc.controller_html();
+        let controller = anc.controller_html(self);
         let pin = anc.pin_html(self.pin);
         let footer = self.footer(true);
         format!("{title}{controller}{pin}{footer}")
