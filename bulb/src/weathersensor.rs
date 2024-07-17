@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{inactive_attr, Card, View};
+use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::item::ItemStates;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
@@ -699,11 +699,10 @@ impl WeatherSensor {
     fn to_html_compact(&self, anc: &WeatherSensorAnc) -> String {
         let name = HtmlStr::new(self.name());
         let item_states = ItemStates::from(anc.item_state(self));
-        let inactive = inactive_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
             "<div class='title row'>{name} {item_states}</div>\
-            <div class='info fill{inactive}'>{location}</div>"
+            <div class='info fill'>{location}</div>"
         )
     }
 

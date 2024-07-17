@@ -10,8 +10,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{inactive_attr, Card, View};
+use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
+use crate::item::ItemStates;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::{Deserialize, Serialize};
@@ -34,12 +35,11 @@ impl RampMeter {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &RampMeterAnc) -> String {
         let name = HtmlStr::new(self.name());
-        let item_state = anc.item_state(self);
-        let inactive = inactive_attr(self.controller.is_some());
+        let item_states = ItemStates::from(anc.item_state(self));
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='title row'>{name} {item_state}</div>\
-            <div class='info fill{inactive}'>{location}</div>"
+            "<div class='title row'>{name} {item_states}</div>\
+            <div class='info fill'>{location}</div>"
         )
     }
 
