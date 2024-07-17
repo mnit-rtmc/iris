@@ -13,7 +13,7 @@
 use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::item::ItemStates;
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use crate::util::{ContainsLower, Fields, HtmlStr, Input};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
@@ -59,18 +59,9 @@ impl RampMeter {
     fn to_html_setup(&self, anc: &RampMeterAnc) -> String {
         let title = self.title(View::Setup);
         let controller = anc.controller_html();
-        let pin = OptVal(self.pin);
+        let pin = anc.pin_html(self.pin);
         let footer = self.footer(true);
-        format!(
-            "{title}\
-            {controller}\
-            <div class='row'>\
-              <label for='pin'>Pin</label>\
-              <input id='pin' type='number' min='1' max='104' \
-                     size='8' value='{pin}'>\
-            </div>\
-            {footer}"
-        )
+        format!("{title}{controller}{pin}{footer}")
     }
 }
 

@@ -72,7 +72,7 @@ impl Camera {
         let title = self.title(View::Setup);
         let cam_num = OptVal(self.cam_num);
         let controller = anc.controller_html();
-        let pin = OptVal(self.pin);
+        let pin = anc.pin_html(self.pin);
         let footer = self.footer(true);
         format!(
             "{title}\
@@ -82,11 +82,7 @@ impl Camera {
                      size='8' value='{cam_num}'>\
              </div>\
              {controller}\
-             <div class='row'>\
-               <label for='pin'>Pin</label>\
-               <input id='pin' type='number' min='1' max='104' \
-                      size='8' value='{pin}'>\
-             </div>\
+             {pin}\
              {footer}"
         )
     }

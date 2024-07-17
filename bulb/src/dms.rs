@@ -17,9 +17,7 @@ use crate::device::DeviceReq;
 use crate::error::Result;
 use crate::fetch::{Action, Uri};
 use crate::item::{ItemState, ItemStates};
-use crate::util::{
-    ContainsLower, Doc, Fields, HtmlStr, Input, OptVal, TextArea,
-};
+use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, TextArea};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use chrono::DateTime;
 use fnv::FnvHasher;
@@ -912,7 +910,7 @@ impl Dms {
         let title = self.title(View::Setup);
         let notes = HtmlStr::new(&self.notes);
         let controller = anc.cio.controller_html();
-        let pin = OptVal(self.pin);
+        let pin = anc.cio.pin_html(self.pin);
         let footer = self.footer(true);
         format!(
             "{title}\
@@ -922,11 +920,7 @@ impl Dms {
                         cols='24'>{notes}</textarea>\
             </div>\
             {controller}\
-            <div class='row'>\
-              <label for='pin'>Pin</label>\
-              <input id='pin' type='number' min='1' max='104' \
-                     size='8' value='{pin}'>\
-            </div>\
+            {pin}\
             {footer}"
         )
     }

@@ -12,7 +12,7 @@
 //
 use crate::card::{inactive_attr, Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
+use crate::util::{ContainsLower, Fields, HtmlStr, Input, TextArea};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
@@ -50,7 +50,7 @@ impl LaneMarking {
         let title = self.title(View::Setup);
         let notes = HtmlStr::new(&self.notes);
         let controller = anc.controller_html();
-        let pin = OptVal(self.pin);
+        let pin = anc.pin_html(self.pin);
         format!(
             "{title}\
             <div class='row'>\
@@ -59,11 +59,7 @@ impl LaneMarking {
                         cols='24'>{notes}</textarea>\
             </div>\
             {controller}\
-            <div class='row'>\
-              <label for='pin'>Pin</label>\
-              <input id='pin' type='number' min='1' max='104' \
-                     size='8' value='{pin}'>\
-            </div>"
+            {pin}"
         )
     }
 }

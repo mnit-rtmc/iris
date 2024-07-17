@@ -13,7 +13,7 @@
 use crate::card::{inactive_attr, Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::item::ItemState;
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use crate::util::{ContainsLower, Fields, HtmlStr, Input};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
@@ -85,7 +85,7 @@ impl Alarm {
         let title = self.title(View::Setup);
         let description = HtmlStr::new(&self.description);
         let controller = anc.controller_html();
-        let pin = OptVal(self.pin);
+        let pin = anc.pin_html(self.pin);
         format!(
             "{title}\
             <div class='row'>\
@@ -94,11 +94,7 @@ impl Alarm {
                      value='{description}'>\
             </div>\
             {controller}\
-            <div class='row'>\
-              <label for='pin'>Pin</label>\
-              <input id='pin' type='number' min='1' max='104' \
-                     size='8' value='{pin}'>\
-            </div>"
+            {pin}"
         )
     }
 }

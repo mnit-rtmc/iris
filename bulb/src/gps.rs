@@ -12,7 +12,7 @@
 //
 use crate::card::{inactive_attr, Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use crate::util::{ContainsLower, Fields, HtmlStr, Input};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
@@ -42,16 +42,8 @@ impl Gps {
     fn to_html_setup(&self, anc: &GpsAnc) -> String {
         let title = self.title(View::Setup);
         let controller = anc.controller_html();
-        let pin = OptVal(self.pin);
-        format!(
-            "{title}\
-            {controller}\
-            <div class='row'>\
-              <label for='pin'>Pin</label>\
-              <input id='pin' type='number' min='1' max='104' \
-                     size='8' value='{pin}'>\
-            </div>"
-        )
+        let pin = anc.pin_html(self.pin);
+        format!("{title}{controller}{pin}")
     }
 }
 

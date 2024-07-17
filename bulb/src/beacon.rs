@@ -193,7 +193,7 @@ impl Beacon {
         let message = HtmlStr::new(&self.message);
         let notes = HtmlStr::new(&self.notes);
         let controller = anc.cio.controller_html();
-        let pin = OptVal(self.pin);
+        let pin = anc.cio.pin_html(self.pin);
         let verify_pin = OptVal(self.verify_pin);
         let ext_mode = if self.ext_mode.unwrap_or(false) {
             " checked"
@@ -214,11 +214,7 @@ impl Beacon {
                         cols='24'>{notes}</textarea>\
             </div>\
             {controller}\
-            <div class='row'>\
-              <label for='pin'>Pin</label>\
-              <input id='pin' type='number' min='1' max='104' \
-                     size='8' value='{pin}'>\
-            </div>\
+            {pin}\
             <div class='row'>\
               <label for='verify_pin'>Verify Pin</label>\
               <input id='verify_pin' type='number' min='1' max='104' \

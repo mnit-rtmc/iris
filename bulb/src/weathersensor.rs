@@ -13,7 +13,7 @@
 use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::item::ItemStates;
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
+use crate::util::{ContainsLower, Fields, HtmlStr, Input, TextArea};
 use humantime::format_duration;
 use mag::length::{m, mm};
 use mag::temp::DegC;
@@ -743,7 +743,7 @@ impl WeatherSensor {
         let alt_id = HtmlStr::new(&self.alt_id);
         let notes = HtmlStr::new(&self.notes);
         let controller = anc.controller_html();
-        let pin = OptVal(self.pin);
+        let pin = anc.pin_html(self.pin);
         let footer = self.footer(true);
         format!(
             "{title}\
@@ -763,11 +763,7 @@ impl WeatherSensor {
                         cols='26'>{notes}</textarea>\
             </div>\
             {controller}\
-            <div class='row'>\
-              <label for='pin'>Pin</label>\
-              <input id='pin' type='number' min='1' max='104' \
-                     size='8' value='{pin}'>\
-            </div>\
+            {pin}\
             {footer}"
         )
     }

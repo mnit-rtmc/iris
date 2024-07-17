@@ -15,7 +15,7 @@ use crate::card::{AncillaryData, Card, View};
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::item::ItemState;
-use crate::util::HtmlStr;
+use crate::util::{HtmlStr, OptVal};
 use std::borrow::Cow;
 use std::marker::PhantomData;
 use wasm_bindgen::JsValue;
@@ -79,6 +79,18 @@ where
               <input id='controller' maxlength='20' size='20' \
                      value='{controller}'>\
               {ctl_btn}\
+            </div>"
+        )
+    }
+
+    /// Make pin row as HTML
+    pub fn pin_html(&self, pin: Option<u32>) -> String {
+        let pin = OptVal(pin);
+        format!(
+            "<div class='row'>\
+              <label for='pin'>Pin</label>\
+              <input id='pin' type='number' min='1' max='104' \
+                     size='8' value='{pin}'>\
             </div>"
         )
     }
