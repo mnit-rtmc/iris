@@ -33,8 +33,8 @@ impl FlowStream {
     fn to_html_compact(&self, anc: &FlowStreamAnc) -> String {
         let name = HtmlStr::new(self.name());
         let inactive = inactive_attr(self.controller.is_some());
-        let item_state = anc.item_state(self);
-        format!("<div class='title row{inactive}'>{name} {item_state}</div>")
+        let item_states = anc.item_states(self);
+        format!("<div class='title row{inactive}'>{name} {item_states}</div>")
     }
 
     /// Convert to Setup HTML

@@ -36,11 +36,11 @@ impl LaneMarking {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LaneMarkingAnc) -> String {
         let name = HtmlStr::new(self.name());
-        let item_state = anc.item_state(self);
+        let item_states = anc.item_states(self);
         let inactive = inactive_attr(self.controller.is_some());
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='title row'>{name} {item_state}</div>\
+            "<div class='title row'>{name} {item_states}</div>\
             <div class='info fill{inactive}'>{location}</div>"
         )
     }

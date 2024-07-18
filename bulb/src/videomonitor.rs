@@ -33,7 +33,7 @@ impl VideoMonitor {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &VideoMonitorAnc) -> String {
         let name = HtmlStr::new(self.name());
-        let item_state = anc.item_state(self);
+        let item_state = anc.item_states(self);
         let inactive = inactive_attr(self.controller.is_some());
         let mon_num = self.mon_num;
         format!(
@@ -97,7 +97,7 @@ impl Card for VideoMonitor {
     fn is_match(&self, search: &str, anc: &VideoMonitorAnc) -> bool {
         self.name.contains_lower(search)
             || self.mon_num.to_string().contains(search)
-            || anc.item_state(self).is_match(search)
+            || anc.item_states(self).is_match(search)
     }
 
     /// Convert to HTML view

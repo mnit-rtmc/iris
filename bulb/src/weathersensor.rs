@@ -12,7 +12,6 @@
 //
 use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
-use crate::item::ItemStates;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, TextArea};
 use humantime::format_duration;
 use mag::length::{m, mm};
@@ -698,7 +697,7 @@ impl WeatherSensor {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &WeatherSensorAnc) -> String {
         let name = HtmlStr::new(self.name());
-        let item_states = ItemStates::from(anc.item_state(self));
+        let item_states = anc.item_states(self);
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
             "<div class='title row'>{name} {item_states}</div>\
@@ -709,7 +708,7 @@ impl WeatherSensor {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &WeatherSensorAnc) -> String {
         let title = self.title(View::Status);
-        let item_states = ItemStates::from(anc.item_state(self)).to_html();
+        let item_states = anc.item_states(self).to_html();
         let location = HtmlStr::new(&self.location).with_len(64);
         let site_id = HtmlStr::new(&self.site_id);
         let alt_id = HtmlStr::new(&self.alt_id);
@@ -809,7 +808,7 @@ impl Card for WeatherSensor {
             || self.location.contains_lower(search)
             || self.site_id.contains_lower(search)
             || self.alt_id.contains_lower(search)
-            || anc.item_state(self).is_match(search)
+            || anc.item_states(self).is_match(search)
             || self.notes.contains_lower(search)
     }
 

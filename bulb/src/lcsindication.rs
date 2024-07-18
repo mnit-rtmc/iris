@@ -14,7 +14,6 @@ use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
-use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input};
 use resources::Res;
 use serde::{Deserialize, Serialize};
@@ -101,20 +100,10 @@ impl ControllerIo for LcsIndication {
 }
 
 impl LcsIndication {
-    /// Get item states
-    fn item_states(&self, anc: &LcsIndicationAnc) -> ItemStates {
-        let state = anc.cio.item_state(self);
-        match state {
-            ItemState::Offline => ItemStates::default()
-                .with(ItemState::Offline, "FIXME: since fail time"),
-            _ => state.into(),
-        }
-    }
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LcsIndicationAnc) -> String {
         let name = HtmlStr::new(self.name());
-        let item_states = self.item_states(anc);
+        let item_states = anc.cio.item_states(self);
         let indication = anc.indication(self);
         format!(
             "<div class='title row'>{name} {item_states}</div>\
@@ -156,7 +145,7 @@ impl Card for LcsIndication {
     /// Check if a search string matches
     fn is_match(&self, search: &str, anc: &LcsIndicationAnc) -> bool {
         self.name.contains_lower(search)
-            || self.item_states(anc).is_match(search)
+            || anc.cio.item_states(self).is_match(search)
             || anc.indication(self).contains(search)
     }
 

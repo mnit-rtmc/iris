@@ -101,13 +101,12 @@ impl ControllerIo for GateArm {
 
 impl GateArm {
     /// Get item states
-    fn item_states(&self, anc: &GateArmAnc) -> ItemStates {
-        let state = anc.cio.item_state(self);
-        match state {
-            ItemState::Available => item_state(self.arm_state).into(),
-            ItemState::Offline => ItemStates::default()
-                .with(ItemState::Offline, "FIXME: since fail time"),
-            _ => state.into(),
+    fn item_states<'a>(&'a self, anc: &'a GateArmAnc) -> ItemStates<'a> {
+        let states = anc.cio.item_states(self);
+        if states.contains(ItemState::Available) {
+            item_state(self.arm_state).into()
+        } else {
+            states
         }
     }
 

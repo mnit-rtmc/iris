@@ -12,7 +12,6 @@
 //
 use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
-use crate::item::ItemStates;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input};
 use resources::Res;
 use serde::{Deserialize, Serialize};
@@ -35,7 +34,7 @@ impl RampMeter {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &RampMeterAnc) -> String {
         let name = HtmlStr::new(self.name());
-        let item_states = ItemStates::from(anc.item_state(self));
+        let item_states = anc.item_states(self);
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
             "<div class='title row'>{name} {item_states}</div>\
@@ -103,7 +102,7 @@ impl Card for RampMeter {
     fn is_match(&self, search: &str, anc: &RampMeterAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || anc.item_state(self).is_match(search)
+            || anc.item_states(self).is_match(search)
     }
 
     /// Convert to HTML view

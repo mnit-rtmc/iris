@@ -12,7 +12,7 @@
 //
 use crate::card::{inactive_attr, Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
-use crate::item::ItemState;
+use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input};
 use resources::Res;
 use serde::{Deserialize, Serialize};
@@ -33,18 +33,13 @@ pub struct Alarm {
 type AlarmAnc = ControllerIoAnc<Alarm>;
 
 impl Alarm {
-    /// Get the item state
-    fn item_state(&self, anc: &AlarmAnc) -> ItemState {
-        let item_state = anc.item_state(self);
-        match item_state {
-            ItemState::Available => {
-                if self.state {
-                    ItemState::Fault
-                } else {
-                    ItemState::Available
-                }
-            }
-            _ => item_state,
+    /// Get the item states
+    fn item_states<'a>(&'a self, anc: &'a AlarmAnc) -> ItemStates<'a> {
+        let states = anc.item_states(self);
+        if states.contains(ItemState::Available) && self.state {
+            ItemState::Fault.into()
+        } else {
+            states
         }
     }
 
@@ -52,10 +47,10 @@ impl Alarm {
     fn to_html_compact(&self, anc: &AlarmAnc) -> String {
         let name = HtmlStr::new(self.name());
         let inactive = inactive_attr(self.controller.is_some());
-        let item_state = self.item_state(anc);
+        let item_states = self.item_states(anc);
         let description = HtmlStr::new(&self.description);
         format!(
-            "<div class='title row'>{name} {item_state}</div>\
+            "<div class='title row'>{name} {item_states}</div>\
             <div class='info fill{inactive}'>{description}</div>"
         )
     }
@@ -63,15 +58,14 @@ impl Alarm {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &AlarmAnc) -> String {
         let title = self.title(View::Status);
+        let item_states = self.item_states(anc).to_html();
         let description = HtmlStr::new(&self.description);
-        let item_state = self.item_state(anc);
-        let item_desc = item_state.description();
         let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
         format!(
             "{title}\
+            <div>{item_states}</div>\
             <div class='row'>\
               <span class='info full'>{description}</span>\
-              <span class='full'>{item_state} {item_desc}</span>\
             </div>\
             <div class='row'>\
               <span>Triggered</span>\
@@ -132,7 +126,7 @@ impl Card for Alarm {
     fn is_match(&self, search: &str, anc: &AlarmAnc) -> bool {
         self.description.contains_lower(search)
             || self.name.contains_lower(search)
-            || self.item_state(anc).is_match(search)
+            || self.item_states(anc).is_match(search)
     }
 
     /// Convert to HTML view

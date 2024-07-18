@@ -12,7 +12,6 @@
 //
 use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
-use crate::item::ItemStates;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input};
 use resources::Res;
 use serde::{Deserialize, Serialize};
@@ -42,7 +41,7 @@ impl Detector {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &DetectorAnc) -> String {
         let name = HtmlStr::new(self.name());
-        let item_states = ItemStates::from(anc.item_state(self));
+        let item_states = anc.item_states(self);
         let label = HtmlStr::new(&self.label);
         format!(
             "<div class='title row'>{name} {item_states}</div>\
@@ -53,7 +52,7 @@ impl Detector {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &DetectorAnc) -> String {
         let title = self.title(View::Status);
-        let item_states = ItemStates::from(anc.item_state(self)).to_html();
+        let item_states = anc.item_states(self).to_html();
         let label = HtmlStr::new(&self.label).with_len(20);
         format!(
             "{title}\
@@ -107,7 +106,7 @@ impl Card for Detector {
     fn is_match(&self, search: &str, anc: &DetectorAnc) -> bool {
         self.name.contains_lower(search)
             || self.label.contains_lower(search)
-            || anc.item_state(self).is_match(search)
+            || anc.item_states(self).is_match(search)
     }
 
     /// Convert to HTML view

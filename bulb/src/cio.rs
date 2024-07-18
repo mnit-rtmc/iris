@@ -14,7 +14,7 @@ use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::controller::Controller;
 use crate::error::Result;
-use crate::item::ItemState;
+use crate::item::{ItemState, ItemStates};
 use crate::util::{HtmlStr, OptVal};
 use std::borrow::Cow;
 use std::marker::PhantomData;
@@ -80,10 +80,16 @@ where
         )
     }
 
-    /// Get item state
-    pub fn item_state(&self, pri: &C) -> ItemState {
-        self.controller(pri)
-            .map_or(ItemState::Inactive, |c| c.item_state())
+    /// Get item states
+    pub fn item_states<'a>(&'a self, pri: &'a C) -> ItemStates<'a> {
+        let state = self
+            .controller(pri)
+            .map_or(ItemState::Inactive, |c| c.item_state());
+        match state {
+            ItemState::Offline => ItemStates::default()
+                .with(ItemState::Offline, "FIXME: since fail time"),
+            _ => state.into(),
+        }
     }
 }
 

@@ -181,6 +181,11 @@ impl<'a> ItemStates<'a> {
         self
     }
 
+    /// Check if states contains an item state
+    pub fn contains(&self, state: ItemState) -> bool {
+        self.all.iter().any(|(s, _dtl)| *s == state)
+    }
+
     /// Check if a search string matches
     pub fn is_match(&self, search: &str) -> bool {
         self.all.iter().any(|(s, _dtl)| s.is_match(search))

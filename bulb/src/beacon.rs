@@ -97,10 +97,10 @@ impl Beacon {
     }
 
     /// Get item states
-    fn item_states(&self, anc: &BeaconAnc) -> ItemStates {
-        let state = anc.cio.item_state(self);
-        match state {
-            ItemState::Available => match self.state {
+    fn item_states<'a>(&'a self, anc: &'a BeaconAnc) -> ItemStates<'a> {
+        let mut states = anc.cio.item_states(self);
+        if states.contains(ItemState::Available) {
+            states = match self.state {
                 2 => ItemState::Available.into(),
                 4 => ItemState::Deployed.into(),
                 5 => ItemState::Fault.into(),
@@ -109,11 +109,9 @@ impl Beacon {
                 7 => ItemStates::from(ItemState::Deployed)
                     .with(ItemState::External, "external flashing"),
                 _ => ItemState::Unknown.into(),
-            },
-            ItemState::Offline => ItemStates::default()
-                .with(ItemState::Offline, "FIXME: since fail time"),
-            _ => state.into(),
+            }
         }
+        states
     }
 
     /// Get beacon state
@@ -156,8 +154,8 @@ impl Beacon {
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &BeaconAnc) -> String {
         let title = self.title(View::Control);
-        let location = HtmlStr::new(&self.location).with_len(64);
         let item_states = self.item_states(anc).to_html();
+        let location = HtmlStr::new(&self.location).with_len(64);
         let flashing = if self.flashing() {
             CLASS_FLASHING
         } else {
@@ -167,10 +165,10 @@ impl Beacon {
         let message = HtmlStr::new(&self.message);
         format!(
             "{title}\
+            <div class='row'>{item_states}</div>\
             <div class='row'>\
               <span class='info'>{location}</span>\
             </div>\
-            <div class='row'>{item_states}</div>\
             <div class='beacon-container row center'>\
               <button id='ob_flashing'></button>\
               <label for='ob_flashing' class='beacon'>\

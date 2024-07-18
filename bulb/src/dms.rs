@@ -444,7 +444,7 @@ impl SignMessage {
     }
 
     /// Get item states
-    fn item_states(&self) -> ItemStates {
+    fn item_states(&self) -> ItemStates<'_> {
         let blank = is_blank(&self.multi);
         let sources = self.sources();
         let mut states = ItemStates::default();
@@ -755,7 +755,7 @@ impl Dms {
     }
 
     /// Get one dedicated hashtag, if defined
-    fn dedicated(&self) -> Option<&str> {
+    fn dedicated(&self) -> Option<&'static str> {
         DEDICATED.iter().find(|tag| self.has_hashtag(tag)).copied()
     }
 
@@ -776,14 +776,10 @@ impl Dms {
 
     /// Get item states
     fn item_states<'a>(&'a self, anc: &'a DmsAnc) -> ItemStates<'a> {
-        let state = anc.cio.item_state(self);
-        let mut states = match state {
-            ItemState::Inactive => return ItemState::Inactive.into(),
-            ItemState::Available => anc.msg_states(self.msg_current.as_deref()),
-            ItemState::Offline => ItemStates::default()
-                .with(ItemState::Offline, "FIXME: since fail time"),
-            _ => state.into(),
-        };
+        let mut states = anc.cio.item_states(self);
+        if states.contains(ItemState::Available) {
+            states = anc.msg_states(self.msg_current.as_deref());
+        }
         if let Some(dedicated) = self.dedicated() {
             states = states.with(ItemState::Dedicated, dedicated);
         }
