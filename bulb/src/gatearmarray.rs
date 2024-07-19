@@ -14,7 +14,8 @@ use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
 use crate::gatearm::item_state;
-use crate::util::{ContainsLower, Fields, HtmlStr};
+use crate::geoloc::{Loc, LocAnc};
+use crate::util::{ContainsLower, HtmlStr};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
@@ -44,37 +45,48 @@ pub struct GateArmArray {
 /// Ancillary gate arm array data
 #[derive(Debug, Default)]
 pub struct GateArmArrayAnc {
-    assets: Vec<Asset>,
-    pub states: Option<Vec<GateArmState>>,
+    loc: LocAnc<GateArmArray>,
+    pub states: Vec<GateArmState>,
 }
 
 impl AncillaryData for GateArmArrayAnc {
     type Primary = GateArmArray;
 
     /// Construct ancillary gate arm array data
-    fn new(_pri: &GateArmArray, view: View) -> Self {
-        let assets = match view {
-            View::Search | View::Control => vec![Asset::GateArmStates],
-            _ => vec![],
-        };
-        let states = None;
-        GateArmArrayAnc { assets, states }
+    fn new(pri: &GateArmArray, view: View) -> Self {
+        let mut loc = LocAnc::new(pri, view);
+        if let View::Search | View::Control = view {
+            loc.assets.push(Asset::GateArmStates);
+        }
+        let states = Vec::new();
+        GateArmArrayAnc { loc, states }
     }
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.assets.pop()
+        self.loc.assets.pop()
     }
 
     /// Set asset value
     fn set_asset(
         &mut self,
-        _pri: &GateArmArray,
-        _asset: Asset,
+        pri: &GateArmArray,
+        asset: Asset,
         value: JsValue,
     ) -> Result<()> {
-        self.states = Some(serde_wasm_bindgen::from_value(value)?);
+        if let Asset::GateArmStates = asset {
+            self.states = serde_wasm_bindgen::from_value(value)?;
+        } else {
+            self.loc.set_asset(pri, asset, value)?;
+        }
         Ok(())
+    }
+}
+
+impl Loc for GateArmArray {
+    /// Get geo location name
+    fn geoloc(&self) -> Option<&str> {
+        self.geo_loc.as_deref()
     }
 }
 
@@ -126,11 +138,6 @@ impl Card for GateArmArray {
         self
     }
 
-    /// Get geo location name
-    fn geo_loc(&self) -> Option<&str> {
-        self.geo_loc.as_deref()
-    }
-
     /// Check if a search string matches
     fn is_match(&self, search: &str, _anc: &GateArmArrayAnc) -> bool {
         self.name.contains_lower(search)
@@ -143,13 +150,13 @@ impl Card for GateArmArray {
         match view {
             View::Create => self.to_html_create(anc),
             View::Control => self.to_html_control(),
+            View::Location => anc.loc.to_html_loc(self),
             _ => self.to_html_compact(),
         }
     }
 
-    /// Get changed fields from Setup form
-    fn changed_fields(&self) -> String {
-        let fields = Fields::new();
-        fields.into_value().to_string()
+    /// Get changed fields on Location view
+    fn changed_location(&self, anc: GateArmArrayAnc) -> String {
+        anc.loc.changed_location()
     }
 }

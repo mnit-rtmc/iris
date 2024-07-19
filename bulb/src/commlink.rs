@@ -256,7 +256,7 @@ impl Card for CommLink {
     }
 
     /// Get changed fields from Setup form
-    fn changed_fields(&self) -> String {
+    fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("description", &self.description);
         fields.changed_input("uri", &self.uri);

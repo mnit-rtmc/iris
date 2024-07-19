@@ -10,12 +10,16 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{inactive_attr, Card, View};
+use crate::asset::Asset;
+use crate::card::{AncillaryData, Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
+use crate::error::Result;
+use crate::geoloc::{Loc, LocAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, TextArea};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
+use wasm_bindgen::JsValue;
 
 /// Lane Marking
 #[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
@@ -30,18 +34,51 @@ pub struct LaneMarking {
     pub pin: Option<u32>,
 }
 
-type LaneMarkingAnc = ControllerIoAnc<LaneMarking>;
+/// Lane marking ancillary data
+pub struct LaneMarkingAnc {
+    cio: ControllerIoAnc<LaneMarking>,
+    loc: LocAnc<LaneMarking>,
+}
+
+impl AncillaryData for LaneMarkingAnc {
+    type Primary = LaneMarking;
+
+    /// Construct ancillary lane marking data
+    fn new(pri: &LaneMarking, view: View) -> Self {
+        let cio = ControllerIoAnc::new(pri, view);
+        let loc = LocAnc::new(pri, view);
+        LaneMarkingAnc { cio, loc }
+    }
+
+    /// Get next asset to fetch
+    fn asset(&mut self) -> Option<Asset> {
+        self.cio.assets.pop().or_else(|| self.loc.assets.pop())
+    }
+
+    /// Set asset value
+    fn set_asset(
+        &mut self,
+        pri: &LaneMarking,
+        asset: Asset,
+        value: JsValue,
+    ) -> Result<()> {
+        if let Asset::Controllers = asset {
+            self.cio.set_asset(pri, asset, value)
+        } else {
+            self.loc.set_asset(pri, asset, value)
+        }
+    }
+}
 
 impl LaneMarking {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LaneMarkingAnc) -> String {
         let name = HtmlStr::new(self.name());
-        let item_states = anc.item_states(self);
-        let inactive = inactive_attr(self.controller.is_some());
+        let item_states = anc.cio.item_states(self);
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
             "<div class='title row'>{name} {item_states}</div>\
-            <div class='info fill{inactive}'>{location}</div>"
+            <div class='info fill'>{location}</div>"
         )
     }
 
@@ -49,8 +86,8 @@ impl LaneMarking {
     fn to_html_setup(&self, anc: &LaneMarkingAnc) -> String {
         let title = self.title(View::Setup);
         let notes = HtmlStr::new(&self.notes);
-        let controller = anc.controller_html(self);
-        let pin = anc.pin_html(self.pin);
+        let controller = anc.cio.controller_html(self);
+        let pin = anc.cio.pin_html(self.pin);
         format!(
             "{title}\
             <div class='row'>\
@@ -65,9 +102,16 @@ impl LaneMarking {
 }
 
 impl ControllerIo for LaneMarking {
-    /// Get controller
+    /// Get controller name
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
+    }
+}
+
+impl Loc for LaneMarking {
+    /// Get geo location name
+    fn geoloc(&self) -> Option<&str> {
+        self.geo_loc.as_deref()
     }
 }
 
@@ -93,11 +137,6 @@ impl Card for LaneMarking {
         self
     }
 
-    /// Get geo location name
-    fn geo_loc(&self) -> Option<&str> {
-        self.geo_loc.as_deref()
-    }
-
     /// Check if a search string matches
     fn is_match(&self, search: &str, _anc: &LaneMarkingAnc) -> bool {
         self.name.contains_lower(search)
@@ -109,17 +148,23 @@ impl Card for LaneMarking {
     fn to_html(&self, view: View, anc: &LaneMarkingAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
+            View::Location => anc.loc.to_html_loc(self),
             View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }
     }
 
     /// Get changed fields from Setup form
-    fn changed_fields(&self) -> String {
+    fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_text_area("notes", &self.notes);
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
         fields.into_value().to_string()
+    }
+
+    /// Get changed fields on Location view
+    fn changed_location(&self, anc: LaneMarkingAnc) -> String {
+        anc.loc.changed_location()
     }
 }

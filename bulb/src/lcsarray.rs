@@ -13,7 +13,7 @@
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
-use crate::util::{ContainsLower, Fields, HtmlStr};
+use crate::util::{ContainsLower, HtmlStr};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
@@ -145,11 +145,5 @@ impl Card for LcsArray {
             View::Control => self.to_html_control(anc),
             _ => self.to_html_compact(anc),
         }
-    }
-
-    /// Get changed fields from Setup form
-    fn changed_fields(&self) -> String {
-        let fields = Fields::new();
-        fields.into_value().to_string()
     }
 }

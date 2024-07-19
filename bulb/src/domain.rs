@@ -122,7 +122,7 @@ impl Card for Domain {
     }
 
     /// Get changed fields from Setup form
-    fn changed_fields(&self) -> String {
+    fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("block", &self.block);
         fields.changed_input("enabled", self.enabled);

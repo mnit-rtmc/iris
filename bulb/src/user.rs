@@ -195,7 +195,7 @@ impl Card for User {
     }
 
     /// Get changed fields from Setup form
-    fn changed_fields(&self) -> String {
+    fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("full_name", &self.full_name);
         fields.changed_input("dn", &self.dn);

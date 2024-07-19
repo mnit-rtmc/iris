@@ -453,8 +453,7 @@ async fn handle_delete(cv: CardView) -> Result<()> {
 async fn handle_save(cv: CardView) -> Result<()> {
     match cv.view {
         View::Create => save_create(cv).await,
-        View::Setup => save_setup(cv).await,
-        View::Location => save_location(cv).await,
+        View::Setup | View::Location => save_changed(cv).await,
         _ => Ok(()),
     }
 }
@@ -462,24 +461,13 @@ async fn handle_save(cv: CardView) -> Result<()> {
 /// Save a create view card
 async fn save_create(cv: CardView) -> Result<()> {
     card::create_and_post(cv.res).await?;
-    replace_card(cv.view(View::CreateCompact)).await?;
-    Ok(())
+    replace_card(cv.view(View::CreateCompact)).await
 }
 
-/// Save changed values on setup card
-async fn save_setup(cv: CardView) -> Result<()> {
+/// Save changed values on Setup / Location card
+async fn save_changed(cv: CardView) -> Result<()> {
     card::patch_changed(&cv).await?;
     replace_card(cv.view(View::Compact)).await
-}
-
-/// Save a location view card
-async fn save_location(cv: CardView) -> Result<()> {
-    if let Some(geo_loc) = card::fetch_geo_loc(&cv).await? {
-        let lv = CardView::new(Res::GeoLoc, &geo_loc, View::Location);
-        card::patch_changed(&lv).await?;
-        replace_card(cv.view(View::Compact)).await?;
-    }
-    Ok(())
 }
 
 /// Handle a button click on a form card

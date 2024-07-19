@@ -12,10 +12,11 @@
 //
 use crate::asset::Asset;
 use crate::cabinetstyle::CabinetStyle;
-use crate::card::{inactive_attr, AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card, View};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::error::Result;
+use crate::geoloc::{Loc, LocAnc};
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select, TextArea};
 use resources::Res;
@@ -66,7 +67,7 @@ pub struct Controller {
 /// Ancillary controller data
 #[derive(Debug, Default)]
 pub struct ControllerAnc {
-    assets: Vec<Asset>,
+    loc: LocAnc<Controller>,
     pub conditions: Option<Vec<Condition>>,
     pub cabinet_styles: Option<Vec<CabinetStyle>>,
     pub comm_links: Option<Vec<CommLink>>,
@@ -79,34 +80,40 @@ impl AncillaryData for ControllerAnc {
 
     /// Construct ancillary controller data
     fn new(pri: &Controller, view: View) -> Self {
-        let assets = match view {
+        let mut loc = LocAnc::new(pri, view);
+        match view {
             View::Search => {
-                vec![Asset::Conditions, Asset::CommLinks, Asset::CommConfigs]
+                loc.assets.push(Asset::Conditions);
+                loc.assets.push(Asset::CommLinks);
+                loc.assets.push(Asset::CommConfigs);
             }
-            View::Status => vec![
-                Asset::Conditions,
-                Asset::CommLinks,
-                Asset::CommConfigs,
-                Asset::ControllerIo(pri.name.to_string()),
-            ],
-            View::Setup => vec![Asset::Conditions, Asset::CabinetStyles],
-            _ => Vec::new(),
+            View::Status => {
+                loc.assets.push(Asset::Conditions);
+                loc.assets.push(Asset::CommLinks);
+                loc.assets.push(Asset::CommConfigs);
+                loc.assets.push(Asset::ControllerIo(pri.name.to_string()));
+            }
+            View::Setup => {
+                loc.assets.push(Asset::Conditions);
+                loc.assets.push(Asset::CabinetStyles);
+            }
+            _ => (),
         };
         ControllerAnc {
-            assets,
+            loc,
             ..Default::default()
         }
     }
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.assets.pop()
+        self.loc.asset()
     }
 
     /// Set asset value
     fn set_asset(
         &mut self,
-        _pri: &Controller,
+        pri: &Controller,
         asset: Asset,
         value: JsValue,
     ) -> Result<()> {
@@ -129,7 +136,7 @@ impl AncillaryData for ControllerAnc {
                 self.controller_io =
                     Some(serde_wasm_bindgen::from_value(value)?);
             }
-            _ => unreachable!(),
+            _ => self.loc.set_asset(pri, asset, value)?,
         }
         Ok(())
     }
@@ -247,6 +254,13 @@ impl Io {
     }
 }
 
+impl Loc for Controller {
+    /// Get geo location name
+    fn geoloc(&self) -> Option<&str> {
+        self.geo_loc.as_deref()
+    }
+}
+
 impl Controller {
     /// Is controller active?
     pub fn is_active(&self) -> bool {
@@ -316,11 +330,10 @@ impl Controller {
     fn to_html_compact(&self) -> String {
         let name = HtmlStr::new(self.name());
         let item_state = self.item_state();
-        let inactive = inactive_attr(self.is_active());
         let link_drop = HtmlStr::new(self.link_drop());
         format!(
             "<div class='title row'>{name} {item_state}</div>\
-            <div class='info fill{inactive}'>{link_drop}</div>"
+            <div class='info fill'>{link_drop}</div>"
         )
     }
 
@@ -475,11 +488,6 @@ impl Card for Controller {
         self
     }
 
-    /// Get geo location name
-    fn geo_loc(&self) -> Option<&str> {
-        self.geo_loc.as_deref()
-    }
-
     /// Check if a search string matches
     fn is_match(&self, search: &str, anc: &ControllerAnc) -> bool {
         self.name.contains_lower(search)
@@ -510,14 +518,15 @@ impl Card for Controller {
     fn to_html(&self, view: View, anc: &ControllerAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status => self.to_html_status(anc),
+            View::Location => anc.loc.to_html_loc(self),
             View::Setup => self.to_html_setup(anc),
+            View::Status => self.to_html_status(anc),
             _ => self.to_html_compact(),
         }
     }
 
     /// Get changed fields from Setup form
-    fn changed_fields(&self) -> String {
+    fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("comm_link", &self.comm_link);
         fields.changed_input("drop_id", self.drop_id);
@@ -526,5 +535,10 @@ impl Card for Controller {
         fields.changed_text_area("notes", &self.notes);
         fields.changed_input("password", &self.password);
         fields.into_value().to_string()
+    }
+
+    /// Get changed fields on Location view
+    fn changed_location(&self, anc: ControllerAnc) -> String {
+        anc.loc.changed_location()
     }
 }

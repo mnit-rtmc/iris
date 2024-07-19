@@ -13,10 +13,9 @@
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
-use resources::Res;
+use crate::util::{Fields, HtmlStr, Input, OptVal, Select};
 use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
+use std::marker::PhantomData;
 use wasm_bindgen::JsValue;
 
 /// Road definitions
@@ -44,7 +43,7 @@ pub struct RoadModifier {
     pub md: String,
 }
 
-/// Geo location
+/// Geo location data
 #[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct GeoLoc {
     pub name: String,
@@ -59,29 +58,53 @@ pub struct GeoLoc {
     pub lon: Option<f64>,
 }
 
-/// Ancillary location data
-#[derive(Debug, Default)]
-pub struct GeoLocAnc {
-    assets: Vec<Asset>,
-    pub roads: Option<Vec<Road>>,
-    pub directions: Option<Vec<Direction>>,
-    pub modifiers: Option<Vec<RoadModifier>>,
+/// Location resource
+pub trait Loc {
+    /// Get geo location name
+    fn geoloc(&self) -> Option<&str> {
+        None
+    }
 }
 
-impl AncillaryData for GeoLocAnc {
-    type Primary = GeoLoc;
+/// Ancillary location data
+#[derive(Debug, Default)]
+pub struct LocAnc<L> {
+    pri: PhantomData<L>,
+    pub assets: Vec<Asset>,
+    geoloc: Option<GeoLoc>,
+    roads: Vec<Road>,
+    directions: Vec<Direction>,
+    modifiers: Vec<RoadModifier>,
+}
 
-    /// Construct ancillary geoloc data
-    fn new(_pri: &GeoLoc, view: View) -> Self {
-        let assets = match view {
-            View::Location => {
-                vec![Asset::Directions, Asset::Roads, Asset::RoadModifiers]
+impl<L> AncillaryData for LocAnc<L>
+where
+    L: Loc + Card,
+{
+    type Primary = L;
+
+    /// Construct ancillary location data
+    fn new(pri: &L, view: View) -> Self {
+        let mut assets = Vec::new();
+        match (view, pri.geoloc()) {
+            (View::Control, Some(nm)) => {
+                assets.push(Asset::GeoLoc(nm.to_string(), L::res()));
             }
-            _ => Vec::new(),
-        };
-        GeoLocAnc {
+            (View::Location, Some(nm)) => {
+                assets.push(Asset::GeoLoc(nm.to_string(), L::res()));
+                assets.push(Asset::Directions);
+                assets.push(Asset::Roads);
+                assets.push(Asset::RoadModifiers);
+            }
+            _ => (),
+        }
+        LocAnc {
+            pri: PhantomData,
             assets,
-            ..Default::default()
+            geoloc: None,
+            roads: Vec::new(),
+            directions: Vec::new(),
+            modifiers: Vec::new(),
         }
     }
 
@@ -93,19 +116,22 @@ impl AncillaryData for GeoLocAnc {
     /// Set asset value
     fn set_asset(
         &mut self,
-        _pri: &GeoLoc,
+        _pri: &L,
         asset: Asset,
         value: JsValue,
     ) -> Result<()> {
         match asset {
+            Asset::GeoLoc(_nm, _assoc) => {
+                self.geoloc = Some(serde_wasm_bindgen::from_value(value)?);
+            }
             Asset::Directions => {
-                self.directions = Some(serde_wasm_bindgen::from_value(value)?);
+                self.directions = serde_wasm_bindgen::from_value(value)?;
             }
             Asset::RoadModifiers => {
-                self.modifiers = Some(serde_wasm_bindgen::from_value(value)?);
+                self.modifiers = serde_wasm_bindgen::from_value(value)?;
             }
             Asset::Roads => {
-                self.roads = Some(serde_wasm_bindgen::from_value(value)?);
+                self.roads = serde_wasm_bindgen::from_value(value)?;
             }
             _ => unreachable!(),
         }
@@ -113,25 +139,23 @@ impl AncillaryData for GeoLocAnc {
     }
 }
 
-impl GeoLocAnc {
+impl<L> LocAnc<L> {
     /// Create an HTML `select` element of roads
     fn roads_html(&self, id: &str, groad: Option<&str>) -> String {
         let mut html = String::new();
         html.push_str("<select id='");
         html.push_str(id);
         html.push_str("'><option></option>");
-        if let Some(roads) = &self.roads {
-            for road in roads {
-                html.push_str("<option ");
-                if let Some(groad) = groad {
-                    if groad == road.name {
-                        html.push_str(" selected");
-                    }
+        for road in &self.roads {
+            html.push_str("<option ");
+            if let Some(groad) = groad {
+                if groad == road.name {
+                    html.push_str(" selected");
                 }
-                html.push('>');
-                html.push_str(&format!("{}", HtmlStr::new(&road.name)));
-                html.push_str("</option>");
             }
+            html.push('>');
+            html.push_str(&format!("{}", HtmlStr::new(&road.name)));
+            html.push_str("</option>");
         }
         html.push_str("</select>");
         html
@@ -143,18 +167,16 @@ impl GeoLocAnc {
         html.push_str("<select id='");
         html.push_str(id);
         html.push_str("'>");
-        if let Some(directions) = &self.directions {
-            for direction in directions {
-                html.push_str("<option value='");
-                html.push_str(&direction.id.to_string());
-                html.push('\'');
-                if dir == direction.id {
-                    html.push_str(" selected");
-                }
-                html.push('>');
-                html.push_str(&direction.direction);
-                html.push_str("</option>");
+        for direction in &self.directions {
+            html.push_str("<option value='");
+            html.push_str(&direction.id.to_string());
+            html.push('\'');
+            if dir == direction.id {
+                html.push_str(" selected");
             }
+            html.push('>');
+            html.push_str(&direction.direction);
+            html.push_str("</option>");
         }
         html.push_str("</select>");
         html
@@ -164,41 +186,48 @@ impl GeoLocAnc {
     fn modifiers_html(&self, md: u16) -> String {
         let mut html = String::new();
         html.push_str("<select id='cross_mod'>");
-        if let Some(modifiers) = &self.modifiers {
-            for modifier in modifiers {
-                html.push_str("<option value='");
-                html.push_str(&modifier.id.to_string());
-                html.push('\'');
-                if md == modifier.id {
-                    html.push_str(" selected");
-                }
-                html.push('>');
-                html.push_str(&modifier.modifier);
-                html.push_str("</option>");
+        for modifier in &self.modifiers {
+            html.push_str("<option value='");
+            html.push_str(&modifier.id.to_string());
+            html.push('\'');
+            if md == modifier.id {
+                html.push_str(" selected");
             }
+            html.push('>');
+            html.push_str(&modifier.modifier);
+            html.push_str("</option>");
         }
         html.push_str("</select>");
         html
     }
-}
 
-impl GeoLoc {
     /// Convert to Location HTML
-    fn to_html_location(&self, anc: &GeoLocAnc) -> String {
-        let title = self.title(View::Location);
-        let roadway = anc.roads_html("roadway", self.roadway.as_deref());
-        let rdir = anc.directions_html("road_dir", self.road_dir);
-        let xmod = anc.modifiers_html(self.cross_mod);
+    pub fn to_html_loc<C>(&self, card: &C) -> String
+    where
+        C: Card,
+    {
+        let title = card.title(View::Location);
+        let footer = card.footer(false);
+        let html = match &self.geoloc {
+            Some(geoloc) => self.to_html_location(geoloc),
+            None => "Error: missing geo_loc!".to_string(),
+        };
+        format!("{title}{html}{footer}")
+    }
+
+    /// Convert to Location HTML
+    fn to_html_location(&self, loc: &GeoLoc) -> String {
+        let roadway = self.roads_html("roadway", loc.roadway.as_deref());
+        let rdir = self.directions_html("road_dir", loc.road_dir);
+        let xmod = self.modifiers_html(loc.cross_mod);
         let xstreet =
-            anc.roads_html("cross_street", self.cross_street.as_deref());
-        let xdir = anc.directions_html("cross_dir", self.cross_dir);
-        let landmark = HtmlStr::new(&self.landmark);
-        let lat = OptVal(self.lat);
-        let lon = OptVal(self.lon);
-        let footer = self.footer(false);
+            self.roads_html("cross_street", loc.cross_street.as_deref());
+        let xdir = self.directions_html("cross_dir", loc.cross_dir);
+        let landmark = HtmlStr::new(&loc.landmark);
+        let lat = OptVal(loc.lat);
+        let lon = OptVal(loc.lon);
         format!(
-            "{title}\
-            <div class='row'>\
+            "<div class='row'>\
               <label for='roadway'>Roadway</label>\
               {roadway}\
               {rdir}\
@@ -223,49 +252,22 @@ impl GeoLoc {
               <label for='lon'>Longitude</label>\
               <input id='lon' type='number' step='0.00001' \
                      inputmode='decimal' value='{lon}'>\
-            </div>\
-            {footer}"
+            </div>"
         )
-    }
-}
-
-impl Card for GeoLoc {
-    type Ancillary = GeoLocAnc;
-
-    /// Display name
-    const DNAME: &'static str = "🗺️ Location";
-
-    /// Get the resource
-    fn res() -> Res {
-        Res::GeoLoc
-    }
-
-    /// Get the name
-    fn name(&self) -> Cow<str> {
-        Cow::Borrowed(&self.name)
-    }
-
-    /// Set the name
-    fn with_name(mut self, name: &str) -> Self {
-        self.name = name.to_string();
-        self
-    }
-
-    /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &GeoLocAnc) -> bool {
-        self.name.contains_lower(search)
-    }
-
-    /// Convert to HTML view
-    fn to_html(&self, view: View, anc: &GeoLocAnc) -> String {
-        match view {
-            View::Location => self.to_html_location(anc),
-            _ => unreachable!(),
-        }
     }
 
     /// Get changed fields from Location form
-    fn changed_fields(&self) -> String {
+    pub fn changed_location(&self) -> String {
+        match &self.geoloc {
+            Some(geoloc) => geoloc.changed_location(),
+            None => String::new(),
+        }
+    }
+}
+
+impl GeoLoc {
+    /// Get changed fields from Location form
+    fn changed_location(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_select("roadway", &self.roadway);
         fields.changed_select("road_dir", self.road_dir);

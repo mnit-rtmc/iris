@@ -26,7 +26,6 @@ use crate::fetch::{Action, Uri};
 use crate::flowstream::FlowStream;
 use crate::gatearm::GateArm;
 use crate::gatearmarray::GateArmArray;
-use crate::geoloc::GeoLoc;
 use crate::gps::Gps;
 use crate::item::ItemState;
 use crate::lanemarking::LaneMarking;
@@ -165,26 +164,13 @@ pub struct CardView {
     pub name: String,
     /// Card view
     pub view: View,
-    /// Associated resource
-    pub assoc: Option<Res>,
 }
 
 impl CardView {
     /// Create a new card view
     pub fn new<N: Into<String>>(res: Res, name: N, view: View) -> Self {
         let name = name.into();
-        CardView {
-            res,
-            name,
-            view,
-            assoc: None,
-        }
-    }
-
-    /// Set associated resource type
-    pub fn with_assoc(mut self, assoc: Res) -> Self {
-        self.assoc = Some(assoc);
-        self
+        CardView { res, name, view }
     }
 
     /// Get HTML element ID of card
@@ -298,11 +284,6 @@ pub trait Card: Default + DeserializeOwned + Serialize + PartialEq {
         "".into()
     }
 
-    /// Get geo location name
-    fn geo_loc(&self) -> Option<&str> {
-        None
-    }
-
     /// Get the main item state
     fn item_state_main(&self, _anc: &Self::Ancillary) -> ItemState {
         ItemState::Unknown
@@ -327,8 +308,15 @@ pub trait Card: Default + DeserializeOwned + Serialize + PartialEq {
     /// Convert to HTML view
     fn to_html(&self, view: View, _anc: &Self::Ancillary) -> String;
 
-    /// Get changed fields from Setup / Location form
-    fn changed_fields(&self) -> String;
+    /// Get changed fields from Setup view
+    fn changed_setup(&self) -> String {
+        String::new()
+    }
+
+    /// Get changed fields on Location view
+    fn changed_location(&self, _anc: Self::Ancillary) -> String {
+        String::new()
+    }
 
     /// Handle click event for a button on the card
     fn handle_click(&self, _anc: Self::Ancillary, _id: String) -> Vec<Action> {
@@ -427,7 +415,6 @@ pub fn res_views(res: Res) -> &'static [View] {
         Res::Controller | Res::WeatherSensor => {
             &[View::Compact, View::Status, View::Setup, View::Location]
         }
-        Res::GeoLoc => &[View::Compact, View::Location],
         _ => &[View::Compact, View::Control, View::Setup],
     }
 }
@@ -884,14 +871,6 @@ pub async fn fetch_one(cv: &CardView) -> Result<String> {
             html_card_create(cv.res, &html)
         }
         View::CreateCompact => CREATE_COMPACT.to_string(),
-        View::Location => match fetch_geo_loc(cv).await? {
-            Some(geo_loc) => {
-                let cv = CardView::new(Res::GeoLoc, &geo_loc, View::Location)
-                    .with_assoc(cv.res);
-                fetch_one_res(&cv).await?
-            }
-            None => return Err(Error::CardMismatch()),
-        },
         _ => fetch_one_res(cv).await?,
     };
     Ok(html)
@@ -913,7 +892,6 @@ async fn fetch_one_res(cv: &CardView) -> Result<String> {
         Res::FlowStream => fetch_one_x::<FlowStream>(cv).await,
         Res::GateArm => fetch_one_x::<GateArm>(cv).await,
         Res::GateArmArray => fetch_one_x::<GateArmArray>(cv).await,
-        Res::GeoLoc => fetch_one_x::<GeoLoc>(cv).await,
         Res::Gps => fetch_one_x::<Gps>(cv).await,
         Res::LaneMarking => fetch_one_x::<LaneMarking>(cv).await,
         Res::LcsArray => fetch_one_x::<LcsArray>(cv).await,
@@ -943,41 +921,12 @@ async fn fetch_one_x<C: Card>(cv: &CardView) -> Result<String> {
 
 /// Fetch primary JSON resource
 async fn fetch_primary<C: Card>(cv: &CardView) -> Result<C> {
-    let mut uri = uri_one(C::res(), &cv.name);
-    if let Some(assoc) = &cv.assoc {
-        uri.query("res", assoc.as_str());
-    }
+    let uri = uri_one(C::res(), &cv.name);
     let json = uri.get().await?;
     C::new(json)
 }
 
-/// Fetch geo location name (if any)
-pub async fn fetch_geo_loc(cv: &CardView) -> Result<Option<String>> {
-    match cv.res {
-        Res::Beacon => geo_loc::<Beacon>(cv).await,
-        Res::Camera => geo_loc::<Camera>(cv).await,
-        Res::Controller => geo_loc::<Controller>(cv).await,
-        Res::Dms => geo_loc::<Dms>(cv).await,
-        Res::GateArmArray => geo_loc::<GateArmArray>(cv).await,
-        Res::GeoLoc => Ok(Some(cv.name.to_string())),
-        Res::LaneMarking => geo_loc::<LaneMarking>(cv).await,
-        Res::RampMeter => geo_loc::<RampMeter>(cv).await,
-        Res::TagReader => geo_loc::<TagReader>(cv).await,
-        Res::WeatherSensor => geo_loc::<WeatherSensor>(cv).await,
-        _ => Ok(None),
-    }
-}
-
-/// Fetch geo location name
-async fn geo_loc<C: Card>(cv: &CardView) -> Result<Option<String>> {
-    let pri = fetch_primary::<C>(cv).await?;
-    match pri.geo_loc() {
-        Some(geo_loc) => Ok(Some(geo_loc.to_string())),
-        None => Ok(None),
-    }
-}
-
-/// Patch changed fields on card
+/// Patch changed fields on Setup / Location view
 pub async fn patch_changed(cv: &CardView) -> Result<()> {
     match cv.res {
         Res::Alarm => patch_changed_x::<Alarm>(cv).await,
@@ -993,7 +942,6 @@ pub async fn patch_changed(cv: &CardView) -> Result<()> {
         Res::FlowStream => patch_changed_x::<FlowStream>(cv).await,
         Res::GateArm => patch_changed_x::<GateArm>(cv).await,
         Res::GateArmArray => patch_changed_x::<GateArmArray>(cv).await,
-        Res::GeoLoc => patch_changed_x::<GeoLoc>(cv).await,
         Res::Gps => patch_changed_x::<Gps>(cv).await,
         Res::LaneMarking => patch_changed_x::<LaneMarking>(cv).await,
         Res::LcsArray => patch_changed_x::<LcsArray>(cv).await,
@@ -1010,12 +958,34 @@ pub async fn patch_changed(cv: &CardView) -> Result<()> {
     }
 }
 
-/// Patch changed fields from a Setup or Location view
+/// Patch changed fields from a Setup / Location view
 async fn patch_changed_x<C: Card>(cv: &CardView) -> Result<()> {
+    match cv.view {
+        View::Setup => patch_setup::<C>(cv).await,
+        View::Location => patch_loc::<C>(cv).await,
+        _ => unreachable!(),
+    }
+}
+
+/// Patch changed fields from a Setup view
+async fn patch_setup<C: Card>(cv: &CardView) -> Result<()> {
     let pri = fetch_primary::<C>(cv).await?;
-    let changed = pri.changed_fields();
+    let changed = pri.changed_setup();
     if !changed.is_empty() {
         uri_one(C::res(), &cv.name).patch(&changed.into()).await?;
+    }
+    Ok(())
+}
+
+/// Patch changed fields from a Location view
+async fn patch_loc<C: Card>(cv: &CardView) -> Result<()> {
+    let pri = fetch_primary::<C>(cv).await?;
+    let anc = fetch_ancillary(&pri, View::Location).await?;
+    let changed = pri.changed_location(anc);
+    if !changed.is_empty() {
+        uri_one(Res::GeoLoc, &cv.name)
+            .patch(&changed.into())
+            .await?;
     }
     Ok(())
 }

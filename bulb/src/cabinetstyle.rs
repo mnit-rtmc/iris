@@ -125,7 +125,7 @@ impl Card for CabinetStyle {
     }
 
     /// Get changed fields from Setup form
-    fn changed_fields(&self) -> String {
+    fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("police_panel_pin_1", self.police_panel_pin_1);
         fields.changed_input("police_panel_pin_2", self.police_panel_pin_2);

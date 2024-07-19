@@ -65,7 +65,7 @@ impl VideoMonitor {
 }
 
 impl ControllerIo for VideoMonitor {
-    /// Get controller
+    /// Get controller name
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
     }
@@ -111,7 +111,7 @@ impl Card for VideoMonitor {
     }
 
     /// Get changed fields from Setup form
-    fn changed_fields(&self) -> String {
+    fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);

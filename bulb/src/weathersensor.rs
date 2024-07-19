@@ -10,8 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{Card, View};
+use crate::asset::Asset;
+use crate::card::{AncillaryData, Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
+use crate::error::Result;
+use crate::geoloc::{Loc, LocAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, TextArea};
 use humantime::format_duration;
 use mag::length::{m, mm};
@@ -21,6 +24,7 @@ use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::time::Duration;
+use wasm_bindgen::JsValue;
 
 /// Display Units
 type TempUnit = mag::temp::DegF;
@@ -144,7 +148,42 @@ pub struct WeatherSensor {
     pub sample_time: Option<String>,
 }
 
-type WeatherSensorAnc = ControllerIoAnc<WeatherSensor>;
+/// Weather sensor ancillary data
+#[derive(Default)]
+pub struct WeatherSensorAnc {
+    cio: ControllerIoAnc<WeatherSensor>,
+    loc: LocAnc<WeatherSensor>,
+}
+
+impl AncillaryData for WeatherSensorAnc {
+    type Primary = WeatherSensor;
+
+    /// Construct ancillary weather sensor data
+    fn new(pri: &WeatherSensor, view: View) -> Self {
+        let cio = ControllerIoAnc::new(pri, view);
+        let loc = LocAnc::new(pri, view);
+        WeatherSensorAnc { cio, loc }
+    }
+
+    /// Get next asset to fetch
+    fn asset(&mut self) -> Option<Asset> {
+        self.cio.assets.pop().or_else(|| self.loc.assets.pop())
+    }
+
+    /// Set asset value
+    fn set_asset(
+        &mut self,
+        pri: &WeatherSensor,
+        asset: Asset,
+        value: JsValue,
+    ) -> Result<()> {
+        if let Asset::Controllers = asset {
+            self.cio.set_asset(pri, asset, value)
+        } else {
+            self.loc.set_asset(pri, asset, value)
+        }
+    }
+}
 
 /// Get visibility situation string (from NTCIP 1204)
 fn vis_situation(situation: &str) -> &'static str {
@@ -697,7 +736,7 @@ impl WeatherSensor {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &WeatherSensorAnc) -> String {
         let name = HtmlStr::new(self.name());
-        let item_states = anc.item_states(self);
+        let item_states = anc.cio.item_states(self);
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
             "<div class='title row'>{name} {item_states}</div>\
@@ -708,7 +747,7 @@ impl WeatherSensor {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &WeatherSensorAnc) -> String {
         let title = self.title(View::Status);
-        let item_states = anc.item_states(self).to_html();
+        let item_states = anc.cio.item_states(self).to_html();
         let location = HtmlStr::new(&self.location).with_len(64);
         let site_id = HtmlStr::new(&self.site_id);
         let alt_id = HtmlStr::new(&self.alt_id);
@@ -741,8 +780,8 @@ impl WeatherSensor {
         let site_id = HtmlStr::new(&self.site_id);
         let alt_id = HtmlStr::new(&self.alt_id);
         let notes = HtmlStr::new(&self.notes);
-        let controller = anc.controller_html(self);
-        let pin = anc.pin_html(self.pin);
+        let controller = anc.cio.controller_html(self);
+        let pin = anc.cio.pin_html(self.pin);
         let footer = self.footer(true);
         format!(
             "{title}\
@@ -769,9 +808,16 @@ impl WeatherSensor {
 }
 
 impl ControllerIo for WeatherSensor {
-    /// Get controller
+    /// Get controller name
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
+    }
+}
+
+impl Loc for WeatherSensor {
+    /// Get geo location name
+    fn geoloc(&self) -> Option<&str> {
+        self.geo_loc.as_deref()
     }
 }
 
@@ -797,18 +843,13 @@ impl Card for WeatherSensor {
         self
     }
 
-    /// Get geo location name
-    fn geo_loc(&self) -> Option<&str> {
-        self.geo_loc.as_deref()
-    }
-
     /// Check if a search string matches
     fn is_match(&self, search: &str, anc: &WeatherSensorAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
             || self.site_id.contains_lower(search)
             || self.alt_id.contains_lower(search)
-            || anc.item_states(self).is_match(search)
+            || anc.cio.item_states(self).is_match(search)
             || self.notes.contains_lower(search)
     }
 
@@ -816,14 +857,15 @@ impl Card for WeatherSensor {
     fn to_html(&self, view: View, anc: &WeatherSensorAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status => self.to_html_status(anc),
+            View::Location => anc.loc.to_html_loc(self),
             View::Setup => self.to_html_setup(anc),
+            View::Status => self.to_html_status(anc),
             _ => self.to_html_compact(anc),
         }
     }
 
     /// Get changed fields from Setup form
-    fn changed_fields(&self) -> String {
+    fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("site_id", &self.site_id);
         fields.changed_input("alt_id", &self.alt_id);
@@ -831,5 +873,10 @@ impl Card for WeatherSensor {
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
         fields.into_value().to_string()
+    }
+
+    /// Get changed fields on Location view
+    fn changed_location(&self, anc: WeatherSensorAnc) -> String {
+        anc.loc.changed_location()
     }
 }

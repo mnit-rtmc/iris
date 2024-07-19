@@ -12,6 +12,7 @@
 //
 use crate::error::{Error, Result};
 use crate::fetch::{ContentType, Uri};
+use resources::Res;
 use wasm_bindgen::JsValue;
 
 /// Fetchable assets for ancillary card data
@@ -29,6 +30,7 @@ pub enum Asset {
     Font(String),
     Fonts,
     GateArmStates,
+    GeoLoc(String, Res),
     Graphic(String),
     Graphics,
     LaneUseIndications,
@@ -71,6 +73,12 @@ impl Asset {
             }
             Fonts => "/iris/api/font".into(),
             GateArmStates => "/iris/lut/gate_arm_state".into(),
+            GeoLoc(nm, assoc) => {
+                let mut uri = Uri::from("/iris/api/geo_loc");
+                uri.push(nm);
+                uri.query("res", assoc.as_str());
+                uri
+            }
             Graphic(nm) => {
                 let mut uri =
                     Uri::from("/iris/gif/").with_content_type(ContentType::Gif);

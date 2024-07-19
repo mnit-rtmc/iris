@@ -16,6 +16,7 @@ use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::DeviceReq;
 use crate::error::Result;
 use crate::fetch::{Action, Uri};
+use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, TextArea};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
@@ -206,6 +207,7 @@ pub struct GraphicName {
 #[derive(Default)]
 pub struct DmsAnc {
     cio: ControllerIoAnc<Dms>,
+    loc: LocAnc<Dms>,
     messages: Vec<SignMessage>,
     configs: Vec<SignConfig>,
     compose_patterns: Vec<MsgPattern>,
@@ -296,15 +298,17 @@ impl AncillaryData for DmsAnc {
             cio.assets.push(Asset::Fonts);
             cio.assets.push(Asset::Graphics);
         }
+        let loc = LocAnc::new(pri, view);
         DmsAnc {
             cio,
+            loc,
             ..Default::default()
         }
     }
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.cio.assets.pop()
+        self.cio.assets.pop().or_else(|| self.loc.assets.pop())
     }
 
     /// Set asset value
@@ -315,6 +319,9 @@ impl AncillaryData for DmsAnc {
         value: JsValue,
     ) -> Result<()> {
         match asset {
+            Asset::Controllers => {
+                self.cio.set_asset(pri, asset, value)?;
+            }
             Asset::SignMessages => {
                 self.messages = serde_wasm_bindgen::from_value(value)?;
             }
@@ -392,7 +399,7 @@ impl AncillaryData for DmsAnc {
                     console::log_1(&format!("invalid graphic: {nm}").into());
                 }
             }
-            _ => self.cio.set_asset(pri, asset, value)?,
+            _ => self.loc.set_asset(pri, asset, value)?,
         }
         Ok(())
     }
@@ -1068,9 +1075,16 @@ impl Dms {
 }
 
 impl ControllerIo for Dms {
-    /// Get controller
+    /// Get controller name
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
+    }
+}
+
+impl Loc for Dms {
+    /// Get geo location name
+    fn geoloc(&self) -> Option<&str> {
+        self.geo_loc.as_deref()
     }
 }
 
@@ -1106,11 +1120,6 @@ impl Card for Dms {
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
         self
-    }
-
-    /// Get geo location name
-    fn geo_loc(&self) -> Option<&str> {
-        self.geo_loc.as_deref()
     }
 
     /// Get the main item state
@@ -1153,19 +1162,25 @@ impl Card for Dms {
         match view {
             View::Create => self.to_html_create(anc),
             View::Control => self.to_html_control(anc),
-            View::Setup => self.to_html_setup(anc),
+            View::Location => anc.loc.to_html_loc(self),
             View::Request => self.to_html_request(anc),
+            View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }
     }
 
     /// Get changed fields from Setup form
-    fn changed_fields(&self) -> String {
+    fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_text_area("notes", &self.notes);
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
         fields.into_value().to_string()
+    }
+
+    /// Get changed fields on Location view
+    fn changed_location(&self, anc: DmsAnc) -> String {
+        anc.loc.changed_location()
     }
 
     /// Handle click event for a button on the card

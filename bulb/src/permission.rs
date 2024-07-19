@@ -287,7 +287,7 @@ impl Card for Permission {
     }
 
     /// Get changed fields from Setup form
-    fn changed_fields(&self) -> String {
+    fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_select("role", &self.role);
         fields.changed_select("resource_n", &self.resource_n);

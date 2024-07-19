@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{inactive_attr, Card, View};
+use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input};
 use resources::Res;
@@ -33,9 +33,8 @@ impl Gps {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &GpsAnc) -> String {
         let name = HtmlStr::new(self.name());
-        let inactive = inactive_attr(self.controller.is_some());
         let item_states = anc.item_states(self);
-        format!("<div class='end{inactive}'>{name} {item_states}</div>")
+        format!("<div class='end'>{name} {item_states}</div>")
     }
 
     /// Convert to Setup HTML
@@ -48,7 +47,7 @@ impl Gps {
 }
 
 impl ControllerIo for Gps {
-    /// Get controller
+    /// Get controller name
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
     }
@@ -91,7 +90,7 @@ impl Card for Gps {
     }
 
     /// Get changed fields from Setup form
-    fn changed_fields(&self) -> String {
+    fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);

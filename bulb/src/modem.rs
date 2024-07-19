@@ -114,7 +114,7 @@ impl Card for Modem {
     }
 
     /// Get changed fields from Setup form
-    fn changed_fields(&self) -> String {
+    fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("uri", &self.uri);
         fields.changed_input("config", &self.config);

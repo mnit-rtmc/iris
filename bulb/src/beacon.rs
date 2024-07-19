@@ -15,6 +15,7 @@ use crate::card::{uri_one, AncillaryData, Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::fetch::Action;
+use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use resources::Res;
@@ -49,6 +50,7 @@ pub struct Beacon {
 #[derive(Default)]
 pub struct BeaconAnc {
     cio: ControllerIoAnc<Beacon>,
+    loc: LocAnc<Beacon>,
     states: Option<Vec<BeaconState>>,
 }
 
@@ -59,13 +61,14 @@ impl AncillaryData for BeaconAnc {
     fn new(pri: &Beacon, view: View) -> Self {
         let mut cio = ControllerIoAnc::new(pri, view);
         cio.assets.push(Asset::BeaconStates);
+        let loc = LocAnc::new(pri, view);
         let states = None;
-        BeaconAnc { cio, states }
+        BeaconAnc { cio, loc, states }
     }
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.cio.assets.pop()
+        self.cio.assets.pop().or_else(|| self.loc.assets.pop())
     }
 
     /// Set asset value
@@ -79,7 +82,10 @@ impl AncillaryData for BeaconAnc {
             Asset::BeaconStates => {
                 self.states = Some(serde_wasm_bindgen::from_value(value)?);
             }
-            _ => self.cio.set_asset(pri, asset, value)?,
+            Asset::Controllers => {
+                self.cio.set_asset(pri, asset, value)?;
+            }
+            _ => self.loc.set_asset(pri, asset, value)?,
         }
         Ok(())
     }
@@ -228,9 +234,16 @@ impl Beacon {
 }
 
 impl ControllerIo for Beacon {
-    /// Get controller
+    /// Get controller name
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
+    }
+}
+
+impl Loc for Beacon {
+    /// Get geo location name
+    fn geoloc(&self) -> Option<&str> {
+        self.geo_loc.as_deref()
     }
 }
 
@@ -265,11 +278,6 @@ impl Card for Beacon {
         self
     }
 
-    /// Get geo location name
-    fn geo_loc(&self) -> Option<&str> {
-        self.geo_loc.as_deref()
-    }
-
     /// Check if a search string matches
     fn is_match(&self, search: &str, anc: &BeaconAnc) -> bool {
         self.name.contains_lower(search)
@@ -284,13 +292,14 @@ impl Card for Beacon {
         match view {
             View::Create => self.to_html_create(anc),
             View::Control => self.to_html_control(anc),
+            View::Location => anc.loc.to_html_loc(self),
             View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }
     }
 
     /// Get changed fields from Setup form
-    fn changed_fields(&self) -> String {
+    fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_text_area("message", &self.message);
         fields.changed_text_area("notes", &self.notes);
@@ -299,6 +308,11 @@ impl Card for Beacon {
         fields.changed_input("verify_pin", self.verify_pin);
         fields.changed_input("ext_mode", self.ext_mode);
         fields.into_value().to_string()
+    }
+
+    /// Get changed fields on Location view
+    fn changed_location(&self, anc: BeaconAnc) -> String {
+        anc.loc.changed_location()
     }
 
     /// Handle click event for a button on the card
