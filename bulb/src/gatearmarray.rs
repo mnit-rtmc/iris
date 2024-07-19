@@ -105,12 +105,12 @@ impl GateArmArray {
     /// Convert to Control HTML
     fn to_html_control(&self) -> String {
         let title = self.title(View::Control);
-        let location = HtmlStr::new(&self.location).with_len(64);
         let item_states = item_states(self.arm_state).to_html();
+        let location = HtmlStr::new(&self.location).with_len(64);
         format!(
             "{title}\
-            <div class='info'>{location}</div>\
-            <div class='info'>{item_states}</div>"
+            <div class='row'>{item_states}</div>\
+            <div class='info'>{location}</div>"
         )
     }
 }

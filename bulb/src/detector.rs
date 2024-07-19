@@ -56,7 +56,7 @@ impl Detector {
         let label = HtmlStr::new(&self.label).with_len(20);
         format!(
             "{title}\
-            <div>{item_states}</div>\
+            <div class='row'>{item_states}</div>\
             <div class='row'>\
               <span class='info'>{label}</span>\
             </div>"

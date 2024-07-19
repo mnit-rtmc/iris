@@ -62,7 +62,7 @@ impl Alarm {
         let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
         format!(
             "{title}\
-            <div>{item_states}</div>\
+            <div class='row'>{item_states}</div>\
             <div class='row'>\
               <span class='info full'>{description}</span>\
             </div>\

@@ -753,7 +753,7 @@ impl WeatherSensor {
         let alt_id = HtmlStr::new(&self.alt_id);
         let mut html = format!(
             "{title}\
-            <span>{item_states}</span>\
+            <div class='row'>{item_states}</div>\
             <div class='row'>\
               <span class='info'>{location}</span>\
             </div>\

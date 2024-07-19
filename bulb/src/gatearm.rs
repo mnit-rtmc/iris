@@ -128,7 +128,7 @@ impl GateArm {
         let item_states = self.item_states(anc).to_html();
         format!(
             "{title}\
-            <div>{item_states}</div>\
+            <div class='row'>{item_states}</div>\
             <div class='info'>{location}</div>"
         )
     }
