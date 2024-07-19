@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{inactive_attr, Card, View};
+use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input};
 use resources::Res;
@@ -32,9 +32,8 @@ impl FlowStream {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &FlowStreamAnc) -> String {
         let name = HtmlStr::new(self.name());
-        let inactive = inactive_attr(self.controller.is_some());
         let item_states = anc.item_states(self);
-        format!("<div class='title row{inactive}'>{name} {item_states}</div>")
+        format!("<div class='title row'>{name} {item_states}</div>")
     }
 
     /// Convert to Setup HTML

@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{inactive_attr, Card, View};
+use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input};
@@ -46,12 +46,11 @@ impl Alarm {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &AlarmAnc) -> String {
         let name = HtmlStr::new(self.name());
-        let inactive = inactive_attr(self.controller.is_some());
         let item_states = self.item_states(anc);
         let description = HtmlStr::new(&self.description);
         format!(
             "<div class='title row'>{name} {item_states}</div>\
-            <div class='info fill{inactive}'>{description}</div>"
+            <div class='info fill'>{description}</div>"
         )
     }
 

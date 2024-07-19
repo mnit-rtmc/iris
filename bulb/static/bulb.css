@@ -340,9 +340,6 @@ label:has(+ #sb_resource) {
   font-size: smaller;
   margin-top: 0.1rem;
 }
-.inactive {
-  text-decoration: line-through;
-}
 .row {
   display: flex;
   justify-content: space-between;

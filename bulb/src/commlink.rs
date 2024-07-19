@@ -11,11 +11,11 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{inactive_attr, AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card, View};
 use crate::commconfig::CommConfig;
 use crate::controller::Controller;
 use crate::error::Result;
-use crate::item::ItemState;
+use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
 use resources::Res;
 use serde::{Deserialize, Serialize};
@@ -138,33 +138,30 @@ impl CommLinkAnc {
 }
 
 impl CommLink {
-    /// Get item state
-    fn item_state(&self) -> ItemState {
+    /// Get item states
+    fn item_states(&self) -> ItemStates {
         match (self.poll_enabled, self.connected) {
-            (true, true) => ItemState::Available,
-            (true, false) => ItemState::Offline,
-            _ => ItemState::Inactive,
+            (true, true) => ItemState::Available.into(),
+            (true, false) => ItemState::Offline.into(),
+            _ => ItemState::Inactive.into(),
         }
     }
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let name = HtmlStr::new(self.name());
-        let item_state = self.item_state();
-        let inactive = inactive_attr(self.poll_enabled);
+        let item_states = self.item_states();
         let description = HtmlStr::new(&self.description);
         format!(
-            "<div class='title row'>{name} {item_state}</div>\
-            <div class='info fill{inactive}'>{description}</div>"
+            "<div class='title row'>{name} {item_states}</div>\
+            <div class='info fill'>{description}</div>"
         )
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &CommLinkAnc) -> String {
         let title = self.title(View::Status);
-        let item_state = self.item_state();
-        let desc = item_state.description();
-        let inactive = inactive_attr(self.poll_enabled);
+        let item_states = self.item_states().to_html();
         let description = HtmlStr::new(&self.description);
         let comm_config = anc.comm_config_desc(self);
         let config = HtmlStr::new(comm_config);
@@ -172,8 +169,8 @@ impl CommLink {
         format!(
             "{title}\
             <div class='row'>\
-              <span>{item_state} {desc}</span>\
-              <span class='info end{inactive}'>{description}</span>\
+              <span>{item_states}</span>\
+              <span class='info end'>{description}</span>\
             </div>\
             <div class='row'>\
               <span>{config}</span>\
@@ -242,7 +239,7 @@ impl Card for CommLink {
             || self.name.contains_lower(search)
             || anc.comm_config_desc(self).contains_lower(search)
             || self.uri.contains_lower(search)
-            || self.item_state().is_match(search)
+            || self.item_states().is_match(search)
     }
 
     /// Convert to HTML view

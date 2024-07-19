@@ -1067,12 +1067,3 @@ pub fn html_title_row(spans: &[&str], cls: &[&str]) -> String {
     row.push_str("</div>");
     row
 }
-
-/// Get attribute for inactive cards
-pub fn inactive_attr(active: bool) -> &'static str {
-    if active {
-        ""
-    } else {
-        " inactive"
-    }
-}
