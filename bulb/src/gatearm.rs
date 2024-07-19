@@ -47,16 +47,16 @@ pub struct GateArmAnc {
     pub states: Option<Vec<GateArmState>>,
 }
 
-/// Get gate arm item state
-pub fn item_state(arm_state: u32) -> ItemState {
+/// Get gate arm item states
+pub fn item_states(arm_state: u32) -> ItemStates<'static> {
     match arm_state {
-        1 => ItemState::Fault,
-        2 => ItemState::Opening,
-        3 => ItemState::Open,
-        4 => ItemState::WarnClose,
-        5 => ItemState::Closing,
-        6 => ItemState::Closed,
-        _ => ItemState::Unknown,
+        1 => ItemState::Fault.into(),
+        2 => ItemState::Opening.into(),
+        3 => ItemState::Open.into(),
+        4 => ItemState::WarnClose.into(),
+        5 => ItemState::Closing.into(),
+        6 => ItemState::Closed.into(),
+        _ => ItemState::Unknown.into(),
     }
 }
 
@@ -104,7 +104,7 @@ impl GateArm {
     fn item_states<'a>(&'a self, anc: &'a GateArmAnc) -> ItemStates<'a> {
         let states = anc.cio.item_states(self);
         if states.contains(ItemState::Available) {
-            item_state(self.arm_state).into()
+            item_states(self.arm_state)
         } else {
             states
         }

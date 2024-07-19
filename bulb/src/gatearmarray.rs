@@ -13,7 +13,7 @@
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
-use crate::gatearm::item_state;
+use crate::gatearm::item_states;
 use crate::geoloc::{Loc, LocAnc};
 use crate::util::{ContainsLower, HtmlStr};
 use resources::Res;
@@ -94,10 +94,10 @@ impl GateArmArray {
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let name = HtmlStr::new(self.name());
-        let item = item_state(self.arm_state);
+        let item_states = item_states(self.arm_state);
         let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='title row'>{name} {item}</div>\
+            "<div class='title row'>{name} {item_states}</div>\
             <div class='info fill'>{location}</div>"
         )
     }
@@ -106,12 +106,11 @@ impl GateArmArray {
     fn to_html_control(&self) -> String {
         let title = self.title(View::Control);
         let location = HtmlStr::new(&self.location).with_len(64);
-        let item = item_state(self.arm_state);
-        let desc = item.description();
+        let item_states = item_states(self.arm_state).to_html();
         format!(
             "{title}\
             <div class='info'>{location}</div>\
-            <div class='info'>{item} {desc}</div>"
+            <div class='info'>{item_states}</div>"
         )
     }
 }
@@ -142,7 +141,7 @@ impl Card for GateArmArray {
     fn is_match(&self, search: &str, _anc: &GateArmArrayAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || item_state(self.arm_state).is_match(search)
+            || item_states(self.arm_state).is_match(search)
     }
 
     /// Convert to HTML view
