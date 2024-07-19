@@ -82,14 +82,8 @@ where
 
     /// Get item states
     pub fn item_states<'a>(&'a self, pri: &'a C) -> ItemStates<'a> {
-        let state = self
-            .controller(pri)
-            .map_or(ItemState::Inactive, |c| c.item_state());
-        match state {
-            ItemState::Offline => ItemStates::default()
-                .with(ItemState::Offline, "FIXME: since fail time"),
-            _ => state.into(),
-        }
+        self.controller(pri)
+            .map_or(ItemState::Inactive.into(), |c| c.item_states())
     }
 }
 

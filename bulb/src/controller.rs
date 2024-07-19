@@ -17,7 +17,7 @@ use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
-use crate::item::ItemState;
+use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select, TextArea};
 use resources::Res;
 use serde::{Deserialize, Serialize};
@@ -268,16 +268,13 @@ impl Controller {
         self.condition == 1
     }
 
-    /// Get item state
-    pub fn item_state(&self) -> ItemState {
-        if self.is_active() {
-            if self.fail_time.is_some() {
-                ItemState::Offline
-            } else {
-                ItemState::Available
-            }
-        } else {
-            ItemState::Inactive
+    /// Get item states
+    pub fn item_states(&self) -> ItemStates {
+        match (self.is_active(), self.fail_time.is_some()) {
+            (true, true) => ItemStates::default()
+                .with(ItemState::Offline, "FIXME: since fail time"),
+            (true, false) => ItemState::Available.into(),
+            (false, _) => ItemState::Inactive.into(),
         }
     }
 
@@ -329,10 +326,10 @@ impl Controller {
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
         let name = HtmlStr::new(self.name());
-        let item_state = self.item_state();
+        let item_states = self.item_states();
         let link_drop = HtmlStr::new(self.link_drop());
         format!(
-            "<div class='title row'>{name} {item_state}</div>\
+            "<div class='title row'>{name} {item_states}</div>\
             <div class='info fill'>{link_drop}</div>"
         )
     }
@@ -342,8 +339,7 @@ impl Controller {
         let title = self.title(View::Status);
         let res = Res::CommLink;
         let condition = anc.condition(self);
-        let item_state = self.item_state();
-        let item_desc = item_state.description();
+        let item_states = self.item_states().to_html();
         let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
         let comm_config = anc.comm_config(self);
@@ -398,8 +394,8 @@ impl Controller {
         format!(
             "{title}\
             <div class='row'>\
+              <span>{item_states}</span>\
               <span>{condition}</span>\
-              <span>{item_state} {item_desc}</span>\
               <span>\
                 <button type='button' class='go_link' \
                         data-link='{comm_link}' data-type='{res}'>\
@@ -492,7 +488,7 @@ impl Card for Controller {
     fn is_match(&self, search: &str, anc: &ControllerAnc) -> bool {
         self.name.contains_lower(search)
             || self.link_drop().contains_lower(search)
-            || self.item_state().is_match(search)
+            || self.item_states().is_match(search)
             || anc.condition(self).contains_lower(search)
             || anc.comm_config(self).contains_lower(search)
             || self.location.contains_lower(search)
