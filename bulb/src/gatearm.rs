@@ -44,7 +44,7 @@ pub struct GateArm {
 #[derive(Debug, Default)]
 pub struct GateArmAnc {
     cio: ControllerIoAnc<GateArm>,
-    pub states: Option<Vec<GateArmState>>,
+    pub states: Vec<GateArmState>,
 }
 
 /// Get gate arm item states
@@ -67,7 +67,7 @@ impl AncillaryData for GateArmAnc {
     fn new(pri: &GateArm, view: View) -> Self {
         let mut cio = ControllerIoAnc::new(pri, view);
         cio.assets.push(Asset::GateArmStates);
-        GateArmAnc { cio, states: None }
+        GateArmAnc { cio, states: Vec::new() }
     }
 
     /// Get next asset to fetch
@@ -84,7 +84,7 @@ impl AncillaryData for GateArmAnc {
     ) -> Result<()> {
         match asset {
             Asset::GateArmStates => {
-                self.states = Some(serde_wasm_bindgen::from_value(value)?);
+                self.states = serde_wasm_bindgen::from_value(value)?;
             }
             _ => self.cio.set_asset(pri, asset, value)?,
         }

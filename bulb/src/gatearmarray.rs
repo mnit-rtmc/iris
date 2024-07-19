@@ -13,22 +13,13 @@
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
-use crate::gatearm::item_states;
+use crate::gatearm::{item_states, GateArmState};
 use crate::geoloc::{Loc, LocAnc};
 use crate::util::{ContainsLower, HtmlStr};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
-
-/// Gate arm states
-///
-/// FIXME: share with gatearm module
-#[derive(Debug, Deserialize, Serialize)]
-pub struct GateArmState {
-    pub id: u32,
-    pub description: String,
-}
 
 /// Gate Arm Array
 #[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
