@@ -730,6 +730,24 @@ struct QueryParams {
     res: String,
 }
 
+/// Get name to use for access checks
+fn check_name(
+    type_n: &str,
+    obj_n: &str,
+    params: &Option<Query<QueryParams>>,
+) -> Result<Name> {
+    let nm = Name::new(type_n)?;
+    match (nm.res_type, params) {
+        (Res::GeoLoc, Some(p)) => {
+            // Use "res" query parameter for GeoLoc access check
+            Ok(Name::new(&p.res)?.obj(obj_n)?)
+        }
+        (Res::GeoLoc, None) => Err(Error::InvalidValue),
+        (_, Some(_p)) => Err(Error::InvalidValue),
+        _ => Ok(nm.obj(obj_n)?),
+    }
+}
+
 /// Router for other objects
 fn other_object(honey: Honey) -> Router {
     /// Handle `GET` request
@@ -739,37 +757,25 @@ fn other_object(honey: Honey) -> Router {
         AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
         params: Option<Query<QueryParams>>,
     ) -> Resp2 {
+        log::info!("GET {type_n}/{obj_n} {params:?}");
         let nm = Name::new(&type_n)?.obj(&obj_n)?;
-        log::info!("GET {nm} {params:?}");
+        let ck_nm = check_name(&type_n, &obj_n, &params)?;
+        // get precent-decoded object name
+        let obj_n = nm.object_n().ok_or(Error::InvalidValue)?;
         let sql = one_sql(nm.res_type);
-        let name = nm.object_n().ok_or(StatusCode::BAD_REQUEST)?;
         let cred = Credentials::load(&session).await?;
-        match (nm.res_type, params) {
-            (Res::GeoLoc, Some(p)) => {
-                // Use associated res parameter for access check
-                let res = &p.res;
-                let nm = Name::new(res)?.obj(&obj_n)?;
-                honey.name_access(cred.user(), &nm, Access::View).await?;
-                let body = get_by_pkey2(&honey.db, sql, &name, res).await?;
-                json_resp(body)
+        honey.name_access(cred.user(), &ck_nm, Access::View).await?;
+        let body = match nm.res_type {
+            Res::GeoLoc => {
+                get_by_pkey2(&honey.db, sql, &obj_n, ck_nm.res_type.as_str())
+                    .await?
             }
-            (Res::GeoLoc, None) => {
-                return Err(StatusCode::BAD_REQUEST);
+            Res::ControllerIo => {
+                get_array_by_pkey(&honey.db, sql, &obj_n).await?
             }
-            (_, Some(_p)) => {
-                return Err(StatusCode::BAD_REQUEST);
-            }
-            (Res::ControllerIo, _) => {
-                honey.name_access(cred.user(), &nm, Access::View).await?;
-                let body = get_array_by_pkey(&honey.db, sql, &name).await?;
-                json_resp(body)
-            }
-            _ => {
-                honey.name_access(cred.user(), &nm, Access::View).await?;
-                let body = get_by_pkey(&honey.db, sql, &name).await?;
-                json_resp(body)
-            }
-        }
+            _ => get_by_pkey(&honey.db, sql, &obj_n).await?,
+        };
+        json_resp(body)
     }
 
     /// Handle `PATCH` request
@@ -777,17 +783,20 @@ fn other_object(honey: Honey) -> Router {
         session: Session,
         State(honey): State<Honey>,
         AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
+        params: Option<Query<QueryParams>>,
         Json(attrs): Json<Map<String, Value>>,
     ) -> Resp0 {
+        log::info!("PATCH {type_n}/{obj_n} {params:?}");
         let nm = Name::new(&type_n)?.obj(&obj_n)?;
-        log::info!("PATCH {nm}");
+        let ck_nm = check_name(&type_n, &obj_n, &params)?;
         let cred = Credentials::load(&session).await?;
         // *At least* Operate access needed (further checks below)
-        let access =
-            honey.name_access(cred.user(), &nm, Access::Operate).await?;
+        let access = honey
+            .name_access(cred.user(), &ck_nm, Access::Operate)
+            .await?;
         for key in attrs.keys() {
             let attr = &key[..];
-            let required = Access::required_patch(nm.res_type, attr);
+            let required = Access::required_patch(ck_nm.res_type, attr);
             access.check(required)?;
         }
         if let Some(mut msn) = honey.authenticate(cred).await? {
