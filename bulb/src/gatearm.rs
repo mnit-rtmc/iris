@@ -67,7 +67,10 @@ impl AncillaryData for GateArmAnc {
     fn new(pri: &GateArm, view: View) -> Self {
         let mut cio = ControllerIoAnc::new(pri, view);
         cio.assets.push(Asset::GateArmStates);
-        GateArmAnc { cio, states: Vec::new() }
+        GateArmAnc {
+            cio,
+            states: Vec::new(),
+        }
     }
 
     /// Get next asset to fetch

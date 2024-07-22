@@ -26,6 +26,7 @@ use crate::fetch::{Action, Uri};
 use crate::flowstream::FlowStream;
 use crate::gatearm::GateArm;
 use crate::gatearmarray::GateArmArray;
+use crate::geoloc::Loc;
 use crate::gps::Gps;
 use crate::item::ItemState;
 use crate::lanemarking::LaneMarking;
@@ -928,47 +929,47 @@ async fn fetch_primary<C: Card>(cv: &CardView) -> Result<C> {
 
 /// Patch changed fields on Setup / Location view
 pub async fn patch_changed(cv: &CardView) -> Result<()> {
-    match cv.res {
-        Res::Alarm => patch_changed_x::<Alarm>(cv).await,
-        Res::Beacon => patch_changed_x::<Beacon>(cv).await,
-        Res::CabinetStyle => patch_changed_x::<CabinetStyle>(cv).await,
-        Res::Camera => patch_changed_x::<Camera>(cv).await,
-        Res::CommConfig => patch_changed_x::<CommConfig>(cv).await,
-        Res::CommLink => patch_changed_x::<CommLink>(cv).await,
-        Res::Controller => patch_changed_x::<Controller>(cv).await,
-        Res::Detector => patch_changed_x::<Detector>(cv).await,
-        Res::Dms => patch_changed_x::<Dms>(cv).await,
-        Res::Domain => patch_changed_x::<Domain>(cv).await,
-        Res::FlowStream => patch_changed_x::<FlowStream>(cv).await,
-        Res::GateArm => patch_changed_x::<GateArm>(cv).await,
-        Res::GateArmArray => patch_changed_x::<GateArmArray>(cv).await,
-        Res::Gps => patch_changed_x::<Gps>(cv).await,
-        Res::LaneMarking => patch_changed_x::<LaneMarking>(cv).await,
-        Res::LcsArray => patch_changed_x::<LcsArray>(cv).await,
-        Res::LcsIndication => patch_changed_x::<LcsIndication>(cv).await,
-        Res::Modem => patch_changed_x::<Modem>(cv).await,
-        Res::Permission => patch_changed_x::<Permission>(cv).await,
-        Res::RampMeter => patch_changed_x::<RampMeter>(cv).await,
-        Res::Role => patch_changed_x::<Role>(cv).await,
-        Res::TagReader => patch_changed_x::<TagReader>(cv).await,
-        Res::User => patch_changed_x::<User>(cv).await,
-        Res::VideoMonitor => patch_changed_x::<VideoMonitor>(cv).await,
-        Res::WeatherSensor => patch_changed_x::<WeatherSensor>(cv).await,
-        _ => unreachable!(),
-    }
-}
-
-/// Patch changed fields from a Setup / Location view
-async fn patch_changed_x<C: Card>(cv: &CardView) -> Result<()> {
     match cv.view {
-        View::Setup => patch_setup::<C>(cv).await,
-        View::Location => patch_loc::<C>(cv).await,
+        View::Setup => patch_setup(cv).await,
+        View::Location => patch_loc(cv).await,
         _ => unreachable!(),
     }
 }
 
 /// Patch changed fields from a Setup view
-async fn patch_setup<C: Card>(cv: &CardView) -> Result<()> {
+async fn patch_setup(cv: &CardView) -> Result<()> {
+    match cv.res {
+        Res::Alarm => patch_setup_x::<Alarm>(cv).await,
+        Res::Beacon => patch_setup_x::<Beacon>(cv).await,
+        Res::CabinetStyle => patch_setup_x::<CabinetStyle>(cv).await,
+        Res::Camera => patch_setup_x::<Camera>(cv).await,
+        Res::CommConfig => patch_setup_x::<CommConfig>(cv).await,
+        Res::CommLink => patch_setup_x::<CommLink>(cv).await,
+        Res::Controller => patch_setup_x::<Controller>(cv).await,
+        Res::Detector => patch_setup_x::<Detector>(cv).await,
+        Res::Dms => patch_setup_x::<Dms>(cv).await,
+        Res::Domain => patch_setup_x::<Domain>(cv).await,
+        Res::FlowStream => patch_setup_x::<FlowStream>(cv).await,
+        Res::GateArm => patch_setup_x::<GateArm>(cv).await,
+        Res::GateArmArray => patch_setup_x::<GateArmArray>(cv).await,
+        Res::Gps => patch_setup_x::<Gps>(cv).await,
+        Res::LaneMarking => patch_setup_x::<LaneMarking>(cv).await,
+        Res::LcsArray => patch_setup_x::<LcsArray>(cv).await,
+        Res::LcsIndication => patch_setup_x::<LcsIndication>(cv).await,
+        Res::Modem => patch_setup_x::<Modem>(cv).await,
+        Res::Permission => patch_setup_x::<Permission>(cv).await,
+        Res::RampMeter => patch_setup_x::<RampMeter>(cv).await,
+        Res::Role => patch_setup_x::<Role>(cv).await,
+        Res::TagReader => patch_setup_x::<TagReader>(cv).await,
+        Res::User => patch_setup_x::<User>(cv).await,
+        Res::VideoMonitor => patch_setup_x::<VideoMonitor>(cv).await,
+        Res::WeatherSensor => patch_setup_x::<WeatherSensor>(cv).await,
+        _ => unreachable!(),
+    }
+}
+
+/// Patch changed fields from a Setup view
+async fn patch_setup_x<C: Card>(cv: &CardView) -> Result<()> {
     let pri = fetch_primary::<C>(cv).await?;
     let changed = pri.changed_setup();
     if !changed.is_empty() {
@@ -978,14 +979,35 @@ async fn patch_setup<C: Card>(cv: &CardView) -> Result<()> {
 }
 
 /// Patch changed fields from a Location view
-async fn patch_loc<C: Card>(cv: &CardView) -> Result<()> {
+async fn patch_loc(cv: &CardView) -> Result<()> {
+    match cv.res {
+        Res::Beacon => patch_loc_x::<Beacon>(cv).await,
+        Res::Camera => patch_loc_x::<Camera>(cv).await,
+        Res::Controller => patch_loc_x::<Controller>(cv).await,
+        Res::Dms => patch_loc_x::<Dms>(cv).await,
+        Res::GateArmArray => patch_loc_x::<GateArmArray>(cv).await,
+        Res::LaneMarking => patch_loc_x::<LaneMarking>(cv).await,
+        Res::RampMeter => patch_loc_x::<RampMeter>(cv).await,
+        Res::TagReader => patch_loc_x::<TagReader>(cv).await,
+        Res::WeatherSensor => patch_loc_x::<WeatherSensor>(cv).await,
+        _ => unreachable!(),
+    }
+}
+
+/// Patch changed fields from a Location view
+async fn patch_loc_x<C>(cv: &CardView) -> Result<()>
+where
+    C: Card + Loc,
+{
     let pri = fetch_primary::<C>(cv).await?;
-    let anc = fetch_ancillary(&pri, View::Location).await?;
-    let changed = pri.changed_location(anc);
-    if !changed.is_empty() {
-        uri_one(Res::GeoLoc, &cv.name)
-            .patch(&changed.into())
-            .await?;
+    if let Some(geoloc) = pri.geoloc() {
+        let anc = fetch_ancillary(&pri, View::Location).await?;
+        let changed = pri.changed_location(anc);
+        if !changed.is_empty() {
+            let mut uri = uri_one(Res::GeoLoc, geoloc);
+            uri.query("res", cv.res.as_str());
+            uri.patch(&changed.into()).await?;
+        }
     }
     Ok(())
 }
