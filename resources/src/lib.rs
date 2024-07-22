@@ -67,6 +67,7 @@ pub enum Res {
     SignMessage,
     SystemAttribute,
     TagReader,
+    TollZone,
     User,
     VideoMonitor,
     WeatherSensor,
@@ -142,6 +143,7 @@ impl Res {
             SignMessage,
             SystemAttribute,
             TagReader,
+            TollZone,
             User,
             VideoMonitor,
             WeatherSensor,
@@ -205,6 +207,7 @@ impl Res {
             SignMessage => "sign_message",
             SystemAttribute => "system_attribute",
             TagReader => "tag_reader",
+            TollZone => "toll_zone",
             User => "user_id",
             VideoMonitor => "video_monitor",
             WeatherSensor => "weather_sensor",
@@ -240,6 +243,7 @@ impl Res {
             RampMeter => "🚦",
             Role => "💪",
             TagReader => "🏷️ ",
+            TollZone => "💲",
             User => "👤",
             VideoMonitor => "📺",
             WeatherSensor => "🌦️ ",
@@ -282,7 +286,7 @@ impl Res {
             // Camera resources
             FlowStream | VideoMonitor => Camera,
             // Controller resources
-            Alarm | CommLink | ControllerIo | Modem => Controller,
+            Alarm | CommLink | ControllerIo | Gps | Modem => Controller,
             // Detector resources
             Rnode | Road => Detector,
             // DMS resources
@@ -298,6 +302,8 @@ impl Res {
             Domain | User | Role => Permission,
             // System attribute resources
             CabinetStyle | CommConfig => SystemAttribute,
+            // Toll zone resources
+            TagReader => TollZone,
             // Others
             _ => self,
         }
