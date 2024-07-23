@@ -19,9 +19,9 @@ import java.util.LinkedList;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Work;
 import us.mn.state.dot.sched.Worker;
-import us.mn.state.dot.sonar.CidrBlock;
 import us.mn.state.dot.sonar.Domain;
 import us.mn.state.dot.sonar.Role;
+import us.mn.state.dot.tms.utils.CidrBlock;
 
 /**
  * Simple class to authenticate a user with an LDAP server.

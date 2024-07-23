@@ -17,11 +17,11 @@ package us.mn.state.dot.tms.server;
 import java.net.InetAddress;
 import java.util.List;
 import java.util.Properties;
-import us.mn.state.dot.sonar.CidrBlock;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.GateArmArray;
+import us.mn.state.dot.tms.utils.CidrBlock;
 
 /**
  * A namespace which checks client IP addresses against an allow list.
