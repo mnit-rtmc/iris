@@ -112,7 +112,7 @@ Property               | Description
 `db.url`               | URL of PostgreSQL server
 `db.user`              | User for PostgreSQL connection
 `db.password`          | Password for PostgreSQL connection
-`sonar.ldap.urls`      | List of URLs for LDAP authentication
+`sonar.ldap.url`       | URL of LDAP server for user authentication
 `sonar.port`           | TCP port to connect to SONAR
 `sonar.protocols`      | Protocol names to enable (regex)
 `sonar.cipher.suites`  | Cipher suite names to enable (regex)
@@ -134,12 +134,12 @@ changed, since they were configured earlier by the `iris_ctl` script.
 
 ### LDAP
 
-The `sonar.ldap.urls` property can be used to let IRIS pass user authentication
-requests to one or more LDAP servers.  Multiple URLs must be separated by a
-space.  IRIS can manage user accounts and passwords without an LDAP server, but
-this feature allows operators to log into IRIS without requiring them to
-remember an additional user name and password.  If your organization already has
-an LDAP server, such as Active Directory, you should use that.
+The `sonar.ldap.url` property can be used to let IRIS pass user authentication
+requests to an LDAP server.  IRIS can manage user accounts and passwords
+without an LDAP server, but this feature allows operators to log into IRIS
+without requiring them to remember an additional user name and password.  If
+your organization already has an LDAP server, such as Active Directory, you
+should use that.
 
 #### LDAPS
 

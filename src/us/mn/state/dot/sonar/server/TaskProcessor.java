@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2021  Minnesota Department of Transportation
+ * Copyright (C) 2006-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -168,11 +168,9 @@ public class TaskProcessor {
 		authenticator = new Authenticator(this);
 		context = Security.createContext(props);
 		LDAPSocketFactory.FACTORY = context.getSocketFactory();
-		String ldap_urls = props.getProperty("sonar.ldap.urls");
-		if (ldap_urls != null) {
-			for (String url: ldap_urls.split("[ \t,]+"))
-				addProvider(new LDAPProvider(url));
-		}
+		String ldap_url = props.getProperty("sonar.ldap.url");
+		if (ldap_url != null)
+			addProvider(new LDAPProvider(ldap_url));
 		session_file = props.getProperty("sonar.session.file");
 	}
 
