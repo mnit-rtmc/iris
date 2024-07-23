@@ -42,6 +42,7 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.SSLState;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.server.HashProvider;
 
 /**
  * The task processor handles all SONAR tasks.
@@ -160,17 +161,18 @@ public class TaskProcessor {
 
 	/** Create a task processor */
 	public TaskProcessor(ServerNamespace n, Properties p,
-		AccessMonitor am) throws IOException, ConfigurationError
+		AccessMonitor am, HashProvider hp) throws IOException,
+		ConfigurationError
 	{
 		namespace = n;
 		props = p;
 		access_monitor = am;
-		authenticator = new Authenticator(this);
+		authenticator = new Authenticator(this, hp);
 		context = Security.createContext(props);
 		LDAPSocketFactory.FACTORY = context.getSocketFactory();
-		String ldap_url = props.getProperty("sonar.ldap.url");
-		if (ldap_url != null)
-			addProvider(new LDAPProvider(ldap_url));
+		String url = props.getProperty("sonar.ldap.url");
+		if (url != null)
+			authenticator.setLdapProvider(new LdapProvider(url));
 		session_file = props.getProperty("sonar.session.file");
 	}
 
@@ -179,11 +181,6 @@ public class TaskProcessor {
 		SSLException
 	{
 		return new SSLState(conn, context, props, false);
-	}
-
-	/** Add an authentication provider */
-	public void addProvider(AuthProvider ap) {
-		authenticator.addProvider(ap);
 	}
 
 	/** Get the SONAR namespace */
@@ -330,7 +327,11 @@ public class TaskProcessor {
 	void authenticate(ConnectionImpl c, String name, char[] password) {
 		if (DEBUG.isOpen())
 			DEBUG.log("authenticating " + name + " on " + c);
-		authenticator.authenticate(c, lookupUser(name), name, password);
+		UserImpl user = lookupUser(name);
+		if (user != null)
+			authenticator.authenticate(c, user, password);
+		else
+			failLogin(c, name, false);
 	}
 
 	/** Lookup a user by name. */

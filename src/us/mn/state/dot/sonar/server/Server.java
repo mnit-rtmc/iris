@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2017  Minnesota Department of Transportation
+ * Copyright (C) 2006-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Props;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.tms.server.HashProvider;
 
 /**
  * The SONAR server processes all data transfers with client connections.
@@ -36,16 +37,12 @@ public final class Server {
 
 	/** Create the SONAR server */
 	public Server(ServerNamespace n, Properties props,
-		AccessMonitor am) throws IOException, ConfigurationError
+		AccessMonitor am, HashProvider hp) throws IOException,
+		ConfigurationError
 	{
 		int port = Props.getIntProp(props, "sonar.port");
-		processor = new TaskProcessor(n, props, am);
+		processor = new TaskProcessor(n, props, am, hp);
 		thread = new SelectorThread(processor, port);
-	}
-
-	/** Add an authentication provider */
-	public void addProvider(AuthProvider ap) {
-		processor.addProvider(ap);
 	}
 
 	/** Join the selector thread */

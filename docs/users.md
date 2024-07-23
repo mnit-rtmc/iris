@@ -13,9 +13,9 @@ Field     | Description
 ----------|-------------
 Name      | Account name
 Full Name | User name
+Role      | [Role](#roles) which determines the authorized permissions
 Dn        | **Distinguished name** for [LDAP] authentication
 Password  | Hash of password
-Role      | [Role](#roles) which determines the authorized permissions
 Enabled   | Flag to disable account
 
 On login, these checks are performed:
@@ -23,10 +23,10 @@ On login, these checks are performed:
  - The connection IP must be within an `enabled` domain for the role
  - _(Web UI)_ All IPs in the [X-Forwarded-For] HTTP header must be within
    `enabled` domains for the role
- - If `dn` is not NULL, authentication is performed using [LDAP].  On
-   successful authentication, the cached password is updated, if necessary.
- - If `dn` is NULL or the LDAP server does not respond, authentication is
-   performed with the stored password hash
+ - Password authenticated
+   * If `dn` is set: [LDAP] server authentication - on success, update the
+     cached password hash
+   * If `dn` is NULL (or LDAP connection fails): password hash authentication
 
 <details>
 <summary>API Resources 🕵️ </summary>

@@ -76,8 +76,8 @@ public class MainServer {
 	/** SONAR server */
 	static public Server server;
 
-	/** Authentication provider */
-	static public IrisProvider auth_provider;
+	/** Hash password authentication provider */
+	static public HashProvider hash_provider;
 
 	/** SQL connection */
 	static private SQLConnection store;
@@ -110,9 +110,9 @@ public class MainServer {
 			scheduleTimerJobs();
 			scheduleFlushJobs();
 			startProtocolServer();
-			server = new Server(ns, props, new AccessLogger(FLUSH));
-			auth_provider = new IrisProvider();
-			server.addProvider(auth_provider);
+			hash_provider = new HashProvider();
+			server = new Server(ns, props, new AccessLogger(FLUSH),
+				hash_provider);
 			System.err.println("IRIS Server active");
 			server.join();
 		}

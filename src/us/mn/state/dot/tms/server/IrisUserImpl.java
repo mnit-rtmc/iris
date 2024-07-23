@@ -171,7 +171,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		InvalidKeySpecException
 	{
 		checkPassword(pwd);
-		String ph = MainServer.auth_provider.createHash(
+		String ph = MainServer.hash_provider.createHash(
 			pwd.toCharArray());
 		store.update(this, "password", ph);
 		setPassword(ph);

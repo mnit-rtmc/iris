@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2016  Minnesota Department of Transportation
+ * Copyright (C) 2012-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,17 +21,15 @@ import java.security.spec.InvalidKeySpecException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import us.mn.state.dot.sonar.server.AuthProvider;
 import us.mn.state.dot.sonar.server.UserImpl;
 import us.mn.state.dot.tms.utils.Base64;
-import static us.mn.state.dot.tms.utils.SString.isBlank;
 
 /**
- * Authentication provider for IRIS users.
+ * Hashed password authentication provider for IRIS users.
  *
  * @author Douglas Lau
  */
-public class IrisProvider implements AuthProvider {
+public class HashProvider {
 
 	/** Number of iterations for generating hash */
 	static private final int N_ITERATIONS = 10 * 1024;
@@ -48,8 +46,8 @@ public class IrisProvider implements AuthProvider {
 	/** Factory for hashing keys */
 	private final SecretKeyFactory factory;
 
-	/** Create a new IRIS authentication provider */
-	public IrisProvider() throws NoSuchAlgorithmException {
+	/** Create a new hash authentication provider */
+	public HashProvider() throws NoSuchAlgorithmException {
 		rng = SecureRandom.getInstance("SHA1PRNG");
 		factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 	}
@@ -74,8 +72,7 @@ public class IrisProvider implements AuthProvider {
 	/** Authenticate a user */
 	public boolean authenticate(UserImpl user, char[] pwd) {
 		try {
-			return isBlank(user.getDn()) &&
-			       user instanceof IrisUserImpl &&
+			return (user instanceof IrisUserImpl) &&
 			       check((IrisUserImpl) user, pwd);
 		}
 		catch (Exception e) {

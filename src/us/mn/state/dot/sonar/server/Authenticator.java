@@ -15,13 +15,14 @@
 package us.mn.state.dot.sonar.server;
 
 import java.net.InetAddress;
-import java.util.LinkedList;
+import javax.naming.CommunicationException;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Work;
 import us.mn.state.dot.sched.Worker;
 import us.mn.state.dot.sonar.Domain;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.utils.CidrBlock;
+import us.mn.state.dot.tms.server.HashProvider;
 
 /**
  * Simple class to authenticate a user with an LDAP server.
@@ -32,15 +33,26 @@ public class Authenticator {
 
 	/** Check that a user is enabled */
 	static private boolean isUserEnabled(UserImpl u) {
-		return u != null && u.getEnabled();
+		return u.getEnabled()
+		    && isRoleEnabled(u.getRole());
+	}
+
+	/** Check that a role is enabled */
+	static private boolean isRoleEnabled(Role r) {
+		return (r != null) && r.getEnabled();
+	}
+
+	/** Check whethere a distinguished name is set */
+	static private boolean isDnSet(String dn) {
+		return (dn != null) && (dn.length() > 0);
 	}
 
 	/** Check that a password is sane */
-	static protected boolean isPasswordSane(char[] pwd) {
-		return pwd != null && pwd.length > 0;
+	static private boolean isPasswordSane(char[] pwd) {
+		return (pwd != null) && (pwd.length >= 6);
 	}
 
-	/** Clear a password in memory */
+	/** Clear a password buffer in memory */
 	static private void clearPassword(char[] pwd) {
 		for (int i = 0; i < pwd.length; i++)
 			pwd[i] = '\0';
@@ -61,51 +73,86 @@ public class Authenticator {
 	/** Task processor */
 	private final TaskProcessor processor;
 
-	/** List of authentication providers */
-	private final LinkedList<AuthProvider> providers =
-		new LinkedList<AuthProvider>();
+	/** Password hash authentication provider */
+	private final HashProvider hash_provider;
 
-	/** Add an authentication provider */
-	public void addProvider(final AuthProvider ap) {
+	/** LDAP authentication provider (optional) */
+	private LdapProvider ldap_provider;
+
+	/** Set LDAP authentication provider */
+	public void setLdapProvider(final LdapProvider lp) {
 		auth_sched.addWork(new Work() {
 			public void perform() {
-				// Add to beginning of list, so that LDAP
-				// providers will be checked last
-				providers.addFirst(ap);
+				ldap_provider = lp;
 			}
 		});
 	}
 
 	/** Create a new user authenticator */
-	public Authenticator(TaskProcessor tp) {
+	public Authenticator(TaskProcessor tp, HashProvider hp) {
 		processor = tp;
+		hash_provider = hp;
+		ldap_provider = null;
 	}
 
 	/** Authenticate a user connection */
-	void authenticate(final ConnectionImpl c, final UserImpl u,
-		final String name, final char[] password)
+	void authenticate(final ConnectionImpl c, final UserImpl user,
+		final char[] password)
 	{
-		auth_sched.addWork(new Work() {
-			public void perform() {
-				doAuthenticate(c, u, name, password);
-			}
-		});
+		if (user != null) {
+			auth_sched.addWork(new Work() {
+				public void perform() {
+					doAuthenticate(c, user, password);
+				}
+			});
+		}
 	}
 
-	/** Perform a user authentication */
+	/** Perform a user authentication (auth_sched thread) */
 	private void doAuthenticate(ConnectionImpl c, UserImpl user,
-		String name, char[] pwd)
+		char[] pwd)
 	{
 		try {
-			if (!authenticate(user, pwd))
-				processor.failLogin(c, name, false);
-			if (!checkDomain(c, user))
-				processor.failLogin(c, name, true);
-			else
+			if (authenticate(c, user, user.getName(), pwd)) {
 				processor.finishLogin(c, user);
+			}
 		}
 		finally {
 			clearPassword(pwd);
+		}
+	}
+
+	/** Authenticate a user's credentials (auth_sched thread) */
+	private boolean authenticate(ConnectionImpl c, UserImpl user,
+		String name, char[] pwd)
+	{
+		if (!isUserEnabled(user) || !isPasswordSane(pwd)) {
+			processor.failLogin(c, name, false);
+			return false;
+		}
+		if (!checkDomain(c, user)) {
+			processor.failLogin(c, name, true);
+			return false;
+		}
+		String dn = user.getDn();
+		if (isDnSet(dn) && ldap_provider != null) {
+			try {
+				if (ldap_provider.authenticate(dn, pwd)) {
+					// update cached password hash
+					processor.finishPassword(c, user, pwd);
+					return true;
+				}
+			}
+			catch (CommunicationException e) {
+				// error communicating with LDAP server;
+				// fall thru and use hash_provider
+			}
+		}
+		if (hash_provider.authenticate(user, pwd)) {
+			return true;
+		} else {
+			processor.failLogin(c, name, false);
+			return false;
 		}
 	}
 
@@ -113,7 +160,7 @@ public class Authenticator {
 	private boolean checkDomain(ConnectionImpl c, UserImpl user) {
 		if (c != null && user != null) {
 			Role role = user.getRole();
-			if (role != null && role.getEnabled()) {
+			if (isRoleEnabled(role)) {
 				InetAddress addr = c.getAddress();
 				for (Domain d : role.getDomains()) {
 					if (checkDomain(d, addr))
@@ -135,36 +182,34 @@ public class Authenticator {
 		}
 	}
 
-	/** Authenticate a user's credentials */
-	private boolean authenticate(UserImpl user, char[] pwd) {
-		if (isUserEnabled(user) && isPasswordSane(pwd)) {
-			for (AuthProvider p: providers) {
-				if (p.authenticate(user, pwd))
-					return true;
-			}
-		}
-		return false;
-	}
-
 	/** Change a user password */
 	void changePassword(final ConnectionImpl c, final UserImpl u,
 		final char[] pwd_current, final char[] pwd_new)
 	{
-		auth_sched.addWork(new Work() {
-			public void perform() {
-				doChangePassword(c, u, pwd_current, pwd_new);
-			}
-		});
+		if (u != null) {
+			auth_sched.addWork(new Work() {
+				public void perform() {
+					doChangePassword(c, u, pwd_current,
+						pwd_new);
+				}
+			});
+		}
 	}
 
-	/** Perform a user password change */
+	/** Perform a user password change (auth_sched thread) */
 	private void doChangePassword(ConnectionImpl c, UserImpl user,
 		char[] pwd_current, char[] pwd_new)
 	{
 		try {
-			if (authenticate(user, pwd_current))
+			String dn = user.getDn();
+			if (isDnSet(dn)) {
+				processor.failPassword(c, PermissionDenied.
+					authenticationFailed().getMessage());
+			} else if (authenticate(c, user, user.getName(),
+				pwd_current))
+			{
 				processor.finishPassword(c, user, pwd_new);
-			else {
+			} else {
 				processor.failPassword(c, PermissionDenied.
 					authenticationFailed().getMessage());
 			}
