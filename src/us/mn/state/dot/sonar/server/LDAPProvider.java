@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,8 @@ public class LDAPProvider implements AuthProvider {
 			"com.sun.jndi.ldap.LdapCtxFactory");
 		env.put(Context.PROVIDER_URL, url);
 		env.put("com.sun.jndi.ldap.connect.timeout", "5000");
-		if(url.startsWith("ldaps")) {
+		env.put("com.sun.jndi.ldap.read.timeout", "5000");
+		if (url.startsWith("ldaps")) {
 			env.put(Context.SECURITY_PROTOCOL, "ssl");
 			env.put("java.naming.ldap.factory.socket",
 				LDAPSocketFactory.class.getName());
@@ -56,9 +57,10 @@ public class LDAPProvider implements AuthProvider {
 	}
 
 	/** Get a string representation of the provider (URL) */
+	@Override
 	public String toString() {
 		Object url = env.get(Context.PROVIDER_URL);
-		if(url != null)
+		if (url != null)
 			return url.toString();
 		else
 			return "";
@@ -70,15 +72,15 @@ public class LDAPProvider implements AuthProvider {
 	 * @return true if user was authenticated, otherwise false. */
 	public boolean authenticate(UserImpl user, char[] pwd) {
 		String dn = user.getDn();
-		if(isDnSane(dn)) {
+		if (isDnSane(dn)) {
 			try {
 				authenticate(dn, pwd);
 				return true;
 			}
-			catch(AuthenticationException e) {
+			catch (AuthenticationException e) {
 				// fall to end of method
 			}
-			catch(NamingException e) {
+			catch (NamingException e) {
 				TaskProcessor.DEBUG.log(namingMessage(e) +
 					" on " + toString());
 			}
