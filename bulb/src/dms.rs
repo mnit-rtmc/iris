@@ -18,6 +18,7 @@ use crate::error::Result;
 use crate::fetch::{Action, Uri};
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
+use crate::start::fly_map_to;
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, TextArea};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use chrono::DateTime;
@@ -831,6 +832,11 @@ impl Dms {
 
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &DmsAnc) -> String {
+        if let Some((lat, lon)) = anc.loc.latlon() {
+            let lat = JsValue::from_f64(lat);
+            let lon = JsValue::from_f64(lon);
+            fly_map_to(&lat, &lon);
+        }
         let mut html = self.title(View::Control);
         html.push_str("<div class='row fill'>");
         html.push_str("<span>");

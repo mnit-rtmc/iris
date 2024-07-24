@@ -42,6 +42,8 @@ extern "C" {
     fn update_stat_sample(data: &JsValue);
     // Update TMS main item states
     fn update_item_states(data: &JsValue);
+    // Fly map to given point
+    pub fn fly_map_to(lat: &JsValue, lng: &JsValue);
 }
 
 /// Button attributes

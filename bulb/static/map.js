@@ -257,7 +257,7 @@ function init_map() {
             tooltip.close();
             tooltip = null;
         }
-        let fid = osm_layer_id(e.layer);
+        let fid = osm_layer_id(e.propagatedFrom);
         let change = (typeof fid != "undefined") && (fid != osm_select);
         if (osm_select) {
             osm_layers.resetFeatureStyle(osm_select);
@@ -273,7 +273,7 @@ function init_map() {
                 opacity: 0.1,
                 radius: 6,
             });
-            let label = osm_layer_label(e.layer);
+            let label = osm_layer_label(e.propagatedFrom);
             if (label) {
                 tooltip = L.tooltip()
                            .setContent(label)
@@ -290,7 +290,7 @@ function init_map() {
             tooltip.close();
             tooltip = null;
         }
-        let fid = tms_layer_id(e.layer);
+        let fid = tms_layer_id(e.propagatedFrom);
         let change = (typeof fid != "undefined") && (fid != tms_select);
         if (tms_select) {
             tms_layers.resetFeatureStyle(tms_select);
@@ -298,12 +298,12 @@ function init_map() {
         }
         if (change) {
             tms_select = fid;
-            let style = tms_style(e.layer.properties);
+            let style = tms_style(e.propagatedFrom.properties);
             style.weight = 2;
             style.color = 'white';
             style.opacity = 1,
             tms_layers.setFeatureStyle(fid, style);
-            let label = tms_layer_label(e.layer);
+            let label = tms_layer_label(e.propagatedFrom);
             if (label) {
                 tooltip = L.tooltip()
                            .setContent(label)

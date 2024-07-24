@@ -140,6 +140,19 @@ where
 }
 
 impl<L> LocAnc<L> {
+    /// Get lat/lon of location
+    pub fn latlon(&self) -> Option<(f64, f64)> {
+        match &self.geoloc {
+            Some(geoloc) => {
+                match (geoloc.lat, geoloc.lon) {
+                    (Some(lat), Some(lon)) => Some((lat, lon)),
+                    _ => None,
+                }
+            }
+            None => None,
+        }
+    }
+
     /// Create an HTML `select` element of roads
     fn roads_html(&self, id: &str, groad: Option<&str>) -> String {
         let mut html = String::new();
