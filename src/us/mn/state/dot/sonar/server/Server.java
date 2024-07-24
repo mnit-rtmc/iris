@@ -20,6 +20,7 @@ import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Props;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.tms.server.AccessLogger;
 import us.mn.state.dot.tms.server.HashProvider;
 
 /**
@@ -37,11 +38,11 @@ public final class Server {
 
 	/** Create the SONAR server */
 	public Server(ServerNamespace n, Properties props,
-		AccessMonitor am, HashProvider hp) throws IOException,
+		AccessLogger al, HashProvider hp) throws IOException,
 		ConfigurationError
 	{
 		int port = Props.getIntProp(props, "sonar.port");
-		processor = new TaskProcessor(n, props, am, hp);
+		processor = new TaskProcessor(n, props, al, hp);
 		thread = new SelectorThread(processor, port);
 	}
 

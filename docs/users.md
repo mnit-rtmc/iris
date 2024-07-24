@@ -135,7 +135,9 @@ Whenever certain client events occur, a time-stamped record is added to the
 * FAIL AUTHENTICATION
 * FAIL DOMAIN
 * FAIL DOMAIN XFF
+* FAIL PASSWORD
 * CHANGE PASSWORD
+* UPDATE PASSWORD
 
 These records are purged automatically when older than the value of the
 `client_event_purge_days` [system attribute].

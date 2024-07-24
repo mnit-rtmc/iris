@@ -138,8 +138,13 @@ public class Authenticator {
 		if (isDnSet(dn) && ldap_provider != null) {
 			try {
 				if (ldap_provider.authenticate(dn, pwd)) {
-					// update cached password hash
-					processor.finishPassword(c, user, pwd);
+					// does cached password need updating?
+					if (!hash_provider.authenticate(user,
+						pwd))
+					{
+						processor.finishPassword(c, user,
+							pwd, true);
+					}
 					return true;
 				}
 			}
@@ -208,7 +213,7 @@ public class Authenticator {
 			} else if (authenticate(c, user, user.getName(),
 				pwd_current))
 			{
-				processor.finishPassword(c, user, pwd_new);
+				processor.finishPassword(c, user, pwd_new, false);
 			} else {
 				processor.failPassword(c, PermissionDenied.
 					authenticationFailed().getMessage());

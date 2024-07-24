@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2018  Minnesota Department of Transportation
+ * Copyright (C) 2012-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,17 +16,16 @@ package us.mn.state.dot.tms.server;
 
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
-import us.mn.state.dot.sonar.server.AccessMonitor;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.ClientEvent;
 
 /**
- * This is the main class to start the IRIS server.
+ * Client access logging (to database)
  *
  * @author Douglas Lau
  */
-public class AccessLogger implements AccessMonitor {
+public class AccessLogger {
 
 	/** FLUSH Scheduler for I/O jobs */
 	private final Scheduler flush;
@@ -37,43 +36,41 @@ public class AccessLogger implements AccessMonitor {
 	}
 
 	/** Log a connect event */
-	@Override
 	public void connect(String hostport) {
 		log_event(EventType.CLIENT_CONNECT, hostport, null);
 	}
 
 	/** Log an authenticate event */
-	@Override
 	public void authenticate(String hostport, String user) {
 		log_event(EventType.CLIENT_AUTHENTICATE, hostport, user);
 	}
 
 	/** Callback for a client fail domain login event */
-	@Override
 	public void failDomain(String hostport, String user) {
 		log_event(EventType.CLIENT_FAIL_DOMAIN, hostport, user);
 	}
 
 	/** Log a fail authentication event */
-	@Override
 	public void failAuthentication(String hostport, String user) {
 		log_event(EventType.CLIENT_FAIL_AUTHENTICATION, hostport, user);
 	}
 
 	/** Log a disconnect event */
-	@Override
 	public void disconnect(String hostport, String user) {
 		log_event(EventType.CLIENT_DISCONNECT, hostport, user);
 	}
 
 	/** Log a change password event */
-	@Override
 	public void changePassword(String hostport, String user) {
 		log_event(EventType.CLIENT_CHANGE_PASSWORD, hostport, user);
 	}
 
+	/** Log an update password event */
+	public void updatePassword(String hostport, String user) {
+		log_event(EventType.CLIENT_UPDATE_PASSWORD, hostport, user);
+	}
+
 	/** Log a fail password event */
-	@Override
 	public void failPassword(String hostport, String user) {
 		log_event(EventType.CLIENT_FAIL_PASSWORD, hostport, user);
 	}

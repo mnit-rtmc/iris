@@ -42,6 +42,7 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.SSLState;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.server.AccessLogger;
 import us.mn.state.dot.tms.server.HashProvider;
 
 /**
@@ -119,8 +120,8 @@ public class TaskProcessor {
 	/** Server properties */
 	private final Properties props;
 
-	/** Access monitor */
-	private final AccessMonitor access_monitor;
+	/** Access logger */
+	private final AccessLogger access_logger;
 
 	/** SSL context */
 	private final SSLContext context;
@@ -161,12 +162,12 @@ public class TaskProcessor {
 
 	/** Create a task processor */
 	public TaskProcessor(ServerNamespace n, Properties p,
-		AccessMonitor am, HashProvider hp) throws IOException,
+		AccessLogger al, HashProvider hp) throws IOException,
 		ConfigurationError
 	{
 		namespace = n;
 		props = p;
-		access_monitor = am;
+		access_logger = al;
 		authenticator = new Authenticator(this, hp);
 		context = Security.createContext(props);
 		LDAPSocketFactory.FACTORY = context.getSocketFactory();
@@ -231,7 +232,7 @@ public class TaskProcessor {
 	{
 		ConnectionImpl con = new ConnectionImpl(this, skey, sc);
 		doAddObject(con);
-		access_monitor.connect(con.getName());
+		access_logger.connect(con.getName());
 		synchronized (clients) {
 			clients.put(skey, con);
 			updateConnectionList();
@@ -274,7 +275,7 @@ public class TaskProcessor {
 		}
 		debugTask("Disconnecting", c);
 		if (c != null) {
-			access_monitor.disconnect(c.getName(), c.getUserName());
+			access_logger.disconnect(c.getName(), c.getUserName());
 			updateSessionList();
 			scheduleRemoveObject(c);
 		}
@@ -343,7 +344,7 @@ public class TaskProcessor {
 	void finishLogin(final ConnectionImpl c, final UserImpl u) {
 		processor.addWork(new TaskWork("Finish LOGIN", c) {
 			protected void doPerform() {
-				access_monitor.authenticate(c.getName(),
+				access_logger.authenticate(c.getName(),
 					u.getName());
 				scheduleSetAttribute(c, "user");
 				c.finishLogin(u);
@@ -358,10 +359,10 @@ public class TaskProcessor {
 		processor.addWork(new TaskWork("Fail LOGIN", c) {
 			protected void doPerform() {
 				if (domain) {
-					access_monitor.failDomain(c.getName(),
+					access_logger.failDomain(c.getName(),
 						name);
 				} else {
-					access_monitor.failAuthentication(
+					access_logger.failAuthentication(
 						c.getName(), name);
 				}
 				c.failLogin();
@@ -378,7 +379,7 @@ public class TaskProcessor {
 
 	/** Finish a PASSWORD */
 	void finishPassword(final ConnectionImpl c, final UserImpl u,
-		char[] pwd_new)
+		char[] pwd_new, final boolean update)
 	{
 		// Need to copy password, since authenticator will clear it
 		final String pwd = new String(pwd_new);
@@ -386,8 +387,15 @@ public class TaskProcessor {
 			protected void doPerform() {
 				try {
 					u.doSetPassword(pwd);
-					access_monitor.changePassword(
-						c.getName(), c.getUserName());
+					if (update) {
+						access_logger.updatePassword(
+							c.getName(),
+							c.getUserName());
+					} else {
+						access_logger.changePassword(
+							c.getName(),
+							c.getUserName());
+					}
 				}
 				catch (Exception e) {
 					failPassword(c, e.getMessage());
@@ -401,7 +409,7 @@ public class TaskProcessor {
 		processor.addWork(new TaskWork("Fail PASSWORD", c) {
 			protected void doPerform() {
 				c.failPassword(msg);
-				access_monitor.failPassword(c.getName(),
+				access_logger.failPassword(c.getName(),
 					c.getUserName());
 			}
 		});
