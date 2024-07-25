@@ -362,6 +362,12 @@ impl GeoLoc {
         self.pos().map(|pos| Pt::from(WebMercatorPos::from(pos)))
     }
 
+    /// Get the location normal
+    fn normal(&self) -> f64 {
+        let dir = TravelDir::from_i16(self.road_dir).unwrap_or(TravelDir::Nb);
+        Pt::from(dir).right().angle()
+    }
+
     /// Get tag values
     fn values(&self) -> Values {
         vec![Some(self.name.clone())]
@@ -658,7 +664,7 @@ impl Corridor {
 
     /// Calculate normal vector for a corridor location
     fn loc_normal(&self, loc: &GeoLoc) -> f64 {
-        let mut norm = Pt::from(TravelDir::Nb).right().angle();
+        let mut norm = loc.normal();
         let Some(pos) = loc.pos() else {
             return norm;
         };
@@ -955,7 +961,7 @@ impl SegmentState {
                 return cor.loc_normal(loc);
             }
         };
-        Pt::from(TravelDir::Nb).right().angle()
+        loc.normal()
     }
 }
 
