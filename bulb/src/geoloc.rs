@@ -143,12 +143,10 @@ impl<L> LocAnc<L> {
     /// Get lat/lon of location
     pub fn latlon(&self) -> Option<(f64, f64)> {
         match &self.geoloc {
-            Some(geoloc) => {
-                match (geoloc.lat, geoloc.lon) {
-                    (Some(lat), Some(lon)) => Some((lat, lon)),
-                    _ => None,
-                }
-            }
+            Some(geoloc) => match (geoloc.lat, geoloc.lon) {
+                (Some(lat), Some(lon)) => Some((lat, lon)),
+                _ => None,
+            },
             None => None,
         }
     }

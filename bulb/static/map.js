@@ -4,8 +4,14 @@ var map;
 // Current displayed tooltip
 var tooltip = null;
 
-/// TMS layers
+// TMS layers
 var tms_layers = null;
+
+// Current TMS selection
+var tms_select = null;
+
+// Fly map enabled
+var fly_enabled = true;
 
 // Current station sample data
 var stat_sample = null;
@@ -138,9 +144,9 @@ function tms_styles() {
     };
 }
 
-// Get style for a TMS feature
-function tms_style(properties) {
-    let style = {
+// Get base TMS style
+function tms_style_base() {
+    return {
         fill: true,
         fillColor: "#666",
         fillOpacity: 0.8,
@@ -149,45 +155,30 @@ function tms_style(properties) {
         color: "#000",
         opacity: 0.5,
     };
-    if (properties.name) {
-        if (item_states) {
-            let state = item_states[properties.name];
-            if (state) {
-                return item_style(state);
-            }
-        }
-        let style = {
-            fill: false,
-            stroke: false,
-        };
-        return style;
-    } else {
-        let station_id = properties.station_id;
-        if (station_id && stat_sample) {
-            let sample = stat_sample.samples[station_id];
-            if (sample) {
-                let flow = sample[0];
-                let speed = sample[1];
-                let density = (flow && speed) ? Math.round(flow / speed) : null;
-                style.fillColor = density_color(density);
-                style.fillOpacity = 1;
-            }
-        }
-        return style;
+}
+
+// Get TMS style
+function tms_style(properties) {
+    return tms_style_feature(properties.name, properties.station_id);
+}
+
+// Get style for a TMS feature
+function tms_style_feature(name, sid) {
+    return (name) ? tms_style_item(name) : tms_style_station(sid);
+}
+
+// Get style for a TMS item
+function tms_style_item(name) {
+    let state = '';
+    if (item_states) {
+        state = item_states[name];
     }
+    return item_style(state);
 }
 
 // Get style based on item state
 function item_style(state) {
-    let style = {
-        fill: true,
-        fillColor: "#666",
-        fillOpacity: 0.8,
-        stroke: true,
-        weight: 0.5,
-        color: "#000",
-        opacity: 0.5,
-    };
+    let style = tms_style_base();
     switch (state) {
         case '🔹':
             style.fillColor = "#55acee";
@@ -203,10 +194,26 @@ function item_style(state) {
         case '🔌':
             return style;
         default:
-            style.stroke = false;
             style.fill = false;
+            style.stroke = false;
             return style;
     }
+}
+
+// Get style for a TMS station
+function tms_style_station(sid) {
+    let style = tms_style_base();
+    if (sid && stat_sample) {
+        let sample = stat_sample.samples[sid];
+        if (sample) {
+            let flow = sample[0];
+            let speed = sample[1];
+            let density = (flow && speed) ? Math.round(flow / speed) : null;
+            style.fillColor = density_color(density);
+            style.fillOpacity = 1;
+        }
+    }
+    return style;
 }
 
 // Get color based on density (veh/mi)
@@ -224,6 +231,28 @@ function density_color(density) {
         return "#c0f";
     }
     return "#666";
+}
+
+// Select feature on TMS layers
+function select_tms_feature(fid, name, sid) {
+    let change = (typeof fid != "undefined") && (fid != tms_select);
+    if (tooltip) {
+        tooltip.close();
+        tooltip = null;
+    }
+    if (tms_select) {
+        tms_layers.resetFeatureStyle(tms_select);
+        tms_select = null;
+    }
+    if (change) {
+        let style = tms_style_feature(name, sid);
+        style.weight = 2;
+        style.color = 'white';
+        style.opacity = 1,
+        tms_layers.setFeatureStyle(fid, style);
+        tms_select = fid;
+    }
+    return change;
 }
 
 // Initialize leaflet map
@@ -284,25 +313,12 @@ function init_map() {
         L.DomEvent.stop(e);
     }
     osm_layers.on('click', osm_on_click);
-    var tms_select;
     function tms_on_click(e) {
-        if (tooltip) {
-            tooltip.close();
-            tooltip = null;
-        }
         let fid = tms_layer_id(e.propagatedFrom);
-        let change = (typeof fid != "undefined") && (fid != tms_select);
-        if (tms_select) {
-            tms_layers.resetFeatureStyle(tms_select);
-            tms_select = null;
-        }
+        let name = e.propagatedFrom.properties.name;
+        let sid = e.propagatedFrom.properties.station_id;
+        let change = select_tms_feature(fid, name, sid);
         if (change) {
-            tms_select = fid;
-            let style = tms_style(e.propagatedFrom.properties);
-            style.weight = 2;
-            style.color = 'white';
-            style.opacity = 1,
-            tms_layers.setFeatureStyle(fid, style);
             let label = tms_layer_label(e.propagatedFrom);
             if (label) {
                 tooltip = L.tooltip()

@@ -42,8 +42,10 @@ extern "C" {
     fn update_stat_sample(data: &JsValue);
     // Update TMS main item states
     fn update_item_states(data: &JsValue);
-    // Fly map to given point
-    pub fn fly_map_to(lat: &JsValue, lng: &JsValue);
+    // Fly map to given item
+    fn fly_map_to(fid: &JsValue, lat: &JsValue, lng: &JsValue);
+    // Enable/disable flying map
+    fn fly_enable(enable: JsValue);
 }
 
 /// Button attributes
@@ -83,6 +85,14 @@ fn hide_toast() {
     Doc::get()
         .elem::<HtmlElement>("sb_toast")
         .set_class_name("");
+}
+
+/// Fly map to specified item
+pub fn fly_map_item(fid: &str, lat: f64, lon: f64) {
+    let fid = JsValue::from_str(fid);
+    let lat = JsValue::from_f64(lat);
+    let lon = JsValue::from_f64(lon);
+    fly_map_to(&fid, &lat, &lon);
 }
 
 /// Application starting function
@@ -502,7 +512,9 @@ async fn click_card(res: Res, name: String, id: String) -> Result<()> {
     if id.ends_with('_') {
         cv = cv.view(View::Create);
     }
-    replace_card(cv).await
+    replace_card(cv).await?;
+    fly_enable(JsValue::TRUE);
+    Ok(())
 }
 
 /// Handle login button press
@@ -643,6 +655,7 @@ fn add_map_click_listener(elem: &Element) -> JsResult<()> {
 /// Select a card from a map marker click
 async fn select_card_map(res: Res, name: String) -> Result<()> {
     let id = format!("{res}_{name}");
+    fly_enable(JsValue::FALSE);
     click_card(res, name, id).await?;
     search_card_list().await
 }
