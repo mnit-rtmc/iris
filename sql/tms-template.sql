@@ -1479,7 +1479,7 @@ CREATE TABLE iris.controller (
     cabinet_style VARCHAR(20) REFERENCES iris.cabinet_style(name),
     geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
     condition INTEGER NOT NULL REFERENCES iris.condition,
-    notes VARCHAR(128),
+    notes VARCHAR CHECK (LENGTH(notes) < 256),
     password VARCHAR(32),
     setup JSONB,
     fail_time TIMESTAMP WITH time zone
@@ -1774,11 +1774,12 @@ CREATE VIEW camera_view AS
            c.publish, c.video_loss, c.geo_loc,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
            l.landmark, l.lat, l.lon, l.corridor, l.location,
-           c.controller, ctr.comm_link, ctr.drop_id, ctr.condition, c.notes
-    FROM iris.camera c
+           cio.controller, ctr.comm_link, ctr.drop_id, ctr.condition, c.notes
+    FROM iris._camera c
+    JOIN iris.controller_io cio ON c.name = cio.name
     LEFT JOIN iris.encoder_type et ON c.encoder_type = et.name
     LEFT JOIN geo_loc_view l ON c.geo_loc = l.name
-    LEFT JOIN controller_view ctr ON c.controller = ctr.name;
+    LEFT JOIN controller_view ctr ON cio.controller = ctr.name;
 GRANT SELECT ON camera_view TO PUBLIC;
 
 CREATE VIEW iris.camera_hashtag AS
@@ -2175,7 +2176,7 @@ CREATE TABLE iris._beacon (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
     message VARCHAR(128) NOT NULL,
-    notes VARCHAR(128),
+    notes VARCHAR CHECK (LENGTH(notes) < 256),
     verify_pin INTEGER,
     ext_mode BOOLEAN NOT NULL,
     state INTEGER NOT NULL REFERENCES iris.beacon_state
@@ -2264,16 +2265,18 @@ CREATE TRIGGER beacon_delete_trig
     FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW beacon_view AS
-    SELECT b.name, b.notes, b.message, p.camera, p.preset_num, b.geo_loc,
+    SELECT b.name, b.notes, b.message, cp.camera, cp.preset_num, b.geo_loc,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
            l.landmark, l.lat, l.lon, l.corridor, l.location,
-           b.controller, b.pin, b.verify_pin, b.ext_mode,
+           cio.controller, cio.pin, b.verify_pin, b.ext_mode,
            ctr.comm_link, ctr.drop_id, ctr.condition, bs.description AS state
-    FROM iris.beacon b
+    FROM iris._beacon b
     JOIN iris.beacon_state bs ON b.state = bs.id
-    LEFT JOIN iris.camera_preset p ON b.preset = p.name
+    JOIN iris.controller_io cio ON b.name = cio.name
+    LEFT JOIN iris.device_preset p ON b.name = p.name
+    LEFT JOIN iris.camera_preset cp ON cp.name = p.preset
     LEFT JOIN geo_loc_view l ON b.geo_loc = l.name
-    LEFT JOIN controller_view ctr ON b.controller = ctr.name;
+    LEFT JOIN controller_view ctr ON cio.controller = ctr.name;
 GRANT SELECT ON beacon_view TO PUBLIC;
 
 CREATE TABLE iris.beacon_action (
@@ -2370,10 +2373,10 @@ CREATE TRIGGER detector_table_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.detector AS
-    SELECT det.name, controller, pin, r_node, lane_code, lane_number,
+    SELECT d.name, controller, pin, r_node, lane_code, lane_number,
            abandoned, force_fail, auto_fail, field_length, fake, notes
-    FROM iris._detector det
-    JOIN iris.controller_io cio ON det.name = cio.name;
+    FROM iris._detector d
+    JOIN iris.controller_io cio ON d.name = cio.name;
 
 CREATE FUNCTION iris.detector_insert() RETURNS TRIGGER AS
     $detector_insert$
@@ -2504,7 +2507,7 @@ CREATE VIEW detector_label_view AS
                iris.root_lbl(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod, l.landmark),
                d.lane_code, d.lane_number, d.abandoned
            ) AS label, rnd.geo_loc
-    FROM iris.detector d
+    FROM iris._detector d
     LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
     LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name;
 GRANT SELECT ON detector_label_view TO PUBLIC;
@@ -2518,17 +2521,18 @@ CREATE TABLE event.detector_event (
 );
 
 CREATE VIEW detector_view AS
-    SELECT d.name, d.r_node, d.controller, c.comm_link, c.drop_id, d.pin,
+    SELECT d.name, d.r_node, c.comm_link, c.drop_id, cio.controller, cio.pin,
            dl.label, dl.geo_loc, l.rd || '_' || l.road_dir AS cor_id,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
            d.lane_number, d.field_length, lc.description AS lane_type,
            d.lane_code, d.abandoned, d.force_fail, d.auto_fail, c.condition,
            d.fake, d.notes
     FROM iris.detector d
+    JOIN iris.controller_io cio ON d.name = cio.name
     LEFT JOIN detector_label_view dl ON d.name = dl.det_id
     LEFT JOIN geo_loc_view l ON dl.geo_loc = l.name
     LEFT JOIN iris.lane_code lc ON d.lane_code = lc.lcode
-    LEFT JOIN controller_view c ON d.controller = c.name;
+    LEFT JOIN controller_view c ON cio.controller = c.name;
 GRANT SELECT ON detector_view TO PUBLIC;
 
 CREATE VIEW detector_event_view AS
@@ -2554,7 +2558,7 @@ GRANT SELECT ON detector_auto_fail_view TO PUBLIC;
 --
 CREATE TABLE iris._gps (
     name VARCHAR(20) PRIMARY KEY,
-    notes VARCHAR(32),
+    notes VARCHAR CHECK (LENGTH(notes) < 256),
     latest_poll TIMESTAMP WITH time zone,
     latest_sample TIMESTAMP WITH time zone,
     lat double precision,
@@ -2632,8 +2636,9 @@ CREATE TRIGGER gps_delete_trig
     FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW gps_view AS
-    SELECT name, controller, pin, notes, latest_poll, latest_sample, lat, lon
-    FROM iris.gps;
+    SELECT g.name, controller, pin, notes, latest_poll, latest_sample, lat, lon
+    FROM iris._gps g
+    JOIN iris.controller_io cio ON g.name = cio.name;
 GRANT SELECT ON gps_view TO PUBLIC;
 
 --
@@ -3038,7 +3043,7 @@ GRANT SELECT ON graphic_view TO PUBLIC;
 CREATE TABLE iris._dms (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
-    notes VARCHAR(128),
+    notes VARCHAR CHECK (LENGTH(notes) < 256),
     gps VARCHAR(20) REFERENCES iris._gps,
     static_graphic VARCHAR(20) REFERENCES iris.graphic,
     beacon VARCHAR(20) REFERENCES iris._beacon,
@@ -3151,15 +3156,17 @@ CREATE TRIGGER dms_delete_trig
     FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW dms_view AS
-    SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.gps,
+    SELECT d.name, d.geo_loc, cio.controller, cio.pin, d.notes, d.gps,
            d.sign_config, d.sign_detail, d.static_graphic, d.beacon,
-           p.camera, p.preset_num, default_font,
+           cp.camera, cp.preset_num, default_font,
            msg_user, msg_sched, msg_current, expire_time,
            status, stuck_pixels,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street,
            l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location
-    FROM iris.dms d
-    LEFT JOIN iris.camera_preset p ON d.preset = p.name
+    FROM iris._dms d
+    JOIN iris.controller_io cio ON d.name = cio.name
+    JOIN iris.device_preset p ON d.name = p.name
+    LEFT JOIN iris.camera_preset cp ON cp.name = p.preset
     LEFT JOIN geo_loc_view l ON d.geo_loc = l.name
     LEFT JOIN iris.sign_config sc ON d.sign_config = sc.name;
 GRANT SELECT ON dms_view TO PUBLIC;
@@ -3383,7 +3390,7 @@ COPY iris.gate_arm_interlock(id, description) FROM stdin;
 CREATE TABLE iris._gate_arm_array (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
-    notes VARCHAR(64),
+    notes VARCHAR CHECK (LENGTH(notes) < 256),
     opposing BOOLEAN NOT NULL,
     prereq VARCHAR(20) REFERENCES iris._gate_arm_array,
     camera VARCHAR(20) REFERENCES iris._camera,
@@ -3422,10 +3429,10 @@ CREATE TRIGGER gate_arm_array_table_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.gate_arm_array AS
-    SELECT g.name, geo_loc, controller, pin, notes, opposing, prereq, camera,
+    SELECT ga.name, geo_loc, controller, pin, notes, opposing, prereq, camera,
            approach, action_plan, arm_state, interlock
-    FROM iris._gate_arm_array g JOIN iris.controller_io cio
-    ON g.name = cio.name;
+    FROM iris._gate_arm_array ga
+    JOIN iris.controller_io cio ON ga.name = cio.name;
 
 CREATE FUNCTION iris.gate_arm_array_insert() RETURNS TRIGGER AS
     $gate_arm_array_insert$
@@ -3478,22 +3485,23 @@ CREATE TRIGGER gate_arm_array_delete_trig
 CREATE VIEW gate_arm_array_view AS
     SELECT ga.name, ga.notes, ga.geo_loc, l.roadway, l.road_dir, l.cross_mod,
            l.cross_street, l.cross_dir, l.landmark, l.lat, l.lon, l.corridor,
-           l.location, ga.controller, ga.pin, ctr.comm_link, ctr.drop_id,
+           l.location, cio.controller, cio.pin, ctr.comm_link, ctr.drop_id,
            ctr.condition, ga.opposing, ga.prereq, ga.camera, ga.approach,
            ga.action_plan, gas.description AS arm_state,
            gai.description AS interlock
-    FROM iris.gate_arm_array ga
+    FROM iris._gate_arm_array ga
+    JOIN iris.controller_io cio ON ga.name = cio.name
     JOIN iris.gate_arm_state gas ON ga.arm_state = gas.id
     JOIN iris.gate_arm_interlock gai ON ga.interlock = gai.id
     LEFT JOIN geo_loc_view l ON ga.geo_loc = l.name
-    LEFT JOIN controller_view ctr ON ga.controller = ctr.name;
+    LEFT JOIN controller_view ctr ON cio.controller = ctr.name;
 GRANT SELECT ON gate_arm_array_view TO PUBLIC;
 
 CREATE TABLE iris._gate_arm (
     name VARCHAR(20) PRIMARY KEY,
     ga_array VARCHAR(20) NOT NULL REFERENCES iris._gate_arm_array,
     idx INTEGER NOT NULL,
-    notes VARCHAR(32),
+    notes VARCHAR CHECK (LENGTH(notes) < 256),
     arm_state INTEGER NOT NULL REFERENCES iris.gate_arm_state,
     fault VARCHAR(32)
 );
@@ -3510,7 +3518,8 @@ CREATE TRIGGER gate_arm_notify_trig
 
 CREATE VIEW iris.gate_arm AS
     SELECT g.name, ga_array, idx, controller, pin, notes, arm_state, fault
-    FROM iris._gate_arm g JOIN iris.controller_io cio ON g.name = cio.name;
+    FROM iris._gate_arm g
+    JOIN iris.controller_io cio ON g.name = cio.name;
 
 CREATE FUNCTION iris.gate_arm_insert() RETURNS TRIGGER AS
     $gate_arm_insert$
@@ -3558,14 +3567,15 @@ CREATE TRIGGER gate_arm_delete_trig
 CREATE VIEW gate_arm_view AS
     SELECT g.name, g.ga_array, g.notes, ga.geo_loc, l.roadway, l.road_dir,
            l.cross_mod, l.cross_street, l.cross_dir, l.landmark, l.lat, l.lon,
-           l.corridor, l.location, g.controller, g.pin, ctr.comm_link,
+           l.corridor, l.location, cio.controller, cio.pin, ctr.comm_link,
            ctr.drop_id, ctr.condition, ga.opposing, ga.prereq, ga.camera,
            ga.approach, gas.description AS arm_state, fault
-    FROM iris.gate_arm g
+    FROM iris._gate_arm g
+    JOIN iris.controller_io cio ON g.name = cio.name
     JOIN iris.gate_arm_state gas ON g.arm_state = gas.id
     JOIN iris._gate_arm_array ga ON g.ga_array = ga.name
     LEFT JOIN geo_loc_view l ON ga.geo_loc = l.name
-    LEFT JOIN controller_view ctr ON g.controller = ctr.name;
+    LEFT JOIN controller_view ctr ON cio.controller = ctr.name;
 GRANT SELECT ON gate_arm_view TO PUBLIC;
 
 CREATE TABLE event.gate_arm_event (
@@ -4320,7 +4330,7 @@ CREATE TABLE cap.alert_info (
 CREATE TABLE iris._lane_marking (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-    notes VARCHAR(64),
+    notes VARCHAR CHECK (LENGTH(notes) < 256),
     deployed BOOLEAN NOT NULL
 );
 
@@ -4378,11 +4388,12 @@ CREATE TRIGGER lane_marking_delete_trig
 CREATE VIEW lane_marking_view AS
     SELECT m.name, m.notes, m.geo_loc, l.roadway, l.road_dir, l.cross_mod,
            l.cross_street, l.cross_dir, l.landmark, l.lat, l.lon, l.corridor,
-           l.location, m.controller, m.pin, ctr.comm_link, ctr.drop_id,
+           l.location, cio.controller, cio.pin, ctr.comm_link, ctr.drop_id,
            ctr.condition, m.deployed
-    FROM iris.lane_marking m
+    FROM iris._lane_marking m
+    JOIN iris.controller_io cio ON m.name = cio.name
     LEFT JOIN geo_loc_view l ON m.geo_loc = l.name
-    LEFT JOIN controller_view ctr ON m.controller = ctr.name;
+    LEFT JOIN controller_view ctr ON cio.controller = ctr.name;
 GRANT SELECT ON lane_marking_view TO PUBLIC;
 
 CREATE TABLE iris.lane_action (
@@ -4409,7 +4420,7 @@ COPY iris.lcs_lock (id, description) FROM stdin;
 
 CREATE TABLE iris._lcs_array (
     name VARCHAR(20) PRIMARY KEY,
-    notes VARCHAR(128),
+    notes VARCHAR CHECK (LENGTH(notes) < 256),
     shift INTEGER NOT NULL,
     lcs_lock INTEGER REFERENCES iris.lcs_lock(id)
 );
@@ -4425,7 +4436,8 @@ CREATE TRIGGER lcs_array_notify_trig
 
 CREATE VIEW iris.lcs_array AS
     SELECT la.name, controller, pin, notes, shift, lcs_lock
-    FROM iris._lcs_array la JOIN iris.controller_io cio ON la.name = cio.name;
+    FROM iris._lcs_array la
+    JOIN iris.controller_io cio ON la.name = cio.name;
 
 CREATE FUNCTION iris.lcs_array_insert() RETURNS TRIGGER AS
     $lcs_array_insert$
@@ -4468,7 +4480,7 @@ CREATE TRIGGER lcs_array_delete_trig
 
 CREATE VIEW lcs_array_view AS
     SELECT name, shift, notes, lcs_lock
-    FROM iris.lcs_array;
+    FROM iris._lcs_array;
 GRANT SELECT ON lcs_array_view TO PUBLIC;
 
 CREATE TABLE iris.lcs (
@@ -4749,7 +4761,7 @@ COPY iris.meter_lock (id, description) FROM stdin;
 CREATE TABLE iris._ramp_meter (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-    notes VARCHAR(128),
+    notes VARCHAR CHECK (LENGTH(notes) < 256),
     meter_type INTEGER NOT NULL REFERENCES iris.meter_type(id),
     storage INTEGER NOT NULL,
     max_wait INTEGER NOT NULL,
@@ -4848,16 +4860,18 @@ CREATE TRIGGER ramp_meter_delete_trig
     FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW ramp_meter_view AS
-    SELECT m.name, geo_loc, controller, pin, notes,
+    SELECT m.name, geo_loc, cio.controller, cio.pin, notes,
            mt.description AS meter_type, storage, max_wait,
            alg.description AS algorithm, am_target, pm_target, beacon, camera,
            preset_num, ml.description AS meter_lock, l.roadway, l.road_dir,
            l.cross_mod, l.cross_street, l.cross_dir, l.landmark, l.lat, l.lon,
            l.corridor, l.location, l.rd
-    FROM iris.ramp_meter m
+    FROM iris._ramp_meter m
+    JOIN iris.controller_io cio ON m.name = cio.name
+    LEFT JOIN iris.device_preset p ON m.name = p.name
+    LEFT JOIN iris.camera_preset cp ON cp.name = p.preset
     LEFT JOIN iris.meter_type mt ON m.meter_type = mt.id
     LEFT JOIN iris.meter_algorithm alg ON m.algorithm = alg.id
-    LEFT JOIN iris.camera_preset p ON m.preset = p.name
     LEFT JOIN iris.meter_lock ml ON m.m_lock = ml.id
     LEFT JOIN geo_loc_view l ON m.geo_loc = l.name;
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
@@ -4970,7 +4984,7 @@ GRANT SELECT ON toll_zone_view TO PUBLIC;
 CREATE TABLE iris._tag_reader (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-    notes VARCHAR(64),
+    notes VARCHAR CHECK (LENGTH(notes) < 256),
     toll_zone VARCHAR(20) REFERENCES iris.toll_zone(name),
     settings JSONB
 );
@@ -5000,7 +5014,8 @@ CREATE TRIGGER tag_reader_table_notify_trig
 
 CREATE VIEW iris.tag_reader AS
     SELECT t.name, geo_loc, controller, pin, notes, toll_zone, settings
-    FROM iris._tag_reader t JOIN iris.controller_io cio ON t.name = cio.name;
+    FROM iris._tag_reader t
+    JOIN iris.controller_io cio ON t.name = cio.name;
 
 CREATE FUNCTION iris.tag_reader_insert() RETURNS TRIGGER AS
     $tag_reader_insert$
@@ -5048,7 +5063,8 @@ CREATE TRIGGER tag_reader_delete_trig
 CREATE VIEW tag_reader_view AS
     SELECT t.name, t.geo_loc, location, controller, pin, notes, toll_zone,
            settings
-    FROM iris.tag_reader t
+    FROM iris._tag_reader t
+    JOIN iris.controller_io cio ON t.name = cio.name
     LEFT JOIN geo_loc_view l ON t.geo_loc = l.name;
 GRANT SELECT ON tag_reader_view TO PUBLIC;
 
@@ -5202,7 +5218,7 @@ GRANT SELECT ON monitor_style_view TO PUBLIC;
 
 CREATE TABLE iris._video_monitor (
     name VARCHAR(12) PRIMARY KEY,
-    notes VARCHAR(32),
+    notes VARCHAR CHECK (LENGTH(notes) < 256),
     group_n VARCHAR(16),
     mon_num INTEGER NOT NULL,
     restricted BOOLEAN NOT NULL,
@@ -5238,7 +5254,8 @@ CREATE TRIGGER video_monitor_table_notify_trig
 CREATE VIEW iris.video_monitor AS
     SELECT m.name, controller, pin, notes, group_n, mon_num, restricted,
            monitor_style, camera
-    FROM iris._video_monitor m JOIN iris.controller_io cio ON m.name = cio.name;
+    FROM iris._video_monitor m
+    JOIN iris.controller_io cio ON m.name = cio.name;
 
 CREATE FUNCTION iris.video_monitor_insert() RETURNS TRIGGER AS
     $video_monitor_insert$
@@ -5288,9 +5305,10 @@ CREATE TRIGGER video_monitor_delete_trig
 
 CREATE VIEW video_monitor_view AS
     SELECT m.name, m.notes, group_n, mon_num, restricted, monitor_style,
-           m.controller, m.pin, ctr.condition, ctr.comm_link, camera
-    FROM iris.video_monitor m
-    LEFT JOIN controller_view ctr ON m.controller = ctr.name;
+           cio.controller, cio.pin, ctr.condition, ctr.comm_link, camera
+    FROM iris._video_monitor m
+    JOIN iris.controller_io cio ON m.name = cio.name
+    LEFT JOIN controller_view ctr ON cio.controller = ctr.name;
 GRANT SELECT ON video_monitor_view TO PUBLIC;
 
 --
@@ -5382,10 +5400,11 @@ CREATE TRIGGER flow_stream_delete_trig
     FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW flow_stream_view AS
-    SELECT f.name, f.controller, pin, condition, comm_link, restricted,
+    SELECT f.name, cio.controller, cio.pin, condition, comm_link, restricted,
            loc_overlay, eq.description AS quality, camera, mon_num, address,
            port, s.description AS status
-    FROM iris.flow_stream f
+    FROM iris._flow_stream f
+    JOIN iris.controller_io cio ON f.name = cio.name
     JOIN iris.flow_stream_status s ON f.status = s.id
     LEFT JOIN controller_view ctr ON controller = ctr.name
     LEFT JOIN iris.encoding_quality eq ON f.quality = eq.id;
@@ -5399,7 +5418,7 @@ CREATE TABLE iris._weather_sensor (
     site_id VARCHAR(20),
     alt_id VARCHAR(20),
     geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-    notes VARCHAR(64),
+    notes VARCHAR CHECK (LENGTH(notes) < 256),
     settings JSONB,
     sample JSONB,
     sample_time TIMESTAMP WITH time zone
@@ -5434,8 +5453,8 @@ CREATE TRIGGER weather_sensor_table_notify_trig
 CREATE VIEW iris.weather_sensor AS
     SELECT w.name, site_id, alt_id, geo_loc, controller, pin, notes, settings,
            sample, sample_time
-      FROM iris._weather_sensor w
-      JOIN iris.controller_io cio ON w.name = cio.name;
+    FROM iris._weather_sensor w
+    JOIN iris.controller_io cio ON w.name = cio.name;
 
 CREATE FUNCTION iris.weather_sensor_insert() RETURNS TRIGGER AS
     $weather_sensor_insert$
@@ -5488,10 +5507,11 @@ CREATE VIEW weather_sensor_view AS
     SELECT w.name, site_id, alt_id, w.notes, settings, sample, sample_time,
            w.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
            l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location,
-           w.controller, w.pin, ctr.comm_link, ctr.drop_id, ctr.condition
-    FROM iris.weather_sensor w
+           cio.controller, cio.pin, ctr.comm_link, ctr.drop_id, ctr.condition
+    FROM iris._weather_sensor w
+    JOIN iris.controller_io cio ON w.name = cio.name
     LEFT JOIN geo_loc_view l ON w.geo_loc = l.name
-    LEFT JOIN controller_view ctr ON w.controller = ctr.name;
+    LEFT JOIN controller_view ctr ON cio.controller = ctr.name;
 GRANT SELECT ON weather_sensor_view TO PUBLIC;
 
 CREATE TABLE iris.dms_weather_sensor (
