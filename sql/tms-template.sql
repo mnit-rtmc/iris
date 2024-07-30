@@ -2163,6 +2163,25 @@ CREATE TABLE iris._beacon (
 ALTER TABLE iris._beacon ADD CONSTRAINT _beacon_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
+CREATE FUNCTION iris.beacon_hashtag() RETURNS TRIGGER AS
+    $beacon_hashtag$
+BEGIN
+    IF (TG_OP != 'INSERT') THEN
+        DELETE FROM iris.hashtag
+        WHERE resource_n = 'beacon' AND name = OLD.name;
+    END IF;
+    IF (TG_OP != 'DELETE') THEN
+        INSERT INTO iris.hashtag (resource_n, name, hashtag)
+        SELECT 'beacon', NEW.name, parse_tags(NEW.notes);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$beacon_hashtag$ LANGUAGE plpgsql;
+
+CREATE TRIGGER beacon_hashtag_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._beacon
+    FOR EACH ROW EXECUTE FUNCTION iris.beacon_hashtag();
+
 CREATE FUNCTION iris.beacon_notify() RETURNS TRIGGER AS
     $beacon_notify$
 BEGIN
@@ -2545,6 +2564,25 @@ CREATE TABLE iris._gps (
 
 ALTER TABLE iris._gps ADD CONSTRAINT _gps_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
+
+CREATE FUNCTION iris.gps_hashtag() RETURNS TRIGGER AS
+    $gps_hashtag$
+BEGIN
+    IF (TG_OP != 'INSERT') THEN
+        DELETE FROM iris.hashtag
+        WHERE resource_n = 'gps' AND name = OLD.name;
+    END IF;
+    IF (TG_OP != 'DELETE') THEN
+        INSERT INTO iris.hashtag (resource_n, name, hashtag)
+        SELECT 'gps', NEW.name, parse_tags(NEW.notes);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$gps_hashtag$ LANGUAGE plpgsql;
+
+CREATE TRIGGER gps_hashtag_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._gps
+    FOR EACH ROW EXECUTE FUNCTION iris.gps_hashtag();
 
 CREATE FUNCTION iris.gps_notify() RETURNS TRIGGER AS
     $gps_notify$
@@ -3369,6 +3407,25 @@ CREATE TABLE iris._gate_arm_array (
 -- Gate arm arrays are *not* associated with controllers or pins
 ALTER TABLE iris._gate_arm_array ADD CONSTRAINT _gate_arm_array_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
+
+CREATE FUNCTION iris.gate_arm_array_hashtag() RETURNS TRIGGER AS
+    $gate_arm_array_hashtag$
+BEGIN
+    IF (TG_OP != 'INSERT') THEN
+        DELETE FROM iris.hashtag
+        WHERE resource_n = 'gate_arm_array' AND name = OLD.name;
+    END IF;
+    IF (TG_OP != 'DELETE') THEN
+        INSERT INTO iris.hashtag (resource_n, name, hashtag)
+        SELECT 'gate_arm_array', NEW.name, parse_tags(NEW.notes);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$gate_arm_array_hashtag$ LANGUAGE plpgsql;
+
+CREATE TRIGGER gate_arm_array_hashtag_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._gate_arm_array
+    FOR EACH ROW EXECUTE FUNCTION iris.gate_arm_array_hashtag();
 
 CREATE FUNCTION iris.gate_arm_array_notify() RETURNS TRIGGER AS
     $gate_arm_array_notify$
@@ -4740,6 +4797,25 @@ CREATE TABLE iris._ramp_meter (
 ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
+CREATE FUNCTION iris.ramp_meter_hashtag() RETURNS TRIGGER AS
+    $ramp_meter_hashtag$
+BEGIN
+    IF (TG_OP != 'INSERT') THEN
+        DELETE FROM iris.hashtag
+        WHERE resource_n = 'ramp_meter' AND name = OLD.name;
+    END IF;
+    IF (TG_OP != 'DELETE') THEN
+        INSERT INTO iris.hashtag (resource_n, name, hashtag)
+        SELECT 'ramp_meter', NEW.name, parse_tags(NEW.notes);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$ramp_meter_hashtag$ LANGUAGE plpgsql;
+
+CREATE TRIGGER ramp_meter_hashtag_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._ramp_meter
+    FOR EACH ROW EXECUTE FUNCTION iris.ramp_meter_hashtag();
+
 CREATE FUNCTION iris.ramp_meter_notify() RETURNS TRIGGER AS
     $ramp_meter_notify$
 BEGIN
@@ -5392,6 +5468,25 @@ CREATE TABLE iris._weather_sensor (
 
 ALTER TABLE iris._weather_sensor ADD CONSTRAINT _weather_sensor_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
+
+CREATE FUNCTION iris.weather_sensor_hashtag() RETURNS TRIGGER AS
+    $weather_sensor_hashtag$
+BEGIN
+    IF (TG_OP != 'INSERT') THEN
+        DELETE FROM iris.hashtag
+        WHERE resource_n = 'weather_sensor' AND name = OLD.name;
+    END IF;
+    IF (TG_OP != 'DELETE') THEN
+        INSERT INTO iris.hashtag (resource_n, name, hashtag)
+        SELECT 'weather_sensor', NEW.name, parse_tags(NEW.notes);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$weather_sensor_hashtag$ LANGUAGE plpgsql;
+
+CREATE TRIGGER weather_sensor_hashtag_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._weather_sensor
+    FOR EACH ROW EXECUTE FUNCTION iris.weather_sensor_hashtag();
 
 CREATE FUNCTION iris.weather_sensor_notify() RETURNS TRIGGER AS
     $weather_sensor_notify$
