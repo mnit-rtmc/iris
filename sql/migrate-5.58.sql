@@ -524,4 +524,28 @@ CREATE VIEW controller_report AS
     LEFT JOIN controller_device_view d ON d.controller = c.name;
 GRANT SELECT ON controller_report TO PUBLIC;
 
+-- Concatenate DMS hashtags to notes fields
+WITH dms_hashtags AS (
+    SELECT name, string_agg(hashtag, ' ' ORDER BY hashtag) hashtags
+    FROM hashtag_view
+    WHERE resource_n = 'dms'
+    GROUP BY name
+)
+UPDATE iris.dms d
+SET notes = concat_ws(e'\n\n', notes, h.hashtags)
+FROM dms_hashtags h
+WHERE h.name = d.name;
+
+-- Concatenate camera hashtags to notes fields
+WITH cam_hashtags AS (
+    SELECT name, string_agg(hashtag, ' ' ORDER BY hashtag) hashtags
+    FROM hashtag_view
+    WHERE resource_n = 'camera'
+    GROUP BY name
+)
+UPDATE iris.camera c
+SET notes = concat_ws(e'\n\n', notes, h.hashtags)
+FROM cam_hashtags h
+WHERE h.name = c.name;
+
 COMMIT;
