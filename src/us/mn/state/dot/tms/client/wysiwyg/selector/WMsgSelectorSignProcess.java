@@ -19,7 +19,7 @@ import java.util.Iterator;
 import javax.swing.SwingWorker;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.HashtagHelper;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.SignConfig;
@@ -58,11 +58,11 @@ public class WMsgSelectorSignProcess extends
 		SignConfig dmsConfig = dms.getSignConfig();
 		ArrayList<MsgPattern> plist = new ArrayList<MsgPattern>();
 
+		Hashtags tags = new Hashtags(dms.getNotes());
 		Iterator<MsgPattern> pit = MsgPatternHelper.iterator();
 		while (pit.hasNext()) {
 			MsgPattern pat = pit.next();
-			String cht = pat.getComposeHashtag();
-			if (HashtagHelper.hasHashtag(dms, cht))
+			if (tags.contains(pat.getComposeHashtag()))
 				plist.add(pat);
 		}
 		return plist;

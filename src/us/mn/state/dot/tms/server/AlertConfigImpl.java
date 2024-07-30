@@ -23,7 +23,7 @@ import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.AlertConfig;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.HashtagHelper;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TMSException;
 
@@ -846,7 +846,7 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 
 	/** Set the DMS hashtag */
 	public void doSetDmsHashtag(String ht) throws TMSException {
-		String t = HashtagHelper.normalize(ht);
+		String t = Hashtags.normalize(ht);
 		if (!objectEquals(t, ht))
 			throw new ChangeVetoException("Bad hashtag");
 		if (!objectEquals(ht, dms_hashtag)) {

@@ -64,10 +64,11 @@ public class MsgLineHelper extends BaseHelper {
 			if (pat == null)
 				return lines;
 		}
+		Hashtags hashtags = new Hashtags(dms.getNotes());
 		Iterator<MsgLine> it = iterator();
 		while (it.hasNext()) {
 			MsgLine ml = it.next();
-			if (checkLine(ml, pat, dms)) {
+			if (checkLine(ml, pat, hashtags)) {
 				MsgLine aml = abbreviateLine(ml, line_rects);
 				if (aml != null)
 					lines.add(aml);
@@ -77,10 +78,12 @@ public class MsgLineHelper extends BaseHelper {
 	}
 
 	/** Check if a message line belongs */
-	static private boolean checkLine(MsgLine ml, MsgPattern pat, DMS dms) {
+	static private boolean checkLine(MsgLine ml, MsgPattern pat,
+		Hashtags hashtags)
+	{
 		if (ml.getMsgPattern() == pat) {
 			String rht = ml.getRestrictHashtag();
-			return (rht == null || HashtagHelper.hasHashtag(dms, rht));
+			return (rht == null) || hashtags.contains(rht);
 		}
 		return false;
 	}

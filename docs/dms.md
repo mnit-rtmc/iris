@@ -31,7 +31,7 @@ The following features are supported:
 |--------------|------------------------------------------|---------------|
 | 👁️  View      | name, location, msg\_current, has_faults | sign\_config, sign\_detail, geo\_loc, msg\_sched, expire\_time, status, stuck\_pixels |
 | 👉 Operate   |                                          | msg\_user     |
-| 💡 Manage    | notes, hashtags                          | preset, device\_request † |
+| 💡 Manage    | notes                                    | preset, device\_request † |
 | 🔧 Configure | controller                               | pin, static\_graphic, beacon |
 
 † _Write only_
@@ -45,8 +45,8 @@ Checks of [free-form text] are also affected by the access level.
 The DMS properties form has setup information.
 
 Field          | Description
----------------|------------------------------------------------
-Hashtags       | space-separated list of [hashtag]s for the sign
+---------------|---------------------------------------------------
+Notes          | administrator notes, possibly including [hashtag]s
 Remote beacon  | beacon activated automatically when sign deployed
 Static graphic | image of static sign in which DMS is inset
 

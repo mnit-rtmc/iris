@@ -50,7 +50,7 @@ import us.mn.state.dot.tms.CapUrgency;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.HashtagHelper;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.PlanPhaseHelper;
@@ -508,16 +508,17 @@ public class AlertData {
 	private void createAlertInfo(AlertConfig cfg) throws SonarException,
 		TMSException
 	{
-		String cfg_hashtag = cfg.getDmsHashtag();
-		if (cfg_hashtag == null)
+		String cht = cfg.getDmsHashtag();
+		if (cht == null)
 			return;
 		TreeSet<DMS> plan_dms = new TreeSet<DMS>();
 		Iterator<DMS> it = DMSHelper.iterator();
 		while (it.hasNext()) {
 			DMS d = it.next();
-			if (all_dms.contains(d) &&
-			    HashtagHelper.hasHashtag(d, cfg_hashtag))
-				plan_dms.add(d);
+			if (all_dms.contains(d)) {
+				if (new Hashtags(d.getNotes()).contains(cht))
+					plan_dms.add(d);
+			}
 		}
 		ActionPlanImpl plan = createPlan(cfg, plan_dms);
 		if (plan != null)

@@ -52,8 +52,9 @@ public class DmsActionHelper extends BaseHelper {
 		Iterator<DMS> it = DMSHelper.iterator();
 		while (it.hasNext()) {
 			DMS dms = it.next();
+			Hashtags tags = new Hashtags(dms.getNotes());
 			for (String ht: plan_hashtags) {
-				if (HashtagHelper.hasHashtag(dms, ht)) {
+				if (tags.contains(ht)) {
 					plan_signs.add(dms);
 					break;
 				}

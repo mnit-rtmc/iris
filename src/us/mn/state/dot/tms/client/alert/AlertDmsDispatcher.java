@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.TreeSet;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -37,7 +36,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.HashtagHelper;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.client.Session;
@@ -134,11 +133,10 @@ public class AlertDmsDispatcher extends IPanel {
 
 	/** Add a hashtag to a sign */
 	private void addDmsHashtag(DMS dms, String ht) {
-		TreeSet<String> hashtags = new TreeSet<String>();
-		hashtags.add(ht);
-		for (String dht: dms.getHashtags())
-			hashtags.add(dht);
-		dms.setHashtags(hashtags.toArray(new String[0]));
+		String notes = dms.getNotes();
+		Hashtags tags = new Hashtags(notes);
+		if (!tags.contains(ht))
+			dms.setNotes(Hashtags.add(notes, ht));
 	}
 
 	/** Remove alert's active hashtag from a sign */
@@ -150,11 +148,10 @@ public class AlertDmsDispatcher extends IPanel {
 
 	/** Remove a hashtag from a sign */
 	private void removeDmsHashtag(DMS dms, String ht) {
-		TreeSet<String> hashtags = new TreeSet<String>();
-		for (String dht: dms.getHashtags())
-			hashtags.add(dht);
-		hashtags.remove(ht);
-		dms.setHashtags(hashtags.toArray(new String[0]));
+		String notes = dms.getNotes();
+		Hashtags tags = new Hashtags(notes);
+		if (tags.contains(ht))
+			dms.setNotes(Hashtags.remove(notes, ht));
 	}
 
 	/** Included DMS table model */
@@ -259,7 +256,8 @@ public class AlertDmsDispatcher extends IPanel {
 			Iterator<DMS> it = DMSHelper.iterator();
 			while (it.hasNext()) {
 				DMS d = it.next();
-				if (HashtagHelper.hasHashtag(d, aht))
+				Hashtags tags = new Hashtags(d.getNotes());
+				if (tags.contains(aht))
 					dm.put(d, included.contains(d));
 			}
 		}

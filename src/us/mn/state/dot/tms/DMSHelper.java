@@ -53,7 +53,7 @@ public class DMSHelper extends BaseHelper {
 
 	/** Check if a DMS is hidden (#Hidden hashtag) */
 	static public boolean isHidden(DMS dms) {
-		return HashtagHelper.hasHashtag(dms, "#Hidden");
+		return new Hashtags(dms.getNotes()).contains("#Hidden");
 	}
 
 	/** Reserved hashtags for dedicated-purpose signs */
@@ -70,11 +70,10 @@ public class DMSHelper extends BaseHelper {
 
 	/** Check if a DMS is general-purpose */
 	static public boolean isGeneralPurpose(DMS dms) {
-		for (String tag: dms.getHashtags()) {
-			for (String ht: DEDICATED_PURPOSE_TAGS) {
-				if (ht.equalsIgnoreCase(tag))
-					return false;
-			}
+		Hashtags tags = new Hashtags(dms.getNotes());
+		for (String tag: DEDICATED_PURPOSE_TAGS) {
+			if (tags.contains(tag))
+				return false;
 		}
 		return true;
 	}

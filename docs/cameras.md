@@ -19,7 +19,7 @@ Select `View ➔ Video ➔ Cameras` menu item
 |--------------|----------------------|-------------------------|
 | 👁️  View      | name, location       | geo\_loc, video\_loss   |
 | 👉 Operate   | publish              | ptz †, recall\_preset † |
-| 💡 Manage    | notes, hashtags      | store\_preset †         |
+| 💡 Manage    | notes                | store\_preset †         |
 | 🔧 Configure | controller, cam\_num | pin, cam\_template, encoder\_type, enc\_address, enc\_port, enc\_mcast, enc\_channel
 
 † _Write only_
@@ -38,7 +38,7 @@ Encoder Port      | Port number for unicast streams (overrides scheme default)
 Multicast Address | IP address for [multicast] streams
 Encoder Channel   | Channel number, for encoders which support multiple cameras
 Publish           | Flag to allow public viewing of camera video
-Hashtags          | Space-separated list of [hashtag]s for the camera
+Notes             | Administrator notes, possibly including [hashtag]s
 
 ## Encoder Types
 

@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.util.ArrayList;
-import us.mn.state.dot.tms.HashtagHelper;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -58,8 +58,7 @@ public class MsgPatternTableModel extends ProxyTableModel<MsgPattern> {
 				return canWrite(pat);
 			}
 			public void setValueAt(MsgPattern pat, Object value) {
-				String cht = HashtagHelper.normalize(
-					value.toString());
+				String cht = Hashtags.normalize(value.toString());
 				pat.setComposeHashtag(cht);
 			}
 		});

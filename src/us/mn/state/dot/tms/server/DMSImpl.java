@@ -48,7 +48,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Gps;
 import us.mn.state.dot.tms.Graphic;
-import us.mn.state.dot.tms.HashtagHelper;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LCS;
@@ -248,17 +248,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		expire_time = stampMillis(et);
 		status = st;
 		stuck_pixels = sp;
-		hashtags = lookupHashtagMapping();
 		weather_sensors = lookupEssMapping();
 		initTransients();
-	}
-
-	/** Lookup mapping of hashtags */
-	private String[] lookupHashtagMapping() throws TMSException {
-		TreeSet<String> ht_set = new TreeSet<String>();
-		for (String ht: tag_map.lookup(this))
-			ht_set.add(ht);
-		return ht_set.toArray(new String[0]);
 	}
 
 	/** Lookup mapping of RWIS sensors configured to the sign */
@@ -387,57 +378,38 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return static_graphic;
 	}
 
-	/** Hashtags for the DMS */
-	private String[] hashtags = new String[0];
-
-	/** Set the hashtags assigned to the DMS */
+	/** Set the administrator notes */
 	@Override
-	public void setHashtags(String[] ht) {
-		hashtags = ht;
+	public void doSetNotes(String n) throws TMSException {
+		setHashtags(n);
+		super.doSetNotes(n);
 	}
 
 	/** Set the hashtags assigned to the DMS */
-	public synchronized void doSetHashtags(String[] ht)
-		throws TMSException
-	{
-		String[] ht2 = HashtagHelper.makeHashtags(ht);
-		if (!Arrays.equals(ht, ht2))
-			throw new ChangeVetoException("BAD HASHTAGS");
-		if (!Arrays.equals(ht, hashtags)) {
-			TreeSet<String> ht_set = new TreeSet<String>(
-				Arrays.asList(ht)
-			);
-			tag_map.update(this, ht_set);
-			setHashtags(ht);
+	private synchronized void setHashtags(String n) throws TMSException {
+		Hashtags tags = new Hashtags(n);
+		if (!tags.valid)
+			throw new ChangeVetoException("BAD HASHTAG");
+		Hashtags hashtags = new Hashtags(notes);
+		if (!tags.equals(hashtags)) {
+			tag_map.update(this, tags.tags());
 			updateStyles();
 		}
 	}
 
 	/** Add a hashtag to the DMS */
-	public synchronized void addHashtagNotify(String aht) {
-		aht = HashtagHelper.normalize(aht);
-		if (aht == null)
+	public synchronized void addHashtagNotify(String ht) {
+		ht = Hashtags.normalize(ht);
+		if (ht == null)
 			return;
-		TreeSet<String> ht_set = new TreeSet<String>(
-			Arrays.asList(hashtags)
-		);
-		if (ht_set.add(aht)) {
-			try {
-				tag_map.update(this, ht_set);
-				hashtags = ht_set.toArray(new String[0]);
-				notifyAttribute("hashtags");
-				updateStyles();
-			}
-			catch (TMSException e) {
-				logError("hashtags map: " + e.getMessage());
-			}
+		if (new Hashtags(notes).contains(ht))
+			return;
+		try {
+			doSetNotes(Hashtags.add(notes, ht));
 		}
-	}
-
-	/** Get the hashtags assigned to the DMS */
-	@Override
-	public String[] getHashtags() {
-		return hashtags;
+		catch (TMSException e) {
+			logError("add hashtags: " + e.getMessage());
+		}
 	}
 
 	/** Remote beacon */

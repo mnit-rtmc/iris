@@ -47,13 +47,14 @@ public class LaneUseMultiHelper extends BaseHelper {
 	 * @param dms Sign to match.
 	 * @return A lane-use MULTI. */
 	static public LaneUseMulti find(int ind, DMS dms) {
+		Hashtags hashtags = new Hashtags(dms.getNotes());
 		Iterator<LaneUseMulti> it = iterator();
 		while (it.hasNext()) {
 			LaneUseMulti lum = it.next();
-			if (lum.getIndication() == ind) {
-				String ht = lum.getDmsHashtag();
-				if (HashtagHelper.hasHashtag(dms, ht))
-					return lum;
+			if (lum.getIndication() == ind &&
+			    hashtags.contains(lum.getDmsHashtag()))
+			{
+				return lum;
 			}
 		}
 		return null;

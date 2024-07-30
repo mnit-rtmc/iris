@@ -25,7 +25,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DmsAction;
-import us.mn.state.dot.tms.HashtagHelper;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.PlanPhaseHelper;
@@ -82,8 +82,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				return canWrite(da);
 			}
 			public void setValueAt(DmsAction da, Object value) {
-				String ht = HashtagHelper.normalize(
-					value.toString());
+				String ht = Hashtags.normalize(value.toString());
 				if (ht != null)
 					da.setDmsHashtag(ht);
 				else
@@ -194,7 +193,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	/** Create an object with a hashtag */
 	@Override
 	public void createObject(String hashtag) {
-		String ht = HashtagHelper.normalize(hashtag);
+		String ht = Hashtags.normalize(hashtag);
 		if (ht != null && ht.equals(hashtag))
 			create(hashtag);
 		else

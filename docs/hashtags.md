@@ -1,8 +1,9 @@
 # Hashtags
 
-A **hashtag** is the `#` character, followed by a string of letters and/or
-numbers.  They can be used for grouping resources into districts or other
-categories.
+Many devices include a **notes** field, which may contain one or more
+**hashtags**.  This is the `#` (hash) character, followed by a string of
+letters (A-Z, a-z) and/or numbers.  They can be used for grouping resources
+into categories or districts.
 
 - [Message patterns] can have a **compose** hashtag
 - [Message lines] can have a **restrict** hashtag

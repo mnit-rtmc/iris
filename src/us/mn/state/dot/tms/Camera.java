@@ -21,7 +21,7 @@ package us.mn.state.dot.tms;
  * @author Douglas Lau
  * @author John L. Stanley - SRF Consulting
  */
-public interface Camera extends Device, Taggable {
+public interface Camera extends Device {
 
 	/** Minimum camera number */
 	int CAM_NUM_MIN = 1;
@@ -76,12 +76,6 @@ public interface Camera extends Device, Taggable {
 
 	/** Get flag to allow publishing camera images */
 	boolean getPublish();
-
-	/** Set the hashtags */
-	void setHashtags(String[] ht);
-
-	/** Get the hashtags */
-	String[] getHashtags();
 
 	/** Command the camera to pan, tilt or zoom */
 	void setPtz(Float[] ptz);

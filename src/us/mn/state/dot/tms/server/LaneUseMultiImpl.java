@@ -19,7 +19,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.HashtagHelper;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.MsgPattern;
@@ -179,7 +179,7 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 
 	/** Set the DMS hashtag */
 	public void doSetDmsHashtag(String ht) throws TMSException {
-		String t = HashtagHelper.normalize(ht);
+		String t = Hashtags.normalize(ht);
 		if (!objectEquals(t, ht))
 			throw new ChangeVetoException("Bad hashtag");
 		if (!objectEquals(ht, dms_hashtag)) {

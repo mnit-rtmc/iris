@@ -70,13 +70,14 @@ public class MsgPatternHelper extends BaseHelper {
 			new NumericAlphaComparator<MsgPattern>());
 		if (dms == null)
 			return pats;
+		Hashtags hashtags = new Hashtags(dms.getNotes());
 		Iterator<MsgPattern> it = iterator();
 		while (it.hasNext()) {
 			MsgPattern pat = it.next();
-			if (isValidMulti(pat)) {
-				String cht = pat.getComposeHashtag();
-				if (HashtagHelper.hasHashtag(dms, cht))
-					pats.add(pat);
+			if (isValidMulti(pat) &&
+			    hashtags.contains(pat.getComposeHashtag()))
+			{
+				pats.add(pat);
 			}
 		}
 		return pats;
@@ -131,7 +132,8 @@ public class MsgPatternHelper extends BaseHelper {
 			Iterator<DMS> it = DMSHelper.iterator();
 			while (it.hasNext()) {
 				DMS dms = it.next();
-				if (HashtagHelper.hasHashtag(dms, ht)) {
+				Hashtags tags = new Hashtags(dms.getNotes());
+				if (tags.contains(ht)) {
 					SignConfig sc = dms.getSignConfig();
 					if (sc != null && !cfgs.contains(sc))
 						cfgs.add(sc);
@@ -255,15 +257,15 @@ public class MsgPatternHelper extends BaseHelper {
 	static public MsgPattern findSubstitute(MsgPattern pat, DMS dms,
 		int n_lines)
 	{
+		Hashtags tags = new Hashtags(dms.getNotes());
 		Iterator<MsgPattern> it = iterator();
 		while (it.hasNext()) {
 			MsgPattern mp = it.next();
 			if (mp != pat && isValidMulti(mp)) {
-				String cht = mp.getComposeHashtag();
-				if (HashtagHelper.hasHashtag(dms, cht) &&
-				    lineCount(mp) == n_lines)
-				{
-					return mp;
+				if (lineCount(mp) == n_lines) {
+					String ht = mp.getComposeHashtag();
+					if (tags.contains(ht))
+						return mp;
 				}
 			}
 		}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +22,10 @@ package us.mn.state.dot.tms;
  */
 public interface Device extends ControllerIO {
 
-	/** Set the administrator notes */
+	/** Set administrator notes (including hashtags) */
 	void setNotes(String n);
 
-	/** Get the administrator notes */
+	/** Get administrator notes (including hashtags) */
 	String getNotes();
 
 	/** Request a device operation (query message, test pixels, etc.) */

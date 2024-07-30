@@ -19,7 +19,7 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import us.mn.state.dot.tms.HashtagHelper;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgLine;
 import us.mn.state.dot.tms.client.Session;
@@ -74,8 +74,7 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 			}
 			public void setValueAt(MsgLine ml, Object value) {
 				selected = ml.getName();
-				String ht = HashtagHelper.normalize(
-					value.toString());
+				String ht = Hashtags.normalize(value.toString());
 				ml.setRestrictHashtag(ht);
 			}
 		});

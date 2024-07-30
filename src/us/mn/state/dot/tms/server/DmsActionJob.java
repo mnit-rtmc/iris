@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
-import us.mn.state.dot.tms.HashtagHelper;
+import us.mn.state.dot.tms.Hashtags;
 
 /**
  * Job to perform DMS actions.
@@ -74,7 +74,8 @@ public class DmsActionJob extends Job {
 			DMS d = it.next();
 			if (d instanceof DMSImpl) {
 				DMSImpl dms = (DMSImpl) d;
-				if (HashtagHelper.hasHashtag(dms, ht))
+				Hashtags tags = new Hashtags(dms.getNotes());
+				if (tags.contains(ht))
 					checkAction(da, dms);
 			}
 		}

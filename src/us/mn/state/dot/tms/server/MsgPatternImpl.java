@@ -20,7 +20,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.HashtagHelper;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.utils.MultiString;
@@ -177,7 +177,7 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
 
 	/** Set the hashtag for composing with the pattern */
 	public void doSetComposeHashtag(String cht) throws TMSException {
-		String ht = HashtagHelper.normalize(cht);
+		String ht = Hashtags.normalize(cht);
 		if (!objectEquals(ht, cht))
 			throw new ChangeVetoException("Bad hashtag");
 		if (!objectEquals(cht, compose_hashtag)) {

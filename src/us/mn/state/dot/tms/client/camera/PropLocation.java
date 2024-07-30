@@ -15,10 +15,7 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import javax.swing.JButton;
-import javax.swing.JTextArea;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.client.Session;
@@ -33,9 +30,6 @@ import us.mn.state.dot.tms.client.widget.IAction;
  * @author Douglas Lau
  */
 public class PropLocation extends LocationPanel {
-
-	/** Notes text area */
-	private final JTextArea notes_txt = new JTextArea(3, 24);
 
 	/** Controller action */
 	private final IAction controller = new IAction("controller") {
@@ -66,39 +60,14 @@ public class PropLocation extends LocationPanel {
 	@Override
 	public void initialize() {
 		super.initialize();
-		add("device.notes");
-		add(notes_txt, Stretch.FULL);
 		add(new JButton(controller), Stretch.RIGHT);
 		setGeoLoc(camera.getGeoLoc());
-	}
-
-	/** Create the widget jobs */
-	@Override
-	protected void createJobs() {
-		super.createJobs();
-		notes_txt.addFocusListener(new FocusAdapter() {
-			public void focusLost(FocusEvent e) {
-				String n = notes_txt.getText().trim();
-				camera.setNotes((n.length() > 0) ? n : null);
-			}
-		});
-	}
-
-	/** Update the edit mode */
-	@Override
-	public void updateEditMode() {
-		super.updateEditMode();
-		notes_txt.setEnabled(canWrite("notes"));
 	}
 
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
 		if (a == null || a.equals("controller"))
 			controller.setEnabled(camera.getController() != null);
-		if (a == null || a.equals("notes")) {
-			String n = camera.getNotes();
-			notes_txt.setText((n != null) ? n : "");
-		}
 	}
 
 	/** Check if the user can write an attribute */

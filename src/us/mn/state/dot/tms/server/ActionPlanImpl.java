@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.HashtagHelper;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneActionHelper;
 import us.mn.state.dot.tms.LaneMarking;
@@ -412,8 +412,8 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			DMS d = it.next();
 			if (d instanceof DMSImpl) {
 				DMSImpl dms = (DMSImpl) d;
-				if (HashtagHelper.hasHashtag(d, dht) &&
-				    dms.hasError())
+				Hashtags tags = new Hashtags(d.getNotes());
+				if (tags.contains(dht) && dms.hasError())
 					return false;
 			}
 		}

@@ -56,7 +56,8 @@ public class AlertInfoHelper extends BaseHelper {
 				Iterator<DMS> dit = DMSHelper.iterator();
 				while (dit.hasNext()) {
 					DMS d = dit.next();
-					if (HashtagHelper.hasHashtag(d, ht))
+					String n = d.getNotes();
+					if (new Hashtags(n).contains(ht))
 						signs.add(d);
 				}
 			}

@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.HashtagHelper;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.IncImpact;
@@ -200,7 +200,7 @@ public class UpstreamDeviceFinder {
 	private boolean isTollingDeployable(DMS dms, UpstreamDevice ed,
 		boolean branched)
 	{
-		if (!HashtagHelper.hasHashtag(dms, "#Tolling"))
+		if (!new Hashtags(dms.getNotes()).contains("#Tolling"))
 			return false;
 		if (branched)
 			return false;

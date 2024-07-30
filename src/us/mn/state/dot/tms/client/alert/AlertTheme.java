@@ -37,7 +37,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.HashtagHelper;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.DMSManager;
@@ -251,7 +251,8 @@ public class AlertTheme extends ProxyTheme<AlertInfo> {
 			Iterator<DMS> it = DMSHelper.iterator();
 			while (it.hasNext()) {
 				DMS d = it.next();
-				if (HashtagHelper.hasHashtag(d, aht))
+				Hashtags tags = new Hashtags(d.getNotes());
+				if (tags.contains(aht))
 					drawDms(g, d, dmsAvailableStyle, t);
 			}
 			it = active.iterator();

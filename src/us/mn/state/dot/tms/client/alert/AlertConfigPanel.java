@@ -33,7 +33,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.AlertConfig;
 import us.mn.state.dot.tms.AlertMessage;
 import us.mn.state.dot.tms.CapEvent;
-import us.mn.state.dot.tms.HashtagHelper;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
@@ -69,7 +69,7 @@ public class AlertConfigPanel extends IPanel {
 
 	/** Check a hashtag */
 	static private String checkHashtag(Object value) {
-		return HashtagHelper.normalize(value.toString());
+		return Hashtags.normalize(value.toString());
 	}
 
 	/** AlertConfig action */

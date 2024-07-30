@@ -17,8 +17,9 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
+import java.util.Set;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.HashtagHelper;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -94,11 +95,12 @@ public class DmsTheme extends ProxyTheme<DMS> {
 	private Symbol getPurposeSymbol(MapObject mo) {
 		DMS proxy = manager.findProxy(mo);
 		if (proxy != null) {
-			if (HashtagHelper.hasHashtag(proxy, "#Wayfinding"))
+			Hashtags tags = new Hashtags(proxy.getNotes());
+			if (tags.contains("#Wayfinding"))
 				return WAYFINDING_SYMBOL;
-			if (HashtagHelper.hasHashtag(proxy, "#Tolling"))
+			if (tags.contains("#Tolling"))
 				return TOLLING_SYMBOL;
-			if (HashtagHelper.hasHashtag(proxy, "#Parking"))
+			if (tags.contains("#Parking"))
 				return PARKING_SYMBOL;
 		}
 		return null;

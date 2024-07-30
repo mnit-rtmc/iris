@@ -26,7 +26,6 @@ import javax.swing.JTextArea;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.Graphic;
-import us.mn.state.dot.tms.HashtagHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -41,8 +40,8 @@ import us.mn.state.dot.tms.client.widget.IPanel;
  */
 public class PropSetup extends IPanel {
 
-	/** Hashtag text area */
-	private final JTextArea hashtag_txt = new JTextArea(6, 32);
+	/** Notes text area */
+	private final JTextArea notes_txt = new JTextArea(10, 32);
 
 	/** Remote beacon combo box model */
 	private final IComboBoxModel<Beacon> beacon_mdl;
@@ -101,26 +100,29 @@ public class PropSetup extends IPanel {
 	@Override
 	public void initialize() {
 		super.initialize();
-		hashtag_txt.addFocusListener(new FocusAdapter() {
-			@Override public void focusLost(FocusEvent e) {
-				String ht = hashtag_txt.getText();
-				String[] tags = HashtagHelper.makeHashtags(
-					ht.split(" ")
-				);
-				dms.setHashtags(tags);
-			}
-		});
 		beacon_cbx.setModel(beacon_mdl);
 		beacon_cbx.setAction(beacon_act);
 		graphic_cbx.setModel(graphic_mdl);
 		graphic_cbx.setAction(graphic_act);
 		graphic_cbx.setRenderer(new GraphicListCellRenderer());
-		add("hashtags");
-		add(hashtag_txt, Stretch.LAST);
+		add("device.notes");
+		add(notes_txt, Stretch.LAST);
 		add("dms.beacon.rem");
 		add(beacon_cbx, Stretch.LAST);
 		add("dms.static.graphic");
 		add(graphic_cbx, Stretch.LAST);
+		createJobs();
+	}
+
+	/** Create the widget jobs */
+	private void createJobs() {
+		notes_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				String n = notes_txt.getText().trim();
+				dms.setNotes((n.length() > 0) ? n : null);
+			}
+		});
 	}
 
 	/** Dispose of the panel */
@@ -131,19 +133,16 @@ public class PropSetup extends IPanel {
 
 	/** Update the edit mode */
 	public void updateEditMode() {
-		hashtag_txt.setEnabled(canWrite("hashtags"));
+		notes_txt.setEnabled(canWrite("notes"));
 		graphic_act.setEnabled(canWrite("staticGraphic"));
 		beacon_act.setEnabled(canWrite("beacon"));
 	}
 
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
-		if (null == a || a.equals("hashtags")) {
-			String[] hashtags = dms.getHashtags();
-			String ht = (hashtags != null)
-				? String.join(" ", hashtags)
-				: "";
-			hashtag_txt.setText(ht);
+		if (a == null || a.equals("notes")) {
+			String n = dms.getNotes();
+			notes_txt.setText((n != null) ? n : "");
 		}
 		if (null == a || a.equals("staticGraphic"))
 			graphic_act.updateSelected();

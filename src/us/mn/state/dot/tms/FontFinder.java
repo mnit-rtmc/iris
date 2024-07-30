@@ -64,26 +64,24 @@ public class FontFinder {
 
 	/** Find font tags in all message patterns for the sign's hashtags */
 	private void findMsgPatternTags() {
+		Hashtags tags = new Hashtags(dms.getNotes());
 		Iterator<MsgPattern> it = MsgPatternHelper.iterator();
 		while (it.hasNext()) {
 			MsgPattern pat = it.next();
-			String cht = pat.getComposeHashtag();
-			if (HashtagHelper.hasHashtag(dms, cht))
+			if (tags.contains(pat.getComposeHashtag()))
 				findFontTags(pat.getMulti());
 		}
 	}
 
 	/** Find font tags in all DMS actions for the sign's hashtags */
 	private void findDmsActionTags() {
+		Hashtags tags = new Hashtags(dms.getNotes());
 		Iterator<DmsAction> it = DmsActionHelper.iterator();
 		while (it.hasNext()) {
 			DmsAction da = it.next();
 			MsgPattern pat = da.getMsgPattern();
-			if (pat != null) {
-				String ht = da.getDmsHashtag();
-				if (HashtagHelper.hasHashtag(dms, ht))
-					findFontTags(pat.getMulti());
-			}
+			if (pat != null && tags.contains(da.getDmsHashtag()))
+				findFontTags(pat.getMulti());
 		}
 	}
 

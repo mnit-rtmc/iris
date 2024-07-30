@@ -16,11 +16,8 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JTextArea;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
@@ -39,9 +36,6 @@ import us.mn.state.dot.tms.client.widget.IComboBoxModel;
  * @author Douglas Lau
  */
 public class PropLocation extends LocationPanel {
-
-	/** Notes text area */
-	private final JTextArea notes_txt = new JTextArea(11, 24);
 
 	/** Camera preset combo box model */
 	private final IComboBoxModel<CameraPreset> preset_mdl;
@@ -99,9 +93,6 @@ public class PropLocation extends LocationPanel {
 		preset_cbx.setModel(preset_mdl);
 		preset_cbx.setAction(preset_act);
 		preset_cbx.setRenderer(new PresetComboRenderer());
-
-		add("device.notes");
-		add(notes_txt, Stretch.DOUBLE);
 		add(gps_pnl, Stretch.CENTER);
 		add("camera.preset");
 		add(preset_cbx, Stretch.LAST);
@@ -109,25 +100,11 @@ public class PropLocation extends LocationPanel {
 		setGeoLoc(dms.getGeoLoc());
 	}
 
-	/** Create the widget jobs */
-	@Override
-	protected void createJobs() {
-		super.createJobs();
-		notes_txt.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				String n = notes_txt.getText().trim();
-				dms.setNotes((n.length() > 0) ? n : null);
-			}
-		});
-	}
-
 	/** Update the edit mode */
 	@Override
 	public void updateEditMode() {
 		super.updateEditMode();
 		gps_pnl.updateEditMode();
-		notes_txt.setEnabled(canWrite("notes"));
 		preset_act.setEnabled(canWrite("preset"));
 	}
 
@@ -135,10 +112,6 @@ public class PropLocation extends LocationPanel {
 	public void updateAttribute(String a) {
 		if (a == null || a.equals("controller"))
 			controller.setEnabled(dms.getController() != null);
-		if (a == null || a.equals("notes")) {
-			String n = dms.getNotes();
-			notes_txt.setText((n != null) ? n : "");
-		}
 		if (a == null || a.equals("preset"))
 			preset_act.updateSelected();
 	}
