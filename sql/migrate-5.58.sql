@@ -548,4 +548,8 @@ SET notes = concat_ws(e'\n\n', notes, h.hashtags)
 FROM cam_hashtags h
 WHERE h.name = c.name;
 
+-- Drop hashtag notification trigger
+DROP TRIGGER hashtag_notify_trig ON iris.hashtag;
+DROP FUNCTION iris.hashtag_notify();
+
 COMMIT;
