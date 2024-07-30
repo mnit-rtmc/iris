@@ -50,7 +50,7 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 	private final JTextArea alt_id_txt = new JTextArea(1, 24);
 
 	/** Notes text area */
-	private final JTextArea notes_txt = new JTextArea(3, 24);
+	private final JTextArea notes_txt = new JTextArea(8, 32);
 
 	/** Controller action */
 	private final IAction controller = new IAction("controller") {

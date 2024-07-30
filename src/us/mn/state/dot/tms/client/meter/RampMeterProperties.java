@@ -61,7 +61,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	private final LocationPanel loc_pnl;
 
 	/** Notes text area */
-	private final JTextArea notes_txt = new JTextArea(3, 24);
+	private final JTextArea notes_txt = new JTextArea(8, 32);
 
 	/** Camera preset action */
 	private final IAction preset_act = new IAction("camera.preset") {

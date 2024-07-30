@@ -44,7 +44,7 @@ import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 public class PropSetup extends IPanel {
 
 	/** Notes text area */
-	private final JTextArea notes_txt = new JTextArea(6, 32);
+	private final JTextArea notes_txt = new JTextArea(8, 32);
 
 	/** Camera number text */
 	private final JTextField cam_num_txt = new JTextField("", 8);

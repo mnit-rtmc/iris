@@ -50,7 +50,7 @@ public class BeaconProperties extends SonarObjectForm<Beacon> {
 	private final LocationPanel loc_pnl;
 
 	/** Notes text area */
-	private final JTextArea notes_txt = new JTextArea(3, 24);
+	private final JTextArea notes_txt = new JTextArea(8, 32);
 
 	/** Controller action */
 	private final IAction controller = new IAction("controller") {

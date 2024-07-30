@@ -41,7 +41,7 @@ import us.mn.state.dot.tms.client.widget.IPanel;
 public class PropSetup extends IPanel {
 
 	/** Notes text area */
-	private final JTextArea notes_txt = new JTextArea(10, 32);
+	private final JTextArea notes_txt = new JTextArea(8, 32);
 
 	/** Remote beacon combo box model */
 	private final IComboBoxModel<Beacon> beacon_mdl;

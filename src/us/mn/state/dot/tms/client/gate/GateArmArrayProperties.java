@@ -54,7 +54,7 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	private final LocationPanel loc_pnl;
 
 	/** Notes text area */
-	private final JTextArea notes_txt = new JTextArea(3, 24);
+	private final JTextArea notes_txt = new JTextArea(8, 32);
 
 	/** Camera combo box model */
 	private final IComboBoxModel<Camera> camera_mdl;
