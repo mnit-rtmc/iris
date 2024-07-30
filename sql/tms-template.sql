@@ -495,6 +495,15 @@ CREATE VIEW hashtag_view AS
     FROM iris.hashtag;
 GRANT SELECT ON hashtag_view TO PUBLIC;
 
+CREATE FUNCTION parse_tags(notes TEXT) RETURNS SETOF TEXT AS
+    $parse_tags$
+BEGIN
+    RETURN QUERY SELECT tag[1] FROM (
+        SELECT regexp_matches(notes, '#([A-Za-z0-9]+)', 'g') AS tag
+    );
+END;
+$parse_tags$ LANGUAGE plpgsql STABLE;
+
 CREATE TABLE iris.permission (
     id SERIAL PRIMARY KEY,
     role VARCHAR(15) NOT NULL REFERENCES iris.role ON DELETE CASCADE,
@@ -1666,6 +1675,25 @@ CREATE TABLE iris._camera (
 ALTER TABLE iris._camera ADD CONSTRAINT _camera_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
+CREATE FUNCTION iris.camera_hashtag() RETURNS TRIGGER AS
+    $camera_hashtag$
+BEGIN
+    IF (TG_OP != 'INSERT') THEN
+        DELETE FROM iris.hashtag
+        WHERE resource_n = 'camera' AND name = OLD.name;
+    END IF;
+    IF (TG_OP != 'DELETE') THEN
+        INSERT INTO iris.hashtag (resource_n, name, hashtag)
+        SELECT 'camera', NEW.name, parse_tags(NEW.notes);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$camera_hashtag$ LANGUAGE plpgsql;
+
+CREATE TRIGGER camera_hashtag_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._camera
+    FOR EACH ROW EXECUTE FUNCTION iris.camera_hashtag();
+
 CREATE FUNCTION iris.camera_notify() RETURNS TRIGGER AS
     $camera_notify$
 BEGIN
@@ -1765,40 +1793,6 @@ CREATE VIEW camera_view AS
     LEFT JOIN geo_loc_view l ON c.geo_loc = l.name
     LEFT JOIN controller_view ctr ON cio.controller = ctr.name;
 GRANT SELECT ON camera_view TO PUBLIC;
-
-CREATE VIEW iris.camera_hashtag AS
-    SELECT name AS camera, hashtag
-        FROM iris.hashtag
-        WHERE resource_n = 'camera';
-
-CREATE FUNCTION iris.camera_hashtag_insert() RETURNS TRIGGER AS
-    $camera_hashtag_insert$
-BEGIN
-    INSERT INTO iris.hashtag (resource_n, name, hashtag)
-         VALUES ('camera', NEW.camera, NEW.hashtag);
-    RETURN NEW;
-END;
-$camera_hashtag_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER camera_hashtag_insert_trig
-    INSTEAD OF INSERT ON iris.camera_hashtag
-    FOR EACH ROW EXECUTE FUNCTION iris.camera_hashtag_insert();
-
-CREATE FUNCTION iris.camera_hashtag_delete() RETURNS TRIGGER AS
-    $camera_hashtag_delete$
-BEGIN
-    DELETE FROM iris.hashtag WHERE resource_n = 'camera' AND name = OLD.camera;
-    IF FOUND THEN
-        RETURN OLD;
-    ELSE
-        RETURN NULL;
-    END IF;
-END;
-$camera_hashtag_delete$ LANGUAGE plpgsql;
-
-CREATE TRIGGER camera_hashtag_delete_trig
-    INSTEAD OF DELETE ON iris.camera_hashtag
-    FOR EACH ROW EXECUTE FUNCTION iris.camera_hashtag_delete();
 
 CREATE TABLE iris._cam_sequence (
     seq_num INTEGER PRIMARY KEY
@@ -3166,37 +3160,24 @@ CREATE VIEW dms_message_view AS
     LEFT JOIN iris.sign_message sm ON d.msg_current = sm.name;
 GRANT SELECT ON dms_message_view TO PUBLIC;
 
-CREATE VIEW iris.dms_hashtag AS
-    SELECT name AS dms, hashtag FROM iris.hashtag WHERE resource_n = 'dms';
-
-CREATE FUNCTION iris.dms_hashtag_insert() RETURNS TRIGGER AS
-    $dms_hashtag_insert$
+CREATE FUNCTION iris.dms_hashtag() RETURNS TRIGGER AS
+    $dms_hashtag$
 BEGIN
-    INSERT INTO iris.hashtag (resource_n, name, hashtag)
-         VALUES ('dms', NEW.dms, NEW.hashtag);
-    RETURN NEW;
-END;
-$dms_hashtag_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER dms_hashtag_insert_trig
-    INSTEAD OF INSERT ON iris.dms_hashtag
-    FOR EACH ROW EXECUTE FUNCTION iris.dms_hashtag_insert();
-
-CREATE FUNCTION iris.dms_hashtag_delete() RETURNS TRIGGER AS
-    $dms_hashtag_delete$
-BEGIN
-    DELETE FROM iris.hashtag WHERE resource_n = 'dms' AND name = OLD.dms;
-    IF FOUND THEN
-        RETURN OLD;
-    ELSE
-        RETURN NULL;
+    IF (TG_OP != 'INSERT') THEN
+        DELETE FROM iris.hashtag
+        WHERE resource_n = 'dms' AND name = OLD.name;
     END IF;
+    IF (TG_OP != 'DELETE') THEN
+        INSERT INTO iris.hashtag (resource_n, name, hashtag)
+        SELECT 'dms', NEW.name, parse_tags(NEW.notes);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
 END;
-$dms_hashtag_delete$ LANGUAGE plpgsql;
+$dms_hashtag$ LANGUAGE plpgsql;
 
-CREATE TRIGGER dms_hashtag_delete_trig
-    INSTEAD OF DELETE ON iris.dms_hashtag
-    FOR EACH ROW EXECUTE FUNCTION iris.dms_hashtag_delete();
+CREATE TRIGGER dms_hashtag_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._dms
+    FOR EACH ROW EXECUTE FUNCTION iris.dms_hashtag();
 
 CREATE TABLE iris.msg_pattern (
     name VARCHAR(20) PRIMARY KEY,
@@ -5170,10 +5151,11 @@ CREATE VIEW iris.msg_pattern_toll_zone AS
         FROM iris.msg_pattern_closed;
 
 CREATE VIEW dms_toll_zone_view AS
-    SELECT dms, dh.hashtag, tz.state, toll_zone, action_plan, da.msg_pattern
+    SELECT ht.name AS dms, hashtag, tz.state, toll_zone, action_plan,
+           da.msg_pattern
     FROM dms_action_view da
-    JOIN iris.dms_hashtag dh
-    ON da.dms_hashtag = dh.hashtag
+    JOIN iris.hashtag ht
+    ON ht.hashtag = dms_hashtag AND resource_n = 'dms'
     JOIN iris.msg_pattern mp
     ON da.msg_pattern = mp.name
     JOIN iris.msg_pattern_toll_zone tz

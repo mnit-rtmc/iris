@@ -552,4 +552,72 @@ WHERE h.name = c.name;
 DROP TRIGGER hashtag_notify_trig ON iris.hashtag;
 DROP FUNCTION iris.hashtag_notify();
 
+-- Add triggers to populate hashtag table
+DROP VIEW dms_toll_zone_view;
+DROP VIEW iris.camera_hashtag;
+DROP FUNCTION iris.camera_hashtag_insert();
+DROP FUNCTION iris.camera_hashtag_delete();
+DROP VIEW iris.dms_hashtag;
+DROP FUNCTION iris.dms_hashtag_insert();
+DROP FUNCTION iris.dms_hashtag_delete();
+
+CREATE VIEW dms_toll_zone_view AS
+    SELECT ht.name AS dms, hashtag, tz.state, toll_zone, action_plan,
+           da.msg_pattern
+    FROM dms_action_view da
+    JOIN iris.hashtag ht
+    ON ht.hashtag = dms_hashtag AND resource_n = 'dms'
+    JOIN iris.msg_pattern mp
+    ON da.msg_pattern = mp.name
+    JOIN iris.msg_pattern_toll_zone tz
+    ON da.msg_pattern = tz.msg_pattern;
+GRANT SELECT ON dms_toll_zone_view TO PUBLIC;
+
+CREATE FUNCTION parse_tags(notes TEXT) RETURNS SETOF TEXT AS
+    $parse_tags$
+BEGIN
+    RETURN QUERY SELECT tag[1] FROM (
+        SELECT regexp_matches(notes, '(#[A-Za-z0-9]+)', 'g') AS tag
+    );
+END;
+$parse_tags$ LANGUAGE plpgsql STABLE;
+
+CREATE FUNCTION iris.camera_hashtag() RETURNS TRIGGER AS
+    $camera_hashtag$
+BEGIN
+    IF (TG_OP != 'INSERT') THEN
+        DELETE FROM iris.hashtag
+        WHERE resource_n = 'camera' AND name = OLD.name;
+    END IF;
+    IF (TG_OP != 'DELETE') THEN
+        INSERT INTO iris.hashtag (resource_n, name, hashtag)
+        SELECT 'camera', NEW.name, parse_tags(NEW.notes);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$camera_hashtag$ LANGUAGE plpgsql;
+
+CREATE TRIGGER camera_hashtag_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._camera
+    FOR EACH ROW EXECUTE FUNCTION iris.camera_hashtag();
+
+CREATE FUNCTION iris.dms_hashtag() RETURNS TRIGGER AS
+    $dms_hashtag$
+BEGIN
+    IF (TG_OP != 'INSERT') THEN
+        DELETE FROM iris.hashtag
+        WHERE resource_n = 'dms' AND name = OLD.name;
+    END IF;
+    IF (TG_OP != 'DELETE') THEN
+        INSERT INTO iris.hashtag (resource_n, name, hashtag)
+        SELECT 'dms', NEW.name, parse_tags(NEW.notes);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$dms_hashtag$ LANGUAGE plpgsql;
+
+CREATE TRIGGER dms_hashtag_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._dms
+    FOR EACH ROW EXECUTE FUNCTION iris.dms_hashtag();
+
 COMMIT;

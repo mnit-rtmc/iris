@@ -86,9 +86,6 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
-	/** DMS / hashtag mapping */
-	static private TagMapping tag_map;
-
 	/** DMS / weather sensor mapping */
 	static private TableMapping ess_map;
 
@@ -125,8 +122,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Load all the DMS */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
-		tag_map = new TagMapping(store, "iris", SONAR_TYPE,
-			"hashtag");
 		ess_map = new TableMapping(store, "iris", SONAR_TYPE,
 			WeatherSensor.SONAR_TYPE);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
@@ -381,20 +376,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Set the administrator notes */
 	@Override
 	public void doSetNotes(String n) throws TMSException {
-		setHashtags(n);
 		super.doSetNotes(n);
-	}
-
-	/** Set the hashtags assigned to the DMS */
-	private synchronized void setHashtags(String n) throws TMSException {
-		Hashtags tags = new Hashtags(n);
-		if (!tags.valid)
-			throw new ChangeVetoException("BAD HASHTAG");
-		Hashtags hashtags = new Hashtags(notes);
-		if (!tags.equals(hashtags)) {
-			tag_map.update(this, tags.tags());
-			updateStyles();
-		}
+		updateStyles();
 	}
 
 	/** Add a hashtag to the DMS */

@@ -48,7 +48,7 @@ public class HashtagsTest extends TestCase {
 		assertTrue(tags.contains("#hi"));
 		assertTrue(tags.contains("#isthis"));
 		assertTrue(tags.contains("#agood"));
-		assertFalse(tags.contains("#test"));
+		assertTrue(tags.contains("#test"));
 		assertFalse(tags.contains("#test?"));
 		tags = new Hashtags("(#Nesting[#brace{#test}#this]#should)#work");
 		assertTrue(tags.contains("#NESTING"));

@@ -25,12 +25,11 @@ import us.mn.state.dot.tms.utils.NumericAlphaComparator;
  */
 public class Hashtags {
 
-	/** Characters for tag boundaries */
-	static private final String BOUNDARY = "# \t\n\r\f,;:()[]{}<>";
-
-	/** Check if a character is a tag boundary */
-	static private boolean isBoundary(char c) {
-		return BOUNDARY.indexOf(c) >= 0;
+	/** Check if a character is valid in a tag */
+	static private boolean isTagChar(char c) {
+		return (c >= '0' && c <= '9')
+		    || (c >= 'A' && c <= 'Z')
+		    || (c >= 'a' && c <= 'z');
 	}
 
 	/** Normalize a hashtag value */
@@ -63,12 +62,8 @@ public class Hashtags {
 	/** Set of tags */
 	private final TreeSet<String> tags = new TreeSet<String>();
 
-	/** Valid tags flag */
-	public final boolean valid;
-
 	/** Construct hashtags from notes */
 	public Hashtags(String notes) {
-		boolean v = true;
 		if (notes != null) {
 			int len = notes.length();
 			for (int i = 0; i < len; i++) {
@@ -76,21 +71,15 @@ public class Hashtags {
 					int j = i + 1;
 					for (; j < len; j++) {
 						char t = notes.charAt(j);
-						if (isBoundary(t))
+						if (!isTagChar(t))
 							break;
 					}
-					String tag = notes.substring(i, j);
-					String t = normalize(tag);
-					if (t != null) {
-						tags.add(t);
-						if (!t.equals(tag))
-							v = false;
-					}
+					if (j > i + 1)
+						tags.add(notes.substring(i, j));
 					i = j;
 				}
 			}
 		}
-		valid = v;
 	}
 
 	/** Check if hashtag is contained in a set */

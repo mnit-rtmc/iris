@@ -54,9 +54,6 @@ import us.mn.state.dot.tms.server.event.CameraVideoEvent;
  */
 public class CameraImpl extends DeviceImpl implements Camera {
 
-	/** Camera / hashtag mapping */
-	static private TagMapping tag_map;
-
 	/** Invalid preset number */
 	static private final int INVALID_PRESET = -1;
 
@@ -71,8 +68,6 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	/** Load all the cameras */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, CameraImpl.class);
-		tag_map = new TagMapping(store, "iris", SONAR_TYPE,
-			"hashtag");
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"cam_num, encoder_type, enc_address, enc_port, " +
 			"enc_mcast, enc_channel, publish, video_loss, " +
@@ -351,20 +346,8 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	/** Set the administrator notes */
 	@Override
 	public void doSetNotes(String n) throws TMSException {
-		setHashtags(n);
 		super.doSetNotes(n);
-	}
-
-	/** Set the hashtags assigned to the camera */
-	private synchronized void setHashtags(String n) throws TMSException {
-		Hashtags tags = new Hashtags(n);
-		if (!tags.valid)
-			throw new ChangeVetoException("BAD HASHTAG");
-		Hashtags hashtags = new Hashtags(notes);
-		if (!tags.equals(hashtags)) {
-			tag_map.update(this, tags.tags());
-			updateStyles();
-		}
+		updateStyles();
 	}
 
 	/** Add a hashtag to the camera */
