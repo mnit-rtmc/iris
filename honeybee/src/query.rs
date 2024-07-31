@@ -61,36 +61,27 @@ pub const CABINET_STYLE_ONE: &str = "\
 
 /// SQL query for all cameras (primary)
 pub const CAMERA_ALL: &str = "\
-  SELECT c.name, location, controller, notes, hashtags, cam_num, publish \
+  SELECT c.name, location, controller, notes, cam_num, publish \
   FROM iris.camera c \
   LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
-  LEFT JOIN (\
-    SELECT camera, string_agg(hashtag, ' ' ORDER BY hashtag) AS hashtags \
-    FROM iris.camera_hashtag \
-    GROUP BY camera\
-  ) h ON c.name = h.camera \
   ORDER BY cam_num, c.name";
 
 /// SQL query for one camera (secondary)
 pub const CAMERA_ONE: &str = "\
   SELECT c.name, location, geo_loc, controller, pin, notes, cam_num, publish, \
-         hashtags, cam_template, encoder_type, enc_address, enc_port, \
-         enc_mcast, enc_channel, video_loss \
+         cam_template, encoder_type, enc_address, enc_port, enc_mcast, \
+         enc_channel, video_loss \
   FROM iris.camera c \
   LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
-  LEFT JOIN (\
-    SELECT camera, string_agg(hashtag, ' ' ORDER BY hashtag) AS hashtags \
-    FROM iris.camera_hashtag \
-    GROUP BY camera\
-  ) h ON c.name = h.camera \
   WHERE c.name = $1";
 
 /// SQL query for all cameras (public)
 ///
 /// FIXME: remove streamable when client has updated
 pub const CAMERA_PUB: &str = "\
-  SELECT name, publish, s.camera IS NOT NULL AS streamable, hashtags, roadway, \
-         road_dir, cross_street, location, lat, lon, ARRAY(\
+  SELECT c.name, publish, s.name IS NOT NULL AS streamable, hashtags, \
+         roadway, road_dir, cross_street, location, lat, lon, \
+         ARRAY(\
            SELECT view_num \
            FROM iris.encoder_stream \
            WHERE encoder_type = c.encoder_type \
@@ -99,16 +90,17 @@ pub const CAMERA_PUB: &str = "\
          ) AS views \
   FROM camera_view c \
   LEFT JOIN (\
-    SELECT camera \
-    FROM iris.camera_hashtag \
-    WHERE hashtag = '#LiveStream'\
-  ) s ON c.name = s.camera \
+    SELECT name \
+    FROM iris.hashtag \
+    WHERE resource_n = 'camera' AND hashtag = '#LiveStream'\
+  ) s ON c.name = s.name \
   LEFT JOIN (\
-    SELECT camera, string_agg(hashtag, ' ' ORDER BY hashtag) AS hashtags \
-    FROM iris.camera_hashtag \
-    GROUP BY camera\
-  ) h ON c.name = h.camera \
-  ORDER BY name";
+    SELECT name, string_agg(hashtag, ' ' ORDER BY hashtag) AS hashtags \
+    FROM iris.hashtag \
+    WHERE resource_n = 'camera' \
+    GROUP BY name\
+  ) h ON c.name = h.name \
+  ORDER BY c.name";
 
 /// SQL query for all comm configs (primary)
 pub const COMM_CONFIG_ALL: &str = "\
@@ -203,29 +195,19 @@ pub const DIRECTION_LUT: &str = "\
 pub const DMS_ALL: &str = "\
   SELECT d.name, location, msg_current, \
          NULLIF(char_length(status->>'faults') > 0, false) AS has_faults, \
-         notes, hashtags, controller \
+         notes, controller \
   FROM iris.dms d \
   LEFT JOIN geo_loc_view gl ON d.geo_loc = gl.name \
-  LEFT JOIN (\
-    SELECT dms, string_agg(hashtag, ' ' ORDER BY hashtag) AS hashtags \
-    FROM iris.dms_hashtag \
-    GROUP BY dms\
-  ) h ON d.name = h.dms \
   ORDER BY d.name";
 
 /// SQL query for one DMS (secondary)
 pub const DMS_ONE: &str = "\
-  SELECT d.name, location, geo_loc, controller, pin, notes, hashtags, \
+  SELECT d.name, location, geo_loc, controller, pin, notes, \
          static_graphic, beacon, preset, sign_config, sign_detail, status, \
          char_length(status->>'faults') > 0 AS has_faults, \
          msg_user, msg_sched, msg_current, expire_time, stuck_pixels \
   FROM iris.dms d \
   LEFT JOIN geo_loc_view gl ON d.geo_loc = gl.name \
-  LEFT JOIN (\
-    SELECT dms, string_agg(hashtag, ' ' ORDER BY hashtag) AS hashtags \
-    FROM iris.dms_hashtag \
-    GROUP BY dms\
-  ) h ON d.name = h.dms \
   WHERE d.name = $1";
 
 /// SQL query for all DMS (public)
