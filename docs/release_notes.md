@@ -1,5 +1,15 @@
 # IRIS 5.x Release Notes
 
+5.58.0 (31 Jul 2024)
+ - Replace "sonar.ldap.urls" with "sonar.ldap.url" in iris-server.properties
+ - Allow login while LDAP server unreachable (CrowdStrike event)
+ - Merge hashtags into "notes" for camera / DMS
+ - Add hashtag support for more devices: beacon, gps, gate_arm_array,
+   ramp_meter, weather_sensor
+ - Improve web UI fetch latency
+ - Improve consistency of web UI
+ - On web UI, "fly" to map location when DMS card is selected
+
 5.57.0 (10 Jul 2024)
  - Add RWIS message automation
  - Drop "streamable" from camera table
