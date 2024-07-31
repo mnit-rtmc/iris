@@ -921,7 +921,7 @@ impl Dms {
             "{title}\
             <div class='row'>\
               <label for='notes'>Notes</label>\
-              <textarea id='notes' maxlength='256' rows='4' \
+              <textarea id='notes' maxlength='255' rows='4' \
                         cols='24'>{notes}</textarea>\
             </div>\
             {controller}\
