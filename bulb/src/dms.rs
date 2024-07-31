@@ -18,6 +18,7 @@ use crate::error::Result;
 use crate::fetch::{Action, Uri};
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
+use crate::notes::contains_hashtag;
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, TextArea};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
@@ -124,7 +125,6 @@ pub struct Dms {
     pub location: Option<String>,
     pub controller: Option<String>,
     pub notes: Option<String>,
-    pub hashtags: Option<String>,
     pub msg_current: Option<String>,
     pub has_faults: Option<bool>,
     // secondary attributes
@@ -754,10 +754,8 @@ impl Dms {
 
     /// Check if DMS has a given hashtag
     fn has_hashtag(&self, hashtag: &str) -> bool {
-        match &self.hashtags {
-            Some(hashtags) => {
-                hashtags.split(' ').any(|h| hashtag.eq_ignore_ascii_case(h))
-            }
+        match &self.notes {
+            Some(notes) => contains_hashtag(notes, hashtag),
             None => false,
         }
     }
@@ -923,7 +921,7 @@ impl Dms {
             "{title}\
             <div class='row'>\
               <label for='notes'>Notes</label>\
-              <textarea id='notes' maxlength='128' rows='2' \
+              <textarea id='notes' maxlength='256' rows='4' \
                         cols='24'>{notes}</textarea>\
             </div>\
             {controller}\
@@ -1154,7 +1152,6 @@ impl Card for Dms {
                 .notes
                 .as_ref()
                 .is_some_and(|n| n.contains_lower(search))
-            || self.has_hashtag(search)
             || self.item_states(anc).is_match(search)
             || anc
                 .sign_message(self.msg_current.as_deref())

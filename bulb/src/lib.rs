@@ -38,6 +38,7 @@ mod lanemarking;
 mod lcsarray;
 mod lcsindication;
 mod modem;
+mod notes;
 mod permission;
 mod rampmeter;
 mod role;
