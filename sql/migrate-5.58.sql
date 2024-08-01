@@ -578,7 +578,7 @@ CREATE FUNCTION parse_tags(notes TEXT) RETURNS SETOF TEXT AS
 BEGIN
     RETURN QUERY SELECT tag[1] FROM (
         SELECT regexp_matches(notes, '(#[A-Za-z0-9]+)', 'g') AS tag
-    );
+    ) AS tags;
 END;
 $parse_tags$ LANGUAGE plpgsql STABLE;
 
