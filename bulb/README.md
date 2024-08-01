@@ -18,8 +18,13 @@ cd iris/bulb/
 ./build.sh
 ```
 
-The WebAssembly files will be located in the `./pkg` directory.  Copy them
-to `/var/lib/iris/web/bulb/` and change the ownership to `tms:tms`.
+The `./pkg` directory must be copied to where honeybee can serve them to
+users.  Run these commands as root:
+
+```sh
+cp -r pkg/* /var/lib/iris/web/bulb/
+chown -R tms:tms /var/lib/iris/web/bulb/
+```
 
 Now, use firefox or chrome to login at http://127.0.0.1/iris/
 
