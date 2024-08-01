@@ -22,6 +22,7 @@ The `./pkg` directory must be copied to where honeybee can serve them to
 users.  Run these commands as root:
 
 ```sh
+cp index.html /var/lib/iris/web/
 cp -r pkg/* /var/lib/iris/web/bulb/
 chown -R tms:tms /var/lib/iris/web/bulb/
 ```
