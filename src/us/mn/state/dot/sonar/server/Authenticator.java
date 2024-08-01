@@ -207,16 +207,15 @@ public class Authenticator {
 	{
 		try {
 			String dn = user.getDn();
-			if (isDnSet(dn)) {
-				processor.failPassword(c, PermissionDenied.
-					authenticationFailed().getMessage());
-			} else if (authenticate(c, user, user.getName(),
-				pwd_current))
+			// only allow change for "local" accounts (no LDAP)
+			if (!isDnSet(dn) &&
+			    authenticate(c, user, user.getName(), pwd_current))
 			{
 				processor.finishPassword(c, user, pwd_new, false);
 			} else {
-				processor.failPassword(c, PermissionDenied.
-					authenticationFailed().getMessage());
+				processor.failPassword(c, user,
+					PermissionDenied.authenticationFailed()
+					.getMessage());
 			}
 		}
 		finally {

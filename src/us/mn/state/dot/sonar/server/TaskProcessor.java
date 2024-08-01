@@ -390,27 +390,29 @@ public class TaskProcessor {
 					if (update) {
 						access_logger.updatePassword(
 							c.getName(),
-							c.getUserName());
+							u.getName());
 					} else {
 						access_logger.changePassword(
 							c.getName(),
-							c.getUserName());
+							u.getName());
 					}
 				}
 				catch (Exception e) {
-					failPassword(c, e.getMessage());
+					failPassword(c, u, e.getMessage());
 				}
 			}
 		});
 	}
 
 	/** Fail a PASSWORD */
-	void failPassword(final ConnectionImpl c, final String msg) {
+	void failPassword(final ConnectionImpl c, final UserImpl u,
+		final String msg)
+	{
 		processor.addWork(new TaskWork("Fail PASSWORD", c) {
 			protected void doPerform() {
 				c.failPassword(msg);
 				access_logger.failPassword(c.getName(),
-					c.getUserName());
+					u.getName());
 			}
 		});
 	}
