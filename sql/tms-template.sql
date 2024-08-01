@@ -495,7 +495,7 @@ CREATE VIEW hashtag_view AS
     FROM iris.hashtag;
 GRANT SELECT ON hashtag_view TO PUBLIC;
 
-CREATE FUNCTION parse_tags(notes TEXT) RETURNS SETOF TEXT AS
+CREATE FUNCTION iris.parse_tags(notes TEXT) RETURNS SETOF TEXT AS
     $parse_tags$
 BEGIN
     RETURN QUERY SELECT tag[1] FROM (
@@ -1684,7 +1684,7 @@ BEGIN
     END IF;
     IF (TG_OP != 'DELETE') THEN
         INSERT INTO iris.hashtag (resource_n, name, hashtag)
-        SELECT 'camera', NEW.name, parse_tags(NEW.notes);
+        SELECT 'camera', NEW.name, iris.parse_tags(NEW.notes);
     END IF;
     RETURN NULL; -- AFTER trigger return is ignored
 END;
@@ -2172,7 +2172,7 @@ BEGIN
     END IF;
     IF (TG_OP != 'DELETE') THEN
         INSERT INTO iris.hashtag (resource_n, name, hashtag)
-        SELECT 'beacon', NEW.name, parse_tags(NEW.notes);
+        SELECT 'beacon', NEW.name, iris.parse_tags(NEW.notes);
     END IF;
     RETURN NULL; -- AFTER trigger return is ignored
 END;
@@ -2574,7 +2574,7 @@ BEGIN
     END IF;
     IF (TG_OP != 'DELETE') THEN
         INSERT INTO iris.hashtag (resource_n, name, hashtag)
-        SELECT 'gps', NEW.name, parse_tags(NEW.notes);
+        SELECT 'gps', NEW.name, iris.parse_tags(NEW.notes);
     END IF;
     RETURN NULL; -- AFTER trigger return is ignored
 END;
@@ -3207,7 +3207,7 @@ BEGIN
     END IF;
     IF (TG_OP != 'DELETE') THEN
         INSERT INTO iris.hashtag (resource_n, name, hashtag)
-        SELECT 'dms', NEW.name, parse_tags(NEW.notes);
+        SELECT 'dms', NEW.name, iris.parse_tags(NEW.notes);
     END IF;
     RETURN NULL; -- AFTER trigger return is ignored
 END;
@@ -3417,7 +3417,7 @@ BEGIN
     END IF;
     IF (TG_OP != 'DELETE') THEN
         INSERT INTO iris.hashtag (resource_n, name, hashtag)
-        SELECT 'gate_arm_array', NEW.name, parse_tags(NEW.notes);
+        SELECT 'gate_arm_array', NEW.name, iris.parse_tags(NEW.notes);
     END IF;
     RETURN NULL; -- AFTER trigger return is ignored
 END;
@@ -4806,7 +4806,7 @@ BEGIN
     END IF;
     IF (TG_OP != 'DELETE') THEN
         INSERT INTO iris.hashtag (resource_n, name, hashtag)
-        SELECT 'ramp_meter', NEW.name, parse_tags(NEW.notes);
+        SELECT 'ramp_meter', NEW.name, iris.parse_tags(NEW.notes);
     END IF;
     RETURN NULL; -- AFTER trigger return is ignored
 END;
@@ -5478,7 +5478,7 @@ BEGIN
     END IF;
     IF (TG_OP != 'DELETE') THEN
         INSERT INTO iris.hashtag (resource_n, name, hashtag)
-        SELECT 'weather_sensor', NEW.name, parse_tags(NEW.notes);
+        SELECT 'weather_sensor', NEW.name, iris.parse_tags(NEW.notes);
     END IF;
     RETURN NULL; -- AFTER trigger return is ignored
 END;
