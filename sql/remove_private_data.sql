@@ -43,7 +43,6 @@ UPDATE iris.video_monitor SET notes = NULL;
 UPDATE iris.camera SET enc_address = NULL;
 UPDATE iris.camera SET enc_mcast = NULL;
 UPDATE iris.camera SET enc_channel = NULL;
-UPDATE iris.camera SET notes = NULL;
 UPDATE iris.vid_src_template SET config = '';
 
 -- DELETE FROM iris.sign_message;
