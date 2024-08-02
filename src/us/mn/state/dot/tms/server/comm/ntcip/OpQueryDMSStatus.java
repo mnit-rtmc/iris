@@ -63,7 +63,7 @@ public class OpQueryDMSStatus extends OpDMS {
 		int val = value.getInteger();
 		int mx = max.getInteger();
 		return (val >= 0 && val <= mx)
-		      ? Math.round(((float) val) / mx)
+		      ? Math.round((val * 100.0f) / mx)
 		      : null;
 	}
 
@@ -72,7 +72,7 @@ public class OpQueryDMSStatus extends OpDMS {
 		return (value >= 0 && value <= 65535) ? (value / 100f) : null;
 	}
 
-	/** Photocell level (composite) */
+	/** Photocell level (virtual) */
 	private final ASN1Integer p_level =
 		dmsIllumPhotocellLevelStatus.makeInt();
 
@@ -447,31 +447,38 @@ public class OpQueryDMSStatus extends OpDMS {
 			if (row <= n_sensors)
 				return this;
 			else {
-				photocells.put(compositePhotocell());
+				photocell = virtualPhotocell();
+				if (photocell != null)
+					photocells.put(photocell);
 				putStatus(DMS.PHOTOCELLS, photocells);
 				return vendorStatus();
 			}
 		}
 	}
 
-	/** Get the composite photocell value */
-	private JSONObject compositePhotocell() {
-		JSONObject photocell = new JSONObject();
-		photocell.put("description", "composite");
-		String r = compositePhotocellReading();
-		if (r != null)
+	/** Get the virtual photocell value */
+	private JSONObject virtualPhotocell() {
+		String r = virtualPhotocellReading();
+		if (r != null) {
+			JSONObject photocell = new JSONObject();
+			photocell.put("description", "virtual");
 			photocell.put("reading", r);
-		return photocell;
+			return photocell;
+		} else
+			return null;
 	}
 
-	/** Get the composite photocell reading */
-	private String compositePhotocellReading() {
-		int err = shortError.getInteger();
-		if (ShortErrorStatus.PHOTOCELL.isSet(err))
-			return "fail";
+	/** Get the virtual photocell reading */
+	private String virtualPhotocellReading() {
+		Integer r = getPercent(p_level, max_level);
+		if (r != null)
+			return r.toString();
 		else {
-			Integer r = getPercent(p_level, max_level);
-			return (r != null) ? r.toString() : null;
+			int err = shortError.getInteger();
+			if (ShortErrorStatus.PHOTOCELL.isSet(err))
+				return "fail";
+			else
+				return null;
 		}
 	}
 
