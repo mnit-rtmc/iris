@@ -440,7 +440,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			else {
 				Integer r = getPercent(reading);
 				if (r != null)
-					photocell.put("reading", r);
+					photocell.put("reading", r.toString());
 			}
 			photocells.put(photocell);
 			row++;
