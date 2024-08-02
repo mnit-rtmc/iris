@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2022  Minnesota Department of Transportation
+ * Copyright (C) 2010-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,6 +13,8 @@
  * GNU General Public License for more details.
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
+
+import us.mn.state.dot.tms.server.comm.snmp.DisplayString;
 
 /**
  * Enumeration of power status values.
@@ -31,5 +33,10 @@ public enum DmsPowerStatus {
 	/** Is there some kind of error? */
 	public boolean isError() {
 		return this != noError;
+	}
+
+	/** Get detailed power supply status */
+	public String getDetail(DisplayString mfr_status) {
+		return (this == other) ? mfr_status.toString() : toString();
 	}
 }

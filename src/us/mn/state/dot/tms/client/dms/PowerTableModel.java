@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2022  Minnesota Department of Transportation
+ * Copyright (C) 2002-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 public class PowerTableModel extends AbstractTableModel {
 
 	/** Count of columns in table model */
-	static private final int COLUMN_COUNT = 5;
+	static private final int COLUMN_COUNT = 3;
 
 	/** Power supply description column number */
 	static private final int COL_DESC = 0;
@@ -39,14 +39,8 @@ public class PowerTableModel extends AbstractTableModel {
 	/** Power supply type column number */
 	static private final int COL_TYPE = 1;
 
-	/** Power supply error column number */
-	static private final int COL_ERROR = 2;
-
-	/** Power supply detail column number */
-	static private final int COL_DETAIL = 3;
-
 	/** Power supply voltage column number */
-	static private final int COL_VOLTAGE = 4;
+	static private final int COL_VOLTAGE = 2;
 
 	/** Create a new table column */
 	static private TableColumn createColumn(int column, int width,
@@ -64,11 +58,7 @@ public class PowerTableModel extends AbstractTableModel {
 		switch (column) {
 			case COL_DESC: return ps.optString("description");
 			case COL_TYPE: return ps.optString("supply_type");
-			case COL_ERROR: return ps.optString("error");
-			case COL_DETAIL: return ps.optString("detail");
-			case COL_VOLTAGE:
-				Number v = ps.optNumber("voltage");
-				return (v != null) ? v.toString() : null;
+			case COL_VOLTAGE: return ps.optString("voltage");
 			default: return null;
 		}
 	}
@@ -114,10 +104,6 @@ public class PowerTableModel extends AbstractTableModel {
 			I18N.get("dms.power.description")));
 		m.addColumn(createColumn(COL_TYPE, 80,
 			I18N.get("dms.power.type")));
-		m.addColumn(createColumn(COL_ERROR, 80,
-			I18N.get("dms.power.error")));
-		m.addColumn(createColumn(COL_DETAIL, 100,
-			I18N.get("dms.power.detail")));
 		m.addColumn(createColumn(COL_VOLTAGE, 80,
 			I18N.get("dms.power.voltage")));
 		return m;

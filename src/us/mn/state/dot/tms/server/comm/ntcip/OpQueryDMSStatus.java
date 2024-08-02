@@ -73,9 +73,12 @@ public class OpQueryDMSStatus extends OpDMS {
 		return (r != null) ? r.toString() : "invalid";
 	}
 
-	/** Scale power supply voltage */
-	static private Float scaleVoltage(int value) {
-		return (value >= 0 && value <= 65535) ? (value / 100f) : null;
+	/** Get power supply voltage */
+	static private String getVoltage(ASN1Integer voltage) {
+		Integer v = voltage.getInteger();
+		return (v >= 0 && v <= 65535)
+		      ? Float.toString(v / 100f)
+		      : "invalid";
 	}
 
 	/** Photocell level (virtual) */
@@ -368,11 +371,9 @@ public class OpQueryDMSStatus extends OpDMS {
 			JSONObject supply = new JSONObject();
 			supply.put("description", desc.getValue());
 			supply.put("supply_type", p_type.getValue());
-			if (p_stat.getEnum().isError())
-				supply.put("error", p_stat.getValue());
-			supply.put("detail", mfr_status.getValue());
-			supply.put("voltage",
-				scaleVoltage(voltage.getInteger()));
+			supply.put("voltage", (p_stat.getEnum().isError())
+				? p_stat.getEnum().getDetail(mfr_status)
+				: getVoltage(voltage));
 			supplies.put(supply);
 			if (p_stat.getEnum() == DmsPowerStatus.powerFail)
 				n_failed++;

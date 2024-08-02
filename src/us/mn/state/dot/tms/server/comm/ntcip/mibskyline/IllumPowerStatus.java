@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2022  Minnesota Department of Transportation
+ * Copyright (C) 2002-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,9 +97,7 @@ public class IllumPowerStatus extends ASN1OctetString {
 		supply.put("description", "#" + (num + 1));
 		supply.put("supply_type", "ledSupply"); // 1203v2 dmsPowerType
 		Enum e = Enum.fromOrdinal(vals[num]);
-		if (e.isError())
-			supply.put("error", e.value());
-		supply.put("detail", "skyline");
+		supply.put("voltage", e.value());
 		return supply;
 	}
 
