@@ -79,8 +79,7 @@ const BLANK_BUTTON: &str = "<button id='mc_blank' type='button'>Blank</button>";
 #[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Photocell {
     description: String,
-    error: Option<String>,
-    reading: Option<i32>,
+    reading: Option<String>,
 }
 
 /// Power supply status

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2022  Minnesota Department of Transportation
+ * Copyright (C) 2010-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,16 +31,13 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 public class PhotocellTableModel extends AbstractTableModel {
 
 	/** Count of columns in table model */
-	static private final int COLUMN_COUNT = 3;
+	static private final int COLUMN_COUNT = 2;
 
 	/** Photocell description column number */
 	static private final int COL_DESC = 0;
 
-	/** Photocell error column number */
-	static private final int COL_ERROR = 1;
-
 	/** Photocell reading detail column number */
-	static private final int COL_READING = 2;
+	static private final int COL_READING = 1;
 
 	/** Create a new table column */
 	static private TableColumn createColumn(int column, int width,
@@ -57,10 +54,7 @@ public class PhotocellTableModel extends AbstractTableModel {
 			return null;
 		switch (column) {
 			case COL_DESC: return pc.optString("description");
-			case COL_ERROR: return pc.optString("error");
-			case COL_READING:
-				Number n = pc.optNumber("reading");
-				return (n != null) ? n.toString() : null;
+			case COL_READING: return pc.optString("reading");
 			default: return null;
 		}
 	}
@@ -104,8 +98,6 @@ public class PhotocellTableModel extends AbstractTableModel {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_DESC, 120,
 			I18N.get("dms.photocell.description")));
-		m.addColumn(createColumn(COL_ERROR, 80,
-			I18N.get("dms.photocell.error")));
 		m.addColumn(createColumn(COL_READING, 80,
 			I18N.get("dms.photocell.reading")));
 		return m;

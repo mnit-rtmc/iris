@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2023       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -436,8 +436,12 @@ public class OpQueryDMSStatus extends OpDMS {
 			JSONObject photocell = new JSONObject();
 			photocell.put("description", desc.getValue());
 			if (s_stat.getEnum().isError())
-				photocell.put("error", s_stat.getValue());
-			photocell.put("reading", getPercent(reading));
+				photocell.put("reading", s_stat.getValue());
+			else {
+				Integer r = getPercent(reading);
+				if (r != null)
+					photocell.put("reading", r);
+			}
 			photocells.put(photocell);
 			row++;
 			if (row <= n_sensors)
@@ -454,15 +458,21 @@ public class OpQueryDMSStatus extends OpDMS {
 	private JSONObject compositePhotocell() {
 		JSONObject photocell = new JSONObject();
 		photocell.put("description", "composite");
-		photocell.put("error", compositePhotocellError());
-		photocell.put("reading", getPercent(p_level, max_level));
+		String r = compositePhotocellReading();
+		if (r != null)
+			photocell.put("reading", r);
 		return photocell;
 	}
 
-	/** Get the composite photocell error */
-	private String compositePhotocellError() {
+	/** Get the composite photocell reading */
+	private String compositePhotocellReading() {
 		int err = shortError.getInteger();
-		return ShortErrorStatus.PHOTOCELL.isSet(err) ? "fail" : null;
+		if (ShortErrorStatus.PHOTOCELL.isSet(err))
+			return "fail";
+		else {
+			Integer r = getPercent(p_level, max_level);
+			return (r != null) ? r.toString() : null;
+		}
 	}
 
 	/** Get phase to query vendor-specific status objects */
