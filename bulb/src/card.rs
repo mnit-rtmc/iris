@@ -399,22 +399,23 @@ pub fn res_views(res: Res) -> &'static [View] {
         Res::GateArmArray => &[View::Compact, View::Control, View::Location],
         Res::LcsArray => &[View::Compact, View::Control],
         Res::Beacon | Res::Camera | Res::RampMeter => {
-            &[View::Compact, View::Control, View::Setup, View::Location]
+            &[View::Compact, View::Control, View::Location, View::Setup]
         }
         Res::Dms => &[
             View::Compact,
             View::Control,
-            View::Setup,
             View::Location,
             View::Request,
+            View::Setup,
+            View::Status,
         ],
         Res::Alarm
         | Res::CommLink
         | Res::Detector
         | Res::GateArm
-        | Res::VideoMonitor => &[View::Compact, View::Status, View::Setup],
+        | Res::VideoMonitor => &[View::Compact, View::Setup, View::Status],
         Res::Controller | Res::TagReader | Res::WeatherSensor => {
-            &[View::Compact, View::Status, View::Setup, View::Location]
+            &[View::Compact, View::Location, View::Setup, View::Status]
         }
         _ => &[View::Compact, View::Control, View::Setup],
     }

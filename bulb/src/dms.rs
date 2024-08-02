@@ -79,7 +79,7 @@ const BLANK_BUTTON: &str = "<button id='mc_blank' type='button'>Blank</button>";
 #[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Photocell {
     description: String,
-    reading: Option<String>,
+    reading: String,
 }
 
 /// Power supply status
@@ -909,71 +909,6 @@ impl Dms {
         best
     }
 
-    /// Convert to Setup HTML
-    fn to_html_setup(&self, anc: &DmsAnc) -> String {
-        let title = self.title(View::Setup);
-        let notes = HtmlStr::new(&self.notes);
-        let controller = anc.cio.controller_html(self);
-        let pin = anc.cio.pin_html(self.pin);
-        let footer = self.footer(true);
-        format!(
-            "{title}\
-            <div class='row'>\
-              <label for='notes'>Notes</label>\
-              <textarea id='notes' maxlength='255' rows='4' \
-                        cols='24'>{notes}</textarea>\
-            </div>\
-            {controller}\
-            {pin}\
-            {footer}"
-        )
-    }
-
-    /// Convert to Request HTML
-    fn to_html_request(&self, _anc: &DmsAnc) -> String {
-        let title = self.title(View::Request);
-        let name = HtmlStr::new(self.name());
-        let work = "http://example.com"; // FIXME
-        format!(
-            "{title}\
-            <div class='row'>\
-              <span>Current Message</span>\
-              <button id='rq_msg_query' type='button'>Query</button>\
-            </div>\
-            <div class='row'>\
-              <span>Current Status</span>\
-              <button id='rq_status_query' type='button'>Query</button>\
-            </div>\
-            <div class='row'>\
-              <span>Pixel Errors</span>\
-              <span>\
-                <button id='rq_pixel_test' type='button'>Test</button>\
-                <button id='rq_pixel_query' type='button'>Query</button>\
-              </span>\
-            </div>\
-            <div class='row'>\
-              <span>Settings</span>\
-              <span>\
-                <button id='rq_settings_send' type='button'>Send</button>\
-                <button id='rq_settings_query' type='button'>Query</button>\
-              </span>\
-            </div>\
-            <div class='row'>\
-              <span>Configuration</span>\
-              <span>\
-                <button id='rq_config_reset' type='button'>Reset</button>\
-                <button id='rq_config_query' type='button'>Query</button>\
-              </span>\
-            </div>\
-            <div class='row'>\
-              <span>Work Request</span>
-              <a href='{work}' target='_blank' rel='noopener noreferrer'>\
-                🔗 {name}\
-              </a>\
-            </div>"
-        )
-    }
-
     /// Make an ntcip sign
     fn make_sign(&self, anc: &DmsAnc) -> Option<Sign> {
         let cfg = anc.sign_config(self.sign_config.as_deref())?;
@@ -1073,6 +1008,133 @@ impl Dms {
         actions.push(Action::Patch(uri, value.into()));
         actions
     }
+
+    /// Convert to Request HTML
+    fn to_html_request(&self, _anc: &DmsAnc) -> String {
+        let title = self.title(View::Request);
+        let name = HtmlStr::new(self.name());
+        let work = "http://example.com"; // FIXME
+        format!(
+            "{title}\
+            <div class='row'>\
+              <span>Current Message</span>\
+              <button id='rq_msg_query' type='button'>Query</button>\
+            </div>\
+            <div class='row'>\
+              <span>Current Status</span>\
+              <button id='rq_status_query' type='button'>Query</button>\
+            </div>\
+            <div class='row'>\
+              <span>Pixel Errors</span>\
+              <span>\
+                <button id='rq_pixel_test' type='button'>Test</button>\
+                <button id='rq_pixel_query' type='button'>Query</button>\
+              </span>\
+            </div>\
+            <div class='row'>\
+              <span>Settings</span>\
+              <span>\
+                <button id='rq_settings_send' type='button'>Send</button>\
+                <button id='rq_settings_query' type='button'>Query</button>\
+              </span>\
+            </div>\
+            <div class='row'>\
+              <span>Configuration</span>\
+              <span>\
+                <button id='rq_config_reset' type='button'>Reset</button>\
+                <button id='rq_config_query' type='button'>Query</button>\
+              </span>\
+            </div>\
+            <div class='row'>\
+              <span>Work Request</span>
+              <a href='{work}' target='_blank' rel='noopener noreferrer'>\
+                🔗 {name}\
+              </a>\
+            </div>"
+        )
+    }
+
+    /// Convert to Setup HTML
+    fn to_html_setup(&self, anc: &DmsAnc) -> String {
+        let title = self.title(View::Setup);
+        let notes = HtmlStr::new(&self.notes);
+        let controller = anc.cio.controller_html(self);
+        let pin = anc.cio.pin_html(self.pin);
+        let footer = self.footer(true);
+        format!(
+            "{title}\
+            <div class='row'>\
+              <label for='notes'>Notes</label>\
+              <textarea id='notes' maxlength='255' rows='4' \
+                        cols='24'>{notes}</textarea>\
+            </div>\
+            {controller}\
+            {pin}\
+            {footer}"
+        )
+    }
+
+    /// Convert to Status HTML
+    fn to_html_status(&self, anc: &DmsAnc) -> String {
+        let title = self.title(View::Status);
+        let item_states = anc.cio.item_states(self).to_html();
+        let location = HtmlStr::new(&self.location).with_len(64);
+        let mut html = format!(
+            "{title}\
+            <div class='row'>{item_states}</div>\
+            <div class='row'>\
+              <span class='info'>{location}</span>\
+            </div>"
+        );
+        html.push_str(&self.light_html());
+        html
+    }
+
+    /// Get light status as HTML
+    fn light_html(&self) -> String {
+        let mut html = String::new();
+        if let Some(status) = &self.status {
+            html.push_str("<details open><summary>Light 🔅");
+            if let Some(light) = &status.light_output {
+                let light = light.to_string();
+                html.push_str("<meter max='100' value='");
+                html.push_str(&light);
+                html.push_str("'></meter>🔆 ");
+                html.push_str(&light);
+                html.push_str("%");
+            }
+            html.push_str("</summary>");
+            if let Some(photocells) = &status.photocells {
+                html.push_str("<ul>");
+                for photocell in photocells {
+                    html.push_str("<li>");
+                    html.push_str(
+                        &HtmlStr::new(&photocell.description)
+                            .with_len(20)
+                            .to_string(),
+                    );
+                    let reading = &photocell.reading;
+                    match reading.parse::<f32>() {
+                        Ok(_r) => {
+                            html.push_str(" <meter max='100' value='");
+                            html.push_str(&reading);
+                            html.push_str("'></meter>☀️ ");
+                            html.push_str(&reading);
+                            html.push_str("%");
+                        }
+                        Err(_e) => {
+                            html.push_str(
+                                &HtmlStr::new(reading).with_len(16).to_string(),
+                            );
+                        }
+                    }
+                }
+                html.push_str("</ul>");
+            }
+            html.push_str("</details>");
+        }
+        html
+    }
 }
 
 impl ControllerIo for Dms {
@@ -1165,6 +1227,7 @@ impl Card for Dms {
             View::Location => anc.loc.to_html_loc(self),
             View::Request => self.to_html_request(anc),
             View::Setup => self.to_html_setup(anc),
+            View::Status => self.to_html_status(anc),
             _ => self.to_html_compact(anc),
         }
     }

@@ -67,6 +67,12 @@ public class OpQueryDMSStatus extends OpDMS {
 		      : null;
 	}
 
+	/** Get photocell reading */
+	static private String getReading(ASN1Integer reading) {
+		Integer r = getPercent(reading);
+		return (r != null) ? r.toString() : "invalid";
+	}
+
 	/** Scale power supply voltage */
 	static private Float scaleVoltage(int value) {
 		return (value >= 0 && value <= 65535) ? (value / 100f) : null;
@@ -435,13 +441,10 @@ public class OpQueryDMSStatus extends OpDMS {
 			logQuery(reading);
 			JSONObject photocell = new JSONObject();
 			photocell.put("description", desc.getValue());
-			if (s_stat.getEnum().isError())
-				photocell.put("reading", s_stat.getValue());
-			else {
-				Integer r = getPercent(reading);
-				if (r != null)
-					photocell.put("reading", r.toString());
-			}
+			photocell.put("reading", (s_stat.getEnum().isError())
+				? s_stat.getValue()
+				: getReading(reading)
+			);
 			photocells.put(photocell);
 			row++;
 			if (row <= n_sensors)
