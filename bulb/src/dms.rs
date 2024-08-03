@@ -25,6 +25,7 @@ use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use chrono::DateTime;
 use fnv::FnvHasher;
 use js_sys::{ArrayBuffer, Uint8Array};
+use mag::temp::DegC;
 use ntcip::dms::multi::{
     is_blank, join_text, normalize as multi_normalize, split as multi_split,
 };
@@ -38,6 +39,9 @@ use std::hash::{Hash, Hasher};
 use std::iter::repeat;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{console, HtmlElement, HtmlInputElement, HtmlSelectElement};
+
+/// Display Units
+type TempUnit = mag::temp::DegF;
 
 /// Ntcip DMS sign
 type Sign = ntcip::dms::Dms<256, 24, 32>;
@@ -87,24 +91,22 @@ pub struct Photocell {
 pub struct PowerSupply {
     description: String,
     supply_type: String,
-    error: Option<String>,
-    detail: String,
-    voltage: Option<f32>,
+    voltage: String,
 }
 
 /// Sign status
 #[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct SignStatus {
     faults: Option<String>,
-    photocells: Option<Vec<Photocell>>,
-    light_output: Option<u32>,
-    power_supplies: Option<Vec<PowerSupply>>,
-    cabinet_temp_min: Option<i32>,
-    cabinet_temp_max: Option<i32>,
     ambient_temp_min: Option<i32>,
     ambient_temp_max: Option<i32>,
     housing_temp_min: Option<i32>,
     housing_temp_max: Option<i32>,
+    cabinet_temp_min: Option<i32>,
+    cabinet_temp_max: Option<i32>,
+    light_output: Option<u32>,
+    photocells: Option<Vec<Photocell>>,
+    power_supplies: Option<Vec<PowerSupply>>,
     ldc_pot_base: Option<i32>,
     pixel_current_low: Option<i32>,
     pixel_current_high: Option<i32>,
@@ -286,8 +288,11 @@ impl AncillaryData for DmsAnc {
     /// Construct ancillary DMS data
     fn new(pri: &Dms, view: View) -> Self {
         let mut cio = ControllerIoAnc::new(pri, view);
-        if let View::Compact | View::Control | View::Search | View::Hidden =
-            view
+        if let View::Compact
+        | View::Control
+        | View::Hidden
+        | View::Search
+        | View::Status = view
         {
             cio.assets.push(Asset::SignMessages);
         }
@@ -1077,16 +1082,43 @@ impl Dms {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &DmsAnc) -> String {
         let title = self.title(View::Status);
-        let item_states = anc.cio.item_states(self).to_html();
+        let item_states = self.item_states(anc).to_html();
         let location = HtmlStr::new(&self.location).with_len(64);
         let mut html = format!(
             "{title}\
-            <div class='row'>{item_states}</div>\
+            <div>{item_states}</div>\
             <div class='row'>\
               <span class='info'>{location}</span>\
             </div>"
         );
+        html.push_str(&self.temp_html());
         html.push_str(&self.light_html());
+        html.push_str(&self.power_html());
+        html
+    }
+
+    /// Get temperature status as HTML
+    fn temp_html(&self) -> String {
+        let mut html = String::new();
+        if let Some(status) = &self.status {
+            html.push_str("<div>🌡️ <b>Temperature</b></div><ul>");
+            html.push_str(&temp_range(
+                "Ambient",
+                status.ambient_temp_min,
+                status.ambient_temp_max,
+            ));
+            html.push_str(&temp_range(
+                "Housing",
+                status.housing_temp_min,
+                status.housing_temp_max,
+            ));
+            html.push_str(&temp_range(
+                "Cabinet",
+                status.cabinet_temp_min,
+                status.cabinet_temp_max,
+            ));
+            html.push_str("</ul>");
+        }
         html
     }
 
@@ -1094,20 +1126,22 @@ impl Dms {
     fn light_html(&self) -> String {
         let mut html = String::new();
         if let Some(status) = &self.status {
-            html.push_str("<details open><summary>Light 🔅");
+            html.push_str("<div>🔆 <b>Light Output</b>");
             if let Some(light) = &status.light_output {
                 let light = light.to_string();
-                html.push_str("<meter max='100' value='");
+                html.push_str(" 🔅<meter max='100' value='");
                 html.push_str(&light);
                 html.push_str("'></meter>🔆 ");
                 html.push_str(&light);
-                html.push_str("%");
+                html.push('%');
             }
-            html.push_str("</summary>");
+            html.push_str("</div>");
             if let Some(photocells) = &status.photocells {
-                html.push_str("<ul>");
-                for photocell in photocells {
-                    html.push_str("<li>");
+                html.push_str("<table>");
+                for (i, photocell) in photocells.iter().enumerate() {
+                    html.push_str("<tr><td>");
+                    html.push_str(&(i + 1).to_string());
+                    html.push_str("<td>");
                     html.push_str(
                         &HtmlStr::new(&photocell.description)
                             .with_len(20)
@@ -1116,24 +1150,91 @@ impl Dms {
                     let reading = &photocell.reading;
                     match reading.parse::<f32>() {
                         Ok(_r) => {
-                            html.push_str(" <meter max='100' value='");
+                            html.push_str("<td><meter max='100' value='");
                             html.push_str(&reading);
                             html.push_str("'></meter>☀️ ");
                             html.push_str(&reading);
-                            html.push_str("%");
+                            html.push('%');
                         }
                         Err(_e) => {
+                            html.push_str("<td class='fault'>");
                             html.push_str(
                                 &HtmlStr::new(reading).with_len(16).to_string(),
                             );
                         }
                     }
                 }
-                html.push_str("</ul>");
+                html.push_str("</table>");
             }
-            html.push_str("</details>");
         }
         html
+    }
+
+    /// Get power supply status as HTML
+    fn power_html(&self) -> String {
+        let mut html = String::new();
+        if let Some(status) = &self.status {
+            if let Some(power_supplies) = &status.power_supplies {
+                html.push_str("<div>⚡ <b>Power</b></div><table>");
+                for (i, supply) in power_supplies.iter().enumerate() {
+                    html.push_str("<tr><td>");
+                    html.push_str(&(i + 1).to_string());
+                    html.push_str("<td>");
+                    html.push_str(
+                        &HtmlStr::new(&supply.description)
+                            .with_len(20)
+                            .to_string(),
+                    );
+                    let voltage = &supply.voltage;
+                    match voltage.parse::<f32>() {
+                        Ok(v) => {
+                            if v > 0.0 {
+                                html.push_str("<td>");
+                            } else {
+                                html.push_str("<td class='fault'>");
+                            }
+                            html.push_str(&voltage);
+                            html.push('V');
+                        }
+                        Err(_e) => {
+                            html.push_str("<td class='fault'>");
+                            html.push_str(
+                                &HtmlStr::new(voltage).with_len(16).to_string(),
+                            );
+                        }
+                    }
+                    html.push_str("<td>");
+                    html.push_str(
+                        &HtmlStr::new(&supply.supply_type)
+                            .with_len(12)
+                            .to_string(),
+                    );
+                }
+                html.push_str("</table>");
+            }
+        }
+        html
+    }
+}
+
+/// Format a temperature range
+fn temp_range(label: &str, mn: Option<i32>, mx: Option<i32>) -> String {
+    match (mn, mx) {
+        (Some(mn), Some(mx)) => {
+            if mx > mn {
+                let mn = (f64::from(mn) * DegC).to::<TempUnit>();
+                let mx = (f64::from(mx) * DegC).to::<TempUnit>();
+                format!("<li><div>{label} {mn:.1}…{mx:.1}</div>")
+            } else {
+                let t = (f64::from(mn) * DegC).to::<TempUnit>();
+                format!("<li><div>{label} {t:.1}</div>")
+            }
+        }
+        (Some(t), None) | (None, Some(t)) => {
+            let t = (f64::from(t) * DegC).to::<TempUnit>();
+            format!("<li><div>{label} {t:.1}</div>")
+        }
+        _ => String::new(),
     }
 }
 
