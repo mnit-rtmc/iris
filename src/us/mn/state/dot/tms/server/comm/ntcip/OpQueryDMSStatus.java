@@ -45,6 +45,10 @@ import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
  */
 public class OpQueryDMSStatus extends OpDMS {
 
+	/** Valid temperature range (non-inclusive) */
+	static private final int TEMP_MIN = -128;
+	static private final int TEMP_MAX = 127;
+
 	/** Get the pixel maintenance threshold */
 	static private int pixelMaintThreshold() {
 		return SystemAttrEnum.DMS_PIXEL_MAINT_THRESHOLD.getInt();
@@ -636,10 +640,18 @@ public class OpQueryDMSStatus extends OpDMS {
 			logQuery(max_temp);
 			int mn = min_temp.getInteger();
 			int mx = max_temp.getInteger();
-			if (mn <= mx) {
-				putStatus(min_key, mn);
-				putStatus(max_key, mx);
+			boolean mn_valid = (mn > TEMP_MIN && mn < TEMP_MAX);
+			boolean mx_valid = (mx > TEMP_MIN && mx < TEMP_MAX);
+			if (mn_valid && mx_valid && mn > mx) {
+				// swap min/max temps
+				int v = mn;
+				mn = mx;
+				mx = v;
 			}
+			if (mn_valid)
+				putStatus(min_key, mn);
+			if (mx_valid)
+				putStatus(max_key, mx);
 		}
 		catch (NoSuchName e) {
 			// Some signs don't have all temperature objects.
