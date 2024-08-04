@@ -1126,10 +1126,10 @@ impl Dms {
     fn light_html(&self) -> String {
         let mut html = String::new();
         if let Some(status) = &self.status {
-            html.push_str("<div>🔆 <b>Light Output</b>");
+            html.push_str("<div>🔅 <b>Light Output</b>");
             if let Some(light) = &status.light_output {
                 let light = light.to_string();
-                html.push_str(" 🔅<meter max='100' value='");
+                html.push_str(" <meter max='100' value='");
                 html.push_str(&light);
                 html.push_str("'></meter>🔆 ");
                 html.push_str(&light);
