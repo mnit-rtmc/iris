@@ -3070,7 +3070,7 @@ CREATE TABLE iris._dms (
     msg_current VARCHAR(20) REFERENCES iris.sign_message,
     expire_time TIMESTAMP WITH time zone,
     status JSONB,
-    stuck_pixels JSONB
+    pixel_failures VARCHAR
 );
 
 ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
@@ -3104,7 +3104,8 @@ CREATE TRIGGER dms_table_notify_trig
 CREATE VIEW iris.dms AS
     SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
            beacon, preset, sign_config, sign_detail,
-           msg_user, msg_sched, msg_current, expire_time, status, stuck_pixels
+           msg_user, msg_sched, msg_current, expire_time, status,
+           pixel_failures
     FROM iris._dms d
     JOIN iris.controller_io cio ON d.name = cio.name
     JOIN iris.device_preset p ON d.name = p.name;
@@ -3119,12 +3120,12 @@ BEGIN
     INSERT INTO iris._dms (
         name, geo_loc, notes, gps, static_graphic, beacon,
         sign_config, sign_detail, msg_user, msg_sched, msg_current,
-        expire_time, status, stuck_pixels
+        expire_time, status, pixel_failures
     ) VALUES (
         NEW.name, NEW.geo_loc, NEW.notes, NEW.gps, NEW.static_graphic,
         NEW.beacon, NEW.sign_config, NEW.sign_detail,
         NEW.msg_user, NEW.msg_sched, NEW.msg_current, NEW.expire_time,
-        NEW.status, NEW.stuck_pixels
+        NEW.status, NEW.pixel_failures
     );
     RETURN NEW;
 END;
@@ -3157,7 +3158,7 @@ BEGIN
            msg_current = NEW.msg_current,
            expire_time = NEW.expire_time,
            status = NEW.status,
-           stuck_pixels = NEW.stuck_pixels
+           pixel_failures = NEW.pixel_failures
      WHERE name = OLD.name;
     RETURN NEW;
 END;
@@ -3176,7 +3177,7 @@ CREATE VIEW dms_view AS
            d.sign_config, d.sign_detail, d.static_graphic, d.beacon,
            cp.camera, cp.preset_num, default_font,
            msg_user, msg_sched, msg_current, expire_time,
-           status, stuck_pixels,
+           status, pixel_failures,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street,
            l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location
     FROM iris._dms d

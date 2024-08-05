@@ -29,7 +29,7 @@ The following features are supported:
 
 | Access       | Primary                                  | Secondary     |
 |--------------|------------------------------------------|---------------|
-| 👁️  View      | name, location, msg\_current, has_faults | sign\_config, sign\_detail, geo\_loc, msg\_sched, expire\_time, status, stuck\_pixels |
+| 👁️  View      | name, location, msg\_current, has_faults | sign\_config, sign\_detail, geo\_loc, msg\_sched, expire\_time, status, pix\_failures |
 | 👉 Operate   |                                          | msg\_user     |
 | 💡 Manage    | notes                                    | preset, device\_request † |
 | 🔧 Configure | controller                               | pin, static\_graphic, beacon |

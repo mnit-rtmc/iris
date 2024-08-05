@@ -22,9 +22,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.json.JSONException;
 import org.json.JSONObject;
-import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
+import us.mn.state.dot.tms.utils.RleTable;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -34,6 +34,12 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Michael Darter
  */
 public class DMSHelper extends BaseHelper {
+
+	/** Stuck ON pixels */
+	static public final int STUCK_ON = 1;
+
+	/** Stuck OFF */
+	static public final int STUCK_OFF = 2;
 
 	/** don't instantiate */
 	private DMSHelper() {
@@ -351,20 +357,20 @@ public class DMSHelper extends BaseHelper {
 	}
 
 	/** Create stuck pixel bitmap */
-	static public BitmapGraphic createStuckBitmap(DMS dms, String key)
+	static public BitmapGraphic createStuckBitmap(DMS dms, int stuck)
 		throws InvalidMsgException
 	{
-		String stuck = (dms != null) ? dms.getStuckPixels() : null;
-		if (stuck != null) {
+		String fail = (dms != null) ? dms.getPixelFailures() : null;
+		if (fail != null) {
 			BitmapGraphic bg = createBitmapGraphic(dms);
 			if (bg != null) {
 				try {
-					JSONObject jo = new JSONObject(stuck);
-					return setStuckPixels(bg, jo.opt(key));
+					setStuckPixels(bg, fail, stuck);
+					return bg;
 				}
-				catch (JSONException e) {
+				catch (Exception e) {
 					throw new InvalidMsgException(
-						"Malformed JSON");
+						"Malformed pixel_failures");
 				}
 			}
 		}
@@ -382,27 +388,20 @@ public class DMSHelper extends BaseHelper {
 			return null;
 	}
 
-	/** Get stuck pixel bitmap */
-	static private BitmapGraphic setStuckPixels(BitmapGraphic bg,
-		Object bm) throws InvalidMsgException
+	/** Get stuck pixels in bitmap */
+	static private void setStuckPixels(BitmapGraphic bg, String fail,
+		int stuck)
 	{
-		if (bm instanceof String) {
-			String bmap = (String) bm;
-			try {
-				byte[] pixels = Base64.decode(bmap);
-				if (pixels.length == bg.length()) {
-					bg.setPixelData(pixels);
-					return bg;
-				}
-			}
-			catch (IOException e) {
-				throw new InvalidMsgException("Base64 decode");
-			}
-			catch (IndexOutOfBoundsException e) {
-				// stuck bitmap doesn't match current dimensions
+		RleTable table = new RleTable(fail);
+		for (int y = 0; y < bg.getHeight(); y++) {
+			for (int x = 0; x < bg.getWidth(); x++) {
+				int pf = table.decode();
+				if (stuck == STUCK_ON && pf == 1)
+					bg.setPixel(x, y, DmsColor.WHITE);
+				if (stuck == STUCK_OFF && pf > 1)
+					bg.setPixel(x, y, DmsColor.WHITE);
 			}
 		}
-		return null;
 	}
 
 	/** Check if a MULTI string is rasterizable for a sign */

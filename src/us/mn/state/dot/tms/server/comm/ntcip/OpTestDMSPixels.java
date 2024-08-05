@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,14 +15,11 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
-import org.json.JSONException;
-import org.json.JSONObject;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.utils.RleTable;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -48,12 +45,6 @@ public class OpTestDMSPixels extends OpDMS {
 		PixelTestActivation>(PixelTestActivation.class,
 		pixelTestActivation.node);
 
-	/** Stuck ON bitmap */
-	private final BitmapGraphic stuck_on;
-
-	/** Stuck OFF bitmap */
-	private final BitmapGraphic stuck_off;
-
 	/** Number of rows in pixel failure table */
 	private final ASN1Integer total_rows =
 		pixelFailureTableNumRows.makeInt();
@@ -65,15 +56,20 @@ public class OpTestDMSPixels extends OpDMS {
 	private final ASN1Integer message_rows =
 		dmsPixelFailureMessageRows.makeInt();
 
+	/** Width of sign in pixels */
+	private final int width;
+
+	/** Pixel status codes */
+	private final int[] pixels;
+
 	/** Create a new test DMS pixel operation */
 	public OpTestDMSPixels(DMSImpl d, boolean p) {
 		super(PriorityLevel.DIAGNOSTIC, d);
 		perform_test = p;
 		SignConfig sc = d.getSignConfig();
-		int w = (sc != null) ? sc.getPixelWidth() : 0;
+		width = (sc != null) ? sc.getPixelWidth() : 0;
 		int h = (sc != null) ? sc.getPixelHeight() : 0;
-		stuck_on = new BitmapGraphic(w, h);
-		stuck_off = new BitmapGraphic(w, h);
+		pixels = new int[width * h];
 	}
 
 	/** Create the second phase of the operation */
@@ -240,10 +236,7 @@ public class OpTestDMSPixels extends OpDMS {
 			logQuery(status);
 			int x = x_loc.getInteger() - 1;
 			int y = y_loc.getInteger() - 1;
-			if (PixelFailureStatus.isStuckOn(status.getInteger()))
-				setStuckOn(x, y);
-			if (PixelFailureStatus.isStuckOff(status.getInteger()))
-				setStuckOff(x, y);
+			setPixelStatus(x, y, status.getInteger());
 			row++;
 			if (row <= n_rows)
 				return this;
@@ -261,23 +254,12 @@ public class OpTestDMSPixels extends OpDMS {
 		}
 	}
 
-	/** Set a pixel to "stuck on" status */
-	private void setStuckOn(int x, int y) {
-		try {
-			stuck_on.setPixel(x, y, DmsColor.AMBER);
-		}
-		catch (IndexOutOfBoundsException e) {
-			// Ignore; configuration has not been read yet
-		}
-	}
-
-	/** Set a pixel to "stuck off" status */
-	private void setStuckOff(int x, int y) {
-		try {
-			stuck_off.setPixel(x, y, DmsColor.AMBER);
-		}
-		catch (IndexOutOfBoundsException e) {
-			// Ignore; configuration has not been read yet
+	/** Set a pixel status */
+	private void setPixelStatus(int x, int y, int status) {
+		if (x >= 0 && x < width && y >= 0) {
+			int i = (y * width) + x;
+			if (i < pixels.length && status > 0)
+				pixels[i] = status;
 		}
 	}
 
@@ -285,22 +267,15 @@ public class OpTestDMSPixels extends OpDMS {
 	@Override
 	public void cleanup() {
 		if (isSuccess())
-			dms.setStuckPixelsNotify(getStuckPixels());
+			dms.setPixelFailuresNotify(getPixelFailures());
 		super.cleanup();
 	}
 
-	/** Get stuck pixels as JSON */
-	private String getStuckPixels() {
-		JSONObject sp = new JSONObject();
-		try {
-			sp.put(DMS.STUCK_OFF_BITMAP,
-				stuck_off.getEncodedPixels());
-			sp.put(DMS.STUCK_ON_BITMAP,
-				stuck_on.getEncodedPixels());
-		}
-		catch (JSONException e) {
-			logError("getStuckPixels: " + e.getMessage());
-		}
-		return sp.toString();
+	/** Get pixel failures (RleTable-encoded) */
+	private String getPixelFailures() {
+		RleTable table = new RleTable();
+		for (int i = 0; i < pixels.length; i++)
+			table.encode(pixels[i]);
+		return table.toString();
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -141,11 +141,11 @@ public class PropPixels extends IPanel {
 		stuck_on_pnl.setDrawModules(true);
 		try {
 			BitmapGraphic stuck_off = DMSHelper.createStuckBitmap(
-				dms, DMS.STUCK_OFF_BITMAP
+				dms, DMSHelper.STUCK_OFF
 			);
 			stuck_off_pnl.setGraphic(stuck_off);
 			BitmapGraphic stuck_on = DMSHelper.createStuckBitmap(
-				dms, DMS.STUCK_ON_BITMAP
+				dms, DMSHelper.STUCK_ON
 			);
 			stuck_on_pnl.setGraphic(stuck_on);
 			int n_bad = 0;

@@ -160,9 +160,9 @@ public class SignMessageHelper extends BaseHelper {
 			throw new InvalidMsgException("no pages");
 		if (!multi.isBlank()) {
 			BitmapGraphic stuck_off = DMSHelper.createStuckBitmap(
-				dms, DMS.STUCK_OFF_BITMAP);
+				dms, DMSHelper.STUCK_OFF);
 			BitmapGraphic stuck_on = DMSHelper.createStuckBitmap(
-				dms, DMS.STUCK_ON_BITMAP);
+				dms, DMSHelper.STUCK_ON);
 			if (stuck_off != null && stuck_on != null) {
 				for (BitmapGraphic bg : bmaps) {
 					validateBitmap(bg, stuck_off, stuck_on);

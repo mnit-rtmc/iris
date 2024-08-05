@@ -127,7 +127,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"gps, static_graphic, beacon, preset, sign_config, " +
 			"sign_detail, msg_user, msg_sched, msg_current, " +
-			"expire_time, status, stuck_pixels FROM iris." +
+			"expire_time, status, pixel_failures FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -168,7 +168,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("msg_current", msg_current);
 		map.put("expire_time", asTimestamp(expire_time));
 		map.put("status", status);
-		map.put("stuck_pixels", stuck_pixels);
+		map.put("pixel_failures", pixel_failures);
 		return map;
 	}
 
@@ -198,7 +198,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		geo_loc = g;
 		expire_time = null;
 		status = null;
-		stuck_pixels = null;
+		pixel_failures = null;
 	}
 
 	/** Create a dynamic message sign */
@@ -219,7 +219,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		     row.getString(14),    // msg_current
 		     row.getTimestamp(15), // expire_time
 		     row.getString(16),    // status
-		     row.getString(17)     // stuck_pixels
+		     row.getString(17)     // pixel_failures
 		);
 	}
 
@@ -227,7 +227,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private DMSImpl(String n, String loc, String c, int p, String nt,
 		String g, String sg, String b, String cp, String sc,
 		String sd, String mu, String ms, String mc, Date et,
-		String st, String sp) throws TMSException
+		String st, String pf) throws TMSException
 	{
 		super(n, lookupController(c), p, nt);
 		geo_loc = lookupGeoLoc(loc);
@@ -242,7 +242,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		msg_current = SignMessageHelper.lookup(mc);
 		expire_time = stampMillis(et);
 		status = st;
-		stuck_pixels = sp;
+		pixel_failures = pf;
 		weather_sensors = lookupEssMapping();
 		initTransients();
 	}
@@ -558,7 +558,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Reset sign state (and notify clients) */
 	public void resetStateNotify() {
 		setStatusNotify(null);
-		setStuckPixelsNotify(null);
+		setPixelFailuresNotify(null);
 		resetMsgUser();
 		setMsgSchedNotify(null);
 		setMsgCurrentNotify(null);
@@ -877,7 +877,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			}
 			catch (InvalidMsgException e) {
 				// message can't be displayed,
-				// most likely due to stuck pixels
+				// most likely due to pixel failures
 			}
 		}
 		// no message, or invalid -- blank the sign
@@ -1076,28 +1076,27 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return status;
 	}
 
-	/** Stuck pixel bitmaps as JSON.  There are two Base64-encoded bitmaps
-	 * as attributes STUCK_ON_BITMAP and STUCK_OFF_BITMAP. */
-	private String stuck_pixels;
+	/** Pixel failures (RleTable-encoded) */
+	private String pixel_failures;
 
-	/** Set the stuck pixel JSON and notify clients */
-	public void setStuckPixelsNotify(String sp) {
-		if (!objectEquals(sp, stuck_pixels)) {
+	/** Set the pixel failures and notify clients */
+	public void setPixelFailuresNotify(String pf) {
+		if (!objectEquals(pf, pixel_failures)) {
 			try {
-				store.update(this, "stuck_pixels", sp);
-				stuck_pixels = sp;
-				notifyAttribute("stuckPixels");
+				store.update(this, "pixel_failures", pf);
+				pixel_failures = pf;
+				notifyAttribute("pixelFailures");
 			}
 			catch (TMSException e) {
-				logError("stuck_pixels: " + e.getMessage());
+				logError("pixel_failures: " + e.getMessage());
 			}
 		}
 	}
 
-	/** Get the stuck pixels as JSON */
+	/** Get the pixel failures (RleTable-encoded) */
 	@Override
-	public String getStuckPixels() {
-		return stuck_pixels;
+	public String getPixelFailures() {
+		return pixel_failures;
 	}
 
 	/** Feedback brightness sample data */

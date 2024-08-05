@@ -205,7 +205,8 @@ pub const DMS_ONE: &str = "\
   SELECT d.name, location, geo_loc, controller, pin, notes, \
          static_graphic, beacon, preset, sign_config, sign_detail, status, \
          char_length(status->>'faults') > 0 AS has_faults, \
-         msg_user, msg_sched, msg_current, expire_time, stuck_pixels \
+         msg_user, msg_sched, msg_current, expire_time, \
+         md5(concat(sign_config, text(pixel_failures))) as pix_failures \
   FROM iris.dms d \
   LEFT JOIN geo_loc_view gl ON d.geo_loc = gl.name \
   WHERE d.name = $1";

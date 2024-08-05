@@ -112,13 +112,6 @@ pub struct SignStatus {
     pixel_current_high: Option<i32>,
 }
 
-/// Stuck pixel bitmaps (Base64-encoded)
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
-pub struct StuckPixels {
-    off: Option<String>,
-    on: Option<String>,
-}
-
 /// Dms
 #[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Dms {
@@ -140,7 +133,7 @@ pub struct Dms {
     pub geo_loc: Option<String>,
     pub status: Option<SignStatus>,
     pub expire_time: Option<String>,
-    pub stuck_pixels: Option<StuckPixels>,
+    pub pix_failures: Option<String>,
 }
 
 /// Action value to patch "msg_user"

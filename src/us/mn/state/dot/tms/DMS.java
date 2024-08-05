@@ -138,12 +138,6 @@ public interface DMS extends Device {
 	/** Pixel high current threshold; Integer (LEDSTAR only) */
 	String PIXEL_CURRENT_HIGH = "pixel_current_high";
 
-	/** Get the stuck pixels as JSON */
-	String getStuckPixels();
-
-	/** Stuck-off attribute; Base64-encoded bitmap */
-	String STUCK_OFF_BITMAP = "off";
-
-	/** Stuck-on attribute; Base64-encoded bitmap */
-	String STUCK_ON_BITMAP = "on";
+	/** Get the pixel failures (RleTable-encoded) */
+	String getPixelFailures();
 }
