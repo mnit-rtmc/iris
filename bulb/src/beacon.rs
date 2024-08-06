@@ -17,6 +17,7 @@ use crate::error::Result;
 use crate::fetch::Action;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
+use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
 use resources::Res;
 use serde::{Deserialize, Serialize};
@@ -159,6 +160,9 @@ impl Beacon {
 
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &BeaconAnc) -> String {
+        if let Some((lat, lon)) = anc.loc.latlon() {
+            fly_map_item(&self.name, lat, lon);
+        }
         let title = self.title(View::Control);
         let item_states = self.item_states(anc).to_html();
         let location = HtmlStr::new(&self.location).with_len(64);
@@ -276,6 +280,22 @@ impl Card for Beacon {
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
         self
+    }
+
+    /// Get the main item state
+    fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
+        let item_states = self.item_states(anc);
+        if item_states.is_match(ItemState::Inactive.code()) {
+            ItemState::Inactive
+        } else if item_states.is_match(ItemState::Offline.code()) {
+            ItemState::Offline
+        } else if item_states.is_match(ItemState::Deployed.code()) {
+            ItemState::Deployed
+        } else if item_states.is_match(ItemState::Fault.code()) {
+            ItemState::Fault
+        } else {
+            ItemState::Available
+        }
     }
 
     /// Check if a search string matches

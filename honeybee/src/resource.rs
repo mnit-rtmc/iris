@@ -415,7 +415,9 @@ impl Resource {
             Rnode => query_all_nodes(client, segments).await,
             RoadFull => query_all_roads(client, segments).await,
             SignMessage => self.query_sign_msgs(client).await,
-            Dms | WeatherSensor => self.query_all_locs(client, segments).await,
+            Beacon | Dms | WeatherSensor => {
+                self.query_all_locs(client, segments).await
+            }
             _ => self.query_file(client, self.path()).await,
         }
     }

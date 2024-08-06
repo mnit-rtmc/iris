@@ -971,22 +971,55 @@ fn zoom_scale(zoom: u32) -> f64 {
     1.0 / f64::from(1 << zoom)
 }
 
+/// Get range of zoom levels for a resource
+fn zoom_levels(res: Res) -> RangeInclusive<u32> {
+    match res {
+        Res::Beacon => 10..=18,
+        Res::Dms => 11..=18,
+        Res::WeatherSensor => 10..=18,
+        _ => unimplemented!(),
+    }
+}
+
 /// Make a resource location marker
 fn loc_marker(res: Res, pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
     match res {
+        Res::Beacon => beacon_marker(pt, norm, sz),
         Res::Dms => dms_marker(pt, norm, sz),
         Res::WeatherSensor => weather_sensor_marker(pt, sz),
         _ => unimplemented!(),
     }
 }
 
-/// Get range of zoom levels for a resource
-fn zoom_levels(res: Res) -> RangeInclusive<u32> {
-    match res {
-        Res::Dms => 11..=18,
-        Res::WeatherSensor => 12..=18,
-        _ => unimplemented!(),
-    }
+/// Make beacon marker
+fn beacon_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
+    const S2: f64 = std::f64::consts::SQRT_2;
+    const S1: f64 = 2.0 - S2;
+    let t = Transform::with_scale(sz, sz)
+        .rotate(norm)
+        .translate(pt.x, pt.y);
+    vec![
+        // base
+        Pt::from((0.0, -2.0)) * t,
+        Pt::from((S1, -S2)) * t,
+        Pt::from((S2, -S2)) * t,
+        Pt::from((S2, -S1)) * t,
+        Pt::from((2.0, 0.0)) * t,
+        Pt::from((S2, S1)) * t,
+        Pt::from((S2, S2)) * t,
+        Pt::from((S1, S2)) * t,
+        // point
+        Pt::from((0.0, 3.0)) * t,
+        Pt::from((-S1, S2)) * t,
+        Pt::from((-S2, S2)) * t,
+        Pt::from((-S2, S1)) * t,
+        Pt::from((-2.0, 0.0)) * t,
+        Pt::from((-S2, -S1)) * t,
+        Pt::from((-S2, -S2)) * t,
+        Pt::from((-S1, -S2)) * t,
+        // close
+        Pt::from((0.0, -2.0)) * t,
+    ]
 }
 
 /// Make DMS marker
@@ -1015,11 +1048,11 @@ fn dms_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
 fn weather_sensor_marker(pt: Pt<f64>, sz: f64) -> Vec<Pt<f64>> {
     let t = Transform::with_scale(sz, sz).translate(pt.x, pt.y);
     vec![
-        Pt::from((-4.0, -3.0)) * t,
-        Pt::from((-4.0, 3.0)) * t,
-        Pt::from((4.0, 2.0)) * t,
-        Pt::from((3.0, 0.0)) * t,
-        Pt::from((4.0, -2.0)) * t,
-        Pt::from((-4.0, -3.0)) * t,
+        Pt::from((-3.0, -2.0)) * t,
+        Pt::from((-3.0, 2.0)) * t,
+        Pt::from((3.0, 1.0)) * t,
+        Pt::from((2.0, 0.0)) * t,
+        Pt::from((3.0, -1.0)) * t,
+        Pt::from((-3.0, -2.0)) * t,
     ]
 }
