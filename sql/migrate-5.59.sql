@@ -216,4 +216,13 @@ CREATE VIEW dms_view AS
     LEFT JOIN iris.sign_config sc ON d.sign_config = sc.name;
 GRANT SELECT ON dms_view TO PUBLIC;
 
+-- Set sign module sizes to NULL if zero
+UPDATE iris.sign_config SET module_width = NULL WHERE module_width = 0;
+ALTER TABLE iris.sign_config ADD CONSTRAINT sign_config_module_width_check
+    CHECK (module_width > 0);
+
+UPDATE iris.sign_config SET module_height = NULL WHERE module_height = 0;
+ALTER TABLE iris.sign_config ADD CONSTRAINT sign_config_module_height_check
+    CHECK (module_height > 0);
+
 COMMIT;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2023  Minnesota Department of Transportation
+ * Copyright (C) 2016-2024  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -74,14 +74,14 @@ public interface SignConfig extends SonarObject {
 	int getDefaultFont();
 
 	/** Get module width (pixels) */
-	int getModuleWidth();
+	Integer getModuleWidth();
 
 	/** Set module width(pixels) */
-	void setModuleWidth(int mw);
+	void setModuleWidth(Integer mw);
 
 	/** Get module height (pixels) */
-	int getModuleHeight();
+	Integer getModuleHeight();
 
 	/** Set module height (pixels) */
-	void setModuleHeight(int mh);
+	void setModuleHeight(Integer mh);
 }

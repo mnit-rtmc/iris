@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2023  Minnesota Department of Transportation
+ * Copyright (C) 2016-2024  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -118,6 +118,52 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig,
 		});
 	}
 
+	/** Create a sign config */
+	private SignConfigImpl(ResultSet row) throws SQLException {
+		this(row.getString(1), // name
+		     row.getInt(2),    // face_width
+		     row.getInt(3),    // face_height
+		     row.getInt(4),    // border_horiz
+		     row.getInt(5),    // border_vert
+		     row.getInt(6),    // pitch_horiz
+		     row.getInt(7),    // pitch_vert
+		     row.getInt(8),    // pixel_width
+		     row.getInt(9),    // pixel_height
+		     row.getInt(10),   // char_width
+		     row.getInt(11),   // char_height
+		     row.getInt(12),   // monochrome_foreground
+		     row.getInt(13),   // monochrome_background
+		     row.getInt(14),   // color_scheme
+		     row.getInt(15),   // default_font
+		     (Integer) row.getObject(16), // module_width
+		     (Integer) row.getObject(17)  // module_height
+		);
+	}
+
+	/** Create a sign config */
+	private SignConfigImpl(String n, int fw, int fh, int bh, int bv, int ph,
+		int pv, int pxw, int pxh, int cw, int ch, int mf, int mb,
+		int cs, int df, Integer mw, Integer mh)
+	{
+		super(n);
+		face_width = fw;
+		face_height = fh;
+		border_horiz = bh;
+		border_vert = bv;
+		pitch_horiz = ph;
+		pitch_vert = pv;
+		pixel_width = pxw;
+		pixel_height = pxh;
+		char_width = cw;
+		char_height = ch;
+		monochrome_foreground = mf;
+		monochrome_background = mb;
+		color_scheme = ColorScheme.fromOrdinal(cs);
+		default_font = df;
+		module_width = mw;
+		module_height = mh;
+	}
+
 	/** Get a mapping of the columns */
 	@Override
 	public Map<String, Object> getColumns() {
@@ -165,52 +211,6 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig,
 			return c;
 		else
 			return name.compareTo(sc.name);
-	}
-
-	/** Create a sign config */
-	private SignConfigImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),   // name
-		     row.getInt(2),      // face_width
-		     row.getInt(3),      // face_height
-		     row.getInt(4),      // border_horiz
-		     row.getInt(5),      // border_vert
-		     row.getInt(6),      // pitch_horiz
-		     row.getInt(7),      // pitch_vert
-		     row.getInt(8),      // pixel_width
-		     row.getInt(9),      // pixel_height
-		     row.getInt(10),     // char_width
-		     row.getInt(11),     // char_height
-		     row.getInt(12),     // monochrome_foreground
-		     row.getInt(13),     // monochrome_background
-		     row.getInt(14),     // color_scheme
-		     row.getInt(15),     // default_font
-		     row.getInt(16),     // module_width
-		     row.getInt(17)      // module_height
-		);
-	}
-
-	/** Create a sign config */
-	private SignConfigImpl(String n, int fw, int fh, int bh, int bv, int ph,
-		int pv, int pxw, int pxh, int cw, int ch, int mf, int mb,
-		int cs, int df, int mw, int mh)
-	{
-		super(n);
-		face_width = fw;
-		face_height = fh;
-		border_horiz = bh;
-		border_vert = bv;
-		pitch_horiz = ph;
-		pitch_vert = pv;
-		pixel_width = pxw;
-		pixel_height = pxh;
-		char_width = cw;
-		char_height = ch;
-		monochrome_foreground = mf;
-		monochrome_background = mb;
-		color_scheme = ColorScheme.fromOrdinal(cs);
-		default_font = df;
-		module_width = mw;
-		module_height = mh;
 	}
 
 	/** Width of the sign face (mm) */
@@ -354,46 +354,46 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig,
 	}
 
 	/** Module width (pixels) */
-	private int module_width;
+	private Integer module_width;
 
 	/** Get module width (pixels) */
 	@Override
-	public int getModuleWidth() {
+	public Integer getModuleWidth() {
 		return module_width;
 	}
 
 	/** Set the module width (pixels) */
 	@Override
-	public void setModuleWidth(int mw) {
+	public void setModuleWidth(Integer mw) {
 		module_width = mw;
 	}
 
 	/** Set the module width (pixels) */
-	public void doSetModuleWidth(int mw) throws TMSException {
-		if (mw != module_width) {
+	public void doSetModuleWidth(Integer mw) throws TMSException {
+		if (!objectEquals(mw, module_width)) {
 			store.update(this, "module_width", mw);
 			setModuleWidth(mw);
 		}
 	}
 
 	/** Module height (pixels) */
-	private int module_height;
+	private Integer module_height;
 
 	/** Get height of the sign face (mm) */
 	@Override
-	public int getModuleHeight() {
+	public Integer getModuleHeight() {
 		return module_height;
 	}
 
 	/** Set the module height (pixels) */
 	@Override
-	public void setModuleHeight(int mh) {
+	public void setModuleHeight(Integer mh) {
 		module_height = mh;
 	}
 
 	/** Set the module height (pixels) */
-	public void doSetModuleHeight(int mh) throws TMSException {
-		if (mh != module_height) {
+	public void doSetModuleHeight(Integer mh) throws TMSException {
+		if (!objectEquals(mh, module_height)) {
 			store.update(this, "module_height", mh);
 			setModuleHeight(mh);
 		}

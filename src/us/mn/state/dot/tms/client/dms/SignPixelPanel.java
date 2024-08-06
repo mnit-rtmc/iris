@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -132,7 +132,7 @@ public class SignPixelPanel extends JPanel {
 		draw_modules = draw;
 	}
 
-	/** Draw  vertical pixel module lines.
+	/** Draw vertical pixel module lines.
 	 * @param g Graphics to draw the line */
 	private void drawVerticalLines(Graphics2D g) {
 		if (mwidth_pix <= 0 || width_pix % mwidth_pix != 0)
@@ -151,7 +151,7 @@ public class SignPixelPanel extends JPanel {
 
 	}
 
-	/** Draw  hotizontal lines pixel module lines.
+	/** Draw hotizontal pixel module lines.
 	 * @param g Graphics to draw the line */
 	private void drawHorizontalLines(Graphics2D g) {
 		if (mheight_pix <= 0 || height_pix % mheight_pix != 0)
@@ -441,8 +441,10 @@ public class SignPixelPanel extends JPanel {
 			int ph = sc.getPixelHeight();
 			int cw = sc.getCharWidth();
 			int ch = sc.getCharHeight();
-			int mw = sc.getModuleWidth();
-			int mh = sc.getModuleHeight();
+			Integer mwi = sc.getModuleWidth();
+			int mw = (mwi instanceof Integer) ? (int) mwi : 0;
+			Integer mhi = sc.getModuleHeight();
+			int mh = (mhi instanceof Integer) ? (int) mhi : 0;
 			setLogicalDimensions(pw, ph, cw, ch, mw, mh);
 		} else
 			setLogicalDimensions(0, 0, 0, 0, 0, 0);

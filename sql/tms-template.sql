@@ -2895,8 +2895,8 @@ CREATE TABLE iris.sign_config (
     monochrome_background INTEGER NOT NULL,
     color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
     default_font INTEGER NOT NULL,
-    module_width INTEGER,
-    module_height INTEGER
+    module_width INTEGER CHECK (module_width > 0),
+    module_height INTEGER CHECK (module_height > 0)
 );
 
 CREATE TRIGGER sign_config_notify_trig

@@ -269,17 +269,17 @@ public class PropConfiguration extends IPanel {
 				font_height_lbl.setText(calculateFontHeight());
 			}
 		}
-		if (null == a || a.equals("moduleHeight")) {
-			Integer h = sc.getModuleHeight();
-			module_height_txt.setText((h != null)
-			                         ? h.toString()
-			                         : "");
-		}
 		if (null == a || a.equals("moduleWidth")) {
 			Integer w = sc.getModuleWidth();
 			module_width_txt.setText((w != null)
 			                        ? w.toString()
 			                        : "");
+		}
+		if (null == a || a.equals("moduleHeight")) {
+			Integer h = sc.getModuleHeight();
+			module_height_txt.setText((h != null)
+			                         ? h.toString()
+			                         : "");
 		}
 	}
 
