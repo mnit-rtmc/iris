@@ -396,9 +396,9 @@ public class DMSHelper extends BaseHelper {
 		for (int y = 0; y < bg.getHeight(); y++) {
 			for (int x = 0; x < bg.getWidth(); x++) {
 				int pf = table.decode();
-				if (stuck == STUCK_ON && pf == 1)
+				if ((stuck == STUCK_ON) && (pf & 0x01) > 0)
 					bg.setPixel(x, y, DmsColor.WHITE);
-				if (stuck == STUCK_OFF && pf > 1)
+				if ((stuck == STUCK_OFF) && (pf & 0x10) > 0)
 					bg.setPixel(x, y, DmsColor.WHITE);
 			}
 		}

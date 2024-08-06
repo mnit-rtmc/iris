@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ public enum PixelFailureStatus {
 	/** Test if the pixel is stuck off (1203v1) */
 	static private boolean isStuckOffV1(int v) {
 		/** stuck off assumed for 1203v1 when STUCK_ON unset */
-		return !(STUCK_ON.isSet(v) | PARTIAL_FAILURE.isSet(v));
+		return !(STUCK_ON.isSet(v) || PARTIAL_FAILURE.isSet(v));
 	}
 
 	/** Test if the pixel is stuck off (1203v2) */

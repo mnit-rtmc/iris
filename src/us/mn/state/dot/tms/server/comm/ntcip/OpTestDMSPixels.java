@@ -256,6 +256,9 @@ public class OpTestDMSPixels extends OpDMS {
 
 	/** Set a pixel status */
 	private void setPixelStatus(int x, int y, int status) {
+		// Make sure STUCK_OFF bit is set, even for V1 signs
+		if (PixelFailureStatus.isStuckOff(status))
+			status |= 1 << PixelFailureStatus.STUCK_OFF.ordinal();
 		if (x >= 0 && x < width && y >= 0) {
 			int i = (y * width) + x;
 			if (i < pixels.length && status > 0)
