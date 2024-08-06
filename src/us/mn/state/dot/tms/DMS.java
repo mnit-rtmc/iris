@@ -130,7 +130,7 @@ public interface DMS extends Device {
 	String HOUSING_TEMP_MAX = "housing_temp_max";
 
 	/** Pot base; Integer (LEDSTAR only) */
-	String LDC_POT_BASE = "lcd_pot_base";
+	String LDC_POT_BASE = "ldc_pot_base";
 
 	/** Pixel low current threshold; Integer (LEDSTAR only) */
 	String PIXEL_CURRENT_LOW = "pixel_current_low";
