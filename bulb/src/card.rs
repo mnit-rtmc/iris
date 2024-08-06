@@ -415,7 +415,7 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::GateArm
         | Res::VideoMonitor => &[View::Compact, View::Status, View::Setup],
         Res::Controller | Res::TagReader | Res::WeatherSensor => {
-            &[View::Compact, View::Location, View::Setup, View::Status]
+            &[View::Compact, View::Status, View::Location, View::Setup]
         }
         _ => &[View::Compact, View::Control, View::Setup],
     }

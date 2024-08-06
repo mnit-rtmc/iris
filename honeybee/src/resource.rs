@@ -415,7 +415,7 @@ impl Resource {
             Rnode => query_all_nodes(client, segments).await,
             RoadFull => query_all_roads(client, segments).await,
             SignMessage => self.query_sign_msgs(client).await,
-            Dms => self.query_dms(client, segments).await,
+            Dms | WeatherSensor => self.query_all_locs(client, segments).await,
             _ => self.query_file(client, self.path()).await,
         }
     }
@@ -450,11 +450,11 @@ impl Resource {
         render_all().await
     }
 
-    /// Query DMS resource.
+    /// Query all records of the resource, including locations.
     ///
     /// * `client` The database connection.
     /// * `segments` Segment state.
-    async fn query_dms(
+    async fn query_all_locs(
         self,
         client: &mut Client,
         segments: &mut SegmentState,
