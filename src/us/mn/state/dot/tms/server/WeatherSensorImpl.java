@@ -160,7 +160,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor,
 	}
 
 	/** Device location */
-	private GeoLocImpl geo_loc;
+	private final GeoLocImpl geo_loc;
 
 	/** Get the device location */
 	@Override

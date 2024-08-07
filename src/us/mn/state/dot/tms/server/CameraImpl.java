@@ -169,7 +169,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	}
 
 	/** Device location */
-	private GeoLocImpl geo_loc;
+	private final GeoLocImpl geo_loc;
 
 	/** Get the device location */
 	@Override

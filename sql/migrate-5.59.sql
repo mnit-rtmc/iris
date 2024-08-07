@@ -225,4 +225,187 @@ UPDATE iris.sign_config SET module_height = NULL WHERE module_height = 0;
 ALTER TABLE iris.sign_config ADD CONSTRAINT sign_config_module_height_check
     CHECK (module_height > 0);
 
+-- Make geo_loc for devices NOT NULL
+ALTER TABLE iris._camera ALTER COLUMN geo_loc SET NOT NULL;
+
+CREATE OR REPLACE FUNCTION iris.camera_update() RETURNS TRIGGER AS
+    $camera_update$
+BEGIN
+    UPDATE iris.controller_io
+       SET controller = NEW.controller,
+           pin = NEW.pin
+     WHERE name = OLD.name;
+    UPDATE iris._camera
+       SET notes = NEW.notes,
+           cam_num = NEW.cam_num,
+           cam_template = NEW.cam_template,
+           encoder_type = NEW.encoder_type,
+           enc_address = NEW.enc_address,
+           enc_port = NEW.enc_port,
+           enc_mcast = NEW.enc_mcast,
+           enc_channel = NEW.enc_channel,
+           publish = NEW.publish,
+           video_loss = NEW.video_loss
+     WHERE name = OLD.name;
+    RETURN NEW;
+END;
+$camera_update$ LANGUAGE plpgsql;
+
+ALTER TABLE iris._beacon ALTER COLUMN geo_loc SET NOT NULL;
+
+CREATE OR REPLACE FUNCTION iris.beacon_update() RETURNS TRIGGER AS
+    $beacon_update$
+BEGIN
+    UPDATE iris.controller_io
+       SET controller = NEW.controller,
+           pin = NEW.pin
+     WHERE name = OLD.name;
+    UPDATE iris.device_preset
+       SET preset = NEW.preset
+     WHERE name = OLD.name;
+    UPDATE iris._beacon
+       SET notes = NEW.notes,
+           message = NEW.message,
+           verify_pin = NEW.verify_pin,
+           ext_mode = NEW.ext_mode,
+           state = NEW.state
+     WHERE name = OLD.name;
+    RETURN NEW;
+END;
+$beacon_update$ LANGUAGE plpgsql;
+
+ALTER TABLE iris._dms ALTER COLUMN geo_loc SET NOT NULL;
+
+CREATE OR REPLACE FUNCTION iris.dms_update() RETURNS TRIGGER AS
+    $dms_update$
+BEGIN
+    UPDATE iris.controller_io
+       SET controller = NEW.controller,
+           pin = NEW.pin
+     WHERE name = OLD.name;
+    UPDATE iris.device_preset
+       SET preset = NEW.preset
+     WHERE name = OLD.name;
+    UPDATE iris._dms
+       SET notes = NEW.notes,
+           gps = NEW.gps,
+           static_graphic = NEW.static_graphic,
+           beacon = NEW.beacon,
+           sign_config = NEW.sign_config,
+           sign_detail = NEW.sign_detail,
+           msg_user = NEW.msg_user,
+           msg_sched = NEW.msg_sched,
+           msg_current = NEW.msg_current,
+           expire_time = NEW.expire_time,
+           status = NEW.status,
+           pixel_failures = NEW.pixel_failures
+     WHERE name = OLD.name;
+    RETURN NEW;
+END;
+$dms_update$ LANGUAGE plpgsql;
+
+ALTER TABLE iris._gate_arm_array ALTER COLUMN geo_loc SET NOT NULL;
+
+CREATE OR REPLACE FUNCTION iris.gate_arm_array_update() RETURNS TRIGGER AS
+    $gate_arm_array_update$
+BEGIN
+    UPDATE iris.controller_io SET controller = NEW.controller, pin = NEW.pin
+     WHERE name = OLD.name;
+    UPDATE iris._gate_arm_array
+       SET notes = NEW.notes,
+           opposing = NEW.opposing,
+           prereq = NEW.prereq,
+           camera = NEW.camera,
+           approach = NEW.approach,
+           action_plan = NEW.action_plan,
+           arm_state = NEW.arm_state,
+           interlock = NEW.interlock
+     WHERE name = OLD.name;
+    RETURN NEW;
+END;
+$gate_arm_array_update$ LANGUAGE plpgsql;
+
+ALTER TABLE iris._lane_marking ALTER COLUMN geo_loc SET NOT NULL;
+
+CREATE OR REPLACE FUNCTION iris.lane_marking_update() RETURNS TRIGGER AS
+    $lane_marking_update$
+BEGIN
+    UPDATE iris.controller_io
+       SET controller = NEW.controller,
+           pin = NEW.pin
+     WHERE name = OLD.name;
+    UPDATE iris._lane_marking
+       SET notes = NEW.notes,
+           deployed = NEW.deployed
+     WHERE name = OLD.name;
+    RETURN NEW;
+END;
+$lane_marking_update$ LANGUAGE plpgsql;
+
+ALTER TABLE iris._ramp_meter ALTER COLUMN geo_loc SET NOT NULL;
+
+CREATE OR REPLACE FUNCTION iris.ramp_meter_update() RETURNS TRIGGER AS
+    $ramp_meter_update$
+BEGIN
+    UPDATE iris.controller_io
+       SET controller = NEW.controller,
+           pin = NEW.pin
+     WHERE name = OLD.name;
+    UPDATE iris.device_preset
+       SET preset = NEW.preset
+     WHERE name = OLD.name;
+    UPDATE iris._ramp_meter
+       SET notes = NEW.notes,
+           meter_type = NEW.meter_type,
+           storage = NEW.storage,
+           max_wait = NEW.max_wait,
+           algorithm = NEW.algorithm,
+           am_target = NEW.am_target,
+           pm_target = NEW.pm_target,
+           beacon = NEW.beacon,
+           m_lock = NEW.m_lock
+     WHERE name = OLD.name;
+    RETURN NEW;
+END;
+$ramp_meter_update$ LANGUAGE plpgsql;
+
+ALTER TABLE iris._tag_reader ALTER COLUMN geo_loc SET NOT NULL;
+
+CREATE OR REPLACE FUNCTION iris.tag_reader_update() RETURNS TRIGGER AS
+    $tag_reader_update$
+BEGIN
+    UPDATE iris.controller_io
+       SET controller = NEW.controller,
+           pin = NEW.pin
+     WHERE name = OLD.name;
+    UPDATE iris._tag_reader
+       SET notes = NEW.notes,
+           toll_zone = NEW.toll_zone,
+           settings = NEW.settings
+     WHERE name = OLD.name;
+    RETURN NEW;
+END;
+$tag_reader_update$ LANGUAGE plpgsql;
+
+ALTER TABLE iris._weather_sensor ALTER COLUMN geo_loc SET NOT NULL;
+
+CREATE OR REPLACE FUNCTION iris.weather_sensor_update() RETURNS TRIGGER AS
+    $weather_sensor_update$
+BEGIN
+    UPDATE iris.controller_io
+       SET controller = NEW.controller,
+           pin = NEW.pin
+     WHERE name = OLD.name;
+    UPDATE iris._weather_sensor
+       SET site_id = NEW.site_id,
+           alt_id = NEW.alt_id,
+           notes = NEW.notes,
+           settings = NEW.settings,
+           sample = NEW.sample,
+           sample_time = NEW.sample_time
+     WHERE name = OLD.name;
+    RETURN NEW;
+END;
+$weather_sensor_update$ LANGUAGE plpgsql;
+
 COMMIT;

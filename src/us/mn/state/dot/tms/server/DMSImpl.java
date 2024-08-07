@@ -318,7 +318,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Device location */
-	private GeoLocImpl geo_loc;
+	private final GeoLocImpl geo_loc;
 
 	/** Get the device location */
 	@Override

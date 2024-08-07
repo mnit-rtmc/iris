@@ -184,7 +184,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	}
 
 	/** Device location */
-	private GeoLocImpl geo_loc;
+	private final GeoLocImpl geo_loc;
 
 	/** Get the device location */
 	@Override

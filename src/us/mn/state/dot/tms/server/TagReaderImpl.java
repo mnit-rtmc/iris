@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2023  Minnesota Department of Transportation
+ * Copyright (C) 2014-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -145,7 +145,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	}
 
 	/** Device location */
-	private GeoLocImpl geo_loc;
+	private final GeoLocImpl geo_loc;
 
 	/** Get the device location */
 	@Override

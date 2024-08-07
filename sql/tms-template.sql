@@ -1659,7 +1659,7 @@ CREATE TABLE iris.camera_template (
 
 CREATE TABLE iris._camera (
     name VARCHAR(20) PRIMARY KEY,
-    geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
+    geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
     notes VARCHAR(256),
     cam_num INTEGER UNIQUE,
     cam_template VARCHAR(20) REFERENCES iris.camera_template,
@@ -1756,8 +1756,7 @@ BEGIN
            pin = NEW.pin
      WHERE name = OLD.name;
     UPDATE iris._camera
-       SET geo_loc = NEW.geo_loc,
-           notes = NEW.notes,
+       SET notes = NEW.notes,
            cam_num = NEW.cam_num,
            cam_template = NEW.cam_template,
            encoder_type = NEW.encoder_type,
@@ -2152,7 +2151,7 @@ COPY iris.beacon_state (id, description) FROM stdin;
 
 CREATE TABLE iris._beacon (
     name VARCHAR(20) PRIMARY KEY,
-    geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
+    geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
     message VARCHAR(128) NOT NULL,
     notes VARCHAR CHECK (LENGTH(notes) < 256),
     verify_pin INTEGER,
@@ -2242,8 +2241,7 @@ BEGIN
        SET preset = NEW.preset
      WHERE name = OLD.name;
     UPDATE iris._beacon
-       SET geo_loc = NEW.geo_loc,
-           notes = NEW.notes,
+       SET notes = NEW.notes,
            message = NEW.message,
            verify_pin = NEW.verify_pin,
            ext_mode = NEW.ext_mode,
@@ -3058,7 +3056,7 @@ GRANT SELECT ON graphic_view TO PUBLIC;
 
 CREATE TABLE iris._dms (
     name VARCHAR(20) PRIMARY KEY,
-    geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
+    geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc,
     notes VARCHAR CHECK (LENGTH(notes) < 256),
     gps VARCHAR(20) REFERENCES iris._gps,
     static_graphic VARCHAR(20) REFERENCES iris.graphic,
@@ -3146,8 +3144,7 @@ BEGIN
        SET preset = NEW.preset
      WHERE name = OLD.name;
     UPDATE iris._dms
-       SET geo_loc = NEW.geo_loc,
-           notes = NEW.notes,
+       SET notes = NEW.notes,
            gps = NEW.gps,
            static_graphic = NEW.static_graphic,
            beacon = NEW.beacon,
@@ -3393,7 +3390,7 @@ COPY iris.gate_arm_interlock(id, description) FROM stdin;
 
 CREATE TABLE iris._gate_arm_array (
     name VARCHAR(20) PRIMARY KEY,
-    geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
+    geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc,
     notes VARCHAR CHECK (LENGTH(notes) < 256),
     opposing BOOLEAN NOT NULL,
     prereq VARCHAR(20) REFERENCES iris._gate_arm_array,
@@ -3483,8 +3480,7 @@ BEGIN
     UPDATE iris.controller_io SET controller = NEW.controller, pin = NEW.pin
      WHERE name = OLD.name;
     UPDATE iris._gate_arm_array
-       SET geo_loc = NEW.geo_loc,
-           notes = NEW.notes,
+       SET notes = NEW.notes,
            opposing = NEW.opposing,
            prereq = NEW.prereq,
            camera = NEW.camera,
@@ -4352,7 +4348,7 @@ CREATE TABLE cap.alert_info (
 --
 CREATE TABLE iris._lane_marking (
     name VARCHAR(20) PRIMARY KEY,
-    geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
+    geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
     notes VARCHAR CHECK (LENGTH(notes) < 256),
     deployed BOOLEAN NOT NULL
 );
@@ -4392,8 +4388,7 @@ BEGIN
            pin = NEW.pin
      WHERE name = OLD.name;
     UPDATE iris._lane_marking
-       SET geo_loc = NEW.geo_loc,
-           notes = NEW.notes,
+       SET notes = NEW.notes,
            deployed = NEW.deployed
      WHERE name = OLD.name;
     RETURN NEW;
@@ -4783,7 +4778,7 @@ COPY iris.meter_lock (id, description) FROM stdin;
 
 CREATE TABLE iris._ramp_meter (
     name VARCHAR(20) PRIMARY KEY,
-    geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
+    geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
     notes VARCHAR CHECK (LENGTH(notes) < 256),
     meter_type INTEGER NOT NULL REFERENCES iris.meter_type(id),
     storage INTEGER NOT NULL,
@@ -4878,8 +4873,7 @@ BEGIN
        SET preset = NEW.preset
      WHERE name = OLD.name;
     UPDATE iris._ramp_meter
-       SET geo_loc = NEW.geo_loc,
-           notes = NEW.notes,
+       SET notes = NEW.notes,
            meter_type = NEW.meter_type,
            storage = NEW.storage,
            max_wait = NEW.max_wait,
@@ -5025,7 +5019,7 @@ GRANT SELECT ON toll_zone_view TO PUBLIC;
 
 CREATE TABLE iris._tag_reader (
     name VARCHAR(20) PRIMARY KEY,
-    geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
+    geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
     notes VARCHAR CHECK (LENGTH(notes) < 256),
     toll_zone VARCHAR(20) REFERENCES iris.toll_zone(name),
     settings JSONB
@@ -5085,8 +5079,7 @@ BEGIN
            pin = NEW.pin
      WHERE name = OLD.name;
     UPDATE iris._tag_reader
-       SET geo_loc = NEW.geo_loc,
-           notes = NEW.notes,
+       SET notes = NEW.notes,
            toll_zone = NEW.toll_zone,
            settings = NEW.settings
      WHERE name = OLD.name;
@@ -5460,7 +5453,7 @@ CREATE TABLE iris._weather_sensor (
     name VARCHAR(20) PRIMARY KEY,
     site_id VARCHAR(20),
     alt_id VARCHAR(20),
-    geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
+    geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
     notes VARCHAR CHECK (LENGTH(notes) < 256),
     settings JSONB,
     sample JSONB,
@@ -5547,7 +5540,6 @@ BEGIN
     UPDATE iris._weather_sensor
        SET site_id = NEW.site_id,
            alt_id = NEW.alt_id,
-           geo_loc = NEW.geo_loc,
            notes = NEW.notes,
            settings = NEW.settings,
            sample = NEW.sample,
