@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2016  SRF Consulting Group
- * Copyright (C) 2018-2023  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -258,7 +258,7 @@ public class GpsImpl extends DeviceImpl implements Gps {
 
 	/** Set the latitude */
 	private void setLatNotify(Double lt) throws TMSException {
-		if (lt != lat) {
+		if (!objectEquals(lt, lat)) {
 			store.update(this, "lat", lat);
 			lat = lt;
 			notifyAttribute("lat");
@@ -276,7 +276,7 @@ public class GpsImpl extends DeviceImpl implements Gps {
 
 	/** Set the longitude */
 	private void setLonNotify(Double ln) throws TMSException {
-		if (ln != lon) {
+		if (!objectEquals(ln, lon)) {
 			store.update(this, "lon", ln);
 			lon = ln;
 			notifyAttribute("lon");
