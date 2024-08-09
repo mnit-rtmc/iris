@@ -12,7 +12,7 @@
 //
 use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
-use crate::util::{ContainsLower, Fields, HtmlStr, Input};
+use crate::util::{ContainsLower, Fields, HtmlStr, Input, TextArea};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
@@ -25,6 +25,7 @@ pub struct Gps {
     pub notes: Option<String>,
     // secondary attributes
     pub pin: Option<u32>,
+    pub geo_loc: Option<String>,
 }
 
 type GpsAnc = ControllerIoAnc<Gps>;
@@ -40,9 +41,27 @@ impl Gps {
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &GpsAnc) -> String {
         let title = self.title(View::Setup);
+        let notes = HtmlStr::new(&self.notes);
         let controller = anc.controller_html(self);
         let pin = anc.pin_html(self.pin);
-        format!("{title}{controller}{pin}")
+        let geo_loc = HtmlStr::new(&self.geo_loc);
+        let footer = self.footer(true);
+        format!(
+            "{title}\
+            <div class='row'>\
+              <label for='notes'>Notes</label>\
+              <textarea id='notes' maxlength='255' rows='4' \
+                        cols='24'>{notes}</textarea>\
+            </div>\
+            <div class='row'>\
+              <label for='geo_loc'>Device Loc</label>\
+              <input id='geo_loc' maxlength='20' size='20' \
+                     value='{geo_loc}'>\
+            </div>\
+            {controller}\
+            {pin}\
+            {footer}"
+        )
     }
 }
 
@@ -92,6 +111,8 @@ impl Card for Gps {
     /// Get changed fields from Setup form
     fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
+        fields.changed_text_area("notes", &self.notes);
+        fields.changed_input("geo_loc", &self.geo_loc);
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
         fields.into_value().to_string()

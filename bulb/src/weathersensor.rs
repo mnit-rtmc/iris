@@ -166,7 +166,8 @@ impl AncillaryData for WeatherSensorAnc {
         let mut loc = LocAnc::new(pri, view);
         // Need geoloc to fly to location on map
         if let (View::Status, Some(nm)) = (view, pri.geoloc()) {
-            loc.assets.push(Asset::GeoLoc(nm.to_string(), Res::WeatherSensor));
+            loc.assets
+                .push(Asset::GeoLoc(nm.to_string(), Res::WeatherSensor));
         }
         WeatherSensorAnc { cio, loc }
     }

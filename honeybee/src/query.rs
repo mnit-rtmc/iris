@@ -331,7 +331,8 @@ pub const GPS_ALL: &str = "\
 
 /// SQL query for one GPS (secondary)
 pub const GPS_ONE: &str = "\
-  SELECT name, controller, pin, notes, latest_poll, latest_sample, lat, lon \
+  SELECT name, controller, pin, notes, geo_loc, latest_poll, latest_sample, \
+         lat, lon \
   FROM iris.gps \
   WHERE name = $1";
 
