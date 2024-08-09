@@ -153,7 +153,6 @@ detector_auto_fail_enable	true
 detector_event_purge_days	90
 detector_occ_spike_secs	60
 dms_comm_loss_enable	true
-dms_gps_jitter_m	100
 dms_lamp_test_timeout_secs	30
 dms_message_tooltip_enable	false
 dms_page_on_max_secs	10.0
@@ -174,6 +173,7 @@ email_sender_server
 email_smtp_host	
 gate_arm_alert_timeout_secs	90
 gate_arm_event_purge_days	0
+gps_jitter_m	100
 help_trouble_ticket_enable	false
 help_trouble_ticket_url	
 incident_clear_advice_multi	JUST CLEARED

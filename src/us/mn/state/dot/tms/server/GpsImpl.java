@@ -45,7 +45,7 @@ public class GpsImpl extends DeviceImpl implements Gps {
 
 	/** Get the jitter tolerance (m) */
 	static private int jitterToleranceMeters() {
-		return SystemAttrEnum.DMS_GPS_JITTER_M.getInt();
+		return SystemAttrEnum.GPS_JITTER_M.getInt();
 	}
 
 	/** Save a location change to the geo_loc table

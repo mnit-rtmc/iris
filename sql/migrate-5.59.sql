@@ -465,4 +465,8 @@ BEGIN
 END;
 $weather_sensor_update$ LANGUAGE plpgsql;
 
+-- Rename dms_gps_jitter_m system attribute to gps_jitter_m
+UPDATE iris.system_attribute SET name = 'gps_jitter_m'
+    WHERE name = 'dms_gps_jitter_m';
+
 COMMIT;

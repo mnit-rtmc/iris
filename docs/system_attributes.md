@@ -45,7 +45,6 @@ System Attribute                 | Description
 `detector_auto_fail_enable`      | Enable [auto-fail] of traffic detectors with suspicious data
 `detector_event_purge_days`      | Number of days after which detector events will be purged
 `dms_comm_loss_enable`           | Enable blanking [DMS] after communication time out
-`dms_gps_jitter_m`               | Threshold (m) for GPS change to update [DMS] location
 `dms_lamp_test_timeout_secs`     | Time to wait for [DMS] lamp test to complete
 `dms_page_on_max_secs`           | Maximum selectable [DMS] page on time (seconds)
 `dms_page_on_min_secs`           | Minimum selectable [DMS] page on time (seconds)
@@ -66,6 +65,7 @@ System Attribute                 | Description
 `email_smtp_host`                | SMTP host for sending email
 `gate_arm_alert_timeout_secs`    | Time to wait before sending gate arm alerts after comm failure
 `gate_arm_event_purge_days`      | Number of days after which gate arm events will be purged
+`gps_jitter_m`                   | Threshold (m) for GPS change to update device location
 `help_trouble_ticket_enable`     | Enable help menu item for creating trouble tickets
 `help_trouble_ticket_url`        | URL of Trac trouble ticket system
 `incident_clear_advice_multi`    | Advice for [DMS] messages when incidents are cleared
