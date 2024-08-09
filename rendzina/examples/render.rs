@@ -38,7 +38,7 @@ fn main() {
     let configs = SignConfig::load_all(SIGN_CFGS.as_bytes()).unwrap();
     let mut fonts = FontTable::default();
     let f = fonts.font_mut(0).unwrap();
-    *f = load_font(&include_bytes!("../../fonts/F08.tfon")[..]).unwrap();
+    *f = load_font(&include_bytes!("../../tfon/F08.tfon")[..]).unwrap();
     let mut graphics = GraphicTable::default();
     let g = graphics.graphic_mut(0).unwrap();
     *g = load_graphic(&include_bytes!("g24.gif")[..], 24).unwrap();
