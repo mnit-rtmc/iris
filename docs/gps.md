@@ -14,7 +14,7 @@ Notes        | administrator notes, possibly including [hashtag]s
 Geo Location | device location name (same as device name)
 
 To check a GPS device, select the device ([DMS], etc.) and open its `Properties`
-form.  On the `Location` tag, there are widgets for querying the GPS status.
+form.  On the `Location` tab, there are widgets for querying the GPS status.
 
 <details>
 <summary>API Resources 🕵️ </summary>
