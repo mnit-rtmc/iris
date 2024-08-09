@@ -23,9 +23,8 @@ import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.tms.CommLink;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Gps;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
@@ -76,7 +75,7 @@ public class GpsImpl extends DeviceImpl implements Gps {
 	/** Load all the GPS */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, GpsImpl.class);
-		store.query("SELECT name, controller, pin, notes, " +
+		store.query("SELECT name, controller, pin, notes, geo_loc, " +
 			"latest_poll, latest_sample, lat, lon FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
@@ -94,6 +93,7 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
+		map.put("geo_loc", geo_loc);
 		map.put("latest_poll", asTimestamp(latest_poll));
 		map.put("latest_sample", asTimestamp(latest_sample));
 		map.put("lat", lat);
@@ -119,28 +119,22 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		     row.getString(2),          // controller
 		     row.getInt(3),             // pin
 		     row.getString(4),          // notes
-		     row.getTimestamp(5),       // latest_poll
-		     row.getTimestamp(6),       // latest_sample
-		     (Double) row.getObject(7), // lat
-		     (Double) row.getObject(8)  // lon
+		     row.getString(5),          // geo_loc
+		     row.getTimestamp(6),       // latest_poll
+		     row.getTimestamp(7),       // latest_sample
+		     (Double) row.getObject(8), // lat
+		     (Double) row.getObject(9)  // lon
 		);
 	}
 
 	/** Create a GPS */
-	private GpsImpl(String n, String c, int p, String nt, Date lp, Date ls,
-	                Double lt, Double ln)
+	private GpsImpl(String n, String c, int p, String nt, String loc,
+	                Date lp, Date ls, Double lt, Double ln)
 	{
-		this(n, lookupController(c), p, nt, stampMillis(lp),
-		     stampMillis(ls), lt, ln);
-	}
-
-	/** Create a GPS */
-	private GpsImpl(String n, ControllerImpl c, int p, String nt, Long lp,
-	                Long ls, Double lt, Double ln)
-	{
-		super(n, c, p, nt);
-		latest_poll = lp;
-		latest_sample = ls;
+		super(n, lookupController(c), p, nt);
+		geo_loc = lookupGeoLoc(loc);
+		latest_poll = stampMillis(lp);
+		latest_sample = stampMillis(ls);
 		lat = lt;
 		lon = ln;
 		initTransients();
@@ -151,66 +145,28 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		super(n);
 	}
 
-	/** Save a device's lat/lon values and update the device's GIS info.
-	 * @param loc Device location to update.
-	 * @param lt New latitude.
-	 * @param ln New longitude. */
-	public void saveDeviceLocation(GeoLocImpl loc, double lt, double ln) {
-		if (isValidLocation(lt, ln)) {
-			if (checkJitter(lt, ln))
-				changeDeviceLocation(loc, lt, ln);
-			updateLatLon(lt, ln);
-		}
-	}
+	/** Associated device location */
+	private GeoLocImpl geo_loc;
 
-	/** Check if position has moved more than jitter threshold.
-	 * @param lt New latitude.
-	 * @param ln New longitude.
-	 * @return true if new position should be stored. */
-	private boolean checkJitter(double lt, double ln) {
-		Double old_lat = getLat();
-		Double old_lon = getLon();
-		if (!isValidLocation(old_lat, old_lon))
-			return true;
-		Position p0 = new Position(old_lat, old_lon);
-		Position p1 = new Position(lt, ln);
-		return p0.distanceHaversine(p1) >= jitterToleranceMeters();
-	}
-
-	/** Save a location change to the _gps table.
-	 * (Also updates the _gps.latest_sample field.)
-	 * @param lt Latitude.
-	 * @param ln Longitude. */
-	private void updateLatLon(Double lt, Double ln) {
-		try {
-			setLatNotify(lt);
-			setLonNotify(ln);
-			if (lt != null && ln != null)
-				setLatestSampleNotify(getLatestPoll());
-		}
-		catch (TMSException ex) {
-			GPS_LOG.log("Error updating gps: " + ex);
-		}
-	}
-
-	/** Request a device operation (query message, test pixels, etc.) */
+	/** Set the associated device location */
 	@Override
-	public void sendDeviceRequest(DeviceRequest dr) {
-		GpsPoller p = getGpsPoller();
-		if (p != null)
-			p.sendRequest(this, dr);
+	public void setGeoLoc(GeoLoc loc) {
+		if (loc instanceof GeoLocImpl)
+			geo_loc = (GeoLocImpl) loc;
 	}
 
-	/** Get the GPS poller */
-	private GpsPoller getGpsPoller() {
-		DevicePoller dp = getPoller();
-		return (dp instanceof GpsPoller) ? (GpsPoller) dp : null;
+	/** Set the associated device location */
+	public void doSetGeoLoc(GeoLoc loc) throws TMSException {
+		if (!objectEquals(loc, geo_loc)) {
+			store.update(this, "geo_loc", loc);
+			setGeoLoc(loc);
+		}
 	}
 
-	/** Get controller comm link */
-	public CommLink getCommLink() {
-		Controller c = controller;
-		return (c != null) ? c.getCommLink() : null;
+	/** Get the associated device location */
+	@Override
+	public GeoLoc getGeoLoc() {
+		return geo_loc;
 	}
 
 	/** Timestamp when latest poll was attempted */
@@ -287,6 +243,66 @@ public class GpsImpl extends DeviceImpl implements Gps {
 	@Override
 	public Double getLon() {
 		return lon;
+	}
+
+	/** Save a device's lat/lon values and update the device's GIS info.
+	 * @param loc Device location to update.
+	 * @param lt New latitude.
+	 * @param ln New longitude. */
+	public void saveDeviceLocation(double lt, double ln) {
+		GeoLocImpl loc = geo_loc;
+		if (loc != null && isValidLocation(lt, ln)) {
+			if (checkJitter(lt, ln)) {
+				changeDeviceLocation(loc, lt, ln);
+				updateLatLon(lt, ln);
+			}
+		}
+	}
+
+	/** Check if position has moved more than jitter threshold.
+	 * @param lt New latitude.
+	 * @param ln New longitude.
+	 * @return true if new position should be stored. */
+	private boolean checkJitter(double lt, double ln) {
+		Double old_lat = getLat();
+		Double old_lon = getLon();
+		if (!isValidLocation(old_lat, old_lon))
+			return true;
+		Position p0 = new Position(old_lat, old_lon);
+		Position p1 = new Position(lt, ln);
+		return p0.distanceHaversine(p1) >= jitterToleranceMeters();
+	}
+
+	/** Save a location change to the _gps table.
+	 * (Also updates the _gps.latest_sample field.)
+	 * @param lt Latitude.
+	 * @param ln Longitude. */
+	private void updateLatLon(Double lt, Double ln) {
+		try {
+			setLatNotify(lt);
+			setLonNotify(ln);
+			if (lt != null && ln != null)
+				setLatestSampleNotify(getLatestPoll());
+		}
+		catch (TMSException ex) {
+			GPS_LOG.log("Error updating gps: " + ex);
+		}
+	}
+
+	/** Request a device operation (query message, test pixels, etc.) */
+	@Override
+	public void sendDeviceRequest(DeviceRequest dr) {
+		if (geo_loc != null) {
+			GpsPoller p = getGpsPoller();
+			if (p != null)
+				p.sendRequest(this, dr);
+		}
+	}
+
+	/** Get the GPS poller */
+	private GpsPoller getGpsPoller() {
+		DevicePoller dp = getPoller();
+		return (dp instanceof GpsPoller) ? (GpsPoller) dp : null;
 	}
 
 	/** Perform a periodic poll */

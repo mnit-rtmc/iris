@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.PresetComboRenderer;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
-import us.mn.state.dot.tms.client.gps.GpsPanel;
+import us.mn.state.dot.tms.client.gps.DeviceGpsPanel;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
@@ -72,7 +72,7 @@ public class PropLocation extends LocationPanel {
 	}
 
 	/** GPS panel */
-	private final GpsPanel gps_pnl;
+	private final DeviceGpsPanel gps_pnl;
 
 	/** DMS to display */
 	private final DMS dms;
@@ -83,13 +83,14 @@ public class PropLocation extends LocationPanel {
 		dms = sign;
 		preset_mdl = new IComboBoxModel<CameraPreset>(
 			state.getCamCache().getPresetModel());
-		gps_pnl = new GpsPanel(s, sign);
+		gps_pnl = new DeviceGpsPanel(s, sign.getGeoLoc());
 	}
 
 	/** Initialize the widgets on the form */
 	@Override
 	public void initialize() {
 		super.initialize();
+		gps_pnl.initialize();
 		preset_cbx.setModel(preset_mdl);
 		preset_cbx.setAction(preset_act);
 		preset_cbx.setRenderer(new PresetComboRenderer());
@@ -100,11 +101,17 @@ public class PropLocation extends LocationPanel {
 		setGeoLoc(dms.getGeoLoc());
 	}
 
+	/** Dispose of the panel */
+	@Override
+	public void dispose() {
+		super.dispose();
+		gps_pnl.dispose();
+	}
+
 	/** Update the edit mode */
 	@Override
 	public void updateEditMode() {
 		super.updateEditMode();
-		gps_pnl.updateEditMode();
 		preset_act.setEnabled(canWrite("preset"));
 	}
 

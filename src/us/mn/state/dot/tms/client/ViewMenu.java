@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.client.comm.MaintenanceMenu;
 import us.mn.state.dot.tms.client.detector.DetectorForm;
 import us.mn.state.dot.tms.client.detector.StationForm;
 import us.mn.state.dot.tms.client.dms.SignMenu;
+import us.mn.state.dot.tms.client.gps.GpsForm;
 import us.mn.state.dot.tms.client.incident.IncidentMenu;
 import us.mn.state.dot.tms.client.lcs.LaneUseMenu;
 import us.mn.state.dot.tms.client.reports.RptSetupForm;
@@ -61,6 +62,7 @@ public class ViewMenu extends IMenu {
 		addMenu(new AlertMenu(session));
 		addItem(createDetectorItem());
 		addItem(createStationItem());
+		addItem(createGpsItem());
 		addItem(session.createTableAction(RampMeter.SONAR_TYPE));
 		addItem(createScheduleItem());
 		addItem(session.createTableAction(WeatherSensor.SONAR_TYPE));
@@ -85,6 +87,16 @@ public class ViewMenu extends IMenu {
 		    new IAction("detector.station.plural") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new StationForm(session));
+			}
+		    } : null;
+	}
+
+	/** Create a GPS menu item action */
+	private IAction createGpsItem() {
+		return GpsForm.isPermitted(session) ?
+		    new IAction("gps") {
+			protected void doActionPerformed(ActionEvent e){
+				desktop.show(new GpsForm(session));
 			}
 		    } : null;
 	}

@@ -426,14 +426,21 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	 * and landmark for current lat/lon location. */
 	public void doCalculateGIS() throws TMSException {
 		GeoLoc loc = findNearest();
-		if (null == loc)
-			throw new TMSException("Failed to snap location");
-		setRoadwayNotify(loc.getRoadway());
-		setRoadDirNotify(loc.getRoadDir());
-		setCrossStreetNotify(loc.getCrossStreet());
-		setCrossDirNotify(loc.getCrossDir());
-		setCrossModNotify(loc.getCrossMod());
-		setLandmarkNotify(loc.getLandmark());
+		if (loc != null) {
+			setRoadwayNotify(loc.getRoadway());
+			setRoadDirNotify(loc.getRoadDir());
+			setCrossStreetNotify(loc.getCrossStreet());
+			setCrossDirNotify(loc.getCrossDir());
+			setCrossModNotify(loc.getCrossMod());
+			setLandmarkNotify(loc.getLandmark());
+		} else {
+			setRoadwayNotify(null);
+			setRoadDirNotify((short) 0);
+			setCrossStreetNotify(null);
+			setCrossDirNotify((short) 0);
+			setCrossModNotify((short) 0);
+			setLandmarkNotify(null);
+		}
 	}
 
 	/** Find the nearest geo location to current lat/lon. */

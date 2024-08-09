@@ -122,15 +122,102 @@ $weather_sensor_hashtag$ LANGUAGE plpgsql;
 
 DROP FUNCTION parse_tags(text);
 
--- Replace DMS stuck_pixels with pixel_failures
+-- Add geo_loc to gps
+DROP VIEW gps_view;
+DROP VIEW iris.gps;
+
+ALTER TABLE iris._gps ADD COLUMN geo_loc VARCHAR(20) REFERENCES iris.geo_loc;
+
+CREATE OR REPLACE FUNCTION iris.gps_notify() RETURNS TRIGGER AS
+    $gps_notify$
+BEGIN
+    IF (NEW.notes IS DISTINCT FROM OLD.notes) OR
+       (NEW.geo_loc IS DISTINCT FROM OLD.geo_loc)
+    THEN
+        NOTIFY gps;
+    ELSE
+        PERFORM pg_notify('gps', NEW.name);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$gps_notify$ LANGUAGE plpgsql;
+
+CREATE VIEW iris.gps AS
+    SELECT g.name, controller, pin, notes, geo_loc, latest_poll, latest_sample,
+           lat, lon
+    FROM iris._gps g
+    JOIN iris.controller_io cio ON g.name = cio.name;
+
+CREATE OR REPLACE FUNCTION iris.gps_insert() RETURNS TRIGGER AS
+    $gps_insert$
+BEGIN
+    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
+         VALUES (NEW.name, 'gps', NEW.controller, NEW.pin);
+    INSERT INTO iris._gps (name, notes, geo_loc, latest_poll, latest_sample,
+                           lat, lon)
+         VALUES (NEW.name, NEW.notes, NEW.geo_loc, NEW.latest_poll,
+                 NEW.latest_sample, NEW.lat, NEW.lon);
+    RETURN NEW;
+END;
+$gps_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER gps_insert_trig
+    INSTEAD OF INSERT ON iris.gps
+    FOR EACH ROW EXECUTE FUNCTION iris.gps_insert();
+
+CREATE OR REPLACE FUNCTION iris.gps_update() RETURNS TRIGGER AS
+    $gps_update$
+BEGIN
+    UPDATE iris.controller_io
+       SET controller = NEW.controller,
+           pin = NEW.pin
+     WHERE name = OLD.name;
+    UPDATE iris._gps
+       SET notes = NEW.notes,
+           geo_loc = NEW.geo_loc,
+           latest_poll = NEW.latest_poll,
+           latest_sample = NEW.latest_sample,
+           lat = NEW.lat,
+           lon = NEW.lon
+     WHERE name = OLD.name;
+    RETURN NEW;
+END;
+$gps_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER gps_update_trig
+    INSTEAD OF UPDATE ON iris.gps
+    FOR EACH ROW EXECUTE FUNCTION iris.gps_update();
+
+CREATE TRIGGER gps_delete_trig
+    INSTEAD OF DELETE ON iris.gps
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
+
+CREATE VIEW gps_view AS
+    SELECT g.name, controller, pin, notes, geo_loc, latest_poll, latest_sample,
+           lat, lon
+    FROM iris._gps g
+    JOIN iris.controller_io cio ON g.name = cio.name;
+GRANT SELECT ON gps_view TO PUBLIC;
+
+WITH cte AS (
+    SELECT geo_loc, gps
+    FROM iris.dms
+    WHERE gps IS NOT NULL
+)
+UPDATE iris._gps SET geo_loc = cte.geo_loc
+FROM cte
+WHERE iris._gps.name = cte.gps;
+
+-- Replace DMS stuck_pixels with pixel_failures; remove gps column
 DROP VIEW dms_view;
 DROP VIEW iris.dms;
 
 ALTER TABLE iris._dms DROP COLUMN stuck_pixels;
 ALTER TABLE iris._dms ADD COLUMN pixel_failures VARCHAR;
+ALTER TABLE iris._dms DROP COLUMN gps;
 
 CREATE VIEW iris.dms AS
-    SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
+    SELECT d.name, geo_loc, controller, pin, notes, static_graphic,
            beacon, preset, sign_config, sign_detail,
            msg_user, msg_sched, msg_current, expire_time, status,
            pixel_failures
@@ -146,11 +233,11 @@ BEGIN
     INSERT INTO iris.device_preset (name, resource_n, preset)
          VALUES (NEW.name, 'dms', NEW.preset);
     INSERT INTO iris._dms (
-        name, geo_loc, notes, gps, static_graphic, beacon,
+        name, geo_loc, notes, static_graphic, beacon,
         sign_config, sign_detail, msg_user, msg_sched, msg_current,
         expire_time, status, pixel_failures
     ) VALUES (
-        NEW.name, NEW.geo_loc, NEW.notes, NEW.gps, NEW.static_graphic,
+        NEW.name, NEW.geo_loc, NEW.notes, NEW.static_graphic,
         NEW.beacon, NEW.sign_config, NEW.sign_detail,
         NEW.msg_user, NEW.msg_sched, NEW.msg_current, NEW.expire_time,
         NEW.status, NEW.pixel_failures
@@ -174,9 +261,7 @@ BEGIN
        SET preset = NEW.preset
      WHERE name = OLD.name;
     UPDATE iris._dms
-       SET geo_loc = NEW.geo_loc,
-           notes = NEW.notes,
-           gps = NEW.gps,
+       SET notes = NEW.notes,
            static_graphic = NEW.static_graphic,
            beacon = NEW.beacon,
            sign_config = NEW.sign_config,
@@ -201,7 +286,7 @@ CREATE TRIGGER dms_delete_trig
     FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW dms_view AS
-    SELECT d.name, d.geo_loc, cio.controller, cio.pin, d.notes, d.gps,
+    SELECT d.name, d.geo_loc, cio.controller, cio.pin, d.notes,
            d.sign_config, d.sign_detail, d.static_graphic, d.beacon,
            cp.camera, cp.preset_num, default_font,
            msg_user, msg_sched, msg_current, expire_time,
@@ -275,34 +360,6 @@ END;
 $beacon_update$ LANGUAGE plpgsql;
 
 ALTER TABLE iris._dms ALTER COLUMN geo_loc SET NOT NULL;
-
-CREATE OR REPLACE FUNCTION iris.dms_update() RETURNS TRIGGER AS
-    $dms_update$
-BEGIN
-    UPDATE iris.controller_io
-       SET controller = NEW.controller,
-           pin = NEW.pin
-     WHERE name = OLD.name;
-    UPDATE iris.device_preset
-       SET preset = NEW.preset
-     WHERE name = OLD.name;
-    UPDATE iris._dms
-       SET notes = NEW.notes,
-           gps = NEW.gps,
-           static_graphic = NEW.static_graphic,
-           beacon = NEW.beacon,
-           sign_config = NEW.sign_config,
-           sign_detail = NEW.sign_detail,
-           msg_user = NEW.msg_user,
-           msg_sched = NEW.msg_sched,
-           msg_current = NEW.msg_current,
-           expire_time = NEW.expire_time,
-           status = NEW.status,
-           pixel_failures = NEW.pixel_failures
-     WHERE name = OLD.name;
-    RETURN NEW;
-END;
-$dms_update$ LANGUAGE plpgsql;
 
 ALTER TABLE iris._gate_arm_array ALTER COLUMN geo_loc SET NOT NULL;
 

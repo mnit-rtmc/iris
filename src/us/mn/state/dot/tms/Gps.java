@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2016  SRF Consulting Group
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,12 @@ public interface Gps extends Device {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "gps";
+
+	/** Set the associated device location */
+	void setGeoLoc(GeoLoc l);
+
+	/** Get the associated device location */
+	GeoLoc getGeoLoc();
 
 	/** Get the latest poll date &amp; time */
 	Long getLatestPoll();

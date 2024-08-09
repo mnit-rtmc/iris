@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2016  SRF Consulting Group
- * Copyright (C) 2018-2023  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.server.GeoLocImpl;
 import us.mn.state.dot.tms.server.GpsImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -42,9 +41,6 @@ public class OpQueryGpsLocation extends OpNtcip {
 	/** GPS device being queried */
 	private final GpsImpl gps;
 
-	/** Location of device */
-	private final GeoLocImpl loc;
-
 	/** GPS latitude */
 	private final ASN1Integer lat = MIB1204.essLatitude.makeInt();
 
@@ -52,10 +48,9 @@ public class OpQueryGpsLocation extends OpNtcip {
 	private final ASN1Integer lon = MIB1204.essLongitude.makeInt();
 
 	/** Create a new query GPS location operation */
-	public OpQueryGpsLocation(GpsImpl g, GeoLocImpl l) {
+	public OpQueryGpsLocation(GpsImpl g) {
 		super(PriorityLevel.POLL_LOW, g);
 		gps = g;
-		loc = l;
 		gps.setLatestPollNotify();
 	}
 
@@ -102,7 +97,7 @@ public class OpQueryGpsLocation extends OpNtcip {
 		int lt = lat.getInteger();
 		int ln = lon.getInteger();
 		if ((NO_GPS_LOCK_LAT != lt) && (NO_GPS_LOCK_LON != ln)) {
-			gps.saveDeviceLocation(loc, lt / 1000000.0,
+			gps.saveDeviceLocation(lt / 1000000.0,
 				ln / 1000000.0);
 		} else
 			setErrorStatus("No GPS Lock");

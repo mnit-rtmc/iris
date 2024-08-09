@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2017  SRF Consulting Group
- * Copyright (C) 2018-2022  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@
 package us.mn.state.dot.tms.server.comm.redlion;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.server.GeoLocImpl;
 import us.mn.state.dot.tms.server.GpsImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
@@ -39,17 +38,13 @@ public class OpQueryGpsLocation extends OpDevice<RedLionProperty> {
 	/** GPS device */
 	private final GpsImpl gps;
 
-	/** Device location */
-	private final GeoLocImpl loc;
-
 	/** Property to query */
 	private final RedLionProperty prop;
 
 	/** Create a new GPS operation */
-	public OpQueryGpsLocation(GpsImpl g, GeoLocImpl l) {
+	public OpQueryGpsLocation(GpsImpl g) {
 		super(PriorityLevel.POLL_LOW, g);
 		gps = g;
-		loc = l;
 		prop = new RedLionProperty();
 		gps.setLatestPollNotify();
 	}
@@ -85,7 +80,7 @@ public class OpQueryGpsLocation extends OpDevice<RedLionProperty> {
 	private void updateGpsLocation() {
 		if (prop.gotValidResponse()) {
 			if (prop.gotGpsLock()) {
-				gps.saveDeviceLocation(loc, prop.getLat(),
+				gps.saveDeviceLocation(prop.getLat(),
 					prop.getLon());
 			} else
 				setErrorStatus("No GPS Lock");

@@ -23,14 +23,11 @@ import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.GpsHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.GeoLocImpl;
 import us.mn.state.dot.tms.server.GpsImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
@@ -150,11 +147,7 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 	public void sendRequest(GpsImpl gps, DeviceRequest r) {
 		switch (r) {
 		case QUERY_GPS_LOCATION:
-			GeoLoc loc = GpsHelper.lookupDeviceLoc(gps);
-			if (loc instanceof GeoLocImpl) {
-				addOp(new OpQueryGpsLocation(gps,
-					(GeoLocImpl) loc));
-			}
+			addOp(new OpQueryGpsLocation(gps));
 			break;
 		default:
 			; // Ignore other requests

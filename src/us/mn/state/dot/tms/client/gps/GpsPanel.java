@@ -1,7 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2017  SRF Consulting Group
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,218 +14,156 @@
  */
 package us.mn.state.dot.tms.client.gps;
 
-import java.awt.event.ActionEvent;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import us.mn.state.dot.sonar.client.TypeCache;
-import static us.mn.state.dot.tms.DeviceRequest.QUERY_GPS_LOCATION;
-import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Gps;
+import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
-import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
-import static us.mn.state.dot.tms.client.widget.Widgets.UI;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * IPanel for configuring/polling a GPS (to be
- * included in a device's "Location" properties-tab).
+ * Panel for configuring a GPS
  *
- * @author Michael Janson - SRF Consulting
  * @author Douglas Lau
  */
-public class GpsPanel extends IPanel implements ProxyView<Gps> {
-
-	/** Suffix for GPS names */
-	static private final String NAME_SUFFIX = "_gps";
-
-	/** Maximum length of GPS names */
-	static private final int MAX_NAME_LEN = 20 - NAME_SUFFIX.length();
-
-	/** Device request to query GPS location */
-	static private final int QUERY_LOC = QUERY_GPS_LOCATION.ordinal();
-
-	/** Checkbox to enable GPS for a device */
-	private final JCheckBox enable_cbx = new JCheckBox();
-
-	/** Button to query GPS */
-	private final JButton query_btn = new JButton();
-
-	/** Operation label */
-	private final JLabel op_lbl = new JLabel();
-
-	/** Label for latest poll */
-	private final JLabel poll_lbl = new JLabel();
-
-	/** Label for latest sample */
-	private final JLabel sample_lbl = new JLabel();
-
-	/** Date/time formatter */
-	private final SimpleDateFormat dt_format =
-		new SimpleDateFormat("yyyy-MM-dd HH:mm");
+public class GpsPanel extends IPanel {
 
 	/** User session */
 	private final Session session;
 
-	/** Cache of GPS objects */
-	private final TypeCache<Gps> cache;
+	/** Notes text area */
+	private final JTextArea notes_txt = new JTextArea(8, 32);
 
-	/** DMS being tracked by the GPS */
-	private final DMS dms;
+	/** Geoloc name */
+	private final JTextField geoloc_txt = new JTextField(20);
 
 	/** Proxy watcher */
 	private final ProxyWatcher<Gps> watcher;
+
+	/** Proxy view */
+	private final ProxyView<Gps> view = new ProxyView<Gps>() {
+		public void enumerationComplete() { }
+		public void update(Gps g, String a) {
+			updateGps(g, a);
+		}
+		public void clear() {
+			clearGps();
+		}
+	};
+
+	/** Edit mode listener */
+	private final EditModeListener edit_lsnr = new EditModeListener() {
+		public void editModeChanged() {
+			updateEditMode();
+		}
+	};
 
 	/** Associated GPS object */
 	private Gps gps;
 
 	/** Create the panel */
-	public GpsPanel(Session s, DMS d) {
-		setBorder(UI.buttonBorder());
+	public GpsPanel(Session s) {
 		session = s;
-		dms = d;
-		cache = s.getSonarState().getGpses();
-		watcher = new ProxyWatcher<Gps>(cache, this, false);
+		TypeCache<Gps> cache = s.getSonarState().getGpses();
+		watcher = new ProxyWatcher<Gps>(cache, view, false);
+	}
 
-		add(enable_cbx);
-		add(query_btn, Stretch.END);
-		add("device.operation");
-		add(op_lbl, Stretch.LAST);
-		add("gps.latest.poll");
-		add(poll_lbl, Stretch.LAST);
-		add("gps.latest.sample");
-		add(sample_lbl, Stretch.LAST);
-
-		enable_cbx.setAction(new IAction("gps.enable") {
-			protected void doActionPerformed(ActionEvent e) {
-				selectGpsEnabled();
-			}
-		});
-		query_btn.setAction(new IAction("gps.query") {
-			protected void doActionPerformed(ActionEvent e) {
-				queryGps();
-			}
-		});
-
+	/** Initialize the panel */
+	@Override
+	public void initialize() {
+		super.initialize();
+		add("device.notes");
+		add(notes_txt, Stretch.FULL);
+		add("gps.loc");
+		add(geoloc_txt, Stretch.FULL);
+		createJobs();
 		watcher.initialize();
-		setGps(dms.getGps());
+		clearGps();
+		session.addEditModeListener(edit_lsnr);
+	}
+
+	/** Create the jobs */
+	private void createJobs() {
+		notes_txt.addFocusListener(new FocusAdapter() {
+			public void focusLost(FocusEvent e) {
+				setNotes(notes_txt.getText().trim());
+			}
+		});
+		geoloc_txt.addFocusListener(new FocusAdapter() {
+			public void focusLost(FocusEvent e) {
+				setGeoLoc(geoloc_txt.getText().trim());
+			}
+		});
 	}
 
 	/** Set the GPS object */
-	private void setGps(Gps g) {
+	public void setGps(Gps g) {
 		watcher.setProxy(g);
-		query_btn.setEnabled(canRequestGps());
 	}
 
-	/** GPS enabled checkbox action */
-	private void selectGpsEnabled() {
-		if (enable_cbx.isSelected()) {
-			if (null == gps)
-				createGps();
-		} else if (gps != null)
-			destroyGps();
-		updateEditMode();
-	}
-
-	/** Create a GPS device */
-	private void createGps() {
-		String name = getGpsName();
-		cache.createObject(name);
-		Gps g = cache.lookupObjectWait(name);
-		dms.setGps(g);
-		setGps(g);
-	}
-
-	/** Get the GPS name */
-	private String getGpsName() {
-		return getDmsNameTruncated() + NAME_SUFFIX;
-	}
-
-	/** Get the DMS name truncated */
-	private String getDmsNameTruncated() {
-		String n = dms.getName();
-		return (n.length() <= MAX_NAME_LEN)
-		      ? n
-		      : n.substring(0, MAX_NAME_LEN);
-	}
-
-	/** Destroy a GPS device */
-	private void destroyGps() {
-		Gps g = gps;
-		dms.setGps(null);
-		g.setController(null);
-		g.destroy();
-	}
-
-	/** Force GPS to be queried */
-	private void queryGps() {
+	/** Set the notes */
+	private void setNotes(String n) {
 		Gps g = gps;
 		if (g != null)
-			g.setDeviceRequest(QUERY_LOC);
+			g.setNotes((n.length() > 0) ? n : null);
 	}
 
-	/** Update the edit mode */
-	public void updateEditMode() {
-		enable_cbx.setEnabled(canUpdateGps());
+	/** Set the geo loc */
+	private void setGeoLoc(String l) {
+		Gps g = gps;
+		if (g != null)
+			g.setGeoLoc(GeoLocHelper.lookup(l));
 	}
 
-	/** Check if GPS can be updated */
-	private boolean canUpdateGps() {
-		return session.canWrite("gps")
-		    && session.canWrite(dms, "gps");
+	/** Check if an attribute can be written */
+	private boolean canWrite(String a) {
+		Gps g = gps;
+		return (g != null) && session.canWrite(g, a);
 	}
 
-	/** Format a date/time stamp */
-	private String formatStamp(Long ts) {
-		return (ts != null) ? dt_format.format(new Date(ts)) : "";
-	}
-
-	/** Called when all proxies have been enumerated (from ProxyView). */
-	@Override
-	public void enumerationComplete() { }
-
-	@Override
-	public void update(Gps g, String a) {
-		gps = g;
-		updateEditMode();
-		boolean e = (g != null);
-		enable_cbx.setSelected(e);
-		query_btn.setEnabled(canRequestGps());
-		if (e) {
-			op_lbl.setText(g.getOperation());
-			poll_lbl.setText(formatStamp(g.getLatestPoll()));
-			sample_lbl.setText(formatStamp(g.getLatestSample()));
-		} else {
-			op_lbl.setText("");
-			poll_lbl.setText("");
-			sample_lbl.setText("");
+	/** Update the GPS */
+	private void updateGps(Gps g, String a) {
+		if (a == null) {
+			gps = g;
+			updateEditMode();
+		}
+		if (a == null || a.equals("notes")) {
+			String n = g.getNotes();
+			notes_txt.setText((n != null) ? n : "");
+		}
+		if (a == null || a.equals("geoLoc")) {
+			GeoLoc loc = g.getGeoLoc();
+			geoloc_txt.setText((loc != null) ? loc.getName() : "");
 		}
 	}
 
-	/** Check if GPS can be requested */
-	private boolean canRequestGps() {
-		Gps g = gps;
-		return (g != null) && session.isWritePermitted(g);
+	/** Update the edit mode */
+	private void updateEditMode() {
+		notes_txt.setEnabled(canWrite("notes"));
+		geoloc_txt.setEnabled(canWrite("geoLoc"));
 	}
 
-	@Override
-	public void clear() {
+	/** Clear the selected GPS */
+	private void clearGps() {
 		gps = null;
-		enable_cbx.setSelected(false);
-		query_btn.setEnabled(false);
-		op_lbl.setText("");
-		poll_lbl.setText("");
-		sample_lbl.setText("");
+		notes_txt.setEnabled(false);
+		notes_txt.setText("");
+		geoloc_txt.setEnabled(false);
+		geoloc_txt.setText("");
 	}
 
 	/** Dispose of the GPS panel */
 	@Override
 	public void dispose() {
+		clearGps();
+		session.removeEditModeListener(edit_lsnr);
 		watcher.dispose();
 		super.dispose();
 	}

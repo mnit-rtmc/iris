@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2017  SRF Consulting Group
- * Copyright (C) 2018-2022  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@
 package us.mn.state.dot.tms.server.comm.sierragx;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.server.GeoLocImpl;
 import us.mn.state.dot.tms.server.GpsImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
@@ -34,17 +33,13 @@ public class OpQueryGpsLocation extends OpDevice<SierraGxProperty> {
 	/** GPS device */
 	private final GpsImpl gps;
 
-	/** Device location */
-	private final GeoLocImpl loc;
-
 	/** GPS location property */
 	private final GpsLocationProperty gps_prop;
 
 	/** Create a new query GPS operation */
-	public OpQueryGpsLocation(GpsImpl g, GeoLocImpl l) {
+	public OpQueryGpsLocation(GpsImpl g) {
 		super(PriorityLevel.POLL_LOW, g);
 		gps = g;
-		loc = l;
 		gps_prop = new GpsLocationProperty();
 		gps.setLatestPollNotify();
 	}
@@ -154,7 +149,7 @@ public class OpQueryGpsLocation extends OpDevice<SierraGxProperty> {
 	private void updateGpsLocation() {
 		if (gps_prop.gotValidResponse()) {
 			if (gps_prop.gotGpsLock()) {
-				gps.saveDeviceLocation(loc, gps_prop.getLat(),
+				gps.saveDeviceLocation(gps_prop.getLat(),
 					gps_prop.getLon());
 			} else
 				setErrorStatus("No GPS Lock");

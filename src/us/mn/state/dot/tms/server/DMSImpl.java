@@ -125,7 +125,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		ess_map = new TableMapping(store, "iris", SONAR_TYPE,
 			WeatherSensor.SONAR_TYPE);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"gps, static_graphic, beacon, preset, sign_config, " +
+			"static_graphic, beacon, preset, sign_config, " +
 			"sign_detail, msg_user, msg_sched, msg_current, " +
 			"expire_time, status, pixel_failures FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
@@ -157,7 +157,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
-		map.put("gps", gps);
 		map.put("static_graphic", static_graphic);
 		map.put("beacon", beacon);
 		map.put("preset", preset);
@@ -208,30 +207,28 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		     row.getString(3),     // controller
 		     row.getInt(4),        // pin
 		     row.getString(5),     // notes
-		     row.getString(6),     // gps
-		     row.getString(7),     // static_graphic
-		     row.getString(8),     // beacon
-		     row.getString(9),     // preset
-		     row.getString(10),    // sign_config
-		     row.getString(11),    // sign_detail
-		     row.getString(12),    // msg_user
-		     row.getString(13),    // msg_sched
-		     row.getString(14),    // msg_current
-		     row.getTimestamp(15), // expire_time
-		     row.getString(16),    // status
-		     row.getString(17)     // pixel_failures
+		     row.getString(6),     // static_graphic
+		     row.getString(7),     // beacon
+		     row.getString(8),     // preset
+		     row.getString(9),     // sign_config
+		     row.getString(10),    // sign_detail
+		     row.getString(11),    // msg_user
+		     row.getString(12),    // msg_sched
+		     row.getString(13),    // msg_current
+		     row.getTimestamp(14), // expire_time
+		     row.getString(15),    // status
+		     row.getString(16)     // pixel_failures
 		);
 	}
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, String loc, String c, int p, String nt,
-		String g, String sg, String b, String cp, String sc,
-		String sd, String mu, String ms, String mc, Date et,
+		String sg, String b, String cp, String sc, String sd,
+		String mu, String ms, String mc, Date et,
 		String st, String pf) throws TMSException
 	{
 		super(n, lookupController(c), p, nt);
 		geo_loc = lookupGeoLoc(loc);
-		gps = lookupGps(g);
 		static_graphic = lookupGraphic(sg);
 		beacon = lookupBeacon(b);
 		setPreset(lookupPreset(cp));
@@ -324,30 +321,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public GeoLoc getGeoLoc() {
 		return geo_loc;
-	}
-
-	/** Associated GPS */
-	private GpsImpl gps;
-
-	/** Set associated GPS */
-	@Override
-	public void setGps(Gps g) {
-		if (g instanceof GpsImpl)
-			gps = (GpsImpl) g;
-	}
-
-	/** Set associated GPS */
-	public void doSetGps(Gps g) throws TMSException {
-		if (g != gps) {
-			store.update(this, "gps", g);
-			setGps(g);
-		}
-	}
-
-	/** Get associated GPS */
-	@Override
-	public Gps getGps() {
-		return gps;
 	}
 
 	/** Static graphic (hybrid sign) */

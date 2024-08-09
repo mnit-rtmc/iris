@@ -2554,6 +2554,7 @@ GRANT SELECT ON detector_auto_fail_view TO PUBLIC;
 CREATE TABLE iris._gps (
     name VARCHAR(20) PRIMARY KEY,
     notes VARCHAR CHECK (LENGTH(notes) < 256),
+    geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
     latest_poll TIMESTAMP WITH time zone,
     latest_sample TIMESTAMP WITH time zone,
     lat double precision,
@@ -2585,7 +2586,9 @@ CREATE TRIGGER gps_hashtag_trig
 CREATE FUNCTION iris.gps_notify() RETURNS TRIGGER AS
     $gps_notify$
 BEGIN
-    IF (NEW.notes IS DISTINCT FROM OLD.notes) THEN
+    IF (NEW.notes IS DISTINCT FROM OLD.notes) OR
+       (NEW.geo_loc IS DISTINCT FROM OLD.geo_loc)
+    THEN
         NOTIFY gps;
     ELSE
         PERFORM pg_notify('gps', NEW.name);
@@ -2603,7 +2606,8 @@ CREATE TRIGGER gps_table_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.gps AS
-    SELECT g.name, controller, pin, notes, latest_poll, latest_sample, lat, lon
+    SELECT g.name, controller, pin, notes, geo_loc, latest_poll, latest_sample,
+           lat, lon
     FROM iris._gps g
     JOIN iris.controller_io cio ON g.name = cio.name;
 
@@ -2612,9 +2616,10 @@ CREATE FUNCTION iris.gps_insert() RETURNS TRIGGER AS
 BEGIN
     INSERT INTO iris.controller_io (name, resource_n, controller, pin)
          VALUES (NEW.name, 'gps', NEW.controller, NEW.pin);
-    INSERT INTO iris._gps (name, notes, latest_poll, latest_sample, lat,lon)
-         VALUES (NEW.name, NEW.notes, NEW.latest_poll, NEW.latest_sample,
-                 NEW.lat, NEW.lon);
+    INSERT INTO iris._gps (name, notes, geo_loc, latest_poll, latest_sample,
+                           lat, lon)
+         VALUES (NEW.name, NEW.notes, NEW.geo_loc, NEW.latest_poll,
+                 NEW.latest_sample, NEW.lat, NEW.lon);
     RETURN NEW;
 END;
 $gps_insert$ LANGUAGE plpgsql;
@@ -2632,6 +2637,7 @@ BEGIN
      WHERE name = OLD.name;
     UPDATE iris._gps
        SET notes = NEW.notes,
+           geo_loc = NEW.geo_loc,
            latest_poll = NEW.latest_poll,
            latest_sample = NEW.latest_sample,
            lat = NEW.lat,
@@ -2650,7 +2656,8 @@ CREATE TRIGGER gps_delete_trig
     FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW gps_view AS
-    SELECT g.name, controller, pin, notes, latest_poll, latest_sample, lat, lon
+    SELECT g.name, controller, pin, notes, geo_loc, latest_poll, latest_sample,
+           lat, lon
     FROM iris._gps g
     JOIN iris.controller_io cio ON g.name = cio.name;
 GRANT SELECT ON gps_view TO PUBLIC;
@@ -3058,7 +3065,6 @@ CREATE TABLE iris._dms (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc,
     notes VARCHAR CHECK (LENGTH(notes) < 256),
-    gps VARCHAR(20) REFERENCES iris._gps,
     static_graphic VARCHAR(20) REFERENCES iris.graphic,
     beacon VARCHAR(20) REFERENCES iris._beacon,
     sign_config VARCHAR(16) REFERENCES iris.sign_config,
@@ -3100,7 +3106,7 @@ CREATE TRIGGER dms_table_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.dms AS
-    SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
+    SELECT d.name, geo_loc, controller, pin, notes, static_graphic,
            beacon, preset, sign_config, sign_detail,
            msg_user, msg_sched, msg_current, expire_time, status,
            pixel_failures
@@ -3116,11 +3122,11 @@ BEGIN
     INSERT INTO iris.device_preset (name, resource_n, preset)
          VALUES (NEW.name, 'dms', NEW.preset);
     INSERT INTO iris._dms (
-        name, geo_loc, notes, gps, static_graphic, beacon,
+        name, geo_loc, notes, static_graphic, beacon,
         sign_config, sign_detail, msg_user, msg_sched, msg_current,
         expire_time, status, pixel_failures
     ) VALUES (
-        NEW.name, NEW.geo_loc, NEW.notes, NEW.gps, NEW.static_graphic,
+        NEW.name, NEW.geo_loc, NEW.notes, NEW.static_graphic,
         NEW.beacon, NEW.sign_config, NEW.sign_detail,
         NEW.msg_user, NEW.msg_sched, NEW.msg_current, NEW.expire_time,
         NEW.status, NEW.pixel_failures
@@ -3145,7 +3151,6 @@ BEGIN
      WHERE name = OLD.name;
     UPDATE iris._dms
        SET notes = NEW.notes,
-           gps = NEW.gps,
            static_graphic = NEW.static_graphic,
            beacon = NEW.beacon,
            sign_config = NEW.sign_config,
@@ -3170,7 +3175,7 @@ CREATE TRIGGER dms_delete_trig
     FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW dms_view AS
-    SELECT d.name, d.geo_loc, cio.controller, cio.pin, d.notes, d.gps,
+    SELECT d.name, d.geo_loc, cio.controller, cio.pin, d.notes,
            d.sign_config, d.sign_detail, d.static_graphic, d.beacon,
            cp.camera, cp.preset_num, default_font,
            msg_user, msg_sched, msg_current, expire_time,

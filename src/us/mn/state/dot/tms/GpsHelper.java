@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2016  SRF Consulting Group
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,13 +41,15 @@ public class GpsHelper extends BaseHelper {
 			Gps.SONAR_TYPE));
 	}
 
-	/** Get associated device geo location for a GPS */
-	static public GeoLoc lookupDeviceLoc(Gps gps) {
-		Iterator<DMS> it = DMSHelper.iterator();
-		while (it.hasNext()) {
-			DMS dms = it.next();
-			if (gps.equals(dms.getGps()))
-				return dms.getGeoLoc();
+	/** Find Gps for a geo location */
+	static public Gps findLoc(GeoLoc loc) {
+		if (loc != null) {
+			Iterator<Gps> it = iterator();
+			while (it.hasNext()) {
+				Gps gps = it.next();
+				if (gps.getGeoLoc() == loc)
+					return gps;
+			}
 		}
 		return null;
 	}
