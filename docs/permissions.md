@@ -46,24 +46,24 @@ To simplify administration, some permissions grant access to related resources.
 In other words, permissions on the base resource also applies to any dependent
 resource, at the same access level.
 
-| Base Resource      | Dependent Resources                            |
-|--------------------|------------------------------------------------|
-| action plan        | beacon action, camera action, day matcher, day plan, dms action, lane action, meter action, plan phase |
-| alert config       |                                                |
-| beacon             |                                                |
-| [camera]           | catalog, [flow stream], monitor style, play list, [video monitor] |
-| [controller]       | [alarm], [comm link], [controller io], gps, [modem] |
-| [detector]         | [r_node], [road], station                      |
-| [dms]              | [font], [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
-| [gate arm]         | [gate arm array]                               |
-| incident           | inc_advice, inc_descriptor, inc_locator        |
-| [lcs]              | [lcs array], [lcs indication], [lane marking]  |
-| parking area       |                                                |
-| permission         | [domain], [role], [user id]                    |
-| ramp meter         |                                                |
-| [system attribute] | [cabinet style], [comm config]                 |
-| [toll zone]        | [tag reader]                                   |
-| weather sensor     |                                                |
+| Base Resource      | Dependent Resources                                   |
+|--------------------|-------------------------------------------------------|
+| action plan        | day matcher, day plan, plan phase                     |
+| alert config       |                                                       |
+| [beacon]           | beacon action                                         |
+| [camera]           | camera action, catalog, [flow stream], monitor style, play list, [video monitor] |
+| [controller]       | [alarm], [comm link], [controller io], [gps], [modem] |
+| [detector]         | [r_node], [road], station                             |
+| [dms]              | dms action, [font], [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
+| [gate arm]         | [gate arm array]                                      |
+| [incident]         | inc_advice, inc_descriptor, inc_locator               |
+| [lcs]              | [lcs array], [lcs indication], lane action, [lane marking] |
+| [parking area]     |                                                       |
+| permission         | [domain], [role], [user id]                           |
+| [ramp meter]       | meter action                                          |
+| [system attribute] | [cabinet style], [comm config]                        |
+| [toll zone]        | [tag reader]                                          |
+| [weather sensor]   |                                                       |
 
 ## Associated Resources
 
@@ -77,6 +77,7 @@ These include:
 
 
 [alarm]: alarms.html
+[beacon]: beacons.html
 [cabinet style]: controllers.html#cabinet-styles
 [camera]: cameras.html
 [capabilities]: users.html#capabilities
@@ -92,8 +93,10 @@ These include:
 [gate arm]: gate_arms.html
 [gate arm array]: gate_arms.html#arrays
 [geo loc]: geo_loc.html
+[gps]: gps.html
 [graphic]: graphics.html
 [hashtag]: hashtags.html
+[incident]: incidents.html
 [lane marking]: lcs.html#lane-markings
 [lcs]: lcs.html
 [lcs array]: lcs.html#arrays
@@ -101,8 +104,10 @@ These include:
 [message line]: message_patterns.html#message-lines
 [message pattern]: message_patterns.html
 [modem]: modem.html
+[parking area]: parking_areas.html
 [privileges]: users.html#privileges
 [r_node]: road_topology.html#r_nodes
+[ramp meter]: ramp_meters.html
 [resource]: rest_api.html#resource-types
 [restricted resource]: rest_api.html#restricted-resources-codeirisapicode
 [road]: road_topology.html#roads
@@ -115,4 +120,5 @@ These include:
 [toll zone]: tolling.html#toll-zones
 [user id]: users.html#user-ids
 [video monitor]: video.html
+[weather sensor]: weather_sensors.html
 [word]: words.html
