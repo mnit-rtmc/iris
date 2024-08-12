@@ -377,7 +377,9 @@ public class TaskProcessor {
 		authenticator.changePassword(c, u, pwd_current, pwd_new);
 	}
 
-	/** Finish a PASSWORD */
+	/** Finish a PASSWORD.
+	 * @param update Update cached password (true),
+	 *               or change password (false). */
 	void finishPassword(final ConnectionImpl c, final UserImpl u,
 		char[] pwd_new, final boolean update)
 	{
