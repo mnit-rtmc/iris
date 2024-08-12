@@ -1144,9 +1144,9 @@ impl Dms {
                     match reading.parse::<f32>() {
                         Ok(_r) => {
                             html.push_str("<td><meter max='100' value='");
-                            html.push_str(&reading);
+                            html.push_str(reading);
                             html.push_str("'></meter>☀️ ");
-                            html.push_str(&reading);
+                            html.push_str(reading);
                             html.push('%');
                         }
                         Err(_e) => {
@@ -1186,7 +1186,7 @@ impl Dms {
                             } else {
                                 html.push_str("<td class='fault'>");
                             }
-                            html.push_str(&voltage);
+                            html.push_str(voltage);
                             html.push('V');
                         }
                         Err(_e) => {
