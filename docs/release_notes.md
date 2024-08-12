@@ -1,5 +1,16 @@
 # IRIS 5.x Release Notes
 
+5.59.0 (12 Aug 2024)
+ - Reworked GPS to use with devices other than DMS
+ - Renamed "dms_gps_jitter_m" => "gps_jitter_m"
+ - Improved DMS photocell status JSON
+ - Improved DMS power supply status JSON
+ - Improved DMS pixel failure status JSON
+ - Add beacons and weather sensors to Web UI map
+ - Add checks for invalid DMS temps (NTCIP)
+ - Fix minor SQL problems
+ - Improve client event logging
+
 5.58.0 (31 Jul 2024)
  - Replace "sonar.ldap.urls" with "sonar.ldap.url" in iris-server.properties
  - Allow login while LDAP server unreachable (CrowdStrike event)
