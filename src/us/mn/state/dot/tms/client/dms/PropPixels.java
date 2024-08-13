@@ -123,7 +123,7 @@ public class PropPixels extends IPanel {
 	public void updateAttribute(String a) {
 		// NOTE: msgCurrent attribute changes after all sign
 		//       dimension attributes are updated.
-		if (a == null || a.equals("stuckPixels") ||
+		if (a == null || a.equals("pixelFailures") ||
 		    a.equals("msgCurrent"))
 			updatePixelStatus();
 		if (a == null) {
