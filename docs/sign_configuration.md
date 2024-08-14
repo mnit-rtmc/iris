@@ -32,6 +32,7 @@ sign, in milimeters.
 The **default [font]** is used for [sign message]s which do not specify a font.
 
 **Module** width and height are the dimensions of physical pixel modules.
+If set, module boundaries are displayed as an aid to technicians.
 
 ## Sign Details
 
@@ -42,6 +43,7 @@ communication is established.
 <summary>API Resources 🕵️ </summary>
 
 * `iris/api/sign_detail` (primary)
+* `iris/api/sign_detail/{name}`
 
 | Access  | Primary |
 |---------|---------|
