@@ -16,19 +16,19 @@ use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input};
 use resources::Res;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
 
 /// Lane Use Indications
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
 pub struct LaneUseIndication {
     pub id: u32,
     pub description: String,
 }
 
 /// LCS Indication
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct LcsIndication {
     pub name: String,
     pub controller: Option<String>,

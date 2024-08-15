@@ -17,13 +17,13 @@ use crate::item::ItemState;
 use crate::role::Role;
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, Select};
 use resources::Res;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_json::{Map, Value};
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
 
 /// Permission
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct Permission {
     pub id: u32,
     pub role: String,
@@ -33,7 +33,7 @@ pub struct Permission {
 }
 
 /// Resource Type
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize)]
 pub struct ResourceType {
     pub name: String,
     pub base: bool,

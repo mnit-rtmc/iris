@@ -20,19 +20,19 @@ use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select, TextArea};
 use resources::Res;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
 
 /// Controller conditions
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
 pub struct Condition {
     pub id: u32,
     pub description: String,
 }
 
 /// Controller IO
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
 pub struct Io {
     pub pin: u32,
     pub resource_n: String,
@@ -40,7 +40,7 @@ pub struct Io {
 }
 
 /// Optional setup data
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct Setup {
     pub model: Option<String>,
     pub serial_num: Option<String>,
@@ -48,7 +48,7 @@ pub struct Setup {
 }
 
 /// Controller
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct Controller {
     pub name: String,
     pub location: Option<String>,

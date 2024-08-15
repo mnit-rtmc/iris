@@ -14,11 +14,11 @@ use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input};
 use resources::Res;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::borrow::Cow;
 
 /// Video Monitor
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct VideoMonitor {
     pub name: String,
     pub mon_num: u32,

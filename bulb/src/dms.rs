@@ -80,14 +80,14 @@ const SEND_BUTTON: &str = "<button id='mc_send' type='button'>Send</button>";
 const BLANK_BUTTON: &str = "<button id='mc_blank' type='button'>Blank</button>";
 
 /// Photocell status
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct Photocell {
     description: String,
     reading: String,
 }
 
 /// Power supply status
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct PowerSupply {
     description: String,
     supply_type: String,
@@ -95,7 +95,7 @@ pub struct PowerSupply {
 }
 
 /// Sign status
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct SignStatus {
     faults: Option<String>,
     ambient_temp_min: Option<i32>,
@@ -113,7 +113,7 @@ pub struct SignStatus {
 }
 
 /// Dms
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct Dms {
     pub name: String,
     pub location: Option<String>,
@@ -158,7 +158,7 @@ pub struct SignMessage {
 }
 
 /// Message Pattern
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
+#[derive(Debug, Default, Deserialize, PartialEq, Eq)]
 pub struct MsgPattern {
     pub name: String,
     pub compose_hashtag: Option<String>,
@@ -167,7 +167,8 @@ pub struct MsgPattern {
 }
 
 /// Message Line
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize)]
+#[allow(dead_code)]
 pub struct MsgLine {
     pub name: String,
     pub msg_pattern: String,
@@ -177,7 +178,7 @@ pub struct MsgLine {
 }
 
 /// Word (for messages)
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize)]
 pub struct Word {
     pub name: String,
     pub abbr: Option<String>,
@@ -185,14 +186,16 @@ pub struct Word {
 }
 
 /// Font name
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize)]
+#[allow(dead_code)]
 pub struct FontName {
     pub font_number: u8,
     pub name: String,
 }
 
 /// Graphic name
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize)]
+#[allow(dead_code)]
 pub struct GraphicName {
     pub number: u8,
     pub name: String,

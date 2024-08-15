@@ -14,12 +14,13 @@ use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
 use crate::util::{Fields, HtmlStr, Input, OptVal, Select};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::marker::PhantomData;
 use wasm_bindgen::JsValue;
 
 /// Road definitions
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct Road {
     pub name: String,
     pub abbrev: String,
@@ -28,7 +29,8 @@ pub struct Road {
 }
 
 /// Roadway directions
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct Direction {
     pub id: u16,
     pub direction: String,
@@ -36,7 +38,8 @@ pub struct Direction {
 }
 
 /// Roadway modifiers
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct RoadModifier {
     pub id: u16,
     pub modifier: String,
@@ -44,7 +47,7 @@ pub struct RoadModifier {
 }
 
 /// Geo location data
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct GeoLoc {
     pub name: String,
     pub resource_n: String,

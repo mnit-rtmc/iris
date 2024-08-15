@@ -23,7 +23,7 @@ use mag::length::{m, mm};
 use mag::temp::DegC;
 use mag::time::s;
 use resources::Res;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::borrow::Cow;
 use std::time::Duration;
 use wasm_bindgen::JsValue;
@@ -38,7 +38,7 @@ type SpeedUnit = mag::time::h;
 const PASCALS_TO_IN_HG: f32 = 0.0002953;
 
 /// Pavement sensor settings
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct PavementSettings {
     location: Option<String>,
     pavement_type: Option<String>,
@@ -48,7 +48,7 @@ pub struct PavementSettings {
 }
 
 /// Sub-surface sensor settings
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct SubSurfaceSettings {
     location: Option<String>,
     sub_surface_type: Option<String>,
@@ -56,20 +56,20 @@ pub struct SubSurfaceSettings {
 }
 
 /// Weather Sensor Settings
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct WeatherSettings {
     pavement_sensor: Option<Vec<PavementSettings>>,
     sub_surface_sensor: Option<Vec<SubSurfaceSettings>>,
 }
 
 /// Air temp data
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct AirTemp {
     air_temp: Option<f32>,
 }
 
 /// Wind sensor data
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct WindData {
     avg_speed: Option<f32>,
     avg_direction: Option<u32>,
@@ -80,7 +80,7 @@ pub struct WindData {
 }
 
 /// Pavement sensor data
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct PavementData {
     surface_status: Option<String>,
     sensor_error: Option<String>,
@@ -94,7 +94,7 @@ pub struct PavementData {
 }
 
 /// Sub-surface sensor data
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct SubSurfaceData {
     sensor_error: Option<String>,
     temp: Option<f32>,
@@ -102,7 +102,7 @@ pub struct SubSurfaceData {
 }
 
 /// Weather Sensor Data
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct WeatherData {
     visibility_situation: Option<String>,
     visibility: Option<u32>,
@@ -134,7 +134,7 @@ pub struct WeatherData {
 }
 
 /// Weather Sensor
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct WeatherSensor {
     pub name: String,
     pub location: Option<String>,

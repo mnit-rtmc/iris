@@ -14,11 +14,11 @@ use crate::card::{AncillaryData, Card, View};
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, Input};
 use resources::Res;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::borrow::Cow;
 
 /// Role
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct Role {
     pub name: String,
     pub enabled: bool,

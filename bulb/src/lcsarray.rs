@@ -15,19 +15,19 @@ use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
 use crate::util::{ContainsLower, HtmlStr};
 use resources::Res;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
 
 /// LCS locks
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
 pub struct LcsLock {
     pub id: u32,
     pub description: String,
 }
 
 /// LCS Array
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct LcsArray {
     pub name: String,
     pub notes: Option<String>,

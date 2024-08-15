@@ -15,7 +15,7 @@ use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
 use resources::Res;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::borrow::Cow;
 use std::fmt;
 use wasm_bindgen::JsValue;
@@ -114,14 +114,14 @@ fn period_options(periods: &[Period], seconds: Option<u32>) -> String {
 }
 
 /// Comm protocol
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
 pub struct Protocol {
     pub id: u32,
     pub description: String,
 }
 
 /// Comm configuration
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct CommConfig {
     pub name: String,
     pub description: String,

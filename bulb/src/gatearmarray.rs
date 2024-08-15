@@ -17,12 +17,12 @@ use crate::gatearm::{item_states, GateArmState};
 use crate::geoloc::{Loc, LocAnc};
 use crate::util::{ContainsLower, HtmlStr};
 use resources::Res;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
 
 /// Gate Arm Array
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct GateArmArray {
     pub name: String,
     pub location: Option<String>,

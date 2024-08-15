@@ -15,13 +15,13 @@ use crate::item::ItemState;
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input};
 use cidr::IpCidr;
 use resources::Res;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::borrow::Cow;
 use std::str::FromStr;
 use web_sys::{HtmlButtonElement, HtmlInputElement};
 
 /// Domain
-#[derive(Debug, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct Domain {
     pub name: String,
     pub enabled: bool,

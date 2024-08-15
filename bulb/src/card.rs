@@ -45,7 +45,6 @@ use futures::stream::FuturesUnordered;
 use futures::StreamExt;
 use resources::Res;
 use serde::de::DeserializeOwned;
-use serde::Serialize;
 use serde_json::map::Map;
 use serde_json::Value;
 use std::borrow::Cow;
@@ -257,7 +256,7 @@ const ITEM_STATES: &str = "<option value=''>all ↴</option>\
      <option value='▪️'>▪️ inactive</option>";
 
 /// A card view of a resource
-pub trait Card: Default + DeserializeOwned + Serialize + PartialEq {
+pub trait Card: Default + DeserializeOwned + PartialEq {
     type Ancillary: AncillaryData<Primary = Self>;
 
     /// Display name
