@@ -37,8 +37,8 @@ pub struct CommLink {
 #[derive(Debug, Default)]
 pub struct CommLinkAnc {
     assets: Vec<Asset>,
-    pub controllers: Option<Vec<Controller>>,
-    pub comm_configs: Option<Vec<CommConfig>>,
+    pub controllers: Vec<Controller>,
+    pub comm_configs: Vec<CommConfig>,
 }
 
 impl AncillaryData for CommLinkAnc {
@@ -47,13 +47,11 @@ impl AncillaryData for CommLinkAnc {
     /// Construct ancillary comm link data
     fn new(_pri: &CommLink, view: View) -> Self {
         let assets = match view {
-            View::Status => {
-                vec![Asset::Controllers, Asset::CommConfigs]
-            }
+            View::Status => vec![Asset::Controllers, Asset::CommConfigs],
             _ => vec![Asset::CommConfigs],
         };
-        let controllers = None;
-        let comm_configs = None;
+        let controllers = Vec::new();
+        let comm_configs = Vec::new();
         CommLinkAnc {
             assets,
             controllers,
@@ -79,11 +77,10 @@ impl AncillaryData for CommLinkAnc {
                     serde_wasm_bindgen::from_value(value)?;
                 controllers
                     .retain(|c| c.comm_link.as_deref() == Some(&pri.name));
-                self.controllers = Some(controllers);
+                self.controllers = controllers;
             }
             Asset::CommConfigs => {
-                self.comm_configs =
-                    Some(serde_wasm_bindgen::from_value(value)?);
+                self.comm_configs = serde_wasm_bindgen::from_value(value)?;
             }
             _ => unreachable!(),
         }
@@ -94,11 +91,9 @@ impl AncillaryData for CommLinkAnc {
 impl CommLinkAnc {
     /// Get comm config description
     fn comm_config_desc(&self, pri: &CommLink) -> &str {
-        if let Some(comm_configs) = &self.comm_configs {
-            for config in comm_configs {
-                if pri.comm_config == config.name {
-                    return &config.description;
-                }
+        for config in &self.comm_configs {
+            if pri.comm_config == config.name {
+                return &config.description;
             }
         }
         ""
@@ -108,18 +103,16 @@ impl CommLinkAnc {
     fn comm_configs_html(&self, pri: &CommLink) -> String {
         let mut html = String::new();
         html.push_str("<select id='comm_config'>");
-        if let Some(comm_configs) = &self.comm_configs {
-            for config in comm_configs {
-                html.push_str("<option value='");
-                html.push_str(&config.name);
-                html.push('\'');
-                if pri.comm_config == config.name {
-                    html.push_str(" selected");
-                }
-                html.push('>');
-                html.push_str(&config.description);
-                html.push_str("</option>");
+        for config in &self.comm_configs {
+            html.push_str("<option value='");
+            html.push_str(&config.name);
+            html.push('\'');
+            if pri.comm_config == config.name {
+                html.push_str(" selected");
             }
+            html.push('>');
+            html.push_str(&config.description);
+            html.push_str("</option>");
         }
         html.push_str("</select>");
         html
@@ -128,10 +121,8 @@ impl CommLinkAnc {
     /// Build controller links as HTML
     fn controllers_html(&self) -> String {
         let mut html = String::new();
-        if let Some(controllers) = &self.controllers {
-            for ctrl in controllers {
-                html.push_str(&ctrl.button_loc_html());
-            }
+        for ctrl in &self.controllers {
+            html.push_str(&ctrl.button_loc_html());
         }
         html
     }
