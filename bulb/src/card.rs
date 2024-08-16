@@ -36,6 +36,7 @@ use crate::modem::Modem;
 use crate::permission::Permission;
 use crate::rampmeter::RampMeter;
 use crate::role::Role;
+use crate::signconfig::SignConfig;
 use crate::tagreader::TagReader;
 use crate::user::User;
 use crate::util::{Doc, HtmlStr};
@@ -394,6 +395,7 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::Modem
         | Res::Permission
         | Res::Role
+        | Res::SignConfig
         | Res::User => &[View::Compact, View::Setup],
         Res::GateArmArray => &[View::Compact, View::Control, View::Location],
         Res::LcsArray => &[View::Compact, View::Control],
@@ -416,7 +418,7 @@ pub fn res_views(res: Res) -> &'static [View] {
         Res::Controller | Res::TagReader | Res::WeatherSensor => {
             &[View::Compact, View::Status, View::Location, View::Setup]
         }
-        _ => &[View::Compact, View::Control, View::Setup],
+        _ => &[View::Compact],
     }
 }
 
@@ -501,6 +503,7 @@ pub async fn fetch_resource(config: bool) -> Result<String> {
     add_option::<RampMeter>(&access, &mut html);
     if config {
         add_option::<Role>(&access, &mut html);
+        add_option::<SignConfig>(&access, &mut html);
         add_option::<TagReader>(&access, &mut html);
         add_option::<User>(&access, &mut html);
     }
@@ -636,6 +639,7 @@ impl CardList {
             Res::Permission => self.make_html_x::<Permission>().await,
             Res::RampMeter => self.make_html_x::<RampMeter>().await,
             Res::Role => self.make_html_x::<Role>().await,
+            Res::SignConfig => self.make_html_x::<SignConfig>().await,
             Res::TagReader => self.make_html_x::<TagReader>().await,
             Res::User => self.make_html_x::<User>().await,
             Res::VideoMonitor => self.make_html_x::<VideoMonitor>().await,
@@ -901,6 +905,7 @@ async fn fetch_one_res(cv: &CardView) -> Result<String> {
         Res::Permission => fetch_one_x::<Permission>(cv).await,
         Res::RampMeter => fetch_one_x::<RampMeter>(cv).await,
         Res::Role => fetch_one_x::<Role>(cv).await,
+        Res::SignConfig => fetch_one_x::<SignConfig>(cv).await,
         Res::TagReader => fetch_one_x::<TagReader>(cv).await,
         Res::User => fetch_one_x::<User>(cv).await,
         Res::VideoMonitor => fetch_one_x::<VideoMonitor>(cv).await,
@@ -960,6 +965,7 @@ async fn patch_setup(cv: &CardView) -> Result<()> {
         Res::Permission => patch_setup_x::<Permission>(cv).await,
         Res::RampMeter => patch_setup_x::<RampMeter>(cv).await,
         Res::Role => patch_setup_x::<Role>(cv).await,
+        Res::SignConfig => patch_setup_x::<SignConfig>(cv).await,
         Res::TagReader => patch_setup_x::<TagReader>(cv).await,
         Res::User => patch_setup_x::<User>(cv).await,
         Res::VideoMonitor => patch_setup_x::<VideoMonitor>(cv).await,

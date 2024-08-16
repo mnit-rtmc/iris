@@ -583,7 +583,8 @@ pub const SIGN_CONFIG_ALL: &str = "\
          char_width, char_height, monochrome_foreground, \
          monochrome_background, color_scheme, default_font, \
          module_width, module_height \
-  FROM sign_config_view";
+  FROM sign_config_view \
+  ORDER BY name";
 
 /// SQL query for one sign configuration (secondary)
 pub const SIGN_CONFIG_ONE: &str = "\
@@ -592,7 +593,7 @@ pub const SIGN_CONFIG_ONE: &str = "\
          char_width, char_height, monochrome_foreground, \
          monochrome_background, color_scheme, default_font, \
          module_width, module_height \
-  FROM iris.sign_config \
+  FROM sign_config_view \
   WHERE name = $1";
 
 /// SQL query for all sign details (primary)
@@ -601,7 +602,8 @@ pub const SIGN_DETAIL_ALL: &str = "\
          beacon_type, hardware_make, hardware_model, software_make, \
          software_model, supported_tags, max_pages, max_multi_len, \
          beacon_activation_flag, pixel_service_flag \
-  FROM sign_detail_view";
+  FROM sign_detail_view \
+  ORDER BY name";
 
 /// SQL query for one sign detail (secondary)
 pub const SIGN_DETAIL_ONE: &str = "\
@@ -609,7 +611,7 @@ pub const SIGN_DETAIL_ONE: &str = "\
          beacon_type, hardware_make, hardware_model, software_make, \
          software_model, supported_tags, max_pages, max_multi_len, \
          beacon_activation_flag, pixel_service_flag \
-  FROM iris.sign_detail \
+  FROM sign_detail_view \
   WHERE name = $1";
 
 /// SQL query for all sign messages (public)

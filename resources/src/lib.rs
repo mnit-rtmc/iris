@@ -242,6 +242,7 @@ impl Res {
             Permission => "🗝️ ",
             RampMeter => "🚦",
             Role => "💪",
+            SignConfig => "📐",
             TagReader => "🏷️ ",
             TollZone => "💲",
             User => "👤",

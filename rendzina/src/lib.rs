@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2023  Minnesota Department of Transportation
+// Copyright (C) 2018-2024  Minnesota Department of Transportation
 //
 //! rendzina is for rendering DMS sign messages to .gif files
 #![forbid(unsafe_code)]
@@ -51,7 +51,7 @@ pub enum Error {
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// Sign configuration (in IRIS)
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct SignConfig {
     pub name: String,
     pub face_width: i32,

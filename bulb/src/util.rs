@@ -83,6 +83,15 @@ impl From<OptVal<u32>> for Value {
     }
 }
 
+impl From<OptVal<i32>> for Value {
+    fn from(val: OptVal<i32>) -> Self {
+        match val.0 {
+            Some(num) => Value::Number(num.into()),
+            None => Value::Null,
+        }
+    }
+}
+
 impl From<OptVal<f64>> for Value {
     fn from(val: OptVal<f64>) -> Self {
         match val.0 {
@@ -447,6 +456,15 @@ impl Select<u32> for Fields {
 impl Select<Option<u32>> for Fields {
     fn changed_select(&mut self, id: &str, val: Option<u32>) {
         let parsed = self.doc.select_parse::<u32>(id);
+        if parsed != val {
+            self.insert(id, OptVal(parsed).into());
+        }
+    }
+}
+
+impl Select<Option<i32>> for Fields {
+    fn changed_select(&mut self, id: &str, val: Option<i32>) {
+        let parsed = self.doc.select_parse::<i32>(id);
         if parsed != val {
             self.insert(id, OptVal(parsed).into());
         }
