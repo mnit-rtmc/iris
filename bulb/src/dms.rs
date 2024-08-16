@@ -815,6 +815,7 @@ impl Dms {
     fn make_sign(&self, anc: &DmsAnc) -> Option<NtcipSign> {
         let cfg = anc.sign_config(self.sign_config.as_deref())?;
         NtcipSign::new(cfg, anc.fonts.clone(), anc.graphics.clone())
+            .map(|sign| sign.with_id("mc_preview"))
     }
 
     // Get selected message pattern

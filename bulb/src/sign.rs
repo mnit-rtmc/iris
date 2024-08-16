@@ -18,6 +18,9 @@ use web_sys::console;
 /// Ntcip DMS sign
 pub struct NtcipSign {
     pub dms: ntcip::dms::Dms<256, 24, 32>,
+    id: Option<String>,
+    width: u16,
+    height: u16,
 }
 
 impl NtcipSign {
@@ -35,7 +38,12 @@ impl NtcipSign {
             .with_multi_cfg(cfg.multi_cfg())
             .build()
         {
-            Ok(dms) => Some(NtcipSign { dms }),
+            Ok(dms) => Some(NtcipSign {
+                dms,
+                id: None,
+                width: 240,
+                height: 80,
+            }),
             Err(e) => {
                 console::log_1(&format!("make_sign: {e:?}").into());
                 None
@@ -43,12 +51,45 @@ impl NtcipSign {
         }
     }
 
+    /// Set the element id
+    pub fn with_id(mut self, id: &str) -> Self {
+        self.id = Some(id.to_string());
+        self
+    }
+
+    /// Set the width for rendering
+    pub fn with_width(mut self, width: u16) -> Self {
+        self.width = width;
+        self
+    }
+
+    /// Set the height for rendering
+    pub fn with_height(mut self, height: u16) -> Self {
+        self.height = height;
+        self
+    }
+
     /// Render sign preview image
     pub fn render(&self, html: &mut String, multi: &str) {
-        html.push_str("<img id='mc_preview' width='240' height='80' ");
+        html.push_str("<img");
+        if let Some(id) = &self.id {
+            html.push_str(" id='");
+            html.push_str(id);
+            html.push('\'');
+        }
+        html.push_str(" width='");
+        html.push_str(&self.width.to_string());
+        html.push_str("' height='");
+        html.push_str(&self.height.to_string());
+        html.push_str("' ");
         let mut buf = Vec::with_capacity(4096);
-        match rendzina::render(&mut buf, &self.dms, multi, Some(240), Some(80))
-        {
+        match rendzina::render(
+            &mut buf,
+            &self.dms,
+            multi,
+            Some(self.width),
+            Some(self.height),
+        ) {
             Ok(()) => {
                 html.push_str("src='data:image/gif;base64,");
                 b64enc.encode_string(buf, html);

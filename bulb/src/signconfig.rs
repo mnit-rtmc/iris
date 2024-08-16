@@ -10,28 +10,87 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
+use crate::error::Result;
 use crate::factor;
+use crate::sign::NtcipSign;
 use crate::util::{ContainsLower, Fields, HtmlStr, OptVal, Select};
 use mag::length::mm;
+use ntcip::dms::{tfon, FontTable, GraphicTable};
 pub use rendzina::SignConfig;
 use resources::Res;
+use serde::Deserialize;
 use std::borrow::Cow;
+use wasm_bindgen::JsValue;
 
 /// Display Units
 type SizeUnit = mag::length::ft;
 type SizeUnitSm = mag::length::In;
 
+/// Font name
+/// FIXME: share with dms module
+#[derive(Debug, Default, Deserialize)]
+#[allow(dead_code)]
+pub struct FontName {
+    pub font_number: u8,
+    pub name: String,
+}
+
 /// Ancillary sign configuration
-#[derive(Debug, Default)]
-pub struct SignConfigAnc;
+#[derive(Default)]
+pub struct SignConfigAnc {
+    assets: Vec<Asset>,
+    fonts: FontTable<256, 24>,
+}
 
 impl AncillaryData for SignConfigAnc {
     type Primary = SignConfig;
 
     /// Construct ancillary sign config data
-    fn new(_pri: &SignConfig, _view: View) -> Self {
-        SignConfigAnc
+    fn new(_pri: &SignConfig, view: View) -> Self {
+        let mut assets = Vec::new();
+        if let View::Setup = view {
+            assets.push(Asset::Fonts);
+        }
+        SignConfigAnc {
+            assets,
+            ..Default::default()
+        }
+    }
+
+    /// Get next asset to fetch
+    fn asset(&mut self) -> Option<Asset> {
+        self.assets.pop()
+    }
+
+    /// Set asset value
+    fn set_asset(
+        &mut self,
+        _pri: &SignConfig,
+        asset: Asset,
+        value: JsValue,
+    ) -> Result<()> {
+        match asset {
+            Asset::Fonts => {
+                let fnames: Vec<FontName> =
+                    serde_wasm_bindgen::from_value(value)?;
+                for fname in fnames {
+                    self.assets.push(Asset::Font(fname.name));
+                }
+            }
+            Asset::Font(_nm) => {
+                let font: String = serde_wasm_bindgen::from_value(value)?;
+                let font = tfon::read(font.as_bytes())?;
+                if let Some(f) = self.fonts.font_mut(font.number) {
+                    *f = font;
+                } else if let Some(f) = self.fonts.font_mut(0) {
+                    *f = font;
+                }
+            }
+            _ => unreachable!(),
+        }
+        Ok(())
     }
 }
 
@@ -42,7 +101,12 @@ fn to_html_compact(sc: &SignConfig) -> String {
 }
 
 /// Convert to setup HTML
-fn to_html_setup(sc: &SignConfig, title: &str, footer: &str) -> String {
+fn to_html_setup(
+    sc: &SignConfig,
+    anc: &SignConfigAnc,
+    title: &str,
+    footer: &str,
+) -> String {
     let color_scheme = &sc.color_scheme;
     let monochrome = monochrome_html(sc);
     let face_width = (f64::from(sc.face_width) * mm).to::<SizeUnit>();
@@ -67,6 +131,7 @@ fn to_html_setup(sc: &SignConfig, title: &str, footer: &str) -> String {
         select_factors_html("module_width", sc.pixel_width, sc.module_width);
     let module_height =
         select_factors_html("module_height", sc.pixel_height, sc.module_height);
+    let sign = render_sign(sc, anc).unwrap_or_default();
     format!(
         "{title}\
         <div class='row'>\
@@ -74,6 +139,7 @@ fn to_html_setup(sc: &SignConfig, title: &str, footer: &str) -> String {
           <span class='info'>{color_scheme}</span>\
         </div>\
         {monochrome}\
+        <div class='center'>{sign}</div>\
         <div class='row'>\
           <label>Face Size</label>\
           <span class='info'>{face_width:.2} x {face_height:.2}</span>\
@@ -118,6 +184,14 @@ fn monochrome_html(sc: &SignConfig) -> String {
     } else {
         String::new()
     }
+}
+
+/// Render the sign
+fn render_sign(sc: &SignConfig, anc: &SignConfigAnc) -> Option<String> {
+    let sign = NtcipSign::new(sc, anc.fonts.clone(), GraphicTable::default())?;
+    let mut html = String::new();
+    sign.render(&mut html, "ABC");
+    Some(html)
 }
 
 /// Create an HTML `select` element of comm configs
@@ -167,13 +241,13 @@ impl Card for SignConfig {
     }
 
     /// Convert to HTML view
-    fn to_html(&self, view: View, _anc: &SignConfigAnc) -> String {
+    fn to_html(&self, view: View, anc: &SignConfigAnc) -> String {
         match view {
             View::Compact => to_html_compact(self),
             View::Setup => {
                 let title = self.title(View::Setup);
                 let footer = self.footer(true);
-                to_html_setup(self, &title, &footer)
+                to_html_setup(self, anc, &title, &footer)
             }
             _ => unreachable!(),
         }
