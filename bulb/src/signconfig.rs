@@ -109,14 +109,10 @@ fn to_html_setup(
 ) -> String {
     let color_scheme = &sc.color_scheme;
     let monochrome = monochrome_html(sc);
-    let face_width = (f64::from(sc.face_width) * mm).to::<SizeUnit>();
-    let face_height = (f64::from(sc.face_height) * mm).to::<SizeUnit>();
-    let border_horiz = (f64::from(sc.border_horiz) * mm).to::<SizeUnitSm>();
-    let border_vert = (f64::from(sc.border_vert) * mm).to::<SizeUnitSm>();
-    let pitch_horiz = (f64::from(sc.pitch_horiz) * mm).to::<SizeUnitSm>();
-    let pitch_vert = (f64::from(sc.pitch_vert) * mm).to::<SizeUnitSm>();
     let pixel_width = sc.pixel_width;
     let pixel_height = sc.pixel_height;
+    let pitch_horiz = (f64::from(sc.pitch_horiz) * mm).to::<SizeUnitSm>();
+    let pitch_vert = (f64::from(sc.pitch_vert) * mm).to::<SizeUnitSm>();
     let char_width = if sc.char_width > 0 {
         format!("{} px", sc.char_width)
     } else {
@@ -139,22 +135,14 @@ fn to_html_setup(
           <span class='info'>{color_scheme}</span>\
         </div>\
         {monochrome}\
-        <div class='center'>{sign}</div>\
-        <div class='row'>\
-          <label>Face Size</label>\
-          <span class='info'>{face_width:.2} x {face_height:.2}</span>\
-        </div>\
-        <div class='row'>\
-          <label>Border</label>\
-          <span class='info'>{border_horiz:.2} x {border_vert:.2}</span>\
-        </div>\
-        <div class='row'>\
-          <label>Pitch</label>\
-          <span class='info'>{pitch_horiz:.2} x {pitch_vert:.2}</span>\
-        </div>\
         <div class='row'>\
           <label>Pixel Size</label>\
           <span class='info'>{pixel_width} x {pixel_height} px</span>\
+        </div>\
+        <div class='center'>{sign}</div>\
+        <div class='row'>\
+          <label>Pitch</label>\
+          <span class='info'>{pitch_horiz:.2} x {pitch_vert:.2}</span>\
         </div>\
         <div class='row'>\
           <label>Character Width</label><span class='info'>{char_width}</span>\
@@ -188,10 +176,29 @@ fn monochrome_html(sc: &SignConfig) -> String {
 
 /// Render the sign
 fn render_sign(sc: &SignConfig, anc: &SignConfigAnc) -> Option<String> {
+    let face_width = (f64::from(sc.face_width) * mm).to::<SizeUnit>();
+    let face_height = (f64::from(sc.face_height) * mm).to::<SizeUnit>();
+    let border_horiz = (f64::from(sc.border_horiz) * mm).to::<SizeUnitSm>();
+    let border_vert = (f64::from(sc.border_vert) * mm).to::<SizeUnitSm>();
     let sign = NtcipSign::new(sc, anc.fonts.clone(), GraphicTable::default())?;
     let mut html = String::new();
     sign.render(&mut html, "ABC");
-    Some(html)
+    Some(format!(
+        "<table>\
+          <tr>\
+            <td>\
+            <td style='text-align: center;'>{face_width:.2}\
+            <td>\
+          <tr>\
+            <td style='text-align: right;'>{face_height:.2}\
+            <td>{html}\
+            <td style='vertical-align: bottom;'>{border_vert:.2}\
+          <tr>\
+            <td>\
+            <td style='text-align: right;'>{border_horiz:.2}\
+            <td><span style='color:#116;'>(border)</span>\
+        </table>"
+    ))
 }
 
 /// Create an HTML `select` element of comm configs
