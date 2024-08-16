@@ -19,15 +19,15 @@ use crate::fetch::{Action, Uri};
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::notes::contains_hashtag;
+use crate::signmessage::SignMessage;
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, TextArea};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use chrono::DateTime;
-use fnv::FnvHasher;
 use js_sys::{ArrayBuffer, Uint8Array};
 use mag::temp::DegC;
 use ntcip::dms::multi::{
-    is_blank, join_text, normalize as multi_normalize, split as multi_split,
+    join_text, normalize as multi_normalize, split as multi_split,
 };
 use ntcip::dms::{tfon, Font, FontTable, GraphicTable, MessagePattern};
 use rendzina::{load_graphic, SignConfig};
@@ -35,7 +35,6 @@ use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::cmp::Ordering;
-use std::hash::{Hash, Hasher};
 use std::iter::repeat;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{console, HtmlElement, HtmlInputElement, HtmlSelectElement};
@@ -140,21 +139,6 @@ pub struct Dms {
 #[derive(Debug, Serialize)]
 struct MsgUser<'a> {
     msg_user: &'a str,
-}
-
-/// Sign Message
-#[derive(Debug, Default, Hash, Deserialize, Serialize)]
-pub struct SignMessage {
-    pub name: String,
-    pub sign_config: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub incident: Option<String>,
-    pub multi: String,
-    pub msg_owner: String,
-    pub flash_beacon: bool,
-    pub msg_priority: u32,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub duration: Option<u32>,
 }
 
 /// Message Pattern
@@ -403,86 +387,6 @@ impl AncillaryData for DmsAnc {
             _ => self.loc.set_asset(pri, asset, value)?,
         }
         Ok(())
-    }
-}
-
-impl SignMessage {
-    /// Make a sign message
-    fn new(
-        cfg: &str,
-        ms: &str,
-        owner: String,
-        priority: u32,
-        duration: Option<u32>,
-    ) -> Self {
-        let mut sign_message = SignMessage {
-            name: "usr_".to_string(),
-            sign_config: cfg.to_string(),
-            multi: ms.to_string(),
-            msg_owner: owner,
-            msg_priority: priority,
-            duration,
-            ..Default::default()
-        };
-        let mut hasher = FnvHasher::default();
-        sign_message.hash(&mut hasher);
-        let hash = hasher.finish() as u32;
-        sign_message.name = format!("usr_{hash:08X}");
-        sign_message
-    }
-
-    /// Get message owner
-    fn owner(&self) -> &str {
-        &self.msg_owner
-    }
-
-    /// Get "system" owner
-    fn system(&self) -> &str {
-        self.owner().split(';').next().unwrap_or("").trim()
-    }
-
-    /// Get "sources" owner
-    fn sources(&self) -> &str {
-        self.owner().split(';').nth(1).unwrap_or("").trim()
-    }
-
-    /// Get "user" owner
-    fn user(&self) -> &str {
-        self.owner().split(';').nth(2).unwrap_or("").trim()
-    }
-
-    /// Get item states
-    fn item_states(&self) -> ItemStates<'_> {
-        let blank = is_blank(&self.multi);
-        let sources = self.sources();
-        let mut states = ItemStates::default();
-        if sources.contains("blank") || blank {
-            states = states.with(ItemState::Available, "");
-        }
-        if sources.contains("operator") {
-            states = states.with(ItemState::Deployed, self.user());
-        }
-        if sources.contains("schedule") {
-            states = states.with(ItemState::Planned, self.user());
-        }
-        if sources.contains("external") {
-            states = states.with(ItemState::External, sources);
-        }
-        if sources.contains("incident") {
-            states = states.with(ItemState::Incident, "");
-        }
-        if sources.is_empty() && !blank {
-            states = states.with(ItemState::External, self.system());
-        }
-        states
-    }
-
-    /// Check if a search string matches
-    fn is_match(&self, search: &str) -> bool {
-        // checks are ordered by "most likely to be searched"
-        self.multi.contains_lower(search)
-            || self.user().contains_lower(search)
-            || self.system().contains_lower(search)
     }
 }
 

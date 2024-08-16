@@ -44,6 +44,7 @@ mod permission;
 mod rampmeter;
 mod role;
 mod signconfig;
+mod signmessage;
 mod start;
 mod tagreader;
 mod user;

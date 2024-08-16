@@ -126,9 +126,7 @@ fn select_factors_html(id: &str, max: i32, value: Option<i32>) -> String {
     html.push_str("<select id='");
     html.push_str(id);
     html.push_str("'>");
-    for fact in
-        std::iter::once(None).chain(factor::unique(max).map(Some))
-    {
+    for fact in std::iter::once(None).chain(factor::unique(max).map(Some)) {
         html.push_str("<option");
         if value == fact {
             html.push_str(" selected");
