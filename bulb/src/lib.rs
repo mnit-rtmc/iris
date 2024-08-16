@@ -43,6 +43,7 @@ mod notes;
 mod permission;
 mod rampmeter;
 mod role;
+mod sign;
 mod signconfig;
 mod signmessage;
 mod start;

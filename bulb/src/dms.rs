@@ -19,10 +19,10 @@ use crate::fetch::{Action, Uri};
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::notes::contains_hashtag;
+use crate::sign::NtcipSign;
 use crate::signmessage::SignMessage;
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, TextArea};
-use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
 use chrono::DateTime;
 use js_sys::{ArrayBuffer, Uint8Array};
 use mag::temp::DegC;
@@ -41,9 +41,6 @@ use web_sys::{console, HtmlElement, HtmlInputElement, HtmlSelectElement};
 
 /// Display Units
 type TempUnit = mag::temp::DegF;
-
-/// Ntcip DMS sign
-type Sign = ntcip::dms::Dms<256, 24, 32>;
 
 /// Low 1 message priority
 const LOW_1: u32 = 1;
@@ -429,7 +426,7 @@ impl DmsAnc {
     /// Make line select elements
     fn make_lines(
         &self,
-        sign: &Sign,
+        sign: &NtcipSign,
         pat: Option<&MsgPattern>,
         ms_cur: &str,
     ) -> String {
@@ -445,20 +442,20 @@ impl DmsAnc {
     /// Make line select elements
     fn make_lines_div(
         &self,
-        sign: &Sign,
+        sign: &NtcipSign,
         pat: &MsgPattern,
         ms_cur: &str,
     ) -> String {
         // NOTE: this prevents lifetime from escaping
         let mut pat = pat;
         let mut html = String::new();
-        let widths = MessagePattern::new(sign, &pat.multi).widths();
-        let cur_lines = MessagePattern::new(sign, &pat.multi)
+        let widths = MessagePattern::new(&sign.dms, &pat.multi).widths();
+        let cur_lines = MessagePattern::new(&sign.dms, &pat.multi)
             .lines(ms_cur)
             .chain(repeat(""));
         if self.pat_lines(pat).count() == 0 {
             let n_lines =
-                MessagePattern::new(sign, &pat.multi).widths().count();
+                MessagePattern::new(&sign.dms, &pat.multi).widths().count();
             match self.find_substitute(pat, n_lines) {
                 Some(sub) => pat = sub,
                 None => return html,
@@ -482,7 +479,7 @@ impl DmsAnc {
             html.push_str("><datalist id='mc_choice");
             html.push_str(&line);
             html.push_str("'>");
-            if let Some(font) = sign.font_definition().font(font_num) {
+            if let Some(font) = sign.dms.font_definition().font(font_num) {
                 for ml in self.pat_lines(pat) {
                     if ml.line == ln {
                         self.append_line(
@@ -778,7 +775,7 @@ impl Dms {
         html.push_str("<div id='mc_grid'>");
         let pat_def = self.pattern_default(anc);
         let multi = pat_def.map(|pat| &pat.multi[..]).unwrap_or("");
-        render_preview(&mut html, &sign, multi);
+        sign.render(&mut html, multi);
         html.push_str("<select id='mc_pattern'>");
         for pat in &anc.compose_patterns {
             html.push_str("<option");
@@ -815,22 +812,9 @@ impl Dms {
     }
 
     /// Make an ntcip sign
-    fn make_sign(&self, anc: &DmsAnc) -> Option<Sign> {
+    fn make_sign(&self, anc: &DmsAnc) -> Option<NtcipSign> {
         let cfg = anc.sign_config(self.sign_config.as_deref())?;
-        match ntcip::dms::Dms::builder()
-            .with_font_definition(anc.fonts.clone())
-            .with_graphic_definition(anc.graphics.clone())
-            .with_sign_cfg(cfg.sign_cfg())
-            .with_vms_cfg(cfg.vms_cfg())
-            .with_multi_cfg(cfg.multi_cfg())
-            .build()
-        {
-            Ok(sign) => Some(sign),
-            Err(e) => {
-                console::log_1(&format!("make_sign: {e:?}").into());
-                None
-            }
-        }
+        NtcipSign::new(cfg, anc.fonts.clone(), anc.graphics.clone())
     }
 
     // Get selected message pattern
@@ -862,7 +846,7 @@ impl Dms {
         let pat = self.selected_pattern(anc)?;
         let sign = self.make_sign(anc)?;
         let lines = self.selected_lines();
-        let multi = MessagePattern::new(&sign, &pat.multi)
+        let multi = MessagePattern::new(&sign.dms, &pat.multi)
             .fill(lines.iter().map(|l| &l[..]));
         Some(multi_normalize(&multi))
     }
@@ -1281,12 +1265,12 @@ impl Card for Dms {
         } else {
             self.selected_lines()
         };
-        let multi = MessagePattern::new(&sign, &pat.multi)
+        let multi = MessagePattern::new(&sign.dms, &pat.multi)
             .fill(lines.iter().map(|l| &l[..]));
         let multi = multi_normalize(&multi);
         // update mc_preview image element
         let mut html = String::new();
-        render_preview(&mut html, &sign, &multi);
+        sign.render(&mut html, &multi);
         let preview = Doc::get().elem::<HtmlElement>("mc_preview");
         preview.set_outer_html(&html);
     }
@@ -1302,21 +1286,4 @@ fn sign_msg_owner(priority: u32) -> Option<String> {
         };
         format!("IRIS; {sources}; {user}")
     })
-}
-
-/// Render sign preview image
-fn render_preview(html: &mut String, sign: &Sign, multi: &str) {
-    html.push_str("<img id='mc_preview' width='240' height='80' ");
-    let mut buf = Vec::with_capacity(4096);
-    match rendzina::render(&mut buf, sign, multi, Some(240), Some(80)) {
-        Ok(()) => {
-            html.push_str("src='data:image/gif;base64,");
-            b64enc.encode_string(buf, html);
-            html.push_str("'/>");
-        }
-        Err(e) => {
-            console::log_1(&format!("render_preview: {e:?}").into());
-            html.push_str("src=''/>");
-        }
-    }
 }
