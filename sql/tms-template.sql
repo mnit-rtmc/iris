@@ -2908,11 +2908,11 @@ CREATE TABLE iris.sign_config (
     default_font INTEGER NOT NULL,
     module_width INTEGER CHECK (
         module_width > 0 AND
-        module_width * (pixel_width / module_width) = pixel_width
+        (pixel_width % module_width) = 0
     ),
     module_height INTEGER CHECK (
         module_height > 0 AND
-        module_height * (pixel_height / module_height) = pixel_height
+        (pixel_height % module_height) = 0
     )
 );
 
