@@ -12,7 +12,7 @@ bb8-postgres = "0.8"
 chrono = "0.4"
 env_logger = { version = "0.11", default-features = false }
 log = "0.4"
-ntcip = "0.12"
+ntcip = "0.13"
 thiserror = "1"
 tokio-postgres = "0.7"
 

@@ -19,7 +19,7 @@ use crate::fetch::{Action, Uri};
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::notes::contains_hashtag;
-use crate::sign::NtcipSign;
+use crate::sign::{self, NtcipSign};
 use crate::signmessage::SignMessage;
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, TextArea};
@@ -771,11 +771,12 @@ impl Dms {
             return None;
         }
         let sign = self.make_sign(anc)?;
+        let sign = Some(sign);
         let mut html = String::new();
         html.push_str("<div id='mc_grid'>");
         let pat_def = self.pattern_default(anc);
         let multi = pat_def.map(|pat| &pat.multi[..]).unwrap_or("");
-        sign.render(&mut html, multi);
+        html.push_str(&sign::render(&sign, multi, 240, 80));
         html.push_str("<select id='mc_pattern'>");
         for pat in &anc.compose_patterns {
             html.push_str("<option");
@@ -788,7 +789,11 @@ impl Dms {
             html.push_str(&pat.name);
         }
         html.push_str("</select>");
-        html.push_str(&anc.make_lines(&sign, pat_def, self.current_multi(anc)));
+        html.push_str(&anc.make_lines(
+            &sign.unwrap(),
+            pat_def,
+            self.current_multi(anc),
+        ));
         html.push_str(EXPIRE_SELECT);
         html.push_str(SEND_BUTTON);
         html.push_str(BLANK_BUTTON);
@@ -1270,8 +1275,7 @@ impl Card for Dms {
             .fill(lines.iter().map(|l| &l[..]));
         let multi = multi_normalize(&multi);
         // update mc_preview image element
-        let mut html = String::new();
-        sign.render(&mut html, &multi);
+        let html = sign::render(&Some(sign), &multi, 240, 80);
         let preview = Doc::get().elem::<HtmlElement>("mc_preview");
         preview.set_outer_html(&html);
     }

@@ -14,7 +14,7 @@ use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
 use crate::factor;
-use crate::sign::NtcipSign;
+use crate::sign::{self, NtcipSign};
 use crate::util::{ContainsLower, Fields, HtmlStr, OptVal, Select};
 use mag::length::mm;
 use ntcip::dms::{tfon, FontTable, GraphicTable};
@@ -127,7 +127,7 @@ fn to_html_setup(
         select_factors_html("module_width", sc.pixel_width, sc.module_width);
     let module_height =
         select_factors_html("module_height", sc.pixel_height, sc.module_height);
-    let sign = render_sign(sc, anc).unwrap_or_default();
+    let sign = render_sign(sc, anc);
     format!(
         "{title}\
         <div class='row'>\
@@ -135,10 +135,7 @@ fn to_html_setup(
           <span class='info'>{color_scheme}</span>\
         </div>\
         {monochrome}\
-        <div class='row'>\
-          <label>Pixel Size</label>\
-          <span class='info'>{pixel_width} x {pixel_height} px</span>\
-        </div>\
+        <div class='center info'>{pixel_width} x {pixel_height} px</div>\
         <div class='center'>{sign}</div>\
         <div class='row'>\
           <label>Pitch</label>\
@@ -175,15 +172,14 @@ fn monochrome_html(sc: &SignConfig) -> String {
 }
 
 /// Render the sign
-fn render_sign(sc: &SignConfig, anc: &SignConfigAnc) -> Option<String> {
+fn render_sign(sc: &SignConfig, anc: &SignConfigAnc) -> String {
     let face_width = (f64::from(sc.face_width) * mm).to::<SizeUnit>();
     let face_height = (f64::from(sc.face_height) * mm).to::<SizeUnit>();
     let border_horiz = (f64::from(sc.border_horiz) * mm).to::<SizeUnitSm>();
     let border_vert = (f64::from(sc.border_vert) * mm).to::<SizeUnitSm>();
-    let sign = NtcipSign::new(sc, anc.fonts.clone(), GraphicTable::default())?;
-    let mut html = String::new();
-    sign.render(&mut html, "ABC");
-    Some(format!(
+    let sign = NtcipSign::new(sc, anc.fonts.clone(), GraphicTable::default());
+    let html = sign::render(&sign, "A1", 240, 80);
+    format!(
         "<table>\
           <tr>\
             <td>\
@@ -198,7 +194,7 @@ fn render_sign(sc: &SignConfig, anc: &SignConfigAnc) -> Option<String> {
             <td style='text-align: right;'>{border_horiz:.2}\
             <td><span style='color:#116;'>(border)</span>\
         </table>"
-    ))
+    )
 }
 
 /// Create an HTML `select` element of comm configs

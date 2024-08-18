@@ -213,7 +213,7 @@ pub fn render<W: Write>(
 }
 
 /// Calculate size to render DMS "face"
-fn face_size(
+pub fn face_size(
     dms: &Dms<256, 24, 32>,
     max_width: u16,
     max_height: u16,

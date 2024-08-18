@@ -19,8 +19,6 @@ use web_sys::console;
 pub struct NtcipSign {
     pub dms: ntcip::dms::Dms<256, 24, 32>,
     id: Option<String>,
-    width: u16,
-    height: u16,
 }
 
 impl NtcipSign {
@@ -38,12 +36,7 @@ impl NtcipSign {
             .with_multi_cfg(cfg.multi_cfg())
             .build()
         {
-            Ok(dms) => Some(NtcipSign {
-                dms,
-                id: None,
-                width: 240,
-                height: 80,
-            }),
+            Ok(dms) => Some(NtcipSign { dms, id: None }),
             Err(e) => {
                 console::log_1(&format!("make_sign: {e:?}").into());
                 None
@@ -56,49 +49,47 @@ impl NtcipSign {
         self.id = Some(id.to_string());
         self
     }
+}
 
-    /// Set the width for rendering
-    pub fn with_width(mut self, width: u16) -> Self {
-        self.width = width;
-        self
-    }
-
-    /// Set the height for rendering
-    pub fn with_height(mut self, height: u16) -> Self {
-        self.height = height;
-        self
-    }
-
-    /// Render sign preview image
-    pub fn render(&self, html: &mut String, multi: &str) {
-        html.push_str("<img");
-        if let Some(id) = &self.id {
+/// Render sign image
+pub fn render(
+    sign: &Option<NtcipSign>,
+    multi: &str,
+    mut width: u16,
+    mut height: u16,
+) -> String {
+    let mut html = String::new();
+    html.push_str("<img");
+    if let Some(sign) = &sign {
+        (width, height) = rendzina::face_size(&sign.dms, width, height);
+        if let Some(id) = &sign.id {
             html.push_str(" id='");
             html.push_str(id);
             html.push('\'');
         }
-        html.push_str(" width='");
-        html.push_str(&self.width.to_string());
-        html.push_str("' height='");
-        html.push_str(&self.height.to_string());
-        html.push_str("' ");
+    }
+    html.push_str(" width='");
+    html.push_str(&width.to_string());
+    html.push_str("' height='");
+    html.push_str(&height.to_string());
+    html.push_str("' ");
+    if let Some(sign) = &sign {
         let mut buf = Vec::with_capacity(4096);
         match rendzina::render(
             &mut buf,
-            &self.dms,
+            &sign.dms,
             multi,
-            Some(self.width),
-            Some(self.height),
+            Some(width),
+            Some(height),
         ) {
             Ok(()) => {
                 html.push_str("src='data:image/gif;base64,");
-                b64enc.encode_string(buf, html);
-                html.push_str("'/>");
+                b64enc.encode_string(buf, &mut html);
+                html.push('\'');
             }
-            Err(e) => {
-                console::log_1(&format!("render_preview: {e:?}").into());
-                html.push_str("src=''/>");
-            }
+            Err(e) => console::log_1(&format!("render: {e:?}").into()),
         }
     }
+    html.push_str("/>");
+    html
 }
