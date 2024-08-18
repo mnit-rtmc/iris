@@ -178,13 +178,17 @@ fn render_sign(sc: &SignConfig, anc: &SignConfigAnc) -> String {
     let border_horiz = (f64::from(sc.border_horiz) * mm).to::<SizeUnitSm>();
     let border_vert = (f64::from(sc.border_vert) * mm).to::<SizeUnitSm>();
     let sign = NtcipSign::new(sc, anc.fonts.clone(), GraphicTable::default());
+    let valid = match sign {
+        Some(_) => "<td>",
+        None => "<td class='fault'>Invalid",
+    };
     let html = sign::render(&sign, "A1", 240, 80);
     format!(
         "<table>\
           <tr>\
             <td>\
             <td style='text-align: center;'>{face_width:.2}\
-            <td>\
+            {valid}\
           <tr>\
             <td style='text-align: right;'>{face_height:.2}\
             <td>{html}\
