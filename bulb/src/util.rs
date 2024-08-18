@@ -433,6 +433,16 @@ impl Select<&Option<String>> for Fields {
     }
 }
 
+impl Select<u8> for Fields {
+    fn changed_select(&mut self, id: &str, val: u8) {
+        if let Some(parsed) = self.doc.select_parse::<u8>(id) {
+            if parsed != val {
+                self.insert(id, Value::Number(parsed.into()));
+            }
+        }
+    }
+}
+
 impl Select<u16> for Fields {
     fn changed_select(&mut self, id: &str, val: u16) {
         if let Some(parsed) = self.doc.select_parse::<u16>(id) {

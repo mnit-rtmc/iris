@@ -94,6 +94,27 @@ impl AncillaryData for SignConfigAnc {
     }
 }
 
+impl SignConfigAnc {
+    /// Build fonts select element
+    fn select_fonts_html(&self, font_num: u8) -> String {
+        let mut html = String::new();
+        html.push_str("<select id='default_font'>");
+        for num in 1..=255 {
+            if let Some(_f) = self.fonts.font(num) {
+                html.push_str("<option");
+                if num == font_num {
+                    html.push_str(" selected");
+                }
+                html.push('>');
+                html.push_str(&num.to_string());
+                html.push_str("</option>");
+            }
+        }
+        html.push_str("</select>");
+        html
+    }
+}
+
 /// Convert to compact HTML
 fn to_html_compact(sc: &SignConfig) -> String {
     let name = HtmlStr::new(&sc.name);
@@ -127,6 +148,7 @@ fn to_html_setup(
         select_factors_html("module_width", sc.pixel_width, sc.module_width);
     let module_height =
         select_factors_html("module_height", sc.pixel_height, sc.module_height);
+    let default_font = anc.select_fonts_html(sc.default_font);
     let sign = render_sign(sc, anc);
     format!(
         "{title}\
@@ -148,6 +170,9 @@ fn to_html_setup(
         <div class='row'>\
           <label for='module_width'>Module Width</label>{module_width}\
           <label for='module_height'>x Height</label>{module_height}\
+        </div>\
+        <div class='row'>\
+          <label for='default_font'>Default Font</label>{default_font}\
         </div>\
         {footer}"
     )
@@ -265,6 +290,7 @@ impl Card for SignConfig {
         let mut fields = Fields::new();
         fields.changed_select("module_width", self.module_width);
         fields.changed_select("module_height", self.module_height);
+        fields.changed_select("default_font", self.default_font);
         fields.into_value().to_string()
     }
 }
