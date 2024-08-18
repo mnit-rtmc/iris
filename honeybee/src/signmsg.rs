@@ -151,13 +151,16 @@ impl MsgData {
             .with_multi_cfg(cfg.multi_cfg())
             .build()?;
         let mut buf = Vec::with_capacity(1024);
-        if let Err(e) = rendzina::render(&mut buf, &dms, &msg.multi, None, None)
-        {
-            log::warn!("{name}, {e:?} multi={}", msg.multi);
-            return Ok(None);
-        };
-        log::info!("{name} rendered in {:?}", t.elapsed());
-        Ok(Some(buf))
+        match rendzina::render(&mut buf, &dms, &msg.multi, 450, 100) {
+            Ok(()) => {
+                log::info!("{name} rendered in {:?}", t.elapsed());
+                Ok(Some(buf))
+            }
+            Err(e) => {
+                log::warn!("{name}, {e:?} multi={}", msg.multi);
+                Ok(None)
+            }
+        }
     }
 }
 
@@ -177,9 +180,15 @@ pub async fn render_all() -> Result<()> {
         name.push_str(".gif");
         if cache.contains(&name) {
             cache.keep(&name);
-        } else if let Some(buf) = msg_data.render_sign_msg(&sign_msg, &name)? {
-            let file = cache.file(&name).await?;
-            file.write_buf(&buf).await?;
+        } else {
+            match msg_data.render_sign_msg(&sign_msg, &name) {
+                Ok(Some(buf)) => {
+                    let file = cache.file(&name).await?;
+                    file.write_buf(&buf).await?;
+                }
+                Ok(None) => (),
+                Err(e) => log::warn!("render {name}, {e:?}"),
+            }
         }
     }
     cache.clear().await;

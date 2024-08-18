@@ -19,12 +19,6 @@ use serde_derive::Deserialize;
 use std::collections::HashMap;
 use std::io::{Read, Write};
 
-/// Maximum pixel width of DMS images
-const PIX_WIDTH: u16 = 450;
-
-/// Maximum pixel height of DMS images
-const PIX_HEIGHT: u16 = 100;
-
 /// Rendzina error
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -172,14 +166,10 @@ pub fn render<W: Write>(
     mut writer: W,
     dms: &Dms<256, 24, 32>,
     multi: &str,
-    max_width: Option<u16>,
-    max_height: Option<u16>,
+    max_width: u16,
+    max_height: u16,
 ) -> Result<()> {
-    let (width, height) = face_size(
-        dms,
-        max_width.unwrap_or(PIX_WIDTH),
-        max_height.unwrap_or(PIX_HEIGHT),
-    );
+    let (width, height) = face_size(dms, max_width, max_height);
     let mut steps = Vec::new();
     for page in Pages::new(dms, multi) {
         let Page {

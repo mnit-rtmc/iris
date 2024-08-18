@@ -75,13 +75,7 @@ pub fn render(
     html.push_str("' ");
     if let Some(sign) = &sign {
         let mut buf = Vec::with_capacity(4096);
-        match rendzina::render(
-            &mut buf,
-            &sign.dms,
-            multi,
-            Some(width),
-            Some(height),
-        ) {
+        match rendzina::render(&mut buf, &sign.dms, multi, width, height) {
             Ok(()) => {
                 html.push_str("src='data:image/gif;base64,");
                 b64enc.encode_string(buf, &mut html);
