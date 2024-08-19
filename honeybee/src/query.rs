@@ -578,22 +578,36 @@ pub const ROLE_ONE: &str = "\
 
 /// SQL query for all sign configs (primary)
 pub const SIGN_CONFIG_ALL: &str = "\
+  WITH cte AS (\
+    SELECT sign_config, count(*) AS sign_count \
+    FROM iris._dms \
+    GROUP BY sign_config\
+  ) \
   SELECT name, face_width, face_height, border_horiz, border_vert, \
          pitch_horiz, pitch_vert, pixel_width, pixel_height, \
          char_width, char_height, monochrome_foreground, \
          monochrome_background, color_scheme, default_font, \
-         module_width, module_height \
-  FROM sign_config_view \
+         module_width, module_height, \
+         COALESCE(sign_count, 0) AS sign_count \
+  FROM sign_config_view sc \
+  LEFT JOIN cte ON name = cte.sign_config \
   ORDER BY name";
 
 /// SQL query for one sign configuration (secondary)
 pub const SIGN_CONFIG_ONE: &str = "\
+  WITH cte AS (\
+    SELECT sign_config, count(*) AS sign_count \
+    FROM iris._dms \
+    GROUP BY sign_config\
+  ) \
   SELECT name, face_width, face_height, border_horiz, border_vert, \
          pitch_horiz, pitch_vert, pixel_width, pixel_height, \
          char_width, char_height, monochrome_foreground, \
          monochrome_background, color_scheme, default_font, \
-         module_width, module_height \
-  FROM sign_config_view \
+         module_width, module_height, \
+         COALESCE(sign_count, 0) AS sign_count \
+  FROM sign_config_view sc \
+  LEFT JOIN cte ON name = cte.sign_config \
   WHERE name = $1";
 
 /// SQL query for all sign details (primary)

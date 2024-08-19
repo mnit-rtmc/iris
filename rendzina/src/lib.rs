@@ -64,6 +64,7 @@ pub struct SignConfig {
     pub default_font: u8,
     pub module_width: Option<i32>,
     pub module_height: Option<i32>,
+    pub sign_count: u32,
 }
 
 impl SignConfig {
@@ -252,7 +253,7 @@ fn render_modules(raster: &mut Raster<SRgb8>, mod_size: Option<(u32, u32)>) {
             if md == 0 {
                 let clr = raster.pixel_mut(x as i32, y as i32);
                 if *clr == SRgb8::default() {
-                    *clr = SRgb8::new(40, 40, 40);
+                    *clr = SRgb8::new(32, 32, 32);
                 }
             }
         }

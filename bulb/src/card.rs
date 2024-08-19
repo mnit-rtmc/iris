@@ -573,7 +573,10 @@ impl CardList {
 
     /// Set config mode
     pub fn config(mut self, config: bool) -> Self {
-        self.config = config;
+        // sign configs cannot be created manually
+        if self.res != Res::SignConfig {
+            self.config = config;
+        }
         self
     }
 

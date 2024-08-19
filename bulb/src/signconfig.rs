@@ -14,6 +14,7 @@ use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
 use crate::factor;
+use crate::item::{ItemState, ItemStates};
 use crate::sign::{self, NtcipSign};
 use crate::util::{ContainsLower, Fields, HtmlStr, OptVal, Select};
 use mag::length::mm;
@@ -118,7 +119,17 @@ impl SignConfigAnc {
 /// Convert to compact HTML
 fn to_html_compact(sc: &SignConfig) -> String {
     let name = HtmlStr::new(&sc.name);
-    format!("<div class='title row'>{name}</div>")
+    let item_states = item_states(sc);
+    format!("<div class='title row'>{name} {item_states}</div>")
+}
+
+/// Get item states
+fn item_states(sc: &SignConfig) -> ItemStates {
+    if sc.sign_count > 0 {
+        ItemState::Available.into()
+    } else {
+        ItemState::Inactive.into()
+    }
 }
 
 /// Convert to setup HTML
