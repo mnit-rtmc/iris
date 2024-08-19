@@ -207,7 +207,13 @@ fn render_sign(sc: &SignConfig, anc: &SignConfigAnc) -> String {
         Some(_) => "<td>",
         None => "<td class='fault'>Invalid",
     };
-    let html = sign::render(&sign, "A1", 240, 80);
+    let mod_size = match (sc.module_width, sc.module_height) {
+        (Some(mw), Some(mh)) if mw > 0 && mh > 0 => {
+            Some((mw as u32, mh as u32))
+        }
+        _ => None,
+    };
+    let html = sign::render(&sign, "A1", 240, 80, mod_size);
     format!(
         "<table>\
           <tr>\

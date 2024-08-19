@@ -168,14 +168,16 @@ pub fn render<W: Write>(
     multi: &str,
     max_width: u16,
     max_height: u16,
+    mod_size: Option<(u32, u32)>,
 ) -> Result<()> {
     let (width, height) = face_size(dms, max_width, max_height);
     let mut steps = Vec::new();
     for page in Pages::new(dms, multi) {
         let Page {
-            raster,
+            mut raster,
             duration_ds,
         } = page?;
+        render_modules(&mut raster, mod_size);
         let delay_cs = duration_ds * 10;
         let mut palette = make_palette(&raster);
         palette.set_threshold_fn(palette_threshold_rgb8_256);
@@ -239,6 +241,24 @@ fn make_palette(raster: &Raster<SRgb8>) -> Palette {
     palette
 }
 
+/// Render pixel modules onto sign raster
+fn render_modules(raster: &mut Raster<SRgb8>, mod_size: Option<(u32, u32)>) {
+    for y in 0..raster.height() {
+        for x in 0..raster.width() {
+            let md = match mod_size {
+                Some((sx, sy)) => (x / sx + y / sy) % 2,
+                None => 0,
+            };
+            if md == 0 {
+                let clr = raster.pixel_mut(x as i32, y as i32);
+                if *clr == SRgb8::default() {
+                    *clr = SRgb8::new(40, 40, 40);
+                }
+            }
+        }
+    }
+}
+
 /// Make a raster of sign face
 fn make_face_raster(
     dms: &Dms<256, 24, 32>,
@@ -255,10 +275,7 @@ fn make_face_raster(
         let py = dms.pixel_y(y, height.into()) as i32;
         for x in 0..raster.width() {
             let px = dms.pixel_x(x, width.into()) as i32;
-            let mut clr = raster.pixel(x as i32, y as i32);
-            if clr == SRgb8::default() {
-                clr = SRgb8::new(26, 26, 26);
-            }
+            let clr = raster.pixel(x as i32, y as i32);
             *face.pixel_mut(px, py) = clr.convert();
             if px + 1 < width.into() && py + 1 < height.into() {
                 *face.pixel_mut(px + 1, py + 1) = clr.convert();

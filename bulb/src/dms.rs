@@ -776,7 +776,7 @@ impl Dms {
         html.push_str("<div id='mc_grid'>");
         let pat_def = self.pattern_default(anc);
         let multi = pat_def.map(|pat| &pat.multi[..]).unwrap_or("");
-        html.push_str(&sign::render(&sign, multi, 240, 80));
+        html.push_str(&sign::render(&sign, multi, 240, 80, None));
         html.push_str("<select id='mc_pattern'>");
         for pat in &anc.compose_patterns {
             html.push_str("<option");
@@ -1275,7 +1275,7 @@ impl Card for Dms {
             .fill(lines.iter().map(|l| &l[..]));
         let multi = multi_normalize(&multi);
         // update mc_preview image element
-        let html = sign::render(&Some(sign), &multi, 240, 80);
+        let html = sign::render(&Some(sign), &multi, 240, 80, None);
         let preview = Doc::get().elem::<HtmlElement>("mc_preview");
         preview.set_outer_html(&html);
     }
