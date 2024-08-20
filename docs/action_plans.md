@@ -34,10 +34,9 @@ plan.  These devices can be:
  - [beacon], activates the flashing beacon
  - [ramp meter], enables the [density metering] algorithm
  - [camera], recalls the specified camera [preset]
+ - [lane marking], activates in-pavement LEDs
 
-For non-DMS device types, **Condition** action tags can be used in the message
-pattern to activate a device only when the condition is met.  [Priority]
-determines the priority of messages created by the action.
+[Priority] determines the priority of messages created by the action.
 
 ### Action Tags
 
@@ -45,6 +44,9 @@ Some *[MULTI]-like* tags are supported in [message pattern]s used by device
 actions.  These tags are interpreted by IRIS before sending the message to a
 DMS.  NOTE: they are **only** usable in action plan messages - not
 operator-selected ones.
+
+**Condition** action tags can also be used for non-DMS device types.  This
+causes the device to be activated only when the condition is met.
 
 Tag              | Description                                | Tag Mode
 -----------------|--------------------------------------------|---------
@@ -72,7 +74,7 @@ the specified phase.
 
 The time of a scheduled **time action** can be displayed in DMS messages using
 [device actions](#device-actions) within the same action plan.  A `[ta` *…* `]`
-[action tag](#action-tag) in the [message pattern] will be replaced with the
+[action tag](#action-tags) in the [message pattern] will be replaced with the
 appropriate value.  It has the following format:
 
 `[ta` *dir*,*format* `]`
@@ -164,6 +166,7 @@ than the value of the `action_plan_event_purge_days` [system attribute].
 [DMS]: dms.html
 [exit ramp backup]: exit_backup.html
 [hashtag]: hashtags.html
+[lane marking]: lcs.html#lane-markings
 [message pattern]: message_patterns.html
 [message priority]: sign_message.html#message-priority
 [Msg-Feed]: protocols.html#msg-feed

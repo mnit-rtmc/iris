@@ -57,7 +57,7 @@ resource, at the same access level.
 | [dms]              | [font], [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
 | [gate arm]         | [gate arm array]                                      |
 | [incident]         | inc_advice, inc_descriptor, inc_locator               |
-| [lcs]              | [lcs array], [lcs indication], lane action, [lane marking] |
+| [lcs]              | [lcs array], [lcs indication], [lane marking]         |
 | [parking area]     |                                                       |
 | permission         | [domain], [role], [user id]                           |
 | [ramp meter]       |                                                       |
