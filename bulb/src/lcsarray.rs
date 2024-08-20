@@ -115,7 +115,7 @@ impl Card for LcsArray {
     type Ancillary = LcsArrayAnc;
 
     /// Display name
-    const DNAME: &'static str = "🡇🡇 LCS Array";
+    const DNAME: &'static str = "🡇 ❌ LCS Array";
 
     /// Get the resource
     fn res() -> Res {

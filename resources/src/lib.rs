@@ -236,7 +236,7 @@ impl Res {
             Gps => "🌐",
             Incident => "🚨",
             LaneMarking => "⛙",
-            LcsArray => "🡇🡇 ",
+            LcsArray => "🡇 ❌ ",
             LcsIndication => "🡇 ",
             Modem => "🖀 ",
             Permission => "🗝️ ",

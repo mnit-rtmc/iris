@@ -268,6 +268,11 @@ impl Card for SignConfig {
     /// Display name
     const DNAME: &'static str = "📐 Sign Config";
 
+    /// All item states as html options
+    const ITEM_STATES: &'static str = "<option value=''>all ↴\
+         <option value='🔹'>🔹 available\
+         <option value='▪️'>▪️ inactive";
+
     /// Get the resource
     fn res() -> Res {
         Res::SignConfig
@@ -286,7 +291,7 @@ impl Card for SignConfig {
 
     /// Check if a search string matches
     fn is_match(&self, search: &str, _anc: &SignConfigAnc) -> bool {
-        self.name.contains_lower(search)
+        self.name.contains_lower(search) || item_states(self).is_match(search)
     }
 
     /// Convert to HTML view
