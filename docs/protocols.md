@@ -174,9 +174,9 @@ V66E37\tSNOW PLOW[nl]AHEAD[nl]USE CAUTION\t2022-10-02 11:37:00-05:00
 ```
 
 `dms`: Name of the sign to deploy, which must have the [hashtag] referenced
-by a [DMS action].  Additionally, that action must be associated with the
+by a [device action].  Additionally, that action must be associated with the
 current phase of an active [action plan].  The [message pattern] of the
-_DMS action_ must be a `feed` [action tag].  For example, if the `msgfeed`
+_device action_ must be a `feed` [action tag].  For example, if the `msgfeed`
 _Comm Link_ name is `XYZ`, then the pattern must be `[feedXYZ]`.
 
 `multi`: Message to deploy, using the [MULTI] markup language.  Each line of
@@ -286,7 +286,7 @@ camera can be associated with each [controller], using [IO pin] 1.
 
 
 [action plan]: action_plans.html
-[action tag]: action_plans.html#dms-action-tags
+[action tag]: action_plans.html#action-tags
 [alarms]: alarms.html
 [beacons]: beacons.html
 [binned data]: vehicle_detection.html#binned-data
@@ -298,8 +298,8 @@ camera can be associated with each [controller], using [IO pin] 1.
 [comm link]: comm_links.html
 [controller]: controllers.html
 [device]: controllers.html#devices
+[device action]: action_plans.html#device-actions
 [DMS]: dms.html
-[DMS action]: action_plans.html#dms-actions
 [flow stream]: flow_streams.html
 [gate arm]: gate_arms.html
 [GPS]: gps.html

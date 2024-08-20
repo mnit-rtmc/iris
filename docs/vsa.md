@@ -70,6 +70,6 @@ Heavy rain    | -900  | -600    | -450
 Ice           | -750  | -500    | -375
 
 
-[action tag]: action_plans.html#dms-action-tags
+[action tag]: action_plans.html#action-tags
 [corridor]: road_topology.html#corridors
 [speed limit]: road_topology.html#speed-limit

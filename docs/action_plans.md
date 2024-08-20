@@ -9,17 +9,15 @@ Action plans have a [phase](#plan-phases), which is chosen from a preconfigured
 set.  It can be changed by an operator, or at specified times with
 [time actions](#time-actions).
 
-Each phase can be associated with any number of [DMS](#dms-actions),
-[ramp meter](#meter-actions), [camera](#camera-actions), or
-[beacon](#beacon-actions) actions.  Advanced plans can have many phases, each
-with separate actions.
+Each phase can be associated with any number of device actions.  Advanced
+plans can have many phases, each with separate actions.
 
 - **Sync Actions**: if selected, the phase can only be changed if all associated
   devices are online.
-- **Sticky**: if selected, messages sent with [DMS actions](#dms-actions) will
-  be configured to persist even if communication or power is lost.
-- **Ignore Auto-Fail**: if selected, [DMS action](#dms-actions) messages will
-  ignore detector [auto-fail] (`[exit` *…* `]` or `[slow` *…* `]` only)
+- **Sticky**: if selected, messages sent with [device actions](#device-actions)
+  will be configured to persist even if communication or power is lost.
+- **Ignore Auto-Fail**: if selected, [device action](#device-actions) messages
+  will ignore detector [auto-fail] (`[exit` *…* `]` or `[slow` *…* `]` only)
 
 ## Plan Phases
 
@@ -28,52 +26,39 @@ added on the **Plan Phases** tab.  Each phase must have a unique name.
 By specifying **Hold Time**, a *transient* phase will advance automatically to
 the **Next Phase**.  *Hold Time* must be a multiple of 30 seconds.
 
-## DMS Actions
+## Device Actions
 
-[DMS] actions have an associated [hashtag] to determine which signs are
-affected by the action.  The action happens when the corresponding action plan
-phase is selected.  The [message pattern] indicates which message is activated.
-If **flash beacon** is selected, the sign's _internal_ beacon will also be
-activated.  [Message priority] determines the priority of messages created by
-the action.
+Device actions use [hashtag]s to associate devices with a phase of the action
+plan.  These devices can be:
+ - [DMS], displays the [message pattern] on the sign
+ - [beacon], activates the flashing beacon
+ - [ramp meter], enables the [density metering] algorithm
+ - [camera], recalls the specified camera [preset]
 
-### DMS Action Tags
+For non-DMS device types, **Condition** action tags can be used in the message
+pattern to activate a device only when the condition is met.  [Priority]
+determines the priority of messages created by the action.
 
-Some *[MULTI]-like* tags are supported in [message pattern]s used by DMS
-actions.  These tags are interpreted by IRIS before sending the message to the
+### Action Tags
+
+Some *[MULTI]-like* tags are supported in [message pattern]s used by device
+actions.  These tags are interpreted by IRIS before sending the message to a
 DMS.  NOTE: they are **only** usable in action plan messages - not
 operator-selected ones.
 
-Tag              | Description
------------------|------------------
-`[cg` *…* `]`    | [ClearGuide] data
-`[exit` *…* `]`  | [Exit ramp backup]
-`[feed` *…* `]`  | [Msg-Feed] message
-`[pa` *…* `]`    | [Parking area] availability
-`[rwis_` *…* `]` | [RWIS] weather conditions
-`[slow` *…* `]`  | [Slow traffic] warning
-`[standby]`      | Standby messages
-`[ta` *…* `]`    | Scheduled [time actions](#time-action-tag)
-`[tt` *…* `]`    | [Travel time] estimation
-`[tz` *…* `]`    | [Toll zone] pricing
-`[vsa]`          | [Variable speed advisory]
-
-## Meter Actions
-
-A [ramp meter] action causes the meter to begin metering when the specified
-*phase* is selected.  When the plan is set to any other phase, the meter will
-shut off.
-
-## Camera Actions
-
-A [camera] action causes a specific [preset] to be recalled when the specified
-*phase* is selected.
-
-## Beacon Actions
-
-A [beacon] action can cause a beacon to be deployed when the action plan is set
-to the specified *phase*.  When the plan is set to any other phase, the beacon
-will shut off.
+Tag              | Description                                | Tag Mode
+-----------------|--------------------------------------------|---------
+`[cg` *…* `]`    | [ClearGuide] data                          | Replace
+`[exit` *…* `]`  | [Exit ramp backup]                         | Condition
+`[feed` *…* `]`  | [Msg-Feed] message                         | Replace
+`[pa` *…* `]`    | [Parking area] availability                | Replace
+`[rwis_` *…* `]` | [RWIS] weather conditions                  | Condition
+`[slow` *…* `]`  | [Slow traffic] warning                     | Condition + Replace
+`[standby]`      | Standby messages                           | Standby
+`[ta` *…* `]`    | Scheduled [time actions](#time-action-tag) | Replace
+`[tt` *…* `]`    | [Travel time] estimation                   | Replace
+`[tz` *…* `]`    | [Toll zone] pricing                        | Replace
+`[vsa]`          | [Variable speed advisory]                  | Condition + Replace
 
 ## Time Actions
 
@@ -86,8 +71,8 @@ the specified phase.
 ## Time Action Tag
 
 The time of a scheduled **time action** can be displayed in DMS messages using
-[DMS actions](#dms-actions) within the same action plan.  A `[ta` *…* `]`
-[action tag](#dms-action-tag) in the [message pattern] will be replaced with the
+[device actions](#device-actions) within the same action plan.  A `[ta` *…* `]`
+[action tag](#action-tag) in the [message pattern] will be replaced with the
 appropriate value.  It has the following format:
 
 `[ta` *dir*,*format* `]`
@@ -175,6 +160,7 @@ than the value of the `action_plan_event_purge_days` [system attribute].
 [camera]: cameras.html
 [ClearGuide]: clearguide.html
 [DateTimeFormatter]: https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
+[density metering]: density_adaptive.html
 [DMS]: dms.html
 [exit ramp backup]: exit_backup.html
 [hashtag]: hashtags.html

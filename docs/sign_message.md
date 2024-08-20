@@ -2,7 +2,7 @@
 
 A sign message is an immutable record containing all information needed to
 display a message on a [DMS].  They are created when operators [compose] them,
-and also when [DMS actions] are scheduled.  They are deleted automatically
+and also when [device actions] are scheduled.  They are deleted automatically
 after being unused for a few minutes.
 
 <details>
@@ -34,7 +34,7 @@ The **msg_owner** is a string containing 3 fields, separated by semicolons
 
 ### Message Priority
 
-Priority determines precedence between operator messages and [DMS actions].
+Priority determines precedence between operator messages and [device actions].
 
 | Low          | Medium           | High           |
 |--------------|------------------|----------------|
@@ -49,11 +49,11 @@ the `low_sys` priority.  Messages sent by external systems are assigned to
 `medium_sys`.
 
 
-[action tag]: action_plans.html#dms-action-tags
+[action tag]: action_plans.html#action-tags
 [cleared incidents]: incident_dms.html#clearing
 [compose]: dms.html#composing-messages
+[device actions]: action_plans.html#device-actions
 [DMS]: dms.html
-[DMS actions]: action_plans.html#dms-actions
 [graphics]: graphics.html
 [MULTI]: multi.html
 [sign configuration]: sign_configuration.html

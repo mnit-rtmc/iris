@@ -8,7 +8,10 @@ with a sign config.  They can be:
 
 * Selected by operators [composing messages], for signs matching the _compose_
   [hashtag]
-* Scheduled by [DMS action]s as part of an [action plan]
+* Scheduled by [device actions] as part of an [action plan]
+
+If **flash beacon** is selected, the sign's _internal_ beacon will also be
+activated.
 
 <details>
 <summary>API Resources 🕵️ </summary>
@@ -121,7 +124,7 @@ of the operator message.
 
 [action plan]: action_plans.html
 [composing messages]: dms.html#composing-messages
-[DMS action]: action_plans.html#dms-actions
+[device actions]: action_plans.html#device-actions
 [hashtag]: hashtags.html
 [MULTI]: multi.html
 [WYSIWYG]: wysiwyg.html

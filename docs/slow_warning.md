@@ -1,9 +1,10 @@
 # Slow Traffic Warning
 
-Warning messages for slow traffic can be displayed on DMS using [DMS actions].
-A `[slow` *…* `]` [action tag] in the [message pattern] will be replaced with
-the appropriate value.  Additionally, the entire message will be displayed
-**only in the presence of slow traffic**.  This tag has the following format:
+Warning messages for slow traffic can be displayed on DMS using
+[device actions].  A `[slow` *…* `]` [action tag] in the [message pattern]
+will be replaced with the appropriate value.  Additionally, the entire message
+will be displayed **only in the presence of slow traffic**.  This tag has the
+following format:
 
 `[slow` *speed,distance,mode* `]`
 
@@ -35,6 +36,6 @@ Display message if traffic slower than 45 mph within 0.5 miles:
 ```
 
 
-[action tag]: action_plans.html#dms-action-tags
-[DMS actions]: action_plans.html#dms-actions
+[action tag]: action_plans.html#action-tags
+[device actions]: action_plans.html#device-actions
 [message pattern]: message_patterns.html

@@ -52,11 +52,11 @@ in a message.
 
 Additional non-MULTI tags are supported in specific contexts, interpreted by
 IRIS and replaced with dynamic values:
-- [Action Tags], for use in scheduled DMS actions
+- [Action Tags], for use in scheduled device actions
 - [Locator Tags], for incident DMS deployment
 
 
-[Action Tags]: action_plans.html#dms-action-tags
+[Action Tags]: action_plans.html#action-tags
 [DMS]: dms.html
 [Locator Tags]: incident_dms.html#locator-tags
 [NTCIP]: https://www.ntcip.org/document-numbers-and-status/

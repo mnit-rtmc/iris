@@ -59,17 +59,17 @@
     - Type the name of the new Action Plan in the edit field, e.g. `slick_roads`
     - Press the `Create` button
     - The new Plan should appear in the lower table
- 5. Create DMS Actions
+ 5. Create device actions
     - Click on the Action Plan just created (e.g. `slick_roads`)
-    - Click the DMS Actions tab
-    - In the edit field on the bottom of the form, type a DMS hashtag
+    - Click the Device Actions tab
+    - In the edit field on the bottom of the form, type a hashtag
     - Press the `Create` button
-    - The new DMS Action should appear in the table
-    - Select the `deployed` phase for the DMS action
-    - Click on the `Message Pattern` column in the DMS Action just created
+    - The new device ation should appear in the table
+    - Select the `deployed` phase for the device action
+    - Click on the `Message Pattern` column in the device action just created
     - Specify the name of an existing [message pattern] to send to the sign
-    - Repeat the above DMS Actions steps as many times as desired to send a
-      message to additional DMS hashtags
+    - Repeat the above device actions steps as many times as desired to send a
+      message to additional hashtags
  6. Activate the messages on the signs
     - Select the `Plan` tab to the left of the map
     - Locate the action plan from the list and select it

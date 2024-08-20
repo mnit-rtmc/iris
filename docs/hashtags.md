@@ -7,7 +7,7 @@ into categories or districts.
 
 - [Message patterns] can have a **compose** hashtag
 - [Message lines] can have a **restrict** hashtag
-- [DMS actions] use hashtags to select affected signs
+- [Device actions] use hashtags to associate devices
 - [Alert configurations] and [alert messages]
 - [Lane-use MULTI] indications
 - [Permissions] can restrict access by hashtag
@@ -39,7 +39,7 @@ Hashtag     | Purpose
 
 [alert configurations]: alerts.html#dms-hashtags
 [alert messages]: alerts.html#alert-messages
-[DMS actions]: action_plans.html#dms-actions
+[device actions]: action_plans.html#device-actions
 [lane-use]: lcs.html
 [lane-use MULTI]: lcs.html#lane-use-multi
 [message lines]: message_patterns.html#message-lines

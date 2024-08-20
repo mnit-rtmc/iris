@@ -54,9 +54,9 @@ larger and smaller views.
 An [action plan] can be associated with a gate arm array.  The plan's [phase]
 will be continuously updated according to the array state (see below).
 
-Any number of [DMS actions] can be assigned to these phases to warn motorists of
-the gate arm state.  The messages for these are displayed to the right of the
-camera view, for up to two of these signs.
+Any number of [device actions] can be assigned to these phases to warn
+motorists of the gate arm state.  DMS messages for these are displayed to the
+right of the camera view, for up to two signs.
 
 ## Operating
 
@@ -142,7 +142,7 @@ filesystem at `/var/lib/iris/gate_arm_enable` (using the touch command).
 [CIDR]: https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing
 [comm link]: comm_links.html
 [controller]: controllers.html
-[DMS actions]: action_plans.html#dms-actions
+[device actions]: action_plans.html#device-actions
 [phase]: action_plans.html#plan-phases
 [system attribute]: system_attributes.html
 [warning action plan]: #warning-action-plan

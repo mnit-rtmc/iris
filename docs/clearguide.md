@@ -10,9 +10,10 @@ name.
 
 ## ClearGuide Action Tag
 
-Real-time ClearGuide data can be embedded in DMS messages using [DMS actions].
-A `[cg` *…* `]` [action tag] in the [message pattern] will be replaced by the
-appropriate value.  The action tag has the following format:
+Real-time ClearGuide data can be embedded in DMS messages using
+[device actions].  A `[cg` *…* `]` [action tag] in the [message pattern] will
+be replaced by the appropriate value.  The action tag has the following
+format:
 
 `[cg` *dms,wid,min,mode,idx* `]`
 
@@ -30,6 +31,6 @@ appropriate value.  The action tag has the following format:
 5. `idx`: The zero-based index of the workzone associated with the DMS. This only applies for DMS with more than 1 associated workzone. It is optional and defaults to zero.
 
 
-[action tag]: action_plans.html#dms-action-tags
-[DMS actions]: action_plans.html#dms-actions
+[action tag]: action_plans.html#action-tags
+[device actions]: action_plans.html#device-actions
 [message pattern]: message_patterns.html

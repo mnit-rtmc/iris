@@ -337,7 +337,7 @@ Keys                             | Function
 <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> | Save As...
 
 
-[action tag]: action_plans.html#dms-action-tags
+[action tag]: action_plans.html#action-tags
 [DMS]: dms.html
 [edit mode]: ui.html#edit-mode
 [font]: fonts.html

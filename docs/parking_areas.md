@@ -19,8 +19,8 @@ lane type will be used.
 ## Parking Area Action Tag
 
 The number of available parking spaces can be displayed in DMS messages using
-[DMS actions].  A `[pa` *…* `]` [action tag] in the [message pattern] will be
-replaced with the appropriate value.  It has the following format:
+[device actions].  A `[pa` *…* `]` [action tag] in the [message pattern] will
+be replaced with the appropriate value.  It has the following format:
 
 `[pa` *id,low,closed* `]`
 
@@ -37,7 +37,7 @@ REST AREA 2 MILES[nl]PARKING [pa1,LOW,CLOSED]
 ```
 
 
-[action tag]: action_plans.html#dms-action-tags
+[action tag]: action_plans.html#action-tags
 [corridor]: road_topology.html#corridors
-[DMS actions]: action_plans.html#dms-actions
+[device actions]: action_plans.html#device-actions
 [message pattern]: message_patterns.html

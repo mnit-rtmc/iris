@@ -62,7 +62,7 @@ Beacons can be controlled in a few ways:
 - Changing state manually through the user interface
 - Deploying or blanking DMS with a [remote] beacon
 - Activating a ramp meter with an advance warning beacon
-- With [action plans] containing [beacon actions]
+- With [action plans] containing [device actions]
 
 
 ## Events
@@ -73,8 +73,8 @@ the value of the `beacon_event_purge_days` [system attribute].
 
 
 [action plans]: action_plans.html
-[beacon actions]: action_plans.html#beacon-actions
 [CBW]: protocols.html#cbw
+[device actions]: action_plans.html#device-actions
 [Din-Relay]: protocols.html#din-relay
 [DMS]: dms.html
 [MnDOT-170]: protocols.html#mndot-170

@@ -96,12 +96,11 @@ message.  The server then performs a validation check ensuring the user has
 
 
 [abbreviated]: words.html#abbreviation
-[action tags]: action_plans.html#dms-action-tags
+[action tags]: action_plans.html#action-tags
 [beacon]: beacons.html
 [comm link]: comm_links.html
 [free-form text]: #composing-messages
 [dedicated purpose]: hashtags.html#dedicated-purpose
-[DMS actions]: action_plans.html#dms-actions
 [fillable text rectangles]: message_patterns.html#fillable-text-rectangles
 [font]: fonts.html
 [graphic]: graphics.html

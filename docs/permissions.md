@@ -50,17 +50,17 @@ resource, at the same access level.
 |--------------------|-------------------------------------------------------|
 | action plan        | day matcher, day plan, plan phase                     |
 | alert config       |                                                       |
-| [beacon]           | beacon action                                         |
-| [camera]           | camera action, catalog, [flow stream], monitor style, play list, [video monitor] |
+| [beacon]           |                                                       |
+| [camera]           | catalog, [flow stream], monitor style, play list, [video monitor] |
 | [controller]       | [alarm], [comm link], [controller io], [gps], [modem] |
 | [detector]         | [r_node], [road], station                             |
-| [dms]              | dms action, [font], [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
+| [dms]              | [font], [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
 | [gate arm]         | [gate arm array]                                      |
 | [incident]         | inc_advice, inc_descriptor, inc_locator               |
 | [lcs]              | [lcs array], [lcs indication], lane action, [lane marking] |
 | [parking area]     |                                                       |
 | permission         | [domain], [role], [user id]                           |
-| [ramp meter]       | meter action                                          |
+| [ramp meter]       |                                                       |
 | [system attribute] | [cabinet style], [comm config]                        |
 | [toll zone]        | [tag reader]                                          |
 | [weather sensor]   |                                                       |

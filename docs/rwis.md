@@ -5,10 +5,10 @@ using data collected from [weather sensor]s.
 
 ## RWIS Action Tags
 
-Warning messages for road weather conditions can be displayed on DMS using
-[DMS actions].  An `[rwis_` *…* `]` [action tag] in the [message pattern] will
-cause a message to be displayed when the specified weather condition is
-detected.  The tag has the following format:
+Warning indications for road weather conditions can be activated using
+[device actions].  An `[rwis_` *…* `]` **condition** [action tag] in the
+[message pattern] will cause a message to be displayed when the specified
+weather condition is detected.  The tag has the following format:
 
 `[rwis_` *condition*,*level* `]`
 
@@ -70,9 +70,9 @@ each condition to report level 2.  The testing mode will clear automatically
 the next time the sensor records an observation.
 
 
-[action tag]: action_plans.html#dms-action-tags
+[action tag]: action_plans.html#action-tags
+[device actions]: action_plans.html#device-actions
 [DMS]: dms.html
-[DMS actions]: action_plans.html#dms-actions
 [message pattern]: message_patterns.html
 [system attributes]: system_attributes.html
 [weather sensor]: weather_sensors.html

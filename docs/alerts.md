@@ -249,7 +249,7 @@ real alert.  Note that in a production environment this may activate real signs,
 so care must be taken to ensure the testing is done in a controlled manner.
 
 
-[action tags]: action_plans.html#dms-action-tags
+[action tags]: action_plans.html#action-tags
 [alert configuration]: #alert-configuration
 [comm config]: comm_config.html
 [comm link]: comm_links.html

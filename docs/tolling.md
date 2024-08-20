@@ -60,7 +60,7 @@ The toll price is then rounded to the nearest $0.25.
 
 ## Pricing on DMS
 
-The toll price can be displayed in DMS messages using [DMS actions].  A
+The toll price can be displayed in DMS messages using [device actions].  A
 `[tz` *…* `]` [action tag] in the [message pattern] will be replaced with the
 appropriate value.  It has the following format:
 
@@ -97,9 +97,9 @@ These records are purged automatically when older than the value of the
 `price_message_event_purge_days` [system attribute].
 
 
-[action tag]: action_plans.html#dms-action-tags
+[action tag]: action_plans.html#action-tags
+[device actions]: action_plans.html#device-actions
 [DMS]: dms.html
-[DMS actions]: action_plans.html#dms-actions
 [message pattern]: message_patterns.html
 [station]: road_topology.html#r_node-types
 [system attribute]: system_attributes.html
