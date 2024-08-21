@@ -112,7 +112,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		IncLocatorImpl.loadAll();
 		IncAdviceImpl.loadAll();
 		TimeActionImpl.loadAll();
-		DmsActionImpl.loadAll();
+		DeviceActionImpl.loadAll();
 		BeaconActionImpl.loadAll();
 		CameraActionImpl.loadAll();
 		LaneActionImpl.loadAll();
@@ -351,11 +351,11 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		      : null;
 	}
 
-	/** Lookup a DMS action */
-	static protected DmsActionImpl lookupDmsAction(String name) {
-		SonarObject so = lookupObject(DmsActionImpl.SONAR_TYPE, name);
-		return (so instanceof DmsActionImpl)
-		      ? (DmsActionImpl) so
+	/** Lookup a device action */
+	static protected DeviceActionImpl lookupDeviceAction(String name) {
+		SonarObject so = lookupObject(DeviceActionImpl.SONAR_TYPE, name);
+		return (so instanceof DeviceActionImpl)
+		      ? (DeviceActionImpl) so
 		      : null;
 	}
 

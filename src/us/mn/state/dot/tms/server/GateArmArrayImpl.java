@@ -489,7 +489,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Update scheduled DMS action */
 	private void updateDmsActions() {
-		TIMER.addJob(new DmsActionJob(SCHED_LOG));
+		TIMER.addJob(new DeviceActionJob(SCHED_LOG));
 	}
 
 	/** Update the arm state */

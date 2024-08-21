@@ -116,7 +116,7 @@ public class MsgPatternHelper extends BaseHelper {
 	 * This includes configs for:
 	 * - the pattern's compose hashtag
 	 * - Lane use multi with the pattern
-	 * - DMS action with the pattern
+	 * - Device action with the pattern
 	 * - Alert config + message with the pattern */
 	static public List<SignConfig> findSignConfigs(MsgPattern pat) {
 		ArrayList<SignConfig> cfgs = new ArrayList<SignConfig>();
@@ -127,7 +127,7 @@ public class MsgPatternHelper extends BaseHelper {
 		if (cht != null)
 			hashtags.add(cht);
 		hashtags.addAll(LaneUseMultiHelper.findHashtags(pat));
-		hashtags.addAll(DmsActionHelper.findHashtags(pat));
+		hashtags.addAll(DeviceActionHelper.findHashtags(pat));
 		for (String ht: hashtags) {
 			Iterator<DMS> it = DMSHelper.iterator();
 			while (it.hasNext()) {

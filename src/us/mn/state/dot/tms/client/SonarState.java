@@ -43,7 +43,7 @@ import us.mn.state.dot.tms.CameraTemplate;
 import us.mn.state.dot.tms.CameraVidSourceOrder;
 import us.mn.state.dot.tms.DayMatcher;
 import us.mn.state.dot.tms.DayPlan;
-import us.mn.state.dot.tms.DmsAction;
+import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GeoLoc;
@@ -453,13 +453,13 @@ public class SonarState extends Client {
 		return time_actions;
 	}
 
-	/** Cache of DMS actions */
-	private final TypeCache<DmsAction> dms_actions =
-		new TypeCache<DmsAction>(DmsAction.class, this);
+	/** Cache of device actions */
+	private final TypeCache<DeviceAction> device_actions =
+		new TypeCache<DeviceAction>(DeviceAction.class, this);
 
-	/** Get the DMS action cache */
-	public TypeCache<DmsAction> getDmsActions() {
-		return dms_actions;
+	/** Get the device action cache */
+	public TypeCache<DeviceAction> getDeviceActions() {
+		return device_actions;
 	}
 
 	/** Cache of beacon actions */
@@ -682,7 +682,7 @@ public class SonarState extends Client {
 			gate_arms.ignoreAttribute("operation");
 		populateReadable(parking_areas);
 		populateReadable(time_actions);
-		populateReadable(dms_actions);
+		populateReadable(device_actions);
 		populateReadable(beacon_actions);
 		populateReadable(lane_actions);
 		populateReadable(meter_actions);

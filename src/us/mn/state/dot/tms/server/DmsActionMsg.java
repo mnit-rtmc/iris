@@ -29,7 +29,7 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
-import us.mn.state.dot.tms.DmsAction;
+import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
@@ -63,8 +63,8 @@ import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
- * A DMS action message parses custom action tags, which are similar to MULTI,
- * but processed before sending to the sign.
+ * A DMS action message parses action tags, which are similar to MULTI, but
+ * processed before sending to the sign.
  *
  * @author Douglas Lau
  * @author Michael Darter
@@ -197,8 +197,8 @@ public class DmsActionMsg {
 		}
 	}
 
-	/** DMS action */
-	public final DmsAction action;
+	/** Device action */
+	public final DeviceAction action;
 
 	/** DMS for message formatting */
 	private final DMSImpl dms;
@@ -209,7 +209,7 @@ public class DmsActionMsg {
 	/** Schedule debug log */
 	private final DebugLog dlog;
 
-	/** MULTI string after processing DMS action tags */
+	/** MULTI string after processing action tags */
 	private final String multi;
 
 	/** Valid message flag */
@@ -284,7 +284,7 @@ public class DmsActionMsg {
 	}
 
 	/** Create a new DMS action message */
-	public DmsActionMsg(DmsAction da, DMSImpl d, DebugLog l) {
+	public DmsActionMsg(DeviceAction da, DMSImpl d, DebugLog l) {
 		action = da;
 		dms = d;
 		loc = d.getGeoLoc();
@@ -309,7 +309,7 @@ public class DmsActionMsg {
 		return (ms.length() > 0) ? process(ms) : null;
 	}
 
-	/** MULTI string builder for parsing DMS action tags */
+	/** MULTI string builder for parsing action tags */
 	private final MultiBuilder builder = new MultiBuilder() {
 		@Override public void addTravelTime(String sid,
 			OverLimitMode mode, String o_txt)
@@ -356,7 +356,7 @@ public class DmsActionMsg {
 		}
 	};
 
-	/** Process DMS action tags */
+	/** Process action tags */
 	private String process(String ms) {
 		addSource(SignMsgSource.schedule);
 		if (isGateArm())

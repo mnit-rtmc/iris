@@ -694,10 +694,10 @@ public class AlertData {
 		PlanPhase phase, MsgPattern pat) throws SonarException
 	{
 		String tmpl = plan.getName() + "_%d";
-		String dname = DmsActionImpl.createUniqueName(tmpl);
+		String dname = DeviceActionImpl.createUniqueName(tmpl);
 		int mp = SignMsgPriority.low_4.ordinal();
-		DmsActionImpl da = new DmsActionImpl(dname, plan, phase, ht,
-			pat, mp);
+		DeviceActionImpl da = new DeviceActionImpl(dname, plan, phase,
+			ht, pat, mp);
 		log("created DMS action " + dname);
 		da.notifyCreate();
 	}

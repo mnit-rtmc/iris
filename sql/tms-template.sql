@@ -416,8 +416,8 @@ controller	t
 day_matcher	f
 day_plan	f
 detector	t
+device_action	f
 dms	t
-dms_action	f
 domain	f
 encoder_stream	f
 encoder_type	f
@@ -703,7 +703,7 @@ PRV_0119	plan_admin	beacon_action		t
 PRV_012A	plan_admin	camera_action		t
 PRV_0120	plan_admin	day_plan		t
 PRV_0121	plan_admin	day_matcher		t
-PRV_0122	plan_admin	dms_action		t
+PRV_0122	plan_admin	device_action		t
 PRV_0123	plan_admin	lane_action		t
 PRV_0124	plan_admin	meter_action		t
 PRV_0125	plan_admin	plan_phase		t
@@ -714,7 +714,7 @@ PRV_0129	plan_tab	day_plan		f
 PRV_0130	plan_tab	day_matcher		f
 PRV_0131	plan_tab	plan_phase		f
 PRV_0132	plan_tab	time_action		f
-PRV_0133	plan_tab	dms_action		f
+PRV_0133	plan_tab	device_action		f
 PRV_0134	plan_tab	beacon_action		f
 PRV_013A	plan_tab	camera_action		f
 PRV_0135	plan_tab	lane_action		f
@@ -3291,20 +3291,27 @@ CREATE VIEW msg_line_view AS
     FROM iris.msg_line;
 GRANT SELECT ON msg_line_view TO PUBLIC;
 
-CREATE TABLE iris.dms_action (
+CREATE TABLE iris.device_action (
     name VARCHAR(30) PRIMARY KEY,
     action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
     phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
-    dms_hashtag VARCHAR(16) NOT NULL,
+    hashtag VARCHAR(16) NOT NULL,
     msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern,
     msg_priority INTEGER NOT NULL,
 
-    CONSTRAINT hashtag_ck CHECK (dms_hashtag ~ '^#[A-Za-z0-9]+$')
+    CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$')
 );
 
+CREATE VIEW device_action_view AS
+    SELECT name, action_plan, phase, hashtag, msg_pattern, msg_priority
+    FROM iris.device_action;
+GRANT SELECT ON device_action_view TO PUBLIC;
+
 CREATE VIEW dms_action_view AS
-    SELECT name, action_plan, phase, dms_hashtag, msg_pattern, msg_priority
-    FROM iris.dms_action;
+    SELECT h.name AS dms, action_plan, phase, h.hashtag, msg_pattern,
+           msg_priority
+    FROM iris.device_action da
+    JOIN iris.hashtag h ON h.hashtag = da.hashtag AND resource_n = 'dms';
 GRANT SELECT ON dms_action_view TO PUBLIC;
 
 CREATE TABLE event.sign_event (
@@ -5244,11 +5251,8 @@ CREATE VIEW iris.msg_pattern_toll_zone AS
         FROM iris.msg_pattern_closed;
 
 CREATE VIEW dms_toll_zone_view AS
-    SELECT ht.name AS dms, hashtag, tz.state, toll_zone, action_plan,
-           da.msg_pattern
+    SELECT dms, hashtag, tz.state, toll_zone, action_plan, da.msg_pattern
     FROM dms_action_view da
-    JOIN iris.hashtag ht
-    ON ht.hashtag = dms_hashtag AND resource_n = 'dms'
     JOIN iris.msg_pattern mp
     ON da.msg_pattern = mp.name
     JOIN iris.msg_pattern_toll_zone tz

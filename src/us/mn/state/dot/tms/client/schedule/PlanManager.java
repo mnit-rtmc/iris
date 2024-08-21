@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2019  Minnesota Department of Transportation
+ * Copyright (C) 2011-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@ import us.mn.state.dot.tms.BeaconAction;
 import us.mn.state.dot.tms.BeaconActionHelper;
 import us.mn.state.dot.tms.CameraAction;
 import us.mn.state.dot.tms.CameraActionHelper;
-import us.mn.state.dot.tms.DmsAction;
-import us.mn.state.dot.tms.DmsActionHelper;
+import us.mn.state.dot.tms.DeviceAction;
+import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneAction;
@@ -82,7 +82,7 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 			return false;
 		switch (is) {
 		case DMS:
-			return proxy.getActive() && hasDmsAction(proxy);
+			return proxy.getActive() && hasDeviceAction(proxy);
 		case BEACON:
 			return proxy.getActive() && hasBeaconAction(proxy);
 		case CAMERA:
@@ -125,11 +125,11 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		return false;
 	}
 
-	/** Test if an action plan has DMS actions */
-	private boolean hasDmsAction(ActionPlan p) {
-		Iterator<DmsAction> it = DmsActionHelper.iterator();
+	/** Test if an action plan has device actions */
+	private boolean hasDeviceAction(ActionPlan p) {
+		Iterator<DeviceAction> it = DeviceActionHelper.iterator();
 		while (it.hasNext()) {
-			DmsAction da = it.next();
+			DeviceAction da = it.next();
 			if (da.getActionPlan() == p)
 				return true;
 		}

@@ -24,7 +24,7 @@ import javax.swing.SortOrder;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.ActionPlan;
-import us.mn.state.dot.tms.DmsAction;
+import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.PlanPhase;
@@ -40,16 +40,16 @@ import static us.mn.state.dot.tms.client.widget.IOptionPane.showHint;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
- * Table model for DMS actions assigned to action plans
+ * Table model for device actions assigned to action plans
  *
  * @author Douglas Lau
  */
-public class DmsActionModel extends ProxyTableModel<DmsAction> {
+public class DeviceActionModel extends ProxyTableModel<DeviceAction> {
 
 	/** Create a proxy descriptor */
-	static public ProxyDescriptor<DmsAction> descriptor(Session s) {
-		return new ProxyDescriptor<DmsAction>(
-			s.getSonarState().getDmsActions(), false
+	static public ProxyDescriptor<DeviceAction> descriptor(Session s) {
+		return new ProxyDescriptor<DeviceAction>(
+			s.getSonarState().getDeviceActions(), false
 		);
 	}
 
@@ -71,32 +71,32 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 
 	/** Create the columns in the model */
 	@Override
-	protected ArrayList<ProxyColumn<DmsAction>> createColumns() {
-		ArrayList<ProxyColumn<DmsAction>> cols =
-			new ArrayList<ProxyColumn<DmsAction>>(4);
-		cols.add(new ProxyColumn<DmsAction>("hashtag", 120) {
-			public Object getValueAt(DmsAction da) {
-				return da.getDmsHashtag();
+	protected ArrayList<ProxyColumn<DeviceAction>> createColumns() {
+		ArrayList<ProxyColumn<DeviceAction>> cols =
+			new ArrayList<ProxyColumn<DeviceAction>>(4);
+		cols.add(new ProxyColumn<DeviceAction>("hashtag", 120) {
+			public Object getValueAt(DeviceAction da) {
+				return da.getHashtag();
 			}
-			public boolean isEditable(DmsAction da) {
+			public boolean isEditable(DeviceAction da) {
 				return canWrite(da);
 			}
-			public void setValueAt(DmsAction da, Object value) {
+			public void setValueAt(DeviceAction da, Object value) {
 				String ht = Hashtags.normalize(value.toString());
 				if (ht != null)
-					da.setDmsHashtag(ht);
+					da.setHashtag(ht);
 				else
 					showHint("hashtag.invalid.hint");
 			}
 		});
-		cols.add(new ProxyColumn<DmsAction>("action.plan.phase", 100) {
-			public Object getValueAt(DmsAction da) {
+		cols.add(new ProxyColumn<DeviceAction>("action.plan.phase", 100) {
+			public Object getValueAt(DeviceAction da) {
 				return da.getPhase();
 			}
-			public boolean isEditable(DmsAction da) {
+			public boolean isEditable(DeviceAction da) {
 				return canWrite(da);
 			}
-			public void setValueAt(DmsAction da, Object value) {
+			public void setValueAt(DeviceAction da, Object value) {
 				if (value instanceof PlanPhase)
 					da.setPhase((PlanPhase) value);
 			}
@@ -108,30 +108,30 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<DmsAction>("msg.pattern", 160) {
-			public Object getValueAt(DmsAction da) {
+		cols.add(new ProxyColumn<DeviceAction>("msg.pattern", 160) {
+			public Object getValueAt(DeviceAction da) {
 				return da.getMsgPattern();
 			}
-			public boolean isEditable(DmsAction da) {
+			public boolean isEditable(DeviceAction da) {
 				return canWrite(da);
 			}
-			public void setValueAt(DmsAction da, Object value) {
+			public void setValueAt(DeviceAction da, Object value) {
 				String v = value.toString().trim();
 				da.setMsgPattern(
 					MsgPatternHelper.lookup(v));
 			}
 		});
-		cols.add(new ProxyColumn<DmsAction>("dms.msg.priority",
+		cols.add(new ProxyColumn<DeviceAction>("dms.msg.priority",
 			120)
 		{
-			public Object getValueAt(DmsAction da) {
+			public Object getValueAt(DeviceAction da) {
 				return SignMsgPriority.fromOrdinal(
 				       da.getMsgPriority());
 			}
-			public boolean isEditable(DmsAction da) {
+			public boolean isEditable(DeviceAction da) {
 				return canWrite(da);
 			}
-			public void setValueAt(DmsAction da, Object value) {
+			public void setValueAt(DeviceAction da, Object value) {
 				if (value instanceof SignMsgPriority) {
 					SignMsgPriority mp =
 						(SignMsgPriority) value;
@@ -153,8 +153,8 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	/** Plan phase model */
 	private final ProxyListModel<PlanPhase> phase_mdl;
 
-	/** Create a new DMS action table model */
-	public DmsActionModel(Session s, ActionPlan ap) {
+	/** Create a new device action table model */
+	public DeviceActionModel(Session s, ActionPlan ap) {
 		super(s, descriptor(s), 12);
 		action_plan = ap;
 		phase_mdl = s.getSonarState().getPhaseModel();
@@ -162,15 +162,15 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 
 	/** Check if a proxy is included in the list */
 	@Override
-	protected boolean check(DmsAction proxy) {
+	protected boolean check(DeviceAction proxy) {
 		return proxy.getActionPlan() == action_plan;
 	}
 
 	/** Get a table row sorter */
 	@Override
-	public RowSorter<ProxyTableModel<DmsAction>> createSorter() {
-		TableRowSorter<ProxyTableModel<DmsAction>> sorter =
-			new TableRowSorter<ProxyTableModel<DmsAction>>(this)
+	public RowSorter<ProxyTableModel<DeviceAction>> createSorter() {
+		TableRowSorter<ProxyTableModel<DeviceAction>> sorter =
+			new TableRowSorter<ProxyTableModel<DeviceAction>>(this)
 		{
 			@Override public boolean isSortable(int c) {
 				return c == 0;

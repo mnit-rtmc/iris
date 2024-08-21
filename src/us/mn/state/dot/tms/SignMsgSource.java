@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2023  Minnesota Department of Transportation
+ * Copyright (C) 2015-2024  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -32,7 +32,7 @@ public enum SignMsgSource {
 	lcs,            //  7 lane-use control signal
 	gate_arm,       //  8 gate arm system
 	alert,          //  9 alert system (IPAWS or other)
-	schedule,       // 10 scheduled DMS action
+	schedule,       // 10 scheduled device action
 	clearguide,     // 11 ClearGuide advisory with [cg...] tag
 	exit_warning,   // 12 exit backup warning with [exit...] tag
 	parking,        // 13 parking availability with [pa...] tag

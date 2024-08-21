@@ -29,8 +29,8 @@ import us.mn.state.dot.tms.BeaconActionHelper;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsAction;
-import us.mn.state.dot.tms.DmsActionHelper;
+import us.mn.state.dot.tms.DeviceAction;
+import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.LaneAction;
@@ -357,7 +357,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	public void doSetPhase(PlanPhase p) throws TMSException {
 		if (p != phase) {
 			if (getSyncActions()) {
-				validateDmsActions();    // throws exception
+				validateDeviceActions(); // throws exception
 				validateBeaconActions(); // throws exception
 				// FIXME: any way to validate camera actions?
 				validateLaneActions();   // throws exception
@@ -389,24 +389,24 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/**
-	 * Validate that all DMS actions are deployable.
-	 * @throws ChangeVetoException If a single DmsAction for this
-	 * ActionPlan is not deployable.
+	 * Validate that all device actions are deployable.
+	 * @throws ChangeVetoException If any DeviceAction for this
+	 *         ActionPlan is not deployable.
 	 */
-	private void validateDmsActions() throws ChangeVetoException {
-		Iterator<DmsAction> it = DmsActionHelper.iterator();
+	private void validateDeviceActions() throws ChangeVetoException {
+		Iterator<DeviceAction> it = DeviceActionHelper.iterator();
 		while (it.hasNext()) {
-			DmsAction da = it.next();
+			DeviceAction da = it.next();
 			if (da.getActionPlan() == this && !isDeployable(da)) {
-				throw new ChangeVetoException("DMS action " +
+				throw new ChangeVetoException("Device action " +
 					da.getName() + " not deployable");
 			}
 		}
 	}
 
-	/** Check if a DMS action is deployable */
-	private boolean isDeployable(DmsAction da) {
-		String dht = da.getDmsHashtag();
+	/** Check if a device action is deployable */
+	private boolean isDeployable(DeviceAction da) {
+		String dht = da.getHashtag();
 		Iterator<DMS> it = DMSHelper.iterator();
 		while (it.hasNext()) {
 			DMS d = it.next();

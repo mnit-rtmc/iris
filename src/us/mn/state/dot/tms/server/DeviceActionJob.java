@@ -21,16 +21,16 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsAction;
-import us.mn.state.dot.tms.DmsActionHelper;
+import us.mn.state.dot.tms.DeviceAction;
+import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.Hashtags;
 
 /**
- * Job to perform DMS actions.
+ * Job to perform device actions.
  *
  * @author Douglas Lau
  */
-public class DmsActionJob extends Job {
+public class DeviceActionJob extends Job {
 
 	/** Logger for debugging */
 	private final DebugLog logger;
@@ -39,8 +39,8 @@ public class DmsActionJob extends Job {
 	private final HashMap<DMSImpl, DmsActionMsg> dms_actions =
 		new HashMap<DMSImpl, DmsActionMsg>();
 
-	/** Create a new DMS action job */
-	public DmsActionJob(DebugLog dl) {
+	/** Create a new device action job */
+	public DeviceActionJob(DebugLog dl) {
 		super(0);
 		logger = dl;
 	}
@@ -51,12 +51,12 @@ public class DmsActionJob extends Job {
 			logger.log(dms.getName() + ": " + msg);
 	}
 
-	/** Perform DMS actions */
+	/** Perform device actions */
 	@Override
 	public void perform() {
-		Iterator<DmsAction> it = DmsActionHelper.iterator();
+		Iterator<DeviceAction> it = DeviceActionHelper.iterator();
 		while (it.hasNext()) {
-			DmsAction da = it.next();
+			DeviceAction da = it.next();
 			ActionPlan ap = da.getActionPlan();
 			if (ap.getActive()) {
 				if (ap.getPhase() == da.getPhase())
@@ -67,8 +67,8 @@ public class DmsActionJob extends Job {
 	}
 
 	/** Perform a DMS action */
-	private void performDmsAction(DmsAction da) {
-		String ht = da.getDmsHashtag();
+	private void performDmsAction(DeviceAction da) {
+		String ht = da.getHashtag();
 		Iterator<DMS> it = DMSHelper.iterator();
 		while (it.hasNext()) {
 			DMS d = it.next();
@@ -82,7 +82,7 @@ public class DmsActionJob extends Job {
 	}
 
 	/** Check an action for one DMS */
-	private void checkAction(DmsAction da, DMSImpl dms) {
+	private void checkAction(DeviceAction da, DMSImpl dms) {
 		if (logger.isOpen())
 			logSched(dms, "checking " + da);
 		if (shouldReplace(da, dms)) {
@@ -94,9 +94,9 @@ public class DmsActionJob extends Job {
 	}
 
 	/** Check if an action should replace the current DMS action */
-	private boolean shouldReplace(DmsAction da, DMSImpl dms) {
+	private boolean shouldReplace(DeviceAction da, DMSImpl dms) {
 		DmsActionMsg amsg = dms_actions.get(dms);
-		DmsAction o = (amsg != null) ? amsg.action : null;
+		DeviceAction o = (amsg != null) ? amsg.action : null;
 		return (null == o) || da.getMsgPriority() >= o.getMsgPriority();
 	}
 

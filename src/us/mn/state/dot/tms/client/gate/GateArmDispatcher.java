@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2021  Minnesota Department of Transportation
+ * Copyright (C) 2013-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@ import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
+import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
 import static us.mn.state.dot.tms.GateArmArray.MAX_ARMS;
@@ -387,7 +387,7 @@ public class GateArmDispatcher extends IPanel
 	/** Update the action plan */
 	private void updateActionPlan(GateArmArray ga) {
 		ActionPlan ap = ga.getActionPlan();
-		TreeSet<DMS> signs = DmsActionHelper.findSigns(ap);
+		TreeSet<DMS> signs = DeviceActionHelper.findSigns(ap);
 		warn_dms_1.setSelected(signs.pollFirst());
 		warn_dms_2.setSelected(signs.pollFirst());
 	}

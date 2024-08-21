@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import javax.swing.JTabbedPane;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.BeaconAction;
 import us.mn.state.dot.tms.CameraAction;
-import us.mn.state.dot.tms.DmsAction;
+import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.PlanPhase;
@@ -40,9 +40,9 @@ public class ActionPlanTab extends JPanel {
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
 		return s.canRead(ActionPlan.SONAR_TYPE) &&
-		       s.canRead(DmsAction.SONAR_TYPE) &&
 		       s.canRead(BeaconAction.SONAR_TYPE) &&
 		       s.canRead(CameraAction.SONAR_TYPE) &&
+		       s.canRead(DeviceAction.SONAR_TYPE) &&
 		       s.canRead(LaneAction.SONAR_TYPE) &&
 		       s.canRead(MeterAction.SONAR_TYPE) &&
 		       s.canRead(PlanPhase.SONAR_TYPE) &&
@@ -58,8 +58,8 @@ public class ActionPlanTab extends JPanel {
 	/** Time action table panel */
 	private final ProxyTablePanel<TimeAction> t_panel;
 
-	/** DMS action table panel */
-	private final ProxyTablePanel<DmsAction> d_panel;
+	/** Device action table panel */
+	private final ProxyTablePanel<DeviceAction> d_panel;
 
 	/** Beacon action table panel */
 	private final ProxyTablePanel<BeaconAction> b_panel;
@@ -83,8 +83,8 @@ public class ActionPlanTab extends JPanel {
 			}
 		};
 		t_panel = new TimeActionPanel(s);
-		d_panel = new ProxyTablePanel<DmsAction>(
-			new DmsActionModel(s, null));
+		d_panel = new ProxyTablePanel<DeviceAction>(
+			new DeviceActionModel(s, null));
 		b_panel = new ProxyTablePanel<BeaconAction>(
 			new BeaconActionModel(s, null));
 		c_panel = new ProxyTablePanel<CameraAction>(
@@ -106,7 +106,7 @@ public class ActionPlanTab extends JPanel {
 		m_panel.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("action.plan.schedule"), t_panel);
-		tab.add(I18N.get("action.plan.dms"), d_panel);
+		tab.add(I18N.get("action.plan.device"), d_panel);
 		tab.add(I18N.get("action.plan.beacon"), b_panel);
 		tab.add(I18N.get("action.plan.camera"), c_panel);
 		tab.add(I18N.get("action.plan.lane"), l_panel);
@@ -139,7 +139,7 @@ public class ActionPlanTab extends JPanel {
 	private void selectActionPlan() {
 		ActionPlan ap = plan_pnl.getSelectedProxy();
 		t_panel.setModel(new TimeActionModel(session, ap));
-		d_panel.setModel(new DmsActionModel(session, ap));
+		d_panel.setModel(new DeviceActionModel(session, ap));
 		b_panel.setModel(new BeaconActionModel(session, ap));
 		c_panel.setModel(new CameraActionModel(session, ap));
 		l_panel.setModel(new LaneActionModel(session, ap));

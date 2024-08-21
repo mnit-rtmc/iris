@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2023  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  * Copyright (C) 2017-2018  Iteris Inc.
  *
@@ -177,7 +177,7 @@ public class DMSManager extends DeviceManager<DMS> {
 		}
 	}
 
-	/** Add DMS actions to a popup menu */
+	/** Add actions to a popup menu */
 	private void addPopupActions(JPopupMenu p, DMSDispatcher d) {
 		p.add(d.getBlankMsgAction());
 		p.addSeparator();

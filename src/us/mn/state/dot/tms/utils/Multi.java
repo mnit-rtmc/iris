@@ -164,7 +164,7 @@ public interface Multi {
 	/** Set the text rectangle */
 	void setTextRectangle(int x, int y, int w, int h);
 
-	/* IRIS-specific DMS action tags (not part of MULTI) */
+	/* IRIS-specific action tags (not part of MULTI) */
 
 	/** Add a ClearGuide advisory.
 	 * @param dms DMS name

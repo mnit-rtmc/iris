@@ -38,8 +38,8 @@ import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
@@ -565,7 +565,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @return New sign message, or null on error. */
 	private SignMessage createMsgSched(DmsActionMsg amsg) {
 		assert (amsg != null);
-		DmsAction da = amsg.action;
+		DeviceAction da = amsg.action;
 		String ms = amsg.getMulti();
 		int src = amsg.getSources();
 		String owner = SignMessageHelper.makeMsgOwner(src,
@@ -579,10 +579,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			owner, fb, mp, dur);
 	}
 
-	/** Get the duration of a DMS action.
-	 * @param da DMS action.
+	/** Get the duration of a device action.
+	 * @param da Device action.
 	 * @return Duration (minutes), or null for indefinite. */
-	private Integer getDuration(DmsAction da) {
+	private Integer getDuration(DeviceAction da) {
 		return da.getActionPlan().getSticky()
 		     ? null
 		     : getUnstickyDurationMins();

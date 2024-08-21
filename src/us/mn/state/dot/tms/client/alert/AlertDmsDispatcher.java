@@ -31,10 +31,10 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.AlertInfo;
 import us.mn.state.dot.tms.AlertMessageHelper;
+import us.mn.state.dot.tms.DeviceAction;
+import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsAction;
-import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.MsgPattern;
@@ -112,13 +112,13 @@ public class AlertDmsDispatcher extends IPanel {
 	/** Get active hashtag for a given alert / sign config */
 	private String getActiveHashtag(AlertInfo ai, SignConfig sc) {
 		ActionPlan ap = ai.getActionPlan();
-		Iterator<DmsAction> it = DmsActionHelper.iterator();
+		Iterator<DeviceAction> it = DeviceActionHelper.iterator();
 		while (it.hasNext()) {
-			DmsAction da = it.next();
+			DeviceAction da = it.next();
 			if (da.getActionPlan() == ap) {
 				MsgPattern pat = da.getMsgPattern();
 				if (AlertMessageHelper.find(pat, sc) != null)
-					return da.getDmsHashtag();
+					return da.getHashtag();
 			}
 		}
 		return null;
@@ -250,7 +250,7 @@ public class AlertDmsDispatcher extends IPanel {
 		if (ai != null) {
 			// Find all DMS included in action plan
 			ActionPlan plan = ai.getActionPlan();
-			Set<DMS> included = DmsActionHelper.findSigns(plan);
+			Set<DMS> included = DeviceActionHelper.findSigns(plan);
 			// Find all DMS for alert info
 			String aht = ai.getAllHashtag();
 			Iterator<DMS> it = DMSHelper.iterator();

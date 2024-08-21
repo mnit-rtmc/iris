@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.DmsAction;
+import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.PlanPhase;
@@ -28,28 +28,28 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
- * Action for sending a message to a DMS sign group triggered by an action plan.
+ * Action for activating devices triggered by an action plan.
  *
  * @author Douglas Lau
  */
-public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
+public class DeviceActionImpl extends BaseObjectImpl implements DeviceAction {
 
-	/** Create a unique DmsAction record name */
+	/** Create a unique DeviceAction record name */
 	static public String createUniqueName(String template) {
 		UniqueNameCreator unc = new UniqueNameCreator(template, 30,
-			(n)->lookupDmsAction(n));
+			(n)->lookupDeviceAction(n));
 		return unc.createUniqueName();
 	}
 
-	/** Load all the DMS actions */
+	/** Load all the device actions */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, DmsActionImpl.class);
-		store.query("SELECT name, action_plan, phase, dms_hashtag," +
+		namespace.registerType(SONAR_TYPE, DeviceActionImpl.class);
+		store.query("SELECT name, action_plan, phase, hashtag," +
 			"msg_pattern, msg_priority FROM iris." + SONAR_TYPE +
 			";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new DmsActionImpl(row));
+				namespace.addObject(new DeviceActionImpl(row));
 			}
 		});
 	}
@@ -61,7 +61,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		map.put("name", name);
 		map.put("action_plan", action_plan);
 		map.put("phase", phase);
-		map.put("dms_hashtag", dms_hashtag);
+		map.put("hashtag", hashtag);
 		map.put("msg_pattern", msg_pattern);
 		map.put("msg_priority", msg_priority);
 		return map;
@@ -79,40 +79,40 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		return SONAR_TYPE;
 	}
 
-	/** Create a new DMS action */
-	public DmsActionImpl(String n) {
+	/** Create a new device action */
+	public DeviceActionImpl(String n) {
 		super(n);
 	}
 
-	/** Create a DMS action */
-	private DmsActionImpl(ResultSet row) throws SQLException {
+	/** Create a device action */
+	private DeviceActionImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name
 		     row.getString(2),  // action_plan
 		     row.getString(3),  // phase
-		     row.getString(4),  // dms_hashtag
+		     row.getString(4),  // hashtag
 		     row.getString(5),  // msg_pattern
 		     row.getInt(6)      // msg_priority
 		);
 	}
 
-	/** Create a DMS action */
-	private DmsActionImpl(String n, String a, String p, String ht,
-		String pat, int mp)
+	/** Create a device action */
+	private DeviceActionImpl(String n, String a, String p, String ht,
+		String pat, int pr)
 	{
 		this(n, lookupActionPlan(a), lookupPlanPhase(p), ht,
-		     lookupMsgPattern(pat), mp);
+		     lookupMsgPattern(pat), pr);
 	}
 
-	/** Create a DMS action */
-	public DmsActionImpl(String n, ActionPlan a, PlanPhase p, String ht,
-		MsgPattern pat, int mp)
+	/** Create a device action */
+	public DeviceActionImpl(String n, ActionPlan a, PlanPhase p, String ht,
+		MsgPattern pat, int pr)
 	{
 		this(n);
 		action_plan = a;
 		phase = p;
-		dms_hashtag = ht;
+		hashtag = ht;
 		msg_pattern = pat;
-		msg_priority = mp;
+		msg_priority = pr;
 	}
 
 	/** Action plan */
@@ -124,7 +124,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		return action_plan;
 	}
 
-	/** Action plan phase to trigger DMS action */
+	/** Action plan phase to trigger device action */
 	private PlanPhase phase;
 
 	/** Set the plan phase to perform action */
@@ -147,30 +147,30 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		return phase;
 	}
 
-	/** DMS hashtag */
-	private String dms_hashtag;
+	/** Hashtag */
+	private String hashtag;
 
-	/** Set the DMS hashtag */
+	/** Set the hashtag */
 	@Override
-	public void setDmsHashtag(String ht) {
-		dms_hashtag = ht;
+	public void setHashtag(String ht) {
+		hashtag = ht;
 	}
 
-	/** Set the DMS hashtag */
-	public void doSetDmsHashtag(String ht) throws TMSException {
+	/** Set the hashtag */
+	public void doSetHashtag(String ht) throws TMSException {
 		String t = Hashtags.normalize(ht);
 		if (!objectEquals(t, ht))
 			throw new ChangeVetoException("Bad hashtag");
-		if (!objectEquals(ht, dms_hashtag)) {
-			store.update(this, "dms_hashtag", ht);
-			setDmsHashtag(ht);
+		if (!objectEquals(ht, hashtag)) {
+			store.update(this, "hashtag", ht);
+			setHashtag(ht);
 		}
 	}
 
-	/** Get the DMS hashtag */
+	/** Get the hashtag */
 	@Override
-	public String getDmsHashtag() {
-		return dms_hashtag;
+	public String getHashtag() {
+		return hashtag;
 	}
 
 	/** Message to send when action happens */
@@ -196,22 +196,22 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		return msg_pattern;
 	}
 
-	/** Message priority */
+	/** Message priority (1-255) */
 	private int msg_priority;
 
 	/** Set the message priority.
-	 * @param mp Priority ranging from 1 (low) to 255 (high).
+	 * @param pr Priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.SignMsgPriority */
 	@Override
-	public void setMsgPriority(int mp) {
-		msg_priority = mp;
+	public void setMsgPriority(int pr) {
+		msg_priority = pr;
 	}
 
 	/** Set the message priority */
-	public void doSetMsgPriority(int mp) throws TMSException {
-		if (mp != msg_priority) {
-			store.update(this, "msg_priority", mp);
-			setMsgPriority(mp);
+	public void doSetMsgPriority(int pr) throws TMSException {
+		if (pr != msg_priority) {
+			store.update(this, "msg_priority", pr);
+			setMsgPriority(pr);
 		}
 	}
 

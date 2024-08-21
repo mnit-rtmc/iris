@@ -48,11 +48,11 @@ public class AlertInfoHelper extends BaseHelper {
 	static public Set<DMS> findActiveSigns(AlertInfo ai) {
 		HashSet<DMS> signs = new HashSet<DMS>();
 		ActionPlan ap = ai.getActionPlan();
-		Iterator<DmsAction> it = DmsActionHelper.iterator();
+		Iterator<DeviceAction> it = DeviceActionHelper.iterator();
 		while (it.hasNext()) {
-			DmsAction da = it.next();
+			DeviceAction da = it.next();
 			if (da.getActionPlan() == ap) {
-				String ht = da.getDmsHashtag();
+				String ht = da.getHashtag();
 				Iterator<DMS> dit = DMSHelper.iterator();
 				while (dit.hasNext()) {
 					DMS d = dit.next();

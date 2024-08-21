@@ -48,7 +48,7 @@ public class FontFinder {
 		dms = d;
 		font_nums.add(DMSHelper.getDefaultFontNum(dms));
 		findMsgPatternTags();
-		findDmsActionTags();
+		findDeviceActionTags();
 	}
 
 	/** Get a map of all fonts found */
@@ -73,14 +73,14 @@ public class FontFinder {
 		}
 	}
 
-	/** Find font tags in all DMS actions for the sign's hashtags */
-	private void findDmsActionTags() {
+	/** Find font tags in all device actions for the sign's hashtags */
+	private void findDeviceActionTags() {
 		Hashtags tags = new Hashtags(dms.getNotes());
-		Iterator<DmsAction> it = DmsActionHelper.iterator();
+		Iterator<DeviceAction> it = DeviceActionHelper.iterator();
 		while (it.hasNext()) {
-			DmsAction da = it.next();
+			DeviceAction da = it.next();
 			MsgPattern pat = da.getMsgPattern();
-			if (pat != null && tags.contains(da.getDmsHashtag()))
+			if (pat != null && tags.contains(da.getHashtag()))
 				findFontTags(pat.getMulti());
 		}
 	}

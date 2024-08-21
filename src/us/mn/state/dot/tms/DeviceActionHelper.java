@@ -21,27 +21,27 @@ import java.util.TreeSet;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
- * Helper class for DMS actions.
+ * Helper class for device actions.
  *
  * @author Douglas Lau
  */
-public class DmsActionHelper extends BaseHelper {
+public class DeviceActionHelper extends BaseHelper {
 
 	/** Don't allow instances to be created */
-	private DmsActionHelper() {
+	private DeviceActionHelper() {
 		assert false;
 	}
 
-	/** Lookup the DMS action with the specified name */
-	static public DmsAction lookup(String name) {
-		return (DmsAction)namespace.lookupObject(DmsAction.SONAR_TYPE,
-			name);
+	/** Lookup the device action with the specified name */
+	static public DeviceAction lookup(String name) {
+		return (DeviceAction) namespace.lookupObject(
+			DeviceAction.SONAR_TYPE, name);
 	}
 
-	/** Get a DMS action iterator */
-	static public Iterator<DmsAction> iterator() {
-		return new IteratorWrapper<DmsAction>(namespace.iterator(
-			DmsAction.SONAR_TYPE));
+	/** Get a device action iterator */
+	static public Iterator<DeviceAction> iterator() {
+		return new IteratorWrapper<DeviceAction>(namespace.iterator(
+			DeviceAction.SONAR_TYPE));
 	}
 
 	/** Get set of DMS controlled by an action plan */
@@ -63,14 +63,14 @@ public class DmsActionHelper extends BaseHelper {
 		return plan_signs;
 	}
 
-	/** Find all DMS hashtags associated with an action plan */
+	/** Find all hashtags associated with an action plan */
 	static public Set<String> findHashtags(ActionPlan ap) {
 		HashSet<String> hashtags = new HashSet<String>();
-		Iterator<DmsAction> it = iterator();
+		Iterator<DeviceAction> it = iterator();
 		while (it.hasNext()) {
-			DmsAction da = it.next();
+			DeviceAction da = it.next();
 			if (da.getActionPlan() == ap)
-				hashtags.add(da.getDmsHashtag());
+				hashtags.add(da.getHashtag());
 		}
 		return hashtags;
 	}
@@ -78,11 +78,11 @@ public class DmsActionHelper extends BaseHelper {
 	/** Get set of hashtags with an action using a given message pattern */
 	static public Set<String> findHashtags(MsgPattern pat) {
 		HashSet<String> hashtags = new HashSet<String>();
-		Iterator<DmsAction> it = iterator();
+		Iterator<DeviceAction> it = iterator();
 		while (it.hasNext()) {
-			DmsAction da = it.next();
+			DeviceAction da = it.next();
 			if (da.getMsgPattern() == pat)
-				hashtags.add(da.getDmsHashtag());
+				hashtags.add(da.getHashtag());
 		}
 		return hashtags;
 	}

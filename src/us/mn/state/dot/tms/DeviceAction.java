@@ -17,14 +17,14 @@ package us.mn.state.dot.tms;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * Action for sending a message to DMS triggered by an action plan.
+ * Action for activating devices, triggered by an action plan.
  *
  * @author Douglas Lau
  */
-public interface DmsAction extends SonarObject {
+public interface DeviceAction extends SonarObject {
 
 	/** SONAR type name */
-	String SONAR_TYPE = "dms_action";
+	String SONAR_TYPE = "device_action";
 
 	/** Get the action plan */
 	ActionPlan getActionPlan();
@@ -35,11 +35,11 @@ public interface DmsAction extends SonarObject {
 	/** Get the phase to perform action */
 	PlanPhase getPhase();
 
-	/** Set the DMS hashtag */
-	void setDmsHashtag(String ht);
+	/** Set the hashtag */
+	void setHashtag(String ht);
 
-	/** Get the DMS hashtag */
-	String getDmsHashtag();
+	/** Get the hashtag */
+	String getHashtag();
 
 	/** Set the message pattern */
 	void setMsgPattern(MsgPattern pat);

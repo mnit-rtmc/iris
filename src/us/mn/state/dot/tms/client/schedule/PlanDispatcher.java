@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2023  Minnesota Department of Transportation
+ * Copyright (C) 2011-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,9 +30,9 @@ import us.mn.state.dot.tms.BeaconActionHelper;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraAction;
 import us.mn.state.dot.tms.CameraActionHelper;
+import us.mn.state.dot.tms.DeviceAction;
+import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DmsAction;
-import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneActionHelper;
 import us.mn.state.dot.tms.LaneMarking;
@@ -207,9 +207,9 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 	private TreeSet<PlanPhase> createPhaseSet(final ActionPlan ap) {
 		final TreeSet<PlanPhase> phases =
 			new TreeSet<PlanPhase>(comparator);
-		Iterator<DmsAction> dit = DmsActionHelper.iterator();
+		Iterator<DeviceAction> dit = DeviceActionHelper.iterator();
 		while (dit.hasNext()) {
-			DmsAction da = dit.next();
+			DeviceAction da = dit.next();
 			if (da.getActionPlan() == ap)
 				phases.add(da.getPhase());
 		}
@@ -265,7 +265,7 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 
 	/** Get a count of DMS controlled by an action plan */
 	private int countDMS(ActionPlan ap) {
-		return DmsActionHelper.findSigns(ap).size();
+		return DeviceActionHelper.findSigns(ap).size();
 	}
 
 	/** Get a count a beacons controlled by an action plan */
