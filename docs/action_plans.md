@@ -28,7 +28,7 @@ the **Next Phase**.  *Hold Time* must be a multiple of 30 seconds.
 
 ## Device Actions
 
-Device actions use [hashtag]s to associate devices with a phase of the action
+Device actions use [hashtag]s to associate devices with one phase of an action
 plan.  These devices can be:
  - [DMS], displays the [message pattern] on the sign
  - [beacon], activates the flashing beacon
@@ -40,13 +40,16 @@ plan.  These devices can be:
 
 ### Action Tags
 
-Some *[MULTI]-like* tags are supported in [message pattern]s used by device
-actions.  These tags are interpreted by IRIS before sending the message to a
-DMS.  NOTE: they are **only** usable in action plan messages - not
-operator-selected ones.
+A device action [message pattern] is a message to display on a device.  These
+patterns support additional *action tags* which are not valid [MULTI].  They
+are only usable in device actions - not operator-composed messages.
 
-**Condition** action tags can also be used for non-DMS device types.  This
-causes the device to be activated only when the condition is met.
+**Replace** tags are substituted with computed text before being sent to a
+sign.  For example, a `[tt` *…* `]` tag will be replaced with the current
+estimated travel time.  These tags can be used only on DMS devices.
+
+**Condition** tags add a stipulation which activates the device only when the
+condition is met.  These tags can be used with any device type.
 
 Tag              | Description                                | Tag Mode
 -----------------|--------------------------------------------|---------
@@ -168,7 +171,7 @@ than the value of the `action_plan_event_purge_days` [system attribute].
 [hashtag]: hashtags.html
 [lane marking]: lcs.html#lane-markings
 [message pattern]: message_patterns.html
-[message priority]: sign_message.html#message-priority
+[priority]: sign_message.html#message-priority
 [Msg-Feed]: protocols.html#msg-feed
 [MULTI]: multi.html
 [Parking area]: parking_areas.html
