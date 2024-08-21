@@ -37,7 +37,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import static us.mn.state.dot.tms.client.widget.IOptionPane.showHint;
-import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * Table model for device actions assigned to action plans

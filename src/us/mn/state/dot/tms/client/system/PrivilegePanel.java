@@ -72,7 +72,6 @@ public class PrivilegePanel extends ProxyTablePanel<Privilege> {
 		"incident",
 		"incident_detail",
 		"inc_locator",
-		"lane_action",
 		"lane_marking",
 		"lane_use_multi",
 		"lcs",

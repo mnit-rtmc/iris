@@ -67,4 +67,31 @@ CREATE VIEW dms_toll_zone_view AS
     ON da.msg_pattern = tz.msg_pattern;
 GRANT SELECT ON dms_toll_zone_view TO PUBLIC;
 
+-- Add lane marking hashtag trigger
+CREATE FUNCTION iris.lane_marking_hashtag() RETURNS TRIGGER AS
+    $lane_marking_hashtag$
+BEGIN
+    IF (NEW.notes IS DISTINCT FROM OLD.notes) THEN
+        IF (TG_OP != 'INSERT') THEN
+            DELETE FROM iris.hashtag
+            WHERE resource_n = 'lane_marking' AND name = OLD.name;
+        END IF;
+        IF (TG_OP != 'DELETE') THEN
+            INSERT INTO iris.hashtag (resource_n, name, hashtag)
+            SELECT 'lane_marking', NEW.name, iris.parse_tags(NEW.notes);
+        END IF;
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$lane_marking_hashtag$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lane_marking_hashtag_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._lane_marking
+    FOR EACH ROW EXECUTE FUNCTION iris.lane_marking_hashtag();
+
+-- Remove lane_action
+DELETE FROM iris.privilege WHERE type_n = 'lane_action';
+DELETE FROM iris.resource_type WHERE name = 'lane_action';
+DROP TABLE iris.lane_action;
+
 COMMIT;

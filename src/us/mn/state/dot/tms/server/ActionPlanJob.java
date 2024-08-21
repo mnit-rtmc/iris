@@ -52,7 +52,6 @@ public class ActionPlanJob extends Job {
 		timer.addJob(new DeviceActionJob(SCHED_LOG));
 		timer.addJob(new BeaconActionJob());
 		timer.addJob(new CameraActionJob());
-		timer.addJob(new LaneActionJob());
 		timer.addJob(new MeterActionJob());
 		updateActionPlanPhases();
 	}

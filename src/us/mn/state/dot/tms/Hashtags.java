@@ -16,7 +16,6 @@ package us.mn.state.dot.tms;
 
 import java.util.Set;
 import java.util.TreeSet;
-import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * Set of hashtags.

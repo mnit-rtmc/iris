@@ -18,6 +18,7 @@ import java.awt.Color;
 import java.util.Iterator;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.ActionPlanHelper;
 import us.mn.state.dot.tms.BeaconAction;
 import us.mn.state.dot.tms.BeaconActionHelper;
 import us.mn.state.dot.tms.CameraAction;
@@ -26,8 +27,6 @@ import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.LaneAction;
-import us.mn.state.dot.tms.LaneActionHelper;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.MeterActionHelper;
 import us.mn.state.dot.tms.PlanPhase;
@@ -82,7 +81,8 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 			return false;
 		switch (is) {
 		case DMS:
-			return proxy.getActive() && hasDeviceAction(proxy);
+			return proxy.getActive() &&
+			      !ActionPlanHelper.findDms(proxy).isEmpty();
 		case BEACON:
 			return proxy.getActive() && hasBeaconAction(proxy);
 		case CAMERA:
@@ -90,7 +90,8 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		case METER:
 			return proxy.getActive() && hasMeterAction(proxy);
 		case LANE:
-			return proxy.getActive() && hasLaneAction(proxy);
+			return proxy.getActive() &&
+			      !ActionPlanHelper.findLaneMarkings(proxy).isEmpty();
 		case TIME:
 			return proxy.getActive() && hasTimeAction(proxy);
 		case ACTIVE:
@@ -125,17 +126,6 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		return false;
 	}
 
-	/** Test if an action plan has device actions */
-	private boolean hasDeviceAction(ActionPlan p) {
-		Iterator<DeviceAction> it = DeviceActionHelper.iterator();
-		while (it.hasNext()) {
-			DeviceAction da = it.next();
-			if (da.getActionPlan() == p)
-				return true;
-		}
-		return false;
-	}
-
 	/** Test if an action plan has beacon actions */
 	private boolean hasBeaconAction(ActionPlan p) {
 		Iterator<BeaconAction> it = BeaconActionHelper.iterator();
@@ -153,17 +143,6 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		while (it.hasNext()) {
 			CameraAction ca = it.next();
 			if (ca.getActionPlan() == p)
-				return true;
-		}
-		return false;
-	}
-
-	/** Test if an action plan has lane actions */
-	private boolean hasLaneAction(ActionPlan p) {
-		Iterator<LaneAction> it = LaneActionHelper.iterator();
-		while (it.hasNext()) {
-			LaneAction la = it.next();
-			if (la.getActionPlan() == p)
 				return true;
 		}
 		return false;

@@ -33,9 +33,8 @@ import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.Hashtags;
-import us.mn.state.dot.tms.LaneAction;
-import us.mn.state.dot.tms.LaneActionHelper;
 import us.mn.state.dot.tms.LaneMarking;
+import us.mn.state.dot.tms.LaneMarkingHelper;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.MeterActionHelper;
 import us.mn.state.dot.tms.PlanPhase;
@@ -360,7 +359,6 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 				validateDeviceActions(); // throws exception
 				validateBeaconActions(); // throws exception
 				// FIXME: any way to validate camera actions?
-				validateLaneActions();   // throws exception
 				validateMeterActions();  // throws exception
 			}
 			store.update(this, "phase", p);
@@ -406,15 +404,39 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Check if a device action is deployable */
 	private boolean isDeployable(DeviceAction da) {
-		String dht = da.getHashtag();
+		String ht = da.getHashtag();
+		return areDmsDeployable(ht) && areLaneMarkingsDeployable(ht);
+	}
+
+	/** Check if all DMS for a hashtag are deployable */
+	private boolean areDmsDeployable(String ht) {
 		Iterator<DMS> it = DMSHelper.iterator();
 		while (it.hasNext()) {
 			DMS d = it.next();
 			if (d instanceof DMSImpl) {
 				DMSImpl dms = (DMSImpl) d;
-				Hashtags tags = new Hashtags(d.getNotes());
-				if (tags.contains(dht) && dms.hasError())
-					return false;
+				if (dms.hasError()) {
+					if (new Hashtags(d.getNotes())
+					   .contains(ht))
+						return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/** Check if all lane markings for a hashtag are deployable */
+	private boolean areLaneMarkingsDeployable(String ht) {
+		Iterator<LaneMarking> it = LaneMarkingHelper.iterator();
+		while (it.hasNext()) {
+			LaneMarking lm = it.next();
+			if (lm instanceof LaneMarkingImpl) {
+				LaneMarkingImpl lmi = (LaneMarkingImpl) lm;
+				if (lmi.isFailed()) {
+					if (new Hashtags(lmi.getNotes())
+					   .contains(ht))
+						return false;
+				}
 			}
 		}
 		return true;
@@ -440,31 +462,6 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		Beacon b = ba.getBeacon();
 		if (b instanceof BeaconImpl)
 			return !((BeaconImpl) b).isFailed();
-		else
-			return false;
-	}
-
-	/**
-	 * Validate that all lane actions are deployable.
-	 * @throws ChangeVetoException If a single LaneAction is not
-	 * deployable.
-	 */
-	private void validateLaneActions() throws ChangeVetoException {
-		Iterator<LaneAction> it = LaneActionHelper.iterator();
-		while (it.hasNext()) {
-			LaneAction la = it.next();
-			if (la.getActionPlan() == this && !isDeployable(la)) {
-				throw new ChangeVetoException("Lane action " +
-					la.getName() + " not deployable");
-			}
-		}
-	}
-
-	/** Check if a lane action is deployable */
-	private boolean isDeployable(LaneAction la) {
-		LaneMarking lm = la.getLaneMarking();
-		if (lm instanceof LaneMarkingImpl)
-			return !((LaneMarkingImpl) lm).isFailed();
 		else
 			return false;
 	}

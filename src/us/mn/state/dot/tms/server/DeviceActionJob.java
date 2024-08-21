@@ -24,6 +24,8 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.Hashtags;
+import us.mn.state.dot.tms.LaneMarking;
+import us.mn.state.dot.tms.LaneMarkingHelper;
 
 /**
  * Job to perform device actions.
@@ -59,8 +61,11 @@ public class DeviceActionJob extends Job {
 			DeviceAction da = it.next();
 			ActionPlan ap = da.getActionPlan();
 			if (ap.getActive()) {
-				if (ap.getPhase() == da.getPhase())
+				boolean deploy =
+					(ap.getPhase() == da.getPhase());
+				if (deploy)
 					performDmsAction(da);
+				performLaneMarkingAction(da, deploy);
 			}
 		}
 		updateDmsMessages();
@@ -111,6 +116,21 @@ public class DeviceActionJob extends Job {
 				if (logger.isOpen())
 					logSched(dms, "scheduling " + amsg);
 				dmsi.setActionMsg(amsg);
+			}
+		}
+	}
+
+	/** Perform a lane marking action */
+	private void performLaneMarkingAction(DeviceAction da, boolean deploy) {
+		String ht = da.getHashtag();
+		Iterator<LaneMarking> it = LaneMarkingHelper.iterator();
+		while (it.hasNext()) {
+			LaneMarking lm = it.next();
+			if (lm instanceof LaneMarkingImpl) {
+				LaneMarkingImpl lmi = (LaneMarkingImpl) lm;
+				Hashtags tags = new Hashtags(lmi.getNotes());
+				if (tags.contains(ht))
+					lmi.setDeployed(deploy);
 			}
 		}
 	}

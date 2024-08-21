@@ -434,7 +434,6 @@ inc_descriptor	f
 incident	t
 incident_detail	f
 inc_locator	f
-lane_action	f
 lane_marking	f
 lane_use_multi	f
 lcs	t
@@ -704,7 +703,6 @@ PRV_012A	plan_admin	camera_action		t
 PRV_0120	plan_admin	day_plan		t
 PRV_0121	plan_admin	day_matcher		t
 PRV_0122	plan_admin	device_action		t
-PRV_0123	plan_admin	lane_action		t
 PRV_0124	plan_admin	meter_action		t
 PRV_0125	plan_admin	plan_phase		t
 PRV_0126	plan_admin	time_action		t
@@ -717,7 +715,6 @@ PRV_0132	plan_tab	time_action		f
 PRV_0133	plan_tab	device_action		f
 PRV_0134	plan_tab	beacon_action		f
 PRV_013A	plan_tab	camera_action		f
-PRV_0135	plan_tab	lane_action		f
 PRV_0136	plan_tab	meter_action		f
 PRV_0137	sensor_admin	detector		t
 PRV_0138	sensor_admin	r_node		t
@@ -4384,6 +4381,27 @@ CREATE TABLE iris._lane_marking (
 ALTER TABLE iris._lane_marking ADD CONSTRAINT _lane_marking_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
+CREATE FUNCTION iris.lane_marking_hashtag() RETURNS TRIGGER AS
+    $lane_marking_hashtag$
+BEGIN
+    IF (NEW.notes IS DISTINCT FROM OLD.notes) THEN
+        IF (TG_OP != 'INSERT') THEN
+            DELETE FROM iris.hashtag
+            WHERE resource_n = 'lane_marking' AND name = OLD.name;
+        END IF;
+        IF (TG_OP != 'DELETE') THEN
+            INSERT INTO iris.hashtag (resource_n, name, hashtag)
+            SELECT 'lane_marking', NEW.name, iris.parse_tags(NEW.notes);
+        END IF;
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$lane_marking_hashtag$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lane_marking_hashtag_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._lane_marking
+    FOR EACH ROW EXECUTE FUNCTION iris.lane_marking_hashtag();
+
 CREATE TRIGGER lane_marking_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris._lane_marking
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
@@ -4441,13 +4459,6 @@ CREATE VIEW lane_marking_view AS
     LEFT JOIN geo_loc_view l ON m.geo_loc = l.name
     LEFT JOIN controller_view ctr ON cio.controller = ctr.name;
 GRANT SELECT ON lane_marking_view TO PUBLIC;
-
-CREATE TABLE iris.lane_action (
-    name VARCHAR(30) PRIMARY KEY,
-    action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-    lane_marking VARCHAR(20) NOT NULL REFERENCES iris._lane_marking,
-    phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
-);
 
 --
 -- Lane-Use Control Signals

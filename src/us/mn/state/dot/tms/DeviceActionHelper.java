@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
-import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * Helper class for device actions.
@@ -42,37 +41,6 @@ public class DeviceActionHelper extends BaseHelper {
 	static public Iterator<DeviceAction> iterator() {
 		return new IteratorWrapper<DeviceAction>(namespace.iterator(
 			DeviceAction.SONAR_TYPE));
-	}
-
-	/** Get set of DMS controlled by an action plan */
-	static public TreeSet<DMS> findSigns(ActionPlan ap) {
-		Set<String> plan_hashtags = findHashtags(ap);
-		TreeSet<DMS> plan_signs = new TreeSet<DMS>(
-			new NumericAlphaComparator<DMS>());
-		Iterator<DMS> it = DMSHelper.iterator();
-		while (it.hasNext()) {
-			DMS dms = it.next();
-			Hashtags tags = new Hashtags(dms.getNotes());
-			for (String ht: plan_hashtags) {
-				if (tags.contains(ht)) {
-					plan_signs.add(dms);
-					break;
-				}
-			}
-		}
-		return plan_signs;
-	}
-
-	/** Find all hashtags associated with an action plan */
-	static public Set<String> findHashtags(ActionPlan ap) {
-		HashSet<String> hashtags = new HashSet<String>();
-		Iterator<DeviceAction> it = iterator();
-		while (it.hasNext()) {
-			DeviceAction da = it.next();
-			if (da.getActionPlan() == ap)
-				hashtags.add(da.getHashtag());
-		}
-		return hashtags;
 	}
 
 	/** Get set of hashtags with an action using a given message pattern */

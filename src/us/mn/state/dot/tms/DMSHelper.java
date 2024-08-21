@@ -23,7 +23,6 @@ import java.util.TreeSet;
 import org.json.JSONException;
 import org.json.JSONObject;
 import us.mn.state.dot.tms.utils.MultiString;
-import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 import us.mn.state.dot.tms.utils.RleTable;
 import us.mn.state.dot.tms.utils.SString;
 

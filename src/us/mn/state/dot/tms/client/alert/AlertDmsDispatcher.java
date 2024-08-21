@@ -29,6 +29,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.ActionPlanHelper;
 import us.mn.state.dot.tms.AlertInfo;
 import us.mn.state.dot.tms.AlertMessageHelper;
 import us.mn.state.dot.tms.DeviceAction;
@@ -250,7 +251,7 @@ public class AlertDmsDispatcher extends IPanel {
 		if (ai != null) {
 			// Find all DMS included in action plan
 			ActionPlan plan = ai.getActionPlan();
-			Set<DMS> included = DeviceActionHelper.findSigns(plan);
+			Set<DMS> included = ActionPlanHelper.findDms(plan);
 			// Find all DMS for alert info
 			String aht = ai.getAllHashtag();
 			Iterator<DMS> it = DMSHelper.iterator();

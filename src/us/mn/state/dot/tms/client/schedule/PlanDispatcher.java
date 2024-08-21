@@ -24,6 +24,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.ActionPlanHelper;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.BeaconAction;
 import us.mn.state.dot.tms.BeaconActionHelper;
@@ -33,9 +34,6 @@ import us.mn.state.dot.tms.CameraActionHelper;
 import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.LaneAction;
-import us.mn.state.dot.tms.LaneActionHelper;
-import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.MeterActionHelper;
 import us.mn.state.dot.tms.PlanPhase;
@@ -225,12 +223,6 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 			if (ca.getActionPlan() == ap)
 				phases.add(ca.getPhase());
 		}
-		Iterator<LaneAction> lit = LaneActionHelper.iterator();
-		while (lit.hasNext()) {
-			LaneAction la = lit.next();
-			if (la.getActionPlan() == ap)
-				phases.add(la.getPhase());
-		}
 		Iterator<MeterAction> mit = MeterActionHelper.iterator();
 		while (mit.hasNext()) {
 			MeterAction ma = mit.next();
@@ -265,7 +257,7 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 
 	/** Get a count of DMS controlled by an action plan */
 	private int countDMS(ActionPlan ap) {
-		return DeviceActionHelper.findSigns(ap).size();
+		return ActionPlanHelper.findDms(ap).size();
 	}
 
 	/** Get a count a beacons controlled by an action plan */
@@ -293,15 +285,8 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 	}
 
 	/** Get a count a lane markings controlled by an action plan */
-	private int countLanes(ActionPlan p) {
-		HashSet<LaneMarking> plan_lanes = new HashSet<LaneMarking>();
-		Iterator<LaneAction> lit = LaneActionHelper.iterator();
-		while (lit.hasNext()) {
-			LaneAction la = lit.next();
-			if (la.getActionPlan() == p)
-				plan_lanes.add(la.getLaneMarking());
-		}
-		return plan_lanes.size();
+	private int countLanes(ActionPlan ap) {
+		return ActionPlanHelper.findLaneMarkings(ap).size();
 	}
 
 	/** Get a count a ramp meters controlled by an action plan */

@@ -26,10 +26,10 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.ActionPlanHelper;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
-import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
@@ -387,7 +387,7 @@ public class GateArmDispatcher extends IPanel
 	/** Update the action plan */
 	private void updateActionPlan(GateArmArray ga) {
 		ActionPlan ap = ga.getActionPlan();
-		TreeSet<DMS> signs = DeviceActionHelper.findSigns(ap);
+		TreeSet<DMS> signs = ActionPlanHelper.findDms(ap);
 		warn_dms_1.setSelected(signs.pollFirst());
 		warn_dms_2.setSelected(signs.pollFirst());
 	}
