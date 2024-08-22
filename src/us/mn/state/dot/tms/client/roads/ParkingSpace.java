@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2019  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.map.MapObject;
 import us.mn.state.dot.tms.geo.MapVector;
-import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
