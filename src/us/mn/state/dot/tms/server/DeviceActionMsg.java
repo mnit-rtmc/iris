@@ -221,8 +221,11 @@ public class DeviceActionMsg {
 	/** MULTI string after processing action tags */
 	private final String multi;
 
-	/** Valid message flag */
+	/** Valid message (successfully parsed) */
 	private boolean valid;
+
+	/** Passing all action tag conditions (stipulations) */
+	private boolean passing;
 
 	/** Sign message sources */
 	private int sources;
@@ -267,14 +270,14 @@ public class DeviceActionMsg {
 		return action.toString() + " on " + device;
 	}
 
-	/** Check if the message is valid */
-	public boolean isValid() {
-		return valid && (multi != null);
+	/** Check if passing all action tag conditions (stipulations) */
+	public boolean isPassing() {
+		return passing;
 	}
 
 	/** Check if the message is rasterizable */
 	public boolean isRasterizable() {
-		if (isValid() && device instanceof DMSImpl) {
+		if ((multi != null) && device instanceof DMSImpl) {
 			DMSImpl dms = (DMSImpl) device;
 			return DMSHelper.isRasterizable(dms, multi);
 		} else
@@ -289,6 +292,7 @@ public class DeviceActionMsg {
 	/** Fail parsing message */
 	private String fail(String msg) {
 		valid = false;
+		passing = false;
 		if (dlog.isOpen()) {
 			dlog.log(toString() + " [fail]: " + msg +
 				" (" + getActionMulti() + ")");
@@ -305,6 +309,7 @@ public class DeviceActionMsg {
 		loc = gl;
 		dlog = l;
 		valid = true;
+		passing = true;
 		multi = processAction();
 		if (valid && dlog.isOpen()) {
 			dlog.log(toString() + " [ok]: " + multi +

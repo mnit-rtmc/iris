@@ -130,8 +130,17 @@ public class DeviceActionJob extends Job {
 			if (lm instanceof LaneMarkingImpl) {
 				LaneMarkingImpl lmi = (LaneMarkingImpl) lm;
 				Hashtags tags = new Hashtags(lmi.getNotes());
-				if (tags.contains(ht))
-					lmi.setDeployed(deploy);
+				if (tags.contains(ht)) {
+					DeviceActionMsg amsg =
+						new DeviceActionMsg(
+							da,
+							lmi,
+							lmi.getGeoLoc(),
+							logger
+						);
+					if (amsg.isPassing())
+						lmi.setDeployed(deploy);
+				}
 			}
 		}
 	}
