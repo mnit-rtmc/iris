@@ -56,6 +56,25 @@ public class ActionPlanHelper extends BaseHelper {
 		return hashtags;
 	}
 
+	/** Get set of cameras controlled by an action plan */
+	static public TreeSet<Camera> findCameras(ActionPlan ap) {
+		Set<String> hashtags = findHashtags(ap);
+		TreeSet<Camera> cameras = new TreeSet<Camera>(
+			new NumericAlphaComparator<Camera>());
+		Iterator<Camera> it = CameraHelper.iterator();
+		while (it.hasNext()) {
+			Camera cam = it.next();
+			Hashtags tags = new Hashtags(cam.getNotes());
+			for (String ht: hashtags) {
+				if (tags.contains(ht)) {
+					cameras.add(cam);
+					break;
+				}
+			}
+		}
+		return cameras;
+	}
+
 	/** Get set of DMS controlled by an action plan */
 	static public TreeSet<DMS> findDms(ActionPlan ap) {
 		Set<String> hashtags = findHashtags(ap);

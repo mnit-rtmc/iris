@@ -19,7 +19,6 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.BeaconAction;
-import us.mn.state.dot.tms.CameraAction;
 import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.PlanPhase;
@@ -40,7 +39,6 @@ public class ActionPlanTab extends JPanel {
 	static public boolean isPermitted(Session s) {
 		return s.canRead(ActionPlan.SONAR_TYPE) &&
 		       s.canRead(BeaconAction.SONAR_TYPE) &&
-		       s.canRead(CameraAction.SONAR_TYPE) &&
 		       s.canRead(DeviceAction.SONAR_TYPE) &&
 		       s.canRead(MeterAction.SONAR_TYPE) &&
 		       s.canRead(PlanPhase.SONAR_TYPE) &&
@@ -62,9 +60,6 @@ public class ActionPlanTab extends JPanel {
 	/** Beacon action table panel */
 	private final ProxyTablePanel<BeaconAction> b_panel;
 
-	/** Camera action table panel */
-	private final ProxyTablePanel<CameraAction> c_panel;
-
 	/** Meter action table panel */
 	private final ProxyTablePanel<MeterAction> m_panel;
 
@@ -82,8 +77,6 @@ public class ActionPlanTab extends JPanel {
 			new DeviceActionModel(s, null));
 		b_panel = new ProxyTablePanel<BeaconAction>(
 			new BeaconActionModel(s, null));
-		c_panel = new ProxyTablePanel<CameraAction>(
-			new CameraActionModel(s, null));
 		m_panel = new ProxyTablePanel<MeterAction>(
 			new MeterActionModel(s, null));
 	}
@@ -94,13 +87,11 @@ public class ActionPlanTab extends JPanel {
 		t_panel.initialize();
 		d_panel.initialize();
 		b_panel.initialize();
-		c_panel.initialize();
 		m_panel.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("action.plan.schedule"), t_panel);
 		tab.add(I18N.get("action.plan.device"), d_panel);
 		tab.add(I18N.get("action.plan.beacon"), b_panel);
-		tab.add(I18N.get("action.plan.camera"), c_panel);
 		tab.add(I18N.get("action.plan.meter"), m_panel);
 		GroupLayout gl = new GroupLayout(this);
 		GroupLayout.ParallelGroup hg = gl.createParallelGroup();
@@ -120,7 +111,6 @@ public class ActionPlanTab extends JPanel {
 		plan_pnl.dispose();
 		t_panel.dispose();
 		d_panel.dispose();
-		c_panel.dispose();
 		b_panel.dispose();
 		m_panel.dispose();
 	}
@@ -131,7 +121,6 @@ public class ActionPlanTab extends JPanel {
 		t_panel.setModel(new TimeActionModel(session, ap));
 		d_panel.setModel(new DeviceActionModel(session, ap));
 		b_panel.setModel(new BeaconActionModel(session, ap));
-		c_panel.setModel(new CameraActionModel(session, ap));
 		m_panel.setModel(new MeterActionModel(session, ap));
 	}
 }

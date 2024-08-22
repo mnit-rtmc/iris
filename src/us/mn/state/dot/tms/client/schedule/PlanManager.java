@@ -21,8 +21,6 @@ import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanHelper;
 import us.mn.state.dot.tms.BeaconAction;
 import us.mn.state.dot.tms.BeaconActionHelper;
-import us.mn.state.dot.tms.CameraAction;
-import us.mn.state.dot.tms.CameraActionHelper;
 import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.GeoLoc;
@@ -86,7 +84,8 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		case BEACON:
 			return proxy.getActive() && hasBeaconAction(proxy);
 		case CAMERA:
-			return proxy.getActive() && hasCameraAction(proxy);
+			return proxy.getActive() &&
+			      !ActionPlanHelper.findCameras(proxy).isEmpty();
 		case METER:
 			return proxy.getActive() && hasMeterAction(proxy);
 		case LANE:
@@ -132,17 +131,6 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		while (it.hasNext()) {
 			BeaconAction ba = it.next();
 			if (ba.getActionPlan() == p)
-				return true;
-		}
-		return false;
-	}
-
-	/** Test if an action plan has camera actions */
-	private boolean hasCameraAction(ActionPlan p) {
-		Iterator<CameraAction> it = CameraActionHelper.iterator();
-		while (it.hasNext()) {
-			CameraAction ca = it.next();
-			if (ca.getActionPlan() == p)
 				return true;
 		}
 		return false;

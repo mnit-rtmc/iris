@@ -41,7 +41,6 @@ public class PrivilegePanel extends ProxyTablePanel<Privilege> {
 		"beacon_action",
 		"cabinet_style",
 		"camera",
-		"camera_action",
 		"camera_preset",
 		"camera_template",
 		"cam_vid_src_ord",

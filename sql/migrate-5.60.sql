@@ -89,10 +89,13 @@ CREATE TRIGGER lane_marking_hashtag_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris._lane_marking
     FOR EACH ROW EXECUTE FUNCTION iris.lane_marking_hashtag();
 
--- Remove lane_action
-DELETE FROM iris.privilege WHERE type_n = 'lane_action';
-DELETE FROM iris.resource_type WHERE name = 'lane_action';
+-- Remove lane_action and camera_action
+DELETE FROM iris.privilege
+    WHERE type_n = 'lane_action' OR type_n = 'camera_action';
+DELETE FROM iris.resource_type
+    WHERE name = 'lane_action' OR name = 'camera_action';
 DROP TABLE iris.lane_action;
+DROP TABLE iris.camera_action;
 
 -- Re-introduce RWIS auto max distance
 INSERT INTO iris.system_attribute (name, value) VALUES

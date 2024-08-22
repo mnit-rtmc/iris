@@ -29,8 +29,6 @@ import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.BeaconAction;
 import us.mn.state.dot.tms.BeaconActionHelper;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.CameraAction;
-import us.mn.state.dot.tms.CameraActionHelper;
 import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.DMS;
@@ -217,12 +215,6 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 			if (ba.getActionPlan() == ap)
 				phases.add(ba.getPhase());
 		}
-		Iterator<CameraAction> cit = CameraActionHelper.iterator();
-		while (cit.hasNext()) {
-			CameraAction ca = cit.next();
-			if (ca.getActionPlan() == ap)
-				phases.add(ca.getPhase());
-		}
 		Iterator<MeterAction> mit = MeterActionHelper.iterator();
 		while (mit.hasNext()) {
 			MeterAction ma = mit.next();
@@ -273,15 +265,8 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 	}
 
 	/** Get a count of cameras controlled by an action plan */
-	private int countCameras(ActionPlan p) {
-		HashSet<Camera> plan_cameras = new HashSet<Camera>();
-		Iterator<CameraAction> cit = CameraActionHelper.iterator();
-		while (cit.hasNext()) {
-			CameraAction ca = cit.next();
-			if (ca.getActionPlan() == p)
-				plan_cameras.add(ca.getPreset().getCamera());
-		}
-		return plan_cameras.size();
+	private int countCameras(ActionPlan ap) {
+		return ActionPlanHelper.findCameras(ap).size();
 	}
 
 	/** Get a count a lane markings controlled by an action plan */

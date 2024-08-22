@@ -19,6 +19,8 @@ import java.util.Iterator;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DeviceAction;
@@ -65,6 +67,7 @@ public class DeviceActionJob extends Job {
 					(ap.getPhase() == da.getPhase());
 				if (deploy)
 					performDmsAction(da);
+				performCameraAction(da);
 				performLaneMarkingAction(da, deploy);
 			}
 		}
@@ -121,27 +124,53 @@ public class DeviceActionJob extends Job {
 		}
 	}
 
+	/** Perform a camera action */
+	private void performCameraAction(DeviceAction da) {
+		// FIXME: only perform this action when phase is first changed
+		Iterator<Camera> it = CameraHelper.iterator();
+		while (it.hasNext()) {
+			Camera c = it.next();
+			if (c instanceof CameraImpl)
+				performCameraAction(da, (CameraImpl) c);
+		}
+	}
+
+	/** Perform a camera action */
+	private void performCameraAction(DeviceAction da, CameraImpl cam) {
+		Hashtags tags = new Hashtags(cam.getNotes());
+		if (tags.contains(da.getHashtag())) {
+			DeviceActionMsg amsg = new DeviceActionMsg(da, cam,
+				cam.getGeoLoc(), logger);
+			if (amsg.isPassing()) {
+				// FIXME: recall preset / save a snapshot
+				//        after a moment
+				// cam.setRecallPreset(...);
+			}
+		}
+	}
+
 	/** Perform a lane marking action */
 	private void performLaneMarkingAction(DeviceAction da, boolean deploy) {
-		String ht = da.getHashtag();
 		Iterator<LaneMarking> it = LaneMarkingHelper.iterator();
 		while (it.hasNext()) {
 			LaneMarking lm = it.next();
 			if (lm instanceof LaneMarkingImpl) {
-				LaneMarkingImpl lmi = (LaneMarkingImpl) lm;
-				Hashtags tags = new Hashtags(lmi.getNotes());
-				if (tags.contains(ht)) {
-					DeviceActionMsg amsg =
-						new DeviceActionMsg(
-							da,
-							lmi,
-							lmi.getGeoLoc(),
-							logger
-						);
-					if (amsg.isPassing())
-						lmi.setDeployed(deploy);
-				}
+				performLaneMarkingAction(da, deploy,
+					(LaneMarkingImpl) lm);
 			}
+		}
+	}
+
+	/** Perform a lane marking action */
+	private void performLaneMarkingAction(DeviceAction da, boolean deploy,
+		LaneMarkingImpl lm)
+	{
+		Hashtags tags = new Hashtags(lm.getNotes());
+		if (tags.contains(da.getHashtag())) {
+			DeviceActionMsg amsg = new DeviceActionMsg(da, lm,
+				lm.getGeoLoc(), logger);
+			if (amsg.isPassing())
+				lm.setDeployed(deploy);
 		}
 	}
 }

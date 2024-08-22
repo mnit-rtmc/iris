@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.camera;
 
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.CameraAction;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.CameraTemplate;
 import us.mn.state.dot.tms.Catalog;
@@ -115,14 +114,6 @@ public class CamCache {
 		return preset_model;
 	}
 
-	/** Cache of camera actions */
-	private final TypeCache<CameraAction> camera_actions;
-
-	/** Get the camera action object cache */
-	public TypeCache<CameraAction> getCameraActions() {
-		return camera_actions;
-	}
-
 	/** Cache of play lists */
 	private final TypeCache<PlayList> play_lists;
 
@@ -196,8 +187,6 @@ public class CamCache {
 			}
 		};
 		preset_model.initialize();
-		camera_actions = new TypeCache<CameraAction>(CameraAction.class,
-			client);
 		play_lists = new TypeCache<PlayList>(PlayList.class, client,
 			PlayList.GROUP_CHECKER);
 		catalogs = new TypeCache<Catalog>(Catalog.class, client);
@@ -220,7 +209,6 @@ public class CamCache {
 		if (client.canRead(Camera.SONAR_TYPE))
 			cameras.ignoreAttribute("operation");
 		client.populateReadable(presets);
-		client.populateReadable(camera_actions);
 		client.populateReadable(play_lists);
 		client.populateReadable(catalogs);
 		client.populateReadable(monitor_styles);
