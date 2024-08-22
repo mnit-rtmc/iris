@@ -37,9 +37,9 @@ public class DeviceActionJob extends Job {
 	/** Logger for debugging */
 	private final DebugLog logger;
 
-	/** Mapping of DMS actions */
-	private final HashMap<DMSImpl, DmsActionMsg> dms_actions =
-		new HashMap<DMSImpl, DmsActionMsg>();
+	/** Mapping of DMS to device actions */
+	private final HashMap<DMSImpl, DeviceActionMsg> dms_actions =
+		new HashMap<DMSImpl, DeviceActionMsg>();
 
 	/** Create a new device action job */
 	public DeviceActionJob(DebugLog dl) {
@@ -91,7 +91,8 @@ public class DeviceActionJob extends Job {
 		if (logger.isOpen())
 			logSched(dms, "checking " + da);
 		if (shouldReplace(da, dms)) {
-			DmsActionMsg amsg = new DmsActionMsg(da, dms, logger);
+			DeviceActionMsg amsg = new DeviceActionMsg(da, dms,
+				dms.getGeoLoc(), logger);
 			if (amsg.isRasterizable())
 				dms_actions.put(dms, amsg);
 		} else if (logger.isOpen())
@@ -100,7 +101,7 @@ public class DeviceActionJob extends Job {
 
 	/** Check if an action should replace the current DMS action */
 	private boolean shouldReplace(DeviceAction da, DMSImpl dms) {
-		DmsActionMsg amsg = dms_actions.get(dms);
+		DeviceActionMsg amsg = dms_actions.get(dms);
 		DeviceAction o = (amsg != null) ? amsg.action : null;
 		return (null == o) || da.getMsgPriority() >= o.getMsgPriority();
 	}
@@ -112,7 +113,7 @@ public class DeviceActionJob extends Job {
 			DMS dms = it.next();
 			if (dms instanceof DMSImpl) {
 				DMSImpl dmsi = (DMSImpl) dms;
-				DmsActionMsg amsg = dms_actions.get(dmsi);
+				DeviceActionMsg amsg = dms_actions.get(dmsi);
 				if (logger.isOpen())
 					logSched(dms, "scheduling " + amsg);
 				dmsi.setActionMsg(amsg);

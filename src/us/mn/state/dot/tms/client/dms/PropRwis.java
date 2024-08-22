@@ -49,17 +49,6 @@ import us.mn.state.dot.tms.utils.I18N;
 @SuppressWarnings("serial")
 public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 
-	/** Get distance in meters between a WeatherSensor and a DMS.
-	 *  Returns null if distance is unknown. */
-	static private Integer calcDistanceMeters(WeatherSensor ws, DMS dms) {
-		if ((ws == null) || (dms == null))
-			return null;
-		GeoLoc g1 = ws.getGeoLoc();
-		GeoLoc g2 = dms.getGeoLoc();
-		Distance d = GeoLocHelper.distanceTo(g1, g2);
-		return (d == null) ? null : d.round(Distance.Units.METERS);
-	}
-
 	/** Parse whitespace-separated list of WeatherSensor names */
 	static private WeatherSensor[] parseWeatherSensors(String names)
 		throws TMSException
@@ -80,38 +69,6 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 			}
 		}
 		return ws_map.values().toArray(new WeatherSensor[0]);
-	}
-
-	/** Find the WeatherSensor that's closest to the DMS.
-	 * @return A two-Object-array containing the WeatherSensor
-	 *         and the distance to that WeatherSensor in meters.
-	 *         If no WeatherSensor qualifies, return a two Object array
-	 *         containing nulls. */
-	static private Object[] findClosestWeatherSensor(DMS dms) {
-		Object[] retVals = new Object[2];
-		retVals[0] = null;
-		retVals[1] = null;
-		int cd = Integer.MAX_VALUE;
-		WeatherSensor closestWs = null;
-		WeatherSensor ws;
-		Integer closestDist = cd;
-		Integer dist;
-		Iterator<WeatherSensor> it = WeatherSensorHelper.iterator();
-		while (it.hasNext()) {
-			ws = it.next();
-			dist = calcDistanceMeters(ws, dms);
-			if ((dist == null) || (dist > closestDist))
-				continue;
-			if (dist < closestDist) {
-				closestDist = dist;
-				closestWs   = ws;
-			}
-		}
-		if (closestWs != null) {
-			retVals[0] = closestWs;
-			retVals[1] = closestDist;
-		}
-		return retVals;
 	}
 
 	/** Closest WeatherSensor label */
@@ -173,11 +130,11 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 
 	/** Update all text and labels */
 	public void updateGui() {
-		Object[] o = findClosestWeatherSensor(dms);
-		WeatherSensor ws = (WeatherSensor) o[0];
-		Integer       d  = (Integer)       o[1];
+		GeoLoc loc = dms.getGeoLoc();
+		WeatherSensor ws = WeatherSensorHelper.findNearest(loc);
 		if (ws != null) {
-			Distance dist = Distance.create(d, Units.METERS);
+			Distance dist =
+				GeoLocHelper.distanceTo(loc, ws.getGeoLoc());
 			closest_lbl.setText(ws.getName());
 			boolean useSI =
 				SystemAttrEnum.CLIENT_UNITS_SI.getBoolean();

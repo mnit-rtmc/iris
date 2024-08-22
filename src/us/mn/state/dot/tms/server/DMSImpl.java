@@ -561,9 +561,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Create a scheduled message.
-	 * @param amsg DMS action message.
+	 * @param amsg Device action message.
 	 * @return New sign message, or null on error. */
-	private SignMessage createMsgSched(DmsActionMsg amsg) {
+	private SignMessage createMsgSched(DeviceActionMsg amsg) {
 		assert (amsg != null);
 		DeviceAction da = amsg.action;
 		String ms = amsg.getMulti();
@@ -703,8 +703,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return msg_sched;
 	}
 
-	/** Set the scheduled DMS action message */
-	public void setActionMsg(DmsActionMsg amsg) {
+	/** Set the scheduled device action message */
+	public void setActionMsg(DeviceActionMsg amsg) {
 		SignMessage sm = (amsg != null) ? createMsgSched(amsg) : null;
 		setPrices(amsg);
 		if (setMsgSchedNotify(sm))
@@ -750,7 +750,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private transient ArrayList<PriceMessageEvent> prices;
 
 	/** Set tolling prices */
-	private void setPrices(DmsActionMsg amsg) {
+	private void setPrices(DeviceActionMsg amsg) {
 		prices = (amsg != null) ? amsg.getPrices() : null;
 	}
 

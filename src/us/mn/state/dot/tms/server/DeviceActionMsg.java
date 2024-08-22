@@ -63,13 +63,13 @@ import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
- * A DMS action message parses action tags, which are similar to MULTI, but
+ * A device action message parses action tags, which are similar to MULTI, but
  * processed before sending to the sign.
  *
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DmsActionMsg {
+public class DeviceActionMsg {
 
 	/** Empty text span */
 	static private final String EMPTY_SPAN = "";
@@ -141,6 +141,12 @@ public class DmsActionMsg {
 	static private class ActiveSensors {
 		private final ArrayList<WeatherSensor> sensors =
 			new ArrayList<WeatherSensor>();
+		private ActiveSensors(WeatherSensor ws) {
+			if (ws != null) {
+				if (!WeatherSensorHelper.isSampleExpired(ws))
+					this.sensors.add(ws);
+			}
+		}
 		private ActiveSensors(WeatherSensor[] sensors) {
 			for (WeatherSensor ws: sensors) {
 				if (!WeatherSensorHelper.isSampleExpired(ws))
@@ -200,10 +206,10 @@ public class DmsActionMsg {
 	/** Device action */
 	public final DeviceAction action;
 
-	/** DMS for message formatting */
-	private final DMSImpl dms;
+	/** Device in question */
+	private final DeviceImpl device;
 
-	/** DMS location */
+	/** Device location */
 	private final GeoLoc loc;
 
 	/** Schedule debug log */
@@ -244,7 +250,7 @@ public class DmsActionMsg {
 		float price)
 	{
 		return new PriceMessageEvent(EventType.PRICE_DEPLOYED,
-			dms.getName(), zid, det, price);
+			device.getName(), zid, det, price);
 	}
 
 	/** Get tolling prices */
@@ -255,7 +261,7 @@ public class DmsActionMsg {
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		return action.toString() + " on " + dms;
+		return action.toString() + " on " + device;
 	}
 
 	/** Check if the message is valid */
@@ -265,7 +271,11 @@ public class DmsActionMsg {
 
 	/** Check if the message is rasterizable */
 	public boolean isRasterizable() {
-		return isValid() && DMSHelper.isRasterizable(dms, multi);
+		if (isValid() && device instanceof DMSImpl) {
+			DMSImpl dms = (DMSImpl) device;
+			return DMSHelper.isRasterizable(dms, multi);
+		} else
+			return false;
 	}
 
 	/** Get the MULTI string */
@@ -283,11 +293,13 @@ public class DmsActionMsg {
 		return EMPTY_SPAN;
 	}
 
-	/** Create a new DMS action message */
-	public DmsActionMsg(DeviceAction da, DMSImpl d, DebugLog l) {
+	/** Create a new device action message */
+	public DeviceActionMsg(DeviceAction da, DeviceImpl d, GeoLoc gl,
+		DebugLog l)
+	{
 		action = da;
-		dms = d;
-		loc = d.getGeoLoc();
+		device = d;
+		loc = gl;
 		dlog = l;
 		valid = true;
 		multi = processAction();
@@ -297,13 +309,13 @@ public class DmsActionMsg {
 		}
 	}
 
-	/** Get the MULTI string for the DMS action */
+	/** Get the MULTI string for the device action */
 	private String getActionMulti() {
 		MsgPattern pat = action.getMsgPattern();
 		return (pat != null) ? pat.getMulti().trim() : EMPTY_SPAN;
 	}
 
-	/** Process a DMS action */
+	/** Process a device action */
 	private String processAction() {
 		String ms = getActionMulti();
 		return (ms.length() > 0) ? process(ms) : null;
@@ -413,7 +425,7 @@ public class DmsActionMsg {
 
 	/** Lookup a feed message */
 	private String getFeedMsg(String fid) {
-		FeedMsg msg = FeedBucket.getMessage(fid, dms.getName());
+		FeedMsg msg = FeedBucket.getMessage(fid, device.getName());
 		return (msg != null)
 		      ? getFeedMsg(msg)
 		      : fail("No message for sign");
@@ -431,8 +443,13 @@ public class DmsActionMsg {
 
 	/** Test if a feed message is valid */
 	private boolean isFeedMsgValid(String ms) {
-		MsgPattern pat = action.getMsgPattern();
-		return MsgPatternHelper.validateLines(pat, dms, ms) == null;
+		if (device instanceof DMSImpl) {
+			DMSImpl dms = (DMSImpl) device;
+			MsgPattern pat = action.getMsgPattern();
+			return MsgPatternHelper.validateLines(pat, dms, ms)
+			    == null;
+		} else
+			return false;
 	}
 
 	/** Calculate speed advisory span */
@@ -444,7 +461,7 @@ public class DmsActionMsg {
 		      : fail("Corridor not found");
 	}
 
-	/** Lookup the corridor for the DMS */
+	/** Lookup the corridor for the device */
 	private Corridor lookupCorridor() {
 		return BaseObjectImpl.corridors.getCorridor(loc);
 	}
@@ -497,7 +514,13 @@ public class DmsActionMsg {
 
 	/** Get active RWIS weather sensors */
 	private ActiveSensors activeSensors() {
-		return new ActiveSensors(dms.getWeatherSensors());
+		if (device instanceof DMSImpl) {
+			DMSImpl dms = (DMSImpl) device;
+			return new ActiveSensors(dms.getWeatherSensors());
+		} else {
+			WeatherSensor ws = WeatherSensorHelper.findNearest(loc);
+			return new ActiveSensors(ws);
+		}
 	}
 
 	/** Make an RWIS slippery condition span.
@@ -726,11 +749,12 @@ public class DmsActionMsg {
 			TollZoneImpl tz = lookupZone(zid);
 			if (null == tz)
 				return fail("Toll zone not found: " + zid);
-			VehicleSampler vs = tz.findMaxDensity(dms.getName(),
+			VehicleSampler vs = tz.findMaxDensity(device.getName(),
 				loc);
 			if (null == vs)
 				return fail("Zone sampler not found: " + zid);
-			Float zone_price = tz.getPrice(dms.getName(), vs, loc);
+			Float zone_price = tz.getPrice(device.getName(), vs,
+				loc);
 			if (null == zone_price)
 				return fail("No Zone density: " + zid);
 			last_zid = zid;
@@ -772,7 +796,7 @@ public class DmsActionMsg {
 		if (r != null && r.legCount() > 0)
 			processTravelTime(r, sid, mode, o_txt);
 		else {
-			logEvent(EventType.TT_NO_ROUTE, dms.getName(), sid);
+			logEvent(EventType.TT_NO_ROUTE, device.getName(), sid);
 			fail("No route to destination: " + sid);
 		}
 	}
@@ -798,7 +822,7 @@ public class DmsActionMsg {
 			travel.put(sid, createTravelTime(r, mode, o_txt));
 		}
 		catch (BadRouteException e) {
-			logEvent(e.event_type, dms.getName(), e.sid);
+			logEvent(e.event_type, device.getName(), e.sid);
 			fail("Invalid route: " + e.getMessage());
 		}
 	}
@@ -960,7 +984,7 @@ public class DmsActionMsg {
 		Integer stat = ClearGuidePoller.cg_dms.getStat(
 			dms, rid, min, mode, ridx);
 		if (dlog.isOpen()) {
-			dlog.log("DmsActionMsg.calcClearGuideAdvisory:" +
+			dlog.log("calcClearGuideAdvisory:" +
 				" dms=" + dms + " rid=" + rid +
 				" min=" + min + " mode=" + mode +
 				" ridx=" + ridx + " stat=" + stat);

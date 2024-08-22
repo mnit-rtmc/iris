@@ -20,6 +20,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.geo.Position;
+import us.mn.state.dot.tms.units.Distance;
 
 /**
  * Helper class for weather sensors.
@@ -90,13 +92,34 @@ public class WeatherSensorHelper extends BaseHelper {
 	}
 
 	/** Get a sorted map of values to be shown in device tool-tip */
-	//FIXME: Rewrite when we get a more robust RWIS implementation 
-	public Map<String, Object> getTooltipMap(WeatherSensor ws) {
+	static public Map<String, Object> getTooltipMap(WeatherSensor ws) {
 		Map<String, Object> map = new TreeMap<String, Object>();
 		map.put("MaxWindGustSpeed", ws.getMaxWindGustSpeed());
 		map.put("Visibility", ws.getVisibility());
 		map.put("SurfTemp", ws.getSurfTemp());
 		map.put("PvmtFriction", ws.getPvmtFriction());
 		return map;
+	}
+
+	/** Find the nearest WeatherSensor to a location */
+	static public WeatherSensor findNearest(GeoLoc geo_loc) {
+		WeatherSensor nearest = null;
+		Position pos = GeoLocHelper.getWgs84Position(geo_loc);
+		if (pos != null) {
+			Distance dist = null;
+			Iterator<WeatherSensor> it = iterator();
+			while (it.hasNext()) {
+				WeatherSensor ws = it.next();
+				GeoLoc loc = ws.getGeoLoc();
+				Distance d = GeoLocHelper.distanceTo(loc, pos);
+				if (dist == null ||
+				    (d != null && d.m() < dist.m()))
+				{
+					nearest = ws;
+					dist = d;
+				}
+			}
+		}
+		return nearest;
 	}
 }
