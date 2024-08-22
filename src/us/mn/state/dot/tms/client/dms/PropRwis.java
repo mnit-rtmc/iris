@@ -71,8 +71,8 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 		return ws_map.values().toArray(new WeatherSensor[0]);
 	}
 
-	/** Closest WeatherSensor label */
-	private final JLabel closest_lbl = new JLabel();
+	/** Nearest WeatherSensor label */
+	private final JLabel nearest_lbl = new JLabel();
 
 	/** Distance label */
 	private final JLabel distance_lbl = new JLabel();
@@ -117,8 +117,8 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 				}
 			}
 		});
-		add("dms.rwis.closest");
-		add(closest_lbl, Stretch.LAST);
+		add("dms.rwis.nearest");
+		add(nearest_lbl, Stretch.LAST);
 		add("dms.rwis.distance");
 		add(distance_lbl, Stretch.LAST);
 		add(new JLabel(" "), Stretch.CENTER);
@@ -135,14 +135,14 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 		if (ws != null) {
 			Distance dist =
 				GeoLocHelper.distanceTo(loc, ws.getGeoLoc());
-			closest_lbl.setText(ws.getName());
+			nearest_lbl.setText(ws.getName());
 			boolean useSI =
 				SystemAttrEnum.CLIENT_UNITS_SI.getBoolean();
 			Units u = useSI ? Units.KILOMETERS : Units.MILES;
 			String dStr = dist.convert(u).toString();
 			distance_lbl.setText(dStr);
 		} else {
-			closest_lbl.setText(I18N.get("dms.rwis.none.defined"));
+			nearest_lbl.setText(I18N.get("dms.rwis.none.nearby"));
 			distance_lbl.setText("");
 		}
 		repaint();
