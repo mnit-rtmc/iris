@@ -34,6 +34,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.ParkingArea;
@@ -54,6 +55,7 @@ import us.mn.state.dot.tms.server.event.PriceMessageEvent;
 import us.mn.state.dot.tms.server.event.TravelTimeEvent;
 import us.mn.state.dot.tms.server.comm.clearguide.ClearGuidePoller;
 import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
 import us.mn.state.dot.tms.units.Speed;
@@ -141,6 +143,7 @@ public class DeviceActionMsg {
 	static private class ActiveSensors {
 		private final ArrayList<WeatherSensor> sensors =
 			new ArrayList<WeatherSensor>();
+		private ActiveSensors() { }
 		private ActiveSensors(WeatherSensor ws) {
 			if (ws != null) {
 				if (!WeatherSensorHelper.isSampleExpired(ws))
@@ -516,11 +519,19 @@ public class DeviceActionMsg {
 	private ActiveSensors activeSensors() {
 		if (device instanceof DMSImpl) {
 			DMSImpl dms = (DMSImpl) device;
-			return new ActiveSensors(dms.getWeatherSensors());
-		} else {
-			WeatherSensor ws = WeatherSensorHelper.findNearest(loc);
-			return new ActiveSensors(ws);
+			WeatherSensor[] sensors = dms.getWeatherSensors();
+			if (sensors != null && sensors.length > 0)
+				return new ActiveSensors(sensors);
 		}
+		WeatherSensor ws = WeatherSensorHelper.findNearest(loc);
+		Distance dist = GeoLocHelper.distanceTo(loc, ws.getGeoLoc());
+		Distance max_dist = new Distance(
+			SystemAttrEnum.RWIS_AUTO_MAX_DIST_MILES.getFloat(),
+			MILES
+		);
+		return (dist.m() <= max_dist.m())
+		      ? new ActiveSensors(ws)
+		      : new ActiveSensors();
 	}
 
 	/** Make an RWIS slippery condition span.

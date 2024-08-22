@@ -94,4 +94,8 @@ DELETE FROM iris.privilege WHERE type_n = 'lane_action';
 DELETE FROM iris.resource_type WHERE name = 'lane_action';
 DROP TABLE iris.lane_action;
 
+-- Re-introduce RWIS auto max distance
+INSERT INTO iris.system_attribute (name, value) VALUES
+    ('rwis_auto_max_dist_miles', '1.0');
+
 COMMIT;

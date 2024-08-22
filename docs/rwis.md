@@ -52,14 +52,17 @@ Attribute Name            | Field          | Default Threshold
 `rwis_flooding_1_mm`      | `precip`       | 6
 `rwis_flooding_2_mm`      | `precip`       | 8
 
-Also, the `rwis_obs_age_limit_secs` determines the maximum valid age for a
-weather sensor observation.
+Attribute Name             | Description
+---------------------------|------------------------------------------
+`rwis_auto_max_dist_miles` | Maximum distance to auto-associate device
+`rwis_obs_age_limit_secs`  | Maximum valid age for an observation
 
 ## DMS Weather Sensors
 
 An RWIS action tag can use data from one or more weather sensors.  Each DMS can
 have its own set of sensors configured.  A sign with no associated weather
-sensors will not activate messages from RWIS action tags.
+sensors will use the nearest weather sensor, as long as it is not further than
+`rwis_auto_max_dist_miles` away.
 
 ## Testing Condition Levels
 

@@ -192,6 +192,7 @@ operation_retry_threshold	3
 price_message_event_purge_days	0
 route_max_legs	8
 route_max_miles	16
+rwis_auto_max_dist_miles	1.0
 rwis_obs_age_limit_secs	900
 rwis_slippery_1_percent	70
 rwis_slippery_2_degrees	0

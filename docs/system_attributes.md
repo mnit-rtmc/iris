@@ -84,7 +84,8 @@ System Attribute                 | Description
 `price_message_event_purge_days` | Number of days after which price message events will be purged
 `route_max_legs`                 | Maximum number of corridors for route finding
 `route_max_miles`                | Maximum distance (miles) for route finding
-`rwis_obs_age_limit_secs`        | Weather sensor observations with an age (in secs) greater than this value will be ignored
+`rwis_auto_max_dist_miles`       | Maximum distance to auto-associate a weather sensor to a device
+`rwis_obs_age_limit_secs`        | Weather sensor observations with an age greater than this value will be ignored
 `rwis_slippery_1_percent`        | Friction threshold for slippery 1 condition
 `rwis_slippery_2_degrees`        | Temperature threshold for slippery 2 condition
 `rwis_slippery_3_percent`        | Friction threshold for slippery 3 condition
