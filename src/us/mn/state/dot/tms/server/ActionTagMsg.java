@@ -31,7 +31,6 @@ import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -273,15 +272,6 @@ public class ActionTagMsg {
 	/** Check if passing all action tag conditions (stipulations) */
 	public boolean isPassing() {
 		return passing;
-	}
-
-	/** Check if the message is rasterizable */
-	public boolean isRasterizable() {
-		if ((multi != null) && device instanceof DMSImpl) {
-			DMSImpl dms = (DMSImpl) device;
-			return DMSHelper.isRasterizable(dms, multi);
-		} else
-			return false;
 	}
 
 	/** Get the MULTI string */

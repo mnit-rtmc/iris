@@ -96,7 +96,7 @@ public class DeviceActionJob extends Job {
 		if (shouldReplace(da, dms)) {
 			ActionTagMsg amsg = new ActionTagMsg(da, dms,
 				dms.getGeoLoc(), logger);
-			if (amsg.isRasterizable())
+			if (DMSHelper.isRasterizable(dms, amsg.getMulti()))
 				dms_actions.put(dms, amsg);
 		} else if (logger.isOpen())
 			logSched(dms, "dropping " + da);
