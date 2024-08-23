@@ -94,7 +94,7 @@ public class ActionPlanHelper extends BaseHelper {
 		return signs;
 	}
 
-	/** Get set of Lane Markings controlled by an action plan */
+	/** Get set of lane markings controlled by an action plan */
 	static public TreeSet<LaneMarking> findLaneMarkings(ActionPlan ap) {
 		Set<String> hashtags = findHashtags(ap);
 		TreeSet<LaneMarking> markings = new TreeSet<LaneMarking>(
@@ -111,5 +111,24 @@ public class ActionPlanHelper extends BaseHelper {
 			}
 		}
 		return markings;
+	}
+
+	/** Get set of ramp meters controlled by an action plan */
+	static public TreeSet<RampMeter> findRampMeters(ActionPlan ap) {
+		Set<String> hashtags = findHashtags(ap);
+		TreeSet<RampMeter> meters = new TreeSet<RampMeter>(
+			new NumericAlphaComparator<RampMeter>());
+		Iterator<RampMeter> it = RampMeterHelper.iterator();
+		while (it.hasNext()) {
+			RampMeter rm = it.next();
+			Hashtags tags = new Hashtags(rm.getNotes());
+			for (String ht: hashtags) {
+				if (tags.contains(ht)) {
+					meters.add(rm);
+					break;
+				}
+			}
+		}
+		return meters;
 	}
 }

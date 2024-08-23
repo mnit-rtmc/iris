@@ -51,7 +51,6 @@ import us.mn.state.dot.tms.Gps;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.MapExtent;
-import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
@@ -470,15 +469,6 @@ public class SonarState extends Client {
 		return beacon_actions;
 	}
 
-	/** Cache of meter actions */
-	private final TypeCache<MeterAction> meter_actions =
-		new TypeCache<MeterAction>(MeterAction.class, this);
-
-	/** Get the meter action cache */
-	public TypeCache<MeterAction> getMeterActions() {
-		return meter_actions;
-	}
-
 	/** Cache of words */
 	private final TypeCache<Word> words =
 		new TypeCache<Word>(Word.class, this);
@@ -674,7 +664,6 @@ public class SonarState extends Client {
 		populateReadable(time_actions);
 		populateReadable(device_actions);
 		populateReadable(beacon_actions);
-		populateReadable(meter_actions);
 		populateReadable(gpses);
 		if (canRead(Gps.SONAR_TYPE)) {
 			gpses.ignoreAttribute("operation");

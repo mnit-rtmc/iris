@@ -20,7 +20,6 @@ import javax.swing.JTabbedPane;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.BeaconAction;
 import us.mn.state.dot.tms.DeviceAction;
-import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.client.Session;
@@ -40,7 +39,6 @@ public class ActionPlanTab extends JPanel {
 		return s.canRead(ActionPlan.SONAR_TYPE) &&
 		       s.canRead(BeaconAction.SONAR_TYPE) &&
 		       s.canRead(DeviceAction.SONAR_TYPE) &&
-		       s.canRead(MeterAction.SONAR_TYPE) &&
 		       s.canRead(PlanPhase.SONAR_TYPE) &&
 		       s.canRead(TimeAction.SONAR_TYPE);
 	}
@@ -60,9 +58,6 @@ public class ActionPlanTab extends JPanel {
 	/** Beacon action table panel */
 	private final ProxyTablePanel<BeaconAction> b_panel;
 
-	/** Meter action table panel */
-	private final ProxyTablePanel<MeterAction> m_panel;
-
 	/** Create a new action plan panel */
 	public ActionPlanTab(Session s) {
 		session = s;
@@ -77,8 +72,6 @@ public class ActionPlanTab extends JPanel {
 			new DeviceActionModel(s, null));
 		b_panel = new ProxyTablePanel<BeaconAction>(
 			new BeaconActionModel(s, null));
-		m_panel = new ProxyTablePanel<MeterAction>(
-			new MeterActionModel(s, null));
 	}
 
 	/** Initializze the widgets on the panel */
@@ -87,12 +80,10 @@ public class ActionPlanTab extends JPanel {
 		t_panel.initialize();
 		d_panel.initialize();
 		b_panel.initialize();
-		m_panel.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("action.plan.schedule"), t_panel);
 		tab.add(I18N.get("action.plan.device"), d_panel);
 		tab.add(I18N.get("action.plan.beacon"), b_panel);
-		tab.add(I18N.get("action.plan.meter"), m_panel);
 		GroupLayout gl = new GroupLayout(this);
 		GroupLayout.ParallelGroup hg = gl.createParallelGroup();
 		GroupLayout.SequentialGroup vg = gl.createSequentialGroup();
@@ -112,7 +103,6 @@ public class ActionPlanTab extends JPanel {
 		t_panel.dispose();
 		d_panel.dispose();
 		b_panel.dispose();
-		m_panel.dispose();
 	}
 
 	/** Change the selected action plan */
@@ -121,6 +111,5 @@ public class ActionPlanTab extends JPanel {
 		t_panel.setModel(new TimeActionModel(session, ap));
 		d_panel.setModel(new DeviceActionModel(session, ap));
 		b_panel.setModel(new BeaconActionModel(session, ap));
-		m_panel.setModel(new MeterActionModel(session, ap));
 	}
 }

@@ -35,10 +35,9 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.LaneMarkingHelper;
-import us.mn.state.dot.tms.MeterAction;
-import us.mn.state.dot.tms.MeterActionHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
@@ -358,8 +357,6 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			if (getSyncActions()) {
 				validateDeviceActions(); // throws exception
 				validateBeaconActions(); // throws exception
-				// FIXME: any way to validate camera actions?
-				validateMeterActions();  // throws exception
 			}
 			store.update(this, "phase", p);
 			setPhase(p);
@@ -405,7 +402,10 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Check if a device action is deployable */
 	private boolean isDeployable(DeviceAction da) {
 		String ht = da.getHashtag();
-		return areDmsDeployable(ht) && areLaneMarkingsDeployable(ht);
+		// FIXME: any way to validate camera actions?
+		return areDmsDeployable(ht)
+		    && areLaneMarkingsDeployable(ht)
+		    && areRampMetersDeployable(ht);
 	}
 
 	/** Check if all DMS for a hashtag are deployable */
@@ -442,6 +442,23 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		return true;
 	}
 
+	/** Check if all ramp meters for a hashtag are deployable */
+	private boolean areRampMetersDeployable(String ht) {
+		Iterator<RampMeter> it = RampMeterHelper.iterator();
+		while (it.hasNext()) {
+			RampMeter rm = it.next();
+			if (rm instanceof RampMeterImpl) {
+				RampMeterImpl rmi = (RampMeterImpl) rm;
+				if (rmi.isFailed()) {
+					if (new Hashtags(rmi.getNotes())
+					   .contains(ht))
+						return false;
+				}
+			}
+		}
+		return true;
+	}
+
 	/**
 	 * Validate that all beacon actions are deployable.
 	 * @throws ChangeVetoException
@@ -462,30 +479,6 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		Beacon b = ba.getBeacon();
 		if (b instanceof BeaconImpl)
 			return !((BeaconImpl) b).isFailed();
-		else
-			return false;
-	}
-
-	/**
-	 * Validate that all meter actions are deployable.
-	 * @throws ChangeVetoException
-	 */
-	private void validateMeterActions() throws ChangeVetoException {
-		Iterator<MeterAction> it = MeterActionHelper.iterator();
-		while (it.hasNext()) {
-			MeterAction ma = it.next();
-			if (ma.getActionPlan() == this && !isDeployable(ma)) {
-				throw new ChangeVetoException("Meter action " +
-					ma.getName() + " not deployable");
-			}
-		}
-	}
-
-	/** Check if a meter action is deployable */
-	private boolean isDeployable(MeterAction ma) {
-		RampMeter rm = ma.getRampMeter();
-		if (rm instanceof RampMeterImpl)
-			return !((RampMeterImpl) rm).isFailed();
 		else
 			return false;
 	}

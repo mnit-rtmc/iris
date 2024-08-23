@@ -25,8 +25,6 @@ import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.MeterAction;
-import us.mn.state.dot.tms.MeterActionHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
@@ -87,7 +85,8 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 			return proxy.getActive() &&
 			      !ActionPlanHelper.findCameras(proxy).isEmpty();
 		case METER:
-			return proxy.getActive() && hasMeterAction(proxy);
+			return proxy.getActive() &&
+			      !ActionPlanHelper.findRampMeters(proxy).isEmpty();
 		case LANE:
 			return proxy.getActive() &&
 			      !ActionPlanHelper.findLaneMarkings(proxy).isEmpty();
@@ -131,17 +130,6 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		while (it.hasNext()) {
 			BeaconAction ba = it.next();
 			if (ba.getActionPlan() == p)
-				return true;
-		}
-		return false;
-	}
-
-	/** Test if an action plan has meter actions */
-	private boolean hasMeterAction(ActionPlan p) {
-		Iterator<MeterAction> it = MeterActionHelper.iterator();
-		while (it.hasNext()) {
-			MeterAction ma = it.next();
-			if (ma.getActionPlan() == p)
 				return true;
 		}
 		return false;

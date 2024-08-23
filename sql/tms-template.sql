@@ -440,7 +440,6 @@ lcs	t
 lcs_array	f
 lcs_indication	f
 map_extent	f
-meter_action	f
 modem	f
 monitor_style	f
 msg_pattern	f
@@ -702,7 +701,6 @@ PRV_0119	plan_admin	beacon_action		t
 PRV_0120	plan_admin	day_plan		t
 PRV_0121	plan_admin	day_matcher		t
 PRV_0122	plan_admin	device_action		t
-PRV_0124	plan_admin	meter_action		t
 PRV_0125	plan_admin	plan_phase		t
 PRV_0126	plan_admin	time_action		t
 PRV_0127	plan_control	action_plan	phase	t
@@ -713,7 +711,6 @@ PRV_0131	plan_tab	plan_phase		f
 PRV_0132	plan_tab	time_action		f
 PRV_0133	plan_tab	device_action		f
 PRV_0134	plan_tab	beacon_action		f
-PRV_0136	plan_tab	meter_action		f
 PRV_0137	sensor_admin	detector		t
 PRV_0138	sensor_admin	r_node		t
 PRV_0139	sensor_admin	weather_sensor		t
@@ -4944,19 +4941,14 @@ CREATE VIEW ramp_meter_view AS
     LEFT JOIN geo_loc_view l ON m.geo_loc = l.name;
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
 
-CREATE TABLE iris.meter_action (
-    name VARCHAR(30) PRIMARY KEY,
-    action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-    ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter,
-    phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
-);
-
 CREATE VIEW meter_action_view AS
-    SELECT ramp_meter, ta.phase, time_of_day, day_plan, sched_date
-    FROM iris.meter_action ma, iris.action_plan ap, iris.time_action ta
-    WHERE ma.action_plan = ap.name
-    AND ap.name = ta.action_plan
-    AND active = true
+    SELECT h.name AS ramp_meter, da.action_plan, ta.phase, h.hashtag,
+           msg_pattern, time_of_day, day_plan, sched_date
+    FROM iris.device_action da
+    JOIN iris.hashtag h ON h.hashtag = da.hashtag AND resource_n = 'ramp_meter'
+    JOIN iris.action_plan ap ON da.action_plan = ap.name
+    LEFT JOIN iris.time_action ta ON ta.action_plan = ap.name
+    WHERE active = true
     ORDER BY ramp_meter, time_of_day;
 GRANT SELECT ON meter_action_view TO PUBLIC;
 

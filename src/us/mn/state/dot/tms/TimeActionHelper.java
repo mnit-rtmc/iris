@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,12 +17,13 @@ package us.mn.state.dot.tms;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.TreeMap;
 
 /**
  * Helper class for time actions.
@@ -257,5 +258,23 @@ public class TimeActionHelper extends BaseHelper {
 			if (!DayPlanHelper.isHoliday(dp, pst))
 				filter.check(pst.getTime(), ta);
 		}
+	}
+
+	/** Find all time actions from a list of device actions */
+	static public ArrayList<TimeAction> find(
+		ArrayList<DeviceAction> actions)
+	{
+		HashSet<ActionPlan> plans = new HashSet<ActionPlan>();
+		for (DeviceAction da : actions) {
+			plans.add(da.getActionPlan());
+		}
+		ArrayList<TimeAction> times = new ArrayList<TimeAction>();
+		Iterator<TimeAction> it = iterator();
+		while (it.hasNext()) {
+			TimeAction ta = it.next();
+			if (plans.contains(ta.getActionPlan()))
+				times.add(ta);
+		}
+		return times;
 	}
 }

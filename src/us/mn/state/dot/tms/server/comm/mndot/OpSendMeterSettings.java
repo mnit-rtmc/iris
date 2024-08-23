@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,13 +16,10 @@ package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.Iterator;
-import us.mn.state.dot.tms.ActionPlan;
-import us.mn.state.dot.tms.MeterAction;
-import us.mn.state.dot.tms.MeterActionHelper;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.MeterAlgorithm;
-import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
+import us.mn.state.dot.tms.TimingTable;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
@@ -85,45 +82,28 @@ public class OpSendMeterSettings extends Op170Device {
 
 	/** Update the timing table with active timing plans */
 	private void updateTimingTable() {
-		Iterator<MeterAction> it = MeterActionHelper.iterator();
-		while (it.hasNext()) {
-			MeterAction ma = it.next();
-			if (ma.getRampMeter() == meter)
-			    updateTable(ma);
-		}
-	}
-
-	/** Update one timing table with a meter action */
-	private void updateTable(MeterAction ma) {
-		ActionPlan ap = ma.getActionPlan();
-		if (ap.getActive()) {
-			Iterator<TimeAction> it = TimeActionHelper.iterator();
-			while (it.hasNext()) {
-				TimeAction ta = it.next();
-				if (ta.getActionPlan() == ap)
-					updateTable(ma, ta);
-			}
+		Hashtags tags = new Hashtags(meter.getNotes());
+		TimingTable table = new TimingTable(tags);
+		for (int e = 0;; e++) {
+			int start = table.lookupStart(e);
+			int stop = table.lookupStop(e);
+			if (start > 0 && stop > 0)
+				updateTable(start, stop);
 		}
 	}
 
 	/** Update one timing table with a time action */
-	private void updateTable(MeterAction ma, TimeAction ta) {
-		Integer min = TimeActionHelper.getMinuteOfDay(ta);
-		if (min != null)
-			updateTable(ma, ta, min);
-	}
-
-	/** Update one timing table with a time action */
-	private void updateTable(MeterAction ma, TimeAction ta, int min) {
-		int p = TimeActionHelper.getPeriod(min);
-		int hhmm = minuteHHMM(min);
+	private void updateTable(int start, int stop) {
+		int p = TimeActionHelper.getPeriod(start);
+		if (TimeActionHelper.getPeriod(stop) != p)
+			return;
+		int hhmm = minuteHHMM(start);
+		table_start[p] = Math.min(table_start[p], hhmm);
+		hhmm = minuteHHMM(stop);
+		table_stop[p] = Math.max(table_stop[p], hhmm);
 		table_red[p] = RedTime.fromReleaseRate(getTarget(p),
 			meter.getMeterType());
 		table_rate[p] = MeterRate.TOD;
-		if (ma.getPhase() == ta.getPhase())
-			table_start[p] = Math.min(table_start[p], hhmm);
-		else
-			table_stop[p] = Math.max(table_stop[p], hhmm);
 	}
 
 	/** Get the target release rate for the given period */

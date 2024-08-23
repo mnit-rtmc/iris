@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.ActionPlan;
@@ -28,6 +29,8 @@ import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.LaneMarkingHelper;
+import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.RampMeterHelper;
 
 /**
  * Job to perform device actions.
@@ -42,6 +45,10 @@ public class DeviceActionJob extends Job {
 	/** Mapping of DMS to action tag messages */
 	private final HashMap<DMSImpl, ActionTagMsg> dms_actions =
 		new HashMap<DMSImpl, ActionTagMsg>();
+
+	/** Mapping of ramp meters to operating states */
+	private final HashMap<RampMeterImpl, Boolean> meters =
+		new HashMap<RampMeterImpl, Boolean>();
 
 	/** Create a new device action job */
 	public DeviceActionJob(DebugLog dl) {
@@ -69,12 +76,14 @@ public class DeviceActionJob extends Job {
 					performDmsAction(da);
 				performCameraAction(da);
 				performLaneMarkingAction(da, deploy);
+				performRampMeterAction(da, deploy);
 			}
 		}
 		updateDmsMessages();
+		updateRampMeterStates();
 	}
 
-	/** Perform a DMS action */
+	/** Perform an action for DMS */
 	private void performDmsAction(DeviceAction da) {
 		String ht = da.getHashtag();
 		Iterator<DMS> it = DMSHelper.iterator();
@@ -124,7 +133,7 @@ public class DeviceActionJob extends Job {
 		}
 	}
 
-	/** Perform a camera action */
+	/** Perform an action for cameras */
 	private void performCameraAction(DeviceAction da) {
 		// FIXME: only perform this action when phase is first changed
 		Iterator<Camera> it = CameraHelper.iterator();
@@ -149,7 +158,7 @@ public class DeviceActionJob extends Job {
 		}
 	}
 
-	/** Perform a lane marking action */
+	/** Perform an action for lane markings */
 	private void performLaneMarkingAction(DeviceAction da, boolean deploy) {
 		Iterator<LaneMarking> it = LaneMarkingHelper.iterator();
 		while (it.hasNext()) {
@@ -172,5 +181,38 @@ public class DeviceActionJob extends Job {
 			if (amsg.isPassing())
 				lm.setDeployed(deploy);
 		}
+	}
+
+	/** Perform an action for ramp meters */
+	private void performRampMeterAction(DeviceAction da, boolean deploy) {
+		Iterator<RampMeter> it = RampMeterHelper.iterator();
+		while (it.hasNext()) {
+			RampMeter rm = it.next();
+			if (rm instanceof RampMeterImpl) {
+				performRampMeterAction(da, deploy,
+					(RampMeterImpl) rm);
+			}
+		}
+	}
+
+	/** Perform a ramp meter action */
+	private void performRampMeterAction(DeviceAction da, boolean deploy,
+		RampMeterImpl rm)
+	{
+		Hashtags tags = new Hashtags(rm.getNotes());
+		if (tags.contains(da.getHashtag())) {
+			ActionTagMsg amsg = new ActionTagMsg(da, rm,
+				rm.getGeoLoc(), logger);
+			boolean operate = amsg.isPassing() && deploy;
+			if (meters.containsKey(rm))
+				operate |= meters.get(rm);
+			meters.put(rm, operate);
+		}
+	}
+
+	/** Update the ramp meter states */
+	private void updateRampMeterStates() {
+		for (Map.Entry<RampMeterImpl, Boolean> e: meters.entrySet())
+			e.getKey().setOperating(e.getValue());
 	}
 }

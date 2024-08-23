@@ -32,8 +32,6 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.MeterAction;
-import us.mn.state.dot.tms.MeterActionHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.Session;
@@ -215,12 +213,6 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 			if (ba.getActionPlan() == ap)
 				phases.add(ba.getPhase());
 		}
-		Iterator<MeterAction> mit = MeterActionHelper.iterator();
-		while (mit.hasNext()) {
-			MeterAction ma = mit.next();
-			if (ma.getActionPlan() == ap)
-				phases.add(ma.getPhase());
-		}
 		return phases;
 	}
 
@@ -275,15 +267,8 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 	}
 
 	/** Get a count a ramp meters controlled by an action plan */
-	private int countMeters(ActionPlan p) {
-		HashSet<RampMeter> plan_meters = new HashSet<RampMeter>();
-		Iterator<MeterAction> mit = MeterActionHelper.iterator();
-		while (mit.hasNext()) {
-			MeterAction ma = mit.next();
-			if (ma.getActionPlan() == p)
-				plan_meters.add(ma.getRampMeter());
-		}
-		return plan_meters.size();
+	private int countMeters(ActionPlan ap) {
+		return ActionPlanHelper.findRampMeters(ap).size();
 	}
 
 	/** Check if the user is permitted to update the given action plan */

@@ -5,6 +5,44 @@ BEGIN;
 
 SELECT iris.update_version('5.59.0', '5.60.0');
 
+-- temp function
+CREATE FUNCTION meter_plan_hashtag(TEXT) RETURNS TEXT AS $mph$
+DECLARE
+    action_plan ALIAS FOR $1;
+    words TEXT[];
+    word TEXT;
+    res TEXT := '#';
+BEGIN
+    words = regexp_split_to_array(
+        regexp_replace(action_plan, '(\d)_(\d)', '\1s\2', 'g'),
+        '_'
+    );
+    FOREACH word IN ARRAY words
+    LOOP
+        IF length(word) > 2 THEN
+            res = res || initcap(word);
+        ELSE
+            res = res || upper(word);
+        END IF;
+    END LOOP;
+    RETURN res;
+END;
+$mph$ LANGUAGE plpgsql;
+
+-- Concatenate meter action hashtags to notes fields
+WITH cte AS (
+    SELECT ramp_meter, string_agg(
+        DISTINCT(meter_plan_hashtag(action_plan)),
+        ' ' ORDER BY meter_plan_hashtag(action_plan)
+    ) hashtags
+    FROM iris.meter_action
+    GROUP BY ramp_meter
+)
+UPDATE iris.ramp_meter m
+SET notes = concat_ws(e'\n\n', notes, h.hashtags)
+FROM cte h
+WHERE h.ramp_meter = m.name;
+
 ALTER TABLE iris.sign_config DROP CONSTRAINT sign_config_module_width_check;
 ALTER TABLE iris.sign_config ADD CONSTRAINT sign_config_check
     CHECK (
@@ -19,13 +57,24 @@ ALTER TABLE iris.sign_config ADD CONSTRAINT sign_config_check1
         (pixel_height % module_height) = 0
     );
 
--- Rename dms_action to device_action
+-- Replace camera/dms/lane/meter actions with device_action
 DROP VIEW dms_toll_zone_view;
 DROP VIEW dms_action_view;
+DROP VIEW meter_action_view;
 
 INSERT INTO iris.resource_type (name, base) VALUES ('device_action', false);
 UPDATE iris.privilege SET type_n = 'device_action' WHERE type_n = 'dms_action';
-DELETE FROM iris.resource_type WHERE name = 'dms_action';
+
+DELETE FROM iris.privilege
+    WHERE type_n = 'lane_action'
+       OR type_n = 'camera_action'
+       OR type_n = 'meter_action';
+
+DELETE FROM iris.resource_type
+    WHERE name = 'camera_action'
+       OR name = 'dms_action'
+       OR name = 'lane_action'
+       OR name = 'meter_action';
 
 CREATE TABLE iris.device_action (
     name VARCHAR(30) PRIMARY KEY,
@@ -44,7 +93,13 @@ INSERT INTO iris.device_action (
 SELECT name, action_plan, phase, dms_hashtag, msg_pattern, msg_priority
 FROM iris.dms_action;
 
-DROP TABLE iris.dms_action;
+INSERT INTO iris.device_action (
+    name, action_plan, phase, hashtag, msg_priority
+)
+SELECT DISTINCT ON (action_plan, phase)
+    name, action_plan, phase, meter_plan_hashtag(action_plan), 1
+FROM iris.meter_action
+ORDER BY action_plan, phase, name;
 
 CREATE VIEW device_action_view AS
     SELECT name, action_plan, phase, hashtag, msg_pattern, msg_priority
@@ -67,6 +122,24 @@ CREATE VIEW dms_toll_zone_view AS
     ON da.msg_pattern = tz.msg_pattern;
 GRANT SELECT ON dms_toll_zone_view TO PUBLIC;
 
+CREATE VIEW meter_action_view AS
+    SELECT h.name AS ramp_meter, da.action_plan, ta.phase, h.hashtag,
+           msg_pattern, time_of_day, day_plan, sched_date
+    FROM iris.device_action da
+    JOIN iris.hashtag h ON h.hashtag = da.hashtag AND resource_n = 'ramp_meter'
+    JOIN iris.action_plan ap ON da.action_plan = ap.name
+    LEFT JOIN iris.time_action ta ON ta.action_plan = ap.name
+    WHERE active = true
+    ORDER BY ramp_meter, time_of_day;
+GRANT SELECT ON meter_action_view TO PUBLIC;
+
+DROP TABLE iris.camera_action;
+DROP TABLE iris.dms_action;
+DROP TABLE iris.lane_action;
+DROP TABLE iris.meter_action;
+
+DROP FUNCTION meter_plan_hashtag(TEXT);
+
 -- Add lane marking hashtag trigger
 CREATE FUNCTION iris.lane_marking_hashtag() RETURNS TRIGGER AS
     $lane_marking_hashtag$
@@ -88,14 +161,6 @@ $lane_marking_hashtag$ LANGUAGE plpgsql;
 CREATE TRIGGER lane_marking_hashtag_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris._lane_marking
     FOR EACH ROW EXECUTE FUNCTION iris.lane_marking_hashtag();
-
--- Remove lane_action and camera_action
-DELETE FROM iris.privilege
-    WHERE type_n = 'lane_action' OR type_n = 'camera_action';
-DELETE FROM iris.resource_type
-    WHERE name = 'lane_action' OR name = 'camera_action';
-DROP TABLE iris.lane_action;
-DROP TABLE iris.camera_action;
 
 -- Re-introduce RWIS auto max distance
 INSERT INTO iris.system_attribute (name, value) VALUES

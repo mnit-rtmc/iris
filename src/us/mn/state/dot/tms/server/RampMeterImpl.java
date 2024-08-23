@@ -32,10 +32,9 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneCode;
-import us.mn.state.dot.tms.MeterAction;
-import us.mn.state.dot.tms.MeterActionHelper;
 import us.mn.state.dot.tms.MeterAlgorithm;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
@@ -44,8 +43,8 @@ import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.SystemAttributeHelper;
-import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
+import us.mn.state.dot.tms.TimingTable;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.geo.Position;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
@@ -369,61 +368,19 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			return getPmTarget();
 	}
 
-	/** Get the start minute for current period */
-	public int getStartMin() {
-		return getTimeActionMinute(true);
-	}
-
 	/** Get the stop minute for current period */
 	public int getStopMin() {
-		return getTimeActionMinute(false);
-	}
-
-	/** Get the minute for a matching time action */
-	private int getTimeActionMinute(boolean start) {
 		int period = currentPeriod();
-		ArrayList<MeterAction> act = getMeterActions();
-		Iterator<TimeAction> it = TimeActionHelper.iterator();
-		while (it.hasNext()) {
-			TimeAction ta = it.next();
-			Integer min = TimeActionHelper.getMinuteOfDay(ta);
-			if (min != null) {
-				if (TimeActionHelper.getPeriod(min) == period) {
-					if (checkTimeAction(ta, start, act))
-						return min;
-				}
-			}
+		Hashtags tags = new Hashtags(getNotes());
+		TimingTable table = new TimingTable(tags);
+		for (int e = 0;; e++) {
+			int min = table.lookupStop(e);
+			if (min <= 0)
+				break;
+			if (TimeActionHelper.getPeriod(min) == period)
+				return min;
 		}
 		return TimeActionHelper.NOON;
-	}
-
-	/** Get a list of all meter actions which control the meter */
-	private ArrayList<MeterAction> getMeterActions() {
-		ArrayList<MeterAction> act = new ArrayList<MeterAction>();
-		Iterator<MeterAction> it = MeterActionHelper.iterator();
-		while (it.hasNext()) {
-			MeterAction ma = it.next();
-			if (ma.getRampMeter() == this) {
-				ActionPlan ap = ma.getActionPlan();
-				if (ap.getActive())
-					act.add(ma);
-			}
-		}
-		return act;
-	}
-
-	/** Check a time action */
-	private boolean checkTimeAction(TimeAction ta, boolean start,
-		ArrayList<MeterAction> act)
-	{
-		for (MeterAction ma: act) {
-			if (ta.getActionPlan() == ma.getActionPlan()) {
-				boolean deploy = ta.getPhase() == ma.getPhase();
-				if (deploy == start)
-					return true;
-			}
-		}
-		return false;
 	}
 
 	/** Advance warning beacon */

@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -53,5 +54,17 @@ public class DeviceActionHelper extends BaseHelper {
 				hashtags.add(da.getHashtag());
 		}
 		return hashtags;
+	}
+
+	/** Find all device actions for a set of hashtags */
+	static public ArrayList<DeviceAction> find(Hashtags tags) {
+		ArrayList<DeviceAction> actions = new ArrayList<DeviceAction>();
+		Iterator<DeviceAction> it = iterator();
+		while (it.hasNext()) {
+			DeviceAction da = it.next();
+			if (tags.contains(da.getHashtag()))
+				actions.add(da);
+		}
+		return actions;
 	}
 }

@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.HashSet;
 import java.util.Set;
@@ -76,11 +77,10 @@ public class FontFinder {
 	/** Find font tags in all device actions for the sign's hashtags */
 	private void findDeviceActionTags() {
 		Hashtags tags = new Hashtags(dms.getNotes());
-		Iterator<DeviceAction> it = DeviceActionHelper.iterator();
-		while (it.hasNext()) {
-			DeviceAction da = it.next();
+		ArrayList<DeviceAction> act = DeviceActionHelper.find(tags);
+		for (DeviceAction da : act) {
 			MsgPattern pat = da.getMsgPattern();
-			if (pat != null && tags.contains(da.getHashtag()))
+			if (pat != null)
 				findFontTags(pat.getMulti());
 		}
 	}

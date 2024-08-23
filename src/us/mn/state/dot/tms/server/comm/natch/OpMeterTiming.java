@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021-2022  Minnesota Department of Transportation
+ * Copyright (C) 2021-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,9 @@ import java.util.Calendar;
 import java.util.Map;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.TimeActionHelper;
+import us.mn.state.dot.tms.TimingTable;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.OpStep;
@@ -54,7 +56,8 @@ public class OpMeterTiming extends OpNatch {
 		meter = m;
 		entry = e;
 		prop = new MeterTimingProp(c, meter);
-		TimingTable table = new TimingTable(meter);
+		Hashtags tags = new Hashtags(meter.getNotes());
+		TimingTable table = new TimingTable(tags);
 		start = table.lookupStart(entry);
 		stop = table.lookupStop(entry);
 	}
