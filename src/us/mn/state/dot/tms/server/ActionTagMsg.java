@@ -65,13 +65,13 @@ import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
- * A device action message parses action tags, which are similar to MULTI, but
- * processed before sending to the sign.
+ * Action tags are similar to MULTI tags, but processed before sending to the
+ * sign.
  *
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DeviceActionMsg {
+public class ActionTagMsg {
 
 	/** Empty text span */
 	static private final String EMPTY_SPAN = "";
@@ -300,8 +300,8 @@ public class DeviceActionMsg {
 		return EMPTY_SPAN;
 	}
 
-	/** Create a new device action message */
-	public DeviceActionMsg(DeviceAction da, DeviceImpl d, GeoLoc gl,
+	/** Create a new action tag message */
+	public ActionTagMsg(DeviceAction da, DeviceImpl d, GeoLoc gl,
 		DebugLog l)
 	{
 		action = da;

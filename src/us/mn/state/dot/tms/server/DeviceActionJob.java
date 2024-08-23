@@ -39,9 +39,9 @@ public class DeviceActionJob extends Job {
 	/** Logger for debugging */
 	private final DebugLog logger;
 
-	/** Mapping of DMS to device actions */
-	private final HashMap<DMSImpl, DeviceActionMsg> dms_actions =
-		new HashMap<DMSImpl, DeviceActionMsg>();
+	/** Mapping of DMS to action tag messages */
+	private final HashMap<DMSImpl, ActionTagMsg> dms_actions =
+		new HashMap<DMSImpl, ActionTagMsg>();
 
 	/** Create a new device action job */
 	public DeviceActionJob(DebugLog dl) {
@@ -94,7 +94,7 @@ public class DeviceActionJob extends Job {
 		if (logger.isOpen())
 			logSched(dms, "checking " + da);
 		if (shouldReplace(da, dms)) {
-			DeviceActionMsg amsg = new DeviceActionMsg(da, dms,
+			ActionTagMsg amsg = new ActionTagMsg(da, dms,
 				dms.getGeoLoc(), logger);
 			if (amsg.isRasterizable())
 				dms_actions.put(dms, amsg);
@@ -104,7 +104,7 @@ public class DeviceActionJob extends Job {
 
 	/** Check if an action should replace the current DMS action */
 	private boolean shouldReplace(DeviceAction da, DMSImpl dms) {
-		DeviceActionMsg amsg = dms_actions.get(dms);
+		ActionTagMsg amsg = dms_actions.get(dms);
 		DeviceAction o = (amsg != null) ? amsg.action : null;
 		return (null == o) || da.getMsgPriority() >= o.getMsgPriority();
 	}
@@ -116,7 +116,7 @@ public class DeviceActionJob extends Job {
 			DMS dms = it.next();
 			if (dms instanceof DMSImpl) {
 				DMSImpl dmsi = (DMSImpl) dms;
-				DeviceActionMsg amsg = dms_actions.get(dmsi);
+				ActionTagMsg amsg = dms_actions.get(dmsi);
 				if (logger.isOpen())
 					logSched(dms, "scheduling " + amsg);
 				dmsi.setActionMsg(amsg);
@@ -139,7 +139,7 @@ public class DeviceActionJob extends Job {
 	private void performCameraAction(DeviceAction da, CameraImpl cam) {
 		Hashtags tags = new Hashtags(cam.getNotes());
 		if (tags.contains(da.getHashtag())) {
-			DeviceActionMsg amsg = new DeviceActionMsg(da, cam,
+			ActionTagMsg amsg = new ActionTagMsg(da, cam,
 				cam.getGeoLoc(), logger);
 			if (amsg.isPassing()) {
 				// FIXME: recall preset / save a snapshot
@@ -167,7 +167,7 @@ public class DeviceActionJob extends Job {
 	{
 		Hashtags tags = new Hashtags(lm.getNotes());
 		if (tags.contains(da.getHashtag())) {
-			DeviceActionMsg amsg = new DeviceActionMsg(da, lm,
+			ActionTagMsg amsg = new ActionTagMsg(da, lm,
 				lm.getGeoLoc(), logger);
 			if (amsg.isPassing())
 				lm.setDeployed(deploy);
