@@ -199,14 +199,14 @@ public class DeviceActionModel extends ProxyTableModel<DeviceAction> {
 			showHint("hashtag.invalid.hint");
 	}
 
-	/** Create a new DMS action */
+	/** Create a new device action */
 	private void create(String hashtag) {
 		String name = createUniqueName();
 		if (name != null) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("action_plan", action_plan);
-			attrs.put("dms_hashtag", hashtag);
+			attrs.put("hashtag", hashtag);
 			attrs.put("phase", lookupPlanPhase());
 			attrs.put("msg_priority",
 				SignMsgPriority.medium_1.ordinal());
@@ -214,7 +214,7 @@ public class DeviceActionModel extends ProxyTableModel<DeviceAction> {
 		}
 	}
 
-	/** Create a unique DMS action name */
+	/** Create a unique device action name */
 	private String createUniqueName() {
 		for (int uid = 1; uid <= 999; uid++) {
 			String n = action_plan.getName() + "_" + uid;
@@ -224,7 +224,7 @@ public class DeviceActionModel extends ProxyTableModel<DeviceAction> {
 		return null;
 	}
 
-	/** Lookup the appropriate plan phase for a DMS action */
+	/** Lookup the appropriate plan phase for a device action */
 	private PlanPhase lookupPlanPhase() {
 		PlanPhase phase = PlanPhaseHelper.lookup("deployed");
 		return (phase != null) ? phase : action_plan.getDefaultPhase();
