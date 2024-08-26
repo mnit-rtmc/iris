@@ -76,19 +76,19 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		switch (is) {
 		case BEACON:
 			return proxy.getActive() &&
-			      !ActionPlanHelper.findBeacons(proxy).isEmpty();
+			       ActionPlanHelper.countBeacons(proxy) > 0;
 		case CAMERA:
 			return proxy.getActive() &&
-			      !ActionPlanHelper.findCameras(proxy).isEmpty();
+			       ActionPlanHelper.countCameras(proxy) > 0;
 		case DMS:
 			return proxy.getActive() &&
-			      !ActionPlanHelper.findDms(proxy).isEmpty();
+			       ActionPlanHelper.countDms(proxy) > 0;
 		case LANE:
 			return proxy.getActive() &&
-			      !ActionPlanHelper.findLaneMarkings(proxy).isEmpty();
+			      ActionPlanHelper.countLaneMarkings(proxy) > 0;
 		case METER:
 			return proxy.getActive() &&
-			      !ActionPlanHelper.findRampMeters(proxy).isEmpty();
+			       ActionPlanHelper.countRampMeters(proxy) > 0;
 		case TIME:
 			return proxy.getActive() && hasTimeAction(proxy);
 		case ACTIVE:

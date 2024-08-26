@@ -56,42 +56,46 @@ public class ActionPlanHelper extends BaseHelper {
 		return hashtags;
 	}
 
-	/** Get set of beacons controlled by an action plan */
-	static public TreeSet<Beacon> findBeacons(ActionPlan ap) {
+	/** Get count of beacons controlled by an action plan */
+	static public int countBeacons(ActionPlan ap) {
+		int n_count = 0;
 		Set<String> hashtags = findHashtags(ap);
-		TreeSet<Beacon> beacons = new TreeSet<Beacon>(
-			new NumericAlphaComparator<Beacon>());
 		Iterator<Beacon> it = BeaconHelper.iterator();
 		while (it.hasNext()) {
 			Beacon b = it.next();
 			Hashtags tags = new Hashtags(b.getNotes());
-			for (String ht: hashtags) {
-				if (tags.contains(ht)) {
-					beacons.add(b);
-					break;
-				}
-			}
+			if (tags.containsAny(hashtags))
+				n_count++;
 		}
-		return beacons;
+		return n_count;
 	}
 
-	/** Get set of cameras controlled by an action plan */
-	static public TreeSet<Camera> findCameras(ActionPlan ap) {
+	/** Get count of cameras controlled by an action plan */
+	static public int countCameras(ActionPlan ap) {
+		int n_count = 0;
 		Set<String> hashtags = findHashtags(ap);
-		TreeSet<Camera> cameras = new TreeSet<Camera>(
-			new NumericAlphaComparator<Camera>());
 		Iterator<Camera> it = CameraHelper.iterator();
 		while (it.hasNext()) {
 			Camera cam = it.next();
 			Hashtags tags = new Hashtags(cam.getNotes());
-			for (String ht: hashtags) {
-				if (tags.contains(ht)) {
-					cameras.add(cam);
-					break;
-				}
-			}
+			if (tags.containsAny(hashtags))
+				n_count++;
 		}
-		return cameras;
+		return n_count;
+	}
+
+	/** Get count of DMS controlled by an action plan */
+	static public int countDms(ActionPlan ap) {
+		int n_count = 0;
+		Set<String> hashtags = findHashtags(ap);
+		Iterator<DMS> it = DMSHelper.iterator();
+		while (it.hasNext()) {
+			DMS dms = it.next();
+			Hashtags tags = new Hashtags(dms.getNotes());
+			if (tags.containsAny(hashtags))
+				n_count++;
+		}
+		return n_count;
 	}
 
 	/** Get set of DMS controlled by an action plan */
@@ -103,51 +107,37 @@ public class ActionPlanHelper extends BaseHelper {
 		while (it.hasNext()) {
 			DMS dms = it.next();
 			Hashtags tags = new Hashtags(dms.getNotes());
-			for (String ht: hashtags) {
-				if (tags.contains(ht)) {
-					signs.add(dms);
-					break;
-				}
-			}
+			if (tags.containsAny(hashtags))
+				signs.add(dms);
 		}
 		return signs;
 	}
 
-	/** Get set of lane markings controlled by an action plan */
-	static public TreeSet<LaneMarking> findLaneMarkings(ActionPlan ap) {
+	/** Get count of lane markings controlled by an action plan */
+	static public int countLaneMarkings(ActionPlan ap) {
+		int n_count = 0;
 		Set<String> hashtags = findHashtags(ap);
-		TreeSet<LaneMarking> markings = new TreeSet<LaneMarking>(
-			new NumericAlphaComparator<LaneMarking>());
 		Iterator<LaneMarking> it = LaneMarkingHelper.iterator();
 		while (it.hasNext()) {
 			LaneMarking lm = it.next();
 			Hashtags tags = new Hashtags(lm.getNotes());
-			for (String ht: hashtags) {
-				if (tags.contains(ht)) {
-					markings.add(lm);
-					break;
-				}
-			}
+			if (tags.containsAny(hashtags))
+				n_count++;
 		}
-		return markings;
+		return n_count;
 	}
 
-	/** Get set of ramp meters controlled by an action plan */
-	static public TreeSet<RampMeter> findRampMeters(ActionPlan ap) {
+	/** Get count of ramp meters controlled by an action plan */
+	static public int countRampMeters(ActionPlan ap) {
+		int n_count = 0;
 		Set<String> hashtags = findHashtags(ap);
-		TreeSet<RampMeter> meters = new TreeSet<RampMeter>(
-			new NumericAlphaComparator<RampMeter>());
 		Iterator<RampMeter> it = RampMeterHelper.iterator();
 		while (it.hasNext()) {
 			RampMeter rm = it.next();
 			Hashtags tags = new Hashtags(rm.getNotes());
-			for (String ht: hashtags) {
-				if (tags.contains(ht)) {
-					meters.add(rm);
-					break;
-				}
-			}
+			if (tags.containsAny(hashtags))
+				n_count++;
 		}
-		return meters;
+		return n_count;
 	}
 }

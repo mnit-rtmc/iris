@@ -43,6 +43,6 @@ public class GateArmArrayHelper extends BaseHelper {
 	/** Check if an array has action plan signs */
 	static public boolean hasActionPlanSigns(GateArmArray ga) {
 		ActionPlan ap = ga.getActionPlan();
-		return !ActionPlanHelper.findDms(ap).isEmpty();
+		return ActionPlanHelper.countDms(ap) > 0;
 	}
 }

@@ -81,13 +81,22 @@ public class Hashtags {
 		}
 	}
 
-	/** Check if hashtag is contained in a set */
+	/** Check if a hashtag is contained in set */
 	public boolean contains(String ht) {
 		if (ht != null) {
 			for (String tag: tags) {
 				if (ht.equalsIgnoreCase(tag))
 					return true;
 			}
+		}
+		return false;
+	}
+
+	/** Check if any hashtag is contained in set */
+	public boolean containsAny(Set<String> hashtags) {
+		for (String ht: hashtags) {
+			if (contains(ht))
+				return true;
 		}
 		return false;
 	}

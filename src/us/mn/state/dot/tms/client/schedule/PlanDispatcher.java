@@ -159,11 +159,11 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		if (a == null || a.equals("description"))
 			description_lbl.setText(ap.getDescription());
 		if (a == null || a.equals("active")) {
-			dms_lbl.setText(Integer.toString(countDMS(ap)));
-			beacon_lbl.setText(Integer.toString(countBeacons(ap)));
-			camera_lbl.setText(Integer.toString(countCameras(ap)));
-			lane_lbl.setText(Integer.toString(countLanes(ap)));
-			meter_lbl.setText(Integer.toString(countMeters(ap)));
+			dms_lbl.setText(countDMS(ap));
+			beacon_lbl.setText(countBeacons(ap));
+			camera_lbl.setText(countCameras(ap));
+			lane_lbl.setText(countLaneMarkings(ap));
+			meter_lbl.setText(countRampMeters(ap));
 		}
 		if (a == null || a.equals("phase")) {
 			phase_cbx.setAction(null);
@@ -232,28 +232,28 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 	}
 
 	/** Get a count a beacons controlled by an action plan */
-	private int countBeacons(ActionPlan ap) {
-		return ActionPlanHelper.findBeacons(ap).size();
+	private String countBeacons(ActionPlan ap) {
+		return Integer.toString(ActionPlanHelper.countBeacons(ap));
 	}
 
 	/** Get a count of cameras controlled by an action plan */
-	private int countCameras(ActionPlan ap) {
-		return ActionPlanHelper.findCameras(ap).size();
+	private String countCameras(ActionPlan ap) {
+		return Integer.toString(ActionPlanHelper.countCameras(ap));
 	}
 
 	/** Get a count of DMS controlled by an action plan */
-	private int countDMS(ActionPlan ap) {
-		return ActionPlanHelper.findDms(ap).size();
+	private String countDMS(ActionPlan ap) {
+		return Integer.toString(ActionPlanHelper.countDms(ap));
 	}
 
 	/** Get a count a lane markings controlled by an action plan */
-	private int countLanes(ActionPlan ap) {
-		return ActionPlanHelper.findLaneMarkings(ap).size();
+	private String countLaneMarkings(ActionPlan ap) {
+		return Integer.toString(ActionPlanHelper.countLaneMarkings(ap));
 	}
 
 	/** Get a count a ramp meters controlled by an action plan */
-	private int countMeters(ActionPlan ap) {
-		return ActionPlanHelper.findRampMeters(ap).size();
+	private String countRampMeters(ActionPlan ap) {
+		return Integer.toString(ActionPlanHelper.countRampMeters(ap));
 	}
 
 	/** Check if the user is permitted to update the given action plan */
