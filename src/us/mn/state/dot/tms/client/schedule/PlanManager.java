@@ -19,8 +19,6 @@ import java.util.Iterator;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanHelper;
-import us.mn.state.dot.tms.BeaconAction;
-import us.mn.state.dot.tms.BeaconActionHelper;
 import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.GeoLoc;
@@ -76,20 +74,21 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		if (!isWritePermitted(proxy))
 			return false;
 		switch (is) {
-		case DMS:
-			return proxy.getActive() &&
-			      !ActionPlanHelper.findDms(proxy).isEmpty();
 		case BEACON:
-			return proxy.getActive() && hasBeaconAction(proxy);
+			return proxy.getActive() &&
+			      !ActionPlanHelper.findBeacons(proxy).isEmpty();
 		case CAMERA:
 			return proxy.getActive() &&
 			      !ActionPlanHelper.findCameras(proxy).isEmpty();
-		case METER:
+		case DMS:
 			return proxy.getActive() &&
-			      !ActionPlanHelper.findRampMeters(proxy).isEmpty();
+			      !ActionPlanHelper.findDms(proxy).isEmpty();
 		case LANE:
 			return proxy.getActive() &&
 			      !ActionPlanHelper.findLaneMarkings(proxy).isEmpty();
+		case METER:
+			return proxy.getActive() &&
+			      !ActionPlanHelper.findRampMeters(proxy).isEmpty();
 		case TIME:
 			return proxy.getActive() && hasTimeAction(proxy);
 		case ACTIVE:
@@ -119,17 +118,6 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		while (it.hasNext()) {
 			TimeAction ta = it.next();
 			if (ta.getActionPlan() == p)
-				return true;
-		}
-		return false;
-	}
-
-	/** Test if an action plan has beacon actions */
-	private boolean hasBeaconAction(ActionPlan p) {
-		Iterator<BeaconAction> it = BeaconActionHelper.iterator();
-		while (it.hasNext()) {
-			BeaconAction ba = it.next();
-			if (ba.getActionPlan() == p)
 				return true;
 		}
 		return false;

@@ -6,7 +6,7 @@ BEGIN;
 SELECT iris.update_version('5.59.0', '5.60.0');
 
 -- temp function
-CREATE FUNCTION meter_plan_hashtag(TEXT) RETURNS TEXT AS $mph$
+CREATE FUNCTION action_plan_hashtag(TEXT) RETURNS TEXT AS $aph$
 DECLARE
     action_plan ALIAS FOR $1;
     words TEXT[];
@@ -27,13 +27,13 @@ BEGIN
     END LOOP;
     RETURN res;
 END;
-$mph$ LANGUAGE plpgsql;
+$aph$ LANGUAGE plpgsql;
 
 -- Concatenate meter action hashtags to notes fields
 WITH cte AS (
     SELECT ramp_meter, string_agg(
-        DISTINCT(meter_plan_hashtag(action_plan)),
-        ' ' ORDER BY meter_plan_hashtag(action_plan)
+        DISTINCT(action_plan_hashtag(action_plan)),
+        ' ' ORDER BY action_plan_hashtag(action_plan)
     ) hashtags
     FROM iris.meter_action
     GROUP BY ramp_meter
@@ -42,6 +42,20 @@ UPDATE iris.ramp_meter m
 SET notes = concat_ws(e'\n\n', notes, h.hashtags)
 FROM cte h
 WHERE h.ramp_meter = m.name;
+
+-- Concatenate beacon action hashtags to notes fields
+WITH cte AS (
+    SELECT beacon, string_agg(
+        DISTINCT(action_plan_hashtag(action_plan)),
+        ' ' ORDER BY action_plan_hashtag(action_plan)
+    ) hashtags
+    FROM iris.beacon_action
+    GROUP BY beacon
+)
+UPDATE iris.beacon b
+SET notes = concat_ws(e'\n\n', notes, h.hashtags)
+FROM cte h
+WHERE h.beacon = b.name;
 
 ALTER TABLE iris.sign_config DROP CONSTRAINT sign_config_module_width_check;
 ALTER TABLE iris.sign_config ADD CONSTRAINT sign_config_check
@@ -66,12 +80,14 @@ INSERT INTO iris.resource_type (name, base) VALUES ('device_action', false);
 UPDATE iris.privilege SET type_n = 'device_action' WHERE type_n = 'dms_action';
 
 DELETE FROM iris.privilege
-    WHERE type_n = 'lane_action'
+    WHERE type_n = 'beacon_action'
        OR type_n = 'camera_action'
+       OR type_n = 'lane_action'
        OR type_n = 'meter_action';
 
 DELETE FROM iris.resource_type
-    WHERE name = 'camera_action'
+    WHERE name = 'beacon_action'
+       OR name = 'camera_action'
        OR name = 'dms_action'
        OR name = 'lane_action'
        OR name = 'meter_action';
@@ -97,8 +113,16 @@ INSERT INTO iris.device_action (
     name, action_plan, phase, hashtag, msg_priority
 )
 SELECT DISTINCT ON (action_plan, phase)
-    name, action_plan, phase, meter_plan_hashtag(action_plan), 1
+    name, action_plan, phase, action_plan_hashtag(action_plan), 1
 FROM iris.meter_action
+ORDER BY action_plan, phase, name;
+
+INSERT INTO iris.device_action (
+    name, action_plan, phase, hashtag, msg_priority
+)
+SELECT DISTINCT ON (action_plan, phase)
+    concat(name, '0'), action_plan, phase, action_plan_hashtag(action_plan), 1
+FROM iris.beacon_action
 ORDER BY action_plan, phase, name;
 
 CREATE VIEW device_action_view AS
@@ -133,12 +157,13 @@ CREATE VIEW meter_action_view AS
     ORDER BY ramp_meter, time_of_day;
 GRANT SELECT ON meter_action_view TO PUBLIC;
 
+DROP TABLE iris.beacon_action;
 DROP TABLE iris.camera_action;
 DROP TABLE iris.dms_action;
 DROP TABLE iris.lane_action;
 DROP TABLE iris.meter_action;
 
-DROP FUNCTION meter_plan_hashtag(TEXT);
+DROP FUNCTION action_plan_hashtag(TEXT);
 
 -- Add lane marking hashtag trigger
 CREATE FUNCTION iris.lane_marking_hashtag() RETURNS TRIGGER AS

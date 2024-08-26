@@ -24,8 +24,7 @@ import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Beacon;
-import us.mn.state.dot.tms.BeaconAction;
-import us.mn.state.dot.tms.BeaconActionHelper;
+import us.mn.state.dot.tms.BeaconHelper;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -354,10 +353,8 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	 */
 	public void doSetPhase(PlanPhase p) throws TMSException {
 		if (p != phase) {
-			if (getSyncActions()) {
+			if (getSyncActions())
 				validateDeviceActions(); // throws exception
-				validateBeaconActions(); // throws exception
-			}
 			store.update(this, "phase", p);
 			setPhase(p);
 		}
@@ -403,9 +400,27 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	private boolean isDeployable(DeviceAction da) {
 		String ht = da.getHashtag();
 		// FIXME: any way to validate camera actions?
-		return areDmsDeployable(ht)
+		return areBeaconsDeployable(ht)
+		    && areDmsDeployable(ht)
 		    && areLaneMarkingsDeployable(ht)
 		    && areRampMetersDeployable(ht);
+	}
+
+	/** Check if all beacons for a hashtag are deployable */
+	private boolean areBeaconsDeployable(String ht) {
+		Iterator<Beacon> it = BeaconHelper.iterator();
+		while (it.hasNext()) {
+			Beacon b = it.next();
+			if (b instanceof BeaconImpl) {
+				BeaconImpl bi = (BeaconImpl) b;
+				if (bi.isFailed()) {
+					if (new Hashtags(bi.getNotes())
+					   .contains(ht))
+						return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	/** Check if all DMS for a hashtag are deployable */
@@ -457,30 +472,6 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			}
 		}
 		return true;
-	}
-
-	/**
-	 * Validate that all beacon actions are deployable.
-	 * @throws ChangeVetoException
-	 */
-	private void validateBeaconActions() throws ChangeVetoException {
-		Iterator<BeaconAction> it = BeaconActionHelper.iterator();
-		while (it.hasNext()) {
-			BeaconAction ba = it.next();
-			if (ba.getActionPlan() == this && !isDeployable(ba)) {
-				throw new ChangeVetoException("Beacon action " +
-					ba.getName() + " not deployable");
-			}
-		}
-	}
-
-	/** Check if a beacon action is deployable */
-	private boolean isDeployable(BeaconAction ba) {
-		Beacon b = ba.getBeacon();
-		if (b instanceof BeaconImpl)
-			return !((BeaconImpl) b).isFailed();
-		else
-			return false;
 	}
 
 	/** Update the plan phase */

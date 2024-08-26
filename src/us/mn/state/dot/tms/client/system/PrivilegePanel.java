@@ -38,7 +38,6 @@ public class PrivilegePanel extends ProxyTablePanel<Privilege> {
 		"alert_info",
 		"alert_message",
 		"beacon",
-		"beacon_action",
 		"cabinet_style",
 		"camera",
 		"camera_preset",

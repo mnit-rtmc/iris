@@ -38,7 +38,6 @@ import us.mn.state.dot.tms.AlertInfo;
 import us.mn.state.dot.tms.AlertMessage;
 import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.Beacon;
-import us.mn.state.dot.tms.BeaconAction;
 import us.mn.state.dot.tms.CameraTemplate;
 import us.mn.state.dot.tms.CameraVidSourceOrder;
 import us.mn.state.dot.tms.DayMatcher;
@@ -460,15 +459,6 @@ public class SonarState extends Client {
 		return device_actions;
 	}
 
-	/** Cache of beacon actions */
-	private final TypeCache<BeaconAction> beacon_actions =
-		new TypeCache<BeaconAction>(BeaconAction.class, this);
-
-	/** Get the beacon action cache */
-	public TypeCache<BeaconAction> getBeaconActions() {
-		return beacon_actions;
-	}
-
 	/** Cache of words */
 	private final TypeCache<Word> words =
 		new TypeCache<Word>(Word.class, this);
@@ -663,7 +653,6 @@ public class SonarState extends Client {
 		populateReadable(parking_areas);
 		populateReadable(time_actions);
 		populateReadable(device_actions);
-		populateReadable(beacon_actions);
 		populateReadable(gpses);
 		if (canRead(Gps.SONAR_TYPE)) {
 			gpses.ignoreAttribute("operation");

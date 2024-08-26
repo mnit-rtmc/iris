@@ -20,6 +20,9 @@ import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.Beacon;
+import us.mn.state.dot.tms.BeaconHelper;
+import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.DMS;
@@ -74,6 +77,7 @@ public class DeviceActionJob extends Job {
 					(ap.getPhase() == da.getPhase());
 				if (deploy)
 					performDmsAction(da);
+				performBeaconAction(da, deploy);
 				performCameraAction(da);
 				performLaneMarkingAction(da, deploy);
 				performRampMeterAction(da, deploy);
@@ -133,6 +137,31 @@ public class DeviceActionJob extends Job {
 		}
 	}
 
+	/** Perform an action for beacons */
+	private void performBeaconAction(DeviceAction da, boolean deploy) {
+		Iterator<Beacon> it = BeaconHelper.iterator();
+		while (it.hasNext()) {
+			Beacon b = it.next();
+			if (b instanceof BeaconImpl)
+				performBeaconAction(da, deploy, (BeaconImpl) b);
+		}
+	}
+
+	/** Perform a beacon action */
+	private void performBeaconAction(DeviceAction da, boolean deploy,
+		BeaconImpl b)
+	{
+		Hashtags tags = new Hashtags(b.getNotes());
+		if (tags.contains(da.getHashtag())) {
+			ActionTagMsg amsg = new ActionTagMsg(da, b,
+				b.getGeoLoc(), logger);
+			BeaconState bs = (amsg.isPassing() && deploy)
+				? BeaconState.FLASHING_REQ
+				: BeaconState.DARK_REQ;
+			b.setState(bs.ordinal());
+		}
+	}
+
 	/** Perform an action for cameras */
 	private void performCameraAction(DeviceAction da) {
 		// FIXME: only perform this action when phase is first changed
@@ -178,8 +207,7 @@ public class DeviceActionJob extends Job {
 		if (tags.contains(da.getHashtag())) {
 			ActionTagMsg amsg = new ActionTagMsg(da, lm,
 				lm.getGeoLoc(), logger);
-			if (amsg.isPassing())
-				lm.setDeployed(deploy);
+			lm.setDeployed(amsg.isPassing() && deploy);
 		}
 	}
 

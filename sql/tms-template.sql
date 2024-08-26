@@ -401,7 +401,6 @@ alert_config	t
 alert_info	f
 alert_message	f
 beacon	t
-beacon_action	f
 cabinet_style	f
 camera	t
 camera_preset	f
@@ -697,7 +696,6 @@ PRV_0115	meter_control	ramp_meter	rateNext	t
 PRV_0116	meter_control	ramp_meter	deviceRequest	t
 PRV_0117	meter_tab	ramp_meter		f
 PRV_0118	plan_admin	action_plan		t
-PRV_0119	plan_admin	beacon_action		t
 PRV_0120	plan_admin	day_plan		t
 PRV_0121	plan_admin	day_matcher		t
 PRV_0122	plan_admin	device_action		t
@@ -710,7 +708,6 @@ PRV_0130	plan_tab	day_matcher		f
 PRV_0131	plan_tab	plan_phase		f
 PRV_0132	plan_tab	time_action		f
 PRV_0133	plan_tab	device_action		f
-PRV_0134	plan_tab	beacon_action		f
 PRV_0137	sensor_admin	detector		t
 PRV_0138	sensor_admin	r_node		t
 PRV_0139	sensor_admin	weather_sensor		t
@@ -2262,13 +2259,6 @@ CREATE VIEW beacon_view AS
     LEFT JOIN geo_loc_view l ON b.geo_loc = l.name
     LEFT JOIN controller_view ctr ON cio.controller = ctr.name;
 GRANT SELECT ON beacon_view TO PUBLIC;
-
-CREATE TABLE iris.beacon_action (
-    name VARCHAR(30) PRIMARY KEY,
-    action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-    beacon VARCHAR(20) NOT NULL REFERENCES iris._beacon,
-    phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
-);
 
 CREATE TABLE event.beacon_event (
     event_id SERIAL PRIMARY KEY,

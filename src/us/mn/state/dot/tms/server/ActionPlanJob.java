@@ -50,7 +50,6 @@ public class ActionPlanJob extends Job {
 	public void perform() throws TMSException {
 		timer.addJob(new TimeActionJob());
 		timer.addJob(new DeviceActionJob(SCHED_LOG));
-		timer.addJob(new BeaconActionJob());
 		updateActionPlanPhases();
 	}
 

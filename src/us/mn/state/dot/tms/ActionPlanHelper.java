@@ -56,6 +56,25 @@ public class ActionPlanHelper extends BaseHelper {
 		return hashtags;
 	}
 
+	/** Get set of beacons controlled by an action plan */
+	static public TreeSet<Beacon> findBeacons(ActionPlan ap) {
+		Set<String> hashtags = findHashtags(ap);
+		TreeSet<Beacon> beacons = new TreeSet<Beacon>(
+			new NumericAlphaComparator<Beacon>());
+		Iterator<Beacon> it = BeaconHelper.iterator();
+		while (it.hasNext()) {
+			Beacon b = it.next();
+			Hashtags tags = new Hashtags(b.getNotes());
+			for (String ht: hashtags) {
+				if (tags.contains(ht)) {
+					beacons.add(b);
+					break;
+				}
+			}
+		}
+		return beacons;
+	}
+
 	/** Get set of cameras controlled by an action plan */
 	static public TreeSet<Camera> findCameras(ActionPlan ap) {
 		Set<String> hashtags = findHashtags(ap);

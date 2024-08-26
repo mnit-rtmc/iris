@@ -26,8 +26,6 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanHelper;
 import us.mn.state.dot.tms.Beacon;
-import us.mn.state.dot.tms.BeaconAction;
-import us.mn.state.dot.tms.BeaconActionHelper;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceActionHelper;
@@ -207,12 +205,6 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 			if (da.getActionPlan() == ap)
 				phases.add(da.getPhase());
 		}
-		Iterator<BeaconAction> bit = BeaconActionHelper.iterator();
-		while (bit.hasNext()) {
-			BeaconAction ba = bit.next();
-			if (ba.getActionPlan() == ap)
-				phases.add(ba.getPhase());
-		}
 		return phases;
 	}
 
@@ -239,26 +231,19 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		phases.removeAll(n_phases);
 	}
 
-	/** Get a count of DMS controlled by an action plan */
-	private int countDMS(ActionPlan ap) {
-		return ActionPlanHelper.findDms(ap).size();
-	}
-
 	/** Get a count a beacons controlled by an action plan */
-	private int countBeacons(ActionPlan p) {
-		HashSet<Beacon> plan_beacons = new HashSet<Beacon>();
-		Iterator<BeaconAction> bit = BeaconActionHelper.iterator();
-		while (bit.hasNext()) {
-			BeaconAction ba = bit.next();
-			if (ba.getActionPlan() == p)
-				plan_beacons.add(ba.getBeacon());
-		}
-		return plan_beacons.size();
+	private int countBeacons(ActionPlan ap) {
+		return ActionPlanHelper.findBeacons(ap).size();
 	}
 
 	/** Get a count of cameras controlled by an action plan */
 	private int countCameras(ActionPlan ap) {
 		return ActionPlanHelper.findCameras(ap).size();
+	}
+
+	/** Get a count of DMS controlled by an action plan */
+	private int countDMS(ActionPlan ap) {
+		return ActionPlanHelper.findDms(ap).size();
 	}
 
 	/** Get a count a lane markings controlled by an action plan */

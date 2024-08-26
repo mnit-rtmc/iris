@@ -31,8 +31,8 @@ the **Next Phase**.  *Hold Time* must be a multiple of 30 seconds.
 Device actions use [hashtag]s to associate devices with one phase of an action
 plan.  These devices can be:
  - [DMS], displays the [message pattern] on the sign
- - [beacon], activates the flashing beacon
- - [ramp meter], enables the [density metering] algorithm
+ - [beacon], activates flashing lights
+ - [ramp meter], enables metering operation
  - [camera], recalls the specified camera [preset]
  - [lane marking], activates in-pavement LEDs
 
@@ -165,7 +165,6 @@ than the value of the `action_plan_event_purge_days` [system attribute].
 [camera]: cameras.html
 [ClearGuide]: clearguide.html
 [DateTimeFormatter]: https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
-[density metering]: density_adaptive.html
 [DMS]: dms.html
 [exit ramp backup]: exit_backup.html
 [hashtag]: hashtags.html
