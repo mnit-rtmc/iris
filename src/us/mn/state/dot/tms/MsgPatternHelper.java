@@ -118,8 +118,8 @@ public class MsgPatternHelper extends BaseHelper {
 	 * - Lane use multi with the pattern
 	 * - Device action with the pattern
 	 * - Alert config + message with the pattern */
-	static public List<SignConfig> findSignConfigs(MsgPattern pat) {
-		ArrayList<SignConfig> cfgs = new ArrayList<SignConfig>();
+	static public Set<SignConfig> findSignConfigs(MsgPattern pat) {
+		TreeSet<SignConfig> cfgs = new TreeSet<SignConfig>();
 		if (pat == null)
 			return cfgs;
 		LinkedHashSet<String> hashtags = new LinkedHashSet<String>();
@@ -128,22 +128,17 @@ public class MsgPatternHelper extends BaseHelper {
 			hashtags.add(cht);
 		hashtags.addAll(LaneUseMultiHelper.findHashtags(pat));
 		hashtags.addAll(DeviceActionHelper.findHashtags(pat));
-		for (String ht: hashtags) {
-			Iterator<DMS> it = DMSHelper.iterator();
-			while (it.hasNext()) {
-				DMS dms = it.next();
-				Hashtags tags = new Hashtags(dms.getNotes());
-				if (tags.contains(ht)) {
-					SignConfig sc = dms.getSignConfig();
-					if (sc != null && !cfgs.contains(sc))
-						cfgs.add(sc);
-				}
+		Iterator<DMS> it = DMSHelper.iterator();
+		while (it.hasNext()) {
+			DMS dms = it.next();
+			Hashtags tags = new Hashtags(dms.getNotes());
+			if (tags.containsAny(hashtags)) {
+				SignConfig sc = dms.getSignConfig();
+				if (sc != null)
+					cfgs.add(sc);
 			}
 		}
-		for (SignConfig sc: AlertMessageHelper.findSignConfigs(pat)) {
-			if (!cfgs.contains(sc))
-				cfgs.add(sc);
-		}
+		cfgs.addAll(AlertMessageHelper.findSignConfigs(pat));
 		return cfgs;
 	}
 

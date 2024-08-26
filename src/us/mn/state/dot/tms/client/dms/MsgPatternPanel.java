@@ -20,7 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.GroupLayout;
@@ -269,7 +269,7 @@ public class MsgPatternPanel extends JPanel {
 				}
 			}
 		});
-		List<SignConfig> cfgs = MsgPatternHelper.findSignConfigs(pat);
+		Set<SignConfig> cfgs = MsgPatternHelper.findSignConfigs(pat);
 		DefaultListModel<SignConfig> mdl =
 			new DefaultListModel<SignConfig>();
 		for (SignConfig cfg: cfgs)
