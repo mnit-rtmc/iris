@@ -35,7 +35,6 @@ import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.TMSException;
-import static us.mn.state.dot.tms.server.ActionPlanJob.SCHED_LOG;
 import static us.mn.state.dot.tms.server.GateArmSystem.checkEnabled;
 import static us.mn.state.dot.tms.server.GateArmSystem.sendEmailAlert;
 import static us.mn.state.dot.tms.server.MainServer.TIMER;
@@ -473,12 +472,12 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 			PlanPhase op = lookupPlanPhase(
 				PlanPhase.GATE_ARM_OPEN);
 			if (op != null && ap.setPhaseNotify(op))
-				updateDmsActions();
+				updateDmsActions(ap);
 		} else {
 			PlanPhase cp = lookupPlanPhase(
 				PlanPhase.GATE_ARM_CLOSED);
 			if (cp != null && ap.setPhaseNotify(cp))
-				updateDmsActions();
+				updateDmsActions(ap);
 		}
 	}
 
@@ -487,9 +486,9 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		return isActive() && arm_state == GateArmState.OPEN;
 	}
 
-	/** Update scheduled DMS action */
-	private void updateDmsActions() {
-		TIMER.addJob(new DeviceActionJob(SCHED_LOG));
+	/** Update scheduled DMS actions for a plan */
+	private void updateDmsActions(ActionPlanImpl ap) {
+		TIMER.addJob(new DeviceActionJob(ap));
 	}
 
 	/** Update the arm state */

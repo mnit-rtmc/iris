@@ -33,9 +33,6 @@ public class ActionPlanJob extends Job {
 	/** Seconds to offset each poll from start of interval */
 	static private final int OFFSET_SECS = 14;
 
-	/** Schedule debug log */
-	static public final DebugLog SCHED_LOG = new DebugLog("sched");
-
 	/** TIMER Scheduler */
 	private final Scheduler timer;
 
@@ -49,7 +46,7 @@ public class ActionPlanJob extends Job {
 	@Override
 	public void perform() throws TMSException {
 		timer.addJob(new TimeActionJob());
-		timer.addJob(new DeviceActionJob(SCHED_LOG));
+		timer.addJob(new DeviceActionJob());
 		updateActionPlanPhases();
 	}
 

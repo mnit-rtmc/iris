@@ -42,6 +42,12 @@ import us.mn.state.dot.tms.RampMeterHelper;
  */
 public class DeviceActionJob extends Job {
 
+	/** Schedule debug log */
+	static private final DebugLog SCHED_LOG = new DebugLog("sched");
+
+	/** Single action plan to process (null for all) */
+	private final ActionPlanImpl plan;
+
 	/** Logger for debugging */
 	private final DebugLog logger;
 
@@ -54,15 +60,20 @@ public class DeviceActionJob extends Job {
 		new HashMap<RampMeterImpl, Boolean>();
 
 	/** Create a new device action job */
-	public DeviceActionJob(DebugLog dl) {
+	public DeviceActionJob(ActionPlanImpl ap) {
 		super(0);
-		logger = dl;
+		logger = SCHED_LOG;
+		plan = ap;
+	}
+
+	/** Create a new device action job */
+	public DeviceActionJob() {
+		this(null);
 	}
 
 	/** Log a DMS schedule message */
 	private void logSched(DMS dms, String msg) {
-		if (logger.isOpen())
-			logger.log(dms.getName() + ": " + msg);
+		logger.log(dms.getName() + ": " + msg);
 	}
 
 	/** Perform device actions */
@@ -72,19 +83,22 @@ public class DeviceActionJob extends Job {
 		while (it.hasNext()) {
 			DeviceAction da = it.next();
 			ActionPlan ap = da.getActionPlan();
-			if (ap.getActive()) {
-				boolean deploy =
-					(ap.getPhase() == da.getPhase());
-				if (deploy)
-					performDmsAction(da);
-				performBeaconAction(da, deploy);
-				performCameraAction(da);
-				performLaneMarkingAction(da, deploy);
-				performRampMeterAction(da, deploy);
-			}
+			if (ap.getActive() && (plan == null || plan == ap))
+				processAction(ap, da);
 		}
 		updateDmsMessages();
 		updateRampMeterStates();
+	}
+
+	/** Process one device action */
+	private void processAction(ActionPlan ap, DeviceAction da) {
+		boolean deploy = (ap.getPhase() == da.getPhase());
+		if (deploy)
+			performDmsAction(da);
+		performBeaconAction(da, deploy);
+		performCameraAction(da);
+		performLaneMarkingAction(da, deploy);
+		performRampMeterAction(da, deploy);
 	}
 
 	/** Perform an action for DMS */
@@ -104,9 +118,9 @@ public class DeviceActionJob extends Job {
 
 	/** Check an action for one DMS */
 	private void checkAction(DeviceAction da, DMSImpl dms) {
-		if (logger.isOpen())
-			logSched(dms, "checking " + da);
 		if (shouldReplace(da, dms)) {
+			if (logger.isOpen())
+				logSched(dms, "checking " + da);
 			ActionTagMsg amsg = new ActionTagMsg(da, dms,
 				dms.getGeoLoc(), logger);
 			if (DMSHelper.isRasterizable(dms, amsg.getMulti()))
