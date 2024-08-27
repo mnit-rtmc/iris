@@ -33,8 +33,8 @@ plan.  These devices can be:
  - [DMS], displays the [message pattern] on the sign
  - [beacon], activates flashing lights
  - [ramp meter], enables metering operation
- - [camera], recalls the specified camera [preset]
  - [lane marking], activates in-pavement LEDs
+ - [camera], recalls the specified camera [preset] (experimental)
 
 [Priority] determines the priority of messages created by the action.
 

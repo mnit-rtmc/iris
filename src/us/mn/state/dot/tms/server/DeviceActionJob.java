@@ -96,7 +96,7 @@ public class DeviceActionJob extends Job {
 		if (deploy)
 			performDmsAction(da);
 		performBeaconAction(da, deploy);
-		performCameraAction(da);
+		performCameraAction(da, deploy);
 		performLaneMarkingAction(da, deploy);
 		performRampMeterAction(da, deploy);
 	}
@@ -177,23 +177,25 @@ public class DeviceActionJob extends Job {
 	}
 
 	/** Perform an action for cameras */
-	private void performCameraAction(DeviceAction da) {
+	private void performCameraAction(DeviceAction da, boolean deploy) {
 		// FIXME: only perform this action when phase is first changed
 		Iterator<Camera> it = CameraHelper.iterator();
 		while (it.hasNext()) {
 			Camera c = it.next();
 			if (c instanceof CameraImpl)
-				performCameraAction(da, (CameraImpl) c);
+				performCameraAction(da, deploy, (CameraImpl) c);
 		}
 	}
 
 	/** Perform a camera action */
-	private void performCameraAction(DeviceAction da, CameraImpl cam) {
+	private void performCameraAction(DeviceAction da, boolean deploy,
+		CameraImpl cam)
+	{
 		Hashtags tags = new Hashtags(cam.getNotes());
 		if (tags.contains(da.getHashtag())) {
 			ActionTagMsg amsg = new ActionTagMsg(da, cam,
 				cam.getGeoLoc(), logger);
-			if (amsg.isPassing()) {
+			if (amsg.isPassing() && deploy) {
 				// FIXME: recall preset / save a snapshot
 				//        after a moment
 				// cam.setRecallPreset(...);
