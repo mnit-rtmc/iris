@@ -176,22 +176,21 @@ async fn perform_fetch(
     json: Option<&JsValue>,
 ) -> Result<Response> {
     let window = web_sys::window().unwrap_throw();
-    let headers = Headers::new().unwrap_throw();
-    if json.is_some() {
+    let ri = RequestInit::new();
+    ri.set_method(method);
+    if let Some(json) = &json {
+        let headers = Headers::new().unwrap_throw();
         headers
             .set("Content-Type", "application/json")
             .unwrap_throw();
+        ri.set_headers(&headers);
+        ri.set_body(json);
     } else {
+        let headers = Headers::new().unwrap_throw();
         headers.set("Content-Type", "text/plain").unwrap_throw();
+        ri.set_headers(&headers);
     }
-    let req = Request::new_with_str_and_init(
-        uri,
-        RequestInit::new()
-            .method(method)
-            .body(json)
-            .headers(&headers),
-    )
-    .map_err(|e| {
+    let req = Request::new_with_str_and_init(uri, &ri).map_err(|e| {
         console::log_1(&e);
         Error::FetchRequest()
     })?;

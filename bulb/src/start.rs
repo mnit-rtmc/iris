@@ -446,9 +446,9 @@ fn replace_card_html(cv: &CardView, html: &str) {
     elem.set_inner_html(html);
     elem.set_class_name(cv.view.class_name());
     if cv.view.is_form() {
-        let mut opt = ScrollIntoViewOptions::new();
-        opt.behavior(ScrollBehavior::Smooth)
-            .block(ScrollLogicalPosition::Nearest);
+        let opt = ScrollIntoViewOptions::new();
+        opt.set_behavior(ScrollBehavior::Smooth);
+        opt.set_block(ScrollLogicalPosition::Nearest);
         elem.scroll_into_view_with_scroll_into_view_options(&opt);
     }
 }
