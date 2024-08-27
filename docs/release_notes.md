@@ -1,5 +1,13 @@
 # IRIS 5.x Release Notes
 
+5.60.0 (27 Aug 2024)
+ - Merged DMS/meter/etc. actions into "device_action"
+ - Device actions use hashtags for ramp meters, beacons, etc.
+ - Device actions can use msg_pattern for condition checks (non-DMS)
+ - Added rwis_auto_max_dist_miles system attribute;
+   used when weather sensors not set, or non-DMS
+ - Add SignConfig cards to Web UI
+
 5.59.0 (12 Aug 2024)
  - Reworked GPS to use with devices other than DMS
  - Renamed "dms_gps_jitter_m" => "gps_jitter_m"
