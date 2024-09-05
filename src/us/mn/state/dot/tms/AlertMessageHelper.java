@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -83,7 +82,8 @@ public class AlertMessageHelper extends BaseHelper {
 
 	/** Get set of alert msg sign configs for a given message pattern */
 	static public Set<SignConfig> findSignConfigs(MsgPattern pat) {
-		HashSet<SignConfig> cfgs = new HashSet<SignConfig>();
+		TreeSet<SignConfig> cfgs = new TreeSet<SignConfig>(
+			new NumericAlphaComparator<SignConfig>());
 		Iterator<AlertMessage> it = iterator();
 		while (it.hasNext()) {
 			AlertMessage msg = it.next();

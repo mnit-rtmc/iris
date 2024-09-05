@@ -119,7 +119,8 @@ public class MsgPatternHelper extends BaseHelper {
 	 * - Device action with the pattern
 	 * - Alert config + message with the pattern */
 	static public Set<SignConfig> findSignConfigs(MsgPattern pat) {
-		TreeSet<SignConfig> cfgs = new TreeSet<SignConfig>();
+		TreeSet<SignConfig> cfgs = new TreeSet<SignConfig>(
+			new NumericAlphaComparator<SignConfig>());
 		if (pat == null)
 			return cfgs;
 		LinkedHashSet<String> hashtags = new LinkedHashSet<String>();
