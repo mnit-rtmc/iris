@@ -5266,8 +5266,6 @@ GRANT SELECT ON monitor_style_view TO PUBLIC;
 CREATE TABLE iris._video_monitor (
     name VARCHAR(12) PRIMARY KEY,
     notes VARCHAR CHECK (LENGTH(notes) < 256),
-    -- FIXME: use hashtags instead
-    group_n VARCHAR(16),
     mon_num INTEGER NOT NULL,
     restricted BOOLEAN NOT NULL,
     monitor_style VARCHAR(24) REFERENCES iris.monitor_style,
@@ -5321,8 +5319,8 @@ CREATE TRIGGER video_monitor_table_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.video_monitor AS
-    SELECT m.name, controller, pin, notes, group_n, mon_num, restricted,
-           monitor_style, camera
+    SELECT m.name, controller, pin, notes, mon_num, restricted, monitor_style,
+           camera
     FROM iris._video_monitor m
     JOIN iris.controller_io cio ON m.name = cio.name;
 
@@ -5332,10 +5330,10 @@ BEGIN
     INSERT INTO iris.controller_io (name, resource_n, controller, pin)
          VALUES (NEW.name, 'video_monitor', NEW.controller, NEW.pin);
     INSERT INTO iris._video_monitor (
-        name, notes, group_n, mon_num, restricted, monitor_style, camera
+        name, notes, mon_num, restricted, monitor_style, camera
     ) VALUES (
-        NEW.name, NEW.notes, NEW.group_n, NEW.mon_num, NEW.restricted,
-        NEW.monitor_style, NEW.camera
+        NEW.name, NEW.notes, NEW.mon_num, NEW.restricted, NEW.monitor_style,
+        NEW.camera
     );
     RETURN NEW;
 END;
@@ -5354,7 +5352,6 @@ BEGIN
      WHERE name = OLD.name;
     UPDATE iris._video_monitor
        SET notes = NEW.notes,
-           group_n = NEW.group_n,
            mon_num = NEW.mon_num,
            restricted = NEW.restricted,
            monitor_style = NEW.monitor_style,
@@ -5373,7 +5370,7 @@ CREATE TRIGGER video_monitor_delete_trig
     FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW video_monitor_view AS
-    SELECT m.name, m.notes, group_n, mon_num, restricted, monitor_style,
+    SELECT m.name, m.notes, mon_num, restricted, monitor_style,
            cio.controller, cio.pin, ctr.condition, ctr.comm_link, camera
     FROM iris._video_monitor m
     JOIN iris.controller_io cio ON m.name = cio.name

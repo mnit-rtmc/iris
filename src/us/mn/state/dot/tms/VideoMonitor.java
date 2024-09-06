@@ -27,12 +27,6 @@ public interface VideoMonitor extends Device {
 	/** SONAR type name */
 	String SONAR_TYPE = "video_monitor";
 
-	/** Set the group name */
-	void setGroupN(String g);
-
-	/** Get the group name */
-	String getGroupN();
-
 	/** Set the monitor number */
 	void setMonNum(int mn);
 
