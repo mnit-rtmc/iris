@@ -23,7 +23,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import us.mn.state.dot.tms.server.CommLinkImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -51,9 +50,6 @@ public class ClearGuideProperty extends ControllerProperty {
 
         /** Decode an XML string */
         static public String decodeXml(String xml) {
-		try {
-			xml = URLDecoder.decode(xml, "UTF-8");
-		} catch(UnsupportedEncodingException ex) {}
                 xml = xml.replace("&amp;", "&");
                 xml = xml.replace("&lt;", "<");
                 xml = xml.replace("&gt;", ">");
