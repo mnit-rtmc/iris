@@ -48,7 +48,7 @@ resource, at the same access level.
 
 | Base Resource      | Dependent Resources                                   |
 |--------------------|-------------------------------------------------------|
-| action plan        | day matcher, day plan, plan phase                     |
+| action plan        | day matcher, day plan, plan phase, device action      |
 | alert config       |                                                       |
 | [beacon]           |                                                       |
 | [camera]           | catalog, [flow stream], monitor style, play list, [video monitor] |

@@ -31,11 +31,12 @@ Each row of the table represents one _video monitor_.
 Field         | Description
 --------------|---------------------------------------------------
 Name          | Video monitor name
-Notes         | Location or usage text
-Group name    | [Privilege] group, for access control
+Notes         | Administrator notes, possibly including [hashtag]s
 Monitor num   | Number for selecting and switching
 Restricted    | Flag restricting monitor to published cameras only
 Monitor style | [Style](#style) of title bar, _etc_
+
+Hashtags in notes allow for restricting [permissions] for specific roles.
 
 The `monitor num` is used to identify monitors when selecting [camera]s with
 a [switching](#switching) system.
@@ -112,9 +113,10 @@ assigned sequence numbers, so they can be used in the same way.
 [comm link]: comm_links.html
 [controller]: controllers.html
 [flow streams]: flow_streams.html
+[hashtag]: hashtags.html
 [IO pin]: controllers.html#io-pins
 [MonStream]: https://github.com/mnit-rtmc/monstream
-[Privilege]: users.html#privileges
+[permissions]: permissions.html
 [protocol]: protocols.html
 [selector tool]: cameras.html#selector-tool
 [system attribute]: system_attributes.html
