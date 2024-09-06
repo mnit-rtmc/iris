@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2020  Minnesota Department of Transportation
+ * Copyright (C) 2007-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -151,8 +151,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Load all the video monitors */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, VideoMonitorImpl.class,
-			GROUP_CHECKER);
+		namespace.registerType(SONAR_TYPE, VideoMonitorImpl.class);
 		store.query("SELECT name, controller, pin, notes, group_n, " +
 		            "mon_num, restricted, monitor_style, camera " +
 		            "FROM iris." + SONAR_TYPE + ";", new ResultFactory()
@@ -340,7 +339,9 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	}
 
 	/** Set the camera displayed on the monitor */
-	public void doSetCamera(Camera c) {
+	public void doSetCamera(Camera c) throws TMSException {
+		if (queryPermAccess() < 2)
+			return;
 		setCamSrc(toCameraImpl(c), getProcUser(), true);
 	}
 
@@ -519,6 +520,13 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		setCamSequence(mon_num, seq);
 		if (seq != null)
 			CAM_SWITCH.addJob(new CamSequenceUpdateJob(seq));
+	}
+
+	/** Set the play list.
+	 * This will start the given play list from the beginning. */
+	public void doSetPlayList(PlayList pl) throws TMSException {
+		if (queryPermAccess() >= 2)
+			setPlayList(pl);
 	}
 
 	/** Get the camera sequence */
