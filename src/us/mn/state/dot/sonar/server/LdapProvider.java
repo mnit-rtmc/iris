@@ -81,6 +81,8 @@ public class LdapProvider {
 			return false;
 		}
 		catch (CommunicationException e) {
+			TaskProcessor.DEBUG.log(namingMessage(e) +
+				" on " + toString());
 			throw e;
 		}
 		catch (NamingException e) {
