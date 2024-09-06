@@ -188,9 +188,10 @@ impl Permission {
         let role = HtmlStr::new(&self.role);
         let access = item_state(self.access_n);
         let resource = HtmlStr::new(&self.resource_n);
+        let hashtag = HtmlStr::new(&self.hashtag);
         format!(
             "<div class='title row'>{role} {access} {id}</div>\
-            <div class='info fill'>{resource}</div>"
+            <div class='info fill'>{resource}<span>{hashtag}</span></div>"
         )
     }
 
