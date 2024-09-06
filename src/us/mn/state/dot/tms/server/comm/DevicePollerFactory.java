@@ -47,6 +47,7 @@ import us.mn.state.dot.tms.server.comm.pelcod.PelcoDPoller;
 import us.mn.state.dot.tms.server.comm.pelcop.PelcoPPoller;
 import us.mn.state.dot.tms.server.comm.redlion.RedLionPoller;
 import us.mn.state.dot.tms.server.comm.sierragx.SierraGxPoller;
+import us.mn.state.dot.tms.server.comm.sierrassh.SierraSshPoller;
 import us.mn.state.dot.tms.server.comm.ss105.SS105Poller;
 import us.mn.state.dot.tms.server.comm.ss125.SS125Poller;
 import us.mn.state.dot.tms.server.comm.stc.STCPoller;
@@ -138,6 +139,8 @@ public class DevicePollerFactory {
 			return new ClearGuidePoller(link);
 		case NDOT_BEACON:
 			return new NdotBeaconPoller(link);
+		case SIERRA_SSH_GPS:
+			return new SierraSshPoller(link);
 		default:
 			return null;
 		}

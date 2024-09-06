@@ -170,8 +170,11 @@ public enum CommProtocol {
 	GPS_DIGI_WR("GPS Digi WR", false),
 
 	/** ONVIF PTZ (45) */
-	ONVIF_PTZ("ONVIF PTZ");
-
+	ONVIF_PTZ("ONVIF PTZ"),
+	
+	/** Sierra SSH GPS (46) */
+	SIERRA_SSH_GPS("Sierra SSH GPS");
+	
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {
 		this(d, true);
