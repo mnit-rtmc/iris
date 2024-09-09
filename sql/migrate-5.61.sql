@@ -3,6 +3,8 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
+SELECT iris.update_version('5.60.0', '5.61.0');
+
 -- Add shared hashtag_trig function
 CREATE FUNCTION iris.hashtag_trig() RETURNS TRIGGER AS
     $hashtag_trig$
