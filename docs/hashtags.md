@@ -1,6 +1,6 @@
 # Hashtags
 
-Many devices include a **notes** field, which may contain one or more
+Many resources include a **notes** field, which may contain one or more
 **hashtags**.  This is the `#` (hash) character, followed by a string of
 letters (A-Z, a-z) and/or numbers.  They can be used for grouping resources
 into categories or districts.
