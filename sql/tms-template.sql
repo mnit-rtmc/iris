@@ -1666,7 +1666,7 @@ CREATE TABLE iris.camera_template (
 CREATE TABLE iris._camera (
     name VARCHAR(20) PRIMARY KEY,
     geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
-    notes VARCHAR(256),
+    notes VARCHAR CHECK (LENGTH(notes) < 256),
     cam_num INTEGER UNIQUE,
     cam_template VARCHAR(20) REFERENCES iris.camera_template,
     encoder_type VARCHAR(8) REFERENCES iris.encoder_type,

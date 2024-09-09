@@ -80,4 +80,45 @@ CREATE TRIGGER video_monitor_hashtag_trig
 UPDATE iris.video_monitor SET notes = notes || ' ';
 UPDATE iris.video_monitor SET notes = trim(notes);
 
+-- Change type of camera notes column
+DROP VIEW camera_view;
+DROP VIEW iris.camera;
+
+ALTER TABLE iris._camera ALTER COLUMN notes TYPE VARCHAR;
+ALTER TABLE iris._camera ADD CONSTRAINT _camera_notes_check
+    CHECK (LENGTH(notes) < 256);
+
+CREATE VIEW iris.camera AS
+    SELECT c.name, geo_loc, controller, pin, notes, cam_num, cam_template,
+           encoder_type, enc_address, enc_port, enc_mcast, enc_channel,
+           publish, video_loss
+    FROM iris._camera c
+    JOIN iris.controller_io cio ON c.name = cio.name;
+
+CREATE TRIGGER camera_insert_trig
+    INSTEAD OF INSERT ON iris.camera
+    FOR EACH ROW EXECUTE FUNCTION iris.camera_insert();
+
+CREATE TRIGGER camera_update_trig
+    INSTEAD OF UPDATE ON iris.camera
+    FOR EACH ROW EXECUTE FUNCTION iris.camera_update();
+
+CREATE TRIGGER camera_delete_trig
+    INSTEAD OF DELETE ON iris.camera
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
+
+CREATE VIEW camera_view AS
+    SELECT c.name, cam_num, c.cam_template, encoder_type, et.make, et.model,
+           et.config, c.enc_address, c.enc_port, c.enc_mcast, c.enc_channel,
+           c.publish, c.video_loss, c.geo_loc,
+           l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+           l.landmark, l.lat, l.lon, l.corridor, l.location,
+           cio.controller, ctr.comm_link, ctr.drop_id, ctr.condition, c.notes
+    FROM iris._camera c
+    JOIN iris.controller_io cio ON c.name = cio.name
+    LEFT JOIN iris.encoder_type et ON c.encoder_type = et.name
+    LEFT JOIN geo_loc_view l ON c.geo_loc = l.name
+    LEFT JOIN controller_view ctr ON cio.controller = ctr.name;
+GRANT SELECT ON camera_view TO PUBLIC;
+
 COMMIT;
