@@ -317,6 +317,8 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	 */
 	public void doSetPhase(PlanPhase p) throws TMSException {
 		if (p != phase) {
+			if (queryPermAccess() < 2)
+				throw new ChangeVetoException("NOT PERMITTED");
 			if (getSyncActions())
 				validateDeviceActions(); // throws exception
 			store.update(this, "phase", p);
