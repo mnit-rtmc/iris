@@ -5,13 +5,7 @@ Select `View ➔ Plans and Schedules` menu item
 *Action plans* provide a way to automate and coördinate control of devices, such
 as [DMS]s and [ramp meter]s.
 
-Action plans have a [phase](#plan-phases), which is chosen from a preconfigured
-set.  It can be changed by an operator, or at specified times with
-[time actions](#time-actions).
-
-Each phase can be associated with any number of device actions.  Advanced
-plans can have many phases, each with separate actions.
-
+- **Notes**: administrator notes, possibly including [hashtag]s
 - **Sync Actions**: if selected, the phase can only be changed if all associated
   devices are online.
 - **Sticky**: if selected, messages sent with [device actions](#device-actions)
@@ -20,6 +14,13 @@ plans can have many phases, each with separate actions.
   will ignore detector [auto-fail] (`[exit` *…* `]` or `[slow` *…* `]` only)
 
 ## Plan Phases
+
+A plan phase is used to associate [device actions](#device-actions) with a plan.
+The current phase can be changed by an operator, or at specified times with
+[time actions](#time-actions).
+
+A phase can be associated with any number of device actions.  Advanced
+plans can have many phases, each with separate actions.
 
 The basic phases are **deployed** and **undeployed**.  Additional phases can be
 added on the **Plan Phases** tab.  Each phase must have a unique name.

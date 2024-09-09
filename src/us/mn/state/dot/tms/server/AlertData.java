@@ -544,12 +544,11 @@ public class AlertData {
 		// Create action plan
 		String pname = ActionPlanImpl.createUniqueName("ALERT_" +
 			event.name() + "_%d");
-		String dsc = "Alert: " + event.description;
-		PlanPhase undep = PlanPhaseHelper.lookup(PlanPhase.UNDEPLOYED);
-		PlanPhase phase = PlanPhaseHelper.lookup(lookupCurrentPhase(
-			cfg));
-		ActionPlanImpl plan = new ActionPlanImpl(pname, dsc, "alert",
-			false, false, false, cfg.getAutoDeploy(), undep, phase);
+		String notes = "#Alert " + event.description;
+		String cur_phase = lookupCurrentPhase(cfg);
+		ActionPlanImpl plan = new ActionPlanImpl(pname, notes,
+			false, false, false, cfg.getAutoDeploy(),
+			PlanPhase.UNDEPLOYED, cur_phase);
 		log("created plan " + pname);
 		plan.notifyCreate();
 		createTimeActions(cfg, plan);
@@ -560,7 +559,7 @@ public class AlertData {
 			MsgPattern pat = ent.getKey();
 			Set<AlertMessage> p_msgs = ent.getValue();
 			String ph = lookupPhase(cfg, lookupPeriod(p_msgs));
-			phase = PlanPhaseHelper.lookup(ph);
+			PlanPhase phase = PlanPhaseHelper.lookup(ph);
 			if (phase == null) {
 				if (ph != null)
 					log("plan phase not found: " + ph);

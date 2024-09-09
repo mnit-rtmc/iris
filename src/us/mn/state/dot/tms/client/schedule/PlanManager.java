@@ -104,6 +104,7 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 
 	/** Check if the user is permitted to update the given action plan */
 	private boolean isWritePermitted(ActionPlan plan) {
+		// FIXME: use permissions instead
 		return session.isWritePermitted(plan, "phase");
 	}
 
@@ -124,8 +125,12 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	}
 
 	/** Get the description of an action plan */
+	@Override
 	public String getDescription(ActionPlan plan) {
-		return plan.getName() + " -- " + plan.getDescription();
+		String n = plan.getNotes();
+		return (n != null)
+		      ? plan.getName() + " -- " + n
+		      : plan.getName();
 	}
 
 	/** Create a popup menu for a single selection */

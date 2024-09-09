@@ -46,36 +46,23 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 	@Override
 	protected ArrayList<ProxyColumn<ActionPlan>> createColumns() {
 		ArrayList<ProxyColumn<ActionPlan>> cols =
-			new ArrayList<ProxyColumn<ActionPlan>>(8);
+			new ArrayList<ProxyColumn<ActionPlan>>(7);
 		cols.add(new ProxyColumn<ActionPlan>("action.plan.name", 120) {
 			public Object getValueAt(ActionPlan ap) {
 				return ap.getName();
 			}
 		});
-		cols.add(new ProxyColumn<ActionPlan>("device.description", 370){
+		cols.add(new ProxyColumn<ActionPlan>("device.notes", 400) {
 			public Object getValueAt(ActionPlan ap) {
-				return ap.getDescription();
+				String n = ap.getNotes();
+				return (n != null) ? n : "";
 			}
 			public boolean isEditable(ActionPlan ap) {
-				return canWrite(ap, "description");
+				return canWrite(ap, "notes");
 			}
 			public void setValueAt(ActionPlan ap, Object value) {
-				String v = value.toString().trim();
-				ap.setDescription(v);
-			}
-		});
-		cols.add(new ProxyColumn<ActionPlan>("action.plan.group",
-			120)
-		{
-			public Object getValueAt(ActionPlan ap) {
-				return ap.getGroupN();
-			}
-			public boolean isEditable(ActionPlan ap) {
-				return canWrite(ap);
-			}
-			public void setValueAt(ActionPlan ap, Object value) {
-				String v = value.toString().trim();
-				ap.setGroupN((v.length() > 0) ? v : null);
+				String n = value.toString().trim();
+				ap.setNotes((n.length() > 0) ? n : null);
 			}
 		});
 		cols.add(new ProxyColumn<ActionPlan>("action.plan.sync.actions",

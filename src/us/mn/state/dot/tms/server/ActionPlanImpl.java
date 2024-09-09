@@ -61,11 +61,10 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Load all the action plans */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, ActionPlanImpl.class,
-			GROUP_CHECKER);
-		store.query("SELECT name, description, group_n, sync_actions, "+
-			"sticky, ignore_auto_fail, active, default_phase, " +
-			"phase FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		namespace.registerType(SONAR_TYPE, ActionPlanImpl.class);
+		store.query("SELECT name, notes, sync_actions, sticky, " +
+			"ignore_auto_fail, active, default_phase, phase " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new ActionPlanImpl(row));
@@ -78,8 +77,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("description", description);
-		map.put("group_n", group_n);
+		map.put("notes", notes);
 		map.put("sync_actions", sync_actions);
 		map.put("sticky", sticky);
 		map.put("ignore_auto_fail", ignore_auto_fail);
@@ -104,90 +102,56 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Create a new action plan */
 	public ActionPlanImpl(String n) {
 		super(n);
-		description = "";
 	}
 
 	/** Create an action plan */
 	private ActionPlanImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name
-		     row.getString(2),  // description
-		     row.getString(3),  // group_n
-		     row.getBoolean(4), // sync_actions
-		     row.getBoolean(5), // sticky
-		     row.getBoolean(6), // ignore_auto_fail
-		     row.getBoolean(7), // active
-		     row.getString(8),  // default_phase
-		     row.getString(9)   // phase
+		     row.getString(2),  // notes
+		     row.getBoolean(3), // sync_actions
+		     row.getBoolean(4), // sticky
+		     row.getBoolean(5), // ignore_auto_fail
+		     row.getBoolean(6), // active
+		     row.getString(7),  // default_phase
+		     row.getString(8)   // phase
 		);
 	}
 
 	/** Create an action plan */
-	private ActionPlanImpl(String n, String dsc, String gn, boolean sa,
-		boolean st, boolean ig, boolean a, String dp, String p)
-	{
-		this(n, dsc, gn, sa, st, ig, a, lookupPlanPhase(dp),
-		     lookupPlanPhase(p));
-	}
-
-	/** Create an action plan */
-	public ActionPlanImpl(String n, String dsc, String gn, boolean sa,
-		boolean st, boolean ig, boolean a, PlanPhase dp, PlanPhase p)
+	protected ActionPlanImpl(String n, String nt, boolean sa, boolean st,
+		boolean ig, boolean a, String dp, String p)
 	{
 		this(n);
-		description = dsc;
-		group_n = gn;
+		notes = nt;
 		sync_actions = sa;
 		sticky = st;
 		ignore_auto_fail = ig;
 		active = a;
-		default_phase = dp;
-		phase = p;
+		default_phase = lookupPlanPhase(dp);
+		phase = lookupPlanPhase(p);
 	}
 
-	/** Plan description */
-	private String description;
+	/** Administrator notes */
+	private String notes;
 
-	/** Set the description */
+	/** Set administrator notes (including hashtags) */
 	@Override
-	public void setDescription(String d) {
-		description = d;
+	public void setNotes(String n) {
+		notes = n;
 	}
 
-	/** Set the description */
-	public void doSetDescription(String d) throws TMSException {
-		if (!objectEquals(d, description)) {
-			store.update(this, "description", d);
-			setDescription(d);
+	/** Set administrator notes (including hashtags) */
+	public void doSetNotes(String n) throws TMSException {
+		if (!objectEquals(n, notes)) {
+			store.update(this, "notes", n);
+			setNotes(n);
 		}
 	}
 
-	/** Get the description */
+	/** Get administrator notes (including hashtags) */
 	@Override
-	public String getDescription() {
-		return description;
-	}
-
-	/** Group name */
-	private String group_n;
-
-	/** Set the group name */
-	@Override
-	public void setGroupN(String g) {
-		group_n = g;
-	}
-
-	/** Set the group name */
-	public void doSetGroupN(String g) throws TMSException {
-		if (!objectEquals(g, group_n)) {
-			store.update(this, "group_n", g);
-			setGroupN(g);
-		}
-	}
-
-	/** Get the group name */
-	@Override
-	public String getGroupN() {
-		return group_n;
+	public String getNotes() {
+		return notes;
 	}
 
 	/** Sync actions flag */
@@ -353,6 +317,8 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	 */
 	public void doSetPhase(PlanPhase p) throws TMSException {
 		if (p != phase) {
+			if (queryPermAccess() < 2)
+				throw new ChangeVetoException("NOT PERMITTED");
 			if (getSyncActions())
 				validateDeviceActions(); // throws exception
 			store.update(this, "phase", p);
