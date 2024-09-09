@@ -1246,8 +1246,7 @@ ga_closed	0	\N
 
 CREATE TABLE iris.action_plan (
     name VARCHAR(16) PRIMARY KEY,
-    description VARCHAR(64) NOT NULL,
-    group_n VARCHAR(16),
+    notes VARCHAR CHECK (LENGTH(notes) < 256),
     sync_actions BOOLEAN NOT NULL,
     sticky BOOLEAN NOT NULL,
     ignore_auto_fail BOOLEAN NOT NULL,
@@ -1256,9 +1255,13 @@ CREATE TABLE iris.action_plan (
     phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
+CREATE TRIGGER action_plan_hashtag_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.action_plan
+    FOR EACH ROW EXECUTE FUNCTION iris.hashtag_trig('action_plan');
+
 CREATE VIEW action_plan_view AS
-    SELECT name, description, group_n, sync_actions, sticky, ignore_auto_fail,
-           active, default_phase, phase
+    SELECT name, notes, sync_actions, sticky, ignore_auto_fail, active,
+           default_phase, phase
     FROM iris.action_plan;
 GRANT SELECT ON action_plan_view TO PUBLIC;
 
