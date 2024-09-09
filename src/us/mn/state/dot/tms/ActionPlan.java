@@ -26,10 +26,10 @@ public interface ActionPlan extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "action_plan";
 
-	/** Set the notes */
+	/** Set administrator notes (including hashtags) */
 	void setNotes(String n);
 
-	/** Get the notes */
+	/** Get administrator notes (including hashtags) */
 	String getNotes();
 
 	/** Set the sync actions flag */

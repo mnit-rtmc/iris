@@ -134,13 +134,13 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Administrator notes */
 	private String notes;
 
-	/** Set the administrator notes */
+	/** Set administrator notes (including hashtags) */
 	@Override
 	public void setNotes(String n) {
 		notes = n;
 	}
 
-	/** Set the administrator notes */
+	/** Set administrator notes (including hashtags) */
 	public void doSetNotes(String n) throws TMSException {
 		if (!objectEquals(n, notes)) {
 			store.update(this, "notes", n);
@@ -148,7 +148,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		}
 	}
 
-	/** Get the administrator notes */
+	/** Get administrator notes (including hashtags) */
 	@Override
 	public String getNotes() {
 		return notes;
