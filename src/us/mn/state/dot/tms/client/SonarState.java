@@ -425,8 +425,8 @@ public class SonarState extends Client {
 	}
 
 	/** Cache of action plans */
-	private final TypeCache<ActionPlan> action_plans = new TypeCache
-		<ActionPlan>(ActionPlan.class, this, ActionPlan.GROUP_CHECKER);
+	private final TypeCache<ActionPlan> action_plans =
+		new TypeCache<ActionPlan>(ActionPlan.class, this);
 
 	/** Get the action plan cache */
 	public TypeCache<ActionPlan> getActionPlans() {

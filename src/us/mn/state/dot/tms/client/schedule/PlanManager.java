@@ -124,8 +124,12 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	}
 
 	/** Get the description of an action plan */
+	@Override
 	public String getDescription(ActionPlan plan) {
-		return plan.getName() + " -- " + plan.getDescription();
+		String n = plan.getNotes();
+		return (n != null)
+		      ? plan.getName() + " -- " + n
+		      : plan.getName();
 	}
 
 	/** Create a popup menu for a single selection */

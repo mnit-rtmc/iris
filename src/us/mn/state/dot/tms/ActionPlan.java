@@ -14,9 +14,6 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.GroupChecker;
-import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
@@ -29,17 +26,11 @@ public interface ActionPlan extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "action_plan";
 
-	/** Set the description */
-	void setDescription(String d);
+	/** Set the notes */
+	void setNotes(String n);
 
-	/** Get the description */
-	String getDescription();
-
-	/** Set the group name */
-	void setGroupN(String g);
-
-	/** Get the group name */
-	String getGroupN();
+	/** Get the notes */
+	String getNotes();
 
 	/** Set the sync actions flag */
 	void setSyncActions(boolean s);
@@ -76,13 +67,4 @@ public interface ActionPlan extends SonarObject {
 
 	/** Get the phase */
 	PlanPhase getPhase();
-
-	/** Group privilege checker */
-	GroupChecker GROUP_CHECKER = new GroupChecker() {
-		public boolean checkGroup(Name name, User u, String g) {
-			String n = name.getObjectPart();
-			ActionPlan ap = ActionPlanHelper.lookup(n);
-			return ap != null && g.equals(ap.getGroupN());
-		}
-	};
 }

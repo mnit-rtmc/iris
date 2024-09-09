@@ -50,8 +50,8 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 	/** Name component */
 	private final JLabel name_lbl = createValueLabel();
 
-	/** Description component */
-	private final JLabel description_lbl = createValueLabel();
+	/** Notes component */
+	private final JLabel notes_lbl = createValueLabel();
 
 	/** DMS count component */
 	private final JLabel dms_lbl = createValueLabel();
@@ -109,8 +109,8 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		setTitle(I18N.get("action.plan.selected"));
 		add("action.plan.name");
 		add(name_lbl, Stretch.LAST);
-		add("device.description");
-		add(description_lbl, Stretch.LAST);
+		add("device.notes");
+		add(notes_lbl, Stretch.LAST);
 		add("dms");
 		add(dms_lbl, Stretch.LAST);
 		add("beacon.title");
@@ -156,8 +156,10 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		}
 		if (a == null || a.equals("name"))
 			name_lbl.setText(ap.getName());
-		if (a == null || a.equals("description"))
-			description_lbl.setText(ap.getDescription());
+		if (a == null || a.equals("notes")) {
+			String n = ap.getNotes();
+			notes_lbl.setText((n != null) ? n : "");
+		}
 		if (a == null || a.equals("active")) {
 			dms_lbl.setText(countDMS(ap));
 			beacon_lbl.setText(countBeacons(ap));
@@ -265,7 +267,7 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 	@Override
 	public void clear() {
 		name_lbl.setText("");
-		description_lbl.setText("");
+		notes_lbl.setText("");
 		dms_lbl.setText("");
 		beacon_lbl.setText("");
 		camera_lbl.setText("");
