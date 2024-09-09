@@ -193,7 +193,7 @@ public class CamCache {
 		monitor_styles = new TypeCache<MonitorStyle>(MonitorStyle.class,
 			client);
 		monitors = new TypeCache<VideoMonitor>(VideoMonitor.class,
-			client, VideoMonitor.GROUP_CHECKER);
+			client);
 		monitor_model = new ProxyListModel<VideoMonitor>(monitors);
 		monitor_model.initialize();
 		flow_streams = new TypeCache<FlowStream>(FlowStream.class,

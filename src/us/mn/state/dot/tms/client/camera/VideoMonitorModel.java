@@ -46,13 +46,13 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 	@Override
 	protected ArrayList<ProxyColumn<VideoMonitor>> createColumns() {
 		ArrayList<ProxyColumn<VideoMonitor>> cols =
-			new ArrayList<ProxyColumn<VideoMonitor>>(6);
+			new ArrayList<ProxyColumn<VideoMonitor>>(5);
 		cols.add(new ProxyColumn<VideoMonitor>("video.monitor", 140) {
 			public Object getValueAt(VideoMonitor vm) {
 				return vm.getName();
 			}
 		});
-		cols.add(new ProxyColumn<VideoMonitor>("device.notes", 300) {
+		cols.add(new ProxyColumn<VideoMonitor>("device.notes", 360) {
 			public Object getValueAt(VideoMonitor vm) {
 				String n = vm.getNotes();
 				return (n != null) ? n : "";
@@ -63,20 +63,6 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 			public void setValueAt(VideoMonitor vm, Object value) {
 				String n = value.toString().trim();
 				vm.setNotes((n.length() > 0) ? n : null);
-			}
-		});
-		cols.add(new ProxyColumn<VideoMonitor>("video.monitor.group",
-			160)
-		{
-			public Object getValueAt(VideoMonitor vm) {
-				return vm.getGroupN();
-			}
-			public boolean isEditable(VideoMonitor vm) {
-				return canWrite(vm);
-			}
-			public void setValueAt(VideoMonitor vm, Object value) {
-				String v = value.toString().trim();
-				vm.setGroupN((v.length() > 0) ? v : null);
 			}
 		});
 		cols.add(new ProxyColumn<VideoMonitor>("video.monitor.num",

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2020  Minnesota Department of Transportation
+ * Copyright (C) 2007-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -151,11 +151,10 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Load all the video monitors */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, VideoMonitorImpl.class,
-			GROUP_CHECKER);
-		store.query("SELECT name, controller, pin, notes, group_n, " +
-		            "mon_num, restricted, monitor_style, camera " +
-		            "FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		namespace.registerType(SONAR_TYPE, VideoMonitorImpl.class);
+		store.query("SELECT name, controller, pin, notes, mon_num, " +
+		            "restricted, monitor_style, camera FROM iris." +
+		            SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new VideoMonitorImpl(row));
@@ -171,7 +170,6 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
-		map.put("group_n", group_n);
 		map.put("mon_num", mon_num);
 		map.put("restricted", restricted);
 		map.put("monitor_style", monitor_style);
@@ -197,28 +195,26 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		     row.getString(2),  // controller
 		     row.getInt(3),     // pin
 		     row.getString(4),  // notes
-		     row.getString(5),  // group_n
-		     row.getInt(6),     // mon_num
-		     row.getBoolean(7), // restricted
-		     row.getString(8),  // monitor_style
-		     row.getString(9)   // camera
+		     row.getInt(5),     // mon_num
+		     row.getBoolean(6), // restricted
+		     row.getString(7),  // monitor_style
+		     row.getString(8)   // camera
 		);
 	}
 
 	/** Create a video monitor */
 	private VideoMonitorImpl(String n, String c, int p, String nt,
-		String gn, int mn, boolean r, String ms, String cam)
+		int mn, boolean r, String ms, String cam)
 	{
-		this(n, lookupController(c), p, nt, gn, mn, r,
+		this(n, lookupController(c), p, nt, mn, r,
 		     lookupMonitorStyle(ms), lookupCamera(cam));
 	}
 
 	/** Create a video monitor */
 	private VideoMonitorImpl(String n, ControllerImpl c, int p, String nt,
-		String gn, int mn, boolean r, MonitorStyle ms, Camera cam)
+		int mn, boolean r, MonitorStyle ms, Camera cam)
 	{
 		super(n, c, p, nt);
-		group_n = gn;
 		mon_num = mn;
 		restricted = r;
 		monitor_style = ms;
@@ -229,29 +225,6 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	/** Create a new video monitor */
 	public VideoMonitorImpl(String n) throws TMSException, SonarException {
 		super(n);
-	}
-
-	/** Group name */
-	private String group_n;
-
-	/** Set the group name */
-	@Override
-	public void setGroupN(String g) {
-		group_n = g;
-	}
-
-	/** Set the group name */
-	public void doSetGroupN(String g) throws TMSException {
-		if (!objectEquals(g, group_n)) {
-			store.update(this, "group_n", g);
-			setGroupN(g);
-		}
-	}
-
-	/** Get the group name */
-	@Override
-	public String getGroupN() {
-		return group_n;
 	}
 
 	/** Monitor number */
@@ -340,7 +313,9 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	}
 
 	/** Set the camera displayed on the monitor */
-	public void doSetCamera(Camera c) {
+	public void doSetCamera(Camera c) throws TMSException {
+		if (queryPermAccess() < 2)
+			return;
 		setCamSrc(toCameraImpl(c), getProcUser(), true);
 	}
 
@@ -519,6 +494,13 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		setCamSequence(mon_num, seq);
 		if (seq != null)
 			CAM_SWITCH.addJob(new CamSequenceUpdateJob(seq));
+	}
+
+	/** Set the play list.
+	 * This will start the given play list from the beginning. */
+	public void doSetPlayList(PlayList pl) throws TMSException {
+		if (queryPermAccess() >= 2)
+			setPlayList(pl);
 	}
 
 	/** Get the camera sequence */
