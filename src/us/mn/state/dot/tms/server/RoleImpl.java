@@ -15,22 +15,24 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
 import us.mn.state.dot.sonar.Capability;
+import us.mn.state.dot.sonar.server.CapabilityImpl;
 import us.mn.state.dot.sonar.server.ServerNamespace;
-import us.mn.state.dot.sonar.server.RoleImpl;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Domain;
+import us.mn.state.dot.tms.Role;
 import us.mn.state.dot.tms.TMSException;
 
 /**
- * IRIS role
+ * A role is a set of permissions for the SONAR namespace.
  *
  * @author Douglas lau
  */
-public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
+public class RoleImpl implements Role, Comparable<RoleImpl>,
 	Storable
 {
 	/** SQL connection to database */
@@ -55,7 +57,7 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 			";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				ns.addObject(new IrisRoleImpl(ns,
+				ns.addObject(new RoleImpl(ns,
 					row.getString(1),	// name
 					row.getBoolean(2)	// enabled
 				));
@@ -77,19 +79,25 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 		store.create(this);
 	}
 
+	/** Get the SONAR type name */
+	@Override
+	public String getTypeName() {
+		return SONAR_TYPE;
+	}
+
 	/** Get the database table name */
 	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Create a new IRIS role */
-	public IrisRoleImpl(String n) {
-		super(n);
+	/** Create a new role */
+	public RoleImpl(String n) {
+		name = n;
 	}
 
-	/** Create an IRIS role from database lookup */
-	private IrisRoleImpl(ServerNamespace ns, String n, boolean e)
+	/** Create an role from database lookup */
+	private RoleImpl(ServerNamespace ns, String n, boolean e)
 		throws TMSException
 	{
 		this(n);
@@ -127,15 +135,15 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 
 	/** Compare to another role */
 	@Override
-	public int compareTo(IrisRoleImpl o) {
+	public int compareTo(RoleImpl o) {
 		return name.compareTo(o.name);
 	}
 
 	/** Test if the role equals another role */
 	@Override
 	public boolean equals(Object o) {
-		if (o instanceof IrisRoleImpl)
-			return name.equals(((IrisRoleImpl) o).name);
+		if (o instanceof RoleImpl)
+			return name.equals(((RoleImpl) o).name);
 		else
 			return false;
 	}
@@ -164,9 +172,33 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 		return name;
 	}
 
-	/** Destroy an IRIS role */
+	/** Destroy a role */
+	@Override
+	public void destroy() {
+		// Subclasses must remove role from backing store
+	}
+
+	/** Destroy a role */
 	public void doDestroy() throws TMSException {
 		store.destroy(this);
+	}
+
+	/** Role name */
+	private final String name;
+
+	/** Get the SONAR object name */
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	/** Flag to enable the role */
+	private boolean enabled;
+
+	/** Enable or disable the role */
+	@Override
+	public void setEnabled(boolean e) {
+		enabled = e;
 	}
 
 	/** Set the enabled flag */
@@ -175,6 +207,24 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 			store.update(this, "enabled", e);
 			setEnabled(e);
 		}
+	}
+
+	/** Get the enabled flag */
+	@Override
+	public boolean getEnabled() {
+		return enabled;
+	}
+
+	/** Capabilities for the role */
+	private CapabilityImpl[] capabilities = new CapabilityImpl[0];
+
+	/** Set the capabilities */
+	@Override
+	public void setCapabilities(Capability[] c) {
+		CapabilityImpl[] _c = new CapabilityImpl[c.length];
+		for (int i = 0; i < c.length; i++)
+			_c[i] = (CapabilityImpl) c[i];
+		capabilities = _c;
 	}
 
 	/** Set the capabilities assigned to the role */
@@ -190,6 +240,26 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 		setCapabilities(caps);
 	}
 
+	/** Get the capabilities */
+	@Override
+	public Capability[] getCapabilities() {
+		return capabilities;
+	}
+
+	/** Allowed login domains */
+	private DomainImpl[] domains = new DomainImpl[0];
+
+	/** Set the allowed login domains */
+	@Override
+	public void setDomains(Domain[] ds) {
+		ArrayList<DomainImpl> list = new ArrayList<DomainImpl>();
+		for (Domain d : ds) {
+			if (d instanceof DomainImpl)
+				list.add((DomainImpl) d);
+		}
+		domains = list.toArray(new DomainImpl[0]);
+	}
+
 	/** Set the domains assigned to the user */
 	public void doSetDomains(Domain[] doms) throws TMSException {
 		TreeSet<Storable> dset = new TreeSet<Storable>();
@@ -201,5 +271,11 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 		}
 		dom_map.update(this, dset);
 		setDomains(doms);
+	}
+
+	/** Get the allowed login domains */
+	@Override
+	public Domain[] getDomains() {
+		return domains;
 	}
 }

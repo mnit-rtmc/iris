@@ -19,11 +19,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.UserImpl;
 import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.Role;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.utils.SString.countLetters;
 import static us.mn.state.dot.tms.utils.SString.countUnique;
@@ -60,9 +60,9 @@ public class IrisUserImpl extends UserImpl implements Storable {
 	}
 
 	/** Lookup a role */
-	static private IrisRoleImpl lookupRole(ServerNamespace ns, String name){
-		SonarObject so = ns.lookupObject(IrisRoleImpl.SONAR_TYPE, name);
-		return (so instanceof IrisRoleImpl) ? (IrisRoleImpl) so : null;
+	static private RoleImpl lookupRole(ServerNamespace ns, String name){
+		SonarObject so = ns.lookupObject(RoleImpl.SONAR_TYPE, name);
+		return (so instanceof RoleImpl) ? (RoleImpl) so : null;
 	}
 
 	/** Get a mapping of the columns */
@@ -125,7 +125,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 
 	/** Create an IRIS user from database lookup */
 	private IrisUserImpl(String n, String fn, String pwd, String d,
-		IrisRoleImpl r, boolean e)
+		RoleImpl r, boolean e)
 	{
 		super(n);
 		fullName = fn;

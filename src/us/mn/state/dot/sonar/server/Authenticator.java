@@ -19,8 +19,8 @@ import javax.naming.CommunicationException;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Work;
 import us.mn.state.dot.sched.Worker;
-import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.Domain;
+import us.mn.state.dot.tms.Role;
 import us.mn.state.dot.tms.utils.CidrBlock;
 import us.mn.state.dot.tms.server.HashProvider;
 

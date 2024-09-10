@@ -14,8 +14,9 @@
  */
 package us.mn.state.dot.sonar.server;
 
-import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.Role;
+import us.mn.state.dot.tms.server.RoleImpl;
 
 /**
  * A user must be authenticated by an LDAP server.

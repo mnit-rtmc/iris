@@ -1,5 +1,5 @@
 /*
- * SONAR -- Simple Object Notification And Replication
+ * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2006-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
@@ -12,9 +12,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.sonar;
+package us.mn.state.dot.tms;
 
-import us.mn.state.dot.tms.Domain;
+import us.mn.state.dot.sonar.Capability;
+import us.mn.state.dot.sonar.SonarObject;
 
 /**
  * A role is a set of capabilities for the SONAR namespace.
