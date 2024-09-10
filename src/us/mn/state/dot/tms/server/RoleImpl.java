@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.TreeSet;
 import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.server.CapabilityImpl;
-import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Domain;
 import us.mn.state.dot.tms.Role;
@@ -32,23 +31,18 @@ import us.mn.state.dot.tms.TMSException;
  *
  * @author Douglas lau
  */
-public class RoleImpl implements Role, Comparable<RoleImpl>,
-	Storable
+public class RoleImpl extends BaseObjectImpl implements Role,
+	Comparable<RoleImpl>
 {
-	/** SQL connection to database */
-	static private SQLConnection store;
-
 	/** Role/Capability table mapping */
 	static private TableMapping cap_map;
 
 	/** Role/Domain table mapping */
 	static private TableMapping dom_map;
 
-	/** Lookup all the roles */
-	static public void lookup(SQLConnection c, final ServerNamespace ns)
-		throws TMSException
-	{
-		store = c;
+	/** Load all */
+	static public void loadAll() throws TMSException {
+		namespace.registerType(SONAR_TYPE, RoleImpl.class);
 		cap_map = new TableMapping(store, "iris", SONAR_TYPE,
 			Capability.SONAR_TYPE);
 		dom_map = new TableMapping(store, "iris", SONAR_TYPE,
@@ -57,7 +51,7 @@ public class RoleImpl implements Role, Comparable<RoleImpl>,
 			";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				ns.addObject(new RoleImpl(ns,
+				namespace.addObject(new RoleImpl(
 					row.getString(1),	// name
 					row.getBoolean(2)	// enabled
 				));
@@ -74,9 +68,10 @@ public class RoleImpl implements Role, Comparable<RoleImpl>,
 		return map;
 	}
 
-	/** Store an object */
-	public void doStore() throws TMSException {
-		store.create(this);
+	/** Get the database table name */
+	@Override
+	public String getTable() {
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
@@ -85,35 +80,27 @@ public class RoleImpl implements Role, Comparable<RoleImpl>,
 		return SONAR_TYPE;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new role */
 	public RoleImpl(String n) {
-		name = n;
+		super(n);
 	}
 
-	/** Create an role from database lookup */
-	private RoleImpl(ServerNamespace ns, String n, boolean e)
-		throws TMSException
-	{
+	/** Create a role from database lookup */
+	private RoleImpl(String n, boolean e) throws TMSException {
 		this(n);
 		enabled = e;
-		setCapabilities(lookupCapabilities(ns));
-		setDomains(lookupDomains(ns));
+		setCapabilities(lookupCapabilities());
+		setDomains(lookupDomains());
 	}
 
 	/** Lookup all the capabilities for a role */
-	private IrisCapabilityImpl[] lookupCapabilities(ServerNamespace ns)
+	private IrisCapabilityImpl[] lookupCapabilities()
 		throws TMSException
 	{
 		TreeSet<IrisCapabilityImpl> cset =
 			new TreeSet<IrisCapabilityImpl>();
 		for (String o: cap_map.lookup(this)) {
-			Object c = ns.lookupObject("capability", o);
+			Object c = namespace.lookupObject("capability", o);
 			if (c instanceof IrisCapabilityImpl)
 				cset.add((IrisCapabilityImpl) c);
 		}
@@ -121,12 +108,10 @@ public class RoleImpl implements Role, Comparable<RoleImpl>,
 	}
 
 	/** Lookup all the domains for a user */
-	private DomainImpl[] lookupDomains(ServerNamespace ns)
-		throws TMSException
-	{
+	private DomainImpl[] lookupDomains() throws TMSException {
 		TreeSet<DomainImpl> dset = new TreeSet<DomainImpl>();
 		for (String o: dom_map.lookup(this)) {
-			Object d = ns.lookupObject(Domain.SONAR_TYPE, o);
+			Object d = namespace.lookupObject(Domain.SONAR_TYPE, o);
 			if (d instanceof DomainImpl)
 				dset.add((DomainImpl) d);
 		}
@@ -146,50 +131,6 @@ public class RoleImpl implements Role, Comparable<RoleImpl>,
 			return name.equals(((RoleImpl) o).name);
 		else
 			return false;
-	}
-
-	/** Calculate a hash code */
-	@Override
-	public int hashCode() {
-		return name.hashCode();
-	}
-
-	/** Get the primary key name */
-	@Override
-	public String getPKeyName() {
-		return "name";
-	}
-
-	/** Get the primary key */
-	@Override
-	public String getPKey() {
-		return name;
-	}
-
-	/** Get a string representation of the object */
-	@Override
-	public String toString() {
-		return name;
-	}
-
-	/** Destroy a role */
-	@Override
-	public void destroy() {
-		// Subclasses must remove role from backing store
-	}
-
-	/** Destroy a role */
-	public void doDestroy() throws TMSException {
-		store.destroy(this);
-	}
-
-	/** Role name */
-	private final String name;
-
-	/** Get the SONAR object name */
-	@Override
-	public String getName() {
-		return name;
 	}
 
 	/** Flag to enable the role */

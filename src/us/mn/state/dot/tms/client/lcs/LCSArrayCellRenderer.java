@@ -26,10 +26,10 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.Border;
-import us.mn.state.dot.tms.IrisUserHelper;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.User;
+import us.mn.state.dot.tms.UserHelper;
 import us.mn.state.dot.tms.client.roads.LaneConfigurationPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
@@ -131,8 +131,7 @@ public class LCSArrayCellRenderer extends JPanel
 		lane_config.setConfiguration(manager.laneConfiguration(
 			lcs_array));
 		name_lbl.setText(lcs_array.getName());
-		user_lbl.setText(IrisUserHelper.getNamePruned(
-			getUser(lcs_array)));
+		user_lbl.setText(UserHelper.getNamePruned(getUser(lcs_array)));
 		lcs_pnl.setIndications(getIndications(lcs_array),
 			lcs_array.getShift());
 		loc_lbl.setText(LCSArrayHelper.lookupLocation(lcs_array));

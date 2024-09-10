@@ -20,7 +20,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Role;
 import us.mn.state.dot.tms.TMSException;
@@ -35,34 +34,23 @@ import static us.mn.state.dot.tms.utils.SString.longestCommonSubstring;
  *
  * @author Douglas lau
  */
-public class UserImpl implements User, Storable {
+public class UserImpl extends BaseObjectImpl implements User {
 
 	/** Get required number of unique characters for a password length */
 	static private int uniqueRequirement(int plen) {
 		return (plen < 24) ? (plen / 2) : 12;
 	}
 
-	/** SQL connection to database */
-	static private SQLConnection store;
-
-	/** Lookup all the users */
-	static public void lookup(SQLConnection c, final ServerNamespace ns)
-		throws TMSException
-	{
-		store = c;
+	/** Load all */
+	static protected void loadAll() throws TMSException {
+		namespace.registerType(SONAR_TYPE, UserImpl.class);
 		store.query("SELECT name, full_name, password, dn, role, " +
 			"enabled FROM iris.user_id;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				ns.addObject(new UserImpl(ns, row));
+				namespace.addObject(new UserImpl(row));
 			}
 		});
-	}
-
-	/** Lookup a role */
-	static private RoleImpl lookupRole(ServerNamespace ns, String name){
-		SonarObject so = ns.lookupObject(RoleImpl.SONAR_TYPE, name);
-		return (so instanceof RoleImpl) ? (RoleImpl) so : null;
 	}
 
 	/** Get a mapping of the columns */
@@ -78,9 +66,10 @@ public class UserImpl implements User, Storable {
 		return map;
 	}
 
-	/** Store an object */
-	public void doStore() throws TMSException {
-		store.create(this);
+	/** Get the database table name */
+	@Override
+	public String getTable() {
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
@@ -89,94 +78,41 @@ public class UserImpl implements User, Storable {
 		return SONAR_TYPE;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris.user_id";
-	}
-
 	/** Create a new user */
 	public UserImpl(String n) throws TMSException {
+		super(n);
 		if (!n.equals(n.toLowerCase())) {
 			throw new ChangeVetoException(
 				"Must not contain upper-case characters");
 		}
-		name = n;
 		fullName = "";
 		password = "";
-		dn = "cn=" + name;
+		dn = "cn=" + n;
 		role = null;
 		enabled = false;
 	}
 
-	/** Create an user from a database row */
-	private UserImpl(ServerNamespace ns, ResultSet row)
-		throws SQLException, TMSException
-	{
-		this(ns, row.getString(1),  // name
-		         row.getString(2),  // full_name
-		         row.getString(3),  // password
-		         row.getString(4),  // dn
-		         row.getString(5),  // role
-		         row.getBoolean(6)  // enabled
+	/** Create a user from a database row */
+	private UserImpl(ResultSet row) throws SQLException, TMSException {
+		this(row.getString(1),  // name
+		     row.getString(2),  // full_name
+		     row.getString(3),  // password
+		     row.getString(4),  // dn
+		     row.getString(5),  // role
+		     row.getBoolean(6)  // enabled
 		);
 	}
 
 	/** Create an user from database lookup */
-	private UserImpl(ServerNamespace ns, String n, String fn,
-		String pwd, String d, String r, boolean e) throws TMSException
+	private UserImpl(String n, String fn, String pwd, String d, String r,
+		boolean e) throws TMSException
 	{
-		this(n, fn, pwd, d, lookupRole(ns, r), e);
-	}
-
-	/** Create an user from database lookup */
-	private UserImpl(String n, String fn, String pwd, String d,
-		RoleImpl r, boolean e)
-	{
-		name = n;
+		super(n);
 		fullName = fn;
 		password = pwd;
 		dn = d;
-		role = r;
+		role = lookupRole(r);
 		enabled = e;
-	}
-
-	/** Get the primary key name */
-	@Override
-	public String getPKeyName() {
-		return "name";
-	}
-
-	/** Get the primary key */
-	@Override
-	public String getPKey() {
-		return name;
-	}
-
-	/** Get a string representation of the object */
-	@Override
-	public String toString() {
-		return name;
-	}
-
-	/** Destroy a user */
-	@Override
-	public void destroy() {
-		// Subclasses must remove user from backing store
-	}
-
-	/** Destroy a user */
-	public void doDestroy() throws TMSException {
-		store.destroy(this);
-	}
-
-	/** User name */
-	private final String name;
-
-	/** Get the SONAR object name */
-	@Override
-	public String getName() {
-		return name;
 	}
 
 	/** Full (display) name */
@@ -190,7 +126,7 @@ public class UserImpl implements User, Storable {
 
 	/** Set the full (display) name */
 	public void doSetFullName(String n) throws TMSException {
-		if (!n.equals(fullName)) {
+		if (!objectEquals(n, fullName)) {
 			store.update(this, "full_name", n);
 			setFullName(n);
 		}
@@ -268,7 +204,7 @@ public class UserImpl implements User, Storable {
 
 	/** Set the LDAP distinguished name */
 	public void doSetDn(String d) throws TMSException {
-		if (!d.equals(dn)) {
+		if (!objectEquals(d, dn)) {
 			store.update(this, "dn", d);
 			setDn(d);
 		}
@@ -286,13 +222,12 @@ public class UserImpl implements User, Storable {
 	/** Set the role */
 	@Override
 	public void setRole(Role r) {
-		if (r instanceof RoleImpl)
-			role = (RoleImpl) r;
+		role = (r instanceof RoleImpl) ? (RoleImpl) r : null;
 	}
 
 	/** Set the role assigned to the user */
 	public void doSetRole(Role r) throws TMSException {
-		if (r != role) {
+		if (!objectEquals(r, role)) {
 			store.update(this, "role", r);
 			setRole(r);
 		}

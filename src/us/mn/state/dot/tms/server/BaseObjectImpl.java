@@ -52,6 +52,9 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	{
 		store = s;
 		namespace = ns;
+		DomainImpl.loadAll();
+		RoleImpl.loadAll();
+		UserImpl.loadAll();
 		SystemAttributeImpl.loadAll();
 		GraphicImpl.loadAll();
 		FontImpl.loadAll();
@@ -145,6 +148,12 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			return namespace.lookupObject(st, name);
 		else
 			return null;
+	}
+
+	/** Lookup a role */
+	static protected RoleImpl lookupRole(String name) {
+		SonarObject so = lookupObject(RoleImpl.SONAR_TYPE, name);
+		return (so instanceof RoleImpl) ? (RoleImpl) so : null;
 	}
 
 	/** Lookup a road */

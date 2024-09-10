@@ -15,31 +15,31 @@
 package us.mn.state.dot.tms;
 
 /**
- * IRIS user helper methods.
+ * User helper methods.
  *
  * @author Michael Darter
  * @author Douglas Lau
  * @see User
  */
-public class IrisUserHelper extends BaseHelper {
+public class UserHelper extends BaseHelper {
 
 	/** Disallow instantiation */
-	protected IrisUserHelper() {
+	protected UserHelper() {
 		assert false;
 	}
 
 	/** Lookup a User in the SONAR namespace. 
 	 *  @return The specified user or null if it does not exist. */
 	static public User lookup(String name) {
-		return (User)namespace.lookupObject(User.SONAR_TYPE, name);
+		return (User) namespace.lookupObject(User.SONAR_TYPE, name);
 	}
 
 	/** Get the name of a user pruned to the first dot */
 	static public String getNamePruned(User user) {
-		if(user != null) {
+		if (user != null) {
 			String name = user.getName();
 			int i = name.indexOf('.');
-			if(i >= 0)
+			if (i >= 0)
 				return name.substring(0, i);
 			else
 				return name;

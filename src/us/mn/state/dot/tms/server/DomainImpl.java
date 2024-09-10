@@ -18,7 +18,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Domain;
 import us.mn.state.dot.tms.TMSException;
@@ -28,22 +27,17 @@ import us.mn.state.dot.tms.TMSException;
  *
  * @author Douglas lau
  */
-public class DomainImpl implements Domain, Storable,
+public class DomainImpl extends BaseObjectImpl implements Domain,
 	Comparable<DomainImpl>
 {
-	/** SQL connection to database */
-	static private SQLConnection store;
-
 	/** Lookup all the domains */
-	static public void lookup(SQLConnection c, final ServerNamespace ns)
-		throws TMSException
-	{
-		store = c;
+	static protected void loadAll() throws TMSException {
+		namespace.registerType(SONAR_TYPE, DomainImpl.class);
 		store.query("SELECT name, block, enabled FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				ns.addObject(new DomainImpl(row));
+				namespace.addObject(new DomainImpl(row));
 			}
 		});
 	}
@@ -56,11 +50,6 @@ public class DomainImpl implements Domain, Storable,
 		map.put("block", getBlock());
 		map.put("enabled", getEnabled());
 		return map;
-	}
-
-	/** Store an object */
-	public void doStore() throws TMSException {
-		store.create(this);
 	}
 
 	/** Get the database table name */
@@ -77,7 +66,7 @@ public class DomainImpl implements Domain, Storable,
 
 	/** Create a new domain */
 	public DomainImpl(String n) {
-		name = n;
+		super(n);
 	}
 
 	/** Create an domain from database lookup */
@@ -98,60 +87,16 @@ public class DomainImpl implements Domain, Storable,
 	/** Compare to another domain */
 	@Override
 	public int compareTo(DomainImpl o) {
-		return getName().compareTo(o.getName());
+		return name.compareTo(o.name);
 	}
 
 	/** Test if the domain equals another domain */
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof DomainImpl)
-			return getName().equals(((DomainImpl) o).getName());
+			return name.equals(((DomainImpl) o).name);
 		else
 			return false;
-	}
-
-	/** Calculate a hash code */
-	@Override
-	public int hashCode() {
-		return getName().hashCode();
-	}
-
-	/** Get the primary key name */
-	@Override
-	public String getPKeyName() {
-		return "name";
-	}
-
-	/** Get the primary key */
-	@Override
-	public String getPKey() {
-		return getName();
-	}
-
-	/** Get a string representation of the object */
-	@Override
-	public String toString() {
-		return getName();
-	}
-
-	/** Destroy a domain */
-	@Override
-	public void destroy() {
-		// Subclasses must remove domain from backing store
-	}
-
-	/** Destroy an IRIS domain */
-	public void doDestroy() throws TMSException {
-		store.destroy(this);
-	}
-
-	/** Domain name */
-	private final String name;
-
-	/** Get the SONAR object name */
-	@Override
-	public String getName() {
-		return name;
 	}
 
 	/** CIDR (Classless Inter-Domain Routing) block */
@@ -165,7 +110,7 @@ public class DomainImpl implements Domain, Storable,
 
 	/** Set the CIDR block */
 	public void doSetBlock(String b) throws TMSException {
-		if (!b.equals(getBlock())) {
+		if (!objectEquals(b, block)) {
 			store.update(this, "block", b);
 			setBlock(b);
 		}
@@ -176,6 +121,7 @@ public class DomainImpl implements Domain, Storable,
 	public String getBlock() {
 		return block;
 	}
+
 	/** Enabled flag */
 	private boolean enabled;
 
