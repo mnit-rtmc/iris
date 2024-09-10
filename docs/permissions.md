@@ -48,7 +48,7 @@ resource, at the same access level.
 
 | Base Resource      | Dependent Resources                                   |
 |--------------------|-------------------------------------------------------|
-| action plan        | day matcher, day plan, plan phase, device action      |
+| [action plan]      | day matcher, [day plan], [device action], [plan phase], [time action] |
 | alert config       |                                                       |
 | [beacon]           |                                                       |
 | [camera]           | catalog, [flow stream], monitor style, play list, [video monitor] |
@@ -76,6 +76,7 @@ These include:
 * __hashtag__
 
 
+[action plan]: action_plans.html
 [alarm]: alarms.html
 [beacon]: beacons.html
 [cabinet style]: controllers.html#cabinet-styles
@@ -85,7 +86,9 @@ These include:
 [comm link]: comm_links.html
 [controller]: controllers.html
 [controller io]: controllers.html#io-pins
+[day plan]: action_plans.html#day-plans
 [detector]: vehicle_detection.html
+[device action]: action_plans.html#device-actions
 [dms]: dms.html
 [domain]: users.html#domains
 [flow stream]: flow_streams.html
@@ -105,6 +108,7 @@ These include:
 [message pattern]: message_patterns.html
 [modem]: modem.html
 [parking area]: parking_areas.html
+[plan phase]: action_plans.html#plan-phases
 [privileges]: users.html#privileges
 [r_node]: road_topology.html#r_nodes
 [ramp meter]: ramp_meters.html
@@ -117,6 +121,7 @@ These include:
 [sign message]: sign_message.html
 [system attribute]: system_attributes.html
 [tag reader]: tolling.html#tag-readers
+[time action]: action_plans.html#time-actions
 [toll zone]: tolling.html#toll-zones
 [user id]: users.html#user-ids
 [video monitor]: video.html
