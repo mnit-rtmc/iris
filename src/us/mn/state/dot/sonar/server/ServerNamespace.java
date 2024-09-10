@@ -27,7 +27,7 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.User;
 
 /**
  * A SONAR namespace is a mapping from all SONAR names to types, objects and

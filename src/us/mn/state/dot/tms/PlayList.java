@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017-2018  Minnesota Department of Transportation
+ * Copyright (C) 2017-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@ package us.mn.state.dot.tms;
 import us.mn.state.dot.sonar.GroupChecker;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.sonar.User;
 
 /**
  * Play list (camera sequence).

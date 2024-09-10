@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.sonar;
 
+import us.mn.state.dot.tms.User;
+
 /**
  * Namespace group privilege checker.
  *

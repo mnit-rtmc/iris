@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2010-2015  AHMCT, University of California
  * Copyright (C) 2015  Iteris Inc.
  *
@@ -31,10 +31,10 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 import us.mn.state.dot.sched.ExceptionHandler;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.MapExtentHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.client.map.MapBean;
 import us.mn.state.dot.tms.client.map.MapModel;
 import us.mn.state.dot.tms.client.map.PointSelector;

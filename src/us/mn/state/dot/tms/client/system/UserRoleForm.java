@@ -20,7 +20,7 @@ import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.tms.Domain;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.tms.Role;
-import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.widget.AbstractForm;

@@ -15,10 +15,10 @@
 package us.mn.state.dot.tms.server.comm.ndorv5;
 
 import us.mn.state.dot.sched.DebugLog;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArmState;
+import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.server.GateArmImpl;
 import us.mn.state.dot.tms.server.comm.GateArmPoller;
 import us.mn.state.dot.tms.server.comm.ThreadedPoller;

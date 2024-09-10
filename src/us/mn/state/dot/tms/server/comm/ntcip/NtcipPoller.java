@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.net.URI;
 import us.mn.state.dot.sched.DebugLog;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -26,6 +25,7 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.GpsImpl;

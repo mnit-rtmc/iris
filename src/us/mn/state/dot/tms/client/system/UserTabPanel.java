@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.system;
 
 import javax.swing.GroupLayout;
 import javax.swing.JPanel;
-import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;

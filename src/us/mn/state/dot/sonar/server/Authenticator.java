@@ -21,8 +21,9 @@ import us.mn.state.dot.sched.Work;
 import us.mn.state.dot.sched.Worker;
 import us.mn.state.dot.tms.Domain;
 import us.mn.state.dot.tms.Role;
-import us.mn.state.dot.tms.utils.CidrBlock;
 import us.mn.state.dot.tms.server.HashProvider;
+import us.mn.state.dot.tms.server.UserImpl;
+import us.mn.state.dot.tms.utils.CidrBlock;
 
 /**
  * Simple class to authenticate a user with an LDAP server.

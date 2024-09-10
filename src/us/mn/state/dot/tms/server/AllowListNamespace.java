@@ -18,9 +18,9 @@ import java.net.InetAddress;
 import java.util.List;
 import java.util.Properties;
 import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.GateArmArray;
+import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.utils.CidrBlock;
 
 /**

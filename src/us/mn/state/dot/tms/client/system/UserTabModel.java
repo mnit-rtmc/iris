@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.client.system;
 
 import java.util.ArrayList;
-import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;

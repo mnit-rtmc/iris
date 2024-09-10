@@ -1,5 +1,5 @@
 /*
- * SONAR -- Simple Object Notification And Replication
+ * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2006-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
@@ -12,12 +12,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.sonar;
+package us.mn.state.dot.tms;
 
-import us.mn.state.dot.tms.Role;
+import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * A user must be authenticated by an LDAP server.
+ * A user account which can access IRIS.
  *
  * @author Douglas Lau
  */

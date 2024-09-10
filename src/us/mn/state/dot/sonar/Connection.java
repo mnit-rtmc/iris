@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,6 +13,8 @@
  * GNU General Public License for more details.
  */
 package us.mn.state.dot.sonar;
+
+import us.mn.state.dot.tms.User;
 
 /**
  * A connection encapsulates the state of one client connection on the server.

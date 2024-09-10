@@ -15,11 +15,11 @@
 package us.mn.state.dot.tms.server.comm.natch;
 
 import java.util.HashMap;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.server.AlarmImpl;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;

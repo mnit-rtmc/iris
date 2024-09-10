@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.User;
 
 /**
  * A video monitor device.

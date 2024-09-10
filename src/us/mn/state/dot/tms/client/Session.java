@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2021  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  * Copyright (C) 2019  SRF Consulting Group
  *
@@ -24,7 +24,7 @@ import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.client.alert.AlertManager;
 import us.mn.state.dot.tms.client.beacon.BeaconManager;
 import us.mn.state.dot.tms.client.camera.CameraManager;

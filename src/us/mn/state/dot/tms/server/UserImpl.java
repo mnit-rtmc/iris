@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2024  Minnesota Department of Transportation
+ * Copyright (C) 2006-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,21 +21,21 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.server.ServerNamespace;
-import us.mn.state.dot.sonar.server.UserImpl;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Role;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.User;
 import static us.mn.state.dot.tms.utils.SString.countLetters;
 import static us.mn.state.dot.tms.utils.SString.countUnique;
 import static us.mn.state.dot.tms.utils.SString.isDisplayable;
 import static us.mn.state.dot.tms.utils.SString.longestCommonSubstring;
 
 /**
- * IRIS user
+ * A user account which can access IRIS.
  *
  * @author Douglas lau
  */
-public class IrisUserImpl extends UserImpl implements Storable {
+public class UserImpl implements User, Storable {
 
 	/** Get required number of unique characters for a password length */
 	static private int uniqueRequirement(int plen) {
@@ -54,7 +54,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 			"enabled FROM iris.user_id;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				ns.addObject(new IrisUserImpl(ns, row));
+				ns.addObject(new UserImpl(ns, row));
 			}
 		});
 	}
@@ -83,28 +83,34 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		store.create(this);
 	}
 
+	/** Get the SONAR type name */
+	@Override
+	public String getTypeName() {
+		return SONAR_TYPE;
+	}
+
 	/** Get the database table name */
 	@Override
 	public String getTable() {
 		return "iris.user_id";
 	}
 
-	/** Create a new IRIS user */
-	public IrisUserImpl(String n) throws TMSException {
-		super(n);
+	/** Create a new user */
+	public UserImpl(String n) throws TMSException {
 		if (!n.equals(n.toLowerCase())) {
 			throw new ChangeVetoException(
 				"Must not contain upper-case characters");
 		}
+		name = n;
 		fullName = "";
 		password = "";
-		dn = "";
+		dn = "cn=" + name;
 		role = null;
 		enabled = false;
 	}
 
-	/** Create an IRIS user from a database row */
-	private IrisUserImpl(ServerNamespace ns, ResultSet row)
+	/** Create an user from a database row */
+	private UserImpl(ServerNamespace ns, ResultSet row)
 		throws SQLException, TMSException
 	{
 		this(ns, row.getString(1),  // name
@@ -116,18 +122,18 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		);
 	}
 
-	/** Create an IRIS user from database lookup */
-	private IrisUserImpl(ServerNamespace ns, String n, String fn,
+	/** Create an user from database lookup */
+	private UserImpl(ServerNamespace ns, String n, String fn,
 		String pwd, String d, String r, boolean e) throws TMSException
 	{
 		this(n, fn, pwd, d, lookupRole(ns, r), e);
 	}
 
-	/** Create an IRIS user from database lookup */
-	private IrisUserImpl(String n, String fn, String pwd, String d,
+	/** Create an user from database lookup */
+	private UserImpl(String n, String fn, String pwd, String d,
 		RoleImpl r, boolean e)
 	{
-		super(n);
+		name = n;
 		fullName = fn;
 		password = pwd;
 		dn = d;
@@ -153,17 +159,56 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		return name;
 	}
 
-	/** Destroy an IRIS user */
+	/** Destroy a user */
+	@Override
+	public void destroy() {
+		// Subclasses must remove user from backing store
+	}
+
+	/** Destroy a user */
 	public void doDestroy() throws TMSException {
 		store.destroy(this);
+	}
+
+	/** User name */
+	private final String name;
+
+	/** Get the SONAR object name */
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	/** Full (display) name */
+	private String fullName;
+
+	/** Set the user's full name */
+	@Override
+	public void setFullName(String n) {
+		fullName = n;
 	}
 
 	/** Set the full (display) name */
 	public void doSetFullName(String n) throws TMSException {
 		if (!n.equals(fullName)) {
 			store.update(this, "full_name", n);
-			super.setFullName(n);
+			setFullName(n);
 		}
+	}
+
+	/** Get the user's full name */
+	@Override
+	public String getFullName() {
+		return fullName;
+	}
+
+	/** Password hash */
+	private String password;
+
+	/** Set the password */
+	@Override
+	public void setPassword(String pwd) {
+		password = pwd;
 	}
 
 	/** Set the password */
@@ -212,27 +257,73 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		return password;
 	}
 
+	/** LDAP Distinguished Name */
+	private String dn;
+
+	/** Set the LDAP Distinguished Name */
+	@Override
+	public void setDn(String d) {
+		dn = d;
+	}
+
 	/** Set the LDAP distinguished name */
 	public void doSetDn(String d) throws TMSException {
 		if (!d.equals(dn)) {
 			store.update(this, "dn", d);
-			super.setDn(d);
+			setDn(d);
 		}
+	}
+
+	/** Get the LDAP Distinguished Name */
+	@Override
+	public String getDn() {
+		return dn;
+	}
+
+	/** Role of the user */
+	private RoleImpl role;
+
+	/** Set the role */
+	@Override
+	public void setRole(Role r) {
+		if (r instanceof RoleImpl)
+			role = (RoleImpl) r;
 	}
 
 	/** Set the role assigned to the user */
 	public void doSetRole(Role r) throws TMSException {
 		if (r != role) {
 			store.update(this, "role", r);
-			super.setRole(r);
+			setRole(r);
 		}
+	}
+
+	/** Get the role */
+	@Override
+	public Role getRole() {
+		return role;
+	}
+
+	/** Enabled flag */
+	private boolean enabled;
+
+	/** Set the enabled flag */
+	@Override
+	public void setEnabled(boolean e) {
+		enabled = e;
 	}
 
 	/** Set the enabled flag */
 	public void doSetEnabled(boolean e) throws TMSException {
 		if (e != enabled) {
 			store.update(this, "enabled", e);
-			super.setEnabled(e);
+			setEnabled(e);
 		}
+	}
+
+	/** Get the enabled flag */
+	@Override
+	public boolean getEnabled() {
+		return enabled;
 	}
 }

@@ -41,9 +41,10 @@ import us.mn.state.dot.sonar.Security;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.SSLState;
-import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.server.AccessLogger;
 import us.mn.state.dot.tms.server.HashProvider;
+import us.mn.state.dot.tms.server.UserImpl;
 
 /**
  * The task processor handles all SONAR tasks.

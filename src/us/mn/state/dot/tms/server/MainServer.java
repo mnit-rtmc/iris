@@ -105,7 +105,7 @@ public class MainServer {
 			IrisPrivilegeImpl.lookup(store, ns);
 			DomainImpl.lookup(store, ns);
 			RoleImpl.lookup(store, ns);
-			IrisUserImpl.lookup(store, ns);
+			UserImpl.lookup(store, ns);
 			BaseObjectImpl.loadAll(store, ns);
 			scheduleTimerJobs();
 			scheduleFlushJobs();

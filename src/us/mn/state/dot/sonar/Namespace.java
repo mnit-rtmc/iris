@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.postgis.MultiPolygon;
 import us.mn.state.dot.tms.Role;
+import us.mn.state.dot.tms.User;
 
 /**
  * A namespace is a mapping of names to objects.

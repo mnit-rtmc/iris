@@ -21,7 +21,6 @@ import java.security.spec.InvalidKeySpecException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import us.mn.state.dot.sonar.server.UserImpl;
 import us.mn.state.dot.tms.utils.Base64;
 
 /**
@@ -72,8 +71,7 @@ public class HashProvider {
 	/** Authenticate a user */
 	public boolean authenticate(UserImpl user, char[] pwd) {
 		try {
-			return (user instanceof IrisUserImpl) &&
-			       check((IrisUserImpl) user, pwd);
+			return check(user, pwd);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -82,7 +80,7 @@ public class HashProvider {
 	}
 
 	/** Check a password against a stored hash */
-	private boolean check(IrisUserImpl user, char[] pwd) throws IOException,
+	private boolean check(UserImpl user, char[] pwd) throws IOException,
 		InvalidKeySpecException
 	{
 		String stored = user.getPassword();
