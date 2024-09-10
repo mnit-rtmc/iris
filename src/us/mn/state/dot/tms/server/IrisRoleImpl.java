@@ -18,12 +18,12 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
-import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.sonar.Capability;
-import us.mn.state.dot.sonar.Domain;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.RoleImpl;
+import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.Domain;
+import us.mn.state.dot.tms.TMSException;
 
 /**
  * IRIS role
@@ -113,16 +113,16 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 	}
 
 	/** Lookup all the domains for a user */
-	private IrisDomainImpl[] lookupDomains(ServerNamespace ns)
+	private DomainImpl[] lookupDomains(ServerNamespace ns)
 		throws TMSException
 	{
-		TreeSet<IrisDomainImpl> dset = new TreeSet<IrisDomainImpl>();
+		TreeSet<DomainImpl> dset = new TreeSet<DomainImpl>();
 		for (String o: dom_map.lookup(this)) {
 			Object d = ns.lookupObject(Domain.SONAR_TYPE, o);
-			if (d instanceof IrisDomainImpl)
-				dset.add((IrisDomainImpl) d);
+			if (d instanceof DomainImpl)
+				dset.add((DomainImpl) d);
 		}
-		return dset.toArray(new IrisDomainImpl[0]);
+		return dset.toArray(new DomainImpl[0]);
 	}
 
 	/** Compare to another role */
@@ -194,8 +194,8 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 	public void doSetDomains(Domain[] doms) throws TMSException {
 		TreeSet<Storable> dset = new TreeSet<Storable>();
 		for (Domain d: doms) {
-			if (d instanceof IrisDomainImpl)
-				dset.add((IrisDomainImpl) d);
+			if (d instanceof DomainImpl)
+				dset.add((DomainImpl) d);
 			else
 				throw new ChangeVetoException("Bad domain");
 		}

@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.sonar;
 
+import us.mn.state.dot.tms.Domain;
+
 /**
  * A role is a set of capabilities for the SONAR namespace.
  *

@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.system;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import us.mn.state.dot.sonar.Domain;
+import us.mn.state.dot.tms.Domain;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;

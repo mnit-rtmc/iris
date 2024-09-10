@@ -103,7 +103,7 @@ public class MainServer {
 			AllowListNamespace ns = createNamespace(props);
 			IrisCapabilityImpl.lookup(store, ns);
 			IrisPrivilegeImpl.lookup(store, ns);
-			IrisDomainImpl.lookup(store, ns);
+			DomainImpl.lookup(store, ns);
 			IrisRoleImpl.lookup(store, ns);
 			IrisUserImpl.lookup(store, ns);
 			BaseObjectImpl.loadAll(store, ns);

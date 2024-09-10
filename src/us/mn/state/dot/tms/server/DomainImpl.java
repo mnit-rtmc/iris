@@ -18,19 +18,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.sonar.Domain;
 import us.mn.state.dot.sonar.server.ServerNamespace;
-import us.mn.state.dot.sonar.server.DomainImpl;
+import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.Domain;
+import us.mn.state.dot.tms.TMSException;
 
 /**
- * IRIS domain
+ * A network domain for log-in access control.
  *
  * @author Douglas lau
  */
-public class IrisDomainImpl extends DomainImpl implements Storable,
-	Comparable<IrisDomainImpl>
+public class DomainImpl implements Domain, Storable,
+	Comparable<DomainImpl>
 {
 	/** SQL connection to database */
 	static private SQLConnection store;
@@ -44,7 +43,7 @@ public class IrisDomainImpl extends DomainImpl implements Storable,
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				ns.addObject(new IrisDomainImpl(row));
+				ns.addObject(new DomainImpl(row));
 			}
 		});
 	}
@@ -70,21 +69,27 @@ public class IrisDomainImpl extends DomainImpl implements Storable,
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Create a new IRIS domain */
-	public IrisDomainImpl(String n) {
-		super(n);
+	/** Get the SONAR type name */
+	@Override
+	public String getTypeName() {
+		return SONAR_TYPE;
 	}
 
-	/** Create an IRIS domain from database lookup */
-	private IrisDomainImpl(ResultSet row) throws SQLException {
+	/** Create a new domain */
+	public DomainImpl(String n) {
+		name = n;
+	}
+
+	/** Create an domain from database lookup */
+	private DomainImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name
 		     row.getString(2),  // block
 		     row.getBoolean(3)  // enabled
 		);
 	}
 
-	/** Create an IRIS domain from database lookup */
-	private IrisDomainImpl(String n, String b, boolean e) {
+	/** Create an domain from database lookup */
+	private DomainImpl(String n, String b, boolean e) {
 		this(n);
 		setBlock(b);
 		setEnabled(e);
@@ -92,15 +97,15 @@ public class IrisDomainImpl extends DomainImpl implements Storable,
 
 	/** Compare to another domain */
 	@Override
-	public int compareTo(IrisDomainImpl o) {
+	public int compareTo(DomainImpl o) {
 		return getName().compareTo(o.getName());
 	}
 
 	/** Test if the domain equals another domain */
 	@Override
 	public boolean equals(Object o) {
-		if (o instanceof IrisDomainImpl)
-			return getName().equals(((IrisDomainImpl) o).getName());
+		if (o instanceof DomainImpl)
+			return getName().equals(((DomainImpl) o).getName());
 		else
 			return false;
 	}
@@ -129,9 +134,33 @@ public class IrisDomainImpl extends DomainImpl implements Storable,
 		return getName();
 	}
 
+	/** Destroy a domain */
+	@Override
+	public void destroy() {
+		// Subclasses must remove domain from backing store
+	}
+
 	/** Destroy an IRIS domain */
 	public void doDestroy() throws TMSException {
 		store.destroy(this);
+	}
+
+	/** Domain name */
+	private final String name;
+
+	/** Get the SONAR object name */
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	/** CIDR (Classless Inter-Domain Routing) block */
+	private String block;
+
+	/** Set the CIDR block */
+	@Override
+	public void setBlock(String b) {
+		block = b;
 	}
 
 	/** Set the CIDR block */
@@ -142,11 +171,31 @@ public class IrisDomainImpl extends DomainImpl implements Storable,
 		}
 	}
 
+	/** Get the CIDR block */
+	@Override
+	public String getBlock() {
+		return block;
+	}
+	/** Enabled flag */
+	private boolean enabled;
+
+	/** Set the enabled flag */
+	@Override
+	public void setEnabled(boolean e) {
+		enabled = e;
+	}
+
 	/** Set the enabled flag */
 	public void doSetEnabled(boolean e) throws TMSException {
 		if (e != getEnabled()) {
 			store.update(this, "enabled", e);
 			setEnabled(e);
 		}
+	}
+
+	/** Get the enabled flag */
+	@Override
+	public boolean getEnabled() {
+		return enabled;
 	}
 }

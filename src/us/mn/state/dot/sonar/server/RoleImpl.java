@@ -16,8 +16,9 @@ package us.mn.state.dot.sonar.server;
 
 import java.util.ArrayList;
 import us.mn.state.dot.sonar.Capability;
-import us.mn.state.dot.sonar.Domain;
 import us.mn.state.dot.sonar.Role;
+import us.mn.state.dot.tms.Domain;
+import us.mn.state.dot.tms.server.DomainImpl;
 
 /**
  * A role is a set of permissions for the SONAR namespace.
