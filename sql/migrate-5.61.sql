@@ -215,4 +215,15 @@ GRANT SELECT ON action_plan_view TO PUBLIC;
 -- Make video monitor a base resource
 UPDATE iris.resource_type SET base = true WHERE name = 'video_monitor';
 
+-- Drop privileges and capabilities
+DROP VIEW role_privilege_view;
+DROP TABLE iris.privilege;
+DROP TABLE iris.role_capability;
+DROP TABLE iris.capability;
+
+CREATE VIEW permission_view AS
+    SELECT id, role, resource_n, hashtag, access_n
+    FROM iris.permission;
+GRANT SELECT ON permission_view TO PUBLIC;
+
 COMMIT;
