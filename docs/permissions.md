@@ -49,9 +49,9 @@ resource, at the same access level.
 | Base Resource      | Dependent Resources                                   |
 |--------------------|-------------------------------------------------------|
 | [action plan]      | day matcher, [day plan], [device action], [plan phase], [time action] |
-| alert config       |                                                       |
+| alert config       | alert info, alert message                             |
 | [beacon]           |                                                       |
-| [camera]           | catalog, [flow stream], monitor style, play list, [video monitor] |
+| [camera]           | catalog, [flow stream], play list                     |
 | [controller]       | [alarm], [comm link], [controller io], [gps], [modem] |
 | [detector]         | [r_node], [road], station                             |
 | [dms]              | [font], [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
@@ -63,6 +63,7 @@ resource, at the same access level.
 | [ramp meter]       |                                                       |
 | [system attribute] | [cabinet style], [comm config]                        |
 | [toll zone]        | [tag reader]                                          |
+| [video monitor]    | monitor style                                         |
 | [weather sensor]   |                                                       |
 
 ## Associated Resources

@@ -212,4 +212,7 @@ CREATE VIEW action_plan_view AS
     FROM iris.action_plan;
 GRANT SELECT ON action_plan_view TO PUBLIC;
 
+-- Make video monitor a base resource
+UPDATE iris.resource_type SET base = true WHERE name = 'video_monitor';
+
 COMMIT;

@@ -285,7 +285,7 @@ impl Res {
         use Res::*;
         match self {
             // Camera resources
-            FlowStream | VideoMonitor => Camera,
+            FlowStream => Camera,
             // Controller resources
             Alarm | CommLink | ControllerIo | Gps | Modem => Controller,
             // Detector resources
