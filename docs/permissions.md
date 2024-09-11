@@ -1,8 +1,6 @@
 # Permissions
 
-**Permissions** are a newer access control feature intended to replace
-[capabilities] and [privileges].  For now, they determine permissions for web
-access only.
+**Permissions** determine how much access a [role] has to [resource]s.
 
 <details>
 <summary>API Resources 🕵️ </summary>
@@ -82,7 +80,6 @@ These include:
 [beacon]: beacons.html
 [cabinet style]: controllers.html#cabinet-styles
 [camera]: cameras.html
-[capabilities]: users.html#capabilities
 [comm config]: comm_config.html
 [comm link]: comm_links.html
 [controller]: controllers.html
@@ -110,7 +107,6 @@ These include:
 [modem]: modem.html
 [parking area]: parking_areas.html
 [plan phase]: action_plans.html#plan-phases
-[privileges]: users.html#privileges
 [r_node]: road_topology.html#r_nodes
 [ramp meter]: ramp_meters.html
 [resource]: rest_api.html#resource-types

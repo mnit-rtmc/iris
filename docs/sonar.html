@@ -80,20 +80,11 @@
 	type_2/object_B
 	type_2/object_B/attribute_X
 </pre>
-<h3 id="auth">Authentication and User Privileges</h3>
-<p>
-	Every SONAR namespace contains the <em>user</em> and <em>role</em>
-	types. Each SONAR user must have a user object createed before logging
-	in. Each user object is assigned a set of roles that the user can
-	assume. A role consists of a name glob and a set of access flags.
-	The name glob applies to names in the SONAR namespace, and the access
-	flags (read, update, add, remove) define the privilege. All access to
-	the SONAR namespace is denied unless one of the user's roles allows it.
-</p>
+<h3 id="auth">Authentication</h3>
 <p>
 	The actual user authentication is done by the SONAR server. It connects
 	to an LDAP server, such as NDS or Active Directory to authenticate a
-	user. Once a user is authenticated, all privilege information is
+	user. Once a user is authenticated, all permission information is
 	handled by SONAR, not the LDAP server.
 </p>
 <h2 id="config">Configuration</h2>
@@ -161,22 +152,6 @@
 	All access to this Map must be synchronized on the Map object.
 </p>
 <h2 id="server">Server API</h2>
-<p>
-	A server using SONAR first needs to create a Namespace object. This is
-	a container which holds all information published through SONAR. The
-	namespace must be populated by adding objects which implement the
-	SonarObject interface. There are two types which must be populated
-	for any client to log in: User and Role.
-</p>
-<p>
-	To allow the user/role information to be stored in a database, UserImpl
-	and RoleImpl (found in the server subpackeage) must be subclassed. The
-	create method should call a SQL INSERT. The destroy method should call
-	a SQL DELETE. The setRoles and setDn methods of UserImpl should call a
-	SQL UPDATE. The setPattern, setReadPrivilege, setUpdatePrivilege,
-	setAddPrivilege and setRemovePrivilege methods of RoleImpl should call
-	a SQL UPDATE as well.
-</p>
 <p>
 	Once the Namespace is fully populated, a Server object can be created.
 	This will start an SSL network server on a new thread. Another thread,

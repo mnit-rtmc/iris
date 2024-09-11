@@ -24,28 +24,28 @@ When the edit mode is **OFF**, all configuration changes will be disallowed.
 This feature prevents administrators from accidentally modifying the system
 while looking up information.  It is recommended to only turn the edit mode
 **ON** while updating the system configuration.  Note: edit mode does not grant
-any capabilities which are not already associated with the user's [role].
+any [permissions] which are not already associated with the user's [role].
 
 ## Side Panels
 
 To the left of the map is a set of tabbed panels.  Which panels are available
-is dependant on the [capabilities] of the user's [role].
+is dependant on the [permissions] of the user's [role].
 
-Tab      | Capability
+Tab      | Permission
 ---------|---------------
-Incident | `incident_tab`
-DMS      | `dms_tab`
-Camera   | `camera_tab`
-LCS      | `lcs_tab`
-Meter    | `meter_tab`
-Gates    | `gate_arm_tab`
-Parking  | `parking_tab`
-R_Node   | `sensor_tab`
-Beacon   | `beacon_tab`
-Toll     | `tag_reader_tab`
-Plan     | `plan_tab`
-Comm     | `comm_tab`
-Weather  | `sensor_tab`
+Incident | `incident`
+DMS      | `dms`
+Camera   | `camera`
+LCS      | `lcs`
+Meter    | `ramp_meter`
+Gates    | `gate_arm`
+Parking  | `parking_area`
+R_Node   | `detector`
+Beacon   | `beacon`
+Toll     | `toll_zone`
+Plan     | `action_plan`
+Comm     | `controller`
+Weather  | `weather_sensor`
 
 ## Session Menu
 
@@ -60,9 +60,9 @@ dialogs.
 
 
 [selector tool]: cameras.html#selector-tool
-[capabilities]: users.html#capabilities
 [device]: controllers.html#devices
 [LDAP]: installation.html#ldap
 [map extents]: mapping.html#map-extents
+[permissions]: permissions.html
 [role]: users.html#roles
 [traffic layer]: vehicle_detection.html#traffic-layer

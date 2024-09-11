@@ -192,8 +192,8 @@ Operators may adjust the signs that are included in the deployment by checking
 or unchecking the box next to each DMS in the list.  This list is limited to
 signs in or near the alert area (with proximity determined by the
 `alert_sign_thresh_auto_meters` and `alert_sign_thresh_opt_meters` system
-attributes).  Operators must have the `alert_deploy` capability to approve or
-edit alert deployments.
+attributes).  Operators must have permissions to approve or edit alert
+deployments.
 
 If the alert configuration is flagged as "auto deploy", alert deployments will
 automatically be sent to signs with no human interaction.
