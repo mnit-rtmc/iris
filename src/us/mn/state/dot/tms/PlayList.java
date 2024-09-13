@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.GroupChecker;
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
@@ -51,15 +49,4 @@ public interface PlayList extends SonarObject {
 
 	/** Get the cameras in the play list */
 	Camera[] getCameras();
-
-	/** Group privilege checker */
-	GroupChecker GROUP_CHECKER = new GroupChecker() {
-		public boolean checkGroup(Name name, User u, String g) {
-			if ("user".equals(g)) {
-				String n = "PL_" + u.getName();
-				return name.getObjectPart().equals(n);
-			} else
-				return false;
-		}
-	};
 }

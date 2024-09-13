@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017-2021  Minnesota Department of Transportation
+ * Copyright (C) 2017-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,8 +36,7 @@ public class PlayListImpl extends BaseObjectImpl implements PlayList {
 
 	/** Load all the play lists */
 	static public void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, PlayListImpl.class,
-			PlayList.GROUP_CHECKER);
+		namespace.registerType(SONAR_TYPE, PlayListImpl.class);
 		mapping = new TableMappingList(store, "iris", SONAR_TYPE,
 			Camera.SONAR_TYPE);
 		store.query("SELECT name, seq_num, description FROM iris." +

@@ -270,25 +270,11 @@ abstract public class Namespace {
 	private boolean checkPriv(Name name, User u, Privilege p,
 		boolean write)
 	{
-		if (p.getWrite() == write) {
-			if (write) {
-				return name.checkWrite(p)
-				    && checkGroupWrite(name, u, p);
-			} else
-				return name.checkRead(p);
-		} else
+		if (p.getWrite() == write)
+			return (write) ? name.checkWrite(p) : name.checkRead(p);
+		else
 			return false;
 	}
-
-	/** Check for group write privilege */
-	private boolean checkGroupWrite(Name name, User u, Privilege p) {
-		String g = p.getGroupN();
-		return "".equals(g)
-		    || getGroupChecker(name).checkGroup(name, u, g);
-	}
-
-	/** Get the group checker for a name type */
-	abstract protected GroupChecker getGroupChecker(Name name);
 
 	/** Lookup an object in the SONAR namespace.
 	 * @param tname Sonar type name

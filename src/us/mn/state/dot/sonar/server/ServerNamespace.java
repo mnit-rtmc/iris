@@ -19,7 +19,6 @@ import java.net.InetAddress;
 import java.util.Iterator;
 import java.util.HashMap;
 import us.mn.state.dot.sonar.EmptyIterator;
-import us.mn.state.dot.sonar.GroupChecker;
 import us.mn.state.dot.sonar.Message;
 import us.mn.state.dot.sonar.MessageEncoder;
 import us.mn.state.dot.sonar.Name;
@@ -36,13 +35,6 @@ import us.mn.state.dot.tms.User;
  * @author Douglas Lau
  */
 public class ServerNamespace extends Namespace {
-
-	/** Default group checker for types */
-	static private final GroupChecker NO_GROUP = new GroupChecker() {
-		public boolean checkGroup(Name name, User u, String g) {
-			return false;
-		}
-	};
 
 	/** All SONAR types are stored in the root of the namespace */
 	private final HashMap<String, TypeNode> root =
@@ -188,29 +180,13 @@ public class ServerNamespace extends Namespace {
 	/** Register a new type in the namespace.
 	 * @param n Type name.
 	 * @param c Type class.
-	 * @param gc Group privilege checker.
 	 * @return New type node. */
-	public TypeNode registerType(String n, Class c, GroupChecker gc) {
-		TypeNode node = new TypeNode(this, n, c, gc);
+	public TypeNode registerType(String n, Class c) {
+		TypeNode node = new TypeNode(this, n, c);
 		synchronized (root) {
 			root.put(n, node);
 		}
 		return node;
-	}
-
-	/** Register a new type in the namespace.
-	 * @param n Type name.
-	 * @param c Type class.
-	 * @return New type node. */
-	public TypeNode registerType(String n, Class c) {
-		return registerType(n, c, NO_GROUP);
-	}
-
-	/** Get the group checker for a name type */
-	@Override
-	protected GroupChecker getGroupChecker(Name name) {
-		TypeNode n = _getTypeNode(name.getTypePart());
-		return (n != null) ? n.group_chk : NO_GROUP;
 	}
 
 	/** Add an object into the namespace without storing */
