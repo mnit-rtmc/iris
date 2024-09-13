@@ -221,8 +221,55 @@ DROP TABLE iris.privilege;
 DROP TABLE iris.role_capability;
 DROP TABLE iris.capability;
 
+CREATE TABLE perm (
+    name VARCHAR(8) PRIMARY KEY,
+    role VARCHAR(15) NOT NULL REFERENCES iris.role ON DELETE CASCADE,
+    base_resource VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
+    hashtag VARCHAR(16),
+    access_level INTEGER NOT NULL
+);
+
+INSERT INTO perm (name, role, base_resource, hashtag, access_level) (
+    SELECT 'prm_' || id, role, resource_n, hashtag, access_n
+    FROM iris.permission
+);
+
+DROP TABLE iris.permission;
+
+CREATE TABLE iris.permission (
+    name VARCHAR(8) PRIMARY KEY,
+    role VARCHAR(15) NOT NULL REFERENCES iris.role ON DELETE CASCADE,
+    base_resource VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
+    hashtag VARCHAR(16),
+    access_level INTEGER NOT NULL,
+
+    CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$'),
+    CONSTRAINT permission_access
+        CHECK (access_level >= 1 AND access_level <= 4),
+    -- hashtag cannot be applied to "View" access level
+    CONSTRAINT hashtag_access_ck CHECK (hashtag IS NULL OR access_level != 1)
+);
+
+ALTER TABLE iris.permission
+    ADD CONSTRAINT base_resource_ck
+        CHECK (iris.resource_is_base(base_resource)) NOT VALID;
+
+INSERT INTO iris.permission (name, role, base_resource, hashtag, access_level) (
+    SELECT name, role, base_resource, hashtag, access_level
+    FROM perm
+);
+
+DROP TABLE perm;
+
+CREATE UNIQUE INDEX permission_role_base_resource_hashtag_idx
+    ON iris.permission (role, base_resource, COALESCE(hashtag, ''));
+
+CREATE TRIGGER permission_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.permission
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
 CREATE VIEW permission_view AS
-    SELECT id, role, resource_n, hashtag, access_n
+    SELECT name, role, base_resource, hashtag, access_level
     FROM iris.permission;
 GRANT SELECT ON permission_view TO PUBLIC;
 

@@ -6,13 +6,13 @@
 <summary>API Resources 🕵️ </summary>
 
 * `iris/api/permission`
-* `iris/api/permission/{id}`
+* `iris/api/permission/{name}`
 * `iris/api/access`
 
-| Access       | Primary                               |
-|--------------|---------------------------------------|
-| 👁️  View      | id                                    |
-| 🔧 Configure | role, resource\_n, hashtag, access\_n |
+| Access       | Primary                                      |
+|--------------|----------------------------------------------|
+| 👁️  View      | name                                         |
+| 🔧 Configure | role, base\_resource, hashtag, access\_level |
 
 </details>
 
@@ -20,13 +20,14 @@
 
 [Role] is the user role associated with the permissions.
 
-[Resource] is the `{type}` part of a base [restricted resource] to be accessed.
+[Base resource](#base-resources) is the resource to grant permission for the
+role.
 
 [Hashtag] restricts the permission to resources which have the assigned tag.
 Permissions containing hashtags are only checked for updates to existing
 resources, not creation/deletion.
 
-There are 4 **access** levels, with increasing permissiveness:
+There are 4 **access levels**, with increasing permissiveness:
 
 | Level | Access       | Permissions              |
 |-------|--------------|--------------------------|

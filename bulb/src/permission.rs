@@ -25,11 +25,11 @@ use wasm_bindgen::JsValue;
 /// Permission
 #[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct Permission {
-    pub id: u32,
+    pub name: String,
     pub role: String,
-    pub resource_n: String,
+    pub base_resource: String,
     pub hashtag: Option<String>,
-    pub access_n: u32,
+    pub access_level: u32,
 }
 
 /// Resource Type
@@ -97,12 +97,12 @@ impl PermissionAnc {
     /// Create an HTML `select` element of resource types
     fn resource_types_html(&self, pri: &Permission) -> String {
         let mut html = String::new();
-        html.push_str("<select id='resource_n'>");
+        html.push_str("<select id='base_resource'>");
         if let Some(resource_types) = &self.resource_types {
             for resource_type in resource_types {
                 if resource_type.base {
                     html.push_str("<option");
-                    if pri.resource_n == resource_type.name {
+                    if pri.base_resource == resource_type.name {
                         html.push_str(" selected");
                     }
                     html.push('>');
@@ -135,9 +135,9 @@ impl PermissionAnc {
     }
 }
 
-/// Get item state for an access value
-fn item_state(access_n: u32) -> ItemState {
-    match access_n {
+/// Get item state for an access level
+fn item_state(access_level: u32) -> ItemState {
+    match access_level {
         1 => ItemState::View,
         2 => ItemState::Operate,
         3 => ItemState::Manage,
@@ -146,19 +146,19 @@ fn item_state(access_n: u32) -> ItemState {
     }
 }
 
-/// Create an HTML `select` element of access
-fn access_html(selected: u32) -> String {
+/// Create an HTML `select` element of access level
+fn access_level_html(selected: u32) -> String {
     let mut html = String::new();
-    html.push_str("<select id='access_n'>");
-    for access_n in 1..=4 {
+    html.push_str("<select id='access_level'>");
+    for access in 1..=4 {
         html.push_str("<option value='");
-        html.push_str(&access_n.to_string());
+        html.push_str(&access.to_string());
         html.push('\'');
-        if selected == access_n {
+        if selected == access {
             html.push_str(" selected");
         }
         html.push('>');
-        let item = item_state(access_n);
+        let item = item_state(access);
         html.push_str(item.code());
         html.push(' ');
         html.push_str(item.description());
@@ -172,11 +172,14 @@ impl Permission {
     /// Get value to create a new object
     pub fn create_value(doc: &Doc) -> Result<String> {
         let role = doc.select_parse::<String>("role");
-        let resource_n = doc.select_parse::<String>("resource_n");
-        if let (Some(role), Some(resource_n)) = (role, resource_n) {
+        let base_resource = doc.select_parse::<String>("base_resource");
+        if let (Some(role), Some(base_resource)) = (role, base_resource) {
             let mut obj = Map::new();
             obj.insert("role".to_string(), Value::String(role));
-            obj.insert("resource_n".to_string(), Value::String(resource_n));
+            obj.insert(
+                "base_resource".to_string(),
+                Value::String(base_resource),
+            );
             return Ok(Value::Object(obj).to_string());
         }
         Err(Error::Parse())
@@ -184,13 +187,13 @@ impl Permission {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let id = self.id;
+        let name = &self.name;
         let role = HtmlStr::new(&self.role);
-        let access = item_state(self.access_n);
-        let resource = HtmlStr::new(&self.resource_n);
+        let access = item_state(self.access_level);
+        let resource = HtmlStr::new(&self.base_resource);
         let hashtag = HtmlStr::new(&self.hashtag);
         format!(
-            "<div class='title row'>{role} {access} {id}</div>\
+            "<div class='title row'>{role} {access} {name}</div>\
             <div class='info fill'>{resource}<span>{hashtag}</span></div>"
         )
     }
@@ -201,7 +204,7 @@ impl Permission {
         let role = anc.roles_html(self);
         let resource = anc.resource_types_html(self);
         let hashtag = HtmlStr::new(&self.hashtag);
-        let access = access_html(self.access_n);
+        let access = access_level_html(self.access_level);
         let footer = self.footer(true);
         format!(
             "{title}\
@@ -210,7 +213,7 @@ impl Permission {
                {role}\
             </div>\
             <div class='row'>\
-              <label for='resource_n'>Resource</label>\
+              <label for='base_resource'>Resource</label>\
               {resource}\
             </div>\
             <div class='row'>\
@@ -218,7 +221,7 @@ impl Permission {
                <input id='hashtag' maxlength='16' size='16' value='{hashtag}'>\
             </div>\
             <div class='row'>\
-              <label for='access_n'>Access</label>\
+              <label for='access_level'>Access</label>\
               {access}\
             </div>\
             {footer}"
@@ -246,7 +249,7 @@ impl Card for Permission {
 
     /// Get the name
     fn name(&self) -> Cow<str> {
-        Cow::Owned(self.id.to_string())
+        Cow::Borrowed(&self.name)
     }
 
     /// Set the name
@@ -256,10 +259,10 @@ impl Card for Permission {
 
     /// Check if a search string matches
     fn is_match(&self, search: &str, _anc: &PermissionAnc) -> bool {
-        self.id.to_string().contains(search)
-            || item_state(self.access_n).is_match(search)
+        self.name.contains(search)
+            || item_state(self.access_level).is_match(search)
             || self.role.contains_lower(search)
-            || self.resource_n.contains(search)
+            || self.base_resource.contains(search)
     }
 
     /// Get row for Create card
@@ -272,7 +275,7 @@ impl Card for Permission {
               {role}\
             </div>\
             <div class='row'>\
-              <label for='resource_n'>Resource</label>\
+              <label for='base_resource'>Resource</label>\
               {resource}\
             </div>"
         )
@@ -291,9 +294,9 @@ impl Card for Permission {
     fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_select("role", &self.role);
-        fields.changed_select("resource_n", &self.resource_n);
+        fields.changed_select("base_resource", &self.base_resource);
         fields.changed_input("hashtag", &self.hashtag);
-        fields.changed_select("access_n", self.access_n);
+        fields.changed_select("access_level", self.access_level);
         fields.into_value().to_string()
     }
 }

@@ -23,93 +23,93 @@ use tokio_postgres::Row;
 
 /// Create one permission
 const INSERT_ONE: &str = "\
-  INSERT INTO iris.permission (role, resource_n, access_n) \
+  INSERT INTO iris.permission (role, base_resource, access_level) \
   VALUES ($1, $2, $3)";
 
 /// Update one permission
 const UPDATE_ONE: &str = "\
   UPDATE iris.permission \
-  SET (role, resource_n, hashtag, access_n) = ($2, $3, $4, $5) \
-  WHERE id = $1";
+  SET (role, base_resource, hashtag, access_level) = ($2, $3, $4, $5) \
+  WHERE name = $1";
 
 /// Delete one permission
 const DELETE_ONE: &str = "\
   DELETE \
   FROM iris.permission \
-  WHERE id = $1";
+  WHERE name = $1";
 
 /// Query access permissions for a user
 const ACCESS_BY_USER: &str = "\
-  SELECT p.id, p.role, p.resource_n, p.hashtag, p.access_n \
+  SELECT p.name, p.role, p.base_resource, p.hashtag, p.access_level \
   FROM iris.user_id u \
   JOIN iris.role r ON u.role = r.name \
   JOIN iris.permission p ON p.role = r.name \
   WHERE u.enabled = true \
     AND r.enabled = true \
     AND u.name = $1 \
-  ORDER BY p.resource_n, p.hashtag";
+  ORDER BY p.base_resource, p.hashtag";
 
 /// Query permission for a user / resource (no hashtag)
 const QUERY_PERMISSION: &str = "\
-  SELECT p.id, p.role, p.resource_n, p.hashtag, p.access_n \
+  SELECT p.name, p.role, p.base_resource, p.hashtag, p.access_level \
   FROM iris.permission p \
   JOIN iris.role r ON p.role = r.name \
   JOIN iris.user_id u ON u.role = r.name \
   WHERE r.enabled = true \
     AND u.enabled = true \
     AND u.name = $1 \
-    AND p.resource_n = $2 \
+    AND p.base_resource = $2 \
     AND p.hashtag IS NULL";
 
 /// Query permission for a user / resource / hashtag
 const QUERY_PERMISSION_TAG: &str = "\
-  SELECT p.id, p.role, p.resource_n, p.hashtag, p.access_n \
+  SELECT p.name, p.role, p.base_resource, p.hashtag, p.access_level \
   FROM iris.permission p \
   JOIN iris.role r ON p.role = r.name \
   JOIN iris.user_id u ON u.role = r.name \
   WHERE r.enabled = true \
     AND u.enabled = true \
     AND u.name = $1 \
-    AND p.resource_n = $2 \
+    AND p.base_resource = $2 \
     AND (\
       p.hashtag IS NULL OR \
       p.hashtag IN (\
         SELECT hashtag \
         FROM iris.hashtag h \
-        WHERE h.resource_n = p.resource_n \
+        WHERE h.resource_n = p.base_resource \
           AND h.name = $3 \
       )\
     ) \
-  ORDER BY access_n DESC \
+  ORDER BY access_level DESC \
   LIMIT 1";
 
 /// Permission
 #[derive(Clone, Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct Permission {
-    pub id: i32,
+    pub name: String,
     pub role: String,
-    pub resource_n: String,
+    pub base_resource: String,
     pub hashtag: Option<String>,
-    pub access_n: i32,
+    pub access_level: i32,
 }
 
 impl Permission {
     fn from_row(row: Row) -> Self {
         Permission {
-            id: row.get(0),
+            name: row.get(0),
             role: row.get(1),
-            resource_n: row.get(2),
+            base_resource: row.get(2),
             hashtag: row.get(3),
-            access_n: row.get(4),
+            access_level: row.get(4),
         }
     }
 }
 
-/// Get permission by ID
-pub async fn get_by_id(db: &Database, id: i32) -> Result<Permission> {
+/// Get one permission by name
+pub async fn get_one(db: &Database, name: &str) -> Result<Permission> {
     let client = db.client().await?;
     let row = client
-        .query_one(query::PERMISSION_ONE, &[&id])
+        .query_one(query::PERMISSION_ONE, &[&name])
         .await
         .map_err(|_e| Error::NotFound)?;
     Ok(Permission::from_row(row))
@@ -129,12 +129,12 @@ pub async fn get_by_user(db: &Database, user: &str) -> Result<Vec<Permission>> {
 pub async fn post_role_res(
     db: &Database,
     role: &str,
-    resource_n: &str,
+    base_resource: &str,
 ) -> Result<()> {
-    let access_n = 1; // View is a good default
+    let access_level = 1; // View is a good default
     let client = db.client().await?;
     let rows = client
-        .execute(INSERT_ONE, &[&role, &resource_n, &access_n])
+        .execute(INSERT_ONE, &[&role, &base_resource, &access_level])
         .await
         .map_err(|_e| Error::InvalidValue)?;
     if rows == 1 {
@@ -144,43 +144,46 @@ pub async fn post_role_res(
     }
 }
 
-/// Patch permission by ID
-pub async fn patch_by_id(
+/// Patch permission by name
+pub async fn patch_by_name(
     db: &Database,
-    id: i32,
+    name: &str,
     mut obj: Map<String, Value>,
 ) -> Result<()> {
     let mut client = db.client().await?;
     let transaction = client.transaction().await?;
     let row = transaction
-        .query_one(query::PERMISSION_ONE, &[&id])
+        .query_one(query::PERMISSION_ONE, &[&name])
         .await
         .map_err(|_e| Error::NotFound)?;
     let Permission {
-        id,
+        name,
         mut role,
-        mut resource_n,
+        mut base_resource,
         mut hashtag,
-        mut access_n,
+        mut access_level,
     } = Permission::from_row(row);
     if let Some(Value::String(r)) = obj.remove("role") {
         role = r;
     }
-    if let Some(Value::String(r)) = obj.remove("resource_n") {
-        resource_n = r;
+    if let Some(Value::String(r)) = obj.remove("base_resource") {
+        base_resource = r;
     }
     match obj.remove("hashtag") {
         Some(Value::String(ht)) => hashtag = Some(ht),
         Some(Value::Null) => hashtag = None,
         _ => (),
     };
-    if let Some(Value::Number(a)) = obj.remove("access_n") {
+    if let Some(Value::Number(a)) = obj.remove("access_level") {
         if let Some(a) = a.as_i64() {
-            access_n = a as i32;
+            access_level = a as i32;
         }
     }
     let rows = transaction
-        .execute(UPDATE_ONE, &[&id, &role, &resource_n, &hashtag, &access_n])
+        .execute(
+            UPDATE_ONE,
+            &[&name, &role, &base_resource, &hashtag, &access_level],
+        )
         .await
         .map_err(|_e| Error::Conflict)?;
     if rows == 1 {
@@ -191,10 +194,10 @@ pub async fn patch_by_id(
     }
 }
 
-/// Delete permission by ID
-pub async fn delete_by_id(db: &Database, id: i32) -> Result<()> {
+/// Delete permission by name
+pub async fn delete_by_name(db: &Database, name: &str) -> Result<()> {
     let client = db.client().await?;
-    let rows = client.execute(DELETE_ONE, &[&id]).await?;
+    let rows = client.execute(DELETE_ONE, &[&name]).await?;
     if rows == 1 {
         Ok(())
     } else {
@@ -209,18 +212,18 @@ pub async fn get_by_name(
     name: &Name,
 ) -> Result<Permission> {
     let client = db.client().await?;
-    let type_n = name.res_type.base().as_str();
+    let base_resource = name.res_type.base().as_str();
     match name.object_n() {
         Some(tag) => {
             let row = client
-                .query_one(QUERY_PERMISSION_TAG, &[&user, &type_n, &tag])
+                .query_one(QUERY_PERMISSION_TAG, &[&user, &base_resource, &tag])
                 .await
                 .map_err(|_e| Error::Forbidden)?;
             Ok(Permission::from_row(row))
         }
         None => {
             let row = client
-                .query_one(QUERY_PERMISSION, &[&user, &type_n])
+                .query_one(QUERY_PERMISSION, &[&user, &base_resource])
                 .await
                 .map_err(|_e| Error::Forbidden)?;
             Ok(Permission::from_row(row))

@@ -207,7 +207,7 @@ impl Honey {
     ) -> Result<Access> {
         log::debug!("name_access {user} {name}");
         let perm = permission::get_by_name(&self.db, user, name).await?;
-        let acc = Access::new(perm.access_n).ok_or(Error::Forbidden)?;
+        let acc = Access::new(perm.access_level).ok_or(Error::Forbidden)?;
         acc.check(access)?;
         Ok(acc)
     }
@@ -590,13 +590,13 @@ fn permission_resource(honey: Honey) -> Router {
             .name_access(cred.user(), &nm, Access::Configure)
             .await?;
         let role = attrs.get("role");
-        let resource_n = attrs.get("resource_n");
-        if let (Some(Value::String(role)), Some(Value::String(resource_n))) =
-            (role, resource_n)
+        let base_resource = attrs.get("base_resource");
+        if let (Some(Value::String(role)), Some(Value::String(base_resource))) =
+            (role, base_resource)
         {
             let role = role.to_string();
-            let resource_n = resource_n.to_string();
-            permission::post_role_res(&honey.db, &role, &resource_n).await?;
+            let base_resource = base_resource.to_string();
+            permission::post_role_res(&honey.db, &role, &base_resource).await?;
             return Ok(StatusCode::CREATED);
         }
         Err(Error::InvalidValue)?
@@ -669,13 +669,13 @@ fn permission_object(honey: Honey) -> Router {
     async fn handle_get(
         session: Session,
         State(honey): State<Honey>,
-        AxumPath(id): AxumPath<i32>,
+        AxumPath(obj_n): AxumPath<String>,
     ) -> Resp2 {
-        let nm = Name::from(Res::Permission).obj(&id.to_string())?;
+        let nm = Name::from(Res::Permission).obj(&obj_n)?;
         log::info!("GET {nm}");
         let cred = Credentials::load(&session).await?;
         honey.name_access(cred.user(), &nm, Access::View).await?;
-        let perm = permission::get_by_id(&honey.db, id).await?;
+        let perm = permission::get_one(&honey.db, &obj_n).await?;
         match serde_json::to_value(perm) {
             Ok(body) => json_resp(body.to_string()),
             Err(_e) => Err(StatusCode::BAD_REQUEST),
@@ -686,16 +686,16 @@ fn permission_object(honey: Honey) -> Router {
     async fn handle_patch(
         session: Session,
         State(honey): State<Honey>,
-        AxumPath(id): AxumPath<i32>,
+        AxumPath(obj_n): AxumPath<String>,
         Json(attrs): Json<Map<String, Value>>,
     ) -> Resp0 {
-        let nm = Name::from(Res::Permission).obj(&id.to_string())?;
+        let nm = Name::from(Res::Permission).obj(&obj_n)?;
         log::info!("PATCH {nm}");
         let cred = Credentials::load(&session).await?;
         honey
             .name_access(cred.user(), &nm, Access::Configure)
             .await?;
-        permission::patch_by_id(&honey.db, id, attrs).await?;
+        permission::patch_by_name(&honey.db, &obj_n, attrs).await?;
         Ok(StatusCode::NO_CONTENT)
     }
 
@@ -703,21 +703,21 @@ fn permission_object(honey: Honey) -> Router {
     async fn handle_delete(
         session: Session,
         State(honey): State<Honey>,
-        AxumPath(id): AxumPath<i32>,
+        AxumPath(obj_n): AxumPath<String>,
     ) -> Resp0 {
-        let nm = Name::from(Res::Permission).obj(&id.to_string())?;
+        let nm = Name::from(Res::Permission).obj(&obj_n)?;
         log::info!("DELETE {nm}");
         let cred = Credentials::load(&session).await?;
         honey
             .name_access(cred.user(), &nm, Access::Configure)
             .await?;
-        permission::delete_by_id(&honey.db, id).await?;
+        permission::delete_by_name(&honey.db, &obj_n).await?;
         Ok(StatusCode::NO_CONTENT)
     }
 
     Router::new()
         .route(
-            "/permission/:id",
+            "/permission/:obj_n",
             get(handle_get).patch(handle_patch).delete(handle_delete),
         )
         .with_state(honey)

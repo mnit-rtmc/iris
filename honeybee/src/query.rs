@@ -489,15 +489,15 @@ pub const PARKING_AREA_ARCH: &str = "\
 
 /// SQL query for all permissions (primary)
 pub const PERMISSION_ALL: &str = "\
-  SELECT id, role, resource_n, hashtag, access_n \
+  SELECT name, role, base_resource, hashtag, access_level \
   FROM iris.permission \
-  ORDER BY role, resource_n, id";
+  ORDER BY role, base_resource, name";
 
 /// SQL query for one permission (secondary)
 pub const PERMISSION_ONE: &str = "\
-  SELECT id, role, resource_n, hashtag, access_n \
+  SELECT name, role, base_resource, hashtag, access_level \
   FROM iris.permission \
-  WHERE id = $1";
+  WHERE name = $1";
 
 /// SQL query for all ramp meters (primary)
 pub const RAMP_METER_ALL: &str = "\

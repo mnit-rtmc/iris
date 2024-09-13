@@ -518,7 +518,7 @@ fn add_option<C: Card>(access: &[Permission], html: &mut String) {
     for perm in access {
         if perm.hashtag.is_none() {
             let res = C::res();
-            if perm.resource_n == res.base().as_str() {
+            if perm.base_resource == res.base().as_str() {
                 html.push_str("<option value='");
                 html.push_str(res.as_str());
                 html.push_str("'>");

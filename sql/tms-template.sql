@@ -468,43 +468,44 @@ CREATE VIEW user_id_view AS
 GRANT SELECT ON user_id_view TO PUBLIC;
 
 CREATE TABLE iris.permission (
-    id SERIAL PRIMARY KEY,
+    name VARCHAR(8) PRIMARY KEY,
     role VARCHAR(15) NOT NULL REFERENCES iris.role ON DELETE CASCADE,
-    resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
+    base_resource VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
     hashtag VARCHAR(16),
-    access_n INTEGER NOT NULL,
+    access_level INTEGER NOT NULL,
 
     CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$'),
-    CONSTRAINT permission_access_n CHECK (access_n >= 1 AND access_n <= 4),
-    -- hashtag cannot be applied to "View" access
-    CONSTRAINT hashtag_access_ck CHECK (hashtag IS NULL OR access_n != 1)
+    CONSTRAINT permission_access
+        CHECK (access_level >= 1 AND access_level <= 4),
+    -- hashtag cannot be applied to "View" access level
+    CONSTRAINT hashtag_access_ck CHECK (hashtag IS NULL OR access_level != 1)
 );
 
 ALTER TABLE iris.permission
     ADD CONSTRAINT base_resource_ck
-        CHECK (iris.resource_is_base(resource_n)) NOT VALID;
+        CHECK (iris.resource_is_base(base_resource)) NOT VALID;
 
-CREATE UNIQUE INDEX permission_role_resource_n_hashtag_idx
-    ON iris.permission (role, resource_n, COALESCE(hashtag, ''));
+CREATE UNIQUE INDEX permission_role_base_resource_hashtag_idx
+    ON iris.permission (role, base_resource, COALESCE(hashtag, ''));
 
-COPY iris.permission (role, resource_n, access_n) FROM stdin;
-administrator	action_plan	4
-administrator	alert_config	4
-administrator	beacon	4
-administrator	camera	4
-administrator	controller	4
-administrator	detector	4
-administrator	dms	4
-administrator	gate_arm	4
-administrator	incident	4
-administrator	lcs	4
-administrator	parking_area	4
-administrator	permission	4
-administrator	ramp_meter	4
-administrator	system_attribute	4
-administrator	toll_zone	4
-administrator	video_monitor	4
-administrator	weather_sensor	4
+COPY iris.permission (name, role, base_resource, access_level) FROM stdin;
+prm_1	administrator	action_plan	4
+prm_2	administrator	alert_config	4
+prm_3	administrator	beacon	4
+prm_4	administrator	camera	4
+prm_5	administrator	controller	4
+prm_6	administrator	detector	4
+prm_7	administrator	dms	4
+prm_8	administrator	gate_arm	4
+prm_9	administrator	incident	4
+prm_10	administrator	lcs	4
+prm_11	administrator	parking_area	4
+prm_12	administrator	permission	4
+prm_13	administrator	ramp_meter	4
+prm_14	administrator	system_attribute	4
+prm_15	administrator	toll_zone	4
+prm_16	administrator	video_monitor	4
+prm_17	administrator	weather_sensor	4
 \.
 
 CREATE TRIGGER permission_notify_trig
@@ -512,7 +513,7 @@ CREATE TRIGGER permission_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW permission_view AS
-    SELECT id, role, resource_n, hashtag, access_n
+    SELECT name, role, base_resource, hashtag, access_level
     FROM iris.permission;
 GRANT SELECT ON permission_view TO PUBLIC;
 
