@@ -287,7 +287,7 @@ impl Res {
             // Camera resources
             FlowStream => Camera,
             // Controller resources
-            Alarm | CommLink | ControllerIo | Gps | Modem => Controller,
+            Alarm | CommLink | ControllerIo | GeoLoc | Gps | Modem => Controller,
             // Detector resources
             Rnode | Road => Detector,
             // DMS resources

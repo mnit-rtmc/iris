@@ -260,80 +260,80 @@ $update_version$ language plpgsql;
 --
 CREATE TABLE iris.resource_type (
     name VARCHAR(16) PRIMARY KEY,
-    base BOOLEAN NOT NULL
+    base VARCHAR(16) REFERENCES iris.resource_type
 );
 
 COPY iris.resource_type (name, base) FROM stdin;
-action_plan	t
-day_matcher	f
-day_plan	f
-device_action	f
-plan_phase	f
-time_action	f
-alert_config	t
-alert_info	f
-alert_message	f
-beacon	t
-camera	t
-camera_preset	f
-camera_template	f
-cam_vid_src_ord	f
-catalog	f
-encoder_stream	f
-encoder_type	f
-flow_stream	f
-play_list	f
-vid_src_template	f
-controller	t
-alarm	f
-comm_link	f
-gps	f
-modem	f
-detector	t
-r_node	f
-road	f
-station	f
-dms	t
-font	f
-glyph	f
-graphic	f
-msg_line	f
-msg_pattern	f
-sign_config	f
-sign_detail	f
-sign_message	f
-word	f
-gate_arm	t
-gate_arm_array	f
-incident	t
-inc_advice	f
-inc_descriptor	f
-incident_detail	f
-inc_locator	f
-lcs	t
-lane_marking	f
-lane_use_multi	f
-lcs_array	f
-lcs_indication	f
-parking_area	t
-permission	t
-connection	f
-domain	f
-role	f
-user_id	f
-ramp_meter	t
-system_attribute	t
-cabinet_style	f
-comm_config	f
-geo_loc	f
-map_extent	f
-rpt_conduit	f
-road_affix	f
-toll_zone	t
-tag_reader	f
-video_monitor	t
-monitor_style	f
-weather_sensor	t
+action_plan	\N
+day_matcher	action_plan
+day_plan	action_plan
+device_action	action_plan
+plan_phase	action_plan
+time_action	action_plan
+alert_config	\N
+alert_info	alert_config
+alert_message	alert_config
+beacon	\N
+camera	\N
+camera_preset	camera
+camera_template	camera
+cam_vid_src_ord	camera
+catalog	camera
+encoder_stream	camera
+encoder_type	camera
+flow_stream	camera
+play_list	camera
+vid_src_template	camera
+controller	\N
+alarm	controller
+comm_link	controller
+geo_loc	controller
+gps	controller
+modem	controller
+detector	\N
+r_node	detector
+road	detector
+station	detector
+dms	\N
+font	dms
+glyph	dms
+graphic	dms
+msg_line	dms
+msg_pattern	dms
+sign_config	dms
+sign_detail	dms
+sign_message	dms
+word	dms
+gate_arm	\N
+gate_arm_array	gate_arm
+incident	\N
+inc_advice	incident
+inc_descriptor	incident
+incident_detail	incident
+inc_locator	incident
+lcs	\N
+lane_marking	lcs
+lane_use_multi	lcs
+lcs_array	lcs
+lcs_indication	lcs
+parking_area	\N
+permission	\N
+connection	permission
+domain	permission
+role	permission
+user_id	permission
+ramp_meter	\N
+system_attribute	\N
+cabinet_style	system_attribute
+comm_config	system_attribute
+map_extent	system_attribute
+rpt_conduit	system_attribute
+road_affix	system_attribute
+toll_zone	\N
+tag_reader	toll_zone
+video_monitor	\N
+monitor_style	video_monitor
+weather_sensor	\N
 \.
 
 CREATE FUNCTION iris.resource_is_base(VARCHAR(16)) RETURNS BOOLEAN AS
@@ -341,7 +341,7 @@ CREATE FUNCTION iris.resource_is_base(VARCHAR(16)) RETURNS BOOLEAN AS
 SELECT EXISTS (
     SELECT 1
     FROM iris.resource_type
-    WHERE name = $1 AND base = true
+    WHERE name = $1 AND base IS NULL
 );
 $resource_is_base$ LANGUAGE sql;
 

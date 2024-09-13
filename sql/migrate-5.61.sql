@@ -212,9 +212,6 @@ CREATE VIEW action_plan_view AS
     FROM iris.action_plan;
 GRANT SELECT ON action_plan_view TO PUBLIC;
 
--- Make video monitor a base resource
-UPDATE iris.resource_type SET base = true WHERE name = 'video_monitor';
-
 -- Drop privileges and capabilities
 DROP VIEW role_privilege_view;
 DROP TABLE iris.privilege;
@@ -235,6 +232,61 @@ INSERT INTO perm (name, role, base_resource, hashtag, access_level) (
 );
 
 DROP TABLE iris.permission;
+DROP FUNCTION iris.resource_is_base(VARCHAR(16));
+
+ALTER TABLE iris.resource_type DROP COLUMN base;
+ALTER TABLE iris.resource_type ADD COLUMN base VARCHAR(16)
+    REFERENCES iris.resource_type;
+DELETE FROM iris.resource_type WHERE name = 'capability' OR name = 'privilege';
+UPDATE iris.resource_type SET base = 'action_plan' WHERE name IN (
+    'day_matcher', 'day_plan', 'device_action', 'plan_phase', 'time_action'
+);
+UPDATE iris.resource_type SET base = 'alert_config' WHERE name IN (
+    'alert_info', 'alert_message'
+);
+UPDATE iris.resource_type SET base = 'camera' WHERE name IN (
+    'camera_preset', 'camera_template', 'cam_vid_src_ord', 'catalog',
+    'encoder_stream', 'encoder_type', 'flow_stream', 'play_list',
+    'vid_src_template'
+);
+UPDATE iris.resource_type SET base = 'controller' WHERE name IN (
+    'alarm', 'comm_link', 'geo_loc', 'gps', 'modem'
+);
+UPDATE iris.resource_type SET base = 'detector' WHERE name IN (
+    'r_node', 'road', 'station'
+);
+UPDATE iris.resource_type SET base = 'dms' WHERE name IN (
+    'font', 'glyph', 'graphic', 'msg_line', 'msg_pattern', 'sign_config',
+    'sign_detail', 'sign_message', 'word'
+);
+UPDATE iris.resource_type SET base = 'gate_arm' WHERE name = 'gate_arm_array';
+UPDATE iris.resource_type SET base = 'incident' WHERE name IN (
+    'inc_advice', 'inc_descriptor', 'incident_detail', 'inc_locator'
+);
+UPDATE iris.resource_type SET base = 'lcs' WHERE name IN (
+    'lane_marking', 'lane_use_multi', 'lcs_array', 'lcs_indication'
+);
+UPDATE iris.resource_type SET base = 'permission' WHERE name IN (
+    'connection', 'domain', 'role', 'user_id'
+);
+UPDATE iris.resource_type SET base = 'system_attribute' WHERE name IN (
+    'cabinet_style', 'comm_config', 'map_extent', 'rpt_conduit', 'road_affix'
+);
+INSERT INTO iris.resource_type (name, base)
+    VALUES ('rpt_conduit', 'system_attribute')
+    ON CONFLICT DO NOTHING;
+UPDATE iris.resource_type SET base = 'toll_zone' WHERE name = 'tag_reader';
+UPDATE iris.resource_type SET base = 'video_monitor'
+    WHERE name = 'monitor_style';
+
+CREATE FUNCTION iris.resource_is_base(VARCHAR(16)) RETURNS BOOLEAN AS
+    $resource_is_base$
+SELECT EXISTS (
+    SELECT 1
+    FROM iris.resource_type
+    WHERE name = $1 AND base IS NULL
+);
+$resource_is_base$ LANGUAGE sql;
 
 CREATE TABLE iris.permission (
     name VARCHAR(8) PRIMARY KEY,

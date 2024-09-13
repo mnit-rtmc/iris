@@ -36,15 +36,15 @@ pub struct Permission {
 #[derive(Debug, Default, Deserialize)]
 pub struct ResourceType {
     pub name: String,
-    pub base: bool,
+    pub base: Option<String>,
 }
 
 /// Ancillary permission data
 #[derive(Debug)]
 pub struct PermissionAnc {
     assets: Vec<Asset>,
-    pub resource_types: Option<Vec<ResourceType>>,
-    pub roles: Option<Vec<Role>>,
+    pub resource_types: Vec<ResourceType>,
+    pub roles: Vec<Role>,
 }
 
 impl AncillaryData for PermissionAnc {
@@ -58,8 +58,8 @@ impl AncillaryData for PermissionAnc {
             }
             _ => Vec::new(),
         };
-        let resource_types = None;
-        let roles = None;
+        let resource_types = Vec::new();
+        let roles = Vec::new();
         PermissionAnc {
             assets,
             resource_types,
@@ -81,11 +81,10 @@ impl AncillaryData for PermissionAnc {
     ) -> Result<()> {
         match asset {
             Asset::ResourceTypes => {
-                self.resource_types =
-                    Some(serde_wasm_bindgen::from_value(value)?)
+                self.resource_types = serde_wasm_bindgen::from_value(value)?;
             }
             Asset::Roles => {
-                self.roles = Some(serde_wasm_bindgen::from_value(value)?)
+                self.roles = serde_wasm_bindgen::from_value(value)?;
             }
             _ => unreachable!(),
         }
@@ -98,17 +97,15 @@ impl PermissionAnc {
     fn resource_types_html(&self, pri: &Permission) -> String {
         let mut html = String::new();
         html.push_str("<select id='base_resource'>");
-        if let Some(resource_types) = &self.resource_types {
-            for resource_type in resource_types {
-                if resource_type.base {
-                    html.push_str("<option");
-                    if pri.base_resource == resource_type.name {
-                        html.push_str(" selected");
-                    }
-                    html.push('>');
-                    html.push_str(&resource_type.name);
-                    html.push_str("</option>");
+        for resource_type in &self.resource_types {
+            if resource_type.base.is_none() {
+                html.push_str("<option");
+                if pri.base_resource == resource_type.name {
+                    html.push_str(" selected");
                 }
+                html.push('>');
+                html.push_str(&resource_type.name);
+                html.push_str("</option>");
             }
         }
         html.push_str("</select>");
@@ -119,16 +116,14 @@ impl PermissionAnc {
     fn roles_html(&self, pri: &Permission) -> String {
         let mut html = String::new();
         html.push_str("<select id='role'>");
-        if let Some(roles) = &self.roles {
-            for role in roles {
-                html.push_str("<option");
-                if pri.role == role.name {
-                    html.push_str(" selected");
-                }
-                html.push('>');
-                html.push_str(&role.name);
-                html.push_str("</option>");
+        for role in &self.roles {
+            html.push_str("<option");
+            if pri.role == role.name {
+                html.push_str(" selected");
             }
+            html.push('>');
+            html.push_str(&role.name);
+            html.push_str("</option>");
         }
         html.push_str("</select>");
         html
