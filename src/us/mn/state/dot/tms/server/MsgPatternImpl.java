@@ -66,12 +66,6 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Compare to another message pattern */
 	@Override
 	public int compareTo(MsgPatternImpl o) {

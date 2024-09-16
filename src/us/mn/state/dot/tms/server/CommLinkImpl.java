@@ -108,12 +108,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new comm link */
 	public CommLinkImpl(String n) {
 		super(n);

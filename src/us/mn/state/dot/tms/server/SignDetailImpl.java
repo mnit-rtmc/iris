@@ -160,12 +160,6 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a sign detail */
 	private SignDetailImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),   // name

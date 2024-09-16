@@ -55,12 +55,6 @@ public class LCSIndicationImpl extends ControllerIoImpl
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new LCS indication */
 	private LCSIndicationImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name

@@ -54,12 +54,6 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new modem */
 	private ModemImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),		// name

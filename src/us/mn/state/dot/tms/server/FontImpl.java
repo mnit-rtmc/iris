@@ -65,12 +65,6 @@ public class FontImpl extends BaseObjectImpl implements Font {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new font */
 	public FontImpl(String n) {
 		super(n);

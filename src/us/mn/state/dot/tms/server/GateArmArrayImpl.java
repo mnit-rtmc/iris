@@ -84,12 +84,6 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new gate arm array with a string name */
 	public GateArmArrayImpl(String n) throws TMSException, SonarException {
 		super(n);

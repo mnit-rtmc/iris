@@ -177,12 +177,6 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a video monitor */
 	private VideoMonitorImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name

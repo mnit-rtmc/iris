@@ -66,12 +66,6 @@ public class UserImpl extends BaseObjectImpl implements User {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new user */
 	public UserImpl(String n) throws TMSException {
 		super(n);

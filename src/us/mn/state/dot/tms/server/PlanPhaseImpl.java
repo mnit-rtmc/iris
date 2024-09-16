@@ -57,12 +57,6 @@ public class PlanPhaseImpl extends BaseObjectImpl
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new plan phase */
 	public PlanPhaseImpl(String n) {
 		super(n);

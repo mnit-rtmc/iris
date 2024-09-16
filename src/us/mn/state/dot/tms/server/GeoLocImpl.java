@@ -110,12 +110,6 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new geo location */
 	public GeoLocImpl(String n) {
 		// This constructor should only be called by sonar,

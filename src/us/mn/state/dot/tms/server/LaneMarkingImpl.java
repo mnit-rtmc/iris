@@ -61,12 +61,6 @@ public class LaneMarkingImpl extends DeviceImpl implements LaneMarking {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new lane marking with a string name */
 	public LaneMarkingImpl(String n) throws TMSException, SonarException {
 		super(n);

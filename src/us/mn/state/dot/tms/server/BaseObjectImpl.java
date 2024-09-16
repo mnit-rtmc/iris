@@ -388,6 +388,12 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		      : null;
 	}
 
+	/** Get the database table name */
+	@Override
+	public String getTable() {
+		return "iris." + getTypeName();
+	}
+
 	/** Get the primary key name */
 	@Override
 	public String getPKeyName() {

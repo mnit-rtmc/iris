@@ -188,12 +188,6 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig,
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Compare to another sign config */
 	@Override
 	public int compareTo(SignConfigImpl sc) {

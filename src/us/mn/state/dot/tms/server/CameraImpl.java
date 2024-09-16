@@ -101,12 +101,6 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new camera with a string name */
 	public CameraImpl(String n) throws TMSException, SonarException {
 		super(n);

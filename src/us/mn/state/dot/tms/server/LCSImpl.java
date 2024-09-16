@@ -56,12 +56,6 @@ public class LCSImpl extends BaseObjectImpl implements LCS {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new LCS */
 	public LCSImpl(String n) {
 		super(n);

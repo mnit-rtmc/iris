@@ -74,12 +74,6 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a tag reader */
 	private TagReaderImpl(ResultSet row) throws SQLException, TMSException {
 		this(row.getString(1),     // name

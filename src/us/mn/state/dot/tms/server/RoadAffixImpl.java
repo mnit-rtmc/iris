@@ -53,12 +53,6 @@ public class RoadAffixImpl extends BaseObjectImpl implements RoadAffix {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new road affix */
 	public RoadAffixImpl(String n) {
 		super(n);

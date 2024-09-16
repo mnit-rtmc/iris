@@ -96,12 +96,6 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor,
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Compare to another weather sensor */
 	@Override
 	public int compareTo(WeatherSensorImpl o) {

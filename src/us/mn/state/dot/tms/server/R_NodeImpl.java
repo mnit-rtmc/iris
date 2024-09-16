@@ -128,12 +128,6 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new r_node */
 	public R_NodeImpl(String n) {
 		super(n);

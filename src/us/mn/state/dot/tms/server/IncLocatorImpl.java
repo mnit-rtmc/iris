@@ -55,12 +55,6 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create an incident locator */
 	private IncLocatorImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),          // name

@@ -69,12 +69,6 @@ public class AlarmImpl extends ControllerIoImpl implements Alarm {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new alarm */
 	public AlarmImpl(String n) {
 		super(n, null, 0);

@@ -59,12 +59,6 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create an incident advice */
 	private IncAdviceImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),           // name

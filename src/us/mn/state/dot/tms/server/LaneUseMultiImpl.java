@@ -58,12 +58,6 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new lane-use MULTI */
 	public LaneUseMultiImpl(String n) {
 		super(n);

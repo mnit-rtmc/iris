@@ -129,12 +129,6 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new sign message (by SONAR clients) */
 	public SignMessageImpl(String n) {
 		super(n);

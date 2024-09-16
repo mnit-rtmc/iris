@@ -51,12 +51,6 @@ public class EncoderTypeImpl extends BaseObjectImpl implements EncoderType {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new encoder type */
 	public EncoderTypeImpl(String n) {
 		super(n);

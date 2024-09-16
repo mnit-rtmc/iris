@@ -198,12 +198,6 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new parking area */
 	public ParkingAreaImpl(String n) throws SonarException {
 		super(n);

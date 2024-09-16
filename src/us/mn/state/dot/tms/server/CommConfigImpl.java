@@ -73,12 +73,6 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new comm config */
 	public CommConfigImpl(String n) {
 		super(n);

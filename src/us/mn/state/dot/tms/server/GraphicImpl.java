@@ -58,12 +58,6 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new graphic */
 	public GraphicImpl(String n) {
 		super(n);

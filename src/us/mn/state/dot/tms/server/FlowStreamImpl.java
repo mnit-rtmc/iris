@@ -71,12 +71,6 @@ public class FlowStreamImpl extends ControllerIoImpl implements FlowStream {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new flow stream */
 	public FlowStreamImpl(String n) {
 		super(n, null, 0);

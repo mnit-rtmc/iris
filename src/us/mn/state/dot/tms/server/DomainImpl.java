@@ -52,12 +52,6 @@ public class DomainImpl extends BaseObjectImpl implements Domain,
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new domain */
 	public DomainImpl(String n) {
 		super(n);

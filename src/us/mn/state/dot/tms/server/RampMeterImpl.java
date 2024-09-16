@@ -137,12 +137,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new ramp meter with a string name */
 	public RampMeterImpl(String n) throws TMSException, SonarException {
 		super(n);

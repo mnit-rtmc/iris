@@ -108,12 +108,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new controller */
 	public ControllerImpl(String n) throws TMSException, SonarException {
 		super(n);

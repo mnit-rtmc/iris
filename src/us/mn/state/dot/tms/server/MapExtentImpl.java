@@ -56,12 +56,6 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new map extent */
 	public MapExtentImpl(String n) {
 		super(n);

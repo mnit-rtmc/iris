@@ -59,12 +59,6 @@ public class AlertMessageImpl extends BaseObjectImpl implements AlertMessage,
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Compare to another alert message */
 	@Override
 	public int compareTo(AlertMessageImpl o) {

@@ -64,12 +64,6 @@ public class RoadImpl extends BaseObjectImpl implements Road {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new road */
 	public RoadImpl(String n) {
 		super(n);

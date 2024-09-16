@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2020  Minnesota Department of Transportation
+ * Copyright (C) 2020-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,12 +56,6 @@ public class CameraVidSourceOrderImpl extends BaseObjectImpl
 		map.put("src_order", src_order);
 		map.put("src_template", src_template);
 		return map;
-	}
-
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
 	}
 
 	/** Create a new camera video source order with a string name */

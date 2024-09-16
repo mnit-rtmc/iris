@@ -62,12 +62,6 @@ public class EncoderStreamImpl extends BaseObjectImpl implements EncoderStream {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new encoder stream */
 	public EncoderStreamImpl(String n) {
 		super(n);

@@ -53,12 +53,6 @@ public class CameraTemplateImpl extends BaseObjectImpl implements CameraTemplate
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a camera template */
 	public CameraTemplateImpl(String n) {
 		super(n);

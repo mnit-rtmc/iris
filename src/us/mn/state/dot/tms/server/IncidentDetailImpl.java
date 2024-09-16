@@ -53,6 +53,7 @@ public class IncidentDetailImpl extends BaseObjectImpl
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "event." + SONAR_TYPE;
 	}

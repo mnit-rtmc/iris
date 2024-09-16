@@ -44,12 +44,6 @@ public class RptConduitImpl extends BaseObjectImpl
 		namespace.registerType(SONAR_TYPE, RptConduitImpl.class);
 	}
 
-	/** Get the database table name. */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Get a mapping of the columns */
 	@Override
 	public Map<String, Object> getColumns() {

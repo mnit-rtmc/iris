@@ -59,12 +59,6 @@ public class DayPlanImpl extends BaseObjectImpl implements DayPlan {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new day plan */
 	public DayPlanImpl(String n) {
 		super(n);

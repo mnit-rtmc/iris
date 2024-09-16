@@ -66,12 +66,6 @@ public class DayMatcherImpl extends BaseObjectImpl implements DayMatcher,
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new day matcher */
 	public DayMatcherImpl(String n) {
 		super(n);

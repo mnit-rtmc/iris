@@ -77,12 +77,6 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new time action */
 	public TimeActionImpl(String n) {
 		super(n);

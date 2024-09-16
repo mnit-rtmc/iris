@@ -283,12 +283,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Create a new detector */
 	public DetectorImpl(String n) throws TMSException, SonarException {
 		super(n);

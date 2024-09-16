@@ -146,12 +146,6 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 		super(n);
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
 	/** Get a mapping of the columns */
 	@Override
 	public Map<String, Object> getColumns() {
