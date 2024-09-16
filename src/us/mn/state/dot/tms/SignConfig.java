@@ -28,6 +28,12 @@ public interface SignConfig extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "sign_config";
 
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
+
 	/** Get width of the sign face (mm) */
 	int getFaceWidth();
 

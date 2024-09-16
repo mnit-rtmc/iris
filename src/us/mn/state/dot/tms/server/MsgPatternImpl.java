@@ -72,12 +72,6 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Compare to another message pattern */
 	@Override
 	public int compareTo(MsgPatternImpl o) {

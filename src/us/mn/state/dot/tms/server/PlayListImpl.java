@@ -64,12 +64,6 @@ public class PlayListImpl extends BaseObjectImpl implements PlayList {
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a new play list */
 	public PlayListImpl(String n) {
 		super(n);

@@ -31,6 +31,12 @@ public interface CameraVidSourceOrder extends SonarObject,
 	/** SONAR type name */
 	String SONAR_TYPE = "cam_vid_src_ord";
 
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
+
 	/** Set the camera template */
 	void setCameraTemplate(String cameraTemplate);
 

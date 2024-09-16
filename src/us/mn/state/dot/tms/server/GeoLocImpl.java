@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2022  Minnesota Department of Transportation
+ * Copyright (C) 2005-2024  Minnesota Department of Transportation
  * Copyright (C) 2014       AHMCT, University of California
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
@@ -114,12 +114,6 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
 	}
 
 	/** Create a new geo location */

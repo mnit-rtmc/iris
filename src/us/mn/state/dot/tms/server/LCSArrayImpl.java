@@ -127,12 +127,6 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a new LCS array */
 	public LCSArrayImpl(String n) throws TMSException, SonarException {
 		super(n);

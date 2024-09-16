@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,12 @@ public interface SystemAttribute extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "system_attribute";
+
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
 
 	/** maximum length of an attribute name */
 	int MAXLEN_ANAME = 32;

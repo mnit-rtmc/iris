@@ -32,6 +32,12 @@ public interface PlayList extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "play_list";
 
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
+
 	/** Set sequence number */
 	void setSeqNum(Integer n);
 

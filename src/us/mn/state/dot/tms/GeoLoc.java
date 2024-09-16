@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2019  Minnesota Department of Transportation
+ * Copyright (C) 2005-2024  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,12 @@ public interface GeoLoc extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "geo_loc";
+
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
 
 	/** Set the roadway name */
 	void setRoadway(Road r);

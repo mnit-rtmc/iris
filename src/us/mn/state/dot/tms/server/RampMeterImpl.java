@@ -143,12 +143,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a new ramp meter with a string name */
 	public RampMeterImpl(String n) throws TMSException, SonarException {
 		super(n);

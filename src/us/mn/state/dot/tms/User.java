@@ -26,6 +26,12 @@ public interface User extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "user_id";
 
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
+
 	/** Set the user's full name */
 	void setFullName(String n);
 

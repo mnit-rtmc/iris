@@ -37,6 +37,12 @@ public interface CameraTemplate extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "camera_template";
 
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
+
 	/** Get the label */
 	String getLabel();
 

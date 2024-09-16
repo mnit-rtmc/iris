@@ -80,12 +80,6 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a tag reader */
 	private TagReaderImpl(ResultSet row) throws SQLException, TMSException {
 		this(row.getString(1),     // name

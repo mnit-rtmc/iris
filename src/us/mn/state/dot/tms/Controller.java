@@ -26,6 +26,12 @@ public interface Controller extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "controller";
 
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
+
 	/** All I/O pins */
 	int ALL_PINS = 150;
 

@@ -26,6 +26,12 @@ public interface Domain extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "domain";
 
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
+
 	/** Set the CIDR block */
 	void setBlock(String b);
 

@@ -58,12 +58,6 @@ public class DomainImpl extends BaseObjectImpl implements Domain,
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a new domain */
 	public DomainImpl(String n) {
 		super(n);

@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms;
 
 import us.mn.state.dot.sonar.SonarObject;
@@ -37,6 +36,12 @@ public interface RptConduit extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "rpt_conduit";
 
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
+
 	//-------------------------------------------
 	// cancel the operation
 
@@ -58,4 +63,3 @@ public interface RptConduit extends SonarObject {
 
 	String getResults();
 }
-

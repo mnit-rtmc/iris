@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2023  Minnesota Department of Transportation
+ * Copyright (C) 2011-2024  Minnesota Department of Transportation
  * Copyright (C) 2015  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -26,6 +26,12 @@ public interface Modem extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "modem";
+
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
 
 	/** Set config string */
 	void setConfig(String c);

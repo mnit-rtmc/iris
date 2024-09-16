@@ -107,12 +107,6 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a new camera with a string name */
 	public CameraImpl(String n) throws TMSException, SonarException {
 		super(n);

@@ -83,12 +83,6 @@ public class ConnectionImpl extends Conduit implements Connection {
 		return RAND.nextLong();
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Client host name and port */
 	protected final String hostport;
 

@@ -26,6 +26,12 @@ public interface ActionPlan extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "action_plan";
 
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
+
 	/** Set administrator notes (including hashtags) */
 	void setNotes(String n);
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2017  Minnesota Department of Transportation
+ * Copyright (C) 2003-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,12 @@ public interface DayMatcher extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "day_matcher";
+
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
 
 	/** Set the holiday flag */
 	void setHoliday(boolean h);

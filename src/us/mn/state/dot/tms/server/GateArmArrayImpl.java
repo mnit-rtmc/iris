@@ -90,12 +90,6 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a new gate arm array with a string name */
 	public GateArmArrayImpl(String n) throws TMSException, SonarException {
 		super(n);

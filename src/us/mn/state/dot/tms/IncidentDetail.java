@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,12 @@ public interface IncidentDetail extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "incident_detail";
+
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
 
 	/** Set the description */
 	void setDescription(String d);

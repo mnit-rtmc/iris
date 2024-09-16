@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2010  Minnesota Department of Transportation
+ * Copyright (C) 2004-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,12 @@ public interface Station extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "station";
+
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
 
 	/** Get the roadway node */
 	R_Node getR_Node();

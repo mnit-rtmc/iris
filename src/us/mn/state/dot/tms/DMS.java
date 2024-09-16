@@ -24,6 +24,12 @@ public interface DMS extends Device {
 	/** SONAR type name */
 	String SONAR_TYPE = "dms";
 
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
+
 	/** Get the device location */
 	GeoLoc getGeoLoc();
 

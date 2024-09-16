@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2012  Minnesota Department of Transportation
+ * Copyright (C) 2011-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@ public class PlanPhaseImpl extends BaseObjectImpl
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -57,13 +58,9 @@ public class PlanPhaseImpl extends BaseObjectImpl
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
-	}
-
-	/** Get the SONAR type name */
-	public String getTypeName() {
-		return SONAR_TYPE;
 	}
 
 	/** Create a new plan phase */
@@ -83,6 +80,7 @@ public class PlanPhaseImpl extends BaseObjectImpl
 	private int hold_time = 0;
 
 	/** Set the hold time (seconds) */
+	@Override
 	public void setHoldTime(int ht) {
 		hold_time = ht;
 	}
@@ -98,6 +96,7 @@ public class PlanPhaseImpl extends BaseObjectImpl
 	}
 
 	/** Get the hold time (seconds) */
+	@Override
 	public int getHoldTime() {
 		return hold_time;
 	}
@@ -106,6 +105,7 @@ public class PlanPhaseImpl extends BaseObjectImpl
 	protected String next_phase;
 
 	/** Set the next phase */
+	@Override
 	public void setNextPhase(PlanPhase np) {
 		next_phase = np != null ? np.getName() : null;
 	}
@@ -121,6 +121,7 @@ public class PlanPhaseImpl extends BaseObjectImpl
 	}
 
 	/** Get the next phase */
+	@Override
 	public PlanPhase getNextPhase() {
 		return PlanPhaseHelper.lookup(next_phase);
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2023  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,12 @@ public interface LaneUseMulti extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "lane_use_multi";
+
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
 
 	/** Set the indication (ordinal of LaneUseIndication) */
 	void setIndication(int i);

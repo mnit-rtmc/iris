@@ -146,12 +146,6 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 		super(n);
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Get the database table name */
 	@Override
 	public String getTable() {

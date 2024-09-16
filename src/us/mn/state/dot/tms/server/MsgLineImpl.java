@@ -65,12 +65,6 @@ public class MsgLineImpl extends BaseObjectImpl implements MsgLine {
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a new message line */
 	public MsgLineImpl(String n) {
 		super(n);

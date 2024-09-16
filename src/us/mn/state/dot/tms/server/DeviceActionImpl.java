@@ -73,12 +73,6 @@ public class DeviceActionImpl extends BaseObjectImpl implements DeviceAction {
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a new device action */
 	public DeviceActionImpl(String n) {
 		super(n);

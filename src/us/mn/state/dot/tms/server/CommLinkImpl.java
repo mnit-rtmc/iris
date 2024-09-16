@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -112,12 +112,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
 	}
 
 	/** Create a new comm link */

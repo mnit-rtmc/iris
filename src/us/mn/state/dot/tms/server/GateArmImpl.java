@@ -76,12 +76,6 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a new gate arm with a string name */
 	public GateArmImpl(String n) throws TMSException, SonarException {
 		super(n);

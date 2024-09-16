@@ -26,6 +26,12 @@ public interface Connection extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "connection";
 
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
+
 	/** Get the user logged in on the connection.
 	 * May be null (before a successful login). */
 	User getUser();

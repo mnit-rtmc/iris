@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,12 +51,6 @@ public class ClientIncident implements Incident {
 	public String getName() {
 		// must be unique due to selection model
 		return NAME + Integer.toString(System.identityHashCode(this));
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
 	}
 
 	/** Name of replaced incident */

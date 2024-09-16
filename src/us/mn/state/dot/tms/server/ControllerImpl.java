@@ -114,12 +114,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a new controller */
 	public ControllerImpl(String n) throws TMSException, SonarException {
 		super(n);

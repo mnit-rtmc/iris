@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -56,13 +57,9 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
-	}
-
-	/** Get the SONAR type name */
-	public String getTypeName() {
-		return SONAR_TYPE;
 	}
 
 	/** Create a new map extent */
@@ -82,6 +79,7 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 	protected float lon;
 
 	/** Set the longitude */
+	@Override
 	public void setLon(float ln) {
 		lon = ln;
 	}
@@ -95,6 +93,7 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 	}
 
 	/** Get the longitude */
+	@Override
 	public float getLon() {
 		return lon;
 	}
@@ -103,6 +102,7 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 	protected float lat;
 
 	/** Set the latitude */
+	@Override
 	public void setLat(float lt) {
 		lat = lt;
 	}
@@ -116,6 +116,7 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 	}
 
 	/** Get the latitude */
+	@Override
 	public float getLat() {
 		return lat;
 	}
@@ -124,6 +125,7 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 	protected int zoom;
 
 	/** Set the zoom level */
+	@Override
 	public void setZoom(int z) {
 		zoom = z;
 	}
@@ -139,6 +141,7 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 	}
 
 	/** Get the zoom level */
+	@Override
 	public int getZoom() {
 		return zoom;
 	}

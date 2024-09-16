@@ -26,6 +26,12 @@ public interface DeviceAction extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "device_action";
 
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
+
 	/** Get the action plan */
 	ActionPlan getActionPlan();
 

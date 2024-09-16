@@ -72,12 +72,6 @@ public class VidSourceTemplateImpl extends BaseObjectImpl
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a video source template */
 	public VidSourceTemplateImpl(String n) {
 		super(n);

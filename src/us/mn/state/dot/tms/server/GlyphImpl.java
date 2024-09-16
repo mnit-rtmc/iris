@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2018  Minnesota Department of Transportation
+ * Copyright (C) 2007-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,12 +61,6 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
 	}
 
 	/** Create a glyph from database lookup */

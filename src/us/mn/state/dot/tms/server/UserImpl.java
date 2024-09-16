@@ -72,12 +72,6 @@ public class UserImpl extends BaseObjectImpl implements User {
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a new user */
 	public UserImpl(String n) throws TMSException {
 		super(n);

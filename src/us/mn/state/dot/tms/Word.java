@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015  Iteris Inc.
- * Copyright (C) 2020-2023  Minnesota Department of Transportation
+ * Copyright (C) 2020-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,12 @@ public interface Word extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "word";
+
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
 
 	/** Get the abbreviation */
 	String getAbbr();

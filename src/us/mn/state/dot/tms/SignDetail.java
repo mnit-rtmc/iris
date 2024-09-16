@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2021  Minnesota Department of Transportation
+ * Copyright (C) 2019-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,12 @@ public interface SignDetail extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "sign_detail";
+
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
 
 	/** Get DMS type */
 	int getDmsType();

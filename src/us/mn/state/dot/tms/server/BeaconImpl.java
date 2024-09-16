@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2023  Minnesota Department of Transportation
+ * Copyright (C) 2004-2024  Minnesota Department of Transportation
  * Copyright (C) 2022       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -74,12 +74,6 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
 	}
 
 	/** Create a new beacon with a string name */

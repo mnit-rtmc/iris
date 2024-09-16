@@ -35,13 +35,8 @@ import us.mn.state.dot.tms.server.reports.RptGen;
  * @author John L. Stanley - SRF Consulting
  */
 public class RptConduitImpl extends BaseObjectImpl
-		implements RptConduit {
-
-	/** Get the SONAR type name */
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
+	implements RptConduit
+{
 	/** Load all reports from the database (of which there are none...).
 	 * (Just registers the "rpt_conduit" type with the namespace.)
 	 */

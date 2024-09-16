@@ -194,12 +194,6 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig,
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Compare to another sign config */
 	@Override
 	public int compareTo(SignConfigImpl sc) {

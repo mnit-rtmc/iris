@@ -102,12 +102,6 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor,
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Compare to another weather sensor */
 	@Override
 	public int compareTo(WeatherSensorImpl o) {

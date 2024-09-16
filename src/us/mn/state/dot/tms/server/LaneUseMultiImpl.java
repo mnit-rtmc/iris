@@ -64,12 +64,6 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a new lane-use MULTI */
 	public LaneUseMultiImpl(String n) {
 		super(n);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2020  Minnesota Department of Transportation
+ * Copyright (C) 2019-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,12 @@ public interface EncoderStream extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "encoder_stream";
+
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
 
 	/** Default buffering latency */
 	int DEFAULT_LATENCY_MS = 50;

@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
- * Copyright (C) 2021-2023  Minnesota Department of Transportation
+ * Copyright (C) 2021-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,12 @@ public interface AlertConfig extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "alert_config";
+
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
 
 	/** Set the alert event code */
 	void setEvent(String ev);

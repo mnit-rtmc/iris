@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2023  Minnesota Department of Transportation
+ * Copyright (C) 2004-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,12 @@ public interface MsgLine extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "msg_line";
+
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
 
 	/** Maximum length of MULTI string */
 	int MAX_LEN_MULTI = 64;

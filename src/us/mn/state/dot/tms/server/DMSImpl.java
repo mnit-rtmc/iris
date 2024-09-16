@@ -177,12 +177,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Compare to another DMS */
 	@Override
 	public int compareTo(DMSImpl o) {

@@ -134,12 +134,6 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a new r_node */
 	public R_NodeImpl(String n) {
 		super(n);

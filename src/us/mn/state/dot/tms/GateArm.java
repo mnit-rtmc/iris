@@ -24,6 +24,12 @@ public interface GateArm extends Device {
 	/** SONAR type name */
 	String SONAR_TYPE = "gate_arm";
 
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
+
 	/** Get the gate arm array */
 	GateArmArray getGaArray();
 

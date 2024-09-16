@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2021  Minnesota Department of Transportation
+ * Copyright (C) 2011-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,12 @@ public interface PlanPhase extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "plan_phase";
+
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
 
 	/** Undeployed phase name */
 	String UNDEPLOYED = "undeployed";

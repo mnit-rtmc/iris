@@ -289,12 +289,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a new detector */
 	public DetectorImpl(String n) throws TMSException, SonarException {
 		super(n);

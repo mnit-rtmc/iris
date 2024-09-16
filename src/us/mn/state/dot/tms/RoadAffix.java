@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2019  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,12 @@ public interface RoadAffix extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "road_affix";
+
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
 
 	/** Set flag to indicate prefix (true) or suffix (false) */
 	void setPrefix(boolean p);

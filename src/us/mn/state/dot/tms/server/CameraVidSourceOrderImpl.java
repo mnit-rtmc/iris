@@ -64,12 +64,6 @@ public class CameraVidSourceOrderImpl extends BaseObjectImpl
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a new camera video source order with a string name */
 	public CameraVidSourceOrderImpl(String n) {
 		super(n);

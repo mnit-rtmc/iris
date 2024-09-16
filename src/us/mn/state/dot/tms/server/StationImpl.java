@@ -98,12 +98,6 @@ public class StationImpl implements Station, VehicleSampler {
 		r_node = n;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Destroy a station */
 	@Override
 	public void destroy() {

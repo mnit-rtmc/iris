@@ -93,12 +93,6 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a new action plan */
 	public ActionPlanImpl(String n) {
 		super(n);

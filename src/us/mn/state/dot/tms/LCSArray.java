@@ -25,6 +25,12 @@ public interface LCSArray extends Device {
 	/** SONAR type name */
 	String SONAR_TYPE = "lcs_array";
 
+	/** Get the SONAR type name */
+	@Override
+	default String getTypeName() {
+		return SONAR_TYPE;
+	}
+
 	/** Set the lane shift of left lane */
 	void setShift(int s);
 

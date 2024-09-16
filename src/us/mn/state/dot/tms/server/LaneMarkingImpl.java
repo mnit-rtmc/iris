@@ -67,12 +67,6 @@ public class LaneMarkingImpl extends DeviceImpl implements LaneMarking {
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a new lane marking with a string name */
 	public LaneMarkingImpl(String n) throws TMSException, SonarException {
 		super(n);

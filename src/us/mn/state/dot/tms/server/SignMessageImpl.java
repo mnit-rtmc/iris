@@ -135,12 +135,6 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		return "iris." + SONAR_TYPE;
 	}
 
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a new sign message (by SONAR clients) */
 	public SignMessageImpl(String n) {
 		super(n);
