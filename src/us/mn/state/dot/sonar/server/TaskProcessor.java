@@ -158,8 +158,8 @@ public class TaskProcessor {
 	/** File to write session list */
 	private final String session_file;
 
-	/** User for current message processing */
-	private String proc_user = null;
+	/** Connection for current message processing */
+	private ConnectionImpl proc_conn = null;
 
 	/** Create a task processor */
 	public TaskProcessor(ServerNamespace n, Properties p,
@@ -190,9 +190,9 @@ public class TaskProcessor {
 		return namespace;
 	}
 
-	/** Get user for current message processing */
-	public String getProcUser() {
-		return proc_user;
+	/** Get connection for current message processing */
+	public ConnectionImpl getProcConnection() {
+		return proc_conn;
 	}
 
 	/** Get a list of active connections */
@@ -309,9 +309,9 @@ public class TaskProcessor {
 	void processMessages(final ConnectionImpl c) {
 		processor.addWork(new TaskWork("Processing msgs", c) {
 			protected void doPerform() {
-				proc_user = c.getUserName();
+				proc_conn = c;
 				c.processMessages();
-				proc_user = null;
+				proc_conn = null;
 			}
 		});
 	}

@@ -15,6 +15,7 @@
 package us.mn.state.dot.sonar.server;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.Properties;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Props;
@@ -73,6 +74,13 @@ public final class Server {
 
 	/** Get user for current message processing */
 	public String getProcUser() {
-		return processor.getProcUser();
+		ConnectionImpl c = processor.getProcConnection();
+		return (c != null) ? c.getUserName() : null;
+	}
+
+	/** Get address for current message processing */
+	public InetAddress getProcAddress() {
+		ConnectionImpl c = processor.getProcConnection();
+		return (c != null) ? c.getAddress() : null;
 	}
 }

@@ -14,11 +14,15 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.net.InetAddress;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Camera;
@@ -38,6 +42,7 @@ import us.mn.state.dot.tms.User;
 import static us.mn.state.dot.tms.server.GateArmSystem.checkEnabled;
 import static us.mn.state.dot.tms.server.GateArmSystem.sendEmailAlert;
 import static us.mn.state.dot.tms.server.MainServer.TIMER;
+import us.mn.state.dot.tms.utils.CidrBlock;
 
 /**
  * A Gate Arm array is a group of gate arms at a single ramp location.
@@ -46,6 +51,30 @@ import static us.mn.state.dot.tms.server.MainServer.TIMER;
  * @author Douglas Lau
  */
 public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
+
+	/** Allow list of CIDR blocks */
+	static private final List<CidrBlock> ALLOW_LIST =
+		new ArrayList<CidrBlock>();
+
+	/** Initialize the gate arm allow list */
+	static public void initAllowList(Properties props)
+		throws IllegalArgumentException
+	{
+		List<CidrBlock> allow = CidrBlock.parseList(props.getProperty(
+			"gate.arm.whitelist"));
+		ALLOW_LIST.addAll(allow);
+	}
+
+	/** Check if IP address is in allow list */
+	static private boolean checkList(InetAddress a)
+		throws ChangeVetoException
+	{
+		for (CidrBlock block: ALLOW_LIST) {
+			if (block.matches(a))
+				return true;
+		}
+		throw new ChangeVetoException("IP ADDRESS NOT ALLOWED: " + a);
+	}
 
 	/** Exception thrown for interlock conflicts */
 	static private final ChangeVetoException INTERLOCK_CONFLICT =
@@ -353,6 +382,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Set the arm state (request change) */
 	public synchronized void doSetArmStateNext(int gas) throws TMSException{
 		try {
+			checkList(MainServer.server.getProcAddress());
 			if (ownerNext != null)
 				doSetArmStateNext(gas, ownerNext);
 			else

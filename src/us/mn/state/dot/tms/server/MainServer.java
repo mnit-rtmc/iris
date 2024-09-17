@@ -101,6 +101,7 @@ public class MainServer {
 			store = createStore(props);
 			BaseEvent.store = store;
 			I18N.initialize(props);
+			GateArmArrayImpl.initAllowList(props);
 			ServerNamespace ns = createNamespace();
 			BaseObjectImpl.loadAll(store, ns);
 			scheduleTimerJobs();
