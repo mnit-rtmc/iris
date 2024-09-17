@@ -36,7 +36,6 @@ public class AlertMessageImpl extends BaseObjectImpl implements AlertMessage,
 {
 	/** Load all the alert messages */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(AlertMessageImpl.class);
 		store.query("SELECT name, alert_config, alert_period, " +
 			"msg_pattern, sign_config FROM iris." + SONAR_TYPE +
 			";", new ResultFactory()

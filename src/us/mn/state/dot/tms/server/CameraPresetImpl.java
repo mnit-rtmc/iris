@@ -31,7 +31,6 @@ public class CameraPresetImpl extends BaseObjectImpl implements CameraPreset {
 
 	/** Load all the camera presets */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(CameraPresetImpl.class);
 		store.query("SELECT name, camera, preset_num, direction " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{

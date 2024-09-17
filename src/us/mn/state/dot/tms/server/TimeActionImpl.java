@@ -45,7 +45,6 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 
 	/** Load all the time actions */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(TimeActionImpl.class);
 		store.query("SELECT name, action_plan, day_plan, sched_date, " +
 			"time_of_day, phase FROM iris." + SONAR_TYPE  +";",
 			new ResultFactory()

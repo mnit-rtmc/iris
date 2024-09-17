@@ -32,7 +32,6 @@ public class LCSImpl extends BaseObjectImpl implements LCS {
 
 	/** Load all the LCS */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(LCSImpl.class);
 		store.query("SELECT name, lcs_array, lane FROM iris." +
 			SONAR_TYPE  + ";", new ResultFactory()
 		{

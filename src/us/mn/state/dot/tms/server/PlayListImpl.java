@@ -36,7 +36,6 @@ public class PlayListImpl extends BaseObjectImpl implements PlayList {
 
 	/** Load all the play lists */
 	static public void loadAll() throws TMSException {
-		namespace.registerType(PlayListImpl.class);
 		mapping = new TableMappingList(store, "iris", SONAR_TYPE,
 			Camera.SONAR_TYPE);
 		store.query("SELECT name, seq_num, description FROM iris." +

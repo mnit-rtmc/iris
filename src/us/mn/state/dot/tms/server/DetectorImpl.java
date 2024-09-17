@@ -211,7 +211,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Load all the detectors */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(DetectorImpl.class);
 		store.query("SELECT name, controller, pin, r_node, lane_code, "+
 			"lane_number, abandoned, force_fail, auto_fail, " +
 			"field_length, fake, notes FROM iris." + SONAR_TYPE +

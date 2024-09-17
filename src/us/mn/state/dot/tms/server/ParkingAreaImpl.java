@@ -144,7 +144,6 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 
 	/** Load all the parking areas */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(ParkingAreaImpl.class);
 		store.query("SELECT name, geo_loc, preset_1, preset_2, " +
 			"preset_3, site_id, time_stamp_static, " +
 			"relevant_highway, reference_post, exit_id, " +

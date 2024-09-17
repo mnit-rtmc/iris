@@ -45,7 +45,6 @@ public class AlarmImpl extends ControllerIoImpl implements Alarm {
 
 	/** Load all the alarms */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(AlarmImpl.class);
 		store.query("SELECT name, description, controller, pin, " +
 			"state, trigger_time FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()

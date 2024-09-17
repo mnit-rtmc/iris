@@ -33,7 +33,6 @@ public class DayMatcherImpl extends BaseObjectImpl implements DayMatcher,
 {
 	/** Load all the day matchers */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(DayMatcherImpl.class);
 		store.query("SELECT name, holiday, month, day, week, " +
 			"weekday, shift FROM iris." + SONAR_TYPE  + ";",
 			new ResultFactory()

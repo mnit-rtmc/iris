@@ -37,7 +37,6 @@ public class LaneMarkingImpl extends DeviceImpl implements LaneMarking {
 
 	/** Load all the lane markings */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(LaneMarkingImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"deployed FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()

@@ -38,7 +38,6 @@ public class RoadImpl extends BaseObjectImpl implements Road {
 
 	/** Load all the roads */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(RoadImpl.class);
 		store.query("SELECT name, abbrev, r_class, direction " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{

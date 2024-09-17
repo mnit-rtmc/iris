@@ -42,7 +42,6 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 
 	/** Load all the beacons */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(BeaconImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"preset, message, verify_pin, ext_mode, state " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()

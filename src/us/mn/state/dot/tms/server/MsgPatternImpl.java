@@ -44,7 +44,6 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
 
 	/** Load all the message patterns */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(MsgPatternImpl.class);
 		store.query("SELECT name, multi, flash_beacon, " +
 			"compose_hashtag FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()

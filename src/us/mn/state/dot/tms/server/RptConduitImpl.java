@@ -36,12 +36,8 @@ import us.mn.state.dot.tms.server.reports.RptGen;
 public class RptConduitImpl extends BaseObjectImpl
 	implements RptConduit
 {
-	/** Load all reports from the database (of which there are none...).
-	 * (Just registers the "rpt_conduit" type with the namespace.)
-	 */
-	static protected void loadAll() throws TMSException {
-		namespace.registerType(RptConduitImpl.class);
-	}
+	/** Load all reports from the database (of which there are none...) */
+	static protected void loadAll() throws TMSException { }
 
 	/** Get a mapping of the columns */
 	@Override

@@ -81,7 +81,6 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 
 	/** Load all the geo locations */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(GeoLocImpl.class);
 		store.query("SELECT name, resource_n, roadway, road_dir, " +
 			"cross_street, cross_dir, cross_mod, landmark, lat, " +
 			"lon FROM iris." + SONAR_TYPE  + ";",

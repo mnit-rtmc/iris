@@ -41,7 +41,6 @@ public class FlowStreamImpl extends ControllerIoImpl implements FlowStream {
 
 	/** Load all the flow streams */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(FlowStreamImpl.class);
 		store.query("SELECT name, controller, pin, restricted, " +
 			"loc_overlay, quality, camera, mon_num, address, " +
 			"port, status FROM iris." + SONAR_TYPE + ";",

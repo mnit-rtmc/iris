@@ -35,7 +35,6 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 
 	/** Load all the glyphs */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(GlyphImpl.class);
 		store.query("SELECT name, font, code_point, width, pixels " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{

@@ -30,7 +30,6 @@ public class EncoderTypeImpl extends BaseObjectImpl implements EncoderType {
 
 	/** Load all the encoder types */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(EncoderTypeImpl.class);
 		store.query("SELECT name, make, model, config FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{

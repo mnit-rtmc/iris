@@ -43,7 +43,6 @@ public class CabinetStyleImpl extends BaseObjectImpl implements CabinetStyle {
 
 	/** Load all the cabinet styles */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(CabinetStyleImpl.class);
 		store.query("SELECT name, police_panel_pin_1, " +
 			"police_panel_pin_2, watchdog_reset_pin_1, " +
 			"watchdog_reset_pin_2, dip FROM iris." + SONAR_TYPE +

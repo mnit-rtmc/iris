@@ -33,7 +33,6 @@ public class PlanPhaseImpl extends BaseObjectImpl
 {
 	/** Load all the plan phases */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(PlanPhaseImpl.class);
 		store.query("SELECT name, hold_time, next_phase FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{

@@ -151,7 +151,6 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Load all the video monitors */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(VideoMonitorImpl.class);
 		store.query("SELECT name, controller, pin, notes, mon_num, " +
 		            "restricted, monitor_style, camera FROM iris." +
 		            SONAR_TYPE + ";", new ResultFactory()

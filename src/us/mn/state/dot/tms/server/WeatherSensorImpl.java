@@ -71,7 +71,6 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor,
 
 	/** Load all the weather sensors */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(WeatherSensorImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"site_id, alt_id FROM iris." + SONAR_TYPE + ";", 
 			new ResultFactory()

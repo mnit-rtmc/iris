@@ -44,7 +44,6 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 
 	/** Load all the alert config objects */
 	static public void loadAll() throws TMSException {
-		namespace.registerType(AlertConfigImpl.class);
 		store.query("SELECT name, event, response_shelter, " +
 			"response_evacuate, response_prepare, " +
 			"response_execute, response_avoid, response_monitor, " +

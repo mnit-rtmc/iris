@@ -43,7 +43,6 @@ public class DeviceActionImpl extends BaseObjectImpl implements DeviceAction {
 
 	/** Load all the device actions */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(DeviceActionImpl.class);
 		store.query("SELECT name, action_plan, phase, hashtag," +
 			"msg_pattern, msg_priority FROM iris." + SONAR_TYPE +
 			";", new ResultFactory()

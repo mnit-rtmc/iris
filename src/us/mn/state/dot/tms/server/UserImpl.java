@@ -43,7 +43,6 @@ public class UserImpl extends BaseObjectImpl implements User {
 
 	/** Load all */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(UserImpl.class);
 		store.query("SELECT name, full_name, password, dn, role, " +
 			"enabled FROM iris.user_id;", new ResultFactory()
 		{

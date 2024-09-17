@@ -32,7 +32,6 @@ public class DomainImpl extends BaseObjectImpl implements Domain,
 {
 	/** Lookup all the domains */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(DomainImpl.class);
 		store.query("SELECT name, block, enabled FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{

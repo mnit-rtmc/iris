@@ -37,7 +37,6 @@ public class DayPlanImpl extends BaseObjectImpl implements DayPlan {
 
 	/** Load all the day plans */
 	static public void loadAll() throws TMSException {
-		namespace.registerType(DayPlanImpl.class);
 		mapping = new TableMapping(store, "iris", SONAR_TYPE,
 			DayMatcher.SONAR_TYPE);
 		store.query("SELECT name FROM iris." + SONAR_TYPE + ";",

@@ -35,7 +35,6 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 
 	/** Load all the lane-use MULTIs */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(LaneUseMultiImpl.class);
 		store.query("SELECT name, indication, msg_num, msg_pattern, " +
 			"dms_hashtag FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()

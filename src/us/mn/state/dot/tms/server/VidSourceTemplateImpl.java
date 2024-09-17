@@ -34,7 +34,6 @@ public class VidSourceTemplateImpl extends BaseObjectImpl
 {
 	/** Load all the stream templates */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(VidSourceTemplateImpl.class);
 		store.query("SELECT name, label, config, default_port, " +
 			"subnets, latency, encoder, scheme, codec, " +
 			"rez_width, rez_height, multicast, notes FROM iris." +

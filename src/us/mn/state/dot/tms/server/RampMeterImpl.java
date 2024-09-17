@@ -88,7 +88,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Load all the ramp meters */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(RampMeterImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"meter_type, storage, max_wait, algorithm, am_target, "+
 			"pm_target, beacon, preset, m_lock FROM iris." +

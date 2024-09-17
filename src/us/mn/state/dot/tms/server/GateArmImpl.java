@@ -44,7 +44,6 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Load all the gate arms */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(GateArmImpl.class);
 		store.query("SELECT name, ga_array, idx, controller, pin, " +
 			"notes, arm_state, fault FROM iris." + SONAR_TYPE  +
 			";", new ResultFactory()

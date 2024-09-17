@@ -30,7 +30,6 @@ public class WordImpl extends BaseObjectImpl implements Word {
 
 	/** Load all words */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(WordImpl.class);
 		store.query("SELECT name, abbr, allowed FROM " +
 			"iris." + SONAR_TYPE + ";", new ResultFactory()
 		{

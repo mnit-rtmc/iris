@@ -34,7 +34,6 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 
 	/** Load all the incident advices */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(IncAdviceImpl.class);
 		store.query("SELECT name, impact, lane_code, range, " +
 			"open_lanes, impacted_lanes, multi FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()

@@ -32,7 +32,6 @@ public class RoadAffixImpl extends BaseObjectImpl implements RoadAffix {
 
 	/** Load all the road affixes */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(RoadAffixImpl.class);
 		store.query("SELECT name, prefix, fixup, allow_retain " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
