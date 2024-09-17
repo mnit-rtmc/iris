@@ -55,10 +55,7 @@ public class ServerNamespace extends Namespace {
 	/** Get a type node from the namespace */
 	private TypeNode getTypeNode(SonarObject o) {
 		TypeNode n = _getTypeNode(o.getTypeName());
-		if (n == null)
-			return registerType(o);
-		else
-			return n;
+		return (n != null) ? n : registerType(o);
 	}
 
 	/** Get a type node from the namespace by name */
@@ -230,10 +227,7 @@ public class ServerNamespace extends Namespace {
 	@Override
 	public Iterator<SonarObject> iterator(String tname) {
 		TypeNode t = _getTypeNode(tname);
-		if (t != null)
-			return t.iterator();
-		else
-			return new EmptyIterator();
+		return (t != null) ? t.iterator() : new EmptyIterator();
 	}
 
 	/** Get a count of the number of objects of the specified type.
@@ -242,10 +236,7 @@ public class ServerNamespace extends Namespace {
 	@Override
 	public int getCount(String tname) {
 		TypeNode t = _getTypeNode(tname);
-		if (t != null)
-			return t.size();
-		else
-			return 0;
+		return (t != null) ? t.size() : 0;
 	}
 
 	/** Check if a user has read privileges.  This can be overridden by a

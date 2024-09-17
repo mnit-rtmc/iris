@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2008-2021  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,10 +43,7 @@ public class Name {
 
 	/** Get the parts of a name */
 	private String[] getParts() {
-		if (path.length() < 1)
-			return new String[0];
-		else
-			return path.split(SEP);
+		return (path.length() > 0) ? path.split(SEP) : new String[0];
 	}
 
 	/** Create a name with a type and object */
@@ -97,26 +94,17 @@ public class Name {
 
 	/** Get the type part */
 	public String getTypePart() {
-		if (parts.length > 0)
-			return parts[0];
-		else
-			return "";
+		return (parts.length > 0) ? parts[0] : "";
 	}
 
 	/** Get the object part */
 	public String getObjectPart() {
-		if (parts.length > 1)
-			return parts[1];
-		else
-			return "";
+		return (parts.length > 1) ? parts[1] : "";
 	}
 
 	/** Get the attribute part */
 	public String getAttributePart() {
-		if (parts.length > 2)
-			return parts[2];
-		else
-			return "";
+		return (parts.length > 2) ? parts[2] : "";
 	}
 
 	/** Get the full object name */
