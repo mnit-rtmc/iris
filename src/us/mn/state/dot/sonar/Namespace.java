@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import org.postgis.MultiPolygon;
+import us.mn.state.dot.tms.Permission;
 import us.mn.state.dot.tms.Role;
 import us.mn.state.dot.tms.User;
 
@@ -58,6 +59,15 @@ abstract public class Namespace {
 		assert SonarObject.class.isAssignableFrom(t);
 		Field f = t.getField("SONAR_TYPES");
 		return (String []) f.get(t);
+	}
+
+	/** Get the base name of a SONAR type */
+	static public String baseName(Class t)
+		throws NoSuchFieldException, IllegalAccessException
+	{
+		assert SonarObject.class.isAssignableFrom(t);
+		Field f = t.getField("SONAR_BASE");
+		return (String) f.get(t);
 	}
 
 	/** Make an array of the given class and size */
@@ -199,82 +209,56 @@ abstract public class Namespace {
 		return params;
 	}
 
-	/** Check if a user has read privileges.
+	/** Get a user's access level for a name.
 	 * @param name Name to check.
 	 * @param u User to check.
-	 * @return true If user has read privileges. */
-	public boolean canRead(Name name, User u) {
-		return (u != null) && checkPriv(name, u, false);
-	}
-
-	/** Check if a user has write privileges.
-	 * @param name Name to check.
-	 * @param u User to check.
-	 * @return true If user has write privileges. */
-	public boolean canWrite(Name name, User u) {
-		return (u != null) && checkPriv(name, u, true);
-	}
-
-	/** Check if a user has privileges.
-	 * @param name Name to check.
-	 * @param u User to check.
-	 * @param write Check for write privilege.
-	 * @return true If user has specified privileges. */
-	private boolean checkPriv(Name name, User u, boolean write) {
-		Role r = u.getRole();
-		return u.getEnabled()
-		    && (r != null)
-		    && r.getEnabled()
-		    && checkPriv(name, u, r.getCapabilities(), write);
-	}
-
-	/** Check if a user has privileges for a set of capabilites.
-	 * @param name Name to check.
-	 * @param u User to check.
-	 * @param caps Capabilities to check.
-	 * @param write Check for write privilege.
-	 * @return true If user has specified privileges. */
-	private boolean checkPriv(Name name, User u, Capability[] caps,
-		boolean write)
-	{
-		for (Capability c: caps) {
-			if (c.getEnabled() && checkPriv(name, u, c, write))
-				return true;
+	 * @return Access level (0-4). */
+	public int accessLevel(Name name, User u) {
+		if (u != null && u.getEnabled()) {
+			Role r = u.getRole();
+			if (r != null && r.getEnabled())
+				return accessLevel(name, u, r);
 		}
-		return false;
+		return 0;
 	}
 
-	/** Check if a user has privileges for a capability.
+	/** Get a user's access level for a name.
 	 * @param name Name to check.
 	 * @param u User to check.
-	 * @param c Capability to check.
-	 * @param write Check for write privilege.
-	 * @return true If capability has privileges. */
-	private boolean checkPriv(Name name, User u, Capability c,
-		boolean write)
-	{
-		Iterator<SonarObject> it = iterator(Privilege.SONAR_TYPE);
+	 * @param role Role to check.
+	 * @return Access level (0-4). */
+	private int accessLevel(Name name, User u, Role role) {
+		int level = 0;
+		Iterator<SonarObject> it = iterator(Permission.SONAR_TYPE);
 		while (it.hasNext()) {
 			SonarObject so = it.next();
-			if (so instanceof Privilege) {
-				Privilege p = (Privilege) so;
-				if ((p.getCapability() == c)
-				  && checkPriv(name, u, p, write))
-					return true;
+			if (so instanceof Permission) {
+				Permission p = (Permission) so;
+				if (p.getRole() == role) {
+					int lvl = accessLevel(name, p);
+					level = Math.max(level, lvl);
+				}
 			}
 		}
-		return false;
+		return level;
 	}
 
-	/** Check for read/write privilege */
-	private boolean checkPriv(Name name, User u, Privilege p,
-		boolean write)
-	{
-		if (p.getWrite() == write)
-			return (write) ? name.checkWrite(p) : name.checkRead(p);
-		else
-			return false;
+	/** Get permission access level for a name.
+	 * @param name Name to check.
+	 * @param p Permission to check.
+	 * @return Access level (0-4). */
+	private int accessLevel(Name name, Permission p) {
+		String base = getTypeBase(name);
+		if (p.getBaseResource().equals(base)) {
+			// FIXME: check hashtags
+			// FIXME: check attributes
+			return p.getAccessLevel();
+		}
+		return 0;
 	}
+
+	/** Get base resource type name */
+	abstract protected String getTypeBase(Name name);
 
 	/** Lookup an object in the SONAR namespace.
 	 * @param tname Sonar type name

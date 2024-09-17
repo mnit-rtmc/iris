@@ -21,8 +21,7 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -172,7 +171,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 			try {
 				namespace.addObject(station);
 			}
-			catch (NamespaceError e) {
+			catch (SonarException e) {
 				e.printStackTrace();
 			}
 		}

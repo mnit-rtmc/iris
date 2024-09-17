@@ -54,6 +54,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		namespace = ns;
 		DomainImpl.loadAll();
 		RoleImpl.loadAll();
+		PermissionImpl.loadAll();
 		UserImpl.loadAll();
 		SystemAttributeImpl.loadAll();
 		GraphicImpl.loadAll();

@@ -307,7 +307,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		User u = user;
 		if (u != null &&
 		    isWatching(name) &&
-		    namespace.canRead(name, u, address))
+		    namespace.accessLevel(name, u) > 0)
 		{
 			notifyAttribute(name.toString(), params);
 		}
@@ -534,7 +534,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		if (params.size() > 2)
 			throw ProtocolError.wrongParameterCount();
 		Name name = createName(params);
-		if (!namespace.canRead(name, user, address))
+		if (namespace.accessLevel(name, user) < 1)
 			throw PermissionDenied.create(name);
 		startWatching(name);
 		try {
@@ -572,7 +572,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			throw ProtocolError.wrongParameterCount();
 		Name name = new Name(params.get(1));
 		if (name.isObject()) {
-			if (!namespace.canWrite(name, user, address))
+			if (namespace.accessLevel(name, user) < 4)
 				throw PermissionDenied.create(name);
 			createObject(name);
 		} else
@@ -612,7 +612,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		if (params.size() != 2)
 			throw ProtocolError.wrongParameterCount();
 		Name name = new Name(params.get(1));
-		if (!namespace.canWrite(name, user, address))
+		if (namespace.accessLevel(name, user) < 4)
 			throw PermissionDenied.create(name);
 		SonarObject obj = namespace.lookupObject(name);
 		if (obj != null) {
@@ -640,7 +640,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Check if an attribute if writable */
 	private boolean checkWriteAttr(Name name) {
-		return namespace.canWrite(name, user, address);
+		return namespace.accessLevel(name, user) > 1;
 	}
 
 	/** Set the value of an attribute.

@@ -229,7 +229,7 @@ public class TaskProcessor {
 
 	/** Create a client connection */
 	private void doConnect(SelectionKey skey, SocketChannel sc)
-		throws IOException, NamespaceError
+		throws IOException, SonarException
 	{
 		ConnectionImpl con = new ConnectionImpl(this, skey, sc);
 		doAddObject(con);
@@ -455,14 +455,14 @@ public class TaskProcessor {
 	/** Schedule an object to be added to the server's namespace */
 	public void scheduleAddObject(final SonarObject o) {
 		processor.addWork(new TaskWork("Add object") {
-			protected void doPerform() throws NamespaceError {
+			protected void doPerform() throws SonarException {
 				doAddObject(o);
 			}
 		});
 	}
 
 	/** Perform an add object task. */
-	private void doAddObject(SonarObject o) throws NamespaceError {
+	private void doAddObject(SonarObject o) throws SonarException {
 		debugTask("Adding object", o.getName());
 		namespace.addObject(o);
 		notifyObject(o);

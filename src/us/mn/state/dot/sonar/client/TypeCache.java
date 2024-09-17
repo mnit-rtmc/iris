@@ -46,6 +46,9 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 	/** Type name */
 	public final String tname;
 
+	/** Base type name */
+	public final String base;
+
 	/** Interfaces which proxies of this type implement */
 	private final Class[] ifaces;
 
@@ -96,6 +99,7 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 	{
 		assert SonarObject.class.isAssignableFrom(iface);
 		tname = Namespace.typeName(iface);
+		base = Namespace.baseName(iface);
 		ifaces = new Class[] { iface };
 		invoker = new SonarInvoker(this, iface);
 		client = c;

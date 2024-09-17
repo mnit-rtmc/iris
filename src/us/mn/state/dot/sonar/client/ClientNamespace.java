@@ -56,6 +56,11 @@ public class ClientNamespace extends Namespace {
 	}
 
 	/** Get the TypeCache for the specified name */
+	private TypeCache _getTypeCache(Name name) {
+		return types.get(name.getTypePart());
+	}
+
+	/** Get the TypeCache for the specified name */
 	private TypeCache getTypeCache(Name name) throws NamespaceError {
 		String tname = name.getTypePart();
 		if (types.containsKey(tname)) {
@@ -121,6 +126,13 @@ public class ClientNamespace extends Namespace {
 			cur_obj = null;
 		} else
 			throw NamespaceError.nameInvalid(t);
+	}
+
+	/** Get base resource type name */
+	@Override
+	protected String getTypeBase(Name name) {
+		TypeCache t = _getTypeCache(name);
+		return (t != null) ? t.base : null;
 	}
 
 	/** Lookup an object in the SONAR namespace.

@@ -297,7 +297,7 @@ public class Session {
 
 	/** Check if the user can read a type */
 	public boolean canRead(String tname) {
-		return namespace.canRead(new Name(tname), user);
+		return namespace.accessLevel(new Name(tname), user) > 0;
 	}
 
 	/** Check if the user is permitted to write an object, regardless of
@@ -350,7 +350,7 @@ public class Session {
 	 * @param can_edit Flag to allow editing.
 	 * @return true if user can write. */
 	private boolean canWrite(Name name, boolean can_edit) {
-		return can_edit && namespace.canWrite(name, user);
+		return can_edit && namespace.accessLevel(name, user) > 1;
 	}
 
 	/** Check if the user can write an attribute.

@@ -30,7 +30,6 @@ public class MonitorStyleImpl extends BaseObjectImpl implements MonitorStyle {
 
 	/** Load all the monitor styles */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(MonitorStyleImpl.class);
 		store.query("SELECT name, force_aspect, accent, font_sz, " +
 			"title_bar, auto_expand, hgap, vgap FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()

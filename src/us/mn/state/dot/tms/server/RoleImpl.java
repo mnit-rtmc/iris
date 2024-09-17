@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
-import us.mn.state.dot.sonar.Capability;
-import us.mn.state.dot.sonar.server.CapabilityImpl;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Domain;
 import us.mn.state.dot.tms.Role;
@@ -34,16 +32,11 @@ import us.mn.state.dot.tms.TMSException;
 public class RoleImpl extends BaseObjectImpl implements Role,
 	Comparable<RoleImpl>
 {
-	/** Role/Capability table mapping */
-	static private TableMapping cap_map;
-
 	/** Role/Domain table mapping */
 	static private TableMapping dom_map;
 
 	/** Load all */
 	static public void loadAll() throws TMSException {
-		cap_map = new TableMapping(store, "iris", SONAR_TYPE,
-			Capability.SONAR_TYPE);
 		dom_map = new TableMapping(store, "iris", SONAR_TYPE,
 			Domain.SONAR_TYPE);
 		store.query("SELECT name, enabled FROM iris." + SONAR_TYPE +
@@ -67,18 +60,6 @@ public class RoleImpl extends BaseObjectImpl implements Role,
 		return map;
 	}
 
-	/** Get the database table name */
-	@Override
-	public String getTable() {
-		return "iris." + SONAR_TYPE;
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	public String getTypeName() {
-		return SONAR_TYPE;
-	}
-
 	/** Create a new role */
 	public RoleImpl(String n) {
 		super(n);
@@ -88,22 +69,7 @@ public class RoleImpl extends BaseObjectImpl implements Role,
 	private RoleImpl(String n, boolean e) throws TMSException {
 		this(n);
 		enabled = e;
-		setCapabilities(lookupCapabilities());
 		setDomains(lookupDomains());
-	}
-
-	/** Lookup all the capabilities for a role */
-	private IrisCapabilityImpl[] lookupCapabilities()
-		throws TMSException
-	{
-		TreeSet<IrisCapabilityImpl> cset =
-			new TreeSet<IrisCapabilityImpl>();
-		for (String o: cap_map.lookup(this)) {
-			Object c = namespace.lookupObject("capability", o);
-			if (c instanceof IrisCapabilityImpl)
-				cset.add((IrisCapabilityImpl) c);
-		}
-		return cset.toArray(new IrisCapabilityImpl[0]);
 	}
 
 	/** Lookup all the domains for a user */
@@ -153,37 +119,6 @@ public class RoleImpl extends BaseObjectImpl implements Role,
 	@Override
 	public boolean getEnabled() {
 		return enabled;
-	}
-
-	/** Capabilities for the role */
-	private CapabilityImpl[] capabilities = new CapabilityImpl[0];
-
-	/** Set the capabilities */
-	@Override
-	public void setCapabilities(Capability[] c) {
-		CapabilityImpl[] _c = new CapabilityImpl[c.length];
-		for (int i = 0; i < c.length; i++)
-			_c[i] = (CapabilityImpl) c[i];
-		capabilities = _c;
-	}
-
-	/** Set the capabilities assigned to the role */
-	public void doSetCapabilities(Capability[] caps) throws TMSException {
-		TreeSet<Storable> cset = new TreeSet<Storable>();
-		for (Capability c: caps) {
-			if (c instanceof IrisCapabilityImpl)
-				cset.add((IrisCapabilityImpl) c);
-			else
-				throw new ChangeVetoException("Bad capability");
-		}
-		cap_map.update(this, cset);
-		setCapabilities(caps);
-	}
-
-	/** Get the capabilities */
-	@Override
-	public Capability[] getCapabilities() {
-		return capabilities;
 	}
 
 	/** Allowed login domains */

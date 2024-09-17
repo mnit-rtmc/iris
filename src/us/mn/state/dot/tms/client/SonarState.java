@@ -19,11 +19,9 @@ package us.mn.state.dot.tms.client;
 import java.io.IOException;
 import java.util.Properties;
 import us.mn.state.dot.sched.ExceptionHandler;
-import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.Client;
@@ -49,6 +47,7 @@ import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.ParkingArea;
+import us.mn.state.dot.tms.Permission;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.Road;
@@ -79,22 +78,13 @@ import us.mn.state.dot.tms.utils.SubnetChecker;
  */
 public class SonarState extends Client {
 
-	/** Cache of capability proxies */
-	private final TypeCache<Capability> capabilities =
-		new TypeCache<Capability>(Capability.class, this);
+	/** Cache of domain proxies */
+	private final TypeCache<Domain> domains =
+		new TypeCache<Domain>(Domain.class, this);
 
-	/** Get the capability type cache */
-	public TypeCache<Capability> getCapabilities() {
-		return capabilities;
-	}
-
-	/** Cache of privilege proxies */
-	private final TypeCache<Privilege> privileges =
-		new TypeCache<Privilege>(Privilege.class, this);
-
-	/** Get the privilege type cache */
-	public TypeCache<Privilege> getPrivileges() {
-		return privileges;
+	/** Get the domain type cache */
+	public TypeCache<Domain> getDomains() {
+		return domains;
 	}
 
 	/** Cache of role proxies */
@@ -106,13 +96,13 @@ public class SonarState extends Client {
 		return roles;
 	}
 
-	/** Cache of domain proxies */
-	private final TypeCache<Domain> domains =
-		new TypeCache<Domain>(Domain.class, this);
+	/** Cache of permission proxies */
+	private final TypeCache<Permission> permissions =
+		new TypeCache<Permission>(Permission.class, this);
 
-	/** Get the domain type cache */
-	public TypeCache<Domain> getDomains() {
-		return domains;
+	/** Get the permission type cache */
+	public TypeCache<Permission> getPermissions() {
+		return permissions;
 	}
 
 	/** Cache of user proxies */
@@ -564,7 +554,7 @@ public class SonarState extends Client {
 
 	/** Check if the user can read a type */
 	public boolean canRead(String tname) {
-		return getNamespace().canRead(new Name(tname), user);
+		return getNamespace().accessLevel(new Name(tname), user) > 0;
 	}
 
 	/** Login to the SONAR server */
@@ -592,10 +582,9 @@ public class SonarState extends Client {
 
 	/** Populate the type caches */
 	public void populateCaches() {
-		populate(capabilities);
-		populate(privileges);
 		populate(domains);
 		populate(roles);
+		populate(permissions);
 		populate(users);
 		populate(connections, true);
 		user = users.lookupObject(user_name);

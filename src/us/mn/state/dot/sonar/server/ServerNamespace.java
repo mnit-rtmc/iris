@@ -41,7 +41,7 @@ public class ServerNamespace extends Namespace {
 		new HashMap<String, TypeNode>();
 
 	/** Register a new type in the namespace */
-	private TypeNode registerType(SonarObject o) {
+	private TypeNode registerType(SonarObject o) throws SonarException {
 		return registerType(o.getClass());
 	}
 
@@ -53,7 +53,7 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Get a type node from the namespace */
-	private TypeNode getTypeNode(SonarObject o) {
+	private TypeNode getTypeNode(SonarObject o) throws SonarException {
 		TypeNode n = _getTypeNode(o.getTypeName());
 		return (n != null) ? n : registerType(o);
 	}
@@ -177,17 +177,23 @@ public class ServerNamespace extends Namespace {
 	/** Register a new type in the namespace.
 	 * @param c Type class.
 	 * @return New type node. */
-	public TypeNode registerType(Class c) {
-		String tname = typeName(c);
-		TypeNode node = new TypeNode(this, tname, c);
-		synchronized (root) {
-			root.put(tname, node);
+	public TypeNode registerType(Class c) throws SonarException {
+		try {
+			String tname = typeName(c);
+			String base = baseName(c);
+			TypeNode node = new TypeNode(this, tname, base, c);
+			synchronized (root) {
+				root.put(tname, node);
+			}
+			return node;
 		}
-		return node;
+		catch (NoSuchFieldException | IllegalAccessException e) {
+			throw new SonarException(e);
+		}
 	}
 
 	/** Add an object into the namespace without storing */
-	public void addObject(SonarObject o) throws NamespaceError {
+	public void addObject(SonarObject o) throws SonarException {
 		getTypeNode(o).addObject(o);
 	}
 
@@ -200,6 +206,13 @@ public class ServerNamespace extends Namespace {
 	public SonarObject createObject(Name name) throws SonarException {
 		TypeNode n = getTypeNode(name);
 		return n.createObject(name.getObjectPart());
+	}
+
+	/** Get base resource type name */
+	@Override
+	protected String getTypeBase(Name name) {
+		TypeNode t = _getTypeNode(name.getTypePart());
+		return (t != null) ? t.base : null;
 	}
 
 	/** Lookup an object in the SONAR namespace.
@@ -237,25 +250,5 @@ public class ServerNamespace extends Namespace {
 	public int getCount(String tname) {
 		TypeNode t = _getTypeNode(tname);
 		return (t != null) ? t.size() : 0;
-	}
-
-	/** Check if a user has read privileges.  This can be overridden by a
-	 * subclass to check an allow list of CIDR blocks.
-	 * @param name Name to check.
-	 * @param u User to check.
-	 * @param a Inet address of connection.
-	 * @return true if read is allowed; false otherwise. */
-	public boolean canRead(Name name, User u, InetAddress a) {
-		return canRead(name, u);
-	}
-
-	/** Check if a user has write privileges.  This can be overridden by a
-	 * subclass to check an allow list of CIDR blocks.
-	 * @param name Name to check.
-	 * @param u User to check.
-	 * @param a Inet address of connection.
-	 * @return true if write is allowed; false otherwise. */
-	public boolean canWrite(Name name, User u, InetAddress a) {
-		return canWrite(name, u);
 	}
 }

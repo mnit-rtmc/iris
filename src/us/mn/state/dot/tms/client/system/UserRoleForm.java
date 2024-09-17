@@ -15,10 +15,9 @@
 package us.mn.state.dot.tms.client.system;
 
 import javax.swing.JTabbedPane;
-import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.tms.Domain;
-import us.mn.state.dot.sonar.Privilege;
+import us.mn.state.dot.tms.Permission;
 import us.mn.state.dot.tms.Role;
 import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.client.Session;
@@ -38,22 +37,18 @@ public class UserRoleForm extends AbstractForm {
 	static public boolean isPermitted(Session s) {
 		return s.isWritePermitted(User.SONAR_TYPE) ||
 		       s.isWritePermitted(Role.SONAR_TYPE) ||
-		       s.isWritePermitted(Capability.SONAR_TYPE) ||
-		       s.isWritePermitted(Privilege.SONAR_TYPE) ||
+		       s.isWritePermitted(Permission.SONAR_TYPE) ||
 		       s.isWritePermitted(Domain.SONAR_TYPE);
 	}
-
-	/** Role panel */
-	private final RolePanel r_panel;
 
 	/** Domain panel */
 	private final DomainPanel d_panel;
 
+	/** Role panel */
+	private final RolePanel r_panel;
+
 	/** User tab panel */
 	private final UserTabPanel u_panel;
-
-	/** Capability panel */
-	private final CapabilityPanel cap_panel;
 
 	/** Connection panel */
 	private final ProxyTablePanel<Connection> c_panel;
@@ -65,10 +60,9 @@ public class UserRoleForm extends AbstractForm {
 	public UserRoleForm(Session s) {
 		super(I18N.get("user.menu"));
 		setHelpPageName("help.userroleform");
-		r_panel = new RolePanel(s);
 		d_panel = new DomainPanel(s);
+		r_panel = new RolePanel(s);
 		u_panel = new UserTabPanel(s);
-		cap_panel = new CapabilityPanel(s);
 		c_panel = new ProxyTablePanel<Connection>(
 			new ConnectionModel(s));
 	}
@@ -77,15 +71,13 @@ public class UserRoleForm extends AbstractForm {
 	@Override
 	protected void initialize() {
 		super.initialize();
-		r_panel.initialize();
 		d_panel.initialize();
+		r_panel.initialize();
 		u_panel.initialize();
-		cap_panel.initialize();
 		c_panel.initialize();
-		tab.add(I18N.get("role.plural"), r_panel);
 		tab.add(I18N.get("domain.plural"), d_panel);
+		tab.add(I18N.get("role.plural"), r_panel);
 		tab.add(I18N.get("user.plural"), u_panel);
-		tab.add(I18N.get("capability.plural"), cap_panel);
 		tab.add(I18N.get("connection.plural"), c_panel);
 		add(tab);
 	}
@@ -93,10 +85,9 @@ public class UserRoleForm extends AbstractForm {
 	/** Dispose of the form */
 	@Override
 	protected void dispose() {
-		r_panel.dispose();
 		d_panel.dispose();
+		r_panel.dispose();
 		u_panel.dispose();
-		cap_panel.dispose();
 		c_panel.dispose();
 		super.dispose();
 	}

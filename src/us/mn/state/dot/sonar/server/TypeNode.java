@@ -40,6 +40,9 @@ public class TypeNode {
 	/** Type name */
 	public final String tname;
 
+	/** Base type name */
+	public final String base;
+
 	/** All child objects of this type are put here.  Note: we still
 	 * synchronize on updates to this hash map to prevent inconsistency.
 	 * Synchronization is not needed to read or iterate over the map. */
@@ -51,8 +54,9 @@ public class TypeNode {
 	private final AttributeDispatcher dispatcher;
 
 	/** Create a namespace type node */
-	public TypeNode(Namespace ns, String tn, Class c) {
+	public TypeNode(Namespace ns, String tn, String bn, Class c) {
 		tname = tn;
+		base = bn;
 		dispatcher = new AttributeDispatcher(c, ns);
 	}
 

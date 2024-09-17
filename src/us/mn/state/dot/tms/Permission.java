@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2024  Minnesota Department of Transportation
+ * Copyright (C) 2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,14 +17,14 @@ package us.mn.state.dot.tms;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * A role is a set of permissions for user access.
+ * Permissions control a user's access to resources.
  *
  * @author Douglas Lau
  */
-public interface Role extends SonarObject {
+public interface Permission extends SonarObject {
 
 	/** SONAR type name */
-	String SONAR_TYPE = "role";
+	String SONAR_TYPE = "permission";
 
 	/** Get the SONAR type name */
 	@Override
@@ -32,15 +32,21 @@ public interface Role extends SonarObject {
 		return SONAR_TYPE;
 	}
 
-	/** Enable or disable the role */
-	void setEnabled(boolean e);
+	/** Get the role */
+	Role getRole();
 
-	/** Get the enabled flag */
-	boolean getEnabled();
+	/** Get the base resource */
+	String getBaseResource();
 
-	/** Set the allowed login domains */
-	void setDomains(Domain[] d);
+	/** Get hashtag */
+	String getHashtag();
 
-	/** Get the allowed login domains */
-	Domain[] getDomains();
+	/** Set hashtag */
+	void setHashtag(String h);
+
+	/** Get the access level */
+	int getAccessLevel();
+
+	/** Set the access level */
+	void setAccessLevel(int a);
 }

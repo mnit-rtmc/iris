@@ -30,7 +30,6 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 
 	/** Load all the map extents */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(MapExtentImpl.class);
 		store.query("SELECT name, lon, lat, zoom FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{

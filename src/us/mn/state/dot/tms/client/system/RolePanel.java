@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.system;
 
 import javax.swing.GroupLayout;
 import javax.swing.JPanel;
-import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.tms.Domain;
 import us.mn.state.dot.tms.Role;
 import us.mn.state.dot.tms.client.Session;
@@ -39,8 +38,8 @@ public class RolePanel extends JPanel {
 	/** Domain table panel */
 	private final ProxyTablePanel<Domain> dom_pnl;
 
-	/** Capability table panel */
-	private final ProxyTablePanel<Capability> cap_pnl;
+	/** Permission panel */
+	private final PermissionPanel perm_pnl;
 
 	/** Create a new role panel */
 	public RolePanel(Session s) {
@@ -50,9 +49,9 @@ public class RolePanel extends JPanel {
 			protected void proxyChangedSwing(Role r) {
 				super.proxyChangedSwing(r);
 				/* Repaint other panels when the
-				 * role capabilities are changed. */
+				 * role domains are changed. */
 				dom_pnl.repaint();
-				cap_pnl.repaint();
+				perm_pnl.repaint();
 			}
 		};
 		role_pnl = new ProxyTablePanel<Role>(r_mdl) {
@@ -62,16 +61,18 @@ public class RolePanel extends JPanel {
 			}
 		};
 		dom_pnl = new ProxyTablePanel<Domain>(
-			new RoleDomainModel(s, null));
-		cap_pnl = new ProxyTablePanel<Capability>(
-			new RoleCapabilityModel(s, null));
+			new RoleDomainModel(s, null)
+		);
+		perm_pnl = new PermissionPanel(
+			new PermissionModel(s, null)
+		);
 	}
 
 	/** Initializze the panel */
 	public void initialize() {
 		role_pnl.initialize();
 		dom_pnl.initialize();
-		cap_pnl.initialize();
+		perm_pnl.initialize();
 		layoutPanel();
 	}
 
@@ -93,7 +94,7 @@ public class RolePanel extends JPanel {
 		hg.addGap(UI.hgap);
 		hg.addComponent(dom_pnl);
 		hg.addGap(UI.hgap);
-		hg.addComponent(cap_pnl);
+		hg.addComponent(perm_pnl);
 		return hg;
 	}
 
@@ -102,7 +103,7 @@ public class RolePanel extends JPanel {
 		GroupLayout.ParallelGroup vg = gl.createParallelGroup();
 		vg.addComponent(role_pnl);
 		vg.addComponent(dom_pnl);
-		vg.addComponent(cap_pnl);
+		vg.addComponent(perm_pnl);
 		return vg;
 	}
 
@@ -110,7 +111,7 @@ public class RolePanel extends JPanel {
 	public void dispose() {
 		role_pnl.dispose();
 		dom_pnl.dispose();
-		cap_pnl.dispose();
+		perm_pnl.dispose();
 		removeAll();
 	}
 
@@ -118,6 +119,6 @@ public class RolePanel extends JPanel {
 	private void selectRole() {
 		Role r = role_pnl.getSelectedProxy();
 		dom_pnl.setModel(new RoleDomainModel(session, r));
-		cap_pnl.setModel(new RoleCapabilityModel(session, r));
+		perm_pnl.setModel(new PermissionModel(session, r));
 	}
 }

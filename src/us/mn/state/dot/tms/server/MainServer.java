@@ -22,12 +22,13 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Authenticator;
 import java.net.ProxySelector;
-import java.net.UnknownHostException;
 import java.util.Properties;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.server.Server;
+import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -100,9 +101,7 @@ public class MainServer {
 			store = createStore(props);
 			BaseEvent.store = store;
 			I18N.initialize(props);
-			AllowListNamespace ns = createNamespace(props);
-			IrisCapabilityImpl.lookup(store, ns);
-			IrisPrivilegeImpl.lookup(store, ns);
+			ServerNamespace ns = createNamespace();
 			BaseObjectImpl.loadAll(store, ns);
 			scheduleTimerJobs();
 			scheduleFlushJobs();
@@ -189,15 +188,14 @@ public class MainServer {
 	}
 
 	/** Create the server namespace */
-	static private AllowListNamespace createNamespace(Properties props)
-		throws UnknownHostException, NumberFormatException
-	{
-		AllowListNamespace ns = new AllowListNamespace(props);
+	static private ServerNamespace createNamespace() throws SonarException {
+		ServerNamespace ns = new ServerNamespace();
 		// FIXME: static namespace hacks
 		BaseHelper.namespace = ns;
 		ns.registerType(StationImpl.class);
 		ns.registerType(DomainImpl.class);
 		ns.registerType(RoleImpl.class);
+		ns.registerType(PermissionImpl.class);
 		ns.registerType(UserImpl.class);
 		ns.registerType(SystemAttributeImpl.class);
 		ns.registerType(GraphicImpl.class);

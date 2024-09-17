@@ -46,7 +46,6 @@ abstract public class BaseHelper {
 
 	/** Check if a type can be read */
 	static protected boolean canRead(String tname) {
-		return (user != null)
-		    && namespace.canRead(new Name(tname), user);
+		return namespace.accessLevel(new Name(tname), user) > 0;
 	}
 }

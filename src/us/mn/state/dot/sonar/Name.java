@@ -116,32 +116,4 @@ public class Name {
 	public String getAttributeName() {
 		return getTypePart() + SEP + SEP + getAttributePart();
 	}
-
-	/** Check for read privilege.
-	 * @param p Privilege to check. */
-	public boolean checkRead(Privilege p) {
-		return p.getTypeN().equals(getTypePart());
-	}
-
-	/** Check for write privilege.
-	 * @param p Privilege to check. */
-	public boolean checkWrite(Privilege p) {
-		// NOTE: object and attribute checks are
-		//       only valid for write privileges.
-		return p.getTypeN().equals(getTypePart())
-		    && checkObj(p)
-		    && checkAttr(p);
-	}
-
-	/** Check if an object matches a privilege */
-	private boolean checkObj(Privilege p) {
-		String o = p.getObjN();
-		return "".equals(o) || getObjectPart().matches(o);
-	}
-
-	/** Check if an attribute matches a privilege */
-	private boolean checkAttr(Privilege p) {
-		String a = p.getAttrN();
-		return "".equals(a) || getAttributePart().equals(a);
-	}
 }

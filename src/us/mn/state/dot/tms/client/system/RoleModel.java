@@ -66,10 +66,4 @@ public class RoleModel extends ProxyTableModel<Role> {
 	public RoleModel(Session s) {
 		super(s, descriptor(s), 16);
 	}
-
-	/** Check if the user can remove a role */
-	@Override
-	public boolean canRemove(Role r) {
-		return super.canRemove(r) && r.getCapabilities().length == 0;
-	}
 }
