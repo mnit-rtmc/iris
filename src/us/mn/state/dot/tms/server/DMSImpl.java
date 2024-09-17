@@ -121,7 +121,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Load all the DMS */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, DMSImpl.class);
+		namespace.registerType(DMSImpl.class);
 		ess_map = new TableMapping(store, "iris", SONAR_TYPE,
 			WeatherSensor.SONAR_TYPE);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +

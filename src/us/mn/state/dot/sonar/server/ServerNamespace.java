@@ -42,7 +42,7 @@ public class ServerNamespace extends Namespace {
 
 	/** Register a new type in the namespace */
 	private TypeNode registerType(SonarObject o) {
-		return registerType(o.getTypeName(), o.getClass());
+		return registerType(o.getClass());
 	}
 
 	/** Get a type node from the namespace */
@@ -129,7 +129,7 @@ public class ServerNamespace extends Namespace {
 	private void enumerateRoot(MessageEncoder enc) throws IOException {
 		synchronized (root) {
 			for (TypeNode t: root.values())
-				enc.encode(Message.TYPE, t.name);
+				enc.encode(Message.TYPE, t.tname);
 		}
 		enc.encode(Message.TYPE);
 	}
@@ -178,13 +178,13 @@ public class ServerNamespace extends Namespace {
 	}
 
 	/** Register a new type in the namespace.
-	 * @param n Type name.
 	 * @param c Type class.
 	 * @return New type node. */
-	public TypeNode registerType(String n, Class c) {
-		TypeNode node = new TypeNode(this, n, c);
+	public TypeNode registerType(Class c) {
+		String tname = typeName(c);
+		TypeNode node = new TypeNode(this, tname, c);
 		synchronized (root) {
-			root.put(n, node);
+			root.put(tname, node);
 		}
 		return node;
 	}

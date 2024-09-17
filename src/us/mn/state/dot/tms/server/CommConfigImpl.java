@@ -35,7 +35,7 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 
 	/** Load all the comm configs */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, CommConfigImpl.class);
+		namespace.registerType(CommConfigImpl.class);
 		store.query("SELECT name, description, protocol, " +
 			"timeout_ms, poll_period_sec, long_poll_period_sec, " +
 			"idle_disconnect_sec, no_response_disconnect_sec " +

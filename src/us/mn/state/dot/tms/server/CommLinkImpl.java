@@ -54,7 +54,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Load all the comm links */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, CommLinkImpl.class);
+		namespace.registerType(CommLinkImpl.class);
 		store.query("SELECT name, description, uri, poll_enabled, " +
 			"comm_config, connected FROM iris." + SONAR_TYPE  + ";",
 			new ResultFactory()

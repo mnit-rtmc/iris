@@ -122,7 +122,7 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 
 	/** Load all the sign details */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, SignDetailImpl.class);
+		namespace.registerType(SignDetailImpl.class);
 		store.query("SELECT name, dms_type, portable, technology, " +
 			"sign_access, legend, beacon_type, " +
 			"hardware_make, hardware_model, software_make, " +

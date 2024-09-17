@@ -67,7 +67,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 
 	/** Load all the cameras */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, CameraImpl.class);
+		namespace.registerType(CameraImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"cam_num, encoder_type, enc_address, enc_port, " +
 			"enc_mcast, enc_channel, publish, video_loss, " +

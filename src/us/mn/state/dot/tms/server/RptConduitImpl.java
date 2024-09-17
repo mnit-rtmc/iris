@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server;
 
 import java.util.HashMap;
@@ -41,7 +40,7 @@ public class RptConduitImpl extends BaseObjectImpl
 	 * (Just registers the "rpt_conduit" type with the namespace.)
 	 */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, RptConduitImpl.class);
+		namespace.registerType(RptConduitImpl.class);
 	}
 
 	/** Get a mapping of the columns */

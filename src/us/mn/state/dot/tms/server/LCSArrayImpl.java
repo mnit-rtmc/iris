@@ -88,7 +88,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 
 	/** Load all the LCS arrays */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, LCSArrayImpl.class);
+		namespace.registerType(LCSArrayImpl.class);
 		store.query("SELECT name, controller, pin, notes, shift, " +
 			"lcs_lock FROM iris." + SONAR_TYPE  + ";",
 			new ResultFactory()

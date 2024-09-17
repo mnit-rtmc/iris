@@ -195,7 +195,7 @@ public class MainServer {
 		AllowListNamespace ns = new AllowListNamespace(props);
 		// FIXME: static namespace hacks
 		BaseHelper.namespace = ns;
-		ns.registerType(Station.SONAR_TYPE, StationImpl.class);
+		ns.registerType(StationImpl.class);
 		return ns;
 	}
 

@@ -69,7 +69,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 
 	/** Load all the toll zones */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, TollZoneImpl.class);
+		namespace.registerType(TollZoneImpl.class);
 		store.query("SELECT name, start_id, end_id, tollway, alpha, " +
 			"beta, max_price FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()

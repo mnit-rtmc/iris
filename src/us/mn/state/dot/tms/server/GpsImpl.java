@@ -74,7 +74,7 @@ public class GpsImpl extends DeviceImpl implements Gps {
 
 	/** Load all the GPS */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, GpsImpl.class);
+		namespace.registerType(GpsImpl.class);
 		store.query("SELECT name, controller, pin, notes, geo_loc, " +
 			"latest_poll, latest_sample, lat, lon FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()

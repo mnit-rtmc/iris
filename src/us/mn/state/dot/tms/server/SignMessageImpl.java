@@ -103,7 +103,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Load all the sign messages */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, SignMessageImpl.class);
+		namespace.registerType(SignMessageImpl.class);
 		store.query("SELECT name, sign_config, incident, multi, " +
 			"msg_owner, flash_beacon, msg_priority, duration " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()

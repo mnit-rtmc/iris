@@ -38,7 +38,7 @@ public class CatalogImpl extends BaseObjectImpl implements Catalog {
 
 	/** Load all the catalogs */
 	static public void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, CatalogImpl.class);
+		namespace.registerType(CatalogImpl.class);
 		mapping = new TableMappingList(store, "iris", SONAR_TYPE,
 			PlayList.SONAR_TYPE);
 		store.query("SELECT name, seq_num, description FROM iris." +

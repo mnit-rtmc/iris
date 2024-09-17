@@ -31,7 +31,7 @@ public class CameraVidSourceOrderImpl extends BaseObjectImpl
 {
 	/** Load all the camera video source order mappings */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, CameraVidSourceOrderImpl.class);
+		namespace.registerType(CameraVidSourceOrderImpl.class);
 		store.query("SELECT name, camera_template, src_order, " +
 			"src_template FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()

@@ -34,7 +34,7 @@ public class FontImpl extends BaseObjectImpl implements Font {
 
 	/** Load all the fonts */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, FontImpl.class);
+		namespace.registerType(FontImpl.class);
 		store.query("SELECT name, f_number, height, width, " +
 			"line_spacing, char_spacing FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()

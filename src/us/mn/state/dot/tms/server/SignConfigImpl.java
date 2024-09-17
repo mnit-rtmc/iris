@@ -103,7 +103,7 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig,
 
 	/** Load all the sign configs */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, SignConfigImpl.class);
+		namespace.registerType(SignConfigImpl.class);
 		store.query("SELECT name, face_width, face_height, " +
 			"border_horiz, border_vert, pitch_horiz, pitch_vert, " +
 			"pixel_width, pixel_height, char_width, char_height, " +

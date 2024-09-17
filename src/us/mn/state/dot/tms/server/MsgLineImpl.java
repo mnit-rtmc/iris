@@ -35,7 +35,7 @@ public class MsgLineImpl extends BaseObjectImpl implements MsgLine {
 
 	/** Load all the message lines */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, MsgLineImpl.class);
+		namespace.registerType(MsgLineImpl.class);
 		store.query("SELECT name, msg_pattern, restrict_hashtag," +
 			"line, multi, rank FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()

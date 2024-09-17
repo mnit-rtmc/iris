@@ -33,7 +33,7 @@ public class EncoderStreamImpl extends BaseObjectImpl implements EncoderStream {
 
 	/** Load all the encoder streams */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, EncoderStreamImpl.class);
+		namespace.registerType(EncoderStreamImpl.class);
 		store.query("SELECT name, encoder_type, view_num, " +
 			"flow_stream, encoding, quality, uri_scheme, " +
 			"uri_path, mcast_port, latency FROM iris." +

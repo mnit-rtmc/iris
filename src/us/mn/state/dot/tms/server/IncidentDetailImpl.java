@@ -31,7 +31,7 @@ public class IncidentDetailImpl extends BaseObjectImpl
 {
 	/** Load all the incident details */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, IncidentDetailImpl.class);
+		namespace.registerType(IncidentDetailImpl.class);
 		store.query("SELECT name, description FROM event." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{

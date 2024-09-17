@@ -33,7 +33,7 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 
 	/** Load all the graphics */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, GraphicImpl.class);
+		namespace.registerType(GraphicImpl.class);
 		store.query("SELECT name, g_number, color_scheme, height, " +
 			"width, transparent_color, pixels FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()

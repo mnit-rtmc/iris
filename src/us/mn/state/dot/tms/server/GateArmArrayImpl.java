@@ -53,7 +53,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Load all the gate arm arrays */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, GateArmArrayImpl.class);
+		namespace.registerType(GateArmArrayImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"opposing, prereq, camera, approach, action_plan, " +
 			"arm_state, interlock FROM iris." + SONAR_TYPE  + ";",

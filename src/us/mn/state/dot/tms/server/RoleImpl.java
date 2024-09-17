@@ -42,9 +42,9 @@ public class RoleImpl extends BaseObjectImpl implements Role,
 
 	/** Load all */
 	static public void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, RoleImpl.class);
 		cap_map = new TableMapping(store, "iris", SONAR_TYPE,
 			Capability.SONAR_TYPE);
+		namespace.registerType(RoleImpl.class);
 		dom_map = new TableMapping(store, "iris", SONAR_TYPE,
 			Domain.SONAR_TYPE);
 		store.query("SELECT name, enabled FROM iris." + SONAR_TYPE +

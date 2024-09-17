@@ -41,7 +41,7 @@ public class SystemAttributeImpl extends BaseObjectImpl
 
 	/** Load all */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, SystemAttributeImpl.class);
+		namespace.registerType(SystemAttributeImpl.class);
 		store.query("SELECT name, value FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{

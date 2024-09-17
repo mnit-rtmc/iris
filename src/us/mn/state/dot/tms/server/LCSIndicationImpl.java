@@ -33,7 +33,7 @@ public class LCSIndicationImpl extends ControllerIoImpl
 {
 	/** Load all the LCS indications */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, LCSIndicationImpl.class);
+		namespace.registerType(LCSIndicationImpl.class);
 		store.query("SELECT name, controller, pin, lcs, indication " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{

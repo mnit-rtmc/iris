@@ -38,7 +38,7 @@ public class TypeNode {
 	static private final int INITIAL_CAPACITY = 256;
 
 	/** Type name */
-	public final String name;
+	public final String tname;
 
 	/** All child objects of this type are put here.  Note: we still
 	 * synchronize on updates to this hash map to prevent inconsistency.
@@ -51,8 +51,8 @@ public class TypeNode {
 	private final AttributeDispatcher dispatcher;
 
 	/** Create a namespace type node */
-	public TypeNode(Namespace ns, String n, Class c) {
-		name = n;
+	public TypeNode(Namespace ns, String tn, Class c) {
+		tname = tn;
 		dispatcher = new AttributeDispatcher(c, ns);
 	}
 
@@ -125,7 +125,7 @@ public class TypeNode {
 	public void enumerateObject(MessageEncoder enc, SonarObject o)
 		throws SonarException, IOException
 	{
-		assert(o.getTypeName() == name);
+		assert(o.getTypeName() == tname);
 		boolean first = true;
 		for (String a: dispatcher.getGettableAttributes()) {
 			String[] v = getValue(o, a);
@@ -136,7 +136,7 @@ public class TypeNode {
 			enc.encode(Message.ATTRIBUTE, a, v);
 		}
 		if (first)
-			enc.encode(Message.TYPE, name);
+			enc.encode(Message.TYPE, tname);
 		enc.encode(Message.OBJECT, o.getName());
 	}
 

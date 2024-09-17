@@ -36,7 +36,7 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 
 	/** Load all the incident descriptors */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, IncDescriptorImpl.class);
+		namespace.registerType(IncDescriptorImpl.class);
 		store.query("SELECT name, event_desc_id, detail, lane_code, " +
 			"multi FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()

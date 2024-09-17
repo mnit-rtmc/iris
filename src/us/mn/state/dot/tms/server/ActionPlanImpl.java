@@ -61,7 +61,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Load all the action plans */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, ActionPlanImpl.class);
+		namespace.registerType(ActionPlanImpl.class);
 		store.query("SELECT name, notes, sync_actions, sticky, " +
 			"ignore_auto_fail, active, default_phase, phase " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()

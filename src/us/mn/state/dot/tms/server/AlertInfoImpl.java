@@ -52,7 +52,7 @@ public class AlertInfoImpl extends BaseObjectImpl implements AlertInfo {
 
 	/** Load all the alert infos */
 	static public void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, AlertInfoImpl.class);
+		namespace.registerType(AlertInfoImpl.class);
 		store.query("SELECT name, alert, replaces, start_date, " +
 			"end_date, event, response_type, urgency, severity, " +
 			"certainty, headline, description, instruction, " +

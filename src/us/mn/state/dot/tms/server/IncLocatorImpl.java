@@ -33,7 +33,7 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 
 	/** Load all the incident locators */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, IncLocatorImpl.class);
+		namespace.registerType(IncLocatorImpl.class);
 		store.query("SELECT name, range, branched, picked, multi " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
