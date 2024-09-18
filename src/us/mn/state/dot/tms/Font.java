@@ -34,6 +34,9 @@ public interface Font extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = DMS.SONAR_TYPE;
+
 	/** Set the font number */
 	void setNumber(int n);
 

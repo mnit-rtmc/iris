@@ -41,6 +41,9 @@ public interface Graphic extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = DMS.SONAR_TYPE;
+
 	/** Set the graphic number */
 	void setGNumber(int n);
 

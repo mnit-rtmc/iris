@@ -42,6 +42,9 @@ public interface RptConduit extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = SystemAttribute.SONAR_TYPE;
+
 	//-------------------------------------------
 	// cancel the operation
 

@@ -32,6 +32,9 @@ public interface User extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = Permission.SONAR_TYPE;
+
 	/** Set the user's full name */
 	void setFullName(String n);
 

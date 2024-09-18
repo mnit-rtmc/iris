@@ -32,6 +32,9 @@ public interface Role extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = Permission.SONAR_TYPE;
+
 	/** Enable or disable the role */
 	void setEnabled(boolean e);
 

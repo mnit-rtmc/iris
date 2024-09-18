@@ -32,6 +32,9 @@ public interface EncoderStream extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = Camera.SONAR_TYPE;
+
 	/** Default buffering latency */
 	int DEFAULT_LATENCY_MS = 50;
 

@@ -32,6 +32,9 @@ public interface Domain extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = Permission.SONAR_TYPE;
+
 	/** Set the CIDR block */
 	void setBlock(String b);
 

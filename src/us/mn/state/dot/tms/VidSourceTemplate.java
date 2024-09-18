@@ -43,6 +43,9 @@ public interface VidSourceTemplate extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = Camera.SONAR_TYPE;
+
 	/** Get the stream-type label shown in the video window.
 	 * @return the label
 	 */

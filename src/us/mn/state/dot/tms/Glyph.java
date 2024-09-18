@@ -32,6 +32,9 @@ public interface Glyph extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = DMS.SONAR_TYPE;
+
 	/** Get the font */
 	Font getFont();
 

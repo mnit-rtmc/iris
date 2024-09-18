@@ -30,6 +30,9 @@ public interface Alarm extends ControllerIO {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = Controller.SONAR_TYPE;
+
 	/** Set the description */
 	void setDescription(String d);
 

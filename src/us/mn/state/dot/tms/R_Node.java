@@ -32,6 +32,9 @@ public interface R_Node extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = Detector.SONAR_TYPE;
+
 	/** Minimum lane shift */
 	int MIN_SHIFT = 1;
 

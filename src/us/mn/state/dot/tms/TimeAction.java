@@ -33,6 +33,9 @@ public interface TimeAction extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = ActionPlan.SONAR_TYPE;
+
 	/** Get the action plan */
 	ActionPlan getActionPlan();
 

@@ -50,17 +50,17 @@ resource, at the same access level.
 | [action plan]      | day matcher, [day plan], [device action], [plan phase], [time action] |
 | alert config       | alert info, alert message                             |
 | [beacon]           |                                                       |
-| [camera]           | catalog, [flow stream], play list                     |
+| [camera]           | camera preset, camera template, camera vid source order, catalog, encoder stream, encoder type, [flow stream], play list, vid source template |
 | [controller]       | [alarm], [comm link], [controller io], [gps], [modem] |
-| [detector]         | [r_node], [road], station                             |
-| [dms]              | [font], [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
+| [detector]         | [r_node], [road], road affix, station                 |
+| [dms]              | [font], glyph, [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
 | [gate arm]         | [gate arm array]                                      |
 | [incident]         | inc_advice, inc_descriptor, inc_locator               |
-| [lcs]              | [lcs array], [lcs indication], [lane marking]         |
+| [lcs]              | [lcs array], [lcs indication], [lane marking], lane use multi |
 | [parking area]     |                                                       |
 | permission         | [domain], [role], [user id]                           |
 | [ramp meter]       |                                                       |
-| [system attribute] | [cabinet style], [comm config]                        |
+| [system attribute] | [cabinet style], [comm config], map extent, rpt conduit |
 | [toll zone]        | [tag reader]                                          |
 | [video monitor]    | monitor style                                         |
 | [weather sensor]   |                                                       |

@@ -33,6 +33,9 @@ public interface IncLocator extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = Incident.SONAR_TYPE;
+
 	/** Set the range */
 	void setRange(int r);
 

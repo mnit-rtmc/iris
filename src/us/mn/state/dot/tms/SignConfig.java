@@ -34,6 +34,9 @@ public interface SignConfig extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = DMS.SONAR_TYPE;
+
 	/** Get width of the sign face (mm) */
 	int getFaceWidth();
 

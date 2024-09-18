@@ -34,6 +34,9 @@ public interface DayMatcher extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = ActionPlan.SONAR_TYPE;
+
 	/** Set the holiday flag */
 	void setHoliday(boolean h);
 

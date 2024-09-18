@@ -30,6 +30,9 @@ public interface GateArmArray extends Device {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = GateArm.SONAR_TYPE;
+
 	/** Maximum number of gate arms in array */
 	int MAX_ARMS = 8;
 

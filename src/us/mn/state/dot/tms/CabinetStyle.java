@@ -32,6 +32,9 @@ public interface CabinetStyle extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = SystemAttribute.SONAR_TYPE;
+
 	/** Set the police panel input pin for meter 1 */
 	void setPolicePanelPin1(Integer p);
 

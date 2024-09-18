@@ -31,6 +31,9 @@ public interface TagReader extends Device {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = TollZone.SONAR_TYPE;
+
 	/** Get the device location */
 	GeoLoc getGeoLoc();
 

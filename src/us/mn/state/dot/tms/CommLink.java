@@ -34,6 +34,9 @@ public interface CommLink extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = Controller.SONAR_TYPE;
+
 	/** Set text description */
 	void setDescription(String d);
 

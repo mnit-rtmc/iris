@@ -33,6 +33,9 @@ public interface Word extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = DMS.SONAR_TYPE;
+
 	/** Get the abbreviation */
 	String getAbbr();
 

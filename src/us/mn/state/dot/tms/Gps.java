@@ -32,6 +32,9 @@ public interface Gps extends Device {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = Controller.SONAR_TYPE;
+
 	/** Set the associated device location */
 	void setGeoLoc(GeoLoc l);
 

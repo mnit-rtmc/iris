@@ -32,6 +32,9 @@ public interface EncoderType extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = Camera.SONAR_TYPE;
+
 	/** Set the encoder make */
 	void setMake(String m);
 

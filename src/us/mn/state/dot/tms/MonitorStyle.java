@@ -32,6 +32,9 @@ public interface MonitorStyle extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = VideoMonitor.SONAR_TYPE;
+
 	/** Default accent color */
 	String DEFAULT_ACCENT = "608060";
 

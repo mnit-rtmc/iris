@@ -35,6 +35,9 @@ public interface CommConfig extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = SystemAttribute.SONAR_TYPE;
+
 	/** Valid polling periods */
 	Interval[] VALID_PERIODS = {
 		new Interval(5),

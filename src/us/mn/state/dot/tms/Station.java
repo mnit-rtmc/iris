@@ -32,6 +32,9 @@ public interface Station extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = Detector.SONAR_TYPE;
+
 	/** Get the roadway node */
 	R_Node getR_Node();
 }

@@ -33,6 +33,9 @@ public interface LaneUseMulti extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = LCS.SONAR_TYPE;
+
 	/** Set the indication (ordinal of LaneUseIndication) */
 	void setIndication(int i);
 

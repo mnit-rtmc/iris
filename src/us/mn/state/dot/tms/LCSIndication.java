@@ -31,6 +31,9 @@ public interface LCSIndication extends ControllerIO {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = LCS.SONAR_TYPE;
+
 	/** Get the LCS */
 	LCS getLcs();
 

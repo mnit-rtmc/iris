@@ -32,6 +32,9 @@ public interface PlanPhase extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = ActionPlan.SONAR_TYPE;
+
 	/** Undeployed phase name */
 	String UNDEPLOYED = "undeployed";
 

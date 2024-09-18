@@ -65,9 +65,14 @@ abstract public class Namespace {
 	static public String baseName(Class t)
 		throws NoSuchFieldException, IllegalAccessException
 	{
-		assert SonarObject.class.isAssignableFrom(t);
-		Field f = t.getField("SONAR_BASE");
-		return (String) f.get(t);
+		try {
+			assert SonarObject.class.isAssignableFrom(t);
+			Field f = t.getField("SONAR_BASE");
+			return (String) f.get(t);
+		}
+		catch (NoSuchFieldException | IllegalAccessException e) {
+			return typeName(t);
+		}
 	}
 
 	/** Make an array of the given class and size */

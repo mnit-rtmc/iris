@@ -32,6 +32,9 @@ public interface MapExtent extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = SystemAttribute.SONAR_TYPE;
+
 	/** Set the longitude */
 	void setLon(float ln);
 

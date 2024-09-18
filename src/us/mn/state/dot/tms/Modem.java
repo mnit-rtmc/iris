@@ -33,6 +33,9 @@ public interface Modem extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = Controller.SONAR_TYPE;
+
 	/** Set config string */
 	void setConfig(String c);
 

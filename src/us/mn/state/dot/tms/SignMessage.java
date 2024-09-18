@@ -35,6 +35,9 @@ public interface SignMessage extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = DMS.SONAR_TYPE;
+
 	/** Maximum number of lines per text rectangle */
 	int MAX_LINES = 4;
 

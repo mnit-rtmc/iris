@@ -33,6 +33,9 @@ public interface RoadAffix extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = Detector.SONAR_TYPE;
+
 	/** Set flag to indicate prefix (true) or suffix (false) */
 	void setPrefix(boolean p);
 

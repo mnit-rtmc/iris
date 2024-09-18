@@ -38,6 +38,9 @@ public interface AlertInfo extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = AlertConfig.SONAR_TYPE;
+
 	/** Get the alert identifier */
 	String getAlert();
 

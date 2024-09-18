@@ -33,6 +33,9 @@ public interface IncDescriptor extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = Incident.SONAR_TYPE;
+
 	/** Set the event type */
 	void setEventType(int et);
 

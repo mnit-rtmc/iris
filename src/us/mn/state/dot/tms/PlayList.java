@@ -38,6 +38,9 @@ public interface PlayList extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = Camera.SONAR_TYPE;
+
 	/** Set sequence number */
 	void setSeqNum(Integer n);
 

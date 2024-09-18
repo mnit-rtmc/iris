@@ -32,6 +32,9 @@ public interface CameraPreset extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = Camera.SONAR_TYPE;
+
 	/** Maximum allowed preset number */
 	int MAX_PRESET = 12;
 

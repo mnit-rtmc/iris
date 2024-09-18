@@ -27,11 +27,6 @@ public interface SonarObject {
 	/** Get the SONAR type name */
 	String getTypeName();
 
-	/** Get the base type name */
-	default String getTypeBase() {
-		return getTypeName();
-	}
-
 	/** Get the SONAR object name */
 	String getName();
 

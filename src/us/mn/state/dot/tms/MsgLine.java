@@ -33,6 +33,9 @@ public interface MsgLine extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = DMS.SONAR_TYPE;
+
 	/** Maximum length of MULTI string */
 	int MAX_LEN_MULTI = 64;
 
