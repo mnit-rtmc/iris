@@ -84,7 +84,7 @@ public class OpSendMeterSettings extends Op170Device {
 	private void updateTimingTable() {
 		Hashtags tags = new Hashtags(meter.getNotes());
 		TimingTable table = new TimingTable(tags);
-		for (int e = 0;; e++) {
+		for (int e = 0; e < 2; e++) {
 			int start = table.lookupStart(e);
 			int stop = table.lookupStop(e);
 			if (start > 0 && stop > 0)
