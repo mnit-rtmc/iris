@@ -119,12 +119,12 @@ Instead, an _alert_ email will be sent to the address in the
 There are a couple of extra security features to restrict access to gate arm
 control.
 
-### Whitelist
+### Allowlist
 
-There is a whitelist of client IP addresses from which clients are allowed to
-control gate arms.  It is specified as the `gate.arm.whitelist` property in the
-`/etc/iris/iris-server.properties` configuration file.  The property contains a
-list of addresses in [CIDR] notation (exact IP, or ranges specified such as
+There is a list of IP addresses from which clients are allowed to control gate
+arms.  It is specified as the `gate.arm.allowlist` property in the
+`/etc/iris/iris-server.properties` configuration file.  The property contains
+a list of addresses in [CIDR] notation (exact IP, or ranges specified such as
 `192.168.1.0/24`).
 
 ### System Disable

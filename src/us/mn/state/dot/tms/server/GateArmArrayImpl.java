@@ -53,7 +53,7 @@ import us.mn.state.dot.tms.utils.CidrBlock;
 public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Allow list of CIDR blocks */
-	static private final List<CidrBlock> ALLOW_LIST =
+	static private final List<CidrBlock> ALLOWLIST =
 		new ArrayList<CidrBlock>();
 
 	/** Initialize the gate arm allow list */
@@ -61,15 +61,15 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		throws IllegalArgumentException
 	{
 		List<CidrBlock> allow = CidrBlock.parseList(props.getProperty(
-			"gate.arm.whitelist"));
-		ALLOW_LIST.addAll(allow);
+			"gate.arm.allowlist"));
+		ALLOWLIST.addAll(allow);
 	}
 
 	/** Check if IP address is in allow list */
 	static private boolean checkList(InetAddress a)
 		throws ChangeVetoException
 	{
-		for (CidrBlock block: ALLOW_LIST) {
+		for (CidrBlock block: ALLOWLIST) {
 			if (block.matches(a))
 				return true;
 		}
