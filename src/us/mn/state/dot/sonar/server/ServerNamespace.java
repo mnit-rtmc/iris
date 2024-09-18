@@ -179,11 +179,9 @@ public class ServerNamespace extends Namespace {
 	 * @return New type node. */
 	public TypeNode registerType(Class c) throws SonarException {
 		try {
-			String tname = typeName(c);
-			String base = baseName(c);
-			TypeNode node = new TypeNode(this, tname, base, c);
+			TypeNode node = new TypeNode(this, c);
 			synchronized (root) {
-				root.put(tname, node);
+				root.put(node.tname, node);
 			}
 			return node;
 		}

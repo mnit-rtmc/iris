@@ -54,9 +54,11 @@ public class TypeNode {
 	private final AttributeDispatcher dispatcher;
 
 	/** Create a namespace type node */
-	public TypeNode(Namespace ns, String tn, String bn, Class c) {
-		tname = tn;
-		base = bn;
+	public TypeNode(Namespace ns, Class c)
+		throws NoSuchFieldException, IllegalAccessException
+	{
+		tname = Namespace.typeName(c);
+		base = Namespace.baseName(c);
 		dispatcher = new AttributeDispatcher(c, ns);
 	}
 

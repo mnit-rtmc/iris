@@ -15,9 +15,9 @@
 package us.mn.state.dot.sonar.client;
 
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -79,8 +79,8 @@ public class TypeCache<T extends SonarObject> implements Iterable<T> {
 	private T phantom;
 
 	/** Proxy listener list */
-	private final LinkedList<ProxyListener<T>> listeners =
-		new LinkedList<ProxyListener<T>>();
+	private final ArrayList<ProxyListener<T>> listeners =
+		new ArrayList<ProxyListener<T>>();
 
 	/** Create a type cache.
 	 *
