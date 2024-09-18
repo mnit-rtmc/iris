@@ -39,6 +39,7 @@ import us.mn.state.dot.sonar.ProtocolError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.SSLState;
+import us.mn.state.dot.tms.AccessLevel;
 import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.server.UserImpl;
 
@@ -307,7 +308,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		User u = user;
 		if (u != null &&
 		    isWatching(name) &&
-		    namespace.accessLevel(name, u) > 0)
+		    namespace.accessLevel(name, u) >= AccessLevel.VIEW.ordinal())
 		{
 			notifyAttribute(name.toString(), params);
 		}
@@ -534,7 +535,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 		if (params.size() > 2)
 			throw ProtocolError.wrongParameterCount();
 		Name name = createName(params);
-		if (namespace.accessLevel(name, user) < 1)
+		int lvl = namespace.accessLevel(name, user);
+		if (lvl < AccessLevel.VIEW.ordinal())
 			throw PermissionDenied.create(name);
 		startWatching(name);
 		try {
@@ -572,7 +574,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 			throw ProtocolError.wrongParameterCount();
 		Name name = new Name(params.get(1));
 		if (name.isObject()) {
-			if (namespace.accessLevel(name, user) < 4)
+			int lvl = namespace.accessLevel(name, user);
+			if (lvl < AccessLevel.CONFIGURE.ordinal())
 				throw PermissionDenied.create(name);
 			createObject(name);
 		} else
@@ -612,7 +615,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 		if (params.size() != 2)
 			throw ProtocolError.wrongParameterCount();
 		Name name = new Name(params.get(1));
-		if (namespace.accessLevel(name, user) < 4)
+		int lvl = namespace.accessLevel(name, user);
+		if (lvl < AccessLevel.CONFIGURE.ordinal())
 			throw PermissionDenied.create(name);
 		SonarObject obj = namespace.lookupObject(name);
 		if (obj != null) {
@@ -640,7 +644,8 @@ public class ConnectionImpl extends Conduit implements Connection {
 
 	/** Check if an attribute if writable */
 	private boolean checkWriteAttr(Name name) {
-		return namespace.accessLevel(name, user) > 1;
+		int lvl = namespace.accessLevel(name, user);
+		return lvl >= AccessLevel.OPERATE.ordinal();
 	}
 
 	/** Set the value of an attribute.

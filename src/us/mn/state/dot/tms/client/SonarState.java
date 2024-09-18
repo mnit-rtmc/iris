@@ -26,6 +26,7 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.AccessLevel;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.AlertConfig;
@@ -554,7 +555,8 @@ public class SonarState extends Client {
 
 	/** Check if the user can read a type */
 	public boolean canRead(String tname) {
-		return getNamespace().accessLevel(new Name(tname), user) > 0;
+		int lvl = getNamespace().accessLevel(new Name(tname), user);
+		return lvl >= AccessLevel.VIEW.ordinal();
 	}
 
 	/** Login to the SONAR server */
