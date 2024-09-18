@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2019-2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -126,9 +126,9 @@ public class OpSendDMSDefaults extends OpDMS {
 			ASN1Integer dur = vmsPixelServiceDuration.makeInt();
 			ASN1Integer freq = vmsPixelServiceFrequency.makeInt();
 			ASN1Integer time = vmsPixelServiceTime.makeInt();
-			dur.setInteger(10);
-			freq.setInteger(1440);
-			time.setInteger(180);
+			dur.setInteger(10); // 10 seconds
+			freq.setInteger(1440); // 1,440 minutes (24-hours)
+			time.setInteger(180); // minute-of-day (3 AM)
 			mess.add(dur);
 			mess.add(freq);
 			mess.add(time);
