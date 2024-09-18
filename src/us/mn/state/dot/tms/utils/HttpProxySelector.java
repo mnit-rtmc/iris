@@ -142,7 +142,7 @@ public class HttpProxySelector extends ProxySelector {
 	/** Create an allow list of CIDR blocks to skip proxy */
 	private List<CidrBlock> createProxyAllowList(Properties props) {
 		return CidrBlock.parseList(props.getProperty(
-			"http.proxy.whitelist"));
+			"http.proxy.allowlist"));
 	}
 
 	/** Handle a failed connection to a proxy server */

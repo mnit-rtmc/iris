@@ -108,7 +108,7 @@ Property               | Description
 `variant`              | IETF BCP 47 language variant subtag.
 `district`             | District name — useful where multiple IRIS servers exist within the same organization
 `http.proxy`           | List of HTTP proxy settings (used for downloading map tiles, XML files, etc.)
-`http.proxy.whitelist` | List of addresses to bypass using proxy server, in [CIDR] notation (exact IP, or ranges specified such as 192.168.1.0/24)
+`http.proxy.allowlist` | List of addresses to bypass using proxy server, in [CIDR] notation (exact IP, or ranges specified such as 192.168.1.0/24)
 `db.url`               | URL of PostgreSQL server
 `db.user`              | User for PostgreSQL connection
 `db.password`          | Password for PostgreSQL connection

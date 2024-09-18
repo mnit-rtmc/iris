@@ -13,7 +13,7 @@ Property               | Description
 `variant`              | IETF BCP 47 language variant subtag.
 `district`             | District name — useful where multiple IRIS servers exist within the same organization
 `http.proxy`           | List of HTTP proxy settings (used for downloading map tiles, XML files, etc.)
-`http.proxy.whitelist` | List of addresses to bypass using proxy server, in [CIDR] notation (exact IP, or ranges specified such as 192.168.1.0/24)
+`http.proxy.allowlist` | List of addresses to bypass using proxy server, in [CIDR] notation (exact IP, or ranges specified such as 192.168.1.0/24)
 `keystore.file`        | URL for the client keystore file
 `keystore.password`    | Password for the client keystore
 `sonar.host`           | IP or hostname of the SONAR server
