@@ -48,9 +48,9 @@ resource, at the same access level.
 | Base Resource      | Dependent Resources                                   |
 |--------------------|-------------------------------------------------------|
 | [action plan]      | day matcher, [day plan], [device action], [plan phase], [time action] |
-| alert config       | alert info, alert message                             |
+| [alert config]     | alert info, [alert message]                           |
 | [beacon]           |                                                       |
-| [camera]           | camera preset, camera template, cam vid src ord, catalog, encoder stream, encoder type, [flow stream], play list, vid source template |
+| [camera]           | [camera preset], camera template, cam vid src ord, [catalog], encoder stream, [encoder type], [flow stream], play list, vid source template |
 | [controller]       | [alarm], [comm link], [controller io], [gps], [modem] |
 | [detector]         | [r_node], [road], road affix, station                 |
 | [dms]              | [font], glyph, [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
@@ -62,7 +62,7 @@ resource, at the same access level.
 | [ramp meter]       |                                                       |
 | [system attribute] | [cabinet style], [comm config], map extent, rpt conduit |
 | [toll zone]        | [tag reader]                                          |
-| [video monitor]    | monitor style                                         |
+| [video monitor]    | [monitor style]                                       |
 | [weather sensor]   |                                                       |
 
 ## Associated Resources
@@ -78,9 +78,13 @@ These include:
 
 [action plan]: action_plans.html
 [alarm]: alarms.html
+[alert config]: alerts.html#alert-configuration
+[alert message]: alerts.html#alert-messages
 [beacon]: beacons.html
 [cabinet style]: controllers.html#cabinet-styles
 [camera]: cameras.html
+[camera preset]: cameras.html#presets
+[catalog]: video.html#catalogs
 [comm config]: comm_config.html
 [comm link]: comm_links.html
 [controller]: controllers.html
@@ -90,6 +94,7 @@ These include:
 [device action]: action_plans.html#device-actions
 [dms]: dms.html
 [domain]: users.html#domains
+[encoder type]: cameras.html#encoder-types
 [flow stream]: flow_streams.html
 [font]: fonts.html
 [gate arm]: gate_arms.html
@@ -106,6 +111,7 @@ These include:
 [message line]: message_patterns.html#message-lines
 [message pattern]: message_patterns.html
 [modem]: modem.html
+[monitor style]: video.html#style
 [parking area]: parking_areas.html
 [plan phase]: action_plans.html#plan-phases
 [r_node]: road_topology.html#r_nodes
