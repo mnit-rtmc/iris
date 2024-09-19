@@ -32,6 +32,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.BeaconState;
@@ -630,7 +631,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Check if the user has permission to send a given message */
 	private void checkMsgUser(SignMessage sm) throws TMSException {
-		switch (queryPermAccess()) {
+		int lvl = accessLevel(new Name(this, "msgUser"));
+		switch (lvl) {
 		case 2: // "Operate" access level
 			denyFreeForm(sm);
 			return;

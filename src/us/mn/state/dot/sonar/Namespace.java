@@ -222,17 +222,16 @@ abstract public class Namespace {
 		if (u != null && u.getEnabled()) {
 			Role r = u.getRole();
 			if (r != null && r.getEnabled())
-				return accessLevel(name, u, r);
+				return accessLevel(name, r);
 		}
 		return 0;
 	}
 
 	/** Get a user's access level for a name.
 	 * @param name Name to check.
-	 * @param u User to check.
 	 * @param role Role to check.
 	 * @return Access level (0-4). */
-	private int accessLevel(Name name, User u, Role role) {
+	private int accessLevel(Name name, Role role) {
 		int level = 0;
 		Iterator<SonarObject> it = iterator(Permission.SONAR_TYPE);
 		while (it.hasNext()) {

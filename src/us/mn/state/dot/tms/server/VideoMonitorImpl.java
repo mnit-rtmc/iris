@@ -22,9 +22,12 @@ import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.tms.AccessLevel;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
+import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.FlowStream;
@@ -301,8 +304,9 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Set the camera displayed on the monitor */
 	public void doSetCamera(Camera c) throws TMSException {
-		if (queryPermAccess() < 2)
-			return;
+		int lvl = accessLevel(new Name(this, "camera"));
+		if (lvl < AccessLevel.OPERATE.ordinal())
+			throw new ChangeVetoException("NOT PERMITTED");
 		setCamSrc(toCameraImpl(c), getProcUser(), true);
 	}
 
@@ -486,8 +490,10 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	/** Set the play list.
 	 * This will start the given play list from the beginning. */
 	public void doSetPlayList(PlayList pl) throws TMSException {
-		if (queryPermAccess() >= 2)
-			setPlayList(pl);
+		int lvl = accessLevel(new Name(this, "playList"));
+		if (lvl < AccessLevel.OPERATE.ordinal())
+			throw new ChangeVetoException("NOT PERMITTED");
+		setPlayList(pl);
 	}
 
 	/** Get the camera sequence */

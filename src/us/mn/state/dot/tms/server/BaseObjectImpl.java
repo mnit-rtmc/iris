@@ -21,6 +21,7 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Date;
 import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.server.Server;
@@ -149,6 +150,12 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			return namespace.lookupObject(st, name);
 		else
 			return null;
+	}
+
+	/** Lookup a user */
+	static protected UserImpl lookupUser(String name) {
+		SonarObject so = lookupObject(UserImpl.SONAR_TYPE, name);
+		return (so instanceof UserImpl) ? (UserImpl) so : null;
 	}
 
 	/** Lookup a role */
@@ -464,6 +471,12 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		// Override this to initialize new objects
 	}
 
+	/** Get access level of current SONAR processing user */
+	protected int accessLevel(Name name) {
+		UserImpl user = lookupUser(getProcUser());
+		return namespace.accessLevel(name, user);
+	}
+
 	/** Get user for current SONAR message processing */
 	public String getProcUser() {
 		Server s = MainServer.server;
@@ -558,39 +571,5 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 				ev.doStore();
 			}
 		});
-	}
-
-	/** Query user's permission access level for this object.
-	 *
-	 * @return Access level (0-4)
-	 *         0 none, 1 view, 2 operate, 3 manage, 4 configure */
-	public int queryPermAccess() throws TMSException {
-		// FIXME: this should get the base resource
-		String res = getTypeName();
-		String user = getProcUser();
-		final int[] access = { 0 };
-		store.query("SELECT max(access_level) " +
-			"FROM iris.permission p " +
-			"JOIN iris.user_id u ON u.role = p.role " +
-			"WHERE p.base_resource = '" + res + "' " +
-			"AND u.name = '" + user + "' " +
-			"AND (" +
-				"p.hashtag IS NULL OR " +
-				"p.hashtag IN (" +
-					"SELECT hashtag " +
-					"FROM iris.hashtag " +
-					"WHERE base_resource = '" + res + "' " +
-					"AND name = '" + getName() + "'" +
-				")" +
-			");",
-			new ResultFactory()
-		{
-			@Override public void create(ResultSet row)
-				throws SQLException
-			{
-				access[0] = row.getInt(1);
-			}
-		});
-		return access[0];
 	}
 }
