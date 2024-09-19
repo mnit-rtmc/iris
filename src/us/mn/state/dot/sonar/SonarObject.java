@@ -30,6 +30,11 @@ public interface SonarObject {
 	/** Get the SONAR object name */
 	String getName();
 
+	/** Check if an object has an associated hashtag */
+	default boolean hasHashtag(String h) {
+		return false;
+	}
+
 	/** Destroy the SONAR object */
 	void destroy();
 }

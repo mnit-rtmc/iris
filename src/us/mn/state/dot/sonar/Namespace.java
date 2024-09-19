@@ -255,11 +255,23 @@ abstract public class Namespace {
 	private int accessLevel(Name name, Permission p) {
 		String base = getTypeBase(name);
 		if (p.getBaseResource().equals(base)) {
-			// FIXME: check hashtags
 			// FIXME: check attributes
-			return p.getAccessLevel();
+			String h = p.getHashtag();
+			if (h != null) {
+				SonarObject obj = lookupObject(name);
+				if (obj != null && obj.hasHashtag(h))
+					return p.getAccessLevel();
+			} else
+				return p.getAccessLevel();
 		}
 		return 0;
+	}
+
+	/** Lookup an object in the SONAR namespace.
+	 * @param name Sonar name
+	 * @return Object from namespace or null if name does not exist */
+	private SonarObject lookupObject(Name name) {
+		return lookupObject(name.getTypePart(), name.getObjectPart());
 	}
 
 	/** Get base resource type name */
