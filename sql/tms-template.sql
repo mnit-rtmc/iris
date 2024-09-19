@@ -293,6 +293,7 @@ modem	controller
 detector	\N
 r_node	detector
 road	detector
+road_affix	detector
 station	detector
 dms	\N
 font	dms
@@ -328,7 +329,6 @@ cabinet_style	system_attribute
 comm_config	system_attribute
 map_extent	system_attribute
 rpt_conduit	system_attribute
-road_affix	system_attribute
 toll_zone	\N
 tag_reader	toll_zone
 video_monitor	\N

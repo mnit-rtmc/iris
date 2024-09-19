@@ -50,15 +50,15 @@ resource, at the same access level.
 | [action plan]      | day matcher, [day plan], [device action], [plan phase], [time action] |
 | alert config       | alert info, alert message                             |
 | [beacon]           |                                                       |
-| [camera]           | camera preset, camera template, camera vid source order, catalog, encoder stream, encoder type, [flow stream], play list, vid source template |
+| [camera]           | camera preset, camera template, cam vid src ord, catalog, encoder stream, encoder type, [flow stream], play list, vid source template |
 | [controller]       | [alarm], [comm link], [controller io], [gps], [modem] |
 | [detector]         | [r_node], [road], road affix, station                 |
 | [dms]              | [font], glyph, [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
 | [gate arm]         | [gate arm array]                                      |
-| [incident]         | inc_advice, inc_descriptor, inc_locator               |
-| [lcs]              | [lcs array], [lcs indication], [lane marking], lane use multi |
+| [incident]         | inc_advice, inc_descriptor, inc_locator, incident_detail |
+| [lcs]              | [lane marking], lane use multi, [lcs array], [lcs indication] |
 | [parking area]     |                                                       |
-| permission         | [domain], [role], [user id]                           |
+| permission         | connection, [domain], [role], [user id]               |
 | [ramp meter]       |                                                       |
 | [system attribute] | [cabinet style], [comm config], map extent, rpt conduit |
 | [toll zone]        | [tag reader]                                          |

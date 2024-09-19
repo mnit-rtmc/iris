@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.sonar;
 
+import us.mn.state.dot.tms.Permission;
 import us.mn.state.dot.tms.User;
 
 /**
@@ -31,6 +32,9 @@ public interface Connection extends SonarObject {
 	default String getTypeName() {
 		return SONAR_TYPE;
 	}
+
+	/** SONAR base type name */
+	String SONAR_BASE = Permission.SONAR_TYPE;
 
 	/** Get the user logged in on the connection.
 	 * May be null (before a successful login). */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2017  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  * Copyright (C) 2020 SRF Consulting Group
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.client.camera;
 import java.util.ArrayList;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraTemplate;
-import us.mn.state.dot.tms.CameraVidSourceOrder;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.PlayList;
@@ -43,7 +42,7 @@ public class CameraTemplateModel extends ProxyTableModel<CameraTemplate> {
 			true,	/* has_properties */
 			true,	/* has_create_delete */
 			true	/* has_name */
-				) {
+		) {
 			@Override
 			public CameraTemplateProperties createPropertiesForm(
 				CameraTemplate ct)

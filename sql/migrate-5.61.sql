@@ -253,7 +253,7 @@ UPDATE iris.resource_type SET base = 'controller' WHERE name IN (
     'alarm', 'comm_link', 'geo_loc', 'gps', 'modem'
 );
 UPDATE iris.resource_type SET base = 'detector' WHERE name IN (
-    'r_node', 'road', 'station'
+    'r_node', 'road', 'road_affix', 'station'
 );
 UPDATE iris.resource_type SET base = 'dms' WHERE name IN (
     'font', 'glyph', 'graphic', 'msg_line', 'msg_pattern', 'sign_config',
@@ -261,7 +261,7 @@ UPDATE iris.resource_type SET base = 'dms' WHERE name IN (
 );
 UPDATE iris.resource_type SET base = 'gate_arm' WHERE name = 'gate_arm_array';
 UPDATE iris.resource_type SET base = 'incident' WHERE name IN (
-    'inc_advice', 'inc_descriptor', 'incident_detail', 'inc_locator'
+    'inc_advice', 'inc_descriptor', 'inc_locator', 'incident_detail'
 );
 UPDATE iris.resource_type SET base = 'lcs' WHERE name IN (
     'lane_marking', 'lane_use_multi', 'lcs_array', 'lcs_indication'
@@ -270,7 +270,7 @@ UPDATE iris.resource_type SET base = 'permission' WHERE name IN (
     'connection', 'domain', 'role', 'user_id'
 );
 UPDATE iris.resource_type SET base = 'system_attribute' WHERE name IN (
-    'cabinet_style', 'comm_config', 'map_extent', 'rpt_conduit', 'road_affix'
+    'cabinet_style', 'comm_config', 'map_extent', 'rpt_conduit'
 );
 INSERT INTO iris.resource_type (name, base)
     VALUES ('rpt_conduit', 'system_attribute')
