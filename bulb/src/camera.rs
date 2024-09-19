@@ -15,6 +15,8 @@ use crate::card::{AncillaryData, Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
+use crate::item::ItemState;
+use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::Deserialize;
@@ -48,7 +50,10 @@ impl AncillaryData for CameraAnc {
     /// Construct ancillary camera data
     fn new(pri: &Camera, view: View) -> Self {
         let cio = ControllerIoAnc::new(pri, view);
-        let loc = LocAnc::new(pri, view);
+        let mut loc = LocAnc::new(pri, view);
+        if let (View::Status, Some(nm)) = (view, pri.geoloc()) {
+            loc.assets.push(Asset::GeoLoc(nm.to_string(), Res::Camera));
+        }
         CameraAnc { cio, loc }
     }
 
@@ -86,6 +91,9 @@ impl Camera {
 
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &CameraAnc) -> String {
+        if let Some((lat, lon)) = anc.loc.latlon() {
+            fly_map_item(&self.name, lat, lon);
+        }
         let title = self.title(View::Control);
         let item_states = anc.cio.item_states(self).to_html();
         let location = HtmlStr::new(&self.location).with_len(64);
@@ -153,6 +161,18 @@ impl Card for Camera {
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
         self
+    }
+
+    /// Get the main item state
+    fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
+        let item_states = anc.cio.item_states(self);
+        if item_states.is_match(ItemState::Inactive.code()) {
+            ItemState::Inactive
+        } else if item_states.is_match(ItemState::Offline.code()) {
+            ItemState::Offline
+        } else {
+            ItemState::Available
+        }
     }
 
     /// Check if a search string matches
