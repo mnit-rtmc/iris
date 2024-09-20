@@ -17,6 +17,7 @@ use std::fmt;
 /// Enumeration of resource types
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Res {
+    ActionPlan,
     Alarm,
     Beacon,
     BeaconState,
@@ -93,6 +94,7 @@ impl Res {
     pub fn iter() -> impl Iterator<Item = Res> {
         use Res::*;
         [
+            ActionPlan,
             Alarm,
             Beacon,
             BeaconState,
@@ -157,6 +159,7 @@ impl Res {
     pub const fn as_str(self) -> &'static str {
         use Res::*;
         match self {
+            ActionPlan => "action_plan",
             Alarm => "alarm",
             Beacon => "beacon",
             BeaconState => "beacon_state",
@@ -219,6 +222,7 @@ impl Res {
     pub const fn symbol(self) -> &'static str {
         use Res::*;
         match self {
+            ActionPlan => "🎬",
             Alarm => "📢",
             Beacon => "🔆",
             CabinetStyle => "🗄️ ",
