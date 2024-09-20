@@ -104,7 +104,6 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 
 	/** Check if the user is permitted to update the given action plan */
 	private boolean isWritePermitted(ActionPlan plan) {
-		// FIXME: use permissions instead
 		return session.isWritePermitted(plan, "phase");
 	}
 
