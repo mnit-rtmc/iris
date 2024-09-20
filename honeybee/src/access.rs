@@ -95,7 +95,8 @@ fn required_patch_operate(res: Res, att: &str) -> bool {
         | (Res::LcsArray, "lcs_lock")
         | (Res::RampMeter, "m_lock")
         | (Res::RampMeter, "rate")
-        | (Res::VideoMonitor, "camera") => true,
+        | (Res::VideoMonitor, "camera")
+        | (Res::VideoMonitor, "play_list") => true,
         _ => false,
     }
 }

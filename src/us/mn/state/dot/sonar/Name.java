@@ -136,6 +136,7 @@ public class Name {
 		{ "ramp_meter", "mLock" },
 		{ "ramp_meter", "rate" },
 		{ "video_monitor", "camera" },
+		{ "video_monitor", "playList" },
 	};
 
 	/** Write access exceptions for MANAGE level */
