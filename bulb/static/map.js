@@ -159,6 +159,15 @@ function tms_styles() {
         weather_sensor_16: tms_style,
         weather_sensor_17: tms_style,
         weather_sensor_18: tms_style,
+        camera_10: tms_style,
+        camera_11: tms_style,
+        camera_12: tms_style,
+        camera_13: tms_style,
+        camera_14: tms_style,
+        camera_15: tms_style,
+        camera_16: tms_style,
+        camera_17: tms_style,
+        camera_18: tms_style,
     };
 }
 
