@@ -24,7 +24,6 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.tms.AccessLevel;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.ChangeVetoException;
@@ -304,8 +303,8 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Set the camera displayed on the monitor */
 	public void doSetCamera(Camera c) throws TMSException {
-		int lvl = accessLevel(new Name(this, "camera"));
-		if (lvl < AccessLevel.OPERATE.ordinal())
+		Name name = new Name(this, "camera");
+		if (accessLevel(name) < name.accessWrite())
 			throw new ChangeVetoException("NOT PERMITTED");
 		setCamSrc(toCameraImpl(c), getProcUser(), true);
 	}
@@ -490,8 +489,8 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	/** Set the play list.
 	 * This will start the given play list from the beginning. */
 	public void doSetPlayList(PlayList pl) throws TMSException {
-		int lvl = accessLevel(new Name(this, "playList"));
-		if (lvl < AccessLevel.OPERATE.ordinal())
+		Name name = new Name(this, "playList");
+		if (accessLevel(name) < name.accessWrite())
 			throw new ChangeVetoException("NOT PERMITTED");
 		setPlayList(pl);
 	}

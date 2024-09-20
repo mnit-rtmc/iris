@@ -738,6 +738,7 @@ fn check_name(
 ) -> Result<Name> {
     let nm = Name::new(type_n)?;
     match (nm.res_type, params) {
+        // FIXME: check for ControllerIo / DevicePreset
         (Res::GeoLoc, Some(p)) => {
             // Use "res" query parameter for GeoLoc access check
             Ok(Name::new(&p.res)?.obj(obj_n)?)

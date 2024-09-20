@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.tms.AccessLevel;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.BeaconHelper;
@@ -306,8 +305,8 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	 */
 	public void doSetPhase(PlanPhase p) throws TMSException {
 		if (!objectEquals(p, phase)) {
-			int lvl = accessLevel(new Name(this, "phase"));
-			if (lvl < AccessLevel.OPERATE.ordinal())
+			Name name = new Name(this, "phase");
+			if (accessLevel(name) < name.accessWrite())
 				throw new ChangeVetoException("NOT PERMITTED");
 			if (getSyncActions())
 				validateDeviceActions(); // throws exception

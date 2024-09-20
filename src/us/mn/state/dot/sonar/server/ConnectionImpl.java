@@ -575,7 +575,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 		Name name = new Name(params.get(1));
 		if (name.isObject()) {
 			int lvl = namespace.accessLevel(name, user);
-			if (lvl < AccessLevel.CONFIGURE.ordinal())
+			if (lvl < name.accessWrite())
 				throw PermissionDenied.create(name);
 			createObject(name);
 		} else
@@ -616,7 +616,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 			throw ProtocolError.wrongParameterCount();
 		Name name = new Name(params.get(1));
 		int lvl = namespace.accessLevel(name, user);
-		if (lvl < AccessLevel.CONFIGURE.ordinal())
+		if (lvl < name.accessWrite())
 			throw PermissionDenied.create(name);
 		SonarObject obj = namespace.lookupObject(name);
 		if (obj != null) {
@@ -645,7 +645,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	/** Check if an attribute if writable */
 	private boolean checkWriteAttr(Name name) {
 		int lvl = namespace.accessLevel(name, user);
-		return lvl >= AccessLevel.OPERATE.ordinal();
+		return lvl >= name.accessWrite();
 	}
 
 	/** Set the value of an attribute.

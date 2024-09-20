@@ -254,7 +254,6 @@ abstract public class Namespace {
 	private int accessLevel(Name name, Permission p) {
 		String base = getTypeBase(name);
 		if (p.getBaseResource().equals(base)) {
-			// FIXME: check attributes
 			String h = p.getHashtag();
 			if (h != null) {
 				SonarObject obj = lookupObject(name);

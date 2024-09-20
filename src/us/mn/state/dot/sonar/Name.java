@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.sonar;
 
+import us.mn.state.dot.tms.AccessLevel;
+
 /**
  * A name represents a type, object or attribute in SONAR namespace.
  *
@@ -115,5 +117,78 @@ public class Name {
 	/** Get the attribute name with no object specified */
 	public String getAttributeName() {
 		return getTypePart() + SEP + SEP + getAttributePart();
+	}
+
+	/** Write access exceptions for OPERATE level */
+	static final String[][] WRITE_OPERATE = {
+		{ "beacon", "state" },
+		{ "camera", "ptz" },
+		{ "camera", "publish" },
+		{ "camera", "recallPreset" },
+		{ "controller", "deviceRequest" },
+		{ "detector", "fieldLength" },
+		{ "detector", "forceFail" },
+		{ "dms", "msgUser" },
+		{ "lane_marking", "deployed" },
+		{ "lcs_array", "lcsLock" },
+		{ "ramp_meter", "mLock" },
+		{ "ramp_meter", "rate" },
+	};
+
+	/** Write access exceptions for MANAGE level */
+	static final String[][] WRITE_MANAGE = {
+		{ "beacon", "message" },
+		{ "beacon", "notes" },
+		{ "beacon", "preset" },
+		{ "camera", "notes" },
+		{ "camera", "storePreset" },
+		{ "comm_config", "timeoutMs" },
+		{ "comm_config", "idleDisconnectSec" },
+		{ "comm_config", "noResponseDisconnectSec" },
+		{ "comm_link", "pollEnabled" },
+		{ "controller", "condition" },
+		{ "controller", "notes" },
+		{ "detector", "abandoned" },
+		{ "detector", "notes" },
+		{ "dms", "deviceRequest" },
+		{ "dms", "notes" },
+		{ "dms", "preset" },
+		{ "lane_marking", "notes" },
+		{ "lcs_array", "notes" },
+		{ "modem", "enabled" },
+		{ "modem", "timeoutMs" },
+		{ "ramp_meter", "notes" },
+		{ "ramp_meter", "storage" },
+		{ "ramp_meter", "maxWait" },
+		{ "ramp_meter", "algorithm" },
+		{ "ramp_meter", "amTarget" },
+		{ "ramp_meter", "pmTarget" },
+		{ "role", "enabled" },
+		{ "user", "enabled" },
+		{ "weather_sensor", "deviceRequest" },
+		{ "weather_sensor", "siteId" },
+		{ "weather_sensor", "altId" },
+		{ "weather_sensor", "notes" },
+	};
+
+	/** Get access level required to write object/attribute */
+	public int accessWrite() {
+		if (isAttribute()) {
+			String typ = getTypePart();
+			String att = getAttributePart();
+			for (String[] acc: WRITE_OPERATE) {
+				if (acc[0].equals(typ) && acc[1].equals(att))
+					return AccessLevel.OPERATE.ordinal();
+			}
+			for (String[] acc: WRITE_MANAGE) {
+				if (acc[0].equals(typ) && acc[1].equals(att))
+					return AccessLevel.MANAGE.ordinal();
+			}
+		} else if (isObject()) {
+			// Allow CREATE/DELETE of SignMessage w/OPERATE
+			if ("sign_message".equals(getTypePart()))
+				return AccessLevel.OPERATE.ordinal();
+		}
+		return AccessLevel.CONFIGURE.ordinal();
 	}
 }

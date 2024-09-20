@@ -353,7 +353,7 @@ public class Session {
 	 * @return true if user can write. */
 	private boolean canWrite(Name name, boolean can_edit) {
 		int lvl = namespace.accessLevel(name, user);
-		return can_edit && lvl >= AccessLevel.OPERATE.ordinal();
+		return can_edit && lvl >= name.accessWrite();
 	}
 
 	/** Check if the user can write an attribute.

@@ -118,7 +118,7 @@ public class ServerNamespace extends Namespace {
 	/** Lookup the object with the specified name */
 	SonarObject lookupObject(Name name) {
 		return name.isObject()
-		      ?	_lookupObject(name.getTypePart(), name.getObjectPart())
+		      ? _lookupObject(name.getTypePart(), name.getObjectPart())
 		      : null;
 	}
 
