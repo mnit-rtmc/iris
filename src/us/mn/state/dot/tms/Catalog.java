@@ -33,7 +33,7 @@ public interface Catalog extends SonarObject {
 	}
 
 	/** SONAR base type name */
-	String SONAR_BASE = Camera.SONAR_TYPE;
+	String SONAR_BASE = VideoMonitor.SONAR_TYPE;
 
 	/** Set sequence number */
 	void setSeqNum(int n);

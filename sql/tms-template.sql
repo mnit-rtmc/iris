@@ -278,11 +278,9 @@ camera	\N
 camera_preset	camera
 camera_template	camera
 cam_vid_src_ord	camera
-catalog	camera
 encoder_stream	camera
 encoder_type	camera
 flow_stream	camera
-play_list	camera
 vid_src_template	camera
 controller	\N
 alarm	controller
@@ -332,7 +330,9 @@ rpt_conduit	system_attribute
 toll_zone	\N
 tag_reader	toll_zone
 video_monitor	\N
+catalog	video_monitor
 monitor_style	video_monitor
+play_list	video_monitor
 weather_sensor	\N
 \.
 

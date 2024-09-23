@@ -50,7 +50,7 @@ resource, at the same access level.
 | [action plan]      | day matcher, [day plan], [device action], [plan phase], [time action] |
 | [alert config]     | alert info, [alert message]                           |
 | [beacon]           |                                                       |
-| [camera]           | [camera preset], camera template, cam vid src ord, [catalog], encoder stream, [encoder type], [flow stream], play list, vid source template |
+| [camera]           | [camera preset], camera template, cam vid src ord, encoder stream, [encoder type], [flow stream], vid source template |
 | [controller]       | [alarm], [comm link], [controller io], [gps], [modem] |
 | [detector]         | [r_node], [road], road affix, station                 |
 | [dms]              | [font], glyph, [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
@@ -62,7 +62,7 @@ resource, at the same access level.
 | [ramp meter]       |                                                       |
 | [system attribute] | [cabinet style], [comm config], map extent, rpt conduit |
 | [toll zone]        | [tag reader]                                          |
-| [video monitor]    | [monitor style]                                       |
+| [video monitor]    | [catalog], [monitor style], [play list]               |
 | [weather sensor]   |                                                       |
 
 ## Associated Resources
@@ -114,6 +114,7 @@ resource.  These include:
 [monitor style]: video.html#style
 [parking area]: parking_areas.html
 [plan phase]: action_plans.html#plan-phases
+[play list]: video.html#play-lists
 [r_node]: road_topology.html#r_nodes
 [ramp meter]: ramp_meters.html
 [resource]: rest_api.html#resource-types
