@@ -280,7 +280,6 @@ camera_template	camera
 cam_vid_src_ord	camera
 encoder_stream	camera
 encoder_type	camera
-flow_stream	camera
 vid_src_template	camera
 controller	\N
 alarm	controller
@@ -331,6 +330,7 @@ toll_zone	\N
 tag_reader	toll_zone
 video_monitor	\N
 catalog	video_monitor
+flow_stream	video_monitor
 monitor_style	video_monitor
 play_list	video_monitor
 weather_sensor	\N

@@ -246,7 +246,7 @@ UPDATE iris.resource_type SET base = 'alert_config' WHERE name IN (
 );
 UPDATE iris.resource_type SET base = 'camera' WHERE name IN (
     'camera_preset', 'camera_template', 'cam_vid_src_ord', 'encoder_stream',
-    'encoder_type', 'flow_stream', 'vid_src_template'
+    'encoder_type', 'vid_src_template'
 );
 UPDATE iris.resource_type SET base = 'controller' WHERE name IN (
     'alarm', 'comm_link', 'geo_loc', 'gps', 'modem'
@@ -276,7 +276,7 @@ INSERT INTO iris.resource_type (name, base)
     ON CONFLICT DO NOTHING;
 UPDATE iris.resource_type SET base = 'toll_zone' WHERE name = 'tag_reader';
 UPDATE iris.resource_type SET base = 'video_monitor' WHERE name IN (
-    'catalog', 'monitor_style', 'play_list'
+    'catalog', 'flow_stream', 'monitor_style', 'play_list'
 );
 
 CREATE FUNCTION iris.resource_is_base(VARCHAR(16)) RETURNS BOOLEAN AS

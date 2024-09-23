@@ -50,7 +50,7 @@ resource, at the same access level.
 | [action plan]      | day matcher, [day plan], [device action], [plan phase], [time action] |
 | [alert config]     | alert info, [alert message]                           |
 | [beacon]           |                                                       |
-| [camera]           | [camera preset], camera template, cam vid src ord, encoder stream, [encoder type], [flow stream], vid source template |
+| [camera]           | [camera preset], camera template, cam vid src ord, encoder stream, [encoder type], vid source template |
 | [controller]       | [alarm], [comm link], [controller io], [gps], [modem] |
 | [detector]         | [r_node], [road], road affix, station                 |
 | [dms]              | [font], glyph, [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
@@ -62,7 +62,7 @@ resource, at the same access level.
 | [ramp meter]       |                                                       |
 | [system attribute] | [cabinet style], [comm config], map extent, rpt conduit |
 | [toll zone]        | [tag reader]                                          |
-| [video monitor]    | [catalog], [monitor style], [play list]               |
+| [video monitor]    | [catalog], [flow stream], [monitor style], [play list] |
 | [weather sensor]   |                                                       |
 
 ## Associated Resources

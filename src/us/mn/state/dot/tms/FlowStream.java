@@ -31,7 +31,7 @@ public interface FlowStream extends ControllerIO {
 	}
 
 	/** SONAR base type name */
-	String SONAR_BASE = Camera.SONAR_TYPE;
+	String SONAR_BASE = VideoMonitor.SONAR_TYPE;
 
 	/** Set flag to restrict publishing camera images */
 	void setRestricted(boolean r);
