@@ -1,6 +1,6 @@
 # Permissions
 
-**Permissions** determine how much access a [role] has to [resource]s.
+A **permission** record grants one [role] access to a [resource].
 
 <details>
 <summary>API Resources 🕵️ </summary>
@@ -9,16 +9,16 @@
 * `iris/api/permission/{name}`
 * `iris/api/access`
 
-| Access       | Primary                                      |
-|--------------|----------------------------------------------|
-| 👁️  View      | name                                         |
-| 🔧 Configure | role, base\_resource, hashtag, access\_level |
+| Access       | Primary                    |
+|--------------|----------------------------|
+| 👁️  View      | name, role, base\_resource |
+| 🔧 Configure | hashtag, access\_level     |
 
 </details>
 
 ## Setup
 
-[Role] is the user role associated with the permissions.
+[Role] is the user role associated with the permission.
 
 [Base resource](#base-resources) is the resource to grant permission for the
 role.
@@ -67,8 +67,8 @@ resource, at the same access level.
 
 ## Associated Resources
 
-Some resources contain an associated resource_n, linking them to a base resource.
-These include:
+Some resources contain an associated `resource_n`, linking them to another
+resource.  These include:
 
 * __geo loc__
 * __controller io__
