@@ -325,4 +325,10 @@ CREATE VIEW permission_view AS
     FROM iris.permission;
 GRANT SELECT ON permission_view TO PUBLIC;
 
+-- Improve flow_stream constraint
+ALTER TABLE iris._flow_stream DROP CONSTRAINT camera_or_monitor;
+ALTER TABLE iris._flow_stream ADD CONSTRAINT camera_or_monitor CHECK (
+    (camera IS NULL) != (mon_num IS NULL)
+);
+
 COMMIT;

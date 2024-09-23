@@ -4971,7 +4971,8 @@ CREATE TABLE iris._flow_stream (
     address INET,
     port INTEGER CHECK (port > 0 AND port <= 65535),
     status INTEGER NOT NULL REFERENCES iris.flow_stream_status,
-    CONSTRAINT camera_or_monitor CHECK (camera IS NULL OR mon_num IS NULL)
+
+    CONSTRAINT camera_or_monitor CHECK ((camera IS NULL) != (mon_num IS NULL))
 );
 
 ALTER TABLE iris._flow_stream ADD CONSTRAINT _flow_stream_fkey
