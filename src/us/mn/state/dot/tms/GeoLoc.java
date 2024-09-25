@@ -34,6 +34,9 @@ public interface GeoLoc extends SonarObject {
 		return SONAR_TYPE;
 	}
 
+	/** SONAR base type name */
+	String SONAR_BASE = Controller.SONAR_TYPE;
+
 	/** Set the roadway name */
 	void setRoadway(Road r);
 

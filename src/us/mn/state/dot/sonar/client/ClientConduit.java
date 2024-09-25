@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2021  Minnesota Department of Transportation
+ * Copyright (C) 2006-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -110,7 +110,7 @@ class ClientConduit extends Conduit {
 	private final ClientNamespace namespace;
 
 	/** Get the namespace */
-	Namespace getNamespace() {
+	ClientNamespace getNamespace() {
 		return namespace;
 	}
 

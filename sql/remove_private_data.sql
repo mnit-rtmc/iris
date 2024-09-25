@@ -61,8 +61,7 @@ DELETE FROM iris.user_id;
 DELETE FROM iris.role_domain;
 DELETE FROM iris.domain
     WHERE name NOT LIKE 'any_%' AND name NOT LIKE 'local_%';
-DELETE FROM iris.role_capability
-    WHERE role NOT IN ('administrator', 'operator');
+DELETE FROM iris.permission WHERE role NOT IN ('administrator', 'operator');
 DELETE FROM iris.role WHERE name NOT IN ('administrator', 'operator');
 
 INSERT INTO iris.user_id (name, full_name, password, dn, role, enabled)

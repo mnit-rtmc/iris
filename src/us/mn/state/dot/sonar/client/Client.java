@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2021  Minnesota Department of Transportation
+ * Copyright (C) 2006-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,7 +81,7 @@ public class Client {
 	}
 
 	/** Get the namespace */
-	public Namespace getNamespace() {
+	public ClientNamespace getNamespace() {
 		return conduit.getNamespace();
 	}
 

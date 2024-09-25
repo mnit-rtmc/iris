@@ -25,6 +25,7 @@ import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.Client;
+import us.mn.state.dot.sonar.client.ClientNamespace;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.AccessLevel;
 import us.mn.state.dot.tms.ActionPlan;
@@ -571,6 +572,9 @@ public class SonarState extends Client {
 	public void populateReadable(TypeCache<? extends SonarObject> tc,
 		boolean do_wait)
 	{
+		ClientNamespace namespace = getNamespace();
+		if (namespace != null)
+			namespace.addType(tc);
 		if (canRead(tc.tname))
 			populate(tc, do_wait);
 		else
