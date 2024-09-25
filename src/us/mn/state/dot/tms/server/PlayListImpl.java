@@ -16,12 +16,15 @@ package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.ArrayList;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.PlayList;
+import us.mn.state.dot.tms.PlayListHelper;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -31,20 +34,31 @@ import us.mn.state.dot.tms.TMSException;
  */
 public class PlayListImpl extends BaseObjectImpl implements PlayList {
 
-	/** PlayList / Camera table mapping */
-	static private TableMappingList mapping;
+	/** PlayList / Entry table mapping */
+	static private PlayListMapping ent_map;
 
 	/** Load all the play lists */
 	static public void loadAll() throws TMSException {
-		mapping = new TableMappingList(store, "iris", SONAR_TYPE,
-			Camera.SONAR_TYPE);
-		store.query("SELECT name, seq_num, description FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+		ent_map = new PlayListMapping(store);
+		store.query("SELECT name, meta, seq_num, description " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new PlayListImpl(row));
 			}
 		});
+		initAllTransients();
+	}
+
+	/** Initialize transients for all play lists.  This needs to happen after
+	 * all play lists are loaded (for resolving sub lists). */
+	static private void initAllTransients() throws TMSException {
+		Iterator<PlayList> it = PlayListHelper.iterator();
+		while (it.hasNext()) {
+			PlayList pl = it.next();
+			if (pl instanceof PlayListImpl)
+				((PlayListImpl) pl).initTransients();
+		}
 	}
 
 	/** Get a mapping of the columns */
@@ -52,36 +66,53 @@ public class PlayListImpl extends BaseObjectImpl implements PlayList {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
+		map.put("meta", meta);
 		map.put("seq_num", seq_num);
 		map.put("description", description);
 		return map;
 	}
 
 	/** Create a new play list */
-	public PlayListImpl(String n) {
+	public PlayListImpl(String n) throws TMSException {
 		super(n);
+		initTransients();
 	}
 
 	/** Create a play list from database lookup */
 	private PlayListImpl(ResultSet row) throws SQLException, TMSException {
-		this(row.getString(1),              // name
-		     (Integer) row.getObject(2),    // seq_num
-		     row.getString(3)               // description
+		this(row.getString(1),           // name
+		     row.getBoolean(2),          // meta
+		     (Integer) row.getObject(3), // seq_num
+		     row.getString(4)            // description
 		);
 	}
 
 	/** Create a play list from database lookup */
-	private PlayListImpl(String n, Integer sn, String d)
+	private PlayListImpl(String n, boolean m, Integer sn, String d)
 		throws TMSException
 	{
 		this(n);
+		meta = m;
 		seq_num = sn;
 		description = d;
-		ArrayList<CameraImpl> cam_ls = new ArrayList<CameraImpl>();
-		for (String o: mapping.lookup(this)) {
-			cam_ls.add(lookupCamera(o));
-		}
-		cameras = cam_ls.toArray(new CameraImpl[0]);
+	}
+
+	/** Initialize the transient state */
+	@Override
+	public void initTransients() throws TMSException {
+		super.initTransients();
+		entries = buildEntries(
+			ent_map.lookup(this).toArray(new String[0])
+		);
+	}
+
+	/** Meta list flag */
+	private boolean meta;
+
+	/** Get meta list flag */
+	@Override
+	public boolean getMeta() {
+		return meta;
 	}
 
 	/** Sequence number */
@@ -132,36 +163,53 @@ public class PlayListImpl extends BaseObjectImpl implements PlayList {
 		return description;
 	}
 
-	/** Cameras in the play list */
-	private CameraImpl[] cameras = new CameraImpl[0];
+	/** Entries in the play list */
+	private String[] entries = new String[0];
 
-	/** Set the cameras in the play list */
-	@Override
-	public void setCameras(Camera[] cams) {
-		ArrayList<CameraImpl> cam_ls = new ArrayList<CameraImpl>();
-		for (Camera c: cams) {
-			if (c instanceof CameraImpl)
-				cam_ls.add((CameraImpl) c);
-		}
-		cameras = cam_ls.toArray(new CameraImpl[0]);
+	/** Build array of entries */
+	private String[] buildEntries(String[] ents) {
+		return (meta) ? buildSubLists(ents) : buildCameras(ents);
 	}
 
-	/** Set the cameras in the play list */
-	public void doSetCameras(Camera[] cams) throws TMSException {
-		ArrayList<Storable> cam_ls = new ArrayList<Storable>();
-		for (Camera c: cams) {
-			if (c instanceof CameraImpl)
-				cam_ls.add((CameraImpl) c);
-			else
-				throw new ChangeVetoException("Invalid camera");
+	/** Build array of sub list entries */
+	private String[] buildSubLists(String[] ents) {
+		ArrayList<String> ls = new ArrayList<String>();
+		for (String e: ents) {
+			if (lookupPlayList(e) != null)
+				ls.add(e);
 		}
-		mapping.update(this, cam_ls);
-		setCameras(cams);
+		return ls.toArray(new String[0]);
 	}
 
-	/** Get the cameras in the play list */
+	/** Build array of camera entries */
+	private String[] buildCameras(String[] ents) {
+		ArrayList<String> ls = new ArrayList<String>();
+		for (String e: ents) {
+			if (lookupCamera(e) != null)
+				ls.add(e);
+		}
+		return ls.toArray(new String[0]);
+	}
+
+	/** Set the entries in the play list */
 	@Override
-	public Camera[] getCameras() {
-		return cameras;
+	public void setEntries(String[] ents) {
+		entries = buildEntries(ents);
+	}
+
+	/** Set the entries in the play list */
+	public void doSetEntries(String[] ents) throws TMSException {
+		if (!Arrays.equals(ents, buildEntries(ents)))
+			throw new ChangeVetoException("Invalid entries");
+		if (!Arrays.equals(entries, ents)) {
+			ent_map.update(this, ents);
+			setEntries(ents);
+		}
+	}
+
+	/** Get the entries in the play list */
+	@Override
+	public String[] getEntries() {
+		return entries;
 	}
 }

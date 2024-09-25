@@ -174,6 +174,7 @@ public class Name {
 		{ "msg_line", "rank" },
 		{ "msg_pattern", "composeHashtag" },
 		{ "msg_pattern", "flashBeacon" },
+		{ "play_list", "entries" },
 		{ "ramp_meter", "notes" },
 		{ "ramp_meter", "storage" },
 		{ "ramp_meter", "maxWait" },

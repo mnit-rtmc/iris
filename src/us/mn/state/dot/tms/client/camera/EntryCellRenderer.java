@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2020  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,18 +16,32 @@ package us.mn.state.dot.tms.client.camera;
 
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
+import us.mn.state.dot.tms.PlayList;
 import us.mn.state.dot.tms.client.widget.IListCellRenderer;
 
 /**
- * Cell renderer used for cameras.
+ * Cell renderer used for play lists.
  *
  * @author Douglas Lau
  */
-public class CameraCellRenderer extends IListCellRenderer<Camera> {
+public class EntryCellRenderer extends IListCellRenderer<String> {
+
+	/** Play list meta value */
+	private final boolean meta;
+
+	/** Create a new entry cell renderer */
+	public EntryCellRenderer(PlayList pl) {
+		meta = pl.getMeta();
+	}
 
 	/** Convert value to a string */
 	@Override
-	protected String valueToString(Camera value) {
-		return CameraHelper.getCameraNum(value);
+	protected String valueToString(String value) {
+		if (meta)
+			return value;
+		else {
+			Camera c = CameraHelper.lookup(value);
+			return CameraHelper.getCameraNum(c);
+		}
 	}
 }

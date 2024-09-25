@@ -231,7 +231,6 @@ public class MainServer {
 		ns.registerType(CameraImpl.class);
 		ns.registerType(CameraPresetImpl.class);
 		ns.registerType(PlayListImpl.class);
-		ns.registerType(CatalogImpl.class);
 		ns.registerType(MonitorStyleImpl.class);
 		ns.registerType(VideoMonitorImpl.class);
 		ns.registerType(FlowStreamImpl.class);

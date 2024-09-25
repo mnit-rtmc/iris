@@ -96,16 +96,15 @@ for switching.
 
 Select `View ➔ Video ➔ Play Lists` menu item
 
-Play lists can be created to cycle through related [camera]s.  Each user can
-have a personal play list, but system play lists are available to all users.
-Selecting a play list on a monitor will cause the play list to automatically
-switch.  The interval is specified by the `camera_sequence_dwell_sec`
-[system attribute].
+Play lists can be created to quickly cycle through [camera]s.  Selecting a
+play list on a monitor will cause the cameras to automatically switch after
+a short dwell time, specified by the `camera_sequence_dwell_sec`
+[system attribute].  A **seq num** is a unique number to select the list.
 
-## Catalogs
+A **meta** play list consists of (non-meta) sub-lists.  This allows lists to
+be broken up and shared with other meta lists.
 
-A catalog is a collection of play lists.  Both play lists and catalogs can be
-assigned sequence numbers, so they can be used in the same way.
+Each user can have a personal play list.
 
 
 [camera]: cameras.html

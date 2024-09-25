@@ -237,7 +237,9 @@ DROP FUNCTION iris.resource_is_base(VARCHAR(16));
 ALTER TABLE iris.resource_type DROP COLUMN base;
 ALTER TABLE iris.resource_type ADD COLUMN base VARCHAR(16)
     REFERENCES iris.resource_type;
-DELETE FROM iris.resource_type WHERE name = 'capability' OR name = 'privilege';
+DELETE FROM iris.resource_type WHERE name IN (
+    'capability', 'catalog', 'privilege'
+);
 UPDATE iris.resource_type SET base = 'action_plan' WHERE name IN (
     'day_matcher', 'day_plan', 'device_action', 'plan_phase', 'time_action'
 );
@@ -276,7 +278,7 @@ INSERT INTO iris.resource_type (name, base)
     ON CONFLICT DO NOTHING;
 UPDATE iris.resource_type SET base = 'toll_zone' WHERE name = 'tag_reader';
 UPDATE iris.resource_type SET base = 'video_monitor' WHERE name IN (
-    'catalog', 'flow_stream', 'monitor_style', 'play_list'
+    'flow_stream', 'monitor_style', 'play_list'
 );
 
 CREATE FUNCTION iris.resource_is_base(VARCHAR(16)) RETURNS BOOLEAN AS
@@ -330,5 +332,77 @@ ALTER TABLE iris._flow_stream DROP CONSTRAINT camera_or_monitor;
 ALTER TABLE iris._flow_stream ADD CONSTRAINT camera_or_monitor CHECK (
     (camera IS NULL) != (mon_num IS NULL)
 );
+
+-- Combine catalog with play list
+DROP VIEW play_list_view;
+DROP VIEW iris.play_list;
+DROP FUNCTION iris.play_list_insert();
+DROP FUNCTION iris.play_list_update();
+DROP FUNCTION iris.play_list_delete();
+DROP VIEW iris.catalog;
+DROP FUNCTION iris.catalog_insert();
+DROP FUNCTION iris.catalog_update();
+DROP FUNCTION iris.catalog_delete();
+
+CREATE TABLE iris.play_list (
+    name VARCHAR(20) PRIMARY KEY,
+    meta BOOLEAN NOT NULL,
+    seq_num INTEGER UNIQUE,
+    description VARCHAR(32)
+);
+
+CREATE FUNCTION iris.play_list_is_meta(VARCHAR(20)) RETURNS BOOLEAN AS
+$play_list_is_meta$
+    SELECT meta FROM iris.play_list WHERE name = $1;
+$play_list_is_meta$ LANGUAGE sql;
+
+CREATE TABLE iris.play_list_entry (
+    play_list VARCHAR(20) NOT NULL REFERENCES iris.play_list,
+    ordinal INTEGER NOT NULL,
+    camera VARCHAR(20) REFERENCES iris._camera,
+    sub_list VARCHAR(20) REFERENCES iris.play_list,
+
+    CONSTRAINT camera_ck CHECK (
+        iris.play_list_is_meta(play_list) = (camera IS NULL)
+    ) NOT VALID,
+    CONSTRAINT sub_list_ck CHECK (
+        iris.play_list_is_meta(play_list) = (sub_list IS NOT NULL)
+        AND NOT iris.play_list_is_meta(sub_list)
+    ) NOT VALID
+);
+ALTER TABLE iris.play_list_entry ADD PRIMARY KEY (play_list, ordinal);
+
+CREATE VIEW play_list_view AS
+    SELECT pl.name AS play_list, pl.seq_num, description, pe.ordinal,
+           se.ordinal AS sub_ordinal, COALESCE(pe.camera, se.camera) AS camera
+    FROM iris.play_list pl
+    JOIN iris.play_list_entry pe ON pe.play_list = pl.name
+    LEFT JOIN iris.play_list_entry se ON se.play_list = pe.sub_list
+    ORDER BY pl.name, pe.ordinal, se.ordinal;
+GRANT SELECT ON play_list_view TO PUBLIC;
+
+INSERT INTO iris.play_list (name, meta, seq_num, description)
+SELECT p.name, false, p.seq_num, p.description
+FROM iris._play_list p
+JOIN iris.play_list_camera c ON c.play_list = p.name
+GROUP BY p.name, p.seq_num, p.description;
+
+INSERT INTO iris.play_list_entry (play_list, ordinal, camera)
+SELECT play_list, ordinal, camera
+FROM iris.play_list_camera;
+
+INSERT INTO iris.play_list (name, meta, seq_num, description)
+SELECT name, true, seq_num, description
+FROM iris._catalog;
+
+INSERT INTO iris.play_list_entry (play_list, ordinal, sub_list)
+SELECT catalog, ordinal, play_list
+FROM iris.catalog_play_list;
+
+DROP TABLE iris.play_list_camera;
+DROP TABLE iris.catalog_play_list;
+DROP TABLE iris._catalog;
+DROP TABLE iris._play_list;
+DROP TABLE iris._cam_sequence;
 
 COMMIT;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,9 +15,7 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.event.ActionEvent;
-
 import javax.swing.JInternalFrame;
-
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -45,7 +43,6 @@ public class VideoMenu extends IMenu {
 		addItem(createEncoderTypeItem());
 		addItem(session.createTableAction(Camera.SONAR_TYPE));
 		addItem(createPlayListItem());
-		addItem(createCatalogItem());
 		addItem(createMonitorStyleItem());
 		addItem(createVideoMonitorItem());
 		addItem(createCameraTemplateItem());
@@ -69,16 +66,6 @@ public class VideoMenu extends IMenu {
 		    new IAction("play.list.title") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new PlayListForm(session));
-			}
-		} : null;
-	}
-
-	/** Create a catalog menu item action */
-	private IAction createCatalogItem() {
-		return CatalogForm.isPermitted(session) ?
-		    new IAction("catalog.title") {
-			protected void doActionPerformed(ActionEvent e) {
-				desktop.show(new CatalogForm(session));
 			}
 		} : null;
 	}

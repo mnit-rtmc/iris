@@ -41,6 +41,9 @@ public interface PlayList extends SonarObject {
 	/** SONAR base type name */
 	String SONAR_BASE = VideoMonitor.SONAR_TYPE;
 
+	/** Get meta list flag */
+	boolean getMeta();
+
 	/** Set sequence number */
 	void setSeqNum(Integer n);
 
@@ -53,9 +56,9 @@ public interface PlayList extends SonarObject {
 	/** Get description */
 	String getDescription();
 
-	/** Set the cameras in the play list */
-	void setCameras(Camera[] cams);
+	/** Set the entries in the play list */
+	void setEntries(String[] ents);
 
-	/** Get the cameras in the play list */
-	Camera[] getCameras();
+	/** Get the entries in the play list */
+	String[] getEntries();
 }

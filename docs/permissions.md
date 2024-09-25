@@ -62,7 +62,7 @@ resource, at the same access level.
 | [ramp meter]       |                                                       |
 | [system attribute] | [cabinet style], [comm config], map extent, rpt conduit |
 | [toll zone]        | [tag reader]                                          |
-| [video monitor]    | [catalog], [flow stream], [monitor style], [play list] |
+| [video monitor]    | [flow stream], [monitor style], [play list]           |
 | [weather sensor]   |                                                       |
 
 ## Associated Resources
@@ -84,7 +84,6 @@ resource.  These include:
 [cabinet style]: controllers.html#cabinet-styles
 [camera]: cameras.html
 [camera preset]: cameras.html#presets
-[catalog]: video.html#catalogs
 [comm config]: comm_config.html
 [comm link]: comm_links.html
 [controller]: controllers.html

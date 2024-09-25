@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017-2022  Minnesota Department of Transportation
+ * Copyright (C) 2017-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ import javax.swing.SwingConstants;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.PlayList;
+import us.mn.state.dot.tms.PlayListHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
@@ -58,60 +59,60 @@ public class PlayListPanel extends JPanel {
 	/** Sequence number text */
 	private final JTextField seq_txt = new JTextField("", 8);
 
-	/** Camera label */
-	private final JLabel cam_lbl = new JLabel(I18N.get("camera"));
+	/** Entry label */
+	private final JLabel ent_lbl = new JLabel(I18N.get("play.list.entry"));
 
-	/** Camera text field (for adding) */
-	private final JTextField cam_txt = new JTextField(20);
+	/** Entry text field (for adding) */
+	private final JTextField ent_txt = new JTextField(20);
 
-	/** Camera list model */
-	private final DefaultListModel<Camera> cam_mdl =
-		new DefaultListModel<Camera>();
+	/** Entry list model */
+	private final DefaultListModel<String> ent_mdl =
+		new DefaultListModel<String>();
 
-	/** Camera list */
-	private final JList<Camera> cam_lst = new JList<Camera>(cam_mdl);
+	/** Entry list */
+	private final JList<String> ent_lst = new JList<String>(ent_mdl);
 
-	/** Camera scroll pane */
-	private final JScrollPane cam_scrl = new JScrollPane(cam_lst);
+	/** Entry scroll pane */
+	private final JScrollPane ent_scrl = new JScrollPane(ent_lst);
 
-	/** Insert camera button */
+	/** Insert entry button */
 	private final JButton insert_btn = new JButton(new IAction(
 		"play.list.insert")
 	{
 		protected void doActionPerformed(ActionEvent e) {
-			insertCamera();
+			insertEntry();
 		}
 	});
 
-	/** Insert a camera */
-	private void insertCamera() {
-		Camera c = lookupCamera();
-		if (c != null) {
-			insertIntoModel(c);
-			changeCameras();
+	/** Insert an entry */
+	private void insertEntry() {
+		String e = lookupEntry();
+		if (e != null) {
+			insertIntoModel(e);
+			changeEntries();
 		}
-		cam_txt.setText("");
+		ent_txt.setText("");
 	}
 
-	/** Insert a camera into the model */
-	private void insertIntoModel(Camera c) {
-		int s = cam_lst.getSelectedIndex();
+	/** Insert an entry into the model */
+	private void insertIntoModel(String e) {
+		int s = ent_lst.getSelectedIndex();
 		if (s >= 0) {
-			cam_mdl.add(s, c);
-			cam_lst.setSelectedIndex(s);
+			ent_mdl.add(s, e);
+			ent_lst.setSelectedIndex(s);
 		} else
-			cam_mdl.addElement(c);
+			ent_mdl.addElement(e);
 	}
 
-	/** Remove camera button */
+	/** Remove entry button */
 	private final JButton remove_btn = new JButton(new IAction(
 		"play.list.remove")
 	{
 		protected void doActionPerformed(ActionEvent e) {
-			int s = cam_lst.getSelectedIndex();
+			int s = ent_lst.getSelectedIndex();
 			if (s >= 0) {
-				cam_mdl.remove(s);
-				changeCameras();
+				ent_mdl.remove(s);
+				changeEntries();
 			}
 		}
 	});
@@ -121,20 +122,20 @@ public class PlayListPanel extends JPanel {
 		"play.list.up")
 	{
 		protected void doActionPerformed(ActionEvent e) {
-			moveCameraUp();
+			moveEntryUp();
 		}
 	});
 
-	/** Move selected camera up */
-	private void moveCameraUp() {
-		int s = cam_lst.getSelectedIndex();
+	/** Move selected entry up */
+	private void moveEntryUp() {
+		int s = ent_lst.getSelectedIndex();
 		if (s > 0) {
-			Camera c0 = cam_mdl.get(s - 1);
-			Camera c1 = cam_mdl.get(s);
-			cam_mdl.set(s - 1, c1);
-			cam_mdl.set(s, c0);
-			cam_lst.setSelectedIndex(s - 1);
-			changeCameras();
+			String e0 = ent_mdl.get(s - 1);
+			String e1 = ent_mdl.get(s);
+			ent_mdl.set(s - 1, e1);
+			ent_mdl.set(s, e0);
+			ent_lst.setSelectedIndex(s - 1);
+			changeEntries();
 		}
 	}
 
@@ -143,28 +144,28 @@ public class PlayListPanel extends JPanel {
 		"play.list.down")
 	{
 		protected void doActionPerformed(ActionEvent e) {
-			moveCameraDown();
+			moveEntryDown();
 		}
 	});
 
-	/** Move selected camera down */
-	private void moveCameraDown() {
-		int s = cam_lst.getSelectedIndex();
-		if (s >= 0 && s < cam_mdl.size() - 1) {
-			Camera c0 = cam_mdl.get(s);
-			Camera c1 = cam_mdl.get(s + 1);
-			cam_mdl.set(s, c1);
-			cam_mdl.set(s + 1, c0);
-			cam_lst.setSelectedIndex(s + 1);
-			changeCameras();
+	/** Move selected entry down */
+	private void moveEntryDown() {
+		int s = ent_lst.getSelectedIndex();
+		if (s >= 0 && s < ent_mdl.size() - 1) {
+			String e0 = ent_mdl.get(s);
+			String e1 = ent_mdl.get(s + 1);
+			ent_mdl.set(s, e1);
+			ent_mdl.set(s + 1, e0);
+			ent_lst.setSelectedIndex(s + 1);
+			changeEntries();
 		}
 	}
 
-	/** Change cameras in list */
-	private void changeCameras() {
-		Camera[] cams = new Camera[cam_mdl.size()];
-		cam_mdl.copyInto(cams);
-		play_list.setCameras(cams);
+	/** Change entries in list */
+	private void changeEntries() {
+		String[] ents = new String[ent_mdl.size()];
+		ent_mdl.copyInto(ents);
+		play_list.setEntries(ents);
 	}
 
 	/** Create a new play list panel */
@@ -176,8 +177,8 @@ public class PlayListPanel extends JPanel {
 	/** Initialize the widgets */
 	public void initialize() {
 		setBorder(UI.border);
-		cam_lst.setVisibleRowCount(12);
-		cam_lst.setCellRenderer(new CameraCellRenderer());
+		ent_lst.setVisibleRowCount(12);
+		ent_lst.setCellRenderer(new EntryCellRenderer(play_list));
 		layoutPanel();
 		createJobs();
 	}
@@ -200,7 +201,7 @@ public class PlayListPanel extends JPanel {
 		GroupLayout.ParallelGroup p0 = gl.createParallelGroup(
 			GroupLayout.Alignment.TRAILING);
 		p0.addComponent(seq_lbl);
-		p0.addComponent(cam_lbl);
+		p0.addComponent(ent_lbl);
 		p0.addComponent(insert_btn);
 		p0.addComponent(remove_btn);
 		p0.addComponent(up_btn);
@@ -210,9 +211,9 @@ public class PlayListPanel extends JPanel {
 		GroupLayout.ParallelGroup p1 = gl.createParallelGroup(
 			GroupLayout.Alignment.CENTER);
 		p1.addComponent(seq_txt);
-		p1.addComponent(cam_txt);
-		p1.addComponent(cam_scrl);
-		gl.linkSize(SwingConstants.HORIZONTAL, cam_txt, cam_scrl);
+		p1.addComponent(ent_txt);
+		p1.addComponent(ent_scrl);
+		gl.linkSize(SwingConstants.HORIZONTAL, ent_txt, ent_scrl);
 		hg.addGroup(p1);
 		return hg;
 	}
@@ -228,8 +229,8 @@ public class PlayListPanel extends JPanel {
 		vg.addGap(UI.vgap);
 		GroupLayout.ParallelGroup p1 = gl.createParallelGroup(
 			GroupLayout.Alignment.CENTER);
-		p1.addComponent(cam_lbl);
-		p1.addComponent(cam_txt);
+		p1.addComponent(ent_lbl);
+		p1.addComponent(ent_txt);
 		vg.addGroup(p1);
 		vg.addGap(UI.vgap);
 		GroupLayout.ParallelGroup p2 = gl.createParallelGroup(
@@ -243,7 +244,7 @@ public class PlayListPanel extends JPanel {
 		v1.addGap(UI.vgap);
 		v1.addComponent(down_btn);
 		p2.addGroup(v1);
-		p2.addComponent(cam_scrl);
+		p2.addComponent(ent_scrl);
 		vg.addGroup(p2);
 		return vg;
 	}
@@ -257,16 +258,16 @@ public class PlayListPanel extends JPanel {
 			    play_list.setSeqNum(n);
 			}
 		});
-		cam_txt.addKeyListener(new KeyAdapter() {
+		ent_txt.addKeyListener(new KeyAdapter() {
 			@Override public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER)
-					insertCamera();
+					insertEntry();
 			}
 			@Override public void keyReleased(KeyEvent ke) {
 				updateButtons();
 			}
 		});
-		ListSelectionModel s = cam_lst.getSelectionModel();
+		ListSelectionModel s = ent_lst.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		s.addListSelectionListener(new IListSelectionAdapter() {
 			@Override
@@ -279,16 +280,16 @@ public class PlayListPanel extends JPanel {
 	/** Update the edit mode */
 	public void updateEditMode() {
 		seq_txt.setEnabled(canWrite("seqNum"));
-		boolean ud = canWrite("cameras");
-		cam_txt.setEnabled(ud);
-		cam_lst.setEnabled(ud);
+		boolean ud = canWrite("entries");
+		ent_txt.setEnabled(ud);
+		ent_lst.setEnabled(ud);
 		updateButtons();
 	}
 
 	/** Update buttons */
 	private void updateButtons() {
-		boolean ud = canWrite("cameras");
-		insert_btn.setEnabled(ud && hasCamNum());
+		boolean ud = canWrite("entries");
+		insert_btn.setEnabled(ud && hasEntry());
 		remove_btn.setEnabled(ud && isSelected());
 		up_btn.setEnabled(ud && canMoveUp());
 		down_btn.setEnabled(ud && canMoveDown());
@@ -299,30 +300,37 @@ public class PlayListPanel extends JPanel {
 		return session.canWrite(play_list, attr);
 	}
 
-	/** Check if text field has a valid camera number */
-	private boolean hasCamNum() {
-		return lookupCamera() != null;
+	/** Check if text field has a valid entry */
+	private boolean hasEntry() {
+		return lookupEntry() != null;
 	}
 
-	/** Lookup camera by number */
-	private Camera lookupCamera() {
-		return CameraHelper.findNum(cam_txt.getText());
+	/** Lookup entry by name/number */
+	private String lookupEntry() {
+		String e = ent_txt.getText();
+		if (play_list.getMeta()) {
+			PlayList pl = PlayListHelper.lookup(e);
+			return (pl != null) ? pl.getName() : null;
+		} else {
+			Camera c = CameraHelper.findNum(e);
+			return (c != null) ? c.getName() : null;
+		}
 	}
 
-	/** Check if a camera is selected */
+	/** Check if an entry is selected */
 	private boolean isSelected() {
-		return cam_lst.getSelectedIndex() >= 0;
+		return ent_lst.getSelectedIndex() >= 0;
 	}
 
-	/** Check if selected camera can be moved up */
+	/** Check if selected entry can be moved up */
 	private boolean canMoveUp() {
-		return cam_lst.getSelectedIndex() > 0;
+		return ent_lst.getSelectedIndex() > 0;
 	}
 
-	/** Check if selected camera can be moved down */
+	/** Check if selected entry can be moved down */
 	private boolean canMoveDown() {
-		int s = cam_lst.getSelectedIndex();
-		return (s >= 0 && s < cam_mdl.size() - 1);
+		int s = ent_lst.getSelectedIndex();
+		return (s >= 0 && s < ent_mdl.size() - 1);
 	}
 
 	/** Update one attribute on the form */
@@ -331,22 +339,22 @@ public class PlayListPanel extends JPanel {
 			Integer n = play_list.getSeqNum();
 			seq_txt.setText((n != null) ? n.toString() : "");
 		}
-		if (null == a || a.equals("cameras"))
-			updateCameras();
+		if (null == a || a.equals("entries"))
+			updateEntries();
 	}
 
-	/** Update the cameras */
-	private void updateCameras() {
-		cam_txt.setText("");
-		Camera[] cams = play_list.getCameras();
-		for (int i = 0; i < cams.length; i++) {
-			Camera c = cams[i];
-			if (i < cam_mdl.size())
-				cam_mdl.set(i, c);
+	/** Update the entries */
+	private void updateEntries() {
+		ent_txt.setText("");
+		String[] ents = play_list.getEntries();
+		for (int i = 0; i < ents.length; i++) {
+			String e = ents[i];
+			if (i < ent_mdl.size())
+				ent_mdl.set(i, e);
 			else
-				cam_mdl.addElement(c);
+				ent_mdl.addElement(e);
 		}
-		for (int i = cams.length; i < cam_mdl.size(); i++)
-			cam_mdl.remove(i);
+		for (int i = ents.length; i < ent_mdl.size(); i++)
+			ent_mdl.remove(i);
 	}
 }

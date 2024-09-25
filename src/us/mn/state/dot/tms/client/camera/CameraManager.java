@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2018  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,10 +63,10 @@ public class CameraManager extends DeviceManager<Camera> {
 		};
 	}
 
-	/** Check if an array contains a camera */
-	static private boolean containsCam(Camera[] cams, Camera c) {
-		for (Camera cm: cams) {
-			if (c.equals(cm))
+	/** Check if an array contains an entry */
+	static private boolean containsEntry(String[] ents, String e) {
+		for (String ent: ents) {
+			if (ent.equals(e))
 				return true;
 		}
 		return false;
@@ -188,7 +188,7 @@ public class CameraManager extends DeviceManager<Camera> {
 	@Override
 	public boolean checkStyle(ItemStyle is, Camera proxy) {
 		if (is == ItemStyle.PLAYLIST)
-			return inPlaylist(proxy);
+			return inPlaylist(proxy.getName());
 		else
 			return super.checkStyle(is, proxy);
 	}
@@ -207,7 +207,7 @@ public class CameraManager extends DeviceManager<Camera> {
 		p.add(new UnpublishAction(sel_model));
 		p.addSeparator();
 		if (canEditPlayList(play_list)) {
-			if (inPlaylist(c))
+			if (inPlaylist(c.getName()))
 				p.add(new RemovePlaylistAction(this,sel_model));
 			else
 				p.add(new AddPlaylistAction(this, sel_model));
@@ -233,36 +233,38 @@ public class CameraManager extends DeviceManager<Camera> {
 		return p;
 	}
 
-	/** Test if a camera is in the play list */
-	public boolean inPlaylist(Camera c) {
+	/** Test if an entry is in the play list */
+	public boolean inPlaylist(String e) {
 		PlayList pl = play_list;
-		return pl != null && containsCam(pl.getCameras(), c);
+		return (pl != null) && containsEntry(pl.getEntries(), e);
 	}
 
-	/** Add a camera to the play list */
-	public void addPlaylist(Camera c) {
+	/** Add an entry to the play list */
+	public void addPlaylist(String e) {
 		PlayList pl = play_list;
 		if (canEditPlayList(pl)) {
-			ArrayList<Camera> cams = new ArrayList<Camera>(
-				Arrays.asList(pl.getCameras()));
-			cams.add(c);
-			pl.setCameras(cams.toArray(new Camera[0]));
+			ArrayList<String> ents = new ArrayList<String>(
+				Arrays.asList(pl.getEntries())
+			);
+			ents.add(e);
+			pl.setEntries(ents.toArray(new String[0]));
 		}
 	}
 
 	/** Check if the user can edit a play list */
 	private boolean canEditPlayList(PlayList pl) {
-		return session.isWritePermitted(pl, "cameras");
+		return session.isWritePermitted(pl, "entries");
 	}
 
-	/** Remove a camera from the play list */
-	public void removePlaylist(Camera c) {
+	/** Remove an entry from the play list */
+	public void removePlaylist(String e) {
 		PlayList pl = play_list;
 		if (canEditPlayList(pl)) {
-			ArrayList<Camera> cams = new ArrayList<Camera>(
-				Arrays.asList(pl.getCameras()));
-			cams.remove(c);
-			pl.setCameras(cams.toArray(new Camera[0]));
+			ArrayList<String> ents = new ArrayList<String>(
+				Arrays.asList(pl.getEntries())
+			);
+			ents.remove(e);
+			pl.setEntries(ents.toArray(new String[0]));
 		}
 	}
 

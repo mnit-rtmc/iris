@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2019  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,14 +15,13 @@
 package us.mn.state.dot.tms.server;
 
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.Catalog;
-import us.mn.state.dot.tms.CatalogHelper;
+import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.PlayList;
 import us.mn.state.dot.tms.PlayListHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
- * A camera sequence is either a play list or a play catalog.
+ * A camera sequence is a play list with a selected entry.
  *
  * @author Douglas Lau
  */
@@ -36,39 +35,22 @@ public class CamSequence {
 	/** Dwell time paused value */
 	static private final int DWELL_PAUSED = -1;
 
-	/** Maximum number of empty play lists to check */
-	static private final int MAX_EMPTY_PLAY_LISTS = 10;
-
-	/** Create camera sequence */
-	public CamSequence(int sn) {
-		seq_num = sn;
-		catalog = CatalogHelper.findSeqNum(sn);
-		c_item = 0;
-		play_list = (null == catalog)
-		          ? PlayListHelper.findSeqNum(sn)
-		          : null;
-		pl_item = -1;	// nextItem will advance to 0
-		dwell = 0;
-	}
-
 	/** Create camera sequence */
 	public CamSequence(PlayList pl) {
 		seq_num = (pl != null) ? pl.getSeqNum() : null;
-		catalog = null;
-		c_item = 0;
 		play_list = pl;
-		pl_item = -1;	// nextItem will advance to 0
-		dwell = 0;
+		pl_item = 0;
+		sl_item = 0;
+		dwell = getDwellSec();
+	}
+
+	/** Create camera sequence */
+	public CamSequence(int sn) {
+		this(PlayListHelper.findSeqNum(sn));
 	}
 
 	/** Camera sequence number */
 	private final Integer seq_num;
-
-	/** Running catalog (or null for play list sequence) */
-	private final Catalog catalog;
-
-	/** Item in catalog */
-	private int c_item;
 
 	/** Running play list */
 	private final PlayList play_list;
@@ -76,12 +58,20 @@ public class CamSequence {
 	/** Item in play list */
 	private int pl_item;
 
+	/** Item in sub list */
+	private int sl_item;
+
 	/** Remaining dwell time (negative means paused) */
 	private int dwell;
 
 	/** Check if sequence is valid */
 	public boolean isValid() {
-		return catalog != null || play_list != null;
+		return play_list != null;
+	}
+
+	/** Check if the play list is meta */
+	private boolean isMeta() {
+		return (play_list != null) && play_list.getMeta();
 	}
 
 	/** Get the sequence number */
@@ -110,15 +100,35 @@ public class CamSequence {
 			dwell = DWELL_PAUSED;
 	}
 
-	/** Go to the next item */
-	public void goNextItem() {
-		resetDwell();
-		nextItem();
-	}
-
 	/** Reset dwell time */
 	private void resetDwell() {
 		dwell = (dwell >= 0) ? getDwellSec() : DWELL_PAUSED;
+	}
+
+	/** Get the current camera */
+	public Camera getCamera() {
+		PlayList pl = play_list;
+		int i = pl_item;
+		if (isMeta()) {
+			pl = getSubList();
+			i = sl_item;
+		}
+		if (pl != null) {
+			String[] ents = pl.getEntries();
+			if (i < ents.length)
+				return CameraHelper.lookup(ents[i]);
+		}
+		return null;
+	}
+
+	/** Get current meta sub list */
+	private PlayList getSubList() {
+		if (isMeta()) {
+			String[] sl = play_list.getEntries();
+			if (pl_item < sl.length)
+				return PlayListHelper.lookup(sl[pl_item]);
+		}
+		return null;
 	}
 
 	/** Check if sequence is running */
@@ -126,59 +136,50 @@ public class CamSequence {
 		return dwell > DWELL_PAUSED;
 	}
 
+	/** Go to the next item */
+	public void goNextItem() {
+		resetDwell();
+		nextItem();
+	}
+
 	/** Advance to the next item */
 	private void nextItem() {
-		final int i = pl_item;
-		nextItemPlayList();
-		// Check if we rolled over to next play list
-		if (catalog != null && (0 == pl_item) && (i > 0))
-			nextItemCatalog();
+		if (isMeta()) {
+			// Skip sub lists with no cameras
+			for (int i = 0; i < size(); i++) {
+				nextItemMeta();
+				if (getCamera() != null)
+					break;
+			}
+		} else
+			nextItemPlayList();
+	}
+
+	/** Advance to the next item in a meta play list */
+	private void nextItemMeta() {
+		sl_item++;
+		if (getCamera() == null) {
+			nextItemPlayList();
+			sl_item = 0;
+		}
 	}
 
 	/** Advance to the next item in play list */
 	private void nextItemPlayList() {
-		pl_item = (pl_item < lastPlayListItem()) ? pl_item + 1 : 0;
+		pl_item++;
+		if (pl_item >= size())
+			pl_item = 0;
 	}
 
-	/** Get the last item in play list */
-	private int lastPlayListItem() {
-		PlayList pl = getPlayList();
-		return (pl != null) ? pl.getCameras().length - 1 : 0;
+	/** Get size of play list */
+	private int size() {
+		return (play_list != null) ? play_list.getEntries().length : 0;
 	}
 
-	/** Advance to the next item in catalog */
-	private void nextItemCatalog() {
-		final int c_last = catalog.getPlayLists().length - 1;
-		for (int i = 0; i < MAX_EMPTY_PLAY_LISTS; i++) {
-			c_item = (c_item < c_last) ? c_item + 1 : 0;
-			assert 0 == pl_item; // first item in play list
-			// Skip play lists with no cameras
-			if (getCamera() != null)
-				break;
-		}
-	}
-
-	/** Get the current camera */
-	public Camera getCamera() {
-		PlayList pl = getPlayList();
-		return (pl != null) ? getCamera(pl) : null;
-	}
-
-	/** Get the current camera in a play list */
-	private Camera getCamera(PlayList pl) {
-		Camera[] cams = pl.getCameras();
-		return (pl_item < cams.length) ? cams[pl_item] : null;
-	}
-
-	/** Get the current play list */
-	private PlayList getPlayList() {
-		return (catalog != null) ? getCatalogPlayList() : play_list;
-	}
-
-	/** Get the current catalog play list */
-	private PlayList getCatalogPlayList() {
-		PlayList[] pls = catalog.getPlayLists();
-		return (c_item < pls.length) ? pls[c_item] : null;
+	/** Get size of meta sub play list */
+	private int subSize() {
+		PlayList pl = getSubList();
+		return (pl != null) ? pl.getEntries().length : 0;
 	}
 
 	/** Go to the previous item */
@@ -189,27 +190,32 @@ public class CamSequence {
 
 	/** Revert to the previous item */
 	private void prevItem() {
-		final int i = pl_item;
-		prevItemPlayList();
-		// Check if we rolled over to previous play list
-		if (catalog != null && (pl_item > i))
-			prevItemCatalog();
+		if (isMeta()) {
+			// Skip sub lists with no cameras
+			for (int i = 0; i < size(); i++) {
+				prevItemMeta();
+				if (getCamera() != null)
+					break;
+			}
+		} else
+			prevItemPlayList();
+	}
+
+	/** Revert to the previous item in a meta play list */
+	private void prevItemMeta() {
+		if (sl_item == 0) {
+			prevItemPlayList();
+			sl_item = subSize();
+		}
+		if (sl_item > 0)
+			sl_item--;
 	}
 
 	/** Revert to the previous item in play list */
 	private void prevItemPlayList() {
-		pl_item = (pl_item > 0) ? pl_item - 1 : lastPlayListItem();
-	}
-
-	/** Revert to the previous item in catalog */
-	private void prevItemCatalog() {
-		final int c_last = catalog.getPlayLists().length - 1;
-		for (int i = 0; i < MAX_EMPTY_PLAY_LISTS; i++) {
-			c_item = (c_item > 0) ? c_item - 1 : c_last;
-			pl_item = lastPlayListItem();
-			// Skip play lists with no cameras
-			if (getCamera() != null)
-				break;
-		}
+		if (pl_item == 0)
+			pl_item = size();
+		if (pl_item > 0)
+			pl_item--;
 	}
 }

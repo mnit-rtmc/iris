@@ -92,7 +92,6 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		CameraImpl.loadAll();
 		CameraPresetImpl.loadAll();
 		PlayListImpl.loadAll();
-		CatalogImpl.loadAll();
 		MonitorStyleImpl.loadAll();
 		VideoMonitorImpl.loadAll();
 		FlowStreamImpl.loadAll();
