@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2023  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  * Copyright (C) 2018  SRF Consulting Group
  *
@@ -24,7 +24,6 @@ import java.awt.event.MouseListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;

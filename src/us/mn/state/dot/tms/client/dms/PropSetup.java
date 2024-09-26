@@ -20,7 +20,6 @@ import java.awt.event.FocusEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JTextArea;
 import us.mn.state.dot.tms.Beacon;

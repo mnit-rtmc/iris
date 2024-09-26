@@ -20,7 +20,6 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraTemplate;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.IncidentDetail;
-import us.mn.state.dot.tms.PlayList;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;

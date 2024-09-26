@@ -29,7 +29,6 @@ import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
-import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.IAction;
