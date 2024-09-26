@@ -54,7 +54,7 @@ public class PlayListEntryPanel extends JPanel {
 	private final PlayList play_list;
 
 	/** Entry label */
-	private final JLabel ent_lbl = new JLabel(I18N.get("play.list.entry"));
+	private final JLabel ent_lbl;
 
 	/** Entry text field (for adding) */
 	private final JTextField ent_txt = new JTextField(20);
@@ -166,6 +166,8 @@ public class PlayListEntryPanel extends JPanel {
 	public PlayListEntryPanel(Session s, PlayList pl) {
 		session = s;
 		play_list = pl;
+	 	String entry = pl.getMeta() ? "play.list.sub.list" : "camera";
+	 	ent_lbl = new JLabel(I18N.get(entry));
 	}
 
 	/** Initialize the widgets */

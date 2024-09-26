@@ -64,7 +64,7 @@ public class PlayListModel extends ProxyTableModel<PlayList> {
 				return pl.getMeta();
 			}
 		});
-		cols.add(new ProxyColumn<PlayList>("play.list.seq", 90,
+		cols.add(new ProxyColumn<PlayList>("play.list.seq", 80,
 			Integer.class)
 		{
 			public Object getValueAt(PlayList pl) {
