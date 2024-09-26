@@ -84,11 +84,10 @@ public class PlayListMapping {
 			private boolean first = true;
 			private int i = 0;
 			public String next() {
-				if (i < entries.length) {
-					if (first) {
-						first = false;
-						return createDelete(key);
-					}
+				if (first) {
+					first = false;
+					return createDelete(key);
+				} else if (i < entries.length) {
 					int o = i;
 					String entry = entries[o];
 					i++;
