@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017-2018  Minnesota Department of Transportation
+ * Copyright (C) 2017-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,12 +28,12 @@ import us.mn.state.dot.tms.utils.I18N;
 public class PlayListProperties extends SonarObjectForm<PlayList> {
 
 	/** Play list panel */
-	private final PlayListPanel play_pnl;
+	private final PlayListEntryPanel entry_pnl;
 
 	/** Create a new play list properties form */
 	public PlayListProperties(Session s, PlayList pl) {
 		super(I18N.get("play.list") + ": ", s, pl);
-		play_pnl = new PlayListPanel(s, pl);
+		entry_pnl = new PlayListEntryPanel(s, pl);
 	}
 
 	/** Get the SONAR type cache */
@@ -45,20 +45,20 @@ public class PlayListProperties extends SonarObjectForm<PlayList> {
 	/** Initialize the widgets on the form */
 	@Override
 	protected void initialize() {
-		play_pnl.initialize();
-		add(play_pnl);
+		entry_pnl.initialize();
+		add(entry_pnl);
 		super.initialize();
 	}
 
 	/** Update the edit mode */
 	@Override
 	protected void updateEditMode() {
-		play_pnl.updateEditMode();
+		entry_pnl.updateEditMode();
 	}
 
 	/** Update one attribute on the form */
 	@Override
 	protected void doUpdateAttribute(String a) {
-		play_pnl.updateAttribute(a);
+		entry_pnl.updateAttribute(a);
 	}
 }

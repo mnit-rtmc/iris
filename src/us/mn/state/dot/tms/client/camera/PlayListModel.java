@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017-2018  Minnesota Department of Transportation
+ * Copyright (C) 2017-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import us.mn.state.dot.tms.PlayList;
 import us.mn.state.dot.tms.PlayListHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -50,18 +51,36 @@ public class PlayListModel extends ProxyTableModel<PlayList> {
 	@Override
 	protected ArrayList<ProxyColumn<PlayList>> createColumns() {
 		ArrayList<ProxyColumn<PlayList>> cols =
-			new ArrayList<ProxyColumn<PlayList>>(3);
-		cols.add(new ProxyColumn<PlayList>("play.list", 120) {
+			new ArrayList<ProxyColumn<PlayList>>(4);
+		cols.add(new ProxyColumn<PlayList>("play.list", 90) {
 			public Object getValueAt(PlayList pl) {
 				return pl.getName();
 			}
 		});
-		cols.add(new ProxyColumn<PlayList>("play.list.seq", 120) {
+		cols.add(new ProxyColumn<PlayList>("play.list.meta", 50,
+			Boolean.class)
+		{
+			public Object getValueAt(PlayList pl) {
+				return pl.getMeta();
+			}
+		});
+		cols.add(new ProxyColumn<PlayList>("play.list.seq", 90,
+			Integer.class)
+		{
 			public Object getValueAt(PlayList pl) {
 				return pl.getSeqNum();
 			}
+			public boolean isEditable(PlayList pl) {
+				return canWrite(pl);
+			}
+			public void setValueAt(PlayList pl, Object value) {
+				Integer sn = (value instanceof Integer)
+					? (Integer) value
+					: null;
+				pl.setSeqNum(sn);
+			}
 		});
-		cols.add(new ProxyColumn<PlayList>("play.list.desc", 200) {
+		cols.add(new ProxyColumn<PlayList>("play.list.desc", 300) {
 			public Object getValueAt(PlayList pl) {
 				return pl.getDescription();
 			}
@@ -82,18 +101,21 @@ public class PlayListModel extends ProxyTableModel<PlayList> {
 	}
 
 	/** Create a new play list */
-	@Override
-	public void createObject(String n) {
-		// Ignore name given to us
-		String name = createUniqueName();
-		if (name != null)
-			descriptor.cache.createObject(name);
+	public void createObject(boolean meta) {
+		String name = createUniqueName(meta);
+		if (name != null) {
+			HashMap<String, Object> attrs =
+				new HashMap<String, Object>();
+			attrs.put("meta", meta);
+			descriptor.cache.createObject(name, attrs);
+		}
 	}
 
 	/** Create a unique play list name */
-	private String createUniqueName() {
+	private String createUniqueName(boolean meta) {
+		String prefix = (meta) ? "CAT_" : "PL_";
 		for (int i = PlayList.NUM_MIN; i <= PlayList.NUM_MAX; i++) {
-			String n = "PL_" + i;
+			String n = prefix + i;
 			if (PlayListHelper.lookup(n) == null)
 				return n;
 		}

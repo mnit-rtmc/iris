@@ -41,23 +41,17 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * PlayListPanel is a UI for entering and editing play lists.
+ * PlayListEntryPanel is a UI for entering and editing play lists.
  *
  * @author Douglas Lau
  */
-public class PlayListPanel extends JPanel {
+public class PlayListEntryPanel extends JPanel {
 
 	/** User Session */
 	private final Session session;
 
 	/** Play list proxy */
 	private final PlayList play_list;
-
-	/** Sequence num label */
-	private final JLabel seq_lbl = new JLabel(I18N.get("play.list.seq"));
-
-	/** Sequence number text */
-	private final JTextField seq_txt = new JTextField("", 8);
 
 	/** Entry label */
 	private final JLabel ent_lbl = new JLabel(I18N.get("play.list.entry"));
@@ -168,8 +162,8 @@ public class PlayListPanel extends JPanel {
 		play_list.setEntries(ents);
 	}
 
-	/** Create a new play list panel */
-	public PlayListPanel(Session s, PlayList pl) {
+	/** Create a new play list entry panel */
+	public PlayListEntryPanel(Session s, PlayList pl) {
 		session = s;
 		play_list = pl;
 	}
@@ -200,7 +194,6 @@ public class PlayListPanel extends JPanel {
 		GroupLayout.SequentialGroup hg = gl.createSequentialGroup();
 		GroupLayout.ParallelGroup p0 = gl.createParallelGroup(
 			GroupLayout.Alignment.TRAILING);
-		p0.addComponent(seq_lbl);
 		p0.addComponent(ent_lbl);
 		p0.addComponent(insert_btn);
 		p0.addComponent(remove_btn);
@@ -210,7 +203,6 @@ public class PlayListPanel extends JPanel {
 		hg.addGap(UI.hgap);
 		GroupLayout.ParallelGroup p1 = gl.createParallelGroup(
 			GroupLayout.Alignment.CENTER);
-		p1.addComponent(seq_txt);
 		p1.addComponent(ent_txt);
 		p1.addComponent(ent_scrl);
 		gl.linkSize(SwingConstants.HORIZONTAL, ent_txt, ent_scrl);
@@ -223,17 +215,11 @@ public class PlayListPanel extends JPanel {
 		GroupLayout.SequentialGroup vg = gl.createSequentialGroup();
 		GroupLayout.ParallelGroup p0 = gl.createParallelGroup(
 			GroupLayout.Alignment.CENTER);
-		p0.addComponent(seq_lbl);
-		p0.addComponent(seq_txt);
+		p0.addComponent(ent_lbl);
+		p0.addComponent(ent_txt);
 		vg.addGroup(p0);
 		vg.addGap(UI.vgap);
 		GroupLayout.ParallelGroup p1 = gl.createParallelGroup(
-			GroupLayout.Alignment.CENTER);
-		p1.addComponent(ent_lbl);
-		p1.addComponent(ent_txt);
-		vg.addGroup(p1);
-		vg.addGap(UI.vgap);
-		GroupLayout.ParallelGroup p2 = gl.createParallelGroup(
 			GroupLayout.Alignment.LEADING);
 		GroupLayout.SequentialGroup v1 = gl.createSequentialGroup();
 		v1.addComponent(insert_btn);
@@ -243,21 +229,14 @@ public class PlayListPanel extends JPanel {
 		v1.addComponent(up_btn);
 		v1.addGap(UI.vgap);
 		v1.addComponent(down_btn);
-		p2.addGroup(v1);
-		p2.addComponent(ent_scrl);
-		vg.addGroup(p2);
+		p1.addGroup(v1);
+		p1.addComponent(ent_scrl);
+		vg.addGroup(p1);
 		return vg;
 	}
 
 	/** Create jobs */
 	private void createJobs() {
-		seq_txt.addFocusListener(new FocusAdapter() {
-			public void focusLost(FocusEvent e) {
-			    Integer n = IPanel.parseInt(seq_txt);
-			    seq_txt.setText((n != null) ? n.toString() : "");
-			    play_list.setSeqNum(n);
-			}
-		});
 		ent_txt.addKeyListener(new KeyAdapter() {
 			@Override public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER)
@@ -279,7 +258,6 @@ public class PlayListPanel extends JPanel {
 
 	/** Update the edit mode */
 	public void updateEditMode() {
-		seq_txt.setEnabled(canWrite("seqNum"));
 		boolean ud = canWrite("entries");
 		ent_txt.setEnabled(ud);
 		ent_lst.setEnabled(ud);
@@ -335,10 +313,6 @@ public class PlayListPanel extends JPanel {
 
 	/** Update one attribute on the form */
 	public void updateAttribute(String a) {
-		if (null == a || a.equals("seqNum")) {
-			Integer n = play_list.getSeqNum();
-			seq_txt.setText((n != null) ? n.toString() : "");
-		}
 		if (null == a || a.equals("entries"))
 			updateEntries();
 	}
