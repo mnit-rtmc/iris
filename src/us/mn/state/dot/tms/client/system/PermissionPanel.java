@@ -98,7 +98,7 @@ public class PermissionPanel extends ProxyTablePanel<Permission> {
 		super.updateButtonPanel();
 	}
 
-	/** Create a new proxy object */
+	/** Create a new permission object */
 	@Override
 	protected void createObject() {
 		if (model instanceof PermissionModel) {

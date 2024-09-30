@@ -116,7 +116,6 @@ public class PermissionModel extends ProxyTableModel<Permission> {
 				new HashMap<String, Object>();
 			attrs.put("role", role);
 			attrs.put("base_resource", br);
-			attrs.put("access_level", AccessLevel.VIEW.ordinal());
 			descriptor.cache.createObject(name, attrs);
 		}
 	}

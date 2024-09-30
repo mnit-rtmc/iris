@@ -132,12 +132,12 @@ abstract public class Namespace {
 				return new MultiPolygon(p);
 		}
 		catch (NumberFormatException|SQLException|ParseException e) {
-			throw ProtocolError.invalidParameter();
+			throw ProtocolError.invalidParameter(p);
 		}
 		if (SonarObject.class.isAssignableFrom(t))
 			return unmarshallObject(t, p);
 		else {
-			throw ProtocolError.invalidParameter();
+			throw ProtocolError.invalidParameter(p);
 		}
 	}
 
@@ -151,12 +151,12 @@ abstract public class Namespace {
 		catch (NoSuchFieldException e) {
 			System.err.println("SONAR: SONAR_TYPE and " +
 				"SONAR_TYPES not defined for " + t);
-			throw ProtocolError.invalidParameter();
+			throw ProtocolError.invalidParameter(p);
 		}
 		catch (Exception e) {
 			System.err.println("SONAR: unmarshall \"" + p +
 				"\": " + e.getMessage());
-			throw ProtocolError.invalidParameter();
+			throw ProtocolError.invalidParameter(p);
 		}
 	}
 
