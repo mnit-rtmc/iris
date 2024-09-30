@@ -50,7 +50,7 @@ public class RoleDomainModel extends ProxyTableModel<Domain> {
 				return d.getName();
 			}
 		});
-		cols.add(new ProxyColumn<Domain>("domain.assigned", 80,
+		cols.add(new ProxyColumn<Domain>("domain.assigned", 60,
 			Boolean.class)
 		{
 			public Object getValueAt(Domain d) {

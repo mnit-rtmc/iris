@@ -88,7 +88,7 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 	};
 
 	/** Dn (distinguished name) field */
-	private final JTextField dn_txt = new JTextField(64);
+	private final JTextField dn_txt = new JTextField(48);
 
 	/** Role list model */
 	private final ProxyListModel<Role> r_list;

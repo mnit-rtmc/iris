@@ -52,7 +52,7 @@ public class PermissionPanel extends ProxyTablePanel<Permission> {
 
 	/** Base resource label */
 	private final ILabel resource_lbl =
-		new ILabel("permission.resource.base");
+		new ILabel("permission.base.resource");
 
 	/** Base resource combo box */
 	private final JComboBox<String> resource_cbx =

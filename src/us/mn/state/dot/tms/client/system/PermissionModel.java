@@ -50,7 +50,7 @@ public class PermissionModel extends ProxyTableModel<Permission> {
 		ArrayList<ProxyColumn<Permission>> cols =
 			new ArrayList<ProxyColumn<Permission>>(3);
 		cols.add(new ProxyColumn<Permission>("permission.base.resource",
-			140)
+			120)
 		{
 			public Object getValueAt(Permission p) {
 				return p.getBaseResource();
@@ -70,7 +70,8 @@ public class PermissionModel extends ProxyTableModel<Permission> {
 		});
 		cols.add(new ProxyColumn<Permission>("permission.access", 80) {
 			public Object getValueAt(Permission p) {
-				return p.getAccessLevel();
+				return AccessLevel.fromOrdinal(
+					p.getAccessLevel());
 			}
 			public boolean isEditable(Permission p) {
 				return canWrite(p);
