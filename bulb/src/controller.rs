@@ -468,6 +468,9 @@ impl Card for Controller {
     /// Display name
     const DNAME: &'static str = "🎛️ Controller";
 
+    /// Suggested name prefix
+    const PREFIX: &'static str = "ctl";
+
     /// Get the resource
     fn res() -> Res {
         Res::Controller
@@ -495,19 +498,6 @@ impl Card for Controller {
             || self.notes.contains_lower(search)
             || self.cabinet_style.contains_lower(search)
             || self.version().unwrap_or("").contains_lower(search)
-    }
-
-    /// Get next suggested name
-    fn next_name(obs: &[Self]) -> String {
-        let mut num = 1;
-        for ob in obs {
-            if let Some(("ctl", suffix)) = ob.name.split_once('_') {
-                if let Ok(n) = suffix.parse::<u32>() {
-                    num = num.max(n + 1);
-                }
-            }
-        }
-        format!("ctl_{num}")
     }
 
     /// Convert to HTML view

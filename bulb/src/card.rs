@@ -49,6 +49,7 @@ use serde::de::DeserializeOwned;
 use serde_json::map::Map;
 use serde_json::Value;
 use std::borrow::Cow;
+use std::fmt;
 use std::iter::repeat;
 use wasm_bindgen::JsValue;
 
@@ -167,6 +168,15 @@ pub struct CardView {
     pub view: View,
 }
 
+impl fmt::Display for CardView {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let id = self.id();
+        let name = &self.name;
+        let cn = self.view.class_name();
+        write!(f, "id='{id}' name='{name}' class='{cn}'")
+    }
+}
+
 impl CardView {
     /// Create a new card view
     pub fn new<N: Into<String>>(res: Res, name: N, view: View) -> Self {
@@ -177,7 +187,11 @@ impl CardView {
     /// Get HTML element ID of card
     pub fn id(&self) -> String {
         let res = self.res;
-        format!("{res}_{}", &self.name)
+        let nm = match self.view {
+            View::CreateCompact | View::Create => "",
+            _ => &self.name,
+        };
+        format!("{res}_{nm}")
     }
 
     /// Set the view to compact
@@ -266,6 +280,9 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     /// All item states as html options
     const ITEM_STATES: &'static str = ITEM_STATES;
 
+    /// Suggested name prefix
+    const PREFIX: &'static str = "";
+
     /// Get the resource
     fn res() -> Res;
 
@@ -279,11 +296,6 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
 
     /// Set the name
     fn with_name(self, name: &str) -> Self;
-
-    /// Get next suggested name
-    fn next_name(_obs: &[Self]) -> String {
-        "".into()
-    }
 
     /// Get the main item state
     fn item_state_main(&self, _anc: &Self::Ancillary) -> ItemState {
@@ -655,21 +667,17 @@ impl CardList {
         let cards: Vec<C> = serde_json::from_str(&self.json)?;
         // Use default value for ancillary data lookup
         let anc = fetch_ancillary(&C::default(), View::Search).await?;
-        let rname = C::res().as_str();
         self.views.clear();
         let mut html = String::new();
         html.push_str("<ul class='cards'>");
         if self.config {
-            self.views
-                .push(CardView::new(C::res(), "", View::CreateCompact));
-            let cn = View::CreateCompact.class_name();
-            let next_name = C::next_name(&cards);
-            // the "Create" card has id "{rname}_" and next available name
-            html.push_str(&format!(
-                "<li id='{rname}_' name='{next_name}' class='{cn}'>\
-                    {CREATE_COMPACT}\
-                </li>"
-            ));
+            let cv = CardView::new(
+                C::res(),
+                Self::next_name(&cards),
+                View::CreateCompact,
+            );
+            html.push_str(&format!("<li {cv}>{CREATE_COMPACT}</li>"));
+            self.views.push(cv);
         }
         for pri in &cards {
             let view = if self.search.is_match(pri, &anc) {
@@ -678,11 +686,7 @@ impl CardList {
                 View::Hidden
             };
             let cv = CardView::new(C::res(), pri.name(), view);
-            let cn = view.class_name();
-            let name = pri.name();
-            html.push_str(&format!(
-                "<li id='{rname}_{name}' name='{name}' class='{cn}'>"
-            ));
+            html.push_str(&format!("<li {cv}>"));
             html.push_str(&pri.to_html(view, &anc));
             html.push_str("</li>");
             self.views.push(cv);
@@ -690,6 +694,25 @@ impl CardList {
         html.push_str("</ul>");
         self.states_main = build_item_states(&cards, &anc);
         Ok(html)
+    }
+
+    /// Get next suggested name
+    fn next_name<C: Card>(obs: &[C]) -> String {
+        let prefix = C::PREFIX;
+        if prefix == "" {
+            return String::new();
+        }
+        let mut num = 1;
+        for ob in obs {
+            if let Some((pre, suffix)) = ob.name().split_once('_') {
+                if pre == prefix {
+                    if let Ok(n) = suffix.parse::<u32>() {
+                        num = num.max(n + 1);
+                    }
+                }
+            }
+        }
+        format!("{prefix}_{num}")
     }
 
     /// Get a list of cards whose view has changed

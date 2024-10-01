@@ -263,6 +263,9 @@ impl Card for CommConfig {
     /// Display name
     const DNAME: &'static str = "📡 Comm Config";
 
+    /// Suggested name prefix
+    const PREFIX: &'static str = "cfg";
+
     /// Get the resource
     fn res() -> Res {
         Res::CommConfig
@@ -292,19 +295,6 @@ impl Card for CommConfig {
             View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(),
         }
-    }
-
-    /// Get next suggested name
-    fn next_name(obs: &[Self]) -> String {
-        let mut num = 1;
-        for ob in obs {
-            if let Some(("cfg", suffix)) = ob.name.split_once('_') {
-                if let Ok(n) = suffix.parse::<u32>() {
-                    num = num.max(n + 1);
-                }
-            }
-        }
-        format!("cfg_{num}")
     }
 
     /// Get changed fields from Setup form

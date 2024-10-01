@@ -239,6 +239,9 @@ impl Card for Permission {
          <option value='💡'>💡 manage\
          <option value='🔧'>🔧 configure";
 
+    /// Suggested name prefix
+    const PREFIX: &'static str = "prm";
+
     /// Get the resource
     fn res() -> Res {
         Res::Permission
@@ -253,19 +256,6 @@ impl Card for Permission {
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
         self
-    }
-
-    /// Get next suggested name
-    fn next_name(obs: &[Self]) -> String {
-        let mut num = 1;
-        for ob in obs {
-            if let Some(("prm", suffix)) = ob.name.split_once('_') {
-                if let Ok(n) = suffix.parse::<u32>() {
-                    num = num.max(n + 1);
-                }
-            }
-        }
-        format!("prm_{num}")
     }
 
     /// Check if a search string matches

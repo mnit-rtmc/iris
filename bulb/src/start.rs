@@ -437,10 +437,12 @@ async fn replace_card(cv: CardView) -> Result<()> {
     Ok(())
 }
 
-/// Replace a card with provieded HTML
+/// Replace a card with provided HTML
 fn replace_card_html(cv: &CardView, html: &str) {
     let Some(elem) = Doc::get().try_elem::<HtmlElement>(&cv.id()) else {
-        console::log_1(&format!("replace_card_html: {}", cv.id()).into());
+        console::log_1(
+            &format!("replace_card_html: {} not found", cv.id()).into(),
+        );
         return;
     };
     elem.set_inner_html(html);
@@ -507,11 +509,11 @@ async fn click_card(res: Res, name: String, id: String) -> Result<()> {
         replace_card(cv.compact()).await?;
     }
     // FIXME: check if id are the same for old/new cards
-    let view = *card::res_views(res).get(1).unwrap_or(&View::Compact);
-    let mut cv = CardView::new(res, &name, view);
+    let mut view = *card::res_views(res).get(1).unwrap_or(&View::Compact);
     if id.ends_with('_') {
-        cv = cv.view(View::Create);
+        view = View::Create;
     }
+    let cv = CardView::new(res, &name, view);
     replace_card(cv).await?;
     fly_enable(JsValue::TRUE);
     Ok(())
