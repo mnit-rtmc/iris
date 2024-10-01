@@ -58,11 +58,7 @@ pub enum Error {
 
     /// Element ID not found
     #[error("Elem id {0} not found")]
-    ElemIdNotFound(String),
-
-    /// Parse error
-    #[error("Parse error")]
-    Parse(),
+    ElemIdNotFound(&'static str),
 
     /// Card mismatch (added / deleted)
     #[error("card mismatch")]

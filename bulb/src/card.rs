@@ -450,14 +450,12 @@ pub async fn create_and_post(res: Res) -> Result<()> {
 
 /// Create a name value
 fn create_value(doc: &Doc) -> Result<String> {
-    match doc.input_option_string("create_name") {
-        Some(name) => {
-            let mut obj = Map::new();
-            obj.insert("name".to_string(), Value::String(name));
-            Ok(Value::Object(obj).to_string())
-        }
-        None => Err(Error::ElemIdNotFound(String::from("create_name"))),
-    }
+    let name = doc
+        .input_option_string("create_name")
+        .ok_or(Error::ElemIdNotFound("create_name"))?;
+    let mut obj = Map::new();
+    obj.insert("name".to_string(), Value::String(name));
+    Ok(Value::Object(obj).to_string())
 }
 
 /// Delete a resource by name

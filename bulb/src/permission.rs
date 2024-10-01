@@ -166,18 +166,20 @@ fn access_level_html(selected: u32) -> String {
 impl Permission {
     /// Get value to create a new object
     pub fn create_value(doc: &Doc) -> Result<String> {
-        let role = doc.select_parse::<String>("role");
-        let base_resource = doc.select_parse::<String>("base_resource");
-        if let (Some(role), Some(base_resource)) = (role, base_resource) {
-            let mut obj = Map::new();
-            obj.insert("role".to_string(), Value::String(role));
-            obj.insert(
-                "base_resource".to_string(),
-                Value::String(base_resource),
-            );
-            return Ok(Value::Object(obj).to_string());
-        }
-        Err(Error::Parse())
+        let name = doc
+            .input_option_string("create_name")
+            .ok_or(Error::ElemIdNotFound("create_name"))?;
+        let role = doc
+            .select_parse::<String>("role")
+            .ok_or(Error::ElemIdNotFound("role"))?;
+        let base_resource = doc
+            .select_parse::<String>("base_resource")
+            .ok_or(Error::ElemIdNotFound("base_resource"))?;
+        let mut obj = Map::new();
+        obj.insert("name".to_string(), Value::String(name));
+        obj.insert("role".to_string(), Value::String(role));
+        obj.insert("base_resource".to_string(), Value::String(base_resource));
+        Ok(Value::Object(obj).to_string())
     }
 
     /// Convert to Compact HTML
@@ -248,8 +250,22 @@ impl Card for Permission {
     }
 
     /// Set the name
-    fn with_name(self, _name: &str) -> Self {
+    fn with_name(mut self, name: &str) -> Self {
+        self.name = name.to_string();
         self
+    }
+
+    /// Get next suggested name
+    fn next_name(obs: &[Self]) -> String {
+        let mut num = 1;
+        for ob in obs {
+            if let Some(("prm", suffix)) = ob.name.split_once('_') {
+                if let Ok(n) = suffix.parse::<u32>() {
+                    num = num.max(n + 1);
+                }
+            }
+        }
+        format!("prm_{num}")
     }
 
     /// Check if a search string matches
@@ -262,10 +278,15 @@ impl Card for Permission {
 
     /// Get row for Create card
     fn to_html_create(&self, anc: &PermissionAnc) -> String {
+        let name = HtmlStr::new(self.name());
         let role = anc.roles_html(self);
         let resource = anc.resource_types_html(self);
         format!(
             "<div class='row'>\
+              <label for='create_name'>Name</label>\
+              <input id='create_name' maxlength='24' size='24' value='{name}'>\
+            </div>\
+            <div class='row'>\
               <label for='role'>Role</label>\
               {role}\
             </div>\
