@@ -631,7 +631,7 @@ dependencies = [
 
 [[package]]
 name = "bulb"
-version = "5.60.0"
+version = "5.61.0"
 dependencies = [
  "base64 0.21.7",
  "chrono",
@@ -1381,7 +1381,7 @@ dependencies = [
 
 [[package]]
 name = "honeybee"
-version = "5.60.0"
+version = "5.61.0"
 dependencies = [
  "anyhow",
  "argh",
@@ -1700,7 +1700,7 @@ checksum = "0e7465ac9959cc2b1404e8e2367b43684a6d13790fe23056cc8c6c5a6b7bcb94"
 
 [[package]]
 name = "mayfly"
-version = "5.60.0"
+version = "5.61.0"
 dependencies = [
  "argh",
  "async-std",
@@ -2226,7 +2226,7 @@ dependencies = [
 
 [[package]]
 name = "rendzina"
-version = "5.60.0"
+version = "5.61.0"
 dependencies = [
  "fstr",
  "gift",
@@ -2241,7 +2241,7 @@ dependencies = [
 
 [[package]]
 name = "resources"
-version = "5.60.0"
+version = "5.61.0"
 
 [[package]]
 name = "ring"
@@ -2260,9 +2260,9 @@ dependencies = [
 
 [[package]]
 name = "rosewood"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "89c69aa516df5d097eb75b1b3b6bb004b48b5a90fcb6eb72ffcfa5bc519dbb63"
+checksum = "d26fc6be4851c76d035d32b3b5945025a885b7dfdd79fd6839eb8aa73d12dd83"
 dependencies = [
  "loam",
  "log",
