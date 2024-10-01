@@ -191,9 +191,7 @@ impl Honey {
             .merge(login_resource(self.clone()))
             .merge(access_get(self.clone()))
             .merge(notify_resource(self.clone()))
-            .merge(permission_resource(self.clone()))
             .merge(other_resource(self.clone()))
-            .merge(permission_object(self.clone()))
             .merge(other_object(self.clone()))
             .layer(session_layer)
     }
@@ -561,7 +559,8 @@ fn notify_resource(honey: Honey) -> Router {
         .with_state(honey)
 }
 
-/// Router for permission resource
+/// Router for permission resource (REMOVE?)
+#[allow(dead_code)]
 fn permission_resource(honey: Honey) -> Router {
     /// Handle `GET` request
     async fn handle_get(
@@ -663,7 +662,8 @@ fn other_resource(honey: Honey) -> Router {
         .with_state(honey)
 }
 
-/// Router for permission object
+/// Router for permission object (REMOVE?)
+#[allow(dead_code)]
 fn permission_object(honey: Honey) -> Router {
     /// Handle `GET` request
     async fn handle_get(
