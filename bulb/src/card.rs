@@ -699,7 +699,7 @@ impl CardList {
     /// Get next suggested name
     fn next_name<C: Card>(obs: &[C]) -> String {
         let prefix = C::PREFIX;
-        if prefix == "" {
+        if prefix.is_empty() {
             return String::new();
         }
         let mut num = 1;
