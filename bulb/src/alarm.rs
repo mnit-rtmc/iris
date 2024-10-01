@@ -79,6 +79,7 @@ impl Alarm {
         let description = HtmlStr::new(&self.description);
         let controller = anc.controller_html(self);
         let pin = anc.pin_html(self.pin);
+        let footer = self.footer(true);
         format!(
             "{title}\
             <div class='row'>\
@@ -87,7 +88,8 @@ impl Alarm {
                      value='{description}'>\
             </div>\
             {controller}\
-            {pin}"
+            {pin}\
+            {footer}"
         )
     }
 }
