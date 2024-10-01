@@ -137,13 +137,21 @@ impl Name {
             Err(Error::InvalidValue)?
         } else if self.res_type == Res::Controller && att == "drop_id" {
             Ok(format!("{self}/drop"))
-        } else if self.res_type == Res::SignMessage {
-            // sign_message attributes are in snake case
+        } else if attr_snake(self.res_type, att) {
             Ok(format!("{self}/{att}"))
         } else {
             // most IRIS attributes are in camel case (Java)
             Ok(format!("{self}/{}", att.to_lower_camel_case()))
         }
+    }
+}
+
+/// Check if an attribute is in snake case
+fn attr_snake(res_type: Res, att: &str) -> bool {
+    match (res_type, att) {
+        (Res::SignMessage, _) => true,
+        (Res::Permission, "base_resource") => true,
+        _ => false,
     }
 }
 
