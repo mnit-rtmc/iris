@@ -212,12 +212,7 @@ CREATE VIEW action_plan_view AS
     FROM iris.action_plan;
 GRANT SELECT ON action_plan_view TO PUBLIC;
 
--- Drop privileges and capabilities
-DROP VIEW role_privilege_view;
-DROP TABLE iris.privilege;
-DROP TABLE iris.role_capability;
-DROP TABLE iris.capability;
-
+-- Replace privileges and capabilities with permissions
 CREATE TABLE perm (
     name VARCHAR(8) PRIMARY KEY,
     role VARCHAR(15) NOT NULL REFERENCES iris.role ON DELETE CASCADE,
@@ -233,6 +228,7 @@ INSERT INTO perm (name, role, base_resource, hashtag, access_level) (
 
 DROP TABLE iris.permission;
 DROP FUNCTION iris.resource_is_base(VARCHAR(16));
+ALTER TABLE iris.privilege DROP CONSTRAINT privilege_type_n_fkey;
 
 ALTER TABLE iris.resource_type DROP COLUMN base;
 ALTER TABLE iris.resource_type ADD COLUMN base VARCHAR(16)
@@ -317,6 +313,101 @@ DROP TABLE perm;
 
 CREATE UNIQUE INDEX permission_role_base_resource_hashtag_idx
     ON iris.permission (role, base_resource, COALESCE(hashtag, ''));
+
+CREATE FUNCTION perm_num(TEXT) RETURNS INTEGER AS $$
+DECLARE
+    nm ALIAS FOR $1;
+    parts TEXT[];
+BEGIN
+    parts = regexp_split_to_array(nm, '_');
+    IF array_length(parts, 1) = 2 AND parts[1] = 'prm' THEN
+        RETURN parts[2]::INTEGER;
+    ELSE
+        RETURN 0;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION perm_next() RETURNS TEXT AS $$
+    SELECT 'prm_' || (1 + MAX(perm_num(name))) FROM iris.permission;
+$$ LANGUAGE sql;
+
+CREATE FUNCTION perm_cap(cap TEXT, res TEXT, lvl INTEGER) RETURNS VOID AS
+$$
+    INSERT INTO iris.permission (name, role, base_resource, access_level) (
+        SELECT perm_next(), role, res, lvl
+        FROM iris.role_capability
+        WHERE capability = cap
+    ) ON CONFLICT DO NOTHING;
+$$ LANGUAGE sql;
+
+-- WARNING: fragile conversion from capabilities to permissions
+SELECT perm_cap('plan_admin', 'action_plan', 4);
+SELECT perm_cap('plan_control', 'action_plan', 2);
+SELECT perm_cap('plan_tag', 'action_plan', 1);
+SELECT perm_cap('alert_admin', 'alert_config', 4);
+SELECT perm_cap('alert_deploy', 'alert_config', 2);
+SELECT perm_cap('alert_tab', 'alert_config', 1);
+SELECT perm_cap('device_admin', 'beacon', 4);
+SELECT perm_cap('beacon_control', 'beacon', 2);
+SELECT perm_cap('beacon_tab', 'beacon', 1);
+SELECT perm_cap('camera_admin', 'camera', 4);
+SELECT perm_cap('camera_publish', 'camera', 3);
+SELECT perm_cap('camera_control', 'camera', 2);
+SELECT perm_cap('camera_tab', 'camera', 1);
+SELECT perm_cap('ctrl_admin', 'controller', 4);
+SELECT perm_cap('device_admin', 'controller', 4);
+SELECT perm_cap('integrator', 'controller', 4);
+SELECT perm_cap('maintenance', 'controller', 2);
+SELECT perm_cap('controllers', 'controller', 1);
+SELECT perm_cap('rwis', 'controller', 1);
+SELECT perm_cap('device_admin', 'detector', 4);
+SELECT perm_cap('integrator', 'detector', 4);
+SELECT perm_cap('det_control', 'detector', 2);
+SELECT perm_cap('login', 'detector', 1);
+SELECT perm_cap('sensor_tab', 'detector', 1);
+SELECT perm_cap('dms_admin', 'dms', 4);
+SELECT perm_cap('msg_admin_all', 'dms', 3);
+SELECT perm_cap('dms_control', 'dms', 2);
+SELECT perm_cap('dms_tab', 'dms', 1);
+SELECT perm_cap('device_admin', 'gate_arm', 4);
+SELECT perm_cap('gate_arm_control', 'gate_arm', 2);
+SELECT perm_cap('gate_arm_tab', 'gate_arm', 1);
+SELECT perm_cap('policy_admin', 'incident', 4);
+SELECT perm_cap('dms_admin', 'incident', 4);
+SELECT perm_cap('incident_control', 'incident', 2);
+SELECT perm_cap('incident_tab', 'incident', 1);
+SELECT perm_cap('device_admin', 'lcs', 4);
+SELECT perm_cap('maintenance', 'lcs', 3);
+SELECT perm_cap('lcs_control', 'lcs', 2);
+SELECT perm_cap('lcs_tab', 'lcs', 1);
+SELECT perm_cap('parking_admin', 'parking_area', 4);
+SELECT perm_cap('parking_tab', 'parking_area', 1);
+SELECT perm_cap('user_admin', 'permission', 4);
+SELECT perm_cap('login', 'permission', 1);
+SELECT perm_cap('device_admin', 'ramp_meter', 4);
+SELECT perm_cap('maintenance', 'ramp_meter', 3);
+SELECT perm_cap('meter_control', 'ramp_meter', 2);
+SELECT perm_cap('meter_tab', 'ramp_meter', 1);
+SELECT perm_cap('system_admin', 'system_attribute', 4);
+SELECT perm_cap('login', 'system_attribute', 1);
+SELECT perm_cap('device_admin', 'toll_zone', 4);
+SELECT perm_cap('tag_reader_tab', 'toll_zone', 1);
+SELECT perm_cap('camera_admin', 'video_monitor', 4);
+SELECT perm_cap('camera_tab', 'video_monitor', 1);
+SELECT perm_cap('device_admin', 'weather_sensor', 4);
+SELECT perm_cap('rwis_admin', 'weather_sensor', 4);
+SELECT perm_cap('rwis', 'weather_sensor', 1);
+
+DROP FUNCTION perm_cap(TEXT, TEXT, INTEGER);
+DROP FUNCTION perm_next();
+DROP FUNCTION perm_num(TEXT);
+
+-- Drop privileges and capabilities
+DROP VIEW role_privilege_view;
+DROP TABLE iris.privilege;
+DROP TABLE iris.role_capability;
+DROP TABLE iris.capability;
 
 CREATE TRIGGER permission_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.permission
