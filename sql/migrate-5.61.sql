@@ -344,7 +344,7 @@ $$ LANGUAGE sql;
 -- WARNING: fragile conversion from capabilities to permissions
 SELECT perm_cap('plan_admin', 'action_plan', 4);
 SELECT perm_cap('plan_control', 'action_plan', 2);
-SELECT perm_cap('plan_tag', 'action_plan', 1);
+SELECT perm_cap('plan_tab', 'action_plan', 1);
 SELECT perm_cap('alert_admin', 'alert_config', 4);
 SELECT perm_cap('alert_deploy', 'alert_config', 2);
 SELECT perm_cap('alert_tab', 'alert_config', 1);
