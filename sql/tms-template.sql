@@ -4807,8 +4807,12 @@ CREATE TABLE iris.play_list (
     name VARCHAR(20) PRIMARY KEY,
     meta BOOLEAN NOT NULL, -- immutable
     seq_num INTEGER UNIQUE,
-    description VARCHAR(32)
+    notes VARCHAR CHECK (LENGTH(notes) < 64)
 );
+
+CREATE TRIGGER play_list_hashtag_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.play_list
+    FOR EACH ROW EXECUTE FUNCTION iris.hashtag_trig('play_list');
 
 CREATE FUNCTION iris.play_list_is_meta(VARCHAR(20)) RETURNS BOOLEAN AS
 $play_list_is_meta$
@@ -4832,7 +4836,7 @@ CREATE TABLE iris.play_list_entry (
 ALTER TABLE iris.play_list_entry ADD PRIMARY KEY (play_list, ordinal);
 
 CREATE VIEW play_list_view AS
-    SELECT pl.name AS play_list, pl.seq_num, description, pe.ordinal,
+    SELECT pl.name AS play_list, pl.seq_num, notes, pe.ordinal,
            se.ordinal AS sub_ordinal, COALESCE(pe.camera, se.camera) AS camera
     FROM iris.play_list pl
     JOIN iris.play_list_entry pe ON pe.play_list = pl.name
