@@ -286,16 +286,26 @@ SELECT EXISTS (
 );
 $resource_is_base$ LANGUAGE sql;
 
+CREATE TABLE iris.access_level (
+    id INTEGER PRIMARY KEY,
+    description VARCHAR NOT NULL
+);
+
+COPY iris.access_level (id, description) FROM stdin;
+1	View
+2	Operate
+3	Manage
+4	Configure
+\.
+
 CREATE TABLE iris.permission (
     name VARCHAR(8) PRIMARY KEY,
     role VARCHAR(15) NOT NULL REFERENCES iris.role ON DELETE CASCADE,
     base_resource VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
     hashtag VARCHAR(16),
-    access_level INTEGER NOT NULL,
+    access_level INTEGER NOT NULL REFERENCES iris.access_level,
 
     CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$'),
-    CONSTRAINT permission_access
-        CHECK (access_level >= 1 AND access_level <= 4),
     -- hashtag cannot be applied to "View" access level
     CONSTRAINT hashtag_access_ck CHECK (hashtag IS NULL OR access_level != 1)
 );
@@ -435,8 +445,9 @@ CREATE TRIGGER permission_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW permission_view AS
-    SELECT name, role, base_resource, hashtag, access_level
-    FROM iris.permission;
+    SELECT name, role, base_resource, hashtag, description AS access_level
+    FROM iris.permission p
+    JOIN iris.access_level a ON a.id = p.access_level;
 GRANT SELECT ON permission_view TO PUBLIC;
 
 -- Improve flow_stream constraint
