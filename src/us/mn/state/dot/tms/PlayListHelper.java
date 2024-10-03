@@ -77,24 +77,24 @@ public class PlayListHelper extends BaseHelper {
 		}
 	}
 
-	/** Find a personal play list for a user */
-	static public PlayList findPersonal(User u) {
+	/** Find a scratch play list for a user */
+	static public PlayList findScratch(User u) {
 		Role r = u.getRole();
 		if (r == null || !r.getEnabled())
 			return null;
-		Set<String> per_tags = PermissionHelper.findPersonal(r);
-		PlayList personal = null;
+		Set<String> per_tags = PermissionHelper.findScratch(r);
+		PlayList scratch = null;
 		Iterator<PlayList> it = iterator();
 		while (it.hasNext()) {
 			PlayList pl = it.next();
 			Hashtags tags = new Hashtags(pl.getNotes());
 			if (tags.containsAny(per_tags)) {
-				// only one person PlayList allowed!
-				if (personal != null)
+				// only one scratch PlayList allowed!
+				if (scratch != null)
 					return null;
-				personal = pl;
+				scratch = pl;
 			}
 		}
-		return personal;
+		return scratch;
 	}
 }

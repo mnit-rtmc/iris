@@ -119,7 +119,7 @@ public class CameraManager extends DeviceManager<Camera> {
 	/** Play list view */
 	private final ProxyView<PlayList> pl_view = new ProxyView<PlayList>() {
 		public void enumerationComplete() {
-			watchPersonalPlayList();
+			watchScratchPlayList();
 		}
 		public void update(PlayList pl, String a) {
 			play_list = pl;
@@ -129,9 +129,9 @@ public class CameraManager extends DeviceManager<Camera> {
 		}
 	};
 
-	/** Watch user's personal play list */
-	private void watchPersonalPlayList() {
-		watcher.setProxy(PlayListHelper.findPersonal(session.getUser()));
+	/** Watch user's scratch play list */
+	private void watchScratchPlayList() {
+		watcher.setProxy(PlayListHelper.findScratch(session.getUser()));
 	}
 
 	/** Create a new camera manager */
@@ -283,7 +283,7 @@ public class CameraManager extends DeviceManager<Camera> {
 		if (pl != null)
 			watcher.setProxy(pl);
 		else
-			watchPersonalPlayList();
+			watchScratchPlayList();
 		dispatcher.selectMonitorPlayList(pl);
 	}
 

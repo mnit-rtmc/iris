@@ -104,7 +104,9 @@ a short dwell time, specified by the `camera_sequence_dwell_sec`
 A **meta** play list consists of (non-meta) sub-lists.  This allows lists to
 be broken up and shared with other meta lists.
 
-Each user can have a personal play list.
+Each role can have one _scratch_ play list:
+* Must have 💡 Manage [permissions] for `video_monitor`, with a [hashtag]
+* Exactly one play list must have that hashtag
 
 
 [camera]: cameras.html

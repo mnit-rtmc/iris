@@ -41,8 +41,8 @@ public class PermissionHelper extends BaseHelper {
 			Permission.SONAR_TYPE));
 	}
 
-	/** Find all hashtags for personal video_monitor permissions */
-	static public Set<String> findPersonal(Role role) {
+	/** Find all hashtags for scratch video_monitor permissions */
+	static public Set<String> findScratch(Role role) {
 		String notes = "";
 		Iterator<Permission > it = iterator();
 		while (it.hasNext()) {
@@ -50,7 +50,8 @@ public class PermissionHelper extends BaseHelper {
 			String tag = p.getHashtag();
 			if (tag != null &&
 			    p.getRole() == role &&
-			    p.getBaseResource() == PlayList.SONAR_BASE)
+			    p.getBaseResource() == PlayList.SONAR_BASE &&
+			    p.getAccessLevel() == AccessLevel.MANAGE.ordinal())
 			{
 				notes = Hashtags.add(notes, tag);
 			}
