@@ -131,14 +131,7 @@ public class CameraManager extends DeviceManager<Camera> {
 
 	/** Watch user's personal play list */
 	private void watchPersonalPlayList() {
-		String n = "PL_" + session.getUser().getName();
-		PlayList pl = PlayListHelper.lookup(n);
-		if (pl != null)
-			watcher.setProxy(pl);
-		else if (session.isWritePermitted(PlayList.SONAR_TYPE, n)) {
-			session.getSonarState().getCamCache().getPlayLists()
-				.createObject(n);
-		}
+		watcher.setProxy(PlayListHelper.findPersonal(session.getUser()));
 	}
 
 	/** Create a new camera manager */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017-2018  Minnesota Department of Transportation
+ * Copyright (C) 2017-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Helper class for play lists.
@@ -74,5 +75,26 @@ public class PlayListHelper extends BaseHelper {
 		catch (NumberFormatException e) {
 			return null;
 		}
+	}
+
+	/** Find a personal play list for a user */
+	static public PlayList findPersonal(User u) {
+		Role r = u.getRole();
+		if (r == null || !r.getEnabled())
+			return null;
+		Set<String> per_tags = PermissionHelper.findPersonal(r);
+		PlayList personal = null;
+		Iterator<PlayList> it = iterator();
+		while (it.hasNext()) {
+			PlayList pl = it.next();
+			Hashtags tags = new Hashtags(pl.getNotes());
+			if (tags.containsAny(per_tags)) {
+				// only one person PlayList allowed!
+				if (personal != null)
+					return null;
+				personal = pl;
+			}
+		}
+		return personal;
 	}
 }
