@@ -40,7 +40,7 @@ public class PlayListImpl extends BaseObjectImpl implements PlayList {
 	/** Load all the play lists */
 	static public void loadAll() throws TMSException {
 		ent_map = new PlayListMapping(store);
-		store.query("SELECT name, meta, seq_num, description " +
+		store.query("SELECT name, meta, seq_num, notes " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -68,7 +68,7 @@ public class PlayListImpl extends BaseObjectImpl implements PlayList {
 		map.put("name", name);
 		map.put("meta", meta);
 		map.put("seq_num", seq_num);
-		map.put("description", description);
+		map.put("notes", notes);
 		return map;
 	}
 
@@ -83,18 +83,18 @@ public class PlayListImpl extends BaseObjectImpl implements PlayList {
 		this(row.getString(1),           // name
 		     row.getBoolean(2),          // meta
 		     (Integer) row.getObject(3), // seq_num
-		     row.getString(4)            // description
+		     row.getString(4)            // notes
 		);
 	}
 
 	/** Create a play list from database lookup */
-	private PlayListImpl(String n, boolean m, Integer sn, String d)
+	private PlayListImpl(String n, boolean m, Integer sn, String nt)
 		throws TMSException
 	{
 		this(n);
 		meta = m;
 		seq_num = sn;
-		description = d;
+		notes = nt;
 	}
 
 	/** Initialize the transient state */
@@ -140,27 +140,27 @@ public class PlayListImpl extends BaseObjectImpl implements PlayList {
 		return seq_num;
 	}
 
-	/** Description of the play list */
-	private String description;
+	/** Notes (including hashtags) */
+	private String notes;
 
-	/** Set the description */
+	/** Set notes (including hashtags) */
 	@Override
-	public void setDescription(String d) {
-		description = d;
+	public void setNotes(String n) {
+		notes = n;
 	}
 
-	/** Set the description */
-	public void doSetDescription(String d) throws TMSException {
-		if (!objectEquals(d, description)) {
-			store.update(this, "description", d);
-			setDescription(d);
+	/** Set notes (including hashtags) */
+	public void doSetNotes(String n) throws TMSException {
+		if (!objectEquals(n, notes)) {
+			store.update(this, "notes", n);
+			setNotes(n);
 		}
 	}
 
-	/** Get the description */
+	/** Get notes (including hashtags) */
 	@Override
-	public String getDescription() {
-		return description;
+	public String getNotes() {
+		return notes;
 	}
 
 	/** Entries in the play list */

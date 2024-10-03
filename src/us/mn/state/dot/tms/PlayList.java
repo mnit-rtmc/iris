@@ -50,11 +50,11 @@ public interface PlayList extends SonarObject {
 	/** Get sequence number */
 	Integer getSeqNum();
 
-	/** Set description */
-	void setDescription(String d);
+	/** Set notes (including hashtags) */
+	void setNotes(String n);
 
-	/** Get description */
-	String getDescription();
+	/** Get notes (including hashtags) */
+	String getNotes();
 
 	/** Set the entries in the play list */
 	void setEntries(String[] ents);

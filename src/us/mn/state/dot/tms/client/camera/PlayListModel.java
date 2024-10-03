@@ -80,16 +80,16 @@ public class PlayListModel extends ProxyTableModel<PlayList> {
 				pl.setSeqNum(sn);
 			}
 		});
-		cols.add(new ProxyColumn<PlayList>("play.list.desc", 300) {
+		cols.add(new ProxyColumn<PlayList>("play.list.notes", 300) {
 			public Object getValueAt(PlayList pl) {
-				return pl.getDescription();
+				return pl.getNotes();
 			}
 			public boolean isEditable(PlayList pl) {
 				return canWrite(pl);
 			}
 			public void setValueAt(PlayList pl, Object value) {
 				String v = value.toString().trim();
-				pl.setDescription((v.length() > 0) ? v : null);
+				pl.setNotes((v.length() > 0) ? v : null);
 			}
 		});
 		return cols;
