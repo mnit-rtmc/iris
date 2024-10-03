@@ -1,6 +1,13 @@
 --
 -- PostgreSQL database template for IRIS
 --
+-- ** Overview **
+--
+-- * public schema contains only VIEWs
+-- * LUTs are updated only on version changes
+-- * LUTs should have 'id' INTEGER + 'description' VARCHAR (no len constraint)
+-- * Columns named 'notes' may include hashtags.
+--
 SET client_encoding = 'UTF8';
 
 \set ON_ERROR_STOP
