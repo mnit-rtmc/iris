@@ -155,20 +155,20 @@ public class AttributeDispatcher {
 
 	/** Lookup all the attributes of the specified class */
 	private void lookup_attributes(Class c) {
-		while (c != null) {
-			for (Class iface: c.getInterfaces()) {
-				if (is_sonar_iface(iface)) {
-					lookup_iface_attributes(iface);
-					lookup_attributes(iface);
-				}
-			}
-			c = c.getSuperclass();
+		// Lookup super classes first to allow method overrides
+		Class sup = c.getSuperclass();
+		if (sup != null)
+			lookup_attributes(sup);
+		for (Class iface: c.getInterfaces()) {
+			if (is_sonar_iface(iface))
+				lookup_iface_attributes(iface);
 		}
 	}
 
 	/** Lookup all the attributes of the specified interface */
 	private void lookup_iface_attributes(Class iface) {
-		for (Method m: iface.getDeclaredMethods()) {
+		// Lookup all methods, in case of overrides
+		for (Method m: iface.getMethods()) {
 			String n = m.getName();
 			if (n.startsWith("set"))
 				lookup_setter(m);
