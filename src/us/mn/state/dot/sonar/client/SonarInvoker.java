@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ class SonarInvoker implements InvocationHandler {
 	/** Get an attribute name from a method */
 	static protected String attribute_name(String prefix, Method m) {
 		String n = m.getName();
-		if(n.startsWith(prefix)) {
+		if (n.startsWith(prefix)) {
 			int p = prefix.length();
 			StringBuilder b = new StringBuilder();
 			b.append(Character.toLowerCase(n.charAt(p)));
@@ -48,9 +48,9 @@ class SonarInvoker implements InvocationHandler {
 		String prefix)
 	{
 		HashMap<Method, String> methods = new HashMap<Method, String>();
-		for(Method m: iface.getMethods()) {
+		for (Method m: iface.getMethods()) {
 			String a = attribute_name(prefix, m);
-			if(a != null)
+			if (a != null)
 				methods.put(m, a);
 		}
 		return methods;
@@ -93,44 +93,44 @@ class SonarInvoker implements InvocationHandler {
 		throws SonarException
 	{
 		assert proxy instanceof SonarObject;
-		SonarObject o = (SonarObject)proxy;
-		if(getters.containsKey(method))
+		SonarObject o = (SonarObject) proxy;
+		if (getters.containsKey(method))
 			return cache.getAttribute(o, getters.get(method));
-		else if(setters.containsKey(method)) {
+		else if (setters.containsKey(method)) {
 			String aname = setters.get(method);
 			boolean check = getters.containsValue(aname);
 			cache.setAttribute(o, aname, args, check);
 			return null;
 		} else {
 			String m = method.getName();
-			if(m.equals("hashCode"))
+			if (m.equals("hashCode"))
 				return System.identityHashCode(proxy);
-			if(m.equals("equals"))
+			if (m.equals("equals"))
 				return proxy == args[0];
-			if(m.equals("toString"))
+			if (m.equals("toString"))
 				return cache.getAttribute(o, "name");
-			if(m.equals("destroy")) {
+			if (m.equals("destroy")) {
 				cache.removeObject(o);
 				return null;
 			}
+			throw NamespaceError.nameUnknown("method: " + m);
 		}
-		throw NamespaceError.nameUnknown("*method*");
 	}
 
 	/** Create attributes for one proxy instance */
 	public Map<String, Attribute> createAttributes(String name) {
 		HashMap<String, Attribute> amap =
 			new HashMap<String, Attribute>();
-		for(Map.Entry<Method, String> e: getters.entrySet()) {
+		for (Map.Entry<Method, String> e: getters.entrySet()) {
 			Method m = e.getKey();
 			String n = e.getValue();
 			Attribute a = new Attribute(m.getReturnType());
 			amap.put(n, a);
 		}
-		for(Map.Entry<Method, String> e: setters.entrySet()) {
+		for (Map.Entry<Method, String> e: setters.entrySet()) {
 			Method m = e.getKey();
 			String n = e.getValue();
-			if(!amap.containsKey(n)) {
+			if (!amap.containsKey(n)) {
 				Class[] p_types = m.getParameterTypes();
 				Attribute a = new Attribute(p_types[0]);
 				amap.put(n, a);
