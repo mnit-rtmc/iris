@@ -117,7 +117,4 @@ public interface R_Node extends SonarObject {
 
 	/** Set the administrator notes */
 	void setNotes(String n);
-
-	/** Get the administrator notes */
-	String getNotes();
 }

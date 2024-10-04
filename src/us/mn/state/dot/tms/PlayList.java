@@ -41,13 +41,6 @@ public interface PlayList extends SonarObject {
 	/** SONAR base type name */
 	String SONAR_BASE = VideoMonitor.SONAR_TYPE;
 
-	/** Check if an object has an associated hashtag */
-	@Override
-	default boolean hasHashtag(String h) {
-		Hashtags tags = new Hashtags(getNotes());
-		return tags.contains(h);
-	}
-
 	/** Get meta list flag */
 	boolean getMeta();
 
@@ -59,9 +52,6 @@ public interface PlayList extends SonarObject {
 
 	/** Set notes (including hashtags) */
 	void setNotes(String n);
-
-	/** Get notes (including hashtags) */
-	String getNotes();
 
 	/** Set the entries in the play list */
 	void setEntries(String[] ents);

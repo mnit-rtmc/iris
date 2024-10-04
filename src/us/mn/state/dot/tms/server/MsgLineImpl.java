@@ -120,6 +120,12 @@ public class MsgLineImpl extends BaseObjectImpl implements MsgLine {
 		}
 	}
 
+	/** Get notes (including hashtag) */
+	@Override
+	public String getNotes() {
+		return getRestrictHashtag();
+	}
+
 	/** Line number on sign (usually 1-3) */
 	private short line;
 

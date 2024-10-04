@@ -72,16 +72,16 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 		return (c != null) ? c.getPoller() : null;
 	}
 
-	/** Administrator notes for this device */
+	/** Notes (including hashtags) */
 	protected String notes;
 
-	/** Set the administrator notes */
+	/** Set notes (including hashtags) */
 	@Override
 	public void setNotes(String n) {
 		notes = n;
 	}
 
-	/** Set the administrator notes */
+	/** Set notes (including hashtags) */
 	public void doSetNotes(String n) throws TMSException {
 		if (!objectEquals(n, notes)) {
 			store.update(this, "notes", n);
@@ -89,7 +89,7 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 		}
 	}
 
-	/** Get the administrator notes */
+	/** Get notes (including hashtags) */
 	@Override
 	public String getNotes() {
 		return notes;

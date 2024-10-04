@@ -93,6 +93,12 @@ public class ConnectionImpl extends Conduit implements Connection {
 		return hostport;
 	}
 
+	/** Get notes (including hashtags) */
+	@Override
+	public String getNotes() {
+		return null;
+	}
+
 	/** Get a string representation */
 	@Override
 	public String toString() {

@@ -53,6 +53,12 @@ public class ClientIncident implements Incident {
 		return NAME + Integer.toString(System.identityHashCode(this));
 	}
 
+	/** Get notes (including hashtags) */
+	@Override
+	public String getNotes() {
+		return null;
+	}
+
 	/** Name of replaced incident */
 	private final String replaces;
 

@@ -36,13 +36,6 @@ public interface MsgLine extends SonarObject {
 	/** SONAR base type name */
 	String SONAR_BASE = DMS.SONAR_TYPE;
 
-	/** Check if an object has an associated hashtag */
-	@Override
-	default boolean hasHashtag(String h) {
-		Hashtags tags = new Hashtags(getRestrictHashtag());
-		return tags.contains(h);
-	}
-
 	/** Maximum length of MULTI string */
 	int MAX_LEN_MULTI = 64;
 

@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import org.postgis.MultiPolygon;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.Permission;
 import us.mn.state.dot.tms.Role;
 import us.mn.state.dot.tms.User;
@@ -256,8 +257,9 @@ abstract public class Namespace {
 		if (p.getBaseResource().equals(base)) {
 			String h = p.getHashtag();
 			if (h != null) {
-				SonarObject obj = lookupObject(name);
-				if (obj != null && obj.hasHashtag(h))
+				SonarObject o = lookupObject(name);
+				String n = (o != null) ? o.getNotes() : null;
+				if (n != null && new Hashtags(n).contains(h))
 					return p.getAccessLevel();
 			} else
 				return p.getAccessLevel();

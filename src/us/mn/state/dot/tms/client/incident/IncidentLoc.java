@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -56,6 +56,12 @@ public class IncidentLoc implements GeoLoc {
 	@Override
 	public String getName() {
 		return "iloc_" + incident.getName();
+	}
+
+	/** Get notes (including hashtags) */
+	@Override
+	public String getNotes() {
+		return null;
 	}
 
 	/** Destroy the incident loc */

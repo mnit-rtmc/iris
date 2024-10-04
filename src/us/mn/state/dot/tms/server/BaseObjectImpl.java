@@ -422,6 +422,12 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		return name;
 	}
 
+	/** Get notes (including hashtags) */
+	@Override
+	public String getNotes() {
+		return null;
+	}
+
 	/** Create a new base object */
 	protected BaseObjectImpl(String n) {
 		name = n;

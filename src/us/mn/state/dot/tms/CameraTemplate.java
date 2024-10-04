@@ -52,9 +52,6 @@ public interface CameraTemplate extends SonarObject {
 	/** Set the label */
 	void setLabel(String label);
 
-	/** Get the notes */
-	String getNotes();
-
 	/** Set the notes */
 	void setNotes(String notes);
 }

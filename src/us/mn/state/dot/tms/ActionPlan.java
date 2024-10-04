@@ -32,18 +32,8 @@ public interface ActionPlan extends SonarObject {
 		return SONAR_TYPE;
 	}
 
-	/** Check if an object has an associated hashtag */
-	@Override
-	default boolean hasHashtag(String h) {
-		Hashtags tags = new Hashtags(getNotes());
-		return tags.contains(h);
-	}
-
 	/** Set administrator notes (including hashtags) */
 	void setNotes(String n);
-
-	/** Get administrator notes (including hashtags) */
-	String getNotes();
 
 	/** Set the sync actions flag */
 	void setSyncActions(boolean s);

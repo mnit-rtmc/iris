@@ -152,11 +152,6 @@ public interface VidSourceTemplate extends SonarObject {
 	 */
 	void setMulticast(Boolean multicast);
 
-	/** Get the notes for this template.
-	 * @return the notes string (or null)
-	 */
-	String getNotes();
-
 	/** Set the notes for this template.
 	 * @param notes the notes string (or null)
 	 */

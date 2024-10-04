@@ -68,11 +68,8 @@ public interface Controller extends SonarObject {
 	/** Get the access password */
 	String getPassword();
 
-	/** Set the administrator notes */
+	/** Set notes (including hashtags) */
 	void setNotes(String n);
-
-	/** Get the administrator notes */
-	String getNotes();
 
 	/** Get setup data read from the controller */
 	String getSetup();

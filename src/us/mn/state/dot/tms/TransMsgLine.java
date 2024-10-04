@@ -58,6 +58,12 @@ public class TransMsgLine implements MsgLine {
 		return "ml_" + multi;
 	}
 
+	/** Get notes (including hashtags) */
+	@Override
+	public String getNotes() {
+		return null;
+	}
+
 	/** Get the message pattern */
 	@Override
 	public MsgPattern getMsgPattern() {

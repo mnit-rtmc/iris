@@ -83,6 +83,12 @@ public class StationImpl implements Station, VehicleSampler {
 		return name;
 	}
 
+	/** Get notes (including hashtags) */
+	@Override
+	public String getNotes() {
+		return null;
+	}
+
 	/** Roadway node */
 	private final R_NodeImpl r_node;
 

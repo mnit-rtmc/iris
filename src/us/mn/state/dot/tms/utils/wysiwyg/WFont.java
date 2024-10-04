@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.utils.wysiwyg;
 
 import java.util.ArrayList;
@@ -30,16 +29,15 @@ public class WFont implements Font {
 
 	/** referenced Font */
 	Font font;
-	
+
 	/** ArrayList (indexed by charNum) of glyphs */
-	private ArrayList<WGlyph> glyphList =
-			new ArrayList<WGlyph>();
-	
+	private ArrayList<WGlyph> glyphList = new ArrayList<WGlyph>();
+
 	/** Maximum char width in font */
 	private int maxCharWidth;
-	
+
 	//===========================================
-	
+
 	/** Pre-expand an ArrayList and pad with nulls. */
 	private void ensureListSize(
 			ArrayList<WGlyph> la,
@@ -94,22 +92,22 @@ public class WFont implements Font {
 			return null;
 		}
 	}
-	
+
 	/** Get glyph for char ch */
 	public WGlyph getGlyph(char ch) {
 		return getGlyph((int)ch);
 	}
-	
+
 	/** Returns an Iterator&lt;WGlyph&gt; for all WGlyphs
 	 *  in the font ordered by character number */
 	public Iterator<WGlyph> glyphs(int fontNum) {
 		return glyphList.iterator();
 	}
-	
+
 	//===========================================
 	// Tools for figuring out pixel-width of
 	// various kinds of text.
-	
+
 	/** Get maximum character width in font */
 	public int getMaxCharWidth() {
 		return maxCharWidth;
@@ -165,7 +163,7 @@ public class WFont implements Font {
 		String str = Integer.toString(i);
 		return getTextWidth(chsp, str);
 	}
-	
+
 	/** Get max pixel-width required to display
 	 *  any number in a range of numbers.
 	 * @param chsp Character spacing (null = use font default)
@@ -182,7 +180,7 @@ public class WFont implements Font {
 		}
 		return wid;
 	}
-	
+
 	//===========================================
 	// Pass-thru methods for accessing the underlying Font
 	
@@ -207,6 +205,12 @@ public class WFont implements Font {
 	@Override
 	public String getTypeName() {
 		return font.getTypeName();
+	}
+
+	/** Get notes (including hashtags) */
+	@Override
+	public String getNotes() {
+		return null;
 	}
 
 	/* (non-Javadoc)

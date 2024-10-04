@@ -93,6 +93,12 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
 		compose_hashtag = cht;
 	}
 
+	/** Get notes (including hashtags) */
+	@Override
+	public String getNotes() {
+		return getComposeHashtag();
+	}
+
 	/** Message MULTI string, contains message text for all pages */
 	private String multi = "";
 

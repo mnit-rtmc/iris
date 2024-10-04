@@ -22,18 +22,8 @@ package us.mn.state.dot.tms;
  */
 public interface Device extends ControllerIO {
 
-	/** Check if an object has an associated hashtag */
-	@Override
-	default boolean hasHashtag(String h) {
-		Hashtags tags = new Hashtags(getNotes());
-		return tags.contains(h);
-	}
-
-	/** Set administrator notes (including hashtags) */
+	/** Set notes (including hashtags) */
 	void setNotes(String n);
-
-	/** Get administrator notes (including hashtags) */
-	String getNotes();
 
 	/** Request a device operation (query message, test pixels, etc.) */
 	void setDeviceRequest(int r);
