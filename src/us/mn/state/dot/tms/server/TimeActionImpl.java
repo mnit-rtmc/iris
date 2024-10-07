@@ -19,7 +19,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DayPlanHelper;
@@ -51,13 +50,12 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new TimeActionImpl(
-					namespace,
-					row.getString(1),	// name
-					row.getString(2),	// action_plan
-					row.getString(3),	// day_plan
-					row.getDate(4),		// sched_date
-					row.getTime(5),		// time_of_day
-					row.getString(6)	// phase
+					row.getString(1), // name
+					row.getString(2), // action_plan
+					row.getString(3), // day_plan
+					row.getDate(4),   // sched_date
+					row.getTime(5),   // time_of_day
+					row.getString(6)  // phase
 				));
 			}
 		});
@@ -82,28 +80,19 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	}
 
 	/** Create a new time action */
-	protected TimeActionImpl(Namespace ns, String n, String a, String d,
-		Date sd, Date tod, String p)
-	{
-		this(n, lookupActionPlan(a),
-		     (DayPlan) ns.lookupObject(DayPlan.SONAR_TYPE, d), sd, tod,
-		     lookupPlanPhase(p));
-	}
-
-	/** Create a new time action */
-	public TimeActionImpl(String n, ActionPlan a, DayPlan d, Date sd,
-		Date tod, PlanPhase p)
+	protected TimeActionImpl(String n, String a, String d, Date sd,
+		Date tod, String p)
 	{
 		this(n);
-		action_plan = a;
-		day_plan = d;
+		action_plan = lookupActionPlan(a);
+		day_plan = lookupDayPlan(d);
 		sched_date = TimeActionHelper.formatDate(sd);
 		time_of_day = TimeActionHelper.formatTime(tod);
-		phase = p;
+		phase = lookupPlanPhase(p);
 	}
 
 	/** Action plan */
-	protected ActionPlan action_plan;
+	private ActionPlan action_plan;
 
 	/** Get the action plan */
 	@Override
@@ -112,7 +101,7 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	}
 
 	/** Day plan */
-	protected DayPlan day_plan;
+	private DayPlan day_plan;
 
 	/** Get the day plan */
 	@Override
@@ -121,7 +110,7 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	}
 
 	/** Scheduled date */
-	protected String sched_date;
+	private String sched_date;
 
 	/** Get the scheduled date */
 	@Override
@@ -130,7 +119,7 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	}
 
 	/** Time-of-day */
-	protected String time_of_day;
+	private String time_of_day;
 
 	/** Get the time-of-day */
 	@Override
@@ -149,10 +138,10 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 
 	/** Set the phase to trigger */
 	public void doSetPhase(PlanPhase p) throws TMSException {
-		if(p == phase)
-			return;
-		store.update(this, "phase", p);
-		setPhase(p);
+		if (p != phase) {
+			store.update(this, "phase", p);
+			setPhase(p);
+		}
 	}
 
 	/** Get the phase to trigger */
@@ -181,7 +170,7 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 
 	/** Test if the date schedule is valid for the specified date */
 	private boolean isDateScheduleValid(Calendar cal) {
-		if(sched_date == null)
+		if (sched_date == null)
 			return false;
 		Calendar sd = Calendar.getInstance();
 		sd.setTime(TimeActionHelper.parseDate(sched_date));
@@ -193,9 +182,9 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	/** Perform the time action */
 	protected void perform() throws TMSException {
 		ActionPlan ap = action_plan;	// Avoid race
-		if(ap instanceof ActionPlanImpl) {
-			ActionPlanImpl api = (ActionPlanImpl)ap;
-			if(api.getActive())
+		if (ap instanceof ActionPlanImpl) {
+			ActionPlanImpl api = (ActionPlanImpl) ap;
+			if (api.getActive())
 				api.setPhaseNotify(getPhase());
 		}
 	}

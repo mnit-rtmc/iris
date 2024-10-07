@@ -657,13 +657,12 @@ public class AlertData {
 	private void createTimeAction(ActionPlanImpl plan, Date dt, String ph)
 		throws SonarException
 	{
-		String tname = TimeActionImpl.createUniqueName(plan.getName() +
-			"_%d");
-		PlanPhase phase = PlanPhaseHelper.lookup(ph);
-		if (phase == null)
+		String pname = plan.getName();
+		String tname = TimeActionImpl.createUniqueName(pname + "_%d");
+		TimeActionImpl ta = new TimeActionImpl(tname, pname, null, dt,
+			dt, ph);
+		if (ta.getPhase() == null)
 			log("plan phase not found, " + ph);
-		TimeActionImpl ta = new TimeActionImpl(tname, plan, null, dt,
-			dt, phase);
 		log("created time action " + tname);
 		ta.notifyCreate();
 	}
