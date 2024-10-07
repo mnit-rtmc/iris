@@ -50,7 +50,7 @@ public class PermissionHelper extends BaseHelper {
 			String tag = p.getHashtag();
 			if (tag != null &&
 			    p.getRole() == role &&
-			    p.getBaseResource() == PlayList.SONAR_BASE &&
+			    PlayList.SONAR_BASE.equals(p.getBaseResource()) &&
 			    p.getAccessLevel() == AccessLevel.MANAGE.ordinal())
 			{
 				notes = Hashtags.add(notes, tag);
