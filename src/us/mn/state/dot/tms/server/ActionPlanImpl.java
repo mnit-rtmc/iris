@@ -324,15 +324,14 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Set the deployed phase (and notify clients) */
 	public boolean setPhaseNotify(PlanPhase p) throws TMSException {
 		boolean change = (p != phase);
-		if (change)
-			doSetPhaseNotify(p);
+		if (change) {
+			if (getSyncActions())
+				validateDeviceActions(); // throws exception
+			store.update(this, "phase", p);
+			setPhase(p);
+			notifyAttribute("phase");
+		}
 		return change;
-	}
-
-	/** Set the deployed phase with notification */
-	private void doSetPhaseNotify(PlanPhase p) throws TMSException {
-		doSetPhase(p);
-		notifyAttribute("phase");
 	}
 
 	/**
