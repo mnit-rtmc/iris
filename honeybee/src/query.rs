@@ -79,7 +79,7 @@ pub const CAMERA_ONE: &str = "\
 ///
 /// FIXME: remove streamable when client has updated
 pub const CAMERA_PUB: &str = "\
-  SELECT c.name, publish, s.name IS NOT NULL AS streamable, hashtags, \
+  SELECT c.name, cam_num, publish, s.name IS NOT NULL AS streamable, hashtags,\
          roadway, road_dir, cross_street, location, lat, lon, \
          ARRAY(\
            SELECT view_num \
