@@ -57,6 +57,10 @@ public class OpQueryDMSMessage extends OpDMS {
 	private final ASN1Integer beacon = dmsMessageBeacon.makeInt(
 		DmsMessageMemoryType.currentBuffer, 1);
 
+	/** Pixel service for current buffer */
+	private final ASN1Integer srv = dmsMessagePixelService.makeInt(
+		DmsMessageMemoryType.currentBuffer, 1);
+
 	/** Message priority for current buffer */
 	private final ASN1Enum<SignMsgPriority> prior = new ASN1Enum<
 		SignMsgPriority>(SignMsgPriority.class, dmsMessageRunTimePriority
@@ -95,6 +99,11 @@ public class OpQueryDMSMessage extends OpDMS {
 	/** Get flash beacon flag for a sign message */
 	private boolean getFlashBeacon(SignMessage sm) {
 		return (sm != null) ? sm.getFlashBeacon() : false;
+	}
+
+	/** Get pixel service flag for a sign message */
+	private boolean getPixelService(SignMessage sm) {
+		return (sm != null) ? sm.getPixelService() : false;
 	}
 
 	/** Phase to query the current message source (memory type) */
@@ -172,8 +181,9 @@ public class OpQueryDMSMessage extends OpDMS {
 	private boolean checkMsgCrc(SignMessage sm, boolean gids) {
 		String ms = lookupMulti(sm);
 		boolean fb = getFlashBeacon(sm);
+		boolean ps = getPixelService(sm);
 		ms = (gids) ? addGraphicIds(ms) : ms;
-		int crc = DmsMessageCRC.calculate(ms, fb, false);
+		int crc = DmsMessageCRC.calculate(ms, fb, ps);
 		return source.getCrc() == crc;
 	}
 
@@ -189,6 +199,10 @@ public class OpQueryDMSMessage extends OpDMS {
 				mess.add(beacon);
 			else
 				beacon.setInteger(0);
+			if (supportsPixelService())
+				mess.add(srv);
+			else
+				srv.setInteger(0);
 			mess.add(prior);
 			mess.add(status);
 			mess.add(time);
@@ -197,6 +211,8 @@ public class OpQueryDMSMessage extends OpDMS {
 			logQuery(msg_owner);
 			if (supportsBeaconActivation())
 				logQuery(beacon);
+			if (supportsPixelService())
+				logQuery(srv);
 			logQuery(prior);
 			logQuery(status);
 			logQuery(time);
@@ -211,10 +227,11 @@ public class OpQueryDMSMessage extends OpDMS {
 			String ms = multi_string.getValue();
 			String owner = msg_owner.getValue();
 			boolean fb = (beacon.getInteger() == 1);
+			boolean ps = (srv.getInteger() == 1);
 			SignMsgPriority mp = getMsgPriority();
 			Integer duration = parseDuration(time.getInteger());
-			SignMessage sm = dms.createMsg(ms, owner, fb, mp,
-				duration);
+			SignMessage sm = dms.createMsg(ms, owner, fb, ps,
+				mp, duration);
 			setMsgCurrent(sm);
 		} else
 			setErrorStatus("INVALID STATUS: " + status);

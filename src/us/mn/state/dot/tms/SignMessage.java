@@ -68,6 +68,9 @@ public interface SignMessage extends SonarObject {
 	/** Get flash beacon flag */
 	boolean getFlashBeacon();
 
+	/** Get pixel service flag */
+	boolean getPixelService();
+
 	/** Get the message priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.SignMsgPriority */

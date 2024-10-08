@@ -532,4 +532,28 @@ DROP TABLE iris._catalog;
 DROP TABLE iris._play_list;
 DROP TABLE iris._cam_sequence;
 
+-- Add pixel_service to sign_message
+ALTER TABLE iris.sign_message ADD COLUMN pixel_service BOOLEAN;
+UPDATE iris.sign_message SET pixel_service = false;
+ALTER TABLE iris.sign_message ALTER COLUMN pixel_service SET NOT NULL;
+
+DROP VIEW sign_message_view;
+CREATE VIEW sign_message_view AS
+    SELECT name, sign_config, incident, multi, msg_owner, flash_beacon,
+           pixel_service, msg_priority, duration
+    FROM iris.sign_message;
+GRANT SELECT ON sign_message_view TO PUBLIC;
+
+DROP VIEW dms_message_view;
+CREATE VIEW dms_message_view AS
+    SELECT d.name, msg_current, cc.description AS condition,
+           fail_time IS NOT NULL AS failed, multi, msg_owner, flash_beacon,
+           pixel_service, msg_priority, duration, expire_time
+    FROM iris._dms d
+    LEFT JOIN iris.controller_io cio ON d.name = cio.name
+    LEFT JOIN iris.controller c ON cio.controller = c.name
+    LEFT JOIN iris.condition cc ON c.condition = cc.id
+    LEFT JOIN iris.sign_message sm ON d.msg_current = sm.name;
+GRANT SELECT ON dms_message_view TO PUBLIC;
+
 COMMIT;

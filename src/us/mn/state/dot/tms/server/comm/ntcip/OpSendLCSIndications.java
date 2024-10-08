@@ -100,7 +100,7 @@ public class OpSendLCSIndications extends OpLCS {
 				user.getName()
 			);
 			SignMsgPriority mp = SignMsgPriority.high_1;
-			return dms.createMsg(ms, owner, false, mp, null);
+			return dms.createMsg(ms, owner, false, false, mp, null);
 		}
 	}
 

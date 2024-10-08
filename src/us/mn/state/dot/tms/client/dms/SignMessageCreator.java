@@ -113,7 +113,7 @@ public class SignMessageCreator {
 	{
 		String owner = SignMessageHelper.makeMsgOwner(src, user);
 		String nm = "usr_" + SignMessageHelper.makeHash(sc, inc, ms,
-			owner, fb, mp, dur);
+			owner, fb, false, mp, dur);
 		SignMessage sm = SignMessageHelper.lookup(nm);
 		if (sm != null)
 			return sm;

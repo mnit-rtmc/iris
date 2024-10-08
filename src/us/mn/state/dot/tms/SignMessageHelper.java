@@ -83,15 +83,16 @@ public class SignMessageHelper extends BaseHelper {
 	 * @param ms MULTI string.
 	 * @param owner Message owner.
 	 * @param fb Flash beacon flag.
+	 * @param ps Pixel service flag.
 	 * @param mp Message priority.
 	 * @param dur Duration (null for indefinite).
 	 * @return Hash code of sign message. */
 	static public String makeHash(SignConfig sc, String inc,
-		String ms, String owner, boolean fb, SignMsgPriority mp,
-		Integer dur)
+		String ms, String owner, boolean fb, boolean ps,
+		SignMsgPriority mp, Integer dur)
 	{
-		int hash = Objects.hash(sc.getName(), inc, ms, owner, fb, mp,
-			dur);
+		int hash = Objects.hash(sc.getName(), inc, ms, owner, fb, ps,
+			mp, dur);
 		return HexString.format(hash, 8);
 	}
 

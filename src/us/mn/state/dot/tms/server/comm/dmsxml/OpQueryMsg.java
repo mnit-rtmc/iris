@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -241,7 +241,7 @@ class OpQueryMsg extends OpDms {
 		SignMsgPriority rpri, Integer duration)
 	{
 		return (SignMessageImpl) m_dms.createMsg(multi, owner, false,
-			rpri, duration);
+			false, rpri, duration);
 	}
 
 	/** Return a MULTI with an updated page on-time with the value read

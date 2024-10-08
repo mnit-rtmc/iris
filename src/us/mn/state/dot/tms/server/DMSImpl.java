@@ -34,6 +34,7 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.CameraPreset;
@@ -530,22 +531,24 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		src |= SignMsgSource.blank.bit();
 		String owner = SignMessageHelper.makeMsgOwner(src);
 		SignMsgPriority mp = SignMsgPriority.low_1;
+		// Allow pixel service during blank messages
 		return SignMessageImpl.findOrCreate(sign_config, null, "",
-			owner, false, mp, null);
+			owner, false, true, mp, null);
 	}
 
 	/** Create a message for the sign.
 	 * @param ms MULTI string for message.
 	 * @param owner Message owner.
 	 * @param fb Flash beacon flag.
+	 * @param ps Pixel service flag.
 	 * @param mp Message priority.
 	 * @param dur Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	public SignMessage createMsg(String ms, String owner, boolean fb,
-		SignMsgPriority mp, Integer dur)
+		boolean ps, SignMsgPriority mp, Integer dur)
 	{
 		return SignMessageImpl.findOrCreate(sign_config, null, ms,
-			owner, fb, mp, dur);
+			owner, fb, ps, mp, dur);
 	}
 
 	/** Create a scheduled message.
@@ -554,26 +557,20 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private SignMessage createMsgSched(ActionTagMsg amsg) {
 		assert (amsg != null);
 		DeviceAction da = amsg.action;
+		ActionPlan ap = da.getActionPlan();
 		String ms = amsg.getMulti();
 		int src = amsg.getSources();
 		String owner = SignMessageHelper.makeMsgOwner(src,
-			da.getActionPlan().getName());
+			ap.getName());
 		MsgPattern pat = da.getMsgPattern();
 		boolean fb = (pat != null) && pat.getFlashBeacon();
+		// Only allow pixel service for sticky messages
+		boolean ps = ap.getSticky();
 		SignMsgPriority mp = SignMsgPriority.fromOrdinal(
 			da.getMsgPriority());
-		Integer dur = getDuration(da);
+		Integer dur = ap.getSticky() ? null : getUnstickyDurationMins();
 		return SignMessageImpl.findOrCreate(sign_config, null, ms,
-			owner, fb, mp, dur);
-	}
-
-	/** Get the duration of a device action.
-	 * @param da Device action.
-	 * @return Duration (minutes), or null for indefinite. */
-	private Integer getDuration(DeviceAction da) {
-		return da.getActionPlan().getSticky()
-		     ? null
-		     : getUnstickyDurationMins();
+			owner, fb, ps, mp, dur);
 	}
 
 	/** Get the duration of an unsticky action */
@@ -904,6 +901,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	{
 		String inc = user.getIncident();
 		boolean fb = user.getFlashBeacon();
+		boolean ps = user.getPixelService();
 		SignMsgPriority mp = SignMsgPriority.fromOrdinal(
 			user.getMsgPriority());
 		// combine user and scheduled message sources
@@ -917,7 +915,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		String owner = SignMessageHelper.makeMsgOwner(src, unm);
 		Integer dur = user.getDuration();
 		return SignMessageImpl.findOrCreate(sign_config, inc, ms,
-			owner, fb, mp, dur);
+			owner, fb, ps, mp, dur);
 	}
 
 	/** Compare sign messages for higher priority */

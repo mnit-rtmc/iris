@@ -173,7 +173,7 @@ public class OpSendDMSMessage extends OpDMS {
 		multi = addGraphicIds(sm.getMulti());
 		msg_num = lookupMsgNum(multi);
 		message_crc = DmsMessageCRC.calculate(multi,
-			sm.getFlashBeacon(), false);
+			sm.getFlashBeacon(), sm.getPixelService());
 		status = makeStatus(DmsMessageMemoryType.changeable, msg_num);
 		graphics = GraphicHelper.lookupMulti(multi);
 	}
@@ -341,7 +341,7 @@ public class OpSendDMSMessage extends OpDMS {
 			multi_string.setString(multi);
 			msg_owner.setString(message.getMsgOwner());
 			beacon.setInteger(message.getFlashBeacon() ? 1 : 0);
-			srv.setInteger(0);
+			srv.setInteger(message.getPixelService() ? 1 : 0);
 			prior.setInteger(message.getMsgPriority());
 			mess.add(multi_string);
 			mess.add(msg_owner);
