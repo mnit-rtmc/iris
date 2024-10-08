@@ -31,6 +31,7 @@ struct SignMessage {
     multi: String,
     msg_owner: String,
     flash_beacon: bool,
+    pixel_service: bool,
     msg_priority: i32,
     duration: Option<i32>,
 }

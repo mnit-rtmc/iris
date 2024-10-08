@@ -396,6 +396,7 @@ impl DmsAnc {
                 && m.multi == msg.multi
                 && m.msg_owner == msg.msg_owner
                 && m.flash_beacon == msg.flash_beacon
+                && m.pixel_service == msg.pixel_service
                 && m.msg_priority == msg.msg_priority
                 && m.duration == msg.duration
         })

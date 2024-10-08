@@ -27,6 +27,7 @@ pub struct SignMessage {
     pub multi: String,
     pub msg_owner: String,
     pub flash_beacon: bool,
+    pub pixel_service: bool,
     pub msg_priority: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub duration: Option<u32>,
