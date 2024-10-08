@@ -9,7 +9,8 @@ as [DMS]s and [ramp meter]s.
 - **Sync Actions**: if selected, the phase can only be changed if all associated
   devices are online.
 - **Sticky**: if selected, messages sent with [device actions](#device-actions)
-  will be configured to persist even if communication or power is lost.
+  will be configured to persist even if communication or power is lost.  Also,
+  pixel service checks will be enabled.
 - **Ignore Auto-Fail**: if selected, [device action](#device-actions) messages
   will ignore detector [auto-fail] (`[exit` *…* `]` or `[slow` *…* `]` only)
 
