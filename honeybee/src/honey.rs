@@ -85,24 +85,22 @@ pub struct Honey {
 /// No-header response result
 type Resp0 = std::result::Result<StatusCode, StatusCode>;
 
-/// Single-header response result
-type Resp1 =
-    std::result::Result<([(HeaderName, &'static str); 1], String), StatusCode>;
-
 /// Two-header response result
 type Resp2 =
-    std::result::Result<([(HeaderName, &'static str); 2], String), StatusCode>;
-
-/// Two-header response result
-type Resp2b =
     std::result::Result<([(HeaderName, &'static str); 2], Body), StatusCode>;
 
 /// Three-header response result
 type Resp3 = std::result::Result<([(HeaderName, String); 3], Body), StatusCode>;
 
 /// Create an HTML response
-fn html_resp(html: &str) -> Resp1 {
-    Ok(([(header::CONTENT_TYPE, "text/html")], html.to_string()))
+fn html_resp(html: &'static str) -> Resp2 {
+    Ok((
+        [
+            (header::CACHE_CONTROL, "private, no-store"),
+            (header::CONTENT_TYPE, "text/html"),
+        ],
+        Body::from(html),
+    ))
 }
 
 /// Create a JSON response
@@ -112,7 +110,7 @@ fn json_resp(json: String) -> Resp2 {
             (header::CACHE_CONTROL, "private, no-store"),
             (header::CONTENT_TYPE, "application/json"),
         ],
-        json,
+        Body::from(json),
     ))
 }
 
@@ -299,7 +297,7 @@ impl Honey {
 }
 
 /// Build a stream from a file (with max-age 1 day)
-async fn file_stream(fname: &str, content_type: &'static str) -> Resp2b {
+async fn file_stream(fname: &str, content_type: &'static str) -> Resp2 {
     let file = tokio::fs::File::open(fname)
         .await
         .map_err(|_e| StatusCode::NOT_FOUND)?;
@@ -381,7 +379,7 @@ fn public_dir_get() -> Router {
 
 /// `GET` JSON file from LUT directory
 fn lut_dir_get() -> Router {
-    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2b {
+    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2 {
         let fname = format!("lut/{fname}");
         log::info!("GET {fname}");
         file_stream(&fname, "application/json").await
@@ -391,7 +389,7 @@ fn lut_dir_get() -> Router {
 
 /// `GET` file from sign img directory
 fn img_dir_get() -> Router {
-    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2b {
+    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2 {
         let fname = format!("img/{fname}");
         log::info!("GET {fname}");
         file_stream(&fname, "image/gif").await
@@ -401,7 +399,7 @@ fn img_dir_get() -> Router {
 
 /// `GET` file from tfon directory
 fn tfon_dir_get() -> Router {
-    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2b {
+    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2 {
         let fname = format!("tfon/{fname}");
         log::info!("GET {fname}");
         file_stream(&fname, "text/plain").await
@@ -411,7 +409,7 @@ fn tfon_dir_get() -> Router {
 
 /// `GET` file from gif directory
 fn gif_dir_get() -> Router {
-    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2b {
+    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2 {
         let fname = format!("gif/{fname}");
         log::info!("GET {fname}");
         file_stream(&fname, "image/gif").await
@@ -439,7 +437,7 @@ fn login_resource(honey: Honey) -> Router {
         XForwardedFor(xff): XForwardedFor,
         State(honey): State<Honey>,
         Json(cred): Json<Credentials>,
-    ) -> Resp1 {
+    ) -> Resp2 {
         log::info!("POST login from {addr}");
         session
             .cycle_id()
@@ -545,7 +543,7 @@ fn notify_resource(honey: Honey) -> Router {
         session: Session,
         State(honey): State<Honey>,
         Json(channels): Json<Vec<String>>,
-    ) -> Resp1 {
+    ) -> Resp2 {
         log::info!("POST notify");
         let names = try_names_from_channels(&channels)?;
         honey.check_view_channels(&session, &names).await?;
