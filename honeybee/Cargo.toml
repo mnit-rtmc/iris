@@ -8,6 +8,7 @@ edition.workspace = true
 [dependencies]
 argh = "0.1"
 async-trait = "0.1"
+axum = { workspace = true }
 bb8 = { workspace = true }
 bb8-postgres = { workspace = true }
 cidr = { workspace = true }
@@ -15,7 +16,7 @@ env_logger = { workspace = true }
 futures = { version = "0.3", default-features = false }
 headers = "0.4"
 heck = "0.5"
-http = "1"
+http = { workspace = true }
 loam = "0.3"
 log = { workspace = true }
 mvt = "0.9"
@@ -37,10 +38,6 @@ tokio-util = "0.7"
 tower-sessions = "0.10"
 tower-sessions-moka-store = "0.10"
 whoami = "1"
-
-[dependencies.axum]
-version = "0.7"
-features = ["http2"]
 
 [dependencies.axum-extra]
 version = "0.9"
