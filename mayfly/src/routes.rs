@@ -25,12 +25,13 @@ use axum::Router;
 use chrono::{Local, NaiveDate, TimeDelta};
 use serde::Deserialize;
 use std::fmt::{Display, Write};
-use std::io::Read as _;
+use std::io::{ErrorKind, Read as _};
 use std::marker::PhantomData;
 use std::path::{Path, PathBuf};
 use tokio::fs::{read_dir, File};
 use tokio::io::AsyncReadExt;
 use tokio::task;
+use zip::result::ZipError;
 
 /// Base traffic archive path
 const BASE_PATH: &str = "/var/lib/iris/traffic";
@@ -162,11 +163,7 @@ fn date_path(district: &Option<String>, date: &str) -> Result<PathBuf> {
 /// Get path to a date traffic (zip) file
 fn zip_path(district: &Option<String>, date: &str) -> Result<PathBuf> {
     parse_date(date)?;
-    let mut path = PathBuf::from(BASE_PATH);
-    let district = district.as_deref().unwrap_or(DISTRICT_DEFAULT);
-    path.push(district);
-    path.push(date.get(..4).unwrap_or("")); // year
-    path.push(date);
+    let mut path = date_path(district, date)?;
     path.set_extension(EXT);
     Ok(path)
 }
@@ -405,7 +402,7 @@ pub fn corridors_get() -> Router {
         let path = corridors.0.zip_path()?;
         let mut scanner = Scanner::new();
         match scanner.scan_zip(&path, check_corridor).await {
-            Err(Error::NotFound) => {
+            Err(Error::Io(e)) if e.kind() == ErrorKind::NotFound => {
                 let path = corridors.0.path()?;
                 scanner.scan_dir(&path, check_corridor).await?;
             }
@@ -425,9 +422,7 @@ fn check_corridor(nm: &str, dir: bool) -> bool {
 impl Detectors {
     /// Get path to directory
     fn path(&self) -> Result<PathBuf> {
-        let mut path = date_path(&self.district, &self.date)?;
-        path.push("corridors");
-        Ok(path)
+        date_path(&self.district, &self.date)
     }
 
     /// Get path to (zip) file
@@ -442,11 +437,12 @@ pub fn detectors_get() -> Router {
         let path = detectors.0.zip_path()?;
         let mut scanner = Scanner::new();
         match scanner.scan_zip(&path, check_detector).await {
-            Err(Error::NotFound) => {
+            Err(Error::Io(e)) if e.kind() == ErrorKind::NotFound => {
                 let path = detectors.0.path()?;
                 match scanner.scan_dir(&path, check_detector).await {
-                    Ok(_) | Err(Error::NotFound) => (),
+                    Err(Error::Io(e)) if e.kind() == ErrorKind::NotFound => (),
                     Err(e) => Err(e)?,
+                    Ok(_) => (),
                 }
             }
             Err(e) => Err(e)?,
@@ -454,7 +450,7 @@ pub fn detectors_get() -> Router {
         }
         scanner.into_json()
     }
-    Router::new().route("/corridors", get(handler))
+    Router::new().route("/detectors", get(handler))
 }
 
 /// Check for detector IDs
@@ -486,7 +482,8 @@ where
     fn lookup_zipped_blocking(self, mut traffic: Traffic) -> Result<String> {
         if !self.filter().is_filtered() {
             match self.lookup_zipped_bin(&mut traffic) {
-                Err(Error::NotFound) => (),
+                Err(Error::Zip(ZipError::FileNotFound)) => (),
+                Err(Error::Io(e)) if e.kind() == ErrorKind::NotFound => (),
                 res => return res,
             }
         }
@@ -496,35 +493,27 @@ where
     /// Lookup archived data from 30-second binned data (blocking)
     fn lookup_zipped_bin(&self, traffic: &mut Traffic) -> Result<String> {
         let name = self.binned_file_name();
-        match traffic.by_name(&name) {
-            Ok(mut zf) => {
-                log::info!("opened {} in {}.{}", name, self.date, EXT);
-                let mut buf = Self::make_bin_buffer(zf.size())?;
-                zf.read_exact(&mut buf)?;
-                Ok(self.make_binned_body(buf))
-            }
-            _ => Err(Error::NotFound),
-        }
+        let mut zf = traffic.by_name(&name)?;
+        log::info!("opened {} in {}.{}", name, self.date, EXT);
+        let mut buf = Self::make_bin_buffer(zf.size())?;
+        zf.read_exact(&mut buf)?;
+        Ok(self.make_binned_body(buf))
     }
 
     /// Read vehicle log data from a zip file (blocking)
     fn lookup_zipped_vlog(&self, traffic: &mut Traffic) -> Result<String> {
         let name = self.vlog_file_name();
-        match traffic.by_name(&name) {
-            Ok(zf) => {
-                log::info!("opened {} in {}.{}", name, self.date, EXT);
-                let vlog = VehLog::from_reader_blocking(zf)?;
-                Ok(self.make_vlog_body(vlog))
-            }
-            _ => Err(Error::NotFound),
-        }
+        let zf = traffic.by_name(&name)?;
+        log::info!("opened {} in {}.{}", name, self.date, EXT);
+        let vlog = VehLog::from_reader_blocking(zf)?;
+        Ok(self.make_vlog_body(vlog))
     }
 
     /// Lookup data from file system (unzipped)
     async fn lookup_unzipped(&self) -> Result<String> {
         if !self.filter().is_filtered() {
             match self.lookup_unzipped_bin().await {
-                Err(Error::NotFound) => (),
+                Err(Error::Io(e)) if e.kind() == ErrorKind::NotFound => (),
                 res => return res,
             }
         }
@@ -547,14 +536,10 @@ where
     async fn lookup_unzipped_vlog(&self) -> Result<String> {
         let mut path = self.date_path()?;
         path.push(self.vlog_file_name());
-        match File::open(&path).await {
-            Ok(file) => {
-                log::info!("opened {:?}", &path);
-                let vlog = VehLog::from_reader_async(file).await?;
-                Ok(self.make_vlog_body(vlog))
-            }
-            _ => Err(Error::NotFound),
-        }
+        let file = File::open(&path).await?;
+        log::info!("opened {:?}", &path);
+        let vlog = VehLog::from_reader_async(file).await?;
+        Ok(self.make_vlog_body(vlog))
     }
 
     /// Create a vehicle filter

@@ -22,7 +22,7 @@ use mayfly::traffic::Traffic;
 use mayfly::vehicle::{VehLog, VehicleFilter};
 use std::ffi::OsString;
 use std::fs::File;
-use std::io::{BufWriter, Write};
+use std::io::{BufWriter, ErrorKind, Write};
 use std::path::{Path, PathBuf};
 use zip::write::SimpleFileOptions;
 use zip::{DateTime, ZipWriter};
@@ -206,7 +206,7 @@ fn backup_path(path: &Path) -> Result<PathBuf> {
             }
         }
     }
-    Err(Error::NotFound)
+    Err(std::io::Error::new(ErrorKind::NotFound, BACKUP_PATH))?
 }
 
 /// Make temp path name

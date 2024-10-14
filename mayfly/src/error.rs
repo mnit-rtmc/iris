@@ -14,7 +14,7 @@
 //
 use axum::response::{IntoResponse, Response};
 use http::StatusCode;
-use std::io;
+use std::io::{self, ErrorKind};
 use zip::result::ZipError;
 
 /// Error enum
@@ -44,10 +44,6 @@ pub enum Error {
     #[error("Join {0}")]
     Join(#[from] tokio::task::JoinError),
 
-    /// Not found
-    #[error("Not found")]
-    NotFound,
-
     /// File exists
     #[error("File exists")]
     FileExists,
@@ -63,9 +59,14 @@ pub type Result<T> = std::result::Result<T, Error>;
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
         let status = match self {
-            Self::NotFound => StatusCode::NOT_FOUND,
             Self::InvalidQuery => StatusCode::BAD_REQUEST,
             Self::InvalidDate => StatusCode::BAD_REQUEST,
+            Self::Io(e) if e.kind() == ErrorKind::TimedOut => {
+                StatusCode::GATEWAY_TIMEOUT
+            }
+            Self::Io(e) if e.kind() == ErrorKind::NotFound => {
+                StatusCode::NOT_FOUND
+            }
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         };
         (status, status.canonical_reason().unwrap_or("WTF")).into_response()

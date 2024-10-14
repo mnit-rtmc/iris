@@ -14,7 +14,7 @@
 //
 use http::StatusCode;
 use std::time::SystemTimeError;
-use tokio::io::ErrorKind;
+use std::io::ErrorKind;
 
 /// Honeybee error
 #[derive(Debug, thiserror::Error)]

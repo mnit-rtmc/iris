@@ -12,7 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::error::{Error, Result};
+use crate::error::Result;
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::BufReader;
@@ -37,7 +37,7 @@ impl Traffic {
 
     /// Open a traffic archive
     fn open(path: PathBuf) -> Result<Self> {
-        let file = File::open(&path).or(Err(Error::NotFound))?;
+        let file = File::open(&path)?;
         let buf = BufReader::new(file);
         let archive = ZipArchive::new(buf)?;
         Ok(Traffic { path, archive })
