@@ -225,14 +225,15 @@ impl Scanner {
     {
         let path = PathBuf::from(path.as_ref());
         let names =
-            task::spawn_blocking(move || scan_zip_sync(path, check)).await?;
+            task::spawn_blocking(move || scan_zip_blocking(path, check))
+                .await?;
         self.names = names?;
         Ok(())
     }
 }
 
-/// Scan entries in a zip file
-fn scan_zip_sync(
+/// Scan entries in a zip file (blocking)
+fn scan_zip_blocking(
     path: PathBuf,
     check: fn(&str, bool) -> bool,
 ) -> Result<JsonVec> {
@@ -478,11 +479,11 @@ where
 {
     /// Lookup data from a zip archive
     async fn lookup_zipped(self, traffic: Traffic) -> Result<String> {
-        task::spawn_blocking(|| self.lookup_zipped_sync(traffic)).await?
+        task::spawn_blocking(|| self.lookup_zipped_blocking(traffic)).await?
     }
 
-    /// Lookup data from a zip archive
-    fn lookup_zipped_sync(self, mut traffic: Traffic) -> Result<String> {
+    /// Lookup data from a zip archive (blocking)
+    fn lookup_zipped_blocking(self, mut traffic: Traffic) -> Result<String> {
         if !self.filter().is_filtered() {
             match self.lookup_zipped_bin(&mut traffic) {
                 Err(Error::NotFound) => (),
@@ -492,7 +493,7 @@ where
         self.lookup_zipped_vlog(&mut traffic)
     }
 
-    /// Lookup archived data from 30-second binned data
+    /// Lookup archived data from 30-second binned data (blocking)
     fn lookup_zipped_bin(&self, traffic: &mut Traffic) -> Result<String> {
         let name = self.binned_file_name();
         match traffic.by_name(&name) {
@@ -506,13 +507,13 @@ where
         }
     }
 
-    /// Read vehicle log data from a zip file
+    /// Read vehicle log data from a zip file (blocking)
     fn lookup_zipped_vlog(&self, traffic: &mut Traffic) -> Result<String> {
         let name = self.vlog_file_name();
         match traffic.by_name(&name) {
             Ok(zf) => {
                 log::info!("opened {} in {}.{}", name, self.date, EXT);
-                let vlog = VehLog::from_blocking_reader(zf)?;
+                let vlog = VehLog::from_reader_blocking(zf)?;
                 Ok(self.make_vlog_body(vlog))
             }
             _ => Err(Error::NotFound),
@@ -549,7 +550,7 @@ where
         match File::open(&path).await {
             Ok(file) => {
                 log::info!("opened {:?}", &path);
-                let vlog = VehLog::from_async_reader(file).await?;
+                let vlog = VehLog::from_reader_async(file).await?;
                 Ok(self.make_vlog_body(vlog))
             }
             _ => Err(Error::NotFound),

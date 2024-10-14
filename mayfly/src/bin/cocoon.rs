@@ -111,7 +111,7 @@ impl Binner {
             match self.vlog_det_id(zf.name()) {
                 Some(det_id) => {
                     let mtime = zf.last_modified();
-                    let vlog = VehLog::from_blocking_reader(zf)?;
+                    let vlog = VehLog::from_reader_blocking(zf)?;
                     n_binned += self.write_binned::<OccupancyData>(
                         det_id.to_string() + ".c30",
                         &vlog,

@@ -328,7 +328,7 @@ impl VehicleEvent {
 
 impl VehLog {
     /// Create a vehicle event log from an async reader
-    pub async fn from_async_reader<R>(reader: R) -> Result<Self>
+    pub async fn from_reader_async<R>(reader: R) -> Result<Self>
     where
         R: AsyncReadExt + Unpin,
     {
@@ -341,8 +341,8 @@ impl VehLog {
         Ok(log)
     }
 
-    /// Create a vehicle event log from a blocking reader
-    pub fn from_blocking_reader<R>(reader: R) -> Result<Self>
+    /// Create a vehicle event log from a reader (blocking)
+    pub fn from_reader_blocking<R>(reader: R) -> Result<Self>
     where
         R: BlockingRead,
     {
