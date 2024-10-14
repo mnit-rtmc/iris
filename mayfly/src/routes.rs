@@ -15,7 +15,7 @@
 use crate::binned::{
     CountData, HeadwayData, LengthData, OccupancyData, SpeedData, TrafficData,
 };
-use crate::common::{Error, Result};
+use crate::error::{Error, Result};
 use crate::traffic::Traffic;
 use crate::vehicle::{VehLog, VehicleFilter};
 use axum::extract::Query;

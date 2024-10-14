@@ -13,7 +13,7 @@
 // GNU General Public License for more details.
 //
 use crate::binned::TrafficData;
-use crate::common::{Error, Result};
+use crate::error::{Error, Result};
 use std::io::BufRead as _;
 use std::io::Read as BlockingRead;
 use std::marker::PhantomData;

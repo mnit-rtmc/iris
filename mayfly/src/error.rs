@@ -1,4 +1,4 @@
-// common.rs
+// error.rs
 //
 // Copyright (c) 2019-2024  Minnesota Department of Transportation
 //

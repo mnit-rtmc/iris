@@ -17,7 +17,7 @@
 use argh::FromArgs;
 use log::{debug, info};
 use mayfly::binned::{CountData, OccupancyData, SpeedData, TrafficData};
-use mayfly::common::{Error, Result};
+use mayfly::error::{Error, Result};
 use mayfly::traffic::Traffic;
 use mayfly::vehicle::{VehLog, VehicleFilter};
 use std::ffi::OsString;

@@ -12,7 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::common::{Error, Result};
+use crate::error::{Error, Result};
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::BufReader;
