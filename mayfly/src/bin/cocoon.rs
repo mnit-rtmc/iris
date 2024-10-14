@@ -24,7 +24,7 @@ use std::ffi::OsString;
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::{Path, PathBuf};
-use zip::write::FileOptions;
+use zip::write::SimpleFileOptions;
 use zip::{DateTime, ZipWriter};
 
 /// Traffic archive backup path
@@ -58,9 +58,6 @@ struct Binner {
     /// Set of files in archive
     files: Vec<String>,
 
-    /// Backup file path
-    backup: PathBuf,
-
     /// Destination archive
     writer: ZipWriter<BufWriter<File>>,
 }
@@ -81,13 +78,14 @@ impl BinCommand {
             let traffic = Traffic::new(&file)?;
             let n_files = traffic.len();
             if traffic.needs_binning() {
-                let mut copier = Binner::new(&traffic)?;
+                let backup = backup_path(traffic.path())?;
+                let copier = Binner::new(&traffic)?;
                 let n_binned = copier.add_binned(traffic)?;
                 info!(
                     "archive: {:?} {} files, {} binned",
                     file, n_files, n_binned
                 );
-                std::fs::rename(&file, copier.backup)?;
+                std::fs::rename(&file, backup)?;
                 std::fs::rename(temp_path(&file), file)?;
             } else {
                 info!("archive: {:?} {} files, skipping", file, n_files);
@@ -101,17 +99,12 @@ impl Binner {
     /// Create a new traffic archive binner
     fn new(traffic: &Traffic) -> Result<Self> {
         let files = traffic.file_names().map(|n| n.to_string()).collect();
-        let backup = backup_path(traffic.path())?;
         let writer = make_writer(&traffic.path())?;
-        Ok(Binner {
-            files,
-            backup,
-            writer,
-        })
+        Ok(Binner { files, writer })
     }
 
     /// Add binned files to archive
-    fn add_binned(&mut self, mut traffic: Traffic) -> Result<u32> {
+    fn add_binned(mut self, mut traffic: Traffic) -> Result<u32> {
         let mut n_binned = 0;
         for i in 0..traffic.len() {
             let zf = traffic.by_index(i)?;
@@ -178,14 +171,19 @@ impl Binner {
         &mut self,
         name: String,
         vlog: &VehLog,
-        mtime: &DateTime,
+        mtime: &Option<DateTime>,
     ) -> Result<u32> {
         if self.contains(&name) {
             return Ok(0);
         }
         if let Some(buf) = pack_binned::<T>(vlog) {
             debug!("Binning {:?}", name);
-            let options = FileOptions::default().last_modified_time(*mtime);
+            let options = match mtime {
+                Some(mtime) => {
+                    SimpleFileOptions::default().last_modified_time(*mtime)
+                }
+                None => SimpleFileOptions::default(),
+            };
             self.writer.start_file(name, options)?;
             self.writer.write_all(&buf[..])?;
             Ok(1)

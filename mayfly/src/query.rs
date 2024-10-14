@@ -528,7 +528,7 @@ where
         log::info!("opened {:?}", &path);
         let mut buf = Self::make_bin_buffer(metadata.len())?;
         file.read_exact(&mut buf).await?;
-        return Ok(self.make_binned_body(buf));
+        Ok(self.make_binned_body(buf))
     }
 
     /// Lookup unzipped data from vehicle log file
