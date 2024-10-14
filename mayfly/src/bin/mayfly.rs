@@ -19,7 +19,7 @@ use axum::routing::get;
 use axum::Router;
 use http::header;
 use mayfly::common::Result;
-use mayfly::query;
+use mayfly::routes;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 
@@ -80,14 +80,14 @@ fn route_mayfly() -> Router {
     Router::new()
         .merge(index_get())
         .merge(css_get())
-        .merge(query::districts_get())
-        .merge(query::years_get())
-        .merge(query::dates_get())
-        .merge(query::corridors_get())
-        .merge(query::detectors_get())
-        .merge(query::counts_get())
-        .merge(query::speeds_get())
-        .merge(query::headways_get())
-        .merge(query::occupancies_get())
-        .merge(query::lengths_get())
+        .merge(routes::districts_get())
+        .merge(routes::years_get())
+        .merge(routes::dates_get())
+        .merge(routes::corridors_get())
+        .merge(routes::detectors_get())
+        .merge(routes::counts_get())
+        .merge(routes::speeds_get())
+        .merge(routes::headways_get())
+        .merge(routes::occupancies_get())
+        .merge(routes::lengths_get())
 }
