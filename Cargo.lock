@@ -1019,7 +1019,6 @@ dependencies = [
  "http",
  "log",
  "serde",
- "serde_json",
  "thiserror",
  "tokio",
  "zip",

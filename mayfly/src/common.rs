@@ -52,10 +52,6 @@ pub enum Error {
     #[error("File exists")]
     FileExists,
 
-    /// Serde JSON
-    #[error("Json {0}")]
-    Json(#[from] serde_json::Error),
-
     /// Zip error
     #[error("Zip error")]
     Zip(#[from] ZipError),

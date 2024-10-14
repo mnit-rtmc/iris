@@ -44,15 +44,15 @@ const DEXT: &str = ".traffic";
 /// Traffic file extension without dot
 const EXT: &str = "traffic";
 
-/// File name scanner
-#[derive(Default)]
-struct Scanner {
-    names: Vec<String>,
-}
-
 /// JSON array of values
 struct JsonVec {
     value: String,
+}
+
+/// File name scanner
+#[derive(Default)]
+struct Scanner {
+    names: JsonVec,
 }
 
 /// Query parameters for years
@@ -177,17 +177,18 @@ impl Scanner {
         Self::default()
     }
 
+    /// Push a file name
     fn push(&mut self, nm: &str) {
         if let Some(stem) = Path::new(nm).file_stem() {
             if let Some(st) = stem.to_str() {
-                self.names.push(st.to_string());
+                self.names.write_quoted(st);
             }
         }
     }
 
     /// Convert into JSON string
     fn into_json(self) -> Result<String> {
-        Ok(serde_json::to_string(&self.names)?)
+        Ok(self.names.into())
     }
 
     /// Scan entries in a directory
@@ -225,7 +226,7 @@ impl Scanner {
         let path = PathBuf::from(path.as_ref());
         let names =
             task::spawn_blocking(move || scan_zip_sync(path, check)).await?;
-        self.names.append(&mut names?);
+        self.names = names?;
         Ok(())
     }
 }
@@ -234,12 +235,12 @@ impl Scanner {
 fn scan_zip_sync(
     path: PathBuf,
     check: fn(&str, bool) -> bool,
-) -> Result<Vec<String>> {
+) -> Result<JsonVec> {
     let traffic = Traffic::new(&path)?;
-    let mut names = Vec::new();
+    let mut names = JsonVec::default();
     for nm in traffic.file_names() {
         if check(nm, false) {
-            names.push(nm.to_owned());
+            names.write_quoted(nm);
         }
     }
     Ok(names)
@@ -291,14 +292,25 @@ impl Default for JsonVec {
 }
 
 impl JsonVec {
-    /// Write one value
-    fn write<T: Display>(&mut self, value: T) {
+    /// Write delimiter
+    fn write_delim(&mut self) {
         if self.value.is_empty() {
             self.value.push('[');
         } else {
             self.value.push(',');
         }
+    }
+
+    /// Write one value
+    fn write<D: Display>(&mut self, value: D) {
+        self.write_delim();
         write!(self.value, "{value}").unwrap();
+    }
+
+    /// Write one quoted value
+    fn write_quoted<D: Display>(&mut self, value: D) {
+        self.write_delim();
+        write!(self.value, "\"{value}\"").unwrap();
     }
 }
 
@@ -439,7 +451,6 @@ pub fn detectors_get() -> Router {
             Err(e) => Err(e)?,
             Ok(_) => (),
         }
-        // FIXME: update files to stems only
         scanner.into_json()
     }
     Router::new().route("/corridors", get(handler))
