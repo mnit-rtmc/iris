@@ -1,6 +1,6 @@
 // common.rs
 //
-// Copyright (c) 2019-2023  Minnesota Department of Transportation
+// Copyright (c) 2019-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,9 +12,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use async_std::io;
-use std::fmt::{Display, Write};
-use tide::{Response, StatusCode};
+use axum::response::{IntoResponse, Response};
+use http::StatusCode;
+use std::io;
 use zip::result::ZipError;
 
 /// Error enum
@@ -23,124 +23,55 @@ pub enum Error {
     /// I/O error
     #[error("I/O {0}")]
     Io(#[from] io::Error),
+
     /// Invalid query
     #[error("Invalid query")]
     InvalidQuery,
+
     /// Invalid date
     #[error("Invalid date")]
     InvalidDate,
+
     /// Invalid data
     #[error("Invalid data")]
     InvalidData,
+
     /// Invalid stamp
     #[error("Invalid stamp")]
     InvalidStamp,
+
+    /// Tokio join error
+    #[error("Join {0}")]
+    Join(#[from] tokio::task::JoinError),
+
     /// Not found
     #[error("Not found")]
     NotFound,
+
     /// File exists
     #[error("File exists")]
     FileExists,
+
+    /// Serde JSON
+    #[error("Json {0}")]
+    Json(#[from] serde_json::Error),
+
     /// Zip error
     #[error("Zip error")]
     Zip(#[from] ZipError),
 }
 
+/// Result type
 pub type Result<T> = std::result::Result<T, Error>;
 
-/// JSON body (array of values)
-///
-/// TODO: Use tide::Body::from_reader -- to make fast!
-pub struct Body {
-    /// Max age in seconds
-    max_age: Option<u64>,
-    /// Response body
-    body: String,
-}
-
-impl Error {
-    /// Get HTTP status code
-    fn status_code(&self) -> StatusCode {
-        match self {
-            Self::NotFound => StatusCode::NotFound,
-            Self::InvalidQuery => StatusCode::BadRequest,
-            Self::InvalidDate => StatusCode::BadRequest,
-            _ => StatusCode::InternalServerError,
-        }
-    }
-}
-
-impl From<Error> for tide::Result {
-    fn from(err: Error) -> Self {
-        Ok(Response::builder(err.status_code())
-            .body(err.to_string())
-            .build())
-    }
-}
-
-impl Default for Body {
-    fn default() -> Self {
-        let body = String::with_capacity(2880 * 4);
-        Body {
-            max_age: None,
-            body,
-        }
-    }
-}
-
-/// Build JSON response from data
-impl Body {
-    /// Set the max-age
-    pub fn with_max_age(mut self, max_age: Option<u64>) -> Self {
-        self.max_age = max_age;
-        self
-    }
-
-    /// Start a new JSON value
-    pub fn start_value(&mut self) {
-        if self.body.is_empty() {
-            self.push('[');
-        } else {
-            self.push(',');
-        }
-    }
-
-    /// Push a char
-    pub fn push(&mut self, c: char) {
-        self.body.push(c);
-    }
-
-    /// Write to body
-    pub fn write<T: Display>(&mut self, value: T) {
-        write!(self.body, "{}", value).unwrap();
-    }
-}
-
-impl From<Body> for String {
-    fn from(body: Body) -> Self {
-        let mut v = body.body;
-        if v.is_empty() {
-            v.push_str("[]");
-        } else {
-            v.push(']');
-        }
-        v
-    }
-}
-
-impl From<Body> for tide::Result {
-    fn from(body: Body) -> Self {
-        if let Some(max_age) = body.max_age {
-            Ok(Response::builder(StatusCode::Ok)
-                .content_type("application/json")
-                .body(String::from(body))
-                .header("cache-control", format!("max-age={}", max_age))
-                .build())
-        } else {
-            Ok(Response::builder(StatusCode::Ok)
-                .content_type("application/json")
-                .body(String::from(body))
-                .build())
-        }
+impl IntoResponse for Error {
+    fn into_response(self) -> Response {
+        let status = match self {
+            Self::NotFound => StatusCode::NOT_FOUND,
+            Self::InvalidQuery => StatusCode::BAD_REQUEST,
+            Self::InvalidDate => StatusCode::BAD_REQUEST,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
+        };
+        (status, status.canonical_reason().unwrap_or("WTF")).into_response()
     }
 }

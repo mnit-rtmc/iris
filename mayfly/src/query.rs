@@ -12,19 +12,25 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::binned::TrafficData;
-use crate::common::{Body, Error, Result};
+use crate::binned::{
+    CountData, HeadwayData, LengthData, OccupancyData, SpeedData, TrafficData,
+};
+use crate::common::{Error, Result};
 use crate::traffic::Traffic;
 use crate::vehicle::{VehLog, VehicleFilter};
-use async_std::fs::{read_dir, File};
-use async_std::io::ReadExt;
-use async_std::path::{Path, PathBuf};
-use async_std::stream::StreamExt;
+use axum::extract::Query;
+use axum::response::IntoResponse;
+use axum::routing::get;
+use axum::Router;
 use chrono::{Local, NaiveDate, TimeDelta};
 use serde::Deserialize;
-use std::collections::HashSet;
+use std::fmt::{Display, Write};
 use std::io::Read as _;
 use std::marker::PhantomData;
+use std::path::{Path, PathBuf};
+use tokio::fs::{read_dir, File};
+use tokio::io::AsyncReadExt;
+use tokio::task;
 
 /// Base traffic archive path
 const BASE_PATH: &str = "/var/lib/iris/traffic";
@@ -38,47 +44,54 @@ const DEXT: &str = ".traffic";
 /// Traffic file extension without dot
 const EXT: &str = "traffic";
 
-/// Query for districts in archive
-#[derive(Default, Deserialize)]
-pub struct DistrictQuery {}
+/// File name scanner
+#[derive(Default)]
+struct Scanner {
+    names: Vec<String>,
+}
 
-/// Query for years with archived data
+/// JSON array of values
+struct JsonVec {
+    value: String,
+}
+
+/// Query parameters for years
 #[derive(Deserialize)]
-pub struct YearQuery {
+struct Years {
     /// District ID
     district: Option<String>,
 }
 
-/// Query for dates with archived data
+/// Query parameters for dates
 #[derive(Deserialize)]
-pub struct DateQuery {
+struct Dates {
     /// District ID
     district: Option<String>,
     /// Year to query
     year: String,
 }
 
-/// Query for corridors with detectors
+/// Query parameters for corridors with detectors
 #[derive(Deserialize)]
-pub struct CorridorQuery {
+struct Corridors {
     /// District ID
-    pub district: Option<String>,
+    district: Option<String>,
     /// Date (8-character yyyyMMdd)
-    pub date: String,
+    date: String,
 }
 
-/// Query for detectors with archived data
+/// Query parameters for detectors with archived data
 #[derive(Deserialize)]
-pub struct DetectorQuery {
+struct Detectors {
     /// District ID
-    pub district: Option<String>,
+    district: Option<String>,
     /// Date (8-character yyyyMMdd)
-    pub date: String,
+    date: String,
 }
 
-/// Query for archived traffic data
+/// Query parameters for archived traffic data
 #[derive(Deserialize)]
-pub struct TrafficQuery<T: TrafficData> {
+struct Traf<T: TrafficData> {
     /// Traffic data type
     _data: Option<PhantomData<T>>,
     /// District ID
@@ -103,14 +116,34 @@ pub struct TrafficQuery<T: TrafficData> {
     _bin_secs: Option<u32>,
 }
 
-/// Get path to district directory (async_std PathBuf)
+/// Create a JSON response
+fn json_resp(
+    json: String,
+    is_recent: bool,
+) -> ([(http::header::HeaderName, &'static str); 2], String) {
+    let max_age = if is_recent {
+        "max-age=30"
+    } else {
+        // 100 weeks => 100 * 7 * 24 * 60 * 60
+        "max-age=60480000"
+    };
+    (
+        [
+            (http::header::CACHE_CONTROL, max_age),
+            (http::header::CONTENT_TYPE, "application/json"),
+        ],
+        json,
+    )
+}
+
+/// Get path to district directory
 fn district_path(district: &Option<String>) -> PathBuf {
     let mut path = PathBuf::from(BASE_PATH);
     path.push(district.as_deref().unwrap_or(DISTRICT_DEFAULT));
     path
 }
 
-/// Get path to a year directory (async_std PathBuf)
+/// Get path to a year directory
 fn year_path(district: &Option<String>, year: &str) -> PathBuf {
     assert_eq!(year.len(), 4);
     let mut path = district_path(district);
@@ -118,71 +151,98 @@ fn year_path(district: &Option<String>, year: &str) -> PathBuf {
     path
 }
 
-/// Get path to a date directory (async_std PathBuf)
-fn date_path(district: &Option<String>, date: &str) -> PathBuf {
-    assert_eq!(date.len(), 8);
+/// Get path to a date directory
+fn date_path(district: &Option<String>, date: &str) -> Result<PathBuf> {
+    parse_date(date)?;
     let mut path = year_path(district, date.get(..4).unwrap_or(""));
     path.push(date);
-    path
+    Ok(path)
 }
 
-/// Get path to a date traffic (zip) file (std PathBuf)
-fn zip_path(district: &Option<String>, date: &str) -> std::path::PathBuf {
-    assert_eq!(date.len(), 8);
-    let mut path = std::path::PathBuf::from(BASE_PATH);
+/// Get path to a date traffic (zip) file
+fn zip_path(district: &Option<String>, date: &str) -> Result<PathBuf> {
+    parse_date(date)?;
+    let mut path = PathBuf::from(BASE_PATH);
     let district = district.as_deref().unwrap_or(DISTRICT_DEFAULT);
     path.push(district);
     path.push(date.get(..4).unwrap_or("")); // year
     path.push(date);
     path.set_extension(EXT);
-    path
+    Ok(path)
 }
 
-/// Scan entries in a directory
-async fn scan_dir(
-    path: &Path,
-    check: fn(&str, bool) -> Option<&str>,
-    body: &mut Body,
-) -> Result<()> {
-    let mut entries = read_dir(path).await.or(Err(Error::NotFound))?;
-    let mut names = HashSet::new();
-    while let Some(entry) = entries.next().await {
-        if let Ok(entry) = entry {
-            if let Ok(tp) = entry.file_type().await {
-                if !tp.is_symlink() {
-                    if let Some(name) = entry.file_name().to_str() {
-                        if let Some(name) = check(name, tp.is_dir()) {
-                            names.insert(name.to_owned());
-                        }
+impl Scanner {
+    /// Create a new scanner
+    fn new() -> Self {
+        Self::default()
+    }
+
+    fn push(&mut self, nm: &str) {
+        if let Some(stem) = Path::new(nm).file_stem() {
+            if let Some(st) = stem.to_str() {
+                self.names.push(st.to_string());
+            }
+        }
+    }
+
+    /// Convert into JSON string
+    fn into_json(self) -> Result<String> {
+        Ok(serde_json::to_string(&self.names)?)
+    }
+
+    /// Scan entries in a directory
+    async fn scan_dir<P>(
+        &mut self,
+        path: &P,
+        check: fn(&str, bool) -> bool,
+    ) -> Result<()>
+    where
+        P: AsRef<Path>,
+    {
+        let mut entries = read_dir(path).await?;
+        while let Some(entry) = entries.next_entry().await? {
+            let tp = entry.file_type().await?;
+            if !tp.is_symlink() {
+                if let Some(nm) = entry.file_name().to_str() {
+                    if check(nm, tp.is_dir()) {
+                        self.push(nm);
                     }
                 }
             }
         }
+        Ok(())
     }
-    for name in names {
-        body.start_value();
-        body.push('\"');
-        body.write(name);
-        body.push('\"');
+
+    /// Scan entries in a zip file
+    async fn scan_zip<P>(
+        &mut self,
+        path: &P,
+        check: fn(&str, bool) -> bool,
+    ) -> Result<()>
+    where
+        P: AsRef<Path>,
+    {
+        let path = PathBuf::from(path.as_ref());
+        let names =
+            task::spawn_blocking(move || scan_zip_sync(path, check)).await?;
+        self.names.append(&mut names?);
+        Ok(())
     }
-    Ok(())
 }
 
 /// Scan entries in a zip file
-fn scan_zip(
-    path: &impl AsRef<std::path::Path>,
-    check: fn(&str, bool) -> Option<&str>,
-    body: &mut Body,
-) -> Result<()> {
-    let traffic = Traffic::new(path)?;
-    let names = traffic.find_files_checked(check);
-    for name in names {
-        body.start_value();
-        body.push('\"');
-        body.write(name);
-        body.push('\"');
+fn scan_zip_sync(
+    path: PathBuf,
+    check: fn(&str, bool) -> bool,
+) -> Result<Vec<String>> {
+    let traffic = Traffic::new(&path)?;
+    let mut names = Vec::new();
+    for nm in traffic.file_names() {
+        if check(nm, false) {
+            names.push(nm.to_owned());
+        }
     }
-    Ok(())
+    Ok(names)
 }
 
 /// Parse year parameter
@@ -222,194 +282,196 @@ fn parse_date(date: &str) -> Result<NaiveDate> {
     Err(Error::InvalidDate)
 }
 
-/// Max age for caching resources (100 weeks)
-const MAX_AGE_SEC: u64 = 100 * 7 * 24 * 60 * 60;
-
-/// Get max age for cache control heder
-fn max_age(date: &str) -> Option<u64> {
-    if let Ok(date) = parse_date(date) {
-        let today = Local::now().date_naive();
-        if today > date + TimeDelta::try_days(2).unwrap() {
-            Some(MAX_AGE_SEC)
-        } else {
-            Some(30)
+impl Default for JsonVec {
+    fn default() -> Self {
+        JsonVec {
+            value: String::with_capacity(2880 * 4),
         }
-    } else {
-        None
     }
 }
 
-impl DistrictQuery {
-    /// Lookup all districts in archive
-    pub async fn lookup(&self) -> Result<Body> {
-        let path = PathBuf::from(BASE_PATH);
-        let mut body = Body::default();
-        scan_dir(&path, check_district, &mut body).await?;
-        Ok(body)
+impl JsonVec {
+    /// Write one value
+    fn write<T: Display>(&mut self, value: T) {
+        if self.value.is_empty() {
+            self.value.push('[');
+        } else {
+            self.value.push(',');
+        }
+        write!(self.value, "{value}").unwrap();
     }
 }
 
-/// Check for valid district
-fn check_district(name: &str, dir: bool) -> Option<&str> {
-    if dir {
-        Some(name)
-    } else {
-        None
+impl From<JsonVec> for String {
+    fn from(vec: JsonVec) -> Self {
+        let mut v = vec.value;
+        if v.is_empty() {
+            v.push_str("[]");
+        } else {
+            v.push(']');
+        }
+        v
     }
 }
 
-impl YearQuery {
-    /// Lookup years with archived data
-    pub async fn lookup(&self) -> Result<Body> {
-        let path = district_path(&self.district);
-        let mut body = Body::default();
-        scan_dir(&path, check_year, &mut body).await?;
-        Ok(body)
+/// Build route for districts
+pub fn districts_get() -> Router {
+    async fn handler() -> impl IntoResponse {
+        let path = Path::new(BASE_PATH);
+        let mut scanner = Scanner::new();
+        scanner.scan_dir(&path, |_nm, is_dir| is_dir).await?;
+        scanner.into_json()
     }
+    Router::new().route("/districts", get(handler))
+}
+
+/// Build route for years
+pub fn years_get() -> Router {
+    async fn handler(years: Query<Years>) -> impl IntoResponse {
+        let path = district_path(&years.0.district);
+        let mut scanner = Scanner::new();
+        scanner.scan_dir(&path, check_year).await?;
+        scanner.into_json()
+    }
+    Router::new().route("/years", get(handler))
 }
 
 /// Check for valid year
-fn check_year(name: &str, dir: bool) -> Option<&str> {
-    if dir {
-        parse_year(name).ok().map(|_| name)
-    } else {
-        None
+fn check_year(nm: &str, is_dir: bool) -> bool {
+    is_dir && parse_year(nm).is_ok()
+}
+
+impl Dates {
+    /// Get path to directory
+    fn path(&self) -> Result<PathBuf> {
+        parse_year(&self.year)?;
+        Ok(year_path(&self.district, &self.year))
     }
 }
 
-impl DateQuery {
-    /// Lookup dates with archived data
-    pub async fn lookup(&self) -> Result<Body> {
-        parse_year(&self.year)?;
-        let path = year_path(&self.district, &self.year);
-        let mut body = Body::default();
-        scan_dir(&path, check_date, &mut body).await?;
-        Ok(body)
+/// Build route for dates
+pub fn dates_get() -> Router {
+    async fn handler(dates: Query<Dates>) -> impl IntoResponse {
+        let path = dates.0.path()?;
+        let mut scanner = Scanner::new();
+        scanner.scan_dir(&path, check_date).await?;
+        scanner.into_json()
     }
+    Router::new().route("/dates", get(handler))
 }
 
 /// Check for valid date files
-fn check_date(name: &str, dir: bool) -> Option<&str> {
-    let dt = if dir {
-        name
-    } else if name.len() == 16 && name.ends_with(DEXT) {
-        name.get(..8).unwrap_or("")
+fn check_date(nm: &str, is_dir: bool) -> bool {
+    let dt = if is_dir {
+        nm
+    } else if nm.len() == 16 && nm.ends_with(DEXT) {
+        nm.get(..8).unwrap_or("")
     } else {
         ""
     };
-    parse_date(dt).ok().map(|_| dt)
+    parse_date(dt).is_ok()
 }
 
-impl CorridorQuery {
-    /// Lookup corridors with detectors
-    pub async fn lookup(&self) -> Result<Body> {
-        parse_date(&self.date)?;
-        let mut body = Body::default();
-        match scan_zip(&self.zip_path(), check_corridor, &mut body) {
-            Ok(_) => Ok(body),
-            Err(Error::NotFound) => {
-                match scan_dir(&self.date_path(), check_corridor, &mut body)
-                    .await
-                {
-                    Ok(_) | Err(Error::NotFound) => Ok(body),
-                    Err(e) => Err(e),
-                }
-            }
-            Err(e) => Err(e),
-        }
-    }
-
-    /// Get path to directory containing archived data
-    fn date_path(&self) -> PathBuf {
-        let mut path = date_path(&self.district, &self.date);
+impl Corridors {
+    /// Get path to directory
+    fn path(&self) -> Result<PathBuf> {
+        let mut path = date_path(&self.district, &self.date)?;
         path.push("corridors");
-        path
+        Ok(path)
     }
 
-    /// Get path to (zip) file (std PathBuf)
-    fn zip_path(&self) -> std::path::PathBuf {
+    /// Get path to (zip) file
+    fn zip_path(&self) -> Result<PathBuf> {
         zip_path(&self.district, &self.date)
     }
+}
+
+/// Build route for corridors
+pub fn corridors_get() -> Router {
+    async fn handler(corridors: Query<Corridors>) -> impl IntoResponse {
+        let path = corridors.0.zip_path()?;
+        let mut scanner = Scanner::new();
+        match scanner.scan_zip(&path, check_corridor).await {
+            Err(Error::NotFound) => {
+                let path = corridors.0.path()?;
+                scanner.scan_dir(&path, check_corridor).await?;
+            }
+            Err(e) => Err(e)?,
+            Ok(_) => (),
+        }
+        scanner.into_json()
+    }
+    Router::new().route("/corridors", get(handler))
 }
 
 /// Check for corridor IDs
-fn check_corridor(name: &str, dir: bool) -> Option<&str> {
-    if !dir && !name.contains('.') && name.contains('_') {
-        Some(name)
-    } else {
-        None
-    }
+fn check_corridor(nm: &str, dir: bool) -> bool {
+    !dir && !nm.contains('.') && nm.contains('_')
 }
 
-impl DetectorQuery {
-    /// Lookup detectors with archived data
-    pub async fn lookup(&self) -> Result<Body> {
-        parse_date(&self.date)?;
-        let mut body = Body::default();
-        match scan_zip(&self.zip_path(), check_detector, &mut body) {
-            Ok(_) => Ok(body),
-            Err(Error::NotFound) => {
-                match scan_dir(&self.date_path(), check_detector, &mut body)
-                    .await
-                {
-                    Ok(_) | Err(Error::NotFound) => Ok(body),
-                    Err(e) => Err(e),
-                }
-            }
-            Err(e) => Err(e),
-        }
+impl Detectors {
+    /// Get path to directory
+    fn path(&self) -> Result<PathBuf> {
+        let mut path = date_path(&self.district, &self.date)?;
+        path.push("corridors");
+        Ok(path)
     }
 
-    /// Get path to directory containing archived data
-    fn date_path(&self) -> PathBuf {
-        date_path(&self.district, &self.date)
-    }
-
-    /// Get path to (zip) file (std PathBuf)
-    fn zip_path(&self) -> std::path::PathBuf {
+    /// Get path to (zip) file
+    fn zip_path(&self) -> Result<PathBuf> {
         zip_path(&self.district, &self.date)
     }
 }
 
+/// Lookup detectors with archived data
+pub fn detectors_get() -> Router {
+    async fn handler(detectors: Query<Detectors>) -> impl IntoResponse {
+        let path = detectors.0.zip_path()?;
+        let mut scanner = Scanner::new();
+        match scanner.scan_zip(&path, check_detector).await {
+            Err(Error::NotFound) => {
+                let path = detectors.0.path()?;
+                match scanner.scan_dir(&path, check_detector).await {
+                    Ok(_) | Err(Error::NotFound) => (),
+                    Err(e) => Err(e)?,
+                }
+            }
+            Err(e) => Err(e)?,
+            Ok(_) => (),
+        }
+        // FIXME: update files to stems only
+        scanner.into_json()
+    }
+    Router::new().route("/corridors", get(handler))
+}
+
 /// Check for detector IDs
-fn check_detector(name: &str, dir: bool) -> Option<&str> {
-    if !dir {
-        let path = Path::new(name);
+fn check_detector(nm: &str, is_dir: bool) -> bool {
+    !is_dir && {
+        let path = Path::new(nm);
         path.extension()
             .and_then(|ext| ext.to_str())
-            .and_then(file_ext)
-            .and_then(|_| path.file_stem())
-            .and_then(|f| f.to_str())
-    } else {
-        None
+            .is_some_and(is_ext_valid)
     }
 }
 
 /// Check a archive file extension
-fn file_ext(ext: &str) -> Option<&str> {
+fn is_ext_valid(ext: &str) -> bool {
     const EXTS: &[&str] = &["vlog", "v30", "c30", "s30"];
-    if EXTS.contains(&ext) {
-        Some(ext)
-    } else {
-        None
-    }
+    EXTS.contains(&ext)
 }
 
-impl<T: TrafficData> TrafficQuery<T> {
-    /// Lookup archived traffic data.
-    ///
-    /// Check for binned data first, since it will be faster than scanning a
-    /// vehicle event log.
-    pub async fn lookup(&self) -> Result<Body> {
-        parse_date(&self.date)?;
-        match Traffic::new(&self.zip_path()) {
-            Ok(traffic) => self.lookup_zipped(traffic),
-            _ => self.lookup_unzipped().await,
-        }
+impl<T> Traf<T>
+where
+    T: TrafficData + Sync + Send + 'static,
+{
+    /// Lookup data from a zip archive
+    async fn lookup_zipped(self, traffic: Traffic) -> Result<String> {
+        task::spawn_blocking(|| self.lookup_zipped_sync(traffic)).await?
     }
 
     /// Lookup data from a zip archive
-    fn lookup_zipped(&self, mut traffic: Traffic) -> Result<Body> {
+    fn lookup_zipped_sync(self, mut traffic: Traffic) -> Result<String> {
         if !self.filter().is_filtered() {
             match self.lookup_zipped_bin(&mut traffic) {
                 Err(Error::NotFound) => (),
@@ -420,12 +482,12 @@ impl<T: TrafficData> TrafficQuery<T> {
     }
 
     /// Lookup archived data from 30-second binned data
-    fn lookup_zipped_bin(&self, traffic: &mut Traffic) -> Result<Body> {
+    fn lookup_zipped_bin(&self, traffic: &mut Traffic) -> Result<String> {
         let name = self.binned_file_name();
         match traffic.by_name(&name) {
             Ok(mut zf) => {
                 log::info!("opened {} in {}.{}", name, self.date, EXT);
-                let mut buf = Self::make_buffer(zf.size())?;
+                let mut buf = Self::make_bin_buffer(zf.size())?;
                 zf.read_exact(&mut buf)?;
                 Ok(self.make_binned_body(buf))
             }
@@ -434,7 +496,7 @@ impl<T: TrafficData> TrafficQuery<T> {
     }
 
     /// Read vehicle log data from a zip file
-    fn lookup_zipped_vlog(&self, traffic: &mut Traffic) -> Result<Body> {
+    fn lookup_zipped_vlog(&self, traffic: &mut Traffic) -> Result<String> {
         let name = self.vlog_file_name();
         match traffic.by_name(&name) {
             Ok(zf) => {
@@ -447,7 +509,7 @@ impl<T: TrafficData> TrafficQuery<T> {
     }
 
     /// Lookup data from file system (unzipped)
-    async fn lookup_unzipped(&self) -> Result<Body> {
+    async fn lookup_unzipped(&self) -> Result<String> {
         if !self.filter().is_filtered() {
             match self.lookup_unzipped_bin().await {
                 Err(Error::NotFound) => (),
@@ -458,23 +520,20 @@ impl<T: TrafficData> TrafficQuery<T> {
     }
 
     /// Lookup unzipped data from 30-second binned data
-    async fn lookup_unzipped_bin(&self) -> Result<Body> {
-        let mut path = self.date_path();
+    async fn lookup_unzipped_bin(&self) -> Result<String> {
+        let mut path = self.date_path()?;
         path.push(self.binned_file_name());
-        if let Ok(mut file) = File::open(&path).await {
-            if let Ok(metadata) = file.metadata().await {
-                log::info!("opened {:?}", &path);
-                let mut buf = Self::make_buffer(metadata.len())?;
-                file.read_exact(&mut buf).await?;
-                return Ok(self.make_binned_body(buf));
-            }
-        }
-        Err(Error::NotFound)
+        let mut file = File::open(&path).await?;
+        let metadata = file.metadata().await?;
+        log::info!("opened {:?}", &path);
+        let mut buf = Self::make_bin_buffer(metadata.len())?;
+        file.read_exact(&mut buf).await?;
+        return Ok(self.make_binned_body(buf));
     }
 
     /// Lookup unzipped data from vehicle log file
-    async fn lookup_unzipped_vlog(&self) -> Result<Body> {
-        let mut path = self.date_path();
+    async fn lookup_unzipped_vlog(&self) -> Result<String> {
+        let mut path = self.date_path()?;
         path.push(self.vlog_file_name());
         match File::open(&path).await {
             Ok(file) => {
@@ -503,7 +562,7 @@ impl<T: TrafficData> TrafficQuery<T> {
     }
 
     /// Make buffer to hold 30-second binned data
-    fn make_buffer(len: u64) -> Result<Vec<u8>> {
+    fn make_bin_buffer(len: u64) -> Result<Vec<u8>> {
         let sz = 2880 * T::bin_bytes();
         if len == sz as u64 {
             Ok(vec![0; sz])
@@ -512,33 +571,26 @@ impl<T: TrafficData> TrafficQuery<T> {
         }
     }
 
-    /// Make a JSON result body
-    fn make_body(&self) -> Body {
-        Body::default().with_max_age(max_age(&self.date))
-    }
-
     /// Make body from binned buffer
-    fn make_binned_body(&self, buf: Vec<u8>) -> Body {
-        let mut body = self.make_body();
+    fn make_binned_body(&self, buf: Vec<u8>) -> String {
+        let mut vec = JsonVec::default();
         for val in buf.chunks_exact(T::bin_bytes()) {
-            body.start_value();
-            body.write(T::unpack(val));
+            vec.write(T::unpack(val));
         }
-        body
+        vec.into()
     }
 
     /// Make body from vehicle log
-    fn make_vlog_body(&self, vlog: VehLog) -> Body {
-        let mut body = self.make_body();
+    fn make_vlog_body(&self, vlog: VehLog) -> String {
+        let mut vec = JsonVec::default();
         for val in vlog.binned_iter::<T>(30, self.filter()) {
-            body.start_value();
-            body.write(val);
+            vec.write(val);
         }
-        body
+        vec.into()
     }
 
-    /// Get path to (zip) file (std PathBuf)
-    fn zip_path(&self) -> std::path::PathBuf {
+    /// Get path to (zip) file
+    fn zip_path(&self) -> Result<PathBuf> {
         zip_path(&self.district, &self.date)
     }
 
@@ -548,7 +600,68 @@ impl<T: TrafficData> TrafficQuery<T> {
     }
 
     /// Get path containing archive data for one date
-    fn date_path(&self) -> PathBuf {
+    fn date_path(&self) -> Result<PathBuf> {
         date_path(&self.district, &self.date)
     }
+
+    /// Check if date is "recent" for max-age cache control heder
+    fn is_recent(&self) -> Result<bool> {
+        let date = parse_date(&self.date)?;
+        let today = Local::now().date_naive();
+        Ok(today < date + TimeDelta::try_days(2).unwrap())
+    }
+}
+
+/// Handle a generic request for traffic data
+async fn traf_handler<T>(traf: Traf<T>) -> impl IntoResponse
+where
+    T: TrafficData + Sync + Send + 'static,
+{
+    let path = traf.zip_path()?;
+    let is_recent = traf.is_recent()?;
+    let body = match Traffic::new(&path) {
+        Ok(traffic) => traf.lookup_zipped(traffic).await,
+        _ => traf.lookup_unzipped().await,
+    }?;
+    Result::<_>::Ok(json_resp(body, is_recent))
+}
+
+/// Lookup archived count data.
+pub fn counts_get() -> Router {
+    async fn handler(traf: Query<Traf<CountData>>) -> impl IntoResponse {
+        traf_handler(traf.0).await
+    }
+    Router::new().route("/counts", get(handler))
+}
+
+/// Lookup archived headway data.
+pub fn headways_get() -> Router {
+    async fn handler(traf: Query<Traf<HeadwayData>>) -> impl IntoResponse {
+        traf_handler(traf.0).await
+    }
+    Router::new().route("/headways", get(handler))
+}
+
+/// Lookup archived length data.
+pub fn lengths_get() -> Router {
+    async fn handler(traf: Query<Traf<LengthData>>) -> impl IntoResponse {
+        traf_handler(traf.0).await
+    }
+    Router::new().route("/lengths", get(handler))
+}
+
+/// Lookup archived occupancy data.
+pub fn occupancies_get() -> Router {
+    async fn handler(traf: Query<Traf<OccupancyData>>) -> impl IntoResponse {
+        traf_handler(traf.0).await
+    }
+    Router::new().route("/occupancies", get(handler))
+}
+
+/// Lookup archived speed data.
+pub fn speeds_get() -> Router {
+    async fn handler(traf: Query<Traf<SpeedData>>) -> impl IntoResponse {
+        traf_handler(traf.0).await
+    }
+    Router::new().route("/speeds", get(handler))
 }

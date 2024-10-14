@@ -1,6 +1,6 @@
 // vehicle.rs
 //
-// Copyright (c) 2021  Minnesota Department of Transportation
+// Copyright (c) 2021-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,13 +14,12 @@
 //
 use crate::binned::TrafficData;
 use crate::common::{Error, Result};
-use async_std::io::{BufReader, ReadExt};
-use async_std::prelude::*;
 use std::io::BufRead as _;
 use std::io::Read as BlockingRead;
 use std::marker::PhantomData;
 use std::num::{NonZeroU16, NonZeroU32, NonZeroU8};
 use std::str::FromStr;
+use tokio::io::{AsyncBufReadExt, AsyncReadExt, BufReader};
 
 /// Time stamp
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -331,12 +330,12 @@ impl VehLog {
     /// Create a vehicle event log from an async reader
     pub async fn from_async_reader<R>(reader: R) -> Result<Self>
     where
-        R: ReadExt + Unpin,
+        R: AsyncReadExt + Unpin,
     {
         let mut log = Self::default();
         let mut lines = BufReader::new(reader).lines();
-        while let Some(line) = lines.next().await {
-            log.append(&line?)?;
+        while let Some(line) = lines.next_line().await? {
+            log.append(&line)?;
         }
         log.finish();
         Ok(log)

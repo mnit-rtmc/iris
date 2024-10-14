@@ -1,6 +1,6 @@
 // cocoon.rs
 //
-// Copyright (c) 2021  Minnesota Department of Transportation
+// Copyright (c) 2021-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ use mayfly::binned::{CountData, OccupancyData, SpeedData, TrafficData};
 use mayfly::common::{Error, Result};
 use mayfly::traffic::Traffic;
 use mayfly::vehicle::{VehLog, VehicleFilter};
-use std::collections::HashSet;
 use std::ffi::OsString;
 use std::fs::File;
 use std::io::{BufWriter, Write};
@@ -57,7 +56,7 @@ struct BinCommand {
 /// Traffic archive binner
 struct Binner {
     /// Set of files in archive
-    files: HashSet<String>,
+    files: Vec<String>,
 
     /// Backup file path
     backup: PathBuf,
@@ -101,7 +100,7 @@ impl BinCommand {
 impl Binner {
     /// Create a new traffic archive binner
     fn new(traffic: &Traffic) -> Result<Self> {
-        let files = traffic.find_file_names();
+        let files = traffic.file_names().map(|n| n.to_string()).collect();
         let backup = backup_path(traffic.path())?;
         let writer = make_writer(&traffic.path())?;
         Ok(Binner {
@@ -168,7 +167,7 @@ impl Binner {
         let path = Path::new(name);
         if let Some(name) = path.file_name() {
             if let Some(name) = name.to_str() {
-                return self.files.contains(name);
+                return self.files.iter().any(|n| n == name);
             }
         }
         false
@@ -241,8 +240,7 @@ fn pack_binned<T: TrafficData>(vlog: &VehLog) -> Option<Vec<u8>> {
 }
 
 /// Main function
-#[async_std::main]
-async fn main() -> Result<()> {
+fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
     let args: Args = argh::from_env();
     args.run()?;
