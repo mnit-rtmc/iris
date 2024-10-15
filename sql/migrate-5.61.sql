@@ -563,4 +563,7 @@ INSERT INTO iris.system_attribute (name, value) VALUES
     ('legacy_xml_sign_message_enable', 'true'),
     ('legacy_xml_weather_sensor_enable', 'true');
 
+-- Delete unused system attributes
+DELETE FROM iris.system_attribute WHERE name = 'dms_lamp_test_timeout_secs';
+
 COMMIT;

@@ -45,7 +45,6 @@ System Attribute                 | Description
 `detector_auto_fail_enable`      | Enable [auto-fail] of traffic detectors with suspicious data
 `detector_event_purge_days`      | Number of days after which detector events will be purged
 `dms_comm_loss_enable`           | Enable blanking [DMS] after communication time out
-`dms_lamp_test_timeout_secs`     | Time to wait for [DMS] lamp test to complete
 `dms_page_on_max_secs`           | Maximum selectable [DMS] page on time (seconds)
 `dms_page_on_min_secs`           | Minimum selectable [DMS] page on time (seconds)
 `dms_pixel_off_limit`            | Number of stuck-off pixels allowed in a [DMS] message
