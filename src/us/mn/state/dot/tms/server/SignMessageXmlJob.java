@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.util.Calendar;
 import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * Job to write out sign message XML file.
@@ -26,7 +27,7 @@ import us.mn.state.dot.sched.Job;
 public class SignMessageXmlJob extends Job {
 
 	/** Seconds to offset each poll from start of interval */
-	static protected final int OFFSET_SECS = 20;
+	static private final int OFFSET_SECS = 20;
 
 	/** Create a new sign message XML job */
 	public SignMessageXmlJob() {
@@ -35,7 +36,10 @@ public class SignMessageXmlJob extends Job {
 
 	/** Perform the sign message XML job */
 	public void perform() throws IOException {
-		SignMessageXmlWriter writer = new SignMessageXmlWriter();
-		writer.write();
+		if (SystemAttrEnum.LEGACY_XML_SIGN_MESSAGE_ENABLE.getBoolean()) {
+			SignMessageXmlWriter writer =
+				new SignMessageXmlWriter();
+			writer.write();
+		}
 	}
 }

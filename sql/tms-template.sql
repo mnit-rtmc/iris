@@ -185,6 +185,10 @@ help_trouble_ticket_enable	false
 help_trouble_ticket_url	
 incident_clear_advice_multi	JUST CLEARED
 incident_clear_secs	300
+legacy_xml_config_enable	true
+legacy_xml_incident_enable	true
+legacy_xml_sign_message_enable	true
+legacy_xml_weather_sensor_enable	true
 map_extent_name_initial	Home
 map_icon_size_scale_max	30
 map_segment_max_meters	2000

@@ -70,6 +70,10 @@ System Attribute                 | Description
 `help_trouble_ticket_url`        | URL of Trac trouble ticket system
 `incident_clear_advice_multi`    | Advice for [DMS] messages when incidents are cleared
 `incident_clear_secs`            | Seconds to leave cleared incidents before removing them
+`legacy_xml_config_enable`       | Enable saving system configuration as legacy XML
+`legacy_xml_incident_enable`     | Enable saving incidents as legacy XML
+`legacy_xml_sign_message_enable` | Enable saving sign messages as legacy XML
+`legacy_xml_weather_sensor_enable` | Enable saving weather sensors as legacy XML
 `map_extent_name_initial`        | Name of map extent displayed when client starts
 `map_icon_size_scale_max`        | Maximum map scale (meters per pixel) to use full icon size
 `map_segment_max_meters`         | Maximum distance for connecting map segments

@@ -556,4 +556,11 @@ CREATE VIEW dms_message_view AS
     LEFT JOIN iris.sign_message sm ON d.msg_current = sm.name;
 GRANT SELECT ON dms_message_view TO PUBLIC;
 
+-- Add attributes to disable legacy XML output
+INSERT INTO iris.system_attribute (name, value) VALUES
+    ('legacy_xml_config_enable', 'true'),
+    ('legacy_xml_incident_enable', 'true'),
+    ('legacy_xml_sign_message_enable', 'true'),
+    ('legacy_xml_weather_sensor_enable', 'true');
+
 COMMIT;
