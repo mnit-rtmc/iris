@@ -50,6 +50,7 @@ System Attribute                 | Description
 `database_version`               | IRIS database version; developer attribute.  **Do not change**.
 `detector_auto_fail_enable`      | Enable [auto-fail] of traffic detectors with suspicious data
 `detector_event_purge_days`      | Number of days after which detector events will be purged
+`detector_data_archive_enable`   | Enable archiving of detector data
 `detector_occ_spike_secs`        | Duration for occupancy spikes to trigger "auto fail" (0=disabled)
 `dms_comm_loss_enable`           | Enable blanking [DMS] after communication time out
 `dms_message_tooltip_enable`     | Enable tooltip showing current posted DMS message and user
@@ -106,7 +107,6 @@ System Attribute                 | Description
 `rwis_visibility_2_m`            | Distance threshold for visibility 2 condition
 `rwis_windy_1_kph`               | Gust speed threshold for windy 1 condition
 `rwis_windy_2_kph`               | Gust speed threshold for windy 2 condition
-`sample_archive_enable`          | Enable archiving of sample data
 `sign_event_purge_days`          | Number of days after which sign events will be purged
 `speed_limit_default_mph`        | Default roadway speed limit
 `speed_limit_max_mph`            | Maximum roadway speed limit

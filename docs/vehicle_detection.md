@@ -234,7 +234,7 @@ maximum downstream distance for associating station data with a segment.
 
 ## Traffic Data Archiving
 
-Collected data is archived only if the `sample_archive_enable`
+Collected data is archived only if the `detector_data_archive_enable`
 [system attribute] is `true`.  The [Mayfly] service can be installed to make
 this data available on the web.
 

@@ -158,6 +158,7 @@ comm_event_purge_days	14
 database_version	5.60.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
+detector_data_archive_enable	true
 detector_occ_spike_secs	60
 dms_comm_loss_enable	true
 dms_message_tooltip_enable	false
@@ -214,7 +215,6 @@ rwis_visibility_1_m	1609
 rwis_visibility_2_m	402
 rwis_flooding_1_mm	6
 rwis_flooding_2_mm	8
-sample_archive_enable	true
 sign_event_purge_days	0
 speed_limit_min_mph	45
 speed_limit_default_mph	55
