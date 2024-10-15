@@ -229,6 +229,7 @@ vid_connect_autostart	true
 vid_connect_fail_next_source	true
 vid_connect_fail_sec	20
 vid_lost_timeout_sec	10
+vid_max_duration_sec	0
 vid_reconnect_auto	true
 vid_reconnect_timeout_sec	10
 vsa_bottleneck_id_mph	55
