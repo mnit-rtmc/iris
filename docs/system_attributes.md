@@ -77,6 +77,7 @@ System Attribute                 | Description
 `incident_clear_advice_multi`    | Advice for [DMS] messages when incidents are cleared
 `incident_clear_secs`            | Seconds to leave cleared incidents before removing them
 `legacy_xml_config_enable`       | Enable saving system configuration as legacy XML
+`legacy_xml_detector_enable`     | Enable saving detector data as legacy XML
 `legacy_xml_incident_enable`     | Enable saving incidents as legacy XML
 `legacy_xml_sign_message_enable` | Enable saving sign messages as legacy XML
 `legacy_xml_weather_sensor_enable` | Enable saving weather sensors as legacy XML
