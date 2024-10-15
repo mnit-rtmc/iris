@@ -23,11 +23,6 @@ use mayfly::routes;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 
-/// Create an HTML response
-fn html_resp(html: &'static str) -> impl IntoResponse {
-    ([(header::CONTENT_TYPE, "text/html; charset=utf-8")], html)
-}
-
 /// Main function
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -53,10 +48,10 @@ fn root_get() -> Router {
 
 /// Handler for index page
 async fn index_handler() -> impl IntoResponse {
-    html_resp(include_str!(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/static/index.html"
-    )))
+    (
+        [(header::CONTENT_TYPE, "text/html; charset=utf-8")],
+        include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/static/index.html")),
+    )
 }
 
 /// Build route for index html
@@ -67,10 +62,13 @@ fn index_get() -> Router {
 /// Build route for CSS
 fn css_get() -> Router {
     async fn handler() -> impl IntoResponse {
-        html_resp(include_str!(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/static/mayfly.css"
-        )))
+        (
+            [(header::CONTENT_TYPE, "text/css")],
+            include_str!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/static/mayfly.css"
+            )),
+        )
     }
     Router::new().route("/mayfly.css", get(handler))
 }
