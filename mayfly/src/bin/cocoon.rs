@@ -17,7 +17,7 @@
 use argh::FromArgs;
 use log::{debug, info};
 use mayfly::binned::{CountData, OccupancyData, SpeedData, TrafficData};
-use mayfly::error::{Error, Result};
+use mayfly::error::Result;
 use mayfly::traffic::Traffic;
 use mayfly::vehicle::{VehLog, VehicleFilter};
 use std::ffi::OsString;
@@ -199,11 +199,13 @@ fn backup_path(path: &Path) -> Result<PathBuf> {
     if backup.is_dir() {
         if let Some(name) = path.file_name() {
             backup.push(name);
-            if backup.is_file() {
-                return Err(Error::FileExists);
-            } else {
+            if !backup.is_file() {
                 return Ok(backup);
             }
+            Err(std::io::Error::new(
+                ErrorKind::AlreadyExists,
+                name.to_string_lossy(),
+            ))?;
         }
     }
     Err(std::io::Error::new(ErrorKind::NotFound, BACKUP_PATH))?

@@ -248,7 +248,7 @@ fn scan_zip_blocking(
 fn parse_year(year: &str) -> Result<i32> {
     match year.parse() {
         Ok(y) if (1900..=9999).contains(&y) => Ok(y),
-        _ => Err(Error::InvalidDate),
+        _ => Err(Error::InvalidQuery("year")),
     }
 }
 
@@ -256,7 +256,7 @@ fn parse_year(year: &str) -> Result<i32> {
 fn parse_month(month: &str) -> Result<u32> {
     match month.parse() {
         Ok(m) if (1..=12).contains(&m) => Ok(m),
-        _ => Err(Error::InvalidDate),
+        _ => Err(Error::InvalidQuery("month")),
     }
 }
 
@@ -264,7 +264,7 @@ fn parse_month(month: &str) -> Result<u32> {
 fn parse_day(day: &str) -> Result<u32> {
     match day.parse() {
         Ok(d) if (1..=31).contains(&d) => Ok(d),
-        _ => Err(Error::InvalidDate),
+        _ => Err(Error::InvalidQuery("day")),
     }
 }
 
@@ -278,7 +278,7 @@ fn parse_date(date: &str) -> Result<NaiveDate> {
             return Ok(date);
         }
     }
-    Err(Error::InvalidDate)
+    Err(Error::InvalidQuery("date"))
 }
 
 impl Default for JsonVec {
@@ -483,7 +483,6 @@ where
         if !self.filter().is_filtered() {
             match self.lookup_zipped_bin(&mut traffic) {
                 Err(Error::Zip(ZipError::FileNotFound)) => (),
-                Err(Error::Io(e)) if e.kind() == ErrorKind::NotFound => (),
                 res => return res,
             }
         }
@@ -494,7 +493,7 @@ where
     fn lookup_zipped_bin(&self, traffic: &mut Traffic) -> Result<String> {
         let name = self.binned_file_name();
         let mut zf = traffic.by_name(&name)?;
-        log::info!("opened {} in {}.{}", name, self.date, EXT);
+        log::info!("opened {name} in {}.{EXT}", self.date);
         let mut buf = Self::make_bin_buffer(zf.size())?;
         zf.read_exact(&mut buf)?;
         Ok(self.make_binned_body(buf))
@@ -504,7 +503,7 @@ where
     fn lookup_zipped_vlog(&self, traffic: &mut Traffic) -> Result<String> {
         let name = self.vlog_file_name();
         let zf = traffic.by_name(&name)?;
-        log::info!("opened {} in {}.{}", name, self.date, EXT);
+        log::info!("opened {name} in {}.{EXT}", self.date);
         let vlog = VehLog::from_reader_blocking(zf)?;
         Ok(self.make_vlog_body(vlog))
     }
@@ -526,7 +525,7 @@ where
         path.push(self.binned_file_name());
         let mut file = File::open(&path).await?;
         let metadata = file.metadata().await?;
-        log::info!("opened {:?}", &path);
+        log::info!("opened {path:?}");
         let mut buf = Self::make_bin_buffer(metadata.len())?;
         file.read_exact(&mut buf).await?;
         Ok(self.make_binned_body(buf))
@@ -537,7 +536,7 @@ where
         let mut path = self.date_path()?;
         path.push(self.vlog_file_name());
         let file = File::open(&path).await?;
-        log::info!("opened {:?}", &path);
+        log::info!("opened {path:?}");
         let vlog = VehLog::from_reader_async(file).await?;
         Ok(self.make_vlog_body(vlog))
     }
@@ -564,7 +563,7 @@ where
         if len == sz as u64 {
             Ok(vec![0; sz])
         } else {
-            Err(Error::InvalidData)
+            Err(Error::InvalidData("bin"))
         }
     }
 

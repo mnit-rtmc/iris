@@ -20,36 +20,24 @@ use zip::result::ZipError;
 /// Error enum
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    /// I/O error
-    #[error("I/O {0}")]
-    Io(#[from] io::Error),
+    /// Invalid query parameter
+    #[error("Invalid {0} query")]
+    InvalidQuery(&'static str),
 
-    /// Invalid query
-    #[error("Invalid query")]
-    InvalidQuery,
-
-    /// Invalid date
-    #[error("Invalid date")]
-    InvalidDate,
-
-    /// Invalid data
-    #[error("Invalid data")]
-    InvalidData,
-
-    /// Invalid stamp
-    #[error("Invalid stamp")]
-    InvalidStamp,
+    /// Invalid traffic data
+    #[error("Invalid {0} data")]
+    InvalidData(&'static str),
 
     /// Tokio join error
     #[error("Join {0}")]
     Join(#[from] tokio::task::JoinError),
 
-    /// File exists
-    #[error("File exists")]
-    FileExists,
+    /// I/O error
+    #[error("I/O {0}")]
+    Io(#[from] io::Error),
 
     /// Zip error
-    #[error("Zip error")]
+    #[error("Zip {0}")]
     Zip(#[from] ZipError),
 }
 
@@ -59,14 +47,14 @@ pub type Result<T> = std::result::Result<T, Error>;
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
         let status = match self {
-            Self::InvalidQuery => StatusCode::BAD_REQUEST,
-            Self::InvalidDate => StatusCode::BAD_REQUEST,
+            Self::InvalidQuery(_) => StatusCode::BAD_REQUEST,
             Self::Io(e) if e.kind() == ErrorKind::TimedOut => {
                 StatusCode::GATEWAY_TIMEOUT
             }
             Self::Io(e) if e.kind() == ErrorKind::NotFound => {
                 StatusCode::NOT_FOUND
             }
+            Self::Zip(ZipError::FileNotFound) => StatusCode::NOT_FOUND,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         };
         (status, status.canonical_reason().unwrap_or("WTF")).into_response()

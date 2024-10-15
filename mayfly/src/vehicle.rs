@@ -99,7 +99,7 @@ pub struct BinIter<'a, T: TrafficData> {
 fn parse_hour(hour: &str) -> Result<u32> {
     match hour.parse() {
         Ok(h) if h < 24 => Ok(h),
-        _ => Err(Error::InvalidStamp),
+        _ => Err(Error::InvalidData("hour")),
     }
 }
 
@@ -107,7 +107,7 @@ fn parse_hour(hour: &str) -> Result<u32> {
 fn parse_min_sec(min_sec: &str) -> Result<u32> {
     match min_sec.parse() {
         Ok(ms) if ms < 60 => Ok(ms),
-        _ => Err(Error::InvalidStamp),
+        _ => Err(Error::InvalidData("minute")),
     }
 }
 
@@ -127,7 +127,7 @@ impl FromStr for Stamp {
                 return Ok(st);
             }
         }
-        Err(Error::InvalidStamp)
+        Err(Error::InvalidData("stamp"))
     }
 }
 
@@ -205,7 +205,7 @@ impl VehicleEvent {
                     ev.duration = dur.parse().ok();
                 }
             }
-            None => return Err(Error::InvalidData),
+            None => return Err(Error::InvalidData("duration")),
         }
         match val.next() {
             Some(hdw) => {
@@ -213,7 +213,7 @@ impl VehicleEvent {
                     ev.headway = hdw.parse().ok();
                 }
             }
-            None => return Err(Error::InvalidData),
+            None => return Err(Error::InvalidData("headway")),
         }
         if let Some(stamp) = val.next() {
             if !stamp.is_empty() {
