@@ -327,6 +327,7 @@ impl From<JsonVec> for String {
 /// Build route for districts
 pub fn districts_get() -> Router {
     async fn handler() -> impl IntoResponse {
+        log::info!("GET /districts");
         let path = Path::new(BASE_PATH);
         let mut scanner = Scanner::new();
         scanner.scan_dir(&path, |_nm, is_dir| is_dir).await?;
@@ -338,6 +339,7 @@ pub fn districts_get() -> Router {
 /// Build route for years
 pub fn years_get() -> Router {
     async fn handler(years: Query<Years>) -> impl IntoResponse {
+        log::info!("GET /years");
         let path = district_path(&years.0.district);
         let mut scanner = Scanner::new();
         scanner.scan_dir(&path, check_year).await?;
@@ -362,6 +364,7 @@ impl Dates {
 /// Build route for dates
 pub fn dates_get() -> Router {
     async fn handler(dates: Query<Dates>) -> impl IntoResponse {
+        log::info!("GET /dates");
         let path = dates.0.path()?;
         let mut scanner = Scanner::new();
         scanner.scan_dir(&path, check_date).await?;
@@ -399,6 +402,7 @@ impl Corridors {
 /// Build route for corridors
 pub fn corridors_get() -> Router {
     async fn handler(corridors: Query<Corridors>) -> impl IntoResponse {
+        log::info!("GET /corridors");
         let path = corridors.0.zip_path()?;
         let mut scanner = Scanner::new();
         match scanner.scan_zip(&path, check_corridor).await {
@@ -434,6 +438,7 @@ impl Detectors {
 /// Lookup detectors with archived data
 pub fn detectors_get() -> Router {
     async fn handler(detectors: Query<Detectors>) -> impl IntoResponse {
+        log::info!("GET /detectors");
         let path = detectors.0.zip_path()?;
         let mut scanner = Scanner::new();
         match scanner.scan_zip(&path, check_detector).await {
@@ -625,6 +630,7 @@ where
 /// Lookup archived count data.
 pub fn counts_get() -> Router {
     async fn handler(traf: Query<Traf<CountData>>) -> impl IntoResponse {
+        log::info!("GET /counts");
         traf_handler(traf.0).await
     }
     Router::new().route("/counts", get(handler))
@@ -633,6 +639,7 @@ pub fn counts_get() -> Router {
 /// Lookup archived headway data.
 pub fn headways_get() -> Router {
     async fn handler(traf: Query<Traf<HeadwayData>>) -> impl IntoResponse {
+        log::info!("GET /headways");
         traf_handler(traf.0).await
     }
     Router::new().route("/headways", get(handler))
@@ -641,6 +648,7 @@ pub fn headways_get() -> Router {
 /// Lookup archived length data.
 pub fn lengths_get() -> Router {
     async fn handler(traf: Query<Traf<LengthData>>) -> impl IntoResponse {
+        log::info!("GET /lengths");
         traf_handler(traf.0).await
     }
     Router::new().route("/lengths", get(handler))
@@ -649,6 +657,7 @@ pub fn lengths_get() -> Router {
 /// Lookup archived occupancy data.
 pub fn occupancies_get() -> Router {
     async fn handler(traf: Query<Traf<OccupancyData>>) -> impl IntoResponse {
+        log::info!("GET /occupancies");
         traf_handler(traf.0).await
     }
     Router::new().route("/occupancies", get(handler))
@@ -657,6 +666,7 @@ pub fn occupancies_get() -> Router {
 /// Lookup archived speed data.
 pub fn speeds_get() -> Router {
     async fn handler(traf: Query<Traf<SpeedData>>) -> impl IntoResponse {
+        log::info!("GET /speeds");
         traf_handler(traf.0).await
     }
     Router::new().route("/speeds", get(handler))

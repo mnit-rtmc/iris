@@ -81,14 +81,11 @@ impl BinCommand {
                 let backup = backup_path(traffic.path())?;
                 let copier = Binner::new(&traffic)?;
                 let n_binned = copier.add_binned(traffic)?;
-                info!(
-                    "archive: {:?} {} files, {} binned",
-                    file, n_files, n_binned
-                );
+                info!("archive: {file:?} {n_files} files, {n_binned} binned");
                 std::fs::rename(&file, backup)?;
                 std::fs::rename(temp_path(&file), file)?;
             } else {
-                info!("archive: {:?} {} files, skipping", file, n_files);
+                info!("archive: {file:?} {n_files} files, skipping");
             }
         }
         Ok(())
@@ -177,7 +174,7 @@ impl Binner {
             return Ok(0);
         }
         if let Some(buf) = pack_binned::<T>(vlog) {
-            debug!("Binning {:?}", name);
+            debug!("Binning {name:?}");
             let options = match mtime {
                 Some(mtime) => {
                     SimpleFileOptions::default().last_modified_time(*mtime)
@@ -199,7 +196,7 @@ fn backup_path(path: &Path) -> Result<PathBuf> {
     if backup.is_dir() {
         if let Some(name) = path.file_name() {
             backup.push(name);
-            if !backup.is_file() {
+            if !backup.exists() {
                 return Ok(backup);
             }
             Err(std::io::Error::new(
