@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2021  Minnesota Department of Transportation
+ * Copyright (C) 2013-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GateArmState;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -28,24 +27,6 @@ import us.mn.state.dot.tms.TMSException;
  * @author Douglas Lau
  */
 public class GateArmEvent extends BaseEvent {
-
-	/** Database table name */
-	static private final String TABLE = "event.gate_arm_event";
-
-	/** Get gate arm event purge threshold (days) */
-	static private int getPurgeDays() {
-		return SystemAttrEnum.GATE_ARM_EVENT_PURGE_DAYS.getInt();
-	}
-
-	/** Purge old records */
-	static public void purgeRecords() throws TMSException {
-		int age = getPurgeDays();
-		if (store != null && age > 0) {
-			store.update("DELETE FROM " + TABLE +
-				" WHERE event_date < now() - '" + age +
-				" days'::interval;");
-		}
-	}
 
 	/** Get corresponding event type for a gate arm state */
 	static private EventType gateArmStateEventType(GateArmState gas) {
@@ -84,10 +65,16 @@ public class GateArmEvent extends BaseEvent {
 		fault = f;
 	}
 
+	/** Get the event config name */
+	@Override
+	protected String eventConfigName() {
+		return "gate_arm_event";
+	}
+
 	/** Get the database table name */
 	@Override
 	public String getTable() {
-		return TABLE;
+		return "event.gate_arm_event";
 	}
 
 	/** Get a mapping of the columns */

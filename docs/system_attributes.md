@@ -20,12 +20,9 @@ or server to be restarted.
 System Attribute                 | Description
 ---------------------------------|-----------------------------------------------------
 `action_plan_alert_list`         | CSV list of users that trigger [action plan] activation alerts
-`action_plan_event_purge_days`   | Number of days after which [action plan] events will be purged
-`alarm_event_purge_days`         | Number of days after which [alarm] events will be purged
 `alert_clear_secs`               | Seconds to leave cleared alerts before removing them
 `alert_sign_thresh_auto_meters`  | Threshold around alert area (in meters) for selecting DMS for automatic deployment of alerts
 `alert_sign_thresh_opt_meters`   | Threshold around alert area (in meters) for selecting DMS for optional inclusion in alert deployments
-`beacon_event_purge_days`        | Number of days after which [beacon] events will be purged
 `camera_autoplay`                | Automatically stream video when a [camera] is selected
 `camera_blank_url`               | Location of PNG image to display for blankd [video monitors]
 `camera_construction_url`        | Location of PNG image to display for [camera]s out due to construction
@@ -37,19 +34,12 @@ System Attribute                 | Description
 `camera_ptz_blind`               | Allow [camera] controls to be used even when not currently streaming to the IRIS client
 `camera_sequence_dwell_sec`      | Dwell time for [camera] sequences
 `camera_stream_controls_enable`  | Enable [camera] stream control panel (stop, play, etc.)
-`camera_switch_event_purge_days` | Number of days after which [camera] switch events will be purged
-`camera_video_event_purge_days`  | Number of days after which [camera] video events will be purged
 `camera_wiper_precip_mm_hr`      | Precipitation rate to activate [camera] wipers (mm/hour)
-`cap_alert_purge_days`           | Number of days after which CAP alert events will be purged from database
 `cap_xml_save_enable`            | Enable saving CAP XML file for parsing errors
 `clearguide_key`                 | ClearGuide customer key
-`client_event_purge_days`        | Number of days after which client events will be purged
 `client_units_si`                | `true` for the client to display units using the International System of Units (SI) or `false` for customary (US) units
-`comm_event_enable`              | Enable logging communication events to database
-`comm_event_purge_days`          | Number of days after which communication events will be purged
 `database_version`               | IRIS database version; developer attribute.  **Do not change**.
 `detector_auto_fail_enable`      | Enable [auto-fail] of traffic detectors with suspicious data
-`detector_event_purge_days`      | Number of days after which detector events will be purged
 `detector_data_archive_enable`   | Enable archiving of detector data
 `detector_occ_spike_secs`        | Duration for occupancy spikes to trigger "auto fail" (0=disabled)
 `dms_comm_loss_enable`           | Enable blanking [DMS] after communication time out
@@ -71,7 +61,6 @@ System Attribute                 | Description
 `email_sender_server`            | Sender email address of IRIS server
 `email_smtp_host`                | SMTP host for sending email
 `gate_arm_alert_timeout_secs`    | Time to wait before sending gate arm alerts after comm failure
-`gate_arm_event_purge_days`      | Number of days after which gate arm events will be purged
 `gps_jitter_m`                   | Threshold (m) for GPS change to update device location
 `help_trouble_ticket_enable`     | Enable help menu item for creating trouble tickets
 `help_trouble_ticket_url`        | URL of Trac trouble ticket system
@@ -85,15 +74,12 @@ System Attribute                 | Description
 `map_extent_name_initial`        | Name of map extent displayed when client starts
 `map_icon_size_scale_max`        | Maximum map scale (meters per pixel) to use full icon size
 `map_segment_max_meters`         | Maximum distance for connecting map segments
-`meter_event_enable`             | Enable logging [ramp meter] events to database
-`meter_event_purge_days`         | Number of days after which [ramp meter] events will be purged
 `meter_green_secs`               | [Ramp meter] green interval time
 `meter_max_red_secs`             | [Ramp meter] maximum red interval time
 `meter_min_red_secs`             | [Ramp meter] minimum red interval time
 `meter_yellow_secs`              | [Ramp meter] yellow interval time
 `msg_feed_verify`                | Require [DMS] messages from msg_feed to exist in message library
 `operation_retry_threshold`      | Number of times a controller operation is retried if not already failed
-`price_message_event_purge_days` | Number of days after which price message events will be purged
 `route_max_legs`                 | Maximum number of corridors for route finding
 `route_max_miles`                | Maximum distance (miles) for route finding
 `rwis_auto_max_dist_miles`       | Maximum distance to auto-associate a weather sensor to a device
@@ -107,12 +93,10 @@ System Attribute                 | Description
 `rwis_visibility_2_m`            | Distance threshold for visibility 2 condition
 `rwis_windy_1_kph`               | Gust speed threshold for windy 1 condition
 `rwis_windy_2_kph`               | Gust speed threshold for windy 2 condition
-`sign_event_purge_days`          | Number of days after which sign events will be purged
 `speed_limit_default_mph`        | Default roadway speed limit
 `speed_limit_max_mph`            | Maximum roadway speed limit
 `speed_limit_min_mph`            | Minimum roadway speed limit
 `subnet_target_1`                | Subnets for video source templates (1, 2, 3, etc)
-`tag_read_event_purge_days`      | Number of days after which tag read events will be purged
 `toll_density_alpha`             | α coefficient to convert density to [tolling] price
 `toll_density_beta`              | β coefficient (exponent) to convert density to [tolling] price
 `toll_min_price`                 | Minimum [tolling] price for one trip
@@ -135,19 +119,18 @@ System Attribute                 | Description
 `vsa_start_intervals`            | Number of intervals before activating a bottleneck for [VSA]
 `vsa_start_threshold`            | Acceleration threshold to activate a bottleneck
 `vsa_stop_threshold`             | Acceleration threshold to deactivate a bottleneck
-`weather_sensor_event_purge_days` | Number of days after which weather sensor events will be purged from database
 `window_title`                   | Window title prefix when user is logged in
 `work_request_url`               | URL to submit device work requests
 
+Configuration of [events] is handled with **Event Configuration**.
+
 
 [action plan]: action_plans.html
-[alarm]: alarms.html
 [auto-fail]: vehicle_detection.html#auto-fail
-[beacon]: beacons.html
 [camera]: cameras.html
 [DMS]: dms.html
+[events]: events.html
 [keyboards]: cameras.html#camera-keyboards
-[ramp meter]: ramp_meters.html
 [tolling]: tolling.html
 [travel time]: travel_time.html
 [video monitors]: video.html

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021-2022  Minnesota Department of Transportation
+ * Copyright (C) 2021-2024  Minnesota Department of Transportation
  * Copyright (C) 2020  SRF Consulting Group, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,6 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.CapMsgType;
 import us.mn.state.dot.tms.CapScope;
 import us.mn.state.dot.tms.CapStatus;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -50,17 +49,11 @@ public class CapAlert implements Storable {
 	/** Database table name */
 	static private final String TABLE = "cap.alert";
 
-	/** Get purge threshold (days) */
-	static private int getPurgeDays() {
-		return SystemAttrEnum.CAP_ALERT_PURGE_DAYS.getInt();
-	}
-
 	/** Purge old records */
-	static public void purgeRecords() throws TMSException {
-		int age = getPurgeDays();
-		if (BaseObjectImpl.store != null && age > 0) {
+	static void purgeRecords(int days) throws TMSException {
+		if (BaseObjectImpl.store != null && days > 0) {
 			BaseObjectImpl.store.update("DELETE FROM " + TABLE +
-				" WHERE receive_date < now() - '" + age +
+				" WHERE receive_date < now() - '" + days +
 				" days'::interval AND identifier NOT IN " +
 				"(SELECT alert FROM cap.alert_info);");
 		}

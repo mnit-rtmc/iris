@@ -157,9 +157,8 @@ address specified by the `email_recipient_action_plan` [system attribute].
 
 ## Events
 
-Whenever an action plan phase changes, a time-stamped record is added to the
-`action_plan_event` table.  These events are purged automatically when older
-than the value of the `action_plan_event_purge_days` [system attribute].
+Whenever an action plan phase changes, a time-stamped [event] record can be
+stored in the `action_plan_event` table.
 
 
 [auto-fail]: vehicle_detection.html#auto-fail
@@ -168,6 +167,7 @@ than the value of the `action_plan_event_purge_days` [system attribute].
 [ClearGuide]: clearguide.html
 [DateTimeFormatter]: https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
 [DMS]: dms.html
+[event]: events.html
 [exit ramp backup]: exit_backup.html
 [hashtag]: hashtags.html
 [lane marking]: lcs.html#lane-markings

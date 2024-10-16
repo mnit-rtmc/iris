@@ -35,6 +35,36 @@ SET search_path = public, pg_catalog;
 --
 CREATE SEQUENCE event.event_id_seq;
 
+CREATE TABLE iris.event_config (
+    name VARCHAR(32) PRIMARY KEY,
+    enable_store BOOLEAN NOT NULL,
+    enable_purge BOOLEAN NOT NULL,
+    purge_days INTEGER NOT NULL
+);
+
+INSERT INTO iris.event_config (name, enable_store, enable_purge, purge_days)
+VALUES
+    ('action_plan_event', true, true, 90),
+    ('alarm_event', true, false, 0),
+    ('beacon_event', true, false, 0),
+    ('brightness_sample', true, false, 0),
+    ('camera_switch_event', true, true, 30),
+    ('camera_video_event', true, true, 14),
+    ('cap_alert', true, true, 7),
+    ('client_event', true, false, 0),
+    ('comm_event', true, true, 14),
+    ('detector_event', true, true, 90),
+    ('gate_arm_event', true, false, 0),
+    ('incident', true, false, 0),
+    ('incident_update', true, false, 0),
+    ('meter_event', true, true, 14),
+    ('price_message_event', true, false, 0),
+    ('sign_event', true, false, 0),
+    ('tag_read_event', true, false, 0),
+    ('travel_time_event', true, true, 1),
+    ('weather_sensor_sample', true, true, 90),
+    ('weather_sensor_settings', true, false, 0);
+
 CREATE TABLE event.event_description (
     event_desc_id INTEGER PRIMARY KEY,
     description text NOT NULL
@@ -128,12 +158,9 @@ CREATE TRIGGER system_attribute_notify_trig
 
 COPY iris.system_attribute (name, value) FROM stdin;
 action_plan_alert_list	
-action_plan_event_purge_days	90
-alarm_event_purge_days	0
 alert_clear_secs	300
 alert_sign_thresh_auto_meters	1000
 alert_sign_thresh_opt_meters	4000
-beacon_event_purge_days	0
 camera_autoplay	true
 camera_blank_url	
 camera_construction_url	
@@ -145,19 +172,12 @@ camera_out_of_service_url
 camera_ptz_blind	true
 camera_sequence_dwell_sec	5
 camera_stream_controls_enable	false
-camera_switch_event_purge_days	30
-camera_video_event_purge_days	14
 camera_wiper_precip_mm_hr	8
-cap_alert_purge_days	7
 cap_xml_save_enable	true
 clearguide_key	
-client_event_purge_days	0
 client_units_si	true
-comm_event_enable	true
-comm_event_purge_days	14
 database_version	5.60.0
 detector_auto_fail_enable	true
-detector_event_purge_days	90
 detector_data_archive_enable	true
 detector_occ_spike_secs	60
 dms_comm_loss_enable	true
@@ -179,7 +199,6 @@ email_recipient_gate_arm
 email_sender_server	
 email_smtp_host	
 gate_arm_alert_timeout_secs	90
-gate_arm_event_purge_days	0
 gps_jitter_m	100
 help_trouble_ticket_enable	false
 help_trouble_ticket_url	
@@ -193,15 +212,12 @@ legacy_xml_weather_sensor_enable	true
 map_extent_name_initial	Home
 map_icon_size_scale_max	30
 map_segment_max_meters	2000
-meter_event_enable	true
-meter_event_purge_days	14
 meter_green_secs	1.3
 meter_max_red_secs	13.0
 meter_min_red_secs	0.1
 meter_yellow_secs	0.7
 msg_feed_verify	true
 operation_retry_threshold	3
-price_message_event_purge_days	0
 route_max_legs	8
 route_max_miles	16
 rwis_auto_max_dist_miles	1.0
@@ -215,11 +231,9 @@ rwis_visibility_1_m	1609
 rwis_visibility_2_m	402
 rwis_flooding_1_mm	6
 rwis_flooding_2_mm	8
-sign_event_purge_days	0
 speed_limit_min_mph	45
 speed_limit_default_mph	55
 speed_limit_max_mph	75
-tag_read_event_purge_days	0
 toll_density_alpha	0.045
 toll_density_beta	1.1
 toll_min_price	0.25
@@ -242,7 +256,6 @@ vsa_min_station_miles	0.1
 vsa_start_intervals	3
 vsa_start_threshold	-1500
 vsa_stop_threshold	-750
-weather_sensor_event_purge_days	90
 window_title	IRIS: 
 work_request_url	
 \.

@@ -1,5 +1,9 @@
 # Troubleshooting
 
+## Events
+
+Many [events] are stored in the [database], and can be used for troubleshooting.
+
 ## Error Logs
 
 Serious system errors are written to `stderr`, which is redirected to a file
@@ -20,29 +24,6 @@ Filename              | Period     | Description
 `stat_sample.xml.gz`  | 30 seconds | Mainline [station] data from [vehicle detection systems]
 `incident.xml.gz`     | 30 seconds | Current incident information
 `sign_message.xml.gz` | 30 seconds | Current DMS sign message information
-
-## Database Event Tables
-
-There are a number of event tables in the [database] for logging different
-types of events.  Each of these tables has a **view** in the public DB schema.
-There is also a **purge threshold** for each table, stored as a
-[system attribute].  To disable purging older records from an event table, set
-the corresponding purge threshold to 0.
-
-View                       | Purge Threshold
----------------------------|----------------------
-`action_plan_event_view`   | `action_plan_event_purge_days`
-`alarm_event_view`         | `alarm_event_purge_days`
-`beacon_event_view`        | `beacon_event_purge_days`
-`camera_switch_event_view` | `camera_switch_event_purge_days`
-`client_event_view`        | `client_event_purge_days`
-`comm_event_view`          | `comm_event_purge_days`
-`detector_event_view`      | `detector_event_purge_days`
-`gate_arm_event_view`      | `gate_arm_event_purge_days`
-`meter_event_view`         | `meter_event_purge_days`
-`price_message_event_view` | `price_message_event_purge_days`
-`sign_event_view`          | `sign_event_purge_days`
-`tag_read_event_view`      | `tag_read_event_purge_days`
 
 ## Debug Trace Logs
 
@@ -99,6 +80,7 @@ Filename               | Description
 [district]: installation.html#server-properties
 [DMS-XML]: protocols.html#dms-xml
 [E6]: protocols.html#e6
+[events]: events.html
 [G4]: protocols.html#g4
 [Infinova]: protocols.html#infinova
 [Manchester]: protocols.html#manchester

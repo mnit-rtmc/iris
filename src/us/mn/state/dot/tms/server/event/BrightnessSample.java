@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2021  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,12 +70,20 @@ public class BrightnessSample extends BaseEvent {
 		output = o;
 	}
 
+	/** Get the event config name */
+	@Override
+	protected String eventConfigName() {
+		return "brightness_sample";
+	}
+
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "event.brightness_sample";
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("event_desc_id", event_type.id);

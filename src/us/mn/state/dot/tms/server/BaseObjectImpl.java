@@ -58,6 +58,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		PermissionImpl.loadAll();
 		UserImpl.loadAll();
 		SystemAttributeImpl.loadAll();
+		EventConfigImpl.loadAll();
 		GraphicImpl.loadAll();
 		FontImpl.loadAll();
 		GlyphImpl.loadAll();

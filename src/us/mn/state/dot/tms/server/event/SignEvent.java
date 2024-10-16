@@ -18,7 +18,6 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -27,24 +26,6 @@ import us.mn.state.dot.tms.TMSException;
  * @author Douglas Lau
  */
 public class SignEvent extends BaseEvent {
-
-	/** Database table name */
-	static private final String TABLE = "event.sign_event";
-
-	/** Get sign event purge threshold (days) */
-	static private int getPurgeDays() {
-		return SystemAttrEnum.SIGN_EVENT_PURGE_DAYS.getInt();
-	}
-
-	/** Purge old records */
-	static public void purgeRecords() throws TMSException {
-		int age = getPurgeDays();
-		if (store != null && age > 0) {
-			store.update("DELETE FROM " + TABLE +
-				" WHERE event_date < now() - '" + age +
-				" days'::interval;");
-		}
-	}
 
 	/** Is the specified event a sign event? */
 	static private boolean isSignEvent(EventType et) {
@@ -81,10 +62,16 @@ public class SignEvent extends BaseEvent {
 		duration = dur;
 	}
 
+	/** Get the event config name */
+	@Override
+	protected String eventConfigName() {
+		return "sign_event";
+	}
+
 	/** Get the database table name */
 	@Override
 	public String getTable() {
-		return TABLE;
+		return "event.sign_event";
 	}
 
 	/** Get a mapping of the columns */

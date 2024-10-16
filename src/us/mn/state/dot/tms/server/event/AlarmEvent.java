@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2021  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -27,24 +26,6 @@ import us.mn.state.dot.tms.TMSException;
  * @author Douglas Lau
  */
 public class AlarmEvent extends BaseEvent {
-
-	/** Database table name */
-	static private final String TABLE = "event.alarm_event";
-
-	/** Get alarm event purge threshold (days) */
-	static private int getPurgeDays() {
-		return SystemAttrEnum.ALARM_EVENT_PURGE_DAYS.getInt();
-	}
-
-	/** Purge old records */
-	static public void purgeRecords() throws TMSException {
-		int age = getPurgeDays();
-		if (store != null && age > 0) {
-			store.update("DELETE FROM " + TABLE +
-				" WHERE event_date < now() - '" + age +
-				" days'::interval;");
-		}
-	}
 
 	/** Is the specified event an alarm event? */
 	static private boolean isAlarmEvent(EventType et) {
@@ -62,10 +43,16 @@ public class AlarmEvent extends BaseEvent {
 		alarm = a;
 	}
 
+	/** Get the event config name */
+	@Override
+	protected String eventConfigName() {
+		return "alarm_event";
+	}
+
 	/** Get the database table name */
 	@Override
 	public String getTable() {
-		return TABLE;
+		return "event.alarm_event";
 	}
 
 	/** Get a mapping of the columns */

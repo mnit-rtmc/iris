@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2018  Iteris Inc.
- * Copyright (C) 2018-2021  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -29,24 +28,6 @@ import us.mn.state.dot.tms.TMSException;
  * @author Douglas Lau
  */
 public class ActionPlanEvent extends BaseEvent {
-
-	/** Database table name */
-	static private final String TABLE = "event.action_plan_event";
-
-	/** Get purge threshold (days) */
-	static private int getPurgeDays() {
-		return SystemAttrEnum.ACTION_PLAN_EVENT_PURGE_DAYS.getInt();
-	}
-
-	/** Purge old records */
-	static public void purgeRecords() throws TMSException {
-		int age = getPurgeDays();
-		if (store != null && age > 0) {
-			store.update("DELETE FROM " + TABLE +
-				" WHERE event_date < now() - '" + age +
-				" days'::interval;");
-		}
-	}
 
 	/** Is the specified event an action plan event? */
 	static private boolean isActionPlanEvent(EventType et) {
@@ -72,10 +53,16 @@ public class ActionPlanEvent extends BaseEvent {
 		detail = dt;
 	}
 
+	/** Get the event config name */
+	@Override
+	protected String eventConfigName() {
+		return "action_plan_event";
+	}
+
 	/** Get the database table name */
 	@Override
 	public String getTable() {
-		return TABLE;
+		return "event.action_plan_event";
 	}
 
 	/** Get a mapping of the columns */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2021  Minnesota Department of Transportation
+ * Copyright (C) 2019-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -27,24 +26,6 @@ import us.mn.state.dot.tms.TMSException;
  * @author Douglas Lau
  */
 public class CameraVideoEvent extends BaseEvent {
-
-	/** Database table name */
-	static private final String TABLE = "event.camera_video_event";
-
-	/** Get event purge threshold (days) */
-	static private int getPurgeDays() {
-		return SystemAttrEnum.CAMERA_VIDEO_EVENT_PURGE_DAYS.getInt();
-	}
-
-	/** Purge old records */
-	static public void purgeRecords() throws TMSException {
-		int age = getPurgeDays();
-		if (store != null && age > 0) {
-			store.update("DELETE FROM " + TABLE +
-				" WHERE event_date < now() - '" + age +
-				" days'::interval;");
-		}
-	}
 
 	/** Is the specified event a camera video event? */
 	static private boolean isCameraVideoEvent(EventType et) {
@@ -66,10 +47,16 @@ public class CameraVideoEvent extends BaseEvent {
 		monitor_id = m;
 	}
 
+	/** Get the event config name */
+	@Override
+	protected String eventConfigName() {
+		return "camera_video_event";
+	}
+
 	/** Get the database table name */
 	@Override
 	public String getTable() {
-		return TABLE;
+		return "event.camera_video_event";
 	}
 
 	/** Get a mapping of the columns */

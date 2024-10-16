@@ -31,13 +31,11 @@ located just downstream of a pricing DMS.
 
 ### Tag Read Events
 
-When a tag is read, an event is logged in the `tag_read_event` database table.
+When a tag is read, an [event] can be stored in the `tag_read_event` table.
 The event includes the **date and time**, **tag ID**, **toll zone** and
-**tollway**.  This can be combined with the price message events to build a list
-of trips for each tag ID.  This information can be used to bill customers.
-
-These records are purged automatically when older than the value of the
-`tag_read_event_purge_days` [system attribute].
+**tollway**.  This can be combined with the price message events to build a
+list of trips for each tag ID.  This information can be used to bill
+customers.
 
 ## Toll Zones
 
@@ -85,21 +83,19 @@ If required, a message such as `OPEN` or `CLOSED` may be appended after the tag.
 
 ### Price Message Events
 
-_Price events_ are logged when a message is sent to a DMS, and again when the
-message is verified.  The price event includes the **date and time**,
+A price [event] can be stored when a message is sent to a DMS, and again when
+the message is verified.  The event includes the **date and time**,
 **DEPLOYED** or **VERIFIED** status, **DMS id**, **toll zone**, _highest
 density_ **detector(s)** and **price**.
 
 The logged _toll zone_ is the last zone specified in the tag.  In _priced_ mode,
 the displayed price is logged.  For _open_ or _closed_, a price of 0 is logged.
 
-These records are purged automatically when older than the value of the
-`price_message_event_purge_days` [system attribute].
-
 
 [action tag]: action_plans.html#action-tags
 [device actions]: action_plans.html#device-actions
 [DMS]: dms.html
+[event]: events.html
 [message pattern]: message_patterns.html
 [station]: road_topology.html#r_node-types
 [system attribute]: system_attributes.html

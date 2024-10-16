@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2023  Minnesota Department of Transportation
+ * Copyright (C) 2016-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,24 +27,6 @@ import us.mn.state.dot.tms.TMSException;
  */
 public class TravelTimeEvent extends BaseEvent {
 
-	/** Database table name */
-	static private final String TABLE = "event.travel_time_event";
-
-	/** Get travel time event purge threshold (days) */
-	static private int getPurgeDays() {
-		return 1;
-	}
-
-	/** Purge old records */
-	static public void purgeRecords() throws TMSException {
-		int age = getPurgeDays();
-		if (store != null && age > 0) {
-			store.update("DELETE FROM " + TABLE +
-				" WHERE event_date < now() - '" + age +
-				" days'::interval;");
-		}
-	}
-
 	/** Device ID */
 	private final String device_id;
 
@@ -62,10 +44,16 @@ public class TravelTimeEvent extends BaseEvent {
 		station_id = sid;
 	}
 
+	/** Get the event config name */
+	@Override
+	protected String eventConfigName() {
+		return "travel_time_event";
+	}
+
 	/** Get the database table name */
 	@Override
 	public String getTable() {
-		return TABLE;
+		return "event.travel_time_event";
 	}
 
 	/** Get a mapping of the columns */

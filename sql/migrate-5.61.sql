@@ -564,8 +564,160 @@ INSERT INTO iris.system_attribute (name, value) VALUES
     ('legacy_xml_sign_message_enable', 'true'),
     ('legacy_xml_weather_sensor_enable', 'true');
 
+-- Add event config table
+CREATE TABLE iris.event_config (
+    name VARCHAR(32) PRIMARY KEY,
+    enable_store BOOLEAN NOT NULL,
+    enable_purge BOOLEAN NOT NULL,
+    purge_days INTEGER NOT NULL
+);
+
+INSERT INTO iris.event_config (name, enable_store, enable_purge, purge_days)
+VALUES
+    ('action_plan_event', true, true, 90),
+    ('alarm_event', true, false, 0),
+    ('beacon_event', true, false, 0),
+    ('brightness_sample', true, false, 0),
+    ('camera_switch_event', true, true, 30),
+    ('camera_video_event', true, true, 14),
+    ('cap_alert', true, true, 7),
+    ('client_event', true, false, 0),
+    ('comm_event', true, true, 14),
+    ('detector_event', true, true, 90),
+    ('gate_arm_event', true, false, 0),
+    ('incident', true, false, 0),
+    ('incident_update', true, false, 0),
+    ('meter_event', true, true, 14),
+    ('price_message_event', true, false, 0),
+    ('sign_event', true, false, 0),
+    ('tag_read_event', true, false, 0),
+    ('travel_time_event', true, true, 1),
+    ('weather_sensor_sample', true, true, 90),
+    ('weather_sensor_settings', true, false, 0);
+
+UPDATE iris.event_config c
+    SET enable_purge = (a.value <> '0'), purge_days = CAST(a.value AS INTEGER)
+    FROM iris.system_attribute a
+    WHERE c.name = 'action_plan_event'
+    AND a.name = 'action_plan_event_purge_days';
+
+UPDATE iris.event_config c
+    SET enable_purge = (a.value <> '0'), purge_days = CAST(a.value AS INTEGER)
+    FROM iris.system_attribute a
+    WHERE c.name = 'alarm_event'
+    AND a.name = 'alarm_event_purge_days';
+
+UPDATE iris.event_config c
+    SET enable_purge = (a.value <> '0'), purge_days = CAST(a.value AS INTEGER)
+    FROM iris.system_attribute a
+    WHERE c.name = 'beacon_event'
+    AND a.name = 'beacon_event_purge_days';
+
+UPDATE iris.event_config c
+    SET enable_purge = (a.value <> '0'), purge_days = CAST(a.value AS INTEGER)
+    FROM iris.system_attribute a
+    WHERE c.name = 'camera_switch_event'
+    AND a.name = 'camera_switch_event_purge_days';
+
+UPDATE iris.event_config c
+    SET enable_purge = (a.value <> '0'), purge_days = CAST(a.value AS INTEGER)
+    FROM iris.system_attribute a
+    WHERE c.name = 'camera_video_event'
+    AND a.name = 'camera_video_event_purge_days';
+
+UPDATE iris.event_config c
+    SET enable_purge = (a.value <> '0'), purge_days = CAST(a.value AS INTEGER)
+    FROM iris.system_attribute a
+    WHERE c.name = 'cap_alert'
+    AND a.name = 'cap_alert_purge_days';
+
+UPDATE iris.event_config c
+    SET enable_purge = (a.value <> '0'), purge_days = CAST(a.value AS INTEGER)
+    FROM iris.system_attribute a
+    WHERE c.name = 'client_event'
+    AND a.name = 'client_event_purge_days';
+
+UPDATE iris.event_config c
+    SET enable_store = CAST(a.value AS BOOLEAN)
+    FROM iris.system_attribute a
+    WHERE c.name = 'comm_event'
+    AND a.name = 'comm_event_enable';
+
+UPDATE iris.event_config c
+    SET enable_purge = (a.value <> '0'), purge_days = CAST(a.value AS INTEGER)
+    FROM iris.system_attribute a
+    WHERE c.name = 'comm_event'
+    AND a.name = 'comm_event_purge_days';
+
+UPDATE iris.event_config c
+    SET enable_purge = (a.value <> '0'), purge_days = CAST(a.value AS INTEGER)
+    FROM iris.system_attribute a
+    WHERE c.name = 'detector_event'
+    AND a.name = 'detector_event_purge_days';
+
+UPDATE iris.event_config c
+    SET enable_purge = (a.value <> '0'), purge_days = CAST(a.value AS INTEGER)
+    FROM iris.system_attribute a
+    WHERE c.name = 'gate_arm_event'
+    AND a.name = 'gate_arm_event_purge_days';
+
+UPDATE iris.event_config c
+    SET enable_store = CAST(a.value AS BOOLEAN)
+    FROM iris.system_attribute a
+    WHERE c.name = 'meter_event'
+    AND a.name = 'meter_event_enable';
+
+UPDATE iris.event_config c
+    SET enable_purge = (a.value <> '0'), purge_days = CAST(a.value AS INTEGER)
+    FROM iris.system_attribute a
+    WHERE c.name = 'meter_event'
+    AND a.name = 'meter_event_purge_days';
+
+UPDATE iris.event_config c
+    SET enable_purge = (a.value <> '0'), purge_days = CAST(a.value AS INTEGER)
+    FROM iris.system_attribute a
+    WHERE c.name = 'price_message_event'
+    AND a.name = 'price_message_event_purge_days';
+
+UPDATE iris.event_config c
+    SET enable_purge = (a.value <> '0'), purge_days = CAST(a.value AS INTEGER)
+    FROM iris.system_attribute a
+    WHERE c.name = 'sign_event'
+    AND a.name = 'sign_event_purge_days';
+
+UPDATE iris.event_config c
+    SET enable_purge = (a.value <> '0'), purge_days = CAST(a.value AS INTEGER)
+    FROM iris.system_attribute a
+    WHERE c.name = 'tag_read_event'
+    AND a.name = 'tag_read_event_purge_days';
+
+UPDATE iris.event_config c
+    SET enable_purge = (a.value <> '0'), purge_days = CAST(a.value AS INTEGER)
+    FROM iris.system_attribute a
+    WHERE c.name = 'weather_sensor_sample'
+    AND a.name = 'weather_sensor_event_purge_days';
+
 -- Delete unused system attributes
-DELETE FROM iris.system_attribute WHERE name = 'dms_lamp_test_timeout_secs';
+DELETE FROM iris.system_attribute WHERE name IN (
+    'dms_lamp_test_timeout_secs',
+    'action_plan_event_purge_days',
+    'alarm_event_purge_days',
+    'beacon_event_purge_days',
+    'camera_switch_event_purge_days',
+    'camera_video_event_purge_days',
+    'cap_alert_purge_days',
+    'client_event_purge_days',
+    'comm_event_enable',
+    'comm_event_purge_days',
+    'detector_event_purge_days',
+    'gate_arm_event_purge_days',
+    'meter_event_enable',
+    'meter_event_purge_days',
+    'price_message_event_purge_days',
+    'sign_event_purge_days',
+    'tag_read_event_purge_days',
+    'weather_sensor_event_purge_days'
+);
 
 -- Rename system attribute
 UPDATE iris.system_attribute SET name = 'detector_data_archive_enable'

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2023  Minnesota Department of Transportation
+ * Copyright (C) 2001-2024  Minnesota Department of Transportation
  * Copyright (C) 2011-2012  University of Minnesota Duluth (NATSRL)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -301,8 +301,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			ms.validate();
 			if (ALG_LOG.isOpen())
 				log(ms.toString());
-			if (MeterEvent.getEnabled())
-				ms.logMeterEvent();
+			ms.logMeterEvent();
 		} else if (ALG_LOG.isOpen())
 			log("No state for " + meter.getName());
 	}

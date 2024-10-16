@@ -951,8 +951,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Log a comm event */
 	private void logCommEvent(EventType event, String id) {
-		if (CommEvent.getEnabled())
-			logEvent(new CommEvent(event, getName(), id));
+		logEvent(new CommEvent(event, getName(), id));
 	}
 
 	/** Complete a controller operation */
