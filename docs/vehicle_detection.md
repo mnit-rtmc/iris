@@ -133,9 +133,9 @@ to the [poll period] of the [comm config].
 ## Auto-Fail
 
 Traffic data is continuously checked for five common failure conditions.  When
-one of these first occurs and every hour that it persists, an event is logged in
-the `detector_event` database table.  The `detector_auto_fail_view` can be used
-to check recent events.
+one of these first occurs and every hour that it persists, an [event] can be
+stored in the `detector_event` database table.  The `detector_auto_fail_view`
+can be used to check recent events.
 
 If the `detector_auto_fail_enable` [system attribute] is `true`, the **auto
 fail** flag for each detector will be set and cleared automatically whenever
@@ -346,6 +346,7 @@ _missing_.
 [district]: installation.html#server-properties
 [DR-500]: protocols.html#dr-500
 [DXM]: protocols.html#dxm
+[event]: events.html
 [G4]: protocols.html#g4
 [IO pins]: controllers.html#io-pins
 [Mayfly]: https://github.com/mnit-rtmc/iris/tree/master/mayfly
