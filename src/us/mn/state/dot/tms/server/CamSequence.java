@@ -29,7 +29,7 @@ public class CamSequence {
 
 	/** Get the dwell time (seconds) */
 	static private int getDwellSec() {
-		return SystemAttrEnum.CAMERA_SEQUENCE_DWELL_SEC.getInt();
+		return SystemAttrEnum.CAMERA_PLAYLIST_DWELL_SEC.getInt();
  	}
 
 	/** Dwell time paused value */
