@@ -1086,15 +1086,13 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		SamplePoller sp = getSamplePoller();
 		if (sp != null)
 			sp.sendRequest(this, req);
-		else {
-			requestDevices(req);
-			// Only send settings to the "first" video monitor
-			// on the controller (lowest pin number)
-			VideoMonitorImpl vm = getFirstVideoMonitor();
-			if (vm != null) {
-				int dr = req.ordinal();
-				vm.setDeviceRequest(dr);
-			}
+		requestDevices(req);
+		// Only send settings to the "first" video monitor
+		// on the controller (lowest pin number)
+		VideoMonitorImpl vm = getFirstVideoMonitor();
+		if (vm != null) {
+			int dr = req.ordinal();
+			vm.setDeviceRequest(dr);
 		}
 	}
 
