@@ -98,7 +98,7 @@ Select `View ➔ Video ➔ Play Lists` menu item
 
 Play lists can be created to quickly cycle through [camera]s.  Selecting a
 play list on a monitor will cause the cameras to automatically switch after
-a short dwell time, specified by the `camera_sequence_dwell_sec`
+a short dwell time, specified by the `camera_playlist_dwell_sec`
 [system attribute].  A **seq num** is a unique number to select the list.
 
 A **meta** play list consists of (non-meta) sub-lists.  This allows lists to

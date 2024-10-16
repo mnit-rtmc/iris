@@ -31,8 +31,8 @@ System Attribute                 | Description
 `camera_latest_ptz_enable`       | Enable tooltip showing latest user who attempted to move a [camera]
 `camera_num_blank`               | [Camera] number reserved for blanking [video monitors]
 `camera_out_of_service_url`      | Location of PNG image to display for out of service [camera]s
+`camera_playlist_dwell_sec`      | Dwell time for [camera] play lists
 `camera_ptz_blind`               | Allow [camera] controls to be used even when not currently streaming to the IRIS client
-`camera_sequence_dwell_sec`      | Dwell time for [camera] sequences
 `camera_stream_controls_enable`  | Enable [camera] stream control panel (stop, play, etc.)
 `camera_wiper_precip_mm_hr`      | Precipitation rate to activate [camera] wipers (mm/hour)
 `cap_xml_save_enable`            | Enable saving CAP XML file for parsing errors

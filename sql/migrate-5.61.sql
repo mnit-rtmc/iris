@@ -719,8 +719,10 @@ DELETE FROM iris.system_attribute WHERE name IN (
     'weather_sensor_event_purge_days'
 );
 
--- Rename system attribute
+-- Rename system attributes
 UPDATE iris.system_attribute SET name = 'detector_data_archive_enable'
     WHERE name = 'sample_archive_enable';
+UPDATE iris.system_attribute SET name = 'camera_playlist_dwell_sec'
+    WHERE name = 'camera_sequence_dwell_sec';
 
 COMMIT;
