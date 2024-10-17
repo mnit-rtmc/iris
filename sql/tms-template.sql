@@ -31,112 +31,6 @@ SET SESSION AUTHORIZATION 'tms';
 SET search_path = public, pg_catalog;
 
 --
--- Events
---
-CREATE SEQUENCE event.event_id_seq;
-
-CREATE TABLE iris.event_config (
-    name VARCHAR(32) PRIMARY KEY,
-    enable_store BOOLEAN NOT NULL,
-    enable_purge BOOLEAN NOT NULL,
-    purge_days INTEGER NOT NULL
-);
-
-INSERT INTO iris.event_config (name, enable_store, enable_purge, purge_days)
-VALUES
-    ('action_plan_event', true, true, 90),
-    ('alarm_event', true, false, 0),
-    ('beacon_event', true, false, 0),
-    ('brightness_sample', true, false, 0),
-    ('camera_switch_event', true, true, 30),
-    ('camera_video_event', true, true, 14),
-    ('cap_alert', true, true, 7),
-    ('client_event', true, false, 0),
-    ('comm_event', true, true, 14),
-    ('detector_event', true, true, 90),
-    ('gate_arm_event', true, false, 0),
-    ('incident', true, false, 0),
-    ('incident_update', true, false, 0),
-    ('meter_event', true, true, 14),
-    ('price_message_event', true, false, 0),
-    ('sign_event', true, false, 0),
-    ('tag_read_event', true, false, 0),
-    ('travel_time_event', true, true, 1),
-    ('weather_sensor_sample', true, true, 90),
-    ('weather_sensor_settings', true, false, 0);
-
-CREATE TABLE event.event_description (
-    event_desc_id INTEGER PRIMARY KEY,
-    description text NOT NULL
-);
-
-COPY event.event_description (event_desc_id, description) FROM stdin;
-1	Alarm TRIGGERED
-2	Alarm CLEARED
-8	Comm ERROR
-9	Comm RESTORED
-10	Comm QUEUE DRAINED
-11	Comm POLL TIMEOUT
-12	Comm PARSING ERROR
-13	Comm CHECKSUM ERROR
-14	Comm CONTROLLER ERROR
-15	Comm CONNECTION REFUSED
-20	Incident CLEARED
-21	Incident CRASH
-22	Incident STALL
-23	Incident HAZARD
-24	Incident ROADWORK
-29	Incident IMPACT
-65	Comm FAILED
-81	DMS MSG ERROR
-82	DMS PIXEL ERROR
-83	DMS MSG RESET
-89	LCS DEPLOYED
-90	LCS CLEARED
-91	Sign DEPLOYED
-92	Sign CLEARED
-94	NO HITS
-95	LOCKED ON
-96	CHATTER
-97	NO CHANGE
-98	OCC SPIKE
-101	Sign BRIGHTNESS LOW
-102	Sign BRIGHTNESS GOOD
-103	Sign BRIGHTNESS HIGH
-201	Client CONNECT
-202	Client AUTHENTICATE
-203	Client FAIL AUTHENTICATION
-204	Client DISCONNECT
-205	Client CHANGE PASSWORD
-206	Client FAIL PASSWORD
-207	Client FAIL DOMAIN
-208	Client FAIL DOMAIN XFF
-209	Client UPDATE PASSWORD
-301	Gate Arm UNKNOWN
-302	Gate Arm FAULT
-303	Gate Arm OPENING
-304	Gate Arm OPEN
-305	Gate Arm WARN CLOSE
-306	Gate Arm CLOSING
-307	Gate Arm CLOSED
-401	Meter event
-501	Beacon STATE
-601	Tag Read
-651	Price DEPLOYED
-652	Price VERIFIED
-701	TT Link too long
-703	TT No destination data
-704	TT No origin data
-705	TT No route
-801	Camera SWITCHED
-811	Camera Video LOST
-812	Camera Video RESTORED
-900	Action Plan ACTIVATED
-901	Action Plan DEACTIVATED
-902	Action Plan Phase CHANGED
-\.
-
---
 -- System attributes
 --
 CREATE TABLE iris.system_attribute (
@@ -281,6 +175,116 @@ END;
 $update_version$ language plpgsql;
 
 --
+-- Events
+--
+CREATE SEQUENCE event.event_id_seq;
+
+CREATE TABLE iris.event_config (
+    name VARCHAR(32) PRIMARY KEY,
+    enable_store BOOLEAN NOT NULL,
+    enable_purge BOOLEAN NOT NULL,
+    purge_days INTEGER NOT NULL
+);
+
+INSERT INTO iris.event_config (name, enable_store, enable_purge, purge_days)
+VALUES
+    ('action_plan_event', true, true, 90),
+    ('alarm_event', true, false, 0),
+    ('beacon_event', true, false, 0),
+    ('brightness_sample', true, false, 0),
+    ('camera_switch_event', true, true, 30),
+    ('camera_video_event', true, true, 14),
+    ('cap_alert', true, true, 7),
+    ('client_event', true, false, 0),
+    ('comm_event', true, true, 14),
+    ('detector_event', true, true, 90),
+    ('gate_arm_event', true, false, 0),
+    ('incident', true, false, 0),
+    ('incident_update', true, false, 0),
+    ('meter_event', true, true, 14),
+    ('price_message_event', true, false, 0),
+    ('sign_event', true, false, 0),
+    ('tag_read_event', true, false, 0),
+    ('travel_time_event', true, true, 1),
+    ('weather_sensor_sample', true, true, 90),
+    ('weather_sensor_settings', true, false, 0);
+
+CREATE TRIGGER event_config_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.event_config
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+CREATE TABLE event.event_description (
+    event_desc_id INTEGER PRIMARY KEY,
+    description text NOT NULL
+);
+
+COPY event.event_description (event_desc_id, description) FROM stdin;
+1	Alarm TRIGGERED
+2	Alarm CLEARED
+8	Comm ERROR
+9	Comm RESTORED
+10	Comm QUEUE DRAINED
+11	Comm POLL TIMEOUT
+12	Comm PARSING ERROR
+13	Comm CHECKSUM ERROR
+14	Comm CONTROLLER ERROR
+15	Comm CONNECTION REFUSED
+20	Incident CLEARED
+21	Incident CRASH
+22	Incident STALL
+23	Incident HAZARD
+24	Incident ROADWORK
+29	Incident IMPACT
+65	Comm FAILED
+81	DMS MSG ERROR
+82	DMS PIXEL ERROR
+83	DMS MSG RESET
+89	LCS DEPLOYED
+90	LCS CLEARED
+91	Sign DEPLOYED
+92	Sign CLEARED
+94	NO HITS
+95	LOCKED ON
+96	CHATTER
+97	NO CHANGE
+98	OCC SPIKE
+101	Sign BRIGHTNESS LOW
+102	Sign BRIGHTNESS GOOD
+103	Sign BRIGHTNESS HIGH
+201	Client CONNECT
+202	Client AUTHENTICATE
+203	Client FAIL AUTHENTICATION
+204	Client DISCONNECT
+205	Client CHANGE PASSWORD
+206	Client FAIL PASSWORD
+207	Client FAIL DOMAIN
+208	Client FAIL DOMAIN XFF
+209	Client UPDATE PASSWORD
+301	Gate Arm UNKNOWN
+302	Gate Arm FAULT
+303	Gate Arm OPENING
+304	Gate Arm OPEN
+305	Gate Arm WARN CLOSE
+306	Gate Arm CLOSING
+307	Gate Arm CLOSED
+401	Meter event
+501	Beacon STATE
+601	Tag Read
+651	Price DEPLOYED
+652	Price VERIFIED
+701	TT Link too long
+703	TT No destination data
+704	TT No origin data
+705	TT No route
+801	Camera SWITCHED
+811	Camera Video LOST
+812	Camera Video RESTORED
+900	Action Plan ACTIVATED
+901	Action Plan DEACTIVATED
+902	Action Plan Phase CHANGED
+\.
+
+--
 -- Resources and Hashtags
 --
 CREATE TABLE iris.resource_type (
@@ -349,6 +353,7 @@ ramp_meter	\N
 system_attribute	\N
 cabinet_style	system_attribute
 comm_config	system_attribute
+event_config	system_attribute
 map_extent	system_attribute
 rpt_conduit	system_attribute
 toll_zone	\N

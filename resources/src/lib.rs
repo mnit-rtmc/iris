@@ -33,6 +33,7 @@ pub enum Res {
     Direction,
     Dms,
     Domain,
+    EventConfig,
     FlowStream,
     Font,
     GateArm,
@@ -110,6 +111,7 @@ impl Res {
             Direction,
             Dms,
             Domain,
+            EventConfig,
             FlowStream,
             Font,
             GateArm,
@@ -175,6 +177,7 @@ impl Res {
             Direction => "direction",
             Dms => "dms",
             Domain => "domain",
+            EventConfig => "event_config",
             FlowStream => "flow_stream",
             Font => "font",
             GateArm => "gate_arm",
@@ -233,6 +236,7 @@ impl Res {
             Detector => "🚗⬚",
             Dms => "⬛",
             Domain => "🖧 ",
+            EventConfig => "📜",
             FlowStream => "🎞️ ",
             GateArm => "⫬",
             GateArmArray => "⫭⫬",
@@ -274,12 +278,13 @@ impl Res {
         #[allow(clippy::match_like_matches_macro)]
         match self {
             Alarm | Beacon | CabinetStyle | Camera | CommConfig | CommLink
-            | Controller | Detector | Dms | Domain | FlowStream | GateArm
-            | GateArmArray | Gps | Incident | LaneMarking | LcsArray
-            | LcsIndication | Modem | MsgLine | MsgPattern | ParkingArea
-            | Permission | RampMeter | Rnode | Road | Role | SignConfig
-            | SignDetail | SignMessage | SystemAttribute | TagReader | User
-            | VideoMonitor | WeatherSensor | Word => true,
+            | Controller | Detector | Dms | Domain | EventConfig
+            | FlowStream | GateArm | GateArmArray | Gps | Incident
+            | LaneMarking | LcsArray | LcsIndication | Modem | MsgLine
+            | MsgPattern | ParkingArea | Permission | RampMeter | Rnode
+            | Road | Role | SignConfig | SignDetail | SignMessage
+            | SystemAttribute | TagReader | User | VideoMonitor
+            | WeatherSensor | Word => true,
             _ => false,
         }
     }
@@ -291,7 +296,9 @@ impl Res {
             // Camera resources
             FlowStream => Camera,
             // Controller resources
-            Alarm | CommLink | ControllerIo | GeoLoc | Gps | Modem => Controller,
+            Alarm | CommLink | ControllerIo | GeoLoc | Gps | Modem => {
+                Controller
+            }
             // Detector resources
             Rnode | Road => Detector,
             // DMS resources
@@ -306,7 +313,7 @@ impl Res {
             // Permission resources
             Domain | User | Role => Permission,
             // System attribute resources
-            CabinetStyle | CommConfig => SystemAttribute,
+            CabinetStyle | CommConfig | EventConfig => SystemAttribute,
             // Toll zone resources
             TagReader => TollZone,
             // Others

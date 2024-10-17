@@ -241,6 +241,12 @@ pub const DOMAIN_ONE: &str = "\
   FROM iris.domain \
   WHERE name = $1";
 
+/// SQL query for all event configs (primary)
+pub const EVENT_CONFIG_ALL: &str = "\
+  SELECT name, enable_store, enable_purge, purge_days \
+  FROM iris.event_config \
+  ORDER BY name";
+
 /// SQL query for all flow streams (primary)
 pub const FLOW_STREAM_ALL: &str = "\
   SELECT name, controller \

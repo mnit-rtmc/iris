@@ -60,7 +60,7 @@ resource, at the same access level.
 | [parking area]     |                                                       |
 | permission         | connection, [domain], [role], [user id]               |
 | [ramp meter]       |                                                       |
-| [system attribute] | [cabinet style], [comm config], map extent, rpt conduit |
+| [system attribute] | [cabinet style], [comm config], [event config], map extent, rpt conduit |
 | [toll zone]        | [tag reader]                                          |
 | [video monitor]    | [flow stream], [monitor style], [play list]           |
 | [weather sensor]   |                                                       |
@@ -94,6 +94,7 @@ resource.  These include:
 [dms]: dms.html
 [domain]: users.html#domains
 [encoder type]: cameras.html#encoder-types
+[event config]: events.html#event-configuration
 [flow stream]: flow_streams.html
 [font]: fonts.html
 [gate arm]: gate_arms.html

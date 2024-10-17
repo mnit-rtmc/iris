@@ -572,6 +572,9 @@ CREATE TABLE iris.event_config (
     purge_days INTEGER NOT NULL
 );
 
+INSERT INTO iris.resource_type (name, base)
+    VALUES ('event_config', 'system_attribute');
+
 INSERT INTO iris.event_config (name, enable_store, enable_purge, purge_days)
 VALUES
     ('action_plan_event', true, true, 90),
@@ -696,6 +699,10 @@ UPDATE iris.event_config c
     FROM iris.system_attribute a
     WHERE c.name = 'weather_sensor_sample'
     AND a.name = 'weather_sensor_event_purge_days';
+
+CREATE TRIGGER event_config_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.event_config
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 -- Delete unused system attributes
 DELETE FROM iris.system_attribute WHERE name IN (

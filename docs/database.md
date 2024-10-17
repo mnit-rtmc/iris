@@ -40,6 +40,7 @@ update, and is caused by one of these conditions:
 `detector`         |     | ✔️   |     |
 `dms`              | ✔️   | ✔️   | ✔️   |
 `domain`           |     |     |     |
+`event_config`     |     |     |     |
 `flow_stream`      |     | ✔️   |     |
 `gate_arm`         |     | ✔️   |     |
 `gate_arm_array`   | ✔️   | ✔️   |     |
