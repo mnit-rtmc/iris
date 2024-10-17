@@ -642,9 +642,14 @@ pub const SIGN_MSG_ONE: &str = "\
   FROM iris.sign_message \
   WHERE name = $1";
 
+/// SQL query for system attributes (all)
+pub const SYSTEM_ATTRIBUTE_ALL: &str = "\
+  SELECT jsonb_object_agg(name, value)::text \
+  FROM iris.system_attribute";
+
 /// SQL query for system attributes (public)
 pub const SYSTEM_ATTRIBUTE_PUB: &str = "\
-SELECT jsonb_object_agg(name, value)::text \
+  SELECT jsonb_object_agg(name, value)::text \
   FROM iris.system_attribute \
   WHERE name LIKE 'dms\\_%' OR name LIKE 'map\\_%'";
 

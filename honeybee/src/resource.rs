@@ -77,6 +77,7 @@ pub enum Resource {
     SignConfig,
     SignDetail,
     SignMessage,
+    SystemAttribute,
     SystemAttributePub,
     TagReader,
     User,
@@ -140,6 +141,7 @@ impl Resource {
             SignConfig,
             SignDetail,
             SignMessage,
+            SystemAttribute,
             SystemAttributePub,
             TagReader,
             User,
@@ -200,7 +202,7 @@ impl Resource {
             SignConfig => Res::SignConfig,
             SignDetail => Res::SignDetail,
             SignMessage => Res::SignMessage,
-            SystemAttributePub => Res::SystemAttribute,
+            SystemAttribute | SystemAttributePub => Res::SystemAttribute,
             TagReader => Res::TagReader,
             User => Res::User,
             VideoMonitor => Res::VideoMonitor,
@@ -262,6 +264,7 @@ impl Resource {
             SignConfig => "api/sign_config",
             SignDetail => "api/sign_detail",
             SignMessage => "sign_message",
+            SystemAttribute => "api/system_attribute",
             SystemAttributePub => "system_attribute_pub",
             TagReader => "api/tag_reader",
             User => "api/user_id",
@@ -335,6 +338,7 @@ impl Resource {
             SignConfig => query::SIGN_CONFIG_ALL,
             SignDetail => query::SIGN_DETAIL_ALL,
             SignMessage => query::SIGN_MSG_PUB,
+            SystemAttribute => query::SYSTEM_ATTRIBUTE_ALL,
             SystemAttributePub => query::SYSTEM_ATTRIBUTE_PUB,
             TagReader => query::TAG_READER_ALL,
             User => query::USER_ALL,
@@ -349,7 +353,7 @@ impl Resource {
     const fn all_sql_json(self) -> bool {
         use Resource::*;
         match self {
-            SystemAttributePub => false,
+            SystemAttribute | SystemAttributePub => false,
             _ => true,
         }
     }
