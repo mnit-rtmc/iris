@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ public class SystemMenu extends IMenu {
 		session = s;
 		desktop = s.getDesktop();
 		addItem(createSystemAttributesItem());
+		addItem(createEventConfigItem());
 		addItem(createUsersAndRolesItem());
 		addItem(createMapExtentsItem());
 		addItem(createRoadItem());
@@ -53,6 +54,16 @@ public class SystemMenu extends IMenu {
 		    new IAction("system.attributes") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new SystemAttributeForm(session));
+			}
+		    } : null;
+	}
+
+	/** Create an event config menu item action */
+	private IAction createEventConfigItem() {
+		return SystemAttributeForm.isPermitted(session) ?
+		    new IAction("event.config") {
+			protected void doActionPerformed(ActionEvent e) {
+				desktop.show(new EventConfigForm(session));
 			}
 		    } : null;
 	}

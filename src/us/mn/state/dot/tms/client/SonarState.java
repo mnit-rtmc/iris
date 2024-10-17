@@ -41,6 +41,7 @@ import us.mn.state.dot.tms.DayMatcher;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.Domain;
+import us.mn.state.dot.tms.EventConfig;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GeoLoc;
@@ -132,6 +133,15 @@ public class SonarState extends Client {
 	/** Get the system attribute type cache */
 	public TypeCache<SystemAttribute> getSystemAttributes() {
 		return system_attributes;
+	}
+
+	/** Cache of event configs */
+	private final TypeCache<EventConfig> event_configs =
+		new TypeCache<EventConfig>(EventConfig.class, this);
+
+	/** Get the event config type cache */
+	public TypeCache<EventConfig> getEventConfigs() {
+		return event_configs;
 	}
 
 	/** Cache of graphic proxies */
@@ -597,6 +607,7 @@ public class SonarState extends Client {
 		// FIXME: this is a hack ...
 		BaseHelper.user = user;
 		populate(system_attributes, true);
+		populate(event_configs, true);
 		SubnetChecker.start();
 		populate(map_extents, true);
 		populate(roads);
