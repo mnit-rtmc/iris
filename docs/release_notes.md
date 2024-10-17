@@ -1,5 +1,37 @@
 # IRIS 5.x Release Notes
 
+5.61.0 (17 Oct 2024)
+ - Remove capabilities/privileges (replace with permissions)
+   NOTE: migrate-5.61.sql handles the transition, but non-standard
+   capabilities might not be converted correctly
+ - Made permission into Sonar object (not DB-only)
+ - Added support for video monitor hashtags (for permissions)
+ - Drop video monitor `group_n` (use hashtags instead)
+ - Replace action plan `description` with `notes` (+ hashtag)
+ - Remove catalogs in favor of "meta" play lists
+ - Replace play list `description` with `notes` (+ hashtag)
+ - Added "scratch" play lists (manually created) to replace "personal" ones
+ - Consolidated SQL trigger functions for hashtags
+ - Add `pixel_service` flag to sign message (set for sticky action plans)
+ - Add system attributes to allow disabling legacy XML output
+ - Replace many `*_purge_days` system attributes with more flexible
+   event config table
+ - Rename system attributes:
+   * `sample_archive_enable` => `detector_data_archive_enable`
+   * `camera_sequence_dwell_sec` => `camera_playlist_dwell_sec`
+ - Replaced `operation_retry_threshold` system attribute with
+   `retry_threshold` column on comm config
+ - Fixed issue preventing weather sensor settings polls
+ - Renamed `gate.arm.whitelist` property => `gate.arm.allowlist`
+ - Renamed `http.proxy.whitelist` property => `http.proxy.allowlist`
+ - Fixed infinite loop in mndot170 meter settings operation
+ - Add camera markers to web UI map
+ - Convert mayfly from tide to axum crate
+ - REST API:
+   * Add `cam_num` to `camera_pub` JSON
+   * Add restricted `api/system_attribute`
+   * Add restricted `api/event_config`
+
 5.60.0 (27 Aug 2024)
  - Merged DMS/meter/etc. actions into "device_action"
  - Device actions use hashtags for ramp meters, beacons, etc.
