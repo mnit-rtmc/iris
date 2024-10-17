@@ -704,6 +704,32 @@ CREATE TRIGGER event_config_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.event_config
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
+-- Rename system attributes
+UPDATE iris.system_attribute SET name = 'detector_data_archive_enable'
+    WHERE name = 'sample_archive_enable';
+UPDATE iris.system_attribute SET name = 'camera_playlist_dwell_sec'
+    WHERE name = 'camera_sequence_dwell_sec';
+
+-- Replace operation_retry_threshold system attribute with comm_config column
+DROP VIEW comm_config_view;
+ALTER TABLE iris.comm_config ADD COLUMN retry_threshold INTEGER;
+UPDATE iris.comm_config SET retry_threshold = CAST(a.value AS INTEGER)
+    FROM iris.system_attribute a
+    WHERE a.name = 'operation_retry_threshold';
+ALTER TABLE iris.comm_config ALTER COLUMN retry_threshold SET NOT NULL;
+
+ALTER TABLE iris.comm_config
+    ADD CONSTRAINT retry_threshold_ck
+    CHECK (retry_threshold >= 0 AND retry_threshold <= 8);
+
+CREATE VIEW comm_config_view AS
+    SELECT cc.name, cc.description, cp.description AS protocol,
+           timeout_ms, retry_threshold, poll_period_sec, long_poll_period_sec,
+           idle_disconnect_sec, no_response_disconnect_sec
+    FROM iris.comm_config cc
+    JOIN iris.comm_protocol cp ON cc.protocol = cp.id;
+GRANT SELECT ON comm_config_view TO PUBLIC;
+
 -- Delete unused system attributes
 DELETE FROM iris.system_attribute WHERE name IN (
     'dms_lamp_test_timeout_secs',
@@ -720,16 +746,11 @@ DELETE FROM iris.system_attribute WHERE name IN (
     'gate_arm_event_purge_days',
     'meter_event_enable',
     'meter_event_purge_days',
+    'operation_retry_threshold',
     'price_message_event_purge_days',
     'sign_event_purge_days',
     'tag_read_event_purge_days',
     'weather_sensor_event_purge_days'
 );
-
--- Rename system attributes
-UPDATE iris.system_attribute SET name = 'detector_data_archive_enable'
-    WHERE name = 'sample_archive_enable';
-UPDATE iris.system_attribute SET name = 'camera_playlist_dwell_sec'
-    WHERE name = 'camera_sequence_dwell_sec';
 
 COMMIT;

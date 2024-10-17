@@ -219,6 +219,12 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return comm_link;
 	}
 
+	/** Get the operation retry threshold */
+	public int getRetryThreshold() {
+		CommLinkImpl cl = comm_link;
+		return (cl != null) ? cl.getRetryThreshold() : 0;
+	}
+
 	/** Get the polling period (sec) */
 	public int getPollPeriodSec() {
 		CommLinkImpl cl = comm_link;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2020-2023  Minnesota Department of Transportation
+ * Copyright (C) 2020-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,7 +83,7 @@ public class CommConfigModel extends ProxyTableModel<CommConfig> {
 	@Override
 	protected ArrayList<ProxyColumn<CommConfig>> createColumns() {
 		ArrayList<ProxyColumn<CommConfig>> cols =
-			new ArrayList<ProxyColumn<CommConfig>>(8);
+			new ArrayList<ProxyColumn<CommConfig>>(9);
 		cols.add(new ProxyColumn<CommConfig>("comm.config", 60) {
 			public Object getValueAt(CommConfig cc) {
 				return cc.getName();
@@ -139,6 +139,20 @@ public class CommConfigModel extends ProxyTableModel<CommConfig> {
 			}
 			protected TableCellEditor createCellEditor() {
 				return new TimeoutCellEditor(MAX_TIMEOUT_MS);
+			}
+		});
+		cols.add(new ProxyColumn<CommConfig>(
+			"comm.config.retry_threshold", 100, Integer.class)
+		{
+			public Object getValueAt(CommConfig cc) {
+				return cc.getRetryThreshold();
+			}
+			public boolean isEditable(CommConfig cc) {
+				return canWrite(cc, "retryThreshold");
+			}
+			public void setValueAt(CommConfig cc, Object value) {
+				if (value instanceof Integer)
+					cc.setRetryThreshold((Integer) value);
 			}
 		});
 		cols.add(new PeriodColumn("comm.config.poll_period_sec",

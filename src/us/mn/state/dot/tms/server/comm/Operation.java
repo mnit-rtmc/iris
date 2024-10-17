@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2022  Minnesota Department of Transportation
+ * Copyright (C) 2005-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.ControllerIoImpl;
 import us.mn.state.dot.tms.utils.I18N;
@@ -30,11 +29,6 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Douglas Lau
  */
 public final class Operation implements Comparable<Operation> {
-
-	/** Get the error retry threshold */
-	static private int systemRetryThreshold() {
-		return SystemAttrEnum.OPERATION_RETRY_THRESHOLD.getInt();
-	}
 
 	/** Expire time for steps which wait indefinitely */
 	static private final int EXPIRE_INDEFINITE_MS = 24 * 60 * 60 * 1000;
@@ -301,7 +295,9 @@ public final class Operation implements Comparable<Operation> {
 
 	/** Get the error retry threshold */
 	private int getRetryThreshold() {
-		return (controller.isFailed()) ? 0 : systemRetryThreshold();
+		return controller.isFailed()
+		      ? 0
+		      : controller.getRetryThreshold();
 	}
 
 	/** Destroy the operation.  The operation gets destroyed after

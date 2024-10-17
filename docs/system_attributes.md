@@ -79,7 +79,6 @@ System Attribute                 | Description
 `meter_min_red_secs`             | [Ramp meter] minimum red interval time
 `meter_yellow_secs`              | [Ramp meter] yellow interval time
 `msg_feed_verify`                | Require [DMS] messages from msg_feed to exist in message library
-`operation_retry_threshold`      | Number of times a controller operation is retried if not already failed
 `route_max_legs`                 | Maximum number of corridors for route finding
 `route_max_miles`                | Maximum distance (miles) for route finding
 `rwis_auto_max_dist_miles`       | Maximum distance to auto-associate a weather sensor to a device

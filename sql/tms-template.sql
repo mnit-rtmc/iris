@@ -111,7 +111,6 @@ meter_max_red_secs	13.0
 meter_min_red_secs	0.1
 meter_yellow_secs	0.7
 msg_feed_verify	true
-operation_retry_threshold	3
 route_max_legs	8
 route_max_miles	16
 rwis_auto_max_dist_miles	1.0
@@ -1087,6 +1086,7 @@ CREATE TABLE iris.comm_config (
     description VARCHAR(20) NOT NULL UNIQUE,
     protocol SMALLINT NOT NULL REFERENCES iris.comm_protocol(id),
     timeout_ms INTEGER NOT NULL,
+    retry_threshold INTEGER NOT NULL,
     poll_period_sec INTEGER NOT NULL,
     long_poll_period_sec INTEGER NOT NULL,
     idle_disconnect_sec INTEGER NOT NULL,
@@ -1094,15 +1094,19 @@ CREATE TABLE iris.comm_config (
 );
 
 ALTER TABLE iris.comm_config
+    ADD CONSTRAINT retry_threshold_ck
+    CHECK (retry_threshold >= 0 AND retry_threshold <= 8);
+
+ALTER TABLE iris.comm_config
     ADD CONSTRAINT poll_period_ck
     CHECK (poll_period_sec >= 5 AND long_poll_period_sec >= poll_period_sec);
 
-COPY iris.comm_config (name, description, protocol, timeout_ms,
-                       poll_period_sec, long_poll_period_sec,
-                       idle_disconnect_sec, no_response_disconnect_sec)
-FROM stdin;
-cfg_0	NTCIP udp	11	1000	30	300	0	0
-\.
+INSERT INTO iris.comm_config (
+    name, description, protocol, timeout_ms, retry_threshold, poll_period_sec,
+    long_poll_period_sec, idle_disconnect_sec, no_response_disconnect_sec
+) VALUES (
+     'cfg_0', 'NTCIP udp', 11, 1000, 3, 30, 300, 0, 0
+);
 
 CREATE TRIGGER comm_config_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.comm_config
@@ -1110,7 +1114,7 @@ CREATE TRIGGER comm_config_notify_trig
 
 CREATE VIEW comm_config_view AS
     SELECT cc.name, cc.description, cp.description AS protocol,
-           timeout_ms, poll_period_sec, long_poll_period_sec,
+           timeout_ms, retry_threshold, poll_period_sec, long_poll_period_sec,
            idle_disconnect_sec, no_response_disconnect_sec
     FROM iris.comm_config cc
     JOIN iris.comm_protocol cp ON cc.protocol = cp.id;

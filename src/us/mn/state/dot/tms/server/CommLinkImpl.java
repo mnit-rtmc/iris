@@ -313,6 +313,11 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return comm_config;
 	}
 
+	/** Get operation retry threshold */
+	public int getRetryThreshold() {
+		return comm_config.getRetryThreshold();
+	}
+
 	/** Device poller */
 	private transient DevicePoller poller;
 
