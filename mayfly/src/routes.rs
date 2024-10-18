@@ -24,6 +24,7 @@ use axum::routing::get;
 use axum::Router;
 use chrono::{Local, NaiveDate, TimeDelta};
 use serde::Deserialize;
+use std::collections::HashSet;
 use std::fmt::{Display, Write};
 use std::io::{ErrorKind, Read as _};
 use std::marker::PhantomData;
@@ -45,15 +46,9 @@ const DEXT: &str = ".traffic";
 /// Traffic file extension without dot
 const EXT: &str = "traffic";
 
-/// JSON array of values
+/// JSON vec  of values
 struct JsonVec {
     value: String,
-}
-
-/// File name scanner
-#[derive(Default)]
-struct Scanner {
-    names: JsonVec,
 }
 
 /// Query parameters for years
@@ -117,6 +112,54 @@ struct Traf<T: TrafficData> {
     _bin_secs: Option<u32>,
 }
 
+impl Default for JsonVec {
+    fn default() -> Self {
+        JsonVec {
+            value: String::with_capacity(2880 * 4),
+        }
+    }
+}
+
+impl JsonVec {
+    /// Create a new JSON vec
+    fn new() -> Self {
+        Self::default()
+    }
+
+    /// Write delimiter
+    fn write_delim(&mut self) {
+        if self.value.is_empty() {
+            self.value.push('[');
+        } else {
+            self.value.push(',');
+        }
+    }
+
+    /// Write one value
+    fn write<D: Display>(&mut self, value: D) {
+        self.write_delim();
+        write!(self.value, "{value}").unwrap();
+    }
+
+    /// Write one quoted value
+    fn write_quoted<D: Display>(&mut self, value: D) {
+        self.write_delim();
+        write!(self.value, "\"{value}\"").unwrap();
+    }
+}
+
+impl From<JsonVec> for String {
+    fn from(vec: JsonVec) -> Self {
+        let mut v = vec.value;
+        if v.is_empty() {
+            v.push_str("[]");
+        } else {
+            v.push(']');
+        }
+        v
+    }
+}
+
 /// Create a JSON response
 fn json_resp(
     json: String,
@@ -168,80 +211,65 @@ fn zip_path(district: &Option<String>, date: &str) -> Result<PathBuf> {
     Ok(path)
 }
 
-impl Scanner {
-    /// Create a new scanner
-    fn new() -> Self {
-        Self::default()
-    }
+/// Get file stem
+fn file_stem(nm: &str) -> Option<&str> {
+    Path::new(nm).file_stem().and_then(|st| st.to_str())
+}
 
-    /// Push a file name
-    fn push(&mut self, nm: &str) {
-        if let Some(stem) = Path::new(nm).file_stem() {
-            if let Some(st) = stem.to_str() {
-                self.names.write_quoted(st);
-            }
-        }
-    }
-
-    /// Convert into JSON string
-    fn into_json(self) -> Result<String> {
-        Ok(self.names.into())
-    }
-
-    /// Scan entries in a directory
-    async fn scan_dir<P>(
-        &mut self,
-        path: &P,
-        check: fn(&str, bool) -> bool,
-    ) -> Result<()>
-    where
-        P: AsRef<Path>,
-    {
-        let mut entries = read_dir(path).await?;
-        while let Some(entry) = entries.next_entry().await? {
-            let tp = entry.file_type().await?;
-            if !tp.is_symlink() {
-                if let Some(nm) = entry.file_name().to_str() {
-                    if check(nm, tp.is_dir()) {
-                        self.push(nm);
+/// Scan entries in a directory
+async fn scan_dir<P>(path: &P, check: fn(&str, bool) -> bool) -> Result<String>
+where
+    P: AsRef<Path>,
+{
+    let mut entries = read_dir(path).await?;
+    let mut names = HashSet::new();
+    while let Some(entry) = entries.next_entry().await? {
+        let tp = entry.file_type().await?;
+        if !tp.is_symlink() {
+            if let Some(nm) = entry.file_name().to_str() {
+                if check(nm, tp.is_dir()) {
+                    if let Some(stem) = file_stem(nm) {
+                        names.insert(stem.to_string());
                     }
                 }
             }
         }
-        Ok(())
     }
+    let mut json = JsonVec::new();
+    for name in names {
+        json.write_quoted(name);
+    }
+    Ok(String::from(json))
+}
 
-    /// Scan entries in a zip file
-    async fn scan_zip<P>(
-        &mut self,
-        path: &P,
-        check: fn(&str, bool) -> bool,
-    ) -> Result<()>
-    where
-        P: AsRef<Path>,
-    {
-        let path = PathBuf::from(path.as_ref());
-        let names =
-            task::spawn_blocking(move || scan_zip_blocking(path, check))
-                .await?;
-        self.names = names?;
-        Ok(())
-    }
+/// Scan entries in a zip file
+async fn scan_zip<P>(path: &P, check: fn(&str, bool) -> bool) -> Result<String>
+where
+    P: AsRef<Path>,
+{
+    let path = PathBuf::from(path.as_ref());
+    task::spawn_blocking(move || scan_zip_blocking(path, check)).await?
 }
 
 /// Scan entries in a zip file (blocking)
 fn scan_zip_blocking(
     path: PathBuf,
     check: fn(&str, bool) -> bool,
-) -> Result<JsonVec> {
+) -> Result<String> {
     let traffic = Traffic::new(&path)?;
-    let mut names = JsonVec::default();
+    let mut names = HashSet::new();
     for nm in traffic.file_names() {
         if check(nm, false) {
-            names.write_quoted(nm);
+            if let Some(stem) = file_stem(nm) {
+                names.insert(stem.to_string());
+            }
         }
     }
-    Ok(names)
+    let mut json = JsonVec::new();
+    for name in names {
+        json.write_quoted(name);
+    }
+    Ok(String::from(json))
 }
 
 /// Parse year parameter
@@ -281,57 +309,12 @@ fn parse_date(date: &str) -> Result<NaiveDate> {
     Err(Error::InvalidQuery("date"))
 }
 
-impl Default for JsonVec {
-    fn default() -> Self {
-        JsonVec {
-            value: String::with_capacity(2880 * 4),
-        }
-    }
-}
-
-impl JsonVec {
-    /// Write delimiter
-    fn write_delim(&mut self) {
-        if self.value.is_empty() {
-            self.value.push('[');
-        } else {
-            self.value.push(',');
-        }
-    }
-
-    /// Write one value
-    fn write<D: Display>(&mut self, value: D) {
-        self.write_delim();
-        write!(self.value, "{value}").unwrap();
-    }
-
-    /// Write one quoted value
-    fn write_quoted<D: Display>(&mut self, value: D) {
-        self.write_delim();
-        write!(self.value, "\"{value}\"").unwrap();
-    }
-}
-
-impl From<JsonVec> for String {
-    fn from(vec: JsonVec) -> Self {
-        let mut v = vec.value;
-        if v.is_empty() {
-            v.push_str("[]");
-        } else {
-            v.push(']');
-        }
-        v
-    }
-}
-
 /// Build route for districts
 pub fn districts_get() -> Router {
     async fn handler() -> impl IntoResponse {
         log::info!("GET /districts");
         let path = Path::new(BASE_PATH);
-        let mut scanner = Scanner::new();
-        scanner.scan_dir(&path, |_nm, is_dir| is_dir).await?;
-        scanner.into_json()
+        scan_dir(&path, |_nm, is_dir| is_dir).await
     }
     Router::new().route("/districts", get(handler))
 }
@@ -341,9 +324,7 @@ pub fn years_get() -> Router {
     async fn handler(years: Query<Years>) -> impl IntoResponse {
         log::info!("GET /years");
         let path = district_path(&years.0.district);
-        let mut scanner = Scanner::new();
-        scanner.scan_dir(&path, check_year).await?;
-        scanner.into_json()
+        scan_dir(&path, check_year).await
     }
     Router::new().route("/years", get(handler))
 }
@@ -366,9 +347,7 @@ pub fn dates_get() -> Router {
     async fn handler(dates: Query<Dates>) -> impl IntoResponse {
         log::info!("GET /dates");
         let path = dates.0.path()?;
-        let mut scanner = Scanner::new();
-        scanner.scan_dir(&path, check_date).await?;
-        scanner.into_json()
+        scan_dir(&path, check_date).await
     }
     Router::new().route("/dates", get(handler))
 }
@@ -404,16 +383,13 @@ pub fn corridors_get() -> Router {
     async fn handler(corridors: Query<Corridors>) -> impl IntoResponse {
         log::info!("GET /corridors");
         let path = corridors.0.zip_path()?;
-        let mut scanner = Scanner::new();
-        match scanner.scan_zip(&path, check_corridor).await {
+        match scan_zip(&path, check_corridor).await {
             Err(Error::Io(e)) if e.kind() == ErrorKind::NotFound => {
                 let path = corridors.0.path()?;
-                scanner.scan_dir(&path, check_corridor).await?;
+                scan_dir(&path, check_corridor).await
             }
-            Err(e) => Err(e)?,
-            Ok(_) => (),
+            res => res,
         }
-        scanner.into_json()
     }
     Router::new().route("/corridors", get(handler))
 }
@@ -440,20 +416,13 @@ pub fn detectors_get() -> Router {
     async fn handler(detectors: Query<Detectors>) -> impl IntoResponse {
         log::info!("GET /detectors");
         let path = detectors.0.zip_path()?;
-        let mut scanner = Scanner::new();
-        match scanner.scan_zip(&path, check_detector).await {
+        match scan_zip(&path, check_detector).await {
             Err(Error::Io(e)) if e.kind() == ErrorKind::NotFound => {
                 let path = detectors.0.path()?;
-                match scanner.scan_dir(&path, check_detector).await {
-                    Err(Error::Io(e)) if e.kind() == ErrorKind::NotFound => (),
-                    Err(e) => Err(e)?,
-                    Ok(_) => (),
-                }
+                scan_dir(&path, check_detector).await
             }
-            Err(e) => Err(e)?,
-            Ok(_) => (),
+            res => res,
         }
-        scanner.into_json()
     }
     Router::new().route("/detectors", get(handler))
 }
@@ -574,20 +543,20 @@ where
 
     /// Make body from binned buffer
     fn make_binned_body(&self, buf: Vec<u8>) -> String {
-        let mut vec = JsonVec::default();
+        let mut vec = JsonVec::new();
         for val in buf.chunks_exact(T::bin_bytes()) {
             vec.write(T::unpack(val));
         }
-        vec.into()
+        String::from(vec)
     }
 
     /// Make body from vehicle log
     fn make_vlog_body(&self, vlog: VehLog) -> String {
-        let mut vec = JsonVec::default();
+        let mut vec = JsonVec::new();
         for val in vlog.binned_iter::<T>(30, self.filter()) {
             vec.write(val);
         }
-        vec.into()
+        String::from(vec)
     }
 
     /// Get path to (zip) file
