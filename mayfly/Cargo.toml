@@ -16,6 +16,6 @@ thiserror = { workspace = true }
 tokio = { workspace = true }
 
 [dependencies.zip]
-version = "2"
+version = "0.6"
 default-features = false
 features = ["deflate", "time"]

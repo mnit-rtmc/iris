@@ -24,7 +24,7 @@ use std::ffi::OsString;
 use std::fs::File;
 use std::io::{BufWriter, ErrorKind, Write};
 use std::path::{Path, PathBuf};
-use zip::write::SimpleFileOptions;
+use zip::write::FileOptions;
 use zip::{DateTime, ZipWriter};
 
 /// Traffic archive backup path
@@ -168,19 +168,14 @@ impl Binner {
         &mut self,
         name: String,
         vlog: &VehLog,
-        mtime: &Option<DateTime>,
+        mtime: &DateTime,
     ) -> Result<u32> {
         if self.contains(&name) {
             return Ok(0);
         }
         if let Some(buf) = pack_binned::<T>(vlog) {
             debug!("Binning {name:?}");
-            let options = match mtime {
-                Some(mtime) => {
-                    SimpleFileOptions::default().last_modified_time(*mtime)
-                }
-                None => SimpleFileOptions::default(),
-            };
+            let options = FileOptions::default().last_modified_time(*mtime);
             self.writer.start_file(name, options)?;
             self.writer.write_all(&buf[..])?;
             Ok(1)
