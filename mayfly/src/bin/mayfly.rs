@@ -84,8 +84,8 @@ fn route_mayfly() -> Router {
         .merge(routes::corridors_get())
         .merge(routes::detectors_get())
         .merge(routes::counts_get())
-        .merge(routes::speeds_get())
-        .merge(routes::headways_get())
-        .merge(routes::occupancies_get())
-        .merge(routes::lengths_get())
+        .merge(routes::speed_get())
+        .merge(routes::headway_get())
+        .merge(routes::occupancy_get())
+        .merge(routes::length_get())
 }
