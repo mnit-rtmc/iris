@@ -46,7 +46,7 @@ const DEXT: &str = ".traffic";
 /// Traffic file extension without dot
 const EXT: &str = "traffic";
 
-/// JSON vec  of values
+/// JSON vec of values
 struct JsonVec {
     value: String,
 }
