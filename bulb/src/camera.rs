@@ -11,9 +11,11 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, View};
+use crate::card::{uri_one, AncillaryData, Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
+use crate::device::DeviceReq;
 use crate::error::Result;
+use crate::fetch::Action;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::ItemState;
 use crate::start::fly_map_item;
@@ -35,6 +37,15 @@ pub struct Camera {
     // secondary attributes
     pub geo_loc: Option<String>,
     pub pin: Option<u32>,
+    pub encoder_type: Option<String>,
+    pub encoder_type_string: Option<String>,
+    pub enc_address: Option<String>,
+    pub enc_port: Option<u32>,
+    pub enc_mcast: Option<String>,
+    pub enc_channel: Option<u32>,
+    pub cam_template: Option<String>,
+    pub comm_link: Option<String>,
+    pub controller_uri: Option<String>,
 }
 
 /// Camera ancillary data
@@ -106,12 +117,55 @@ impl Camera {
         )
     }
 
+    /// Create action to handle click on a device request button
+    #[allow(clippy::vec_init_then_push)]
+    fn device_req(&self, req: DeviceReq) -> Vec<Action> {
+        let uri = uri_one(Res::Camera, &self.name);
+        let mut fields = Fields::new();
+        fields.insert_num("device_request", req as u32);
+        let value = fields.into_value().to_string();
+        let mut actions = Vec::with_capacity(1);
+        actions.push(Action::Patch(uri, value.into()));
+        actions
+    }
+
+    /// Convert to Request HTML
+    fn to_html_request(&self, _anc: &CameraAnc) -> String {
+        let title = self.title(View::Request);
+        format!(
+            "{title}\
+            <div class='row'>\
+              <span>Reset/Reboot</span>\
+              <span>\
+                <button id='rq_reset' type='button'>Reboot</button>\
+              </span>\
+            </div>"
+        )
+    }
+
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &CameraAnc) -> String {
         let title = self.title(View::Setup);
         let cam_num = OptVal(self.cam_num);
         let controller = anc.cio.controller_html(self);
+        let cam_notes = &self.notes.clone().unwrap_or(String::new());
+        let encoder_type = &self.encoder_type_string.clone().unwrap_or(String::new());
+        let enc_address = &self.enc_address.clone().unwrap_or(String::new());
+        let enc_port = if let Some(e_p) = &self.enc_port {
+                e_p.to_string()
+            } else {
+                String::new()
+            };
+        let enc_mcast = &self.enc_mcast.clone().unwrap_or(String::new());
+        let enc_channel = if let Some(e_c) = &self.enc_channel {
+                e_c.to_string()
+            } else {
+                String::new()
+            };
+        let cam_template = &self.cam_template.clone().unwrap_or("N/A".to_string());
+        let controller_uri = &self.controller_uri.clone().unwrap_or(String::new());
         let pin = anc.cio.pin_html(self.pin);
+        let publish = if self.publish { " checked" } else { "" };
         let footer = self.footer(true);
         format!(
             "{title}\
@@ -121,7 +175,44 @@ impl Camera {
                      size='8' value='{cam_num}'>\
              </div>\
              {controller}\
+             <div class='row'>\
+               <label for='controller_uri'>Controller Address</label>\
+               <span class='info' id='controller_uri'>{controller_uri}</span>\
+             </div>\
+             <div class='row'>\
+               <label for='cam_notes'>Notes</label>\
+               <input type='text' id='cam_notes' value='{cam_notes}'>\
+             </div>\
+             <div class='row'>\
+               <label for='encoder_type'>Encoder Type</label>\
+               <span class='info' id='encoder_type'>{encoder_type}</span>\
+             </div>\
+             <div class='row'>\
+               <label for='enc_address'>Encoder Address/Port Override</label>\
+               <span class='info'>\
+                 <input id='enc_address' type='text' value='{enc_address}'>\
+                 <input id='enc_port' type='number' min='1' size='4' \
+                        value='{enc_port}'>\
+               </span>\
+             </div>\
+             <div class='row'>\
+               <label for='enc_mcast'>Multicast Address</label>\
+               <input id='enc_mcast' type='text' value='{enc_mcast}'>\
+             </div>\
+             <div class='row'>\
+               <label for='enc_channel'>Encoder Channel</label>\
+               <input id='enc_channel' type='number' min='1' size='8' \
+                      value='{enc_channel}'>\
+             </div>\
+             <div class='row'>\
+               <label for='cam_template'>Camera Template</label>\
+               <span class='info' id='cam_template'>{cam_template}</span>\
+             </div>\
              {pin}\
+             <div class='row'>\
+               <label for='publish'>Publish</label>\
+               <input id='publish' type='checkbox'{publish}>\
+             </div>\
              {footer}"
         )
     }
@@ -192,6 +283,7 @@ impl Card for Camera {
             View::Create => self.to_html_create(anc),
             View::Control => self.to_html_control(anc),
             View::Location => anc.loc.to_html_loc(self),
+            View::Request => self.to_html_request(anc),
             View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }
@@ -202,12 +294,26 @@ impl Card for Camera {
         let mut fields = Fields::new();
         fields.changed_input("cam_num", self.cam_num);
         fields.changed_input("controller", &self.controller);
+        fields.changed_input("cam_notes", &self.notes);
+        fields.changed_input("enc_address", &self.enc_address);
+        fields.changed_input("enc_port", self.enc_port);
+        fields.changed_input("enc_mcast", &self.enc_mcast);
+        fields.changed_input("enc_channel", self.enc_channel);
         fields.changed_input("pin", self.pin);
+        fields.changed_input("publish", self.publish);
         fields.into_value().to_string()
     }
 
     /// Get changed fields on Location view
     fn changed_location(&self, anc: CameraAnc) -> String {
         anc.loc.changed_location()
+    }
+
+    /// Handle click event for a button on the card
+    fn handle_click(&self, _anc: CameraAnc, id: String) -> Vec<Action> {
+        match id.as_str() {
+            "rq_reset" => self.device_req(DeviceReq::ResetDevice),
+            _ => Vec::new(),
+        }
     }
 }
