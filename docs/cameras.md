@@ -8,6 +8,20 @@ video.  To view MPEG4 or h.264 video, the [MonStream] application is required.
 
 Select `View ➔ Video ➔ Cameras` menu item
 
+The **Setup** tab within a camera properties form contains attributes to
+configure the video encoder.
+
+Field             | Description
+------------------|-------------------------------------------------------
+Cam Num           | Camera number, used for [keyboards](#camera-keyboards)
+Encoder Type      | The type of video encoder
+Encoder Address   | IP address for unicast streams (or [SDP] files)
+Encoder Port      | Port number for unicast streams (overrides scheme default)
+Multicast Address | IP address for [multicast] streams
+Encoder Channel   | Channel number, for encoders which support multiple cameras
+Publish           | Flag to allow public viewing of camera video
+Notes             | Administrator notes, possibly including [hashtag]s
+
 <details>
 <summary>API Resources 🕵️ </summary>
 
@@ -26,26 +40,18 @@ Select `View ➔ Video ➔ Cameras` menu item
 
 </details>
 
-The **Setup** tab within a camera properties form contains attributes to
-configure the video encoder.
-
-Field             | Description
-------------------|-------------------------------------------------------
-Cam Num           | Camera number, used for [keyboards](#camera-keyboards)
-Encoder Type      | The type of video encoder
-Encoder Address   | IP address for unicast streams (or [SDP] files)
-Encoder Port      | Port number for unicast streams (overrides scheme default)
-Multicast Address | IP address for [multicast] streams
-Encoder Channel   | Channel number, for encoders which support multiple cameras
-Publish           | Flag to allow public viewing of camera video
-Notes             | Administrator notes, possibly including [hashtag]s
-
 ## Encoder Types
 
 Select `View ➔ Video ➔ Encoder Types` menu item
 
 An encoder type represents a specific make and model of video encoder.  All
 cameras with the same type share a common configuration.
+
+Field  | Description
+-------|------------------
+Make   | Manufacturer name
+Model  | Device model
+Config | Encoder configuration
 
 <details>
 <summary>API Resources 🕵️ </summary>
@@ -59,12 +65,6 @@ cameras with the same type share a common configuration.
 | 🔧 Configure | make, model, config |
 
 </details>
-
-Field  | Description
--------|------------------
-Make   | Manufacturer name
-Model  | Device model
-Config | Encoder configuration
 
 ### Streams
 
@@ -88,6 +88,19 @@ Latency        | Buffering latency (ms) for consuming stream
 A stream can be either _unicast_ or _multicast_, but not both.  For a multicast
 stream defined by an [SDP] file, specify the _URI scheme_ and _path_ instead of
 _multicast port_.
+
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/encoder_stream` (primary)
+* `iris/api/encoder_stream/{name}`
+
+| Access       | Primary             | Secondary |
+|--------------|---------------------|-----------|
+| 👁️  View      | name, encoder\_type |           |
+| 🔧 Configure | view\_num, encoding | flow\_stream, quality, uri\_scheme, uri\_path, mcast\_port, latency |
+
+</details>
 
 ## Pan Tilt and Zoom
 

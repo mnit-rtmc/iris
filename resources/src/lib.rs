@@ -33,6 +33,7 @@ pub enum Res {
     Direction,
     Dms,
     Domain,
+    EncoderStream,
     EncoderType,
     EventConfig,
     FlowStream,
@@ -112,6 +113,7 @@ impl Res {
             Direction,
             Dms,
             Domain,
+            EncoderStream,
             EncoderType,
             EventConfig,
             FlowStream,
@@ -179,6 +181,7 @@ impl Res {
             Direction => "direction",
             Dms => "dms",
             Domain => "domain",
+            EncoderStream => "encoder_stream",
             EncoderType => "encoder_type",
             EventConfig => "event_config",
             FlowStream => "flow_stream",
@@ -239,6 +242,7 @@ impl Res {
             Detector => "🚗⬚",
             Dms => "⬛",
             Domain => "🖧 ",
+            EncoderStream => "〜",
             EncoderType => "🎥📽️",
             EventConfig => "📜",
             FlowStream => "🎞️ ",
@@ -282,13 +286,13 @@ impl Res {
         #[allow(clippy::match_like_matches_macro)]
         match self {
             Alarm | Beacon | CabinetStyle | Camera | CommConfig | CommLink
-            | Controller | Detector | Dms | Domain | EncoderType
-            | EventConfig | FlowStream | GateArm | GateArmArray | Gps
-            | Incident | LaneMarking | LcsArray | LcsIndication | Modem
-            | MsgLine | MsgPattern | ParkingArea | Permission | RampMeter
-            | Rnode | Road | Role | SignConfig | SignDetail | SignMessage
-            | SystemAttribute | TagReader | User | VideoMonitor
-            | WeatherSensor | Word => true,
+            | Controller | Detector | Dms | Domain | EncoderStream
+            | EncoderType | EventConfig | FlowStream | GateArm
+            | GateArmArray | Gps | Incident | LaneMarking | LcsArray
+            | LcsIndication | Modem | MsgLine | MsgPattern | ParkingArea
+            | Permission | RampMeter | Rnode | Road | Role | SignConfig
+            | SignDetail | SignMessage | SystemAttribute | TagReader | User
+            | VideoMonitor | WeatherSensor | Word => true,
             _ => false,
         }
     }
@@ -298,7 +302,7 @@ impl Res {
         use Res::*;
         match self {
             // Camera resources
-            EncoderType => Camera,
+            EncoderStream | EncoderType => Camera,
             // Controller resources
             Alarm | CommLink | ControllerIo | GeoLoc | Gps | Modem => {
                 Controller

@@ -1384,6 +1384,10 @@ ALTER TABLE iris.encoder_stream
     ADD CONSTRAINT unicast_or_multicast_ck
     CHECK ((uri_scheme IS NULL AND uri_path IS NULL) OR mcast_port IS NULL);
 
+CREATE TRIGGER encoder_stream_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.encoder_stream
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
 CREATE VIEW encoder_stream_view AS
     SELECT es.name, encoder_type, make, model, config, view_num,flow_stream,
            enc.description AS encoding, eq.description AS quality,

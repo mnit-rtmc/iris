@@ -50,7 +50,7 @@ resource, at the same access level.
 | [action plan]      | day matcher, [day plan], [device action], [plan phase], [time action] |
 | [alert config]     | alert info, [alert message]                           |
 | [beacon]           |                                                       |
-| [camera]           | [camera preset], camera template, cam vid src ord, encoder stream, [encoder type], vid source template |
+| [camera]           | [camera preset], camera template, cam vid src ord, [encoder stream], [encoder type], vid source template |
 | [controller]       | [alarm], [comm link], [controller io], [gps], [modem] |
 | [detector]         | [r_node], [road], road affix, station                 |
 | [dms]              | [font], glyph, [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
@@ -93,6 +93,7 @@ resource.  These include:
 [device action]: action_plans.html#device-actions
 [dms]: dms.html
 [domain]: users.html#domains
+[encoder stream]: cameras.html#streams
 [encoder type]: cameras.html#encoder-types
 [event config]: events.html#event-configuration
 [flow stream]: flow_streams.html

@@ -242,6 +242,19 @@ pub const DOMAIN_ONE: &str = "\
   FROM iris.domain \
   WHERE name = $1";
 
+/// SQL query for all encoder streams (primary)
+pub const ENCODER_STREAM_ALL: &str = "\
+  SELECT name, encoder_type, view_num, encoding \
+  FROM iris.encoder_stream \
+  ORDER BY name";
+
+/// SQL query for one encoder stream
+pub const ENCODER_STREAM_ONE: &str = "\
+  SELECT name, encoder_type, view_num, encoding, flow_stream, quality, \
+         uri_scheme, uri_path, mcast_port, latency \
+  FROM iris.encoder_stream \
+  WHERE name = $1";
+
 /// SQL query for all encoder types (primary)
 pub const ENCODER_TYPE_ALL: &str = "\
   SELECT name, make, model, config \
