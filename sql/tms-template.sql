@@ -1362,6 +1362,10 @@ CREATE TABLE iris.encoder_type (
     UNIQUE(make, model, config)
 );
 
+CREATE TRIGGER encoder_type_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.encoder_type
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
 CREATE TABLE iris.encoder_stream (
     name VARCHAR(8) PRIMARY KEY,
     encoder_type VARCHAR(8) NOT NULL REFERENCES iris.encoder_type,

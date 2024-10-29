@@ -33,6 +33,7 @@ pub enum Res {
     Direction,
     Dms,
     Domain,
+    EncoderType,
     EventConfig,
     FlowStream,
     Font,
@@ -111,6 +112,7 @@ impl Res {
             Direction,
             Dms,
             Domain,
+            EncoderType,
             EventConfig,
             FlowStream,
             Font,
@@ -177,6 +179,7 @@ impl Res {
             Direction => "direction",
             Dms => "dms",
             Domain => "domain",
+            EncoderType => "encoder_type",
             EventConfig => "event_config",
             FlowStream => "flow_stream",
             Font => "font",
@@ -236,6 +239,7 @@ impl Res {
             Detector => "🚗⬚",
             Dms => "⬛",
             Domain => "🖧 ",
+            EncoderType => "🎥📽️",
             EventConfig => "📜",
             FlowStream => "🎞️ ",
             GateArm => "⫬",
@@ -278,11 +282,11 @@ impl Res {
         #[allow(clippy::match_like_matches_macro)]
         match self {
             Alarm | Beacon | CabinetStyle | Camera | CommConfig | CommLink
-            | Controller | Detector | Dms | Domain | EventConfig
-            | FlowStream | GateArm | GateArmArray | Gps | Incident
-            | LaneMarking | LcsArray | LcsIndication | Modem | MsgLine
-            | MsgPattern | ParkingArea | Permission | RampMeter | Rnode
-            | Road | Role | SignConfig | SignDetail | SignMessage
+            | Controller | Detector | Dms | Domain | EncoderType
+            | EventConfig | FlowStream | GateArm | GateArmArray | Gps
+            | Incident | LaneMarking | LcsArray | LcsIndication | Modem
+            | MsgLine | MsgPattern | ParkingArea | Permission | RampMeter
+            | Rnode | Road | Role | SignConfig | SignDetail | SignMessage
             | SystemAttribute | TagReader | User | VideoMonitor
             | WeatherSensor | Word => true,
             _ => false,
@@ -294,7 +298,7 @@ impl Res {
         use Res::*;
         match self {
             // Camera resources
-            FlowStream => Camera,
+            EncoderType => Camera,
             // Controller resources
             Alarm | CommLink | ControllerIo | GeoLoc | Gps | Modem => {
                 Controller
@@ -316,6 +320,8 @@ impl Res {
             CabinetStyle | CommConfig | EventConfig => SystemAttribute,
             // Toll zone resources
             TagReader => TollZone,
+            // Video monitor resources
+            FlowStream => VideoMonitor,
             // Others
             _ => self,
         }

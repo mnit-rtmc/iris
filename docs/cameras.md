@@ -47,11 +47,24 @@ Select `View ➔ Video ➔ Encoder Types` menu item
 An encoder type represents a specific make and model of video encoder.  All
 cameras with the same type share a common configuration.
 
-Field    | Description
----------|------------------
-Make     | Manufacturer name
-Model    | Device model
-Config   | Encoder configuration
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/encoder_type` (primary)
+* `iris/api/encoder_type/{name}`
+
+| Access       | Primary             |
+|--------------|---------------------|
+| 👁️  View      | name                |
+| 🔧 Configure | make, model, config |
+
+</details>
+
+Field  | Description
+-------|------------------
+Make   | Manufacturer name
+Model  | Device model
+Config | Encoder configuration
 
 ### Streams
 

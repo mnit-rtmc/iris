@@ -242,6 +242,18 @@ pub const DOMAIN_ONE: &str = "\
   FROM iris.domain \
   WHERE name = $1";
 
+/// SQL query for all encoder types (primary)
+pub const ENCODER_TYPE_ALL: &str = "\
+  SELECT name, make, model, config \
+  FROM iris.encoder_type \
+  ORDER BY name";
+
+/// SQL query for one encoder type
+pub const ENCODER_TYPE_ONE: &str = "\
+  SELECT name, make, model, config \
+  FROM iris.encoder_type \
+  WHERE name = $1";
+
 /// SQL query for all event configs (primary)
 pub const EVENT_CONFIG_ALL: &str = "\
   SELECT name, enable_store, enable_purge, purge_days \

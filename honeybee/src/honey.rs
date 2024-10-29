@@ -862,6 +862,7 @@ const fn one_sql(res: Res) -> &'static str {
         Detector => query::DETECTOR_ONE,
         Dms => query::DMS_ONE,
         Domain => query::DOMAIN_ONE,
+        EncoderType => query::ENCODER_TYPE_ONE,
         FlowStream => query::FLOW_STREAM_ONE,
         Font => query::FONT_ONE,
         GateArm => query::GATE_ARM_ONE,
