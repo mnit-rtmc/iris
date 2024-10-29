@@ -645,7 +645,6 @@ public class SonarState extends Client {
 		populateReadable(weather_sensors);
 		if (canRead(WeatherSensor.SONAR_TYPE)) {
 			weather_sensors.ignoreAttribute("operation");
-			weather_sensors.ignoreAttribute("stamp");
 		}
 		populateReadable(tag_readers);
 		if (canRead(TagReader.SONAR_TYPE))
@@ -662,8 +661,6 @@ public class SonarState extends Client {
 		populateReadable(gpses);
 		if (canRead(Gps.SONAR_TYPE)) {
 			gpses.ignoreAttribute("operation");
-			gpses.ignoreAttribute("latestPoll");
-			gpses.ignoreAttribute("latestSample");
 		}
 		populateReadable(cam_templates);
 		populateReadable(vid_src_templates);
