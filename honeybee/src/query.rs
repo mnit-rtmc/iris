@@ -424,6 +424,12 @@ pub const INC_IMPACT_LUT: &str = "\
   FROM iris.inc_impact \
   ORDER BY id";
 
+/// SQL query for incident ranges (LUT)
+pub const INC_RANGE_LUT: &str = "\
+  SELECT id, description \
+  FROM iris.inc_range \
+  ORDER BY id";
+
 /// SQL query for all lane markings (primary)
 pub const LANE_MARKING_ALL: &str = "\
   SELECT m.name, location, controller, notes, deployed \
