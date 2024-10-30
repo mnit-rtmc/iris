@@ -258,6 +258,7 @@ impl Res {
             Gps => "🌐",
             Incident => "🚨",
             IncidentDetail => "🚨➕",
+            IncAdvice => "🚨❗",
             LaneMarking => "⛙",
             LcsArray => "🡇 ❌ ",
             LcsIndication => "🡇 ",
@@ -295,11 +296,12 @@ impl Res {
             Alarm | Beacon | CabinetStyle | Camera | CommConfig | CommLink
             | Controller | Detector | Dms | Domain | EncoderStream
             | EncoderType | EventConfig | FlowStream | GateArm
-            | GateArmArray | Gps | Incident | IncidentDetail | LaneMarking
-            | LcsArray | LcsIndication | Modem | MsgLine | MsgPattern
-            | ParkingArea | Permission | RampMeter | Rnode | Road | Role
-            | SignConfig | SignDetail | SignMessage | SystemAttribute
-            | TagReader | User | VideoMonitor | WeatherSensor | Word => true,
+            | GateArmArray | Gps | Incident | IncidentDetail | IncAdvice
+            | LaneMarking | LcsArray | LcsIndication | Modem | MsgLine
+            | MsgPattern | ParkingArea | Permission | RampMeter | Rnode
+            | Road | Role | SignConfig | SignDetail | SignMessage
+            | SystemAttribute | TagReader | User | VideoMonitor
+            | WeatherSensor | Word => true,
             _ => false,
         }
     }

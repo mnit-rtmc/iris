@@ -387,6 +387,13 @@ pub const GRAPHIC_ONE: &str = "\
   FROM iris.graphic \
   WHERE name = $1";
 
+/// SQL query for all active incidents (public)
+pub const INCIDENT_PUB: &str = "\
+  SELECT name, event_date, description, road, direction, lane_type, \
+         impact, confirmed, camera, detail, replaces, lat, lon \
+  FROM incident_view \
+  WHERE cleared = false";
+
 /// SQL query for all incident details (primary)
 pub const INCIDENT_DETAIL_ALL: &str = "\
   SELECT name, description \
@@ -399,12 +406,17 @@ pub const INCIDENT_DETAIL_ONE: &str = "\
   FROM event.incident_detail \
   WHERE name = $1";
 
-/// SQL query for all active incidents (public)
-pub const INCIDENT_PUB: &str = "\
-  SELECT name, event_date, description, road, direction, lane_type, \
-         impact, confirmed, camera, detail, replaces, lat, lon \
-  FROM incident_view \
-  WHERE cleared = false";
+/// SQL query for all incident advice (primary)
+pub const INC_ADVICE_ALL: &str = "\
+  SELECT name, impact \
+  FROM iris.inc_advice \
+  ORDER BY name";
+
+/// SQL query for one incident advice
+pub const INC_ADVICE_ONE: &str = "\
+  SELECT name, impact, open_lanes, impacted_lanes, range, lane_code, multi \
+  FROM iris.inc_advice \
+  WHERE name = $1";
 
 /// SQL query for all lane markings (primary)
 pub const LANE_MARKING_ALL: &str = "\

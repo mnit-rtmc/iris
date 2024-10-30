@@ -50,6 +50,7 @@ update, and is caused by one of these conditions:
 `graphic`          |     |     |     |
 `incident`         |     |     |     |
 `incident_detail`  |     |     |     |
+`inc_advice`       |     |     |     |
 `lane_marking`     | ✔️   | ✔️   |     |
 `lcs_array`        |     | ✔️   |     |
 `lcs_indication`   |     | ✔️   |     |

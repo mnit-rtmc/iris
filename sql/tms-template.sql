@@ -3430,6 +3430,10 @@ CREATE TRIGGER inc_advice_ck_trig
     BEFORE INSERT OR UPDATE ON iris.inc_advice
     FOR EACH ROW EXECUTE FUNCTION iris.inc_advice_ck();
 
+CREATE TRIGGER inc_advice_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.inc_advice
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
 CREATE VIEW inc_advice_view AS
     SELECT a.name, imp.description AS impact, lc.description AS lane_type,
            rng.description AS range, open_lanes, impacted_lanes, multi
