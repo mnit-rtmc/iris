@@ -104,6 +104,8 @@
 				value="postgis-jdbc-${postgis_version}.jar"/>
 			<param name="file.dep"
 				value="postgis-geometry-${postgis_version}.jar"/>
+			<param name="file.dep"
+				value="jsch-${jsch_version}.jar"/>
 		</antcall>
 	</target>
 
@@ -120,6 +122,7 @@
 				        value="${gst_java_version}"/>
 				<filter token="JSON.VERSION" value="${json_version}"/>
 				<filter token="POSTGIS.VERSION" value="${postgis_version}"/>
+				<filter token="JSCH.VERSION" value="${jsch_version}"/>
 				<filter token="BUILD.RPM" value="${build.rpm}"/>
 				<filter token="RPM.URL" value="${rpm.url}"/>
 				<filter token="RPM.RELEASE"
@@ -239,6 +242,7 @@
 				<include name="json-${json_version}.jar"/>
 				<include name="postgis-jdbc-${postgis_version}.jar"/>
 				<include name="postgis-geometry-${postgis_version}.jar"/>
+				<include name="jsch-${jsch_version}.jar"/>
 			</fileset>
 		</copy>
 	</target>
