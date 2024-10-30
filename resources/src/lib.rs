@@ -47,6 +47,7 @@ pub enum Res {
     Gps,
     Graphic,
     Incident,
+    IncidentDetail,
     IncAdvice,
     IncDescriptor,
     IncLocator,
@@ -128,6 +129,7 @@ impl Res {
             Gps,
             Graphic,
             Incident,
+            IncidentDetail,
             IncAdvice,
             IncDescriptor,
             IncLocator,
@@ -197,6 +199,7 @@ impl Res {
             Gps => "gps",
             Graphic => "graphic",
             Incident => "incident",
+            IncidentDetail => "incident_detail",
             IncAdvice => "inc_advice",
             IncDescriptor => "inc_descriptor",
             IncLocator => "inc_locator",
@@ -254,6 +257,7 @@ impl Res {
             GeoLoc => "🗺️ ",
             Gps => "🌐",
             Incident => "🚨",
+            IncidentDetail => "🚨➕",
             LaneMarking => "⛙",
             LcsArray => "🡇 ❌ ",
             LcsIndication => "🡇 ",
@@ -291,11 +295,11 @@ impl Res {
             Alarm | Beacon | CabinetStyle | Camera | CommConfig | CommLink
             | Controller | Detector | Dms | Domain | EncoderStream
             | EncoderType | EventConfig | FlowStream | GateArm
-            | GateArmArray | Gps | Incident | LaneMarking | LcsArray
-            | LcsIndication | Modem | MsgLine | MsgPattern | ParkingArea
-            | Permission | RampMeter | Rnode | Road | Role | SignConfig
-            | SignDetail | SignMessage | SystemAttribute | TagReader | User
-            | VideoMonitor | WeatherSensor | Word => true,
+            | GateArmArray | Gps | Incident | IncidentDetail | LaneMarking
+            | LcsArray | LcsIndication | Modem | MsgLine | MsgPattern
+            | ParkingArea | Permission | RampMeter | Rnode | Road | Role
+            | SignConfig | SignDetail | SignMessage | SystemAttribute
+            | TagReader | User | VideoMonitor | WeatherSensor | Word => true,
             _ => false,
         }
     }
@@ -318,7 +322,7 @@ impl Res {
             // Gate arm resources
             GateArmArray => GateArm,
             // Incident resources
-            IncAdvice | IncDescriptor | IncLocator => Incident,
+            IncidentDetail | IncAdvice | IncDescriptor | IncLocator => Incident,
             // LCS resources
             LcsArray | LcsIndication | LaneMarking => Lcs,
             // Permission resources

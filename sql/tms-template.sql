@@ -333,9 +333,9 @@ word	dms
 gate_arm	\N
 gate_arm_array	gate_arm
 incident	\N
+incident_detail	incident
 inc_advice	incident
 inc_descriptor	incident
-incident_detail	incident
 inc_locator	incident
 lcs	\N
 lane_marking	lcs
@@ -3145,26 +3145,30 @@ CREATE TABLE event.incident_detail (
     description VARCHAR(32) NOT NULL
 );
 
-COPY event.incident_detail (name, description) FROM stdin;
-animal	Animal on Road
-debris	Debris
-detour	Detour
-emrg_veh	Emergency Vehicles
-event	Event Congestion
-flooding	Flash Flooding
-gr_fire	Grass Fire
-ice	Ice
-jacknife	Jacknifed Trailer
-pavement	Pavement Failure
-ped	Pedestrian
-rollover	Rollover
-sgnl_out	Traffic Lights Out
-snow_rmv	Snow Removal
-spill	Spilled Load
-spin_out	Vehicle Spin Out
-test	Test Incident
-veh_fire	Vehicle Fire
-\.
+INSERT INTO event.incident_detail (name, description)
+VALUES
+    ('animal', 'Animal on Road'),
+    ('debris', 'Debris'),
+    ('detour', 'Detour'),
+    ('emrg_veh', 'Emergency Vehicles'),
+    ('event', 'Event Congestion'),
+    ('flooding', 'Flash Flooding'),
+    ('gr_fire', 'Grass Fire'),
+    ('ice', 'Ice'),
+    ('jacknife', 'Jacknifed Trailer'),
+    ('pavement', 'Pavement Failure'),
+    ('ped', 'Pedestrian'),
+    ('rollover', 'Rollover'),
+    ('sgnl_out', 'Traffic Lights Out'),
+    ('snow_rmv', 'Snow Removal'),
+    ('spill', 'Spilled Load'),
+    ('spin_out', 'Vehicle Spin Out'),
+    ('test', 'Test Incident'),
+    ('veh_fire', 'Vehicle Fire');
+
+CREATE TRIGGER incident_detail_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON event.incident_detail
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE TABLE event.incident (
     event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),

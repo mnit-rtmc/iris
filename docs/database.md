@@ -49,6 +49,7 @@ update, and is caused by one of these conditions:
 `gps`              | ✔️   | ✔️   |     |
 `graphic`          |     |     |     |
 `incident`         |     |     |     |
+`incident_detail`  |     |     |     |
 `lane_marking`     | ✔️   | ✔️   |     |
 `lcs_array`        |     | ✔️   |     |
 `lcs_indication`   |     | ✔️   |     |

@@ -55,7 +55,7 @@ resource, at the same access level.
 | [detector]         | [r_node], [road], road affix, station                 |
 | [dms]              | [font], glyph, [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
 | [gate arm]         | [gate arm array]                                      |
-| [incident]         | inc_advice, inc_descriptor, inc_locator, incident_detail |
+| [incident]         | incident_detail, inc_advice, inc_descriptor, inc_locator |
 | [lcs]              | [lane marking], lane use multi, [lcs array], [lcs indication] |
 | [parking area]     |                                                       |
 | permission         | connection, [domain], [role], [user id]               |

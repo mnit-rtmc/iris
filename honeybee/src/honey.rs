@@ -871,6 +871,7 @@ const fn one_sql(res: Res) -> &'static str {
         GeoLoc => query::GEO_LOC_ONE,
         Gps => query::GPS_ONE,
         Graphic => query::GRAPHIC_ONE,
+        IncidentDetail => query::INCIDENT_DETAIL_ONE,
         LaneMarking => query::LANE_MARKING_ONE,
         LcsArray => query::LCS_ARRAY_ONE,
         LcsIndication => query::LCS_INDICATION_ONE,

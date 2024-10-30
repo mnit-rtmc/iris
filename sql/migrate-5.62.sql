@@ -5,14 +5,17 @@ BEGIN;
 
 SELECT iris.update_version('5.61.0', '5.62.0');
 
--- Add encoder type notify channel
+-- Add notify channels
 CREATE TRIGGER encoder_type_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.encoder_type
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
--- Add encoder stream notify channel
 CREATE TRIGGER encoder_stream_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.encoder_stream
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+CREATE TRIGGER incident_detail_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON event.incident_detail
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 COMMIT;
