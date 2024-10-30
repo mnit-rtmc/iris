@@ -436,6 +436,18 @@ pub const INC_IMPACT_LUT: &str = "\
   FROM iris.inc_impact \
   ORDER BY id";
 
+/// SQL query for all incident locators (primary)
+pub const INC_LOCATOR_ALL: &str = "\
+  SELECT name, range \
+  FROM iris.inc_locator \
+  ORDER BY name";
+
+/// SQL query for one incident locator
+pub const INC_LOCATOR_ONE: &str = "\
+  SELECT name, range, branched, picked, multi \
+  FROM iris.inc_locator \
+  WHERE name = $1";
+
 /// SQL query for incident ranges (LUT)
 pub const INC_RANGE_LUT: &str = "\
   SELECT id, description \

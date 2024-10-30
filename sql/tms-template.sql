@@ -3383,6 +3383,10 @@ CREATE TABLE iris.inc_locator (
     multi VARCHAR(64) NOT NULL
 );
 
+CREATE TRIGGER inc_locator_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.inc_locator
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
 CREATE VIEW inc_locator_view AS
     SELECT il.name, rng.description AS range, branched, picked, multi
     FROM iris.inc_locator il

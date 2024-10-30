@@ -52,6 +52,7 @@ update, and is caused by one of these conditions:
 `incident_detail`  |     |     |     |
 `inc_advice`       |     |     |     |
 `inc_descriptor`   |     |     |     |
+`inc_locator`      |     |     |     |
 `lane_marking`     | ✔️   | ✔️   |     |
 `lcs_array`        |     | ✔️   |     |
 `lcs_indication`   |     | ✔️   |     |
