@@ -265,6 +265,7 @@ impl Res {
             Incident => "🚨",
             IncidentDetail => "🚨➕",
             IncAdvice => "🚨❗",
+            IncDescriptor => "🚨❓",
             LaneMarking => "⛙",
             LcsArray => "🡇 ❌ ",
             LcsIndication => "🡇 ",
@@ -304,11 +305,11 @@ impl Res {
             | Controller | Detector | Dms | Domain | EncoderStream
             | EncoderType | EventConfig | FlowStream | GateArm
             | GateArmArray | Gps | Incident | IncidentDetail | IncAdvice
-            | LaneMarking | LcsArray | LcsIndication | Modem | MsgLine
-            | MsgPattern | ParkingArea | Permission | RampMeter | Rnode
-            | Road | Role | SignConfig | SignDetail | SignMessage
-            | SystemAttribute | TagReader | User | VideoMonitor
-            | WeatherSensor | Word => true,
+            | IncDescriptor | LaneMarking | LcsArray | LcsIndication
+            | Modem | MsgLine | MsgPattern | ParkingArea | Permission
+            | RampMeter | Rnode | Road | Role | SignConfig | SignDetail
+            | SignMessage | SystemAttribute | TagReader | User
+            | VideoMonitor | WeatherSensor | Word => true,
             _ => false,
         }
     }

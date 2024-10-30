@@ -418,6 +418,18 @@ pub const INC_ADVICE_ONE: &str = "\
   FROM iris.inc_advice \
   WHERE name = $1";
 
+/// SQL query for all incident descriptor (primary)
+pub const INC_DESCRIPTOR_ALL: &str = "\
+  SELECT name, event_desc_id \
+  FROM iris.inc_descriptor \
+  ORDER BY name";
+
+/// SQL query for one incident descriptor
+pub const INC_DESCRIPTOR_ONE: &str = "\
+  SELECT name, event_desc_id, detail, lane_code, multi \
+  FROM iris.inc_descriptor \
+  WHERE name = $1";
+
 /// SQL query for incident impacts (LUT)
 pub const INC_IMPACT_LUT: &str = "\
   SELECT id, description \

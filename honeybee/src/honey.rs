@@ -873,6 +873,7 @@ const fn one_sql(res: Res) -> &'static str {
         Graphic => query::GRAPHIC_ONE,
         IncidentDetail => query::INCIDENT_DETAIL_ONE,
         IncAdvice => query::INC_ADVICE_ONE,
+        IncDescriptor => query::INC_DESCRIPTOR_ONE,
         LaneMarking => query::LANE_MARKING_ONE,
         LcsArray => query::LCS_ARRAY_ONE,
         LcsIndication => query::LCS_INDICATION_ONE,

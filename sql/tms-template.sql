@@ -3303,6 +3303,10 @@ CREATE TRIGGER inc_descriptor_ck_trig
     BEFORE INSERT OR UPDATE ON iris.inc_descriptor
     FOR EACH ROW EXECUTE FUNCTION iris.inc_descriptor_ck();
 
+CREATE TRIGGER inc_descriptor_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.inc_descriptor
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
 CREATE VIEW inc_descriptor_view AS
     SELECT id.name, ed.description AS event_description, detail,
            lc.description AS lane_type, multi

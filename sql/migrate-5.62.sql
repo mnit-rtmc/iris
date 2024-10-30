@@ -22,4 +22,8 @@ CREATE TRIGGER inc_advice_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.inc_advice
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
+CREATE TRIGGER inc_descriptor_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.inc_descriptor
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
 COMMIT;
