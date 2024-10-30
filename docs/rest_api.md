@@ -88,6 +88,7 @@ These are static resources which may only change on IRIS updates:
 - `comm_protocol`  Communication [protocols]
 - `condition`  [Controller] conditions
 - `direction`  Travel directions
+- `encoding`  Video encodings
 - `gate_arm_interlock`  [Gate arm] interlocks
 - `gate_arm_state`  [Gate arm] states
 - `lane_use_indication`  [LCS] lane use indications
