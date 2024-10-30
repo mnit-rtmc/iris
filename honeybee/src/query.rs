@@ -418,6 +418,12 @@ pub const INC_ADVICE_ONE: &str = "\
   FROM iris.inc_advice \
   WHERE name = $1";
 
+/// SQL query for incident impacts (LUT)
+pub const INC_IMPACT_LUT: &str = "\
+  SELECT id, description \
+  FROM iris.inc_impact \
+  ORDER BY id";
+
 /// SQL query for all lane markings (primary)
 pub const LANE_MARKING_ALL: &str = "\
   SELECT m.name, location, controller, notes, deployed \

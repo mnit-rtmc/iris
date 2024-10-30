@@ -50,6 +50,7 @@ pub enum Res {
     IncidentDetail,
     IncAdvice,
     IncDescriptor,
+    IncImpact,
     IncLocator,
     LaneMarking,
     LaneUseIndication,
@@ -132,6 +133,7 @@ impl Res {
             IncidentDetail,
             IncAdvice,
             IncDescriptor,
+            IncImpact,
             IncLocator,
             LaneMarking,
             LaneUseIndication,
@@ -202,6 +204,7 @@ impl Res {
             IncidentDetail => "incident_detail",
             IncAdvice => "inc_advice",
             IncDescriptor => "inc_descriptor",
+            IncImpact => "inc_impact",
             IncLocator => "inc_locator",
             LaneUseIndication => "lane_use_indication",
             LaneMarking => "lane_marking",
@@ -282,7 +285,7 @@ impl Res {
         #[allow(clippy::match_like_matches_macro)]
         match self {
             BeaconState | CommProtocol | Condition | Direction | Encoding
-            | Font | GateArmInterlock | GateArmState | Graphic
+            | Font | GateArmInterlock | GateArmState | Graphic | IncImpact
             | LaneUseIndication | LcsLock | ResourceType | RoadModifier => true,
             _ => false,
         }

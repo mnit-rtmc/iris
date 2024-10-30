@@ -91,6 +91,7 @@ These are static resources which may only change on IRIS updates:
 - `encoding`  Video encodings
 - `gate_arm_interlock`  [Gate arm] interlocks
 - `gate_arm_state`  [Gate arm] states
+- `inc_impact`  Incident impacts
 - `lane_use_indication`  [LCS] lane use indications
 - `lcs_lock`  [LCS] lock codes
 - `resource_type`  [Resource types] available in `iris/api/`
