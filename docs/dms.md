@@ -71,10 +71,7 @@ All       | All signs
 
 ## Composing Messages
 
-When a DMS is selected, a few things happen:
-- the sign's location is displayed
-- the current message is rendered
-- the [message pattern] selector is populated:
+When a DMS is selected, the [message pattern] selector is populated:
   * only patterns whose **compose** [hashtag] matches the sign
   * only patterns containing **NO** [action tags]
 
@@ -83,7 +80,7 @@ When an operator chooses a pattern, a series of selectors is populated with
 are too wide to fit the sign are [abbreviated] as necessary.
 
 The selectors may also allow **free-form text** entry, depending on the
-permision access level of the user:
+**DMS** permision access level:
 
 * 👉 **Operate**: No free-form text permitted
 * 💡 **Manage**: Free-form text checked for **banned** [word]s
