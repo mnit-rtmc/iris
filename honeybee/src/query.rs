@@ -102,6 +102,18 @@ pub const CAMERA_PUB: &str = "\
   ) h ON c.name = h.name \
   ORDER BY c.name";
 
+/// SQL query for all camera presets (primary)
+pub const CAMERA_PRESET_ALL: &str = "\
+  SELECT name, camera, preset_num \
+  FROM iris.camera_preset \
+  ORDER BY camera, preset_num";
+
+/// SQL query for one camera preset (secondary)
+pub const CAMERA_PRESET_ONE: &str = "\
+  SELECT name, camera, preset_num, direction \
+  FROM iris.camera_preset \
+  WHERE name = $1";
+
 /// SQL query for all comm configs (primary)
 pub const COMM_CONFIG_ALL: &str = "\
   SELECT name, description \

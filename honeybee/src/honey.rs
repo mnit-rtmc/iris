@@ -855,6 +855,7 @@ const fn one_sql(res: Res) -> &'static str {
         Beacon => query::BEACON_ONE,
         CabinetStyle => query::CABINET_STYLE_ONE,
         Camera => query::CAMERA_ONE,
+        CameraPreset => query::CAMERA_PRESET_ONE,
         CommConfig => query::COMM_CONFIG_ONE,
         CommLink => query::COMM_LINK_ONE,
         Controller => query::CONTROLLER_ONE,

@@ -1591,6 +1591,10 @@ CREATE TABLE iris.camera_preset (
     UNIQUE(camera, preset_num)
 );
 
+CREATE TRIGGER camera_preset_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.camera_preset
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
 CREATE TABLE iris.device_preset (
     name VARCHAR(20) PRIMARY KEY,
     resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,

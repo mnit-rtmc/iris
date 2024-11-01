@@ -23,6 +23,7 @@ pub enum Res {
     BeaconState,
     CabinetStyle,
     Camera,
+    CameraPreset,
     CommConfig,
     CommLink,
     CommProtocol,
@@ -107,6 +108,7 @@ impl Res {
             BeaconState,
             CabinetStyle,
             Camera,
+            CameraPreset,
             CommConfig,
             CommLink,
             CommProtocol,
@@ -179,6 +181,7 @@ impl Res {
             BeaconState => "beacon_state",
             CabinetStyle => "cabinet_style",
             Camera => "camera",
+            CameraPreset => "camera_preset",
             CommConfig => "comm_config",
             CommLink => "comm_link",
             CommProtocol => "comm_protocol",
@@ -248,6 +251,7 @@ impl Res {
             Beacon => "🔆",
             CabinetStyle => "🗄️ ",
             Camera => "🎥",
+            CameraPreset => "🎥📌",
             CommConfig => "📡",
             CommLink => "🔗",
             Controller => "🎛️ ",
@@ -302,15 +306,15 @@ impl Res {
         use Res::*;
         #[allow(clippy::match_like_matches_macro)]
         match self {
-            Alarm | Beacon | CabinetStyle | Camera | CommConfig | CommLink
-            | Controller | Detector | Dms | Domain | EncoderStream
-            | EncoderType | EventConfig | FlowStream | GateArm
-            | GateArmArray | Gps | Incident | IncidentDetail | IncAdvice
-            | IncDescriptor | IncLocator | LaneMarking | LcsArray
-            | LcsIndication | Modem | MsgLine | MsgPattern | ParkingArea
-            | Permission | RampMeter | Rnode | Road | Role | SignConfig
-            | SignDetail | SignMessage | SystemAttribute | TagReader | User
-            | VideoMonitor | WeatherSensor | Word => true,
+            Alarm | Beacon | CabinetStyle | Camera | CameraPreset
+            | CommConfig | CommLink | Controller | Detector | Dms | Domain
+            | EncoderStream | EncoderType | EventConfig | FlowStream
+            | GateArm | GateArmArray | Gps | Incident | IncidentDetail
+            | IncAdvice | IncDescriptor | IncLocator | LaneMarking
+            | LcsArray | LcsIndication | Modem | MsgLine | MsgPattern
+            | ParkingArea | Permission | RampMeter | Rnode | Road | Role
+            | SignConfig | SignDetail | SignMessage | SystemAttribute
+            | TagReader | User | VideoMonitor | WeatherSensor | Word => true,
             _ => false,
         }
     }
@@ -320,7 +324,7 @@ impl Res {
         use Res::*;
         match self {
             // Camera resources
-            EncoderStream | EncoderType => Camera,
+            CameraPreset | EncoderStream | EncoderType => Camera,
             // Controller resources
             Alarm | CommLink | ControllerIo | GeoLoc | Gps | Modem => {
                 Controller

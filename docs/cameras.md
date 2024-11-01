@@ -136,6 +136,19 @@ preset**, select it on the **Location** tab of the device's properties form.
 If a stream is defined with a _view num_ that matches the _preset num_, that
 stream will be selected instead of a typical PTZ preset.
 
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/camera_preset` (primary)
+* `iris/api/camera_preset/{name}`
+
+| Access       | Primary                  | Secondary |
+|--------------|--------------------------|-----------|
+| 👁️  View      | name, camera, preset_num |           |
+| 🔧 Configure |                          | direction |
+
+</details>
+
 ## Selector Tool
 
 The _selector tool_ is on the toolbar just below the map.  It has a text entry

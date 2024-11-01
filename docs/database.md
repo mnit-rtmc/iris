@@ -34,6 +34,7 @@ update, and is caused by one of these conditions:
 `cabinet_style`    |     |     |     |
 `camera`           | ✔️   | ✔️   |     |
 `camera_publish` † |     |     |     |
+`camera_preset`    |     |     |     |
 `comm_config`      |     |     |     |
 `comm_link`        |     |     |     |
 `controller`       | ✔️   |     |     |
