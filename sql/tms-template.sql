@@ -3190,7 +3190,9 @@ CREATE TABLE event.incident (
     camera VARCHAR(20),
     impact VARCHAR(20) NOT NULL,
     cleared BOOLEAN NOT NULL,
-    confirmed BOOLEAN NOT NULL
+    confirmed BOOLEAN NOT NULL,
+
+    CONSTRAINT impact_ck CHECK (impact ~ '^[!?\.]*$')
 );
 
 CREATE TRIGGER incident_notify_trig

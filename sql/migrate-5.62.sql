@@ -34,4 +34,8 @@ CREATE TRIGGER camera_preset_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.camera_preset
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
+-- Add impact constraint to incident
+ALTER TABLE event.incident ADD CONSTRAINT impact_ck
+    CHECK (impact ~ '^[!?\.]*$');
+
 COMMIT;
