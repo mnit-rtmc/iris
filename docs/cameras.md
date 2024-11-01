@@ -130,9 +130,8 @@ and wiper control.
 
 The **Preset** tab within a camera properties form can be used to configure up
 to 12 presets per camera.  A preset can be associated with either a compass
-direction or a device, such as [DMS] or [ramp meter].  To associate a preset
-with a device, enable the preset, then select that preset on the **Location**
-tab of the device's properties form.
+direction or a device, such as [DMS] or [ramp meter].  To associate a **device
+preset**, select it on the **Location** tab of the device's properties form.
 
 If a stream is defined with a _view num_ that matches the _preset num_, that
 stream will be selected instead of a typical PTZ preset.

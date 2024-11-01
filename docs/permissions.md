@@ -51,7 +51,7 @@ resource, at the same access level.
 | [alert config]     | alert info, [alert message]                           |
 | [beacon]           |                                                       |
 | [camera]           | [camera preset], camera template, cam vid src ord, [encoder stream], [encoder type], vid source template |
-| [controller]       | [alarm], [comm link], [controller io], [gps], [modem] |
+| [controller]       | [alarm], [comm link], [gps], [modem]                  |
 | [detector]         | [r_node], [road], road affix, station                 |
 | [dms]              | [font], glyph, [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
 | [gate arm]         | [gate arm array]                                      |
@@ -70,10 +70,10 @@ resource, at the same access level.
 Some resources contain an associated `resource_n`, linking them to another
 resource.  These include:
 
-* __geo loc__
-* __controller io__
-* __device preset__
-* __hashtag__
+* [geo loc]
+* [controller io]
+* device [preset]
+* [hashtag]
 
 
 [action plan]: action_plans.html
@@ -116,6 +116,7 @@ resource.  These include:
 [parking area]: parking_areas.html
 [plan phase]: action_plans.html#plan-phases
 [play list]: video.html#play-lists
+[preset]: cameras.html#presets
 [r_node]: road_topology.html#r_nodes
 [ramp meter]: ramp_meters.html
 [resource]: rest_api.html#resource-types
