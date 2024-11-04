@@ -50,6 +50,7 @@ import us.mn.state.dot.tms.geo.Position;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
+import us.mn.state.dot.tms.server.event.MeterLockEvent;
 
 /**
  * A ramp meter is a traffic signal which meters the flow of traffic on a
@@ -438,32 +439,30 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return preset;
 	}
 
-	/** Metering rate lock status */
+	/** Meter lock code */
 	private RampMeterLock m_lock = null;
 
-	/** Set the ramp meter lock status */
+	/** Set the meter lock code */
 	@Override
-	public void setMLock(Integer l) {
-		// Required by RampMeter iface; shouldn't ever be called
-		m_lock = RampMeterLock.fromOrdinal(l);
+	public void setMLock(Integer lk) {
+		m_lock = RampMeterLock.fromOrdinal(lk);
 	}
 
-	/** Set the ramp meter lock (update) */
-	private void setMLock(RampMeterLock l) throws TMSException {
-		if (l == m_lock)
-			return;
-		if (l != null)
-			store.update(this, "m_lock", l.ordinal());
-		else
-			store.update(this, "m_lock", null);
-		m_lock = l;
-		updateStyles();
+	/** Set the meter lock (update) */
+	private void setMLock(Integer lk, String u) throws TMSException {
+		if (RampMeterLock.fromOrdinal(lk) != m_lock) {
+			store.update(this, "m_lock", lk);
+			setMLock(lk);
+			updateStyles();
+			logEvent(new MeterLockEvent(name, lk, u));
+		}
 	}
 
-	/** Set the ramp meter lock (notify clients) */
-	private void setMLockNotify(RampMeterLock l) {
+	/** Set the meter lock (notify clients) */
+	private void setMLockNotify(RampMeterLock ml) {
 		try {
-			setMLock(l);
+			Integer lk = (ml != null) ? ml.ordinal() : null;
+			setMLock(lk, null);
 			notifyAttribute("mLock");
 		}
 		catch (TMSException e) {
@@ -471,15 +470,15 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		}
 	}
 
-	/** Set the ramp meter lock status */
-	public void doSetMLock(Integer l) throws TMSException {
-		RampMeterLock ml = RampMeterLock.fromOrdinal(l);
+	/** Set the meter lock code */
+	public void doSetMLock(Integer lk) throws TMSException {
+		RampMeterLock ml = RampMeterLock.fromOrdinal(lk);
 		if (ml != null && ml.controller_lock)
 			throw new ChangeVetoException("Invalid lock value");
-		setMLock(ml);
+		setMLock(lk, getProcUser());
 	}
 
-	/** Get the ramp meter lock status */
+	/** Get the ramp meter lock code */
 	@Override
 	public Integer getMLock() {
 		return (m_lock != null) ? m_lock.ordinal() : null;
@@ -684,9 +683,9 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	protected boolean needsMaintenance() {
 		if (super.needsMaintenance())
 			return true;
-		RampMeterLock lck = m_lock;
-		return lck == RampMeterLock.POLICE_PANEL ||
-		       lck == RampMeterLock.MAINTENANCE;
+		RampMeterLock lk = m_lock;
+		return lk == RampMeterLock.POLICE_PANEL ||
+		       lk == RampMeterLock.MAINTENANCE;
 	}
 
 	/** Test if meter is available */

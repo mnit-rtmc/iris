@@ -59,4 +59,29 @@ CREATE VIEW gate_arm_event_view AS
     JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
 GRANT SELECT ON gate_arm_event_view TO PUBLIC;
 
+-- Add meter_lock_event
+CREATE TABLE event.meter_lock_event (
+    id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc INTEGER NOT NULL REFERENCES event.event_description,
+    ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter
+        ON DELETE CASCADE,
+    m_lock INTEGER REFERENCES iris.meter_lock,
+    user_id VARCHAR(15)
+);
+
+CREATE VIEW meter_lock_event_view AS
+    SELECT ev.id, event_date, ed.description, ramp_meter,
+           lk.description AS m_lock, user_id
+    FROM event.meter_lock_event ev
+    JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id
+    JOIN iris.meter_lock lk ON ev.m_lock = lk.id;
+GRANT SELECT ON meter_lock_event_view TO PUBLIC;
+
+INSERT INTO event.event_description (event_desc_id, description)
+    VALUES (402, 'Meter LOCK');
+
+INSERT INTO iris.event_config (name, enable_store, enable_purge, purge_days)
+    VALUES ('meter_lock_event', true, false, 0);
+
 COMMIT;

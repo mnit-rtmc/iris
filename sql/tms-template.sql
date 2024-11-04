@@ -201,6 +201,7 @@ VALUES
     ('incident', true, false, 0),
     ('incident_update', true, false, 0),
     ('meter_event', true, true, 14),
+    ('meter_lock_event', true, false, 0),
     ('price_message_event', true, false, 0),
     ('sign_event', true, false, 0),
     ('tag_read_event', true, false, 0),
@@ -267,6 +268,7 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 306	Gate Arm CLOSING
 307	Gate Arm CLOSED
 401	Meter event
+402	Meter LOCK
 501	Beacon STATE
 601	Tag Read
 651	Price DEPLOYED
@@ -4523,6 +4525,24 @@ CREATE VIEW meter_event_view AS
     JOIN event.meter_queue_state ON q_state = meter_queue_state.id
     JOIN event.meter_limit_control ON limit_ctrl = meter_limit_control.id;
 GRANT SELECT ON meter_event_view TO PUBLIC;
+
+CREATE TABLE event.meter_lock_event (
+    id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc INTEGER NOT NULL REFERENCES event.event_description,
+    ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter
+        ON DELETE CASCADE,
+    m_lock INTEGER REFERENCES iris.meter_lock,
+    user_id VARCHAR(15)
+);
+
+CREATE VIEW meter_lock_event_view AS
+    SELECT ev.id, event_date, ed.description, ramp_meter,
+           lk.description AS m_lock, user_id
+    FROM event.meter_lock_event ev
+    JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id
+    JOIN iris.meter_lock lk ON ev.m_lock = lk.id;
+GRANT SELECT ON meter_lock_event_view TO PUBLIC;
 
 --
 -- Toll Zones, Tag Readers
