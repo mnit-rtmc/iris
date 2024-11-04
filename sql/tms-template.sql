@@ -482,9 +482,12 @@ CREATE TABLE iris.user_id (
     enabled BOOLEAN NOT NULL
 );
 
-COPY iris.user_id (name, full_name, password, dn, role, enabled) FROM stdin;
-admin	IRIS Administrator	+vAwDtk/0KGx9k+kIoKFgWWbd3Ku8e/FOHoZoHB65PAuNEiN2muHVavP0fztOi4=		administrator	t
-\.
+INSERT INTO iris.user_id (name, full_name, password, dn, role, enabled)
+    VALUES (
+        'admin', 'IRIS Administrator',
+        '+vAwDtk/0KGx9k+kIoKFgWWbd3Ku8e/FOHoZoHB65PAuNEiN2muHVavP0fztOi4=',
+        '', 'administrator', true
+    );
 
 CREATE TRIGGER user_id_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.user_id
@@ -562,12 +565,12 @@ CREATE TABLE event.client_event (
     event_desc_id integer NOT NULL
         REFERENCES event.event_description(event_desc_id),
     host_port VARCHAR(64) NOT NULL,
-    iris_user VARCHAR(15)
+    user_id VARCHAR(15)
 );
 
 CREATE VIEW client_event_view AS
     SELECT e.event_id, e.event_date, ed.description, e.host_port,
-           e.iris_user
+           e.user_id
     FROM event.client_event e
     JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
 GRANT SELECT ON client_event_view TO PUBLIC;
@@ -3130,12 +3133,12 @@ CREATE TABLE event.gate_arm_event (
     event_desc_id INTEGER NOT NULL
         REFERENCES event.event_description(event_desc_id),
     device_id VARCHAR(20),
-    iris_user VARCHAR(15),
+    user_id VARCHAR(15),
     fault VARCHAR(32)
 );
 
 CREATE VIEW gate_arm_event_view AS
-    SELECT e.event_id, e.event_date, ed.description, device_id, e.iris_user,
+    SELECT e.event_id, e.event_date, ed.description, device_id, e.user_id,
            e.fault
     FROM event.gate_arm_event e
     JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
