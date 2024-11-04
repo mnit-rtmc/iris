@@ -562,19 +562,17 @@ CREATE VIEW permission_view AS
 GRANT SELECT ON permission_view TO PUBLIC;
 
 CREATE TABLE event.client_event (
-    event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+    id SERIAL PRIMARY KEY,
     event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
-    event_desc_id integer NOT NULL
-        REFERENCES event.event_description(event_desc_id),
+    event_desc INTEGER NOT NULL REFERENCES event.event_description,
     host_port VARCHAR(64) NOT NULL,
     user_id VARCHAR(15)
 );
 
 CREATE VIEW client_event_view AS
-    SELECT e.event_id, e.event_date, ed.description, e.host_port,
-           e.user_id
-    FROM event.client_event e
-    JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+    SELECT ev.id, event_date, ed.description, host_port, user_id
+    FROM event.client_event ev
+    JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id;
 GRANT SELECT ON client_event_view TO PUBLIC;
 
 --
@@ -3130,20 +3128,18 @@ CREATE VIEW gate_arm_view AS
 GRANT SELECT ON gate_arm_view TO PUBLIC;
 
 CREATE TABLE event.gate_arm_event (
-    event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+    id SERIAL PRIMARY KEY,
     event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
-    event_desc_id INTEGER NOT NULL
-        REFERENCES event.event_description(event_desc_id),
+    event_desc INTEGER NOT NULL REFERENCES event.event_description,
     device_id VARCHAR(20),
     user_id VARCHAR(15),
     fault VARCHAR(32)
 );
 
 CREATE VIEW gate_arm_event_view AS
-    SELECT e.event_id, e.event_date, ed.description, device_id, e.user_id,
-           e.fault
-    FROM event.gate_arm_event e
-    JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+    SELECT ev.id, event_date, ed.description, device_id, user_id, fault
+    FROM event.gate_arm_event ev
+    JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id;
 GRANT SELECT ON gate_arm_event_view TO PUBLIC;
 
 --

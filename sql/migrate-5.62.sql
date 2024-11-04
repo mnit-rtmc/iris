@@ -38,25 +38,57 @@ CREATE TRIGGER camera_preset_notify_trig
 ALTER TABLE event.incident ADD CONSTRAINT impact_ck
     CHECK (impact ~ '^[!?\.]*$');
 
--- Rename iris_user to user_id in event tables
+-- Rename iris_user to user_id in client_event
 DROP VIEW client_event_view;
-DROP VIEW gate_arm_event_view;
 
-ALTER TABLE event.client_event RENAME COLUMN iris_user TO user_id;
-ALTER TABLE event.gate_arm_event RENAME COLUMN iris_user TO user_id;
+ALTER TABLE event.client_event RENAME TO old_client_event;
+
+CREATE TABLE event.client_event (
+    id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc INTEGER NOT NULL REFERENCES event.event_description,
+    host_port VARCHAR(64) NOT NULL,
+    user_id VARCHAR(15)
+);
+
+INSERT INTO event.client_event (event_date, event_desc, host_port, user_id)
+SELECT event_date, event_desc_id, host_port, iris_user
+FROM event.old_client_event;
+
+DROP TABLE event.old_client_event;
 
 CREATE VIEW client_event_view AS
-    SELECT e.event_id, e.event_date, ed.description, e.host_port,
-           e.user_id
-    FROM event.client_event e
-    JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+    SELECT ev.id, event_date, ed.description, host_port, user_id
+    FROM event.client_event ev
+    JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id;
 GRANT SELECT ON client_event_view TO PUBLIC;
 
+-- Rename iris_user to user_id in gate_arm_event
+DROP VIEW gate_arm_event_view;
+
+ALTER TABLE event.gate_arm_event RENAME TO old_gate_arm_event;
+
+CREATE TABLE event.gate_arm_event (
+    id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc INTEGER NOT NULL REFERENCES event.event_description,
+    device_id VARCHAR(20),
+    user_id VARCHAR(15),
+    fault VARCHAR(32)
+);
+
+INSERT INTO event.gate_arm_event (
+    event_date, event_desc, device_id, user_id, fault
+)
+SELECT event_date, event_desc_id, device_id, iris_user, fault
+FROM event.old_gate_arm_event;
+
+DROP TABLE event.old_gate_arm_event;
+
 CREATE VIEW gate_arm_event_view AS
-    SELECT e.event_id, e.event_date, ed.description, device_id, e.user_id,
-           e.fault
-    FROM event.gate_arm_event e
-    JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+    SELECT ev.id, event_date, ed.description, device_id, user_id, fault
+    FROM event.gate_arm_event ev
+    JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id;
 GRANT SELECT ON gate_arm_event_view TO PUBLIC;
 
 -- Add meter_lock_event

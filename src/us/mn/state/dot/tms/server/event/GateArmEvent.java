@@ -81,7 +81,7 @@ public class GateArmEvent extends BaseEvent {
 	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put("event_desc_id", event_type.id);
+		map.put("event_desc", event_type.id);
 		map.put("event_date", new Timestamp(event_date.getTime()));
 		map.put("device_id", device_id);
 		map.put("user_id", user_id);
