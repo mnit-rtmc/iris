@@ -43,15 +43,15 @@ public class ClientEvent extends BaseEvent {
 	/** Host:port of client connection */
 	private final String host_port;
 
-	/** User name */
-	private final String iris_user;
+	/** User ID */
+	private final String user_id;
 
 	/** Create a new client event */
-	public ClientEvent(EventType et, String hp, String iu) {
+	public ClientEvent(EventType et, String hp, String ui) {
 		super(et);
 		assert isClientEvent(et);
 		host_port = SString.truncate(hp, 64);
-		iris_user = SString.truncate(iu, 15);
+		user_id = SString.truncate(ui, 15);
 	}
 
 	/** Get the event config name */
@@ -73,7 +73,7 @@ public class ClientEvent extends BaseEvent {
 		map.put("event_desc_id", event_type.id);
 		map.put("event_date", new Timestamp(event_date.getTime()));
 		map.put("host_port", host_port);
-		map.put("iris_user", iris_user);
+		map.put("user_id", user_id);
 		return map;
 	}
 }

@@ -52,7 +52,7 @@ public class GateArmEvent extends BaseEvent {
 	private final String device_id;
 
 	/** User who initiated change */
-	private final String iris_user;
+	private final String user_id;
 
 	/** Fault description (if any) */
 	private final String fault;
@@ -61,7 +61,7 @@ public class GateArmEvent extends BaseEvent {
 	public GateArmEvent(GateArmState gas, String d, String u, String f) {
 		super(gateArmStateEventType(gas));
 		device_id = d;
-		iris_user = u;
+		user_id = u;
 		fault = f;
 	}
 
@@ -84,7 +84,7 @@ public class GateArmEvent extends BaseEvent {
 		map.put("event_desc_id", event_type.id);
 		map.put("event_date", new Timestamp(event_date.getTime()));
 		map.put("device_id", device_id);
-		map.put("iris_user", iris_user);
+		map.put("user_id", user_id);
 		map.put("fault", fault);
 		return map;
 	}
