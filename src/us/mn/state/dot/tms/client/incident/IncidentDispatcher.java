@@ -329,6 +329,7 @@ public class IncidentDispatcher extends IPanel
 			attrs.put("camera", getSelectedCamera());
 			attrs.put("impact", impact_pnl.getImpact());
 			attrs.put("cleared", false);
+			attrs.put("user_id", session.getUser().getName());
 			cache.createObject(name, attrs);
 			Incident proxy = cache.lookupObjectWait(name);
 			if (proxy != null)

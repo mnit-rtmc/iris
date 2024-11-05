@@ -57,25 +57,27 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, replaces, event_desc_id, " +
 			"event_date, detail, lane_code, road, dir, lat, " +
-			"lon, camera, impact, cleared, confirmed FROM event." +
-			SONAR_TYPE + " WHERE cleared = 'f';",new ResultFactory()
+			"lon, camera, impact, cleared, confirmed, user_id " +
+			"FROM event." + SONAR_TYPE + " WHERE cleared = 'f';",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new IncidentImpl(namespace,
-					row.getString(1),	// name
-					row.getString(2),	// replaces
-					row.getInt(3),		// event_desc_id
-					row.getTimestamp(4),	// event_date
-					row.getString(5),	// detail
-					row.getString(6),	// lane_code
-					row.getString(7),	// road
-					row.getShort(8),	// dir
-					row.getDouble(9),	// lat
-					row.getDouble(10),	// lon
-					row.getString(11),	// camera
-					row.getString(12),	// impact
-					row.getBoolean(13),	// cleared
-					row.getBoolean(14)	// confirmed
+				namespace.addObject(new IncidentImpl(
+					row.getString(1),    // name
+					row.getString(2),    // replaces
+					row.getInt(3),       // event_desc_id
+					row.getTimestamp(4), // event_date
+					row.getString(5),    // detail
+					row.getString(6),    // lane_code
+					row.getString(7),    // road
+					row.getShort(8),     // dir
+					row.getDouble(9),    // lat
+					row.getDouble(10),   // lon
+					row.getString(11),   // camera
+					row.getString(12),   // impact
+					row.getBoolean(13),  // cleared
+					row.getBoolean(14),  // confirmed
+					row.getString(15)    // user_id
 				));
 			}
 		});
@@ -99,6 +101,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		map.put("impact", impact);
 		map.put("cleared", cleared);
 		map.put("confirmed", confirmed);
+		map.put("user_id", user_id);
 		return map;
 	}
 
@@ -114,19 +117,20 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	}
 
 	/** Create an incident */
-	protected IncidentImpl(Namespace ns, String n, String rpl, int et,
-		Date ed, String dtl, String lc, String r, short d, double lt,
-		double ln, String cam, String im, boolean clr, boolean cnf)
+	private IncidentImpl(String n, String rpl, int et, Date ed,
+		String dtl, String lc, String r, short d, double lt,
+		double ln, String cam, String im, boolean clr, boolean cnf,
+		String uid)
 	{
-		this(n, rpl, et, ed, (IncidentDetail)ns.lookupObject(
-		     IncidentDetail.SONAR_TYPE, dtl), lc, lookupRoad(r), d, lt,
-		     ln, lookupCamera(cam), im, clr, cnf);
+		this(n, rpl, et, ed, lookupIncDetail(dtl), lc, lookupRoad(r),
+		     d, lt, ln, lookupCamera(cam), im, clr, cnf, uid);
 	}
 
 	/** Create an incident */
 	public IncidentImpl(String n, String rpl, int et, Date ed,
 		IncidentDetail dtl, String lc, Road r, short d, double lt,
-		double ln, Camera cam, String im, boolean clr, boolean cnf)
+		double ln, Camera cam, String im, boolean clr, boolean cnf,
+		String uid)
 	{
 		super(n);
 		replaces = rpl;
@@ -142,6 +146,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		impact = im;
 		cleared = clr;
 		confirmed = cnf;
+		user_id = uid;
 	}
 
 	/** Destroy an object */
@@ -263,6 +268,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	public void doSetImpact(String imp) throws TMSException {
 		if (!imp.equals(impact)) {
 			validateImpact(imp);
+			setUserId();
 			setConfirmedNotify(true);
 			store.update(this, "impact", imp);
 			setImpact(imp);
@@ -288,6 +294,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	/** Set the cleared status */
 	public void doSetCleared(boolean c) throws TMSException {
 		if (c != cleared) {
+			setUserId();
 			store.update(this, "cleared", c);
 			setCleared(c);
 		}
@@ -330,6 +337,16 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 			confirmed = c;
 			notifyAttribute("confirmed");
 		}
+	}
+
+	/** User ID */
+	private String user_id = null;
+
+	/** Set the user ID */
+	private void setUserId() throws TMSException {
+		String uid = getProcUser();
+		store.update(this, "user_id", uid);
+		user_id = uid;
 	}
 
 	/** Write the incident as xml */

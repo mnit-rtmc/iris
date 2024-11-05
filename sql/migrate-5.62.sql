@@ -34,10 +34,6 @@ CREATE TRIGGER camera_preset_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.camera_preset
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
--- Add impact constraint to incident
-ALTER TABLE event.incident ADD CONSTRAINT impact_ck
-    CHECK (impact ~ '^[!?\.]*$');
-
 -- Rename iris_user to user_id in client_event
 DROP VIEW client_event_view;
 
@@ -176,5 +172,120 @@ CREATE VIEW beacon_event_view AS
     FROM event.beacon_event be
     JOIN iris.beacon_state bs ON be.state = bs.id;
 GRANT SELECT ON beacon_event_view TO PUBLIC;
+
+-- Add user_id to incident / incident_update
+DROP VIEW incident_update_view;
+DROP VIEW incident_view;
+
+ALTER TABLE event.incident_update DROP CONSTRAINT incident_update_incident_fkey;
+
+ALTER TABLE event.incident DROP CONSTRAINT incident_pkey;
+ALTER TABLE event.incident DROP CONSTRAINT incident_replaces_fkey;
+ALTER TABLE event.incident DROP CONSTRAINT incident_name_key;
+ALTER TABLE event.incident DROP CONSTRAINT incident_detail_fkey;
+ALTER TABLE event.incident DROP CONSTRAINT incident_dir_fkey;
+ALTER TABLE event.incident DROP CONSTRAINT incident_event_desc_id_fkey;
+ALTER TABLE event.incident DROP CONSTRAINT incident_lane_code_fkey;
+
+ALTER TABLE event.incident_update DROP CONSTRAINT incident_update_pkey;
+
+ALTER TABLE event.incident RENAME TO old_incident;
+ALTER TABLE event.incident_update RENAME TO old_incident_update;
+
+CREATE TABLE event.incident (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(16) NOT NULL UNIQUE,
+    replaces VARCHAR(16) REFERENCES event.incident(name),
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc INTEGER NOT NULL REFERENCES event.event_description,
+    detail VARCHAR(8) REFERENCES event.incident_detail(name),
+    lane_code VARCHAR(1) NOT NULL REFERENCES iris.lane_code,
+    road VARCHAR(20) NOT NULL,
+    dir SMALLINT NOT NULL REFERENCES iris.direction(id),
+    lat double precision NOT NULL,
+    lon double precision NOT NULL,
+    camera VARCHAR(20),
+    impact VARCHAR(20) NOT NULL,
+    cleared BOOLEAN NOT NULL,
+    confirmed BOOLEAN NOT NULL,
+    user_id VARCHAR(15),
+
+    CONSTRAINT impact_ck CHECK (impact ~ '^[!?\.]*$')
+);
+
+INSERT INTO event.incident (
+    replaces, event_date, event_desc, detail, lane_code, road, dir, lat, lon,
+    camera, impact, cleared, confirmed
+)
+SELECT replaces, event_date, event_desc_id, detail, lane_code, road,
+       dir, lat, lon, camera, impact, cleared, confirmed
+FROM event.old_incident;
+
+DROP TABLE event.old_incident;
+
+CREATE TRIGGER incident_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON event.incident
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+CREATE TABLE event.incident_update (
+    id SERIAL PRIMARY KEY,
+    incident VARCHAR(16) NOT NULL REFERENCES event.incident(name),
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    impact VARCHAR(20) NOT NULL,
+    cleared BOOLEAN NOT NULL,
+    confirmed BOOLEAN NOT NULL,
+    user_id VARCHAR(15)
+);
+
+INSERT INTO event.incident_update (
+    incident, event_date, impact, cleared, confirmed
+)
+SELECT incident, event_date, impact, cleared, confirmed
+FROM event.old_incident_update;
+
+DROP TABLE event.old_incident_update;
+
+CREATE OR REPLACE FUNCTION event.incident_update_trig() RETURNS TRIGGER AS
+$incident_update_trig$
+BEGIN
+    IF (NEW.impact IS DISTINCT FROM OLD.impact) OR
+       (NEW.cleared IS DISTINCT FROM OLD.cleared)
+    THEN
+        INSERT INTO event.incident_update (
+            incident, event_date, impact, cleared, confirmed, user_id
+        ) VALUES (
+            NEW.name, now(), NEW.impact, NEW.cleared, NEW.confirmed, NEW.user_id
+        );
+    END IF;
+    RETURN NEW;
+END;
+$incident_update_trig$ LANGUAGE plpgsql;
+
+CREATE TRIGGER incident_update_trigger
+    AFTER INSERT OR UPDATE ON event.incident
+    FOR EACH ROW EXECUTE FUNCTION event.incident_update_trig();
+
+CREATE VIEW incident_view AS
+    SELECT i.id, name, event_date, ed.description, road, d.direction,
+           impact, event.incident_blocked_lanes(impact) AS blocked_lanes,
+           event.incident_blocked_shoulders(impact) AS blocked_shoulders,
+           cleared, confirmed, user_id, camera, lc.description AS lane_type,
+           detail, replaces, lat, lon
+    FROM event.incident i
+    LEFT JOIN event.event_description ed ON i.event_desc = ed.event_desc_id
+    LEFT JOIN iris.direction d ON i.dir = d.id
+    LEFT JOIN iris.lane_code lc ON i.lane_code = lc.lcode;
+GRANT SELECT ON incident_view TO PUBLIC;
+
+CREATE VIEW incident_update_view AS
+    SELECT iu.id, name, iu.event_date, ed.description, road,
+           d.direction, iu.impact, iu.cleared, iu.confirmed, iu.user_id,
+           camera, lc.description AS lane_type, detail, replaces, lat, lon
+    FROM event.incident i
+    JOIN event.incident_update iu ON i.name = iu.incident
+    LEFT JOIN event.event_description ed ON i.event_desc = ed.event_desc_id
+    LEFT JOIN iris.direction d ON i.dir = d.id
+    LEFT JOIN iris.lane_code lc ON i.lane_code = lc.lcode;
+GRANT SELECT ON incident_update_view TO PUBLIC;
 
 COMMIT;

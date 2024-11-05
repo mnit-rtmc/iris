@@ -170,7 +170,8 @@ public class IncidentCache {
 		IncidentImpl inc = new IncidentImpl(n, orig,
 			pi.inc_type.id, new Date(), pi.detail,
 			lc, loc.getRoadway(), loc.getRoadDir(),
-			pi.lat, pi.lon, pi.lookupCamera(), im, false, false);
+			pi.lat, pi.lon, pi.lookupCamera(), im,
+			false, false, null);
 		try {
 			inc.notifyCreate();
 			return true;

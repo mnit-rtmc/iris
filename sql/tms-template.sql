@@ -3176,12 +3176,11 @@ CREATE TRIGGER incident_detail_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE TABLE event.incident (
-    event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+    id SERIAL PRIMARY KEY,
     name VARCHAR(16) NOT NULL UNIQUE,
     replaces VARCHAR(16) REFERENCES event.incident(name),
     event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
-    event_desc_id INTEGER NOT NULL
-        REFERENCES event.event_description(event_desc_id),
+    event_desc INTEGER NOT NULL REFERENCES event.event_description,
     detail VARCHAR(8) REFERENCES event.incident_detail(name),
     lane_code VARCHAR(1) NOT NULL REFERENCES iris.lane_code,
     road VARCHAR(20) NOT NULL,
@@ -3192,6 +3191,7 @@ CREATE TABLE event.incident (
     impact VARCHAR(20) NOT NULL,
     cleared BOOLEAN NOT NULL,
     confirmed BOOLEAN NOT NULL,
+    user_id VARCHAR(15),
 
     CONSTRAINT impact_ck CHECK (impact ~ '^[!?\.]*$')
 );
@@ -3236,32 +3236,39 @@ END;
 $incident_blocked_shoulders$ LANGUAGE plpgsql;
 
 CREATE VIEW incident_view AS
-    SELECT event_id, name, event_date, ed.description, road, d.direction,
+    SELECT i.id, name, event_date, ed.description, road, d.direction,
            impact, event.incident_blocked_lanes(impact) AS blocked_lanes,
            event.incident_blocked_shoulders(impact) AS blocked_shoulders,
-           cleared, confirmed, camera, lc.description AS lane_type, detail,
-           replaces, lat, lon
+           cleared, confirmed, user_id, camera, lc.description AS lane_type,
+           detail, replaces, lat, lon
     FROM event.incident i
-    LEFT JOIN event.event_description ed ON i.event_desc_id = ed.event_desc_id
+    LEFT JOIN event.event_description ed ON i.event_desc = ed.event_desc_id
     LEFT JOIN iris.direction d ON i.dir = d.id
     LEFT JOIN iris.lane_code lc ON i.lane_code = lc.lcode;
 GRANT SELECT ON incident_view TO PUBLIC;
 
 CREATE TABLE event.incident_update (
-    event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+    id SERIAL PRIMARY KEY,
     incident VARCHAR(16) NOT NULL REFERENCES event.incident(name),
     event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
     impact VARCHAR(20) NOT NULL,
     cleared BOOLEAN NOT NULL,
-    confirmed BOOLEAN NOT NULL
+    confirmed BOOLEAN NOT NULL,
+    user_id VARCHAR(15)
 );
 
 CREATE FUNCTION event.incident_update_trig() RETURNS TRIGGER AS
 $incident_update_trig$
 BEGIN
-    INSERT INTO event.incident_update
-               (incident, event_date, impact, cleared, confirmed)
-        VALUES (NEW.name, now(), NEW.impact, NEW.cleared, NEW.confirmed);
+    IF (NEW.impact IS DISTINCT FROM OLD.impact) OR
+       (NEW.cleared IS DISTINCT FROM OLD.cleared)
+    THEN
+        INSERT INTO event.incident_update (
+            incident, event_date, impact, cleared, confirmed, user_id
+        ) VALUES (
+            NEW.name, now(), NEW.impact, NEW.cleared, NEW.confirmed, NEW.user_id
+        );
+    END IF;
     RETURN NEW;
 END;
 $incident_update_trig$ LANGUAGE plpgsql;
@@ -3271,12 +3278,12 @@ CREATE TRIGGER incident_update_trigger
     FOR EACH ROW EXECUTE FUNCTION event.incident_update_trig();
 
 CREATE VIEW incident_update_view AS
-    SELECT iu.event_id, name, iu.event_date, ed.description, road,
-           d.direction, iu.impact, iu.cleared, iu.confirmed, camera,
-           lc.description AS lane_type, detail, replaces, lat, lon
+    SELECT iu.id, name, iu.event_date, ed.description, road,
+           d.direction, iu.impact, iu.cleared, iu.confirmed, iu.user_id,
+           camera, lc.description AS lane_type, detail, replaces, lat, lon
     FROM event.incident i
     JOIN event.incident_update iu ON i.name = iu.incident
-    LEFT JOIN event.event_description ed ON i.event_desc_id = ed.event_desc_id
+    LEFT JOIN event.event_description ed ON i.event_desc = ed.event_desc_id
     LEFT JOIN iris.direction d ON i.dir = d.id
     LEFT JOIN iris.lane_code lc ON i.lane_code = lc.lcode;
 GRANT SELECT ON incident_update_view TO PUBLIC;
