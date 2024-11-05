@@ -116,4 +116,40 @@ INSERT INTO event.event_description (event_desc_id, description)
 INSERT INTO iris.event_config (name, enable_store, enable_purge, purge_days)
     VALUES ('meter_lock_event', true, false, 0);
 
+-- Add phase and user_id to action_plan_event
+DROP VIEW action_plan_event_view;
+
+ALTER TABLE event.action_plan_event RENAME TO old_action_plan_event;
+
+CREATE TABLE event.action_plan_event (
+    id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc INTEGER NOT NULL REFERENCES event.event_description,
+    action_plan VARCHAR(16) NOT NULL,
+    phase VARCHAR(12),
+    user_id VARCHAR(15)
+);
+
+INSERT INTO event.action_plan_event (
+    event_date, event_desc, action_plan, user_id
+)
+SELECT event_date, event_desc_id, action_plan, detail
+FROM event.old_action_plan_event
+WHERE event_desc_id = 900 OR event_desc_id = 901;
+
+INSERT INTO event.action_plan_event (
+    event_date, event_desc, action_plan, phase
+)
+SELECT event_date, event_desc_id, action_plan, detail::VARCHAR(12)
+FROM event.old_action_plan_event
+WHERE event_desc_id = 902;
+
+DROP TABLE event.old_action_plan_event;
+
+CREATE VIEW action_plan_event_view AS
+    SELECT ev.id, event_date, ed.description, action_plan, phase, user_id
+    FROM event.action_plan_event ev
+    JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id;
+GRANT SELECT ON action_plan_event_view TO PUBLIC;
+
 COMMIT;

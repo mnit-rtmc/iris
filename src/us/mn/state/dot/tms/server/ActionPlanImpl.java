@@ -218,18 +218,23 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	@Override
 	public void setActive(boolean a) {
 		active = a;
-		String un = getProcUser();
 		EventType et = (a ? EventType.ACTION_PLAN_ACTIVATED : 
 			EventType.ACTION_PLAN_DEACTIVATED);
-		logEvent(new ActionPlanEvent(et, getName(), un));
+		String un = getProcUser();
+		logEvent(et, null, un);
 		sendEmailAlert(un, a, getName());
+	}
+
+	/** Log an action plan event */
+	private void logEvent(EventType et, PlanPhase phase, String ui) {
+		logEvent(new ActionPlanEvent(et, getName(), phase, ui));
 	}
 
 	/** Set the active status */
 	public void doSetActive(boolean a) throws TMSException {
 		if (a != active) {
 			if (a)
-				setPhaseNotify(default_phase);
+				setPhaseNotify(default_phase, getProcUser());
 			store.update(this, "active", a);
 			setActive(a);
 		}
@@ -238,7 +243,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Set active and schedule phase */
 	public void setActiveScheduledNotify(boolean a) throws TMSException {
 		if (a)
-			setPhaseNotify(getScheduledPhase());
+			setPhaseNotify(getScheduledPhase(), null);
 		if (a != active) {
 			store.update(this, "active", a);
 			setActive(a);
@@ -295,8 +300,6 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	public void setPhase(PlanPhase p) {
 		phase = p;
 		phase_time = TimeSteward.currentTimeMillis();
-		EventType et = EventType.ACTION_PLAN_PHASE_CHANGED;
-		logEvent(new ActionPlanEvent(et, getName(), p.toString()));
 	}
 
 	/**
@@ -312,6 +315,8 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 				validateDeviceActions(); // throws exception
 			store.update(this, "phase", p);
 			setPhase(p);
+			logEvent(EventType.ACTION_PLAN_PHASE_CHANGED, p,
+				getProcUser());
 		}
 	}
 
@@ -322,7 +327,9 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/** Set the deployed phase (and notify clients) */
-	public boolean setPhaseNotify(PlanPhase p) throws TMSException {
+	public boolean setPhaseNotify(PlanPhase p, String ui)
+		throws TMSException
+	{
 		boolean change = (p != phase);
 		if (change) {
 			if (getSyncActions())
@@ -330,6 +337,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			store.update(this, "phase", p);
 			setPhase(p);
 			notifyAttribute("phase");
+			logEvent(EventType.ACTION_PLAN_PHASE_CHANGED, p, ui);
 		}
 		return change;
 	}
@@ -434,7 +442,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		if (p != null) {
 			PlanPhase np = p.getNextPhase();
 			if (np != null && phaseSecs() >= p.getHoldTime())
-				setPhaseNotify(np);
+				setPhaseNotify(np, null);
 		}
 	}
 

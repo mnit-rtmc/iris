@@ -19,7 +19,9 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * Log Action Plan events to the database.
@@ -39,18 +41,23 @@ public class ActionPlanEvent extends BaseEvent {
 	/** Action Plan affected by this event */
 	private final String action_plan;
 
-	/** Detail message */
-	private final String detail;
+	/** Plan phase */
+	private final String phase;
+
+	/** User ID */
+	private final String user_id;
 
 	/** Create a new event.
 	 * @param et Event type.
 	 * @param ap Action plan name.
-	 * @param dt Detail message (user name, etc.) */
-	public ActionPlanEvent(EventType et, String ap, String dt) {
+	 * @param p Plan phase.
+	 * @param ui User ID. */
+	public ActionPlanEvent(EventType et, String ap, PlanPhase p, String ui) {
 		super(et);
 		assert isActionPlanEvent(et);
 		action_plan = ap;
-		detail = dt;
+		phase = (p != null) ? p.toString() : null;
+		user_id = SString.truncate(ui, 15);
 	}
 
 	/** Get the event config name */
@@ -70,9 +77,10 @@ public class ActionPlanEvent extends BaseEvent {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("event_date", new Timestamp(event_date.getTime()));
-		map.put("event_desc_id", event_type.id);
+		map.put("event_desc", event_type.id);
 		map.put("action_plan", action_plan);
-		map.put("detail", detail);
+		map.put("phase", phase);
+		map.put("user_id", user_id);
 		return map;
 	}
 }

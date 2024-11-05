@@ -245,7 +245,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 			arm_state = gas;
 			notifyAttribute("armState");
 		}
-		ga_array.updateArmState();
+		ga_array.updateArmState(o);
 	}
 
 	/** Get the arm state */

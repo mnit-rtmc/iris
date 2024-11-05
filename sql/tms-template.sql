@@ -1012,19 +1012,18 @@ CREATE VIEW time_action_view AS
 GRANT SELECT ON time_action_view TO PUBLIC;
 
 CREATE TABLE event.action_plan_event (
-    event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+    id SERIAL PRIMARY KEY,
     event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
-    event_desc_id INTEGER NOT NULL
-        REFERENCES event.event_description(event_desc_id),
+    event_desc INTEGER NOT NULL REFERENCES event.event_description,
     action_plan VARCHAR(16) NOT NULL,
-    detail VARCHAR(15) NOT NULL
+    phase VARCHAR(12),
+    user_id VARCHAR(15)
 );
 
 CREATE VIEW action_plan_event_view AS
-    SELECT e.event_id, e.event_date, ed.description AS event_description,
-           e.action_plan, e.detail
-    FROM event.action_plan_event e
-    JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+    SELECT ev.id, event_date, ed.description, action_plan, phase, user_id
+    FROM event.action_plan_event ev
+    JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id;
 GRANT SELECT ON action_plan_event_view TO PUBLIC;
 
 --
