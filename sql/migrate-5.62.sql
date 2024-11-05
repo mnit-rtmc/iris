@@ -152,4 +152,29 @@ CREATE VIEW action_plan_event_view AS
     JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id;
 GRANT SELECT ON action_plan_event_view TO PUBLIC;
 
+-- Add user_id to beacon_event
+DROP VIEW beacon_event_view;
+
+ALTER TABLE event.beacon_event RENAME TO old_beacon_event;
+
+CREATE TABLE event.beacon_event (
+    id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    beacon VARCHAR(20) NOT NULL REFERENCES iris._beacon ON DELETE CASCADE,
+    state INTEGER NOT NULL REFERENCES iris.beacon_state,
+    user_id VARCHAR(15)
+);
+
+INSERT INTO event.beacon_event (event_date, beacon, state)
+SELECT event_date, beacon, state
+FROM event.old_beacon_event;
+
+DROP TABLE event.old_beacon_event;
+
+CREATE VIEW beacon_event_view AS
+    SELECT be.id, event_date, beacon, bs.description AS state, user_id
+    FROM event.beacon_event be
+    JOIN iris.beacon_state bs ON be.state = bs.id;
+GRANT SELECT ON beacon_event_view TO PUBLIC;
+
 COMMIT;

@@ -1837,14 +1837,15 @@ CREATE VIEW beacon_view AS
 GRANT SELECT ON beacon_view TO PUBLIC;
 
 CREATE TABLE event.beacon_event (
-    event_id SERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
     beacon VARCHAR(20) NOT NULL REFERENCES iris._beacon ON DELETE CASCADE,
-    state INTEGER NOT NULL REFERENCES iris.beacon_state
+    state INTEGER NOT NULL REFERENCES iris.beacon_state,
+    user_id VARCHAR(15)
 );
 
 CREATE VIEW beacon_event_view AS
-    SELECT event_id, event_date, beacon, bs.description AS state
+    SELECT be.id, event_date, beacon, bs.description AS state, user_id
     FROM event.beacon_event be
     JOIN iris.beacon_state bs ON be.state = bs.id;
 GRANT SELECT ON beacon_event_view TO PUBLIC;

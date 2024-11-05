@@ -20,6 +20,7 @@ import java.util.Map;
 import us.mn.state.dot.tms.BeaconState;
 import static us.mn.state.dot.tms.EventType.BEACON_EVENT;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * This is a class for logging beacon events to a database.
@@ -34,11 +35,15 @@ public class BeaconEvent extends BaseEvent {
 	/** Beacon state ordinal */
 	private final int state;
 
+	/** User ID */
+	private final String user_id;
+
 	/** Create a new beacon event */
-	public BeaconEvent(String bid, BeaconState bs) {
+	public BeaconEvent(String bid, BeaconState bs, String ui) {
 		super(BEACON_EVENT);
 		beacon = bid;
 		state = bs.ordinal();
+		user_id = SString.truncate(ui, 15);
 	}
 
 	/** Get the event config name */
@@ -60,6 +65,7 @@ public class BeaconEvent extends BaseEvent {
 		map.put("event_date", new Timestamp(event_date.getTime()));
 		map.put("beacon", beacon);
 		map.put("state", state);
+		map.put("user_id", user_id);
 		return map;
 	}
 }

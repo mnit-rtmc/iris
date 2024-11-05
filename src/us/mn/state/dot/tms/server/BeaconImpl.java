@@ -301,9 +301,11 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 
 	/** Set beacon state request (ordinal of BeaconState) */
 	public void doSetState(int bs) throws TMSException {
-		switch (BeaconState.fromOrdinal(bs)) {
+		BeaconState s = BeaconState.fromOrdinal(bs);
+		switch (s) {
 			case DARK_REQ:
 			case FLASHING_REQ:
+				logBeaconEvent(s, getProcUser());
 				setState(bs);
 				break;
 			default:
@@ -323,7 +325,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 			catch (TMSException e) {
 				e.printStackTrace();
 			}
-			logBeaconEvent(bs);
+			logBeaconEvent(bs, null);
 			updateStyles();
 		}
 	}
@@ -358,8 +360,8 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	}
 
 	/** Log a beacon event */
-	private void logBeaconEvent(BeaconState bs) {
-		logEvent(new BeaconEvent(name, bs));
+	private void logBeaconEvent(BeaconState bs, String ui) {
+		logEvent(new BeaconEvent(name, bs, ui));
 	}
 
 	/** Get a beacon poller */
