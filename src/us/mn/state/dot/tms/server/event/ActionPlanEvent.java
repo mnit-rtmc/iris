@@ -51,13 +51,14 @@ public class ActionPlanEvent extends BaseEvent {
 	 * @param et Event type.
 	 * @param ap Action plan name.
 	 * @param p Plan phase.
-	 * @param ui User ID. */
-	public ActionPlanEvent(EventType et, String ap, PlanPhase p, String ui) {
+	 * @param uid User ID. */
+	public ActionPlanEvent(EventType et, String ap, PlanPhase p, String uid)
+	{
 		super(et);
 		assert isActionPlanEvent(et);
 		action_plan = ap;
 		phase = (p != null) ? p.toString() : null;
-		user_id = SString.truncate(ui, 15);
+		user_id = SString.truncate(uid, 15);
 	}
 
 	/** Get the event config name */

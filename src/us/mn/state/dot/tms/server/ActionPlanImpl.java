@@ -226,8 +226,8 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/** Log an action plan event */
-	private void logEvent(EventType et, PlanPhase phase, String ui) {
-		logEvent(new ActionPlanEvent(et, getName(), phase, ui));
+	private void logEvent(EventType et, PlanPhase phase, String uid) {
+		logEvent(new ActionPlanEvent(et, getName(), phase, uid));
 	}
 
 	/** Set the active status */
@@ -327,7 +327,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/** Set the deployed phase (and notify clients) */
-	public boolean setPhaseNotify(PlanPhase p, String ui)
+	public boolean setPhaseNotify(PlanPhase p, String uid)
 		throws TMSException
 	{
 		boolean change = (p != phase);
@@ -337,7 +337,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			store.update(this, "phase", p);
 			setPhase(p);
 			notifyAttribute("phase");
-			logEvent(EventType.ACTION_PLAN_PHASE_CHANGED, p, ui);
+			logEvent(EventType.ACTION_PLAN_PHASE_CHANGED, p, uid);
 		}
 		return change;
 	}

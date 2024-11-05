@@ -18,6 +18,7 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * This is a class for logging ramp meter lock events to a database.
@@ -36,11 +37,11 @@ public class MeterLockEvent extends BaseEvent {
 	private final String user_id;
 
 	/** Create a new meter lock event */
-	public MeterLockEvent(String rm, Integer lk, String u) {
+	public MeterLockEvent(String rm, Integer lk, String uid) {
 		super(EventType.METER_LOCK_EVENT);
 		ramp_meter = rm;
 		m_lock = lk;
-		user_id = u;
+		user_id = SString.truncate(uid, 15);
 	}
 
 	/** Get the event config name */

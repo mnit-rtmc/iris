@@ -39,11 +39,11 @@ public class BeaconEvent extends BaseEvent {
 	private final String user_id;
 
 	/** Create a new beacon event */
-	public BeaconEvent(String bid, BeaconState bs, String ui) {
+	public BeaconEvent(String bid, BeaconState bs, String uid) {
 		super(BEACON_EVENT);
 		beacon = bid;
 		state = bs.ordinal();
-		user_id = SString.truncate(ui, 15);
+		user_id = SString.truncate(uid, 15);
 	}
 
 	/** Get the event config name */

@@ -47,11 +47,11 @@ public class ClientEvent extends BaseEvent {
 	private final String user_id;
 
 	/** Create a new client event */
-	public ClientEvent(EventType et, String hp, String ui) {
+	public ClientEvent(EventType et, String hp, String uid) {
 		super(et);
 		assert isClientEvent(et);
 		host_port = SString.truncate(hp, 64);
-		user_id = SString.truncate(ui, 15);
+		user_id = SString.truncate(uid, 15);
 	}
 
 	/** Get the event config name */

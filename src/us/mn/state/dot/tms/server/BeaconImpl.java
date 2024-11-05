@@ -360,8 +360,8 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	}
 
 	/** Log a beacon event */
-	private void logBeaconEvent(BeaconState bs, String ui) {
-		logEvent(new BeaconEvent(name, bs, ui));
+	private void logBeaconEvent(BeaconState bs, String uid) {
+		logEvent(new BeaconEvent(name, bs, uid));
 	}
 
 	/** Get a beacon poller */

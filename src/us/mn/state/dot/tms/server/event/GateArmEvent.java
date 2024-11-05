@@ -20,6 +20,7 @@ import java.util.Map;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * This is a class for logging gate arm state change events to a database.
@@ -58,10 +59,10 @@ public class GateArmEvent extends BaseEvent {
 	private final String fault;
 
 	/** Create a new gate arm event */
-	public GateArmEvent(GateArmState gas, String d, String u, String f) {
+	public GateArmEvent(GateArmState gas, String d, String uid, String f) {
 		super(gateArmStateEventType(gas));
 		device_id = d;
-		user_id = u;
+		user_id = SString.truncate(uid, 15);
 		fault = f;
 	}
 

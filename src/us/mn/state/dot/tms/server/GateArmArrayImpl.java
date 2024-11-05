@@ -487,16 +487,16 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	private void updatePlanPhase(ActionPlanImpl ap, User o)
 		throws TMSException
 	{
-		String ui = (o != null) ? o.getName() : null;
+		String uid = (o != null) ? o.getName() : null;
 		if (isMsgOpen()) {
 			PlanPhase op = lookupPlanPhase(
 				PlanPhase.GATE_ARM_OPEN);
-			if (op != null && ap.setPhaseNotify(op, ui))
+			if (op != null && ap.setPhaseNotify(op, uid))
 				updateDmsActions(ap);
 		} else {
 			PlanPhase cp = lookupPlanPhase(
 				PlanPhase.GATE_ARM_CLOSED);
-			if (cp != null && ap.setPhaseNotify(cp, ui))
+			if (cp != null && ap.setPhaseNotify(cp, uid))
 				updateDmsActions(ap);
 		}
 	}
