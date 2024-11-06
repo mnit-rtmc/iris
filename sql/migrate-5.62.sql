@@ -295,4 +295,12 @@ DELETE FROM event.event_description
 -- Change road_affix base to incident
 UPDATE iris.resource_type SET base = 'incident' WHERE name = 'road_affix';
 
+-- Add sign_message foreign key to incidents
+UPDATE iris.sign_message SET incident = NULL
+    WHERE incident IS NOT NULL
+    AND incident NOT IN (SELECT name FROM event.incident);
+ALTER TABLE iris.sign_message
+    ADD CONSTRAINT sign_message_incident_fkey FOREIGN KEY (incident)
+    REFERENCES event.incident(name) ON DELETE SET NULL;
+
 COMMIT;

@@ -2898,7 +2898,7 @@ GRANT SELECT ON sign_config_view TO PUBLIC;
 CREATE TABLE iris.sign_message (
     name VARCHAR(20) PRIMARY KEY,
     sign_config VARCHAR(16) NOT NULL REFERENCES iris.sign_config,
-    incident VARCHAR(16),
+    incident VARCHAR(16) REFERENCES event.incident(name) ON DELETE SET NULL,
     multi VARCHAR(1024) NOT NULL,
     msg_owner VARCHAR(127) NOT NULL,
     flash_beacon BOOLEAN NOT NULL,
