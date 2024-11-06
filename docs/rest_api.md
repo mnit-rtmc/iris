@@ -93,6 +93,7 @@ These are static resources which may only change on IRIS updates:
 - `gate_arm_state`  [Gate arm] states
 - `inc_impact`  Incident impacts
 - `inc_range`  Incident range
+- `lane_code`  Lane codes
 - `lane_use_indication`  [LCS] lane use indications
 - `lcs_lock`  [LCS] lock codes
 - `r_node_transition`  R_Node transitions

@@ -54,6 +54,7 @@ pub enum Res {
     IncImpact,
     IncLocator,
     IncRange,
+    LaneCode,
     LaneMarking,
     LaneUseIndication,
     Lcs,
@@ -142,6 +143,7 @@ impl Res {
             IncImpact,
             IncLocator,
             IncRange,
+            LaneCode,
             LaneMarking,
             LaneUseIndication,
             Lcs,
@@ -218,6 +220,7 @@ impl Res {
             IncImpact => "inc_impact",
             IncLocator => "inc_locator",
             IncRange => "inc_range",
+            LaneCode => "lane_code",
             LaneUseIndication => "lane_use_indication",
             LaneMarking => "lane_marking",
             Lcs => "lcs",
@@ -304,8 +307,9 @@ impl Res {
         match self {
             BeaconState | CommProtocol | Condition | Direction | Encoding
             | Font | GateArmInterlock | GateArmState | Graphic | IncImpact
-            | IncRange | LaneUseIndication | LcsLock | ResourceType
-            | RnodeTransition | RnodeType | RoadClass | RoadModifier => true,
+            | IncRange | LaneCode | LaneUseIndication | LcsLock
+            | ResourceType | RnodeTransition | RnodeType | RoadClass
+            | RoadModifier => true,
             _ => false,
         }
     }

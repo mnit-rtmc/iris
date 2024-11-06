@@ -466,6 +466,12 @@ pub const INC_RANGE_LUT: &str = "\
   FROM iris.inc_range \
   ORDER BY id";
 
+/// SQL query for lane codes (LUT)
+pub const LANE_CODE_LUT: &str = "\
+  SELECT lcode, description \
+  FROM iris.lane_code \
+  ORDER BY lcode";
+
 /// SQL query for all lane markings (primary)
 pub const LANE_MARKING_ALL: &str = "\
   SELECT m.name, location, controller, notes, deployed \
