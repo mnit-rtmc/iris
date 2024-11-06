@@ -208,7 +208,6 @@ modem	controller
 detector	\N
 r_node	detector
 road	detector
-road_affix	detector
 station	detector
 dms	\N
 font	dms
@@ -227,6 +226,7 @@ incident_detail	incident
 inc_advice	incident
 inc_descriptor	incident
 inc_locator	incident
+road_affix	incident
 lcs	\N
 lane_marking	lcs
 lane_use_multi	lcs

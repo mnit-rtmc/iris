@@ -292,4 +292,7 @@ GRANT SELECT ON incident_update_view TO PUBLIC;
 DELETE FROM event.event_description
     WHERE event_desc_id = 20 OR event_desc_id = 29;
 
+-- Change road_affix base to incident
+UPDATE iris.resource_type SET base = 'incident' WHERE name = 'road_affix';
+
 COMMIT;

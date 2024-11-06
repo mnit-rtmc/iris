@@ -52,10 +52,10 @@ resource, at the same access level.
 | [beacon]           |                                                       |
 | [camera]           | [camera preset], camera template, cam vid src ord, [encoder stream], [encoder type], vid source template |
 | [controller]       | [alarm], [comm link], [gps], [modem]                  |
-| [detector]         | [r_node], [road], road affix, station                 |
+| [detector]         | [r_node], [road], station                             |
 | [dms]              | [font], glyph, [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
 | [gate arm]         | [gate arm array]                                      |
-| [incident]         | incident_detail, inc_advice, inc_descriptor, inc_locator |
+| [incident]         | incident_detail, inc_advice, inc_descriptor, inc_locator, road_affix |
 | [lcs]              | [lane marking], lane use multi, [lcs array], [lcs indication] |
 | [parking area]     |                                                       |
 | permission         | connection, [domain], [role], [user id]               |
