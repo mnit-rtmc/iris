@@ -675,6 +675,12 @@ pub const ROAD_ONE: &str = "\
   JOIN iris.road_class ON r_class = id \
   WHERE name = $1";
 
+/// SQL query for road classes (LUT)
+pub const ROAD_CLASS_LUT: &str = "\
+  SELECT id, description, grade, scale \
+  FROM iris.road_class \
+  ORDER BY id";
+
 /// SQL query for road modifiers (LUT)
 pub const ROAD_MODIFIER_LUT: &str = "\
   SELECT id, modifier, mod AS md \

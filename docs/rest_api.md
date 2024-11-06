@@ -98,6 +98,7 @@ These are static resources which may only change on IRIS updates:
 - `r_node_transition`  R_Node transitions
 - `r_node_type`  R_Node types
 - `resource_type`  [Resource types] available in `iris/api/`
+- `road_class`  Road classes
 - `road_modifier`  Road modifiers
 
 ### Fonts: `iris/tfon/`

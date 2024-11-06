@@ -71,6 +71,7 @@ pub enum Res {
     RnodeTransition,
     RnodeType,
     Road,
+    RoadClass,
     RoadModifier,
     Role,
     SignConfig,
@@ -158,6 +159,7 @@ impl Res {
             RnodeTransition,
             RnodeType,
             Road,
+            RoadClass,
             RoadModifier,
             Role,
             SignConfig,
@@ -233,6 +235,7 @@ impl Res {
             RnodeTransition => "r_node_transition",
             RnodeType => "r_node_type",
             Road => "road",
+            RoadClass => "road_class",
             RoadModifier => "road_modifier",
             Role => "role",
             SignConfig => "sign_config",
@@ -302,7 +305,7 @@ impl Res {
             BeaconState | CommProtocol | Condition | Direction | Encoding
             | Font | GateArmInterlock | GateArmState | Graphic | IncImpact
             | IncRange | LaneUseIndication | LcsLock | ResourceType
-            | RnodeTransition | RnodeType | RoadModifier => true,
+            | RnodeTransition | RnodeType | RoadClass | RoadModifier => true,
             _ => false,
         }
     }
