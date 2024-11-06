@@ -303,8 +303,9 @@ ALTER TABLE iris.sign_message
     ADD CONSTRAINT sign_message_incident_fkey FOREIGN KEY (incident)
     REFERENCES event.incident(name) ON DELETE SET NULL;
 
--- Change column names for r_node_transition LUT
+-- Change column names for r_node_transition / r_node_type LUTs
 ALTER TABLE iris.r_node DROP CONSTRAINT r_node_transition_fkey;
+ALTER TABLE iris.r_node DROP CONSTRAINT r_node_node_type_fkey;
 DROP VIEW r_node_view;
 DROP TABLE iris.r_node_transition;
 
@@ -328,16 +329,36 @@ ALTER TABLE iris.r_node
     ADD CONSTRAINT r_node_transition_fkey FOREIGN KEY (transition)
     REFERENCES iris.r_node_transition;
 
+DROP TABLE iris.r_node_type;
+
+CREATE TABLE iris.r_node_type (
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(12) NOT NULL
+);
+
+INSERT INTO iris.r_node_type (id, description)
+VALUES
+    (0, 'station'),
+    (1, 'entrance'),
+    (2, 'exit'),
+    (3, 'intersection'),
+    (4, 'access'),
+    (5, 'interchange');
+
+ALTER TABLE iris.r_node
+    ADD CONSTRAINT r_node_node_type_fkey FOREIGN KEY (node_type)
+    REFERENCES iris.r_node_type;
+
 CREATE VIEW r_node_view AS
     SELECT n.name, n.geo_loc,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
            l.landmark, l.lat, l.lon, l.corridor, l.location,
-           nt.name AS node_type, n.pickable, n.above,
+           nt.description AS node_type, n.pickable, n.above,
            tr.description AS transition, n.lanes, n.attach_side, n.shift,
            n.active, n.station_id, n.speed_limit, n.notes
     FROM iris.r_node n
     JOIN geo_loc_view l ON n.geo_loc = l.name
-    JOIN iris.r_node_type nt ON n.node_type = nt.n_type
+    JOIN iris.r_node_type nt ON n.node_type = nt.id
     JOIN iris.r_node_transition tr ON n.transition = tr.id;
 GRANT SELECT ON r_node_view TO PUBLIC;
 

@@ -650,6 +650,12 @@ pub const RNODE_TRANSITION_LUT: &str = "\
   FROM iris.r_node_transition \
   ORDER BY id";
 
+/// SQL query for RNode types (LUT)
+pub const RNODE_TYPE_LUT: &str = "\
+  SELECT id, description \
+  FROM iris.r_node_type \
+  ORDER BY id";
+
 /// SQL query for all roads (primary)
 pub const ROAD_ALL: &str = "\
   SELECT name, abbrev, r_class, direction \
