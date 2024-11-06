@@ -34,6 +34,10 @@ CREATE TRIGGER camera_preset_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.camera_preset
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
+CREATE TRIGGER road_affix_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.road_affix
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
 -- Rename iris_user to user_id in client_event
 DROP VIEW client_event_view;
 

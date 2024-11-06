@@ -65,6 +65,7 @@ update, and is caused by one of these conditions:
 `ramp_meter`       | ✔️   | ✔️   | ✔️   |
 `r_node`           | ✔️   |     |     |
 `road`             |     |     |     |
+`road_affix`       |     |     |     |
 `role`             |     |     |     | ✔️ 
 `sign_config`      |     |     |     |
 `sign_detail`      |     |     |     |

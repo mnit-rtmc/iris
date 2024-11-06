@@ -883,6 +883,7 @@ const fn one_sql(res: Res) -> &'static str {
         MsgLine => query::MSG_LINE_ONE,
         MsgPattern => query::MSG_PATTERN_ONE,
         Permission => query::PERMISSION_ONE,
+        RoadAffix => query::ROAD_AFFIX_ONE,
         RampMeter => query::RAMP_METER_ONE,
         Role => query::ROLE_ONE,
         SignConfig => query::SIGN_CONFIG_ONE,

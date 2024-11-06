@@ -681,6 +681,18 @@ pub const ROAD_ONE: &str = "\
   JOIN iris.road_class ON r_class = id \
   WHERE name = $1";
 
+/// SQL query for all road affixes (primary)
+pub const ROAD_AFFIX_ALL: &str = "\
+  SELECT name, prefix, fixup, allow_retain \
+  FROM iris.road_affix \
+  ORDER BY name";
+
+/// SQL query for one road affix
+pub const ROAD_AFFIX_ONE: &str = "\
+  SELECT name, prefix, fixup, allow_retain \
+  FROM iris.road_affix \
+  WHERE name = $1";
+
 /// SQL query for road classes (LUT)
 pub const ROAD_CLASS_LUT: &str = "\
   SELECT id, description, grade, scale \

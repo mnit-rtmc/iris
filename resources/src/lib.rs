@@ -72,6 +72,7 @@ pub enum Res {
     RnodeTransition,
     RnodeType,
     Road,
+    RoadAffix,
     RoadClass,
     RoadModifier,
     Role,
@@ -161,6 +162,7 @@ impl Res {
             RnodeTransition,
             RnodeType,
             Road,
+            RoadAffix,
             RoadClass,
             RoadModifier,
             Role,
@@ -238,6 +240,7 @@ impl Res {
             RnodeTransition => "r_node_transition",
             RnodeType => "r_node_type",
             Road => "road",
+            RoadAffix => "road_affix",
             RoadClass => "road_class",
             RoadModifier => "road_modifier",
             Role => "role",
@@ -288,6 +291,7 @@ impl Res {
             LcsIndication => "🡇 ",
             Modem => "🖀 ",
             Permission => "🗝️ ",
+            RoadAffix => "🛣️ ",
             RampMeter => "🚦",
             Role => "💪",
             SignConfig => "📐",
@@ -325,9 +329,10 @@ impl Res {
             | GateArm | GateArmArray | Gps | Incident | IncidentDetail
             | IncAdvice | IncDescriptor | IncLocator | LaneMarking
             | LcsArray | LcsIndication | Modem | MsgLine | MsgPattern
-            | ParkingArea | Permission | RampMeter | Rnode | Road | Role
-            | SignConfig | SignDetail | SignMessage | SystemAttribute
-            | TagReader | User | VideoMonitor | WeatherSensor | Word => true,
+            | ParkingArea | Permission | RampMeter | Rnode | Road
+            | RoadAffix | Role | SignConfig | SignDetail | SignMessage
+            | SystemAttribute | TagReader | User | VideoMonitor
+            | WeatherSensor | Word => true,
             _ => false,
         }
     }
@@ -350,7 +355,8 @@ impl Res {
             // Gate arm resources
             GateArmArray => GateArm,
             // Incident resources
-            IncidentDetail | IncAdvice | IncDescriptor | IncLocator => Incident,
+            IncidentDetail | IncAdvice | IncDescriptor | IncLocator
+            | RoadAffix => Incident,
             // LCS resources
             LcsArray | LcsIndication | LaneMarking => Lcs,
             // Permission resources

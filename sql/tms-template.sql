@@ -1067,6 +1067,10 @@ TR	f		f
 WAY	f		f
 \.
 
+CREATE TRIGGER road_affix_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.road_affix
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
 --
 -- Domains, Roles, Users, and Permissions
 --
