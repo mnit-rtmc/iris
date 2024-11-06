@@ -229,12 +229,10 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 13	Comm CHECKSUM ERROR
 14	Comm CONTROLLER ERROR
 15	Comm CONNECTION REFUSED
-20	Incident CLEARED
 21	Incident CRASH
 22	Incident STALL
 23	Incident HAZARD
 24	Incident ROADWORK
-29	Incident IMPACT
 65	Comm FAILED
 81	DMS MSG ERROR
 82	DMS PIXEL ERROR

@@ -288,4 +288,8 @@ CREATE VIEW incident_update_view AS
     LEFT JOIN iris.lane_code lc ON i.lane_code = lc.lcode;
 GRANT SELECT ON incident_update_view TO PUBLIC;
 
+-- Delete unused incident event descriptions
+DELETE FROM event.event_description
+    WHERE event_desc_id = 20 OR event_desc_id = 29;
+
 COMMIT;
