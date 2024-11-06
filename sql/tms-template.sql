@@ -174,116 +174,6 @@ END;
 $update_version$ language plpgsql;
 
 --
--- Events
---
-CREATE SEQUENCE event.event_id_seq;
-
-CREATE TABLE iris.event_config (
-    name VARCHAR(32) PRIMARY KEY,
-    enable_store BOOLEAN NOT NULL,
-    enable_purge BOOLEAN NOT NULL,
-    purge_days INTEGER NOT NULL
-);
-
-INSERT INTO iris.event_config (name, enable_store, enable_purge, purge_days)
-VALUES
-    ('action_plan_event', true, true, 90),
-    ('alarm_event', true, false, 0),
-    ('beacon_event', true, false, 0),
-    ('brightness_sample', true, false, 0),
-    ('camera_switch_event', true, true, 30),
-    ('camera_video_event', true, true, 14),
-    ('cap_alert', true, true, 7),
-    ('client_event', true, false, 0),
-    ('comm_event', true, true, 14),
-    ('detector_event', true, true, 90),
-    ('gate_arm_event', true, false, 0),
-    ('incident', true, false, 0),
-    ('incident_update', true, false, 0),
-    ('meter_event', true, true, 14),
-    ('meter_lock_event', true, false, 0),
-    ('price_message_event', true, false, 0),
-    ('sign_event', true, false, 0),
-    ('tag_read_event', true, false, 0),
-    ('travel_time_event', true, true, 1),
-    ('weather_sensor_sample', true, true, 90),
-    ('weather_sensor_settings', true, false, 0);
-
-CREATE TRIGGER event_config_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.event_config
-    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
-
-CREATE TABLE event.event_description (
-    event_desc_id INTEGER PRIMARY KEY,
-    description text NOT NULL
-);
-
-COPY event.event_description (event_desc_id, description) FROM stdin;
-1	Alarm TRIGGERED
-2	Alarm CLEARED
-8	Comm ERROR
-9	Comm RESTORED
-10	Comm QUEUE DRAINED
-11	Comm POLL TIMEOUT
-12	Comm PARSING ERROR
-13	Comm CHECKSUM ERROR
-14	Comm CONTROLLER ERROR
-15	Comm CONNECTION REFUSED
-21	Incident CRASH
-22	Incident STALL
-23	Incident HAZARD
-24	Incident ROADWORK
-65	Comm FAILED
-81	DMS MSG ERROR
-82	DMS PIXEL ERROR
-83	DMS MSG RESET
-89	LCS DEPLOYED
-90	LCS CLEARED
-91	Sign DEPLOYED
-92	Sign CLEARED
-94	NO HITS
-95	LOCKED ON
-96	CHATTER
-97	NO CHANGE
-98	OCC SPIKE
-101	Sign BRIGHTNESS LOW
-102	Sign BRIGHTNESS GOOD
-103	Sign BRIGHTNESS HIGH
-201	Client CONNECT
-202	Client AUTHENTICATE
-203	Client FAIL AUTHENTICATION
-204	Client DISCONNECT
-205	Client CHANGE PASSWORD
-206	Client FAIL PASSWORD
-207	Client FAIL DOMAIN
-208	Client FAIL DOMAIN XFF
-209	Client UPDATE PASSWORD
-301	Gate Arm UNKNOWN
-302	Gate Arm FAULT
-303	Gate Arm OPENING
-304	Gate Arm OPEN
-305	Gate Arm WARN CLOSE
-306	Gate Arm CLOSING
-307	Gate Arm CLOSED
-401	Meter event
-402	Meter LOCK
-501	Beacon STATE
-601	Tag Read
-651	Price DEPLOYED
-652	Price VERIFIED
-701	TT Link too long
-703	TT No destination data
-704	TT No origin data
-705	TT No route
-801	Camera SWITCHED
-811	Camera Video LOST
-812	Camera Video RESTORED
-900	Action Plan ACTIVATED
-901	Action Plan DEACTIVATED
-902	Action Plan Phase CHANGED
-\.
-
---
 -- Resources and Hashtags
 --
 CREATE TABLE iris.resource_type (
@@ -412,6 +302,770 @@ BEGIN
     RETURN NULL; -- AFTER trigger return is ignored
 END;
 $hashtag_trig$ LANGUAGE plpgsql;
+
+--
+-- Events
+--
+CREATE SEQUENCE event.event_id_seq;
+
+CREATE TABLE iris.event_config (
+    name VARCHAR(32) PRIMARY KEY,
+    enable_store BOOLEAN NOT NULL,
+    enable_purge BOOLEAN NOT NULL,
+    purge_days INTEGER NOT NULL
+);
+
+INSERT INTO iris.event_config (name, enable_store, enable_purge, purge_days)
+VALUES
+    ('action_plan_event', true, true, 90),
+    ('alarm_event', true, false, 0),
+    ('beacon_event', true, false, 0),
+    ('brightness_sample', true, false, 0),
+    ('camera_switch_event', true, true, 30),
+    ('camera_video_event', true, true, 14),
+    ('cap_alert', true, true, 7),
+    ('client_event', true, false, 0),
+    ('comm_event', true, true, 14),
+    ('detector_event', true, true, 90),
+    ('gate_arm_event', true, false, 0),
+    ('incident', true, false, 0),
+    ('incident_update', true, false, 0),
+    ('meter_event', true, true, 14),
+    ('meter_lock_event', true, false, 0),
+    ('price_message_event', true, false, 0),
+    ('sign_event', true, false, 0),
+    ('tag_read_event', true, false, 0),
+    ('travel_time_event', true, true, 1),
+    ('weather_sensor_sample', true, true, 90),
+    ('weather_sensor_settings', true, false, 0);
+
+CREATE TRIGGER event_config_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.event_config
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+CREATE TABLE event.event_description (
+    event_desc_id INTEGER PRIMARY KEY,
+    description text NOT NULL
+);
+
+COPY event.event_description (event_desc_id, description) FROM stdin;
+1	Alarm TRIGGERED
+2	Alarm CLEARED
+8	Comm ERROR
+9	Comm RESTORED
+10	Comm QUEUE DRAINED
+11	Comm POLL TIMEOUT
+12	Comm PARSING ERROR
+13	Comm CHECKSUM ERROR
+14	Comm CONTROLLER ERROR
+15	Comm CONNECTION REFUSED
+21	Incident CRASH
+22	Incident STALL
+23	Incident HAZARD
+24	Incident ROADWORK
+65	Comm FAILED
+81	DMS MSG ERROR
+82	DMS PIXEL ERROR
+83	DMS MSG RESET
+89	LCS DEPLOYED
+90	LCS CLEARED
+91	Sign DEPLOYED
+92	Sign CLEARED
+94	NO HITS
+95	LOCKED ON
+96	CHATTER
+97	NO CHANGE
+98	OCC SPIKE
+101	Sign BRIGHTNESS LOW
+102	Sign BRIGHTNESS GOOD
+103	Sign BRIGHTNESS HIGH
+201	Client CONNECT
+202	Client AUTHENTICATE
+203	Client FAIL AUTHENTICATION
+204	Client DISCONNECT
+205	Client CHANGE PASSWORD
+206	Client FAIL PASSWORD
+207	Client FAIL DOMAIN
+208	Client FAIL DOMAIN XFF
+209	Client UPDATE PASSWORD
+301	Gate Arm UNKNOWN
+302	Gate Arm FAULT
+303	Gate Arm OPENING
+304	Gate Arm OPEN
+305	Gate Arm WARN CLOSE
+306	Gate Arm CLOSING
+307	Gate Arm CLOSED
+401	Meter event
+402	Meter LOCK
+501	Beacon STATE
+601	Tag Read
+651	Price DEPLOYED
+652	Price VERIFIED
+701	TT Link too long
+703	TT No destination data
+704	TT No origin data
+705	TT No route
+801	Camera SWITCHED
+811	Camera Video LOST
+812	Camera Video RESTORED
+900	Action Plan ACTIVATED
+901	Action Plan DEACTIVATED
+902	Action Plan Phase CHANGED
+\.
+
+--
+-- Lane Codes, Direction, Road, Map Extent, Geo Loc
+--
+CREATE TABLE iris.lane_code (
+    lcode VARCHAR(1) PRIMARY KEY,
+    description VARCHAR(12) NOT NULL
+);
+
+COPY iris.lane_code (lcode, description) FROM stdin;
+	Mainline
+A	Auxiliary
+B	Bypass
+C	CD Lane
+D	Shoulder
+G	Green
+H	HOV
+K	Parking
+M	Merge
+O	Omnibus
+P	Passage
+Q	Queue
+R	Reversible
+T	HOT
+V	Velocity
+X	Exit
+Y	Wrong Way
+\.
+
+CREATE VIEW lane_code_view AS
+    SELECT lcode, description FROM iris.lane_code;
+GRANT SELECT ON lane_code_view TO PUBLIC;
+
+CREATE TABLE iris.direction (
+    id SMALLINT PRIMARY KEY,
+    direction VARCHAR(4) NOT NULL,
+    dir VARCHAR(4) NOT NULL
+);
+
+COPY iris.direction (id, direction, dir) FROM stdin;
+0		
+1	NB	N
+2	SB	S
+3	EB	E
+4	WB	W
+5	N-S	NS
+6	E-W	EW
+\.
+
+CREATE TABLE iris.road_class (
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(12) NOT NULL,
+    grade CHAR NOT NULL,
+    scale REAL NOT NULL
+);
+
+COPY iris.road_class (id, description, grade, scale) FROM stdin;
+0			1
+1	residential	A	2
+2	business	B	3
+3	collector	C	3
+4	arterial	D	4
+5	expressway	E	4
+6	freeway	F	6
+7	CD road		3.5
+\.
+
+CREATE TABLE iris.road_modifier (
+    id SMALLINT PRIMARY KEY,
+    modifier TEXT NOT NULL,
+    mod VARCHAR(2) NOT NULL
+);
+
+COPY iris.road_modifier (id, modifier, mod) FROM stdin;
+0	@	
+1	N of	N
+2	S of	S
+3	E of	E
+4	W of	W
+5	N Jct	Nj
+6	S Jct	Sj
+7	E Jct	Ej
+8	W Jct	Wj
+\.
+
+CREATE TABLE iris.road (
+    name VARCHAR(20) PRIMARY KEY,
+    abbrev VARCHAR(6) NOT NULL,
+    r_class SMALLINT NOT NULL REFERENCES iris.road_class(id),
+    direction SMALLINT NOT NULL REFERENCES iris.direction(id)
+);
+
+CREATE FUNCTION iris.road_notify() RETURNS TRIGGER AS
+    $road_notify$
+BEGIN
+    IF (TG_OP = 'DELETE') THEN
+        PERFORM pg_notify('road', OLD.name);
+    ELSE
+        PERFORM pg_notify('road', NEW.name);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$road_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER road_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.road
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.road_notify();
+
+CREATE VIEW road_view AS
+    SELECT name, abbrev, rcl.description AS r_class, dir.direction
+    FROM iris.road r
+    LEFT JOIN iris.road_class rcl ON r.r_class = rcl.id
+    LEFT JOIN iris.direction dir ON r.direction = dir.id;
+GRANT SELECT ON road_view TO PUBLIC;
+
+CREATE TABLE iris.map_extent (
+    name VARCHAR(20) PRIMARY KEY,
+    lat real NOT NULL,
+    lon real NOT NULL,
+    zoom INTEGER NOT NULL
+);
+
+CREATE TABLE iris.geo_loc (
+    name VARCHAR(20) PRIMARY KEY,
+    resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
+    roadway VARCHAR(20) REFERENCES iris.road(name),
+    road_dir SMALLINT NOT NULL REFERENCES iris.direction(id),
+    cross_street VARCHAR(20) REFERENCES iris.road(name),
+    cross_dir SMALLINT NOT NULL REFERENCES iris.direction(id),
+    cross_mod SMALLINT NOT NULL REFERENCES iris.road_modifier(id),
+    landmark VARCHAR(24),
+    lat double precision,
+    lon double precision
+);
+
+CREATE FUNCTION iris.geo_loc_notify() RETURNS TRIGGER AS
+    $geo_loc_notify$
+BEGIN
+    IF (NEW.roadway IS DISTINCT FROM OLD.roadway) OR
+       (NEW.road_dir IS DISTINCT FROM OLD.road_dir) OR
+       (NEW.cross_street IS DISTINCT FROM OLD.cross_street) OR
+       (NEW.cross_dir IS DISTINCT FROM OLD.cross_dir) OR
+       (NEW.cross_mod IS DISTINCT FROM OLD.cross_mod) OR
+       (NEW.landmark IS DISTINCT FROM OLD.landmark)
+    THEN
+        PERFORM pg_notify(NEW.resource_n, '');
+    ELSIF (NEW.lat IS DISTINCT FROM OLD.lat) OR
+          (NEW.lon IS DISTINCT FROM OLD.lon)
+    THEN
+        PERFORM pg_notify(NEW.resource_n, NEW.name);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$geo_loc_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER geo_loc_notify_trig
+    AFTER UPDATE ON iris.geo_loc
+    FOR EACH ROW EXECUTE FUNCTION iris.geo_loc_notify();
+
+CREATE FUNCTION iris.geo_location(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT)
+    RETURNS TEXT AS $geo_location$
+DECLARE
+    roadway ALIAS FOR $1;
+    road_dir ALIAS FOR $2;
+    cross_mod ALIAS FOR $3;
+    cross_street ALIAS FOR $4;
+    cross_dir ALIAS FOR $5;
+    landmark ALIAS FOR $6;
+    corridor TEXT;
+    xloc TEXT;
+    lmrk TEXT;
+BEGIN
+    corridor = trim(roadway || concat(' ', road_dir));
+    xloc = trim(concat(cross_mod, ' ') || cross_street
+        || concat(' ', cross_dir));
+    lmrk = replace('(' || landmark || ')', '()', '');
+    RETURN NULLIF(trim(concat(corridor, ' ' || xloc, ' ' || lmrk)), '');
+END;
+$geo_location$ LANGUAGE plpgsql;
+
+CREATE VIEW geo_loc_view AS
+    SELECT l.name, r.abbrev AS rd, l.roadway, r_dir.direction AS road_dir,
+           r_dir.dir AS rdir, m.modifier AS cross_mod, m.mod AS xmod,
+           c.abbrev as xst, l.cross_street, c_dir.direction AS cross_dir,
+           l.landmark, l.lat, l.lon,
+           trim(l.roadway || concat(' ', r_dir.direction)) AS corridor,
+           iris.geo_location(l.roadway, r_dir.direction, m.modifier,
+           l.cross_street, c_dir.direction, l.landmark) AS location
+    FROM iris.geo_loc l
+    LEFT JOIN iris.road r ON l.roadway = r.name
+    LEFT JOIN iris.road_modifier m ON l.cross_mod = m.id
+    LEFT JOIN iris.road c ON l.cross_street = c.name
+    LEFT JOIN iris.direction r_dir ON l.road_dir = r_dir.id
+    LEFT JOIN iris.direction c_dir ON l.cross_dir = c_dir.id;
+GRANT SELECT ON geo_loc_view TO PUBLIC;
+
+--
+-- Incidents, descriptors, locators, advice, road affix
+--
+CREATE TABLE event.incident_detail (
+    name VARCHAR(8) PRIMARY KEY,
+    description VARCHAR(32) NOT NULL
+);
+
+INSERT INTO event.incident_detail (name, description)
+VALUES
+    ('animal', 'Animal on Road'),
+    ('debris', 'Debris'),
+    ('detour', 'Detour'),
+    ('emrg_veh', 'Emergency Vehicles'),
+    ('event', 'Event Congestion'),
+    ('flooding', 'Flash Flooding'),
+    ('gr_fire', 'Grass Fire'),
+    ('ice', 'Ice'),
+    ('jacknife', 'Jacknifed Trailer'),
+    ('pavement', 'Pavement Failure'),
+    ('ped', 'Pedestrian'),
+    ('rollover', 'Rollover'),
+    ('sgnl_out', 'Traffic Lights Out'),
+    ('snow_rmv', 'Snow Removal'),
+    ('spill', 'Spilled Load'),
+    ('spin_out', 'Vehicle Spin Out'),
+    ('test', 'Test Incident'),
+    ('veh_fire', 'Vehicle Fire');
+
+CREATE TRIGGER incident_detail_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON event.incident_detail
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+CREATE TABLE event.incident (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(16) NOT NULL UNIQUE,
+    replaces VARCHAR(16) REFERENCES event.incident(name),
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc INTEGER NOT NULL REFERENCES event.event_description,
+    detail VARCHAR(8) REFERENCES event.incident_detail(name),
+    lane_code VARCHAR(1) NOT NULL REFERENCES iris.lane_code,
+    road VARCHAR(20) NOT NULL,
+    dir SMALLINT NOT NULL REFERENCES iris.direction(id),
+    lat double precision NOT NULL,
+    lon double precision NOT NULL,
+    camera VARCHAR(20),
+    impact VARCHAR(20) NOT NULL,
+    cleared BOOLEAN NOT NULL,
+    confirmed BOOLEAN NOT NULL,
+    user_id VARCHAR(15),
+
+    CONSTRAINT impact_ck CHECK (impact ~ '^[!?\.]*$')
+);
+
+CREATE TRIGGER incident_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON event.incident
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+CREATE FUNCTION event.incident_blocked_lanes(TEXT)
+    RETURNS INTEGER AS $incident_blocked_lanes$
+DECLARE
+    impact ALIAS FOR $1;
+    imp TEXT;
+    lanes INTEGER;
+BEGIN
+    lanes = length(impact) - 2;
+    IF lanes > 0 THEN
+        imp = substring(impact FROM 2 FOR lanes);
+        RETURN lanes - length(replace(imp, '!', ''));
+    ELSE
+        RETURN 0;
+    END IF;
+END;
+$incident_blocked_lanes$ LANGUAGE plpgsql;
+
+CREATE FUNCTION event.incident_blocked_shoulders(TEXT)
+    RETURNS INTEGER AS $incident_blocked_shoulders$
+DECLARE
+    impact ALIAS FOR $1;
+    len INTEGER;
+    imp TEXT;
+BEGIN
+    len = length(impact);
+    IF len > 2 THEN
+        imp = substring(impact FROM 1 FOR 1) ||
+              substring(impact FROM len FOR 1);
+        RETURN 2 - length(replace(imp, '!', ''));
+    ELSE
+        RETURN 0;
+    END IF;
+END;
+$incident_blocked_shoulders$ LANGUAGE plpgsql;
+
+CREATE VIEW incident_view AS
+    SELECT i.id, name, event_date, ed.description, road, d.direction,
+           impact, event.incident_blocked_lanes(impact) AS blocked_lanes,
+           event.incident_blocked_shoulders(impact) AS blocked_shoulders,
+           cleared, confirmed, user_id, camera, lc.description AS lane_type,
+           detail, replaces, lat, lon
+    FROM event.incident i
+    LEFT JOIN event.event_description ed ON i.event_desc = ed.event_desc_id
+    LEFT JOIN iris.direction d ON i.dir = d.id
+    LEFT JOIN iris.lane_code lc ON i.lane_code = lc.lcode;
+GRANT SELECT ON incident_view TO PUBLIC;
+
+CREATE TABLE event.incident_update (
+    id SERIAL PRIMARY KEY,
+    incident VARCHAR(16) NOT NULL REFERENCES event.incident(name),
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    impact VARCHAR(20) NOT NULL,
+    cleared BOOLEAN NOT NULL,
+    confirmed BOOLEAN NOT NULL,
+    user_id VARCHAR(15)
+);
+
+CREATE FUNCTION event.incident_update_trig() RETURNS TRIGGER AS
+$incident_update_trig$
+BEGIN
+    IF (NEW.impact IS DISTINCT FROM OLD.impact) OR
+       (NEW.cleared IS DISTINCT FROM OLD.cleared)
+    THEN
+        INSERT INTO event.incident_update (
+            incident, event_date, impact, cleared, confirmed, user_id
+        ) VALUES (
+            NEW.name, now(), NEW.impact, NEW.cleared, NEW.confirmed, NEW.user_id
+        );
+    END IF;
+    RETURN NEW;
+END;
+$incident_update_trig$ LANGUAGE plpgsql;
+
+CREATE TRIGGER incident_update_trigger
+    AFTER INSERT OR UPDATE ON event.incident
+    FOR EACH ROW EXECUTE FUNCTION event.incident_update_trig();
+
+CREATE VIEW incident_update_view AS
+    SELECT iu.id, name, iu.event_date, ed.description, road,
+           d.direction, iu.impact, iu.cleared, iu.confirmed, iu.user_id,
+           camera, lc.description AS lane_type, detail, replaces, lat, lon
+    FROM event.incident i
+    JOIN event.incident_update iu ON i.name = iu.incident
+    LEFT JOIN event.event_description ed ON i.event_desc = ed.event_desc_id
+    LEFT JOIN iris.direction d ON i.dir = d.id
+    LEFT JOIN iris.lane_code lc ON i.lane_code = lc.lcode;
+GRANT SELECT ON incident_update_view TO PUBLIC;
+
+CREATE TABLE iris.inc_descriptor (
+    name VARCHAR(10) PRIMARY KEY,
+    event_desc_id INTEGER NOT NULL
+        REFERENCES event.event_description(event_desc_id),
+    detail VARCHAR(8) REFERENCES event.incident_detail(name),
+    lane_code VARCHAR(1) NOT NULL REFERENCES iris.lane_code,
+    multi VARCHAR(64) NOT NULL
+);
+
+CREATE FUNCTION iris.inc_descriptor_ck() RETURNS TRIGGER AS
+    $inc_descriptor_ck$
+BEGIN
+    -- Only incident event IDs are allowed
+    IF NEW.event_desc_id < 21 OR NEW.event_desc_id > 24 THEN
+        RAISE EXCEPTION 'invalid incident event_desc_id';
+    END IF;
+    -- Only mainline, cd road, merge and exit lane types are allowed
+    IF NEW.lane_code != '' AND NEW.lane_code != 'C' AND
+       NEW.lane_code != 'M' AND NEW.lane_code != 'X' THEN
+        RAISE EXCEPTION 'invalid incident lane_code';
+    END IF;
+    RETURN NEW;
+END;
+$inc_descriptor_ck$ LANGUAGE plpgsql;
+
+CREATE TRIGGER inc_descriptor_ck_trig
+    BEFORE INSERT OR UPDATE ON iris.inc_descriptor
+    FOR EACH ROW EXECUTE FUNCTION iris.inc_descriptor_ck();
+
+CREATE TRIGGER inc_descriptor_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.inc_descriptor
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+CREATE VIEW inc_descriptor_view AS
+    SELECT id.name, ed.description AS event_description, detail,
+           lc.description AS lane_type, multi
+    FROM iris.inc_descriptor id
+    JOIN event.event_description ed ON id.event_desc_id = ed.event_desc_id
+    LEFT JOIN iris.lane_code lc ON id.lane_code = lc.lcode;
+GRANT SELECT ON inc_descriptor_view TO PUBLIC;
+
+COPY iris.inc_descriptor (name, event_desc_id, detail, lane_code, multi) FROM stdin;
+idsc_00001	21	\N		CRASH
+idsc_00002	21	\N	X	CRASH ON EXIT
+idsc_00003	22	\N		STALLED VEHICLE
+idsc_00004	23	\N		INCIDENT
+idsc_00005	23	animal		ANIMAL ON ROAD
+idsc_00006	23	debris		DEBRIS ON ROAD
+idsc_00007	23	emrg_veh		EMERGENCY VEHICLES
+idsc_00008	23	event		EVENT CONGESTION
+idsc_00009	23	event	X	CONGESTION ON RAMP
+idsc_00010	23	flooding		FLASH FLOODING
+idsc_00011	23	gr_fire		GRASS FIRE
+idsc_00012	23	ice		ICE
+idsc_00013	23	pavement		PAVEMENT FAILURE
+idsc_00014	23	ped		PEDESTRIAN ON ROAD
+idsc_00015	23	rollover		CRASH
+idsc_00016	23	snow_rmv		SNOW REMOVAL
+idsc_00017	23	spin_out		CRASH
+idsc_00018	23	spin_out	X	CRASH ON EXIT
+idsc_00019	23	test		TEST
+idsc_00020	23	veh_fire		VEHICLE FIRE
+idsc_00021	24	\N		ROAD WORK
+idsc_00022	24	\N	X	ROAD WORK ON RAMP
+\.
+
+CREATE TABLE iris.inc_impact (
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(24) NOT NULL
+);
+
+COPY iris.inc_impact (id, description) FROM stdin;
+0	lanes blocked
+1	left lanes blocked
+2	right lanes blocked
+3	center lanes blocked
+4	lanes affected
+5	left lanes affected
+6	right lanes affected
+7	center lanes affected
+8	both shoulders blocked
+9	left shoulder blocked
+10	right shoulder blocked
+11	both shoulders affected
+12	left shoulder affected
+13	right shoulder affected
+14	free flowing
+\.
+
+CREATE TABLE iris.inc_range (
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(10) NOT NULL
+);
+
+COPY iris.inc_range (id, description) FROM stdin;
+0	ahead
+1	near
+2	middle
+3	far
+\.
+
+CREATE TABLE iris.inc_locator (
+    name VARCHAR(10) PRIMARY KEY,
+    range INTEGER NOT NULL REFERENCES iris.inc_range(id),
+    branched BOOLEAN NOT NULL,
+    picked BOOLEAN NOT NULL,
+    multi VARCHAR(64) NOT NULL
+);
+
+CREATE TRIGGER inc_locator_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.inc_locator
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+CREATE VIEW inc_locator_view AS
+    SELECT il.name, rng.description AS range, branched, picked, multi
+    FROM iris.inc_locator il
+    LEFT JOIN iris.inc_range rng ON il.range = rng.id;
+GRANT SELECT ON inc_locator_view TO PUBLIC;
+
+COPY iris.inc_locator (name, range, branched, picked, multi) FROM stdin;
+iloc_00001	0	f	f	AHEAD
+iloc_00002	0	f	t	AHEAD
+iloc_00003	0	t	f	AHEAD
+iloc_00004	0	t	t	AHEAD
+iloc_00005	1	f	f	[locmi] MILES AHEAD
+iloc_00006	1	f	t	[locmd] [locxn]
+iloc_00007	1	t	f	ON [locrn] [locrd]
+iloc_00008	1	t	t	ON [locrn] [locrd]
+iloc_00009	2	f	f	[locmi] MILES AHEAD
+iloc_00010	2	f	t	[locmd] [locxn]
+iloc_00011	2	t	f	ON [locrn] [locrd]
+iloc_00012	2	t	t	ON [locrn] [locrd] [locmd] [locxn]
+iloc_00013	3	f	f	[locmi] MILES AHEAD
+iloc_00014	3	f	t	[locmd] [locxn]
+iloc_00015	3	t	f	ON [locrn] [locrd]
+iloc_00016	3	t	t	ON [locrn] [locrd] [locmd] [locxn]
+\.
+
+CREATE TABLE iris.inc_advice (
+    name VARCHAR(10) PRIMARY KEY,
+    impact INTEGER NOT NULL REFERENCES iris.inc_impact(id),
+    open_lanes INTEGER,
+    impacted_lanes INTEGER,
+    range INTEGER NOT NULL REFERENCES iris.inc_range(id),
+    lane_code VARCHAR(1) NOT NULL REFERENCES iris.lane_code,
+    multi VARCHAR(64) NOT NULL
+);
+
+CREATE FUNCTION iris.inc_advice_ck() RETURNS TRIGGER AS
+    $inc_advice_ck$
+BEGIN
+    -- Only mainline, cd road, merge and exit lane codes are allowed
+    IF NEW.lane_code != '' AND NEW.lane_code != 'C' AND
+       NEW.lane_code != 'M' AND NEW.lane_code != 'X' THEN
+        RAISE EXCEPTION 'invalid incident lane_code';
+    END IF;
+    RETURN NEW;
+END;
+$inc_advice_ck$ LANGUAGE plpgsql;
+
+CREATE TRIGGER inc_advice_ck_trig
+    BEFORE INSERT OR UPDATE ON iris.inc_advice
+    FOR EACH ROW EXECUTE FUNCTION iris.inc_advice_ck();
+
+CREATE TRIGGER inc_advice_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.inc_advice
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+CREATE VIEW inc_advice_view AS
+    SELECT a.name, imp.description AS impact, lc.description AS lane_type,
+           rng.description AS range, open_lanes, impacted_lanes, multi
+    FROM iris.inc_advice a
+    LEFT JOIN iris.inc_impact imp ON a.impact = imp.id
+    LEFT JOIN iris.inc_range rng ON a.range = rng.id
+    LEFT JOIN iris.lane_code lc ON a.lane_code = lc.lcode;
+GRANT SELECT ON inc_advice_view TO PUBLIC;
+
+COPY iris.inc_advice (name, impact, lane_code, range, open_lanes, impacted_lanes, multi) FROM stdin;
+iadv_00001	0		0	0	\N	ROAD CLOSED
+iadv_00002	0		0	\N	\N	LANES CLOSED
+iadv_00003	0		1	0	\N	ROAD CLOSED
+iadv_00004	0		1	\N	\N	LANES CLOSED
+iadv_00005	0		2	\N	1	1 LANE CLOSED
+iadv_00006	0		2	\N	2	2 LANES CLOSED
+iadv_00007	0		2	\N	3	3 LANES CLOSED
+iadv_00008	0		2	0	\N	ROAD CLOSED
+iadv_00009	0		2	1	\N	SINGLE LANE
+iadv_00010	0		2	\N	\N	LANES CLOSED
+iadv_00011	0		3	\N	1	1 LANE CLOSED
+iadv_00012	0		3	\N	2	2 LANES CLOSED
+iadv_00013	0		3	\N	3	3 LANES CLOSED
+iadv_00014	0		3	0	\N	ROAD CLOSED
+iadv_00015	0		3	1	\N	SINGLE LANE
+iadv_00016	0		3	\N	\N	LANES CLOSED
+iadv_00017	1		0	\N	1	LEFT LANE CLOSED
+iadv_00018	1		0	\N	2	LEFT 2 LANES CLOSED
+iadv_00019	1		0	\N	3	LEFT 3 LANES CLOSED
+iadv_00020	1		0	\N	\N	LEFT LANES CLOSED
+iadv_00021	1		1	\N	1	LEFT LANE CLOSED
+iadv_00022	1		1	\N	2	LEFT 2 LANES CLOSED
+iadv_00023	1		1	\N	3	LEFT 3 LANES CLOSED
+iadv_00024	1		1	\N	\N	LEFT LANES CLOSED
+iadv_00025	1		2	\N	1	LANE CLOSED
+iadv_00026	1		2	\N	2	2 LANES CLOSED
+iadv_00027	1		2	\N	3	3 LANES CLOSED
+iadv_00028	1		2	1	\N	SINGLE LANE
+iadv_00029	1		2	\N	\N	LANES CLOSED
+iadv_00030	1		3	\N	1	LANE CLOSED
+iadv_00031	1		3	\N	2	2 LANES CLOSED
+iadv_00032	1		3	\N	3	3 LANES CLOSED
+iadv_00033	1		3	1	\N	SINGLE LANE
+iadv_00034	1		3	\N	\N	LANES CLOSED
+iadv_00035	2		0	\N	1	RIGHT LANE CLOSED
+iadv_00036	2		0	\N	2	RIGHT 2 LANES CLOSED
+iadv_00037	2		0	\N	3	RIGHT 3 LANES CLOSED
+iadv_00038	2		0	\N	\N	RIGHT LANES CLOSED
+iadv_00039	2		1	\N	1	RIGHT LANE CLOSED
+iadv_00040	2		1	\N	2	RIGHT 2 LANES CLOSED
+iadv_00041	2		1	\N	3	RIGHT 3 LANES CLOSED
+iadv_00042	2		1	\N	\N	RIGHT LANES CLOSED
+iadv_00043	2		2	\N	1	LANE CLOSED
+iadv_00044	2		2	\N	2	2 LANES CLOSED
+iadv_00045	2		2	\N	3	3 LANES CLOSED
+iadv_00046	2		2	1	\N	SINGLE LANE
+iadv_00047	2		2	\N	\N	LANES CLOSED
+iadv_00048	2		3	\N	1	LANE CLOSED
+iadv_00049	2		3	\N	2	2 LANES CLOSED
+iadv_00050	2		3	\N	3	3 LANES CLOSED
+iadv_00051	2		3	1	\N	SINGLE LANE
+iadv_00052	2		3	\N	\N	LANES CLOSED
+iadv_00053	3		0	\N	1	CENTER LANE CLOSED
+iadv_00054	3		0	\N	\N	CENTER LANES CLOSED
+iadv_00055	3		1	\N	1	CENTER LANE CLOSED
+iadv_00056	3		1	\N	\N	CENTER LANES CLOSED
+iadv_00057	3		2	\N	1	LANE CLOSED
+iadv_00058	3		2	\N	2	2 LANES CLOSED
+iadv_00059	3		2	\N	3	3 LANES CLOSED
+iadv_00060	3		2	\N	\N	LANES CLOSED
+iadv_00061	3		3	\N	1	LANE CLOSED
+iadv_00062	3		3	\N	2	2 LANES CLOSED
+iadv_00063	3		3	\N	3	3 LANES CLOSED
+iadv_00064	3		3	\N	\N	LANES CLOSED
+iadv_00065	4		0	0	1	IN LANE
+iadv_00066	4		0	0	2	IN BOTH LANES
+iadv_00067	4		0	0	\N	IN ALL LANES
+iadv_00068	4		1	0	1	IN LANE
+iadv_00069	4		1	0	2	IN BOTH LANES
+iadv_00070	4		1	0	\N	IN ALL LANES
+iadv_00071	5		0	\N	1	IN LEFT LANE
+iadv_00072	5		0	\N	2	IN LEFT 2 LANES
+iadv_00073	5		0	\N	3	IN LEFT 3 LANES
+iadv_00074	5		0	\N	4	IN LEFT 4 LANES
+iadv_00075	5		0	\N	\N	IN LEFT LANES
+iadv_00076	5		1	\N	1	IN LEFT LANE
+iadv_00077	5		1	\N	2	IN LEFT 2 LANES
+iadv_00078	5		1	\N	3	IN LEFT 3 LANES
+iadv_00079	5		1	\N	4	IN LEFT 4 LANES
+iadv_00080	5		1	\N	\N	IN LEFT LANES
+iadv_00081	6		0	\N	1	IN RIGHT LANE
+iadv_00082	6		0	\N	2	IN RIGHT 2 LANES
+iadv_00083	6		0	\N	3	IN RIGHT 3 LANES
+iadv_00084	6		0	\N	4	IN RIGHT 4 LANES
+iadv_00085	6		0	\N	\N	IN RIGHT LANES
+iadv_00086	6		1	\N	1	IN RIGHT LANE
+iadv_00087	6		1	\N	2	IN RIGHT 2 LANES
+iadv_00088	6		1	\N	3	IN RIGHT 3 LANES
+iadv_00089	6		1	\N	4	IN RIGHT 4 LANES
+iadv_00090	6		1	\N	\N	IN RIGHT LANES
+iadv_00091	7		0	\N	1	IN CENTER LANE
+iadv_00092	7		0	\N	\N	IN CENTER LANES
+iadv_00093	7		1	\N	1	IN CENTER LANE
+iadv_00094	7		1	\N	\N	IN CENTER LANES
+iadv_00095	8		0	\N	\N	ON BOTH SHOULDERS
+iadv_00096	8		1	\N	\N	ON BOTH SHOULDERS
+iadv_00097	9		0	\N	\N	ON LEFT SHOULDER
+iadv_00098	9		1	\N	\N	ON LEFT SHOULDER
+iadv_00099	10		0	\N	\N	ON RIGHT SHOULDER
+iadv_00100	10		1	\N	\N	ON RIGHT SHOULDER
+iadv_00101	11		0	\N	\N	IN BOTH SHOULDERS
+iadv_00102	11		1	\N	\N	IN BOTH SHOULDERS
+iadv_00103	12		0	\N	\N	IN LEFT SHOULDER
+iadv_00104	12		1	\N	\N	IN LEFT SHOULDER
+iadv_00105	13		0	\N	\N	IN RIGHT SHOULDER
+iadv_00106	13		1	\N	\N	IN RIGHT SHOULDER
+\.
+
+CREATE TABLE iris.road_affix (
+    name VARCHAR(12) PRIMARY KEY,
+    prefix BOOLEAN NOT NULL,
+    fixup VARCHAR(12),
+    allow_retain BOOLEAN NOT NULL
+);
+
+COPY iris.road_affix (name, prefix, fixup, allow_retain) FROM stdin;
+C.S.A.H.	t	CTY	f
+CO RD	t	CTY	f
+I-	t		f
+U.S.	t	HWY	f
+T.H.	t	HWY	f
+AVE	f		t
+BLVD	f		f
+CIR	f		f
+DR	f		t
+HWY	f		f
+LN	f		f
+PKWY	f		f
+PL	f		f
+RD	f		t
+ST	f		t
+TR	f		f
+WAY	f		f
+\.
 
 --
 -- Domains, Roles, Users, and Permissions
@@ -572,457 +1226,6 @@ CREATE VIEW client_event_view AS
     FROM event.client_event ev
     JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id;
 GRANT SELECT ON client_event_view TO PUBLIC;
-
---
--- Direction, Road, Geo Location, R_Node, Map Extent
---
-CREATE TABLE iris.direction (
-    id SMALLINT PRIMARY KEY,
-    direction VARCHAR(4) NOT NULL,
-    dir VARCHAR(4) NOT NULL
-);
-
-COPY iris.direction (id, direction, dir) FROM stdin;
-0		
-1	NB	N
-2	SB	S
-3	EB	E
-4	WB	W
-5	N-S	NS
-6	E-W	EW
-\.
-
-CREATE TABLE iris.road_class (
-    id INTEGER PRIMARY KEY,
-    description VARCHAR(12) NOT NULL,
-    grade CHAR NOT NULL,
-    scale REAL NOT NULL
-);
-
-COPY iris.road_class (id, description, grade, scale) FROM stdin;
-0			1
-1	residential	A	2
-2	business	B	3
-3	collector	C	3
-4	arterial	D	4
-5	expressway	E	4
-6	freeway	F	6
-7	CD road		3.5
-\.
-
-CREATE TABLE iris.road_modifier (
-    id SMALLINT PRIMARY KEY,
-    modifier TEXT NOT NULL,
-    mod VARCHAR(2) NOT NULL
-);
-
-COPY iris.road_modifier (id, modifier, mod) FROM stdin;
-0	@	
-1	N of	N
-2	S of	S
-3	E of	E
-4	W of	W
-5	N Jct	Nj
-6	S Jct	Sj
-7	E Jct	Ej
-8	W Jct	Wj
-\.
-
-CREATE TABLE iris.road (
-    name VARCHAR(20) PRIMARY KEY,
-    abbrev VARCHAR(6) NOT NULL,
-    r_class SMALLINT NOT NULL REFERENCES iris.road_class(id),
-    direction SMALLINT NOT NULL REFERENCES iris.direction(id)
-);
-
-CREATE FUNCTION iris.road_notify() RETURNS TRIGGER AS
-    $road_notify$
-BEGIN
-    IF (TG_OP = 'DELETE') THEN
-        PERFORM pg_notify('road', OLD.name);
-    ELSE
-        PERFORM pg_notify('road', NEW.name);
-    END IF;
-    RETURN NULL; -- AFTER trigger return is ignored
-END;
-$road_notify$ LANGUAGE plpgsql;
-
-CREATE TRIGGER road_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.road
-    FOR EACH STATEMENT EXECUTE FUNCTION iris.road_notify();
-
-CREATE VIEW road_view AS
-    SELECT name, abbrev, rcl.description AS r_class, dir.direction
-    FROM iris.road r
-    LEFT JOIN iris.road_class rcl ON r.r_class = rcl.id
-    LEFT JOIN iris.direction dir ON r.direction = dir.id;
-GRANT SELECT ON road_view TO PUBLIC;
-
-CREATE TABLE iris.road_affix (
-    name VARCHAR(12) PRIMARY KEY,
-    prefix BOOLEAN NOT NULL,
-    fixup VARCHAR(12),
-    allow_retain BOOLEAN NOT NULL
-);
-
-COPY iris.road_affix (name, prefix, fixup, allow_retain) FROM stdin;
-C.S.A.H.	t	CTY	f
-CO RD	t	CTY	f
-I-	t		f
-U.S.	t	HWY	f
-T.H.	t	HWY	f
-AVE	f		t
-BLVD	f		f
-CIR	f		f
-DR	f		t
-HWY	f		f
-LN	f		f
-PKWY	f		f
-PL	f		f
-RD	f		t
-ST	f		t
-TR	f		f
-WAY	f		f
-\.
-
-CREATE TABLE iris.geo_loc (
-    name VARCHAR(20) PRIMARY KEY,
-    resource_n VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
-    roadway VARCHAR(20) REFERENCES iris.road(name),
-    road_dir SMALLINT NOT NULL REFERENCES iris.direction(id),
-    cross_street VARCHAR(20) REFERENCES iris.road(name),
-    cross_dir SMALLINT NOT NULL REFERENCES iris.direction(id),
-    cross_mod SMALLINT NOT NULL REFERENCES iris.road_modifier(id),
-    landmark VARCHAR(24),
-    lat double precision,
-    lon double precision
-);
-
-CREATE FUNCTION iris.geo_loc_notify() RETURNS TRIGGER AS
-    $geo_loc_notify$
-BEGIN
-    IF (NEW.roadway IS DISTINCT FROM OLD.roadway) OR
-       (NEW.road_dir IS DISTINCT FROM OLD.road_dir) OR
-       (NEW.cross_street IS DISTINCT FROM OLD.cross_street) OR
-       (NEW.cross_dir IS DISTINCT FROM OLD.cross_dir) OR
-       (NEW.cross_mod IS DISTINCT FROM OLD.cross_mod) OR
-       (NEW.landmark IS DISTINCT FROM OLD.landmark)
-    THEN
-        PERFORM pg_notify(NEW.resource_n, '');
-    ELSIF (NEW.lat IS DISTINCT FROM OLD.lat) OR
-          (NEW.lon IS DISTINCT FROM OLD.lon)
-    THEN
-        PERFORM pg_notify(NEW.resource_n, NEW.name);
-    END IF;
-    RETURN NULL; -- AFTER trigger return is ignored
-END;
-$geo_loc_notify$ LANGUAGE plpgsql;
-
-CREATE TRIGGER geo_loc_notify_trig
-    AFTER UPDATE ON iris.geo_loc
-    FOR EACH ROW EXECUTE FUNCTION iris.geo_loc_notify();
-
-CREATE FUNCTION iris.geo_location(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT)
-    RETURNS TEXT AS $geo_location$
-DECLARE
-    roadway ALIAS FOR $1;
-    road_dir ALIAS FOR $2;
-    cross_mod ALIAS FOR $3;
-    cross_street ALIAS FOR $4;
-    cross_dir ALIAS FOR $5;
-    landmark ALIAS FOR $6;
-    corridor TEXT;
-    xloc TEXT;
-    lmrk TEXT;
-BEGIN
-    corridor = trim(roadway || concat(' ', road_dir));
-    xloc = trim(concat(cross_mod, ' ') || cross_street
-        || concat(' ', cross_dir));
-    lmrk = replace('(' || landmark || ')', '()', '');
-    RETURN NULLIF(trim(concat(corridor, ' ' || xloc, ' ' || lmrk)), '');
-END;
-$geo_location$ LANGUAGE plpgsql;
-
-CREATE VIEW geo_loc_view AS
-    SELECT l.name, r.abbrev AS rd, l.roadway, r_dir.direction AS road_dir,
-           r_dir.dir AS rdir, m.modifier AS cross_mod, m.mod AS xmod,
-           c.abbrev as xst, l.cross_street, c_dir.direction AS cross_dir,
-           l.landmark, l.lat, l.lon,
-           trim(l.roadway || concat(' ', r_dir.direction)) AS corridor,
-           iris.geo_location(l.roadway, r_dir.direction, m.modifier,
-           l.cross_street, c_dir.direction, l.landmark) AS location
-    FROM iris.geo_loc l
-    LEFT JOIN iris.road r ON l.roadway = r.name
-    LEFT JOIN iris.road_modifier m ON l.cross_mod = m.id
-    LEFT JOIN iris.road c ON l.cross_street = c.name
-    LEFT JOIN iris.direction r_dir ON l.road_dir = r_dir.id
-    LEFT JOIN iris.direction c_dir ON l.cross_dir = c_dir.id;
-GRANT SELECT ON geo_loc_view TO PUBLIC;
-
-CREATE TABLE iris.r_node_type (
-    n_type INTEGER PRIMARY KEY,
-    name VARCHAR(12) NOT NULL
-);
-
-COPY iris.r_node_type (n_type, name) FROM stdin;
-0	station
-1	entrance
-2	exit
-3	intersection
-4	access
-5	interchange
-\.
-
-CREATE TABLE iris.r_node_transition (
-    n_transition INTEGER PRIMARY KEY,
-    name VARCHAR(12) NOT NULL
-);
-
-COPY iris.r_node_transition (n_transition, name) FROM stdin;
-0	none
-1	loop
-2	leg
-3	slipramp
-4	CD
-5	HOV
-6	common
-7	flyover
-\.
-
-CREATE TABLE iris.r_node (
-    name VARCHAR(10) PRIMARY KEY,
-    geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
-    node_type INTEGER NOT NULL REFERENCES iris.r_node_type,
-    pickable BOOLEAN NOT NULL,
-    above BOOLEAN NOT NULL,
-    transition INTEGER NOT NULL REFERENCES iris.r_node_transition,
-    lanes INTEGER NOT NULL,
-    attach_side BOOLEAN NOT NULL,
-    shift INTEGER NOT NULL,
-    active BOOLEAN NOT NULL,
-    station_id VARCHAR(10),
-    speed_limit INTEGER NOT NULL,
-    notes VARCHAR(160)
-);
-
-CREATE UNIQUE INDEX r_node_station_idx ON iris.r_node USING btree (station_id);
-
-CREATE FUNCTION iris.r_node_notify() RETURNS TRIGGER AS
-    $r_node_notify$
-BEGIN
-    IF (TG_OP = 'DELETE') THEN
-        PERFORM pg_notify('r_node', OLD.name);
-    ELSE
-        PERFORM pg_notify('r_node', NEW.name);
-    END IF;
-    RETURN NULL; -- AFTER trigger return is ignored
-END;
-$r_node_notify$ LANGUAGE plpgsql;
-
-CREATE TRIGGER r_node_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.r_node
-    FOR EACH ROW EXECUTE FUNCTION iris.r_node_notify();
-
-CREATE FUNCTION iris.r_node_left(INTEGER, INTEGER, BOOLEAN, INTEGER)
-    RETURNS INTEGER AS $r_node_left$
-DECLARE
-    node_type ALIAS FOR $1;
-    lanes ALIAS FOR $2;
-    attach_side ALIAS FOR $3;
-    shift ALIAS FOR $4;
-BEGIN
-    IF attach_side = TRUE THEN
-        RETURN shift;
-    END IF;
-    IF node_type = 0 THEN
-        RETURN shift - lanes;
-    END IF;
-    RETURN shift;
-END;
-$r_node_left$ LANGUAGE plpgsql;
-
-CREATE FUNCTION iris.r_node_right(INTEGER, INTEGER, BOOLEAN, INTEGER)
-    RETURNS INTEGER AS $r_node_right$
-DECLARE
-    node_type ALIAS FOR $1;
-    lanes ALIAS FOR $2;
-    attach_side ALIAS FOR $3;
-    shift ALIAS FOR $4;
-BEGIN
-    IF attach_side = FALSE THEN
-        RETURN shift;
-    END IF;
-    IF node_type = 0 THEN
-        RETURN shift + lanes;
-    END IF;
-    RETURN shift;
-END;
-$r_node_right$ LANGUAGE plpgsql;
-
-ALTER TABLE iris.r_node ADD CONSTRAINT left_edge_ck
-    CHECK (iris.r_node_left(node_type, lanes, attach_side, shift) >= 1);
-ALTER TABLE iris.r_node ADD CONSTRAINT right_edge_ck
-    CHECK (iris.r_node_right(node_type, lanes, attach_side, shift) <= 9);
-
-CREATE VIEW r_node_view AS
-    SELECT n.name, n.geo_loc,
-           l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-           l.landmark, l.lat, l.lon, l.corridor, l.location,
-           nt.name AS node_type, n.pickable, n.above, tr.name AS transition,
-           n.lanes, n.attach_side, n.shift, n.active,
-           n.station_id, n.speed_limit, n.notes
-    FROM iris.r_node n
-    JOIN geo_loc_view l ON n.geo_loc = l.name
-    JOIN iris.r_node_type nt ON n.node_type = nt.n_type
-    JOIN iris.r_node_transition tr ON n.transition = tr.n_transition;
-GRANT SELECT ON r_node_view TO PUBLIC;
-
-CREATE VIEW roadway_station_view AS
-    SELECT station_id, roadway, road_dir, cross_mod, cross_street, active,
-           speed_limit
-    FROM iris.r_node r, geo_loc_view l
-    WHERE r.geo_loc = l.name AND station_id IS NOT NULL;
-GRANT SELECT ON roadway_station_view TO PUBLIC;
-
-CREATE TABLE iris.map_extent (
-    name VARCHAR(20) PRIMARY KEY,
-    lat real NOT NULL,
-    lon real NOT NULL,
-    zoom INTEGER NOT NULL
-);
-
---
--- Day Matchers, Day Plans, Plan Phases, Action Plans and Time Actions
---
-CREATE TABLE iris.day_matcher (
-    name VARCHAR(32) PRIMARY KEY,
-    holiday BOOLEAN NOT NULL,
-    month INTEGER NOT NULL,
-    day INTEGER NOT NULL,
-    week INTEGER NOT NULL,
-    weekday INTEGER NOT NULL,
-    shift INTEGER NOT NULL
-);
-
-COPY iris.day_matcher (name, holiday, month, day, week, weekday, shift) FROM stdin;
-Any Day	f	-1	0	0	0	0
-Sunday Holiday	t	-1	0	0	1	0
-Saturday Holiday	t	-1	0	0	7	0
-New Years Day	t	0	1	0	0	0
-Memorial Day	t	4	0	-1	2	0
-Independence Day	t	6	4	0	0	0
-Labor Day	t	8	0	1	2	0
-Thanksgiving Day	t	10	0	4	5	0
-Black Friday	t	10	0	4	5	1
-Christmas Eve	t	11	24	0	0	0
-Christmas Day	t	11	25	0	0	0
-New Years Eve	t	11	31	0	0	0
-\.
-
-CREATE TABLE iris.day_plan (
-    name VARCHAR(10) PRIMARY KEY
-);
-
-COPY iris.day_plan (name) FROM stdin;
-EVERY_DAY
-WEEKDAYS
-WORK_DAYS
-\.
-
-CREATE TABLE iris.day_plan_day_matcher (
-    day_plan VARCHAR(10) NOT NULL REFERENCES iris.day_plan,
-    day_matcher VARCHAR(32) NOT NULL REFERENCES iris.day_matcher
-);
-ALTER TABLE iris.day_plan_day_matcher ADD PRIMARY KEY (day_plan, day_matcher);
-
-COPY iris.day_plan_day_matcher (day_plan, day_matcher) FROM stdin;
-EVERY_DAY	Any Day
-WEEKDAYS	Any Day
-WEEKDAYS	Sunday Holiday
-WEEKDAYS	Saturday Holiday
-WORK_DAYS	Any Day
-WORK_DAYS	Sunday Holiday
-WORK_DAYS	Saturday Holiday
-WORK_DAYS	New Years Day
-WORK_DAYS	Memorial Day
-WORK_DAYS	Independence Day
-WORK_DAYS	Labor Day
-WORK_DAYS	Thanksgiving Day
-WORK_DAYS	Black Friday
-WORK_DAYS	Christmas Eve
-WORK_DAYS	Christmas Day
-WORK_DAYS	New Years Eve
-\.
-
-CREATE TABLE iris.plan_phase (
-    name VARCHAR(12) PRIMARY KEY,
-    hold_time INTEGER NOT NULL,
-    next_phase VARCHAR(12) REFERENCES iris.plan_phase
-);
-
-COPY iris.plan_phase (name, hold_time, next_phase) FROM stdin;
-deployed	0	\N
-undeployed	0	\N
-alert_before	0	\N
-alert_during	0	\N
-alert_after	0	\N
-ga_open	0	\N
-ga_closed	0	\N
-\.
-
-CREATE TABLE iris.action_plan (
-    name VARCHAR(16) PRIMARY KEY,
-    notes VARCHAR CHECK (LENGTH(notes) < 256),
-    sync_actions BOOLEAN NOT NULL,
-    sticky BOOLEAN NOT NULL,
-    ignore_auto_fail BOOLEAN NOT NULL,
-    active BOOLEAN NOT NULL,
-    default_phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
-    phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
-);
-
-CREATE TRIGGER action_plan_hashtag_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.action_plan
-    FOR EACH ROW EXECUTE FUNCTION iris.hashtag_trig('action_plan');
-
-CREATE VIEW action_plan_view AS
-    SELECT name, notes, sync_actions, sticky, ignore_auto_fail, active,
-           default_phase, phase
-    FROM iris.action_plan;
-GRANT SELECT ON action_plan_view TO PUBLIC;
-
-CREATE TABLE iris.time_action (
-    name VARCHAR(30) PRIMARY KEY,
-    action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-    day_plan VARCHAR(10) REFERENCES iris.day_plan,
-    sched_date DATE,
-    time_of_day TIME WITHOUT TIME ZONE NOT NULL,
-    phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
-    CONSTRAINT time_action_date CHECK (
-        ((day_plan IS NULL) OR (sched_date IS NULL)) AND
-        ((day_plan IS NOT NULL) OR (sched_date IS NOT NULL))
-    )
-);
-
-CREATE VIEW time_action_view AS
-    SELECT name, action_plan, day_plan, sched_date, time_of_day, phase
-    FROM iris.time_action;
-GRANT SELECT ON time_action_view TO PUBLIC;
-
-CREATE TABLE event.action_plan_event (
-    id SERIAL PRIMARY KEY,
-    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
-    event_desc INTEGER NOT NULL REFERENCES event.event_description,
-    action_plan VARCHAR(16) NOT NULL,
-    phase VARCHAR(12),
-    user_id VARCHAR(15)
-);
-
-CREATE VIEW action_plan_event_view AS
-    SELECT ev.id, event_date, ed.description, action_plan, phase, user_id
-    FROM event.action_plan_event ev
-    JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id;
-GRANT SELECT ON action_plan_event_view TO PUBLIC;
 
 --
 -- Comm Protocols, Comm Links, Modems, Cabinets, Controllers
@@ -1324,6 +1527,489 @@ CREATE VIEW controller_io_view AS
     SELECT name, resource_n, controller, pin
     FROM iris.controller_io;
 GRANT SELECT ON controller_io_view TO PUBLIC;
+
+--
+-- R_Node, Detectors
+--
+CREATE TABLE iris.r_node_type (
+    n_type INTEGER PRIMARY KEY,
+    name VARCHAR(12) NOT NULL
+);
+
+COPY iris.r_node_type (n_type, name) FROM stdin;
+0	station
+1	entrance
+2	exit
+3	intersection
+4	access
+5	interchange
+\.
+
+CREATE TABLE iris.r_node_transition (
+    n_transition INTEGER PRIMARY KEY,
+    name VARCHAR(12) NOT NULL
+);
+
+COPY iris.r_node_transition (n_transition, name) FROM stdin;
+0	none
+1	loop
+2	leg
+3	slipramp
+4	CD
+5	HOV
+6	common
+7	flyover
+\.
+
+CREATE TABLE iris.r_node (
+    name VARCHAR(10) PRIMARY KEY,
+    geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
+    node_type INTEGER NOT NULL REFERENCES iris.r_node_type,
+    pickable BOOLEAN NOT NULL,
+    above BOOLEAN NOT NULL,
+    transition INTEGER NOT NULL REFERENCES iris.r_node_transition,
+    lanes INTEGER NOT NULL,
+    attach_side BOOLEAN NOT NULL,
+    shift INTEGER NOT NULL,
+    active BOOLEAN NOT NULL,
+    station_id VARCHAR(10),
+    speed_limit INTEGER NOT NULL,
+    notes VARCHAR(160)
+);
+
+CREATE UNIQUE INDEX r_node_station_idx ON iris.r_node USING btree (station_id);
+
+CREATE FUNCTION iris.r_node_notify() RETURNS TRIGGER AS
+    $r_node_notify$
+BEGIN
+    IF (TG_OP = 'DELETE') THEN
+        PERFORM pg_notify('r_node', OLD.name);
+    ELSE
+        PERFORM pg_notify('r_node', NEW.name);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$r_node_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER r_node_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.r_node
+    FOR EACH ROW EXECUTE FUNCTION iris.r_node_notify();
+
+CREATE FUNCTION iris.r_node_left(INTEGER, INTEGER, BOOLEAN, INTEGER)
+    RETURNS INTEGER AS $r_node_left$
+DECLARE
+    node_type ALIAS FOR $1;
+    lanes ALIAS FOR $2;
+    attach_side ALIAS FOR $3;
+    shift ALIAS FOR $4;
+BEGIN
+    IF attach_side = TRUE THEN
+        RETURN shift;
+    END IF;
+    IF node_type = 0 THEN
+        RETURN shift - lanes;
+    END IF;
+    RETURN shift;
+END;
+$r_node_left$ LANGUAGE plpgsql;
+
+CREATE FUNCTION iris.r_node_right(INTEGER, INTEGER, BOOLEAN, INTEGER)
+    RETURNS INTEGER AS $r_node_right$
+DECLARE
+    node_type ALIAS FOR $1;
+    lanes ALIAS FOR $2;
+    attach_side ALIAS FOR $3;
+    shift ALIAS FOR $4;
+BEGIN
+    IF attach_side = FALSE THEN
+        RETURN shift;
+    END IF;
+    IF node_type = 0 THEN
+        RETURN shift + lanes;
+    END IF;
+    RETURN shift;
+END;
+$r_node_right$ LANGUAGE plpgsql;
+
+ALTER TABLE iris.r_node ADD CONSTRAINT left_edge_ck
+    CHECK (iris.r_node_left(node_type, lanes, attach_side, shift) >= 1);
+ALTER TABLE iris.r_node ADD CONSTRAINT right_edge_ck
+    CHECK (iris.r_node_right(node_type, lanes, attach_side, shift) <= 9);
+
+CREATE VIEW r_node_view AS
+    SELECT n.name, n.geo_loc,
+           l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+           l.landmark, l.lat, l.lon, l.corridor, l.location,
+           nt.name AS node_type, n.pickable, n.above, tr.name AS transition,
+           n.lanes, n.attach_side, n.shift, n.active,
+           n.station_id, n.speed_limit, n.notes
+    FROM iris.r_node n
+    JOIN geo_loc_view l ON n.geo_loc = l.name
+    JOIN iris.r_node_type nt ON n.node_type = nt.n_type
+    JOIN iris.r_node_transition tr ON n.transition = tr.n_transition;
+GRANT SELECT ON r_node_view TO PUBLIC;
+
+CREATE VIEW roadway_station_view AS
+    SELECT station_id, roadway, road_dir, cross_mod, cross_street, active,
+           speed_limit
+    FROM iris.r_node r, geo_loc_view l
+    WHERE r.geo_loc = l.name AND station_id IS NOT NULL;
+GRANT SELECT ON roadway_station_view TO PUBLIC;
+
+CREATE TABLE iris._detector (
+    name VARCHAR(20) PRIMARY KEY,
+    r_node VARCHAR(10) NOT NULL REFERENCES iris.r_node(name),
+    lane_code VARCHAR(1) NOT NULL REFERENCES iris.lane_code,
+    lane_number SMALLINT NOT NULL,
+    abandoned BOOLEAN NOT NULL,
+    force_fail BOOLEAN NOT NULL,
+    auto_fail BOOLEAN NOT NULL,
+    field_length REAL NOT NULL,
+    fake VARCHAR(32),
+    notes VARCHAR(32)
+);
+
+ALTER TABLE iris._detector ADD CONSTRAINT _detector_fkey
+    FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
+
+CREATE FUNCTION iris.detector_notify() RETURNS TRIGGER AS
+    $detector_notify$
+BEGIN
+    -- lane_code, lane_number and abandoned are secondary, but affect label
+    IF (NEW.notes IS DISTINCT FROM OLD.notes) OR
+       (NEW.lane_code IS DISTINCT FROM OLD.lane_code) OR
+       (NEW.lane_number IS DISTINCT FROM OLD.lane_number) OR
+       (NEW.abandoned IS DISTINCT FROM OLD.abandoned)
+    THEN
+        NOTIFY detector;
+    ELSE
+        PERFORM pg_notify('detector', NEW.name);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$detector_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER detector_notify_trig
+    AFTER UPDATE ON iris._detector
+    FOR EACH ROW EXECUTE FUNCTION iris.detector_notify();
+
+CREATE TRIGGER detector_table_notify_trig
+    AFTER INSERT OR DELETE ON iris._detector
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+CREATE VIEW iris.detector AS
+    SELECT d.name, controller, pin, r_node, lane_code, lane_number,
+           abandoned, force_fail, auto_fail, field_length, fake, notes
+    FROM iris._detector d
+    JOIN iris.controller_io cio ON d.name = cio.name;
+
+CREATE FUNCTION iris.detector_insert() RETURNS TRIGGER AS
+    $detector_insert$
+BEGIN
+    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
+         VALUES (NEW.name, 'detector', NEW.controller, NEW.pin);
+    INSERT INTO iris._detector (
+        name, r_node, lane_code, lane_number, abandoned, force_fail, auto_fail,
+        field_length, fake, notes
+    ) VALUES (
+        NEW.name, NEW.r_node, NEW.lane_code, NEW.lane_number, NEW.abandoned,
+        NEW.force_fail, NEW.auto_fail, NEW.field_length, NEW.fake, NEW.notes
+    );
+    RETURN NEW;
+END;
+$detector_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER detector_insert_trig
+    INSTEAD OF INSERT ON iris.detector
+    FOR EACH ROW EXECUTE FUNCTION iris.detector_insert();
+
+CREATE FUNCTION iris.detector_update() RETURNS TRIGGER AS
+    $detector_update$
+BEGIN
+    UPDATE iris.controller_io
+       SET controller = NEW.controller,
+           pin = NEW.pin
+     WHERE name = OLD.name;
+    UPDATE iris._detector
+       SET r_node = NEW.r_node,
+           lane_code = NEW.lane_code,
+           lane_number = NEW.lane_number,
+           abandoned = NEW.abandoned,
+           force_fail = NEW.force_fail,
+           auto_fail = NEW.auto_fail,
+           field_length = NEW.field_length,
+           fake = NEW.fake,
+           notes = NEW.notes
+     WHERE name = OLD.name;
+    RETURN NEW;
+END;
+$detector_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER detector_update_trig
+    INSTEAD OF UPDATE ON iris.detector
+    FOR EACH ROW EXECUTE FUNCTION iris.detector_update();
+
+CREATE TRIGGER detector_delete_trig
+    INSTEAD OF DELETE ON iris.detector
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
+
+CREATE FUNCTION iris.landmark_abbrev(VARCHAR(24)) RETURNS TEXT
+    AS $landmark_abbrev$
+DECLARE
+    lmrk TEXT;
+    lmrk2 TEXT;
+BEGIN
+    lmrk = initcap($1);
+    -- Replace common words
+    lmrk = replace(lmrk, 'Of ', '');
+    lmrk = replace(lmrk, 'Miles', 'MI');
+    lmrk = replace(lmrk, 'Mile', 'MI');
+    -- Remove whitespace and non-printable characters
+    lmrk = regexp_replace(lmrk, '[^[:graph:]]', '', 'g');
+    IF length(lmrk) > 6 THEN
+        -- Remove lower-case vowels
+        lmrk = regexp_replace(lmrk, '[aeiouy]', '', 'g');
+    END IF;
+    IF length(lmrk) > 6 THEN
+        -- Remove all punctuation
+        lmrk = regexp_replace(lmrk, '[[:punct:]]', '', 'g');
+    END IF;
+    lmrk2 = lmrk;
+    IF length(lmrk) > 6 THEN
+        -- Remove letters
+        lmrk = regexp_replace(lmrk, '[[:alpha:]]', '', 'g');
+    END IF;
+    IF length(lmrk) > 0 THEN
+        RETURN left(lmrk, 6);
+    ELSE
+        RETURN left(lmrk2, 6);
+    END IF;
+END;
+$landmark_abbrev$ LANGUAGE plpgsql;
+
+CREATE FUNCTION iris.root_lbl(rd VARCHAR(6), rdir VARCHAR(4), xst VARCHAR(6),
+    xdir VARCHAR(4), xmod VARCHAR(2), lmark VARCHAR(24)) RETURNS TEXT AS
+$$
+    SELECT rd || '/' || COALESCE(
+        xdir || replace(xmod, '@', '') || xst,
+        iris.landmark_abbrev(lmark)
+    ) || rdir;
+$$ LANGUAGE sql SECURITY DEFINER;
+
+ALTER FUNCTION iris.root_lbl(VARCHAR(6), VARCHAR(4), VARCHAR(6), VARCHAR(4),
+    VARCHAR(2), VARCHAR(24)
+)
+    SET search_path = pg_catalog, pg_temp;
+
+CREATE FUNCTION iris.detector_label(TEXT, CHAR, SMALLINT, BOOLEAN) RETURNS TEXT
+    AS $detector_label$
+DECLARE
+    root ALIAS FOR $1;
+    lcode ALIAS FOR $2;
+    lane_number ALIAS FOR $3;
+    abandoned ALIAS FOR $4;
+    lnum VARCHAR(2);
+    suffix VARCHAR(5);
+BEGIN
+    lnum = '';
+    IF lane_number > 0 THEN
+        lnum = TO_CHAR(lane_number, 'FM9');
+    END IF;
+    suffix = '';
+    IF abandoned THEN
+        suffix = '-ABND';
+    END IF;
+    RETURN COALESCE(
+        root || lcode || lnum || suffix,
+        'FUTURE'
+    );
+END;
+$detector_label$ LANGUAGE plpgsql;
+
+CREATE VIEW detector_label_view AS
+    SELECT d.name AS det_id,
+           iris.detector_label(
+               iris.root_lbl(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod, l.landmark),
+               d.lane_code, d.lane_number, d.abandoned
+           ) AS label, rnd.geo_loc
+    FROM iris._detector d
+    LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
+    LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name;
+GRANT SELECT ON detector_label_view TO PUBLIC;
+
+CREATE TABLE event.detector_event (
+    event_id INTEGER DEFAULT nextval('event.event_id_seq') NOT NULL,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc_id INTEGER NOT NULL
+        REFERENCES event.event_description(event_desc_id),
+    device_id VARCHAR(20) REFERENCES iris._detector(name) ON DELETE CASCADE
+);
+
+CREATE VIEW detector_view AS
+    SELECT d.name, d.r_node, c.comm_link, c.drop_id, cio.controller, cio.pin,
+           dl.label, dl.geo_loc, l.rd || '_' || l.road_dir AS cor_id,
+           l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+           d.lane_number, d.field_length, lc.description AS lane_type,
+           d.lane_code, d.abandoned, d.force_fail, d.auto_fail, c.condition,
+           d.fake, d.notes
+    FROM iris.detector d
+    JOIN iris.controller_io cio ON d.name = cio.name
+    LEFT JOIN detector_label_view dl ON d.name = dl.det_id
+    LEFT JOIN geo_loc_view l ON dl.geo_loc = l.name
+    LEFT JOIN iris.lane_code lc ON d.lane_code = lc.lcode
+    LEFT JOIN controller_view c ON cio.controller = c.name;
+GRANT SELECT ON detector_view TO PUBLIC;
+
+CREATE VIEW detector_event_view AS
+    SELECT e.event_id, e.event_date, ed.description, e.device_id, dl.label
+    FROM event.detector_event e
+    JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
+    JOIN detector_label_view dl ON e.device_id = dl.det_id;
+GRANT SELECT ON detector_event_view TO PUBLIC;
+
+CREATE VIEW detector_auto_fail_view AS
+    WITH af AS (SELECT device_id, event_desc_id, count(*) AS event_count,
+                max(event_date) AS last_fail
+                FROM event.detector_event
+                GROUP BY device_id, event_desc_id)
+    SELECT device_id, label, ed.description, event_count, last_fail
+    FROM af
+    JOIN event.event_description ed ON af.event_desc_id = ed.event_desc_id
+    JOIN detector_label_view dl ON af.device_id = dl.det_id;
+GRANT SELECT ON detector_auto_fail_view TO PUBLIC;
+
+--
+-- Day Matchers, Day Plans, Plan Phases, Action Plans and Time Actions
+--
+CREATE TABLE iris.day_matcher (
+    name VARCHAR(32) PRIMARY KEY,
+    holiday BOOLEAN NOT NULL,
+    month INTEGER NOT NULL,
+    day INTEGER NOT NULL,
+    week INTEGER NOT NULL,
+    weekday INTEGER NOT NULL,
+    shift INTEGER NOT NULL
+);
+
+COPY iris.day_matcher (name, holiday, month, day, week, weekday, shift) FROM stdin;
+Any Day	f	-1	0	0	0	0
+Sunday Holiday	t	-1	0	0	1	0
+Saturday Holiday	t	-1	0	0	7	0
+New Years Day	t	0	1	0	0	0
+Memorial Day	t	4	0	-1	2	0
+Independence Day	t	6	4	0	0	0
+Labor Day	t	8	0	1	2	0
+Thanksgiving Day	t	10	0	4	5	0
+Black Friday	t	10	0	4	5	1
+Christmas Eve	t	11	24	0	0	0
+Christmas Day	t	11	25	0	0	0
+New Years Eve	t	11	31	0	0	0
+\.
+
+CREATE TABLE iris.day_plan (
+    name VARCHAR(10) PRIMARY KEY
+);
+
+COPY iris.day_plan (name) FROM stdin;
+EVERY_DAY
+WEEKDAYS
+WORK_DAYS
+\.
+
+CREATE TABLE iris.day_plan_day_matcher (
+    day_plan VARCHAR(10) NOT NULL REFERENCES iris.day_plan,
+    day_matcher VARCHAR(32) NOT NULL REFERENCES iris.day_matcher
+);
+ALTER TABLE iris.day_plan_day_matcher ADD PRIMARY KEY (day_plan, day_matcher);
+
+COPY iris.day_plan_day_matcher (day_plan, day_matcher) FROM stdin;
+EVERY_DAY	Any Day
+WEEKDAYS	Any Day
+WEEKDAYS	Sunday Holiday
+WEEKDAYS	Saturday Holiday
+WORK_DAYS	Any Day
+WORK_DAYS	Sunday Holiday
+WORK_DAYS	Saturday Holiday
+WORK_DAYS	New Years Day
+WORK_DAYS	Memorial Day
+WORK_DAYS	Independence Day
+WORK_DAYS	Labor Day
+WORK_DAYS	Thanksgiving Day
+WORK_DAYS	Black Friday
+WORK_DAYS	Christmas Eve
+WORK_DAYS	Christmas Day
+WORK_DAYS	New Years Eve
+\.
+
+CREATE TABLE iris.plan_phase (
+    name VARCHAR(12) PRIMARY KEY,
+    hold_time INTEGER NOT NULL,
+    next_phase VARCHAR(12) REFERENCES iris.plan_phase
+);
+
+COPY iris.plan_phase (name, hold_time, next_phase) FROM stdin;
+deployed	0	\N
+undeployed	0	\N
+alert_before	0	\N
+alert_during	0	\N
+alert_after	0	\N
+ga_open	0	\N
+ga_closed	0	\N
+\.
+
+CREATE TABLE iris.action_plan (
+    name VARCHAR(16) PRIMARY KEY,
+    notes VARCHAR CHECK (LENGTH(notes) < 256),
+    sync_actions BOOLEAN NOT NULL,
+    sticky BOOLEAN NOT NULL,
+    ignore_auto_fail BOOLEAN NOT NULL,
+    active BOOLEAN NOT NULL,
+    default_phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
+    phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
+);
+
+CREATE TRIGGER action_plan_hashtag_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.action_plan
+    FOR EACH ROW EXECUTE FUNCTION iris.hashtag_trig('action_plan');
+
+CREATE VIEW action_plan_view AS
+    SELECT name, notes, sync_actions, sticky, ignore_auto_fail, active,
+           default_phase, phase
+    FROM iris.action_plan;
+GRANT SELECT ON action_plan_view TO PUBLIC;
+
+CREATE TABLE iris.time_action (
+    name VARCHAR(30) PRIMARY KEY,
+    action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+    day_plan VARCHAR(10) REFERENCES iris.day_plan,
+    sched_date DATE,
+    time_of_day TIME WITHOUT TIME ZONE NOT NULL,
+    phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
+    CONSTRAINT time_action_date CHECK (
+        ((day_plan IS NULL) OR (sched_date IS NULL)) AND
+        ((day_plan IS NOT NULL) OR (sched_date IS NOT NULL))
+    )
+);
+
+CREATE VIEW time_action_view AS
+    SELECT name, action_plan, day_plan, sched_date, time_of_day, phase
+    FROM iris.time_action;
+GRANT SELECT ON time_action_view TO PUBLIC;
+
+CREATE TABLE event.action_plan_event (
+    id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc INTEGER NOT NULL REFERENCES event.event_description,
+    action_plan VARCHAR(16) NOT NULL,
+    phase VARCHAR(12),
+    user_id VARCHAR(15)
+);
+
+CREATE VIEW action_plan_event_view AS
+    SELECT ev.id, event_date, ed.description, action_plan, phase, user_id
+    FROM event.action_plan_event ev
+    JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id;
+GRANT SELECT ON action_plan_event_view TO PUBLIC;
 
 --
 -- Cameras, Encoders, Presets
@@ -1847,260 +2533,6 @@ CREATE VIEW beacon_event_view AS
     FROM event.beacon_event be
     JOIN iris.beacon_state bs ON be.state = bs.id;
 GRANT SELECT ON beacon_event_view TO PUBLIC;
-
---
--- Lane Codes, Detectors
---
-CREATE TABLE iris.lane_code (
-    lcode VARCHAR(1) PRIMARY KEY,
-    description VARCHAR(12) NOT NULL
-);
-
-COPY iris.lane_code (lcode, description) FROM stdin;
-	Mainline
-A	Auxiliary
-B	Bypass
-C	CD Lane
-D	Shoulder
-G	Green
-H	HOV
-K	Parking
-M	Merge
-O	Omnibus
-P	Passage
-Q	Queue
-R	Reversible
-T	HOT
-V	Velocity
-X	Exit
-Y	Wrong Way
-\.
-
-CREATE VIEW lane_code_view AS
-    SELECT lcode, description FROM iris.lane_code;
-GRANT SELECT ON lane_code_view TO PUBLIC;
-
-CREATE TABLE iris._detector (
-    name VARCHAR(20) PRIMARY KEY,
-    r_node VARCHAR(10) NOT NULL REFERENCES iris.r_node(name),
-    lane_code VARCHAR(1) NOT NULL REFERENCES iris.lane_code,
-    lane_number SMALLINT NOT NULL,
-    abandoned BOOLEAN NOT NULL,
-    force_fail BOOLEAN NOT NULL,
-    auto_fail BOOLEAN NOT NULL,
-    field_length REAL NOT NULL,
-    fake VARCHAR(32),
-    notes VARCHAR(32)
-);
-
-ALTER TABLE iris._detector ADD CONSTRAINT _detector_fkey
-    FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
-
-CREATE FUNCTION iris.detector_notify() RETURNS TRIGGER AS
-    $detector_notify$
-BEGIN
-    -- lane_code, lane_number and abandoned are secondary, but affect label
-    IF (NEW.notes IS DISTINCT FROM OLD.notes) OR
-       (NEW.lane_code IS DISTINCT FROM OLD.lane_code) OR
-       (NEW.lane_number IS DISTINCT FROM OLD.lane_number) OR
-       (NEW.abandoned IS DISTINCT FROM OLD.abandoned)
-    THEN
-        NOTIFY detector;
-    ELSE
-        PERFORM pg_notify('detector', NEW.name);
-    END IF;
-    RETURN NULL; -- AFTER trigger return is ignored
-END;
-$detector_notify$ LANGUAGE plpgsql;
-
-CREATE TRIGGER detector_notify_trig
-    AFTER UPDATE ON iris._detector
-    FOR EACH ROW EXECUTE FUNCTION iris.detector_notify();
-
-CREATE TRIGGER detector_table_notify_trig
-    AFTER INSERT OR DELETE ON iris._detector
-    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
-
-CREATE VIEW iris.detector AS
-    SELECT d.name, controller, pin, r_node, lane_code, lane_number,
-           abandoned, force_fail, auto_fail, field_length, fake, notes
-    FROM iris._detector d
-    JOIN iris.controller_io cio ON d.name = cio.name;
-
-CREATE FUNCTION iris.detector_insert() RETURNS TRIGGER AS
-    $detector_insert$
-BEGIN
-    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
-         VALUES (NEW.name, 'detector', NEW.controller, NEW.pin);
-    INSERT INTO iris._detector (
-        name, r_node, lane_code, lane_number, abandoned, force_fail, auto_fail,
-        field_length, fake, notes
-    ) VALUES (
-        NEW.name, NEW.r_node, NEW.lane_code, NEW.lane_number, NEW.abandoned,
-        NEW.force_fail, NEW.auto_fail, NEW.field_length, NEW.fake, NEW.notes
-    );
-    RETURN NEW;
-END;
-$detector_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER detector_insert_trig
-    INSTEAD OF INSERT ON iris.detector
-    FOR EACH ROW EXECUTE FUNCTION iris.detector_insert();
-
-CREATE FUNCTION iris.detector_update() RETURNS TRIGGER AS
-    $detector_update$
-BEGIN
-    UPDATE iris.controller_io
-       SET controller = NEW.controller,
-           pin = NEW.pin
-     WHERE name = OLD.name;
-    UPDATE iris._detector
-       SET r_node = NEW.r_node,
-           lane_code = NEW.lane_code,
-           lane_number = NEW.lane_number,
-           abandoned = NEW.abandoned,
-           force_fail = NEW.force_fail,
-           auto_fail = NEW.auto_fail,
-           field_length = NEW.field_length,
-           fake = NEW.fake,
-           notes = NEW.notes
-     WHERE name = OLD.name;
-    RETURN NEW;
-END;
-$detector_update$ LANGUAGE plpgsql;
-
-CREATE TRIGGER detector_update_trig
-    INSTEAD OF UPDATE ON iris.detector
-    FOR EACH ROW EXECUTE FUNCTION iris.detector_update();
-
-CREATE TRIGGER detector_delete_trig
-    INSTEAD OF DELETE ON iris.detector
-    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
-
-CREATE FUNCTION iris.landmark_abbrev(VARCHAR(24)) RETURNS TEXT
-    AS $landmark_abbrev$
-DECLARE
-    lmrk TEXT;
-    lmrk2 TEXT;
-BEGIN
-    lmrk = initcap($1);
-    -- Replace common words
-    lmrk = replace(lmrk, 'Of ', '');
-    lmrk = replace(lmrk, 'Miles', 'MI');
-    lmrk = replace(lmrk, 'Mile', 'MI');
-    -- Remove whitespace and non-printable characters
-    lmrk = regexp_replace(lmrk, '[^[:graph:]]', '', 'g');
-    IF length(lmrk) > 6 THEN
-        -- Remove lower-case vowels
-        lmrk = regexp_replace(lmrk, '[aeiouy]', '', 'g');
-    END IF;
-    IF length(lmrk) > 6 THEN
-        -- Remove all punctuation
-        lmrk = regexp_replace(lmrk, '[[:punct:]]', '', 'g');
-    END IF;
-    lmrk2 = lmrk;
-    IF length(lmrk) > 6 THEN
-        -- Remove letters
-        lmrk = regexp_replace(lmrk, '[[:alpha:]]', '', 'g');
-    END IF;
-    IF length(lmrk) > 0 THEN
-        RETURN left(lmrk, 6);
-    ELSE
-        RETURN left(lmrk2, 6);
-    END IF;
-END;
-$landmark_abbrev$ LANGUAGE plpgsql;
-
-CREATE FUNCTION iris.root_lbl(rd VARCHAR(6), rdir VARCHAR(4), xst VARCHAR(6),
-    xdir VARCHAR(4), xmod VARCHAR(2), lmark VARCHAR(24)) RETURNS TEXT AS
-$$
-    SELECT rd || '/' || COALESCE(
-        xdir || replace(xmod, '@', '') || xst,
-        iris.landmark_abbrev(lmark)
-    ) || rdir;
-$$ LANGUAGE sql SECURITY DEFINER;
-
-ALTER FUNCTION iris.root_lbl(VARCHAR(6), VARCHAR(4), VARCHAR(6), VARCHAR(4),
-    VARCHAR(2), VARCHAR(24)
-)
-    SET search_path = pg_catalog, pg_temp;
-
-CREATE FUNCTION iris.detector_label(TEXT, CHAR, SMALLINT, BOOLEAN) RETURNS TEXT
-    AS $detector_label$
-DECLARE
-    root ALIAS FOR $1;
-    lcode ALIAS FOR $2;
-    lane_number ALIAS FOR $3;
-    abandoned ALIAS FOR $4;
-    lnum VARCHAR(2);
-    suffix VARCHAR(5);
-BEGIN
-    lnum = '';
-    IF lane_number > 0 THEN
-        lnum = TO_CHAR(lane_number, 'FM9');
-    END IF;
-    suffix = '';
-    IF abandoned THEN
-        suffix = '-ABND';
-    END IF;
-    RETURN COALESCE(
-        root || lcode || lnum || suffix,
-        'FUTURE'
-    );
-END;
-$detector_label$ LANGUAGE plpgsql;
-
-CREATE VIEW detector_label_view AS
-    SELECT d.name AS det_id,
-           iris.detector_label(
-               iris.root_lbl(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod, l.landmark),
-               d.lane_code, d.lane_number, d.abandoned
-           ) AS label, rnd.geo_loc
-    FROM iris._detector d
-    LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
-    LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name;
-GRANT SELECT ON detector_label_view TO PUBLIC;
-
-CREATE TABLE event.detector_event (
-    event_id INTEGER DEFAULT nextval('event.event_id_seq') NOT NULL,
-    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
-    event_desc_id INTEGER NOT NULL
-        REFERENCES event.event_description(event_desc_id),
-    device_id VARCHAR(20) REFERENCES iris._detector(name) ON DELETE CASCADE
-);
-
-CREATE VIEW detector_view AS
-    SELECT d.name, d.r_node, c.comm_link, c.drop_id, cio.controller, cio.pin,
-           dl.label, dl.geo_loc, l.rd || '_' || l.road_dir AS cor_id,
-           l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-           d.lane_number, d.field_length, lc.description AS lane_type,
-           d.lane_code, d.abandoned, d.force_fail, d.auto_fail, c.condition,
-           d.fake, d.notes
-    FROM iris.detector d
-    JOIN iris.controller_io cio ON d.name = cio.name
-    LEFT JOIN detector_label_view dl ON d.name = dl.det_id
-    LEFT JOIN geo_loc_view l ON dl.geo_loc = l.name
-    LEFT JOIN iris.lane_code lc ON d.lane_code = lc.lcode
-    LEFT JOIN controller_view c ON cio.controller = c.name;
-GRANT SELECT ON detector_view TO PUBLIC;
-
-CREATE VIEW detector_event_view AS
-    SELECT e.event_id, e.event_date, ed.description, e.device_id, dl.label
-    FROM event.detector_event e
-    JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
-    JOIN detector_label_view dl ON e.device_id = dl.det_id;
-GRANT SELECT ON detector_event_view TO PUBLIC;
-
-CREATE VIEW detector_auto_fail_view AS
-    WITH af AS (SELECT device_id, event_desc_id, count(*) AS event_count,
-                max(event_date) AS last_fail
-                FROM event.detector_event
-                GROUP BY device_id, event_desc_id)
-    SELECT device_id, label, ed.description, event_count, last_fail
-    FROM af
-    JOIN event.event_description ed ON af.event_desc_id = ed.event_desc_id
-    JOIN detector_label_view dl ON af.device_id = dl.det_id;
-GRANT SELECT ON detector_auto_fail_view TO PUBLIC;
 
 --
 -- GPS
@@ -3139,438 +3571,6 @@ CREATE VIEW gate_arm_event_view AS
     FROM event.gate_arm_event ev
     JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id;
 GRANT SELECT ON gate_arm_event_view TO PUBLIC;
-
---
--- Incidents
---
-CREATE TABLE event.incident_detail (
-    name VARCHAR(8) PRIMARY KEY,
-    description VARCHAR(32) NOT NULL
-);
-
-INSERT INTO event.incident_detail (name, description)
-VALUES
-    ('animal', 'Animal on Road'),
-    ('debris', 'Debris'),
-    ('detour', 'Detour'),
-    ('emrg_veh', 'Emergency Vehicles'),
-    ('event', 'Event Congestion'),
-    ('flooding', 'Flash Flooding'),
-    ('gr_fire', 'Grass Fire'),
-    ('ice', 'Ice'),
-    ('jacknife', 'Jacknifed Trailer'),
-    ('pavement', 'Pavement Failure'),
-    ('ped', 'Pedestrian'),
-    ('rollover', 'Rollover'),
-    ('sgnl_out', 'Traffic Lights Out'),
-    ('snow_rmv', 'Snow Removal'),
-    ('spill', 'Spilled Load'),
-    ('spin_out', 'Vehicle Spin Out'),
-    ('test', 'Test Incident'),
-    ('veh_fire', 'Vehicle Fire');
-
-CREATE TRIGGER incident_detail_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON event.incident_detail
-    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
-
-CREATE TABLE event.incident (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(16) NOT NULL UNIQUE,
-    replaces VARCHAR(16) REFERENCES event.incident(name),
-    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
-    event_desc INTEGER NOT NULL REFERENCES event.event_description,
-    detail VARCHAR(8) REFERENCES event.incident_detail(name),
-    lane_code VARCHAR(1) NOT NULL REFERENCES iris.lane_code,
-    road VARCHAR(20) NOT NULL,
-    dir SMALLINT NOT NULL REFERENCES iris.direction(id),
-    lat double precision NOT NULL,
-    lon double precision NOT NULL,
-    camera VARCHAR(20),
-    impact VARCHAR(20) NOT NULL,
-    cleared BOOLEAN NOT NULL,
-    confirmed BOOLEAN NOT NULL,
-    user_id VARCHAR(15),
-
-    CONSTRAINT impact_ck CHECK (impact ~ '^[!?\.]*$')
-);
-
-CREATE TRIGGER incident_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON event.incident
-    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
-
-CREATE FUNCTION event.incident_blocked_lanes(TEXT)
-    RETURNS INTEGER AS $incident_blocked_lanes$
-DECLARE
-    impact ALIAS FOR $1;
-    imp TEXT;
-    lanes INTEGER;
-BEGIN
-    lanes = length(impact) - 2;
-    IF lanes > 0 THEN
-        imp = substring(impact FROM 2 FOR lanes);
-        RETURN lanes - length(replace(imp, '!', ''));
-    ELSE
-        RETURN 0;
-    END IF;
-END;
-$incident_blocked_lanes$ LANGUAGE plpgsql;
-
-CREATE FUNCTION event.incident_blocked_shoulders(TEXT)
-    RETURNS INTEGER AS $incident_blocked_shoulders$
-DECLARE
-    impact ALIAS FOR $1;
-    len INTEGER;
-    imp TEXT;
-BEGIN
-    len = length(impact);
-    IF len > 2 THEN
-        imp = substring(impact FROM 1 FOR 1) ||
-              substring(impact FROM len FOR 1);
-        RETURN 2 - length(replace(imp, '!', ''));
-    ELSE
-        RETURN 0;
-    END IF;
-END;
-$incident_blocked_shoulders$ LANGUAGE plpgsql;
-
-CREATE VIEW incident_view AS
-    SELECT i.id, name, event_date, ed.description, road, d.direction,
-           impact, event.incident_blocked_lanes(impact) AS blocked_lanes,
-           event.incident_blocked_shoulders(impact) AS blocked_shoulders,
-           cleared, confirmed, user_id, camera, lc.description AS lane_type,
-           detail, replaces, lat, lon
-    FROM event.incident i
-    LEFT JOIN event.event_description ed ON i.event_desc = ed.event_desc_id
-    LEFT JOIN iris.direction d ON i.dir = d.id
-    LEFT JOIN iris.lane_code lc ON i.lane_code = lc.lcode;
-GRANT SELECT ON incident_view TO PUBLIC;
-
-CREATE TABLE event.incident_update (
-    id SERIAL PRIMARY KEY,
-    incident VARCHAR(16) NOT NULL REFERENCES event.incident(name),
-    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
-    impact VARCHAR(20) NOT NULL,
-    cleared BOOLEAN NOT NULL,
-    confirmed BOOLEAN NOT NULL,
-    user_id VARCHAR(15)
-);
-
-CREATE FUNCTION event.incident_update_trig() RETURNS TRIGGER AS
-$incident_update_trig$
-BEGIN
-    IF (NEW.impact IS DISTINCT FROM OLD.impact) OR
-       (NEW.cleared IS DISTINCT FROM OLD.cleared)
-    THEN
-        INSERT INTO event.incident_update (
-            incident, event_date, impact, cleared, confirmed, user_id
-        ) VALUES (
-            NEW.name, now(), NEW.impact, NEW.cleared, NEW.confirmed, NEW.user_id
-        );
-    END IF;
-    RETURN NEW;
-END;
-$incident_update_trig$ LANGUAGE plpgsql;
-
-CREATE TRIGGER incident_update_trigger
-    AFTER INSERT OR UPDATE ON event.incident
-    FOR EACH ROW EXECUTE FUNCTION event.incident_update_trig();
-
-CREATE VIEW incident_update_view AS
-    SELECT iu.id, name, iu.event_date, ed.description, road,
-           d.direction, iu.impact, iu.cleared, iu.confirmed, iu.user_id,
-           camera, lc.description AS lane_type, detail, replaces, lat, lon
-    FROM event.incident i
-    JOIN event.incident_update iu ON i.name = iu.incident
-    LEFT JOIN event.event_description ed ON i.event_desc = ed.event_desc_id
-    LEFT JOIN iris.direction d ON i.dir = d.id
-    LEFT JOIN iris.lane_code lc ON i.lane_code = lc.lcode;
-GRANT SELECT ON incident_update_view TO PUBLIC;
-
-CREATE TABLE iris.inc_descriptor (
-    name VARCHAR(10) PRIMARY KEY,
-    event_desc_id INTEGER NOT NULL
-        REFERENCES event.event_description(event_desc_id),
-    detail VARCHAR(8) REFERENCES event.incident_detail(name),
-    lane_code VARCHAR(1) NOT NULL REFERENCES iris.lane_code,
-    multi VARCHAR(64) NOT NULL
-);
-
-CREATE FUNCTION iris.inc_descriptor_ck() RETURNS TRIGGER AS
-    $inc_descriptor_ck$
-BEGIN
-    -- Only incident event IDs are allowed
-    IF NEW.event_desc_id < 21 OR NEW.event_desc_id > 24 THEN
-        RAISE EXCEPTION 'invalid incident event_desc_id';
-    END IF;
-    -- Only mainline, cd road, merge and exit lane types are allowed
-    IF NEW.lane_code != '' AND NEW.lane_code != 'C' AND
-       NEW.lane_code != 'M' AND NEW.lane_code != 'X' THEN
-        RAISE EXCEPTION 'invalid incident lane_code';
-    END IF;
-    RETURN NEW;
-END;
-$inc_descriptor_ck$ LANGUAGE plpgsql;
-
-CREATE TRIGGER inc_descriptor_ck_trig
-    BEFORE INSERT OR UPDATE ON iris.inc_descriptor
-    FOR EACH ROW EXECUTE FUNCTION iris.inc_descriptor_ck();
-
-CREATE TRIGGER inc_descriptor_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.inc_descriptor
-    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
-
-CREATE VIEW inc_descriptor_view AS
-    SELECT id.name, ed.description AS event_description, detail,
-           lc.description AS lane_type, multi
-    FROM iris.inc_descriptor id
-    JOIN event.event_description ed ON id.event_desc_id = ed.event_desc_id
-    LEFT JOIN iris.lane_code lc ON id.lane_code = lc.lcode;
-GRANT SELECT ON inc_descriptor_view TO PUBLIC;
-
-COPY iris.inc_descriptor (name, event_desc_id, detail, lane_code, multi) FROM stdin;
-idsc_00001	21	\N		CRASH
-idsc_00002	21	\N	X	CRASH ON EXIT
-idsc_00003	22	\N		STALLED VEHICLE
-idsc_00004	23	\N		INCIDENT
-idsc_00005	23	animal		ANIMAL ON ROAD
-idsc_00006	23	debris		DEBRIS ON ROAD
-idsc_00007	23	emrg_veh		EMERGENCY VEHICLES
-idsc_00008	23	event		EVENT CONGESTION
-idsc_00009	23	event	X	CONGESTION ON RAMP
-idsc_00010	23	flooding		FLASH FLOODING
-idsc_00011	23	gr_fire		GRASS FIRE
-idsc_00012	23	ice		ICE
-idsc_00013	23	pavement		PAVEMENT FAILURE
-idsc_00014	23	ped		PEDESTRIAN ON ROAD
-idsc_00015	23	rollover		CRASH
-idsc_00016	23	snow_rmv		SNOW REMOVAL
-idsc_00017	23	spin_out		CRASH
-idsc_00018	23	spin_out	X	CRASH ON EXIT
-idsc_00019	23	test		TEST
-idsc_00020	23	veh_fire		VEHICLE FIRE
-idsc_00021	24	\N		ROAD WORK
-idsc_00022	24	\N	X	ROAD WORK ON RAMP
-\.
-
-CREATE TABLE iris.inc_impact (
-    id INTEGER PRIMARY KEY,
-    description VARCHAR(24) NOT NULL
-);
-
-COPY iris.inc_impact (id, description) FROM stdin;
-0	lanes blocked
-1	left lanes blocked
-2	right lanes blocked
-3	center lanes blocked
-4	lanes affected
-5	left lanes affected
-6	right lanes affected
-7	center lanes affected
-8	both shoulders blocked
-9	left shoulder blocked
-10	right shoulder blocked
-11	both shoulders affected
-12	left shoulder affected
-13	right shoulder affected
-14	free flowing
-\.
-
-CREATE TABLE iris.inc_range (
-    id INTEGER PRIMARY KEY,
-    description VARCHAR(10) NOT NULL
-);
-
-COPY iris.inc_range (id, description) FROM stdin;
-0	ahead
-1	near
-2	middle
-3	far
-\.
-
-CREATE TABLE iris.inc_locator (
-    name VARCHAR(10) PRIMARY KEY,
-    range INTEGER NOT NULL REFERENCES iris.inc_range(id),
-    branched BOOLEAN NOT NULL,
-    picked BOOLEAN NOT NULL,
-    multi VARCHAR(64) NOT NULL
-);
-
-CREATE TRIGGER inc_locator_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.inc_locator
-    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
-
-CREATE VIEW inc_locator_view AS
-    SELECT il.name, rng.description AS range, branched, picked, multi
-    FROM iris.inc_locator il
-    LEFT JOIN iris.inc_range rng ON il.range = rng.id;
-GRANT SELECT ON inc_locator_view TO PUBLIC;
-
-COPY iris.inc_locator (name, range, branched, picked, multi) FROM stdin;
-iloc_00001	0	f	f	AHEAD
-iloc_00002	0	f	t	AHEAD
-iloc_00003	0	t	f	AHEAD
-iloc_00004	0	t	t	AHEAD
-iloc_00005	1	f	f	[locmi] MILES AHEAD
-iloc_00006	1	f	t	[locmd] [locxn]
-iloc_00007	1	t	f	ON [locrn] [locrd]
-iloc_00008	1	t	t	ON [locrn] [locrd]
-iloc_00009	2	f	f	[locmi] MILES AHEAD
-iloc_00010	2	f	t	[locmd] [locxn]
-iloc_00011	2	t	f	ON [locrn] [locrd]
-iloc_00012	2	t	t	ON [locrn] [locrd] [locmd] [locxn]
-iloc_00013	3	f	f	[locmi] MILES AHEAD
-iloc_00014	3	f	t	[locmd] [locxn]
-iloc_00015	3	t	f	ON [locrn] [locrd]
-iloc_00016	3	t	t	ON [locrn] [locrd] [locmd] [locxn]
-\.
-
-CREATE TABLE iris.inc_advice (
-    name VARCHAR(10) PRIMARY KEY,
-    impact INTEGER NOT NULL REFERENCES iris.inc_impact(id),
-    open_lanes INTEGER,
-    impacted_lanes INTEGER,
-    range INTEGER NOT NULL REFERENCES iris.inc_range(id),
-    lane_code VARCHAR(1) NOT NULL REFERENCES iris.lane_code,
-    multi VARCHAR(64) NOT NULL
-);
-
-CREATE FUNCTION iris.inc_advice_ck() RETURNS TRIGGER AS
-    $inc_advice_ck$
-BEGIN
-    -- Only mainline, cd road, merge and exit lane codes are allowed
-    IF NEW.lane_code != '' AND NEW.lane_code != 'C' AND
-       NEW.lane_code != 'M' AND NEW.lane_code != 'X' THEN
-        RAISE EXCEPTION 'invalid incident lane_code';
-    END IF;
-    RETURN NEW;
-END;
-$inc_advice_ck$ LANGUAGE plpgsql;
-
-CREATE TRIGGER inc_advice_ck_trig
-    BEFORE INSERT OR UPDATE ON iris.inc_advice
-    FOR EACH ROW EXECUTE FUNCTION iris.inc_advice_ck();
-
-CREATE TRIGGER inc_advice_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.inc_advice
-    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
-
-CREATE VIEW inc_advice_view AS
-    SELECT a.name, imp.description AS impact, lc.description AS lane_type,
-           rng.description AS range, open_lanes, impacted_lanes, multi
-    FROM iris.inc_advice a
-    LEFT JOIN iris.inc_impact imp ON a.impact = imp.id
-    LEFT JOIN iris.inc_range rng ON a.range = rng.id
-    LEFT JOIN iris.lane_code lc ON a.lane_code = lc.lcode;
-GRANT SELECT ON inc_advice_view TO PUBLIC;
-
-COPY iris.inc_advice (name, impact, lane_code, range, open_lanes, impacted_lanes, multi) FROM stdin;
-iadv_00001	0		0	0	\N	ROAD CLOSED
-iadv_00002	0		0	\N	\N	LANES CLOSED
-iadv_00003	0		1	0	\N	ROAD CLOSED
-iadv_00004	0		1	\N	\N	LANES CLOSED
-iadv_00005	0		2	\N	1	1 LANE CLOSED
-iadv_00006	0		2	\N	2	2 LANES CLOSED
-iadv_00007	0		2	\N	3	3 LANES CLOSED
-iadv_00008	0		2	0	\N	ROAD CLOSED
-iadv_00009	0		2	1	\N	SINGLE LANE
-iadv_00010	0		2	\N	\N	LANES CLOSED
-iadv_00011	0		3	\N	1	1 LANE CLOSED
-iadv_00012	0		3	\N	2	2 LANES CLOSED
-iadv_00013	0		3	\N	3	3 LANES CLOSED
-iadv_00014	0		3	0	\N	ROAD CLOSED
-iadv_00015	0		3	1	\N	SINGLE LANE
-iadv_00016	0		3	\N	\N	LANES CLOSED
-iadv_00017	1		0	\N	1	LEFT LANE CLOSED
-iadv_00018	1		0	\N	2	LEFT 2 LANES CLOSED
-iadv_00019	1		0	\N	3	LEFT 3 LANES CLOSED
-iadv_00020	1		0	\N	\N	LEFT LANES CLOSED
-iadv_00021	1		1	\N	1	LEFT LANE CLOSED
-iadv_00022	1		1	\N	2	LEFT 2 LANES CLOSED
-iadv_00023	1		1	\N	3	LEFT 3 LANES CLOSED
-iadv_00024	1		1	\N	\N	LEFT LANES CLOSED
-iadv_00025	1		2	\N	1	LANE CLOSED
-iadv_00026	1		2	\N	2	2 LANES CLOSED
-iadv_00027	1		2	\N	3	3 LANES CLOSED
-iadv_00028	1		2	1	\N	SINGLE LANE
-iadv_00029	1		2	\N	\N	LANES CLOSED
-iadv_00030	1		3	\N	1	LANE CLOSED
-iadv_00031	1		3	\N	2	2 LANES CLOSED
-iadv_00032	1		3	\N	3	3 LANES CLOSED
-iadv_00033	1		3	1	\N	SINGLE LANE
-iadv_00034	1		3	\N	\N	LANES CLOSED
-iadv_00035	2		0	\N	1	RIGHT LANE CLOSED
-iadv_00036	2		0	\N	2	RIGHT 2 LANES CLOSED
-iadv_00037	2		0	\N	3	RIGHT 3 LANES CLOSED
-iadv_00038	2		0	\N	\N	RIGHT LANES CLOSED
-iadv_00039	2		1	\N	1	RIGHT LANE CLOSED
-iadv_00040	2		1	\N	2	RIGHT 2 LANES CLOSED
-iadv_00041	2		1	\N	3	RIGHT 3 LANES CLOSED
-iadv_00042	2		1	\N	\N	RIGHT LANES CLOSED
-iadv_00043	2		2	\N	1	LANE CLOSED
-iadv_00044	2		2	\N	2	2 LANES CLOSED
-iadv_00045	2		2	\N	3	3 LANES CLOSED
-iadv_00046	2		2	1	\N	SINGLE LANE
-iadv_00047	2		2	\N	\N	LANES CLOSED
-iadv_00048	2		3	\N	1	LANE CLOSED
-iadv_00049	2		3	\N	2	2 LANES CLOSED
-iadv_00050	2		3	\N	3	3 LANES CLOSED
-iadv_00051	2		3	1	\N	SINGLE LANE
-iadv_00052	2		3	\N	\N	LANES CLOSED
-iadv_00053	3		0	\N	1	CENTER LANE CLOSED
-iadv_00054	3		0	\N	\N	CENTER LANES CLOSED
-iadv_00055	3		1	\N	1	CENTER LANE CLOSED
-iadv_00056	3		1	\N	\N	CENTER LANES CLOSED
-iadv_00057	3		2	\N	1	LANE CLOSED
-iadv_00058	3		2	\N	2	2 LANES CLOSED
-iadv_00059	3		2	\N	3	3 LANES CLOSED
-iadv_00060	3		2	\N	\N	LANES CLOSED
-iadv_00061	3		3	\N	1	LANE CLOSED
-iadv_00062	3		3	\N	2	2 LANES CLOSED
-iadv_00063	3		3	\N	3	3 LANES CLOSED
-iadv_00064	3		3	\N	\N	LANES CLOSED
-iadv_00065	4		0	0	1	IN LANE
-iadv_00066	4		0	0	2	IN BOTH LANES
-iadv_00067	4		0	0	\N	IN ALL LANES
-iadv_00068	4		1	0	1	IN LANE
-iadv_00069	4		1	0	2	IN BOTH LANES
-iadv_00070	4		1	0	\N	IN ALL LANES
-iadv_00071	5		0	\N	1	IN LEFT LANE
-iadv_00072	5		0	\N	2	IN LEFT 2 LANES
-iadv_00073	5		0	\N	3	IN LEFT 3 LANES
-iadv_00074	5		0	\N	4	IN LEFT 4 LANES
-iadv_00075	5		0	\N	\N	IN LEFT LANES
-iadv_00076	5		1	\N	1	IN LEFT LANE
-iadv_00077	5		1	\N	2	IN LEFT 2 LANES
-iadv_00078	5		1	\N	3	IN LEFT 3 LANES
-iadv_00079	5		1	\N	4	IN LEFT 4 LANES
-iadv_00080	5		1	\N	\N	IN LEFT LANES
-iadv_00081	6		0	\N	1	IN RIGHT LANE
-iadv_00082	6		0	\N	2	IN RIGHT 2 LANES
-iadv_00083	6		0	\N	3	IN RIGHT 3 LANES
-iadv_00084	6		0	\N	4	IN RIGHT 4 LANES
-iadv_00085	6		0	\N	\N	IN RIGHT LANES
-iadv_00086	6		1	\N	1	IN RIGHT LANE
-iadv_00087	6		1	\N	2	IN RIGHT 2 LANES
-iadv_00088	6		1	\N	3	IN RIGHT 3 LANES
-iadv_00089	6		1	\N	4	IN RIGHT 4 LANES
-iadv_00090	6		1	\N	\N	IN RIGHT LANES
-iadv_00091	7		0	\N	1	IN CENTER LANE
-iadv_00092	7		0	\N	\N	IN CENTER LANES
-iadv_00093	7		1	\N	1	IN CENTER LANE
-iadv_00094	7		1	\N	\N	IN CENTER LANES
-iadv_00095	8		0	\N	\N	ON BOTH SHOULDERS
-iadv_00096	8		1	\N	\N	ON BOTH SHOULDERS
-iadv_00097	9		0	\N	\N	ON LEFT SHOULDER
-iadv_00098	9		1	\N	\N	ON LEFT SHOULDER
-iadv_00099	10		0	\N	\N	ON RIGHT SHOULDER
-iadv_00100	10		1	\N	\N	ON RIGHT SHOULDER
-iadv_00101	11		0	\N	\N	IN BOTH SHOULDERS
-iadv_00102	11		1	\N	\N	IN BOTH SHOULDERS
-iadv_00103	12		0	\N	\N	IN LEFT SHOULDER
-iadv_00104	12		1	\N	\N	IN LEFT SHOULDER
-iadv_00105	13		0	\N	\N	IN RIGHT SHOULDER
-iadv_00106	13		1	\N	\N	IN RIGHT SHOULDER
-\.
 
 --
 -- Alerts
