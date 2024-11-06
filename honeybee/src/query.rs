@@ -644,6 +644,12 @@ pub const RNODE_ONE: &str = "\
   FROM r_node_view n \
   WHERE n.name = $1";
 
+/// SQL query for RNode transitions (LUT)
+pub const RNODE_TRANSITION_LUT: &str = "\
+  SELECT id, description \
+  FROM iris.r_node_transition \
+  ORDER BY id";
+
 /// SQL query for all roads (primary)
 pub const ROAD_ALL: &str = "\
   SELECT name, abbrev, r_class, direction \

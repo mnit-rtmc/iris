@@ -1546,20 +1546,20 @@ COPY iris.r_node_type (n_type, name) FROM stdin;
 \.
 
 CREATE TABLE iris.r_node_transition (
-    n_transition INTEGER PRIMARY KEY,
-    name VARCHAR(12) NOT NULL
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(12) NOT NULL
 );
 
-COPY iris.r_node_transition (n_transition, name) FROM stdin;
-0	none
-1	loop
-2	leg
-3	slipramp
-4	CD
-5	HOV
-6	common
-7	flyover
-\.
+INSERT INTO iris.r_node_transition (id, description)
+VALUES
+    (0, 'none'),
+    (1, 'loop'),
+    (2, 'leg'),
+    (3, 'slipramp'),
+    (4, 'CD'),
+    (5, 'HOV'),
+    (6, 'common'),
+    (7, 'flyover');
 
 CREATE TABLE iris.r_node (
     name VARCHAR(10) PRIMARY KEY,
@@ -1640,13 +1640,13 @@ CREATE VIEW r_node_view AS
     SELECT n.name, n.geo_loc,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
            l.landmark, l.lat, l.lon, l.corridor, l.location,
-           nt.name AS node_type, n.pickable, n.above, tr.name AS transition,
-           n.lanes, n.attach_side, n.shift, n.active,
-           n.station_id, n.speed_limit, n.notes
+           nt.name AS node_type, n.pickable, n.above,
+           tr.description AS transition, n.lanes, n.attach_side, n.shift,
+           n.active, n.station_id, n.speed_limit, n.notes
     FROM iris.r_node n
     JOIN geo_loc_view l ON n.geo_loc = l.name
     JOIN iris.r_node_type nt ON n.node_type = nt.n_type
-    JOIN iris.r_node_transition tr ON n.transition = tr.n_transition;
+    JOIN iris.r_node_transition tr ON n.transition = tr.id;
 GRANT SELECT ON r_node_view TO PUBLIC;
 
 CREATE VIEW roadway_station_view AS

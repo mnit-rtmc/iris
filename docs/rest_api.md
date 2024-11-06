@@ -95,6 +95,7 @@ These are static resources which may only change on IRIS updates:
 - `inc_range`  Incident range
 - `lane_use_indication`  [LCS] lane use indications
 - `lcs_lock`  [LCS] lock codes
+- `r_node_transition`  R_Node transitions
 - `resource_type`  [Resource types] available in `iris/api/`
 - `road_modifier`  Road modifiers
 

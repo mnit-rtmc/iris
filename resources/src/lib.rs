@@ -68,6 +68,7 @@ pub enum Res {
     RampMeter,
     ResourceType,
     Rnode,
+    RnodeTransition,
     Road,
     RoadModifier,
     Role,
@@ -153,6 +154,7 @@ impl Res {
             RampMeter,
             ResourceType,
             Rnode,
+            RnodeTransition,
             Road,
             RoadModifier,
             Role,
@@ -226,6 +228,7 @@ impl Res {
             RampMeter => "ramp_meter",
             ResourceType => "resource_type",
             Rnode => "r_node",
+            RnodeTransition => "r_node_transition",
             Road => "road",
             RoadModifier => "road_modifier",
             Role => "role",
@@ -296,7 +299,7 @@ impl Res {
             BeaconState | CommProtocol | Condition | Direction | Encoding
             | Font | GateArmInterlock | GateArmState | Graphic | IncImpact
             | IncRange | LaneUseIndication | LcsLock | ResourceType
-            | RoadModifier => true,
+            | RnodeTransition | RoadModifier => true,
             _ => false,
         }
     }
