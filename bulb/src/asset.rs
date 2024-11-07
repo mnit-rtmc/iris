@@ -24,6 +24,7 @@ pub enum Asset {
     CommLinks,
     CommProtocols,
     Conditions,
+    // For all CIO pins for one controller
     ControllerIo(String),
     Controllers,
     Directions,

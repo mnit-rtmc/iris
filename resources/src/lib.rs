@@ -344,6 +344,8 @@ impl Res {
             // Camera resources
             CameraPreset | EncoderStream | EncoderType => Camera,
             // Controller resources
+            // (ControllerIo is a special case
+            // to GET request all pins for one controller).
             Alarm | CommLink | ControllerIo | GeoLoc | Gps | Modem => {
                 Controller
             }
