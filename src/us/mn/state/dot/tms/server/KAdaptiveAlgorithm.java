@@ -21,8 +21,8 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.LaneCode;
+import us.mn.state.dot.tms.MeterQueueState;
 import us.mn.state.dot.tms.R_NodeType;
-import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.HOUR;
 import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
@@ -306,13 +306,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			log("No state for " + meter.getName());
 	}
 
-	/** Get ramp meter queue state enum value */
+	/** Get meter queue state enum value */
 	@Override
-	public RampMeterQueue getQueueState(RampMeterImpl meter) {
+	public MeterQueueState getQueueState(RampMeterImpl meter) {
 		MeterState ms = getMeterState(meter);
 		return (ms != null)
 		      ? ms.getQueueState()
-		      : RampMeterQueue.UNKNOWN;
+		      : MeterQueueState.UNKNOWN;
 	}
 
 	/** Get the meter state for a given ramp meter */
@@ -976,19 +976,19 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			green_accum = 0;
 		}
 
-		/** Get ramp meter queue state enum value */
-		private RampMeterQueue getQueueState() {
+		/** Get meter queue state enum value */
+		private MeterQueueState getQueueState() {
 			if (isMetering()) {
 				if (isQueueFull())
-					return RampMeterQueue.FULL;
+					return MeterQueueState.FULL;
 				else if (!passage_good)
-					return RampMeterQueue.UNKNOWN;
+					return MeterQueueState.UNKNOWN;
 				else if (isQueueEmpty())
-					return RampMeterQueue.EMPTY;
+					return MeterQueueState.EMPTY;
 				else
-					return RampMeterQueue.EXISTS;
+					return MeterQueueState.EXISTS;
 			}
-			return RampMeterQueue.UNKNOWN;
+			return MeterQueueState.UNKNOWN;
 		}
 
 		/** Check if the ramp meter queue is full */

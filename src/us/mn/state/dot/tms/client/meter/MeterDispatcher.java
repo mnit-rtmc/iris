@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,10 +26,10 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.MeterQueueState;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.RampMeterLock;
-import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.CameraPresetAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
@@ -203,8 +203,8 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 			shrink_btn.setEnabled(up);
 			grow_btn.setEnabled(up);
 		}
-		if(a == null || a.equals("queue")) {
-			RampMeterQueue q = RampMeterQueue.fromOrdinal(
+		if (a == null || a.equals("queue")) {
+			MeterQueueState q = MeterQueueState.fromOrdinal(
 				rm.getQueue());
 			queue_lbl.setText(q.description);
 		}

@@ -36,11 +36,11 @@ import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.MeterAlgorithm;
+import us.mn.state.dot.tms.MeterQueueState;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
-import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TimeActionHelper;
@@ -565,11 +565,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			logError("validateAlgorithm: No state");
 	}
 
-	/** Ramp meter queue status */
-	private RampMeterQueue queue = RampMeterQueue.UNKNOWN;
+	/** Meter queue state */
+	private MeterQueueState queue = MeterQueueState.UNKNOWN;
 
-	/** Set the queue status */
-	private void setQueueNotify(RampMeterQueue q) {
+	/** Set the queue state */
+	private void setQueueNotify(MeterQueueState q) {
 		if (q != queue) {
 			queue = q;
 			notifyAttribute("queue");
@@ -583,20 +583,20 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return queue.ordinal();
 	}
 
-	/** Update the ramp meter queue status */
+	/** Update the ramp meter queue state */
 	public void updateQueueState() {
-		setQueueNotify(queueStatus(alg_state));
+		setQueueNotify(queueState(alg_state));
 	}
 
-	/** Determine the queue status */
-	private RampMeterQueue queueStatus(MeterAlgorithmState as) {
+	/** Determine the queue state */
+	private MeterQueueState queueState(MeterAlgorithmState as) {
 		if (as != null && !isFailed()) {
 			if (isMetering())
 				return as.getQueueState(this);
 			else
-				return RampMeterQueue.EMPTY;
+				return MeterQueueState.EMPTY;
 		} else
-			return RampMeterQueue.UNKNOWN;
+			return MeterQueueState.UNKNOWN;
 	}
 
 	/** Planned next release rate */
@@ -696,12 +696,12 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Test if meter has a full queue */
 	private boolean isQueueFull() {
-		return isOnline() && queue == RampMeterQueue.FULL;
+		return isOnline() && queue == MeterQueueState.FULL;
 	}
 
 	/** Test if meter has a queue */
 	private boolean queueExists() {
-		return isOnline() && queue == RampMeterQueue.EXISTS;
+		return isOnline() && queue == MeterQueueState.EXISTS;
 	}
 
 	/** Calculate the item styles */
