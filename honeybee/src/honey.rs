@@ -26,7 +26,7 @@ use axum::body::Body;
 use axum::extract::{ConnectInfo, Json, Path as AxumPath, Query, State};
 use axum::http::{header, StatusCode};
 use axum::response::sse::{Event, KeepAlive};
-use axum::response::Sse;
+use axum::response::{IntoResponse, Sse};
 use axum::routing::get;
 use axum::Router;
 use axum_extra::TypedHeader;
@@ -350,7 +350,7 @@ async fn file_etag(path: &str) -> Result<String> {
 /// Handler for index page
 async fn index_handler(
     TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
-) -> Resp3 {
+) -> impl IntoResponse {
     file_stream_etag("index.html", "text/html; charset=utf-8", if_none_match)
         .await
 }
@@ -370,7 +370,7 @@ fn public_dir_get() -> Router {
     async fn handler(
         TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
         AxumPath(fname): AxumPath<String>,
-    ) -> Resp3 {
+    ) -> impl IntoResponse {
         log::info!("GET {fname}");
         file_stream_etag(&fname, "application/json", if_none_match).await
     }
@@ -379,7 +379,7 @@ fn public_dir_get() -> Router {
 
 /// `GET` JSON file from LUT directory
 fn lut_dir_get() -> Router {
-    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2 {
+    async fn handler(AxumPath(fname): AxumPath<String>) -> impl IntoResponse {
         let fname = format!("lut/{fname}");
         log::info!("GET {fname}");
         file_stream(&fname, "application/json").await
@@ -389,7 +389,7 @@ fn lut_dir_get() -> Router {
 
 /// `GET` file from sign img directory
 fn img_dir_get() -> Router {
-    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2 {
+    async fn handler(AxumPath(fname): AxumPath<String>) -> impl IntoResponse {
         let fname = format!("img/{fname}");
         log::info!("GET {fname}");
         file_stream(&fname, "image/gif").await
@@ -399,7 +399,7 @@ fn img_dir_get() -> Router {
 
 /// `GET` file from tfon directory
 fn tfon_dir_get() -> Router {
-    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2 {
+    async fn handler(AxumPath(fname): AxumPath<String>) -> impl IntoResponse {
         let fname = format!("tfon/{fname}");
         log::info!("GET {fname}");
         file_stream(&fname, "text/plain").await
@@ -409,7 +409,7 @@ fn tfon_dir_get() -> Router {
 
 /// `GET` file from gif directory
 fn gif_dir_get() -> Router {
-    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2 {
+    async fn handler(AxumPath(fname): AxumPath<String>) -> impl IntoResponse {
         let fname = format!("gif/{fname}");
         log::info!("GET {fname}");
         file_stream(&fname, "image/gif").await
@@ -420,7 +420,7 @@ fn gif_dir_get() -> Router {
 /// Router for login resource
 fn login_resource(honey: Honey) -> Router {
     /// Handle `GET` request
-    async fn handle_get(session: Session) -> Resp2 {
+    async fn handle_get(session: Session) -> impl IntoResponse {
         log::info!("GET login");
         let cred = Credentials::load(&session).await?;
         let mut resp = String::new();
@@ -437,7 +437,7 @@ fn login_resource(honey: Honey) -> Router {
         XForwardedFor(xff): XForwardedFor,
         State(honey): State<Honey>,
         Json(cred): Json<Credentials>,
-    ) -> Resp2 {
+    ) -> impl IntoResponse {
         log::info!("POST login from {addr}");
         session
             .cycle_id()
@@ -487,7 +487,10 @@ fn login_resource(honey: Honey) -> Router {
 
 /// `GET` access permissions
 fn access_get(honey: Honey) -> Router {
-    async fn handler(session: Session, State(honey): State<Honey>) -> Resp2 {
+    async fn handler(
+        session: Session,
+        State(honey): State<Honey>,
+    ) -> impl IntoResponse {
         log::info!("GET access");
         let cred = Credentials::load(&session).await?;
         let perms = permission::get_by_user(&honey.db, cred.user()).await?;
@@ -543,7 +546,7 @@ fn notify_resource(honey: Honey) -> Router {
         session: Session,
         State(honey): State<Honey>,
         Json(channels): Json<Vec<String>>,
-    ) -> Resp2 {
+    ) -> impl IntoResponse {
         log::info!("POST notify");
         let names = try_names_from_channels(&channels)?;
         honey.check_view_channels(&session, &names).await?;
@@ -565,7 +568,7 @@ fn permission_resource(honey: Honey) -> Router {
         session: Session,
         State(honey): State<Honey>,
         TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
-    ) -> Resp3 {
+    ) -> impl IntoResponse {
         log::info!("GET api/permission");
         let nm = Name::from(Res::Permission);
         let cred = Credentials::load(&session).await?;
@@ -612,7 +615,7 @@ fn other_resource(honey: Honey) -> Router {
         State(honey): State<Honey>,
         TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
         AxumPath(type_n): AxumPath<String>,
-    ) -> Resp3 {
+    ) -> impl IntoResponse {
         log::info!("GET api/{type_n}");
         let nm = Name::new(&type_n)?;
         let cred = Credentials::load(&session).await?;
@@ -668,7 +671,7 @@ fn permission_object(honey: Honey) -> Router {
         session: Session,
         State(honey): State<Honey>,
         AxumPath(obj_n): AxumPath<String>,
-    ) -> Resp2 {
+    ) -> impl IntoResponse {
         let nm = Name::from(Res::Permission).obj(&obj_n)?;
         log::info!("GET {nm}");
         let cred = Credentials::load(&session).await?;
@@ -755,7 +758,7 @@ fn other_object(honey: Honey) -> Router {
         State(honey): State<Honey>,
         AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
         params: Option<Query<QueryParams>>,
-    ) -> Resp2 {
+    ) -> impl IntoResponse {
         log::info!("GET {type_n}/{obj_n} {params:?}");
         let nm = Name::new(&type_n)?.obj(&obj_n)?;
         let ck_nm = check_name(&type_n, &obj_n, &params)?;
