@@ -366,4 +366,90 @@ CREATE VIEW r_node_view AS
     JOIN iris.r_node_transition tr ON n.transition = tr.id;
 GRANT SELECT ON r_node_view TO PUBLIC;
 
+-- Move meter_event LUTs to iris schema
+DROP VIEW meter_event_view;
+
+CREATE TABLE iris.metering_phase (
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(16) NOT NULL
+);
+
+INSERT INTO iris.metering_phase (id, description)
+VALUES
+    (0, 'not started'),
+    (1, 'metering'),
+    (2, 'flushing'),
+    (3, 'stopped');
+
+CREATE TABLE iris.meter_queue_state (
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(16) NOT NULL
+);
+
+INSERT INTO iris.meter_queue_state (id, description)
+VALUES
+    (0, 'unknown'),
+    (1, 'empty'),
+    (2, 'exists'),
+    (3, 'full');
+
+CREATE TABLE iris.meter_limit_control (
+    id INTEGER PRIMARY KEY,
+    description VARCHAR(16) NOT NULL
+);
+
+INSERT INTO iris.meter_limit_control (id, description)
+VALUES
+    (0, 'passage fail'),
+    (1, 'storage limit'),
+    (2, 'wait limit'),
+    (3, 'target minimum'),
+    (4, 'backup limit');
+
+ALTER TABLE event.meter_event RENAME TO old_meter_event;
+
+CREATE TABLE event.meter_event (
+    id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc INTEGER NOT NULL REFERENCES event.event_description,
+    ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter
+        ON DELETE CASCADE,
+    phase INTEGER NOT NULL REFERENCES iris.metering_phase,
+    q_state INTEGER NOT NULL REFERENCES iris.meter_queue_state,
+    q_len REAL NOT NULL,
+    dem_adj REAL NOT NULL,
+    wait_secs INTEGER NOT NULL,
+    limit_ctrl INTEGER NOT NULL REFERENCES iris.meter_limit_control,
+    min_rate INTEGER NOT NULL,
+    rel_rate INTEGER NOT NULL,
+    max_rate INTEGER NOT NULL,
+    d_node VARCHAR(10),
+    seg_density REAL NOT NULL
+);
+
+INSERT INTO event.meter_event (
+    event_date, event_desc, ramp_meter, phase, q_state, q_len, dem_adj,
+    wait_secs, limit_ctrl, min_rate, rel_rate, max_rate, d_node, seg_density
+)
+SELECT event_date, event_desc_id, ramp_meter, phase, q_state, q_len, dem_adj,
+    wait_secs, limit_ctrl, min_rate, rel_rate, max_rate, d_node, seg_density
+FROM event.old_meter_event;
+
+DROP TABLE event.old_meter_event;
+DROP TABLE event.meter_phase;
+DROP TABLE event.meter_queue_state;
+DROP TABLE event.meter_limit_control;
+
+CREATE VIEW meter_event_view AS
+    SELECT me.id, event_date, ed.description, ramp_meter,
+           mp.description AS phase, qs.description AS q_state, q_len, dem_adj,
+           wait_secs, lc.description AS limit_ctrl, min_rate, rel_rate,
+           max_rate, d_node, seg_density
+    FROM event.meter_event me
+    JOIN event.event_description ed ON me.event_desc = ed.event_desc_id
+    JOIN iris.metering_phase mp ON phase = mp.id
+    JOIN iris.meter_queue_state qs ON q_state = qs.id
+    JOIN iris.meter_limit_control lc ON limit_ctrl = lc.id;
+GRANT SELECT ON meter_event_view TO PUBLIC;
+
 COMMIT;

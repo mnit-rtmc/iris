@@ -1178,14 +1178,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			StationNode dn = s_node.segmentStationNode();
 			double k = s_node.calculateSegmentDensity(dn);
 			segment_k_hist.push(k);
-			phase = checkMeterPhase();
+			phase = checkMeteringPhase();
 			if (isMetering())
 				setRate(calculateRate(k));
 		}
 
 		/** Check metering phase transitions.
 		 * @return New metering phase. */
-		private MeteringPhase checkMeterPhase() {
+		private MeteringPhase checkMeteringPhase() {
 			switch (phase) {
 			case not_started:
 				return checkStart();
