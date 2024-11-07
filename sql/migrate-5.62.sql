@@ -218,10 +218,10 @@ CREATE TABLE event.incident (
 );
 
 INSERT INTO event.incident (
-    replaces, event_date, event_desc, detail, lane_code, road, dir, lat, lon,
-    camera, impact, cleared, confirmed
+    name, replaces, event_date, event_desc, detail, lane_code, road,
+    dir, lat, lon, camera, impact, cleared, confirmed
 )
-SELECT replaces, event_date, event_desc_id, detail, lane_code, road,
+SELECT name, replaces, event_date, event_desc_id, detail, lane_code, road,
        dir, lat, lon, camera, impact, cleared, confirmed
 FROM event.old_incident;
 
