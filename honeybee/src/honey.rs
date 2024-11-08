@@ -863,6 +863,7 @@ const fn one_sql(res: Res) -> &'static str {
         CommLink => query::COMM_LINK_ONE,
         Controller => query::CONTROLLER_ONE,
         ControllerIo => query::CONTROLLER_IO_ONE,
+        DayMatcher => query::DAY_MATCHER_ONE,
         Detector => query::DETECTOR_ONE,
         Dms => query::DMS_ONE,
         Domain => query::DOMAIN_ONE,

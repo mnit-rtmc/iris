@@ -1912,6 +1912,10 @@ Christmas Day	t	11	25	0	0	0
 New Years Eve	t	11	31	0	0	0
 \.
 
+CREATE TRIGGER day_matcher_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.day_matcher
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
 CREATE TABLE iris.day_plan (
     name VARCHAR(10) PRIMARY KEY
 );

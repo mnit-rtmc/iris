@@ -178,6 +178,18 @@ pub const CONTROLLER_IO_ONE: &str = "\
   WHERE controller = $1 \
   ORDER BY pin";
 
+/// SQL query for all day matchers (primary)
+pub const DAY_MATCHER_ALL: &str = "\
+  SELECT name, holiday, month, day, week, weekday, shift \
+  FROM iris.day_matcher \
+  ORDER BY name";
+
+/// SQL query for one day matcher (secondary)
+pub const DAY_MATCHER_ONE: &str = "\
+  SELECT name, holiday, month, day, week, weekday, shift \
+  FROM iris.day_matcher \
+  WHERE name = $1";
+
 /// SQL query for all detectors (primary)
 pub const DETECTOR_ALL: &str = "\
   SELECT name, label, controller, notes \

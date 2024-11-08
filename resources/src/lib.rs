@@ -30,6 +30,7 @@ pub enum Res {
     Condition,
     Controller,
     ControllerIo,
+    DayMatcher,
     Detector,
     Direction,
     Dms,
@@ -121,6 +122,7 @@ impl Res {
             Condition,
             Controller,
             ControllerIo,
+            DayMatcher,
             Detector,
             Direction,
             Dms,
@@ -200,6 +202,7 @@ impl Res {
             Condition => "condition",
             Controller => "controller",
             ControllerIo => "controller_io",
+            DayMatcher => "day_matcher",
             Detector => "detector",
             Direction => "direction",
             Dms => "dms",
@@ -273,6 +276,7 @@ impl Res {
             CommConfig => "📡",
             CommLink => "🔗",
             Controller => "🎛️ ",
+            DayMatcher => "🗓️",
             Detector => "🚗⬚",
             Dms => "⬛",
             Domain => "🖧 ",
@@ -327,15 +331,15 @@ impl Res {
         #[allow(clippy::match_like_matches_macro)]
         match self {
             Alarm | Beacon | CabinetStyle | Camera | CameraPreset
-            | CommConfig | CommLink | Controller | Detector | Dms | Domain
-            | EncoderStream | EncoderType | EventConfig | FlowStream
-            | GateArm | GateArmArray | Gps | Incident | IncidentDetail
-            | IncAdvice | IncDescriptor | IncLocator | LaneMarking
-            | LcsArray | LcsIndication | Modem | MsgLine | MsgPattern
-            | ParkingArea | Permission | RampMeter | Rnode | Road
-            | RoadAffix | Role | SignConfig | SignDetail | SignMessage
-            | SystemAttribute | TagReader | User | VideoMonitor
-            | WeatherSensor | Word => true,
+            | CommConfig | CommLink | Controller | DayMatcher | Detector
+            | Dms | Domain | EncoderStream | EncoderType | EventConfig
+            | FlowStream | GateArm | GateArmArray | Gps | Incident
+            | IncidentDetail | IncAdvice | IncDescriptor | IncLocator
+            | LaneMarking | LcsArray | LcsIndication | Modem | MsgLine
+            | MsgPattern | ParkingArea | Permission | RampMeter | Rnode
+            | Road | RoadAffix | Role | SignConfig | SignDetail
+            | SignMessage | SystemAttribute | TagReader | User
+            | VideoMonitor | WeatherSensor | Word => true,
             _ => false,
         }
     }
@@ -344,6 +348,8 @@ impl Res {
     pub const fn base(self) -> Self {
         use Res::*;
         match self {
+            // Action plan resources
+            DayMatcher => ActionPlan,
             // Camera resources
             CameraPreset | EncoderStream | EncoderType => Camera,
             // Controller resources
