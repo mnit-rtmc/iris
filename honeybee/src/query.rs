@@ -522,6 +522,12 @@ pub const LCS_LOCK_LUT: &str = "\
   FROM iris.lcs_lock \
   ORDER BY id";
 
+/// SQL query for ramp meter queue states (LUT)
+pub const METER_QUEUE_STATE_LUT: &str = "\
+  SELECT id, description \
+  FROM iris.meter_queue_state \
+  ORDER BY id";
+
 /// SQL query for all modems (primary)
 pub const MODEM_ALL: &str = "\
   SELECT name, enabled \
