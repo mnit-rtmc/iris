@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  * Copyright (C) 2012-2021  Iteris Inc.
  * Copyright (C) 2015-2023  SRF Consulting Group
  *
@@ -153,13 +153,13 @@ public enum CommProtocol {
 
 	/** GPS using RedLion AT+BMDIAG command (39) */
 	GPS_REDLION("GPS RedLion"),
-	
+
 	/** Cohu Helois PTZ (40) */
 	COHU_HELIOS_PTZ("Cohu Helios PTZ"),
 
 	/** Streambed (41) */
 	STREAMBED("Streambed", false),
-	
+
 	/** CAP feed (such as IPAWS-OPEN) (42) */
 	CAP("CAP Feed", false),
 
@@ -171,10 +171,10 @@ public enum CommProtocol {
 
 	/** ONVIF PTZ (45) */
 	ONVIF_PTZ("ONVIF PTZ"),
-	
+
 	/** Sierra SSH GPS (46) */
 	SIERRA_SSH_GPS("Sierra SSH GPS");
-	
+
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {
 		this(d, true);

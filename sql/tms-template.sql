@@ -1286,6 +1286,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 43	ClearGuide
 44	GPS Digi WR
 45	ONVIF PTZ
+46	Sierra SSH GPS
 \.
 
 CREATE TABLE iris.comm_config (

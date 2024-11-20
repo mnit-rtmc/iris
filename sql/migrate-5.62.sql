@@ -528,4 +528,8 @@ CREATE VIEW day_plan_view AS
     JOIN iris.day_matcher m ON m.day_plan = p.name;
 GRANT SELECT ON day_plan_view TO PUBLIC;
 
+-- Reserve protocol value for Sierra SSH GPS modem
+INSERT INTO iris.comm_protocol (id, description)
+    VALUES (46, 'Sierra SSH GPS');
+
 COMMIT;
