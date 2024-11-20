@@ -117,6 +117,7 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %{_serverdir}/json-@@JSON.VERSION@@.jar
 %{_serverdir}/postgis-jdbc-@@POSTGIS.VERSION@@.jar
 %{_serverdir}/postgis-geometry-@@POSTGIS.VERSION@@.jar
+%{_serverdir}/jsch-@@JSCH.VERSION@@.jar
 
 # /var/cache/nginx/earthwyrm-iris
 %dir %attr(0755,nginx,nginx) /var/cache/nginx

@@ -57,6 +57,8 @@ abstract public class Messenger implements Closeable {
 			return HttpFileMessenger.create(u, rt);
 		else if ("modem".equals(scheme))
 			return ModemMessenger.create(u, rt, nrd);
+		else if ("ssh".equals(scheme))
+			return SshMessenger.create(u, rt, rt, nrd);
 		else
 			throw INVALID_URI_SCHEME;
 	}
