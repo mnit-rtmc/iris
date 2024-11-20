@@ -55,7 +55,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 
 	/** Load all the incidents */
 	static protected void loadAll() throws TMSException {
-		store.query("SELECT name, replaces, event_desc_id, " +
+		store.query("SELECT name, replaces, event_desc, " +
 			"event_date, detail, lane_code, road, dir, lat, " +
 			"lon, camera, impact, cleared, confirmed, user_id " +
 			"FROM event." + SONAR_TYPE + " WHERE cleared = 'f';",
@@ -65,7 +65,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 				namespace.addObject(new IncidentImpl(
 					row.getString(1),    // name
 					row.getString(2),    // replaces
-					row.getInt(3),       // event_desc_id
+					row.getInt(3),       // event_desc
 					row.getTimestamp(4), // event_date
 					row.getString(5),    // detail
 					row.getString(6),    // lane_code
@@ -89,7 +89,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("replaces", replaces);
-		map.put("event_desc_id", event_desc_id);
+		map.put("event_desc", event_desc);
 		map.put("event_date", event_date);
 		map.put("detail", detail);
 		map.put("lane_code", lane_code);
@@ -134,7 +134,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	{
 		super(n);
 		replaces = rpl;
-		event_desc_id = et;
+		event_desc = et;
 		event_date = new Date(ed.getTime());
 		detail = dtl;
 		lane_code = lc;
@@ -168,12 +168,12 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	}
 
 	/** Event type (id of EventType enum) */
-	private int event_desc_id;
+	private int event_desc;
 
 	/** Get the event type */
 	@Override
 	public int getEventType() {
-		return event_desc_id;
+		return event_desc;
 	}
 
 	/** Event date (timestamp) */
@@ -358,7 +358,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		if (replaces != null)
 			w.write(createAttribute("replaces", replaces));
 		w.write(createAttribute("event_type",
-			EventType.fromId(event_desc_id)));
+			EventType.fromId(event_desc)));
 		w.write(createAttribute("event_date", event_date));
 		if (dtl != null)
 			w.write(createAttribute("detail", dtl));

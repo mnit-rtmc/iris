@@ -101,7 +101,7 @@ public class MeterEvent extends BaseEvent {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("event_date", new Timestamp(event_date.getTime()));
-		map.put("event_desc_id", event_type.id);
+		map.put("event_desc", event_type.id);
 		map.put("ramp_meter", ramp_meter);
 		map.put("phase", phase);
 		map.put("q_state", q_state);
