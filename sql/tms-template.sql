@@ -70,7 +70,7 @@ camera_wiper_precip_mm_hr	8
 cap_xml_save_enable	true
 clearguide_key	
 client_units_si	true
-database_version	5.61.0
+database_version	5.62.0
 detector_auto_fail_enable	true
 detector_data_archive_enable	true
 detector_occ_spike_secs	60

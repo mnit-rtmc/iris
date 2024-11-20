@@ -1,5 +1,23 @@
 # IRIS 5.x Release Notes
 
+5.62.0 (20 Nov 2024)
+ - Log sign event with blank msg (including user ID)
+ - Log meter lock events (add `meter_lock_event_view`)
+ - Add `phase` / `user_id` to action plan event
+ - Add `user_id` to beacon event
+ - Add `user_id` to incident / `incident_update`
+ - Made event column names consistent: `iris_user` => `user_id`
+ - Reworked day plan/matcher relationship
+ - honeybee: Add LUT resources: `encoding`, `inc_impact`, `inc_range`,
+   `r_node_type`, `r_node_transition`, `lane_code`, `road_class`,
+   `meter_queue_state`
+ - honeybee: Add resources: `encoder_type`, `encoder_stream`, `camera_preset`,
+   `incident_detail`, `inc_descriptor`, `inc_locator`, `road_affix`,
+   `day_plan`, `day_matcher`
+ - Add Sierra Wireless SSH GPS driver
+ - Fixed Sonar `phantom` bug on SQL error
+ - Fixed client Sonar updates for GPS/ESS
+
 5.61.0 (17 Oct 2024)
  - Remove capabilities/privileges (replace with permissions)
    NOTE: migrate-5.61.sql handles the transition, but non-standard
