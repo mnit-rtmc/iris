@@ -864,6 +864,7 @@ const fn one_sql(res: Res) -> &'static str {
         Controller => query::CONTROLLER_ONE,
         ControllerIo => query::CONTROLLER_IO_ONE,
         DayMatcher => query::DAY_MATCHER_ONE,
+        DayPlan => query::DAY_PLAN_ONE,
         Detector => query::DETECTOR_ONE,
         Dms => query::DMS_ONE,
         Domain => query::DOMAIN_ONE,

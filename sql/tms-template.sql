@@ -1885,87 +1885,23 @@ CREATE VIEW detector_auto_fail_view AS
 GRANT SELECT ON detector_auto_fail_view TO PUBLIC;
 
 --
--- Day Matchers, Day Plans, Plan Phases, Action Plans and Time Actions
+-- Action Plans, Plan Phases, Day Plans, Day Matchers, and Time Actions
 --
-CREATE TABLE iris.day_matcher (
-    name VARCHAR(32) PRIMARY KEY,
-    holiday BOOLEAN NOT NULL,
-    month INTEGER NOT NULL,
-    day INTEGER NOT NULL,
-    week INTEGER NOT NULL,
-    weekday INTEGER NOT NULL,
-    shift INTEGER NOT NULL
-);
-
-COPY iris.day_matcher (name, holiday, month, day, week, weekday, shift) FROM stdin;
-Any Day	f	-1	0	0	0	0
-Sunday Holiday	t	-1	0	0	1	0
-Saturday Holiday	t	-1	0	0	7	0
-New Years Day	t	0	1	0	0	0
-Memorial Day	t	4	0	-1	2	0
-Independence Day	t	6	4	0	0	0
-Labor Day	t	8	0	1	2	0
-Thanksgiving Day	t	10	0	4	5	0
-Black Friday	t	10	0	4	5	1
-Christmas Eve	t	11	24	0	0	0
-Christmas Day	t	11	25	0	0	0
-New Years Eve	t	11	31	0	0	0
-\.
-
-CREATE TRIGGER day_matcher_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.day_matcher
-    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
-
-CREATE TABLE iris.day_plan (
-    name VARCHAR(10) PRIMARY KEY
-);
-
-COPY iris.day_plan (name) FROM stdin;
-EVERY_DAY
-WEEKDAYS
-WORK_DAYS
-\.
-
-CREATE TABLE iris.day_plan_day_matcher (
-    day_plan VARCHAR(10) NOT NULL REFERENCES iris.day_plan,
-    day_matcher VARCHAR(32) NOT NULL REFERENCES iris.day_matcher
-);
-ALTER TABLE iris.day_plan_day_matcher ADD PRIMARY KEY (day_plan, day_matcher);
-
-COPY iris.day_plan_day_matcher (day_plan, day_matcher) FROM stdin;
-EVERY_DAY	Any Day
-WEEKDAYS	Any Day
-WEEKDAYS	Sunday Holiday
-WEEKDAYS	Saturday Holiday
-WORK_DAYS	Any Day
-WORK_DAYS	Sunday Holiday
-WORK_DAYS	Saturday Holiday
-WORK_DAYS	New Years Day
-WORK_DAYS	Memorial Day
-WORK_DAYS	Independence Day
-WORK_DAYS	Labor Day
-WORK_DAYS	Thanksgiving Day
-WORK_DAYS	Black Friday
-WORK_DAYS	Christmas Eve
-WORK_DAYS	Christmas Day
-WORK_DAYS	New Years Eve
-\.
-
 CREATE TABLE iris.plan_phase (
     name VARCHAR(12) PRIMARY KEY,
     hold_time INTEGER NOT NULL,
     next_phase VARCHAR(12) REFERENCES iris.plan_phase
 );
 
-COPY iris.plan_phase (name, hold_time, next_phase) FROM stdin;
-deployed	0	\N
-undeployed	0	\N
-alert_before	0	\N
-alert_during	0	\N
-alert_after	0	\N
-ga_open	0	\N
-ga_closed	0	\N
-\.
+INSERT INTO iris.plan_phase (name, hold_time)
+VALUES
+    ('deployed', 0),
+    ('undeployed', 0),
+    ('alert_before', 0),
+    ('alert_during', 0),
+    ('alert_after', 0),
+    ('ga_open', 0),
+    ('ga_closed', 0);
 
 CREATE TABLE iris.action_plan (
     name VARCHAR(16) PRIMARY KEY,
@@ -1988,6 +1924,83 @@ CREATE VIEW action_plan_view AS
     FROM iris.action_plan;
 GRANT SELECT ON action_plan_view TO PUBLIC;
 
+CREATE TABLE iris.day_plan (
+    name VARCHAR(10) PRIMARY KEY,
+    holidays BOOLEAN NOT NULL
+);
+
+INSERT INTO iris.day_plan (name, holidays)
+VALUES
+    ('ALL_DAYS', true),
+    ('WEEKDAYS', true),
+    ('METER_AM', true),
+    ('METER_PM', true);
+
+CREATE FUNCTION iris.day_plan_notify() RETURNS TRIGGER AS
+    $day_plan_notify$
+BEGIN
+    NOTIFY day_plan;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$day_plan_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER day_plan_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.day_plan
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.day_plan_notify();
+
+CREATE TABLE iris.day_matcher (
+    name VARCHAR(10) PRIMARY KEY,
+    day_plan VARCHAR(10) NOT NULL REFERENCES iris.day_plan,
+    month INTEGER CHECK (month >= 1 AND month <= 12),
+    day INTEGER CHECK (day >= 1 AND day <= 31),
+    weekday INTEGER CHECK (weekday >= 1 AND weekday <= 7),
+    week INTEGER CHECK (week >= 1 AND week <= 4 OR week = -1),
+    shift INTEGER CHECK (shift >= -2 AND shift <= 2 AND shift != 0),
+
+    CONSTRAINT day_matcher_valid CHECK (
+        (COALESCE(month, day, weekday, week) IS NOT NULL) AND
+        (day IS NULL OR week IS NULL) AND
+        (shift IS NULL OR (weekday IS NOT NULL AND week IS NOT NULL))
+    )
+);
+
+INSERT INTO iris.day_matcher (name, day_plan, month, day, weekday, week, shift)
+VALUES
+    ('dm_1', 'METER_AM', 1, 1, NULL, NULL, NULL), -- New Years Day
+    ('dm_2', 'METER_PM', 1, 1, NULL, NULL, NULL),
+    ('dm_3', 'METER_AM', 5, NULL, 2, -1, NULL), -- Memorial Day
+    ('dm_4', 'METER_PM', 5, NULL, 2, -1, NULL),
+    ('dm_5', 'METER_AM', 7, 4, NULL, NULL, NULL), -- Independence Day
+    ('dm_6', 'METER_PM', 7, 4, NULL, NULL, NULL),
+    ('dm_7', 'METER_AM', 9, NULL, 2, 1, NULL), -- Labor Day
+    ('dm_8', 'METER_PM', 9, NULL, 2, 1, NULL),
+    ('dm_9', 'METER_AM', 11, NULL, 5, 4, NULL), -- Thanksgiving Day
+    ('dm_10', 'METER_PM', 11, NULL, 5, 4, NULL),
+    ('dm_11', 'METER_AM', 11, NULL, 5, 4, 1), -- Black Friday
+    ('dm_12', 'METER_PM', 11, NULL, 5, 4, 1),
+    ('dm_13', 'METER_AM', 12, 24, NULL, NULL, NULL), -- Christmas Eve
+    ('dm_14', 'METER_PM', 12, 24, NULL, NULL, NULL),
+    ('dm_15', 'METER_AM', 12, 25, NULL, NULL, NULL), -- Christmas Day
+    ('dm_16', 'METER_PM', 12, 25, NULL, NULL, NULL),
+    ('dm_17', 'METER_AM', 12, 31, NULL, NULL, NULL), -- New Years Eve
+    ('dm_18', 'METER_PM', 12, 31, NULL, NULL, NULL),
+    ('dm_19', 'WEEKDAYS', NULL, NULL, 1, NULL, NULL), -- Sundays
+    ('dm_20', 'METER_AM', NULL, NULL, 1, NULL, NULL),
+    ('dm_21', 'METER_PM', NULL, NULL, 1, NULL, NULL),
+    ('dm_22', 'WEEKDAYS', NULL, NULL, 7, NULL, NULL), -- Saturdays
+    ('dm_23', 'METER_AM', NULL, NULL, 7, NULL, NULL),
+    ('dm_24', 'METER_PM', NULL, NULL, 7, NULL, NULL);
+
+CREATE TRIGGER day_matcher_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.day_matcher
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.day_plan_notify();
+
+CREATE VIEW day_plan_view AS
+    SELECT p.name, holidays, month, day, weekday, week, shift
+    FROM iris.day_plan p
+    JOIN iris.day_matcher m ON m.day_plan = p.name;
+GRANT SELECT ON day_plan_view TO PUBLIC;
+
 CREATE TABLE iris.time_action (
     name VARCHAR(30) PRIMARY KEY,
     action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
@@ -1995,6 +2008,7 @@ CREATE TABLE iris.time_action (
     sched_date DATE,
     time_of_day TIME WITHOUT TIME ZONE NOT NULL,
     phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
+
     CONSTRAINT time_action_date CHECK (
         ((day_plan IS NULL) OR (sched_date IS NULL)) AND
         ((day_plan IS NOT NULL) OR (sched_date IS NOT NULL))

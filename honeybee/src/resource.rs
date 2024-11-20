@@ -41,6 +41,7 @@ pub enum Resource {
     Condition,
     Controller,
     DayMatcher,
+    DayPlan,
     Detector,
     DetectorPub,
     Direction,
@@ -123,6 +124,7 @@ impl Resource {
             Condition,
             Controller,
             DayMatcher,
+            DayPlan,
             Detector,
             DetectorPub,
             Direction,
@@ -206,6 +208,7 @@ impl Resource {
             Condition => Res::Condition,
             Controller => Res::Controller,
             DayMatcher => Res::DayMatcher,
+            DayPlan => Res::DayPlan,
             Detector | DetectorPub => Res::Detector,
             Direction => Res::Direction,
             Dms | DmsPub | DmsStat => Res::Dms,
@@ -282,6 +285,7 @@ impl Resource {
             Condition => "lut/condition",
             Controller => "api/controller",
             DayMatcher => "api/day_matcher",
+            DayPlan => "api/day_plan",
             Detector => "api/detector",
             DetectorPub => "detector_pub",
             Direction => "lut/direction",
@@ -374,6 +378,7 @@ impl Resource {
             Condition => query::CONDITION_LUT,
             Controller => query::CONTROLLER_ALL,
             DayMatcher => query::DAY_MATCHER_ALL,
+            DayPlan => query::DAY_PLAN_ALL,
             Detector => query::DETECTOR_ALL,
             DetectorPub => query::DETECTOR_PUB,
             Direction => query::DIRECTION_LUT,
@@ -511,6 +516,11 @@ impl Resource {
             SignMessage => self.query_sign_msgs(client).await,
             Beacon | Dms | WeatherSensor | Camera => {
                 self.query_all_locs(client, segments).await
+            }
+            DayPlan => {
+                // there is no separate channel for DayMatcher
+                self.query_file(client, self.path()).await?;
+                DayMatcher.query_file(client, DayMatcher.path()).await
             }
             _ => self.query_file(client, self.path()).await,
         }

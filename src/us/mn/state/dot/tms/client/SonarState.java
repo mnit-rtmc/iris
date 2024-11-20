@@ -615,8 +615,8 @@ public class SonarState extends Client {
 		populate(geo_locs);
 		populateReadable(rpt_conduits);
 		populateReadable(words);
-		populateReadable(day_matchers);
 		populateReadable(day_plans);
+		populateReadable(day_matchers);
 		populateReadable(plan_phases);
 		// Populate a second time to resolve nextPhase self-references
 		populateReadable(plan_phases);

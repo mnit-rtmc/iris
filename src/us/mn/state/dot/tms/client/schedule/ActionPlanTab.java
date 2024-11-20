@@ -36,9 +36,7 @@ public class ActionPlanTab extends JPanel {
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
 		return s.canRead(ActionPlan.SONAR_TYPE) &&
-		       s.canRead(DeviceAction.SONAR_TYPE) &&
-		       s.canRead(PlanPhase.SONAR_TYPE) &&
-		       s.canRead(TimeAction.SONAR_TYPE);
+		       s.canRead(DeviceAction.SONAR_TYPE);
 	}
 
 	/** User session */

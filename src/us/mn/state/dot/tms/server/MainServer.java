@@ -214,8 +214,8 @@ public class MainServer {
 		ns.registerType(ControllerImpl.class);
 		ns.registerType(SignConfigImpl.class);
 		ns.registerType(SignDetailImpl.class);
-		ns.registerType(DayMatcherImpl.class);
 		ns.registerType(DayPlanImpl.class);
+		ns.registerType(DayMatcherImpl.class);
 		ns.registerType(PlanPhaseImpl.class);
 		ns.registerType(ActionPlanImpl.class);
 		ns.registerType(R_NodeImpl.class);

@@ -15,11 +15,10 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DayMatcher;
+import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -28,24 +27,23 @@ import us.mn.state.dot.tms.TMSException;
  *
  * @author Douglas Lau
  */
-public class DayMatcherImpl extends BaseObjectImpl implements DayMatcher,
-	Comparable<DayMatcherImpl>
-{
+public class DayMatcherImpl extends BaseObjectImpl implements DayMatcher {
+
 	/** Load all the day matchers */
 	static protected void loadAll() throws TMSException {
-		store.query("SELECT name, holiday, month, day, week, " +
-			"weekday, shift FROM iris." + SONAR_TYPE  + ";",
+		store.query("SELECT name, day_plan, month, day, weekday, " +
+			"week, shift FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DayMatcherImpl(
-					row.getString(1),	// name
-					row.getBoolean(2),	// holiday
-					row.getInt(3),		// month
-					row.getInt(4),		// day
-					row.getInt(5),		// week
-					row.getInt(6),		// weekday
-					row.getInt(7)		// shift
+					row.getString(1),           // name
+					row.getString(2),           // day_plan
+					(Integer) row.getObject(3), // month
+					(Integer) row.getObject(4), // day
+					(Integer) row.getObject(5), // weekday
+					(Integer) row.getObject(6), // week
+					(Integer) row.getObject(7)  // shift
 				));
 			}
 		});
@@ -56,11 +54,11 @@ public class DayMatcherImpl extends BaseObjectImpl implements DayMatcher,
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("holiday", holiday);
+		map.put("day_plan", day_plan);
 		map.put("month", month);
 		map.put("day", day);
-		map.put("week", week);
 		map.put("weekday", weekday);
+		map.put("week", week);
 		map.put("shift", shift);
 		return map;
 	}
@@ -71,234 +69,69 @@ public class DayMatcherImpl extends BaseObjectImpl implements DayMatcher,
 	}
 
 	/** Create a new day matcher */
-	private DayMatcherImpl(String n, boolean h, int m, int d, int w, int wd,
-		int s)
+	private DayMatcherImpl(String n, String pl, Integer m, Integer d,
+		Integer wd, Integer w, Integer s)
 	{
 		this(n);
-		holiday = h;
+		day_plan = lookupDayPlan(pl);
 		month = m;
 		day = d;
-		week = w;
 		weekday = wd;
+		week = w;
 		shift = s;
 	}
 
-	/** Compare to another day matcher */
+	/** Day plan */
+	private DayPlan day_plan;
+
+	/** Get the day plan */
 	@Override
-	public int compareTo(DayMatcherImpl o) {
-		return name.compareTo(o.name);
+	public DayPlan getDayPlan() {
+		return day_plan;
 	}
 
-	/** Test if the day matcher equals another day matcher */
+	/** Month of year (1-12) */
+	private Integer month;
+
+	/** Get the month (1-12) */
 	@Override
-	public boolean equals(Object o) {
-		if (o instanceof DayMatcherImpl)
-			return name.equals(((DayMatcherImpl) o).name);
-		else
-			return false;
-	}
-
-	/** Check if a selection of properties is valid */
-	private void checkSelection(int d, int w, int wd, int s)
-		throws ChangeVetoException
-	{
-		/* Invalid matchers:
-		 *   - Day of month + week
-		 *   - Day of month + shift
-		 *   - Shift + "any" week
-		 *   - Shift + "any" weekday
-		 */
-		if (d != ANY_DAY && (w != ANY_WEEK || s != 0))
-			throw new ChangeVetoException("Invalid selection");
-		if (s != 0 && (w == ANY_WEEK || wd == ANY_WEEKDAY))
-			throw new ChangeVetoException("Invalid selection");
-	}
-
-	/** Holiday flag */
-	private boolean holiday = true;
-
-	/** Set the holiday flag */
-	@Override
-	public void setHoliday(boolean h) {
-		holiday = h;
-	}
-
-	/** Set the holiday flag */
-	public void doSetHoliday(boolean h) throws TMSException {
-		if (h != holiday) {
-			store.update(this, "holiday", h);
-			setHoliday(h);
-		}
-	}
-
-	/** Get the holiday flag */
-	@Override
-	public boolean getHoliday() {
-		return holiday;
-	}
-
-	/** Month of year */
-	private int month = ANY_MONTH;
-
-	/** Set the month */
-	@Override
-	public void setMonth(int m) {
-		month = m;
-	}
-
-	/** Set the month */
-	public void doSetMonth(int m) throws TMSException {
-		if (m != month) {
-			validateMonth(m);
-			store.update(this, "month", m);
-			setMonth(m);
-		}
-	}
-
-	/** Validate the month */
-	private void validateMonth(int m) throws ChangeVetoException {
-		if (m != ANY_MONTH &&
-		   (m < Calendar.JANUARY || m > Calendar.DECEMBER))
-			throw new ChangeVetoException("Invalid month:" + m);
-	}
-
-	/** Get the month */
-	@Override
-	public int getMonth() {
+	public Integer getMonth() {
 		return month;
 	}
 
-	/** Day of month */
-	private int day = ANY_DAY;
+	/** Day of month (1-31) */
+	private Integer day;
 
-	/** Set the day-of-month */
+	/** Get the day-of-month (1-31) */
 	@Override
-	public void setDay(int d) {
-		day = d;
-	}
-
-	/** Set the day-of-month */
-	public void doSetDay(int d) throws TMSException {
-		if (d != day) {
-			validateDay(d);
-			store.update(this, "day", d);
-			setDay(d);
-		}
-	}
-
-	/** Validate the day-of-month */
-	private void validateDay(int d) throws ChangeVetoException {
-		if (d != ANY_DAY) {
-			if (d < 1 || d > 31)
-				throw new ChangeVetoException("Invalid day:"+d);
-			checkSelection(d, week, weekday, shift);
-		}
-	}
-
-	/** Get the day-of-month */
-	@Override
-	public int getDay() {
+	public Integer getDay() {
 		return day;
 	}
 
-	/** Week of month */
-	private int week = ANY_WEEK;
+	/** Day of week (1-7) */
+	private Integer weekday;
 
-	/** Set the week-of-month */
+	/** Get the day-of-week (1-7) */
 	@Override
-	public void setWeek(int w) {
-		week = w;
-	}
-
-	/** Set the week-of-month */
-	public void doSetWeek(int w) throws TMSException {
-		if (w != week) {
-			validateWeek(w);
-			store.update(this, "week", w);
-			setWeek(w);
-		}
-	}
-
-	/** Validate the week-of-month */
-	private void validateWeek(int w) throws ChangeVetoException {
-		if (w != ANY_WEEK) {
-			// -1 is last week in month
-			if (w < -1 || w > 4)
-			       throw new ChangeVetoException("Invalid week:"+w);
-			checkSelection(day, w, weekday, shift);
-		}
-	}
-
-	/** Get the week-of-month */
-	@Override
-	public int getWeek() {
-		return week;
-	}
-
-	/** Day of week */
-	private int weekday = ANY_WEEKDAY;
-
-	/** Set the day-of-week */
-	@Override
-	public void setWeekday(int wd) {
-		weekday = wd;
-	}
-
-	/** Set the day-of-week */
-	public void doSetWeekday(int wd) throws TMSException {
-		if (wd != weekday) {
-			validateWeekday(wd);
-			store.update(this, "weekday", wd);
-			setWeekday(wd);
-		}
-	}
-
-	/** Validate the day-of-week */
-	private void validateWeekday(int wd) throws ChangeVetoException {
-		if (wd != ANY_WEEKDAY) {
-			if (wd < Calendar.SUNDAY || wd > Calendar.SATURDAY) {
-				throw new ChangeVetoException(
-					"Invalid weekday:" + wd);
-			}
-			checkSelection(day, week, wd, shift);
-		}
-	}
-
-	/** Get the day-of-week */
-	@Override
-	public int getWeekday() {
+	public Integer getWeekday() {
 		return weekday;
 	}
 
-	/** Shift (in days) from actual match (for Shopping day, etc) */
-	private int shift = 0;
+	/** Week of month */
+	private Integer week;
 
-	/** Set the shift from the actual day */
+	/** Get the week-of-month (1-4, or -1 for last) */
 	@Override
-	public void setShift(int s) {
-		shift = s;
+	public Integer getWeek() {
+		return week;
 	}
 
-	/** Set the shift from the actual day */
-	public void doSetShift(int s) throws TMSException {
-		if (s != shift) {
-			validateShift(s);
-			store.update(this, "shift", s);
-			setShift(s);
-		}
-	}
-
-	/** Validate the shift days */
-	private void validateShift(int s) throws ChangeVetoException {
-		if (s < -2 || s > 2)
-			throw new ChangeVetoException("Invalid shift:" + s);
-		if (s != 0)
-			checkSelection(day, week, weekday, s);
-	}
+	/** Shift (in days) from actual match (for Black Friday, etc) */
+	private Integer shift;
 
 	/** Get the shift from the actual day */
 	@Override
-	public int getShift() {
+	public Integer getShift() {
 		return shift;
 	}
 }

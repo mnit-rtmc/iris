@@ -35,9 +35,6 @@ public interface DayPlan extends SonarObject {
 	/** SONAR base type name */
 	String SONAR_BASE = ActionPlan.SONAR_TYPE;
 
-	/** Get the day matchers for the day plan */
-	DayMatcher[] getDayMatchers();
-
-	/** Set the day matchers for the day plan */
-	void setDayMatchers(DayMatcher[] dms);
+	/** Get holiday value for matchers */
+	boolean getHolidays();
 }

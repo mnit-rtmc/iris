@@ -180,14 +180,26 @@ pub const CONTROLLER_IO_ONE: &str = "\
 
 /// SQL query for all day matchers (primary)
 pub const DAY_MATCHER_ALL: &str = "\
-  SELECT name, holiday, month, day, week, weekday, shift \
+  SELECT name, day_plan, month, day, weekday, week, shift \
   FROM iris.day_matcher \
+  ORDER BY day_plan, month, day, weekday, week, shift";
+
+/// SQL query for one day matcher
+pub const DAY_MATCHER_ONE: &str = "\
+  SELECT name, day_plan, month, day, weekday, week, shift \
+  FROM iris.day_matcher \
+  WHERE name = $1";
+
+/// SQL query for all day plans (primary)
+pub const DAY_PLAN_ALL: &str = "\
+  SELECT name, holidays \
+  FROM iris.day_plan \
   ORDER BY name";
 
-/// SQL query for one day matcher (secondary)
-pub const DAY_MATCHER_ONE: &str = "\
-  SELECT name, holiday, month, day, week, weekday, shift \
-  FROM iris.day_matcher \
+/// SQL query for one day plan
+pub const DAY_PLAN_ONE: &str = "\
+  SELECT name, holidays \
+  FROM iris.day_plan \
   WHERE name = $1";
 
 /// SQL query for all detectors (primary)

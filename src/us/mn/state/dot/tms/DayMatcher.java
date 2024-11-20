@@ -19,7 +19,6 @@ import us.mn.state.dot.sonar.SonarObject;
 /**
  * A day matcher represents a day or days to be included or excluded from a
  * day plan schedule.
- * FIXME: should be immutable after creation.
  *
  * @author Douglas Lau
  */
@@ -37,51 +36,21 @@ public interface DayMatcher extends SonarObject {
 	/** SONAR base type name */
 	String SONAR_BASE = ActionPlan.SONAR_TYPE;
 
-	/** Set the holiday flag */
-	void setHoliday(boolean h);
+	/** Get the day plan */
+	DayPlan getDayPlan();
 
-	/** Get the holiday flag */
-	boolean getHoliday();
+	/** Get the month (1-12) */
+	Integer getMonth();
 
-	/** Constant for days not matched by month */
-	int ANY_MONTH = -1;
+	/** Get the day-of-month (1-31) */
+	Integer getDay();
 
-	/** Set the month */
-	void setMonth(int m);
+	/** Get the day-of-week (1-7) */
+	Integer getWeekday();
 
-	/** Get the month */
-	int getMonth();
-
-	/** Constant for days not matched by day-of-month */
-	int ANY_DAY = 0;
-
-	/** Set the day-of-month */
-	void setDay(int d);
-
-	/** Get the day-of-month */
-	int getDay();
-
-	/** Constant for days not matched by week-of-month */
-	int ANY_WEEK = 0;
-
-	/** Set the week-of-month (1-4; 0 for any; -1 for last) */
-	void setWeek(int w);
-
-	/** Get the week-of-month */
-	int getWeek();
-
-	/** Constant for days not matched by day-of-week */
-	int ANY_WEEKDAY = 0;
-
-	/** Set the day-of-week */
-	void setWeekday(int d);
-
-	/** Get the day-of-week */
-	int getWeekday();
-
-	/** Set the shift from the actual day */
-	void setShift(int s);
+	/** Get the week-of-month (1-4 or -1 for last) */
+	Integer getWeek();
 
 	/** Get the shift from the actual day */
-	int getShift();
+	Integer getShift();
 }

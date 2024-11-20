@@ -140,13 +140,17 @@ UNTIL 10 PM
 
 ## Day Plans
 
-A day plan is a set of days which can be used for scheduling.  Day plans are
-specified with a table of **day matchers**.  The matchers for a day plan
-determine whether a specific day is included in the plan or not.  Day matchers
-flagged as **holidays** are excluded.  Day matchers are specified by **Month**,
-**Day**, **Week** and **Weekday**.  Any day which matches **all** specified
-fields will match.  **Shift** is only required for days like *Black Friday*
-(Fourth Thursday of November **+1**).
+A day plan is a set of days which can be used for scheduling.  They contain
+a table of **day matchers**, which specify either active days or holidays,
+depending on the **holidays** flag.  A matcher contains 5 fields, which can
+be `NULL` for "any":
+
+- **Month** (1-12)
+- **Day** (1-31)
+- **Weekday** (1-7)
+- **Week** (1-4, or -1 for last)
+- **Shift** - only needed for days like *Black Friday*
+  (Fourth Thursday of November **+1**)
 
 ## Manual Control
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.util.Calendar;
+import java.util.Iterator;
 
 /**
  * Helper class for day matchers.
@@ -28,36 +29,50 @@ public class DayMatcherHelper extends BaseHelper {
 		assert false;
 	}
 
+	/** Get an iterator */
+	static public Iterator<DayMatcher> iterator() {
+		return new IteratorWrapper<DayMatcher>(
+			namespace.iterator(DayMatcher.SONAR_TYPE));
+	}
+
 	/** Lookup the day matcher with the specified name */
 	static public DayMatcher lookup(String name) {
 		return (DayMatcher) namespace.lookupObject(
 			DayMatcher.SONAR_TYPE, name);
 	}
 
-	/** Check if the given time matches */
-	static public boolean matches(DayMatcher dm, Calendar stamp) {
-		int month = dm.getMonth();
-		int day = dm.getDay();
-		int week = dm.getWeek();
-		int weekday = dm.getWeekday();
-		int shift = dm.getShift();
-		if (month != DayMatcher.ANY_MONTH &&
-		    month != stamp.get(Calendar.MONTH))
-			return false;
-		if (day != DayMatcher.ANY_DAY &&
-		    day != stamp.get(Calendar.DAY_OF_MONTH))
-			return false;
-		if (week != DayMatcher.ANY_WEEK) {
-			Calendar t = (Calendar) stamp.clone();
-			t.set(Calendar.DAY_OF_WEEK, weekday);
-			t.set(Calendar.DAY_OF_WEEK_IN_MONTH, week);
-			t.add(Calendar.DAY_OF_MONTH, shift);
-			if (!t.equals(stamp))
-				return false;
-		} else if (weekday != DayMatcher.ANY_WEEKDAY) {
-			if (weekday != stamp.get(Calendar.DAY_OF_WEEK))
-				return false;
+	/** Check if the given stamp matches */
+	static public boolean matches(DayPlan plan, Calendar stamp) {
+		Iterator<DayMatcher> it = iterator();
+		while (it.hasNext()) {
+			DayMatcher dm = it.next();
+			if (dm.getDayPlan() == plan &&
+			    matches(dm, stamp))
+				return true;
 		}
-		return true;
+		return false;
+	}
+
+	/** Check if the given stamp matches */
+	static private boolean matches(DayMatcher dm, Calendar stamp) {
+		Integer month = dm.getMonth();
+		if (month != null && month != 1 + stamp.get(Calendar.MONTH))
+			return false;
+		Integer day = dm.getDay();
+		if (day != null && day != stamp.get(Calendar.DAY_OF_MONTH))
+			return false;
+		Calendar st = (Calendar) stamp.clone();
+		Integer weekday = dm.getWeekday();
+		if (weekday != null)
+			st.set(Calendar.DAY_OF_WEEK, weekday);
+		Integer week = dm.getWeek();
+		if (week != null) {
+			// NOTE: setting this to -1 means "last in month"
+			st.set(Calendar.DAY_OF_WEEK_IN_MONTH, week);
+		}
+		Integer shift = dm.getShift();
+		if (shift != null)
+			st.add(Calendar.DAY_OF_MONTH, shift);
+		return st.equals(stamp);
 	}
 }

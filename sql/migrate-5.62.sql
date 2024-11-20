@@ -456,4 +456,76 @@ CREATE VIEW meter_event_view AS
     JOIN iris.meter_limit_control lc ON limit_ctrl = lc.id;
 GRANT SELECT ON meter_event_view TO PUBLIC;
 
+-- Rework `day_matcher` / `day_plan`
+ALTER TABLE iris.day_plan ADD COLUMN holidays BOOLEAN;
+UPDATE iris.day_plan SET holidays = true;
+ALTER TABLE iris.day_plan ALTER COLUMN holidays SET NOT NULL;
+
+ALTER TABLE iris.day_plan_day_matcher
+    DROP CONSTRAINT day_plan_day_matcher_day_matcher_fkey;
+
+ALTER TABLE iris.day_matcher RENAME TO old_day_matcher;
+
+CREATE TABLE iris.day_matcher (
+    name VARCHAR(10) PRIMARY KEY,
+    day_plan VARCHAR(10) NOT NULL REFERENCES iris.day_plan,
+    month INTEGER CHECK (month >= 1 AND month <= 12),
+    day INTEGER CHECK (day >= 1 AND day <= 31),
+    weekday INTEGER CHECK (weekday >= 1 AND weekday <= 7),
+    week INTEGER CHECK (week >= 1 AND week <= 4 OR week = -1),
+    shift INTEGER CHECK (shift >= -2 AND shift <= 2 AND shift != 0),
+
+    CONSTRAINT day_matcher_valid CHECK (
+        (COALESCE(month, day, weekday, week) IS NOT NULL) AND
+        (day IS NULL OR week IS NULL) AND
+        (shift IS NULL OR (weekday IS NOT NULL AND week IS NOT NULL))
+    )
+);
+
+INSERT INTO iris.day_matcher (
+    name, day_plan, month, day, weekday, week, shift
+)
+(
+SELECT 'dm_' || ROW_NUMBER() OVER (ORDER BY m.day_plan, day_matcher),
+    m.day_plan, NULLIF(month + 1, 0), NULLIF(day, 0), NULLIF(weekday, 0),
+    NULLIF(week, 0), NULLIF(shift, 0)
+FROM iris.day_plan_day_matcher m
+JOIN iris.old_day_matcher dm ON m.day_matcher = dm.name
+WHERE month >= 0 OR day > 0 OR weekday > 0 OR week != 0
+);
+
+UPDATE iris.day_plan SET holidays = false WHERE name IN (
+    SELECT m.day_plan
+    FROM iris.day_plan_day_matcher m
+    JOIN iris.old_day_matcher dm ON m.day_matcher = dm.name
+    WHERE dm.holiday = false AND (
+        month >= 0 OR day > 0 OR weekday > 0 OR week != 0
+    )
+);
+
+DROP TABLE iris.day_plan_day_matcher;
+DROP TABLE iris.old_day_matcher;
+
+CREATE FUNCTION iris.day_plan_notify() RETURNS TRIGGER AS
+    $day_plan_notify$
+BEGIN
+    NOTIFY day_plan;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$day_plan_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER day_plan_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.day_plan
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.day_plan_notify();
+
+CREATE TRIGGER day_matcher_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.day_matcher
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.day_plan_notify();
+
+CREATE VIEW day_plan_view AS
+    SELECT p.name, holidays, month, day, weekday, week, shift
+    FROM iris.day_plan p
+    JOIN iris.day_matcher m ON m.day_plan = p.name;
+GRANT SELECT ON day_plan_view TO PUBLIC;
+
 COMMIT;

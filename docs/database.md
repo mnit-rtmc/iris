@@ -38,7 +38,7 @@ update, and is caused by one of these conditions:
 `comm_config`      |     |     |     |
 `comm_link`        |     |     |     |
 `controller`       | ✔️   |     |     |
-`day_matcher`      |     |     |     |
+`day_plan`         |     |     |     |
 `detector`         |     | ✔️   |     |
 `dms`              | ✔️   | ✔️   | ✔️   |
 `domain`           |     |     |     |
