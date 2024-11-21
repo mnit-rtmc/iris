@@ -99,7 +99,7 @@ fn required_patch_operate(res: Res, att: &str) -> bool {
         | (Res::LcsArray, "owner_next")
         | (Res::LcsArray, "lcs_lock")
         | (Res::RampMeter, "m_lock")
-        | (Res::RampMeter, "rate")
+        | (Res::RampMeter, "rate_next")
         | (Res::VideoMonitor, "camera")
         | (Res::VideoMonitor, "play_list") => true,
         _ => false,
@@ -143,6 +143,7 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
         | (Res::MsgLine, "rank")
         | (Res::MsgPattern, "compose_hashtag")
         | (Res::MsgPattern, "flash_beacon")
+        | (Res::RampMeter, "device_request")
         | (Res::RampMeter, "notes")
         | (Res::RampMeter, "storage")
         | (Res::RampMeter, "max_wait")

@@ -137,7 +137,7 @@ public class Name {
 		{ "lcs_array", "ownerNext" },
 		{ "lcs_array", "lcsLock" },
 		{ "ramp_meter", "mLock" },
-		{ "ramp_meter", "rate" },
+		{ "ramp_meter", "rateNext" },
 		{ "video_monitor", "camera" },
 		{ "video_monitor", "playList" },
 	};
@@ -179,6 +179,7 @@ public class Name {
 		{ "msg_pattern", "composeHashtag" },
 		{ "msg_pattern", "flashBeacon" },
 		{ "play_list", "entries" },
+		{ "ramp_meter", "deviceRequest" },
 		{ "ramp_meter", "notes" },
 		{ "ramp_meter", "storage" },
 		{ "ramp_meter", "maxWait" },
