@@ -29,12 +29,14 @@ LCS are grouped into **arrays**, with one over each lane.
 * `iris/api/lcs_array` (primary)
 * `iris/api/lcs_array/{name}`
 
-| Access       | Primary    | Secondary |
-|--------------|------------|-----------|
-| 👁️  View      | name       |           |
-| 👉 Operate   | lcs\_lock  |           |
-| 💡 Manage    | notes      |           |
-| 🔧 Configure |            | shift     |
+| Access       | Primary    | Secondary                          |
+|--------------|------------|------------------------------------|
+| 👁️  View      | name       |                                    |
+| 👉 Operate   | lcs\_lock  | owner\_next †, indications\_next † |
+| 💡 Manage    | notes      |                                    |
+| 🔧 Configure |            | shift                              |
+
+† _Write only_
 
 </details>
 

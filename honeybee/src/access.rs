@@ -92,6 +92,8 @@ fn required_patch_operate(res: Res, att: &str) -> bool {
         | (Res::Dms, "msg_user")
         | (Res::GateArmArray, "arm_state")
         | (Res::LaneMarking, "deployed")
+        | (Res::LcsArray, "indications_next")
+        | (Res::LcsArray, "owner_next")
         | (Res::LcsArray, "lcs_lock")
         | (Res::RampMeter, "m_lock")
         | (Res::RampMeter, "rate")

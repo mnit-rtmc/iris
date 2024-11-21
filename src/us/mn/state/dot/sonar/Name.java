@@ -132,6 +132,8 @@ public class Name {
 		{ "dms", "msgUser" },
 		{ "gate_arm_array", "armState" },
 		{ "lane_marking", "deployed" },
+		{ "lcs_array", "indicationsNext" },
+		{ "lcs_array", "ownerNext" },
 		{ "lcs_array", "lcsLock" },
 		{ "ramp_meter", "mLock" },
 		{ "ramp_meter", "rate" },
