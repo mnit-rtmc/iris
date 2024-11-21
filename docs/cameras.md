@@ -29,11 +29,11 @@ Notes             | Administrator notes, possibly including [hashtag]s
 * `iris/api/camera` (primary)
 * `iris/api/camera/{name}`
 
-| Access       | Primary              | Secondary               |
-|--------------|----------------------|-------------------------|
-| 👁️  View      | name, location       | geo\_loc, video\_loss   |
-| 👉 Operate   | publish              | ptz †, recall\_preset † |
-| 💡 Manage    | notes                | store\_preset †         |
+| Access       | Primary              | Secondary                          |
+|--------------|----------------------|------------------------------------|
+| 👁️  View      | name, location       | geo\_loc, video\_loss              |
+| 👉 Operate   | publish              | ptz †, recall\_preset †            |
+| 💡 Manage    | notes                | store\_preset †, device\_request † |
 | 🔧 Configure | controller, cam\_num | pin, cam\_template, encoder\_type, enc\_address, enc\_port, enc\_mcast, enc\_channel
 
 † _Write only_

@@ -153,6 +153,7 @@ public class Name {
 		{ "beacon", "message" },
 		{ "beacon", "notes" },
 		{ "beacon", "preset" },
+		{ "camera", "deviceRequest" },
 		{ "camera", "notes" },
 		{ "camera", "storePreset" },
 		{ "comm_config", "timeoutMs" },

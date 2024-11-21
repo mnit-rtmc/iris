@@ -118,6 +118,7 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
         | (Res::Beacon, "message")
         | (Res::Beacon, "notes")
         | (Res::Beacon, "preset")
+        | (Res::Camera, "device_request")
         | (Res::Camera, "notes")
         | (Res::Camera, "store_preset")
         | (Res::CommConfig, "timeout_ms")
