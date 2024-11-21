@@ -195,6 +195,9 @@ public class Name {
 
 	/** Get access level required to write object/attribute */
 	public int accessWrite() {
+		// Allow WRITE/CREATE/DELETE of SignMessage w/OPERATE
+		if ("sign_message".equals(getTypePart()))
+			return AccessLevel.OPERATE.ordinal();
 		if (isAttribute()) {
 			String typ = getTypePart();
 			String att = getAttributePart();
@@ -206,10 +209,6 @@ public class Name {
 				if (acc[0].equals(typ) && acc[1].equals(att))
 					return AccessLevel.MANAGE.ordinal();
 			}
-		} else if (isObject()) {
-			// Allow CREATE/DELETE of SignMessage w/OPERATE
-			if ("sign_message".equals(getTypePart()))
-				return AccessLevel.OPERATE.ordinal();
 		}
 		return AccessLevel.CONFIGURE.ordinal();
 	}
