@@ -197,6 +197,9 @@ public class Name {
 
 	/** Get access level required to write object/attribute */
 	public int accessWrite() {
+		// Allow WRITE/CREATE/DELETE of Incident w/OPERATE
+		if ("incident".equals(getTypePart()))
+			return AccessLevel.OPERATE.ordinal();
 		// Allow WRITE/CREATE/DELETE of SignMessage w/OPERATE
 		if ("sign_message".equals(getTypePart()))
 			return AccessLevel.OPERATE.ordinal();

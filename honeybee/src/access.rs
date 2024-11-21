@@ -90,6 +90,8 @@ fn required_patch_operate(res: Res, att: &str) -> bool {
         | (Res::Detector, "field_length")
         | (Res::Detector, "force_fail")
         | (Res::Dms, "msg_user")
+        | (Res::Incident, "impact")
+        | (Res::Incident, "cleared")
         | (Res::GateArmArray, "arm_state")
         | (Res::LaneMarking, "deployed")
         | (Res::LcsArray, "indications_next")
@@ -163,7 +165,7 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
 fn required_post_operate(res: Res) -> bool {
     use Res::*;
     match res {
-        SignMessage => true,
+        Incident | SignMessage => true,
         _ => false,
     }
 }
