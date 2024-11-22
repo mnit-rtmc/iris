@@ -119,6 +119,16 @@ public class Name {
 		return getTypePart() + SEP + SEP + getAttributePart();
 	}
 
+	/** Write/create/delete access exceptions for OPERATE level */
+	static final String[] TYPE_OPERATE = {
+		"incident", "sign_message"
+	};
+
+	/** Write/create/delete access exceptions for MANAGE level */
+	static final String[] TYPE_MANAGE = {
+		"msg_pattern", "msg_line"
+	};
+
 	/** Write access exceptions for OPERATE level */
 	static final String[][] WRITE_OPERATE = {
 		{ "action_plan", "phase" },
@@ -174,10 +184,6 @@ public class Name {
 		{ "lcs_array", "notes" },
 		{ "modem", "enabled" },
 		{ "modem", "timeoutMs" },
-		{ "msg_line", "restrictHashtag" },
-		{ "msg_line", "rank" },
-		{ "msg_pattern", "composeHashtag" },
-		{ "msg_pattern", "flashBeacon" },
 		{ "play_list", "entries" },
 		{ "ramp_meter", "deviceRequest" },
 		{ "ramp_meter", "notes" },
@@ -200,14 +206,16 @@ public class Name {
 
 	/** Get access level required to write object/attribute */
 	public int accessWrite() {
-		// Allow WRITE/CREATE/DELETE of Incident w/OPERATE
-		if ("incident".equals(getTypePart()))
-			return AccessLevel.OPERATE.ordinal();
-		// Allow WRITE/CREATE/DELETE of SignMessage w/OPERATE
-		if ("sign_message".equals(getTypePart()))
-			return AccessLevel.OPERATE.ordinal();
+		String typ = getTypePart();
+		for (String acc: TYPE_OPERATE) {
+			if (acc.equals(typ))
+				return AccessLevel.OPERATE.ordinal();
+		}
+		for (String acc: TYPE_MANAGE) {
+			if (acc.equals(typ))
+				return AccessLevel.MANAGE.ordinal();
+		}
 		if (isAttribute()) {
-			String typ = getTypePart();
 			String att = getAttributePart();
 			for (String[] acc: WRITE_OPERATE) {
 				if (acc[0].equals(typ) && acc[1].equals(att))

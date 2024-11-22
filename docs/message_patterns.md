@@ -19,12 +19,12 @@ activated.
 * `iris/api/msg_pattern` (primary)
 * `iris/api/msg_pattern/{name}`
 
-| Access       | Primary          | Secondary     |
-|--------------|------------------|---------------|
-| 👁️  View      | name             |               |
-| 👉 Operate   |                  |               |
-| 💡 Manage    | compose\_hashtag | flash\_beacon |
-| 🔧 Configure | multi            |               |
+| Access       | Primary                 | Secondary     |
+|--------------|-------------------------|---------------|
+| 👁️  View      | name                    |               |
+| 👉 Operate   |                         |               |
+| 💡 Manage    | compose\_hashtag, multi | flash\_beacon |
+| 🔧 Configure |                         |               |
 
 </details>
 
@@ -60,12 +60,12 @@ same number of lines in their text rectangles.
 * `iris/api/msg_line` (primary)
 * `iris/api/msg_line/{name}`
 
-| Access       | Primary                   | Secondary |
-|--------------|---------------------------|-----------|
-| 👁️  View      | name                      |           |
-| 👉 Operate   |                           |           |
-| 💡 Manage    | restrict\_hashtag         | rank      |
-| 🔧 Configure | msg\_pattern, line, multi |           |
+| Access       | Primary                        | Secondary |
+|--------------|--------------------------------|-----------|
+| 👁️  View      | name, msg\_pattern             |           |
+| 👉 Operate   |                                |           |
+| 💡 Manage    | line, multi, restrict\_hashtag | rank      |
+| 🔧 Configure |                                |           |
 
 </details>
 

@@ -139,10 +139,8 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
         | (Res::LcsArray, "notes")
         | (Res::Modem, "enabled")
         | (Res::Modem, "timeout_ms")
-        | (Res::MsgLine, "restrict_hashtag")
-        | (Res::MsgLine, "rank")
-        | (Res::MsgPattern, "compose_hashtag")
-        | (Res::MsgPattern, "flash_beacon")
+        | (Res::MsgLine, _)
+        | (Res::MsgPattern, _)
         | (Res::RampMeter, "device_request")
         | (Res::RampMeter, "notes")
         | (Res::RampMeter, "storage")
@@ -174,6 +172,10 @@ fn required_post_operate(res: Res) -> bool {
 }
 
 /// Check if Manage access is required to POST a resource
-fn required_post_manage(_res: Res) -> bool {
-    false
+fn required_post_manage(res: Res) -> bool {
+    use Res::*;
+    match res {
+        MsgPattern | MsgLine => true,
+        _ => false,
+    }
 }
