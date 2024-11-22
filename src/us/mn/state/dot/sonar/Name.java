@@ -126,7 +126,8 @@ public class Name {
 
 	/** Write/create/delete access exceptions for MANAGE level */
 	static final String[] TYPE_MANAGE = {
-		"msg_pattern", "msg_line"
+		"action_plan", "device_action", "msg_pattern", "msg_line",
+		"time_action"
 	};
 
 	/** Write access exceptions for OPERATE level */
@@ -157,12 +158,6 @@ public class Name {
 
 	/** Write access exceptions for MANAGE level */
 	static final String[][] WRITE_MANAGE = {
-		{ "action_plan", "notes" },
-		{ "action_plan", "syncActions" },
-		{ "action_plan", "sticky" },
-		{ "action_plan", "ignoreAutoFail" },
-		{ "action_plan", "active" },
-		{ "action_plan", "defaultPhase" },
 		{ "alarm", "description" },
 		{ "beacon", "message" },
 		{ "beacon", "notes" },
@@ -209,26 +204,45 @@ public class Name {
 
 	/** Get access level required to write object/attribute */
 	public int accessWrite() {
+		if (canWriteOperate())
+			return AccessLevel.OPERATE.ordinal();
+		else if (canWriteManage())
+			return AccessLevel.MANAGE.ordinal();
+		else
+			return AccessLevel.CONFIGURE.ordinal();
+	}
+
+	/** Check for write access at OPERATE level */
+	private boolean canWriteOperate() {
 		String typ = getTypePart();
 		for (String acc: TYPE_OPERATE) {
 			if (acc.equals(typ))
-				return AccessLevel.OPERATE.ordinal();
-		}
-		for (String acc: TYPE_MANAGE) {
-			if (acc.equals(typ))
-				return AccessLevel.MANAGE.ordinal();
+				return true;
 		}
 		if (isAttribute()) {
 			String att = getAttributePart();
 			for (String[] acc: WRITE_OPERATE) {
 				if (acc[0].equals(typ) && acc[1].equals(att))
-					return AccessLevel.OPERATE.ordinal();
-			}
-			for (String[] acc: WRITE_MANAGE) {
-				if (acc[0].equals(typ) && acc[1].equals(att))
-					return AccessLevel.MANAGE.ordinal();
+					return true;
 			}
 		}
-		return AccessLevel.CONFIGURE.ordinal();
+		return false;
+	}
+
+	/** Check for write access at MANAGE level */
+	private boolean canWriteManage() {
+		String typ = getTypePart();
+		for (String acc: TYPE_MANAGE) {
+			if (acc.equals(typ))
+				return true;
+		}
+		if (isAttribute()) {
+			String att = getAttributePart();
+			for (String[] acc: WRITE_MANAGE) {
+				if (acc[0].equals(typ) && acc[1].equals(att))
+					return true;
+			}
+		}
+		return false;
 	}
 }

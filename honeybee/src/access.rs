@@ -112,12 +112,7 @@ fn required_patch_operate(res: Res, att: &str) -> bool {
 /// Check if Manage access is required to PATCH a resource/attribute
 fn required_patch_manage(res: Res, att: &str) -> bool {
     match (res, att) {
-        (Res::ActionPlan, "notes")
-        | (Res::ActionPlan, "sync_actions")
-        | (Res::ActionPlan, "sticky")
-        | (Res::ActionPlan, "ignore_auto_fail")
-        | (Res::ActionPlan, "active")
-        | (Res::ActionPlan, "default_phase")
+        (Res::ActionPlan, _)
         | (Res::Alarm, "description")
         | (Res::Beacon, "message")
         | (Res::Beacon, "notes")
@@ -178,7 +173,7 @@ fn required_post_operate(res: Res) -> bool {
 fn required_post_manage(res: Res) -> bool {
     use Res::*;
     match res {
-        MsgPattern | MsgLine => true,
+        ActionPlan | MsgPattern | MsgLine => true,
         _ => false,
     }
 }
