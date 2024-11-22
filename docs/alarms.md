@@ -15,10 +15,11 @@ alarms, such as [MnDOT-170].
 * `iris/api/alarm` (primary)
 * `iris/api/alarm/{name}`
 
-| Access       | Primary                 | Secondary     |
-|--------------|-------------------------|---------------|
-| 👁️  View      | name, state             | trigger\_time |
-| 🔧 Configure | description, controller | pin           |
+| Access       | Primary     | Secondary     |
+|--------------|-------------|---------------|
+| 👁️  View      | name, state | trigger\_time |
+| 💡 Manage    | description |               |
+| 🔧 Configure | controller  | pin           |
 
 </details>
 

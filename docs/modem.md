@@ -12,11 +12,12 @@ phone number instead of IP address.
 * `iris/api/modem` (primary)
 * `iris/api/modem/{name}`
 
-| Access       | Primary    | Secondary   |
-|--------------|------------|-------------|
-| 👁️  View      | name       |             |
-| 💡 Manage    | enabled    | timeout\_ms |
-| 🔧 Configure |            | uri, config |
+| Access       | Primary | Secondary   |
+|--------------|---------|-------------|
+| 👁️  View      | name    |             |
+| 👉 Operate   | enabled |             |
+| 💡 Manage    |         | timeout\_ms |
+| 🔧 Configure |         | uri, config |
 
 </details>
 
