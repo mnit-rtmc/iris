@@ -986,9 +986,9 @@ fn zoom_levels(res: Res) -> RangeInclusive<u32> {
 fn loc_marker(res: Res, pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
     match res {
         Res::Beacon => beacon_marker(pt, norm, sz),
+        Res::Camera => camera_marker(pt, norm, sz),
         Res::Dms => dms_marker(pt, norm, sz),
         Res::WeatherSensor => weather_sensor_marker(pt, sz),
-        Res::Camera => camera_marker(pt, norm, sz),
         _ => unimplemented!(),
     }
 }
@@ -1024,6 +1024,26 @@ fn beacon_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
     ]
 }
 
+/// Make camera marker
+fn camera_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
+    let t = Transform::with_scale(sz, sz)
+        .rotate(norm)
+        .translate(pt.x, pt.y);
+    vec![
+        Pt::from((0.0, 1.2)) * t,
+        Pt::from((1.5, 0.4)) * t,
+        Pt::from((2.0, 0.4)) * t,
+        Pt::from((2.0, 1.2)) * t,
+        Pt::from((6.0, 1.2)) * t,
+        Pt::from((6.0, -1.2)) * t,
+        Pt::from((2.0, -1.2)) * t,
+        Pt::from((2.0, -0.4)) * t,
+        Pt::from((1.5, -0.4)) * t,
+        Pt::from((0.0, -1.2)) * t,
+        Pt::from((0.0, 1.2)) * t,
+    ]
+}
+
 /// Make DMS marker
 fn dms_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
     let t = Transform::with_scale(sz, sz)
@@ -1056,23 +1076,5 @@ fn weather_sensor_marker(pt: Pt<f64>, sz: f64) -> Vec<Pt<f64>> {
         Pt::from((2.0, 0.0)) * t,
         Pt::from((3.0, -1.0)) * t,
         Pt::from((-3.0, -2.0)) * t,
-    ]
-}
-
-/// Make camera marker
-fn camera_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
-    let t = Transform::with_scale(sz, sz)
-        .rotate(norm)
-        .translate(pt.x, pt.y);
-    vec![
-        Pt::from((0.0, 0.0)) * t,
-        Pt::from((2.0, 0.0)) * t,
-        Pt::from((2.0, 3.0)) * t,
-        Pt::from((1.0, 3.0)) * t,
-        Pt::from((2.0, 4.0)) * t,
-        Pt::from((0.0, 4.0)) * t,
-        Pt::from((1.0, 3.0)) * t,
-        Pt::from((0.0, 3.0)) * t,
-        Pt::from((0.0, 0.0)) * t,
     ]
 }
