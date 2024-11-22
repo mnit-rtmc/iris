@@ -122,6 +122,7 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
         | (Res::Camera, "notes")
         | (Res::Camera, "store_preset")
         | (Res::CommConfig, "timeout_ms")
+        | (Res::CommConfig, "retry_threshold")
         | (Res::CommConfig, "idle_disconnect_sec")
         | (Res::CommConfig, "no_response_disconnect_sec")
         | (Res::CommLink, "poll_enabled")

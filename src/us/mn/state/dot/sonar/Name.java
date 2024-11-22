@@ -167,6 +167,7 @@ public class Name {
 		{ "camera", "notes" },
 		{ "camera", "storePreset" },
 		{ "comm_config", "timeoutMs" },
+		{ "comm_config", "retryThreshold" },
 		{ "comm_config", "idleDisconnectSec" },
 		{ "comm_config", "noResponseDisconnectSec" },
 		{ "comm_link", "pollEnabled" },
