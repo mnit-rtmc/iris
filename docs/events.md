@@ -21,6 +21,7 @@ Table Name                | View
 `incident`                | `incident_view`
 `incident_update`         | `incident_update_view`
 `meter_event`             | `meter_event_view`
+`meter_lock_event`        | `meter_lock_event_view`
 `price_message_event`     | `price_message_event_view`
 `sign_event`              | `sign_event_view`
 `tag_read_event`          | `tag_read_event_view`
