@@ -1,9 +1,23 @@
 # Events
 
-## Database Event Tables
+There are a number of [database] tables for logging different types of events.
 
-There are a number of event tables in the [database] for logging different
-types of events.  Most of these tables have a **view** in the public DB schema.
+## Configuration
+
+Select the `View ➔ System ➔ Event Config` menu item.
+
+Each event type can be configured independently.
+
+Field        | Description
+-------------|-------------------------
+Name         | Table name of event type
+Enable Store | Enable or disable storing event type
+Enable Purge | Enable or disable purging event type
+Purge Days   | Number of days to keep events before purging
+
+## Event Tables
+
+Most event tables have a **view** in the public DB schema.
 
 Table Name                | View
 --------------------------|-------------------------
@@ -28,18 +42,6 @@ Table Name                | View
 `travel_time_event`       | `travel_time_event_view`
 `weather_sensor_sample`   | `weather_sensor_sample_view`
 `weather_sensor_settings` | `weather_sensor_settings_view`
-
-## Event Configuration
-
-Each event type can be configured independently.
-
-**Name**: Table name of event type
-
-**Enable Store**: Enable/disable storing event type
-
-**Enable Purge**: Enable/disable purging event type
-
-**Purge Days**: Number of days to keep events before purging
 
 
 [database]: database.html

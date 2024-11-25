@@ -95,7 +95,7 @@ resource.  These include:
 [domain]: users.html#domains
 [encoder stream]: cameras.html#streams
 [encoder type]: cameras.html#encoder-types
-[event config]: events.html#event-configuration
+[event config]: events.html#configuration
 [flow stream]: flow_streams.html
 [font]: fonts.html
 [gate arm]: gate_arms.html

@@ -83,10 +83,10 @@ If required, a message such as `OPEN` or `CLOSED` may be appended after the tag.
 
 ### Price Message Events
 
-A price [event] can be stored when a message is sent to a DMS, and again when
-the message is verified.  The event includes the **date and time**,
-**DEPLOYED** or **VERIFIED** status, **DMS id**, **toll zone**, _highest
-density_ **detector(s)** and **price**.
+An [event] can be stored in the `price_message_event` table when a message is
+sent to a DMS, and again when the message is verified.  The event includes the
+**date and time**, **DEPLOYED** or **VERIFIED** status, **DMS id**,
+**toll zone**, _highest density_ **detector(s)** and **price**.
 
 The logged _toll zone_ is the last zone specified in the tag.  In _priced_ mode,
 the displayed price is logged.  For _open_ or _closed_, a price of 0 is logged.
