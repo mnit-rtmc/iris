@@ -1165,12 +1165,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Test if DMS needs maintenance */
 	@Override
 	protected boolean needsMaintenance() {
-		return super.needsMaintenance() || hasCriticalError();
-	}
-
-	/** Test if DMS has a critical error */
-	private boolean hasCriticalError() {
-		return !DMSHelper.getCriticalError(this).isEmpty();
+		return super.needsMaintenance() ||
+		       DMSHelper.hasCriticalError(this);
 	}
 
 	/** Calculate the item styles */

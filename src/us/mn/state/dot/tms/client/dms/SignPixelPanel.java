@@ -54,7 +54,7 @@ public class SignPixelPanel extends JPanel {
 	static public Color filterColor(DMS dms) {
 		if (DMSHelper.isFailed(dms))
 			return FILTER_FAILED;
-		else if (DMSHelper.getCriticalError(dms).length() > 0)
+		else if (DMSHelper.hasCriticalError(dms))
 			return FILTER_ERROR;
 		else
 			return null;
