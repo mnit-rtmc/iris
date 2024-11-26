@@ -18,7 +18,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.AccessLevel;
 import us.mn.state.dot.tms.Permission;
 import us.mn.state.dot.tms.Role;
@@ -104,6 +107,24 @@ public class PermissionModel extends ProxyTableModel<Permission> {
 	@Override
 	protected boolean check(Permission proxy) {
 		return proxy.getRole() == role;
+	}
+
+	/** Get a table row sorter */
+	@Override
+	public RowSorter<ProxyTableModel<Permission>> createSorter() {
+		TableRowSorter<ProxyTableModel<Permission>> sorter =
+			new TableRowSorter<ProxyTableModel<Permission>>(this)
+		{
+			@Override public boolean isSortable(int c) {
+				return c == 0;
+			}
+		};
+		sorter.setSortsOnUpdates(true);
+		ArrayList<RowSorter.SortKey> keys =
+			new ArrayList<RowSorter.SortKey>();
+		keys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+		sorter.setSortKeys(keys);
+		return sorter;
 	}
 
 	/** Create an object with the given name.
