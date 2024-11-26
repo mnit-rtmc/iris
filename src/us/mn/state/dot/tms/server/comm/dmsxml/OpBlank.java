@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -114,9 +114,6 @@ class OpBlank extends OpDms {
 			errmsg = ex.getMessage();
 			handleCommError(EventType.PARSING_ERROR,errmsg);
 		}
-
-		// update 
-		complete(mess);
 
 		// update dms
 		updateMaintStatus("");

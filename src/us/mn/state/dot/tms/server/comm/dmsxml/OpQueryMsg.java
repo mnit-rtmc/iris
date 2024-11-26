@@ -390,11 +390,8 @@ class OpQueryMsg extends OpDms {
 			handleCommError(EventType.PARSING_ERROR,errmsg);
 		}
 
-		// update
-		complete(mess);
-
 		// process response
-		if(valid) {
+		if (valid) {
 			setErrorStatus("");
 			if (updateMaintStatus(owner))
 				sendMaintenanceEmail();

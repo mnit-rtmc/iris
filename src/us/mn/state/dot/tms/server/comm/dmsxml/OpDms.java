@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2023  Minnesota Department of Transportation
+ * Copyright (C) 2002-2024  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -139,10 +139,6 @@ abstract class OpDms extends OpDevice {
 	 *  returned as a string. */
 	static String generateId() {
 		return "" + (System.currentTimeMillis() + m_rand.nextInt());
-	}
-
-	/** update iris status, called after operation complete */
-	void complete(Message m) {
 	}
 
 	/** return description of operation */
@@ -338,14 +334,11 @@ abstract class OpDms extends OpDevice {
 
 				// error message text
 				errmsg = xrr.getResString("ErrMsg");
-				if(!valid && errmsg.length() <= 0)
+				if (!valid && errmsg.length() <= 0)
 					errmsg = FAILURE_UNKNOWN;
 
-				// update
-				complete(mess);
-
 				// valid message received?
-				if(valid) {
+				if (valid) {
 					signAccess = xrr.getResString(
 						"signAccess");
 					model = xrr.getResString("model");
