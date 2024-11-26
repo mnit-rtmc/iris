@@ -610,9 +610,9 @@ public class SonarState extends Client {
 		populate(event_configs, true);
 		SubnetChecker.start();
 		populate(map_extents, true);
-		populate(roads);
-		populate(road_affixes);
-		populate(geo_locs);
+		populateReadable(roads);
+		populateReadable(geo_locs);
+		populateReadable(road_affixes);
 		populateReadable(rpt_conduits);
 		populateReadable(words);
 		populateReadable(day_plans);
