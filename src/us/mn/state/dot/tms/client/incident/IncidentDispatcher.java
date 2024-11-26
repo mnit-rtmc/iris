@@ -317,7 +317,7 @@ public class IncidentDispatcher extends IPanel
 				attrs.put("replaces", getOriginalReplaces(rpl));
 				destroyIncident(rpl);
 			}
-			attrs.put("event_desc_id", inc.getEventType());
+			attrs.put("event_desc", inc.getEventType());
 			IncidentDetail dtl = getSelectedDetail();
 			if (dtl != null)
 				attrs.put("detail", dtl);
