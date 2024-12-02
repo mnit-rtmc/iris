@@ -232,7 +232,7 @@ abstract public class OpController<T extends ControllerProperty> {
 
 	/** Get the error retry threshold */
 	public int getRetryThreshold() {
-		return controller.isFailed()
+		return controller.isOffline()
 		      ? 0
 		      : controller.getRetryThreshold();
 	}

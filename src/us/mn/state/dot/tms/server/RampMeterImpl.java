@@ -590,7 +590,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Determine the queue state */
 	private MeterQueueState queueState(MeterAlgorithmState as) {
-		if (as != null && !isFailed()) {
+		if (as != null && !isOffline()) {
 			if (isMetering())
 				return as.getQueueState(this);
 			else
@@ -638,7 +638,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Get current minimum release rate (vehicles per hour) */
 	private int getMinimum() {
-		return (isFailed()) ? getMaxRelease() : getMinRelease();
+		return (isOffline()) ? getMaxRelease() : getMinRelease();
 	}
 
 	/** Send a new release rate to the meter */

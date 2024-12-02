@@ -32,8 +32,7 @@ determined by the protocol.  For modem links with restricted bandwidth, it
 may be useful set this the same as **poll period**, to reduce costs.
 
 **Timeout** determines how long to wait after a poll, if a response is not
-received, before communicaton will fail.  For each poll, 2 retries will happen
-before the operation is aborted.
+received, before the poll will fail.
 
 **Retry Threshold** is the number of times a controller operation is retried
 if not already failed.

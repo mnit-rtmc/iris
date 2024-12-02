@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2019  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -118,9 +118,9 @@ public class LCSArrayHelper extends BaseHelper {
 			return null;
 	}
 
-	/** Check if an LCS array is failed */
-	static public boolean isFailed(LCSArray lcs_array) {
-		return ItemStyle.FAILED.checkBit(lcs_array.getStyles());
+	/** Check if an LCS array is offline */
+	static public boolean isOffline(LCSArray lcs_array) {
+		return ItemStyle.OFFLINE.checkBit(lcs_array.getStyles());
 	}
 
 	/** Check if an LCS array is deployed */

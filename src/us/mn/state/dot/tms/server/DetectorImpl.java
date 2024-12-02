@@ -649,15 +649,15 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		return auto_fail;
 	}
 
-	/** Check if the detector is currently 'failed' */
+	/** Check if the detector is currently offline / 'failed' */
 	@Override
-	public boolean isFailed() {
+	public boolean isOffline() {
 		return isFailed(false);
 	}
 
-	/** Check if the detector is currently 'failed' */
+	/** Check if the detector is currently offline / 'failed' */
 	private boolean isFailed(boolean ignore_auto_fail) {
-		return force_fail || super.isFailed() ||
+		return force_fail || super.isOffline() ||
 		      (auto_fail && !ignore_auto_fail);
 	}
 

@@ -347,7 +347,7 @@ public class GateArmDispatcher extends IPanel
 		if (null == a || a.equals("camera") || a.equals("approach"))
 			updateSwapButton(ga);
 		if (null == a || a.equals("styles")) {
-			if (ItemStyle.FAILED.checkBit(ga.getStyles())) {
+			if (ItemStyle.OFFLINE.checkBit(ga.getStyles())) {
 				arm_state_lbl.setForeground(Color.WHITE);
 				arm_state_lbl.setBackground(Color.GRAY);
 			} else {
@@ -519,7 +519,7 @@ public class GateArmDispatcher extends IPanel
 	/** Update the status widgets */
 	private void updateStateColor(GateArm ga, int i) {
 		Controller c = ga.getController();
-		if (ControllerHelper.isFailed(c)) {
+		if (ControllerHelper.isOffline(c)) {
 			state_lbl[i].setForeground(Color.WHITE);
 			state_lbl[i].setBackground(Color.GRAY);
 		} else if (ControllerHelper.getStatus(c).length() > 0) {

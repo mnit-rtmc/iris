@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -70,8 +70,8 @@ public class ControllerHelper extends BaseHelper {
 		    && CommLinkHelper.getPollEnabled(ctrl.getCommLink());
 	}
 
-	/** Check if a controller is failed */
-	static public boolean isFailed(Controller ctrl) {
+	/** Check if a controller is offline */
+	static public boolean isOffline(Controller ctrl) {
 		return isActive(ctrl)
 		    && ctrl.getFailTime() != null;
 	}

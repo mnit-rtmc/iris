@@ -730,12 +730,12 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		return false;
 	}
 
-	/** Get the failure status */
+	/** Get the offline status */
 	@Override
-	public boolean isFailed() {
+	public boolean isOffline() {
 		for (int i = 0; i < MAX_ARMS; i++) {
 			GateArmImpl ga = getArm(i);
-			if (ga != null && ga.isActive() && ga.isFailed())
+			if (ga != null && ga.isActive() && ga.isOffline())
 				return true;
 		}
 		return false;

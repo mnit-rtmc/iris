@@ -429,8 +429,8 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	@Override
 	public void periodicPoll(boolean is_long) {
 		if (!is_long) {
-			// make sure controller is not failed
-			clearFailed();
+			// make sure controller is not offline
+			clearOffline();
 			// NOTE: This is a workaround for a Cohu bug, which
 			//       never cleans up dropped TCP connections and
 			//       eventually flakes out.  Firewalls will drop a
@@ -440,11 +440,11 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		}
 	}
 
-	/** Clear the camera failed status */
-	private void clearFailed() {
+	/** Clear the camera offline status */
+	private void clearOffline() {
 		ControllerImpl ctl = controller;
 		if (ctl != null)
-			ctl.setFailed(false);
+			ctl.setOffline(false);
 	}
 
 	/** Command the camera pan, tilt or zoom */
@@ -504,13 +504,13 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		return (c == null) || c.isActive();
 	}
 
-	/** Get the failure status */
+	/** Get the offline status */
 	@Override
-	public boolean isFailed() {
+	public boolean isOffline() {
 		// since controller is only for PTZ,
-		// treat camera without controller as not failed
+		// treat camera without controller as online
 		ControllerImpl c = controller;	// Avoid race
-		return (c != null) && c.isFailed();
+		return (c != null) && c.isOffline();
 	}
 
 	/** Calculate the item styles */

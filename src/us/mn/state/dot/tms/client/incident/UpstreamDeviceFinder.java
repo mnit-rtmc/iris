@@ -191,7 +191,7 @@ public class UpstreamDeviceFinder {
 		boolean branched)
 	{
 		return DMSHelper.isActive(dms) &&
-		      !DMSHelper.isFailed(dms) &&
+		      !DMSHelper.isOffline(dms) &&
 		      (DMSHelper.isGeneralPurpose(dms) ||
 		       isTollingDeployable(dms, ed, branched));
 	}

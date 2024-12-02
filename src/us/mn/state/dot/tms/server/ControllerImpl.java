@@ -720,16 +720,16 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	public void logCommEvent(EventType et, String id, String message) {
 		incrementCommCounter(et);
 		setCommStatus(message);
-		if (!isFailed())
+		if (!isOffline())
 			logCommEvent(et, id);
 	}
 
 	/** Time stamp of most recent comm failure */
 	private Long failTime = TimeSteward.currentTimeMillis();
 
-	/** Set the failed status of the controller */
-	private void setFailed(boolean f, String id) {
-		if (f == isFailed())
+	/** Set the offline status of the controller */
+	private void setOffline(boolean f, String id) {
+		if (f == isOffline())
 			return;
 		if (f) {
 			setFailTime(TimeSteward.currentTimeMillis());
@@ -755,13 +755,13 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		failTime = ft;
 	}
 
-	/** Set the controller failed status */
-	public void setFailed(boolean f) {
-		setFailed(f, null);
+	/** Set the controller offline status */
+	public void setOffline(boolean f) {
+		setOffline(f, null);
 	}
 
-	/** Get the controller failed status */
-	public boolean isFailed() {
+	/** Get the controller offline status */
+	public boolean isOffline() {
 		return failTime != null;
 	}
 
@@ -966,7 +966,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			incrementSuccessOps();
 		else
 			incrementFailedOps();
-		setFailed(!success, id);
+		setOffline(!success, id);
 	}
 
 	/** Get active device poller */
@@ -977,9 +977,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Get the device poller (don't check isActive) */
 	private DevicePoller getDevicePoller() {
 		DevicePoller dp = getPoller(comm_link);
-		if ((null == dp) && !isFailed()) {
 			setCommStatus("comm_link error");
-			setFailed(true, null);
+		if ((null == dp) && !isOffline()) {
+			setOffline(true, null);
 		}
 		return dp;
 	}

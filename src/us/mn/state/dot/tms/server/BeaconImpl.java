@@ -117,8 +117,8 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	/** Update the item styles */
 	@Override
 	public void updateStyles() {
-		// NOTE: called by ControllerImpl.setFailed
-		if (isFailed())
+		// NOTE: called by ControllerImpl.setOffline
+		if (isOffline())
 			setStateNotify(BeaconState.UNKNOWN);
 		super.updateStyles();
 	}

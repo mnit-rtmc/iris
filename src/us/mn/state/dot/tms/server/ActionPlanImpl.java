@@ -375,7 +375,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			Beacon b = it.next();
 			if (b instanceof BeaconImpl) {
 				BeaconImpl bi = (BeaconImpl) b;
-				if (bi.isFailed()) {
+				if (bi.isOffline()) {
 					if (new Hashtags(bi.getNotes())
 					   .contains(ht))
 						return false;
@@ -409,7 +409,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			LaneMarking lm = it.next();
 			if (lm instanceof LaneMarkingImpl) {
 				LaneMarkingImpl lmi = (LaneMarkingImpl) lm;
-				if (lmi.isFailed()) {
+				if (lmi.isOffline()) {
 					if (new Hashtags(lmi.getNotes())
 					   .contains(ht))
 						return false;
@@ -426,7 +426,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			RampMeter rm = it.next();
 			if (rm instanceof RampMeterImpl) {
 				RampMeterImpl rmi = (RampMeterImpl) rm;
-				if (rmi.isFailed()) {
+				if (rmi.isOffline()) {
 					if (new Hashtags(rmi.getNotes())
 					   .contains(ht))
 						return false;

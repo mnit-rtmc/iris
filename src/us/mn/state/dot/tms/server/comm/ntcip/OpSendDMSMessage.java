@@ -1028,7 +1028,7 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.storeProps();
 			if (block * block_size.getInteger() < bitmap.length) {
 				block++;
-				if (block % 20 == 0 && !controller.isFailed())
+				if (block % 20 == 0 && !controller.isOffline())
 					setSuccess(true);
 				return this;
 			} else

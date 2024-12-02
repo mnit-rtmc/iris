@@ -215,7 +215,7 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 				isWritePermitted(rm)));
 		}
 		if(a == null || a.equals("styles")) {
-			if(ItemStyle.FAILED.checkBit(rm.getStyles())) {
+			if (ItemStyle.OFFLINE.checkBit(rm.getStyles())) {
 				operation_lbl.setForeground(Color.WHITE);
 				operation_lbl.setBackground(Color.GRAY);
 			} else {

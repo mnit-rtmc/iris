@@ -171,8 +171,8 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 			s |= ItemStyle.AVAILABLE.bit();
 		if (isOnline() && needsMaintenance())
 			s |= ItemStyle.MAINTENANCE.bit();
-		if (isActive() && isFailed())
-			s |= ItemStyle.FAILED.bit();
+		if (isActive() && isOffline())
+			s |= ItemStyle.OFFLINE.bit();
 		if (getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
 		return s;
@@ -184,12 +184,12 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 		return (c != null) && c.isActive();
 	}
 
-	/** Get the failure status */
-	public boolean isFailed() {
+	/** Get the offline status */
+	public boolean isOffline() {
 		ControllerImpl c = controller;	// Avoid race
 		// FIXME: check if comm link connected
 		//        needs status update to work properly
-		return (c == null) || c.isFailed();
+		return (c == null) || c.isOffline();
 	}
 
 	/** Get the number of milliseconds communication has been failed */
@@ -198,9 +198,9 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 		return (c != null) ? c.getFailMillis() : Long.MAX_VALUE;
 	}
 
-	/** Test if device is online (active and not failed) */
+	/** Test if device is online (active and not offline) */
 	public boolean isOnline() {
-		return isActive() && !isFailed();
+		return isActive() && !isOffline();
 	}
 
 	/** Test if device is available */

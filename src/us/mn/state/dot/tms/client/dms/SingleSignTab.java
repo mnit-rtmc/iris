@@ -350,7 +350,7 @@ public class SingleSignTab extends IPanel {
 
 	/** Update the status widgets */
 	private void updateStatus(DMS dms) {
-		if (DMSHelper.isFailed(dms)) {
+		if (DMSHelper.isOffline(dms)) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.GRAY);
 			status_lbl.setText(DMSHelper.getStatus(dms));

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ public class OpQueryLCSIndications extends OpLCS {
 
 	/** Lookup an indication on a DMS */
 	private Integer lookupIndication(DMSImpl dms) {
-		if (dms.isFailed() || DMSHelper.hasCriticalError(dms))
+		if (dms.isOffline() || DMSHelper.hasCriticalError(dms))
 			return null;
 		else {
 			SignMessage sm = dms.getMsgCurrent();

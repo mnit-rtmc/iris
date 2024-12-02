@@ -295,7 +295,7 @@ public final class Operation implements Comparable<Operation> {
 
 	/** Get the error retry threshold */
 	private int getRetryThreshold() {
-		return controller.isFailed()
+		return controller.isOffline()
 		      ? 0
 		      : controller.getRetryThreshold();
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ public class MeterTheme extends ProxyTheme<RampMeter> {
 		addStyle(ItemStyle.METERING, COLOR_METERING);
 		addStyle(ItemStyle.LOCKED, ProxyTheme.OUTLINE_LOCKED, null);
 		addStyle(ItemStyle.MAINTENANCE, ProxyTheme.COLOR_UNAVAILABLE);
-		addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
+		addStyle(ItemStyle.OFFLINE, ProxyTheme.COLOR_OFFLINE);
 		addStyle(ItemStyle.ALL);
 		addStyle(LCK_AVAILABLE);
 		addStyle(LCK_QUEUE_FULL);

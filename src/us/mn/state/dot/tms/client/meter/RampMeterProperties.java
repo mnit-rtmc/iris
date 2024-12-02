@@ -376,7 +376,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		if (a == null || a.equals("operation"))
 			op_lbl.setText(proxy.getOperation());
 		if (a == null || a.equals("styles")) {
-			if (ItemStyle.FAILED.checkBit(proxy.getStyles())) {
+			if (ItemStyle.OFFLINE.checkBit(proxy.getStyles())) {
 				op_lbl.setForeground(Color.WHITE);
 				op_lbl.setBackground(Color.GRAY);
 			} else {

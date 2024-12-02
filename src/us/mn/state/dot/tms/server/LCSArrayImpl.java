@@ -495,12 +495,12 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 		}) != null;
 	}
 
-	/** Check if LCS array is failed */
+	/** Check if LCS array is offline */
 	@Override
-	public boolean isFailed() {
+	public boolean isOffline() {
 		return forEachDMS(new DMSChecker() {
 			public boolean check(DMSImpl dms, LaneUseIndication u) {
-				return dms.isFailed();
+				return dms.isOffline();
 			}
 		}) != null;
 	}

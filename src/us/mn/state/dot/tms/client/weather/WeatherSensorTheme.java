@@ -39,9 +39,9 @@ public class WeatherSensorTheme extends ProxyTheme<WeatherSensor> {
 	/** Create a new proxy theme */
 	public WeatherSensorTheme(ProxyManager<WeatherSensor> m) {
 		super(m, new WeatherSensorMarker());
-		addStyle(ItemStyle.FAILED, 
-			ProxyTheme.COLOR_FAILED);
 		addStyle(ItemStyle.MAINTENANCE,
+		addStyle(ItemStyle.OFFLINE, 
+			ProxyTheme.COLOR_OFFLINE);
 			ProxyTheme.COLOR_UNAVAILABLE);
 		addStyle(ItemStyle.ACTIVE, 
 			ProxyTheme.COLOR_AVAILABLE);

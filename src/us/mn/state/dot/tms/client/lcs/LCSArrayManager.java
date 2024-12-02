@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,7 +95,7 @@ public class LCSArrayManager extends DeviceManager<LCSArray> {
 		theme.addStyle(ItemStyle.SCHEDULED, ProxyTheme.COLOR_SCHEDULED);
 		theme.addStyle(ItemStyle.MAINTENANCE,
 			ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
+		theme.addStyle(ItemStyle.OFFLINE, ProxyTheme.COLOR_OFFLINE);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}

@@ -149,7 +149,7 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 
 	/** Bin detection event data */
 	private void binEventData(ControllerImpl c, int per_sec) {
-		boolean s = isConnected() && !c.isFailed();
+		boolean s = isConnected() && !c.isOffline();
 		if (!s)
 			c.logGap();
 		c.binEventData(per_sec, s);

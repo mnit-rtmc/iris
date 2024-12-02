@@ -65,7 +65,7 @@ Deployed  | Displaying an operator-defined message
 Schedule  | Displaying a scheduled message
 External  | Displaying a message from an external system (not IRIS)
 Maint.    | Sign requires maintenance, but might still be functional
-Failed    | Communication failure to sign
+Offline   | Communication to sign offline
 Purpose   | [Dedicated purpose] sign
 All       | All signs
 

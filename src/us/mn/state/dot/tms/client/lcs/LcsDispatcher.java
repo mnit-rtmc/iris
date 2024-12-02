@@ -272,7 +272,7 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 
 	/** Update the status widgets */
 	private void updateStatus(LCSArray la) {
-		if (LCSArrayHelper.isFailed(la)) {
+		if (LCSArrayHelper.isOffline(la)) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.GRAY);
 			status_lbl.setText(LCSArrayHelper.getStatus(la));

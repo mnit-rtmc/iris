@@ -68,7 +68,7 @@ abstract public class OpLCS extends OpNtcip {
 		if (isSuccess())
 			lcs_array.setIndicationsCurrent(ind_after, user);
 		for (DMSImpl dms: dmss) {
-			if (dms == null || dms.isFailed())
+			if (dms == null || dms.isOffline())
 				setFailed();
 		}
 		super.cleanup();

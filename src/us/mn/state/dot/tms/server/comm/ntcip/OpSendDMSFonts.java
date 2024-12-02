@@ -609,7 +609,7 @@ public class OpSendDMSFonts extends OpDMS {
 					ex.getMessage());
 			}
 			count++;
-			if (count % 20 == 0 && !controller.isFailed())
+			if (count % 20 == 0 && !controller.isOffline())
 				setSuccess(true);
 			if (chars.hasNext()) {
 				glyph = chars.next();

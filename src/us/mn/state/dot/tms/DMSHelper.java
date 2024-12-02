@@ -114,9 +114,9 @@ public class DMSHelper extends BaseHelper {
 		return ItemStyle.ACTIVE.checkBit(proxy.getStyles());
 	}
 
-	/** Test if a DMS is failed */
-	static public boolean isFailed(DMS proxy) {
-		return ItemStyle.FAILED.checkBit(proxy.getStyles());
+	/** Test if a DMS is offline */
+	static public boolean isOffline(DMS proxy) {
+		return ItemStyle.OFFLINE.checkBit(proxy.getStyles());
 	}
 
 	/** Test if a DMS is a dedicated purpose sign */
