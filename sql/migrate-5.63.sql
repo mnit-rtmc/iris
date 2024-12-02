@@ -148,4 +148,8 @@ CREATE VIEW weather_sensor_view AS
     LEFT JOIN controller_view ctr ON cio.controller = ctr.name;
 GRANT SELECT ON weather_sensor_view TO PUBLIC;
 
+-- Delete system attribute
+DELETE FROM iris.system_attribute
+    WHERE name = 'dms_pixel_maint_threshold';
+
 COMMIT;

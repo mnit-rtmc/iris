@@ -46,7 +46,6 @@ System Attribute                 | Description
 `dms_message_tooltip_enable`     | Enable tooltip showing current posted DMS message and user
 `dms_page_on_max_secs`           | Maximum selectable [DMS] page on time (seconds)
 `dms_page_on_min_secs`           | Minimum selectable [DMS] page on time (seconds)
-`dms_pixel_maint_threshold`      | Number of pixel failures before requiring maintenance
 `dms_pixel_off_limit`            | Number of stuck-off pixels allowed in a [DMS] message
 `dms_pixel_on_limit`             | Number of adjacent stuck-on pixels allowed in a [DMS] message
 `dms_pixel_test_timeout_secs`    | Time to wait for [DMS] pixel test to complete
