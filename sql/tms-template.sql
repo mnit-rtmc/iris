@@ -2424,16 +2424,16 @@ CREATE TABLE iris.beacon_state (
     description VARCHAR(18) NOT NULL
 );
 
-COPY iris.beacon_state (id, description) FROM stdin;
-0	Unknown
-1	Dark Req
-2	Dark
-3	Flashing Req
-4	Flashing
-5	Fault: No Verify
-6	Fault: Stuck On
-7	Flashing: External
-\.
+INSERT INTO iris.beacon_state (id, description)
+VALUES
+    (0, 'Unknown'),
+    (1, 'Dark Req'),
+    (2, 'Dark'),
+    (3, 'Flashing Req'),
+    (4, 'Flashing'),
+    (5, 'Fault: No Verify'),
+    (6, 'Fault: Stuck On'),
+    (7, 'Flashing: External');
 
 CREATE TABLE iris._beacon (
     name VARCHAR(20) PRIMARY KEY,
