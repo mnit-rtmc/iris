@@ -63,7 +63,7 @@ public class MeterTheme extends ProxyTheme<RampMeter> {
 
 	/** Locked maintenance style */
 	static private final Style LCK_MAINTENANCE = locked(
-		ItemStyle.MAINTENANCE, COLOR_UNAVAILABLE);
+		ItemStyle.FAULT, COLOR_FAULT);
 
 	/** Create a new meter theme */
 	public MeterTheme(MeterManager man) {
@@ -73,7 +73,7 @@ public class MeterTheme extends ProxyTheme<RampMeter> {
 		addStyle(ItemStyle.QUEUE_EXISTS, COLOR_DEPLOYED);
 		addStyle(ItemStyle.METERING, COLOR_METERING);
 		addStyle(ItemStyle.LOCKED, ProxyTheme.OUTLINE_LOCKED, null);
-		addStyle(ItemStyle.MAINTENANCE, ProxyTheme.COLOR_UNAVAILABLE);
+		addStyle(ItemStyle.FAULT, ProxyTheme.COLOR_FAULT);
 		addStyle(ItemStyle.OFFLINE, ProxyTheme.COLOR_OFFLINE);
 		addStyle(ItemStyle.ALL);
 		addStyle(LCK_AVAILABLE);
@@ -95,7 +95,7 @@ public class MeterTheme extends ProxyTheme<RampMeter> {
 				return LCK_QUEUE_EXISTS;
 			if (manager.checkStyle(ItemStyle.METERING, rm))
 				return LCK_METERING;
-			if (manager.checkStyle(ItemStyle.MAINTENANCE, rm))
+			if (manager.checkStyle(ItemStyle.FAULT, rm))
 				return LCK_MAINTENANCE;
 		}
 		return super.getStyle(rm);

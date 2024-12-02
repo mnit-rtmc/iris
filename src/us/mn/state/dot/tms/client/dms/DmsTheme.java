@@ -63,7 +63,7 @@ public class DmsTheme extends ProxyTheme<DMS> {
 		addStyle(ItemStyle.DEPLOYED, COLOR_DEPLOYED);
 		addStyle(ItemStyle.SCHEDULED, COLOR_SCHEDULED);
 		addStyle(ItemStyle.EXTERNAL, COLOR_EXTERNAL);
-		addStyle(ItemStyle.MAINTENANCE, COLOR_UNAVAILABLE);
+		addStyle(ItemStyle.FAULT, COLOR_FAULT);
 		addStyle(ItemStyle.OFFLINE, COLOR_OFFLINE);
 		addStyle(ItemStyle.PURPOSE, COLOR_PURPOSE);
 		addStyle(ItemStyle.ALL);

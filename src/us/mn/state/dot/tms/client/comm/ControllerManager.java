@@ -84,9 +84,8 @@ public class ControllerManager extends ProxyManager<Controller> {
 	protected ProxyTheme<Controller> createTheme() {
 		ControllerTheme theme = new ControllerTheme(this,
 			new ControllerMarker());
-		theme.addStyle(ItemStyle.MAINTENANCE,
 		theme.addStyle(ItemStyle.OFFLINE, ProxyTheme.COLOR_OFFLINE);
-			ProxyTheme.COLOR_UNAVAILABLE);
+		theme.addStyle(ItemStyle.FAULT, ProxyTheme.COLOR_FAULT);
 		theme.addStyle(ItemStyle.ACTIVE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
@@ -122,8 +121,8 @@ public class ControllerManager extends ProxyManager<Controller> {
 		switch (is) {
 		case ACTIVE:
 			return ControllerHelper.isActive(proxy);
-		case MAINTENANCE:
 			return ControllerHelper.needsMaintenance(proxy);
+		case FAULT:
 		case OFFLINE:
 			return ControllerHelper.isOffline(proxy);
 		case ALL:

@@ -86,8 +86,7 @@ public class GateArmArrayManager extends DeviceManager<GateArmArray> {
 		theme.addStyle(ItemStyle.CLOSED, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.MOVING, ProxyTheme.COLOR_MOVING);
 		theme.addStyle(ItemStyle.OPEN, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(ItemStyle.MAINTENANCE,
-			ProxyTheme.COLOR_UNAVAILABLE);
+		theme.addStyle(ItemStyle.FAULT, ProxyTheme.COLOR_FAULT);
 		theme.addStyle(ItemStyle.OFFLINE, ProxyTheme.COLOR_OFFLINE);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;

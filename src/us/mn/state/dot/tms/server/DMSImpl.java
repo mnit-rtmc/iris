@@ -1192,7 +1192,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		if (isExternalDeployed() || isAlertDeployed())
 			s |= ItemStyle.EXTERNAL.bit();
 		if (isOnline() && needsMaintenance())
-			s |= ItemStyle.MAINTENANCE.bit();
+			s |= ItemStyle.FAULT.bit();
 		if (isActive() && isOffline())
 			s |= ItemStyle.OFFLINE.bit();
 		if (isActive() && !DMSHelper.isGeneralPurpose(this))

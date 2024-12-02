@@ -170,7 +170,7 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 		if (isAvailable())
 			s |= ItemStyle.AVAILABLE.bit();
 		if (isOnline() && needsMaintenance())
-			s |= ItemStyle.MAINTENANCE.bit();
+			s |= ItemStyle.FAULT.bit();
 		if (isActive() && isOffline())
 			s |= ItemStyle.OFFLINE.bit();
 		if (getController() == null)

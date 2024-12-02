@@ -57,8 +57,8 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 	/** Color to display offline devices */
 	static public final Color COLOR_OFFLINE = Color.GRAY;
 
-	/** Color to display unavailable devices */
-	static public final Color COLOR_UNAVAILABLE = Color.BLACK;
+	/** Color to display fault devices */
+	static public final Color COLOR_FAULT = Color.BLACK;
 
 	/** Color to display available devices */
 	static public final Color COLOR_AVAILABLE = new Color(96, 96, 255);
