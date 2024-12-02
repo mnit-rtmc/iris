@@ -81,13 +81,16 @@ public interface Controller extends SonarObject {
 	/** Get controller location (from GeoLoc) */
 	String getLocation();
 
-	/** Get the controller error status.  If this attribute is set (not
-	 * an empty string), there is a critical error. */
+	/** Get the current status as JSON */
 	String getStatus();
 
-	/** Get the controller maint status.  If this attribute is set (not
-	 * an empty string), there is a non-critical maintenance problem. */
-	String getMaint();
+	/** Status JSON attributes */
+
+	/** Fault conditions.
+	 *
+	 * Semicolon-delimited list of fault conditions:
+	 * `other`, `prom`, `program_processor`, `ram`, `display` */
+	String FAULTS = "faults";
 
 	/** Get the timeout error count */
 	int getTimeoutErr();

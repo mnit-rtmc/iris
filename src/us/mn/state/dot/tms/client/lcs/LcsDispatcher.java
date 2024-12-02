@@ -272,37 +272,18 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 
 	/** Update the status widgets */
 	private void updateStatus(LCSArray la) {
+		String faults = LCSArrayHelper.getFaults(la);
 		if (LCSArrayHelper.isOffline(la)) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.GRAY);
-			status_lbl.setText(LCSArrayHelper.getStatus(la));
-		} else
-			updateCritical(la);
-	}
-
-	/** Update the critical error status */
-	private void updateCritical(LCSArray la) {
-		String critical = LCSArrayHelper.getCriticalError(la);
-		if (critical.isEmpty())
-			updateMaintenance(la);
-		else {
+		} else if (faults != null) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.BLACK);
-			status_lbl.setText(critical);
-		}
-	}
-
-	/** Update the maintenance error status */
-	private void updateMaintenance(LCSArray la) {
-		String maintenance = LCSArrayHelper.getMaintenance(la);
-		if (maintenance.isEmpty()) {
+		} else {
 			status_lbl.setForeground(null);
 			status_lbl.setBackground(null);
-		} else {
-			status_lbl.setForeground(Color.BLACK);
-			status_lbl.setBackground(Color.YELLOW);
 		}
-		status_lbl.setText(maintenance);
+		status_lbl.setText((faults != null) ? faults : "");
 	}
 
 	/** Select the DMS for the specified lane */

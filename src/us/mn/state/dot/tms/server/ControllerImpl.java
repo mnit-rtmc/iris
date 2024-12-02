@@ -687,39 +687,50 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		setSetupNotify("version", v);
 	}
 
-	/** Controller error status */
-	private transient String errorStatus = "";
+	/** Status (JSON) read from controller */
+	private String status;
 
-	/** Set the controller error status */
-	public void setErrorStatus(String s) {
-		if (!s.equals(errorStatus)) {
-			errorStatus = s;
-			notifyAttribute("status");
-			updateStyles();
+	/** Get the controller status as JSON */
+	@Override
+	public String getStatus() {
+		return status;
+	}
+
+	/** Set the current controller status as JSON */
+	public void setStatusNotify(String st) {
+		if (!objectEquals(st, status)) {
+			try {
+				store.update(this, "status", st);
+				status = st;
+				notifyAttribute("status");
+			}
+			catch (TMSException e) {
+				// malformed JSON
+				e.printStackTrace();
+			}
 		}
 	}
 
-	/** Controller communication status */
-	private transient String commStatus = Constants.UNKNOWN;
-
-	/** Get the controller error status */
-	@Override
-	public String getStatus() {
-		return isFailed() ? commStatus : errorStatus;
-	}
-
-	/** Set the controller communication status */
-	private void setCommStatus(String s) {
-		// NOTE: the status attribute is set here, but don't notify
-		// clients until communication fails. That happens in the
-		// setFailed method.
-		commStatus = s;
+	/** Set a status value and notify clients of the change */
+	public void setStatusNotify(String key, Object value) {
+		String s = status;
+		try {
+			JSONObject jo = (s != null)
+				? new JSONObject(s)
+				: new JSONObject();
+			jo.put(key, value);
+			setStatusNotify(jo.toString());
+		}
+		catch (JSONException e) {
+			// malformed JSON
+			e.printStackTrace();
+		}
 	}
 
 	/** Log a comm event */
-	public void logCommEvent(EventType et, String id, String message) {
+	public void logCommEvent(EventType et, String id, String msg) {
 		incrementCommCounter(et);
-		setCommStatus(message);
+		setStatusNotify(Controller.FAULTS, msg);
 		if (!isOffline())
 			logCommEvent(et, id);
 	}
@@ -738,7 +749,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			setFailTime(null);
 			logCommEvent(EventType.COMM_RESTORED, id);
 		}
-		notifyAttribute("status");
 		notifyAttribute("failTime");
 		updateStyles();
 	}
@@ -797,24 +807,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			location = loc;
 			notifyAttribute("location");
 		}
-	}
-
-	/** Controller maint status */
-	private transient String maint = "";
-
-	/** Set the controller maint status */
-	public void setMaintNotify(String s) {
-		if (!s.equals(maint)) {
-			maint = s;
-			notifyAttribute("maint");
-			updateStyles();
-		}
-	}
-
-	/** Get the controller maint status */
-	@Override
-	public String getMaint() {
-		return maint;
 	}
 
 	/** Timeout error count */
@@ -925,10 +917,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		notifyAttribute("failedOps");
 	}
 
-	/** Clear the counters and error status */
+	/** Clear the counters and status */
 	private void clearCounters() {
-		setMaintNotify("");
-		setErrorStatus("");
+		setStatusNotify(null);
 		if (timeoutErr != 0) {
 			timeoutErr = 0;
 			notifyAttribute("timeoutErr");
@@ -977,8 +968,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Get the device poller (don't check isActive) */
 	private DevicePoller getDevicePoller() {
 		DevicePoller dp = getPoller(comm_link);
-			setCommStatus("comm_link error");
 		if ((null == dp) && !isOffline()) {
+			setStatusNotify(Controller.FAULTS, "comm_link error");
 			setOffline(true, null);
 		}
 		return dp;

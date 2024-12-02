@@ -28,8 +28,6 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanHelper;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
@@ -504,9 +502,6 @@ public class GateArmDispatcher extends IPanel
 
 	/** Get one gate arm state */
 	private String getArmState(GateArm ga) {
-		String cs = ControllerHelper.getStatus(ga.getController());
-		if (cs.length() > 0)
-			return cs;
 		GateArmState gas = GateArmState.fromOrdinal(ga.getArmState());
 		if (GateArmState.FAULT == gas) {
 			String fault = ga.getFault();
@@ -518,19 +513,20 @@ public class GateArmDispatcher extends IPanel
 
 	/** Update the status widgets */
 	private void updateStateColor(GateArm ga, int i) {
-		Controller c = ga.getController();
-		if (ControllerHelper.isOffline(c)) {
+		GateArmState gas = GateArmState.fromOrdinal(ga.getArmState());
+		switch (gas) {
+		case UNKNOWN:
 			state_lbl[i].setForeground(Color.WHITE);
 			state_lbl[i].setBackground(Color.GRAY);
-		} else if (ControllerHelper.getStatus(c).length() > 0) {
-			state_lbl[i].setForeground(Color.WHITE);
-			state_lbl[i].setBackground(Color.BLACK);
-		} else if (ControllerHelper.getMaintenance(c).length() > 0) {
+			break;
+		case FAULT:
 			state_lbl[i].setForeground(Color.BLACK);
 			state_lbl[i].setBackground(Color.YELLOW);
-		} else {
+			break;
+		default:
 			state_lbl[i].setForeground(DARK_BLUE);
 			state_lbl[i].setBackground(null);
+			break;
 		}
 	}
 }

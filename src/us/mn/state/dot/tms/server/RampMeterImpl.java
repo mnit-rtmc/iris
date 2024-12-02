@@ -678,11 +678,9 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return rate != null;
 	}
 
-	/** Test if a meter needs maintenance */
+	/** Test if a meter has faults */
 	@Override
-	protected boolean needsMaintenance() {
-		if (super.needsMaintenance())
-			return true;
+	protected boolean hasFaults() {
 		RampMeterLock lk = m_lock;
 		return lk == RampMeterLock.POLICE_PANEL ||
 		       lk == RampMeterLock.MAINTENANCE;

@@ -18,9 +18,12 @@ package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.io.IOException;
 import java.util.Random;
+import org.json.JSONException;
+import org.json.JSONObject;
 import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.CommConfig;
 import us.mn.state.dot.tms.DmsColor;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.PageTimeHelper;
@@ -75,10 +78,37 @@ abstract class OpDms extends OpDevice {
 		m_opDesc = opDesc;
 	}
 
+	/** DMS status */
+	private final JSONObject status = new JSONObject();
+
+	/** Put an object into DMS status */
+	protected final void putStatus(String key, Object value) {
+		try {
+			status.put(key, value);
+		}
+		catch (JSONException e) {
+			LOG.log("putStatus: " + e.getMessage() + ", " + key);
+		}
+	}
+
+	/** Put FAULTS into sign status */
+	protected void putFaults(Object value) {
+		putStatus(DMS.FAULTS, value);
+	}
+
+	/** Put FAULTS into controller status */
+	@Override
+	protected void putCtrlFaults(Object value) {
+		putFaults((value != null) ? "controller" : null);
+		super.putCtrlFaults(value);
+	}
+
 	/** Cleanup the operation. Called by CommThread.doPoll(). */
 	@Override
 	public void cleanup() {
 		if (isSuccess()) {
+			if (!status.isEmpty())
+				m_dms.setStatusNotify(status.toString());
 			m_dms.requestConfigure();
 		} else {
 			// flag dms not configured
@@ -193,38 +223,23 @@ abstract class OpDms extends OpDevice {
 		mess.queryProps();
 	}
 
-	/** Return true if the message owner is Reinit */
-	static boolean ownerIsReinit(final String o) {
-		if (o == null)
-			return false;
-		else
-			return o.toLowerCase().equals("reinit");
+	/** Check message owner */
+	public void checkMsgOwner(String o) {
+		if (ownerIsReinit(o)) {
+			putCtrlFaults("Power cycle event");
+			sendMaintenanceEmail();
+		}
 	}
 
-	/**
-	 * Set the maintenance status string.
-	 * @return True if the maintenance status was set and it also changed
-	 *         relative to the value stored in the controller.
-	 */
-	public boolean updateMaintStatus(String o) {
-		boolean reinit_detect = SystemAttrEnum.DMSXML_REINIT_DETECT.getBoolean();
-		if (!reinit_detect) {
-			return false;
-		}
-		if (ownerIsReinit(o)) {
-			String msg = "Power cycle event";
-			setMaintStatus(msg);
-			return !msg.equals(getControllerMaintStatus());
-		} else {
-			// NOTE: won't this wipe out existing maint status
-			// (from other causes)?:
-			setMaintStatus("");
-			return false;
-		}
+	/** Return true if the message owner is Reinit */
+	private boolean ownerIsReinit(final String o) {
+		return SystemAttrEnum.DMSXML_REINIT_DETECT.getBoolean()
+		    && (o != null)
+		    && o.toLowerCase().equals("reinit");
 	}
 
 	/** Send power cycle email */
-	public void sendMaintenanceEmail() {
+	private void sendMaintenanceEmail() {
 		String sub = "CMS maintenance alert: " + m_dms;
 		String msg = "IRIS has placed CMS " + m_dms + " into "
 			+ "\"maintenance\" mode.  One reason this may have "
@@ -236,14 +251,9 @@ abstract class OpDms extends OpDevice {
 		EmailHandler.sendEmail(sub, msg, recip);
 	}
 
-	/** Get the maint status message in the controller */
-	private String getControllerMaintStatus() {
-		return controller.getMaint();
-	}
-
 	/** Phase to query the dms config, which is used by subclasses */
-	class PhaseGetConfig extends Phase
-	{
+	class PhaseGetConfig extends Phase {
+
 		/** next phase to execute or null */
 		private Phase m_next = null;
 
@@ -390,7 +400,6 @@ abstract class OpDms extends OpDevice {
 			// set config values these values are displayed in
 			// the DMS dialog, Configuration tab
 			if (valid) {
-				setErrorStatus("");
 				controller.setVersionNotify(version);
 
 				int dt = type.ordinal();
@@ -419,10 +428,10 @@ abstract class OpDms extends OpDevice {
 					"SensorServer received, ignored " +
 					"because Xml valid field is false, " +
 					"errmsg=" + errmsg);
-				setErrorStatus(errmsg);
+				putCtrlFaults(errmsg);
 
 				// try again
-				if(flagFailureShouldRetry(errmsg)) {
+				if (flagFailureShouldRetry(errmsg)) {
 					LOG.log("PhaseGetConfig: will " +
 						"retry failed op.");
 					return true;

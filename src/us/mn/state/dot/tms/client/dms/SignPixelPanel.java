@@ -47,15 +47,15 @@ public class SignPixelPanel extends JPanel {
 	/** Filter color for offline DMS */
 	static private final Color FILTER_OFFLINE = filterColor(Color.GRAY, 192);
 
-	/** Filter color for DMS with controller errors */
-	static private final Color FILTER_ERROR = new Color(255, 64, 0, 64);
+	/** Filter color for DMS with faults */
+	static private final Color FILTER_FAULTS = new Color(255, 64, 0, 64);
 
 	/** Get the filter color for a DMS */
 	static public Color filterColor(DMS dms) {
-		else if (DMSHelper.hasCriticalError(dms))
-			return FILTER_ERROR;
 		if (DMSHelper.isOffline(dms))
 			return FILTER_OFFLINE;
+		else if (DMSHelper.hasFaults(dms))
+			return FILTER_FAULTS;
 		else
 			return null;
 	}

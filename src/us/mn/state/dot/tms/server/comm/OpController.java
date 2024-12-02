@@ -17,6 +17,9 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.utils.SString;
@@ -36,11 +39,6 @@ abstract public class OpController<T extends ControllerProperty> {
 	/** Filter a message */
 	static private String filterMsg(String m) {
 		return SString.truncate(m, MAX_MSG_LEN);
-	}
-
-	/** Append a status string */
-	static private String appendStatus(String a, String b) {
-		return (a.length() > 0) ? (a + ", " + b) : b;
 	}
 
 	/** Strip all characters up to the last dot */
@@ -125,27 +123,26 @@ abstract public class OpController<T extends ControllerProperty> {
 		phase = null;
 	}
 
-	/** Maint status message */
-	private String maintStatus = null;
+	/** Controller status */
+	private JSONObject ctrl_stat = null;
 
-	/** Set the maint status message.  If non-null, the controller "maint"
-	 * attribute is set to this message when the operation completes. */
-	public void setMaintStatus(String s) {
-		maintStatus = s;
+	/** Put a key/value pair into controller status */
+	protected final void putCtrlStatus(String key, Object value) {
+		if (ctrl_stat == null)
+			ctrl_stat = new JSONObject();
+		try {
+			ctrl_stat.putOpt(key, value);
+		}
+		catch (JSONException e) {
+			System.err.println(
+				"putCtrlStatus: " + e.getMessage() + ", " + key
+			);
+		}
 	}
 
-	/** Error status message */
-	private String err_status = null;
-
-	/** Set the error status message.  If non-null, the controller "error"
-	 * attribute is set to this message when the operation completes. */
-	public void setErrorStatus(String s) {
-		assert s != null;
-		if (err_status != null) {
-			if (s.length() > 0)
-				err_status = appendStatus(err_status, s);
-		} else
-			err_status = s;
+	/** Put FAULTS into controller status */
+	protected void putCtrlFaults(Object value) {
+		putCtrlStatus(Controller.FAULTS, value);
 	}
 
 	/** Create a new controller operation */
@@ -238,29 +235,18 @@ abstract public class OpController<T extends ControllerProperty> {
 	}
 
 	/** Cleanup the operation.  The operation gets cleaned up after
-	 * processing is complete and it is removed from the queue.  This method
-	 * may get called more than once after the operation is done. */
+	 * processing is complete and it is removed from the queue. */
 	public void cleanup() {
-		updateMaintStatus();
-		updateErrorStatus();
+		updateCtrlStatus();
 		controller.completeOperation(id, isSuccess());
 	}
 
-	/** Update controller maintenance status */
-	protected final void updateMaintStatus() {
-		String s = maintStatus;
-		if (s != null) {
-			controller.setMaintNotify(filterMsg(s));
-			maintStatus = null;
-		}
-	}
-
-	/** Update controller error status */
-	private void updateErrorStatus() {
-		String s = err_status;
-		if (s != null) {
-			controller.setErrorStatus(filterMsg(s));
-			err_status = null;
+	/** Update the controller status */
+	protected final void updateCtrlStatus() {
+		if (ctrl_stat != null) {
+			controller.setStatusNotify(ctrl_stat.toString());
+			// Set to `null` in case this is called more than once
+			ctrl_stat = null;
 		}
 	}
 }

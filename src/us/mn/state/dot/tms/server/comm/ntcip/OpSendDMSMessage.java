@@ -223,7 +223,7 @@ public class OpSendDMSMessage extends OpDMS {
 				// Some Ledstar signs will return NoSuchName
 				// when trying to set dmsActivateMessage with
 				// the "wrong" community name (Public).
-				setErrorStatus("READ ONLY (NoSuchName)");
+				putCtrlFaults("READ ONLY (NoSuchName)");
 				return null;
 			}
 			catch (GenError e) {
@@ -282,7 +282,7 @@ public class OpSendDMSMessage extends OpDMS {
 				// If we modify a message when the sign is in
 				// 'local' mode, we will get a GEN error.
 				// It's better if we don't even try.
-				setErrorStatus(mode.toString());
+				putCtrlFaults(mode.toString());
 				return null;
 			default:
 				// All other modes are retired in V2
@@ -316,7 +316,7 @@ public class OpSendDMSMessage extends OpDMS {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			if (status.getEnum() != DmsMessageStatus.modifying) {
-				setErrorStatus(status.toString());
+				putCtrlFaults(status.toString());
 				return null;
 			}
 			ASN1String multi_string = new ASN1String(
@@ -403,7 +403,7 @@ public class OpSendDMSMessage extends OpDMS {
 				String msg = "Message CRC: " +
 					Integer.toHexString(message_crc) + ", "+
 					Integer.toHexString(crc.getInteger());
-				setErrorStatus(msg);
+				putCtrlFaults(msg);
 				return null;
 			}
 			msg_validated = true;
@@ -430,12 +430,12 @@ public class OpSendDMSMessage extends OpDMS {
 			case other:
 			case beacons:
 			case pixelService:
-				setErrorStatus(error.toString());
+				putCtrlFaults(error.toString());
 				break;
 			default:
 				// This should never happen, but of course it
 				// does in some cases with Addco signs.
-				setErrorStatus(status.toString());
+				putCtrlFaults(status.toString());
 			}
 			return null;
 		}
@@ -464,7 +464,7 @@ public class OpSendDMSMessage extends OpDMS {
 				// Some Ledstar signs will return NoSuchName
 				// when trying to set dmsActivateMessage with
 				// the "wrong" community name (Public).
-				setErrorStatus("READ ONLY (NoSuchName)");
+				putCtrlFaults("READ ONLY (NoSuchName)");
 				return null;
 			}
 			catch (GenError e) {
@@ -491,7 +491,7 @@ public class OpSendDMSMessage extends OpDMS {
 			case syntaxMULTI:
 				return new QueryMultiSyntaxErr();
 			case other:
-				setErrorStatus(error.toString());
+				putCtrlFaults(error.toString());
 				return queryOtherError();
 			case messageMemoryType:
 				// For original 1203v1, blank memory type was
@@ -506,7 +506,7 @@ public class OpSendDMSMessage extends OpDMS {
 					return new MsgModifyReq();
 				// else fall through to default case ...
 			default:
-				setErrorStatus(error.toString());
+				putCtrlFaults(error.toString());
 				return null;
 			}
 		}
@@ -538,7 +538,7 @@ public class OpSendDMSMessage extends OpDMS {
 					return new QueryGraphicsConfig();
 				// else fall through to default case ...
 			default:
-				setErrorStatus(m_err.toString());
+				putCtrlFaults(m_err.toString());
 				return null;
 			}
 		}
@@ -568,12 +568,12 @@ public class OpSendDMSMessage extends OpDMS {
 				logQuery(o_err);
 				if (isGraphicError() && graphics.hasNext())
 					return new QueryGraphicsConfig();
-				setErrorStatus(o_err.toString());
+				putCtrlFaults(o_err.toString());
 			}
 			catch (NoSuchName e) {
 				// For 1203v1, dmsMultiOtherErrorDescription
 				// had not been defined...
-				setErrorStatus(m_err.toString());
+				putCtrlFaults(m_err.toString());
 			}
 			return null;
 		}
@@ -615,7 +615,7 @@ public class OpSendDMSMessage extends OpDMS {
 				return null;
 			}
 			logQuery(error);
-			setErrorStatus(error.toString());
+			putCtrlFaults(error.toString());
 			return null;
 		}
 	}
@@ -716,7 +716,7 @@ public class OpSendDMSMessage extends OpDMS {
 			Graphic g = graphics.next();
 			String e = checkGraphic(g);
 			if (e != null) {
-				setErrorStatus(e);
+				putCtrlFaults(e);
 				return null;
 			}
 			return new FindGraphicNumber(g);
@@ -822,7 +822,7 @@ public class OpSendDMSMessage extends OpDMS {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			if (g_num < 1) {
-				setErrorStatus("Bad graphic #: " + g_num);
+				putCtrlFaults("Bad graphic #: " + g_num);
 				return null;
 			}
 			ASN1Integer number = dmsGraphicNumber.makeInt(row);
@@ -847,7 +847,7 @@ public class OpSendDMSMessage extends OpDMS {
 				return new CheckGraphic(graphic, row,
 					g_stat.get(row - 1));
 			} else {
-				setErrorStatus("Graphic table full");
+				putCtrlFaults("Graphic table full");
 				return null;
 			}
 		}
@@ -881,7 +881,7 @@ public class OpSendDMSMessage extends OpDMS {
 			case notUsed:
 				return new SetGraphicModifying(graphic, row);
 			default:
-				setErrorStatus(gst.toString());
+				putCtrlFaults(gst.toString());
 				return null;
 			}
 		}
@@ -940,7 +940,7 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.queryProps();
 			logQuery(gst);
 			if (gst.getEnum() != DmsGraphicStatus.modifying) {
-				setErrorStatus(gst.toString());
+				putCtrlFaults(gst.toString());
 				return null;
 			}
 			return new CreateGraphic(graphic, row);
@@ -1016,7 +1016,7 @@ public class OpSendDMSMessage extends OpDMS {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			if (bitmap.length > max_size.getInteger()) {
-				setErrorStatus("Graphic too large: " +
+				putCtrlFaults("Graphic too large: " +
 					graphic.getGNumber());
 				return null;
 			}
@@ -1091,7 +1091,7 @@ public class OpSendDMSMessage extends OpDMS {
 			if (TimeSteward.currentTimeMillis() < expire)
 				return this;
 			else {
-				setErrorStatus("Graphic not ready: " + gst);
+				putCtrlFaults("Graphic not ready: " + gst);
 				return null;
 			}
 		}
@@ -1112,7 +1112,7 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.queryProps();
 			logQuery(gid);
 			if (!isIDCorrect(graphic, gid.getInteger())) {
-				setErrorStatus("Graphic ID incorrect");
+				putCtrlFaults("Graphic ID incorrect");
 				return null;
 			}
 			setGraphicStatus(row, DmsGraphicStatus.readyForUseReq);

@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.server;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.CommLink;
-import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.ItemStyle;
@@ -169,7 +168,7 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 			s |= ItemStyle.INACTIVE.bit();
 		if (isAvailable())
 			s |= ItemStyle.AVAILABLE.bit();
-		if (isOnline() && needsMaintenance())
+		if (isOnline() && hasFaults())
 			s |= ItemStyle.FAULT.bit();
 		if (isActive() && isOffline())
 			s |= ItemStyle.OFFLINE.bit();
@@ -205,28 +204,12 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 
 	/** Test if device is available */
 	protected boolean isAvailable() {
-		return isOnline() && !needsMaintenance();
+		return isOnline() && !hasFaults();
 	}
 
-	/** Test if a device needs maintenance */
-	protected boolean needsMaintenance() {
-		return !getMaintenance().isEmpty();
-	}
-
-	/** Get maintenance status */
-	private String getMaintenance() {
-		return ControllerHelper.getMaintenance(getController());
-	}
-
-	/** Check if the controller has an error */
-	public boolean hasError() {
-		return isFailed() || hasStatusError();
-	}
-
-	/** Check if the controller has a status error */
-	private boolean hasStatusError() {
-		ControllerImpl c = controller;	// Avoid race
-		return (c == null) || !c.getStatus().isEmpty();
+	/** Test if a device has faults */
+	protected boolean hasFaults() {
+		return false;
 	}
 
 	/** Get the polling period (sec) */

@@ -83,30 +83,20 @@ public class DMSHelper extends BaseHelper {
 		return true;
 	}
 
-	/** Get the maintenance status of a DMS */
-	static public String getMaintenance(DMS proxy) {
-		return ControllerHelper.getMaintenance(proxy.getController());
-	}
-
-	/** Test if a DMS has a critical error */
-	static public boolean hasCriticalError(DMS proxy) {
-		return !getCriticalError(proxy).isEmpty();
-	}
-
-	/** Get the DMS critical error */
-	static public String getCriticalError(DMS proxy) {
+	/** Get DMS faults */
+	static public String getFaults(DMS proxy) {
 		SignConfig sc = proxy.getSignConfig();
 		if (null == sc ||
 		    sc.getFaceWidth() <= 0 ||
 		    sc.getFaceHeight() <= 0)
 			return "Invalid dimensions";
-		else
-			return getStatus(proxy);
+		Object faults = getStatus(proxy, DMS.FAULTS);
+		return (faults != null) ? faults.toString() : null;
 	}
 
-	/** Get DMS controller communication status */
-	static public String getStatus(DMS proxy) {
-		return ControllerHelper.getStatus(proxy.getController());
+	/** Test if a DMS has faults */
+	static public boolean hasFaults(DMS proxy) {
+		return !getFaults(proxy).isEmpty();
 	}
 
 	/** Test if a DMS is active */

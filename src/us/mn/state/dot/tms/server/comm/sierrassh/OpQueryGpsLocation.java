@@ -79,7 +79,7 @@ public class OpQueryGpsLocation extends OpDevice<GpsLocationProperty> {
 				gps.saveDeviceLocation(gps_prop.getLat(),
 					gps_prop.getLon());
 			} else
-				setErrorStatus("No GPS Lock");
+				putCtrlFaults("No GPS Lock");
 		}
 	}
 }

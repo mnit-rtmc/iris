@@ -1422,6 +1422,7 @@ CREATE TABLE iris.controller (
     notes VARCHAR CHECK (LENGTH(notes) < 256),
     password VARCHAR(32),
     setup JSONB,
+    status JSONB,
     fail_time TIMESTAMP WITH time zone
 );
 
@@ -1457,7 +1458,7 @@ CREATE TRIGGER controller_table_notify_trig
 
 CREATE VIEW controller_view AS
     SELECT c.name, drop_id, comm_link, cabinet_style, geo_loc,
-           cnd.description AS condition, notes, setup, fail_time
+           cnd.description AS condition, notes, setup, status, fail_time
     FROM iris.controller c
     LEFT JOIN iris.condition cnd ON c.condition = cnd.id;
 GRANT SELECT ON controller_view TO PUBLIC;

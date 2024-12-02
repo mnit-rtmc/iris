@@ -1162,11 +1162,22 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return isMsgDeployed() && isMsgAlert();
 	}
 
-	/** Test if DMS needs maintenance */
+	/** Test if DMS has faults */
 	@Override
-	protected boolean needsMaintenance() {
-		return super.needsMaintenance() ||
-		       DMSHelper.hasCriticalError(this);
+	protected boolean hasFaults() {
+		return DMSHelper.hasFaults(this);
+	}
+
+	/** Check if the controller has an error */
+	public boolean hasError() {
+		return isOffline() || hasStatusError();
+	}
+
+	/** Check if the controller has a status error */
+	private boolean hasStatusError() {
+		ControllerImpl c = controller; // Avoid race
+		String s = (c != null) ? c.getStatus() : null;
+		return (s != null) ? !s.isEmpty() : false;
 	}
 
 	/** Calculate the item styles */
@@ -1191,7 +1202,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			s |= ItemStyle.SCHEDULED.bit();
 		if (isExternalDeployed() || isAlertDeployed())
 			s |= ItemStyle.EXTERNAL.bit();
-		if (isOnline() && needsMaintenance())
+		if (isOnline() && hasFaults())
 			s |= ItemStyle.FAULT.bit();
 		if (isActive() && isOffline())
 			s |= ItemStyle.OFFLINE.bit();

@@ -20,7 +20,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -48,11 +47,6 @@ public class OpQueryDMSStatus extends OpDMS {
 	/** Valid temperature range (non-inclusive) */
 	static private final int TEMP_MIN = -128;
 	static private final int TEMP_MAX = 127;
-
-	/** Get the pixel maintenance threshold */
-	static private int pixelMaintThreshold() {
-		return SystemAttrEnum.DMS_PIXEL_MAINT_THRESHOLD.getInt();
-	}
 
 	/** Get integer value from 0 to 65,535 as percent */
 	static private Integer getPercent(ASN1Integer value) {
@@ -112,19 +106,6 @@ public class OpQueryDMSStatus extends OpDMS {
 		int n_test = test_rows.getInteger();
 		int n_msg = message_rows.getInteger();
 		return Math.max(n_test, n_msg);
-	}
-
-	/** DMS status */
-	private final JSONObject status = new JSONObject();
-
-	/** Put an object into status */
-	private void putStatus(String key, Object value) {
-		try {
-			status.put(key, value);
-		}
-		catch (JSONException e) {
-			logError("putStatus: " + e.getMessage() + ", " + key);
-		}
 	}
 
 	/** Create a new DMS query status object */
@@ -276,8 +257,12 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.queryProps();
 			if (ShortErrorStatus.MESSAGE.isSet(se))
 				logQuery(msg_err);
-			if (ShortErrorStatus.CONTROLLER.isSet(se))
+			if (ShortErrorStatus.CONTROLLER.isSet(se)) {
 				logQuery(con);
+				String faults = con.getValue(";");
+				if (faults.length() > 0)
+					putFaults(faults.toLowerCase());
+			}
 			if (ShortErrorStatus.PIXEL.isSet(se))
 				logQuery(pix_rows);
 			return new QueryTestAndMessageRows();
@@ -385,8 +370,6 @@ public class OpQueryDMSStatus extends OpDMS {
 			if (row <= n_supplies)
 				return this;
 			else {
-				if (2 * n_failed > n_supplies)
-					setErrorStatus("POWER");
 				putStatus(DMS.POWER_SUPPLIES, supplies);
 				return new LightSensorCount();
 			}
@@ -554,74 +537,8 @@ public class OpQueryDMSStatus extends OpDMS {
 			logQuery(power);
 			logQuery(sensor);
 			putStatus(DMS.POWER_SUPPLIES, power.getPowerStatus());
-			if (power.isCritical())
-				setErrorStatus("POWER");
 			return null;
 		}
-	}
-
-	/** Cleanup the operation */
-	@Override
-	public void cleanup() {
-		if (isSuccess()) {
-			dms.setStatusNotify(status.toString());
-			setMaintStatus(formatMaintStatus());
-			setErrorStatus(formatErrorStatus());
-		}
-		super.cleanup();
-	}
-
-	/** Format the new maintenance status */
-	private String formatMaintStatus() {
-		if (hasMaintenanceError() || hasPixelError())
-			return shortError.getValue();
-		else
-			return "";
-	}
-
-	/** Check if we should report the error for maintenance */
-	private boolean hasMaintenanceError() {
-		int se = shortError.getInteger();
-		// MESSAGE errors can pop up for lots of reasons,
-		// so we shouldn't consider them real errors.
-		return ShortErrorStatus.LAMP.isSet(se)
-		    || ShortErrorStatus.PHOTOCELL.isSet(se)
-		    || ShortErrorStatus.TEMPERATURE.isSet(se)
-		    || ShortErrorStatus.CLIMATE_CONTROL.isSet(se)
-		    || ShortErrorStatus.DOOR_OPEN.isSet(se)
-		    || ShortErrorStatus.DRUM_ROTOR.isSet(se)
-		    || ShortErrorStatus.HUMIDITY.isSet(se)
-		    || ShortErrorStatus.POWER.isSet(se);
-	}
-
-	/** Check if we have too many pixel errors */
-	private boolean hasPixelError() {
-		int se = shortError.getInteger();
-		// PIXEL errors are only reported if pixelFailureTableNumRows.0
-		// is greater than dms_pixel_maint_threshold system attribute.
-		final int pmt = pixelMaintThreshold();
-		return ShortErrorStatus.PIXEL.isSet(se)
-		    && getPixelErrorCount() > pmt && pmt >= 0;
-	}
-
-	/** Format the new error status */
-	private String formatErrorStatus() {
-		// If no error status bits should be reported,
-		// clear the controller error status by setting "".
-		if (hasCriticalError())
-			return shortError.getValue();
-		else
-			return "";
-	}
-
-	/** Check if there is a critical error */
-	private boolean hasCriticalError() {
-		int se = shortError.getInteger();
-		return ShortErrorStatus.OTHER.isSet(se)
-		    || ShortErrorStatus.COMMUNICATIONS.isSet(se)
-		    || ShortErrorStatus.ATTACHED_DEVICE.isSet(se)
-		    || ShortErrorStatus.CONTROLLER.isSet(se)
-		    || ShortErrorStatus.CRITICAL_TEMPERATURE.isSet(se);
 	}
 
 	/** Consolidated method to query temperature status */

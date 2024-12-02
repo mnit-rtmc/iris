@@ -29,7 +29,6 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.MeterAlgorithm;
@@ -176,9 +175,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Operation description label */
 	private final JLabel op_lbl = new JLabel();
 
-	/** Status component */
-	private final JLabel status_lbl = new JLabel();
-
 	/** Send settings action */
 	private final IAction settings = new IAction("device.send.settings") {
 		protected void doActionPerformed(ActionEvent e) {
@@ -311,8 +307,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		p.add(op_lbl, Stretch.LAST);
 		// Make label opaque so that we can set the background color
 		op_lbl.setOpaque(true);
-		p.add("device.status");
-		p.add(status_lbl, Stretch.LAST);
 		p.add(new JButton(settings), Stretch.RIGHT);
 		return p;
 	}
@@ -383,8 +377,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 				op_lbl.setForeground(null);
 				op_lbl.setBackground(null);
 			}
-			status_lbl.setText(ControllerHelper.getStatus(
-				proxy.getController()));
 		}
 	}
 

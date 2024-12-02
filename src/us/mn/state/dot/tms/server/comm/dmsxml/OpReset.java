@@ -115,9 +115,8 @@ class OpReset extends OpDms {
 		}
 
 		// process response
-		updateMaintStatus("");
 		if (valid) {
-			setErrorStatus("");
+			putCtrlFaults(null);
 			SignMessage sm = m_dms.createMsgBlank(
 				SignMsgSource.reset.bit());
 			if (sm != null)
@@ -127,7 +126,7 @@ class OpReset extends OpDms {
 		} else {
 			LOG.log("OpReset: isvalid is false, " +
 				"errmsg=" + errmsg);
-			setErrorStatus(errmsg);
+			putCtrlFaults(errmsg);
 
 			// try again
 			if (flagFailureShouldRetry(errmsg)) {

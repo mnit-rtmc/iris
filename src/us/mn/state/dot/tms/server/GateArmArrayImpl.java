@@ -768,9 +768,9 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		       arm_state == GateArmState.CLOSING);
 	}
 
-	/** Test if gate arm needs maintenance */
+	/** Test if gate arm has faults */
 	@Override
-	protected boolean needsMaintenance() {
+	protected boolean hasFaults() {
 		return arm_state == GateArmState.FAULT;
 	}
 

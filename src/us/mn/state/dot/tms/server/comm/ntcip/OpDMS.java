@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2023  Minnesota Department of Transportation
+ * Copyright (C) 2002-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,9 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.SignDetail;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -69,12 +72,39 @@ abstract public class OpDMS extends OpNtcip {
 		dms = d;
 	}
 
+	/** DMS status */
+	private final JSONObject status = new JSONObject();
+
+	/** Put an object into DMS status */
+	protected final void putStatus(String key, Object value) {
+		try {
+			status.put(key, value);
+		}
+		catch (JSONException e) {
+			logError("putStatus: " + e.getMessage() + ", " + key);
+		}
+	}
+
+	/** Put FAULTS into sign status */
+	protected void putFaults(Object value) {
+		putStatus(DMS.FAULTS, value);
+	}
+
+	/** Put FAULTS into controller status */
+	@Override
+	protected void putCtrlFaults(Object value) {
+		putFaults((value != null) ? "controller" : null);
+		super.putCtrlFaults(value);
+	}
+
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
-		if (isSuccess())
+		if (isSuccess()) {
+			if (!status.isEmpty())
+				dms.setStatusNotify(status.toString());
 			dms.requestConfigure();
-		else
+		} else
 			dms.setConfigure(false);
 		super.cleanup();
 	}

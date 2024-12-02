@@ -306,8 +306,9 @@ public class OpSendDMSFonts extends OpDMS {
 
 	/** Abort upload of the current font */
 	private void abortUpload(FontRow frow, String msg) {
-		setErrorStatus("Font " + frow.font.getName() + " aborted -- " +
-		               msg);
+		putCtrlFaults(
+			"Font " + frow.font.getName() + " aborted -- " + msg
+		);
 	}
 
 	/** Phase to verify a font */

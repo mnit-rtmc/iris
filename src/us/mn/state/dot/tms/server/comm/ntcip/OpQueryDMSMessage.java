@@ -134,7 +134,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		 * observed in old Skyline signs after being powered down for
 		 * extended periods of time.  It can be cleared up by sending
 		 * settings operation. */
-		setErrorStatus("INVALID SOURCE: " + source);
+		putCtrlFaults("INVALID SOURCE: " + source);
 		return null;
 	}
 
@@ -234,7 +234,7 @@ public class OpQueryDMSMessage extends OpDMS {
 				mp, duration);
 			setMsgCurrent(sm);
 		} else
-			setErrorStatus("INVALID STATUS: " + status);
+			putCtrlFaults("INVALID STATUS: " + status);
 	}
 
 	/** Get the message priority of the current message */
@@ -250,7 +250,7 @@ public class OpQueryDMSMessage extends OpDMS {
 			dms.setMsgCurrentNotify(sm);
 		else {
 			System.err.println("setMsgCurrent null: " + dms);
-			setErrorStatus("MSG RENDER FAILED");
+			putCtrlFaults("MSG RENDER FAILED");
 		}
 	}
 }

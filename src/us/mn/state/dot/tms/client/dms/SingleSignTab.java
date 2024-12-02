@@ -350,40 +350,20 @@ public class SingleSignTab extends IPanel {
 
 	/** Update the status widgets */
 	private void updateStatus(DMS dms) {
+		String faults = DMSHelper.getFaults(dms);
 		if (DMSHelper.isOffline(dms)) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.GRAY);
-			status_lbl.setText(DMSHelper.getStatus(dms));
-		} else
-			updateCritical(dms);
-		setIncidentAction(dms);
-		operation_lbl.setText(dms.getOperation());
-	}
-
-	/** Update the critical error status */
-	private void updateCritical(DMS dms) {
-		String critical = DMSHelper.getCriticalError(dms);
-		if (critical.isEmpty())
-			updateMaintenance(dms);
-		else {
+		} else if (faults != null) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.BLACK);
-			status_lbl.setText(critical);
-		}
-	}
-
-	/** Update the maintenance error status */
-	private void updateMaintenance(DMS dms) {
-		String maintenance = DMSHelper.getMaintenance(dms);
-		if (maintenance.isEmpty()) {
+		} else {
 			status_lbl.setForeground(null);
 			status_lbl.setBackground(null);
-			status_lbl.setText("");
-		} else {
-			status_lbl.setForeground(Color.BLACK);
-			status_lbl.setBackground(Color.YELLOW);
-			status_lbl.setText(maintenance);
 		}
+		status_lbl.setText((faults != null) ? faults : "");
+		setIncidentAction(dms);
+		operation_lbl.setText(dms.getOperation());
 	}
 
 	/** Update the current message on a sign */

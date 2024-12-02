@@ -541,15 +541,15 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 		}) != null;
 	}
 
-	/** Test if LCS array needs maintenance */
+	/** Test if LCS array has faults */
 	@Override
-	protected boolean needsMaintenance() {
+	protected boolean hasFaults() {
 		LCSArrayLock lock = lcs_lock;
 		if (lock == LCSArrayLock.MAINTENANCE)
 			return true;
 		return forEachDMS(new DMSChecker() {
 			public boolean check(DMSImpl dms, LaneUseIndication u) {
-				return dms.needsMaintenance();
+				return dms.hasFaults();
 			}
 		}) != null;
 	}
@@ -560,7 +560,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 		return !isLocked() &&
 		        isOnline() &&
 		       !isDeployed() &&
-		       !needsMaintenance();
+		       !hasFaults();
 	}
 
 	/** Calculate the item styles */

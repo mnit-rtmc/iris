@@ -90,34 +90,6 @@ public class LCSArrayHelper extends BaseHelper {
 		return (dms != null) ? dms.getGeoLoc() : null;
 	}
 
-	/** Get the controller status */
-	static public String getStatus(LCSArray lcs_array) {
-		String st = "???";
-		Iterator<LCS> it = LCSHelper.iterator();
-		while(it.hasNext()) {
-			LCS lcs = it.next();
-			if(lcs.getArray() == lcs_array) {
-				String s = getStatus(lcs);
-				if(s != null) {
-					if(s.isEmpty())
-						st = "";
-					else
-						return lcs.getName() + ": " + s;
-				}
-			}
-		}
-		return st;
-	}
-
-	/** Get the status of one LCS */
-	static private String getStatus(LCS lcs) {
-		DMS dms = DMSHelper.lookup(lcs.getName());
-		if(dms != null)
-			return DMSHelper.getStatus(dms);
-		else
-			return null;
-	}
-
 	/** Check if an LCS array is offline */
 	static public boolean isOffline(LCSArray lcs_array) {
 		return ItemStyle.OFFLINE.checkBit(lcs_array.getStyles());
@@ -128,59 +100,23 @@ public class LCSArrayHelper extends BaseHelper {
 		return ItemStyle.DEPLOYED.checkBit(lcs_array.getStyles());
 	}
 
-	/** Get controller critical error */
-	static public String getCriticalError(LCSArray lcs_array) {
-		String s = "???";
+	/** Get LCS array faults */
+	static public String getFaults(LCSArray lcs_array) {
 		Iterator<LCS> it = LCSHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			LCS lcs = it.next();
-			if(lcs.getArray() == lcs_array) {
-				String ce = getCriticalError(lcs);
-				if(ce != null) {
-					if(ce.isEmpty())
-						s = "";
-					else
-						return lcs.getName() + ": " +ce;
-				}
+			if (lcs.getArray() == lcs_array) {
+				String f = getFaults(lcs);
+				if (f != null)
+					return lcs.getName() + ": " + f;
 			}
 		}
-		return s;
+		return "";
 	}
 
-	/** Get LCS critical error */
-	static private String getCriticalError(LCS lcs) {
+	/** Get LCS faults */
+	static private String getFaults(LCS lcs) {
 		DMS dms = DMSHelper.lookup(lcs.getName());
-		if(dms != null)
-			return DMSHelper.getCriticalError(dms);
-		else
-			return null;
-	}
-
-	/** Get controller maintenance */
-	static public String getMaintenance(LCSArray lcs_array) {
-		String m = "???";
-		Iterator<LCS> it = LCSHelper.iterator();
-		while(it.hasNext()) {
-			LCS lcs = it.next();
-			if(lcs.getArray() == lcs_array) {
-				String me = getMaintenance(lcs);
-				if(me != null) {
-					if(me.isEmpty())
-						m = "";
-					else
-						return lcs.getName() + ": " +me;
-				}
-			}
-		}
-		return m;
-	}
-
-	/** Get LCS maintenance */
-	static private String getMaintenance(LCS lcs) {
-		DMS dms = DMSHelper.lookup(lcs.getName());
-		if(dms != null)
-			return DMSHelper.getMaintenance(dms);
-		else
-			return null;
+		return (dms != null) ? DMSHelper.getFaults(dms) : null;
 	}
 }

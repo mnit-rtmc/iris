@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2023  Minnesota Department of Transportation
+ * Copyright (C) 2015-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -149,19 +149,9 @@ public class OpQueryStatus extends OpE6 {
 	@Override
 	public void cleanup() {
 		if (isSuccess()) {
-			setMaintStatus(formatMaintStatus());
-			setErrorStatus(formatErrorStatus());
+			String faults = stat.toString();
+			putCtrlFaults((!faults.isEmpty()) ? faults : null);
 		}
 		super.cleanup();
-	}
-
-	/** Format the new maintenance status */
-	private String formatMaintStatus() {
-		return stat.formatMaint();
-	}
-
-	/** Format the new error status */
-	private String formatErrorStatus() {
-		return stat.formatErrors();
 	}
 }

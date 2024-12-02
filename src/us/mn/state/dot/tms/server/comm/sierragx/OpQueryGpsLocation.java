@@ -100,7 +100,7 @@ public class OpQueryGpsLocation extends OpDevice<SierraGxProperty> {
 			if (prop.gotPwPrompt())
 				return new SendPassword();
 			else {
-				setErrorStatus("Login Failed");
+				putCtrlFaults("Login Failed");
 				return null;
 			}
 		}
@@ -119,7 +119,7 @@ public class OpQueryGpsLocation extends OpDevice<SierraGxProperty> {
 			if (prop.getLoginFinished())
 				return new QueryGps();
 			else {
-				setErrorStatus("Login Failed");
+				putCtrlFaults("Login Failed");
 				return null;
 			}
 		}
@@ -152,7 +152,7 @@ public class OpQueryGpsLocation extends OpDevice<SierraGxProperty> {
 				gps.saveDeviceLocation(gps_prop.getLat(),
 					gps_prop.getLon());
 			} else
-				setErrorStatus("No GPS Lock");
+				putCtrlFaults("No GPS Lock");
 		}
 	}
 }

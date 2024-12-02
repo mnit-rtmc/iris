@@ -111,7 +111,6 @@ public class ControllerManager extends ProxyManager<Controller> {
 	@Override
 	public boolean isStyleAttrib(String a) {
 		return "failTime".equals(a)
-		    || "maint".equals(a)
 		    || "status".equals(a);
 	}
 
@@ -121,8 +120,8 @@ public class ControllerManager extends ProxyManager<Controller> {
 		switch (is) {
 		case ACTIVE:
 			return ControllerHelper.isActive(proxy);
-			return ControllerHelper.needsMaintenance(proxy);
 		case FAULT:
+			return ControllerHelper.hasFaults(proxy);
 		case OFFLINE:
 			return ControllerHelper.isOffline(proxy);
 		case ALL:

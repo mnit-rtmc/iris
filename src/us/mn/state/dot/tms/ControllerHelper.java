@@ -76,27 +76,6 @@ public class ControllerHelper extends BaseHelper {
 		    && ctrl.getFailTime() != null;
 	}
 
-	/** Check if a controller needs maintenance */
-	static public boolean needsMaintenance(Controller ctrl) {
-		return isActive(ctrl) && !isFailed(ctrl) &&
-		       !(ctrl.getStatus().isEmpty() &&
-		         ctrl.getMaint().isEmpty());
-	}
-
-	/** Get controller communication status */
-	static public String getStatus(Controller ctrl) {
-		return (ctrl != null)
-		      ? ctrl.getStatus()
-		      : ItemStyle.NO_CONTROLLER.toString();
-	}
-
-	/** Get controller maintenance status */
-	static public String getMaintenance(Controller ctrl) {
-		return (ctrl != null)
-		      ? ctrl.getMaint()
-		      : ItemStyle.NO_CONTROLLER.toString();
-	}
-
 	/** Get controller setup data */
 	static public String getSetup(Controller ctrl, String key) {
 		String setup = (ctrl != null) ? ctrl.getSetup() : null;
@@ -141,5 +120,30 @@ public class ControllerHelper extends BaseHelper {
 			}
 		}
 		return "UNKNOWN";
+	}
+
+	/** Get controller status data */
+	static public Object getStatus(Controller ctrl, String key) {
+		String status = (ctrl != null) ? ctrl.getStatus() : null;
+		if (status != null) {
+			try {
+				JSONObject jo = new JSONObject(status);
+				return jo.opt(key);
+			}
+			catch (JSONException e) {
+				// malformed JSON
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	/** Check if a controller has faults */
+	static public boolean hasFaults(Controller ctrl) {
+		if (isActive(ctrl)) {
+			Object faults = getStatus(ctrl, Controller.FAULTS);
+			return faults != null;
+		}
+		return false;
 	}
 }

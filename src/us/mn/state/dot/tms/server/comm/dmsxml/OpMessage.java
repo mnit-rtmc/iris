@@ -239,19 +239,18 @@ class OpMessage extends OpDms {
 		}
 
 		// parse rest of response
-		updateMaintStatus("");
 		if (valid) {
-			setErrorStatus("");
+			putCtrlFaults(null);
 			m_dms.setMsgCurrentNotify(m_sm);
 		} else {
 			LOG.log("OpMessage.parseResponse(): response " +
 				"from SensorServer received, ignored " +
 				"because Xml valid field is false, " +
 				"errmsg=" + errmsg + ", id=" + id);
-			setErrorStatus(errmsg);
+			putCtrlFaults(errmsg);
 
 			// try again
-			if(flagFailureShouldRetry(errmsg)) {
+			if (flagFailureShouldRetry(errmsg)) {
 				LOG.log("OpMessage: will retry " +
 					"failed operation.");
 				return true;

@@ -161,13 +161,12 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		    && state == BeaconState.FLASHING_EXTERNAL.ordinal();
 	}
 
-	/** Test if beacon needs maintenance */
+	/** Test if beacon has faults */
 	@Override
-	protected boolean needsMaintenance() {
+	protected boolean hasFaults() {
 		int bs = state;
 		return bs == BeaconState.FAULT_NO_VERIFY.ordinal()
-			|| bs == BeaconState.FAULT_STUCK_ON.ordinal()
-			|| super.needsMaintenance();
+		    || bs == BeaconState.FAULT_STUCK_ON.ordinal();
 	}
 
 	/** Device location */

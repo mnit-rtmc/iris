@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2022  Minnesota Department of Transportation
+ * Copyright (C) 2016-2024  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -526,7 +526,7 @@ abstract public class BasePoller implements DevicePoller {
 		}
 		catch (ProtocolException e) {
 			op.setFailed();
-			op.setMaintStatus(ex_msg(e));
+			op.putCtrlFaults(ex_msg(e));
 		}
 		catch (IOException e) {
 			op.handleEvent(EventType.COMM_ERROR, ex_msg(e));
@@ -629,7 +629,7 @@ abstract public class BasePoller implements DevicePoller {
 		}
 		catch (ProtocolException e) {
 			op.setFailed();
-			op.setMaintStatus(ex_msg(e));
+			op.putCtrlFaults(ex_msg(e));
 			return false;
 		}
 		catch (ChecksumException e) {
@@ -644,7 +644,7 @@ abstract public class BasePoller implements DevicePoller {
 			String msg = ex_msg(e);
 			op.handleEvent(EventType.CONTROLLER_ERROR, msg);
 			op.setFailed();
-			op.setMaintStatus(msg);
+			op.putCtrlFaults(msg);
 			return true;
 		}
 		catch (IOException e) {

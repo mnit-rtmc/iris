@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2023  Minnesota Department of Transportation
+ * Copyright (C) 2013-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -177,13 +177,12 @@ abstract public class OpNtcip extends OpDevice {
 		super(p, d);
 	}
 
-	/** Set the error status message.  If non-null, the controller "error"
-	 * attribute is set to this message when the operation completes. */
+	/** Put FAULTS into controller status */
 	@Override
-	public void setErrorStatus(String s) {
-		if (s != null && s.length() > 0)
-			logError(s);
-		super.setErrorStatus(s);
+	protected void putCtrlFaults(Object value) {
+		if (value != null)
+			logError(value.toString());
+		super.putCtrlFaults(value);
 	}
 
 	/** Get the hardware make */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2017-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -265,7 +265,7 @@ public class CommThread<T extends ControllerProperty> {
 		catch (ProtocolException e) {
 			String msg = getMessage(e);
 			o.setFailed();
-			o.setMaintStatus(msg);
+			o.putCtrlFaults(msg);
 		}
 		catch (ChecksumException e) {
 			String msg = getMessage(e);
@@ -281,7 +281,7 @@ public class CommThread<T extends ControllerProperty> {
 			String msg = getMessage(e);
 			o.handleCommError(EventType.CONTROLLER_ERROR, msg);
 			o.setFailed();
-			o.setMaintStatus(msg);
+			o.putCtrlFaults(msg);
 		}
 		catch (SocketTimeoutException e) {
 			String msg = getMessage(e);

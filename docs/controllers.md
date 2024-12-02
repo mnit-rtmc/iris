@@ -20,7 +20,7 @@ of `pin`, `name` and `resource_n` of associated [devices](#devices).
 
 | Access       | Primary                              | Secondary         |
 |--------------|--------------------------------------|-------------------|
-| 👁️  View      | name, location, setup, fail\_time    | geo\_loc          |
+| 👁️  View      | name, location, setup, fail\_time    | geo\_loc, status  |
 | 👉 Operate   | condition                            | device\_request † |
 | 💡 Manage    | notes                                |                   |
 | 🔧 Configure | comm\_link, drop\_id, cabinet\_style | password          |

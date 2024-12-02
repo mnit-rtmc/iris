@@ -392,9 +392,8 @@ class OpQueryMsg extends OpDms {
 
 		// process response
 		if (valid) {
-			setErrorStatus("");
-			if (updateMaintStatus(owner))
-				sendMaintenanceEmail();
+			putCtrlFaults(null);
+			checkMsgOwner(owner);
 
 			// have on time? if not, create
 			if (!useont) {
@@ -446,10 +445,10 @@ class OpQueryMsg extends OpDms {
 			LOG.log("OpQueryMsg: response from SensorServer " +
 				"received, ignored, Xml valid field is " +
 				"false, errmsg=" + errmsg);
-			setErrorStatus(errmsg);
+			putCtrlFaults(errmsg);
 
 			// try again
-			if(flagFailureShouldRetry(errmsg)) {
+			if (flagFailureShouldRetry(errmsg)) {
 				LOG.log("OpQueryMsg: will retry op.");
 				return true;
 			}

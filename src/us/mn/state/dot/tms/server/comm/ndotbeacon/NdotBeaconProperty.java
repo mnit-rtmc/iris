@@ -78,7 +78,7 @@ public class NdotBeaconProperty extends AsciiDeviceProperty {
 			}
 		}
 		throw new ParsingException(
-				"INVALID RESPONSE "+ch+": \"" + resp + "\"");
+			"INVALID RESPONSE "+ch+": \"" + resp + "\"");
 	}
 
 	/** Parse response from controller **/
@@ -130,18 +130,18 @@ public class NdotBeaconProperty extends AsciiDeviceProperty {
 		return incompleteResult;
 	}
 
-	/** Get maintenance description (or empty string) */
-	public String formatMaintStatus() {
+	/** Get FAULT description (or null) */
+	public String getFaultStatus() {
 		if (!gotValidResponse())
 			return "COMM_ERROR";
 		if (primaryStatus.isError()) {
 			if (primaryStatus == secondaryStatus)
-				return"BOTH_ERROR";
+				return "BOTH_ERROR";
 			return "PRIMARY_ERROR";
 		}
 		if (secondaryStatus.isError())
 			return "SECONDARY_ERROR";
-		return "";
+		return null;
 	}
 
 	/** Get a string representation */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2018  Minnesota Department of Transportation
+ * Copyright (C) 2013-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -302,17 +302,14 @@ public class StatusProperty extends STCProperty {
 		                       CommandStatus.isReset(command_state));
 	}
 
-	/** Get the maintenance status */
-	public String getMaintStatus() {
+	/** Get FAULT status */
+	public String getFaultStatus() {
 		OperatorStatus os = operator_state;
 		if (OperatorStatus.isFault(os))
 			return os.toString();
-		else {
-			CommandStatus cs = command_state;
-			if (CommandStatus.isNormal(cs))
-				return "";
-			else
-				return cs.toString();
-		}
+		CommandStatus cs = command_state;
+		if (CommandStatus.isFault(cs))
+			return cs.toString();
+		return null;
 	}
 }
