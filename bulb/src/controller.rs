@@ -47,6 +47,12 @@ pub struct Setup {
     pub version: Option<String>,
 }
 
+/// Optional status data
+#[derive(Debug, Default, Deserialize, PartialEq)]
+pub struct ControllerStatus {
+    pub faults: Option<String>,
+}
+
 /// Controller
 #[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct Controller {
@@ -58,6 +64,7 @@ pub struct Controller {
     pub condition: u32,
     pub notes: Option<String>,
     pub setup: Option<Setup>,
+    pub status: Option<ControllerStatus>,
     pub fail_time: Option<String>,
     // secondary attributes
     pub geo_loc: Option<String>,

@@ -166,7 +166,7 @@ pub const CONTROLLER_ALL: &str = "\
 /// SQL query for one controller (secondary)
 pub const CONTROLLER_ONE: &str = "\
   SELECT c.name, location, geo_loc, comm_link, drop_id, cabinet_style, \
-         condition, notes, password, setup, fail_time \
+         condition, notes, password, setup, status, fail_time \
   FROM iris.controller c \
   LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
   WHERE c.name = $1";
