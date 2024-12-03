@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2022  Minnesota Department of Transportation
+ * Copyright (C) 2012-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import java.io.OutputStream;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.utils.HexString;
+import us.mn.state.dot.tms.utils.Json;
 
 /**
  * Sensor information property contains firmware version, serial no., etc.
@@ -115,8 +116,8 @@ public class SensorInfoProperty extends G4Property {
 	/** Reserved data */
 	private int reserved;
 
-	/** Get the model */
-	public String getModel() {
+	/** Get the RTMS model */
+	private String getModel() {
 		return HexString.format(model, 2);
 	}
 
@@ -125,8 +126,36 @@ public class SensorInfoProperty extends G4Property {
 		return "mcu:" + mcu_rev + '-' + mcu_build + ",fpga:" + fpga_rel;
 	}
 
+	/** Get the hardware as JSON */
+	private String[] getHardware() {
+		StringBuilder sb = new StringBuilder();
+		sb.append('{');
+		sb.append(Json.str("make", "RTMS"));
+		sb.append(Json.str("model", getModel()));
+		sb.append(Json.str("version", getVersion()));
+		// remove trailing comma
+		if (sb.charAt(sb.length() - 1) == ',')
+			sb.setLength(sb.length() - 1);
+		sb.append('}');
+		return new String[] { sb.toString() };
+	}
+
+	/** Get controller setup as JSON */
+	public String getSetup() {
+		StringBuilder sb = new StringBuilder();
+		sb.append('{');
+		sb.append(Json.str("version", getVersion()));
+		sb.append(Json.arr("hw", getHardware()));
+		// remove trailing comma
+		if (sb.charAt(sb.length() - 1) == ',')
+			sb.setLength(sb.length() - 1);
+		sb.append('}');
+		return sb.toString();
+	}
+
 	/** Get the serial number */
 	public String getSerialNum() {
+		// NOTE: this is not a real serial number
 		return HexString.format(serial_no, 4);
 	}
 
