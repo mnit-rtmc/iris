@@ -79,17 +79,8 @@ public class ControllerHelper extends BaseHelper {
 	/** Get controller setup data */
 	static public String getSetup(Controller ctrl, String key) {
 		String setup = (ctrl != null) ? ctrl.getSetup() : null;
-		if (setup != null) {
-			try {
-				JSONObject jo = new JSONObject(setup);
-				return jo.optString(key, "");
-			}
-			catch (JSONException e) {
-				// malformed JSON
-				e.printStackTrace();
-			}
-		}
-		return "";
+		Object value = optJson(setup, key);
+		return (value != null) ? value.toString() : "";
 	}
 
 	/** Get controller setup array data.
@@ -122,28 +113,20 @@ public class ControllerHelper extends BaseHelper {
 		return "UNKNOWN";
 	}
 
-	/** Get controller status data */
-	static public Object getStatus(Controller ctrl, String key) {
+	/** Get optional controller status attribute, or null */
+	static public Object optStatus(Controller ctrl, String key) {
 		String status = (ctrl != null) ? ctrl.getStatus() : null;
-		if (status != null) {
-			try {
-				JSONObject jo = new JSONObject(status);
-				return jo.opt(key);
-			}
-			catch (JSONException e) {
-				// malformed JSON
-				e.printStackTrace();
-			}
-		}
-		return null;
+		return optJson(status, key);
+	}
+
+	/** Get optional controller faults, or null */
+	static public String optFaults(Controller ctrl) {
+		Object faults = optStatus(ctrl, Controller.FAULTS);
+		return (faults != null) ? faults.toString() : null;
 	}
 
 	/** Check if a controller has faults */
 	static public boolean hasFaults(Controller ctrl) {
-		if (isActive(ctrl)) {
-			Object faults = getStatus(ctrl, Controller.FAULTS);
-			return faults != null;
-		}
-		return false;
+		return isActive(ctrl) && optFaults(ctrl) != null;
 	}
 }

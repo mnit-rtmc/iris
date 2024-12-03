@@ -161,13 +161,13 @@ public class PropManufacturer extends IPanel {
 	public void updateAttribute(String a) {
 		if (null == a || a.equals("status")) {
 			pot_base_lbl.setText(formatObj(
-				DMSHelper.getStatus(dms, DMS.LDC_POT_BASE)
+				DMSHelper.optStatus(dms, DMS.LDC_POT_BASE)
 			));
 			current_low_lbl.setText(formatObj(
-				DMSHelper.getStatus(dms, DMS.PIXEL_CURRENT_LOW)
+				DMSHelper.optStatus(dms, DMS.PIXEL_CURRENT_LOW)
 			));
 			current_high_lbl.setText(formatObj(
-				DMSHelper.getStatus(dms,DMS.PIXEL_CURRENT_HIGH)
+				DMSHelper.optStatus(dms,DMS.PIXEL_CURRENT_HIGH)
 			));
 		}
 		if (null == a || a.equals("signConfig")) {

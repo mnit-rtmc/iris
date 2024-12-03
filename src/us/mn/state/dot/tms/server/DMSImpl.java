@@ -28,8 +28,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
-import org.json.JSONException;
-import org.json.JSONObject;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Name;
@@ -1020,18 +1018,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set a status value and notify clients of the change */
 	public void setStatusNotify(String key, Object value) {
-		String s = status;
-		try {
-			JSONObject jo = (s != null)
-				? new JSONObject(s)
-				: new JSONObject();
-			jo.put(key, value);
-			setStatusNotify(jo.toString());
-		}
-		catch (JSONException e) {
-			// malformed JSON
-			e.printStackTrace();
-		}
+		String st = DMSHelper.putJson(status, key, value);
+		setStatusNotify(st);
 	}
 
 	/** Get the current status as JSON */

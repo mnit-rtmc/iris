@@ -327,7 +327,7 @@ public class SingleSignTab extends IPanel {
 		if (a == null || a.equals("name"))
 			name_lbl.setText(dms.getName());
 		if (a == null || a.equals("status")) {
-			Object o = DMSHelper.getStatus(dms, DMS.LIGHT_OUTPUT);
+			Object o = DMSHelper.optStatus(dms, DMS.LIGHT_OUTPUT);
 			if (o instanceof Integer)
 				brightness_lbl.setText("" + o + "%");
 			else
@@ -350,7 +350,7 @@ public class SingleSignTab extends IPanel {
 
 	/** Update the status widgets */
 	private void updateStatus(DMS dms) {
-		String faults = DMSHelper.getFaults(dms);
+		String faults = DMSHelper.optFaults(dms);
 		if (DMSHelper.isOffline(dms)) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.GRAY);

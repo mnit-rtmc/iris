@@ -156,8 +156,8 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 		});
 		cols.add(new ProxyColumn<Controller>("controller.fault", 200) {
 			public Object getValueAt(Controller c) {
-				return ControllerHelper.getStatus(c,
-					Controller.FAULTS);
+				String faults = ControllerHelper.optFaults(c);
+				return (faults != null) ? faults : "";
 			}
 		});
 		cols.add(new ProxyColumn<Controller>("controller.fail", 180,

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,7 +116,7 @@ public class PropBrightness extends IPanel {
 		if (a == null || a.equals("status") ||
 		    a.equals("msgCurrent"))
 		{
-			Object o = DMSHelper.getStatus(dms, DMS.LIGHT_OUTPUT);
+			Object o = DMSHelper.optStatus(dms, DMS.LIGHT_OUTPUT);
 			if (o instanceof Integer)
 				output_lbl.setText("" + o + "%");
 			else
@@ -127,7 +127,7 @@ public class PropBrightness extends IPanel {
 
 	/** Update the photocell status */
 	private void updatePhotocellStatus() {
-		Object ps = DMSHelper.getStatus(dms, DMS.PHOTOCELLS);
+		Object ps = DMSHelper.optStatus(dms, DMS.PHOTOCELLS);
 		if (ps instanceof JSONArray) {
 			PhotocellTableModel m = new PhotocellTableModel(
 				(JSONArray) ps);

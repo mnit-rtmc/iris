@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
-import org.json.JSONException;
-import org.json.JSONObject;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.RleTable;
 import us.mn.state.dot.tms.utils.SString;
@@ -83,20 +81,20 @@ public class DMSHelper extends BaseHelper {
 		return true;
 	}
 
-	/** Get DMS faults */
-	static public String getFaults(DMS proxy) {
+	/** Get optional DMS faults, or null */
+	static public String optFaults(DMS proxy) {
 		SignConfig sc = proxy.getSignConfig();
 		if (null == sc ||
 		    sc.getFaceWidth() <= 0 ||
 		    sc.getFaceHeight() <= 0)
 			return "Invalid dimensions";
-		Object faults = getStatus(proxy, DMS.FAULTS);
+		Object faults = optStatus(proxy, DMS.FAULTS);
 		return (faults != null) ? faults.toString() : null;
 	}
 
 	/** Test if a DMS has faults */
 	static public boolean hasFaults(DMS proxy) {
-		return !getFaults(proxy).isEmpty();
+		return optFaults(proxy) != null;
 	}
 
 	/** Test if a DMS is active */
@@ -329,20 +327,10 @@ public class DMSHelper extends BaseHelper {
 		      : null;
 	}
 
-	/** Get DMS status attribute */
-	static public Object getStatus(DMS dms, String key) {
+	/** Get optional DMS status attribute, or null */
+	static public Object optStatus(DMS dms, String key) {
 		String status = (dms != null) ? dms.getStatus() : null;
-		if (status != null) {
-			try {
-				JSONObject jo = new JSONObject(status);
-				return jo.opt(key);
-			}
-			catch (JSONException e) {
-				// malformed JSON
-				e.printStackTrace();
-			}
-		}
-		return null;
+		return optJson(status, key);
 	}
 
 	/** Create stuck pixel bitmap */

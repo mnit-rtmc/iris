@@ -196,16 +196,16 @@ public class PropStatus extends IPanel {
 	public void updateAttribute(String a) {
 		if (a == null || a.equals("status")) {
 			temp_cabinet_lbl.setText(formatTemp(
-				DMSHelper.getStatus(dms, DMS.CABINET_TEMP_MIN),
-				DMSHelper.getStatus(dms, DMS.CABINET_TEMP_MAX)
+				DMSHelper.optStatus(dms, DMS.CABINET_TEMP_MIN),
+				DMSHelper.optStatus(dms, DMS.CABINET_TEMP_MAX)
 			));
 			temp_ambient_lbl.setText(formatTemp(
-				DMSHelper.getStatus(dms, DMS.AMBIENT_TEMP_MIN),
-				DMSHelper.getStatus(dms, DMS.AMBIENT_TEMP_MAX)
+				DMSHelper.optStatus(dms, DMS.AMBIENT_TEMP_MIN),
+				DMSHelper.optStatus(dms, DMS.AMBIENT_TEMP_MAX)
 			));
 			temp_housing_lbl.setText(formatTemp(
-				DMSHelper.getStatus(dms, DMS.HOUSING_TEMP_MIN),
-				DMSHelper.getStatus(dms, DMS.HOUSING_TEMP_MAX)
+				DMSHelper.optStatus(dms, DMS.HOUSING_TEMP_MIN),
+				DMSHelper.optStatus(dms, DMS.HOUSING_TEMP_MAX)
 			));
 			updatePowerStatus();
 		}
@@ -222,7 +222,7 @@ public class PropStatus extends IPanel {
 
 	/** Update the power status */
 	private void updatePowerStatus() {
-		Object ps = DMSHelper.getStatus(dms, DMS.POWER_SUPPLIES);
+		Object ps = DMSHelper.optStatus(dms, DMS.POWER_SUPPLIES);
 		if (ps instanceof JSONArray) {
 			PowerTableModel m = new PowerTableModel((JSONArray) ps);
 			power_tbl.setColumnModel(m.createColumnModel());

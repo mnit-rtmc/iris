@@ -24,8 +24,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.json.JSONException;
-import org.json.JSONObject;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.CabinetStyle;
@@ -668,18 +666,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Set a setup value and notify clients of the change */
 	public void setSetupNotify(String key, String value) {
-		String s = setup;
-		try {
-			JSONObject jo = (s != null)
-				? new JSONObject(s)
-				: new JSONObject();
-			jo.put(key, trimTruncate(value, 64));
-			setSetupNotify(jo.toString());
-		}
-		catch (JSONException e) {
-			// malformed JSON
-			e.printStackTrace();
-		}
+		String s = ControllerHelper.putJson(setup, key,
+			trimTruncate(value, 64));
+		setSetupNotify(s);
 	}
 
 	/** Set the firmware version and notify clients of the change */
@@ -696,35 +685,29 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return status;
 	}
 
-	/** Set the current controller status as JSON */
+	/** Set the controller JSON status */
+	private void setStatus(String st) {
+		try {
+			store.update(this, "status", st);
+			status = st;
+		}
+		catch (TMSException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Set the JSON controller status */
 	public void setStatusNotify(String st) {
 		if (!objectEquals(st, status)) {
-			try {
-				store.update(this, "status", st);
-				status = st;
-				notifyAttribute("status");
-			}
-			catch (TMSException e) {
-				// malformed JSON
-				e.printStackTrace();
-			}
+			setStatus(st);
+			notifyAttribute("status");
 		}
 	}
 
 	/** Set a status value and notify clients of the change */
 	public void setStatusNotify(String key, Object value) {
-		String s = status;
-		try {
-			JSONObject jo = (s != null)
-				? new JSONObject(s)
-				: new JSONObject();
-			jo.put(key, value);
-			setStatusNotify(jo.toString());
-		}
-		catch (JSONException e) {
-			// malformed JSON
-			e.printStackTrace();
-		}
+		String st = ControllerHelper.putJson(status, key, value);
+		setStatusNotify(st);
 	}
 
 	/** Log a comm event */

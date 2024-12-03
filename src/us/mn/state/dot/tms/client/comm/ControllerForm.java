@@ -385,9 +385,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 			version_lbl.setText(v);
 		}
 		if (a == null || a.equals("status")) {
-			Object f = ControllerHelper.getStatus(proxy,
-				Controller.FAULTS);
-			fault_lbl.setText((f != null) ? f.toString() : "");
+			String f = ControllerHelper.optFaults(proxy);
+			fault_lbl.setText((f != null) ? f : "");
 		}
 		if (a == null || a.equals("failTime")) {
 			Long ft = proxy.getFailTime();

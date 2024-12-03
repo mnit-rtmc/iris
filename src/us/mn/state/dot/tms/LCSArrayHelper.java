@@ -106,7 +106,7 @@ public class LCSArrayHelper extends BaseHelper {
 		while (it.hasNext()) {
 			LCS lcs = it.next();
 			if (lcs.getArray() == lcs_array) {
-				String f = getFaults(lcs);
+				String f = optFaults(lcs);
 				if (f != null)
 					return lcs.getName() + ": " + f;
 			}
@@ -114,9 +114,9 @@ public class LCSArrayHelper extends BaseHelper {
 		return "";
 	}
 
-	/** Get LCS faults */
-	static private String getFaults(LCS lcs) {
+	/** Get optional LCS faults, or null */
+	static private String optFaults(LCS lcs) {
 		DMS dms = DMSHelper.lookup(lcs.getName());
-		return (dms != null) ? DMSHelper.getFaults(dms) : null;
+		return (dms != null) ? DMSHelper.optFaults(dms) : null;
 	}
 }
