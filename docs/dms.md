@@ -53,6 +53,20 @@ Static graphic | image of static sign in which DMS is inset
 **Internal** beacons are controlled through the DMS controller using the [NTCIP]
 protocol.  **Remote** [beacon]s are controlled using a separate [comm link].
 
+## Status JSON
+
+Sign status data is stored as JSON in `status`.
+
+Key              | Value
+-----------------|----------------------------------
+`faults`         | Array of current fault conditions
+`photocells`     | Array of objects: `description`, `error`, `reading`
+`light_output`   | Integer light output percentage
+`power_supplies` | Array of objects: `description`, `supply_type`, `error`, `detail`, `voltage`
+`cabinet_temps`  | Array of integer temps (C)
+`ambient_temps`  | Array of integer temps (C)
+`housing_temps`  | Array of integer temps (C)
+
 ## Styles
 
 Each DMS can have a number of _styles_, depending on its current state.  Styles

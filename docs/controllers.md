@@ -56,7 +56,7 @@ controller **password** field is used to enter authentication data.
 
 ## Setup JSON
 
-Cnfiguration data read from the controller is stored as JSON in `setup`.
+Configuration data read from the controller is stored as JSON in `setup`.
 
 Key          | Value
 -------------|--------------------------------
