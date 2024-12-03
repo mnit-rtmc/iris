@@ -98,8 +98,8 @@ pub struct SignStatus {
     housing_temps: Vec<i32>,
     cabinet_temps: Vec<i32>,
     light_output: Option<u32>,
-    photocells: Option<Vec<Photocell>>,
-    power_supplies: Option<Vec<PowerSupply>>,
+    photocells: Vec<Photocell>,
+    power_supplies: Vec<PowerSupply>,
     ldc_pot_base: Option<i32>,
     pixel_current_low: Option<i32>,
     pixel_current_high: Option<i32>,
@@ -1012,7 +1012,8 @@ impl Dms {
                 html.push('%');
             }
             html.push_str("</div>");
-            if let Some(photocells) = &status.photocells {
+            let photocells = &status.photocells;
+            if !photocells.is_empty() {
                 html.push_str("<table>");
                 for (i, photocell) in photocells.iter().enumerate() {
                     html.push_str("<tr><td>");
@@ -1050,7 +1051,8 @@ impl Dms {
     fn power_html(&self) -> String {
         let mut html = String::new();
         if let Some(status) = &self.status {
-            if let Some(power_supplies) = &status.power_supplies {
+            let power_supplies = &status.power_supplies;
+            if !power_supplies.is_empty() {
                 html.push_str("<div>⚡ <b>Power</b></div><table>");
                 for (i, supply) in power_supplies.iter().enumerate() {
                     html.push_str("<tr><td>");
