@@ -186,9 +186,8 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query the DMS controller temperature */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			pollTemp(mess,
-				tempMinCtrlCabinet, DMS.CABINET_TEMP_MIN,
-				tempMaxCtrlCabinet, DMS.CABINET_TEMP_MAX);
+			pollTemp(mess, DMS.CABINET_TEMPS, tempMinCtrlCabinet,
+				tempMaxCtrlCabinet);
 			return new AmbientTemperature();
 		}
 	}
@@ -199,9 +198,8 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query the DMS ambient temperature */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			pollTemp(mess,
-				tempMinAmbient, DMS.AMBIENT_TEMP_MIN,
-				tempMaxAmbient, DMS.AMBIENT_TEMP_MAX);
+			pollTemp(mess, DMS.AMBIENT_TEMPS, tempMinAmbient,
+				tempMaxAmbient);
 			return new HousingTemperature();
 		}
 	}
@@ -212,9 +210,8 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query the DMS housing temperature */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			pollTemp(mess,
-				tempMinSignHousing, DMS.HOUSING_TEMP_MIN,
-				tempMaxSignHousing, DMS.HOUSING_TEMP_MAX);
+			pollTemp(mess, DMS.HOUSING_TEMPS, tempMinSignHousing,
+				tempMaxSignHousing);
 			return new Failures();
 		}
 	}
@@ -543,9 +540,8 @@ public class OpQueryDMSStatus extends OpDMS {
 
 	/** Consolidated method to query temperature status */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void pollTemp(CommMessage mess,
-		MIB1203 min_obj, String min_key,
-		MIB1203 max_obj, String max_key) throws IOException
+	private void pollTemp(CommMessage mess, String key, MIB1203 min_obj,
+		MIB1203 max_obj) throws IOException
 	{
 		ASN1Integer min_temp = min_obj.makeInt();
 		ASN1Integer max_temp = max_obj.makeInt();
@@ -565,10 +561,13 @@ public class OpQueryDMSStatus extends OpDMS {
 				mn = mx;
 				mx = v;
 			}
+			JSONArray temps = new JSONArray();
 			if (mn_valid)
-				putStatus(min_key, mn);
+				temps.put(mn);
 			if (mx_valid)
-				putStatus(max_key, mx);
+				temps.put(mx);
+			if (mn_valid || mx_valid)
+				putStatus(key, temps);
 		}
 		catch (NoSuchName e) {
 			// Some signs don't have all temperature objects.

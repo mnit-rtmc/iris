@@ -94,12 +94,9 @@ pub struct PowerSupply {
 #[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct SignStatus {
     faults: Option<String>,
-    ambient_temp_min: Option<i32>,
-    ambient_temp_max: Option<i32>,
-    housing_temp_min: Option<i32>,
-    housing_temp_max: Option<i32>,
-    cabinet_temp_min: Option<i32>,
-    cabinet_temp_max: Option<i32>,
+    ambient_temps: Vec<i32>,
+    housing_temps: Vec<i32>,
+    cabinet_temps: Vec<i32>,
     light_output: Option<u32>,
     photocells: Option<Vec<Photocell>>,
     power_supplies: Option<Vec<PowerSupply>>,
@@ -993,21 +990,9 @@ impl Dms {
         let mut html = String::new();
         if let Some(status) = &self.status {
             html.push_str("<div>🌡️ <b>Temperature</b></div><ul>");
-            html.push_str(&temp_range(
-                "Ambient",
-                status.ambient_temp_min,
-                status.ambient_temp_max,
-            ));
-            html.push_str(&temp_range(
-                "Housing",
-                status.housing_temp_min,
-                status.housing_temp_max,
-            ));
-            html.push_str(&temp_range(
-                "Cabinet",
-                status.cabinet_temp_min,
-                status.cabinet_temp_max,
-            ));
+            html.push_str(&temp_range("Ambient", &status.ambient_temps));
+            html.push_str(&temp_range("Housing", &status.housing_temps));
+            html.push_str(&temp_range("Cabinet", &status.cabinet_temps));
             html.push_str("</ul>");
         }
         html
@@ -1108,22 +1093,32 @@ impl Dms {
     }
 }
 
-/// Format a temperature range
-fn temp_range(label: &str, mn: Option<i32>, mx: Option<i32>) -> String {
+/// Format a temperature range from a Vec
+fn temp_range(label: &str, temps: &[i32]) -> String {
+    let mut mn = None;
+    let mut mx = None;
+    for &temp in temps {
+        match (mn, mx) {
+            (Some(t0), Some(t1)) => {
+                mn = Some(temp.min(t0));
+                mx = Some(temp.max(t1));
+            }
+            _ => {
+                mn = Some(temp);
+                mx = Some(temp);
+            }
+        }
+    }
     match (mn, mx) {
         (Some(mn), Some(mx)) => {
-            if mx > mn {
+            if mn == mx {
+                let t = (f64::from(mn) * DegC).to::<TempUnit>();
+                format!("<li><div>{label} {t:.1}</div>")
+            } else {
                 let mn = (f64::from(mn) * DegC).to::<TempUnit>();
                 let mx = (f64::from(mx) * DegC).to::<TempUnit>();
                 format!("<li><div>{label} {mn:.1}…{mx:.1}</div>")
-            } else {
-                let t = (f64::from(mn) * DegC).to::<TempUnit>();
-                format!("<li><div>{label} {t:.1}</div>")
             }
-        }
-        (Some(t), None) | (None, Some(t)) => {
-            let t = (f64::from(t) * DegC).to::<TempUnit>();
-            format!("<li><div>{label} {t:.1}</div>")
         }
         _ => String::new(),
     }
