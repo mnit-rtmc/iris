@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2022  Minnesota Department of Transportation
+ * Copyright (C) 2016-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import us.mn.state.dot.tms.utils.Json;
 import us.mn.state.dot.tms.utils.LineReader;
 
 /**
@@ -111,6 +112,33 @@ public class CBWProperty extends ControllerProperty {
 	/** Get parsed serial number */
 	public String getSerialNumber() {
 		return serialNumber;
+	}
+
+	/** Get the hardware as JSON */
+	private String[] getHardware() {
+		StringBuilder sb = new StringBuilder();
+		sb.append('{');
+		sb.append(Json.str("make", "CBW"));
+		sb.append(Json.str("model", getModel()));
+		// remove trailing comma
+		if (sb.charAt(sb.length() - 1) == ',')
+		       sb.setLength(sb.length() - 1);
+		sb.append('}');
+		return new String[] { sb.toString() };
+	}
+
+	/** Get controller setup as JSON */
+	public String getSetup() {
+		StringBuilder sb = new StringBuilder();
+		sb.append('{');
+		sb.append(Json.str("serial_num", getSerialNumber()));
+		sb.append(Json.str("version", getModel()));
+		sb.append(Json.arr("hw", getHardware()));
+		// remove trailing comma
+		if (sb.charAt(sb.length() - 1) == ',')
+		       sb.setLength(sb.length() - 1);
+		sb.append('}');
+		return sb.toString();
 	}
 
 	/** Get a string representation */

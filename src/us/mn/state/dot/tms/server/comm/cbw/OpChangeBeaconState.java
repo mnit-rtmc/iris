@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2022  Minnesota Department of Transportation
+ * Copyright (C) 2016-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ public class OpChangeBeaconState extends OpDevice<CBWProperty> {
 
 	/** Get URI path + query components */
 	private String getPathQuery(int pin, boolean on) {
-		String m = ControllerHelper.getSetup(controller, "model");
+		String m = ControllerHelper.getSetup(controller, "hw", "model");
 		Model mdl = Model.fromValue(m);
 		return mdl.statePath() + mdl.commandQuery(pin, on);
 	}
