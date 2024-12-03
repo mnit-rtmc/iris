@@ -54,6 +54,17 @@ controller **password** field is used to enter authentication data.
   separate the username and password with a colon, in the same manner as HTTP
   basic authentication.
 
+## Setup JSON
+
+Cnfiguration data read from the controller is stored as JSON in `setup`.
+
+Key          | Value
+-------------|--------------------------------
+`serial_num` | Unique controller serial number
+`version`    | Version number / tag
+`hw`         | Array of hardware modules: `make`, `model`, `version`
+`sw`         | Array of software modules: `make`, `model`, `version`
+
 ## Devices
 
 A _device_ is one of several types of traffic control or sensing systems.  These

@@ -71,7 +71,7 @@ public interface Controller extends SonarObject {
 	/** Set notes (including hashtags) */
 	void setNotes(String n);
 
-	/** Get setup data read from the controller */
+	/** Get setup data read from the controller as JSON */
 	String getSetup();
 
 	/** Get the controller fail time, or null if communication is not
