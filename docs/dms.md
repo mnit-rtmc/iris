@@ -58,8 +58,8 @@ protocol.  **Remote** [beacon]s are controlled using a separate [comm link].
 Sign status data is stored as JSON in `status`.
 
 Key              | Value
------------------|----------------------------------
-`faults`         | Array of current fault conditions
+-----------------|--------------------------------------------------
+`faults`         | Current fault conditions, separated by semicolons
 `photocells`     | Array of objects: `description`, `error`, `reading`
 `light_output`   | Integer light output percentage
 `power_supplies` | Array of objects: `description`, `supply_type`, `error`, `detail`, `voltage`

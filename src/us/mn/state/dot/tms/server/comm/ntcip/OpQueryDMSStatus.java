@@ -227,7 +227,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			logQuery(shortError);
 			String faults = shortError.getValue(";");
 			if (faults.length() > 0)
-				putStatus(DMS.FAULTS, faults.toLowerCase());
+				putFaults(faults.toLowerCase());
 			return new MoreFailures();
 		}
 	}
@@ -258,7 +258,7 @@ public class OpQueryDMSStatus extends OpDMS {
 				logQuery(con);
 				String faults = con.getValue(";");
 				if (faults.length() > 0)
-					putFaults(faults.toLowerCase());
+					putCtrlFaults(faults.toLowerCase());
 			}
 			if (ShortErrorStatus.PIXEL.isSet(se))
 				logQuery(pix_rows);

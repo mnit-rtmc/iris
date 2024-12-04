@@ -78,7 +78,7 @@ abstract public class OpDMS extends OpNtcip {
 	/** Put an object into DMS status */
 	protected final void putStatus(String key, Object value) {
 		try {
-			status.put(key, value);
+			status.putOnce(key, value);
 		}
 		catch (JSONException e) {
 			logError("putStatus: " + e.getMessage() + ", " + key);

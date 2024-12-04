@@ -84,7 +84,7 @@ abstract class OpDms extends OpDevice {
 	/** Put an object into DMS status */
 	protected final void putStatus(String key, Object value) {
 		try {
-			status.put(key, value);
+			status.putOnce(key, value);
 		}
 		catch (JSONException e) {
 			LOG.log("putStatus: " + e.getMessage() + ", " + key);
