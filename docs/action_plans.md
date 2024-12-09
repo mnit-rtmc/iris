@@ -51,7 +51,7 @@ the **Next Phase**.  *Hold Time* must be a multiple of 30 seconds.
 | Access       | Primary                 |
 |--------------|-------------------------|
 | 👁️  View      | name                    |
-| 💡 Manage    | hold\_time, next\_phase |
+| 🔧 Configure | hold\_time, next\_phase |
 
 </details>
 

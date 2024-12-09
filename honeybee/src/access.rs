@@ -128,6 +128,7 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
         | (Res::Controller, "notes")
         | (Res::Detector, "abandoned")
         | (Res::Detector, "notes")
+        | (Res::DeviceAction, _)
         | (Res::Dms, "device_request")
         | (Res::Dms, "notes")
         | (Res::Dms, "preset")
@@ -147,6 +148,7 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
         | (Res::RampMeter, "am_target")
         | (Res::RampMeter, "pm_target")
         | (Res::Role, "enabled")
+        | (Res::TimeAction, _)
         | (Res::User, "enabled")
         | (Res::User, "password")
         | (Res::VideoMonitor, "notes")
@@ -173,7 +175,7 @@ fn required_post_operate(res: Res) -> bool {
 fn required_post_manage(res: Res) -> bool {
     use Res::*;
     match res {
-        ActionPlan | MsgPattern | MsgLine => true,
+        ActionPlan | DeviceAction | MsgPattern | MsgLine | TimeAction => true,
         _ => false,
     }
 }
