@@ -854,6 +854,7 @@ fn other_object(honey: Honey) -> Router {
 const fn one_sql(res: Res) -> &'static str {
     use Res::*;
     match res {
+        ActionPlan => query::ACTION_PLAN_ONE,
         Alarm => query::ALARM_ONE,
         Beacon => query::BEACON_ONE,
         CabinetStyle => query::CABINET_STYLE_ONE,
@@ -866,6 +867,7 @@ const fn one_sql(res: Res) -> &'static str {
         DayMatcher => query::DAY_MATCHER_ONE,
         DayPlan => query::DAY_PLAN_ONE,
         Detector => query::DETECTOR_ONE,
+        DeviceAction => query::DEVICE_ACTION_ONE,
         Dms => query::DMS_ONE,
         Domain => query::DOMAIN_ONE,
         EncoderStream => query::ENCODER_STREAM_ONE,
@@ -888,6 +890,7 @@ const fn one_sql(res: Res) -> &'static str {
         MsgLine => query::MSG_LINE_ONE,
         MsgPattern => query::MSG_PATTERN_ONE,
         Permission => query::PERMISSION_ONE,
+        PlanPhase => query::PLAN_PHASE_ONE,
         RoadAffix => query::ROAD_AFFIX_ONE,
         RampMeter => query::RAMP_METER_ONE,
         Role => query::ROLE_ONE,
@@ -895,6 +898,7 @@ const fn one_sql(res: Res) -> &'static str {
         SignDetail => query::SIGN_DETAIL_ONE,
         SignMessage => query::SIGN_MSG_ONE,
         TagReader => query::TAG_READER_ONE,
+        TimeAction => query::TIME_ACTION_ONE,
         User => query::USER_ONE,
         VideoMonitor => query::VIDEO_MONITOR_ONE,
         WeatherSensor => query::WEATHER_SENSOR_ONE,

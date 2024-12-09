@@ -23,7 +23,7 @@ as [DMS]s and [ramp meter]s.
 | Access       | Primary       | Secondary     |
 |--------------|---------------|---------------|
 | 👁️  View      | name          |               |
-| 👉 Operate   | phase         |               |
+| 👉 Operate   |               | phase         |
 | 💡 Manage    | notes, active | sync\_actions, sticky, ignore\_auto\_fail, default\_phase |
 
 </details>
@@ -73,10 +73,10 @@ plan.  These devices can be:
 * `iris/api/device_action` (primary)
 * `iris/api/device_action/{name}`
 
-| Access       | Primary                         | Secondary     |
-|--------------|---------------------------------|---------------|
-| 👁️  View      | name, action\_plan              |               |
-| 💡 Manage    | phase, hashtag, msg\_pattern    | msg\_priority |
+| Access       | Primary            | Secondary                          |
+|--------------|--------------------|------------------------------------|
+| 👁️  View      | name, action\_plan |                                    |
+| 💡 Manage    | hashtag            | phase, msg\_priority, msg\_pattern |
 
 </details>
 

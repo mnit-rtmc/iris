@@ -28,6 +28,7 @@ use tokio_postgres::Client;
 /// A resource which can be queried from a database connection.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Resource {
+    ActionPlan,
     Alarm,
     Beacon,
     BeaconState,
@@ -44,6 +45,7 @@ pub enum Resource {
     DayPlan,
     Detector,
     DetectorPub,
+    DeviceAction,
     Direction,
     Dms,
     DmsPub,
@@ -82,6 +84,7 @@ pub enum Resource {
     ParkingAreaDyn,
     ParkingAreaArch,
     Permission,
+    PlanPhase,
     RampMeter,
     ResourceType,
     Rnode,
@@ -99,6 +102,7 @@ pub enum Resource {
     SystemAttribute,
     SystemAttributePub,
     TagReader,
+    TimeAction,
     User,
     VideoMonitor,
     WeatherSensor,
@@ -111,6 +115,7 @@ impl Resource {
     pub fn iter() -> impl Iterator<Item = Resource> {
         use Resource::*;
         [
+            ActionPlan,
             Alarm,
             Beacon,
             BeaconState,
@@ -127,6 +132,7 @@ impl Resource {
             DayPlan,
             Detector,
             DetectorPub,
+            DeviceAction,
             Direction,
             Dms,
             DmsPub,
@@ -165,6 +171,7 @@ impl Resource {
             ParkingAreaDyn,
             ParkingAreaArch,
             Permission,
+            PlanPhase,
             RampMeter,
             ResourceType,
             Rnode,
@@ -182,6 +189,7 @@ impl Resource {
             SystemAttribute,
             SystemAttributePub,
             TagReader,
+            TimeAction,
             User,
             VideoMonitor,
             WeatherSensor,
@@ -196,6 +204,7 @@ impl Resource {
     const fn res_type(self) -> Res {
         use Resource::*;
         match self {
+            ActionPlan => Res::ActionPlan,
             Alarm => Res::Alarm,
             Beacon => Res::Beacon,
             BeaconState => Res::BeaconState,
@@ -210,6 +219,7 @@ impl Resource {
             DayMatcher => Res::DayMatcher,
             DayPlan => Res::DayPlan,
             Detector | DetectorPub => Res::Detector,
+            DeviceAction => Res::DeviceAction,
             Direction => Res::Direction,
             Dms | DmsPub | DmsStat => Res::Dms,
             Domain => Res::Domain,
@@ -246,6 +256,7 @@ impl Resource {
                 Res::ParkingArea
             }
             Permission => Res::Permission,
+            PlanPhase => Res::PlanPhase,
             RampMeter => Res::RampMeter,
             ResourceType => Res::ResourceType,
             Rnode => Res::Rnode,
@@ -261,6 +272,7 @@ impl Resource {
             SignMessage => Res::SignMessage,
             SystemAttribute | SystemAttributePub => Res::SystemAttribute,
             TagReader => Res::TagReader,
+            TimeAction => Res::TimeAction,
             User => Res::User,
             VideoMonitor => Res::VideoMonitor,
             WeatherSensor | WeatherSensorPub => Res::WeatherSensor,
@@ -272,6 +284,7 @@ impl Resource {
     const fn path(self) -> &'static str {
         use Resource::*;
         match self {
+            ActionPlan => "api/action_plan",
             Alarm => "api/alarm",
             Beacon => "api/beacon",
             BeaconState => "lut/beacon_state",
@@ -288,6 +301,7 @@ impl Resource {
             DayPlan => "api/day_plan",
             Detector => "api/detector",
             DetectorPub => "detector_pub",
+            DeviceAction => "api/device_action",
             Direction => "lut/direction",
             Dms => "api/dms",
             DmsPub => "dms_pub",
@@ -326,6 +340,7 @@ impl Resource {
             ParkingAreaDyn => "TPIMS_dynamic",
             ParkingAreaArch => "TPIMS_archive",
             Permission => "api/permission",
+            PlanPhase => "api/plan_phase",
             RampMeter => "api/ramp_meter",
             ResourceType => "lut/resource_type",
             Rnode => unreachable!(),
@@ -343,6 +358,7 @@ impl Resource {
             SystemAttribute => "api/system_attribute",
             SystemAttributePub => "system_attribute_pub",
             TagReader => "api/tag_reader",
+            TimeAction => "api/time_action",
             User => "api/user_id",
             VideoMonitor => "api/video_monitor",
             WeatherSensor => "api/weather_sensor",
@@ -365,6 +381,7 @@ impl Resource {
     const fn all_sql(self) -> &'static str {
         use Resource::*;
         match self {
+            ActionPlan => query::ACTION_PLAN_ALL,
             Alarm => query::ALARM_ALL,
             Beacon => query::BEACON_ALL,
             BeaconState => query::BEACON_STATE_LUT,
@@ -381,6 +398,7 @@ impl Resource {
             DayPlan => query::DAY_PLAN_ALL,
             Detector => query::DETECTOR_ALL,
             DetectorPub => query::DETECTOR_PUB,
+            DeviceAction => query::DEVICE_ACTION_ALL,
             Direction => query::DIRECTION_LUT,
             Dms => query::DMS_ALL,
             DmsPub => query::DMS_PUB,
@@ -419,6 +437,7 @@ impl Resource {
             ParkingAreaDyn => query::PARKING_AREA_DYN,
             ParkingAreaArch => query::PARKING_AREA_ARCH,
             Permission => query::PERMISSION_ALL,
+            PlanPhase => query::PLAN_PHASE_ALL,
             RampMeter => query::RAMP_METER_ALL,
             ResourceType => query::RESOURCE_TYPE_LUT,
             Rnode => query::RNODE_FULL,
@@ -436,6 +455,7 @@ impl Resource {
             SystemAttribute => query::SYSTEM_ATTRIBUTE_ALL,
             SystemAttributePub => query::SYSTEM_ATTRIBUTE_PUB,
             TagReader => query::TAG_READER_ALL,
+            TimeAction => query::TIME_ACTION_ALL,
             User => query::USER_ALL,
             VideoMonitor => query::VIDEO_MONITOR_ALL,
             WeatherSensor => query::WEATHER_SENSOR_ALL,

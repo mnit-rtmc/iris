@@ -33,6 +33,7 @@ pub enum Res {
     DayMatcher,
     DayPlan,
     Detector,
+    DeviceAction,
     Direction,
     Dms,
     Domain,
@@ -69,6 +70,7 @@ pub enum Res {
     MsgPattern,
     ParkingArea,
     Permission,
+    PlanPhase,
     RampMeter,
     ResourceType,
     Rnode,
@@ -84,6 +86,7 @@ pub enum Res {
     SignMessage,
     SystemAttribute,
     TagReader,
+    TimeAction,
     TollZone,
     User,
     VideoMonitor,
@@ -126,6 +129,7 @@ impl Res {
             DayMatcher,
             DayPlan,
             Detector,
+            DeviceAction,
             Direction,
             Dms,
             Domain,
@@ -162,6 +166,7 @@ impl Res {
             MsgPattern,
             ParkingArea,
             Permission,
+            PlanPhase,
             RampMeter,
             ResourceType,
             Rnode,
@@ -177,6 +182,7 @@ impl Res {
             SignMessage,
             SystemAttribute,
             TagReader,
+            TimeAction,
             TollZone,
             User,
             VideoMonitor,
@@ -207,6 +213,7 @@ impl Res {
             DayMatcher => "day_matcher",
             DayPlan => "day_plan",
             Detector => "detector",
+            DeviceAction => "device_action",
             Direction => "direction",
             Dms => "dms",
             Domain => "domain",
@@ -243,6 +250,7 @@ impl Res {
             MsgPattern => "msg_pattern",
             ParkingArea => "parking_area",
             Permission => "permission",
+            PlanPhase => "plan_phase",
             RampMeter => "ramp_meter",
             ResourceType => "resource_type",
             Rnode => "r_node",
@@ -258,6 +266,7 @@ impl Res {
             SignMessage => "sign_message",
             SystemAttribute => "system_attribute",
             TagReader => "tag_reader",
+            TimeAction => "time_action",
             TollZone => "toll_zone",
             User => "user_id",
             VideoMonitor => "video_monitor",
@@ -282,6 +291,7 @@ impl Res {
             DayMatcher => "🗓️",
             DayPlan => "🗓️",
             Detector => "🚗⬚",
+            DeviceAction => "➡️",
             Dms => "⬛",
             Domain => "🖧 ",
             EncoderStream => "〜",
@@ -302,11 +312,13 @@ impl Res {
             LcsIndication => "🡇 ",
             Modem => "🖀 ",
             Permission => "🗝️ ",
-            RoadAffix => "🛣️ ",
+            PlanPhase => "🪜",
             RampMeter => "🚦",
+            RoadAffix => "🛣️ ",
             Role => "💪",
             SignConfig => "📐",
             TagReader => "🏷️ ",
+            TimeAction => "⏰",
             TollZone => "💲",
             User => "👤",
             VideoMonitor => "📺",
@@ -334,15 +346,16 @@ impl Res {
         use Res::*;
         #[allow(clippy::match_like_matches_macro)]
         match self {
-            Alarm | Beacon | CabinetStyle | Camera | CameraPreset
-            | CommConfig | CommLink | Controller | DayMatcher | DayPlan
-            | Detector | Dms | Domain | EncoderStream | EncoderType
-            | EventConfig | FlowStream | GateArm | GateArmArray | Gps
-            | Incident | IncidentDetail | IncAdvice | IncDescriptor
-            | IncLocator | LaneMarking | LcsArray | LcsIndication | Modem
-            | MsgLine | MsgPattern | ParkingArea | Permission | RampMeter
-            | Rnode | Road | RoadAffix | Role | SignConfig | SignDetail
-            | SignMessage | SystemAttribute | TagReader | User
+            ActionPlan | Alarm | Beacon | CabinetStyle | Camera
+            | CameraPreset | CommConfig | CommLink | Controller
+            | DayMatcher | DayPlan | Detector | DeviceAction | Dms | Domain
+            | EncoderStream | EncoderType | EventConfig | FlowStream
+            | GateArm | GateArmArray | Gps | Incident | IncidentDetail
+            | IncAdvice | IncDescriptor | IncLocator | LaneMarking
+            | LcsArray | LcsIndication | Modem | MsgLine | MsgPattern
+            | ParkingArea | Permission | PlanPhase | RampMeter | Rnode
+            | Road | RoadAffix | Role | SignConfig | SignDetail
+            | SignMessage | SystemAttribute | TagReader | TimeAction | User
             | VideoMonitor | WeatherSensor | Word => true,
             _ => false,
         }
@@ -353,7 +366,9 @@ impl Res {
         use Res::*;
         match self {
             // Action plan resources
-            DayMatcher | DayPlan => ActionPlan,
+            DayMatcher | DayPlan | DeviceAction | PlanPhase | TimeAction => {
+                ActionPlan
+            }
             // Camera resources
             CameraPreset | EncoderStream | EncoderType => Camera,
             // Controller resources

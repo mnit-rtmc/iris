@@ -13,6 +13,19 @@
 // GNU General Public License for more details.
 //
 
+/// SQL query for all action plans (primary)
+pub const ACTION_PLAN_ALL: &str = "\
+  SELECT name, notes, active \
+  FROM iris.action_plan \
+  ORDER BY name";
+
+/// SQL query for one action plan (secondary)
+pub const ACTION_PLAN_ONE: &str = "\
+  SELECT name, notes, active, sync_actions, sticky, ignore_auto_fail, \
+         default_phase, phase \
+  FROM iris.action_plan \
+  WHERE name = $1";
+
 /// SQL query for all alarms (primary)
 pub const ALARM_ALL: &str = "\
   SELECT name, description, controller, state \
@@ -221,6 +234,18 @@ pub const DETECTOR_ONE: &str = "\
 pub const DETECTOR_PUB: &str = "\
   SELECT name, r_node, cor_id, lane_number, lane_code, field_length \
   FROM detector_view";
+
+/// SQL query for all device actions (primary)
+pub const DEVICE_ACTION_ALL: &str = "\
+  SELECT name, action_plan, hashtag \
+  FROM iris.device_action \
+  ORDER BY action_plan, name";
+
+/// SQL query for one device action (secondary)
+pub const DEVICE_ACTION_ONE: &str = "\
+  SELECT name, action_plan, hashtag, phase, msg_priority, msg_pattern \
+  FROM iris.device_action \
+  WHERE name = $1";
 
 /// SQL query for directions (LUT)
 pub const DIRECTION_LUT: &str = "\
@@ -645,6 +670,18 @@ pub const PERMISSION_ONE: &str = "\
   FROM iris.permission \
   WHERE name = $1";
 
+/// SQL query for all plan phases (primary)
+pub const PLAN_PHASE_ALL: &str = "\
+  SELECT name, hold_time, next_phase \
+  FROM iris.plan_phase \
+  ORDER BY name";
+
+/// SQL query for one plan phase (secondary)
+pub const PLAN_PHASE_ONE: &str = "\
+  SELECT name, hold_time, next_phase \
+  FROM iris.plan_phase \
+  WHERE name = $1";
+
 /// SQL query for all ramp meters (primary)
 pub const RAMP_METER_ALL: &str = "\
   SELECT m.name, location, controller, notes \
@@ -843,6 +880,18 @@ pub const TAG_READER_ONE: &str = "\
   FROM iris.tag_reader t \
   LEFT JOIN geo_loc_view gl ON t.geo_loc = gl.name \
   WHERE t.name = $1";
+
+/// SQL query for all time actions (primary)
+pub const TIME_ACTION_ALL: &str = "\
+  SELECT name, action_plan \
+  FROM iris.time_action \
+  ORDER BY action_plan, day_plan, sched_date, time_of_day, name";
+
+/// SQL query for one time action (secondary)
+pub const TIME_ACTION_ONE: &str = "\
+  SELECT name, action_plan, day_plan, sched_date, time_of_day, phase \
+  FROM iris.time_action \
+  WHERE name = $1";
 
 /// SQL query for all users (primary)
 pub const USER_ALL: &str = "\
