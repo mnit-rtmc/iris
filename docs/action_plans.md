@@ -14,6 +14,20 @@ as [DMS]s and [ramp meter]s.
 - **Ignore Auto-Fail**: if selected, [device action](#device-actions) messages
   will ignore detector [auto-fail] (`[exit` *…* `]` or `[slow` *…* `]` only)
 
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/action_plan` (primary)
+* `iris/api/action_plan/{name}`
+
+| Access       | Primary       | Secondary     |
+|--------------|---------------|---------------|
+| 👁️  View      | name          |               |
+| 👉 Operate   | phase         |               |
+| 💡 Manage    | notes, active | sync\_actions, sticky, ignore\_auto\_fail, default\_phase |
+
+</details>
+
 ## Plan Phases
 
 A plan phase is used to associate [device actions](#device-actions) with a plan.
@@ -28,6 +42,19 @@ added on the **Plan Phases** tab.  Each phase must have a unique name.
 By specifying **Hold Time**, a *transient* phase will advance automatically to
 the **Next Phase**.  *Hold Time* must be a multiple of 30 seconds.
 
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/plan_phase` (primary)
+* `iris/api/plan_phase/{name}`
+
+| Access       | Primary                 |
+|--------------|-------------------------|
+| 👁️  View      | name                    |
+| 💡 Manage    | hold\_time, next\_phase |
+
+</details>
+
 ## Device Actions
 
 Device actions use [hashtag]s to associate devices with one phase of an action
@@ -39,6 +66,19 @@ plan.  These devices can be:
  - [camera], recalls the specified camera [preset] (experimental)
 
 [Priority] determines the priority of messages created by the action.
+
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/device_action` (primary)
+* `iris/api/device_action/{name}`
+
+| Access       | Primary                         | Secondary     |
+|--------------|---------------------------------|---------------|
+| 👁️  View      | name, action\_plan              |               |
+| 💡 Manage    | phase, hashtag, msg\_pattern    | msg\_priority |
+
+</details>
 
 ### Action Tags
 
@@ -74,6 +114,19 @@ These events are scheduled using either a [day plan](#day-plans) or a specific
 date (but not both).  A time of day must also be specified (HH:MM in 24-hour
 format).  Whenever the scheduled time occurs, the action plan will be changed to
 the specified phase.
+
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/time_action` (primary)
+* `iris/api/time_action/{name}`
+
+| Access       | Primary            | Secondary                             |
+|--------------|--------------------|---------------------------------------|
+| 👁️  View      | name, action\_plan | day\_plan, sched\_date, time\_of\_day |
+| 💡 Manage    |                    | phase                                 |
+
+</details>
 
 ## Time Action Tag
 
@@ -151,6 +204,25 @@ be `NULL` for "any":
 - **Week** (1-4, or -1 for last)
 - **Shift** - only needed for days like *Black Friday*
   (Fourth Thursday of November **+1**)
+
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/day_plan` (primary)
+* `iris/api/day_plan/{name}`
+
+| Access       | Primary        |
+|--------------|----------------|
+| 👁️  View      | name, holidays |
+
+* `iris/api/day_matcher` (primary)
+* `iris/api/day_matcher/{name}`
+
+| Access       | Primary                                           |
+|--------------|---------------------------------------------------|
+| 👁️  View      | name, day\_plan, month, day, weekday, week, shift |
+
+</details>
 
 ## Manual Control
 
