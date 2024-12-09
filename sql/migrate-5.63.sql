@@ -152,4 +152,67 @@ GRANT SELECT ON weather_sensor_view TO PUBLIC;
 DELETE FROM iris.system_attribute
     WHERE name = 'dms_pixel_maint_threshold';
 
+-- Add action plan notify triggers
+CREATE TRIGGER plan_phase_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.plan_phase
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+CREATE FUNCTION iris.action_plan_notify() RETURNS TRIGGER AS
+    $action_plan_notify$
+BEGIN
+    IF (NEW.notes IS DISTINCT FROM OLD.notes) OR
+       (NEW.active IS DISTINCT FROM OLD.active)
+    THEN
+        NOTIFY action_plan;
+    ELSE
+        PERFORM pg_notify('action_plan', NEW.name);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$action_plan_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER action_plan_notify_trig
+    AFTER UPDATE ON iris.action_plan
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.action_plan_notify();
+
+CREATE TRIGGER action_plan_table_notify_trig
+    AFTER INSERT OR DELETE ON iris.action_plan
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+CREATE FUNCTION iris.time_action_notify() RETURNS TRIGGER AS
+    $time_action_notify$
+BEGIN
+    PERFORM pg_notify('time_action', NEW.name);
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$time_action_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER time_action_notify_trig
+    AFTER UPDATE ON iris.time_action
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.time_action_notify();
+
+CREATE TRIGGER time_action_table_notify_trig
+    AFTER INSERT OR DELETE ON iris.time_action
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+CREATE FUNCTION iris.device_action_notify() RETURNS TRIGGER AS
+    $device_action_notify$
+BEGIN
+    IF (NEW.hashtag IS DISTINCT FROM OLD.hashtag) THEN
+        NOTIFY device_action;
+    ELSE
+        PERFORM pg_notify('device_action', NEW.name);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$device_action_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER device_action_notify_trig
+    AFTER UPDATE ON iris.device_action
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.device_action_notify();
+
+CREATE TRIGGER device_action_table_notify_trig
+    AFTER INSERT OR DELETE ON iris.device_action
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
 COMMIT;

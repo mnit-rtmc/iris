@@ -29,6 +29,7 @@ update, and is caused by one of these conditions:
 
 *Notify Channel*   | (G) | (C) | (P) | (D)
 -------------------|-----|-----|-----|-----
+`action_plan`      |     |     |     |
 `alarm`            |     | ✔️   |     |
 `beacon`           | ✔️   | ✔️   | ✔️   |
 `cabinet_style`    |     |     |     |
@@ -40,6 +41,7 @@ update, and is caused by one of these conditions:
 `controller`       | ✔️   |     |     |
 `day_plan`         |     |     |     |
 `detector`         |     | ✔️   |     |
+`device_action`    |     |      |     |
 `dms`              | ✔️   | ✔️   | ✔️   |
 `domain`           |     |     |     |
 `encoder_stream`   |     |     |     |
@@ -63,6 +65,7 @@ update, and is caused by one of these conditions:
 `msg_line`         |     |     |     |
 `parking_area`     | ✔️   |     |     |
 `permission`       |     |     |     |
+`plan_phase`       |     |     |     |
 `ramp_meter`       | ✔️   | ✔️   | ✔️   |
 `r_node`           | ✔️   |     |     |
 `road`             |     |     |     |
@@ -73,6 +76,7 @@ update, and is caused by one of these conditions:
 `sign_message`     |     |     |     |
 `system_attribute` |     |     |     |
 `tag_reader`       | ✔️   | ✔️   |     |
+`time_action`      |     |     |     |
 `user_id`          |     |     |     |
 `video_monitor`    |     | ✔️   |     |
 `weather_sensor`   | ✔️   | ✔️   |     |
