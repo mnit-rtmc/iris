@@ -151,6 +151,7 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
         | (Res::TimeAction, _)
         | (Res::User, "enabled")
         | (Res::User, "password")
+        | (Res::VideoMonitor, "device_request")
         | (Res::VideoMonitor, "notes")
         | (Res::VideoMonitor, "restricted")
         | (Res::VideoMonitor, "monitor_style")

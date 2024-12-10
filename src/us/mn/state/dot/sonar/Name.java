@@ -193,6 +193,7 @@ public class Name {
 		{ "role", "enabled" },
 		{ "user", "enabled" },
 		{ "user", "password" },
+		{ "video_monitor", "deviceRequest" },
 		{ "video_monitor", "notes" },
 		{ "video_monitor", "restricted" },
 		{ "video_monitor", "monitorStyle" },

@@ -51,8 +51,10 @@ a [switching](#switching) system.
 |--------------|----------------------|----------------------------|
 | 👁️  View      | name                 |                            |
 | 👉 Operate   |                      | camera                     |
-| 💡 Manage    | notes                | restricted, monitor\_style |
+| 💡 Manage    | notes                | restricted, monitor\_style, device\_request † |
 | 🔧 Configure | mon\_num, controller | pin                        |
+
+† _Write only_
 
 </details>
 
