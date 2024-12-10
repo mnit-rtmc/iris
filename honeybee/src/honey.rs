@@ -901,6 +901,7 @@ const fn one_sql(res: Res) -> &'static str {
         SignMessage => query::SIGN_MSG_ONE,
         TagReader => query::TAG_READER_ONE,
         TimeAction => query::TIME_ACTION_ONE,
+        TollZone => query::TOLL_ZONE_ONE,
         User => query::USER_ONE,
         VideoMonitor => query::VIDEO_MONITOR_ONE,
         WeatherSensor => query::WEATHER_SENSOR_ONE,

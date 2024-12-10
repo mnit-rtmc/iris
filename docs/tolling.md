@@ -56,6 +56,19 @@ p = α ⋅ k <sup>β</sup>
 
 The toll price is then rounded to the nearest $0.25.
 
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/toll_zone` (primary)
+* `iris/api/toll_zone/{name}`
+
+| Access       | Primary | Secondary                                   |
+|--------------|---------|---------------------------------------------|
+| 👁️  View      | name    |                                             |
+| 💡 Manage    | tollway | start\_id, end\_id, alpha, beta, max\_price |
+
+</details>
+
 ## Pricing on DMS
 
 The toll price can be displayed in DMS messages using [device actions].  A

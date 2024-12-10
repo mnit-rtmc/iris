@@ -923,6 +923,18 @@ pub const TIME_ACTION_ONE: &str = "\
   FROM iris.time_action \
   WHERE name = $1";
 
+/// SQL query for all toll zones (primary)
+pub const TOLL_ZONE_ALL: &str = "\
+  SELECT name, tollway \
+  FROM iris.toll_zone \
+  ORDER BY name";
+
+/// SQL query for one toll zone (secondary)
+pub const TOLL_ZONE_ONE: &str = "\
+  SELECT name, start_id, end_id, tollway, alpha, beta, max_price \
+  FROM iris.toll_zone \
+  WHERE name = $1";
+
 /// SQL query for all users (primary)
 pub const USER_ALL: &str = "\
   SELECT name, full_name, role, enabled \

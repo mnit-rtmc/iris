@@ -364,7 +364,8 @@ impl Res {
             | MsgPattern | ParkingArea | Permission | PlanPhase | PlayList
             | RampMeter | Rnode | Road | RoadAffix | Role | SignConfig
             | SignDetail | SignMessage | SystemAttribute | TagReader
-            | TimeAction | User | VideoMonitor | WeatherSensor | Word => true,
+            | TimeAction | TollZone | User | VideoMonitor | WeatherSensor
+            | Word => true,
             _ => false,
         }
     }
