@@ -71,6 +71,19 @@ Font Size     | Size of title bar font (points)
 Title Bar     | Flag to enable title bar
 Auto Expand   | Flag to use full screen when only one monitor is active
 
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/monitor_style` (primary)
+* `iris/api/monitor_style/{name}`
+
+| Access       | Primary | Secondary |
+|--------------|---------|-----------|
+| 👁️  View      | name    |           |
+| 🔧 Configure |         | force\_aspect, accent, font\_sz, title\_bar, auto\_expand, hgap, vgap |
+
+</details>
+
 ## Switching
 
 There are several methods available for switching video monitors.  Using any of
@@ -109,6 +122,20 @@ be broken up and shared with other meta lists.
 Each role can have one _scratch_ play list:
 * Must have 💡 Manage [permissions] for `video_monitor`, with a [hashtag]
 * Exactly one play list must have that hashtag
+
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/play_list` (primary)
+* `iris/api/play_list/{name}`
+
+| Access       | Primary         | Secondary |
+|--------------|-----------------|-----------|
+| 👁️  View      | name            |           |
+| 💡 Manage    |                 | entries   |
+| 🔧 Configure | seq\_num, notes | meta      |
+
+</details>
 
 
 [camera]: cameras.html

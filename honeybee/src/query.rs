@@ -589,6 +589,19 @@ pub const MODEM_ONE: &str = "\
   FROM iris.modem \
   WHERE name = $1";
 
+/// SQL query for all monitor styles (primary)
+pub const MONITOR_STYLE_ALL: &str = "\
+  SELECT name \
+  FROM iris.monitor_style \
+  ORDER BY name";
+
+/// SQL query for one monitor style (secondary)
+pub const MONITOR_STYLE_ONE: &str = "\
+  SELECT name, force_aspect, accent, font_sz, title_bar, auto_expand, hgap, \
+         vgap \
+  FROM iris.monitor_style \
+  WHERE name = $1";
+
 /// SQL query for all message lines (primary)
 pub const MSG_LINE_ALL: &str = "\
   SELECT name, msg_pattern, line, multi, restrict_hashtag \
@@ -680,6 +693,23 @@ pub const PLAN_PHASE_ALL: &str = "\
 pub const PLAN_PHASE_ONE: &str = "\
   SELECT name, hold_time, next_phase \
   FROM iris.plan_phase \
+  WHERE name = $1";
+
+/// SQL query for all play lists (primary)
+pub const PLAY_LIST_ALL: &str = "\
+  SELECT name, seq_num, notes \
+  FROM iris.play_list \
+  ORDER BY name";
+
+/// SQL query for one play list (secondary)
+pub const PLAY_LIST_ONE: &str = "\
+  SELECT name, meta, seq_num, notes, ARRAY(\
+      SELECT COALESCE(camera, sub_list) \
+      FROM iris.play_list_entry \
+      WHERE play_list = name \
+      ORDER BY ordinal\
+  ) AS entries \
+  FROM iris.play_list \
   WHERE name = $1";
 
 /// SQL query for all ramp meters (primary)

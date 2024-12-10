@@ -66,11 +66,13 @@ pub enum Res {
     LcsLock,
     MeterQueueState,
     Modem,
+    MonitorStyle,
     MsgLine,
     MsgPattern,
     ParkingArea,
     Permission,
     PlanPhase,
+    PlayList,
     RampMeter,
     ResourceType,
     Rnode,
@@ -162,11 +164,13 @@ impl Res {
             LcsLock,
             MeterQueueState,
             Modem,
+            MonitorStyle,
             MsgLine,
             MsgPattern,
             ParkingArea,
             Permission,
             PlanPhase,
+            PlayList,
             RampMeter,
             ResourceType,
             Rnode,
@@ -246,11 +250,13 @@ impl Res {
             LcsLock => "lcs_lock",
             MeterQueueState => "meter_queue_state",
             Modem => "modem",
+            MonitorStyle => "monitor_style",
             MsgLine => "msg_line",
             MsgPattern => "msg_pattern",
             ParkingArea => "parking_area",
             Permission => "permission",
             PlanPhase => "plan_phase",
+            PlayList => "play_list",
             RampMeter => "ramp_meter",
             ResourceType => "resource_type",
             Rnode => "r_node",
@@ -311,8 +317,10 @@ impl Res {
             LcsArray => "🡇 ❌ ",
             LcsIndication => "🡇 ",
             Modem => "🖀 ",
+            MonitorStyle => "FIXME",
             Permission => "🗝️ ",
             PlanPhase => "🪜",
+            PlayList => "FIXME",
             RampMeter => "🚦",
             RoadAffix => "🛣️ ",
             Role => "💪",
@@ -352,11 +360,11 @@ impl Res {
             | EncoderStream | EncoderType | EventConfig | FlowStream
             | GateArm | GateArmArray | Gps | Incident | IncidentDetail
             | IncAdvice | IncDescriptor | IncLocator | LaneMarking
-            | LcsArray | LcsIndication | Modem | MsgLine | MsgPattern
-            | ParkingArea | Permission | PlanPhase | RampMeter | Rnode
-            | Road | RoadAffix | Role | SignConfig | SignDetail
-            | SignMessage | SystemAttribute | TagReader | TimeAction | User
-            | VideoMonitor | WeatherSensor | Word => true,
+            | LcsArray | LcsIndication | Modem | MonitorStyle | MsgLine
+            | MsgPattern | ParkingArea | Permission | PlanPhase | PlayList
+            | RampMeter | Rnode | Road | RoadAffix | Role | SignConfig
+            | SignDetail | SignMessage | SystemAttribute | TagReader
+            | TimeAction | User | VideoMonitor | WeatherSensor | Word => true,
             _ => false,
         }
     }
@@ -396,7 +404,7 @@ impl Res {
             // Toll zone resources
             TagReader => TollZone,
             // Video monitor resources
-            FlowStream => VideoMonitor,
+            FlowStream | MonitorStyle | PlayList => VideoMonitor,
             // Others
             _ => self,
         }
