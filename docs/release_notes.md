@@ -1,5 +1,15 @@
 # IRIS 5.x Release Notes
 
+5.63.0 (10 Dec 2024)
+ - Renamed "Maintenance" style to "Fault"
+ - Renamed "Failed" style to "Offline"
+ - Improved DMS `status` JSON format
+ - Improved controller `setup` JSON format/support
+ - Add controller `status` JSON
+ - honeybee: Add more API resources: `action_plan`, `device_action`,
+   `plan_phase`, `time_action`
+ - Removed `dms_pixel_maint_threshold` system attribute
+
 5.62.0 (20 Nov 2024)
  - Log sign event with blank msg (including user ID)
  - Log meter lock events (add `meter_lock_event_view`)
