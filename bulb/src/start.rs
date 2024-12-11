@@ -18,6 +18,7 @@ use crate::item::ItemState;
 use crate::util::Doc;
 use js_sys::JsString;
 use resources::Res;
+use std::error::Error as _;
 use std::future::Future;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -208,7 +209,12 @@ async fn do_future(future: impl Future<Output = Result<()>>) {
             // Card list may be out-of-date; refresh
             app::defer_action(DeferredAction::RefreshList, 200);
         }
-        Err(e) => show_toast(&format!("Error: {e}")),
+        Err(e) => {
+            if let Some(se) = e.source() {
+                console::log_1(&format!("{se}").into());
+            }
+            show_toast(&format!("Error: {e}"));
+        }
     }
 }
 
