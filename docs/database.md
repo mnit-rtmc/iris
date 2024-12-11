@@ -61,11 +61,13 @@ update, and is caused by one of these conditions:
 `lcs_array`        |     | ✔️   |     |
 `lcs_indication`   |     | ✔️   |     |
 `modem`            |     |     |     |
+`monitor_style`    |     |     |     |
 `msg_pattern`      |     |     |     |
 `msg_line`         |     |     |     |
 `parking_area`     | ✔️   |     |     |
 `permission`       |     |     |     |
 `plan_phase`       |     |     |     |
+`play_list`        |     |     |     |
 `ramp_meter`       | ✔️   | ✔️   | ✔️   |
 `r_node`           | ✔️   |     |     |
 `road`             |     |     |     |
@@ -77,6 +79,7 @@ update, and is caused by one of these conditions:
 `system_attribute` |     |     |     |
 `tag_reader`       | ✔️   | ✔️   |     |
 `time_action`      |     |     |     |
+`toll_zone`        |     |     |     |
 `user_id`          |     |     |     |
 `video_monitor`    |     | ✔️   |     |
 `weather_sensor`   | ✔️   | ✔️   |     |
