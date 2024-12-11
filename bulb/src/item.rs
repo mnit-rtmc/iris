@@ -150,7 +150,7 @@ impl ItemState {
     }
 }
 
-impl<'a> fmt::Display for ItemStates<'a> {
+impl fmt::Display for ItemStates<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut first = true;
         for (state, _dtl) in self.all.iter() {
@@ -164,7 +164,7 @@ impl<'a> fmt::Display for ItemStates<'a> {
     }
 }
 
-impl<'a> From<ItemState> for ItemStates<'a> {
+impl From<ItemState> for ItemStates<'_> {
     fn from(state: ItemState) -> Self {
         ItemStates {
             all: vec![(state, "")],

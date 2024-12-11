@@ -788,6 +788,7 @@ impl Dms {
         }
         html.push_str("</select>");
         html.push_str(&anc.make_lines(
+            #[allow(clippy::unnecessary_literal_unwrap)]
             &sign.unwrap(),
             pat_def,
             self.current_multi(anc),
