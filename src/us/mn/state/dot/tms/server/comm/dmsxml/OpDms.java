@@ -33,7 +33,9 @@ import us.mn.state.dot.tms.server.EmailHandler;
 import us.mn.state.dot.tms.server.SignConfigImpl;
 import us.mn.state.dot.tms.server.SignDetailImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.OpDevice;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
 import us.mn.state.dot.tms.units.Interval;
@@ -67,9 +69,6 @@ abstract class OpDms extends OpDevice {
 
 	/** operation description */
 	private String m_opDesc = "";
-
-	/** Number of times this operation has been previously attempted */
-	private int m_retry = 0;
 
 	/** Create a new DMS operation */
 	OpDms(PriorityLevel p, DMSImpl d, String opDesc) {
@@ -124,7 +123,7 @@ abstract class OpDms extends OpDevice {
 
 	/** Return true if the message is owned by the AWS */
 	static boolean ownerIsAws(final String msg_owner) {
-		if(msg_owner == null)
+		if (msg_owner == null)
 			return false;
 		return msg_owner.toLowerCase().equals(awsName().toLowerCase());
 	}
@@ -141,25 +140,6 @@ abstract class OpDms extends OpDevice {
 		int s = cc.getNoResponseDisconnectSec();
 		LOG.log("Op timeout is " + s + " secs, dms=" + m_dms);
 		return s * 1000;
-	}
-
-	/** Handle a failed operation.
-	  * @param errmsg Error message
-	  * @return true if the operation should be retried else false. */
-	boolean flagFailureShouldRetry(String errmsg) {
-	 	String msg = m_dms.getName();
-		if(errmsg == null || errmsg.isEmpty())
-			msg += " unknown error.";
-		else
-			msg += " " + errmsg;
-
-		// trigger error handling, changes status if necessary
-		// phase is set to null if no retry should be performed
-		handleCommError(EventType.PARSING_ERROR, msg);
-		boolean retry = !isDone();
-		if(retry)
-			++m_retry;
-		return retry;
 	}
 
 	/** random number generator */
@@ -274,7 +254,7 @@ abstract class OpDms extends OpDevice {
 		 *		<UseOnTime>...</UseOnTime>
 		 *		<OnTime>...</OnTime>
 		 *		<UseOffTime>...</UseOffTime>
-	 	 *		<OffTime>...</OffTime>
+		 *		<OffTime>...</OffTime>
 		 *		<DisplayTimeMS>...</DisplayTimeMS>
 		 *		<ActPriority>...</ActPriority>
 		 *		<RunPriority>...</RunPriority>
@@ -315,10 +295,10 @@ abstract class OpDms extends OpDevice {
 
 		/** Parse response.
 		 *  @return True to retry the operation else false if done. */
-		private boolean parseResponse(Message mess, XmlElem xrr) {
+		private boolean parseResponse(Message mess, XmlElem xrr)
+			throws IOException
+		{
 			long id = 0;
-			boolean valid = false;
-			String errmsg = "";
 			String model = "";
 			String signAccess = "";
 			String make = "";
@@ -336,109 +316,73 @@ abstract class OpDms extends OpDevice {
 			int signWidthPixels = 0;
 
 			try {
-				// id
 				id = xrr.getResLong("Id");
-
-				// valid flag
-				valid = xrr.getResBoolean("IsValid");
-
-				// error message text
-				errmsg = xrr.getResString("ErrMsg");
-				if (!valid && errmsg.length() <= 0)
-					errmsg = FAILURE_UNKNOWN;
-
-				// valid message received?
-				if (valid) {
-					signAccess = xrr.getResString(
-						"signAccess");
-					model = xrr.getResString("model");
-					make = xrr.getResString("make");
-					version = xrr.getResString("version");
-
-					// determine matrix type
-					String stype = xrr.getResString("type");
-					if(stype.toLowerCase().contains(
-						"full"))
-					{
-						type = DMSType.VMS_FULL;
-					} else {
-						LOG.log("SEVERE: Unknown "
-							+ "matrix type read ("
-							+ stype + ")");
-					}
-
-					horizBorder = xrr.getResInt(
-						"horizBorder");
-					vertBorder = xrr.getResInt(
-						"vertBorder");
-					horizPitch = xrr.getResInt(
-						"horizPitch");
-					vertPitch = xrr.getResInt(
-						"vertPitch");
-					signHeight = xrr.getResInt(
-						"signHeight");
-					signWidth = xrr.getResInt(
-						"signWidth");
-					characterHeightPixels = xrr.getResInt(
-						"characterHeightPixels");
-					characterWidthPixels = xrr.getResInt(
-						"characterWidthPixels");
-					signHeightPixels = xrr.getResInt(
-						"signHeightPixels");
-					signWidthPixels = xrr.getResInt(
-						"signWidthPixels");
+				boolean valid = xrr.getResBoolean("IsValid");
+				String errmsg = xrr.getResString("ErrMsg");
+				if (!valid) {
+					LOG.log("WARNING: response ignored " +
+						"because valid is false, " +
+						"errmsg=" + errmsg
+					);
+					throw new ControllerException(errmsg);
 				}
-			} catch (IllegalArgumentException ex) {
+				signAccess = xrr.getResString(
+					"signAccess");
+				model = xrr.getResString("model");
+				make = xrr.getResString("make");
+				version = xrr.getResString("version");
+
+				String stype = xrr.getResString("type");
+				if (stype.toLowerCase().contains("full")) {
+					type = DMSType.VMS_FULL;
+				} else {
+					LOG.log("SEVERE: Unknown "
+						+ "matrix type read ("
+						+ stype + ")");
+				}
+
+				horizBorder = xrr.getResInt("horizBorder");
+				vertBorder = xrr.getResInt("vertBorder");
+				horizPitch = xrr.getResInt("horizPitch");
+				vertPitch = xrr.getResInt("vertPitch");
+				signHeight = xrr.getResInt("signHeight");
+				signWidth = xrr.getResInt("signWidth");
+				characterHeightPixels = xrr.getResInt(
+					"characterHeightPixels");
+				characterWidthPixels = xrr.getResInt(
+					"characterWidthPixels");
+				signHeightPixels = xrr.getResInt(
+					"signHeightPixels");
+				signWidthPixels = xrr.getResInt(
+					"signWidthPixels");
+			}
+			catch (IllegalArgumentException ex) {
 				LOG.log("PhaseGetConfig: Malformed XML " +
 					"received:" + ex + ", id=" + id);
-				valid = false;
-				errmsg = ex.getMessage();
-				handleCommError(EventType.PARSING_ERROR,
-					errmsg);
+				throw new ParsingException(ex);
 			}
 
-			// set config values these values are displayed in
-			// the DMS dialog, Configuration tab
-			if (valid) {
-				controller.setVersionNotify(version);
+			controller.setVersionNotify(version);
 
-				int dt = type.ordinal();
-				SignDetailImpl sd = SignDetailImpl.findOrCreate(
-					dt, false, "OTHER", signAccess, "other",
-					"other", make, model, make, model, 0,
-					2, 64, false, false);
-				if (sd != null)
-					m_dms.setSignDetailNotify(sd);
-				SignConfigImpl sc = SignConfigImpl.findOrCreate(
-					signWidth, signHeight,
-					horizBorder, vertBorder,
-					horizPitch, vertPitch,
-					signWidthPixels, signHeightPixels,
-					characterWidthPixels,
-					characterHeightPixels,
-					ColorScheme.MONOCHROME_1_BIT.ordinal(),
-				        DmsColor.AMBER.rgb(),
-				        DmsColor.BLACK.rgb());
-				if (sc != null)
-					m_dms.setSignConfigNotify(sc);
-
-			// failure
-			} else {
-				LOG.log("WARNING: response from " +
-					"SensorServer received, ignored " +
-					"because Xml valid field is false, " +
-					"errmsg=" + errmsg);
-				putCtrlFaults(errmsg);
-
-				// try again
-				if (flagFailureShouldRetry(errmsg)) {
-					LOG.log("PhaseGetConfig: will " +
-						"retry failed op.");
-					return true;
-				}
-			}
-
-			// execute subsequent phase
+			int dt = type.ordinal();
+			SignDetailImpl sd = SignDetailImpl.findOrCreate(
+				dt, false, "OTHER", signAccess, "other",
+				"other", make, model, make, model, 0,
+				2, 64, false, false);
+			if (sd != null)
+				m_dms.setSignDetailNotify(sd);
+			SignConfigImpl sc = SignConfigImpl.findOrCreate(
+				signWidth, signHeight,
+				horizBorder, vertBorder,
+				horizPitch, vertPitch,
+				signWidthPixels, signHeightPixels,
+				characterWidthPixels,
+				characterHeightPixels,
+				ColorScheme.MONOCHROME_1_BIT.ordinal(),
+				DmsColor.AMBER.rgb(),
+				DmsColor.BLACK.rgb());
+			if (sc != null)
+				m_dms.setSignConfigNotify(sc);
 			return false;
 		}
 
@@ -448,30 +392,18 @@ abstract class OpDms extends OpDevice {
 		 * Note, the type of exception throw here determines
 		 * if the messenger reopens the connection on failure.
 		 * @see CommThread#doPoll()
-		 * @see Messenger#handleCommError()
-		 * @see Messenger#shouldReopen()
 		 */
 		protected Phase poll(CommMessage argmess)
 			throws IOException
 		{
 			Message mess = (Message) argmess;
-
-			// set message attributes as a function of the op
 			setMsgAttributes(mess);
-
-			// build xml request and expected response
 			mess.setName(getOpName());
 			XmlElem xrr = buildXmlElem("GetDmsConfigReqMsg",
 				"GetDmsConfigRespMsg");
-
-			// send request and read response
 			mess.add(xrr);
 			sendRead(mess);
-
-			if(parseResponse(mess, xrr))
-				return this;
-			else
-				return m_next;
+			return parseResponse(mess, xrr) ? this : m_next;
 		}
 	}
 }
