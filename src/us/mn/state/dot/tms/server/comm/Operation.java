@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.ControllerIoImpl;
 import us.mn.state.dot.tms.utils.I18N;
-import us.mn.state.dot.tms.utils.SString;
 
 /**
  * An operation is a sequence of steps to be performed on a field controller.
@@ -35,14 +34,6 @@ public final class Operation implements Comparable<Operation> {
 
 	/** Expire time for steps which wait indefinitely */
 	static private final int EXPIRE_INDEFINITE_MS = 24 * 60 * 60 * 1000;
-
-	/** Maximum message length */
-	static private final int MAX_MSG_LEN = 64;
-
-	/** Filter a message */
-	static private String filterMsg(String m) {
-		return SString.truncate(m, MAX_MSG_LEN);
-	}
 
 	/** Operation name */
 	private final String name;
@@ -272,8 +263,8 @@ public final class Operation implements Comparable<Operation> {
 	}
 
 	/** Handle an IO event */
-	public void handleEvent(EventType et, String msg) {
-		controller.logCommEvent(et, getId(), filterMsg(msg));
+	public void handleEvent(EventType et) {
+		controller.logCommEvent(et, getId());
 		if (!retry())
 			setFailed();
 	}

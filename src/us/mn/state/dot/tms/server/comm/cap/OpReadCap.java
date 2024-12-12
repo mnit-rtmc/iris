@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,9 +67,9 @@ public class OpReadCap extends OpController<CapProperty> {
 
 	/** Handle a communication error */
 	@Override
-	public void handleCommError(EventType et, String msg) {
-		CapPoller.slog("ERROR: " + msg);
-		super.handleCommError(et, msg);
+	public void handleCommError(EventType et) {
+		CapPoller.slog("ERROR: " + et);
+		super.handleCommError(et);
 	}
 
 	/** Cleanup the operation */

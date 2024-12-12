@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2022  Minnesota Department of Transportation
+ * Copyright (C) 2006-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,14 +39,15 @@ public class OpQueryEventSamples extends OpCanoga {
 
 	/** Handle a communication error */
 	@Override
-	public void handleCommError(EventType et, String msg) {
+	public void handleCommError(EventType et) {
 		setSuccess(false);
-		super.handleCommError(et, msg);
+		super.handleCommError(et);
 	}
 
 	/** Get the error retry threshold */
 	@Override
 	public int getRetryThreshold() {
+		// FIXME: use value from comm config?
 		if (controller.hasActiveDetector())
 			return Integer.MAX_VALUE;
 		else

@@ -63,9 +63,9 @@ public class OpTestCap extends OpReadCap {
 
 	/** Handle a communication error */
 	@Override
-	public void handleCommError(EventType et, String msg) {
-		CapPoller.slog("TEST ERROR: " + msg);
-		super.handleCommError(et, msg);
+	public void handleCommError(EventType et) {
+		CapPoller.slog("TEST ERROR: " + et);
+		super.handleCommError(et);
 	}
 
 	/** Cleanup the operation */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021-2022  Minnesota Department of Transportation
+ * Copyright (C) 2021-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,9 +37,9 @@ public class OpPerVehicle extends OpG4 {
 
 	/** Handle a communication error */
 	@Override
-	public void handleCommError(EventType et, String msg) {
+	public void handleCommError(EventType et) {
 		setSuccess(false);
-		super.handleCommError(et, msg);
+		super.handleCommError(et);
 	}
 
 	/** Create the first phase of the operation */

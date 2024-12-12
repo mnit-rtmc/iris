@@ -81,4 +81,7 @@ CREATE TRIGGER toll_zone_table_notify_trig
 -- Delete obsolete system attribute
 DELETE FROM iris.system_attribute WHERE name = 'email_recipient_aws';
 
+-- Reset all controller status to blank
+UPDATE iris.controller SET status = NULL;
+
 COMMIT;

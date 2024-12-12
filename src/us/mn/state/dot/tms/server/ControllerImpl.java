@@ -711,11 +711,17 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Log a comm event */
-	public void logCommEvent(EventType et, String id, String msg) {
+	public void logCommEvent(EventType et, String id) {
 		incrementCommCounter(et);
-		setStatusNotify(Controller.FAULTS, msg);
-		if (!isOffline())
-			logCommEvent(et, id);
+		if (shouldLogEvent(et))
+			logEvent(new CommEvent(et, getName(), id));
+	}
+
+	/** Check if an event should be logged */
+	private boolean shouldLogEvent(EventType et) {
+		return et == EventType.COMM_FAILED ||
+		       et == EventType.COMM_RESTORED ||
+		       !isOffline();
 	}
 
 	/** Time stamp of most recent comm failure */
@@ -927,11 +933,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			failedOps = 0;
 			notifyAttribute("failedOps");
 		}
-	}
-
-	/** Log a comm event */
-	private void logCommEvent(EventType event, String id) {
-		logEvent(new CommEvent(event, getName(), id));
 	}
 
 	/** Complete a controller operation */

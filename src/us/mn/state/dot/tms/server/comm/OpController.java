@@ -22,7 +22,6 @@ import org.json.JSONObject;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.utils.SString;
 
 /**
  * An operation is a sequence of phases to be performed on a field controller.
@@ -32,14 +31,6 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Travis Swanston
  */
 abstract public class OpController<T extends ControllerProperty> {
-
-	/** Maximum message length */
-	static private final int MAX_MSG_LEN = 64;
-
-	/** Filter a message */
-	static private String filterMsg(String m) {
-		return SString.truncate(m, MAX_MSG_LEN);
-	}
 
 	/** Strip all characters up to the last dot */
 	static private String stripToLastDot(String v) {
@@ -212,9 +203,9 @@ abstract public class OpController<T extends ControllerProperty> {
 	}
 
 	/** Handle a communication error */
-	public void handleCommError(EventType et, String msg) {
-		controller.logCommEvent(et, id, filterMsg(msg));
-		if (!retry())
+	public void handleCommError(EventType et) {
+		controller.logCommEvent(et, id);
+		if (!shouldRetry())
 			setFailed();
 	}
 
@@ -222,7 +213,7 @@ abstract public class OpController<T extends ControllerProperty> {
 	private int error_cnt = 0;
 
 	/** Check if the operation should be retried */
-	private boolean retry() {
+	private boolean shouldRetry() {
 		++error_cnt;
 		return error_cnt < getRetryThreshold();
 	}
