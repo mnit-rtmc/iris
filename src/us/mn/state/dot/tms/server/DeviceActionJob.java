@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
@@ -51,6 +52,10 @@ public class DeviceActionJob extends Job {
 
 	/** Logger for debugging */
 	private final DebugLog logger;
+
+	/** Set of deployed device actions */
+	private final HashSet<DeviceAction> dep_actions =
+		new HashSet<DeviceAction>();
 
 	/** Mapping of DMS to action tag messages */
 	private final HashMap<DMSImpl, ActionTagMsg> dms_actions =
@@ -97,9 +102,16 @@ public class DeviceActionJob extends Job {
 		if (deploy)
 			performDmsAction(da);
 		performBeaconAction(da, deploy);
-		performCameraAction(da, deploy);
 		performLaneMarkingAction(da, deploy);
 		performRampMeterAction(da, deploy);
+		if (deploy) {
+			// Only perform camera actions on change
+			if (!dep_actions.contains(da)) {
+				performCameraAction(da);
+				dep_actions.add(da);
+			}
+		} else
+			dep_actions.remove(da);
 	}
 
 	/** Perform an action for DMS */
@@ -178,25 +190,22 @@ public class DeviceActionJob extends Job {
 	}
 
 	/** Perform an action for cameras */
-	private void performCameraAction(DeviceAction da, boolean deploy) {
-		// FIXME: only perform this action when phase is first changed
+	private void performCameraAction(DeviceAction da) {
 		Iterator<Camera> it = CameraHelper.iterator();
 		while (it.hasNext()) {
 			Camera c = it.next();
 			if (c instanceof CameraImpl)
-				performCameraAction(da, deploy, (CameraImpl) c);
+				performCameraAction(da, (CameraImpl) c);
 		}
 	}
 
 	/** Perform a camera action */
-	private void performCameraAction(DeviceAction da, boolean deploy,
-		CameraImpl cam)
-	{
+	private void performCameraAction(DeviceAction da, CameraImpl cam) {
 		Hashtags tags = new Hashtags(cam.getNotes());
 		if (tags.contains(da.getHashtag())) {
 			ActionTagMsg amsg = new ActionTagMsg(da, cam,
 				cam.getGeoLoc(), logger);
-			if (amsg.isPassing() && deploy) {
+			if (amsg.isPassing()) {
 				int preset_num = da.getMsgPriority();
 				if (preset_num == 0) {
 					cam.setDeviceReq(DeviceRequest.
