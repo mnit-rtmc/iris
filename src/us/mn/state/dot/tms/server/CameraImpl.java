@@ -464,24 +464,18 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	public void sendPTZ(float p, float t, float z) {
 		CameraPoller cp = getCameraPoller();
 		if (cp != null) {
-			last_preset = INVALID_PRESET;
 			cp.sendPTZ(this, p, t, z);
 			if ((p != 0.0) || (t != 0.0) || (z != 0.0))
 				savePtzInfo();
 		}
 	}
 
-	/** Last commanded preset number */
-	private transient int last_preset = INVALID_PRESET;
-
 	/** Command the camera to store a preset */
 	@Override
 	public void setStorePreset(int preset) {
 		CameraPoller cp = getCameraPoller();
-		if (cp != null) {
-			last_preset = preset;
+		if (cp != null)
 			cp.sendStorePreset(this, preset);
-		}
 	}
 
 	/** Command the camera to recall a preset */
@@ -489,7 +483,6 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	public void setRecallPreset(int preset) {
 		CameraPoller cp = getCameraPoller();
 		if (cp != null) {
-			last_preset = preset;
 			cp.sendRecallPreset(this, preset);
 			savePtzInfo();
 		}
