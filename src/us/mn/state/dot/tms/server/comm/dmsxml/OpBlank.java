@@ -113,7 +113,6 @@ class OpBlank extends OpDms {
 				ex + ",id=" + id);
 			throw new ParsingException(ex);
 		}
-		putCtrlFaults(null);
 		m_dms.setMsgCurrentNotify(m_sm);
 		return false;
 	}

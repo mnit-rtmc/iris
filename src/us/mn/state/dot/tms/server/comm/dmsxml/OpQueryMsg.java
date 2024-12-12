@@ -367,7 +367,6 @@ class OpQueryMsg extends OpDms {
 			throw new ParsingException(ex);
 		}
 
-		putCtrlFaults(null);
 		checkMsgOwner(owner);
 
 		// have on time?  if not, create
