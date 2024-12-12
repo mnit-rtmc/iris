@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceActionHelper;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.LaneMarkingHelper;
@@ -196,9 +197,15 @@ public class DeviceActionJob extends Job {
 			ActionTagMsg amsg = new ActionTagMsg(da, cam,
 				cam.getGeoLoc(), logger);
 			if (amsg.isPassing() && deploy) {
-				// FIXME: recall preset / save a snapshot
-				//        after a moment
-				// cam.setRecallPreset(...);
+				int preset_num = da.getMsgPriority();
+				if (preset_num == 0) {
+					cam.setDeviceReq(DeviceRequest.
+						CAMERA_WIPER_ONESHOT);
+				} else if (preset_num > 0 && preset_num <= 12) {
+					cam.setRecallPreset(preset_num);
+				} else {
+					// FIXME: save snapshot?
+				}
 			}
 		}
 	}
