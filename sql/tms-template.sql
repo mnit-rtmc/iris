@@ -66,7 +66,6 @@ camera_out_of_service_url
 camera_playlist_dwell_sec	5
 camera_ptz_blind	true
 camera_stream_controls_enable	false
-camera_wiper_precip_mm_hr	8
 cap_xml_save_enable	true
 clearguide_key	
 client_units_si	true
