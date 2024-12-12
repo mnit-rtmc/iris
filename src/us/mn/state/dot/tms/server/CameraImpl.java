@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
@@ -52,9 +51,6 @@ import us.mn.state.dot.tms.server.event.CameraVideoEvent;
  * @author John L. Stanley - SRF Consulting
  */
 public class CameraImpl extends DeviceImpl implements Camera {
-
-	/** Invalid preset number */
-	static private final int INVALID_PRESET = -1;
 
 	/** Duration of video good/loss report "freshness" */
 	static private final long VIDEO_REPORT_MS = 5000;
