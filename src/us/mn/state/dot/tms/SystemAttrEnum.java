@@ -64,7 +64,6 @@ public enum SystemAttrEnum {
 	DMSXML_REINIT_DETECT(false),
 	EMAIL_RATE_LIMIT_HOURS(0, 0),
 	EMAIL_RECIPIENT_ACTION_PLAN(String.class),
-	EMAIL_RECIPIENT_AWS(String.class),
 	EMAIL_RECIPIENT_DMSXML_REINIT(String.class),
 	EMAIL_RECIPIENT_GATE_ARM(String.class),
 	EMAIL_SENDER_SERVER(String.class),

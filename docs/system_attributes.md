@@ -54,7 +54,6 @@ System Attribute                 | Description
 `dmsxml_reinit_detect`           | Enable [DMS] reinitialization detection for DMSXML controllers
 `email_rate_limit_hours`         | Hours to wait before sending duplicate emails
 `email_recipient_action_plan`    | Recipient of [action plan] emails
-`email_recipient_aws`            | Recipient of AWS emails
 `email_recipient_dmsxml_reinit`  | Recipient of [DMS] reinit detection emails
 `email_recipient_gate_arm`       | Recipient of gate arm alert emails
 `email_sender_server`            | Sender email address of IRIS server

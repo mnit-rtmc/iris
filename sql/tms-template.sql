@@ -86,7 +86,6 @@ dms_update_font_table	true
 dmsxml_reinit_detect	false
 email_rate_limit_hours	0
 email_recipient_action_plan	
-email_recipient_aws	
 email_recipient_dmsxml_reinit	
 email_recipient_gate_arm	
 email_sender_server	

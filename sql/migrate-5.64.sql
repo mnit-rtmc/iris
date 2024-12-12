@@ -78,4 +78,7 @@ CREATE TRIGGER toll_zone_table_notify_trig
     AFTER INSERT OR DELETE ON iris.toll_zone
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
+-- Delete obsolete system attribute
+DELETE FROM iris.system_attribute WHERE name = 'email_recipient_aws';
+
 COMMIT;
