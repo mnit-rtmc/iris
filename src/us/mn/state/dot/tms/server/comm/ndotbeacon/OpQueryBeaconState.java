@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2022  SRF Consulting Group
- * Copyright (C) 2021       Minnesota Department of Transportation
+ * Copyright (C) 2021-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,10 @@
 package us.mn.state.dot.tms.server.comm.ndotbeacon;
 
 import java.io.IOException;
-
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  *
  * @author John L. Stanley - SRF Consulting
  */
-
 public class OpQueryBeaconState extends OpNdotBeacon<NdotBeaconProperty> {
 
 	/** Create a new gate arm query status operation */
@@ -46,23 +45,15 @@ public class OpQueryBeaconState extends OpNdotBeacon<NdotBeaconProperty> {
 	/** Phase to query the gate status */
 	protected class QueryStatus extends Phase<NdotBeaconProperty> {
 
-		int failCount = 0;
-
 		/** Query the status */
-		protected Phase<NdotBeaconProperty> poll(CommMessage<NdotBeaconProperty> mess)
+		protected Phase<NdotBeaconProperty> poll(
+			CommMessage<NdotBeaconProperty> mess)
 			throws IOException
 		{
 			mess.add(prop);
 			mess.queryProps();
-
-			if (prop.gotValidResponse() == false) {
-				if (failCount++ < 3) {
-					return this; // try again
-				}
-
-				handleCommError(EventType.COMM_FAILED, "No Response");
-				return null;
-			}
+			if (!prop.gotValidResponse())
+				throw new ParsingException("NO RESPONSE");
 			return null;
 		}
 	}
