@@ -564,7 +564,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			JSONArray temps = new JSONArray();
 			if (mn_valid)
 				temps.put(mn);
-			if (mx_valid)
+			if (mx_valid && (mx > mn || !mn_valid))
 				temps.put(mx);
 			if (mn_valid || mx_valid)
 				putStatus(key, temps);
