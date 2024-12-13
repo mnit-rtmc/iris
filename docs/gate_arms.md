@@ -113,8 +113,7 @@ interlock_.  Once they are both open, the prerequisite will have a _close
 interlock_ until the dependent is closed.
 
 If a constraint is broken, IRIS will not automatically try to resolve it.
-Instead, an _alert_ email will be sent to the address in the
-`email_recipient_gate_arm` [system attribute].
+Instead, an _alert_ will logged in the `email_event` table.
 
 ## Security
 

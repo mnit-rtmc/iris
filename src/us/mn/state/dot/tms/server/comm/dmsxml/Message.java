@@ -21,7 +21,6 @@ import java.io.OutputStream;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.server.EmailHandler;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;

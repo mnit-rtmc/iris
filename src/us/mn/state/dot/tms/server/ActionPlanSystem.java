@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2018  Iteris Inc.
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.Date;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
@@ -54,9 +55,8 @@ public class ActionPlanSystem {
 				(active ? " actived" : " deactivated") +
 				" action plan " + "'" + pname + "' on " +
 				new Date().toString();
-			String recip = SystemAttrEnum.
-				EMAIL_RECIPIENT_ACTION_PLAN.getString();
-			EmailHandler.sendEmail(sub, msg, recip);
+			EmailHandler.send(EventType.ACTION_PLAN_SYSTEM, sub,
+				msg);
 		}
 	}
 }

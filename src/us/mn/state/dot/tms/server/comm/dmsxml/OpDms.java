@@ -29,7 +29,6 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.EmailHandler;
 import us.mn.state.dot.tms.server.SignConfigImpl;
 import us.mn.state.dot.tms.server.SignDetailImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -205,30 +204,8 @@ abstract class OpDms extends OpDevice {
 
 	/** Check message owner */
 	public void checkMsgOwner(String o) {
-		if (ownerIsReinit(o)) {
+		if ("reinit".equalsIgnoreCase(o))
 			putCtrlFaults("Power cycle event");
-			sendMaintenanceEmail();
-		}
-	}
-
-	/** Return true if the message owner is Reinit */
-	private boolean ownerIsReinit(final String o) {
-		return SystemAttrEnum.DMSXML_REINIT_DETECT.getBoolean()
-		    && (o != null)
-		    && o.toLowerCase().equals("reinit");
-	}
-
-	/** Send power cycle email */
-	private void sendMaintenanceEmail() {
-		String sub = "CMS maintenance alert: " + m_dms;
-		String msg = "IRIS has placed CMS " + m_dms + " into "
-			+ "\"maintenance\" mode.  One reason this may have "
-			+ "happened is if IRIS has found the sign to be "
-			+ "unexpectedly blank, which could indicate that the "
-			+ "sign controller's power has been cycled.";
-		String recip =
-			SystemAttrEnum.EMAIL_RECIPIENT_DMSXML_REINIT.getString();
-		EmailHandler.sendEmail(sub, msg, recip);
 	}
 
 	/** Phase to query the dms config, which is used by subclasses */

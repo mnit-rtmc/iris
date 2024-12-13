@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2022  Minnesota Department of Transportation
+ * Copyright (C) 2013-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import java.io.File;
 import java.util.Iterator;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GeoLoc;
@@ -125,9 +126,8 @@ public class GateArmSystem {
 
 	/** Send an email alert */
 	static public void sendEmailAlert(String msg) {
-		String recip =
-			SystemAttrEnum.EMAIL_RECIPIENT_GATE_ARM.getString();
-		EmailHandler.sendEmail("Gate arm ALERT", msg, recip);
+		EmailHandler.send(EventType.GATE_ARM_SYSTEM, "Gate Arm ALERT",
+			msg);
 	}
 
 	/** Check all gate arm open interlocks for one road.

@@ -92,8 +92,6 @@
 	<target name="check-rpm">
 		<antcall target="check-dep">
 			<param name="file.dep" value="iris-build.properties"/>
-			<param name="file.dep" value="javax.activation.jar"/>
-			<param name="file.dep" value="mail.jar"/>
 			<param name="file.dep" value="jna-${jna_version}.jar"/>
 			<param name="file.dep"
 			       value="jna-platform-${jna_version}.jar"/>
@@ -237,8 +235,6 @@
 		</copy>
 		<copy todir="${dist.server}">
 			<fileset dir="${lib.dir}">
-				<include name="javax.activation.jar"/>
-				<include name="mail.jar"/>
 				<include name="json-${json_version}.jar"/>
 				<include name="postgis-jdbc-${postgis_version}.jar"/>
 				<include name="postgis-geometry-${postgis_version}.jar"/>

@@ -112,8 +112,6 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %dir %{_serverdir}
 %{_serverdir}/iris-server-%{version}.jar
 %{_serverdir}/iris-common-%{version}.jar
-%{_serverdir}/javax.activation.jar
-%{_serverdir}/mail.jar
 %{_serverdir}/json-@@JSON.VERSION@@.jar
 %{_serverdir}/postgis-jdbc-@@POSTGIS.VERSION@@.jar
 %{_serverdir}/postgis-geometry-@@POSTGIS.VERSION@@.jar

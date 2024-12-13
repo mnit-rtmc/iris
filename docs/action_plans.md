@@ -231,8 +231,8 @@ be `NULL` for "any":
 
 On the **Plan** tab of the client interface, users can manually change the phase
 of an action plan.  If the user is in the list specified by the
-`action_plan_alert_list` [system attribute], an email will be sent to the
-address specified by the `email_recipient_action_plan` [system attribute].
+`action_plan_alert_list` [system attribute], an email event will be logged
+to the `email_event` table.
 
 ## Events
 

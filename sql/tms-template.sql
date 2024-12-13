@@ -82,11 +82,7 @@ dms_pixel_on_limit	1
 dms_pixel_test_timeout_secs	30
 dms_send_confirmation_enable	false
 dms_update_font_table	true
-dmsxml_reinit_detect	false
 email_rate_limit_hours	0
-email_recipient_action_plan	
-email_recipient_dmsxml_reinit	
-email_recipient_gate_arm	
 email_sender_server	
 email_smtp_host	
 gate_arm_alert_timeout_secs	90
@@ -324,6 +320,7 @@ VALUES
     ('client_event', true, false, 0),
     ('comm_event', true, true, 14),
     ('detector_event', true, true, 90),
+    ('email_event', true, true, 30),
     ('gate_arm_event', true, false, 0),
     ('incident', true, false, 0),
     ('incident_update', true, false, 0),
@@ -392,6 +389,7 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 305	Gate Arm WARN CLOSE
 306	Gate Arm CLOSING
 307	Gate Arm CLOSED
+308	Gate Arm SYSTEM
 401	Meter event
 402	Meter LOCK
 501	Beacon STATE
@@ -408,7 +406,22 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 900	Action Plan ACTIVATED
 901	Action Plan DEACTIVATED
 902	Action Plan Phase CHANGED
+903	Action Plan SYSTEM
 \.
+
+CREATE TABLE event.email_event (
+    id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc INTEGER NOT NULL REFERENCES event.event_description,
+    subject VARCHAR(32) NOT NULL,
+    message VARCHAR NOT NULL
+);
+
+CREATE VIEW email_event_view AS
+    SELECT ev.id, event_date, ed.description, subject, message
+    FROM event.email_event ev
+    JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id;
+GRANT SELECT ON email_event_view TO PUBLIC;
 
 --
 -- Lane Codes, Direction, Road, Map Extent, Geo Loc

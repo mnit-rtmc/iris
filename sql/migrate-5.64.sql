@@ -81,10 +81,37 @@ CREATE TRIGGER toll_zone_table_notify_trig
 -- Delete obsolete system attributes
 DELETE FROM iris.system_attribute WHERE name IN (
     'camera_wiper_precip_mm_hr',
-    'email_recipient_aws'
+    'dmsxml_reinit_detect',
+    'email_recipient_action_plan',
+    'email_recipient_aws',
+    'email_recipient_dmsxml_reinit',
+    'email_recipient_gate_arm'
 );
 
 -- Reset all controller status to blank
 UPDATE iris.controller SET status = NULL;
+
+-- Add email events
+INSERT INTO iris.event_config (name, enable_store, enable_purge, purge_days)
+VALUES ('email_event', true, true, 30);
+
+INSERT INTO event.event_description (event_desc_id, description)
+VALUES
+    (308, 'Gate Arm SYSTEM'),
+    (903, 'Action Plan SYSTEM');
+
+CREATE TABLE event.email_event (
+    id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc INTEGER NOT NULL REFERENCES event.event_description,
+    subject VARCHAR(32) NOT NULL,
+    message VARCHAR NOT NULL
+);
+
+CREATE VIEW email_event_view AS
+    SELECT ev.id, event_date, ed.description, subject, message
+    FROM event.email_event ev
+    JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id;
+GRANT SELECT ON email_event_view TO PUBLIC;
 
 COMMIT;
