@@ -1,5 +1,16 @@
 # IRIS 5.x Release Notes
 
+5.64.0 (16 Dec 2024)
+ - Fixed controller `status` fault handling
+ - Added `email_event` logging table
+ - Simplified error handling for a few comm. protocols
+ - Added camera device actions (wiper and recall preset)
+ - bulb: Fixed serialization errors
+ - honeybee: Add more API resources: `toll_zone`, `monitor_style`, `play_list`
+ - Removed obsolete system attributes: `camera_wiper_precip_mm_hr`,
+   `dmsxml_reinit_detect`, `email_recipient_action_plan`, `email_recipient_aws`,
+   `email_recipient_dmsxml_reinit`, `email_recipient_gate_arm`
+
 5.63.0 (10 Dec 2024)
  - Renamed "Maintenance" style to "Fault"
  - Renamed "Failed" style to "Offline"
