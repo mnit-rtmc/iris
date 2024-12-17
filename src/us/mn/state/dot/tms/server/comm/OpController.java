@@ -235,7 +235,8 @@ abstract public class OpController<T extends ControllerProperty> {
 	/** Update the controller status */
 	protected final void updateCtrlStatus() {
 		if (ctrl_stat != null) {
-			controller.setStatusNotify(ctrl_stat.toString());
+			String s = ctrl_stat.toString();
+			controller.setStatusNotify((!s.isEmpty()) ? s : null);
 			// Set to `null` in case this is called more than once
 			ctrl_stat = null;
 		}

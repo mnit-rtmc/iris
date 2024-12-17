@@ -300,7 +300,8 @@ public final class Operation implements Comparable<Operation> {
 	/** Update status when done or for long-lived operations */
 	public void updateCtrlStatus() {
 		if (ctrl_stat != null) {
-			controller.setStatusNotify(ctrl_stat.toString());
+			String s = ctrl_stat.toString();
+			controller.setStatusNotify((!s.isEmpty()) ? s : null);
 			// Set to `null` because this method may be called
 			// more than once after the operation is done
 			ctrl_stat = null;
