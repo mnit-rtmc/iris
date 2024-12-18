@@ -64,7 +64,7 @@ abstract public class OpGateNdorV5<T extends ControllerProperty>
 		gate_arm = ga;
 		int pin = gate_arm.getPin();
 		if ((pin < 1) || (pin > 8)) {
-			putCtrlFaults("Invalid pin");
+			putCtrlFaults("other", "Invalid pin");
 			sGateArm = null;
 		} else
 			sGateArm = (pin == 1) ? "" : ("" + pin);
@@ -76,7 +76,7 @@ abstract public class OpGateNdorV5<T extends ControllerProperty>
 		String fault = prop.getFault();
 		gate_arm.setFaultNotify(fault);
 		if (fault != null) {
-			putCtrlFaults(fault);
+			putCtrlFaults("other", fault);
 			updateCtrlStatus();
 			controller.incrementControllerErr();
 		}

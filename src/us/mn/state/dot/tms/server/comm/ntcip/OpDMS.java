@@ -92,9 +92,9 @@ abstract public class OpDMS extends OpNtcip {
 
 	/** Put FAULTS into controller status */
 	@Override
-	protected void putCtrlFaults(Object value) {
-		putFaults((value != null) ? "controller" : null);
-		super.putCtrlFaults(value);
+	protected void putCtrlFaults(String fault, String msg) {
+		putFaults((fault != null) ? "controller" : null);
+		super.putCtrlFaults(fault, msg);
 	}
 
 	/** Cleanup the operation */

@@ -89,8 +89,11 @@ public interface Controller extends SonarObject {
 	/** Fault conditions.
 	 *
 	 * Semicolon-delimited list of fault conditions:
-	 * `other`, `prom`, `program_processor`, `ram`, `display` */
+	 * `other`, `prom`, `program_processor`, `ram`, `display`, `gps` */
 	String FAULTS = "faults";
+
+	/** Status message */
+	String MSG = "msg";
 
 	/** Get the timeout error count */
 	int getTimeoutErr();

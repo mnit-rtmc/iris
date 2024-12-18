@@ -83,7 +83,7 @@ public class OpQueryGpsLocation extends OpDevice<RedLionProperty> {
 				gps.saveDeviceLocation(prop.getLat(),
 					prop.getLon());
 			} else
-				putCtrlFaults("No GPS Lock");
+				putCtrlFaults("gps", "No GPS Lock");
 		}
 	}
 }

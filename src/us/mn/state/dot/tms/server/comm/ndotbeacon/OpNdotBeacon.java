@@ -65,7 +65,7 @@ abstract public class OpNdotBeacon<T extends ControllerProperty>
 	public void cleanup() {
 		if (isSuccess()) {
 			beacon.setStateNotify(prop.getState());
-			putCtrlFaults(prop.getFaultStatus());
+			putCtrlFaults("other", prop.getFaultStatus());
 			updateCtrlStatus();
 		}
 		super.cleanup();

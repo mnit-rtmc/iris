@@ -96,9 +96,9 @@ abstract class OpDms extends OpDevice {
 
 	/** Put FAULTS into controller status */
 	@Override
-	protected void putCtrlFaults(Object value) {
-		putFaults((value != null) ? "controller" : null);
-		super.putCtrlFaults(value);
+	protected void putCtrlFaults(String fault, String msg) {
+		putFaults((fault != null) ? "controller" : null);
+		super.putCtrlFaults(fault, msg);
 	}
 
 	/** Cleanup the operation. Called by CommThread.doPoll(). */
@@ -205,7 +205,7 @@ abstract class OpDms extends OpDevice {
 	/** Check message owner */
 	public void checkMsgOwner(String o) {
 		if ("reinit".equalsIgnoreCase(o))
-			putCtrlFaults("Power cycle event");
+			putCtrlFaults("other", "Power cycle event");
 	}
 
 	/** Phase to query the dms config, which is used by subclasses */

@@ -220,7 +220,7 @@ public final class Operation implements Comparable<Operation> {
 	private JSONObject ctrl_stat = null;
 
 	/** Put a key/value pair into controller status */
-	protected final void putCtrlStatus(String key, Object value) {
+	private final void putCtrlStatus(String key, Object value) {
 		if (ctrl_stat == null)
 			ctrl_stat = new JSONObject();
 		try {
@@ -234,8 +234,9 @@ public final class Operation implements Comparable<Operation> {
 	}
 
 	/** Put FAULTS into controller status */
-	protected void putCtrlFaults(Object value) {
-		putCtrlStatus(Controller.FAULTS, value);
+	protected void putCtrlFaults(String fault, String msg) {
+		putCtrlStatus(Controller.FAULTS, fault);
+		putCtrlStatus(Controller.MSG, msg);
 	}
 
 	/** Poll the current step.

@@ -149,8 +149,13 @@ public class OpQueryStatus extends OpE6 {
 	@Override
 	public void cleanup() {
 		if (isSuccess()) {
-			String faults = stat.toString();
-			putCtrlFaults((!faults.isEmpty()) ? faults : null);
+			String fault = "other";
+			String msg = stat.toString();
+			if (msg.isEmpty()) {
+				fault = null;
+				msg = null;
+			}
+			putCtrlFaults(fault, msg);
 		}
 		super.cleanup();
 	}

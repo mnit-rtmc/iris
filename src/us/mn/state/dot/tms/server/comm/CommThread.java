@@ -273,7 +273,7 @@ public class CommThread<T extends ControllerProperty> {
 		}
 		catch (ProtocolException e) {
 			String msg = logException(e);
-			o.putCtrlFaults(msg);
+			o.putCtrlFaults("other", msg);
 			o.setFailed();
 		}
 		catch (ChecksumException e) {
@@ -288,7 +288,7 @@ public class CommThread<T extends ControllerProperty> {
 		}
 		catch (ControllerException e) {
 			String msg = logException(e);
-			o.putCtrlFaults(msg);
+			o.putCtrlFaults("other", msg);
 			o.handleCommError(EventType.CONTROLLER_ERROR);
 			o.setFailed();
 		}

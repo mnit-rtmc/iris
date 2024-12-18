@@ -179,10 +179,10 @@ abstract public class OpNtcip extends OpDevice {
 
 	/** Put FAULTS into controller status */
 	@Override
-	protected void putCtrlFaults(Object value) {
-		if (value != null)
-			logError(value.toString());
-		super.putCtrlFaults(value);
+	protected void putCtrlFaults(String fault, String msg) {
+		if (fault != null)
+			logError(fault + ": " + msg);
+		super.putCtrlFaults(fault, msg);
 	}
 
 	/** Get the hardware make */

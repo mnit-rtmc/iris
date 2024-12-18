@@ -115,7 +115,7 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 			}
 			catch (ControllerException e) {
 				if (!(e instanceof SampleException))
-					putCtrlFaults(e.getMessage());
+					putCtrlFaults("ram", e.getMessage());
 				rec = new byte[75];
 				MemoryProperty rec_mem = new MemoryProperty(
 					Address.DATA_BUFFER_5_MINUTE, rec);

@@ -254,12 +254,15 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.queryProps();
 			if (ShortErrorStatus.MESSAGE.isSet(se))
 				logQuery(msg_err);
+			String faults = "";
 			if (ShortErrorStatus.CONTROLLER.isSet(se)) {
 				logQuery(con);
-				String faults = con.getValue(";");
-				if (faults.length() > 0)
-					putCtrlFaults(faults.toLowerCase());
+				faults = con.getValue(";");
 			}
+			if (faults.length() > 0)
+				putCtrlFaults(faults.toLowerCase(), null);
+			else
+				putCtrlFaults(null, null);
 			if (ShortErrorStatus.PIXEL.isSet(se))
 				logQuery(pix_rows);
 			return new QueryTestAndMessageRows();

@@ -41,7 +41,7 @@ public class OpQueryBeaconState extends OpDevice<DinRelayProperty> {
 				beacon.setFlashingNotify(outlets[p - 1]);
 			else {
 				beacon.setStateNotify(BeaconState.UNKNOWN);
-				putCtrlFaults("Invalid pin");
+				putCtrlFaults("other", "Invalid pin");
 			}
 		}
 		public void complete(boolean success) { }

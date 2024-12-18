@@ -532,7 +532,7 @@ abstract public class BasePoller implements DevicePoller {
 		}
 		catch (ProtocolException e) {
 			op.setFailed();
-			op.putCtrlFaults(ex_msg(e));
+			op.putCtrlFaults("other", ex_msg(e));
 		}
 		catch (IOException e) {
 			op.handleEvent(EventType.COMM_ERROR);
@@ -635,7 +635,7 @@ abstract public class BasePoller implements DevicePoller {
 		}
 		catch (ProtocolException e) {
 			op.setFailed();
-			op.putCtrlFaults(ex_msg(e));
+			op.putCtrlFaults("other", ex_msg(e));
 			return false;
 		}
 		catch (ChecksumException e) {
@@ -649,7 +649,7 @@ abstract public class BasePoller implements DevicePoller {
 		catch (ControllerException e) {
 			op.handleEvent(EventType.CONTROLLER_ERROR);
 			op.setFailed();
-			op.putCtrlFaults(ex_msg(e));
+			op.putCtrlFaults("other", ex_msg(e));
 			return true;
 		}
 		catch (IOException e) {

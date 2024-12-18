@@ -115,8 +115,10 @@ public class OpQueryLCSIndications extends OpLCS {
 			// was added after the "indications" array was created
 			if (i >= 0 && i < indications.length) {
 				if (indications[i] != null) {
-					putCtrlFaults("Indication conflict: " +
-						lcs.getLane());
+					putCtrlFaults("other",
+						"Indication conflict: " +
+						lcs.getLane()
+					);
 				}
 				indications[i] = li.getIndication();
 			}

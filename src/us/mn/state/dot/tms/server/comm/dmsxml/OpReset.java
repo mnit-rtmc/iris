@@ -108,7 +108,7 @@ class OpReset extends OpDms {
 				", id=" + id);
 			throw new ParsingException(ex);
 		}
-		putCtrlFaults(null);
+		putCtrlFaults(null, null);
 		SignMessage sm = m_dms.createMsgBlank(
 			SignMsgSource.reset.bit());
 		if (sm != null)

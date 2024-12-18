@@ -67,7 +67,7 @@ public class OpChangeBeaconState extends OpDevice<DinRelayProperty> {
 			int p = beacon.getPin();
 			if (p < 1 && p > 8) {
 				beacon.setStateNotify(BeaconState.UNKNOWN);
-				putCtrlFaults("Invalid pin");
+				putCtrlFaults("other", "Invalid pin");
 				return null;
 			}
 			CommandProperty prop = new CommandProperty(p, flash);
