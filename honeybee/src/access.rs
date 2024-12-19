@@ -83,6 +83,7 @@ fn required_patch_operate(res: Res, att: &str) -> bool {
     match (res, att) {
         (Res::ActionPlan, "phase")
         | (Res::Beacon, "state")
+        | (Res::Camera, "device_request")
         | (Res::Camera, "ptz")
         | (Res::Camera, "publish")
         | (Res::Camera, "recall_preset")
@@ -91,6 +92,7 @@ fn required_patch_operate(res: Res, att: &str) -> bool {
         | (Res::Controller, "device_request")
         | (Res::Detector, "field_length")
         | (Res::Detector, "force_fail")
+        | (Res::Dms, "device_request")
         | (Res::Dms, "msg_user")
         | (Res::Incident, "impact")
         | (Res::Incident, "cleared")
@@ -101,10 +103,13 @@ fn required_patch_operate(res: Res, att: &str) -> bool {
         | (Res::LcsArray, "owner_next")
         | (Res::LcsArray, "lcs_lock")
         | (Res::Modem, "enabled")
+        | (Res::RampMeter, "device_request")
         | (Res::RampMeter, "m_lock")
         | (Res::RampMeter, "rate_next")
         | (Res::VideoMonitor, "camera")
-        | (Res::VideoMonitor, "play_list") => true,
+        | (Res::VideoMonitor, "device_request")
+        | (Res::VideoMonitor, "play_list")
+        | (Res::WeatherSensor, "device_request") => true,
         _ => false,
     }
 }
@@ -117,7 +122,6 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
         | (Res::Beacon, "message")
         | (Res::Beacon, "notes")
         | (Res::Beacon, "preset")
-        | (Res::Camera, "device_request")
         | (Res::Camera, "notes")
         | (Res::Camera, "store_preset")
         | (Res::CommConfig, "timeout_ms")
@@ -129,7 +133,6 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
         | (Res::Detector, "abandoned")
         | (Res::Detector, "notes")
         | (Res::DeviceAction, _)
-        | (Res::Dms, "device_request")
         | (Res::Dms, "notes")
         | (Res::Dms, "preset")
         | (Res::Domain, "enabled")
@@ -140,7 +143,6 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
         | (Res::Modem, "timeout_ms")
         | (Res::MsgLine, _)
         | (Res::MsgPattern, _)
-        | (Res::RampMeter, "device_request")
         | (Res::RampMeter, "notes")
         | (Res::RampMeter, "storage")
         | (Res::RampMeter, "max_wait")
@@ -151,11 +153,9 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
         | (Res::TimeAction, _)
         | (Res::User, "enabled")
         | (Res::User, "password")
-        | (Res::VideoMonitor, "device_request")
         | (Res::VideoMonitor, "notes")
         | (Res::VideoMonitor, "restricted")
         | (Res::VideoMonitor, "monitor_style")
-        | (Res::WeatherSensor, "device_request")
         | (Res::WeatherSensor, "site_id")
         | (Res::WeatherSensor, "alt_id")
         | (Res::WeatherSensor, "notes") => true,

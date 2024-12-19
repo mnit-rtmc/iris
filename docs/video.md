@@ -50,8 +50,8 @@ a [switching](#switching) system.
 | Access       | Primary              | Secondary                  |
 |--------------|----------------------|----------------------------|
 | 👁️  View      | name                 |                            |
-| 👉 Operate   |                      | camera                     |
-| 💡 Manage    | notes                | restricted, monitor\_style, device\_request † |
+| 👉 Operate   |                      | camera, device\_request †  |                    |
+| 💡 Manage    | notes                | restricted, monitor\_style |
 | 🔧 Configure | mon\_num, controller | pin                        |
 
 † _Write only_
