@@ -234,14 +234,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Head (furthest upstream) node on corridor */
 	private final Node head;
 
-	/** Tail (furthest downstream) node on corridor */
-	private final Node tail;
-
 	/** Create a new KAdaptiveAlgorithm */
 	private KAdaptiveAlgorithm(Corridor c) {
 		corridor = c;
 		head = createNodes();
-		tail = head.tailNode();
 		debug();
 	}
 
@@ -380,15 +376,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		return null;
 	}
 
-	/** Get the furthest downstream station node. */
-	private StationNode lastStation() {
-		for (Node n = tail; n != null; n = n.upstream) {
-			if (n instanceof StationNode)
-				return (StationNode) n;
-		}
-		return null;
-	}
-
 	/** Is this KAdaptiveAlgorithm done? */
 	private boolean isDone() {
 		for (MeterState ms : meter_states.values()) {
@@ -431,14 +418,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Get the distancee to another node (in feet) */
 		protected int distanceFeet(Node other) {
 			return Math.round(distanceMiles(other) * FEET_PER_MILE);
-		}
-
-		/** Get the tail of a node list */
-		protected Node tailNode() {
-			Node n = this;
-			while (n.downstream != null)
-				n = n.downstream;
-			return n;
 		}
 
 		/** Find next upstream station node.
