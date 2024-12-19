@@ -1803,6 +1803,7 @@ BEGIN
 END;
 $landmark_abbrev$ LANGUAGE plpgsql;
 
+-- FIXME: rename to label_base
 CREATE FUNCTION iris.root_lbl(rd VARCHAR(6), rdir VARCHAR(4), xst VARCHAR(6),
     xdir VARCHAR(4), xmod VARCHAR(2), lmark VARCHAR(24)) RETURNS TEXT AS
 $$

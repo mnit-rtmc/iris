@@ -285,8 +285,8 @@ public class GeoLocHelper extends BaseHelper {
 		      : null;
 	}
 
-	/** Get the root label (for a detector or a station) */
-	static public String getRootLabel(GeoLoc loc) {
+	/** Get the label "base" (for a detector or a station) */
+	static public String getLabelBase(GeoLoc loc) {
 		if (loc == null)
 			return FUTURE;
 		Road roadway = loc.getRoadway();

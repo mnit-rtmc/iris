@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ public class StationHelper extends BaseHelper {
 
 	/** Get the station label */
 	static public String getLabel(Station s) {
-		return GeoLocHelper.getRootLabel(s.getR_Node().getGeoLoc());
+		return GeoLocHelper.getLabelBase(s.getR_Node().getGeoLoc());
 	}
 	
 	/** Get the station description */
