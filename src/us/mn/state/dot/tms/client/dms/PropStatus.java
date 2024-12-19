@@ -114,7 +114,7 @@ public class PropStatus extends IPanel {
 	};
 
 	/** Button to query configuration */
-	private final IAction config = new IAction("dms.query.config") {
+	private final IAction query_config = new IAction("dms.query.config") {
 		protected void doActionPerformed(ActionEvent e) {
 			dms.setDeviceRequest(DeviceRequest.
 				QUERY_CONFIGURATION.ordinal());
@@ -194,7 +194,7 @@ public class PropStatus extends IPanel {
 		box.add(Box.createHorizontalStrut(UI.hgap));
 		box.add(new JButton(query_status));
 		box.add(Box.createHorizontalStrut(UI.hgap));
-		box.add(new JButton(config));
+		box.add(new JButton(query_config));
 		box.add(Box.createHorizontalStrut(UI.hgap));
 		box.add(new JButton(query_settings));
 		box.add(Box.createHorizontalStrut(UI.hgap));
@@ -221,7 +221,7 @@ public class PropStatus extends IPanel {
 		if (null == a) {
 			boolean r = canRequest();
 			query_msg_act.setEnabled(r);
-			config.setEnabled(r);
+			query_config.setEnabled(r);
 			query_status.setEnabled(r);
 			query_settings.setEnabled(r);
 			send_settings.setEnabled(r);
