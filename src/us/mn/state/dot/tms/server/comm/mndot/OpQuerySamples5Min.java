@@ -152,4 +152,12 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 			}
 		}
 	}
+
+	/** Cleanup the operation */
+	@Override
+	public void cleanup() {
+		if (isSuccess())
+			putCtrlFaults(null, null);
+		super.cleanup();
+	}
 }
