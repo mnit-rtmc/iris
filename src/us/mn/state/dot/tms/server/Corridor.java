@@ -73,7 +73,7 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 		return null;
 	}
 
-	/** Get the IDs of all linked CD roads */
+	/** Get the corridor IDs of all linked CD roads */
 	public Iterator<String> getLinkedCDRoads() {
 		HashSet<String> cds = new HashSet<String>();
 		for (R_NodeImpl r_node: n_points.values()) {

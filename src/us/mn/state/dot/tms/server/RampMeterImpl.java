@@ -856,10 +856,9 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		if (isDeviceLogging())
 			logError("findEntrance: corridor mismatch " + n);
 		Corridor c = corridors.getCorridor(loc);
-		if (c != null)
-			return c.findActiveNode(new EntranceFinder());
-		else
-			return null;
+		return (c != null)
+		      ? c.findActiveNode(new EntranceFinder())
+		      : null;
 	}
 
 	/** Check if a locations is on the same corridor as the ramp meter */
