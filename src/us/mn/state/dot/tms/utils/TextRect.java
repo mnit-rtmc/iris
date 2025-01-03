@@ -32,7 +32,6 @@ import us.mn.state.dot.tms.WordHelper;
  *
  * @author Douglas Lau
  * @author John L. Stanley - SRF Consulting
-
  */
 public class TextRect {
 	public final int page_number;
@@ -42,13 +41,15 @@ public class TextRect {
 	public final int height;
 	public final int c_height;
 	public final int font_num;
-	public boolean   implied;
+	public final boolean implied;
 
 	/** Glyph width cache */
 	private HashMap<Integer, Integer> glyph_widths;
 
 	/** Create a new text rectangle */
-	public TextRect(int pn, int x, int y, int w, int h, int ch, int fn) {
+	public TextRect(int pn, int x, int y, int w, int h, int ch, int fn,
+		boolean imp)
+	{
 		page_number = pn;
 		rx = x;
 		ry = y;
@@ -56,7 +57,13 @@ public class TextRect {
 		height = h;
 		c_height = ch;
 		font_num = fn;
-		implied = false;
+		implied = imp;
+	}
+
+	/** Create an implied full-page TextRect */
+	private TextRect pageRect(int page, int font_cur) {
+		return new TextRect(page, rx, ry, width, height, c_height,
+			font_cur, true);
 	}
 
 	/** Compare with another text rectangle for equality.
@@ -97,7 +104,7 @@ public class TextRect {
 
 		private Scanner() {
 			font_cur = font_num;
-			page_rect = genImpliedPageRect(page, font_cur);
+			page_rect = pageRect(page, font_cur);
 			rect = page_rect;
 			fillable = true;
 		}
@@ -120,7 +127,7 @@ public class TextRect {
 		}
 		@Override public void addPage() {
 			page++;
-			page_rect = genImpliedPageRect(page, font_cur);
+			page_rect = pageRect(page, font_cur);
 			startRect(page_rect);
 		}
 		@Override public void setTextRectangle(int x, int y,
@@ -133,7 +140,7 @@ public class TextRect {
 			if (rect.equals(page_rect))
 				fillable = false;
 			startRect(new TextRect(page, x, y, w, h, c_height,
-				font_cur));
+				font_cur, false));
 		}
 	}
 
@@ -163,7 +170,7 @@ public class TextRect {
 			rects = trs;
 			lines = lns.iterator();
 			font_cur = font_num;
-			fillRect(genImpliedPageRect(page, font_cur));
+			fillRect(pageRect(page, font_cur));
 		}
 
 		private void fillRect(TextRect tr) {
@@ -189,7 +196,7 @@ public class TextRect {
 		@Override public void addPage() {
 			super.addPage();
 			page++;
-			fillRect(genImpliedPageRect(page, font_cur));
+			fillRect(pageRect(page, font_cur));
 		}
 		@Override public void setTextRectangle(int x, int y,
 			int w, int h)
@@ -200,7 +207,7 @@ public class TextRect {
 			if (h == 0)
 				h = height - (y - 1);
 			fillRect(new TextRect(page, x, y, w, h, c_height,
-				font_cur));
+				font_cur, false));
 		}
 		@Override public void addFeed(String fid) {
 			// strip feed tags
@@ -392,13 +399,5 @@ public class TextRect {
 				break;
 		}
 		return null;
-	}
-
-	/** Generate an implied full-page TextRect */
-	private TextRect genImpliedPageRect(int page, int font_cur) {
-		TextRect tr = new TextRect(page, rx, ry, width, height,
-				c_height, font_cur);
-		tr.implied = true;
-		return tr;
 	}
 }

@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.utils.TextRect;
 public class TextRectTest extends TestCase {
 
 	// page size for 3 lines of text
-	final TextRect tr3 = new TextRect(1, 1, 1, 50, 26, 0, 1);
+	final TextRect tr3 = new TextRect(1, 1, 1, 50, 26, 0, 1, true);
 
 	public TextRectTest(String name) {
 		super(name);
@@ -45,34 +45,34 @@ public class TextRectTest extends TestCase {
 	public void testFind3() {
 		List<TextRect> rects = tr3.find("[np]");
 		assertTrue(rects.size() == 2);
-		assertTrue(rects.get(0).equals(new TextRect(1, 1, 1, 50, 26, 0, 1)));
-		assertTrue(rects.get(1).equals(new TextRect(2, 1, 1, 50, 26, 0, 1)));
+		assertTrue(rects.get(0).equals(new TextRect(1, 1, 1, 50, 26, 0, 1, true)));
+		assertTrue(rects.get(1).equals(new TextRect(2, 1, 1, 50, 26, 0, 1, true)));
 	}
 
 	public void testFind4() {
 		List<TextRect> rects = tr3.find("FIRST[np]");
 		assertTrue(rects.size() == 1);
-		assertTrue(rects.get(0).equals(new TextRect(2, 1, 1, 50, 26, 0, 1)));
+		assertTrue(rects.get(0).equals(new TextRect(2, 1, 1, 50, 26, 0, 1, true)));
 	}
 
 	public void testFind5() {
 		List<TextRect> rects = tr3.find("[np]SECOND");
 		assertTrue(rects.size() == 1);
-		assertTrue(rects.get(0).equals(new TextRect(1, 1, 1, 50, 26, 0, 1)));
+		assertTrue(rects.get(0).equals(new TextRect(1, 1, 1, 50, 26, 0, 1, true)));
 	}
 
 	public void testFind6() {
 		List<TextRect> rects = tr3.find("[np][np]");
 		assertTrue(rects.size() == 3);
-		assertTrue(rects.get(0).equals(new TextRect(1, 1, 1, 50, 26, 0, 1)));
-		assertTrue(rects.get(1).equals(new TextRect(2, 1, 1, 50, 26, 0, 1)));
-		assertTrue(rects.get(2).equals(new TextRect(3, 1, 1, 50, 26, 0, 1)));
+		assertTrue(rects.get(0).equals(new TextRect(1, 1, 1, 50, 26, 0, 1, true)));
+		assertTrue(rects.get(1).equals(new TextRect(2, 1, 1, 50, 26, 0, 1, true)));
+		assertTrue(rects.get(2).equals(new TextRect(3, 1, 1, 50, 26, 0, 1, true)));
 	}
 
 	public void testFind7() {
 		List<TextRect> rects = tr3.find("[tr1,1,50,24]");
 		assertTrue(rects.size() == 1);
-		assertTrue(rects.get(0).equals(new TextRect(1, 1, 1, 50, 24, 0, 1)));
+		assertTrue(rects.get(0).equals(new TextRect(1, 1, 1, 50, 24, 0, 1, false)));
 	}
 
 	public void testFind8() {
@@ -83,25 +83,25 @@ public class TextRectTest extends TestCase {
 	public void testFind9() {
 		List<TextRect> rects = tr3.find("[tr1,1,50,24][tr1,25,50,24]");
 		assertTrue(rects.size() == 2);
-		assertTrue(rects.get(0).equals(new TextRect(1, 1, 1, 50, 24, 0, 1)));
-		assertTrue(rects.get(1).equals(new TextRect(1, 1, 25, 50, 24, 0, 1)));
+		assertTrue(rects.get(0).equals(new TextRect(1, 1, 1, 50, 24, 0, 1, false)));
+		assertTrue(rects.get(1).equals(new TextRect(1, 1, 25, 50, 24, 0, 1, false)));
 	}
 
 	public void testFind10() {
 		List<TextRect> rects = tr3.find(
 			"[tr1,1,50,24][fo2][tr1,25,50,24]");
 		assertTrue(rects.size() == 2);
-		assertTrue(rects.get(0).equals(new TextRect(1, 1, 1, 50, 24, 0, 1)));
-		assertTrue(rects.get(1).equals(new TextRect(1, 1, 25, 50, 24, 0, 2)));
+		assertTrue(rects.get(0).equals(new TextRect(1, 1, 1, 50, 24, 0, 1, false)));
+		assertTrue(rects.get(1).equals(new TextRect(1, 1, 25, 50, 24, 0, 2, false)));
 	}
 
 	public void testFind11() {
 		List<TextRect> rects = tr3.find(
 			"[tr1,1,50,24][fo2][tr1,25,50,24][fo3][np]");
 		assertTrue(rects.size() == 3);
-		assertTrue(rects.get(0).equals(new TextRect(1, 1, 1, 50, 24, 0, 1)));
-		assertTrue(rects.get(1).equals(new TextRect(1, 1, 25, 50, 24, 0, 2)));
-		assertTrue(rects.get(2).equals(new TextRect(2, 1, 1, 50, 26, 0, 3)));
+		assertTrue(rects.get(0).equals(new TextRect(1, 1, 1, 50, 24, 0, 1, false)));
+		assertTrue(rects.get(1).equals(new TextRect(1, 1, 25, 50, 24, 0, 2, false)));
+		assertTrue(rects.get(2).equals(new TextRect(2, 1, 1, 50, 26, 0, 3, true)));
 	}
 
 	public void testFillFail() {
