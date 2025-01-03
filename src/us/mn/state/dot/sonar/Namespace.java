@@ -28,6 +28,7 @@ import org.postgis.MultiPolygon;
 import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.Permission;
 import us.mn.state.dot.tms.Role;
+import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.User;
 
 /**
@@ -260,6 +261,10 @@ abstract public class Namespace {
 				SonarObject o = lookupObject(name);
 				String n = (o != null) ? o.getNotes() : null;
 				if (n != null && new Hashtags(n).contains(h))
+					return p.getAccessLevel();
+				// FIXME: this is hacky -- find a better way!
+				String tp = name.getTypePart();
+				if (SignMessage.SONAR_TYPE.equals(tp))
 					return p.getAccessLevel();
 			} else
 				return p.getAccessLevel();
