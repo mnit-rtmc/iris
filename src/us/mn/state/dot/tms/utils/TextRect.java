@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2022-2024  Minnesota Department of Transportation
+ * Copyright (C) 2024       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +31,8 @@ import us.mn.state.dot.tms.WordHelper;
  * Text rectangle on a full-matrix sign
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
+
  */
 public class TextRect {
 	public final int page_number;
@@ -39,6 +42,7 @@ public class TextRect {
 	public final int height;
 	public final int c_height;
 	public final int font_num;
+	public boolean   implied;
 
 	/** Glyph width cache */
 	private HashMap<Integer, Integer> glyph_widths;
@@ -52,9 +56,14 @@ public class TextRect {
 		height = h;
 		c_height = ch;
 		font_num = fn;
+		implied = false;
 	}
 
-	/** Compare with another text rectangle for equality */
+	/** Compare with another text rectangle for equality.
+	 * Note that an implied text-rectangle is counted as
+	 * different than an explicit text rectangle of the
+	 * same size to make the fillable text rectangle
+	 * algorithm implemented here work correctly. */
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof TextRect) {
@@ -64,7 +73,8 @@ public class TextRect {
 			       ry == rhs.ry &&
 			       width == rhs.width &&
 			       height == rhs.height &&
-			       font_num == rhs.font_num;
+			       font_num == rhs.font_num &&
+			       implied == rhs.implied;
 		} else
 			return false;
 	}
@@ -87,13 +97,9 @@ public class TextRect {
 
 		private Scanner() {
 			font_cur = font_num;
-			page_rect = pageRect();
+			page_rect = genImpliedPageRect(page, font_cur);
 			rect = page_rect;
 			fillable = true;
-		}
-		private TextRect pageRect() {
-			return new TextRect(page, rx, ry, width, height,
-				c_height, font_cur);
 		}
 		void startRect(TextRect tr) {
 			if (fillable)
@@ -114,7 +120,7 @@ public class TextRect {
 		}
 		@Override public void addPage() {
 			page++;
-			page_rect = pageRect();
+			page_rect = genImpliedPageRect(page, font_cur);
 			startRect(page_rect);
 		}
 		@Override public void setTextRectangle(int x, int y,
@@ -157,8 +163,7 @@ public class TextRect {
 			rects = trs;
 			lines = lns.iterator();
 			font_cur = font_num;
-			fillRect(new TextRect(page, rx, ry, width, height,
-				c_height, font_cur));
+			fillRect(genImpliedPageRect(page, font_cur));
 		}
 
 		private void fillRect(TextRect tr) {
@@ -184,8 +189,7 @@ public class TextRect {
 		@Override public void addPage() {
 			super.addPage();
 			page++;
-			fillRect(new TextRect(page, rx, ry, width, height,
-				c_height, font_cur));
+			fillRect(genImpliedPageRect(page, font_cur));
 		}
 		@Override public void setTextRectangle(int x, int y,
 			int w, int h)
@@ -388,5 +392,13 @@ public class TextRect {
 				break;
 		}
 		return null;
+	}
+
+	/** Generate an implied full-page TextRect */
+	private TextRect genImpliedPageRect(int page, int font_cur) {
+		TextRect tr = new TextRect(page, rx, ry, width, height,
+				c_height, font_cur);
+		tr.implied = true;
+		return tr;
 	}
 }
