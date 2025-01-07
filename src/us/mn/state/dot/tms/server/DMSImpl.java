@@ -1009,6 +1009,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				store.update(this, "status", st);
 				status = st;
 				notifyAttribute("status");
+				updateStyles();
 			}
 			catch (TMSException e) {
 				logError("status: " + e.getMessage());
