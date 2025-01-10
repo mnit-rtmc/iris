@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2024  Minnesota Department of Transportation
+ * Copyright (C) 2001-2025  Minnesota Department of Transportation
  * Copyright (C) 2011-2012  University of Minnesota Duluth (NATSRL)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -676,7 +676,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		public MeterState(RampMeterImpl mtr, EntranceNode en) {
 			meter = mtr;
 			node = en;
-			SamplerSet ss = meter.getSamplerSet();
+			SamplerSet ss = meter.getEntranceSet();
 			queue = ss.filter(LaneCode.QUEUE);
 			passage = ss.filter(LaneCode.PASSAGE);
 			merge = ss.filter(LaneCode.MERGE);
