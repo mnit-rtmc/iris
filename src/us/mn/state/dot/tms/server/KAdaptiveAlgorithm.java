@@ -193,8 +193,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			KAdaptiveAlgorithm alg = lookupAlgorithm(c);
 			if (alg.createMeterState(meter))
 				return alg;
-		} else if (ALG_LOG.isOpen())
-			ALG_LOG.log("No corridor for " + meter.getName());
+		}
 		return null;
 	}
 
@@ -339,11 +338,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @return Entrance node matching ramp meter. */
 	private EntranceNode findEntranceNode(RampMeterImpl meter) {
 		R_NodeImpl rnode = meter.getEntranceNode();
-		if (null == rnode) {
-			if (ALG_LOG.isOpen())
-				log("No entrance node " + meter.getName());
+		if (null == rnode)
 			return null;
-		}
 		for (Node n = head; n != null; n = n.downstream) {
 			if (n instanceof EntranceNode) {
 				EntranceNode en = (EntranceNode) n;

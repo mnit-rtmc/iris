@@ -869,7 +869,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	 * CD road to the main corridor. */
 	public R_NodeImpl getEntranceNode() {
 		R_NodeImpl n = getR_Node();
-		return (n != null) ? findEntrance(n) : null;
+		if (n != null)
+			n = findEntrance(n);
+		if (n == null)
+			updateFault(RampMeterFault.NO_ENTRANCE_NODE);
+		return n;
 	}
 
 	/** Find entrance r_node on same corridor as ramp meter */
