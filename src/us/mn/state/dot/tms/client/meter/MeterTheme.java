@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2024  Minnesota Department of Transportation
+ * Copyright (C) 2016-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,8 +61,8 @@ public class MeterTheme extends ProxyTheme<RampMeter> {
 	static private final Style LCK_METERING = locked(ItemStyle.METERING,
 		COLOR_METERING);
 
-	/** Locked maintenance style */
-	static private final Style LCK_MAINTENANCE = locked(
+	/** Locked fault style */
+	static private final Style LCK_FAULT = locked(
 		ItemStyle.FAULT, COLOR_FAULT);
 
 	/** Create a new meter theme */
@@ -80,7 +80,7 @@ public class MeterTheme extends ProxyTheme<RampMeter> {
 		addStyle(LCK_QUEUE_FULL);
 		addStyle(LCK_QUEUE_EXISTS);
 		addStyle(LCK_METERING);
-		addStyle(LCK_MAINTENANCE);
+		addStyle(LCK_FAULT);
 	}
 
 	/** Get an appropriate style */
@@ -96,7 +96,7 @@ public class MeterTheme extends ProxyTheme<RampMeter> {
 			if (manager.checkStyle(ItemStyle.METERING, rm))
 				return LCK_METERING;
 			if (manager.checkStyle(ItemStyle.FAULT, rm))
-				return LCK_MAINTENANCE;
+				return LCK_FAULT;
 		}
 		return super.getStyle(rm);
 	}

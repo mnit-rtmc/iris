@@ -39,15 +39,15 @@ should _NOT_ be the CD road, but the entrance [r_node] should.
 | Access       | Primary               | Secondary                        |
 |--------------|-----------------------|----------------------------------|
 | 👁️  View      | name, location, fault | geo\_loc                         |
-| 👉 Operate   |                       | m\_lock, rate                    |
+| 👉 Operate   | m\_lock               | rate                             |
 | 💡 Manage    | notes                 | storage, max\_wait, algorithm, am\_target, pm\_target |
 | 🔧 Configure | controller            | pin, meter\_type, beacon, preset |
 
 </details>
 
 
-[CD roads]: road_topology.html#r_node-transitions
+[CD roads]: road_topology.html#rnode-transitions
 [density adaptive]: density_adaptive.html
 [green]: vehicle_detection.html#lane-type
-[r_node]: road_topology.html#r_nodes
+[r_node]: road_topology.html#rnodes
 [road topology]: road_topology.html

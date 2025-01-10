@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,6 +87,9 @@ public interface RampMeter extends Device {
 
 	/** Get the meter lock code */
 	Integer getMLock();
+
+	/** Get meter fault code */
+	Integer getFault();
 
 	/* Transient attributes (not stored in database) */
 

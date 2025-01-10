@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@ import us.mn.state.dot.tms.MeterQueueState;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.RampMeterFault;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.SystemAttributeHelper;
@@ -91,7 +92,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"meter_type, storage, max_wait, algorithm, am_target, "+
-			"pm_target, beacon, preset, m_lock FROM iris." +
+			"pm_target, beacon, preset, m_lock, fault FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -109,7 +110,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 					row.getInt(11),    // pm_target
 					row.getString(12), // beacon
 					row.getString(13), // preset
-					row.getInt(14)     // m_lock
+					row.getInt(14),    // m_lock
+					(Integer) row.getObject(15) // fault
 				));
 			}
 		});
@@ -134,6 +136,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		map.put("preset", preset);
 		if (m_lock != null)
 			map.put("m_lock", m_lock.ordinal());
+		if (fault != null)
+			map.put("fault", fault.ordinal());
 		return map;
 	}
 
@@ -146,32 +150,24 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Create a ramp meter */
-	private RampMeterImpl(String n, GeoLocImpl loc, ControllerImpl c,
-		int p, String nt, int t, int st, int w, int alg, int at, int pt,
-		Beacon b, CameraPreset cp, Integer lk)
+	private RampMeterImpl(String n, String loc, String c, int p,
+		String nt, int t, int st, int w, int alg, int at, int pt,
+		String b, String cp, Integer lk, Integer flt)
 	{
-		super(n, c, p, nt);
-		geo_loc = loc;
+		super(n, lookupController(c), p, nt);
+		geo_loc = lookupGeoLoc(loc);
 		meter_type = RampMeterType.fromOrdinal(t);
 		storage = st;
 		max_wait = w;
-		setPreset(cp);
+		setPreset(lookupPreset(cp));
 		algorithm = alg;
 		am_target = at;
 		pm_target = pt;
-		beacon = b;
+		beacon = lookupBeacon(b);
 		m_lock = RampMeterLock.fromOrdinal(lk);
+		fault = RampMeterFault.fromOrdinal(flt);
 		rate = null;
 		initTransients();
-	}
-
-	/** Create a ramp meter */
-	private RampMeterImpl(String n, String loc, String c, int p,
-		String nt, int t, int st, int w, int alg, int at, int pt,
-		String b, String cp, Integer lk)
-	{
-		this(n, lookupGeoLoc(loc), lookupController(c), p, nt, t, st, w,
-		     alg, at, pt, lookupBeacon(b), lookupPreset(cp), lk);
 	}
 
 	/** Initialize the transient state */
@@ -448,34 +444,15 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		m_lock = RampMeterLock.fromOrdinal(lk);
 	}
 
-	/** Set the meter lock (update) */
-	private void setMLock(Integer lk, String u) throws TMSException {
+	/** Set the meter lock code */
+	public void doSetMLock(Integer lk) throws TMSException {
 		if (RampMeterLock.fromOrdinal(lk) != m_lock) {
 			store.update(this, "m_lock", lk);
 			setMLock(lk);
 			updateStyles();
+			String u = getProcUser();
 			logEvent(new MeterLockEvent(name, lk, u));
 		}
-	}
-
-	/** Set the meter lock (notify clients) */
-	private void setMLockNotify(RampMeterLock ml) {
-		try {
-			Integer lk = (ml != null) ? ml.ordinal() : null;
-			setMLock(lk, null);
-			notifyAttribute("mLock");
-		}
-		catch (TMSException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/** Set the meter lock code */
-	public void doSetMLock(Integer lk) throws TMSException {
-		RampMeterLock ml = RampMeterLock.fromOrdinal(lk);
-		if (ml != null && ml.controller_lock)
-			throw new ChangeVetoException("Invalid lock value");
-		setMLock(lk, getProcUser());
 	}
 
 	/** Get the ramp meter lock code */
@@ -489,26 +466,48 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return m_lock != null;
 	}
 
-	/** Set the status of the police panel switch */
-	public void setPolicePanel(boolean p) {
-		if (p) {
-			if (m_lock == null)
-				setMLockNotify(RampMeterLock.POLICE_PANEL);
-		} else {
-			if (m_lock == RampMeterLock.POLICE_PANEL)
-				setMLockNotify(null);
+	/** Meter fault */
+	private RampMeterFault fault = null;
+
+	/** Set the meter fault (notify clients) */
+	private void setFaultNotify(RampMeterFault flt) {
+		if (!objectEquals(flt, fault)) {
+			try {
+				Integer f = (flt != null)
+				       ? flt.ordinal()
+				       : null;
+				store.update(this, "fault", f);
+				fault = flt;
+				updateStyles();
+				notifyAttribute("fault");
+			}
+			catch (TMSException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
+	/** Get the ramp meter fault */
+	@Override
+	public Integer getFault() {
+		RampMeterFault flt = fault;
+		return (flt != null) ? flt.ordinal() : null;
+	}
+
+	/** Set the status of the police panel switch */
+	public void setPolicePanel(boolean p) {
+		if (p)
+			setFaultNotify(RampMeterFault.POLICE_PANEL);
+		else if (fault == RampMeterFault.POLICE_PANEL)
+			setFaultNotify(null);
+	}
+
 	/** Set the status of manual metering */
-	public void setManual(boolean m) {
-		if (m) {
-			if (m_lock == null)
-				setMLockNotify(RampMeterLock.MANUAL);
-		} else {
-			if (m_lock == RampMeterLock.MANUAL)
-				setMLockNotify(null);
-		}
+	public void setManualMode(boolean m) {
+		if (m)
+			setFaultNotify(RampMeterFault.MANUAL_MODE);
+		else if (fault == RampMeterFault.MANUAL_MODE)
+			setFaultNotify(null);
 	}
 
 	/** Get the meter poller */
@@ -681,9 +680,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Test if a meter has faults */
 	@Override
 	protected boolean hasFaults() {
-		RampMeterLock lk = m_lock;
-		return lk == RampMeterLock.POLICE_PANEL ||
-		       lk == RampMeterLock.MAINTENANCE;
+		return fault != null;
 	}
 
 	/** Test if meter is available */

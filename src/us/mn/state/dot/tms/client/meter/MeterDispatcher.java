@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.MeterQueueState;
 import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.RampMeterFault;
 import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.client.Session;
@@ -75,8 +76,8 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 	/** Location label */
 	private final JLabel location_lbl = createValueLabel();
 
-	/** Operation label */
-	private final JLabel operation_lbl = createValueLabel();
+	/** Status label */
+	private final JLabel status_lbl = createValueLabel();
 
 	/** Release rate label */
 	private final JLabel release_lbl = createValueLabel();
@@ -136,10 +137,10 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		preset_btn.setBorder(UI.buttonBorder());
 		add("location");
 		add(location_lbl, Stretch.LAST);
-		add("device.operation");
-		add(operation_lbl, Stretch.LAST);
+		add("device.status");
+		add(status_lbl, Stretch.LAST);
 		// Make label opaque so that we can set the background color
-		operation_lbl.setOpaque(true);
+		status_lbl.setOpaque(true);
 		add("ramp.meter.rate");
 		add(release_lbl);
 		add("ramp.meter.cycle");
@@ -189,9 +190,7 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 			location_lbl.setText(GeoLocHelper.getOnRampLocation(
 				rm.getGeoLoc()));
 		}
-		if(a == null || a.equals("operation"))
-			operation_lbl.setText(rm.getOperation());
-		if(a == null || a.equals("rate")) {
+		if (a == null || a.equals("rate")) {
 			Integer rt = rm.getRate();
 			release_lbl.setText(RampMeterHelper.formatRelease(rt));
 			cycle_lbl.setText(RampMeterHelper.formatCycle(rt));
@@ -214,15 +213,8 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 			lock_cbx.setAction(new LockMeterAction(rm, lock_cbx,
 				isWritePermitted(rm)));
 		}
-		if(a == null || a.equals("styles")) {
-			if (ItemStyle.OFFLINE.checkBit(rm.getStyles())) {
-				operation_lbl.setForeground(Color.WHITE);
-				operation_lbl.setBackground(Color.GRAY);
-			} else {
-				operation_lbl.setForeground(null);
-				operation_lbl.setBackground(null);
-			}
-		}
+		if (a == null || a.equals("fault") || a.equals("styles"))
+			updateStatus(rm);
 	}
 
 	/** Update the ramp meter config */
@@ -234,6 +226,24 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		on_btn.setAction(new TurnOnAction(rm, update));
 		off_btn.setAction(new TurnOffAction(rm, update));
 		lock_cbx.setAction(new LockMeterAction(rm, lock_cbx, update));
+	}
+
+	/** Update the ramp meter status */
+	private void updateStatus(RampMeter rm) {
+		Integer fault = rm.getFault();
+		if (ItemStyle.OFFLINE.checkBit(rm.getStyles())) {
+			status_lbl.setForeground(Color.WHITE);
+			status_lbl.setBackground(Color.GRAY);
+		} else if (fault != null) {
+			status_lbl.setForeground(Color.WHITE);
+			status_lbl.setBackground(Color.BLACK);
+		} else {
+			status_lbl.setForeground(null);
+			status_lbl.setBackground(null);
+		}
+		status_lbl.setText((fault != null)
+		      ? RampMeterFault.fromOrdinal(fault).toString()
+		      : "");
 	}
 
 	/** Set the camera preset action */
@@ -254,9 +264,9 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		name_lbl.setText("");
 		setPresetAction(null);
 		location_lbl.setText("");
-		operation_lbl.setText("");
-		operation_lbl.setForeground(null);
-		operation_lbl.setBackground(null);
+		status_lbl.setText("");
+		status_lbl.setForeground(null);
+		status_lbl.setBackground(null);
 		release_lbl.setText("");
 		cycle_lbl.setText("");
 		queue_lbl.setText("");
