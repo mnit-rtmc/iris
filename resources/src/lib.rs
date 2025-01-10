@@ -1,6 +1,6 @@
 // lib.rs
 //
-// Copyright (C) 2024  Minnesota Department of Transportation
+// Copyright (C) 2024-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -64,6 +64,8 @@ pub enum Res {
     LcsArray,
     LcsIndication,
     LcsLock,
+    MeterFault,
+    MeterLock,
     MeterQueueState,
     Modem,
     MonitorStyle,
@@ -162,6 +164,8 @@ impl Res {
             LcsArray,
             LcsIndication,
             LcsLock,
+            MeterFault,
+            MeterLock,
             MeterQueueState,
             Modem,
             MonitorStyle,
@@ -248,6 +252,8 @@ impl Res {
             LcsArray => "lcs_array",
             LcsIndication => "lcs_indication",
             LcsLock => "lcs_lock",
+            MeterFault => "meter_fault",
+            MeterLock => "meter_lock",
             MeterQueueState => "meter_queue_state",
             Modem => "modem",
             MonitorStyle => "monitor_style",
@@ -343,8 +349,8 @@ impl Res {
             BeaconState | CommProtocol | Condition | Direction | Encoding
             | Font | GateArmInterlock | GateArmState | Graphic | IncImpact
             | IncRange | LaneCode | LaneUseIndication | LcsLock
-            | MeterQueueState | ResourceType | RnodeTransition | RnodeType
-            | RoadClass | RoadModifier => true,
+            | MeterFault | MeterLock | MeterQueueState | ResourceType
+            | RnodeTransition | RnodeType | RoadClass | RoadModifier => true,
             _ => false,
         }
     }

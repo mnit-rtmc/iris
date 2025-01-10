@@ -1,6 +1,6 @@
 // query.rs
 //
-// Copyright (C) 2018-2024  Minnesota Department of Transportation
+// Copyright (C) 2018-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -571,6 +571,18 @@ pub const LCS_LOCK_LUT: &str = "\
   FROM iris.lcs_lock \
   ORDER BY id";
 
+/// SQL query for ramp meter faults (LUT)
+pub const METER_FAULT_LUT: &str = "\
+  SELECT id, description \
+  FROM iris.meter_fault \
+  ORDER BY id";
+
+/// SQL query for ramp meter locks (LUT)
+pub const METER_LOCK_LUT: &str = "\
+  SELECT id, description \
+  FROM iris.meter_lock \
+  ORDER BY id";
+
 /// SQL query for ramp meter queue states (LUT)
 pub const METER_QUEUE_STATE_LUT: &str = "\
   SELECT id, description \
@@ -714,7 +726,7 @@ pub const PLAY_LIST_ONE: &str = "\
 
 /// SQL query for all ramp meters (primary)
 pub const RAMP_METER_ALL: &str = "\
-  SELECT m.name, location, controller, notes \
+  SELECT m.name, location, controller, notes, m_lock, fault \
   FROM iris.ramp_meter m \
   LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
   ORDER BY m.name";
@@ -723,7 +735,7 @@ pub const RAMP_METER_ALL: &str = "\
 pub const RAMP_METER_ONE: &str = "\
   SELECT m.name, location, geo_loc, controller, pin, notes, meter_type, \
          beacon, preset, storage, max_wait, algorithm, am_target, pm_target, \
-         m_lock \
+         m_lock, fault \
   FROM iris.ramp_meter m \
   LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
   WHERE m.name = $1";

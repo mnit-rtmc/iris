@@ -1,6 +1,6 @@
 // resource.rs
 //
-// Copyright (C) 2018-2024  Minnesota Department of Transportation
+// Copyright (C) 2018-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -76,6 +76,8 @@ pub enum Resource {
     LcsArray,
     LcsIndication,
     LcsLock,
+    MeterFault,
+    MeterLock,
     MeterQueueState,
     Modem,
     MonitorStyle,
@@ -166,6 +168,8 @@ impl Resource {
             LcsArray,
             LcsIndication,
             LcsLock,
+            MeterFault,
+            MeterLock,
             MeterQueueState,
             Modem,
             MonitorStyle,
@@ -254,6 +258,8 @@ impl Resource {
             LcsArray => Res::LcsArray,
             LcsIndication => Res::LcsIndication,
             LcsLock => Res::LcsLock,
+            MeterFault => Res::MeterFault,
+            MeterLock => Res::MeterLock,
             MeterQueueState => Res::MeterQueueState,
             Modem => Res::Modem,
             MonitorStyle => Res::MonitorStyle,
@@ -341,6 +347,8 @@ impl Resource {
             LcsArray => "api/lcs_array",
             LcsIndication => "api/lcs_indication",
             LcsLock => "lut/lcs_lock",
+            MeterFault => "lut/meter_fault",
+            MeterLock => "lut/meter_lock",
             MeterQueueState => "lut/meter_queue_state",
             Modem => "api/modem",
             MonitorStyle => "api/monitor_style",
@@ -441,6 +449,8 @@ impl Resource {
             LcsArray => query::LCS_ARRAY_ALL,
             LcsIndication => query::LCS_INDICATION_ALL,
             LcsLock => query::LCS_LOCK_LUT,
+            MeterFault => query::METER_FAULT_LUT,
+            MeterLock => query::METER_LOCK_LUT,
             MeterQueueState => query::METER_QUEUE_STATE_LUT,
             Modem => query::MODEM_ALL,
             MonitorStyle => query::MONITOR_STYLE_ALL,
