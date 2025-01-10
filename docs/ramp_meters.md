@@ -15,21 +15,6 @@ The following operations can be performed on a ramp meter:
 * Synchronizing clock
 * Configuring time-of-day operation
 
-## Setup
-
-For basic time-of-day operation, the **simple** metering `algorithm` will run
-the meter at a fixed release rate, equal to the target rate for the current
-period (AM or PM).
-
-The [density adaptive] algorithm requires a bit more configuration, since it
-depends on the [road topology].  An _entrance_ [r_node] must exist, with
-matching `roadway`, `road_dir`, `cross_street`, `cross_dir` and `cross_mod`.
-This `r_node` must have a [green] detector, plus optional _queue_ and
-_passage_ detectors.
-
-There is special handling for meters on [CD roads].  The meter `roadway`
-should _NOT_ be the CD road, but the entrance [r_node] should.
-
 <details>
 <summary>API Resources 🕵️ </summary>
 
@@ -45,9 +30,43 @@ should _NOT_ be the CD road, but the entrance [r_node] should.
 
 </details>
 
+## Setup
+
+Field                  | Description
+-----------------------|---------------------------------------------------
+Notes                  | administrator notes, possibly including [hashtag]s
+Meter Type             | number of metered lanes, etc.
+Storage                | distance from meter to queue detector
+Max Wait               | maximum allowed wait time (estimated)
+Metering Algorithm     | **simple** or **density adaptive**
+AM Target              | historical hourly AM target rate
+PM Target              | historical hourly PM target rate
+Advance Warning Beacon | beacon activated automatically when active
+
+For basic time-of-day operation, the **simple** metering `algorithm` will run
+the meter at a fixed release rate, equal to the target rate for the current
+period (AM or PM).
+
+The [density adaptive] algorithm requires a bit more configuration, since it
+depends on the [road topology].  An _entrance_ [r_node] must exist, with
+matching `roadway`, `road_dir`, `cross_street`, `cross_dir` and `cross_mod`.
+This `r_node` must have a [green] detector, plus optional _queue_ and
+_passage_ detectors.
+
+There is special handling for meters on [CD roads].  The meter `roadway`
+should _NOT_ be the CD road, but the entrance [r_node] should.
+
+Advance warning beacons are flashing lights on a static sign, e.g. "PREPARE TO
+STOP WHEN FLASHING".  Typically, they are hard-wired to flash when the meter
+is operating, but they can be controlled by IRIS if that is not feasable.
+In that case, beacons will also flash if a [merge] detector on the entrance
+ramp has high occupancy (30%+).
+
 
 [CD roads]: road_topology.html#rnode-transitions
 [density adaptive]: density_adaptive.html
 [green]: vehicle_detection.html#lane-type
+[hashtag]: hashtags.html
+[merge]: vehicle_detection.html#lane-type
 [r_node]: road_topology.html#rnodes
 [road topology]: road_topology.html
