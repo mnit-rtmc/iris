@@ -1,5 +1,13 @@
 # IRIS 5.x Release Notes
 
+5.65.0 (13 Jan 2025)
+ - Add ramp meter `fault` column to diagnose setup problems
+ - Allow creating sign message with only DMS hashtag permission
+ - Fix problem with text rectangles in message patterns
+ - Fix DMS styles not changing on status update
+ - Improve controller fault handling
+ - Add `ordinal` column to `r_node`
+
 5.64.0 (16 Dec 2024)
  - Fixed controller `status` fault handling
  - Added `email_event` logging table
