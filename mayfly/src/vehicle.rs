@@ -1,6 +1,6 @@
 // vehicle.rs
 //
-// Copyright (c) 2021-2024  Minnesota Department of Transportation
+// Copyright (c) 2021-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -534,7 +534,7 @@ fn sec_to_ms(m: f32) -> u32 {
     (m * 1000.0).round() as u32
 }
 
-impl<'a, T: TrafficData> Iterator for BinIter<'a, T> {
+impl<T: TrafficData> Iterator for BinIter<'_, T> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
