@@ -133,4 +133,22 @@ UPDATE iris._ramp_meter SET m_lock = NULL WHERE m_lock >= 5;
 UPDATE iris.meter_lock SET description = 'Knocked down' WHERE id = 5;
 DELETE FROM iris.meter_lock WHERE id = 6;
 
+-- Add ordinal to r_node table
+DROP VIEW r_node_view;
+
+ALTER TABLE iris.r_node ADD COLUMN ordinal INTEGER UNIQUE;
+
+CREATE VIEW r_node_view AS
+    SELECT n.name, n.geo_loc, n.ordinal,
+           l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+           l.landmark, l.lat, l.lon, l.corridor, l.location,
+           nt.description AS node_type, n.pickable, n.above,
+           tr.description AS transition, n.lanes, n.attach_side, n.shift,
+           n.active, n.station_id, n.speed_limit, n.notes
+    FROM iris.r_node n
+    JOIN geo_loc_view l ON n.geo_loc = l.name
+    JOIN iris.r_node_type nt ON n.node_type = nt.id
+    JOIN iris.r_node_transition tr ON n.transition = tr.id;
+GRANT SELECT ON r_node_view TO PUBLIC;
+
 COMMIT;

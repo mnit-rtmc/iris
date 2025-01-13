@@ -602,8 +602,8 @@ impl Corridor {
     async fn write_file(&self, roads: &HashMap<String, Road>) -> Result<()> {
         let abbrev = roads
             .get(&self.cor_id.roadway)
-            .map(|r| r.abbrev.clone())
-            .unwrap_or_else(|| "".to_owned());
+            .map(|r| &r.abbrev[..])
+            .unwrap_or_else(|| "");
         if abbrev.is_empty() {
             log::warn!("write_file no 'abbrev' for {}", self.cor_id.roadway);
             return Ok(());

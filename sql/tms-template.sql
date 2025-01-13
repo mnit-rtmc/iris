@@ -1580,6 +1580,7 @@ VALUES
 CREATE TABLE iris.r_node (
     name VARCHAR(10) PRIMARY KEY,
     geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
+    ordinal INTEGER UNIQUE,
     node_type INTEGER NOT NULL REFERENCES iris.r_node_type,
     pickable BOOLEAN NOT NULL,
     above BOOLEAN NOT NULL,
@@ -1653,7 +1654,7 @@ ALTER TABLE iris.r_node ADD CONSTRAINT right_edge_ck
     CHECK (iris.r_node_right(node_type, lanes, attach_side, shift) <= 9);
 
 CREATE VIEW r_node_view AS
-    SELECT n.name, n.geo_loc,
+    SELECT n.name, n.geo_loc, n.ordinal,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
            l.landmark, l.lat, l.lon, l.corridor, l.location,
            nt.description AS node_type, n.pickable, n.above,
