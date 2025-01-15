@@ -284,7 +284,14 @@ public class OpQueryDMSConfiguration extends OpDMS {
 				mono_fg, mono_bg, color_scheme.getInteger());
 			if (sc != null)
 				dms.setSignConfigNotify(sc);
-		}
+			else {
+				putCtrlFaults("other", "Config: " +
+					s_width.getInteger() + "x" +
+					s_height.getInteger()
+				);
+			}
+		} else
+			putCtrlFaults("other", "Query Configuration");
 		super.cleanup();
 	}
 
