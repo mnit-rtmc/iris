@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,12 +54,14 @@ public class SamplerSet implements VehicleSampler {
 		return ss;
 	}
 
-	/** Filter a vehicle sampler set */
+	/** Filter a vehicle sampler set for non-abandoned detectors */
 	public SamplerSet filter(final LaneCode lc) {
 		return filter(new Filter() {
 			public boolean check(VehicleSampler vs) {
 				if (vs instanceof DetectorImpl) {
 					DetectorImpl d = (DetectorImpl) vs;
+					if (d.getAbandoned())
+						return false;
 					return lc.lcode.equals(d.getLaneCode());
 				} else
 					return false;

@@ -43,6 +43,7 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterFault;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterType;
+import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TimingTable;
@@ -174,7 +175,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	@Override
 	public void initTransients() {
 		super.initTransients();
-		lookupDetectors();
+		lookupEntranceNode();
 		updateStyles();
 	}
 
@@ -723,107 +724,105 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return s;
 	}
 
-	/** Entrance detector set */
-	private transient SamplerSet entrance_set = new SamplerSet();
+	/** Meter entrance node */
+	private transient R_NodeImpl ent_node = null;
 
-	/** Get the meter entrance detector set */
-	public SamplerSet getEntranceSet() {
-		return entrance_set;
+	/** Get the meter entrance r_node */
+	public R_NodeImpl getEntranceNode() {
+		return ent_node;
 	}
 
-	/** Lookup the detector set associated with the ramp meter */
-	private SamplerSet lookupEntranceSet(SamplerSet.Filter f) {
-		boolean found = false;
-		DetFinder finder = new DetFinder(f);
+	/** Lookup the entrance R_Node */
+	public void lookupEntranceNode() {
+		ent_node = findEntranceNode();
+	}
+
+	/** Find the entrance R_Node */
+	private R_NodeImpl findEntranceNode() {
 		Corridor corridor = getCorridor();
 		if (corridor != null) {
-			if (corridor.findActiveNode(finder) != null)
-				found = true;
+			R_NodeImpl n = corridor.findActiveNode(finder);
+			if (n != null)
+				return n;
 			Iterator<String> it = corridor.getLinkedCDRoads();
 			while (it.hasNext()) {
 				String cd = it.next();
 				Corridor cd_road = corridors.getCorridor(cd);
 				if (cd_road != null) {
-					if (cd_road.findActiveNode(finder)
-					    != null)
-						found = true;
+					n = cd_road.findActiveNode(finder);
+					if (n != null)
+						return n;
 				}
 			}
-		} else
-			logError("lookupEntranceSet: no corridor");
-		if (!found)
-			updateFault(RampMeterFault.NO_ENTRANCE_NODE);
-		return new SamplerSet(finder.samplers);
-	}
-
-	/** Get the set of non-abandoned entrance detectors */
-	private SamplerSet lookupEntranceSet() {
-		return lookupEntranceSet(new SamplerSet.Filter() {
-			public boolean check(VehicleSampler vs) {
-				if (vs instanceof DetectorImpl) {
-					DetectorImpl d = (DetectorImpl) vs;
-					return !d.getAbandoned();
-				} else
-					return false;
-			}
-		});
-	}
-
-	/** Entrance detector finder */
-	private class DetFinder implements Corridor.NodeFinder {
-		private final ArrayList<VehicleSampler> samplers =
-			new ArrayList<VehicleSampler>();
-		private final SamplerSet.Filter filter;
-		private DetFinder(SamplerSet.Filter f) {
-			filter = f;
 		}
+		updateFault(RampMeterFault.NO_ENTRANCE_NODE);
+		return null;
+	}
+
+	/** Get a sampler set for a lane code */
+	public SamplerSet getSamplerSet(LaneCode lc) {
+		R_NodeImpl n = ent_node;
+		return (n != null)
+		      ? n.getSamplerSet().filter(lc)
+		      : new SamplerSet();
+	}
+
+	/** Node finder for meter entrance node */
+	private final Corridor.NodeFinder finder = new Corridor.NodeFinder() {
 		public boolean check(float m, R_NodeImpl n) {
-			if (n.getNodeType() == R_NodeType.ENTRANCE.ordinal()) {
-				GeoLoc l = n.getGeoLoc();
-				if (GeoLocHelper.matchesRoot(l, geo_loc)) {
-					SamplerSet ds = n.getSamplerSet();
-					samplers.addAll(ds.filter(filter)
-					                  .getAll());
-				}
-			}
-			return false;
+			return checkNode(n);
 		}
+	};
+
+	/** Check if a node is an entrance for the meter */
+	private boolean checkNode(R_NodeImpl n) {
+		if (n.getNodeType() != R_NodeType.ENTRANCE.ordinal())
+			return false;
+		if (!matchesCD(n.getGeoLoc()))
+			return false;
+		SamplerSet greens = n.getSamplerSet().filter(LaneCode.GREEN);
+		return greens.size() == 1;
+	}
+
+	/** Test if another location matches (including CD roads) */
+	private boolean matchesCD(GeoLoc loc) {
+		Road r0 = geo_loc.getRoadway();
+		Road x0 = geo_loc.getCrossStreet();
+		Road r1 = loc.getRoadway();
+		Road x1 = loc.getCrossStreet();
+		if (r0 == null || x0 == null || r1 == null || x1 == null)
+			return false;
+		String n0 = r0.getName();
+		String n1 = r1.getName();
+		return (
+			n0.equals(n1) ||
+			n0.startsWith(n1) && n1.endsWith(" CD")
+		) &&
+			(x0 == x1) &&
+			(geo_loc.getRoadDir() == loc.getRoadDir()) &&
+			(geo_loc.getCrossDir() == loc.getCrossDir()) &&
+			(geo_loc.getCrossMod() == loc.getCrossMod());
 	}
 
 	/** Check if traffic is backed up over merge detector */
 	private boolean isMergeBackedUp() {
 		int per_ms = DetectorImpl.BIN_PERIOD_MS;
 		long stamp = DetectorImpl.calculateEndTime(per_ms);
-		SamplerSet merge_set = entrance_set.filter(LaneCode.MERGE);
+		SamplerSet merge_set = getSamplerSet(LaneCode.MERGE);
 		float occ = merge_set.getMaxOccupancy(stamp, per_ms);
 		return merge_set.isPerfect() && occ >= MERGE_BACKUP_OCC;
 	}
 
-	/** Green count detector */
-	private transient DetectorImpl green_det = null;
-
 	/** Get the green count detector */
 	public DetectorImpl getGreenDet() {
-		return green_det;
-	}
-
-	/** Lookup the entrance detectors from R_Nodes */
-	public void lookupDetectors() {
-		entrance_set = lookupEntranceSet();
-		green_det = lookupGreen();
-		if (green_det != null)
-			updateFault(null);
-	}
-
-	/** Lookup a single green detector from entrance set */
-	private DetectorImpl lookupGreen() {
-		SamplerSet greens = entrance_set.filter(LaneCode.GREEN);
+		SamplerSet greens = getSamplerSet(LaneCode.GREEN);
 		if (1 == greens.size()) {
 			VehicleSampler vs = greens.getAll().get(0);
-			if (vs instanceof DetectorImpl)
+			if (vs instanceof DetectorImpl) {
+				updateFault(null);
 				return (DetectorImpl) vs;
+			}
 		}
-		logError("lookupGreen: wrong size " + greens.size());
 		updateFault(RampMeterFault.NO_GREEN_DETECTOR);
 		return null;
 	}
@@ -849,56 +848,5 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		if (mw != DEFAULT_MAX_WAIT)
 			w.write(" max_wait='" + mw + "'");
 		w.write("/>\n");
-	}
-
-	/** Get the r_node associated with the ramp meter */
-	public R_NodeImpl getR_Node() {
-		DetectorImpl det = green_det;
-		if (det != null) {
-			R_Node n = det.getR_Node();
-			if (n instanceof R_NodeImpl)
-				return (R_NodeImpl) n;
-		}
-		logError("getR_Node: No green det");
-		return null;
-	}
-
-	/** Get the entrance r_node on same corridor as ramp meter.
-	 *
-	 * For meters on CD roads, this will search for an entrance from the
-	 * CD road to the main corridor. */
-	public R_NodeImpl getEntranceNode() {
-		R_NodeImpl n = getR_Node();
-		if (n != null)
-			n = findEntrance(n);
-		if (n == null)
-			updateFault(RampMeterFault.NO_ENTRANCE_NODE);
-		return n;
-	}
-
-	/** Find entrance r_node on same corridor as ramp meter */
-	private R_NodeImpl findEntrance(R_NodeImpl n) {
-		GeoLoc loc = n.getGeoLoc();
-		if (isSameCorridor(loc))
-			return n;
-		if (isDeviceLogging())
-			logError("findEntrance: corridor mismatch " + n);
-		Corridor c = corridors.getCorridor(loc);
-		return (c != null)
-		      ? c.findActiveNode(new EntranceFinder())
-		      : null;
-	}
-
-	/** Check if a locations is on the same corridor as the ramp meter */
-	private boolean isSameCorridor(GeoLoc loc) {
-		return getCorridor() == corridors.getCorridor(loc);
-	}
-
-	/** Entrance finder */
-	private class EntranceFinder implements Corridor.NodeFinder {
-		public boolean check(float m, R_NodeImpl n) {
-			R_NodeImpl f = n.getFork();
-			return (f != null) && isSameCorridor(f.getGeoLoc());
-		}
 	}
 }

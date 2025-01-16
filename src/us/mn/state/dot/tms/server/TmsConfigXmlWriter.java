@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2022  Minnesota Department of Transportation
+ * Copyright (C) 2012-2025  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  * Copyright (C) 2012  Iteris Inc.
  *
@@ -188,7 +188,7 @@ public class TmsConfigXmlWriter extends XmlWriter {
 			RampMeter m = it.next();
 			if (m instanceof RampMeterImpl) {
 				RampMeterImpl meter = (RampMeterImpl) m;
-				R_NodeImpl n = meter.getR_Node();
+				R_NodeImpl n = meter.getEntranceNode();
 				if (n != null)
 					m_nodes.put(n.getName(), meter);
 			}
