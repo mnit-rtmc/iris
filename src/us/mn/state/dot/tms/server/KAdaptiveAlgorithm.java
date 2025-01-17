@@ -15,6 +15,7 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import us.mn.state.dot.sched.DebugLog;
@@ -230,46 +231,43 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private final HashMap<String, MeterState> meter_states =
 		new HashMap<String, MeterState>();
 
-	/** Head (furthest upstream) node on corridor */
-	private final Node head;
+	/** All entrance / station nodes on corridor */
+	private final ArrayList<Node> nodes;
 
 	/** Create a new KAdaptiveAlgorithm */
 	private KAdaptiveAlgorithm(Corridor c) {
 		corridor = c;
-		head = createNodes();
+		nodes = createNodes();
 		debug();
 	}
 
 	/** Create nodes from corridor structure */
-	private Node createNodes() {
+	private ArrayList<Node> createNodes() {
 		NFinder finder = new NFinder();
 		corridor.findActiveNode(finder);
-		return finder.first;
+		return finder.nodes;
 	}
 
 	/** Node finder */
 	private class NFinder implements Corridor.NodeFinder {
-		private Node first = null;
-		private Node prev = null;
+		private ArrayList<Node> nodes = new ArrayList<Node>();
 		public boolean check(float m, R_NodeImpl rnode) {
-			Node n = createNode(rnode, m, prev);
+			Node n = createNode(rnode, m);
 			if (n != null)
-				prev = n;
-			if (null == first)
-				first = prev;
+				nodes.add(n);
 			return false;
 		}
 	}
 
 	/** Create one node */
-	private Node createNode(R_NodeImpl rnode, float mile, Node prev) {
+	private Node createNode(R_NodeImpl rnode, float mile) {
 		switch (R_NodeType.fromOrdinal(rnode.getNodeType())) {
 		case ENTRANCE:
-			return new EntranceNode(rnode, mile, prev);
+			return new EntranceNode(rnode, mile);
 		case STATION:
 			StationImpl stat = rnode.getStation();
 			if (stat != null && stat.getActive())
-				return new StationNode(rnode, mile, prev, stat);
+				return new StationNode(rnode, mile, stat);
 		default:
 			return null;
 		}
@@ -278,7 +276,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Debug corridor structure */
 	private void debug() {
 		log("-------- Corridor Structure --------");
-		for (Node n = head; n != null; n = n.downstream)
+		for (Node n : nodes)
 			log(n.toString());
 	}
 
@@ -340,7 +338,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		R_NodeImpl rnode = meter.getEntranceNode();
 		if (null == rnode)
 			return null;
-		for (Node n = head; n != null; n = n.downstream) {
+		for (Node n : nodes) {
 			if (n instanceof EntranceNode) {
 				EntranceNode en = (EntranceNode) n;
 				if (en.rnode.equals(rnode))
@@ -356,33 +354,38 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Update the station nodes for the current interval */
 	private void updateStations(long stamp) {
-		for (StationNode sn = firstStation(); sn != null;
-		    sn = sn.downstreamStation())
-		{
-			sn.updateState(stamp);
+		for (Node n : nodes) {
+			if (n instanceof StationNode) {
+				StationNode sn = (StationNode) n;
+				sn.updateState(stamp);
+			}
 		}
-	}
-
-	/** Get the furthest upstream station node. */
-	private StationNode firstStation() {
-		for (Node n = head; n != null; n = n.downstream) {
-			if (n instanceof StationNode)
-				return (StationNode) n;
-		}
-		return null;
 	}
 
 	/** Find previous upstream station node.
 	 * @return Upstream station node, or null. */
 	private StationNode upstreamStation(final Node here) {
 		StationNode upstream = null;
-		for (Node n = head; n != null; n = n.downstream) {
+		for (Node n : nodes) {
 			if (n == here)
 				break;
 			else if (n instanceof StationNode)
 				upstream = (StationNode) n;
 		}
 		return upstream;
+	}
+
+	/** Find next downstream station node.
+	 * @return Downstream station node, or null. */
+	private StationNode downstreamStation(final Node here) {
+		boolean found = false;
+		for (Node n : nodes) {
+			if (found && n instanceof StationNode)
+				return (StationNode) n;
+			if (here == n)
+				found = true;
+		}
+		return null;
 	}
 
 	/** Is this KAdaptiveAlgorithm done? */
@@ -403,16 +406,10 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Mile point of the node */
 		protected final float mile;
 
-		/** Link to downstream node */
-		protected Node downstream;
-
 		/** Create a new node */
-		protected Node(R_NodeImpl n, float m, Node up) {
+		protected Node(R_NodeImpl n, float m) {
 			rnode = n;
 			mile = m;
-			if (up != null)
-				up.downstream = this;
-			downstream = null;
 		}
 
 		/** Get the distance to another node (in miles) */
@@ -423,16 +420,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Get the distancee to another node (in feet) */
 		protected int distanceFeet(Node other) {
 			return Math.round(distanceMiles(other) * FEET_PER_MILE);
-		}
-
-		/** Find next downstream station node.
-		 * @return Downstream station node. */
-		protected StationNode downstreamStation() {
-			for (Node n = downstream; n != null; n = n.downstream) {
-				if (n instanceof StationNode)
-					return (StationNode) n;
-			}
-			return null;
 		}
 	}
 
@@ -451,11 +438,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			new BoundedSampleHistory(steps(60));
 
 		/** Create a new station node. */
-		public StationNode(R_NodeImpl rnode, float m, Node up,
-			StationImpl stat)
-		{
-			super(rnode, m, up);
-			station = stat;
+		public StationNode(R_NodeImpl rnode, float m, StationImpl st) {
+			super(rnode, m);
+			station = st;
 		}
 
 		/** Update station state */
@@ -486,12 +471,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return average density (distance weight). */
 		private double calculateSegmentDensity(final StationNode dn) {
 			StationNode cursor = this;
-			double dist_seg = 0;	/* Segment distance */
-			double veh_seg = 0;	/* Sum of vehicles in segment */
+			double dist_seg = 0;  /* Segment distance */
+			double veh_seg = 0;   /* Sum of vehicles in segment */
 			double k_cursor = cursor.getDensity();
-			for (StationNode sn = cursor.downstreamStation();
+			for (StationNode sn = downstreamStation(cursor);
 			     sn != null && cursor != dn;
-			     sn = sn.downstreamStation())
+			     sn = downstreamStation(sn))
 			{
 				double k_down = sn.getDensity();
 				double k_middle = (k_cursor + k_down) / 2;
@@ -529,7 +514,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			StationNode dn = this;
 			double dk = 0;
 			for (StationNode sn = this; sn != null;
-			     sn = sn.downstreamStation())
+			     sn = downstreamStation(sn))
 			{
 				if (distanceMiles(sn) > SEGMENT_LENGTH_MILES)
 					break;
@@ -553,8 +538,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	class EntranceNode extends Node {
 
 		/** Create a new entrance node */
-		public EntranceNode(R_NodeImpl rnode, float m, Node prev) {
-			super(rnode, m, prev);
+		public EntranceNode(R_NodeImpl rnode, float m) {
+			super(rnode, m);
 		}
 
 		/** Get a string representation of an entrance node */
@@ -683,7 +668,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return Associated station node, or null. */
 		private StationNode getAssociatedStation() {
 			StationNode us = getAssociatedUpstream();
-			StationNode ds = node.downstreamStation();
+			StationNode ds = downstreamStation(node);
 			return useDownstream(us, ds) ? ds : us;
 		}
 
