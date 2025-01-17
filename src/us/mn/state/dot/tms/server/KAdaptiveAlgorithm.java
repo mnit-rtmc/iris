@@ -372,6 +372,19 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		return null;
 	}
 
+	/** Find previous upstream station node.
+	 * @return Upstream station node, or null. */
+	private StationNode upstreamStation(final Node here) {
+		StationNode upstream = null;
+		for (Node n = head; n != null; n = n.downstream) {
+			if (n == here)
+				break;
+			else if (n instanceof StationNode)
+				upstream = (StationNode) n;
+		}
+		return upstream;
+	}
+
 	/** Is this KAdaptiveAlgorithm done? */
 	private boolean isDone() {
 		for (MeterState ms : meter_states.values()) {
@@ -390,9 +403,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Mile point of the node */
 		protected final float mile;
 
-		/** Link to upstream node */
-		protected final Node upstream;
-
 		/** Link to downstream node */
 		protected Node downstream;
 
@@ -402,7 +412,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			mile = m;
 			if (up != null)
 				up.downstream = this;
-			upstream = up;
 			downstream = null;
 		}
 
@@ -414,16 +423,6 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Get the distancee to another node (in feet) */
 		protected int distanceFeet(Node other) {
 			return Math.round(distanceMiles(other) * FEET_PER_MILE);
-		}
-
-		/** Find next upstream station node.
-		 * @return Upstream station node. */
-		protected StationNode upstreamStation() {
-			for (Node n = upstream; n != null; n = n.upstream) {
-				if (n instanceof StationNode)
-					return (StationNode) n;
-			}
-			return null;
 		}
 
 		/** Find next downstream station node.
@@ -691,7 +690,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Get associated upstream station.
 		 * @return Station node upstream of meter, or null. */
 		private StationNode getAssociatedUpstream() {
-			StationNode us = node.upstreamStation();
+			StationNode us = upstreamStation(node);
 			return isUpstreamStationOk(us) ? us : null;
 		}
 
