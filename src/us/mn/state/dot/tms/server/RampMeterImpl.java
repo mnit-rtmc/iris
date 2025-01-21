@@ -813,7 +813,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 				return (DetectorImpl) vs;
 			}
 		}
-		updateFault(RampMeterFault.NO_GREEN_DETECTOR);
+		logError("No green detector");
 		return null;
 	}
 

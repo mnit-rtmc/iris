@@ -24,7 +24,7 @@ public enum RampMeterFault {
 	POLICE_PANEL,      /* 0 */
 	MANUAL_MODE,       /* 1 */
 	NO_ENTRANCE_NODE,  /* 2 */
-	NO_GREEN_DETECTOR; /* 3 */
+	NO_GREEN_DETECTOR; /* 3; FIXME: remove this? */
 
 	/** Get a ramp meter fault from an ordinal value */
 	static public RampMeterFault fromOrdinal(Integer o) {

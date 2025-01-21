@@ -50,11 +50,13 @@ period (AM or PM).
 The [density adaptive] algorithm requires a bit more configuration, since it
 depends on the [road topology].  An _entrance_ [r_node] must exist, with
 matching `roadway`, `road_dir`, `cross_street`, `cross_dir` and `cross_mod`.
-This `r_node` must have a [green] detector, plus optional _queue_ and
+This `r_node` must have one [green] detector, plus optional _queue_ and
 _passage_ detectors.
 
-There is special handling for meters on [CD roads].  The meter `roadway`
-should _NOT_ be the CD road, but the entrance [r_node] should.
+There is special handling for meters on [CD roads].  The name of the CD road
+must be the same as the main roadway with a " CD" suffix.  The entrance
+[r_node] should be on the CD road, but the meter `roadway` should be the main
+road (**NOT** the CD).
 
 Advance warning beacons are flashing lights on a static sign, e.g. "PREPARE TO
 STOP WHEN FLASHING".  Typically, they are hard-wired to flash when the meter
