@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2024  Minnesota Department of Transportation
+ * Copyright (C) 2007-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,11 +80,17 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 			if (R_NodeHelper.isCD(r_node)) {
 				GeoLoc l = r_node.getGeoLoc();
 				String cid = GeoLocHelper.getLinkedName(l);
-				if (cid != null)
+				if (matchesCD(cid))
 					cds.add(cid);
 			}
 		}
 		return cds.iterator();
+	}
+
+	/** Check if a corridor ID matches, with a CD suffix */
+	private boolean matchesCD(String cid) {
+		return cid != null &&
+		       getName().startsWith(cid) && cid.endsWith(" CD");
 	}
 
 	/** Write out the corridor to an XML file */

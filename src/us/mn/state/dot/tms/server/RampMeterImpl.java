@@ -778,30 +778,20 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	private boolean checkNode(R_NodeImpl n) {
 		if (n.getNodeType() != R_NodeType.ENTRANCE.ordinal())
 			return false;
-		if (!matchesCD(n.getGeoLoc()))
+		if (!matchesCross(n.getGeoLoc()))
 			return false;
 		SamplerSet greens = n.getSamplerSet().filter(LaneCode.GREEN);
 		return greens.size() == 1;
 	}
 
-	/** Test if another location matches (including CD roads) */
-	private boolean matchesCD(GeoLoc loc) {
-		Road r0 = geo_loc.getRoadway();
-		Road x0 = geo_loc.getCrossStreet();
-		Road r1 = loc.getRoadway();
-		Road x1 = loc.getCrossStreet();
-		if (r0 == null || x0 == null || r1 == null || x1 == null)
-			return false;
-		String n0 = r0.getName();
-		String n1 = r1.getName();
-		return (
-			n0.equals(n1) ||
-			n0.startsWith(n1) && n1.endsWith(" CD")
-		) &&
-			(x0 == x1) &&
-			(geo_loc.getRoadDir() == loc.getRoadDir()) &&
-			(geo_loc.getCrossDir() == loc.getCrossDir()) &&
-			(geo_loc.getCrossMod() == loc.getCrossMod());
+	/** Test if a location cross street and direction matches the meter.
+	 * Ignore roadway/direction, since it might be on CD road. */
+	private boolean matchesCross(GeoLoc loc) {
+		Road x = geo_loc.getCrossStreet();
+		return (x != null) &&
+		       (x == loc.getCrossStreet()) &&
+		       (geo_loc.getCrossDir() == loc.getCrossDir()) &&
+		       (geo_loc.getCrossMod() == loc.getCrossMod());
 	}
 
 	/** Check if traffic is backed up over merge detector */
