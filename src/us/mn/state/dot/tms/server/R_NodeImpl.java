@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2024  Minnesota Department of Transportation
+ * Copyright (C) 2007-2025  Minnesota Department of Transportation
  * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -569,18 +569,17 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Update exit fork (branch to other corridor) */
 	public void updateFork() {
-		fork = isExit() ? findFork() : null;
+		fork = isExit() ? findForkEntrance() : null;
 	}
 
 	/** Find fork node (branch to other corridor) */
-	private R_NodeImpl findFork() {
-		// FIXME: use CorridorBase.findFork
+	private R_NodeImpl findForkEntrance() {
 		R_NodeImpl nearest = null;
 		Distance d = new Distance(0);
 		Iterator<R_Node> it = R_NodeHelper.iterator();
 		while (it.hasNext()) {
 			R_Node n = it.next();
-			if (isExitLink(n)) {
+			if (isEntranceLink(n)) {
 				Distance m = Corridor.nodeDistance(this, n);
 				if ((m != null) &&
 				    ((null == nearest) || m.m() < d.m()))
@@ -593,10 +592,10 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		return nearest;
 	}
 
-	/** Test if an exit node links with a matching entrance node.
+	/** Test if an entrance node links with this node (exit).
 	 * @param n Node to check.
 	 * @return true If nodes should link. */
-	private boolean isExitLink(R_Node n) {
+	private boolean isEntranceLink(R_Node n) {
 		return (n instanceof R_NodeImpl)
 		    && R_NodeHelper.isEntrance(n)
 		    && GeoLocHelper.rampMatches(geo_loc, n.getGeoLoc());
