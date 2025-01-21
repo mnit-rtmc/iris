@@ -50,8 +50,8 @@ period (AM or PM).
 The [density adaptive] algorithm requires a bit more configuration, since it
 depends on the [road topology].  An _entrance_ [r_node] must exist, with
 matching `roadway`, `road_dir`, `cross_street`, `cross_dir` and `cross_mod`.
-This `r_node` must have one [green] detector, plus optional _queue_ and
-_passage_ detectors.
+This `r_node` must have one [green] detector, plus optional _queue_,
+_passage_, _bypass_ and _merge_ detectors.
 
 There is special handling for meters on [CD roads].  The name of the CD road
 must be the same as the main roadway with a " CD" suffix.  The entrance
