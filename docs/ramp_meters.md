@@ -53,10 +53,11 @@ matching `roadway`, `road_dir`, `cross_street`, `cross_dir` and `cross_mod`.
 This `r_node` must have one [green] detector, plus optional _queue_,
 _passage_, _bypass_ and _merge_ detectors.
 
-There is special handling for meters on [CD roads].  The name of the CD road
-must be the same as the main roadway with a " CD" suffix.  The entrance
-[r_node] should be on the CD road, but the meter `roadway` should be the main
-road (**NOT** the CD).
+There are special rules for meters on [CD roads]:
+* The meter's `roadway` must be the main road
+* The entrance [r_node] must be on the CD road
+* The name of the CD road must be the same as the main roadway, but with a " CD"
+  suffix
 
 Advance warning beacons are flashing lights on a static sign, e.g. "PREPARE TO
 STOP WHEN FLASHING".  Typically, they are hard-wired to flash when the meter
