@@ -23,6 +23,7 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.MeterQueueState;
+import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.HOUR;
@@ -335,7 +336,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @param meter Ramp meter to search for.
 	 * @return Entrance node matching ramp meter. */
 	private EntranceNode findEntranceNode(RampMeterImpl meter) {
-		R_NodeImpl rnode = meter.getEntranceNode();
+		R_NodeImpl rnode = findRNode(meter);
 		if (null == rnode)
 			return null;
 		for (Node n : nodes) {
@@ -350,6 +351,44 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				meter.getName() + " not found");
 		}
 		return null;
+	}
+
+	/** Find node from meter onto this corridor */
+	private R_NodeImpl findRNode(RampMeterImpl meter) {
+		R_NodeImpl rnode = meter.getEntranceNode();
+		if (null == rnode)
+			return null;
+		String cid = R_NodeHelper.getCorridorName(rnode);
+		if (corridor.matchesCD(cid)) {
+			Corridor cor =
+				BaseObjectImpl.corridors.getCorridor(cid);
+			if (cor != null) {
+				return cor.findActiveNode(
+					new ForkFinder(rnode));
+			}
+		}
+		return rnode;
+	}
+
+	/** Fork finder for CD roads */
+	private class ForkFinder implements Corridor.NodeFinder {
+		/** Entrance node of meter on CD road */
+		private final R_NodeImpl rnode;
+		/** Have we found the entrance node yet? */
+		private boolean found;
+		/** Create a fork finder */
+		private ForkFinder(R_NodeImpl n) {
+			rnode = n;
+		}
+		public boolean check(float m, R_NodeImpl n) {
+			found |= (n == rnode);
+			if (!found)
+				return false;
+			R_NodeImpl fork = n.getFork();
+			return (fork != null) && corridor.getName().equals(
+				R_NodeHelper.getCorridorName(fork)
+			);
+		}
 	}
 
 	/** Update the station nodes for the current interval */

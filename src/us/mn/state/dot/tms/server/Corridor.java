@@ -88,7 +88,7 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 	}
 
 	/** Check if a corridor ID matches, with a CD suffix */
-	private boolean matchesCD(String cid) {
+	public boolean matchesCD(String cid) {
 		return cid != null &&
 		       getName().startsWith(cid) && cid.endsWith(" CD");
 	}
