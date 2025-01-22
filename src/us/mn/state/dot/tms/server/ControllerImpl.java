@@ -79,8 +79,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, comm_link, drop_id, " +
 			"cabinet_style, geo_loc, condition, notes, password, " +
-			"setup, fail_time FROM iris." +
-		        SONAR_TYPE  +";", new ResultFactory()
+			"setup, status, fail_time FROM iris." + SONAR_TYPE +
+			";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new ControllerImpl(row));
@@ -101,6 +101,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		map.put("notes", notes);
 		map.put("password", password);
 		map.put("setup", setup);
+		map.put("status", status);
 		map.put("fail_time", asTimestamp(failTime));
 		return map;
 	}
@@ -112,6 +113,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		gl.notifyCreate();
 		geo_loc = gl;
 		condition = CtrlCondition.PLANNED;
+		setup = null;
+		status = null;
 	}
 
 	/** Create a controller */
@@ -125,14 +128,15 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		     row.getString(7),    // notes
 		     row.getString(8),    // password
 		     row.getString(9),    // setup
-		     row.getTimestamp(10) // fail_time
+		     row.getString(10),   // status
+		     row.getTimestamp(11) // fail_time
 		);
 	}
 
 	/** Create a controller */
 	private ControllerImpl(String n, String cl, short d, String cs,
-		String gl, int cnd, String nt, String p, String s, Date ft)
-		throws TMSException
+		String gl, int cnd, String nt, String p, String s,
+		String st, Date ft) throws TMSException
 	{
 		super(n);
 		comm_link = lookupCommLink(cl);
@@ -143,6 +147,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		notes = nt;
 		password = p;
 		setup = s;
+		status = st;
 		failTime = stampMillis(ft);
 		initTransients();
 	}
