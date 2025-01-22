@@ -21,6 +21,7 @@ import java.util.Iterator;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.MeterQueueState;
 import us.mn.state.dot.tms.R_NodeHelper;
@@ -358,8 +359,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		R_NodeImpl rnode = meter.getEntranceNode();
 		if (null == rnode)
 			return null;
-		String cid = R_NodeHelper.getCorridorName(rnode);
-		if (corridor.matchesCD(cid)) {
+		GeoLoc l = rnode.getGeoLoc();
+		if (l != null && corridor.matchesCD(l.getRoadway())) {
+			String cid = R_NodeHelper.getCorridorName(rnode);
 			Corridor cor =
 				BaseObjectImpl.corridors.getCorridor(cid);
 			if (cor != null) {

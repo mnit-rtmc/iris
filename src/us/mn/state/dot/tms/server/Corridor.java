@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_NodeHelper;
+import us.mn.state.dot.tms.Road;
 
 /**
  * A corridor is a collection of all R_Node objects for one roadway corridor.
@@ -76,21 +77,26 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 	/** Get the corridor IDs of all linked CD roads */
 	public Iterator<String> getLinkedCDRoads() {
 		HashSet<String> cds = new HashSet<String>();
-		for (R_NodeImpl r_node: n_points.values()) {
-			if (R_NodeHelper.isCD(r_node)) {
-				GeoLoc l = r_node.getGeoLoc();
-				String cid = GeoLocHelper.getLinkedName(l);
-				if (matchesCD(cid))
-					cds.add(cid);
+		for (R_NodeImpl n: n_points.values()) {
+			if (R_NodeHelper.isEntrance(n)) {
+				GeoLoc l = n.getGeoLoc();
+				Road r = (l != null)
+				       ? l.getCrossStreet()
+				       : null;
+				if (matchesCD(r)) {
+					cds.add(
+						GeoLocHelper.getLinkedName(l)
+					);
+				}
 			}
 		}
 		return cds.iterator();
 	}
 
-	/** Check if a corridor ID matches, with a CD suffix */
-	public boolean matchesCD(String cid) {
-		return cid != null &&
-		       getName().startsWith(cid) && cid.endsWith(" CD");
+	/** Check if a road matches as a CD road */
+	public boolean matchesCD(Road r) {
+		String nm = (r != null) ? r.getName() : "";
+		return nm.startsWith(roadway.toString()) && nm.endsWith(" CD");
 	}
 
 	/** Write out the corridor to an XML file */
