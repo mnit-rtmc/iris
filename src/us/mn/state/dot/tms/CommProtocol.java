@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  * Copyright (C) 2012-2021  Iteris Inc.
  * Copyright (C) 2015-2023  SRF Consulting Group
  *
@@ -146,6 +146,7 @@ public enum CommProtocol {
 	GATE_NDOR5("GATE NDORv5"),
 
 	/** GPS using TAIP protocol (37) */
+	@Deprecated
 	GPS_TAIP("GPS TAIP"),
 
 	/** Sierra Wireless GX modem (38) */

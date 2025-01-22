@@ -5,6 +5,35 @@ protocols, each of which supports specific [device] types.  Some also
 support **multi-drop** addressing, with more than one controller per
 _comm link_.
 
+## Device Control
+
+Protocol        | Beacon | Camera | DMS | Detection | Gates | GPS | Weather
+----------------|--------|--------|-----|-----------|-------|-----|--------
+Axis PTZ        |        | ✔️     |     |           |       |     |
+Banner DXM      |        |        |     | ✔️        |       |     |
+Canoga          |        |        |     | ✔️        |       |     |
+CBW             | ✔️     |        |     |           |       |     |
+Cohu PTZ        |        | ✔️     |     |           |       |     |
+DLI DIN Relay   | ✔️     |        |     |           |       |     |
+DMS XML         |        |        | ✔️  |           |       |     |
+DR-500          |        |        |     | ✔️        |       |     |
+Gate NDORv5     |        |        |     |           | ✔️    |     |
+HySecurity STC  |        |        |     |           | ✔️    |     |
+Infinova PTZ    |        | ✔️     |     |           |       |     |
+Manchester PTZ  |        | ✔️     |     |           |       |     |
+MnDOT 170       | ✔️     |        |     | ✔️        |       |     |
+Natch           | ✔️     |        |     | ✔️        |       |     |
+NDOT Beacon     | ✔️     |        |     |           |       |     |
+NTCIP           |        |        | ✔️  | ✔️        |       |     | ✔️
+ONVIF PTZ       |        | ✔️     |     |           |       |     |
+OSi ORG-815     |        |        |     |           |       |     | ✔️
+Pelco D PTZ     |        | ✔️     |     |           |       |     |
+RedLion GPS     |        |        |     |           |       | ✔️  |
+RTMS G4         |        |        |     | ✔️        |       |     |
+SierraGX        |        |        |     |           |       | ✔️  |
+SmartSensor     |        |        |     | ✔️        |       |     |
+Vicon PTZ       |        | ✔️     |     |           |       |     |
+
 ## Axis PTZ
 
 The `axisptz` protocol can be used for [PTZ] control of Axis [camera]s.  The
