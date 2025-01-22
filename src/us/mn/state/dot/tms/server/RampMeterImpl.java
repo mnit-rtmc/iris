@@ -750,8 +750,10 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 				Corridor cd_road = corridors.getCorridor(cd);
 				if (cd_road != null) {
 					n = cd_road.findActiveNode(finder);
-					if (n != null)
+					if (n != null) {
+						updateFault(null);
 						return n;
+					}
 				}
 			}
 		}
@@ -808,10 +810,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		SamplerSet greens = getSamplerSet(LaneCode.GREEN);
 		if (1 == greens.size()) {
 			VehicleSampler vs = greens.getAll().get(0);
-			if (vs instanceof DetectorImpl) {
-				updateFault(null);
+			if (vs instanceof DetectorImpl)
 				return (DetectorImpl) vs;
-			}
 		}
 		logError("No green detector");
 		return null;
