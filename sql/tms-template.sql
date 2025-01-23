@@ -4420,7 +4420,7 @@ VALUES
     (0, 'police panel'),
     (1, 'manual mode'),
     (2, 'no entrance node'),
-    (3, 'no green detector');
+    (3, 'missing state');
 
 CREATE TABLE iris.meter_lock (
     id INTEGER PRIMARY KEY,

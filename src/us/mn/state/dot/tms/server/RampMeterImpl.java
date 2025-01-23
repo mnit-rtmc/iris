@@ -559,7 +559,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		case SIMPLE:
 			return new SimpleAlgorithm();
 		case K_ADAPTIVE:
-			return KAdaptiveAlgorithm.meterState(this);
+			MeterAlgorithmState as =
+				KAdaptiveAlgorithm.meterState(this);
+			if (null == as)
+				updateFault(RampMeterFault.MISSING_STATE);
+			return as;
 		default:
 			return null;
 		}
