@@ -366,11 +366,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		if (null == cor)
 			return null;
 		R_NodeImpl n = cor.findActiveNode(new ForkFinder(rnode));
-		if (null == n) {
+		if (n != null)
+			return n.getFork();
+		else {
 			log("Fork not found " + rnode.getName() +
 			    " for " + meter.getName());
+			return null;
 		}
-		return n;
 	}
 
 	/** Fork finder for CD roads */
@@ -387,9 +389,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			found |= (n == rnode);
 			if (!found)
 				return false;
-			R_NodeImpl fork = n.getFork();
-			return (fork != null) && corridor.getName().equals(
-				R_NodeHelper.getCorridorName(fork)
+			R_NodeImpl f = n.getFork();
+			return (f != null) && corridor.getName().equals(
+				R_NodeHelper.getCorridorName(f)
 			);
 		}
 	}
