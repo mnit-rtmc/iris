@@ -365,8 +365,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			Corridor cor =
 				BaseObjectImpl.corridors.getCorridor(cid);
 			if (cor != null) {
-				return cor.findActiveNode(
+				R_NodeImpl n = cor.findActiveNode(
 					new ForkFinder(rnode));
+				if (null == n && ALG_LOG.isOpen()) {
+					log("Fork not found " +
+						rnode.getName() + " for " +
+						meter.getName());
+				}
+				return n;
 			}
 		}
 		return rnode;

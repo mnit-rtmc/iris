@@ -559,14 +559,21 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		case SIMPLE:
 			return new SimpleAlgorithm();
 		case K_ADAPTIVE:
-			MeterAlgorithmState as =
-				KAdaptiveAlgorithm.meterState(this);
-			if (null == as)
-				updateFault(RampMeterFault.MISSING_STATE);
-			return as;
+			return createKAdaptiveState();
 		default:
 			return null;
 		}
+	}
+
+	/** Create K-Adaptive algorithm state */
+	private MeterAlgorithmState createKAdaptiveState() {
+		MeterAlgorithmState as = null;
+		if (ent_node != null) {
+			as = KAdaptiveAlgorithm.meterState(this);
+			if (null == as)
+				updateFault(RampMeterFault.MISSING_STATE);
+		}
+		return as;
 	}
 
 	/** Validate the metering algorithm */
