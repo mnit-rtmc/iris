@@ -80,10 +80,7 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 		for (R_NodeImpl n: n_points.values()) {
 			if (R_NodeHelper.isEntrance(n)) {
 				GeoLoc l = n.getGeoLoc();
-				Road r = (l != null)
-				       ? l.getCrossStreet()
-				       : null;
-				if (matchesCD(r)) {
+				if (matchesCD(l)) {
 					cds.add(
 						GeoLocHelper.getLinkedName(l)
 					);
@@ -93,9 +90,10 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 		return cds.iterator();
 	}
 
-	/** Check if a road matches as a CD road */
-	public boolean matchesCD(Road r) {
-		String nm = (r != null) ? r.getName() : "";
+	/** Check if a location matches as a CD road */
+	private boolean matchesCD(GeoLoc loc) {
+		Road xs = (loc != null) ? loc.getCrossStreet() : null;
+		String nm = (xs != null) ? xs.getName() : "";
 		return nm.startsWith(roadway.toString()) && nm.endsWith(" CD");
 	}
 
