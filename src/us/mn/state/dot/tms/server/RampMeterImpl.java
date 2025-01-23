@@ -569,7 +569,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	private MeterAlgorithmState createKAdaptiveState() {
 		MeterAlgorithmState as = null;
 		if (ent_node != null) {
-			as = KAdaptiveAlgorithm.meterState(this);
+			as = KAdaptiveAlgorithm.createState(this);
 			if (null == as)
 				updateFault(RampMeterFault.MISSING_STATE);
 		}

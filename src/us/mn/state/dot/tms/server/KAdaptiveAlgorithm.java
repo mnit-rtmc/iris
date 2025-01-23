@@ -189,8 +189,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	static private HashMap<String, KAdaptiveAlgorithm> ALL_ALGS =
 		new HashMap<String, KAdaptiveAlgorithm>();
 
-	/** Get the K adaptive algorithm state for a meter */
-	static public KAdaptiveAlgorithm meterState(RampMeterImpl meter) {
+	/** Create algorithm state for a meter */
+	static public KAdaptiveAlgorithm createState(RampMeterImpl meter) {
 		Corridor c = meter.getCorridor();
 		if (c != null) {
 			KAdaptiveAlgorithm alg = lookupAlgorithm(c);
