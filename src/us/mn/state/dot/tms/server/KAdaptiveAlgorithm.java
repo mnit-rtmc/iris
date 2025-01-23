@@ -360,27 +360,17 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		if (null == rnode)
 			return null;
 		String cid = R_NodeHelper.getCorridorName(rnode);
-		GeoLoc l = rnode.getGeoLoc();
-		if (l != null && corridor.matchesCD(l.getRoadway())) {
-			Corridor cor =
-				BaseObjectImpl.corridors.getCorridor(cid);
-			if (cor != null) {
-				R_NodeImpl n = cor.findActiveNode(
-					new ForkFinder(rnode));
-				if (null == n && ALG_LOG.isOpen()) {
-					log("Fork not found " +
-						rnode.getName() + " for " +
-						meter.getName());
-				}
-				return n;
-			}
+		if (corridor.getName().equals(cid))
+			return rnode;
+		Corridor cor = BaseObjectImpl.corridors.getCorridor(cid);
+		if (null == cor)
+			return null;
+		R_NodeImpl n = cor.findActiveNode(new ForkFinder(rnode));
+		if (null == n) {
+			log("Fork not found " + rnode.getName() +
+			    " for " + meter.getName());
 		}
-		if (!corridor.getName().equals(cid)) {
-			log("Invalid corridor " + cid + ", node: " +
-				rnode.getName() + " for " +
-				meter.getName());
-		}
-		return rnode;
+		return n;
 	}
 
 	/** Fork finder for CD roads */
