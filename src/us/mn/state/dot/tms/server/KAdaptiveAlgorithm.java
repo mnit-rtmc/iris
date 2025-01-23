@@ -359,9 +359,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		R_NodeImpl rnode = meter.getEntranceNode();
 		if (null == rnode)
 			return null;
+		String cid = R_NodeHelper.getCorridorName(rnode);
 		GeoLoc l = rnode.getGeoLoc();
 		if (l != null && corridor.matchesCD(l.getRoadway())) {
-			String cid = R_NodeHelper.getCorridorName(rnode);
 			Corridor cor =
 				BaseObjectImpl.corridors.getCorridor(cid);
 			if (cor != null) {
@@ -374,6 +374,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				}
 				return n;
 			}
+		}
+		if (!corridor.getName().equals(cid)) {
+			log("Invalid corridor " + cid + ", node: " +
+				rnode.getName() + " for " +
+				meter.getName());
 		}
 		return rnode;
 	}
