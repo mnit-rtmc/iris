@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  * Copyright (C) 2018  SRF Consulting Group
  *
@@ -86,7 +86,7 @@ public class SingleSignTab extends IPanel {
 	/** Displays the location of the DMS */
 	private final JLabel location_lbl = createValueLabel();
 
-	/** Displays the controller status */
+	/** Displays the sign status or faults */
 	private final JLabel status_lbl = createValueLabel();
 
 	/** Displays the associated incident */
@@ -350,18 +350,19 @@ public class SingleSignTab extends IPanel {
 
 	/** Update the status widgets */
 	private void updateStatus(DMS dms) {
-		String faults = DMSHelper.optFaults(dms);
+		String status = DMSHelper.optFaults(dms);
 		if (DMSHelper.isOffline(dms)) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.GRAY);
-		} else if (faults != null) {
+			status = "OFFLINE";
+		} else if (status != null) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.BLACK);
 		} else {
 			status_lbl.setForeground(null);
 			status_lbl.setBackground(null);
 		}
-		status_lbl.setText((faults != null) ? faults : "");
+		status_lbl.setText((status != null) ? status : "");
 		setIncidentAction(dms);
 		operation_lbl.setText(dms.getOperation());
 	}
