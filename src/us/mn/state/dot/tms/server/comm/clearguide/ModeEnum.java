@@ -23,11 +23,11 @@ public enum ModeEnum {
 
 	/** Possible modes */
 	UNKNOWN(""),
-	DELAY("delay"),			// work zone delay (mins)
-	TRAVELTIME("tt"),		// TT adjusted w/ speed limit TT (mins)
-	TRAVELTIME_ACTUAL("tta"),	// actual TT
-	TRAVELTIME_SPEED_LIMIT("ttsl"),	// TT at the speed limit
-	SPEED("sp");			// speed
+	DELAY("delay"),                 // work zone delay (mins)
+	TRAVELTIME("tt"),               // TT adjusted w/ speed limit TT (mins)
+	TRAVELTIME_ACTUAL("tta"),       // actual TT
+	TRAVELTIME_SPEED_LIMIT("ttsl"), // TT at the speed limit
+	SPEED("sp");                    // speed
 
 	/** Name of mode */
 	private final String name;

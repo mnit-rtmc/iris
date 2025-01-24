@@ -94,7 +94,7 @@ public class DmsContainer {
 	/** Get the specified statistic for the specified dms.
 	 * @param dms DMS to retrieve statistic for.
 	 * @param rid Route id
- 	 * @param min Min statistic value from [cg] tag, 0 to ignore.
+	 * @param min Min statistic value from [cg] tag, 0 to ignore.
 	 * @param mode Statistic to retrieve as defined by [cg] tag or null.
 	 * @param ridx Route index, zero based.
 	 * @return Specified statistic or null if not found */
@@ -112,7 +112,7 @@ public class DmsContainer {
 			stat = routes.getStat(rid, min, mode, ridx);
 			if (stat == null) {
 				log("getStat: mismatch rid=" + rid +
-					" mode=" + mode);
+				    " mode=" + mode);
 			}
 		}
 		return stat;

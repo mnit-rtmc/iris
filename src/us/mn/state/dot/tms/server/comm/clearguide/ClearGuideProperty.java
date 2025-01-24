@@ -48,15 +48,15 @@ public class ClearGuideProperty extends ControllerProperty {
 		return (str != null ? str : "");
 	}
 
-        /** Decode an XML string */
-        static public String decodeXml(String xml) {
-                xml = xml.replace("&amp;", "&");
-                xml = xml.replace("&lt;", "<");
-                xml = xml.replace("&gt;", ">");
-                xml = xml.replace("&quot;", "\"");
-                xml = xml.replace("&apos;", "\'");
-                return xml;
-        }
+	/** Decode an XML string */
+	static private String decodeXml(String xml) {
+		xml = xml.replace("&amp;", "&");
+		xml = xml.replace("&lt;", "<");
+		xml = xml.replace("&gt;", ">");
+		xml = xml.replace("&quot;", "\"");
+		xml = xml.replace("&apos;", "\'");
+		return xml;
+	}
 
 	/** Return the specified value for a key value pair.
 	 * @param key_value Key value pair in form: "key":"value"
@@ -73,24 +73,24 @@ public class ClearGuideProperty extends ControllerProperty {
 		}
 	}
 
-        /** Return true if specified string is enclosed by another string */
-        static private boolean enclosedBy(String s, String e) {
-                return (s != null && e != null ?
-                	s.startsWith(e) && s.endsWith(e) : false);
-        }
+	/** Return true if specified string is enclosed by another string */
+	static private boolean enclosedBy(String s, String e) {
+		return (s != null && e != null ?
+			s.startsWith(e) && s.endsWith(e) : false);
+	}
 
-        /** Remove enclosing string */
-        static public String deenclose(String s, String e) {
+	/** Remove enclosing string */
+	static public String deenclose(String s, String e) {
 		int len_e = e.length();
 		if (s.length() > 0 && len_e > 0 && enclosedBy(s, e)) {
 			return s.substring(len_e, s.length() - len_e);
 		} else {
 			return s;
 		}
-        }
+	}
 
-        /** Remove prefix from string */
-        static public String removePrefix(String s, String p) {
+	/** Remove prefix from string */
+	static public String removePrefix(String s, String p) {
 		if (p.length() > 0 && s.startsWith(p)) {
 			int len_p = p.length();
 			if (len_p == s.length()) {
@@ -99,10 +99,10 @@ public class ClearGuideProperty extends ControllerProperty {
 			return s.substring(len_p);
 		}
 		return s;
-        }
+	}
 
-        /** Remove postfix from string */
-        static public String removePostfix(String s, String p) {
+	/** Remove postfix from string */
+	static public String removePostfix(String s, String p) {
 		if (p.length() > 0 && s.endsWith(p)) {
 			int len_p = p.length();
 			if (len_p == s.length()) {
@@ -111,7 +111,7 @@ public class ClearGuideProperty extends ControllerProperty {
 			return s.substring(0, s.length() - len_p);
 		}
 		return s;
-        }
+	}
 
 	/** Calculate time delta in ms */
 	static private long timeDelta(long start) {
@@ -187,6 +187,7 @@ public class ClearGuideProperty extends ControllerProperty {
 	public void encodeQuery(ControllerImpl ci, OutputStream os)
 		throws IOException
 	{
+		// do nothing
 	}
 
 	/** Decode a QUERY response: send, read and decode auth response */
@@ -237,6 +238,7 @@ public class ClearGuideProperty extends ControllerProperty {
 	public void encodeStore(ControllerImpl ci, OutputStream os)
 		throws IOException
 	{
+		// do nothing
 	}
 
 	/** Decode a STORE response, read from device */
@@ -244,6 +246,7 @@ public class ClearGuideProperty extends ControllerProperty {
 	public void decodeStore(ControllerImpl ci, InputStream is)
 		throws IOException
 	{
+		// do nothing
 	}
 
 	/** Authenticate with a ClearGuide server, which retrieves API
