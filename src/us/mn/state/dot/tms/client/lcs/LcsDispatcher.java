@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -272,18 +272,19 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 
 	/** Update the status widgets */
 	private void updateStatus(LCSArray la) {
-		String faults = LCSArrayHelper.getFaults(la);
+		String status = LCSArrayHelper.getFaults(la);
 		if (LCSArrayHelper.isOffline(la)) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.GRAY);
-		} else if (faults != null) {
+			status = "OFFLINE";
+		} else if (status != null) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.BLACK);
 		} else {
 			status_lbl.setForeground(null);
 			status_lbl.setBackground(null);
 		}
-		status_lbl.setText((faults != null) ? faults : "");
+		status_lbl.setText((status != null) ? status : "");
 	}
 
 	/** Select the DMS for the specified lane */

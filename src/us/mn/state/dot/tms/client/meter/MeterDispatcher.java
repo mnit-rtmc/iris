@@ -231,9 +231,13 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 	/** Update the ramp meter status */
 	private void updateStatus(RampMeter rm) {
 		Integer fault = rm.getFault();
+		String status = (fault != null)
+		      ? RampMeterFault.fromOrdinal(fault).toString()
+		      : "";
 		if (ItemStyle.OFFLINE.checkBit(rm.getStyles())) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.GRAY);
+			status = "OFFLINE";
 		} else if (fault != null) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.BLACK);
@@ -241,9 +245,7 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 			status_lbl.setForeground(null);
 			status_lbl.setBackground(null);
 		}
-		status_lbl.setText((fault != null)
-		      ? RampMeterFault.fromOrdinal(fault).toString()
-		      : "");
+		status_lbl.setText(status);
 	}
 
 	/** Set the camera preset action */
