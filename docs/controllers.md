@@ -48,6 +48,8 @@ controller **password** field is used to enter authentication data.
 * Web-based devices may require HTTP Basic Authentication.  For these types of
   devices, the password field should contain both the user name and password,
   separated by a colon (`user:password`).
+* For [Central Park], this is a token which is sent in the `x-access-token`
+  HTTP header.
 * For [CBW], the user name portion must be `none`.  HTTP Basic Authentication
   can be enabled on the setup page of the [CBW] device (setup.html).
 * [SierraGX] modems can be configured to require authentiation.  In this case,
@@ -115,6 +117,7 @@ Controllers can have an associated cabinet style, used for MnDOT-170 and Natch
 [beacons]: beacons.html
 [cameras]: cameras.html
 [CBW]: protocols.html#cbw
+[Central Park]: protocols#central-park
 [comm link]: comm_links.html
 [dynamic message signs]: dms.html
 [flow streams]: flow_streams.html

@@ -13,6 +13,7 @@ Axis PTZ        |        | ✔️     |     |           |       |     |
 Banner DXM      |        |        |     | ✔️        |       |     |
 Canoga          |        |        |     | ✔️        |       |     |
 CBW             | ✔️     |        |     |           |       |     |
+Central Park    |        |        |     | ✔️        |       |     |
 Cohu PTZ        |        | ✔️     |     |           |       |     |
 DLI DIN Relay   | ✔️     |        |     |           |       |     |
 DMS XML         |        |        | ✔️  |           |       |     |
@@ -73,6 +74,14 @@ The [IO Pin]s are outputs for controlling relays.
 | X-410        | 1 - 4   |
 | X-WR-10R12   | 1 - 10  |
 | X-332        | 1 - 16  |
+
+## Central Park
+
+The Drivewyze Central Park system can detect vehicle presence for
+[parking area] monitoring.  The _default scheme_ is `https`.  _Multi-drop_ is
+not supported.  Up to 64 detectors can be associated with each [controller],
+using [IO pin]s 1 - 64.  The comm link URI must be the "Data per stall"
+endpoint (ending in `/integration/spot`).
 
 ## ClearGuide
 

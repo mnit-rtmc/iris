@@ -92,9 +92,8 @@ public enum CommProtocol {
 	/** Natch (20) */
 	NATCH("Natch"),
 
-	/** PeMS (21) */
-	@Deprecated
-	PEMS("PeMS", false),
+	/** Central Park JSON (21) */
+	CPARK("Central Park", false),
 
 	/** SSI -- removed (22) */
 	@Deprecated

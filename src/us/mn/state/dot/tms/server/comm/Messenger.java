@@ -64,7 +64,7 @@ abstract public class Messenger implements Closeable {
 	}
 
 	/** Create the URI with a default URI scheme */
-	static protected URI createURI(URI scheme, String uri)
+	static public URI createURI(URI scheme, String uri)
 		throws MessengerException
 	{
 		return scheme.resolve(createURI(uri));

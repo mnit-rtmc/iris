@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2021  Minnesota Department of Transportation
+ * Copyright (C) 2011-2025  Minnesota Department of Transportation
  * Copyright (C) 2015-2022  SRF Consulting Group
  * Copyright (C) 2012-2021  Iteris Inc.
  *
@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.server.comm.cap.CapPoller;
 import us.mn.state.dot.tms.server.comm.cbw.CBWPoller;
 import us.mn.state.dot.tms.server.comm.clearguide.ClearGuidePoller;
 import us.mn.state.dot.tms.server.comm.cohuptz.CohuPTZPoller;
+import us.mn.state.dot.tms.server.comm.cpark.CParkPoller;
 import us.mn.state.dot.tms.server.comm.onvifptz.OnvifPTZPoller;
 import us.mn.state.dot.tms.server.comm.dinrelay.DinRelayPoller;
 import us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller;
@@ -76,6 +77,8 @@ public class DevicePollerFactory {
 			return new CBWPoller(link);
 		case COHU_PTZ:
 			return new CohuPTZPoller(link, protocol);
+		case CPARK:
+			return new CParkPoller(link);
 		case DIN_RELAY:
 			return new DinRelayPoller(link);
 		case DMSXML:

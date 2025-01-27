@@ -1271,7 +1271,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 18	RTMS G4 vlog
 19	SmartSensor 125 vlog
 20	Natch
-21	PeMS
+21	Central Park
 22	SSI
 23	CHP Incidents
 24	NDOT Beacon
@@ -1430,7 +1430,7 @@ CREATE TABLE iris.controller (
     geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
     condition INTEGER NOT NULL REFERENCES iris.condition,
     notes VARCHAR CHECK (LENGTH(notes) < 256),
-    password VARCHAR(32),
+    password VARCHAR CHECK (LENGTH(password) < 128),
     setup JSONB,
     status JSONB,
     fail_time TIMESTAMP WITH time zone
