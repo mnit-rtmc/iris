@@ -1,5 +1,11 @@
 # IRIS 5.x Release Notes
 
+5.66.0 (27 Jan 2025)
+ - Add `cpark` driver for Drivewyze Central Park API
+ - Show offline device status as `OFFLINE`
+ - Fix controller `status` read on startup
+ - Fix ramp meter state matching for CD road meters
+
 5.65.0 (13 Jan 2025)
  - Add ramp meter `fault` column to diagnose setup problems
  - Allow creating sign message with only DMS hashtag permission
