@@ -571,6 +571,12 @@ pub const LCS_LOCK_LUT: &str = "\
   FROM iris.lcs_lock \
   ORDER BY id";
 
+/// SQL query for ramp meter algorithms (LUT)
+pub const METER_ALGORITHM_LUT: &str = "\
+  SELECT id, description \
+  FROM iris.meter_algorithm \
+  ORDER BY id";
+
 /// SQL query for ramp meter faults (LUT)
 pub const METER_FAULT_LUT: &str = "\
   SELECT id, description \
@@ -587,6 +593,12 @@ pub const METER_LOCK_LUT: &str = "\
 pub const METER_QUEUE_STATE_LUT: &str = "\
   SELECT id, description \
   FROM iris.meter_queue_state \
+  ORDER BY id";
+
+/// SQL query for ramp meter types (LUT)
+pub const METER_TYPE_LUT: &str = "\
+  SELECT id, description, lanes \
+  FROM iris.meter_type \
   ORDER BY id";
 
 /// SQL query for all modems (primary)

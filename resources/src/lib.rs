@@ -64,9 +64,11 @@ pub enum Res {
     LcsArray,
     LcsIndication,
     LcsLock,
+    MeterAlgorithm,
     MeterFault,
     MeterLock,
     MeterQueueState,
+    MeterType,
     Modem,
     MonitorStyle,
     MsgLine,
@@ -164,9 +166,11 @@ impl Res {
             LcsArray,
             LcsIndication,
             LcsLock,
+            MeterAlgorithm,
             MeterFault,
             MeterLock,
             MeterQueueState,
+            MeterType,
             Modem,
             MonitorStyle,
             MsgLine,
@@ -252,9 +256,11 @@ impl Res {
             LcsArray => "lcs_array",
             LcsIndication => "lcs_indication",
             LcsLock => "lcs_lock",
+            MeterAlgorithm => "meter_algorithm",
             MeterFault => "meter_fault",
             MeterLock => "meter_lock",
             MeterQueueState => "meter_queue_state",
+            MeterType => "meter_type",
             Modem => "modem",
             MonitorStyle => "monitor_style",
             MsgLine => "msg_line",
@@ -349,8 +355,9 @@ impl Res {
             BeaconState | CommProtocol | Condition | Direction | Encoding
             | Font | GateArmInterlock | GateArmState | Graphic | IncImpact
             | IncRange | LaneCode | LaneUseIndication | LcsLock
-            | MeterFault | MeterLock | MeterQueueState | ResourceType
-            | RnodeTransition | RnodeType | RoadClass | RoadModifier => true,
+            | MeterAlgorithm | MeterFault | MeterLock | MeterQueueState
+            | MeterType | ResourceType | RnodeTransition | RnodeType
+            | RoadClass | RoadModifier => true,
             _ => false,
         }
     }

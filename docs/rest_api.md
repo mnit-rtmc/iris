@@ -96,9 +96,11 @@ These are static resources which may only change on IRIS updates:
 - `lane_code`  Lane codes
 - `lane_use_indication`  [LCS] lane use indications
 - `lcs_lock`  [LCS] lock codes
+- `meter_algorithm`  Ramp metering algorithms
 - `meter_fault`  Ramp meter faults
 - `meter_lock`  Ramp meter lock reasons
 - `meter_queue_state`  Ramp meter queue states
+- `meter_type`  Ramp meter types
 - `r_node_transition`  R_Node transitions
 - `r_node_type`  R_Node types
 - `resource_type`  [Resource types] available in `iris/api/`
