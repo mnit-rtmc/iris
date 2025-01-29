@@ -188,11 +188,11 @@ All others | 24 hours
 
 ### Occ Spike
 
-A spike timer is kept for each detector.  For every 25% change in occupancy
-between two consecutive data values, 30 seconds are added to the timer.  If its
-value ever exceeds 60 seconds, the condidtion is triggered.  After every poll,
-30 seconds are removed from the timer.  The condition will be cleared after 24
-hours of no spikes.
+A spike timer is kept for each non-parking detector.  For every 25% change in
+occupancy between two consecutive data values, 30 seconds are added to the
+timer.  If its value ever exceeds 60 seconds, the condidtion is triggered.
+After every poll, 30 seconds are removed from the timer.  The condition will
+be cleared after 24 hours of no spikes.
 
 ## Force Fail
 

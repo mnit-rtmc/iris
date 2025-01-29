@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -166,10 +166,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Vehicle count "chatter" threshold */
 	static private final Interval CHATTER_THRESHOLD =
 		new Interval(30, SECONDS);
-
-	/** Scan "occ spike" trigger threshold */
-	static private final Interval OCC_SPIKE_THRESHOLD =
-		new Interval(29, SECONDS);
 
 	/** Clear threshold */
 	static private final Interval CLEAR_THRESHOLD =
@@ -429,7 +425,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Get the scan "occ spike" trigger threshold */
 	private Interval getOccSpikeTriggerThreshold() {
-		return OCC_SPIKE_THRESHOLD;
+		return LaneCode.fromCode(lane_code).getOccSpikeThreshold();
 	}
 
 	/** Destroy an object */
