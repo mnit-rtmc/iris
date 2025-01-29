@@ -56,8 +56,8 @@ _passage_, _bypass_ and _merge_ detectors.
 There are special rules for meters on [CD roads]:
 * The meter's `roadway` must be the main road
 * The entrance [r_node] must be on the CD road
-* The name of the CD road must be the same as the main roadway, but with a " CD"
-  suffix
+* The name of the CD road must be the same as the main roadway, but contain
+  the word-token "CD"
 
 Advance warning beacons are flashing lights on a static sign, e.g. "PREPARE TO
 STOP WHEN FLASHING".  Typically, they are hard-wired to flash when the meter

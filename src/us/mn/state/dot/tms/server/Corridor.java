@@ -94,7 +94,8 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 	private boolean matchesCD(GeoLoc loc) {
 		Road xs = (loc != null) ? loc.getCrossStreet() : null;
 		String nm = (xs != null) ? xs.getName() : "";
-		return nm.startsWith(roadway.toString()) && nm.endsWith(" CD");
+		return nm.startsWith(roadway.toString())
+		    && nm.matches(".*\\bCD\\b.*");
 	}
 
 	/** Write out the corridor to an XML file */
