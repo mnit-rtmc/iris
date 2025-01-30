@@ -529,9 +529,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		src |= SignMsgSource.blank.bit();
 		String owner = SignMessageHelper.makeMsgOwner(src);
 		SignMsgPriority mp = SignMsgPriority.low_1;
-		// Allow pixel service during blank messages
 		return SignMessageImpl.findOrCreate(sign_config, null, "",
-			owner, false, true, mp, null);
+			owner, false, false, mp, null);
 	}
 
 	/** Create a message for the sign.
