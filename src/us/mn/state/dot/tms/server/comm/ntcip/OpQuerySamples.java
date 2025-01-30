@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017-2022  Minnesota Department of Transportation
+ * Copyright (C) 2017-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ public class OpQuerySamples extends OpController {
 		per_sec = p;
 	}
 
-	/** Create the second phase of the operation */
+	/** Create the first phase of the operation */
 	@Override
 	protected Phase phaseOne() {
 		return new QueryDetectors();

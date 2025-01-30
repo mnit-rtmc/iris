@@ -20,17 +20,20 @@ import java.net.URI;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.CommLink;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.User;
+import us.mn.state.dot.tms.server.AlarmImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.GpsImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
+import us.mn.state.dot.tms.server.comm.AlarmPoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.GpsPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
@@ -46,8 +49,8 @@ import us.mn.state.dot.tms.utils.URIUtil;
  * @author John L. Stanley
  * @author Michael Darter
  */
-public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
-	LCSPoller, SamplePoller, WeatherPoller
+public class NtcipPoller extends ThreadedPoller implements AlarmPoller,
+	DMSPoller, GpsPoller, LCSPoller, SamplePoller, WeatherPoller
 {
 	/** Get the default URI for a comm protocol */
 	static private URI default_uri(CommProtocol cp) {
@@ -215,6 +218,24 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 			addOp(new OpSyncTime(ws));
 			addOp(new OpQuerySystem(ws));
 			addOp(new OpQueryEssSettings(ws));
+			break;
+		default:
+			// Ignore other requests
+			break;
+		}
+	}
+
+	/** Send a device request to an alarm */
+	@SuppressWarnings("unchecked")
+	@Override
+	public void sendRequest(AlarmImpl alarm, DeviceRequest r) {
+		switch (r) {
+		case QUERY_STATUS:
+			Controller c = alarm.getController();
+			if (c instanceof ControllerImpl) {
+				ControllerImpl ci = (ControllerImpl) c;
+				addOp(new OpQueryAlarm(alarm, ci));
+			}
 			break;
 		default:
 			// Ignore other requests
