@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -172,8 +172,9 @@ public class OpSendDMSMessage extends OpDMS {
 		message = sm;
 		multi = addGraphicIds(sm.getMulti());
 		msg_num = lookupMsgNum(multi);
-		message_crc = DmsMessageCRC.calculate(multi,
-			sm.getFlashBeacon(), sm.getPixelService());
+		boolean fb = getFlashBeacon(sm);
+		boolean ps = getPixelService(sm);
+		message_crc = DmsMessageCRC.calculate(multi, fb, ps);
 		status = makeStatus(DmsMessageMemoryType.changeable, msg_num);
 		graphics = GraphicHelper.lookupMulti(multi);
 	}
@@ -338,8 +339,8 @@ public class OpSendDMSMessage extends OpDMS {
 				msg_num);
 			multi_string.setString(multi);
 			msg_owner.setString(message.getMsgOwner());
-			beacon.setInteger(message.getFlashBeacon() ? 1 : 0);
-			srv.setInteger(message.getPixelService() ? 1 : 0);
+			beacon.setInteger(getFlashBeacon(message) ? 1 : 0);
+			srv.setInteger(getPixelService(message) ? 1 : 0);
 			prior.setInteger(message.getMsgPriority());
 			mess.add(multi_string);
 			mess.add(msg_owner);

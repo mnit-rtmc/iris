@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -95,16 +95,6 @@ public class OpQueryDMSMessage extends OpDMS {
 	 * @return MULTI string or empty string. */
 	private String lookupMulti(SignMessage sm) {
 		return (sm != null) ? sm.getMulti() : "";
-	}
-
-	/** Get flash beacon flag for a sign message */
-	private boolean getFlashBeacon(SignMessage sm) {
-		return (sm != null) ? sm.getFlashBeacon() : false;
-	}
-
-	/** Get pixel service flag for a sign message */
-	private boolean getPixelService(SignMessage sm) {
-		return (sm != null) ? sm.getPixelService() : false;
 	}
 
 	/** Phase to query the current message source (memory type) */
