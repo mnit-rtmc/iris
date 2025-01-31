@@ -424,6 +424,160 @@ CREATE VIEW email_event_view AS
 GRANT SELECT ON email_event_view TO PUBLIC;
 
 --
+-- Domains, Roles, Users, and Permissions
+--
+CREATE TABLE iris.domain (
+    name VARCHAR(15) PRIMARY KEY,
+    block CIDR NOT NULL,
+    enabled BOOLEAN NOT NULL
+);
+
+CREATE TRIGGER domain_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.domain
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+INSERT INTO iris.domain (name, block, enabled) VALUES
+    ('any_ipv4', '0.0.0.0/0', true),
+    ('any_ipv6', '::0/0', true),
+    ('local_ipv6', '::1/128', true);
+
+CREATE TABLE iris.role (
+    name VARCHAR(15) PRIMARY KEY,
+    enabled BOOLEAN NOT NULL
+);
+
+INSERT INTO iris.role (name, enabled) VALUES
+    ('administrator', true), ('operator', true);
+
+CREATE TRIGGER role_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.role
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+CREATE TABLE iris.role_domain (
+    role VARCHAR(15) NOT NULL REFERENCES iris.role,
+    domain VARCHAR(15) NOT NULL REFERENCES iris.domain
+);
+ALTER TABLE iris.role_domain ADD PRIMARY KEY (role, domain);
+
+CREATE FUNCTION iris.role_domain_notify() RETURNS TRIGGER AS
+    $role_domain_notify$
+BEGIN
+    IF (TG_OP = 'DELETE') THEN
+        PERFORM pg_notify('role', OLD.role);
+    ELSE
+        PERFORM pg_notify('role', NEW.role);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$role_domain_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER role_domain_notify_trig
+    AFTER INSERT OR DELETE ON iris.role_domain
+    FOR EACH ROW EXECUTE FUNCTION iris.role_domain_notify();
+
+INSERT INTO iris.role_domain (role, domain) VALUES
+    ('administrator', 'any_ipv4'), ('administrator', 'any_ipv6');
+
+CREATE TABLE iris.user_id (
+    name VARCHAR(15) PRIMARY KEY,
+    full_name VARCHAR(31) NOT NULL,
+    password VARCHAR(64) NOT NULL,
+    dn VARCHAR(128) NOT NULL,
+    role VARCHAR(15) REFERENCES iris.role,
+    enabled BOOLEAN NOT NULL
+);
+
+INSERT INTO iris.user_id (name, full_name, password, dn, role, enabled)
+    VALUES (
+        'admin', 'IRIS Administrator',
+        '+vAwDtk/0KGx9k+kIoKFgWWbd3Ku8e/FOHoZoHB65PAuNEiN2muHVavP0fztOi4=',
+        '', 'administrator', true
+    );
+
+CREATE TRIGGER user_id_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.user_id
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+CREATE VIEW user_id_view AS
+    SELECT name, full_name, dn, role, enabled
+    FROM iris.user_id;
+GRANT SELECT ON user_id_view TO PUBLIC;
+
+CREATE TABLE iris.access_level (
+    id INTEGER PRIMARY KEY,
+    description VARCHAR NOT NULL
+);
+
+INSERT INTO iris.access_level (id, description) VALUES
+    (1, 'View'),
+    (2, 'Operate'),
+    (3, 'Manage'),
+    (4, 'Configure');
+
+CREATE TABLE iris.permission (
+    name VARCHAR(8) PRIMARY KEY,
+    role VARCHAR(15) NOT NULL REFERENCES iris.role ON DELETE CASCADE,
+    base_resource VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
+    hashtag VARCHAR(16),
+    access_level INTEGER NOT NULL REFERENCES iris.access_level,
+
+    CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$'),
+    -- hashtag cannot be applied to "View" access level
+    CONSTRAINT hashtag_access_ck CHECK (hashtag IS NULL OR access_level != 1)
+);
+
+ALTER TABLE iris.permission
+    ADD CONSTRAINT base_resource_ck
+        CHECK (iris.resource_is_base(base_resource)) NOT VALID;
+
+CREATE UNIQUE INDEX permission_role_base_resource_hashtag_idx
+    ON iris.permission (role, base_resource, COALESCE(hashtag, ''));
+
+INSERT INTO iris.permission (name, role, base_resource, access_level)
+VALUES
+    ('prm_1', 'administrator', 'action_plan', 4),
+    ('prm_2', 'administrator', 'alert_config', 4),
+    ('prm_3', 'administrator', 'beacon', 4),
+    ('prm_4', 'administrator', 'camera', 4),
+    ('prm_5', 'administrator', 'controller', 4),
+    ('prm_6', 'administrator', 'detector', 4),
+    ('prm_7', 'administrator', 'dms', 4),
+    ('prm_8', 'administrator', 'gate_arm', 4),
+    ('prm_9', 'administrator', 'incident', 4),
+    ('prm_10', 'administrator', 'lcs', 4),
+    ('prm_11', 'administrator', 'parking_area', 4),
+    ('prm_12', 'administrator', 'permission', 4),
+    ('prm_13', 'administrator', 'ramp_meter', 4),
+    ('prm_14', 'administrator', 'system_attribute', 4),
+    ('prm_15', 'administrator', 'toll_zone', 4),
+    ('prm_16', 'administrator', 'video_monitor', 4),
+    ('prm_17', 'administrator', 'weather_sensor', 4);
+
+CREATE TRIGGER permission_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.permission
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+CREATE VIEW permission_view AS
+    SELECT name, role, base_resource, hashtag, description AS access_level
+    FROM iris.permission p
+    JOIN iris.access_level a ON a.id = p.access_level;
+GRANT SELECT ON permission_view TO PUBLIC;
+
+CREATE TABLE event.client_event (
+    id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc INTEGER NOT NULL REFERENCES event.event_description,
+    host_port VARCHAR(64) NOT NULL,
+    user_id VARCHAR(15)
+);
+
+CREATE VIEW client_event_view AS
+    SELECT ev.id, event_date, ed.description, host_port, user_id
+    FROM event.client_event ev
+    JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id;
+GRANT SELECT ON client_event_view TO PUBLIC;
+
+--
 -- Lane Codes, Direction, Road, Map Extent, Geo Loc
 --
 CREATE TABLE iris.lane_code (
@@ -1080,166 +1234,6 @@ WAY	f		f
 CREATE TRIGGER road_affix_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.road_affix
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
-
---
--- Domains, Roles, Users, and Permissions
---
-CREATE TABLE iris.domain (
-    name VARCHAR(15) PRIMARY KEY,
-    block CIDR NOT NULL,
-    enabled BOOLEAN NOT NULL
-);
-
-CREATE TRIGGER domain_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.domain
-    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
-
-COPY iris.domain (name, block, enabled) FROM stdin;
-any_ipv4	0.0.0.0/0	t
-any_ipv6	::0/0	t
-local_ipv6	::1/128	t
-\.
-
-CREATE TABLE iris.role (
-    name VARCHAR(15) PRIMARY KEY,
-    enabled BOOLEAN NOT NULL
-);
-
-COPY iris.role (name, enabled) FROM stdin;
-administrator	t
-operator	t
-\.
-
-CREATE TRIGGER role_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.role
-    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
-
-CREATE TABLE iris.role_domain (
-    role VARCHAR(15) NOT NULL REFERENCES iris.role,
-    domain VARCHAR(15) NOT NULL REFERENCES iris.domain
-);
-ALTER TABLE iris.role_domain ADD PRIMARY KEY (role, domain);
-
-CREATE FUNCTION iris.role_domain_notify() RETURNS TRIGGER AS
-    $role_domain_notify$
-BEGIN
-    IF (TG_OP = 'DELETE') THEN
-        PERFORM pg_notify('role', OLD.role);
-    ELSE
-        PERFORM pg_notify('role', NEW.role);
-    END IF;
-    RETURN NULL; -- AFTER trigger return is ignored
-END;
-$role_domain_notify$ LANGUAGE plpgsql;
-
-CREATE TRIGGER role_domain_notify_trig
-    AFTER INSERT OR DELETE ON iris.role_domain
-    FOR EACH ROW EXECUTE FUNCTION iris.role_domain_notify();
-
-COPY iris.role_domain (role, domain) FROM stdin;
-administrator	any_ipv4
-administrator	any_ipv6
-\.
-
-CREATE TABLE iris.user_id (
-    name VARCHAR(15) PRIMARY KEY,
-    full_name VARCHAR(31) NOT NULL,
-    password VARCHAR(64) NOT NULL,
-    dn VARCHAR(128) NOT NULL,
-    role VARCHAR(15) REFERENCES iris.role,
-    enabled BOOLEAN NOT NULL
-);
-
-INSERT INTO iris.user_id (name, full_name, password, dn, role, enabled)
-    VALUES (
-        'admin', 'IRIS Administrator',
-        '+vAwDtk/0KGx9k+kIoKFgWWbd3Ku8e/FOHoZoHB65PAuNEiN2muHVavP0fztOi4=',
-        '', 'administrator', true
-    );
-
-CREATE TRIGGER user_id_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.user_id
-    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
-
-CREATE VIEW user_id_view AS
-    SELECT name, full_name, dn, role, enabled
-    FROM iris.user_id;
-GRANT SELECT ON user_id_view TO PUBLIC;
-
-CREATE TABLE iris.access_level (
-    id INTEGER PRIMARY KEY,
-    description VARCHAR NOT NULL
-);
-
-COPY iris.access_level (id, description) FROM stdin;
-1	View
-2	Operate
-3	Manage
-4	Configure
-\.
-
-CREATE TABLE iris.permission (
-    name VARCHAR(8) PRIMARY KEY,
-    role VARCHAR(15) NOT NULL REFERENCES iris.role ON DELETE CASCADE,
-    base_resource VARCHAR(16) NOT NULL REFERENCES iris.resource_type,
-    hashtag VARCHAR(16),
-    access_level INTEGER NOT NULL REFERENCES iris.access_level,
-
-    CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$'),
-    -- hashtag cannot be applied to "View" access level
-    CONSTRAINT hashtag_access_ck CHECK (hashtag IS NULL OR access_level != 1)
-);
-
-ALTER TABLE iris.permission
-    ADD CONSTRAINT base_resource_ck
-        CHECK (iris.resource_is_base(base_resource)) NOT VALID;
-
-CREATE UNIQUE INDEX permission_role_base_resource_hashtag_idx
-    ON iris.permission (role, base_resource, COALESCE(hashtag, ''));
-
-COPY iris.permission (name, role, base_resource, access_level) FROM stdin;
-prm_1	administrator	action_plan	4
-prm_2	administrator	alert_config	4
-prm_3	administrator	beacon	4
-prm_4	administrator	camera	4
-prm_5	administrator	controller	4
-prm_6	administrator	detector	4
-prm_7	administrator	dms	4
-prm_8	administrator	gate_arm	4
-prm_9	administrator	incident	4
-prm_10	administrator	lcs	4
-prm_11	administrator	parking_area	4
-prm_12	administrator	permission	4
-prm_13	administrator	ramp_meter	4
-prm_14	administrator	system_attribute	4
-prm_15	administrator	toll_zone	4
-prm_16	administrator	video_monitor	4
-prm_17	administrator	weather_sensor	4
-\.
-
-CREATE TRIGGER permission_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.permission
-    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
-
-CREATE VIEW permission_view AS
-    SELECT name, role, base_resource, hashtag, description AS access_level
-    FROM iris.permission p
-    JOIN iris.access_level a ON a.id = p.access_level;
-GRANT SELECT ON permission_view TO PUBLIC;
-
-CREATE TABLE event.client_event (
-    id SERIAL PRIMARY KEY,
-    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
-    event_desc INTEGER NOT NULL REFERENCES event.event_description,
-    host_port VARCHAR(64) NOT NULL,
-    user_id VARCHAR(15)
-);
-
-CREATE VIEW client_event_view AS
-    SELECT ev.id, event_date, ed.description, host_port, user_id
-    FROM event.client_event ev
-    JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id;
-GRANT SELECT ON client_event_view TO PUBLIC;
 
 --
 -- Comm Protocols, Comm Links, Modems, Cabinets, Controllers
