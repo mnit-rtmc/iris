@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
  * Cohu device request property.
@@ -104,7 +103,7 @@ public class DeviceReqProp extends CohuPTZProp {
 
 	/** Get the property comand */
 	@Override
-	protected byte[] getCommand() throws ProtocolException {
+	protected byte[] getCommand() {
 		switch (req) {
 		case QUERY_STATUS:
 			return CMD_QUERY_LATCH_STATUS;
@@ -133,9 +132,13 @@ public class DeviceReqProp extends CohuPTZProp {
 		case CAMERA_WIPER_ONESHOT:
 			return CMD_WIPER_TOGGLE;
 		default:
-			throw new ProtocolException(
-				"INVALID DEVICE REQ: " + req);
+			return null;
 		}
+	}
+
+	/** Check if the device request is implemented */
+	public boolean isImplemented() {
+		return getCommand() != null;
 	}
 
 	/** Get a string representation of the property */
