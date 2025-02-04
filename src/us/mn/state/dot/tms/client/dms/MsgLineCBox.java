@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2023  Minnesota Department of Transportation
+ * Copyright (C) 2011-2025  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -58,7 +58,7 @@ public class MsgLineCBox extends JComboBox<MsgLine> {
 			String ms = (item instanceof MsgLine)
 				? ((MsgLine) item).getMulti()
 				: item.toString();
-			return new MultiString(ms.trim())
+			return new MultiString(ms)
 				.normalizeLine()
 				.toString();
 		}
