@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,6 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.MeterAlgorithm;
-import us.mn.state.dot.tms.MeterQueueState;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.RampMeterLock;
@@ -352,20 +351,17 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			pm_target_txt.setText("" + proxy.getPmTarget());
 		if (a == null || a.equals("beacon"))
 			beacon_act.updateSelected();
-		if (a == null || a.equals("rate")) {
-			Integer rt = proxy.getRate();
-			cycle_lbl.setText(RampMeterHelper.formatCycle(rt));
-			release_lbl.setText(RampMeterHelper.formatRelease(rt));
-		}
-		if (a == null || a.equals("queue")) {
-			MeterQueueState q = MeterQueueState.fromOrdinal(
-				proxy.getQueue());
-			queue_lbl.setText(q.description);
-		}
 		if (a == null || a.equals("mLock")) {
 			lock_cbx.setAction(null);
 			lock_cbx.setSelectedIndex(getMLock());
 			lock_cbx.setAction(lock_action);
+		}
+		if (a == null || a.equals("status")) {
+			Integer rt = RampMeterHelper.optRate(proxy);
+			cycle_lbl.setText(RampMeterHelper.formatCycle(rt));
+			release_lbl.setText(RampMeterHelper.formatRelease(rt));
+			String q = RampMeterHelper.optQueue(proxy);
+			queue_lbl.setText((q != null) ? q : "");
 		}
 		if (a == null || a.equals("operation"))
 			op_lbl.setText(proxy.getOperation());

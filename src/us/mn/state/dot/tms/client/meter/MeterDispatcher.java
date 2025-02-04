@@ -26,9 +26,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.MeterQueueState;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.RampMeterFault;
 import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.client.Session;
@@ -190,31 +188,18 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 			location_lbl.setText(GeoLocHelper.getOnRampLocation(
 				rm.getGeoLoc()));
 		}
-		if (a == null || a.equals("rate")) {
-			Integer rt = rm.getRate();
-			release_lbl.setText(RampMeterHelper.formatRelease(rt));
-			cycle_lbl.setText(RampMeterHelper.formatCycle(rt));
-			if(rt != null)
-				on_btn.setSelected(true);
-			else
-				off_btn.setSelected(true);
-			boolean up = isWritePermitted(rm) && rt != null;
-			shrink_btn.setEnabled(up);
-			grow_btn.setEnabled(up);
-		}
-		if (a == null || a.equals("queue")) {
-			MeterQueueState q = MeterQueueState.fromOrdinal(
-				rm.getQueue());
-			queue_lbl.setText(q.description);
-		}
 		if(a == null || a.equals("mLock")) {
 			lock_cbx.setAction(null);
 			lock_cbx.setSelectedIndex(getMLock(rm));
 			lock_cbx.setAction(new LockMeterAction(rm, lock_cbx,
 				isWritePermitted(rm)));
 		}
-		if (a == null || a.equals("fault") || a.equals("styles"))
+		if (a == null || a.equals("status") || a.equals("styles")) {
+			updateRate(rm);
 			updateStatus(rm);
+			String q = RampMeterHelper.optQueue(rm);
+			queue_lbl.setText((q != null) ? q : "");
+		}
 	}
 
 	/** Update the ramp meter config */
@@ -228,12 +213,24 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		lock_cbx.setAction(new LockMeterAction(rm, lock_cbx, update));
 	}
 
+	/** Update the ramp meter release rate */
+	private void updateRate(RampMeter rm) {
+		Integer rt = RampMeterHelper.optRate(rm);
+		release_lbl.setText(RampMeterHelper.formatRelease(rt));
+		cycle_lbl.setText(RampMeterHelper.formatCycle(rt));
+		if (rt != null)
+			on_btn.setSelected(true);
+		else
+			off_btn.setSelected(true);
+		boolean up = isWritePermitted(rm) && rt != null;
+		shrink_btn.setEnabled(up);
+		grow_btn.setEnabled(up);
+	}
+
 	/** Update the ramp meter status */
 	private void updateStatus(RampMeter rm) {
-		Integer fault = rm.getFault();
-		String status = (fault != null)
-		      ? RampMeterFault.fromOrdinal(fault).toString()
-		      : "";
+		String fault = RampMeterHelper.optFault(rm);
+		String status = (fault != null) ? fault : "";
 		if (ItemStyle.OFFLINE.checkBit(rm.getStyles())) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.GRAY);

@@ -21,12 +21,12 @@ The following operations can be performed on a ramp meter:
 * `iris/api/ramp_meter` (primary)
 * `iris/api/ramp_meter/{name}`
 
-| Access       | Primary               | Secondary                        |
-|--------------|-----------------------|----------------------------------|
-| 👁️  View      | name, location, fault | geo\_loc                         |
-| 👉 Operate   | m\_lock               | rate                             |
-| 💡 Manage    | notes                 | storage, max\_wait, algorithm, am\_target, pm\_target |
-| 🔧 Configure | controller            | pin, meter\_type, beacon, preset |
+| Access       | Primary                | Secondary                        |
+|--------------|------------------------|----------------------------------|
+| 👁️  View      | name, location, status | geo\_loc                         |
+| 👉 Operate   | m\_lock                |                                  |
+| 💡 Manage    | notes                  | storage, max\_wait, algorithm, am\_target, pm\_target |
+| 🔧 Configure | controller             | pin, meter\_type, beacon, preset |
 
 </details>
 

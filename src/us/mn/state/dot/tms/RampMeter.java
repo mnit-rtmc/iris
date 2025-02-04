@@ -88,17 +88,41 @@ public interface RampMeter extends Device {
 	/** Get the meter lock code */
 	Integer getMLock();
 
-	/** Get meter fault code */
-	Integer getFault();
-
-	/* Transient attributes (not stored in database) */
-
 	/** Set the release rate (vehicles per hour) */
 	void setRateNext(Integer r);
 
-	/** Get the release rate (vehciels per hour) */
-	Integer getRate();
+	/** Get the current status as JSON */
+	String getStatus();
 
-	/** Get the queue status */
-	int getQueue();
+	/** Status JSON attributes: RATE, QUEUE, FAULT */
+
+	/** Release rate (vehicles per hour; Integer) */
+	String RATE = "rate";
+
+	/** Queue status */
+	String QUEUE = "queue";
+
+	/** QUEUE: empty */
+	String QUEUE_EMPTY = "empty";
+
+	/** QUEUE: exists */
+	String QUEUE_EXISTS = "exists";
+
+	/** QUEUE: full */
+	String QUEUE_FULL = "full";
+
+	/** Fault conditions */
+	String FAULT = "fault";
+
+	/** FAULT: Police panel flash */
+	String FAULT_POLICE_PANEL = "police panel";
+
+	/** FAULT: Manual mode flash */
+	String FAULT_MANUAL_MODE = "manual mode";
+
+	/** FAULT: No entrance node */
+	String FAULT_NO_ENTRANCE_NODE = "no entrance node";
+
+	/** FAULT: Missing state */
+	String FAULT_MISSING_STATE = "missing state";
 }

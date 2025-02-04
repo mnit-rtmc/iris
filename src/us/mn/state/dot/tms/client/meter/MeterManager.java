@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import javax.swing.JPopupMenu;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
@@ -72,7 +73,7 @@ public class MeterManager extends DeviceManager<RampMeter> {
 	@Override
 	protected void fillPopupSingle(JPopupMenu p, RampMeter meter) {
 		if (session.isWritePermitted(meter)) {
-			if (meter.getRate() != null) {
+			if (RampMeterHelper.optRate(meter) != null) {
 				p.add(new ShrinkQueueAction(meter, true));
 				p.add(new GrowQueueAction(meter, true));
 				p.add(new TurnOffAction(meter, true));

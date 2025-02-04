@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2024  Minnesota Department of Transportation
+ * Copyright (C) 2008-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,16 +22,16 @@ package us.mn.state.dot.tms;
 public enum MeterQueueState {
 
 	/** Queue unknown state */
-	UNKNOWN("Unknown"),
+	UNKNOWN(null),
 
 	/** Queue empty state */
-	EMPTY("Empty"),
+	EMPTY(RampMeter.QUEUE_EMPTY),
 
 	/** Queue exists state */
-	EXISTS("Exists"),
+	EXISTS(RampMeter.QUEUE_EXISTS),
 
 	/** Queue full state */
-	FULL("Full");
+	FULL(RampMeter.QUEUE_FULL);
 
 	/** Create a new meter queue state */
 	private MeterQueueState(String d) {
@@ -46,12 +46,4 @@ public enum MeterQueueState {
 
 	/** Description of the queue state */
 	public final String description;
-
-	/** Get a meter queue state from an ordinal value */
-	static public MeterQueueState fromOrdinal(int o) {
-		if (o >= 0 && o < values().length)
-			return values()[o];
-		else
-			return UNKNOWN;
-	}
 }

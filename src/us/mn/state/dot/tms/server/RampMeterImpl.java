@@ -40,7 +40,7 @@ import us.mn.state.dot.tms.MeterQueueState;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.RampMeterFault;
+import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.Road;
@@ -93,7 +93,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"meter_type, storage, max_wait, algorithm, am_target, "+
-			"pm_target, beacon, preset, m_lock, fault FROM iris." +
+			"pm_target, beacon, preset, m_lock, status FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -112,7 +112,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 					row.getString(12), // beacon
 					row.getString(13), // preset
 					row.getInt(14),    // m_lock
-					(Integer) row.getObject(15) // fault
+					row.getString(15)  // status
 				));
 			}
 		});
@@ -137,8 +137,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		map.put("preset", preset);
 		if (m_lock != null)
 			map.put("m_lock", m_lock.ordinal());
-		if (fault != null)
-			map.put("fault", fault.ordinal());
+		map.put("status", status);
 		return map;
 	}
 
@@ -148,17 +147,18 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		GeoLocImpl g = new GeoLocImpl(name, SONAR_TYPE);
 		g.notifyCreate();
 		geo_loc = g;
+		status = null;
 	}
 
 	/** Create a ramp meter */
 	private RampMeterImpl(String n, String loc, String c, int p,
-		String nt, int t, int st, int w, int alg, int at, int pt,
-		String b, String cp, Integer lk, Integer flt)
+		String nt, int t, int s, int w, int alg, int at, int pt,
+		String b, String cp, Integer lk, String st)
 	{
 		super(n, lookupController(c), p, nt);
 		geo_loc = lookupGeoLoc(loc);
 		meter_type = RampMeterType.fromOrdinal(t);
-		storage = st;
+		storage = s;
 		max_wait = w;
 		setPreset(lookupPreset(cp));
 		algorithm = alg;
@@ -166,8 +166,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		pm_target = pt;
 		beacon = lookupBeacon(b);
 		m_lock = RampMeterLock.fromOrdinal(lk);
-		fault = RampMeterFault.fromOrdinal(flt);
-		rate = null;
+		status = st;
 		initTransients();
 	}
 
@@ -467,56 +466,65 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return m_lock != null;
 	}
 
-	/** Meter fault */
-	private RampMeterFault fault = null;
+	/** Current (JSON) meter status */
+	private String status;
 
-	/** Set the meter fault (notify clients) */
-	private void setFaultNotify(RampMeterFault flt) {
-		if (!objectEquals(flt, fault)) {
+	/** Set the current meter status as JSON */
+	private void setStatusNotify(String st) {
+		if (!objectEquals(st, status)) {
 			try {
-				Integer f = (flt != null)
-				       ? flt.ordinal()
-				       : null;
-				store.update(this, "fault", f);
-				fault = flt;
+				store.update(this, "status", st);
+				status = st;
+				notifyAttribute("status");
 				updateStyles();
-				notifyAttribute("fault");
 			}
 			catch (TMSException e) {
-				e.printStackTrace();
+				logError("status: " + e.getMessage());
 			}
 		}
 	}
 
+	/** Set a status value and notify clients of the change */
+	private void setStatusNotify(String key, Object value) {
+		String st = RampMeterHelper.putJson(status, key, value);
+		setStatusNotify(st);
+	}
+
+	/** Set a fault value and notify clients of the change */
+	private void setFaultNotify(Object value) {
+		setStatusNotify(RampMeter.FAULT, value);
+	}
+
 	/** Update fault with checks */
-	private void updateFault(RampMeterFault flt) {
-		RampMeterFault f = fault;
+	private void updateFault(String flt) {
+		String f = RampMeterHelper.optFault(this);
 		// Don't overwrite POLICE_PANEL / MANUAL_MODE
-		if (!objectEquals(f, RampMeterFault.POLICE_PANEL) &&
-		    !objectEquals(f, RampMeterFault.MANUAL_MODE))
+		if (!objectEquals(f, RampMeter.FAULT_POLICE_PANEL) &&
+		    !objectEquals(f, RampMeter.FAULT_MANUAL_MODE))
 			setFaultNotify(flt);
 	}
 
-	/** Get the ramp meter fault */
+	/** Get the current status as JSON */
 	@Override
-	public Integer getFault() {
-		RampMeterFault flt = fault;
-		return (flt != null) ? flt.ordinal() : null;
+	public String getStatus() {
+		return status;
 	}
 
 	/** Set the status of the police panel switch */
 	public void setPolicePanel(boolean p) {
+		String f = RampMeterHelper.optFault(this);
 		if (p)
-			setFaultNotify(RampMeterFault.POLICE_PANEL);
-		else if (fault == RampMeterFault.POLICE_PANEL)
+			setFaultNotify(RampMeter.FAULT_POLICE_PANEL);
+		else if (RampMeter.FAULT_POLICE_PANEL.equals(f))
 			setFaultNotify(null);
 	}
 
 	/** Set the status of manual metering */
 	public void setManualMode(boolean m) {
+		String f = RampMeterHelper.optFault(this);
 		if (m)
-			setFaultNotify(RampMeterFault.MANUAL_MODE);
-		else if (fault == RampMeterFault.MANUAL_MODE)
+			setFaultNotify(RampMeter.FAULT_MANUAL_MODE);
+		else if (RampMeter.FAULT_MANUAL_MODE.equals(f))
 			setFaultNotify(null);
 	}
 
@@ -571,7 +579,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		if (ent_node != null) {
 			as = KAdaptiveAlgorithm.createState(this);
 			if (null == as)
-				updateFault(RampMeterFault.MISSING_STATE);
+				updateFault(RampMeter.FAULT_MISSING_STATE);
 		}
 		return as;
 	}
@@ -592,15 +600,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	private void setQueueNotify(MeterQueueState q) {
 		if (q != queue) {
 			queue = q;
-			notifyAttribute("queue");
-			updateStyles();
+			setStatusNotify(RampMeter.QUEUE, q.description);
 		}
-	}
-
-	/** Get the queue status */
-	@Override
-	public int getQueue() {
-		return queue.ordinal();
 	}
 
 	/** Update the ramp meter queue state */
@@ -663,45 +664,34 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Send a new release rate to the meter */
 	private void sendReleaseRate(Integer r) {
-		if (rateChanged(r)) {
+		if (!objectEquals(r, getRate())) {
 			MeterPoller mp = getMeterPoller();
 			if (mp != null)
 				mp.sendReleaseRate(this, r);
 		}
 	}
 
-	/** Release rate (vehicles per hour) */
-	private transient Integer rate = null;
-
 	/** Set the release rate (and notify clients) */
 	public void setRateNotify(Integer r) {
-		if (rateChanged(r)) {
-			rate = r;
-			notifyAttribute("rate");
-			updateStyles();
-		}
+		if (!objectEquals(r, getRate()))
+			setStatusNotify(RampMeter.RATE, r);
 		updateBeacon();
-	}
-
-	/** Test if the release rate has changed */
-	private boolean rateChanged(Integer r) {
-		return !objectEquals(r, rate);
 	}
 
 	/** Get the release rate (vehciels per hour) */
 	public Integer getRate() {
-		return rate;
+		return RampMeterHelper.optRate(this);
 	}
 
 	/** Is the ramp meter currently metering? */
 	public boolean isMetering() {
-		return rate != null;
+		return getRate() != null;
 	}
 
 	/** Test if a meter has faults */
 	@Override
 	protected boolean hasFaults() {
-		return fault != null;
+		return RampMeterHelper.hasFault(this);
 	}
 
 	/** Test if meter is available */
@@ -768,7 +758,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 				}
 			}
 		}
-		updateFault(RampMeterFault.NO_ENTRANCE_NODE);
+		updateFault(RampMeter.FAULT_NO_ENTRANCE_NODE);
 		return null;
 	}
 

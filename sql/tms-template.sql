@@ -4404,18 +4404,6 @@ COPY iris.meter_algorithm (id, description) FROM stdin;
 3	K Adaptive Metering
 \.
 
-CREATE TABLE iris.meter_fault (
-    id INTEGER PRIMARY KEY,
-    description VARCHAR NOT NULL
-);
-
-INSERT INTO iris.meter_fault (id, description)
-VALUES
-    (0, 'police panel'),
-    (1, 'manual mode'),
-    (2, 'no entrance node'),
-    (3, 'missing state');
-
 CREATE TABLE iris.meter_lock (
     id INTEGER PRIMARY KEY,
     description VARCHAR(16) NOT NULL
@@ -4441,7 +4429,7 @@ CREATE TABLE iris._ramp_meter (
     pm_target INTEGER NOT NULL,
     beacon VARCHAR(20) REFERENCES iris._beacon,
     m_lock INTEGER REFERENCES iris.meter_lock,
-    fault INTEGER REFERENCES iris.meter_fault
+    status JSONB
 );
 
 ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_fkey
@@ -4456,7 +4444,7 @@ CREATE FUNCTION iris.ramp_meter_notify() RETURNS TRIGGER AS
 BEGIN
     IF (NEW.notes IS DISTINCT FROM OLD.notes) OR
        (NEW.m_lock IS DISTINCT FROM OLD.m_lock) OR
-       (NEW.fault IS DISTINCT FROM OLD.fault)
+       (NEW.status IS DISTINCT FROM OLD.status)
     THEN
         NOTIFY ramp_meter;
     ELSE
@@ -4477,7 +4465,7 @@ CREATE TRIGGER ramp_meter_table_notify_trig
 CREATE VIEW iris.ramp_meter AS
     SELECT m.name, geo_loc, controller, pin, notes, meter_type, storage,
            max_wait, algorithm, am_target, pm_target, beacon, preset,
-           m_lock, fault
+           m_lock, status
     FROM iris._ramp_meter m
     JOIN iris.controller_io cio ON m.name = cio.name
     JOIN iris.device_preset p ON m.name = p.name;
@@ -4491,11 +4479,11 @@ BEGIN
          VALUES (NEW.name, 'ramp_meter', NEW.preset);
     INSERT INTO iris._ramp_meter (
         name, geo_loc, notes, meter_type, storage, max_wait, algorithm,
-        am_target, pm_target, beacon, m_lock, fault
+        am_target, pm_target, beacon, m_lock, status
     ) VALUES (
         NEW.name, NEW.geo_loc, NEW.notes, NEW.meter_type, NEW.storage,
         NEW.max_wait, NEW.algorithm, NEW.am_target, NEW.pm_target, NEW.beacon,
-        NEW.m_lock, NEW.fault
+        NEW.m_lock, NEW.status
     );
     RETURN NEW;
 END;
@@ -4525,7 +4513,7 @@ BEGIN
            pm_target = NEW.pm_target,
            beacon = NEW.beacon,
            m_lock = NEW.m_lock,
-           fault = NEW.fault
+           status = NEW.status
      WHERE name = OLD.name;
     RETURN NEW;
 END;
@@ -4543,7 +4531,7 @@ CREATE VIEW ramp_meter_view AS
     SELECT m.name, geo_loc, cio.controller, cio.pin, notes,
            mt.description AS meter_type, storage, max_wait,
            alg.description AS algorithm, am_target, pm_target, beacon, camera,
-           preset_num, ml.description AS meter_lock, fl.description AS fault,
+           preset_num, ml.description AS meter_lock, status,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
            l.landmark, l.lat, l.lon, l.corridor, l.location, l.rd
     FROM iris._ramp_meter m
@@ -4553,7 +4541,6 @@ CREATE VIEW ramp_meter_view AS
     LEFT JOIN iris.meter_type mt ON m.meter_type = mt.id
     LEFT JOIN iris.meter_algorithm alg ON m.algorithm = alg.id
     LEFT JOIN iris.meter_lock ml ON m.m_lock = ml.id
-    LEFT JOIN iris.meter_fault fl ON m.fault = fl.id
     LEFT JOIN geo_loc_view l ON m.geo_loc = l.name;
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
 

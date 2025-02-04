@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.meter;
 
 import java.awt.event.ActionEvent;
 import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.client.proxy.ProxyAction;
 
 /**
@@ -36,7 +37,7 @@ public class ShrinkQueueAction extends ProxyAction<RampMeter> {
 	@Override
 	protected void doActionPerformed(ActionEvent e) {
 		if (proxy != null) {
-			Integer rate = proxy.getRate();
+			Integer rate = RampMeterHelper.optRate(proxy);
 			if (rate != null)
 				proxy.setRateNext(rate + 50);
 		}
