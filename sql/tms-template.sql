@@ -1408,13 +1408,14 @@ CREATE TABLE iris.condition (
     description VARCHAR(12) NOT NULL
 );
 
-COPY iris.condition (id, description) FROM stdin;
-0	Planned
-1	Active
-2	Construction
-3	Removed
-4	Testing
-\.
+INSERT INTO iris.condition (id, description)
+VALUES
+    (0, 'Planned'),
+    (1, 'Active'),
+    (2, 'Construction'),
+    (3, 'Removed'),
+    (4, 'Testing'),
+    (5, 'Maintenance');
 
 CREATE TABLE iris.controller (
     name VARCHAR(20) PRIMARY KEY,

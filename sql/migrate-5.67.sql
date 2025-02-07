@@ -145,4 +145,7 @@ CREATE VIEW meter_lock_event_view AS
     JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id;
 GRANT SELECT ON meter_lock_event_view TO PUBLIC;
 
+-- Add Maintenance controller condition
+INSERT INTO iris.condition (id, description) VALUES (5, 'Maintenance');
+
 COMMIT;
