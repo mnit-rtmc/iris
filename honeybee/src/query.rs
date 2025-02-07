@@ -577,12 +577,6 @@ pub const METER_ALGORITHM_LUT: &str = "\
   FROM iris.meter_algorithm \
   ORDER BY id";
 
-/// SQL query for ramp meter queue states (LUT)
-pub const METER_QUEUE_STATE_LUT: &str = "\
-  SELECT id, description \
-  FROM iris.meter_queue_state \
-  ORDER BY id";
-
 /// SQL query for ramp meter types (LUT)
 pub const METER_TYPE_LUT: &str = "\
   SELECT id, description, lanes \
