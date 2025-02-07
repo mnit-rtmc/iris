@@ -73,6 +73,7 @@ public class MeteringJob extends Job {
 			RampMeter rm = it.next();
 			if (rm instanceof RampMeterImpl) {
 				RampMeterImpl meter = (RampMeterImpl) rm;
+				meter.checkLockExpired();
 				meter.validateAlgorithm();
 			}
 		}

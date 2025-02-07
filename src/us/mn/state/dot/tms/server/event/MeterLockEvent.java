@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2024  Minnesota Department of Transportation
+ * Copyright (C) 2024-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,17 +31,13 @@ public class MeterLockEvent extends BaseEvent {
 	private final String ramp_meter;
 
 	/** Meter lock */
-	private final Integer m_lock;
-
-	/** User who initiated change */
-	private final String user_id;
+	private final String lock;
 
 	/** Create a new meter lock event */
-	public MeterLockEvent(String rm, Integer lk, String uid) {
+	public MeterLockEvent(String rm, String lk) {
 		super(EventType.METER_LOCK_EVENT);
 		ramp_meter = rm;
-		m_lock = lk;
-		user_id = SString.truncate(uid, 15);
+		lock = lk;
 	}
 
 	/** Get the event config name */
@@ -63,8 +59,7 @@ public class MeterLockEvent extends BaseEvent {
 		map.put("event_date", new Timestamp(event_date.getTime()));
 		map.put("event_desc", event_type.id);
 		map.put("ramp_meter", ramp_meter);
-		map.put("m_lock", m_lock);
-		map.put("user_id", user_id);
+		map.put("lock", lock);
 		return map;
 	}
 }

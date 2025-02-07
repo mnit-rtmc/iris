@@ -82,14 +82,13 @@ public interface RampMeter extends Device {
 	/** Get verification camera preset */
 	CameraPreset getPreset();
 
-	/** Set the meter lock code */
-	void setMLock(Integer lk);
+	/** Set the lock as JSON.
+	 * @see MeterLock */
+	void setLock(String lk);
 
-	/** Get the meter lock code */
-	Integer getMLock();
-
-	/** Set the release rate (vehicles per hour) */
-	void setRateNext(Integer r);
+	/** Get the lock as JSON.
+	 * @see MeterLock */
+	String getLock();
 
 	/** Get the current status as JSON */
 	String getStatus();

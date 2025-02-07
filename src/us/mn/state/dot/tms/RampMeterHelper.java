@@ -102,13 +102,34 @@ public class RampMeterHelper extends BaseHelper {
 			return I18N.get("units.na");
 	}
 
+	/** Filter a releae rate for valid range */
+	static public int filterRate(int r) {
+		r = Math.max(r, getMinRelease());
+		return Math.min(r, getMaxRelease());
+	}
+
+	/** Get the absolute minimum release rate */
+	static public int getMinRelease() {
+		return SystemAttributeHelper.getMeterMinRelease();
+	}
+
+	/** Get the absolute maximum release rate */
+	static public int getMaxRelease() {
+		return SystemAttributeHelper.getMeterMaxRelease();
+	}
+
+	/** Get optional lock, or null */
+	static public String optLock(RampMeter meter) {
+		return (meter != null) ? meter.getLock() : null;
+	}
+
 	/** Get optional meter status attribute, or null */
-	static public Object optStatus(RampMeter meter, String key) {
+	static private Object optStatus(RampMeter meter, String key) {
 		String status = (meter != null) ? meter.getStatus() : null;
 		return optJson(status, key);
 	}
 
-	/** Get optional meter rate, or null */
+	/** Get optional status rate, or null */
 	static public Integer optRate(RampMeter meter) {
 		Object rate = optStatus(meter, RampMeter.RATE);
 		return (rate instanceof Integer) ? (Integer) rate : null;

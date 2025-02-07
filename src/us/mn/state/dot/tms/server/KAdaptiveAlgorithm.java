@@ -26,12 +26,12 @@ import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.MeterQueueState;
 import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.R_NodeType;
+import static us.mn.state.dot.tms.RampMeterHelper.filterRate;
+import static us.mn.state.dot.tms.RampMeterHelper.getMaxRelease;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.HOUR;
 import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
-import static us.mn.state.dot.tms.server.RampMeterImpl.filterRate;
-import static us.mn.state.dot.tms.server.RampMeterImpl.getMaxRelease;
 import us.mn.state.dot.tms.server.event.MeterEvent;
 
 /**

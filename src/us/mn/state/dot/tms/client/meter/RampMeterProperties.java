@@ -32,9 +32,9 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.MeterAlgorithm;
+import us.mn.state.dot.tms.MeterLock;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
-import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.PresetComboRenderer;
@@ -155,6 +155,9 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Advance warning beacon combo box model */
 	private final IComboBoxModel<Beacon> beacon_mdl;
 
+	/** Lock reason component */
+	private final JLabel lock_lbl = new JLabel();
+
 	/** Release rate component */
 	private final JLabel release_lbl = new JLabel();
 
@@ -163,13 +166,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Queue label component */
 	private final JLabel queue_lbl = new JLabel();
-
-	/** Meter lock combo box component */
-	private final JComboBox<RampMeterLock> lock_cbx = new JComboBox
-		<RampMeterLock>(RampMeterLock.values());
-
-	/** Lock meter action */
-	private final LockMeterAction lock_action;
 
 	/** Operation description label */
 	private final JLabel op_lbl = new JLabel();
@@ -186,8 +182,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	public RampMeterProperties(Session s, RampMeter meter) {
 		super(I18N.get("ramp_meter") + ": ", s, meter);
 		loc_pnl = new LocationPanel(s);
-		lock_action = new LockMeterAction(meter, lock_cbx,
-			isWritePermitted("mLock"));
 		preset_mdl = new IComboBoxModel<CameraPreset>(
 			state.getCamCache().getPresetModel());
 		beacon_mdl = new IComboBoxModel<Beacon>(
@@ -294,14 +288,14 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Create ramp meter status panel */
 	private JPanel createStatusPanel() {
 		IPanel p = new IPanel();
+		p.add("ramp.meter.lock");
+		p.add(lock_lbl, Stretch.LAST);
 		p.add("ramp.meter.rate");
 		p.add(release_lbl, Stretch.LAST);
 		p.add("ramp.meter.cycle");
 		p.add(cycle_lbl, Stretch.LAST);
 		p.add("ramp.meter.queue");
 		p.add(queue_lbl, Stretch.LAST);
-		p.add("ramp.meter.lock");
-		p.add(lock_cbx, Stretch.LAST);
 		p.add("device.operation");
 		p.add(op_lbl, Stretch.LAST);
 		// Make label opaque so that we can set the background color
@@ -323,7 +317,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		am_target_txt.setEnabled(canWrite("amTarget"));
 		pm_target_txt.setEnabled(canWrite("pmTarget"));
 		beacon_act.setEnabled(canWrite("beacon"));
-		lock_action.setEnabled(canWrite("mLock"));
 	}
 
 	/** Update one attribute on the form */
@@ -351,15 +344,16 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			pm_target_txt.setText("" + proxy.getPmTarget());
 		if (a == null || a.equals("beacon"))
 			beacon_act.updateSelected();
-		if (a == null || a.equals("mLock")) {
-			lock_cbx.setAction(null);
-			lock_cbx.setSelectedIndex(getMLock());
-			lock_cbx.setAction(lock_action);
+		if (a == null || a.equals("lock")) {
+			MeterLock lk = new MeterLock(
+				RampMeterHelper.optLock(proxy));
+			String reason = lk.optReason();
+			lock_lbl.setText((reason != null) ? reason : "");
 		}
 		if (a == null || a.equals("status")) {
 			Integer rt = RampMeterHelper.optRate(proxy);
-			cycle_lbl.setText(RampMeterHelper.formatCycle(rt));
 			release_lbl.setText(RampMeterHelper.formatRelease(rt));
+			cycle_lbl.setText(RampMeterHelper.formatCycle(rt));
 			String q = RampMeterHelper.optQueue(proxy);
 			queue_lbl.setText((q != null) ? q : "");
 		}
@@ -374,11 +368,5 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 				op_lbl.setBackground(null);
 			}
 		}
-	}
-
-	/** Get meter lock index */
-	private int getMLock() {
-		Integer ml = proxy.getMLock();
-		return (ml != null) ? ml : RampMeterLock.OFF.ordinal();
 	}
 }

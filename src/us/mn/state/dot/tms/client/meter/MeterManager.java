@@ -19,7 +19,6 @@ import javax.swing.JPopupMenu;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
@@ -67,20 +66,6 @@ public class MeterManager extends DeviceManager<RampMeter> {
 	@Override
 	protected ProxyTheme<RampMeter> createTheme() {
 		return new MeterTheme(this);
-	}
-
-	/** Fill single selection popup */
-	@Override
-	protected void fillPopupSingle(JPopupMenu p, RampMeter meter) {
-		if (session.isWritePermitted(meter)) {
-			if (RampMeterHelper.optRate(meter) != null) {
-				p.add(new ShrinkQueueAction(meter, true));
-				p.add(new GrowQueueAction(meter, true));
-				p.add(new TurnOffAction(meter, true));
-			} else
-				p.add(new TurnOnAction(meter, true));
-			p.addSeparator();
-		}
 	}
 
 	/** Create a popup menu for multiple objects */

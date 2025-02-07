@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2020  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,40 +16,46 @@ package us.mn.state.dot.tms.client.meter;
 
 import java.awt.event.ActionEvent;
 import javax.swing.JComboBox;
+import us.mn.state.dot.tms.MeterLock;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.RampMeterLock;
+import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.client.proxy.ProxyAction;
 
 /**
- * This action sets a lock on the selected meter.
+ * This action selects a lock reason on the selected meter.
  *
  * @author Douglas Lau
  */
-public class LockMeterAction extends ProxyAction<RampMeter> {
+public class LockReasonAction extends ProxyAction<RampMeter> {
 
-	/** Lock combo box component */
-	private final JComboBox<RampMeterLock> lock_cbx;
+	/** User ID */
+	private final String user;
 
-	/** Create a new action to lock the selected ramp meter */
-	public LockMeterAction(RampMeter rm, JComboBox<RampMeterLock> c,
-		boolean e)
-	{
+	/** Reason combo box component */
+	private final JComboBox<String> reason_cbx;
+
+	/** Create a new action to select a lock reason */
+	public LockReasonAction(RampMeter rm, String u, JComboBox<String> c) {
 		super("ramp.meter.locked", rm);
-		lock_cbx = c;
-		setEnabled(e);
+		user = u;
+		reason_cbx = c;
 	}
 
 	/** Actually perform the action */
 	@Override
 	protected void doActionPerformed(ActionEvent e) {
 		if (proxy != null) {
-			int s = lock_cbx.getSelectedIndex();
-			if (s >= 0) {
-				Integer lk = (s != 0)
-				       ? Integer.valueOf(s)
-				       : null;
-				proxy.setMLock(lk);
-			}
+			String reason = (String) reason_cbx.getSelectedItem();
+			if ("".equals(reason))
+				reason = null;
+			if (reason != null) {
+				MeterLock lk = new MeterLock(proxy.getLock());
+				lk.setReason(reason);
+				lk.setExpires(lk.optRate() != null);
+				lk.setUser(user);
+				proxy.setLock(lk.toString());
+			} else
+				proxy.setLock(null);
 		}
 	}
 }

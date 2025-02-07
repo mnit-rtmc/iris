@@ -244,8 +244,8 @@ INSERT INTO iris.camera_preset (name, camera, preset_num, direction)
 
 -- Test ramp meter view
 INSERT INTO iris.ramp_meter (name, pin, notes, meter_type, storage, max_wait,
-                             algorithm, am_target, pm_target, m_lock)
-	VALUES ('RM_TEST_1', 5, 'notes', 1, 400, 240, 3, 500, 600, 3);
+                             algorithm, am_target, pm_target)
+	VALUES ('RM_TEST_1', 5, 'notes', 1, 400, 240, 3, 500, 600);
 
 \o /dev/null
 SELECT assert ('RM_TEST_1' = (SELECT name FROM iris.ramp_meter
@@ -272,8 +272,6 @@ SELECT assert (600 = (SELECT pm_target FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter insert pm_target');
 SELECT assert ((SELECT preset FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1') IS NULL, 'meter insert preset');
-SELECT assert (3 = (SELECT m_lock FROM iris.ramp_meter
-               WHERE name = 'RM_TEST_1'), 'meter insert m_lock');
 \o
 
 UPDATE iris.ramp_meter SET controller = 'CTL_TEST_1' WHERE name = 'RM_TEST_1';
@@ -287,7 +285,6 @@ UPDATE iris.ramp_meter SET algorithm = 1 WHERE name = 'RM_TEST_1';
 UPDATE iris.ramp_meter SET am_target = 1100 WHERE name = 'RM_TEST_1';
 UPDATE iris.ramp_meter SET pm_target = 1200 WHERE name = 'RM_TEST_1';
 UPDATE iris.ramp_meter SET preset = 'PRE_TEST_1' WHERE name = 'RM_TEST_1';
-UPDATE iris.ramp_meter SET m_lock = 1 WHERE name = 'RM_TEST_1';
 
 \o /dev/null
 SELECT assert ('RM_TEST_1' = (SELECT name FROM iris.ramp_meter
@@ -314,8 +311,6 @@ SELECT assert (1200 = (SELECT pm_target FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter update pm_target');
 SELECT assert ('PRE_TEST_1' = (SELECT preset FROM iris.ramp_meter
                WHERE name = 'RM_TEST_1'), 'meter update preset');
-SELECT assert (1 = (SELECT m_lock FROM iris.ramp_meter
-               WHERE name = 'RM_TEST_1'), 'meter update m_lock');
 \o
 
 DELETE FROM iris.ramp_meter WHERE name = 'RM_TEST_1';

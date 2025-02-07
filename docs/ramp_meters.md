@@ -24,7 +24,7 @@ The following operations can be performed on a ramp meter:
 | Access       | Primary                | Secondary                        |
 |--------------|------------------------|----------------------------------|
 | 👁️  View      | name, location, status | geo\_loc                         |
-| 👉 Operate   | m\_lock                |                                  |
+| 👉 Operate   | lock                   |                                  |
 | 💡 Manage    | notes                  | storage, max\_wait, algorithm, am\_target, pm\_target |
 | 🔧 Configure | controller             | pin, meter\_type, beacon, preset |
 

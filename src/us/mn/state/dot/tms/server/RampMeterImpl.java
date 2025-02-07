@@ -36,12 +36,12 @@ import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.MeterAlgorithm;
+import us.mn.state.dot.tms.MeterLock;
 import us.mn.state.dot.tms.MeterQueueState;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
-import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttributeHelper;
@@ -68,22 +68,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Default maximum wait time (in seconds) */
 	static public final int DEFAULT_MAX_WAIT = 240;
 
-	/** Filter a releae rate for valid range */
-	static public int filterRate(int r) {
-		r = Math.max(r, getMinRelease());
-		return Math.min(r, getMaxRelease());
-	}
-
-	/** Get the absolute minimum release rate */
-	static public int getMinRelease() {
-		return SystemAttributeHelper.getMeterMinRelease();
-	}
-
-	/** Get the absolute maximum release rate */
-	static public int getMaxRelease() {
-		return SystemAttributeHelper.getMeterMaxRelease();
-	}
-
 	/** Get the current AM/PM period */
 	static private int currentPeriod() {
 		return TimeSteward.getCalendarInstance().get(Calendar.AM_PM);
@@ -93,7 +77,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"meter_type, storage, max_wait, algorithm, am_target, "+
-			"pm_target, beacon, preset, m_lock, status FROM iris." +
+			"pm_target, beacon, preset, lock, status FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -111,7 +95,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 					row.getInt(11),    // pm_target
 					row.getString(12), // beacon
 					row.getString(13), // preset
-					row.getInt(14),    // m_lock
+					row.getString(14), // lock
 					row.getString(15)  // status
 				));
 			}
@@ -135,8 +119,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		map.put("pm_target", pm_target);
 		map.put("beacon", beacon);
 		map.put("preset", preset);
-		if (m_lock != null)
-			map.put("m_lock", m_lock.ordinal());
+		map.put("lock", lock);
 		map.put("status", status);
 		return map;
 	}
@@ -147,13 +130,14 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		GeoLocImpl g = new GeoLocImpl(name, SONAR_TYPE);
 		g.notifyCreate();
 		geo_loc = g;
+		lock = null;
 		status = null;
 	}
 
 	/** Create a ramp meter */
 	private RampMeterImpl(String n, String loc, String c, int p,
 		String nt, int t, int s, int w, int alg, int at, int pt,
-		String b, String cp, Integer lk, String st)
+		String b, String cp, String lk, String st)
 	{
 		super(n, lookupController(c), p, nt);
 		geo_loc = lookupGeoLoc(loc);
@@ -165,7 +149,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		am_target = at;
 		pm_target = pt;
 		beacon = lookupBeacon(b);
-		m_lock = RampMeterLock.fromOrdinal(lk);
+		lock = lk;
 		status = st;
 		initTransients();
 	}
@@ -435,35 +419,71 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return preset;
 	}
 
-	/** Meter lock code */
-	private RampMeterLock m_lock = null;
+	/** Meter lock (JSON) */
+	private String lock = null;
 
-	/** Set the meter lock code */
+	/** Set the lock as JSON */
 	@Override
-	public void setMLock(Integer lk) {
-		m_lock = RampMeterLock.fromOrdinal(lk);
+	public void setLock(String lk) {
+		lock = lk;
 	}
 
-	/** Set the meter lock code */
-	public void doSetMLock(Integer lk) throws TMSException {
-		if (RampMeterLock.fromOrdinal(lk) != m_lock) {
-			store.update(this, "m_lock", lk);
-			setMLock(lk);
-			updateStyles();
-			String u = getProcUser();
-			logEvent(new MeterLockEvent(name, lk, u));
+	/** Set the lock as JSON */
+	public void doSetLock(String lk) throws TMSException {
+		if (!objectEquals(lk, lock)) {
+			MeterLock ml = new MeterLock(lk);
+			if (lk != null && !getProcUser().equals(ml.optUser()))
+				throw new ChangeVetoException("Bad user!");
+			setLockChecked(lk);
 		}
 	}
 
-	/** Get the ramp meter lock code */
+	/** Set the lock as JSON */
+	private void setLockChecked(String lk) throws TMSException {
+		store.update(this, "lock", lk);
+		lock = lk;
+		logEvent(new MeterLockEvent(name, lk));
+		updateStyles();
+		// send the new rate immediately
+		Integer rt = getLockRate();
+		if (rt != null)
+			sendReleaseRate(validateRate(rt));
+	}
+
+	/** Check if lock has expired */
+	public void checkLockExpired() {
+		MeterLock ml = new MeterLock(lock);
+		String exp = ml.optExpires();
+		if (exp != null) {
+			Long e = TimeSteward.parse8601(exp);
+			if (e != null && e < TimeSteward.currentTimeMillis()) {
+				try {
+					setLockChecked(null);
+					notifyAttribute("lock");
+				}
+				catch (TMSException ex) {
+					logError("checkLockExpired: " +
+						ex.getMessage());
+				}
+			}
+		}
+	}
+
+	/** Get the lock as JSON */
 	@Override
-	public Integer getMLock() {
-		return (m_lock != null) ? m_lock.ordinal() : null;
+	public String getLock() {
+		return lock;
 	}
 
 	/** Is the metering rate locked? */
 	public boolean isLocked() {
-		return m_lock != null;
+		return lock != null;
+	}
+
+	/** Get the lock metering rate */
+	private Integer getLockRate() {
+		MeterLock ml = new MeterLock(lock);
+		return ml.optRate();
 	}
 
 	/** Current (JSON) meter status */
@@ -634,21 +654,17 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Update the planned rate */
 	public void updateRatePlanned() {
-		if (!isLocked())
-			setRateNext(ratePlanned);
+		Integer rt = getLockRate();
+		if (rt == null)
+			rt = ratePlanned;
+		sendReleaseRate(validateRate(rt));
 		setRatePlanned(null);
-	}
-
-	/** Set the release rate (vehicles per hour) */
-	@Override
-	public void setRateNext(Integer r) {
-		sendReleaseRate(validateRate(r));
 	}
 
 	/** Validate a release rate to send to the meter */
 	private Integer validateRate(Integer r) {
 		return (r != null && isCommOk())
-		      ? filterRate(Math.max(r, getMinimum()))
+		      ? RampMeterHelper.filterRate(Math.max(r, getMinimum()))
 		      : null;
 	}
 
@@ -659,12 +675,14 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Get current minimum release rate (vehicles per hour) */
 	private int getMinimum() {
-		return (isOffline()) ? getMaxRelease() : getMinRelease();
+		return isOffline()
+		     ? RampMeterHelper.getMaxRelease()
+		     : RampMeterHelper.getMinRelease();
 	}
 
 	/** Send a new release rate to the meter */
 	private void sendReleaseRate(Integer r) {
-		if (!objectEquals(r, getRate())) {
+		if (!objectEquals(r, getStatusRate())) {
 			MeterPoller mp = getMeterPoller();
 			if (mp != null)
 				mp.sendReleaseRate(this, r);
@@ -673,19 +691,18 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Set the release rate (and notify clients) */
 	public void setRateNotify(Integer r) {
-		if (!objectEquals(r, getRate()))
-			setStatusNotify(RampMeter.RATE, r);
+		setStatusNotify(RampMeter.RATE, r);
 		updateBeacon();
 	}
 
 	/** Get the release rate (vehciels per hour) */
-	public Integer getRate() {
+	private Integer getStatusRate() {
 		return RampMeterHelper.optRate(this);
 	}
 
 	/** Is the ramp meter currently metering? */
 	public boolean isMetering() {
-		return getRate() != null;
+		return getStatusRate() != null;
 	}
 
 	/** Test if a meter has faults */

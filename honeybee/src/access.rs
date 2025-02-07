@@ -1,6 +1,6 @@
 // access.rs
 //
-// Copyright (C) 2021-2024  Minnesota Department of Transportation
+// Copyright (C) 2021-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -104,8 +104,7 @@ fn required_patch_operate(res: Res, att: &str) -> bool {
         | (Res::LcsArray, "lcs_lock")
         | (Res::Modem, "enabled")
         | (Res::RampMeter, "device_request")
-        | (Res::RampMeter, "m_lock")
-        | (Res::RampMeter, "rate_next")
+        | (Res::RampMeter, "lock")
         | (Res::VideoMonitor, "camera")
         | (Res::VideoMonitor, "device_request")
         | (Res::VideoMonitor, "play_list")

@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.awt.event.ActionEvent;
+import us.mn.state.dot.tms.MeterLock;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.client.proxy.ProxyAction;
@@ -27,19 +28,30 @@ import us.mn.state.dot.tms.client.proxy.ProxyAction;
  */
 public class ShrinkQueueAction extends ProxyAction<RampMeter> {
 
+	/** User ID */
+	private final String user;
+
 	/** Create a new action the shrink the queue at the selected meter */
-	public ShrinkQueueAction(RampMeter rm, boolean e) {
+	public ShrinkQueueAction(RampMeter rm, String u) {
 		super("ramp.meter.shrink", rm);
-		setEnabled(e);
+		user = u;
 	}
 
 	/** Actually perform the action */
 	@Override
 	protected void doActionPerformed(ActionEvent e) {
 		if (proxy != null) {
-			Integer rate = RampMeterHelper.optRate(proxy);
-			if (rate != null)
-				proxy.setRateNext(rate + 50);
+			MeterLock lk = new MeterLock(proxy.getLock());
+			Integer rt = lk.optRate();
+			if (rt != null) {
+				int r = RampMeterHelper.filterRate(rt + 50);
+				if (r != rt) {
+					lk.setRate(r);
+					lk.setExpires(true);
+					lk.setUser(user);
+					proxy.setLock(lk.toString());
+				}
+			}
 		}
 	}
 }

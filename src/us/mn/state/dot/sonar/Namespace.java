@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2024  Minnesota Department of Transportation
+ * Copyright (C) 2006-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,10 +40,10 @@ abstract public class Namespace {
 
 	/** NULL REF string */
 	static private String NULL_STR = String.valueOf(Message.NULL_REF.code);
-	
+
 	/** Date formatter for formatting/parsing dates in ISO 8601 format */
 	static private final SimpleDateFormat iso8601 =
-			new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
 	/** Get the name of a SONAR type */
 	static public String typeName(Class t)
