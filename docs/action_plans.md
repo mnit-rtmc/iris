@@ -5,7 +5,8 @@ Select `View ➔ Plans and Schedules` menu item
 *Action plans* provide a way to automate and coördinate control of devices, such
 as [DMS]s and [ramp meter]s.
 
-- **Notes**: administrator notes, possibly including [hashtag]s
+- **Notes**: administrator notes, possibly including [hashtag]s, which can be
+  used for restricting [permission]s
 - **Sync Actions**: if selected, the phase can only be changed if all associated
   devices are online.
 - **Sticky**: if selected, messages sent with [device actions](#device-actions)
@@ -255,6 +256,7 @@ stored in the `action_plan_event` table.
 [Msg-Feed]: protocols.html#msg-feed
 [MULTI]: multi.html
 [Parking area]: parking_areas.html
+[permission]: permissions.html
 [preset]: cameras.html#presets
 [ramp meter]: ramp_meters.html
 [rwis]: rwis.html
