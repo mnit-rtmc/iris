@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -387,6 +387,7 @@ pub fn item_states(res: Option<Res>) -> &'static str {
         Some(Res::Domain) => Domain::ITEM_STATES,
         Some(Res::GateArm | Res::GateArmArray) => GateArm::ITEM_STATES,
         Some(Res::Permission) => Permission::ITEM_STATES,
+        Some(Res::RampMeter) => RampMeter::ITEM_STATES,
         Some(Res::Role) => Role::ITEM_STATES,
         Some(Res::SignConfig) => SignConfig::ITEM_STATES,
         Some(Res::User) => User::ITEM_STATES,
