@@ -17,7 +17,9 @@ use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::start::fly_map_item;
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
+use crate::util::{
+    ContainsLower, Fields, HtmlStr, Input, OptVal, Select, TextArea,
+};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -55,11 +57,27 @@ pub struct RampMeter {
     pub beacon: Option<String>,
     pub preset: Option<String>,
     pub meter_type: Option<u32>,
+    pub algorithm: Option<u32>,
     pub storage: Option<u32>,
     pub max_wait: Option<u32>,
-    pub algorithm: Option<u32>,
     pub am_target: Option<u32>,
     pub pm_target: Option<u32>,
+}
+
+/// Meter Algorithms
+#[derive(Debug, Deserialize)]
+pub struct MeterAlgorithm {
+    pub id: u32,
+    pub description: String,
+}
+
+/// Meter Types
+#[derive(Debug, Deserialize)]
+pub struct MeterType {
+    pub id: u32,
+    pub description: String,
+    #[allow(dead_code)]
+    pub lanes: u32,
 }
 
 /// Ramp meter ancillary data
@@ -67,6 +85,48 @@ pub struct RampMeter {
 pub struct RampMeterAnc {
     cio: ControllerIoAnc<RampMeter>,
     loc: LocAnc<RampMeter>,
+    meter_types: Vec<MeterType>,
+    algorithms: Vec<MeterAlgorithm>,
+}
+
+impl RampMeterAnc {
+    /// Create an HTML `select` element of meter types
+    fn meter_types_html(&self, pri: &RampMeter) -> String {
+        let mut html = String::new();
+        html.push_str("<select id='meter_type'>");
+        for tp in &self.meter_types {
+            html.push_str("<option value='");
+            html.push_str(&tp.id.to_string());
+            html.push('\'');
+            if Some(tp.id) == pri.meter_type {
+                html.push_str(" selected");
+            }
+            html.push('>');
+            html.push_str(&tp.description);
+            html.push_str("</option>");
+        }
+        html.push_str("</select>");
+        html
+    }
+
+    /// Create an HTML `select` element of metering algorithms
+    fn algorithms_html(&self, pri: &RampMeter) -> String {
+        let mut html = String::new();
+        html.push_str("<select id='algorithm'>");
+        for alg in &self.algorithms {
+            html.push_str("<option value='");
+            html.push_str(&alg.id.to_string());
+            html.push('\'');
+            if Some(alg.id) == pri.algorithm {
+                html.push_str(" selected");
+            }
+            html.push('>');
+            html.push_str(&alg.description);
+            html.push_str("</option>");
+        }
+        html.push_str("</select>");
+        html
+    }
 }
 
 impl AncillaryData for RampMeterAnc {
@@ -74,9 +134,18 @@ impl AncillaryData for RampMeterAnc {
 
     /// Construct ancillary ramp meter data
     fn new(pri: &RampMeter, view: View) -> Self {
-        let cio = ControllerIoAnc::new(pri, view);
+        let mut cio = ControllerIoAnc::new(pri, view);
+        if let View::Setup = view {
+            cio.assets.push(Asset::MeterAlgorithms);
+            cio.assets.push(Asset::MeterTypes);
+        }
         let loc = LocAnc::new(pri, view);
-        RampMeterAnc { cio, loc }
+        RampMeterAnc {
+            cio,
+            loc,
+            meter_types: Vec::new(),
+            algorithms: Vec::new(),
+        }
     }
 
     /// Get next asset to fetch
@@ -91,10 +160,17 @@ impl AncillaryData for RampMeterAnc {
         asset: Asset,
         value: JsValue,
     ) -> Result<()> {
-        if let Asset::Controllers = asset {
-            self.cio.set_asset(pri, asset, value)
-        } else {
-            self.loc.set_asset(pri, asset, value)
+        match asset {
+            Asset::Controllers => self.cio.set_asset(pri, asset, value),
+            Asset::MeterAlgorithms => {
+                self.algorithms = serde_wasm_bindgen::from_value(value)?;
+                Ok(())
+            }
+            Asset::MeterTypes => {
+                self.meter_types = serde_wasm_bindgen::from_value(value)?;
+                Ok(())
+            }
+            _ => self.loc.set_asset(pri, asset, value),
         }
     }
 }
@@ -155,6 +231,8 @@ impl RampMeter {
         let notes = HtmlStr::new(&self.notes);
         let controller = anc.cio.controller_html(self);
         let pin = anc.cio.pin_html(self.pin);
+        let meter_types = anc.meter_types_html(self);
+        let algorithms = anc.algorithms_html(self);
         let storage = OptVal(self.storage);
         let max_wait = OptVal(self.max_wait);
         let am_target = OptVal(self.am_target);
@@ -169,6 +247,14 @@ impl RampMeter {
             </div>\
             {controller}\
             {pin}\
+            <div class='row'>\
+              <label for='meter_type'>Meter Type</label>\
+              {meter_types}\
+            </div>\
+            <div class='row'>\
+              <label for='algorithm'>Algorithm</label>\
+              {algorithms}\
+            </div>\
             <div class='row'>\
               <label for='storage'>Storage (ft)</label>\
               <input id='storage' type='number' min='1' max='5000' \
@@ -280,6 +366,8 @@ impl Card for RampMeter {
         fields.changed_text_area("notes", &self.notes);
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
+        fields.changed_select("meter_type", self.meter_type);
+        fields.changed_select("algorithm", self.algorithm);
         fields.changed_input("storage", self.storage);
         fields.changed_input("max_wait", self.max_wait);
         fields.changed_input("am_target", self.am_target);

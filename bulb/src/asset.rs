@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,6 +36,8 @@ pub enum Asset {
     Graphics,
     LaneUseIndications,
     LcsLocks,
+    MeterAlgorithms,
+    MeterTypes,
     MsgLines,
     MsgPatterns,
     ResourceTypes,
@@ -90,6 +92,8 @@ impl Asset {
             Graphics => "/iris/api/graphic".into(),
             LaneUseIndications => "/iris/lut/lane_use_indication".into(),
             LcsLocks => "/iris/lut/lcs_lock".into(),
+            MeterAlgorithms => "/iris/lut/meter_algorithm".into(),
+            MeterTypes => "/iris/lut/meter_type".into(),
             MsgLines => "/iris/api/msg_line".into(),
             MsgPatterns => "/iris/api/msg_pattern".into(),
             ResourceTypes => "/iris/lut/resource_type".into(),
