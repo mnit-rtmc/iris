@@ -40,14 +40,14 @@ pub struct LcsArray {
 #[derive(Debug, Default)]
 pub struct LcsArrayAnc {
     assets: Vec<Asset>,
-    pub locks: Option<Vec<LcsLock>>,
+    pub locks: Vec<LcsLock>,
 }
 
 impl LcsArrayAnc {
     /// Get lock description
     fn lock(&self, pri: &LcsArray) -> &str {
-        if let (Some(lcs_lock), Some(locks)) = (pri.lcs_lock, &self.locks) {
-            for lock in locks {
+        if let Some(lcs_lock) = pri.lcs_lock {
+            for lock in &self.locks {
                 if lcs_lock == lock.id {
                     return &lock.description;
                 }
@@ -64,7 +64,7 @@ impl AncillaryData for LcsArrayAnc {
     fn new(_pri: &LcsArray, _view: View) -> Self {
         LcsArrayAnc {
             assets: vec![Asset::LcsLocks],
-            locks: None,
+            locks: Vec::new(),
         }
     }
 
@@ -80,7 +80,7 @@ impl AncillaryData for LcsArrayAnc {
         _asset: Asset,
         value: JsValue,
     ) -> Result<()> {
-        self.locks = Some(serde_wasm_bindgen::from_value(value)?);
+        self.locks = serde_wasm_bindgen::from_value(value)?;
         Ok(())
     }
 }
