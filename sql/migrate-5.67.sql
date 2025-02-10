@@ -148,4 +148,14 @@ GRANT SELECT ON meter_lock_event_view TO PUBLIC;
 -- Add Maintenance controller condition
 INSERT INTO iris.condition (id, description) VALUES (5, 'Maintenance');
 
+-- Add check contraints for ramp meter
+ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_storage_check
+    CHECK (storage >= 0);
+ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_max_wait_check
+    CHECK (max_wait > 0);
+ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_am_target_check
+    CHECK (am_target >= 0);
+ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_pm_target_check
+    CHECK (pm_target >= 0);
+
 COMMIT;
