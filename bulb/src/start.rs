@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -679,14 +679,14 @@ fn add_eventsource_listener() {
             return;
         }
     };
-    set_notify_state(NotifyState::Offline);
+    set_notify_state(NotifyState::Disconnected);
     let onopen: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
-        set_notify_state(NotifyState::Updating);
+        set_notify_state(NotifyState::Connecting);
     });
     es.set_onopen(Some(onopen.as_ref().unchecked_ref()));
     onopen.forget();
     let onerror: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
-        set_notify_state(NotifyState::Offline);
+        set_notify_state(NotifyState::Disconnected);
     });
     es.set_onerror(Some(onerror.as_ref().unchecked_ref()));
     onerror.forget();
@@ -704,7 +704,7 @@ fn add_eventsource_listener() {
 /// Set refresh button text
 fn set_notify_state(ns: NotifyState) {
     let sb_refresh = Doc::get().elem::<HtmlButtonElement>("sb_refresh");
-    sb_refresh.set_inner_html(ns.as_str());
+    sb_refresh.set_inner_html(ns.as_html());
     sb_refresh.set_disabled(ns.disabled());
 }
 
@@ -719,7 +719,7 @@ async fn handle_notify(payload: String) {
         console::log_1(&format!("unknown channel: {chan}").into());
         return;
     }
-    set_notify_state(NotifyState::GoodUpdating);
+    set_notify_state(NotifyState::Updating);
     app::defer_action(DeferredAction::SetNotifyState(NotifyState::Good), 600);
     do_future(update_card_list()).await;
 }

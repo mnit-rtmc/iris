@@ -178,6 +178,7 @@ label:has(+ #sb_resource) {
 /* Delete button sliding "confirmation" animation */
 #ob_delete {
   position: relative; /* add position context for ::before pseudo-element */
+  z-index: 1;
   overflow: hidden;
 }
 #ob_delete:active {
@@ -245,19 +246,24 @@ label:has(+ #sb_resource) {
 .tooltip {
   position: relative;
   display: inline-block;
-  border-bottom: 0.1rem dotted gray;
 }
 
 .tooltip * {
+  position: absolute;
+  z-index: 4;
   visibility: hidden;
   inline-size: min-content;
-  z-index: 2;
-  position: absolute;
   top: 50%;
   left: 0;
   padding: 0.5rem;
   border-radius: 0.2rem;
   color: #fff;
+  background-color: #000;
+}
+
+.right {
+  left: unset;
+  right: 0;
 }
 
 .tooltip:hover * {
@@ -358,7 +364,6 @@ label:has(+ #sb_resource) {
   display: flex;
   justify-content: space-between;
   padding: 0.05rem 0;
-  z-index: 1; /* required for ob_delete::before slider pseudo-element */
 }
 .column {
   display: flex;
