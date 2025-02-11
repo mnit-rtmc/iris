@@ -32,27 +32,27 @@ impl NotifyState {
         // NOTE: these have &nbsp; to keep from splitting lines
         match self {
             Self::Starting => {
-                "<div class='tooltip'>⭮ ⚪\
+                "<div class='tooltip'>⭮ ⬜\
                   <span class='right'>Starting</span>\
                 </div>"
             }
             Self::Disconnected => {
-                "<div class='tooltip'>⭮ ⚫\
+                "<div class='tooltip'>⭮ ⬛\
                   <span class='right'>Disconnected</span>\
                 </div>"
             }
             Self::Connecting => {
-                "<div class='tooltip'>⭮ 🟠\
+                "<div class='tooltip'>⭮ 🟧\
                   <span class='right'>Connecting</span>\
                 </div>"
             }
             Self::Updating => {
-                "<div class='tooltip'>⭮ 🟡\
+                "<div class='tooltip'>⭮ 🟨\
                   <span class='right'>Updating</span>\
                 </div>"
             }
             Self::Good => {
-                "<div class='tooltip'>⭮ 🟢\
+                "<div class='tooltip'>⭮ 🟩\
                   <span class='right'>Good</span>\
                 </div>"
             }
