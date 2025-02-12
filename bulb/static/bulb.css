@@ -437,6 +437,18 @@ label:has(+ #sb_resource) {
   margin: 0;
 }
 
+/* ---------------
+ * Signal Housings
+ * --------------- */
+.signal-housing {
+  align-self: start;
+  background-color: black;
+  text-indent: 0;
+  padding: 0.2rem 0.2rem 0 0.2rem;
+  border-radius: 0.2rem;
+  border: 1px solid black;
+}
+
 /* -------
  * Beacons
  * ------- */
@@ -453,20 +465,6 @@ label:has(+ #sb_resource) {
 .beacon {
   cursor: pointer;
   pointer-events: auto;
-  align-self: start;
-  background-color: black;
-  text-indent: 0;
-  padding: 0.15rem 0.1rem 0 0.1rem;
-  border-radius: 0.4rem;
-  border: 1px solid black;
-}
-.beacon-disabled {
-  align-self: start;
-  background-color: black;
-  text-indent: 0;
-  padding: 0.15rem 0.1rem 0 0.1rem;
-  border-radius: 0.4rem;
-  border: 1px solid black;
 }
 .not-flashing {
   opacity: 0;
