@@ -20,10 +20,29 @@ use crate::start::fly_map_item;
 use crate::util::{
     ContainsLower, Fields, HtmlStr, Input, OptVal, Select, TextArea,
 };
+use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
+use gift::block::DisposalMethod;
+use gift::{Encoder, Step};
+use pix::matte::Matte8;
+use pix::ops::SrcOver;
+use pix::rgb::{Rgba8p, SRgb8};
+use pix::{Palette, Raster};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
+use std::io::Write;
 use wasm_bindgen::JsValue;
+use web_sys::console;
+
+/// Meter signal state for rendering GIF
+#[derive(Clone, Copy, Debug)]
+enum MeterState {
+    Off,
+    LowYellow,
+    Green,
+    Yellow,
+    Red,
+}
 
 /// Meter Lock
 #[derive(Debug, Default, Deserialize, PartialEq)]
@@ -175,6 +194,125 @@ impl AncillaryData for RampMeterAnc {
     }
 }
 
+impl MeterState {
+    /// Get red indication color
+    fn red(self) -> Rgba8p {
+        match self {
+            MeterState::Red => Rgba8p::new(255, 0, 0, 255),
+            _ => Rgba8p::new(16, 0, 0, 255),
+        }
+    }
+
+    /// Get yellow indication color
+    fn yellow(self) -> Rgba8p {
+        match self {
+            MeterState::Yellow => Rgba8p::new(255, 160, 0, 255),
+            MeterState::LowYellow => Rgba8p::new(128, 80, 0, 255),
+            _ => Rgba8p::new(16, 10, 0, 255),
+        }
+    }
+
+    /// Get green indication color
+    fn green(self) -> Rgba8p {
+        match self {
+            MeterState::Green => Rgba8p::new(0, 224, 0, 255),
+            _ => Rgba8p::new(0, 14, 0, 255),
+        }
+    }
+}
+
+/// Make a raster palette
+fn make_palette(raster: &Raster<SRgb8>) -> Palette {
+    let mut palette = Palette::new(256);
+    palette.set_entry(SRgb8::default());
+    for pixel in raster.pixels() {
+        palette.set_entry(*pixel);
+    }
+    palette
+}
+
+/// Make a raster of a meter signal
+fn make_meter_signal(state: MeterState) -> Raster<SRgb8> {
+    let mut raster = Raster::<Rgba8p>::with_clear(48, 128);
+    let circle = Raster::<Matte8>::with_u8_buffer(
+        32,
+        32,
+        *include_bytes!("../static/circle.bin"),
+    );
+    raster.composite_matte((8, 8, 32, 32), &circle, (), state.red(), SrcOver);
+    raster.composite_matte(
+        (8, 48, 32, 32),
+        &circle,
+        (),
+        state.yellow(),
+        SrcOver,
+    );
+    raster.composite_matte(
+        (8, 88, 32, 32),
+        &circle,
+        (),
+        state.green(),
+        SrcOver,
+    );
+    Raster::<SRgb8>::with_raster(&raster)
+}
+
+/// Make a GIF step for a meter state
+fn make_step(state: MeterState, hold: u16) -> Step {
+    let raster = make_meter_signal(state);
+    let mut palette = make_palette(&raster);
+    let indexed = palette.make_indexed(raster);
+    Step::with_indexed(indexed, palette)
+        .with_delay_time_cs(Some(hold))
+        .with_disposal_method(DisposalMethod::Keep)
+}
+
+/// Encode a GIF of the meter `off` (flashing yellow)
+fn encode_meter_off<W: Write>(enc: Encoder<W>) -> Result<()> {
+    let mut enc = enc.into_step_enc().with_loop_count(0);
+    enc.encode_step(&make_step(MeterState::Off, 50))?;
+    enc.encode_step(&make_step(MeterState::LowYellow, 50))?;
+    Ok(())
+}
+
+/// Encode a GIF of meter 1 (left) cycling
+fn encode_meter_1<W: Write>(enc: Encoder<W>, red_cs: u16) -> Result<()> {
+    let mut enc = enc.into_step_enc().with_loop_count(0);
+    enc.encode_step(&make_step(MeterState::Green, 130))?;
+    enc.encode_step(&make_step(MeterState::Yellow, 70))?;
+    enc.encode_step(&make_step(MeterState::Red, red_cs))?;
+    enc.encode_step(&make_step(MeterState::Red, 200 + red_cs))?;
+    Ok(())
+}
+
+/// Encode a GIF of meter 2 (right) cycling
+fn encode_meter_2<W: Write>(enc: Encoder<W>, red_cs: u16) -> Result<()> {
+    let mut enc = enc.into_step_enc().with_loop_count(0);
+    enc.encode_step(&make_step(MeterState::Red, 200 + red_cs))?;
+    enc.encode_step(&make_step(MeterState::Green, 130))?;
+    enc.encode_step(&make_step(MeterState::Yellow, 70))?;
+    enc.encode_step(&make_step(MeterState::Red, red_cs))?;
+    Ok(())
+}
+
+/// Make meter signal as html
+fn meter_html(buf: Vec<u8>) -> String {
+    let width = 24;
+    let height = 64;
+    let mut html = String::new();
+    html.push_str("<img");
+    html.push_str(" width='");
+    html.push_str(&width.to_string());
+    html.push_str("' height='");
+    html.push_str(&height.to_string());
+    html.push_str("' ");
+    html.push_str("src='data:image/gif;base64,");
+    b64enc.encode_string(buf, &mut html);
+    html.push('\'');
+    html.push_str("/>");
+    html
+}
+
 impl RampMeter {
     /// Get fault, if any
     fn fault(&self) -> Option<&str> {
@@ -214,6 +352,46 @@ impl RampMeter {
         let title = self.title(View::Control);
         let item_states = self.item_states(anc).to_html();
         let location = HtmlStr::new(&self.location).with_len(64);
+        let mut rate = "".to_string();
+        let mut meter1 = "".to_string();
+        let mut meter2 = "".to_string();
+        if let Some(s) = &self.status {
+            if let Some(r) = s.rate {
+                let c = 3_600.0 / (r as f32);
+                rate = format!("{r} veh/hr ({c:.1} s)");
+                let ds = (c * 10.0).round() as i32;
+                // between 0.1 and 50.0 seconds
+                if ds > 0 && ds < 50_0 {
+                    let red_cs = ds as u16 * 10;
+                    let mut buf = Vec::with_capacity(4096);
+                    match encode_meter_1(Encoder::new(&mut buf), red_cs) {
+                        Ok(()) => meter1 = meter_html(buf),
+                        Err(e) => console::log_1(
+                            &format!("encode_meter_1: {e:?}").into(),
+                        ),
+                    }
+                    let mut buf = Vec::with_capacity(4096);
+                    match encode_meter_2(Encoder::new(&mut buf), red_cs) {
+                        Ok(()) => meter2 = meter_html(buf),
+                        Err(e) => console::log_1(
+                            &format!("encode_meter_2: {e:?}").into(),
+                        ),
+                    }
+                }
+            }
+        }
+        if meter1.is_empty() || meter2.is_empty() {
+            let mut buf = Vec::with_capacity(4096);
+            match encode_meter_off(Encoder::new(&mut buf)) {
+                Ok(()) => {
+                    meter1 = meter_html(buf);
+                    meter2 = meter1.clone();
+                }
+                Err(e) => console::log_1(
+                    &format!("encode_meter_off: {e:?}").into(),
+                ),
+            }
+        }
         format!(
             "{title}\
             <div class='row fill'>\
@@ -221,6 +399,17 @@ impl RampMeter {
             </div>\
             <div class='row'>\
               <span class='info'>{location}</span>\
+            </div>\
+            <div class='row center'>\
+              {meter1}\
+              <div class='column'>\
+                <span>{rate}</span>\
+                <span>\
+                  <button id='q_grow' type='button'>⏫ Grow</button>\
+                  <button id='q_shrink' type='button'>⏬ Shrink</button>\
+                </span>\
+              </div>\
+              {meter2}\
             </div>"
         )
     }
@@ -303,7 +492,7 @@ impl Card for RampMeter {
     /// All item states as html options
     const ITEM_STATES: &'static str = "<option value=''>all ↴\
          <option value='🔹'>🔹 available\
-         <option value='🔶' selected>🔶 deployed\
+         <option value='🔶'>🔶 deployed\
          <option value='⚠️'>⚠️ fault\
          <option value='🔌'>🔌 offline\
          <option value='▪️'>▪️ inactive";
