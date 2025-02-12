@@ -361,7 +361,7 @@ impl RampMeter {
                 rate = format!("{r} veh/hr ({c:.1} s)");
                 let ds = (c * 10.0).round() as i32;
                 // between 0.1 and 50.0 seconds
-                if ds > 0 && ds < 50_0 {
+                if ds > 0 && ds < 500 {
                     let red_cs = ds as u16 * 10;
                     let mut buf = Vec::with_capacity(4096);
                     match encode_meter_1(Encoder::new(&mut buf), red_cs) {
@@ -387,9 +387,9 @@ impl RampMeter {
                     meter1 = meter_html(buf);
                     meter2 = meter1.clone();
                 }
-                Err(e) => console::log_1(
-                    &format!("encode_meter_off: {e:?}").into(),
-                ),
+                Err(e) => {
+                    console::log_1(&format!("encode_meter_off: {e:?}").into())
+                }
             }
         }
         format!(
