@@ -1027,12 +1027,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Test binned occupancy with error detecting algorithms */
 	private void testScans(OccupancySample occ) {
 		boolean lock = occ.value >= OccupancySample.MAX;
-		// Locked-on counter should be cleared only with good
-		// non-zero data.  This helps when the duration of
-		// occupancy spikes is shorter than the threshold time
-		// and interspersed with zeroes.
-		boolean hold = locked_on.failed && (occ.value == 0);
-		locked_on.updateState(occ.per_sec, lock || hold);
+		locked_on.updateState(occ.per_sec, lock);
 		if (locked_on.checkLogging(occ.per_sec))
 			logEvent(EventType.DET_LOCKED_ON);
 		boolean v = (occ.value > 0) && (occ.value == prev_value);
