@@ -3119,6 +3119,7 @@ CREATE TABLE iris._dms (
     geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc,
     notes VARCHAR CHECK (LENGTH(notes) < 256),
     static_graphic VARCHAR(20) REFERENCES iris.graphic,
+    -- FIXME: only allow one reference to a beacon
     beacon VARCHAR(20) REFERENCES iris._beacon,
     sign_config VARCHAR(16) REFERENCES iris.sign_config,
     sign_detail VARCHAR(12) REFERENCES iris.sign_detail,
@@ -4415,6 +4416,7 @@ CREATE TABLE iris._ramp_meter (
     algorithm INTEGER NOT NULL REFERENCES iris.meter_algorithm,
     am_target INTEGER NOT NULL CHECK (am_target >= 0),
     pm_target INTEGER NOT NULL CHECK (pm_target >= 0),
+    -- FIXME: only allow one reference to a beacon
     beacon VARCHAR(20) REFERENCES iris._beacon,
     lock JSONB,
     status JSONB
