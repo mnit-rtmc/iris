@@ -165,15 +165,14 @@ pass with all counts below that threshold.
 ### Locked On
 
 This condition occurs if the detector reports 100% occupancy for a duration
-determined by [lane type](#lane-type).  It is also sustained if the occupancy
-drops to zero with no intervening values.  The condition will be cleared after
+determined by [lane type](#lane-type).  The condition will be cleared after
 24 hours of good occupancy data.
 
-Lane Type                                                              | Duration
------------------------------------------------------------------------|--------
-Mainline, Auxiliary, CD Lane, Reversible, Velocity, HOV, HOT, Shoulder | 2 minutes
-Merge, Queue, Exit, Bypass, Passage, Omnibus, Green, Wrong Way         | 30 minutes
-Parking                                                                | 2 weeks
+Lane Type                                                      | Duration
+---------------------------------------------------------------|---------
+Parking                                                        | 2 weeks
+Merge, Queue, Exit, Bypass, Passage, Omnibus, Green, Wrong Way | 30 minutes
+All Others                                                     | 2 minutes
 
 ### No Change
 
