@@ -1243,55 +1243,55 @@ CREATE TABLE iris.comm_protocol (
     description VARCHAR(20) NOT NULL
 );
 
-COPY iris.comm_protocol (id, description) FROM stdin;
-0	NTCIP Class B
-1	MnDOT 170 (4-bit)
-2	MnDOT 170 (5-bit)
-3	SmartSensor 105
-4	Canoga
-5	Pelco P
-6	Pelco D PTZ
-7	NTCIP Class C
-8	Manchester PTZ
-9	DMS XML
-10	MSG_FEED
-11	NTCIP Class A
-12	Banner DXM
-13	Vicon PTZ
-14	SmartSensor 125 HD
-15	OSi ORG-815
-16	Infinova D PTZ
-17	RTMS G4
-18	RTMS G4 vlog
-19	SmartSensor 125 vlog
-20	Natch
-21	Central Park
-22	SSI
-23	CHP Incidents
-24	NDOT Beacon
-25	DLI DIN Relay
-26	Axis 292
-27	Axis PTZ
-28	HySecurity STC
-29	Cohu PTZ
-30	DR-500
-31	ADDCO
-32	TransCore E6
-33	CBW
-34	Incident Feed
-35	MonStream
-36	Gate NDORv5
-37	GPS TAIP
-38	SierraGX
-39	GPS RedLion
-40	Cohu Helios PTZ
-41	Streambed
-42	CAP Feed
-43	ClearGuide
-44	GPS Digi WR
-45	ONVIF PTZ
-46	Sierra SSH GPS
-\.
+INSERT INTO iris.comm_protocol (id, description)
+VALUES
+    (0, 'NTCIP Class B'),
+    (1, 'MnDOT 170 (4-bit)'),
+    (2, 'MnDOT 170 (5-bit)'),
+    (3, 'SmartSensor 105'),
+    (4, 'Canoga'),
+    (5, 'Pelco P'),
+    (6, 'Pelco D PTZ'),
+    (7, 'NTCIP Class C'),
+    (8, 'Manchester PTZ'),
+    (9, 'DMS XML'),
+    (10, 'MSG_FEED'),
+    (11, 'NTCIP Class A'),
+    (12, 'Banner DXM'),
+    (13, 'Vicon PTZ'),
+    (14, 'SmartSensor 125 HD'),
+    (15, 'OSi ORG-815'),
+    (16, 'Infinova D PTZ'),
+    (17, 'RTMS G4'),
+    (18, 'RTMS G4 vlog'),
+    (19, 'SmartSensor 125 vlog'),
+    (20, 'Natch'),
+    (21, 'Central Park'),
+    (22, 'SSI'),
+    (23, 'CHP Incidents'),
+    (24, 'NDOT Beacon'),
+    (25, 'DLI DIN Relay'),
+    (26, 'Axis 292'),
+    (27, 'Axis PTZ'),
+    (28, 'HySecurity STC'),
+    (29, 'Cohu PTZ'),
+    (30, 'DR-500'),
+    (31, 'ADDCO'),
+    (32, 'TransCore E6'),
+    (33, 'CBW'),
+    (34, 'Incident Feed'),
+    (35, 'MonStream'),
+    (36, 'Gate NDORv5'),
+    (37, 'GPS TAIP'),
+    (38, 'SierraGX'),
+    (39, 'GPS RedLion'),
+    (40, 'Cohu Helios PTZ'),
+    (41, 'Streambed'),
+    (42, 'CAP Feed'),
+    (43, 'ClearGuide'),
+    (44, 'GPS Digi WR'),
+    (45, 'ONVIF PTZ'),
+    (46, 'Sierra SSH GPS');
 
 CREATE TABLE iris.comm_config (
     name VARCHAR(10) PRIMARY KEY,
