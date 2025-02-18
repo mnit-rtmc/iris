@@ -95,9 +95,8 @@ public enum CommProtocol {
 	/** Central Park JSON (21) */
 	CPARK("Central Park", false),
 
-	/** SSI -- removed (22) */
-	@Deprecated
-	SSI("SSI", false),
+	/** ADEC TDC (22) */
+	ADEC_TDC("ADEC TDC"),
 
 	/** CHP Incidents (23) */
 	@Deprecated

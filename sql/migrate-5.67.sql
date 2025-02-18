@@ -158,4 +158,9 @@ ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_am_target_check
 ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_pm_target_check
     CHECK (pm_target >= 0);
 
+-- Change comm protocol 22 to ADEC TDC
+UPDATE iris.comm_protocol
+    SET description = 'ADEC TDC'
+    WHERE id = 22;
+
 COMMIT;

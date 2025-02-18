@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2022  Minnesota Department of Transportation
+ * Copyright (C) 2010-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -160,6 +160,17 @@ abstract public class ControllerProperty {
 		return (hi << 8) | lo;
 	}
 
+	/** Parse a 24-bit value.
+	 * @param buf Buffer to parse.
+	 * @param pos Starting position in buffer.
+	 * @return Parsed value. */
+	static protected int parse24(byte[] body, int pos) {
+		int b2 = body[pos + 0] & 0xFF;
+		int b1 = body[pos + 1] & 0xFF;
+		int b0 = body[pos + 2] & 0xFF;
+		return (b2 << 16) | (b1 << 8) | b0;
+	}
+
 	/** Parse a 32-bit value.
 	 * @param buf Buffer to parse.
 	 * @param pos Starting position in buffer.
@@ -169,6 +180,18 @@ abstract public class ControllerProperty {
 		int b2 = buf[pos + 1] & 0xFF;
 		int b1 = buf[pos + 2] & 0xFF;
 		int b0 = buf[pos + 3] & 0xFF;
+		return (b3 << 24) | (b2 << 16) | (b1 << 8) | b0;
+	}
+
+	/** Parse an unsigned 32-bit value.
+	 * @param buf Buffer to parse.
+	 * @param pos Starting position in buffer.
+	 * @return Parsed value. */
+	static protected long parseU32(byte[] buf, int pos) {
+		long b3 = buf[pos + 0] & 0xFF;
+		long b2 = buf[pos + 1] & 0xFF;
+		long b1 = buf[pos + 2] & 0xFF;
+		long b0 = buf[pos + 3] & 0xFF;
 		return (b3 << 24) | (b2 << 16) | (b1 << 8) | b0;
 	}
 

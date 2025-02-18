@@ -1267,7 +1267,7 @@ VALUES
     (19, 'SmartSensor 125 vlog'),
     (20, 'Natch'),
     (21, 'Central Park'),
-    (22, 'SSI'),
+    (22, 'ADEC TDC'),
     (23, 'CHP Incidents'),
     (24, 'NDOT Beacon'),
     (25, 'DLI DIN Relay'),

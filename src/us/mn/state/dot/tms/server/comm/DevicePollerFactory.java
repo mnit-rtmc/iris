@@ -19,6 +19,7 @@ package us.mn.state.dot.tms.server.comm;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommLinkHelper;
 import us.mn.state.dot.tms.CommProtocol;
+import us.mn.state.dot.tms.server.comm.adectdc.TdcPoller;
 import us.mn.state.dot.tms.server.comm.axisptz.AxisPTZPoller;
 import us.mn.state.dot.tms.server.comm.canoga.CanogaPoller;
 import us.mn.state.dot.tms.server.comm.cap.CapPoller;
@@ -67,6 +68,8 @@ public class DevicePollerFactory {
 	static public DevicePoller create(CommLink link) {
 		CommProtocol protocol = CommLinkHelper.getProtocol(link);
 		switch (protocol) {
+		case ADEC_TDC:
+			return new TdcPoller(link);
 		case AXIS_PTZ:
 			return new AxisPTZPoller(link);
 		case BANNER_DXM:
