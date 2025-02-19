@@ -115,6 +115,7 @@ and [binning](#binned-data) in fixed time periods.
 
 Protocol               | Binning         | Traffic Data
 -----------------------|-----------------|------------------------
+[ADEC TDC]             | N/A             | [vlog]
 [SmartSensor] 125 HD   | 5 sec to 1 hour | Count, Occupancy, Speed
 [SmartSensor] 125 vlog | N/A             | [vlog]
 [SmartSensor] 105      | 5 sec to 1 hour | Count, Occupancy, Speed
@@ -124,7 +125,7 @@ RTMS [G4] vlog         | N/A             | [vlog]
 [MnDOT-170]            | 30 sec          | Count, Occupancy
 [Canoga]               | N/A             | [vlog]
 [DR-500]               | 30-300? sec     | Speed
-[DXM]                  | N/A (presence)  | Magnetic Field
+[DXM]                  | N/A             | Occupancy
 [NTCIP]                | 0-255 sec       | Count, Occupancy
 
 For protocols which allow the binning intereval to be adjusted, it will be set
@@ -338,6 +339,7 @@ indicates missing data.  Any data outside the valid ranges should be considered
 _missing_.
 
 
+[ADEC TDC]: protocols.html#adec-tdc
 [Canoga]: protocols.html#canoga
 [comm config]: comm_config.html
 [comm link]: comm_links.html

@@ -9,6 +9,7 @@ _comm link_.
 
 Protocol        | Beacon | Camera | DMS | Detection | Gates | GPS | Weather
 ----------------|--------|--------|-----|-----------|-------|-----|--------
+ADEC TDC        |        |        |     | ✔️        |       |     |
 Axis PTZ        |        | ✔️     |     |           |       |     |
 Banner DXM      |        |        |     | ✔️        |       |     |
 Canoga          |        |        |     | ✔️        |       |     |
@@ -34,6 +35,13 @@ RTMS G4         |        |        |     | ✔️        |       |     |
 SierraGX        |        |        |     |           |       | ✔️  |
 SmartSensor     |        |        |     | ✔️        |       |     |
 Vicon PTZ       |        | ✔️     |     |           |       |     |
+
+## ADEC TDC
+
+The `ADEC TDC` protocol can collect [vehicle detection] data, logging event
+data for every vehicle.  The _default scheme_ is `tcp`.  _Multi-drop_ is
+supported with drops 1 - 255.  One detector can be associated with each
+[controller], using [IO pin] 1.
 
 ## Axis PTZ
 
