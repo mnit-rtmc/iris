@@ -1,5 +1,14 @@
 # IRIS 5.x Release Notes
 
+5.67.0 (19 Feb 2025)
+ - Add protocol driver for ADEC TDC non-intrusive detector
+ - Improved ramp meter locks (15-minute duration + user ID)
+ - Added ramp meter `status` JSON (rate, queue, fault)
+ - Add `Maintenance` controller condition
+ - Simplified `LOCK_ON` auto-fail logic
+ - cohuptz: Don't fault on unexpected device requests
+ - bulb: Fleshed out ramp meter cards + map markers
+
 5.66.0 (27 Jan 2025)
  - Add `cpark` driver for Drivewyze Central Park API
  - Show offline device status as `OFFLINE`
