@@ -1,6 +1,6 @@
 // xff.rs
 //
-// Copyright (C) 2024  Minnesota Department of Transportation
+// Copyright (C) 2024-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,7 +13,6 @@
 // GNU General Public License for more details.
 //
 use axum::{
-    async_trait,
     extract::FromRequestParts,
     http::{request::Parts, HeaderMap, StatusCode},
 };
@@ -23,7 +22,6 @@ use std::net::IpAddr;
 #[derive(Debug)]
 pub struct XForwardedFor(pub Vec<IpAddr>);
 
-#[async_trait]
 impl<S> FromRequestParts<S> for XForwardedFor
 where
     S: Sync,

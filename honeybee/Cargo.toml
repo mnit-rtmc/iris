@@ -35,12 +35,12 @@ tokio = { workspace = true }
 tokio-postgres = { workspace = true }
 tokio-rustls = "0.25"
 tokio-util = "0.7"
-tower-sessions = "0.10"
-tower-sessions-moka-store = "0.10"
+tower-sessions = "0.14"
+tower-sessions-moka-store = "0.15"
 whoami = "1"
 
 [dependencies.axum-extra]
-version = "0.9"
+version = "0.10"
 features = ["typed-header"]
 
 [dependencies.tokio-stream]

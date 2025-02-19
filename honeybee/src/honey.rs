@@ -1,6 +1,6 @@
 // honey.rs
 //
-// Copyright (C) 2021-2024  Minnesota Department of Transportation
+// Copyright (C) 2021-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -374,7 +374,7 @@ fn public_dir_get() -> Router {
         log::info!("GET {fname}");
         file_stream_etag(&fname, "application/json", if_none_match).await
     }
-    Router::new().route("/:fname", get(handler))
+    Router::new().route("/{fname}", get(handler))
 }
 
 /// `GET` JSON file from LUT directory
@@ -384,7 +384,7 @@ fn lut_dir_get() -> Router {
         log::info!("GET {fname}");
         file_stream(&fname, "application/json").await
     }
-    Router::new().route("/lut/:fname", get(handler))
+    Router::new().route("/lut/{fname}", get(handler))
 }
 
 /// `GET` file from sign img directory
@@ -394,7 +394,7 @@ fn img_dir_get() -> Router {
         log::info!("GET {fname}");
         file_stream(&fname, "image/gif").await
     }
-    Router::new().route("/img/:fname", get(handler))
+    Router::new().route("/img/{fname}", get(handler))
 }
 
 /// `GET` file from tfon directory
@@ -404,7 +404,7 @@ fn tfon_dir_get() -> Router {
         log::info!("GET {fname}");
         file_stream(&fname, "text/plain").await
     }
-    Router::new().route("/tfon/:fname", get(handler))
+    Router::new().route("/tfon/{fname}", get(handler))
 }
 
 /// `GET` file from gif directory
@@ -414,7 +414,7 @@ fn gif_dir_get() -> Router {
         log::info!("GET {fname}");
         file_stream(&fname, "image/gif").await
     }
-    Router::new().route("/gif/:fname", get(handler))
+    Router::new().route("/gif/{fname}", get(handler))
 }
 
 /// Router for login resource
@@ -659,7 +659,7 @@ fn other_resource(honey: Honey) -> Router {
     }
 
     Router::new()
-        .route("/:type_n", get(handle_get).post(handle_post))
+        .route("/{type_n}", get(handle_get).post(handle_post))
         .with_state(honey)
 }
 
@@ -728,24 +728,20 @@ fn permission_object(honey: Honey) -> Router {
 #[derive(Debug, Deserialize)]
 struct QueryParams {
     /// Associatied resource (for GeoLoc)
-    res: String,
+    res: Option<String>,
 }
 
 /// Get name to use for access checks
-fn check_name(
-    type_n: &str,
-    obj_n: &str,
-    params: &Option<Query<QueryParams>>,
-) -> Result<Name> {
+fn check_name(type_n: &str, obj_n: &str, params: &QueryParams) -> Result<Name> {
     let nm = Name::new(type_n)?;
-    match (nm.res_type, params) {
+    match (nm.res_type, &params.res) {
         // FIXME: check for DevicePreset
-        (Res::GeoLoc, Some(p)) => {
+        (Res::GeoLoc, Some(res)) => {
             // Use "res" query parameter for GeoLoc access check
-            Ok(Name::new(&p.res)?.obj(obj_n)?)
+            Ok(Name::new(res)?.obj(obj_n)?)
         }
         (Res::GeoLoc, None) => Err(Error::InvalidValue),
-        (_, Some(_p)) => Err(Error::InvalidValue),
+        (_, Some(_r)) => Err(Error::InvalidValue),
         _ => Ok(nm.obj(obj_n)?),
     }
 }
@@ -757,11 +753,11 @@ fn other_object(honey: Honey) -> Router {
         session: Session,
         State(honey): State<Honey>,
         AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
-        params: Option<Query<QueryParams>>,
+        params: Query<QueryParams>,
     ) -> impl IntoResponse {
         log::info!("GET {type_n}/{obj_n} {params:?}");
         let nm = Name::new(&type_n)?.obj(&obj_n)?;
-        let ck_nm = check_name(&type_n, &obj_n, &params)?;
+        let ck_nm = check_name(&type_n, &obj_n, &params.0)?;
         // get precent-decoded object name
         let obj_n = nm.object_n().ok_or(Error::InvalidValue)?;
         let sql = one_sql(nm.res_type);
@@ -785,12 +781,12 @@ fn other_object(honey: Honey) -> Router {
         session: Session,
         State(honey): State<Honey>,
         AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
-        params: Option<Query<QueryParams>>,
+        params: Query<QueryParams>,
         Json(attrs): Json<Map<String, Value>>,
     ) -> Resp0 {
         log::info!("PATCH {type_n}/{obj_n} {params:?}");
         let nm = Name::new(&type_n)?.obj(&obj_n)?;
-        let ck_nm = check_name(&type_n, &obj_n, &params)?;
+        let ck_nm = check_name(&type_n, &obj_n, &params.0)?;
         let cred = Credentials::load(&session).await?;
         // *At least* Operate access needed (further checks below)
         let access = honey
@@ -844,7 +840,7 @@ fn other_object(honey: Honey) -> Router {
 
     Router::new()
         .route(
-            "/:type_n/:obj_n",
+            "/{type_n}/{obj_n}",
             get(handle_get).patch(handle_patch).delete(handle_delete),
         )
         .with_state(honey)
