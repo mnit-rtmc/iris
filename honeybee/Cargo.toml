@@ -7,7 +7,6 @@ edition.workspace = true
 
 [dependencies]
 argh = "0.1"
-async-trait = "0.1"
 axum = { workspace = true }
 bb8 = { workspace = true }
 bb8-postgres = { workspace = true }
@@ -35,9 +34,13 @@ tokio = { workspace = true }
 tokio-postgres = { workspace = true }
 tokio-rustls = "0.25"
 tokio-util = "0.7"
-tower-sessions = "0.14"
 tower-sessions-moka-store = "0.15"
 whoami = "1"
+
+[dependencies.tower-sessions]
+version = "0.14"
+default-features = false
+features = ["axum-core"]
 
 [dependencies.axum-extra]
 version = "0.10"
