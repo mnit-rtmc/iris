@@ -54,4 +54,10 @@ public class TickProperty extends TdcProperty {
 			throw new ParsingException("Wrong len: " + buf.length);
 		ticks = parse24(buf, 2);
 	}
+
+	/** Get ticks as a string */
+	@Override
+	public String toString() {
+		return "ticks: " + ticks;
+	}
 }

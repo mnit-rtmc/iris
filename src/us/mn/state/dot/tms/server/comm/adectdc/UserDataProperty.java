@@ -65,4 +65,10 @@ public class UserDataProperty extends TdcProperty {
 	{
 		parseSingle(is);
 	}
+
+	/** Get user data as a string */
+	@Override
+	public String toString() {
+		return "user data";
+	}
 }

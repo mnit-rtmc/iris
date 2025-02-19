@@ -29,4 +29,20 @@ abstract public class OpTdc extends OpController<TdcProperty> {
 	protected OpTdc(PriorityLevel p, ControllerImpl c) {
 		super(p, c);
 	}
+
+	/** Log a property query */
+	protected void logQuery(TdcProperty prop) {
+		if (TdcPoller.TDC_LOG.isOpen()) {
+			TdcPoller.TDC_LOG.log(controller.getName() + ": " +
+				prop);
+		}
+	}
+
+	/** Log a property store */
+	protected void logStore(TdcProperty prop) {
+		if (TdcPoller.TDC_LOG.isOpen()) {
+			TdcPoller.TDC_LOG.log(controller.getName() + ":= " +
+				prop);
+		}
+	}
 }

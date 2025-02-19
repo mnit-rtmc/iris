@@ -171,7 +171,8 @@ public class TrafficProperty extends StatusProperty {
 	/** Get events as a string */
 	@Override
 	public String toString() {
-		return "vehicles: " + vehicles.size();
+		return "vehicles: " + vehicles.size() + ", " +
+			super.toString();
 	}
 
 	/** Log vehicle detection events */

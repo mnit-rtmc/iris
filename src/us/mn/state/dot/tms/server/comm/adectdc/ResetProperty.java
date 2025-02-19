@@ -41,4 +41,10 @@ public class ResetProperty extends TdcProperty {
 	{
 		parseSingle(is);
 	}
+
+	/** Get property as a string */
+	@Override
+	public String toString() {
+		return "reset";
+	}
 }

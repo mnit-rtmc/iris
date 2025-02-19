@@ -32,7 +32,7 @@ public class TdcPoller extends ThreadedPoller<TdcProperty>
 	implements SamplePoller
 {
 	/** Debug log */
-	static private final DebugLog TDC_LOG = new DebugLog("tdc");
+	static public final DebugLog TDC_LOG = new DebugLog("tdc");
 
 	/** Mapping of all per vehicle data collectors on line */
 	private final HashMap<ControllerImpl, OpPerVehicle> collectors =

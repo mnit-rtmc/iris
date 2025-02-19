@@ -60,7 +60,9 @@ public class OpPerVehicle extends OpTdc {
 		protected Phase<TdcProperty> poll(CommMessage<TdcProperty> mess)
 			throws IOException
 		{
-			mess.add(new ResetProperty());
+			ResetProperty reset = new ResetProperty();
+			mess.add(reset);
+			logStore(reset);
 			mess.storeProps();
 			setSuccess(true);
 			return new VehicleEvents();
@@ -76,6 +78,7 @@ public class OpPerVehicle extends OpTdc {
 		{
 			mess.add(traf);
 			mess.queryProps();
+			logQuery(traf);
 			setSuccess(true);
 			String f = traf.getFaults();
 			if (!BaseHelper.objectEquals(f, faults)) {
