@@ -59,12 +59,33 @@ public class VehicleInfo {
 	/** Get vehicle info as a string */
 	@Override
 	public String toString() {
-		return "vehicle speed: " + speed +
-		       ", class_lane: " + class_lane +
-		       ", occupancy: " + occupancy +
-		       ", gap: " + gap +
-		       ", length: " + length +
-		       ", sync_stamp: " + sync_stamp;
+		StringBuilder sb = new StringBuilder();
+		sb.append("veh");
+		if (speed > 0) {
+			sb.append(" spd:");
+			sb.append(speed);
+		}
+		if (class_lane != 0) {
+			sb.append(" cl_ln:");
+			sb.append(class_lane);
+		}
+		if (occupancy > 0) {
+			sb.append(" occ:");
+			sb.append(occupancy);
+		}
+		if (gap > 0) {
+			sb.append(" gap:");
+			sb.append(gap);
+		}
+		if (length > 0) {
+			sb.append(" len:");
+			sb.append(length);
+		}
+		if (sync_stamp > 0) {
+			sb.append(" sync_stamp:");
+			sb.append(sync_stamp);
+		}
+		return sb.toString();
 	}
 
 	/** Get the headway from previous vehicle (ms) */

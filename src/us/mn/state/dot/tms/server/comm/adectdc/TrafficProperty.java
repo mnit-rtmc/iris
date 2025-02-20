@@ -146,25 +146,24 @@ public class TrafficProperty extends StatusProperty {
 	public void decodeQuery(ControllerImpl c, InputStream is)
 		throws IOException
 	{
+		vehicles.clear();
 		byte[] buf = parseLong(is, c);
 		if (buf == null) {
-			vehicles.clear();
 			toggleFrameControlBit();
 			return;
 		}
 		if (buf[0] != (CTRL_VEHICLE))
 			throw new ParsingException("Wrong CTRL: " + buf[0]);
 		if (buf.length == 3) {
-			toggleFrameControlBit();
 			parseStatus(buf);
+			toggleFrameControlBit();
 			return;
 		}
 		ArrayList<VehicleInfo> info = parseVehicleInfo(buf);
 		parseStatus(buf);
 		long vc = count + info.size();
 		parseVehicleCount(buf);
-		missed = (count != vc);
-		vehicles.clear();
+		missed = (count > vc);
 		vehicles.addAll(info);
 		toggleFrameControlBit();
 	}
@@ -177,8 +176,15 @@ public class TrafficProperty extends StatusProperty {
 	/** Get events as a string */
 	@Override
 	public String toString() {
-		return "vehicles: " + vehicles.size() + ", " +
-			super.toString();
+		StringBuilder sb = new StringBuilder();
+		sb.append("traf");
+		for (VehicleInfo info: vehicles) {
+			sb.append(' ');
+			sb.append(info.toString());
+		}
+		sb.append(", ");
+		sb.append(super.toString());
+		return sb.toString();
 	}
 
 	/** Log vehicle detection events */
