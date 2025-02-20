@@ -146,6 +146,7 @@ public class TrafficProperty extends StatusProperty {
 	public void decodeQuery(ControllerImpl c, InputStream is)
 		throws IOException
 	{
+		status = 0;
 		vehicles.clear();
 		byte[] buf = parseLong(is, c);
 		if (buf == null) {
@@ -154,13 +155,14 @@ public class TrafficProperty extends StatusProperty {
 		}
 		if (buf[0] != (CTRL_VEHICLE))
 			throw new ParsingException("Wrong CTRL: " + buf[0]);
+		if (buf.length < 3)
+			throw new ParsingException("Wrong len: " + buf.length);
+		parseStatus(buf);
 		if (buf.length == 3) {
-			parseStatus(buf);
 			toggleFrameControlBit();
 			return;
 		}
 		ArrayList<VehicleInfo> info = parseVehicleInfo(buf);
-		parseStatus(buf);
 		long vc = count + info.size();
 		parseVehicleCount(buf);
 		missed = (count > vc);

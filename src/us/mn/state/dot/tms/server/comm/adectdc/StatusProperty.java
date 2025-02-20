@@ -32,7 +32,7 @@ public class StatusProperty extends TdcProperty {
 	private final boolean tdc1_pir = false;
 
 	/** Status value */
-	private int status = 0;
+	protected int status = 0;
 
 	/** Check if a bit flag is set */
 	private boolean checkFlag(int bit) {
