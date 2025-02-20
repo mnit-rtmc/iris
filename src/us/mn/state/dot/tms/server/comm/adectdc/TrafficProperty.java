@@ -30,6 +30,11 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 public class TrafficProperty extends StatusProperty {
 
+	/** Application data buffer offsets */
+	static private final int OFF_STATUS = 2;
+	static private final int OFF_COUNT = 3;
+	static private final int OFF_VEHICLE = 7;
+
 	/** Parse from one to four vehicle informations */
 	static private ArrayList<VehicleInfo> parseVehicleInfo(byte[] buf)
 		throws ParsingException
@@ -46,16 +51,17 @@ public class TrafficProperty extends StatusProperty {
 
 	/** Check if data length is valid for vehicle information */
 	static private boolean isLengthValid(int len, int vlen) {
-		return (len == 7 + vlen) ||
-		       (len == 7 + vlen * 2) ||
-		       (len == 7 + vlen * 3) ||
-		       (len == 7 + vlen * 4);
+		// Up to 4 vehicle can be reported in a packet
+		return (len == OFF_VEHICLE + vlen * 1) ||
+		       (len == OFF_VEHICLE + vlen * 2) ||
+		       (len == OFF_VEHICLE + vlen * 3) ||
+		       (len == OFF_VEHICLE + vlen * 4);
 	}
 
 	/** Parse vehicle information in 6-byte format */
 	static private ArrayList<VehicleInfo> parse6(byte[] buf) {
 		ArrayList<VehicleInfo> infos = new ArrayList<VehicleInfo>();
-		for (int i = 12; i < buf.length; i += 6)
+		for (int i = OFF_VEHICLE; i < buf.length; i += 6)
 			infos.add(parse6(buf, i));
 		return infos;
 	}
@@ -73,7 +79,7 @@ public class TrafficProperty extends StatusProperty {
 	/** Parse vehicle information in 7-byte format */
 	static private ArrayList<VehicleInfo> parse7(byte[] buf) {
 		ArrayList<VehicleInfo> infos = new ArrayList<VehicleInfo>();
-		for (int i = 12; i < buf.length; i += 7)
+		for (int i = OFF_VEHICLE; i < buf.length; i += 7)
 			infos.add(parse7(buf, i));
 		return infos;
 	}
@@ -92,7 +98,7 @@ public class TrafficProperty extends StatusProperty {
 	/** Parse vehicle information in 11-byte format */
 	static private ArrayList<VehicleInfo> parse11(byte[] buf) {
 		ArrayList<VehicleInfo> infos = new ArrayList<VehicleInfo>();
-		for (int i = 12; i < buf.length; i += 11)
+		for (int i = OFF_VEHICLE; i < buf.length; i += 11)
 			infos.add(parse11(buf, i));
 		return infos;
 	}
@@ -165,7 +171,7 @@ public class TrafficProperty extends StatusProperty {
 
 	/** Parse the "lifetime" vehicle count */
 	private void parseVehicleCount(byte[] buf) {
-		count = parseU32(buf, 3);
+		count = parseU32(buf, OFF_COUNT);
 	}
 
 	/** Get events as a string */
