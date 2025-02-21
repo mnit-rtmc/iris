@@ -209,7 +209,6 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		MeterLock lk = new MeterLock(RampMeterHelper.optLock(rm));
 		String r = lk.optReason();
 		reason_cbx.setSelectedItem((r != null) ? r : "");
-		boolean metering = RampMeterHelper.isMetering(rm);
 		String user = session.getUser().getName();
 		TurnOnAction on_act = new TurnOnAction(rm, user);
 		TurnOffAction off_act = new TurnOffAction(rm, user);
@@ -219,11 +218,10 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		GrowQueueAction gq_act = new GrowQueueAction(rm, user);
 		if (!isWritePermitted(rm)) {
 			reason_act.setEnabled(false);
-			if (metering)
-				on_act.setEnabled(false);
-			else
-				off_act.setEnabled(false);
+			on_act.setEnabled(false);
+			off_act.setEnabled(false);
 		}
+		boolean metering = RampMeterHelper.isMetering(rm);
 		if ((!isWritePermitted(rm)) || r == null || !metering) {
 			sq_act.setEnabled(false);
 			gq_act.setEnabled(false);
@@ -241,6 +239,7 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 			on_btn.setSelected(true);
 		else
 			off_btn.setSelected(true);
+		Integer rt = RampMeterHelper.optRate(rm);
 		release_lbl.setText(RampMeterHelper.formatRelease(rt));
 		cycle_lbl.setText(RampMeterHelper.formatCycle(rt));
 	}

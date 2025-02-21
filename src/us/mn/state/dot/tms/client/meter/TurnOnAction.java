@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.client.meter;
 import java.awt.event.ActionEvent;
 import us.mn.state.dot.tms.MeterLock;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.client.proxy.ProxyAction;
 
 /**
@@ -45,7 +45,10 @@ public class TurnOnAction extends ProxyAction<RampMeter> {
 			String reason = lk.optReason();
 			if (reason == null)
 				lk.setReason(MeterLock.REASON_TESTING);
-			lk.setRate(SystemAttributeHelper.getMeterMaxRelease());
+			Integer rt = RampMeterHelper.optRate(proxy);
+			if (rt == null)
+				rt = RampMeterHelper.getMaxRelease();
+			lk.setRate(rt);
 			lk.setExpires(true);
 			lk.setUser(user);
 			proxy.setLock(lk.toString());
