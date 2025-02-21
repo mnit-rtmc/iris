@@ -216,14 +216,11 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 			reason_cbx);
 		ShrinkQueueAction sq_act = new ShrinkQueueAction(rm, user);
 		GrowQueueAction gq_act = new GrowQueueAction(rm, user);
-		if (!isWritePermitted(rm)) {
+		if (!isWritePermitted(rm))
+			reason_act.setEnabled(false);
+		if (!isWritePermitted(rm) || r == null) {
 			on_act.setEnabled(false);
 			off_act.setEnabled(false);
-			reason_act.setEnabled(false);
-			sq_act.setEnabled(false);
-			gq_act.setEnabled(false);
-		}
-		if (r == null) {
 			sq_act.setEnabled(false);
 			gq_act.setEnabled(false);
 		}
