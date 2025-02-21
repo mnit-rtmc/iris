@@ -207,13 +207,15 @@ public class TrafficProperty extends StatusProperty {
 
 	/** Estimate the time stamps */
 	private void estimateTimeStamps() {
-		stamp0 = stamp1;
-		long now = TimeSteward.currentTimeMillis() - 500;
+		final long st = (!missed) ? stamp1 : 0;
+		long now = TimeSteward.currentTimeMillis();
 		long dur = getDuration();
-		if (stamp0 > 0 && dur > 0)
-			stamp1 = Math.min(stamp0 + dur, now);
-		else
-			stamp1 = now;
+		if (st > 0 && dur > 0)
+			stamp1 = Math.min(st + dur, now);
+		else {
+			// estimated age of logged event: 1.5 sec
+			stamp1 = now - 1500;
+		}
 		stamp0 = stamp1 - dur;
 	}
 
@@ -233,15 +235,10 @@ public class TrafficProperty extends StatusProperty {
 	/** Log vehicle detection events */
 	private void logVehicles(DetectorImpl det) {
 		// FIXME: which came first, vehicle 1 or vehicle 2?
-		if (getDuration() > 0) {
-			long st = stamp0;
-			for (VehicleInfo info: vehicles) {
-				st += info.getHeadway();
-				info.logVehicle(det, st);
-			}
-		} else {
-			for (VehicleInfo info: vehicles)
-				info.logVehicle(det, stamp1);
+		long st = stamp0;
+		for (VehicleInfo info: vehicles) {
+			st += info.getHeadway();
+			info.logVehicle(det, st);
 		}
 	}
 }

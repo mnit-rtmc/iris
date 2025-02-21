@@ -101,8 +101,6 @@ public class OpPerVehicle extends OpTdc {
 	/** Update the controller operation counters */
 	public void updateCounters(int p) {
 		boolean s = isSuccess();
-		if (!s)
-			controller.logGap();
 		controller.binEventData(p, s);
 		controller.completeOperation(id, s);
 		updateCtrlStatus();
