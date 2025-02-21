@@ -433,6 +433,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			MeterLock ml = new MeterLock(lk);
 			if (lk != null && !getProcUser().equals(ml.optUser()))
 				throw new ChangeVetoException("Bad user!");
+			if (lk != null && ml.optReason() == null)
+				throw new ChangeVetoException("No reason!");
 			setLockChecked(lk);
 		}
 	}
