@@ -135,6 +135,11 @@ public class RampMeterHelper extends BaseHelper {
 		return (rate instanceof Integer) ? (Integer) rate : null;
 	}
 
+	/** Test if a ramp meter is metering */
+	static public boolean isMetering(RampMeter rm) {
+		return optRate(rm) != null;
+	}
+
 	/** Get optional queue state, or null */
 	static public String optQueue(RampMeter meter) {
 		Object queue = optStatus(meter, RampMeter.QUEUE);
