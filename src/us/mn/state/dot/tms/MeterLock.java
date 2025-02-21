@@ -97,7 +97,7 @@ public class MeterLock {
 
 	/** Get the lock reason, or null */
 	public String optReason() {
-		return lock.optString(REASON);
+		return lock.optString(REASON, null);
 	}
 
 	/** Set the lock reason */
@@ -130,7 +130,7 @@ public class MeterLock {
 
 	/** Get the lock user, or null */
 	public String optUser() {
-		return lock.optString(USER);
+		return lock.optString(USER, null);
 	}
 
 	/** Set the lock user */
@@ -145,7 +145,7 @@ public class MeterLock {
 
 	/** Get the lock expires, or null */
 	public String optExpires() {
-		return lock.optString(EXPIRES);
+		return lock.optString(EXPIRES, null);
 	}
 
 	/** Set the lock expiration date/time */
