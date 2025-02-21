@@ -1,6 +1,6 @@
 // database.rs
 //
-// Copyright (C) 2021-2024  Minnesota Department of Transportation
+// Copyright (C) 2021-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ use crate::error;
 use bb8::{CustomizeConnection, Pool, PooledConnection};
 use bb8_postgres::PostgresConnectionManager;
 use std::env;
-use std::future::Future;
 use std::pin::Pin;
 use tokio_postgres::tls::NoTlsStream;
 use tokio_postgres::{Client, Config, Connection, NoTls, Socket};

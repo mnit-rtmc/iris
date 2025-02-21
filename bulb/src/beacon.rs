@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{uri_one, AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card, View, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::fetch::Action;

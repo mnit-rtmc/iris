@@ -18,7 +18,7 @@ use crate::query;
 use crate::segments::{GeoLoc, RNode, Road, SegmentState};
 use crate::signmsg::render_all;
 use crate::sonar::Name;
-use futures::{pin_mut, TryStreamExt};
+use futures::{TryStreamExt, pin_mut};
 use resources::Res;
 use std::path::Path;
 use std::time::Instant;

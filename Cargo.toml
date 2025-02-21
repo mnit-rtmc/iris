@@ -4,7 +4,7 @@ resolver = "2"
 
 [workspace.package]
 version = "5.67.2"
-edition = "2021"
+edition = "2024"
 
 [workspace.dependencies]
 bb8 = "0.9"

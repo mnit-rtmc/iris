@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2024  Minnesota Department of Transportation
+// Copyright (C) 2018-2025  Minnesota Department of Transportation
 //
 //! rendzina is for rendering DMS sign messages to .gif files
 #![forbid(unsafe_code)]
@@ -8,7 +8,7 @@ use gift::block::DisposalMethod;
 use gift::{Decoder, Encoder, Step};
 use ntcip::dms::config::{MultiCfg, SignCfg, VmsCfg};
 use ntcip::dms::multi::{Color, ColorScheme, JustificationPage, SyntaxError};
-use ntcip::dms::{tfon, Dms, Font, Graphic, Page, Pages};
+use ntcip::dms::{Dms, Font, Graphic, Page, Pages, tfon};
 use pix::bgr::SBgr8;
 use pix::chan::Ch8;
 use pix::el::Pixel;

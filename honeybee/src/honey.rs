@@ -12,6 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::Database;
 use crate::access::Access;
 use crate::cred::Credentials;
 use crate::domain;
@@ -21,31 +22,30 @@ use crate::permission;
 use crate::query;
 use crate::sonar::{Messenger, Name};
 use crate::xff::XForwardedFor;
-use crate::Database;
+use axum::Router;
 use axum::body::Body;
 use axum::extract::{ConnectInfo, Json, Path as AxumPath, Query, State};
-use axum::http::{header, StatusCode};
+use axum::http::{StatusCode, header};
 use axum::response::sse::{Event, KeepAlive};
 use axum::response::{IntoResponse, Sse};
 use axum::routing::get;
-use axum::Router;
 use axum_extra::TypedHeader;
 use headers::{ETag, IfNoneMatch};
 use http::header::HeaderName;
 use resources::Res;
 use serde::Deserialize;
-use serde_json::map::Map;
 use serde_json::Value;
+use serde_json::map::Map;
 use std::collections::HashMap;
 use std::convert::Infallible;
 use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
 use tokio::fs::metadata;
-use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
+use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 use tokio_postgres::types::ToSql;
-use tokio_stream::wrappers::UnboundedReceiverStream;
 use tokio_stream::Stream;
+use tokio_stream::wrappers::UnboundedReceiverStream;
 use tokio_util::io::ReaderStream;
 use tower_sessions::session::Id;
 use tower_sessions::{Expiry, Session, SessionManagerLayer};

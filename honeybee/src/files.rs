@@ -1,11 +1,11 @@
 // files.rs
 //
-// Copyright (C) 2023-2024  Minnesota Department of Transportation
+// Copyright (C) 2023-2025  Minnesota Department of Transportation
 //
 use crate::error::Result;
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
-use tokio::fs::{create_dir_all, read_dir, remove_file, rename, File};
+use tokio::fs::{File, create_dir_all, read_dir, remove_file, rename};
 use tokio::io::{AsyncWriteExt, BufWriter};
 
 /// Make a PathBuf for a backup file

@@ -19,15 +19,14 @@ use crate::util::Doc;
 use js_sys::JsString;
 use resources::Res;
 use std::error::Error as _;
-use std::future::Future;
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{
-    console, CustomEvent, Element, Event, EventSource, HtmlButtonElement,
-    HtmlElement, HtmlInputElement, HtmlSelectElement, MessageEvent,
-    ScrollBehavior, ScrollIntoViewOptions, ScrollLogicalPosition,
-    TransitionEvent, Window,
+    CustomEvent, Element, Event, EventSource, HtmlButtonElement, HtmlElement,
+    HtmlInputElement, HtmlSelectElement, MessageEvent, ScrollBehavior,
+    ScrollIntoViewOptions, ScrollLogicalPosition, TransitionEvent, Window,
+    console,
 };
 
 /// JavaScript result

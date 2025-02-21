@@ -1,6 +1,6 @@
 // permission.rs
 //
-// Copyright (C) 2021-2024  Minnesota Department of Transportation
+// Copyright (C) 2021-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,8 +18,8 @@ use crate::query;
 use crate::sonar::Name;
 use resources::Res;
 use serde::{Deserialize, Serialize};
-use serde_json::map::Map;
 use serde_json::Value;
+use serde_json::map::Map;
 use tokio_postgres::Row;
 
 /// Create one permission

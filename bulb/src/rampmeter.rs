@@ -20,7 +20,7 @@ use crate::start::fly_map_item;
 use crate::util::{
     ContainsLower, Fields, HtmlStr, Input, OptVal, Select, TextArea,
 };
-use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
+use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
 use gift::block::DisposalMethod;
 use gift::{Encoder, Step};
 use pix::matte::Matte8;

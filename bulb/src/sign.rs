@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use base64::{engine::general_purpose::STANDARD_NO_PAD as b64enc, Engine as _};
+use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
 use ntcip::dms::{FontTable, GraphicTable};
 use rendzina::SignConfig;
 use web_sys::console;

@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{html_title_row, uri_one, AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card, View, html_title_row, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::DeviceReq;
 use crate::error::Result;
@@ -29,15 +29,15 @@ use mag::temp::DegC;
 use ntcip::dms::multi::{
     join_text, normalize as multi_normalize, split as multi_split,
 };
-use ntcip::dms::{tfon, Font, FontTable, GraphicTable, MessagePattern};
-use rendzina::{load_graphic, SignConfig};
+use ntcip::dms::{Font, FontTable, GraphicTable, MessagePattern, tfon};
+use rendzina::{SignConfig, load_graphic};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::iter::repeat;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{console, HtmlElement, HtmlInputElement, HtmlSelectElement};
+use web_sys::{HtmlElement, HtmlInputElement, HtmlSelectElement, console};
 
 /// Display Units
 type TempUnit = mag::temp::DegF;

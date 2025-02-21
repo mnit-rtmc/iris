@@ -1,6 +1,6 @@
 // listener.rs
 //
-// Copyright (C) 2018-2024  Minnesota Department of Transportation
+// Copyright (C) 2018-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,10 +18,9 @@ use crate::resource::Resource;
 use crate::sonar::Name;
 use futures::Stream;
 use std::collections::HashSet;
-use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
+use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 use tokio_postgres::tls::NoTlsStream;
 use tokio_postgres::{AsyncMessage, Connection, Socket};
 use tokio_stream::wrappers::UnboundedReceiverStream;

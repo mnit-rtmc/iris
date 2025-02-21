@@ -14,7 +14,7 @@
 //
 use axum::{
     extract::FromRequestParts,
-    http::{request::Parts, HeaderMap, StatusCode},
+    http::{HeaderMap, StatusCode, request::Parts},
 };
 use std::net::IpAddr;
 

@@ -1,6 +1,6 @@
 // signmsg.rs
 //
-// Copyright (C) 2018-2024  Minnesota Department of Transportation
+// Copyright (C) 2018-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 use crate::error::{Error, Result};
 use crate::files::Cache;
 use ntcip::dms::{Dms, FontTable, GraphicTable};
-use rendzina::{load_font, load_graphic, SignConfig};
+use rendzina::{SignConfig, load_font, load_graphic};
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};

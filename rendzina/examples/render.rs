@@ -1,5 +1,5 @@
 use ntcip::dms::{Dms, FontTable, GraphicTable};
-use rendzina::{load_font, load_graphic, SignConfig};
+use rendzina::{SignConfig, load_font, load_graphic};
 use std::fs::File;
 use std::io::BufWriter;
 

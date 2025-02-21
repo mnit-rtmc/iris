@@ -1,6 +1,6 @@
 // honeybee.rs
 //
-// Copyright (C) 2018-2024  Minnesota Department of Transportation
+// Copyright (C) 2018-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 
 use argh::FromArgs;
 use honeybee::{
-    notify_events, Database, Honey, Resource, Result, SegmentState,
+    Database, Honey, Resource, Result, SegmentState, notify_events,
 };
 use std::collections::HashSet;
 use std::net::SocketAddr;
