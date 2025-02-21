@@ -53,5 +53,5 @@ fn main() {
         .unwrap();
     let file = File::create("render.gif").unwrap();
     let writer = BufWriter::new(file);
-    rendzina::render(writer, &dms, MULTI, None, None).unwrap();
+    rendzina::render(writer, &dms, MULTI, 240, 80, None).unwrap();
 }
