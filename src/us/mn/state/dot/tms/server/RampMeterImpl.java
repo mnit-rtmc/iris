@@ -653,9 +653,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Update the planned rate */
 	public void updateRatePlanned() {
-		Integer rt = getLockRate();
-		if (rt == null)
-			rt = ratePlanned;
+		Integer rt = isLocked() ? getLockRate() : ratePlanned;
 		sendReleaseRate(validateRate(rt));
 		setRatePlanned(null);
 	}
