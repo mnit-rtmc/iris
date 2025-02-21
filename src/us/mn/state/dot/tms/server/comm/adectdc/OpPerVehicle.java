@@ -85,8 +85,6 @@ public class OpPerVehicle extends OpTdc {
 				putCtrlFaults(f, null);
 				faults = f;
 			}
-			if (traf.missed)
-				controller.logGap();
 			traf.logVehicles(controller);
 			return controller.hasActiveDetector()
 			      ? this

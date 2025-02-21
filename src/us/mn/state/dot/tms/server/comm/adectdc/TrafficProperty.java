@@ -131,7 +131,13 @@ public class TrafficProperty extends StatusProperty {
 	private long count;
 
 	/** Did we miss any vehicles? */
-	public boolean missed = true;
+	private boolean missed = true;
+
+	/** Previous time stamp */
+	private long stamp0 = 0;
+
+	/** Current time stamp */
+	private long stamp1 = 0;
 
 	/** Encode a QUERY request */
 	@Override
@@ -167,6 +173,7 @@ public class TrafficProperty extends StatusProperty {
 		parseVehicleCount(buf);
 		missed = (count > vc);
 		vehicles.addAll(info);
+		estimateTimeStamps();
 		toggleFrameControlBit();
 	}
 
@@ -191,19 +198,50 @@ public class TrafficProperty extends StatusProperty {
 
 	/** Log vehicle detection events */
 	public void logVehicles(ControllerImpl controller) {
+		if (missed)
+			controller.logGap();
 		DetectorImpl det = controller.getDetectorAtPin(1);
 		if (det != null)
 			logVehicles(det);
 	}
 
+	/** Estimate the time stamps */
+	private void estimateTimeStamps() {
+		stamp0 = stamp1;
+		long now = TimeSteward.currentTimeMillis() - 500;
+		long dur = getDuration();
+		if (stamp0 > 0 && dur > 0)
+			stamp1 = Math.min(stamp0 + dur, now);
+		else
+			stamp1 = now;
+		stamp0 = stamp1 - dur;
+	}
+
+	/** Get duration of vehicle events */
+	private long getDuration() {
+		long dur = 0;
+		for (VehicleInfo info: vehicles) {
+			int h = info.getHeadway();
+			if (h > 0)
+				dur += h;
+			else
+				return 0;
+		}
+		return dur;
+	}
+
 	/** Log vehicle detection events */
 	private void logVehicles(DetectorImpl det) {
-		long st = TimeSteward.currentTimeMillis();
-		for (VehicleInfo info: vehicles)
-			st -= info.getHeadway();
-		for (VehicleInfo info: vehicles) {
-			info.logVehicle(det, st);
-			st += info.getHeadway();
+		// FIXME: which came first, vehicle 1 or vehicle 2?
+		if (getDuration() > 0) {
+			long st = stamp0;
+			for (VehicleInfo info: vehicles) {
+				st += info.getHeadway();
+				info.logVehicle(det, st);
+			}
+		} else {
+			for (VehicleInfo info: vehicles)
+				info.logVehicle(det, stamp1);
 		}
 	}
 }
