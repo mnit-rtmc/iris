@@ -13,18 +13,22 @@ with a sign config.  They can be:
 If **flash beacon** is selected, the sign's _internal_ beacon will also be
 activated.
 
+**Pixel service** indicates that the sign should perform scheduled pixel
+service while the message is active.  This is useful for messages that are
+active for long periods of time.
+
 <details>
 <summary>API Resources 🕵️ </summary>
 
 * `iris/api/msg_pattern` (primary)
 * `iris/api/msg_pattern/{name}`
 
-| Access       | Primary                 | Secondary     |
-|--------------|-------------------------|---------------|
-| 👁️  View      | name                    |               |
-| 👉 Operate   |                         |               |
-| 💡 Manage    | compose\_hashtag, multi | flash\_beacon |
-| 🔧 Configure |                         |               |
+| Access       | Primary                 | Secondary                     |
+|--------------|-------------------------|-------------------------------|
+| 👁️  View      | name                    |                               |
+| 👉 Operate   |                         |                               |
+| 💡 Manage    | compose\_hashtag, multi | flash\_beacon, pixel\_service |
+| 🔧 Configure |                         |                               |
 
 </details>
 

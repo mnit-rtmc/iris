@@ -14,7 +14,7 @@ after being unused for a few minutes.
 
 | Access  | Primary     |
 |---------|-------------|
-| 👁️  View | name, sign\_config, incident, multi, msg\_owner, flash\_beacon, msg\_priority, duration |
+| 👁️  View | name, sign\_config, incident, multi, msg\_owner, flash\_beacon, pixel\_service, msg\_priority, duration |
 
 </details>
 
@@ -29,6 +29,9 @@ The **msg_owner** is a string containing 3 fields, separated by semicolons
 - `user`: name of user who created the message
 
 **Flash Beacon** indicates whether an associated beacon should flash.
+
+**Pixel Service** indicates whether the sign should perform scheduled pixel
+service while the message is displayed.
 
 **Duration** determines how long a message will be displayed (minutes).
 
