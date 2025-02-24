@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2019-2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -91,9 +91,7 @@ public class OpSendDMSDefaults extends OpDMS {
 			logStore(comm_time);
 			logStore(end_msg);
 			mess.storeProps();
-			return supportsPixelService()
-			      ? new PixelService()
-			      : new FlashDefaults();
+			return new PixelService();
 		}
 	}
 
@@ -135,7 +133,12 @@ public class OpSendDMSDefaults extends OpDMS {
 			logStore(dur);
 			logStore(freq);
 			logStore(time);
-			mess.storeProps();
+			try {
+				mess.storeProps();
+			}
+			catch (ControllerException e) {
+				logError("Error setting pixel service sched");
+			}
 			return new FlashDefaults();
 		}
 	}
