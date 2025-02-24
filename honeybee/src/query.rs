@@ -628,7 +628,7 @@ pub const MSG_PATTERN_ALL: &str = "\
 
 /// SQL query for one message pattern (secondary)
 pub const MSG_PATTERN_ONE: &str = "\
-  SELECT name, multi, flash_beacon, compose_hashtag \
+  SELECT name, multi, flash_beacon, pixel_service, compose_hashtag \
   FROM iris.msg_pattern \
   WHERE name = $1";
 

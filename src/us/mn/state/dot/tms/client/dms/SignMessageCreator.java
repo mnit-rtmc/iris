@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  * Copyright (C) 2020       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -59,13 +59,14 @@ public class SignMessageCreator {
 	 * @param sc Sign configuration.
 	 * @param ms MULTI text.
 	 * @param fb Flash beacon.
+	 * @param ps Pixel service.
 	 * @param dur Message duration; null for indefinite.
 	 * @return New sign message, or null on error.
 	 */
 	public SignMessage createMsg(SignConfig sc, String ms, boolean fb,
-		 Integer dur)
+		 boolean ps, Integer dur)
 	{
-		return createMsg(sc, null, ms, fb, SignMsgPriority.high_1,
+		return createMsg(sc, null, ms, fb, ps, SignMsgPriority.high_1,
 			SignMsgSource.operator.bit(), dur);
 	}
 
@@ -74,8 +75,8 @@ public class SignMessageCreator {
 	 * @return Blank sign message, or null on error.
 	 */
 	public SignMessage createMsgBlank(SignConfig sc) {
-		return createMsg(sc, null, "", false, SignMsgPriority.low_1,
-			SignMsgSource.blank.bit(), null);
+		return createMsg(sc, null, "", false, false,
+			SignMsgPriority.low_1, SignMsgSource.blank.bit(), null);
 	}
 
 	/** Create an incident sign message.
@@ -91,7 +92,7 @@ public class SignMessageCreator {
 		SignMsgPriority mp, Integer dur)
 	{
 		if (ms.length() > 0) {
-			return createMsg(sc, inc, ms, false, mp,
+			return createMsg(sc, inc, ms, false, false, mp,
 				INCIDENT_SRC, dur);
 		} else
 			return createMsgBlank(sc);
@@ -103,22 +104,24 @@ public class SignMessageCreator {
 	 * @param inc Associated incident (original name).
 	 * @param ms MULTI text.
 	 * @param fb Flash beacon.
+	 * @param ps Pixel service.
 	 * @param mp Message priority.
 	 * @param src Sign message source bits.
 	 * @param dur Message duration; null for indefinite.
 	 * @return Proxy of new sign message, or null on error.
 	 */
 	private SignMessage createMsg(SignConfig sc, String inc, String ms,
-		boolean fb, SignMsgPriority mp, int src, Integer dur)
+		boolean fb, boolean ps, SignMsgPriority mp, int src,
+		Integer dur)
 	{
 		String owner = SignMessageHelper.makeMsgOwner(src, user);
 		String nm = "usr_" + SignMessageHelper.makeHash(sc, inc, ms,
-			owner, fb, false, mp, dur);
+			owner, fb, ps, mp, dur);
 		SignMessage sm = SignMessageHelper.lookup(nm);
 		if (sm != null)
 			return sm;
 		return canAddSignMessage(nm)
-		      ? createMsg(nm, sc, inc, ms, owner, fb, mp, dur)
+		      ? createMsg(nm, sc, inc, ms, owner, fb, ps, mp, dur)
 		      : null;
 	}
 
@@ -130,13 +133,14 @@ public class SignMessageCreator {
 	 * @param ms MULTI text.
 	 * @param msg_owner Message owner.
 	 * @param fb Flash beacon.
+	 * @param ps Pixel service.
 	 * @param mp Message priority.
 	 * @param dur Message duration; null for indefinite.
 	 * @return Proxy of new sign message, or null on error.
 	 */
 	private SignMessage createMsg(String name, SignConfig sc, String inc,
-		String ms, String msg_owner, boolean fb, SignMsgPriority mp,
-		Integer dur)
+		String ms, String msg_owner, boolean fb, boolean ps,
+		SignMsgPriority mp, Integer dur)
 	{
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("sign_config", sc);
@@ -145,6 +149,7 @@ public class SignMessageCreator {
 		attrs.put("multi", ms);
 		attrs.put("msg_owner", msg_owner);
 		attrs.put("flash_beacon", fb);
+		attrs.put("pixel_service", ps);
 		attrs.put("msg_priority", Integer.valueOf(mp.ordinal()));
 		if (dur != null)
 			attrs.put("duration", dur);

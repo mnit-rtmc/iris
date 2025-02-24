@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2008-2009  AHMCT, University of California
  * Copyright (C) 2012-2021  Iteris Inc.
  * Copyright (C) 2016-2020  SRF Consulting Group
@@ -561,8 +561,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			ap.getName());
 		MsgPattern pat = da.getMsgPattern();
 		boolean fb = (pat != null) && pat.getFlashBeacon();
-		// Only allow pixel service for sticky messages
-		boolean ps = ap.getSticky();
+		boolean ps = (pat != null) && pat.getPixelService();
 		SignMsgPriority mp = SignMsgPriority.fromOrdinal(
 			da.getMsgPriority());
 		Integer dur = ap.getSticky() ? null : getUnstickyDurationMins();
