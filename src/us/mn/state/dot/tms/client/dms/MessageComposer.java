@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2021  Iteris Inc.
  *
@@ -369,6 +369,12 @@ public class MessageComposer extends JPanel {
 	public boolean getFlashBeacon() {
 		MsgPattern pat = getMsgPattern();
 		return (pat != null) && pat.getFlashBeacon();
+	}
+
+	/** Check if pixel service is enabled */
+	public boolean getPixelService() {
+		MsgPattern pat = getMsgPattern();
+		return (pat != null) && pat.getPixelService();
 	}
 
 	/** Get the selected duration */

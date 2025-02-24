@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,8 +45,8 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
 	/** Load all the message patterns */
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, multi, flash_beacon, " +
-			"compose_hashtag FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+			"pixel_service, compose_hashtag FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new MsgPatternImpl(row));
@@ -61,6 +61,7 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
 		map.put("name", name);
 		map.put("multi", multi);
 		map.put("flash_beacon", flash_beacon);
+		map.put("pixel_service", pixel_service);
 		map.put("compose_hashtag", compose_hashtag);
 		return map;
 	}
@@ -81,15 +82,19 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
 		this(row.getString(1),  // name
 		     row.getString(2),  // multi
 		     row.getBoolean(3), // flash_beacon
-		     row.getString(4)   // compose_hashtag
+		     row.getBoolean(4), // pixel_service
+		     row.getString(5)   // compose_hashtag
 		);
 	}
 
 	/** Create a message pattern */
-	private MsgPatternImpl(String n, String m, boolean fb, String cht) {
+	private MsgPatternImpl(String n, String m, boolean fb, boolean ps,
+		String cht)
+	{
 		super(n);
 		multi = m;
 		flash_beacon = fb;
+		pixel_service = ps;
 		compose_hashtag = cht;
 	}
 
@@ -148,6 +153,29 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
 		if (fb != flash_beacon) {
 			store.update(this, "flash_beacon", fb);
 			setFlashBeacon(fb);
+		}
+	}
+
+	/** Pixel service flag */
+	private boolean pixel_service;
+
+	/** Get pixel service flag */
+	@Override
+	public boolean getPixelService() {
+		return pixel_service;
+	}
+
+	/** Set pixel service flag */
+	@Override
+	public void setPixelService(boolean ps) {
+		pixel_service = ps;
+	}
+
+	/** Set pixel service flag */
+	public void doSetPixelService(boolean ps) throws TMSException {
+		if (ps != pixel_service) {
+			store.update(this, "pixel_service", ps);
+			setPixelService(ps);
 		}
 	}
 

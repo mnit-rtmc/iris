@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2024  Minnesota Department of Transportation
+ * Copyright (C) 2018-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,6 +78,18 @@ public class MsgPatternPanel extends JPanel {
 		}
 	});
 
+	/** Pixel service label */
+	private final ILabel pix_srv_lbl = new ILabel("dms.pixel.service");
+
+	/** Checkbox for pixel service flag */
+	private final JCheckBox pix_srv_chk = new JCheckBox(new IAction(null) {
+		protected void doActionPerformed(ActionEvent e) {
+			MsgPattern pat = msg_pattern;
+			if (pat != null)
+				pat.setPixelService(pix_srv_chk.isSelected());
+		}
+	});
+
 	/** Sign config list */
 	private final JList<SignConfig> config_lst = new JList<SignConfig>();
 
@@ -111,6 +123,8 @@ public class MsgPatternPanel extends JPanel {
 				updateMsgPattern(pat);
 			if (null == a || a.equals("flashBeacon"))
 				beacon_chk.setSelected(pat.getFlashBeacon());
+			if (null == a || a.equals("pixelService"))
+				pix_srv_chk.setSelected(pat.getPixelService());
 			if (null == a || a.equals("multi")) {
 				multi_txt.setText(pat.getMulti());
 				updatePixelPnl();
@@ -123,6 +137,8 @@ public class MsgPatternPanel extends JPanel {
 			multi_txt.setText("");
 			beacon_chk.setEnabled(false);
 			beacon_chk.setSelected(false);
+			pix_srv_chk.setEnabled(false);
+			pix_srv_chk.setSelected(false);
 			setPager(null);
 			pixel_pnl.setPhysicalDimensions(0, 0, 0, 0, 0, 0);
 			pixel_pnl.setLogicalDimensions(0, 0, 0, 0);
@@ -142,6 +158,7 @@ public class MsgPatternPanel extends JPanel {
 		MsgPattern pat = msg_pattern;
 		multi_txt.setEnabled(session.canWrite(pat, "multi"));
 		beacon_chk.setEnabled(session.canWrite(pat, "flashBeacon"));
+		pix_srv_chk.setEnabled(session.canWrite(pat, "pixelService"));
 	}
 
 	/** Message pattern being edited */
@@ -211,6 +228,10 @@ public class MsgPatternPanel extends JPanel {
 		              .addGap(UI.hgap)
 		              .addComponent(beacon_chk))
 		  .addGroup(gl.createSequentialGroup()
+		              .addComponent(pix_srv_lbl)
+		              .addGap(UI.hgap)
+		              .addComponent(pix_srv_chk))
+		  .addGroup(gl.createSequentialGroup()
 		              .addComponent(multi_lbl)
 		              .addGap(UI.hgap)
 		              .addComponent(multi_txt))
@@ -225,6 +246,10 @@ public class MsgPatternPanel extends JPanel {
 		vg.addGroup(gl.createParallelGroup()
 		              .addComponent(beacon_lbl)
 		              .addComponent(beacon_chk))
+		  .addGap(UI.vgap)
+		  .addGroup(gl.createParallelGroup()
+		              .addComponent(pix_srv_lbl)
+		              .addComponent(pix_srv_chk))
 		  .addGap(UI.vgap)
 		  .addGroup(gl.createParallelGroup()
 		              .addComponent(multi_lbl)

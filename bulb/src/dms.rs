@@ -142,6 +142,7 @@ pub struct MsgPattern {
     pub compose_hashtag: Option<String>,
     pub multi: String,
     pub flash_beacon: Option<bool>,
+    pub pixel_service: Option<bool>,
 }
 
 /// Message Line
