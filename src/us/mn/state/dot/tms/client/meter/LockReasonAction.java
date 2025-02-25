@@ -51,7 +51,11 @@ public class LockReasonAction extends ProxyAction<RampMeter> {
 			if (reason != null) {
 				MeterLock lk = new MeterLock(proxy.getLock());
 				lk.setReason(reason);
-				lk.setExpires(lk.optRate() != null);
+				Integer rt = lk.optRate();
+				if (rt == null)
+					rt = RampMeterHelper.optRate(proxy);
+				lk.setRate(rt);
+				lk.setExpires(rt != null);
 				lk.setUser(user);
 				proxy.setLock(lk.toString());
 			} else
