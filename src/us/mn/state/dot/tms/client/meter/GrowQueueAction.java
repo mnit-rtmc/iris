@@ -47,7 +47,6 @@ public class GrowQueueAction extends ProxyAction<RampMeter> {
 				int r = RampMeterHelper.filterRate(rt - 50);
 				if (r != rt) {
 					lk.setRate(r);
-					lk.setExpires(true);
 					lk.setUser(user);
 					proxy.setLock(lk.toString());
 				}

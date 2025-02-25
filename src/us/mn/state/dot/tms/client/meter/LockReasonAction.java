@@ -55,7 +55,6 @@ public class LockReasonAction extends ProxyAction<RampMeter> {
 				if (rt == null)
 					rt = RampMeterHelper.optRate(proxy);
 				lk.setRate(rt);
-				lk.setExpires(rt != null);
 				lk.setUser(user);
 				proxy.setLock(lk.toString());
 			} else

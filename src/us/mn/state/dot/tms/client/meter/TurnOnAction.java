@@ -42,14 +42,10 @@ public class TurnOnAction extends ProxyAction<RampMeter> {
 	protected void doActionPerformed(ActionEvent e) {
 		if (proxy != null) {
 			MeterLock lk = new MeterLock(proxy.getLock());
-			String reason = lk.optReason();
-			if (reason == null)
-				lk.setReason(MeterLock.REASON_TESTING);
 			Integer rt = RampMeterHelper.optRate(proxy);
 			if (rt == null)
 				rt = RampMeterHelper.getMaxRelease();
 			lk.setRate(rt);
-			lk.setExpires(true);
 			lk.setUser(user);
 			proxy.setLock(lk.toString());
 		}

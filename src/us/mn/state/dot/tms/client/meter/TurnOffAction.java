@@ -41,11 +41,7 @@ public class TurnOffAction extends ProxyAction<RampMeter> {
 	protected void doActionPerformed(ActionEvent e) {
 		if (proxy != null) {
 			MeterLock lk = new MeterLock(proxy.getLock());
-			String reason = lk.optReason();
-			if (reason == null)
-				lk.setReason(MeterLock.REASON_TESTING);
 			lk.setRate(null);
-			lk.setExpires(false);
 			lk.setUser(user);
 			proxy.setLock(lk.toString());
 		}
