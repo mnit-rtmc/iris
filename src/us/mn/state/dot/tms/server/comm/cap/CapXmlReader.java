@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2025  Minnesota Department of Transportation
  * Copyright (C) 2020  SRF Consulting Group, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,7 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
- * Common Alerting Protocol (CAP) reader.
+ * Common Alerting Protocol (CAP) XML reader.
  *
  * Reads CAP XML documents, converts alerts to JSON and stores to the database.
  *
@@ -38,7 +38,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  * @author Michael Janson
  * @author Gordon Parikh
  */
-public class CapReader {
+public class CapXmlReader {
 
 	/** Date formatter for formatting error file names */
 	static private final SimpleDateFormat DT_FMT =
@@ -71,8 +71,8 @@ public class CapReader {
 	/** Alert handler */
 	private final AlertHandler handler;
 
-	/** Create a new CAP reader */
-	public CapReader(InputStream is) {
+	/** Create a new CAP XML reader */
+	public CapXmlReader(InputStream is) {
 		input = is;
 		handler = new AlertHandler(PROCESSOR);
 	}

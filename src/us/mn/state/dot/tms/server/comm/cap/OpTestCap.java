@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ public class OpTestCap extends OpReadCap {
 		{
 			File testAlert = new File(TEST_FILE);
 			InputStream is = new FileInputStream(testAlert);
-			CapReader reader = new CapReader(is);
+			CapXmlReader reader = new CapXmlReader(is);
 			reader.parse();
 			return null;
 		}
