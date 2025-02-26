@@ -431,12 +431,23 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	public void doSetLock(String lk) throws TMSException {
 		if (!objectEquals(lk, lock)) {
 			MeterLock ml = new MeterLock(lk);
-			if (lk != null && !getProcUser().equals(ml.optUser()))
-				throw new ChangeVetoException("Bad user!");
-			if (lk != null && ml.optReason() == null)
-				throw new ChangeVetoException("No reason!");
+			if (lk != null)
+				checkLock(ml);
 			setLockChecked(lk);
 		}
+	}
+
+	/** Check a lock */
+	private void checkLock(MeterLock ml) throws TMSException {
+		if (ml.optReason() == null)
+			throw new ChangeVetoException("No reason!");
+		if (!getProcUser().equals(ml.optUser()))
+			throw new ChangeVetoException("Bad user!");
+		String exp = ml.optExpires();
+		if (exp != null && TimeSteward.parse8601(exp) == null)
+			throw new ChangeVetoException("Bad expiration!");
+		if (exp != null && ml.optRate() == null)
+			throw new ChangeVetoException("Bad rate!");
 	}
 
 	/** Set the lock as JSON */
