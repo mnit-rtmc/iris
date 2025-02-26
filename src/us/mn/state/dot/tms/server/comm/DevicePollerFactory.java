@@ -139,7 +139,7 @@ public class DevicePollerFactory {
 			return new CohuPTZPoller(link, protocol);
 		case STREAMBED:
 			return new StreambedPoller(link);
-		case CAP:
+		case CAP_XML:
 			return new CapPoller(link);
 		case CLEARGUIDE:
 			return new ClearGuidePoller(link);
