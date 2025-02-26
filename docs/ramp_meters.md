@@ -65,6 +65,22 @@ is operating, but they can be controlled by IRIS if that is not feasable.
 In that case, beacons will also flash if a [merge] detector on the entrance
 ramp has high occupancy (30%+).
 
+## Locks
+
+Operators can _lock_ a ramp meter either ON or OFF by selecting a lock reason.
+OFF locks prevent the meter from turning on, and will stay in place until
+manually removed.  ON locks have an expiration depending on the reason, and
+the metering rate can be adjusted using the _Shrink_ and _Grow_ buttons.
+
+Reason       | ON  | Expiration
+-------------|-----|-----------
+incident     | Yes | 30 minutes
+testing      | Yes | 5 minutes
+knocked down | No  | N/A
+indication   | No  | N/A
+maintenance  | No  | N/A
+construction | No  | N/A
+
 
 [CD roads]: road_topology.html#rnode-transitions
 [density adaptive]: density_adaptive.html
