@@ -139,8 +139,9 @@ public class DevicePollerFactory {
 			return new CohuPTZPoller(link, protocol);
 		case STREAMBED:
 			return new StreambedPoller(link);
+		case CAP_JSON:
 		case CAP_XML:
-			return new CapPoller(link);
+			return new CapPoller(link, protocol);
 		case CLEARGUIDE:
 			return new ClearGuidePoller(link);
 		case NDOT_BEACON:
