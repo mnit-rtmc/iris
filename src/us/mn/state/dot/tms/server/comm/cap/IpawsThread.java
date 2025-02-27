@@ -21,17 +21,18 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.MessengerException;
 import us.mn.state.dot.tms.server.comm.OpQueue;
 
 /**
- * CAP thread, used to provide a Messenger with date required by IPAWS-OPEN.
+ * IPAWS thread, used to provide a Messenger with date required by IPAWS-OPEN.
  *
  * @author Douglas Lau
  */
-public class CapThread extends CommThread<CapProperty> {
+public class IpawsThread extends CommThread<CapProperty> {
 
 	/** Date formatter for formatting dates in IPAWS format */
 	static private final SimpleDateFormat IPAWS_FORMAT =
@@ -40,8 +41,23 @@ public class CapThread extends CommThread<CapProperty> {
 		IPAWS_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
 	}
 
-	/** Create a new CAP thread */
-	public CapThread(CapPoller p, OpQueue<CapProperty> q, URI s,
+	/** Most recent successful request date
+	 *  (at startup, initialize to an hour ago) */
+	static private Date REQ_SUCCESS = new Date(
+		TimeSteward.currentTimeMillis() - 60 * 60 * 1000);
+
+	/** Get date for IPAWS path API request */
+	static private String getReqDate() {
+		return IPAWS_FORMAT.format(REQ_SUCCESS);
+	}
+
+	/** Set date/time of most recent successful request */
+	static public void setReqSuccess(Date dt) {
+		REQ_SUCCESS = dt;
+	}
+
+	/** Create a new IPAWS thread */
+	public IpawsThread(CapPoller p, OpQueue<CapProperty> q, URI s,
 		String u, int rt, int nrd, DebugLog log)
 	{
 		super(p, q, s, u, rt, nrd, log);
@@ -73,10 +89,5 @@ public class CapThread extends CommThread<CapProperty> {
 				u.getQuery(), u.getFragment());
 		} else
 			return u;
-	}
-
-	/** Get date for IPAWS path API request */
-	static private String getReqDate() {
-		return IPAWS_FORMAT.format(CapXmlReader.getReqDate());
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.cap;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,7 +26,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * Class to handle converting alert XML into JSON
+ * SAX event handler to convert CAP-XML into JSON
  *
  * @author Douglas Lau
  */
@@ -63,18 +64,19 @@ public class AlertHandler extends DefaultHandler {
 	/** Element stack */
 	private final ArrayDeque<Object> stack = new ArrayDeque<Object>();
 
-	/** Alert processor */
-	private final AlertProcessor processor;
+	/** List of alerts */
+	private final ArrayList<JSONObject> alerts =
+		new ArrayList<JSONObject>();
 
-	/** Create an alert handler */
-	public AlertHandler(AlertProcessor p) {
-		processor = p;
+	/** Process a received alert */
+	public ArrayList<JSONObject> getAlerts() {
+		return alerts;
 	}
 
 	/** Start an XML element.
 	 *
-	 *  Push a new JSON object to the stack.  This object will contain all
-	 *  sub-elements of this element. */
+	 * Push a new JSON object to the stack.  This object will contain all
+	 * sub-elements of this element. */
 	@Override
 	public void startElement(String uri, String localName,
 		String qName, Attributes attrs)
@@ -110,9 +112,9 @@ public class AlertHandler extends DefaultHandler {
 
 	/** End an XML element.
 	 *
-	 *  Pop the object on top of the stack.  It will be either a JSON object
-	 *  or a String.  Either way, add it to the object now at the top of the
-	 *  stack. */
+	 * Pop the object on top of the stack.  It will be either a JSON object
+	 * or a String.  Either way, add it to the object now at the top of the
+	 * stack. */
 	@Override
 	public void endElement(String uri, String localName,
 		String qName) throws SAXException
@@ -120,7 +122,7 @@ public class AlertHandler extends DefaultHandler {
 		Object obj = stack.pop();
 		if (qName.equals("alert")) {
 			if (obj instanceof JSONObject)
-				processAlert((JSONObject) obj);
+				alerts.add((JSONObject) obj);
 		} else if (ELEMENTS.contains(qName)) {
 			Object parent = stack.peek();
 			if (parent instanceof JSONObject) {
@@ -131,10 +133,5 @@ public class AlertHandler extends DefaultHandler {
 					jo.put(qName, obj);
 			}
 		}
-	}
-
-	/** Process a received alert */
-	private void processAlert(JSONObject alert) {
-		processor.processAlert(alert);
 	}
 }
