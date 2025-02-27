@@ -35,7 +35,10 @@ public class TrafficProperty extends StatusProperty {
 	static private final int OFF_COUNT = 3;
 	static private final int OFF_VEHICLE = 7;
 
-	/** Parse from one to four vehicle informations */
+	/** Parse from one to four vehicle informations.
+	 *
+	 * If multiple vehicles are reported, they are in chronological order;
+	 * vehicle 1 first, then 2, 3 and 4. */
 	static private ArrayList<VehicleInfo> parseVehicleInfo(byte[] buf)
 		throws ParsingException
 	{
@@ -234,7 +237,6 @@ public class TrafficProperty extends StatusProperty {
 
 	/** Log vehicle detection events */
 	private void logVehicles(DetectorImpl det) {
-		// FIXME: which came first, vehicle 1 or vehicle 2?
 		long st = stamp0;
 		for (VehicleInfo info: vehicles) {
 			st += info.getHeadway();
