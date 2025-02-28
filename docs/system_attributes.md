@@ -34,7 +34,7 @@ System Attribute                 | Description
 `camera_playlist_dwell_sec`      | Dwell time for [camera] play lists
 `camera_ptz_blind`               | Allow [camera] controls to be used even when not currently streaming to the IRIS client
 `camera_stream_controls_enable`  | Enable [camera] stream control panel (stop, play, etc.)
-`cap_xml_save_enable`            | Enable saving CAP XML file for parsing errors
+`cap_save_enable`                | Enable saving CAP file for parsing errors
 `clearguide_key`                 | ClearGuide customer key
 `client_units_si`                | `true` for the client to display units using the International System of Units (SI) or `false` for customary (US) units
 `database_version`               | IRIS database version; developer attribute.  **Do not change**.

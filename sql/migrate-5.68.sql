@@ -31,4 +31,8 @@ UPDATE iris.comm_protocol
     SET description = 'CAP-IPAWS'
     WHERE id = 42;
 
+UPDATE iris.system_attribute
+    SET name = 'cap_save_enable'
+    WHERE name = 'cap_xml_save_enable';
+
 COMMIT;

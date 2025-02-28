@@ -66,7 +66,7 @@ camera_out_of_service_url
 camera_playlist_dwell_sec	5
 camera_ptz_blind	true
 camera_stream_controls_enable	false
-cap_xml_save_enable	true
+cap_save_enable	true
 clearguide_key	
 client_units_si	true
 database_version	5.67.0

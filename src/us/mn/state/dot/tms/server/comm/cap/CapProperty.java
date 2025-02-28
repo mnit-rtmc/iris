@@ -46,7 +46,7 @@ public class CapProperty extends ControllerProperty {
 
 	/** Get save document enabled setting */
 	static private boolean getSaveEnabled() {
-		return SystemAttrEnum.CAP_XML_SAVE_ENABLE.getBoolean();
+		return SystemAttrEnum.CAP_SAVE_ENABLE.getBoolean();
 	}
 
 	/** Timer thread for CAP jobs */
