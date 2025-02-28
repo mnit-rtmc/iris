@@ -61,13 +61,20 @@ public class PTZCommandProp extends OnvifProp {
 		String roundedT = df.format(snappedPanTilt[1]);
 		String roundedZ = df.format(z);
 
-		log("Queueing PTZ: " + roundedP + ", " + roundedT + ", " + roundedZ);
-		cmd = new String[] {
-			"ptz",
-			roundedP,
-			roundedT,
-			roundedZ,
-		};
+		if (!("0.0".equals(roundedP) && "0.0".equals(roundedT) && "0.0".equals(roundedZ))) {
+			log("Queueing PTZ: " + roundedP + ", " + roundedT + ", " + roundedZ);
+			cmd = new String[] {
+				"ptz",
+				roundedP,
+				roundedT,
+				roundedZ,
+			};
+		} else {
+			log("Queueing Stop");
+			cmd = new String[] {
+				"stop",
+			};
+		}
 	}
 
 	/** Sets message to store preset { storepreset, token, name } */

@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 import us.mn.state.dot.tms.server.CameraImpl;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -39,11 +40,13 @@ public class OpOnvifPTZ extends OpDevice<OnvifProp> {
 
 	/** ONVIF property */
 	private final OnvifProp prop;
+	private final ControllerImpl controller;
 
 	/** Create a new ONVIF operation */
 	protected OpOnvifPTZ(CameraImpl c, OnvifProp p) {
 		super(PriorityLevel.COMMAND, c);
 		prop = p;
+		controller = (ControllerImpl) c.getController();
 	}
 
 	/** Create the second phase of the operation */
@@ -69,7 +72,7 @@ public class OpOnvifPTZ extends OpDevice<OnvifProp> {
 		protected Phase<OnvifProp> poll(CommMessage<OnvifProp> mess)
 			throws IOException
 		{
-			String resp = prop.sendSoap();
+			String resp = prop.sendSoap(controller);
 			log("Sent soap, response:\n" + resp);
 			return null;
 		}
