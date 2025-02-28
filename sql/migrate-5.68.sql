@@ -3,6 +3,8 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
+SELECT iris.update_version('5.67.0', '5.68.0');
+
 -- Add pixel_service flag to msg_pattern
 ALTER TABLE iris.msg_pattern ADD COLUMN pixel_service BOOLEAN;
 UPDATE iris.msg_pattern SET pixel_service = false;
@@ -19,5 +21,14 @@ CREATE VIEW msg_pattern_view AS
     SELECT name, multi, flash_beacon, pixel_service, compose_hashtag
     FROM iris.msg_pattern;
 GRANT SELECT ON msg_pattern_view TO PUBLIC;
+
+-- Change comm protocol 23 to CAP-NWS
+UPDATE iris.comm_protocol
+    SET description = 'CAP-NWS'
+    WHERE id = 23;
+
+UPDATE iris.comm_protocol
+    SET description = 'CAP-IPAWS'
+    WHERE id = 42;
 
 COMMIT;
