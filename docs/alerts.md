@@ -76,6 +76,15 @@ it is important to keep them updated.  Administrators should keep records of
 when this information was last updated and maintain the latest information in
 the database.
 
+## FIPS Codes
+
+As an alternative to forecast zones, FIPS county codes can be used.  For this,
+download the latest [Counties] shapefile to the IRIS server and unzip it.
+Then, execute the following command on the server:
+```
+shp2pgsql -G <nws_shapefile>.shp cap.nws_counties | psql tms
+```
+
 ## Alert Configuration
 
 As only a subset of alerts will typically be of interest to a particular
@@ -224,7 +233,7 @@ pending mode.
 Because the alert system requires alert CAP messages in order to function, it
 can be challenging to test.  To address this, IRIS provides a testing mechanism
 that allows testing the system with a mocked-up CAP message.  To use this, first
-a CAP XML message must be crafted with:
+a CAP message must be crafted with:
 
  - An event type configured in IRIS (which can be a custom "Test" event)
  - An alert area that contains signs suitable for testing
@@ -235,26 +244,22 @@ To do this, it is best to start with a real CAP message taken from IPAWS-OPEN
 ones suitable for testing.  This must be done with care to ensure the [CAP]
 standard is followed and the message can be parsed.
 
-After a CAP message is created, it can be fed into IRIS in one of two ways.
+After a CAP message is created, it can be fed into IRIS using a `file` comm
+link.  Point the URI to a file on the IRIS server, e.g.
+`file:///var/log/iris/cap_test.geojson`.
 
-1. The file can be hosted on an arbitrary HTTPS server (including the IRIS
-server itself if HTTPS is supported).  IRIS can then be configured with a comm
-link that points to this file on that server.
-2. The file can be placed in `/var/log/iris/cap_test.xml` on the IRIS server
-itself, and the controller of an existing CAP `comm link` can be put into the
-`TESTING` condition.
-
-In either case IRIS will read this file and process the alert as if it were a
-real alert.  Note that in a production environment this may activate real signs,
-so care must be taken to ensure the testing is done in a controlled manner.
+IRIS will read this file and process the alert as if it were a real alert.
+Note that in a production environment this may activate real signs, so care
+must be taken to ensure the testing is done in a controlled manner.
 
 
 [action tags]: action_plans.html#action-tags
 [alert configuration]: #alert-configuration
+[CAP]: http://docs.oasis-open.org/emergency/cap/v1.2/CAP-v1.2.html
 [comm config]: comm_config.html
 [comm link]: comm_links.html
 [controller]: controllers.html
-[CAP]: http://docs.oasis-open.org/emergency/cap/v1.2/CAP-v1.2.html
+[Counties]: https://www.weather.gov/gis/Counties
 [hashtag]: hashtags.html
 [IPAWS]: https://www.fema.gov/emergency-managers/practitioners/integrated-public-alert-warning-system
 [message pattern]: message_patterns.html
