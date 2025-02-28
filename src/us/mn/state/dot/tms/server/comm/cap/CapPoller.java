@@ -56,7 +56,7 @@ public class CapPoller extends ThreadedPoller<CapProperty> implements FeedPoller
 	protected CommThread<CapProperty> createCommThread(String uri,
 		int timeout, int nrd)
 	{
-		if (protocol == CommProtocol.CAP_XML) {
+		if (protocol == CommProtocol.CAP_IPAWS) {
 			return new IpawsThread(this, queue, scheme, uri, timeout,
 				nrd, LOG);
 		} else

@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  *
  * @author Douglas Lau
  */
-public class JsonParser implements AlertParser {
+public class NwsParser implements AlertParser {
 
 	/** Parse alerts */
 	@Override

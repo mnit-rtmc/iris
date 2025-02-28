@@ -29,13 +29,13 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Common Alerting Protocol (CAP) XML document parser.
+ * Common Alerting Protocol (CAP) IPAWS document parser.
  *
- * Parses CAP XML documents and converts alerts to JSON.
+ * Parses IPAWS CAP XML documents and converts alerts to JSON.
  *
  * @author Douglas Lau
  */
-public class XmlParser implements AlertParser {
+public class IpawsParser implements AlertParser {
 
 	/** Parse alerts */
 	@Override
