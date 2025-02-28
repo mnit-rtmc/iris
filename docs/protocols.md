@@ -57,13 +57,20 @@ _Multi-drop_ is supported with drops 0 - 15 (backplane) or 128 - 255 (EEPROM).
 Up to 4 detectors can be associated with each [controller], using [IO pin]s
 1 - 4.
 
-## CAP
+## CAP-IPAWS
 
-The Common Alerting Protocol [CAP] is used for polling external feeds such as
-the Integrated Public Alert and Warning System [IPAWS].  [Alerts] can be used
-to automatically post weather and other messages to Dynamic Message Signs.  For
-IPAWS, this requires an `HTTPS` URI provided by the Federal Emergency Management
-Agency and a [controller] set to `ACTIVE` condition.
+This Common Alerting Protocol [CAP] is used for polling the Integrated Public
+Alert and Warning System [IPAWS].  [Alerts] can be used to automatically post
+weather and other messages to Dynamic Message Signs.  This requires an `HTTPS`
+URI provided by the Federal Emergency Management Agency and a [controller] set
+to `ACTIVE` condition.
+
+## CAP-NWS
+
+This Common Alerting Protocol [CAP] is used for polling the National Weather
+Service weather feed.  [Alerts] can be used to automatically post weather
+messages to Dynamic Message Signs.  This requires a [controller] set to
+`ACTIVE` condition.
 
 ## CBW
 

@@ -35,7 +35,7 @@ have enough disk space available.
 Filename               | Description
 -----------------------|-----------------
 `{comm-link-name}.log` | Comm link log
-`alert`                | [Alert] information, including [CAP] protocol
+`alert`                | [Alert] information
 `bottleneck`           | Bottleneck calculation for VSA algorithm
 `canoga`               | [Canoga] protocol
 `cbw`                  | [CBW] protocol
@@ -73,7 +73,6 @@ Filename               | Description
 
 [Alert]: alerts.html
 [Canoga]: protocols.html#canoga
-[CAP]: protocols.html#cap
 [CBW]: protocols.html#cbw
 [database]: database.html
 [DIN-Relay]: protocols.html#din-relay
