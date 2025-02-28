@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2021  Minnesota Department of Transportation
+ * Copyright (C) 2007-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,6 +55,8 @@ abstract public class Messenger implements Closeable {
 			return HttpFileMessenger.create(u, rt);
 		else if ("https".equals(scheme))
 			return HttpFileMessenger.create(u, rt);
+		else if ("file".equals(scheme))
+			return TestFileMessenger.create(u);
 		else if ("modem".equals(scheme))
 			return ModemMessenger.create(u, rt, nrd);
 		else if ("ssh".equals(scheme))
