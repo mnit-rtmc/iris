@@ -61,9 +61,9 @@ public class CapProperty extends ControllerProperty {
 	/** Create a new CAP property */
 	public CapProperty(String fd, CommProtocol cp) {
 		feed = fd;
-		parser = (cp == CommProtocol.CAP_XML)
-		       ? new XmlParser()
-		       : new JsonParser();
+		parser = (cp == CommProtocol.CAP_IPAWS)
+		       ? new IpawsParser()
+		       : new NwsParser();
 	}
 
 	/** Get a string representation of the property */

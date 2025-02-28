@@ -139,8 +139,8 @@ public class DevicePollerFactory {
 			return new CohuPTZPoller(link, protocol);
 		case STREAMBED:
 			return new StreambedPoller(link);
-		case CAP_JSON:
-		case CAP_XML:
+		case CAP_NWS:
+		case CAP_IPAWS:
 			return new CapPoller(link, protocol);
 		case CLEARGUIDE:
 			return new ClearGuidePoller(link);

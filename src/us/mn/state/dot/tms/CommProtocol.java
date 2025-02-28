@@ -98,8 +98,8 @@ public enum CommProtocol {
 	/** ADEC TDC (22) */
 	ADEC_TDC("ADEC TDC"),
 
-	/** CAP-JSON feed (such as NWS) (23) */
-	CAP_JSON("CAP-JSON Feed", false),
+	/** CAP-NWS feed (GeoJSON) (23) */
+	CAP_NWS("CAP-NWS Feed", false),
 
 	/** Nebraska (NDOT) Beacon (24) */
 	NDOT_BEACON("NDOT Beacon", false),
@@ -158,8 +158,8 @@ public enum CommProtocol {
 	/** Streambed (41) */
 	STREAMBED("Streambed", false),
 
-	/** CAP-XML feed (such as IPAWS-OPEN) (42) */
-	CAP_XML("CAP-XML Feed", false),
+	/** CAP-IPAWS feed (CAP-XML) (42) */
+	CAP_IPAWS("CAP-IPAWS Feed", false),
 
 	/** ClearGuide (43) */
 	CLEARGUIDE("ClearGuide", false),
