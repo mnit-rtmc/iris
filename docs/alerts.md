@@ -18,14 +18,18 @@ posted with no human interaction, or in approval mode, where an operator must
 confirm messages before they are posted or updated.  The alert system is managed
 from the "Alert" tab and other dialogs and system attributes.
 
+## National Weather Service
+
+In the US, the National Weather Service operates an open API providing weather
+alerts.  The URI is `https://api.weather.gov/alerts/active?area={XX}`, with
+`{XX}` being the 2-letter state ID.
+
 ## IPAWS
 
-In the US, the Integrated Public Alert and Warning System [IPAWS] collects and
-distributes a wide variety of public alerts and warnings that originate from
-over 1,500 alerting authorities.  The most common alerts are weather related,
-and are issued by the National Weather Service.
-
-### Obtaining Access
+An alternative to the NWS is the Integrated Public Alert and Warning System
+[IPAWS].  This feed is more difficult to set up, but provides additional alert
+types not related to weather — a wide variety of public alerts and warnings
+that originate from over 1,500 alerting authorities.
 
 The IPAWS Open Platform for Emergency Networks (IPAWS-OPEN) is operated by the
 Federal Emergency Management Agency (FEMA).  Obtaining access requires approval
@@ -34,17 +38,15 @@ running IRIS must obtain their own authorization and may not share it with other
 organizations.
 
 The authorization process can be initiated by sending a request to
-[IPAWS@FEMA.DHS.GOV](mailto:IPAWS@FEMA.DHS.GOV), after which the IPAWS Program
-Office will send the necessary forms for completion. After the completed forms
-have been returned, an MOU will be provided for signature. Once the signed MOU
-has been executed, the URL required to access IPAWS-OPEN will be provided.
+[ipaws@fema.dhs.gov](mailto:IPAWS@FEMA.DHS.GOV), after which the IPAWS Program
+Office will send the necessary forms to sign up.
 
 ## CAP Feed
 
-A CAP feed is configured via a [comm link].  The [comm config] must use the
-`CAP` protocol, with a `timeout` of 8 seconds and `idle disconnect` time of 10
-seconds.  A polling period of 60 seconds is recommended, but you may use longer
-periods if desired.
+A CAP feed is configured via a [comm link].  The [comm config] must use either
+the `CAP-NWS` or `CAP-IPAWS` protocol.  The recommended `timeout` is 8 seconds
+and `idle disconnect` time 10 seconds.  A polling period of 60 seconds is also
+recommended, but you may use longer periods if desired.
 
 The `comm link` must contain the URL for a valid CAP feed.  For IPAWS-OPEN, the
 `path` ends with `recent/`, followed by a date/time stamp.  IRIS will add the
@@ -58,7 +60,7 @@ for new or updated alerts, parse and process them to determine if they are
 relevant and, if appropriate, create messages for deployment.  This processing
 is controlled by [alert configuration](#alert-configuration)s.
 
-## Forecast Zones
+## Geocoding: Forecast Zones and FIPS Codes
 
 Alerts from the National Weather Service use special codes to define GIS
 forecast zones.  This information can be obtained in shapefile format from NWS
@@ -68,7 +70,7 @@ To load geometry data, download the latest [Public Forecast Zones] shapefile
 to the IRIS server and unzip it.  To import the file, execute the following
 command on the server:
 ```
-shp2pgsql -G <nws_shapefile>.shp cap.nws_zones | psql tms
+shp2pgsql -G z_{date}.shp cap.nws_zones | psql tms
 ```
 
 NOTE: Alert areas may change (NWS updates the file roughly every six months), so
@@ -76,13 +78,11 @@ it is important to keep them updated.  Administrators should keep records of
 when this information was last updated and maintain the latest information in
 the database.
 
-## FIPS Codes
-
 As an alternative to forecast zones, FIPS county codes can be used.  For this,
 download the latest [Counties] shapefile to the IRIS server and unzip it.
 Then, execute the following command on the server:
 ```
-shp2pgsql -G <nws_shapefile>.shp cap.nws_counties | psql tms
+shp2pgsql -G c_{date}.shp cap.nws_counties | psql tms
 ```
 
 ## Alert Configuration
