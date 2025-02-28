@@ -101,7 +101,7 @@ public abstract class Service {
 
 	/** Returns the current UTC time for use in password digest */
 	private static String getUTCTime() {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 		return sdf.format(new Date());
 	}
@@ -120,6 +120,7 @@ public abstract class Service {
 
 		Element head = (Element) env.getElementsByTagName("SOAP-ENV:Header").item(0);
 		Element sec = doc.createElement("wsse:Security");
+		sec.setAttribute("SOAP-ENV:mustUnderstand", "1");
 		head.appendChild(sec);
 		Element usernameToken = doc.createElement("wsse:UsernameToken");
 		sec.appendChild(usernameToken);
@@ -137,6 +138,7 @@ public abstract class Service {
 		Base64.Encoder e = Base64.getEncoder();
 		byte[] nonceBinaryData = getNonce().getBytes("UTF-8");
 		String nonceBase64 = e.encodeToString(nonceBinaryData);
+		nonce.setAttribute("EncodingType", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary");
 		nonce.appendChild(doc.createTextNode(nonceBase64));
 
 		// Get the date and save it into the Created element
