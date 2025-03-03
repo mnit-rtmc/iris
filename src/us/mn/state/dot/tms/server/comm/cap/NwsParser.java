@@ -55,8 +55,8 @@ public class NwsParser implements AlertParser {
 	/** Convert an NWS GeoJSON feature into a CAP alert */
 	private JSONObject makeAlert(JSONObject feat) {
 		JSONObject alert = new JSONObject();
-		alert.putOnce("identifier", feat.getString("id"));
 		JSONObject props = feat.getJSONObject("properties");
+		alert.putOnce("identifier", props.getString("id"));
 		alert.putOnce("sender", props.getString("sender"));
 		alert.putOnce("sent", props.getString("sent"));
 		alert.putOnce("status", props.getString("status"));
@@ -71,7 +71,7 @@ public class NwsParser implements AlertParser {
 		info.append("responseType", props.getString("response"));
 		info.putOnce("urgency", props.getString("urgency"));
 		info.putOnce("severity", props.getString("severity"));
-		info.putOnce("certainty", props.getString("centainty"));
+		info.putOnce("certainty", props.getString("certainty"));
 		info.putOnce("effective", props.optString("effective"));
 		info.putOnce("onset", props.optString("onset"));
 		info.putOnce("expires", props.optString("expires"));
