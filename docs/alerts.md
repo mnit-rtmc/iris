@@ -71,6 +71,7 @@ to the IRIS server and unzip it.  To import the file, execute the following
 command on the server:
 ```
 shp2pgsql -G z_{date}.shp cap.nws_zones | psql tms
+psql tms -c 'GRANT SELECT ON cap.nws_zones TO PUBLIC'
 ```
 
 NOTE: Alert areas may change (NWS updates the file roughly every six months), so
@@ -83,6 +84,7 @@ download the latest [Counties] shapefile to the IRIS server and unzip it.
 Then, execute the following command on the server:
 ```
 shp2pgsql -G c_{date}.shp cap.nws_counties | psql tms
+psql tms -c 'GRANT SELECT ON cap.nws_counties TO PUBLIC'
 ```
 
 ## Alert Configuration
