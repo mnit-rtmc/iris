@@ -267,7 +267,7 @@ public class AlertData {
 	{
 		String codes = String.join(",", zones);
 		log("got UGC codes: " + codes);
-		BaseObjectImpl.store.query("SELECT geom FROM " + NWS_ZONE_TABLE
+		BaseObjectImpl.store.query("SELECT geog FROM " + NWS_ZONE_TABLE
 			+ " WHERE state_zone IN (" + codes + ");",
 			new PolygonFactory(polys));
 	}
@@ -302,7 +302,7 @@ public class AlertData {
 	{
 		String codes = String.join(",", fips_codes);
 		log("got FIPS codes: " + codes);
-		BaseObjectImpl.store.query("SELECT geom FROM " +
+		BaseObjectImpl.store.query("SELECT geog FROM " +
 			NWS_COUNTIES_TABLE + " WHERE fips IN (" + codes + ");",
 			new PolygonFactory(polys));
 	}
