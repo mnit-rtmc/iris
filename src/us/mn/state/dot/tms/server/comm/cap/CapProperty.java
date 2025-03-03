@@ -58,12 +58,16 @@ public class CapProperty extends ControllerProperty {
 	/** Alert parser */
 	private final AlertParser parser;
 
+	/** CAP file extension */
+	private final String extension;
+
 	/** Create a new CAP property */
 	public CapProperty(String fd, CommProtocol cp) {
 		feed = fd;
 		parser = (cp == CommProtocol.CAP_IPAWS)
 		       ? new IpawsParser()
 		       : new NwsParser();
+		extension = (cp == CommProtocol.CAP_IPAWS) ? ".xml" : ".json";
 	}
 
 	/** Get a string representation of the property */
@@ -107,7 +111,7 @@ public class CapProperty extends ControllerProperty {
 	/** Save the response document */
 	private void saveDoc(ByteArrayOutputStream doc) throws IOException {
 		String fn = "/var/log/iris/cap_err_" + DT_FMT.format(
-			TimeSteward.getDateInstance()) + ".xml";
+			TimeSteward.getDateInstance()) + extension;
 		doc.writeTo(new FileOutputStream(fn));
 	}
 
