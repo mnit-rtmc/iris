@@ -3,7 +3,7 @@ members = ["honeybee", "mayfly", "bulb", "rendzina", "resources"]
 resolver = "2"
 
 [workspace.package]
-version = "5.67.4"
+version = "5.68.0"
 edition = "2024"
 
 [workspace.dependencies]

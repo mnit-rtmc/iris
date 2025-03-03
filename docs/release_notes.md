@@ -1,5 +1,15 @@
 # IRIS 5.x Release Notes
 
+5.68.0 (3 Mar 2025)
+ - Improved ONVIF camera control issues
+ - Added `pixel_service` flag to message patterns
+ - Added CAP-NWS protocol; renamed CAP to CAP-IPAWS
+ - Added support for testing protocols with `file://` scheme
+ - Improved ramp meter lock constraints and UI
+ - Fixed quirks in ADEC TDC protocol
+ - honeybee: Update to axum 0.8 (+ other deps)
+ - Update to Rust 2024 Edition
+
 5.67.0 (19 Feb 2025)
  - Add protocol driver for ADEC TDC non-intrusive detector
  - Improved ramp meter locks (15-minute duration + user ID)
