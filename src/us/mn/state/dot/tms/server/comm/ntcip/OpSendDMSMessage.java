@@ -379,6 +379,11 @@ public class OpSendDMSMessage extends OpDMS {
 			catch (GenError e) {
 				return new QueryValidateMsgErr();
 			}
+			catch (BadValue e) {
+				// This shoul only happen if the sign
+				// is somehow not in `modifying` state
+				return new QueryValidateMsgErr();
+			}
 			return new ChkMsgValid();
 		}
 	}
