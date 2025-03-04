@@ -89,7 +89,6 @@ abstract public class OnvifProp extends ControllerProperty {
 		String videoSource = ControllerHelper.getSetup(c, "videoSource");
 		boolean needMedia = (mediaProfile == null || mediaProfile.isEmpty()) && (
 			cmd[0].equals("ptz") ||
-			cmd[0].equals("stop") ||
 			cmd[0].equals("wiper") ||
 			cmd[0].contains("preset")
 		);
@@ -158,9 +157,6 @@ abstract public class OnvifProp extends ControllerProperty {
 					break;
 				}
 				sb.append(ptz.continuousMove(mediaProfile, cmd[1], cmd[2], cmd[3]));
-				break;
-			case "stop":
-				sb.append(ptz.stop(mediaProfile));
 				break;
 			case "storepreset":
 				if (cmd.length < 2) {

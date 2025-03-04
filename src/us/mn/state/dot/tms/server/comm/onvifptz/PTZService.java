@@ -138,21 +138,16 @@ public class PTZService extends Service {
 		Element velocity = doc.createElement("wsdl:Velocity");
 		continuousMove.appendChild(velocity);
 
-		if (!("0.0".equals(xVel) || "0".equals(xVel))
-				|| !("0.0".equals(yVel) || "0".equals(yVel))) {
-			Element panTilt = doc.createElement("tt:PanTilt");
-			panTilt.setAttribute("x", xVel);
-			panTilt.setAttribute("y", yVel);
-			panTilt.setAttribute("space", "http://www.onvif.org/ver10/tptz/PanTiltSpaces/VelocityGenericSpace");
-			velocity.appendChild(panTilt);
-		}
+		Element panTilt = doc.createElement("tt:PanTilt");
+		panTilt.setAttribute("x", xVel);
+		panTilt.setAttribute("y", yVel);
+		panTilt.setAttribute("space", "http://www.onvif.org/ver10/tptz/PanTiltSpaces/VelocityGenericSpace");
+		velocity.appendChild(panTilt);
 
-		if (!("0.0".equals(zVel) || "0".equals(zVel))) {
-			Element zoom = doc.createElement("tt:Zoom");
-			zoom.setAttribute("x", zVel);
-			zoom.setAttribute("space", "http://www.onvif.org/ver10/tptz/ZoomSpaces/VelocityGenericSpace");
-			velocity.appendChild(zoom);
-		}
+		Element zoom = doc.createElement("tt:Zoom");
+		zoom.setAttribute("x", zVel);
+		zoom.setAttribute("space", "http://www.onvif.org/ver10/tptz/ZoomSpaces/VelocityGenericSpace");
+		velocity.appendChild(zoom);
 
 		return doc;
 	}
