@@ -371,6 +371,7 @@ impl RampMeter {
         let item_states = self.item_states(anc).to_html();
         let location = HtmlStr::new(&self.location).with_len(64);
         let mut rate = "".to_string();
+        let mut queue = "".to_string();
         let mut meter1 = "".to_string();
         let mut meter2 = "".to_string();
         if let Some(s) = &self.status {
@@ -397,6 +398,19 @@ impl RampMeter {
                     }
                 }
             }
+            if let Some(value) =
+                s.queue.as_ref().and_then(|q| match q.as_str() {
+                    "empty" => Some(1),
+                    "exists" => Some(2),
+                    "full" => Some(4),
+                    _ => None,
+                })
+            {
+                queue = format!(
+                    "queue <meter min='0' optimum='0' low='2' \
+                    high='3' max='4' value='{value}'></meter>"
+                );
+            }
         }
         if meter1.is_empty() || meter2.is_empty() {
             let mut buf = Vec::with_capacity(4096);
@@ -422,6 +436,7 @@ impl RampMeter {
               {meter1}\
               <div class='column'>\
                 <span>{rate}</span>\
+                <span>{queue}</span>\
                 <span>\
                   <button id='q_grow' type='button'>⏫ Grow</button>\
                   <button id='q_shrink' type='button'>⏬ Shrink</button>\
