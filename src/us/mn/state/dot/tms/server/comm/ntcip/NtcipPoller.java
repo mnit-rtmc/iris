@@ -91,6 +91,7 @@ public class NtcipPoller extends ThreadedPoller implements AlarmPoller,
 			break;
 		case QUERY_SETTINGS:
 			addOp(new OpQueryDMSFonts(dms));
+			addOp(new OpQueryDMSGraphics(dms));
 			break;
 		case SEND_SETTINGS:
 			dms.requestConfigure(); //required before sending fonts
