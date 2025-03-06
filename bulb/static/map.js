@@ -211,7 +211,7 @@ function tms_style_item(name) {
     return item_style(state);
 }
 
-// Get style based on item state
+// Get style based on main item state
 function item_style(state) {
     let style = tms_style_base();
     switch (state) {

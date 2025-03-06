@@ -274,6 +274,9 @@ label:has(+ #sb_resource) {
 .item_available {
   background-color: #004;
 }
+.item_incident {
+  background-color: #600;
+}
 .item_deployed {
   background-color: #440;
 }

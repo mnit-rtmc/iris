@@ -316,17 +316,35 @@ fn meter_html(buf: Vec<u8>) -> String {
 impl RampMeter {
     /// Get fault, if any
     fn fault(&self) -> Option<&str> {
-        if let Some(status) = &self.status {
-            if let Some(fault) = &status.fault {
-                return Some(fault);
-            }
+        match &self.status {
+            Some(status) => status.fault.as_deref(),
+            None => Some("No status"),
         }
-        None
     }
 
     /// Get item states
     fn item_states<'a>(&'a self, anc: &'a RampMeterAnc) -> ItemStates<'a> {
+        const LOCKED: &str = "locked";
         let mut states = anc.cio.item_states(self);
+        match (&self.status, &self.lock) {
+            (Some(st), None) => {
+                if st.rate.is_some() {
+                    states = states.with(ItemState::Planned, "metering");
+                }
+            }
+            (Some(st), Some(lock)) => match (st.rate, lock.reason.as_str()) {
+                (Some(_rt), "incident") => {
+                    states = states.with(ItemState::Incident, LOCKED);
+                }
+                (Some(_rt), _) => {
+                    states = states.with(ItemState::Deployed, LOCKED);
+                }
+                _ => {
+                    states = states.with(ItemState::Available, LOCKED);
+                }
+            },
+            _ => (),
+        }
         if let Some(fault) = self.fault() {
             states = states.with(ItemState::Fault, fault);
         }
@@ -492,6 +510,8 @@ impl Card for RampMeter {
     /// All item states as html options
     const ITEM_STATES: &'static str = "<option value=''>all ↴\
          <option value='🔹'>🔹 available\
+         <option value='🗓️'>🗓️ planned\
+         <option value='🚨'>🚨 incident\
          <option value='🔶'>🔶 deployed\
          <option value='⚠️'>⚠️ fault\
          <option value='🔌'>🔌 offline\
@@ -518,10 +538,14 @@ impl Card for RampMeter {
         let item_states = self.item_states(anc);
         if item_states.is_match(ItemState::Inactive.code()) {
             ItemState::Inactive
-        } else if item_states.is_match(ItemState::Deployed.code()) {
-            ItemState::Deployed
         } else if item_states.is_match(ItemState::Offline.code()) {
             ItemState::Offline
+        } else if item_states.is_match(ItemState::Planned.code()) {
+            ItemState::Planned
+        } else if item_states.is_match(ItemState::Incident.code())
+            || item_states.is_match(ItemState::Deployed.code())
+        {
+            ItemState::Deployed
         } else {
             ItemState::Available
         }
