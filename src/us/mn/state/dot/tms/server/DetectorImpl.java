@@ -598,6 +598,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		if (f != force_fail) {
 			store.update(this, "force_fail", f);
 			setForceFail(f);
+			if (!f)
+				resetAutoFailCounters();
 		}
 	}
 
