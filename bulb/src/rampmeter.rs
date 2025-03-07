@@ -30,6 +30,7 @@ use pix::{Palette, Raster};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
+use std::fmt;
 use std::io::Write;
 use wasm_bindgen::JsValue;
 use web_sys::console;
@@ -42,6 +43,18 @@ enum MeterState {
     Green,
     Yellow,
     Red,
+}
+
+/// Meter lock reason
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum LockReason {
+    Unlocked,
+    Incident,
+    Testing,
+    KnockedDown,
+    Indication,
+    Maintenance,
+    Construction,
 }
 
 /// Meter Lock
@@ -297,20 +310,55 @@ fn encode_meter_2<W: Write>(enc: Encoder<W>, red_cs: u16) -> Result<()> {
 
 /// Make meter signal as html
 fn meter_html(buf: Vec<u8>) -> String {
-    let width = 24;
-    let height = 64;
+    const WIDTH: u32 = 24;
+    const HEIGHT: u32 = 64;
     let mut html = String::new();
     html.push_str("<img");
     html.push_str(" width='");
-    html.push_str(&width.to_string());
+    html.push_str(&WIDTH.to_string());
     html.push_str("' height='");
-    html.push_str(&height.to_string());
+    html.push_str(&HEIGHT.to_string());
     html.push_str("' ");
     html.push_str("src='data:image/gif;base64,");
     b64enc.encode_string(buf, &mut html);
-    html.push('\'');
-    html.push_str("/>");
+    html.push_str("' />");
     html
+}
+
+impl From<&str> for LockReason {
+    fn from(r: &str) -> Self {
+        match r {
+            "incident" => Self::Incident,
+            "testing" => Self::Testing,
+            "knocked down" => Self::KnockedDown,
+            "indication" => Self::Indication,
+            "maintenance" => Self::Maintenance,
+            "construction" => Self::Construction,
+            _ => Self::Unlocked,
+        }
+    }
+}
+
+impl fmt::Display for LockReason {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
+impl LockReason {
+    /// Get lock reason as a string slice
+    fn as_str(&self) -> &'static str {
+        use LockReason::*;
+        match self {
+            Unlocked => "unlocked",
+            Incident => "incident",
+            Testing => "testing",
+            KnockedDown => "knocked down",
+            Indication => "indication",
+            Maintenance => "maintenance",
+            Construction => "construction",
+        }
+    }
 }
 
 impl RampMeter {
@@ -321,31 +369,163 @@ impl RampMeter {
 
     /// Get item states
     fn item_states<'a>(&'a self, anc: &'a RampMeterAnc) -> ItemStates<'a> {
-        const LOCKED: &str = "locked";
         let mut states = anc.cio.item_states(self);
-        match (&self.status, &self.lock) {
-            (Some(st), None) => {
-                if st.rate.is_some() {
-                    states = states.with(ItemState::Planned, "metering");
-                }
-            }
-            (Some(st), Some(lock)) => match (st.rate, lock.reason.as_str()) {
-                (Some(_rt), "incident") => {
-                    states = states.with(ItemState::Incident, LOCKED);
-                }
-                (Some(_rt), _) => {
-                    states = states.with(ItemState::Deployed, LOCKED);
-                }
-                _ => {
-                    states = states.with(ItemState::Available, LOCKED);
-                }
-            },
-            _ => (),
+        if states.contains(ItemState::Available) {
+            states = self.item_states_lock();
         }
         if let Some(fault) = self.fault() {
             states = states.with(ItemState::Fault, fault);
         }
         states
+    }
+
+    /// Get item states from status/lock
+    fn item_states_lock(&self) -> ItemStates<'_> {
+        let deployed = match &self.status {
+            Some(st) if st.rate.is_some() => true,
+            _ => false,
+        };
+        let reason = self
+            .lock
+            .as_ref()
+            .map(|lk| LockReason::from(lk.reason.as_str()));
+        let states = if reason == Some(LockReason::Incident) {
+            ItemStates::default()
+                .with(ItemState::Incident, LockReason::Incident.as_str())
+        } else {
+            ItemStates::default()
+        };
+        match (deployed, reason) {
+            (true, Some(reason)) => states
+                .with(ItemState::Deployed, "metering")
+                .with(ItemState::Locked, reason.as_str()),
+            (true, None) => states
+                .with(ItemState::Deployed, "metering")
+                .with(ItemState::Planned, "metering"),
+            (false, Some(reason)) => {
+                states.with(ItemState::Locked, reason.as_str())
+            }
+            (false, None) => ItemState::Available.into(),
+        }
+    }
+
+    /// Render meter images
+    fn meter_images_html(&self) -> (String, String) {
+        let mut meter1 = "".to_string();
+        let mut meter2 = "".to_string();
+        if let Some(s) = &self.status {
+            if let Some(r) = s.rate {
+                let c = 3_600.0 / (r as f32);
+                let ds = (c * 10.0).round() as i32;
+                // between 0.1 and 50.0 seconds
+                if ds > 0 && ds < 500 {
+                    let red_cs = ds as u16 * 10;
+                    let mut buf = Vec::with_capacity(4096);
+                    match encode_meter_1(Encoder::new(&mut buf), red_cs) {
+                        Ok(()) => meter1 = meter_html(buf),
+                        Err(e) => console::log_1(
+                            &format!("encode_meter_1: {e:?}").into(),
+                        ),
+                    }
+                    let mut buf = Vec::with_capacity(4096);
+                    match encode_meter_2(Encoder::new(&mut buf), red_cs) {
+                        Ok(()) => meter2 = meter_html(buf),
+                        Err(e) => console::log_1(
+                            &format!("encode_meter_2: {e:?}").into(),
+                        ),
+                    }
+                }
+            }
+        }
+        if meter1.is_empty() || meter2.is_empty() {
+            let mut buf = Vec::with_capacity(4096);
+            match encode_meter_off(Encoder::new(&mut buf)) {
+                Ok(()) => {
+                    meter1 = meter_html(buf);
+                    meter2 = meter1.clone();
+                }
+                Err(e) => {
+                    console::log_1(&format!("encode_meter_off: {e:?}").into())
+                }
+            }
+        }
+        (meter1, meter2)
+    }
+
+    /// Create an HTML `select` element of lock reasons
+    fn lock_reason_html(&self) -> String {
+        let mut html = String::new();
+        html.push_str("<span>🔒<select id='lock_reason'>");
+        for reason in &[
+            LockReason::Unlocked,
+            LockReason::Incident,
+            LockReason::Testing,
+            LockReason::KnockedDown,
+            LockReason::Indication,
+            LockReason::Maintenance,
+            LockReason::Construction,
+        ] {
+            html.push_str("<option");
+            if let Some(lock) = &self.lock {
+                if lock.reason == reason.as_str() {
+                    html.push_str(" selected");
+                }
+            }
+            html.push('>');
+            html.push_str(reason.as_str());
+            html.push_str("</option>");
+        }
+        html.push_str("</select></span>");
+        html
+    }
+
+    /// Get metering rate as HTML
+    fn rate_html(&self) -> String {
+        if let Some(s) = &self.status {
+            if let Some(r) = s.rate {
+                let c = 3_600.0 / (r as f32);
+                return format!("<span>⏱️ {c:.1} s ({r} veh/hr)</span>");
+            }
+        }
+        String::new()
+    }
+
+    /// Get queue as HTML
+    fn queue_html(&self) -> String {
+        let value = self.status.as_ref().and_then(|s| {
+            s.queue.as_ref().and_then(|q| match q.as_str() {
+                "empty" => Some(8),
+                "exists" => Some(50),
+                "full" => Some(100),
+                _ => None,
+            })
+        });
+        match value {
+            Some(value) => format!(
+                "<span>🚗 queue \
+                  <meter min='0' optimum='0' low='25' high='75' max='100' \
+                         value='{value}'>\
+                  </meter>\
+                </span>"
+            ),
+            None => String::new(),
+        }
+    }
+
+    /// Get shrink/grow buttons as HTML
+    fn shrink_grow_html(&self) -> &'static str {
+        if let Some(lock) = &self.lock {
+            match LockReason::from(lock.reason.as_str()) {
+                LockReason::Incident | LockReason::Testing => {
+                    return "<span>\
+                       <button id='q_shrink' type='button'>Shrink ➘</button>\
+                       <button id='q_grow' type='button'>Grow ➚</button>\
+                     </span>";
+                }
+                _ => (),
+            }
+        }
+        ""
     }
 
     /// Convert to Compact HTML
@@ -367,60 +547,11 @@ impl RampMeter {
         let title = self.title(View::Control);
         let item_states = self.item_states(anc).to_html();
         let location = HtmlStr::new(&self.location).with_len(64);
-        let mut rate = "".to_string();
-        let mut queue = "".to_string();
-        let mut meter1 = "".to_string();
-        let mut meter2 = "".to_string();
-        if let Some(s) = &self.status {
-            if let Some(r) = s.rate {
-                let c = 3_600.0 / (r as f32);
-                rate = format!("{r} veh/hr ({c:.1} s)");
-                let ds = (c * 10.0).round() as i32;
-                // between 0.1 and 50.0 seconds
-                if ds > 0 && ds < 500 {
-                    let red_cs = ds as u16 * 10;
-                    let mut buf = Vec::with_capacity(4096);
-                    match encode_meter_1(Encoder::new(&mut buf), red_cs) {
-                        Ok(()) => meter1 = meter_html(buf),
-                        Err(e) => console::log_1(
-                            &format!("encode_meter_1: {e:?}").into(),
-                        ),
-                    }
-                    let mut buf = Vec::with_capacity(4096);
-                    match encode_meter_2(Encoder::new(&mut buf), red_cs) {
-                        Ok(()) => meter2 = meter_html(buf),
-                        Err(e) => console::log_1(
-                            &format!("encode_meter_2: {e:?}").into(),
-                        ),
-                    }
-                }
-            }
-            if let Some(value) =
-                s.queue.as_ref().and_then(|q| match q.as_str() {
-                    "empty" => Some(8),
-                    "exists" => Some(50),
-                    "full" => Some(100),
-                    _ => None,
-                })
-            {
-                queue = format!(
-                    "queue <meter min='0' optimum='0' low='25' \
-                    high='75' max='100' value='{value}'></meter>"
-                );
-            }
-        }
-        if meter1.is_empty() || meter2.is_empty() {
-            let mut buf = Vec::with_capacity(4096);
-            match encode_meter_off(Encoder::new(&mut buf)) {
-                Ok(()) => {
-                    meter1 = meter_html(buf);
-                    meter2 = meter1.clone();
-                }
-                Err(e) => {
-                    console::log_1(&format!("encode_meter_off: {e:?}").into())
-                }
-            }
-        }
+        let (meter1, meter2) = self.meter_images_html();
+        let reason = self.lock_reason_html();
+        let rate = self.rate_html();
+        let queue = self.queue_html();
+        let shrink_grow = self.shrink_grow_html();
         format!(
             "{title}\
             <div class='row fill'>\
@@ -432,12 +563,7 @@ impl RampMeter {
             <div class='row center'>\
               {meter1}\
               <div class='column'>\
-                <span>{rate}</span>\
-                <span>{queue}</span>\
-                <span>\
-                  <button id='q_grow' type='button'>⏫ Grow</button>\
-                  <button id='q_shrink' type='button'>⏬ Shrink</button>\
-                </span>\
+                {reason}{rate}{queue}{shrink_grow}\
               </div>\
               {meter2}\
             </div>"
@@ -522,9 +648,10 @@ impl Card for RampMeter {
     /// All item states as html options
     const ITEM_STATES: &'static str = "<option value=''>all ↴\
          <option value='🔹'>🔹 available\
+         <option value='🔶' selected>🔶 deployed\
          <option value='🗓️'>🗓️ planned\
          <option value='🚨'>🚨 incident\
-         <option value='🔶'>🔶 deployed\
+         <option value='🔒'>🔒 locked\
          <option value='⚠️'>⚠️ fault\
          <option value='🔌'>🔌 offline\
          <option value='▪️'>▪️ inactive";
@@ -552,12 +679,14 @@ impl Card for RampMeter {
             ItemState::Inactive
         } else if item_states.is_match(ItemState::Offline.code()) {
             ItemState::Offline
+        } else if item_states.is_match(ItemState::Deployed.code()) {
+            ItemState::Deployed
         } else if item_states.is_match(ItemState::Planned.code()) {
             ItemState::Planned
-        } else if item_states.is_match(ItemState::Incident.code())
-            || item_states.is_match(ItemState::Deployed.code())
+        } else if item_states.is_match(ItemState::Fault.code())
+            || item_states.is_match(ItemState::Locked.code())
         {
-            ItemState::Deployed
+            ItemState::Fault
         } else {
             ItemState::Available
         }

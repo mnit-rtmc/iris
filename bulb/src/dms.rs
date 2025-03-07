@@ -1195,6 +1195,8 @@ impl Card for Dms {
             ItemState::Planned
         } else if item_states.is_match(ItemState::External.code()) {
             ItemState::External
+        } else if item_states.is_match(ItemState::Fault.code()) {
+            ItemState::Fault
         } else {
             ItemState::Available
         }

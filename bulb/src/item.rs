@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@ pub enum ItemState {
     Planned,
     /// Deployed for incident
     Incident,
+    /// Locked by operator
+    Locked,
     /// Deployed by external system
     External,
     /// Dedicated purpose
@@ -75,6 +77,7 @@ impl ItemState {
             "🔶" => Some(Self::Deployed),
             "🗓️" => Some(Self::Planned),
             "🚨" => Some(Self::Incident),
+            "🔒" => Some(Self::Locked),
             "👽" => Some(Self::External),
             "🎯" => Some(Self::Dedicated),
             "⚠️" => Some(Self::Fault),
@@ -101,6 +104,7 @@ impl ItemState {
             Self::Deployed => "🔶",
             Self::Planned => "🗓️",
             Self::Incident => "🚨",
+            Self::Locked => "🔒",
             Self::External => "👽",
             Self::Dedicated => "🎯",
             Self::Fault => "⚠️",
@@ -126,6 +130,7 @@ impl ItemState {
             Self::Deployed => "deployed",
             Self::Planned => "planned",
             Self::Incident => "incident",
+            Self::Locked => "locked",
             Self::External => "external",
             Self::Dedicated => "dedicated",
             Self::Fault => "fault",

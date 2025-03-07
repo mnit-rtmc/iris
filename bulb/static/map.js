@@ -226,6 +226,10 @@ function item_style(state) {
             style.fillColor = "#ffca81";
             style.fillOpacity = 0.5;
             return style;
+        case '⚠️':
+            style.fillColor = "black";
+            style.fillOpacity = 0.8;
+            return style;
         case '🔌':
             return style;
         default:
