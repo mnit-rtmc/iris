@@ -371,7 +371,7 @@ label:has(+ #sb_resource) {
 .column {
   display: flex;
   flex-direction: column;
-  padding: 0.1rem;
+  padding: 0.2rem;
 }
 
 .mc_line_gap {
