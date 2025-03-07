@@ -1,5 +1,6 @@
 [workspace]
 members = ["honeybee", "mayfly", "bulb", "rendzina", "resources"]
+default-members = ["honeybee", "mayfly"]
 resolver = "2"
 
 [workspace.package]
