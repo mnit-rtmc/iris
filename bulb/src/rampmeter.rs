@@ -316,10 +316,7 @@ fn meter_html(buf: Vec<u8>) -> String {
 impl RampMeter {
     /// Get fault, if any
     fn fault(&self) -> Option<&str> {
-        match &self.status {
-            Some(status) => status.fault.as_deref(),
-            None => Some("No status"),
-        }
+        self.status.as_ref().and_then(|s| s.fault.as_deref())
     }
 
     /// Get item states
@@ -400,15 +397,15 @@ impl RampMeter {
             }
             if let Some(value) =
                 s.queue.as_ref().and_then(|q| match q.as_str() {
-                    "empty" => Some(1),
-                    "exists" => Some(2),
-                    "full" => Some(4),
+                    "empty" => Some(8),
+                    "exists" => Some(50),
+                    "full" => Some(100),
                     _ => None,
                 })
             {
                 queue = format!(
-                    "queue <meter min='0' optimum='0' low='2' \
-                    high='3' max='4' value='{value}'></meter>"
+                    "queue <meter min='0' optimum='0' low='25' \
+                    high='75' max='100' value='{value}'></meter>"
                 );
             }
         }
