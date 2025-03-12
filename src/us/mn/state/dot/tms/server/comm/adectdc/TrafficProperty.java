@@ -162,7 +162,8 @@ public class TrafficProperty extends StatusProperty {
 			toggleFrameControlBit();
 			return;
 		}
-		if (buf[0] != (CTRL_VEHICLE))
+		// Is response always "Code 0" when detector in SiTOS mode?
+		if (buf[0] != (CTRL_VEHICLE) && buf[0] != (CTRL_RESET))
 			throw new ParsingException("Wrong CTRL: " + buf[0]);
 		if (buf.length < 3)
 			throw new ParsingException("Wrong len: " + buf.length);
