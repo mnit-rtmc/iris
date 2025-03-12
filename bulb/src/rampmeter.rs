@@ -379,33 +379,36 @@ impl RampMeter {
         states
     }
 
+    /// Get lock reason
+    fn lock_reason(&self) -> LockReason {
+        self.lock
+            .as_ref()
+            .map(|lk| LockReason::from(lk.reason.as_str()))
+            .unwrap_or(LockReason::Unlocked)
+    }
+
     /// Get item states from status/lock
     fn item_states_lock(&self) -> ItemStates<'_> {
         let deployed = match &self.status {
             Some(st) if st.rate.is_some() => true,
             _ => false,
         };
-        let reason = self
-            .lock
-            .as_ref()
-            .map(|lk| LockReason::from(lk.reason.as_str()));
-        let states = if reason == Some(LockReason::Incident) {
+        let reason = self.lock_reason();
+        let states = if reason == LockReason::Incident {
             ItemStates::default()
                 .with(ItemState::Incident, LockReason::Incident.as_str())
         } else {
             ItemStates::default()
         };
         match (deployed, reason) {
-            (true, Some(reason)) => states
-                .with(ItemState::Deployed, "metering")
-                .with(ItemState::Locked, reason.as_str()),
-            (true, None) => states
+            (true, LockReason::Unlocked) => states
                 .with(ItemState::Deployed, "metering")
                 .with(ItemState::Planned, "metering"),
-            (false, Some(reason)) => {
-                states.with(ItemState::Locked, reason.as_str())
-            }
-            (false, None) => ItemState::Available.into(),
+            (true, _) => states
+                .with(ItemState::Deployed, "metering")
+                .with(ItemState::Locked, reason.as_str()),
+            (false, LockReason::Unlocked) => ItemState::Available.into(),
+            (false, _) => states.with(ItemState::Locked, reason.as_str()),
         }
     }
 
@@ -454,9 +457,15 @@ impl RampMeter {
 
     /// Create an HTML `select` element of lock reasons
     fn lock_reason_html(&self) -> String {
+        let reason = self.lock_reason();
         let mut html = String::new();
-        html.push_str("<span>🔒<select id='lock_reason'>");
-        for reason in &[
+        html.push_str("<span>");
+        html.push(match reason {
+            LockReason::Unlocked => '🔓',
+            _ => '🔒',
+        });
+        html.push_str("<select id='lock_reason'>");
+        for r in [
             LockReason::Unlocked,
             LockReason::Incident,
             LockReason::Testing,
@@ -466,10 +475,8 @@ impl RampMeter {
             LockReason::Construction,
         ] {
             html.push_str("<option");
-            if let Some(lock) = &self.lock {
-                if lock.reason == reason.as_str() {
-                    html.push_str(" selected");
-                }
+            if r == reason {
+                html.push_str(" selected");
             }
             html.push('>');
             html.push_str(reason.as_str());
@@ -514,18 +521,15 @@ impl RampMeter {
 
     /// Get shrink/grow buttons as HTML
     fn shrink_grow_html(&self) -> &'static str {
-        if let Some(lock) = &self.lock {
-            match LockReason::from(lock.reason.as_str()) {
-                LockReason::Incident | LockReason::Testing => {
-                    return "<span>\
-                       <button id='q_shrink' type='button'>Shrink ➘</button>\
-                       <button id='q_grow' type='button'>Grow ➚</button>\
-                     </span>";
-                }
-                _ => (),
+        match self.lock_reason() {
+            LockReason::Incident | LockReason::Testing => {
+                "<span>\
+                   <button id='q_shrink' type='button'>Shrink ➘</button>\
+                   <button id='q_grow' type='button'>Grow ➚</button>\
+                 </span>"
             }
+            _ => "",
         }
-        ""
     }
 
     /// Convert to Compact HTML
