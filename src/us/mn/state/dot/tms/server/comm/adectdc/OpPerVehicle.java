@@ -95,7 +95,7 @@ public class OpPerVehicle extends OpTdc {
 	/** Get the error retry threshold */
 	@Override
 	public int getRetryThreshold() {
-		return Integer.MAX_VALUE;
+		return controller.getRetryThreshold();
 	}
 
 	/** Update the controller operation counters */
