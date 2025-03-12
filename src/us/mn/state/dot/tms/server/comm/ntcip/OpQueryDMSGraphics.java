@@ -201,13 +201,12 @@ public class OpQueryDMSGraphics extends OpDMS {
 	private class QueryBlock extends Phase {
 		private final int row;
 		private final RasterGraphic raster;
-		private final int blocks;
+		private final int sz;
 		private int block;
 		private QueryBlock(int r, RasterGraphic rg) throws IOException {
 			row = r;
 			raster = rg;
-			int sz = block_size.getInteger();
-			blocks = (rg.length() + sz - 1) / sz;
+			sz = block_size.getInteger();
 			block = 1;
 		}
 		@SuppressWarnings("unchecked")
@@ -217,8 +216,8 @@ public class OpQueryDMSGraphics extends OpDMS {
 			mess.add(block_bitmap);
 			mess.queryProps();
 			logQuery(block_bitmap);
-			copyBlock(block_bitmap.getOctetString(), raster, block);
-			if (block < blocks) {
+			copyBlock(block_bitmap.getOctetString());
+			if (block * sz < raster.length()) {
 				block++;
 				if (block % 20 == 0 && !controller.isOffline())
 					setSuccess(true);
@@ -226,15 +225,14 @@ public class OpQueryDMSGraphics extends OpDMS {
 			}
 			return new QueryNumberName(row, raster);
 		}
-	}
 
-	/** Copy block to raster */
-	private void copyBlock(byte[] buf, RasterGraphic rg, int block) {
-		byte[] pixels = rg.getPixelData();
-		int sz = block_size.getInteger();
-		int pos = (block - 1) * sz;
-		int blen = Math.min(sz, pixels.length - pos);
-		System.arraycopy(buf, pos, pixels, 0, blen);
+		/** Copy block to raster */
+		private void copyBlock(byte[] buf) {
+			byte[] pixels = raster.getPixelData();
+			int pos = (block - 1) * sz;
+			int blen = Math.min(sz, pixels.length - pos);
+			System.arraycopy(buf, 0, pixels, pos, blen);
+		}
 	}
 
 	/** Phase to query a graphic number/name */
