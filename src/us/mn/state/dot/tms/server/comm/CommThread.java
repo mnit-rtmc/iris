@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2017-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -178,6 +178,7 @@ public class CommThread<T extends ControllerProperty> {
 			logException(e);
 		}
 		catch (RuntimeException e) {
+			queue.drain();
 			e.printStackTrace();
 		}
 		finally {

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2021  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.PrintStream;
+import us.mn.state.dot.tms.EventType;
 
 /**
  * A prioritized queue which sorts Operation objects by their priority
@@ -202,5 +203,16 @@ public final class OpQueue<T extends ControllerProperty> {
 			node = node.next;
 		}
 		return flag;
+	}
+
+	/** Drain the operation queue */
+	public void drain() {
+		forEach(new OpHandler<T>() {
+			public boolean handle(OpController<T> o) {
+				o.handleCommError(EventType.QUEUE_DRAINED);
+				o.cleanup();
+				return true;
+			}
+		});
 	}
 }
