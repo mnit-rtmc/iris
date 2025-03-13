@@ -521,20 +521,6 @@ pub const LANE_CODE_LUT: &str = "\
   FROM iris.lane_code \
   ORDER BY lcode";
 
-/// SQL query for all lane markings (primary)
-pub const LANE_MARKING_ALL: &str = "\
-  SELECT m.name, location, controller, notes, deployed \
-  FROM iris.lane_marking m \
-  LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
-  ORDER BY name";
-
-/// SQL query for one lane marking (secondary)
-pub const LANE_MARKING_ONE: &str = "\
-  SELECT m.name, location, geo_loc, controller, pin, notes, deployed \
-  FROM iris.lane_marking m \
-  LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
-  WHERE m.name = $1";
-
 /// SQL query for lane use indications (LUT)
 pub const LANE_USE_INDICATION_LUT: &str = "\
   SELECT id, description \
