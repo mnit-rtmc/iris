@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,8 +32,6 @@ import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.Hashtags;
-import us.mn.state.dot.tms.LaneMarking;
-import us.mn.state.dot.tms.LaneMarkingHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
 
@@ -102,7 +100,6 @@ public class DeviceActionJob extends Job {
 		if (deploy)
 			performDmsAction(da);
 		performBeaconAction(da, deploy);
-		performLaneMarkingAction(da, deploy);
 		performRampMeterAction(da, deploy);
 		if (deploy) {
 			// Only perform camera actions on change
@@ -216,30 +213,6 @@ public class DeviceActionJob extends Job {
 					// FIXME: save snapshot?
 				}
 			}
-		}
-	}
-
-	/** Perform an action for lane markings */
-	private void performLaneMarkingAction(DeviceAction da, boolean deploy) {
-		Iterator<LaneMarking> it = LaneMarkingHelper.iterator();
-		while (it.hasNext()) {
-			LaneMarking lm = it.next();
-			if (lm instanceof LaneMarkingImpl) {
-				performLaneMarkingAction(da, deploy,
-					(LaneMarkingImpl) lm);
-			}
-		}
-	}
-
-	/** Perform a lane marking action */
-	private void performLaneMarkingAction(DeviceAction da, boolean deploy,
-		LaneMarkingImpl lm)
-	{
-		Hashtags tags = new Hashtags(lm.getNotes());
-		if (tags.contains(da.getHashtag())) {
-			ActionTagMsg amsg = new ActionTagMsg(da, lm,
-				lm.getGeoLoc(), logger);
-			lm.setDeployed(amsg.isPassing() && deploy);
 		}
 	}
 
