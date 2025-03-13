@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2024  Minnesota Department of Transportation
+ * Copyright (C) 2011-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,9 +83,6 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		case DMS:
 			return proxy.getActive() &&
 			       ActionPlanHelper.countDms(proxy) > 0;
-		case LANE:
-			return proxy.getActive() &&
-			      ActionPlanHelper.countLaneMarkings(proxy) > 0;
 		case METER:
 			return proxy.getActive() &&
 			       ActionPlanHelper.countRampMeters(proxy) > 0;

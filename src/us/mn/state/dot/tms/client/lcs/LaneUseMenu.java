@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.event.ActionEvent;
-import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.client.Session;
@@ -44,7 +43,6 @@ public class LaneUseMenu extends IMenu {
 		desktop = s.getDesktop();
 		addItem(session.createTableAction(LCSArray.SONAR_TYPE));
 		addItem(createLaneUseMultiItem());
-		addItem(session.createTableAction(LaneMarking.SONAR_TYPE));
 		addItem(session.createTableAction(TagReader.SONAR_TYPE));
 		addItem(createTollZoneItem());
 	}

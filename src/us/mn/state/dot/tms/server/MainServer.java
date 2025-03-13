@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -244,7 +244,6 @@ public class MainServer {
 		ns.registerType(GateArmArrayImpl.class);
 		ns.registerType(GateArmImpl.class);
 		ns.registerType(TagReaderImpl.class);
-		ns.registerType(LaneMarkingImpl.class);
 		ns.registerType(LCSArrayImpl.class);
 		ns.registerType(LCSImpl.class);
 		ns.registerType(LCSIndicationImpl.class);

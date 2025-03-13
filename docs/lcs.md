@@ -93,26 +93,6 @@ these [indications](#indications):
 Each _indication_ must be assigned to a separate [IO pin] on a [controller], as
 well as the DMS which represents the LCS.
 
-## Lane Markings
-
-A lane marking is an in-pavement LED which can dynamically change lane
-striping.
-
-<details>
-<summary>API Resources 🕵️ </summary>
-
-* `iris/api/lane_marking` (primary)
-* `iris/api/lane_marking/{name}`
-
-| Access       | Primary        | Secondary |
-|--------------|----------------|-----------|
-| 👁️  View      | name, location | geo\_loc  |
-| 👉 Operate   | deployed       |           |
-| 💡 Manage    | notes          |           |
-| 🔧 Configure | controller     | pin       |
-
-</details>
-
 
 [controller]: controllers.html
 [DMS]: dms.html

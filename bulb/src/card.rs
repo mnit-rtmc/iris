@@ -29,7 +29,6 @@ use crate::gatearmarray::GateArmArray;
 use crate::geoloc::Loc;
 use crate::gps::Gps;
 use crate::item::ItemState;
-use crate::lanemarking::LaneMarking;
 use crate::lcsarray::LcsArray;
 use crate::lcsindication::LcsIndication;
 use crate::modem::Modem;
@@ -404,7 +403,6 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::Domain
         | Res::FlowStream
         | Res::Gps
-        | Res::LaneMarking
         | Res::LcsIndication
         | Res::Modem
         | Res::Permission
@@ -505,7 +503,6 @@ pub async fn fetch_resource(config: bool) -> Result<String> {
     if config {
         add_option::<Gps>(&access, &mut html);
     }
-    add_option::<LaneMarking>(&access, &mut html);
     add_option::<LcsArray>(&access, &mut html);
     if config {
         add_option::<LcsIndication>(&access, &mut html);
@@ -647,7 +644,6 @@ impl CardList {
             Res::GateArm => self.make_html_x::<GateArm>().await,
             Res::GateArmArray => self.make_html_x::<GateArmArray>().await,
             Res::Gps => self.make_html_x::<Gps>().await,
-            Res::LaneMarking => self.make_html_x::<LaneMarking>().await,
             Res::LcsArray => self.make_html_x::<LcsArray>().await,
             Res::LcsIndication => self.make_html_x::<LcsIndication>().await,
             Res::Modem => self.make_html_x::<Modem>().await,
@@ -733,7 +729,6 @@ impl CardList {
             Res::GateArm => self.view_change_x::<GateArm>().await,
             Res::GateArmArray => self.view_change_x::<GateArmArray>().await,
             Res::Gps => self.view_change_x::<Gps>().await,
-            Res::LaneMarking => self.view_change_x::<LaneMarking>().await,
             Res::LcsArray => self.view_change_x::<LcsArray>().await,
             Res::LcsIndication => self.view_change_x::<LcsIndication>().await,
             Res::Modem => self.view_change_x::<Modem>().await,
@@ -805,7 +800,6 @@ impl CardList {
             Res::GateArm => self.changed::<GateArm>(json).await,
             Res::GateArmArray => self.changed::<GateArmArray>(json).await,
             Res::Gps => self.changed::<Gps>(json).await,
-            Res::LaneMarking => self.changed::<LaneMarking>(json).await,
             Res::LcsArray => self.changed::<LcsArray>(json).await,
             Res::LcsIndication => self.changed::<LcsIndication>(json).await,
             Res::Modem => self.changed::<Modem>(json).await,
@@ -925,7 +919,6 @@ async fn fetch_one_res(cv: &CardView) -> Result<String> {
         Res::GateArm => fetch_one_x::<GateArm>(cv).await,
         Res::GateArmArray => fetch_one_x::<GateArmArray>(cv).await,
         Res::Gps => fetch_one_x::<Gps>(cv).await,
-        Res::LaneMarking => fetch_one_x::<LaneMarking>(cv).await,
         Res::LcsArray => fetch_one_x::<LcsArray>(cv).await,
         Res::LcsIndication => fetch_one_x::<LcsIndication>(cv).await,
         Res::Modem => fetch_one_x::<Modem>(cv).await,
@@ -985,7 +978,6 @@ async fn patch_setup(cv: &CardView) -> Result<()> {
         Res::GateArm => patch_setup_x::<GateArm>(cv).await,
         Res::GateArmArray => patch_setup_x::<GateArmArray>(cv).await,
         Res::Gps => patch_setup_x::<Gps>(cv).await,
-        Res::LaneMarking => patch_setup_x::<LaneMarking>(cv).await,
         Res::LcsArray => patch_setup_x::<LcsArray>(cv).await,
         Res::LcsIndication => patch_setup_x::<LcsIndication>(cv).await,
         Res::Modem => patch_setup_x::<Modem>(cv).await,
@@ -1019,7 +1011,6 @@ async fn patch_loc(cv: &CardView) -> Result<()> {
         Res::Controller => patch_loc_x::<Controller>(cv).await,
         Res::Dms => patch_loc_x::<Dms>(cv).await,
         Res::GateArmArray => patch_loc_x::<GateArmArray>(cv).await,
-        Res::LaneMarking => patch_loc_x::<LaneMarking>(cv).await,
         Res::RampMeter => patch_loc_x::<RampMeter>(cv).await,
         Res::TagReader => patch_loc_x::<TagReader>(cv).await,
         Res::WeatherSensor => patch_loc_x::<WeatherSensor>(cv).await,

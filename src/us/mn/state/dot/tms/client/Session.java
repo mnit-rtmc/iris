@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  * Copyright (C) 2019  SRF Consulting Group
  *
@@ -38,7 +38,6 @@ import us.mn.state.dot.tms.client.lcs.LCSIManager;
 import us.mn.state.dot.tms.client.map.MapBean;
 import us.mn.state.dot.tms.client.map.MapModel;
 import us.mn.state.dot.tms.client.map.TileLayer;
-import us.mn.state.dot.tms.client.marking.LaneMarkingManager;
 import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.parking.ParkingAreaManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
@@ -209,7 +208,6 @@ public class Session {
 		managers.add(dms_manager);
 		managers.add(lcs_array_manager);
 		managers.add(new LCSIManager(this, loc_manager));
-		managers.add(new LaneMarkingManager(this,loc_manager));
 		managers.add(new BeaconManager(this, loc_manager));
 		managers.add(new TagReaderManager(this, loc_manager));
 		managers.add(new WeatherSensorManager(this, loc_manager));

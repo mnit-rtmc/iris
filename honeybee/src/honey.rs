@@ -879,7 +879,6 @@ const fn one_sql(res: Res) -> &'static str {
         IncAdvice => query::INC_ADVICE_ONE,
         IncDescriptor => query::INC_DESCRIPTOR_ONE,
         IncLocator => query::INC_LOCATOR_ONE,
-        LaneMarking => query::LANE_MARKING_ONE,
         LcsArray => query::LCS_ARRAY_ONE,
         LcsIndication => query::LCS_INDICATION_ONE,
         Modem => query::MODEM_ONE,
@@ -915,7 +914,6 @@ fn patch_first_pass(res: Res, att: &str) -> bool {
         | (Beacon, "verify_pin")
         | (Detector, "pin")
         | (Dms, "pin")
-        | (LaneMarking, "pin")
         | (RampMeter, "pin")
         | (WeatherSensor, "pin") => true,
         _ => false,

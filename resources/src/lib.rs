@@ -58,7 +58,6 @@ pub enum Res {
     IncLocator,
     IncRange,
     LaneCode,
-    LaneMarking,
     LaneUseIndication,
     Lcs,
     LcsArray,
@@ -157,7 +156,6 @@ impl Res {
             IncLocator,
             IncRange,
             LaneCode,
-            LaneMarking,
             LaneUseIndication,
             Lcs,
             LcsArray,
@@ -245,7 +243,6 @@ impl Res {
             IncRange => "inc_range",
             LaneCode => "lane_code",
             LaneUseIndication => "lane_use_indication",
-            LaneMarking => "lane_marking",
             Lcs => "lcs",
             LcsArray => "lcs_array",
             LcsIndication => "lcs_indication",
@@ -316,7 +313,6 @@ impl Res {
             IncAdvice => "🚨❗",
             IncDescriptor => "🚨❓",
             IncLocator => "🚨🗺️",
-            LaneMarking => "⛙",
             LcsArray => "🠟✖🠟",
             LcsIndication => "🠟",
             Modem => "🖀 ",
@@ -362,13 +358,12 @@ impl Res {
             | DayMatcher | DayPlan | Detector | DeviceAction | Dms | Domain
             | EncoderStream | EncoderType | EventConfig | FlowStream
             | GateArm | GateArmArray | Gps | Incident | IncidentDetail
-            | IncAdvice | IncDescriptor | IncLocator | LaneMarking
-            | LcsArray | LcsIndication | Modem | MonitorStyle | MsgLine
-            | MsgPattern | ParkingArea | Permission | PlanPhase | PlayList
-            | RampMeter | Rnode | Road | RoadAffix | Role | SignConfig
-            | SignDetail | SignMessage | SystemAttribute | TagReader
-            | TimeAction | TollZone | User | VideoMonitor | WeatherSensor
-            | Word => true,
+            | IncAdvice | IncDescriptor | IncLocator | LcsArray
+            | LcsIndication | Modem | MonitorStyle | MsgLine | MsgPattern
+            | ParkingArea | Permission | PlanPhase | PlayList | RampMeter
+            | Rnode | Road | RoadAffix | Role | SignConfig | SignDetail
+            | SignMessage | SystemAttribute | TagReader | TimeAction
+            | TollZone | User | VideoMonitor | WeatherSensor | Word => true,
             _ => false,
         }
     }
@@ -400,7 +395,7 @@ impl Res {
             IncidentDetail | IncAdvice | IncDescriptor | IncLocator
             | RoadAffix => Incident,
             // LCS resources
-            LcsArray | LcsIndication | LaneMarking => Lcs,
+            LcsArray | LcsIndication => Lcs,
             // Permission resources
             Domain | User | Role => Permission,
             // System attribute resources

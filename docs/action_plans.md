@@ -63,7 +63,6 @@ plan.  These devices can be:
  - [ramp meter], enables metering operation
  - [beacon], activates flashing lights
  - [camera], recalls the specified camera [preset]
- - [lane marking], activates in-pavement LEDs
 
 [Priority] determines the priority of messages created by the action.  For
 camera actions, this value indicates:
@@ -249,7 +248,6 @@ stored in the `action_plan_event` table.
 [event]: events.html
 [exit ramp backup]: exit_backup.html
 [hashtag]: hashtags.html
-[lane marking]: lcs.html#lane-markings
 [message pattern]: message_patterns.html
 [priority]: sign_message.html#message-priority
 [Msg-Feed]: protocols.html#msg-feed

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,20 +111,6 @@ public class ActionPlanHelper extends BaseHelper {
 				signs.add(dms);
 		}
 		return signs;
-	}
-
-	/** Get count of lane markings controlled by an action plan */
-	static public int countLaneMarkings(ActionPlan ap) {
-		int n_count = 0;
-		Set<String> hashtags = findHashtags(ap);
-		Iterator<LaneMarking> it = LaneMarkingHelper.iterator();
-		while (it.hasNext()) {
-			LaneMarking lm = it.next();
-			Hashtags tags = new Hashtags(lm.getNotes());
-			if (tags.containsAny(hashtags))
-				n_count++;
-		}
-		return n_count;
 	}
 
 	/** Get count of ramp meters controlled by an action plan */
