@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -115,7 +115,7 @@ impl Card for LcsArray {
     type Ancillary = LcsArrayAnc;
 
     /// Display name
-    const DNAME: &'static str = "🡇 ❌ LCS Array";
+    const DNAME: &'static str = "🠟✖🠟 LCS Array";
 
     /// Get the resource
     fn res() -> Res {
