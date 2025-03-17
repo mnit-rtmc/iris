@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2025       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +20,7 @@ package us.mn.state.dot.tms;
  * cameras, ramp meters, dynamic message signs, etc.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public interface Device extends ControllerIO {
 
@@ -30,4 +32,15 @@ public interface Device extends ControllerIO {
 
 	/** Get the operation description */
 	String getOperation();
+
+	/** Get hashtags from device notes */
+	Hashtags getHashtags();
+
+	/** Check if a device'a notes has a specific hashtag.
+	 *  The tag string must have a '#' prefix. */
+	boolean hasHashtag(String tag);
+
+	/** Check if a device'a notes has any hashtag from an array.
+	 *  Every string in the tagArray must have a '#' prefix. */
+	boolean hasHashtag(String[] tagArray);
 }

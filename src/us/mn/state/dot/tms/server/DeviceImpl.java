@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2024  Minnesota Department of Transportation
- * Copyright (C) 2015-2017  SRF Consulting Group
+ * Copyright (C) 2015-2025  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +17,9 @@ package us.mn.state.dot.tms.server;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.server.comm.OpDevice;
  * cameras, ramp meters, dynamic message signs, etc.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 
@@ -92,6 +93,28 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 	@Override
 	public String getNotes() {
 		return notes;
+	}
+
+	/** Get Hashtags object from device notes */
+	public Hashtags getHashtags() {
+		return new Hashtags(getNotes());
+	}
+
+	/** Check if a device'a notes has a specific hashtag.
+	 *  The tag string must have a '#' prefix. */
+	public boolean hasHashtag(String tag) {
+		return getHashtags().contains(tag);
+	}
+
+	/** Check if a device'a notes has any hashtag from an array.
+	 *  Every string in the tagArray must have a '#' prefix. */
+	public boolean hasHashtag(String[] tagArray) {
+		Hashtags tags = getHashtags();
+		for (String tag: tagArray) {
+			if (tags.contains(tag))
+				return false;
+		}
+		return true;
 	}
 
 	/** Operation which owns the device */
