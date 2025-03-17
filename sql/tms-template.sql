@@ -222,9 +222,7 @@ inc_locator	incident
 road_affix	incident
 lcs	\N
 lane_marking	lcs
-lane_use_multi	lcs
-lcs_array	lcs
-lcs_indication	lcs
+lcs_state	lcs
 parking_area	\N
 permission	\N
 connection	permission
@@ -4106,194 +4104,198 @@ GRANT SELECT ON lane_marking_view TO PUBLIC;
 --
 -- Lane-Use Control Signals
 --
-CREATE TABLE iris.lcs_lock (
+CREATE TABLE iris.lcs_type (
     id INTEGER PRIMARY KEY,
-    description VARCHAR(16) NOT NULL
+    description VARCHAR NOT NULL
 );
 
-COPY iris.lcs_lock (id, description) FROM stdin;
-1	Incident
-2	Maintenance
-3	Testing
-4	Other reason
-\.
+INSERT INTO iris.lcs_type (id, description)
+VALUES
+    (0, 'Over lane dedicated'),
+    (1, 'Over lane DMS'),
+    (2, 'Pavement LED');
 
-CREATE TABLE iris._lcs_array (
+CREATE TABLE iris._lcs (
     name VARCHAR(20) PRIMARY KEY,
+    geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc,
     notes VARCHAR CHECK (LENGTH(notes) < 256),
+    lcs_type INTEGER NOT NULL REFERENCES iris.lcs_type,
     shift INTEGER NOT NULL,
-    lcs_lock INTEGER REFERENCES iris.lcs_lock(id)
+    lock JSONB,
+    status JSONB
 );
 
--- This constraint ensures that the name is unique among all devices
--- LCS arrays are *not* associated with controllers or pins
-ALTER TABLE iris._lcs_array ADD CONSTRAINT _lcs_array_fkey
+ALTER TABLE iris._lcs ADD CONSTRAINT _lcs_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
-CREATE TRIGGER lcs_array_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris._lcs_array
+CREATE TRIGGER lcs_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._lcs
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
-CREATE VIEW iris.lcs_array AS
-    SELECT la.name, controller, pin, notes, shift, lcs_lock
-    FROM iris._lcs_array la
-    JOIN iris.controller_io cio ON la.name = cio.name;
+CREATE VIEW iris.lcs AS
+    SELECT l.name, geo_loc, controller, pin, notes, preset, lcs_type, shift,
+           lock, status
+    FROM iris._lcs l
+    JOIN iris.controller_io cio ON l.name = cio.name
+    JOIN iris.device_preset p ON l.name = p.name;
 
-CREATE FUNCTION iris.lcs_array_insert() RETURNS TRIGGER AS
-    $lcs_array_insert$
+CREATE FUNCTION iris.lcs_insert() RETURNS TRIGGER AS
+    $lcs_insert$
 BEGIN
     INSERT INTO iris.controller_io (name, resource_n, controller, pin)
-         VALUES (NEW.name, 'lcs_array', NEW.controller, NEW.pin);
-    INSERT INTO iris._lcs_array(name, notes, shift, lcs_lock)
-         VALUES (NEW.name, NEW.notes, NEW.shift, NEW.lcs_lock);
+         VALUES (NEW.name, 'lcs', NEW.controller, NEW.pin);
+    INSERT INTO iris.device_preset (name, resource_n, preset)
+        VALUES (NEW.name, 'lcs', NEW.preset);
+    INSERT INTO iris._lcs (
+        name, geo_loc, notes, lcs_type, shift, lock, status
+    ) VALUES (
+        NEW.name, NEW.geo_loc, NEW.notes, NEW.lcs_type, NEW.shift,
+        NEW.lock, NEW.status
+     );
     RETURN NEW;
 END;
-$lcs_array_insert$ LANGUAGE plpgsql;
+$lcs_insert$ LANGUAGE plpgsql;
 
-CREATE TRIGGER lcs_array_insert_trig
-    INSTEAD OF INSERT ON iris.lcs_array
-    FOR EACH ROW EXECUTE FUNCTION iris.lcs_array_insert();
+CREATE TRIGGER lcs_insert_trig
+    INSTEAD OF INSERT ON iris.lcs
+    FOR EACH ROW EXECUTE FUNCTION iris.lcs_insert();
 
-CREATE FUNCTION iris.lcs_array_update() RETURNS TRIGGER AS
-    $lcs_array_update$
+CREATE FUNCTION iris.lcs_update() RETURNS TRIGGER AS
+    $lcs_update$
 BEGIN
     UPDATE iris.controller_io
        SET controller = NEW.controller,
            pin = NEW.pin
      WHERE name = OLD.name;
-    UPDATE iris._lcs_array
-       SET notes = NEW.notes,
+    UPDATE iris.device_preset
+       SET preset = NEW.preset
+     WHERE name = OLD.name;
+    UPDATE iris._lcs
+       SET geo_loc = NEW.geo_loc,
+           notes = NEW.notes,
+           lcs_type = NEW.lcs_type,
            shift = NEW.shift,
-           lcs_lock = NEW.lcs_lock
+           lock = NEW.lock,
+           status = NEW.status
      WHERE name = OLD.name;
     RETURN NEW;
 END;
-$lcs_array_update$ LANGUAGE plpgsql;
+$lcs_update$ LANGUAGE plpgsql;
 
-CREATE TRIGGER lcs_array_update_trig
-    INSTEAD OF UPDATE ON iris.lcs_array
-    FOR EACH ROW EXECUTE FUNCTION iris.lcs_array_update();
+CREATE TRIGGER lcs_update_trig
+    INSTEAD OF UPDATE ON iris.lcs
+    FOR EACH ROW EXECUTE FUNCTION iris.lcs_update();
 
-CREATE TRIGGER lcs_array_delete_trig
-    INSTEAD OF DELETE ON iris.lcs_array
+CREATE TRIGGER lcs_delete_trig
+    INSTEAD OF DELETE ON iris.lcs
     FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
-
-CREATE VIEW lcs_array_view AS
-    SELECT name, shift, notes, lcs_lock
-    FROM iris._lcs_array;
-GRANT SELECT ON lcs_array_view TO PUBLIC;
-
-CREATE TABLE iris.lcs (
-    name VARCHAR(20) PRIMARY KEY REFERENCES iris._dms,
-    lcs_array VARCHAR(20) NOT NULL REFERENCES iris._lcs_array,
-    lane INTEGER NOT NULL
-);
-CREATE UNIQUE INDEX lcs_array_lane ON iris.lcs USING btree (lcs_array, lane);
 
 CREATE VIEW lcs_view AS
-    SELECT name, lcs_array, lane
-    FROM iris.lcs;
+    SELECT l.name, geo_loc, controller, pin, notes, camera, preset_num,
+           lt.description AS lcs_type, shift, lock, status
+    FROM iris._lcs l
+    JOIN iris.controller_io cio ON l.name = cio.name
+    LEFT JOIN iris.device_preset p ON l.name = p.name
+    LEFT JOIN iris.camera_preset cp ON cp.name = p.preset
+    LEFT JOIN iris.lcs_type lt ON l.lcs_type = lt.id;
 GRANT SELECT ON lcs_view TO PUBLIC;
 
-CREATE TABLE iris.lane_use_indication (
+CREATE TABLE iris.lcs_indication (
     id INTEGER PRIMARY KEY,
-    description VARCHAR(32) NOT NULL
+    description VARCHAR NOT NULL
 );
 
-COPY iris.lane_use_indication (id, description) FROM stdin;
-0	Dark
-1	Lane open
-2	Use caution
-3	Lane closed ahead
-4	Lane closed
-5	HOV / HOT
-6	Merge right
-7	Merge left
-8	Merge left or right
-9	Must exit right
-10	Must exit left
-11	Advisory variable speed limit
-12	Variable speed limit
-13	Low visibility
-14	HOV / HOT begins
-\.
+INSERT INTO iris.lcs_indication (id, description)
+VALUES
+    (0, 'Dark'),
+    (1, 'Lane open'),
+    (2, 'Use caution'),
+    (3, 'Lane closed ahead'),
+    (4, 'Lane closed'),
+    (5, 'Merge right'),
+    (6, 'Merge left'),
+    (7, 'Merge left or right'),
+    (8, 'Must exit right'),
+    (9, 'Must exit left'),
+    (10, 'HOV / HOT'),
+    (11, 'HOV / HOT begins'),
+    (12, 'Variable speed advisory'),
+    (13, 'Variable speed limit'),
+    (14, 'Low visibility');
 
-CREATE TABLE iris._lcs_indication (
+CREATE TABLE iris._lcs_state (
     name VARCHAR(20) PRIMARY KEY,
-    lcs VARCHAR(20) NOT NULL REFERENCES iris.lcs,
-    indication INTEGER NOT NULL REFERENCES iris.lane_use_indication
+    lcs VARCHAR(20) NOT NULL REFERENCES iris._lcs,
+    lane INTEGER NOT NULL,
+    indication INTEGER NOT NULL REFERENCES iris.lcs_indication,
+    msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern,
+    msg_num INTEGER
 );
+CREATE UNIQUE INDEX lcs_lane_indication
+    ON iris._lcs_state USING btree (lcs, lane, indication);
 
-ALTER TABLE iris._lcs_indication ADD CONSTRAINT _lcs_indication_fkey
+ALTER TABLE iris._lcs_state ADD CONSTRAINT _lcs_state_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
-CREATE TRIGGER lcs_indication_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris._lcs_indication
+CREATE TRIGGER lcs_state_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._lcs_state
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
-CREATE VIEW iris.lcs_indication AS
-    SELECT li.name, controller, pin, lcs, indication
-    FROM iris._lcs_indication li
-    JOIN iris.controller_io cio ON li.name = cio.name;
+CREATE VIEW iris.lcs_state AS
+    SELECT ls.name, controller, pin, lcs, lane, indication, msg_pattern,
+           msg_num
+    FROM iris._lcs_state ls
+    JOIN iris.controller_io cio ON ls.name = cio.name;
 
-CREATE FUNCTION iris.lcs_indication_insert() RETURNS TRIGGER AS
-    $lcs_indication_insert$
+CREATE FUNCTION iris.lcs_state_insert() RETURNS TRIGGER AS
+    $lcs_state_insert$
 BEGIN
     INSERT INTO iris.controller_io (name, resource_n, controller, pin)
-         VALUES (NEW.name, 'lcs_indication', NEW.controller, NEW.pin);
-    INSERT INTO iris._lcs_indication(name, lcs, indication)
-         VALUES (NEW.name, NEW.lcs, NEW.indication);
+         VALUES (NEW.name, 'lcs_state', NEW.controller, NEW.pin);
+    INSERT INTO iris._lcs_state
+                (name, lcs, lane, indication, msg_pattern, msg_num)
+         VALUES (NEW.name, NEW.lcs, NEW.lane, NEW.indication,
+                 NEW.msg_pattern, NEW.msg_num);
     RETURN NEW;
 END;
-$lcs_indication_insert$ LANGUAGE plpgsql;
+$lcs_state_insert$ LANGUAGE plpgsql;
 
-CREATE TRIGGER lcs_indication_insert_trig
-    INSTEAD OF INSERT ON iris.lcs_indication
-    FOR EACH ROW EXECUTE FUNCTION iris.lcs_indication_insert();
+CREATE TRIGGER lcs_state_insert_trig
+    INSTEAD OF INSERT ON iris.lcs_state
+    FOR EACH ROW EXECUTE FUNCTION iris.lcs_state_insert();
 
-CREATE FUNCTION iris.lcs_indication_update() RETURNS TRIGGER AS
-    $lcs_indication_update$
+CREATE FUNCTION iris.lcs_state_update() RETURNS TRIGGER AS
+    $lcs_state_update$
 BEGIN
     UPDATE iris.controller_io
        SET controller = NEW.controller,
            pin = NEW.pin
      WHERE name = OLD.name;
-    UPDATE iris._lcs_indication
+    UPDATE iris._lcs_state
        SET lcs = NEW.lcs,
-           indication = NEW.indication
+           lane = NEW.lane,
+           indication = NEW.indication,
+           msg_pattern = NEW.msg_pattern,
+           msg_num = NEW.msg_num
      WHERE name = OLD.name;
     RETURN NEW;
 END;
-$lcs_indication_update$ LANGUAGE plpgsql;
+$lcs_state_update$ LANGUAGE plpgsql;
 
-CREATE TRIGGER lcs_indication_update_trig
-    INSTEAD OF UPDATE ON iris.lcs_indication
-    FOR EACH ROW EXECUTE FUNCTION iris.lcs_indication_update();
+CREATE TRIGGER lcs_state_update_trig
+    INSTEAD OF UPDATE ON iris.lcs_state
+    FOR EACH ROW EXECUTE FUNCTION iris.lcs_state_update();
 
-CREATE TRIGGER lcs_indication_delete_trig
-    INSTEAD OF DELETE ON iris.lcs_indication
+CREATE TRIGGER lcs_state_delete_trig
+    INSTEAD OF DELETE ON iris.lcs_state
     FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
-CREATE VIEW lcs_indication_view AS
-    SELECT name, controller, pin, lcs, description AS indication
-    FROM iris.lcs_indication
-    JOIN iris.lane_use_indication ON indication = id;
-GRANT SELECT ON lcs_indication_view TO PUBLIC;
-
-CREATE TABLE iris.lane_use_multi (
-    name VARCHAR(10) PRIMARY KEY,
-    indication INTEGER NOT NULL REFERENCES iris.lane_use_indication,
-    msg_num INTEGER,
-    msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern,
-    dms_hashtag VARCHAR(16),
-
-    CONSTRAINT hashtag_ck CHECK (dms_hashtag ~ '^#[A-Za-z0-9]+$')
-);
-
-CREATE VIEW lane_use_multi_view AS
-    SELECT name, indication, msg_num, msg_pattern, dms_hashtag
-    FROM iris.lane_use_multi;
-GRANT SELECT ON lane_use_multi_view TO PUBLIC;
+CREATE VIEW lcs_state_view AS
+    SELECT name, controller, pin, lcs, lane, description AS indication,
+           msg_pattern, msg_num
+    FROM iris.lcs_state
+    JOIN iris.lcs_indication ON indication = id;
+GRANT SELECT ON lcs_state_view TO PUBLIC;
 
 --
 -- Parking Areas
