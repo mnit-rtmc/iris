@@ -191,21 +191,22 @@ CREATE TABLE iris.lcs_indication (
 
 INSERT INTO iris.lcs_indication (id, description)
 VALUES
-    (0, 'Dark'),
-    (1, 'Lane open'),
-    (2, 'Use caution'),
-    (3, 'Lane closed ahead'),
-    (4, 'Lane closed'),
-    (5, 'Merge right'),
-    (6, 'Merge left'),
-    (7, 'Merge left or right'),
-    (8, 'Must exit right'),
-    (9, 'Must exit left'),
-    (10, 'HOV / HOT'),
-    (11, 'HOV / HOT begins'),
-    (12, 'Variable speed advisory'),
-    (13, 'Variable speed limit'),
-    (14, 'Low visibility');
+    (0, 'Unknown'),
+    (1, 'Dark'),
+    (2, 'Lane open'),
+    (3, 'Use caution'),
+    (4, 'Lane closed ahead'),
+    (5, 'Lane closed'),
+    (6, 'Merge right'),
+    (7, 'Merge left'),
+    (8, 'Merge left or right'),
+    (9, 'Must exit right'),
+    (10, 'Must exit left'),
+    (11, 'HOV / HOT'),
+    (12, 'HOV / HOT begins'),
+    (13, 'Variable speed advisory'),
+    (14, 'Variable speed limit'),
+    (15, 'Low visibility');
 
 CREATE TABLE iris._lcs_state (
     name VARCHAR(20) PRIMARY KEY,
