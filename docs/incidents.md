@@ -64,7 +64,6 @@ devices to deploy for the incident.
 
 [DMS]: dms.html
 [events]: events.html
-[LCS]: lcs.html
 [suggested DMS]: incident_dms.html
 [suggested LCS]: incident_lcs.html
 [system attribute]: system_attributes.html

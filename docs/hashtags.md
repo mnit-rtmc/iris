@@ -9,7 +9,6 @@ into categories or districts.
 - [Message lines] can have a **restrict** hashtag
 - [Device actions] use hashtags to associate devices
 - [Alert configurations] and [alert messages]
-- [Lane-use MULTI] indications
 - [Permissions] can restrict access by hashtag
 
 ## Dedicated Purpose
@@ -41,7 +40,6 @@ Hashtag     | Purpose
 [alert messages]: alerts.html#alert-messages
 [device actions]: action_plans.html#device-actions
 [lane-use]: lcs.html
-[lane-use MULTI]: lcs.html#lane-use-multi
 [message lines]: message_patterns.html#message-lines
 [message patterns]: message_patterns.html
 [parking area]: parking_areas.html

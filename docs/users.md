@@ -106,7 +106,6 @@ stored in the `client_event` table:
 [CIDR]: https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing
 [device]: controllers.html#devices
 [event]: events.html
-[LCS]: lcs.html
 [LDAP]: installation.html#ldap
 [permissions]: permissions.html
 [x-forwarded-for]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
