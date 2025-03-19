@@ -94,8 +94,7 @@ These are static resources which may only change on IRIS updates:
 - `inc_impact`  Incident impacts
 - `inc_range`  Incident range
 - `lane_code`  Lane codes
-- `lane_use_indication`  [LCS] lane use indications
-- `lcs_lock`  [LCS] lock codes
+- `lcs_indication`  [LCS] indications
 - `meter_algorithm`  Ramp metering algorithms
 - `meter_queue_state`  Ramp meter queue states
 - `meter_type`  Ramp meter types

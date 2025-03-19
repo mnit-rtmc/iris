@@ -79,5 +79,4 @@ in the `beacon_event` table.
 [event]: events.html
 [MnDOT-170]: protocols.html#mndot-170
 [Natch]: protocols.html#natch
-[NTCIP]: protocols.html#ntcip
 [remote]: dms.html#setup
