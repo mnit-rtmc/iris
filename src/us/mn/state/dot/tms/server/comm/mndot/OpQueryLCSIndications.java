@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,12 +15,11 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
-import java.util.Iterator;
-import us.mn.state.dot.tms.LaneUseIndication;
-import us.mn.state.dot.tms.LCS;
-import us.mn.state.dot.tms.LCSIndication;
-import us.mn.state.dot.tms.LCSIndicationHelper;
-import us.mn.state.dot.tms.server.LCSArrayImpl;
+import us.mn.state.dot.tms.Lcs;
+import us.mn.state.dot.tms.LcsHelper;
+import us.mn.state.dot.tms.LcsIndication;
+import us.mn.state.dot.tms.LcsState;
+import us.mn.state.dot.tms.server.LcsImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
@@ -38,7 +37,7 @@ public class OpQueryLCSIndications extends OpLCS {
 	private final byte[] outputs = new byte[2];
 
 	/** Create a new operation to query the LCS */
-	public OpQueryLCSIndications(LCSArrayImpl l) {
+	public OpQueryLCSIndications(LcsImpl l) {
 		super(PriorityLevel.POLL_HIGH, l);
 	}
 
@@ -49,7 +48,7 @@ public class OpQueryLCSIndications extends OpLCS {
 	}
 
 	/** Phase to query the LCS status */
-	protected class QueryStatus extends Phase<MndotProperty> {
+	private class QueryStatus extends Phase<MndotProperty> {
 
 		/** Query the status */
 		protected Phase<MndotProperty> poll(
@@ -59,15 +58,12 @@ public class OpQueryLCSIndications extends OpLCS {
 				Address.RAMP_METER_DATA, status);
 			mess.add(prop);
 			mess.queryProps();
-			if (isTurnedOn())
-				return new QueryOutputs();
-			else
-				return null;
+			return isTurnedOn() ? new QueryOutputs() : null;
 		}
 	}
 
 	/** Phase to query the LCS special function outputs */
-	protected class QueryOutputs extends Phase<MndotProperty> {
+	private class QueryOutputs extends Phase<MndotProperty> {
 
 		/** Query the outputs */
 		protected Phase<MndotProperty> poll(
@@ -84,8 +80,7 @@ public class OpQueryLCSIndications extends OpLCS {
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
-		if (isSuccess())
-			lcs_array.setIndicationsCurrent(getIndications(), null);
+		lcs.setIndicationsNotify(getIndications());
 		super.cleanup();
 	}
 
@@ -95,33 +90,31 @@ public class OpQueryLCSIndications extends OpLCS {
 	}
 
 	/** Get the displayed indications */
-	private Integer[] getIndications() {
-		Integer[] ind = new Integer[lcs_array.getLaneCount()];
-		for (int i = 0; i < ind.length; i++)
-			ind[i] = LaneUseIndication.DARK.ordinal();
+	private int[] getIndications() {
+		if (!isSuccess()) {
+			return LcsHelper.makeIndications(
+				lcs,
+				LcsIndication.UNKNOWN
+			);
+		}
+		int[] ind = LcsHelper.makeIndications(lcs, LcsIndication.DARK);
 		if (isTurnedOn()) {
-			Iterator<LCSIndication> it =
-				LCSIndicationHelper.iterator();
-			while (it.hasNext()) {
-				LCSIndication li = it.next();
-				if (li.getLcs().getArray() == lcs_array) {
-					if (li.getController() == controller)
-						checkIndication(li, ind);
-				}
+			for (LcsState ls: LcsHelper.lookupStates(lcs)) {
+				if (ls.getController() == controller)
+					checkIndication(ls, ind);
 			}
 		}
 		return ind;
 	}
 
 	/** Check if an indication is set */
-	private void checkIndication(LCSIndication li, Integer[] ind) {
-		if (Op170.getSpecFuncOutput(outputs, li.getPin())) {
-			LCS lcs = li.getLcs();
-			int i = lcs.getLane() - 1;
-			// We must check bounds here in case the LCSIndication
+	private void checkIndication(LcsState ls, int[] ind) {
+		if (Op170.getSpecFuncOutput(outputs, ls.getPin())) {
+			int ln = ls.getLane() - 1;
+			// We must check bounds here in case the LcsState
 			// was added after the "ind" array was created
-			if (i >= 0 && i < ind.length)
-				ind[i] = li.getIndication();
+			if (ln >= 0 && ln < ind.length)
+				ind[ln] = ls.getIndication();
 		}
 	}
 }
