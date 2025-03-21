@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.AlarmImpl;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.LaneMarkingImpl;
-import us.mn.state.dot.tms.server.LCSArrayImpl;
+import us.mn.state.dot.tms.server.LcsImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.AlarmPoller;
 import us.mn.state.dot.tms.server.comm.BeaconPoller;
@@ -151,13 +151,10 @@ public class MndotPoller extends ThreadedPoller<MndotProperty>
 
 	/** Send a device request to an LCS array */
 	@Override
-	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
+	public void sendRequest(LcsImpl lcs, DeviceRequest r) {
 		switch (r) {
-		case SEND_SETTINGS:
-			addOp(new OpSendLCSSettings(lcs_array));
-			break;
 		case QUERY_MESSAGE:
-			addOp(new OpQueryLCSIndications(lcs_array));
+			addOp(new OpQueryLCSIndications(lcs));
 			break;
 		default:
 			// Ignore other requests
@@ -166,14 +163,11 @@ public class MndotPoller extends ThreadedPoller<MndotProperty>
 	}
 
 	/** Send new indications to an LCS array.
-	 * @param lcs_array LCS array.
-	 * @param ind New lane use indications.
-	 * @param o User who deployed the indications. */
+	 * @param lcs LCS array.
+	 * @param lock LCS Lock (JSON), or null. */
 	@Override
-	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
-		User o)
-	{
-		addOp(new OpSendLCSIndications(lcs_array, ind, o));
+	public void sendIndications(LcsImpl lcs, String lock) {
+		addOp(new OpSendLCSIndications(lcs, lock));
 	}
 
 	/** Set the deployed status of a lane marking */
