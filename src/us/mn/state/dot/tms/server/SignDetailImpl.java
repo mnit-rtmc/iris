@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2024  Minnesota Department of Transportation
+ * Copyright (C) 2016-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,13 +91,6 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 			System.err.println("createNotify: " + e.getMessage());
 			return null;
 		}
-	}
-
-	/** Find or create LCS sign detail */
-	static public SignDetailImpl findOrCreateLCS() {
-		return findOrCreate(DMSType.OTHER.ordinal(), false, "DLCS",
-			"FRONT", "NONE", "NONE", "", "", "", "", 0, 1, 0, false,
-			false);
 	}
 
 	/** Last allocated sign detail ID */

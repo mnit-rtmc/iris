@@ -51,9 +51,6 @@ import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.LCS;
-import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.LCSHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SignConfig;
@@ -1253,9 +1250,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			sendDeviceRequest(DeviceRequest.QUERY_MESSAGE);
 			checkMsgExpiration();
 			updateSchedMsg();
-			LCSArrayImpl la = lookupLCSArray();
-			if (la != null)
-				la.periodicPoll(is_long);
 		}
 	}
 
@@ -1275,16 +1269,5 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				}
 			}
 		}
-	}
-
-	/** Lookup LCS array if this DMS is lane one */
-	private LCSArrayImpl lookupLCSArray() {
-		LCS lcs = LCSHelper.lookup(name);
-		if (lcs != null && lcs.getLane() == 1) {
-			LCSArray la = lcs.getArray();
-			if (la instanceof LCSArrayImpl)
-				return (LCSArrayImpl) la;
-		}
-		return null;
 	}
 }

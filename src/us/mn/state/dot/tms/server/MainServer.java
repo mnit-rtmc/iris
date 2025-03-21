@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -245,10 +245,8 @@ public class MainServer {
 		ns.registerType(GateArmImpl.class);
 		ns.registerType(TagReaderImpl.class);
 		ns.registerType(LaneMarkingImpl.class);
-		ns.registerType(LCSArrayImpl.class);
-		ns.registerType(LCSImpl.class);
-		ns.registerType(LCSIndicationImpl.class);
-		ns.registerType(LaneUseMultiImpl.class);
+		ns.registerType(LcsImpl.class);
+		ns.registerType(LcsStateImpl.class);
 		ns.registerType(ParkingAreaImpl.class);
 		ns.registerType(IncidentImpl.class);
 		ns.registerType(IncDescriptorImpl.class);
@@ -267,6 +265,7 @@ public class MainServer {
 	/** Schedule jobs on TIMER thread */
 	static private void scheduleTimerJobs() {
 		TIMER.addJob(new MeteringJob(FLUSH));
+		TIMER.addJob(new LcsExpireJob());
 		TIMER.addJob(new SendSettingsJob());
 		TIMER.addJob(new SendSettingsJob(500));
 		TIMER.addJob(new TollZoneJob());

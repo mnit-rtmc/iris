@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm;
 
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.User;
-import us.mn.state.dot.tms.server.LCSArrayImpl;
+import us.mn.state.dot.tms.server.LcsImpl;
 
 /**
  * LCSPoller is an interface for pollers which can send messages to LCS arrays.
@@ -26,11 +26,10 @@ import us.mn.state.dot.tms.server.LCSArrayImpl;
 public interface LCSPoller {
 
 	/** Send a device request */
-	void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r);
+	void sendRequest(LcsImpl lcs, DeviceRequest r);
 
 	/** Send new indications to an LCS array.
-	 * @param lcs_array LCS array.
-	 * @param ind New lane use indications.
-	 * @param o User who deployed the indications. */
-	void sendIndications(LCSArrayImpl lcs_array, Integer[] ind, User o);
+	 * @param lcs LCS array.
+	 * @param lock LCS lock (JSON), or null. */
+	void sendIndications(LcsImpl lcs, String lock);
 }
