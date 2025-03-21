@@ -40,9 +40,9 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.FlowStream;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.Gps;
-import us.mn.state.dot.tms.LaneUseIndication;
-import us.mn.state.dot.tms.LCS;
-import us.mn.state.dot.tms.LCSIndication;
+import us.mn.state.dot.tms.Lcs;
+import us.mn.state.dot.tms.LcsIndication;
+import us.mn.state.dot.tms.LcsState;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.VideoMonitor;
@@ -93,7 +93,8 @@ public class ControllerIOModel extends AbstractTableModel {
 		IO_TYPE.add(DeviceType.Flow_Stream);
 		IO_TYPE.add(DeviceType.Gate_Arm);
 		IO_TYPE.add(DeviceType.Gps);
-		IO_TYPE.add(DeviceType.LCSIndication);
+		IO_TYPE.add(DeviceType.Lcs);
+		IO_TYPE.add(DeviceType.Lcs_State);
 		IO_TYPE.add(DeviceType.Ramp_Meter);
 		IO_TYPE.add(DeviceType.Beacon);
 		IO_TYPE.add(DeviceType.Video_Monitor);
@@ -117,8 +118,10 @@ public class ControllerIOModel extends AbstractTableModel {
 			return DeviceType.Gate_Arm;
 		else if (cio instanceof Gps)
 			return DeviceType.Gps;
-		else if (cio instanceof LCSIndication)
-			return DeviceType.LCSIndication;
+		else if (cio instanceof Lcs)
+			return DeviceType.Lcs;
+		else if (cio instanceof LcsState)
+			return DeviceType.Lcs_State;
 		else if (cio instanceof RampMeter)
 			return DeviceType.Ramp_Meter;
 		else if (cio instanceof Beacon)
@@ -183,8 +186,11 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Controller IO list for Gps */
 	private final ControllerIOList gps_list;
 
-	/** Controller IO list for LCS indications */
-	private final ControllerIOList lcsi_list;
+	/** Controller IO list for LCS arrays */
+	private final ControllerIOList lcs_list;
+
+	/** Controller IO list for LCS states */
+	private final ControllerIOList lcs_state_list;
 
 	/** Controller IO list for ramp meters */
 	private final ControllerIOList m_list;
@@ -229,8 +235,9 @@ public class ControllerIOModel extends AbstractTableModel {
 			state.getCamCache().getFlowStreams());
 		gate_list = new ControllerIOList(state.getGateArms());
 		gps_list = new ControllerIOList<Gps>(state.getGpses());
-		lcsi_list = new ControllerIOList(
-			state.getLcsCache().getLCSIndications());
+		lcs_list = new ControllerIOList(state.getLcsCache().getLcss());
+		lcs_state_list = new ControllerIOList(
+			state.getLcsCache().getLcsStates());
 		m_list = new ControllerIOList(state.getRampMeters());
 		v_list = new ControllerIOList(
 			state.getCamCache().getVideoMonitors());
@@ -272,7 +279,8 @@ public class ControllerIOModel extends AbstractTableModel {
 		flow_list.initialize();
 		gate_list.initialize();
 		gps_list.initialize();
-		lcsi_list.initialize();
+		lcs_list.initialize();
+		lcs_state_list.initialize();
 		m_list.initialize();
 		v_list.initialize();
 		b_list.initialize();
@@ -289,7 +297,8 @@ public class ControllerIOModel extends AbstractTableModel {
 		flow_list.dispose();
 		gate_list.dispose();
 		gps_list.dispose();
-		lcsi_list.dispose();
+		lcs_list.dispose();
+		lcs_state_list.dispose();
 		m_list.dispose();
 		v_list.dispose();
 		b_list.dispose();
@@ -338,7 +347,8 @@ public class ControllerIOModel extends AbstractTableModel {
 		       canWriteIO(Detector.SONAR_TYPE) &&
 		       canWriteIO(DMS.SONAR_TYPE) &&
 		       canWriteIO(GateArm.SONAR_TYPE) &&
-		       canWriteIO(LCSIndication.SONAR_TYPE) &&
+		       canWriteIO(Lcs.SONAR_TYPE) &&
+		       canWriteIO(LcsState.SONAR_TYPE) &&
 		       canWriteIO(RampMeter.SONAR_TYPE) &&
 		       canWriteIO(Beacon.SONAR_TYPE) &&
 		       canWriteIO(WeatherSensor.SONAR_TYPE) &&
@@ -460,8 +470,10 @@ public class ControllerIOModel extends AbstractTableModel {
 			return gate_list;
 		case Gps:
 			return gps_list;
-		case LCSIndication:
-			return lcsi_list;
+		case Lcs:
+			return lcs_list;
+		case Lcs_State:
+			return lcs_state_list;
 		case Ramp_Meter:
 			return m_list;
 		case Video_Monitor:
@@ -491,12 +503,13 @@ public class ControllerIOModel extends AbstractTableModel {
 
 	/** Get a device label (normally name) */
 	private Object getDeviceLabel(Object value) {
-		if (value instanceof LCSIndication) {
-			LCSIndication lcsi = (LCSIndication)value;
-			LCS lcs = lcsi.getLcs();
-			LaneUseIndication lui = LaneUseIndication.fromOrdinal(
-				lcsi.getIndication());
-			return lcs.getName() + " " + lui.description;
+		if (value instanceof LcsState) {
+			LcsState ls = (LcsState) value;
+			Lcs lcs = ls.getLcs();
+			LcsIndication li = LcsIndication.fromOrdinal(
+				ls.getIndication());
+			return lcs.getName() + ' ' + ls.getLane() + ' ' +
+				li.description;
 		} else
 			return value;
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -115,7 +115,6 @@ public class MsgPatternHelper extends BaseHelper {
 	/** Find all sign configs for a message pattern.
 	 * This includes configs for:
 	 * - the pattern's compose hashtag
-	 * - Lane use multi with the pattern
 	 * - Device action with the pattern
 	 * - Alert config + message with the pattern */
 	static public Set<SignConfig> findSignConfigs(MsgPattern pat) {
@@ -127,7 +126,6 @@ public class MsgPatternHelper extends BaseHelper {
 		String cht = pat.getComposeHashtag();
 		if (cht != null)
 			hashtags.add(cht);
-		hashtags.addAll(LaneUseMultiHelper.findHashtags(pat));
 		hashtags.addAll(DeviceActionHelper.findHashtags(pat));
 		Iterator<DMS> it = DMSHelper.iterator();
 		while (it.hasNext()) {

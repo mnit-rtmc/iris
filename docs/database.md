@@ -41,7 +41,7 @@ update, and is caused by one of these conditions:
 `controller`       | ✔️   |     |     |
 `day_plan`         |     |     |     |
 `detector`         |     | ✔️   |     |
-`device_action`    |     |      |     |
+`device_action`    |     |     |     |
 `dms`              | ✔️   | ✔️   | ✔️   |
 `domain`           |     |     |     |
 `encoder_stream`   |     |     |     |
@@ -57,8 +57,8 @@ update, and is caused by one of these conditions:
 `inc_advice`       |     |     |     |
 `inc_descriptor`   |     |     |     |
 `inc_locator`      |     |     |     |
-`lcs_array`        |     | ✔️   |     |
-`lcs_indication`   |     | ✔️   |     |
+`lcs`              | ✔️   | ✔️   | ✔️   |
+`lcs_state`        |     | ✔️   |     |
 `modem`            |     |     |     |
 `monitor_style`    |     |     |     |
 `msg_pattern`      |     |     |     |

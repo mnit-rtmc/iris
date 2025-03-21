@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import us.mn.state.dot.sched.TimeSteward;
@@ -23,7 +24,7 @@ import us.mn.state.dot.sched.TimeSteward;
  *
  * @author Douglas Lau
  */
-public class MeterLock {
+public class LcsLock {
 
 	/** Lock reason */
 	static private final String REASON = "reason";
@@ -33,9 +34,6 @@ public class MeterLock {
 
 	/** REASON: Testing */
 	static private final String REASON_TESTING = "testing";
-
-	/** REASON: Knocked down pole */
-	static private final String REASON_KNOCKED_DOWN = "knocked down";
 
 	/** REASON: Indication failure */
 	static private final String REASON_INDICATION = "indication";
@@ -51,14 +49,13 @@ public class MeterLock {
 		"",
 		REASON_INCIDENT,
 		REASON_TESTING,
-		REASON_KNOCKED_DOWN,
 		REASON_INDICATION,
 		REASON_MAINTENANCE,
 		REASON_CONSTRUCTION,
 	};
 
-	/** Release rate (vehicles per hour; Integer) */
-	static private final String RATE = "rate";
+	/** Array of lane indications (ordinal of LcsIndication) */
+	static private final String INDICATIONS = "indications";
 
 	/** Expires (ISO 8601 date) */
 	static private final String EXPIRES = "expires";
@@ -69,15 +66,31 @@ public class MeterLock {
 	/** Lock JSON object */
 	private final JSONObject lock;
 
-	/** Create a meter lock */
-	public MeterLock(String lk) {
+	/** Compare for equality */
+	@Override
+	public boolean equals(Object other) {
+		if (other instanceof LcsLock) {
+			LcsLock o = (LcsLock) other;
+			return lock.equals(o.lock);
+		} else
+			return false;
+	}
+
+	/** Get hash code */
+	@Override
+	public int hashCode() {
+		return lock.hashCode();
+	}
+
+	/** Create a LCS lock */
+	public LcsLock(String lk) {
 		JSONObject jo = new JSONObject();
 		try {
 			if (lk != null)
 				jo = new JSONObject(lk);
 		}
 		catch (JSONException e) {
-			System.err.println("MeterLock: " + e.getMessage());
+			System.err.println("LcsLock: " + e.getMessage());
 		}
 		lock = jo;
 	}
@@ -86,7 +99,7 @@ public class MeterLock {
 	private void clear() {
 		try {
 			lock.remove(REASON);
-			lock.remove(RATE);
+			lock.remove(INDICATIONS);
 			lock.remove(EXPIRES);
 			lock.remove(USER);
 		}
@@ -106,7 +119,7 @@ public class MeterLock {
 			putReason(r);
 			// Only allow "incident" or "testing" for locked on
 			if (getOnMinutes() == null) {
-				putRate(null);
+				putIndications(null);
 				putExpires(null);
 			}
 		} else
@@ -123,27 +136,42 @@ public class MeterLock {
 		}
 	}
 
-	/** Get the lock rate, or null */
-	public Integer optRate() {
-		return lock.has(RATE) ? lock.optInt(RATE) : null;
+	/** Get the indications, or null */
+	public int[] optIndications() {
+		if (lock.has(INDICATIONS)) {
+			JSONArray arr = lock.optJSONArray(INDICATIONS);
+			if (arr != null) {
+				try {
+					int[] ind = new int[arr.length()];
+					for (int i = 0; i < arr.length(); i++)
+						ind[i] = arr.getInt(i);
+					return ind;
+				}
+				catch (JSONException e) {
+					System.err.println("optIndications: " +
+						e.getMessage());
+				}
+			}
+		}
+		return null;
 	}
 
-	/** Set the lock metering rate */
-	public void setRate(Integer rt) {
-		putRate(rt);
+	/** Set the lock indications */
+	public void setIndications(int[] ind) {
+		putIndications(ind);
 		// Only allow "incident" or "testing" for locked on
-		if (rt != null && getOnMinutes() == null)
+		if (ind != null && getOnMinutes() == null)
 			putReason(REASON_TESTING);
-		putExpires(makeExpires(rt));
+		putExpires((ind != null) ? makeExpires() : null);
 	}
 
-	/** Put the lock metering rate */
-	private void putRate(Integer rt) {
+	/** Put the lock indications */
+	private void putIndications(int[] ind) {
 		try {
-			lock.put(RATE, rt);
+			lock.put(INDICATIONS, ind);
 		}
 		catch (JSONException e) {
-			System.err.println("putRate: " + e.getMessage());
+			System.err.println("putIndications: " + e.getMessage());
 		}
 	}
 
@@ -163,16 +191,14 @@ public class MeterLock {
 	}
 
 	/** Make lock expires date/time */
-	private String makeExpires(Integer rt) {
-		if (rt != null) {
-			Integer min = getOnMinutes();
-			if (min != null) {
-				long now = TimeSteward.currentTimeMillis();
-				long ms = min * 60 * 1000;
-				return TimeSteward.format8601(now + ms);
-			}
-		}
-		return null;
+	private String makeExpires() {
+		Integer min = getOnMinutes();
+		if (min != null) {
+			long now = TimeSteward.currentTimeMillis();
+			long ms = min * 60 * 1000;
+			return TimeSteward.format8601(now + ms);
+		} else
+			return null;
 	}
 
 	/** Get ON duration depending on the lock reason */
@@ -189,6 +215,12 @@ public class MeterLock {
 	/** Get the lock user, or null */
 	public String optUser() {
 		return lock.optString(USER, null);
+	}
+
+	/** Get the lock user */
+	public String getUser() {
+		String user = optUser();
+		return (user != null) ? user : "UNKNOWN";
 	}
 
 	/** Set the lock user */

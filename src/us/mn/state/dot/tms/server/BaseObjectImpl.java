@@ -106,10 +106,8 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		GateArmArrayImpl.loadAll();
 		GateArmImpl.loadAll();
 		TagReaderImpl.loadAll();
-		LCSArrayImpl.loadAll();
-		LCSImpl.loadAll();
-		LCSIndicationImpl.loadAll();
-		LaneUseMultiImpl.loadAll();
+		LcsImpl.loadAll();
+		LcsStateImpl.loadAll();
 		ParkingAreaImpl.loadAll();
 		IncidentImpl.loadAll();
 		IncDescriptorImpl.loadAll();
@@ -321,9 +319,9 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	}
 
 	/** Lookup an LCS */
-	static protected LCSImpl lookupLCS(String name) {
-		SonarObject so = lookupObject(LCSImpl.SONAR_TYPE, name);
-		return (so instanceof LCSImpl) ? (LCSImpl) so : null;
+	static protected LcsImpl lookupLcs(String name) {
+		SonarObject so = lookupObject(LcsImpl.SONAR_TYPE, name);
+		return (so instanceof LcsImpl) ? (LcsImpl) so : null;
 	}
 
 	/** Lookup an incident detail */

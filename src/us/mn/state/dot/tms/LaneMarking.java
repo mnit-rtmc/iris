@@ -14,18 +14,16 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.SonarObject;
-
 /**
- * A Lane-Use Control Signal is a special DMS which is designed to display
- * lane-use indications.
+ * A lane marking is a dynamically-controlled lane striping, such as
+ * in-pavement LED lighting.
  *
  * @author Douglas Lau
  */
-public interface LCS extends SonarObject {
+public interface LaneMarking extends Device {
 
 	/** SONAR type name */
-	String SONAR_TYPE = "lcs";
+	String SONAR_TYPE = "lane_marking";
 
 	/** Get the SONAR type name */
 	@Override
@@ -33,9 +31,15 @@ public interface LCS extends SonarObject {
 		return SONAR_TYPE;
 	}
 
-	/** Get the LCS array */
-	LCSArray getArray();
+	/** SONAR base type name */
+	String SONAR_BASE = Lcs.SONAR_TYPE;
 
-	/** Get the lane number (starting from right lane as 1) */
-	int getLane();
+	/** Get the device location */
+	GeoLoc getGeoLoc();
+
+	/** Set the deployed status */
+	void setDeployed(boolean d);
+
+	/** Get the deployed status */
+	boolean getDeployed();
 }

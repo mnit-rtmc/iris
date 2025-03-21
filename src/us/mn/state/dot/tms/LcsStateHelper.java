@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,20 +17,20 @@ package us.mn.state.dot.tms;
 import java.util.Iterator;
 
 /**
- * Helper for LCS indications.
+ * Helper for LCS states.
  *
  * @author Douglas Lau
  */
-public class LCSIndicationHelper extends BaseHelper {
+public class LcsStateHelper extends BaseHelper {
 
 	/** Disallow instantiation */
-	private LCSIndicationHelper() {
+	private LcsStateHelper() {
 		assert false;
 	}
 
-	/** Get an LCS indication iterator */
-	static public Iterator<LCSIndication> iterator() {
-		return new IteratorWrapper<LCSIndication>(namespace.iterator(
-			LCSIndication.SONAR_TYPE));
+	/** Get an LCS state iterator */
+	static public Iterator<LcsState> iterator() {
+		return new IteratorWrapper<LcsState>(namespace.iterator(
+			LcsState.SONAR_TYPE));
 	}
 }

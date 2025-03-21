@@ -25,13 +25,10 @@ import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CameraPreset;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.LCS;
-import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.LCSArrayHelper;
-import us.mn.state.dot.tms.LCSArrayLock;
-import us.mn.state.dot.tms.User;
+import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.Lcs;
+import us.mn.state.dot.tms.LcsHelper;
+import us.mn.state.dot.tms.LcsLock;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.CameraPresetAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
@@ -49,7 +46,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
+public class LcsDispatcher extends IPanel implements ProxyView<Lcs> {
 
 	/** Size in pixels for each LCS in array */
 	static private final int LCS_SIZE = UI.scaled(44);
@@ -58,10 +55,10 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	private final Session session;
 
 	/** LCS Array manager */
-	private final LCSArrayManager manager;
+	private final LcsManager manager;
 
 	/** Selection model */
-	private final ProxySelectionModel<LCSArray> sel_mdl;
+	private final ProxySelectionModel<Lcs> sel_mdl;
 
 	/** Selection listener */
 	private final ProxySelectionListener sel_listener =
@@ -87,16 +84,16 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	/** Operation of selected LCS array */
 	private final JLabel operation_lbl = createValueLabel();
 
-	/** LCS lock combo box component */
-	private final JComboBox<LCSArrayLock> lock_cbx = new JComboBox
-		<LCSArrayLock>(LCSArrayLock.values());
+	/** Reason the LCS array was locked */
+	private final JComboBox<String> reason_cbx = new JComboBox<String>(
+		LcsLock.REASONS);
 
 	/** Lane configuration panel */
 	private final LaneConfigurationPanel lane_config =
 		new LaneConfigurationPanel(LCS_SIZE, true);
 
 	/** Panel for drawing an LCS array */
-	private final LCSArrayPanel lcs_pnl = new LCSArrayPanel(LCS_SIZE);
+	private final LcsPanel lcs_pnl = new LcsPanel(LCS_SIZE);
 
 	/** LCS indicaiton selector */
 	private final IndicationSelector ind_selector =
@@ -112,30 +109,24 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	/** Button to blank the LCS array indications */
 	private final JButton blank_btn = new JButton();
 
-	/** Action to blank selected LCS */
-	private final BlankLcsAction blank;
-
 	/** Currently logged in user */
-	private final User user;
+	private final String user;
 
 	/** Proxy watcher */
-	private final ProxyWatcher<LCSArray> watcher;
+	private final ProxyWatcher<Lcs> watcher;
 
 	/** Currently selected LCS array */
-	private LCSArray lcs_array;
+	private Lcs lcs;
 
 	/** Create a new LCS dispatcher */
-	public LcsDispatcher(Session s, LCSArrayManager m) {
+	public LcsDispatcher(Session s, LcsManager m) {
 		session = s;
 		manager = m;
-		user = session.getUser();
+		user = session.getUser().getName();
 		sel_mdl = manager.getSelectionModel();
-		blank = new BlankLcsAction(sel_mdl, user);
-		blank_btn.setAction(blank);
-		manager.setBlankAction(blank);
-		TypeCache<LCSArray> cache =
-			session.getSonarState().getLcsCache().getLCSArrays();
-		watcher = new ProxyWatcher<LCSArray>(cache, this, true);
+		TypeCache<Lcs> cache =
+			session.getSonarState().getLcsCache().getLcss();
+		watcher = new ProxyWatcher<Lcs>(cache, this, true);
 	}
 
 	/** Initialize the widgets on the panel */
@@ -157,8 +148,8 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 		add(status_lbl, Stretch.LAST);
 		add("device.operation");
 		add(operation_lbl, Stretch.LAST);
-//		add("lcs.lock");
-//		add(lock_cbx, Stretch.LAST);
+		add("lcs.lock");
+		add(reason_cbx, Stretch.LAST);
 		add(buildSelectorBox(), Stretch.FULL);
 		add(createButtonPanel(), Stretch.RIGHT);
 		watcher.initialize();
@@ -196,8 +187,8 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	}
 
 	/** Set the selected LCS array */
-	public void setSelected(LCSArray la) {
-		watcher.setProxy(la);
+	public void setSelected(Lcs l) {
+		watcher.setProxy(l);
 	}
 
 	/** Called when all proxies have been enumerated */
@@ -206,43 +197,37 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 
 	/** Update the proxy view */
 	@Override
-	public void update(final LCSArray la, String a) {
-		lcs_array = la;
+	public void update(final Lcs l, String a) {
+		lcs = l;
 		if (a == null)
-			updateConfig(la);
+			updateConfig(l);
 		if (a == null || a.equals("name"))
-			name_lbl.setText(la.getName());
+			name_lbl.setText(l.getName());
 		if (a == null || a.equals("preset"))
-			setPresetAction(la);
-		// FIXME: this won't update when geoLoc attributes change
-		//        plus, geoLoc is not an LCSArray attribute
-		if (a == null || a.equals("geoLoc"))
-			location_lbl.setText(LCSArrayHelper.lookupLocation(la));
+			setPresetAction(l);
+		if (a == null || a.equals("geoLoc")) {
+			location_lbl.setText(
+				GeoLocHelper.getLocation(l.getGeoLoc())
+			);
+		}
 		if (a == null || a.equals("operation")) {
-			updateStatus(la);
-			String op = la.getOperation();
+			updateStatus(l);
+			String op = l.getOperation();
 			operation_lbl.setText(op);
 			// These operations can be very slow -- discourage
 			// users from sending multiple operations at once
 			// RE: None -- see server.DeviceImpl.getOperation()
-			send.setEnabled(isWritePermitted(la) &&
+			send.setEnabled(isWritePermitted(l) &&
 				op.equals("None"));
 		}
-		if (a == null || a.equals("lcsLock")) {
-			Integer lk = la.getLcsLock();
-			if (lk != null)
-				lock_cbx.setSelectedIndex(lk);
-			else
-				lock_cbx.setSelectedIndex(0);
-		}
-		if (a == null || a.equals("indicationsCurrent")) {
-			Integer[] ind = la.getIndicationsCurrent();
-			lcs_pnl.setIndications(ind, la.getShift());
-			lcs_pnl.setClickHandler(
-				new LCSArrayPanel.ClickHandler()
-			{
+		if (a == null || a.equals("lock"))
+			updateLock(l);
+		if (a == null || a.equals("status")) {
+			int[] ind = LcsHelper.getIndications(l);
+			lcs_pnl.setIndications(ind, l.getShift());
+			lcs_pnl.setClickHandler(new LcsPanel.ClickHandler() {
 				public void handleClick(int lane) {
-					selectDMS(la, lane);
+					// FIXME: selectDMS(l, lane);
 				}
 			});
 			ind_selector.setIndications(ind);
@@ -250,30 +235,43 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	}
 
 	/** Update the LCS array config */
-	private void updateConfig(LCSArray la) {
-		boolean update = isWritePermitted(la);
-		lane_config.setConfiguration(manager.laneConfiguration(la));
-		ind_selector.setLCSArray(la);
+	private void updateConfig(Lcs l) {
+		lane_config.setConfiguration(manager.laneConfiguration(l));
+		ind_selector.setLcs(l);
+		boolean update = isWritePermitted(l);
 		ind_selector.setEnabled(update);
-		if (update)
-			lock_cbx.setAction(new LockLcsAction(la, lock_cbx));
-		else
-			lock_cbx.setAction(null);
-		lock_cbx.setEnabled(update);
 		send.setEnabled(update);
-		blank_btn.setEnabled(update);
+	}
+
+	/** Update the LCS array config */
+	private void updateLock(Lcs l) {
+		// Remove action so we can update the lock reason in peace
+		reason_cbx.setAction(null);
+		LcsLock lk = new LcsLock(l.getLock());
+		String r = lk.optReason();
+		reason_cbx.setSelectedItem((r != null) ? r : "");
+		LockReasonAction reason_act = new LockReasonAction(l, user,
+			reason_cbx);
+		BlankLcsAction blank_act = new BlankLcsAction(l, user);
+		if (!isWritePermitted(l)) {
+			reason_act.setEnabled(false);
+			blank_act.setEnabled(false);
+		}
+		reason_cbx.setAction(reason_act);
+		blank_btn.setAction(blank_act);
+		manager.setBlankAction(blank_act);
 	}
 
 	/** Set the camera preset action */
-	private void setPresetAction(LCSArray la) {
-		CameraPreset cp = LCSArrayHelper.getPreset(la);
+	private void setPresetAction(Lcs l) {
+		CameraPreset cp = (l != null) ? l.getPreset() : null;
 		preset_btn.setAction(new CameraPresetAction(session, cp));
 	}
 
 	/** Update the status widgets */
-	private void updateStatus(LCSArray la) {
-		String status = LCSArrayHelper.getFaults(la);
-		if (LCSArrayHelper.isOffline(la)) {
+	private void updateStatus(Lcs l) {
+		String status = LcsHelper.optFaults(l);
+		if (LcsHelper.isOffline(l)) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.GRAY);
 			status = "OFFLINE";
@@ -287,22 +285,10 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 		status_lbl.setText((status != null) ? status : "");
 	}
 
-	/** Select the DMS for the specified lane */
-	private void selectDMS(LCSArray la, int lane) {
-		LCS lcs = LCSArrayHelper.lookupLCS(la, lane);
-		if (lcs != null) {
-			DMS dms = DMSHelper.lookup(lcs.getName());
-			if (dms != null) {
-				session.getDMSManager().getSelectionModel().
-					setSelected(dms);
-			}
-		}
-	}
-
 	/** Clear the proxy view. */
 	@Override
 	public void clear() {
-		lcs_array = null;
+		lcs = null;
 		name_lbl.setText("");
 		setPresetAction(null);
 		location_lbl.setText("");
@@ -310,39 +296,38 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 		status_lbl.setForeground(null);
 		status_lbl.setBackground(null);
 		operation_lbl.setText("");
-		lock_cbx.setEnabled(false);
-		lock_cbx.setSelectedItem(null);
 		ind_selector.setEnabled(false);
 		send.setEnabled(false);
-		blank_btn.setEnabled(false);
 		lcs_pnl.clear();
 		lane_config.clear();
+		updateLock(null);
 	}
 
 	/** Send new indications to the selected LCS array */
 	private void sendIndications() {
-		LCSArray la = lcs_array;
-		if (la != null)
-			sendIndications(la);
+		Lcs l = lcs;
+		if (l != null)
+			sendIndications(l);
 	}
 
 	/** Send new indications to the specified LCS array */
-	private void sendIndications(LCSArray la) {
-		Integer[] indications = ind_selector.getIndications();
-		if (indications != null) {
-			la.setOwnerNext(user);
-			la.setIndicationsNext(indications);
+	private void sendIndications(Lcs l) {
+		int[] ind = ind_selector.getIndications();
+		if (ind != null) {
+			LcsLock lk = new LcsLock(l.getLock());
+			lk.setUser(user);
+			lk.setIndications(ind);
+			l.setLock(lk.toString());
 		}
 	}
 
 	/** Check if the user is permitted to update the given LCS array */
-	private boolean isWritePermitted(LCSArray la) {
-		return isWritePermitted(la, "indicationsNext") &&
-		       isWritePermitted(la, "ownerNext");
+	private boolean isWritePermitted(Lcs l) {
+		return isWritePermitted(l, "lock");
 	}
 
 	/** Check if the user is permitted to update a given LCS attribute */
-	private boolean isWritePermitted(LCSArray la, String aname) {
-		return session.isWritePermitted(la, aname);
+	private boolean isWritePermitted(Lcs l, String aname) {
+		return session.isWritePermitted(l, aname);
 	}
 }

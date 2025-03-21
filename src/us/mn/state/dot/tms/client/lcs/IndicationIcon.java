@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,12 +24,12 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import javax.swing.Icon;
-import us.mn.state.dot.tms.LaneUseIndication;
+import us.mn.state.dot.tms.LcsIndication;
 import us.mn.state.dot.tms.client.widget.TextShape;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
- * Renderer for LaneUseIndication
+ * Renderer for LcsIndication
  *
  * @author Douglas Lau
  */
@@ -121,10 +121,10 @@ abstract public class IndicationIcon implements Icon {
 	}
 
 	/** Create a new indication icon */
-	static public IndicationIcon create(int p, LaneUseIndication i) {
-		if(i == null)
+	static public IndicationIcon create(int p, LcsIndication i) {
+		if (i == null)
 			return new UnknownIndicationIcon(p);
-		switch(i) {
+		switch (i) {
 		case DARK:
 			return new DarkIndicationIcon(p);
 		case LANE_OPEN:
@@ -135,18 +135,20 @@ abstract public class IndicationIcon implements Icon {
 			return new LaneClosedAheadIndicationIcon(p);
 		case LANE_CLOSED:
 			return new LaneClosedIndicationIcon(p);
-		case HOV:
-			return new HovIndicationIcon(p, Color.WHITE);
-		case HOV_BEGINS:
-			return new HovIndicationIcon(p, Color.GRAY);
 		case MERGE_RIGHT:
 			return new MergeRightIndicationIcon(p);
 		case MERGE_LEFT:
 			return new MergeLeftIndicationIcon(p);
 		case MERGE_BOTH:
 			return new MergeBothIndicationIcon(p);
+		case HOV:
+			return new HovIndicationIcon(p, Color.WHITE);
+		case HOV_BEGINS:
+			return new HovIndicationIcon(p, Color.GRAY);
 		case VSA:
-			return new VariableSpeedIndicationIcon(p);
+			return new VariableSpeedIndicationIcon(p, AMBER);
+		case VSL:
+			return new VariableSpeedIndicationIcon(p, Color.WHITE);
 		case LOW_VISIBILITY:
 			return new LowVisibilityIndicationIcon(p);
 		default:
@@ -379,14 +381,16 @@ abstract public class IndicationIcon implements Icon {
 	static protected class VariableSpeedIndicationIcon
 		extends IndicationIcon
 	{
-		protected VariableSpeedIndicationIcon(int p) {
+		private final Color color;
+		protected VariableSpeedIndicationIcon(int p, Color c) {
 			super(p);
+			color = c;
 		}
 		protected void paintIcon(Graphics2D g2) {
 			g2.setColor(Color.BLACK);
 			g2.setStroke(shadow);
 			g2.draw(V_SHAPE);
-			g2.setColor(AMBER);
+			g2.setColor(color);
 			g2.setStroke(stroke);
 			g2.draw(V_SHAPE);
 		}

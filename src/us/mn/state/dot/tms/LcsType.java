@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,33 +15,28 @@
 package us.mn.state.dot.tms;
 
 /**
- * An LCS array lock specifies the reason for locking an LCS array.
+ * LCS type enumeration.  The ordinal values correspond to the records in the
+ * iris.lcs_type look-up table.
  *
  * @author Douglas Lau
  */
-public enum LCSArrayLock {
+public enum LcsType {
 
-	/** Placeholder for lock-off status */
-	OFF(" "),
+	/** Over lane dedicated (0) */
+	OVER_LANE_DEDICATED("Over lane dedicated"),
 
-	/** Lock for incident status */
-	INCIDENT("Incident"),
+	/** Over lane DMS (1) */
+	OVER_LANE_DMS("Over lane DMS"),
 
-	/** Lock maintenance status */
-	MAINTENANCE("Maintenance"),
+	/** Pavement LED (2) */
+	PAVEMENT_LED("Pavement LED");
 
-	/** Lock testing status */
-	TESTING("Testing"),
-
-	/** Lock other status */
-	OTHER("Other reason");
-
-	/** Create a new LCS array lock */
-	private LCSArrayLock(String d) {
+	/** Create a new LCS type */
+	private LcsType(String d) {
 		description = d;
 	}
 
-	/** Description of the lock reason */
+	/** Description of the type */
 	public final String description;
 
 	/** Get the string representation */
@@ -50,11 +45,11 @@ public enum LCSArrayLock {
 		return description;
 	}
 
-	/** Get an LCS array lock from an ordinal value */
-	static public LCSArrayLock fromOrdinal(Integer o) {
-		if (o != null && o > 0 && o < values().length)
+	/** Get LCS type from an ordinal value */
+	static public LcsType fromOrdinal(int o) {
+		if (o >= 0 && o < values().length)
 			return values()[o];
 		else
-			return null;
+			return OVER_LANE_DEDICATED;
 	}
 }

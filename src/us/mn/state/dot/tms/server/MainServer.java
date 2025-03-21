@@ -244,10 +244,8 @@ public class MainServer {
 		ns.registerType(GateArmArrayImpl.class);
 		ns.registerType(GateArmImpl.class);
 		ns.registerType(TagReaderImpl.class);
-		ns.registerType(LCSArrayImpl.class);
-		ns.registerType(LCSImpl.class);
-		ns.registerType(LCSIndicationImpl.class);
-		ns.registerType(LaneUseMultiImpl.class);
+		ns.registerType(LcsImpl.class);
+		ns.registerType(LcsStateImpl.class);
 		ns.registerType(ParkingAreaImpl.class);
 		ns.registerType(IncidentImpl.class);
 		ns.registerType(IncDescriptorImpl.class);
@@ -266,6 +264,7 @@ public class MainServer {
 	/** Schedule jobs on TIMER thread */
 	static private void scheduleTimerJobs() {
 		TIMER.addJob(new MeteringJob(FLUSH));
+		TIMER.addJob(new LcsExpireJob());
 		TIMER.addJob(new SendSettingsJob());
 		TIMER.addJob(new SendSettingsJob(500));
 		TIMER.addJob(new TollZoneJob());
