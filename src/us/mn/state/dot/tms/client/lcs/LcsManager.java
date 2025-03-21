@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,12 @@ import javax.swing.JList;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.tms.CorridorBase;
-import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneConfiguration;
-import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.LCSArrayHelper;
+import us.mn.state.dot.tms.Lcs;
+import us.mn.state.dot.tms.LcsHelper;
 import static us.mn.state.dot.tms.R_Node.MAX_LANES;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.map.Style;
@@ -42,22 +41,20 @@ import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * The LCSArrayManager class provides proxies for LCSArray objects.
+ * The LcsManager class provides proxies for Lcs objects.
  *
  * @author Douglas Lau
  */
-public class LCSArrayManager extends DeviceManager<LCSArray> {
+public class LcsManager extends DeviceManager<Lcs> {
 
 	/** Create a proxy descriptor */
-	static public ProxyDescriptor<LCSArray> descriptor(final Session s) {
-		return new ProxyDescriptor<LCSArray>(
-			s.getSonarState().getLcsCache().getLCSArrays(), true
+	static public ProxyDescriptor<Lcs> descriptor(final Session s) {
+		return new ProxyDescriptor<Lcs>(
+			s.getSonarState().getLcsCache().getLcss(), true
 		) {
 			@Override
-			public LCSArrayProperties createPropertiesForm(
-				LCSArray la)
-			{
-				return new LCSArrayProperties(s, la);
+			public LcsProperties createPropertiesForm(Lcs l) {
+				return new LcsProperties(s, l);
 			}
 			@Override
 			public LcsForm makeTableForm() {
@@ -67,15 +64,15 @@ public class LCSArrayManager extends DeviceManager<LCSArray> {
 	}
 
 	/** Action to blank the selected LCS array */
-	private BlankLcsAction blankAction;
+	private BlankLcsAction blank_act;
 
 	/** Set the blank LCS action */
 	public void setBlankAction(BlankLcsAction a) {
-		blankAction = a;
+		blank_act = a;
 	}
 
 	/** Create a new LCS array manager */
-	public LCSArrayManager(Session s, GeoLocManager lm) {
+	public LcsManager(Session s, GeoLocManager lm) {
 		super(s, lm, descriptor(s), 14);
 	}
 
@@ -87,8 +84,8 @@ public class LCSArrayManager extends DeviceManager<LCSArray> {
 
 	/** Create a theme for LCS arrays */
 	@Override
-	protected ProxyTheme<LCSArray> createTheme() {
-		ProxyTheme<LCSArray> theme = new ProxyTheme<LCSArray>(this,
+	protected ProxyTheme<Lcs> createTheme() {
+		ProxyTheme<Lcs> theme = new ProxyTheme<Lcs>(this,
 			new LcsMarker());
 		theme.addStyle(ItemStyle.AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
@@ -101,15 +98,15 @@ public class LCSArrayManager extends DeviceManager<LCSArray> {
 
 	/** Create a list cell renderer */
 	@Override
-	public ListCellRenderer<LCSArray> createCellRenderer() {
-		return new LCSArrayCellRenderer(this);
+	public ListCellRenderer<Lcs> createCellRenderer() {
+		return new LcsCellRenderer(this);
 	}
 
 	/** Comparator for ordering LCS arrays */
-	private final Comparator<LCSArray> lcs_comparator =
-		new Comparator<LCSArray>()
+	private final Comparator<Lcs> lcs_comparator =
+		new Comparator<Lcs>()
 	{
-		public int compare(LCSArray l0, LCSArray l1) {
+		public int compare(Lcs l0, Lcs l1) {
 			// sort downstream to upstream
 			return l1.getName().compareTo(l0.getName());
 		}
@@ -117,10 +114,10 @@ public class LCSArrayManager extends DeviceManager<LCSArray> {
 
 	/** Create a style list model for the given symbol */
 	@Override
-	protected StyleListModel<LCSArray> createStyleListModel(Style sty) {
-		return new StyleListModel<LCSArray>(this, sty.toString()) {
+	protected StyleListModel<Lcs> createStyleListModel(Style sty) {
+		return new StyleListModel<Lcs>(this, sty.toString()) {
 			@Override
-			protected Comparator<LCSArray> comparator() {
+			protected Comparator<Lcs> comparator() {
 				return lcs_comparator;
 			}
 		};
@@ -128,8 +125,8 @@ public class LCSArrayManager extends DeviceManager<LCSArray> {
 
 	/** Create a proxy JList */
 	@Override
-	public ProxyJList<LCSArray> createList() {
-		ProxyJList<LCSArray> list = super.createList();
+	public ProxyJList<Lcs> createList() {
+		ProxyJList<Lcs> list = super.createList();
 		list.setLayoutOrientation(JList.VERTICAL_WRAP);
 		list.setVisibleRowCount(0);
 		return list;
@@ -137,45 +134,31 @@ public class LCSArrayManager extends DeviceManager<LCSArray> {
 
 	/** Fill single selection popup */
 	@Override
-	protected void fillPopupSingle(JPopupMenu p, LCSArray la) {
-		if (LCSArrayHelper.isDeployed(la) && blankAction != null) {
-			p.add(blankAction);
+	protected void fillPopupSingle(JPopupMenu p, Lcs l) {
+		if (LcsHelper.isDeployed(l) && blank_act != null) {
+			p.add(blank_act);
 			p.addSeparator();
 		}
-	}
-
-	/** Fill single selection work request popup */
-	@Override
-	protected void fillPopupWorkReq(JPopupMenu p, LCSArray la) {
-		for (int i = 1; i <= MAX_LANES; i++) {
-			DMS dms = LCSArrayHelper.lookupDMS(la, i);
-			if (dms != null) {
-				p.add(new WorkRequestAction<DMS>(dms,
-					dms.getGeoLoc()));
-			}
-		}
-		p.addSeparator();
 	}
 
 	/** Create a popup menu for multiple objects */
 	@Override
 	protected JPopupMenu createPopupMulti(int n_selected) {
 		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel(I18N.get("lcs_array.title") + ": " +
-			n_selected));
+		p.add(new JLabel(I18N.get("lcs.title") + ": " + n_selected));
 		p.addSeparator();
 		return p;
 	}
 
 	/** Find the map geo location for a proxy */
 	@Override
-	protected GeoLoc getGeoLoc(final LCSArray proxy) {
-		return LCSArrayHelper.lookupGeoLoc(proxy);
+	protected GeoLoc getGeoLoc(final Lcs proxy) {
+		return proxy.getGeoLoc();
 	}
 
 	/** Get the lane configuration at an LCS array */
-	public LaneConfiguration laneConfiguration(LCSArray proxy) {
-		GeoLoc loc = LCSArrayHelper.lookupGeoLoc(proxy);
+	public LaneConfiguration laneConfiguration(Lcs proxy) {
+		GeoLoc loc = proxy.getGeoLoc();
 		CorridorBase cor = session.getR_NodeManager().lookupCorridor(
 			loc);
 		if (cor != null) {

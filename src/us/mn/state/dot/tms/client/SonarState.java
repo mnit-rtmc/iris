@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2024  Minnesota Department of Transportation
+ * Copyright (C) 2007-2025  Minnesota Department of Transportation
  * Copyright (C) 2015       Iteris Inc.
  * Copyright (C) 2016-2021  SRF Consulting Group
  *

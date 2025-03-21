@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2019  Minnesota Department of Transportation
+ * Copyright (C) 2010-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,8 @@ import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
-import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.Lcs;
+import us.mn.state.dot.tms.LcsLock;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -121,19 +122,21 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 	private void deployDevices() {
 		for (int i = 0; i < model.getSize(); i++) {
 			Device dev = model.getElementAt(i);
-			if (dev instanceof LCSArray)
-				sendIndications((LCSArray) dev);
+			if (dev instanceof Lcs)
+				sendIndications((Lcs) dev);
 			if (dev instanceof DMS)
 				sendSignMessage((DMS) dev);
 		}
 	}
 
 	/** Send new indications to the specified LCS array */
-	private void sendIndications(LCSArray lcs_array) {
-		Integer[] ind = model.getIndications(lcs_array.getName());
+	private void sendIndications(Lcs lcs) {
+		int[] ind = model.getIndications(lcs.getName());
 		if (ind != null) {
-			lcs_array.setOwnerNext(session.getUser());
-			lcs_array.setIndicationsNext(ind);
+			LcsLock lk = new LcsLock(lcs.getLock());
+			lk.setUser(session.getUser().getName());
+			lk.setIndications(ind);
+			lcs.setLock(lk.toString());
 		}
 	}
 

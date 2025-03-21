@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2020  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@ package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.event.ActionEvent;
 import javax.swing.JComboBox;
-import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.LCSArrayLock;
+import us.mn.state.dot.tms.Lcs;
+import us.mn.state.dot.tms.LcsLock;
 import us.mn.state.dot.tms.client.proxy.ProxyAction;
 
 /**
@@ -25,24 +25,35 @@ import us.mn.state.dot.tms.client.proxy.ProxyAction;
  *
  * @author Douglas Lau
  */
-public class LockLcsAction extends ProxyAction<LCSArray> {
+public class LockReasonAction extends ProxyAction<Lcs> {
 
-	/** Lock combo box component */
-	private final JComboBox<LCSArrayLock> lock_cbx;
+	/** User ID */
+	private final String user;
 
-	/** Create a new action to lock the selected LCS array */
-	public LockLcsAction(LCSArray p, JComboBox<LCSArrayLock> c) {
+	/** Reason combo box component */
+	private final JComboBox<String> reason_cbx;
+
+	/** Create a new action to select a lock reason */
+	public LockReasonAction(Lcs p, String u, JComboBox<String> c) {
 		super("lcs.locked", p);
-		lock_cbx = c;
+		user = u;
+		reason_cbx = c;
 	}
 
 	/** Actually perform the action */
 	@Override
 	protected void doActionPerformed(ActionEvent e) {
-		int s = lock_cbx.getSelectedIndex();
-		if (s >= 0) {
-			Integer lk = (s != 0) ? Integer.valueOf(s) : null;
-			proxy.setLcsLock(lk);
+		if (proxy != null) {
+			String reason = (String) reason_cbx.getSelectedItem();
+			if ("".equals(reason))
+				reason = null;
+			if (reason != null) {
+				LcsLock lk = new LcsLock(proxy.getLock());
+				lk.setReason(reason);
+				lk.setUser(user);
+				proxy.setLock(lk.toString());
+			} else
+				proxy.setLock(null);
 		}
 	}
 }

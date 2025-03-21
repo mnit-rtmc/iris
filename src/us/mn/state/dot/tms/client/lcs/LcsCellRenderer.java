@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,10 +26,10 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.Border;
-import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.LCSArrayHelper;
-import us.mn.state.dot.tms.User;
-import us.mn.state.dot.tms.UserHelper;
+import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.Lcs;
+import us.mn.state.dot.tms.LcsHelper;
+import us.mn.state.dot.tms.LcsLock;
 import us.mn.state.dot.tms.client.roads.LaneConfigurationPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
@@ -38,14 +38,14 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  *
  * @author Douglas Lau
  */
-public class LCSArrayCellRenderer extends JPanel
-	implements ListCellRenderer<LCSArray>
+public class LcsCellRenderer extends JPanel
+	implements ListCellRenderer<Lcs>
 {
 	/** Size in pixels for each LCS in array */
 	static private final int LCS_SIZE = UI.scaled(20);
 
 	/** LCS array manager */
-	private final LCSArrayManager manager;
+	private final LcsManager manager;
 
 	/** List cell renderer (needed for colors) */
 	private final DefaultListCellRenderer cell =
@@ -66,7 +66,7 @@ public class LCSArrayCellRenderer extends JPanel
 		new LaneConfigurationPanel(LCS_SIZE, false);
 
 	/** LCS array panel */
-	private final LCSArrayPanel lcs_pnl = new LCSArrayPanel(LCS_SIZE);
+	private final LcsPanel lcs_pnl = new LcsPanel(LCS_SIZE);
 
 	/** Location bar */
 	private final Box location = Box.createHorizontalBox();
@@ -76,7 +76,7 @@ public class LCSArrayCellRenderer extends JPanel
 	private final JLabel loc_lbl = new JLabel(" ");
 
 	/** Create a new LCS array cell renderer */
-	public LCSArrayCellRenderer(LCSArrayManager m) {
+	public LcsCellRenderer(LcsManager m) {
 		super(new BorderLayout());
 		manager = m;
 		Border b = UI.cellRendererBorder();
@@ -113,10 +113,10 @@ public class LCSArrayCellRenderer extends JPanel
 	 */
 	@Override
 	public Component getListCellRendererComponent(
-		JList<? extends LCSArray> list, LCSArray value, int index,
+		JList<? extends Lcs> list, Lcs value, int index,
 		boolean isSelected, boolean cellHasFocus)
 	{
-		setLcsArray(value);
+		setLcs(value);
 		if (isSelected) {
 			Component temp = cell.getListCellRendererComponent(list,
 				value, index, isSelected, cellHasFocus);
@@ -127,23 +127,23 @@ public class LCSArrayCellRenderer extends JPanel
 	}
 
 	/** Set the LCS array */
-	private void setLcsArray(LCSArray lcs_array) {
-		lane_config.setConfiguration(manager.laneConfiguration(
-			lcs_array));
-		name_lbl.setText(lcs_array.getName());
-		user_lbl.setText(UserHelper.getNamePruned(getUser(lcs_array)));
-		lcs_pnl.setIndications(getIndications(lcs_array),
-			lcs_array.getShift());
-		loc_lbl.setText(LCSArrayHelper.lookupLocation(lcs_array));
+	private void setLcs(Lcs lcs) {
+		lane_config.setConfiguration(manager.laneConfiguration(lcs));
+		name_lbl.setText(lcs.getName());
+		user_lbl.setText(getUser(lcs));
+		lcs_pnl.setIndications(getIndications(lcs), lcs.getShift());
+		loc_lbl.setText(GeoLocHelper.getLocation(lcs.getGeoLoc()));
 	}
 
 	/** Get the user name (may be overridden) */
-	protected User getUser(LCSArray lcs_array) {
-		return lcs_array.getOwnerCurrent();
+	protected String getUser(Lcs lcs) {
+		LcsLock lk = new LcsLock(lcs.getLock());
+		String user = lk.optUser();
+		return (user != null) ? user : "";
 	}
 
 	/** Get the indications (may be overridden) */
-	protected Integer[] getIndications(LCSArray lcs_array) {
-		return lcs_array.getIndicationsCurrent();
+	protected int[] getIndications(Lcs lcs) {
+		return LcsHelper.getIndications(lcs);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import us.mn.state.dot.tms.LaneUseIndication;
+import us.mn.state.dot.tms.LcsIndication;
 import static us.mn.state.dot.tms.R_Node.MAX_SHIFT;
 
 /**
@@ -28,7 +28,7 @@ import static us.mn.state.dot.tms.R_Node.MAX_SHIFT;
  *
  * @author Douglas Lau
  */
-public class LCSArrayPanel extends JPanel {
+public class LcsPanel extends JPanel {
 
 	/** Interface to handle clicks */
 	static public interface ClickHandler {
@@ -38,8 +38,8 @@ public class LCSArrayPanel extends JPanel {
 	/** Pixel size (height and width) of each LCS */
 	private final int pixels;
 
-	/** Array of LCS indication panels (icons) from left to right */
-	private final LCSPanel[] lcs_pnl = new LCSPanel[MAX_SHIFT + 1];
+	/** Array of indication panels (icons) from left to right */
+	private final LanePanel[] panels = new LanePanel[MAX_SHIFT + 1];
 
 	/** Handler for click events */
 	private ClickHandler handler;
@@ -49,10 +49,10 @@ public class LCSArrayPanel extends JPanel {
 		handler = ch;
 	}
 
-	/** Panel to display on LCS indication */
-	private class LCSPanel extends JLabel {
+	/** Panel to display one LCS indication */
+	private class LanePanel extends JLabel {
 		private Integer lane;
-		private LCSPanel() {
+		private LanePanel() {
 			setBackground(Color.BLACK);
 			addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
@@ -64,7 +64,7 @@ public class LCSArrayPanel extends JPanel {
 		}
 		private void setIndication(int ln, Integer ind) {
 			setIcon(IndicationIcon.create(pixels,
-				LaneUseIndication.fromOrdinal(ind)));
+				LcsIndication.fromOrdinal(ind)));
 			setOpaque(true);
 			lane = ln + 1;
 		}
@@ -86,16 +86,16 @@ public class LCSArrayPanel extends JPanel {
 	 * Create an LCS array panel
 	 * @param p Pixel size for each LCS.
 	 */
-	public LCSArrayPanel(int p) {
+	public LcsPanel(int p) {
 		setLayout(null);
 		pixels = p;
 		int w = getX(MAX_SHIFT + 1);
 		setMinimumSize(new Dimension(w, pixels));
 		setPreferredSize(new Dimension(w, pixels));
-		for (int i = 0; i < lcs_pnl.length; i++) {
-			lcs_pnl[i] = new LCSPanel();
-			add(lcs_pnl[i]);
-			lcs_pnl[i].setBounds(getX(i), 0, pixels, pixels);
+		for (int i = 0; i < panels.length; i++) {
+			panels[i] = new LanePanel();
+			add(panels[i]);
+			panels[i].setBounds(getX(i), 0, pixels, pixels);
 		}
 		setOpaque(false);
 	}
@@ -108,20 +108,20 @@ public class LCSArrayPanel extends JPanel {
 	}
 
 	/** Set new indications */
-	public void setIndications(Integer[] ind, int shift) {
-		int ilen = ind != null ? ind.length : 0;
-		for (int i = 0; i < lcs_pnl.length; i++) {
+	public void setIndications(int[] ind, int shift) {
+		int ilen = (ind != null) ? ind.length : 0;
+		for (int i = 0; i < panels.length; i++) {
 			int ln = shift + ilen - 1 - i;
 			if (ln >= 0 && ln < ilen)
-				lcs_pnl[i].setIndication(ln, ind[ln]);
+				panels[i].setIndication(ln, ind[ln]);
 			else
-				lcs_pnl[i].clearIndication();
+				panels[i].clearIndication();
 		}
 	}
 
 	/** Clear the LCS panel */
 	public void clear() {
-		setIndications(new Integer[0], 0);
+		setIndications(null, 0);
 		handler = null;
 	}
 }

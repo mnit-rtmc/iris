@@ -309,7 +309,7 @@ public class SingleSignTab extends IPanel {
 
 	/** Set the camera preset action */
 	private void setPresetAction(DMS dms) {
-		CameraPreset cp = DMSHelper.getPreset(dms);
+		CameraPreset cp = (dms != null) ? dms.getPreset() : null;
 		preset_btn.setAction(new CameraPresetAction(session, cp));
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,10 +15,8 @@
 package us.mn.state.dot.tms.client.lcs;
 
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.LaneUseMulti;
-import us.mn.state.dot.tms.LCS;
-import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.LCSIndication;
+import us.mn.state.dot.tms.Lcs;
+import us.mn.state.dot.tms.LcsState;
 import us.mn.state.dot.tms.client.SonarState;
 
 /**
@@ -29,59 +27,37 @@ import us.mn.state.dot.tms.client.SonarState;
 public class LcsCache {
 
 	/** Cache of LCS arrays */
-	protected final TypeCache<LCSArray> lcs_arrays;
+	private final TypeCache<Lcs> lcss;
 
 	/** Get the LCS array cache */
-	public TypeCache<LCSArray> getLCSArrays() {
-		return lcs_arrays;
-	}
-
-	/** Cache of LCS */
-	protected final TypeCache<LCS> lcss;
-
-	/** Get the LCS cache */
-	public TypeCache<LCS> getLCSs() {
+	public TypeCache<Lcs> getLcss() {
 		return lcss;
 	}
 
-	/** Cache of LCS indications */
-	protected final TypeCache<LCSIndication> lcs_indications;
+	/** Cache of LCS states */
+	private final TypeCache<LcsState> lcs_states;
 
-	/** Get the LCS indication cache */
-	public TypeCache<LCSIndication> getLCSIndications() {
-		return lcs_indications;
-	}
-
-	/** Cache of lane-use MULTI strings */
-	protected final TypeCache<LaneUseMulti> lane_use_multis;
-
-	/** Get the lane-use MULTI cache */
-	public TypeCache<LaneUseMulti> getLaneUseMultis() {
-		return lane_use_multis;
+	/** Get the LCS cache */
+	public TypeCache<LcsState> getLcsStates() {
+		return lcs_states;
 	}
 
 	/** Create a new LCS cache */
 	public LcsCache(SonarState client) throws IllegalAccessException,
-		NoSuchFieldException 
+		NoSuchFieldException
 	{
-		lcs_arrays = new TypeCache<LCSArray>(LCSArray.class, client);
-		lcss = new TypeCache<LCS>(LCS.class, client);
-		lcs_indications = new TypeCache<LCSIndication>(
-			LCSIndication.class, client);
-		lane_use_multis = new TypeCache<LaneUseMulti>(
-			LaneUseMulti.class, client);
+		lcss = new TypeCache<Lcs>(Lcs.class, client);
+		lcs_states = new TypeCache<LcsState>(LcsState.class, client);
 	}
 
 	/** Populate the LCS cache */
 	public void populate(SonarState client) {
-		client.populateReadable(lcs_arrays);
-		if(client.canRead(LCSArray.SONAR_TYPE)) {
-			lcs_arrays.ignoreAttribute("operation");
-			// We can't ignore indicationsCurrent and ownerCurrent,
-			// because LCSArrayCellRenderer lists need the updates
-		}
 		client.populateReadable(lcss);
-		client.populateReadable(lcs_indications);
-		client.populateReadable(lane_use_multis);
+		if (client.canRead(Lcs.SONAR_TYPE)) {
+			lcss.ignoreAttribute("operation");
+			// We can't ignore status, because LcsCellRenderer
+			// lists need the updates
+		}
+		client.populateReadable(lcs_states);
 	}
 }
