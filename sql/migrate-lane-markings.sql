@@ -11,6 +11,7 @@ CREATE VIEW iris.device_geo_loc_view AS
     SELECT name, geo_loc FROM iris._beacon UNION ALL
     SELECT name, geo_loc FROM iris._camera UNION ALL
     SELECT name, geo_loc FROM iris._dms UNION ALL
+    SELECT name, geo_loc FROM iris._lcs UNION ALL
     SELECT name, geo_loc FROM iris._ramp_meter UNION ALL
     SELECT name, geo_loc FROM iris._tag_reader UNION ALL
     SELECT name, geo_loc FROM iris._weather_sensor UNION ALL

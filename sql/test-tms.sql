@@ -409,96 +409,47 @@ SELECT assert ('yeshh' = (SELECT notes FROM iris.weather_sensor
 
 DELETE FROM iris.weather_sensor WHERE name = 'WS_TEST_1';
 
--- Test lcs_array view
-INSERT INTO iris.lcs_array (name, pin, notes, shift)
+-- Test lcs view
+INSERT INTO iris.lcs (name, pin, notes, shift)
 	VALUES ('LCS_TEST_1', 8, 'a Note', 5);
 
 \o /dev/null
-SELECT assert ('LCS_TEST_1' = (SELECT name FROM iris.lcs_array
+SELECT assert ('LCS_TEST_1' = (SELECT name FROM iris.lcs
                WHERE name = 'LCS_TEST_1'), 'lcs insert name');
-SELECT assert ((SELECT controller FROM iris.lcs_array
+SELECT assert ((SELECT controller FROM iris.lcs
                WHERE name = 'LCS_TEST_1') IS NULL, 'lcs insert controller');
-SELECT assert (8 = (SELECT pin FROM iris.lcs_array
+SELECT assert (8 = (SELECT pin FROM iris.lcs
                WHERE name = 'LCS_TEST_1'), 'lcs insert pin');
-SELECT assert ('a Note' = (SELECT notes FROM iris.lcs_array
+SELECT assert ('a Note' = (SELECT notes FROM iris.lcs
                WHERE name = 'LCS_TEST_1'), 'lcs insert notes');
-SELECT assert (5 = (SELECT shift FROM iris.lcs_array
+SELECT assert (5 = (SELECT shift FROM iris.lcs
                WHERE name = 'LCS_TEST_1'), 'lcs insert shift');
-SELECT assert ((SELECT lcs_lock FROM iris.lcs_array
+SELECT assert ((SELECT lcs_lock FROM iris.lcs
                WHERE name = 'LCS_TEST_1') IS NULL, 'lcs insert lcs_lock');
 \o
 
-UPDATE iris.lcs_array SET controller = 'CTL_TEST_1' WHERE name = 'LCS_TEST_1';
-UPDATE iris.lcs_array SET pin = 11 WHERE name = 'LCS_TEST_1';
-UPDATE iris.lcs_array SET notes = 'nope' WHERE name = 'LCS_TEST_1';
-UPDATE iris.lcs_array SET shift = 4 WHERE name = 'LCS_TEST_1';
-UPDATE iris.lcs_array SET lcs_lock = 3 WHERE name = 'LCS_TEST_1';
+UPDATE iris.lcs SET controller = 'CTL_TEST_1' WHERE name = 'LCS_TEST_1';
+UPDATE iris.lcs SET pin = 11 WHERE name = 'LCS_TEST_1';
+UPDATE iris.lcs SET notes = 'nope' WHERE name = 'LCS_TEST_1';
+UPDATE iris.lcs SET shift = 4 WHERE name = 'LCS_TEST_1';
+UPDATE iris.lcs SET lock = 3 WHERE name = 'LCS_TEST_1';
 
 \o /dev/null
-SELECT assert ('LCS_TEST_1' = (SELECT name FROM iris.lcs_array
+SELECT assert ('LCS_TEST_1' = (SELECT name FROM iris.lcs
                WHERE name = 'LCS_TEST_1'), 'lcs update name');
-SELECT assert ('CTL_TEST_1' = (SELECT controller FROM iris.lcs_array
+SELECT assert ('CTL_TEST_1' = (SELECT controller FROM iris.lcs
                WHERE name = 'LCS_TEST_1'), 'lcs update controller');
-SELECT assert (11 = (SELECT pin FROM iris.lcs_array
+SELECT assert (11 = (SELECT pin FROM iris.lcs
                WHERE name = 'LCS_TEST_1'), 'lcs update pin');
-SELECT assert ('nope' = (SELECT notes FROM iris.lcs_array
+SELECT assert ('nope' = (SELECT notes FROM iris.lcs
                WHERE name = 'LCS_TEST_1'), 'lcs update notes');
-SELECT assert (4 = (SELECT shift FROM iris.lcs_array
+SELECT assert (4 = (SELECT shift FROM iris.lcs
                WHERE name = 'LCS_TEST_1'), 'lcs update shift');
-SELECT assert (3 = (SELECT lcs_lock FROM iris.lcs_array
+SELECT assert (3 = (SELECT lcs_lock FROM iris.lcs
                WHERE name = 'LCS_TEST_1'), 'lcs update lcs_lock');
 \o
 
--- Test lcs_indication view
-INSERT INTO iris.dms (name, pin, notes, aws_allowed, aws_controlled)
-	VALUES ('L_TEST_1', 1, '', false, false);
-INSERT INTO iris.lcs (name, lcs_array, lane)
-	VALUES ('L_TEST_1', 'LCS_TEST_1', 1);
-INSERT INTO iris.dms (name, pin, notes, aws_allowed, aws_controlled)
-	VALUES ('L_TEST_2', 2, '', false, false);
-INSERT INTO iris.lcs (name, lcs_array, lane)
-	VALUES ('L_TEST_2', 'LCS_TEST_1', 2);
-INSERT INTO iris.lcs_indication (name, pin, lcs, indication)
-	VALUES ('LI_TEST_1', 13, 'L_TEST_1', 1);
-
-\o /dev/null
-SELECT assert ('LI_TEST_1' = (SELECT name FROM iris.lcs_indication
-               WHERE name = 'LI_TEST_1'), 'li insert name');
-SELECT assert ((SELECT controller FROM iris.lcs_indication
-               WHERE name = 'LI_TEST_1') IS NULL, 'li insert controller');
-SELECT assert (13 = (SELECT pin FROM iris.lcs_indication
-               WHERE name = 'LI_TEST_1'), 'li insert pin');
-SELECT assert ('L_TEST_1' = (SELECT lcs FROM iris.lcs_indication
-               WHERE name = 'LI_TEST_1'), 'li insert lcs');
-SELECT assert (1 = (SELECT indication FROM iris.lcs_indication
-               WHERE name = 'LI_TEST_1'), 'li insert indication');
-\o
-
-UPDATE iris.lcs_indication SET controller = 'CTL_TEST_1'
-	WHERE name = 'LI_TEST_1';
-UPDATE iris.lcs_indication SET pin = 14 WHERE name = 'LI_TEST_1';
-UPDATE iris.lcs_indication SET lcs = 'L_TEST_2' WHERE name = 'LI_TEST_1';
-UPDATE iris.lcs_indication SET indication = 2 WHERE name = 'LI_TEST_1';
-
-\o /dev/null
-SELECT assert ('LI_TEST_1' = (SELECT name FROM iris.lcs_indication
-               WHERE name = 'LI_TEST_1'), 'li update name');
-SELECT assert ('CTL_TEST_1' = (SELECT controller FROM iris.lcs_indication
-               WHERE name = 'LI_TEST_1'), 'li update controller');
-SELECT assert (14 = (SELECT pin FROM iris.lcs_indication
-               WHERE name = 'LI_TEST_1'), 'li update pin');
-SELECT assert ('L_TEST_2' = (SELECT lcs FROM iris.lcs_indication
-               WHERE name = 'LI_TEST_1'), 'li update lcs');
-SELECT assert (2 = (SELECT indication FROM iris.lcs_indication
-               WHERE name = 'LI_TEST_1'), 'li update indication');
-\o
-
-DELETE FROM iris.lcs_indication WHERE name = 'LI_TEST_1';
-DELETE FROM iris.lcs WHERE name = 'L_TEST_2';
-DELETE FROM iris.dms WHERE name = 'L_TEST_2';
-DELETE FROM iris.lcs WHERE name = 'L_TEST_1';
-DELETE FROM iris.dms WHERE name = 'L_TEST_1';
-DELETE FROM iris.lcs_array WHERE name = 'LCS_TEST_1';
+DELETE FROM iris.lcs WHERE name = 'LCS_TEST_1';
 
 -- Delete controller stuff
 DELETE FROM iris.camera_preset WHERE name = 'PRE_TEST_1';
