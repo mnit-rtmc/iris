@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,28 +14,23 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.SonarObject;
+import java.util.Iterator;
 
 /**
- * A Lane-Use Control Signal is a special DMS which is designed to display
- * lane-use indications.
+ * Helper for LCS states.
  *
  * @author Douglas Lau
  */
-public interface LCS extends SonarObject {
+public class LcsStateHelper extends BaseHelper {
 
-	/** SONAR type name */
-	String SONAR_TYPE = "lcs";
-
-	/** Get the SONAR type name */
-	@Override
-	default String getTypeName() {
-		return SONAR_TYPE;
+	/** Disallow instantiation */
+	private LcsStateHelper() {
+		assert false;
 	}
 
-	/** Get the LCS array */
-	LCSArray getArray();
-
-	/** Get the lane number (starting from right lane as 1) */
-	int getLane();
+	/** Get an LCS state iterator */
+	static public Iterator<LcsState> iterator() {
+		return new IteratorWrapper<LcsState>(namespace.iterator(
+			LcsState.SONAR_TYPE));
+	}
 }

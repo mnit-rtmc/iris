@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,15 +17,14 @@ package us.mn.state.dot.tms;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * A lane-use MULTI is an association between lane-use indication and a
- * message pattern MULTI.
+ * An LCS state represents a lane/indication combination for an LCS array.
  *
  * @author Douglas Lau
  */
-public interface LaneUseMulti extends SonarObject {
+public interface LcsState extends ControllerIO {
 
 	/** SONAR type name */
-	String SONAR_TYPE = "lane_use_multi";
+	String SONAR_TYPE = "lcs_state";
 
 	/** Get the SONAR type name */
 	@Override
@@ -34,19 +33,22 @@ public interface LaneUseMulti extends SonarObject {
 	}
 
 	/** SONAR base type name */
-	String SONAR_BASE = LCS.SONAR_TYPE;
+	String SONAR_BASE = Lcs.SONAR_TYPE;
 
-	/** Set the indication (ordinal of LaneUseIndication) */
+	/** Get the LCS array */
+	Lcs getLcs();
+
+	/** Set the lane (starting from right lane as 1) */
+	void setLane(int ln);
+
+	/** Get the lane (starting from right lane as 1) */
+	int getLane();
+
+	/** Set the indication (ordinal of LcsIndication) */
 	void setIndication(int i);
 
-	/** Get the indication (ordinal of LaneUseIndication) */
+	/** Get the indication (ordinal of LcsIndication) */
 	int getIndication();
-
-	/** Set the message number */
-	void setMsgNum(Integer n);
-
-	/** Get the message number */
-	Integer getMsgNum();
 
 	/** Set the message pattern */
 	void setMsgPattern(MsgPattern pat);
@@ -54,9 +56,9 @@ public interface LaneUseMulti extends SonarObject {
 	/** Get the message pattern */
 	MsgPattern getMsgPattern();
 
-	/** Set the DMS hashtag */
-	void setDmsHashtag(String ht);
+	/** Set the message number */
+	void setMsgNum(Integer n);
 
-	/** Get the DMS hashtag */
-	String getDmsHashtag();
+	/** Get the message number */
+	Integer getMsgNum();
 }
