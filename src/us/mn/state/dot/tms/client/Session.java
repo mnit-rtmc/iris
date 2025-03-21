@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  * Copyright (C) 2019  SRF Consulting Group
  *
@@ -33,8 +33,7 @@ import us.mn.state.dot.tms.client.comm.ControllerManager;
 import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.gate.GateArmArrayManager;
 import us.mn.state.dot.tms.client.incident.IncidentManager;
-import us.mn.state.dot.tms.client.lcs.LCSArrayManager;
-import us.mn.state.dot.tms.client.lcs.LCSIManager;
+import us.mn.state.dot.tms.client.lcs.LcsManager;
 import us.mn.state.dot.tms.client.map.MapBean;
 import us.mn.state.dot.tms.client.map.MapModel;
 import us.mn.state.dot.tms.client.map.TileLayer;
@@ -166,11 +165,11 @@ public class Session {
 	}
 
 	/** LCS array manager */
-	private final LCSArrayManager lcs_array_manager;
+	private final LcsManager lcs_manager;
 
 	/** Get the LCS array manager */
-	public LCSArrayManager getLCSArrayManager() {
-		return lcs_array_manager;
+	public LcsManager getLcsManager() {
+		return lcs_manager;
 	}
 
 	/** Mapping of all tabs */
@@ -199,7 +198,7 @@ public class Session {
 		dms_manager = new DMSManager(this, loc_manager);
 		inc_manager = new IncidentManager(this, loc_manager);
 		alert_manager = new AlertManager(this, loc_manager);
-		lcs_array_manager = new LCSArrayManager(this, loc_manager);
+		lcs_manager = new LcsManager(this, loc_manager);
 		managers = new LinkedList<ProxyManager<?>>();
 		managers.add(r_node_manager);
 		managers.add(new ControllerManager(this, loc_manager));
@@ -207,8 +206,7 @@ public class Session {
 		managers.add(new MeterManager(this, loc_manager));
 		managers.add(new GateArmArrayManager(this, loc_manager));
 		managers.add(dms_manager);
-		managers.add(lcs_array_manager);
-		managers.add(new LCSIManager(this, loc_manager));
+		managers.add(lcs_manager);
 		managers.add(new LaneMarkingManager(this,loc_manager));
 		managers.add(new BeaconManager(this, loc_manager));
 		managers.add(new TagReaderManager(this, loc_manager));

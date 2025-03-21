@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.Lcs;
 import us.mn.state.dot.tms.client.Session;
 
 /**
@@ -35,7 +35,7 @@ public class ProposedDeviceCellRenderer implements ListCellRenderer<Device> {
 		new DefaultListCellRenderer();
 
 	/** List for configuring LCS cell renderer */
-	private final JList<LCSArray> lcs_list = new JList<LCSArray>();
+	private final JList<Lcs> lcs_list = new JList<Lcs>();
 
 	/** List for configuring DMS cell renderer */
 	private final JList<DMS> dms_list = new JList<DMS>();
@@ -65,8 +65,8 @@ public class ProposedDeviceCellRenderer implements ListCellRenderer<Device> {
 		JList<? extends Device> list, Device value, int index,
 		boolean isSelected, boolean cellHasFocus)
 	{
-		if (value instanceof LCSArray) {
-			LCSArray lcs = (LCSArray) value;
+		if (value instanceof Lcs) {
+			Lcs lcs = (Lcs) value;
 			return lcs_renderer.getListCellRendererComponent(
 				lcs_list, lcs, index, isSelected, cellHasFocus);
 		}

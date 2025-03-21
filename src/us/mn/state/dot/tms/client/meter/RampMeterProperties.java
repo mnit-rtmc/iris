@@ -207,6 +207,13 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		super.initialize();
 	}
 
+	/** Dispose of the form */
+	@Override
+	protected void dispose() {
+		loc_pnl.dispose();
+		super.dispose();
+	}
+
 	/** Create the location panel */
 	private JPanel createLocationPanel() {
 		preset_cbx.setModel(preset_mdl);
