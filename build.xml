@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- ant build file for IRIS project
-     Copyright (C) 2007-2024  Minnesota Department of Transportation
+     Copyright (C) 2007-2025  Minnesota Department of Transportation
 
      This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -178,7 +178,7 @@
 		<javac srcdir="${build.src}"
 		       destdir="${build.classes}"
 		       debug="${debug}"
-		       deprecation="on"
+		       deprecation="off"
 		       includeantruntime="false"
 		       source="1.8"
 		       target="1.8">
