@@ -244,7 +244,6 @@ public class MainServer {
 		ns.registerType(GateArmArrayImpl.class);
 		ns.registerType(GateArmImpl.class);
 		ns.registerType(TagReaderImpl.class);
-		ns.registerType(LaneMarkingImpl.class);
 		ns.registerType(LcsImpl.class);
 		ns.registerType(LcsStateImpl.class);
 		ns.registerType(ParkingAreaImpl.class);

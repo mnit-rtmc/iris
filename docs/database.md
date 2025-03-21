@@ -57,7 +57,6 @@ update, and is caused by one of these conditions:
 `inc_advice`       |     |     |     |
 `inc_descriptor`   |     |     |     |
 `inc_locator`      |     |     |     |
-`lane_marking`     | ✔️   | ✔️   |     |
 `lcs`              | ✔️   | ✔️   | ✔️   |
 `lcs_state`        |     | ✔️   |     |
 `modem`            |     |     |     |

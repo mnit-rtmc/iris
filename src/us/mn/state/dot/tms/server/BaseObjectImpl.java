@@ -106,7 +106,6 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		GateArmArrayImpl.loadAll();
 		GateArmImpl.loadAll();
 		TagReaderImpl.loadAll();
-		LaneMarkingImpl.loadAll();
 		LcsImpl.loadAll();
 		LcsStateImpl.loadAll();
 		ParkingAreaImpl.loadAll();

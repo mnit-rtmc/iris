@@ -40,7 +40,6 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.FlowStream;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.Gps;
-import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.Lcs;
 import us.mn.state.dot.tms.LcsIndication;
 import us.mn.state.dot.tms.LcsState;
@@ -78,8 +77,8 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Device types which can be associated with controller IO */
 	private enum DeviceType {
 		Alarm, Camera, Detector, DMS, Flow_Stream, Gate_Arm, Gps,
-		Lane_Marking, Lcs, Lcs_State, Ramp_Meter, Beacon,
-		Video_Monitor, Weather_Sensor, Tag_Reader
+		Lcs, Lcs_State, Ramp_Meter, Beacon, Video_Monitor,
+		Weather_Sensor, Tag_Reader
 	}
 
 	/** Types of IO devices */
@@ -94,7 +93,6 @@ public class ControllerIOModel extends AbstractTableModel {
 		IO_TYPE.add(DeviceType.Flow_Stream);
 		IO_TYPE.add(DeviceType.Gate_Arm);
 		IO_TYPE.add(DeviceType.Gps);
-		IO_TYPE.add(DeviceType.Lane_Marking);
 		IO_TYPE.add(DeviceType.Lcs);
 		IO_TYPE.add(DeviceType.Lcs_State);
 		IO_TYPE.add(DeviceType.Ramp_Meter);
@@ -120,8 +118,6 @@ public class ControllerIOModel extends AbstractTableModel {
 			return DeviceType.Gate_Arm;
 		else if (cio instanceof Gps)
 			return DeviceType.Gps;
-		else if (cio instanceof LaneMarking)
-			return DeviceType.Lane_Marking;
 		else if (cio instanceof Lcs)
 			return DeviceType.Lcs;
 		else if (cio instanceof LcsState)
@@ -190,9 +186,6 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Controller IO list for Gps */
 	private final ControllerIOList gps_list;
 
-	/** Controller IO list for lane markings */
-	private final ControllerIOList lmark_list;
-
 	/** Controller IO list for LCS arrays */
 	private final ControllerIOList lcs_list;
 
@@ -242,7 +235,6 @@ public class ControllerIOModel extends AbstractTableModel {
 			state.getCamCache().getFlowStreams());
 		gate_list = new ControllerIOList(state.getGateArms());
 		gps_list = new ControllerIOList<Gps>(state.getGpses());
-		lmark_list = new ControllerIOList(state.getLaneMarkings());
 		lcs_list = new ControllerIOList(state.getLcsCache().getLcss());
 		lcs_state_list = new ControllerIOList(
 			state.getLcsCache().getLcsStates());
@@ -287,7 +279,6 @@ public class ControllerIOModel extends AbstractTableModel {
 		flow_list.initialize();
 		gate_list.initialize();
 		gps_list.initialize();
-		lmark_list.initialize();
 		lcs_list.initialize();
 		lcs_state_list.initialize();
 		m_list.initialize();
@@ -306,7 +297,6 @@ public class ControllerIOModel extends AbstractTableModel {
 		flow_list.dispose();
 		gate_list.dispose();
 		gps_list.dispose();
-		lmark_list.dispose();
 		lcs_list.dispose();
 		lcs_state_list.dispose();
 		m_list.dispose();
@@ -357,7 +347,6 @@ public class ControllerIOModel extends AbstractTableModel {
 		       canWriteIO(Detector.SONAR_TYPE) &&
 		       canWriteIO(DMS.SONAR_TYPE) &&
 		       canWriteIO(GateArm.SONAR_TYPE) &&
-		       canWriteIO(LaneMarking.SONAR_TYPE) &&
 		       canWriteIO(Lcs.SONAR_TYPE) &&
 		       canWriteIO(LcsState.SONAR_TYPE) &&
 		       canWriteIO(RampMeter.SONAR_TYPE) &&
@@ -481,8 +470,6 @@ public class ControllerIOModel extends AbstractTableModel {
 			return gate_list;
 		case Gps:
 			return gps_list;
-		case Lane_Marking:
-			return lmark_list;
 		case Lcs:
 			return lcs_list;
 		case Lcs_State:

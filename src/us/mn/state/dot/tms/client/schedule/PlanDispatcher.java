@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2024  Minnesota Department of Transportation
+ * Copyright (C) 2011-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,9 +62,6 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 	/** Camera count component */
 	private final JLabel camera_lbl = createValueLabel();
 
-	/** Lane count component */
-	private final JLabel lane_lbl = createValueLabel();
-
 	/** Meter count component */
 	private final JLabel meter_lbl = createValueLabel();
 
@@ -117,8 +114,6 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		add(beacon_lbl, Stretch.LAST);
 		add("camera.title");
 		add(camera_lbl, Stretch.LAST);
-		add("lane_marking.title");
-		add(lane_lbl, Stretch.LAST);
 		add("ramp_meter.title");
 		add(meter_lbl, Stretch.LAST);
 		add("action.plan.phase");
@@ -164,7 +159,6 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 			dms_lbl.setText(countDMS(ap));
 			beacon_lbl.setText(countBeacons(ap));
 			camera_lbl.setText(countCameras(ap));
-			lane_lbl.setText(countLaneMarkings(ap));
 			meter_lbl.setText(countRampMeters(ap));
 		}
 		if (a == null || a.equals("phase")) {
@@ -248,11 +242,6 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		return Integer.toString(ActionPlanHelper.countDms(ap));
 	}
 
-	/** Get a count a lane markings controlled by an action plan */
-	private String countLaneMarkings(ActionPlan ap) {
-		return Integer.toString(ActionPlanHelper.countLaneMarkings(ap));
-	}
-
 	/** Get a count a ramp meters controlled by an action plan */
 	private String countRampMeters(ActionPlan ap) {
 		return Integer.toString(ActionPlanHelper.countRampMeters(ap));
@@ -271,7 +260,6 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		dms_lbl.setText("");
 		beacon_lbl.setText("");
 		camera_lbl.setText("");
-		lane_lbl.setText("");
 		meter_lbl.setText("");
 		phase_cbx.setAction(null);
 		phase_cbx.setModel(new DefaultComboBoxModel<PlanPhase>());

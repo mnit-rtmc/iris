@@ -105,7 +105,6 @@ resource.  These include:
 [graphic]: graphics.html
 [hashtag]: hashtags.html
 [incident]: incidents.html
-[lane marking]: lcs.html#lane-markings
 [lcs]: lcs.html
 [lcs state]: lcs.html#lcs-states
 [message line]: message_patterns.html#message-lines

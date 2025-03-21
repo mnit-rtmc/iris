@@ -37,7 +37,6 @@ import us.mn.state.dot.tms.client.lcs.LcsManager;
 import us.mn.state.dot.tms.client.map.MapBean;
 import us.mn.state.dot.tms.client.map.MapModel;
 import us.mn.state.dot.tms.client.map.TileLayer;
-import us.mn.state.dot.tms.client.marking.LaneMarkingManager;
 import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.parking.ParkingAreaManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
@@ -207,7 +206,6 @@ public class Session {
 		managers.add(new GateArmArrayManager(this, loc_manager));
 		managers.add(dms_manager);
 		managers.add(lcs_manager);
-		managers.add(new LaneMarkingManager(this,loc_manager));
 		managers.add(new BeaconManager(this, loc_manager));
 		managers.add(new TagReaderManager(this, loc_manager));
 		managers.add(new WeatherSensorManager(this, loc_manager));

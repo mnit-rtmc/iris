@@ -24,12 +24,10 @@ import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.server.AlarmImpl;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.LaneMarkingImpl;
 import us.mn.state.dot.tms.server.LcsImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.AlarmPoller;
 import us.mn.state.dot.tms.server.comm.BeaconPoller;
-import us.mn.state.dot.tms.server.comm.LaneMarkingPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -44,8 +42,8 @@ import static us.mn.state.dot.tms.utils.URIUtil.TCP;
  * @author Douglas Lau
  */
 public class MndotPoller extends ThreadedPoller<MndotProperty>
-	implements AlarmPoller, BeaconPoller, LaneMarkingPoller, LCSPoller,
-	MeterPoller, SamplePoller
+	implements AlarmPoller, BeaconPoller, LCSPoller, MeterPoller,
+	SamplePoller
 {
 	/** MnDOT 170 debug log */
 	static private final DebugLog MNDOT_LOG = new DebugLog("mndot170");
@@ -168,12 +166,6 @@ public class MndotPoller extends ThreadedPoller<MndotProperty>
 	@Override
 	public void sendIndications(LcsImpl lcs, String lock) {
 		addOp(new OpSendLCSIndications(lcs, lock));
-	}
-
-	/** Set the deployed status of a lane marking */
-	@Override
-	public void setDeployed(LaneMarkingImpl dev, boolean d) {
-		addOp(new OpDeployLaneMarking(dev, d));
 	}
 
 	/** Send a device request to an alarm */

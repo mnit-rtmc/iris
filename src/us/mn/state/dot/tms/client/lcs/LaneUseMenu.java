@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.event.ActionEvent;
-import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.Lcs;
 import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.client.Session;
@@ -43,7 +42,6 @@ public class LaneUseMenu extends IMenu {
 		session = s;
 		desktop = s.getDesktop();
 		addItem(session.createTableAction(Lcs.SONAR_TYPE));
-		addItem(session.createTableAction(LaneMarking.SONAR_TYPE));
 		addItem(session.createTableAction(TagReader.SONAR_TYPE));
 		addItem(createTollZoneItem());
 	}

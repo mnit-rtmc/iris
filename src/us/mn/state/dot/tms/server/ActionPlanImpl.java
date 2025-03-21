@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  * Copyright (C) 2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -33,8 +33,6 @@ import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.Hashtags;
-import us.mn.state.dot.tms.LaneMarking;
-import us.mn.state.dot.tms.LaneMarkingHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
@@ -364,7 +362,6 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		// FIXME: any way to validate camera actions?
 		return areBeaconsDeployable(ht)
 		    && areDmsDeployable(ht)
-		    && areLaneMarkingsDeployable(ht)
 		    && areRampMetersDeployable(ht);
 	}
 
@@ -394,23 +391,6 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 				DMSImpl dms = (DMSImpl) d;
 				if (dms.hasError()) {
 					if (new Hashtags(d.getNotes())
-					   .contains(ht))
-						return false;
-				}
-			}
-		}
-		return true;
-	}
-
-	/** Check if all lane markings for a hashtag are deployable */
-	private boolean areLaneMarkingsDeployable(String ht) {
-		Iterator<LaneMarking> it = LaneMarkingHelper.iterator();
-		while (it.hasNext()) {
-			LaneMarking lm = it.next();
-			if (lm instanceof LaneMarkingImpl) {
-				LaneMarkingImpl lmi = (LaneMarkingImpl) lm;
-				if (lmi.isOffline()) {
-					if (new Hashtags(lmi.getNotes())
 					   .contains(ht))
 						return false;
 				}

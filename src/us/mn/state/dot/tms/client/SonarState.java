@@ -47,7 +47,6 @@ import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Gps;
 import us.mn.state.dot.tms.Graphic;
-import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.Permission;
@@ -302,15 +301,6 @@ public class SonarState extends Client {
 	/** Get the LCS object cache */
 	public LcsCache getLcsCache() {
 		return lcs_cache;
-	}
-
-	/** Cache of lane markings */
-	private final TypeCache<LaneMarking> lane_markings =
-		new TypeCache<LaneMarking>(LaneMarking.class, this);
-
-	/** Get the lane marking cache */
-	public TypeCache<LaneMarking> getLaneMarkings() {
-		return lane_markings;
 	}
 
 	/** Cache of weather sensors */
@@ -639,9 +629,6 @@ public class SonarState extends Client {
 		dms_cache.populate(this);
 		inc_cache.populate(this);
 		lcs_cache.populate(this);
-		populateReadable(lane_markings);
-		if (canRead(LaneMarking.SONAR_TYPE))
-			lane_markings.ignoreAttribute("operation");
 		populateReadable(weather_sensors);
 		if (canRead(WeatherSensor.SONAR_TYPE)) {
 			weather_sensors.ignoreAttribute("operation");
