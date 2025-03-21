@@ -77,7 +77,7 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Device types which can be associated with controller IO */
 	private enum DeviceType {
 		Alarm, Camera, Detector, DMS, Flow_Stream, Gate_Arm, Gps,
-		LCSIndication, Ramp_Meter, Beacon, Video_Monitor,
+		Lcs, Lcs_State, Ramp_Meter, Beacon, Video_Monitor,
 		Weather_Sensor, Tag_Reader
 	}
 

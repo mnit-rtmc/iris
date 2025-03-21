@@ -56,7 +56,7 @@ resource, at the same access level.
 | [dms]              | [font], glyph, [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
 | [gate arm]         | [gate arm array]                                      |
 | [incident]         | incident_detail, inc_advice, inc_descriptor, inc_locator, road_affix |
-| [lcs]              | lane use multi, [lcs array], [lcs indication]         |
+| [lcs]              | [lcs state]                                           |
 | [parking area]     |                                                       |
 | permission         | connection, [domain], [role], [user id]               |
 | [ramp meter]       |                                                       |
@@ -106,8 +106,7 @@ resource.  These include:
 [hashtag]: hashtags.html
 [incident]: incidents.html
 [lcs]: lcs.html
-[lcs array]: lcs.html#arrays
-[lcs indication]: lcs.html#indications
+[lcs state]: lcs.html#lcs-states
 [message line]: message_patterns.html#message-lines
 [message pattern]: message_patterns.html
 [modem]: modem.html
