@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,13 +14,13 @@
  */
 package us.mn.state.dot.tms.server.comm.dinrelay;
 
-import java.util.Arrays;
 import java.util.Iterator;
-import us.mn.state.dot.tms.LCSIndication;
-import us.mn.state.dot.tms.LCSIndicationHelper;
-import us.mn.state.dot.tms.User;
+import us.mn.state.dot.tms.LcsHelper;
+import us.mn.state.dot.tms.LcsIndication;
+import us.mn.state.dot.tms.LcsLock;
+import us.mn.state.dot.tms.LcsState;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.LCSArrayImpl;
+import us.mn.state.dot.tms.server.LcsImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -32,11 +32,11 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpSendLCSIndications extends OpLCS {
 
-	/** Indications to send */
-	private final Integer[] indications;
+	/** LCS lock */
+	private final LcsLock lock;
 
-	/** User who sent the indications */
-	private final User user;
+	/** LCS indications */
+	private final int[] indications;
 
 	/** Flag to indicate all helper ops succeeded */
 	private boolean op_success = true;
@@ -45,19 +45,21 @@ public class OpSendLCSIndications extends OpLCS {
 	private int n_ops = 0;
 
 	/** Create a new operation to send LCS indications */
-	public OpSendLCSIndications(LCSArrayImpl l, Integer[] ind, User u) {
+	public OpSendLCSIndications(LcsImpl l, String lk) {
 		super(PriorityLevel.COMMAND, l);
+		lock = new LcsLock(lk);
+		int[] ind = lock.optIndications();
+		if (ind == null)
+			ind = LcsHelper.makeIndications(l, LcsIndication.DARK);
 		indications = ind;
-		user = u;
 	}
 
 	/** Operation equality test */
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof OpSendLCSIndications) {
-			OpSendLCSIndications op = (OpSendLCSIndications)o;
-			return lcs_array == op.lcs_array &&
-			       Arrays.equals(indications, op.indications);
+			OpSendLCSIndications op = (OpSendLCSIndications) o;
+			return (lcs == op.lcs) && lock.equals(op.lock);
 		} else
 			return false;
 	}
@@ -76,8 +78,8 @@ public class OpSendLCSIndications extends OpLCS {
 			CommMessage<DinRelayProperty> mess)
 		{
 			Iterator<ControllerImpl> it = controllers.iterator();
-			synchronized(this) {
-				while(it.hasNext())
+			synchronized (this) {
+				while (it.hasNext())
 					createOutletOp(it.next());
 			}
 			return null;
@@ -88,7 +90,7 @@ public class OpSendLCSIndications extends OpLCS {
 	private void createOutletOp(final ControllerImpl c) {
 		DevicePoller dp = c.getPoller();
 		if (dp instanceof DinRelayPoller) {
-			DinRelayPoller drp = (DinRelayPoller)dp;
+			DinRelayPoller drp = (DinRelayPoller) dp;
 			drp.commandOutlets(c, getOutlets(c), new OutletProperty(
 				new OutletProperty.OutletCallback()
 			{
@@ -109,27 +111,25 @@ public class OpSendLCSIndications extends OpLCS {
 	 * @return outlets Outlet state to command for controller. */
 	private boolean[] getOutlets(ControllerImpl c) {
 		boolean[] outlets = new boolean[8];
-		Iterator<LCSIndication> it = LCSIndicationHelper.iterator();
-		while (it.hasNext()) {
-			LCSIndication li = it.next();
-			if (li.getLcs().getArray() == lcs_array) {
-				if (li.getController() == c)
-					updateIndication(li, outlets);
-			}
+		LcsState[] states = LcsHelper.lookupStates(lcs);
+		for (int i = 0; i < states.length; i++) {
+			LcsState ls = states[i];
+			if (ls.getController() == c)
+				updateIndication(ls, outlets);
 		}
 		return outlets;
 	}
 
 	/** Update one indication value (if set).
-	 * @param li LCS indication pin association.
+	 * @param ls LCS state pin association.
 	 * @param outlets Array of outlet states, indexed by pin */
-	private void updateIndication(LCSIndication li, boolean[] outlets) {
-		int i = li.getLcs().getLane() - 1;
-		// We must check bounds here in case the LCSIndication
+	private void updateIndication(LcsState ls, boolean[] outlets) {
+		int ln = ls.getLane() - 1;
+		// We must check bounds here in case the LcsState
 		// was added after the "indications" array was created
-		if (i >= 0 && i < indications.length) {
-			if (indications[i] == li.getIndication()) {
-				int p = li.getPin() - 1;
+		if (ln >= 0 && ln < indications.length) {
+			if (indications[ln] == ls.getIndication()) {
+				int p = ls.getPin() - 1;
 				if (p >= 0 && p < outlets.length)
 					outlets[p] = true;
 			}
@@ -142,6 +142,6 @@ public class OpSendLCSIndications extends OpLCS {
 			op_success = false;
 		n_ops--;
 		if (n_ops == 0 && op_success)
-			lcs_array.setIndicationsCurrent(indications, user);
+			lcs.setIndicationsNotify(indications);
 	}
 }
