@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2024  Minnesota Department of Transportation
+ * Copyright (C) 2013-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,9 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
-import us.mn.state.dot.tms.LaneUseIndication;
-import us.mn.state.dot.tms.LaneUseMulti;
-import us.mn.state.dot.tms.LaneUseMultiHelper;
+import us.mn.state.dot.tms.LcsState;
+import us.mn.state.dot.tms.LcsStateHelper;
 import us.mn.state.dot.tms.MsgPattern;
-import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DeviceImpl;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -45,49 +43,13 @@ abstract public class OpNtcip extends OpDevice {
 	/** NTCIP debug log */
 	static private final DebugLog NTCIP_LOG = new DebugLog("ntcip");
 
-	/** Lookup a sign message number */
-	static protected int lookupMsgNum(String ms) {
-		LaneUseMulti lum = findLaneUseMulti(ms);
-		if (lum != null) {
-			Integer msg_num = lum.getMsgNum();
-			if (msg_num != null)
-				return msg_num;
-		}
-		return 1;
-	}
-
-	/** Lookup an LCS indication on a sign message */
-	static protected Integer lookupIndication(SignMessage sm) {
-		String m = sm.getMulti();
-		MultiString ms = new MultiString(m);
-		if (ms.isBlank())
-			return LaneUseIndication.DARK.ordinal();
-		LaneUseMulti lum = findLaneUseMulti(addGraphicIds(m));
-		if (lum != null)
-			return lum.getIndication();
-		else
-			return null;
-	}
-
-	/** Find a lane-use MULTI which matches a MULTI string */
-	static private LaneUseMulti findLaneUseMulti(String multi) {
-		Iterator<LaneUseMulti> it = LaneUseMultiHelper.iterator();
-		while (it.hasNext()) {
-			LaneUseMulti lum = it.next();
-			MsgPattern pat = lum.getMsgPattern();
-			if (pat != null && match(pat, multi))
-				return lum;
-		}
-		return null;
-	}
-
 	/** Test if a message pattern matches a multi string.
 	 * @param pat Message pattern.
-	 * @param multi MULTI string to compare.
+	 * @param ms MULTI string to compare.
 	 * @return true if they match. */
-	static private boolean match(MsgPattern pat, String multi) {
+	static protected boolean match(MsgPattern pat, String ms) {
 		String re = createRegex(addGraphicIds(pat.getMulti()));
-		return Pattern.matches(re, multi);
+		return Pattern.matches(re, addGraphicIds(ms));
 	}
 
 	/** Create a regex which matches any speed advisory values */
@@ -242,5 +204,22 @@ abstract public class OpNtcip extends OpDevice {
 	/** Get the firmware version */
 	protected String getVersion() {
 		return ControllerHelper.getSetup(controller, "version");
+	}
+
+	/** Lookup a sign message number */
+	protected int lookupMsgNum(String ms) {
+		Iterator<LcsState> it = LcsStateHelper.iterator();
+		while (it.hasNext()) {
+			LcsState ls = it.next();
+			if (controller == ls.getController()) {
+				MsgPattern pat = ls.getMsgPattern();
+				if (pat != null && match(pat, ms)) {
+					Integer num = ls.getMsgNum();
+					if (num != null)
+						return num;
+				}
+			}
+		}
+		return 1;
 	}
 }
