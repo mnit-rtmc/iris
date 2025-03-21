@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021-2024  Minnesota Department of Transportation
+ * Copyright (C) 2021-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.AlarmImpl;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.ControllerIoImpl;
-import us.mn.state.dot.tms.server.LCSArrayImpl;
+import us.mn.state.dot.tms.server.LcsImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.AlarmPoller;
 import us.mn.state.dot.tms.server.comm.BasePoller;
@@ -221,18 +221,16 @@ public class NatchPoller extends BasePoller implements AlarmPoller,
 
 	/** Send a device request to an LCS array */
 	@Override
-	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
+	public void sendRequest(LcsImpl lcs, DeviceRequest r) {
 		// FIXME
 	}
 
 	/** Send new indications to an LCS array.
-	 * @param lcs_array LCS array.
+	 * @param lcs LCS array.
 	 * @param ind New lane use indications.
 	 * @param o User who deployed the indications. */
 	@Override
-	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
-		User o)
-	{
+	public void sendIndications(LcsImpl lcs, String lock) {
 		// FIXME
 	}
 
