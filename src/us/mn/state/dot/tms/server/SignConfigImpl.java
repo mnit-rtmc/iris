@@ -94,13 +94,6 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig,
 		}
 	}
 
-	/** Find or create LCS sign config */
-	static public SignConfigImpl findOrCreateLCS() {
-		return findOrCreate(600, 600, 1, 1, 1, 1, 1, 1, 0, 0,
-			ColorScheme.MONOCHROME_1_BIT.ordinal(),
-			DmsColor.AMBER.rgb(), DmsColor.BLACK.rgb());
-	}
-
 	/** Load all the sign configs */
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, face_width, face_height, " +
