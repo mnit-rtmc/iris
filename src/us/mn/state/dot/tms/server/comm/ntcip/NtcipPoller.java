@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.server.AlarmImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.GpsImpl;
-import us.mn.state.dot.tms.server.LCSArrayImpl;
+import us.mn.state.dot.tms.server.LcsImpl;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.AlarmPoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
@@ -162,13 +162,13 @@ public class NtcipPoller extends ThreadedPoller implements AlarmPoller,
 	/** Send a device request message to an LCS array */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
+	public void sendRequest(LcsImpl lcs, DeviceRequest r) {
 		switch (r) {
 		case SEND_SETTINGS:
-			addOp(new OpSendLCSSettings(lcs_array));
+			addOp(new OpSendLCSSettings(lcs));
 			break;
 		case QUERY_MESSAGE:
-			addOp(new OpQueryLCSIndications(lcs_array));
+			addOp(new OpQueryLCSIndications(lcs));
 			break;
 		default:
 			// Ignore other requests
@@ -177,15 +177,12 @@ public class NtcipPoller extends ThreadedPoller implements AlarmPoller,
 	}
 
 	/** Send new indications to an LCS array.
-	 * @param lcs_array LCS array.
-	 * @param ind New lane use indications.
-	 * @param o User who deployed the indications. */
+	 * @param lcs LCS array.
+	 * @param lock LCS lock. */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
-		User o)
-	{
-		addOp(new OpSendLCSIndications(lcs_array, ind, o));
+	public void sendIndications(LcsImpl lcs, String lock) {
+		addOp(new OpSendLCSIndications(lcs, lock));
 	}
 
 	/** Send detection request to a controller.
