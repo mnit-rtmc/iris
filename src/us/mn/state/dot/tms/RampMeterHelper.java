@@ -75,14 +75,6 @@ public class RampMeterHelper extends BaseHelper {
 		return (ctrl != null) ? ctrl.getCabinetStyle() : null;
 	}
 
-	/** Lookup the preset for a ramp meter */
-	static public CameraPreset getPreset(RampMeter meter) {
-		if (meter != null)
-			return meter.getPreset();
-		else
-			return null;
-	}
-
 	/** Format the meter release rate */
 	static public String formatRelease(Integer rate) {
 		if (rate !=  null) {
