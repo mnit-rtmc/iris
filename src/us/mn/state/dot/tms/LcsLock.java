@@ -66,6 +66,22 @@ public class LcsLock {
 	/** Lock JSON object */
 	private final JSONObject lock;
 
+	/** Compare for equality */
+	@Override
+	public boolean equals(Object other) {
+		if (other instanceof LcsLock) {
+			LcsLock o = (LcsLock) other;
+			return lock.equals(o.lock);
+		} else
+			return false;
+	}
+
+	/** Get hash code */
+	@Override
+	public int hashCode() {
+		return lock.hashCode();
+	}
+
 	/** Create a LCS lock */
 	public LcsLock(String lk) {
 		JSONObject jo = new JSONObject();
