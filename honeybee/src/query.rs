@@ -521,40 +521,43 @@ pub const LANE_CODE_LUT: &str = "\
   FROM iris.lane_code \
   ORDER BY lcode";
 
-/// SQL query for lane use indications (LUT)
-pub const LANE_USE_INDICATION_LUT: &str = "\
-  SELECT id, description \
-  FROM iris.lane_use_indication \
-  ORDER BY id";
-
 /// SQL query for all LCS arrays (primary)
-pub const LCS_ARRAY_ALL: &str = "\
-  SELECT name, notes, lcs_lock \
-  FROM iris.lcs_array \
-  ORDER BY name";
+pub const LCS_ALL: &str = "\
+  SELECT l.name, location, controller, notes, lock, status \
+  FROM iris.lcs l \
+  LEFT JOIN geo_loc_view gl ON l.geo_loc = gl.name \
+  ORDER BY l.name";
 
 /// SQL query for one LCS array (secondary)
-pub const LCS_ARRAY_ONE: &str = "\
-  SELECT name, notes, shift, lcs_lock \
-  FROM iris.lcs_array \
-  WHERE name = $1";
+pub const LCS_ONE: &str = "\
+  SELECT l.name, location, geo_loc, controller, pin, notes, lcs_type, \
+         shift, preset, lock, status \
+  FROM iris.lcs l \
+  LEFT JOIN geo_loc_view gl ON l.geo_loc = gl.name \
+  WHERE l.name = $1";
 
-/// SQL query for all LCS indications (primary)
-pub const LCS_INDICATION_ALL: &str = "\
-  SELECT name, controller, lcs, indication \
+/// SQL query for LCS indications (LUT)
+pub const LCS_INDICATION_LUT: &str = "\
+  SELECT id, description \
   FROM iris.lcs_indication \
+  ORDER BY id";
+
+/// SQL query for all LCS states (primary)
+pub const LCS_STATE_ALL: &str = "\
+  SELECT name, controller, lcs, lane, indication \
+  FROM iris.lcs_state \
   ORDER BY name";
 
-/// SQL query for one LCS indication (secondary)
-pub const LCS_INDICATION_ONE: &str = "\
-  SELECT name, controller, pin, lcs, indication \
-  FROM iris.lcs_indication \
+/// SQL query for one LCS state (secondary)
+pub const LCS_STATE_ONE: &str = "\
+  SELECT name, controller, pin, lcs, lane, indication, msg_pattern, msg_num \
+  FROM iris.lcs_state \
   WHERE name = $1";
 
-/// SQL query for LCS locks (LUT)
-pub const LCS_LOCK_LUT: &str = "\
+/// SQL query for LCS types (LUT)
+pub const LCS_TYPE_LUT: &str = "\
   SELECT id, description \
-  FROM iris.lcs_lock \
+  FROM iris.lcs_type \
   ORDER BY id";
 
 /// SQL query for ramp meter algorithms (LUT)
