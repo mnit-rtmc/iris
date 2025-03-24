@@ -53,8 +53,9 @@ import us.mn.state.dot.tms.server.event.CommEvent;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class ControllerImpl extends BaseObjectImpl implements Controller {
-
+public class ControllerImpl extends BaseObjectImpl implements Controller,
+	Comparable<ControllerImpl>
+{
 	/** Check if controller IO should receive device requests */
 	static private boolean shouldRequestDevice(ControllerIO io) {
 		return io instanceof BeaconImpl ||
@@ -104,6 +105,12 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		map.put("status", status);
 		map.put("fail_time", asTimestamp(failTime));
 		return map;
+	}
+
+	/** Compare to another controller */
+	@Override
+	public int compareTo(ControllerImpl o) {
+		return name.compareTo(o.name);
 	}
 
 	/** Create a new controller */

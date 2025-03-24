@@ -94,19 +94,6 @@ public class LcsHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Lookup LCS controllers */
-	static public Controller[] lookupControllers(Lcs lcs) {
-		TreeSet<Controller> controllers = new TreeSet<Controller>();
-		controllers.add(lcs.getController());
-		Iterator<LcsState> it = LcsStateHelper.iterator();
-		while (it.hasNext()) {
-			LcsState ls = it.next();
-			if (ls.getLcs() == lcs)
-				controllers.add(ls.getController());
-		}
-		return controllers.toArray(new Controller[0]);
-	}
-
 	/** Check if an LCS array is offline */
 	static public boolean isOffline(Lcs lcs) {
 		return ItemStyle.OFFLINE.checkBit(lcs.getStyles());

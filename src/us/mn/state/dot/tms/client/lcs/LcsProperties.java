@@ -182,7 +182,7 @@ public class LcsProperties extends SonarObjectForm<Lcs> {
 		p.add(notes_txt, Stretch.LAST);
 		p.add("lcs.type");
 		p.add(lcs_type_cbx, Stretch.LAST);
-		p.add("lcs.shift");
+		p.add("lcs.lane.shift");
 		p.add(shift_spn, Stretch.LAST);
 		p.add(state_pnl, Stretch.FULL);
 		p.add(new JButton(settings), Stretch.CENTER);

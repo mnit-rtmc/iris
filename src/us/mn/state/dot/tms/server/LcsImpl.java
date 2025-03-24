@@ -16,7 +16,10 @@ package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.CameraPreset;
@@ -31,6 +34,8 @@ import us.mn.state.dot.tms.Lcs;
 import us.mn.state.dot.tms.LcsHelper;
 import us.mn.state.dot.tms.LcsIndication;
 import us.mn.state.dot.tms.LcsLock;
+import us.mn.state.dot.tms.LcsState;
+import us.mn.state.dot.tms.LcsStateHelper;
 import us.mn.state.dot.tms.LcsType;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
@@ -127,6 +132,7 @@ public class LcsImpl extends DeviceImpl implements Lcs {
 		shift = sh;
 		lock = lk;
 		status = st;
+		initTransients();
 	}
 
 	/** Destroy an object */
@@ -398,7 +404,7 @@ public class LcsImpl extends DeviceImpl implements Lcs {
 	public boolean isActive() {
 		int ACTIVE = CtrlCondition.ACTIVE.ordinal();
 		boolean active = false;
-		for (Controller c: LcsHelper.lookupControllers(this)) {
+		for (Controller c: lookupControllers()) {
 			active = true;
 			if (c.getCondition() != ACTIVE)
 				return false;
@@ -410,7 +416,7 @@ public class LcsImpl extends DeviceImpl implements Lcs {
 	@Override
 	public boolean isOffline() {
 		boolean offline = true;
-		for (Controller c: LcsHelper.lookupControllers(this)) {
+		for (Controller c: lookupControllers()) {
 			offline = false;
 			if (c.getFailTime() != null)
 				return true;
@@ -450,5 +456,21 @@ public class LcsImpl extends DeviceImpl implements Lcs {
 		if (isDeployed())
 			s |= ItemStyle.DEPLOYED.bit();
 		return s;
+	}
+
+	/** Lookup the set of controllers for an LCS array */
+	public Set<ControllerImpl> lookupControllers() {
+		TreeSet<ControllerImpl> set = new TreeSet<ControllerImpl>();
+		set.add(controller);
+		Iterator<LcsState> it = LcsStateHelper.iterator();
+		while (it.hasNext()) {
+			LcsState ls = it.next();
+			if (ls.getLcs() == this) {
+				Controller c = ls.getController();
+				if (c instanceof ControllerImpl)
+					set.add((ControllerImpl) c);
+			}
+		}
+		return set;
 	}
 }

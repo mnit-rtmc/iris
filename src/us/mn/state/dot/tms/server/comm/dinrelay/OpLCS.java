@@ -14,13 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm.dinrelay;
 
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Lcs;
-import us.mn.state.dot.tms.LcsHelper;
-import us.mn.state.dot.tms.LcsState;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.LcsImpl;
 import us.mn.state.dot.tms.server.comm.OpDevice;
@@ -43,19 +38,6 @@ abstract public class OpLCS extends OpDevice<DinRelayProperty> {
 	protected OpLCS(PriorityLevel p, LcsImpl l) {
 		super(p, l);
 		lcs = l;
-		controllers = lookupControllers();
-	}
-
-	/** Lookup the set of controllers for an LCS array */
-	private Set<ControllerImpl> lookupControllers() {
-		HashSet<ControllerImpl> set = new HashSet<ControllerImpl>();
-		LcsState[] states = LcsHelper.lookupStates(lcs);
-		for (int i = 0; i < states.length; i++) {
-			LcsState ls = states[i];
-			Controller c = ls.getController();
-			if (c instanceof ControllerImpl)
-				set.add((ControllerImpl) c);
-		}
-		return set;
+		controllers = l.lookupControllers();
 	}
 }

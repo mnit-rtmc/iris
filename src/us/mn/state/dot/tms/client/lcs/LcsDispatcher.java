@@ -247,7 +247,7 @@ public class LcsDispatcher extends IPanel implements ProxyView<Lcs> {
 	private void updateLock(Lcs l) {
 		// Remove action so we can update the lock reason in peace
 		reason_cbx.setAction(null);
-		LcsLock lk = new LcsLock(l.getLock());
+		LcsLock lk = new LcsLock((l != null) ? l.getLock() : null);
 		String r = lk.optReason();
 		reason_cbx.setSelectedItem((r != null) ? r : "");
 		LockReasonAction reason_act = new LockReasonAction(l, user,
