@@ -461,7 +461,8 @@ public class LcsImpl extends DeviceImpl implements Lcs {
 	/** Lookup the set of controllers for an LCS array */
 	public Set<ControllerImpl> lookupControllers() {
 		TreeSet<ControllerImpl> set = new TreeSet<ControllerImpl>();
-		set.add(controller);
+		if (controller != null)
+			set.add(controller);
 		Iterator<LcsState> it = LcsStateHelper.iterator();
 		while (it.hasNext()) {
 			LcsState ls = it.next();
