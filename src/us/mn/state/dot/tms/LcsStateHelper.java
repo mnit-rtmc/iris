@@ -28,6 +28,12 @@ public class LcsStateHelper extends BaseHelper {
 		assert false;
 	}
 
+	/** Lookup the LCS state with the specified name */
+	static public LcsState lookup(String name) {
+		return (LcsState) namespace.lookupObject(LcsState.SONAR_TYPE,
+			name);
+	}
+
 	/** Get an LCS state iterator */
 	static public Iterator<LcsState> iterator() {
 		return new IteratorWrapper<LcsState>(namespace.iterator(

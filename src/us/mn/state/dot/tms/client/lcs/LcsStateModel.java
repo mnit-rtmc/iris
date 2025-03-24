@@ -18,10 +18,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.Lcs;
 import us.mn.state.dot.tms.LcsIndication;
 import us.mn.state.dot.tms.LcsState;
+import us.mn.state.dot.tms.LcsStateHelper;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -132,20 +136,52 @@ public class LcsStateModel extends ProxyTableModel<LcsState> {
 		return ls.getLcs() == lcs;
 	}
 
+	/** Get a table row sorter */
+	@Override
+	public RowSorter<ProxyTableModel<LcsState>> createSorter() {
+		TableRowSorter<ProxyTableModel<LcsState>> sorter =
+			new TableRowSorter<ProxyTableModel<LcsState>>(this)
+		{
+			@Override public boolean isSortable(int c) {
+				return c == 1;
+			}
+		};
+		sorter.setSortsOnUpdates(true);
+		ArrayList<RowSorter.SortKey> keys =
+			new ArrayList<RowSorter.SortKey>();
+		keys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+		sorter.setSortKeys(keys);
+		return sorter;
+	}
+
 	/** Create a new LCS state */
 	@Override
-	public void createObject(String name) {
-		HashMap<String, Object> attrs = new HashMap<String, Object>();
-		attrs.put("lcs", lcs);
-		attrs.put("lane", Integer.valueOf(1));
-		attrs.put("indication", Integer.valueOf(0));
-		descriptor.cache.createObject(name, attrs);
+	public void createObject(String n) {
+		String name = createUniqueName(lcs);
+		if (name != null) {
+			HashMap<String, Object> attrs =
+				new HashMap<String, Object>();
+			attrs.put("lcs", lcs);
+			attrs.put("lane", Integer.valueOf(1));
+			attrs.put("indication", Integer.valueOf(0));
+			descriptor.cache.createObject(name, attrs);
+		}
+	}
+
+	/** Create a unique LCS state name */
+	private String createUniqueName(Lcs lcs) {
+		String nm = lcs.getName();
+		for (int uid = 1; uid <= 9999; uid++) {
+			String n = nm + '_' + uid;
+			if (LcsStateHelper.lookup(n) == null)
+				return n;
+		}
+		return null;
 	}
 
 	/** Check if the user can remove a proxy */
 	@Override
 	public boolean canRemove(LcsState proxy) {
-		return session.canWrite(proxy) &&
-		      (getIndex(proxy) == getRowCount() - 1);
+		return session.canWrite(proxy);
 	}
 }
