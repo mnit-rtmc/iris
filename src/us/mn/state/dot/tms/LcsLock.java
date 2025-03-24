@@ -161,7 +161,7 @@ public class LcsLock {
 		putIndications(ind);
 		// Only allow "incident" or "testing" for locked on
 		if (ind != null && getOnMinutes() == null)
-			putReason(REASON_TESTING);
+			putReason(REASON_INCIDENT);
 		putExpires((ind != null) ? makeExpires() : null);
 	}
 

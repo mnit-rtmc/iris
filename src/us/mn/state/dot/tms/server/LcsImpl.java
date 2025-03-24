@@ -240,11 +240,10 @@ public class LcsImpl extends DeviceImpl implements Lcs {
 	}
 
 	/** Set the lock as JSON */
-	public void doSetLcsLock(String lk) throws TMSException {
+	public void doSetLock(String lk) throws TMSException {
 		if (!objectEquals(lk, lock)) {
-			LcsLock ll = new LcsLock(lk);
-			if (ll != null)
-				checkLock(ll);
+			if (lk != null)
+				checkLock(new LcsLock(lk));
 			setLockChecked(lk);
 		}
 	}
