@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -147,7 +147,7 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 	}
 
 	/** Set the item style bits (and notify clients) */
-	private final void setStyles(long s) {
+	private final void setStylesNotify(long s) {
 		if (s != styles) {
 			styles = s;
 			notifyAttribute("styles");
@@ -156,7 +156,7 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 
 	/** Update the device item styles */
 	public void updateStyles() {
-		setStyles(calculateStyles());
+		setStylesNotify(calculateStyles());
 	}
 
 	/** Calculate the item styles */
