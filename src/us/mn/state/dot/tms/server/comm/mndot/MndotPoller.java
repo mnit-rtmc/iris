@@ -108,6 +108,7 @@ public class MndotPoller extends ThreadedPoller<MndotProperty>
 	public void sendRequest(RampMeterImpl meter, DeviceRequest r) {
 		switch (r) {
 		case SEND_SETTINGS:
+			addOp(new OpSendDeviceSettings(meter));
 			addOp(new OpSendMeterSettings(meter));
 			break;
 		case QUERY_STATUS:
@@ -130,6 +131,7 @@ public class MndotPoller extends ThreadedPoller<MndotProperty>
 	public void sendRequest(BeaconImpl beacon, DeviceRequest r) {
 		switch (r) {
 		case SEND_SETTINGS:
+			addOp(new OpSendDeviceSettings(beacon));
 			addOp(new OpSendBeaconSettings(beacon));
 			break;
 		case QUERY_STATUS:
@@ -151,6 +153,9 @@ public class MndotPoller extends ThreadedPoller<MndotProperty>
 	@Override
 	public void sendRequest(LcsImpl lcs, DeviceRequest r) {
 		switch (r) {
+		case SEND_SETTINGS:
+			addOp(new OpSendDeviceSettings(lcs));
+			break;
 		case QUERY_MESSAGE:
 			addOp(new OpQueryLCSIndications(lcs));
 			break;

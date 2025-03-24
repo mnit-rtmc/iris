@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,7 +84,7 @@ public class OpSendSampleSettings extends Op170 {
 			String v = formatVersion(data[0], data[1]);
 			controller.setVersionNotify(v);
 			if (isVersionBuggy(data[0], data[1]))
-				mess.logError("BUGGY 170 firmware! (" + v +")");
+				putCtrlFaults("prom", "BUGGY firmware");
 			return new QueueBitmap();
 		}
 	}
