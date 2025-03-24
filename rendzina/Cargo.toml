@@ -7,10 +7,10 @@ edition.workspace = true
 
 [dependencies]
 fstr = "0.2"
-gift = "0.10"
+gift = "0.11"
 log = { workspace = true }
 ntcip = { workspace = true }
-pix = "0.13"
+pix = "0.14"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
