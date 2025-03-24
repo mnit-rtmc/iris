@@ -34,8 +34,8 @@ pub enum Asset {
     GeoLoc(String, Res),
     Graphic(String),
     Graphics,
-    LaneUseIndications,
-    LcsLocks,
+    LcsIndications,
+    LcsTypes,
     MeterAlgorithms,
     MeterTypes,
     MsgLines,
@@ -90,8 +90,8 @@ impl Asset {
                 uri
             }
             Graphics => "/iris/api/graphic".into(),
-            LaneUseIndications => "/iris/lut/lane_use_indication".into(),
-            LcsLocks => "/iris/lut/lcs_lock".into(),
+            LcsIndications => "/iris/lut/lcs_indication".into(),
+            LcsTypes => "/iris/lut/lcs_type".into(),
             MeterAlgorithms => "/iris/lut/meter_algorithm".into(),
             MeterTypes => "/iris/lut/meter_type".into(),
             MsgLines => "/iris/api/msg_line".into(),

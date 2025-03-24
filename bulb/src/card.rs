@@ -29,8 +29,8 @@ use crate::gatearmarray::GateArmArray;
 use crate::geoloc::Loc;
 use crate::gps::Gps;
 use crate::item::ItemState;
-use crate::lcsarray::LcsArray;
-use crate::lcsindication::LcsIndication;
+use crate::lcs::Lcs;
+use crate::lcsstate::LcsState;
 use crate::modem::Modem;
 use crate::permission::Permission;
 use crate::rampmeter::RampMeter;
@@ -403,14 +403,14 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::Domain
         | Res::FlowStream
         | Res::Gps
-        | Res::LcsIndication
+        | Res::LcsState
         | Res::Modem
         | Res::Permission
         | Res::Role
         | Res::SignConfig
         | Res::User => &[View::Compact, View::Setup],
         Res::GateArmArray => &[View::Compact, View::Control, View::Location],
-        Res::LcsArray => &[View::Compact, View::Control],
+        Res::Lcs => &[View::Compact, View::Control],
         Res::Beacon | Res::Camera | Res::RampMeter => {
             &[View::Compact, View::Control, View::Location, View::Setup]
         }
@@ -503,9 +503,9 @@ pub async fn fetch_resource(config: bool) -> Result<String> {
     if config {
         add_option::<Gps>(&access, &mut html);
     }
-    add_option::<LcsArray>(&access, &mut html);
+    add_option::<Lcs>(&access, &mut html);
     if config {
-        add_option::<LcsIndication>(&access, &mut html);
+        add_option::<LcsState>(&access, &mut html);
         add_option::<Modem>(&access, &mut html);
         add_option::<Permission>(&access, &mut html);
     }
@@ -644,8 +644,8 @@ impl CardList {
             Res::GateArm => self.make_html_x::<GateArm>().await,
             Res::GateArmArray => self.make_html_x::<GateArmArray>().await,
             Res::Gps => self.make_html_x::<Gps>().await,
-            Res::LcsArray => self.make_html_x::<LcsArray>().await,
-            Res::LcsIndication => self.make_html_x::<LcsIndication>().await,
+            Res::Lcs => self.make_html_x::<Lcs>().await,
+            Res::LcsState => self.make_html_x::<LcsState>().await,
             Res::Modem => self.make_html_x::<Modem>().await,
             Res::Permission => self.make_html_x::<Permission>().await,
             Res::RampMeter => self.make_html_x::<RampMeter>().await,
@@ -729,8 +729,8 @@ impl CardList {
             Res::GateArm => self.view_change_x::<GateArm>().await,
             Res::GateArmArray => self.view_change_x::<GateArmArray>().await,
             Res::Gps => self.view_change_x::<Gps>().await,
-            Res::LcsArray => self.view_change_x::<LcsArray>().await,
-            Res::LcsIndication => self.view_change_x::<LcsIndication>().await,
+            Res::Lcs => self.view_change_x::<Lcs>().await,
+            Res::LcsState => self.view_change_x::<LcsState>().await,
             Res::Modem => self.view_change_x::<Modem>().await,
             Res::Permission => self.view_change_x::<Permission>().await,
             Res::RampMeter => self.view_change_x::<RampMeter>().await,
@@ -800,8 +800,8 @@ impl CardList {
             Res::GateArm => self.changed::<GateArm>(json).await,
             Res::GateArmArray => self.changed::<GateArmArray>(json).await,
             Res::Gps => self.changed::<Gps>(json).await,
-            Res::LcsArray => self.changed::<LcsArray>(json).await,
-            Res::LcsIndication => self.changed::<LcsIndication>(json).await,
+            Res::Lcs => self.changed::<Lcs>(json).await,
+            Res::LcsState => self.changed::<LcsState>(json).await,
             Res::Modem => self.changed::<Modem>(json).await,
             Res::Permission => self.changed::<Permission>(json).await,
             Res::RampMeter => self.changed::<RampMeter>(json).await,
@@ -919,8 +919,8 @@ async fn fetch_one_res(cv: &CardView) -> Result<String> {
         Res::GateArm => fetch_one_x::<GateArm>(cv).await,
         Res::GateArmArray => fetch_one_x::<GateArmArray>(cv).await,
         Res::Gps => fetch_one_x::<Gps>(cv).await,
-        Res::LcsArray => fetch_one_x::<LcsArray>(cv).await,
-        Res::LcsIndication => fetch_one_x::<LcsIndication>(cv).await,
+        Res::Lcs => fetch_one_x::<Lcs>(cv).await,
+        Res::LcsState => fetch_one_x::<LcsState>(cv).await,
         Res::Modem => fetch_one_x::<Modem>(cv).await,
         Res::Permission => fetch_one_x::<Permission>(cv).await,
         Res::RampMeter => fetch_one_x::<RampMeter>(cv).await,
@@ -978,8 +978,8 @@ async fn patch_setup(cv: &CardView) -> Result<()> {
         Res::GateArm => patch_setup_x::<GateArm>(cv).await,
         Res::GateArmArray => patch_setup_x::<GateArmArray>(cv).await,
         Res::Gps => patch_setup_x::<Gps>(cv).await,
-        Res::LcsArray => patch_setup_x::<LcsArray>(cv).await,
-        Res::LcsIndication => patch_setup_x::<LcsIndication>(cv).await,
+        Res::Lcs => patch_setup_x::<Lcs>(cv).await,
+        Res::LcsState => patch_setup_x::<LcsState>(cv).await,
         Res::Modem => patch_setup_x::<Modem>(cv).await,
         Res::Permission => patch_setup_x::<Permission>(cv).await,
         Res::RampMeter => patch_setup_x::<RampMeter>(cv).await,

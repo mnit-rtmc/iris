@@ -20,19 +20,20 @@ use serde::Deserialize;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
 
-/// Lane Use Indications
+/// LCS indications
 #[derive(Debug, Deserialize)]
-pub struct LaneUseIndication {
+pub struct LcsIndication {
     pub id: u32,
     pub description: String,
 }
 
-/// LCS Indication
+/// LCS State
 #[derive(Debug, Default, Deserialize, PartialEq)]
-pub struct LcsIndication {
+pub struct LcsState {
     pub name: String,
     pub controller: Option<String>,
     pub lcs: String,
+    pub lane: u32,
     pub indication: u32,
     // secondary attributes
     pub pin: Option<u32>,
@@ -40,14 +41,14 @@ pub struct LcsIndication {
 
 /// Ancillary LCS indication data
 #[derive(Debug)]
-pub struct LcsIndicationAnc {
-    cio: ControllerIoAnc<LcsIndication>,
-    pub indications: Vec<LaneUseIndication>,
+pub struct LcsStateAnc {
+    cio: ControllerIoAnc<LcsState>,
+    pub indications: Vec<LcsIndication>,
 }
 
-impl LcsIndicationAnc {
+impl LcsStateAnc {
     /// Get indication description
-    fn indication(&self, pri: &LcsIndication) -> &str {
+    fn indication(&self, pri: &LcsState) -> &str {
         for indication in &self.indications {
             if pri.indication == indication.id {
                 return &indication.description;
@@ -57,14 +58,14 @@ impl LcsIndicationAnc {
     }
 }
 
-impl AncillaryData for LcsIndicationAnc {
-    type Primary = LcsIndication;
+impl AncillaryData for LcsStateAnc {
+    type Primary = LcsState;
 
-    /// Construct ancillary LCS indication data
-    fn new(pri: &LcsIndication, view: View) -> Self {
+    /// Construct ancillary LCS state data
+    fn new(pri: &LcsState, view: View) -> Self {
         let mut cio = ControllerIoAnc::new(pri, view);
-        cio.assets.push(Asset::LaneUseIndications);
-        LcsIndicationAnc {
+        cio.assets.push(Asset::LcsIndications);
+        LcsStateAnc {
             cio,
             indications: Vec::new(),
         }
@@ -78,12 +79,12 @@ impl AncillaryData for LcsIndicationAnc {
     /// Set asset value
     fn set_asset(
         &mut self,
-        pri: &LcsIndication,
+        pri: &LcsState,
         asset: Asset,
         value: JsValue,
     ) -> Result<()> {
         match asset {
-            Asset::LaneUseIndications => {
+            Asset::LcsIndications => {
                 self.indications = serde_wasm_bindgen::from_value(value)?;
             }
             _ => self.cio.set_asset(pri, asset, value)?,
@@ -92,16 +93,16 @@ impl AncillaryData for LcsIndicationAnc {
     }
 }
 
-impl ControllerIo for LcsIndication {
+impl ControllerIo for LcsState {
     /// Get controller name
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
     }
 }
 
-impl LcsIndication {
+impl LcsState {
     /// Convert to Compact HTML
-    fn to_html_compact(&self, anc: &LcsIndicationAnc) -> String {
+    fn to_html_compact(&self, anc: &LcsStateAnc) -> String {
         let name = HtmlStr::new(self.name());
         let item_states = anc.cio.item_states(self);
         let indication = anc.indication(self);
@@ -112,7 +113,7 @@ impl LcsIndication {
     }
 
     /// Convert to Setup HTML
-    fn to_html_setup(&self, anc: &LcsIndicationAnc) -> String {
+    fn to_html_setup(&self, anc: &LcsStateAnc) -> String {
         let title = self.title(View::Setup);
         let controller = anc.cio.controller_html(self);
         let pin = anc.cio.pin_html(self.pin);
@@ -120,15 +121,15 @@ impl LcsIndication {
     }
 }
 
-impl Card for LcsIndication {
-    type Ancillary = LcsIndicationAnc;
+impl Card for LcsState {
+    type Ancillary = LcsStateAnc;
 
     /// Display name
-    const DNAME: &'static str = "🠟 LCS Indication";
+    const DNAME: &'static str = "🠟 LCS State";
 
     /// Get the resource
     fn res() -> Res {
-        Res::LcsIndication
+        Res::LcsState
     }
 
     /// Get the name
@@ -143,14 +144,14 @@ impl Card for LcsIndication {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, anc: &LcsIndicationAnc) -> bool {
+    fn is_match(&self, search: &str, anc: &LcsStateAnc) -> bool {
         self.name.contains_lower(search)
             || anc.cio.item_states(self).is_match(search)
             || anc.indication(self).contains(search)
     }
 
     /// Convert to HTML view
-    fn to_html(&self, view: View, anc: &LcsIndicationAnc) -> String {
+    fn to_html(&self, view: View, anc: &LcsStateAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
             View::Setup => self.to_html_setup(anc),
