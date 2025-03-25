@@ -26,48 +26,52 @@ import us.mn.state.dot.tms.utils.I18N;
 public enum LcsIndication {
 
 	/** Unknown (0) */
-	UNKNOWN(I18N.get("lcs.unknown")),
+	UNKNOWN('?', I18N.get("lcs.unknown")),
 
 	/** Dark (no indication) (1) */
-	DARK(I18N.get("lcs.dark")),
+	DARK(' ', I18N.get("lcs.dark")),
 
 	/** Lane open (green arrow) (2) */
-	LANE_OPEN(I18N.get("lcs.lane.open")),
+	LANE_OPEN('↓', I18N.get("lcs.lane.open")),
 
 	/** Use caution (flashing yellow arrow, not in MUTCD) (3) */
-	USE_CAUTION(I18N.get("lcs.use.caution")),
+	USE_CAUTION('⇣', I18N.get("lcs.use.caution")),
 
 	/** Lane closed ahead (Yellow X) (4) */
-	LANE_CLOSED_AHEAD(I18N.get("lcs.lane.closed.ahead")),
+	LANE_CLOSED_AHEAD('✕', I18N.get("lcs.lane.closed.ahead")),
 
 	/** Lane closed (red X) (5) */
-	LANE_CLOSED(I18N.get("lcs.lane.closed")),
+	LANE_CLOSED('✖', I18N.get("lcs.lane.closed")),
 
 	/** Merge right (not in MUTCD) (6) */
-	MERGE_RIGHT(I18N.get("lcs.merge.right")),
+	MERGE_RIGHT('》', I18N.get("lcs.merge.right")),
 
 	/** Merge left (not in MUTCD) (7) */
-	MERGE_LEFT(I18N.get("lcs.merge.left")),
+	MERGE_LEFT('《', I18N.get("lcs.merge.left")),
 
 	/** Must exit right (not in MUTCD) (8) */
-	MUST_EXIT_RIGHT(I18N.get("lcs.must.exit.right")),
+	MUST_EXIT_RIGHT('⤷', I18N.get("lcs.must.exit.right")),
 
 	/** Must exit left (not in MUTCD) (9) */
-	MUST_EXIT_LEFT(I18N.get("lcs.must.exit.left")),
+	MUST_EXIT_LEFT('⤶', I18N.get("lcs.must.exit.left")),
 
 	/** HOV / HOT vehicles only (white diamond) (10) */
-	HOV(I18N.get("lcs.hov.hot")),
+	HOV('◊', I18N.get("lcs.hov.hot")),
 
 	/** Variable speed advisory (amber on black) (11) */
-	VSA(I18N.get("lcs.vsa")),
+	VSA('A', I18N.get("lcs.vsa")),
 
 	/** Variable speed limit (black on white) (12) */
-	VSL(I18N.get("lcs.vsl"));
+	VSL('L', I18N.get("lcs.vsl"));
 
 	/** Create a new LCS indication */
-	private LcsIndication(String d) {
+	private LcsIndication(char s, String d) {
+		symbol = s;
 		description = d;
 	}
+
+	/** Symbol for encoding indication */
+	public final char symbol;
 
 	/** Description of the LCS indication */
 	public final String description;
@@ -81,5 +85,26 @@ public enum LcsIndication {
 	/** Get a LCS indication from an ordinal value */
 	static public LcsIndication fromOrdinal(int o) {
 		return (o >= 0 && o < values().length) ? values()[o] : UNKNOWN;
+	}
+
+	/** Lookup a LCS indication from a character symbol */
+	static public LcsIndication fromSymbol(char s) {
+		for (LcsIndication li: values()) {
+			if (li.symbol == s)
+				return li;
+		}
+		return LcsIndication.UNKNOWN;
+	}
+
+	/** Make indications from an array in lane order */
+	static public String fromLanes(int[] ind) {
+		StringBuilder sb = new StringBuilder();
+		int len = ind.length;
+		for (int i = 0; i < len; i++) {
+			int o = ind[len - i - 1];
+			LcsIndication li = LcsIndication.fromOrdinal(o);
+			sb.append(li.symbol);
+		}
+		return sb.toString();
 	}
 }
