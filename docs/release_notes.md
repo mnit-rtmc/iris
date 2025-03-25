@@ -1,5 +1,11 @@
 # IRIS 5.x Release Notes
 
+5.69.0 (25 Mar 2025)
+ - Refactor LCS database tables / classes
+ - Remove lane markings (LCS features can now support them)
+ - MnDOT: implement send settings for all devices
+ - NTCIP: Fetch DMS graphics on query settings
+
 5.68.0 (3 Mar 2025)
  - Improved ONVIF camera control issues
  - Added `pixel_service` flag to message patterns
