@@ -217,12 +217,12 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		ShrinkQueueAction sq_act = new ShrinkQueueAction(rm, user);
 		GrowQueueAction gq_act = new GrowQueueAction(rm, user);
 		if (!isWritePermitted(rm)) {
-			reason_act.setEnabled(false);
 			on_act.setEnabled(false);
 			off_act.setEnabled(false);
+			reason_act.setEnabled(false);
 		}
-		boolean metering = RampMeterHelper.isMetering(rm);
-		if ((!isWritePermitted(rm)) || r == null || !metering) {
+		boolean locked_on = (lk.optRate() != null);
+		if ((!isWritePermitted(rm)) || !locked_on) {
 			sq_act.setEnabled(false);
 			gq_act.setEnabled(false);
 		}
