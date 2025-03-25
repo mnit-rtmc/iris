@@ -49,29 +49,20 @@ public enum LcsIndication {
 	/** Merge left (not in MUTCD) (7) */
 	MERGE_LEFT(I18N.get("lcs.merge.left")),
 
-	/** Merge left or right (not in MUTCD) (8) */
-	MERGE_BOTH(I18N.get("lcs.merge.both")),
-
-	/** Must exit right (not in MUTCD) (9) */
+	/** Must exit right (not in MUTCD) (8) */
 	MUST_EXIT_RIGHT(I18N.get("lcs.must.exit.right")),
 
-	/** Must exit left (not in MUTCD) (10) */
+	/** Must exit left (not in MUTCD) (9) */
 	MUST_EXIT_LEFT(I18N.get("lcs.must.exit.left")),
 
-	/** HOV / HOT vehicles only (white diamond) (11) */
+	/** HOV / HOT vehicles only (white diamond) (10) */
 	HOV(I18N.get("lcs.hov.hot")),
 
-	/** HOV / HOT begins (white diamond) (12) */
-	HOV_BEGINS(I18N.get("lcs.hov.hot.begins")),
-
-	/** Variable speed advisory (amber on black) (13) */
+	/** Variable speed advisory (amber on black) (11) */
 	VSA(I18N.get("lcs.vsa")),
 
-	/** Variable speed limit (black on white) (14) */
-	VSL(I18N.get("lcs.vsl")),
-
-	/** Low visibility (small green arrow) (15) */
-	LOW_VISIBILITY(I18N.get("lcs.low.visibility"));
+	/** Variable speed limit (black on white) (12) */
+	VSL(I18N.get("lcs.vsl"));
 
 	/** Create a new LCS indication */
 	private LcsIndication(String d) {

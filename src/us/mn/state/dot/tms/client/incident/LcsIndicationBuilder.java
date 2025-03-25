@@ -68,11 +68,9 @@ public class LcsIndicationBuilder {
 	/** Get alternate indication for "changeable" LCS devices. */
 	static private LcsIndication altIndication(LcsIndication li) {
 		switch (li) {
-		case LOW_VISIBILITY:
 		case LANE_CLOSED_AHEAD:
 		case MERGE_RIGHT:
 		case MERGE_LEFT:
-		case MERGE_BOTH:
 			return LcsIndication.USE_CAUTION;
 		case MUST_EXIT_RIGHT:
 		case MUST_EXIT_LEFT:
@@ -269,7 +267,7 @@ public class LcsIndicationBuilder {
 		else if (n_right < n_left)
 			return LcsIndication.MERGE_RIGHT;
 		else if (n_left < MAX_SHIFT)
-			return LcsIndication.MERGE_BOTH;
+			return LcsIndication.LANE_CLOSED_AHEAD;
 		else
 			return createIndicationMediumBlocked(cfg, shift);
 	}
@@ -328,8 +326,6 @@ public class LcsIndicationBuilder {
 			return LcsIndication.MERGE_LEFT;
 		else if (n_right < n_left)
 			return LcsIndication.MERGE_RIGHT;
-		else if (n_left < MAX_SHIFT)
-			return LcsIndication.MERGE_BOTH;
 		else
 			return LcsIndication.LANE_CLOSED;
 	}

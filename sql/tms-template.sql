@@ -4139,14 +4139,11 @@ VALUES
     (5, 'Lane closed'),
     (6, 'Merge right'),
     (7, 'Merge left'),
-    (8, 'Merge left or right'),
-    (9, 'Must exit right'),
-    (10, 'Must exit left'),
-    (11, 'HOV / HOT'),
-    (12, 'HOV / HOT begins'),
-    (13, 'Variable speed advisory'),
-    (14, 'Variable speed limit'),
-    (15, 'Low visibility');
+    (8, 'Must exit right'),
+    (9, 'Must exit left'),
+    (10, 'HOV / HOT'),
+    (11, 'Variable speed advisory'),
+    (12, 'Variable speed limit');
 
 CREATE TABLE iris._lcs_state (
     name VARCHAR(20) PRIMARY KEY,

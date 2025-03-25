@@ -15,14 +15,11 @@ as an array.  They can display standard **indications**:
 | `Lane closed`             | <span style="background:black;color:#f00;border:0.1rem solid gray"> X </span>
 | `Merge right`             | <span style="background:black;color:#ff0;border:0.1rem solid gray"> 》</span> (animated)
 | `Merge left`              | <span style="background:black;color:#ff0;border:0.1rem solid gray">《 </span> (animated)
-| `Merge left or right`     | <span style="background:black;color:#ff0;border:0.1rem solid gray">〈〉</span> (animated)
-| `Must exit right`         |
-| `Must exit left`          |
+| `Must exit right`         | <span style="background:black;color:#ff0;border:0.1rem solid gray"> ⤷ </span> (animated)
+| `Must exit left`          | <span style="background:black;color:#ff0;border:0.1rem solid gray"> ⤶ </span> (animated)
 | `HOV / HOT`               | <span style="background:black;color:#fff;border:0.1rem solid gray"> ◊ </span>
-| `HOV / HOT begins`        | <span style="background:black;color:#fff;border:0.1rem solid gray"> ◊ </span>
 | `Variable speed advisory` | <span style="background:black;color:#ff0;border:0.1rem solid gray"> 45 </span>
 | `Variable speed limit`    | <span style="background:white;color:black;border:0.1rem solid gray"> 50 </span>
-| `Low visibility`          | <span style="background:black;color:#0f0;border:0.1rem solid gray">  ᪳ </span>
 
 <details>
 <summary>API Resources 🕵️ </summary>
