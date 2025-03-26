@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2021  Minnesota Department of Transportation
+ * Copyright (C) 2007-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,15 +37,6 @@ public interface MeterPoller {
 		float y = SystemAttrEnum.METER_YELLOW_SECS.getFloat();
 		return Math.round(y * 10);
 	}
-
-	/** Threshold to fail communication (minutes) */
-	int COMM_FAIL_THRESHOLD = 3;
-
-	/** Threshold to fail communication (deciseconds) */
-	int COMM_FAIL_THRESHOLD_DS = COMM_FAIL_THRESHOLD * 60 * 10;
-
-	/** Threshold to fail communication (ms) */
-	long COMM_FAIL_THRESHOLD_MS = COMM_FAIL_THRESHOLD * 60 * 1000;
 
 	/** Startup green time (tenths of a second) */
 	int STARTUP_GREEN = 80;

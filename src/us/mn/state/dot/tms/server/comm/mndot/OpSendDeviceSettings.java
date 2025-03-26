@@ -15,9 +15,10 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
+import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
 import us.mn.state.dot.tms.server.DeviceImpl;
+import static us.mn.state.dot.tms.server.RampMeterImpl.COMM_LOSS_THRESHOLD;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.MeterPoller;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -107,7 +108,9 @@ public class OpSendDeviceSettings extends Op170Device {
 		protected Phase<MndotProperty> poll(
 			CommMessage<MndotProperty> mess) throws IOException
 		{
-			byte[] data = {MeterPoller.COMM_FAIL_THRESHOLD};
+			byte[] data = {
+				(byte) COMM_LOSS_THRESHOLD.round(MINUTES)
+			};
 			mess.add(new MemoryProperty(Address.COMM_FAIL, data));
 			mess.storeProps();
 			return null;

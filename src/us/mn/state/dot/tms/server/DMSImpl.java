@@ -72,6 +72,8 @@ import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.event.BrightnessSample;
 import us.mn.state.dot.tms.server.event.PriceMessageEvent;
 import us.mn.state.dot.tms.server.event.SignEvent;
+import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -92,8 +94,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return src.checkBit(bits);
 	}
 
-	/** Comm fail time threshold to blank user message */
-	static private final long COMM_FAIL_BLANK_THRESHOLD_MS = 5 * 60 * 1000;
+	/** Comm loss threshold to blank user message */
+	static private final Interval COMM_LOSS_THRESHOLD =
+		new Interval(5, MINUTES);
 
 	/** Minimum duration of a DMS action (minutes) */
 	static private final int DURATION_MINIMUM_MINS = 1;
@@ -273,7 +276,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		// communication has been failed too long.  If so, clear the
 		// user message to prevent it from popping up days later, after
 		// communication is restored.
-		if (!c && getFailMillis() >= COMM_FAIL_BLANK_THRESHOLD_MS)
+		if (!c && getFailMillis() >= COMM_LOSS_THRESHOLD.ms())
 			resetMsgUser();
 	}
 

@@ -48,6 +48,8 @@ import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TimingTable;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.geo.Position;
+import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
@@ -60,6 +62,10 @@ import us.mn.state.dot.tms.server.event.MeterLockEvent;
  * @author Douglas Lau
  */
 public class RampMeterImpl extends DeviceImpl implements RampMeter {
+
+	/** Comm loss threshold */
+	static public final Interval COMM_LOSS_THRESHOLD =
+		new Interval(3, MINUTES);
 
 	/** Occupancy to determine merge backup */
 	static private final int MERGE_BACKUP_OCC = 30;
@@ -680,7 +686,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Check if communication to the meter is OK */
 	private boolean isCommOk() {
-		return getFailMillis() < MeterPoller.COMM_FAIL_THRESHOLD_MS;
+		return getFailMillis() < COMM_LOSS_THRESHOLD.ms();
 	}
 
 	/** Get current minimum release rate (vehicles per hour) */
