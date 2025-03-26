@@ -29,8 +29,9 @@ import us.mn.state.dot.tms.TMSException;
  *
  * @author Douglas Lau
  */
-public class LcsStateImpl extends ControllerIoImpl implements LcsState {
-
+public class LcsStateImpl extends ControllerIoImpl implements LcsState,
+	Comparable<LcsStateImpl>
+{
 	/** Load all the LCS states */
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, controller, pin, lcs, lane, " +
@@ -82,6 +83,21 @@ public class LcsStateImpl extends ControllerIoImpl implements LcsState {
 		indication = i;
 		msg_pattern = lookupMsgPattern(pat);
 		msg_num = (Integer) mn;
+	}
+
+	/** Compare to another LCS state */
+	@Override
+	public int compareTo(LcsStateImpl o) {
+		return name.compareTo(o.name);
+	}
+
+	/** Test if this state equals another state */
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof LcsStateImpl)
+			return name.equals(((LcsStateImpl) o).name);
+		else
+			return false;
 	}
 
 	/** LCS array */
