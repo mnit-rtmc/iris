@@ -34,6 +34,7 @@ Table Name                | View
 `gate_arm_event`          | `gate_arm_event_view`
 `incident`                | `incident_view`
 `incident_update`         | `incident_update_view`
+`lcs_event`               | `lcs_event_view`
 `meter_event`             | `meter_event_view`
 `meter_lock_event`        | `meter_lock_event_view`
 `price_message_event`     | `price_message_event_view`

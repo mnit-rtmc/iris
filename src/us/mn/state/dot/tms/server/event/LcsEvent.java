@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2025  Minnesota Department of Transportation
+ * Copyright (C) 2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,70 +18,62 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
- * This is a class for logging sign events to a database.
+ * This is a class for logging LCS events to a database.
  *
  * @author Douglas Lau
  */
-public class SignEvent extends BaseEvent {
+public class LcsEvent extends BaseEvent {
 
-	/** Is the specified event a sign event? */
-	static private boolean isSignEvent(EventType et) {
-		return EventType.DMS_DEPLOYED == et
-		    || EventType.DMS_CLEARED == et
-		    || EventType.DMS_MSG_ERROR == et
-		    || EventType.DMS_PIXEL_ERROR == et
-		    || EventType.DMS_MSG_RESET == et;
+	/** Is the specified event an LCS event? */
+	static private boolean isLcsEvent(EventType et) {
+		return EventType.LCS_LOCKED == et
+		    || EventType.LCS_UNLOCKED == et
+		    || EventType.LCS_DEPLOYED == et
+		    || EventType.LCS_CLEARED == et;
 	}
 
-	/** Device ID (if device specific) */
-	private final String device_id;
+	/** LCS name */
+	private final String lcs;
 
-	/** Message MULTI text */
-	private final String multi;
+	/** Lock (JSON) */
+	private final String lock;
 
-	/** Message owner */
-	private final String msg_owner;
+	/** Status (JSON) */
+	private final String status;
 
-	/** Duration (minutes) */
-	private final Integer duration;
-
-	/** Create a new sign event */
-	public SignEvent(EventType et, String d, String m, String o,
-		Integer dur)
-	{
+	/** Create a new LCS event */
+	public LcsEvent(EventType et, String l, String lk, String st) {
 		super(et);
-		assert isSignEvent(et);
-		device_id = d;
-		multi = m;
-		msg_owner = o;
-		duration = dur;
+		assert isLcsEvent(et);
+		lcs = l;
+		lock = lk;
+		status = st;
 	}
 
 	/** Get the event config name */
 	@Override
 	protected String eventConfigName() {
-		return "sign_event";
+		return "lcs_event";
 	}
 
 	/** Get the database table name */
 	@Override
 	public String getTable() {
-		return "event.sign_event";
+		return "event.lcs_event";
 	}
 
 	/** Get a mapping of the columns */
 	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put("event_desc_id", event_type.id);
 		map.put("event_date", new Timestamp(event_date.getTime()));
-		map.put("device_id", device_id);
-		map.put("multi", multi);
-		map.put("msg_owner", msg_owner);
-		map.put("duration", duration);
+		map.put("event_desc", event_type.id);
+		map.put("lcs", lcs);
+		map.put("lock", lock);
+		map.put("status", status);
 		return map;
 	}
 }
