@@ -385,6 +385,7 @@ pub fn item_states(res: Option<Res>) -> &'static str {
         Some(Res::Dms) => Dms::ITEM_STATES,
         Some(Res::Domain) => Domain::ITEM_STATES,
         Some(Res::GateArm | Res::GateArmArray) => GateArm::ITEM_STATES,
+        Some(Res::Lcs) => Lcs::ITEM_STATES,
         Some(Res::Permission) => Permission::ITEM_STATES,
         Some(Res::RampMeter) => RampMeter::ITEM_STATES,
         Some(Res::Role) => Role::ITEM_STATES,

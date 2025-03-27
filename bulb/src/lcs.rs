@@ -194,22 +194,24 @@ impl Lcs {
             .unwrap_or(LockReason::Unlocked)
     }
 
+    /// Check if the LCS is deployed
+    fn is_deployed(&self) -> bool {
+        self.status.as_ref().is_some_and(|st| {
+            st.indications
+                .as_ref()
+                .is_some_and(|ind| ind.iter().all(|li| *li > 1))
+        })
+    }
+
     /// Get item states from status/lock
     fn item_states_lock(&self) -> ItemStates<'_> {
-        let deployed = match &self.status {
-            Some(st) if st.indications.is_some() => true,
-            _ => false,
-        };
+        let deployed = self.is_deployed();
         let reason = self.lock_reason();
-        let states = if reason == LockReason::Incident {
-            ItemStates::default()
-                .with(ItemState::Incident, LockReason::Incident.as_str())
-        } else {
-            ItemStates::default()
-        };
+        let states = ItemStates::default();
         match (deployed, reason) {
-            (true, LockReason::Unlocked) => states
-                .with(ItemState::Deployed, "deployed"),
+            (true, LockReason::Unlocked) => {
+                states.with(ItemState::Deployed, "deployed")
+            }
             (true, _) => states
                 .with(ItemState::Deployed, "deployed")
                 .with(ItemState::Locked, reason.as_str()),
@@ -219,12 +221,13 @@ impl Lcs {
     }
 
     /// Convert to Compact HTML
-    fn to_html_compact(&self, _anc: &LcsAnc) -> String {
+    fn to_html_compact(&self, anc: &LcsAnc) -> String {
         let name = HtmlStr::new(self.name());
+        let item_states = self.item_states(anc);
+        let location = HtmlStr::new(&self.location).with_len(32);
         format!(
-            "<div class='title row'>\
-              <span>{name}</span>\
-            </div>"
+            "<div class='title row'>{name} {item_states}</div>\
+            <div class='info fill'>{location}</div>"
         )
     }
 
@@ -234,9 +237,15 @@ impl Lcs {
             fly_map_item(&self.name, lat, lon);
         }
         let title = self.title(View::Control);
+        let item_states = self.item_states(anc).to_html();
+        let location = HtmlStr::new(&self.location).with_len(64);
         format!(
             "{title}\
+            <div class='row fill'>\
+              <span>{item_states}</span>\
+            </div>\
             <div class='row'>\
+              <span class='info'>{location}</span>\
             </div>"
         )
     }
@@ -247,6 +256,15 @@ impl Card for Lcs {
 
     /// Display name
     const DNAME: &'static str = "🠟✖🠟 LCS";
+
+    /// All item states as html options
+    const ITEM_STATES: &'static str = "<option value=''>all ↴\
+         <option value='🔹'>🔹 available\
+         <option value='🔶' selected>🔶 deployed\
+         <option value='🔒'>🔒 locked\
+         <option value='⚠️'>⚠️ fault\
+         <option value='🔌'>🔌 offline\
+         <option value='▪️'>▪️ inactive";
 
     /// Get the resource
     fn res() -> Res {
@@ -262,6 +280,24 @@ impl Card for Lcs {
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
         self
+    }
+
+    /// Get the main item state
+    fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
+        let item_states = anc.cio.item_states(self);
+        if item_states.is_match(ItemState::Inactive.code()) {
+            ItemState::Inactive
+        } else if item_states.is_match(ItemState::Offline.code()) {
+            ItemState::Offline
+        } else if item_states.is_match(ItemState::Deployed.code()) {
+            ItemState::Deployed
+        } else if item_states.is_match(ItemState::Fault.code())
+            || item_states.is_match(ItemState::Locked.code())
+        {
+            ItemState::Fault
+        } else {
+            ItemState::Available
+        }
     }
 
     /// Check if a search string matches
