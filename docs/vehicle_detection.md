@@ -72,7 +72,9 @@ the [r_node].
 
 **Field length** (ft) is the detection "field" of an average vehicle.  It is
 used to derive density from occupancy, for detectors which cannot measure speed
-directly.
+directly.  For **Velocity** type detectors, this is the distance to the start
+of the upstream mainline detector.  This enables recording individual vehicle
+speeds ([Canoga] protocol only).
 
 If a detector is no longer used, it can be marked **abandoned**.
 
