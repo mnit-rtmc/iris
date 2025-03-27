@@ -549,7 +549,7 @@ impl Resource {
             Rnode => query_all_nodes(client, segments).await,
             RoadFull => query_all_roads(client, segments).await,
             SignMessage => self.query_sign_msgs(client).await,
-            Beacon | Camera | Dms | RampMeter | WeatherSensor => {
+            Beacon | Camera | Dms | Lcs | RampMeter | WeatherSensor => {
                 self.query_all_locs(client, segments).await
             }
             DayPlan => {
