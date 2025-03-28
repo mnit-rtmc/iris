@@ -452,6 +452,40 @@ label:has(+ #sb_resource) {
   border: 1px solid black;
 }
 
+.lcs {
+  background-color: black;
+  font-size: x-large;
+  font-weight: bold;
+  display: inline-block;
+  text-align: center;
+  width: 2rem;
+  padding-top: 0.2rem;
+}
+
+.lcs_dark {
+  color: black;
+}
+
+.lcs_lane_open {
+  color: lawngreen;
+}
+
+.lcs_use_caution {
+  color: yellow;
+}
+
+.lcs_lane_closed_ahead {
+  color: yellow;
+}
+
+.lcs_lane_closed {
+  color: red;
+}
+
+.lcs_unknown {
+  color: gray;
+}
+
 /* -------
  * Beacons
  * ------- */

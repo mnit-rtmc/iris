@@ -228,6 +228,34 @@ impl Lcs {
         })
     }
 
+    /// Get current indications
+    fn indications(&self) -> &[u32] {
+        self.status
+            .as_ref()
+            .and_then(|st| st.indications.as_ref().map(|ind| &ind[..]))
+            .unwrap_or(&[0])
+    }
+
+    /// Create an HTML indications element
+    fn indications_html(&self) -> String {
+        let mut html = String::new();
+        html.push_str("<div class='row center'>");
+        for ind in self.indications().iter().rev() {
+            html.push_str("<span class='lcs ");
+            match ind {
+                1 => html.push_str("lcs_dark'>⍽"),
+                2 => html.push_str("lcs_lane_open'>↓"),
+                3 => html.push_str("lcs_use_caution'>⇣"),
+                4 => html.push_str("lcs_lane_closed_ahead'>✕"),
+                5 => html.push_str("lcs_lane_closed'>✖"),
+                _ => html.push_str("lcs_unknown'>?"),
+            }
+            html.push_str("</span>");
+        }
+        html.push_str("</div>");
+        html
+    }
+
     /// Get item states from status/lock
     fn item_states_lock(&self) -> ItemStates<'_> {
         let deployed = self.is_deployed();
@@ -264,6 +292,7 @@ impl Lcs {
         let title = self.title(View::Control);
         let item_states = self.item_states(anc).to_html();
         let location = HtmlStr::new(&self.location).with_len(64);
+        let indications = self.indications_html();
         format!(
             "{title}\
             <div class='row fill'>\
@@ -271,7 +300,8 @@ impl Lcs {
             </div>\
             <div class='row'>\
               <span class='info'>{location}</span>\
-            </div>"
+            </div>\
+            {indications}"
         )
     }
 
