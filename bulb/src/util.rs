@@ -377,6 +377,15 @@ impl Input<Option<bool>> for Fields {
     }
 }
 
+impl Input<Option<u16>> for Fields {
+    fn changed_input(&mut self, id: &str, val: Option<u16>) {
+        let parsed = self.doc.input_parse::<u16>(id);
+        if parsed != val {
+            self.insert(id, OptVal(parsed).into());
+        }
+    }
+}
+
 impl Input<Option<u32>> for Fields {
     fn changed_input(&mut self, id: &str, val: Option<u32>) {
         let parsed = self.doc.input_parse::<u32>(id);

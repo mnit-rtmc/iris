@@ -411,8 +411,7 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::SignConfig
         | Res::User => &[View::Compact, View::Setup],
         Res::GateArmArray => &[View::Compact, View::Control, View::Location],
-        Res::Lcs => &[View::Compact, View::Control],
-        Res::Beacon | Res::Camera | Res::RampMeter => {
+        Res::Beacon | Res::Camera | Res::Lcs | Res::RampMeter => {
             &[View::Compact, View::Control, View::Location, View::Setup]
         }
         Res::Dms => &[

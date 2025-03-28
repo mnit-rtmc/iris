@@ -17,7 +17,9 @@ use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::start::fly_map_item;
-use crate::util::{ContainsLower, HtmlStr};
+use crate::util::{
+    ContainsLower, Fields, HtmlStr, Input, OptVal, Select, TextArea,
+};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -70,8 +72,10 @@ pub struct Lcs {
     pub status: Option<LcsStatus>,
     // secondary attributes
     pub geo_loc: Option<String>,
+    pub lcs_type: Option<u32>,
     pub pin: Option<u32>,
-    pub shift: Option<u32>,
+    pub preset: Option<String>,
+    pub shift: Option<u16>,
 }
 
 /// Ancillary LCS array data
@@ -79,7 +83,28 @@ pub struct Lcs {
 pub struct LcsAnc {
     cio: ControllerIoAnc<Lcs>,
     loc: LocAnc<Lcs>,
-    pub types: Vec<LcsType>,
+    pub lcs_types: Vec<LcsType>,
+}
+
+impl LcsAnc {
+    /// Create an HTML `select` element of LCS types
+    fn lcs_types_html(&self, pri: &Lcs) -> String {
+        let mut html = String::new();
+        html.push_str("<select id='lcs_type'>");
+        for tp in &self.lcs_types {
+            html.push_str("<option value='");
+            html.push_str(&tp.id.to_string());
+            html.push('\'');
+            if Some(tp.id) == pri.lcs_type {
+                html.push_str(" selected");
+            }
+            html.push('>');
+            html.push_str(&tp.description);
+            html.push_str("</option>");
+        }
+        html.push_str("</select>");
+        html
+    }
 }
 
 impl AncillaryData for LcsAnc {
@@ -93,7 +118,7 @@ impl AncillaryData for LcsAnc {
         LcsAnc {
             cio,
             loc,
-            types: Vec::new(),
+            lcs_types: Vec::new(),
         }
     }
 
@@ -112,7 +137,7 @@ impl AncillaryData for LcsAnc {
         match asset {
             Asset::Controllers => self.cio.set_asset(pri, asset, value)?,
             Asset::LcsTypes => {
-                self.types = serde_wasm_bindgen::from_value(value)?;
+                self.lcs_types = serde_wasm_bindgen::from_value(value)?;
             }
             _ => self.loc.set_asset(pri, asset, value)?,
         }
@@ -249,6 +274,37 @@ impl Lcs {
             </div>"
         )
     }
+
+    /// Convert to Setup HTML
+    fn to_html_setup(&self, anc: &LcsAnc) -> String {
+        let title = self.title(View::Setup);
+        let notes = HtmlStr::new(&self.notes);
+        let controller = anc.cio.controller_html(self);
+        let pin = anc.cio.pin_html(self.pin);
+        let lcs_types = anc.lcs_types_html(self);
+        let shift = OptVal(self.shift);
+        let footer = self.footer(true);
+        format!(
+            "{title}\
+            <div class='row'>\
+              <label for='notes'>Notes</label>\
+              <textarea id='notes' maxlength='255' rows='4' \
+                        cols='24'>{notes}</textarea>\
+            </div>\
+            {controller}\
+            {pin}\
+            <div class='row'>\
+              <label for='lcs_type'>LCS Type</label>\
+              {lcs_types}\
+            </div>\
+            <div class='row'>\
+              <label for='shift'>Lane Shift</label>\
+              <input id='shift' type='number' min='1' max='9' \
+                     size='2' value='{shift}'>\
+            </div>\
+            {footer}"
+        )
+    }
 }
 
 impl Card for Lcs {
@@ -317,7 +373,19 @@ impl Card for Lcs {
             View::Create => self.to_html_create(anc),
             View::Control => self.to_html_control(anc),
             View::Location => anc.loc.to_html_loc(self),
+            View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }
+    }
+
+    /// Get changed fields from Setup form
+    fn changed_setup(&self) -> String {
+        let mut fields = Fields::new();
+        fields.changed_text_area("notes", &self.notes);
+        fields.changed_input("controller", &self.controller);
+        fields.changed_input("pin", self.pin);
+        fields.changed_select("lcs_type", self.lcs_type);
+        fields.changed_input("shift", self.shift);
+        fields.into_value().to_string()
     }
 }
