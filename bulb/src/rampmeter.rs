@@ -658,7 +658,7 @@ impl Card for RampMeter {
          <option value='🔒'>🔒 locked\
          <option value='⚠️'>⚠️ fault\
          <option value='🔌'>🔌 offline\
-         <option value='▪️'>▪️ inactive";
+         <option value='🔻'>🔻 inactive";
 
     /// Get the resource
     fn res() -> Res {

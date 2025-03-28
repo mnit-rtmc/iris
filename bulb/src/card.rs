@@ -267,7 +267,7 @@ pub trait AncillaryData {
 const ITEM_STATES: &str = "<option value=''>all ↴</option>\
      <option value='🔹'>🔹 available</option>\
      <option value='🔌'>🔌 offline</option>\
-     <option value='▪️'>▪️ inactive</option>";
+     <option value='🔻'>🔻 inactive</option>";
 
 /// A card view of a resource
 pub trait Card: Default + DeserializeOwned + PartialEq {

@@ -271,7 +271,7 @@ impl Card for SignConfig {
     /// All item states as html options
     const ITEM_STATES: &'static str = "<option value=''>all ↴\
          <option value='🔹'>🔹 available\
-         <option value='▪️'>▪️ inactive";
+         <option value='🔻'>🔻 inactive";
 
     /// Get the resource
     fn res() -> Res {
