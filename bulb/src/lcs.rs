@@ -314,9 +314,9 @@ impl Card for Lcs {
     const DNAME: &'static str = "🠟✖🠟 LCS";
 
     /// All item states as html options
-    const ITEM_STATES: &'static str = "<option value=''>all ↴\
+    const ITEM_STATES: &'static str = "<option value='' selected>all ↴\
          <option value='🔹'>🔹 available\
-         <option value='🔶' selected>🔶 deployed\
+         <option value='🔶'>🔶 deployed\
          <option value='🔒'>🔒 locked\
          <option value='⚠️'>⚠️ fault\
          <option value='🔌'>🔌 offline\
