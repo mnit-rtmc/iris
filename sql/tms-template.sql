@@ -321,6 +321,7 @@ VALUES
     ('gate_arm_event', true, false, 0),
     ('incident', true, false, 0),
     ('incident_update', true, false, 0),
+    ('lcs_event', true, false, 0),
     ('meter_event', true, true, 14),
     ('meter_lock_event', true, false, 0),
     ('price_message_event', true, false, 0),
@@ -358,6 +359,8 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 81	DMS MSG ERROR
 82	DMS PIXEL ERROR
 83	DMS MSG RESET
+87	LCS LOCKED
+88	LCS UNLOCKED
 89	LCS DEPLOYED
 90	LCS CLEARED
 91	Sign DEPLOYED
@@ -4218,6 +4221,21 @@ CREATE VIEW lcs_state_view AS
     FROM iris.lcs_state
     JOIN iris.lcs_indication ON indication = id;
 GRANT SELECT ON lcs_state_view TO PUBLIC;
+
+CREATE TABLE event.lcs_event (
+    id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc INTEGER NOT NULL REFERENCES event.event_description,
+    lcs VARCHAR(20) NOT NULL REFERENCES iris._lcs ON DELETE CASCADE,
+    lock JSONB,
+    status JSONB
+);
+
+CREATE VIEW lcs_event_view AS
+    SELECT ev.id, event_date, ed.description, lcs, lock, status
+    FROM event.lcs_event ev
+    JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id;
+GRANT SELECT ON lcs_event_view TO PUBLIC;
 
 --
 -- Parking Areas
