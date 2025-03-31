@@ -768,7 +768,12 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Lookup the entrance R_Node */
 	public void lookupEntranceNode() {
-		ent_node = findEntranceNode();
+		final R_NodeImpl n = findEntranceNode();
+		if (n != null)
+			updateFault(null);
+		else
+			updateFault(RampMeter.FAULT_NO_ENTRANCE_NODE);
+		ent_node = n;
 	}
 
 	/** Find the entrance R_Node */
@@ -784,14 +789,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 				Corridor cd_road = corridors.getCorridor(cd);
 				if (cd_road != null) {
 					n = cd_road.findActiveNode(finder);
-					if (n != null) {
-						updateFault(null);
+					if (n != null)
 						return n;
-					}
 				}
 			}
 		}
-		updateFault(RampMeter.FAULT_NO_ENTRANCE_NODE);
 		return null;
 	}
 
