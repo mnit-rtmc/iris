@@ -81,15 +81,11 @@ pub const CAMERA_ALL: &str = "\
 
 /// SQL query for one camera (secondary)
 pub const CAMERA_ONE: &str = "\
-  SELECT c.name, location, c.geo_loc, controller, pin, c.notes, cam_num, publish, \
-         cam_template, encoder_type, enc_address, enc_port, enc_mcast, enc_channel, \
-         video_loss, cl.name as comm_link, cl.uri as controller_uri, \
-         concat_ws(' ', e.make, e.model, e.config) as encoder_type_string \
+  SELECT c.name, location, geo_loc, controller, pin, notes, cam_num, publish, \
+         cam_template, encoder_type, enc_address, enc_port, enc_mcast, \
+         enc_channel, video_loss \
   FROM iris.camera c \
   LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
-  LEFT JOIN iris.encoder_type e ON e.name = c.encoder_type \
-  LEFT JOIN iris.controller con ON con.name = c.controller \
-  LEFT JOIN iris.comm_link cl ON cl.name = con.comm_link \
   WHERE c.name = $1";
 
 /// SQL query for all cameras (public)

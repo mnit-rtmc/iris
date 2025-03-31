@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{uri_one, AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card, View, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::DeviceReq;
 use crate::error::Result;
@@ -23,7 +23,31 @@ use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
+use std::fmt;
 use wasm_bindgen::JsValue;
+
+/// Encoder type
+#[derive(Debug, Default, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
+pub struct EncoderType {
+    pub make: String,
+    pub model: String,
+    pub config: String,
+    // NOTE: last to allow deriving PartialOrd / Ord
+    pub name: String,
+}
+
+impl fmt::Display for EncoderType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.make)?;
+        if !self.model.is_empty() {
+            write!(f, " {}", self.model)?;
+        }
+        if !self.config.is_empty() {
+            write!(f, " {}", self.config)?;
+        }
+        Ok(())
+    }
+}
 
 /// Camera
 #[derive(Debug, Default, Deserialize, PartialEq)]
@@ -37,15 +61,13 @@ pub struct Camera {
     // secondary attributes
     pub geo_loc: Option<String>,
     pub pin: Option<u32>,
-    pub encoder_type: Option<String>,
-    pub encoder_type_string: Option<String>,
-    pub enc_address: Option<String>,
-    pub enc_port: Option<u32>,
-    pub enc_mcast: Option<String>,
-    pub enc_channel: Option<u32>,
     pub cam_template: Option<String>,
-    pub comm_link: Option<String>,
-    pub controller_uri: Option<String>,
+    pub encoder_type: Option<String>,
+    pub enc_address: Option<String>,
+    pub enc_port: Option<u16>,
+    pub enc_mcast: Option<String>,
+    pub enc_channel: Option<u16>,
+    pub video_loss: Option<bool>,
 }
 
 /// Camera ancillary data
@@ -53,6 +75,7 @@ pub struct Camera {
 pub struct CameraAnc {
     cio: ControllerIoAnc<Camera>,
     loc: LocAnc<Camera>,
+    enc_types: Vec<EncoderType>,
 }
 
 impl AncillaryData for CameraAnc {
@@ -65,7 +88,14 @@ impl AncillaryData for CameraAnc {
         if let (View::Status, Some(nm)) = (view, pri.geoloc()) {
             loc.assets.push(Asset::GeoLoc(nm.to_string(), Res::Camera));
         }
-        CameraAnc { cio, loc }
+        if let View::Setup = view {
+            loc.assets.push(Asset::EncoderTypes);
+        }
+        CameraAnc {
+            cio,
+            loc,
+            enc_types: Vec::new(),
+        }
     }
 
     /// Get next asset to fetch
@@ -80,11 +110,36 @@ impl AncillaryData for CameraAnc {
         asset: Asset,
         value: JsValue,
     ) -> Result<()> {
-        if let Asset::Controllers = asset {
-            self.cio.set_asset(pri, asset, value)
-        } else {
-            self.loc.set_asset(pri, asset, value)
+        match asset {
+            Asset::Controllers => self.cio.set_asset(pri, asset, value),
+            Asset::EncoderTypes => {
+                self.enc_types = serde_wasm_bindgen::from_value(value)?;
+                self.enc_types.sort();
+                Ok(())
+            }
+            _ => self.loc.set_asset(pri, asset, value),
         }
+    }
+}
+
+impl CameraAnc {
+    /// Create an HTML `select` element of encoder type
+    fn encoder_type_html(&self, pri: &Camera) -> String {
+        let mut html = String::new();
+        html.push_str("<select id='encoder_type'>");
+        for tp in &self.enc_types {
+            html.push_str("<option value='");
+            html.push_str(&tp.name);
+            html.push('\'');
+            if Some(&tp.name) == pri.encoder_type.as_ref() {
+                html.push_str(" selected");
+            }
+            html.push('>');
+            html.push_str(&tp.to_string());
+            html.push_str("</option>");
+        }
+        html.push_str("</select>");
+        html
     }
 }
 
@@ -148,22 +203,22 @@ impl Camera {
         let title = self.title(View::Setup);
         let cam_num = OptVal(self.cam_num);
         let controller = anc.cio.controller_html(self);
-        let cam_notes = &self.notes.clone().unwrap_or(String::new());
-        let encoder_type = &self.encoder_type_string.clone().unwrap_or(String::new());
+        let notes = &self.notes.clone().unwrap_or(String::new());
+        let encoder_type = anc.encoder_type_html(self);
         let enc_address = &self.enc_address.clone().unwrap_or(String::new());
         let enc_port = if let Some(e_p) = &self.enc_port {
-                e_p.to_string()
-            } else {
-                String::new()
-            };
+            e_p.to_string()
+        } else {
+            String::new()
+        };
         let enc_mcast = &self.enc_mcast.clone().unwrap_or(String::new());
         let enc_channel = if let Some(e_c) = &self.enc_channel {
-                e_c.to_string()
-            } else {
-                String::new()
-            };
-        let cam_template = &self.cam_template.clone().unwrap_or("N/A".to_string());
-        let controller_uri = &self.controller_uri.clone().unwrap_or(String::new());
+            e_c.to_string()
+        } else {
+            String::new()
+        };
+        let cam_template =
+            &self.cam_template.clone().unwrap_or("N/A".to_string());
         let pin = anc.cio.pin_html(self.pin);
         let publish = if self.publish { " checked" } else { "" };
         let footer = self.footer(true);
@@ -173,47 +228,45 @@ impl Camera {
               <label for='cam_num'>Cam Num</label>\
               <input id='cam_num' type='number' min='1' max='9999' \
                      size='8' value='{cam_num}'>\
-             </div>\
-             {controller}\
-             <div class='row'>\
-               <label for='controller_uri'>Controller Address</label>\
-               <span class='info' id='controller_uri'>{controller_uri}</span>\
-             </div>\
-             <div class='row'>\
-               <label for='cam_notes'>Notes</label>\
-               <input type='text' id='cam_notes' value='{cam_notes}'>\
-             </div>\
-             <div class='row'>\
-               <label for='encoder_type'>Encoder Type</label>\
-               <span class='info' id='encoder_type'>{encoder_type}</span>\
-             </div>\
-             <div class='row'>\
-               <label for='enc_address'>Encoder Address/Port Override</label>\
-               <span class='info'>\
-                 <input id='enc_address' type='text' value='{enc_address}'>\
-                 <input id='enc_port' type='number' min='1' size='4' \
-                        value='{enc_port}'>\
-               </span>\
-             </div>\
-             <div class='row'>\
-               <label for='enc_mcast'>Multicast Address</label>\
-               <input id='enc_mcast' type='text' value='{enc_mcast}'>\
-             </div>\
-             <div class='row'>\
-               <label for='enc_channel'>Encoder Channel</label>\
-               <input id='enc_channel' type='number' min='1' size='8' \
-                      value='{enc_channel}'>\
-             </div>\
-             <div class='row'>\
-               <label for='cam_template'>Camera Template</label>\
-               <span class='info' id='cam_template'>{cam_template}</span>\
-             </div>\
-             {pin}\
-             <div class='row'>\
-               <label for='publish'>Publish</label>\
-               <input id='publish' type='checkbox'{publish}>\
-             </div>\
-             {footer}"
+            </div>\
+            <div class='row'>\
+              <label for='notes'>Notes</label>\
+              <textarea id='notes' maxlength='255' rows='4' \
+                        cols='24'>{notes}</textarea>\
+            </div>\
+            {controller}\
+            {pin}\
+            <div class='row'>\
+              <label for='encoder_type'>Encoder Type</label>\
+              <span class='info' id='encoder_type'>{encoder_type}</span>\
+            </div>\
+            <div class='row'>\
+              <label for='enc_address'>Enc. Address</label>\
+              <input id='enc_address' type='text' value='{enc_address}'>\
+            </div>\
+            <div class='row'>\
+              <label for='enc_port'>Enc. Port Override</label>\
+              <input id='enc_port' type='number' min='1' size='4' \
+                     value='{enc_port}'>\
+            </div>\
+            <div class='row'>\
+              <label for='enc_mcast'>Multicast Address</label>\
+              <input id='enc_mcast' type='text' value='{enc_mcast}'>\
+            </div>\
+            <div class='row'>\
+              <label for='enc_channel'>Encoder Channel</label>\
+              <input id='enc_channel' type='number' min='1' size='8' \
+                     value='{enc_channel}'>\
+            </div>\
+            <div class='row'>\
+              <label for='cam_template'>Camera Template</label>\
+              <span class='info' id='cam_template'>{cam_template}</span>\
+            </div>\
+            <div class='row'>\
+              <label for='publish'>Publish</label>\
+              <input id='publish' type='checkbox'{publish}>\
+            </div>\
+            {footer}"
         )
     }
 }
@@ -294,7 +347,7 @@ impl Card for Camera {
         let mut fields = Fields::new();
         fields.changed_input("cam_num", self.cam_num);
         fields.changed_input("controller", &self.controller);
-        fields.changed_input("cam_notes", &self.notes);
+        fields.changed_input("notes", &self.notes);
         fields.changed_input("enc_address", &self.enc_address);
         fields.changed_input("enc_port", self.enc_port);
         fields.changed_input("enc_mcast", &self.enc_mcast);

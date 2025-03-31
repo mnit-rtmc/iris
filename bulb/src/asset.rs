@@ -28,6 +28,7 @@ pub enum Asset {
     ControllerIo(String),
     Controllers,
     Directions,
+    EncoderTypes,
     Font(String),
     Fonts,
     GateArmStates,
@@ -68,6 +69,7 @@ impl Asset {
             }
             Controllers => "/iris/api/controller".into(),
             Directions => "/iris/lut/direction".into(),
+            EncoderTypes => "/iris/api/encoder_type".into(),
             Font(nm) => {
                 let mut uri = Uri::from("/iris/tfon/")
                     .with_content_type(ContentType::Text);
