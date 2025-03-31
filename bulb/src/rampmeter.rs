@@ -479,7 +479,7 @@ impl RampMeter {
                 html.push_str(" selected");
             }
             html.push('>');
-            html.push_str(reason.as_str());
+            html.push_str(r.as_str());
             html.push_str("</option>");
         }
         html.push_str("</select></span>");

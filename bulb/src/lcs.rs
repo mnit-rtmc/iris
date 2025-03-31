@@ -235,6 +235,36 @@ impl Lcs {
             .unwrap_or(LockReason::Unlocked)
     }
 
+    /// Create an HTML `select` element of lock reasons
+    fn lock_reason_html(&self) -> String {
+        let reason = self.lock_reason();
+        let mut html = String::new();
+        html.push_str("<span>");
+        html.push(match reason {
+            LockReason::Unlocked => '🔓',
+            _ => '🔒',
+        });
+        html.push_str("<select id='lock_reason'>");
+        for r in [
+            LockReason::Unlocked,
+            LockReason::Incident,
+            LockReason::Testing,
+            LockReason::Indication,
+            LockReason::Maintenance,
+            LockReason::Construction,
+        ] {
+            html.push_str("<option");
+            if r == reason {
+                html.push_str(" selected");
+            }
+            html.push('>');
+            html.push_str(r.as_str());
+            html.push_str("</option>");
+        }
+        html.push_str("</select></span>");
+        html
+    }
+
     /// Check if the LCS is deployed
     fn is_deployed(&self) -> bool {
         self.status.as_ref().is_some_and(|st| {
@@ -297,6 +327,13 @@ impl Lcs {
             html.push_str("</select>");
             html.push_str("</div>");
         }
+        html.push_str("<div class='column'>");
+        html.push_str(&self.lock_reason_html());
+        html.push_str("<span>");
+        html.push_str("<button id='mc_send' type='button'>Send</button>");
+        html.push_str("<button id='mc_blank' type='button'>Blank</button>");
+        html.push_str("</span>");
+        html.push_str("</div>");
         html.push_str("</div>");
         html
     }
