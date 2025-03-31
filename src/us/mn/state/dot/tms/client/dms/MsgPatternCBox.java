@@ -1,7 +1,8 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2023  Minnesota Department of Transportation
- * Copyright (C) 2010  AHMCT, University of California
+ * Copyright (C) 2010       AHMCT, University of California
+ * Copyright (C) 2025       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +21,7 @@ import javax.swing.JComboBox;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
+import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.TextRect;
 
 /**
@@ -30,6 +32,7 @@ import us.mn.state.dot.tms.utils.TextRect;
  *
  * @author Douglas Lau
  * @author Michael Darter
+ * @author John L. Stanley - SRF Consulting
  */
 public class MsgPatternCBox extends JComboBox<MsgPattern> {
 
@@ -64,10 +67,14 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 	/** Find the best pattern for a MULTI string */
 	public MsgPattern findBestPattern(String ms, TextRect tr) {
 		assert tr != null;
+		int pageCnt = (new MultiString(ms)).getNumPages();
 		MsgPattern best = null;
 		for (int i = 0; i < getItemCount(); i++) {
 			MsgPattern pat = getItemAt(i);
 			String multi = pat.getMulti();
+			// Make sure pattern has same number of pages
+			if (pageCnt != (new MultiString(multi)).getNumPages())
+				continue;
 			// check for perfect match
 			if (multi.length() > 0 && multi.equals(ms))
 				return pat;
