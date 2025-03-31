@@ -459,7 +459,7 @@ label:has(+ #sb_resource) {
   display: inline-block;
   text-align: center;
   width: 2rem;
-  padding-top: 0.2rem;
+  padding: 0.2rem 0.3rem 0;
 }
 
 .lcs_dark {

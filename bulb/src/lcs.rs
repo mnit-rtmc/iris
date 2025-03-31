@@ -16,6 +16,7 @@ use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
+use crate::lcsstate::LcsState;
 use crate::start::fly_map_item;
 use crate::util::{
     ContainsLower, Fields, HtmlStr, Input, OptVal, Select, TextArea,
@@ -83,6 +84,7 @@ pub struct Lcs {
 pub struct LcsAnc {
     cio: ControllerIoAnc<Lcs>,
     loc: LocAnc<Lcs>,
+    lcs_states: Vec<LcsState>,
     pub lcs_types: Vec<LcsType>,
 }
 
@@ -105,6 +107,13 @@ impl LcsAnc {
         html.push_str("</select>");
         html
     }
+
+    /// Check if an LCS has a given lane/indication
+    fn has_indication(&self, pri: &Lcs, lane: u16, ind: u32) -> bool {
+        self.lcs_states.iter().any(|st| {
+            st.lcs == pri.name && st.lane == lane && st.indication == ind
+        })
+    }
 }
 
 impl AncillaryData for LcsAnc {
@@ -113,11 +122,15 @@ impl AncillaryData for LcsAnc {
     /// Construct ancillary LCS array data
     fn new(pri: &Lcs, view: View) -> Self {
         let mut cio = ControllerIoAnc::new(pri, view);
-        cio.assets.push(Asset::LcsTypes);
+        cio.assets.push(Asset::LcsStates);
+        if let View::Control = view {
+            cio.assets.push(Asset::LcsTypes);
+        }
         let loc = LocAnc::new(pri, view);
         LcsAnc {
             cio,
             loc,
+            lcs_states: Vec::new(),
             lcs_types: Vec::new(),
         }
     }
@@ -136,6 +149,9 @@ impl AncillaryData for LcsAnc {
     ) -> Result<()> {
         match asset {
             Asset::Controllers => self.cio.set_asset(pri, asset, value)?,
+            Asset::LcsStates => {
+                self.lcs_states = serde_wasm_bindgen::from_value(value)?;
+            }
             Asset::LcsTypes => {
                 self.lcs_types = serde_wasm_bindgen::from_value(value)?;
             }
@@ -237,10 +253,12 @@ impl Lcs {
     }
 
     /// Create an HTML indications element
-    fn indications_html(&self) -> String {
+    fn indications_html(&self, anc: &LcsAnc) -> String {
         let mut html = String::new();
         html.push_str("<div class='row center'>");
-        for ind in self.indications().iter().rev() {
+        for (ln, ind) in self.indications().iter().enumerate().rev() {
+            let ln = (ln + 1) as u16;
+            html.push_str("<div class='column'>");
             html.push_str("<span class='lcs ");
             match ind {
                 1 => html.push_str("lcs_dark'>⍽"),
@@ -251,6 +269,33 @@ impl Lcs {
                 _ => html.push_str("lcs_unknown'>?"),
             }
             html.push_str("</span>");
+            html.push_str("<select>");
+            html.push_str(
+                "<button><selectedcontent></selectedcontent></button>",
+            );
+            // FIXME: use customizable select elements once browsers have
+            //        support for them: https://caniuse.com/selectlist
+            html.push_str("<option value='1' class='lcs lcs_dark'> </option>");
+            if anc.has_indication(self, ln, 2) {
+                html.push_str(
+                    "<option value='2' class='lcs lcs_lane_open'>↓</option>",
+                );
+            }
+            if anc.has_indication(self, ln, 3) {
+                html.push_str(
+                    "<option value='3' class='lcs lcs_use_caution'>⇣</option>",
+                );
+            }
+            if anc.has_indication(self, ln, 4) {
+                html.push_str("<option value='4' class='lcs lcs_lane_closed_ahead'>✕</option>");
+            }
+            if anc.has_indication(self, ln, 5) {
+                html.push_str(
+                    "<option value='5' class='lcs lcs_lane_closed'>✖</option>",
+                );
+            }
+            html.push_str("</select>");
+            html.push_str("</div>");
         }
         html.push_str("</div>");
         html
@@ -292,7 +337,7 @@ impl Lcs {
         let title = self.title(View::Control);
         let item_states = self.item_states(anc).to_html();
         let location = HtmlStr::new(&self.location).with_len(64);
-        let indications = self.indications_html();
+        let indications = self.indications_html(anc);
         format!(
             "{title}\
             <div class='row fill'>\
