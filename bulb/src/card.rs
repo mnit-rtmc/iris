@@ -336,8 +336,8 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     }
 
     /// Handle input event for an element on the card
-    fn handle_input(&self, _anc: Self::Ancillary, _id: String) {
-        // ignore by default
+    fn handle_input(&self, _anc: Self::Ancillary, _id: String) -> Vec<Action> {
+        Vec::new()
     }
 
     /// Build card title
@@ -1082,7 +1082,9 @@ pub async fn handle_input(cv: &CardView, id: String) -> Result<()> {
 async fn handle_input_x<C: Card>(cv: &CardView, id: String) -> Result<()> {
     let pri = fetch_primary::<C>(cv).await?;
     let anc = fetch_ancillary(&pri, View::Control).await?;
-    pri.handle_input(anc, id);
+    for action in pri.handle_input(anc, id) {
+        action.perform().await?;
+    }
     Ok(())
 }
 

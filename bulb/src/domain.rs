@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{AncillaryData, Card, View};
+use crate::fetch::Action;
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input};
 use cidr::IpCidr;
@@ -130,7 +131,7 @@ impl Card for Domain {
     }
 
     /// Handle input event for an element on the card
-    fn handle_input(&self, _anc: DomainAnc, id: String) {
+    fn handle_input(&self, _anc: DomainAnc, id: String) -> Vec<Action> {
         if &id == "block" {
             let doc = Doc::get();
             let block = doc.elem::<HtmlInputElement>("block");
@@ -149,5 +150,6 @@ impl Card for Domain {
             }
             block.report_validity();
         }
+        Vec::new()
     }
 }

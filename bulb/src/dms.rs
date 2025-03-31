@@ -32,7 +32,7 @@ use ntcip::dms::multi::{
 use ntcip::dms::{Font, FontTable, GraphicTable, MessagePattern, tfon};
 use rendzina::{SignConfig, load_graphic};
 use resources::Res;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::iter::repeat;
@@ -127,12 +127,6 @@ pub struct Dms {
     pub status: Option<SignStatus>,
     pub expire_time: Option<String>,
     pub pix_failures: Option<String>,
-}
-
-/// Action value to patch "msg_user"
-#[derive(Debug, Serialize)]
-struct MsgUser<'a> {
-    msg_user: &'a str,
 }
 
 /// Message Pattern
@@ -594,9 +588,7 @@ impl DmsAnc {
         match self.find_sign_msg(&msg) {
             Some(msg) => {
                 let mut actions = Vec::with_capacity(1);
-                if let Some(action) = msg_user_action(uri, &msg.name) {
-                    actions.push(action);
-                }
+                actions.push(msg_user_action(uri, &msg.name));
                 actions
             }
             None => {
@@ -604,9 +596,7 @@ impl DmsAnc {
                 if let Ok(val) = serde_json::to_string(&msg) {
                     let post = Uri::from("/iris/api/sign_message");
                     actions.push(Action::Post(post, val.into()));
-                    if let Some(action) = msg_user_action(uri, &msg.name) {
-                        actions.push(action);
-                    }
+                    actions.push(msg_user_action(uri, &msg.name));
                 }
                 actions
             }
@@ -615,14 +605,9 @@ impl DmsAnc {
 }
 
 /// Create a msg_user patch action
-fn msg_user_action(uri: Uri, msg_name: &str) -> Option<Action> {
-    match serde_json::to_string(&MsgUser { msg_user: msg_name }) {
-        Ok(val) => Some(Action::Patch(uri, val.into())),
-        Err(e) => {
-            console::log_1(&format!("err: {e:?}").into());
-            None
-        }
-    }
+fn msg_user_action(uri: Uri, msg_name: &str) -> Action {
+    let val = format!("{{\"msg_user\":\"{msg_name}\"}}");
+    Action::Patch(uri, val.into())
 }
 
 /// All hashtags for dedicated purpose
@@ -1261,12 +1246,12 @@ impl Card for Dms {
     }
 
     /// Handle input event for an element on the card
-    fn handle_input(&self, anc: DmsAnc, id: String) {
+    fn handle_input(&self, anc: DmsAnc, id: String) -> Vec<Action> {
         let Some(pat) = self.selected_pattern(&anc) else {
-            return;
+            return Vec::new();
         };
         let Some(sign) = self.make_sign(&anc) else {
-            return;
+            return Vec::new();
         };
         let lines = if &id == "mc_pattern" {
             // update mc_lines element
@@ -1284,6 +1269,7 @@ impl Card for Dms {
         let html = sign::render(&Some(sign), &multi, 240, 80, None);
         let preview = Doc::get().elem::<HtmlElement>("mc_preview");
         preview.set_outer_html(&html);
+        Vec::new()
     }
 }
 
