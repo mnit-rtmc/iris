@@ -203,22 +203,13 @@ impl Camera {
         let title = self.title(View::Setup);
         let cam_num = OptVal(self.cam_num);
         let controller = anc.cio.controller_html(self);
-        let notes = &self.notes.clone().unwrap_or(String::new());
+        let notes = HtmlStr::new(&self.notes);
         let encoder_type = anc.encoder_type_html(self);
-        let enc_address = &self.enc_address.clone().unwrap_or(String::new());
-        let enc_port = if let Some(e_p) = &self.enc_port {
-            e_p.to_string()
-        } else {
-            String::new()
-        };
-        let enc_mcast = &self.enc_mcast.clone().unwrap_or(String::new());
-        let enc_channel = if let Some(e_c) = &self.enc_channel {
-            e_c.to_string()
-        } else {
-            String::new()
-        };
-        let cam_template =
-            &self.cam_template.clone().unwrap_or("N/A".to_string());
+        let enc_address = HtmlStr::new(&self.enc_address);
+        let enc_port = OptVal(self.enc_port);
+        let enc_mcast = HtmlStr::new(&self.enc_mcast);
+        let enc_channel = OptVal(self.enc_channel);
+        let cam_template = HtmlStr::new(&self.cam_template);
         let pin = anc.cio.pin_html(self.pin);
         let publish = if self.publish { " checked" } else { "" };
         let footer = self.footer(true);
