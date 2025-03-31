@@ -586,6 +586,7 @@ impl DmsAnc {
     /// Create actions to activate a sign message
     fn sign_msg_actions(self, uri: Uri, msg: SignMessage) -> Vec<Action> {
         match self.find_sign_msg(&msg) {
+            #[allow(clippy::vec_init_then_push)]
             Some(msg) => {
                 let mut actions = Vec::with_capacity(1);
                 actions.push(msg_user_action(uri, &msg.name));

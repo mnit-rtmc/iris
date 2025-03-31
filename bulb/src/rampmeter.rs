@@ -11,14 +11,15 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card, View, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
+use crate::fetch::Action;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::start::fly_map_item;
 use crate::util::{
-    ContainsLower, Fields, HtmlStr, Input, OptVal, Select, TextArea,
+    ContainsLower, Doc, Fields, HtmlStr, Input, OptVal, Select, TextArea,
 };
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
 use gift::block::DisposalMethod;
@@ -33,7 +34,7 @@ use std::borrow::Cow;
 use std::fmt;
 use std::io::Write;
 use wasm_bindgen::JsValue;
-use web_sys::console;
+use web_sys::{HtmlSelectElement, console};
 
 /// Meter signal state for rendering GIF
 #[derive(Clone, Copy, Debug)]
@@ -361,6 +362,34 @@ impl LockReason {
     }
 }
 
+impl fmt::Display for MeterLock {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{{\"reason\":\"{}\"", &self.reason)?;
+        if let Some(rate) = self.rate {
+            write!(f, ",\"rate\":{rate}")?;
+        }
+        if let Some(expires) = &self.expires {
+            write!(f, ",\"expires\":\"{expires}\"")?;
+        }
+        if let Some(user_id) = &self.user_id {
+            write!(f, ",\"user_id\":\"{user_id}\"")?;
+        }
+        write!(f, "}}")
+    }
+}
+
+impl MeterLock {
+    /// Create a new meter lock
+    fn new(r: LockReason, u: String) -> Self {
+        MeterLock {
+            reason: r.as_str().to_string(),
+            rate: None,
+            expires: None,
+            user_id: Some(u),
+        }
+    }
+}
+
 impl RampMeter {
     /// Get fault, if any
     fn fault(&self) -> Option<&str> {
@@ -464,7 +493,7 @@ impl RampMeter {
             LockReason::Unlocked => '🔓',
             _ => '🔒',
         });
-        html.push_str("<select id='lock_reason'>");
+        html.push_str("<select id='lk_reason'>");
         for r in [
             LockReason::Unlocked,
             LockReason::Incident,
@@ -736,5 +765,24 @@ impl Card for RampMeter {
     /// Get changed fields on Location view
     fn changed_location(&self, anc: RampMeterAnc) -> String {
         anc.loc.changed_location()
+    }
+
+    /// Handle input event for an element on the card
+    fn handle_input(&self, _anc: RampMeterAnc, id: String) -> Vec<Action> {
+        if &id == "lk_reason" {
+            #[allow(clippy::vec_init_then_push)]
+            if let Some(user) = crate::app::user() {
+                let uri = uri_one(Res::RampMeter, &self.name);
+                let r =
+                    Doc::get().elem::<HtmlSelectElement>("lk_reason").value();
+                let reason = LockReason::from(&r[..]);
+                let lock = MeterLock::new(reason, user);
+                let val = format!("{{\"lock\":{lock}}}");
+                let mut actions = Vec::with_capacity(1);
+                actions.push(Action::Patch(uri, val.into()));
+                return actions;
+            }
+        }
+        Vec::new()
     }
 }
