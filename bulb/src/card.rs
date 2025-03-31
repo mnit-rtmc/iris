@@ -411,9 +411,16 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::SignConfig
         | Res::User => &[View::Compact, View::Setup],
         Res::GateArmArray => &[View::Compact, View::Control, View::Location],
-        Res::Beacon | Res::Camera | Res::Lcs | Res::RampMeter => {
+        Res::Beacon | Res::Lcs | Res::RampMeter => {
             &[View::Compact, View::Control, View::Location, View::Setup]
         }
+        Res::Camera => &[
+            View::Compact,
+            View::Control,
+            View::Location,
+            View::Request,
+            View::Setup,
+        ],
         Res::Dms => &[
             View::Compact,
             View::Control,
@@ -1043,6 +1050,7 @@ pub async fn handle_click(cv: &CardView, id: String) -> Result<()> {
     }
     match cv.res {
         Res::Beacon => handle_click_x::<Beacon>(cv, id).await,
+        Res::Camera => handle_click_x::<Camera>(cv, id).await,
         Res::Dms => handle_click_x::<Dms>(cv, id).await,
         _ => Ok(()),
     }
