@@ -19,7 +19,7 @@ use crate::fetch::Action;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::ItemState;
 use crate::start::fly_map_item;
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -55,9 +55,9 @@ pub struct Camera {
     pub name: String,
     pub cam_num: Option<u32>,
     pub location: Option<String>,
-    pub publish: bool,
     pub notes: Option<String>,
     pub controller: Option<String>,
+    pub publish: bool,
     // secondary attributes
     pub geo_loc: Option<String>,
     pub pin: Option<u32>,
@@ -202,15 +202,15 @@ impl Camera {
     fn to_html_setup(&self, anc: &CameraAnc) -> String {
         let title = self.title(View::Setup);
         let cam_num = OptVal(self.cam_num);
-        let controller = anc.cio.controller_html(self);
         let notes = HtmlStr::new(&self.notes);
+        let controller = anc.cio.controller_html(self);
+        let pin = anc.cio.pin_html(self.pin);
         let encoder_type = anc.encoder_type_html(self);
         let enc_address = HtmlStr::new(&self.enc_address);
         let enc_port = OptVal(self.enc_port);
         let enc_mcast = HtmlStr::new(&self.enc_mcast);
         let enc_channel = OptVal(self.enc_channel);
         let cam_template = HtmlStr::new(&self.cam_template);
-        let pin = anc.cio.pin_html(self.pin);
         let publish = if self.publish { " checked" } else { "" };
         let footer = self.footer(true);
         format!(
@@ -337,13 +337,14 @@ impl Card for Camera {
     fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("cam_num", self.cam_num);
-        fields.changed_input("controller", &self.controller);
         fields.changed_input("notes", &self.notes);
+        fields.changed_input("controller", &self.controller);
+        fields.changed_input("pin", self.pin);
+        fields.changed_select("encoder_type", &self.encoder_type);
         fields.changed_input("enc_address", &self.enc_address);
         fields.changed_input("enc_port", self.enc_port);
         fields.changed_input("enc_mcast", &self.enc_mcast);
         fields.changed_input("enc_channel", self.enc_channel);
-        fields.changed_input("pin", self.pin);
         fields.changed_input("publish", self.publish);
         fields.into_value().to_string()
     }
