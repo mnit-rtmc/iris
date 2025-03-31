@@ -67,9 +67,8 @@ Beacons can be controlled in a few ways:
 
 ## Events
 
-Whenever a beacon's state changes, a time-stamped record is added to the
-`beacon_event` table.  These records are purged automatically when older than
-the value of the `beacon_event_purge_days` [system attribute].
+Whenever a beacon's state changes, a time-stamped [event] record can be stored
+in the `beacon_event` table.
 
 
 [action plans]: action_plans.html
@@ -77,8 +76,7 @@ the value of the `beacon_event_purge_days` [system attribute].
 [device actions]: action_plans.html#device-actions
 [Din-Relay]: protocols.html#din-relay
 [DMS]: dms.html
+[event]: events.html
 [MnDOT-170]: protocols.html#mndot-170
 [Natch]: protocols.html#natch
-[NTCIP]: protocols.html#ntcip
 [remote]: dms.html#setup
-[system attribute]: system_attributes.html

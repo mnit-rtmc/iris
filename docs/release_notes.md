@@ -1,5 +1,115 @@
 # IRIS 5.x Release Notes
 
+5.69.0 (25 Mar 2025)
+ - Refactor LCS database tables / classes
+ - Remove lane markings (LCS features can now support them)
+ - MnDOT: implement send settings for all devices
+ - NTCIP: Fetch DMS graphics on query settings
+
+5.68.0 (3 Mar 2025)
+ - Improved ONVIF camera control issues
+ - Added `pixel_service` flag to message patterns
+ - Added CAP-NWS protocol; renamed CAP to CAP-IPAWS
+ - Added support for testing protocols with `file://` scheme
+ - Improved ramp meter lock constraints and UI
+ - Fixed quirks in ADEC TDC protocol
+ - honeybee: Update to axum 0.8 (+ other deps)
+ - Update to Rust 2024 Edition
+
+5.67.0 (19 Feb 2025)
+ - Add protocol driver for ADEC TDC non-intrusive detector
+ - Improved ramp meter locks (15-minute duration + user ID)
+ - Added ramp meter `status` JSON (rate, queue, fault)
+ - Add `Maintenance` controller condition
+ - Simplified `LOCK_ON` auto-fail logic
+ - cohuptz: Don't fault on unexpected device requests
+ - bulb: Fleshed out ramp meter cards + map markers
+
+5.66.0 (27 Jan 2025)
+ - Add `cpark` driver for Drivewyze Central Park API
+ - Show offline device status as `OFFLINE`
+ - Fix controller `status` read on startup
+ - Fix ramp meter state matching for CD road meters
+
+5.65.0 (13 Jan 2025)
+ - Add ramp meter `fault` column to diagnose setup problems
+ - Allow creating sign message with only DMS hashtag permission
+ - Fix problem with text rectangles in message patterns
+ - Fix DMS styles not changing on status update
+ - Improve controller fault handling
+ - Add `ordinal` column to `r_node`
+
+5.64.0 (16 Dec 2024)
+ - Fixed controller `status` fault handling
+ - Added `email_event` logging table
+ - Simplified error handling for a few comm. protocols
+ - Added camera device actions (wiper and recall preset)
+ - bulb: Fixed serialization errors
+ - honeybee: Add more API resources: `toll_zone`, `monitor_style`, `play_list`
+ - Removed obsolete system attributes: `camera_wiper_precip_mm_hr`,
+   `dmsxml_reinit_detect`, `email_recipient_action_plan`, `email_recipient_aws`,
+   `email_recipient_dmsxml_reinit`, `email_recipient_gate_arm`
+
+5.63.0 (10 Dec 2024)
+ - Renamed "Maintenance" style to "Fault"
+ - Renamed "Failed" style to "Offline"
+ - Improved DMS `status` JSON format
+ - Improved controller `setup` JSON format/support
+ - Add controller `status` JSON
+ - honeybee: Add more API resources: `action_plan`, `device_action`,
+   `plan_phase`, `time_action`
+ - Removed `dms_pixel_maint_threshold` system attribute
+
+5.62.0 (20 Nov 2024)
+ - Log sign event with blank msg (including user ID)
+ - Log meter lock events (add `meter_lock_event_view`)
+ - Add `phase` / `user_id` to action plan event
+ - Add `user_id` to beacon event
+ - Add `user_id` to incident / `incident_update`
+ - Made event column names consistent: `iris_user` => `user_id`
+ - Reworked day plan/matcher relationship
+ - honeybee: Add LUT resources: `encoding`, `inc_impact`, `inc_range`,
+   `r_node_type`, `r_node_transition`, `lane_code`, `road_class`,
+   `meter_queue_state`
+ - honeybee: Add resources: `encoder_type`, `encoder_stream`, `camera_preset`,
+   `incident_detail`, `inc_descriptor`, `inc_locator`, `road_affix`,
+   `day_plan`, `day_matcher`
+ - Add Sierra Wireless SSH GPS driver
+ - Fixed Sonar `phantom` bug on SQL error
+ - Fixed client Sonar updates for GPS/ESS
+
+5.61.0 (17 Oct 2024)
+ - Remove capabilities/privileges (replace with permissions)
+   NOTE: migrate-5.61.sql handles the transition, but non-standard
+   capabilities might not be converted correctly
+ - Made permission into Sonar object (not DB-only)
+ - Added support for video monitor hashtags (for permissions)
+ - Drop video monitor `group_n` (use hashtags instead)
+ - Replace action plan `description` with `notes` (+ hashtag)
+ - Remove catalogs in favor of "meta" play lists
+ - Replace play list `description` with `notes` (+ hashtag)
+ - Added "scratch" play lists (manually created) to replace "personal" ones
+ - Consolidated SQL trigger functions for hashtags
+ - Add `pixel_service` flag to sign message (set for sticky action plans)
+ - Add system attributes to allow disabling legacy XML output
+ - Replace many `*_purge_days` system attributes with more flexible
+   event config table
+ - Rename system attributes:
+   * `sample_archive_enable` => `detector_data_archive_enable`
+   * `camera_sequence_dwell_sec` => `camera_playlist_dwell_sec`
+ - Replaced `operation_retry_threshold` system attribute with
+   `retry_threshold` column on comm config
+ - Fixed issue preventing weather sensor settings polls
+ - Renamed `gate.arm.whitelist` property => `gate.arm.allowlist`
+ - Renamed `http.proxy.whitelist` property => `http.proxy.allowlist`
+ - Fixed infinite loop in mndot170 meter settings operation
+ - Add camera markers to web UI map
+ - Convert mayfly from tide to axum crate
+ - REST API:
+   * Add `cam_num` to `camera_pub` JSON
+   * Add restricted `api/system_attribute`
+   * Add restricted `api/event_config`
+
 5.60.0 (27 Aug 2024)
  - Merged DMS/meter/etc. actions into "device_action"
  - Device actions use hashtags for ramp meters, beacons, etc.

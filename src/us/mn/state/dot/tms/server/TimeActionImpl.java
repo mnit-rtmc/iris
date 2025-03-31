@@ -185,7 +185,7 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 		if (ap instanceof ActionPlanImpl) {
 			ActionPlanImpl api = (ActionPlanImpl) ap;
 			if (api.getActive())
-				api.setPhaseNotify(getPhase());
+				api.setPhaseNotify(getPhase(), null);
 		}
 	}
 }

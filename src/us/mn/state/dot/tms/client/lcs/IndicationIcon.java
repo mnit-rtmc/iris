@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,12 +24,12 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import javax.swing.Icon;
-import us.mn.state.dot.tms.LaneUseIndication;
+import us.mn.state.dot.tms.LcsIndication;
 import us.mn.state.dot.tms.client.widget.TextShape;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
- * Renderer for LaneUseIndication
+ * Renderer for LcsIndication
  *
  * @author Douglas Lau
  */
@@ -63,18 +63,6 @@ abstract public class IndicationIcon implements Icon {
 		path.lineTo(0.5f, 1 - SHAPE_BORDER);
 		path.lineTo(1 - SHAPE_BORDER, 0.5f);
 		ARROW_SHAPE = path;
-	}
-
-	/** Shape to draw a small arrow */
-	static protected final Shape SMALL_ARROW_SHAPE;
-	static {
-		GeneralPath path = new GeneralPath();
-		path.moveTo(0.5f, 0.25f);
-		path.lineTo(0.5f, 0.75f);
-		path.moveTo(0.25f, 0.5f);
-		path.lineTo(0.5f, 0.75f);
-		path.lineTo(0.75f, 0.5f);
-		SMALL_ARROW_SHAPE = path;
 	}
 
 	/** Shape to draw an X */
@@ -121,10 +109,10 @@ abstract public class IndicationIcon implements Icon {
 	}
 
 	/** Create a new indication icon */
-	static public IndicationIcon create(int p, LaneUseIndication i) {
-		if(i == null)
+	static public IndicationIcon create(int p, LcsIndication i) {
+		if (i == null)
 			return new UnknownIndicationIcon(p);
-		switch(i) {
+		switch (i) {
 		case DARK:
 			return new DarkIndicationIcon(p);
 		case LANE_OPEN:
@@ -135,20 +123,16 @@ abstract public class IndicationIcon implements Icon {
 			return new LaneClosedAheadIndicationIcon(p);
 		case LANE_CLOSED:
 			return new LaneClosedIndicationIcon(p);
-		case HOV:
-			return new HovIndicationIcon(p, Color.WHITE);
-		case HOV_BEGINS:
-			return new HovIndicationIcon(p, Color.GRAY);
 		case MERGE_RIGHT:
 			return new MergeRightIndicationIcon(p);
 		case MERGE_LEFT:
 			return new MergeLeftIndicationIcon(p);
-		case MERGE_BOTH:
-			return new MergeBothIndicationIcon(p);
+		case HOV:
+			return new HovIndicationIcon(p, Color.WHITE);
 		case VSA:
-			return new VariableSpeedIndicationIcon(p);
-		case LOW_VISIBILITY:
-			return new LowVisibilityIndicationIcon(p);
+			return new VariableSpeedIndicationIcon(p, AMBER);
+		case VSL:
+			return new VariableSpeedIndicationIcon(p, Color.WHITE);
 		default:
 			return new UnknownIndicationIcon(p);
 		}
@@ -342,70 +326,22 @@ abstract public class IndicationIcon implements Icon {
 		}
 	}
 
-	/** Icon for merge both lane-use indication */
-	static protected class MergeBothIndicationIcon extends IndicationIcon {
-		protected MergeBothIndicationIcon(int p) {
-			super(p);
-		}
-		protected void paintIcon(Graphics2D g2) {
-			AffineTransform at = g2.getTransform();
-			g2.translate(0.40f, 0);
-			for(int i = 0; i < 2; i++) {
-				g2.setColor(Color.BLACK);
-				g2.setStroke(stroke);
-				g2.draw(CHEVRON_SHAPE);
-				g2.setColor(AMBER);
-				g2.setStroke(thin);
-				g2.draw(CHEVRON_SHAPE);
-				g2.translate(0.15f, 0);
-			}
-			g2.setTransform(at);
-			g2.scale(-1, 1);
-			g2.translate(-1, 0);
-			g2.translate(0.40f, 0);
-			for(int i = 0; i < 2; i++) {
-				g2.setColor(Color.BLACK);
-				g2.setStroke(stroke);
-				g2.draw(CHEVRON_SHAPE);
-				g2.setColor(AMBER);
-				g2.setStroke(thin);
-				g2.draw(CHEVRON_SHAPE);
-				g2.translate(0.15f, 0);
-			}
-		}
-	}
-
 	/** Icon for VSA lane-use indication */
 	static protected class VariableSpeedIndicationIcon
 		extends IndicationIcon
 	{
-		protected VariableSpeedIndicationIcon(int p) {
+		private final Color color;
+		protected VariableSpeedIndicationIcon(int p, Color c) {
 			super(p);
+			color = c;
 		}
 		protected void paintIcon(Graphics2D g2) {
 			g2.setColor(Color.BLACK);
 			g2.setStroke(shadow);
 			g2.draw(V_SHAPE);
-			g2.setColor(AMBER);
+			g2.setColor(color);
 			g2.setStroke(stroke);
 			g2.draw(V_SHAPE);
-		}
-	}
-
-	/** Icon for LOW_VISIBILITY lane-use indication */
-	static protected class LowVisibilityIndicationIcon
-		extends IndicationIcon
-	{
-		protected LowVisibilityIndicationIcon(int p) {
-			super(p);
-		}
-		protected void paintIcon(Graphics2D g2) {
-			g2.setColor(Color.BLACK);
-			g2.setStroke(shadow);
-			g2.draw(SMALL_ARROW_SHAPE);
-			g2.setColor(Color.GREEN);
-			g2.setStroke(stroke);
-			g2.draw(SMALL_ARROW_SHAPE);
 		}
 	}
 

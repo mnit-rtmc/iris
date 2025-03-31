@@ -1,5 +1,5 @@
 use ntcip::dms::{Dms, FontTable, GraphicTable};
-use rendzina::{load_font, load_graphic, SignConfig};
+use rendzina::{SignConfig, load_font, load_graphic};
 use std::fs::File;
 use std::io::BufWriter;
 
@@ -53,5 +53,5 @@ fn main() {
         .unwrap();
     let file = File::create("render.gif").unwrap();
     let writer = BufWriter::new(file);
-    rendzina::render(writer, &dms, MULTI, None, None).unwrap();
+    rendzina::render(writer, &dms, MULTI, 240, 80, None).unwrap();
 }

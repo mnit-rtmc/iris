@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2022  Minnesota Department of Transportation
+ * Copyright (C) 2014-2024  Minnesota Department of Transportation
  * Copyright (C) 2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,23 +16,11 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.Calendar;
+import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.tms.EventConfig;
+import us.mn.state.dot.tms.EventConfigHelper;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.server.event.ActionPlanEvent;
-import us.mn.state.dot.tms.server.event.AlarmEvent;
-import us.mn.state.dot.tms.server.event.BeaconEvent;
-import us.mn.state.dot.tms.server.event.CameraSwitchEvent;
-import us.mn.state.dot.tms.server.event.CameraVideoEvent;
-import us.mn.state.dot.tms.server.event.ClientEvent;
-import us.mn.state.dot.tms.server.event.CommEvent;
-import us.mn.state.dot.tms.server.event.DetAutoFailEvent;
-import us.mn.state.dot.tms.server.event.GateArmEvent;
-import us.mn.state.dot.tms.server.event.MeterEvent;
-import us.mn.state.dot.tms.server.event.PriceMessageEvent;
-import us.mn.state.dot.tms.server.event.SignEvent;
-import us.mn.state.dot.tms.server.event.TagReadEvent;
-import us.mn.state.dot.tms.server.event.TravelTimeEvent;
-import us.mn.state.dot.tms.server.event.WeatherSensorEvent;
 
 /**
  * Job to periodically purge database event records.
@@ -49,21 +37,13 @@ public class EventPurgeJob extends Job {
 
 	/** Perform the event purge job */
 	public void perform() throws TMSException {
-		ActionPlanEvent.purgeRecords();
-		AlarmEvent.purgeRecords();
-		BeaconEvent.purgeRecords();
-		CameraSwitchEvent.purgeRecords();
-		CameraVideoEvent.purgeRecords();
-		ClientEvent.purgeRecords();
-		CommEvent.purgeRecords();
-		DetAutoFailEvent.purgeRecords();
-		GateArmEvent.purgeRecords();
-		MeterEvent.purgeRecords();
-		PriceMessageEvent.purgeRecords();
-		SignEvent.purgeRecords();
-		TagReadEvent.purgeRecords();
-		TravelTimeEvent.purgeRecords();
-		WeatherSensorEvent.purgeRecords();
-		CapAlert.purgeRecords();
+		if (null == BaseObjectImpl.store)
+			return;
+		Iterator<EventConfig> it = EventConfigHelper.iterator();
+		while (it.hasNext()) {
+			EventConfig ec = it.next();
+			if (ec instanceof EventConfigImpl)
+				((EventConfigImpl) ec).purgeRecords();
+		}
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,28 +20,49 @@ pub const TICK_INTERVAL: i32 = 500;
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum NotifyState {
     Starting,
-    Offline,
+    Disconnected,
+    Connecting,
     Updating,
-    GoodUpdating,
     Good,
 }
 
 impl NotifyState {
     /// Get state as string slice
-    pub const fn as_str(self) -> &'static str {
+    pub const fn as_html(self) -> &'static str {
         // NOTE: these have &nbsp; to keep from splitting lines
         match self {
-            Self::Starting => "⭮ ⚪",
-            Self::Offline => "⭮ ⚫",
-            Self::Updating | Self::GoodUpdating => "⭮ 🟡",
-            Self::Good => "⭮ 🟢",
+            Self::Starting => {
+                "<div class='tooltip'>⭮ ⬜\
+                  <span class='right'>Starting</span>\
+                </div>"
+            }
+            Self::Disconnected => {
+                "<div class='tooltip'>⭮ ⬛\
+                  <span class='right'>Disconnected</span>\
+                </div>"
+            }
+            Self::Connecting => {
+                "<div class='tooltip'>⭮ 🟧\
+                  <span class='right'>Connecting</span>\
+                </div>"
+            }
+            Self::Updating => {
+                "<div class='tooltip'>⭮ 🟨\
+                  <span class='right'>Updating</span>\
+                </div>"
+            }
+            Self::Good => {
+                "<div class='tooltip'>⭮ 🟩\
+                  <span class='right'>Good</span>\
+                </div>"
+            }
         }
     }
 
     /// Get button disabled value for a state
     pub const fn disabled(self) -> bool {
         match self {
-            Self::GoodUpdating | Self::Good => true,
+            Self::Updating | Self::Good => true,
             _ => false,
         }
     }

@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,6 +47,12 @@ pub struct Setup {
     pub version: Option<String>,
 }
 
+/// Optional status data
+#[derive(Debug, Default, Deserialize, PartialEq)]
+pub struct ControllerStatus {
+    pub faults: Option<String>,
+}
+
 /// Controller
 #[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct Controller {
@@ -58,6 +64,7 @@ pub struct Controller {
     pub condition: u32,
     pub notes: Option<String>,
     pub setup: Option<Setup>,
+    pub status: Option<ControllerStatus>,
     pub fail_time: Option<String>,
     // secondary attributes
     pub geo_loc: Option<String>,
@@ -68,11 +75,11 @@ pub struct Controller {
 #[derive(Debug, Default)]
 pub struct ControllerAnc {
     loc: LocAnc<Controller>,
-    pub conditions: Option<Vec<Condition>>,
-    pub cabinet_styles: Option<Vec<CabinetStyle>>,
-    pub comm_links: Option<Vec<CommLink>>,
-    pub comm_configs: Option<Vec<CommConfig>>,
-    pub controller_io: Option<Vec<Io>>,
+    pub conditions: Vec<Condition>,
+    pub cabinet_styles: Vec<CabinetStyle>,
+    pub comm_links: Vec<CommLink>,
+    pub comm_configs: Vec<CommConfig>,
+    pub controller_io: Vec<Io>,
 }
 
 impl AncillaryData for ControllerAnc {
@@ -119,22 +126,19 @@ impl AncillaryData for ControllerAnc {
     ) -> Result<()> {
         match asset {
             Asset::CabinetStyles => {
-                self.cabinet_styles =
-                    Some(serde_wasm_bindgen::from_value(value)?);
+                self.cabinet_styles = serde_wasm_bindgen::from_value(value)?;
             }
             Asset::CommConfigs => {
-                self.comm_configs =
-                    Some(serde_wasm_bindgen::from_value(value)?);
+                self.comm_configs = serde_wasm_bindgen::from_value(value)?;
             }
             Asset::CommLinks => {
-                self.comm_links = Some(serde_wasm_bindgen::from_value(value)?);
+                self.comm_links = serde_wasm_bindgen::from_value(value)?;
             }
             Asset::Conditions => {
-                self.conditions = Some(serde_wasm_bindgen::from_value(value)?);
+                self.conditions = serde_wasm_bindgen::from_value(value)?;
             }
             Asset::ControllerIo(_ctrl) => {
-                self.controller_io =
-                    Some(serde_wasm_bindgen::from_value(value)?);
+                self.controller_io = serde_wasm_bindgen::from_value(value)?;
             }
             _ => self.loc.set_asset(pri, asset, value)?,
         }
@@ -145,11 +149,9 @@ impl AncillaryData for ControllerAnc {
 impl ControllerAnc {
     /// Get condition description
     fn condition(&self, pri: &Controller) -> &str {
-        if let Some(conditions) = &self.conditions {
-            for condition in conditions {
-                if pri.condition == condition.id {
-                    return &condition.description;
-                }
+        for condition in &self.conditions {
+            if pri.condition == condition.id {
+                return &condition.description;
             }
         }
         ""
@@ -159,18 +161,16 @@ impl ControllerAnc {
     fn conditions_html(&self, pri: &Controller) -> String {
         let mut html = String::new();
         html.push_str("<select id='condition'>");
-        if let Some(conditions) = &self.conditions {
-            for condition in conditions {
-                html.push_str("<option value='");
-                html.push_str(&condition.id.to_string());
-                html.push('\'');
-                if pri.condition == condition.id {
-                    html.push_str(" selected");
-                }
-                html.push('>');
-                html.push_str(&condition.description);
-                html.push_str("</option>");
+        for condition in &self.conditions {
+            html.push_str("<option value='");
+            html.push_str(&condition.id.to_string());
+            html.push('\'');
+            if pri.condition == condition.id {
+                html.push_str(" selected");
             }
+            html.push('>');
+            html.push_str(&condition.description);
+            html.push_str("</option>");
         }
         html.push_str("</select>");
         html
@@ -181,18 +181,16 @@ impl ControllerAnc {
         let mut html = String::new();
         html.push_str("<select id='cabinet_style'>");
         html.push_str("<option></option>");
-        if let Some(cabinet_styles) = &self.cabinet_styles {
-            for cabinet_style in cabinet_styles {
-                html.push_str("<option");
-                if let Some(cab) = &pri.cabinet_style {
-                    if cab == &cabinet_style.name {
-                        html.push_str(" selected");
-                    }
+        for cabinet_style in &self.cabinet_styles {
+            html.push_str("<option");
+            if let Some(cab) = &pri.cabinet_style {
+                if cab == &cabinet_style.name {
+                    html.push_str(" selected");
                 }
-                html.push('>');
-                html.push_str(&cabinet_style.name);
-                html.push_str("</option>");
             }
+            html.push('>');
+            html.push_str(&cabinet_style.name);
+            html.push_str("</option>");
         }
         html.push_str("</select>");
         html
@@ -200,13 +198,14 @@ impl ControllerAnc {
 
     /// Get the comm config
     fn comm_config(&self, pri: &Controller) -> &str {
-        if let (Some(comm_link), Some(comm_links), Some(comm_configs)) =
-            (&pri.comm_link, &self.comm_links, &self.comm_configs)
-        {
-            if let Some(cl) = comm_links.iter().find(|cl| &cl.name == comm_link)
+        if let Some(comm_link) = &pri.comm_link {
+            if let Some(cl) =
+                &self.comm_links.iter().find(|cl| &cl.name == comm_link)
             {
-                if let Some(comm_config) =
-                    comm_configs.iter().find(|cc| cc.name == cl.comm_config)
+                if let Some(comm_config) = &self
+                    .comm_configs
+                    .iter()
+                    .find(|cc| cc.name == cl.comm_config)
                 {
                     return &comm_config.description[..];
                 }
@@ -218,9 +217,9 @@ impl ControllerAnc {
     /// Build IO links as HTML
     fn io_pins_html(&self) -> String {
         let mut html = String::new();
-        if let Some(controller_io) = &self.controller_io {
+        if !self.controller_io.is_empty() {
             html.push_str("<ul class='pins'>");
-            for cio in controller_io {
+            for cio in &self.controller_io {
                 html.push_str(&cio.button_link_html());
             }
             html.push_str("</ul>");

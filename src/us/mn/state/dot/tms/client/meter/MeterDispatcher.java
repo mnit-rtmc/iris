@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,10 +26,9 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.MeterLock;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
-import us.mn.state.dot.tms.RampMeterLock;
-import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.CameraPresetAction;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
@@ -75,14 +74,20 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 	/** Location label */
 	private final JLabel location_lbl = createValueLabel();
 
-	/** Operation label */
-	private final JLabel operation_lbl = createValueLabel();
+	/** Status label */
+	private final JLabel status_lbl = createValueLabel();
 
-	/** Release rate label */
-	private final JLabel release_lbl = createValueLabel();
+	/** Metering on radio button */
+	private final JRadioButton on_btn = new JRadioButton(
+		I18N.get("ramp.meter.on"));
 
-	/** Cycle time label */
-	private final JLabel cycle_lbl = createValueLabel();
+	/** Metering off radio button */
+	private final JRadioButton off_btn = new JRadioButton(
+		I18N.get("ramp.meter.off"));
+
+	/** Reason the meter was locked */
+	private final JComboBox<String> reason_cbx = new JComboBox<String>(
+		MeterLock.REASONS);
 
 	/** Queue label */
 	private final JLabel queue_lbl = createValueLabel();
@@ -93,17 +98,11 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 	/** Queue grow button */
 	private final JButton grow_btn = new JButton();
 
-	/** Reason the meter was locked */
-	private final JComboBox<RampMeterLock> lock_cbx = new JComboBox
-		<RampMeterLock>(RampMeterLock.values());
+	/** Release rate label */
+	private final JLabel release_lbl = createValueLabel();
 
-	/** Metering on radio button */
-	private final JRadioButton on_btn = new JRadioButton(
-		I18N.get("ramp.meter.on"));
-
-	/** Metering off radio button */
-	private final JRadioButton off_btn = new JRadioButton(
-		I18N.get("ramp.meter.off"));
+	/** Cycle time label */
+	private final JLabel cycle_lbl = createValueLabel();
 
 	/** Proxy watcher */
 	private final ProxyWatcher<RampMeter> watcher;
@@ -136,22 +135,22 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		preset_btn.setBorder(UI.buttonBorder());
 		add("location");
 		add(location_lbl, Stretch.LAST);
-		add("device.operation");
-		add(operation_lbl, Stretch.LAST);
+		add("device.status");
+		add(status_lbl, Stretch.LAST);
 		// Make label opaque so that we can set the background color
-		operation_lbl.setOpaque(true);
-		add("ramp.meter.rate");
-		add(release_lbl);
-		add("ramp.meter.cycle");
-		add(cycle_lbl, Stretch.LAST);
+		status_lbl.setOpaque(true);
+		add("ramp.meter.metering");
+		add(b_pnl);
+		add("ramp.meter.lock");
+		add(reason_cbx, Stretch.LAST);
 		add("ramp.meter.queue");
 		add(queue_lbl);
 		add(shrink_btn, Stretch.NONE);
 		add(grow_btn, Stretch.LAST);
-		add("ramp.meter.lock");
-		add(lock_cbx, Stretch.LAST);
-		add("ramp.meter.metering");
-		add(b_pnl, Stretch.LAST);
+		add("ramp.meter.rate");
+		add(release_lbl);
+		add("ramp.meter.cycle");
+		add(cycle_lbl, Stretch.LAST);
 		watcher.initialize();
 		clear();
 		sel_mdl.addProxySelectionListener(sel_listener);
@@ -178,74 +177,89 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 	/** Update one attribute on the form */
 	@Override
 	public void update(RampMeter rm, String a) {
-		if(a == null)
-			updateConfig(rm);
-		if(a == null || a.equals("name"))
+		if (a == null || a.equals("name"))
 			name_lbl.setText(rm.getName());
 		if (a == null || a.equals("preset"))
 			setPresetAction(rm);
 		// FIXME: this won't update when geoLoc attributes change
-		if(a == null || a.equals("geoLoc")) {
+		if (a == null || a.equals("geoLoc")) {
 			location_lbl.setText(GeoLocHelper.getOnRampLocation(
 				rm.getGeoLoc()));
 		}
-		if(a == null || a.equals("operation"))
-			operation_lbl.setText(rm.getOperation());
-		if(a == null || a.equals("rate")) {
-			Integer rt = rm.getRate();
-			release_lbl.setText(RampMeterHelper.formatRelease(rt));
-			cycle_lbl.setText(RampMeterHelper.formatCycle(rt));
-			if(rt != null)
-				on_btn.setSelected(true);
-			else
-				off_btn.setSelected(true);
-			boolean up = isWritePermitted(rm) && rt != null;
-			shrink_btn.setEnabled(up);
-			grow_btn.setEnabled(up);
+		if (a == null || a.equals("lock"))
+			updateLock(rm);
+		if (a == null || a.equals("status") || a.equals("styles")) {
+			updateRate(rm);
+			updateStatus(rm);
+			String q = RampMeterHelper.optQueue(rm);
+			queue_lbl.setText((q != null) ? q : "");
 		}
-		if(a == null || a.equals("queue")) {
-			RampMeterQueue q = RampMeterQueue.fromOrdinal(
-				rm.getQueue());
-			queue_lbl.setText(q.description);
-		}
-		if(a == null || a.equals("mLock")) {
-			lock_cbx.setAction(null);
-			lock_cbx.setSelectedIndex(getMLock(rm));
-			lock_cbx.setAction(new LockMeterAction(rm, lock_cbx,
-				isWritePermitted(rm)));
-		}
-		if(a == null || a.equals("styles")) {
-			if(ItemStyle.FAILED.checkBit(rm.getStyles())) {
-				operation_lbl.setForeground(Color.WHITE);
-				operation_lbl.setBackground(Color.GRAY);
-			} else {
-				operation_lbl.setForeground(null);
-				operation_lbl.setBackground(null);
-			}
-		}
-	}
-
-	/** Update the ramp meter config */
-	private void updateConfig(RampMeter rm) {
-		boolean update = isWritePermitted(rm);
-		setPresetAction(rm);
-		shrink_btn.setAction(new ShrinkQueueAction(rm, update));
-		grow_btn.setAction(new GrowQueueAction(rm, update));
-		on_btn.setAction(new TurnOnAction(rm, update));
-		off_btn.setAction(new TurnOffAction(rm, update));
-		lock_cbx.setAction(new LockMeterAction(rm, lock_cbx, update));
 	}
 
 	/** Set the camera preset action */
 	private void setPresetAction(RampMeter rm) {
-		CameraPreset cp = RampMeterHelper.getPreset(rm);
+		CameraPreset cp = (rm != null) ? rm.getPreset() : null;
 		preset_btn.setAction(new CameraPresetAction(session, cp));
 	}
 
-	/** Get the current meter lock */
-	private int getMLock(RampMeter rm) {
-		Integer ml = rm.getMLock();
-		return (ml != null) ? ml : RampMeterLock.OFF.ordinal();
+	/** Update the ramp meter lock */
+	private void updateLock(RampMeter rm) {
+		// Remove action so we can update the lock reason in peace
+		reason_cbx.setAction(null);
+		MeterLock lk = new MeterLock(RampMeterHelper.optLock(rm));
+		String r = lk.optReason();
+		reason_cbx.setSelectedItem((r != null) ? r : "");
+		String user = session.getUser().getName();
+		TurnOnAction on_act = new TurnOnAction(rm, user);
+		TurnOffAction off_act = new TurnOffAction(rm, user);
+		LockReasonAction reason_act = new LockReasonAction(rm, user,
+			reason_cbx);
+		ShrinkQueueAction sq_act = new ShrinkQueueAction(rm, user);
+		GrowQueueAction gq_act = new GrowQueueAction(rm, user);
+		if (!isWritePermitted(rm)) {
+			on_act.setEnabled(false);
+			off_act.setEnabled(false);
+			reason_act.setEnabled(false);
+		}
+		boolean locked_on = (lk.optRate() != null);
+		if ((!isWritePermitted(rm)) || !locked_on) {
+			sq_act.setEnabled(false);
+			gq_act.setEnabled(false);
+		}
+		on_btn.setAction(on_act);
+		off_btn.setAction(off_act);
+		reason_cbx.setAction(reason_act);
+		shrink_btn.setAction(sq_act);
+		grow_btn.setAction(gq_act);
+	}
+
+	/** Update the ramp meter release rate */
+	private void updateRate(RampMeter rm) {
+		if (RampMeterHelper.isMetering(rm))
+			on_btn.setSelected(true);
+		else
+			off_btn.setSelected(true);
+		Integer rt = RampMeterHelper.optRate(rm);
+		release_lbl.setText(RampMeterHelper.formatRelease(rt));
+		cycle_lbl.setText(RampMeterHelper.formatCycle(rt));
+	}
+
+	/** Update the ramp meter status */
+	private void updateStatus(RampMeter rm) {
+		String fault = RampMeterHelper.optFault(rm);
+		String status = (fault != null) ? fault : "";
+		if (ItemStyle.OFFLINE.checkBit(rm.getStyles())) {
+			status_lbl.setForeground(Color.WHITE);
+			status_lbl.setBackground(Color.GRAY);
+			status = "OFFLINE";
+		} else if (fault != null) {
+			status_lbl.setForeground(Color.WHITE);
+			status_lbl.setBackground(Color.BLACK);
+		} else {
+			status_lbl.setForeground(null);
+			status_lbl.setBackground(null);
+		}
+		status_lbl.setText(status);
 	}
 
 	/** Clear the proxy view */
@@ -254,23 +268,17 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		name_lbl.setText("");
 		setPresetAction(null);
 		location_lbl.setText("");
-		operation_lbl.setText("");
-		operation_lbl.setForeground(null);
-		operation_lbl.setBackground(null);
+		status_lbl.setText("");
+		status_lbl.setForeground(null);
+		status_lbl.setBackground(null);
+		queue_lbl.setText("");
 		release_lbl.setText("");
 		cycle_lbl.setText("");
-		queue_lbl.setText("");
-		shrink_btn.setAction(new ShrinkQueueAction(null, false));
-		grow_btn.setAction(new GrowQueueAction(null, false));
-		lock_cbx.setAction(new LockMeterAction(null, lock_cbx, false));
-		lock_cbx.setSelectedIndex(0);
-		on_btn.setAction(new TurnOnAction(null, false));
-		off_btn.setAction(new TurnOffAction(null, false));
+		updateLock(null);
 	}
 
 	/** Check if the user is permitted to update the given ramp meter */
 	private boolean isWritePermitted(RampMeter rm) {
-		return session.isWritePermitted(rm, "rateNext") &&
-		       session.isWritePermitted(rm, "mLock");
+		return session.isWritePermitted(rm, "lock");
 	}
 }

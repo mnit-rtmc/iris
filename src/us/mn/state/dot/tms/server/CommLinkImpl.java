@@ -313,6 +313,11 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return comm_config;
 	}
 
+	/** Get operation retry threshold */
+	public int getRetryThreshold() {
+		return comm_config.getRetryThreshold();
+	}
+
 	/** Device poller */
 	private transient DevicePoller poller;
 
@@ -330,7 +335,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		destroyPoller();
 		if (poll_enabled)
 			createPoller();
-		failControllers();
+		offlineControllers();
 		updateConnected();
 	}
 
@@ -347,10 +352,10 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		poller = DevicePollerFactory.create(this);
 	}
 
-	/** Set all controllers to a failed status */
-	private synchronized void failControllers() {
+	/** Set all controllers to offline status */
+	private synchronized void offlineControllers() {
 		for (ControllerImpl c: controllers.values())
-			c.setFailed(true);
+			c.setOffline(true);
 	}
 
 	/** Poll all controllers */

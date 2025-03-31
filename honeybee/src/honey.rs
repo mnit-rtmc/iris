@@ -1,6 +1,6 @@
 // honey.rs
 //
-// Copyright (C) 2021-2024  Minnesota Department of Transportation
+// Copyright (C) 2021-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,6 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::Database;
 use crate::access::Access;
 use crate::cred::Credentials;
 use crate::domain;
@@ -21,31 +22,30 @@ use crate::permission;
 use crate::query;
 use crate::sonar::{Messenger, Name};
 use crate::xff::XForwardedFor;
-use crate::Database;
+use axum::Router;
 use axum::body::Body;
 use axum::extract::{ConnectInfo, Json, Path as AxumPath, Query, State};
-use axum::http::{header, StatusCode};
+use axum::http::{StatusCode, header};
 use axum::response::sse::{Event, KeepAlive};
-use axum::response::Sse;
+use axum::response::{IntoResponse, Sse};
 use axum::routing::get;
-use axum::Router;
 use axum_extra::TypedHeader;
 use headers::{ETag, IfNoneMatch};
 use http::header::HeaderName;
 use resources::Res;
 use serde::Deserialize;
-use serde_json::map::Map;
 use serde_json::Value;
+use serde_json::map::Map;
 use std::collections::HashMap;
 use std::convert::Infallible;
 use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
 use tokio::fs::metadata;
-use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
+use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 use tokio_postgres::types::ToSql;
-use tokio_stream::wrappers::UnboundedReceiverStream;
 use tokio_stream::Stream;
+use tokio_stream::wrappers::UnboundedReceiverStream;
 use tokio_util::io::ReaderStream;
 use tower_sessions::session::Id;
 use tower_sessions::{Expiry, Session, SessionManagerLayer};
@@ -85,24 +85,22 @@ pub struct Honey {
 /// No-header response result
 type Resp0 = std::result::Result<StatusCode, StatusCode>;
 
-/// Single-header response result
-type Resp1 =
-    std::result::Result<([(HeaderName, &'static str); 1], String), StatusCode>;
-
 /// Two-header response result
 type Resp2 =
-    std::result::Result<([(HeaderName, &'static str); 2], String), StatusCode>;
-
-/// Two-header response result
-type Resp2b =
     std::result::Result<([(HeaderName, &'static str); 2], Body), StatusCode>;
 
 /// Three-header response result
 type Resp3 = std::result::Result<([(HeaderName, String); 3], Body), StatusCode>;
 
 /// Create an HTML response
-fn html_resp(html: &str) -> Resp1 {
-    Ok(([(header::CONTENT_TYPE, "text/html")], html.to_string()))
+fn html_resp(html: &'static str) -> Resp2 {
+    Ok((
+        [
+            (header::CACHE_CONTROL, "private, no-store"),
+            (header::CONTENT_TYPE, "text/html"),
+        ],
+        Body::from(html),
+    ))
 }
 
 /// Create a JSON response
@@ -112,7 +110,7 @@ fn json_resp(json: String) -> Resp2 {
             (header::CACHE_CONTROL, "private, no-store"),
             (header::CONTENT_TYPE, "application/json"),
         ],
-        json,
+        Body::from(json),
     ))
 }
 
@@ -204,8 +202,8 @@ impl Honey {
         access: Access,
     ) -> Result<Access> {
         log::debug!("name_access {user} {name}");
-        let perm = permission::get_by_name(&self.db, user, name).await?;
-        let acc = Access::new(perm.access_level).ok_or(Error::Forbidden)?;
+        let access_lvl = permission::name_access(&self.db, user, name).await?;
+        let acc = Access::new(access_lvl).ok_or(Error::Forbidden)?;
         acc.check(access)?;
         Ok(acc)
     }
@@ -299,7 +297,7 @@ impl Honey {
 }
 
 /// Build a stream from a file (with max-age 1 day)
-async fn file_stream(fname: &str, content_type: &'static str) -> Resp2b {
+async fn file_stream(fname: &str, content_type: &'static str) -> Resp2 {
     let file = tokio::fs::File::open(fname)
         .await
         .map_err(|_e| StatusCode::NOT_FOUND)?;
@@ -352,7 +350,7 @@ async fn file_etag(path: &str) -> Result<String> {
 /// Handler for index page
 async fn index_handler(
     TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
-) -> Resp3 {
+) -> impl IntoResponse {
     file_stream_etag("index.html", "text/html; charset=utf-8", if_none_match)
         .await
 }
@@ -372,57 +370,57 @@ fn public_dir_get() -> Router {
     async fn handler(
         TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
         AxumPath(fname): AxumPath<String>,
-    ) -> Resp3 {
+    ) -> impl IntoResponse {
         log::info!("GET {fname}");
         file_stream_etag(&fname, "application/json", if_none_match).await
     }
-    Router::new().route("/:fname", get(handler))
+    Router::new().route("/{fname}", get(handler))
 }
 
 /// `GET` JSON file from LUT directory
 fn lut_dir_get() -> Router {
-    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2b {
+    async fn handler(AxumPath(fname): AxumPath<String>) -> impl IntoResponse {
         let fname = format!("lut/{fname}");
         log::info!("GET {fname}");
         file_stream(&fname, "application/json").await
     }
-    Router::new().route("/lut/:fname", get(handler))
+    Router::new().route("/lut/{fname}", get(handler))
 }
 
 /// `GET` file from sign img directory
 fn img_dir_get() -> Router {
-    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2b {
+    async fn handler(AxumPath(fname): AxumPath<String>) -> impl IntoResponse {
         let fname = format!("img/{fname}");
         log::info!("GET {fname}");
         file_stream(&fname, "image/gif").await
     }
-    Router::new().route("/img/:fname", get(handler))
+    Router::new().route("/img/{fname}", get(handler))
 }
 
 /// `GET` file from tfon directory
 fn tfon_dir_get() -> Router {
-    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2b {
+    async fn handler(AxumPath(fname): AxumPath<String>) -> impl IntoResponse {
         let fname = format!("tfon/{fname}");
         log::info!("GET {fname}");
         file_stream(&fname, "text/plain").await
     }
-    Router::new().route("/tfon/:fname", get(handler))
+    Router::new().route("/tfon/{fname}", get(handler))
 }
 
 /// `GET` file from gif directory
 fn gif_dir_get() -> Router {
-    async fn handler(AxumPath(fname): AxumPath<String>) -> Resp2b {
+    async fn handler(AxumPath(fname): AxumPath<String>) -> impl IntoResponse {
         let fname = format!("gif/{fname}");
         log::info!("GET {fname}");
         file_stream(&fname, "image/gif").await
     }
-    Router::new().route("/gif/:fname", get(handler))
+    Router::new().route("/gif/{fname}", get(handler))
 }
 
 /// Router for login resource
 fn login_resource(honey: Honey) -> Router {
     /// Handle `GET` request
-    async fn handle_get(session: Session) -> Resp2 {
+    async fn handle_get(session: Session) -> impl IntoResponse {
         log::info!("GET login");
         let cred = Credentials::load(&session).await?;
         let mut resp = String::new();
@@ -439,7 +437,7 @@ fn login_resource(honey: Honey) -> Router {
         XForwardedFor(xff): XForwardedFor,
         State(honey): State<Honey>,
         Json(cred): Json<Credentials>,
-    ) -> Resp1 {
+    ) -> impl IntoResponse {
         log::info!("POST login from {addr}");
         session
             .cycle_id()
@@ -489,7 +487,10 @@ fn login_resource(honey: Honey) -> Router {
 
 /// `GET` access permissions
 fn access_get(honey: Honey) -> Router {
-    async fn handler(session: Session, State(honey): State<Honey>) -> Resp2 {
+    async fn handler(
+        session: Session,
+        State(honey): State<Honey>,
+    ) -> impl IntoResponse {
         log::info!("GET access");
         let cred = Credentials::load(&session).await?;
         let perms = permission::get_by_user(&honey.db, cred.user()).await?;
@@ -545,7 +546,7 @@ fn notify_resource(honey: Honey) -> Router {
         session: Session,
         State(honey): State<Honey>,
         Json(channels): Json<Vec<String>>,
-    ) -> Resp1 {
+    ) -> impl IntoResponse {
         log::info!("POST notify");
         let names = try_names_from_channels(&channels)?;
         honey.check_view_channels(&session, &names).await?;
@@ -567,7 +568,7 @@ fn permission_resource(honey: Honey) -> Router {
         session: Session,
         State(honey): State<Honey>,
         TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
-    ) -> Resp3 {
+    ) -> impl IntoResponse {
         log::info!("GET api/permission");
         let nm = Name::from(Res::Permission);
         let cred = Credentials::load(&session).await?;
@@ -614,7 +615,7 @@ fn other_resource(honey: Honey) -> Router {
         State(honey): State<Honey>,
         TypedHeader(if_none_match): TypedHeader<IfNoneMatch>,
         AxumPath(type_n): AxumPath<String>,
-    ) -> Resp3 {
+    ) -> impl IntoResponse {
         log::info!("GET api/{type_n}");
         let nm = Name::new(&type_n)?;
         let cred = Credentials::load(&session).await?;
@@ -658,7 +659,7 @@ fn other_resource(honey: Honey) -> Router {
     }
 
     Router::new()
-        .route("/:type_n", get(handle_get).post(handle_post))
+        .route("/{type_n}", get(handle_get).post(handle_post))
         .with_state(honey)
 }
 
@@ -670,7 +671,7 @@ fn permission_object(honey: Honey) -> Router {
         session: Session,
         State(honey): State<Honey>,
         AxumPath(obj_n): AxumPath<String>,
-    ) -> Resp2 {
+    ) -> impl IntoResponse {
         let nm = Name::from(Res::Permission).obj(&obj_n)?;
         log::info!("GET {nm}");
         let cred = Credentials::load(&session).await?;
@@ -727,24 +728,20 @@ fn permission_object(honey: Honey) -> Router {
 #[derive(Debug, Deserialize)]
 struct QueryParams {
     /// Associatied resource (for GeoLoc)
-    res: String,
+    res: Option<String>,
 }
 
 /// Get name to use for access checks
-fn check_name(
-    type_n: &str,
-    obj_n: &str,
-    params: &Option<Query<QueryParams>>,
-) -> Result<Name> {
+fn check_name(type_n: &str, obj_n: &str, params: &QueryParams) -> Result<Name> {
     let nm = Name::new(type_n)?;
-    match (nm.res_type, params) {
-        // FIXME: check for ControllerIo / DevicePreset
-        (Res::GeoLoc, Some(p)) => {
+    match (nm.res_type, &params.res) {
+        // FIXME: check for DevicePreset
+        (Res::GeoLoc, Some(res)) => {
             // Use "res" query parameter for GeoLoc access check
-            Ok(Name::new(&p.res)?.obj(obj_n)?)
+            Ok(Name::new(res)?.obj(obj_n)?)
         }
         (Res::GeoLoc, None) => Err(Error::InvalidValue),
-        (_, Some(_p)) => Err(Error::InvalidValue),
+        (_, Some(_r)) => Err(Error::InvalidValue),
         _ => Ok(nm.obj(obj_n)?),
     }
 }
@@ -756,11 +753,11 @@ fn other_object(honey: Honey) -> Router {
         session: Session,
         State(honey): State<Honey>,
         AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
-        params: Option<Query<QueryParams>>,
-    ) -> Resp2 {
+        params: Query<QueryParams>,
+    ) -> impl IntoResponse {
         log::info!("GET {type_n}/{obj_n} {params:?}");
         let nm = Name::new(&type_n)?.obj(&obj_n)?;
-        let ck_nm = check_name(&type_n, &obj_n, &params)?;
+        let ck_nm = check_name(&type_n, &obj_n, &params.0)?;
         // get precent-decoded object name
         let obj_n = nm.object_n().ok_or(Error::InvalidValue)?;
         let sql = one_sql(nm.res_type);
@@ -784,12 +781,12 @@ fn other_object(honey: Honey) -> Router {
         session: Session,
         State(honey): State<Honey>,
         AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
-        params: Option<Query<QueryParams>>,
+        params: Query<QueryParams>,
         Json(attrs): Json<Map<String, Value>>,
     ) -> Resp0 {
         log::info!("PATCH {type_n}/{obj_n} {params:?}");
         let nm = Name::new(&type_n)?.obj(&obj_n)?;
-        let ck_nm = check_name(&type_n, &obj_n, &params)?;
+        let ck_nm = check_name(&type_n, &obj_n, &params.0)?;
         let cred = Credentials::load(&session).await?;
         // *At least* Operate access needed (further checks below)
         let access = honey
@@ -843,7 +840,7 @@ fn other_object(honey: Honey) -> Router {
 
     Router::new()
         .route(
-            "/:type_n/:obj_n",
+            "/{type_n}/{obj_n}",
             get(handle_get).patch(handle_patch).delete(handle_delete),
         )
         .with_state(honey)
@@ -853,17 +850,24 @@ fn other_object(honey: Honey) -> Router {
 const fn one_sql(res: Res) -> &'static str {
     use Res::*;
     match res {
+        ActionPlan => query::ACTION_PLAN_ONE,
         Alarm => query::ALARM_ONE,
         Beacon => query::BEACON_ONE,
         CabinetStyle => query::CABINET_STYLE_ONE,
         Camera => query::CAMERA_ONE,
+        CameraPreset => query::CAMERA_PRESET_ONE,
         CommConfig => query::COMM_CONFIG_ONE,
         CommLink => query::COMM_LINK_ONE,
         Controller => query::CONTROLLER_ONE,
         ControllerIo => query::CONTROLLER_IO_ONE,
+        DayMatcher => query::DAY_MATCHER_ONE,
+        DayPlan => query::DAY_PLAN_ONE,
         Detector => query::DETECTOR_ONE,
+        DeviceAction => query::DEVICE_ACTION_ONE,
         Dms => query::DMS_ONE,
         Domain => query::DOMAIN_ONE,
+        EncoderStream => query::ENCODER_STREAM_ONE,
+        EncoderType => query::ENCODER_TYPE_ONE,
         FlowStream => query::FLOW_STREAM_ONE,
         Font => query::FONT_ONE,
         GateArm => query::GATE_ARM_ONE,
@@ -871,19 +875,28 @@ const fn one_sql(res: Res) -> &'static str {
         GeoLoc => query::GEO_LOC_ONE,
         Gps => query::GPS_ONE,
         Graphic => query::GRAPHIC_ONE,
-        LaneMarking => query::LANE_MARKING_ONE,
-        LcsArray => query::LCS_ARRAY_ONE,
-        LcsIndication => query::LCS_INDICATION_ONE,
+        IncidentDetail => query::INCIDENT_DETAIL_ONE,
+        IncAdvice => query::INC_ADVICE_ONE,
+        IncDescriptor => query::INC_DESCRIPTOR_ONE,
+        IncLocator => query::INC_LOCATOR_ONE,
+        Lcs => query::LCS_ONE,
+        LcsState => query::LCS_STATE_ONE,
         Modem => query::MODEM_ONE,
+        MonitorStyle => query::MONITOR_STYLE_ONE,
         MsgLine => query::MSG_LINE_ONE,
         MsgPattern => query::MSG_PATTERN_ONE,
         Permission => query::PERMISSION_ONE,
+        PlanPhase => query::PLAN_PHASE_ONE,
+        PlayList => query::PLAY_LIST_ONE,
+        RoadAffix => query::ROAD_AFFIX_ONE,
         RampMeter => query::RAMP_METER_ONE,
         Role => query::ROLE_ONE,
         SignConfig => query::SIGN_CONFIG_ONE,
         SignDetail => query::SIGN_DETAIL_ONE,
         SignMessage => query::SIGN_MSG_ONE,
         TagReader => query::TAG_READER_ONE,
+        TimeAction => query::TIME_ACTION_ONE,
+        TollZone => query::TOLL_ZONE_ONE,
         User => query::USER_ONE,
         VideoMonitor => query::VIDEO_MONITOR_ONE,
         WeatherSensor => query::WEATHER_SENSOR_ONE,
@@ -901,7 +914,6 @@ fn patch_first_pass(res: Res, att: &str) -> bool {
         | (Beacon, "verify_pin")
         | (Detector, "pin")
         | (Dms, "pin")
-        | (LaneMarking, "pin")
         | (RampMeter, "pin")
         | (WeatherSensor, "pin") => true,
         _ => false,

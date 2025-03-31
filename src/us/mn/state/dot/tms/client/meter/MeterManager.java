@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,20 +66,6 @@ public class MeterManager extends DeviceManager<RampMeter> {
 	@Override
 	protected ProxyTheme<RampMeter> createTheme() {
 		return new MeterTheme(this);
-	}
-
-	/** Fill single selection popup */
-	@Override
-	protected void fillPopupSingle(JPopupMenu p, RampMeter meter) {
-		if (session.isWritePermitted(meter)) {
-			if (meter.getRate() != null) {
-				p.add(new ShrinkQueueAction(meter, true));
-				p.add(new GrowQueueAction(meter, true));
-				p.add(new TurnOffAction(meter, true));
-			} else
-				p.add(new TurnOnAction(meter, true));
-			p.addSeparator();
-		}
 	}
 
 	/** Create a popup menu for multiple objects */

@@ -50,9 +50,11 @@ a [switching](#switching) system.
 | Access       | Primary              | Secondary                  |
 |--------------|----------------------|----------------------------|
 | 👁️  View      | name                 |                            |
-| 👉 Operate   |                      | camera                     |
+| 👉 Operate   |                      | camera, device\_request †  |                    |
 | 💡 Manage    | notes                | restricted, monitor\_style |
 | 🔧 Configure | mon\_num, controller | pin                        |
+
+† _Write only_
 
 </details>
 
@@ -68,6 +70,19 @@ Accent        | Hexadecimal RGB color of title bar
 Font Size     | Size of title bar font (points)
 Title Bar     | Flag to enable title bar
 Auto Expand   | Flag to use full screen when only one monitor is active
+
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/monitor_style` (primary)
+* `iris/api/monitor_style/{name}`
+
+| Access       | Primary | Secondary |
+|--------------|---------|-----------|
+| 👁️  View      | name    |           |
+| 🔧 Configure |         | force\_aspect, accent, font\_sz, title\_bar, auto\_expand, hgap, vgap |
+
+</details>
 
 ## Switching
 
@@ -98,7 +113,7 @@ Select `View ➔ Video ➔ Play Lists` menu item
 
 Play lists can be created to quickly cycle through [camera]s.  Selecting a
 play list on a monitor will cause the cameras to automatically switch after
-a short dwell time, specified by the `camera_sequence_dwell_sec`
+a short dwell time, specified by the `camera_playlist_dwell_sec`
 [system attribute].  A **seq num** is a unique number to select the list.
 
 A **meta** play list consists of (non-meta) sub-lists.  This allows lists to
@@ -107,6 +122,20 @@ be broken up and shared with other meta lists.
 Each role can have one _scratch_ play list:
 * Must have 💡 Manage [permissions] for `video_monitor`, with a [hashtag]
 * Exactly one play list must have that hashtag
+
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/play_list` (primary)
+* `iris/api/play_list/{name}`
+
+| Access       | Primary         | Secondary |
+|--------------|-----------------|-----------|
+| 👁️  View      | name            |           |
+| 💡 Manage    |                 | entries   |
+| 🔧 Configure | seq\_num, notes | meta      |
+
+</details>
 
 
 [camera]: cameras.html

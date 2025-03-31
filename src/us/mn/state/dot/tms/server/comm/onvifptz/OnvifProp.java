@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
@@ -69,7 +70,7 @@ abstract public class OnvifProp extends ControllerProperty {
 	}
 
 	/** Build and send the SOAP messages */
-	public String sendSoap() throws IOException {
+	public String sendSoap(ControllerImpl c) throws IOException {
 		// if no cmd items, nothing to do
 		if (cmd == null || cmd.length == 0) {
 			return "No cmd specified";
@@ -83,52 +84,69 @@ abstract public class OnvifProp extends ControllerProperty {
 		MediaService media = MediaService.getMediaService(dev.getMediaBinding(capabilities), user, pass);
 		ImagingService img = ImagingService.getImagingService(dev.getImagingBinding(capabilities), user, pass);
 
-		String mediaProfile = null, videoSource = null;
-		int mediaWidth = 0, videoWidth = 0;  // to find largest source
+		// Check for cached media/video tokens, and retrieve them if and only if needed
+		String mediaProfile = ControllerHelper.getSetup(c, "mediaProfile");
+		String videoSource = ControllerHelper.getSetup(c, "videoSource");
+		boolean needMedia = (mediaProfile == null || mediaProfile.isEmpty()) && (
+			cmd[0].equals("ptz") ||
+			cmd[0].equals("wiper") ||
+			cmd[0].contains("preset")
+		);
+		boolean needVideo = (videoSource == null || videoSource.isEmpty()) && (
+			cmd[0].contains("iris") ||
+			cmd[0].contains("focus")
+		);
+		if (needMedia || needVideo) {
+			int mediaWidth = 0, videoWidth = 0;  // to find largest source
 
-		// Should contain all necessary tokens
-		Document getProfilesRes = DOMUtils.getDocument(media.getProfiles());
-		if (getProfilesRes == null) return "Error parsing ONVIF media profiles response";
+			// Should contain all necessary tokens
+			Document getProfilesRes = DOMUtils.getDocument(media.getProfiles());
+			if (getProfilesRes == null) return "Error parsing ONVIF media profiles response";
 
-		NodeList profiles = getProfilesRes.getElementsByTagNameNS("*", "Profiles");
-		for (int i = 0; i < profiles.getLength(); i++) {
-			int mx = 0, vx = 0;
-			Element profile = (Element) profiles.item(i);
+			NodeList profiles = getProfilesRes.getElementsByTagNameNS("*", "Profiles");
+			for (int i = 0; i < profiles.getLength(); i++) {
+				int mx = 0, vx = 0;
+				Element profile = (Element) profiles.item(i);
 
-			// get the video source and its width
-			Element videoConfig = (Element) profile.getElementsByTagNameNS("*", "VideoSourceConfiguration").item(0);
-			if (videoConfig == null) continue;  // we want a profile with a video source
-			Element sourceToken = (Element) videoConfig.getElementsByTagNameNS("*", "SourceToken").item(0);
-			Element bounds = (Element) videoConfig.getElementsByTagNameNS("*", "Bounds").item(0);
-			vx = Integer.parseInt(bounds.getAttribute("width"));
+				// get the video source and its width
+				Element videoConfig = (Element) profile.getElementsByTagNameNS("*", "VideoSourceConfiguration").item(0);
+				if (videoConfig == null) continue;  // we want a profile with a video source
+				Element sourceToken = (Element) videoConfig.getElementsByTagNameNS("*", "SourceToken").item(0);
+				Element bounds = (Element) videoConfig.getElementsByTagNameNS("*", "Bounds").item(0);
+				vx = Integer.parseInt(bounds.getAttribute("width"));
 
-			// get the video encoder and its width, if applicable; only for better profile selection
-			Element encoderConfig = (Element) profile.getElementsByTagNameNS("*", "VideoEncoderConfiguration").item(0);
-			if (encoderConfig != null) {
-				Element widthElem = (Element) encoderConfig.getElementsByTagNameNS("*", "Width").item(0);
-				mx = Integer.parseInt(widthElem.getTextContent());
+				// get the video encoder and its width, if applicable; only for better profile selection
+				Element encoderConfig = (Element) profile.getElementsByTagNameNS("*", "VideoEncoderConfiguration").item(0);
+				if (encoderConfig != null) {
+					Element widthElem = (Element) encoderConfig.getElementsByTagNameNS("*", "Width").item(0);
+					mx = Integer.parseInt(widthElem.getTextContent());
+				}
+
+				// if video source bigger than current, replace
+				if (vx >= videoWidth) {
+					log("Video width larger. Setting videoSource...");
+					videoSource = sourceToken.getTextContent();
+					videoWidth = vx;
+				}
+				// replace media profile only if it's larger and the attached source is no smaller
+				if (mx >= mediaWidth && vx >= videoWidth) {
+					log("Both widths larger. Setting mediaProfile...");
+					mediaProfile = profile.getAttribute("token");
+					mediaWidth = mx;
+				}
 			}
 
-			// if video source bigger than current, replace
-			if (vx >= videoWidth) {
-				log("Video width larger. Setting videoSource...");
-				videoSource = sourceToken.getTextContent();
-				videoWidth = vx;
+			if (mediaProfile != null) {
+				c.setSetupNotify("mediaProfile", mediaProfile);
+				log("Set media profile: " + mediaProfile);
 			}
-			// replace media profile only if it's larger and the attached source is no smaller
-			if (mx >= mediaWidth && vx >= videoWidth) {
-				log("Both widths larger. Setting mediaProfile...");
-				mediaProfile = profile.getAttribute("token");
-				mediaWidth = mx;
+			if (videoSource != null) {
+				c.setSetupNotify("videoSource", videoSource);
+				log("Set video source: " + videoSource);
 			}
+			if (mediaProfile == null || videoSource == null)
+				return "Could not retrieve profile tokens";
 		}
-
-		if (mediaProfile != null)
-			log("Set media profile: " + mediaProfile);
-		if (videoSource != null)
-			log("Set video source: " + videoSource);
-		if (mediaProfile == null || videoSource == null)
-			return "Could not retrieve profile tokens";
 
 		// if multi-step operations, send each operation
 		StringBuilder sb = new StringBuilder();
@@ -138,7 +156,7 @@ abstract public class OnvifProp extends ControllerProperty {
 					sb.append("Error sending ptz message - missing pan, tilt, and/or zoom");
 					break;
 				}
-				sb.append(ptz.continuousMove(mediaProfile, Float.parseFloat(cmd[1]), Float.parseFloat(cmd[2]), Float.parseFloat(cmd[3])));
+				sb.append(ptz.continuousMove(mediaProfile, cmd[1], cmd[2], cmd[3]));
 				break;
 			case "storepreset":
 				if (cmd.length < 2) {

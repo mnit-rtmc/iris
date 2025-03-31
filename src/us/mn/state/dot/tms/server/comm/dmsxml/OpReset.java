@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -24,6 +24,8 @@ import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerException;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
 
@@ -44,13 +46,12 @@ class OpReset extends OpDms {
 
 	/** Create the second phase of the operation */
 	protected Phase phaseTwo() {
-		if(dmsConfigured())
+		if (dmsConfigured())
 			return new PhaseResetDms();
-
-		// dms not configured
-		Phase phase2 = new PhaseResetDms();
-		Phase phase1 = new PhaseGetConfig(phase2);
-		return phase1;
+		else {
+			Phase phase2 = new PhaseResetDms();
+			return new PhaseGetConfig(phase2);
+		}
 	}
 
 	/** Build request message in this format:
@@ -87,58 +88,31 @@ class OpReset extends OpDms {
 	 *		<ErrMsg></ErrMsg>
 	 *	</SetInitRespMsg></DmsXml>
 	 *  @return True to retry the operation else false if done. */
-	private boolean parseResponse(Message mess, XmlElem xrr) {
+	private boolean parseResponse(Message mess, XmlElem xrr)
+		throws IOException
+	{
 		long id = 0;
-		boolean valid = false;
-		String errmsg = "";
-
-		// parse response
 		try {
-			// id
 			id = xrr.getResLong("Id");
-
-			// valid flag
-			valid = xrr.getResBoolean("IsValid");
-
-			// error message text
-			errmsg = xrr.getResString("ErrMsg");
-			if(!valid && errmsg.length() <= 0)
-				errmsg = FAILURE_UNKNOWN;
-
-		} catch (IllegalArgumentException ex) {
+			boolean valid = xrr.getResBoolean("IsValid");
+			String errmsg = xrr.getResString("ErrMsg");
+			if (!valid) {
+				LOG.log("OpReset: isvalid is false, " +
+					"errmsg=" + errmsg);
+				throw new ControllerException(errmsg);
+			}
+		}
+		catch (IllegalArgumentException ex) {
 			LOG.log("SEVERE OpReset.PhaseResetDms: " +
 				"Malformed XML received:" + ex +
 				", id=" + id);
-			valid=false;
-			errmsg=ex.getMessage();
-			handleCommError(EventType.PARSING_ERROR,errmsg);
+			throw new ParsingException(ex);
 		}
-
-		// update 
-		complete(mess);
-
-		// process response
-		updateMaintStatus("");
-		if (valid) {
-			setErrorStatus("");
-			SignMessage sm = m_dms.createMsgBlank(
-				SignMsgSource.reset.bit());
-			if (sm != null)
-				m_dms.setMsgCurrentNotify(sm);
-
-		// valid flag is false
-		} else {
-			LOG.log("OpReset: isvalid is false, " +
-				"errmsg=" + errmsg);
-			setErrorStatus(errmsg);
-
-			// try again
-			if (flagFailureShouldRetry(errmsg)) {
-				LOG.log("OpReset: will retry " +
-					"failed operation.");
-				return true;
-			}
-		}
+		putCtrlFaults(null, null);
+		SignMessage sm = m_dms.createMsgBlank(
+			SignMsgSource.reset.bit());
+		if (sm != null)
+			m_dms.setMsgCurrentNotify(sm);
 		return false;
 	}
 
@@ -148,35 +122,20 @@ class OpReset extends OpDms {
 	 * if the messenger reopens the connection on failure.
 	 *
 	 * @see CommThread#doPoll()
-	 * @see Messenger#handleCommError()
-	 * @see Messenger#shouldReopen()
 	 */
-	private class PhaseResetDms extends Phase
-	{
+	private class PhaseResetDms extends Phase {
+
 		/** Query current message */
-		protected Phase poll(CommMessage argmess) 
-			throws IOException 
-		{
-			LOG.log(
-			    "OpReset.PhaseResetDms.poll(msg) called.");
-
+		protected Phase poll(CommMessage argmess) throws IOException {
+			LOG.log("OpReset.PhaseResetDms.poll(msg) called.");
 			Message mess = (Message) argmess;
-
-			// set message attributes as a function of the op
 			setMsgAttributes(mess);
-
-			// build xml request and expected response			
 			mess.setName(getOpName());
-			XmlElem xrr = buildReqRes("SetInitReqMsg", 
+			XmlElem xrr = buildReqRes("SetInitReqMsg",
 				"SetInitRespMsg");
-
-			// send request and read response
 			mess.add(xrr);
 			sendRead(mess);
-
-			if(parseResponse(mess, xrr))
-				return this;
-			return null;
+			return parseResponse(mess, xrr) ? this : null;
 		}
 	}
 }

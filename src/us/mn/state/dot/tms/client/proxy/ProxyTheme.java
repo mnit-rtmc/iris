@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2019  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,11 +54,11 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 	static public final Color COLOR_NO_CONTROLLER =
 		new Color(255, 255, 255, 64);
 
-	/** Color to display failed devices */
-	static public final Color COLOR_FAILED = Color.GRAY;
+	/** Color to display offline devices */
+	static public final Color COLOR_OFFLINE = Color.GRAY;
 
-	/** Color to display unavailable devices */
-	static public final Color COLOR_UNAVAILABLE = Color.BLACK;
+	/** Color to display fault devices */
+	static public final Color COLOR_FAULT = Color.BLACK;
 
 	/** Color to display available devices */
 	static public final Color COLOR_AVAILABLE = new Color(96, 96, 255);

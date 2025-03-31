@@ -14,7 +14,8 @@ this data.
 | Access       | Primary                  | Secondary         |
 |--------------|--------------------------|-------------------|
 | 👁️  View      | name, location           | geo\_loc, settings, sample, sample\_time |
-| 💡 Manage    | site\_id, alt\_id, notes | device\_request † |
+| 👉 Operate   |                          | device\_request † |
+| 💡 Manage    | site\_id, alt\_id, notes |                   |
 | 🔧 Configure | controller               | pin               |
 
 † _Write only_

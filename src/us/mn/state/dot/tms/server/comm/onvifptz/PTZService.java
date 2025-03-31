@@ -124,7 +124,7 @@ public class PTZService extends Service {
 	}
 
 	/** Document builder function for ContinuousMove */
-	public Document getContinuousMoveDocument(String profile, float xVel, float yVel, float zVel) {
+	public Document getContinuousMoveDocument(String profile, String xVel, String yVel, String zVel) {
 		Document doc = getBaseDocument();
 		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
 
@@ -139,13 +139,13 @@ public class PTZService extends Service {
 		continuousMove.appendChild(velocity);
 
 		Element panTilt = doc.createElement("tt:PanTilt");
-		panTilt.setAttribute("x", String.valueOf(xVel));
-		panTilt.setAttribute("y", String.valueOf(yVel));
+		panTilt.setAttribute("x", xVel);
+		panTilt.setAttribute("y", yVel);
 		panTilt.setAttribute("space", "http://www.onvif.org/ver10/tptz/PanTiltSpaces/VelocityGenericSpace");
 		velocity.appendChild(panTilt);
 
 		Element zoom = doc.createElement("tt:Zoom");
-		zoom.setAttribute("x", String.valueOf(zVel));
+		zoom.setAttribute("x", zVel);
 		zoom.setAttribute("space", "http://www.onvif.org/ver10/tptz/ZoomSpaces/VelocityGenericSpace");
 		velocity.appendChild(zoom);
 
@@ -160,7 +160,7 @@ public class PTZService extends Service {
 	 * @param y       the y value (tilt speed) of the move [-1.0, 1.0]
 	 * @param z       the zoom speed of the move [-1.0, 1.0]
 	 */
-	public String continuousMove(String profile, float x, float y, float z)
+	public String continuousMove(String profile, String x, String y, String z)
 		throws IOException
 	{
 		Document doc = getContinuousMoveDocument(profile, x, y, z);

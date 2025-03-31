@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
-import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.Lcs;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.utils.I18N;
@@ -24,10 +24,10 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class LcsForm extends ProxyTableForm<LCSArray> {
+public class LcsForm extends ProxyTableForm<Lcs> {
 
 	/** Create a new LCS form */
 	public LcsForm(Session s) {
-		super(I18N.get("lcs_array.title"), new LCSArrayModel(s));
+		super(I18N.get("lcs.title"), new LcsModel(s));
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2017  Minnesota Department of Transportation
+ * Copyright (C) 2016-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ public class OpListenKeyboard extends OpStep {
 			// what a stupid exception
 		}
 		if (shouldUpdateOpStatus()) {
-			op.updateStatus();
+			op.updateCtrlStatus();
 			op_time += OP_STATUS_INTERVAL_MS;
 		}
 	}

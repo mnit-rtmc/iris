@@ -36,9 +36,10 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 	/** Load all the comm configs */
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, description, protocol, " +
-			"timeout_ms, poll_period_sec, long_poll_period_sec, " +
-			"idle_disconnect_sec, no_response_disconnect_sec " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+			"timeout_ms, retry_threshold, poll_period_sec, " +
+			"long_poll_period_sec, idle_disconnect_sec, " +
+			"no_response_disconnect_sec FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new CommConfigImpl(row));
@@ -64,6 +65,7 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 		map.put("description", description);
 		map.put("protocol", (short) protocol.ordinal());
 		map.put("timeout_ms", timeout_ms);
+		map.put("retry_threshold", retry_threshold);
 		map.put("poll_period_sec", poll_period_sec);
 		map.put("long_poll_period_sec", long_poll_period_sec);
 		map.put("idle_disconnect_sec", idle_disconnect_sec);
@@ -83,22 +85,24 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 		     row.getString(2),  // description
 		     row.getShort(3),   // protocol
 		     row.getInt(4),     // timeout_ms
-		     row.getInt(5),     // poll_period_sec
-		     row.getInt(6),     // long_poll_period_sec
-		     row.getInt(7),     // idle_disconnect_sec
-		     row.getInt(8)      // no_response_disconnect_sec
+		     row.getInt(5),     // retry_threshold
+		     row.getInt(6),     // poll_period_sec
+		     row.getInt(7),     // long_poll_period_sec
+		     row.getInt(8),     // idle_disconnect_sec
+		     row.getInt(9)      // no_response_disconnect_sec
 		);
 	}
 
 	/** Create a comm config */
-	private CommConfigImpl(String n, String d, short p, int t, int pp,
-		int lpp, int idsc, int nrdsc)
+	private CommConfigImpl(String n, String d, short p, int t, int rt,
+		int pp, int lpp, int idsc, int nrdsc)
 	{
 		super(n);
 		description = d;
 		CommProtocol cp = CommProtocol.fromOrdinal(p);
 		protocol = (cp != null) ? cp : CommProtocol.NTCIP_C;
 		timeout_ms = t;
+		retry_threshold = rt;
 		poll_period_sec = pp;
 		long_poll_period_sec = lpp;
 		idle_disconnect_sec = idsc;
@@ -193,6 +197,29 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 	@Override
 	public int getTimeoutMs() {
 		return timeout_ms;
+	}
+
+	/** Operation retry threshold */
+	private int retry_threshold = 3;
+
+	/** Set operation retry threshold */
+	@Override
+	public void setRetryThreshold(int rt) {
+		retry_threshold = rt;
+	}
+
+	/** Set operation retry threshold */
+	public void doSetRetryThreshold(int rt) throws TMSException {
+		if (rt != retry_threshold) {
+			store.update(this, "retry_threshold", rt);
+			setRetryThreshold(rt);
+		}
+	}
+
+	/** Get operation retry threshold */
+	@Override
+	public int getRetryThreshold() {
+		return retry_threshold;
 	}
 
 	/** Polling period (seconds) */

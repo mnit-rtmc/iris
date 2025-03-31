@@ -50,8 +50,8 @@ minutes).  During this time, a cleared incident can be reactivated if necessary.
 
 ## Incident Events
 
-Incidents and all updates are recorded in the database.  There are two views
-available:
+Incidents and updates can be recorded as [events] in the database.  There are
+two views available:
  * `incident_view` contains one record for each recorded incident
  * `incident_update_view` contains a record for every update to each incident
 
@@ -63,7 +63,7 @@ devices to deploy for the incident.
 
 
 [DMS]: dms.html
-[LCS]: lcs.html
+[events]: events.html
 [suggested DMS]: incident_dms.html
 [suggested LCS]: incident_lcs.html
 [system attribute]: system_attributes.html

@@ -89,8 +89,8 @@ can connect to IRIS.
 
 ## Events
 
-Whenever certain client events occur, a time-stamped record is added to the
-`client_event` table:
+Whenever certain client events occur, a time-stamped [event] record can be
+stored in the `client_event` table:
 
 * CONNECT
 * DISCONNECT
@@ -102,14 +102,10 @@ Whenever certain client events occur, a time-stamped record is added to the
 * CHANGE PASSWORD
 * UPDATE PASSWORD
 
-These records are purged automatically when older than the value of the
-`client_event_purge_days` [system attribute].
-
 
 [CIDR]: https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing
 [device]: controllers.html#devices
-[LCS]: lcs.html
+[event]: events.html
 [LDAP]: installation.html#ldap
 [permissions]: permissions.html
-[system attribute]: system_attributes.html
 [x-forwarded-for]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For

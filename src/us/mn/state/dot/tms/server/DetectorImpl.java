@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -166,10 +166,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Vehicle count "chatter" threshold */
 	static private final Interval CHATTER_THRESHOLD =
 		new Interval(30, SECONDS);
-
-	/** Scan "occ spike" trigger threshold */
-	static private final Interval OCC_SPIKE_THRESHOLD =
-		new Interval(29, SECONDS);
 
 	/** Clear threshold */
 	static private final Interval CLEAR_THRESHOLD =
@@ -429,7 +425,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Get the scan "occ spike" trigger threshold */
 	private Interval getOccSpikeTriggerThreshold() {
-		return OCC_SPIKE_THRESHOLD;
+		return LaneCode.fromCode(lane_code).getOccSpikeThreshold();
 	}
 
 	/** Destroy an object */
@@ -602,6 +598,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		if (f != force_fail) {
 			store.update(this, "force_fail", f);
 			setForceFail(f);
+			if (!f)
+				resetAutoFailCounters();
 		}
 	}
 
@@ -649,15 +647,15 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		return auto_fail;
 	}
 
-	/** Check if the detector is currently 'failed' */
+	/** Check if the detector is currently offline / 'failed' */
 	@Override
-	public boolean isFailed() {
+	public boolean isOffline() {
 		return isFailed(false);
 	}
 
-	/** Check if the detector is currently 'failed' */
+	/** Check if the detector is currently offline / 'failed' */
 	private boolean isFailed(boolean ignore_auto_fail) {
-		return force_fail || super.isFailed() ||
+		return force_fail || super.isOffline() ||
 		      (auto_fail && !ignore_auto_fail);
 	}
 
@@ -1031,12 +1029,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Test binned occupancy with error detecting algorithms */
 	private void testScans(OccupancySample occ) {
 		boolean lock = occ.value >= OccupancySample.MAX;
-		// Locked-on counter should be cleared only with good
-		// non-zero data.  This helps when the duration of
-		// occupancy spikes is shorter than the threshold time
-		// and interspersed with zeroes.
-		boolean hold = locked_on.failed && (occ.value == 0);
-		locked_on.updateState(occ.per_sec, lock || hold);
+		locked_on.updateState(occ.per_sec, lock);
 		if (locked_on.checkLogging(occ.per_sec))
 			logEvent(EventType.DET_LOCKED_ON);
 		boolean v = (occ.value > 0) && (occ.value == prev_value);

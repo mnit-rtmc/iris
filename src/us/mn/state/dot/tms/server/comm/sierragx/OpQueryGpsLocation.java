@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.server.comm.sierragx;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.GpsImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
@@ -99,10 +100,8 @@ public class OpQueryGpsLocation extends OpDevice<SierraGxProperty> {
 			mess.queryProps();
 			if (prop.gotPwPrompt())
 				return new SendPassword();
-			else {
-				setErrorStatus("Login Failed");
-				return null;
-			}
+			else
+				throw new ControllerException("Login Failed");
 		}
 	}
 
@@ -118,10 +117,8 @@ public class OpQueryGpsLocation extends OpDevice<SierraGxProperty> {
 			mess.queryProps();
 			if (prop.getLoginFinished())
 				return new QueryGps();
-			else {
-				setErrorStatus("Login Failed");
-				return null;
-			}
+			else
+				throw new ControllerException("Login Failed");
 		}
 	}
 
@@ -152,7 +149,7 @@ public class OpQueryGpsLocation extends OpDevice<SierraGxProperty> {
 				gps.saveDeviceLocation(gps_prop.getLat(),
 					gps_prop.getLon());
 			} else
-				setErrorStatus("No GPS Lock");
+				putCtrlFaults("gps", "No GPS Lock");
 		}
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2016-2017  SRF Consulting Group
  * Copyright (C) 2017       Iteris Inc.
  *
@@ -281,10 +281,17 @@ public class OpQueryDMSConfiguration extends OpDMS {
 				h_pitch.getInteger(), v_pitch.getInteger(),
 				s_width.getInteger(), s_height.getInteger(),
 				c_width.getInteger(), getCharHeight(),
- 				mono_fg, mono_bg, color_scheme.getInteger());
+				mono_fg, mono_bg, color_scheme.getInteger());
 			if (sc != null)
 				dms.setSignConfigNotify(sc);
-		}
+			else {
+				putCtrlFaults("other", "Config: " +
+					s_width.getInteger() + "x" +
+					s_height.getInteger()
+				);
+			}
+		} else
+			putCtrlFaults("other", "Query Configuration");
 		super.cleanup();
 	}
 

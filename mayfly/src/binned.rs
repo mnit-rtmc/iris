@@ -1,6 +1,6 @@
 // binned.rs
 //
-// Copyright (c) 2021  Minnesota Department of Transportation
+// Copyright (c) 2021-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -228,7 +228,7 @@ impl TrafficData for OccupancyData {
     fn unpack(val: &[u8]) -> Self {
         assert_eq!(val.len(), Self::bin_bytes());
         // Scans (60 Hz * 30 s)
-        let scans = (u16::from(val[0]) << 8 | u16::from(val[1])) as i16;
+        let scans = ((u16::from(val[0]) << 8) | u16::from(val[1])) as i16;
         let reset = scans < 0;
         let percent = scans.max(0) as f32 / 1_800.0;
         let duration = (percent * 30_000.0).round() as u32;

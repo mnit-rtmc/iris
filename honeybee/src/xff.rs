@@ -1,6 +1,6 @@
 // xff.rs
 //
-// Copyright (C) 2024  Minnesota Department of Transportation
+// Copyright (C) 2024-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,41 +13,41 @@
 // GNU General Public License for more details.
 //
 use axum::{
-    async_trait,
     extract::FromRequestParts,
-    http::{request::Parts, HeaderMap, StatusCode},
+    http::{HeaderMap, StatusCode, request::Parts},
 };
-use std::convert::Infallible;
 use std::net::IpAddr;
 
 /// X-Forwarded-For header addresses
 #[derive(Debug)]
 pub struct XForwardedFor(pub Vec<IpAddr>);
 
-#[async_trait]
 impl<S> FromRequestParts<S> for XForwardedFor
 where
     S: Sync,
 {
-    type Rejection = (StatusCode, Infallible);
+    type Rejection = StatusCode;
 
     async fn from_request_parts(
         parts: &mut Parts,
         _state: &S,
     ) -> Result<Self, Self::Rejection> {
-        // FIXME: if XFF header is unparseable, reject with StatusCode
-        Ok(Self(addrs_from_headers(&parts.headers)))
+        Ok(Self(addrs_from_headers(&parts.headers)?))
     }
 }
 
 /// Parse addresses in XFF headers
-fn addrs_from_headers(headers: &HeaderMap) -> Vec<IpAddr> {
-    headers
-        .get_all("X-Forwarded-For")
-        .iter()
-        .filter_map(|h| h.to_str().ok())
-        .flat_map(|h| {
-            h.split(',').filter_map(|a| a.trim().parse::<IpAddr>().ok())
-        })
-        .collect()
+fn addrs_from_headers(headers: &HeaderMap) -> Result<Vec<IpAddr>, StatusCode> {
+    let mut ips = Vec::with_capacity(8);
+    for header in headers.get_all("X-Forwarded-For") {
+        let header = header.to_str().map_err(|_e| StatusCode::FORBIDDEN)?;
+        for a in header.split(',') {
+            let ip = a
+                .trim()
+                .parse::<IpAddr>()
+                .map_err(|_e| StatusCode::FORBIDDEN)?;
+            ips.push(ip);
+        }
+    }
+    Ok(ips)
 }

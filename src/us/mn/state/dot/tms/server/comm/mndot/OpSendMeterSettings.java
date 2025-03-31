@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -121,55 +121,11 @@ public class OpSendMeterSettings extends Op170Device {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase<MndotProperty> phaseTwo() {
-		return new ResetWatchdogMonitor();
-	}
-
-	/** Phase to reset the watchdog monitor */
-	protected class ResetWatchdogMonitor extends Phase<MndotProperty> {
-
-		/** Reset the watchdog monitor */
-		protected Phase<MndotProperty> poll(
-			CommMessage<MndotProperty> mess) throws IOException
-		{
-			byte[] data = {Address.WATCHDOG_BITS};
-			mess.add(new MemoryProperty(
-				Address.SPECIAL_FUNCTION_OUTPUTS + 2, data));
-			mess.storeProps();
-			return new ClearWatchdogMonitor();
-		}
-	}
-
-	/** Phase to clear the watchdog monitor */
-	protected class ClearWatchdogMonitor extends Phase<MndotProperty> {
-
-		/** Clear the watchdog monitor */
-		protected Phase<MndotProperty> poll(
-			CommMessage<MndotProperty> mess) throws IOException
-		{
-			byte[] data = new byte[1];
-			mess.add(new MemoryProperty(
-				Address.SPECIAL_FUNCTION_OUTPUTS + 2, data));
-			mess.storeProps();
-			return new SetCommFail();
-		}
-	}
-
-	/** Phase to set the comm fail time */
-	protected class SetCommFail extends Phase<MndotProperty> {
-
-		/** Set the comm fail time */
-		protected Phase<MndotProperty> poll(
-			CommMessage<MndotProperty> mess) throws IOException
-		{
-			byte[] data = {MeterPoller.COMM_FAIL_THRESHOLD};
-			mess.add(new MemoryProperty(Address.COMM_FAIL, data));
-			mess.storeProps();
-			return new SetTimingTable();
-		}
+		return new SetTimingTable();
 	}
 
 	/** Phase to set the timing table for the ramp meter */
-	protected class SetTimingTable extends Phase<MndotProperty> {
+	private class SetTimingTable extends Phase<MndotProperty> {
 
 		/** Set the timing table for the ramp meter */
 		protected Phase<MndotProperty> poll(
@@ -201,7 +157,7 @@ public class OpSendMeterSettings extends Op170Device {
 	}
 
 	/** Phase to clear the meter verifies for the ramp meter */
-	protected class ClearVerifies extends Phase<MndotProperty> {
+	private class ClearVerifies extends Phase<MndotProperty> {
 
 		/** Clear the meter verifies for the ramp meter */
 		protected Phase<MndotProperty> poll(

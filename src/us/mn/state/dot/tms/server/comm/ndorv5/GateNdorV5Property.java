@@ -103,7 +103,7 @@ public class GateNdorV5Property extends AsciiDeviceProperty {
 		// communication error before state could be determined
 		if (statusOfGate == null)
 			return GateArmState.UNKNOWN;
-		
+
 		// gate-motion and primary faults (arm motion faults)
 		switch (statusOfGate) {
 			case OPEN_IN_PROGRESS:
@@ -118,7 +118,7 @@ public class GateNdorV5Property extends AsciiDeviceProperty {
 				return GateArmState.FAULT;
 		}
 		// secondary faults (arm-lights and gate-sign)
-		if ( (gateArmLights == null || gateArmLights.isError())
+		if ((gateArmLights == null || gateArmLights.isError())
 				|| (warningSign == null || warningSign.isError()))
 			return GateArmState.FAULT;
 		// finished moving status

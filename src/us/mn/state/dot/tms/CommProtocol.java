@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  * Copyright (C) 2012-2021  Iteris Inc.
  * Copyright (C) 2015-2023  SRF Consulting Group
  *
@@ -92,17 +92,14 @@ public enum CommProtocol {
 	/** Natch (20) */
 	NATCH("Natch"),
 
-	/** PeMS (21) */
-	@Deprecated
-	PEMS("PeMS", false),
+	/** Central Park JSON (21) */
+	CPARK("Central Park", false),
 
-	/** SSI -- removed (22) */
-	@Deprecated
-	SSI("SSI", false),
+	/** ADEC TDC (22) */
+	ADEC_TDC("ADEC TDC"),
 
-	/** CHP Incidents (23) */
-	@Deprecated
-	CHP_INCIDENTS("CHP Incidents", false),
+	/** CAP-NWS feed (GeoJSON) (23) */
+	CAP_NWS("CAP-NWS Feed", false),
 
 	/** Nebraska (NDOT) Beacon (24) */
 	NDOT_BEACON("NDOT Beacon", false),
@@ -146,6 +143,7 @@ public enum CommProtocol {
 	GATE_NDOR5("GATE NDORv5"),
 
 	/** GPS using TAIP protocol (37) */
+	@Deprecated
 	GPS_TAIP("GPS TAIP"),
 
 	/** Sierra Wireless GX modem (38) */
@@ -153,15 +151,15 @@ public enum CommProtocol {
 
 	/** GPS using RedLion AT+BMDIAG command (39) */
 	GPS_REDLION("GPS RedLion"),
-	
+
 	/** Cohu Helois PTZ (40) */
 	COHU_HELIOS_PTZ("Cohu Helios PTZ"),
 
 	/** Streambed (41) */
 	STREAMBED("Streambed", false),
-	
-	/** CAP feed (such as IPAWS-OPEN) (42) */
-	CAP("CAP Feed", false),
+
+	/** CAP-IPAWS feed (CAP-XML) (42) */
+	CAP_IPAWS("CAP-IPAWS Feed", false),
 
 	/** ClearGuide (43) */
 	CLEARGUIDE("ClearGuide", false),
@@ -170,7 +168,10 @@ public enum CommProtocol {
 	GPS_DIGI_WR("GPS Digi WR", false),
 
 	/** ONVIF PTZ (45) */
-	ONVIF_PTZ("ONVIF PTZ");
+	ONVIF_PTZ("ONVIF PTZ"),
+
+	/** Sierra SSH GPS (46) */
+	SIERRA_SSH_GPS("Sierra SSH GPS");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {

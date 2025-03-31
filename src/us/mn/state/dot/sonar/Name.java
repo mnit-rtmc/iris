@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2008-2024  Minnesota Department of Transportation
+ * Copyright (C) 2008-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -119,61 +119,68 @@ public class Name {
 		return getTypePart() + SEP + SEP + getAttributePart();
 	}
 
+	/** Write/create/delete access exceptions for OPERATE level */
+	static final String[] TYPE_OPERATE = {
+		"incident", "sign_message"
+	};
+
+	/** Write/create/delete access exceptions for MANAGE level */
+	static final String[] TYPE_MANAGE = {
+		"action_plan", "device_action", "msg_pattern", "msg_line",
+		"time_action"
+	};
+
 	/** Write access exceptions for OPERATE level */
 	static final String[][] WRITE_OPERATE = {
 		{ "action_plan", "phase" },
 		{ "beacon", "state" },
+		{ "camera", "deviceRequest" },
 		{ "camera", "ptz" },
 		{ "camera", "publish" },
 		{ "camera", "recallPreset" },
+		{ "comm_link", "pollEnabled" },
+		{ "controller", "condition" },
 		{ "controller", "deviceRequest" },
 		{ "detector", "fieldLength" },
 		{ "detector", "forceFail" },
+		{ "dms", "deviceRequest" },
 		{ "dms", "msgUser" },
-		{ "gate_arm_array", "armState" },
-		{ "lane_marking", "deployed" },
-		{ "lcs_array", "lcsLock" },
-		{ "ramp_meter", "mLock" },
-		{ "ramp_meter", "rate" },
+		{ "gate_arm_array", "armStateNext" },
+		{ "gate_arm_array", "ownerNext" },
+		{ "lcs", "deviceRequest" },
+		{ "lcs", "lock" },
+		{ "modem", "enabled" },
+		{ "ramp_meter", "deviceRequest" },
+		{ "ramp_meter", "lock" },
 		{ "video_monitor", "camera" },
+		{ "video_monitor", "deviceRequest" },
 		{ "video_monitor", "playList" },
+		{ "weather_sensor", "deviceRequest" },
 	};
 
 	/** Write access exceptions for MANAGE level */
 	static final String[][] WRITE_MANAGE = {
-		{ "action_plan", "notes" },
-		{ "action_plan", "syncActions" },
-		{ "action_plan", "sticky" },
-		{ "action_plan", "ignoreAutoFail" },
-		{ "action_plan", "active" },
-		{ "action_plan", "defaultPhase" },
+		{ "alarm", "description" },
 		{ "beacon", "message" },
 		{ "beacon", "notes" },
 		{ "beacon", "preset" },
 		{ "camera", "notes" },
 		{ "camera", "storePreset" },
 		{ "comm_config", "timeoutMs" },
+		{ "comm_config", "retryThreshold" },
 		{ "comm_config", "idleDisconnectSec" },
 		{ "comm_config", "noResponseDisconnectSec" },
-		{ "comm_link", "pollEnabled" },
-		{ "controller", "condition" },
+		{ "comm_link", "description" },
 		{ "controller", "notes" },
 		{ "detector", "abandoned" },
 		{ "detector", "notes" },
-		{ "dms", "deviceRequest" },
 		{ "dms", "notes" },
 		{ "dms", "preset" },
 		{ "domain", "enabled" },
 		{ "gate_arm", "notes" },
 		{ "gate_arm_array", "notes" },
-		{ "lane_marking", "notes" },
-		{ "lcs_array", "notes" },
-		{ "modem", "enabled" },
+		{ "lcs", "notes" },
 		{ "modem", "timeoutMs" },
-		{ "msg_line", "restrictHashtag" },
-		{ "msg_line", "rank" },
-		{ "msg_pattern", "composeHashtag" },
-		{ "msg_pattern", "flashBeacon" },
 		{ "play_list", "entries" },
 		{ "ramp_meter", "notes" },
 		{ "ramp_meter", "storage" },
@@ -187,7 +194,6 @@ public class Name {
 		{ "video_monitor", "notes" },
 		{ "video_monitor", "restricted" },
 		{ "video_monitor", "monitorStyle" },
-		{ "weather_sensor", "deviceRequest" },
 		{ "weather_sensor", "siteId" },
 		{ "weather_sensor", "altId" },
 		{ "weather_sensor", "notes" },
@@ -195,22 +201,45 @@ public class Name {
 
 	/** Get access level required to write object/attribute */
 	public int accessWrite() {
+		if (canWriteOperate())
+			return AccessLevel.OPERATE.ordinal();
+		else if (canWriteManage())
+			return AccessLevel.MANAGE.ordinal();
+		else
+			return AccessLevel.CONFIGURE.ordinal();
+	}
+
+	/** Check for write access at OPERATE level */
+	private boolean canWriteOperate() {
+		String typ = getTypePart();
+		for (String acc: TYPE_OPERATE) {
+			if (acc.equals(typ))
+				return true;
+		}
 		if (isAttribute()) {
-			String typ = getTypePart();
 			String att = getAttributePart();
 			for (String[] acc: WRITE_OPERATE) {
 				if (acc[0].equals(typ) && acc[1].equals(att))
-					return AccessLevel.OPERATE.ordinal();
+					return true;
 			}
+		}
+		return false;
+	}
+
+	/** Check for write access at MANAGE level */
+	private boolean canWriteManage() {
+		String typ = getTypePart();
+		for (String acc: TYPE_MANAGE) {
+			if (acc.equals(typ))
+				return true;
+		}
+		if (isAttribute()) {
+			String att = getAttributePart();
 			for (String[] acc: WRITE_MANAGE) {
 				if (acc[0].equals(typ) && acc[1].equals(att))
-					return AccessLevel.MANAGE.ordinal();
+					return true;
 			}
-		} else if (isObject()) {
-			// Allow CREATE/DELETE of SignMessage w/OPERATE
-			if ("sign_message".equals(getTypePart()))
-				return AccessLevel.OPERATE.ordinal();
 		}
-		return AccessLevel.CONFIGURE.ordinal();
+		return false;
 	}
 }

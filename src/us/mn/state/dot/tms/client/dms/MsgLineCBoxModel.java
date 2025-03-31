@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2023  Minnesota Department of Transportation
+ * Copyright (C) 2008-2025  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -117,7 +117,7 @@ public class MsgLineCBoxModel extends AbstractListModel<MsgLine>
 
 	/** Get or create a message line for the given string */
 	private MsgLine getMsgLine(String s) {
-		MultiString multi = new MultiString(s.trim()).normalizeLine();
+		MultiString multi = new MultiString(s).normalizeLine();
 		if (multi.isBlank())
 			return BLANK_LINE;
 		String ms = multi.toString();

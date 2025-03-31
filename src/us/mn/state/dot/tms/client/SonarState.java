@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2024  Minnesota Department of Transportation
+ * Copyright (C) 2007-2025  Minnesota Department of Transportation
  * Copyright (C) 2015       Iteris Inc.
  * Copyright (C) 2016-2021  SRF Consulting Group
  *
@@ -41,12 +41,12 @@ import us.mn.state.dot.tms.DayMatcher;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.Domain;
+import us.mn.state.dot.tms.EventConfig;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Gps;
 import us.mn.state.dot.tms.Graphic;
-import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.Permission;
@@ -132,6 +132,15 @@ public class SonarState extends Client {
 	/** Get the system attribute type cache */
 	public TypeCache<SystemAttribute> getSystemAttributes() {
 		return system_attributes;
+	}
+
+	/** Cache of event configs */
+	private final TypeCache<EventConfig> event_configs =
+		new TypeCache<EventConfig>(EventConfig.class, this);
+
+	/** Get the event config type cache */
+	public TypeCache<EventConfig> getEventConfigs() {
+		return event_configs;
 	}
 
 	/** Cache of graphic proxies */
@@ -254,6 +263,14 @@ public class SonarState extends Client {
 		return dms_cache;
 	}
 
+	/** Cache of LCS objects */
+	private final LcsCache lcs_cache;
+
+	/** Get the LCS object cache */
+	public LcsCache getLcsCache() {
+		return lcs_cache;
+	}
+
 	/** Cache of incident objects */
 	private final IncCache inc_cache;
 
@@ -284,23 +301,6 @@ public class SonarState extends Client {
 	/** Get the alert info cache */
 	public TypeCache<AlertInfo> getAlertInfos() {
 		return alert_infos;
-	}
-
-	/** Cache of LCS objects */
-	private final LcsCache lcs_cache;
-
-	/** Get the LCS object cache */
-	public LcsCache getLcsCache() {
-		return lcs_cache;
-	}
-
-	/** Cache of lane markings */
-	private final TypeCache<LaneMarking> lane_markings =
-		new TypeCache<LaneMarking>(LaneMarking.class, this);
-
-	/** Get the lane marking cache */
-	public TypeCache<LaneMarking> getLaneMarkings() {
-		return lane_markings;
 	}
 
 	/** Cache of weather sensors */
@@ -520,6 +520,7 @@ public class SonarState extends Client {
 		con_cache = new ConCache(this);
 		det_cache = new DetCache(this);
 		dms_cache = new DmsCache(this);
+		lcs_cache = new LcsCache(this);
 		inc_cache = new IncCache(this);
 		alert_configs = new TypeCache<AlertConfig>(AlertConfig.class,
 			this);
@@ -527,7 +528,6 @@ public class SonarState extends Client {
 			this);
 		alert_infos = new TypeCache<AlertInfo>(AlertInfo.class,
 			this);
-		lcs_cache = new LcsCache(this);
 		gate_arm_array_model = new ProxyListModel<GateArmArray>(
 			gate_arm_arrays);
 		gate_arm_array_model.initialize();
@@ -597,15 +597,16 @@ public class SonarState extends Client {
 		// FIXME: this is a hack ...
 		BaseHelper.user = user;
 		populate(system_attributes, true);
+		populate(event_configs, true);
 		SubnetChecker.start();
 		populate(map_extents, true);
-		populate(roads);
-		populate(road_affixes);
-		populate(geo_locs);
+		populateReadable(roads);
+		populateReadable(geo_locs);
+		populateReadable(road_affixes);
 		populateReadable(rpt_conduits);
 		populateReadable(words);
-		populateReadable(day_matchers);
 		populateReadable(day_plans);
+		populateReadable(day_matchers);
 		populateReadable(plan_phases);
 		// Populate a second time to resolve nextPhase self-references
 		populateReadable(plan_phases);
@@ -626,15 +627,11 @@ public class SonarState extends Client {
 		}
 		populateReadable(graphics);
 		dms_cache.populate(this);
-		inc_cache.populate(this);
 		lcs_cache.populate(this);
-		populateReadable(lane_markings);
-		if (canRead(LaneMarking.SONAR_TYPE))
-			lane_markings.ignoreAttribute("operation");
+		inc_cache.populate(this);
 		populateReadable(weather_sensors);
 		if (canRead(WeatherSensor.SONAR_TYPE)) {
 			weather_sensors.ignoreAttribute("operation");
-			weather_sensors.ignoreAttribute("stamp");
 		}
 		populateReadable(tag_readers);
 		if (canRead(TagReader.SONAR_TYPE))
@@ -651,8 +648,6 @@ public class SonarState extends Client {
 		populateReadable(gpses);
 		if (canRead(Gps.SONAR_TYPE)) {
 			gpses.ignoreAttribute("operation");
-			gpses.ignoreAttribute("latestPoll");
-			gpses.ignoreAttribute("latestSample");
 		}
 		populateReadable(cam_templates);
 		populateReadable(vid_src_templates);

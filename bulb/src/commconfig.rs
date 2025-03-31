@@ -128,6 +128,7 @@ pub struct CommConfig {
     // secondary attributes
     pub protocol: Option<u32>,
     pub timeout_ms: Option<u32>,
+    pub retry_threshold: Option<u32>,
     pub poll_period_sec: Option<u32>,
     pub long_poll_period_sec: Option<u32>,
     pub idle_disconnect_sec: Option<u32>,
@@ -213,6 +214,7 @@ impl CommConfig {
         let description = HtmlStr::new(&self.description);
         let protocols = anc.protocols_html(self);
         let timeout_ms = OptVal(self.timeout_ms);
+        let retry_threshold = OptVal(self.retry_threshold);
         let poll_periods = period_options(&PERIODS[1..], self.poll_period_sec);
         let long_periods =
             period_options(&PERIODS[1..], self.long_poll_period_sec);
@@ -235,6 +237,11 @@ impl CommConfig {
               <label for='timeout_ms'>Timeout (ms)</label>\
               <input id='timeout_ms' type='number' min='0' size='8' \
                      max='20000' step='50' value='{timeout_ms}'>\
+            </div>\
+            <div class='row'>\
+              <label for='retry_threshold'>Retry Threshold</label>\
+              <input id='retry_threshold' type='number' min='0' size='2' \
+                     max='8' value='{retry_threshold}'>\
             </div>\
             <div class='row'>\
               <label for='poll_period_sec'>Poll Period</label>\
@@ -303,6 +310,7 @@ impl Card for CommConfig {
         fields.changed_input("description", &self.description);
         fields.changed_select("protocol", self.protocol);
         fields.changed_input("timeout_ms", self.timeout_ms);
+        fields.changed_input("retry_threshold", self.retry_threshold);
         fields.changed_select("poll_period_sec", self.poll_period_sec);
         fields
             .changed_select("long_poll_period_sec", self.long_poll_period_sec);

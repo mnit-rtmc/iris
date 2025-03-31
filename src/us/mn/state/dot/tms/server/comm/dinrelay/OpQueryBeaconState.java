@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2021  Minnesota Department of Transportation
+ * Copyright (C) 2014-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.dinrelay;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
@@ -38,8 +39,10 @@ public class OpQueryBeaconState extends OpDevice<DinRelayProperty> {
 			int p = beacon.getPin();
 			if (p > 0 && p <= outlets.length)
 				beacon.setFlashingNotify(outlets[p - 1]);
-			else
-				setErrorStatus("Invalid pin");
+			else {
+				beacon.setStateNotify(BeaconState.UNKNOWN);
+				putCtrlFaults("other", "Invalid pin");
+			}
 		}
 		public void complete(boolean success) { }
 	});

@@ -111,6 +111,12 @@ public interface CommConfig extends SonarObject {
 	/** Get the polling timeout (milliseconds) */
 	int getTimeoutMs();
 
+	/** Set operation retry threshold */
+	void setRetryThreshold(int rt);
+
+	/** Get operation retry threshold */
+	int getRetryThreshold();
+
 	/** Set poll period (seconds) */
 	void setPollPeriodSec(int s);
 

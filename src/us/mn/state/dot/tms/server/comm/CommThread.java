@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2017-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.EventType;
 import static us.mn.state.dot.tms.EventType.COMM_ERROR;
 import static us.mn.state.dot.tms.EventType.CONNECTION_REFUSED;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * CommThread represents a communication channel with priority-queued polling.
@@ -34,6 +35,14 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * @author John L. Stanley - SRF Consulting
  */
 public class CommThread<T extends ControllerProperty> {
+
+	/** Maximum message length */
+	static private final int MAX_MSG_LEN = 64;
+
+	/** Filter a message */
+	static private String filterMsg(String m) {
+		return SString.truncate(m, MAX_MSG_LEN);
+	}
 
 	/** Get a message describing an exception */
 	static private String exceptionMessage(Exception e) {
@@ -66,11 +75,11 @@ public class CommThread<T extends ControllerProperty> {
 			logger.log(thread.getName() + " " + msg);
 	}
 
-	/** Get an exception message */
-	protected String getMessage(Exception e) {
+	/** Log an exception message */
+	protected String logException(Exception e) {
 		String msg = exceptionMessage(e);
 		clog("Exception -- " + msg);
-		return msg;
+		return filterMsg(msg);
 	}
 
 	/** Threaded poller */
@@ -166,9 +175,10 @@ public class CommThread<T extends ControllerProperty> {
 			performOperations();
 		}
 		catch (MessengerException e) {
-			getMessage(e);
+			logException(e);
 		}
 		catch (RuntimeException e) {
+			queue.drain();
 			e.printStackTrace();
 		}
 		finally {
@@ -189,7 +199,7 @@ public class CommThread<T extends ControllerProperty> {
 				pollQueue(m);
 			}
 			catch (DisconnectException e) {
-				getMessage(e);
+				logException(e);
 				break;
 			}
 			catch (ReconnectException e) {
@@ -199,20 +209,20 @@ public class CommThread<T extends ControllerProperty> {
 			catch (NoModemException e) {
 				// Keep looping until modem is available
 				connected = false;
-				getMessage(e);
+				logException(e);
 			}
 			catch (ConnectException e) {
-				String msg = getMessage(e);
+				String msg = logException(e);
 				if (poller.handleError(CONNECTION_REFUSED, msg))
 					break;
 			}
 			catch (NoResponseException e) {
-				String msg = getMessage(e);
+				logException(e);
 				if (poller.noMoreOps())
 					break;
 			}
 			catch (IOException e) {
-				String msg = getMessage(e);
+				String msg = logException(e);
 				if (poller.handleError(COMM_ERROR, msg))
 					break;
 			}
@@ -263,46 +273,46 @@ public class CommThread<T extends ControllerProperty> {
 			sendSettings(o.getController(), o.getPriority());
 		}
 		catch (ProtocolException e) {
-			String msg = getMessage(e);
+			String msg = logException(e);
+			o.putCtrlFaults("other", msg);
 			o.setFailed();
-			o.setMaintStatus(msg);
 		}
 		catch (ChecksumException e) {
-			String msg = getMessage(e);
-			o.handleCommError(EventType.CHECKSUM_ERROR, msg);
+			logException(e);
+			o.handleCommError(EventType.CHECKSUM_ERROR);
 			m.drain();
 		}
 		catch (ParsingException e) {
-			String msg = getMessage(e);
-			o.handleCommError(EventType.PARSING_ERROR, msg);
+			logException(e);
+			o.handleCommError(EventType.PARSING_ERROR);
 			m.drain();
 		}
 		catch (ControllerException e) {
-			String msg = getMessage(e);
-			o.handleCommError(EventType.CONTROLLER_ERROR, msg);
+			String msg = logException(e);
+			o.putCtrlFaults("other", msg);
+			o.handleCommError(EventType.CONTROLLER_ERROR);
 			o.setFailed();
-			o.setMaintStatus(msg);
 		}
 		catch (SocketTimeoutException e) {
-			String msg = getMessage(e);
-			o.handleCommError(EventType.POLL_TIMEOUT_ERROR, msg);
+			logException(e);
+			o.handleCommError(EventType.POLL_TIMEOUT_ERROR);
 			// Not sure if this is needed in addition
 			// to no_response_disconnect feature
 			if ((!o.isSuccess()) && needsReconnect(m))
 				throw new ReconnectException();
 		}
 		catch (SocketException e) {
-			String msg = getMessage(e);
+			logException(e);
 			if (m instanceof BasicMessenger) {
 				BasicMessenger bm = (BasicMessenger) m;
 				if (bm.hitNoResponseDisconnect()) {
 					o.handleCommError(EventType
-						.POLL_TIMEOUT_ERROR, msg);
+						.POLL_TIMEOUT_ERROR);
 					o.setFailed();
 					throw new NoResponseException();
 				}
 			}
-			o.handleCommError(EventType.COMM_ERROR, msg);
+			o.handleCommError(EventType.COMM_ERROR);
 			throw new ReconnectException();
 		}
 		finally {

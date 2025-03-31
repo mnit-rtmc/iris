@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -11,12 +11,12 @@
 // GNU General Public License for more details.
 //
 use crate::error::{Error, Result};
-use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
+use percent_encoding::{NON_ALPHANUMERIC, utf8_percent_encode};
 use std::borrow::{Borrow, Cow};
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{console, Blob, Headers, Request, RequestInit, Response};
+use web_sys::{Blob, Headers, Request, RequestInit, Response, console};
 
 /// Fetchable content types
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]

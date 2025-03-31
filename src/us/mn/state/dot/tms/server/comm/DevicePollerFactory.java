@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2021  Minnesota Department of Transportation
+ * Copyright (C) 2011-2025  Minnesota Department of Transportation
  * Copyright (C) 2015-2022  SRF Consulting Group
  * Copyright (C) 2012-2021  Iteris Inc.
  *
@@ -19,12 +19,14 @@ package us.mn.state.dot.tms.server.comm;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommLinkHelper;
 import us.mn.state.dot.tms.CommProtocol;
+import us.mn.state.dot.tms.server.comm.adectdc.TdcPoller;
 import us.mn.state.dot.tms.server.comm.axisptz.AxisPTZPoller;
 import us.mn.state.dot.tms.server.comm.canoga.CanogaPoller;
 import us.mn.state.dot.tms.server.comm.cap.CapPoller;
 import us.mn.state.dot.tms.server.comm.cbw.CBWPoller;
 import us.mn.state.dot.tms.server.comm.clearguide.ClearGuidePoller;
 import us.mn.state.dot.tms.server.comm.cohuptz.CohuPTZPoller;
+import us.mn.state.dot.tms.server.comm.cpark.CParkPoller;
 import us.mn.state.dot.tms.server.comm.onvifptz.OnvifPTZPoller;
 import us.mn.state.dot.tms.server.comm.dinrelay.DinRelayPoller;
 import us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller;
@@ -47,6 +49,7 @@ import us.mn.state.dot.tms.server.comm.pelcod.PelcoDPoller;
 import us.mn.state.dot.tms.server.comm.pelcop.PelcoPPoller;
 import us.mn.state.dot.tms.server.comm.redlion.RedLionPoller;
 import us.mn.state.dot.tms.server.comm.sierragx.SierraGxPoller;
+import us.mn.state.dot.tms.server.comm.sierrassh.SierraSshPoller;
 import us.mn.state.dot.tms.server.comm.ss105.SS105Poller;
 import us.mn.state.dot.tms.server.comm.ss125.SS125Poller;
 import us.mn.state.dot.tms.server.comm.stc.STCPoller;
@@ -65,6 +68,8 @@ public class DevicePollerFactory {
 	static public DevicePoller create(CommLink link) {
 		CommProtocol protocol = CommLinkHelper.getProtocol(link);
 		switch (protocol) {
+		case ADEC_TDC:
+			return new TdcPoller(link);
 		case AXIS_PTZ:
 			return new AxisPTZPoller(link);
 		case BANNER_DXM:
@@ -75,6 +80,8 @@ public class DevicePollerFactory {
 			return new CBWPoller(link);
 		case COHU_PTZ:
 			return new CohuPTZPoller(link, protocol);
+		case CPARK:
+			return new CParkPoller(link);
 		case DIN_RELAY:
 			return new DinRelayPoller(link);
 		case DMSXML:
@@ -132,12 +139,15 @@ public class DevicePollerFactory {
 			return new CohuPTZPoller(link, protocol);
 		case STREAMBED:
 			return new StreambedPoller(link);
-		case CAP:
-			return new CapPoller(link);
+		case CAP_NWS:
+		case CAP_IPAWS:
+			return new CapPoller(link, protocol);
 		case CLEARGUIDE:
 			return new ClearGuidePoller(link);
 		case NDOT_BEACON:
 			return new NdotBeaconPoller(link);
+		case SIERRA_SSH_GPS:
+			return new SierraSshPoller(link);
 		default:
 			return null;
 		}

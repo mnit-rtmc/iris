@@ -1,20 +1,26 @@
 [workspace]
 members = ["honeybee", "mayfly", "bulb", "rendzina", "resources"]
+default-members = ["honeybee", "mayfly"]
 resolver = "2"
 
 [workspace.package]
-version = "5.61.0"
-edition = "2021"
+version = "5.69.0"
+edition = "2024"
 
 [workspace.dependencies]
-bb8 = "0.8"
-bb8-postgres = "0.8"
+bb8 = "0.9"
+bb8-postgres = "0.9"
 chrono = "0.4"
 env_logger = { version = "0.11", default-features = false }
+http = "1"
 log = "0.4"
-ntcip = "0.13"
-thiserror = "1"
+ntcip = "0.14"
+thiserror = "2"
 tokio-postgres = "0.7"
+
+[workspace.dependencies.axum]
+version = "0.8"
+features = ["http2"]
 
 [workspace.dependencies.serde]
 version = "1"

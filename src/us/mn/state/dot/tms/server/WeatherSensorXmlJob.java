@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017  Iteris Inc.
+ * Copyright (C) 2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +18,7 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.util.Calendar;
 import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * Job to write out weather sensor XML file.
@@ -26,7 +28,7 @@ import us.mn.state.dot.sched.Job;
 public class WeatherSensorXmlJob extends Job {
 
 	/** Seconds to offset each poll from start of interval */
-	static protected final int OFFSET_SECS = 20;
+	static private final int OFFSET_SECS = 20;
 
 	/** Create a new job */
 	public WeatherSensorXmlJob() {
@@ -35,8 +37,11 @@ public class WeatherSensorXmlJob extends Job {
 
 	/** Perform the job */
 	public void perform() throws IOException {
-		WeatherSensorXmlWriter writer = new WeatherSensorXmlWriter();
-		writer.write();
+		if (SystemAttrEnum.LEGACY_XML_WEATHER_SENSOR_ENABLE.getBoolean()) {
+			WeatherSensorXmlWriter writer =
+				new WeatherSensorXmlWriter();
+			writer.write();
+		}
 		WeatherSensorCsvWriter.createWrite(1);
 		WeatherSensorCsvWriter.createWrite(2);
 	}

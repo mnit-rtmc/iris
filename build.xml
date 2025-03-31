@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- ant build file for IRIS project
-     Copyright (C) 2007-2024  Minnesota Department of Transportation
+     Copyright (C) 2007-2025  Minnesota Department of Transportation
 
      This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -92,8 +92,6 @@
 	<target name="check-rpm">
 		<antcall target="check-dep">
 			<param name="file.dep" value="iris-build.properties"/>
-			<param name="file.dep" value="javax.activation.jar"/>
-			<param name="file.dep" value="mail.jar"/>
 			<param name="file.dep" value="jna-${jna_version}.jar"/>
 			<param name="file.dep"
 			       value="jna-platform-${jna_version}.jar"/>
@@ -104,6 +102,8 @@
 				value="postgis-jdbc-${postgis_version}.jar"/>
 			<param name="file.dep"
 				value="postgis-geometry-${postgis_version}.jar"/>
+			<param name="file.dep"
+				value="jsch-${jsch_version}.jar"/>
 		</antcall>
 	</target>
 
@@ -120,6 +120,7 @@
 				        value="${gst_java_version}"/>
 				<filter token="JSON.VERSION" value="${json_version}"/>
 				<filter token="POSTGIS.VERSION" value="${postgis_version}"/>
+				<filter token="JSCH.VERSION" value="${jsch_version}"/>
 				<filter token="BUILD.RPM" value="${build.rpm}"/>
 				<filter token="RPM.URL" value="${rpm.url}"/>
 				<filter token="RPM.RELEASE"
@@ -177,7 +178,7 @@
 		<javac srcdir="${build.src}"
 		       destdir="${build.classes}"
 		       debug="${debug}"
-		       deprecation="on"
+		       deprecation="off"
 		       includeantruntime="false"
 		       source="1.8"
 		       target="1.8">
@@ -234,11 +235,10 @@
 		</copy>
 		<copy todir="${dist.server}">
 			<fileset dir="${lib.dir}">
-				<include name="javax.activation.jar"/>
-				<include name="mail.jar"/>
 				<include name="json-${json_version}.jar"/>
 				<include name="postgis-jdbc-${postgis_version}.jar"/>
 				<include name="postgis-geometry-${postgis_version}.jar"/>
+				<include name="jsch-${jsch_version}.jar"/>
 			</fileset>
 		</copy>
 	</target>

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2024  Minnesota Department of Transportation
+ * Copyright (C) 2013-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -149,9 +149,6 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 
 	/** Operation description label */
 	private final JLabel op_lbl = IPanel.createValueLabel();
-
-	/** Status component */
-	private final JLabel status_lbl = IPanel.createValueLabel();
 
 	/** Send settings action */
 	private final IAction settings = new IAction("device.send.settings") {

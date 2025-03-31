@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.CameraPreset;
@@ -36,20 +35,25 @@ import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.MeterAlgorithm;
+import us.mn.state.dot.tms.MeterLock;
+import us.mn.state.dot.tms.MeterQueueState;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.RampMeterLock;
-import us.mn.state.dot.tms.RampMeterQueue;
+import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.RampMeterType;
+import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TimingTable;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.geo.Position;
+import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
+import us.mn.state.dot.tms.server.event.MeterLockEvent;
 
 /**
  * A ramp meter is a traffic signal which meters the flow of traffic on a
@@ -59,27 +63,15 @@ import us.mn.state.dot.tms.server.comm.MeterPoller;
  */
 public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
+	/** Comm loss threshold */
+	static public final Interval COMM_LOSS_THRESHOLD =
+		new Interval(3, MINUTES);
+
 	/** Occupancy to determine merge backup */
 	static private final int MERGE_BACKUP_OCC = 30;
 
 	/** Default maximum wait time (in seconds) */
 	static public final int DEFAULT_MAX_WAIT = 240;
-
-	/** Filter a releae rate for valid range */
-	static public int filterRate(int r) {
-		r = Math.max(r, getMinRelease());
-		return Math.min(r, getMaxRelease());
-	}
-
-	/** Get the absolute minimum release rate */
-	static public int getMinRelease() {
-		return SystemAttributeHelper.getMeterMinRelease();
-	}
-
-	/** Get the absolute maximum release rate */
-	static public int getMaxRelease() {
-		return SystemAttributeHelper.getMeterMaxRelease();
-	}
 
 	/** Get the current AM/PM period */
 	static private int currentPeriod() {
@@ -90,7 +82,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"meter_type, storage, max_wait, algorithm, am_target, "+
-			"pm_target, beacon, preset, m_lock FROM iris." +
+			"pm_target, beacon, preset, lock, status FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -108,7 +100,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 					row.getInt(11),    // pm_target
 					row.getString(12), // beacon
 					row.getString(13), // preset
-					row.getInt(14)     // m_lock
+					row.getString(14), // lock
+					row.getString(15)  // status
 				));
 			}
 		});
@@ -131,8 +124,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		map.put("pm_target", pm_target);
 		map.put("beacon", beacon);
 		map.put("preset", preset);
-		if (m_lock != null)
-			map.put("m_lock", m_lock.ordinal());
+		map.put("lock", lock);
+		map.put("status", status);
 		return map;
 	}
 
@@ -142,42 +135,35 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		GeoLocImpl g = new GeoLocImpl(name, SONAR_TYPE);
 		g.notifyCreate();
 		geo_loc = g;
-	}
-
-	/** Create a ramp meter */
-	private RampMeterImpl(String n, GeoLocImpl loc, ControllerImpl c,
-		int p, String nt, int t, int st, int w, int alg, int at, int pt,
-		Beacon b, CameraPreset cp, Integer lk)
-	{
-		super(n, c, p, nt);
-		geo_loc = loc;
-		meter_type = RampMeterType.fromOrdinal(t);
-		storage = st;
-		max_wait = w;
-		setPreset(cp);
-		algorithm = alg;
-		am_target = at;
-		pm_target = pt;
-		beacon = b;
-		m_lock = RampMeterLock.fromOrdinal(lk);
-		rate = null;
-		initTransients();
+		lock = null;
+		status = null;
 	}
 
 	/** Create a ramp meter */
 	private RampMeterImpl(String n, String loc, String c, int p,
-		String nt, int t, int st, int w, int alg, int at, int pt,
-		String b, String cp, Integer lk)
+		String nt, int t, int s, int w, int alg, int at, int pt,
+		String b, String cp, String lk, String st)
 	{
-		this(n, lookupGeoLoc(loc), lookupController(c), p, nt, t, st, w,
-		     alg, at, pt, lookupBeacon(b), lookupPreset(cp), lk);
+		super(n, lookupController(c), p, nt);
+		geo_loc = lookupGeoLoc(loc);
+		meter_type = RampMeterType.fromOrdinal(t);
+		storage = s;
+		max_wait = w;
+		setPreset(lookupPreset(cp));
+		algorithm = alg;
+		am_target = at;
+		pm_target = pt;
+		beacon = lookupBeacon(b);
+		lock = lk;
+		status = st;
+		initTransients();
 	}
 
 	/** Initialize the transient state */
 	@Override
 	public void initTransients() {
 		super.initTransients();
-		lookupDetectors();
+		lookupEntranceNode();
 		updateStyles();
 	}
 
@@ -438,78 +424,146 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return preset;
 	}
 
-	/** Metering rate lock status */
-	private RampMeterLock m_lock = null;
+	/** Meter lock (JSON) */
+	private String lock = null;
 
-	/** Set the ramp meter lock status */
+	/** Set the lock as JSON */
 	@Override
-	public void setMLock(Integer l) {
-		// Required by RampMeter iface; shouldn't ever be called
-		m_lock = RampMeterLock.fromOrdinal(l);
+	public void setLock(String lk) {
+		lock = lk;
 	}
 
-	/** Set the ramp meter lock (update) */
-	private void setMLock(RampMeterLock l) throws TMSException {
-		if (l == m_lock)
-			return;
-		if (l != null)
-			store.update(this, "m_lock", l.ordinal());
-		else
-			store.update(this, "m_lock", null);
-		m_lock = l;
+	/** Set the lock as JSON */
+	public void doSetLock(String lk) throws TMSException {
+		if (!objectEquals(lk, lock)) {
+			MeterLock ml = new MeterLock(lk);
+			if (lk != null)
+				checkLock(ml);
+			setLockChecked(lk);
+		}
+	}
+
+	/** Check a lock */
+	private void checkLock(MeterLock ml) throws TMSException {
+		if (ml.optReason() == null)
+			throw new ChangeVetoException("No reason!");
+		if (!getProcUser().equals(ml.optUser()))
+			throw new ChangeVetoException("Bad user!");
+		String exp = ml.optExpires();
+		if (exp != null && TimeSteward.parse8601(exp) == null)
+			throw new ChangeVetoException("Bad expiration!");
+		if (exp != null && ml.optRate() == null)
+			throw new ChangeVetoException("Bad rate!");
+	}
+
+	/** Set the lock as JSON */
+	private void setLockChecked(String lk) throws TMSException {
+		store.update(this, "lock", lk);
+		lock = lk;
+		logEvent(new MeterLockEvent(name, lk));
 		updateStyles();
+		// send the new rate immediately
+		Integer rt = getLockRate();
+		if (rt != null)
+			sendReleaseRate(validateRate(rt));
 	}
 
-	/** Set the ramp meter lock (notify clients) */
-	private void setMLockNotify(RampMeterLock l) {
-		try {
-			setMLock(l);
-			notifyAttribute("mLock");
+	/** Check if lock has expired */
+	public void checkLockExpired() {
+		MeterLock ml = new MeterLock(lock);
+		String exp = ml.optExpires();
+		if (exp != null) {
+			Long e = TimeSteward.parse8601(exp);
+			if (e != null && e < TimeSteward.currentTimeMillis()) {
+				try {
+					setLockChecked(null);
+					notifyAttribute("lock");
+				}
+				catch (TMSException ex) {
+					logError("checkLockExpired: " +
+						ex.getMessage());
+				}
+			}
 		}
-		catch (TMSException e) {
-			e.printStackTrace();
-		}
 	}
 
-	/** Set the ramp meter lock status */
-	public void doSetMLock(Integer l) throws TMSException {
-		RampMeterLock ml = RampMeterLock.fromOrdinal(l);
-		if (ml != null && ml.controller_lock)
-			throw new ChangeVetoException("Invalid lock value");
-		setMLock(ml);
-	}
-
-	/** Get the ramp meter lock status */
+	/** Get the lock as JSON */
 	@Override
-	public Integer getMLock() {
-		return (m_lock != null) ? m_lock.ordinal() : null;
+	public String getLock() {
+		return lock;
 	}
 
 	/** Is the metering rate locked? */
 	public boolean isLocked() {
-		return m_lock != null;
+		return lock != null;
+	}
+
+	/** Get the lock metering rate */
+	private Integer getLockRate() {
+		MeterLock ml = new MeterLock(lock);
+		return ml.optRate();
+	}
+
+	/** Current (JSON) meter status */
+	private String status;
+
+	/** Set the current meter status as JSON */
+	private void setStatusNotify(String st) {
+		if (!objectEquals(st, status)) {
+			try {
+				store.update(this, "status", st);
+				status = st;
+				notifyAttribute("status");
+				updateStyles();
+			}
+			catch (TMSException e) {
+				logError("status: " + e.getMessage());
+			}
+		}
+	}
+
+	/** Set a status value and notify clients of the change */
+	private void setStatusNotify(String key, Object value) {
+		String st = RampMeterHelper.putJson(status, key, value);
+		setStatusNotify(st);
+	}
+
+	/** Set a fault value and notify clients of the change */
+	private void setFaultNotify(Object value) {
+		setStatusNotify(RampMeter.FAULT, value);
+	}
+
+	/** Update fault with checks */
+	private void updateFault(String flt) {
+		String f = RampMeterHelper.optFault(this);
+		// Don't overwrite POLICE_PANEL / MANUAL_MODE
+		if (!objectEquals(f, RampMeter.FAULT_POLICE_PANEL) &&
+		    !objectEquals(f, RampMeter.FAULT_MANUAL_MODE))
+			setFaultNotify(flt);
+	}
+
+	/** Get the current status as JSON */
+	@Override
+	public String getStatus() {
+		return status;
 	}
 
 	/** Set the status of the police panel switch */
 	public void setPolicePanel(boolean p) {
-		if (p) {
-			if (m_lock == null)
-				setMLockNotify(RampMeterLock.POLICE_PANEL);
-		} else {
-			if (m_lock == RampMeterLock.POLICE_PANEL)
-				setMLockNotify(null);
-		}
+		String f = RampMeterHelper.optFault(this);
+		if (p)
+			setFaultNotify(RampMeter.FAULT_POLICE_PANEL);
+		else if (RampMeter.FAULT_POLICE_PANEL.equals(f))
+			setFaultNotify(null);
 	}
 
 	/** Set the status of manual metering */
-	public void setManual(boolean m) {
-		if (m) {
-			if (m_lock == null)
-				setMLockNotify(RampMeterLock.MANUAL);
-		} else {
-			if (m_lock == RampMeterLock.MANUAL)
-				setMLockNotify(null);
-		}
+	public void setManualMode(boolean m) {
+		String f = RampMeterHelper.optFault(this);
+		if (m)
+			setFaultNotify(RampMeter.FAULT_MANUAL_MODE);
+		else if (RampMeter.FAULT_MANUAL_MODE.equals(f))
+			setFaultNotify(null);
 	}
 
 	/** Get the meter poller */
@@ -551,10 +605,21 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		case SIMPLE:
 			return new SimpleAlgorithm();
 		case K_ADAPTIVE:
-			return KAdaptiveAlgorithm.meterState(this);
+			return createKAdaptiveState();
 		default:
 			return null;
 		}
+	}
+
+	/** Create K-Adaptive algorithm state */
+	private MeterAlgorithmState createKAdaptiveState() {
+		MeterAlgorithmState as = null;
+		if (ent_node != null) {
+			as = KAdaptiveAlgorithm.createState(this);
+			if (null == as)
+				updateFault(RampMeter.FAULT_MISSING_STATE);
+		}
+		return as;
 	}
 
 	/** Validate the metering algorithm */
@@ -566,38 +631,31 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			logError("validateAlgorithm: No state");
 	}
 
-	/** Ramp meter queue status */
-	private RampMeterQueue queue = RampMeterQueue.UNKNOWN;
+	/** Meter queue state */
+	private MeterQueueState queue = MeterQueueState.UNKNOWN;
 
-	/** Set the queue status */
-	private void setQueueNotify(RampMeterQueue q) {
+	/** Set the queue state */
+	private void setQueueNotify(MeterQueueState q) {
 		if (q != queue) {
 			queue = q;
-			notifyAttribute("queue");
-			updateStyles();
+			setStatusNotify(RampMeter.QUEUE, q.description);
 		}
 	}
 
-	/** Get the queue status */
-	@Override
-	public int getQueue() {
-		return queue.ordinal();
-	}
-
-	/** Update the ramp meter queue status */
+	/** Update the ramp meter queue state */
 	public void updateQueueState() {
-		setQueueNotify(queueStatus(alg_state));
+		setQueueNotify(queueState(alg_state));
 	}
 
-	/** Determine the queue status */
-	private RampMeterQueue queueStatus(MeterAlgorithmState as) {
-		if (as != null && !isFailed()) {
+	/** Determine the queue state */
+	private MeterQueueState queueState(MeterAlgorithmState as) {
+		if (as != null && !isOffline()) {
 			if (isMetering())
 				return as.getQueueState(this);
 			else
-				return RampMeterQueue.EMPTY;
+				return MeterQueueState.EMPTY;
 		} else
-			return RampMeterQueue.UNKNOWN;
+			return MeterQueueState.UNKNOWN;
 	}
 
 	/** Planned next release rate */
@@ -614,79 +672,59 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Update the planned rate */
 	public void updateRatePlanned() {
-		if (!isLocked())
-			setRateNext(ratePlanned);
+		Integer rt = isLocked() ? getLockRate() : ratePlanned;
+		sendReleaseRate(validateRate(rt));
 		setRatePlanned(null);
-	}
-
-	/** Set the release rate (vehicles per hour) */
-	@Override
-	public void setRateNext(Integer r) {
-		sendReleaseRate(validateRate(r));
 	}
 
 	/** Validate a release rate to send to the meter */
 	private Integer validateRate(Integer r) {
 		return (r != null && isCommOk())
-		      ? filterRate(Math.max(r, getMinimum()))
+		      ? RampMeterHelper.filterRate(Math.max(r, getMinimum()))
 		      : null;
 	}
 
 	/** Check if communication to the meter is OK */
 	private boolean isCommOk() {
-		return getFailMillis() < MeterPoller.COMM_FAIL_THRESHOLD_MS;
+		return getFailMillis() < COMM_LOSS_THRESHOLD.ms();
 	}
 
 	/** Get current minimum release rate (vehicles per hour) */
 	private int getMinimum() {
-		return (isFailed()) ? getMaxRelease() : getMinRelease();
+		return isOffline()
+		     ? RampMeterHelper.getMaxRelease()
+		     : RampMeterHelper.getMinRelease();
 	}
 
 	/** Send a new release rate to the meter */
 	private void sendReleaseRate(Integer r) {
-		if (rateChanged(r)) {
+		if (!objectEquals(r, getStatusRate())) {
 			MeterPoller mp = getMeterPoller();
 			if (mp != null)
 				mp.sendReleaseRate(this, r);
 		}
 	}
 
-	/** Release rate (vehicles per hour) */
-	private transient Integer rate = null;
-
 	/** Set the release rate (and notify clients) */
 	public void setRateNotify(Integer r) {
-		if (rateChanged(r)) {
-			rate = r;
-			notifyAttribute("rate");
-			updateStyles();
-		}
+		setStatusNotify(RampMeter.RATE, r);
 		updateBeacon();
 	}
 
-	/** Test if the release rate has changed */
-	private boolean rateChanged(Integer r) {
-		return !objectEquals(r, rate);
-	}
-
 	/** Get the release rate (vehciels per hour) */
-	public Integer getRate() {
-		return rate;
+	private Integer getStatusRate() {
+		return RampMeterHelper.optRate(this);
 	}
 
 	/** Is the ramp meter currently metering? */
 	public boolean isMetering() {
-		return rate != null;
+		return getStatusRate() != null;
 	}
 
-	/** Test if a meter needs maintenance */
+	/** Test if a meter has faults */
 	@Override
-	protected boolean needsMaintenance() {
-		if (super.needsMaintenance())
-			return true;
-		RampMeterLock lck = m_lock;
-		return lck == RampMeterLock.POLICE_PANEL ||
-		       lck == RampMeterLock.MAINTENANCE;
+	protected boolean hasFaults() {
+		return RampMeterHelper.hasFault(this);
 	}
 
 	/** Test if meter is available */
@@ -697,12 +735,12 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Test if meter has a full queue */
 	private boolean isQueueFull() {
-		return isOnline() && queue == RampMeterQueue.FULL;
+		return isOnline() && queue == MeterQueueState.FULL;
 	}
 
 	/** Test if meter has a queue */
 	private boolean queueExists() {
-		return isOnline() && queue == RampMeterQueue.EXISTS;
+		return isOnline() && queue == MeterQueueState.EXISTS;
 	}
 
 	/** Calculate the item styles */
@@ -720,93 +758,96 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return s;
 	}
 
-	/** Get the detector set associated with the ramp meter */
-	private SamplerSet getSamplerSet(SamplerSet.Filter f) {
-		DetFinder finder = new DetFinder(f);
+	/** Meter entrance node */
+	private transient R_NodeImpl ent_node = null;
+
+	/** Get the meter entrance r_node */
+	public R_NodeImpl getEntranceNode() {
+		return ent_node;
+	}
+
+	/** Lookup the entrance R_Node */
+	public void lookupEntranceNode() {
+		ent_node = findEntranceNode();
+	}
+
+	/** Find the entrance R_Node */
+	private R_NodeImpl findEntranceNode() {
 		Corridor corridor = getCorridor();
 		if (corridor != null) {
-			corridor.findActiveNode(finder);
+			R_NodeImpl n = corridor.findActiveNode(finder);
+			if (n != null)
+				return n;
 			Iterator<String> it = corridor.getLinkedCDRoads();
 			while (it.hasNext()) {
 				String cd = it.next();
 				Corridor cd_road = corridors.getCorridor(cd);
-				if (cd_road != null)
-					cd_road.findActiveNode(finder);
-			}
-		} else
-			logError("getSamplerSet: no corridor");
-		return new SamplerSet(finder.samplers);
-	}
-
-	/** Get the set of non-abandoned detectors */
-	public SamplerSet getSamplerSet() {
-		return getSamplerSet(new SamplerSet.Filter() {
-			public boolean check(VehicleSampler vs) {
-				if (vs instanceof DetectorImpl) {
-					DetectorImpl d = (DetectorImpl) vs;
-					return !d.getAbandoned();
-				} else
-					return false;
-			}
-		});
-	}
-
-	/** Detector finder */
-	private class DetFinder implements Corridor.NodeFinder {
-		private final ArrayList<VehicleSampler> samplers =
-			new ArrayList<VehicleSampler>();
-		private final SamplerSet.Filter filter;
-		private DetFinder(SamplerSet.Filter f) {
-			filter = f;
-		}
-		public boolean check(float m, R_NodeImpl n) {
-			if (n.getNodeType() == R_NodeType.ENTRANCE.ordinal()) {
-				GeoLoc l = n.getGeoLoc();
-				if (GeoLocHelper.matchesRoot(l, geo_loc)) {
-					SamplerSet ds = n.getSamplerSet();
-					samplers.addAll(ds.filter(filter)
-					                  .getAll());
+				if (cd_road != null) {
+					n = cd_road.findActiveNode(finder);
+					if (n != null) {
+						updateFault(null);
+						return n;
+					}
 				}
 			}
-			return false;
 		}
+		updateFault(RampMeter.FAULT_NO_ENTRANCE_NODE);
+		return null;
 	}
 
-	/** Merge detector */
-	private transient SamplerSet merge_set = new SamplerSet();
+	/** Get a sampler set for a lane code */
+	public SamplerSet getSamplerSet(LaneCode lc) {
+		R_NodeImpl n = ent_node;
+		return (n != null)
+		      ? n.getSamplerSet().filter(lc)
+		      : new SamplerSet();
+	}
+
+	/** Node finder for meter entrance node */
+	private final Corridor.NodeFinder finder = new Corridor.NodeFinder() {
+		public boolean check(float m, R_NodeImpl n) {
+			return checkNode(n);
+		}
+	};
+
+	/** Check if a node is an entrance for the meter */
+	private boolean checkNode(R_NodeImpl n) {
+		if (n.getNodeType() != R_NodeType.ENTRANCE.ordinal())
+			return false;
+		if (!matchesCross(n.getGeoLoc()))
+			return false;
+		SamplerSet greens = n.getSamplerSet().filter(LaneCode.GREEN);
+		return greens.size() == 1;
+	}
+
+	/** Test if a location cross street and direction matches the meter.
+	 * Ignore roadway/direction, since it might be on CD road. */
+	private boolean matchesCross(GeoLoc loc) {
+		Road x = geo_loc.getCrossStreet();
+		return (x != null) &&
+		       (x == loc.getCrossStreet()) &&
+		       (geo_loc.getCrossDir() == loc.getCrossDir()) &&
+		       (geo_loc.getCrossMod() == loc.getCrossMod());
+	}
 
 	/** Check if traffic is backed up over merge detector */
 	private boolean isMergeBackedUp() {
 		int per_ms = DetectorImpl.BIN_PERIOD_MS;
 		long stamp = DetectorImpl.calculateEndTime(per_ms);
+		SamplerSet merge_set = getSamplerSet(LaneCode.MERGE);
 		float occ = merge_set.getMaxOccupancy(stamp, per_ms);
 		return merge_set.isPerfect() && occ >= MERGE_BACKUP_OCC;
 	}
 
-	/** Green count detector */
-	private transient DetectorImpl green_det = null;
-
 	/** Get the green count detector */
 	public DetectorImpl getGreenDet() {
-		return green_det;
-	}
-
-	/** Lookup the merge and green count detectors from R_Nodes */
-	public void lookupDetectors() {
-		SamplerSet ss = getSamplerSet();
-		merge_set = ss.filter(LaneCode.MERGE);
-		green_det = lookupGreen(ss);
-	}
-
-	/** Lookup a single green detector in a sampler set */
-	private DetectorImpl lookupGreen(SamplerSet ss) {
-		SamplerSet greens = ss.filter(LaneCode.GREEN);
+		SamplerSet greens = getSamplerSet(LaneCode.GREEN);
 		if (1 == greens.size()) {
 			VehicleSampler vs = greens.getAll().get(0);
 			if (vs instanceof DetectorImpl)
 				return (DetectorImpl) vs;
 		}
-		logError("lookupGreen: wrong size " + greens.size());
+		logError("No green detector");
 		return null;
 	}
 
@@ -831,50 +872,5 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		if (mw != DEFAULT_MAX_WAIT)
 			w.write(" max_wait='" + mw + "'");
 		w.write("/>\n");
-	}
-
-	/** Get the r_node associated with the ramp meter */
-	public R_NodeImpl getR_Node() {
-		DetectorImpl det = green_det;
-		if (det != null) {
-			R_Node n = det.getR_Node();
-			if (n instanceof R_NodeImpl)
-				return (R_NodeImpl) n;
-		}
-		logError("getR_Node: No green det");
-		return null;
-	}
-
-	/** Get the entrance r_node on same corridor as ramp meter */
-	public R_NodeImpl getEntranceNode() {
-		R_NodeImpl n = getR_Node();
-		return (n != null) ? findEntrance(n) : null;
-	}
-
-	/** Find entrance r_node on same corridor as ramp meter */
-	private R_NodeImpl findEntrance(R_NodeImpl n) {
-		GeoLoc loc = n.getGeoLoc();
-		if (isSameCorridor(loc))
-			return n;
-		if (isDeviceLogging())
-			logError("findEntrance: corridor mismatch " + n);
-		Corridor c = corridors.getCorridor(loc);
-		if (c != null)
-			return c.findActiveNode(new EntranceFinder());
-		else
-			return null;
-	}
-
-	/** Check if a locations is on the same corridor as the ramp meter */
-	private boolean isSameCorridor(GeoLoc loc) {
-		return getCorridor() == corridors.getCorridor(loc);
-	}
-
-	/** Entrance finder */
-	private class EntranceFinder implements Corridor.NodeFinder {
-		public boolean check(float m, R_NodeImpl n) {
-			R_NodeImpl f = n.getFork();
-			return (f != null) && isSameCorridor(f.getGeoLoc());
-		}
 	}
 }

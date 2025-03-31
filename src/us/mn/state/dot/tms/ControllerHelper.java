@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -70,47 +70,17 @@ public class ControllerHelper extends BaseHelper {
 		    && CommLinkHelper.getPollEnabled(ctrl.getCommLink());
 	}
 
-	/** Check if a controller is failed */
-	static public boolean isFailed(Controller ctrl) {
+	/** Check if a controller is offline */
+	static public boolean isOffline(Controller ctrl) {
 		return isActive(ctrl)
 		    && ctrl.getFailTime() != null;
-	}
-
-	/** Check if a controller needs maintenance */
-	static public boolean needsMaintenance(Controller ctrl) {
-		return isActive(ctrl) && !isFailed(ctrl) &&
-		       !(ctrl.getStatus().isEmpty() &&
-		         ctrl.getMaint().isEmpty());
-	}
-
-	/** Get controller communication status */
-	static public String getStatus(Controller ctrl) {
-		return (ctrl != null)
-		      ? ctrl.getStatus()
-		      : ItemStyle.NO_CONTROLLER.toString();
-	}
-
-	/** Get controller maintenance status */
-	static public String getMaintenance(Controller ctrl) {
-		return (ctrl != null)
-		      ? ctrl.getMaint()
-		      : ItemStyle.NO_CONTROLLER.toString();
 	}
 
 	/** Get controller setup data */
 	static public String getSetup(Controller ctrl, String key) {
 		String setup = (ctrl != null) ? ctrl.getSetup() : null;
-		if (setup != null) {
-			try {
-				JSONObject jo = new JSONObject(setup);
-				return jo.optString(key, "");
-			}
-			catch (JSONException e) {
-				// malformed JSON
-				e.printStackTrace();
-			}
-		}
-		return "";
+		Object value = optJson(setup, key);
+		return (value != null) ? value.toString() : "";
 	}
 
 	/** Get controller setup array data.
@@ -141,5 +111,22 @@ public class ControllerHelper extends BaseHelper {
 			}
 		}
 		return "UNKNOWN";
+	}
+
+	/** Get optional controller status attribute, or null */
+	static public Object optStatus(Controller ctrl, String key) {
+		String status = (ctrl != null) ? ctrl.getStatus() : null;
+		return optJson(status, key);
+	}
+
+	/** Get optional controller faults, or null */
+	static public String optFaults(Controller ctrl) {
+		Object faults = optStatus(ctrl, Controller.FAULTS);
+		return (faults != null) ? faults.toString() : null;
+	}
+
+	/** Check if a controller has faults */
+	static public boolean hasFaults(Controller ctrl) {
+		return isActive(ctrl) && optFaults(ctrl) != null;
 	}
 }

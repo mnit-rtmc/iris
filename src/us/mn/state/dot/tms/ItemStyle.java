@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2021  Minnesota Department of Transportation
+ * Copyright (C) 2012-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,8 +32,8 @@ public enum ItemStyle {
 	AVAILABLE,
 	DEPLOYED,
 	UNDEPLOYED,
-	MAINTENANCE,
-	FAILED,
+	FAULT,
+	OFFLINE,
 	INACTIVE,
 	NO_CONTROLLER,
 	PURPOSE,
@@ -64,7 +64,6 @@ public enum ItemStyle {
 	DMS,
 	BEACON,
 	CAMERA,
-	LANE,
 	METER,
 	TIME,
 	/* Alert styles */

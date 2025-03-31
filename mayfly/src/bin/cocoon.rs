@@ -1,6 +1,6 @@
 // cocoon.rs
 //
-// Copyright (c) 2021  Minnesota Department of Transportation
+// Copyright (c) 2021-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,13 +17,12 @@
 use argh::FromArgs;
 use log::{debug, info};
 use mayfly::binned::{CountData, OccupancyData, SpeedData, TrafficData};
-use mayfly::common::{Error, Result};
+use mayfly::error::Result;
 use mayfly::traffic::Traffic;
 use mayfly::vehicle::{VehLog, VehicleFilter};
-use std::collections::HashSet;
 use std::ffi::OsString;
 use std::fs::File;
-use std::io::{BufWriter, Write};
+use std::io::{BufWriter, ErrorKind, Write};
 use std::path::{Path, PathBuf};
 use zip::write::FileOptions;
 use zip::{DateTime, ZipWriter};
@@ -57,10 +56,7 @@ struct BinCommand {
 /// Traffic archive binner
 struct Binner {
     /// Set of files in archive
-    files: HashSet<String>,
-
-    /// Backup file path
-    backup: PathBuf,
+    files: Vec<String>,
 
     /// Destination archive
     writer: ZipWriter<BufWriter<File>>,
@@ -82,16 +78,14 @@ impl BinCommand {
             let traffic = Traffic::new(&file)?;
             let n_files = traffic.len();
             if traffic.needs_binning() {
-                let mut copier = Binner::new(&traffic)?;
+                let backup = backup_path(traffic.path())?;
+                let copier = Binner::new(&traffic)?;
                 let n_binned = copier.add_binned(traffic)?;
-                info!(
-                    "archive: {:?} {} files, {} binned",
-                    file, n_files, n_binned
-                );
-                std::fs::rename(&file, copier.backup)?;
+                info!("archive: {file:?} {n_files} files, {n_binned} binned");
+                std::fs::rename(&file, backup)?;
                 std::fs::rename(temp_path(&file), file)?;
             } else {
-                info!("archive: {:?} {} files, skipping", file, n_files);
+                info!("archive: {file:?} {n_files} files, skipping");
             }
         }
         Ok(())
@@ -101,25 +95,20 @@ impl BinCommand {
 impl Binner {
     /// Create a new traffic archive binner
     fn new(traffic: &Traffic) -> Result<Self> {
-        let files = traffic.find_file_names();
-        let backup = backup_path(traffic.path())?;
+        let files = traffic.file_names().map(|n| n.to_string()).collect();
         let writer = make_writer(&traffic.path())?;
-        Ok(Binner {
-            files,
-            backup,
-            writer,
-        })
+        Ok(Binner { files, writer })
     }
 
     /// Add binned files to archive
-    fn add_binned(&mut self, mut traffic: Traffic) -> Result<u32> {
+    fn add_binned(mut self, mut traffic: Traffic) -> Result<u32> {
         let mut n_binned = 0;
         for i in 0..traffic.len() {
             let zf = traffic.by_index(i)?;
             match self.vlog_det_id(zf.name()) {
                 Some(det_id) => {
                     let mtime = zf.last_modified();
-                    let vlog = VehLog::from_blocking_reader(zf)?;
+                    let vlog = VehLog::from_reader_blocking(zf)?;
                     n_binned += self.write_binned::<OccupancyData>(
                         det_id.to_string() + ".c30",
                         &vlog,
@@ -168,7 +157,7 @@ impl Binner {
         let path = Path::new(name);
         if let Some(name) = path.file_name() {
             if let Some(name) = name.to_str() {
-                return self.files.contains(name);
+                return self.files.iter().any(|n| n == name);
             }
         }
         false
@@ -185,7 +174,7 @@ impl Binner {
             return Ok(0);
         }
         if let Some(buf) = pack_binned::<T>(vlog) {
-            debug!("Binning {:?}", name);
+            debug!("Binning {name:?}");
             let options = FileOptions::default().last_modified_time(*mtime);
             self.writer.start_file(name, options)?;
             self.writer.write_all(&buf[..])?;
@@ -202,14 +191,16 @@ fn backup_path(path: &Path) -> Result<PathBuf> {
     if backup.is_dir() {
         if let Some(name) = path.file_name() {
             backup.push(name);
-            if backup.is_file() {
-                return Err(Error::FileExists);
-            } else {
+            if !backup.exists() {
                 return Ok(backup);
             }
+            Err(std::io::Error::new(
+                ErrorKind::AlreadyExists,
+                name.to_string_lossy(),
+            ))?;
         }
     }
-    Err(Error::NotFound)
+    Err(std::io::Error::new(ErrorKind::NotFound, BACKUP_PATH))?
 }
 
 /// Make temp path name
@@ -241,8 +232,7 @@ fn pack_binned<T: TrafficData>(vlog: &VehLog) -> Option<Vec<u8>> {
 }
 
 /// Main function
-#[async_std::main]
-async fn main() -> Result<()> {
+fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
     let args: Args = argh::from_env();
     args.run()?;

@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.clearguide;
 
 import java.io.IOException;
-import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.CommLinkImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2023  Minnesota Department of Transportation
+ * Copyright (C) 2002-2024  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -18,19 +18,23 @@ package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.io.IOException;
 import java.util.Random;
+import org.json.JSONException;
+import org.json.JSONObject;
 import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.CommConfig;
 import us.mn.state.dot.tms.DmsColor;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.EmailHandler;
 import us.mn.state.dot.tms.server.SignConfigImpl;
 import us.mn.state.dot.tms.server.SignDetailImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.OpDevice;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
 import us.mn.state.dot.tms.units.Interval;
@@ -65,9 +69,6 @@ abstract class OpDms extends OpDevice {
 	/** operation description */
 	private String m_opDesc = "";
 
-	/** Number of times this operation has been previously attempted */
-	private int m_retry = 0;
-
 	/** Create a new DMS operation */
 	OpDms(PriorityLevel p, DMSImpl d, String opDesc) {
 		super(p, d);
@@ -75,10 +76,37 @@ abstract class OpDms extends OpDevice {
 		m_opDesc = opDesc;
 	}
 
+	/** DMS status */
+	private final JSONObject status = new JSONObject();
+
+	/** Put an object into DMS status */
+	protected final void putStatus(String key, Object value) {
+		try {
+			status.putOnce(key, value);
+		}
+		catch (JSONException e) {
+			LOG.log("putStatus: " + e.getMessage() + ", " + key);
+		}
+	}
+
+	/** Put FAULTS into sign status */
+	protected void putFaults(Object value) {
+		putStatus(DMS.FAULTS, value);
+	}
+
+	/** Put FAULTS into controller status */
+	@Override
+	protected void putCtrlFaults(String fault, String msg) {
+		putFaults((fault != null) ? "controller" : null);
+		super.putCtrlFaults(fault, msg);
+	}
+
 	/** Cleanup the operation. Called by CommThread.doPoll(). */
 	@Override
 	public void cleanup() {
 		if (isSuccess()) {
+			if (!status.isEmpty())
+				m_dms.setStatusNotify(status.toString());
 			m_dms.requestConfigure();
 		} else {
 			// flag dms not configured
@@ -94,7 +122,7 @@ abstract class OpDms extends OpDevice {
 
 	/** Return true if the message is owned by the AWS */
 	static boolean ownerIsAws(final String msg_owner) {
-		if(msg_owner == null)
+		if (msg_owner == null)
 			return false;
 		return msg_owner.toLowerCase().equals(awsName().toLowerCase());
 	}
@@ -113,25 +141,6 @@ abstract class OpDms extends OpDevice {
 		return s * 1000;
 	}
 
-	/** Handle a failed operation.
-	  * @param errmsg Error message
-	  * @return true if the operation should be retried else false. */
-	boolean flagFailureShouldRetry(String errmsg) {
-	 	String msg = m_dms.getName();
-		if(errmsg == null || errmsg.isEmpty())
-			msg += " unknown error.";
-		else
-			msg += " " + errmsg;
-
-		// trigger error handling, changes status if necessary
-		// phase is set to null if no retry should be performed
-		handleCommError(EventType.PARSING_ERROR, msg);
-		boolean retry = !isDone();
-		if(retry)
-			++m_retry;
-		return retry;
-	}
-
 	/** random number generator */
 	private static Random m_rand = new Random(System.currentTimeMillis());
 
@@ -139,10 +148,6 @@ abstract class OpDms extends OpDevice {
 	 *  returned as a string. */
 	static String generateId() {
 		return "" + (System.currentTimeMillis() + m_rand.nextInt());
-	}
-
-	/** update iris status, called after operation complete */
-	void complete(Message m) {
 	}
 
 	/** return description of operation */
@@ -197,57 +202,15 @@ abstract class OpDms extends OpDevice {
 		mess.queryProps();
 	}
 
-	/** Return true if the message owner is Reinit */
-	static boolean ownerIsReinit(final String o) {
-		if (o == null)
-			return false;
-		else
-			return o.toLowerCase().equals("reinit");
-	}
-
-	/**
-	 * Set the maintenance status string.
-	 * @return True if the maintenance status was set and it also changed
-	 *         relative to the value stored in the controller.
-	 */
-	public boolean updateMaintStatus(String o) {
-		boolean reinit_detect = SystemAttrEnum.DMSXML_REINIT_DETECT.getBoolean();
-		if (!reinit_detect) {
-			return false;
-		}
-		if (ownerIsReinit(o)) {
-			String msg = "Power cycle event";
-			setMaintStatus(msg);
-			return !msg.equals(getControllerMaintStatus());
-		} else {
-			// NOTE: won't this wipe out existing maint status
-			// (from other causes)?:
-			setMaintStatus("");
-			return false;
-		}
-	}
-
-	/** Send power cycle email */
-	public void sendMaintenanceEmail() {
-		String sub = "CMS maintenance alert: " + m_dms;
-		String msg = "IRIS has placed CMS " + m_dms + " into "
-			+ "\"maintenance\" mode.  One reason this may have "
-			+ "happened is if IRIS has found the sign to be "
-			+ "unexpectedly blank, which could indicate that the "
-			+ "sign controller's power has been cycled.";
-		String recip =
-			SystemAttrEnum.EMAIL_RECIPIENT_DMSXML_REINIT.getString();
-		EmailHandler.sendEmail(sub, msg, recip);
-	}
-
-	/** Get the maint status message in the controller */
-	private String getControllerMaintStatus() {
-		return controller.getMaint();
+	/** Check message owner */
+	public void checkMsgOwner(String o) {
+		if ("reinit".equalsIgnoreCase(o))
+			putCtrlFaults("other", "Power cycle event");
 	}
 
 	/** Phase to query the dms config, which is used by subclasses */
-	class PhaseGetConfig extends Phase
-	{
+	class PhaseGetConfig extends Phase {
+
 		/** next phase to execute or null */
 		private Phase m_next = null;
 
@@ -268,7 +231,7 @@ abstract class OpDms extends OpDevice {
 		 *		<UseOnTime>...</UseOnTime>
 		 *		<OnTime>...</OnTime>
 		 *		<UseOffTime>...</UseOffTime>
-	 	 *		<OffTime>...</OffTime>
+		 *		<OffTime>...</OffTime>
 		 *		<DisplayTimeMS>...</DisplayTimeMS>
 		 *		<ActPriority>...</ActPriority>
 		 *		<RunPriority>...</RunPriority>
@@ -309,10 +272,10 @@ abstract class OpDms extends OpDevice {
 
 		/** Parse response.
 		 *  @return True to retry the operation else false if done. */
-		private boolean parseResponse(Message mess, XmlElem xrr) {
+		private boolean parseResponse(Message mess, XmlElem xrr)
+			throws IOException
+		{
 			long id = 0;
-			boolean valid = false;
-			String errmsg = "";
 			String model = "";
 			String signAccess = "";
 			String make = "";
@@ -330,113 +293,73 @@ abstract class OpDms extends OpDevice {
 			int signWidthPixels = 0;
 
 			try {
-				// id
 				id = xrr.getResLong("Id");
-
-				// valid flag
-				valid = xrr.getResBoolean("IsValid");
-
-				// error message text
-				errmsg = xrr.getResString("ErrMsg");
-				if(!valid && errmsg.length() <= 0)
-					errmsg = FAILURE_UNKNOWN;
-
-				// update
-				complete(mess);
-
-				// valid message received?
-				if(valid) {
-					signAccess = xrr.getResString(
-						"signAccess");
-					model = xrr.getResString("model");
-					make = xrr.getResString("make");
-					version = xrr.getResString("version");
-
-					// determine matrix type
-					String stype = xrr.getResString("type");
-					if(stype.toLowerCase().contains(
-						"full"))
-					{
-						type = DMSType.VMS_FULL;
-					} else {
-						LOG.log("SEVERE: Unknown "
-							+ "matrix type read ("
-							+ stype + ")");
-					}
-
-					horizBorder = xrr.getResInt(
-						"horizBorder");
-					vertBorder = xrr.getResInt(
-						"vertBorder");
-					horizPitch = xrr.getResInt(
-						"horizPitch");
-					vertPitch = xrr.getResInt(
-						"vertPitch");
-					signHeight = xrr.getResInt(
-						"signHeight");
-					signWidth = xrr.getResInt(
-						"signWidth");
-					characterHeightPixels = xrr.getResInt(
-						"characterHeightPixels");
-					characterWidthPixels = xrr.getResInt(
-						"characterWidthPixels");
-					signHeightPixels = xrr.getResInt(
-						"signHeightPixels");
-					signWidthPixels = xrr.getResInt(
-						"signWidthPixels");
+				boolean valid = xrr.getResBoolean("IsValid");
+				String errmsg = xrr.getResString("ErrMsg");
+				if (!valid) {
+					LOG.log("WARNING: response ignored " +
+						"because valid is false, " +
+						"errmsg=" + errmsg
+					);
+					throw new ControllerException(errmsg);
 				}
-			} catch (IllegalArgumentException ex) {
+				signAccess = xrr.getResString(
+					"signAccess");
+				model = xrr.getResString("model");
+				make = xrr.getResString("make");
+				version = xrr.getResString("version");
+
+				String stype = xrr.getResString("type");
+				if (stype.toLowerCase().contains("full")) {
+					type = DMSType.VMS_FULL;
+				} else {
+					LOG.log("SEVERE: Unknown "
+						+ "matrix type read ("
+						+ stype + ")");
+				}
+
+				horizBorder = xrr.getResInt("horizBorder");
+				vertBorder = xrr.getResInt("vertBorder");
+				horizPitch = xrr.getResInt("horizPitch");
+				vertPitch = xrr.getResInt("vertPitch");
+				signHeight = xrr.getResInt("signHeight");
+				signWidth = xrr.getResInt("signWidth");
+				characterHeightPixels = xrr.getResInt(
+					"characterHeightPixels");
+				characterWidthPixels = xrr.getResInt(
+					"characterWidthPixels");
+				signHeightPixels = xrr.getResInt(
+					"signHeightPixels");
+				signWidthPixels = xrr.getResInt(
+					"signWidthPixels");
+			}
+			catch (IllegalArgumentException ex) {
 				LOG.log("PhaseGetConfig: Malformed XML " +
 					"received:" + ex + ", id=" + id);
-				valid = false;
-				errmsg = ex.getMessage();
-				handleCommError(EventType.PARSING_ERROR,
-					errmsg);
+				throw new ParsingException(ex);
 			}
 
-			// set config values these values are displayed in
-			// the DMS dialog, Configuration tab
-			if (valid) {
-				setErrorStatus("");
-				controller.setVersionNotify(version);
+			controller.setVersionNotify(version);
 
-				int dt = type.ordinal();
-				SignDetailImpl sd = SignDetailImpl.findOrCreate(
-					dt, false, "OTHER", signAccess, "other",
-					"other", make, model, make, model, 0,
-					2, 64, false, false);
-				if (sd != null)
-					m_dms.setSignDetailNotify(sd);
-				SignConfigImpl sc = SignConfigImpl.findOrCreate(
-					signWidth, signHeight,
-					horizBorder, vertBorder,
-					horizPitch, vertPitch,
-					signWidthPixels, signHeightPixels,
-					characterWidthPixels,
-					characterHeightPixels,
-					ColorScheme.MONOCHROME_1_BIT.ordinal(),
-				        DmsColor.AMBER.rgb(),
-				        DmsColor.BLACK.rgb());
-				if (sc != null)
-					m_dms.setSignConfigNotify(sc);
-
-			// failure
-			} else {
-				LOG.log("WARNING: response from " +
-					"SensorServer received, ignored " +
-					"because Xml valid field is false, " +
-					"errmsg=" + errmsg);
-				setErrorStatus(errmsg);
-
-				// try again
-				if(flagFailureShouldRetry(errmsg)) {
-					LOG.log("PhaseGetConfig: will " +
-						"retry failed op.");
-					return true;
-				}
-			}
-
-			// execute subsequent phase
+			int dt = type.ordinal();
+			SignDetailImpl sd = SignDetailImpl.findOrCreate(
+				dt, false, "OTHER", signAccess, "other",
+				"other", make, model, make, model, 0,
+				2, 64, false, false);
+			if (sd != null)
+				m_dms.setSignDetailNotify(sd);
+			SignConfigImpl sc = SignConfigImpl.findOrCreate(
+				signWidth, signHeight,
+				horizBorder, vertBorder,
+				horizPitch, vertPitch,
+				signWidthPixels, signHeightPixels,
+				characterWidthPixels,
+				characterHeightPixels,
+				ColorScheme.MONOCHROME_1_BIT.ordinal(),
+				DmsColor.AMBER.rgb(),
+				DmsColor.BLACK.rgb());
+			if (sc != null)
+				m_dms.setSignConfigNotify(sc);
 			return false;
 		}
 
@@ -446,30 +369,18 @@ abstract class OpDms extends OpDevice {
 		 * Note, the type of exception throw here determines
 		 * if the messenger reopens the connection on failure.
 		 * @see CommThread#doPoll()
-		 * @see Messenger#handleCommError()
-		 * @see Messenger#shouldReopen()
 		 */
 		protected Phase poll(CommMessage argmess)
 			throws IOException
 		{
 			Message mess = (Message) argmess;
-
-			// set message attributes as a function of the op
 			setMsgAttributes(mess);
-
-			// build xml request and expected response
 			mess.setName(getOpName());
 			XmlElem xrr = buildXmlElem("GetDmsConfigReqMsg",
 				"GetDmsConfigRespMsg");
-
-			// send request and read response
 			mess.add(xrr);
 			sendRead(mess);
-
-			if(parseResponse(mess, xrr))
-				return this;
-			else
-				return m_next;
+			return parseResponse(mess, xrr) ? this : m_next;
 		}
 	}
 }

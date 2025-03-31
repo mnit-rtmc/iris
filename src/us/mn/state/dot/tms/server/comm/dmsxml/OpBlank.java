@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -21,8 +21,10 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
+import us.mn.state.dot.tms.server.comm.ControllerException;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
 
 /**
  * Operation to blank the DMS.
@@ -44,14 +46,15 @@ class OpBlank extends OpDms {
 
 	/** Create the second phase of the operation */
 	protected Phase phaseTwo() {
+		if (m_sm == null)
+			return null;
 		m_dms.setMsgNext(m_sm);
 		if (dmsConfigured())
 			return new PhaseSetBlank();
-
-		// dms not configured
-		Phase phase2 = new PhaseSetBlank();
-		Phase phase1 = new PhaseGetConfig(phase2);
-		return phase1;
+		else {
+			Phase phase2 = new PhaseSetBlank();
+			return new PhaseGetConfig(phase2);
+		}
 	}
 
 	/** Build request message in this format:
@@ -88,62 +91,29 @@ class OpBlank extends OpDms {
 	 *		<ErrMsg></ErrMsg>
 	 *	</SetBlankMsgRespMsg></DmsXml>
 	 *  @return True to retry the operation else false if done. */
-	private boolean parseResponse(Message mess, XmlElem xrr) {
+	private boolean parseResponse(Message mess, XmlElem xrr)
+		throws IOException
+	{
 		long id = 0;
-		boolean valid = false;
-		String errmsg = "";
-
 		try {
-			// id
 			id = xrr.getResLong("Id");
-
-			// isvalid
-			valid = xrr.getResBoolean("IsValid");
-
-			// error message text
-			errmsg = xrr.getResString("ErrMsg");
-			if(!valid && errmsg.length() <= 0)
-				errmsg = FAILURE_UNKNOWN;
-
-			// valid resp received?
+			String errmsg = xrr.getResString("ErrMsg");
+			boolean valid = xrr.getResBoolean("IsValid");
 			LOG.log("OpBlank: isvalid =" + valid);
-		} catch (IllegalArgumentException ex) {
-			LOG.log("Malformed XML received in OpBlank(msg):" +
-				ex + ",id=" + id);
-			valid = false;
-			errmsg = ex.getMessage();
-			handleCommError(EventType.PARSING_ERROR,errmsg);
-		}
-
-		// update 
-		complete(mess);
-
-		// update dms
-		updateMaintStatus("");
-		if (valid)
-			m_dms.setMsgCurrentNotify(m_sm);
-		else {
-			LOG.log(
-				"OpBlank: response from SensorServer " +
-				"received, ignored because Xml valid " +
-				"field is false, errmsg=" + errmsg);
-			setErrorStatus(errmsg);
-
-			// try again
-			if(flagFailureShouldRetry(errmsg)) {
-				LOG.log("OpBlank: will retry failed op.");
-				return true;
-
-			// give up
-			} else {
-				// if aws failure, handle it
-				if(mess.checkAwsFailure())
-					mess.handleAwsFailure(
-						"was blanking a msg.");						
+			if (!valid) {
+				LOG.log(
+					"OpBlank: response ignored because " +
+					"valid is false, errmsg=" + errmsg
+				);
+				throw new ControllerException(errmsg);
 			}
 		}
-
-		// done
+		catch (IllegalArgumentException ex) {
+			LOG.log("Malformed XML received in OpBlank(msg):" +
+				ex + ",id=" + id);
+			throw new ParsingException(ex);
+		}
+		m_dms.setMsgCurrentNotify(m_sm);
 		return false;
 	}
 
@@ -153,36 +123,21 @@ class OpBlank extends OpDms {
 	 * if the messenger reopens the connection on failure.
 	 *
 	 * @see CommThread#doPoll()
-	 * @see Messenger#handleCommError()
-	 * @see Messenger#shouldReopen()
 	 */
-	private class PhaseSetBlank extends Phase
-	{
+	private class PhaseSetBlank extends Phase {
+
 		/** Query the number of modules */
-		protected Phase poll(CommMessage argmess)
-			throws IOException 
-		{
-			if(m_sm == null)
-				return null;
+		protected Phase poll(CommMessage argmess) throws IOException {
 			assert argmess instanceof Message :
 			       "wrong message type";
 			Message mess = (Message) argmess;
-
-			// set message attributes as a function of the op
 			setMsgAttributes(mess);
-
-			// build xml request and expected response			
 			mess.setName(getOpName());
-			XmlElem xrr = buildReqRes("SetBlankMsgReqMsg", 
+			XmlElem xrr = buildReqRes("SetBlankMsgReqMsg",
 				"SetBlankMsgRespMsg");
-
-			// send request and read response
 			mess.add(xrr);
 			sendRead(mess);
-
-			if(parseResponse(mess, xrr))
-				return this;
-			return null;
+			return parseResponse(mess, xrr) ? this : null;
 		}
 	}
 

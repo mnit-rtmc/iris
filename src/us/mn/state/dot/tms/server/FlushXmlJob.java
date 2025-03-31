@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2021  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * Job to flush XML data
@@ -43,8 +44,10 @@ public class FlushXmlJob extends Job {
 	/** Perform flush XML data to disk */
 	@Override
 	public void perform() throws IOException {
-		writeSampleXml();
-		station_manager.writeSampleXml();
+		if (SystemAttrEnum.LEGACY_XML_DETECTOR_ENABLE.getBoolean()) {
+			writeSampleXml();
+			station_manager.writeSampleXml();
+		}
 		station_manager.writeSampleJson();
 	}
 

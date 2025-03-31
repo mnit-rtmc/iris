@@ -1,6 +1,6 @@
 // permission.rs
 //
-// Copyright (C) 2021-2024  Minnesota Department of Transportation
+// Copyright (C) 2021-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,9 +16,10 @@ use crate::database::Database;
 use crate::error::{Error, Result};
 use crate::query;
 use crate::sonar::Name;
+use resources::Res;
 use serde::{Deserialize, Serialize};
-use serde_json::map::Map;
 use serde_json::Value;
+use serde_json::map::Map;
 use tokio_postgres::Row;
 
 /// Create one permission
@@ -49,21 +50,9 @@ const ACCESS_BY_USER: &str = "\
     AND u.name = $1 \
   ORDER BY p.base_resource, p.hashtag";
 
-/// Query permission for a user / resource (no hashtag)
-const QUERY_PERMISSION: &str = "\
-  SELECT p.name, p.role, p.base_resource, p.hashtag, p.access_level \
-  FROM iris.permission p \
-  JOIN iris.role r ON p.role = r.name \
-  JOIN iris.user_id u ON u.role = r.name \
-  WHERE r.enabled = true \
-    AND u.enabled = true \
-    AND u.name = $1 \
-    AND p.base_resource = $2 \
-    AND p.hashtag IS NULL";
-
-/// Query permission for a user / resource / hashtag
-const QUERY_PERMISSION_TAG: &str = "\
-  SELECT p.name, p.role, p.base_resource, p.hashtag, p.access_level \
+/// Query access level for a user / resource / hashtag
+const ACCESS_USER_RES_TAG: &str = "\
+  SELECT p.access_level \
   FROM iris.permission p \
   JOIN iris.role r ON p.role = r.name \
   JOIN iris.user_id u ON u.role = r.name \
@@ -77,7 +66,7 @@ const QUERY_PERMISSION_TAG: &str = "\
         SELECT hashtag \
         FROM iris.hashtag h \
         WHERE h.resource_n = p.base_resource \
-          AND h.name = $3 \
+          AND h.name = $3\
       )\
     ) \
   ORDER BY access_level DESC \
@@ -205,28 +194,56 @@ pub async fn delete_by_name(db: &Database, name: &str) -> Result<()> {
     }
 }
 
-/// Get user permission for a Sonar name
-pub async fn get_by_name(
+/// Get user access level for a Sonar name
+pub async fn name_access(
     db: &Database,
     user: &str,
     name: &Name,
-) -> Result<Permission> {
+) -> Result<i32> {
+    if let Some(tag) = name.object_n() {
+        name_access_tag(db, user, name, tag).await
+    } else {
+        name_access_any(db, user, name).await
+    }
+}
+
+/// Get user access level for a Sonar name w/hashtag
+async fn name_access_tag(
+    db: &Database,
+    user: &str,
+    name: &Name,
+    tag: &str,
+) -> Result<i32> {
     let client = db.client().await?;
     let base_resource = name.res_type.base().as_str();
-    match name.object_n() {
-        Some(tag) => {
-            let row = client
-                .query_one(QUERY_PERMISSION_TAG, &[&user, &base_resource, &tag])
-                .await
-                .map_err(|_e| Error::Forbidden)?;
-            Ok(Permission::from_row(row))
+    let row = client
+        .query_one(ACCESS_USER_RES_TAG, &[&user, &base_resource, &tag])
+        .await
+        .map_err(|_e| Error::Forbidden)?;
+    Ok(row.get(0))
+}
+
+/// Get user access level for a Sonar name with no hashtag
+async fn name_access_any(
+    db: &Database,
+    user: &str,
+    name: &Name,
+) -> Result<i32> {
+    let mut access = 0;
+    let client = db.client().await?;
+    let base_resource = name.res_type.base().as_str();
+    for row in client.query(ACCESS_BY_USER, &[&user]).await? {
+        let perm = Permission::from_row(row);
+        if perm.base_resource == base_resource {
+            // FIXME: this is hacky -- find a better way!
+            if perm.hashtag.is_none() || name.res_type == Res::SignMessage {
+                access = access.max(perm.access_level);
+            }
         }
-        None => {
-            let row = client
-                .query_one(QUERY_PERMISSION, &[&user, &base_resource])
-                .await
-                .map_err(|_e| Error::Forbidden)?;
-            Ok(Permission::from_row(row))
-        }
+    }
+    if (1..=4).contains(&access) {
+        Ok(access)
+    } else {
+        Err(Error::Forbidden)
     }
 }

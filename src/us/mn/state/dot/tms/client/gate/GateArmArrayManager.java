@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2019  Minnesota Department of Transportation
+ * Copyright (C) 2013-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,9 +86,8 @@ public class GateArmArrayManager extends DeviceManager<GateArmArray> {
 		theme.addStyle(ItemStyle.CLOSED, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.MOVING, ProxyTheme.COLOR_MOVING);
 		theme.addStyle(ItemStyle.OPEN, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(ItemStyle.MAINTENANCE,
-			ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
+		theme.addStyle(ItemStyle.FAULT, ProxyTheme.COLOR_FAULT);
+		theme.addStyle(ItemStyle.OFFLINE, ProxyTheme.COLOR_OFFLINE);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}

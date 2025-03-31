@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,14 +75,6 @@ public class RampMeterHelper extends BaseHelper {
 		return (ctrl != null) ? ctrl.getCabinetStyle() : null;
 	}
 
-	/** Lookup the preset for a ramp meter */
-	static public CameraPreset getPreset(RampMeter meter) {
-		if (meter != null)
-			return meter.getPreset();
-		else
-			return null;
-	}
-
 	/** Format the meter release rate */
 	static public String formatRelease(Integer rate) {
 		if (rate !=  null) {
@@ -100,5 +92,60 @@ public class RampMeterHelper extends BaseHelper {
 				I18N.get("units.s");
 		} else
 			return I18N.get("units.na");
+	}
+
+	/** Filter a releae rate for valid range */
+	static public int filterRate(int r) {
+		r = Math.max(r, getMinRelease());
+		return Math.min(r, getMaxRelease());
+	}
+
+	/** Get the absolute minimum release rate */
+	static public int getMinRelease() {
+		return SystemAttributeHelper.getMeterMinRelease();
+	}
+
+	/** Get the absolute maximum release rate */
+	static public int getMaxRelease() {
+		return SystemAttributeHelper.getMeterMaxRelease();
+	}
+
+	/** Get optional lock, or null */
+	static public String optLock(RampMeter meter) {
+		return (meter != null) ? meter.getLock() : null;
+	}
+
+	/** Get optional meter status attribute, or null */
+	static private Object optStatus(RampMeter meter, String key) {
+		String status = (meter != null) ? meter.getStatus() : null;
+		return optJson(status, key);
+	}
+
+	/** Get optional status rate, or null */
+	static public Integer optRate(RampMeter meter) {
+		Object rate = optStatus(meter, RampMeter.RATE);
+		return (rate instanceof Integer) ? (Integer) rate : null;
+	}
+
+	/** Test if a ramp meter is metering */
+	static public boolean isMetering(RampMeter rm) {
+		return optRate(rm) != null;
+	}
+
+	/** Get optional queue state, or null */
+	static public String optQueue(RampMeter meter) {
+		Object queue = optStatus(meter, RampMeter.QUEUE);
+		return (queue != null) ? queue.toString() : null;
+	}
+
+	/** Get optional meter fault, or null */
+	static public String optFault(RampMeter meter) {
+		Object fault = optStatus(meter, RampMeter.FAULT);
+		return (fault != null) ? fault.toString() : null;
+	}
+
+	/** Test if a meter has a fault */
+	static public boolean hasFault(RampMeter meter) {
+		return optFault(meter) != null;
 	}
 }

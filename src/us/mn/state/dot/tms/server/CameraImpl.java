@@ -20,10 +20,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeSet;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Camera;
@@ -53,9 +51,6 @@ import us.mn.state.dot.tms.server.event.CameraVideoEvent;
  * @author John L. Stanley - SRF Consulting
  */
 public class CameraImpl extends DeviceImpl implements Camera {
-
-	/** Invalid preset number */
-	static private final int INVALID_PRESET = -1;
 
 	/** Duration of video good/loss report "freshness" */
 	static private final long VIDEO_REPORT_MS = 5000;
@@ -430,8 +425,8 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	@Override
 	public void periodicPoll(boolean is_long) {
 		if (!is_long) {
-			// make sure controller is not failed
-			clearFailed();
+			// make sure controller is not offline
+			clearOffline();
 			// NOTE: This is a workaround for a Cohu bug, which
 			//       never cleans up dropped TCP connections and
 			//       eventually flakes out.  Firewalls will drop a
@@ -441,11 +436,11 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		}
 	}
 
-	/** Clear the camera failed status */
-	private void clearFailed() {
+	/** Clear the camera offline status */
+	private void clearOffline() {
 		ControllerImpl ctl = controller;
 		if (ctl != null)
-			ctl.setFailed(false);
+			ctl.setOffline(false);
 	}
 
 	/** Command the camera pan, tilt or zoom */
@@ -465,24 +460,18 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	public void sendPTZ(float p, float t, float z) {
 		CameraPoller cp = getCameraPoller();
 		if (cp != null) {
-			last_preset = INVALID_PRESET;
 			cp.sendPTZ(this, p, t, z);
 			if ((p != 0.0) || (t != 0.0) || (z != 0.0))
 				savePtzInfo();
 		}
 	}
 
-	/** Last commanded preset number */
-	private transient int last_preset = INVALID_PRESET;
-
 	/** Command the camera to store a preset */
 	@Override
 	public void setStorePreset(int preset) {
 		CameraPoller cp = getCameraPoller();
-		if (cp != null) {
-			last_preset = preset;
+		if (cp != null)
 			cp.sendStorePreset(this, preset);
-		}
 	}
 
 	/** Command the camera to recall a preset */
@@ -490,7 +479,6 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	public void setRecallPreset(int preset) {
 		CameraPoller cp = getCameraPoller();
 		if (cp != null) {
-			last_preset = preset;
 			cp.sendRecallPreset(this, preset);
 			savePtzInfo();
 		}
@@ -505,13 +493,13 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		return (c == null) || c.isActive();
 	}
 
-	/** Get the failure status */
+	/** Get the offline status */
 	@Override
-	public boolean isFailed() {
+	public boolean isOffline() {
 		// since controller is only for PTZ,
-		// treat camera without controller as not failed
+		// treat camera without controller as online
 		ControllerImpl c = controller;	// Avoid race
-		return (c != null) && c.isFailed();
+		return (c != null) && c.isOffline();
 	}
 
 	/** Calculate the item styles */

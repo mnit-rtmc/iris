@@ -88,11 +88,20 @@ These are static resources which may only change on IRIS updates:
 - `comm_protocol`  Communication [protocols]
 - `condition`  [Controller] conditions
 - `direction`  Travel directions
+- `encoding`  Video encodings
 - `gate_arm_interlock`  [Gate arm] interlocks
 - `gate_arm_state`  [Gate arm] states
-- `lane_use_indication`  [LCS] lane use indications
-- `lcs_lock`  [LCS] lock codes
+- `inc_impact`  Incident impacts
+- `inc_range`  Incident range
+- `lane_code`  Lane codes
+- `lcs_indication`  [LCS] indications
+- `meter_algorithm`  Ramp metering algorithms
+- `meter_queue_state`  Ramp meter queue states
+- `meter_type`  Ramp meter types
+- `r_node_transition`  R_Node transitions
+- `r_node_type`  R_Node types
 - `resource_type`  [Resource types] available in `iris/api/`
+- `road_class`  Road classes
 - `road_modifier`  Road modifiers
 
 ### Fonts: `iris/tfon/`

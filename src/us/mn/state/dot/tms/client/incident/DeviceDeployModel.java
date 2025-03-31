@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2019  Minnesota Department of Transportation
+ * Copyright (C) 2010-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
-import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.Lcs;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.utils.MultiString;
 
@@ -44,11 +44,11 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 	private final DmsDeployBuilder dms_builder;
 
 	/** Mapping of LCS array names to proposed indications */
-	private final HashMap<String, Integer []> indications =
-		new HashMap<String, Integer []>();
+	private final HashMap<String, int []> indications =
+		new HashMap<String, int []>();
 
 	/** Get the proposed indications for an LCS array */
-	public Integer[] getIndications(String lcs_a) {
+	public int[] getIndications(String lcs_a) {
 		return indications.get(lcs_a);
 	}
 
@@ -91,20 +91,19 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 		while (it.hasNext()) {
 			UpstreamDevice ud = it.next();
 			Device dev = ud.device;
-			if (dev instanceof LCSArray)
-				addUpstreamLCS((LCSArray) dev, ud);
+			if (dev instanceof Lcs)
+				addUpstreamLCS((Lcs) dev, ud);
 			if (dev instanceof DMS)
 				addUpstreamDMS((DMS) dev, ud);
 		}
 	}
 
 	/** Add an upstream LCS array */
-	private void addUpstreamLCS(LCSArray lcs_array, UpstreamDevice ud) {
-		Integer[] ind = ind_builder.createIndications(lcs_array,
-			ud.distance);
+	private void addUpstreamLCS(Lcs lcs, UpstreamDevice ud) {
+		int[] ind = ind_builder.createIndications(lcs, ud.distance);
 		if (ind != null) {
-			addElement(lcs_array);
-			indications.put(lcs_array.getName(), ind);
+			addElement(lcs);
+			indications.put(lcs.getName(), ind);
 		}
 	}
 

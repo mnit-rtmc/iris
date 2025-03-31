@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2021  Minnesota Department of Transportation
+ * Copyright (C) 2014-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -27,29 +26,6 @@ import us.mn.state.dot.tms.TMSException;
  * @author Douglas Lau
  */
 public class MeterEvent extends BaseEvent {
-
-	/** Database table name */
-	static private final String TABLE = "event.meter_event";
-
-	/** Get meter event enabled setting */
-	static public boolean getEnabled() {
-		return SystemAttrEnum.METER_EVENT_ENABLE.getBoolean();
-	}
-
-	/** Get meter event purge threshold (days) */
-	static private int getPurgeDays() {
-		return SystemAttrEnum.METER_EVENT_PURGE_DAYS.getInt();
-	}
-
-	/** Purge old records */
-	static public void purgeRecords() throws TMSException {
-		int age = getPurgeDays();
-		if (store != null && age > 0) {
-			store.update("DELETE FROM " + TABLE +
-				" WHERE event_date < now() - '" + age +
-				" days'::interval;");
-		}
-	}
 
 	/** Ramp meter ID */
 	private final String ramp_meter;
@@ -108,10 +84,16 @@ public class MeterEvent extends BaseEvent {
 		seg_density = sd;
 	}
 
+	/** Get the event config name */
+	@Override
+	protected String eventConfigName() {
+		return "meter_event";
+	}
+
 	/** Get the database table name */
 	@Override
 	public String getTable() {
-		return TABLE;
+		return "event.meter_event";
 	}
 
 	/** Get a mapping of the columns */
@@ -119,7 +101,7 @@ public class MeterEvent extends BaseEvent {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("event_date", new Timestamp(event_date.getTime()));
-		map.put("event_desc_id", event_type.id);
+		map.put("event_desc", event_type.id);
 		map.put("ramp_meter", ramp_meter);
 		map.put("phase", phase);
 		map.put("q_state", q_state);

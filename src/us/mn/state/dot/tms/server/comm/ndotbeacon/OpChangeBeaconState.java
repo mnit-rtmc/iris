@@ -15,11 +15,11 @@
 package us.mn.state.dot.tms.server.comm.ndotbeacon;
 
 import java.io.IOException;
-
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.FutureOp;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -58,26 +58,19 @@ public class OpChangeBeaconState extends OpNdotBeacon<NdotBeaconProperty> {
 	/** Phase to change the beacon state */
 	protected class ChangeBeacon extends Phase<NdotBeaconProperty> {
 
-		int failCount = 0;
-
 		/** Set the state of the beacon controller */
-		protected Phase<NdotBeaconProperty> poll(CommMessage<NdotBeaconProperty> mess)
+		protected Phase<NdotBeaconProperty> poll(
+			CommMessage<NdotBeaconProperty> mess)
 			throws IOException
 		{
 			mess.add(prop);
 			mess.storeProps();
-
-			if (prop.gotValidResponse() == false) {
-				if (failCount++ < 3) {
-					return this; // try again
-				}
-
-				handleCommError(EventType.COMM_FAILED, "No Response");
-				return null;
-			}
+			if (!prop.gotValidResponse())
+				throw new ParsingException("NO RESPONSE");
 
 			// read the results 2 seconds later
-			FutureOp.queueOp(beacon, 2, new OpQueryBeaconState(beacon));
+			FutureOp.queueOp(beacon, 2,
+				new OpQueryBeaconState(beacon));
 			return null;
 		}
 	}

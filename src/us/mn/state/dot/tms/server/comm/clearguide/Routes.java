@@ -35,8 +35,7 @@ public class Routes {
 	private final LinkedList<Route> cg_routes = new LinkedList<Route>();
 
 	/** Constructor */
-	protected Routes() {
-	}
+	protected Routes() { }
 
 	/** Get number of routes in container */
 	protected int size() {
@@ -63,8 +62,8 @@ public class Routes {
 	}
 
 	/** Get a statistic for the specified route.
- 	 * @param rid ClearGuide route id, 0 to ignore.
- 	 * @param min Min statistic value from [cg] tag, 0 to ignore.
+	 * @param rid ClearGuide route id, 0 to ignore.
+	 * @param min Min statistic value from [cg] tag, 0 to ignore.
 	 * @param mode Statistic to retrieve as defined by [cg] tag.
 	 * @param ridx Route index, zero based.
 	 * @return Specified statistic or null if not found */

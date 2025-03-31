@@ -251,8 +251,8 @@ public class GpsImpl extends DeviceImpl implements Gps {
 	 * @param ln New longitude.
 	 * @return true if new position should be stored. */
 	private boolean checkJitter(double lt, double ln) {
-		Double old_lat = getLat();
-		Double old_lon = getLon();
+		Double old_lat = geo_loc.getLat();
+		Double old_lon = geo_loc.getLon();
 		if (!isValidLocation(old_lat, old_lon))
 			return true;
 		Position p0 = new Position(old_lat, old_lon);

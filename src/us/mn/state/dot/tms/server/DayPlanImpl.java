@@ -17,11 +17,6 @@ package us.mn.state.dot.tms.server;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeSet;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.DayMatcher;
-import us.mn.state.dot.tms.DayMatcherHelper;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.TMSException;
 
@@ -32,19 +27,15 @@ import us.mn.state.dot.tms.TMSException;
  */
 public class DayPlanImpl extends BaseObjectImpl implements DayPlan {
 
-	/** DayPlan / DayMatcher table mapping */
-	static private TableMapping mapping;
-
 	/** Load all the day plans */
 	static public void loadAll() throws TMSException {
-		mapping = new TableMapping(store, "iris", SONAR_TYPE,
-			DayMatcher.SONAR_TYPE);
-		store.query("SELECT name FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+		store.query("SELECT name, holidays FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new DayPlanImpl(namespace,
-					row.getString(1)	// name
+				namespace.addObject(new DayPlanImpl(
+					row.getString(1), // name
+					row.getBoolean(2) // holidays
 				));
 			}
 		});
@@ -55,6 +46,7 @@ public class DayPlanImpl extends BaseObjectImpl implements DayPlan {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
+		map.put("holidays", holidays);
 		return map;
 	}
 
@@ -64,49 +56,17 @@ public class DayPlanImpl extends BaseObjectImpl implements DayPlan {
 	}
 
 	/** Create a day plan from database lookup */
-	private DayPlanImpl(Namespace ns, String n) throws TMSException {
+	private DayPlanImpl(String n, boolean h) throws TMSException {
 		this(n);
-		TreeSet<DayMatcherImpl> dm_set = new TreeSet<DayMatcherImpl>();
-		for (String o: mapping.lookup(this)) {
-			DayMatcher dm = DayMatcherHelper.lookup(o);
-			if (dm instanceof DayMatcherImpl)
-				dm_set.add((DayMatcherImpl) dm);
-		}
-		day_matchers = dm_set.toArray(new DayMatcherImpl[0]);
+		holidays = h;
 	}
 
-	/** DayMatchers for the day plan */
-	private DayMatcherImpl[] day_matchers = new DayMatcherImpl[0];
+	/** Holiday value for matchers */
+	private boolean holidays;
 
-	/** Set the day matchers assigned to the day plan */
+	/** Get holiday value for matchers */
 	@Override
-	public void setDayMatchers(DayMatcher[] dms) {
-		DayMatcherImpl[] _dms = new DayMatcherImpl[dms.length];
-		for (int i = 0; i < dms.length; i++) {
-			if (dms[i] instanceof DayMatcherImpl)
-				_dms[i] = (DayMatcherImpl) dms[i];
-		}
-		day_matchers = _dms;
-	}
-
-	/** Set the day matchers assigned to the day plan */
-	public void doSetDayMatchers(DayMatcher[] dms) throws TMSException {
-		TreeSet<Storable> dm_set = new TreeSet<Storable>();
-		for (DayMatcher dm: dms) {
-			if (dm instanceof DayMatcherImpl)
-				dm_set.add((DayMatcherImpl) dm);
-			else {
-				throw new ChangeVetoException(
-					"Invalid day matcher");
-			}
-		}
-		mapping.update(this, dm_set);
-		setDayMatchers(dms);
-	}
-
-	/** Get the day matchers assigned to the day plan */
-	@Override
-	public DayMatcher[] getDayMatchers() {
-		return day_matchers;
+	public boolean getHolidays() {
+		return holidays;
 	}
 }

@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.server.comm.cap;
 
 import us.mn.state.dot.tms.CommLink;
+import us.mn.state.dot.tms.CommProtocol;
 import static us.mn.state.dot.tms.server.CapAlert.LOG;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommThread;
@@ -41,33 +42,31 @@ public class CapPoller extends ThreadedPoller<CapProperty> implements FeedPoller
 		LOG.log(msg);
 	}
 
+	/** Communication protocol */
+	private final CommProtocol protocol;
+
 	/** Create a new poller */
-	public CapPoller(CommLink link) {
+	public CapPoller(CommLink link, CommProtocol cp) {
 		super(link, HTTPS, LOG);
+		protocol = cp;
 	}
 
 	/** Create a comm thread */
 	@Override
-	protected CapThread createCommThread(String uri, int timeout, int nrd) {
-		return new CapThread(this, queue, scheme, uri, timeout, nrd,
-			LOG);
+	protected CommThread<CapProperty> createCommThread(String uri,
+		int timeout, int nrd)
+	{
+		if (protocol == CommProtocol.CAP_IPAWS) {
+			return new IpawsThread(this, queue, scheme, uri, timeout,
+				nrd, LOG);
+		} else
+			return super.createCommThread(uri, timeout, nrd);
 	}
 
 	/** Query feed for alert messages */
 	@Override
 	public void queryFeed(ControllerImpl c) {
 		slog("creating OpReadCap: " + c);
-		addOp(new OpReadCap(c, name));
-	}
-
-	/** Run a test of the alert processing system.
-	 *
-	 *  Note that this does not test communication with the feed itself,
-	 *  which is assumed to be working and relatively easy to verify/debug,
-	 *  but instead tests the machinery in IRIS to read, parse, process, and
-	 *  deploy these alerts to DMS. */
-	public void startTesting(ControllerImpl c) {
-		slog("creating OpTestCap: " + c);
-		addOp(new OpTestCap(c, name));
+		addOp(new OpReadCap(c, name, protocol));
 	}
 }

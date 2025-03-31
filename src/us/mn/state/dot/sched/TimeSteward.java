@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2014  Minnesota Department of Transportation
+ * Copyright (C) 2010-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,8 @@
  */
 package us.mn.state.dot.sched;
 
-import java.net.Socket;			// Suppress javadoc warning
+import java.net.Socket; // Suppress javadoc warning
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -128,6 +129,25 @@ public final class TimeSteward {
 		SimpleDateFormat sdf = createDateFormat("yyyy-MM-dd HH:mm:ss",
 			local);
 		return sdf.format(new Date(currentTimeMillis()));
+	}
+
+	/** Format date/time in ISO 8601 format */
+	static public String format8601(long dt) {
+		SimpleDateFormat sdf =
+			new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+		return sdf.format(new Date(dt));
+	}
+
+	/** Parse date/time in ISO 8601 format */
+	static public Long parse8601(String dt) {
+		try {
+			SimpleDateFormat sdf =
+				new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+			return sdf.parse(dt).getTime();
+		}
+		catch (ParseException e) {
+			return null;
+		}
 	}
 
 	/** Get the local date as a short YYYYMMDD string */

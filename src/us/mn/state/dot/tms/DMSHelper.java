@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2024  Minnesota Department of Transportation
+ * Copyright (C) 2008-2025  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  * Copyright (C) 2021  Iteris Inc.
  *
@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
-import org.json.JSONException;
-import org.json.JSONObject;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.RleTable;
 import us.mn.state.dot.tms.utils.SString;
@@ -83,30 +81,20 @@ public class DMSHelper extends BaseHelper {
 		return true;
 	}
 
-	/** Get the maintenance status of a DMS */
-	static public String getMaintenance(DMS proxy) {
-		return ControllerHelper.getMaintenance(proxy.getController());
-	}
-
-	/** Test if a DMS has a critical error */
-	static public boolean hasCriticalError(DMS proxy) {
-		return !getCriticalError(proxy).isEmpty();
-	}
-
-	/** Get the DMS critical error */
-	static public String getCriticalError(DMS proxy) {
+	/** Get optional DMS faults, or null */
+	static public String optFaults(DMS proxy) {
 		SignConfig sc = proxy.getSignConfig();
 		if (null == sc ||
 		    sc.getFaceWidth() <= 0 ||
 		    sc.getFaceHeight() <= 0)
 			return "Invalid dimensions";
-		else
-			return getStatus(proxy);
+		Object faults = optStatus(proxy, DMS.FAULTS);
+		return (faults != null) ? faults.toString() : null;
 	}
 
-	/** Get DMS controller communication status */
-	static public String getStatus(DMS proxy) {
-		return ControllerHelper.getStatus(proxy.getController());
+	/** Test if a DMS has faults */
+	static public boolean hasFaults(DMS proxy) {
+		return optFaults(proxy) != null;
 	}
 
 	/** Test if a DMS is active */
@@ -114,9 +102,9 @@ public class DMSHelper extends BaseHelper {
 		return ItemStyle.ACTIVE.checkBit(proxy.getStyles());
 	}
 
-	/** Test if a DMS is failed */
-	static public boolean isFailed(DMS proxy) {
-		return ItemStyle.FAILED.checkBit(proxy.getStyles());
+	/** Test if a DMS is offline */
+	static public boolean isOffline(DMS proxy) {
+		return ItemStyle.OFFLINE.checkBit(proxy.getStyles());
 	}
 
 	/** Test if a DMS is a dedicated purpose sign */
@@ -134,11 +122,6 @@ public class DMSHelper extends BaseHelper {
 			sb.append(style.toString());
 		}
 		return sb.toString();
-	}
-
-	/** Lookup the camera preset for a DMS */
-	static public CameraPreset getPreset(DMS dms) {
-		return (dms != null) ? dms.getPreset() : null;
 	}
 
 	/** Get the DMS roadway direction from the geo location as a String */
@@ -339,20 +322,10 @@ public class DMSHelper extends BaseHelper {
 		      : null;
 	}
 
-	/** Get DMS status attribute */
-	static public Object getStatus(DMS dms, String key) {
+	/** Get optional DMS status attribute, or null */
+	static public Object optStatus(DMS dms, String key) {
 		String status = (dms != null) ? dms.getStatus() : null;
-		if (status != null) {
-			try {
-				JSONObject jo = new JSONObject(status);
-				return jo.opt(key);
-			}
-			catch (JSONException e) {
-				// malformed JSON
-				e.printStackTrace();
-			}
-		}
-		return null;
+		return optJson(status, key);
 	}
 
 	/** Create stuck pixel bitmap */

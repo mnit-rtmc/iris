@@ -1,6 +1,6 @@
 // database.rs
 //
-// Copyright (C) 2021-2024  Minnesota Department of Transportation
+// Copyright (C) 2021-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,11 +12,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::error::Result;
-use async_trait::async_trait;
+use crate::error;
 use bb8::{CustomizeConnection, Pool, PooledConnection};
 use bb8_postgres::PostgresConnectionManager;
 use std::env;
+use std::pin::Pin;
 use tokio_postgres::tls::NoTlsStream;
 use tokio_postgres::{Client, Config, Connection, NoTls, Socket};
 
@@ -30,7 +30,7 @@ pub struct Database {
 }
 
 /// Make database configuration
-fn make_config(db: &str) -> Result<Config> {
+fn make_config(db: &str) -> error::Result<Config> {
     let username = whoami::username();
     // Format path for unix domain socket -- not worth using percent_encode
     let uds = format!("postgres://{username}@%2Frun%2Fpostgresql/{db}");
@@ -62,16 +62,19 @@ fn sql_init() -> Option<String> {
 #[derive(Debug)]
 struct TimeZoneCorrecter;
 
-#[async_trait]
 impl CustomizeConnection<Client, tokio_postgres::Error> for TimeZoneCorrecter {
-    async fn on_acquire(
-        &self,
-        client: &mut Client,
-    ) -> std::result::Result<(), tokio_postgres::Error> {
-        if let Some(sql) = &sql_init() {
-            client.execute(sql, &[]).await?;
-        }
-        Ok(())
+    fn on_acquire<'a>(
+        &'a self,
+        client: &'a mut Client,
+    ) -> Pin<
+        Box<dyn Future<Output = Result<(), tokio_postgres::Error>> + Send + 'a>,
+    > {
+        Box::pin(async move {
+            if let Some(sql) = &sql_init() {
+                client.execute(sql, &[]).await?;
+            }
+            Ok(())
+        })
     }
 }
 
@@ -79,7 +82,7 @@ impl CustomizeConnection<Client, tokio_postgres::Error> for TimeZoneCorrecter {
 type Manager = PostgresConnectionManager<NoTls>;
 
 /// Make postgres pool for connecting to a Db
-async fn make_pool(config: Config) -> Result<Pool<Manager>> {
+async fn make_pool(config: Config) -> error::Result<Pool<Manager>> {
     let manager = PostgresConnectionManager::new(config, NoTls);
     let correcter = TimeZoneCorrecter;
     let pool = Pool::builder()
@@ -91,21 +94,21 @@ async fn make_pool(config: Config) -> Result<Pool<Manager>> {
 
 impl Database {
     /// Create database state
-    pub async fn new(db: &str) -> Result<Self> {
+    pub async fn new(db: &str) -> error::Result<Self> {
         let config = make_config(db)?;
         let pool = make_pool(config.clone()).await?;
         Ok(Database { config, pool })
     }
 
     /// Get database client
-    pub async fn client(&self) -> Result<PooledConnection<Manager>> {
+    pub async fn client(&self) -> error::Result<PooledConnection<Manager>> {
         Ok(self.pool.get().await?)
     }
 
     /// Get a dedicated client/connection, not managed by the pool
     pub async fn dedicated_client(
         &self,
-    ) -> Result<(Client, Connection<Socket, NoTlsStream>)> {
+    ) -> error::Result<(Client, Connection<Socket, NoTlsStream>)> {
         Ok(self.config.connect(NoTls).await?)
     }
 }

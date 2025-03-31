@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2022  Minnesota Department of Transportation
+ * Copyright (C) 2015-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,7 +134,7 @@ public class E6Thread extends CommThread<E6Property> {
 			while (receivePacket());
 		}
 		catch (IOException e) {
-			getMessage(e);
+			logException(e);
 		}
 		finally {
 			destroy();

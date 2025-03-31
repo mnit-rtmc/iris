@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,9 +15,10 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.LcsIndication;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.LCSArrayImpl;
+import us.mn.state.dot.tms.server.LcsImpl;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -28,7 +29,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 public class OpQueryLCSIndications extends OpLCS {
 
 	/** Create a new operation to send LCS indications */
-	public OpQueryLCSIndications(LCSArrayImpl l) {
+	public OpQueryLCSIndications(LcsImpl l) {
 		super(PriorityLevel.POLL_LOW, l);
 		if (l.isQueryAllowed())
 			lookupIndications();
@@ -42,20 +43,19 @@ public class OpQueryLCSIndications extends OpLCS {
 
 	/** Lookup the indications on the LCS array */
 	private void lookupIndications() {
-		for (int i = 0; i < dmss.length; i++) {
-			DMSImpl dms = dmss[i];
-			if (dms != null)
-				ind_after[i] = lookupIndication(dms);
-		}
+		for (int ln = 0; ln < dmss.length; ln++)
+			ind_after[ln] = lookupIndication(dmss[ln]);
 	}
 
 	/** Lookup an indication on a DMS */
-	private Integer lookupIndication(DMSImpl dms) {
-		if (dms.isFailed() || DMSHelper.hasCriticalError(dms))
-			return null;
+	private int lookupIndication(DMSImpl dms) {
+		if (dms.isOffline() || DMSHelper.hasFaults(dms))
+			return LcsIndication.UNKNOWN.ordinal();
 		else {
 			SignMessage sm = dms.getMsgCurrent();
-			return (sm != null) ? lookupIndication(sm) : null;
+			return (sm != null)
+			      ? lookupIndication(sm)
+			      : LcsIndication.UNKNOWN.ordinal();
 		}
 	}
 }

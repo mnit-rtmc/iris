@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2024  Minnesota Department of Transportation
+ * Copyright (C) 2016-2025  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -77,7 +77,7 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig,
 			String n = createUniqueName(template);
 			SignConfigImpl sci = new SignConfigImpl(n, fw, fh, bh,
 				bv, ph, pv, pxw, pxh, cw, ch, mf, mb, cs,
-				FontHelper.DEFAULT_FONT_NUM, 0, 0);
+				FontHelper.DEFAULT_FONT_NUM, null, null);
 			return createNotify(sci);
 		}
 	}
@@ -92,13 +92,6 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig,
 			System.err.println("createNotify: " + e.getMessage());
 			return null;
 		}
-	}
-
-	/** Find or create LCS sign config */
-	static public SignConfigImpl findOrCreateLCS() {
-		return findOrCreate(600, 600, 1, 1, 1, 1, 1, 1, 0, 0,
-			ColorScheme.MONOCHROME_1_BIT.ordinal(),
-			DmsColor.AMBER.rgb(), DmsColor.BLACK.rgb());
 	}
 
 	/** Load all the sign configs */

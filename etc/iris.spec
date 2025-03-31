@@ -4,7 +4,7 @@
 #     and Douglas Lau
 #
 # IRIS -- Intelligent Roadway Information System
-# Copyright (C) 2009-2024  Minnesota Department of Transportation
+# Copyright (C) 2009-2025  Minnesota Department of Transportation
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ Source:		%{name}-%{version}.tar.gz
 URL:		@@RPM.URL@@
 BuildArch:	noarch
 Buildroot:	%{buildroot}
-Requires:	java-openjdk, postgresql-server, postgresql-jdbc, postgis-utils osm2pgsql, nginx
+Requires:	(java-openjdk or java-1.8.0-openjdk), postgresql-server, postgresql-jdbc, postgis-utils osm2pgsql, nginx
 
 %Description
 @@RPM.DESCRIPTION@@
@@ -112,11 +112,10 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %dir %{_serverdir}
 %{_serverdir}/iris-server-%{version}.jar
 %{_serverdir}/iris-common-%{version}.jar
-%{_serverdir}/javax.activation.jar
-%{_serverdir}/mail.jar
 %{_serverdir}/json-@@JSON.VERSION@@.jar
 %{_serverdir}/postgis-jdbc-@@POSTGIS.VERSION@@.jar
 %{_serverdir}/postgis-geometry-@@POSTGIS.VERSION@@.jar
+%{_serverdir}/jsch-@@JSCH.VERSION@@.jar
 
 # /var/cache/nginx/earthwyrm-iris
 %dir %attr(0755,nginx,nginx) /var/cache/nginx

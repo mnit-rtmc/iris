@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2024  Minnesota Department of Transportation
+ * Copyright (C) 2006-2025  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  * Copyright (C) 2019-2020  SRF Consulting Group
  * Copyright (C) 2021  Iteris Inc.
@@ -484,7 +484,7 @@ public class MultiString {
 		return occ != null && occ > 0 && occ < 100;
 	}
 
-	/** MULTI string buffer */
+	/** MULTI string */
 	private final String multi;
 
 	/** Create a new MULTI string.
@@ -694,7 +694,7 @@ public class MultiString {
 		return mb.toMultiString();
 	}
 
-	/** Normalize a single line MULTI string */
+	/** Normalize (and trim) a single line MULTI string */
 	public MultiString normalizeLine() {
 		MultiBuilder mb = new LineMultiNormalizer() {
 			// locator tags also not allowed
@@ -702,7 +702,7 @@ public class MultiString {
 			public void addLocator(String code) {}
 		};
 		parse(mb);
-		return mb.toMultiString();
+		return new MultiString(mb.toString().trim());
 	}
 
 	/** Strip font tags from a MULTI string */

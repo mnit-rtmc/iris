@@ -29,6 +29,7 @@ DELETE FROM event.gate_arm_event;
 DELETE FROM event.incident_update;
 DELETE FROM event.incident;
 DELETE FROM event.meter_event;
+DELETE FROM event.meter_lock_event;
 DELETE FROM event.price_message_event;
 DELETE FROM event.sign_event;
 DELETE FROM event.tag_read_event;
@@ -50,9 +51,7 @@ DELETE FROM iris.map_extent;
 
 UPDATE iris.system_attribute SET value = '' WHERE name = 'clearguide_key';
 UPDATE iris.system_attribute SET value = '' WHERE name = 'email_smtp_host';
-UPDATE iris.system_attribute SET value = '' WHERE name = 'email_sender_client';
 UPDATE iris.system_attribute SET value = '' WHERE name = 'email_sender_server';
-UPDATE iris.system_attribute SET value = '' WHERE name LIKE 'email_recipient_%';
 UPDATE iris.system_attribute SET value = '' WHERE name = 'work_request_url';
 UPDATE iris.system_attribute SET value = '' WHERE name LIKE 'subnet_target_%';
 UPDATE iris.system_attribute SET value = '' WHERE name LIKE 'camera_%_url';

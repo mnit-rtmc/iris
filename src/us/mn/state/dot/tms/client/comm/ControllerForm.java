@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2024  Minnesota Department of Transportation
+ * Copyright (C) 2008-2025  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -92,7 +92,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	private final JTextArea notes_txt = new JTextArea(3, 24);
 
 	/** Access password */
-	private final JPasswordField password = new JPasswordField(16);
+	private final JPasswordField password = new JPasswordField();
 
 	/** Action to clear the access password */
 	private final IAction clear_pwd = new IAction(
@@ -147,11 +147,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Firmware version */
 	private final JLabel version_lbl = IPanel.createValueLabel();
 
-	/** Maint status */
-	private final JLabel maint_lbl = IPanel.createValueLabel();
-
-	/** Status */
-	private final JLabel status_lbl = IPanel.createValueLabel();
+	/** Fault label */
+	private final JLabel fault_lbl = IPanel.createValueLabel();
 
 	/** Fail time */
 	private final JLabel fail_time_lbl = IPanel.createValueLabel();
@@ -258,7 +255,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		p.add("controller.drop");
 		p.add(drop_spn, Stretch.LAST);
 		p.add("controller.password");
-		p.add(password);
+		p.add(password, Stretch.WIDE);
 		p.add(new JButton(clear_pwd), Stretch.RIGHT);
 		p.add("device.notes");
 		p.add(notes_txt, Stretch.FULL);
@@ -330,10 +327,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		IPanel p = new IPanel();
 		p.add("controller.version");
 		p.add(version_lbl, Stretch.LAST);
-		p.add("controller.maint");
-		p.add(maint_lbl, Stretch.LAST);
-		p.add("controller.status");
-		p.add(status_lbl, Stretch.LAST);
+		p.add("controller.fault");
+		p.add(fault_lbl, Stretch.LAST);
 		p.add("controller.fail");
 		p.add(fail_time_lbl, Stretch.LAST);
 		p.add("controller.err.timeout");
@@ -389,10 +384,10 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 			String v = ControllerHelper.getSetup(proxy, "version");
 			version_lbl.setText(v);
 		}
-		if (a == null || a.equals("maint"))
-			maint_lbl.setText(proxy.getMaint());
-		if (a == null || a.equals("status"))
-			status_lbl.setText(proxy.getStatus());
+		if (a == null || a.equals("status")) {
+			String f = ControllerHelper.optFaults(proxy);
+			fault_lbl.setText((f != null) ? f : "");
+		}
 		if (a == null || a.equals("failTime")) {
 			Long ft = proxy.getFailTime();
 			if (ft != null)

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2022  Minnesota Department of Transportation
+ * Copyright (C) 2013-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,13 +81,16 @@ public class OpQueryGateStatus extends OpSTC {
 		}
 	}
 
-	/** Update controller status */
+	/** Update gate/controller status */
 	private void updateStatus() {
-		if (!status.hasFaults())
+		if (status.hasFaults())
+			putCtrlFaults("other", status.getFaultStatus());
+		else {
+			putCtrlFaults(null, null);
 			gate_arm.setFaultNotify(null);
+		}
 		gate_arm.setArmStateNotify(status.getState(), null);
-		setMaintStatus(status.getMaintStatus());
-		updateMaintStatus();
+		updateCtrlStatus();
 		if (shouldUpdateOpCount()) {
 			controller.completeOperation(id, isSuccess());
 			op_time += OP_COUNT_INTERVAL_MS;

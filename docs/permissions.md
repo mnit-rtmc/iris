@@ -50,17 +50,17 @@ resource, at the same access level.
 | [action plan]      | day matcher, [day plan], [device action], [plan phase], [time action] |
 | [alert config]     | alert info, [alert message]                           |
 | [beacon]           |                                                       |
-| [camera]           | [camera preset], camera template, cam vid src ord, encoder stream, [encoder type], vid source template |
-| [controller]       | [alarm], [comm link], [controller io], [gps], [modem] |
-| [detector]         | [r_node], [road], road affix, station                 |
+| [camera]           | [camera preset], camera template, cam vid src ord, [encoder stream], [encoder type], vid source template |
+| [controller]       | [alarm], [comm link], [gps], [modem]                  |
+| [detector]         | [r_node], [road], station                             |
 | [dms]              | [font], glyph, [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
 | [gate arm]         | [gate arm array]                                      |
-| [incident]         | inc_advice, inc_descriptor, inc_locator, incident_detail |
-| [lcs]              | [lane marking], lane use multi, [lcs array], [lcs indication] |
+| [incident]         | incident_detail, inc_advice, inc_descriptor, inc_locator, road_affix |
+| [lcs]              | [lcs state]                                           |
 | [parking area]     |                                                       |
 | permission         | connection, [domain], [role], [user id]               |
 | [ramp meter]       |                                                       |
-| [system attribute] | [cabinet style], [comm config], map extent, rpt conduit |
+| [system attribute] | [cabinet style], [comm config], [event config], map extent, rpt conduit |
 | [toll zone]        | [tag reader]                                          |
 | [video monitor]    | [flow stream], [monitor style], [play list]           |
 | [weather sensor]   |                                                       |
@@ -70,10 +70,10 @@ resource, at the same access level.
 Some resources contain an associated `resource_n`, linking them to another
 resource.  These include:
 
-* __geo loc__
-* __controller io__
-* __device preset__
-* __hashtag__
+* [geo loc]
+* [controller io]
+* device [preset]
+* [hashtag]
 
 
 [action plan]: action_plans.html
@@ -93,7 +93,9 @@ resource.  These include:
 [device action]: action_plans.html#device-actions
 [dms]: dms.html
 [domain]: users.html#domains
+[encoder stream]: cameras.html#streams
 [encoder type]: cameras.html#encoder-types
+[event config]: events.html#configuration
 [flow stream]: flow_streams.html
 [font]: fonts.html
 [gate arm]: gate_arms.html
@@ -103,10 +105,8 @@ resource.  These include:
 [graphic]: graphics.html
 [hashtag]: hashtags.html
 [incident]: incidents.html
-[lane marking]: lcs.html#lane-markings
 [lcs]: lcs.html
-[lcs array]: lcs.html#arrays
-[lcs indication]: lcs.html#indications
+[lcs state]: lcs.html#lcs-states
 [message line]: message_patterns.html#message-lines
 [message pattern]: message_patterns.html
 [modem]: modem.html
@@ -114,6 +114,7 @@ resource.  These include:
 [parking area]: parking_areas.html
 [plan phase]: action_plans.html#plan-phases
 [play list]: video.html#play-lists
+[preset]: cameras.html#presets
 [r_node]: road_topology.html#r_nodes
 [ramp meter]: ramp_meters.html
 [resource]: rest_api.html#resource-types

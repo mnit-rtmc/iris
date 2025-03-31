@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.server.GateArmImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.FutureOp;
 import us.mn.state.dot.tms.server.comm.OpDevice;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -76,8 +77,6 @@ public class OpMoveGateArm extends OpGateNdorV5 {
 	/** Phase to start gate-arm motion */
 	protected class StartGateArmMotion extends Phase {
 
-		int failCount = 0;
-
 		/** Store control */
 		@SuppressWarnings({ "unchecked", "synthetic-access", "incomplete-switch" })
 		protected Phase poll(CommMessage mess)
@@ -85,15 +84,8 @@ public class OpMoveGateArm extends OpGateNdorV5 {
 		{
 			mess.add(prop);
 			mess.storeProps();
-
-			if (prop.gotValidResponse() == false) {
-				if (failCount++ < 3) {
-					return this; // try again
-				}
-
-				handleCommError(EventType.COMM_FAILED, "No Response");
-				return null;
-			}
+			if (!prop.gotValidResponse())
+				throw new ParsingException("NO RESPONSE");
 
 			// queue a lower priority op to monitor the operation
 			OpDevice op;

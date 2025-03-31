@@ -1,6 +1,6 @@
 // mayfly.rs
 //
-// Copyright (c) 2019-2021  Minnesota Department of Transportation
+// Copyright (c) 2019-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,128 +14,78 @@
 //
 #![forbid(unsafe_code)]
 
-use mayfly::binned::{
-    CountData, HeadwayData, LengthData, OccupancyData, SpeedData,
-};
-use mayfly::common::Error;
-use mayfly::query::{
-    CorridorQuery, DateQuery, DetectorQuery, DistrictQuery, TrafficQuery,
-    YearQuery,
-};
-use tide::{Request, Response, StatusCode};
+use axum::response::IntoResponse;
+use axum::routing::get;
+use axum::Router;
+use http::header;
+use mayfly::error::Result;
+use mayfly::routes;
+use std::net::SocketAddr;
+use tokio::net::TcpListener;
 
 /// Main function
-#[async_std::main]
-async fn main() -> tide::Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
-    run_service().await
-}
-
-/// Run as a web service
-async fn run_service() -> tide::Result<()> {
-    let mut app = tide::new();
-    let mut root = app.at("/mayfly/");
-    root.at("").get(|_| handle_index());
-    root.at("index.html").get(|_| handle_index());
-    root.at("mayfly.css").get(|_| handle_css());
-    root.at("districts").get(handle_districts);
-    root.at("years").get(handle_years);
-    root.at("dates").get(handle_dates);
-    root.at("corridors").get(handle_corridors);
-    root.at("detectors").get(handle_detectors);
-    root.at("counts").get(handle_counts);
-    root.at("speed").get(handle_speed);
-    root.at("headway").get(handle_headway);
-    root.at("occupancy").get(handle_occupancy);
-    root.at("length").get(handle_length);
-    app.listen("127.0.0.1:3131").await?;
+    let app = route_root().into_make_service_with_connect_info::<SocketAddr>();
+    let listener = TcpListener::bind("127.0.0.1:3131").await?;
+    axum::serve(listener, app).await?;
+    log::warn!("Axum serve ended");
     Ok(())
 }
 
-/// Handle a request for index page
-async fn handle_index() -> tide::Result {
-    Ok(Response::builder(StatusCode::Ok)
-        .content_type("text/html")
-        .body(include_str!(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/static/index.html"
-        )))
-        .build())
+/// Build root route
+fn route_root() -> Router {
+    Router::new()
+        .merge(root_get())
+        .nest("/mayfly", route_mayfly())
 }
 
-/// Handle a request for CSS
-async fn handle_css() -> tide::Result {
-    Ok(Response::builder(StatusCode::Ok)
-        .content_type("text/css")
-        .body(include_str!(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/static/mayfly.css"
-        )))
-        .build())
+/// Build route for index html
+fn root_get() -> Router {
+    Router::new().route("/mayfly/", get(index_handler))
 }
 
-/// Handle a query
-///
-/// Ideally, this would be done with a Query trait, but that won't work without
-/// async functions in traits.
-macro_rules! handle_query {
-    ($req:expr, $qtype:ty) => {
-        match $req.query::<$qtype>().or(Err(Error::InvalidQuery)) {
-            Ok(query) => match query.lookup().await {
-                Ok(body) => body.into(),
-                Err(err) => err.into(),
-            },
-            Err(err) => err.into(),
-        }
-    };
+/// Handler for index page
+async fn index_handler() -> impl IntoResponse {
+    (
+        [(header::CONTENT_TYPE, "text/html; charset=utf-8")],
+        include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/static/index.html")),
+    )
 }
 
-/// Handle a request for districts
-async fn handle_districts(req: Request<()>) -> tide::Result {
-    handle_query!(req, DistrictQuery)
+/// Build route for index html
+fn index_get() -> Router {
+    Router::new().route("/index.html", get(index_handler))
 }
 
-/// Handle a request for years
-async fn handle_years(req: Request<()>) -> tide::Result {
-    handle_query!(req, YearQuery)
+/// Build route for CSS
+fn css_get() -> Router {
+    async fn handler() -> impl IntoResponse {
+        (
+            [(header::CONTENT_TYPE, "text/css")],
+            include_str!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/static/mayfly.css"
+            )),
+        )
+    }
+    Router::new().route("/mayfly.css", get(handler))
 }
 
-/// Handle a request for dates
-async fn handle_dates(req: Request<()>) -> tide::Result {
-    handle_query!(req, DateQuery)
-}
-
-/// Handle a request for corridors
-async fn handle_corridors(req: Request<()>) -> tide::Result {
-    handle_query!(req, CorridorQuery)
-}
-
-/// Handle a request for detectors
-async fn handle_detectors(req: Request<()>) -> tide::Result {
-    handle_query!(req, DetectorQuery)
-}
-
-/// Handle a request for vehicle counts
-async fn handle_counts(req: Request<()>) -> tide::Result {
-    handle_query!(req, TrafficQuery<CountData>)
-}
-
-/// Handle a request for speed data
-async fn handle_speed(req: Request<()>) -> tide::Result {
-    handle_query!(req, TrafficQuery<SpeedData>)
-}
-
-/// Handle a request for headway data
-async fn handle_headway(req: Request<()>) -> tide::Result {
-    handle_query!(req, TrafficQuery<HeadwayData>)
-}
-
-/// Handle a request for occupancy data
-async fn handle_occupancy(req: Request<()>) -> tide::Result {
-    handle_query!(req, TrafficQuery<OccupancyData>)
-}
-
-/// Handle a request for length data
-async fn handle_length(req: Request<()>) -> tide::Result {
-    handle_query!(req, TrafficQuery<LengthData>)
+/// Build mayfly route
+fn route_mayfly() -> Router {
+    Router::new()
+        .merge(index_get())
+        .merge(css_get())
+        .merge(routes::districts_get())
+        .merge(routes::years_get())
+        .merge(routes::dates_get())
+        .merge(routes::corridors_get())
+        .merge(routes::detectors_get())
+        .merge(routes::counts_get())
+        .merge(routes::speed_get())
+        .merge(routes::headway_get())
+        .merge(routes::occupancy_get())
+        .merge(routes::length_get())
 }

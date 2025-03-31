@@ -1,6 +1,6 @@
 // lib.rs
 //
-// Copyright (c) 2021  Minnesota Department of Transportation
+// Copyright (c) 2021-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 #![forbid(unsafe_code)]
 
 pub mod binned;
-pub mod common;
-pub mod query;
+pub mod error;
+pub mod routes;
 pub mod traffic;
 pub mod vehicle;

@@ -48,7 +48,7 @@ public class DetectorHelper extends BaseHelper {
 
 	/** Get detector label */
 	static public String getLabel(Detector det) {
-		String root = GeoLocHelper.getRootLabel(getGeoLoc(det));
+		String root = GeoLocHelper.getLabelBase(getGeoLoc(det));
 		if (root.equals(GeoLocHelper.FUTURE))
 			return root;
 		StringBuilder b = new StringBuilder();

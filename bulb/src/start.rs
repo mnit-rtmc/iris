@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,15 +18,15 @@ use crate::item::ItemState;
 use crate::util::Doc;
 use js_sys::JsString;
 use resources::Res;
-use std::future::Future;
-use wasm_bindgen::prelude::*;
+use std::error::Error as _;
 use wasm_bindgen::JsCast;
+use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{
-    console, CustomEvent, Element, Event, EventSource, HtmlButtonElement,
-    HtmlElement, HtmlInputElement, HtmlSelectElement, MessageEvent,
-    ScrollBehavior, ScrollIntoViewOptions, ScrollLogicalPosition,
-    TransitionEvent, Window,
+    CustomEvent, Element, Event, EventSource, HtmlButtonElement, HtmlElement,
+    HtmlInputElement, HtmlSelectElement, MessageEvent, ScrollBehavior,
+    ScrollIntoViewOptions, ScrollLogicalPosition, TransitionEvent, Window,
+    console,
 };
 
 /// JavaScript result
@@ -208,7 +208,12 @@ async fn do_future(future: impl Future<Output = Result<()>>) {
             // Card list may be out-of-date; refresh
             app::defer_action(DeferredAction::RefreshList, 200);
         }
-        Err(e) => show_toast(&format!("Error: {e}")),
+        Err(e) => {
+            if let Some(se) = e.source() {
+                console::log_1(&format!("{se}").into());
+            }
+            show_toast(&format!("Error: {e}"));
+        }
     }
 }
 
@@ -673,14 +678,14 @@ fn add_eventsource_listener() {
             return;
         }
     };
-    set_notify_state(NotifyState::Offline);
+    set_notify_state(NotifyState::Disconnected);
     let onopen: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
-        set_notify_state(NotifyState::Updating);
+        set_notify_state(NotifyState::Connecting);
     });
     es.set_onopen(Some(onopen.as_ref().unchecked_ref()));
     onopen.forget();
     let onerror: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
-        set_notify_state(NotifyState::Offline);
+        set_notify_state(NotifyState::Disconnected);
     });
     es.set_onerror(Some(onerror.as_ref().unchecked_ref()));
     onerror.forget();
@@ -698,7 +703,7 @@ fn add_eventsource_listener() {
 /// Set refresh button text
 fn set_notify_state(ns: NotifyState) {
     let sb_refresh = Doc::get().elem::<HtmlButtonElement>("sb_refresh");
-    sb_refresh.set_inner_html(ns.as_str());
+    sb_refresh.set_inner_html(ns.as_html());
     sb_refresh.set_disabled(ns.disabled());
 }
 
@@ -713,7 +718,7 @@ async fn handle_notify(payload: String) {
         console::log_1(&format!("unknown channel: {chan}").into());
         return;
     }
-    set_notify_state(NotifyState::GoodUpdating);
+    set_notify_state(NotifyState::Updating);
     app::defer_action(DeferredAction::SetNotifyState(NotifyState::Good), 600);
     do_future(update_card_list()).await;
 }

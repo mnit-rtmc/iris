@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2022  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.SignConfig;
@@ -67,9 +66,6 @@ public class PropManufacturer extends IPanel {
 
 	/** Software model label */
 	private final JLabel software_model_lbl = createValueLabel();
-
-	/** Version label */
-	private final JLabel version_lbl = createValueLabel();
 
 	/** LDC pot base label */
 	private final JLabel pot_base_lbl = createValueLabel();
@@ -132,8 +128,6 @@ public class PropManufacturer extends IPanel {
 		add(software_make_lbl, Stretch.LAST);
 		add("dms.software.model");
 		add(software_model_lbl, Stretch.LAST);
-		add("dms.version");
-		add(version_lbl, Stretch.LAST);
 		add(card_pnl, Stretch.CENTER);
 		card_pnl.add(createGenericPanel(), MAKE_GENERIC);
 		card_pnl.add(createLedstarPanel(), MAKE_LEDSTAR);
@@ -165,20 +159,15 @@ public class PropManufacturer extends IPanel {
 
 	/** Update one attribute on the panel */
 	public void updateAttribute(String a) {
-		if (null == a || a.equals("controller")) {
-			String v = ControllerHelper.getSetup(
-				dms.getController(), "version");
-			version_lbl.setText(formatString(v));
-		}
 		if (null == a || a.equals("status")) {
 			pot_base_lbl.setText(formatObj(
-				DMSHelper.getStatus(dms, DMS.LDC_POT_BASE)
+				DMSHelper.optStatus(dms, DMS.LDC_POT_BASE)
 			));
 			current_low_lbl.setText(formatObj(
-				DMSHelper.getStatus(dms, DMS.PIXEL_CURRENT_LOW)
+				DMSHelper.optStatus(dms, DMS.PIXEL_CURRENT_LOW)
 			));
 			current_high_lbl.setText(formatObj(
-				DMSHelper.getStatus(dms,DMS.PIXEL_CURRENT_HIGH)
+				DMSHelper.optStatus(dms,DMS.PIXEL_CURRENT_HIGH)
 			));
 		}
 		if (null == a || a.equals("signConfig")) {

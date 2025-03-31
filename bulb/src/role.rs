@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -81,7 +81,7 @@ impl Card for Role {
     /// All item states as html options
     const ITEM_STATES: &'static str = "<option value=''>all ↴\
          <option value='🔹'>🔹 available\
-         <option value='▪️'>▪️ inactive";
+         <option value='🔻'>🔻 inactive";
 
     /// Get the resource
     fn res() -> Res {

@@ -8,24 +8,6 @@ video.  To view MPEG4 or h.264 video, the [MonStream] application is required.
 
 Select `View ➔ Video ➔ Cameras` menu item
 
-<details>
-<summary>API Resources 🕵️ </summary>
-
-* `iris/camera_pub`
-* `iris/api/camera` (primary)
-* `iris/api/camera/{name}`
-
-| Access       | Primary              | Secondary               |
-|--------------|----------------------|-------------------------|
-| 👁️  View      | name, location       | geo\_loc, video\_loss   |
-| 👉 Operate   | publish              | ptz †, recall\_preset † |
-| 💡 Manage    | notes                | store\_preset †         |
-| 🔧 Configure | controller, cam\_num | pin, cam\_template, encoder\_type, enc\_address, enc\_port, enc\_mcast, enc\_channel
-
-† _Write only_
-
-</details>
-
 The **Setup** tab within a camera properties form contains attributes to
 configure the video encoder.
 
@@ -40,6 +22,24 @@ Encoder Channel   | Channel number, for encoders which support multiple cameras
 Publish           | Flag to allow public viewing of camera video
 Notes             | Administrator notes, possibly including [hashtag]s
 
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/camera_pub`
+* `iris/api/camera` (primary)
+* `iris/api/camera/{name}`
+
+| Access       | Primary              | Secondary                          |
+|--------------|----------------------|------------------------------------|
+| 👁️  View      | name, location       | geo\_loc, video\_loss              |
+| 👉 Operate   | publish              | ptz †, recall\_preset †, device\_request † |
+| 💡 Manage    | notes                | store\_preset †                    |
+| 🔧 Configure | controller, cam\_num | pin, cam\_template, encoder\_type, enc\_address, enc\_port, enc\_mcast, enc\_channel
+
+† _Write only_
+
+</details>
+
 ## Encoder Types
 
 Select `View ➔ Video ➔ Encoder Types` menu item
@@ -47,11 +47,24 @@ Select `View ➔ Video ➔ Encoder Types` menu item
 An encoder type represents a specific make and model of video encoder.  All
 cameras with the same type share a common configuration.
 
-Field    | Description
----------|------------------
-Make     | Manufacturer name
-Model    | Device model
-Config   | Encoder configuration
+Field  | Description
+-------|------------------
+Make   | Manufacturer name
+Model  | Device model
+Config | Encoder configuration
+
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/encoder_type` (primary)
+* `iris/api/encoder_type/{name}`
+
+| Access       | Primary             |
+|--------------|---------------------|
+| 👁️  View      | name                |
+| 🔧 Configure | make, model, config |
+
+</details>
 
 ### Streams
 
@@ -75,6 +88,19 @@ Latency        | Buffering latency (ms) for consuming stream
 A stream can be either _unicast_ or _multicast_, but not both.  For a multicast
 stream defined by an [SDP] file, specify the _URI scheme_ and _path_ instead of
 _multicast port_.
+
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/encoder_stream` (primary)
+* `iris/api/encoder_stream/{name}`
+
+| Access       | Primary             | Secondary |
+|--------------|---------------------|-----------|
+| 👁️  View      | name, encoder\_type |           |
+| 🔧 Configure | view\_num, encoding | flow\_stream, quality, uri\_scheme, uri\_path, mcast\_port, latency |
+
+</details>
 
 ## Pan Tilt and Zoom
 
@@ -104,12 +130,24 @@ and wiper control.
 
 The **Preset** tab within a camera properties form can be used to configure up
 to 12 presets per camera.  A preset can be associated with either a compass
-direction or a device, such as [DMS] or [ramp meter].  To associate a preset
-with a device, enable the preset, then select that preset on the **Location**
-tab of the device's properties form.
+direction or a device, such as [DMS] or [ramp meter].  To associate a **device
+preset**, select it on the **Location** tab of the device's properties form.
 
 If a stream is defined with a _view num_ that matches the _preset num_, that
 stream will be selected instead of a typical PTZ preset.
+
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/camera_preset` (primary)
+* `iris/api/camera_preset/{name}`
+
+| Access       | Primary                  | Secondary |
+|--------------|--------------------------|-----------|
+| 👁️  View      | name, camera, preset_num |           |
+| 🔧 Configure |                          | direction |
+
+</details>
 
 ## Selector Tool
 

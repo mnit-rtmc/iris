@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2019  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,9 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.awt.event.ActionEvent;
+import us.mn.state.dot.tms.MeterLock;
 import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.client.proxy.ProxyAction;
 
 /**
@@ -26,19 +28,29 @@ import us.mn.state.dot.tms.client.proxy.ProxyAction;
  */
 public class GrowQueueAction extends ProxyAction<RampMeter> {
 
+	/** User ID */
+	private final String user;
+
 	/** Create a new action to grow the queue at the selected meter */
-	public GrowQueueAction(RampMeter rm, boolean e) {
+	public GrowQueueAction(RampMeter rm, String u) {
 		super("ramp.meter.grow", rm);
-		setEnabled(e);
+		user = u;
 	}
 
 	/** Actually perform the action */
 	@Override
 	protected void doActionPerformed(ActionEvent e) {
 		if (proxy != null) {
-			Integer rate = proxy.getRate();
-			if (rate != null)
-				proxy.setRateNext(rate - 50);
+			MeterLock lk = new MeterLock(proxy.getLock());
+			Integer rt = lk.optRate();
+			if (rt != null) {
+				int r = RampMeterHelper.filterRate(rt - 50);
+				if (r != rt) {
+					lk.setRate(r);
+					lk.setUser(user);
+					proxy.setLock(lk.toString());
+				}
+			}
 		}
 	}
 }

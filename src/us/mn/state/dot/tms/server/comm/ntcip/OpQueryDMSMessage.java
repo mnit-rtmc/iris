@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
@@ -96,16 +97,6 @@ public class OpQueryDMSMessage extends OpDMS {
 		return (sm != null) ? sm.getMulti() : "";
 	}
 
-	/** Get flash beacon flag for a sign message */
-	private boolean getFlashBeacon(SignMessage sm) {
-		return (sm != null) ? sm.getFlashBeacon() : false;
-	}
-
-	/** Get pixel service flag for a sign message */
-	private boolean getPixelService(SignMessage sm) {
-		return (sm != null) ? sm.getPixelService() : false;
-	}
-
 	/** Phase to query the current message source (memory type) */
 	protected class QueryMessageSource extends Phase {
 
@@ -120,7 +111,7 @@ public class OpQueryDMSMessage extends OpDMS {
 	}
 
 	/** Process the current message table source (memory type) */
-	private Phase processMessageSource() {
+	private Phase processMessageSource() throws ControllerException {
 		DmsMessageMemoryType mem_type = source.getMemoryType();
 		if (mem_type != null) {
 			/* We have to test isBlank before "valid", because some
@@ -134,12 +125,11 @@ public class OpQueryDMSMessage extends OpDMS {
 		 * observed in old Skyline signs after being powered down for
 		 * extended periods of time.  It can be cleared up by sending
 		 * settings operation. */
-		setErrorStatus("INVALID SOURCE: " + source);
-		return null;
+		throw new ControllerException("INVALID SOURCE: " + source);
 	}
 
 	/** Process a blank message source from the sign controller */
-	private Phase processMessageBlank() {
+	private Phase processMessageBlank() throws ControllerException {
 		int src = 0;
 		/* Maybe the current msg just expired */
 		if (SignMessageHelper.isOperatorExpiring(
@@ -154,7 +144,7 @@ public class OpQueryDMSMessage extends OpDMS {
 	}
 
 	/** Process a valid message source from the sign controller */
-	private Phase processMessageValid() {
+	private Phase processMessageValid() throws ControllerException {
 		/* The sign is not blank.  If IRIS thinks it is blank, then
 		 * we need to query the current message on the sign. */
 		if (dms.isMsgBlank())
@@ -222,19 +212,20 @@ public class OpQueryDMSMessage extends OpDMS {
 	}
 
 	/** Set the current message on the sign */
-	private void setMsgCurrent() {
-		if (status.getEnum() == DmsMessageStatus.valid) {
-			String ms = multi_string.getValue();
-			String owner = msg_owner.getValue();
-			boolean fb = (beacon.getInteger() == 1);
-			boolean ps = (srv.getInteger() == 1);
-			SignMsgPriority mp = getMsgPriority();
-			Integer duration = parseDuration(time.getInteger());
-			SignMessage sm = dms.createMsg(ms, owner, fb, ps,
-				mp, duration);
-			setMsgCurrent(sm);
-		} else
-			setErrorStatus("INVALID STATUS: " + status);
+	private void setMsgCurrent() throws ControllerException {
+		if (status.getEnum() != DmsMessageStatus.valid) {
+			throw new ControllerException(
+				"INVALID STATUS: " + status
+			);
+		}
+		String ms = multi_string.getValue();
+		String owner = msg_owner.getValue();
+		boolean fb = (beacon.getInteger() == 1);
+		boolean ps = (srv.getInteger() == 1);
+		SignMsgPriority mp = getMsgPriority();
+		Integer duration = parseDuration(time.getInteger());
+		SignMessage sm = dms.createMsg(ms, owner, fb, ps, mp, duration);
+		setMsgCurrent(sm);
 	}
 
 	/** Get the message priority of the current message */
@@ -245,12 +236,12 @@ public class OpQueryDMSMessage extends OpDMS {
 	}
 
 	/** Set the current message on the sign */
-	private void setMsgCurrent(SignMessage sm) {
+	private void setMsgCurrent(SignMessage sm) throws ControllerException {
 		if (sm != null)
 			dms.setMsgCurrentNotify(sm);
 		else {
 			System.err.println("setMsgCurrent null: " + dms);
-			setErrorStatus("MSG RENDER FAILED");
+			throw new ControllerException("MSG RENDER FAILED");
 		}
 	}
 }

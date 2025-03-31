@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,17 +32,17 @@ public class ScheduleForm extends AbstractForm {
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
 		return ActionPlanTab.isPermitted(s) &&
-		       DayPlanPanel.isPermitted(s);
+		       DayPlanTab.isPermitted(s);
 	}
 
 	/** Tabbed pane */
 	private final JTabbedPane tab = new JTabbedPane();
 
 	/** Action plan tab */
-	private final ActionPlanTab p_panel;
+	private final ActionPlanTab p_tab;
 
-	/** Day plan panel */
-	private final DayPlanPanel d_panel;
+	/** Day plan tab */
+	private final DayPlanTab d_tab;
 
 	/** Plan phase panel */
 	private final ProxyTablePanel<PlanPhase> pp_panel;
@@ -50,8 +50,8 @@ public class ScheduleForm extends AbstractForm {
 	/** Create a new schedule form */
 	public ScheduleForm(Session s) {
 		super(I18N.get("action.plan.schedule.title"));
-		p_panel = new ActionPlanTab(s);
-		d_panel = new DayPlanPanel(s);
+		p_tab = new ActionPlanTab(s);
+		d_tab = new DayPlanTab(s);
 		pp_panel =new ProxyTablePanel<PlanPhase>(new PlanPhaseModel(s));
 	}
 
@@ -59,11 +59,11 @@ public class ScheduleForm extends AbstractForm {
 	@Override
 	protected void initialize() {
 		super.initialize();
-		p_panel.initialize();
-		d_panel.initialize();
+		p_tab.initialize();
+		d_tab.initialize();
 		pp_panel.initialize();
-		tab.add(I18N.get("action_plan.title"), p_panel);
-		tab.add(I18N.get("action.plan.day.plural"), d_panel);
+		tab.add(I18N.get("action_plan.title"), p_tab);
+		tab.add(I18N.get("action.plan.day.plural"), d_tab);
 		tab.add(I18N.get("action.plan.phase.plural"), pp_panel);
 		add(tab);
 		setBackground(Color.LIGHT_GRAY);
@@ -72,8 +72,8 @@ public class ScheduleForm extends AbstractForm {
 	/** Dispose of the form */
 	@Override
 	protected void dispose() {
-		p_panel.dispose();
-		d_panel.dispose();
+		p_tab.dispose();
+		d_tab.dispose();
 		pp_panel.dispose();
 		super.dispose();
 	}

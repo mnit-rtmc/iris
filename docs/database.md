@@ -29,40 +29,56 @@ update, and is caused by one of these conditions:
 
 *Notify Channel*   | (G) | (C) | (P) | (D)
 -------------------|-----|-----|-----|-----
+`action_plan`      |     |     |     |
 `alarm`            |     | ✔️   |     |
 `beacon`           | ✔️   | ✔️   | ✔️   |
 `cabinet_style`    |     |     |     |
 `camera`           | ✔️   | ✔️   |     |
 `camera_publish` † |     |     |     |
+`camera_preset`    |     |     |     |
 `comm_config`      |     |     |     |
 `comm_link`        |     |     |     |
 `controller`       | ✔️   |     |     |
+`day_plan`         |     |     |     |
 `detector`         |     | ✔️   |     |
+`device_action`    |     |     |     |
 `dms`              | ✔️   | ✔️   | ✔️   |
 `domain`           |     |     |     |
+`encoder_stream`   |     |     |     |
+`encoder_type`     |     |     |     |
+`event_config`     |     |     |     |
 `flow_stream`      |     | ✔️   |     |
 `gate_arm`         |     | ✔️   |     |
 `gate_arm_array`   | ✔️   | ✔️   |     |
 `gps`              | ✔️   | ✔️   |     |
 `graphic`          |     |     |     |
 `incident`         |     |     |     |
-`lane_marking`     | ✔️   | ✔️   |     |
-`lcs_array`        |     | ✔️   |     |
-`lcs_indication`   |     | ✔️   |     |
+`incident_detail`  |     |     |     |
+`inc_advice`       |     |     |     |
+`inc_descriptor`   |     |     |     |
+`inc_locator`      |     |     |     |
+`lcs`              | ✔️   | ✔️   | ✔️   |
+`lcs_state`        |     | ✔️   |     |
 `modem`            |     |     |     |
+`monitor_style`    |     |     |     |
 `msg_pattern`      |     |     |     |
 `msg_line`         |     |     |     |
 `parking_area`     | ✔️   |     |     |
 `permission`       |     |     |     |
+`plan_phase`       |     |     |     |
+`play_list`        |     |     |     |
 `ramp_meter`       | ✔️   | ✔️   | ✔️   |
 `r_node`           | ✔️   |     |     |
 `road`             |     |     |     |
+`road_affix`       |     |     |     |
 `role`             |     |     |     | ✔️ 
 `sign_config`      |     |     |     |
 `sign_detail`      |     |     |     |
 `sign_message`     |     |     |     |
 `system_attribute` |     |     |     |
 `tag_reader`       | ✔️   | ✔️   |     |
+`time_action`      |     |     |     |
+`toll_zone`        |     |     |     |
 `user_id`          |     |     |     |
 `video_monitor`    |     | ✔️   |     |
 `weather_sensor`   | ✔️   | ✔️   |     |

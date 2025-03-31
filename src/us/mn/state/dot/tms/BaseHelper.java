@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 
@@ -48,5 +50,47 @@ abstract public class BaseHelper {
 	static protected boolean canRead(String tname) {
 		int lvl = namespace.accessLevel(new Name(tname), user);
 		return lvl >= AccessLevel.VIEW.ordinal();
+	}
+
+	/** Get optional JSON attribute, or null */
+	static public Object optJson(String json, String key) {
+		if (json == null)
+			return null;
+		try {
+			JSONObject jo = new JSONObject(json);
+			return jo.opt(key);
+		}
+		catch (JSONException e) {
+			System.err.println("optJson: " + json +
+				"\nmsg: " + e.getMessage());
+			return null;
+		}
+	}
+
+	/** Make a JSON object */
+	static private JSONObject makeJson(String json) {
+		if (json != null) {
+			try {
+				return new JSONObject(json);
+			}
+			catch (JSONException e) {
+				System.err.println("makeJson " + json +
+					"\nmsg: " + e.getMessage());
+			}
+		}
+		return new JSONObject();
+	}
+
+	/** Put a key/value pair into a JSON object */
+	static public String putJson(String json, String key, Object val) {
+		JSONObject jo = makeJson(json);
+		try {
+			jo.put(key, val);
+		}
+		catch (JSONException e) {
+			System.err.println("putJson " + key + ':' + val +
+				"\nmsg: " + e.getMessage());
+		}
+		return (!jo.isEmpty()) ? jo.toString() : null;
 	}
 }

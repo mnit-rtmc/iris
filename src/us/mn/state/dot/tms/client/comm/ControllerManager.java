@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ public class ControllerManager extends ProxyManager<Controller> {
 
 	/** Create a new controller manager */
 	public ControllerManager(Session s, GeoLocManager lm) {
-		super(s, lm, descriptor(s), 16, ItemStyle.FAILED);
+		super(s, lm, descriptor(s), 16, ItemStyle.OFFLINE);
 	}
 
 
@@ -84,9 +84,8 @@ public class ControllerManager extends ProxyManager<Controller> {
 	protected ProxyTheme<Controller> createTheme() {
 		ControllerTheme theme = new ControllerTheme(this,
 			new ControllerMarker());
-		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
-		theme.addStyle(ItemStyle.MAINTENANCE,
-			ProxyTheme.COLOR_UNAVAILABLE);
+		theme.addStyle(ItemStyle.OFFLINE, ProxyTheme.COLOR_OFFLINE);
+		theme.addStyle(ItemStyle.FAULT, ProxyTheme.COLOR_FAULT);
 		theme.addStyle(ItemStyle.ACTIVE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
@@ -112,20 +111,19 @@ public class ControllerManager extends ProxyManager<Controller> {
 	@Override
 	public boolean isStyleAttrib(String a) {
 		return "failTime".equals(a)
-		    || "maint".equals(a)
 		    || "status".equals(a);
 	}
 
 	/** Check the style of the specified proxy */
 	@Override
 	public boolean checkStyle(ItemStyle is, Controller proxy) {
-		switch(is) {
+		switch (is) {
 		case ACTIVE:
 			return ControllerHelper.isActive(proxy);
-		case MAINTENANCE:
-			return ControllerHelper.needsMaintenance(proxy);
-		case FAILED:
-			return ControllerHelper.isFailed(proxy);
+		case FAULT:
+			return ControllerHelper.hasFaults(proxy);
+		case OFFLINE:
+			return ControllerHelper.isOffline(proxy);
 		case ALL:
 			return true;
 		default:

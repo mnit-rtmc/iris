@@ -18,14 +18,18 @@ posted with no human interaction, or in approval mode, where an operator must
 confirm messages before they are posted or updated.  The alert system is managed
 from the "Alert" tab and other dialogs and system attributes.
 
+## National Weather Service
+
+In the US, the National Weather Service operates an open API providing weather
+alerts.  The URI is `https://api.weather.gov/alerts/active?area={XX}`, with
+`{XX}` being the 2-letter state ID.
+
 ## IPAWS
 
-In the US, the Integrated Public Alert and Warning System [IPAWS] collects and
-distributes a wide variety of public alerts and warnings that originate from
-over 1,500 alerting authorities.  The most common alerts are weather related,
-and are issued by the National Weather Service.
-
-### Obtaining Access
+An alternative to the NWS is the Integrated Public Alert and Warning System
+[IPAWS].  This feed is more difficult to set up, but provides additional alert
+types not related to weather — a wide variety of public alerts and warnings
+that originate from over 1,500 alerting authorities.
 
 The IPAWS Open Platform for Emergency Networks (IPAWS-OPEN) is operated by the
 Federal Emergency Management Agency (FEMA).  Obtaining access requires approval
@@ -34,17 +38,15 @@ running IRIS must obtain their own authorization and may not share it with other
 organizations.
 
 The authorization process can be initiated by sending a request to
-[IPAWS@FEMA.DHS.GOV](mailto:IPAWS@FEMA.DHS.GOV), after which the IPAWS Program
-Office will send the necessary forms for completion. After the completed forms
-have been returned, an MOU will be provided for signature. Once the signed MOU
-has been executed, the URL required to access IPAWS-OPEN will be provided.
+[ipaws@fema.dhs.gov](mailto:IPAWS@FEMA.DHS.GOV), after which the IPAWS Program
+Office will send the necessary forms to sign up.
 
 ## CAP Feed
 
-A CAP feed is configured via a [comm link].  The [comm config] must use the
-`CAP` protocol, with a `timeout` of 8 seconds and `idle disconnect` time of 10
-seconds.  A polling period of 60 seconds is recommended, but you may use longer
-periods if desired.
+A CAP feed is configured via a [comm link].  The [comm config] must use either
+the `CAP-NWS` or `CAP-IPAWS` protocol.  The recommended `timeout` is 8 seconds
+and `idle disconnect` time 10 seconds.  A polling period of 60 seconds is also
+recommended, but you may use longer periods if desired.
 
 The `comm link` must contain the URL for a valid CAP feed.  For IPAWS-OPEN, the
 `path` ends with `recent/`, followed by a date/time stamp.  IRIS will add the
@@ -58,7 +60,7 @@ for new or updated alerts, parse and process them to determine if they are
 relevant and, if appropriate, create messages for deployment.  This processing
 is controlled by [alert configuration](#alert-configuration)s.
 
-## Forecast Zones
+## Geocoding: Forecast Zones and FIPS Codes
 
 Alerts from the National Weather Service use special codes to define GIS
 forecast zones.  This information can be obtained in shapefile format from NWS
@@ -68,13 +70,22 @@ To load geometry data, download the latest [Public Forecast Zones] shapefile
 to the IRIS server and unzip it.  To import the file, execute the following
 command on the server:
 ```
-shp2pgsql -G <nws_shapefile>.shp cap.nws_zones | psql tms
+shp2pgsql -G z_{date}.shp cap.nws_zones | psql tms
+psql tms -c 'GRANT SELECT ON cap.nws_zones TO PUBLIC'
 ```
 
 NOTE: Alert areas may change (NWS updates the file roughly every six months), so
 it is important to keep them updated.  Administrators should keep records of
 when this information was last updated and maintain the latest information in
 the database.
+
+As an alternative to forecast zones, FIPS county codes can be used.  For this,
+download the latest [Counties] shapefile to the IRIS server and unzip it.
+Then, execute the following command on the server:
+```
+shp2pgsql -G c_{date}.shp cap.nws_counties | psql tms
+psql tms -c 'GRANT SELECT ON cap.nws_counties TO PUBLIC'
+```
 
 ## Alert Configuration
 
@@ -224,7 +235,7 @@ pending mode.
 Because the alert system requires alert CAP messages in order to function, it
 can be challenging to test.  To address this, IRIS provides a testing mechanism
 that allows testing the system with a mocked-up CAP message.  To use this, first
-a CAP XML message must be crafted with:
+a CAP message must be crafted with:
 
  - An event type configured in IRIS (which can be a custom "Test" event)
  - An alert area that contains signs suitable for testing
@@ -235,26 +246,22 @@ To do this, it is best to start with a real CAP message taken from IPAWS-OPEN
 ones suitable for testing.  This must be done with care to ensure the [CAP]
 standard is followed and the message can be parsed.
 
-After a CAP message is created, it can be fed into IRIS in one of two ways.
+After a CAP message is created, it can be fed into IRIS using a `file` comm
+link.  Point the URI to a file on the IRIS server, e.g.
+`file:///var/log/iris/cap_test.geojson`.
 
-1. The file can be hosted on an arbitrary HTTPS server (including the IRIS
-server itself if HTTPS is supported).  IRIS can then be configured with a comm
-link that points to this file on that server.
-2. The file can be placed in `/var/log/iris/cap_test.xml` on the IRIS server
-itself, and the controller of an existing CAP `comm link` can be put into the
-`TESTING` condition.
-
-In either case IRIS will read this file and process the alert as if it were a
-real alert.  Note that in a production environment this may activate real signs,
-so care must be taken to ensure the testing is done in a controlled manner.
+IRIS will read this file and process the alert as if it were a real alert.
+Note that in a production environment this may activate real signs, so care
+must be taken to ensure the testing is done in a controlled manner.
 
 
 [action tags]: action_plans.html#action-tags
 [alert configuration]: #alert-configuration
+[CAP]: http://docs.oasis-open.org/emergency/cap/v1.2/CAP-v1.2.html
 [comm config]: comm_config.html
 [comm link]: comm_links.html
 [controller]: controllers.html
-[CAP]: http://docs.oasis-open.org/emergency/cap/v1.2/CAP-v1.2.html
+[Counties]: https://www.weather.gov/gis/Counties
 [hashtag]: hashtags.html
 [IPAWS]: https://www.fema.gov/emergency-managers/practitioners/integrated-public-alert-warning-system
 [message pattern]: message_patterns.html

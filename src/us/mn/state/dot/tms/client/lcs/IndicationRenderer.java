@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ import java.awt.Dimension;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import us.mn.state.dot.tms.LaneUseIndication;
+import us.mn.state.dot.tms.LcsIndication;
 
 /**
  * Renderer for LCS indications in a list.
@@ -45,8 +45,8 @@ public class IndicationRenderer extends DefaultListCellRenderer {
 	public Component getListCellRendererComponent(JList list, Object value,
 		int index, boolean isSelected, boolean cellHasFocus)
 	{
-		if(value instanceof LaneUseIndication) {
-			LaneUseIndication li = (LaneUseIndication)value;
+		if (value instanceof LcsIndication) {
+			LcsIndication li = (LcsIndication) value;
 			cell.setIcon(IndicationIcon.create(pixels, li));
 		}
 		Component c = super.getListCellRendererComponent(list, value,

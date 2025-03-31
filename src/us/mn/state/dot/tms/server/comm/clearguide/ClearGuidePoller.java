@@ -28,7 +28,7 @@ import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
  */
 public class ClearGuidePoller extends ThreadedPoller<ClearGuideProperty>
 	implements FeedPoller
- {
+{
 	/** Debug log */
 	static protected final DebugLog CG_LOG = new DebugLog("clearguide");
 

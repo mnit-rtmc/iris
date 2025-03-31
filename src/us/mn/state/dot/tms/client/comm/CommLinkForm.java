@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ public class CommLinkForm extends AbstractForm {
 			if (a == null || a.equals("connected")) {
 				connected_lbl.setText(cl.getConnected()
 					? I18N.get("comm.link.connected")
-					: I18N.get("item.style.failed")
+					: I18N.get("item.style.offline")
 				);
 			}
 		}

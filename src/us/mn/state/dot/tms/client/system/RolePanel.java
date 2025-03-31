@@ -35,11 +35,11 @@ public class RolePanel extends JPanel {
 	/** Role table panel */
 	private final ProxyTablePanel<Role> role_pnl;
 
-	/** Domain table panel */
-	private final ProxyTablePanel<Domain> dom_pnl;
-
 	/** Permission panel */
 	private final PermissionPanel perm_pnl;
+
+	/** Domain table panel */
+	private final ProxyTablePanel<Domain> dom_pnl;
 
 	/** Create a new role panel */
 	public RolePanel(Session s) {
@@ -50,8 +50,8 @@ public class RolePanel extends JPanel {
 				super.proxyChangedSwing(r);
 				/* Repaint other panels when the
 				 * role domains are changed. */
-				dom_pnl.repaint();
 				perm_pnl.repaint();
+				dom_pnl.repaint();
 			}
 		};
 		role_pnl = new ProxyTablePanel<Role>(r_mdl) {
@@ -60,19 +60,19 @@ public class RolePanel extends JPanel {
 				super.selectProxy();
 			}
 		};
-		dom_pnl = new ProxyTablePanel<Domain>(
-			new RoleDomainModel(s, null)
-		);
 		perm_pnl = new PermissionPanel(
 			new PermissionModel(s, null)
+		);
+		dom_pnl = new ProxyTablePanel<Domain>(
+			new RoleDomainModel(s, null)
 		);
 	}
 
 	/** Initializze the panel */
 	public void initialize() {
 		role_pnl.initialize();
-		dom_pnl.initialize();
 		perm_pnl.initialize();
+		dom_pnl.initialize();
 		layoutPanel();
 	}
 
@@ -92,9 +92,9 @@ public class RolePanel extends JPanel {
 		GroupLayout.SequentialGroup hg = gl.createSequentialGroup();
 		hg.addComponent(role_pnl);
 		hg.addGap(UI.hgap);
-		hg.addComponent(dom_pnl);
-		hg.addGap(UI.hgap);
 		hg.addComponent(perm_pnl);
+		hg.addGap(UI.hgap);
+		hg.addComponent(dom_pnl);
 		return hg;
 	}
 
@@ -102,23 +102,23 @@ public class RolePanel extends JPanel {
 	private GroupLayout.Group createVerticalGroup(GroupLayout gl) {
 		GroupLayout.ParallelGroup vg = gl.createParallelGroup();
 		vg.addComponent(role_pnl);
-		vg.addComponent(dom_pnl);
 		vg.addComponent(perm_pnl);
+		vg.addComponent(dom_pnl);
 		return vg;
 	}
 
 	/** Dispose of the panel */
 	public void dispose() {
 		role_pnl.dispose();
-		dom_pnl.dispose();
 		perm_pnl.dispose();
+		dom_pnl.dispose();
 		removeAll();
 	}
 
 	/** Change the selected role */
 	private void selectRole() {
 		Role r = role_pnl.getSelectedProxy();
-		dom_pnl.setModel(new RoleDomainModel(session, r));
 		perm_pnl.setModel(new PermissionModel(session, r));
+		dom_pnl.setModel(new RoleDomainModel(session, r));
 	}
 }

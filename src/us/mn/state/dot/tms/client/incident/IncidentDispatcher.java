@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.IncSeverity;
 import us.mn.state.dot.tms.LaneConfiguration;
 import us.mn.state.dot.tms.LaneCode;
-import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.Lcs;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMsgPriority;
@@ -317,7 +317,7 @@ public class IncidentDispatcher extends IPanel
 				attrs.put("replaces", getOriginalReplaces(rpl));
 				destroyIncident(rpl);
 			}
-			attrs.put("event_desc_id", inc.getEventType());
+			attrs.put("event_desc", inc.getEventType());
 			IncidentDetail dtl = getSelectedDetail();
 			if (dtl != null)
 				attrs.put("detail", dtl);
@@ -329,6 +329,7 @@ public class IncidentDispatcher extends IPanel
 			attrs.put("camera", getSelectedCamera());
 			attrs.put("impact", impact_pnl.getImpact());
 			attrs.put("cleared", false);
+			attrs.put("user_id", session.getUser().getName());
 			cache.createObject(name, attrs);
 			Incident proxy = cache.lookupObjectWait(name);
 			if (proxy != null)
@@ -628,15 +629,9 @@ public class IncidentDispatcher extends IPanel
 		}
 	}
 
-	/** Check if the user can send LCS array indications */
+	/** Check if the user can send LCS array lock */
 	private boolean canSendIndications() {
-		return isLcsUpdatePermitted("indicationsNext")
-		    && isLcsUpdatePermitted("ownerNext");
-	}
-
-	/** Check if the user is permitted to update an LCS array attribute */
-	private boolean isLcsUpdatePermitted(String a) {
-		return session.isWritePermitted(LCSArray.SONAR_TYPE, "oname",a);
+		return session.isWritePermitted(Lcs.SONAR_TYPE, "oname", "lock");
 	}
 
 	/** Clear an incident */

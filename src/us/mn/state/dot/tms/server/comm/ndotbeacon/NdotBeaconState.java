@@ -33,10 +33,10 @@ public enum NdotBeaconState {
 	UNKNOWN_9,
 	UNKNOWN_10;
 
-	/** Static array of GateArmState values */
+	/** Static array of beacon state values */
 	private static final NdotBeaconState[] VALUES = values();
 
-	/** Get gate arm state from an ordinal value */
+	/** Get beacon state from an ordinal value */
 	static public NdotBeaconState fromOrdinal(int o) {
 		return ((o >= 0) && (o < VALUES.length)) ? VALUES[o] : null;
 	}

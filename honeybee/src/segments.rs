@@ -1,6 +1,6 @@
 // segments.rs
 //
-// Copyright (C) 2019-2024  Minnesota Department of Transportation
+// Copyright (C) 2019-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,12 +17,12 @@ use crate::files::AtomicFile;
 use mvt::{WebMercatorPos, Wgs84Pos};
 use pointy::{Pt, Transform};
 use resources::Res;
-use rosewood::gis::Polygons;
 use rosewood::BulkWriter;
+use rosewood::gis::Polygons;
 use serde::{Deserialize, Serialize, Serializer};
 use std::cmp::Ordering;
-use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
+use std::collections::hash_map::DefaultHasher;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::ops::RangeInclusive;
@@ -602,8 +602,8 @@ impl Corridor {
     async fn write_file(&self, roads: &HashMap<String, Road>) -> Result<()> {
         let abbrev = roads
             .get(&self.cor_id.roadway)
-            .map(|r| r.abbrev.clone())
-            .unwrap_or_else(|| "".to_owned());
+            .map(|r| &r.abbrev[..])
+            .unwrap_or_else(|| "");
         if abbrev.is_empty() {
             log::warn!("write_file no 'abbrev' for {}", self.cor_id.roadway);
             return Ok(());
@@ -975,9 +975,11 @@ fn zoom_scale(zoom: u32) -> f64 {
 fn zoom_levels(res: Res) -> RangeInclusive<u32> {
     match res {
         Res::Beacon => 10..=18,
-        Res::Dms => 11..=18,
-        Res::WeatherSensor => 10..=18,
         Res::Camera => 10..=18,
+        Res::Dms => 11..=18,
+        Res::Lcs => 12..=18,
+        Res::RampMeter => 11..=18,
+        Res::WeatherSensor => 10..=18,
         _ => unimplemented!(),
     }
 }
@@ -986,9 +988,11 @@ fn zoom_levels(res: Res) -> RangeInclusive<u32> {
 fn loc_marker(res: Res, pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
     match res {
         Res::Beacon => beacon_marker(pt, norm, sz),
-        Res::Dms => dms_marker(pt, norm, sz),
-        Res::WeatherSensor => weather_sensor_marker(pt, sz),
         Res::Camera => camera_marker(pt, norm, sz),
+        Res::Dms => dms_marker(pt, norm, sz),
+        Res::Lcs => lcs_marker(pt, norm, sz),
+        Res::RampMeter => ramp_meter_marker(pt, norm, sz),
+        Res::WeatherSensor => weather_sensor_marker(pt, sz),
         _ => unimplemented!(),
     }
 }
@@ -1024,6 +1028,26 @@ fn beacon_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
     ]
 }
 
+/// Make camera marker
+fn camera_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
+    let t = Transform::with_scale(sz, sz)
+        .rotate(norm)
+        .translate(pt.x, pt.y);
+    vec![
+        Pt::from((0.0, 1.2)) * t,
+        Pt::from((1.5, 0.4)) * t,
+        Pt::from((2.0, 0.4)) * t,
+        Pt::from((2.0, 1.2)) * t,
+        Pt::from((6.0, 1.2)) * t,
+        Pt::from((6.0, -1.2)) * t,
+        Pt::from((2.0, -1.2)) * t,
+        Pt::from((2.0, -0.4)) * t,
+        Pt::from((1.5, -0.4)) * t,
+        Pt::from((0.0, -1.2)) * t,
+        Pt::from((0.0, 1.2)) * t,
+    ]
+}
+
 /// Make DMS marker
 fn dms_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
     let t = Transform::with_scale(sz, sz)
@@ -1046,6 +1070,45 @@ fn dms_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
     ]
 }
 
+/// Make LCS marker
+fn lcs_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
+    let t = Transform::with_scale(sz, sz)
+        .rotate(norm)
+        .translate(pt.x, pt.y);
+    vec![
+        Pt::from((0.0, 0.0)) * t,
+        Pt::from((1.4, 0.0)) * t,
+        Pt::from((1.4, 0.4)) * t,
+        Pt::from((2.6, 0.4)) * t,
+        Pt::from((2.6, 0.0)) * t,
+        Pt::from((4.0, 0.0)) * t,
+        Pt::from((4.0, 3.0)) * t,
+        Pt::from((2.6, 3.0)) * t,
+        Pt::from((2.6, 2.6)) * t,
+        Pt::from((1.4, 2.6)) * t,
+        Pt::from((1.4, 3.0)) * t,
+        Pt::from((0.0, 3.0)) * t,
+        Pt::from((0.0, 0.0)) * t,
+    ]
+}
+
+/// Make ramp meter marker
+fn ramp_meter_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
+    let t = Transform::with_scale(sz, sz)
+        .rotate(norm)
+        .translate(pt.x, pt.y);
+    vec![
+        Pt::from((0.0, 0.0)) * t,
+        Pt::from((1.8, 0.0)) * t,
+        Pt::from((2.4, -1.0)) * t,
+        Pt::from((2.0, -2.0)) * t,
+        Pt::from((1.0, -2.4)) * t,
+        Pt::from((0.0, -1.8)) * t,
+        Pt::from((0.0, 0.0)) * t,
+        Pt::from((1.0, -1.0)) * t,
+    ]
+}
+
 /// Make weather sensor marker
 fn weather_sensor_marker(pt: Pt<f64>, sz: f64) -> Vec<Pt<f64>> {
     let t = Transform::with_scale(sz, sz).translate(pt.x, pt.y);
@@ -1056,23 +1119,5 @@ fn weather_sensor_marker(pt: Pt<f64>, sz: f64) -> Vec<Pt<f64>> {
         Pt::from((2.0, 0.0)) * t,
         Pt::from((3.0, -1.0)) * t,
         Pt::from((-3.0, -2.0)) * t,
-    ]
-}
-
-/// Make camera marker
-fn camera_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
-    let t = Transform::with_scale(sz, sz)
-        .rotate(norm)
-        .translate(pt.x, pt.y);
-    vec![
-        Pt::from((0.0, 0.0)) * t,
-        Pt::from((2.0, 0.0)) * t,
-        Pt::from((2.0, 3.0)) * t,
-        Pt::from((1.0, 3.0)) * t,
-        Pt::from((2.0, 4.0)) * t,
-        Pt::from((0.0, 4.0)) * t,
-        Pt::from((1.0, 3.0)) * t,
-        Pt::from((0.0, 3.0)) * t,
-        Pt::from((0.0, 0.0)) * t,
     ]
 }

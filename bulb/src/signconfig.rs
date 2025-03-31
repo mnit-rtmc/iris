@@ -1,4 +1,4 @@
-// Copyright (C) 2024  Minnesota Department of Transportation
+// Copyright (C) 2024-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ use crate::item::{ItemState, ItemStates};
 use crate::sign::{self, NtcipSign};
 use crate::util::{ContainsLower, Fields, HtmlStr, OptVal, Select};
 use mag::length::mm;
-use ntcip::dms::{tfon, FontTable, GraphicTable};
+use ntcip::dms::{FontTable, GraphicTable, tfon};
 pub use rendzina::SignConfig;
 use resources::Res;
 use serde::Deserialize;
@@ -271,7 +271,7 @@ impl Card for SignConfig {
     /// All item states as html options
     const ITEM_STATES: &'static str = "<option value=''>all ↴\
          <option value='🔹'>🔹 available\
-         <option value='▪️'>▪️ inactive";
+         <option value='🔻'>🔻 inactive";
 
     /// Get the resource
     fn res() -> Res {

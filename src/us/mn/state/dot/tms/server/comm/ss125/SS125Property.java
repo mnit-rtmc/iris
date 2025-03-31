@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -139,14 +139,6 @@ abstract public class SS125Property extends ControllerProperty {
 		int intg = body[pos] & 0xFF;
 		int frac = body[pos + 1] & 0xFF;
 		return intg + frac / 256f;
-	}
-
-	/** Parse a 24-bit value */
-	static protected int parse24(byte[] body, int pos) {
-		int b2 = body[pos] & 0xFF;
-		int b1 = body[pos + 1] & 0xFF;
-		int b0 = body[pos + 2] & 0xFF;
-		return (b2 << 16) | (b1 << 8) | b0;
 	}
 
 	/** Parse a 24-bit fixed-point value */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -25,6 +25,8 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerException;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
 import us.mn.state.dot.tms.units.Interval;
@@ -71,11 +73,11 @@ class OpMessage extends OpDms {
 	/** Return the bitmap page as a hex string for all pages. */
 	private String convertToHexString(BitmapGraphic[] bitmaps) {
 		StringBuilder hs = new StringBuilder();
-		if(bitmaps != null) {
-			for(BitmapGraphic bg: bitmaps)
+		if (bitmaps != null) {
+			for (BitmapGraphic bg: bitmaps)
 				hs.append(getBitmapPage(bg));
 		}
-		return hs.toString(); 
+		return hs.toString();
 	}
 
 	/** 
@@ -91,15 +93,12 @@ class OpMessage extends OpDms {
 	/** Create the second phase of the operation */
 	protected Phase phaseTwo() {
 		m_dms.setMsgNext(m_sm);
-
-		// dms is configured
-		if(dmsConfigured())
+		if (dmsConfigured())
 			return createPhaseTwo();
-
-		// dms not configured
-		Phase phase2 = createPhaseTwo();
-		Phase phase1 = new PhaseGetConfig(phase2);
-		return phase1;
+		else {
+			Phase phase2 = createPhaseTwo();
+			return new PhaseGetConfig(phase2);
+		}
 	}
 
 	/** Determine if single page message is flashing or not. */
@@ -112,9 +111,7 @@ class OpMessage extends OpDms {
 
 	/** create 2nd phase */
 	private Phase createPhaseTwo() {
-		if(m_npages <= 0)
-			return null;
-		return new PhaseSendMessage();
+		return (m_npages > 0) ? new PhaseSendMessage() : null;
 	}
 
 	/** 
@@ -132,7 +129,7 @@ class OpMessage extends OpDms {
 	 *  This method should not be called if duration is infinite. */
 	protected Calendar calcMsgOffTime(Calendar ontime) {
 		Integer mins = m_sm.getDuration();
-		if(mins == null)
+		if (mins == null)
 			return null;
 		Calendar offtime = (Calendar)ontime.clone();
 		offtime.add(Calendar.MINUTE, mins);
@@ -147,7 +144,7 @@ class OpMessage extends OpDms {
 	 *		<UseOnTime>...</UseOnTime>
 	 *		<OnTime>...</OnTime>
 	 *		<UseOffTime>...</UseOffTime>
- 	 *		<OffTime>...</OffTime>
+	 *		<OffTime>...</OffTime>
 	 *		<DisplayTimeMS>...</DisplayTimeMS>
 	 *		<ActPriority>...</ActPriority>
 	 *		<RunPriority>...</RunPriority>
@@ -158,117 +155,58 @@ class OpMessage extends OpDms {
 	private XmlElem buildReqRes(String elemReqName, String elemResName) {
 		XmlElem xrr = new XmlElem(elemReqName, elemResName);
 
-		// id
 		xrr.addReq("Id", generateId());
-
-		// address, etc.
 		xrr.addReq("Address", controller.getDrop());
-
-		// MsgText
 		xrr.addReq("MsgText", new MultiString(m_sm.getMulti())
 			.normalize());
-
-		// UseOnTime, always true
 		xrr.addReq("UseOnTime", true);
-
-		// OnTime
 		Calendar ontime = calcMsgOnTime();
 		xrr.addReq("OnTime", STime.CalendarToXML(ontime));
-
-		// UseOffTime
 		boolean useofftime = (m_sm.getDuration() != null);
 		xrr.addReq("UseOffTime", useofftime);
-
-		// OffTime, only used if duration is not infinite
-		String offtime= (useofftime ?
+		String offtime = (useofftime ?
 			STime.CalendarToXML(calcMsgOffTime(ontime)) : "");
 		xrr.addReq("OffTime", offtime);
-
-		// DisplayTimeMS: extract from 1st page of MULTI
 		Interval pt = determinePageOnInterval(m_sm.getMulti());
 		xrr.addReq("DisplayTimeMS", pt.round(MILLISECONDS));
-
-		// activation priority
 		xrr.addReq("ActPriority", m_sm.getMsgPriority());
-
-		// runtime priority
 		xrr.addReq("RunPriority", m_sm.getMsgPriority());
-
-		// Owner
 		xrr.addReq("Owner", m_sm.getMsgOwner());
-
-		// bitmap
 		xrr.addReq("Bitmap", m_bitmaps);
 
 		// response
 		xrr.addRes("Id");
 		xrr.addRes("IsValid");
 		xrr.addRes("ErrMsg");
-
 		return xrr;
 	}
 
 	/** Parse response.
 	 *  @return True to retry the operation else false if done. */
-	private boolean parseResponse(Message mess, XmlElem xrr) {
-
+	private boolean parseResponse(Message mess, XmlElem xrr)
+		throws IOException
+	{
 		long id = 0;
-		boolean valid = false;
-		String errmsg = "";
-
 		try {
-			// id
 			id = xrr.getResLong("Id");
-
-			// isvalid
-			valid = xrr.getResBoolean("IsValid");
-
-			// error message text
-			errmsg = xrr.getResString("ErrMsg");
-			if(!valid && errmsg.length() <= 0)
-				errmsg = FAILURE_UNKNOWN;
-
+			boolean valid = xrr.getResBoolean("IsValid");
+			String errmsg = xrr.getResString("ErrMsg");
 			LOG.log("OpMessage.parseResponse(): parsed msg " +
 				"values: IsValid:" + valid + ".");
-		} catch (IllegalArgumentException ex) {
-			LOG.log("OpMessage.parseResponse(): Malformed " +
-				"XML received:" + ex+", id=" + id);
-			valid = false;
-			errmsg = ex.getMessage();
-			handleCommError(EventType.PARSING_ERROR, errmsg);
-		}
-
-		// update 
-		complete(mess);
-
-		// parse rest of response
-		updateMaintStatus("");
-		if (valid) {
-			setErrorStatus("");
-			m_dms.setMsgCurrentNotify(m_sm);
-		} else {
-			LOG.log("OpMessage.parseResponse(): response " +
-				"from SensorServer received, ignored " +
-				"because Xml valid field is false, " +
-				"errmsg=" + errmsg + ", id=" + id);
-			setErrorStatus(errmsg);
-
-			// try again
-			if(flagFailureShouldRetry(errmsg)) {
-				LOG.log("OpMessage: will retry " +
-					"failed operation.");
-				return true;
-
-			// give up
-			} else {
-				if(mess.checkAwsFailure()) {
-					mess.handleAwsFailure(
-						"was sending a message.");
-				}
+			if (!valid) {
+				LOG.log("OpMessage.parseResponse(): response " +
+					"from SensorServer received, ignored " +
+					"because Xml valid field is false, " +
+					"errmsg=" + errmsg + ", id=" + id);
+				throw new ControllerException(errmsg);
 			}
 		}
-
-		// done
+		catch (IllegalArgumentException ex) {
+			LOG.log("OpMessage.parseResponse(): Malformed " +
+				"XML received:" + ex+", id=" + id);
+			throw new ParsingException(ex);
+		}
+		m_dms.setMsgCurrentNotify(m_sm);
 		return false;
 	}
 
@@ -290,40 +228,28 @@ class OpMessage extends OpDms {
 	 * failure.
 	 *
 	 * @see CommThread#doPoll()
-	 * @see Messenger#handleCommError()
-	 * @see Messenger#shouldReopen()
 	 */
 	protected class PhaseSendMessage extends Phase {
 
 		/**
-		 * Set the status to modify request. Called by 
+		 * Set the status to modify request. Called by
 		 * Operation.poll().
 		 * @param argmess
 		 * @return next Phase to execute else null.
 		 * @throws IOException
 		 */
 		protected Phase poll(CommMessage argmess)
-			throws IOException 
+			throws IOException
 		{
 			LOG.log("PhaseSendMessage.poll(msg) called.");
-
 			Message mess = (Message) argmess;
-
-			// set message attributes as a function of the op
 			setMsgAttributes(mess);
-
-			// build XML element with children
 			mess.setName(getOpName());
-			XmlElem xrr = buildReqRes(getXmlReqName(), 
+			XmlElem xrr = buildReqRes(getXmlReqName(),
 				getXmlResName());
-
-			// send request and read response
 			mess.add(xrr);
 			sendRead(mess);
-
-			if(parseResponse(mess, xrr))
-				return this;
-			return null;
+			return parseResponse(mess, xrr) ? this : null;
 		}
 	}
 

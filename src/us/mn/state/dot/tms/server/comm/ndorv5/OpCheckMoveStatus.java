@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.server.GateArmImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.FutureOp;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -79,8 +80,6 @@ public class OpCheckMoveStatus extends OpGateNdorV5 {
 	/** Phase to check for move completion */
 	protected class CheckMoveCompletion extends Phase {
 
-		int failCount = 0;
-
 		/** Query the status */
 		@SuppressWarnings({ "unchecked", "synthetic-access" })
 		protected Phase poll(CommMessage mess)
@@ -88,16 +87,8 @@ public class OpCheckMoveStatus extends OpGateNdorV5 {
 		{
 			mess.add(prop);
 			mess.queryProps();
-
-			// Did we get a valid response?
-			if (prop.gotValidResponse() == false) {
-				if (failCount++ < 3) {
-					return this; // try again
-				}
-				handleCommError(EventType.COMM_FAILED, "No Response");
-				return null;
-			}
-			failCount = 0;
+			if (!prop.gotValidResponse())
+				throw new ParsingException("NO RESPONSE");
 
 			// Has the arm finished the requested motion?
 			GateArmState new_state = prop.getState();

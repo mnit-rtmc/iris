@@ -178,6 +178,7 @@ label:has(+ #sb_resource) {
 /* Delete button sliding "confirmation" animation */
 #ob_delete {
   position: relative; /* add position context for ::before pseudo-element */
+  z-index: 1;
   overflow: hidden;
 }
 #ob_delete:active {
@@ -245,19 +246,24 @@ label:has(+ #sb_resource) {
 .tooltip {
   position: relative;
   display: inline-block;
-  border-bottom: 0.1rem dotted gray;
 }
 
 .tooltip * {
+  position: absolute;
+  z-index: 4;
   visibility: hidden;
   inline-size: min-content;
-  z-index: 2;
-  position: absolute;
   top: 50%;
   left: 0;
   padding: 0.5rem;
   border-radius: 0.2rem;
   color: #fff;
+  background-color: #000;
+}
+
+.right {
+  left: unset;
+  right: 0;
 }
 
 .tooltip:hover * {
@@ -267,6 +273,9 @@ label:has(+ #sb_resource) {
 /* item state classes for tooltip backgrounds */
 .item_available {
   background-color: #004;
+}
+.item_incident {
+  background-color: #600;
 }
 .item_deployed {
   background-color: #440;
@@ -358,12 +367,11 @@ label:has(+ #sb_resource) {
   display: flex;
   justify-content: space-between;
   padding: 0.05rem 0;
-  z-index: 1; /* required for ob_delete::before slider pseudo-element */
 }
 .column {
   display: flex;
   flex-direction: column;
-  padding: 0.1rem;
+  padding: 0.2rem;
 }
 
 .mc_line_gap {
@@ -432,6 +440,52 @@ label:has(+ #sb_resource) {
   margin: 0;
 }
 
+/* ---------------
+ * Signal Housings
+ * --------------- */
+.signal-housing {
+  align-self: start;
+  background-color: black;
+  text-indent: 0;
+  padding: 0.2rem 0.2rem 0 0.2rem;
+  border-radius: 0.2rem;
+  border: 1px solid black;
+}
+
+.lcs {
+  background-color: black;
+  font-size: x-large;
+  font-weight: bold;
+  display: inline-block;
+  text-align: center;
+  width: 2rem;
+  padding: 0.2rem 0.3rem 0;
+}
+
+.lcs_dark {
+  color: black;
+}
+
+.lcs_lane_open {
+  color: lawngreen;
+}
+
+.lcs_use_caution {
+  color: yellow;
+}
+
+.lcs_lane_closed_ahead {
+  color: yellow;
+}
+
+.lcs_lane_closed {
+  color: red;
+}
+
+.lcs_unknown {
+  color: gray;
+}
+
 /* -------
  * Beacons
  * ------- */
@@ -448,20 +502,6 @@ label:has(+ #sb_resource) {
 .beacon {
   cursor: pointer;
   pointer-events: auto;
-  align-self: start;
-  background-color: black;
-  text-indent: 0;
-  padding: 0.15rem 0.1rem 0 0.1rem;
-  border-radius: 0.4rem;
-  border: 1px solid black;
-}
-.beacon-disabled {
-  align-self: start;
-  background-color: black;
-  text-indent: 0;
-  padding: 0.15rem 0.1rem 0 0.1rem;
-  border-radius: 0.4rem;
-  border: 1px solid black;
 }
 .not-flashing {
   opacity: 0;

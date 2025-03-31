@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2017  Minnesota Department of Transportation
+ * Copyright (C) 2005-2024  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
@@ -17,10 +17,11 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.utils.SString;
 
 /**
  * An operation is a sequence of phases to be performed on a field controller.
@@ -30,24 +31,6 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Travis Swanston
  */
 abstract public class OpController<T extends ControllerProperty> {
-
-	/** Get the error retry threshold */
-	static private int systemRetryThreshold() {
-		return SystemAttrEnum.OPERATION_RETRY_THRESHOLD.getInt();
-	}
-
-	/** Maximum message length */
-	static private final int MAX_MSG_LEN = 64;
-
-	/** Filter a message */
-	static private String filterMsg(String m) {
-		return SString.truncate(m, MAX_MSG_LEN);
-	}
-
-	/** Append a status string */
-	static private String appendStatus(String a, String b) {
-		return (a.length() > 0) ? (a + ", " + b) : b;
-	}
 
 	/** Strip all characters up to the last dot */
 	static private String stripToLastDot(String v) {
@@ -131,27 +114,27 @@ abstract public class OpController<T extends ControllerProperty> {
 		phase = null;
 	}
 
-	/** Maint status message */
-	private String maintStatus = null;
+	/** Controller status */
+	private JSONObject ctrl_stat = null;
 
-	/** Set the maint status message.  If non-null, the controller "maint"
-	 * attribute is set to this message when the operation completes. */
-	public void setMaintStatus(String s) {
-		maintStatus = s;
+	/** Put a key/value pair into controller status */
+	private final void putCtrlStatus(String key, Object value) {
+		if (ctrl_stat == null)
+			ctrl_stat = new JSONObject();
+		try {
+			ctrl_stat.putOpt(key, value);
+		}
+		catch (JSONException e) {
+			System.err.println(
+				"putCtrlStatus: " + e.getMessage() + ", " + key
+			);
+		}
 	}
 
-	/** Error status message */
-	private String err_status = null;
-
-	/** Set the error status message.  If non-null, the controller "error"
-	 * attribute is set to this message when the operation completes. */
-	public void setErrorStatus(String s) {
-		assert s != null;
-		if (err_status != null) {
-			if (s.length() > 0)
-				err_status = appendStatus(err_status, s);
-		} else
-			err_status = s;
+	/** Put FAULTS into controller status */
+	protected void putCtrlFaults(String fault, String msg) {
+		putCtrlStatus(Controller.FAULTS, fault);
+		putCtrlStatus(Controller.MSG, msg);
 	}
 
 	/** Create a new controller operation */
@@ -221,9 +204,9 @@ abstract public class OpController<T extends ControllerProperty> {
 	}
 
 	/** Handle a communication error */
-	public void handleCommError(EventType et, String msg) {
-		controller.logCommEvent(et, id, filterMsg(msg));
-		if (!retry())
+	public void handleCommError(EventType et) {
+		controller.logCommEvent(et, id);
+		if (!shouldRetry())
 			setFailed();
 	}
 
@@ -231,40 +214,34 @@ abstract public class OpController<T extends ControllerProperty> {
 	private int error_cnt = 0;
 
 	/** Check if the operation should be retried */
-	private boolean retry() {
+	private boolean shouldRetry() {
 		++error_cnt;
 		return error_cnt < getRetryThreshold();
 	}
 
 	/** Get the error retry threshold */
 	public int getRetryThreshold() {
-		return (controller.isFailed()) ? 0 : systemRetryThreshold();
+		return controller.isOffline()
+		      ? 0
+		      : controller.getRetryThreshold();
 	}
 
 	/** Cleanup the operation.  The operation gets cleaned up after
-	 * processing is complete and it is removed from the queue.  This method
-	 * may get called more than once after the operation is done. */
+	 * processing is complete and it is removed from the queue. */
 	public void cleanup() {
-		updateMaintStatus();
-		updateErrorStatus();
+		updateCtrlStatus();
 		controller.completeOperation(id, isSuccess());
 	}
 
-	/** Update controller maintenance status */
-	protected final void updateMaintStatus() {
-		String s = maintStatus;
+	/** Update the controller status */
+	protected final void updateCtrlStatus() {
+		JSONObject s = ctrl_stat;
 		if (s != null) {
-			controller.setMaintNotify(filterMsg(s));
-			maintStatus = null;
-		}
-	}
-
-	/** Update controller error status */
-	private void updateErrorStatus() {
-		String s = err_status;
-		if (s != null) {
-			controller.setErrorStatus(filterMsg(s));
-			err_status = null;
+			controller.setStatusNotify((!s.isEmpty())
+				? s.toString()
+				: null);
+			// Set to `null` in case this is called more than once
+			ctrl_stat = null;
 		}
 	}
 }

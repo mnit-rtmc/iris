@@ -443,7 +443,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	{
 		if (rs == GateArmState.WARN_CLOSE) {
 			setArmState(rs);
-			updatePlanPhase();
+			updatePlanPhase(o);
 			return;
 		}
 		for (int i = 0; i < MAX_ARMS; i++) {
@@ -471,11 +471,11 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	}
 
 	/** Update the action plan phase */
-	private void updatePlanPhase() {
+	private void updatePlanPhase(User o) {
 		ActionPlanImpl ap = action_plan;
 		if (ap != null) {
 			try {
-				updatePlanPhase(ap);
+				updatePlanPhase(ap, o);
 			}
 			catch (TMSException e) {
 				logError("updatePlanPhase: " + e.getMessage());
@@ -484,16 +484,19 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	}
 
 	/** Update the action plan phase */
-	private void updatePlanPhase(ActionPlanImpl ap) throws TMSException {
+	private void updatePlanPhase(ActionPlanImpl ap, User o)
+		throws TMSException
+	{
+		String uid = (o != null) ? o.getName() : null;
 		if (isMsgOpen()) {
 			PlanPhase op = lookupPlanPhase(
 				PlanPhase.GATE_ARM_OPEN);
-			if (op != null && ap.setPhaseNotify(op))
+			if (op != null && ap.setPhaseNotify(op, uid))
 				updateDmsActions(ap);
 		} else {
 			PlanPhase cp = lookupPlanPhase(
 				PlanPhase.GATE_ARM_CLOSED);
-			if (cp != null && ap.setPhaseNotify(cp))
+			if (cp != null && ap.setPhaseNotify(cp, uid))
 				updateDmsActions(ap);
 		}
 	}
@@ -509,7 +512,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	}
 
 	/** Update the arm state */
-	public void updateArmState() {
+	public void updateArmState(User o) {
 		GateArmState cs = arm_state;
 		GateArmState gas = aggregateArmState();
 		// Don't update WARN_CLOSE back to OPEN
@@ -518,7 +521,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 			setArmState(gas);
 		else
 			checkEnabled();
-		updatePlanPhase();
+		updatePlanPhase(o);
 	}
 
 	/** Get the aggregate arm state for all arms in the array */
@@ -727,12 +730,12 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		return false;
 	}
 
-	/** Get the failure status */
+	/** Get the offline status */
 	@Override
-	public boolean isFailed() {
+	public boolean isOffline() {
 		for (int i = 0; i < MAX_ARMS; i++) {
 			GateArmImpl ga = getArm(i);
-			if (ga != null && ga.isActive() && ga.isFailed())
+			if (ga != null && ga.isActive() && ga.isOffline())
 				return true;
 		}
 		return false;
@@ -765,9 +768,9 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		       arm_state == GateArmState.CLOSING);
 	}
 
-	/** Test if gate arm needs maintenance */
+	/** Test if gate arm has faults */
 	@Override
-	protected boolean needsMaintenance() {
+	protected boolean hasFaults() {
 		return arm_state == GateArmState.FAULT;
 	}
 

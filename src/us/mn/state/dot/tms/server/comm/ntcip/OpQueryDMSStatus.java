@@ -20,7 +20,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -48,11 +47,6 @@ public class OpQueryDMSStatus extends OpDMS {
 	/** Valid temperature range (non-inclusive) */
 	static private final int TEMP_MIN = -128;
 	static private final int TEMP_MAX = 127;
-
-	/** Get the pixel maintenance threshold */
-	static private int pixelMaintThreshold() {
-		return SystemAttrEnum.DMS_PIXEL_MAINT_THRESHOLD.getInt();
-	}
 
 	/** Get integer value from 0 to 65,535 as percent */
 	static private Integer getPercent(ASN1Integer value) {
@@ -112,19 +106,6 @@ public class OpQueryDMSStatus extends OpDMS {
 		int n_test = test_rows.getInteger();
 		int n_msg = message_rows.getInteger();
 		return Math.max(n_test, n_msg);
-	}
-
-	/** DMS status */
-	private final JSONObject status = new JSONObject();
-
-	/** Put an object into status */
-	private void putStatus(String key, Object value) {
-		try {
-			status.put(key, value);
-		}
-		catch (JSONException e) {
-			logError("putStatus: " + e.getMessage() + ", " + key);
-		}
 	}
 
 	/** Create a new DMS query status object */
@@ -205,9 +186,8 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query the DMS controller temperature */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			pollTemp(mess,
-				tempMinCtrlCabinet, DMS.CABINET_TEMP_MIN,
-				tempMaxCtrlCabinet, DMS.CABINET_TEMP_MAX);
+			pollTemp(mess, DMS.CABINET_TEMPS, tempMinCtrlCabinet,
+				tempMaxCtrlCabinet);
 			return new AmbientTemperature();
 		}
 	}
@@ -218,9 +198,8 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query the DMS ambient temperature */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			pollTemp(mess,
-				tempMinAmbient, DMS.AMBIENT_TEMP_MIN,
-				tempMaxAmbient, DMS.AMBIENT_TEMP_MAX);
+			pollTemp(mess, DMS.AMBIENT_TEMPS, tempMinAmbient,
+				tempMaxAmbient);
 			return new HousingTemperature();
 		}
 	}
@@ -231,9 +210,8 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query the DMS housing temperature */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			pollTemp(mess,
-				tempMinSignHousing, DMS.HOUSING_TEMP_MIN,
-				tempMaxSignHousing, DMS.HOUSING_TEMP_MAX);
+			pollTemp(mess, DMS.HOUSING_TEMPS, tempMinSignHousing,
+				tempMaxSignHousing);
 			return new Failures();
 		}
 	}
@@ -249,7 +227,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			logQuery(shortError);
 			String faults = shortError.getValue(";");
 			if (faults.length() > 0)
-				putStatus(DMS.FAULTS, faults.toLowerCase());
+				putFaults(faults.toLowerCase());
 			return new MoreFailures();
 		}
 	}
@@ -276,8 +254,15 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.queryProps();
 			if (ShortErrorStatus.MESSAGE.isSet(se))
 				logQuery(msg_err);
-			if (ShortErrorStatus.CONTROLLER.isSet(se))
+			String faults = "";
+			if (ShortErrorStatus.CONTROLLER.isSet(se)) {
 				logQuery(con);
+				faults = con.getValue(";");
+			}
+			if (faults.length() > 0)
+				putCtrlFaults(faults.toLowerCase(), null);
+			else
+				putCtrlFaults(null, null);
 			if (ShortErrorStatus.PIXEL.isSet(se))
 				logQuery(pix_rows);
 			return new QueryTestAndMessageRows();
@@ -385,8 +370,6 @@ public class OpQueryDMSStatus extends OpDMS {
 			if (row <= n_supplies)
 				return this;
 			else {
-				if (2 * n_failed > n_supplies)
-					setErrorStatus("POWER");
 				putStatus(DMS.POWER_SUPPLIES, supplies);
 				return new LightSensorCount();
 			}
@@ -554,81 +537,14 @@ public class OpQueryDMSStatus extends OpDMS {
 			logQuery(power);
 			logQuery(sensor);
 			putStatus(DMS.POWER_SUPPLIES, power.getPowerStatus());
-			if (power.isCritical())
-				setErrorStatus("POWER");
 			return null;
 		}
 	}
 
-	/** Cleanup the operation */
-	@Override
-	public void cleanup() {
-		if (isSuccess()) {
-			dms.setStatusNotify(status.toString());
-			setMaintStatus(formatMaintStatus());
-			setErrorStatus(formatErrorStatus());
-		}
-		super.cleanup();
-	}
-
-	/** Format the new maintenance status */
-	private String formatMaintStatus() {
-		if (hasMaintenanceError() || hasPixelError())
-			return shortError.getValue();
-		else
-			return "";
-	}
-
-	/** Check if we should report the error for maintenance */
-	private boolean hasMaintenanceError() {
-		int se = shortError.getInteger();
-		// MESSAGE errors can pop up for lots of reasons,
-		// so we shouldn't consider them real errors.
-		return ShortErrorStatus.LAMP.isSet(se)
-		    || ShortErrorStatus.PHOTOCELL.isSet(se)
-		    || ShortErrorStatus.TEMPERATURE.isSet(se)
-		    || ShortErrorStatus.CLIMATE_CONTROL.isSet(se)
-		    || ShortErrorStatus.DOOR_OPEN.isSet(se)
-		    || ShortErrorStatus.DRUM_ROTOR.isSet(se)
-		    || ShortErrorStatus.HUMIDITY.isSet(se)
-		    || ShortErrorStatus.POWER.isSet(se);
-	}
-
-	/** Check if we have too many pixel errors */
-	private boolean hasPixelError() {
-		int se = shortError.getInteger();
-		// PIXEL errors are only reported if pixelFailureTableNumRows.0
-		// is greater than dms_pixel_maint_threshold system attribute.
-		final int pmt = pixelMaintThreshold();
-		return ShortErrorStatus.PIXEL.isSet(se)
-		    && getPixelErrorCount() > pmt && pmt >= 0;
-	}
-
-	/** Format the new error status */
-	private String formatErrorStatus() {
-		// If no error status bits should be reported,
-		// clear the controller error status by setting "".
-		if (hasCriticalError())
-			return shortError.getValue();
-		else
-			return "";
-	}
-
-	/** Check if there is a critical error */
-	private boolean hasCriticalError() {
-		int se = shortError.getInteger();
-		return ShortErrorStatus.OTHER.isSet(se)
-		    || ShortErrorStatus.COMMUNICATIONS.isSet(se)
-		    || ShortErrorStatus.ATTACHED_DEVICE.isSet(se)
-		    || ShortErrorStatus.CONTROLLER.isSet(se)
-		    || ShortErrorStatus.CRITICAL_TEMPERATURE.isSet(se);
-	}
-
 	/** Consolidated method to query temperature status */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void pollTemp(CommMessage mess,
-		MIB1203 min_obj, String min_key,
-		MIB1203 max_obj, String max_key) throws IOException
+	private void pollTemp(CommMessage mess, String key, MIB1203 min_obj,
+		MIB1203 max_obj) throws IOException
 	{
 		ASN1Integer min_temp = min_obj.makeInt();
 		ASN1Integer max_temp = max_obj.makeInt();
@@ -648,10 +564,13 @@ public class OpQueryDMSStatus extends OpDMS {
 				mn = mx;
 				mx = v;
 			}
+			JSONArray temps = new JSONArray();
 			if (mn_valid)
-				putStatus(min_key, mn);
-			if (mx_valid)
-				putStatus(max_key, mx);
+				temps.put(mn);
+			if (mx_valid && (mx > mn || !mn_valid))
+				temps.put(mx);
+			if (mn_valid || mx_valid)
+				putStatus(key, temps);
 		}
 		catch (NoSuchName e) {
 			// Some signs don't have all temperature objects.

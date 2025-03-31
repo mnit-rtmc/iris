@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,9 +61,9 @@ public class MeterTheme extends ProxyTheme<RampMeter> {
 	static private final Style LCK_METERING = locked(ItemStyle.METERING,
 		COLOR_METERING);
 
-	/** Locked maintenance style */
-	static private final Style LCK_MAINTENANCE = locked(
-		ItemStyle.MAINTENANCE, COLOR_UNAVAILABLE);
+	/** Locked fault style */
+	static private final Style LCK_FAULT = locked(
+		ItemStyle.FAULT, COLOR_FAULT);
 
 	/** Create a new meter theme */
 	public MeterTheme(MeterManager man) {
@@ -73,14 +73,14 @@ public class MeterTheme extends ProxyTheme<RampMeter> {
 		addStyle(ItemStyle.QUEUE_EXISTS, COLOR_DEPLOYED);
 		addStyle(ItemStyle.METERING, COLOR_METERING);
 		addStyle(ItemStyle.LOCKED, ProxyTheme.OUTLINE_LOCKED, null);
-		addStyle(ItemStyle.MAINTENANCE, ProxyTheme.COLOR_UNAVAILABLE);
-		addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
+		addStyle(ItemStyle.FAULT, ProxyTheme.COLOR_FAULT);
+		addStyle(ItemStyle.OFFLINE, ProxyTheme.COLOR_OFFLINE);
 		addStyle(ItemStyle.ALL);
 		addStyle(LCK_AVAILABLE);
 		addStyle(LCK_QUEUE_FULL);
 		addStyle(LCK_QUEUE_EXISTS);
 		addStyle(LCK_METERING);
-		addStyle(LCK_MAINTENANCE);
+		addStyle(LCK_FAULT);
 	}
 
 	/** Get an appropriate style */
@@ -95,8 +95,8 @@ public class MeterTheme extends ProxyTheme<RampMeter> {
 				return LCK_QUEUE_EXISTS;
 			if (manager.checkStyle(ItemStyle.METERING, rm))
 				return LCK_METERING;
-			if (manager.checkStyle(ItemStyle.MAINTENANCE, rm))
-				return LCK_MAINTENANCE;
+			if (manager.checkStyle(ItemStyle.FAULT, rm))
+				return LCK_FAULT;
 		}
 		return super.getStyle(rm);
 	}

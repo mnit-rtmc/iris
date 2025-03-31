@@ -30,8 +30,8 @@ The following features are supported:
 | Access       | Primary                                  | Secondary     |
 |--------------|------------------------------------------|---------------|
 | 👁️  View      | name, location, msg\_current, has_faults | sign\_config, sign\_detail, geo\_loc, msg\_sched, expire\_time, status, pix\_failures |
-| 👉 Operate   |                                          | msg\_user     |
-| 💡 Manage    | notes                                    | preset, device\_request † |
+| 👉 Operate   |                                          | msg\_user, device\_request † |
+| 💡 Manage    | notes                                    | preset        |
 | 🔧 Configure | controller                               | pin, static\_graphic, beacon |
 
 † _Write only_
@@ -53,6 +53,20 @@ Static graphic | image of static sign in which DMS is inset
 **Internal** beacons are controlled through the DMS controller using the [NTCIP]
 protocol.  **Remote** [beacon]s are controlled using a separate [comm link].
 
+## Status JSON
+
+Sign status data is stored as JSON in `status`.
+
+Key              | Value
+-----------------|--------------------------------------------------
+`faults`         | Current fault conditions, separated by semicolons
+`photocells`     | Array of objects: `description`, `error`, `reading`
+`light_output`   | Integer light output percentage
+`power_supplies` | Array of objects: `description`, `supply_type`, `error`, `detail`, `voltage`
+`cabinet_temps`  | Array of integer temps (C)
+`ambient_temps`  | Array of integer temps (C)
+`housing_temps`  | Array of integer temps (C)
+
 ## Styles
 
 Each DMS can have a number of _styles_, depending on its current state.  Styles
@@ -64,17 +78,14 @@ Available | Sign is blank and ready to use
 Deployed  | Displaying an operator-defined message
 Schedule  | Displaying a scheduled message
 External  | Displaying a message from an external system (not IRIS)
-Maint.    | Sign requires maintenance, but might still be functional
-Failed    | Communication failure to sign
+Fault     | One or more faults detected in sign
+Offline   | Communication to sign offline
 Purpose   | [Dedicated purpose] sign
 All       | All signs
 
 ## Composing Messages
 
-When a DMS is selected, a few things happen:
-- the sign's location is displayed
-- the current message is rendered
-- the [message pattern] selector is populated:
+When a DMS is selected, the [message pattern] selector is populated:
   * only patterns whose **compose** [hashtag] matches the sign
   * only patterns containing **NO** [action tags]
 
@@ -83,7 +94,7 @@ When an operator chooses a pattern, a series of selectors is populated with
 are too wide to fit the sign are [abbreviated] as necessary.
 
 The selectors may also allow **free-form text** entry, depending on the
-permision access level of the user:
+**DMS** permision access level:
 
 * 👉 **Operate**: No free-form text permitted
 * 💡 **Manage**: Free-form text checked for **banned** [word]s

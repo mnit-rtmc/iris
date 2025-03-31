@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,20 +82,46 @@ public interface RampMeter extends Device {
 	/** Get verification camera preset */
 	CameraPreset getPreset();
 
-	/** Set the meter lock status code */
-	void setMLock(Integer c);
+	/** Set the lock as JSON.
+	 * @see MeterLock */
+	void setLock(String lk);
 
-	/** Get the meter lock status code */
-	Integer getMLock();
+	/** Get the lock as JSON.
+	 * @see MeterLock */
+	String getLock();
 
-	/* Transient attributes (not stored in database) */
+	/** Get the current status as JSON */
+	String getStatus();
 
-	/** Set the release rate (vehicles per hour) */
-	void setRateNext(Integer r);
+	/** Status JSON attributes: RATE, QUEUE, FAULT */
 
-	/** Get the release rate (vehciels per hour) */
-	Integer getRate();
+	/** Release rate (vehicles per hour; Integer) */
+	String RATE = "rate";
 
-	/** Get the queue status */
-	int getQueue();
+	/** Queue status */
+	String QUEUE = "queue";
+
+	/** QUEUE: empty */
+	String QUEUE_EMPTY = "empty";
+
+	/** QUEUE: exists */
+	String QUEUE_EXISTS = "exists";
+
+	/** QUEUE: full */
+	String QUEUE_FULL = "full";
+
+	/** Fault conditions */
+	String FAULT = "fault";
+
+	/** FAULT: Police panel flash */
+	String FAULT_POLICE_PANEL = "police panel";
+
+	/** FAULT: Manual mode flash */
+	String FAULT_MANUAL_MODE = "manual mode";
+
+	/** FAULT: No entrance node */
+	String FAULT_NO_ENTRANCE_NODE = "no entrance node";
+
+	/** FAULT: Missing state */
+	String FAULT_MISSING_STATE = "missing state";
 }

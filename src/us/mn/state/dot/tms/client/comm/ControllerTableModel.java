@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,8 +70,8 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 
 	/** Get a controller comm state */
 	static private CommState getCommState(Controller c) {
-		if (ControllerHelper.isFailed(c))
-			return CommState.FAILED;
+		if (ControllerHelper.isOffline(c))
+			return CommState.OFFLINE;
 		else if (ControllerHelper.isActive(c))
 			return CommState.OK;
 		else
@@ -154,9 +154,10 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 				return new CommCellRenderer();
 			}
 		});
-		cols.add(new ProxyColumn<Controller>("controller.status", 200) {
+		cols.add(new ProxyColumn<Controller>("controller.fault", 200) {
 			public Object getValueAt(Controller c) {
-				return c.getStatus();
+				String faults = ControllerHelper.optFaults(c);
+				return (faults != null) ? faults : "";
 			}
 		});
 		cols.add(new ProxyColumn<Controller>("controller.fail", 180,

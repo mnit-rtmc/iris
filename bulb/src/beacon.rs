@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{uri_one, AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card, View, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::fetch::Action;
@@ -147,11 +147,11 @@ impl Beacon {
             "<div class='title row'>{name} {item_states}</div>\
             <div class='beacon-container row center'>\
               <button id='ob_flashing' disabled></button>\
-              <label for='ob_flashing' class='beacon-disabled'>\
+              <label for='ob_flashing' class='signal-housing'>\
                 <span class='{flashing}'>🔆</span>\
               </label>\
               <span class='beacon-sign tiny'>{message}</span>\
-              <label for='ob_flashing' class='beacon-disabled'>\
+              <label for='ob_flashing' class='signal-housing'>\
                 <span class='{flashing} flash-delayed'>🔆</span>\
               </label>\
             </div>"
@@ -181,11 +181,11 @@ impl Beacon {
             </div>\
             <div class='beacon-container row center'>\
               <button id='ob_flashing'></button>\
-              <label for='ob_flashing' class='beacon'>\
+              <label for='ob_flashing' class='beacon signal-housing'>\
                 <span class='{flashing}'>🔆</span>\
               </label>\
               <span class='beacon-sign'>{message}</span>\
-              <label for='ob_flashing' class='beacon'>\
+              <label for='ob_flashing' class='beacon signal-housing'>\
                 <span class='{flashing} flash-delayed'>🔆</span>\
               </label>\
             </div>\
@@ -264,7 +264,7 @@ impl Card for Beacon {
          <option value='👽'>👽 external\
          <option value='⚠️'>⚠️ fault\
          <option value='🔌'>🔌 offline\
-         <option value='▪️'>▪️ inactive";
+         <option value='🔻'>🔻 inactive";
 
     /// Get the resource
     fn res() -> Res {

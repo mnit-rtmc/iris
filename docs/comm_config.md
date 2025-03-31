@@ -14,7 +14,7 @@ A comm configuration is a set of properties which is shared among multiple
 | Access       | Primary     | Secondary |
 |--------------|-------------|-----------|
 | 👁️  View      | name        |           |
-| 💡 Manage    |             | timeout\_ms, idle\_disconnect\_sec, no\_response\_disconnect\_sec |
+| 💡 Manage    |             | timeout\_ms, retry\_threshold, idle\_disconnect\_sec, no\_response\_disconnect\_sec |
 | 🔧 Configure | description | protocol, poll\_period\_sec, long\_poll\_period\_sec |
 
 </details>
@@ -32,8 +32,10 @@ determined by the protocol.  For modem links with restricted bandwidth, it
 may be useful set this the same as **poll period**, to reduce costs.
 
 **Timeout** determines how long to wait after a poll, if a response is not
-received, before communicaton will fail.  For each poll, 2 retries will happen
-before the operation is aborted.
+received, before the poll will fail.
+
+**Retry Threshold** is the number of times a controller operation is retried
+if not already failed.
 
 **Idle Disconnect** will cause the [comm link] to be disconnected after a
 period of inactivity.  This can reduce charges for modem links.  Setting this

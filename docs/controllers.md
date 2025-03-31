@@ -20,9 +20,9 @@ of `pin`, `name` and `resource_n` of associated [devices](#devices).
 
 | Access       | Primary                              | Secondary         |
 |--------------|--------------------------------------|-------------------|
-| 👁️  View      | name, location, setup, fail\_time    | geo\_loc          |
-| 👉 Operate   |                                      | device\_request † |
-| 💡 Manage    | condition, notes                     |                   |
+| 👁️  View      | name, location, setup, fail\_time    | geo\_loc, status  |
+| 👉 Operate   | condition                            | device\_request † |
+| 💡 Manage    | notes                                |                   |
 | 🔧 Configure | comm\_link, drop\_id, cabinet\_style | password          |
 
 † _Write only_
@@ -48,11 +48,24 @@ controller **password** field is used to enter authentication data.
 * Web-based devices may require HTTP Basic Authentication.  For these types of
   devices, the password field should contain both the user name and password,
   separated by a colon (`user:password`).
+* For [Central Park], this is a token which is sent in the `x-access-token`
+  HTTP header.
 * For [CBW], the user name portion must be `none`.  HTTP Basic Authentication
   can be enabled on the setup page of the [CBW] device (setup.html).
 * [SierraGX] modems can be configured to require authentiation.  In this case,
   separate the username and password with a colon, in the same manner as HTTP
   basic authentication.
+
+## Setup JSON
+
+Configuration data read from the controller is stored as JSON in `setup`.
+
+Key          | Value
+-------------|--------------------------------
+`serial_num` | Unique controller serial number
+`version`    | Version number / tag
+`hw`         | Array of hardware modules: `make`, `model`, `version`
+`sw`         | Array of software modules: `make`, `model`, `version`
 
 ## Devices
 
@@ -104,6 +117,7 @@ Controllers can have an associated cabinet style, used for MnDOT-170 and Natch
 [beacons]: beacons.html
 [cameras]: cameras.html
 [CBW]: protocols.html#cbw
+[Central Park]: protocols#central-park
 [comm link]: comm_links.html
 [dynamic message signs]: dms.html
 [flow streams]: flow_streams.html

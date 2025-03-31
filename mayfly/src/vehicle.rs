@@ -1,6 +1,6 @@
 // vehicle.rs
 //
-// Copyright (c) 2021  Minnesota Department of Transportation
+// Copyright (c) 2021-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,14 +13,13 @@
 // GNU General Public License for more details.
 //
 use crate::binned::TrafficData;
-use crate::common::{Error, Result};
-use async_std::io::{BufReader, ReadExt};
-use async_std::prelude::*;
+use crate::error::{Error, Result};
 use std::io::BufRead as _;
 use std::io::Read as BlockingRead;
 use std::marker::PhantomData;
 use std::num::{NonZeroU16, NonZeroU32, NonZeroU8};
 use std::str::FromStr;
+use tokio::io::{AsyncBufReadExt, AsyncReadExt, BufReader};
 
 /// Time stamp
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -100,7 +99,7 @@ pub struct BinIter<'a, T: TrafficData> {
 fn parse_hour(hour: &str) -> Result<u32> {
     match hour.parse() {
         Ok(h) if h < 24 => Ok(h),
-        _ => Err(Error::InvalidStamp),
+        _ => Err(Error::InvalidData("hour")),
     }
 }
 
@@ -108,7 +107,7 @@ fn parse_hour(hour: &str) -> Result<u32> {
 fn parse_min_sec(min_sec: &str) -> Result<u32> {
     match min_sec.parse() {
         Ok(ms) if ms < 60 => Ok(ms),
-        _ => Err(Error::InvalidStamp),
+        _ => Err(Error::InvalidData("minute")),
     }
 }
 
@@ -128,7 +127,7 @@ impl FromStr for Stamp {
                 return Ok(st);
             }
         }
-        Err(Error::InvalidStamp)
+        Err(Error::InvalidData("stamp"))
     }
 }
 
@@ -206,7 +205,7 @@ impl VehicleEvent {
                     ev.duration = dur.parse().ok();
                 }
             }
-            None => return Err(Error::InvalidData),
+            None => return Err(Error::InvalidData("duration")),
         }
         match val.next() {
             Some(hdw) => {
@@ -214,7 +213,7 @@ impl VehicleEvent {
                     ev.headway = hdw.parse().ok();
                 }
             }
-            None => return Err(Error::InvalidData),
+            None => return Err(Error::InvalidData("headway")),
         }
         if let Some(stamp) = val.next() {
             if !stamp.is_empty() {
@@ -329,21 +328,21 @@ impl VehicleEvent {
 
 impl VehLog {
     /// Create a vehicle event log from an async reader
-    pub async fn from_async_reader<R>(reader: R) -> Result<Self>
+    pub async fn from_reader_async<R>(reader: R) -> Result<Self>
     where
-        R: ReadExt + Unpin,
+        R: AsyncReadExt + Unpin,
     {
         let mut log = Self::default();
         let mut lines = BufReader::new(reader).lines();
-        while let Some(line) = lines.next().await {
-            log.append(&line?)?;
+        while let Some(line) = lines.next_line().await? {
+            log.append(&line)?;
         }
         log.finish();
         Ok(log)
     }
 
-    /// Create a vehicle event log from a blocking reader
-    pub fn from_blocking_reader<R>(reader: R) -> Result<Self>
+    /// Create a vehicle event log from a reader (blocking)
+    pub fn from_reader_blocking<R>(reader: R) -> Result<Self>
     where
         R: BlockingRead,
     {
@@ -535,7 +534,7 @@ fn sec_to_ms(m: f32) -> u32 {
     (m * 1000.0).round() as u32
 }
 
-impl<'a, T: TrafficData> Iterator for BinIter<'a, T> {
+impl<T: TrafficData> Iterator for BinIter<'_, T> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {

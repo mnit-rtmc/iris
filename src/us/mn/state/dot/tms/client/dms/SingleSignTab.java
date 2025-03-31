@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  * Copyright (C) 2018  SRF Consulting Group
  *
@@ -86,7 +86,7 @@ public class SingleSignTab extends IPanel {
 	/** Displays the location of the DMS */
 	private final JLabel location_lbl = createValueLabel();
 
-	/** Displays the controller status */
+	/** Displays the sign status or faults */
 	private final JLabel status_lbl = createValueLabel();
 
 	/** Displays the associated incident */
@@ -309,7 +309,7 @@ public class SingleSignTab extends IPanel {
 
 	/** Set the camera preset action */
 	private void setPresetAction(DMS dms) {
-		CameraPreset cp = DMSHelper.getPreset(dms);
+		CameraPreset cp = (dms != null) ? dms.getPreset() : null;
 		preset_btn.setAction(new CameraPresetAction(session, cp));
 	}
 
@@ -327,7 +327,7 @@ public class SingleSignTab extends IPanel {
 		if (a == null || a.equals("name"))
 			name_lbl.setText(dms.getName());
 		if (a == null || a.equals("status")) {
-			Object o = DMSHelper.getStatus(dms, DMS.LIGHT_OUTPUT);
+			Object o = DMSHelper.optStatus(dms, DMS.LIGHT_OUTPUT);
 			if (o instanceof Integer)
 				brightness_lbl.setText("" + o + "%");
 			else
@@ -350,40 +350,21 @@ public class SingleSignTab extends IPanel {
 
 	/** Update the status widgets */
 	private void updateStatus(DMS dms) {
-		if (DMSHelper.isFailed(dms)) {
+		String status = DMSHelper.optFaults(dms);
+		if (DMSHelper.isOffline(dms)) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.GRAY);
-			status_lbl.setText(DMSHelper.getStatus(dms));
-		} else
-			updateCritical(dms);
-		setIncidentAction(dms);
-		operation_lbl.setText(dms.getOperation());
-	}
-
-	/** Update the critical error status */
-	private void updateCritical(DMS dms) {
-		String critical = DMSHelper.getCriticalError(dms);
-		if (critical.isEmpty())
-			updateMaintenance(dms);
-		else {
+			status = "OFFLINE";
+		} else if (status != null) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.BLACK);
-			status_lbl.setText(critical);
-		}
-	}
-
-	/** Update the maintenance error status */
-	private void updateMaintenance(DMS dms) {
-		String maintenance = DMSHelper.getMaintenance(dms);
-		if (maintenance.isEmpty()) {
+		} else {
 			status_lbl.setForeground(null);
 			status_lbl.setBackground(null);
-			status_lbl.setText("");
-		} else {
-			status_lbl.setForeground(Color.BLACK);
-			status_lbl.setBackground(Color.YELLOW);
-			status_lbl.setText(maintenance);
 		}
+		status_lbl.setText((status != null) ? status : "");
+		setIncidentAction(dms);
+		operation_lbl.setText(dms.getOperation());
 	}
 
 	/** Update the current message on a sign */

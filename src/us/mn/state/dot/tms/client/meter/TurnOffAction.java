@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.awt.event.ActionEvent;
+import us.mn.state.dot.tms.MeterLock;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.proxy.ProxyAction;
 
@@ -26,15 +27,23 @@ import us.mn.state.dot.tms.client.proxy.ProxyAction;
  */
 public class TurnOffAction extends ProxyAction<RampMeter> {
 
+	/** User ID */
+	private final String user;
+
 	/** Create a new action to turn off the selected ramp meter */
-	public TurnOffAction(RampMeter rm, boolean e) {
+	public TurnOffAction(RampMeter rm, String u) {
 		super("ramp.meter.off", rm);
-		setEnabled(e);
+		user = u;
 	}
 
 	/** Actually perform the action */
+	@Override
 	protected void doActionPerformed(ActionEvent e) {
-		if(proxy != null)
-			proxy.setRateNext(null);
+		if (proxy != null) {
+			MeterLock lk = new MeterLock(proxy.getLock());
+			lk.setRate(null);
+			lk.setUser(user);
+			proxy.setLock(lk.toString());
+		}
 	}
 }

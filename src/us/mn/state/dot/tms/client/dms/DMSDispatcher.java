@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  * Copyright (C) 2017-2018  Iteris Inc.
  *
@@ -356,8 +356,9 @@ public class DMSDispatcher extends JPanel {
 			return createMessage(sc, incident, ms);
 		else {
 			boolean fb = composer.getFlashBeacon();
+			boolean ps = composer.getPixelService();
 			Integer d = composer.getDuration();
-			return creator.createMsg(sc, ms, fb, d);
+			return creator.createMsg(sc, ms, fb, ps, d);
 		}
 	}
 

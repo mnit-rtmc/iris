@@ -69,14 +69,26 @@ public class PropStatus extends IPanel {
 	}
 
 	/** Format a temperature range.
-	 * @param mn Minimum temp (Celsius).
-	 * @param mx Maximum temp (Celsius).
+	 * @param temps Array of temps (Celsius).
 	 * @return Formatted temperature range. */
-	static private String formatTemp(Object mn, Object mx) {
-		if (mn == null || DMSHelper.objectEquals(mn, mx))
+	static private String formatTemps(Object temps) {
+		Integer mn = null;
+		Integer mx = null;
+		if (temps instanceof JSONArray) {
+			JSONArray arr = (JSONArray) temps;
+			for (int i = 0; i < arr.length(); i++) {
+				Object val = arr.opt(i);
+				if (val instanceof Integer) {
+					Integer temp = (Integer) val;
+					if (mn == null || temp < mn)
+						mn = temp;
+					if (mx == null || temp > mx)
+						mx = temp;
+				}
+			}
+		}
+		if (mn == null || mn.equals(mx))
 			return formatTemp(mx);
-		else if (mx == null)
-			return formatTemp(mn);
 		else
 			return formatTemp(mn) + "..." + formatTemp(mx);
 	}
@@ -102,7 +114,7 @@ public class PropStatus extends IPanel {
 	};
 
 	/** Button to query configuration */
-	private final IAction config = new IAction("dms.query.config") {
+	private final IAction query_config = new IAction("dms.query.config") {
 		protected void doActionPerformed(ActionEvent e) {
 			dms.setDeviceRequest(DeviceRequest.
 				QUERY_CONFIGURATION.ordinal());
@@ -182,7 +194,7 @@ public class PropStatus extends IPanel {
 		box.add(Box.createHorizontalStrut(UI.hgap));
 		box.add(new JButton(query_status));
 		box.add(Box.createHorizontalStrut(UI.hgap));
-		box.add(new JButton(config));
+		box.add(new JButton(query_config));
 		box.add(Box.createHorizontalStrut(UI.hgap));
 		box.add(new JButton(query_settings));
 		box.add(Box.createHorizontalStrut(UI.hgap));
@@ -195,24 +207,21 @@ public class PropStatus extends IPanel {
 	/** Update one attribute on the panel */
 	public void updateAttribute(String a) {
 		if (a == null || a.equals("status")) {
-			temp_cabinet_lbl.setText(formatTemp(
-				DMSHelper.getStatus(dms, DMS.CABINET_TEMP_MIN),
-				DMSHelper.getStatus(dms, DMS.CABINET_TEMP_MAX)
+			temp_cabinet_lbl.setText(formatTemps(
+				DMSHelper.optStatus(dms, DMS.CABINET_TEMPS)
 			));
-			temp_ambient_lbl.setText(formatTemp(
-				DMSHelper.getStatus(dms, DMS.AMBIENT_TEMP_MIN),
-				DMSHelper.getStatus(dms, DMS.AMBIENT_TEMP_MAX)
+			temp_ambient_lbl.setText(formatTemps(
+				DMSHelper.optStatus(dms, DMS.AMBIENT_TEMPS)
 			));
-			temp_housing_lbl.setText(formatTemp(
-				DMSHelper.getStatus(dms, DMS.HOUSING_TEMP_MIN),
-				DMSHelper.getStatus(dms, DMS.HOUSING_TEMP_MAX)
+			temp_housing_lbl.setText(formatTemps(
+				DMSHelper.optStatus(dms, DMS.HOUSING_TEMPS)
 			));
 			updatePowerStatus();
 		}
 		if (null == a) {
 			boolean r = canRequest();
 			query_msg_act.setEnabled(r);
-			config.setEnabled(r);
+			query_config.setEnabled(r);
 			query_status.setEnabled(r);
 			query_settings.setEnabled(r);
 			send_settings.setEnabled(r);
@@ -222,7 +231,7 @@ public class PropStatus extends IPanel {
 
 	/** Update the power status */
 	private void updatePowerStatus() {
-		Object ps = DMSHelper.getStatus(dms, DMS.POWER_SUPPLIES);
+		Object ps = DMSHelper.optStatus(dms, DMS.POWER_SUPPLIES);
 		if (ps instanceof JSONArray) {
 			PowerTableModel m = new PowerTableModel((JSONArray) ps);
 			power_tbl.setColumnModel(m.createColumnModel());

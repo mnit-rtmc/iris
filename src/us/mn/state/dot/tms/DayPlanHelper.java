@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,17 +36,9 @@ public class DayPlanHelper extends BaseHelper {
 
 	/** Check if the given date is a holiday for the plan */
 	static public boolean isHoliday(DayPlan plan, Calendar stamp) {
-		/* A date is considered a holiday unless it matches
-		 * a non-holiday matcher and no holiday matchers */
-		boolean holiday = true;
-		for (DayMatcher dm: plan.getDayMatchers()) {
-			if (DayMatcherHelper.matches(dm, stamp)) {
-				if (dm.getHoliday())
-					return true;
-				else
-					holiday = false;
-			}
-		}
-		return holiday;
+		boolean holidays = plan.getHolidays();
+		return (DayMatcherHelper.matches(plan, stamp))
+		      ? holidays
+		      : !holidays;
 	}
 }

@@ -27,6 +27,8 @@ import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.SignMessageImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerException;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
 import us.mn.state.dot.tms.units.Interval;
@@ -74,17 +76,17 @@ class OpQueryMsg extends OpDms {
 	private static Integer calcMsgDuration(boolean useont,
 		boolean useofft, Calendar ontime, Calendar offtime)
 	{
-		if(!useont) {
+		if (!useont) {
 			throw new IllegalArgumentException(
 				"must have ontime in calcMsgDuration.");
 		}
-		if(!useofft)
+		if (!useofft)
 			return null;
-		if(ontime == null) {
+		if (ontime == null) {
 			throw new IllegalArgumentException(
 				"invalid null ontime in calcMsgDuration.");
 		}
-		if(offtime == null) {
+		if (offtime == null) {
 			throw new IllegalArgumentException(
 				"invalid null offtime in calcMsgDuration.");
 		}
@@ -93,7 +95,7 @@ class OpQueryMsg extends OpDms {
 		long delta = offtime.getTimeInMillis() -
 		             ontime.getTimeInMillis();
 		long m = ((delta < 0) ? 0 : delta / 1000 / 60);
-		return (int)m;
+		return (int) m;
 	}
 
 	/** Create message MULTI string using a bitmap.
@@ -108,7 +110,7 @@ class OpQueryMsg extends OpDms {
 	private static String createMultiUsingBitmap(
 		BitmapGraphic[] pages, Interval pgOnTime)
 	{
-		if(areBitmapsBlank(pages))
+		if (areBitmapsBlank(pages))
 			return "";
 
 		MultiBuilder multi = new MultiBuilder();
@@ -133,8 +135,8 @@ class OpQueryMsg extends OpDms {
 
 	/** Check if an array of bitmaps is blank */
 	private static boolean areBitmapsBlank(BitmapGraphic[] pages) {
-		for(int i = 0; i < pages.length; i++)
-			if(pages[i].getLitCount() > 0)
+		for (int i = 0; i < pages.length; i++)
+			if (pages[i].getLitCount() > 0)
 				return false;
 		return true;
 	}
@@ -170,15 +172,12 @@ class OpQueryMsg extends OpDms {
 
 	/** Create the second phase of the operation */
 	protected Phase phaseTwo() {
-
-		// already have dms configuration
-		if(dmsConfigured())
+		if (dmsConfigured())
 			return new PhaseQueryMsg();
-
-		// dms not configured
-		Phase phase2 = new PhaseQueryMsg();
-		Phase phase1 = new PhaseGetConfig(phase2);
-		return phase1;
+		else {
+			Phase phase2 = new PhaseQueryMsg();
+			return new PhaseGetConfig(phase2);
+		}
 	}
 
 	/**
@@ -195,18 +194,18 @@ class OpQueryMsg extends OpDms {
 		Integer duration, Interval pgOnTime, SignMsgPriority rpri,
 		String owner)
 	{
-		if(sbitmap == null)
+		if (sbitmap == null)
 			return null;
 		byte[] argbitmap;
 		try {
 			argbitmap = HexString.parse(sbitmap);
 		}
-		catch(IllegalArgumentException e) {
+		catch (IllegalArgumentException e) {
 			LOG.log("SEVERE: received invalid bitmap " +
 				e.getMessage());
 			return null;
 		}
-		if(argbitmap.length % BM_PGLEN_BYTES != 0) {
+		if (argbitmap.length % BM_PGLEN_BYTES != 0) {
 			LOG.log("SEVERE: received bogus bitmap " +
 				"size: len=" + argbitmap.length +
 				", BM_PGLEN_BYTES=" + BM_PGLEN_BYTES);
@@ -218,11 +217,11 @@ class OpQueryMsg extends OpDms {
 		int numpgs = calcNumPages(argbitmap);
 		LOG.log("OpQueryMsg.createSignMessageWithBitmap(): "+
 			"numpages=" + numpgs);
-		if(numpgs <= 0)
+		if (numpgs <= 0)
 			return null;
 
 		BitmapGraphic[] pages = new BitmapGraphic[numpgs];
-		for(int pg = 0; pg < numpgs; pg++)
+		for (int pg = 0; pg < numpgs; pg++)
 			pages[pg] = extractBitmap(argbitmap, pg);
 
 		String multi = createMultiUsingBitmap(pages, pgOnTime);
@@ -296,10 +295,10 @@ class OpQueryMsg extends OpDms {
 
 	/** Parse response.
 	 *  @return True to retry the operation else false if done. */
-	private boolean parseResponse(Message mess, XmlElem xrr) {
+	private boolean parseResponse(Message mess, XmlElem xrr)
+		throws IOException
+	{
 		long id = 0;
-		boolean valid = false;
-		String errmsg = "";
 		boolean txtavail = false;
 		String msgtext = "";
 		SignMsgPriority apri = SignMsgPriority.invalid;
@@ -313,152 +312,99 @@ class OpQueryMsg extends OpDms {
 		boolean usebitmap = false;
 		String bitmap = "";
 
-		// parse response
 		try {
-			// id
 			id = xrr.getResLong("Id");
-
-			// valid flag
-			valid = xrr.getResBoolean("IsValid");
-
-			// error message text
-			errmsg = xrr.getResString("ErrMsg");
-			if(!valid && errmsg.length() <= 0)
-				errmsg = FAILURE_UNKNOWN;
-
-			if(valid) {
-				// msg text available
-				txtavail = xrr.getResBoolean(
-					"MsgTextAvailable");
-
-				// msg text
-				msgtext = xrr.getResString("MsgText");
-
-				// activation priority
-				apri = SignMsgPriority.fromOrdinal(
-					xrr.getResInt("ActPriority"));
-				if (apri == SignMsgPriority.invalid)
-					apri = SignMsgPriority.high_1;
-
-				// runtime priority
-				rpri = SignMsgPriority.fromOrdinal(
-					xrr.getResInt("RunPriority"));
-				if (rpri == SignMsgPriority.invalid)
-					rpri = SignMsgPriority.low_1;
-
-				// owner
-				owner = xrr.getResString("Owner");
-
-				// ontime
-				useont = xrr.getResBoolean("UseOnTime");
-				if(useont)
-					ont.setTime(xrr.getResDate("OnTime"));
-
-				// offtime
-				useofft = xrr.getResBoolean("UseOffTime");
-				if(useofft)
-					offt.setTime(xrr.getResDate("OffTime"));
-
-				// display time (pg on-time)
-				int ms = xrr.getResInt("DisplayTimeMS");
-				pgOnTime = new Interval(ms, MILLISECONDS);
-				LOG.log("PhaseQueryMsg: ms=" + ms +
-					", pgOnTime=" + pgOnTime.ms());
-
-				// bitmap
-				usebitmap = xrr.getResBoolean("UseBitmap");
-				bitmap = xrr.getResString("Bitmap");
-
+			boolean valid = xrr.getResBoolean("IsValid");
+			String errmsg = xrr.getResString("ErrMsg");
+			if (!valid) {
 				LOG.log(
-					"OpQueryMsg() parsed msg values: " +
-					"IsValid:" + valid +
-					", MsgTextAvailable:" + txtavail +
-					", MsgText:" + msgtext +
-					", ActPriority:"  + apri +
-					", RunPriority:"  + rpri +
-					", Owner:"  + owner +
-					", OnTime:"  + ont.getTime() +
-					", OffTime:" + offt.getTime() +
-					", pgOnTime:" + pgOnTime +
-					", bitmap:" + bitmap);
+					"OpQueryMsg: response received, " +
+					"ignored, valid is false, " +
+					"errmsg=" + errmsg
+				);
+				throw new ControllerException(errmsg);
 			}
-		} catch (IllegalArgumentException ex) {
+			txtavail = xrr.getResBoolean("MsgTextAvailable");
+			msgtext = xrr.getResString("MsgText");
+			apri = SignMsgPriority.fromOrdinal(
+				xrr.getResInt("ActPriority"));
+			if (apri == SignMsgPriority.invalid)
+				apri = SignMsgPriority.high_1;
+			rpri = SignMsgPriority.fromOrdinal(
+				xrr.getResInt("RunPriority"));
+			if (rpri == SignMsgPriority.invalid)
+				rpri = SignMsgPriority.low_1;
+			owner = xrr.getResString("Owner");
+			useont = xrr.getResBoolean("UseOnTime");
+			if (useont)
+				ont.setTime(xrr.getResDate("OnTime"));
+			useofft = xrr.getResBoolean("UseOffTime");
+			if (useofft)
+				offt.setTime(xrr.getResDate("OffTime"));
+			int ms = xrr.getResInt("DisplayTimeMS");
+			pgOnTime = new Interval(ms, MILLISECONDS);
+			LOG.log("PhaseQueryMsg: ms=" + ms +
+				", pgOnTime=" + pgOnTime.ms());
+			usebitmap = xrr.getResBoolean("UseBitmap");
+			bitmap = xrr.getResString("Bitmap");
+			LOG.log(
+				"OpQueryMsg() parsed msg values: " +
+				"IsValid:" + valid +
+				", MsgTextAvailable:" + txtavail +
+				", MsgText:" + msgtext +
+				", ActPriority:"  + apri +
+				", RunPriority:"  + rpri +
+				", Owner:"  + owner +
+				", OnTime:"  + ont.getTime() +
+				", OffTime:" + offt.getTime() +
+				", pgOnTime:" + pgOnTime +
+				", bitmap:" + bitmap
+			);
+		}
+		catch (IllegalArgumentException ex) {
 			LOG.log("SEVERE: Malformed XML received:" +
 			    ex + ", id=" + id);
-			valid=false;
-			errmsg=ex.getMessage();
-			handleCommError(EventType.PARSING_ERROR,errmsg);
+			throw new ParsingException(ex);
 		}
 
-		// update
-		complete(mess);
+		checkMsgOwner(owner);
 
-		// process response
-		if(valid) {
-			setErrorStatus("");
-			if (updateMaintStatus(owner))
-				sendMaintenanceEmail();
+		// have on time?  if not, create
+		if (!useont) {
+			useont = true;
+			ont = new GregorianCalendar();
+		}
+		// error checking: valid off time?
+		if (useont && useofft && offt.compareTo(ont) <= 0)
+			useofft = false;
+		Integer duramins = calcMsgDuration(useont,
+			useofft, ont, offt);
 
-			// have on time? if not, create
-			if (!useont) {
-				useont=true;
-				ont=new GregorianCalendar();
-			}
-
-			// error checking: valid off time?
-			if (useont && useofft && offt.compareTo(ont)<=0) {
-				useofft=false;
-			}
-
-			// calc message duration
-			Integer duramins = calcMsgDuration(useont,
-				useofft, ont, offt);
-
-			// have text
-			if(txtavail) {
-				// update page on-time in MULTI with value
-				// read from controller, which comes from
-				// the DisplayTimeMS XML field, not the
-				// MULTI string.
-				msgtext = updatePageOnTime(msgtext, pgOnTime);
-				SignMessageImpl sm = createMsg(msgtext, owner,
-					rpri, duramins);
+		if (txtavail) {
+			// update page on-time in MULTI with value read from
+			// controller, which comes from the DisplayTimeMS XML
+			// field, not the MULTI string.
+			msgtext = updatePageOnTime(msgtext, pgOnTime);
+			SignMessageImpl sm = createMsg(msgtext, owner,
+				rpri, duramins);
+			if (sm != null)
+				m_dms.setMsgCurrentNotify(sm);
+		} else {
+			// don't have text
+			SignMessageImpl sm = null;
+			if (usebitmap) {
+				sm = createSignMessageWithBitmap(
+					bitmap, duramins, pgOnTime,
+					rpri, owner);
 				if (sm != null)
 					m_dms.setMsgCurrentNotify(sm);
-
-			// don't have text
-			} else {
-
-				SignMessageImpl sm = null;
-				if (usebitmap) {
-					sm = createSignMessageWithBitmap(
-						bitmap, duramins, pgOnTime,
-						rpri, owner);
-					if (sm != null)
-						m_dms.setMsgCurrentNotify(sm);
-				}
-				if (sm == null) {
-					sm = createMsg("", owner, rpri, null);
-					if (sm != null)
-						m_dms.setMsgCurrentNotify(sm);
-				}
 			}
-
-		// valid flag is false
-		} else {
-			LOG.log("OpQueryMsg: response from SensorServer " +
-				"received, ignored, Xml valid field is " +
-				"false, errmsg=" + errmsg);
-			setErrorStatus(errmsg);
-
-			// try again
-			if(flagFailureShouldRetry(errmsg)) {
-				LOG.log("OpQueryMsg: will retry op.");
-				return true;
+			if (sm == null) {
+				sm = createMsg("", owner, rpri, null);
+				if (sm != null)
+					m_dms.setMsgCurrentNotify(sm);
 			}
 		}
-
-		// this operation is complete
 		return false;
 	}
 
@@ -468,11 +414,9 @@ class OpQueryMsg extends OpDms {
 	 * if the messenger reopens the connection on failure.
 	 *
 	 * @see CommThread#doPoll()
-	 * @see Messenger#handleCommError()
-	 * @see Messenger#shouldReopen()
 	 */
-	private class PhaseQueryMsg extends Phase
-	{
+	private class PhaseQueryMsg extends Phase {
+
 		/** Query current message */
 		protected Phase poll(CommMessage argmess)
 			throws IOException
@@ -485,22 +429,16 @@ class OpQueryMsg extends OpDms {
 				"called, dms=" + m_dms.getName());
 
 			Message mess = (Message) argmess;
-
-			// set message attributes as a function of the op
 			setMsgAttributes(mess);
-
-			// build xml request and expected response
 			mess.setName(getOpName());
 			XmlElem xrr = buildXmlElem("StatusReqMsg",
 				"StatusRespMsg");
-
-			// send request and read response
 			mess.add(xrr);
 			sendRead(mess);
-			if(xrr.wasResRead())
-				if(parseResponse(mess, xrr))
-					return this;
-			return null;
+			if (xrr.wasResRead() && parseResponse(mess, xrr))
+				return this;
+			else
+				return null;
 		}
 	}
 }

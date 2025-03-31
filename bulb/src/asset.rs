@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ pub enum Asset {
     CommLinks,
     CommProtocols,
     Conditions,
+    // For all CIO pins for one controller
     ControllerIo(String),
     Controllers,
     Directions,
@@ -33,8 +34,11 @@ pub enum Asset {
     GeoLoc(String, Res),
     Graphic(String),
     Graphics,
-    LaneUseIndications,
-    LcsLocks,
+    LcsIndications,
+    LcsStates,
+    LcsTypes,
+    MeterAlgorithms,
+    MeterTypes,
     MsgLines,
     MsgPatterns,
     ResourceTypes,
@@ -87,8 +91,11 @@ impl Asset {
                 uri
             }
             Graphics => "/iris/api/graphic".into(),
-            LaneUseIndications => "/iris/lut/lane_use_indication".into(),
-            LcsLocks => "/iris/lut/lcs_lock".into(),
+            LcsIndications => "/iris/lut/lcs_indication".into(),
+            LcsStates => "/iris/api/lcs_state".into(),
+            LcsTypes => "/iris/lut/lcs_type".into(),
+            MeterAlgorithms => "/iris/lut/meter_algorithm".into(),
+            MeterTypes => "/iris/lut/meter_type".into(),
             MsgLines => "/iris/api/msg_line".into(),
             MsgPatterns => "/iris/api/msg_pattern".into(),
             ResourceTypes => "/iris/lut/resource_type".into(),

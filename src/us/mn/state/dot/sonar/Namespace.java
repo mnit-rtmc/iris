@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2024  Minnesota Department of Transportation
+ * Copyright (C) 2006-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ import org.postgis.MultiPolygon;
 import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.Permission;
 import us.mn.state.dot.tms.Role;
+import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.User;
 
 /**
@@ -39,10 +40,10 @@ abstract public class Namespace {
 
 	/** NULL REF string */
 	static private String NULL_STR = String.valueOf(Message.NULL_REF.code);
-	
+
 	/** Date formatter for formatting/parsing dates in ISO 8601 format */
 	static private final SimpleDateFormat iso8601 =
-			new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
 	/** Get the name of a SONAR type */
 	static public String typeName(Class t)
@@ -260,6 +261,10 @@ abstract public class Namespace {
 				SonarObject o = lookupObject(name);
 				String n = (o != null) ? o.getNotes() : null;
 				if (n != null && new Hashtags(n).contains(h))
+					return p.getAccessLevel();
+				// FIXME: this is hacky -- find a better way!
+				String tp = name.getTypePart();
+				if (SignMessage.SONAR_TYPE.equals(tp))
 					return p.getAccessLevel();
 			} else
 				return p.getAccessLevel();

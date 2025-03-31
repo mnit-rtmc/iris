@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2024  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,9 +21,9 @@ import java.io.OutputStream;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.server.EmailHandler;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -31,20 +31,20 @@ import us.mn.state.dot.tms.utils.SString;
  * DMS XML message. A Message represents the bytes sent and
  * received from a device. The interface is intended to be
  * flexible enough so that a single class can be used for
- * all message types. The DmsXml Message syntax uses XML.
+ * all message types.
  *
  * @author Michael Darter
  * @author Douglas Lau
  */
-class Message implements CommMessage
-{
-    	/** Root XML tag name. */
+class Message implements CommMessage {
+
+	/** Root XML tag name. */
 	public final static String DMSXMLMSGTAG = "DmsXml";
 
 	/** Intermediate status update XML tag name */
 	public final static String ISTATUSTAG = "InterStatus";
 
-    	/** Default max wait time for DMS response. */
+	/** Default max wait time for DMS response. */
 	public final static int DEFAULT_TIMEOUT_DMS_MS = 1000 * 30;
 
 	/** Associated operation. */
@@ -77,7 +77,7 @@ class Message implements CommMessage
 	/** toString */
 	public String toString() {
 		String ret = "Message(";
-		if(m_xelems != null)
+		if (m_xelems != null)
 			ret += "m_xelems=" + m_xelems.toString();
 		ret += ")";
 		return ret;
@@ -107,7 +107,7 @@ class Message implements CommMessage
 
 	/** get completion time in MS */
 	public int getCompletionTimeMS() {
-		return(m_completiontimeMS);
+		return m_completiontimeMS;
 	}
 
 	/** Log a property query */
@@ -130,10 +130,10 @@ class Message implements CommMessage
 
 	/** Add an XmlElem to this message */
 	public void add(ControllerProperty xmlrr) {
-		if(!(xmlrr instanceof XmlElem))
+		if (!(xmlrr instanceof XmlElem))
 			throw new IllegalArgumentException(
 			    "dmsxml.Message.add() wrong arg type.");
-		m_xelems.add((XmlElem)xmlrr);
+		m_xelems.add((XmlElem) xmlrr);
 	}
 
 	/** Set the associated operation */
@@ -145,11 +145,7 @@ class Message implements CommMessage
 	 * @throws IOException On any errors sending a request or receiving
 	 *         response */
 	public void queryProps() throws IOException {
-
-		// send request
 		long starttime = sendRequest();
-
-		// read XML elements in response
 		readElements(starttime);
 	}
 
@@ -171,51 +167,39 @@ class Message implements CommMessage
 
 	/** Get DMS id */
 	private String getDmsId() {
-		if(m_opdms != null)
-			return m_opdms.m_dms.getName();
-		return "V?";
+		return (m_opdms != null) ? m_opdms.m_dms.getName() : "V?";
 	}
 
 	/** Read one XML element in the response. */
 	private void readElements(long starttime) throws IOException {
-		/** The intermediate status is updated in finally block. */
-		String[] istatus = new String[0];
 		long startms = TimeSteward.currentTimeMillis();
 		do {
 			String token = null;
 			try {
 				long elapsed = STime.calcTimeDeltaMS(startms);
-				int leftms = (int)(m_dmsTimeoutMS - elapsed);
-				if(leftms > 0) {
+				int leftms = (int) (m_dmsTimeoutMS - elapsed);
+				if (leftms > 0) {
 					token = m_is.readToken(leftms,
 					       	"<" + DMSXMLMSGTAG + ">",
 						"</" + DMSXMLMSGTAG + ">");
-					setCompletionTimeMS((int)STime.
+					setCompletionTimeMS((int) STime.
 						calcTimeDeltaMS(starttime));
 					LOG.log("Response received in " +
 						getCompletionTimeMS() +
 						" ms.");
 				}
-			} catch(IllegalStateException ex) {
-				istatus = new String[]
-					{"Warning: buffer cap exceeded."};
-				handleAwsFailure(istatus[0]);
-				throw new IOException(istatus[0]);
-			} catch(IOException ex) {
-				istatus = new String[]
-					{"Can't connect to SensorServer."};
-				handleAwsFailure(istatus[0]);
-				LOG.log("WARNING: " + istatus[0]);
-				throw new IOException(istatus[0]);
-			} catch(Exception ex) {
-				istatus = new String[]
-					{"Unexpected problem: " + ex};
-				handleAwsFailure(istatus[0]);
-				throw new IOException(istatus[0]);
+			}
+			catch (IllegalStateException ex) {
+				throw new ParsingException(
+					"buffer cap exceeded");
+			}
+			catch (IOException ex) {
+				LOG.log("WARNING: " + ex.getMessage());
+				throw ex;
 			}
 
-			// timed out?
-			if(token == null) {
+			// time has expired
+			if (token == null) {
 				String dmsid = getDmsId();
 				String err = "";
 				err += "dmsxml.Message.readElements(): " +
@@ -223,131 +207,25 @@ class Message implements CommMessage
 					+ (getCompletionTimeMS() / 1000) +
 					" seconds). Timeout is " +
 					m_dmsTimeoutMS / 1000 + " secs). ";
-				handleAwsFailure(err);
 				LOG.log(err);
-				istatus = new String[] {"Timed out waiting " +
-					"for sensorserver."};
-				throw new IOException("Timed out waiting " +
-					"for " + dmsid);
+				throw new ParsingException("NO RESPONSE");
 			}
 
 			// parse response
 			LOG.log("dmsxml.Message.queryProps(): " +
 				"found complete token:" + token);
 
-			// can throw IOException
-			istatus = new String[] {"Parse error"};
 			// sets 'was read' flag for each XML element
 			m_xelems.parseResponse(Message.DMSXMLMSGTAG,
 				Message.ISTATUSTAG, token);
-
-			// Either a completed response element or an
-			// intermediate status update was read.
-			istatus = getInterStatusMsgs();
-		} while(!m_xelems.readDone());
+		}
+		while (!m_xelems.readDone());
 	}
 
 	/** Get the response value by name.
 	  * @return null if not found else the value. */
 	protected String getResString(String name) {
-		if(m_xelems == null)
-			return null;
-		return m_xelems.getResString(name);
-	}
-
-	/** Return true if message is owned by the AWS. */
-	protected boolean ownerIsAws() {
-		return OpDms.ownerIsAws(getResString("Owner"));
-	}
-
-	/** Determine if failure sending an AWS message to the
-	 *  SensorServer occurred.
-	 * @return true on failure else false. */
-	protected boolean checkAwsFailure() {
-		LOG.log("Message.checkAwsFailure() called. this=" +
-			toString() + ", ownerIsAws=" + ownerIsAws());
- 		if(m_xelems == null)
-			return false;
-		String ret=null;
-
-		// IsValid: was there an error?
-		String isvalid = getResString("IsValid");
-		if(isvalid == null || isvalid.toLowerCase().equals("true"))
-			return false;
-
-		// owner isn't aws?
-		if(!ownerIsAws())
-			return false;
-
-		// at this point we know there was an error to report
-		return true;
-	}
-
-	/** Generate an aws failure message */
-	protected String getAwsFailureMessage() {
-		if(m_xelems == null)
-			return "";
-
-		String ret = "";
-
-		// Owner: was owner the aws?
-		String owner = getResString("Owner");
-		if(owner == null)
-			owner = "";
-
-		// ErrMsg: get the error description
-		String errmsg = getResString("ErrMsg");
-		if(errmsg == null)
-			errmsg = "";
-
-		// Id: get message id
-		String id = getResString("Id");
-		if(id == null)
-			id = "";
-
-		// Address: get cms number
-		String address = getResString("Address");
-		if(address == null)
-			address = "";
-
-		// MsgText: actual message
-		String msg = getResString("MsgText");
-		if(msg == null)
-			msg = "";
-
-		// build error string
-		StringBuilder b = new StringBuilder();
-		b.append("Could not send an AWS message to a DMS: reason=");
-		b.append(errmsg);
-		b.append(", DMS=");
-		b.append(address);
-		b.append(", message id=");
-		b.append(id);
-		b.append(", time=");
-		b.append(STime.getCurDateTimeString(true));
-		b.append(", message=");
-		b.append(msg);
-		b.append(", author=");
-		b.append(owner);
-		b.append(", note=");	// appended to by handleAwsFailure()
-		return ret;
-	}
-
-	/** This method handles a failure when IRIS fails to send an AWS
-	 *  message to a DMS.
-	 *  @param errmsgnote Optional error message, appended to generated
-	 *	  message. */
-	public void handleAwsFailure(String errmsgnote) {
-		if (null == errmsgnote)
-			errmsgnote = "";
-		if (!ownerIsAws())
-			return;
-
-		String sub = "IRIS could not send AWS message to DMS";
-		String msg = getAwsFailureMessage() + errmsgnote;
-		String recip = SystemAttrEnum.EMAIL_RECIPIENT_AWS.getString();
-		EmailHandler.sendEmail(sub, msg, recip);
-		LOG.log("WARNING: failure to send AWS message to DMS: " + msg);
+		return (m_xelems != null) ? m_xelems.getResString(name) : null;
 	}
 
 	/** Store the controller properties.
@@ -358,13 +236,8 @@ class Message implements CommMessage
 	/** Return a request message with this format:
 	 *     <DmsXml><msg name>...etc...</msg name></DmsXml> */
 	public byte[] buildReqMsg() {
-		if(m_xelems == null)
+		if (m_xelems == null)
 			return new byte[0];
 		return m_xelems.buildReqMsg(DMSXMLMSGTAG);
-	}
-
-	/** Get pending intermediate status messages */
-	public String[] getInterStatusMsgs() {
-		return m_xelems.getInterStatusMsgs();
 	}
 }

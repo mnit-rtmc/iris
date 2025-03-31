@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,13 +15,12 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Iterator;
-import us.mn.state.dot.tms.LaneUseIndication;
-import us.mn.state.dot.tms.LCSIndication;
-import us.mn.state.dot.tms.LCSIndicationHelper;
-import us.mn.state.dot.tms.User;
-import us.mn.state.dot.tms.server.LCSArrayImpl;
+import us.mn.state.dot.tms.Lcs;
+import us.mn.state.dot.tms.LcsHelper;
+import us.mn.state.dot.tms.LcsIndication;
+import us.mn.state.dot.tms.LcsLock;
+import us.mn.state.dot.tms.LcsState;
+import us.mn.state.dot.tms.server.LcsImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
@@ -32,26 +31,28 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpSendLCSIndications extends OpLCS {
 
-	/** Indications to send */
-	protected final Integer[] indications;
+	/** LCS lock (JSON) */
+	private final LcsLock lock;
 
-	/** User who sent the indications */
-	protected final User user;
+	/** Indications to send */
+	private final int[] indications;
 
 	/** Create a new operation to send LCS indications */
-	public OpSendLCSIndications(LCSArrayImpl l, Integer[] ind, User u) {
+	public OpSendLCSIndications(LcsImpl l, String lk) {
 		super(PriorityLevel.COMMAND, l);
-		indications = ind;
-		user = u;
+		lock = new LcsLock(lk);
+		int[] ind = lock.optIndications();
+		indications = (ind != null)
+			? ind
+			: LcsHelper.makeIndications(l, LcsIndication.DARK);
 	}
 
 	/** Operation equality test */
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof OpSendLCSIndications) {
-			OpSendLCSIndications op = (OpSendLCSIndications)o;
-			return lcs_array == op.lcs_array &&
-			       Arrays.equals(indications, op.indications);
+			OpSendLCSIndications op = (OpSendLCSIndications) o;
+			return (lcs == op.lcs) && lock.equals(op.lock);
 		} else
 			return false;
 	}
@@ -63,7 +64,7 @@ public class OpSendLCSIndications extends OpLCS {
 	}
 
 	/** Phase to turn off devices */
-	protected class TurnOffDevices extends Phase<MndotProperty> {
+	private class TurnOffDevices extends Phase<MndotProperty> {
 
 		/** Turn off devices */
 		protected Phase<MndotProperty> poll(
@@ -81,7 +82,7 @@ public class OpSendLCSIndications extends OpLCS {
 	}
 
 	/** Phase to set the special function output bits */
-	protected class SetOutputs extends Phase<MndotProperty> {
+	private class SetOutputs extends Phase<MndotProperty> {
 
 		/** Set the special function outputs */
 		protected Phase<MndotProperty> poll(
@@ -91,15 +92,21 @@ public class OpSendLCSIndications extends OpLCS {
 			mess.add(new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS, buffer));
 			mess.storeProps();
-			if (isDark())
-				return null;
-			else
-				return new TurnOnDevices();
+			return (!isDark()) ? new TurnOnDevices() : null;
 		}
 	}
 
+	/** Test if the new indications are all DARK */
+	private boolean isDark() {
+		for (int i: indications) {
+			if (i != LcsIndication.DARK.ordinal())
+				return false;
+		}
+		return true;
+	}
+
 	/** Phase to turn on devices */
-	protected class TurnOnDevices extends Phase<MndotProperty> {
+	private class TurnOnDevices extends Phase<MndotProperty> {
 
 		/** Turn on devices */
 		protected Phase<MndotProperty> poll(
@@ -120,41 +127,28 @@ public class OpSendLCSIndications extends OpLCS {
 	@Override
 	public void cleanup() {
 		if (isSuccess())
-			lcs_array.setIndicationsCurrent(indications, user);
+			lcs.setIndicationsNotify(indications);
 		super.cleanup();
 	}
 
-	/** Test if the new indications are all DARK */
-	protected boolean isDark() {
-		for (int i: indications) {
-			if (i != LaneUseIndication.DARK.ordinal())
-				return false;
-		}
-		return true;
-	}
-
 	/** Create a special function output buffer for the indications */
-	protected byte[] createSpecialFunctionBuffer() {
+	private byte[] createSpecialFunctionBuffer() {
 		byte[] buffer = new byte[2];
-		Iterator<LCSIndication> it = LCSIndicationHelper.iterator();
-		while (it.hasNext()) {
-			LCSIndication li = it.next();
-			if (li.getLcs().getArray() == lcs_array) {
-				if (li.getController() == controller)
-					checkIndication(li, buffer);
-			}
+		for (LcsState ls: LcsHelper.lookupStates(lcs)) {
+			if (ls.getController() == controller)
+				checkIndication(ls, buffer);
 		}
 		return buffer;
 	}
 
 	/** Check if an indication should be set */
-	protected void checkIndication(LCSIndication li, byte[] buffer) {
-		int i = li.getLcs().getLane() - 1;
-		// We must check bounds here in case the LCSIndication
+	private void checkIndication(LcsState ls, byte[] buffer) {
+		int ln = ls.getLane() - 1;
+		// We must check bounds here in case the LcsState
 		// was added after the "indications" array was created
-		if (i >= 0 && i < indications.length) {
-			if (indications[i] == li.getIndication())
-				Op170.setSpecFuncOutput(buffer, li.getPin());
+		if (ln >= 0 && ln < indications.length) {
+			if (indications[ln] == ls.getIndication())
+				Op170.setSpecFuncOutput(buffer, ls.getPin());
 		}
 	}
 }

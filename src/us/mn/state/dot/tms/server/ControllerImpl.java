@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,8 +24,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.json.JSONException;
-import org.json.JSONObject;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.CabinetStyle;
@@ -55,13 +53,14 @@ import us.mn.state.dot.tms.server.event.CommEvent;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class ControllerImpl extends BaseObjectImpl implements Controller {
-
+public class ControllerImpl extends BaseObjectImpl implements Controller,
+	Comparable<ControllerImpl>
+{
 	/** Check if controller IO should receive device requests */
 	static private boolean shouldRequestDevice(ControllerIO io) {
 		return io instanceof BeaconImpl ||
 		       io instanceof DMSImpl ||
-		       io instanceof LCSArrayImpl ||
+		       io instanceof LcsImpl ||
 		       io instanceof RampMeterImpl ||
 		       io instanceof TagReaderImpl ||
 		       io instanceof WeatherSensorImpl;
@@ -81,8 +80,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, comm_link, drop_id, " +
 			"cabinet_style, geo_loc, condition, notes, password, " +
-			"setup, fail_time FROM iris." +
-		        SONAR_TYPE  +";", new ResultFactory()
+			"setup, status, fail_time FROM iris." + SONAR_TYPE +
+			";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new ControllerImpl(row));
@@ -103,8 +102,15 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		map.put("notes", notes);
 		map.put("password", password);
 		map.put("setup", setup);
+		map.put("status", status);
 		map.put("fail_time", asTimestamp(failTime));
 		return map;
+	}
+
+	/** Compare to another controller */
+	@Override
+	public int compareTo(ControllerImpl o) {
+		return name.compareTo(o.name);
 	}
 
 	/** Create a new controller */
@@ -114,6 +120,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		gl.notifyCreate();
 		geo_loc = gl;
 		condition = CtrlCondition.PLANNED;
+		setup = null;
+		status = null;
 	}
 
 	/** Create a controller */
@@ -127,14 +135,15 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		     row.getString(7),    // notes
 		     row.getString(8),    // password
 		     row.getString(9),    // setup
-		     row.getTimestamp(10) // fail_time
+		     row.getString(10),   // status
+		     row.getTimestamp(11) // fail_time
 		);
 	}
 
 	/** Create a controller */
 	private ControllerImpl(String n, String cl, short d, String cs,
-		String gl, int cnd, String nt, String p, String s, Date ft)
-		throws TMSException
+		String gl, int cnd, String nt, String p, String s,
+		String st, Date ft) throws TMSException
 	{
 		super(n);
 		comm_link = lookupCommLink(cl);
@@ -145,6 +154,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		notes = nt;
 		password = p;
 		setup = s;
+		status = st;
 		failTime = stampMillis(ft);
 		initTransients();
 	}
@@ -217,6 +227,12 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	@Override
 	public CommLink getCommLink() {
 		return comm_link;
+	}
+
+	/** Get the operation retry threshold */
+	public int getRetryThreshold() {
+		CommLinkImpl cl = comm_link;
+		return (cl != null) ? cl.getRetryThreshold() : 0;
 	}
 
 	/** Get the polling period (sec) */
@@ -662,18 +678,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Set a setup value and notify clients of the change */
 	public void setSetupNotify(String key, String value) {
-		String s = setup;
-		try {
-			JSONObject jo = (s != null)
-				? new JSONObject(s)
-				: new JSONObject();
-			jo.put(key, trimTruncate(value, 64));
-			setSetupNotify(jo.toString());
-		}
-		catch (JSONException e) {
-			// malformed JSON
-			e.printStackTrace();
-		}
+		String s = ControllerHelper.putJson(setup, key,
+			trimTruncate(value, 64));
+		setSetupNotify(s);
 	}
 
 	/** Set the firmware version and notify clients of the change */
@@ -681,49 +688,60 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		setSetupNotify("version", v);
 	}
 
-	/** Controller error status */
-	private transient String errorStatus = "";
+	/** Status (JSON) read from controller */
+	private String status;
 
-	/** Set the controller error status */
-	public void setErrorStatus(String s) {
-		if (!s.equals(errorStatus)) {
-			errorStatus = s;
-			notifyAttribute("status");
-			updateStyles();
+	/** Get the controller status as JSON */
+	@Override
+	public String getStatus() {
+		return status;
+	}
+
+	/** Set the controller JSON status */
+	private void setStatus(String st) {
+		try {
+			store.update(this, "status", st);
+			status = st;
+		}
+		catch (TMSException e) {
+			e.printStackTrace();
 		}
 	}
 
-	/** Controller communication status */
-	private transient String commStatus = Constants.UNKNOWN;
-
-	/** Get the controller error status */
-	@Override
-	public String getStatus() {
-		return isFailed() ? commStatus : errorStatus;
+	/** Set the JSON controller status */
+	public void setStatusNotify(String st) {
+		if (!objectEquals(st, status)) {
+			setStatus(st);
+			notifyAttribute("status");
+		}
 	}
 
-	/** Set the controller communication status */
-	private void setCommStatus(String s) {
-		// NOTE: the status attribute is set here, but don't notify
-		// clients until communication fails. That happens in the
-		// setFailed method.
-		commStatus = s;
+	/** Set a status value and notify clients of the change */
+	public void setStatusNotify(String key, Object value) {
+		String st = ControllerHelper.putJson(status, key, value);
+		setStatusNotify(st);
 	}
 
 	/** Log a comm event */
-	public void logCommEvent(EventType et, String id, String message) {
+	public void logCommEvent(EventType et, String id) {
 		incrementCommCounter(et);
-		setCommStatus(message);
-		if (!isFailed())
-			logCommEvent(et, id);
+		if (shouldLogEvent(et))
+			logEvent(new CommEvent(et, getName(), id));
+	}
+
+	/** Check if an event should be logged */
+	private boolean shouldLogEvent(EventType et) {
+		return et == EventType.COMM_FAILED ||
+		       et == EventType.COMM_RESTORED ||
+		       !isOffline();
 	}
 
 	/** Time stamp of most recent comm failure */
 	private Long failTime = TimeSteward.currentTimeMillis();
 
-	/** Set the failed status of the controller */
-	private void setFailed(boolean f, String id) {
-		if (f == isFailed())
+	/** Set the offline status of the controller */
+	private void setOffline(boolean f, String id) {
+		if (f == isOffline())
 			return;
 		if (f) {
 			setFailTime(TimeSteward.currentTimeMillis());
@@ -732,7 +750,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			setFailTime(null);
 			logCommEvent(EventType.COMM_RESTORED, id);
 		}
-		notifyAttribute("status");
 		notifyAttribute("failTime");
 		updateStyles();
 	}
@@ -749,13 +766,13 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		failTime = ft;
 	}
 
-	/** Set the controller failed status */
-	public void setFailed(boolean f) {
-		setFailed(f, null);
+	/** Set the controller offline status */
+	public void setOffline(boolean f) {
+		setOffline(f, null);
 	}
 
-	/** Get the controller failed status */
-	public boolean isFailed() {
+	/** Get the controller offline status */
+	public boolean isOffline() {
 		return failTime != null;
 	}
 
@@ -791,24 +808,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			location = loc;
 			notifyAttribute("location");
 		}
-	}
-
-	/** Controller maint status */
-	private transient String maint = "";
-
-	/** Set the controller maint status */
-	public void setMaintNotify(String s) {
-		if (!s.equals(maint)) {
-			maint = s;
-			notifyAttribute("maint");
-			updateStyles();
-		}
-	}
-
-	/** Get the controller maint status */
-	@Override
-	public String getMaint() {
-		return maint;
 	}
 
 	/** Timeout error count */
@@ -919,10 +918,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		notifyAttribute("failedOps");
 	}
 
-	/** Clear the counters and error status */
+	/** Clear the counters and status */
 	private void clearCounters() {
-		setMaintNotify("");
-		setErrorStatus("");
+		setStatusNotify(null);
 		if (timeoutErr != 0) {
 			timeoutErr = 0;
 			notifyAttribute("timeoutErr");
@@ -949,19 +947,13 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 	}
 
-	/** Log a comm event */
-	private void logCommEvent(EventType event, String id) {
-		if (CommEvent.getEnabled())
-			logEvent(new CommEvent(event, getName(), id));
-	}
-
 	/** Complete a controller operation */
 	public void completeOperation(String id, boolean success) {
 		if (success)
 			incrementSuccessOps();
 		else
 			incrementFailedOps();
-		setFailed(!success, id);
+		setOffline(!success, id);
 	}
 
 	/** Get active device poller */
@@ -972,9 +964,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Get the device poller (don't check isActive) */
 	private DevicePoller getDevicePoller() {
 		DevicePoller dp = getPoller(comm_link);
-		if ((null == dp) && !isFailed()) {
-			setCommStatus("comm_link error");
-			setFailed(true, null);
+		if ((null == dp) && !isOffline()) {
+			setStatusNotify(Controller.FAULTS, "comm_link error");
+			setOffline(true, null);
 		}
 		return dp;
 	}
@@ -1073,15 +1065,13 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		SamplePoller sp = getSamplePoller();
 		if (sp != null)
 			sp.sendRequest(this, req);
-		else {
-			requestDevices(req);
-			// Only send settings to the "first" video monitor
-			// on the controller (lowest pin number)
-			VideoMonitorImpl vm = getFirstVideoMonitor();
-			if (vm != null) {
-				int dr = req.ordinal();
-				vm.setDeviceRequest(dr);
-			}
+		requestDevices(req);
+		// Only send settings to the "first" video monitor
+		// on the controller (lowest pin number)
+		VideoMonitorImpl vm = getFirstVideoMonitor();
+		if (vm != null) {
+			int dr = req.ordinal();
+			vm.setDeviceRequest(dr);
 		}
 	}
 

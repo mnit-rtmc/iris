@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,14 +29,12 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.MeterAlgorithm;
+import us.mn.state.dot.tms.MeterLock;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
-import us.mn.state.dot.tms.RampMeterLock;
-import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.PresetComboRenderer;
@@ -157,6 +155,9 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Advance warning beacon combo box model */
 	private final IComboBoxModel<Beacon> beacon_mdl;
 
+	/** Lock reason component */
+	private final JLabel lock_lbl = new JLabel();
+
 	/** Release rate component */
 	private final JLabel release_lbl = new JLabel();
 
@@ -166,18 +167,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Queue label component */
 	private final JLabel queue_lbl = new JLabel();
 
-	/** Meter lock combo box component */
-	private final JComboBox<RampMeterLock> lock_cbx = new JComboBox
-		<RampMeterLock>(RampMeterLock.values());
-
-	/** Lock meter action */
-	private final LockMeterAction lock_action;
-
 	/** Operation description label */
 	private final JLabel op_lbl = new JLabel();
-
-	/** Status component */
-	private final JLabel status_lbl = new JLabel();
 
 	/** Send settings action */
 	private final IAction settings = new IAction("device.send.settings") {
@@ -191,8 +182,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	public RampMeterProperties(Session s, RampMeter meter) {
 		super(I18N.get("ramp_meter") + ": ", s, meter);
 		loc_pnl = new LocationPanel(s);
-		lock_action = new LockMeterAction(meter, lock_cbx,
-			isWritePermitted("mLock"));
 		preset_mdl = new IComboBoxModel<CameraPreset>(
 			state.getCamCache().getPresetModel());
 		beacon_mdl = new IComboBoxModel<Beacon>(
@@ -216,6 +205,13 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		createUpdateJobs();
 		settings.setEnabled(isWritePermitted("deviceRequest"));
 		super.initialize();
+	}
+
+	/** Dispose of the form */
+	@Override
+	protected void dispose() {
+		loc_pnl.dispose();
+		super.dispose();
 	}
 
 	/** Create the location panel */
@@ -299,20 +295,18 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Create ramp meter status panel */
 	private JPanel createStatusPanel() {
 		IPanel p = new IPanel();
+		p.add("ramp.meter.lock");
+		p.add(lock_lbl, Stretch.LAST);
 		p.add("ramp.meter.rate");
 		p.add(release_lbl, Stretch.LAST);
 		p.add("ramp.meter.cycle");
 		p.add(cycle_lbl, Stretch.LAST);
 		p.add("ramp.meter.queue");
 		p.add(queue_lbl, Stretch.LAST);
-		p.add("ramp.meter.lock");
-		p.add(lock_cbx, Stretch.LAST);
 		p.add("device.operation");
 		p.add(op_lbl, Stretch.LAST);
 		// Make label opaque so that we can set the background color
 		op_lbl.setOpaque(true);
-		p.add("device.status");
-		p.add(status_lbl, Stretch.LAST);
 		p.add(new JButton(settings), Stretch.RIGHT);
 		return p;
 	}
@@ -330,7 +324,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		am_target_txt.setEnabled(canWrite("amTarget"));
 		pm_target_txt.setEnabled(canWrite("pmTarget"));
 		beacon_act.setEnabled(canWrite("beacon"));
-		lock_action.setEnabled(canWrite("mLock"));
 	}
 
 	/** Update one attribute on the form */
@@ -358,39 +351,29 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			pm_target_txt.setText("" + proxy.getPmTarget());
 		if (a == null || a.equals("beacon"))
 			beacon_act.updateSelected();
-		if (a == null || a.equals("rate")) {
-			Integer rt = proxy.getRate();
-			cycle_lbl.setText(RampMeterHelper.formatCycle(rt));
+		if (a == null || a.equals("lock")) {
+			MeterLock lk = new MeterLock(
+				RampMeterHelper.optLock(proxy));
+			String reason = lk.optReason();
+			lock_lbl.setText((reason != null) ? reason : "");
+		}
+		if (a == null || a.equals("status")) {
+			Integer rt = RampMeterHelper.optRate(proxy);
 			release_lbl.setText(RampMeterHelper.formatRelease(rt));
-		}
-		if(a == null || a.equals("queue")) {
-			RampMeterQueue q = RampMeterQueue.fromOrdinal(
-				proxy.getQueue());
-			queue_lbl.setText(q.description);
-		}
-		if (a == null || a.equals("mLock")) {
-			lock_cbx.setAction(null);
-			lock_cbx.setSelectedIndex(getMLock());
-			lock_cbx.setAction(lock_action);
+			cycle_lbl.setText(RampMeterHelper.formatCycle(rt));
+			String q = RampMeterHelper.optQueue(proxy);
+			queue_lbl.setText((q != null) ? q : "");
 		}
 		if (a == null || a.equals("operation"))
 			op_lbl.setText(proxy.getOperation());
 		if (a == null || a.equals("styles")) {
-			if (ItemStyle.FAILED.checkBit(proxy.getStyles())) {
+			if (ItemStyle.OFFLINE.checkBit(proxy.getStyles())) {
 				op_lbl.setForeground(Color.WHITE);
 				op_lbl.setBackground(Color.GRAY);
 			} else {
 				op_lbl.setForeground(null);
 				op_lbl.setBackground(null);
 			}
-			status_lbl.setText(ControllerHelper.getStatus(
-				proxy.getController()));
 		}
-	}
-
-	/** Get meter lock index */
-	private int getMLock() {
-		Integer ml = proxy.getMLock();
-		return (ml != null) ? ml : RampMeterLock.OFF.ordinal();
 	}
 }

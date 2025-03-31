@@ -13,8 +13,8 @@
 // GNU General Public License for more details.
 //
 use http::StatusCode;
+use std::io::ErrorKind;
 use std::time::SystemTimeError;
-use tokio::io::ErrorKind;
 
 /// Honeybee error
 #[derive(Debug, thiserror::Error)]

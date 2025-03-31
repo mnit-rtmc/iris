@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2022  Minnesota Department of Transportation
+ * Copyright (C) 2006-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ import java.util.Calendar;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 
 /**
@@ -36,7 +35,7 @@ public class VehicleEventLog {
 
 	/** Is archiving enabled? */
 	static private boolean isArchiveEnabled() {
-		return SystemAttrEnum.SAMPLE_ARCHIVE_ENABLE.getBoolean();
+		return SystemAttrEnum.DETECTOR_DATA_ARCHIVE_ENABLE.getBoolean();
 	}
 
 	/** Get milliseconds for a given timestamp */

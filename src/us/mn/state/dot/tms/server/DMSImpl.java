@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2008-2009  AHMCT, University of California
  * Copyright (C) 2012-2021  Iteris Inc.
  * Copyright (C) 2016-2020  SRF Consulting Group
@@ -28,8 +28,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
-import org.json.JSONException;
-import org.json.JSONObject;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Name;
@@ -53,9 +51,6 @@ import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.LCS;
-import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.LCSHelper;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SignConfig;
@@ -77,6 +72,8 @@ import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.event.BrightnessSample;
 import us.mn.state.dot.tms.server.event.PriceMessageEvent;
 import us.mn.state.dot.tms.server.event.SignEvent;
+import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -97,8 +94,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return src.checkBit(bits);
 	}
 
-	/** Comm fail time threshold to blank user message */
-	static private final long COMM_FAIL_BLANK_THRESHOLD_MS = 5 * 60 * 1000;
+	/** Comm loss threshold to blank user message */
+	static private final Interval COMM_LOSS_THRESHOLD =
+		new Interval(5, MINUTES);
 
 	/** Minimum duration of a DMS action (minutes) */
 	static private final int DURATION_MINIMUM_MINS = 1;
@@ -278,7 +276,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		// communication has been failed too long.  If so, clear the
 		// user message to prevent it from popping up days later, after
 		// communication is restored.
-		if (!c && getFailMillis() >= COMM_FAIL_BLANK_THRESHOLD_MS)
+		if (!c && getFailMillis() >= COMM_LOSS_THRESHOLD.ms())
 			resetMsgUser();
 	}
 
@@ -531,9 +529,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		src |= SignMsgSource.blank.bit();
 		String owner = SignMessageHelper.makeMsgOwner(src);
 		SignMsgPriority mp = SignMsgPriority.low_1;
-		// Allow pixel service during blank messages
 		return SignMessageImpl.findOrCreate(sign_config, null, "",
-			owner, false, true, mp, null);
+			owner, false, false, mp, null);
 	}
 
 	/** Create a message for the sign.
@@ -564,8 +561,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			ap.getName());
 		MsgPattern pat = da.getMsgPattern();
 		boolean fb = (pat != null) && pat.getFlashBeacon();
-		// Only allow pixel service for sticky messages
-		boolean ps = ap.getSticky();
+		boolean ps = (pat != null) && pat.getPixelService();
 		SignMsgPriority mp = SignMsgPriority.fromOrdinal(
 			da.getMsgPriority());
 		Integer dur = ap.getSticky() ? null : getUnstickyDurationMins();
@@ -615,10 +611,14 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			}
 			checkMsgUser(sm);
 			validateMsg(sm);
-			// only retain non-blank user messages
-			SignMessage smu = SignMessageHelper.isBlank(sm)
-				? null
-				: sm;
+			SignMessage smu = sm;
+			if (SignMessageHelper.isBlank(sm)) {
+				// We must log blank messages here so that
+				// the user name is recorded in `msg_owner`
+				logMsg(sm);
+				// only retain non-blank user messages
+				smu = null;
+			}
 			store.update(this, "msg_user", smu);
 			setMsgUser(smu);
 			sm = getMsgValidated();
@@ -1007,6 +1007,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				store.update(this, "status", st);
 				status = st;
 				notifyAttribute("status");
+				updateStyles();
 			}
 			catch (TMSException e) {
 				logError("status: " + e.getMessage());
@@ -1016,18 +1017,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set a status value and notify clients of the change */
 	public void setStatusNotify(String key, Object value) {
-		String s = status;
-		try {
-			JSONObject jo = (s != null)
-				? new JSONObject(s)
-				: new JSONObject();
-			jo.put(key, value);
-			setStatusNotify(jo.toString());
-		}
-		catch (JSONException e) {
-			// malformed JSON
-			e.printStackTrace();
-		}
+		String st = DMSHelper.putJson(status, key, value);
+		setStatusNotify(st);
 	}
 
 	/** Get the current status as JSON */
@@ -1158,15 +1149,22 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return isMsgDeployed() && isMsgAlert();
 	}
 
-	/** Test if DMS needs maintenance */
+	/** Test if DMS has faults */
 	@Override
-	protected boolean needsMaintenance() {
-		return super.needsMaintenance() || hasCriticalError();
+	protected boolean hasFaults() {
+		return DMSHelper.hasFaults(this);
 	}
 
-	/** Test if DMS has a critical error */
-	private boolean hasCriticalError() {
-		return !DMSHelper.getCriticalError(this).isEmpty();
+	/** Check if the controller has an error */
+	public boolean hasError() {
+		return isOffline() || hasStatusError();
+	}
+
+	/** Check if the controller has a status error */
+	private boolean hasStatusError() {
+		ControllerImpl c = controller; // Avoid race
+		String s = (c != null) ? c.getStatus() : null;
+		return (s != null) ? !s.isEmpty() : false;
 	}
 
 	/** Calculate the item styles */
@@ -1191,10 +1189,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			s |= ItemStyle.SCHEDULED.bit();
 		if (isExternalDeployed() || isAlertDeployed())
 			s |= ItemStyle.EXTERNAL.bit();
-		if (isOnline() && needsMaintenance())
-			s |= ItemStyle.MAINTENANCE.bit();
-		if (isActive() && isFailed())
-			s |= ItemStyle.FAILED.bit();
+		if (isOnline() && hasFaults())
+			s |= ItemStyle.FAULT.bit();
+		if (isActive() && isOffline())
+			s |= ItemStyle.OFFLINE.bit();
 		if (isActive() && !DMSHelper.isGeneralPurpose(this))
 			s |= ItemStyle.PURPOSE.bit();
 		return s;
@@ -1255,9 +1253,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			sendDeviceRequest(DeviceRequest.QUERY_MESSAGE);
 			checkMsgExpiration();
 			updateSchedMsg();
-			LCSArrayImpl la = lookupLCSArray();
-			if (la != null)
-				la.periodicPoll(is_long);
 		}
 	}
 
@@ -1277,16 +1272,5 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				}
 			}
 		}
-	}
-
-	/** Lookup LCS array if this DMS is lane one */
-	private LCSArrayImpl lookupLCSArray() {
-		LCS lcs = LCSHelper.lookup(name);
-		if (lcs != null && lcs.getLane() == 1) {
-			LCSArray la = lcs.getArray();
-			if (la instanceof LCSArrayImpl)
-				return (LCSArrayImpl) la;
-		}
-		return null;
 	}
 }

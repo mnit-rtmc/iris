@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.SECONDS;
 import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
 import static us.mn.state.dot.tms.units.Interval.Units.HOURS;
 import static us.mn.state.dot.tms.units.Interval.Units.WEEKS;
@@ -108,6 +109,14 @@ public enum LaneCode {
 	static private final Interval NO_CHANGE_THRESHOLD_FALLBACK =
 		new Interval(2, WEEKS);
 
+	/** Scan "occ spike" threshold for regular sensors */
+	static private final Interval OCC_SPIKE_THRESHOLD =
+		new Interval(29, SECONDS);
+
+	/** Scan "occ spike" threshold for parking sensors */
+	static private final Interval OCC_SPIKE_THRESHOLD_PARKING =
+		new Interval(2, WEEKS);
+
 	/** Description */
 	public final String description;
 
@@ -133,6 +142,14 @@ public enum LaneCode {
 			return NO_CHANGE_THRESHOLD;
 		else
 			return NO_CHANGE_THRESHOLD_FALLBACK;
+	}
+
+	/** Get the occ spike threshold */
+	public final Interval getOccSpikeThreshold() {
+		if (this != PARKING)
+			return OCC_SPIKE_THRESHOLD;
+		else
+			return OCC_SPIKE_THRESHOLD_PARKING;
 	}
 
 	/** Mainline lane */

@@ -5,6 +5,44 @@ protocols, each of which supports specific [device] types.  Some also
 support **multi-drop** addressing, with more than one controller per
 _comm link_.
 
+## Device Control
+
+Protocol        | Beacon | Camera | DMS | Detection | Gates | GPS | Weather
+----------------|--------|--------|-----|-----------|-------|-----|--------
+ADEC TDC        |        |        |     | ✔️        |       |     |
+Axis PTZ        |        | ✔️     |     |           |       |     |
+Banner DXM      |        |        |     | ✔️        |       |     |
+Canoga          |        |        |     | ✔️        |       |     |
+CBW             | ✔️     |        |     |           |       |     |
+Central Park    |        |        |     | ✔️        |       |     |
+Cohu PTZ        |        | ✔️     |     |           |       |     |
+DLI DIN Relay   | ✔️     |        |     |           |       |     |
+DMS XML         |        |        | ✔️  |           |       |     |
+DR-500          |        |        |     | ✔️        |       |     |
+Gate NDORv5     |        |        |     |           | ✔️    |     |
+HySecurity STC  |        |        |     |           | ✔️    |     |
+Infinova PTZ    |        | ✔️     |     |           |       |     |
+Manchester PTZ  |        | ✔️     |     |           |       |     |
+MnDOT 170       | ✔️     |        |     | ✔️        |       |     |
+Natch           | ✔️     |        |     | ✔️        |       |     |
+NDOT Beacon     | ✔️     |        |     |           |       |     |
+NTCIP           |        |        | ✔️  | ✔️        |       |     | ✔️
+ONVIF PTZ       |        | ✔️     |     |           |       |     |
+OSi ORG-815     |        |        |     |           |       |     | ✔️
+Pelco D PTZ     |        | ✔️     |     |           |       |     |
+RedLion GPS     |        |        |     |           |       | ✔️  |
+RTMS G4         |        |        |     | ✔️        |       |     |
+SierraGX        |        |        |     |           |       | ✔️  |
+SmartSensor     |        |        |     | ✔️        |       |     |
+Vicon PTZ       |        | ✔️     |     |           |       |     |
+
+## ADEC TDC
+
+The `ADEC TDC` protocol can collect [vehicle detection] data, logging event
+data for every vehicle.  The _default scheme_ is `tcp`.  _Multi-drop_ is
+supported with drops 1 - 255.  One detector can be associated with each
+[controller], using [IO pin] 1.
+
 ## Axis PTZ
 
 The `axisptz` protocol can be used for [PTZ] control of Axis [camera]s.  The
@@ -19,13 +57,20 @@ _Multi-drop_ is supported with drops 0 - 15 (backplane) or 128 - 255 (EEPROM).
 Up to 4 detectors can be associated with each [controller], using [IO pin]s
 1 - 4.
 
-## CAP
+## CAP-IPAWS
 
-The Common Alerting Protocol [CAP] is used for polling external feeds such as
-the Integrated Public Alert and Warning System [IPAWS].  [Alerts] can be used
-to automatically post weather and other messages to Dynamic Message Signs.  For
-IPAWS, this requires an `HTTPS` URI provided by the Federal Emergency Management
-Agency and a [controller] set to `ACTIVE` condition.
+This Common Alerting Protocol [CAP] is used for polling the Integrated Public
+Alert and Warning System [IPAWS].  [Alerts] can be used to automatically post
+weather and other messages to Dynamic Message Signs.  This requires an `HTTPS`
+URI provided by the Federal Emergency Management Agency and a [controller] set
+to `ACTIVE` condition.
+
+## CAP-NWS
+
+This Common Alerting Protocol [CAP] is used for polling the National Weather
+Service weather feed.  [Alerts] can be used to automatically post weather
+messages to Dynamic Message Signs.  This requires a [controller] set to
+`ACTIVE` condition.
 
 ## CBW
 
@@ -44,6 +89,14 @@ The [IO Pin]s are outputs for controlling relays.
 | X-410        | 1 - 4   |
 | X-WR-10R12   | 1 - 10  |
 | X-332        | 1 - 16  |
+
+## Central Park
+
+The Drivewyze Central Park system can detect vehicle presence for
+[parking area] monitoring.  The _default scheme_ is `https`.  _Multi-drop_ is
+not supported.  Up to 64 detectors can be associated with each [controller],
+using [IO pin]s 1 - 64.  The comm link URI must be the "Data per stall"
+endpoint (ending in `/integration/spot`).
 
 ## ClearGuide
 

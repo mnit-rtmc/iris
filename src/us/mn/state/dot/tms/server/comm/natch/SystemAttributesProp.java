@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,9 @@ package us.mn.state.dot.tms.server.comm.natch;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import static us.mn.state.dot.tms.server.RampMeterImpl.COMM_LOSS_THRESHOLD;
 import static us.mn.state.dot.tms.server.comm.MeterPoller.*;
+import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
 import us.mn.state.dot.tms.server.comm.Operation;
 
 /**
@@ -36,8 +38,9 @@ public class SystemAttributesProp extends NatchProp {
 	public void encodeStore(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		String msg = "SA," + message_id + ',' + COMM_FAIL_THRESHOLD_DS +
-			',' + STARTUP_GREEN + ',' + STARTUP_YELLOW + ',' +
+		long loss_ds = COMM_LOSS_THRESHOLD.round(DECISECONDS);
+		String msg = "SA," + message_id + ',' + loss_ds + ',' +
+			STARTUP_GREEN + ',' + STARTUP_YELLOW + ',' +
 			getGreenTime() + ',' + getYellowTime() + '\n';
 		tx_buf.put(msg.getBytes(UTF8));
 	}

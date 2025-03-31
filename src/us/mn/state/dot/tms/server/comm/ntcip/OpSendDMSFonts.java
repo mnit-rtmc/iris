@@ -306,8 +306,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 	/** Abort upload of the current font */
 	private void abortUpload(FontRow frow, String msg) {
-		setErrorStatus("Font " + frow.font.getName() + " aborted -- " +
-		               msg);
+		logError("Font " + frow.font.getName() + " aborted -- " + msg);
 	}
 
 	/** Phase to verify a font */
@@ -609,7 +608,7 @@ public class OpSendDMSFonts extends OpDMS {
 					ex.getMessage());
 			}
 			count++;
-			if (count % 20 == 0 && !controller.isFailed())
+			if (count % 20 == 0 && !controller.isOffline())
 				setSuccess(true);
 			if (chars.hasNext()) {
 				glyph = chars.next();

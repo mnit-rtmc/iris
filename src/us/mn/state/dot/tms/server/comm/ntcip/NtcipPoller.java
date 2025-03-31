@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  * Copyright (C) 2017-2021  Iteris Inc.
  *
@@ -20,17 +20,20 @@ import java.net.URI;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.CommLink;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.User;
+import us.mn.state.dot.tms.server.AlarmImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.GpsImpl;
-import us.mn.state.dot.tms.server.LCSArrayImpl;
+import us.mn.state.dot.tms.server.LcsImpl;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
+import us.mn.state.dot.tms.server.comm.AlarmPoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.GpsPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
@@ -46,8 +49,8 @@ import us.mn.state.dot.tms.utils.URIUtil;
  * @author John L. Stanley
  * @author Michael Darter
  */
-public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
-	LCSPoller, SamplePoller, WeatherPoller
+public class NtcipPoller extends ThreadedPoller implements AlarmPoller,
+	DMSPoller, GpsPoller, LCSPoller, SamplePoller, WeatherPoller
 {
 	/** Get the default URI for a comm protocol */
 	static private URI default_uri(CommProtocol cp) {
@@ -88,6 +91,7 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 			break;
 		case QUERY_SETTINGS:
 			addOp(new OpQueryDMSFonts(dms));
+			addOp(new OpQueryDMSGraphics(dms));
 			break;
 		case SEND_SETTINGS:
 			dms.requestConfigure(); //required before sending fonts
@@ -150,20 +154,21 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 			addOp(new OpQueryGpsLocation(gps));
 			break;
 		default:
-			; // Ignore other requests
+			// Ignore other requests
+			break;
 		}
 	}
 
 	/** Send a device request message to an LCS array */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
+	public void sendRequest(LcsImpl lcs, DeviceRequest r) {
 		switch (r) {
 		case SEND_SETTINGS:
-			addOp(new OpSendLCSSettings(lcs_array));
+			addOp(new OpSendLCSSettings(lcs));
 			break;
 		case QUERY_MESSAGE:
-			addOp(new OpQueryLCSIndications(lcs_array));
+			addOp(new OpQueryLCSIndications(lcs));
 			break;
 		default:
 			// Ignore other requests
@@ -172,15 +177,12 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 	}
 
 	/** Send new indications to an LCS array.
-	 * @param lcs_array LCS array.
-	 * @param ind New lane use indications.
-	 * @param o User who deployed the indications. */
+	 * @param lcs LCS array.
+	 * @param lock LCS lock. */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
-		User o)
-	{
-		addOp(new OpSendLCSIndications(lcs_array, ind, o));
+	public void sendIndications(LcsImpl lcs, String lock) {
+		addOp(new OpSendLCSIndications(lcs, lock));
 	}
 
 	/** Send detection request to a controller.
@@ -214,6 +216,24 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 			addOp(new OpSyncTime(ws));
 			addOp(new OpQuerySystem(ws));
 			addOp(new OpQueryEssSettings(ws));
+			break;
+		default:
+			// Ignore other requests
+			break;
+		}
+	}
+
+	/** Send a device request to an alarm */
+	@SuppressWarnings("unchecked")
+	@Override
+	public void sendRequest(AlarmImpl alarm, DeviceRequest r) {
+		switch (r) {
+		case QUERY_STATUS:
+			Controller c = alarm.getController();
+			if (c instanceof ControllerImpl) {
+				ControllerImpl ci = (ControllerImpl) c;
+				addOp(new OpQueryAlarm(alarm, ci));
+			}
 			break;
 		default:
 			// Ignore other requests

@@ -117,8 +117,8 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	/** Update the item styles */
 	@Override
 	public void updateStyles() {
-		// NOTE: called by ControllerImpl.setFailed
-		if (isFailed())
+		// NOTE: called by ControllerImpl.setOffline
+		if (isOffline())
 			setStateNotify(BeaconState.UNKNOWN);
 		super.updateStyles();
 	}
@@ -161,13 +161,12 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		    && state == BeaconState.FLASHING_EXTERNAL.ordinal();
 	}
 
-	/** Test if beacon needs maintenance */
+	/** Test if beacon has faults */
 	@Override
-	protected boolean needsMaintenance() {
+	protected boolean hasFaults() {
 		int bs = state;
 		return bs == BeaconState.FAULT_NO_VERIFY.ordinal()
-			|| bs == BeaconState.FAULT_STUCK_ON.ordinal()
-			|| super.needsMaintenance();
+		    || bs == BeaconState.FAULT_STUCK_ON.ordinal();
 	}
 
 	/** Device location */
@@ -301,9 +300,11 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 
 	/** Set beacon state request (ordinal of BeaconState) */
 	public void doSetState(int bs) throws TMSException {
-		switch (BeaconState.fromOrdinal(bs)) {
+		BeaconState s = BeaconState.fromOrdinal(bs);
+		switch (s) {
 			case DARK_REQ:
 			case FLASHING_REQ:
+				logBeaconEvent(s, getProcUser());
 				setState(bs);
 				break;
 			default:
@@ -323,7 +324,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 			catch (TMSException e) {
 				e.printStackTrace();
 			}
-			logBeaconEvent(bs);
+			logBeaconEvent(bs, null);
 			updateStyles();
 		}
 	}
@@ -358,8 +359,8 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	}
 
 	/** Log a beacon event */
-	private void logBeaconEvent(BeaconState bs) {
-		logEvent(new BeaconEvent(name, bs));
+	private void logBeaconEvent(BeaconState bs, String uid) {
+		logEvent(new BeaconEvent(name, bs, uid));
 	}
 
 	/** Get a beacon poller */

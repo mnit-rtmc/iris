@@ -72,7 +72,9 @@ the [r_node].
 
 **Field length** (ft) is the detection "field" of an average vehicle.  It is
 used to derive density from occupancy, for detectors which cannot measure speed
-directly.
+directly.  For **Velocity** type detectors, this is the distance to the start
+of the upstream mainline detector.  This enables recording individual vehicle
+speeds ([Canoga] protocol only).
 
 If a detector is no longer used, it can be marked **abandoned**.
 
@@ -115,6 +117,7 @@ and [binning](#binned-data) in fixed time periods.
 
 Protocol               | Binning         | Traffic Data
 -----------------------|-----------------|------------------------
+[ADEC TDC]             | N/A             | [vlog]
 [SmartSensor] 125 HD   | 5 sec to 1 hour | Count, Occupancy, Speed
 [SmartSensor] 125 vlog | N/A             | [vlog]
 [SmartSensor] 105      | 5 sec to 1 hour | Count, Occupancy, Speed
@@ -124,7 +127,7 @@ RTMS [G4] vlog         | N/A             | [vlog]
 [MnDOT-170]            | 30 sec          | Count, Occupancy
 [Canoga]               | N/A             | [vlog]
 [DR-500]               | 30-300? sec     | Speed
-[DXM]                  | N/A (presence)  | Magnetic Field
+[DXM]                  | N/A             | Occupancy
 [NTCIP]                | 0-255 sec       | Count, Occupancy
 
 For protocols which allow the binning intereval to be adjusted, it will be set
@@ -133,9 +136,9 @@ to the [poll period] of the [comm config].
 ## Auto-Fail
 
 Traffic data is continuously checked for five common failure conditions.  When
-one of these first occurs and every hour that it persists, an event is logged in
-the `detector_event` database table.  The `detector_auto_fail_view` can be used
-to check recent events.
+one of these first occurs and every hour that it persists, an [event] can be
+stored in the `detector_event` database table.  The `detector_auto_fail_view`
+can be used to check recent events.
 
 If the `detector_auto_fail_enable` [system attribute] is `true`, the **auto
 fail** flag for each detector will be set and cleared automatically whenever
@@ -165,15 +168,14 @@ pass with all counts below that threshold.
 ### Locked On
 
 This condition occurs if the detector reports 100% occupancy for a duration
-determined by [lane type](#lane-type).  It is also sustained if the occupancy
-drops to zero with no intervening values.  The condition will be cleared after
+determined by [lane type](#lane-type).  The condition will be cleared after
 24 hours of good occupancy data.
 
-Lane Type                                                              | Duration
------------------------------------------------------------------------|--------
-Mainline, Auxiliary, CD Lane, Reversible, Velocity, HOV, HOT, Shoulder | 2 minutes
-Merge, Queue, Exit, Bypass, Passage, Omnibus, Green, Wrong Way         | 30 minutes
-Parking                                                                | 2 weeks
+Lane Type                                                      | Duration
+---------------------------------------------------------------|---------
+Parking                                                        | 2 weeks
+Merge, Queue, Exit, Bypass, Passage, Omnibus, Green, Wrong Way | 30 minutes
+All Others                                                     | 2 minutes
 
 ### No Change
 
@@ -188,11 +190,11 @@ All others | 24 hours
 
 ### Occ Spike
 
-A spike timer is kept for each detector.  For every 25% change in occupancy
-between two consecutive data values, 30 seconds are added to the timer.  If its
-value ever exceeds 60 seconds, the condidtion is triggered.  After every poll,
-30 seconds are removed from the timer.  The condition will be cleared after 24
-hours of no spikes.
+A spike timer is kept for each non-parking detector.  For every 25% change in
+occupancy between two consecutive data values, 30 seconds are added to the
+timer.  If its value ever exceeds 60 seconds, the condidtion is triggered.
+After every poll, 30 seconds are removed from the timer.  The condition will
+be cleared after 24 hours of no spikes.
 
 ## Force Fail
 
@@ -234,7 +236,7 @@ maximum downstream distance for associating station data with a segment.
 
 ## Traffic Data Archiving
 
-Collected data is archived only if the `sample_archive_enable`
+Collected data is archived only if the `detector_data_archive_enable`
 [system attribute] is `true`.  The [Mayfly] service can be installed to make
 this data available on the web.
 
@@ -339,6 +341,7 @@ indicates missing data.  Any data outside the valid ranges should be considered
 _missing_.
 
 
+[ADEC TDC]: protocols.html#adec-tdc
 [Canoga]: protocols.html#canoga
 [comm config]: comm_config.html
 [comm link]: comm_links.html
@@ -346,6 +349,7 @@ _missing_.
 [district]: installation.html#server-properties
 [DR-500]: protocols.html#dr-500
 [DXM]: protocols.html#dxm
+[event]: events.html
 [G4]: protocols.html#g4
 [IO pins]: controllers.html#io-pins
 [Mayfly]: https://github.com/mnit-rtmc/iris/tree/master/mayfly

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  * Copyright (C) 2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -33,8 +33,6 @@ import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.Hashtags;
-import us.mn.state.dot.tms.LaneMarking;
-import us.mn.state.dot.tms.LaneMarkingHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
@@ -218,18 +216,23 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	@Override
 	public void setActive(boolean a) {
 		active = a;
-		String un = getProcUser();
 		EventType et = (a ? EventType.ACTION_PLAN_ACTIVATED : 
 			EventType.ACTION_PLAN_DEACTIVATED);
-		logEvent(new ActionPlanEvent(et, getName(), un));
+		String un = getProcUser();
+		logEvent(et, null, un);
 		sendEmailAlert(un, a, getName());
+	}
+
+	/** Log an action plan event */
+	private void logEvent(EventType et, PlanPhase phase, String uid) {
+		logEvent(new ActionPlanEvent(et, getName(), phase, uid));
 	}
 
 	/** Set the active status */
 	public void doSetActive(boolean a) throws TMSException {
 		if (a != active) {
 			if (a)
-				setPhaseNotify(default_phase);
+				setPhaseNotify(default_phase, getProcUser());
 			store.update(this, "active", a);
 			setActive(a);
 		}
@@ -238,7 +241,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Set active and schedule phase */
 	public void setActiveScheduledNotify(boolean a) throws TMSException {
 		if (a)
-			setPhaseNotify(getScheduledPhase());
+			setPhaseNotify(getScheduledPhase(), null);
 		if (a != active) {
 			store.update(this, "active", a);
 			setActive(a);
@@ -295,8 +298,6 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	public void setPhase(PlanPhase p) {
 		phase = p;
 		phase_time = TimeSteward.currentTimeMillis();
-		EventType et = EventType.ACTION_PLAN_PHASE_CHANGED;
-		logEvent(new ActionPlanEvent(et, getName(), p.toString()));
 	}
 
 	/**
@@ -312,6 +313,8 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 				validateDeviceActions(); // throws exception
 			store.update(this, "phase", p);
 			setPhase(p);
+			logEvent(EventType.ACTION_PLAN_PHASE_CHANGED, p,
+				getProcUser());
 		}
 	}
 
@@ -322,7 +325,9 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/** Set the deployed phase (and notify clients) */
-	public boolean setPhaseNotify(PlanPhase p) throws TMSException {
+	public boolean setPhaseNotify(PlanPhase p, String uid)
+		throws TMSException
+	{
 		boolean change = (p != phase);
 		if (change) {
 			if (getSyncActions())
@@ -330,6 +335,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			store.update(this, "phase", p);
 			setPhase(p);
 			notifyAttribute("phase");
+			logEvent(EventType.ACTION_PLAN_PHASE_CHANGED, p, uid);
 		}
 		return change;
 	}
@@ -356,7 +362,6 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		// FIXME: any way to validate camera actions?
 		return areBeaconsDeployable(ht)
 		    && areDmsDeployable(ht)
-		    && areLaneMarkingsDeployable(ht)
 		    && areRampMetersDeployable(ht);
 	}
 
@@ -367,7 +372,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			Beacon b = it.next();
 			if (b instanceof BeaconImpl) {
 				BeaconImpl bi = (BeaconImpl) b;
-				if (bi.isFailed()) {
+				if (bi.isOffline()) {
 					if (new Hashtags(bi.getNotes())
 					   .contains(ht))
 						return false;
@@ -394,23 +399,6 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		return true;
 	}
 
-	/** Check if all lane markings for a hashtag are deployable */
-	private boolean areLaneMarkingsDeployable(String ht) {
-		Iterator<LaneMarking> it = LaneMarkingHelper.iterator();
-		while (it.hasNext()) {
-			LaneMarking lm = it.next();
-			if (lm instanceof LaneMarkingImpl) {
-				LaneMarkingImpl lmi = (LaneMarkingImpl) lm;
-				if (lmi.isFailed()) {
-					if (new Hashtags(lmi.getNotes())
-					   .contains(ht))
-						return false;
-				}
-			}
-		}
-		return true;
-	}
-
 	/** Check if all ramp meters for a hashtag are deployable */
 	private boolean areRampMetersDeployable(String ht) {
 		Iterator<RampMeter> it = RampMeterHelper.iterator();
@@ -418,7 +406,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			RampMeter rm = it.next();
 			if (rm instanceof RampMeterImpl) {
 				RampMeterImpl rmi = (RampMeterImpl) rm;
-				if (rmi.isFailed()) {
+				if (rmi.isOffline()) {
 					if (new Hashtags(rmi.getNotes())
 					   .contains(ht))
 						return false;
@@ -434,7 +422,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		if (p != null) {
 			PlanPhase np = p.getNextPhase();
 			if (np != null && phaseSecs() >= p.getHoldTime())
-				setPhaseNotify(np);
+				setPhaseNotify(np, null);
 		}
 	}
 

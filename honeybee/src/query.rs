@@ -1,6 +1,6 @@
 // query.rs
 //
-// Copyright (C) 2018-2024  Minnesota Department of Transportation
+// Copyright (C) 2018-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,6 +12,19 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+
+/// SQL query for all action plans (primary)
+pub const ACTION_PLAN_ALL: &str = "\
+  SELECT name, notes, active \
+  FROM iris.action_plan \
+  ORDER BY name";
+
+/// SQL query for one action plan (secondary)
+pub const ACTION_PLAN_ONE: &str = "\
+  SELECT name, notes, active, sync_actions, sticky, ignore_auto_fail, \
+         default_phase, phase \
+  FROM iris.action_plan \
+  WHERE name = $1";
 
 /// SQL query for all alarms (primary)
 pub const ALARM_ALL: &str = "\
@@ -106,6 +119,18 @@ pub const CAMERA_PUB: &str = "\
   ) h ON c.name = h.name \
   ORDER BY c.name";
 
+/// SQL query for all camera presets (primary)
+pub const CAMERA_PRESET_ALL: &str = "\
+  SELECT name, camera, preset_num \
+  FROM iris.camera_preset \
+  ORDER BY camera, preset_num";
+
+/// SQL query for one camera preset (secondary)
+pub const CAMERA_PRESET_ONE: &str = "\
+  SELECT name, camera, preset_num, direction \
+  FROM iris.camera_preset \
+  WHERE name = $1";
+
 /// SQL query for all comm configs (primary)
 pub const COMM_CONFIG_ALL: &str = "\
   SELECT name, description \
@@ -115,7 +140,8 @@ pub const COMM_CONFIG_ALL: &str = "\
 /// SQL query for one comm config (secondary)
 pub const COMM_CONFIG_ONE: &str = "\
   SELECT name, description, protocol, poll_period_sec, long_poll_period_sec, \
-         timeout_ms, idle_disconnect_sec, no_response_disconnect_sec \
+         timeout_ms, retry_threshold, idle_disconnect_sec, \
+         no_response_disconnect_sec \
   FROM iris.comm_config \
   WHERE name = $1";
 
@@ -157,7 +183,7 @@ pub const CONTROLLER_ALL: &str = "\
 /// SQL query for one controller (secondary)
 pub const CONTROLLER_ONE: &str = "\
   SELECT c.name, location, geo_loc, comm_link, drop_id, cabinet_style, \
-         condition, notes, password, setup, fail_time \
+         condition, notes, password, setup, status, fail_time \
   FROM iris.controller c \
   LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
   WHERE c.name = $1";
@@ -168,6 +194,30 @@ pub const CONTROLLER_IO_ONE: &str = "\
   FROM iris.controller_io \
   WHERE controller = $1 \
   ORDER BY pin";
+
+/// SQL query for all day matchers (primary)
+pub const DAY_MATCHER_ALL: &str = "\
+  SELECT name, day_plan, month, day, weekday, week, shift \
+  FROM iris.day_matcher \
+  ORDER BY day_plan, month, day, weekday, week, shift";
+
+/// SQL query for one day matcher
+pub const DAY_MATCHER_ONE: &str = "\
+  SELECT name, day_plan, month, day, weekday, week, shift \
+  FROM iris.day_matcher \
+  WHERE name = $1";
+
+/// SQL query for all day plans (primary)
+pub const DAY_PLAN_ALL: &str = "\
+  SELECT name, holidays \
+  FROM iris.day_plan \
+  ORDER BY name";
+
+/// SQL query for one day plan
+pub const DAY_PLAN_ONE: &str = "\
+  SELECT name, holidays \
+  FROM iris.day_plan \
+  WHERE name = $1";
 
 /// SQL query for all detectors (primary)
 pub const DETECTOR_ALL: &str = "\
@@ -188,6 +238,18 @@ pub const DETECTOR_ONE: &str = "\
 pub const DETECTOR_PUB: &str = "\
   SELECT name, r_node, cor_id, lane_number, lane_code, field_length \
   FROM detector_view";
+
+/// SQL query for all device actions (primary)
+pub const DEVICE_ACTION_ALL: &str = "\
+  SELECT name, action_plan, hashtag \
+  FROM iris.device_action \
+  ORDER BY action_plan, name";
+
+/// SQL query for one device action (secondary)
+pub const DEVICE_ACTION_ONE: &str = "\
+  SELECT name, action_plan, hashtag, phase, msg_priority, msg_pattern \
+  FROM iris.device_action \
+  WHERE name = $1";
 
 /// SQL query for directions (LUT)
 pub const DIRECTION_LUT: &str = "\
@@ -244,6 +306,43 @@ pub const DOMAIN_ONE: &str = "\
   SELECT name, enabled, block \
   FROM iris.domain \
   WHERE name = $1";
+
+/// SQL query for all encoder streams (primary)
+pub const ENCODER_STREAM_ALL: &str = "\
+  SELECT name, encoder_type, view_num, encoding \
+  FROM iris.encoder_stream \
+  ORDER BY name";
+
+/// SQL query for one encoder stream
+pub const ENCODER_STREAM_ONE: &str = "\
+  SELECT name, encoder_type, view_num, encoding, flow_stream, quality, \
+         uri_scheme, uri_path, mcast_port, latency \
+  FROM iris.encoder_stream \
+  WHERE name = $1";
+
+/// SQL query for all encoder types (primary)
+pub const ENCODER_TYPE_ALL: &str = "\
+  SELECT name, make, model, config \
+  FROM iris.encoder_type \
+  ORDER BY name";
+
+/// SQL query for one encoder type
+pub const ENCODER_TYPE_ONE: &str = "\
+  SELECT name, make, model, config \
+  FROM iris.encoder_type \
+  WHERE name = $1";
+
+/// SQL query for video encodings (LUT)
+pub const ENCODING_LUT: &str = "\
+  SELECT id, description \
+  FROM iris.encoding \
+  ORDER BY description";
+
+/// SQL query for all event configs (primary)
+pub const EVENT_CONFIG_ALL: &str = "\
+  SELECT name, enable_store, enable_purge, purge_days \
+  FROM iris.event_config \
+  ORDER BY name";
 
 /// SQL query for all flow streams (primary)
 pub const FLOW_STREAM_ALL: &str = "\
@@ -360,54 +459,121 @@ pub const INCIDENT_PUB: &str = "\
   FROM incident_view \
   WHERE cleared = false";
 
-/// SQL query for all lane markings (primary)
-pub const LANE_MARKING_ALL: &str = "\
-  SELECT m.name, location, controller, notes, deployed \
-  FROM iris.lane_marking m \
-  LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
+/// SQL query for all incident details (primary)
+pub const INCIDENT_DETAIL_ALL: &str = "\
+  SELECT name, description \
+  FROM event.incident_detail \
   ORDER BY name";
 
-/// SQL query for one lane marking (secondary)
-pub const LANE_MARKING_ONE: &str = "\
-  SELECT m.name, location, geo_loc, controller, pin, notes, deployed \
-  FROM iris.lane_marking m \
-  LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
-  WHERE m.name = $1";
+/// SQL query for one incident detail
+pub const INCIDENT_DETAIL_ONE: &str = "\
+  SELECT name, description \
+  FROM event.incident_detail \
+  WHERE name = $1";
 
-/// SQL query for lane use indications (LUT)
-pub const LANE_USE_INDICATION_LUT: &str = "\
+/// SQL query for all incident advice (primary)
+pub const INC_ADVICE_ALL: &str = "\
+  SELECT name, impact \
+  FROM iris.inc_advice \
+  ORDER BY name";
+
+/// SQL query for one incident advice
+pub const INC_ADVICE_ONE: &str = "\
+  SELECT name, impact, open_lanes, impacted_lanes, range, lane_code, multi \
+  FROM iris.inc_advice \
+  WHERE name = $1";
+
+/// SQL query for all incident descriptor (primary)
+pub const INC_DESCRIPTOR_ALL: &str = "\
+  SELECT name, event_desc_id \
+  FROM iris.inc_descriptor \
+  ORDER BY name";
+
+/// SQL query for one incident descriptor
+pub const INC_DESCRIPTOR_ONE: &str = "\
+  SELECT name, event_desc_id, detail, lane_code, multi \
+  FROM iris.inc_descriptor \
+  WHERE name = $1";
+
+/// SQL query for incident impacts (LUT)
+pub const INC_IMPACT_LUT: &str = "\
   SELECT id, description \
-  FROM iris.lane_use_indication \
+  FROM iris.inc_impact \
   ORDER BY id";
 
-/// SQL query for all LCS arrays (primary)
-pub const LCS_ARRAY_ALL: &str = "\
-  SELECT name, notes, lcs_lock \
-  FROM iris.lcs_array \
+/// SQL query for all incident locators (primary)
+pub const INC_LOCATOR_ALL: &str = "\
+  SELECT name, range \
+  FROM iris.inc_locator \
   ORDER BY name";
+
+/// SQL query for one incident locator
+pub const INC_LOCATOR_ONE: &str = "\
+  SELECT name, range, branched, picked, multi \
+  FROM iris.inc_locator \
+  WHERE name = $1";
+
+/// SQL query for incident ranges (LUT)
+pub const INC_RANGE_LUT: &str = "\
+  SELECT id, description \
+  FROM iris.inc_range \
+  ORDER BY id";
+
+/// SQL query for lane codes (LUT)
+pub const LANE_CODE_LUT: &str = "\
+  SELECT lcode, description \
+  FROM iris.lane_code \
+  ORDER BY lcode";
+
+/// SQL query for all LCS arrays (primary)
+pub const LCS_ALL: &str = "\
+  SELECT l.name, location, controller, notes, lock, status \
+  FROM iris.lcs l \
+  LEFT JOIN geo_loc_view gl ON l.geo_loc = gl.name \
+  ORDER BY l.name";
 
 /// SQL query for one LCS array (secondary)
-pub const LCS_ARRAY_ONE: &str = "\
-  SELECT name, notes, shift, lcs_lock \
-  FROM iris.lcs_array \
-  WHERE name = $1";
+pub const LCS_ONE: &str = "\
+  SELECT l.name, location, geo_loc, controller, pin, notes, lcs_type, \
+         shift, preset, lock, status \
+  FROM iris.lcs l \
+  LEFT JOIN geo_loc_view gl ON l.geo_loc = gl.name \
+  WHERE l.name = $1";
 
-/// SQL query for all LCS indications (primary)
-pub const LCS_INDICATION_ALL: &str = "\
-  SELECT name, controller, lcs, indication \
+/// SQL query for LCS indications (LUT)
+pub const LCS_INDICATION_LUT: &str = "\
+  SELECT id, description \
   FROM iris.lcs_indication \
+  ORDER BY id";
+
+/// SQL query for all LCS states (primary)
+pub const LCS_STATE_ALL: &str = "\
+  SELECT name, controller, lcs, lane, indication \
+  FROM iris.lcs_state \
   ORDER BY name";
 
-/// SQL query for one LCS indication (secondary)
-pub const LCS_INDICATION_ONE: &str = "\
-  SELECT name, controller, pin, lcs, indication \
-  FROM iris.lcs_indication \
+/// SQL query for one LCS state (secondary)
+pub const LCS_STATE_ONE: &str = "\
+  SELECT name, controller, pin, lcs, lane, indication, msg_pattern, msg_num \
+  FROM iris.lcs_state \
   WHERE name = $1";
 
-/// SQL query for LCS locks (LUT)
-pub const LCS_LOCK_LUT: &str = "\
+/// SQL query for LCS types (LUT)
+pub const LCS_TYPE_LUT: &str = "\
   SELECT id, description \
-  FROM iris.lcs_lock \
+  FROM iris.lcs_type \
+  ORDER BY id";
+
+/// SQL query for ramp meter algorithms (LUT)
+pub const METER_ALGORITHM_LUT: &str = "\
+  SELECT id, description \
+  FROM iris.meter_algorithm \
+  ORDER BY id";
+
+/// SQL query for ramp meter types (LUT)
+pub const METER_TYPE_LUT: &str = "\
+  SELECT id, description, lanes \
+  FROM iris.meter_type \
   ORDER BY id";
 
 /// SQL query for all modems (primary)
@@ -420,6 +586,19 @@ pub const MODEM_ALL: &str = "\
 pub const MODEM_ONE: &str = "\
   SELECT name, uri, config, enabled, timeout_ms \
   FROM iris.modem \
+  WHERE name = $1";
+
+/// SQL query for all monitor styles (primary)
+pub const MONITOR_STYLE_ALL: &str = "\
+  SELECT name \
+  FROM iris.monitor_style \
+  ORDER BY name";
+
+/// SQL query for one monitor style (secondary)
+pub const MONITOR_STYLE_ONE: &str = "\
+  SELECT name, force_aspect, accent, font_sz, title_bar, auto_expand, hgap, \
+         vgap \
+  FROM iris.monitor_style \
   WHERE name = $1";
 
 /// SQL query for all message lines (primary)
@@ -442,7 +621,7 @@ pub const MSG_PATTERN_ALL: &str = "\
 
 /// SQL query for one message pattern (secondary)
 pub const MSG_PATTERN_ONE: &str = "\
-  SELECT name, multi, flash_beacon, compose_hashtag \
+  SELECT name, multi, flash_beacon, pixel_service, compose_hashtag \
   FROM iris.msg_pattern \
   WHERE name = $1";
 
@@ -503,9 +682,38 @@ pub const PERMISSION_ONE: &str = "\
   FROM iris.permission \
   WHERE name = $1";
 
+/// SQL query for all plan phases (primary)
+pub const PLAN_PHASE_ALL: &str = "\
+  SELECT name, hold_time, next_phase \
+  FROM iris.plan_phase \
+  ORDER BY name";
+
+/// SQL query for one plan phase (secondary)
+pub const PLAN_PHASE_ONE: &str = "\
+  SELECT name, hold_time, next_phase \
+  FROM iris.plan_phase \
+  WHERE name = $1";
+
+/// SQL query for all play lists (primary)
+pub const PLAY_LIST_ALL: &str = "\
+  SELECT name, seq_num, notes \
+  FROM iris.play_list \
+  ORDER BY name";
+
+/// SQL query for one play list (secondary)
+pub const PLAY_LIST_ONE: &str = "\
+  SELECT name, meta, seq_num, notes, ARRAY(\
+      SELECT COALESCE(camera, sub_list) \
+      FROM iris.play_list_entry \
+      WHERE play_list = name \
+      ORDER BY ordinal\
+  ) AS entries \
+  FROM iris.play_list \
+  WHERE name = $1";
+
 /// SQL query for all ramp meters (primary)
 pub const RAMP_METER_ALL: &str = "\
-  SELECT m.name, location, controller, notes \
+  SELECT m.name, location, controller, notes, lock, status \
   FROM iris.ramp_meter m \
   LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
   ORDER BY m.name";
@@ -514,7 +722,7 @@ pub const RAMP_METER_ALL: &str = "\
 pub const RAMP_METER_ONE: &str = "\
   SELECT m.name, location, geo_loc, controller, pin, notes, meter_type, \
          beacon, preset, storage, max_wait, algorithm, am_target, pm_target, \
-         m_lock \
+         lock, status \
   FROM iris.ramp_meter m \
   LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
   WHERE m.name = $1";
@@ -538,6 +746,18 @@ pub const RNODE_ONE: &str = "\
   FROM r_node_view n \
   WHERE n.name = $1";
 
+/// SQL query for RNode transitions (LUT)
+pub const RNODE_TRANSITION_LUT: &str = "\
+  SELECT id, description \
+  FROM iris.r_node_transition \
+  ORDER BY id";
+
+/// SQL query for RNode types (LUT)
+pub const RNODE_TYPE_LUT: &str = "\
+  SELECT id, description \
+  FROM iris.r_node_type \
+  ORDER BY id";
+
 /// SQL query for all roads (primary)
 pub const ROAD_ALL: &str = "\
   SELECT name, abbrev, r_class, direction \
@@ -556,6 +776,24 @@ pub const ROAD_ONE: &str = "\
   FROM iris.road \
   JOIN iris.road_class ON r_class = id \
   WHERE name = $1";
+
+/// SQL query for all road affixes (primary)
+pub const ROAD_AFFIX_ALL: &str = "\
+  SELECT name, prefix, fixup, allow_retain \
+  FROM iris.road_affix \
+  ORDER BY name";
+
+/// SQL query for one road affix
+pub const ROAD_AFFIX_ONE: &str = "\
+  SELECT name, prefix, fixup, allow_retain \
+  FROM iris.road_affix \
+  WHERE name = $1";
+
+/// SQL query for road classes (LUT)
+pub const ROAD_CLASS_LUT: &str = "\
+  SELECT id, description, grade, scale \
+  FROM iris.road_class \
+  ORDER BY id";
 
 /// SQL query for road modifiers (LUT)
 pub const ROAD_MODIFIER_LUT: &str = "\
@@ -646,9 +884,14 @@ pub const SIGN_MSG_ONE: &str = "\
   FROM iris.sign_message \
   WHERE name = $1";
 
+/// SQL query for system attributes (all)
+pub const SYSTEM_ATTRIBUTE_ALL: &str = "\
+  SELECT jsonb_object_agg(name, value)::text \
+  FROM iris.system_attribute";
+
 /// SQL query for system attributes (public)
 pub const SYSTEM_ATTRIBUTE_PUB: &str = "\
-SELECT jsonb_object_agg(name, value)::text \
+  SELECT jsonb_object_agg(name, value)::text \
   FROM iris.system_attribute \
   WHERE name LIKE 'dms\\_%' OR name LIKE 'map\\_%'";
 
@@ -666,6 +909,30 @@ pub const TAG_READER_ONE: &str = "\
   FROM iris.tag_reader t \
   LEFT JOIN geo_loc_view gl ON t.geo_loc = gl.name \
   WHERE t.name = $1";
+
+/// SQL query for all time actions (primary)
+pub const TIME_ACTION_ALL: &str = "\
+  SELECT name, action_plan \
+  FROM iris.time_action \
+  ORDER BY action_plan, day_plan, sched_date, time_of_day, name";
+
+/// SQL query for one time action (secondary)
+pub const TIME_ACTION_ONE: &str = "\
+  SELECT name, action_plan, day_plan, sched_date, time_of_day, phase \
+  FROM iris.time_action \
+  WHERE name = $1";
+
+/// SQL query for all toll zones (primary)
+pub const TOLL_ZONE_ALL: &str = "\
+  SELECT name, tollway \
+  FROM iris.toll_zone \
+  ORDER BY name";
+
+/// SQL query for one toll zone (secondary)
+pub const TOLL_ZONE_ONE: &str = "\
+  SELECT name, start_id, end_id, tollway, alpha, beta, max_price \
+  FROM iris.toll_zone \
+  WHERE name = $1";
 
 /// SQL query for all users (primary)
 pub const USER_ALL: &str = "\

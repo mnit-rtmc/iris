@@ -17,13 +17,14 @@ package us.mn.state.dot.tms.server.comm;
 import java.io.IOException;
 
 /**
- * @author John L. Stanley - SRF Consulting
+ * Exception for disconnecting after timeout.
  *
+ * @author John L. Stanley - SRF Consulting
  */
 public class NoResponseException extends IOException {
 
 	/** Create a new no-response exception */
 	public NoResponseException() {
-		super("NO RESPONSE FROM DEVICE");
+		super("NO RESPONSE");
 	}
 }

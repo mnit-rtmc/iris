@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2024  Minnesota Department of Transportation
+ * Copyright (C) 2019-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@ import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.IncImpact;
 import us.mn.state.dot.tms.IncSeverity;
-import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.LCSArrayHelper;
+import us.mn.state.dot.tms.Lcs;
+import us.mn.state.dot.tms.LcsHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
@@ -112,7 +112,7 @@ public class UpstreamDeviceFinder {
 		private void findDevices(CorridorBase<R_Node> cb, float mp) {
 			// Only scan for LCS arrays on initial corridor
 			if (initial)
-				findLCSArrays(cb, mp);
+				findLcss(cb, mp);
 			if (exits <= maximum_exits) {
 				findDMSs(cb, mp, exits, dist);
 				if (exits < maximum_exits)
@@ -174,11 +174,11 @@ public class UpstreamDeviceFinder {
 	/** Find LCS arrays.
 	 * @param cb Corridor to scan.
 	 * @param mp Mile point of downstream location. */
-	private void findLCSArrays(CorridorBase<R_Node> cb, float mp) {
-		Iterator<LCSArray> it = LCSArrayHelper.iterator();
+	private void findLcss(CorridorBase<R_Node> cb, float mp) {
+		Iterator<Lcs> it = LcsHelper.iterator();
 		while (it.hasNext()) {
-			LCSArray lcs = it.next();
-			GeoLoc loc = LCSArrayHelper.lookupGeoLoc(lcs);
+			Lcs lcs = it.next();
+			GeoLoc loc = lcs.getGeoLoc();
 			UpstreamDevice ed = UpstreamDevice.create(lcs, cb, mp,
 				loc);
 			if (ed != null)
@@ -191,7 +191,7 @@ public class UpstreamDeviceFinder {
 		boolean branched)
 	{
 		return DMSHelper.isActive(dms) &&
-		      !DMSHelper.isFailed(dms) &&
+		      !DMSHelper.isOffline(dms) &&
 		      (DMSHelper.isGeneralPurpose(dms) ||
 		       isTollingDeployable(dms, ed, branched));
 	}

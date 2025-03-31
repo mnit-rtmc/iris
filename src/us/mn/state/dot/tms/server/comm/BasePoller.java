@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2022  Minnesota Department of Transportation
+ * Copyright (C) 2016-2024  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.utils.HexString;
+import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.URIUtil;
 
 /**
@@ -49,13 +50,18 @@ import us.mn.state.dot.tms.utils.URIUtil;
  */
 abstract public class BasePoller implements DevicePoller {
 
-	/** Read timed out message */
-	static private final String TIMEOUT = "READ TIMED OUT";
+	/** Maximum message length */
+	static private final int MAX_MSG_LEN = 64;
+
+	/** Filter a message */
+	static private String filterMsg(String m) {
+		return SString.truncate(m, MAX_MSG_LEN);
+	}
 
 	/** Drain an operation queue */
 	static private void drainQueue(Collection<Operation> queue) {
 		for (Operation op: queue) {
-			op.handleEvent(EventType.QUEUE_DRAINED, "DRAINED");
+			op.handleEvent(EventType.QUEUE_DRAINED);
 			op.destroy();
 		}
 		queue.clear();
@@ -65,7 +71,7 @@ abstract public class BasePoller implements DevicePoller {
 	static private String ex_msg(Exception e) {
 		String m = e.getMessage();
 		if (m != null && m.length() > 0)
-			return m;
+			return filterMsg(m);
 		else
 			return e.getClass().getSimpleName();
 	}
@@ -335,7 +341,7 @@ abstract public class BasePoller implements DevicePoller {
 	private void checkTimeout(Operation op) {
 		long rt = op.getRemaining();
 		if (rt <= 0 && r_queue.remove(op)) {
-			op.handleEvent(EventType.POLL_TIMEOUT_ERROR, TIMEOUT);
+			op.handleEvent(EventType.POLL_TIMEOUT_ERROR);
 			if (close_on_timeout && op.isDone()) {
 				elog("CLOSE DUE TO TIMEOUT");
 				closeChannel();
@@ -526,15 +532,15 @@ abstract public class BasePoller implements DevicePoller {
 		}
 		catch (ProtocolException e) {
 			op.setFailed();
-			op.setMaintStatus(ex_msg(e));
+			op.putCtrlFaults("other", ex_msg(e));
 		}
 		catch (IOException e) {
-			op.handleEvent(EventType.COMM_ERROR, ex_msg(e));
+			op.handleEvent(EventType.COMM_ERROR);
 			closeChannel();
 		}
 		catch (BufferOverflowException e) {
 			op.setFailed();
-			op.handleEvent(EventType.COMM_ERROR, ex_msg(e));
+			op.handleEvent(EventType.COMM_ERROR);
 			closeChannel();
 		}
 		finally {
@@ -629,26 +635,25 @@ abstract public class BasePoller implements DevicePoller {
 		}
 		catch (ProtocolException e) {
 			op.setFailed();
-			op.setMaintStatus(ex_msg(e));
+			op.putCtrlFaults("other", ex_msg(e));
 			return false;
 		}
 		catch (ChecksumException e) {
-			op.handleEvent(EventType.CHECKSUM_ERROR, ex_msg(e));
+			op.handleEvent(EventType.CHECKSUM_ERROR);
 			return true;
 		}
 		catch (ParsingException e) {
-			op.handleEvent(EventType.PARSING_ERROR, ex_msg(e));
+			op.handleEvent(EventType.PARSING_ERROR);
 			return true;
 		}
 		catch (ControllerException e) {
-			String msg = ex_msg(e);
-			op.handleEvent(EventType.CONTROLLER_ERROR, msg);
+			op.handleEvent(EventType.CONTROLLER_ERROR);
 			op.setFailed();
-			op.setMaintStatus(msg);
+			op.putCtrlFaults("other", ex_msg(e));
 			return true;
 		}
 		catch (IOException e) {
-			op.handleEvent(EventType.COMM_ERROR, ex_msg(e));
+			op.handleEvent(EventType.COMM_ERROR);
 			closeChannel();
 			return true;
 		}

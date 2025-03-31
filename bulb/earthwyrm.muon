@@ -208,6 +208,42 @@ layer_group: tms
     geom_type: polygon
     zoom: 18
     tags: ?name
+  layer: camera_10
+    geom_type: polygon
+    zoom: 10
+    tags: ?name
+  layer: camera_11
+    geom_type: polygon
+    zoom: 11
+    tags: ?name
+  layer: camera_12
+    geom_type: polygon
+    zoom: 12
+    tags: ?name
+  layer: camera_13
+    geom_type: polygon
+    zoom: 13
+    tags: ?name
+  layer: camera_14
+    geom_type: polygon
+    zoom: 14
+    tags: ?name
+  layer: camera_15
+    geom_type: polygon
+    zoom: 15
+    tags: ?name
+  layer: camera_16
+    geom_type: polygon
+    zoom: 16
+    tags: ?name
+  layer: camera_17
+    geom_type: polygon
+    zoom: 17
+    tags: ?name
+  layer: camera_18
+    geom_type: polygon
+    zoom: 18
+    tags: ?name
   layer: dms_11
     geom_type: polygon
     zoom: 11
@@ -237,6 +273,66 @@ layer_group: tms
     zoom: 17
     tags: ?name
   layer: dms_18
+    geom_type: polygon
+    zoom: 18
+    tags: ?name
+  layer: lcs_12
+    geom_type: polygon
+    zoom: 12
+    tags: ?name
+  layer: lcs_13
+    geom_type: polygon
+    zoom: 13
+    tags: ?name
+  layer: lcs_14
+    geom_type: polygon
+    zoom: 14
+    tags: ?name
+  layer: lcs_15
+    geom_type: polygon
+    zoom: 15
+    tags: ?name
+  layer: lcs_16
+    geom_type: polygon
+    zoom: 16
+    tags: ?name
+  layer: lcs_17
+    geom_type: polygon
+    zoom: 17
+    tags: ?name
+  layer: lcs_18
+    geom_type: polygon
+    zoom: 18
+    tags: ?name
+  layer: ramp_meter_11
+    geom_type: polygon
+    zoom: 11
+    tags: ?name
+  layer: ramp_meter_12
+    geom_type: polygon
+    zoom: 12
+    tags: ?name
+  layer: ramp_meter_13
+    geom_type: polygon
+    zoom: 13
+    tags: ?name
+  layer: ramp_meter_14
+    geom_type: polygon
+    zoom: 14
+    tags: ?name
+  layer: ramp_meter_15
+    geom_type: polygon
+    zoom: 15
+    tags: ?name
+  layer: ramp_meter_16
+    geom_type: polygon
+    zoom: 16
+    tags: ?name
+  layer: ramp_meter_17
+    geom_type: polygon
+    zoom: 17
+    tags: ?name
+  layer: ramp_meter_18
     geom_type: polygon
     zoom: 18
     tags: ?name
@@ -273,42 +369,6 @@ layer_group: tms
     zoom: 17
     tags: ?name
   layer: weather_sensor_18
-    geom_type: polygon
-    zoom: 18
-    tags: ?name
-  layer: camera_10
-    geom_type: polygon
-    zoom: 10
-    tags: ?name
-  layer: camera_11
-    geom_type: polygon
-    zoom: 11
-    tags: ?name
-  layer: camera_12
-    geom_type: polygon
-    zoom: 12
-    tags: ?name
-  layer: camera_13
-    geom_type: polygon
-    zoom: 13
-    tags: ?name
-  layer: camera_14
-    geom_type: polygon
-    zoom: 14
-    tags: ?name
-  layer: camera_15
-    geom_type: polygon
-    zoom: 15
-    tags: ?name
-  layer: camera_16
-    geom_type: polygon
-    zoom: 16
-    tags: ?name
-  layer: camera_17
-    geom_type: polygon
-    zoom: 17
-    tags: ?name
-  layer: camera_18
     geom_type: polygon
     zoom: 18
     tags: ?name

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2024  Minnesota Department of Transportation
+ * Copyright (C) 2008-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -229,26 +229,6 @@ public class GeoLocHelper extends BaseHelper {
 		       (l0.getCrossMod() == l1.getCrossMod());
 	}
 
-	/** Test if two roads start with the same name */
-	static private boolean matchRootName(String n0, String n1) {
-		return n0.startsWith(n1) || n1.startsWith(n0);
-	}
-
-	/** Test if another location matches (including CD roads) */
-	static public boolean matchesRoot(GeoLoc l0, GeoLoc l1) {
-		Road r0 = l0.getRoadway();
-		Road x0 = l0.getCrossStreet();
-		Road r1 = l1.getRoadway();
-		Road x1 = l1.getCrossStreet();
-		if (r0 == null || x0 == null || r1 == null || x1 == null)
-			return false;
-		return matchRootName(r0.getName(), r1.getName()) &&
-			(x0 == x1) &&
-			(l0.getRoadDir() == l1.getRoadDir()) &&
-			(l0.getCrossDir() == l1.getCrossDir()) &&
-			(l0.getCrossMod() == l1.getCrossMod());
-	}
-
 	/** Test if two locations have roadway/cross-street swapped */
 	static private boolean isSwapped(GeoLoc l0, GeoLoc l1) {
 		Road r0 = l0.getRoadway();
@@ -285,8 +265,8 @@ public class GeoLocHelper extends BaseHelper {
 		      : null;
 	}
 
-	/** Get the root label (for a detector or a station) */
-	static public String getRootLabel(GeoLoc loc) {
+	/** Get the label "base" (for a detector or a station) */
+	static public String getLabelBase(GeoLoc loc) {
 		if (loc == null)
 			return FUTURE;
 		Road roadway = loc.getRoadway();

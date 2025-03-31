@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2021  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,9 +92,9 @@ public class OpQueryMeterStatus extends Op170Device {
 
 	/** Update ramp meter locks */
 	private void updateMeterLocks() {
-		meter.setPolicePanel(isPolicePanelOn());
 		int s = data[Address.OFF_STATUS];
-		meter.setManual(MeterStatus.isManual(s));
+		meter.setManualMode(MeterStatus.isManual(s));
+		meter.setPolicePanel(isPolicePanelOn());
 	}
 
 	/** Is the police panel switch on? */

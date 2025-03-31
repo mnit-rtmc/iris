@@ -592,8 +592,12 @@ public class ConnectionImpl extends Conduit implements Connection {
 	 * This may only be called on the Task Processor thread. */
 	private void createObject(Name name) throws SonarException {
 		SonarObject o = getObject(name);
-		processor.doStoreObject(o);
-		phantom = null;
+		try {
+			processor.doStoreObject(o);
+		}
+		finally {
+			phantom = null;
+		}
 	}
 
 	/** Get the specified object (either phantom or new object).

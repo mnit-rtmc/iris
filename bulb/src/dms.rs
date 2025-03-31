@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{html_title_row, uri_one, AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card, View, html_title_row, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::DeviceReq;
 use crate::error::Result;
@@ -29,15 +29,15 @@ use mag::temp::DegC;
 use ntcip::dms::multi::{
     join_text, normalize as multi_normalize, split as multi_split,
 };
-use ntcip::dms::{tfon, Font, FontTable, GraphicTable, MessagePattern};
-use rendzina::{load_graphic, SignConfig};
+use ntcip::dms::{Font, FontTable, GraphicTable, MessagePattern, tfon};
+use rendzina::{SignConfig, load_graphic};
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::iter::repeat;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{console, HtmlElement, HtmlInputElement, HtmlSelectElement};
+use web_sys::{HtmlElement, HtmlInputElement, HtmlSelectElement, console};
 
 /// Display Units
 type TempUnit = mag::temp::DegF;
@@ -94,12 +94,9 @@ pub struct PowerSupply {
 #[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct SignStatus {
     faults: Option<String>,
-    ambient_temp_min: Option<i32>,
-    ambient_temp_max: Option<i32>,
-    housing_temp_min: Option<i32>,
-    housing_temp_max: Option<i32>,
-    cabinet_temp_min: Option<i32>,
-    cabinet_temp_max: Option<i32>,
+    ambient_temps: Option<Vec<i32>>,
+    housing_temps: Option<Vec<i32>>,
+    cabinet_temps: Option<Vec<i32>>,
     light_output: Option<u32>,
     photocells: Option<Vec<Photocell>>,
     power_supplies: Option<Vec<PowerSupply>>,
@@ -145,6 +142,7 @@ pub struct MsgPattern {
     pub compose_hashtag: Option<String>,
     pub multi: String,
     pub flash_beacon: Option<bool>,
+    pub pixel_service: Option<bool>,
 }
 
 /// Message Line
@@ -791,6 +789,7 @@ impl Dms {
         }
         html.push_str("</select>");
         html.push_str(&anc.make_lines(
+            #[allow(clippy::unnecessary_literal_unwrap)]
             &sign.unwrap(),
             pat_def,
             self.current_multi(anc),
@@ -993,21 +992,15 @@ impl Dms {
         let mut html = String::new();
         if let Some(status) = &self.status {
             html.push_str("<div>🌡️ <b>Temperature</b></div><ul>");
-            html.push_str(&temp_range(
-                "Ambient",
-                status.ambient_temp_min,
-                status.ambient_temp_max,
-            ));
-            html.push_str(&temp_range(
-                "Housing",
-                status.housing_temp_min,
-                status.housing_temp_max,
-            ));
-            html.push_str(&temp_range(
-                "Cabinet",
-                status.cabinet_temp_min,
-                status.cabinet_temp_max,
-            ));
+            if let Some(temps) = &status.ambient_temps {
+                html.push_str(&temp_range("Ambient", temps));
+            }
+            if let Some(temps) = &status.housing_temps {
+                html.push_str(&temp_range("Housing", temps));
+            }
+            if let Some(temps) = &status.cabinet_temps {
+                html.push_str(&temp_range("Cabinet", temps));
+            }
             html.push_str("</ul>");
         }
         html
@@ -1108,22 +1101,32 @@ impl Dms {
     }
 }
 
-/// Format a temperature range
-fn temp_range(label: &str, mn: Option<i32>, mx: Option<i32>) -> String {
+/// Format a temperature range from a Vec
+fn temp_range(label: &str, temps: &[i32]) -> String {
+    let mut mn = None;
+    let mut mx = None;
+    for &temp in temps {
+        match (mn, mx) {
+            (Some(t0), Some(t1)) => {
+                mn = Some(temp.min(t0));
+                mx = Some(temp.max(t1));
+            }
+            _ => {
+                mn = Some(temp);
+                mx = Some(temp);
+            }
+        }
+    }
     match (mn, mx) {
         (Some(mn), Some(mx)) => {
-            if mx > mn {
+            if mn == mx {
+                let t = (f64::from(mn) * DegC).to::<TempUnit>();
+                format!("<li><div>{label} {t:.1}</div>")
+            } else {
                 let mn = (f64::from(mn) * DegC).to::<TempUnit>();
                 let mx = (f64::from(mx) * DegC).to::<TempUnit>();
                 format!("<li><div>{label} {mn:.1}…{mx:.1}</div>")
-            } else {
-                let t = (f64::from(mn) * DegC).to::<TempUnit>();
-                format!("<li><div>{label} {t:.1}</div>")
             }
-        }
-        (Some(t), None) | (None, Some(t)) => {
-            let t = (f64::from(t) * DegC).to::<TempUnit>();
-            format!("<li><div>{label} {t:.1}</div>")
         }
         _ => String::new(),
     }
@@ -1159,7 +1162,7 @@ impl Card for Dms {
          <option value='🎯'>🎯 dedicated\
          <option value='⚠️'>⚠️ fault\
          <option value='🔌'>🔌 offline\
-         <option value='▪️'>▪️ inactive";
+         <option value='🔻'>🔻 inactive";
 
     /// Get the resource
     fn res() -> Res {
@@ -1192,6 +1195,8 @@ impl Card for Dms {
             ItemState::Planned
         } else if item_states.is_match(ItemState::External.code()) {
             ItemState::External
+        } else if item_states.is_match(ItemState::Fault.code()) {
+            ItemState::Fault
         } else {
             ItemState::Available
         }

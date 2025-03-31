@@ -1,6 +1,6 @@
 // traffic.rs
 //
-// Copyright (c) 2021  Minnesota Department of Transportation
+// Copyright (c) 2021-2024  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,8 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::common::{Error, Result};
-use log::debug;
+use crate::error::Result;
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::BufReader;
@@ -38,7 +37,7 @@ impl Traffic {
 
     /// Open a traffic archive
     fn open(path: PathBuf) -> Result<Self> {
-        let file = File::open(&path).or(Err(Error::NotFound))?;
+        let file = File::open(&path)?;
         let buf = BufReader::new(file);
         let archive = ZipArchive::new(buf)?;
         Ok(Traffic { path, archive })
@@ -52,7 +51,7 @@ impl Traffic {
     /// Check if any vehicle log needs binning
     pub fn needs_binning(&self) -> bool {
         let mut det_ids = HashSet::new();
-        for name in self.archive.file_names() {
+        for name in self.file_names() {
             let p = Path::new(name);
             if let (Some(det_id), Some(ext)) = (p.file_stem(), p.extension()) {
                 if ext == "vlog" {
@@ -60,7 +59,7 @@ impl Traffic {
                 }
             }
         }
-        for name in self.archive.file_names() {
+        for name in self.file_names() {
             let p = Path::new(name);
             if let (Some(det_id), Some(ext)) = (p.file_stem(), p.extension()) {
                 if ext == "v30" {
@@ -71,39 +70,9 @@ impl Traffic {
         !det_ids.is_empty()
     }
 
-    /// Find files in archive
-    pub fn find_file_names(&self) -> HashSet<String> {
-        let mut files = HashSet::new();
-        for name in self.archive.file_names() {
-            let path = Path::new(name);
-            if let Some(name) = path.file_name() {
-                if let Some(name) = name.to_str() {
-                    files.insert(name.to_owned());
-                }
-            }
-        }
-        debug!("found {} files in {:?}", files.len(), self.path);
-        files
-    }
-
-    /// Find checked files in archive
-    pub fn find_files_checked(
-        &self,
-        check: fn(&str, bool) -> Option<&str>,
-    ) -> HashSet<&str> {
-        let mut files = HashSet::new();
-        for name in self.archive.file_names() {
-            let path = Path::new(name);
-            if let Some(name) = path.file_name() {
-                if let Some(name) = name.to_str() {
-                    if let Some(name) = check(name, false) {
-                        files.insert(name);
-                    }
-                }
-            }
-        }
-        debug!("found {} files in {:?}", files.len(), self.path);
-        files
+    /// Get iterator of file names in archive
+    pub fn file_names(&self) -> impl Iterator<Item = &str> {
+        self.archive.file_names()
     }
 
     /// Get the number of files in the archive

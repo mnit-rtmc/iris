@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,54 +59,51 @@ public class DiagStatusProp extends E6Property {
 
 	/** Diag error bits */
 	public enum ErrorBit {
-		FRAM_test		(58, true),
-		FRAM_data		(57, true),
-		FPGA1			(50, true),
-		FPGA2			(49, true),
-		Power_supply		(48, false),
-		DIO_overvoltage		(47, true),
-		DIO_undervoltage	(46, true),
-		RF_ADC_gt_max		(43, false),
-		RF_ADC_lt_min		(42, false),
-		RF_ATTN_DAC1_gt_max	(41, false),
-		RF_ATTN_DAC1_lt_min	(40, false),
-		RF_ATTN_DAC2_gt_max	(39, false),
-		RF_ATTN_DAC2_lt_min	(38, false),
-		RF_DOM_DAC_gt_max	(37, false),
-		RF_DOM_DAC_lt_min	(36, false),
-		RF_XCVR_src1_PLL_unlocked(35, true),
-		RF_XCVR_src2_PLL_unlocked(34, true),
-		RF_XCVR_uncalibrated	(33, true),
-		RF_5VDC_overvoltage	(32, false),
-		RF_5VDC_undervoltage	(31, false),
-		GPS_T_RAIM_alarm	(22, true),
-		GPS_self_test_fault	(21, true),
-		GPS_power_on_fault	(20, true),
-		TDM_two_masters		(19, true),
-		TDM_master_slave	(18, true),
-		TDM_clock		(17, true),
-		GPS_window		(16, true),
-		GPS_one_PPS		(15, true),
-		GPS_comm_link		(14, true),
-		serial_comm_link	(13, false),
-		UDP_IP_comm_link	(12, false),
-		serial_debug_comm_link	(11, false),
-		RF_XCVR_comm_link	(10, true),
-		CPU_firmware		(3, true),
-		Buffered_transactions	(1, false),
-		Error_log_entries	(0, false);
+		FRAM_test                (58),
+		FRAM_data                (57),
+		FPGA1                    (50),
+		FPGA2                    (49),
+		Power_supply             (48),
+		DIO_overvoltage          (47),
+		DIO_undervoltage         (46),
+		RF_ADC_gt_max            (43),
+		RF_ADC_lt_min            (42),
+		RF_ATTN_DAC1_gt_max      (41),
+		RF_ATTN_DAC1_lt_min      (40),
+		RF_ATTN_DAC2_gt_max      (39),
+		RF_ATTN_DAC2_lt_min      (38),
+		RF_DOM_DAC_gt_max        (37),
+		RF_DOM_DAC_lt_min        (36),
+		RF_XCVR_src1_PLL_unlocked(35),
+		RF_XCVR_src2_PLL_unlocked(34),
+		RF_XCVR_uncalibrated     (33),
+		RF_5VDC_overvoltage      (32),
+		RF_5VDC_undervoltage     (31),
+		GPS_T_RAIM_alarm         (22),
+		GPS_self_test_fault      (21),
+		GPS_power_on_fault       (20),
+		TDM_two_masters          (19),
+		TDM_master_slave         (18),
+		TDM_clock                (17),
+		GPS_window               (16),
+		GPS_one_PPS              (15),
+		GPS_comm_link            (14),
+		serial_comm_link         (13),
+		UDP_IP_comm_link         (12),
+		serial_debug_comm_link   (11),
+		RF_XCVR_comm_link        (10),
+		CPU_firmware             (3);
+		// Reset count    4-bits (7-4)
+		// Buffered_transactions (1)
+		// Error_log_entries     (0)
 
 		/** Create a new diag error bit */
-		private ErrorBit(int b, boolean e) {
+		private ErrorBit(int b) {
 			bit = b;
-			err = e;
 		}
 
 		/** Bit number */
 		public final int bit;
-
-		/** Error / maintenance flag */
-		public final boolean err;
 	};
 
 	/** Test status bit for an error */
@@ -116,38 +113,18 @@ public class DiagStatusProp extends E6Property {
 		return (stat[i] & bit) == bit;
 	}
 
-	/** Format maintenance status */
-	public String formatMaint() {
-		return formatStatus(false);
-	}
-
-	/** Format error status */
-	public String formatErrors() {
-		return formatStatus(true);
-	}
-
-	/** Format status */
-	private String formatStatus(boolean err) {
+	/** Get a string representation */
+	@Override
+	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		for (ErrorBit eb: ErrorBit.values()) {
-			if ((eb.err == err) && testBit(eb.bit)) {
+			if (testBit(eb.bit)) {
 				sb.append(eb);
-				sb.append(',');
+				sb.append(';');
 			}
 		}
 		if (sb.length() > 0)
 			sb.setLength(sb.length() - 1);
 		return sb.toString();
-	}
-
-	/** Get a string representation */
-	@Override
-	public String toString() {
-		String errs = formatErrors();
-		String maint = formatMaint();
-		if (errs.length() > 0 && maint.length() > 0)
-			return errs + ", " + maint;
-		else
-			return errs + maint;
 	}
 }

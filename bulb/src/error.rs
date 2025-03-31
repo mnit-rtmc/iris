@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -71,6 +71,10 @@ pub enum Error {
     /// Serde wasm-bindgen error
     #[error("Serialization error")]
     SerdeWasmBindgen(#[from] serde_wasm_bindgen::Error),
+
+    /// GIF error
+    #[error("GIF error")]
+    Gift(#[from] gift::Error),
 }
 
 /// Bulb result

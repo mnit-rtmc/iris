@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.server;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.CommLink;
-import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.ItemStyle;
@@ -148,7 +147,7 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 	}
 
 	/** Set the item style bits (and notify clients) */
-	private final void setStyles(long s) {
+	private final void setStylesNotify(long s) {
 		if (s != styles) {
 			styles = s;
 			notifyAttribute("styles");
@@ -157,7 +156,7 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 
 	/** Update the device item styles */
 	public void updateStyles() {
-		setStyles(calculateStyles());
+		setStylesNotify(calculateStyles());
 	}
 
 	/** Calculate the item styles */
@@ -169,10 +168,10 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 			s |= ItemStyle.INACTIVE.bit();
 		if (isAvailable())
 			s |= ItemStyle.AVAILABLE.bit();
-		if (isOnline() && needsMaintenance())
-			s |= ItemStyle.MAINTENANCE.bit();
-		if (isActive() && isFailed())
-			s |= ItemStyle.FAILED.bit();
+		if (isOnline() && hasFaults())
+			s |= ItemStyle.FAULT.bit();
+		if (isActive() && isOffline())
+			s |= ItemStyle.OFFLINE.bit();
 		if (getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
 		return s;
@@ -184,12 +183,12 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 		return (c != null) && c.isActive();
 	}
 
-	/** Get the failure status */
-	public boolean isFailed() {
+	/** Get the offline status */
+	public boolean isOffline() {
 		ControllerImpl c = controller;	// Avoid race
 		// FIXME: check if comm link connected
 		//        needs status update to work properly
-		return (c == null) || c.isFailed();
+		return (c == null) || c.isOffline();
 	}
 
 	/** Get the number of milliseconds communication has been failed */
@@ -198,35 +197,19 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 		return (c != null) ? c.getFailMillis() : Long.MAX_VALUE;
 	}
 
-	/** Test if device is online (active and not failed) */
+	/** Test if device is online (active and not offline) */
 	public boolean isOnline() {
-		return isActive() && !isFailed();
+		return isActive() && !isOffline();
 	}
 
 	/** Test if device is available */
 	protected boolean isAvailable() {
-		return isOnline() && !needsMaintenance();
+		return isOnline() && !hasFaults();
 	}
 
-	/** Test if a device needs maintenance */
-	protected boolean needsMaintenance() {
-		return !getMaintenance().isEmpty();
-	}
-
-	/** Get maintenance status */
-	private String getMaintenance() {
-		return ControllerHelper.getMaintenance(getController());
-	}
-
-	/** Check if the controller has an error */
-	public boolean hasError() {
-		return isFailed() || hasStatusError();
-	}
-
-	/** Check if the controller has a status error */
-	private boolean hasStatusError() {
-		ControllerImpl c = controller;	// Avoid race
-		return (c == null) || !c.getStatus().isEmpty();
+	/** Test if a device has faults */
+	protected boolean hasFaults() {
+		return false;
 	}
 
 	/** Get the polling period (sec) */

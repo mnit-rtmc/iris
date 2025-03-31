@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,41 +15,43 @@
 package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.event.ActionEvent;
-import us.mn.state.dot.tms.LaneUseIndication;
-import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.User;
-import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.Lcs;
+import us.mn.state.dot.tms.LcsLock;
+import us.mn.state.dot.tms.client.proxy.ProxyAction;
 
 /**
  * Action to blank all selected LCS arrays.
  *
  * @author Douglas Lau
  */
-public class BlankLcsAction extends IAction {
+public class BlankLcsAction extends ProxyAction<Lcs> {
 
-	/** Selection model */
-	private final ProxySelectionModel<LCSArray> selectionModel;
-
-	/** User who is sending message */
-	private final User owner;
+	/** User ID */
+	private final String user;
 
 	/** Create a new action to blank the selected LCS array */
-	public BlankLcsAction(ProxySelectionModel<LCSArray> s, User o) {
-		super("lcs.blank");
-		selectionModel = s;
-		owner = o;
+	public BlankLcsAction(Lcs lcs, String u) {
+		super("lcs.blank", lcs);
+		user = u;
 	}
 
 	/** Actually perform the action */
+	@Override
 	protected void doActionPerformed(ActionEvent e) {
-		for(LCSArray lcs_array: selectionModel.getSelected()) {
-			Integer[] ind = lcs_array.getIndicationsCurrent();
-			ind = new Integer[ind.length];
-			for(int i = 0; i < ind.length; i++)
-				ind[i] = LaneUseIndication.DARK.ordinal();
-			lcs_array.setOwnerNext(owner);
-			lcs_array.setIndicationsNext(ind);
+		if (proxy != null) {
+			String lk = proxy.getLock();
+			if (lk != null) {
+				LcsLock lock = new LcsLock(lk);
+				if (lock.optExpires() != null)
+					// reason: incident or testing
+					proxy.setLock(null);
+				else {
+					// other reason; is this needed?
+					lock.setIndications(null);
+					lock.setUser(user);
+					proxy.setLock(lock.toString());
+				}
+			}
 		}
 	}
 }

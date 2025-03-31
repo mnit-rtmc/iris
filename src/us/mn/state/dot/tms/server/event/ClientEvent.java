@@ -18,7 +18,6 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -28,24 +27,6 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Douglas Lau
  */
 public class ClientEvent extends BaseEvent {
-
-	/** Database table name */
-	static private final String TABLE = "event.client_event";
-
-	/** Get client event purge threshold (days) */
-	static private int getPurgeDays() {
-		return SystemAttrEnum.CLIENT_EVENT_PURGE_DAYS.getInt();
-	}
-
-	/** Purge old records */
-	static public void purgeRecords() throws TMSException {
-		int age = getPurgeDays();
-		if (store != null && age > 0) {
-			store.update("DELETE FROM " + TABLE +
-				" WHERE event_date < now() - '" + age +
-				" days'::interval;");
-		}
-	}
 
 	/** Is the specified event a client event? */
 	static private boolean isClientEvent(EventType et) {
@@ -62,31 +43,37 @@ public class ClientEvent extends BaseEvent {
 	/** Host:port of client connection */
 	private final String host_port;
 
-	/** User name */
-	private final String iris_user;
+	/** User ID */
+	private final String user_id;
 
 	/** Create a new client event */
-	public ClientEvent(EventType et, String hp, String iu) {
+	public ClientEvent(EventType et, String hp, String uid) {
 		super(et);
 		assert isClientEvent(et);
 		host_port = SString.truncate(hp, 64);
-		iris_user = SString.truncate(iu, 15);
+		user_id = SString.truncate(uid, 15);
+	}
+
+	/** Get the event config name */
+	@Override
+	protected String eventConfigName() {
+		return "client_event";
 	}
 
 	/** Get the database table name */
 	@Override
 	public String getTable() {
-		return TABLE;
+		return "event.client_event";
 	}
 
 	/** Get a mapping of the columns */
 	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put("event_desc_id", event_type.id);
+		map.put("event_desc", event_type.id);
 		map.put("event_date", new Timestamp(event_date.getTime()));
 		map.put("host_port", host_port);
-		map.put("iris_user", iris_user);
+		map.put("user_id", user_id);
 		return map;
 	}
 }

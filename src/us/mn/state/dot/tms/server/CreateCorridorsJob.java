@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ public class CreateCorridorsJob extends Job {
 	@Override
 	public void perform() {
 		createCorridors();
-		lookupMeterDetectors();
+		lookupMeterNodes();
 		flush.addJob(new XmlConfigJob(1000));
 	}
 
@@ -51,14 +51,14 @@ public class CreateCorridorsJob extends Job {
 		cm.createCorridors();
 	}
 
-	/** Lookup associated detectors for all ramp meters */
-	private void lookupMeterDetectors() {
+	/** Lookup associated entrance nodes for all ramp meters */
+	private void lookupMeterNodes() {
 		Iterator<RampMeter> it = RampMeterHelper.iterator();
 		while (it.hasNext()) {
 			RampMeter m = it.next();
 			if (m instanceof RampMeterImpl) {
 				RampMeterImpl meter = (RampMeterImpl) m;
-				meter.lookupDetectors();
+				meter.lookupEntranceNode();
 			}
 		}
 	}

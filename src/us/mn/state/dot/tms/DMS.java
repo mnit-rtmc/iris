@@ -111,23 +111,14 @@ public interface DMS extends Device {
 	 * `supply_type`, `error`, `detail` and `voltage` */
 	String POWER_SUPPLIES = "power_supplies";
 
-	/** Minimum cabinet temperature; Integer (Celsius) */
-	String CABINET_TEMP_MIN = "cabinet_temp_min";
+	/** Cabinet temperatures array; Integer (Celsius) */
+	String CABINET_TEMPS = "cabinet_temps";
 
-	/** Maximum cabinet temperature; Integer (Celsius) */
-	String CABINET_TEMP_MAX = "cabinet_temp_max";
+	/** Ambient temperatures array; Integer (Celsius) */
+	String AMBIENT_TEMPS = "ambient_temps";
 
-	/** Minimum ambient temperature; Integer (Celsius) */
-	String AMBIENT_TEMP_MIN = "ambient_temp_min";
-
-	/** Maximum ambient temperature; Integer (Celsius) */
-	String AMBIENT_TEMP_MAX = "ambient_temp_max";
-
-	/** Minimum housing temperature; Integer (Celsius) */
-	String HOUSING_TEMP_MIN = "housing_temp_min";
-
-	/** Maximum housing temperature; Integer (Celsius) */
-	String HOUSING_TEMP_MAX = "housing_temp_max";
+	/** Housing temperatures array; Integer (Celsius) */
+	String HOUSING_TEMPS = "housing_temps";
 
 	/** Pot base; Integer (LEDSTAR only) */
 	String LDC_POT_BASE = "ldc_pot_base";

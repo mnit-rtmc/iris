@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2024  Minnesota Department of Transportation
  * Copyright (C) 2024  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -40,7 +40,7 @@ public class CameraTheme extends ProxyTheme<Camera> {
 
 	/** Unpublished style */
 	static public final Style UNPUBLISHED = new Style(
-		ItemStyle.UNPUBLISHED.toString(), OUTLINE, COLOR_UNAVAILABLE);
+		ItemStyle.UNPUBLISHED.toString(), OUTLINE, COLOR_FAULT);
 
 	/** Inactive style */
 	static public final Style INACTIVE = new Style(

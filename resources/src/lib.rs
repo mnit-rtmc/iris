@@ -1,6 +1,6 @@
 // lib.rs
 //
-// Copyright (C) 2024  Minnesota Department of Transportation
+// Copyright (C) 2024-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,16 +23,24 @@ pub enum Res {
     BeaconState,
     CabinetStyle,
     Camera,
+    CameraPreset,
     CommConfig,
     CommLink,
     CommProtocol,
     Condition,
     Controller,
     ControllerIo,
+    DayMatcher,
+    DayPlan,
     Detector,
+    DeviceAction,
     Direction,
     Dms,
     Domain,
+    EncoderStream,
+    EncoderType,
+    Encoding,
+    EventConfig,
     FlowStream,
     Font,
     GateArm,
@@ -43,24 +51,35 @@ pub enum Res {
     Gps,
     Graphic,
     Incident,
+    IncidentDetail,
     IncAdvice,
     IncDescriptor,
+    IncImpact,
     IncLocator,
-    LaneMarking,
-    LaneUseIndication,
+    IncRange,
+    LaneCode,
     Lcs,
-    LcsArray,
     LcsIndication,
-    LcsLock,
+    LcsState,
+    LcsType,
+    MeterAlgorithm,
+    MeterType,
     Modem,
+    MonitorStyle,
     MsgLine,
     MsgPattern,
     ParkingArea,
     Permission,
+    PlanPhase,
+    PlayList,
     RampMeter,
     ResourceType,
     Rnode,
+    RnodeTransition,
+    RnodeType,
     Road,
+    RoadAffix,
+    RoadClass,
     RoadModifier,
     Role,
     SignConfig,
@@ -68,6 +87,7 @@ pub enum Res {
     SignMessage,
     SystemAttribute,
     TagReader,
+    TimeAction,
     TollZone,
     User,
     VideoMonitor,
@@ -100,16 +120,24 @@ impl Res {
             BeaconState,
             CabinetStyle,
             Camera,
+            CameraPreset,
             CommConfig,
             CommLink,
             CommProtocol,
             Condition,
             Controller,
             ControllerIo,
+            DayMatcher,
+            DayPlan,
             Detector,
+            DeviceAction,
             Direction,
             Dms,
             Domain,
+            EncoderStream,
+            EncoderType,
+            Encoding,
+            EventConfig,
             FlowStream,
             Font,
             GateArm,
@@ -120,24 +148,35 @@ impl Res {
             Gps,
             Graphic,
             Incident,
+            IncidentDetail,
             IncAdvice,
             IncDescriptor,
+            IncImpact,
             IncLocator,
-            LaneMarking,
-            LaneUseIndication,
+            IncRange,
+            LaneCode,
             Lcs,
-            LcsArray,
             LcsIndication,
-            LcsLock,
+            LcsState,
+            LcsType,
+            MeterAlgorithm,
+            MeterType,
             Modem,
+            MonitorStyle,
             MsgLine,
             MsgPattern,
             ParkingArea,
             Permission,
+            PlanPhase,
+            PlayList,
             RampMeter,
             ResourceType,
             Rnode,
+            RnodeTransition,
+            RnodeType,
             Road,
+            RoadAffix,
+            RoadClass,
             RoadModifier,
             Role,
             SignConfig,
@@ -145,6 +184,7 @@ impl Res {
             SignMessage,
             SystemAttribute,
             TagReader,
+            TimeAction,
             TollZone,
             User,
             VideoMonitor,
@@ -165,16 +205,24 @@ impl Res {
             BeaconState => "beacon_state",
             CabinetStyle => "cabinet_style",
             Camera => "camera",
+            CameraPreset => "camera_preset",
             CommConfig => "comm_config",
             CommLink => "comm_link",
             CommProtocol => "comm_protocol",
             Condition => "condition",
             Controller => "controller",
             ControllerIo => "controller_io",
+            DayMatcher => "day_matcher",
+            DayPlan => "day_plan",
             Detector => "detector",
+            DeviceAction => "device_action",
             Direction => "direction",
             Dms => "dms",
             Domain => "domain",
+            EncoderStream => "encoder_stream",
+            EncoderType => "encoder_type",
+            EventConfig => "event_config",
+            Encoding => "encoding",
             FlowStream => "flow_stream",
             Font => "font",
             GateArm => "gate_arm",
@@ -185,24 +233,35 @@ impl Res {
             Gps => "gps",
             Graphic => "graphic",
             Incident => "incident",
+            IncidentDetail => "incident_detail",
             IncAdvice => "inc_advice",
             IncDescriptor => "inc_descriptor",
+            IncImpact => "inc_impact",
             IncLocator => "inc_locator",
-            LaneUseIndication => "lane_use_indication",
-            LaneMarking => "lane_marking",
+            IncRange => "inc_range",
+            LaneCode => "lane_code",
             Lcs => "lcs",
-            LcsArray => "lcs_array",
             LcsIndication => "lcs_indication",
-            LcsLock => "lcs_lock",
+            LcsState => "lcs_state",
+            LcsType => "lcs_type",
+            MeterAlgorithm => "meter_algorithm",
+            MeterType => "meter_type",
             Modem => "modem",
+            MonitorStyle => "monitor_style",
             MsgLine => "msg_line",
             MsgPattern => "msg_pattern",
             ParkingArea => "parking_area",
             Permission => "permission",
+            PlanPhase => "plan_phase",
+            PlayList => "play_list",
             RampMeter => "ramp_meter",
             ResourceType => "resource_type",
             Rnode => "r_node",
+            RnodeTransition => "r_node_transition",
+            RnodeType => "r_node_type",
             Road => "road",
+            RoadAffix => "road_affix",
+            RoadClass => "road_class",
             RoadModifier => "road_modifier",
             Role => "role",
             SignConfig => "sign_config",
@@ -210,6 +269,7 @@ impl Res {
             SignMessage => "sign_message",
             SystemAttribute => "system_attribute",
             TagReader => "tag_reader",
+            TimeAction => "time_action",
             TollZone => "toll_zone",
             User => "user_id",
             VideoMonitor => "video_monitor",
@@ -227,27 +287,42 @@ impl Res {
             Beacon => "🔆",
             CabinetStyle => "🗄️ ",
             Camera => "🎥",
+            CameraPreset => "🎥📌",
             CommConfig => "📡",
             CommLink => "🔗",
             Controller => "🎛️ ",
+            DayMatcher => "🗓️",
+            DayPlan => "🗓️",
             Detector => "🚗⬚",
+            DeviceAction => "➡️",
             Dms => "⬛",
             Domain => "🖧 ",
+            EncoderStream => "〜",
+            EncoderType => "🎥📽️",
+            EventConfig => "📜",
             FlowStream => "🎞️ ",
             GateArm => "⫬",
             GateArmArray => "⫭⫬",
             GeoLoc => "🗺️ ",
             Gps => "🌐",
             Incident => "🚨",
-            LaneMarking => "⛙",
-            LcsArray => "🡇 ❌ ",
-            LcsIndication => "🡇 ",
+            IncidentDetail => "🚨➕",
+            IncAdvice => "🚨❗",
+            IncDescriptor => "🚨❓",
+            IncLocator => "🚨🗺️",
+            Lcs => "🠟✖🠟",
+            LcsState => "🠟",
             Modem => "🖀 ",
+            MonitorStyle => "FIXME",
             Permission => "🗝️ ",
+            PlanPhase => "🪜",
+            PlayList => "FIXME",
             RampMeter => "🚦",
+            RoadAffix => "🛣️ ",
             Role => "💪",
             SignConfig => "📐",
             TagReader => "🏷️ ",
+            TimeAction => "⏰",
             TollZone => "💲",
             User => "👤",
             VideoMonitor => "📺",
@@ -261,9 +336,11 @@ impl Res {
         use Res::*;
         #[allow(clippy::match_like_matches_macro)]
         match self {
-            BeaconState | CommProtocol | Condition | Direction | Font
-            | GateArmInterlock | GateArmState | Graphic | LaneUseIndication
-            | LcsLock | ResourceType | RoadModifier => true,
+            BeaconState | CommProtocol | Condition | Direction | Encoding
+            | Font | GateArmInterlock | GateArmState | Graphic | IncImpact
+            | IncRange | LaneCode | LcsIndication | LcsType
+            | MeterAlgorithm | MeterType | ResourceType | RnodeTransition
+            | RnodeType | RoadClass | RoadModifier => true,
             _ => false,
         }
     }
@@ -273,12 +350,16 @@ impl Res {
         use Res::*;
         #[allow(clippy::match_like_matches_macro)]
         match self {
-            Alarm | Beacon | CabinetStyle | Camera | CommConfig | CommLink
-            | Controller | Detector | Dms | Domain | FlowStream | GateArm
-            | GateArmArray | Gps | Incident | LaneMarking | LcsArray
-            | LcsIndication | Modem | MsgLine | MsgPattern | ParkingArea
-            | Permission | RampMeter | Rnode | Road | Role | SignConfig
-            | SignDetail | SignMessage | SystemAttribute | TagReader | User
+            ActionPlan | Alarm | Beacon | CabinetStyle | Camera
+            | CameraPreset | CommConfig | CommLink | Controller
+            | DayMatcher | DayPlan | Detector | DeviceAction | Dms | Domain
+            | EncoderStream | EncoderType | EventConfig | FlowStream
+            | GateArm | GateArmArray | Gps | Incident | IncidentDetail
+            | IncAdvice | IncDescriptor | IncLocator | Lcs | LcsState
+            | Modem | MonitorStyle | MsgLine | MsgPattern | ParkingArea
+            | Permission | PlanPhase | PlayList | RampMeter | Rnode | Road
+            | RoadAffix | Role | SignConfig | SignDetail | SignMessage
+            | SystemAttribute | TagReader | TimeAction | TollZone | User
             | VideoMonitor | WeatherSensor | Word => true,
             _ => false,
         }
@@ -288,10 +369,18 @@ impl Res {
     pub const fn base(self) -> Self {
         use Res::*;
         match self {
+            // Action plan resources
+            DayMatcher | DayPlan | DeviceAction | PlanPhase | TimeAction => {
+                ActionPlan
+            }
             // Camera resources
-            FlowStream => Camera,
+            CameraPreset | EncoderStream | EncoderType => Camera,
             // Controller resources
-            Alarm | CommLink | ControllerIo | GeoLoc | Gps | Modem => Controller,
+            // (ControllerIo is a special case
+            // to GET request all pins for one controller).
+            Alarm | CommLink | ControllerIo | GeoLoc | Gps | Modem => {
+                Controller
+            }
             // Detector resources
             Rnode | Road => Detector,
             // DMS resources
@@ -300,15 +389,18 @@ impl Res {
             // Gate arm resources
             GateArmArray => GateArm,
             // Incident resources
-            IncAdvice | IncDescriptor | IncLocator => Incident,
+            IncidentDetail | IncAdvice | IncDescriptor | IncLocator
+            | RoadAffix => Incident,
             // LCS resources
-            LcsArray | LcsIndication | LaneMarking => Lcs,
+            LcsState => Lcs,
             // Permission resources
             Domain | User | Role => Permission,
             // System attribute resources
-            CabinetStyle | CommConfig => SystemAttribute,
+            CabinetStyle | CommConfig | EventConfig => SystemAttribute,
             // Toll zone resources
             TagReader => TollZone,
+            // Video monitor resources
+            FlowStream | MonitorStyle | PlayList => VideoMonitor,
             // Others
             _ => self,
         }

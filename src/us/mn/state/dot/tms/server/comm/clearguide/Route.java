@@ -62,16 +62,18 @@ public class Route {
 
 	/** Create a route from JSON.
 	 * @param jroute A single route with attributes:
-	 * 	{"route_id":34731,"speed_mph":68,"route_name":"Cliff to
-	 * 	Diffley Que anal","travel_time_mins":1,"delay_ff_mins":0,
-	 * 	"delay_sl_mins":0,"timestamp":1.611017443E9} */
+	 *       {"route_id":34731,"speed_mph":68,"route_name":"Cliff to
+	 *       Diffley Que anal","travel_time_mins":1,"delay_ff_mins":0,
+	 *       "delay_sl_mins":0,"timestamp":1.611017443E9} */
 	protected Route(JSONObject jroute) throws ParsingException {
-		this(	jroute.getInt("route_id"),
+		this(
+			jroute.getInt("route_id"),
 			jroute.getDouble("travel_time_mins"),
 			jroute.getDouble("delay_sl_mins"),
 			jroute.getLong("timestamp") * 1000,
 			jroute.getDouble("sl_travel_time_mins"),
-			jroute.getInt("speed_mph"));
+			jroute.getInt("speed_mph")
+		);
 	}
 
 	/** Create a route with CG calculated values

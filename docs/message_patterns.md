@@ -13,18 +13,22 @@ with a sign config.  They can be:
 If **flash beacon** is selected, the sign's _internal_ beacon will also be
 activated.
 
+**Pixel service** indicates that the sign should perform scheduled pixel
+service while the message is active.  This is useful for messages that are
+active for long periods of time.
+
 <details>
 <summary>API Resources 🕵️ </summary>
 
 * `iris/api/msg_pattern` (primary)
 * `iris/api/msg_pattern/{name}`
 
-| Access       | Primary          | Secondary     |
-|--------------|------------------|---------------|
-| 👁️  View      | name             |               |
-| 👉 Operate   |                  |               |
-| 💡 Manage    | compose\_hashtag | flash\_beacon |
-| 🔧 Configure | multi            |               |
+| Access       | Primary                 | Secondary                     |
+|--------------|-------------------------|-------------------------------|
+| 👁️  View      | name                    |                               |
+| 👉 Operate   |                         |                               |
+| 💡 Manage    | compose\_hashtag, multi | flash\_beacon, pixel\_service |
+| 🔧 Configure |                         |                               |
 
 </details>
 
@@ -60,12 +64,12 @@ same number of lines in their text rectangles.
 * `iris/api/msg_line` (primary)
 * `iris/api/msg_line/{name}`
 
-| Access       | Primary                   | Secondary |
-|--------------|---------------------------|-----------|
-| 👁️  View      | name                      |           |
-| 👉 Operate   |                           |           |
-| 💡 Manage    | restrict\_hashtag         | rank      |
-| 🔧 Configure | msg\_pattern, line, multi |           |
+| Access       | Primary                        | Secondary |
+|--------------|--------------------------------|-----------|
+| 👁️  View      | name, msg\_pattern             |           |
+| 👉 Operate   |                                |           |
+| 💡 Manage    | line, multi, restrict\_hashtag | rank      |
+| 🔧 Configure |                                |           |
 
 </details>
 

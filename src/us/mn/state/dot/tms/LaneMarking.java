@@ -32,7 +32,7 @@ public interface LaneMarking extends Device {
 	}
 
 	/** SONAR base type name */
-	String SONAR_BASE = LCS.SONAR_TYPE;
+	String SONAR_BASE = Lcs.SONAR_TYPE;
 
 	/** Get the device location */
 	GeoLoc getGeoLoc();

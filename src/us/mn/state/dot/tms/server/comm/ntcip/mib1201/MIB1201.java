@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,7 +71,19 @@ public enum MIB1201 {
 	          dayPlanMinute			(timeBaseDayPlanEntry, 4),
 	          dayPlanActionNumberOID	(timeBaseDayPlanEntry, 5),
 	      dayPlanStatus			(timebase, 6),
-	      timeBaseScheduleTableStatus	(timebase, 7);
+	      timeBaseScheduleTableStatus	(timebase, 7),
+	  auxIOv2				(global, 7),
+	    maxAuxIOv2TableNumDigitalPorts	(auxIOv2, 1),
+	    maxAuxIOv2TableNumAnalogPorts	(auxIOv2, 2),
+	    auxIOv2Table			(auxIOv2, 3),
+	      auxIOv2Entry			(auxIOv2Table, 1),
+	        auxIOv2PortType			(auxIOv2Entry, 1),
+	        auxIOv2PortNumber		(auxIOv2Entry, 2),
+	        auxIOv2PortDescription		(auxIOv2Entry, 3),
+	        auxIOv2PortResolution		(auxIOv2Entry, 4),
+	        auxIOv2PortValue		(auxIOv2Entry, 5),
+	        auxIOv2PortDirection		(auxIOv2Entry, 6),
+	        auxIOv2PortLastCommandedState	(auxIOv2Entry, 7);
 
 	/** MIB node */
 	public final MIBNode node;

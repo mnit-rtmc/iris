@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2021  Minnesota Department of Transportation
+ * Copyright (C) 2013-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GateArmState;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * This is a class for logging gate arm state change events to a database.
@@ -28,24 +28,6 @@ import us.mn.state.dot.tms.TMSException;
  * @author Douglas Lau
  */
 public class GateArmEvent extends BaseEvent {
-
-	/** Database table name */
-	static private final String TABLE = "event.gate_arm_event";
-
-	/** Get gate arm event purge threshold (days) */
-	static private int getPurgeDays() {
-		return SystemAttrEnum.GATE_ARM_EVENT_PURGE_DAYS.getInt();
-	}
-
-	/** Purge old records */
-	static public void purgeRecords() throws TMSException {
-		int age = getPurgeDays();
-		if (store != null && age > 0) {
-			store.update("DELETE FROM " + TABLE +
-				" WHERE event_date < now() - '" + age +
-				" days'::interval;");
-		}
-	}
 
 	/** Get corresponding event type for a gate arm state */
 	static private EventType gateArmStateEventType(GateArmState gas) {
@@ -71,33 +53,39 @@ public class GateArmEvent extends BaseEvent {
 	private final String device_id;
 
 	/** User who initiated change */
-	private final String iris_user;
+	private final String user_id;
 
 	/** Fault description (if any) */
 	private final String fault;
 
 	/** Create a new gate arm event */
-	public GateArmEvent(GateArmState gas, String d, String u, String f) {
+	public GateArmEvent(GateArmState gas, String d, String uid, String f) {
 		super(gateArmStateEventType(gas));
 		device_id = d;
-		iris_user = u;
+		user_id = SString.truncate(uid, 15);
 		fault = f;
+	}
+
+	/** Get the event config name */
+	@Override
+	protected String eventConfigName() {
+		return "gate_arm_event";
 	}
 
 	/** Get the database table name */
 	@Override
 	public String getTable() {
-		return TABLE;
+		return "event.gate_arm_event";
 	}
 
 	/** Get a mapping of the columns */
 	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put("event_desc_id", event_type.id);
+		map.put("event_desc", event_type.id);
 		map.put("event_date", new Timestamp(event_date.getTime()));
 		map.put("device_id", device_id);
-		map.put("iris_user", iris_user);
+		map.put("user_id", user_id);
 		map.put("fault", fault);
 		return map;
 	}

@@ -74,7 +74,7 @@ public class OpQueryGpsLocation extends OpNtcip {
 			catch (NoSuchName | ParsingException e) {
 				// Some NDOR sign controllers throw
 				// ParsingException instead of NoSuchName...
-				setErrorStatus("GPS Not Available");
+				putCtrlFaults("gps", "GPS Not Available");
 				setFailed();
 				return null;
 			}
@@ -100,6 +100,6 @@ public class OpQueryGpsLocation extends OpNtcip {
 			gps.saveDeviceLocation(lt / 1000000.0,
 				ln / 1000000.0);
 		} else
-			setErrorStatus("No GPS Lock");
+			putCtrlFaults("gps", "No GPS Lock");
 	}
 }

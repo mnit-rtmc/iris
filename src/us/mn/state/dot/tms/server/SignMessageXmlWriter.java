@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2024  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -75,10 +75,10 @@ public class SignMessageXmlWriter extends XmlWriter {
 	/** Write the body of the sign message XML file */
 	private void writeBody(Writer w) throws IOException {
 		Iterator<DMS> it = DMSHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			DMS dms = it.next();
-			if(dms instanceof DMSImpl)
-				((DMSImpl)dms).writeSignMessageXml(w);
+			if (dms instanceof DMSImpl)
+				((DMSImpl) dms).writeSignMessageXml(w);
 		}
 	}
 

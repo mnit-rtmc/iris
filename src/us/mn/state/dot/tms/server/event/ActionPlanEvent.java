@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2018  Iteris Inc.
- * Copyright (C) 2018-2021  Minnesota Department of Transportation
+ * Copyright (C) 2018-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,9 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * Log Action Plan events to the database.
@@ -29,24 +30,6 @@ import us.mn.state.dot.tms.TMSException;
  * @author Douglas Lau
  */
 public class ActionPlanEvent extends BaseEvent {
-
-	/** Database table name */
-	static private final String TABLE = "event.action_plan_event";
-
-	/** Get purge threshold (days) */
-	static private int getPurgeDays() {
-		return SystemAttrEnum.ACTION_PLAN_EVENT_PURGE_DAYS.getInt();
-	}
-
-	/** Purge old records */
-	static public void purgeRecords() throws TMSException {
-		int age = getPurgeDays();
-		if (store != null && age > 0) {
-			store.update("DELETE FROM " + TABLE +
-				" WHERE event_date < now() - '" + age +
-				" days'::interval;");
-		}
-	}
 
 	/** Is the specified event an action plan event? */
 	static private boolean isActionPlanEvent(EventType et) {
@@ -58,24 +41,36 @@ public class ActionPlanEvent extends BaseEvent {
 	/** Action Plan affected by this event */
 	private final String action_plan;
 
-	/** Detail message */
-	private final String detail;
+	/** Plan phase */
+	private final String phase;
+
+	/** User ID */
+	private final String user_id;
 
 	/** Create a new event.
 	 * @param et Event type.
 	 * @param ap Action plan name.
-	 * @param dt Detail message (user name, etc.) */
-	public ActionPlanEvent(EventType et, String ap, String dt) {
+	 * @param p Plan phase.
+	 * @param uid User ID. */
+	public ActionPlanEvent(EventType et, String ap, PlanPhase p, String uid)
+	{
 		super(et);
 		assert isActionPlanEvent(et);
 		action_plan = ap;
-		detail = dt;
+		phase = (p != null) ? p.toString() : null;
+		user_id = SString.truncate(uid, 15);
+	}
+
+	/** Get the event config name */
+	@Override
+	protected String eventConfigName() {
+		return "action_plan_event";
 	}
 
 	/** Get the database table name */
 	@Override
 	public String getTable() {
-		return TABLE;
+		return "event.action_plan_event";
 	}
 
 	/** Get a mapping of the columns */
@@ -83,9 +78,10 @@ public class ActionPlanEvent extends BaseEvent {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("event_date", new Timestamp(event_date.getTime()));
-		map.put("event_desc_id", event_type.id);
+		map.put("event_desc", event_type.id);
 		map.put("action_plan", action_plan);
-		map.put("detail", detail);
+		map.put("phase", phase);
+		map.put("user_id", user_id);
 		return map;
 	}
 }

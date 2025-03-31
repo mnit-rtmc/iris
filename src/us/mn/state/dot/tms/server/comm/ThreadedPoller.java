@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2022  Minnesota Department of Transportation
+ * Copyright (C) 2014-2025  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -83,20 +83,8 @@ public class ThreadedPoller<T extends ControllerProperty>
 	public void destroy() {
 		queue.close();
 		disconnect();
-		drainQueue();
+		queue.drain();
 		log("DESTROYED");
-	}
-
-	/** Drain the operation queue */
-	private void drainQueue() {
-		queue.forEach(new OpHandler<T>() {
-			public boolean handle(OpController<T> o) {
-				o.handleCommError(EventType.QUEUE_DRAINED,
-					"DRAINED");
-				o.cleanup();
-				return true;
-			}
-		});
 	}
 
 	/** Handle error for all operations in queue.
@@ -111,15 +99,16 @@ public class ThreadedPoller<T extends ControllerProperty>
 			OpController<T> o = queue.tryNext();
 			if (null == o)
 				break;
-			o.handleCommError(et, msg);
+			o.handleCommError(et);
 			if (o.isDone()) {
 				try {
 					o.cleanup();
-				} catch (Exception e) {
-					// catch any exceptions encountered while cleaning up so
-					// we can log them with the error
-					log("Encountered exception " + e.toString() +
-							" while cleaning up error " + msg);
+				}
+				catch (Exception e) {
+					// catch exceptions while cleaning up
+					// so we can log them with the error
+					log("Encountered exception " + e +
+					    " while cleaning up error " + msg);
 					StringWriter sw = new StringWriter();
 					PrintWriter pw = new PrintWriter(sw);
 					e.printStackTrace(pw);
