@@ -122,9 +122,10 @@ impl AncillaryData for LcsAnc {
     /// Construct ancillary LCS array data
     fn new(pri: &Lcs, view: View) -> Self {
         let mut cio = ControllerIoAnc::new(pri, view);
-        cio.assets.push(Asset::LcsStates);
-        if let View::Control = view {
-            cio.assets.push(Asset::LcsTypes);
+        match view {
+            View::Control => cio.assets.push(Asset::LcsStates),
+            View::Setup => cio.assets.push(Asset::LcsTypes),
+            _ => (),
         }
         let loc = LocAnc::new(pri, view);
         LcsAnc {
