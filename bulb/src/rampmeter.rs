@@ -13,6 +13,7 @@
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
+use crate::device::DeviceReq;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::geoloc::{Loc, LocAnc};
@@ -396,6 +397,7 @@ impl LockReason {
 
 impl fmt::Display for MeterLock {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // format as JSON for setting meter lock
         write!(f, "{{\"reason\":\"{}\"", &self.reason)?;
         if let Some(rate) = self.rate {
             write!(f, ",\"rate\":{rate}")?;
@@ -475,6 +477,43 @@ impl RampMeter {
             let val = format!("{{\"lock\":{lock}}}");
             actions.push(Action::Patch(uri, val.into()));
         }
+        actions
+    }
+
+    /// Make lock shrink action
+    fn lock_shrink(&self) -> Vec<Action> {
+        let reason = self.lock_reason();
+        if let Some(rate) = self.lock_rate() {
+            // FIXME: use system attributes
+            if rate < 1714 {
+                let rate = Some((rate + 50).min(1714));
+                return self.make_lock_action(reason, rate);
+            }
+        }
+        Vec::new()
+    }
+
+    /// Make lock grow action
+    fn lock_grow(&self) -> Vec<Action> {
+        let mut reason = self.lock_reason();
+        if reason != LockReason::Incident && reason != LockReason::Testing {
+            reason = LockReason::Incident;
+        }
+        // FIXME: use system attributes
+        let rate = self.lock_rate().unwrap_or(1714);
+        if rate > 240 {
+            let rate = Some((rate - 50).max(240));
+            return self.make_lock_action(reason, rate);
+        }
+        Vec::new()
+    }
+
+    /// Create action to handle click on a device request button
+    #[allow(clippy::vec_init_then_push)]
+    fn device_req(&self, req: DeviceReq) -> Vec<Action> {
+        let uri = uri_one(Res::RampMeter, &self.name);
+        let mut actions = Vec::with_capacity(1);
+        actions.push(Action::Patch(uri, req.to_string().into()));
         actions
     }
 
@@ -660,6 +699,26 @@ impl RampMeter {
         )
     }
 
+    /// Convert to Request HTML
+    fn to_html_request(&self, _anc: &RampMeterAnc) -> String {
+        let title = self.title(View::Request);
+        let name = HtmlStr::new(self.name());
+        let work = "http://example.com"; // FIXME
+        format!(
+            "{title}\
+            <div class='row'>\
+              <span>Settings</span>\
+              <button id='rq_settings_send' type='button'>Send</button>\
+            </div>\
+            <div class='row'>\
+              <span>Work Request</span>
+              <a href='{work}' target='_blank' rel='noopener noreferrer'>\
+                🔗 {name}\
+              </a>\
+            </div>"
+        )
+    }
+
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &RampMeterAnc) -> String {
         let title = self.title(View::Setup);
@@ -799,6 +858,7 @@ impl Card for RampMeter {
             View::Create => self.to_html_create(anc),
             View::Control => self.to_html_control(anc),
             View::Location => anc.loc.to_html_loc(self),
+            View::Request => self.to_html_request(anc),
             View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }
@@ -826,29 +886,12 @@ impl Card for RampMeter {
 
     /// Handle click event for a button on the card
     fn handle_click(&self, _anc: RampMeterAnc, id: String) -> Vec<Action> {
-        if &id == "lk_shrink" {
-            let reason = self.lock_reason();
-            if let Some(rate) = self.lock_rate() {
-                // FIXME: use system attributes
-                if rate < 1714 {
-                    let rate = Some((rate + 50).min(1714));
-                    return self.make_lock_action(reason, rate);
-                }
-            }
+        match id.as_str() {
+            "lk_shrink" => self.lock_shrink(),
+            "lk_grow" => self.lock_grow(),
+            "rq_settings_send" => self.device_req(DeviceReq::SendSettings),
+            _ => Vec::new(),
         }
-        if &id == "lk_grow" {
-            let mut reason = self.lock_reason();
-            if reason != LockReason::Incident && reason != LockReason::Testing {
-                reason = LockReason::Incident;
-            }
-            // FIXME: use system attributes
-            let rate = self.lock_rate().unwrap_or(1714);
-            if rate > 240 {
-                let rate = Some((rate - 50).max(240));
-                return self.make_lock_action(reason, rate);
-            }
-        }
-        Vec::new()
     }
 
     /// Handle input event for an element on the card

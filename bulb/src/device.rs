@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,8 +10,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use std::fmt;
 
 /// Device requests
+#[repr(u8)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[allow(dead_code)]
 pub enum DeviceReq {
@@ -49,4 +51,11 @@ pub enum DeviceReq {
     CameraMenuOpen,
     CameraMenuEnter,
     CameraMenuCancel,
+}
+
+impl fmt::Display for DeviceReq {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // format as JSON for setting device request
+        write!(f, "{{\"device_request\":{}}}", *self as u8)
+    }
 }
