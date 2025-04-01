@@ -450,10 +450,21 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		if (!getProcUser().equals(ml.optUser()))
 			throw new ChangeVetoException("Bad user!");
 		String exp = ml.optExpires();
-		if (exp != null && TimeSteward.parse8601(exp) == null)
-			throw new ChangeVetoException("Bad expiration!");
-		if (exp != null && ml.optRate() == null)
-			throw new ChangeVetoException("Bad rate!");
+		Long expires = (exp != null)
+			? TimeSteward.parse8601(exp)
+			: null;
+		if (exp != null && expires == null)
+			throw new ChangeVetoException("Bad expires!");
+		if (expires != null) {
+			long now = TimeSteward.currentTimeMillis();
+			if (expires < now || expires > now + 3600 * 1000)
+				throw new ChangeVetoException("Expires range!");
+		}
+		Integer rate = ml.optRate();
+		if (rate != null && exp == null)
+			throw new ChangeVetoException("No expires!");
+		if (exp != null && rate == null)
+			throw new ChangeVetoException("No rate!");
 	}
 
 	/** Set the lock as JSON */
