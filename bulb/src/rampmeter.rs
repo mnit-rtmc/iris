@@ -474,7 +474,8 @@ impl RampMeter {
         if let Some(user) = crate::app::user() {
             let uri = uri_one(Res::RampMeter, &self.name);
             let lock = MeterLock::new(reason, rate, user);
-            let val = format!("{{\"lock\":{lock}}}");
+            // Lock must be String (in quotes), containing a JSON object
+            let val = format!("{{\"lock\":\"{lock}\"}}");
             actions.push(Action::Patch(uri, val.into()));
         }
         actions
