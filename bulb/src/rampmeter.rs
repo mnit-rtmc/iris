@@ -32,6 +32,7 @@ use pix::rgb::{Rgba8p, SRgb8};
 use pix::{Palette, Raster};
 use resources::Res;
 use serde::Deserialize;
+use serde_json::Value;
 use std::borrow::Cow;
 use std::fmt;
 use std::io::Write;
@@ -473,9 +474,10 @@ impl RampMeter {
         let mut actions = Vec::with_capacity(1);
         if let Some(user) = crate::app::user() {
             let uri = uri_one(Res::RampMeter, &self.name);
-            let lock = MeterLock::new(reason, rate, user);
             // Lock must be String (in quotes), containing a JSON object
-            let val = format!("{{\"lock\":\"{lock}\"}}");
+            let lock =
+                Value::String(MeterLock::new(reason, rate, user).to_string());
+            let val = format!("{{\"lock\":{lock}}}");
             actions.push(Action::Patch(uri, val.into()));
         }
         actions
