@@ -432,6 +432,15 @@ impl MeterLock {
             (now + d).to_rfc3339()
         }))
     }
+
+    /// Encode into JSON Value
+    fn json(&self) -> Value {
+        let reason = LockReason::from(self.reason.as_str());
+        match reason {
+            LockReason::Unlocked => Value::Null,
+            _ => Value::String(self.to_string()),
+        }
+    }
 }
 
 impl RampMeter {
@@ -474,9 +483,7 @@ impl RampMeter {
         let mut actions = Vec::with_capacity(1);
         if let Some(user) = crate::app::user() {
             let uri = uri_one(Res::RampMeter, &self.name);
-            // Lock must be String (in quotes), containing a JSON object
-            let lock =
-                Value::String(MeterLock::new(reason, rate, user).to_string());
+            let lock = MeterLock::new(reason, rate, user).json();
             let val = format!("{{\"lock\":{lock}}}");
             actions.push(Action::Patch(uri, val.into()));
         }
