@@ -22,6 +22,7 @@ use crate::util::{
     ContainsLower, Doc, Fields, HtmlStr, Input, OptVal, Select, TextArea,
 };
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
+use chrono::{DateTime, Local};
 use gift::block::DisposalMethod;
 use gift::{Encoder, Step};
 use pix::matte::Matte8;
@@ -33,6 +34,7 @@ use serde::Deserialize;
 use std::borrow::Cow;
 use std::fmt;
 use std::io::Write;
+use std::time::Duration;
 use wasm_bindgen::JsValue;
 use web_sys::{HtmlSelectElement, console};
 
@@ -347,8 +349,21 @@ impl fmt::Display for LockReason {
 }
 
 impl LockReason {
+    /// Get a slice containing all reasons
+    fn all() -> &'static [LockReason] {
+        &[
+            LockReason::Unlocked,
+            LockReason::Incident,
+            LockReason::Testing,
+            LockReason::KnockedDown,
+            LockReason::Indication,
+            LockReason::Maintenance,
+            LockReason::Construction,
+        ]
+    }
+
     /// Get lock reason as a string slice
-    fn as_str(&self) -> &'static str {
+    fn as_str(self) -> &'static str {
         use LockReason::*;
         match self {
             Unlocked => "unlocked",
@@ -358,6 +373,23 @@ impl LockReason {
             Indication => "indication",
             Maintenance => "maintenance",
             Construction => "construction",
+        }
+    }
+
+    /// Is growing the queue allowed?
+    fn is_grow_allowed(self) -> bool {
+        matches!(
+            self,
+            LockReason::Unlocked | LockReason::Incident | LockReason::Testing
+        )
+    }
+
+    /// Get lock duration
+    fn duration(self) -> Option<Duration> {
+        match self {
+            LockReason::Incident => Some(Duration::from_secs(30 * 60)),
+            LockReason::Testing => Some(Duration::from_secs(5 * 60)),
+            _ => None,
         }
     }
 }
@@ -380,13 +412,22 @@ impl fmt::Display for MeterLock {
 
 impl MeterLock {
     /// Create a new meter lock
-    fn new(r: LockReason, u: String) -> Self {
+    fn new(r: LockReason, rate: Option<u32>, u: String) -> Self {
+        let expires = MeterLock::make_expires(r, rate);
         MeterLock {
             reason: r.as_str().to_string(),
-            rate: None,
-            expires: None,
+            rate,
+            expires,
             user_id: Some(u),
         }
+    }
+
+    /// Make expire time
+    fn make_expires(r: LockReason, rate: Option<u32>) -> Option<String> {
+        rate.and(r.duration().map(|d| {
+            let now: DateTime<Local> = Local::now();
+            (now + d).to_rfc3339()
+        }))
     }
 }
 
@@ -414,6 +455,27 @@ impl RampMeter {
             .as_ref()
             .map(|lk| LockReason::from(lk.reason.as_str()))
             .unwrap_or(LockReason::Unlocked)
+    }
+
+    /// Get lock rate
+    fn lock_rate(&self) -> Option<u32> {
+        self.lock.as_ref().and_then(|lk| lk.rate)
+    }
+
+    /// Make action to lock the meter
+    fn make_lock_action(
+        &self,
+        reason: LockReason,
+        rate: Option<u32>,
+    ) -> Vec<Action> {
+        let mut actions = Vec::with_capacity(1);
+        if let Some(user) = crate::app::user() {
+            let uri = uri_one(Res::RampMeter, &self.name);
+            let lock = MeterLock::new(reason, rate, user);
+            let val = format!("{{\"lock\":{lock}}}");
+            actions.push(Action::Patch(uri, val.into()));
+        }
+        actions
     }
 
     /// Get item states from status/lock
@@ -494,17 +556,9 @@ impl RampMeter {
             _ => '🔒',
         });
         html.push_str("<select id='lk_reason'>");
-        for r in [
-            LockReason::Unlocked,
-            LockReason::Incident,
-            LockReason::Testing,
-            LockReason::KnockedDown,
-            LockReason::Indication,
-            LockReason::Maintenance,
-            LockReason::Construction,
-        ] {
+        for r in LockReason::all() {
             html.push_str("<option");
-            if r == reason {
+            if *r == reason {
                 html.push_str(" selected");
             }
             html.push('>');
@@ -549,16 +603,19 @@ impl RampMeter {
     }
 
     /// Get shrink/grow buttons as HTML
-    fn shrink_grow_html(&self) -> &'static str {
-        match self.lock_reason() {
-            LockReason::Incident | LockReason::Testing => {
-                "<span>\
-                   <button id='q_shrink' type='button'>Shrink ➘</button>\
-                   <button id='q_grow' type='button'>Grow ➚</button>\
-                 </span>"
-            }
-            _ => "",
+    fn shrink_grow_html(&self) -> String {
+        let locked_on = self.lock_rate().is_some();
+        let shrink = if locked_on { "" } else { "disabled" };
+        let mut grow = shrink;
+        if self.lock_reason().is_grow_allowed() {
+            grow = "";
         }
+        format!(
+            "<span>\
+              <button id='lk_shrink' type='button' {shrink}>Shrink ➘</button>\
+              <button id='lk_grow' type='button' {grow}>Grow ➚</button>\
+            </span>"
+        )
     }
 
     /// Convert to Compact HTML
@@ -767,21 +824,40 @@ impl Card for RampMeter {
         anc.loc.changed_location()
     }
 
+    /// Handle click event for a button on the card
+    fn handle_click(&self, _anc: RampMeterAnc, id: String) -> Vec<Action> {
+        if &id == "lk_shrink" {
+            let reason = self.lock_reason();
+            if let Some(rate) = self.lock_rate() {
+                // FIXME: use system attributes
+                if rate < 1714 {
+                    let rate = Some((rate + 50).min(1714));
+                    return self.make_lock_action(reason, rate);
+                }
+            }
+        }
+        if &id == "lk_grow" {
+            let mut reason = self.lock_reason();
+            if reason != LockReason::Incident && reason != LockReason::Testing {
+                reason = LockReason::Incident;
+            }
+            // FIXME: use system attributes
+            let rate = self.lock_rate().unwrap_or(1714);
+            if rate > 240 {
+                let rate = Some((rate - 50).max(240));
+                return self.make_lock_action(reason, rate);
+            }
+        }
+        Vec::new()
+    }
+
     /// Handle input event for an element on the card
     fn handle_input(&self, _anc: RampMeterAnc, id: String) -> Vec<Action> {
         if &id == "lk_reason" {
-            #[allow(clippy::vec_init_then_push)]
-            if let Some(user) = crate::app::user() {
-                let uri = uri_one(Res::RampMeter, &self.name);
-                let r =
-                    Doc::get().elem::<HtmlSelectElement>("lk_reason").value();
-                let reason = LockReason::from(&r[..]);
-                let lock = MeterLock::new(reason, user);
-                let val = format!("{{\"lock\":{lock}}}");
-                let mut actions = Vec::with_capacity(1);
-                actions.push(Action::Patch(uri, val.into()));
-                return actions;
-            }
+            let r = Doc::get().elem::<HtmlSelectElement>("lk_reason").value();
+            let reason = LockReason::from(&r[..]);
+            let rate = self.lock_rate();
+            return self.make_lock_action(reason, rate);
         }
         Vec::new()
     }

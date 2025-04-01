@@ -1052,6 +1052,7 @@ pub async fn handle_click(cv: &CardView, id: String) -> Result<()> {
         Res::Beacon => handle_click_x::<Beacon>(cv, id).await,
         Res::Camera => handle_click_x::<Camera>(cv, id).await,
         Res::Dms => handle_click_x::<Dms>(cv, id).await,
+        Res::RampMeter => handle_click_x::<RampMeter>(cv, id).await,
         _ => Ok(()),
     }
 }
