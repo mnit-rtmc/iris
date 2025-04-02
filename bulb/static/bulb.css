@@ -440,6 +440,10 @@ label:has(+ #sb_resource) {
   margin: 0;
 }
 
+.hidden {
+  visibility: hidden;
+}
+
 /* ---------------
  * Signal Housings
  * --------------- */

@@ -608,6 +608,19 @@ impl RampMeter {
         (meter1, meter2)
     }
 
+    /// Get metering rate as HTML
+    fn rate_html(&self) -> String {
+        match self.status_rate() {
+            Some(r) => {
+                let c = 3_600.0 / (r as f32);
+                format!("<span>⏱️ {c:.1} s ({r} veh/hr)</span>")
+            }
+            None => {
+                "<span class='hidden'>⏱️ 0.0 s (N/A veh/hr)</span>".to_string()
+            }
+        }
+    }
+
     /// Create an HTML `select` element of lock reasons
     fn lock_reason_html(&self) -> String {
         let reason = self.lock_reason();
@@ -631,13 +644,24 @@ impl RampMeter {
         html
     }
 
-    /// Get metering rate as HTML
-    fn rate_html(&self) -> String {
-        if let Some(r) = self.status_rate() {
-            let c = 3_600.0 / (r as f32);
-            return format!("<span>⏱️ {c:.1} s ({r} veh/hr)</span>");
-        }
-        String::new()
+    /// Get shrink/grow buttons as HTML
+    fn shrink_grow_html(&self) -> String {
+        let shrink = if self.is_shrink_allowed() {
+            ""
+        } else {
+            "disabled"
+        };
+        let grow = if self.is_grow_allowed() {
+            ""
+        } else {
+            "disabled"
+        };
+        format!(
+            "<span>\
+              <button id='lk_shrink' type='button' {shrink}>Shrink ↩</button>\
+              <button id='lk_grow' type='button' {grow}>Grow ↪</button>\
+            </span>"
+        )
     }
 
     /// Get queue as HTML
@@ -658,28 +682,12 @@ impl RampMeter {
                   </meter>\
                 </span>"
             ),
-            None => String::new(),
+            None => {
+                "<span class='hidden'>🚗 queue \
+                  <meter value='0'></meter>\
+                </span>".to_string()
+            }
         }
-    }
-
-    /// Get shrink/grow buttons as HTML
-    fn shrink_grow_html(&self) -> String {
-        let shrink = if self.is_shrink_allowed() {
-            ""
-        } else {
-            "disabled"
-        };
-        let grow = if self.is_grow_allowed() {
-            ""
-        } else {
-            "disabled"
-        };
-        format!(
-            "<span>\
-              <button id='lk_shrink' type='button' {shrink}>Shrink ➘</button>\
-              <button id='lk_grow' type='button' {grow}>Grow ➚</button>\
-            </span>"
-        )
     }
 
     /// Convert to Compact HTML
@@ -702,10 +710,10 @@ impl RampMeter {
         let item_states = self.item_states(anc).to_html();
         let location = HtmlStr::new(&self.location).with_len(64);
         let (meter1, meter2) = self.meter_images_html();
-        let reason = self.lock_reason_html();
         let rate = self.rate_html();
-        let queue = self.queue_html();
+        let reason = self.lock_reason_html();
         let shrink_grow = self.shrink_grow_html();
+        let queue = self.queue_html();
         format!(
             "{title}\
             <div class='row fill'>\
@@ -717,7 +725,7 @@ impl RampMeter {
             <div class='row center'>\
               {meter1}\
               <div class='column'>\
-                {reason}{rate}{queue}{shrink_grow}\
+                {rate}{reason}{shrink_grow}{queue}\
               </div>\
               {meter2}\
             </div>"
