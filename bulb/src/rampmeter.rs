@@ -378,8 +378,8 @@ impl LockReason {
         }
     }
 
-    /// Is growing the queue allowed?
-    fn is_grow_allowed(self) -> bool {
+    /// Is shrinking/growing the queue allowed?
+    fn is_shrink_grow_allowed(self) -> bool {
         matches!(
             self,
             LockReason::Unlocked | LockReason::Incident | LockReason::Testing
@@ -415,10 +415,14 @@ impl fmt::Display for MeterLock {
 
 impl MeterLock {
     /// Create a new meter lock
-    fn new(r: LockReason, rate: Option<u32>, u: String) -> Self {
-        let expires = MeterLock::make_expires(r, rate);
+    fn new(mut reason: LockReason, rate: Option<u32>, u: String) -> Self {
+        // If turned on, reason must be incident/testing
+        if rate.is_some() && reason.duration().is_none() {
+            reason = LockReason::Testing;
+        }
+        let expires = MeterLock::make_expires(reason, rate);
         MeterLock {
-            reason: r.as_str().to_string(),
+            reason: reason.as_str().to_string(),
             rate,
             expires,
             user_id: Some(u),
@@ -444,6 +448,11 @@ impl MeterLock {
 }
 
 impl RampMeter {
+    /// Get status rate
+    fn status_rate(&self) -> Option<u32> {
+        self.status.as_ref().and_then(|st| st.rate)
+    }
+
     /// Get fault, if any
     fn fault(&self) -> Option<&str> {
         self.status.as_ref().and_then(|s| s.fault.as_deref())
@@ -490,14 +499,25 @@ impl RampMeter {
         actions
     }
 
+    /// Is shrinking queue allowed?
+    fn is_shrink_allowed(&self) -> bool {
+        self.lock_reason().is_shrink_grow_allowed()
+            && (self.lock_rate().is_some() || self.status_rate().is_some())
+    }
+
+    /// Is growing queue allowed?
+    fn is_grow_allowed(&self) -> bool {
+        self.lock_reason().is_shrink_grow_allowed()
+    }
+
     /// Make lock shrink action
     fn lock_shrink(&self) -> Vec<Action> {
-        let reason = self.lock_reason();
-        if let Some(rate) = self.lock_rate() {
+        if let Some(rate) = self.lock_rate().or(self.status_rate()) {
             // FIXME: use system attributes
-            if rate < 1714 {
-                let rate = Some((rate + 50).min(1714));
-                return self.make_lock_action(reason, rate);
+            let rt = (rate + 50).min(1714);
+            if rt != rate {
+                let reason = self.lock_reason();
+                return self.make_lock_action(reason, Some(rt));
             }
         }
         Vec::new()
@@ -505,17 +525,15 @@ impl RampMeter {
 
     /// Make lock grow action
     fn lock_grow(&self) -> Vec<Action> {
-        let mut reason = self.lock_reason();
-        if reason != LockReason::Incident && reason != LockReason::Testing {
-            reason = LockReason::Incident;
-        }
         // FIXME: use system attributes
-        let rate = self.lock_rate().unwrap_or(1714);
-        if rate > 240 {
-            let rate = Some((rate - 50).max(240));
-            return self.make_lock_action(reason, rate);
+        let rate = self.lock_rate().or(self.status_rate()).unwrap_or(1714);
+        let rt = (rate - 50).max(240);
+        if rt != rate {
+            let reason = self.lock_reason();
+            self.make_lock_action(reason, Some(rt))
+        } else {
+            Vec::new()
         }
-        Vec::new()
     }
 
     /// Create action to handle click on a device request button
@@ -529,10 +547,7 @@ impl RampMeter {
 
     /// Get item states from status/lock
     fn item_states_lock(&self) -> ItemStates<'_> {
-        let deployed = match &self.status {
-            Some(st) if st.rate.is_some() => true,
-            _ => false,
-        };
+        let deployed = self.status_rate().is_some();
         let reason = self.lock_reason();
         let states = if reason == LockReason::Incident {
             ItemStates::default()
@@ -556,26 +571,24 @@ impl RampMeter {
     fn meter_images_html(&self) -> (String, String) {
         let mut meter1 = "".to_string();
         let mut meter2 = "".to_string();
-        if let Some(s) = &self.status {
-            if let Some(r) = s.rate {
-                let c = 3_600.0 / (r as f32);
-                let ds = (c * 10.0).round() as i32;
-                // between 0.1 and 50.0 seconds
-                if ds > 0 && ds < 500 {
-                    let red_cs = ds as u16 * 10;
-                    let mut buf = Vec::with_capacity(4096);
-                    match encode_meter_1(Encoder::new(&mut buf), red_cs) {
-                        Ok(()) => meter1 = meter_html(buf),
-                        Err(e) => console::log_1(
-                            &format!("encode_meter_1: {e:?}").into(),
-                        ),
+        if let Some(r) = self.status_rate() {
+            let c = 3_600.0 / (r as f32);
+            let ds = (c * 10.0).round() as i32;
+            // between 0.1 and 50.0 seconds
+            if ds > 0 && ds < 500 {
+                let red_cs = ds as u16 * 10;
+                let mut buf = Vec::with_capacity(4096);
+                match encode_meter_1(Encoder::new(&mut buf), red_cs) {
+                    Ok(()) => meter1 = meter_html(buf),
+                    Err(e) => {
+                        console::log_1(&format!("encode_meter_1: {e:?}").into())
                     }
-                    let mut buf = Vec::with_capacity(4096);
-                    match encode_meter_2(Encoder::new(&mut buf), red_cs) {
-                        Ok(()) => meter2 = meter_html(buf),
-                        Err(e) => console::log_1(
-                            &format!("encode_meter_2: {e:?}").into(),
-                        ),
+                }
+                let mut buf = Vec::with_capacity(4096);
+                match encode_meter_2(Encoder::new(&mut buf), red_cs) {
+                    Ok(()) => meter2 = meter_html(buf),
+                    Err(e) => {
+                        console::log_1(&format!("encode_meter_2: {e:?}").into())
                     }
                 }
             }
@@ -620,11 +633,9 @@ impl RampMeter {
 
     /// Get metering rate as HTML
     fn rate_html(&self) -> String {
-        if let Some(s) = &self.status {
-            if let Some(r) = s.rate {
-                let c = 3_600.0 / (r as f32);
-                return format!("<span>⏱️ {c:.1} s ({r} veh/hr)</span>");
-            }
+        if let Some(r) = self.status_rate() {
+            let c = 3_600.0 / (r as f32);
+            return format!("<span>⏱️ {c:.1} s ({r} veh/hr)</span>");
         }
         String::new()
     }
@@ -653,12 +664,16 @@ impl RampMeter {
 
     /// Get shrink/grow buttons as HTML
     fn shrink_grow_html(&self) -> String {
-        let locked_on = self.lock_rate().is_some();
-        let shrink = if locked_on { "" } else { "disabled" };
-        let mut grow = shrink;
-        if self.lock_reason().is_grow_allowed() {
-            grow = "";
-        }
+        let shrink = if self.is_shrink_allowed() {
+            ""
+        } else {
+            "disabled"
+        };
+        let grow = if self.is_grow_allowed() {
+            ""
+        } else {
+            "disabled"
+        };
         format!(
             "<span>\
               <button id='lk_shrink' type='button' {shrink}>Shrink ➘</button>\
@@ -909,7 +924,11 @@ impl Card for RampMeter {
         if &id == "lk_reason" {
             let r = Doc::get().elem::<HtmlSelectElement>("lk_reason").value();
             let reason = LockReason::from(&r[..]);
-            let rate = self.lock_rate();
+            let rate = if reason.duration().is_some() {
+                self.lock_rate().or(self.status_rate()).or(Some(1714))
+            } else {
+                None
+            };
             return self.make_lock_action(reason, rate);
         }
         Vec::new()
