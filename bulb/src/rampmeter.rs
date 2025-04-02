@@ -17,6 +17,7 @@ use crate::device::DeviceReq;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::geoloc::{Loc, LocAnc};
+use crate::html::Html;
 use crate::item::{ItemState, ItemStates};
 use crate::start::fly_map_item;
 use crate::util::{
@@ -650,22 +651,23 @@ impl RampMeter {
 
     /// Get shrink/grow buttons as HTML
     fn shrink_grow_html(&self) -> String {
-        let shrink = if self.is_shrink_allowed() {
-            ""
-        } else {
-            "disabled"
-        };
-        let grow = if self.is_grow_allowed() {
-            ""
-        } else {
-            "disabled"
-        };
-        format!(
-            "<span>\
-              <button id='lk_shrink' type='button' {shrink}>Shrink ↩</button>\
-              <button id='lk_grow' type='button' {grow}>Grow ↪</button>\
-            </span>"
-        )
+        let mut html = Html::new();
+        html.elem("span")
+            .elem("button")
+            .attr_val("id", "lk_shrink")
+            .attr_val("type", "button");
+        if !self.is_shrink_allowed() {
+            html.attr("disabled");
+        }
+        html.content("Shrink ↩").end();
+        html.elem("button")
+            .attr_val("id", "lk_grow")
+            .attr_val("type", "button");
+        if !self.is_grow_allowed() {
+            html.attr("disabled");
+        }
+        html.content("Grow ↪");
+        html.build().unwrap_or_default()
     }
 
     /// Get queue as HTML
