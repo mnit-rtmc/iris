@@ -77,14 +77,6 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 	/** Status label */
 	private final JLabel status_lbl = createValueLabel();
 
-	/** Metering on radio button */
-	private final JRadioButton on_btn = new JRadioButton(
-		I18N.get("ramp.meter.on"));
-
-	/** Metering off radio button */
-	private final JRadioButton off_btn = new JRadioButton(
-		I18N.get("ramp.meter.off"));
-
 	/** Reason the meter was locked */
 	private final JComboBox<String> reason_cbx = new JComboBox<String>(
 		MeterLock.REASONS);
@@ -121,12 +113,6 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 	@Override
 	public void initialize() {
 		super.initialize();
-		ButtonGroup group = new ButtonGroup();
-		group.add(on_btn);
-		group.add(off_btn);
-		JPanel b_pnl = new JPanel(new GridLayout(1, 2));
-		b_pnl.add(on_btn);
-		b_pnl.add(off_btn);
 		setTitle(I18N.get("ramp_meter.selected"));
 		add("device.name");
 		add(name_lbl);
@@ -139,8 +125,6 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		add(status_lbl, Stretch.LAST);
 		// Make label opaque so that we can set the background color
 		status_lbl.setOpaque(true);
-		add("ramp.meter.metering");
-		add(b_pnl);
 		add("ramp.meter.lock");
 		add(reason_cbx, Stretch.LAST);
 		add("ramp.meter.queue");
@@ -210,24 +194,18 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		String r = lk.optReason();
 		reason_cbx.setSelectedItem((r != null) ? r : "");
 		String user = session.getUser().getName();
-		TurnOnAction on_act = new TurnOnAction(rm, user);
-		TurnOffAction off_act = new TurnOffAction(rm, user);
 		LockReasonAction reason_act = new LockReasonAction(rm, user,
 			reason_cbx);
 		ShrinkQueueAction sq_act = new ShrinkQueueAction(rm, user);
 		GrowQueueAction gq_act = new GrowQueueAction(rm, user);
 		if (!isWritePermitted(rm)) {
-			on_act.setEnabled(false);
-			off_act.setEnabled(false);
 			reason_act.setEnabled(false);
-		}
-		boolean locked_on = (lk.optRate() != null);
-		if ((!isWritePermitted(rm)) || !locked_on) {
 			sq_act.setEnabled(false);
 			gq_act.setEnabled(false);
 		}
-		on_btn.setAction(on_act);
-		off_btn.setAction(off_act);
+		boolean metering = RampMeterHelper.optRate(rm) != null;
+		if (!metering)
+			sq_act.setEnabled(false);
 		reason_cbx.setAction(reason_act);
 		shrink_btn.setAction(sq_act);
 		grow_btn.setAction(gq_act);
@@ -235,10 +213,6 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 
 	/** Update the ramp meter release rate */
 	private void updateRate(RampMeter rm) {
-		if (RampMeterHelper.isMetering(rm))
-			on_btn.setSelected(true);
-		else
-			off_btn.setSelected(true);
 		Integer rt = RampMeterHelper.optRate(rm);
 		release_lbl.setText(RampMeterHelper.formatRelease(rt));
 		cycle_lbl.setText(RampMeterHelper.formatCycle(rt));

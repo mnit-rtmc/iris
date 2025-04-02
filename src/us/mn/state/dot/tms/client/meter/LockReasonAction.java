@@ -50,11 +50,15 @@ public class LockReasonAction extends ProxyAction<RampMeter> {
 				reason = null;
 			if (reason != null) {
 				MeterLock lk = new MeterLock(proxy.getLock());
-				lk.setReason(reason);
+				// set rate first, knowing it will be cleared
+				// if reason is not "incident" or "testing"
 				Integer rt = lk.optRate();
 				if (rt == null)
 					rt = RampMeterHelper.optRate(proxy);
+				if (rt == null)
+					rt = RampMeterHelper.getMaxRelease();
 				lk.setRate(rt);
+				lk.setReason(reason);
 				lk.setUser(user);
 				proxy.setLock(lk.toString());
 			} else

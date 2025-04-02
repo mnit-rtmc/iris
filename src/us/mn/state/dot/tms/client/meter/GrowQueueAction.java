@@ -43,13 +43,15 @@ public class GrowQueueAction extends ProxyAction<RampMeter> {
 		if (proxy != null) {
 			MeterLock lk = new MeterLock(proxy.getLock());
 			Integer rt = lk.optRate();
-			if (rt != null) {
-				int r = RampMeterHelper.filterRate(rt - 50);
-				if (r != rt) {
-					lk.setRate(r);
-					lk.setUser(user);
-					proxy.setLock(lk.toString());
-				}
+			if (rt == null)
+				rt = RampMeterHelper.optRate(proxy);
+			if (rt == null)
+				rt = RampMeterHelper.getMaxRelease();
+			int r = RampMeterHelper.filterRate(rt - 50);
+			if (r != rt) {
+				lk.setRate(r);
+				lk.setUser(user);
+				proxy.setLock(lk.toString());
 			}
 		}
 	}

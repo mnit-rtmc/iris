@@ -43,6 +43,8 @@ public class ShrinkQueueAction extends ProxyAction<RampMeter> {
 		if (proxy != null) {
 			MeterLock lk = new MeterLock(proxy.getLock());
 			Integer rt = lk.optRate();
+			if (rt == null)
+				rt = RampMeterHelper.optRate(proxy);
 			if (rt != null) {
 				int r = RampMeterHelper.filterRate(rt + 50);
 				if (r != rt) {
