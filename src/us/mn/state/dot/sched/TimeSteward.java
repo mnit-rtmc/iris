@@ -142,7 +142,7 @@ public final class TimeSteward {
 	static public Long parse8601(String dt) {
 		try {
 			SimpleDateFormat sdf =
-				new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+				new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
 			return sdf.parse(dt).getTime();
 		}
 		catch (ParseException e) {
