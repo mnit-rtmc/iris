@@ -23,7 +23,7 @@ use crate::util::{
     ContainsLower, Doc, Fields, HtmlStr, Input, OptVal, Select, TextArea,
 };
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
-use chrono::{DateTime, Local};
+use chrono::{DateTime, Local, format::SecondsFormat};
 use gift::block::DisposalMethod;
 use gift::{Encoder, Step};
 use pix::matte::Matte8;
@@ -433,7 +433,7 @@ impl MeterLock {
     fn make_expires(r: LockReason, rate: Option<u32>) -> Option<String> {
         rate.and(r.duration().map(|d| {
             let now: DateTime<Local> = Local::now();
-            (now + d).to_rfc3339()
+            (now + d).to_rfc3339_opts(SecondsFormat::Secs, false)
         }))
     }
 
@@ -674,20 +674,19 @@ impl RampMeter {
                 _ => None,
             })
         });
-        match value {
-            Some(value) => format!(
-                "<span>🚗 queue \
-                  <meter min='0' optimum='0' low='25' high='75' max='100' \
-                         value='{value}'>\
-                  </meter>\
-                </span>"
-            ),
-            None => {
-                "<span class='hidden'>🚗 queue \
-                  <meter value='0'></meter>\
-                </span>".to_string()
-            }
-        }
+        let cls = if value.is_none() {
+            " class='hidden'"
+        } else {
+            ""
+        };
+        let value = value.unwrap_or(0);
+        format!(
+            "<span{cls}>🚗 queue \
+              <meter min='0' optimum='0' low='25' high='75' max='100' \
+                     value='{value}'>\
+              </meter>\
+            </span>"
+        )
     }
 
     /// Convert to Compact HTML
