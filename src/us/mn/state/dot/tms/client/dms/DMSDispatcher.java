@@ -1,8 +1,9 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2025  Minnesota Department of Transportation
- * Copyright (C) 2010 AHMCT, University of California, Davis
+ * Copyright (C) 2010       AHMCT, University of California, Davis
  * Copyright (C) 2017-2018  Iteris Inc.
+ * Copyright (C) 2025       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,6 +52,7 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Douglas Lau
  * @author Erik Engstrom
  * @author Michael Darter
+ * @author John L. Stanley - SRF Consulting
  */
 public class DMSDispatcher extends JPanel {
 
@@ -375,7 +377,8 @@ public class DMSDispatcher extends JPanel {
 	/** Update the selected sign(s) */
 	private void updateSelected() {
 		Set<DMS> sel = sel_mdl.getSelected();
-		if (sel.size() == 0)
+		int signCount = sel.size(); 
+		if (signCount == 0)
 			clearSelected();
 		else {
 			for (DMS dms: sel) {
@@ -383,10 +386,12 @@ public class DMSDispatcher extends JPanel {
 				setSelected(dms);
 				break;
 			}
-			if (sel.size() > 1) {
+			if (signCount > 1) {
 				singleTab.setSelected(null);
 				setEnabled(true);
 			}
+			else
+				selectPreview(false);
 		}
 	}
 
