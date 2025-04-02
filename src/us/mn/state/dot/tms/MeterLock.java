@@ -46,6 +46,9 @@ public class MeterLock {
 	/** REASON: Construction */
 	static private final String REASON_CONSTRUCTION = "construction";
 
+	/** REASON: Reserve */
+	static private final String REASON_RESERVE = "reserve";
+
 	/** Lock reasons */
 	static public final String[] REASONS = {
 		"",
@@ -55,6 +58,7 @@ public class MeterLock {
 		REASON_INDICATION,
 		REASON_MAINTENANCE,
 		REASON_CONSTRUCTION,
+		REASON_RESERVE,
 	};
 
 	/** Release rate (vehicles per hour; Integer) */

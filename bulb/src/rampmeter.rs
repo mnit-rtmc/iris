@@ -60,6 +60,7 @@ enum LockReason {
     Indication,
     Maintenance,
     Construction,
+    Reserve,
 }
 
 /// Meter Lock
@@ -339,6 +340,7 @@ impl From<&str> for LockReason {
             "indication" => Self::Indication,
             "maintenance" => Self::Maintenance,
             "construction" => Self::Construction,
+            "reserve" => Self::Reserve,
             _ => Self::Unlocked,
         }
     }
@@ -361,6 +363,7 @@ impl LockReason {
             LockReason::Indication,
             LockReason::Maintenance,
             LockReason::Construction,
+            LockReason::Reserve,
         ]
     }
 
@@ -375,6 +378,7 @@ impl LockReason {
             Indication => "indication",
             Maintenance => "maintenance",
             Construction => "construction",
+            Reserve => "reserve",
         }
     }
 

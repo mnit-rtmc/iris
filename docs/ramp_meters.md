@@ -72,14 +72,15 @@ OFF locks prevent the meter from turning on, and will stay in place until
 manually removed.  ON locks have an expiration depending on the reason, and
 the metering rate can be adjusted using the _Shrink_ and _Grow_ buttons.
 
-Reason       | State    | Expiration
--------------|----------|-----------
-incident     | OFF / ON | 30 minutes
-testing      | OFF / ON | 5 minutes
-knocked down | OFF      | N/A
-indication   | OFF      | N/A
-maintenance  | OFF      | N/A
-construction | OFF      | N/A
+Reason       | State | Expiration
+-------------|-------|-----------
+incident     | ON    | 30 minutes
+testing      | ON    | 5 minutes
+knocked down | OFF   | N/A
+indication   | OFF   | N/A
+maintenance  | OFF   | N/A
+construction | OFF   | N/A
+reserve      | OFF   | N/A
 
 
 [CD roads]: road_topology.html#rnode-transitions
