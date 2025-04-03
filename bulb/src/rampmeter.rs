@@ -127,9 +127,8 @@ pub struct RampMeterAnc {
 }
 
 impl RampMeterAnc {
-    /// Create an HTML `select` element of meter types
-    fn meter_types_html(&self, pri: &RampMeter) -> String {
-        let mut html = Html::new();
+    /// Build meter types HTML
+    fn meter_types_html(&self, pri: &RampMeter, html: &mut Html) {
         html.elem("select").id("meter_type");
         for tp in &self.meter_types {
             html.elem("option").attr("value", tp.id.to_string());
@@ -138,12 +137,11 @@ impl RampMeterAnc {
             }
             html.text(&tp.description).end();
         }
-        html.build()
+        html.end(); /* select */
     }
 
-    /// Create an HTML `select` element of metering algorithms
-    fn algorithms_html(&self, pri: &RampMeter) -> String {
-        let mut html = Html::new();
+    /// Build metering algorithms HTML
+    fn algorithms_html(&self, pri: &RampMeter, html: &mut Html) {
         html.elem("select").id("algorithm");
         for alg in &self.algorithms {
             html.elem("option").attr("value", alg.id.to_string());
@@ -152,7 +150,7 @@ impl RampMeterAnc {
             }
             html.text(&alg.description).end();
         }
-        html.build()
+        html.end(); /* select */
     }
 }
 
@@ -303,18 +301,16 @@ fn encode_meter_2<W: Write>(enc: Encoder<W>, red_cs: u16) -> Result<()> {
     Ok(())
 }
 
-/// Make meter signal as html
-fn meter_html(buf: Vec<u8>) -> String {
+/// Build meter signal HTML
+fn meter_html(buf: Vec<u8>, html: &mut Html) {
     const WIDTH: u32 = 24;
     const HEIGHT: u32 = 64;
     let mut src = "data:image/gif;base64,".to_owned();
     b64enc.encode_string(buf, &mut src);
-    let mut html = Html::new();
     html.elem("img")
         .attr("width", WIDTH.to_string())
         .attr("height", HEIGHT.to_string())
         .attr("src", &src);
-    html.build()
 }
 
 impl From<&str> for LockReason {
@@ -557,10 +553,8 @@ impl RampMeter {
         }
     }
 
-    /// Render meter images
-    fn meter_images_html(&self) -> (String, String) {
-        let mut meter1 = "".to_string();
-        let mut meter2 = "".to_string();
+    /// Build meter image HTML
+    fn meter_image_html(&self, num: u32, html: &mut Html) {
         if let Some(r) = self.status_rate() {
             let c = 3_600.0 / (r as f32);
             let ds = (c * 10.0).round() as i32;
@@ -568,53 +562,49 @@ impl RampMeter {
             if ds > 0 && ds < 500 {
                 let red_cs = ds as u16 * 10;
                 let mut buf = Vec::with_capacity(4096);
-                match encode_meter_1(Encoder::new(&mut buf), red_cs) {
-                    Ok(()) => meter1 = meter_html(buf),
-                    Err(e) => {
-                        console::log_1(&format!("encode_meter_1: {e:?}").into())
+                let res = if num == 1 {
+                    encode_meter_1(Encoder::new(&mut buf), red_cs)
+                } else {
+                    encode_meter_2(Encoder::new(&mut buf), red_cs)
+                };
+                match res {
+                    Ok(()) => {
+                        meter_html(buf, html);
+                        return;
                     }
-                }
-                let mut buf = Vec::with_capacity(4096);
-                match encode_meter_2(Encoder::new(&mut buf), red_cs) {
-                    Ok(()) => meter2 = meter_html(buf),
                     Err(e) => {
-                        console::log_1(&format!("encode_meter_2: {e:?}").into())
+                        console::log_1(&format!("encode_meter: {e:?}").into())
                     }
                 }
             }
         }
-        if meter1.is_empty() || meter2.is_empty() {
-            let mut buf = Vec::with_capacity(4096);
-            match encode_meter_off(Encoder::new(&mut buf)) {
-                Ok(()) => {
-                    meter1 = meter_html(buf);
-                    meter2 = meter1.clone();
-                }
-                Err(e) => {
-                    console::log_1(&format!("encode_meter_off: {e:?}").into())
-                }
+        let mut buf = Vec::with_capacity(4096);
+        match encode_meter_off(Encoder::new(&mut buf)) {
+            Ok(()) => meter_html(buf, html),
+            Err(e) => {
+                console::log_1(&format!("encode_meter_off: {e:?}").into())
             }
         }
-        (meter1, meter2)
     }
 
-    /// Get metering rate as HTML
-    fn rate_html(&self) -> String {
+    /// Build metering rate HTML
+    fn rate_html(&self, html: &mut Html) {
+        html.elem("span");
         match self.status_rate() {
             Some(r) => {
                 let c = 3_600.0 / (r as f32);
-                format!("<span>⏱️ {c:.1} s ({r} veh/hr)</span>")
+                html.text(format!("⏱️ {c:.1} s ({r} veh/hr)"));
             }
             None => {
-                "<span class='hidden'>⏱️ 0.0 s (N/A veh/hr)</span>".to_string()
+                html.class("hidden").text("⏱️ 0.0 s (N/A veh/hr)");
             }
         }
+        html.end();
     }
 
-    /// Create an HTML `select` element of lock reasons
-    fn lock_reason_html(&self) -> String {
+    /// Build lock reason HTML
+    fn lock_reason_html(&self, html: &mut Html) {
         let reason = self.lock_reason();
-        let mut html = Html::new();
         html.elem("span").text(match reason {
             LockReason::Unlocked => "🔓",
             _ => "🔒",
@@ -627,12 +617,11 @@ impl RampMeter {
             }
             html.text(r.as_str()).end();
         }
-        html.build()
+        html.end().end();
     }
 
-    /// Get shrink/grow buttons as HTML
-    fn shrink_grow_html(&self) -> String {
-        let mut html = Html::new();
+    /// Build shrink/grow buttons HTML
+    fn shrink_grow_html(&self, html: &mut Html) {
         html.elem("span")
             .elem("button")
             .id("lk_shrink")
@@ -645,12 +634,12 @@ impl RampMeter {
         if !self.is_grow_allowed() {
             html.attr_bool("disabled");
         }
-        html.text("Grow ↪");
-        html.build()
+        html.text("Grow ↪").end();
+        html.end(); /* span */
     }
 
-    /// Get queue as HTML
-    fn queue_html(&self) -> String {
+    /// Build queue HTML
+    fn queue_html(&self, html: &mut Html) {
         let value = self.status.as_ref().and_then(|s| {
             s.queue.as_ref().and_then(|q| match q.as_str() {
                 "empty" => Some(8),
@@ -659,7 +648,6 @@ impl RampMeter {
                 _ => None,
             })
         });
-        let mut html = Html::new();
         html.elem("span");
         if value.is_none() {
             html.class("hidden");
@@ -672,8 +660,9 @@ impl RampMeter {
             .attr("low", "25")
             .attr("high", "75")
             .attr("max", "100")
-            .attr("value", &value);
-        html.build()
+            .attr("value", &value)
+            .end();
+        html.end(); /* span */
     }
 
     /// Convert to Compact HTML
@@ -707,16 +696,15 @@ impl RampMeter {
             .text_len(opt_ref(&self.location), 64)
             .end();
         html.end(); /* div */
-        let (meter1, meter2) = self.meter_images_html();
         html.elem("div").class("row center");
-        html.raw(meter1);
+        self.meter_image_html(1, &mut html);
         html.elem("div").class("column");
-        html.raw(self.rate_html());
-        html.raw(self.lock_reason_html());
-        html.raw(self.shrink_grow_html());
-        html.raw(self.queue_html());
+        self.rate_html(&mut html);
+        self.lock_reason_html(&mut html);
+        self.shrink_grow_html(&mut html);
+        self.queue_html(&mut html);
         html.end(); /* div */
-        html.raw(meter2);
+        self.meter_image_html(2, &mut html);
         html.build()
     }
 
@@ -763,14 +751,14 @@ impl RampMeter {
             .attr("for", "meter_type")
             .text("Type")
             .end();
-        html.raw(anc.meter_types_html(self));
+        anc.meter_types_html(self, &mut html);
         html.end(); /* div */
         html.elem("div").class("row");
         html.elem("label")
             .attr("for", "algorithm")
             .text("Algorithm")
             .end();
-        html.raw(anc.algorithms_html(self));
+        anc.algorithms_html(self, &mut html);
         html.end(); /* div */
         html.elem("div").class("row");
         html.elem("label")
