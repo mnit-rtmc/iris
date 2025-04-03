@@ -17,7 +17,7 @@ pub struct Html {
     html: String,
     stack: Vec<&'static str>,
     open_tag: bool,
-    error: bool,
+    error: Option<&'static str>,
 }
 
 /// HTML Void elements
@@ -38,7 +38,7 @@ impl Html {
             html: String::new(),
             stack: Vec::new(),
             open_tag: false,
-            error: false,
+            error: None,
         }
     }
 
@@ -47,8 +47,8 @@ impl Html {
     /// # Returns
     /// HTML as an owned `String`
     pub fn build(mut self) -> String {
-        if self.error {
-            return "<p>Html error</p>".to_owned();
+        if let Some(err) = self.error {
+            return format!("<p>Error: {err}");
         }
         while let Some(elem) = self.stack.pop() {
             self.html.push_str("</");
@@ -73,7 +73,7 @@ impl Html {
     /// Add a boolean attribute to an open element
     ///
     /// Must be called after `elem`, `attr` or `attr_bool`
-    pub fn attr_bool(&mut self, attr: &str) -> &mut Self {
+    pub fn attr_bool(&mut self, attr: &'static str) -> &mut Self {
         if self.open_tag {
             match self.html.pop() {
                 Some(gt) => assert_eq!(gt, '>'),
@@ -83,7 +83,7 @@ impl Html {
             self.html.push_str(attr);
             self.html.push('>');
         } else {
-            self.error = true;
+            self.error = Some("attribute after text");
         }
         self
     }
@@ -91,7 +91,7 @@ impl Html {
     /// Add an attribute with value to an open element
     ///
     /// Must be called after `elem`, `attr` or `attr_bool`
-    pub fn attr(&mut self, attr: &str, val: &str) -> &mut Self {
+    pub fn attr(&mut self, attr: &'static str, val: &str) -> &mut Self {
         if self.open_tag {
             match self.html.pop() {
                 Some(gt) => assert_eq!(gt, '>'),
@@ -109,7 +109,7 @@ impl Html {
             }
             self.html.push_str("\">");
         } else {
-            self.error = true;
+            self.error = Some("attribute after text");
         }
         self
     }
@@ -134,7 +134,7 @@ impl Html {
     /// Add text content which will be escaped
     pub fn text_len(&mut self, text: &str, len: usize) -> &mut Self {
         if self.stack.is_empty() {
-            self.error = true;
+            self.error = Some("text at root");
         } else {
             for c in text.chars().take(len) {
                 match c {
@@ -158,7 +158,7 @@ impl Html {
     #[allow(dead_code)]
     pub fn text_no_esc(&mut self, text: &str) -> &mut Self {
         if self.stack.is_empty() {
-            self.error = true;
+            self.error = Some("text at root");
         } else {
             self.html.push_str(text);
             self.open_tag = false;
@@ -174,7 +174,7 @@ impl Html {
                 self.html.push_str(elem);
                 self.html.push('>');
             }
-            None => self.error = true,
+            None => self.error = Some("stack underflow"),
         }
         self.open_tag = false;
         self
