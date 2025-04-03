@@ -57,10 +57,10 @@ impl Html {
         self
     }
 
-    /// Add an attribute to an open element
+    /// Add a boolean attribute to an open element
     ///
-    /// Must be called after `elem`, `attr` or `attr_val`
-    pub fn attr(&mut self, attr: &str) -> &mut Self {
+    /// Must be called after `elem`, `attr` or `attr_bool`
+    pub fn attr_bool(&mut self, attr: &str) -> &mut Self {
         if self.open_tag {
             match self.html.pop() {
                 Some(gt) => assert_eq!(gt, '>'),
@@ -77,8 +77,8 @@ impl Html {
 
     /// Add an attribute with value to an open element
     ///
-    /// Must be called after `elem`, `attr` or `attr_val`
-    pub fn attr_val(&mut self, attr: &str, val: &str) -> &mut Self {
+    /// Must be called after `elem`, `attr` or `attr_bool`
+    pub fn attr(&mut self, attr: &str, val: &str) -> &mut Self {
         if self.open_tag {
             match self.html.pop() {
                 Some(gt) => assert_eq!(gt, '>'),
@@ -103,13 +103,19 @@ impl Html {
 
     /// Add an `id` attribute to an open element
     pub fn id(&mut self, val: &str) -> &mut Self {
-        self.attr_val("id", val)
+        self.attr("id", val)
     }
 
     /// Add a `class` attribute to an open element
     #[allow(dead_code)]
     pub fn class(&mut self, val: &str) -> &mut Self {
-        self.attr_val("class", val)
+        self.attr("class", val)
+    }
+
+    /// Add a `type` attribute to an open element
+    #[allow(dead_code)]
+    pub fn type_(&mut self, val: &str) -> &mut Self {
+        self.attr("type", val)
     }
 
     /// Add text content which will be escaped
@@ -172,7 +178,7 @@ mod test {
         html.elem("div");
         assert_eq!(html.build(), String::from("<div></div>"));
         let mut html = Html::new();
-        html.elem("div").attr_val("id", "test").attr("spellcheck");
+        html.elem("div").id("test").attr_bool("spellcheck");
         assert_eq!(
             html.build(),
             String::from("<div id=\"test\" spellcheck></div>")

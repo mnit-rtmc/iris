@@ -39,7 +39,7 @@ use crate::role::Role;
 use crate::signconfig::SignConfig;
 use crate::tagreader::TagReader;
 use crate::user::User;
-use crate::util::{Doc, HtmlStr};
+use crate::util::Doc;
 use crate::videomonitor::VideoMonitor;
 use crate::weathersensor::WeatherSensor;
 use futures::StreamExt;
@@ -309,13 +309,18 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
 
     /// Convert to Create HTML
     fn to_html_create(&self, _anc: &Self::Ancillary) -> String {
-        let name = HtmlStr::new(self.name());
-        format!(
-            "<div class='row'>\
-              <label for='create_name'>Name</label>\
-              <input id='create_name' maxlength='24' size='24' value='{name}'>\
-            </div>"
-        )
+        let mut html = Html::new();
+        html.elem("div").class("row");
+        html.elem("label")
+            .attr("for", "create_name")
+            .text("Name")
+            .end();
+        html.elem("input")
+            .id("create_name")
+            .attr("maxlength", "24")
+            .attr("size", "24")
+            .attr("value", &self.name());
+        html.build()
     }
 
     /// Convert to HTML view
@@ -351,7 +356,7 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
         for v in res_views(Self::res()) {
             html.elem("option");
             if *v == view {
-                html.attr("selected");
+                html.attr_bool("selected");
             }
             html.text(v.as_str()).end();
         }

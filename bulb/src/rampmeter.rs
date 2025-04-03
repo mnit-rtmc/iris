@@ -134,9 +134,9 @@ impl RampMeterAnc {
         let mut html = Html::new();
         html.elem("select").id("meter_type");
         for tp in &self.meter_types {
-            html.elem("option").attr_val("value", &tp.id.to_string());
+            html.elem("option").attr("value", &tp.id.to_string());
             if Some(tp.id) == pri.meter_type {
-                html.attr("selected");
+                html.attr_bool("selected");
             }
             html.text(&tp.description).end();
         }
@@ -148,9 +148,9 @@ impl RampMeterAnc {
         let mut html = Html::new();
         html.elem("select").id("algorithm");
         for alg in &self.algorithms {
-            html.elem("option").attr_val("value", &alg.id.to_string());
+            html.elem("option").attr("value", &alg.id.to_string());
             if Some(alg.id) == pri.algorithm {
-                html.attr("selected");
+                html.attr_bool("selected");
             }
             html.text(&alg.description).end();
         }
@@ -313,9 +313,9 @@ fn meter_html(buf: Vec<u8>) -> String {
     b64enc.encode_string(buf, &mut src);
     let mut html = Html::new();
     html.elem("img")
-        .attr_val("width", &WIDTH.to_string())
-        .attr_val("height", &HEIGHT.to_string())
-        .attr_val("src", &src);
+        .attr("width", &WIDTH.to_string())
+        .attr("height", &HEIGHT.to_string())
+        .attr("src", &src);
     html.build()
 }
 
@@ -630,7 +630,7 @@ impl RampMeter {
         for r in LockReason::all() {
             html.elem("option");
             if *r == reason {
-                html.attr("selected");
+                html.attr_bool("selected");
             }
             html.text(r.as_str()).end();
         }
@@ -642,17 +642,15 @@ impl RampMeter {
         let mut html = Html::new();
         html.elem("span")
             .elem("button")
-            .attr_val("id", "lk_shrink")
-            .attr_val("type", "button");
+            .id("lk_shrink")
+            .type_("button");
         if !self.is_shrink_allowed() {
-            html.attr("disabled");
+            html.attr_bool("disabled");
         }
         html.text("Shrink ↩").end();
-        html.elem("button")
-            .attr_val("id", "lk_grow")
-            .attr_val("type", "button");
+        html.elem("button").id("lk_grow").type_("button");
         if !self.is_grow_allowed() {
-            html.attr("disabled");
+            html.attr_bool("disabled");
         }
         html.text("Grow ↪");
         html.build()
@@ -676,12 +674,12 @@ impl RampMeter {
         html.text("🚗 queue ");
         let value = value.unwrap_or(0).to_string();
         html.elem("meter")
-            .attr_val("min", "0")
-            .attr_val("optimum", "0")
-            .attr_val("low", "25")
-            .attr_val("high", "75")
-            .attr_val("max", "100")
-            .attr_val("value", &value);
+            .attr("min", "0")
+            .attr("optimum", "0")
+            .attr("low", "25")
+            .attr("high", "75")
+            .attr("max", "100")
+            .attr("value", &value);
         html.build()
     }
 
@@ -734,22 +732,25 @@ impl RampMeter {
 
     /// Convert to Request HTML
     fn to_html_request(&self, _anc: &RampMeterAnc) -> String {
-        let title = self.title(View::Request).build();
-        let name = HtmlStr::new(self.name());
         let work = "http://example.com"; // FIXME
-        format!(
-            "{title}\
-            <div class='row'>\
-              <span>Settings</span>\
-              <button id='rq_settings_send' type='button'>Send</button>\
-            </div>\
-            <div class='row'>\
-              <span>Work Request</span>
-              <a href='{work}' target='_blank' rel='noopener noreferrer'>\
-                🔗 {name}\
-              </a>\
-            </div>"
-        )
+        let mut html = self.title(View::Request);
+        html.elem("div").class("row");
+        html.elem("span").text("Settings").end();
+        html.elem("button")
+            .id("rq_settings")
+            .type_("button")
+            .text("Send")
+            .end()
+            .end(); /* div */
+        html.elem("div").class("row");
+        html.elem("span").text("Work Request").end();
+        html.elem("a")
+            .attr("href", &work)
+            .attr("target", "_blank")
+            .attr("rel", "noopener noreferrer")
+            .text("🔗 ")
+            .text(&self.name());
+        html.build()
     }
 
     /// Convert to Setup HTML
@@ -922,7 +923,7 @@ impl Card for RampMeter {
         match id.as_str() {
             "lk_shrink" => self.lock_shrink(),
             "lk_grow" => self.lock_grow(),
-            "rq_settings_send" => self.device_req(DeviceReq::SendSettings),
+            "rq_settings" => self.device_req(DeviceReq::SendSettings),
             _ => Vec::new(),
         }
     }
