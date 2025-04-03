@@ -20,9 +20,7 @@ use crate::geoloc::{Loc, LocAnc};
 use crate::html::{Html, opt_ref, opt_str};
 use crate::item::{ItemState, ItemStates};
 use crate::start::fly_map_item;
-use crate::util::{
-    ContainsLower, Doc, Fields, HtmlStr, Input, Select, TextArea,
-};
+use crate::util::{ContainsLower, Doc, Fields, Input, Select, TextArea};
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
 use chrono::{DateTime, Local, format::SecondsFormat};
 use gift::block::DisposalMethod;
@@ -699,30 +697,27 @@ impl RampMeter {
         if let Some((lat, lon)) = anc.loc.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let title = self.title(View::Control).build();
-        let item_states = self.item_states(anc).to_html();
-        let location = HtmlStr::new(&self.location).with_len(64);
+        let mut html = self.title(View::Control);
+        html.elem("div").class("row fill");
+        html.elem("span").raw(self.item_states(anc).to_html()).end();
+        html.end(); /* div */
+        html.elem("div").class("row");
+        html.elem("span")
+            .class("info")
+            .text_len(opt_ref(&self.location), 64)
+            .end();
+        html.end(); /* div */
         let (meter1, meter2) = self.meter_images_html();
-        let rate = self.rate_html();
-        let reason = self.lock_reason_html();
-        let shrink_grow = self.shrink_grow_html();
-        let queue = self.queue_html();
-        format!(
-            "{title}\
-            <div class='row fill'>\
-              <span>{item_states}</span>\
-            </div>\
-            <div class='row'>\
-              <span class='info'>{location}</span>\
-            </div>\
-            <div class='row center'>\
-              {meter1}\
-              <div class='column'>\
-                {rate}{reason}{shrink_grow}{queue}\
-              </div>\
-              {meter2}\
-            </div>"
-        )
+        html.elem("div").class("row center");
+        html.raw(meter1);
+        html.elem("div").class("column");
+        html.raw(self.rate_html());
+        html.raw(self.lock_reason_html());
+        html.raw(self.shrink_grow_html());
+        html.raw(self.queue_html());
+        html.end(); /* div */
+        html.raw(meter2);
+        html.build()
     }
 
     /// Convert to Request HTML
@@ -761,21 +756,21 @@ impl RampMeter {
             .text(opt_ref(&self.notes))
             .end();
         html.end(); /* div */
-        html.raw(&anc.cio.controller_html(self));
-        html.raw(&anc.cio.pin_html(self.pin));
+        html.raw(anc.cio.controller_html(self));
+        html.raw(anc.cio.pin_html(self.pin));
         html.elem("div").class("row");
         html.elem("label")
             .attr("for", "meter_type")
             .text("Type")
             .end();
-        html.raw(&anc.meter_types_html(self));
+        html.raw(anc.meter_types_html(self));
         html.end(); /* div */
         html.elem("div").class("row");
         html.elem("label")
             .attr("for", "algorithm")
             .text("Algorithm")
             .end();
-        html.raw(&anc.algorithms_html(self));
+        html.raw(anc.algorithms_html(self));
         html.end(); /* div */
         html.elem("div").class("row");
         html.elem("label")
@@ -829,7 +824,7 @@ impl RampMeter {
             .attr("size", "8")
             .attr("value", opt_str(self.pm_target));
         html.end(); /* div */
-        html.raw(&self.footer(true));
+        html.raw(self.footer(true));
         html.build()
     }
 }

@@ -177,8 +177,8 @@ impl Html {
 
     /// Add raw content
     #[allow(dead_code)]
-    pub fn raw(&mut self, text: &str) -> &mut Self {
-        self.html.push_str(text);
+    pub fn raw(&mut self, text: impl AsRef<str>) -> &mut Self {
+        self.html.push_str(text.as_ref());
         self.open_tag = false;
         self
     }
