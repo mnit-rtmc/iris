@@ -17,11 +17,11 @@ use crate::device::DeviceReq;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::geoloc::{Loc, LocAnc};
-use crate::html::Html;
+use crate::html::{Html, opt_ref, opt_str};
 use crate::item::{ItemState, ItemStates};
 use crate::start::fly_map_item;
 use crate::util::{
-    ContainsLower, Doc, Fields, HtmlStr, Input, OptVal, Select, TextArea,
+    ContainsLower, Doc, Fields, HtmlStr, Input, Select, TextArea,
 };
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
 use chrono::{DateTime, Local, format::SecondsFormat};
@@ -134,7 +134,7 @@ impl RampMeterAnc {
         let mut html = Html::new();
         html.elem("select").id("meter_type");
         for tp in &self.meter_types {
-            html.elem("option").attr("value", &tp.id.to_string());
+            html.elem("option").attr("value", tp.id.to_string());
             if Some(tp.id) == pri.meter_type {
                 html.attr_bool("selected");
             }
@@ -148,7 +148,7 @@ impl RampMeterAnc {
         let mut html = Html::new();
         html.elem("select").id("algorithm");
         for alg in &self.algorithms {
-            html.elem("option").attr("value", &alg.id.to_string());
+            html.elem("option").attr("value", alg.id.to_string());
             if Some(alg.id) == pri.algorithm {
                 html.attr_bool("selected");
             }
@@ -313,8 +313,8 @@ fn meter_html(buf: Vec<u8>) -> String {
     b64enc.encode_string(buf, &mut src);
     let mut html = Html::new();
     html.elem("img")
-        .attr("width", &WIDTH.to_string())
-        .attr("height", &HEIGHT.to_string())
+        .attr("width", WIDTH.to_string())
+        .attr("height", HEIGHT.to_string())
         .attr("src", &src);
     html.build()
 }
@@ -440,11 +440,6 @@ impl MeterLock {
 }
 
 impl RampMeter {
-    /// Get location description
-    fn location(&self) -> &str {
-        self.location.as_ref().map_or("", |l| l)
-    }
-
     /// Get status rate
     fn status_rate(&self) -> Option<u32> {
         self.status.as_ref().and_then(|st| st.rate)
@@ -689,13 +684,13 @@ impl RampMeter {
         let mut html = Html::new();
         html.elem("div")
             .class("title row")
-            .text(&self.name())
+            .text(self.name())
             .text(" ")
-            .text(&item_states.to_string())
+            .text(item_states.to_string())
             .end();
         html.elem("div")
             .class("info fill")
-            .text_len(self.location(), 32);
+            .text_len(opt_ref(&self.location), 32);
         html.build()
     }
 
@@ -745,66 +740,97 @@ impl RampMeter {
         html.elem("div").class("row");
         html.elem("span").text("Work Request").end();
         html.elem("a")
-            .attr("href", &work)
+            .attr("href", work)
             .attr("target", "_blank")
             .attr("rel", "noopener noreferrer")
             .text("🔗 ")
-            .text(&self.name());
+            .text(self.name());
         html.build()
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &RampMeterAnc) -> String {
-        let title = self.title(View::Setup).build();
-        let notes = HtmlStr::new(&self.notes);
-        let controller = anc.cio.controller_html(self);
-        let pin = anc.cio.pin_html(self.pin);
-        let meter_types = anc.meter_types_html(self);
-        let algorithms = anc.algorithms_html(self);
-        let storage = OptVal(self.storage);
-        let max_wait = OptVal(self.max_wait);
-        let am_target = OptVal(self.am_target);
-        let pm_target = OptVal(self.pm_target);
-        let footer = self.footer(true);
-        format!(
-            "{title}\
-            <div class='row'>\
-              <label for='notes'>Notes</label>\
-              <textarea id='notes' maxlength='255' rows='4' \
-                        cols='24'>{notes}</textarea>\
-            </div>\
-            {controller}\
-            {pin}\
-            <div class='row'>\
-              <label for='meter_type'>Meter Type</label>\
-              {meter_types}\
-            </div>\
-            <div class='row'>\
-              <label for='algorithm'>Algorithm</label>\
-              {algorithms}\
-            </div>\
-            <div class='row'>\
-              <label for='storage'>Storage (ft)</label>\
-              <input id='storage' type='number' min='1' max='5000' \
-                     size='8' value='{storage}'>\
-            </div>\
-            <div class='row'>\
-              <label for='max_wait'>Max Wait (s)</label>\
-              <input id='max_wait' type='number' min='1' max='600' \
-                     size='8' value='{max_wait}'>\
-            </div>\
-            <div class='row'>\
-              <label for='am_target'>AM Target</label>\
-              <input id='am_target' type='number' min='0' max='2000' \
-                     size='8' value='{am_target}'>\
-            </div>\
-            <div class='row'>\
-              <label for='pm_target'>PM Target</label>\
-              <input id='pm_target' type='number' min='0' max='2000' \
-                     size='8' value='{pm_target}'>\
-            </div>\
-            {footer}"
-        )
+        let mut html = self.title(View::Setup);
+        html.elem("div").class("row");
+        html.elem("label").attr("for", "notes").text("Notes").end();
+        html.elem("textarea")
+            .id("notes")
+            .attr("maxlength", "255")
+            .attr("rows", "4")
+            .attr("cols", "24")
+            .text(opt_ref(&self.notes))
+            .end();
+        html.end(); /* div */
+        html.raw(&anc.cio.controller_html(self));
+        html.raw(&anc.cio.pin_html(self.pin));
+        html.elem("div").class("row");
+        html.elem("label")
+            .attr("for", "meter_type")
+            .text("Type")
+            .end();
+        html.raw(&anc.meter_types_html(self));
+        html.end(); /* div */
+        html.elem("div").class("row");
+        html.elem("label")
+            .attr("for", "algorithm")
+            .text("Algorithm")
+            .end();
+        html.raw(&anc.algorithms_html(self));
+        html.end(); /* div */
+        html.elem("div").class("row");
+        html.elem("label")
+            .attr("for", "storage")
+            .text("Storage (ft)")
+            .end();
+        html.elem("input")
+            .id("storage")
+            .type_("number")
+            .attr("min", "1")
+            .attr("max", "5000")
+            .attr("size", "8")
+            .attr("value", opt_str(self.storage));
+        html.end(); /* div */
+        html.elem("div").class("row");
+        html.elem("label")
+            .attr("for", "max_wait")
+            .text("Max Wait (s)")
+            .end();
+        html.elem("input")
+            .id("max_wait")
+            .type_("number")
+            .attr("min", "1")
+            .attr("max", "600")
+            .attr("size", "8")
+            .attr("value", opt_str(self.max_wait));
+        html.end(); /* div */
+        html.elem("div").class("row");
+        html.elem("label")
+            .attr("for", "am_target")
+            .text("AM Target")
+            .end();
+        html.elem("input")
+            .id("am_target")
+            .type_("number")
+            .attr("min", "0")
+            .attr("max", "2000")
+            .attr("size", "8")
+            .attr("value", opt_str(self.am_target));
+        html.end(); /* div */
+        html.elem("div").class("row");
+        html.elem("label")
+            .attr("for", "pm_target")
+            .text("PM Target")
+            .end();
+        html.elem("input")
+            .id("pm_target")
+            .type_("number")
+            .attr("min", "0")
+            .attr("max", "2000")
+            .attr("size", "8")
+            .attr("value", opt_str(self.pm_target));
+        html.end(); /* div */
+        html.raw(&self.footer(true));
+        html.build()
     }
 }
 

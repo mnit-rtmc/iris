@@ -319,7 +319,7 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
             .id("create_name")
             .attr("maxlength", "24")
             .attr("size", "24")
-            .attr("value", &self.name());
+            .attr("value", self.name());
         html.build()
     }
 

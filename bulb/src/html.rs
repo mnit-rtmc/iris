@@ -10,6 +10,23 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use std::fmt::Display;
+
+/// Get optional `str` reference
+pub fn opt_ref(val: &Option<impl AsRef<str>>) -> &str {
+    match val {
+        Some(v) => v.as_ref(),
+        None => "",
+    }
+}
+
+/// Get optional String
+pub fn opt_str(val: Option<impl Display>) -> String {
+    match val {
+        Some(v) => v.to_string(),
+        None => String::new(),
+    }
+}
 
 /// Simple HTML builder
 #[derive(Debug)]
@@ -91,7 +108,11 @@ impl Html {
     /// Add an attribute with value to an open element
     ///
     /// Must be called after `elem`, `attr` or `attr_bool`
-    pub fn attr(&mut self, attr: &'static str, val: &str) -> &mut Self {
+    pub fn attr(
+        &mut self,
+        attr: &'static str,
+        val: impl AsRef<str>,
+    ) -> &mut Self {
         if self.open_tag {
             match self.html.pop() {
                 Some(gt) => assert_eq!(gt, '>'),
@@ -100,7 +121,7 @@ impl Html {
             self.html.push(' ');
             self.html.push_str(attr);
             self.html.push_str("=\"");
-            for c in val.chars() {
+            for c in val.as_ref().chars() {
                 match c {
                     '&' => self.html.push_str("&amp;"),
                     '"' => self.html.push_str("&quot;"),
@@ -115,28 +136,28 @@ impl Html {
     }
 
     /// Add an `id` attribute to an open element
-    pub fn id(&mut self, val: &str) -> &mut Self {
+    pub fn id(&mut self, val: impl AsRef<str>) -> &mut Self {
         self.attr("id", val)
     }
 
     /// Add a `class` attribute to an open element
     #[allow(dead_code)]
-    pub fn class(&mut self, val: &str) -> &mut Self {
+    pub fn class(&mut self, val: impl AsRef<str>) -> &mut Self {
         self.attr("class", val)
     }
 
     /// Add a `type` attribute to an open element
     #[allow(dead_code)]
-    pub fn type_(&mut self, val: &str) -> &mut Self {
+    pub fn type_(&mut self, val: impl AsRef<str>) -> &mut Self {
         self.attr("type", val)
     }
 
     /// Add text content which will be escaped
-    pub fn text_len(&mut self, text: &str, len: usize) -> &mut Self {
+    pub fn text_len(&mut self, text: impl AsRef<str>, len: usize) -> &mut Self {
         if self.stack.is_empty() {
             self.error = Some("text at root");
         } else {
-            for c in text.chars().take(len) {
+            for c in text.as_ref().chars().take(len) {
                 match c {
                     '&' => self.html.push_str("&amp;"),
                     '<' => self.html.push_str("&lt;"),
@@ -150,19 +171,15 @@ impl Html {
     }
 
     /// Add text content which will be escaped
-    pub fn text(&mut self, text: &str) -> &mut Self {
+    pub fn text(&mut self, text: impl AsRef<str>) -> &mut Self {
         self.text_len(text, usize::MAX)
     }
 
-    /// Add text content with no escaping
+    /// Add raw content
     #[allow(dead_code)]
-    pub fn text_no_esc(&mut self, text: &str) -> &mut Self {
-        if self.stack.is_empty() {
-            self.error = Some("text at root");
-        } else {
-            self.html.push_str(text);
-            self.open_tag = false;
-        }
+    pub fn raw(&mut self, text: &str) -> &mut Self {
+        self.html.push_str(text);
+        self.open_tag = false;
         self
     }
 
@@ -207,7 +224,7 @@ mod test {
             .elem("span")
             .text("Test")
             .end()
-            .text_no_esc("&quot;");
+            .raw("&quot;");
         assert_eq!(
             html.build(),
             String::from("<div><span>Test</span>&quot;</div>")
