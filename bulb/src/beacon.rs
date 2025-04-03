@@ -264,7 +264,7 @@ impl Card for Beacon {
          <option value='👽'>👽 external\
          <option value='⚠️'>⚠️ fault\
          <option value='🔌'>🔌 offline\
-         <option value='🔻'>🔻 inactive";
+         <option value='🔺'>🔺 inactive";
 
     /// Get the resource
     fn res() -> Res {
