@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ impl CabinetStyle {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self) -> String {
-        let title = self.title(View::Setup);
+        let title = self.title(View::Setup).build();
         let police_panel_pin_1 = OptVal(self.police_panel_pin_1);
         let police_panel_pin_2 = OptVal(self.police_panel_pin_2);
         let watchdog_reset_pin_1 = OptVal(self.watchdog_reset_pin_1);

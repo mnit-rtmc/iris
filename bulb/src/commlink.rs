@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -151,7 +151,7 @@ impl CommLink {
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &CommLinkAnc) -> String {
-        let title = self.title(View::Status);
+        let title = self.title(View::Status).build();
         let item_states = self.item_states().to_html();
         let description = HtmlStr::new(&self.description);
         let comm_config = anc.comm_config_desc(self);
@@ -172,7 +172,7 @@ impl CommLink {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &CommLinkAnc) -> String {
-        let title = self.title(View::Setup);
+        let title = self.title(View::Setup).build();
         let description = HtmlStr::new(&self.description);
         let uri = HtmlStr::new(&self.uri);
         let enabled = if self.poll_enabled { " checked" } else { "" };

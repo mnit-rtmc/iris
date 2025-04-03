@@ -34,17 +34,17 @@ impl Html {
     /// Build the HTML into a String
     ///
     /// # Returns
-    /// HTML as an owned `String`, or `None` on error
-    pub fn build(mut self) -> Option<String> {
+    /// HTML as an owned `String`
+    pub fn build(mut self) -> String {
         if self.error {
-            return None;
+            return "<p>Html error</p>".to_owned();
         }
         while let Some(elem) = self.parents.pop() {
             self.html.push_str("</");
             self.html.push_str(elem);
             self.html.push('>');
         }
-        Some(self.html)
+        self.html
     }
 
     /// Add an element
@@ -170,22 +170,19 @@ mod test {
     fn html() {
         let mut html = Html::new();
         html.elem("div");
-        assert_eq!(html.build().unwrap(), String::from("<div></div>"));
+        assert_eq!(html.build(), String::from("<div></div>"));
         let mut html = Html::new();
         html.elem("div").attr_val("id", "test").attr("spellcheck");
         assert_eq!(
-            html.build().unwrap(),
+            html.build(),
             String::from("<div id=\"test\" spellcheck></div>")
         );
         let mut html = Html::new();
         html.elem("p").text("This is a paragraph");
-        assert_eq!(
-            html.build().unwrap(),
-            String::from("<p>This is a paragraph</p>")
-        );
+        assert_eq!(html.build(), String::from("<p>This is a paragraph</p>"));
         let mut html = Html::new();
         html.elem("em").text("You & I");
-        assert_eq!(html.build().unwrap(), String::from("<em>You &amp; I</em>"));
+        assert_eq!(html.build(), String::from("<em>You &amp; I</em>"));
         let mut html = Html::new();
         html.elem("div")
             .elem("span")
@@ -193,7 +190,7 @@ mod test {
             .end()
             .text_no_esc("&quot;");
         assert_eq!(
-            html.build().unwrap(),
+            html.build(),
             String::from("<div><span>Test</span>&quot;</div>")
         );
     }
@@ -205,7 +202,7 @@ mod test {
         html.elem("li").class("cat").text("nori").end();
         html.elem("li").class("cat").text("chashu");
         assert_eq!(
-            html.build().unwrap(),
+            html.build(),
             String::from(
                 "<ol><li class=\"cat\">nori</li><li class=\"cat\">chashu</li></ol>"
             )

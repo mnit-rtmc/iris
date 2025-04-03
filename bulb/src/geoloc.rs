@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -220,7 +220,7 @@ impl<L> LocAnc<L> {
     where
         C: Card,
     {
-        let title = card.title(View::Location);
+        let title = card.title(View::Location).build();
         let footer = card.footer(false);
         let html = match &self.geoloc {
             Some(geoloc) => self.to_html_location(geoloc),

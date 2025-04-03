@@ -335,7 +335,7 @@ impl Controller {
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &ControllerAnc) -> String {
-        let title = self.title(View::Status);
+        let title = self.title(View::Status).build();
         let res = Res::CommLink;
         let condition = anc.condition(self);
         let item_states = self.item_states().to_html();
@@ -418,7 +418,7 @@ impl Controller {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &ControllerAnc) -> String {
-        let title = self.title(View::Setup);
+        let title = self.title(View::Setup).build();
         let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
         let cabinet_styles = anc.cabinet_styles_html(self);

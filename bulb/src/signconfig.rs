@@ -299,7 +299,7 @@ impl Card for SignConfig {
         match view {
             View::Compact => to_html_compact(self),
             View::Setup => {
-                let title = self.title(View::Setup);
+                let title = self.title(View::Setup).build();
                 let footer = self.footer(true);
                 to_html_setup(self, anc, &title, &footer)
             }

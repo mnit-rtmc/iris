@@ -140,7 +140,7 @@ impl RampMeterAnc {
             }
             html.text(&tp.description).end();
         }
-        html.build().unwrap_or_default()
+        html.build()
     }
 
     /// Create an HTML `select` element of metering algorithms
@@ -154,7 +154,7 @@ impl RampMeterAnc {
             }
             html.text(&alg.description).end();
         }
-        html.build().unwrap_or_default()
+        html.build()
     }
 }
 
@@ -316,7 +316,7 @@ fn meter_html(buf: Vec<u8>) -> String {
         .attr_val("width", &WIDTH.to_string())
         .attr_val("height", &HEIGHT.to_string())
         .attr_val("src", &src);
-    html.build().unwrap_or_default()
+    html.build()
 }
 
 impl From<&str> for LockReason {
@@ -634,7 +634,7 @@ impl RampMeter {
             }
             html.text(r.as_str()).end();
         }
-        html.build().unwrap_or_default()
+        html.build()
     }
 
     /// Get shrink/grow buttons as HTML
@@ -655,7 +655,7 @@ impl RampMeter {
             html.attr("disabled");
         }
         html.text("Grow ↪");
-        html.build().unwrap_or_default()
+        html.build()
     }
 
     /// Get queue as HTML
@@ -682,7 +682,7 @@ impl RampMeter {
             .attr_val("high", "75")
             .attr_val("max", "100")
             .attr_val("value", &value);
-        html.build().unwrap_or_default()
+        html.build()
     }
 
     /// Convert to Compact HTML
@@ -698,7 +698,7 @@ impl RampMeter {
         html.elem("div")
             .class("info fill")
             .text_len(self.location(), 32);
-        html.build().unwrap_or_default()
+        html.build()
     }
 
     /// Convert to Control HTML
@@ -706,7 +706,7 @@ impl RampMeter {
         if let Some((lat, lon)) = anc.loc.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let title = self.title(View::Control);
+        let title = self.title(View::Control).build();
         let item_states = self.item_states(anc).to_html();
         let location = HtmlStr::new(&self.location).with_len(64);
         let (meter1, meter2) = self.meter_images_html();
@@ -734,7 +734,7 @@ impl RampMeter {
 
     /// Convert to Request HTML
     fn to_html_request(&self, _anc: &RampMeterAnc) -> String {
-        let title = self.title(View::Request);
+        let title = self.title(View::Request).build();
         let name = HtmlStr::new(self.name());
         let work = "http://example.com"; // FIXME
         format!(
@@ -754,7 +754,7 @@ impl RampMeter {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &RampMeterAnc) -> String {
-        let title = self.title(View::Setup);
+        let title = self.title(View::Setup).build();
         let notes = HtmlStr::new(&self.notes);
         let controller = anc.cio.controller_html(self);
         let pin = anc.cio.pin_html(self.pin);

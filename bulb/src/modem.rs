@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ impl Modem {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self) -> String {
-        let title = self.title(View::Setup);
+        let title = self.title(View::Setup).build();
         let uri = HtmlStr::new(&self.uri);
         let config = HtmlStr::new(&self.config);
         let timeout_ms = OptVal(self.timeout_ms);

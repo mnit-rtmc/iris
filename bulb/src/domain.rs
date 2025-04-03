@@ -62,7 +62,7 @@ impl Domain {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self) -> String {
-        let title = self.title(View::Setup);
+        let title = self.title(View::Setup).build();
         let block = HtmlStr::new(&self.block);
         let enabled = if self.enabled { " checked" } else { "" };
         let footer = self.footer(true);

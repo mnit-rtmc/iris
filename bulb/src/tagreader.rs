@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -150,7 +150,7 @@ impl TagReader {
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &TagReaderAnc) -> String {
-        let title = self.title(View::Status);
+        let title = self.title(View::Status).build();
         let item_states = anc.cio.item_states(self).to_html();
         let location = HtmlStr::new(&self.location).with_len(64);
         format!(
@@ -164,7 +164,7 @@ impl TagReader {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &TagReaderAnc) -> String {
-        let title = self.title(View::Setup);
+        let title = self.title(View::Setup).build();
         let controller = anc.cio.controller_html(self);
         let pin = anc.cio.pin_html(self.pin);
         format!("{title}{controller}{pin}")

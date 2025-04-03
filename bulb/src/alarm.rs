@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ impl Alarm {
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &AlarmAnc) -> String {
-        let title = self.title(View::Status);
+        let title = self.title(View::Status).build();
         let item_states = self.item_states(anc).to_html();
         let description = HtmlStr::new(&self.description);
         let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
@@ -75,7 +75,7 @@ impl Alarm {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &AlarmAnc) -> String {
-        let title = self.title(View::Setup);
+        let title = self.title(View::Setup).build();
         let description = HtmlStr::new(&self.description);
         let controller = anc.controller_html(self);
         let pin = anc.pin_html(self.pin);

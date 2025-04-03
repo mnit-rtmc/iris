@@ -171,7 +171,7 @@ impl LcsState {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &LcsStateAnc) -> String {
-        let title = self.title(View::Setup);
+        let title = self.title(View::Setup).build();
         let lcs = &self.lcs;
         let controller = anc.cio.controller_html(self);
         let pin = anc.cio.pin_html(self.pin);

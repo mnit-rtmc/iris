@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ impl Detector {
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &DetectorAnc) -> String {
-        let title = self.title(View::Status);
+        let title = self.title(View::Status).build();
         let item_states = anc.item_states(self).to_html();
         let label = HtmlStr::new(&self.label).with_len(20);
         format!(
@@ -65,7 +65,7 @@ impl Detector {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &DetectorAnc) -> String {
-        let title = self.title(View::Setup);
+        let title = self.title(View::Setup).build();
         let controller = anc.controller_html(self);
         let pin = anc.pin_html(self.pin);
         let footer = self.footer(true);

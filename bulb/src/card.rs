@@ -28,6 +28,7 @@ use crate::gatearm::GateArm;
 use crate::gatearmarray::GateArmArray;
 use crate::geoloc::Loc;
 use crate::gps::Gps;
+use crate::html::Html;
 use crate::item::ItemState;
 use crate::lcs::Lcs;
 use crate::lcsstate::LcsState;
@@ -341,22 +342,21 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     }
 
     /// Build card title
-    fn title(&self, view: View) -> String {
-        let name =
-            format!("{} {}", Self::res().symbol(), HtmlStr::new(self.name()));
-        let mut views = String::new();
-        views.push_str("<select id='ob_view'>");
+    fn title(&self, view: View) -> Html {
+        let mut html = Html::new();
+        html.elem("div").class("title row");
+        let name = format!("{} {}", Self::res().symbol(), self.name());
+        html.elem("span").text(&name).end();
+        html.elem("select").id("ob_view");
         for v in res_views(Self::res()) {
+            html.elem("option");
             if *v == view {
-                views.push_str("<option selected>");
-            } else {
-                views.push_str("<option>");
+                html.attr("selected");
             }
-            views.push_str(v.as_str());
-            views.push_str("</option>");
+            html.text(v.as_str()).end();
         }
-        views.push_str("</select>");
-        html_title_row(&[&name, &views], &[])
+        html.end().end();
+        html
     }
 
     /// Build card footer
