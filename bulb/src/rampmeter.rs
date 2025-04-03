@@ -440,6 +440,11 @@ impl MeterLock {
 }
 
 impl RampMeter {
+    /// Get location description
+    fn location(&self) -> &str {
+        self.location.as_ref().map_or("", |l| l)
+    }
+
     /// Get status rate
     fn status_rate(&self) -> Option<u32> {
         self.status.as_ref().and_then(|st| st.rate)
@@ -616,24 +621,20 @@ impl RampMeter {
     /// Create an HTML `select` element of lock reasons
     fn lock_reason_html(&self) -> String {
         let reason = self.lock_reason();
-        let mut html = String::new();
-        html.push_str("<span>");
-        html.push(match reason {
-            LockReason::Unlocked => '🔓',
-            _ => '🔒',
+        let mut html = Html::new();
+        html.elem("span").text(match reason {
+            LockReason::Unlocked => "🔓",
+            _ => "🔒",
         });
-        html.push_str("<select id='lk_reason'>");
+        html.elem("select").id("lk_reason");
         for r in LockReason::all() {
-            html.push_str("<option");
+            html.elem("option");
             if *r == reason {
-                html.push_str(" selected");
+                html.attr("selected");
             }
-            html.push('>');
-            html.push_str(r.as_str());
-            html.push_str("</option>");
+            html.text(r.as_str()).end();
         }
-        html.push_str("</select></span>");
-        html
+        html.build().unwrap_or_default()
     }
 
     /// Get shrink/grow buttons as HTML
@@ -667,30 +668,37 @@ impl RampMeter {
                 _ => None,
             })
         });
-        let cls = if value.is_none() {
-            " class='hidden'"
-        } else {
-            ""
-        };
-        let value = value.unwrap_or(0);
-        format!(
-            "<span{cls}>🚗 queue \
-              <meter min='0' optimum='0' low='25' high='75' max='100' \
-                     value='{value}'>\
-              </meter>\
-            </span>"
-        )
+        let mut html = Html::new();
+        html.elem("span");
+        if value.is_none() {
+            html.class("hidden");
+        }
+        html.text("🚗 queue ");
+        let value = value.unwrap_or(0).to_string();
+        html.elem("meter")
+            .attr_val("min", "0")
+            .attr_val("optimum", "0")
+            .attr_val("low", "25")
+            .attr_val("high", "75")
+            .attr_val("max", "100")
+            .attr_val("value", &value);
+        html.build().unwrap_or_default()
     }
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &RampMeterAnc) -> String {
-        let name = HtmlStr::new(self.name());
         let item_states = self.item_states(anc);
-        let location = HtmlStr::new(&self.location).with_len(32);
-        format!(
-            "<div class='title row'>{name} {item_states}</div>\
-            <div class='info fill'>{location}</div>"
-        )
+        let mut html = Html::new();
+        html.elem("div")
+            .class("title row")
+            .text(&self.name())
+            .text(" ")
+            .text(&item_states.to_string())
+            .end();
+        html.elem("div")
+            .class("info fill")
+            .text_len(self.location(), 32);
+        html.build().unwrap_or_default()
     }
 
     /// Convert to Control HTML

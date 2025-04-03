@@ -113,11 +113,11 @@ impl Html {
     }
 
     /// Add text content which will be escaped
-    pub fn text(&mut self, text: &str) -> &mut Self {
+    pub fn text_len(&mut self, text: &str, len: usize) -> &mut Self {
         if self.parents.is_empty() {
             self.error = true;
         } else {
-            for c in text.chars() {
+            for c in text.chars().take(len) {
                 match c {
                     '&' => self.html.push_str("&amp;"),
                     '<' => self.html.push_str("&lt;"),
@@ -128,6 +128,11 @@ impl Html {
             self.open_tag = false;
         }
         self
+    }
+
+    /// Add text content which will be escaped
+    pub fn text(&mut self, text: &str) -> &mut Self {
+        self.text_len(text, usize::MAX)
     }
 
     /// Add text content with no escaping
