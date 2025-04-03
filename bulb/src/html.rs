@@ -15,9 +15,20 @@
 #[derive(Debug)]
 pub struct Html {
     html: String,
-    parents: Vec<&'static str>,
+    stack: Vec<&'static str>,
     open_tag: bool,
     error: bool,
+}
+
+/// HTML Void elements
+const VOID_ELEMENTS: &[&str] = &[
+    "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta",
+    "param", "source", "track", "wbr",
+];
+
+/// Check if an element is a Void element
+fn is_void(elem: &str) -> bool {
+    VOID_ELEMENTS.contains(&elem)
 }
 
 impl Html {
@@ -25,7 +36,7 @@ impl Html {
     pub fn new() -> Self {
         Html {
             html: String::new(),
-            parents: Vec::new(),
+            stack: Vec::new(),
             open_tag: false,
             error: false,
         }
@@ -39,7 +50,7 @@ impl Html {
         if self.error {
             return "<p>Html error</p>".to_owned();
         }
-        while let Some(elem) = self.parents.pop() {
+        while let Some(elem) = self.stack.pop() {
             self.html.push_str("</");
             self.html.push_str(elem);
             self.html.push('>');
@@ -52,7 +63,9 @@ impl Html {
         self.html.push('<');
         self.html.push_str(elem);
         self.html.push('>');
-        self.parents.push(elem);
+        if !is_void(elem) {
+            self.stack.push(elem);
+        }
         self.open_tag = true;
         self
     }
@@ -120,7 +133,7 @@ impl Html {
 
     /// Add text content which will be escaped
     pub fn text_len(&mut self, text: &str, len: usize) -> &mut Self {
-        if self.parents.is_empty() {
+        if self.stack.is_empty() {
             self.error = true;
         } else {
             for c in text.chars().take(len) {
@@ -144,7 +157,7 @@ impl Html {
     /// Add text content with no escaping
     #[allow(dead_code)]
     pub fn text_no_esc(&mut self, text: &str) -> &mut Self {
-        if self.parents.is_empty() {
+        if self.stack.is_empty() {
             self.error = true;
         } else {
             self.html.push_str(text);
@@ -155,7 +168,7 @@ impl Html {
 
     /// End the current element
     pub fn end(&mut self) -> &mut Self {
-        match self.parents.pop() {
+        match self.stack.pop() {
             Some(elem) => {
                 self.html.push_str("</");
                 self.html.push_str(elem);
@@ -212,6 +225,16 @@ mod test {
             String::from(
                 "<ol><li class=\"cat\">nori</li><li class=\"cat\">chashu</li></ol>"
             )
+        );
+    }
+
+    #[test]
+    fn void() {
+        let mut html = Html::new();
+        html.elem("div").elem("input").type_("text").text("Stuff");
+        assert_eq!(
+            html.build(),
+            String::from("<div><input type=\"text\">Stuff</div>")
         );
     }
 }
