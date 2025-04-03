@@ -131,40 +131,30 @@ pub struct RampMeterAnc {
 impl RampMeterAnc {
     /// Create an HTML `select` element of meter types
     fn meter_types_html(&self, pri: &RampMeter) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='meter_type'>");
+        let mut html = Html::new();
+        html.elem("select").id("meter_type");
         for tp in &self.meter_types {
-            html.push_str("<option value='");
-            html.push_str(&tp.id.to_string());
-            html.push('\'');
+            html.elem("option").attr_val("value", &tp.id.to_string());
             if Some(tp.id) == pri.meter_type {
-                html.push_str(" selected");
+                html.attr("selected");
             }
-            html.push('>');
-            html.push_str(&tp.description);
-            html.push_str("</option>");
+            html.text(&tp.description).end();
         }
-        html.push_str("</select>");
-        html
+        html.build().unwrap_or_default()
     }
 
     /// Create an HTML `select` element of metering algorithms
     fn algorithms_html(&self, pri: &RampMeter) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='algorithm'>");
+        let mut html = Html::new();
+        html.elem("select").id("algorithm");
         for alg in &self.algorithms {
-            html.push_str("<option value='");
-            html.push_str(&alg.id.to_string());
-            html.push('\'');
+            html.elem("option").attr_val("value", &alg.id.to_string());
             if Some(alg.id) == pri.algorithm {
-                html.push_str(" selected");
+                html.attr("selected");
             }
-            html.push('>');
-            html.push_str(&alg.description);
-            html.push_str("</option>");
+            html.text(&alg.description).end();
         }
-        html.push_str("</select>");
-        html
+        html.build().unwrap_or_default()
     }
 }
 
@@ -319,17 +309,14 @@ fn encode_meter_2<W: Write>(enc: Encoder<W>, red_cs: u16) -> Result<()> {
 fn meter_html(buf: Vec<u8>) -> String {
     const WIDTH: u32 = 24;
     const HEIGHT: u32 = 64;
-    let mut html = String::new();
-    html.push_str("<img");
-    html.push_str(" width='");
-    html.push_str(&WIDTH.to_string());
-    html.push_str("' height='");
-    html.push_str(&HEIGHT.to_string());
-    html.push_str("' ");
-    html.push_str("src='data:image/gif;base64,");
-    b64enc.encode_string(buf, &mut html);
-    html.push_str("' />");
-    html
+    let mut src = "data:image/gif;base64,".to_owned();
+    b64enc.encode_string(buf, &mut src);
+    let mut html = Html::new();
+    html.elem("img")
+        .attr_val("width", &WIDTH.to_string())
+        .attr_val("height", &HEIGHT.to_string())
+        .attr_val("src", &src);
+    html.build().unwrap_or_default()
 }
 
 impl From<&str> for LockReason {
@@ -659,14 +646,14 @@ impl RampMeter {
         if !self.is_shrink_allowed() {
             html.attr("disabled");
         }
-        html.content("Shrink ↩").end();
+        html.text("Shrink ↩").end();
         html.elem("button")
             .attr_val("id", "lk_grow")
             .attr_val("type", "button");
         if !self.is_grow_allowed() {
             html.attr("disabled");
         }
-        html.content("Grow ↪");
+        html.text("Grow ↪");
         html.build().unwrap_or_default()
     }
 

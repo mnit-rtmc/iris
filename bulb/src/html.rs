@@ -86,27 +86,42 @@ impl Html {
             }
             self.html.push(' ');
             self.html.push_str(attr);
-            self.html.push_str("='");
-            self.html.push_str(val);
-            self.html.push_str("'>");
+            self.html.push_str("=\"");
+            for c in val.chars() {
+                match c {
+                    '&' => self.html.push_str("&amp;"),
+                    '"' => self.html.push_str("&quot;"),
+                    _ => self.html.push(c),
+                }
+            }
+            self.html.push_str("\">");
         } else {
             self.error = true;
         }
         self
     }
 
-    /// Add unescaped content
-    pub fn content(&mut self, content: &str) -> &mut Self {
+    /// Add an `id` attribute to an open element
+    pub fn id(&mut self, val: &str) -> &mut Self {
+        self.attr_val("id", val)
+    }
+
+    /// Add a `class` attribute to an open element
+    #[allow(dead_code)]
+    pub fn class(&mut self, val: &str) -> &mut Self {
+        self.attr_val("class", val)
+    }
+
+    /// Add text content which will be escaped
+    pub fn text(&mut self, text: &str) -> &mut Self {
         if self.parents.is_empty() {
             self.error = true;
         } else {
-            for c in content.chars() {
+            for c in text.chars() {
                 match c {
                     '&' => self.html.push_str("&amp;"),
                     '<' => self.html.push_str("&lt;"),
                     '>' => self.html.push_str("&gt;"),
-                    '"' => self.html.push_str("&quot;"),
-                    '\'' => self.html.push_str("&#x27;"),
                     _ => self.html.push(c),
                 }
             }
@@ -115,13 +130,13 @@ impl Html {
         self
     }
 
-    /// Add escaped content
+    /// Add text content with no escaping
     #[allow(dead_code)]
-    pub fn content_esc(&mut self, content: &str) -> &mut Self {
+    pub fn text_no_esc(&mut self, text: &str) -> &mut Self {
         if self.parents.is_empty() {
             self.error = true;
         } else {
-            self.html.push_str(content);
+            self.html.push_str(text);
             self.open_tag = false;
         }
         self
@@ -155,26 +170,40 @@ mod test {
         html.elem("div").attr_val("id", "test").attr("spellcheck");
         assert_eq!(
             html.build().unwrap(),
-            String::from("<div id='test' spellcheck></div>")
+            String::from("<div id=\"test\" spellcheck></div>")
         );
         let mut html = Html::new();
-        html.elem("p").content("This is a paragraph");
+        html.elem("p").text("This is a paragraph");
         assert_eq!(
             html.build().unwrap(),
             String::from("<p>This is a paragraph</p>")
         );
         let mut html = Html::new();
-        html.elem("em").content("You & I");
+        html.elem("em").text("You & I");
         assert_eq!(html.build().unwrap(), String::from("<em>You &amp; I</em>"));
         let mut html = Html::new();
         html.elem("div")
             .elem("span")
-            .content("Test")
+            .text("Test")
             .end()
-            .content_esc("&quot;");
+            .text_no_esc("&quot;");
         assert_eq!(
             html.build().unwrap(),
             String::from("<div><span>Test</span>&quot;</div>")
+        );
+    }
+
+    #[test]
+    fn ol() {
+        let mut html = Html::new();
+        html.elem("ol");
+        html.elem("li").class("cat").text("nori").end();
+        html.elem("li").class("cat").text("chashu");
+        assert_eq!(
+            html.build().unwrap(),
+            String::from(
+                "<ol><li class=\"cat\">nori</li><li class=\"cat\">chashu</li></ol>"
+            )
         );
     }
 }
