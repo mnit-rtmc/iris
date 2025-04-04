@@ -34,7 +34,6 @@ mod gatearm;
 mod gatearmarray;
 mod geoloc;
 mod gps;
-mod html;
 mod item;
 mod lcs;
 mod lcsstate;
