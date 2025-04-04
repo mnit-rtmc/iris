@@ -12,7 +12,8 @@
 //
 use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
-use crate::util::{ContainsLower, Fields, HtmlStr, Input};
+use crate::util::{ContainsLower, Fields, Input};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -31,18 +32,22 @@ type FlowStreamAnc = ControllerIoAnc<FlowStream>;
 impl FlowStream {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &FlowStreamAnc) -> String {
-        let name = HtmlStr::new(self.name());
-        let item_states = anc.item_states(self);
-        format!("<div class='title row'>{name} {item_states}</div>")
+        let mut html = Html::new();
+        html.div()
+            .class("title row")
+            .text(self.name())
+            .text(" ")
+            .text(anc.item_states(self).to_string());
+        html.build()
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &FlowStreamAnc) -> String {
-        let title = self.title(View::Setup).build();
-        let controller = anc.controller_html(self);
-        let pin = anc.pin_html(self.pin);
-        let footer = self.footer(true);
-        format!("{title}{controller}{pin}{footer}")
+        let mut html = self.title(View::Setup);
+        html.raw(anc.controller_html(self));
+        html.raw(anc.pin_html(self.pin));
+        html.raw(self.footer(true));
+        html.build()
     }
 }
 
