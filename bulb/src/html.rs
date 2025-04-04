@@ -32,7 +32,6 @@ pub fn opt_str(val: Option<impl Display>) -> String {
 pub struct Html {
     html: String,
     stack: Vec<&'static str>,
-    error: Option<&'static str>,
 }
 
 /// Borrowed HTML element
@@ -58,7 +57,6 @@ impl Html {
         Html {
             html: String::new(),
             stack: Vec::new(),
-            error: None,
         }
     }
 
@@ -67,9 +65,6 @@ impl Html {
     /// # Returns
     /// HTML as an owned `String`
     pub fn build(mut self) -> String {
-        if let Some(err) = self.error {
-            return format!("<p>Error: {err}");
-        }
         while let Some(elem) = self.stack.pop() {
             self.html.push_str("</");
             self.html.push_str(elem);
@@ -186,16 +181,12 @@ impl Html {
 
     /// Add text content which will be escaped
     pub fn text_len(&mut self, text: impl AsRef<str>, len: usize) -> &mut Self {
-        if self.stack.is_empty() {
-            self.error = Some("text at root");
-        } else {
-            for c in text.as_ref().chars().take(len) {
-                match c {
-                    '&' => self.html.push_str("&amp;"),
-                    '<' => self.html.push_str("&lt;"),
-                    '>' => self.html.push_str("&gt;"),
-                    _ => self.html.push(c),
-                }
+        for c in text.as_ref().chars().take(len) {
+            match c {
+                '&' => self.html.push_str("&amp;"),
+                '<' => self.html.push_str("&lt;"),
+                '>' => self.html.push_str("&gt;"),
+                _ => self.html.push(c),
             }
         }
         self
@@ -209,13 +200,10 @@ impl Html {
 
     /// End the current element
     pub fn end(&mut self) -> &mut Self {
-        match self.stack.pop() {
-            Some(elem) => {
-                self.html.push_str("</");
-                self.html.push_str(elem);
-                self.html.push('>');
-            }
-            None => self.error = Some("stack underflow"),
+        if let Some(elem) = self.stack.pop() {
+            self.html.push_str("</");
+            self.html.push_str(elem);
+            self.html.push('>');
         }
         self
     }
