@@ -129,11 +129,11 @@ pub struct RampMeterAnc {
 impl RampMeterAnc {
     /// Build meter types HTML
     fn meter_types_html(&self, pri: &RampMeter, html: &mut Html) {
-        html.elem("select").id("meter_type");
+        html.select().id("meter_type");
         for tp in &self.meter_types {
-            html.elem("option").attr("value", tp.id.to_string());
+            let option = html.option().attr("value", tp.id.to_string());
             if Some(tp.id) == pri.meter_type {
-                html.attr_bool("selected");
+                option.attr_bool("selected");
             }
             html.text(&tp.description).end();
         }
@@ -142,11 +142,11 @@ impl RampMeterAnc {
 
     /// Build metering algorithms HTML
     fn algorithms_html(&self, pri: &RampMeter, html: &mut Html) {
-        html.elem("select").id("algorithm");
+        html.select().id("algorithm");
         for alg in &self.algorithms {
-            html.elem("option").attr("value", alg.id.to_string());
+            let option = html.option().attr("value", alg.id.to_string());
             if Some(alg.id) == pri.algorithm {
-                html.attr_bool("selected");
+                option.attr_bool("selected");
             }
             html.text(&alg.description).end();
         }
@@ -307,7 +307,7 @@ fn meter_html(buf: Vec<u8>, html: &mut Html) {
     const HEIGHT: u32 = 64;
     let mut src = "data:image/gif;base64,".to_owned();
     b64enc.encode_string(buf, &mut src);
-    html.elem("img")
+    html.img()
         .attr("width", WIDTH.to_string())
         .attr("height", HEIGHT.to_string())
         .attr("src", &src);
@@ -589,14 +589,14 @@ impl RampMeter {
 
     /// Build metering rate HTML
     fn rate_html(&self, html: &mut Html) {
-        html.elem("span");
+        let span = html.span();
         match self.status_rate() {
             Some(r) => {
                 let c = 3_600.0 / (r as f32);
-                html.text(format!("⏱️ {c:.1} s ({r} veh/hr)"));
+                span.text(format!("⏱️ {c:.1} s ({r} veh/hr)"));
             }
             None => {
-                html.class("hidden").text("⏱️ 0.0 s (N/A veh/hr)");
+                span.class("hidden").text("⏱️ 0.0 s (N/A veh/hr)");
             }
         }
         html.end();
@@ -605,15 +605,15 @@ impl RampMeter {
     /// Build lock reason HTML
     fn lock_reason_html(&self, html: &mut Html) {
         let reason = self.lock_reason();
-        html.elem("span").text(match reason {
+        html.span().text(match reason {
             LockReason::Unlocked => "🔓",
             _ => "🔒",
         });
-        html.elem("select").id("lk_reason");
+        html.select().id("lk_reason");
         for r in LockReason::all() {
-            html.elem("option");
+            let option = html.option();
             if *r == reason {
-                html.attr_bool("selected");
+                option.attr_bool("selected");
             }
             html.text(r.as_str()).end();
         }
@@ -622,17 +622,15 @@ impl RampMeter {
 
     /// Build shrink/grow buttons HTML
     fn shrink_grow_html(&self, html: &mut Html) {
-        html.elem("span")
-            .elem("button")
-            .id("lk_shrink")
-            .type_("button");
+        html.span();
+        let button = html.button().id("lk_shrink").type_("button");
         if !self.is_shrink_allowed() {
-            html.attr_bool("disabled");
+            button.attr_bool("disabled");
         }
         html.text("Shrink ↩").end();
-        html.elem("button").id("lk_grow").type_("button");
+        let button = html.button().id("lk_grow").type_("button");
         if !self.is_grow_allowed() {
-            html.attr_bool("disabled");
+            button.attr_bool("disabled");
         }
         html.text("Grow ↪").end();
         html.end(); /* span */
@@ -648,13 +646,13 @@ impl RampMeter {
                 _ => None,
             })
         });
-        html.elem("span");
+        let elem = html.span();
         if value.is_none() {
-            html.class("hidden");
+            elem.class("hidden");
         }
         html.text("🚗 queue ");
         let value = value.unwrap_or(0).to_string();
-        html.elem("meter")
+        html.meter()
             .attr("min", "0")
             .attr("optimum", "0")
             .attr("low", "25")
@@ -669,13 +667,13 @@ impl RampMeter {
     fn to_html_compact(&self, anc: &RampMeterAnc) -> String {
         let item_states = self.item_states(anc);
         let mut html = Html::new();
-        html.elem("div")
+        html.div()
             .class("title row")
             .text(self.name())
             .text(" ")
             .text(item_states.to_string())
             .end();
-        html.elem("div")
+        html.div()
             .class("info fill")
             .text_len(opt_ref(&self.location), 32);
         html.build()
@@ -687,18 +685,19 @@ impl RampMeter {
             fly_map_item(&self.name, lat, lon);
         }
         let mut html = self.title(View::Control);
-        html.elem("div").class("row fill");
-        html.elem("span").raw(self.item_states(anc).to_html()).end();
+        html.div().class("row fill");
+        html.span();
+        html.raw(self.item_states(anc).to_html()).end();
         html.end(); /* div */
-        html.elem("div").class("row");
-        html.elem("span")
+        html.div().class("row");
+        html.span()
             .class("info")
             .text_len(opt_ref(&self.location), 64)
             .end();
         html.end(); /* div */
-        html.elem("div").class("row center");
+        html.div().class("row center");
         self.meter_image_html(1, &mut html);
-        html.elem("div").class("column");
+        html.div().class("column");
         self.rate_html(&mut html);
         self.lock_reason_html(&mut html);
         self.shrink_grow_html(&mut html);
@@ -712,17 +711,17 @@ impl RampMeter {
     fn to_html_request(&self, _anc: &RampMeterAnc) -> String {
         let work = "http://example.com"; // FIXME
         let mut html = self.title(View::Request);
-        html.elem("div").class("row");
-        html.elem("span").text("Settings").end();
-        html.elem("button")
+        html.div().class("row");
+        html.span().text("Settings").end();
+        html.button()
             .id("rq_settings")
             .type_("button")
             .text("Send")
             .end()
             .end(); /* div */
-        html.elem("div").class("row");
-        html.elem("span").text("Work Request").end();
-        html.elem("a")
+        html.div().class("row");
+        html.span().text("Work Request").end();
+        html.a()
             .attr("href", work)
             .attr("target", "_blank")
             .attr("rel", "noopener noreferrer")
@@ -734,9 +733,9 @@ impl RampMeter {
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &RampMeterAnc) -> String {
         let mut html = self.title(View::Setup);
-        html.elem("div").class("row");
-        html.elem("label").attr("for", "notes").text("Notes").end();
-        html.elem("textarea")
+        html.div().class("row");
+        html.label().attr("for", "notes").text("Notes").end();
+        html.textarea()
             .id("notes")
             .attr("maxlength", "255")
             .attr("rows", "4")
@@ -746,26 +745,23 @@ impl RampMeter {
         html.end(); /* div */
         html.raw(anc.cio.controller_html(self));
         html.raw(anc.cio.pin_html(self.pin));
-        html.elem("div").class("row");
-        html.elem("label")
-            .attr("for", "meter_type")
-            .text("Type")
-            .end();
+        html.div().class("row");
+        html.label().attr("for", "meter_type").text("Type").end();
         anc.meter_types_html(self, &mut html);
         html.end(); /* div */
-        html.elem("div").class("row");
-        html.elem("label")
+        html.div().class("row");
+        html.label()
             .attr("for", "algorithm")
             .text("Algorithm")
             .end();
         anc.algorithms_html(self, &mut html);
         html.end(); /* div */
-        html.elem("div").class("row");
-        html.elem("label")
+        html.div().class("row");
+        html.label()
             .attr("for", "storage")
             .text("Storage (ft)")
             .end();
-        html.elem("input")
+        html.input()
             .id("storage")
             .type_("number")
             .attr("min", "1")
@@ -773,12 +769,12 @@ impl RampMeter {
             .attr("size", "8")
             .attr("value", opt_str(self.storage));
         html.end(); /* div */
-        html.elem("div").class("row");
-        html.elem("label")
+        html.div().class("row");
+        html.label()
             .attr("for", "max_wait")
             .text("Max Wait (s)")
             .end();
-        html.elem("input")
+        html.input()
             .id("max_wait")
             .type_("number")
             .attr("min", "1")
@@ -786,12 +782,12 @@ impl RampMeter {
             .attr("size", "8")
             .attr("value", opt_str(self.max_wait));
         html.end(); /* div */
-        html.elem("div").class("row");
-        html.elem("label")
+        html.div().class("row");
+        html.label()
             .attr("for", "am_target")
             .text("AM Target")
             .end();
-        html.elem("input")
+        html.input()
             .id("am_target")
             .type_("number")
             .attr("min", "0")
@@ -799,12 +795,12 @@ impl RampMeter {
             .attr("size", "8")
             .attr("value", opt_str(self.am_target));
         html.end(); /* div */
-        html.elem("div").class("row");
-        html.elem("label")
+        html.div().class("row");
+        html.label()
             .attr("for", "pm_target")
             .text("PM Target")
             .end();
-        html.elem("input")
+        html.input()
             .id("pm_target")
             .type_("number")
             .attr("min", "0")

@@ -14,7 +14,8 @@ use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
+use crate::html::{Html, opt_ref, opt_str};
+use crate::util::{ContainsLower, Fields, Input, Select};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -155,57 +156,70 @@ impl ControllerIo for LcsState {
 impl LcsState {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LcsStateAnc) -> String {
-        let name = HtmlStr::new(self.name());
-        let item_states = anc.cio.item_states(self);
-        let lcs = &self.lcs;
-        let lane = self.lane;
-        let indication = anc.indication(self).symbol();
-        format!(
-            "<div class='title row'>{name} {item_states}</div>\
-            <div class='info row'>{lcs}\
-              <span>{lane}</span>\
-              <span>{indication}</span>\
-            </div>"
-        )
+        let mut html = Html::new();
+        html.div()
+            .class("title row")
+            .text(self.name())
+            .text(" ")
+            .text(anc.cio.item_states(self).to_string())
+            .end();
+        html.div().class("info row").text(&self.lcs);
+        html.span().text(self.lane.to_string()).end();
+        html.span()
+            .text(anc.indication(self).symbol().to_string())
+            .end();
+        html.build()
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &LcsStateAnc) -> String {
-        let title = self.title(View::Setup).build();
-        let lcs = &self.lcs;
-        let controller = anc.cio.controller_html(self);
-        let pin = anc.cio.pin_html(self.pin);
-        let lane = self.lane;
-        let indications = anc.indications_html(self);
-        let msg_pattern = HtmlStr::new(&self.msg_pattern);
-        let msg_num = OptVal(self.msg_num);
-        let footer = self.footer(true);
-        format!(
-            "{title}\
-            <div class='row'><label>LCS</label><span>{lcs}</span></div>\
-            {controller}\
-            {pin}\
-            <div class='row'>\
-              <label for='lane'>Lane</label>\
-              <input id='lane' type='number' min='1' max='9' \
-                     size='2' value='{lane}'>\
-            </div>\
-            <div class='row'>\
-              <label for='indication'>Indication</label>\
-              {indications}\
-            </div>\
-            <div class='row'>\
-              <label for='msg_pattern'>Msg Pattern</label>\
-              <input id='msg_pattern' maxlength='20' size='20' \
-                     value='{msg_pattern}'>\
-            </div>\
-            <div class='row'>\
-              <label for='msg_num'>Msg #</label>\
-              <input id='msg_num' type='number' min='2' max='65535' \
-                     size='5' value='{msg_num}'>\
-            </div>\
-            {footer}"
-        )
+        let mut html = self.title(View::Setup);
+        html.div().class("row");
+        html.label().text("LCS").end();
+        html.span().text(&self.lcs).end();
+        html.end(); /* div */
+        html.raw(anc.cio.controller_html(self));
+        html.raw(anc.cio.pin_html(self.pin));
+        html.div().class("row");
+        html.label().attr("for", "lane").text("Lane").end();
+        html.input()
+            .id("lane")
+            .type_("number")
+            .attr("min", "1")
+            .attr("max", "9")
+            .attr("size", "2")
+            .attr("value", self.lane.to_string());
+        html.end(); /* div */
+        html.div().class("row");
+        html.label()
+            .attr("for", "indication")
+            .text("Indication")
+            .end();
+        html.raw(anc.indications_html(self));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label()
+            .attr("for", "msg_pattern")
+            .text("Msg Pattern")
+            .end();
+        html.input()
+            .id("msg_pattern")
+            .attr("maxlength", "20")
+            .attr("size", "20")
+            .attr("value", opt_ref(&self.msg_pattern));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().attr("for", "msg_num").text("Msg #").end();
+        html.input()
+            .id("msg_num")
+            .type_("number")
+            .attr("min", "2")
+            .attr("max", "65535")
+            .attr("size", "5")
+            .attr("value", opt_str(self.msg_num));
+        html.end(); /* div */
+        html.raw(self.footer(true));
+        html.build()
     }
 }
 

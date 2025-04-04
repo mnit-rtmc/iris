@@ -310,12 +310,9 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     /// Convert to Create HTML
     fn to_html_create(&self, _anc: &Self::Ancillary) -> String {
         let mut html = Html::new();
-        html.elem("div").class("row");
-        html.elem("label")
-            .attr("for", "create_name")
-            .text("Name")
-            .end();
-        html.elem("input")
+        html.div().class("row");
+        html.label().attr("for", "create_name").text("Name").end();
+        html.input()
             .id("create_name")
             .attr("maxlength", "24")
             .attr("size", "24")
@@ -349,14 +346,14 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     /// Build card title
     fn title(&self, view: View) -> Html {
         let mut html = Html::new();
-        html.elem("div").class("title row");
+        html.div().class("title row");
         let name = format!("{} {}", Self::res().symbol(), self.name());
-        html.elem("span").text(&name).end();
-        html.elem("select").id("ob_view");
+        html.span().text(&name).end();
+        html.select().id("ob_view");
         for v in res_views(Self::res()) {
-            html.elem("option");
+            let option = html.option();
             if *v == view {
-                html.attr_bool("selected");
+                option.attr_bool("selected");
             }
             html.text(v.as_str()).end();
         }
