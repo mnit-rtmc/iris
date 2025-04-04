@@ -13,7 +13,8 @@
 use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::item::{ItemState, ItemStates};
-use crate::util::{ContainsLower, Fields, HtmlStr, Input};
+use crate::util::{ContainsLower, Fields, Input};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -45,52 +46,48 @@ impl Alarm {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &AlarmAnc) -> String {
-        let name = HtmlStr::new(self.name());
-        let item_states = self.item_states(anc);
-        let description = HtmlStr::new(&self.description);
-        format!(
-            "<div class='title row'>{name} {item_states}</div>\
-            <div class='info fill'>{description}</div>"
-        )
+        let mut html = Html::new();
+        html.div()
+            .class("title row")
+            .text(self.name())
+            .text(" ")
+            .text(self.item_states(anc).to_string())
+            .end();
+        html.div().class("info fill").text(&self.description);
+        html.build()
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &AlarmAnc) -> String {
-        let title = self.title(View::Status).build();
-        let item_states = self.item_states(anc).to_html();
-        let description = HtmlStr::new(&self.description);
-        let trigger_time = self.trigger_time.as_deref().unwrap_or("-");
-        format!(
-            "{title}\
-            <div class='row'>{item_states}</div>\
-            <div class='row'>\
-              <span class='info full'>{description}</span>\
-            </div>\
-            <div class='row'>\
-              <span>Triggered</span>\
-              <span class='info'>{trigger_time}</span>\
-            </div>"
-        )
+        let mut html = self.title(View::Status);
+        html.div().class("row");
+        html.raw(self.item_states(anc).to_html()).end();
+        html.div().class("row");
+        html.span().class("info full").text(&self.description).end();
+        html.end(); /* div */
+        html.div().class("row");
+        html.span().text("Triggered").end();
+        html.span()
+            .class("info")
+            .text(self.trigger_time.as_deref().unwrap_or("-"));
+        html.build()
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &AlarmAnc) -> String {
-        let title = self.title(View::Setup).build();
-        let description = HtmlStr::new(&self.description);
-        let controller = anc.controller_html(self);
-        let pin = anc.pin_html(self.pin);
-        let footer = self.footer(true);
-        format!(
-            "{title}\
-            <div class='row'>\
-              <label for='description'>Description</label>\
-              <input id='description' maxlength='24' size='24' \
-                     value='{description}'>\
-            </div>\
-            {controller}\
-            {pin}\
-            {footer}"
-        )
+        let mut html = self.title(View::Setup);
+        html.div().class("row");
+        html.label().for_("description").text("Description").end();
+        html.input()
+            .id("description")
+            .attr("maxlength", "24")
+            .size("24")
+            .value(&self.description);
+        html.end(); /* div */
+        html.raw(anc.controller_html(self));
+        html.raw(anc.pin_html(self.pin));
+        html.raw(self.footer(true));
+        html.build()
     }
 }
 
