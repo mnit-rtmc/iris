@@ -12,7 +12,8 @@
 //
 use crate::card::{AncillaryData, Card, View};
 use crate::item::{ItemState, ItemStates};
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use crate::util::{ContainsLower, Fields, Input};
+use hatmil::{Html, opt_ref, opt_str};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -52,38 +53,51 @@ impl Modem {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let name = HtmlStr::new(self.name());
-        let item_states = self.item_states();
-        format!("<div class='title row'>{name} {item_states}</div>")
+        let mut html = Html::new();
+        html.div()
+            .class("title row")
+            .text(self.name())
+            .text(" ")
+            .text(self.item_states().to_string());
+        html.build()
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self) -> String {
-        let title = self.title(View::Setup).build();
-        let uri = HtmlStr::new(&self.uri);
-        let config = HtmlStr::new(&self.config);
-        let timeout_ms = OptVal(self.timeout_ms);
-        let enabled = if self.enabled { " checked" } else { "" };
-        format!(
-            "{title}\
-            <div class='row'>\
-              <label for='uri'>URI</label>\
-              <input id='uri' maxlength='64' size='30' value='{uri}'>\
-            </div>\
-            <div class='row'>\
-              <label for='config'>Config</label>\
-              <input id='config' maxlength='64' size='28' value='{config}'>\
-            </div>\
-            <div class='row'>\
-              <label for='timeout_ms'>Timeout (ms)</label>\
-              <input id='timeout_ms' type='number' min='0' size='8' \
-                     max='90000' value='{timeout_ms}'>\
-            </div>\
-            <div class='row'>\
-              <label for='enabled'>Enabled</label>\
-              <input id='enabled' type='checkbox'{enabled}>\
-            </div>"
-        )
+        let mut html = self.title(View::Setup);
+        html.div().class("row");
+        html.label().for_("uri").text("URI").end();
+        html.input()
+            .id("uri")
+            .attr("maxlength", "64")
+            .size("30")
+            .value(opt_ref(&self.uri));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("config").text("Config").end();
+        html.input()
+            .id("config")
+            .attr("maxlength", "64")
+            .size("28")
+            .value(opt_ref(&self.config));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("timeout_ms").text("Timeout (ms)").end();
+        html.input()
+            .id("timeout_ms")
+            .type_("number")
+            .min("0")
+            .max("90000")
+            .size("8")
+            .value(opt_str(self.timeout_ms));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("enabled").text("Enabled").end();
+        let enabled = html.input().id("enabled").type_("checkbox");
+        if self.enabled {
+            enabled.attr_bool("checked");
+        }
+        html.build()
     }
 }
 
