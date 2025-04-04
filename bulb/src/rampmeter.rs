@@ -665,13 +665,12 @@ impl RampMeter {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &RampMeterAnc) -> String {
-        let item_states = self.item_states(anc);
         let mut html = Html::new();
         html.div()
             .class("title row")
             .text(self.name())
             .text(" ")
-            .text(item_states.to_string())
+            .text(self.item_states(anc).to_string())
             .end();
         html.div()
             .class("info fill")

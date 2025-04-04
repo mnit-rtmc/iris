@@ -18,9 +18,8 @@ use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::lcsstate::LcsState;
 use crate::start::fly_map_item;
-use crate::util::{
-    ContainsLower, Fields, HtmlStr, Input, OptVal, Select, TextArea,
-};
+use crate::util::{ContainsLower, Fields, Input, Select, TextArea};
+use hatmil::{Html, opt_ref, opt_str};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -89,23 +88,17 @@ pub struct LcsAnc {
 }
 
 impl LcsAnc {
-    /// Create an HTML `select` element of LCS types
-    fn lcs_types_html(&self, pri: &Lcs) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='lcs_type'>");
+    /// Build LCS types HTML
+    fn lcs_types_html(&self, pri: &Lcs, html: &mut Html) {
+        html.select().id("lcs_type");
         for tp in &self.lcs_types {
-            html.push_str("<option value='");
-            html.push_str(&tp.id.to_string());
-            html.push('\'');
+            let option = html.option().value(tp.id.to_string());
             if Some(tp.id) == pri.lcs_type {
-                html.push_str(" selected");
+                option.attr_bool("selected");
             }
-            html.push('>');
-            html.push_str(&tp.description);
-            html.push_str("</option>");
+            html.text(&tp.description).end();
         }
-        html.push_str("</select>");
-        html
+        html.end(); /* select */
     }
 
     /// Check if an LCS has a given lane/indication
@@ -236,16 +229,15 @@ impl Lcs {
             .unwrap_or(LockReason::Unlocked)
     }
 
-    /// Create an HTML `select` element of lock reasons
-    fn lock_reason_html(&self) -> String {
+    /// Build lock reason HTML
+    fn lock_reason_html(&self, html: &mut Html) {
         let reason = self.lock_reason();
-        let mut html = String::new();
-        html.push_str("<span>");
-        html.push(match reason {
-            LockReason::Unlocked => '🔓',
-            _ => '🔒',
+        html.span();
+        html.text(match reason {
+            LockReason::Unlocked => "🔓",
+            _ => "🔒",
         });
-        html.push_str("<select id='lock_reason'>");
+        html.select().id("lock_reason");
         for r in [
             LockReason::Unlocked,
             LockReason::Incident,
@@ -254,16 +246,13 @@ impl Lcs {
             LockReason::Maintenance,
             LockReason::Construction,
         ] {
-            html.push_str("<option");
+            let option = html.option();
             if r == reason {
-                html.push_str(" selected");
+                option.attr_bool("selected");
             }
-            html.push('>');
-            html.push_str(r.as_str());
-            html.push_str("</option>");
+            html.text(r.as_str()).end();
         }
-        html.push_str("</select></span>");
-        html
+        html.end().end();
     }
 
     /// Check if the LCS is deployed
@@ -283,60 +272,56 @@ impl Lcs {
             .unwrap_or(&[0])
     }
 
-    /// Create an HTML indications element
-    fn indications_html(&self, anc: &LcsAnc) -> String {
-        let mut html = String::new();
-        html.push_str("<div class='row center'>");
+    /// Build indications HTML
+    fn indications_html(&self, anc: &LcsAnc, html: &mut Html) {
+        html.div().class("row center");
         for (ln, ind) in self.indications().iter().enumerate().rev() {
             let ln = (ln + 1) as u16;
-            html.push_str("<div class='column'>");
-            html.push_str("<span class='lcs ");
+            let span = html.div().class("column").span();
             match ind {
-                1 => html.push_str("lcs_dark'>⍽"),
-                2 => html.push_str("lcs_lane_open'>↓"),
-                3 => html.push_str("lcs_use_caution'>⇣"),
-                4 => html.push_str("lcs_lane_closed_ahead'>✕"),
-                5 => html.push_str("lcs_lane_closed'>✖"),
-                _ => html.push_str("lcs_unknown'>?"),
-            }
-            html.push_str("</span>");
-            html.push_str("<select>");
-            html.push_str(
-                "<button><selectedcontent></selectedcontent></button>",
-            );
+                1 => span.class("lcs lcs_dark").text("⍽"),
+                2 => span.class("lcs lcs_lane_open").text("↓"),
+                3 => span.class("lcs lcs_use_caution").text("⇣"),
+                4 => span.class("lcs lcs_lane_closed_ahead").text("✕"),
+                5 => span.class("lcs lcs_lane_closed").text("✖"),
+                _ => span.class("lcs lcs_unknown").text("?"),
+            };
+            html.end(); /* span */
+            html.select();
+            html.button().end();
             // FIXME: use customizable select elements once browsers have
             //        support for them: https://caniuse.com/selectlist
-            html.push_str("<option value='1' class='lcs lcs_dark'> </option>");
+            html.option().class("lcs lcs_dark").value("1").text(" ");
+            html.end();
             if anc.has_indication(self, ln, 2) {
-                html.push_str(
-                    "<option value='2' class='lcs lcs_lane_open'>↓</option>",
-                );
+                html.option().class("lcs lcs_lane_open").value("2");
+                html.text("↓").end();
             }
             if anc.has_indication(self, ln, 3) {
-                html.push_str(
-                    "<option value='3' class='lcs lcs_use_caution'>⇣</option>",
-                );
+                html.option().class("lcs lcs_use_caution").value("3");
+                html.text("⇣").end();
             }
             if anc.has_indication(self, ln, 4) {
-                html.push_str("<option value='4' class='lcs lcs_lane_closed_ahead'>✕</option>");
+                html.option().class("lcs lcs_lane_closed_ahead").value("4");
+                html.text("✕").end();
             }
             if anc.has_indication(self, ln, 5) {
-                html.push_str(
-                    "<option value='5' class='lcs lcs_lane_closed'>✖</option>",
-                );
+                html.option().class("lcs lcs_lane_closed").value("5");
+                html.text("✖").end();
             }
-            html.push_str("</select>");
-            html.push_str("</div>");
+            html.end(); /* select */
+            html.end(); /* div */
         }
-        html.push_str("<div class='column'>");
-        html.push_str(&self.lock_reason_html());
-        html.push_str("<span>");
-        html.push_str("<button id='mc_send' type='button'>Send</button>");
-        html.push_str("<button id='mc_blank' type='button'>Blank</button>");
-        html.push_str("</span>");
-        html.push_str("</div>");
-        html.push_str("</div>");
-        html
+        html.div().class("column");
+        self.lock_reason_html(html);
+        html.span();
+        html.button().id("lk_send").type_("button").text("Send");
+        html.end();
+        html.button().id("lk_blank").type_("button").text("Blank");
+        html.end();
+        html.end(); /* span */
+        html.end(); /* div */
+        html.end(); /* div */
     }
 
     /// Get item states from status/lock
@@ -358,13 +343,17 @@ impl Lcs {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LcsAnc) -> String {
-        let name = HtmlStr::new(self.name());
-        let item_states = self.item_states(anc);
-        let location = HtmlStr::new(&self.location).with_len(32);
-        format!(
-            "<div class='title row'>{name} {item_states}</div>\
-            <div class='info fill'>{location}</div>"
-        )
+        let mut html = Html::new();
+        html.div()
+            .class("title row")
+            .text(self.name())
+            .text(" ")
+            .text(self.item_states(anc).to_string())
+            .end();
+        html.div()
+            .class("info fill")
+            .text_len(opt_ref(&self.location), 32);
+        html.build()
     }
 
     /// Convert to Control HTML
@@ -372,51 +361,52 @@ impl Lcs {
         if let Some((lat, lon)) = anc.loc.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let title = self.title(View::Control).build();
-        let item_states = self.item_states(anc).to_html();
-        let location = HtmlStr::new(&self.location).with_len(64);
-        let indications = self.indications_html(anc);
-        format!(
-            "{title}\
-            <div class='row fill'>\
-              <span>{item_states}</span>\
-            </div>\
-            <div class='row'>\
-              <span class='info'>{location}</span>\
-            </div>\
-            {indications}"
-        )
+        let mut html = self.title(View::Control);
+        html.div().class("row fill");
+        html.span();
+        html.raw(self.item_states(anc).to_html()).end();
+        html.end(); /* div */
+        html.div().class("row");
+        html.span()
+            .class("info")
+            .text_len(opt_ref(&self.location), 64)
+            .end();
+        html.end(); /* div */
+        self.indications_html(anc, &mut html);
+        html.build()
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &LcsAnc) -> String {
-        let title = self.title(View::Setup).build();
-        let notes = HtmlStr::new(&self.notes);
-        let controller = anc.cio.controller_html(self);
-        let pin = anc.cio.pin_html(self.pin);
-        let lcs_types = anc.lcs_types_html(self);
-        let shift = OptVal(self.shift);
-        let footer = self.footer(true);
-        format!(
-            "{title}\
-            <div class='row'>\
-              <label for='notes'>Notes</label>\
-              <textarea id='notes' maxlength='255' rows='4' \
-                        cols='24'>{notes}</textarea>\
-            </div>\
-            {controller}\
-            {pin}\
-            <div class='row'>\
-              <label for='lcs_type'>LCS Type</label>\
-              {lcs_types}\
-            </div>\
-            <div class='row'>\
-              <label for='shift'>Lane Shift</label>\
-              <input id='shift' type='number' min='1' max='9' \
-                     size='2' value='{shift}'>\
-            </div>\
-            {footer}"
-        )
+        let mut html = self.title(View::Setup);
+        html.div().class("row");
+        html.label().for_("notes").text("Notes").end();
+        html.textarea()
+            .id("notes")
+            .attr("maxlength", "255")
+            .attr("rows", "4")
+            .attr("cols", "24")
+            .text(opt_ref(&self.notes))
+            .end();
+        html.end(); /* div */
+        html.raw(anc.cio.controller_html(self));
+        html.raw(anc.cio.pin_html(self.pin));
+        html.div().class("row");
+        html.label().for_("lcs_type").text("LCS Type").end();
+        anc.lcs_types_html(self, &mut html);
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("shift").text("Lane Shift").end();
+        html.input()
+            .id("shift")
+            .type_("number")
+            .min("1")
+            .max("9")
+            .size("2")
+            .value(opt_str(self.shift));
+        html.end(); /* div */
+        html.raw(self.footer(true));
+        html.build()
     }
 }
 
