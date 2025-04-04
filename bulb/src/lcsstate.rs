@@ -181,42 +181,36 @@ impl LcsState {
         html.raw(anc.cio.controller_html(self));
         html.raw(anc.cio.pin_html(self.pin));
         html.div().class("row");
-        html.label().attr("for", "lane").text("Lane").end();
+        html.label().for_("lane").text("Lane").end();
         html.input()
             .id("lane")
             .type_("number")
-            .attr("min", "1")
-            .attr("max", "9")
-            .attr("size", "2")
-            .attr("value", self.lane.to_string());
+            .min("1")
+            .max("9")
+            .size("2")
+            .value(self.lane.to_string());
         html.end(); /* div */
         html.div().class("row");
-        html.label()
-            .attr("for", "indication")
-            .text("Indication")
-            .end();
+        html.label().for_("indication").text("Indication").end();
         html.raw(anc.indications_html(self));
         html.end(); /* div */
         html.div().class("row");
-        html.label()
-            .attr("for", "msg_pattern")
-            .text("Msg Pattern")
-            .end();
+        html.label().for_("msg_pattern").text("Msg Pattern").end();
         html.input()
             .id("msg_pattern")
             .attr("maxlength", "20")
-            .attr("size", "20")
-            .attr("value", opt_ref(&self.msg_pattern));
+            .size("20")
+            .value(opt_ref(&self.msg_pattern));
         html.end(); /* div */
         html.div().class("row");
-        html.label().attr("for", "msg_num").text("Msg #").end();
+        html.label().for_("msg_num").text("Msg #").end();
         html.input()
             .id("msg_num")
             .type_("number")
-            .attr("min", "2")
-            .attr("max", "65535")
-            .attr("size", "5")
-            .attr("value", opt_str(self.msg_num));
+            .min("2")
+            .max("65535")
+            .size("5")
+            .value(opt_str(self.msg_num));
         html.end(); /* div */
         html.raw(self.footer(true));
         html.build()
