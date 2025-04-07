@@ -13,7 +13,8 @@
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
+use crate::util::{ContainsLower, Fields, Input, Select, opt_str};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -93,24 +94,25 @@ const PERIODS: &[Period] = &[
     Period::new(24, TimeUnit::Hr),
 ];
 
-/// Make `option` elements for an HTML period `select`
-fn period_options(periods: &[Period], seconds: Option<u32>) -> String {
-    let mut html = String::new();
+/// Build periods HTML
+fn periods_html(
+    id: &str,
+    seconds: Option<u32>,
+    periods: &[Period],
+    html: &mut Html,
+) {
+    html.select().id(id);
     for period in periods {
         let sec = period.seconds();
-        html.push_str("<option value='");
-        html.push_str(&sec.to_string());
-        html.push('\'');
+        let option = html.option().value(sec.to_string());
         if let Some(s) = seconds {
             if s == sec {
-                html.push_str(" selected");
+                option.attr_bool("selected");
             }
         }
-        html.push('>');
-        html.push_str(&period.to_string());
-        html.push_str("</option>");
+        html.text(period.to_string()).end();
     }
-    html
+    html.end(); /* select */
 }
 
 /// Comm protocol
@@ -173,94 +175,122 @@ impl AncillaryData for CommConfigAnc {
 }
 
 impl CommConfigAnc {
-    /// Create an HTML `select` element of comm protocols
-    fn protocols_html(&self, pri: &CommConfig) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='protocol'>");
+    /// Build comm protocols HTML
+    fn protocols_html(&self, pri: &CommConfig, html: &mut Html) {
+        html.select().id("protocol");
         if let Some(protocols) = &self.protocols {
             for protocol in protocols {
-                html.push_str("<option value='");
-                html.push_str(&protocol.id.to_string());
-                html.push('\'');
+                let option = html.option().value(protocol.id.to_string());
                 if let Some(p) = pri.protocol {
                     if p == protocol.id {
-                        html.push_str(" selected");
+                        option.attr_bool("selected");
                     }
                 }
-                html.push('>');
-                html.push_str(&protocol.description);
-                html.push_str("</option>");
+                html.text(&protocol.description).end();
             }
         }
-        html.push_str("</select>");
-        html
+        html.end(); /* select */
     }
 }
 
 impl CommConfig {
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let name = HtmlStr::new(self.name());
-        let description = HtmlStr::new(&self.description);
-        format!(
-            "<div class='title row'>{name}</div>\
-            <div class='info fill'>{description}</div>"
-        )
+        let mut html = Html::new();
+        html.div().class("title row").text(self.name()).end();
+        html.div().class("info fill").text(&self.description);
+        html.into()
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &CommConfigAnc) -> String {
-        let title = String::from(self.title(View::Setup));
-        let description = HtmlStr::new(&self.description);
-        let protocols = anc.protocols_html(self);
-        let timeout_ms = OptVal(self.timeout_ms);
-        let retry_threshold = OptVal(self.retry_threshold);
-        let poll_periods = period_options(&PERIODS[1..], self.poll_period_sec);
-        let long_periods =
-            period_options(&PERIODS[1..], self.long_poll_period_sec);
-        let idle_periods = period_options(PERIODS, self.idle_disconnect_sec);
-        let no_resp_periods =
-            period_options(PERIODS, self.no_response_disconnect_sec);
-        let footer = self.footer(true);
-        format!(
-            "{title}\
-            <div class='row'>\
-              <label for='description'>Description</label>\
-              <input id='description' maxlength='20' size='20' \
-                     value='{description}'>\
-            </div>\
-            <div class='row'>\
-              <label for='protocol'>Protocol</label>\
-              {protocols}\
-            </div>\
-            <div class='row'>\
-              <label for='timeout_ms'>Timeout (ms)</label>\
-              <input id='timeout_ms' type='number' min='0' size='8' \
-                     max='20000' step='50' value='{timeout_ms}'>\
-            </div>\
-            <div class='row'>\
-              <label for='retry_threshold'>Retry Threshold</label>\
-              <input id='retry_threshold' type='number' min='0' size='2' \
-                     max='8' value='{retry_threshold}'>\
-            </div>\
-            <div class='row'>\
-              <label for='poll_period_sec'>Poll Period</label>\
-              <select id='poll_period_sec'>{poll_periods}</select>\
-            </div>\
-            <div class='row'>\
-              <label for='long_poll_period_sec'>Long Poll Period</label>\
-              <select id='long_poll_period_sec'>{long_periods}</select>\
-            </div>\
-            <div class='row'>\
-              <label for='idle_disconnect_sec'>Idle Disconnect</label>\
-              <select id='idle_disconnect_sec'>{idle_periods}</select>\
-            </div>\
-            <div class='row'>\
-              <label for='no_response_disconnect_sec'>No Response Disconnect</label>\
-              <select id='no_response_disconnect_sec'>{no_resp_periods}</select>\
-            </div>\
-            {footer}"
-        )
+        let mut html = self.title(View::Setup);
+        html.div().class("row");
+        html.label().for_("description").text("Description").end();
+        html.input()
+            .id("description")
+            .maxlength("20")
+            .size("20")
+            .value(&self.description);
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("protocol").text("Protocol").end();
+        anc.protocols_html(self, &mut html);
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("timeout_ms").text("Timeout (ms)").end();
+        html.input()
+            .id("timeout_ms")
+            .type_("number")
+            .min("0")
+            .max("20000")
+            .size("8")
+            .attr("step", "50")
+            .value(opt_str(self.timeout_ms));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label()
+            .for_("retry_threshold")
+            .text("Retry Threshold")
+            .end();
+        html.input()
+            .id("retry_threshold")
+            .type_("number")
+            .min("0")
+            .max("8")
+            .size("2")
+            .value(opt_str(self.retry_threshold));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label()
+            .for_("poll_period_sec")
+            .text("Poll Period")
+            .end();
+        periods_html(
+            "poll_period_sec",
+            self.poll_period_sec,
+            &PERIODS[1..],
+            &mut html,
+        );
+        html.end(); /* div */
+        html.div().class("row");
+        html.label()
+            .for_("long_poll_period_sec")
+            .text("Long Poll Period")
+            .end();
+        periods_html(
+            "long_poll_period_sec",
+            self.long_poll_period_sec,
+            &PERIODS[1..],
+            &mut html,
+        );
+        html.end(); /* div */
+        html.div().class("row");
+        html.label()
+            .for_("idle_disconnect_sec")
+            .text("Idle Disconnect")
+            .end();
+        periods_html(
+            "idle_disconnect_sec",
+            self.idle_disconnect_sec,
+            PERIODS,
+            &mut html,
+        );
+        html.end(); /* div */
+        html.div().class("row");
+        html.label()
+            .for_("no_response_disconnect_sec")
+            .text("No Response Disconnect")
+            .end();
+        periods_html(
+            "no_response_disconnect_sec",
+            self.no_response_disconnect_sec,
+            PERIODS,
+            &mut html,
+        );
+        html.end(); /* div */
+        html.raw(self.footer(true));
+        html.into()
     }
 }
 
