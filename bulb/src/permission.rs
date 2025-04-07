@@ -15,7 +15,8 @@ use crate::card::{AncillaryData, Card, View};
 use crate::error::{Error, Result};
 use crate::item::ItemState;
 use crate::role::Role;
-use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, Select};
+use crate::util::{ContainsLower, Doc, Fields, Input, Select, opt_ref};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use serde_json::{Map, Value};
@@ -93,40 +94,32 @@ impl AncillaryData for PermissionAnc {
 }
 
 impl PermissionAnc {
-    /// Create an HTML `select` element of resource types
-    fn resource_types_html(&self, pri: &Permission) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='base_resource'>");
+    /// Create resource types HTML
+    fn resource_types_html(&self, pri: &Permission, html: &mut Html) {
+        html.select().id("base_resource");
         for resource_type in &self.resource_types {
             if resource_type.base.is_none() {
-                html.push_str("<option");
+                let option = html.option();
                 if pri.base_resource == resource_type.name {
-                    html.push_str(" selected");
+                    option.attr_bool("selected");
                 }
-                html.push('>');
-                html.push_str(&resource_type.name);
-                html.push_str("</option>");
+                html.text(&resource_type.name).end();
             }
         }
-        html.push_str("</select>");
-        html
+        html.end(); /* select */
     }
 
-    /// Create an HTML `select` element of roles
-    fn roles_html(&self, pri: &Permission) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='role'>");
+    /// Create roles HTML
+    fn roles_html(&self, pri: &Permission, html: &mut Html) {
+        html.select().id("role");
         for role in &self.roles {
-            html.push_str("<option");
+            let option = html.option();
             if pri.role == role.name {
-                html.push_str(" selected");
+                option.attr_bool("selected");
             }
-            html.push('>');
-            html.push_str(&role.name);
-            html.push_str("</option>");
+            html.text(&role.name).end();
         }
-        html.push_str("</select>");
-        html
+        html.end(); /* select */
     }
 }
 
@@ -142,25 +135,20 @@ fn item_state(access_level: u32) -> ItemState {
 }
 
 /// Create an HTML `select` element of access level
-fn access_level_html(selected: u32) -> String {
-    let mut html = String::new();
-    html.push_str("<select id='access_level'>");
+fn access_level_html(selected: u32, html: &mut Html) {
+    html.select().id("access_level");
     for access in 1..=4 {
-        html.push_str("<option value='");
-        html.push_str(&access.to_string());
-        html.push('\'');
+        let option = html.option().value(access.to_string());
         if selected == access {
-            html.push_str(" selected");
+            option.attr_bool("selected");
         }
-        html.push('>');
         let item = item_state(access);
-        html.push_str(item.code());
-        html.push(' ');
-        html.push_str(item.description());
-        html.push_str("</option>");
+        html.text(item.code())
+            .text(" ")
+            .text(item.description())
+            .end();
     }
-    html.push_str("</select>");
-    html
+    html.end(); /* select */
 }
 
 impl Permission {
@@ -184,45 +172,44 @@ impl Permission {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let name = &self.name;
-        let role = HtmlStr::new(&self.role);
-        let access = item_state(self.access_level);
-        let resource = HtmlStr::new(&self.base_resource);
-        let hashtag = HtmlStr::new(&self.hashtag);
-        format!(
-            "<div class='title row'>{role} {access} {name}</div>\
-            <div class='info fill'>{resource}<span>{hashtag}</span></div>"
-        )
+        let mut html = Html::new();
+        html.div()
+            .class("title row")
+            .text(&self.role)
+            .text(" ")
+            .text(item_state(self.access_level).to_string())
+            .text(&self.name)
+            .end();
+        html.div().class("info fill").text(&self.base_resource);
+        html.span().text(opt_ref(&self.hashtag)).end();
+        html.into()
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &PermissionAnc) -> String {
-        let title = String::from(self.title(View::Setup));
-        let role = anc.roles_html(self);
-        let resource = anc.resource_types_html(self);
-        let hashtag = HtmlStr::new(&self.hashtag);
-        let access = access_level_html(self.access_level);
-        let footer = self.footer(true);
-        format!(
-            "{title}\
-            <div class='row'>\
-               <label for='role'>Role</label>\
-               {role}\
-            </div>\
-            <div class='row'>\
-              <label for='base_resource'>Resource</label>\
-              {resource}\
-            </div>\
-            <div class='row'>\
-               <label for='hashtag'>Hashtag</label>\
-               <input id='hashtag' maxlength='16' size='16' value='{hashtag}'>\
-            </div>\
-            <div class='row'>\
-              <label for='access_level'>Access</label>\
-              {access}\
-            </div>\
-            {footer}"
-        )
+        let mut html = self.title(View::Setup);
+        html.div().class("row");
+        html.label().for_("role").text("Role").end();
+        anc.roles_html(self, &mut html);
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("base_resource").text("Resource").end();
+        anc.resource_types_html(self, &mut html);
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("hashtag").text("Hashtag").end();
+        html.input()
+            .id("hashtag")
+            .maxlength("16")
+            .size("16")
+            .value(opt_ref(&self.hashtag));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("access_level").text("Access").end();
+        access_level_html(self.access_level, &mut html);
+        html.end(); /* div */
+        html.raw(self.footer(true));
+        html.into()
     }
 }
 
@@ -268,23 +255,23 @@ impl Card for Permission {
 
     /// Get row for Create card
     fn to_html_create(&self, anc: &PermissionAnc) -> String {
-        let name = HtmlStr::new(self.name());
-        let role = anc.roles_html(self);
-        let resource = anc.resource_types_html(self);
-        format!(
-            "<div class='row'>\
-              <label for='create_name'>Name</label>\
-              <input id='create_name' maxlength='24' size='24' value='{name}'>\
-            </div>\
-            <div class='row'>\
-              <label for='role'>Role</label>\
-              {role}\
-            </div>\
-            <div class='row'>\
-              <label for='base_resource'>Resource</label>\
-              {resource}\
-            </div>"
-        )
+        let mut html = Html::new();
+        html.div().class("row");
+        html.label().for_("create_name").text("Name").end();
+        html.input()
+            .id("create_name")
+            .maxlength("24")
+            .size("24")
+            .value(self.name());
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("role").text("Role").end();
+        anc.roles_html(self, &mut html);
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("base_resource").text("Resource").end();
+        anc.resource_types_html(self, &mut html);
+        html.into()
     }
 
     /// Convert to HTML view
