@@ -269,7 +269,11 @@ fn render_sign(sc: &SignConfig, anc: &SignConfigAnc, html: &mut Html) {
         .attr("style", "text-align: right;")
         .text(format_len_sm(sc.border_vert))
         .end();
-    html.td().span().attr("style", "color:#116").text("(border)").end();
+    html.td()
+        .span()
+        .attr("style", "color:#116")
+        .text("(border)")
+        .end();
     html.end().end().end(); /* td; tr; table */
 }
 

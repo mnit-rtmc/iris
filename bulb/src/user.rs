@@ -15,7 +15,8 @@ use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
 use crate::item::ItemState;
 use crate::role::Role;
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
+use crate::util::{ContainsLower, Fields, Input, Select, opt_ref};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -79,24 +80,20 @@ impl UserAnc {
         ItemState::Inactive
     }
 
-    /// Create an HTML `select` element of roles
-    fn roles_html(&self, pri: &User) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='role'>");
-        html.push_str("<option></option>");
+    /// Build roles HTML
+    fn roles_html(&self, pri: &User, html: &mut Html) {
+        html.select().id("role");
+        html.option().end();
         if let Some(roles) = &self.roles {
             for role in roles {
-                html.push_str("<option");
+                let option = html.option();
                 if pri.role.as_ref() == Some(&role.name) {
-                    html.push_str(" selected");
+                    option.attr_bool("selected");
                 }
-                html.push('>');
-                html.push_str(&role.name);
-                html.push_str("</option>");
+                html.text(&role.name).end();
             }
         }
-        html.push_str("</select>");
-        html
+        html.end(); /* select */
     }
 }
 
@@ -113,40 +110,47 @@ impl User {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &UserAnc) -> String {
-        let name = HtmlStr::new(self.name());
-        let item_state = self.item_state(anc);
-        format!("<div class='title row'>{name} {item_state}</div>")
+        let mut html = Html::new();
+        html.div()
+            .class("title row")
+            .text(self.name())
+            .text(" ")
+            .text(self.item_state(anc).to_string());
+        html.into()
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &UserAnc) -> String {
-        let title = String::from(self.title(View::Setup));
-        let full_name = HtmlStr::new(&self.full_name);
-        let dn = HtmlStr::new(&self.dn);
-        let role = anc.roles_html(self);
-        let enabled = if self.enabled { " checked" } else { "" };
-        let footer = self.footer(true);
-        format!(
-            "{title}\
-            <div class='row'>\
-               <label for='full_name'>Full Name</label>\
-               <input id='full_name' maxlength='31' size='20' \
-                      value='{full_name}'>\
-            </div>\
-            <div class='row'>\
-               <label for='dn'>Dn</label>\
-               <input id='dn' maxlength='128' size='32' value='{dn}'>\
-            </div>\
-            <div class='row'>\
-               <label for='role'>Role</label>\
-               {role}\
-            </div>\
-            <div class='row'>\
-              <label for='enabled'>Enabled</label>\
-              <input id='enabled' type='checkbox'{enabled}>\
-            </div>\
-            {footer}"
-        )
+        let mut html = self.title(View::Setup);
+        html.div().class("row");
+        html.label().for_("full_name").text("Full Name").end();
+        html.input()
+            .id("full_name")
+            .maxlength("31")
+            .size("20")
+            .value(&self.full_name);
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("dn").text("Dn").end();
+        html.input()
+            .id("dn")
+            .maxlength("128")
+            .size("32")
+            .value(opt_ref(&self.dn));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("role").text("Role").end();
+        anc.roles_html(self, &mut html);
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("enabled").text("Enabled").end();
+        let enabled = html.input().id("enabled").type_("checkbox");
+        if self.enabled {
+            enabled.checked();
+        }
+        html.end(); /* div */
+        html.raw(self.footer(true));
+        html.into()
     }
 }
 
