@@ -16,7 +16,7 @@ use crate::error::Result;
 use crate::factor;
 use crate::item::{ItemState, ItemStates};
 use crate::sign::{self, NtcipSign};
-use crate::util::{ContainsLower, Fields, OptVal, Select};
+use crate::util::{ContainsLower, Fields, Select, opt_str};
 use hatmil::Html;
 use mag::length::mm;
 use ntcip::dms::{FontTable, GraphicTable, tfon};
@@ -26,9 +26,28 @@ use serde::Deserialize;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
 
-/// Display Units
-type SizeUnit = mag::length::ft;
-type SizeUnitSm = mag::length::In;
+/// Length display units
+type LenUnit = mag::length::ft;
+type LenUnitSm = mag::length::In;
+
+/// Format length to "normal" units (feet)
+fn format_len(val: i32) -> String {
+    format!("{:.2}", (f64::from(val) * mm).to::<LenUnit>())
+}
+
+/// Format length to "small" units (inches)
+fn format_len_sm(val: i32) -> String {
+    format!("{:.2}", (f64::from(val) * mm).to::<LenUnitSm>())
+}
+
+/// Format pixel width/height
+fn format_px(val: i32) -> String {
+    if val > 0 {
+        format!("{} px", val)
+    } else {
+        "variable".to_string()
+    }
+}
 
 /// Font name
 /// FIXME: share with dms module
@@ -97,23 +116,19 @@ impl AncillaryData for SignConfigAnc {
 }
 
 impl SignConfigAnc {
-    /// Build fonts select element
-    fn select_fonts_html(&self, font_num: u8) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='default_font'>");
+    /// Build fonts HTML
+    fn select_fonts_html(&self, font_num: u8, html: &mut Html) {
+        html.select().id("default_font");
         for num in 1..=255 {
             if let Some(_f) = self.fonts.font(num) {
-                html.push_str("<option");
+                let option = html.option();
                 if num == font_num {
-                    html.push_str(" selected");
+                    option.attr_bool("selected");
                 }
-                html.push('>');
-                html.push_str(&num.to_string());
-                html.push_str("</option>");
+                html.text(num.to_string()).end();
             }
         }
-        html.push_str("</select>");
-        html
+        html.end(); /* select */
     }
 }
 
@@ -138,133 +153,142 @@ fn item_states(sc: &SignConfig) -> ItemStates {
 }
 
 /// Convert to setup HTML
-fn to_html_setup(
-    sc: &SignConfig,
-    anc: &SignConfigAnc,
-    title: &str,
-    footer: &str,
-) -> String {
-    let color_scheme = &sc.color_scheme;
-    let monochrome = monochrome_html(sc);
-    let pixel_width = sc.pixel_width;
-    let pixel_height = sc.pixel_height;
-    let pitch_horiz = (f64::from(sc.pitch_horiz) * mm).to::<SizeUnitSm>();
-    let pitch_vert = (f64::from(sc.pitch_vert) * mm).to::<SizeUnitSm>();
-    let char_width = if sc.char_width > 0 {
-        format!("{} px", sc.char_width)
-    } else {
-        "variable".to_string()
-    };
-    let char_height = if sc.char_height > 0 {
-        format!("{} px", sc.char_height)
-    } else {
-        "variable".to_string()
-    };
-    let module_width =
-        select_factors_html("module_width", sc.pixel_width, sc.module_width);
-    let module_height =
-        select_factors_html("module_height", sc.pixel_height, sc.module_height);
-    let default_font = anc.select_fonts_html(sc.default_font);
-    let sign = render_sign(sc, anc);
-    format!(
-        "{title}\
-        <div class='row'>\
-          <label>Color Scheme</label>\
-          <span class='info'>{color_scheme}</span>\
-        </div>\
-        {monochrome}\
-        <div class='center info'>{pixel_width} x {pixel_height} px</div>\
-        <div class='center'>{sign}</div>\
-        <div class='row'>\
-          <label>Pitch</label>\
-          <span class='info'>{pitch_horiz:.2} x {pitch_vert:.2}</span>\
-        </div>\
-        <div class='row'>\
-          <label>Character Width</label><span class='info'>{char_width}</span>\
-          <label>x Height</label><span class='info'>{char_height}</span>\
-        </div>\
-        <div class='row'>\
-          <label for='module_width'>Module Width</label>{module_width}\
-          <label for='module_height'>x Height</label>{module_height}\
-        </div>\
-        <div class='row'>\
-          <label for='default_font'>Default Font</label>{default_font}\
-        </div>\
-        {footer}"
-    )
+fn to_html_setup(sc: &SignConfig, anc: &SignConfigAnc) -> String {
+    let mut html = sc.title(View::Setup);
+    html.div().class("row");
+    html.label().text("Color Scheme").end();
+    html.span().class("info").text(&sc.color_scheme).end();
+    html.end(); /* div */
+    monochrome_html(sc, &mut html);
+    html.div()
+        .class("center info")
+        .text(sc.pixel_width.to_string())
+        .text(" x ")
+        .text(sc.pixel_height.to_string())
+        .text(" px")
+        .end();
+    html.div().class("center");
+    render_sign(sc, anc, &mut html);
+    html.end(); /* div */
+    html.div().class("row");
+    html.label().text("Pitch").end();
+    html.span()
+        .class("info")
+        .text(format_len_sm(sc.pitch_horiz))
+        .text(" x ")
+        .text(format_len_sm(sc.pitch_vert))
+        .end();
+    html.end(); /* div */
+    html.div().class("row");
+    html.label().text("Character Width").end();
+    html.span()
+        .class("info")
+        .text(format_px(sc.char_width))
+        .end();
+    html.label().text("x Height").end();
+    html.span()
+        .class("info")
+        .text(format_px(sc.char_height))
+        .end();
+    html.end(); /* div */
+    html.div().class("row");
+    html.label().for_("module_width").text("Module Width").end();
+    select_factors_html(
+        "module_width",
+        sc.pixel_width,
+        sc.module_width,
+        &mut html,
+    );
+    html.label()
+        .for_("module_height")
+        .text("Module Height")
+        .end();
+    select_factors_html(
+        "module_height",
+        sc.pixel_height,
+        sc.module_height,
+        &mut html,
+    );
+    html.end(); /* div */
+    html.div().class("row");
+    html.label().for_("default_font").text("Default Font").end();
+    anc.select_fonts_html(sc.default_font, &mut html);
+    html.end(); /* div */
+    html.raw(sc.footer(true));
+    html.into()
 }
 
-/// Make monochrome color div element
-fn monochrome_html(sc: &SignConfig) -> String {
+/// Build monochrome color HTML
+fn monochrome_html(sc: &SignConfig, html: &mut Html) {
     let fg = sc.monochrome_foreground;
     let bg = sc.monochrome_background;
     if fg > 0 || bg > 0 {
-        format!(
-            "<div class='row'>\
-              <label>FG / BG</label>\
-              <span style='color: #{fg:06X}; background-color: #{bg:06X}'>\
-                #{fg:06X} / #{bg:06X}\
-              </span>\
-            </div>"
-        )
-    } else {
-        String::new()
+        let style = format!("color: #{fg:06X}; background-color: #{bg:06X}");
+        let text = format!("#{fg:06X} / #{bg:06X}");
+        html.div().class("row");
+        html.label().text("FG / BG").end();
+        html.span().attr("style", style).text(text).end();
+        html.end(); /* div */
     }
 }
 
-/// Render the sign
-fn render_sign(sc: &SignConfig, anc: &SignConfigAnc) -> String {
-    let face_width = (f64::from(sc.face_width) * mm).to::<SizeUnit>();
-    let face_height = (f64::from(sc.face_height) * mm).to::<SizeUnit>();
-    let border_horiz = (f64::from(sc.border_horiz) * mm).to::<SizeUnitSm>();
-    let border_vert = (f64::from(sc.border_vert) * mm).to::<SizeUnitSm>();
+/// Render the sign HTML
+fn render_sign(sc: &SignConfig, anc: &SignConfigAnc, html: &mut Html) {
     let sign = NtcipSign::new(sc, anc.fonts.clone(), GraphicTable::default());
-    let valid = match sign {
-        Some(_) => "<td>",
-        None => "<td class='fault'>Invalid",
-    };
+    html.table();
+    html.tr().td().end();
+    html.td()
+        .attr("style", "text-align: center;")
+        .text(format_len(sc.face_width))
+        .end();
+    let td = html.td();
+    if sign.is_none() {
+        td.class("fault").text("Invalid");
+    }
+    html.end().end(); /* td; tr */
+    html.tr()
+        .td()
+        .attr("style", "text-align: right;")
+        .text(format_len(sc.face_height))
+        .end();
+    html.td();
     let mod_size = match (sc.module_width, sc.module_height) {
         (Some(mw), Some(mh)) if mw > 0 && mh > 0 => {
             Some((mw as u32, mh as u32))
         }
         _ => None,
     };
-    let html = sign::render(&sign, "A1", 240, 80, mod_size);
-    format!(
-        "<table>\
-          <tr>\
-            <td>\
-            <td style='text-align: center;'>{face_width:.2}\
-            {valid}\
-          <tr>\
-            <td style='text-align: right;'>{face_height:.2}\
-            <td>{html}\
-            <td style='vertical-align: bottom;'>{border_vert:.2}\
-          <tr>\
-            <td>\
-            <td style='text-align: right;'>{border_horiz:.2}\
-            <td><span style='color:#116;'>(border)</span>\
-        </table>"
-    )
+    html.raw(sign::render(&sign, "A1", 240, 80, mod_size));
+    html.end(); /* td */
+    html.td()
+        .attr("style", "vertical-align: bottom;")
+        .text(format_len_sm(sc.border_horiz))
+        .end();
+    html.tr().td().end();
+    html.td()
+        .attr("style", "text-align: right;")
+        .text(format_len_sm(sc.border_vert))
+        .end();
+    html.td().span().attr("style", "color:#116").text("(border)").end();
+    html.end().end().end(); /* td; tr; table */
 }
 
-/// Create an HTML `select` element of comm configs
-fn select_factors_html(id: &str, max: i32, value: Option<i32>) -> String {
-    let mut html = String::new();
-    html.push_str("<select id='");
-    html.push_str(id);
-    html.push_str("'>");
+/// Build factors HTML
+fn select_factors_html(
+    id: &str,
+    max: i32,
+    value: Option<i32>,
+    html: &mut Html,
+) {
+    html.select().id(id);
     for fact in std::iter::once(None).chain(factor::unique(max).map(Some)) {
-        html.push_str("<option");
+        let option = html.option();
         if value == fact {
-            html.push_str(" selected");
+            option.attr_bool("selected");
         }
-        html.push('>');
-        html.push_str(&OptVal(fact).to_string());
-        html.push_str("</option>");
+        html.text(opt_str(fact)).end();
     }
-    html.push_str("</select>");
-    html
+    html.end(); /* select */
 }
 
 impl Card for SignConfig {
@@ -303,11 +327,7 @@ impl Card for SignConfig {
     fn to_html(&self, view: View, anc: &SignConfigAnc) -> String {
         match view {
             View::Compact => to_html_compact(self),
-            View::Setup => {
-                let title = String::from(self.title(View::Setup));
-                let footer = self.footer(true);
-                to_html_setup(self, anc, &title, &footer)
-            }
+            View::Setup => to_html_setup(self, anc),
             _ => unreachable!(),
         }
     }

@@ -627,12 +627,12 @@ impl RampMeter {
         html.span();
         let button = html.button().id("lk_shrink").type_("button");
         if !self.is_shrink_allowed() {
-            button.attr_bool("disabled");
+            button.disabled();
         }
         html.text("Shrink ↩").end();
         let button = html.button().id("lk_grow").type_("button");
         if !self.is_grow_allowed() {
-            button.attr_bool("disabled");
+            button.disabled();
         }
         html.text("Grow ↪").end();
         html.end(); /* span */
