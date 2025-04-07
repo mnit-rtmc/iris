@@ -148,9 +148,7 @@ impl CommLink {
     fn to_html_status(&self, anc: &CommLinkAnc) -> String {
         let mut html = self.title(View::Status);
         html.div().class("row");
-        html.span();
-        html.raw(self.item_states().to_html());
-        html.end(); /* span */
+        self.item_states().tooltips(&mut html);
         html.span().class("info end").text(&self.description).end();
         html.end(); /* div */
         html.div().class("row");

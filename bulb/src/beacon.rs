@@ -19,6 +19,7 @@ use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -164,7 +165,9 @@ impl Beacon {
             fly_map_item(&self.name, lat, lon);
         }
         let title = String::from(self.title(View::Control));
-        let item_states = self.item_states(anc).to_html();
+        let mut html = Html::new();
+        self.item_states(anc).tooltips(&mut html);
+        let item_states = String::from(html);
         let location = HtmlStr::new(&self.location).with_len(64);
         let flashing = if self.flashing() {
             CLASS_FLASHING

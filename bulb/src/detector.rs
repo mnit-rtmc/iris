@@ -13,6 +13,7 @@
 use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -52,7 +53,9 @@ impl Detector {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &DetectorAnc) -> String {
         let title = String::from(self.title(View::Status));
-        let item_states = anc.item_states(self).to_html();
+        let mut html = Html::new();
+        anc.item_states(self).tooltips(&mut html);
+        let item_states = String::from(html);
         let label = HtmlStr::new(&self.label).with_len(20);
         format!(
             "{title}\

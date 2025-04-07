@@ -16,6 +16,7 @@ use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -151,7 +152,9 @@ impl TagReader {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &TagReaderAnc) -> String {
         let title = String::from(self.title(View::Status));
-        let item_states = anc.cio.item_states(self).to_html();
+        let mut html = Html::new();
+        anc.cio.item_states(self).tooltips(&mut html);
+        let item_states = String::from(html);
         let location = HtmlStr::new(&self.location).with_len(64);
         format!(
             "{title}\

@@ -16,6 +16,7 @@ use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -129,7 +130,9 @@ impl GateArm {
     fn to_html_status(&self, anc: &GateArmAnc) -> String {
         let title = String::from(self.title(View::Status));
         let location = HtmlStr::new(&self.location).with_len(64);
-        let item_states = self.item_states(anc).to_html();
+        let mut html = Html::new();
+        self.item_states(anc).tooltips(&mut html);
+        let item_states = String::from(html);
         format!(
             "{title}\
             <div class='row'>{item_states}</div>\

@@ -19,6 +19,7 @@ use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select, TextArea};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -338,7 +339,9 @@ impl Controller {
         let title = String::from(self.title(View::Status));
         let res = Res::CommLink;
         let condition = anc.condition(self);
-        let item_states = self.item_states().to_html();
+        let mut html = Html::new();
+        self.item_states().tooltips(&mut html);
+        let item_states = String::from(html);
         let comm_link = HtmlStr::new(&self.comm_link);
         let drop_id = self.drop_id;
         let comm_config = anc.comm_config(self);

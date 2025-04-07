@@ -61,7 +61,8 @@ impl Alarm {
     fn to_html_status(&self, anc: &AlarmAnc) -> String {
         let mut html = self.title(View::Status);
         html.div().class("row");
-        html.raw(self.item_states(anc).to_html()).end();
+        self.item_states(anc).tooltips(&mut html);
+        html.end(); /* div */
         html.div().class("row");
         html.span().class("info full").text(&self.description).end();
         html.end(); /* div */

@@ -18,6 +18,7 @@ use crate::geoloc::{Loc, LocAnc};
 use crate::item::ItemState;
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Fields, HtmlStr, Input, TextArea};
+use hatmil::Html;
 use humantime::format_duration;
 use mag::length::{m, mm};
 use mag::temp::DegC;
@@ -757,7 +758,9 @@ impl WeatherSensor {
             fly_map_item(&self.name, lat, lon);
         }
         let title = String::from(self.title(View::Status));
-        let item_states = anc.cio.item_states(self).to_html();
+        let mut html = Html::new();
+        anc.cio.item_states(self).tooltips(&mut html);
+        let item_states = String::from(html);
         let location = HtmlStr::new(&self.location).with_len(64);
         let site_id = HtmlStr::new(&self.site_id);
         let alt_id = HtmlStr::new(&self.alt_id);

@@ -24,6 +24,7 @@ use crate::signmessage::SignMessage;
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, TextArea};
 use chrono::DateTime;
+use hatmil::Html;
 use js_sys::{ArrayBuffer, Uint8Array};
 use mag::temp::DegC;
 use ntcip::dms::multi::{
@@ -721,9 +722,9 @@ impl Dms {
         }
         let mut html = String::from(self.title(View::Control));
         html.push_str("<div class='row fill'>");
-        html.push_str("<span>");
-        html.push_str(&self.item_states(anc).to_html());
-        html.push_str("</span>");
+        let mut h = Html::new();
+        self.item_states(anc).tooltips(&mut h);
+        html.push_str(&String::from(h));
         html.push_str("<span>");
         if let Some(expire_time) = &self.expire_time {
             match DateTime::parse_from_rfc3339(expire_time) {
@@ -955,7 +956,9 @@ impl Dms {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &DmsAnc) -> String {
         let title = String::from(self.title(View::Status));
-        let item_states = self.item_states(anc).to_html();
+        let mut html = Html::new();
+        self.item_states(anc).tooltips(&mut html);
+        let item_states = String::from(html);
         let location = HtmlStr::new(&self.location).with_len(64);
         let mut html = format!(
             "{title}\

@@ -365,8 +365,7 @@ impl Lcs {
         }
         let mut html = self.title(View::Control);
         html.div().class("row fill");
-        html.span();
-        html.raw(self.item_states(anc).to_html()).end();
+        self.item_states(anc).tooltips(&mut html);
         html.end(); /* div */
         html.div().class("row");
         html.span()

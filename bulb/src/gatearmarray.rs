@@ -102,7 +102,7 @@ impl GateArmArray {
     fn to_html_control(&self) -> String {
         let mut html = self.title(View::Control);
         html.div().class("row");
-        html.raw(item_states(self.arm_state).to_html());
+        item_states(self.arm_state).tooltips(&mut html);
         html.end(); /* div */
         html.div()
             .class("info")

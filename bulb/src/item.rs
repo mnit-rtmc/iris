@@ -10,6 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use hatmil::Html;
 use std::fmt;
 
 /// Item state
@@ -196,29 +197,22 @@ impl<'a> ItemStates<'a> {
         self.all.iter().any(|(s, _dtl)| s.is_match(search))
     }
 
-    /// Convert item states to html
-    pub fn to_html(&self) -> String {
-        let mut desc = String::new();
+    /// Build item state tooltips
+    pub fn tooltips(&self, html: &mut Html) {
         for (state, dtl) in self.all.iter() {
-            if !desc.is_empty() {
-                desc.push(' ');
-            }
-            desc.push_str("<div class='tooltip'>");
-            desc.push_str(state.code());
-            desc.push(' ');
-            desc.push_str(state.description());
+            html.div().class("tooltip");
+            html.text(state.code()).text(" ").text(state.description());
             if !dtl.is_empty() {
-                desc.push_str("<span class='item_");
-                desc.push_str(state.description());
-                desc.push_str("'>");
+                let mut cls = String::from("item_");
+                cls.push_str(state.description());
+                html.span().class(cls);
                 for d in dtl.split(';') {
-                    desc.push_str(d);
-                    desc.push(' ');
+                    html.text(d);
+                    html.text(" ");
                 }
-                desc.push_str("</span>");
+                html.end(); /* span */
             }
-            desc.push_str("</div>");
+            html.end(); /* div */
         }
-        desc
     }
 }

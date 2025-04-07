@@ -161,7 +161,7 @@ impl Camera {
         }
         let mut html = self.title(View::Control);
         html.div().class("row");
-        html.raw(anc.cio.item_states(self).to_html());
+        anc.cio.item_states(self).tooltips(&mut html);
         html.end(); /* div */
         html.div().class("row");
         html.span()
