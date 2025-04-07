@@ -16,7 +16,8 @@ use crate::commconfig::CommConfig;
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select};
+use crate::util::{ContainsLower, Fields, Input, Select};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -99,32 +100,24 @@ impl CommLinkAnc {
         ""
     }
 
-    /// Create an HTML `select` element of comm configs
-    fn comm_configs_html(&self, pri: &CommLink) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='comm_config'>");
+    /// Build comm configs HTML
+    fn comm_configs_html(&self, pri: &CommLink, html: &mut Html) {
+        html.select().id("comm_config");
         for config in &self.comm_configs {
-            html.push_str("<option value='");
-            html.push_str(&config.name);
-            html.push('\'');
+            let option = html.option().value(&config.name);
             if pri.comm_config == config.name {
-                html.push_str(" selected");
+                option.attr_bool("selected");
             }
-            html.push('>');
-            html.push_str(&config.description);
-            html.push_str("</option>");
+            html.text(&config.description).end();
         }
-        html.push_str("</select>");
-        html
+        html.end(); /* select */
     }
 
-    /// Build controller links as HTML
-    fn controllers_html(&self) -> String {
-        let mut html = String::new();
+    /// Build controller links HTML
+    fn controllers_html(&self, html: &mut Html) {
         for ctrl in &self.controllers {
-            html.push_str(&ctrl.button_loc_html());
+            html.raw(ctrl.button_loc_html());
         }
-        html
     }
 }
 
@@ -140,65 +133,65 @@ impl CommLink {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let name = HtmlStr::new(self.name());
-        let item_states = self.item_states();
-        let description = HtmlStr::new(&self.description);
-        format!(
-            "<div class='title row'>{name} {item_states}</div>\
-            <div class='info fill'>{description}</div>"
-        )
+        let mut html = Html::new();
+        html.div()
+            .class("title row")
+            .text(self.name())
+            .text(" ")
+            .text(self.item_states().to_string())
+            .end();
+        html.div().class("info fill").text(&self.description);
+        html.into()
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &CommLinkAnc) -> String {
-        let title = String::from(self.title(View::Status));
-        let item_states = self.item_states().to_html();
-        let description = HtmlStr::new(&self.description);
-        let comm_config = anc.comm_config_desc(self);
-        let config = HtmlStr::new(comm_config);
-        let controllers = anc.controllers_html();
-        format!(
-            "{title}\
-            <div class='row'>\
-              <span>{item_states}</span>\
-              <span class='info end'>{description}</span>\
-            </div>\
-            <div class='row'>\
-              <span>{config}</span>\
-            </div>\
-            {controllers}"
-        )
+        let mut html = self.title(View::Status);
+        html.div().class("row");
+        html.span();
+        html.raw(self.item_states().to_html());
+        html.end(); /* span */
+        html.span().class("info end").text(&self.description).end();
+        html.end(); /* div */
+        html.div().class("row");
+        html.span().text(anc.comm_config_desc(self)).end();
+        html.end(); /* div */
+        anc.controllers_html(&mut html);
+        html.into()
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &CommLinkAnc) -> String {
-        let title = String::from(self.title(View::Setup));
-        let description = HtmlStr::new(&self.description);
-        let uri = HtmlStr::new(&self.uri);
-        let enabled = if self.poll_enabled { " checked" } else { "" };
-        let comm_configs = anc.comm_configs_html(self);
-        let footer = self.footer(true);
-        format!(
-            "{title}\
-            <div class='row'>\
-              <label for='description'>Description</label>\
-              <input id='description' maxlength='32' size='24' \
-                     value='{description}'>\
-            </div>\
-            <div class='row'>\
-              <label for='uri'>URI</label>\
-              <input id='uri' maxlength='256' size='28' value='{uri}'>\
-            </div>\
-            <div class='row'>\
-              <label for='comm_config'>Comm Config</label>\
-              {comm_configs}\
-            </div>\
-            <div class='row'>\
-              <label for='poll_enabled'>Poll Enabled</label>\
-              <input id='poll_enabled' type='checkbox'{enabled}>\
-            </div>\
-            {footer}"
-        )
+        let mut html = self.title(View::Setup);
+        html.div().class("row");
+        html.label().for_("description").text("Description").end();
+        html.input()
+            .id("description")
+            .maxlength("32")
+            .size("24")
+            .value(&self.description);
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("uri").text("URI").end();
+        html.input()
+            .id("uri")
+            .maxlength("256")
+            .size("28")
+            .value(&self.uri);
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("comm_config").text("Comm Config").end();
+        anc.comm_configs_html(self, &mut html);
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("poll_enabled").text("Poll Enabled").end();
+        let enabled = html.input().id("poll_enabled").type_("checkbox");
+        if self.poll_enabled {
+            enabled.checked();
+        }
+        html.end(); /* div */
+        html.raw(self.footer(true));
+        html.into()
     }
 }
 
