@@ -199,8 +199,9 @@ impl<'a> ItemStates<'a> {
 
     /// Build item state tooltips
     pub fn tooltips(&self, html: &mut Html) {
+        html.div();
         for (state, dtl) in self.all.iter() {
-            html.div().class("tooltip");
+            html.span().class("tooltip");
             html.text(state.code()).text(" ").text(state.description());
             if !dtl.is_empty() {
                 let mut cls = String::from("item_");
@@ -212,7 +213,8 @@ impl<'a> ItemStates<'a> {
                 }
                 html.end(); /* span */
             }
-            html.end(); /* div */
+            html.end(); /* span */
         }
+        html.end(); /* div */
     }
 }
