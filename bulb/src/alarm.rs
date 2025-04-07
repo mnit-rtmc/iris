@@ -54,7 +54,7 @@ impl Alarm {
             .text(self.item_states(anc).to_string())
             .end();
         html.div().class("info fill").text(&self.description);
-        html.build()
+        html.into()
     }
 
     /// Convert to Status HTML
@@ -70,7 +70,7 @@ impl Alarm {
         html.span()
             .class("info")
             .text(self.trigger_time.as_deref().unwrap_or("-"));
-        html.build()
+        html.into()
     }
 
     /// Convert to Setup HTML
@@ -80,14 +80,14 @@ impl Alarm {
         html.label().for_("description").text("Description").end();
         html.input()
             .id("description")
-            .attr("maxlength", "24")
+            .maxlength("24")
             .size("24")
             .value(&self.description);
         html.end(); /* div */
         html.raw(anc.controller_html(self));
         html.raw(anc.pin_html(self.pin));
         html.raw(self.footer(true));
-        html.build()
+        html.into()
     }
 }
 

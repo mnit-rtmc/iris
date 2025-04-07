@@ -210,7 +210,7 @@ impl CommConfig {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &CommConfigAnc) -> String {
-        let title = self.title(View::Setup).build();
+        let title = String::from(self.title(View::Setup));
         let description = HtmlStr::new(&self.description);
         let protocols = anc.protocols_html(self);
         let timeout_ms = OptVal(self.timeout_ms);

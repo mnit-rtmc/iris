@@ -120,7 +120,7 @@ impl User {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &UserAnc) -> String {
-        let title = self.title(View::Setup).build();
+        let title = String::from(self.title(View::Setup));
         let full_name = HtmlStr::new(&self.full_name);
         let dn = HtmlStr::new(&self.dn);
         let role = anc.roles_html(self);

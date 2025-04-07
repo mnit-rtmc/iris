@@ -756,7 +756,7 @@ impl WeatherSensor {
         if let Some((lat, lon)) = anc.loc.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let title = self.title(View::Status).build();
+        let title = String::from(self.title(View::Status));
         let item_states = anc.cio.item_states(self).to_html();
         let location = HtmlStr::new(&self.location).with_len(64);
         let site_id = HtmlStr::new(&self.site_id);
@@ -786,7 +786,7 @@ impl WeatherSensor {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &WeatherSensorAnc) -> String {
-        let title = self.title(View::Setup).build();
+        let title = String::from(self.title(View::Setup));
         let site_id = HtmlStr::new(&self.site_id);
         let alt_id = HtmlStr::new(&self.alt_id);
         let notes = HtmlStr::new(&self.notes);

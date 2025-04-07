@@ -40,6 +40,22 @@ impl ContainsLower for &Option<String> {
     }
 }
 
+/// Get `str` reference from an `Option`
+pub fn opt_ref(val: &Option<impl AsRef<str>>) -> &str {
+    match val {
+        Some(v) => v.as_ref(),
+        None => "",
+    }
+}
+
+/// Get `String` from an `Option`
+pub fn opt_str(val: Option<impl ToString>) -> String {
+    match val {
+        Some(v) => v.to_string(),
+        None => String::new(),
+    }
+}
+
 /// An optional value which has impl Display
 #[derive(Debug)]
 pub struct OptVal<T>(pub Option<T>);

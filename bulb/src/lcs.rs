@@ -18,8 +18,10 @@ use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::lcsstate::LcsState;
 use crate::start::fly_map_item;
-use crate::util::{ContainsLower, Fields, Input, Select, TextArea};
-use hatmil::{Html, opt_ref, opt_str};
+use crate::util::{
+    ContainsLower, Fields, Input, Select, TextArea, opt_ref, opt_str,
+};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -353,7 +355,7 @@ impl Lcs {
         html.div()
             .class("info fill")
             .text_len(opt_ref(&self.location), 32);
-        html.build()
+        html.into()
     }
 
     /// Convert to Control HTML
@@ -373,7 +375,7 @@ impl Lcs {
             .end();
         html.end(); /* div */
         self.indications_html(anc, &mut html);
-        html.build()
+        html.into()
     }
 
     /// Convert to Setup HTML
@@ -383,7 +385,7 @@ impl Lcs {
         html.label().for_("notes").text("Notes").end();
         html.textarea()
             .id("notes")
-            .attr("maxlength", "255")
+            .maxlength("255")
             .attr("rows", "4")
             .attr("cols", "24")
             .text(opt_ref(&self.notes))
@@ -406,7 +408,7 @@ impl Lcs {
             .value(opt_str(self.shift));
         html.end(); /* div */
         html.raw(self.footer(true));
-        html.build()
+        html.into()
     }
 }
 

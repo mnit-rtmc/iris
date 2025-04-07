@@ -38,7 +38,7 @@ impl FlowStream {
             .text(self.name())
             .text(" ")
             .text(anc.item_states(self).to_string());
-        html.build()
+        html.into()
     }
 
     /// Convert to Setup HTML
@@ -47,7 +47,7 @@ impl FlowStream {
         html.raw(anc.controller_html(self));
         html.raw(anc.pin_html(self.pin));
         html.raw(self.footer(true));
-        html.build()
+        html.into()
     }
 }
 

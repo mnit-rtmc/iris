@@ -49,7 +49,7 @@ impl CabinetStyle {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self) -> String {
-        let title = self.title(View::Setup).build();
+        let title = String::from(self.title(View::Setup));
         let police_panel_pin_1 = OptVal(self.police_panel_pin_1);
         let police_panel_pin_2 = OptVal(self.police_panel_pin_2);
         let watchdog_reset_pin_1 = OptVal(self.watchdog_reset_pin_1);

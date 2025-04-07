@@ -51,7 +51,7 @@ impl Detector {
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &DetectorAnc) -> String {
-        let title = self.title(View::Status).build();
+        let title = String::from(self.title(View::Status));
         let item_states = anc.item_states(self).to_html();
         let label = HtmlStr::new(&self.label).with_len(20);
         format!(
@@ -65,7 +65,7 @@ impl Detector {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &DetectorAnc) -> String {
-        let title = self.title(View::Setup).build();
+        let title = String::from(self.title(View::Setup));
         let controller = anc.controller_html(self);
         let pin = anc.pin_html(self.pin);
         let footer = self.footer(true);

@@ -14,8 +14,8 @@ use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
-use crate::util::{ContainsLower, Fields, Input, Select};
-use hatmil::{Html, opt_ref, opt_str};
+use crate::util::{ContainsLower, Fields, Input, Select, opt_ref, opt_str};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -168,7 +168,7 @@ impl LcsState {
         html.span()
             .text(anc.indication(self).symbol().to_string())
             .end();
-        html.build()
+        html.into()
     }
 
     /// Convert to Setup HTML
@@ -198,7 +198,7 @@ impl LcsState {
         html.label().for_("msg_pattern").text("Msg Pattern").end();
         html.input()
             .id("msg_pattern")
-            .attr("maxlength", "20")
+            .maxlength("20")
             .size("20")
             .value(opt_ref(&self.msg_pattern));
         html.end(); /* div */
@@ -213,7 +213,7 @@ impl LcsState {
             .value(opt_str(self.msg_num));
         html.end(); /* div */
         html.raw(self.footer(true));
-        html.build()
+        html.into()
     }
 }
 

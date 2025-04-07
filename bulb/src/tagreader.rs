@@ -150,7 +150,7 @@ impl TagReader {
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &TagReaderAnc) -> String {
-        let title = self.title(View::Status).build();
+        let title = String::from(self.title(View::Status));
         let item_states = anc.cio.item_states(self).to_html();
         let location = HtmlStr::new(&self.location).with_len(64);
         format!(
@@ -164,7 +164,7 @@ impl TagReader {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &TagReaderAnc) -> String {
-        let title = self.title(View::Setup).build();
+        let title = String::from(self.title(View::Setup));
         let controller = anc.cio.controller_html(self);
         let pin = anc.cio.pin_html(self.pin);
         format!("{title}{controller}{pin}")

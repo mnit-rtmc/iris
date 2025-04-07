@@ -19,12 +19,14 @@ use crate::fetch::Action;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::start::fly_map_item;
-use crate::util::{ContainsLower, Doc, Fields, Input, Select, TextArea};
+use crate::util::{
+    ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
+};
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
 use chrono::{DateTime, Local, format::SecondsFormat};
 use gift::block::DisposalMethod;
 use gift::{Encoder, Step};
-use hatmil::{Html, opt_ref, opt_str};
+use hatmil::Html;
 use pix::matte::Matte8;
 use pix::ops::SrcOver;
 use pix::rgb::{Rgba8p, SRgb8};
@@ -675,7 +677,7 @@ impl RampMeter {
         html.div()
             .class("info fill")
             .text_len(opt_ref(&self.location), 32);
-        html.build()
+        html.into()
     }
 
     /// Convert to Control HTML
@@ -703,7 +705,7 @@ impl RampMeter {
         self.queue_html(&mut html);
         html.end(); /* div */
         self.meter_image_html(2, &mut html);
-        html.build()
+        html.into()
     }
 
     /// Convert to Request HTML
@@ -726,7 +728,7 @@ impl RampMeter {
             .attr("rel", "noopener noreferrer")
             .text("🔗 ")
             .text(self.name());
-        html.build()
+        html.into()
     }
 
     /// Convert to Setup HTML
@@ -736,7 +738,7 @@ impl RampMeter {
         html.label().for_("notes").text("Notes").end();
         html.textarea()
             .id("notes")
-            .attr("maxlength", "255")
+            .maxlength("255")
             .attr("rows", "4")
             .attr("cols", "24")
             .text(opt_ref(&self.notes))
@@ -793,7 +795,7 @@ impl RampMeter {
             .value(opt_str(self.pm_target));
         html.end(); /* div */
         html.raw(self.footer(true));
-        html.build()
+        html.into()
     }
 }
 

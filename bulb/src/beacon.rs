@@ -163,7 +163,7 @@ impl Beacon {
         if let Some((lat, lon)) = anc.loc.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let title = self.title(View::Control).build();
+        let title = String::from(self.title(View::Control));
         let item_states = self.item_states(anc).to_html();
         let location = HtmlStr::new(&self.location).with_len(64);
         let flashing = if self.flashing() {
@@ -197,7 +197,7 @@ impl Beacon {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &BeaconAnc) -> String {
-        let title = self.title(View::Setup).build();
+        let title = String::from(self.title(View::Setup));
         let message = HtmlStr::new(&self.message);
         let notes = HtmlStr::new(&self.notes);
         let controller = anc.cio.controller_html(self);

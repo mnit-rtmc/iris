@@ -220,7 +220,7 @@ impl<L> LocAnc<L> {
     where
         C: Card,
     {
-        let title = card.title(View::Location).build();
+        let title = String::from(card.title(View::Location));
         let footer = card.footer(false);
         let html = match &self.geoloc {
             Some(geoloc) => self.to_html_location(geoloc),

@@ -40,7 +40,7 @@ impl Gps {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &GpsAnc) -> String {
-        let title = self.title(View::Setup).build();
+        let title = String::from(self.title(View::Setup));
         let notes = HtmlStr::new(&self.notes);
         let controller = anc.controller_html(self);
         let pin = anc.pin_html(self.pin);

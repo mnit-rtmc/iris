@@ -151,7 +151,7 @@ impl CommLink {
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &CommLinkAnc) -> String {
-        let title = self.title(View::Status).build();
+        let title = String::from(self.title(View::Status));
         let item_states = self.item_states().to_html();
         let description = HtmlStr::new(&self.description);
         let comm_config = anc.comm_config_desc(self);
@@ -172,7 +172,7 @@ impl CommLink {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &CommLinkAnc) -> String {
-        let title = self.title(View::Setup).build();
+        let title = String::from(self.title(View::Setup));
         let description = HtmlStr::new(&self.description);
         let uri = HtmlStr::new(&self.uri);
         let enabled = if self.poll_enabled { " checked" } else { "" };

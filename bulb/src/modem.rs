@@ -12,8 +12,8 @@
 //
 use crate::card::{AncillaryData, Card, View};
 use crate::item::{ItemState, ItemStates};
-use crate::util::{ContainsLower, Fields, Input};
-use hatmil::{Html, opt_ref, opt_str};
+use crate::util::{ContainsLower, Fields, Input, opt_ref, opt_str};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -59,7 +59,7 @@ impl Modem {
             .text(self.name())
             .text(" ")
             .text(self.item_states().to_string());
-        html.build()
+        html.into()
     }
 
     /// Convert to Setup HTML
@@ -69,7 +69,7 @@ impl Modem {
         html.label().for_("uri").text("URI").end();
         html.input()
             .id("uri")
-            .attr("maxlength", "64")
+            .maxlength("64")
             .size("30")
             .value(opt_ref(&self.uri));
         html.end(); /* div */
@@ -77,7 +77,7 @@ impl Modem {
         html.label().for_("config").text("Config").end();
         html.input()
             .id("config")
-            .attr("maxlength", "64")
+            .maxlength("64")
             .size("28")
             .value(opt_ref(&self.config));
         html.end(); /* div */
@@ -97,7 +97,7 @@ impl Modem {
         if self.enabled {
             enabled.attr_bool("checked");
         }
-        html.build()
+        html.into()
     }
 }
 

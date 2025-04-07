@@ -58,7 +58,7 @@ impl Role {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self) -> String {
-        let title = self.title(View::Setup).build();
+        let title = String::from(self.title(View::Setup));
         let enabled = if self.enabled { " checked" } else { "" };
         let footer = self.footer(true);
         format!(

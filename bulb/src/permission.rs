@@ -197,7 +197,7 @@ impl Permission {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &PermissionAnc) -> String {
-        let title = self.title(View::Setup).build();
+        let title = String::from(self.title(View::Setup));
         let role = anc.roles_html(self);
         let resource = anc.resource_types_html(self);
         let hashtag = HtmlStr::new(&self.hashtag);

@@ -719,7 +719,7 @@ impl Dms {
         if let Some((lat, lon)) = anc.loc.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let mut html = self.title(View::Control).build();
+        let mut html = String::from(self.title(View::Control));
         html.push_str("<div class='row fill'>");
         html.push_str("<span>");
         html.push_str(&self.item_states(anc).to_html());
@@ -889,7 +889,7 @@ impl Dms {
 
     /// Convert to Request HTML
     fn to_html_request(&self, _anc: &DmsAnc) -> String {
-        let title = self.title(View::Request).build();
+        let title = String::from(self.title(View::Request));
         let name = HtmlStr::new(self.name());
         let work = "http://example.com"; // FIXME
         format!(
@@ -934,7 +934,7 @@ impl Dms {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &DmsAnc) -> String {
-        let title = self.title(View::Setup).build();
+        let title = String::from(self.title(View::Setup));
         let notes = HtmlStr::new(&self.notes);
         let controller = anc.cio.controller_html(self);
         let pin = anc.cio.pin_html(self.pin);
@@ -954,7 +954,7 @@ impl Dms {
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &DmsAnc) -> String {
-        let title = self.title(View::Status).build();
+        let title = String::from(self.title(View::Status));
         let item_states = self.item_states(anc).to_html();
         let location = HtmlStr::new(&self.location).with_len(64);
         let mut html = format!(

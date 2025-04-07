@@ -311,13 +311,13 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     fn to_html_create(&self, _anc: &Self::Ancillary) -> String {
         let mut html = Html::new();
         html.div().class("row");
-        html.label().attr("for", "create_name").text("Name").end();
+        html.label().for_("create_name").text("Name").end();
         html.input()
             .id("create_name")
-            .attr("maxlength", "24")
-            .attr("size", "24")
-            .attr("value", self.name());
-        html.build()
+            .maxlength("24")
+            .size("24")
+            .value(self.name());
+        html.into()
     }
 
     /// Convert to HTML view

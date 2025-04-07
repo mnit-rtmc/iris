@@ -160,7 +160,7 @@ impl Camera {
         if let Some((lat, lon)) = anc.loc.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let title = self.title(View::Control).build();
+        let title = String::from(self.title(View::Control));
         let item_states = anc.cio.item_states(self).to_html();
         let location = HtmlStr::new(&self.location).with_len(64);
         format!(
@@ -186,7 +186,7 @@ impl Camera {
 
     /// Convert to Request HTML
     fn to_html_request(&self, _anc: &CameraAnc) -> String {
-        let title = self.title(View::Request).build();
+        let title = String::from(self.title(View::Request));
         format!(
             "{title}\
             <div class='row'>\
@@ -200,7 +200,7 @@ impl Camera {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &CameraAnc) -> String {
-        let title = self.title(View::Setup).build();
+        let title = String::from(self.title(View::Setup));
         let cam_num = OptVal(self.cam_num);
         let notes = HtmlStr::new(&self.notes);
         let controller = anc.cio.controller_html(self);
