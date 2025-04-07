@@ -12,7 +12,8 @@
 //
 use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, TextArea};
+use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -33,35 +34,41 @@ type GpsAnc = ControllerIoAnc<Gps>;
 impl Gps {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &GpsAnc) -> String {
-        let name = HtmlStr::new(self.name());
-        let item_states = anc.item_states(self);
-        format!("<div class='end'>{name} {item_states}</div>")
+        let mut html = Html::new();
+        html.div()
+            .class("end")
+            .text(self.name())
+            .text(" ")
+            .text(anc.item_states(self).to_string());
+        html.into()
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &GpsAnc) -> String {
-        let title = String::from(self.title(View::Setup));
-        let notes = HtmlStr::new(&self.notes);
-        let controller = anc.controller_html(self);
-        let pin = anc.pin_html(self.pin);
-        let geo_loc = HtmlStr::new(&self.geo_loc);
-        let footer = self.footer(true);
-        format!(
-            "{title}\
-            <div class='row'>\
-              <label for='notes'>Notes</label>\
-              <textarea id='notes' maxlength='255' rows='4' \
-                        cols='24'>{notes}</textarea>\
-            </div>\
-            <div class='row'>\
-              <label for='geo_loc'>Device Loc</label>\
-              <input id='geo_loc' maxlength='20' size='20' \
-                     value='{geo_loc}'>\
-            </div>\
-            {controller}\
-            {pin}\
-            {footer}"
-        )
+        let mut html = self.title(View::Setup);
+        html.div().class("row");
+        html.label().for_("notes").text("Notes").end();
+        html.textarea()
+            .id("notes")
+            .maxlength("255")
+            .attr("rows", "4")
+            .attr("cols", "24")
+            .text(opt_ref(&self.notes))
+            .end();
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("geo_loc").text("Device Loc").end();
+        html.input()
+            .id("geo_loc")
+            .maxlength("20")
+            .size("20")
+            .value(opt_ref(&self.geo_loc))
+            .end();
+        html.end(); /* div */
+        html.raw(anc.controller_html(self));
+        html.raw(anc.pin_html(self.pin));
+        html.raw(self.footer(true));
+        html.into()
     }
 }
 

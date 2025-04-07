@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
+use hatmil::Html;
 use ntcip::dms::{FontTable, GraphicTable};
 use rendzina::SignConfig;
 use web_sys::console;
@@ -59,34 +60,27 @@ pub fn render(
     mut height: u16,
     mod_size: Option<(u32, u32)>,
 ) -> String {
-    let mut html = String::new();
-    html.push_str("<img");
+    let mut html = Html::new();
+    let mut img = html.img();
     if let Some(sign) = &sign {
         (width, height) = rendzina::face_size(&sign.dms, width, height);
         if let Some(id) = &sign.id {
-            html.push_str(" id='");
-            html.push_str(id);
-            html.push('\'');
+            img = img.id(id);
         }
     }
-    html.push_str(" width='");
-    html.push_str(&width.to_string());
-    html.push_str("' height='");
-    html.push_str(&height.to_string());
-    html.push_str("' ");
+    img = img.width(width.to_string()).height(height.to_string());
     if let Some(sign) = &sign {
         let mut buf = Vec::with_capacity(4096);
         match rendzina::render(
             &mut buf, &sign.dms, multi, width, height, mod_size,
         ) {
             Ok(()) => {
-                html.push_str("src='data:image/gif;base64,");
-                b64enc.encode_string(buf, &mut html);
-                html.push('\'');
+                let mut src = "data:image/gif;base64,".to_owned();
+                b64enc.encode_string(buf, &mut src);
+                img.src(src);
             }
             Err(e) => console::log_1(&format!("render: {e:?}").into()),
         }
     }
-    html.push_str("/>");
-    html
+    html.into()
 }

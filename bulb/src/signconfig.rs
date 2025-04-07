@@ -16,7 +16,8 @@ use crate::error::Result;
 use crate::factor;
 use crate::item::{ItemState, ItemStates};
 use crate::sign::{self, NtcipSign};
-use crate::util::{ContainsLower, Fields, HtmlStr, OptVal, Select};
+use crate::util::{ContainsLower, Fields, OptVal, Select};
+use hatmil::Html;
 use mag::length::mm;
 use ntcip::dms::{FontTable, GraphicTable, tfon};
 pub use rendzina::SignConfig;
@@ -118,9 +119,13 @@ impl SignConfigAnc {
 
 /// Convert to compact HTML
 fn to_html_compact(sc: &SignConfig) -> String {
-    let name = HtmlStr::new(&sc.name);
-    let item_states = item_states(sc);
-    format!("<div class='title row'>{name} {item_states}</div>")
+    let mut html = Html::new();
+    html.div()
+        .class("title row")
+        .text(&sc.name)
+        .text(" ")
+        .text(item_states(sc).to_string());
+    html.into()
 }
 
 /// Get item states

@@ -15,7 +15,8 @@ use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
 use crate::gatearm::{GateArmState, item_states};
 use crate::geoloc::{Loc, LocAnc};
-use crate::util::{ContainsLower, HtmlStr};
+use crate::util::{ContainsLower, opt_ref};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -84,25 +85,29 @@ impl Loc for GateArmArray {
 impl GateArmArray {
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let name = HtmlStr::new(self.name());
-        let item_states = item_states(self.arm_state);
-        let location = HtmlStr::new(&self.location).with_len(32);
-        format!(
-            "<div class='title row'>{name} {item_states}</div>\
-            <div class='info fill'>{location}</div>"
-        )
+        let mut html = Html::new();
+        html.div()
+            .class("title row")
+            .text(self.name())
+            .text(" ")
+            .text(item_states(self.arm_state).to_string())
+            .end();
+        html.div()
+            .class("info fill")
+            .text_len(opt_ref(&self.location), 32);
+        html.into()
     }
 
     /// Convert to Control HTML
     fn to_html_control(&self) -> String {
-        let title = String::from(self.title(View::Control));
-        let item_states = item_states(self.arm_state).to_html();
-        let location = HtmlStr::new(&self.location).with_len(64);
-        format!(
-            "{title}\
-            <div class='row'>{item_states}</div>\
-            <div class='info'>{location}</div>"
-        )
+        let mut html = self.title(View::Control);
+        html.div().class("row");
+        html.raw(item_states(self.arm_state).to_html());
+        html.end(); /* div */
+        html.div()
+            .class("info")
+            .text_len(opt_ref(&self.location), 64);
+        html.into()
     }
 }
 
