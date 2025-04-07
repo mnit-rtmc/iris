@@ -19,7 +19,8 @@ use crate::fetch::Action;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::ItemState;
 use crate::start::fly_map_item;
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, Select};
+use crate::util::{ContainsLower, Fields, Input, Select, opt_ref, opt_str};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -123,36 +124,34 @@ impl AncillaryData for CameraAnc {
 }
 
 impl CameraAnc {
-    /// Create an HTML `select` element of encoder type
-    fn encoder_type_html(&self, pri: &Camera) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='encoder_type'>");
+    /// Build encoder types HTML
+    fn encoder_type_html(&self, pri: &Camera, html: &mut Html) {
+        html.select().id("encoder_type");
         for tp in &self.enc_types {
-            html.push_str("<option value='");
-            html.push_str(&tp.name);
-            html.push('\'');
+            let option = html.option().value(&tp.name);
             if Some(&tp.name) == pri.encoder_type.as_ref() {
-                html.push_str(" selected");
+                option.attr_bool("selected");
             }
-            html.push('>');
-            html.push_str(&tp.to_string());
-            html.push_str("</option>");
+            html.text(tp.to_string()).end();
         }
-        html.push_str("</select>");
-        html
+        html.end(); /* select */
     }
 }
 
 impl Camera {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &CameraAnc) -> String {
-        let name = HtmlStr::new(self.name());
-        let item_states = anc.cio.item_states(self);
-        let location = HtmlStr::new(&self.location).with_len(32);
-        format!(
-            "<div class='title row'>{name} {item_states}</div>\
-            <div class='info fill'>{location}</div>"
-        )
+        let mut html = Html::new();
+        html.div()
+            .class("title row")
+            .text(self.name())
+            .text(" ")
+            .text(anc.cio.item_states(self).to_string())
+            .end();
+        html.div()
+            .class("info fill")
+            .text_len(opt_ref(&self.location), 32);
+        html.into()
     }
 
     /// Convert to Control HTML
@@ -160,16 +159,15 @@ impl Camera {
         if let Some((lat, lon)) = anc.loc.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let title = String::from(self.title(View::Control));
-        let item_states = anc.cio.item_states(self).to_html();
-        let location = HtmlStr::new(&self.location).with_len(64);
-        format!(
-            "{title}\
-            <div class='row'>{item_states}</div>\
-            <div class='row'>\
-              <span class='info'>{location}</span>\
-            </div>"
-        )
+        let mut html = self.title(View::Control);
+        html.div().class("row");
+        html.raw(anc.cio.item_states(self).to_html());
+        html.end(); /* div */
+        html.div().class("row");
+        html.span()
+            .class("info")
+            .text_len(opt_ref(&self.location), 64);
+        html.into()
     }
 
     /// Create action to handle click on a device request button
@@ -186,79 +184,103 @@ impl Camera {
 
     /// Convert to Request HTML
     fn to_html_request(&self, _anc: &CameraAnc) -> String {
-        let title = String::from(self.title(View::Request));
-        format!(
-            "{title}\
-            <div class='row'>\
-              <span>Reset/Reboot</span>\
-              <span>\
-                <button id='rq_reset' type='button'>Reboot</button>\
-              </span>\
-            </div>"
-        )
+        let mut html = self.title(View::Request);
+        html.div().class("row");
+        html.span().text("Reset/Reboot").end();
+        html.button().id("rq_reset").type_("button").text("Reboot");
+        html.into()
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &CameraAnc) -> String {
-        let title = String::from(self.title(View::Setup));
-        let cam_num = OptVal(self.cam_num);
-        let notes = HtmlStr::new(&self.notes);
-        let controller = anc.cio.controller_html(self);
-        let pin = anc.cio.pin_html(self.pin);
-        let encoder_type = anc.encoder_type_html(self);
-        let enc_address = HtmlStr::new(&self.enc_address);
-        let enc_port = OptVal(self.enc_port);
-        let enc_mcast = HtmlStr::new(&self.enc_mcast);
-        let enc_channel = OptVal(self.enc_channel);
-        let cam_template = HtmlStr::new(&self.cam_template);
-        let publish = if self.publish { " checked" } else { "" };
-        let footer = self.footer(true);
-        format!(
-            "{title}\
-            <div class='row'>\
-              <label for='cam_num'>Cam Num</label>\
-              <input id='cam_num' type='number' min='1' max='9999' \
-                     size='8' value='{cam_num}'>\
-            </div>\
-            <div class='row'>\
-              <label for='notes'>Notes</label>\
-              <textarea id='notes' maxlength='255' rows='4' \
-                        cols='24'>{notes}</textarea>\
-            </div>\
-            {controller}\
-            {pin}\
-            <div class='row'>\
-              <label for='encoder_type'>Encoder Type</label>\
-              <span class='info' id='encoder_type'>{encoder_type}</span>\
-            </div>\
-            <div class='row'>\
-              <label for='enc_address'>Enc. Address</label>\
-              <input id='enc_address' type='text' value='{enc_address}'>\
-            </div>\
-            <div class='row'>\
-              <label for='enc_port'>Enc. Port Override</label>\
-              <input id='enc_port' type='number' min='1' size='4' \
-                     value='{enc_port}'>\
-            </div>\
-            <div class='row'>\
-              <label for='enc_mcast'>Multicast Address</label>\
-              <input id='enc_mcast' type='text' value='{enc_mcast}'>\
-            </div>\
-            <div class='row'>\
-              <label for='enc_channel'>Encoder Channel</label>\
-              <input id='enc_channel' type='number' min='1' size='8' \
-                     value='{enc_channel}'>\
-            </div>\
-            <div class='row'>\
-              <label for='cam_template'>Camera Template</label>\
-              <span class='info' id='cam_template'>{cam_template}</span>\
-            </div>\
-            <div class='row'>\
-              <label for='publish'>Publish</label>\
-              <input id='publish' type='checkbox'{publish}>\
-            </div>\
-            {footer}"
-        )
+        let mut html = self.title(View::Setup);
+        html.div().class("row");
+        html.label().for_("cam_num").text("Cam Num").end();
+        html.input()
+            .id("cam_num")
+            .type_("number")
+            .min("1")
+            .max("9999")
+            .size("8")
+            .value(opt_str(self.cam_num));
+        html.end();
+        html.div().class("row");
+        html.label().for_("notes").text("Notes").end();
+        html.textarea()
+            .id("notes")
+            .maxlength("255")
+            .attr("rows", "4")
+            .attr("cols", "24")
+            .text(opt_ref(&self.notes))
+            .end();
+        html.end(); /* div */
+        html.raw(anc.cio.controller_html(self));
+        html.raw(anc.cio.pin_html(self.pin));
+        html.div().class("row");
+        html.label().for_("encoder_type").text("Encoder Type").end();
+        anc.encoder_type_html(self, &mut html);
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("enc_address").text("Enc. Address").end();
+        html.input()
+            .id("enc_address")
+            .type_("text")
+            .value(opt_ref(&self.enc_address));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label()
+            .for_("enc_port")
+            .text("Enc. Port Override")
+            .end();
+        html.input()
+            .id("enc_port")
+            .type_("number")
+            .min("1")
+            .size("4")
+            .value(opt_str(self.enc_port));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label()
+            .for_("enc_mcast")
+            .text("Multicast Address")
+            .end();
+        html.input()
+            .id("enc_mcast")
+            .type_("text")
+            .value(opt_ref(&self.enc_mcast));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label()
+            .for_("enc_channel")
+            .text("Encoder Channel")
+            .end();
+        html.input()
+            .id("enc_channel")
+            .type_("number")
+            .min("1")
+            .size("8")
+            .value(opt_str(self.enc_channel));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label()
+            .for_("cam_template")
+            .text("Camera Template")
+            .end();
+        html.span()
+            .id("cam_template")
+            .class("info")
+            .text(opt_ref(&self.cam_template))
+            .end();
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("publish").text("Publish").end();
+        let publish = html.input().id("publish").type_("checkbox");
+        if self.publish {
+            publish.checked();
+        }
+        html.end(); /* div */
+        html.raw(self.footer(true));
+        html.into()
     }
 }
 

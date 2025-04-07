@@ -91,23 +91,17 @@ impl LcsStateAnc {
         }
     }
 
-    /// Create an HTML `select` element of LCS indications
-    fn indications_html(&self, pri: &LcsState) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='indication'>");
+    /// Build indications HTML
+    fn indications_html(&self, pri: &LcsState, html: &mut Html) {
+        html.select().id("indication");
         for ind in &self.indications {
-            html.push_str("<option value='");
-            html.push_str(&ind.id.to_string());
-            html.push('\'');
+            let option = html.option().value(ind.id.to_string());
             if ind.id == pri.indication {
-                html.push_str(" selected");
+                option.attr_bool("selected");
             }
-            html.push('>');
-            html.push_str(&ind.to_string());
-            html.push_str("</option>");
+            html.text(ind.to_string()).end();
         }
-        html.push_str("</select>");
-        html
+        html.end(); /* select */
     }
 }
 
@@ -192,7 +186,7 @@ impl LcsState {
         html.end(); /* div */
         html.div().class("row");
         html.label().for_("indication").text("Indication").end();
-        html.raw(anc.indications_html(self));
+        anc.indications_html(self, &mut html);
         html.end(); /* div */
         html.div().class("row");
         html.label().for_("msg_pattern").text("Msg Pattern").end();
