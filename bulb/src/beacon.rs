@@ -203,8 +203,12 @@ impl Beacon {
         let title = String::from(self.title(View::Setup));
         let message = HtmlStr::new(&self.message);
         let notes = HtmlStr::new(&self.notes);
-        let controller = anc.cio.controller_html(self);
-        let pin = anc.cio.pin_html(self.pin);
+        let mut html = Html::new();
+        anc.cio.controller_html(self, &mut html);
+        let controller = String::from(html);
+        let mut html = Html::new();
+        anc.cio.pin_html(self.pin, &mut html);
+        let pin = String::from(html);
         let verify_pin = OptVal(self.verify_pin);
         let ext_mode = if self.ext_mode.unwrap_or(false) {
             " checked"

@@ -172,8 +172,8 @@ impl LcsState {
         html.label().text("LCS").end();
         html.span().text(&self.lcs).end();
         html.end(); /* div */
-        html.raw(anc.cio.controller_html(self));
-        html.raw(anc.cio.pin_html(self.pin));
+        anc.cio.controller_html(self, &mut html);
+        anc.cio.pin_html(self.pin, &mut html);
         html.div().class("row");
         html.label().for_("lane").text("Lane").end();
         html.input()

@@ -15,8 +15,8 @@ use crate::card::{AncillaryData, Card, View};
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
-use crate::util::{HtmlStr, OptVal};
-use std::borrow::Cow;
+use crate::util::opt_str;
+use hatmil::Html;
 use std::marker::PhantomData;
 use wasm_bindgen::JsValue;
 
@@ -53,31 +53,34 @@ where
     }
 
     /// Make controller row as HTML
-    pub fn controller_html(&self, pri: &C) -> String {
-        let (controller, ctl_btn) = match self.controller(pri) {
-            Some(c) => (HtmlStr::new(c.name()), c.button_html()),
-            None => (HtmlStr::new(Cow::Borrowed("")), "<span></span>".into()),
-        };
-        format!(
-            "<div class='row'>\
-              <label for='controller'>Controller</label>\
-              <input id='controller' maxlength='20' size='20' \
-                     value='{controller}'>\
-              {ctl_btn}\
-            </div>"
-        )
+    pub fn controller_html(&self, pri: &C, html: &mut Html) {
+        html.div().class("row");
+        html.label().for_("controller").text("Controller").end();
+        let input = html.input().id("controller").maxlength("20").size("20");
+        match self.controller(pri) {
+            Some(c) => {
+                input.value(c.name());
+                html.raw(c.button_html());
+            }
+            None => {
+                html.span().end(); /* empty */
+            }
+        }
+        html.end(); /* div */
     }
 
     /// Make pin row as HTML
-    pub fn pin_html(&self, pin: Option<u32>) -> String {
-        let pin = OptVal(pin);
-        format!(
-            "<div class='row'>\
-              <label for='pin'>Pin</label>\
-              <input id='pin' type='number' min='1' max='104' \
-                     size='8' value='{pin}'>\
-            </div>"
-        )
+    pub fn pin_html(&self, pin: Option<u32>, html: &mut Html) {
+        html.div().class("row");
+        html.label().for_("pin").text("Pin").end();
+        html.input()
+            .id("pin")
+            .type_("number")
+            .min("1")
+            .max("104")
+            .size("8")
+            .value(opt_str(pin));
+        html.end(); /* div */
     }
 
     /// Get item states

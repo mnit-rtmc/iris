@@ -44,8 +44,8 @@ impl FlowStream {
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &FlowStreamAnc) -> String {
         let mut html = self.title(View::Setup);
-        html.raw(anc.controller_html(self));
-        html.raw(anc.pin_html(self.pin));
+        anc.controller_html(self, &mut html);
+        anc.pin_html(self.pin, &mut html);
         html.raw(self.footer(true));
         html.into()
     }

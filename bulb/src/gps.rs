@@ -65,8 +65,8 @@ impl Gps {
             .value(opt_ref(&self.geo_loc))
             .end();
         html.end(); /* div */
-        html.raw(anc.controller_html(self));
-        html.raw(anc.pin_html(self.pin));
+        anc.controller_html(self, &mut html);
+        anc.pin_html(self.pin, &mut html);
         html.raw(self.footer(true));
         html.into()
     }

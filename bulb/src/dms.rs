@@ -955,8 +955,12 @@ impl Dms {
     fn to_html_setup(&self, anc: &DmsAnc) -> String {
         let title = String::from(self.title(View::Setup));
         let notes = HtmlStr::new(&self.notes);
-        let controller = anc.cio.controller_html(self);
-        let pin = anc.cio.pin_html(self.pin);
+        let mut html = Html::new();
+        anc.cio.controller_html(self, &mut html);
+        let controller = String::from(html);
+        let mut html = Html::new();
+        anc.cio.pin_html(self.pin, &mut html);
+        let pin = String::from(html);
         let footer = self.footer(true);
         format!(
             "{title}\

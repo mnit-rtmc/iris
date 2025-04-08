@@ -13,6 +13,7 @@
 use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::util::{ContainsLower, Fields, HtmlStr, Input};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -56,8 +57,12 @@ impl VideoMonitor {
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &VideoMonitorAnc) -> String {
         let title = String::from(self.title(View::Setup));
-        let controller = anc.controller_html(self);
-        let pin = anc.pin_html(self.pin);
+        let mut html = Html::new();
+        anc.controller_html(self, &mut html);
+        let controller = String::from(html);
+        let mut html = Html::new();
+        anc.pin_html(self.pin, &mut html);
+        let pin = String::from(html);
         let footer = self.footer(true);
         format!("{title}{controller}{pin}{footer}")
     }

@@ -15,8 +15,7 @@ use crate::card::{AncillaryData, Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
-use crate::util::{ContainsLower, Fields, HtmlStr, Input};
-use hatmil::Html;
+use crate::util::{ContainsLower, Fields, Input, opt_ref};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -140,37 +139,29 @@ impl AncillaryData for TagReaderAnc {
 impl TagReader {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &TagReaderAnc) -> String {
-        let name = HtmlStr::new(self.name());
-        let item_states = anc.cio.item_states(self);
-        let location = HtmlStr::new(&self.location).with_len(32);
-        format!(
-            "<div class='title row'>{name} {item_states}</div>\
-            <div class='info fill'>{location}</div>"
-        )
+        let mut html = self.title(View::Status);
+        html.div().class("title row").text(self.name()).text(" ").text(anc.cio.item_states(self).to_string()).end();
+        html.div().class("info fill").text_len(opt_ref(&self.location), 32);
+        html.into()
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &TagReaderAnc) -> String {
-        let title = String::from(self.title(View::Status));
-        let mut html = Html::new();
+        let mut html = self.title(View::Status);
+        html.div();
         anc.cio.item_states(self).tooltips(&mut html);
-        let item_states = String::from(html);
-        let location = HtmlStr::new(&self.location).with_len(64);
-        format!(
-            "{title}\
-            <div>{item_states}</div>\
-            <div class='row'>\
-              <span class='info'>{location}</span>\
-            </div>"
-        )
+        html.end(); /* div */
+        html.div().class("row");
+        html.span().class("info").text_len(opt_ref(&self.location), 64);
+        html.into()
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &TagReaderAnc) -> String {
-        let title = String::from(self.title(View::Setup));
-        let controller = anc.cio.controller_html(self);
-        let pin = anc.cio.pin_html(self.pin);
-        format!("{title}{controller}{pin}")
+        let mut html = self.title(View::Setup);
+        anc.cio.controller_html(self, &mut html);
+        anc.cio.pin_html(self.pin, &mut html);
+        html.into()
     }
 }
 

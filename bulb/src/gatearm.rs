@@ -142,11 +142,11 @@ impl GateArm {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &GateArmAnc) -> String {
-        let title = String::from(self.title(View::Setup));
-        let controller = anc.cio.controller_html(self);
-        let pin = anc.cio.pin_html(self.pin);
-        let footer = self.footer(true);
-        format!("{title}{controller}{pin}{footer}")
+        let mut html = self.title(View::Setup);
+        anc.cio.controller_html(self, &mut html);
+        anc.cio.pin_html(self.pin, &mut html);
+        html.raw(self.footer(true));
+        html.into()
     }
 }
 
