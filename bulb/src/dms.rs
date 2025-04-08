@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, View, html_title_row, uri_one};
+use crate::card::{AncillaryData, Card, View, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::DeviceReq;
 use crate::error::Result;
@@ -623,6 +623,24 @@ const DEDICATED: &[&str] = &[
     "#Vsl",
     "#Hidden",
 ];
+
+/// Build an HTML title row (div) from a slice of spans
+fn html_title_row(spans: &[&str], cls: &[&str]) -> String {
+    let mut row = String::from("<div class='title row'>");
+    for (span, c) in spans.iter().zip(cls.iter().chain(repeat(&""))) {
+        if !c.is_empty() {
+            row.push_str("<span class='");
+            row.push_str(c);
+            row.push_str("'>");
+        } else {
+            row.push_str("<span>");
+        }
+        row.push_str(span);
+        row.push_str("</span>");
+    }
+    row.push_str("</div>");
+    row
+}
 
 impl Dms {
     /// Get multi of current message

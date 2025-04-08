@@ -49,14 +49,10 @@ use serde::de::DeserializeOwned;
 use serde_json::Value;
 use serde_json::map::Map;
 use std::borrow::Cow;
-use std::iter::repeat;
 use wasm_bindgen::JsValue;
 
 /// Compact "Create" card
 const CREATE_COMPACT: &str = "<span class='create'>Create 🆕</span>";
-
-/// Save button
-const SAVE_BUTTON: &str = "<button id='ob_save' type='button'>🖍️ Save</button>";
 
 /// Card element view
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -361,18 +357,22 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
 
     /// Build card footer
     fn footer(&self, delete: bool) -> String {
-        let ob_delete = if delete {
-            "<button id='ob_delete' type='button'>🗑️ Delete</button>"
-        } else {
-            ""
+        let mut html = Html::new();
+        html.div().class("row");
+        html.span().end(); /* empty */
+        if delete {
+            html.button()
+                .id("ob_delete")
+                .type_("button")
+                .text("🗑️ Delete")
+                .end();
         };
-        format!(
-            "<div class='row'>\
-              <span></span>\
-              {ob_delete}\
-              {SAVE_BUTTON}\
-            </div>"
-        )
+        html.button()
+            .id("ob_save")
+            .type_("button")
+            .text("🖍️ Save")
+            .end();
+        html.into()
     }
 }
 
@@ -678,7 +678,7 @@ impl CardList {
                 View::CreateCompact,
             );
             cv.to_html(&mut html);
-            html.text(CREATE_COMPACT).end();
+            html.raw(CREATE_COMPACT).end();
             self.views.push(cv);
         }
         for pri in &cards {
@@ -1091,36 +1091,23 @@ async fn handle_input_x<C: Card>(cv: &CardView, id: String) -> Result<()> {
 
 /// Build a create card
 fn html_card_create(res: Res, create: &str) -> String {
-    let name = format!("{} 🆕", res.symbol());
-    let mut views = String::new();
-    views.push_str("<select id='ob_view'>");
-    views.push_str("<option>");
-    views.push_str(View::CreateCompact.as_str());
-    views.push_str("<option selected>");
-    views.push_str(View::Create.as_str());
-    views.push_str("</select>");
-    let mut html = html_title_row(&[&name, &views], &[]);
-    html.push_str(create);
-    html.push_str("<div class='row end'>");
-    html.push_str(SAVE_BUTTON);
-    html.push_str("</div>");
-    html
-}
-
-/// Build an HTML title row (div) from a slice of spans
-pub fn html_title_row(spans: &[&str], cls: &[&str]) -> String {
-    let mut row = String::from("<div class='title row'>");
-    for (span, c) in spans.iter().zip(cls.iter().chain(repeat(&""))) {
-        if !c.is_empty() {
-            row.push_str("<span class='");
-            row.push_str(c);
-            row.push_str("'>");
-        } else {
-            row.push_str("<span>");
-        }
-        row.push_str(span);
-        row.push_str("</span>");
-    }
-    row.push_str("</div>");
-    row
+    let mut html = Html::new();
+    html.div().class("title row");
+    html.span().text(res.symbol()).text(" 🆕").end();
+    html.select().id("ob_view");
+    html.option().text(View::CreateCompact.as_str()).end();
+    html.option()
+        .attr_bool("selected")
+        .text(View::Create.as_str())
+        .end();
+    html.end(); /* select */
+    html.end(); /* div */
+    html.raw(create);
+    html.div().class("row end");
+    html.button()
+        .id("ob_save")
+        .type_("button")
+        .text("🖍️ Save")
+        .end();
+    html.into()
 }
