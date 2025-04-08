@@ -49,7 +49,6 @@ use serde::de::DeserializeOwned;
 use serde_json::Value;
 use serde_json::map::Map;
 use std::borrow::Cow;
-use std::fmt;
 use std::iter::repeat;
 use wasm_bindgen::JsValue;
 
@@ -168,15 +167,6 @@ pub struct CardView {
     pub view: View,
 }
 
-impl fmt::Display for CardView {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let id = self.id();
-        let name = &self.name;
-        let cn = self.view.class_name();
-        write!(f, "id='{id}' name='{name}' class='{cn}'")
-    }
-}
-
 impl CardView {
     /// Create a new card view
     pub fn new<N: Into<String>>(res: Res, name: N, view: View) -> Self {
@@ -204,6 +194,14 @@ impl CardView {
     pub fn view(mut self, v: View) -> Self {
         self.view = v;
         self
+    }
+
+    /// Output card view to HTML
+    fn to_html(&self, html: &mut Html) {
+        html.li()
+            .id(self.id())
+            .attr("name", &self.name)
+            .class(self.view.class_name());
     }
 }
 
@@ -487,7 +485,8 @@ pub async fn delete_one(cv: &CardView) -> Result<()> {
 pub async fn fetch_resource(config: bool) -> Result<String> {
     let json = Uri::from("/iris/api/access").get().await?;
     let access: Vec<Permission> = serde_wasm_bindgen::from_value(json)?;
-    let mut html = "<option/>".to_string();
+    let mut html = Html::new();
+    html.option().end();
     if config {
         add_option::<Alarm>(&access, &mut html);
     }
@@ -527,20 +526,16 @@ pub async fn fetch_resource(config: bool) -> Result<String> {
     }
     add_option::<VideoMonitor>(&access, &mut html);
     add_option::<WeatherSensor>(&access, &mut html);
-    Ok(html)
+    Ok(html.into())
 }
 
 /// Add option to access select
-fn add_option<C: Card>(access: &[Permission], html: &mut String) {
+fn add_option<C: Card>(access: &[Permission], html: &mut Html) {
     for perm in access {
         if perm.hashtag.is_none() {
             let res = C::res();
             if perm.base_resource == res.base().as_str() {
-                html.push_str("<option value='");
-                html.push_str(res.as_str());
-                html.push_str("'>");
-                html.push_str(C::DNAME);
-                html.push_str("</option>");
+                html.option().value(res.as_str()).text(C::DNAME).end();
             }
         }
     }
@@ -674,15 +669,16 @@ impl CardList {
         // Use default value for ancillary data lookup
         let anc = fetch_ancillary(&C::default(), View::Search).await?;
         self.views.clear();
-        let mut html = String::new();
-        html.push_str("<ul class='cards'>");
+        let mut html = Html::new();
+        html.ul().class("cards");
         if self.config {
             let cv = CardView::new(
                 C::res(),
                 Self::next_name(&cards),
                 View::CreateCompact,
             );
-            html.push_str(&format!("<li {cv}>{CREATE_COMPACT}</li>"));
+            cv.to_html(&mut html);
+            html.text(CREATE_COMPACT).end();
             self.views.push(cv);
         }
         for pri in &cards {
@@ -692,14 +688,14 @@ impl CardList {
                 View::Hidden
             };
             let cv = CardView::new(C::res(), pri.name(), view);
-            html.push_str(&format!("<li {cv}>"));
-            html.push_str(&pri.to_html(view, &anc));
-            html.push_str("</li>");
+            cv.to_html(&mut html);
+            html.raw(pri.to_html(view, &anc));
+            html.end(); /* li */
             self.views.push(cv);
         }
-        html.push_str("</ul>");
+        html.end(); /* ul */
         self.states_main = build_item_states(&cards, &anc);
-        Ok(html)
+        Ok(html.into())
     }
 
     /// Get next suggested name
