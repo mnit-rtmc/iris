@@ -13,7 +13,8 @@
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
-use crate::util::{Fields, HtmlStr, Input, OptVal, Select};
+use crate::util::{Fields, Input, Select, opt_ref, opt_str};
+use hatmil::Html;
 use serde::Deserialize;
 use std::marker::PhantomData;
 use wasm_bindgen::JsValue;
@@ -154,65 +155,46 @@ impl<L> LocAnc<L> {
         }
     }
 
-    /// Create an HTML `select` element of roads
-    fn roads_html(&self, id: &str, groad: Option<&str>) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='");
-        html.push_str(id);
-        html.push_str("'><option></option>");
+    /// Build roads HTML
+    fn roads_html(&self, id: &str, groad: Option<&str>, html: &mut Html) {
+        html.select().id(id);
+        html.option().end(); /* empty */
         for road in &self.roads {
-            html.push_str("<option ");
+            let option = html.option();
             if let Some(groad) = groad {
                 if groad == road.name {
-                    html.push_str(" selected");
+                    option.attr_bool("selected");
                 }
             }
-            html.push('>');
-            html.push_str(&format!("{}", HtmlStr::new(&road.name)));
-            html.push_str("</option>");
+            html.text(&road.name).end();
         }
-        html.push_str("</select>");
-        html
+        html.end(); /* select */
     }
 
-    /// Create an HTML `select` element of road directions
-    fn directions_html(&self, id: &str, dir: u16) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='");
-        html.push_str(id);
-        html.push_str("'>");
+    /// Build road directions HTML
+    fn directions_html(&self, id: &str, dir: u16, html: &mut Html) {
+        html.select().id(id);
         for direction in &self.directions {
-            html.push_str("<option value='");
-            html.push_str(&direction.id.to_string());
-            html.push('\'');
+            let option = html.option().value(direction.id.to_string());
             if dir == direction.id {
-                html.push_str(" selected");
+                option.attr_bool("selected");
             }
-            html.push('>');
-            html.push_str(&direction.direction);
-            html.push_str("</option>");
+            html.text(&direction.direction).end();
         }
-        html.push_str("</select>");
-        html
+        html.end(); /* select */
     }
 
-    /// Create an HTML `select` element of road modifiers
-    fn modifiers_html(&self, md: u16) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='cross_mod'>");
+    /// Build road modifiers HTML
+    fn modifiers_html(&self, md: u16, html: &mut Html) {
+        html.select().id("cross_mod");
         for modifier in &self.modifiers {
-            html.push_str("<option value='");
-            html.push_str(&modifier.id.to_string());
-            html.push('\'');
+            let option = html.option().value(modifier.id.to_string());
             if md == modifier.id {
-                html.push_str(" selected");
+                option.attr_bool("selected");
             }
-            html.push('>');
-            html.push_str(&modifier.modifier);
-            html.push_str("</option>");
+            html.text(&modifier.modifier).end();
         }
-        html.push_str("</select>");
-        html
+        html.end(); /* select */
     }
 
     /// Convert to Location HTML
@@ -220,54 +202,56 @@ impl<L> LocAnc<L> {
     where
         C: Card,
     {
-        let title = String::from(card.title(View::Location));
-        let footer = card.footer(false);
-        let html = match &self.geoloc {
-            Some(geoloc) => self.to_html_location(geoloc),
-            None => "Error: missing geo_loc!".to_string(),
+        let mut html = card.title(View::Location);
+        match &self.geoloc {
+            Some(geoloc) => self.location_html(geoloc, &mut html),
+            None => {
+                html.span().text("Error: missing geo_loc!").end();
+            }
         };
-        format!("{title}{html}{footer}")
+        html.raw(card.footer(false));
+        html.into()
     }
 
-    /// Convert to Location HTML
-    fn to_html_location(&self, loc: &GeoLoc) -> String {
-        let roadway = self.roads_html("roadway", loc.roadway.as_deref());
-        let rdir = self.directions_html("road_dir", loc.road_dir);
-        let xmod = self.modifiers_html(loc.cross_mod);
-        let xstreet =
-            self.roads_html("cross_street", loc.cross_street.as_deref());
-        let xdir = self.directions_html("cross_dir", loc.cross_dir);
-        let landmark = HtmlStr::new(&loc.landmark);
-        let lat = OptVal(loc.lat);
-        let lon = OptVal(loc.lon);
-        format!(
-            "<div class='row'>\
-              <label for='roadway'>Roadway</label>\
-              {roadway}\
-              {rdir}\
-            </div>\
-            <div class='row'>\
-              <label for='cross_street'> </label>\
-              {xmod}\
-              {xstreet}\
-              {xdir}\
-            </div>\
-            <div class='row'>\
-              <label for='landmark'>Landmark</label>\
-              <input id='landmark' maxlength='22' size='24' \
-                     value='{landmark}'>\
-            </div>\
-            <div class='row'>\
-              <label for='lat'>Latitude</label>\
-              <input id='lat' type='number' step='0.00001' \
-                     inputmode='decimal' value='{lat}'>\
-            </div>\
-            <div class='row'>\
-              <label for='lon'>Longitude</label>\
-              <input id='lon' type='number' step='0.00001' \
-                     inputmode='decimal' value='{lon}'>\
-            </div>"
-        )
+    /// Build Location HTML
+    fn location_html(&self, loc: &GeoLoc, html: &mut Html) {
+        html.div().class("row");
+        html.label().for_("roadway").text("Roadway").end();
+        self.roads_html("roadway", loc.roadway.as_deref(), html);
+        self.directions_html("road_dir", loc.road_dir, html);
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("cross_street").text(" ").end();
+        self.modifiers_html(loc.cross_mod, html);
+        self.roads_html("cross_street", loc.cross_street.as_deref(), html);
+        self.directions_html("cross_dir", loc.cross_dir, html);
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("landmark").text("Landmark").end();
+        html.input()
+            .id("landmark")
+            .maxlength("22")
+            .size("24")
+            .value(opt_ref(&loc.landmark));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("lat").text("Latitude").end();
+        html.input()
+            .id("lat")
+            .type_("number")
+            .attr("step", "0.00001")
+            .attr("inputmode", "decimal")
+            .value(opt_str(loc.lat));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("lon").text("Longitude").end();
+        html.input()
+            .id("lon")
+            .type_("number")
+            .attr("step", "0.00001")
+            .attr("inputmode", "decimal")
+            .value(opt_str(loc.lon));
+        html.end(); /* div */
     }
 
     /// Get changed fields from Location form
