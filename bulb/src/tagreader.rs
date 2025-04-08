@@ -140,8 +140,15 @@ impl TagReader {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &TagReaderAnc) -> String {
         let mut html = self.title(View::Status);
-        html.div().class("title row").text(self.name()).text(" ").text(anc.cio.item_states(self).to_string()).end();
-        html.div().class("info fill").text_len(opt_ref(&self.location), 32);
+        html.div()
+            .class("title row")
+            .text(self.name())
+            .text(" ")
+            .text(anc.cio.item_states(self).to_string())
+            .end();
+        html.div()
+            .class("info fill")
+            .text_len(opt_ref(&self.location), 32);
         html.into()
     }
 
@@ -152,7 +159,9 @@ impl TagReader {
         anc.cio.item_states(self).tooltips(&mut html);
         html.end(); /* div */
         html.div().class("row");
-        html.span().class("info").text_len(opt_ref(&self.location), 64);
+        html.span()
+            .class("info")
+            .text_len(opt_ref(&self.location), 64);
         html.into()
     }
 

@@ -12,7 +12,7 @@
 //
 use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
-use crate::util::{ContainsLower, Fields, HtmlStr, Input};
+use crate::util::{ContainsLower, Fields, Input};
 use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
@@ -33,38 +33,32 @@ type VideoMonitorAnc = ControllerIoAnc<VideoMonitor>;
 impl VideoMonitor {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &VideoMonitorAnc) -> String {
-        let name = HtmlStr::new(self.name());
-        let item_states = anc.item_states(self);
-        let mon_num = self.mon_num;
-        format!(
-            "<div class='title row'>{name} {item_states}</div>\
-            <div class='info fill'>{mon_num}</div>"
-        )
+        let mut html = Html::new();
+        html.div()
+            .class("title row")
+            .text(self.name())
+            .text(" ")
+            .text(anc.item_states(self).to_string())
+            .end();
+        html.div().class("info fill").text(self.mon_num.to_string());
+        html.into()
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self) -> String {
-        let title = String::from(self.title(View::Status));
-        let mon_num = self.mon_num;
-        format!(
-            "{title}\
-            <div class='row'>\
-              <span class='info'>{mon_num}</span>\
-            </div>"
-        )
+        let mut html = self.title(View::Status);
+        html.div().class("row");
+        html.span().class("info").text(self.mon_num.to_string());
+        html.into()
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &VideoMonitorAnc) -> String {
-        let title = String::from(self.title(View::Setup));
-        let mut html = Html::new();
+        let mut html = self.title(View::Setup);
         anc.controller_html(self, &mut html);
-        let controller = String::from(html);
-        let mut html = Html::new();
         anc.pin_html(self.pin, &mut html);
-        let pin = String::from(html);
-        let footer = self.footer(true);
-        format!("{title}{controller}{pin}{footer}")
+        html.raw(self.footer(true));
+        html.into()
     }
 }
 

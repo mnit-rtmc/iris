@@ -12,7 +12,7 @@
 //
 use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
-use crate::util::{ContainsLower, Fields, HtmlStr, Input};
+use crate::util::{ContainsLower, Fields, Input, opt_ref};
 use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
@@ -41,29 +41,29 @@ type DetectorAnc = ControllerIoAnc<Detector>;
 impl Detector {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &DetectorAnc) -> String {
-        let name = HtmlStr::new(self.name());
-        let item_states = anc.item_states(self);
-        let label = HtmlStr::new(&self.label);
-        format!(
-            "<div class='title row'>{name} {item_states}</div>\
-            <div class='info fill'>{label}</div>"
-        )
+        let mut html = Html::new();
+        html.div()
+            .class("title row")
+            .text(self.name())
+            .text(" ")
+            .text(anc.item_states(self).to_string())
+            .end();
+        html.div().class("info fill").text(opt_ref(&self.label));
+        html.into()
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &DetectorAnc) -> String {
-        let title = String::from(self.title(View::Status));
-        let mut html = Html::new();
+        let mut html = self.title(View::Status);
+        html.div().class("row");
         anc.item_states(self).tooltips(&mut html);
-        let item_states = String::from(html);
-        let label = HtmlStr::new(&self.label).with_len(20);
-        format!(
-            "{title}\
-            <div class='row'>{item_states}</div>\
-            <div class='row'>\
-              <span class='info'>{label}</span>\
-            </div>"
-        )
+        html.end(); /* div */
+        html.div().class("row");
+        html.span()
+            .class("info")
+            .text_len(opt_ref(&self.label), 20)
+            .end();
+        html.into()
     }
 
     /// Convert to Setup HTML

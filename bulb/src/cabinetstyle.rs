@@ -11,7 +11,8 @@
 // GNU General Public License for more details.
 //
 use crate::card::{AncillaryData, Card, View};
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal};
+use crate::util::{ContainsLower, Fields, Input, opt_str};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -40,51 +41,67 @@ impl AncillaryData for CabinetStyleAnc {
     }
 }
 
+/// Build pin row HTML
+fn pin_row_html(id: &str, name: &str, pin: Option<u32>, html: &mut Html) {
+    html.div().class("row");
+    html.label().for_(id).text(name).end();
+    html.input()
+        .id(id)
+        .type_("number")
+        .min("1")
+        .max("104")
+        .size("8")
+        .value(opt_str(pin));
+    html.end(); /* div */
+}
+
 impl CabinetStyle {
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let name = HtmlStr::new(self.name());
-        format!("<div>{name}</div>")
+        let mut html = Html::new();
+        html.div().text(self.name());
+        html.into()
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self) -> String {
-        let title = String::from(self.title(View::Setup));
-        let police_panel_pin_1 = OptVal(self.police_panel_pin_1);
-        let police_panel_pin_2 = OptVal(self.police_panel_pin_2);
-        let watchdog_reset_pin_1 = OptVal(self.watchdog_reset_pin_1);
-        let watchdog_reset_pin_2 = OptVal(self.watchdog_reset_pin_2);
-        let dip = OptVal(self.dip);
-        let footer = self.footer(true);
-        format!(
-            "{title}\
-            <div class='row'>\
-              <label for='police_panel_pin_1'>Police Panel Pin 1</label>\
-              <input id='police_panel_pin_1' type='number' min='1' max='104' \
-                     size='8' value='{police_panel_pin_1}'>\
-            </div>\
-            <div class='row'>\
-              <label for='police_panel_pin_2'>Police Panel Pin 2</label>\
-              <input id='police_panel_pin_2' type='number' min='1' max='104' \
-                     size='8' value='{police_panel_pin_2}'>\
-            </div>\
-            <div class='row'>\
-              <label for='watchdog_reset_pin_1'>Watchdog Reset Pin 1</label>\
-              <input id='watchdog_reset_pin_1' type='number' min='1' max='104' \
-                     size='8' value='{watchdog_reset_pin_1}'>\
-            </div>\
-            <div class='row'>\
-              <label for='watchdog_reset_pin_2'>Watchdog Reset Pin 2</label>\
-              <input id='watchdog_reset_pin_2' type='number' min='1' max='104' \
-                     size='8' value='{watchdog_reset_pin_2}'>\
-            </div>\
-            <div class='row'>\
-              <label for='dip'>Dip</label>\
-              <input id='dip' type='number' min='0' max='255' \
-                     size='8' value='{dip}'>\
-            </div>\
-            {footer}"
-        )
+        let mut html = self.title(View::Setup);
+        pin_row_html(
+            "police_panel_pin_1",
+            "Police Panel Pin 1",
+            self.police_panel_pin_1,
+            &mut html,
+        );
+        pin_row_html(
+            "police_panel_pin_2",
+            "Police Panel Pin 2",
+            self.police_panel_pin_2,
+            &mut html,
+        );
+        pin_row_html(
+            "watchdog_reset_pin_1",
+            "Watchdog Reset Pin 1",
+            self.watchdog_reset_pin_1,
+            &mut html,
+        );
+        pin_row_html(
+            "watchdog_reset_pin_2",
+            "Watchdog Reset Pin 2",
+            self.watchdog_reset_pin_2,
+            &mut html,
+        );
+        html.div().class("row");
+        html.label().for_("dip").text("Dip").end();
+        html.input()
+            .id("dip")
+            .type_("number")
+            .min("0")
+            .max("255")
+            .size("8")
+            .value(opt_str(self.dip));
+        html.end(); /* div */
+        html.raw(self.footer(true));
+        html.into()
     }
 }
 
