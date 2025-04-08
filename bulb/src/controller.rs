@@ -18,7 +18,7 @@ use crate::commlink::CommLink;
 use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, Select, TextArea};
+use crate::util::{ContainsLower, Fields, Input, Select, TextArea, opt_ref};
 use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
@@ -158,43 +158,33 @@ impl ControllerAnc {
         ""
     }
 
-    /// Create an HTML `select` element of controller conditions
-    fn conditions_html(&self, pri: &Controller) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='condition'>");
+    /// Build controller conditions HTML
+    fn conditions_html(&self, pri: &Controller, html: &mut Html) {
+        html.select().id("condition");
         for condition in &self.conditions {
-            html.push_str("<option value='");
-            html.push_str(&condition.id.to_string());
-            html.push('\'');
+            let option = html.option().value(condition.id.to_string());
             if pri.condition == condition.id {
-                html.push_str(" selected");
+                option.attr_bool("selected");
             }
-            html.push('>');
-            html.push_str(&condition.description);
-            html.push_str("</option>");
+            html.text(&condition.description).end();
         }
-        html.push_str("</select>");
-        html
+        html.end(); /* select */
     }
 
-    /// Create an HTML `select` element of cabinet styles
-    fn cabinet_styles_html(&self, pri: &Controller) -> String {
-        let mut html = String::new();
-        html.push_str("<select id='cabinet_style'>");
-        html.push_str("<option></option>");
+    /// Build cabinet styles HTML
+    fn cabinet_styles_html(&self, pri: &Controller, html: &mut Html) {
+        html.select().id("cabinet_style");
+        html.option().end(); /* empty */
         for cabinet_style in &self.cabinet_styles {
-            html.push_str("<option");
+            let option = html.option();
             if let Some(cab) = &pri.cabinet_style {
                 if cab == &cabinet_style.name {
-                    html.push_str(" selected");
+                    option.attr_bool("selected");
                 }
             }
-            html.push('>');
-            html.push_str(&cabinet_style.name);
-            html.push_str("</option>");
+            html.text(&cabinet_style.name).end();
         }
-        html.push_str("</select>");
-        html
+        html.end(); /* select */
     }
 
     /// Get the comm config
@@ -215,41 +205,34 @@ impl ControllerAnc {
         ""
     }
 
-    /// Build IO links as HTML
-    fn io_pins_html(&self) -> String {
-        let mut html = String::new();
+    /// Build IO pins HTML
+    fn io_pins_html(&self, html: &mut Html) {
         if !self.controller_io.is_empty() {
-            html.push_str("<ul class='pins'>");
+            html.ul().class("pins");
             for cio in &self.controller_io {
-                html.push_str(&cio.button_link_html());
+                cio.button_link_html(html);
             }
-            html.push_str("</ul>");
+            html.end(); /* ul */
         }
-        html
     }
 }
 
 impl Io {
-    /// Create a button to select the controller IO
-    pub fn button_link_html(&self) -> String {
-        let pin = self.pin;
-        match Res::try_from(self.resource_n.as_str()) {
-            Ok(res) => {
-                let symbol = res.symbol();
-                let name = HtmlStr::new(&self.name);
-                format!(
-                    "<li class='row'>\
-                      <span>#{pin}</span>\
-                      <span>{symbol} \
-                        <button type='button' class='go_link' \
-                                data-link='{name}' data-type='{res}'>\
-                                {name}\
-                        </button>\
-                      </span>\
-                    </li>"
-                )
-            }
-            _ => String::new(),
+    /// Build controller IO link button HTML
+    fn button_link_html(&self, html: &mut Html) {
+        if let Ok(res) = Res::try_from(self.resource_n.as_str()) {
+            html.li().class("row");
+            html.span().text("#").text(self.pin.to_string()).end();
+            html.span().text(res.symbol());
+            html.button()
+                .type_("button")
+                .class("go_link")
+                .attr("data-link", &self.name)
+                .attr("data-type", res.as_str())
+                .text(&self.name)
+                .end();
+            html.end(); /* span */
+            html.end(); /* li */
         }
     }
 }
@@ -279,7 +262,7 @@ impl Controller {
     }
 
     /// Get controller `link:drop`
-    pub fn link_drop(&self) -> String {
+    fn link_drop(&self) -> String {
         let comm_link = self.comm_link.as_deref().unwrap_or("");
         format!("{comm_link}:{}", self.drop_id)
     }
@@ -299,168 +282,150 @@ impl Controller {
         self.setup.as_ref().and_then(|s| s.serial_num.as_deref())
     }
 
-    /// Create a button to select the controller
+    /// Build controller button HTML
     pub fn button_html(&self) -> String {
-        let res = Res::Controller;
-        let link_drop = HtmlStr::new(self.link_drop());
-        format!(
-            "<button type='button' class='go_link' \
-                     data-link='{link_drop}' data-type='{res}'>\
-                     {link_drop}\
-            </button>"
-        )
+        let mut html = Html::new();
+        html.button()
+            .type_("button")
+            .class("go_link")
+            .attr("data-link", self.link_drop())
+            .attr("data-type", Res::Controller.as_str())
+            .text(self.link_drop())
+            .end();
+        html.into()
     }
 
-    /// Create a controller button and location
+    /// Build button and location HTML
     pub fn button_loc_html(&self) -> String {
-        let button = self.button_html();
-        let loc = HtmlStr::new(&self.location).with_len(32);
-        format!(
-            "<div class='row start'>\
-              {button}\
-              <span class='info'>{loc}</span>\
-            </div>"
-        )
+        let mut html = Html::new();
+        html.div().class("row start");
+        html.raw(self.button_html());
+        html.span()
+            .class("info")
+            .text_len(opt_ref(&self.location), 32);
+        html.into()
     }
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let name = HtmlStr::new(self.name());
-        let item_states = self.item_states();
-        let link_drop = HtmlStr::new(self.link_drop());
-        format!(
-            "<div class='title row'>{name} {item_states}</div>\
-            <div class='info fill'>{link_drop}</div>"
-        )
+        let mut html = Html::new();
+        html.div()
+            .class("title row")
+            .text(self.name())
+            .text(" ")
+            .text(self.item_states().to_string())
+            .end();
+        html.div().class("info fill").text(self.link_drop());
+        html.into()
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &ControllerAnc) -> String {
-        let title = String::from(self.title(View::Status));
-        let res = Res::CommLink;
-        let condition = anc.condition(self);
-        let mut html = Html::new();
+        let mut html = self.title(View::Status);
+        html.div().class("row");
+        html.span();
         self.item_states().tooltips(&mut html);
-        let item_states = String::from(html);
-        let comm_link = HtmlStr::new(&self.comm_link);
-        let drop_id = self.drop_id;
-        let comm_config = anc.comm_config(self);
-        let location = HtmlStr::new(&self.location).with_len(64);
-        let notes = HtmlStr::new(&self.notes);
-        let model = self
-            .model()
-            .map(|m| {
-                format!(
-                    "<div class='row fill'>\
-                      <span>Model</span>\
-                      <span class='info'>{}</span>\
-                    </div>",
-                    HtmlStr::new(m).with_len(32),
-                )
-            })
-            .unwrap_or_default();
-        let version = self
-            .version()
-            .map(|v| {
-                format!(
-                    "<div class='row fill'>\
-                      <span>Version</span>\
-                      <span class='info'>{}</span>\
-                    </div>",
-                    HtmlStr::new(v).with_len(32),
-                )
-            })
-            .unwrap_or_default();
-        let serial_num = self
-            .serial_num()
-            .map(|sn| {
-                format!(
-                    "<div class='row fill'>\
-                      <span>S/N</span>\
-                      <span class='info'>{}</span>\
-                    </div>",
-                    HtmlStr::new(sn).with_len(32),
-                )
-            })
-            .unwrap_or_default();
-        let fail_time = match &self.fail_time {
-            Some(fail_time) => {
-                format!(
-                    "<span>Fail Time</span>\
-                    <span class='info'>{fail_time}</span>"
-                )
-            }
-            None => "".to_string(),
-        };
-        let io_pins = anc.io_pins_html();
-        format!(
-            "{title}\
-            <div class='row'>\
-              <span>{item_states}</span>\
-              <span>{condition}</span>\
-              <span>\
-                <button type='button' class='go_link' \
-                        data-link='{comm_link}' data-type='{res}'>\
-                  {comm_link}\
-                </button>\
-                :{drop_id}\
-              </span>\
-            </div>\
-            <div class='info end'>{comm_config}</div>\
-            <div class='row'>\
-              <span>{location}</span>\
-              <span class='info'>{notes}</span>\
-            </div>\
-            {model}\
-            {version}\
-            {serial_num}\
-            <div class='row'>{fail_time}</div>\
-            {io_pins}"
-        )
+        html.end(); /* span */
+        html.span().text(anc.condition(self)).end();
+        html.span();
+        html.button()
+            .type_("button")
+            .class("go_link")
+            .attr("data-link", opt_ref(&self.comm_link))
+            .attr("data-type", Res::CommLink.as_str())
+            .text(opt_ref(&self.comm_link))
+            .end();
+        html.text(":").text(self.drop_id.to_string());
+        html.end(); /* span */
+        html.end(); /* div */
+        html.div()
+            .class("info end")
+            .text(anc.comm_config(self))
+            .end();
+        html.div().class("row");
+        html.span().text_len(opt_ref(&self.location), 64).end();
+        html.span().class("into").text(opt_ref(&self.notes)).end();
+        html.end(); /* div */
+        if let Some(model) = self.model() {
+            html.div().class("row fill");
+            html.span().text("Model").end();
+            html.span().class("info").text_len(model, 32).end();
+            html.end(); /* div */
+        }
+        if let Some(version) = self.version() {
+            html.div().class("row fill");
+            html.span().text("Version").end();
+            html.span().class("info").text_len(version, 32).end();
+            html.end(); /* div */
+        }
+        if let Some(serial_num) = self.serial_num() {
+            html.div().class("row fill");
+            html.span().text("S/N").end();
+            html.span().class("info").text_len(serial_num, 32).end();
+            html.end(); /* div */
+        }
+        if let Some(fail_time) = &self.fail_time {
+            html.div().class("row");
+            html.span().text("Fail Time").end();
+            html.span().class("info").text(fail_time).end();
+            html.end(); /* div */
+        }
+        anc.io_pins_html(&mut html);
+        html.into()
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &ControllerAnc) -> String {
-        let title = String::from(self.title(View::Setup));
-        let comm_link = HtmlStr::new(&self.comm_link);
-        let drop_id = self.drop_id;
-        let cabinet_styles = anc.cabinet_styles_html(self);
-        let conditions = anc.conditions_html(self);
-        let notes = HtmlStr::new(&self.notes);
-        let password = HtmlStr::new(&self.password);
-        let footer = self.footer(true);
-        format!(
-            "{title}\
-            <div class='row'>\
-              <label for='comm_link'>Comm Link</label>\
-              <input id='comm_link' maxlength='20' size='20' \
-                     value='{comm_link}'>\
-            </div>\
-            <div class='row'>\
-              <label for='drop_id'>Drop ID</label>\
-              <input id='drop_id' type='number' min='0'
-                     max='65535' size='6' value='{drop_id}'>\
-            </div>\
-            <div class='row'>\
-              <label for='cabinet_style'>Cabinet Style</label>\
-              {cabinet_styles}
-            </div>\
-            <div class='row'>\
-              <label for='condition'>Condition</label>\
-              {conditions}\
-            </div>\
-            <div class='row'>\
-              <label for='notes'>Notes</label>\
-              <textarea id='notes' maxlength='128' rows='2' \
-                        cols='26'>{notes}</textarea>\
-            </div>\
-            <div class='row'>\
-              <label for='password'>Password</label>\
-              <input id='password' maxlength='32' size='26' \
-                     value='{password}'>\
-            </div>\
-            {footer}"
-        )
+        let mut html = self.title(View::Setup);
+        html.div().class("row");
+        html.label().for_("comm_link").text("Comm Link").end();
+        html.input()
+            .id("comm_link")
+            .maxlength("20")
+            .size("20")
+            .value(opt_ref(&self.comm_link));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("drop_id").text("Drop ID").end();
+        html.input()
+            .id("drop_id")
+            .type_("number")
+            .min("0")
+            .max("65535")
+            .size("6")
+            .value(self.drop_id.to_string());
+        html.end(); /* div */
+        html.div().class("row");
+        html.label()
+            .for_("cabinet_style")
+            .text("Cabinet Style")
+            .end();
+        anc.cabinet_styles_html(self, &mut html);
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("condition").text("Condition").end();
+        anc.conditions_html(self, &mut html);
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("notes").text("Notes").end();
+        html.textarea()
+            .id("notes")
+            .maxlength("128")
+            .attr("rows", "2")
+            .attr("cols", "26")
+            .text(opt_ref(&self.notes))
+            .end();
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("password").text("Password").end();
+        html.input()
+            .id("password")
+            .maxlength("32")
+            .size("26")
+            .value(opt_ref(&self.password));
+        html.end(); /* div */
+        html.raw(self.footer(true));
+        html.into()
     }
 }
 
