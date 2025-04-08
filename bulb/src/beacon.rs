@@ -18,7 +18,7 @@ use crate::fetch::Action;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::start::fly_map_item;
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, OptVal, TextArea};
+use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref, opt_str};
 use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
@@ -93,15 +93,29 @@ impl AncillaryData for BeaconAnc {
     }
 }
 
-/// Flashing state class names
-const CLASS_FLASHING: &str = "flashing";
-const CLASS_NOT_FLASHING: &str = "not-flashing";
-
 impl Beacon {
     /// Check if beacon is flashing
     fn flashing(&self) -> bool {
         // 4: FLASHING, 6: FAULT_STUCK_ON, 7: FLASHING_EXT
         matches!(self.state, 4 | 6 | 7)
+    }
+
+    /** Get flash class name */
+    fn class_flash(&self) -> &'static str {
+        if self.flashing() {
+            "flashing"
+        } else {
+            "not-flashing"
+        }
+    }
+
+    /** Get delayed flash class name */
+    fn class_delayed(&self) -> &'static str {
+        if self.flashing() {
+            "flashing flash-delayed"
+        } else {
+            "not-flashing flash-delayed"
+        }
     }
 
     /// Get item states
@@ -136,27 +150,25 @@ impl Beacon {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &BeaconAnc) -> String {
-        let name = HtmlStr::new(self.name());
-        let item_states = self.item_states(anc);
-        let flashing = if self.flashing() {
-            CLASS_FLASHING
-        } else {
-            CLASS_NOT_FLASHING
-        };
-        let message = HtmlStr::new(&self.message);
-        format!(
-            "<div class='title row'>{name} {item_states}</div>\
-            <div class='beacon-container row center'>\
-              <button id='ob_flashing' disabled></button>\
-              <label for='ob_flashing' class='signal-housing'>\
-                <span class='{flashing}'>🔆</span>\
-              </label>\
-              <span class='beacon-sign tiny'>{message}</span>\
-              <label for='ob_flashing' class='signal-housing'>\
-                <span class='{flashing} flash-delayed'>🔆</span>\
-              </label>\
-            </div>"
-        )
+        let mut html = Html::new();
+        html.div()
+            .class("title row")
+            .text(self.name())
+            .text(" ")
+            .text(self.item_states(anc).to_string())
+            .end();
+        html.div().class("beacon-container row center");
+        html.button().id("ob_flashing").disabled().end();
+        html.label().for_("ob_flashing").class("signal-housing");
+        html.span().class(self.class_flash()).text("🔆").end();
+        html.end(); /* label */
+        html.span()
+            .class("beacon-sign tiny")
+            .text(&self.message)
+            .end();
+        html.label().for_("ob_flashing").class("signal-housing");
+        html.span().class(self.class_delayed()).text("🔆");
+        html.into()
     }
 
     /// Convert to Control HTML
@@ -164,83 +176,78 @@ impl Beacon {
         if let Some((lat, lon)) = anc.loc.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let title = String::from(self.title(View::Control));
-        let mut html = Html::new();
+        let mut html = self.title(View::Control);
+        html.div().class("row");
         self.item_states(anc).tooltips(&mut html);
-        let item_states = String::from(html);
-        let location = HtmlStr::new(&self.location).with_len(64);
-        let flashing = if self.flashing() {
-            CLASS_FLASHING
-        } else {
-            CLASS_NOT_FLASHING
-        };
-        let beacon_state = self.beacon_state(anc);
-        let message = HtmlStr::new(&self.message);
-        format!(
-            "{title}\
-            <div class='row'>{item_states}</div>\
-            <div class='row'>\
-              <span class='info'>{location}</span>\
-            </div>\
-            <div class='beacon-container row center'>\
-              <button id='ob_flashing'></button>\
-              <label for='ob_flashing' class='beacon signal-housing'>\
-                <span class='{flashing}'>🔆</span>\
-              </label>\
-              <span class='beacon-sign'>{message}</span>\
-              <label for='ob_flashing' class='beacon signal-housing'>\
-                <span class='{flashing} flash-delayed'>🔆</span>\
-              </label>\
-            </div>\
-            <div class='row center'>\
-              <span>{beacon_state}</span>\
-            </div>"
-        )
+        html.end(); /* div */
+        html.div().class("row");
+        html.span()
+            .class("info")
+            .text_len(opt_ref(&self.location), 64)
+            .end();
+        html.end(); /* div */
+        html.div().class("beacon-container row center");
+        html.button().id("ob_flashing").end();
+        html.label()
+            .for_("ob_flashing")
+            .class("beacon signal-housing");
+        html.span().class(self.class_flash()).text("🔆").end();
+        html.end(); /* label */
+        html.span().class("beacon-sign").text(&self.message).end();
+        html.label()
+            .for_("ob_flashing")
+            .class("beacon signal-housing");
+        html.span().class(self.class_delayed()).text("🔆").end();
+        html.end(); /* label */
+        html.div().class("row center");
+        html.span().text(self.beacon_state(anc));
+        html.into()
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &BeaconAnc) -> String {
-        let title = String::from(self.title(View::Setup));
-        let message = HtmlStr::new(&self.message);
-        let notes = HtmlStr::new(&self.notes);
-        let mut html = Html::new();
+        let mut html = self.title(View::Setup);
+        html.div().class("row");
+        html.label().for_("message").text("Message").end();
+        html.textarea()
+            .id("message")
+            .maxlength("128")
+            .attr("rows", "3")
+            .attr("cols", "24")
+            .text(&self.message)
+            .end();
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("notes").text("Notes").end();
+        html.textarea()
+            .id("notes")
+            .maxlength("128")
+            .attr("rows", "2")
+            .attr("cols", "24")
+            .text(opt_ref(&self.notes))
+            .end();
+        html.end(); /* div */
         anc.cio.controller_html(self, &mut html);
-        let controller = String::from(html);
-        let mut html = Html::new();
         anc.cio.pin_html(self.pin, &mut html);
-        let pin = String::from(html);
-        let verify_pin = OptVal(self.verify_pin);
-        let ext_mode = if self.ext_mode.unwrap_or(false) {
-            " checked"
-        } else {
-            ""
-        };
-        let footer = self.footer(true);
-        format!(
-            "{title}\
-            <div class='row'>\
-              <label for='message'>Message</label>\
-              <textarea id='message' maxlength='128' rows='3' \
-                        cols='24'>{message}</textarea>\
-            </div>\
-            <div class='row'>\
-              <label for='notes'>Notes</label>\
-              <textarea id='notes' maxlength='128' rows='2' \
-                        cols='24'>{notes}</textarea>\
-            </div>\
-            {controller}\
-            {pin}\
-            <div class='row'>\
-              <label for='verify_pin'>Verify Pin</label>\
-              <input id='verify_pin' type='number' min='1' max='104' \
-                     size='8' value='{verify_pin}'>\
-            </div>\
-            <div class='row'>\
-              <label for='ext_mode'>Ext Mode</label>\
-              <input id='ext_mode' type='checkbox'{ext_mode}>\
-            </div>\
-            {footer}"
-        )
+        html.div().class("row");
+        html.label().for_("verify_pin").text("Verify Pin").end();
+        html.input()
+            .id("verify_pin")
+            .type_("number")
+            .min("1")
+            .max("104")
+            .size("8")
+            .value(opt_str(self.verify_pin));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("ext_mode").text("Ext Mode").end();
+        let ext_mode = html.input().id("ext_mode").type_("checkbox");
+        if let Some(true) = self.ext_mode {
+            ext_mode.checked();
+        }
+        html.end(); /* div */
+        html.raw(self.footer(true));
+        html.into()
     }
 }
 

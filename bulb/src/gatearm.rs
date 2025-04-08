@@ -15,7 +15,7 @@ use crate::card::{AncillaryData, Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
-use crate::util::{ContainsLower, Fields, HtmlStr, Input};
+use crate::util::{ContainsLower, Fields, Input, opt_ref};
 use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
@@ -117,27 +117,29 @@ impl GateArm {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &GateArmAnc) -> String {
-        let name = HtmlStr::new(self.name());
-        let item_states = self.item_states(anc);
-        let location = HtmlStr::new(&self.location).with_len(32);
-        format!(
-            "<div class='title row'>{name} {item_states}</div>\
-            <div class='info fill'>{location}</div>"
-        )
+        let mut html = Html::new();
+        html.div()
+            .class("title row")
+            .text(self.name())
+            .text(" ")
+            .text(self.item_states(anc).to_string())
+            .end();
+        html.div()
+            .class("info fill")
+            .text_len(opt_ref(&self.location), 32);
+        html.into()
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &GateArmAnc) -> String {
-        let title = String::from(self.title(View::Status));
-        let location = HtmlStr::new(&self.location).with_len(64);
-        let mut html = Html::new();
+        let mut html = self.title(View::Status);
+        html.div().class("row");
         self.item_states(anc).tooltips(&mut html);
-        let item_states = String::from(html);
-        format!(
-            "{title}\
-            <div class='row'>{item_states}</div>\
-            <div class='info'>{location}</div>"
-        )
+        html.end(); /* div */
+        html.div()
+            .class("info")
+            .text_len(opt_ref(&self.location), 64);
+        html.into()
     }
 
     /// Convert to Setup HTML
