@@ -67,7 +67,7 @@ impl Gps {
         html.end(); /* div */
         anc.controller_html(self, &mut html);
         anc.pin_html(self.pin, &mut html);
-        html.raw(self.footer(true));
+        self.footer_html(true, &mut html);
         html.into()
     }
 }

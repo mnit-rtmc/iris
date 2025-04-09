@@ -13,6 +13,7 @@
 use crate::card::{AncillaryData, Card, View};
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, Input};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -51,24 +52,27 @@ impl Role {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let name = self.name();
-        let item_state = self.item_state();
-        format!("<div class='title row'>{name} {item_state}</div>")
+        let mut html = Html::new();
+        html.div()
+            .class("title row")
+            .text(self.name())
+            .text(" ")
+            .text(self.item_state().to_string());
+        html.into()
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self) -> String {
-        let title = String::from(self.title(View::Setup));
-        let enabled = if self.enabled { " checked" } else { "" };
-        let footer = self.footer(true);
-        format!(
-            "{title}\
-            <div class='row'>\
-              <label for='enabled'>Enabled</label>\
-              <input id='enabled' type='checkbox'{enabled}>\
-            </div>\
-            {footer}"
-        )
+        let mut html = self.title(View::Setup);
+        html.div().class("row");
+        html.label().for_("enabled").text("Enabled").end();
+        let input = html.input().id("enabled").type_("checkbox");
+        if self.enabled {
+            input.checked();
+        }
+        html.end(); /* div */
+        self.footer_html(true, &mut html);
+        html.into()
     }
 }
 

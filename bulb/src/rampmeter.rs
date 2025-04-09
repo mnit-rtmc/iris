@@ -793,7 +793,7 @@ impl RampMeter {
             .size("8")
             .value(opt_str(self.pm_target));
         html.end(); /* div */
-        html.raw(self.footer(true));
+        self.footer_html(true, &mut html);
         html.into()
     }
 }

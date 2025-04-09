@@ -209,7 +209,7 @@ impl<L> LocAnc<L> {
                 html.span().text("Error: missing geo_loc!").end();
             }
         };
-        html.raw(card.footer(false));
+        card.footer_html(false, &mut html);
         html.into()
     }
 

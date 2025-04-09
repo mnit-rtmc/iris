@@ -406,7 +406,7 @@ impl Lcs {
             .size("2")
             .value(opt_str(self.shift));
         html.end(); /* div */
-        html.raw(self.footer(true));
+        self.footer_html(true, &mut html);
         html.into()
     }
 }

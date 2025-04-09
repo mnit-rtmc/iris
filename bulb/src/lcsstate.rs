@@ -206,7 +206,7 @@ impl LcsState {
             .size("5")
             .value(opt_str(self.msg_num));
         html.end(); /* div */
-        html.raw(self.footer(true));
+        self.footer_html(true, &mut html);
         html.into()
     }
 }

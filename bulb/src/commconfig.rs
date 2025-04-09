@@ -289,7 +289,7 @@ impl CommConfig {
             &mut html,
         );
         html.end(); /* div */
-        html.raw(self.footer(true));
+        self.footer_html(true, &mut html);
         html.into()
     }
 }

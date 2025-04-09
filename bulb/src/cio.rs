@@ -60,7 +60,7 @@ where
         match self.controller(pri) {
             Some(c) => {
                 input.value(c.name());
-                html.raw(c.button_html());
+                c.button_html(html);
             }
             None => {
                 html.span().end(); /* empty */

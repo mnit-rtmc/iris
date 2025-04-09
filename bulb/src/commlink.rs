@@ -116,7 +116,7 @@ impl CommLinkAnc {
     /// Build controller links HTML
     fn controllers_html(&self, html: &mut Html) {
         for ctrl in &self.controllers {
-            html.raw(ctrl.button_loc_html());
+            ctrl.button_loc_html(html);
         }
     }
 }
@@ -188,7 +188,7 @@ impl CommLink {
             enabled.checked();
         }
         html.end(); /* div */
-        html.raw(self.footer(true));
+        self.footer_html(true, &mut html);
         html.into()
     }
 }

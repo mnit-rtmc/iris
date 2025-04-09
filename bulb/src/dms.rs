@@ -952,7 +952,7 @@ impl Dms {
         html.end(); /* div */
         anc.cio.controller_html(self, &mut html);
         anc.cio.pin_html(self.pin, &mut html);
-        html.raw(self.footer(true));
+        self.footer_html(true, &mut html);
         html.into()
     }
 

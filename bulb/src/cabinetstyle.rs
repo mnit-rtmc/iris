@@ -100,7 +100,7 @@ impl CabinetStyle {
             .size("8")
             .value(opt_str(self.dip));
         html.end(); /* div */
-        html.raw(self.footer(true));
+        self.footer_html(true, &mut html);
         html.into()
     }
 }

@@ -208,7 +208,7 @@ impl Permission {
         html.label().for_("access_level").text("Access").end();
         access_level_html(self.access_level, &mut html);
         html.end(); /* div */
-        html.raw(self.footer(true));
+        self.footer_html(true, &mut html);
         html.into()
     }
 }

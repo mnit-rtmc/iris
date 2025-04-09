@@ -283,8 +283,7 @@ impl Controller {
     }
 
     /// Build controller button HTML
-    pub fn button_html(&self) -> String {
-        let mut html = Html::new();
+    pub fn button_html(&self, html: &mut Html) {
         html.button()
             .type_("button")
             .class("go_link")
@@ -292,18 +291,17 @@ impl Controller {
             .attr("data-type", Res::Controller.as_str())
             .text(self.link_drop())
             .end();
-        html.into()
     }
 
     /// Build button and location HTML
-    pub fn button_loc_html(&self) -> String {
-        let mut html = Html::new();
+    pub fn button_loc_html(&self, html: &mut Html) {
         html.div().class("row start");
-        html.raw(self.button_html());
+        self.button_html(html);
         html.span()
             .class("info")
-            .text_len(opt_ref(&self.location), 32);
-        html.into()
+            .text_len(opt_ref(&self.location), 32)
+            .end();
+        html.end(); /* div */
     }
 
     /// Convert to compact HTML
@@ -424,7 +422,7 @@ impl Controller {
             .size("26")
             .value(opt_ref(&self.password));
         html.end(); /* div */
-        html.raw(self.footer(true));
+        self.footer_html(true, &mut html);
         html.into()
     }
 }

@@ -214,7 +214,7 @@ fn to_html_setup(sc: &SignConfig, anc: &SignConfigAnc) -> String {
     html.label().for_("default_font").text("Default Font").end();
     anc.select_fonts_html(sc.default_font, &mut html);
     html.end(); /* div */
-    html.raw(sc.footer(true));
+    sc.footer_html(true, &mut html);
     html.into()
 }
 

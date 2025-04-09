@@ -355,9 +355,8 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
         html
     }
 
-    /// Build card footer
-    fn footer(&self, delete: bool) -> String {
-        let mut html = Html::new();
+    /// Build card footer HTML
+    fn footer_html(&self, delete: bool, html: &mut Html) {
         html.div().class("row");
         html.span().end(); /* empty */
         if delete {
@@ -372,7 +371,7 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
             .type_("button")
             .text("🖍️ Save")
             .end();
-        html.into()
+        html.end(); /* div */
     }
 }
 
