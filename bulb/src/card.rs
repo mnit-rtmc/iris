@@ -375,8 +375,8 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     }
 }
 
-/// Get all item states as html options
-pub fn item_states(res: Option<Res>) -> &'static str {
+/// Build all item states HTML
+pub fn item_states_html(res: Option<Res>) -> &'static str {
     match res {
         Some(Res::Beacon) => Beacon::ITEM_STATES,
         Some(Res::CabinetStyle) => "",
@@ -693,7 +693,7 @@ impl CardList {
             self.views.push(cv);
         }
         html.end(); /* ul */
-        self.states_main = build_item_states(&cards, &anc);
+        self.states_main = item_states_main(&cards, &anc);
         Ok(html.into())
     }
 
@@ -851,7 +851,7 @@ impl CardList {
                 values.push((cv, html));
             }
         }
-        self.states_main = build_item_states(&cards1, &anc);
+        self.states_main = item_states_main(&cards1, &anc);
         Ok(values)
     }
 }
@@ -876,7 +876,7 @@ async fn fetch_ancillary<C: Card>(pri: &C, view: View) -> Result<C::Ancillary> {
 }
 
 /// Build item states JSON object
-fn build_item_states<C: Card>(cards: &[C], anc: &C::Ancillary) -> String {
+fn item_states_main<C: Card>(cards: &[C], anc: &C::Ancillary) -> String {
     let mut states = String::new();
     states.push('{');
     for pri in cards {

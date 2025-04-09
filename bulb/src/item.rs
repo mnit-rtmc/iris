@@ -197,7 +197,7 @@ impl<'a> ItemStates<'a> {
         self.all.iter().any(|(s, _dtl)| s.is_match(search))
     }
 
-    /// Build item state tooltips
+    /// Build item state tooltips HTML
     pub fn tooltips(&self, html: &mut Html) {
         html.div();
         for (state, dtl) in self.all.iter() {
