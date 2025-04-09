@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,6 @@
 //
 use serde_json::map::Map;
 use serde_json::{Number, Value};
-use std::borrow::Cow;
 use std::fmt;
 use std::str::FromStr;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
@@ -125,77 +124,6 @@ impl From<OptVal<String>> for Value {
         match val.0 {
             Some(s) => Value::String(s),
             None => Value::Null,
-        }
-    }
-}
-
-/// String wrapper which can be written as HTML
-#[derive(Debug)]
-pub struct HtmlStr<S> {
-    val: S,
-    len: usize,
-}
-
-impl<S> HtmlStr<S> {
-    /// Create a new HTML string
-    pub fn new(val: S) -> Self {
-        Self {
-            val,
-            len: usize::MAX,
-        }
-    }
-
-    /// Adjust the maximum length
-    pub fn with_len(mut self, len: usize) -> Self {
-        self.len = len;
-        self
-    }
-
-    /// Format and encode entities
-    fn fmt_encode(&self, val: &str, f: &mut fmt::Formatter) -> fmt::Result {
-        for c in val.chars().take(self.len) {
-            match c {
-                '&' => write!(f, "&amp;")?,
-                '<' => write!(f, "&lt;")?,
-                '>' => write!(f, "&gt;")?,
-                '"' => write!(f, "&quot;")?,
-                '\'' => write!(f, "&#x27;")?,
-                _ => write!(f, "{c}")?,
-            }
-        }
-        Ok(())
-    }
-}
-
-impl fmt::Display for HtmlStr<&str> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.fmt_encode(self.val, f)
-    }
-}
-
-impl fmt::Display for HtmlStr<Cow<'_, str>> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.fmt_encode(&self.val, f)
-    }
-}
-
-impl fmt::Display for HtmlStr<&String> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.fmt_encode(self.val, f)
-    }
-}
-
-impl fmt::Display for HtmlStr<String> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.fmt_encode(&self.val, f)
-    }
-}
-
-impl fmt::Display for HtmlStr<&Option<String>> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self.val.as_ref() {
-            Some(val) => self.fmt_encode(val, f),
-            None => Ok(()),
         }
     }
 }
@@ -503,24 +431,5 @@ impl Select<Option<i32>> for Fields {
         if parsed != val {
             self.insert(id, OptVal(parsed).into());
         }
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn html() {
-        assert_eq!(HtmlStr::new("<").to_string(), "&lt;");
-        assert_eq!(HtmlStr::new(">").to_string(), "&gt;");
-        assert_eq!(HtmlStr::new("&").to_string(), "&amp;");
-        assert_eq!(HtmlStr::new("\"").to_string(), "&quot;");
-        assert_eq!(HtmlStr::new("'").to_string(), "&#x27;");
-        assert_eq!(
-            HtmlStr::new("<script>XSS stuff</script>").to_string(),
-            "&lt;script&gt;XSS stuff&lt;/script&gt;"
-        );
-        assert_eq!(HtmlStr::new("len").with_len(2).to_string(), "le");
     }
 }
