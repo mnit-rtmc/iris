@@ -16,6 +16,7 @@ use crate::error::{Error, Result};
 use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::util::Doc;
+use hatmil::Html;
 use js_sys::JsString;
 use resources::Res;
 use std::error::Error as _;
@@ -31,9 +32,6 @@ use web_sys::{
 
 /// JavaScript result
 pub type JsResult<T> = std::result::Result<T, JsValue>;
-
-/// Page sidebar
-const SIDEBAR: &str = include_str!("sidebar.html");
 
 /// JavaScript imports
 #[wasm_bindgen(module = "/static/glue.js")]
@@ -110,7 +108,7 @@ async fn add_sidebar() -> JsResult<()> {
     let doc = window.document().unwrap_throw();
     let doc = Doc(doc);
     let sidebar: HtmlElement = doc.elem("sidebar");
-    sidebar.set_inner_html(SIDEBAR);
+    sidebar.set_inner_html(&sidebar_html());
     add_fullscreenchange_listener(&sidebar)?;
     add_change_listener(&sidebar)?;
     add_click_listener(&sidebar)?;
@@ -123,6 +121,77 @@ async fn add_sidebar() -> JsResult<()> {
     do_future(finish_init()).await;
     fetch_station_sample();
     Ok(())
+}
+
+/// Build sidebar HTML
+fn sidebar_html() -> String {
+    let mut html = Html::new();
+    html.div().class("sb_row");
+    html.label().for_("sb_resource").text("Resource").end();
+    html.select().id("sb_resource").end();
+    html.input()
+        .id("sb_config")
+        .type_("checkbox")
+        .class("toggle");
+    html.label().for_("sb_config").text("🧰").end();
+    html.input()
+        .id("sb_fullscreen")
+        .type_("checkbox")
+        .class("toggle");
+    html.label().for_("sb_fullscreen").text(" ⛶ ").end();
+    html.end(); /* div */
+    html.div().class("sb_row");
+    html.input()
+        .id("sb_search")
+        .type_("search")
+        .size("16")
+        .attr("placeholder", "🔍");
+    html.select().id("sb_state").end();
+    html.button()
+        .id("sb_refresh")
+        .type_("button")
+        .text("⭮ ⚪")
+        .end();
+    html.end(); /* div */
+    html.div().id("sb_list").end();
+    html.div().id("sb_toast").end();
+    html.div().id("sb_login").class("hide");
+    html.div().class("form");
+    html.div().class("row center");
+    html.img().src("bulb/iris.svg");
+    html.end(); /* div */
+    html.div().class("row end");
+    html.span().text("IRIS authentication required").end();
+    html.end(); /* div */
+    html.div().class("row end");
+    html.label().for_("login_user").text("User name").end();
+    html.input()
+        .id("login_user")
+        .type_("text")
+        .attr("name", "username")
+        .attr("autocomplete", "username")
+        .required();
+    html.end(); /* div */
+    html.div().class("row end");
+    html.label().for_("login_pass").text("Password").end();
+    html.input()
+        .id("login_pass")
+        .type_("password")
+        .attr("name", "password")
+        .attr("autocomplete", "current-password")
+        .required();
+    html.end(); /* div */
+    html.div().class("row end");
+    html.button()
+        .id("ob_login")
+        .type_("button")
+        .text("Login")
+        .end();
+    html.end(); /* div */
+    html.end(); /* div (form) */
+    html.div().id("sb_shade").end();
+    html.end(); /* div (sb_login) */
+    html.into()
 }
 
 /// Finish initialization

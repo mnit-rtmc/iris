@@ -602,7 +602,7 @@ impl CardList {
         std::mem::take(&mut self.json)
     }
 
-    /// Get main item states
+    /// Get main item states JSON
     pub fn states_main(&self) -> &str {
         &self.states_main
     }
