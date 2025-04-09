@@ -22,7 +22,7 @@ use crate::notes::contains_hashtag;
 use crate::sign::{self, NtcipSign};
 use crate::signmessage::SignMessage;
 use crate::start::fly_map_item;
-use crate::util::{ContainsLower, Doc, Fields, HtmlStr, Input, TextArea};
+use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
 use chrono::DateTime;
 use hatmil::Html;
 use js_sys::{ArrayBuffer, Uint8Array};
@@ -69,12 +69,6 @@ const EXPIRE_SELECT: &str = "<select id='mc_expire'>\
 <option value='960'>16 h\
 <option value='1440'>24 h\
 </select>";
-
-/// Send button
-const SEND_BUTTON: &str = "<button id='mc_send' type='button'>Send</button>";
-
-/// Blank button
-const BLANK_BUTTON: &str = "<button id='mc_blank' type='button'>Blank</button>";
 
 /// Photocell status
 #[derive(Debug, Default, Deserialize, PartialEq)]
@@ -418,73 +412,51 @@ impl DmsAnc {
     }
 
     /// Make line select elements
-    fn make_lines(
+    fn make_lines_html(
         &self,
         sign: &NtcipSign,
-        pat: Option<&MsgPattern>,
+        pat_def: &MsgPattern,
         ms_cur: &str,
-    ) -> String {
-        let mut html = String::new();
-        html.push_str("<div id='mc_lines' class='column'>");
-        if let Some(pat) = pat {
-            html.push_str(&self.make_lines_div(sign, pat, ms_cur));
-        }
-        html.push_str("</div>");
-        html
-    }
-
-    /// Make line select elements
-    fn make_lines_div(
-        &self,
-        sign: &NtcipSign,
-        pat: &MsgPattern,
-        ms_cur: &str,
-    ) -> String {
+        html: &mut Html,
+    ) {
         // NOTE: this prevents lifetime from escaping
-        let mut pat = pat;
-        let mut html = String::new();
-        let widths = MessagePattern::new(&sign.dms, &pat.multi).widths();
-        let cur_lines = MessagePattern::new(&sign.dms, &pat.multi)
-            .lines(ms_cur)
-            .chain(repeat(""));
+        let mut pat = pat_def;
         if self.pat_lines(pat).count() == 0 {
             let n_lines =
                 MessagePattern::new(&sign.dms, &pat.multi).widths().count();
             match self.find_substitute(pat, n_lines) {
                 Some(sub) => pat = sub,
-                None => return html,
+                None => return,
             }
         }
+        let widths = MessagePattern::new(&sign.dms, &pat_def.multi).widths();
+        let cur_lines = MessagePattern::new(&sign.dms, &pat_def.multi)
+            .lines(ms_cur)
+            .chain(repeat(""));
+        html.div().id("mc_lines").class("column");
         let mut rect_num = 0;
         for (i, ((width, font_num, rn), cur_line)) in
             widths.zip(cur_lines).enumerate()
         {
             let ln = 1 + i as u16;
-            let line = ln.to_string();
-            html.push_str("<input id='mc_line");
-            html.push_str(&line);
-            html.push_str("' list='mc_choice");
-            html.push_str(&line);
-            html.push('\'');
+            let mc_line = format!("mc_line{ln}");
+            let mc_choice = format!("mc_choice{ln}");
+            let input = html.input().id(mc_line).attr("list", &mc_choice);
             if rn != rect_num {
-                html.push_str(" class='mc_line_gap'");
+                input.class("mc_line_gap");
                 rect_num = rn;
             }
-            html.push_str("><datalist id='mc_choice");
-            html.push_str(&line);
-            html.push_str("'>");
+            html.datalist().id(mc_choice);
             if let Some(font) = sign.dms.font_definition().font(font_num) {
                 for ml in self.pat_lines(pat) {
                     if ml.line == ln {
-                        self.append_line(
-                            &ml.multi, width, font, cur_line, &mut html,
-                        )
+                        self.line_html(&ml.multi, width, font, cur_line, html)
                     }
                 }
             }
-            html.push_str("</datalist>");
+            html.end(); /* datalist */
         }
-        html
+        html.end(); /* div */
     }
 
     /// Find a substitute message pattern
@@ -514,14 +486,14 @@ impl DmsAnc {
         self.lines.iter().filter(|ml| ml.msg_pattern == pat.name)
     }
 
-    /// Append a line as an option element
-    fn append_line(
+    /// Build line HTML
+    fn line_html(
         &self,
         multi: &str,
         width: u16,
         font: &Font,
         cur_line: &str,
-        html: &mut String,
+        html: &mut Html,
     ) {
         // FIXME: handle line-allowed MULTI tags
         let mut ms = multi;
@@ -531,14 +503,11 @@ impl DmsAnc {
                 return;
             };
             if w <= width {
-                html.push_str("<option value='");
-                html.push_str(ms);
+                let option = html.option().value(ms);
                 if ms == cur_line {
-                    html.push_str("' selected>");
-                } else {
-                    html.push_str("'>");
+                    option.attr_bool("selected");
                 }
-                html.push_str(&join_text(ms, " "));
+                html.text(join_text(ms, " ")).end();
                 break;
             } else if let Some(abbrev) = self.abbreviate_text(ms) {
                 line = abbrev;
@@ -624,24 +593,6 @@ const DEDICATED: &[&str] = &[
     "#Hidden",
 ];
 
-/// Build an HTML title row (div) from a slice of spans
-fn html_title_row(spans: &[&str], cls: &[&str]) -> String {
-    let mut row = String::from("<div class='title row'>");
-    for (span, c) in spans.iter().zip(cls.iter().chain(repeat(&""))) {
-        if !c.is_empty() {
-            row.push_str("<span class='");
-            row.push_str(c);
-            row.push_str("'>");
-        } else {
-            row.push_str("<span>");
-        }
-        row.push_str(span);
-        row.push_str("</span>");
-    }
-    row.push_str("</div>");
-    row
-}
-
 impl Dms {
     /// Get multi of current message
     fn current_multi<'a>(&'a self, anc: &'a DmsAnc) -> &'a str {
@@ -655,6 +606,13 @@ impl Dms {
         anc.sign_message(self.msg_current.as_deref())
             .map(|m| m.user())
             .unwrap_or("")
+    }
+
+    /// Get name of current message .gif
+    fn msg_current_gif(&self) -> Option<String> {
+        self.msg_current
+            .as_ref()
+            .map(|msg| format!("/iris/img/{msg}.gif"))
     }
 
     /// Check if DMS has a given hashtag
@@ -702,20 +660,21 @@ impl Dms {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &DmsAnc) -> String {
-        let name = HtmlStr::new(self.name());
-        let item_states = self.item_states(anc);
-        let nm = format!("{name} {item_states}");
-        let user = self.user(anc);
-        let mut html = html_title_row(&[&nm, &user], &["", "info"]);
-        if let Some(msg_current) = &self.msg_current {
-            html.push_str("<img class='message' src='/iris/img/");
-            html.push_str(msg_current);
-            html.push_str(".gif'>");
+        let mut html = Html::new();
+        html.div().class("title row");
+        html.span()
+            .text(self.name())
+            .text(" ")
+            .text(self.item_states(anc).to_string())
+            .end();
+        html.span().class("info").text(self.user(anc)).end();
+        html.end(); /* div */
+        if let Some(gif) = self.msg_current_gif() {
+            html.img().class("message").src(gif);
         }
-        html.push_str("<div class='info fill'>");
-        html.push_str(&HtmlStr::new(&self.location).with_len(64).to_string());
-        html.push_str("</div>");
-        html
+        html.div().class("info fill");
+        html.text_len(opt_ref(&self.location), 64);
+        html.into()
     }
 
     /// Get user to display
@@ -738,72 +697,76 @@ impl Dms {
         if let Some((lat, lon)) = anc.loc.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let mut html = String::from(self.title(View::Control));
-        html.push_str("<div class='row fill'>");
-        let mut h = Html::new();
-        self.item_states(anc).tooltips(&mut h);
-        html.push_str(&String::from(h));
-        html.push_str("<span>");
+        let mut html = self.title(View::Control);
+        html.div().class("row fill");
+        self.item_states(anc).tooltips(&mut html);
+        html.span();
         if let Some(expire_time) = &self.expire_time {
             match DateTime::parse_from_rfc3339(expire_time) {
-                Ok(dt) => html.push_str(&format!("⏲️ {}", &dt.format("%H:%M"))),
-                _ => html.push_str("expires"),
-            }
+                Ok(dt) => html.text(format!("⏲️ {}", &dt.format("%H:%M"))),
+                _ => html.text("expires"),
+            };
         }
-        html.push_str("</span>");
-        html.push_str("</div>");
-        if let Some(msg_current) = &self.msg_current {
-            html.push_str("<img class='message' src='/iris/img/");
-            html.push_str(msg_current);
-            html.push_str(".gif'>");
+        html.end(); /* span */
+        html.end(); /* div */
+        if let Some(gif) = self.msg_current_gif() {
+            html.img().class("message").src(gif);
         }
-        html.push_str("<div class='info fill'>");
-        html.push_str(&HtmlStr::new(&self.location).with_len(64).to_string());
-        html.push_str("</div>");
-        if let Some(pats) = &self.compose_patterns(anc) {
-            html.push_str(pats);
-        }
-        html
+        html.div().class("info fill");
+        html.text_len(opt_ref(&self.location), 64);
+        html.end(); /* div */
+        self.message_composer_html(anc, &mut html);
+        html.into()
     }
 
-    /// Build compose pattern HTML
-    fn compose_patterns(&self, anc: &DmsAnc) -> Option<String> {
+    /// Build message composer HTML
+    fn message_composer_html(&self, anc: &DmsAnc, html: &mut Html) {
         if anc.compose_patterns.is_empty() {
             console::log_1(
                 &format!("{}: No compose patterns", self.name).into(),
             );
-            return None;
+            return;
         }
-        let sign = self.make_sign(anc)?;
+        let Some(sign) = self.make_sign(anc) else {
+            return;
+        };
         let sign = Some(sign);
-        let mut html = String::new();
-        html.push_str("<div id='mc_grid'>");
         let pat_def = self.pattern_default(anc);
         let multi = pat_def.map(|pat| &pat.multi[..]).unwrap_or("");
-        html.push_str(&sign::render(&sign, multi, 240, 80, None));
-        html.push_str("<select id='mc_pattern'>");
+        html.div().id("mc_grid");
+        html.raw(sign::render(&sign, multi, 240, 80, None));
+        html.select().id("mc_pattern");
         for pat in &anc.compose_patterns {
-            html.push_str("<option");
+            let option = html.option();
             if let Some(p) = pat_def {
                 if p.name == pat.name {
-                    html.push_str(" selected");
+                    option.attr_bool("selected");
                 }
             }
-            html.push('>');
-            html.push_str(&pat.name);
+            html.text(&pat.name).end();
         }
-        html.push_str("</select>");
-        html.push_str(&anc.make_lines(
-            #[allow(clippy::unnecessary_literal_unwrap)]
-            &sign.unwrap(),
-            pat_def,
-            self.current_multi(anc),
-        ));
-        html.push_str(EXPIRE_SELECT);
-        html.push_str(SEND_BUTTON);
-        html.push_str(BLANK_BUTTON);
-        html.push_str("</div>");
-        Some(html)
+        html.end(); /* select */
+        if let Some(pat) = pat_def {
+            anc.make_lines_html(
+                #[allow(clippy::unnecessary_literal_unwrap)]
+                &sign.unwrap(),
+                pat,
+                self.current_multi(anc),
+                html,
+            );
+        }
+        html.raw(EXPIRE_SELECT);
+        html.button()
+            .id("mc_send")
+            .type_("button")
+            .text("Send")
+            .end();
+        html.button()
+            .id("mc_blank")
+            .type_("button")
+            .text("Blank")
+            .end();
+        html.end(); /* div */
     }
 
     /// Get the pattern which should be selected by default
@@ -908,209 +871,196 @@ impl Dms {
 
     /// Convert to Request HTML
     fn to_html_request(&self, _anc: &DmsAnc) -> String {
-        let title = String::from(self.title(View::Request));
-        let name = HtmlStr::new(self.name());
         let work = "http://example.com"; // FIXME
-        format!(
-            "{title}\
-            <div class='row'>\
-              <span>Current Message</span>\
-              <button id='rq_msg_query' type='button'>Query</button>\
-            </div>\
-            <div class='row'>\
-              <span>Current Status</span>\
-              <button id='rq_status_query' type='button'>Query</button>\
-            </div>\
-            <div class='row'>\
-              <span>Pixel Errors</span>\
-              <span>\
-                <button id='rq_pixel_test' type='button'>Test</button>\
-                <button id='rq_pixel_query' type='button'>Query</button>\
-              </span>\
-            </div>\
-            <div class='row'>\
-              <span>Settings</span>\
-              <span>\
-                <button id='rq_settings_send' type='button'>Send</button>\
-                <button id='rq_settings_query' type='button'>Query</button>\
-              </span>\
-            </div>\
-            <div class='row'>\
-              <span>Configuration</span>\
-              <span>\
-                <button id='rq_config_reset' type='button'>Reset</button>\
-                <button id='rq_config_query' type='button'>Query</button>\
-              </span>\
-            </div>\
-            <div class='row'>\
-              <span>Work Request</span>
-              <a href='{work}' target='_blank' rel='noopener noreferrer'>\
-                🔗 {name}\
-              </a>\
-            </div>"
-        )
+        let mut html = self.title(View::Request);
+        html.div().class("row");
+        html.span().text("Current Message").end();
+        html.button()
+            .id("rq_msg_query")
+            .type_("button")
+            .text("Query");
+        html.end().end(); /* button, div */
+        html.div().class("row");
+        html.span().text("Current Status").end();
+        html.button()
+            .id("rq_status_query")
+            .type_("button")
+            .text("Query");
+        html.end().end(); /* button, div */
+        html.div().class("row");
+        html.span().text("Pixel Errors").end();
+        html.span();
+        html.button()
+            .id("rq_pixel_text")
+            .type_("button")
+            .text("Test")
+            .end();
+        html.button()
+            .id("rq_pixel_query")
+            .type_("button")
+            .text("Query");
+        html.end().end().end(); /* button, span, div */
+        html.div().class("row");
+        html.span().text("Settings").end();
+        html.span();
+        html.button()
+            .id("rq_settings_send")
+            .type_("button")
+            .text("Send");
+        html.end();
+        html.button()
+            .id("rq_settings_query")
+            .type_("button")
+            .text("Query");
+        html.end().end().end(); /* button, span, div */
+        html.div().class("row");
+        html.span().text("Configuration").end();
+        html.span();
+        html.button()
+            .id("rq_config_reset")
+            .type_("button")
+            .text("Reset");
+        html.end();
+        html.button()
+            .id("rq_config_query")
+            .type_("button")
+            .text("Query");
+        html.end().end().end(); /* button, span, div */
+        html.div().class("row");
+        html.span().text("Work Request").end();
+        html.a()
+            .href(work)
+            .attr("target", "_blank")
+            .attr("rel", "noopener noreferrer")
+            .text("🔗 ")
+            .text(self.name());
+        html.into()
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &DmsAnc) -> String {
-        let title = String::from(self.title(View::Setup));
-        let notes = HtmlStr::new(&self.notes);
-        let mut html = Html::new();
+        let mut html = self.title(View::Setup);
+        html.div().class("row");
+        html.label().for_("notes").text("Notes").end();
+        html.textarea()
+            .id("notes")
+            .maxlength("255")
+            .attr("rows", "4")
+            .attr("cols", "24")
+            .text(opt_ref(&self.notes))
+            .end();
+        html.end(); /* div */
         anc.cio.controller_html(self, &mut html);
-        let controller = String::from(html);
-        let mut html = Html::new();
         anc.cio.pin_html(self.pin, &mut html);
-        let pin = String::from(html);
-        let footer = self.footer(true);
-        format!(
-            "{title}\
-            <div class='row'>\
-              <label for='notes'>Notes</label>\
-              <textarea id='notes' maxlength='255' rows='4' \
-                        cols='24'>{notes}</textarea>\
-            </div>\
-            {controller}\
-            {pin}\
-            {footer}"
-        )
+        html.raw(self.footer(true));
+        html.into()
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &DmsAnc) -> String {
-        let title = String::from(self.title(View::Status));
-        let mut html = Html::new();
+        let mut html = self.title(View::Status);
+        html.div();
         self.item_states(anc).tooltips(&mut html);
-        let item_states = String::from(html);
-        let location = HtmlStr::new(&self.location).with_len(64);
-        let mut html = format!(
-            "{title}\
-            <div>{item_states}</div>\
-            <div class='row'>\
-              <span class='info'>{location}</span>\
-            </div>"
-        );
-        html.push_str(&self.temp_html());
-        html.push_str(&self.light_html());
-        html.push_str(&self.power_html());
-        html
+        html.end(); /* div */
+        html.div().class("row");
+        html.span()
+            .class("info")
+            .text_len(opt_ref(&self.location), 64)
+            .end();
+        html.end(); /* div */
+        self.temp_html(&mut html);
+        self.light_html(&mut html);
+        self.power_html(&mut html);
+        html.into()
     }
 
-    /// Get temperature status as HTML
-    fn temp_html(&self) -> String {
-        let mut html = String::new();
+    /// Build temperature status HTML
+    fn temp_html(&self, html: &mut Html) {
         if let Some(status) = &self.status {
-            html.push_str("<div>🌡️ <b>Temperature</b></div><ul>");
+            html.div().text("🌡️ ").b().text("Temperature").end().end();
+            html.ul();
             if let Some(temps) = &status.ambient_temps {
-                html.push_str(&temp_range("Ambient", temps));
+                temp_range_html("Ambient", temps, html);
             }
             if let Some(temps) = &status.housing_temps {
-                html.push_str(&temp_range("Housing", temps));
+                temp_range_html("Housing", temps, html);
             }
             if let Some(temps) = &status.cabinet_temps {
-                html.push_str(&temp_range("Cabinet", temps));
+                temp_range_html("Cabinet", temps, html);
             }
-            html.push_str("</ul>");
+            html.end(); /* ul */
         }
-        html
     }
 
-    /// Get light status as HTML
-    fn light_html(&self) -> String {
-        let mut html = String::new();
+    /// Build light status HTML
+    fn light_html(&self, html: &mut Html) {
         if let Some(status) = &self.status {
-            html.push_str("<div>🔅 <b>Light Output</b>");
+            html.div().text("🔅 ").b().text("Light Output").end();
             if let Some(light) = &status.light_output {
                 let light = light.to_string();
-                html.push_str(" <meter max='100' value='");
-                html.push_str(&light);
-                html.push_str("'></meter>🔆 ");
-                html.push_str(&light);
-                html.push('%');
+                html.meter().max("100").value(&light).end();
+                html.text("🔆 ").text(light).text("%");
             }
-            html.push_str("</div>");
+            html.end(); /* div */
             if let Some(photocells) = &status.photocells {
-                html.push_str("<table>");
+                html.table();
                 for (i, photocell) in photocells.iter().enumerate() {
-                    html.push_str("<tr><td>");
-                    html.push_str(&(i + 1).to_string());
-                    html.push_str("<td>");
-                    html.push_str(
-                        &HtmlStr::new(&photocell.description)
-                            .with_len(20)
-                            .to_string(),
-                    );
+                    html.tr();
+                    html.td().text((i + 1).to_string()).end();
+                    html.td().text_len(&photocell.description, 20).end();
+                    let td = html.td();
                     let reading = &photocell.reading;
                     match reading.parse::<f32>() {
                         Ok(_r) => {
-                            html.push_str("<td><meter max='100' value='");
-                            html.push_str(reading);
-                            html.push_str("'></meter>☀️ ");
-                            html.push_str(reading);
-                            html.push('%');
+                            html.meter().max("100").value(reading).end();
+                            html.text("☀️ ").text(reading).text("%");
                         }
                         Err(_e) => {
-                            html.push_str("<td class='fault'>");
-                            html.push_str(
-                                &HtmlStr::new(reading).with_len(16).to_string(),
-                            );
+                            td.class("fault").text_len(reading, 16);
                         }
                     }
+                    html.end().end(); /* td, tr */
                 }
-                html.push_str("</table>");
+                html.end(); /* table */
             }
         }
-        html
     }
 
-    /// Get power supply status as HTML
-    fn power_html(&self) -> String {
-        let mut html = String::new();
+    /// Build power supply status HTML
+    fn power_html(&self, html: &mut Html) {
         if let Some(status) = &self.status {
             if let Some(power_supplies) = &status.power_supplies {
-                html.push_str("<div>⚡ <b>Power</b></div><table>");
+                html.div().text("⚡ ").b().text("Power").end().end();
+                html.table();
                 for (i, supply) in power_supplies.iter().enumerate() {
-                    html.push_str("<tr><td>");
-                    html.push_str(&(i + 1).to_string());
-                    html.push_str("<td>");
-                    html.push_str(
-                        &HtmlStr::new(&supply.description)
-                            .with_len(20)
-                            .to_string(),
-                    );
+                    html.tr();
+                    html.td().text((i + 1).to_string()).end();
+                    html.td().text_len(&supply.description, 20).end();
+                    let td = html.td();
                     let voltage = &supply.voltage;
                     match voltage.parse::<f32>() {
                         Ok(v) => {
-                            if v > 0.0 {
-                                html.push_str("<td>");
-                            } else {
-                                html.push_str("<td class='fault'>");
+                            if v <= 0.0 {
+                                td.class("fault");
                             }
-                            html.push_str(voltage);
-                            html.push('V');
+                            html.text(voltage).text("V");
                         }
                         Err(_e) => {
-                            html.push_str("<td class='fault'>");
-                            html.push_str(
-                                &HtmlStr::new(voltage).with_len(16).to_string(),
-                            );
+                            td.class("fault").text_len(voltage, 16);
                         }
                     }
-                    html.push_str("<td>");
-                    html.push_str(
-                        &HtmlStr::new(&supply.supply_type)
-                            .with_len(12)
-                            .to_string(),
-                    );
+                    html.end(); /* td */
+                    html.td().text_len(&supply.supply_type, 12).end();
+                    html.end(); /* tr */
                 }
-                html.push_str("</table>");
+                html.end(); /* table */
             }
         }
-        html
     }
 }
 
-/// Format a temperature range from a Vec
-fn temp_range(label: &str, temps: &[i32]) -> String {
+/// Build temperature range HTML
+fn temp_range_html(label: &str, temps: &[i32], html: &mut Html) {
     let mut mn = None;
     let mut mx = None;
     for &temp in temps {
@@ -1125,18 +1075,17 @@ fn temp_range(label: &str, temps: &[i32]) -> String {
             }
         }
     }
-    match (mn, mx) {
-        (Some(mn), Some(mx)) => {
-            if mn == mx {
-                let t = (f64::from(mn) * DegC).to::<TempUnit>();
-                format!("<li><div>{label} {t:.1}</div>")
-            } else {
-                let mn = (f64::from(mn) * DegC).to::<TempUnit>();
-                let mx = (f64::from(mx) * DegC).to::<TempUnit>();
-                format!("<li><div>{label} {mn:.1}…{mx:.1}</div>")
-            }
-        }
-        _ => String::new(),
+    if let (Some(mn), Some(mx)) = (mn, mx) {
+        let t = if mn == mx {
+            format!(" {:.1}", (f64::from(mn) * DegC).to::<TempUnit>())
+        } else {
+            format!(
+                " {:.1}…{:.1}",
+                (f64::from(mn) * DegC).to::<TempUnit>(),
+                (f64::from(mx) * DegC).to::<TempUnit>(),
+            )
+        };
+        html.li().text(label).text(t).end();
     }
 }
 
@@ -1278,9 +1227,10 @@ impl Card for Dms {
         };
         let lines = if &id == "mc_pattern" {
             // update mc_lines element
-            let html = anc.make_lines(&sign, Some(pat), "");
+            let mut html = Html::new();
+            anc.make_lines_html(&sign, pat, "", &mut html);
             let mc_lines = Doc::get().elem::<HtmlElement>("mc_lines");
-            mc_lines.set_outer_html(&html);
+            mc_lines.set_outer_html(&String::from(html));
             Vec::new()
         } else {
             self.selected_lines()

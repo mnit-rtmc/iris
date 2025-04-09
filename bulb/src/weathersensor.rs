@@ -17,7 +17,7 @@ use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::ItemState;
 use crate::start::fly_map_item;
-use crate::util::{ContainsLower, Fields, HtmlStr, Input, TextArea, opt_ref};
+use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref};
 use hatmil::Html;
 use humantime::format_duration;
 use mag::length::{m, mm};
@@ -769,38 +769,37 @@ impl WeatherSensor {
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &WeatherSensorAnc) -> String {
-        let title = String::from(self.title(View::Setup));
-        let site_id = HtmlStr::new(&self.site_id);
-        let alt_id = HtmlStr::new(&self.alt_id);
-        let notes = HtmlStr::new(&self.notes);
-        let mut html = Html::new();
+        let mut html = self.title(View::Setup);
+        html.div().class("row");
+        html.label().for_("site_id").text("Site ID").end();
+        html.input()
+            .id("site_id")
+            .maxlength("20")
+            .size("20")
+            .value(opt_ref(&self.site_id));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("alt_id").text("Alt ID").end();
+        html.input()
+            .id("alt_id")
+            .maxlength("20")
+            .size("20")
+            .value(opt_ref(&self.alt_id));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().for_("notes").text("Notes").end();
+        html.textarea()
+            .id("notes")
+            .maxlength("64")
+            .attr("rows", "2")
+            .attr("cols", "26")
+            .text(opt_ref(&self.notes))
+            .end();
+        html.end(); /* div */
         anc.cio.controller_html(self, &mut html);
-        let controller = String::from(html);
-        let mut html = Html::new();
         anc.cio.pin_html(self.pin, &mut html);
-        let pin = String::from(html);
-        let footer = self.footer(true);
-        format!(
-            "{title}\
-            <div class='row'>\
-              <label for='site_id'>Site ID</label>\
-              <input id='site_id' maxlength='20' size='20' \
-                     value='{site_id}'>\
-            </div>\
-            <div class='row'>\
-              <label for='alt_id'>Alt ID</label>\
-              <input id='alt_id' maxlength='20' size='20' \
-                     value='{alt_id}'>\
-            </div>\
-            <div class='row'>\
-              <label for='notes'>Notes</label>\
-              <textarea id='notes' maxlength='64' rows='2' \
-                        cols='26'>{notes}</textarea>\
-            </div>\
-            {controller}\
-            {pin}\
-            {footer}"
-        )
+        html.raw(self.footer(true));
+        html.into()
     }
 }
 
