@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.ItemStyle;

@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.SonarObject;
-
 /**
  * An LCS state represents a lane/indication combination for an LCS array.
  *
