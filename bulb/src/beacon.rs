@@ -199,6 +199,7 @@ impl Beacon {
             .class("beacon signal-housing");
         html.span().class(self.class_delayed()).text("🔆").end();
         html.end(); /* label */
+        html.end(); /* div */
         html.div().class("row center");
         html.span().text(self.beacon_state(anc));
         html.into()
