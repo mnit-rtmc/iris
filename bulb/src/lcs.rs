@@ -178,7 +178,7 @@ impl fmt::Display for LockReason {
 
 impl LockReason {
     /// Get lock reason as a string slice
-    fn as_str(&self) -> &'static str {
+    fn as_str(self) -> &'static str {
         use LockReason::*;
         match self {
             Unlocked => "unlocked",
@@ -188,6 +188,12 @@ impl LockReason {
             Maintenance => "maintenance",
             Construction => "construction",
         }
+    }
+
+    /// Check if LCS lock is deployable
+    fn is_deployable(self) -> bool {
+        use LockReason::*;
+        matches!(self, Unlocked | Incident | Testing)
     }
 }
 
@@ -257,6 +263,14 @@ impl Lcs {
         html.end().end();
     }
 
+    /// Get lock indications
+    fn lock_indications(&self) -> &[u32] {
+        self.lock
+            .as_ref()
+            .and_then(|lk| lk.indications.as_ref().map(|ind| &ind[..]))
+            .unwrap_or(&[0])
+    }
+
     /// Check if the LCS is deployed
     fn is_deployed(&self) -> bool {
         self.status.as_ref().is_some_and(|st| {
@@ -276,8 +290,14 @@ impl Lcs {
 
     /// Build indications HTML
     fn indications_html(&self, anc: &LcsAnc, html: &mut Html) {
+        let enabled = self.lock_reason().is_deployable();
         html.div().class("row center");
-        for (ln, ind) in self.indications().iter().enumerate().rev() {
+        let indications = self.indications();
+        let lock_indications = self.lock_indications();
+        let len = indications.len().max(lock_indications.len());
+        for ln in (0..len).rev() {
+            let ind = *indications.get(ln).unwrap_or(&0);
+            let lki = *lock_indications.get(ln).unwrap_or(&1);
             let ln = (ln + 1) as u16;
             let span = html.div().class("column").span();
             match ind {
@@ -289,26 +309,42 @@ impl Lcs {
                 _ => span.class("lcs lcs_unknown").text("?"),
             };
             html.end(); /* span */
-            html.select();
+            let select = html.select();
+            if !enabled {
+                select.attr_bool("disabled");
+            }
             html.button().end();
             // FIXME: use customizable select elements once browsers have
             //        support for them: https://caniuse.com/selectlist
-            html.option().class("lcs lcs_dark").value("1").text(" ");
-            html.end();
+            html.option().class("lcs lcs_dark").value("1");
+            html.text(" ").end();
             if anc.has_indication(self, ln, 2) {
-                html.option().class("lcs lcs_lane_open").value("2");
+                let opt = html.option().class("lcs lcs_lane_open").value("2");
+                if lki == 2 {
+                    opt.attr_bool("selected");
+                }
                 html.text("↓").end();
             }
             if anc.has_indication(self, ln, 3) {
-                html.option().class("lcs lcs_use_caution").value("3");
+                let opt = html.option().class("lcs lcs_use_caution").value("3");
+                if lki == 3 {
+                    opt.attr_bool("selected");
+                }
                 html.text("⇣").end();
             }
             if anc.has_indication(self, ln, 4) {
-                html.option().class("lcs lcs_lane_closed_ahead").value("4");
+                let opt =
+                    html.option().class("lcs lcs_lane_closed_ahead").value("4");
+                if lki == 4 {
+                    opt.attr_bool("selected");
+                }
                 html.text("✕").end();
             }
             if anc.has_indication(self, ln, 5) {
-                html.option().class("lcs lcs_lane_closed").value("5");
+                let opt = html.option().class("lcs lcs_lane_closed").value("5");
+                if lki == 5 {
+                    opt.attr_bool("selected");
+                }
                 html.text("✖").end();
             }
             html.end(); /* select */
@@ -317,10 +353,16 @@ impl Lcs {
         html.div().class("column");
         self.lock_reason_html(html);
         html.span();
-        html.button().id("lk_send").type_("button").text("Send");
-        html.end();
-        html.button().id("lk_blank").type_("button").text("Blank");
-        html.end();
+        let send = html.button().id("lk_send").type_("button");
+        if !enabled {
+            send.attr_bool("disabled");
+        }
+        html.text("Send").end();
+        let blank = html.button().id("lk_blank").type_("button");
+        if !enabled || !self.is_deployed() {
+            blank.attr_bool("disabled");
+        }
+        html.text("Blank").end();
         html.end(); /* span */
         html.end(); /* div */
         html.end(); /* div */
