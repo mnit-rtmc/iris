@@ -271,18 +271,21 @@ impl Card for Beacon {
     /// Display name
     const DNAME: &'static str = "🔆 Beacon";
 
-    /// All item states as html options
-    const ITEM_STATES: &'static str = "<option value=''>all ↴\
-         <option value='🔹'>🔹 available\
-         <option value='🔶'>🔶 deployed\
-         <option value='👽'>👽 external\
-         <option value='⚠️'>⚠️ fault\
-         <option value='🔌'>🔌 offline\
-         <option value='🔺'>🔺 inactive";
-
     /// Get the resource
     fn res() -> Res {
         Res::Beacon
+    }
+
+    /// Get all item states
+    fn item_states_all() -> &'static [ItemState] {
+        &[
+            ItemState::Available,
+            ItemState::Deployed,
+            ItemState::External,
+            ItemState::Fault,
+            ItemState::Offline,
+            ItemState::Inactive,
+        ]
     }
 
     /// Get the name

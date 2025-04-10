@@ -16,6 +16,7 @@ use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
 use crate::util::{ContainsLower, Fields, Input, opt_ref};
+use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -139,7 +140,7 @@ impl AncillaryData for TagReaderAnc {
 impl TagReader {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &TagReaderAnc) -> String {
-        let mut html = self.title(View::Status);
+        let mut html = Html::new();
         html.div()
             .class("title row")
             .text(self.name())

@@ -94,11 +94,6 @@ impl Card for Domain {
     /// Display name
     const DNAME: &'static str = "🖧 Domain";
 
-    /// All item states as html options
-    const ITEM_STATES: &'static str = "<option value=''>all ↴\
-         <option value='🔹'>🔹 available\
-         <option value='🔺'>🔺 inactive";
-
     /// Get the resource
     fn res() -> Res {
         Res::Domain

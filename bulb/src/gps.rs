@@ -12,6 +12,7 @@
 //
 use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
+use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref};
 use hatmil::Html;
 use resources::Res;
@@ -88,6 +89,11 @@ impl Card for Gps {
     /// Get the resource
     fn res() -> Res {
         Res::Gps
+    }
+
+    /// Get all item states
+    fn item_states_all() -> &'static [ItemState] {
+        &[ItemState::Available, ItemState::Inactive]
     }
 
     /// Get the name

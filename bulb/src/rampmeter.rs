@@ -818,20 +818,23 @@ impl Card for RampMeter {
     /// Display name
     const DNAME: &'static str = "🚦 Ramp Meter";
 
-    /// All item states as html options
-    const ITEM_STATES: &'static str = "<option value=''>all ↴\
-         <option value='🔹'>🔹 available\
-         <option value='🔶' selected>🔶 deployed\
-         <option value='🗓️'>🗓️ planned\
-         <option value='🚨'>🚨 incident\
-         <option value='🔒'>🔒 locked\
-         <option value='⚠️'>⚠️ fault\
-         <option value='🔌'>🔌 offline\
-         <option value='🔺'>🔺 inactive";
-
     /// Get the resource
     fn res() -> Res {
         Res::RampMeter
+    }
+
+    /// Get all item states
+    fn item_states_all() -> &'static [ItemState] {
+        &[
+            ItemState::Available,
+            ItemState::Deployed,
+            ItemState::Planned,
+            ItemState::Incident,
+            ItemState::Locked,
+            ItemState::Fault,
+            ItemState::Offline,
+            ItemState::Inactive,
+        ]
     }
 
     /// Get the name

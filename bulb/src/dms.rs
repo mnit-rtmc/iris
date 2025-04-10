@@ -1109,21 +1109,24 @@ impl Card for Dms {
     /// Display name
     const DNAME: &'static str = "⬛ Dms";
 
-    /// All item states as html options
-    const ITEM_STATES: &'static str = "<option value=''>all ↴\
-         <option value='🔹'>🔹 available\
-         <option value='🔶' selected>🔶 deployed\
-         <option value='🗓️'>🗓️ planned\
-         <option value='🚨'>🚨 incident\
-         <option value='👽'>👽 external\
-         <option value='🎯'>🎯 dedicated\
-         <option value='⚠️'>⚠️ fault\
-         <option value='🔌'>🔌 offline\
-         <option value='🔺'>🔺 inactive";
-
     /// Get the resource
     fn res() -> Res {
         Res::Dms
+    }
+
+    /// Get all item states
+    fn item_states_all() -> &'static [ItemState] {
+        &[
+            ItemState::Available,
+            ItemState::Deployed,
+            ItemState::Planned,
+            ItemState::Incident,
+            ItemState::External,
+            ItemState::Dedicated,
+            ItemState::Fault,
+            ItemState::Offline,
+            ItemState::Inactive,
+        ]
     }
 
     /// Get the name

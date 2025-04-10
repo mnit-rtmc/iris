@@ -417,18 +417,21 @@ impl Card for Lcs {
     /// Display name
     const DNAME: &'static str = "🠟✖🠟 LCS";
 
-    /// All item states as html options
-    const ITEM_STATES: &'static str = "<option value='' selected>all ↴\
-         <option value='🔹'>🔹 available\
-         <option value='🔶'>🔶 deployed\
-         <option value='🔒'>🔒 locked\
-         <option value='⚠️'>⚠️ fault\
-         <option value='🔌'>🔌 offline\
-         <option value='🔺'>🔺 inactive";
-
     /// Get the resource
     fn res() -> Res {
         Res::Lcs
+    }
+
+    /// Get all item states
+    fn item_states_all() -> &'static [ItemState] {
+        &[
+            ItemState::Available,
+            ItemState::Deployed,
+            ItemState::Locked,
+            ItemState::Fault,
+            ItemState::Offline,
+            ItemState::Inactive,
+        ]
     }
 
     /// Get the name

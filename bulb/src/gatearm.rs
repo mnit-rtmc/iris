@@ -158,20 +158,23 @@ impl Card for GateArm {
     /// Display name
     const DNAME: &'static str = "⫬ Gate Arm";
 
-    /// All item states as html options
-    const ITEM_STATES: &'static str = "<option value=''>all ↴\
-         <option value='↗️'>↗️ opening\
-         <option value='✔️'>✔️ open\
-         <option value='‼️'>‼️ warn close\
-         <option value='↘️'>↘️ closing\
-         <option value='⛔'>⛔ closed\
-         <option value='⚠️'>⚠️ fault\
-         <option value='🔌'>🔌 offline\
-         <option value='🔺'>🔺 inactive";
-
     /// Get the resource
     fn res() -> Res {
         Res::GateArm
+    }
+
+    /// Get all item states
+    fn item_states_all() -> &'static [ItemState] {
+        &[
+            ItemState::Opening,
+            ItemState::Open,
+            ItemState::WarnClose,
+            ItemState::Closing,
+            ItemState::Closed,
+            ItemState::Fault,
+            ItemState::Offline,
+            ItemState::Inactive,
+        ]
     }
 
     /// Get the name

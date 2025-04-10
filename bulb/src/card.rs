@@ -258,12 +258,6 @@ pub trait AncillaryData {
     }
 }
 
-/// Default item states as html options
-const ITEM_STATES: &str = "<option value=''>all ↴</option>\
-     <option value='🔹'>🔹 available</option>\
-     <option value='🔌'>🔌 offline</option>\
-     <option value='🔺'>🔺 inactive</option>";
-
 /// A card view of a resource
 pub trait Card: Default + DeserializeOwned + PartialEq {
     type Ancillary: AncillaryData<Primary = Self>;
@@ -271,14 +265,16 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     /// Display name
     const DNAME: &'static str;
 
-    /// All item states as html options
-    const ITEM_STATES: &'static str = ITEM_STATES;
-
     /// Suggested name prefix
     const PREFIX: &'static str = "";
 
     /// Get the resource
     fn res() -> Res;
+
+    /// Get all item states
+    fn item_states_all() -> &'static [ItemState] {
+        &[ItemState::Available, ItemState::Inactive]
+    }
 
     /// Create from a JSON value
     fn new(json: JsValue) -> Result<Self> {
@@ -376,22 +372,42 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
 }
 
 /// Build all item states HTML
-pub fn item_states_html(res: Option<Res>) -> &'static str {
+pub fn item_states_html(res: Res) -> String {
+    let mut html = Html::new();
+    html.option().value("").text("all ↴").end();
+    for st in item_states_all(res) {
+        let option = html.option().value(st.code());
+        if *st == ItemState::Deployed {
+            option.attr_bool("selected");
+        }
+        html.text(st.code()).text(" ").text(st.description()).end();
+    }
+    html.into()
+}
+
+/// Get slice of all item states for a resource
+fn item_states_all(res: Res) -> &'static [ItemState] {
     match res {
-        Some(Res::Beacon) => Beacon::ITEM_STATES,
-        Some(Res::CabinetStyle) => "",
-        Some(Res::CommConfig) => "",
-        Some(Res::Dms) => Dms::ITEM_STATES,
-        Some(Res::Domain) => Domain::ITEM_STATES,
-        Some(Res::GateArm | Res::GateArmArray) => GateArm::ITEM_STATES,
-        Some(Res::Lcs) => Lcs::ITEM_STATES,
-        Some(Res::Permission) => Permission::ITEM_STATES,
-        Some(Res::RampMeter) => RampMeter::ITEM_STATES,
-        Some(Res::Role) => Role::ITEM_STATES,
-        Some(Res::SignConfig) => SignConfig::ITEM_STATES,
-        Some(Res::User) => User::ITEM_STATES,
-        Some(_) => ITEM_STATES,
-        None => "",
+        Res::Alarm => Alarm::item_states_all(),
+        Res::Beacon => Beacon::item_states_all(),
+        Res::Camera => Camera::item_states_all(),
+        Res::CommLink => CommLink::item_states_all(),
+        Res::Controller => Controller::item_states_all(),
+        Res::Detector => Detector::item_states_all(),
+        Res::Dms => Dms::item_states_all(),
+        Res::Domain => Domain::item_states_all(),
+        Res::GateArm | Res::GateArmArray => GateArm::item_states_all(),
+        Res::Gps => Gps::item_states_all(),
+        Res::Lcs => Lcs::item_states_all(),
+        Res::Permission => Permission::item_states_all(),
+        Res::RampMeter => RampMeter::item_states_all(),
+        Res::Role => Role::item_states_all(),
+        Res::SignConfig => SignConfig::item_states_all(),
+        Res::TagReader => TagReader::item_states_all(),
+        Res::User => User::item_states_all(),
+        Res::VideoMonitor => VideoMonitor::item_states_all(),
+        Res::WeatherSensor=> WeatherSensor::item_states_all(),
+        _ => &[],
     }
 }
 

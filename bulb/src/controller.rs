@@ -441,6 +441,15 @@ impl Card for Controller {
         Res::Controller
     }
 
+    /// Get all item states
+    fn item_states_all() -> &'static [ItemState] {
+        &[
+            ItemState::Available,
+            ItemState::Offline,
+            ItemState::Inactive,
+        ]
+    }
+
     /// Get the name
     fn name(&self) -> Cow<str> {
         Cow::Borrowed(&self.name)

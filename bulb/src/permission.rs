@@ -219,19 +219,22 @@ impl Card for Permission {
     /// Display name
     const DNAME: &'static str = "🗝️ Permission";
 
-    /// All item states as html options
-    const ITEM_STATES: &'static str = "<option value=''>all ↴\
-         <option value='👁️'>👁️ view\
-         <option value='👉'>👉 operate\
-         <option value='💡'>💡 manage\
-         <option value='🔧'>🔧 configure";
-
     /// Suggested name prefix
     const PREFIX: &'static str = "prm";
 
     /// Get the resource
     fn res() -> Res {
         Res::Permission
+    }
+
+    /// Get all item states
+    fn item_states_all() -> &'static [ItemState] {
+        &[
+            ItemState::View,
+            ItemState::Operate,
+            ItemState::Manage,
+            ItemState::Configure,
+        ]
     }
 
     /// Get the name

@@ -291,7 +291,11 @@ async fn handle_resource_change() {
     let res = resource_value();
     app::card_list(None);
     let sb_state = Doc::get().elem::<HtmlSelectElement>("sb_state");
-    sb_state.set_inner_html(card::item_states_html(res));
+    let html = match res {
+        Some(res) => card::item_states_html(res),
+        None => String::new(),
+    };
+    sb_state.set_inner_html(&html);
     do_future(fetch_card_list()).await;
     do_future(populate_card_list()).await;
     let uri = Uri::from("/iris/api/notify");
