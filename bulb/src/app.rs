@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{CardList, CardView};
+use hatmil::Html;
 use std::cell::RefCell;
 
 /// Interval (ms) between ticks for deferred actions
@@ -27,36 +28,35 @@ pub enum NotifyState {
 }
 
 impl NotifyState {
-    /// Get state as string slice
-    pub const fn as_html(self) -> &'static str {
-        // NOTE: these have &nbsp; to keep from splitting lines
+    /// Get symbol for a state
+    pub const fn symbol(self) -> &'static str {
         match self {
-            Self::Starting => {
-                "<div class='tooltip'>⭮ ⬜\
-                  <span class='right'>Starting</span>\
-                </div>"
-            }
-            Self::Disconnected => {
-                "<div class='tooltip'>⭮ ⬛\
-                  <span class='right'>Disconnected</span>\
-                </div>"
-            }
-            Self::Connecting => {
-                "<div class='tooltip'>⭮ 🟧\
-                  <span class='right'>Connecting</span>\
-                </div>"
-            }
-            Self::Updating => {
-                "<div class='tooltip'>⭮ 🟨\
-                  <span class='right'>Updating</span>\
-                </div>"
-            }
-            Self::Good => {
-                "<div class='tooltip'>⭮ 🟩\
-                  <span class='right'>Good</span>\
-                </div>"
-            }
+            Self::Starting => "⬜",
+            Self::Disconnected => "⬛",
+            Self::Connecting => "🟧",
+            Self::Updating => "🟨",
+            Self::Good => "🟩",
         }
+    }
+
+    /// Get description of a state
+    pub const fn description(self) -> &'static str {
+        match self {
+            Self::Starting => "Starting",
+            Self::Disconnected => "Disconnected",
+            Self::Connecting => "Connecting",
+            Self::Updating => "Updating",
+            Self::Good => "Good",
+        }
+    }
+
+    /// Build state HTML
+    pub fn build_html(self) -> String {
+        // NOTE: these have &nbsp; to keep from splitting lines
+        let mut html = Html::new();
+        html.div().class("tooltip").text("⭮ ").text(self.symbol());
+        html.span().class("right").text(self.description());
+        html.into()
     }
 
     /// Get button disabled value for a state

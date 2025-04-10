@@ -406,7 +406,7 @@ fn item_states_all(res: Res) -> &'static [ItemState] {
         Res::TagReader => TagReader::item_states_all(),
         Res::User => User::item_states_all(),
         Res::VideoMonitor => VideoMonitor::item_states_all(),
-        Res::WeatherSensor=> WeatherSensor::item_states_all(),
+        Res::WeatherSensor => WeatherSensor::item_states_all(),
         _ => &[],
     }
 }

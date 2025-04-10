@@ -776,7 +776,7 @@ fn add_eventsource_listener() {
 /// Set refresh button text
 fn set_notify_state(ns: NotifyState) {
     let sb_refresh = Doc::get().elem::<HtmlButtonElement>("sb_refresh");
-    sb_refresh.set_inner_html(ns.as_html());
+    sb_refresh.set_inner_html(&ns.build_html());
     sb_refresh.set_disabled(ns.disabled());
 }
 
