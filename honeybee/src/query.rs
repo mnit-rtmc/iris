@@ -448,6 +448,20 @@ pub const GRAPHIC_ONE: &str = "\
   FROM iris.graphic \
   WHERE name = $1";
 
+/// SQL query for all active incidents (primary)
+pub const INCIDENT_ALL: &str = "\
+  SELECT name, replaces, event_desc, road, dir, detail \
+  FROM event.incident \
+  WHERE cleared = false \
+  ORDER BY event_date";
+
+/// SQL query for one active incident (secondary)
+pub const INCIDENT_ONE: &str = "\
+  SELECT name, replaces, event_date, event_desc, road, dir, lane_code, \
+         impact, cleared, confirmed, camera, detail, lat, lon, user_id \
+  FROM event.incident \
+  WHERE name = $1";
+
 /// SQL query for all active incidents (public)
 pub const INCIDENT_PUB: &str = "\
   SELECT name, event_date, description, road, direction, lane_type, \
