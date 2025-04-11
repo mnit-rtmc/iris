@@ -313,7 +313,7 @@ dependencies = [
 name = "bulb"
 version = "5.69.0"
 dependencies = [
- "base64 0.21.7",
+ "base64 0.22.1",
  "chrono",
  "cidr",
  "console_error_panic_hook",
@@ -398,9 +398,9 @@ dependencies = [
 
 [[package]]
 name = "cidr"
-version = "0.2.3"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6bdf600c45bd958cf2945c445264471cca8b6c8e67bc87b71affd6d7e5682621"
+checksum = "bd1b64030216239a2e7c364b13cd96a2097ebf0dfe5025f2dedee14a23f2ab60"
 dependencies = [
  "serde",
 ]
@@ -1177,9 +1177,9 @@ dependencies = [
 
 [[package]]
 name = "mag"
-version = "0.5.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b247793f15143d0addc67f46255b1836a061d738caa558b9f6235a63ecb3febb"
+checksum = "b5682e792e856abc9c879448ebc478308cef362cf7093510b9d46eb99754112c"
 
 [[package]]
 name = "matchers"

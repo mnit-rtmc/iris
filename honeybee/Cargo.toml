@@ -52,7 +52,7 @@ features = ["time"]
 
 [dependencies.postgres-types]
 version = "0.2"
-features = ["with-cidr-0_2"]
+features = ["with-cidr-0_3"]
 
 [dev-dependencies]
 anyhow = "1.0"

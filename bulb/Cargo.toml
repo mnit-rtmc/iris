@@ -7,7 +7,7 @@ edition.workspace = true
 crate-type = ["cdylib"]
 
 [dependencies]
-base64 = "0.21"
+base64 = "0.22"
 chrono = { workspace = true }
 cidr = { workspace = true }
 console_error_panic_hook = "0.1"
@@ -16,7 +16,7 @@ gift = "0.11"
 hatmil = "0.3"
 humantime = "2.1"
 js-sys = "0.3"
-mag = "0.5"
+mag = "0.6"
 ntcip = { workspace = true }
 percent-encoding = "2"
 pix = "0.14"

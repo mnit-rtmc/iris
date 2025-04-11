@@ -32,7 +32,7 @@ default-features = false
 features = ["fs", "io-util", "macros", "net", "rt-multi-thread", "time"]
 
 [workspace.dependencies.cidr]
-version = "0.2"
+version = "0.3"
 features = ["serde"]
 
 [patch.crates-io]
