@@ -49,6 +49,11 @@ The `axisptz` protocol can be used for [PTZ] control of Axis [camera]s.  The
 _default scheme_ is `http`.  _Multi-drop_ is not supported.  One camera can be
 associated with each [controller], using [IO pin] 1.
 
+## CampbellCloud
+
+The `CampbellCloud` protocol is for [weather sensor] data collected by
+Campbell Scientific, and retrieved through their cloud API.
+
 ## Canoga
 
 The `canoga` protocol can collect [vehicle detection] data, with

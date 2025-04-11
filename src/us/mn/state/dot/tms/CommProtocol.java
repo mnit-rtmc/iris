@@ -107,9 +107,8 @@ public enum CommProtocol {
 	/** Digital Loggers Inc DIN Relay (25) */
 	DIN_RELAY("DLI DIN Relay", false),
 
-	/** Axis 292 Video Decoder (26) */
-	@Deprecated
-	AXIS_292("Axis 292"),
+	/** CampbellCloud RWIS (26) */
+	CAMPBELL_CLOUD("CampbellCloud"),
 
 	/** Axis PTS (27) */
 	AXIS_PTZ("Axis PTZ", false),

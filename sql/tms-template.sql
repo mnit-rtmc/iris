@@ -1268,7 +1268,7 @@ VALUES
     (23, 'CAP-NWS Feed'),
     (24, 'NDOT Beacon'),
     (25, 'DLI DIN Relay'),
-    (26, 'Axis 292'),
+    (26, 'CampbellCloud'),
     (27, 'Axis PTZ'),
     (28, 'HySecurity STC'),
     (29, 'Cohu PTZ'),
