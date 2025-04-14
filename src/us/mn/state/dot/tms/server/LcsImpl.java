@@ -40,7 +40,7 @@ import us.mn.state.dot.tms.LcsType;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
-import us.mn.state.dot.tms.server.event.SignEvent;
+import us.mn.state.dot.tms.server.event.LcsEvent;
 
 /**
  * A Lane-Use Control Signal Array is a series of LCS devices across all lanes
@@ -49,16 +49,6 @@ import us.mn.state.dot.tms.server.event.SignEvent;
  * @author Douglas Lau
  */
 public class LcsImpl extends DeviceImpl implements Lcs {
-
-	/** Create a message to log LCS sign status event */
-	static private String createLogText(int[] ind) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = ind.length - 1; i >= 0; i--) {
-			sb.append(LcsIndication.fromOrdinal(ind[i]));
-			sb.append(' ');
-		}
-		return sb.toString().trim();
-	}
 
 	/** Test if all indications are DARK */
 	static private boolean areAllDark(int[] ind) {
@@ -277,7 +267,10 @@ public class LcsImpl extends DeviceImpl implements Lcs {
 	private void setLockChecked(String lk) throws TMSException {
 		store.update(this, "lock", lk);
 		lock = lk;
-		// FIXME: logEvent(new LcsLockEvent(name, lk));
+		EventType et = (lk != null)
+			? EventType.LCS_LOCKED
+			: EventType.LCS_UNLOCKED;
+		logEvent(new LcsEvent(et, name, lk, status));
 		updateStyles();
 		sendIndications(lk);
 	}
@@ -311,41 +304,40 @@ public class LcsImpl extends DeviceImpl implements Lcs {
 	private String status;
 
 	/** Set the status (JSON) */
-	private void setStatusNotify(String st) {
+	private String setStatusNotify(String st) {
 		if (!objectEquals(st, status)) {
 			try {
 				store.update(this, "status", st);
 				status = st;
 				notifyAttribute("status");
 				updateStyles();
+				return st;
 			}
 			catch (TMSException e) {
 				logError("status: " + e.getMessage());
 			}
 		}
+		return null;
 	}
 
 	/** Set a status value and notify clients of the change */
-	private void setStatusNotify(String key, Object value) {
+	private String setStatusNotify(String key, Object value) {
 		String st = LcsHelper.putJson(status, key, value);
-		setStatusNotify(st);
+		return setStatusNotify(st);
 	}
 
 	/** Set the indications and notify clients */
 	public void setIndicationsNotify(int[] ind) {
-		setStatusNotify(
+		String st = setStatusNotify(
 			Lcs.INDICATIONS,
 			LcsHelper.makeIndications(ind)
 		);
-		EventType et = EventType.LCS_DEPLOYED;
-		String text = createLogText(ind);
-		if (areAllDark(ind)) {
-			et = EventType.LCS_CLEARED;
-			text = null;
+		if (st != null) {
+			EventType et = areAllDark(ind)
+				? EventType.LCS_CLEARED
+				: EventType.LCS_DEPLOYED;
+			logEvent(new LcsEvent(et, name, lock, st));
 		}
-		LcsLock lk = new LcsLock(lock);
-		String user = lk.getUser();
-		logEvent(new SignEvent(et, name, text, user, null));
 	}
 
 	/** Set a fault value and notify clients of the change */
