@@ -1,5 +1,16 @@
 # IRIS 5.x Release Notes
 
+5.70.0 (14 Apr 2025)
+ - Add LCS event logging table
+ - Clean up hashtags when reaping alerts
+ - Fixed issue preventing meter faults from updating
+ - Add "reserve" ramp meter lock reason
+ - Simplify ramp meter operation (remove on/off)
+ - Complete ramp meter operation from web UI
+ - Rework web UI html generation
+ - Add LCS to web UI map
+ - Add placeholder for CampbellCloud protocol
+
 5.69.0 (25 Mar 2025)
  - Refactor LCS database tables / classes
  - Remove lane markings (LCS features can now support them)
