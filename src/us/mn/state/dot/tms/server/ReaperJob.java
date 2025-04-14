@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2023  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,14 +23,19 @@ import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.AlertInfo;
 import us.mn.state.dot.tms.AlertInfoHelper;
 import us.mn.state.dot.tms.AlertState;
+import us.mn.state.dot.tms.DeviceAction;
+import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.TimeAction;
+import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -260,8 +265,52 @@ public class ReaperJob extends Job {
 				catch (TMSException e) {
 					e.printStackTrace();
 				}
-			} else
+			} else {
+				reapDmsHashtag(ai.getAllHashtag());
+				reapActionPlan(ai.getActionPlan());
 				ai.notifyRemove();
+			}
+		}
+	}
+
+	/** Reap hashtag from all DMS */
+	private void reapDmsHashtag(String ht) {
+		ht = Hashtags.normalize(ht);
+		if (ht == null)
+			return;
+		Iterator<DMS> it = DMSHelper.iterator();
+		while (it.hasNext()) {
+			DMS dms = it.next();
+			if (dms instanceof DMSImpl) {
+				DMSImpl dmsi = (DMSImpl) dms;
+				dmsi.removeHashtagNotify(ht);
+			}
+		}
+	}
+
+	/** Reap an action plan */
+	private void reapActionPlan(ActionPlan ap) {
+		Iterator<TimeAction> it = TimeActionHelper.iterator();
+		while (it.hasNext()) {
+			TimeAction ta = it.next();
+			if (ta instanceof TimeActionImpl) {
+				TimeActionImpl tai = (TimeActionImpl) ta;
+				if (tai.getActionPlan() == ap)
+					tai.notifyRemove();
+			}
+		}
+		Iterator<DeviceAction> dit = DeviceActionHelper.iterator();
+		while (dit.hasNext()) {
+			DeviceAction da = dit.next();
+			if (da instanceof DeviceActionImpl) {
+				DeviceActionImpl dai = (DeviceActionImpl) da;
+				if (dai.getActionPlan() == ap)
+					dai.notifyRemove();
+			}
+		}
+		if (ap instanceof ActionPlanImpl) {
+			ActionPlanImpl api = (ActionPlanImpl) ap;
+			api.notifyRemove();
 		}
 	}
 }

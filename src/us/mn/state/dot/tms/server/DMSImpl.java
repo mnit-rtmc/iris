@@ -355,6 +355,18 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
+	/** Remove a hashtag to the DMS */
+	public synchronized void removeHashtagNotify(String ht) {
+		if (!new Hashtags(notes).contains(ht))
+			return;
+		try {
+			doSetNotes(Hashtags.remove(notes, ht));
+		}
+		catch (TMSException e) {
+			logError("remove hashtags: " + e.getMessage());
+		}
+	}
+
 	/** Remote beacon */
 	private Beacon beacon;
 
