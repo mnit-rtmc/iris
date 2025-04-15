@@ -226,7 +226,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Update the current message on a sign */
 	public void updateMsgCurrent(DMS dms) {
-		String ms = DMSHelper.getMultiString(dms);
+		String ms = DMSHelper.getUserMulti(dms);
 		composer.setComposedMulti(ms);
 		incident = DMSHelper.lookupIncident(dms);
 	}
