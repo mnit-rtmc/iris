@@ -192,8 +192,8 @@ impl CardView {
         self
     }
 
-    /// Output card view to HTML
-    fn to_html(&self, html: &mut Html) {
+    /// Build card view list item HTML
+    fn list_item_html(&self, html: &mut Html) {
         html.li()
             .id(self.id())
             .attr("name", &self.name)
@@ -337,8 +337,11 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     fn title(&self, view: View) -> Html {
         let mut html = Html::new();
         html.div().class("title row");
-        let name = format!("{} {}", Self::res().symbol(), self.name());
-        html.span().text(&name).end();
+        html.span()
+            .text(Self::res().symbol())
+            .text(" ")
+            .text(self.name())
+            .end();
         html.select().id("ob_view");
         for v in res_views(Self::res()) {
             let option = html.option();
@@ -692,8 +695,9 @@ impl CardList {
                 Self::next_name(&cards),
                 View::CreateCompact,
             );
-            cv.to_html(&mut html);
-            html.raw(CREATE_COMPACT).end();
+            cv.list_item_html(&mut html);
+            html.raw(CREATE_COMPACT);
+            html.end(); /* li */
             self.views.push(cv);
         }
         for pri in &cards {
@@ -703,7 +707,7 @@ impl CardList {
                 View::Hidden
             };
             let cv = CardView::new(C::res(), pri.name(), view);
-            cv.to_html(&mut html);
+            cv.list_item_html(&mut html);
             html.raw(pri.to_html(view, &anc));
             html.end(); /* li */
             self.views.push(cv);
@@ -912,11 +916,11 @@ fn item_states_main<C: Card>(cards: &[C], anc: &C::Ancillary) -> String {
 /// Fetch a card for a given view
 pub async fn fetch_one(cv: &CardView) -> Result<String> {
     let html = match cv.view {
+        View::CreateCompact => CREATE_COMPACT.to_string(),
         View::Create => {
             let html = fetch_one_res(cv).await?;
             html_card_create(cv.res, &html)
         }
-        View::CreateCompact => CREATE_COMPACT.to_string(),
         _ => fetch_one_res(cv).await?,
     };
     Ok(html)
@@ -1110,7 +1114,10 @@ fn html_card_create(res: Res, create: &str) -> String {
     html.div().class("title row");
     html.span().text(res.symbol()).text(" 🆕").end();
     html.select().id("ob_view");
-    html.option().text(View::CreateCompact.as_str()).end();
+    html.option()
+        .value(View::CreateCompact.as_str())
+        .text(View::Compact.as_str())
+        .end();
     html.option()
         .attr_bool("selected")
         .text(View::Create.as_str())
