@@ -267,8 +267,11 @@ public class ReaperJob extends Job {
 				}
 			} else {
 				reapDmsHashtag(ai.getAllHashtag());
-				reapActionPlan(ai.getActionPlan());
+				// Must delete action plan last, since
+				// AlertInfo has a foreign key to it
+				ActionPlan ap = ai.getActionPlan();
 				ai.notifyRemove();
+				reapActionPlan(ap);
 			}
 		}
 	}
@@ -304,8 +307,11 @@ public class ReaperJob extends Job {
 			DeviceAction da = dit.next();
 			if (da instanceof DeviceActionImpl) {
 				DeviceActionImpl dai = (DeviceActionImpl) da;
-				if (dai.getActionPlan() == ap)
+				if (dai.getActionPlan() == ap) {
+					String ht = dai.getHashtag();
+					reapDmsHashtag(ht);
 					dai.notifyRemove();
+				}
 			}
 		}
 		if (ap instanceof ActionPlanImpl) {
