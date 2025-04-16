@@ -42,15 +42,9 @@ public class BlankLcsAction extends ProxyAction<Lcs> {
 			String lk = proxy.getLock();
 			if (lk != null) {
 				LcsLock lock = new LcsLock(lk);
+				// reason: incident or testing
 				if (lock.optExpires() != null)
-					// reason: incident or testing
 					proxy.setLock(null);
-				else {
-					// other reason; is this needed?
-					lock.setIndications(null);
-					lock.setUser(user);
-					proxy.setLock(lock.toString());
-				}
 			}
 		}
 	}

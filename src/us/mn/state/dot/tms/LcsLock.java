@@ -118,10 +118,10 @@ public class LcsLock {
 		if (r != null) {
 			putReason(r);
 			// Only allow "incident" or "testing" for locked on
-			if (getOnMinutes() == null) {
+			boolean lock_on = (getOnMinutes() != null);
+			if (!lock_on)
 				putIndications(null);
-				putExpires(null);
-			}
+			putExpires((lock_on) ? makeExpires() : null);
 		} else
 			clear();
 	}
