@@ -489,7 +489,7 @@ impl Card for Lcs {
 
     /// Get the main item state
     fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
-        let item_states = anc.cio.item_states(self);
+        let item_states = self.item_states(anc);
         if item_states.is_match(ItemState::Inactive.code()) {
             ItemState::Inactive
         } else if item_states.is_match(ItemState::Offline.code()) {
