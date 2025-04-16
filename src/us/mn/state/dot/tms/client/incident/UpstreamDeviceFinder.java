@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2019-2025  Minnesota Department of Transportation
+ * Copyright (C) 2025       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +33,7 @@ import us.mn.state.dot.tms.IncSeverity;
 import us.mn.state.dot.tms.Lcs;
 import us.mn.state.dot.tms.LcsHelper;
 import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 import static us.mn.state.dot.tms.client.incident.UpstreamDevice.MAX_GAP_MI;
@@ -40,6 +42,7 @@ import static us.mn.state.dot.tms.client.incident.UpstreamDevice.MAX_GAP_MI;
  * Helper class to find devices upstream of an incident.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public class UpstreamDeviceFinder {
 
@@ -224,6 +227,7 @@ public class UpstreamDeviceFinder {
 		Distance dist)
 	{
 		boolean branched = (num_exits > 0);
+		float max_sign_miles = SystemAttrEnum.INCIDENT_MAX_SIGN_MILES.getFloat();
 		Iterator<DMS> dit = DMSHelper.iterator();
 		while (dit.hasNext()) {
 			DMS dms = dit.next();
@@ -232,6 +236,9 @@ public class UpstreamDeviceFinder {
 				loc);
 			if (ed != null && isDeployable(dms, ed, branched)) {
 				ed = ed.adjusted(num_exits, dist);
+				if ((max_sign_miles > 0.0f)
+				 && (ed.distance.asFloat(MILES) > max_sign_miles))
+				 	continue;
 				if (ed.exits <= maximum_exits)
 					devices.add(ed);
 			}
