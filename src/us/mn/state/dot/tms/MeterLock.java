@@ -109,10 +109,10 @@ public class MeterLock {
 		if (r != null) {
 			putReason(r);
 			// Only allow "incident" or "testing" for locked on
-			if (getOnMinutes() == null) {
+			boolean lock_on = (getOnMinutes() != null);
+			if (!lock_on)
 				putRate(null);
-				putExpires(null);
-			}
+			putExpires(makeExpires(optRate()));
 		} else
 			clear();
 	}
