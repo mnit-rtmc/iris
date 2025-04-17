@@ -30,7 +30,7 @@ use serde_json::Value;
 use std::borrow::Cow;
 use std::fmt;
 use wasm_bindgen::JsValue;
-use web_sys::HtmlSelectElement;
+use web_sys::{HtmlButtonElement, HtmlSelectElement};
 
 /// LCS types
 #[derive(Debug, Deserialize)]
@@ -377,9 +377,7 @@ impl Lcs {
         self.lock_reason_html(html);
         html.span();
         let send = html.button().id("lk_send").type_("button");
-        if !enabled {
-            send.attr_bool("disabled");
-        }
+        send.attr_bool("disabled");
         html.text("Send").end();
         let blank = html.button().id("lk_blank").type_("button");
         if !enabled || !self.is_deployed() {
@@ -389,6 +387,46 @@ impl Lcs {
         html.end(); /* span */
         html.end(); /* div */
         html.end(); /* div */
+    }
+
+    /// Get selected indications
+    fn selected_indications(&self) -> Vec<u32> {
+        let mut indications = Vec::new();
+        let len = self.indications().len();
+        for ln in 1..len + 1 {
+            let id = format!("ind_{ln}");
+            let ind = Doc::get().select_parse::<u32>(&id).unwrap_or(0);
+            indications.push(ind);
+        }
+        indications
+    }
+
+    /// Selected indications updated
+    fn update_indications(&self) {
+        // Disable send button if any selected indications are DARK
+        let disable = self.selected_indications().iter().any(|i| *i <= 1);
+        let lk_send = Doc::get().elem::<HtmlButtonElement>("lk_send");
+        lk_send.set_disabled(disable);
+    }
+
+    /// Make lock send action
+    fn lock_send(&self) -> Vec<Action> {
+        let indications = self.selected_indications();
+        if indications.iter().all(|i| *i > 1) {
+            let r = Doc::get().elem::<HtmlSelectElement>("lk_reason").value();
+            let mut reason = LockReason::from(&r[..]);
+            if reason.duration().is_none() {
+                reason = LockReason::Incident;
+            }
+            self.make_lock_action(reason, Some(&indications))
+        } else {
+            Vec::new()
+        }
+    }
+
+    /// Make lock blank action
+    fn lock_blank(&self) -> Vec<Action> {
+        self.make_lock_action(LockReason::Unlocked, None)
     }
 
     /// Get item states from status/lock
@@ -561,17 +599,34 @@ impl Card for Lcs {
         fields.into_value().to_string()
     }
 
+    /// Handle click event for a button on the card
+    fn handle_click(&self, _anc: LcsAnc, id: String) -> Vec<Action> {
+        match id.as_str() {
+            "lk_send" => self.lock_send(),
+            "lk_blank" => self.lock_blank(),
+            _ => Vec::new(),
+        }
+    }
+
     /// Handle input event for an element on the card
     fn handle_input(&self, _anc: LcsAnc, id: String) -> Vec<Action> {
         if &id == "lk_reason" {
             let r = Doc::get().elem::<HtmlSelectElement>("lk_reason").value();
             let reason = LockReason::from(&r[..]);
-            let ind = if reason.duration().is_some() {
-                self.lock_indications().or(Some(self.indications()))
+            if reason.duration().is_some() {
+                if self.is_deployed() {
+                    let indications = self.selected_indications();
+                    if indications.iter().all(|i| *i > 1) {
+                        let ind = Some(&indications[..]);
+                        return self.make_lock_action(reason, ind);
+                    }
+                }
             } else {
-                None
+                return self.make_lock_action(reason, None);
             };
-            return self.make_lock_action(reason, ind);
+        }
+        if id.starts_with("ind_") {
+            self.update_indications();
         }
         Vec::new()
     }
