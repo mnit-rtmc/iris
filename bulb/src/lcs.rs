@@ -11,22 +11,26 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card, View, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
+use crate::fetch::Action;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::lcsstate::LcsState;
 use crate::lock::LockReason;
 use crate::start::fly_map_item;
 use crate::util::{
-    ContainsLower, Fields, Input, Select, TextArea, opt_ref, opt_str,
+    ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
 use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
+use serde_json::Value;
 use std::borrow::Cow;
+use std::fmt;
 use wasm_bindgen::JsValue;
+use web_sys::HtmlSelectElement;
 
 /// LCS types
 #[derive(Debug, Deserialize)]
@@ -76,6 +80,60 @@ pub struct LcsAnc {
     loc: LocAnc<Lcs>,
     lcs_states: Vec<LcsState>,
     pub lcs_types: Vec<LcsType>,
+}
+
+impl fmt::Display for LcsLock {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // format as JSON for setting LCS lock
+        write!(f, "{{\"reason\":\"{}\"", &self.reason)?;
+        if let Some(ind) = &self.indications {
+            write!(f, ",\"indications\":[")?;
+            let mut first = true;
+            for i in ind {
+                if first {
+                    write!(f, "{i}")?;
+                    first = false;
+                } else {
+                    write!(f, ",{i}")?;
+                }
+            }
+            write!(f, "]")?;
+        }
+        if let Some(expires) = &self.expires {
+            write!(f, ",\"expires\":\"{expires}\"")?;
+        }
+        if let Some(user_id) = &self.user_id {
+            write!(f, ",\"user_id\":\"{user_id}\"")?;
+        }
+        write!(f, "}}")
+    }
+}
+
+impl LcsLock {
+    /// Create a new LCS lock
+    fn new(mut reason: LockReason, ind: Option<&[u32]>, u: String) -> Self {
+        // If turned on, reason must be incident/testing
+        if ind.is_some() && reason.duration().is_none() {
+            reason = LockReason::Testing;
+        }
+        let indications = ind.map(|i| i.to_vec());
+        let expires = ind.and(reason.make_expires());
+        LcsLock {
+            reason: reason.as_str().to_string(),
+            indications,
+            expires,
+            user_id: Some(u),
+        }
+    }
+
+    /// Encode into JSON Value
+    fn json(&self) -> Value {
+        let reason = LockReason::from(self.reason.as_str());
+        match reason {
+            LockReason::Unlocked => Value::Null,
+            _ => Value::String(self.to_string()),
+        }
+    }
 }
 
 impl LcsAnc {
@@ -194,7 +252,7 @@ impl Lcs {
             LockReason::Unlocked => "🔓",
             _ => "🔒",
         });
-        html.select().id("lock_reason");
+        html.select().id("lk_reason");
         for r in [
             LockReason::Unlocked,
             LockReason::Incident,
@@ -213,11 +271,26 @@ impl Lcs {
     }
 
     /// Get lock indications
-    fn lock_indications(&self) -> &[u32] {
+    fn lock_indications(&self) -> Option<&[u32]> {
         self.lock
             .as_ref()
             .and_then(|lk| lk.indications.as_ref().map(|ind| &ind[..]))
-            .unwrap_or(&[0])
+    }
+
+    /// Make action to lock the LCS
+    fn make_lock_action(
+        &self,
+        reason: LockReason,
+        ind: Option<&[u32]>,
+    ) -> Vec<Action> {
+        let mut actions = Vec::with_capacity(1);
+        if let Some(user) = crate::app::user() {
+            let uri = uri_one(Res::Lcs, &self.name);
+            let lock = LcsLock::new(reason, ind, user).json();
+            let val = format!("{{\"lock\":{lock}}}");
+            actions.push(Action::Patch(uri, val.into()));
+        }
+        actions
     }
 
     /// Check if the LCS is deployed
@@ -242,12 +315,13 @@ impl Lcs {
         let enabled = self.lock_reason().is_deployable();
         html.div().class("row center");
         let indications = self.indications();
-        let lock_indications = self.lock_indications();
+        let lock_indications = self.lock_indications().unwrap_or(&[0]);
         let len = indications.len().max(lock_indications.len());
         for ln in (0..len).rev() {
             let ind = *indications.get(ln).unwrap_or(&0);
             let lki = *lock_indications.get(ln).unwrap_or(&1);
             let ln = (ln + 1) as u16;
+            let ind_id = format!("ind_{ln}");
             let span = html.div().class("column").span();
             match ind {
                 1 => span.class("lcs lcs_dark").text("⍽"),
@@ -258,7 +332,7 @@ impl Lcs {
                 _ => span.class("lcs lcs_unknown").text("?"),
             };
             html.end(); /* span */
-            let select = html.select();
+            let select = html.select().id(ind_id);
             if !enabled {
                 select.attr_bool("disabled");
             }
@@ -485,5 +559,20 @@ impl Card for Lcs {
         fields.changed_select("lcs_type", self.lcs_type);
         fields.changed_input("shift", self.shift);
         fields.into_value().to_string()
+    }
+
+    /// Handle input event for an element on the card
+    fn handle_input(&self, _anc: LcsAnc, id: String) -> Vec<Action> {
+        if &id == "lk_reason" {
+            let r = Doc::get().elem::<HtmlSelectElement>("lk_reason").value();
+            let reason = LockReason::from(&r[..]);
+            let ind = if reason.duration().is_some() {
+                self.lock_indications().or(Some(self.indications()))
+            } else {
+                None
+            };
+            return self.make_lock_action(reason, ind);
+        }
+        Vec::new()
     }
 }
