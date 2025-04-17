@@ -18,12 +18,12 @@ use crate::error::Result;
 use crate::fetch::Action;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
+use crate::lock::LockReason;
 use crate::start::fly_map_item;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
-use chrono::{DateTime, Local, format::SecondsFormat};
 use gift::block::DisposalMethod;
 use gift::{Encoder, Step};
 use hatmil::Html;
@@ -37,7 +37,6 @@ use serde_json::Value;
 use std::borrow::Cow;
 use std::fmt;
 use std::io::Write;
-use std::time::Duration;
 use wasm_bindgen::JsValue;
 use web_sys::{HtmlSelectElement, console};
 
@@ -49,19 +48,6 @@ enum MeterState {
     Green,
     Yellow,
     Red,
-}
-
-/// Meter lock reason
-#[derive(Clone, Copy, Debug, PartialEq)]
-enum LockReason {
-    Unlocked,
-    Incident,
-    Testing,
-    KnockedDown,
-    Indication,
-    Maintenance,
-    Construction,
-    Reserve,
 }
 
 /// Meter Lock
@@ -315,75 +301,6 @@ fn meter_html(buf: Vec<u8>, html: &mut Html) {
         .src(&src);
 }
 
-impl From<&str> for LockReason {
-    fn from(r: &str) -> Self {
-        match r {
-            "incident" => Self::Incident,
-            "testing" => Self::Testing,
-            "knocked down" => Self::KnockedDown,
-            "indication" => Self::Indication,
-            "maintenance" => Self::Maintenance,
-            "construction" => Self::Construction,
-            "reserve" => Self::Reserve,
-            _ => Self::Unlocked,
-        }
-    }
-}
-
-impl fmt::Display for LockReason {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.as_str())
-    }
-}
-
-impl LockReason {
-    /// Get a slice containing all reasons
-    fn all() -> &'static [LockReason] {
-        &[
-            LockReason::Unlocked,
-            LockReason::Incident,
-            LockReason::Testing,
-            LockReason::KnockedDown,
-            LockReason::Indication,
-            LockReason::Maintenance,
-            LockReason::Construction,
-            LockReason::Reserve,
-        ]
-    }
-
-    /// Get lock reason as a string slice
-    fn as_str(self) -> &'static str {
-        use LockReason::*;
-        match self {
-            Unlocked => "unlocked",
-            Incident => "incident",
-            Testing => "testing",
-            KnockedDown => "knocked down",
-            Indication => "indication",
-            Maintenance => "maintenance",
-            Construction => "construction",
-            Reserve => "reserve",
-        }
-    }
-
-    /// Is shrinking/growing the queue allowed?
-    fn is_shrink_grow_allowed(self) -> bool {
-        matches!(
-            self,
-            LockReason::Unlocked | LockReason::Incident | LockReason::Testing
-        )
-    }
-
-    /// Get lock duration
-    fn duration(self) -> Option<Duration> {
-        match self {
-            LockReason::Incident => Some(Duration::from_secs(30 * 60)),
-            LockReason::Testing => Some(Duration::from_secs(5 * 60)),
-            _ => None,
-        }
-    }
-}
-
 impl fmt::Display for MeterLock {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // format as JSON for setting meter lock
@@ -408,21 +325,13 @@ impl MeterLock {
         if rate.is_some() && reason.duration().is_none() {
             reason = LockReason::Testing;
         }
-        let expires = MeterLock::make_expires(reason, rate);
+        let expires = rate.and(reason.make_expires());
         MeterLock {
             reason: reason.as_str().to_string(),
             rate,
             expires,
             user_id: Some(u),
         }
-    }
-
-    /// Make expire time
-    fn make_expires(r: LockReason, rate: Option<u32>) -> Option<String> {
-        rate.and(r.duration().map(|d| {
-            let now: DateTime<Local> = Local::now();
-            (now + d).to_rfc3339_opts(SecondsFormat::Secs, false)
-        }))
     }
 
     /// Encode into JSON Value
@@ -489,13 +398,13 @@ impl RampMeter {
 
     /// Is shrinking queue allowed?
     fn is_shrink_allowed(&self) -> bool {
-        self.lock_reason().is_shrink_grow_allowed()
+        self.lock_reason().is_deployable()
             && (self.lock_rate().is_some() || self.status_rate().is_some())
     }
 
     /// Is growing queue allowed?
     fn is_grow_allowed(&self) -> bool {
-        self.lock_reason().is_shrink_grow_allowed()
+        self.lock_reason().is_deployable()
     }
 
     /// Make lock shrink action

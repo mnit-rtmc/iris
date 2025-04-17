@@ -37,6 +37,7 @@ mod gps;
 mod item;
 mod lcs;
 mod lcsstate;
+mod lock;
 mod modem;
 mod notes;
 mod permission;

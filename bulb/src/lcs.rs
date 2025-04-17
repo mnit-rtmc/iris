@@ -17,6 +17,7 @@ use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::lcsstate::LcsState;
+use crate::lock::LockReason;
 use crate::start::fly_map_item;
 use crate::util::{
     ContainsLower, Fields, Input, Select, TextArea, opt_ref, opt_str,
@@ -25,7 +26,6 @@ use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
-use std::fmt;
 use wasm_bindgen::JsValue;
 
 /// LCS types
@@ -34,17 +34,6 @@ use wasm_bindgen::JsValue;
 pub struct LcsType {
     pub id: u32,
     pub description: String,
-}
-
-/// LCS lock reason
-#[derive(Clone, Copy, Debug, PartialEq)]
-enum LockReason {
-    Unlocked,
-    Incident,
-    Testing,
-    Indication,
-    Maintenance,
-    Construction,
 }
 
 /// LCS Lock
@@ -154,46 +143,6 @@ impl AncillaryData for LcsAnc {
             _ => self.loc.set_asset(pri, asset, value)?,
         }
         Ok(())
-    }
-}
-
-impl From<&str> for LockReason {
-    fn from(r: &str) -> Self {
-        match r {
-            "incident" => Self::Incident,
-            "testing" => Self::Testing,
-            "indication" => Self::Indication,
-            "maintenance" => Self::Maintenance,
-            "construction" => Self::Construction,
-            _ => Self::Unlocked,
-        }
-    }
-}
-
-impl fmt::Display for LockReason {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.as_str())
-    }
-}
-
-impl LockReason {
-    /// Get lock reason as a string slice
-    fn as_str(self) -> &'static str {
-        use LockReason::*;
-        match self {
-            Unlocked => "unlocked",
-            Incident => "incident",
-            Testing => "testing",
-            Indication => "indication",
-            Maintenance => "maintenance",
-            Construction => "construction",
-        }
-    }
-
-    /// Check if LCS lock is deployable
-    fn is_deployable(self) -> bool {
-        use LockReason::*;
-        matches!(self, Unlocked | Incident | Testing)
     }
 }
 
