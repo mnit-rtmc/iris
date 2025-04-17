@@ -16,12 +16,15 @@ package us.mn.state.dot.tms.client.meter;
 
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -46,6 +49,17 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
+
+	/** Get the lock expiration time */
+	static private String getExpiration(MeterLock lk) {
+		String exp = lk.optExpires();
+		Long et = (exp != null) ? TimeSteward.parse8601(exp) : null;
+		if (et != null) {
+			SimpleDateFormat tf = new SimpleDateFormat("HH:mm");
+			return tf.format(new Date(et));
+		} else
+			return "-";
+	}
 
 	/** Current session */
 	private final Session session;
@@ -80,6 +94,9 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 	/** Reason the meter was locked */
 	private final JComboBox<String> reason_cbx = new JComboBox<String>(
 		MeterLock.REASONS);
+
+	/** Expiration time label */
+	private final JLabel expiration_lbl = createValueLabel();
 
 	/** Queue label */
 	private final JLabel queue_lbl = createValueLabel();
@@ -126,7 +143,9 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		// Make label opaque so that we can set the background color
 		status_lbl.setOpaque(true);
 		add("ramp.meter.lock");
-		add(reason_cbx, Stretch.LAST);
+		add(reason_cbx);
+		add("device.expiration");
+		add(expiration_lbl, Stretch.LAST);
 		add("ramp.meter.queue");
 		add(queue_lbl);
 		add(shrink_btn, Stretch.NONE);
@@ -193,6 +212,7 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		MeterLock lk = new MeterLock(RampMeterHelper.optLock(rm));
 		String r = lk.optReason();
 		reason_cbx.setSelectedItem((r != null) ? r : "");
+		expiration_lbl.setText(getExpiration(lk));
 		String user = session.getUser().getName();
 		LockReasonAction reason_act = new LockReasonAction(rm, user,
 			reason_cbx);
@@ -245,6 +265,7 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		status_lbl.setText("");
 		status_lbl.setForeground(null);
 		status_lbl.setBackground(null);
+		expiration_lbl.setText("-");
 		queue_lbl.setText("");
 		release_lbl.setText("");
 		cycle_lbl.setText("");

@@ -95,7 +95,7 @@ public class SingleSignTab extends IPanel {
 	/** Displays the current operation of the DMS */
 	private final JLabel operation_lbl = createValueLabel();
 
-	/** Displays the expiration time of the current message */
+	/** Expiration time label */
 	private final JLabel expiration_lbl = createValueLabel();
 
 	/** Client session */
@@ -190,7 +190,7 @@ public class SingleSignTab extends IPanel {
 		add(inc_btn, Stretch.RIGHT);
 		add("device.operation");
 		add(operation_lbl, Stretch.TRIPLE);
-		add("dms.expiration");
+		add("device.expiration");
 		add(expiration_lbl, Stretch.LAST);
 		tab.add(I18N.get("dms.msg.current"), current_pnl);
 		tab.add(I18N.get("dms.msg.preview"), preview_pnl);

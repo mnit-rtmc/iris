@@ -16,6 +16,8 @@ package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -23,6 +25,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -47,6 +50,17 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class LcsDispatcher extends IPanel implements ProxyView<Lcs> {
+
+	/** Get the lock expiration time */
+	static private String getExpiration(LcsLock lk) {
+		String exp = lk.optExpires();
+		Long et = (exp != null) ? TimeSteward.parse8601(exp) : null;
+		if (et != null) {
+			SimpleDateFormat tf = new SimpleDateFormat("HH:mm");
+			return tf.format(new Date(et));
+		} else
+			return "-";
+	}
 
 	/** Size in pixels for each LCS in array */
 	static private final int LCS_SIZE = UI.scaled(44);
@@ -87,6 +101,9 @@ public class LcsDispatcher extends IPanel implements ProxyView<Lcs> {
 	/** Reason the LCS array was locked */
 	private final JComboBox<String> reason_cbx = new JComboBox<String>(
 		LcsLock.REASONS);
+
+	/** Expiration time label */
+	private final JLabel expiration_lbl = createValueLabel();
 
 	/** Lane configuration panel */
 	private final LaneConfigurationPanel lane_config =
@@ -149,7 +166,9 @@ public class LcsDispatcher extends IPanel implements ProxyView<Lcs> {
 		add("device.operation");
 		add(operation_lbl, Stretch.LAST);
 		add("lcs.lock");
-		add(reason_cbx, Stretch.LAST);
+		add(reason_cbx);
+		add("device.expiration");
+		add(expiration_lbl, Stretch.LAST);
 		add(buildSelectorBox(), Stretch.FULL);
 		add(createButtonPanel(), Stretch.RIGHT);
 		watcher.initialize();
@@ -250,6 +269,7 @@ public class LcsDispatcher extends IPanel implements ProxyView<Lcs> {
 		LcsLock lk = new LcsLock((l != null) ? l.getLock() : null);
 		String r = lk.optReason();
 		reason_cbx.setSelectedItem((r != null) ? r : "");
+		expiration_lbl.setText(getExpiration(lk));
 		LockReasonAction reason_act = new LockReasonAction(l, user,
 			reason_cbx);
 		BlankLcsAction blank_act = new BlankLcsAction(l, user);
