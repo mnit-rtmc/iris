@@ -1,8 +1,3 @@
-//
-// stc -- Driver for Hysecurity SmartTouch Controller
-// Copyright (C) 2020  Minnesota Department of Transportation
-//
-
 enum CommandStatus {
 	Reset,
 	OpenInProgress,
@@ -38,6 +33,12 @@ struct STCController {
 	close_limit: bool,
 }
 
+struct STCDriver {
+	rx_buf: Vec<u8>,
+	tx_buf: Vec<u8>,
+	controllers: Vec<STCController>,
+}
+
 impl STCController {
 
     pub fn new(address: i32) -> Self {
@@ -69,7 +70,9 @@ impl STCController {
                 self.op_stat = OperatorStatus::NormalStop;
                 self.open_limit = true;
             }
-            _ => self.op_stat = OperatorStatus::NormalStop;
+            _ => {
+            	self.op_stat = OperatorStatus::NormalStop;
+            }
 		}
 	}
 
@@ -91,9 +94,9 @@ impl STCController {
 	fn control_request(&mut self, pkt: &[u8]) -> &[u8] {
 		if pkt.length == 9 {
             match (pkt[1], pkt[2], pkt[3]) {
-                ('1', '0', '0') => self.control_open(),
-			    ('0', '1', '0') => self.control_close(),
-			    ('0', '0', '1') => self.control_stop(),
+                (b'1', b'0', b'0') => self.control_open(),
+			    (b'0', b'1', b'0') => self.control_close(),
+			    (b'0', b'0', b'1') => self.control_stop(),
             }
             Ok("C")
 		} else {
@@ -120,26 +123,20 @@ impl STCController {
 		self.op_stat = OperatorStatus::NormalStop;
 	}
 
-	pub fn process_packet(&mut self, pkt: &[u8]) -> &[u8] {
+	pub fn process_packet(&mut self, pkt: &[u8]) {
 		match pkt[0] {
-            'R' => (),
-		    'V' => "Vh4.33, Boot Loader: V1.0\0",
-		    'S' => {
+            b'R' => (),
+		    b'V' => "Vh4.33, Boot Loader: V1.0\0",
+		    b'S' => {
     			self.update_status();
 	    		return self.process_status_n();
             }
-            'C' => self.control_request(pkt),
+            b'C' => self.control_request(pkt),
 		}
-		return null;
 	}
 }
 
-struct STCDriver {
-	rx_buf: [u8; 1024],
-	tx_buf: [u8; 1024],
-	controllers: Vec<STCController>,
-}
-
+/*
 impl ProtocolDriver for STCDriver {
 	fn sentinel(&self) -> usize {
 		for (i, b) in self.rx_buf.iter().enumerate() {
@@ -206,3 +203,4 @@ public:
 		return tx_buf;
 	}
 }
+*/

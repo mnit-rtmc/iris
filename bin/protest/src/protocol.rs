@@ -1,10 +1,16 @@
 trait ProtocolDriver {
-    fn send(&[u8]) -> Result<()>;
-	fn recv() -> Result<&[u8]>;
+    fn send(pkt: &[u8]) -> Result<(), ()>;
+    fn recv() -> Result<Vec<u8>, ()>;
 }
 
-struct EchoDriver {
-}
+struct EchoDriver {}
 
 impl ProtocolDriver for EchoDriver {
+    fn send(pkt: &[u8]) -> Result<(), ()> {
+        todo!()
+    }
+
+    fn recv() -> Result<Vec<u8>, ()> {
+        todo!()
+    }
 }
