@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.server.CapAlert;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
+import us.mn.state.dot.tms.utils.DevelCfg;
 
 /**
  * Container for a CAP property.
@@ -39,6 +40,10 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  * @author Douglas Lau
  */
 public class CapProperty extends ControllerProperty {
+
+	/** Location of error files */
+	static private final String ERR_DIR =
+			DevelCfg.get("log.output.dir", "/var/log/iris/");
 
 	/** Date formatter for formatting error file names */
 	static private final SimpleDateFormat DT_FMT =
@@ -110,7 +115,7 @@ public class CapProperty extends ControllerProperty {
 
 	/** Save the response document */
 	private void saveDoc(ByteArrayOutputStream doc) throws IOException {
-		String fn = "/var/log/iris/cap_err_" + DT_FMT.format(
+		String fn = ERR_DIR + "cap_err_" + DT_FMT.format(
 			TimeSteward.getDateInstance()) + extension;
 		doc.writeTo(new FileOutputStream(fn));
 	}
