@@ -42,6 +42,9 @@ public class URIUtil {
 	/** Default scheme for RTSP */
 	static public final URI RTSP = createScheme("rtsp");
 
+	/** Default scheme for file */
+	static public final URI FILE = createScheme("file");
+
 	/** Create a scheme URI */
 	static public URI createScheme(String scheme) {
 		try {
@@ -61,7 +64,7 @@ public class URIUtil {
 		if (uri.indexOf(':') >= 0) {
 			try {
 				URI u = new URI(uri);
-				if (u.getHost() != null)
+				if (u.getHost() != null || "file".equals(u.getScheme()))
 					return u;
 			}
 			catch (URISyntaxException e) {
