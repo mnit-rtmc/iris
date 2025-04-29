@@ -133,14 +133,16 @@ public class AlertData {
 	static private Date getEndDate(JSONObject info) throws JSONException,
 		ParseException
 	{
-		JSONArray params = info.getJSONArray("parameter");
-		for (int i = 0; i < params.length(); i++) {
-			JSONObject param = params.getJSONObject(i);
-			if (param.getString("valueName").equals(
-				"eventEndingTime"))
-			{
-				String value = param.getString("value");
-				return CAP_DATE.parse(value);
+		if (info.has("parameter")) {
+			JSONArray params = info.getJSONArray("parameter");
+			for (int i = 0; i < params.length(); i++) {
+				JSONObject param = params.getJSONObject(i);
+				if (param.getString("valueName").equals(
+					"eventEndingTime"))
+				{
+					String value = param.getString("value");
+					return CAP_DATE.parse(value);
+				}
 			}
 		}
 		// No eventEndingTime parameter found; use expires instead
