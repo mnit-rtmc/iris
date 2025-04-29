@@ -91,6 +91,7 @@ help_trouble_ticket_enable	false
 help_trouble_ticket_url	
 incident_clear_advice_multi	JUST CLEARED
 incident_clear_secs	300
+incident_max_sign_miles	0.0
 legacy_xml_config_enable	true
 legacy_xml_detector_enable	true
 legacy_xml_incident_enable	true
