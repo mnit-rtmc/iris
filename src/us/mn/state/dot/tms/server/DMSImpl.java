@@ -349,6 +349,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			return;
 		try {
 			doSetNotes(Hashtags.add(notes, ht));
+			notifyAttribute("notes");
 		}
 		catch (TMSException e) {
 			logError("add hashtags: " + e.getMessage());
@@ -361,6 +362,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			return;
 		try {
 			doSetNotes(Hashtags.remove(notes, ht));
+			notifyAttribute("notes");
 		}
 		catch (TMSException e) {
 			logError("remove hashtags: " + e.getMessage());
