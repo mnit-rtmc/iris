@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021-2022  Minnesota Department of Transportation
+ * Copyright (C) 2021-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,8 +42,6 @@ public class OpMeterWatchdogReset extends OpNatch {
 		counter = c;
 		pin = RampMeterHelper.lookupWatchdogResetPin(m);
 		prop = new PinStatusProp(c, (pin != null) ? pin : 0, true);
-		if (pin == null)
-			setDone(true);
 	}
 
 	/** Poll the controller */
@@ -52,6 +50,9 @@ public class OpMeterWatchdogReset extends OpNatch {
 		if (pin != null) {
 			prop.encodeStore(op, tx_buf);
 			setPolling(false);
+		} else {
+			op.putCtrlFaults("other", "Cabinet style not set");
+			setDone(true);
 		}
 	}
 
@@ -74,6 +75,9 @@ public class OpMeterWatchdogReset extends OpNatch {
 				setPolling(true);
 			} else
 				setDone(true);
+		} else {
+			op.putCtrlFaults("other", "Cabinet style not set");
+			setDone(true);
 		}
 	}
 }

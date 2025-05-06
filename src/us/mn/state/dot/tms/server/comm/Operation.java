@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2024  Minnesota Department of Transportation
+ * Copyright (C) 2005-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -234,7 +234,7 @@ public final class Operation implements Comparable<Operation> {
 	}
 
 	/** Put FAULTS into controller status */
-	protected void putCtrlFaults(String fault, String msg) {
+	public void putCtrlFaults(String fault, String msg) {
 		putCtrlStatus(Controller.FAULTS, fault);
 		putCtrlStatus(Controller.MSG, msg);
 	}
