@@ -16,6 +16,8 @@ package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
 import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
+import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.server.DeviceImpl;
 import static us.mn.state.dot.tms.server.RampMeterImpl.COMM_LOSS_THRESHOLD;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -28,6 +30,17 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpSendDeviceSettings extends Op170Device {
 
+	/** Check if cabinet style is configured */
+	static private boolean isCabinetConfigured(DeviceImpl d) {
+		if (d instanceof RampMeter) {
+			RampMeter rm = (RampMeter) d;
+			Integer pin =
+				RampMeterHelper.lookupWatchdogResetPin(rm);
+			return pin != null;
+		}
+		return true;
+	}
+
 	/** Set the controller firmware version */
 	static private String formatVersion(int major, int minor) {
 		return Integer.toString(major) + "." + Integer.toString(minor);
@@ -36,6 +49,10 @@ public class OpSendDeviceSettings extends Op170Device {
 	/** Create a new device settings operation */
 	public OpSendDeviceSettings(DeviceImpl d) {
 		super(PriorityLevel.SETTINGS, d);
+		if (isCabinetConfigured(d))
+			putCtrlFaults(null, null);
+		else
+			putCtrlFaults("other", "Cabinet style not set");
 	}
 
 	/** Create the second phase of the operation */
@@ -71,6 +88,7 @@ public class OpSendDeviceSettings extends Op170Device {
 		protected Phase<MndotProperty> poll(
 			CommMessage<MndotProperty> mess) throws IOException
 		{
+			// FIXME: use cabinet style pins
 			byte[] data = {Address.WATCHDOG_BITS};
 			mess.add(new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS + 2, data));
@@ -86,6 +104,7 @@ public class OpSendDeviceSettings extends Op170Device {
 		protected Phase<MndotProperty> poll(
 			CommMessage<MndotProperty> mess) throws IOException
 		{
+			// FIXME: use cabinet style pins
 			byte[] data = new byte[1];
 			mess.add(new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS + 2, data));

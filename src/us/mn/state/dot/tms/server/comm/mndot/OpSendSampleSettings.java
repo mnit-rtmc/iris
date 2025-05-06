@@ -43,6 +43,7 @@ public class OpSendSampleSettings extends Op170 {
 	/** Create a new send sample settings operation */
 	public OpSendSampleSettings(PriorityLevel p, ControllerImpl c) {
 		super(p, c);
+		putCtrlFaults(null, null);
 	}
 
 	/** Create a new send sample settings operation */
