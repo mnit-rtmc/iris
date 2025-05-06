@@ -34,7 +34,7 @@ public class OpSendSampleSettings extends Op170 {
 	}
 
 	/** Check for buggy 170 firmware version */
-	static private boolean isVersionBuggy(int major, int minor) {
+	static public boolean isVersionBuggy(int major, int minor) {
 		return (major < 4)
 		    || (major == 4 && minor < 2)
 		    || (major == 5 && minor < 4);

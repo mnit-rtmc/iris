@@ -33,13 +33,6 @@ public class OpSendDeviceSettings extends Op170Device {
 		return Integer.toString(major) + "." + Integer.toString(minor);
 	}
 
-	/** Check for buggy 170 firmware version */
-	static private boolean isVersionBuggy(int major, int minor) {
-		return (major < 4)
-		    || (major == 4 && minor < 2)
-		    || (major == 5 && minor < 4);
-	}
-
 	/** Create a new device settings operation */
 	public OpSendDeviceSettings(DeviceImpl d) {
 		super(PriorityLevel.SETTINGS, d);
@@ -65,7 +58,7 @@ public class OpSendDeviceSettings extends Op170Device {
 			mess.queryProps();
 			String v = formatVersion(data[0], data[1]);
 			controller.setVersionNotify(v);
-			if (isVersionBuggy(data[0], data[1]))
+			if (OpSendSampleSettings.isVersionBuggy(data[0], data[1]))
 				putCtrlFaults("prom", "BUGGY firmware");
 			return new ResetWatchdogMonitor();
 		}
