@@ -72,6 +72,7 @@ command on the server:
 ```
 shp2pgsql -G z_{date}.shp cap.nws_zones | psql tms
 psql tms -c 'GRANT SELECT ON cap.nws_zones TO PUBLIC'
+psql tms -c 'ALTER TABLE cap.nws_zones OWNER TO tms'
 ```
 
 NOTE: Alert areas may change (NWS updates the file roughly every six months), so
@@ -85,6 +86,7 @@ Then, execute the following command on the server:
 ```
 shp2pgsql -G c_{date}.shp cap.nws_counties | psql tms
 psql tms -c 'GRANT SELECT ON cap.nws_counties TO PUBLIC'
+psql tms -c 'ALTER TABLE cap.nws_counties OWNER TO tms'
 ```
 
 ## Alert Configuration
