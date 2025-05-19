@@ -150,8 +150,11 @@ public class NtcipPoller extends ThreadedPoller implements AlarmPoller,
 	@Override
 	public void sendRequest(GpsImpl gps, DeviceRequest r) {
 		switch (r) {
+		case QUERY_STATUS:
+			addOp(new OpQueryGpsLocation(gps, false));
+			break;
 		case QUERY_GPS_LOCATION:
-			addOp(new OpQueryGpsLocation(gps));
+			addOp(new OpQueryGpsLocation(gps, true));
 			break;
 		default:
 			// Ignore other requests
