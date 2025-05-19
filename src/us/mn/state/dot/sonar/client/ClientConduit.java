@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2024  Minnesota Department of Transportation
+ * Copyright (C) 2006-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Message;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.Props;
 import us.mn.state.dot.sonar.ProtocolError;
 import us.mn.state.dot.sonar.Security;
@@ -300,7 +301,12 @@ class ClientConduit extends Conduit {
 	public void doRemove(List<String> p) throws SonarException {
 		if (p.size() != 2)
 			throw ProtocolError.wrongParameterCount();
-		namespace.removeObject(p.get(1));
+		try {
+			namespace.removeObject(p.get(1));
+		}
+		catch (NamespaceError e) {
+			System.err.println("SONAR doRemove: " + e.getMessage());
+		}
 	}
 
 	/** Process an ATTRIBUTE message from the server */
