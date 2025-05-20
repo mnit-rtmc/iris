@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 
-import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
@@ -69,86 +68,123 @@ abstract public class OnvifProp extends ControllerProperty {
 		return Arrays.equals(cmd, op.cmd) && Objects.equals(url, op.url);
 	}
 
+	/** Set up poller, to be deferred by op queue until Send Settings */
+	public String initialize(OnvifPTZPoller poller) throws IOException {
+		if (poller == null) return "No poller specified";
+
+		// First, get bindings:
+		DeviceService dev = DeviceService.getDeviceService(url + "/onvif/device_service", user, pass);
+		poller.dev = dev;
+
+		String capabilities = dev.getCapabilities();
+		poller.capabilities = capabilities;
+
+		poller.ptz = PTZService.getPTZService(dev.getPTZBinding(capabilities), user, pass);
+		poller.media = MediaService.getMediaService(dev.getMediaBinding(capabilities), user, pass);
+		poller.img = ImagingService.getImagingService(dev.getImagingBinding(capabilities), user, pass);
+
+		// Now get tokens:
+		int mediaWidth = 0, videoWidth = 0;  // to find largest source
+		MediaService media = poller.media;
+		String mediaProfile = null, videoSource = null;
+
+		// Should contain all necessary tokens
+		Document getProfilesRes = DOMUtils.getDocument(media.getProfiles());
+		if (getProfilesRes == null) return "Error parsing ONVIF media profiles response";
+
+		NodeList profiles = getProfilesRes.getElementsByTagNameNS("*", "Profiles");
+		for (int i = 0; i < profiles.getLength(); i++) {
+			int mx = 0, vx = 0;
+			Element profile = (Element) profiles.item(i);
+
+			// get the video source and its width
+			Element videoConfig = (Element) profile.getElementsByTagNameNS("*", "VideoSourceConfiguration").item(0);
+			if (videoConfig == null) continue;  // we want a profile with a video source
+			Element sourceToken = (Element) videoConfig.getElementsByTagNameNS("*", "SourceToken").item(0);
+			Element bounds = (Element) videoConfig.getElementsByTagNameNS("*", "Bounds").item(0);
+			vx = Integer.parseInt(bounds.getAttribute("width"));
+
+			// get the video encoder and its width, if applicable; only for better profile selection
+			Element encoderConfig = (Element) profile.getElementsByTagNameNS("*", "VideoEncoderConfiguration").item(0);
+			if (encoderConfig != null) {
+				Element widthElem = (Element) encoderConfig.getElementsByTagNameNS("*", "Width").item(0);
+				mx = Integer.parseInt(widthElem.getTextContent());
+			}
+
+			// if video source bigger than current, replace
+			if (vx >= videoWidth) {
+				log("Video width larger. Setting videoSource...");
+				videoSource = sourceToken.getTextContent();
+				videoWidth = vx;
+			}
+			// replace media profile only if it's larger and the attached source is no smaller
+			if (mx >= mediaWidth && vx >= videoWidth) {
+				log("Both widths larger. Setting mediaProfile...");
+				mediaProfile = profile.getAttribute("token");
+				mediaWidth = mx;
+			}
+		}
+
+		if (mediaProfile != null) {
+			poller.mediaProfile = mediaProfile;
+			log("Set media profile: " + mediaProfile);
+		}
+		if (videoSource != null) {
+			poller.videoSource = videoSource;
+			log("Set video source: " + videoSource);
+		}
+		if (mediaProfile == null || videoSource == null)
+			return "Could not retrieve profile tokens";
+
+		return "Successfully retrieved service bindings and profile tokens";
+	}
+
 	/** Build and send the SOAP messages */
-	public String sendSoap(ControllerImpl c) throws IOException {
+	public String sendSoap(OnvifPTZPoller poller) throws IOException {
 		// if no cmd items, nothing to do
 		if (cmd == null || cmd.length == 0) {
 			return "No cmd specified";
 		}
+		if (poller == null)
+			return "No poller provided";
 
-		// create each service (device service binding specified by ONVIF standard)
-		DeviceService dev = DeviceService.getDeviceService(url + "/onvif/device_service", user, pass);
-		// only need to get capabilities once, then read all bindings from that
-		String capabilities = dev.getCapabilities();
-		PTZService ptz = PTZService.getPTZService(dev.getPTZBinding(capabilities), user, pass);
-		MediaService media = MediaService.getMediaService(dev.getMediaBinding(capabilities), user, pass);
-		ImagingService img = ImagingService.getImagingService(dev.getImagingBinding(capabilities), user, pass);
+		// Check for tokens, and if needed for command
+		String mediaProfile = poller.mediaProfile;
+		//if (mediaProfile != null) log("mediaProfile retrieved: " + mediaProfile);
+		String videoSource = poller.videoSource;
+		//if (videoSource != null) log("videoSource retrieved: " + videoSource);
 
-		// Check for cached media/video tokens, and retrieve them if and only if needed
-		String mediaProfile = ControllerHelper.getSetup(c, "mediaProfile");
-		String videoSource = ControllerHelper.getSetup(c, "videoSource");
-		boolean needMedia = (mediaProfile == null || mediaProfile.isEmpty()) && (
+		boolean needMedia = (
 			cmd[0].equals("ptz") ||
 			cmd[0].equals("wiper") ||
 			cmd[0].contains("preset")
 		);
-		boolean needVideo = (videoSource == null || videoSource.isEmpty()) && (
+		boolean haveMedia = mediaProfile != null && !mediaProfile.trim().isEmpty();
+		boolean needVideo = (
 			cmd[0].contains("iris") ||
 			cmd[0].contains("focus")
 		);
-		if (needMedia || needVideo) {
-			int mediaWidth = 0, videoWidth = 0;  // to find largest source
+		boolean haveVideo = videoSource != null && !videoSource.trim().isEmpty();
 
-			// Should contain all necessary tokens
-			Document getProfilesRes = DOMUtils.getDocument(media.getProfiles());
-			if (getProfilesRes == null) return "Error parsing ONVIF media profiles response";
+		if (needMedia && !haveMedia) return "Missing mediaProfile";
+		if (needVideo && !haveVideo) return "Missing videoSource";
 
-			NodeList profiles = getProfilesRes.getElementsByTagNameNS("*", "Profiles");
-			for (int i = 0; i < profiles.getLength(); i++) {
-				int mx = 0, vx = 0;
-				Element profile = (Element) profiles.item(i);
+		// Check for services, and if needed (yes, except initialize())
+		boolean hasAllServices =
+			poller.dev != null
+			&& poller.ptz != null
+			&& poller.media != null
+			&& poller.img != null;
+		if (!cmd[0].equals("initialize") && !hasAllServices)
+			return "Missing ONVIF services";
 
-				// get the video source and its width
-				Element videoConfig = (Element) profile.getElementsByTagNameNS("*", "VideoSourceConfiguration").item(0);
-				if (videoConfig == null) continue;  // we want a profile with a video source
-				Element sourceToken = (Element) videoConfig.getElementsByTagNameNS("*", "SourceToken").item(0);
-				Element bounds = (Element) videoConfig.getElementsByTagNameNS("*", "Bounds").item(0);
-				vx = Integer.parseInt(bounds.getAttribute("width"));
+		DeviceService dev = poller.dev;
+		PTZService ptz = poller.ptz;
+		MediaService media = poller.media;
+		ImagingService img = poller.img;
 
-				// get the video encoder and its width, if applicable; only for better profile selection
-				Element encoderConfig = (Element) profile.getElementsByTagNameNS("*", "VideoEncoderConfiguration").item(0);
-				if (encoderConfig != null) {
-					Element widthElem = (Element) encoderConfig.getElementsByTagNameNS("*", "Width").item(0);
-					mx = Integer.parseInt(widthElem.getTextContent());
-				}
-
-				// if video source bigger than current, replace
-				if (vx >= videoWidth) {
-					log("Video width larger. Setting videoSource...");
-					videoSource = sourceToken.getTextContent();
-					videoWidth = vx;
-				}
-				// replace media profile only if it's larger and the attached source is no smaller
-				if (mx >= mediaWidth && vx >= videoWidth) {
-					log("Both widths larger. Setting mediaProfile...");
-					mediaProfile = profile.getAttribute("token");
-					mediaWidth = mx;
-				}
-			}
-
-			if (mediaProfile != null) {
-				c.setSetupNotify("mediaProfile", mediaProfile);
-				log("Set media profile: " + mediaProfile);
-			}
-			if (videoSource != null) {
-				c.setSetupNotify("videoSource", videoSource);
-				log("Set video source: " + videoSource);
-			}
-			if (mediaProfile == null || videoSource == null)
-				return "Could not retrieve profile tokens";
-		}
-
-		// if multi-step operations, send each operation
+		// We either don't need services/tokens, or have them
+		// So, evaluate command:
 		StringBuilder sb = new StringBuilder();
 		switch (cmd[0]) {
 			case "ptz":
@@ -216,6 +252,9 @@ abstract public class OnvifProp extends ControllerProperty {
 				break;
 			case "reboot":
 				sb.append(dev.systemReboot());
+				break;
+			case "initialize":
+				sb.append(initialize(poller));
 				break;
 			default:
 				sb.append("Unexpected cmd");

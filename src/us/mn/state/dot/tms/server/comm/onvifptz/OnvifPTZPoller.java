@@ -41,6 +41,19 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 			ONVIF_LOG.log(msg);
 	}
 
+	/** Tokens to send to each ONVIF prop, device/link-specific */
+	/** Should update on Send Settings to avoid extra messages */
+	public String mediaProfile, videoSource;
+
+	/** Capabilities of device */
+	public String capabilities;
+
+	/** ONVIF Service bindings */
+	public DeviceService dev;
+	public PTZService ptz;
+	public MediaService media;
+	public ImagingService img;
+
 	/** Create a new Onvif PTZ poller */
 	public OnvifPTZPoller(CommLink link) {
 		super(link, HTTP, ONVIF_LOG);
@@ -86,6 +99,10 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 			return prop;
 		case RESET_DEVICE:
 			prop.addReboot();
+			return prop;
+		case SEND_SETTINGS:
+		case QUERY_STATUS:
+			prop.addInitialize();
 			return prop;
 		default:
 			return null;
@@ -149,7 +166,9 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest dr) {
 		PTZCommandProp prop = getBaseProp(c);
+		log("Adding " + dr.name() + " to prop...");
 		createDeviceReqProp(prop, dr);
+		log("Added DeviceReq to prop");
 		if (prop != null)
 			addOp(new OpOnvifPTZ(c, prop));
 	}
