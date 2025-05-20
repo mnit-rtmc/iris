@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2016  SRF Consulting Group
- * Copyright (C) 2018-2024  Minnesota Department of Transportation
+ * Copyright (C) 2018-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -236,10 +236,12 @@ public class GpsImpl extends DeviceImpl implements Gps {
 	 * @param loc Device location to update.
 	 * @param lt New latitude.
 	 * @param ln New longitude. */
-	public void saveDeviceLocation(double lt, double ln) {
+	public void saveDeviceLocation(double lt, double ln,
+		boolean jitter_bypass)
+	{
 		GeoLocImpl loc = geo_loc;
 		if (loc != null && isValidLocation(lt, ln)) {
-			if (checkJitter(lt, ln)) {
+			if (jitter_bypass || checkJitter(lt, ln)) {
 				changeDeviceLocation(loc, lt, ln);
 				updateLatLon(lt, ln);
 			}
@@ -264,12 +266,11 @@ public class GpsImpl extends DeviceImpl implements Gps {
 	 * (Also updates the _gps.latest_sample field.)
 	 * @param lt Latitude.
 	 * @param ln Longitude. */
-	private void updateLatLon(Double lt, Double ln) {
+	private void updateLatLon(double lt, double ln) {
 		try {
 			setLatNotify(lt);
 			setLonNotify(ln);
-			if (lt != null && ln != null)
-				setLatestSampleNotify(getLatestPoll());
+			setLatestSampleNotify(getLatestPoll());
 		}
 		catch (TMSException ex) {
 			GPS_LOG.log("Error updating gps: " + ex);
@@ -296,16 +297,6 @@ public class GpsImpl extends DeviceImpl implements Gps {
 	@Override
 	public void periodicPoll(boolean is_long) {
 		if (is_long)
-			sendDeviceRequest(DeviceRequest.QUERY_GPS_LOCATION);
-	}
-
-	/** Request a device operation */
-	@Override
-	public void setDeviceRequest(int r) {
-		DeviceRequest dr = DeviceRequest.fromOrdinal(r);
-		// Clear lat/lon to defeat jitter filter (force update)
-		if (DeviceRequest.QUERY_GPS_LOCATION == dr)
-			updateLatLon(null, null);
-		sendDeviceRequest(dr);
+			sendDeviceRequest(DeviceRequest.QUERY_STATUS);
 	}
 }

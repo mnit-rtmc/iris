@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2016  SRF Consulting Group
- * Copyright (C) 2018-2024  Minnesota Department of Transportation
+ * Copyright (C) 2018-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,9 @@ public class OpQueryGpsLocation extends OpNtcip {
 	/** GPS device being queried */
 	private final GpsImpl gps;
 
+	/** Flag to bypass the jitter filter */
+	private final boolean jitter_bypass;
+
 	/** GPS latitude */
 	private final ASN1Integer lat = MIB1204.essLatitude.makeInt();
 
@@ -48,9 +51,10 @@ public class OpQueryGpsLocation extends OpNtcip {
 	private final ASN1Integer lon = MIB1204.essLongitude.makeInt();
 
 	/** Create a new query GPS location operation */
-	public OpQueryGpsLocation(GpsImpl g) {
+	public OpQueryGpsLocation(GpsImpl g, boolean jb) {
 		super(PriorityLevel.POLL_LOW, g);
 		gps = g;
+		jitter_bypass = jb;
 		gps.setLatestPollNotify();
 	}
 
@@ -94,11 +98,12 @@ public class OpQueryGpsLocation extends OpNtcip {
 
 	/** Update the GPS location */
 	private void updateGpsLocation() {
-		int lt = lat.getInteger();
-		int ln = lon.getInteger();
-		if ((NO_GPS_LOCK_LAT != lt) && (NO_GPS_LOCK_LON != ln)) {
-			gps.saveDeviceLocation(lt / 1000000.0,
-				ln / 1000000.0);
+		int ilt = lat.getInteger();
+		int iln = lon.getInteger();
+		if ((NO_GPS_LOCK_LAT != ilt) && (NO_GPS_LOCK_LON != iln)) {
+			double lat = ilt / 1000000.0;
+			double lon = iln / 1000000.0;
+			gps.saveDeviceLocation(lat, lon, jitter_bypass);
 		} else
 			putCtrlFaults("gps", "No GPS Lock");
 	}

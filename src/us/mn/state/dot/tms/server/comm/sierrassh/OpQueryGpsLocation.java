@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2024  SRF Consulting Group
- * Copyright (C) 2018-2022  Minnesota Department of Transportation
+ * Copyright (C) 2018-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,13 +35,17 @@ public class OpQueryGpsLocation extends OpDevice<GpsLocationProperty> {
 	/** GPS device */
 	private final GpsImpl gps;
 
+	/** Flag to bypass the jitter filter */
+	private final boolean jitter_bypass;
+
 	/** GPS location property */
 	private final GpsLocationProperty gps_prop;
 
 	/** Create a new query GPS operation */
-	public OpQueryGpsLocation(GpsImpl g) {
+	public OpQueryGpsLocation(GpsImpl g, boolean jb) {
 		super(PriorityLevel.POLL_LOW, g);
 		gps = g;
+		jitter_bypass = jb;
 		gps_prop = new GpsLocationProperty();
 		gps.setLatestPollNotify();
 	}
@@ -77,7 +81,7 @@ public class OpQueryGpsLocation extends OpDevice<GpsLocationProperty> {
 		if (gps_prop.gotValidResponse()) {
 			if (gps_prop.gotGpsLock()) {
 				gps.saveDeviceLocation(gps_prop.getLat(),
-					gps_prop.getLon());
+					gps_prop.getLon(), jitter_bypass);
 			} else
 				putCtrlFaults("gps", "No GPS Lock");
 		}
