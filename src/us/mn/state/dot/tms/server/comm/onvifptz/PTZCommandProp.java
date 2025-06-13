@@ -132,4 +132,9 @@ public class PTZCommandProp extends OnvifProp {
 	public void addAutoIrisAndFocus() {
 		cmd = new String[] { "autoirisfocus", "Auto" };
 	}
+
+	/** Adds initialize to callback, for bindings/tokens */
+	public void addInitialize() {
+		cmd = new String[] { "initialize" };
+	}
 }
