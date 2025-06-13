@@ -51,7 +51,7 @@ abstract public class OnvifProp extends ControllerProperty {
 
 	/** Logger method */
 	protected void log(String s) {
-		OnvifPTZPoller.slog("PTZCommandProp:" + s);
+		OnvifPTZPoller.slog("OnvifProp:" + s);
 	}
 
 	public void setUrl(String u) {
@@ -113,13 +113,11 @@ abstract public class OnvifProp extends ControllerProperty {
 
 			// if video source bigger than current, replace
 			if (vx >= videoWidth) {
-				log("Video width larger. Setting videoSource...");
 				videoSource = sourceToken.getTextContent();
 				videoWidth = vx;
 			}
 			// replace media profile only if it's larger and the attached source is no smaller
 			if (mx >= mediaWidth && vx >= videoWidth) {
-				log("Both widths larger. Setting mediaProfile...");
 				mediaProfile = profile.getAttribute("token");
 				mediaWidth = mx;
 			}
@@ -150,9 +148,7 @@ abstract public class OnvifProp extends ControllerProperty {
 
 		// Check for tokens, and if needed for command
 		String mediaProfile = poller.mediaProfile;
-		//if (mediaProfile != null) log("mediaProfile retrieved: " + mediaProfile);
 		String videoSource = poller.videoSource;
-		//if (videoSource != null) log("videoSource retrieved: " + videoSource);
 
 		boolean needMedia = (
 			cmd[0].equals("ptz") ||

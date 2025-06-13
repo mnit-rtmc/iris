@@ -35,7 +35,7 @@ public class OpOnvifPTZ extends OpDevice<OnvifProp> {
 
 	/** Logger method */
 	private void log(String s) {
-		OnvifPTZPoller.slog("PTZCommandProp:" + s);
+		OnvifPTZPoller.slog("OpOnvifPTZ:" + s);
 	}
 
 	/** ONVIF property */
@@ -73,7 +73,7 @@ public class OpOnvifPTZ extends OpDevice<OnvifProp> {
 			throws IOException
 		{
 			String resp = prop.sendSoap(poller);
-			//log("Sent soap, response:\n" + resp);
+			log("Sent soap, response:\n" + resp);
 			return null;
 		}
 	}

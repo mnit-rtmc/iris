@@ -138,7 +138,6 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 	/** Send a PTZ camera move command */
 	@Override
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
-		log("In sendPTZ: " + p + ", " + t + ", " + z);
 		PTZCommandProp prop = getBaseProp(c);
 		prop.addPanTiltZoom(p, t, z);
 		addOp(new OpOnvifPTZ(c, prop));
@@ -166,9 +165,7 @@ public class OnvifPTZPoller extends ThreadedPoller<OnvifProp> implements CameraP
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest dr) {
 		PTZCommandProp prop = getBaseProp(c);
-		log("Adding " + dr.name() + " to prop...");
 		createDeviceReqProp(prop, dr);
-		log("Added DeviceReq to prop");
 		if (prop != null)
 			addOp(new OpOnvifPTZ(c, prop));
 	}
