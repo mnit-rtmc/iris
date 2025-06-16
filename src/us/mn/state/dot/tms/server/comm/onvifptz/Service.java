@@ -54,7 +54,7 @@ public abstract class Service {
 
 	/** Logger method */
 	protected void log(String s) {
-		OnvifPTZPoller.slog("PTZCommandProp:" + s);
+		OnvifPTZPoller.slog("Service:" + s);
 	}
 
 	/**
@@ -192,6 +192,7 @@ public abstract class Service {
 		String soapRequest = DOMUtils.getString(doc);
 		if (soapRequest == null) return "Could not convert document to string";
 		log("\nSending soapRequest to " + endpoint + ":\n" + soapRequest);
+		//log("\nSending soapRequest...");
 
 		try (OutputStream os = connection.getOutputStream()) {
 			byte[] input = soapRequest.getBytes("utf-8");
@@ -202,7 +203,6 @@ public abstract class Service {
 		if (responseCode == HttpURLConnection.HTTP_OK) {
 			BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			resp = in.lines().collect(Collectors.joining("\n"));
-			log("Request succeeded, code: " + responseCode + " Response:\n" + resp);
 			in.close();
 		} else {
 			BufferedReader err = new BufferedReader(new InputStreamReader(connection.getErrorStream()));

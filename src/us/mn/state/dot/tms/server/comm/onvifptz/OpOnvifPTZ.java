@@ -35,18 +35,18 @@ public class OpOnvifPTZ extends OpDevice<OnvifProp> {
 
 	/** Logger method */
 	private void log(String s) {
-		OnvifPTZPoller.slog("PTZCommandProp:" + s);
+		OnvifPTZPoller.slog("OpOnvifPTZ:" + s);
 	}
 
 	/** ONVIF property */
 	private final OnvifProp prop;
-	private final ControllerImpl controller;
+	private final OnvifPTZPoller poller;
 
 	/** Create a new ONVIF operation */
 	protected OpOnvifPTZ(CameraImpl c, OnvifProp p) {
 		super(PriorityLevel.COMMAND, c);
 		prop = p;
-		controller = (ControllerImpl) c.getController();
+		poller = (OnvifPTZPoller) c.getPoller();
 	}
 
 	/** Create the second phase of the operation */
@@ -72,7 +72,7 @@ public class OpOnvifPTZ extends OpDevice<OnvifProp> {
 		protected Phase<OnvifProp> poll(CommMessage<OnvifProp> mess)
 			throws IOException
 		{
-			String resp = prop.sendSoap(controller);
+			String resp = prop.sendSoap(poller);
 			log("Sent soap, response:\n" + resp);
 			return null;
 		}
