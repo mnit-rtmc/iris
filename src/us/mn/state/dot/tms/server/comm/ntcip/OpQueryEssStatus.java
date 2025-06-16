@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017 Iteris Inc.
- * Copyright (C) 2019-2023  Minnesota Department of Transportation
+ * Copyright (C) 2019-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -313,61 +313,14 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(pr.sensor_error);
 			logQuery(pr.salinity);
 			logQuery(pr.black_ice_signal);
-			return new QueryPavementRowV2(pr);
+			return new QueryPavementFriction(pr);
 		}
 	}
 
-	/** Phase to query one pavement sensor row (V2) */
-	protected class QueryPavementRowV2 extends Phase {
+	/** Phase to query pavement friction value (V4) */
+	protected class QueryPavementFriction extends Phase {
 		private final PavementSensorsTable.Row pr;
-		private QueryPavementRowV2(PavementSensorsTable.Row r) {
-			pr = r;
-		}
-
-		@SuppressWarnings("unchecked")
-		protected Phase poll(CommMessage mess) throws IOException {
-			// Note: these objects were introduced in V2
-			mess.add(pr.ice_or_water_depth);
-			mess.add(pr.surface_conductivity_v2);
-			try {
-				mess.queryProps();
-				logQuery(pr.ice_or_water_depth);
-				logQuery(pr.surface_conductivity_v2);
-				return new QueryPavementRowV4(pr);
-			}
-			catch (NoSuchName e) {
-				// Fallback to V1 water depth
-				return new QueryPavementRowV1(pr);
-			}
-		}
-	}
-
-	/** Phase to query one pavement sensor row (V1) */
-	protected class QueryPavementRowV1 extends Phase {
-		private final PavementSensorsTable.Row pr;
-		private QueryPavementRowV1(PavementSensorsTable.Row r) {
-			pr = r;
-		}
-
-		@SuppressWarnings("unchecked")
-		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(pr.water_depth);
-			// Note: essSurfaceConductivity could be polled here
-			try {
-				mess.queryProps();
-				logQuery(pr.water_depth);
-			}
-			catch (NoSuchName e) {
-				// Note: this object was deprecated in V2
-			}
-			return nextPavementRow();
-		}
-	}
-
-	/** Phase to query one pavement sensor row (V4) */
-	protected class QueryPavementRowV4 extends Phase {
-		private final PavementSensorsTable.Row pr;
-		private QueryPavementRowV4(PavementSensorsTable.Row r) {
+		private QueryPavementFriction(PavementSensorsTable.Row r) {
 			pr = r;
 		}
 
@@ -384,7 +337,7 @@ public class OpQueryEssStatus extends OpEss {
 				if (pr.number == 1)
 					return new QueryMobileFriction(pr);
 			}
-			return nextPavementRow();
+			return new QueryPavementConductivity(pr);
 		}
 	}
 
@@ -413,6 +366,93 @@ public class OpQueryEssStatus extends OpEss {
 			}
 			catch (NoSuchName e) {
 				// Note: some vendors do not support this object
+			}
+			return new QueryPavementConductivity(pr);
+		}
+	}
+
+	/** Phase to query pavement conductivity (V2) */
+	protected class QueryPavementConductivity extends Phase {
+		private final PavementSensorsTable.Row pr;
+		private QueryPavementConductivity(PavementSensorsTable.Row r) {
+			pr = r;
+		}
+
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			// Note: this object was introduced in V2
+			mess.add(pr.surface_conductivity_v2);
+			try {
+				mess.queryProps();
+				logQuery(pr.surface_conductivity_v2);
+			}
+			catch (NoSuchName e) {
+				// Fallback to essSurfaceConductivity (V1)
+				return new QueryPavementConductivityV1(pr);
+			}
+			return new QueryPavementDepth(pr);
+		}
+	}
+
+	/** Phase to query pavement conductivity (V1) */
+	protected class QueryPavementConductivityV1 extends Phase {
+		private final PavementSensorsTable.Row pr;
+		private QueryPavementConductivityV1(PavementSensorsTable.Row r) {
+			pr = r;
+		}
+
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(pr.surface_conductivity);
+			try {
+				mess.queryProps();
+				logQuery(pr.surface_conductivity);
+			}
+			catch (NoSuchName e) {
+				// Note: this object was deprecated in V2
+			}
+			return new QueryPavementDepth(pr);
+		}
+	}
+
+	/** Phase to query pavement ice/water depth (V2) */
+	protected class QueryPavementDepth extends Phase {
+		private final PavementSensorsTable.Row pr;
+		private QueryPavementDepth(PavementSensorsTable.Row r) {
+			pr = r;
+		}
+
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(pr.ice_or_water_depth);
+			try {
+				mess.queryProps();
+				logQuery(pr.ice_or_water_depth);
+				return nextPavementRow();
+			}
+			catch (NoSuchName e) {
+				// Fallback to V1 water depth
+				return new QueryPavementDepthV1(pr);
+			}
+		}
+	}
+
+	/** Phase to query one pavement sensor row (V1) */
+	protected class QueryPavementDepthV1 extends Phase {
+		private final PavementSensorsTable.Row pr;
+		private QueryPavementDepthV1(PavementSensorsTable.Row r) {
+			pr = r;
+		}
+
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(pr.water_depth);
+			try {
+				mess.queryProps();
+				logQuery(pr.water_depth);
+			}
+			catch (NoSuchName e) {
+				// Note: this object was deprecated in V2
 			}
 			return nextPavementRow();
 		}

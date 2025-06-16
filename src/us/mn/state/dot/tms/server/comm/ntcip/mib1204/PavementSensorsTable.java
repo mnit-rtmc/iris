@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017  Iteris Inc.
- * Copyright (C) 2019-2023  Minnesota Department of Transportation
+ * Copyright (C) 2019-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,6 +103,7 @@ public class PavementSensorsTable {
 		public final ASN1Integer salinity;
 		public final TemperatureObject freeze_point;
 		public final ASN1Enum<SurfaceBlackIceSignal> black_ice_signal;
+		public final ASN1Integer surface_conductivity;
 		public final ASN1Integer surface_conductivity_v2;
 		public final PercentObject friction;
 
@@ -142,6 +143,7 @@ public class PavementSensorsTable {
 			black_ice_signal = new ASN1Enum<SurfaceBlackIceSignal>(
 				SurfaceBlackIceSignal.class,
 				essSurfaceBlackIceSignal.node, row);
+			surface_conductivity = essSurfaceConductivity.makeInt(row);
 			surface_conductivity_v2 = essSurfaceConductivityV2.makeInt(row);
 			friction = new PercentObject("friction",
 				pavementSensorFrictionCoefficient.makeInt(row));
@@ -236,11 +238,18 @@ public class PavementSensorsTable {
 			return (bis != null && bis.isValue()) ? bis : null;
 		}
 
+		/** Get surface conductivity (V1) as Integer or null on error */
+		public Integer getSurfCond() {
+			return (surface_conductivity != null)
+				? surface_conductivity.getInteger()
+				: null;
+		}
+
 		/** Get surface conductivity (V2) as Integer or null on error */
 		public Integer getSurfCondV2() {
 			return (surface_conductivity_v2 != null)
-					? surface_conductivity_v2.getInteger()
-					: null;
+				? surface_conductivity_v2.getInteger()
+				: null;
 		}
 
 		/** Get JSON representation */
@@ -264,8 +273,10 @@ public class PavementSensorsTable {
 			sb.append(freeze_point.toJson());
 			sb.append(Json.str("black_ice_signal",
 				getBlackIceSignal()));
+			sb.append(Json.num("surface_conductivity",
+				getSurfCond()));
 			sb.append(Json.num("surface_conductivity_v2",
-					getSurfCondV2()));
+				getSurfCondV2()));
 			sb.append(friction.toJson());
 			// remove trailing comma
 			if (sb.charAt(sb.length() - 1) == ',')
