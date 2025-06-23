@@ -535,7 +535,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		setPixelFailuresNotify(null);
 		resetMsgUser();
 		setMsgSchedNotify(null);
-		setMsgCurrentNotify(null);
+		setMsgCurrentNotify(null, false);
 	}
 
 	/** Create a blank message for the sign */
@@ -593,6 +593,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return getPollPeriodSec() * DURATION_PERIODS / 60;
 	}
 
+	/** Owner of sent blank message.
+	 * Since `blank` messages have no owner, save here for logging */
+	private transient String blank_owner;
+
 	/** User selected sign message.
 	 *
 	 * This is cached to allow combining with scheduled messages in
@@ -627,9 +631,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			validateMsg(sm);
 			SignMessage smu = sm;
 			if (SignMessageHelper.isBlank(sm)) {
-				// We must log blank messages here so that
-				// the user name is recorded in `msg_owner`
-				logMsg(sm);
+				blank_owner = sm.getMsgOwner();
 				// only retain non-blank user messages
 				smu = null;
 			}
@@ -741,7 +743,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			if (isMsgSource(usm, SignMsgSource.schedule) ||
 			    isMsgScheduled())
 			{
-				sendMsgLogError(usm);
+				SignMessage mc = msg_current;
+				String owner = (mc != null)
+					? mc.getMsgOwner()
+					: usm.getMsgOwner();
+				sendMsgSched(usm, owner);
 			}
 		}
 	}
@@ -780,12 +786,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Set the current message.
-	 * @param sm Sign message. */
-	public void setMsgCurrentNotify(SignMessage sm) {
+	 * @param sm Sign message.
+	 * @param sent True if message was sent (not queried). */
+	public void setMsgCurrentNotify(SignMessage sm, boolean sent) {
 		if (isMsgSource(sm, SignMsgSource.tolling))
 			logPriceMessages(EventType.PRICE_VERIFIED);
 		if (sm != msg_current) {
-			logMsg(sm);
+			logMsg(sm, sent);
 			setMsgCurrent(sm);
 			notifyAttribute("msgCurrent");
 			updateExpireTime(sm);
@@ -810,7 +817,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Log a message.
 	 * @param sm Sign message. */
-	private void logMsg(SignMessage sm) {
+	private void logMsg(SignMessage sm, boolean sent) {
 		EventType et = EventType.DMS_DEPLOYED;
 		String text = (sm != null) ? sm.getMulti() : null;
 		String owner = (sm != null)
@@ -821,9 +828,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		if (SignMessageHelper.isBlank(sm)) {
 			et = EventType.DMS_CLEARED;
 			text = null;
+			if (sent && blank_owner != null)
+				owner = blank_owner;
 			duration = null;
 		}
 		logEvent(new SignEvent(et, name, text, owner, duration));
+		if (sent)
+			blank_owner = null;
 	}
 
 	/** Next sign message (sending in process) */
@@ -941,12 +952,14 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Send message to DMS, logging any exceptions.
 	 * @param sm Sign message (not null). */
-	private void sendMsgLogError(SignMessage sm) {
+	private void sendMsgSched(SignMessage sm, String owner) {
 		try {
+			if (SignMessageHelper.isBlank(sm))
+				blank_owner = owner;
 			sendMsg(sm);
 		}
 		catch (TMSException e) {
-			logError("sendMsgLogError: " + e.getMessage());
+			logError("sendMsgSched: " + e.getMessage());
 		}
 	}
 
