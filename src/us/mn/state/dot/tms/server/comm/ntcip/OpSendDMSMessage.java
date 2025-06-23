@@ -230,7 +230,7 @@ public class OpSendDMSMessage extends OpDMS {
 			catch (GenError e) {
 				return new QueryActivateMsgErr();
 			}
-			dms.setMsgCurrentNotify(message);
+			dms.setMsgCurrentNotify(message, true);
 			return new SetLossMsgs();
 		}
 	}
@@ -473,7 +473,7 @@ public class OpSendDMSMessage extends OpDMS {
 			catch (GenError e) {
 				return new QueryActivateMsgErr();
 			}
-			dms.setMsgCurrentNotify(message);
+			dms.setMsgCurrentNotify(message, true);
 			return new SetLossMsgs();
 		}
 	}
