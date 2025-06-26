@@ -80,12 +80,17 @@ public class MndotPoller extends ThreadedPoller<MndotProperty>
 		BeaconImpl beacon = c.getActiveBeacon();
 		if (beacon != null)
 			addOp(new OpSendBeaconSettings(p, beacon));
+		// FIXME: send LCS settings
 		RampMeterImpl meter1 = Op170.lookupMeter1(c);
-		if (meter1 != null)
+		if (meter1 != null) {
+			addOp(new OpSendDeviceSettings(p, meter1));
 			addOp(new OpSendMeterSettings(p, meter1));
+		}
 		RampMeterImpl meter2 = Op170.lookupMeter2(c);
-		if (meter2 != null)
+		if (meter2 != null) {
+			addOp(new OpSendDeviceSettings(p, meter2));
 			addOp(new OpSendMeterSettings(p, meter2));
+		}
 	}
 
 	/** Query sample data.

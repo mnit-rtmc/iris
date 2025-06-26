@@ -47,12 +47,17 @@ public class OpSendDeviceSettings extends Op170Device {
 	}
 
 	/** Create a new device settings operation */
-	public OpSendDeviceSettings(DeviceImpl d) {
-		super(PriorityLevel.SETTINGS, d);
+	public OpSendDeviceSettings(PriorityLevel p, DeviceImpl d) {
+		super(p, d);
 		if (isCabinetConfigured(d))
 			putCtrlFaults(null, null);
 		else
 			putCtrlFaults("other", "Cabinet style not set");
+	}
+
+	/** Create a new device settings operation */
+	public OpSendDeviceSettings(DeviceImpl d) {
+		this(PriorityLevel.SETTINGS, d);
 	}
 
 	/** Create the second phase of the operation */
