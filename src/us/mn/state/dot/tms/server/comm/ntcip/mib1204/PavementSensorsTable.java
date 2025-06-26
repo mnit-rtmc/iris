@@ -83,6 +83,20 @@ public class PavementSensorsTable {
 		return null;
 	}
 
+	/** A conductivity of 65,535 is an error condition or missing value */
+	static private final int CONDUCTIVITY_ERROR_MISSING = 65535;
+
+	/** Convert conductivity to integer.
+	 * @return Conductivity or null for missing */
+	static private Integer getConductivity(ASN1Integer c) {
+		if (c != null) {
+			int ic = c.getInteger();
+			if (ic >= 0 && ic < CONDUCTIVITY_ERROR_MISSING)
+				return ic;
+		}
+		return null;
+	}
+
 	/** Number of sensors in table */
 	public final ASN1Integer num_sensors = numEssPavementSensors.makeInt();
 
@@ -143,8 +157,14 @@ public class PavementSensorsTable {
 			black_ice_signal = new ASN1Enum<SurfaceBlackIceSignal>(
 				SurfaceBlackIceSignal.class,
 				essSurfaceBlackIceSignal.node, row);
-			surface_conductivity = essSurfaceConductivity.makeInt(row);
-			surface_conductivity_v2 = essSurfaceConductivityV2.makeInt(row);
+			surface_conductivity = essSurfaceConductivity.makeInt(
+				row);
+			surface_conductivity.setInteger(
+				CONDUCTIVITY_ERROR_MISSING);
+			surface_conductivity_v2 =
+				essSurfaceConductivityV2.makeInt(row);
+			surface_conductivity_v2.setInteger(
+				CONDUCTIVITY_ERROR_MISSING);
 			friction = new PercentObject("friction",
 				pavementSensorFrictionCoefficient.makeInt(row));
 		}
@@ -240,16 +260,12 @@ public class PavementSensorsTable {
 
 		/** Get surface conductivity (V1) as Integer or null on error */
 		public Integer getSurfCond() {
-			return (surface_conductivity != null)
-				? surface_conductivity.getInteger()
-				: null;
+			return getConductivity(surface_conductivity);
 		}
 
 		/** Get surface conductivity (V2) as Integer or null on error */
 		public Integer getSurfCondV2() {
-			return (surface_conductivity_v2 != null)
-				? surface_conductivity_v2.getInteger()
-				: null;
+			return getConductivity(surface_conductivity_v2);
 		}
 
 		/** Get JSON representation */
