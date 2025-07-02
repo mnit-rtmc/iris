@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.SignConfigImpl;
 import us.mn.state.dot.tms.server.SignDetailImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1201.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201.*;
@@ -33,7 +34,6 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Flags;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
-import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 
 /**
  * Operation to query the configuration of a DMS.
@@ -197,7 +197,8 @@ public class OpQueryDMSConfiguration extends OpDMS {
 				mess.queryProps();
 				beacon_activation_flag = true;
 			}
-			catch (NoSuchName e) {
+			catch (ControllerException e) {
+				// NoSuchName / GenError
 				beacon_activation_flag = false;
 			}
 			return new QuerySupportsPixelService();
@@ -220,7 +221,8 @@ public class OpQueryDMSConfiguration extends OpDMS {
 				mess.queryProps();
 				pixel_service_flag = true;
 			}
-			catch (NoSuchName e) {
+			catch (ControllerException e) {
+				// NoSuchName / GenError
 				pixel_service_flag = false;
 			}
 			return new QueryV2();
@@ -246,7 +248,8 @@ public class OpQueryDMSConfiguration extends OpDMS {
 				logQuery(max_pages);
 				logQuery(max_multi_len);
 			}
-			catch (NoSuchName e) {
+			catch (ControllerException e) {
+				// NoSuchName / GenError
 				// Sign supports 1203v1 only
 				return null;
 			}
