@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -388,7 +388,7 @@ class OpQueryMsg extends OpDms {
 			SignMessageImpl sm = createMsg(msgtext, owner,
 				rpri, duramins);
 			if (sm != null)
-				m_dms.setMsgCurrentNotify(sm);
+				m_dms.setMsgCurrentNotify(sm, false);
 		} else {
 			// don't have text
 			SignMessageImpl sm = null;
@@ -397,12 +397,12 @@ class OpQueryMsg extends OpDms {
 					bitmap, duramins, pgOnTime,
 					rpri, owner);
 				if (sm != null)
-					m_dms.setMsgCurrentNotify(sm);
+					m_dms.setMsgCurrentNotify(sm, false);
 			}
 			if (sm == null) {
 				sm = createMsg("", owner, rpri, null);
 				if (sm != null)
-					m_dms.setMsgCurrentNotify(sm);
+					m_dms.setMsgCurrentNotify(sm, false);
 			}
 		}
 		return false;

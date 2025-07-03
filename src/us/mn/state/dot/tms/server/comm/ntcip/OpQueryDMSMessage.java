@@ -238,7 +238,7 @@ public class OpQueryDMSMessage extends OpDMS {
 	/** Set the current message on the sign */
 	private void setMsgCurrent(SignMessage sm) throws ControllerException {
 		if (sm != null)
-			dms.setMsgCurrentNotify(sm);
+			dms.setMsgCurrentNotify(sm, false);
 		else {
 			System.err.println("setMsgCurrent null: " + dms);
 			throw new ControllerException("MSG RENDER FAILED");
