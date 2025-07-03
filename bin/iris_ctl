@@ -2,7 +2,7 @@
 #
 # /usr/bin/iris_ctl -- Script for initializing and updating IRIS
 #
-# Copyright (C) 2012-2024  Minnesota Department of Transportation
+# Copyright (C) 2012-2025  Minnesota Department of Transportation
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ function create_keystores() {
 	/usr/bin/keytool $k_sopts $k_gopts -dname "$d_name"
 	/usr/bin/keytool $k_sopts -export -file $k_cert
 	/usr/bin/keytool $k_copts -import -file $k_cert
-	chown tms.tms $k_server $k_cert $k_client
+	chown tms:tms $k_server $k_cert $k_client
 	p_server=/etc/iris/iris-server.properties
 	p_client=/etc/iris/iris-client.properties
 	sed_s="s:.*keystore.password=.*:keystore.password=$k_pws:"
@@ -67,7 +67,7 @@ function init_db() {
 	pg_pwd=`head -c8 < /dev/random | base64`
 	echo $pg_pwd > $pwd_file
 	echo "*:*:*:postgres:$pg_pwd" >> $pwd_file
-	chown postgres.postgres $pwd_file
+	chown postgres:postgres $pwd_file
 	su --login postgres -c "initdb -A password --pwfile $pwd_file"
 	pg_conf=/var/lib/pgsql/data/postgresql.conf
 	echo "#" >> $pg_conf
