@@ -10,4 +10,6 @@ INSERT INTO iris.system_attribute (name, value)
 
 DELETE FROM iris.system_attribute WHERE name = 'uptime_log_enable';
 
+CREATE INDEX ON event.meter_event (ramp_meter);
+
 COMMIT;

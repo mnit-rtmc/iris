@@ -4580,6 +4580,9 @@ CREATE TABLE event.meter_event (
     seg_density REAL NOT NULL
 );
 
+-- DELETE of iris.ramp_meter *very* slow without this index
+CREATE INDEX ON event.meter_event (ramp_meter);
+
 CREATE VIEW meter_event_view AS
     SELECT me.id, event_date, ed.description, ramp_meter,
            mp.description AS phase, qs.description AS q_state, q_len, dem_adj,
