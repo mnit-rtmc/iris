@@ -126,7 +126,6 @@ toll_density_beta	1.1
 toll_min_price	0.25
 toll_max_price	8
 travel_time_min_mph	15
-uptime_log_enable	false
 vid_connect_autostart	true
 vid_connect_fail_next_source	true
 vid_connect_fail_sec	20

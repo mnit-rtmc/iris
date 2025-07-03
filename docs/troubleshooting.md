@@ -68,6 +68,7 @@ Filename               | Description
 `sys_attr`             | [System attribute] change log
 `toll`                 | Tolling info log
 `travel`               | Travel time info log
+`uptime`               | System uptime log
 `vsa`                  | [Variable speed advisory] info log
 
 

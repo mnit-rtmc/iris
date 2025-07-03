@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,6 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.IOException;
-import java.io.File;
-import java.io.FileWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.text.NumberFormat;
@@ -36,10 +33,6 @@ import us.mn.state.dot.tms.BaseHelper;
  */
 public class Profiler {
 
-	/** Uptime log file name */
-	static private final File UPTIME_LOG_FILE =
-		new File("/var/www/html/irisuptimelog.csv");
-
 	/** Debug line length */
 	static private final int LINE_LEN = 58;
 
@@ -48,6 +41,9 @@ public class Profiler {
 
 	/** Profile debug log */
 	private final DebugLog PROFILE_LOG = new DebugLog("profile");
+
+	/** Uptime debug log */
+	private final DebugLog UPTIME_LOG = new DebugLog("uptime");
 
 	/** Runtime used to get memory information */
 	private final Runtime jvm = Runtime.getRuntime();
@@ -132,13 +128,9 @@ public class Profiler {
 	}
 
 	/** Append to uptime log file */
-	public void appendUptimeLog() throws IOException {
-		FileWriter fw = new FileWriter(UPTIME_LOG_FILE, true);
-		try {
-			fw.write(createLogEntry());
-		}
-		finally {
-			fw.close();
+	public void appendUptimeLog() {
+		if (UPTIME_LOG.isOpen()) {
+			UPTIME_LOG.log(createLogEntry());
 		}
 	}
 

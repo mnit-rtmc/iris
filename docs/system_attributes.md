@@ -94,7 +94,6 @@ System Attribute                 | Description
 `toll_min_price`                 | Minimum [tolling] price for one trip
 `toll_max_price`                 | Default maximum [tolling] price for one trip
 `travel_time_min_mph`            | Minimum overall speed for estimating [travel time]s
-`uptime_log_enable`              | Enable logging of system uptime
 `vid_connect_autostart`          | Automatically start streaming when camera is selected
 `vid_connect_fail_next_source`   | If video source fails, automatically try next source?
 `vid_connect_fail_sec`           | Max seconds to wait for video source to connect
