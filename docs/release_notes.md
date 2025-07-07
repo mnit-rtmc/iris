@@ -1,5 +1,21 @@
 # IRIS 5.x Release Notes
 
+5.71.0 (7 Jul 2025)
+ - Revert broken DMS composer change (displayed msg)
+ - Improve logging of blank DMS messages (owner)
+ - Improve meter / LCS expire time, labels, etc.
+ - Add controller fault when cabinet style is not set
+ - Clean up logic for GPS jitter filter bypass
+ - Reduce number of ONVIF messages sent during PTZ
+ - Handle unexpected NTCIP GenError responses when querying DMS configuration
+ - Fix NTCIP ESS pavement friction sensor polling
+ - Fix MNDOT download request 208 monitor reset
+ - Fix problems with CAP event parsing
+ - Fix DMS notes / hashtag updates
+ - Add `incident_max_sign_miles` system attribute
+ - Fix ordering of alert reaping
+ - Fix rare client crash when removing an object
+
 5.70.0 (14 Apr 2025)
  - Add LCS event logging table
  - Clean up hashtags when reaping alerts
