@@ -181,7 +181,7 @@ impl Honey {
 
     /// Build authenticated api route
     fn route_api(&self) -> Router {
-        let store = MokaStore::new(Some(100));
+        let store = MokaStore::new(Some(4096));
         let session_layer = SessionManagerLayer::new(store)
             .with_name("honeybee")
             .with_expiry(Expiry::OnInactivity(time::Duration::hours(9)));
