@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017  Iteris Inc.
- * Copyright (C) 2019-2024  Minnesota Department of Transportation
+ * Copyright (C) 2019-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,14 +66,13 @@ public class EssRec {
 	/** Store the wind sensor data */
 	private void storeWinds(WeatherSensorImpl ws) {
 		ws.setWindSpeedNotify(ws_table.getAvgSpeed().getSpeedKPH());
-		ws.setWindDirNotify(ws_table.getAvgDir().getDirection());
+		ws.setWindDirNotify(ws_table.getAvgDir().getValue());
 		ws.setSpotWindSpeedNotify(ws_table.getSpotSpeed()
 			.getSpeedKPH());
-		ws.setSpotWindDirNotify(ws_table.getSpotDir().getDirection());
+		ws.setSpotWindDirNotify(ws_table.getSpotDir().getValue());
 		ws.setMaxWindGustSpeedNotify(ws_table.getGustSpeed()
 			.getSpeedKPH());
-		ws.setMaxWindGustDirNotify(ws_table.getGustDir()
-			.getDirection());
+		ws.setMaxWindGustDirNotify(ws_table.getGustDir().getValue());
 	}
 
 	/** Store the temperatures */
@@ -91,7 +90,7 @@ public class EssRec {
 	/** Store precipitation samples */
 	private void storePrecip(WeatherSensorImpl ws) {
 		ws.setHumidityNotify(precip_values.relative_humidity
-			.getPercent());
+			.getValue());
 		ws.setPrecipRateNotify(precip_values.getPrecipRate());
 		ws.setPrecipOneHourNotify(precip_values.getPrecip1Hour());
 		PrecipSituation ps = precip_values.getPrecipSituation();
@@ -109,7 +108,7 @@ public class EssRec {
 				? ss.toString()
 				: SurfaceStatus.undefined.toString());
 			ws.setSurfFreezeTempNotify(row.getFreezePointC());
-			ws.setPvmtFrictionNotify(row.getPvmtFriction());
+			ws.setPvmtFrictionNotify(row.friction.getValue());
 			ws.setSurfCondV2Notify(row.getSurfCondV2());
 		} else {
 			ws.setPvmtSurfTempNotify(null);
@@ -143,10 +142,14 @@ public class EssRec {
 
 	/** Store the radiation sensor data */
 	private void storeRadiation(WeatherSensorImpl ws) {
-		ws.setTotalRadiationNotify(rad_values.total_radiation.getRadiation());
-		ws.setTotalRadiationPeriodNotify(rad_values.getTotalRadiationPeriod());
-		ws.setInstantaneousTerrestrialNotify(rad_values.instantaneous_terrestrial.getRadiation());
-		ws.setInstantaneousSolarNotify(rad_values.instantaneous_solar.getRadiation());
+		ws.setTotalRadiationNotify(
+			rad_values.total_radiation.getValue());
+		ws.setTotalRadiationPeriodNotify(
+			rad_values.getTotalRadiationPeriod());
+		ws.setInstantaneousTerrestrialNotify(
+			rad_values.instantaneous_terrestrial.getValue());
+		ws.setInstantaneousSolarNotify(
+			rad_values.instantaneous_solar.getValue());
 		ws.setSolarRadiationNotify(rad_values.getSolarRadiation());
 		ws.setTotalSunNotify(rad_values.getTotalSun());
 	}

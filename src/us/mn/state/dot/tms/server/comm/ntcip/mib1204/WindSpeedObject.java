@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2022-2023  Minnesota Department of Transportation
+ * Copyright (C) 2022-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,29 +27,17 @@ import us.mn.state.dot.tms.utils.Json;
  *
  * @author Douglas Lau
  */
-public class WindSpeedObject {
-
-	/** Wind speed of 65535 indicates error or missing value */
-	static private final int ERROR_MISSING = 65535;
-
-	/** Json speed key */
-	private final String key;
-
-	/** Integer MIB node */
-	public final ASN1Integer node;
+public class WindSpeedObject extends IntegerObject {
 
 	/** Create a wind speed object */
 	public WindSpeedObject(String k, ASN1Integer n) {
-		key = k;
-		node = n;
-		node.setInteger(ERROR_MISSING);
+		super(k, n);
 	}
 
 	/** Get value as MPS */
 	private Double speedMPS() {
-		// Speeds are recorded in tenths of meters per second
-		int s = node.getInteger();
-		return (s != ERROR_MISSING) ? (double) s * 0.1 : null;
+		Integer s = getValue();
+		return (s != null) ? (double) s * 0.1 : null;
 	}
 
 	/** Get value as Speed.
@@ -66,12 +54,11 @@ public class WindSpeedObject {
 	}
 
 	/** Get JSON representation */
+	@Override
 	public String toJson() {
 		Double mps = speedMPS();
-		if (mps != null) {
-			// Format speed to 1 decimal place
-			return Json.num(key, Num.format(mps, 1));
-		} else
-			return "";
+		// Format speed to 1 decimal place
+		String s = (mps != null) ? Num.format(mps, 1) : null;
+		return Json.num(key, s);
 	}
 }

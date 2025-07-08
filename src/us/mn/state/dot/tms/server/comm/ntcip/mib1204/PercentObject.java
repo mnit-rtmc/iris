@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2022  Minnesota Department of Transportation
+ * Copyright (C) 2022-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,42 +15,22 @@
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-import us.mn.state.dot.tms.utils.Json;
 
 /**
  * Percent object.
  *
  * @author Douglas Lau
  */
-public class PercentObject {
-
-	/** A percent of 101 is an error condition or missing value */
-	static private final int ERROR_MISSING = 101;
-
-	/** Json percent key */
-	private final String key;
-
-	/** Integer MIB node */
-	public final ASN1Integer node;
+public class PercentObject extends IntegerObject {
 
 	/** Create a percent object */
 	public PercentObject(String k, ASN1Integer n) {
-		key = k;
-		node = n;
-		node.setInteger(ERROR_MISSING);
+		super(k, n);
 	}
 
-	/** Get percent value.
-	 * @return Percent or null if missing */
-	public Integer getPercent() {
-		int p = node.getInteger();
-		return (p >= 0 && p < ERROR_MISSING)
-		      ? Integer.valueOf(p)
-		      : null;
-	}
-
-	/** Get JSON representation */
-	public String toJson() {
-		return Json.num(key, getPercent());
+	/** Get the maximum valid value */
+	@Override
+	protected int maxValue() {
+		return 100;
 	}
 }

@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017 Iteris Inc.
- * Copyright (C) 2019-2023  Minnesota Department of Transportation
+ * Copyright (C) 2019-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,12 +72,12 @@ public class OpQueryEssSettings extends OpEss {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(ess_rec.atmospheric_values
-				.reference_elevation);
+				.reference_height.node);
 			mess.add(ess_rec.atmospheric_values
 				.pressure_sensor_height.node);
 			mess.queryProps();
 			logQuery(ess_rec.atmospheric_values
-				.reference_elevation);
+				.reference_height.node);
 			logQuery(ess_rec.atmospheric_values
 				.pressure_sensor_height.node);
 			return new QueryWindSensorsV2();

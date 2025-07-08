@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2022-2025  Minnesota Department of Transportation
+ * Copyright (C) 2019-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,26 +17,26 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 
 /**
- * Radiation object in watts / m^2.
+ * Reference height object in meters.
  *
  * @author Douglas Lau
  */
-public class RadiationObject extends IntegerObject {
+public class RefHeightObject extends HeightObject {
 
-	/** Create a radiation object */
-	public RadiationObject(String k, ASN1Integer n) {
+	/** Create a reference height object */
+	public RefHeightObject(String k, ASN1Integer n) {
 		super(k, n);
 	}
 
 	/** Get the minimum valid value */
 	@Override
 	protected int minValue() {
-		return -2048;
+		return -400;
 	}
 
 	/** Get the maximum valid value */
 	@Override
 	protected int maxValue() {
-		return 2048;
+		return 8000;
 	}
 }

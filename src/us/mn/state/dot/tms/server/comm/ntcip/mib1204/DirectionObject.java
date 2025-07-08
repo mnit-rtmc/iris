@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2022  Minnesota Department of Transportation
+ * Copyright (C) 2022-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,43 +14,26 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
-import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-import us.mn.state.dot.tms.utils.Json;
 
 /**
  * Direction object.
  *
+ * Direction is degrees clockwise from north,
+ * with 361 indicating an error or missing value.
+ *
  * @author Douglas Lau
  */
-public class DirectionObject {
-
-	/** Dir of 361 indicates error or missing value */
-	static private final int ERROR_MISSING = 361;
-
-	/** Json direction key */
-	private final String key;
-
-	/** Integer MIB node */
-	public final ASN1Integer node;
+public class DirectionObject extends IntegerObject {
 
 	/** Create a direction object */
 	public DirectionObject(String k, ASN1Integer n) {
-		key = k;
-		node = n;
-		node.setInteger(ERROR_MISSING);
+		super(k, n);
 	}
 
-	/** Get direction as degrees */
-	public Integer getDirection() {
-		int d = node.getInteger();
-	 	// Direction is degrees clockwise from north,
-	 	// with 361 indicating an error or missing value.
-		return (d >= 0 && d <= 360) ? Integer.valueOf(d) : null;
-	}
-
-	/** Get JSON representation */
-	public String toJson() {
-		return Json.num(key, getDirection());
+	/** Get the maximum valid value */
+	@Override
+	protected int maxValue() {
+		return 360;
 	}
 }

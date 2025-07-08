@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2022  Minnesota Department of Transportation
+ * Copyright (C) 2019-2025  Minnesota Department of Transportation
  * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -31,22 +31,6 @@ import static us.mn.state.dot.tms.units.Distance.Units.METERS;
  * @author Michael Darter
  */
 public class AtmosphericValues {
-
-	/** An elevation of 8001 is an error condition or missing value */
-	static private final int REF_ELEVATION_ERROR_MISSING = 8001;
-
-	/** Convert reference elevation to Distance.
-	 * @param e Elevation in meters with 8001 indicating an error or missing
-	 *          value.
-	 * @return Elevation distance or null for missing */
-	static private Distance convertRefElevation(ASN1Integer e) {
-		if (e != null) {
-			int ie = e.getInteger();
-			if (ie < REF_ELEVATION_ERROR_MISSING)
-				return new Distance(ie, METERS);
-		}
-		return null;
-	}
 
 	/** Pressure of 65535 indicates error or missing value */
 	static private final int PRESSURE_ERROR_MISSING = 65535;
@@ -84,8 +68,8 @@ public class AtmosphericValues {
 	}
 
 	/** Elevation of reference in meters */
-	public final ASN1Integer reference_elevation = essReferenceHeight
-		.makeInt();
+	public final RefHeightObject reference_height = new RefHeightObject(
+		"reference_elevation", essReferenceHeight.makeInt());
 
 	/** Height of pressure sensor in meters */
 	public final HeightObject pressure_sensor_height = new HeightObject(
@@ -105,15 +89,8 @@ public class AtmosphericValues {
 
 	/** Create atmospheric values */
 	public AtmosphericValues() {
-		reference_elevation.setInteger(REF_ELEVATION_ERROR_MISSING);
 		atmospheric_pressure.setInteger(PRESSURE_ERROR_MISSING);
 		visibility.setInteger(VISIBILITY_ERROR_MISSING);
-	}
-
-	/** Get reference elevation in meters above mean sea level */
-	public Integer getReferenceElevation() {
-		Distance h = convertRefElevation(reference_elevation);
-		return (h != null) ? h.round(METERS) : null;
 	}
 
 	/** Get atmospheric pressure in pascals */
@@ -139,8 +116,7 @@ public class AtmosphericValues {
 	/** Get JSON representation */
 	public String toJson() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(Json.num("reference_elevation",
-			getReferenceElevation()));
+		sb.append(reference_height.toJson());
 		sb.append(pressure_sensor_height.toJson());
 		sb.append(Json.num("atmospheric_pressure",
 			getAtmosphericPressure()));

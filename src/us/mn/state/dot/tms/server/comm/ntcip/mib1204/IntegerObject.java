@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2022-2025  Minnesota Department of Transportation
+ * Copyright (C) 2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,28 +15,50 @@
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.utils.Json;
 
 /**
- * Radiation object in watts / m^2.
+ * Integer object.
  *
  * @author Douglas Lau
  */
-public class RadiationObject extends IntegerObject {
+public class IntegerObject {
 
-	/** Create a radiation object */
-	public RadiationObject(String k, ASN1Integer n) {
-		super(k, n);
+	/** Json key name */
+	protected final String key;
+
+	/** Integer MIB node */
+	public final ASN1Integer node;
+
+	/** Create an integer object */
+	public IntegerObject(String k, ASN1Integer n) {
+		key = k;
+		node = n;
+		// `missing` value is always 1 greater than max
+		node.setInteger(maxValue() + 1);
 	}
 
 	/** Get the minimum valid value */
-	@Override
 	protected int minValue() {
-		return -2048;
+		return 0;
 	}
 
 	/** Get the maximum valid value */
-	@Override
 	protected int maxValue() {
-		return 2048;
+		return 65534;
+	}
+
+	/** Get object value.
+	 * @return Value or null if missing */
+	public Integer getValue() {
+		int p = node.getInteger();
+		return (p >= minValue() && p <= maxValue())
+		      ? Integer.valueOf(p)
+		      : null;
+	}
+
+	/** Get JSON representation */
+	public String toJson() {
+		return Json.num(key, getValue());
 	}
 }
