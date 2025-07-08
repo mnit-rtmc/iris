@@ -66,6 +66,7 @@ public class DeviceService extends Service {
 
 		Element capabilities = (Element) capabilitiesDoc.getElementsByTagNameNS("*", "Capabilities").item(0);
 		Element service = (Element) capabilities.getElementsByTagNameNS("*", name).item(0);
+		if (service == null) return null;
 		return ((Element) service.getElementsByTagNameNS("*", "XAddr").item(0)).getTextContent();
 	}
 

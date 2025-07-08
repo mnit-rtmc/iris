@@ -189,7 +189,8 @@ public class ImagingService extends Service {
 		if (doc == null) return 0;
 
 		Element iris = (Element) doc.getElementsByTagNameNS("*", "Iris").item(0);
-		return Float.parseFloat(iris.getTextContent());
+		return iris == null || iris.getTextContent().isEmpty() ?
+			-1 : Float.parseFloat(iris.getTextContent());
 	}
 
 	/**
@@ -201,7 +202,10 @@ public class ImagingService extends Service {
 	public String incrementIris(String vToken, String value)
 		throws IOException
 	{
-		float newIris = getIris(vToken) + Float.parseFloat(value);
+		float currentIris = getIris(vToken);
+		if (currentIris < 0) return "Couldn't get current iris attenuation";
+		float dIris = Float.parseFloat(value);
+		float newIris = currentIris + dIris;
 		return setIris(vToken, String.valueOf(newIris));
 	}
 
