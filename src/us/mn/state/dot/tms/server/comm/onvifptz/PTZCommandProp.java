@@ -57,9 +57,9 @@ public class PTZCommandProp extends OnvifProp {
 	public void addPanTiltZoom(float p, float t, float z) {
 		double[] snappedPanTilt = snapAngle(p, t);
 		DecimalFormat df = new DecimalFormat("0.#");
-		String roundedP = df.format(snappedPanTilt[0]);
-		String roundedT = df.format(snappedPanTilt[1]);
-		String roundedZ = df.format(z);
+		String roundedP = df.format(snappedPanTilt[0]).replaceAll( "^-(?=0(\\.0*)?$)", "");
+		String roundedT = df.format(snappedPanTilt[1]).replaceAll( "^-(?=0(\\.0*)?$)", "");
+		String roundedZ = df.format(z).replaceAll( "^-(?=0(\\.0*)?$)", "");
 
 		log("Queueing PTZ: " + roundedP + ", " + roundedT + ", " + roundedZ);
 		cmd = new String[] {
