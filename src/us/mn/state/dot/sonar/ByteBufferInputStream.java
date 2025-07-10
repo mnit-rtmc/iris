@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
 public class ByteBufferInputStream extends InputStream {
 
 	/** Byte buffer where data is read */
-	protected ByteBuffer buffer;
+	private ByteBuffer buffer;
 
 	/** Create a new byte buffer input stream */
 	public ByteBufferInputStream(ByteBuffer buf) {
@@ -38,31 +38,32 @@ public class ByteBufferInputStream extends InputStream {
 	}
 
 	/** Read a single byte from the input stream */
+	@Override
 	public int read() {
-		if(available() > 0)
-			return buffer.get() & 0xFF;
-		else
-			return -1;
+		return (available() > 0) ? (buffer.get() & 0xFF) : -1;
 	}
 
 	/** Read an array of bytes from the input stream */
+	@Override
 	public int read(byte[] b, int off, int len) {
-		if(available() < 1)
+		if (available() < 1)
 			return -1;
 		len = Math.min(len, available());
-		if(len > 0)
+		if (len > 0)
 			buffer.get(b, off, len);
 		return len;
 	}
 
 	/** Skip ahead in the input stream */
+	@Override
 	public long skip(long n) {
 		n = Math.min(n, buffer.remaining());
-		buffer.position((int)(buffer.position() + n));
+		buffer.position((int) (buffer.position() + n));
 		return n;
 	}
 
 	/** Get the number of bytes available for reading */
+	@Override
 	public int available() {
 		return buffer.remaining();
 	}
