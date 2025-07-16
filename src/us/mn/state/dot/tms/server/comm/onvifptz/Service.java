@@ -201,11 +201,15 @@ public abstract class Service {
 
 		int responseCode = connection.getResponseCode();
 		if (responseCode == HttpURLConnection.HTTP_OK) {
-			BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			InputStream is = connection.getInputStream();
+			if (is == null) return "HTTP_OK: " + responseCode + "; error reading stream";
+			BufferedReader in = new BufferedReader(new InputStreamReader(is));
 			resp = in.lines().collect(Collectors.joining("\n"));
 			in.close();
 		} else {
-			BufferedReader err = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+			InputStream is = connection.getErrorStream();
+			if (is == null) return "HTTP error: " + responseCode + "; error reading stream";
+			BufferedReader err = new BufferedReader(new InputStreamReader(is));
 			resp = "Request failed. Response code: " + responseCode + " Response:\n"
 				+ err.lines().collect(Collectors.joining("\n"));
 			err.close();
