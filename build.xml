@@ -175,7 +175,9 @@
 	<target name="compile"
 	        depends="prepare"
 	        description="Compile all of the source files">
-		<javac srcdir="${build.src}"
+		<javac fork="yes"
+		       executable="/usr/bin/javac"
+		       srcdir="${build.src}"
 		       destdir="${build.classes}"
 		       debug="${debug}"
 		       deprecation="off"
