@@ -60,7 +60,7 @@ public class SshMessenger extends BasicMessenger {
 
 	/** Controller struct */
 	private ControllerImpl controller;
-	
+
 	/** Address to connect */
 	private final InetSocketAddress inetAddress;
 
@@ -71,10 +71,10 @@ public class SshMessenger extends BasicMessenger {
 	private final int conn_timeout;
 
 	/** SSH Session */
-    private Session session;
-    
+	private Session session;
+
 	/** SSH channel */
-    private Channel channel;
+	private Channel channel;
 
 	/** Raw Input stream */
 	private InputStream input;
@@ -145,7 +145,7 @@ public class SshMessenger extends BasicMessenger {
 			throw new ConnectException(msg);
 		}
 	}
-	
+
 	/** Get the input stream.
 	 * @param path Relative path name.
 	 * @return An input stream for reading from the messenger. */
