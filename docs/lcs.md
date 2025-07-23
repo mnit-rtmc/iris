@@ -6,20 +6,20 @@ Lane Control Signs (LCS) are traffic-control devices for displaying downstream
 lane conditions to motorists.  Typically, one sign is mounted over each lane
 as an array.  They can display standard **indications**:
 
-| Indication                | Symbol
-|---------------------------|--------------
-| `Dark`                    | <span style="background:black;border:0.1rem solid gray">    </span>
-| `Lane open`               | <span style="background:black;color:#0f0;border:0.1rem solid gray"> ↓ </span>
-| `Use caution`             | <span style="background:black;color:#ff0;border:0.1rem solid gray"> ⇣ </span>
-| `Lane closed ahead`       | <span style="background:black;color:#ff0;border:0.1rem solid gray"> ✕ </span>
-| `Lane closed`             | <span style="background:black;color:#f00;border:0.1rem solid gray"> ✖ </span>
-| `Merge right`             | <span style="background:black;color:#ff0;border:0.1rem solid gray"> 》</span>
-| `Merge left`              | <span style="background:black;color:#ff0;border:0.1rem solid gray">《 </span>
-| `Must exit right`         | <span style="background:black;color:#fff;border:0.1rem solid gray"> ⤷ </span>
-| `Must exit left`          | <span style="background:black;color:#fff;border:0.1rem solid gray"> ⤶ </span>
-| `HOV / HOT`               | <span style="background:black;color:#fff;border:0.1rem solid gray"> ◊ </span>
-| `Variable speed advisory` | <span style="background:black;color:#ff0;border:0.1rem solid gray"> A </span>
-| `Variable speed limit`    | <span style="background:white;color:black;border:0.1rem solid gray"> L </span>
+| `#` | Indication                | Symbol
+|-----|---------------------------|--------------
+|   1 | `Dark`                    | <span style="background:black;border:0.1rem solid gray">    </span>
+|   2 | `Lane open`               | <span style="background:black;color:#0f0;border:0.1rem solid gray"> ↓ </span>
+|   3 | `Use caution`             | <span style="background:black;color:#ff0;border:0.1rem solid gray"> ⇣ </span>
+|   4 | `Lane closed ahead`       | <span style="background:black;color:#ff0;border:0.1rem solid gray"> ✕ </span>
+|   5 | `Lane closed`             | <span style="background:black;color:#f00;border:0.1rem solid gray"> ✖ </span>
+|   6 | `Merge right`             | <span style="background:black;color:#ff0;border:0.1rem solid gray"> 》</span>
+|   7 | `Merge left`              | <span style="background:black;color:#ff0;border:0.1rem solid gray">《 </span>
+|   8 | `Must exit right`         | <span style="background:black;color:#fff;border:0.1rem solid gray"> ⤷ </span>
+|   9 | `Must exit left`          | <span style="background:black;color:#fff;border:0.1rem solid gray"> ⤶ </span>
+|  10 | `HOV / HOT`               | <span style="background:black;color:#fff;border:0.1rem solid gray"> ◊ </span>
+|  11 | `Variable speed advisory` | <span style="background:black;color:#ff0;border:0.1rem solid gray"> A </span>
+|  12 | `Variable speed limit`    | <span style="background:white;color:black;border:0.1rem solid gray"> L </span>
 
 <details>
 <summary>API Resources 🕵️ </summary>
