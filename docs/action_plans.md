@@ -67,7 +67,8 @@ plan.  These devices can be:
 [Priority] determines the priority of messages created by the action.  For
 camera actions, this value indicates:
 * `0` activate wiper
-* `1-12` a [preset] number to recall
+* `1-12` a [preset] number to recall (ignored if the camera is associated
+  with an [incident])
 
 <details>
 <summary>API Resources 🕵️ </summary>
@@ -248,6 +249,7 @@ stored in the `action_plan_event` table.
 [event]: events.html
 [exit ramp backup]: exit_backup.html
 [hashtag]: hashtags.html
+[incident]: incidents.html
 [message pattern]: message_patterns.html
 [priority]: sign_message.html#message-priority
 [Msg-Feed]: protocols.html#msg-feed

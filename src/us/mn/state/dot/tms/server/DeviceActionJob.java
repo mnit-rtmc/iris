@@ -32,6 +32,8 @@ import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.Hashtags;
+import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
 
@@ -208,12 +210,24 @@ public class DeviceActionJob extends Job {
 					cam.setDeviceReq(DeviceRequest.
 						CAMERA_WIPER_ONESHOT);
 				} else if (preset_num > 0 && preset_num <= 12) {
-					cam.setRecallPreset(preset_num);
+					if (!isIncidentCamera(cam))
+						cam.setRecallPreset(preset_num);
 				} else {
 					// FIXME: save snapshot?
 				}
 			}
 		}
+	}
+
+	/** Check if a camera is associated with an incident */
+	private boolean isIncidentCamera(CameraImpl cam) {
+		Iterator<Incident> it = IncidentHelper.iterator();
+		while (it.hasNext()) {
+			Incident i = it.next();
+			if (cam == i.getCamera() && !i.getCleared())
+				return true;
+		}
+		return false;
 	}
 
 	/** Perform an action for ramp meters */

@@ -24,7 +24,6 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.Lcs;
 import us.mn.state.dot.tms.LcsLock;
 import us.mn.state.dot.tms.client.Session;
