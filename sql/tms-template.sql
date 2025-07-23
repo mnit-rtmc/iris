@@ -3360,7 +3360,8 @@ CREATE TABLE iris.device_action (
     phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
     hashtag VARCHAR(16) NOT NULL,
     msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern,
-    msg_priority INTEGER NOT NULL,
+    msg_priority INTEGER NOT NULL
+        CHECK (msg_priority >= 1 AND msg_priority <= 15),
 
     CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$')
 );

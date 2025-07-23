@@ -206,12 +206,12 @@ public class DeviceActionJob extends Job {
 				cam.getGeoLoc(), logger);
 			if (amsg.isPassing()) {
 				int preset_num = da.getMsgPriority();
-				if (preset_num == 0) {
-					cam.setDeviceReq(DeviceRequest.
-						CAMERA_WIPER_ONESHOT);
-				} else if (preset_num > 0 && preset_num <= 12) {
+				if (preset_num >= 1 && preset_num <= 12) {
 					if (!isIncidentCamera(cam))
 						cam.setRecallPreset(preset_num);
+				} else if (preset_num == 15) {
+					cam.setDeviceReq(DeviceRequest.
+						CAMERA_WIPER_ONESHOT);
 				} else {
 					// FIXME: save snapshot?
 				}
