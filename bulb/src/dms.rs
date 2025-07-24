@@ -85,6 +85,14 @@ pub struct PowerSupply {
     voltage: String,
 }
 
+/// DMS Lock
+#[derive(Debug, Default, Deserialize, PartialEq)]
+pub struct DmsLock {
+    pub reason: String,
+    pub expires: Option<String>,
+    pub user_id: Option<String>,
+}
+
 /// Sign status
 #[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct SignStatus {
@@ -108,6 +116,7 @@ pub struct Dms {
     pub controller: Option<String>,
     pub notes: Option<String>,
     pub msg_current: Option<String>,
+    pub lock: Option<DmsLock>,
     pub has_faults: Option<bool>,
     // secondary attributes
     pub pin: Option<u32>,

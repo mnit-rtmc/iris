@@ -255,7 +255,7 @@ pub const DIRECTION_LUT: &str = "\
 
 /// SQL query for all DMS (primary)
 pub const DMS_ALL: &str = "\
-  SELECT d.name, location, msg_current, \
+  SELECT d.name, location, msg_current, lock, \
          NULLIF(char_length(status->>'faults') > 0, false) AS has_faults, \
          notes, controller \
   FROM iris.dms d \
@@ -265,8 +265,8 @@ pub const DMS_ALL: &str = "\
 /// SQL query for one DMS (secondary)
 pub const DMS_ONE: &str = "\
   SELECT d.name, location, geo_loc, controller, pin, notes, \
-         static_graphic, beacon, preset, sign_config, sign_detail, status, \
-         char_length(status->>'faults') > 0 AS has_faults, \
+         static_graphic, beacon, preset, sign_config, sign_detail, \
+         lock, status, char_length(status->>'faults') > 0 AS has_faults, \
          msg_user, msg_sched, msg_current, expire_time, \
          md5(concat(sign_config, text(pixel_failures))) as pix_failures \
   FROM iris.dms d \
