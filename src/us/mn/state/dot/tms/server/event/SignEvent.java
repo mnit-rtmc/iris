@@ -45,19 +45,13 @@ public class SignEvent extends BaseEvent {
 	/** Message owner */
 	private final String msg_owner;
 
-	/** Duration (minutes) */
-	private final Integer duration;
-
 	/** Create a new sign event */
-	public SignEvent(EventType et, String d, String m, String o,
-		Integer dur)
-	{
+	public SignEvent(EventType et, String d, String m, String o) {
 		super(et);
 		assert isSignEvent(et);
 		device_id = d;
 		multi = m;
 		msg_owner = o;
-		duration = dur;
 	}
 
 	/** Get the event config name */
@@ -81,7 +75,6 @@ public class SignEvent extends BaseEvent {
 		map.put("device_id", device_id);
 		map.put("multi", multi);
 		map.put("msg_owner", msg_owner);
-		map.put("duration", duration);
 		return map;
 	}
 }

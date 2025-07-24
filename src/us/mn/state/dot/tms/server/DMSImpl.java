@@ -288,8 +288,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				EventType.DMS_MSG_RESET,
 				name,
 				sm.getMulti(),
-				sm.getMsgOwner(),
-				sm.getDuration()
+				sm.getMsgOwner()
 			));
 		}
 		setMsgUserNotify(null);
@@ -824,15 +823,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			? sm.getMsgOwner()
 			: SignMessageHelper.makeMsgOwner(
 				SignMsgSource.reset.bit());
-		Integer duration = (sm != null) ? sm.getDuration() : null;
 		if (SignMessageHelper.isBlank(sm)) {
 			et = EventType.DMS_CLEARED;
 			text = null;
 			if (sent && blank_owner != null)
 				owner = blank_owner;
-			duration = null;
 		}
-		logEvent(new SignEvent(et, name, text, owner, duration));
+		logEvent(new SignEvent(et, name, text, owner));
 		if (sent)
 			blank_owner = null;
 	}
@@ -878,8 +875,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				e.getEventType(),
 				name,
 				sm.getMulti(),
-				sm.getMsgOwner(),
-				sm.getDuration()
+				sm.getMsgOwner()
 			));
 			throw e;
 		}
