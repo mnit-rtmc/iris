@@ -264,7 +264,7 @@ public class MainServer {
 	/** Schedule jobs on TIMER thread */
 	static private void scheduleTimerJobs() {
 		TIMER.addJob(new MeteringJob(FLUSH));
-		TIMER.addJob(new LcsExpireJob());
+		TIMER.addJob(new LockExpireJob());
 		TIMER.addJob(new SendSettingsJob());
 		TIMER.addJob(new SendSettingsJob(500));
 		TIMER.addJob(new TollZoneJob());

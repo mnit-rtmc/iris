@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.Set;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.DmsLock;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Incident;
@@ -68,6 +69,9 @@ public class DMSDispatcher extends JPanel {
 
 	/** User session */
 	private final Session session;
+
+	/** Currently logged in user */
+	private final String user;
 
 	/** Selection model */
 	private final ProxySelectionModel<DMS> sel_mdl;
@@ -116,8 +120,10 @@ public class DMSDispatcher extends JPanel {
 			SignConfig sc = dms.getSignConfig();
 			if (sc != null) {
 				SignMessage sm = creator.createMsgBlank(sc);
-				if (sm != null)
+				if (sm != null) {
 					dms.setMsgUser(sm);
+					dms.setLock(null);
+				}
 			}
 		}
 		selectPreview(false);
@@ -198,6 +204,7 @@ public class DMSDispatcher extends JPanel {
 	public DMSDispatcher(Session s, DMSManager manager) {
 		super(new BorderLayout());
 		session = s;
+		user = session.getUser().getName();
 		DmsCache dms_cache = session.getSonarState().getDmsCache();
 		creator = new SignMessageCreator(s);
 		sel_mdl = manager.getSelectionModel();
@@ -343,11 +350,23 @@ public class DMSDispatcher extends JPanel {
 			SignConfig sc = dms.getSignConfig();
 			if (sc != null) {
 				SignMessage sm = createMessage(sc, ms);
-				if (sm != null)
+				if (sm != null) {
+					DmsLock lk = makeLock();
 					dms.setMsgUser(sm);
+					dms.setLock(lk.toString());
+				}
 			}
 		}
 		selectPreview(false);
+	}
+
+	/** Make DMS lock */
+	private DmsLock makeLock() {
+		DmsLock lk = new DmsLock(null);
+		lk.setUser(user);
+		lk.setReason(DmsLock.REASON_INCIDENT);
+		lk.setDuration(composer.getDuration());
+		return lk;
 	}
 
 	/** Create a new message for a sign configuration.

@@ -29,7 +29,7 @@ public class DmsLock {
 	static private final String REASON = "reason";
 
 	/** REASON: Incident */
-	static private final String REASON_INCIDENT = "incident";
+	static public final String REASON_INCIDENT = "incident";
 
 	/** REASON: Testing */
 	static private final String REASON_TESTING = "testing";
@@ -106,12 +106,9 @@ public class DmsLock {
 
 	/** Set the lock reason */
 	public void setReason(String r) {
-		if (r != null) {
+		if (r != null)
 			putReason(r);
-			// Only allow "incident" or "testing" for locked on
-			boolean lock_on = (getOnMinutes() != null);
-			putExpires((lock_on) ? makeExpires() : null);
-		} else
+		else
 			clear();
 	}
 
@@ -130,6 +127,11 @@ public class DmsLock {
 		return lock.optString(EXPIRES, null);
 	}
 
+	/** Set the lock duration */
+	public void setDuration(Integer min) {
+		putExpires(makeExpires(getOnMinutes(min)));
+	}
+
 	/** Put the lock expiration date/time */
 	private void putExpires(String ex) {
 		try {
@@ -141,8 +143,7 @@ public class DmsLock {
 	}
 
 	/** Make lock expires date/time */
-	private String makeExpires() {
-		Integer min = getOnMinutes();
+	private String makeExpires(Integer min) {
 		if (min != null) {
 			long now = TimeSteward.currentTimeMillis();
 			long ms = min * 60 * 1000;
@@ -151,11 +152,11 @@ public class DmsLock {
 			return null;
 	}
 
-	/** Get ON duration depending on the lock reason */
-	private Integer getOnMinutes() {
+	/** Filter ON duration depending on the lock reason */
+	private Integer getOnMinutes(Integer min) {
 		String reason = optReason();
 		if (REASON_INCIDENT.equals(reason))
-			return 30;
+			return min;
 		else if (REASON_TESTING.equals(reason))
 			return 5;
 		else

@@ -18,27 +18,47 @@ import java.util.Calendar;
 import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Lcs;
 import us.mn.state.dot.tms.LcsHelper;
 
 /**
- * Job to expire LCS locks.
+ * Job to expire DMS and LCS locks.
  *
  * @author Douglas Lau
  */
-public class LcsExpireJob extends Job {
+public class LockExpireJob extends Job {
 
-	/** Seconds to offset from start of interval. */
-	static private final int OFFSET_SECS = 2;
+	/** Seconds to offset from start of interval */
+	static private final int OFFSET_SECS = 0;
 
-	/** Create a new LCS expire job */
-	public LcsExpireJob() {
+	/** Create a new lock expire job */
+	public LockExpireJob() {
 		super(Calendar.SECOND, 30, Calendar.SECOND, OFFSET_SECS);
 	}
 
 	/** Perform the job */
 	@Override
 	public void perform() {
+		expireDmsLocks();
+		expireLcsLocks();
+	}
+
+	/** Check DMS locks for expiration */
+	private void expireDmsLocks() {
+		Iterator<DMS> it = DMSHelper.iterator();
+		while (it.hasNext()) {
+			DMS dms = it.next();
+			if (dms instanceof DMSImpl) {
+				DMSImpl dmsi = (DMSImpl) dms;
+				dmsi.checkLockExpired();
+			}
+		}
+	}
+
+	/** Check LCS locks for expiration */
+	private void expireLcsLocks() {
 		Iterator<Lcs> it = LcsHelper.iterator();
 		while (it.hasNext()) {
 			Lcs lcs = it.next();

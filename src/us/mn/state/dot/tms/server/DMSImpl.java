@@ -1319,24 +1319,26 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			sendDeviceRequest(DeviceRequest.QUERY_STATUS);
 		else {
 			sendDeviceRequest(DeviceRequest.QUERY_MESSAGE);
-			checkMsgExpiration();
 			updateSchedMsg();
 		}
 	}
 
-	/** Check if current sign message has expired */
-	private void checkMsgExpiration() {
-		Long et = expire_time;
-		if (et != null) {
-			long now = TimeSteward.currentTimeMillis();
-			if (now >= et) {
+	/** Check if lock has expired */
+	public void checkLockExpired() {
+		DmsLock lk = new DmsLock(lock);
+		String exp = lk.optExpires();
+		if (exp != null) {
+			Long e = TimeSteward.parse8601(exp);
+			if (e != null && e < TimeSteward.currentTimeMillis()) {
 				try {
 					int src = SignMsgSource.expired.bit();
 					doSetMsgUser(createMsgBlank(src));
+					setLockChecked(null);
+					notifyAttribute("lock");
 				}
-				catch (TMSException e) {
-					logError("checkMsgExpiration: " +
-						e.getMessage());
+				catch (TMSException ex) {
+					logError("checkLockExpired: " +
+						ex.getMessage());
 				}
 			}
 		}
