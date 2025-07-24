@@ -20,7 +20,7 @@ import org.json.JSONObject;
 import us.mn.state.dot.sched.TimeSteward;
 
 /**
- * Ramp meter lock.
+ * LCS lock.
  *
  * @author Douglas Lau
  */
