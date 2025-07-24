@@ -40,6 +40,7 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.DmsLock;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
@@ -126,8 +127,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"static_graphic, beacon, preset, sign_config, " +
 			"sign_detail, msg_user, msg_sched, msg_current, " +
-			"expire_time, status, pixel_failures FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+			"expire_time, lock, status, pixel_failures " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DMSImpl(row));
@@ -165,6 +166,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("msg_sched", msg_sched);
 		map.put("msg_current", msg_current);
 		map.put("expire_time", asTimestamp(expire_time));
+		map.put("lock", lock);
 		map.put("status", status);
 		map.put("pixel_failures", pixel_failures);
 		return map;
@@ -183,6 +185,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		g.notifyCreate();
 		geo_loc = g;
 		expire_time = null;
+		lock = null;
 		status = null;
 		pixel_failures = null;
 	}
@@ -203,8 +206,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		     row.getString(12),    // msg_sched
 		     row.getString(13),    // msg_current
 		     row.getTimestamp(14), // expire_time
-		     row.getString(15),    // status
-		     row.getString(16)     // pixel_failures
+		     row.getString(15),    // lock
+		     row.getString(16),    // status
+		     row.getString(17)     // pixel_failures
 		);
 	}
 
@@ -212,7 +216,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private DMSImpl(String n, String loc, String c, int p, String nt,
 		String sg, String b, String cp, String sc, String sd,
 		String mu, String ms, String mc, Date et,
-		String st, String pf) throws TMSException
+		String lk, String st, String pf) throws TMSException
 	{
 		super(n, lookupController(c), p, nt);
 		geo_loc = lookupGeoLoc(loc);
@@ -225,6 +229,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		msg_sched = SignMessageHelper.lookup(ms);
 		msg_current = SignMessageHelper.lookup(mc);
 		expire_time = stampMillis(et);
+		lock = lk;
 		status = st;
 		pixel_failures = pf;
 		weather_sensors = lookupEssMapping();
@@ -1018,6 +1023,46 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public Long getExpireTime() {
 		return expire_time;
+	}
+
+	/** DMS lock (JSON) */
+	private String lock;
+
+	/** Set the lock as JSON */
+	@Override
+	public void setLock(String lk) {
+		lock = lk;
+	}
+
+	/** Set the lock as JSON */
+	public void doSetLock(String lk) throws TMSException {
+		if (!objectEquals(lk, lock)) {
+			if (lk != null)
+				checkLock(new DmsLock(lk));
+			setLockChecked(lk);
+		}
+	}
+
+	/** Check a lock */
+	private void checkLock(DmsLock lk) throws TMSException {
+		if (!getProcUser().equals(lk.optUser()))
+			throw new ChangeVetoException("Bad user!");
+		String exp = lk.optExpires();
+		if (exp != null && TimeSteward.parse8601(exp) == null)
+			throw new ChangeVetoException("Bad expiration!");
+	}
+
+	/** Set the lock as JSON */
+	private void setLockChecked(String lk) throws TMSException {
+		store.update(this, "lock", lk);
+		lock = lk;
+		updateStyles();
+	}
+
+	/** Get the lock as JSON */
+	@Override
+	public String getLock() {
+		return lock;
 	}
 
 	/** Current (JSON) sign status */
