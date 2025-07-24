@@ -3405,8 +3405,7 @@ CREATE TABLE event.sign_event (
         REFERENCES event.event_description(event_desc_id),
     device_id VARCHAR(20),
     multi VARCHAR(1024),
-    msg_owner VARCHAR(127),
-    duration INTEGER
+    msg_owner VARCHAR(127)
 );
 CREATE INDEX ON event.sign_event(event_date);
 
@@ -3427,14 +3426,14 @@ $multi_message$ LANGUAGE plpgsql;
 
 CREATE VIEW sign_event_view AS
     SELECT event_id, event_date, description, device_id,
-           event.multi_message(multi) as message, multi, msg_owner, duration
+           event.multi_message(multi) as message, multi, msg_owner
     FROM event.sign_event JOIN event.event_description
     ON sign_event.event_desc_id = event_description.event_desc_id;
 GRANT SELECT ON sign_event_view TO PUBLIC;
 
 CREATE VIEW recent_sign_event_view AS
     SELECT event_id, event_date, description, device_id, message, multi,
-           msg_owner, duration
+           msg_owner
     FROM sign_event_view
     WHERE event_date > (CURRENT_TIMESTAMP - interval '90 days');
 GRANT SELECT ON recent_sign_event_view TO PUBLIC;
