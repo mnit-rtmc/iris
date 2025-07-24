@@ -28,4 +28,96 @@ CREATE VIEW recent_sign_event_view AS
     WHERE event_date > (CURRENT_TIMESTAMP - interval '90 days');
 GRANT SELECT ON recent_sign_event_view TO PUBLIC;
 
+-- Add DMS lock
+DROP VIEW dms_view;
+DROP VIEW iris.dms;
+
+ALTER TABLE iris._dms ADD COLUMN lock JSONB;
+
+CREATE VIEW iris.dms AS
+    SELECT d.name, geo_loc, controller, pin, notes, static_graphic,
+           beacon, preset, sign_config, sign_detail,
+           msg_user, msg_sched, msg_current, expire_time, lock,
+           status, pixel_failures
+    FROM iris._dms d
+    JOIN iris.controller_io cio ON d.name = cio.name
+    JOIN iris.device_preset p ON d.name = p.name;
+
+CREATE OR REPLACE FUNCTION iris.dms_insert() RETURNS TRIGGER AS
+    $dms_insert$
+BEGIN
+    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
+         VALUES (NEW.name, 'dms', NEW.controller, NEW.pin);
+    INSERT INTO iris.device_preset (name, resource_n, preset)
+         VALUES (NEW.name, 'dms', NEW.preset);
+    INSERT INTO iris._dms (
+        name, geo_loc, notes, static_graphic, beacon,
+        sign_config, sign_detail, msg_user, msg_sched, msg_current,
+        expire_time, lock, status, pixel_failures
+    ) VALUES (
+        NEW.name, NEW.geo_loc, NEW.notes, NEW.static_graphic,
+        NEW.beacon, NEW.sign_config, NEW.sign_detail,
+        NEW.msg_user, NEW.msg_sched, NEW.msg_current, NEW.expire_time,
+        NEW.lock, NEW.status, NEW.pixel_failures
+    );
+    RETURN NEW;
+END;
+$dms_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER dms_insert_trig
+    INSTEAD OF INSERT ON iris.dms
+    FOR EACH ROW EXECUTE FUNCTION iris.dms_insert();
+
+CREATE OR REPLACE FUNCTION iris.dms_update() RETURNS TRIGGER AS
+    $dms_update$
+BEGIN
+    UPDATE iris.controller_io
+       SET controller = NEW.controller,
+           pin = NEW.pin
+     WHERE name = OLD.name;
+    UPDATE iris.device_preset
+       SET preset = NEW.preset
+     WHERE name = OLD.name;
+    UPDATE iris._dms
+       SET notes = NEW.notes,
+           static_graphic = NEW.static_graphic,
+           beacon = NEW.beacon,
+           sign_config = NEW.sign_config,
+           sign_detail = NEW.sign_detail,
+           msg_user = NEW.msg_user,
+           msg_sched = NEW.msg_sched,
+           msg_current = NEW.msg_current,
+           expire_time = NEW.expire_time,
+           lock = NEW.lock,
+           status = NEW.status,
+           pixel_failures = NEW.pixel_failures
+     WHERE name = OLD.name;
+    RETURN NEW;
+END;
+$dms_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER dms_update_trig
+    INSTEAD OF UPDATE ON iris.dms
+    FOR EACH ROW EXECUTE FUNCTION iris.dms_update();
+
+CREATE TRIGGER dms_delete_trig
+    INSTEAD OF DELETE ON iris.dms
+    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
+
+CREATE VIEW dms_view AS
+    SELECT d.name, d.geo_loc, cio.controller, cio.pin, d.notes,
+           d.sign_config, d.sign_detail, d.static_graphic, d.beacon,
+           cp.camera, cp.preset_num, default_font,
+           msg_user, msg_sched, msg_current, expire_time, lock,
+           status, pixel_failures,
+           l.roadway, l.road_dir, l.cross_mod, l.cross_street,
+           l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location
+    FROM iris._dms d
+    JOIN iris.controller_io cio ON d.name = cio.name
+    JOIN iris.device_preset p ON d.name = p.name
+    LEFT JOIN iris.camera_preset cp ON cp.name = p.preset
+    LEFT JOIN geo_loc_view l ON d.geo_loc = l.name
+    LEFT JOIN iris.sign_config sc ON d.sign_config = sc.name;
+GRANT SELECT ON dms_view TO PUBLIC;
+
 COMMIT;

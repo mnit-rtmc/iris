@@ -3127,6 +3127,7 @@ CREATE TABLE iris._dms (
     msg_sched VARCHAR(20) REFERENCES iris.sign_message,
     msg_current VARCHAR(20) REFERENCES iris.sign_message,
     expire_time TIMESTAMP WITH time zone,
+    lock JSONB,
     status JSONB,
     pixel_failures VARCHAR
 );
@@ -3162,8 +3163,8 @@ CREATE TRIGGER dms_table_notify_trig
 CREATE VIEW iris.dms AS
     SELECT d.name, geo_loc, controller, pin, notes, static_graphic,
            beacon, preset, sign_config, sign_detail,
-           msg_user, msg_sched, msg_current, expire_time, status,
-           pixel_failures
+           msg_user, msg_sched, msg_current, expire_time, lock,
+           status, pixel_failures
     FROM iris._dms d
     JOIN iris.controller_io cio ON d.name = cio.name
     JOIN iris.device_preset p ON d.name = p.name;
@@ -3178,12 +3179,12 @@ BEGIN
     INSERT INTO iris._dms (
         name, geo_loc, notes, static_graphic, beacon,
         sign_config, sign_detail, msg_user, msg_sched, msg_current,
-        expire_time, status, pixel_failures
+        expire_time, lock, status, pixel_failures
     ) VALUES (
         NEW.name, NEW.geo_loc, NEW.notes, NEW.static_graphic,
         NEW.beacon, NEW.sign_config, NEW.sign_detail,
         NEW.msg_user, NEW.msg_sched, NEW.msg_current, NEW.expire_time,
-        NEW.status, NEW.pixel_failures
+        NEW.lock, NEW.status, NEW.pixel_failures
     );
     RETURN NEW;
 END;
@@ -3213,6 +3214,7 @@ BEGIN
            msg_sched = NEW.msg_sched,
            msg_current = NEW.msg_current,
            expire_time = NEW.expire_time,
+           lock = NEW.lock,
            status = NEW.status,
            pixel_failures = NEW.pixel_failures
      WHERE name = OLD.name;
@@ -3232,7 +3234,7 @@ CREATE VIEW dms_view AS
     SELECT d.name, d.geo_loc, cio.controller, cio.pin, d.notes,
            d.sign_config, d.sign_detail, d.static_graphic, d.beacon,
            cp.camera, cp.preset_num, default_font,
-           msg_user, msg_sched, msg_current, expire_time,
+           msg_user, msg_sched, msg_current, expire_time, lock,
            status, pixel_failures,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street,
            l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location
