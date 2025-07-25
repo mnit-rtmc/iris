@@ -105,16 +105,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Number of polling periods for DMS action duration */
 	static private final int DURATION_PERIODS = 3;
 
-	/** Get the expiration time of a sign message (at activation time). */
-	static private Long getExpireTime(SignMessage sm) {
-		if (SignMessageHelper.isOperatorExpiring(sm)) {
-			long dur_ms = sm.getDuration() * 60 * 1000;
-			long now = TimeSteward.currentTimeMillis();
-			return now + dur_ms;
-		} else
-			return null;
-	}
-
 	/** Interface for handling brightness samples */
 	static public interface BrightnessHandler {
 		void feedback(EventType et, int photo, int output);
