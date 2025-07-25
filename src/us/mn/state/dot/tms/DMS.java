@@ -75,12 +75,6 @@ public interface DMS extends Device {
 	/** Get the current sign message */
 	SignMessage getMsgCurrent();
 
-	/** Get current message expiration time.
-	 * @return Expiration time for the current message (ms since epoch), or
-	 *         null for no expiration.
-	 * @see java.lang.System#currentTimeMillis */
-	Long getExpireTime();
-
 	/** Set the lock (JSON) */
 	void setLock(String lk);
 
