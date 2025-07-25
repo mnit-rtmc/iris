@@ -240,7 +240,7 @@ class OpQueryMsg extends OpDms {
 		SignMsgPriority rpri, Integer duration)
 	{
 		return (SignMessageImpl) m_dms.createMsg(multi, owner, false,
-			false, rpri, duration);
+			false, false, rpri, duration);
 	}
 
 	/** Return a MULTI with an updated page on-time with the value read

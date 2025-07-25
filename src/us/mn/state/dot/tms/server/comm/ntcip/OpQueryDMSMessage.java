@@ -220,11 +220,13 @@ public class OpQueryDMSMessage extends OpDMS {
 		}
 		String ms = multi_string.getValue();
 		String owner = msg_owner.getValue();
+		boolean st = false;
 		boolean fb = (beacon.getInteger() == 1);
 		boolean ps = (srv.getInteger() == 1);
 		SignMsgPriority mp = getMsgPriority();
 		Integer duration = parseDuration(time.getInteger());
-		SignMessage sm = dms.createMsg(ms, owner, fb, ps, mp, duration);
+		SignMessage sm = dms.createMsg(ms, owner, st, fb, ps, mp,
+			duration);
 		setMsgCurrent(sm);
 	}
 

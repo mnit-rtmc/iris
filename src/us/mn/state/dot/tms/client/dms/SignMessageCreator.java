@@ -115,8 +115,9 @@ public class SignMessageCreator {
 		Integer dur)
 	{
 		String owner = SignMessageHelper.makeMsgOwner(src, user);
+		boolean st = false;
 		String nm = "usr_" + SignMessageHelper.makeHash(sc, inc, ms,
-			owner, fb, ps, mp, dur);
+			owner, st, fb, ps, mp, dur);
 		SignMessage sm = SignMessageHelper.lookup(nm);
 		if (sm != null)
 			return sm;
@@ -148,6 +149,7 @@ public class SignMessageCreator {
 			attrs.put("incident", inc);
 		attrs.put("multi", ms);
 		attrs.put("msg_owner", msg_owner);
+		attrs.put("sticky", false);
 		attrs.put("flash_beacon", fb);
 		attrs.put("pixel_service", ps);
 		attrs.put("msg_priority", Integer.valueOf(mp.ordinal()));

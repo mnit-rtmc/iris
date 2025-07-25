@@ -534,22 +534,23 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		String owner = SignMessageHelper.makeMsgOwner(src);
 		SignMsgPriority mp = SignMsgPriority.low_1;
 		return SignMessageImpl.findOrCreate(sign_config, null, "",
-			owner, false, false, mp, null);
+			owner, false, false, false, mp, null);
 	}
 
 	/** Create a message for the sign.
 	 * @param ms MULTI string for message.
 	 * @param owner Message owner.
+	 * @param st Sticky flag.
 	 * @param fb Flash beacon flag.
 	 * @param ps Pixel service flag.
 	 * @param mp Message priority.
 	 * @param dur Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	public SignMessage createMsg(String ms, String owner, boolean fb,
-		boolean ps, SignMsgPriority mp, Integer dur)
+	public SignMessage createMsg(String ms, String owner, boolean st,
+		boolean fb, boolean ps, SignMsgPriority mp, Integer dur)
 	{
 		return SignMessageImpl.findOrCreate(sign_config, null, ms,
-			owner, fb, ps, mp, dur);
+			owner, st, fb, ps, mp, dur);
 	}
 
 	/** Create a scheduled message.
@@ -564,13 +565,14 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		String owner = SignMessageHelper.makeMsgOwner(src,
 			ap.getName());
 		MsgPattern pat = da.getMsgPattern();
+		boolean st = ap.getSticky();
 		boolean fb = (pat != null) && pat.getFlashBeacon();
 		boolean ps = (pat != null) && pat.getPixelService();
 		SignMsgPriority mp = SignMsgPriority.fromOrdinal(
 			da.getMsgPriority());
 		Integer dur = ap.getSticky() ? null : getUnstickyDurationMins();
 		return SignMessageImpl.findOrCreate(sign_config, null, ms,
-			owner, fb, ps, mp, dur);
+			owner, st, fb, ps, mp, dur);
 	}
 
 	/** Get the duration of an unsticky action */
@@ -911,6 +913,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		SignMessage user, String ms)
 	{
 		String inc = user.getIncident();
+		boolean st = false;
 		boolean fb = user.getFlashBeacon();
 		boolean ps = user.getPixelService();
 		SignMsgPriority mp = SignMsgPriority.fromOrdinal(
@@ -926,7 +929,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		String owner = SignMessageHelper.makeMsgOwner(src, unm);
 		Integer dur = user.getDuration();
 		return SignMessageImpl.findOrCreate(sign_config, inc, ms,
-			owner, fb, ps, mp, dur);
+			owner, st, fb, ps, mp, dur);
 	}
 
 	/** Compare sign messages for higher priority */

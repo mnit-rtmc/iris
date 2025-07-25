@@ -139,7 +139,7 @@ public class NtcipPoller extends ThreadedPoller implements AlarmPoller,
 	@Override
 	public void sendMessage(DMSImpl dms, SignMessage sm) {
 		if (dms.getMsgCurrent() == sm) {
-			if (SignMessageHelper.isScheduledExpiring(sm))
+			if (SignMessageHelper.isScheduledUnsticky(sm))
 				addOp(new OpUpdateDMSDuration(dms, sm));
 		} else
 			addOp(new OpSendDMSMessage(dms, sm));
