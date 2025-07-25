@@ -28,10 +28,16 @@ CREATE VIEW recent_sign_event_view AS
     WHERE event_date > (CURRENT_TIMESTAMP - interval '90 days');
 GRANT SELECT ON recent_sign_event_view TO PUBLIC;
 
+-- ADD sticky to sign message
 -- ADD lock / DROP expire_time from DMS
+DROP VIEW sign_message_view;
 DROP VIEW dms_message_view;
 DROP VIEW dms_view;
 DROP VIEW iris.dms;
+
+ALTER TABLE iris.sign_message ADD COLUMN sticky BOOLEAN;
+UPDATE iris.sign_message SET sticky = false;
+ALTER TABLE iris.sign_message ALTER COLUMN sticky SET NOT NULL;
 
 ALTER TABLE iris._dms ADD COLUMN lock JSONB;
 ALTER TABLE iris._dms DROP COLUMN expire_time;
@@ -121,13 +127,19 @@ GRANT SELECT ON dms_view TO PUBLIC;
 
 CREATE VIEW dms_message_view AS
     SELECT d.name, msg_current, cc.description AS condition,
-           fail_time IS NOT NULL AS failed, multi, msg_owner, flash_beacon,
-           pixel_service, msg_priority, duration
+           fail_time IS NOT NULL AS failed, multi, msg_owner, sticky,
+           flash_beacon, pixel_service, msg_priority, duration
     FROM iris._dms d
     LEFT JOIN iris.controller_io cio ON d.name = cio.name
     LEFT JOIN iris.controller c ON cio.controller = c.name
     LEFT JOIN iris.condition cc ON c.condition = cc.id
     LEFT JOIN iris.sign_message sm ON d.msg_current = sm.name;
 GRANT SELECT ON dms_message_view TO PUBLIC;
+
+CREATE VIEW sign_message_view AS
+    SELECT name, sign_config, incident, multi, msg_owner, sticky, flash_beacon,
+           pixel_service, msg_priority, duration
+    FROM iris.sign_message;
+GRANT SELECT ON sign_message_view TO PUBLIC;
 
 COMMIT;
