@@ -29,8 +29,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CameraPreset;
+import us.mn.state.dot.tms.DmsLock;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -64,9 +66,10 @@ public class SingleSignTab extends IPanel {
 	/** Preview filter color */
 	static private final Color PREVIEW_CLR = new Color(0, 0, 255, 48);
 
-	/** Get the expiration time of a DMS message */
-	static private String getExpiration(DMS dms) {
-		Long et = (dms != null) ? dms.getExpireTime() : null;
+	/** Get the lock expiration time */
+	static private String getExpiration(DmsLock lk) {
+		String exp = lk.optExpires();
+		Long et = (exp != null) ? TimeSteward.parse8601(exp) : null;
 		if (et != null) {
 			SimpleDateFormat tf = new SimpleDateFormat("HH:mm");
 			return tf.format(new Date(et));
@@ -374,7 +377,8 @@ public class SingleSignTab extends IPanel {
 			dispatcher.updateMsgCurrent(dms);
 			adjusting--;
 		}
-		expiration_lbl.setText(getExpiration(dms));
+		DmsLock lk = new DmsLock((dms != null) ? dms.getLock() : null);
+		expiration_lbl.setText(getExpiration(lk));
 	}
 
 	/** Set the sign pixel pager */

@@ -127,8 +127,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"static_graphic, beacon, preset, sign_config, " +
 			"sign_detail, msg_user, msg_sched, msg_current, " +
-			"expire_time, lock, status, pixel_failures " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+			"lock, status, pixel_failures FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DMSImpl(row));
@@ -165,7 +165,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("msg_user", msg_user);
 		map.put("msg_sched", msg_sched);
 		map.put("msg_current", msg_current);
-		map.put("expire_time", asTimestamp(expire_time));
 		map.put("lock", lock);
 		map.put("status", status);
 		map.put("pixel_failures", pixel_failures);
@@ -184,7 +183,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		GeoLocImpl g = new GeoLocImpl(name, SONAR_TYPE);
 		g.notifyCreate();
 		geo_loc = g;
-		expire_time = null;
 		lock = null;
 		status = null;
 		pixel_failures = null;
@@ -205,18 +203,17 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		     row.getString(11),    // msg_user
 		     row.getString(12),    // msg_sched
 		     row.getString(13),    // msg_current
-		     row.getTimestamp(14), // expire_time
-		     row.getString(15),    // lock
-		     row.getString(16),    // status
-		     row.getString(17)     // pixel_failures
+		     row.getString(14),    // lock
+		     row.getString(15),    // status
+		     row.getString(16)     // pixel_failures
 		);
 	}
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, String loc, String c, int p, String nt,
 		String sg, String b, String cp, String sc, String sd,
-		String mu, String ms, String mc, Date et,
-		String lk, String st, String pf) throws TMSException
+		String mu, String ms, String mc, String lk, String st,
+		String pf) throws TMSException
 	{
 		super(n, lookupController(c), p, nt);
 		geo_loc = lookupGeoLoc(loc);
@@ -228,7 +225,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		msg_user = SignMessageHelper.lookup(mu);
 		msg_sched = SignMessageHelper.lookup(ms);
 		msg_current = SignMessageHelper.lookup(mc);
-		expire_time = stampMillis(et);
 		lock = lk;
 		status = st;
 		pixel_failures = pf;
@@ -799,7 +795,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			logMsg(sm, sent);
 			setMsgCurrent(sm);
 			notifyAttribute("msgCurrent");
-			updateExpireTime(sm);
 			updateStyles();
 		}
 		updateBeacon();
@@ -991,38 +986,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		       sm == msg_sched ||
 		       sm == msg_current ||
 		       sm == msg_next;
-	}
-
-	/** Current message expiration time */
-	private Long expire_time;
-
-	/** Update the current message expiration time */
-	private void updateExpireTime(SignMessage sm) {
-		Long et = getExpireTime(sm);
-		try {
-			setExpireTimeNotify(et);
-		}
-		catch (TMSException e) {
-			logError("updateExpireTime: " + e.getMessage());
-		}
-	}
-
-	/** Set the current message expiration time */
-	private void setExpireTimeNotify(Long et) throws TMSException {
-		if (!objectEquals(et, expire_time)) {
-			store.update(this, "expire_time", asTimestamp(et));
-			expire_time = et;
-			notifyAttribute("expireTime");
-		}
-	}
-
-	/** Get current message expiration time.
-	 * @return Expiration time for the current message (ms since epoch), or
-	 *         null for no expiration.
-	 * @see java.lang.System#currentTimeMillis */
-	@Override
-	public Long getExpireTime() {
-		return expire_time;
 	}
 
 	/** DMS lock (JSON) */
