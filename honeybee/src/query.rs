@@ -267,7 +267,7 @@ pub const DMS_ONE: &str = "\
   SELECT d.name, location, geo_loc, controller, pin, notes, \
          static_graphic, beacon, preset, sign_config, sign_detail, \
          lock, status, char_length(status->>'faults') > 0 AS has_faults, \
-         msg_user, msg_sched, msg_current, expire_time, \
+         msg_user, msg_sched, msg_current, \
          md5(concat(sign_config, text(pixel_failures))) as pix_failures \
   FROM iris.dms d \
   LEFT JOIN geo_loc_view gl ON d.geo_loc = gl.name \
@@ -282,12 +282,12 @@ pub const DMS_PUB: &str = "\
 
 /// SQL query for all DMS status (public)
 ///
-/// NOTE: the `sources` attribute is deprecated,
+/// NOTE: the `sources` and `expire_time` attributes are deprecated,
 ///       but required by external systems (for now)
 pub const DMS_STATUS: &str = "\
   SELECT name, msg_current, \
          replace(substring(msg_owner FROM 'IRIS; ([^;]*).*'), '+', ', ') \
-         AS sources, failed, duration, expire_time \
+         AS sources, failed, duration, NULL AS expire_time \
   FROM dms_message_view WHERE condition = 'Active' \
   ORDER BY name";
 
