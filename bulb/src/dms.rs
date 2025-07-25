@@ -93,6 +93,18 @@ pub struct DmsLock {
     pub user_id: Option<String>,
 }
 
+impl DmsLock {
+    /// Format lock expire time
+    fn expires(&self) -> Option<String> {
+        if let Some(expires) = &self.expires {
+            if let Ok(dt) = DateTime::parse_from_rfc3339(expires) {
+                return Some(format!("⏲️ {}", &dt.format("%H:%M")));
+            }
+        }
+        None
+    }
+}
+
 /// Sign status
 #[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct SignStatus {
@@ -129,7 +141,6 @@ pub struct Dms {
     pub msg_user: Option<String>,
     pub geo_loc: Option<String>,
     pub status: Option<SignStatus>,
-    pub expire_time: Option<String>,
     pub pix_failures: Option<String>,
 }
 
@@ -710,11 +721,10 @@ impl Dms {
         html.div().class("row fill");
         self.item_states(anc).tooltips(&mut html);
         html.span();
-        if let Some(expire_time) = &self.expire_time {
-            match DateTime::parse_from_rfc3339(expire_time) {
-                Ok(dt) => html.text(format!("⏲️ {}", &dt.format("%H:%M"))),
-                _ => html.text("expires"),
-            };
+        if let Some(lock) = &self.lock {
+            if let Some(expires) = lock.expires() {
+                html.text(expires);
+            }
         }
         html.end(); /* span */
         html.end(); /* div */
