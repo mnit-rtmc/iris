@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2024  Minnesota Department of Transportation
+ * Copyright (C) 2008-2025  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  * Copyright (C) 2021  Iteris Inc.
  *
@@ -82,17 +82,18 @@ public class SignMessageHelper extends BaseHelper {
 	 * @param inc Associated incident (original name).
 	 * @param ms MULTI string.
 	 * @param owner Message owner.
+	 * @param st Sticky flag.
 	 * @param fb Flash beacon flag.
 	 * @param ps Pixel service flag.
 	 * @param mp Message priority.
 	 * @param dur Duration (null for indefinite).
 	 * @return Hash code of sign message. */
 	static public String makeHash(SignConfig sc, String inc,
-		String ms, String owner, boolean fb, boolean ps,
+		String ms, String owner, boolean st, boolean fb, boolean ps,
 		SignMsgPriority mp, Integer dur)
 	{
-		int hash = Objects.hash(sc.getName(), inc, ms, owner, fb, ps,
-			mp, dur);
+		int hash = Objects.hash(sc.getName(), inc, ms, owner, st, fb,
+			ps, mp, dur);
 		return HexString.format(hash, 8);
 	}
 
@@ -208,23 +209,12 @@ public class SignMessageHelper extends BaseHelper {
 		}
 	}
 
-	/** Check if a message is scheduled and has indefinite duration.
-	 * This should only be true for messages from "sticky" DMS actions.
+	/** Check if a message is scheduled and not sticky.
 	 * @param sm The sign message. */
-	static public boolean isScheduledSticky(SignMessage sm) {
+	static public boolean isScheduledUnsticky(SignMessage sm) {
 		int bits = sourceBits(sm);
 		return SignMsgSource.schedule.checkBit(bits) &&
-		      (sm.getDuration() == null) &&
-		      !SignMsgSource.operator.checkBit(bits);
-	}
-
-	/** Check if a message is scheduled and expires.
-	 * @param sm The sign message. */
-	static public boolean isScheduledExpiring(SignMessage sm) {
-		int bits = sourceBits(sm);
-		return SignMsgSource.schedule.checkBit(bits) &&
-		      (sm.getDuration() != null) &&
-		      !SignMsgSource.operator.checkBit(bits);
+		      !sm.getSticky();
 	}
 
 	/** Check if a message is operator created and expires.

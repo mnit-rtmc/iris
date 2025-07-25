@@ -631,8 +631,7 @@ public class OpSendDMSMessage extends OpDMS {
 			//       stupid sign bug.  It may no longer be needed.
 			ASN1Integer time = dmsMessageTimeRemaining.makeInt();
 			time.setInteger(getDuration());
-			DmsMessageMemoryType memory = SignMessageHelper
-				.isScheduledSticky(message)
+			DmsMessageMemoryType memory = message.getSticky()
 			       ? DmsMessageMemoryType.currentBuffer
 			       : DmsMessageMemoryType.blank;
 			setCommAndPower(memory);
