@@ -73,6 +73,22 @@ public class MeterLock {
 	/** Lock JSON object */
 	private final JSONObject lock;
 
+	/** Compare for equality */
+	@Override
+	public boolean equals(Object other) {
+		if (other instanceof MeterLock) {
+			MeterLock o = (MeterLock) other;
+			return lock.equals(o.lock);
+		} else
+			return false;
+	}
+
+	/** Get hash code */
+	@Override
+	public int hashCode() {
+		return lock.hashCode();
+	}
+
 	/** Create a meter lock */
 	public MeterLock(String lk) {
 		JSONObject jo = new JSONObject();
