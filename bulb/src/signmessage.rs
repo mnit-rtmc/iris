@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2024  Minnesota Department of Transportation
+// Copyright (C) 2022-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,8 +22,6 @@ use std::hash::{Hash, Hasher};
 pub struct SignMessage {
     pub name: String,
     pub sign_config: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub incident: Option<String>,
     pub multi: String,
     pub msg_owner: String,
     pub sticky: bool,

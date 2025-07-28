@@ -399,7 +399,6 @@ impl DmsAnc {
     fn find_sign_msg(&self, msg: &SignMessage) -> Option<&SignMessage> {
         self.messages.iter().find(|m| {
             m.sign_config == msg.sign_config
-                && m.incident == msg.incident
                 && m.multi == msg.multi
                 && m.msg_owner == msg.msg_owner
                 && m.sticky == msg.sticky
