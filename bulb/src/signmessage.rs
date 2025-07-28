@@ -26,29 +26,21 @@ pub struct SignMessage {
     pub incident: Option<String>,
     pub multi: String,
     pub msg_owner: String,
+    pub sticky: bool,
     pub flash_beacon: bool,
     pub pixel_service: bool,
     pub msg_priority: u32,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub duration: Option<u32>,
 }
 
 impl SignMessage {
     /// Make a sign message
-    pub fn new(
-        cfg: &str,
-        ms: &str,
-        owner: String,
-        priority: u32,
-        duration: Option<u32>,
-    ) -> Self {
+    pub fn new(cfg: &str, ms: &str, owner: String, priority: u32) -> Self {
         let mut sign_message = SignMessage {
             name: "usr_".to_string(),
             sign_config: cfg.to_string(),
             multi: ms.to_string(),
             msg_owner: owner,
             msg_priority: priority,
-            duration,
             ..Default::default()
         };
         let mut hasher = FnvHasher::default();

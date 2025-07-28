@@ -402,10 +402,10 @@ impl DmsAnc {
                 && m.incident == msg.incident
                 && m.multi == msg.multi
                 && m.msg_owner == msg.msg_owner
+                && m.sticky == msg.sticky
                 && m.flash_beacon == msg.flash_beacon
                 && m.pixel_service == msg.pixel_service
                 && m.msg_priority == msg.msg_priority
-                && m.duration == msg.duration
         })
     }
 
@@ -574,7 +574,13 @@ impl DmsAnc {
     }
 
     /// Create actions to activate a sign message
-    fn sign_msg_actions(self, uri: Uri, msg: SignMessage) -> Vec<Action> {
+    fn sign_msg_actions(
+        self,
+        uri: Uri,
+        msg: SignMessage,
+        _duration: Option<u32>,
+    ) -> Vec<Action> {
+        // FIXME: set dms lock
         match self.find_sign_msg(&msg) {
             #[allow(clippy::vec_init_then_push)]
             Some(msg) => {
@@ -858,7 +864,8 @@ impl Dms {
                         let duration = self.selected_duration();
                         return anc.sign_msg_actions(
                             uri_one(Res::Dms, &self.name),
-                            SignMessage::new(cfg, ms, owner, HIGH_1, duration),
+                            SignMessage::new(cfg, ms, owner, HIGH_1),
+                            duration,
                         );
                     }
                     None => console::log_1(&"no app user!".into()),
@@ -873,7 +880,8 @@ impl Dms {
         match (&self.sign_config, sign_msg_owner(LOW_1)) {
             (Some(cfg), Some(owner)) => anc.sign_msg_actions(
                 uri_one(Res::Dms, &self.name),
-                SignMessage::new(cfg, "", owner, LOW_1, None),
+                SignMessage::new(cfg, "", owner, LOW_1),
+                None,
             ),
             _ => Vec::new(),
         }

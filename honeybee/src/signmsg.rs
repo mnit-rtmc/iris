@@ -33,7 +33,6 @@ struct SignMessage {
     flash_beacon: bool,
     pixel_service: bool,
     msg_priority: i32,
-    duration: Option<i32>,
 }
 
 /// Data needed for rendering sign messages
