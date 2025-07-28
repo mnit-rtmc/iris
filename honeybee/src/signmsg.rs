@@ -27,9 +27,9 @@ use std::time::Instant;
 struct SignMessage {
     name: String,
     sign_config: String,
-    incident: Option<String>,
     multi: String,
     msg_owner: String,
+    sticky: bool,
     flash_beacon: bool,
     pixel_service: bool,
     msg_priority: i32,

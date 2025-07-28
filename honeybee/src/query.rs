@@ -882,14 +882,14 @@ pub const SIGN_DETAIL_ONE: &str = "\
 
 /// SQL query for all sign messages (public)
 pub const SIGN_MSG_PUB: &str = "\
-  SELECT name, sign_config, incident, multi, msg_owner, sticky, flash_beacon, \
+  SELECT name, sign_config, multi, msg_owner, sticky, flash_beacon, \
          pixel_service, msg_priority \
   FROM sign_message_view \
   ORDER BY name";
 
 /// SQL query for one sign message (secondary)
 pub const SIGN_MSG_ONE: &str = "\
-  SELECT name, sign_config, incident, multi, msg_owner, sticky, flash_beacon, \
+  SELECT name, sign_config, multi, msg_owner, sticky, flash_beacon, \
          pixel_service, msg_priority \
   FROM iris.sign_message \
   WHERE name = $1";
