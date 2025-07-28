@@ -65,7 +65,7 @@ public class SignMessageCreator {
 	public SignMessage createMsg(SignConfig sc, String ms, boolean fb,
 		 boolean ps)
 	{
-		return createMsg(sc, null, ms, fb, ps, SignMsgPriority.high_1,
+		return createMsg(sc, ms, fb, ps, SignMsgPriority.high_1,
 			SignMsgSource.operator.bit());
 	}
 
@@ -74,32 +74,29 @@ public class SignMessageCreator {
 	 * @return Blank sign message, or null on error.
 	 */
 	public SignMessage createMsgBlank(SignConfig sc) {
-		return createMsg(sc, null, "", false, false,
-			SignMsgPriority.low_1, SignMsgSource.blank.bit());
+		return createMsg(sc, "", false, false, SignMsgPriority.low_1,
+			SignMsgSource.blank.bit());
 	}
 
 	/** Create an incident sign message.
 	 *
 	 * @param sc Sign configuration.
-	 * @param inc Associated incident (original name).
 	 * @param ms MULTI text.
 	 * @param mp Message priority.
 	 * @return New sign message, or null on error.
 	 */
-	public SignMessage createMsg(SignConfig sc, String inc, String ms,
+	public SignMessage createIncMsg(SignConfig sc, String ms,
 		SignMsgPriority mp)
 	{
-		if (ms.length() > 0) {
-			return createMsg(sc, inc, ms, false, false, mp,
-				INCIDENT_SRC);
-		} else
+		if (ms.length() > 0)
+			return createMsg(sc, ms, false, false, mp, INCIDENT_SRC);
+		else
 			return createMsgBlank(sc);
 	}
 
 	/** Create a new sign message.
 	 *
 	 * @param sc Sign configuration.
-	 * @param inc Associated incident (original name).
 	 * @param ms MULTI text.
 	 * @param fb Flash beacon.
 	 * @param ps Pixel service.
@@ -107,18 +104,18 @@ public class SignMessageCreator {
 	 * @param src Sign message source bits.
 	 * @return Proxy of new sign message, or null on error.
 	 */
-	private SignMessage createMsg(SignConfig sc, String inc, String ms,
-		boolean fb, boolean ps, SignMsgPriority mp, int src)
+	private SignMessage createMsg(SignConfig sc, String ms, boolean fb,
+		boolean ps, SignMsgPriority mp, int src)
 	{
 		String owner = SignMessageHelper.makeMsgOwner(src, user);
 		boolean st = false;
-		String nm = "usr_" + SignMessageHelper.makeHash(sc, inc, ms,
+		String nm = "usr_" + SignMessageHelper.makeHash(sc, ms,
 			owner, st, fb, ps, mp);
 		SignMessage sm = SignMessageHelper.lookup(nm);
 		if (sm != null)
 			return sm;
 		return canAddSignMessage(nm)
-		      ? createMsg(nm, sc, inc, ms, owner, fb, ps, mp)
+		      ? createMsg(nm, sc, ms, owner, fb, ps, mp)
 		      : null;
 	}
 
@@ -126,7 +123,6 @@ public class SignMessageCreator {
 	 *
 	 * @param name Sign message name.
 	 * @param sc Sign configuration.
-	 * @param inc Associated incident (original name).
 	 * @param ms MULTI text.
 	 * @param msg_owner Message owner.
 	 * @param fb Flash beacon.
@@ -134,14 +130,11 @@ public class SignMessageCreator {
 	 * @param mp Message priority.
 	 * @return Proxy of new sign message, or null on error.
 	 */
-	private SignMessage createMsg(String name, SignConfig sc, String inc,
-		String ms, String msg_owner, boolean fb, boolean ps,
-		SignMsgPriority mp)
+	private SignMessage createMsg(String name, SignConfig sc, String ms,
+		String msg_owner, boolean fb, boolean ps, SignMsgPriority mp)
 	{
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("sign_config", sc);
-		if (inc != null)
-			attrs.put("incident", inc);
 		attrs.put("multi", ms);
 		attrs.put("msg_owner", msg_owner);
 		attrs.put("sticky", false);

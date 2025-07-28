@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2024  Minnesota Department of Transportation
+ * Copyright (C) 2016-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ public class IncidentCache {
 
 	/** Lookup an incident */
 	private IncidentImpl lookupIncident(String id) {
-		Incident inc = IncidentHelper.lookupOriginal(originalId(id));
+		Incident inc = IncidentHelper.lookupByOriginal(originalId(id));
 		return (inc instanceof IncidentImpl)
 		      ? (IncidentImpl) inc
 		      : null;

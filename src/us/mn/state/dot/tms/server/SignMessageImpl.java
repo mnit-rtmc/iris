@@ -44,17 +44,15 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	static private final DebugLog MSG_LOG = new DebugLog("sign_msg");
 
 	/** Make a sign message name */
-	static private String makeName(SignConfig sc, String inc, String ms,
-		String owner, boolean st, boolean fb, boolean ps,
-		SignMsgPriority mp)
+	static private String makeName(SignConfig sc, String ms, String owner,
+		boolean st, boolean fb, boolean ps, SignMsgPriority mp)
 	{
-		return "sys_" + SignMessageHelper.makeHash(sc, inc, ms,
-			owner, st, fb, ps, mp);
+		return "sys_" + SignMessageHelper.makeHash(sc, ms, owner,
+			st, fb, ps, mp);
 	}
 
 	/** Find or create a sign message.
 	 * @param sc Sign configuration.
-	 * @param inc Associated incident (original name).
 	 * @param ms MULTI string for message.
 	 * @param owner Message owner.
 	 * @param st Sticky flag.
@@ -62,18 +60,18 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	 * @param ps Pixel service flag.
 	 * @param mp Message priority.
 	 * @return New sign message, or null on error. */
-	static public SignMessage findOrCreate(SignConfig sc, String inc,
-		String ms, String owner, boolean st, boolean fb, boolean ps,
+	static public SignMessage findOrCreate(SignConfig sc, String ms,
+		String owner, boolean st, boolean fb, boolean ps,
 		SignMsgPriority mp)
 	{
 		if (sc == null)
 			return null;
-		String nm = makeName(sc, inc, ms, owner, st, fb, ps, mp);
+		String nm = makeName(sc, ms, owner, st, fb, ps, mp);
 		SignMessage esm = SignMessageHelper.lookup(nm);
 		if (esm != null)
 			return esm;
 		// no matching message found, create it
-		SignMessageImpl sm = new SignMessageImpl(sc, inc, ms, owner,
+		SignMessageImpl sm = new SignMessageImpl(sc, ms, owner,
 			st, fb, ps, mp);
 		try {
 			sm.notifyCreate();
@@ -105,8 +103,8 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Load all the sign messages */
 	static protected void loadAll() throws TMSException {
-		store.query("SELECT name, sign_config, incident, multi, " +
-			"msg_owner, sticky, flash_beacon, pixel_service, " +
+		store.query("SELECT name, sign_config, multi, msg_owner, " +
+			"sticky, flash_beacon, pixel_service, " +
 			"msg_priority FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
@@ -122,7 +120,6 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("sign_config", sign_config);
-		map.put("incident", incident);
 		map.put("multi", multi);
 		map.put("msg_owner", msg_owner);
 		map.put("sticky", sticky);
@@ -142,23 +139,21 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	private SignMessageImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),   // name
 		     row.getString(2),   // sign_config
-		     row.getString(3),   // incident
-		     row.getString(4),   // multi
-		     row.getString(5),   // msg_owner
-		     row.getBoolean(6),  // sticky
-		     row.getBoolean(7),  // flash_beacon
-		     row.getBoolean(8),  // pixel_service
-		     row.getInt(9)       // msg_priority
+		     row.getString(3),   // multi
+		     row.getString(4),   // msg_owner
+		     row.getBoolean(5),  // sticky
+		     row.getBoolean(6),  // flash_beacon
+		     row.getBoolean(7),  // pixel_service
+		     row.getInt(8)       // msg_priority
 		);
 	}
 
 	/** Create a sign message */
-	private SignMessageImpl(String n, String sc, String inc, String ms,
-		String owner, boolean st, boolean fb, boolean ps, int mp)
+	private SignMessageImpl(String n, String sc, String ms, String owner,
+		boolean st, boolean fb, boolean ps, int mp)
 	{
 		super(n);
 		sign_config = SignConfigHelper.lookup(sc);
-		incident = inc;
 		multi = ms;
 		msg_owner = owner;
 		sticky = st;
@@ -168,13 +163,11 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	}
 
 	/** Create a new sign message (by IRIS) */
-	private SignMessageImpl(SignConfig sc, String inc, String ms,
-		String owner, boolean st, boolean fb, boolean ps,
-		SignMsgPriority mp)
+	private SignMessageImpl(SignConfig sc, String ms, String owner,
+		boolean st, boolean fb, boolean ps, SignMsgPriority mp)
 	{
-		super(makeName(sc, inc, ms, owner, st, fb, ps, mp));
+		super(makeName(sc, ms, owner, st, fb, ps, mp));
 		sign_config = sc;
-		incident = inc;
 		multi = ms;
 		msg_owner = owner;
 		sticky = st;
@@ -197,15 +190,6 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	@Override
 	public SignConfig getSignConfig() {
 		return sign_config;
-	}
-
-	/** Associated incident (original name) */
-	private String incident;
-
-	/** Get the associated incident */
-	@Override
-	public String getIncident() {
-		return incident;
 	}
 
 	/** Message MULTI string, contains message text for all pages */
@@ -285,7 +269,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		w.write(createAttribute("run_priority", msg_priority));
 		w.write(createAttribute("act_priority", msg_priority));
 		w.write(createAttribute("duration", null));
-		w.write(createAttribute("incident", getIncident()));
+		w.write(createAttribute("incident", null));
 		w.write(createAttribute("multi", multi));
 		w.write(createAttribute("bitmaps", "")); // encode from multi?
 		w.write("/>\n");

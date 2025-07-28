@@ -79,7 +79,6 @@ public class SignMessageHelper extends BaseHelper {
 
 	/** Make a name hash based on sign message attributes.
 	 * @param sc Sign configuration.
-	 * @param inc Associated incident (original name).
 	 * @param ms MULTI string.
 	 * @param owner Message owner.
 	 * @param st Sticky flag.
@@ -87,11 +86,10 @@ public class SignMessageHelper extends BaseHelper {
 	 * @param ps Pixel service flag.
 	 * @param mp Message priority.
 	 * @return Hash code of sign message. */
-	static public String makeHash(SignConfig sc, String inc,
-		String ms, String owner, boolean st, boolean fb, boolean ps,
-		SignMsgPriority mp)
+	static public String makeHash(SignConfig sc, String ms, String owner,
+		boolean st, boolean fb, boolean ps, SignMsgPriority mp)
 	{
-		int hash = Objects.hash(sc.getName(), inc, ms, owner, st, fb,
+		int hash = Objects.hash(sc.getName(), ms, owner, st, fb,
 			ps, mp);
 		return HexString.format(hash, 8);
 	}

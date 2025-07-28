@@ -715,10 +715,10 @@ public class IncidentDispatcher extends IPanel
 	{
 		runSwing(new Runnable() {
 			public void run() {
-				SignMessage sm = sm_creator.createMsg(sc,
-					inc_orig, ms, mp);
+				SignMessage sm = sm_creator.createIncMsg(sc,
+					ms, mp);
 				if (sm != null) {
-					DmsLock lk = makeLock(cleared);
+					DmsLock lk = makeLock(inc_orig, cleared);
 					dms.setLock(lk.toString());
 					dms.setMsgUser(sm);
 				}
@@ -727,10 +727,11 @@ public class IncidentDispatcher extends IPanel
 	}
 
 	/** Make DMS lock */
-	private DmsLock makeLock(boolean cleared) {
+	private DmsLock makeLock(String inc, boolean cleared) {
 		DmsLock lk = new DmsLock(null);
 		lk.setUser(user);
 		lk.setReason(DmsLock.REASON_INCIDENT);
+		lk.setIncident(inc);
 		if (cleared)
 			lk.setDuration(DURATION_CLEARED);
 		return lk;
