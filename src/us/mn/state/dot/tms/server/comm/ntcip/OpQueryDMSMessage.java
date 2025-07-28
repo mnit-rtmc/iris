@@ -72,7 +72,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		DmsMessageStatus>(DmsMessageStatus.class, dmsMessageStatus.node,
 		DmsMessageMemoryType.currentBuffer.ordinal(), 1);
 
-	/** Message time remaining */
+	/** Message time remaining (should we remove this?) */
 	private final ASN1Integer time = dmsMessageTimeRemaining.makeInt();
 
 	/** Create a new DMS query status object */
@@ -132,9 +132,7 @@ public class OpQueryDMSMessage extends OpDMS {
 	private Phase processMessageBlank() throws ControllerException {
 		int src = 0;
 		/* Maybe the current msg just expired */
-		if (SignMessageHelper.isOperatorExpiring(
-		    dms.getMsgCurrent()))
-		{
+		if (dms.isOperatorExpiring()) {
 			src = SignMsgSource.expired.bit();
 			/* User msg just expired -- set it to null */
 			dms.setMsgUserNotify(null);
@@ -224,9 +222,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		boolean fb = (beacon.getInteger() == 1);
 		boolean ps = (srv.getInteger() == 1);
 		SignMsgPriority mp = getMsgPriority();
-		Integer duration = parseDuration(time.getInteger());
-		SignMessage sm = dms.createMsg(ms, owner, st, fb, ps, mp,
-			duration);
+		SignMessage sm = dms.createMsg(ms, owner, st, fb, ps, mp);
 		setMsgCurrent(sm);
 	}
 

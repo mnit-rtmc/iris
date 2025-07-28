@@ -116,8 +116,7 @@ public class OpSendLCSIndications extends OpLCS {
 				lock.getUser()
 			);
 			SignMsgPriority mp = SignMsgPriority.high_1;
-			return dms.createMsg(ms, owner, false, false, false, mp,
-				null);
+			return dms.createMsg(ms, owner, false, false, false, mp);
 		}
 	}
 

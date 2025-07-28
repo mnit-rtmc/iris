@@ -78,8 +78,4 @@ public interface SignMessage extends SonarObject {
 	 * @return Priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.SignMsgPriority */
 	int getMsgPriority();
-
-	/** Get the message duration.
-	 * @return Duration in minutes; null means indefinite. */
-	Integer getDuration();
 }

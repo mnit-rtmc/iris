@@ -121,8 +121,8 @@ public class DMSDispatcher extends JPanel {
 			if (sc != null) {
 				SignMessage sm = creator.createMsgBlank(sc);
 				if (sm != null) {
-					dms.setMsgUser(sm);
 					dms.setLock(null);
+					dms.setMsgUser(sm);
 				}
 			}
 		}
@@ -352,8 +352,8 @@ public class DMSDispatcher extends JPanel {
 				SignMessage sm = createMessage(sc, ms);
 				if (sm != null) {
 					DmsLock lk = makeLock();
-					dms.setMsgUser(sm);
 					dms.setLock(lk.toString());
+					dms.setMsgUser(sm);
 				}
 			}
 		}
@@ -378,8 +378,7 @@ public class DMSDispatcher extends JPanel {
 		else {
 			boolean fb = composer.getFlashBeacon();
 			boolean ps = composer.getPixelService();
-			Integer d = composer.getDuration();
-			return creator.createMsg(sc, ms, fb, ps, d);
+			return creator.createMsg(sc, ms, fb, ps);
 		}
 	}
 
@@ -389,8 +388,7 @@ public class DMSDispatcher extends JPanel {
 	{
 		String inc_orig = IncidentHelper.getOriginalName(inc);
 		SignMsgPriority mp = IncidentHelper.getPriority(inc);
-		Integer d = composer.getDuration();
-		return creator.createMsg(sc, inc_orig, ms, mp, d);
+		return creator.createMsg(sc, inc_orig, ms, mp);
 	}
 
 	/** Update the selected sign(s) */

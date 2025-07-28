@@ -34,16 +34,6 @@ abstract public class OpDMS extends OpNtcip {
 	/** Special duration value for indefinite duration */
 	static protected final int DURATION_INDEFINITE = 65535;
 
-	/** Filter message duration (valid for NTCIP) */
-	static protected int getDuration(Integer d) {
-		if (d == null || d >= DURATION_INDEFINITE)
-			return DURATION_INDEFINITE;
-		else if (d < 0)
-			return 0;
-		else
-			return d;
-	}
-
 	/** Parse an NTCIP duration value */
 	static protected Integer parseDuration(int d) {
 		if (d <= 0 || d >= DURATION_INDEFINITE)
@@ -54,6 +44,19 @@ abstract public class OpDMS extends OpNtcip {
 
 	/** DMS to operate */
 	protected final DMSImpl dms;
+
+	/** Get message duration (valid for NTCIP) */
+	protected int getDuration() {
+		Long dur_ms = dms.getDurationMs();
+		if (dur_ms != null) {
+			if (dur_ms <= 0)
+				return 0;
+			int dur_min = (int) (dur_ms / (60 * 1000));
+			if (dur_min < DURATION_INDEFINITE)
+				return dur_min + 1;
+		}
+		return DURATION_INDEFINITE;
+	}
 
 	/** Check if DMS supports beacon activation object */
 	protected boolean supportsBeaconActivation() {

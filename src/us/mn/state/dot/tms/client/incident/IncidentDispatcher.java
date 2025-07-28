@@ -43,6 +43,7 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
+import us.mn.state.dot.tms.DmsLock;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Incident;
@@ -93,6 +94,9 @@ public class IncidentDispatcher extends IPanel
 
 	/** User session */
 	private final Session session;
+
+	/** Currently logged in user */
+	private final String user;
 
 	/** Incident manager */
 	private final IncidentManager manager;
@@ -218,6 +222,7 @@ public class IncidentDispatcher extends IPanel
 		IncidentCreator ic)
 	{
 		session = s;
+		user = session.getUser().getName();
 		manager = man;
 		sel_mdl = manager.getSelectionModel();
 		creator = ic;
@@ -329,7 +334,7 @@ public class IncidentDispatcher extends IPanel
 			attrs.put("camera", getSelectedCamera());
 			attrs.put("impact", impact_pnl.getImpact());
 			attrs.put("cleared", false);
-			attrs.put("user_id", session.getUser().getName());
+			attrs.put("user_id", user);
 			cache.createObject(name, attrs);
 			Incident proxy = cache.lookupObjectWait(name);
 			if (proxy != null)
@@ -644,7 +649,7 @@ public class IncidentDispatcher extends IPanel
 			for (Entry<String, String> ent: msgs.entrySet()) {
 				String dn = ent.getKey();
 				String multi = ent.getValue();
-				sendMessage(dn, inc, multi, DURATION_CLEARED);
+				sendMessage(dn, inc, multi, true);
 			}
 		}
 	}
@@ -687,7 +692,7 @@ public class IncidentDispatcher extends IPanel
 
 	/** Send new sign message to a DMS */
 	public void sendMessage(String dn, Incident inc, String ms,
-		Integer dur)
+		boolean cleared)
 	{
 		SignMsgPriority mp = IncidentHelper.getPriority(inc);
 		String inc_orig = IncidentHelper.getOriginalName(inc);
@@ -696,8 +701,8 @@ public class IncidentDispatcher extends IPanel
 			if (dms != null) {
 				SignConfig sc = dms.getSignConfig();
 				if (sc != null) {
-					sendMessage(dms, sc, inc_orig, ms,
-						mp, dur);
+					sendMessage(dms, sc, inc_orig, ms, mp,
+						cleared);
 				}
 			}
 		}
@@ -706,15 +711,28 @@ public class IncidentDispatcher extends IPanel
 	/** Send new sign message to the specified DMS */
 	private void sendMessage(final DMS dms, final SignConfig sc,
 		final String inc_orig, final String ms,
-		final SignMsgPriority mp, final Integer dur)
+		final SignMsgPriority mp, final boolean cleared)
 	{
 		runSwing(new Runnable() {
 			public void run() {
 				SignMessage sm = sm_creator.createMsg(sc,
-					inc_orig, ms, mp, dur);
-				if (sm != null)
+					inc_orig, ms, mp);
+				if (sm != null) {
+					DmsLock lk = makeLock(cleared);
+					dms.setLock(lk.toString());
 					dms.setMsgUser(sm);
+				}
 			}
 		});
+	}
+
+	/** Make DMS lock */
+	private DmsLock makeLock(boolean cleared) {
+		DmsLock lk = new DmsLock(null);
+		lk.setUser(user);
+		lk.setReason(DmsLock.REASON_INCIDENT);
+		if (cleared)
+			lk.setDuration(DURATION_CLEARED);
+		return lk;
 	}
 }
