@@ -2979,8 +2979,7 @@ CREATE TABLE iris.sign_message (
     sticky BOOLEAN NOT NULL,
     flash_beacon BOOLEAN NOT NULL,
     pixel_service BOOLEAN NOT NULL,
-    msg_priority INTEGER NOT NULL,
-    duration INTEGER
+    msg_priority INTEGER NOT NULL
 );
 
 CREATE TRIGGER sign_message_notify_trig
@@ -2989,7 +2988,7 @@ CREATE TRIGGER sign_message_notify_trig
 
 CREATE VIEW sign_message_view AS
     SELECT name, sign_config, incident, multi, msg_owner, sticky, flash_beacon,
-           pixel_service, msg_priority, duration
+           pixel_service, msg_priority
     FROM iris.sign_message;
 GRANT SELECT ON sign_message_view TO PUBLIC;
 
@@ -3246,7 +3245,7 @@ GRANT SELECT ON dms_view TO PUBLIC;
 CREATE VIEW dms_message_view AS
     SELECT d.name, msg_current, cc.description AS condition,
            fail_time IS NOT NULL AS failed, multi, msg_owner, sticky,
-           flash_beacon, pixel_service, msg_priority, duration
+           flash_beacon, pixel_service, msg_priority
     FROM iris._dms d
     LEFT JOIN iris.controller_io cio ON d.name = cio.name
     LEFT JOIN iris.controller c ON cio.controller = c.name
