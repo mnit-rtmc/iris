@@ -2973,7 +2973,6 @@ GRANT SELECT ON sign_config_view TO PUBLIC;
 CREATE TABLE iris.sign_message (
     name VARCHAR(20) PRIMARY KEY,
     sign_config VARCHAR(16) NOT NULL REFERENCES iris.sign_config,
-    incident VARCHAR(16) REFERENCES event.incident(name) ON DELETE SET NULL,
     multi VARCHAR(1024) NOT NULL,
     msg_owner VARCHAR(127) NOT NULL,
     sticky BOOLEAN NOT NULL,
@@ -2987,7 +2986,7 @@ CREATE TRIGGER sign_message_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW sign_message_view AS
-    SELECT name, sign_config, incident, multi, msg_owner, sticky, flash_beacon,
+    SELECT name, sign_config, multi, msg_owner, sticky, flash_beacon,
            pixel_service, msg_priority
     FROM iris.sign_message;
 GRANT SELECT ON sign_message_view TO PUBLIC;

@@ -14,7 +14,7 @@ after being unused for a few minutes.
 
 | Access  | Primary     |
 |---------|-------------|
-| 👁️  View | name, sign\_config, incident, multi, msg\_owner, sticky, flash\_beacon, pixel\_service, msg\_priority |
+| 👁️  View | name, sign\_config, multi, msg\_owner, sticky, flash\_beacon, pixel\_service, msg\_priority |
 
 </details>
 

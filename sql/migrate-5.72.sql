@@ -28,7 +28,7 @@ CREATE VIEW recent_sign_event_view AS
     WHERE event_date > (CURRENT_TIMESTAMP - interval '90 days');
 GRANT SELECT ON recent_sign_event_view TO PUBLIC;
 
--- sign message: ADD sticky / DROP duration
+-- sign message: ADD sticky / DROP incident + duration
 -- DMS: ADD lock / DROP expire_time
 DROP VIEW sign_message_view;
 DROP VIEW dms_message_view;
@@ -38,6 +38,7 @@ DROP VIEW iris.dms;
 ALTER TABLE iris.sign_message ADD COLUMN sticky BOOLEAN;
 UPDATE iris.sign_message SET sticky = false;
 ALTER TABLE iris.sign_message ALTER COLUMN sticky SET NOT NULL;
+ALTER TABLE iris.sign_message DROP COLUMN incident;
 ALTER TABLE iris.sign_message DROP COLUMN duration;
 
 ALTER TABLE iris._dms ADD COLUMN lock JSONB;
@@ -138,7 +139,7 @@ CREATE VIEW dms_message_view AS
 GRANT SELECT ON dms_message_view TO PUBLIC;
 
 CREATE VIEW sign_message_view AS
-    SELECT name, sign_config, incident, multi, msg_owner, sticky, flash_beacon,
+    SELECT name, sign_config, multi, msg_owner, sticky, flash_beacon,
            pixel_service, msg_priority
     FROM iris.sign_message;
 GRANT SELECT ON sign_message_view TO PUBLIC;
