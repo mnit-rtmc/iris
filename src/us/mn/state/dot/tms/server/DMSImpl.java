@@ -99,11 +99,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	static private final Interval COMM_LOSS_THRESHOLD =
 		new Interval(5, MINUTES);
 
-	/** Minimum duration of a DMS action (minutes) */
-	static private final int DURATION_MINIMUM_MINS = 1;
-
-	/** Number of polling periods for DMS action duration */
-	static private final int DURATION_PERIODS = 3;
+	/** Number of polling periods for scheduled message duration */
+	static private final int SCHED_DURATION_PERIODS = 3;
 
 	/** Interface for handling brightness samples */
 	static public interface BrightnessHandler {
@@ -534,7 +531,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		String owner = SignMessageHelper.makeMsgOwner(src);
 		SignMsgPriority mp = SignMsgPriority.low_1;
 		return SignMessageImpl.findOrCreate(sign_config, null, "",
-			owner, false, false, false, mp, null);
+			owner, false, false, false, mp);
 	}
 
 	/** Create a message for the sign.
@@ -544,13 +541,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param fb Flash beacon flag.
 	 * @param ps Pixel service flag.
 	 * @param mp Message priority.
-	 * @param dur Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	public SignMessage createMsg(String ms, String owner, boolean st,
-		boolean fb, boolean ps, SignMsgPriority mp, Integer dur)
+		boolean fb, boolean ps, SignMsgPriority mp)
 	{
 		return SignMessageImpl.findOrCreate(sign_config, null, ms,
-			owner, st, fb, ps, mp, dur);
+			owner, st, fb, ps, mp);
 	}
 
 	/** Create a scheduled message.
@@ -570,19 +566,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		boolean ps = (pat != null) && pat.getPixelService();
 		SignMsgPriority mp = SignMsgPriority.fromOrdinal(
 			da.getMsgPriority());
-		Integer dur = ap.getSticky() ? null : getUnstickyDurationMins();
 		return SignMessageImpl.findOrCreate(sign_config, null, ms,
-			owner, st, fb, ps, mp, dur);
-	}
-
-	/** Get the duration of an unsticky action */
-	private int getUnstickyDurationMins() {
-		return Math.max(DURATION_MINIMUM_MINS, getDurationMins());
-	}
-
-	/** Get the duration of a DMS action */
-	private int getDurationMins() {
-		return getPollPeriodSec() * DURATION_PERIODS / 60;
+			owner, st, fb, ps, mp);
 	}
 
 	/** Owner of sent blank message.
@@ -685,6 +670,18 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				logError("msg_user: " + e.getMessage());
 			}
 		}
+	}
+
+	/** Check if the current message is operator expiring */
+	public boolean isOperatorExpiring() {
+		SignMessage sm = msg_current;
+		if (isMsgSource(sm, SignMsgSource.operator) &&
+		    !SignMessageHelper.isBlank(sm))
+		{
+			DmsLock lk = new DmsLock(lock);
+			return lk.optExpires() != null;
+		}
+		return false;
 	}
 
 	/** Scheduled sign message */
@@ -927,9 +924,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			);
 		String unm = SignMessageHelper.getMsgOwnerName(user);
 		String owner = SignMessageHelper.makeMsgOwner(src, unm);
-		Integer dur = user.getDuration();
 		return SignMessageImpl.findOrCreate(sign_config, inc, ms,
-			owner, st, fb, ps, mp, dur);
+			owner, st, fb, ps, mp);
 	}
 
 	/** Compare sign messages for higher priority */
@@ -1281,22 +1277,38 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Check if lock has expired */
 	public void checkLockExpired() {
+		Long dur_ms = getDurationMs();
+		if (dur_ms != null && dur_ms <= 0) {
+			try {
+				int src = SignMsgSource.expired.bit();
+				doSetMsgUser(createMsgBlank(src));
+				setLockChecked(null);
+				notifyAttribute("lock");
+			}
+			catch (TMSException ex) {
+				logError("checkLockExpired: " +
+					ex.getMessage());
+			}
+		}
+	}
+
+	/** Get remaining duration of current message (null for indefinite) */
+	public Long getDurationMs() {
+		if (SignMessageHelper.isScheduledUnsticky(msg_current)) {
+			int dur_min = getPollPeriodSec() *
+				SCHED_DURATION_PERIODS / 60;
+			dur_min = Math.max(1, dur_min);
+			return (long) dur_min * 60 * 1000;
+		}
 		DmsLock lk = new DmsLock(lock);
 		String exp = lk.optExpires();
 		if (exp != null) {
 			Long e = TimeSteward.parse8601(exp);
-			if (e != null && e < TimeSteward.currentTimeMillis()) {
-				try {
-					int src = SignMsgSource.expired.bit();
-					doSetMsgUser(createMsgBlank(src));
-					setLockChecked(null);
-					notifyAttribute("lock");
-				}
-				catch (TMSException ex) {
-					logError("checkLockExpired: " +
-						ex.getMessage());
-				}
+			if (e != null) {
+				long now = TimeSteward.currentTimeMillis();
+				return Math.max(e - now, 0);
 			}
 		}
+		return null;
 	}
 }

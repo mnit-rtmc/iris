@@ -161,11 +161,6 @@ public class OpSendDMSMessage extends OpDMS {
 	/** Maximum size of a graphic */
 	private final ASN1Integer max_size = dmsGraphicMaxSize.makeInt();
 
-	/** Get the message duration */
-	private int getDuration() {
-		return getDuration(message.getDuration());
-	}
-
 	/** Create a new send DMS message operation */
 	public OpSendDMSMessage(DMSImpl d, SignMessage sm) {
 		super(PriorityLevel.COMMAND, d);

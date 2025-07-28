@@ -143,7 +143,7 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 	private void sendSignMessage(DMS dms) {
 		String dn = dms.getName();
 		String multi = model.getMulti(dn);
-		dispatcher.sendMessage(dn, proxy, multi, null);
+		dispatcher.sendMessage(dn, proxy, multi, false);
 	}
 
 	/** Update one attribute on the form */

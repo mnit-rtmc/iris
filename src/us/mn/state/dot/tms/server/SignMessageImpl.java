@@ -46,10 +46,10 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	/** Make a sign message name */
 	static private String makeName(SignConfig sc, String inc, String ms,
 		String owner, boolean st, boolean fb, boolean ps,
-		SignMsgPriority mp, Integer dur)
+		SignMsgPriority mp)
 	{
 		return "sys_" + SignMessageHelper.makeHash(sc, inc, ms,
-			owner, st, fb, ps, mp, dur);
+			owner, st, fb, ps, mp);
 	}
 
 	/** Find or create a sign message.
@@ -61,21 +61,20 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	 * @param fb Flash beacon flag.
 	 * @param ps Pixel service flag.
 	 * @param mp Message priority.
-	 * @param dur Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	static public SignMessage findOrCreate(SignConfig sc, String inc,
 		String ms, String owner, boolean st, boolean fb, boolean ps,
-		SignMsgPriority mp, Integer dur)
+		SignMsgPriority mp)
 	{
 		if (sc == null)
 			return null;
-		String nm = makeName(sc, inc, ms, owner, st, fb, ps, mp, dur);
+		String nm = makeName(sc, inc, ms, owner, st, fb, ps, mp);
 		SignMessage esm = SignMessageHelper.lookup(nm);
 		if (esm != null)
 			return esm;
 		// no matching message found, create it
 		SignMessageImpl sm = new SignMessageImpl(sc, inc, ms, owner,
-			st, fb, ps, mp, dur);
+			st, fb, ps, mp);
 		try {
 			sm.notifyCreate();
 			return sm;
@@ -108,7 +107,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, sign_config, incident, multi, " +
 			"msg_owner, sticky, flash_beacon, pixel_service, " +
-			"msg_priority, duration FROM iris." + SONAR_TYPE + ";",
+			"msg_priority FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -130,7 +129,6 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		map.put("flash_beacon", flash_beacon);
 		map.put("pixel_service", pixel_service);
 		map.put("msg_priority", msg_priority);
-		map.put("duration", duration);
 		return map;
 	}
 
@@ -142,23 +140,21 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Create a sign message */
 	private SignMessageImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),           // name
-		     row.getString(2),           // sign_config
-		     row.getString(3),           // incident
-		     row.getString(4),           // multi
-		     row.getString(5),           // msg_owner
-		     row.getBoolean(6),          // sticky
-		     row.getBoolean(7),          // flash_beacon
-		     row.getBoolean(8),          // pixel_service
-		     row.getInt(9),              // msg_priority
-		     (Integer) row.getObject(10) // duration
+		this(row.getString(1),   // name
+		     row.getString(2),   // sign_config
+		     row.getString(3),   // incident
+		     row.getString(4),   // multi
+		     row.getString(5),   // msg_owner
+		     row.getBoolean(6),  // sticky
+		     row.getBoolean(7),  // flash_beacon
+		     row.getBoolean(8),  // pixel_service
+		     row.getInt(9)       // msg_priority
 		);
 	}
 
 	/** Create a sign message */
 	private SignMessageImpl(String n, String sc, String inc, String ms,
-		String owner, boolean st, boolean fb, boolean ps, int mp,
-		Integer dur)
+		String owner, boolean st, boolean fb, boolean ps, int mp)
 	{
 		super(n);
 		sign_config = SignConfigHelper.lookup(sc);
@@ -169,15 +165,14 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		flash_beacon = fb;
 		pixel_service = ps;
 		msg_priority = mp;
-		duration = dur;
 	}
 
 	/** Create a new sign message (by IRIS) */
 	private SignMessageImpl(SignConfig sc, String inc, String ms,
 		String owner, boolean st, boolean fb, boolean ps,
-		SignMsgPriority mp, Integer dur)
+		SignMsgPriority mp)
 	{
-		super(makeName(sc, inc, ms, owner, st, fb, ps, mp, dur));
+		super(makeName(sc, inc, ms, owner, st, fb, ps, mp));
 		sign_config = sc;
 		incident = inc;
 		multi = ms;
@@ -186,7 +181,6 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		flash_beacon = fb;
 		pixel_service = ps;
 		msg_priority = mp.ordinal();
-		duration = dur;
 		logMsg("created (server)");
 	}
 
@@ -282,16 +276,6 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		return msg_priority;
 	}
 
-	/** Duration of message (minutes) */
-	private Integer duration;
-
-	/** Get the message duration.
-	 * @return Duration in minutes; null means indefinite. */
-	@Override
-	public Integer getDuration() {
-		return duration;
-	}
-
 	/** Write the SignMessage object as xml */
 	public void writeXml(Writer w, DMSImpl dms) throws IOException {
 		w.write("<sign_message");
@@ -300,7 +284,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		w.write(createAttribute("flash_beacon", flash_beacon));
 		w.write(createAttribute("run_priority", msg_priority));
 		w.write(createAttribute("act_priority", msg_priority));
-		w.write(createAttribute("duration", getDuration()));
+		w.write(createAttribute("duration", null));
 		w.write(createAttribute("incident", getIncident()));
 		w.write(createAttribute("multi", multi));
 		w.write(createAttribute("bitmaps", "")); // encode from multi?

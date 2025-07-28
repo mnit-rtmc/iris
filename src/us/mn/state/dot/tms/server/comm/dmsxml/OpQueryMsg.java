@@ -64,40 +64,6 @@ class OpQueryMsg extends OpDms {
 		m_startup = startup;
 	}
 
-	/**
-	 * Calculate message duration
-	 * @param useont true to use on time
-	 * @param useofft true to use off time else infinite message
-	 * @param ontime message on time
-	 * @param offtime message off time
-	 * @return Duration in minutes; null indicates no expiration.
-	 * @throws IllegalArgumentException if invalid args.
-	 */
-	private static Integer calcMsgDuration(boolean useont,
-		boolean useofft, Calendar ontime, Calendar offtime)
-	{
-		if (!useont) {
-			throw new IllegalArgumentException(
-				"must have ontime in calcMsgDuration.");
-		}
-		if (!useofft)
-			return null;
-		if (ontime == null) {
-			throw new IllegalArgumentException(
-				"invalid null ontime in calcMsgDuration.");
-		}
-		if (offtime == null) {
-			throw new IllegalArgumentException(
-				"invalid null offtime in calcMsgDuration.");
-		}
-
-		// calc diff in mins
-		long delta = offtime.getTimeInMillis() -
-		             ontime.getTimeInMillis();
-		long m = ((delta < 0) ? 0 : delta / 1000 / 60);
-		return (int) m;
-	}
-
 	/** Create message MULTI string using a bitmap.
 	 * A MULTI string must be created because the SensorServer can
 	 * return a bitmap and no message text. IRIS requires both a
@@ -185,14 +151,12 @@ class OpQueryMsg extends OpDms {
 	 * @param sbitmap Bitmap as hexstring associated with message
 	 *	  text. This bitmap is required to be a 96x25 bitmap
 	 *        which dmsxml will always return.
-	 * @param duration Message duration (in minutes).
 	 * @param pgOnTime DMS page on time.
 	 * @param rpri Sign message runtime priority.
 	 * @return A SignMessage that contains the text of the message and
 	 *         a rendered bitmap. */
 	private SignMessageImpl createSignMessageWithBitmap(String sbitmap,
-		Integer duration, Interval pgOnTime, SignMsgPriority rpri,
-		String owner)
+		Interval pgOnTime, SignMsgPriority rpri, String owner)
 	{
 		if (sbitmap == null)
 			return null;
@@ -232,15 +196,15 @@ class OpQueryMsg extends OpDms {
 		if (rpri == SignMsgPriority.invalid)
 			rpri = SignMsgPriority.medium_sys;
 
-		return createMsg(multi, owner, rpri, duration);
+		return createMsg(multi, owner, rpri);
 	}
 
 	/** Create a sign message */
 	private SignMessageImpl createMsg(String multi, String owner,
-		SignMsgPriority rpri, Integer duration)
+		SignMsgPriority rpri)
 	{
 		return (SignMessageImpl) m_dms.createMsg(multi, owner, false,
-			false, false, rpri, duration);
+			false, false, rpri);
 	}
 
 	/** Return a MULTI with an updated page on-time with the value read
@@ -377,30 +341,26 @@ class OpQueryMsg extends OpDms {
 		// error checking: valid off time?
 		if (useont && useofft && offt.compareTo(ont) <= 0)
 			useofft = false;
-		Integer duramins = calcMsgDuration(useont,
-			useofft, ont, offt);
 
 		if (txtavail) {
 			// update page on-time in MULTI with value read from
 			// controller, which comes from the DisplayTimeMS XML
 			// field, not the MULTI string.
 			msgtext = updatePageOnTime(msgtext, pgOnTime);
-			SignMessageImpl sm = createMsg(msgtext, owner,
-				rpri, duramins);
+			SignMessageImpl sm = createMsg(msgtext, owner, rpri);
 			if (sm != null)
 				m_dms.setMsgCurrentNotify(sm, false);
 		} else {
 			// don't have text
 			SignMessageImpl sm = null;
 			if (usebitmap) {
-				sm = createSignMessageWithBitmap(
-					bitmap, duramins, pgOnTime,
-					rpri, owner);
+				sm = createSignMessageWithBitmap(bitmap,
+					pgOnTime, rpri, owner);
 				if (sm != null)
 					m_dms.setMsgCurrentNotify(sm, false);
 			}
 			if (sm == null) {
-				sm = createMsg("", owner, rpri, null);
+				sm = createMsg("", owner, rpri);
 				if (sm != null)
 					m_dms.setMsgCurrentNotify(sm, false);
 			}

@@ -86,14 +86,13 @@ public class SignMessageHelper extends BaseHelper {
 	 * @param fb Flash beacon flag.
 	 * @param ps Pixel service flag.
 	 * @param mp Message priority.
-	 * @param dur Duration (null for indefinite).
 	 * @return Hash code of sign message. */
 	static public String makeHash(SignConfig sc, String inc,
 		String ms, String owner, boolean st, boolean fb, boolean ps,
-		SignMsgPriority mp, Integer dur)
+		SignMsgPriority mp)
 	{
 		int hash = Objects.hash(sc.getName(), inc, ms, owner, st, fb,
-			ps, mp, dur);
+			ps, mp);
 		return HexString.format(hash, 8);
 	}
 
@@ -215,14 +214,6 @@ public class SignMessageHelper extends BaseHelper {
 		int bits = sourceBits(sm);
 		return SignMsgSource.schedule.checkBit(bits) &&
 		      !sm.getSticky();
-	}
-
-	/** Check if a message is operator created and expires.
-	 * @param sm The sign message. */
-	static public boolean isOperatorExpiring(SignMessage sm) {
-		return (!isBlank(sm)) &&
-		       (sm.getDuration() != null) &&
-		       SignMsgSource.operator.checkBit(sourceBits(sm));
 	}
 
 	/** Check if a message came from RWIS subsystem.

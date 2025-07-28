@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2016  Minnesota Department of Transportation
+ * Copyright (C) 2004-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,11 +43,6 @@ public class OpUpdateDMSDuration extends OpDMS {
 	@Override
 	protected Phase phaseTwo() {
 		return new SetTimeRemaining();
-	}
-
-	/** Get the message duration */
-	private int getDuration() {
-		return getDuration(message.getDuration());
 	}
 
 	/** Phase to set message time remaining */

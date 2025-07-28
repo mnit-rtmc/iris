@@ -125,15 +125,16 @@ class OpMessage extends OpDms {
 		return(new GregorianCalendar());
 	}
 
-	/** Calculate message off time, which is the start time + duration.
-	 *  This method should not be called if duration is infinite. */
+	/** Calculate message off time, which is the start time + duration */
 	protected Calendar calcMsgOffTime(Calendar ontime) {
-		Integer mins = m_sm.getDuration();
-		if (mins == null)
+		Long dur_ms = m_dms.getDurationMs();
+		if (dur_ms != null) {
+			Calendar offtime = (Calendar) ontime.clone();
+			int dur_s = (int) (dur_ms / 1000);
+			offtime.add(Calendar.SECOND, dur_s);
+			return offtime;
+		} else
 			return null;
-		Calendar offtime = (Calendar)ontime.clone();
-		offtime.add(Calendar.MINUTE, mins);
-		return offtime;
 	}
 
 	/** Build request message in this format:
@@ -162,7 +163,7 @@ class OpMessage extends OpDms {
 		xrr.addReq("UseOnTime", true);
 		Calendar ontime = calcMsgOnTime();
 		xrr.addReq("OnTime", STime.CalendarToXML(ontime));
-		boolean useofftime = (m_sm.getDuration() != null);
+		boolean useofftime = (m_dms.getDurationMs() != null);
 		xrr.addReq("UseOffTime", useofftime);
 		String offtime = (useofftime ?
 			STime.CalendarToXML(calcMsgOffTime(ontime)) : "");
