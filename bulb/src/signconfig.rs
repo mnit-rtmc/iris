@@ -43,7 +43,7 @@ fn format_len_sm(val: i32) -> String {
 /// Format pixel width/height
 fn format_px(val: i32) -> String {
     if val > 0 {
-        format!("{} px", val)
+        format!("{val} px")
     } else {
         "variable".to_string()
     }

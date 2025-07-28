@@ -282,12 +282,12 @@ pub const DMS_PUB: &str = "\
 
 /// SQL query for all DMS status (public)
 ///
-/// NOTE: the `sources` and `expire_time` attributes are deprecated,
-///       but required by external systems (for now)
+/// NOTE: the `sources`, `duration` and `expire_time` attributes are
+///       deprecated, but required by external systems (for now)
 pub const DMS_STATUS: &str = "\
   SELECT name, msg_current, \
          replace(substring(msg_owner FROM 'IRIS; ([^;]*).*'), '+', ', ') \
-         AS sources, failed, duration, NULL AS expire_time \
+         AS sources, failed, NULL AS duration, NULL AS expire_time \
   FROM dms_message_view WHERE condition = 'Active' \
   ORDER BY name";
 
@@ -882,15 +882,15 @@ pub const SIGN_DETAIL_ONE: &str = "\
 
 /// SQL query for all sign messages (public)
 pub const SIGN_MSG_PUB: &str = "\
-  SELECT name, sign_config, incident, multi, msg_owner, flash_beacon, \
-         pixel_service, msg_priority, duration \
+  SELECT name, sign_config, incident, multi, msg_owner, sticky, flash_beacon, \
+         pixel_service, msg_priority \
   FROM sign_message_view \
   ORDER BY name";
 
 /// SQL query for one sign message (secondary)
 pub const SIGN_MSG_ONE: &str = "\
-  SELECT name, sign_config, incident, multi, msg_owner, flash_beacon, \
-         pixel_service, msg_priority, duration \
+  SELECT name, sign_config, incident, multi, msg_owner, sticky, flash_beacon, \
+         pixel_service, msg_priority \
   FROM iris.sign_message \
   WHERE name = $1";
 
