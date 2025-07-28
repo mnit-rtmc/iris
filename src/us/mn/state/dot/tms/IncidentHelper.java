@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2023  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ public class IncidentHelper extends BaseHelper {
 	}
 
 	/** Lookup an incident by the original name */
-	static public Incident lookupOriginal(String name) {
+	static public Incident lookupByOriginal(String name) {
 		if (null == name)
 			return null;
 		Incident inc = lookup(name);
@@ -95,27 +95,16 @@ public class IncidentHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Get sign messages deployed for an incident */
-	static public ArrayList<SignMessage> getDeployedMessages(Incident inc) {
-		ArrayList<SignMessage> msgs = new ArrayList<SignMessage>();
-		String orig_name = getOriginalName(inc);
-		Iterator<SignMessage> it = SignMessageHelper.iterator();
-		while (it.hasNext()) {
-			SignMessage sm = it.next();
-			if (orig_name.equals(sm.getIncident()))
-				msgs.add(sm);
-		}
-		return msgs;
-	}
-
 	/** Get list of signs deployed for an incident */
 	static public ArrayList<DMS> getDeployedSigns(Incident inc) {
-		ArrayList<SignMessage> msgs = getDeployedMessages(inc);
+		String orig_name = getOriginalName(inc);
 		ArrayList<DMS> signs = new ArrayList<DMS>();
 		Iterator<DMS> dit = DMSHelper.iterator();
 		while (dit.hasNext()) {
 			DMS dms = dit.next();
-			if (msgs.contains(dms.getMsgCurrent()))
+			DmsLock lk = new DmsLock(dms.getLock());
+			String oi = lk.optIncident();
+			if (oi != null && oi.equals(orig_name))
 				signs.add(dms);
 		}
 		return signs;
@@ -123,12 +112,14 @@ public class IncidentHelper extends BaseHelper {
 
 	/** Get count of signs deployed for an incident */
 	static public int getDeployedCount(Incident inc) {
+		String orig_name = getOriginalName(inc);
 		int n_signs = 0;
-		ArrayList<SignMessage> msgs = getDeployedMessages(inc);
 		Iterator<DMS> dit = DMSHelper.iterator();
 		while (dit.hasNext()) {
 			DMS dms = dit.next();
-			if (msgs.contains(dms.getMsgCurrent()))
+			DmsLock lk = new DmsLock(dms.getLock());
+			String oi = lk.optIncident();
+			if (oi != null && oi.equals(orig_name))
 				n_signs++;
 		}
 		return n_signs;

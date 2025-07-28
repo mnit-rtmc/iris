@@ -316,9 +316,10 @@ public class DMSHelper extends BaseHelper {
 	static public Incident lookupIncident(DMS dms) {
 		if (null == dms)
 			return null;
-		SignMessage sm = dms.getMsgCurrent();
-		return (sm != null)
-		      ? IncidentHelper.lookupOriginal(sm.getIncident())
+		DmsLock lk = new DmsLock(dms.getLock());
+		String inc = lk.optIncident();
+		return (inc != null)
+		      ? IncidentHelper.lookupByOriginal(inc)
 		      : null;
 	}
 

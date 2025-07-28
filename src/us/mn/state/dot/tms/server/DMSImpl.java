@@ -530,8 +530,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		src |= SignMsgSource.blank.bit();
 		String owner = SignMessageHelper.makeMsgOwner(src);
 		SignMsgPriority mp = SignMsgPriority.low_1;
-		return SignMessageImpl.findOrCreate(sign_config, null, "",
-			owner, false, false, false, mp);
+		return SignMessageImpl.findOrCreate(sign_config, "", owner,
+			false, false, false, mp);
 	}
 
 	/** Create a message for the sign.
@@ -545,8 +545,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public SignMessage createMsg(String ms, String owner, boolean st,
 		boolean fb, boolean ps, SignMsgPriority mp)
 	{
-		return SignMessageImpl.findOrCreate(sign_config, null, ms,
-			owner, st, fb, ps, mp);
+		return SignMessageImpl.findOrCreate(sign_config, ms, owner,
+			st, fb, ps, mp);
 	}
 
 	/** Create a scheduled message.
@@ -566,8 +566,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		boolean ps = (pat != null) && pat.getPixelService();
 		SignMsgPriority mp = SignMsgPriority.fromOrdinal(
 			da.getMsgPriority());
-		return SignMessageImpl.findOrCreate(sign_config, null, ms,
-			owner, st, fb, ps, mp);
+		return SignMessageImpl.findOrCreate(sign_config, ms, owner,
+			st, fb, ps, mp);
 	}
 
 	/** Owner of sent blank message.
@@ -909,7 +909,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private SignMessage createMsgCombined(SignMessage sched,
 		SignMessage user, String ms)
 	{
-		String inc = user.getIncident();
 		boolean st = false;
 		boolean fb = user.getFlashBeacon();
 		boolean ps = user.getPixelService();
@@ -924,8 +923,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			);
 		String unm = SignMessageHelper.getMsgOwnerName(user);
 		String owner = SignMessageHelper.makeMsgOwner(src, unm);
-		return SignMessageImpl.findOrCreate(sign_config, inc, ms,
-			owner, st, fb, ps, mp);
+		return SignMessageImpl.findOrCreate(sign_config, ms, owner,
+			st, fb, ps, mp);
 	}
 
 	/** Compare sign messages for higher priority */

@@ -31,6 +31,9 @@ public class DmsLock {
 	/** REASON: Incident */
 	static public final String REASON_INCIDENT = "incident";
 
+	/** REASON: Situation */
+	static public final String REASON_SITUATION = "situation";
+
 	/** REASON: Testing */
 	static private final String REASON_TESTING = "testing";
 
@@ -44,10 +47,14 @@ public class DmsLock {
 	static public final String[] REASONS = {
 		"",
 		REASON_INCIDENT,
+		REASON_SITUATION,
 		REASON_TESTING,
 		REASON_MAINTENANCE,
 		REASON_CONSTRUCTION,
 	};
+
+	/** Incident name */
+	static private final String INCIDENT = "incident";
 
 	/** Expires (ISO 8601 date) */
 	static private final String EXPIRES = "expires";
@@ -91,6 +98,7 @@ public class DmsLock {
 	private void clear() {
 		try {
 			lock.remove(REASON);
+			lock.remove(INCIDENT);
 			lock.remove(EXPIRES);
 			lock.remove(USER);
 		}
@@ -119,6 +127,27 @@ public class DmsLock {
 		}
 		catch (JSONException e) {
 			System.err.println("putReason: " + e.getMessage());
+		}
+	}
+
+	/** Get the lock incident, or null */
+	public String optIncident() {
+		return lock.optString(INCIDENT, null);
+	}
+
+	/** Get the lock incident */
+	public String getIncident() {
+		String inc = optIncident();
+		return (inc != null) ? inc : "NONE";
+	}
+
+	/** Set the lock incident */
+	public void setIncident(String inc) {
+		try {
+			lock.put(INCIDENT, inc);
+		}
+		catch (JSONException e) {
+			System.err.println("setIncident: " + e.getMessage());
 		}
 	}
 
@@ -156,6 +185,8 @@ public class DmsLock {
 	private Integer getOnMinutes(Integer min) {
 		String reason = optReason();
 		if (REASON_INCIDENT.equals(reason))
+			return min;
+		else if (REASON_SITUATION.equals(reason))
 			return min;
 		else if (REASON_TESTING.equals(reason))
 			return 5;

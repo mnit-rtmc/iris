@@ -123,9 +123,7 @@ public class MessageComposer extends JPanel {
 	public void updateMessage(boolean unlink_incident) {
 		if (adjusting == 0) {
 			adjusting++;
-			if (unlink_incident)
-				dispatcher.unlinkIncident();
-			dispatcher.updateMessage();
+			dispatcher.updateMessage(unlink_incident);
 			adjusting--;
 		}
 	}

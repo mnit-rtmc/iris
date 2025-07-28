@@ -44,9 +44,6 @@ public interface SignMessage extends SonarObject {
 	/** Get the sign configuration */
 	SignConfig getSignConfig();
 
-	/** Get the associated incident (original name) */
-	String getIncident();
-
 	/** Get the message MULTI string.
 	 * @return Message text in MULTI markup.
 	 * @see us.mn.state.dot.tms.utils.MultiString */
