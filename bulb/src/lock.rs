@@ -52,6 +52,7 @@ impl fmt::Display for LockReason {
 
 impl LockReason {
     /// Get a slice containing all reasons
+    #[allow(dead_code)]
     pub fn all() -> &'static [LockReason] {
         &[
             LockReason::Unlocked,
@@ -63,6 +64,32 @@ impl LockReason {
             LockReason::Maintenance,
             LockReason::Construction,
             LockReason::Reserve,
+        ]
+    }
+
+    /// Get a slice containing all reasons for ramp meters
+    pub fn all_meter() -> &'static [LockReason] {
+        &[
+            LockReason::Unlocked,
+            LockReason::Incident,
+            LockReason::Testing,
+            LockReason::KnockedDown,
+            LockReason::Indication,
+            LockReason::Maintenance,
+            LockReason::Construction,
+            LockReason::Reserve,
+        ]
+    }
+
+    /// Get a slice containing all reasons for LCS devices
+    pub fn all_lcs() -> &'static [LockReason] {
+        &[
+            LockReason::Unlocked,
+            LockReason::Incident,
+            LockReason::Testing,
+            LockReason::Indication,
+            LockReason::Maintenance,
+            LockReason::Construction,
         ]
     }
 

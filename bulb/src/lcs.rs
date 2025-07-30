@@ -253,16 +253,9 @@ impl Lcs {
             _ => "🔒",
         });
         html.select().id("lk_reason");
-        for r in [
-            LockReason::Unlocked,
-            LockReason::Incident,
-            LockReason::Testing,
-            LockReason::Indication,
-            LockReason::Maintenance,
-            LockReason::Construction,
-        ] {
+        for r in LockReason::all_lcs() {
             let option = html.option();
-            if r == reason {
+            if *r == reason {
                 option.attr_bool("selected");
             }
             html.text(r.as_str()).end();

@@ -521,7 +521,7 @@ impl RampMeter {
             _ => "🔒",
         });
         html.select().id("lk_reason");
-        for r in LockReason::all() {
+        for r in LockReason::all_meter() {
             let option = html.option();
             if *r == reason {
                 option.attr_bool("selected");
