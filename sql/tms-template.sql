@@ -3122,7 +3122,6 @@ CREATE TABLE iris._dms (
     beacon VARCHAR(20) REFERENCES iris._beacon,
     sign_config VARCHAR(16) REFERENCES iris.sign_config,
     sign_detail VARCHAR(12) REFERENCES iris.sign_detail,
-    msg_user VARCHAR(20) REFERENCES iris.sign_message,
     msg_sched VARCHAR(20) REFERENCES iris.sign_message,
     msg_current VARCHAR(20) REFERENCES iris.sign_message,
     lock JSONB,
@@ -3161,7 +3160,7 @@ CREATE TRIGGER dms_table_notify_trig
 CREATE VIEW iris.dms AS
     SELECT d.name, geo_loc, controller, pin, notes, static_graphic,
            beacon, preset, sign_config, sign_detail,
-           msg_user, msg_sched, msg_current, lock, status, pixel_failures
+           msg_sched, msg_current, lock, status, pixel_failures
     FROM iris._dms d
     JOIN iris.controller_io cio ON d.name = cio.name
     JOIN iris.device_preset p ON d.name = p.name;
@@ -3174,14 +3173,12 @@ BEGIN
     INSERT INTO iris.device_preset (name, resource_n, preset)
          VALUES (NEW.name, 'dms', NEW.preset);
     INSERT INTO iris._dms (
-        name, geo_loc, notes, static_graphic, beacon,
-        sign_config, sign_detail, msg_user, msg_sched, msg_current,
-        lock, status, pixel_failures
+        name, geo_loc, notes, static_graphic, beacon, sign_config,
+        sign_detail, msg_sched, msg_current, lock, status, pixel_failures
     ) VALUES (
         NEW.name, NEW.geo_loc, NEW.notes, NEW.static_graphic,
-        NEW.beacon, NEW.sign_config, NEW.sign_detail,
-        NEW.msg_user, NEW.msg_sched, NEW.msg_current,
-        NEW.lock, NEW.status, NEW.pixel_failures
+        NEW.beacon, NEW.sign_config, NEW.sign_detail, NEW.msg_sched,
+        NEW.msg_current, NEW.lock, NEW.status, NEW.pixel_failures
     );
     RETURN NEW;
 END;
@@ -3207,7 +3204,6 @@ BEGIN
            beacon = NEW.beacon,
            sign_config = NEW.sign_config,
            sign_detail = NEW.sign_detail,
-           msg_user = NEW.msg_user,
            msg_sched = NEW.msg_sched,
            msg_current = NEW.msg_current,
            lock = NEW.lock,
@@ -3230,7 +3226,7 @@ CREATE VIEW dms_view AS
     SELECT d.name, d.geo_loc, cio.controller, cio.pin, d.notes,
            d.sign_config, d.sign_detail, d.static_graphic, d.beacon,
            cp.camera, cp.preset_num, default_font,
-           msg_user, msg_sched, msg_current, lock, status, pixel_failures,
+           msg_sched, msg_current, lock, status, pixel_failures,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street,
            l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location
     FROM iris._dms d

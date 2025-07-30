@@ -29,7 +29,7 @@ CREATE VIEW recent_sign_event_view AS
 GRANT SELECT ON recent_sign_event_view TO PUBLIC;
 
 -- sign message: ADD sticky / DROP incident + duration
--- DMS: ADD lock / DROP expire_time
+-- DMS: ADD lock / DROP expire_time + msg_user
 DROP VIEW sign_message_view;
 DROP VIEW dms_message_view;
 DROP VIEW dms_view;
@@ -43,11 +43,12 @@ ALTER TABLE iris.sign_message DROP COLUMN duration;
 
 ALTER TABLE iris._dms ADD COLUMN lock JSONB;
 ALTER TABLE iris._dms DROP COLUMN expire_time;
+ALTER TABLE iris._dms DROP COLUMN msg_user;
 
 CREATE VIEW iris.dms AS
     SELECT d.name, geo_loc, controller, pin, notes, static_graphic,
            beacon, preset, sign_config, sign_detail,
-           msg_user, msg_sched, msg_current, lock, status, pixel_failures
+           msg_sched, msg_current, lock, status, pixel_failures
     FROM iris._dms d
     JOIN iris.controller_io cio ON d.name = cio.name
     JOIN iris.device_preset p ON d.name = p.name;
@@ -60,14 +61,12 @@ BEGIN
     INSERT INTO iris.device_preset (name, resource_n, preset)
          VALUES (NEW.name, 'dms', NEW.preset);
     INSERT INTO iris._dms (
-        name, geo_loc, notes, static_graphic, beacon,
-        sign_config, sign_detail, msg_user, msg_sched, msg_current,
-        lock, status, pixel_failures
+        name, geo_loc, notes, static_graphic, beacon, sign_config,
+        sign_detail, msg_sched, msg_current, lock, status, pixel_failures
     ) VALUES (
         NEW.name, NEW.geo_loc, NEW.notes, NEW.static_graphic,
-        NEW.beacon, NEW.sign_config, NEW.sign_detail,
-        NEW.msg_user, NEW.msg_sched, NEW.msg_current,
-        NEW.lock, NEW.status, NEW.pixel_failures
+        NEW.beacon, NEW.sign_config, NEW.sign_detail, NEW.msg_sched,
+        NEW.msg_current, NEW.lock, NEW.status, NEW.pixel_failures
     );
     RETURN NEW;
 END;
@@ -93,7 +92,6 @@ BEGIN
            beacon = NEW.beacon,
            sign_config = NEW.sign_config,
            sign_detail = NEW.sign_detail,
-           msg_user = NEW.msg_user,
            msg_sched = NEW.msg_sched,
            msg_current = NEW.msg_current,
            lock = NEW.lock,
@@ -116,7 +114,7 @@ CREATE VIEW dms_view AS
     SELECT d.name, d.geo_loc, cio.controller, cio.pin, d.notes,
            d.sign_config, d.sign_detail, d.static_graphic, d.beacon,
            cp.camera, cp.preset_num, default_font,
-           msg_user, msg_sched, msg_current, lock, status, pixel_failures,
+           msg_sched, msg_current, lock, status, pixel_failures,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street,
            l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location
     FROM iris._dms d
