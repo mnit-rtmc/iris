@@ -96,19 +96,19 @@ estimated travel time.  These tags can be used only on DMS devices.
 **Condition** tags add a stipulation which activates the device only when the
 condition is met.  These tags can be used with any device type.
 
-Tag              | Description                                | Tag Mode
------------------|--------------------------------------------|---------
-`[cg` *…* `]`    | [ClearGuide] data                          | Replace
-`[exit` *…* `]`  | [Exit ramp backup]                         | Condition
-`[feed` *…* `]`  | [Msg-Feed] message                         | Replace
-`[pa` *…* `]`    | [Parking area] availability                | Replace
-`[rwis_` *…* `]` | [RWIS] weather conditions                  | Condition
-`[slow` *…* `]`  | [Slow traffic] warning                     | Condition + Replace
-`[standby]`      | Standby messages                           | Standby
-`[ta` *…* `]`    | Scheduled [time actions](#time-action-tag) | Replace
-`[tt` *…* `]`    | [Travel time] estimation                   | Replace
-`[tz` *…* `]`    | [Toll zone] pricing                        | Replace
-`[vsa]`          | [Variable speed advisory]                  | Condition + Replace
+Tag              | Description                      | Tag Mode            | Source
+-----------------|----------------------------------|---------------------|-------------
+`[cg` *…* `]`    | [ClearGuide] data                | Replace             | `clearguide`
+`[exit` *…* `]`  | [Exit ramp backup]               | Condition           | `exit_warning`
+`[feed` *…* `]`  | [Msg-Feed] message               | Replace             | N/A
+`[pa` *…* `]`    | [Parking area] availability      | Replace             | `parking`
+`[rwis_` *…* `]` | [RWIS] weather conditions        | Condition           | `rwis`
+`[slow` *…* `]`  | [Slow traffic] warning           | Condition + Replace | `slow_warning`
+`[standby]`      | Standby messages                 | Standby             | `standby`
+`[ta` *…* `]`    | [Time actions](#time-action-tag) | Replace             | N/A
+`[tt` *…* `]`    | [Travel time] estimation         | Replace             | `travel_time`
+`[tz` *…* `]`    | [Toll zone] pricing              | Replace             | `tolling`
+`[vsa]`          | [Variable speed advisory]        | Condition + Replace | `speed_advisory`
 
 ## Time Actions
 

@@ -25,7 +25,9 @@ The [MULTI] string contains the text and/or [graphics] of the message.
 The **msg_owner** is a string containing 3 fields, separated by semicolons
 (`system`; `sources`; `user`):
 - `system`: normally "IRIS"; possibly another system
-- `sources`: "operator" or [action tag] sources, separated by `+`
+- `sources`: message sources, separated by `+` (`operator`, `blank`, `incident`,
+  `lcs`, `gate_arm`, `alert`, `external`, `reset` or `schedule` + [action tag]
+  source)
 - `user`: name of user who created the message
 
 **Sticky** indicates the message should persist even if communication or power
