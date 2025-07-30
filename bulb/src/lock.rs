@@ -19,6 +19,7 @@ use std::time::Duration;
 pub enum LockReason {
     Unlocked,
     Incident,
+    Situation,
     Testing,
     KnockedDown,
     Indication,
@@ -31,6 +32,7 @@ impl From<&str> for LockReason {
     fn from(r: &str) -> Self {
         match r {
             "incident" => Self::Incident,
+            "situation" => Self::Situation,
             "testing" => Self::Testing,
             "knocked down" => Self::KnockedDown,
             "indication" => Self::Indication,
@@ -54,6 +56,7 @@ impl LockReason {
         &[
             LockReason::Unlocked,
             LockReason::Incident,
+            LockReason::Situation,
             LockReason::Testing,
             LockReason::KnockedDown,
             LockReason::Indication,
@@ -69,6 +72,7 @@ impl LockReason {
         match self {
             Unlocked => "unlocked",
             Incident => "incident",
+            Situation => "situation",
             Testing => "testing",
             KnockedDown => "knocked down",
             Indication => "indication",
@@ -81,13 +85,14 @@ impl LockReason {
     /// Check if device lock is deployable
     pub fn is_deployable(self) -> bool {
         use LockReason::*;
-        matches!(self, Unlocked | Incident | Testing)
+        matches!(self, Unlocked | Incident | Situation | Testing)
     }
 
     /// Get lock duration
     pub fn duration(self) -> Option<Duration> {
         match self {
             LockReason::Incident => Some(Duration::from_secs(30 * 60)),
+            LockReason::Situation => Some(Duration::from_secs(60 * 60)),
             LockReason::Testing => Some(Duration::from_secs(5 * 60)),
             _ => None,
         }

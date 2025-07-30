@@ -92,7 +92,7 @@ fn required_patch_operate(res: Res, att: &str) -> bool {
         | (Res::Detector, "field_length")
         | (Res::Detector, "force_fail")
         | (Res::Dms, "device_request")
-        | (Res::Dms, "msg_user")
+        | (Res::Dms, "lock")
         | (Res::Incident, "impact")
         | (Res::Incident, "cleared")
         | (Res::GateArmArray, "arm_state_next")

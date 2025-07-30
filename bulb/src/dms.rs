@@ -18,12 +18,13 @@ use crate::error::Result;
 use crate::fetch::{Action, Uri};
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
+use crate::lock::LockReason;
 use crate::notes::contains_hashtag;
 use crate::sign::{self, NtcipSign};
 use crate::signmessage::SignMessage;
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
-use chrono::DateTime;
+use chrono::{DateTime, Local, format::SecondsFormat};
 use hatmil::Html;
 use js_sys::{ArrayBuffer, Uint8Array};
 use mag::temp::DegC;
@@ -36,7 +37,9 @@ use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
 use std::cmp::Ordering;
+use std::fmt;
 use std::iter::repeat;
+use std::time::Duration;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{HtmlElement, HtmlInputElement, HtmlSelectElement, console};
 
@@ -89,11 +92,59 @@ pub struct PowerSupply {
 #[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct DmsLock {
     pub reason: String,
+    pub message: Option<String>,
     pub expires: Option<String>,
     pub user_id: Option<String>,
 }
 
+impl fmt::Display for DmsLock {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // format as JSON for setting DMS lock
+        write!(f, "{{\"reason\":\"{}\"", &self.reason)?;
+        if let Some(message) = &self.message {
+            write!(f, ",\"message\":{message}")?;
+        }
+        if let Some(expires) = &self.expires {
+            write!(f, ",\"expires\":\"{expires}\"")?;
+        }
+        if let Some(user_id) = &self.user_id {
+            write!(f, ",\"user_id\":\"{user_id}\"")?;
+        }
+        write!(f, "}}")
+    }
+}
+
 impl DmsLock {
+    /// Create a new DMS lock
+    fn new(reason: &str) -> Self {
+        DmsLock {
+            reason: reason.to_string(),
+            ..Default::default()
+        }
+    }
+
+    /// Set the sign message name
+    fn with_message(mut self, message: Option<&str>) -> Self {
+        self.message = message.map(|m| m.to_string());
+        self
+    }
+
+    /// Set the lock duration
+    fn with_duration(mut self, duration: Option<u32>) -> Self {
+        self.expires = duration.map(|d| {
+            let sec = Duration::from_secs(60 * u64::from(d));
+            let now: DateTime<Local> = Local::now();
+            (now + sec).to_rfc3339_opts(SecondsFormat::Secs, false)
+        });
+        self
+    }
+
+    /// Set the user name
+    fn with_user(mut self, user: Option<&str>) -> Self {
+        self.user_id = user.map(|u| u.to_string());
+        self
+    }
+
     /// Format lock expire time
     fn expires(&self) -> Option<String> {
         if let Some(expires) = &self.expires {
@@ -138,7 +189,6 @@ pub struct Dms {
     pub sign_config: Option<String>,
     pub sign_detail: Option<String>,
     pub msg_sched: Option<String>,
-    pub msg_user: Option<String>,
     pub geo_loc: Option<String>,
     pub status: Option<SignStatus>,
     pub pix_failures: Option<String>,
@@ -577,33 +627,26 @@ impl DmsAnc {
         self,
         uri: Uri,
         msg: SignMessage,
-        _duration: Option<u32>,
+        duration: Option<u32>,
     ) -> Vec<Action> {
-        // FIXME: set dms lock
-        match self.find_sign_msg(&msg) {
-            #[allow(clippy::vec_init_then_push)]
-            Some(msg) => {
-                let mut actions = Vec::with_capacity(1);
-                actions.push(msg_user_action(uri, &msg.name));
-                actions
-            }
-            None => {
-                let mut actions = Vec::with_capacity(2);
-                if let Ok(val) = serde_json::to_string(&msg) {
-                    let post = Uri::from("/iris/api/sign_message");
-                    actions.push(Action::Post(post, val.into()));
-                    actions.push(msg_user_action(uri, &msg.name));
-                }
-                actions
+        let mut actions = Vec::with_capacity(2);
+        let Some(user) = crate::app::user() else {
+            return actions;
+        };
+        let lock = DmsLock::new(LockReason::Situation.as_str())
+            .with_message(Some(&msg.name))
+            .with_duration(duration)
+            .with_user(Some(&user));
+        if self.find_sign_msg(&msg).is_none() {
+            if let Ok(val) = serde_json::to_string(&msg) {
+                let post = Uri::from("/iris/api/sign_message");
+                actions.push(Action::Post(post, val.into()));
             }
         }
+        let val = format!("{{\"lock\":{lock}}}");
+        actions.push(Action::Patch(uri, val.into()));
+        actions
     }
-}
-
-/// Create a msg_user patch action
-fn msg_user_action(uri: Uri, msg_name: &str) -> Action {
-    let val = format!("{{\"msg_user\":\"{msg_name}\"}}");
-    Action::Patch(uri, val.into())
 }
 
 /// All hashtags for dedicated purpose
