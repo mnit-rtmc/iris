@@ -113,9 +113,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			WeatherSensor.SONAR_TYPE);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"static_graphic, beacon, preset, sign_config, " +
-			"sign_detail, msg_user, msg_sched, msg_current, " +
-			"lock, status, pixel_failures FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+			"sign_detail, msg_sched, msg_current, lock, " +
+			"status, pixel_failures FROM iris." + SONAR_TYPE +
+			";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DMSImpl(row));
@@ -149,7 +149,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("preset", preset);
 		map.put("sign_config", sign_config);
 		map.put("sign_detail", sign_detail);
-		map.put("msg_user", msg_user);
 		map.put("msg_sched", msg_sched);
 		map.put("msg_current", msg_current);
 		map.put("lock", lock);
@@ -187,20 +186,19 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		     row.getString(8),     // preset
 		     row.getString(9),     // sign_config
 		     row.getString(10),    // sign_detail
-		     row.getString(11),    // msg_user
-		     row.getString(12),    // msg_sched
-		     row.getString(13),    // msg_current
-		     row.getString(14),    // lock
-		     row.getString(15),    // status
-		     row.getString(16)     // pixel_failures
+		     row.getString(11),    // msg_sched
+		     row.getString(12),    // msg_current
+		     row.getString(13),    // lock
+		     row.getString(14),    // status
+		     row.getString(15)     // pixel_failures
 		);
 	}
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, String loc, String c, int p, String nt,
 		String sg, String b, String cp, String sc, String sd,
-		String mu, String ms, String mc, String lk, String st,
-		String pf) throws TMSException
+		String ms, String mc, String lk, String st, String pf)
+		throws TMSException
 	{
 		super(n, lookupController(c), p, nt);
 		geo_loc = lookupGeoLoc(loc);
@@ -209,7 +207,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		setPreset(lookupPreset(cp));
 		sign_config = SignConfigHelper.lookup(sc);
 		sign_detail = SignDetailHelper.lookup(sd);
-		msg_user = SignMessageHelper.lookup(mu);
 		msg_sched = SignMessageHelper.lookup(ms);
 		msg_current = SignMessageHelper.lookup(mc);
 		lock = lk;
@@ -262,15 +259,15 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		configure = c;
 		// Since this is called after every failed operation, check if
 		// communication has been failed too long.  If so, clear the
-		// user message to prevent it from popping up days later, after
+		// lock to prevent messages from popping up days later, after
 		// communication is restored.
 		if (!c && getFailMillis() >= COMM_LOSS_THRESHOLD.ms())
-			resetMsgUser();
+			resetLock();
 	}
 
-	/** Reset the user message and log a reset sign event */
-	private void resetMsgUser() {
-		SignMessage sm = msg_user;
+	/** Reset the user lock and log a reset sign event */
+	private void resetLock() {
+		SignMessage sm = getMsgUser();
 		if (sm != null) {
 			logEvent(new SignEvent(
 				EventType.DMS_MSG_RESET,
@@ -279,7 +276,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				sm.getMsgOwner()
 			));
 		}
-		setMsgUserNotify(null);
+		setLockNotify(null);
 	}
 
 	/** Get the configure flag.
@@ -517,10 +514,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Reset sign state (and notify clients) */
-	public void resetStateNotify() {
+	private void resetStateNotify() {
 		setStatusNotify(null);
 		setPixelFailuresNotify(null);
-		resetMsgUser();
+		resetLock();
 		setMsgSchedNotify(null);
 		setMsgCurrentNotify(null, false);
 	}
@@ -574,102 +571,15 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * Since `blank` messages have no owner, save here for logging */
 	private transient String blank_owner;
 
-	/** User selected sign message.
-	 *
-	 * This is cached to allow combining with scheduled messages in
-	 * getMsgCombined().
-	 *
-	 * A null value indicates that the user message is unknown. */
-	private SignMessage msg_user;
-
-	/** Get the user sign messasge.
-	 * @return User sign message */
-	@Override
-	public SignMessage getMsgUser() {
-		return msg_user;
+	/** Set the owner of a blank message */
+	public void setBlankOwner(String bo) {
+		blank_owner = bo;
 	}
 
-	/** Set the user selected sign message */
-	@Override
-	public void setMsgUser(SignMessage sm) {
-		msg_user = sm;
-	}
-
-	/** Set the user selected sign message */
-	public void doSetMsgUser(SignMessage sm) throws TMSException {
-		if (!objectEquals(msg_user, sm)) {
-			String unm = SignMessageHelper.getMsgOwnerName(sm);
-			String pusr = getProcUser();
-			if (!unm.equals(pusr)) {
-				throw new ChangeVetoException("USER: " +
-					unm + " != " + pusr);
-			}
-			checkMsgUser(sm);
-			validateMsg(sm);
-			SignMessage smu = sm;
-			if (SignMessageHelper.isBlank(sm)) {
-				blank_owner = sm.getMsgOwner();
-				// only retain non-blank user messages
-				smu = null;
-			}
-			store.update(this, "msg_user", smu);
-			setMsgUser(smu);
-			sm = getMsgValidated();
-			sendMsg(sm);
-		}
-	}
-
-	/** Check if the user has permission to send a given message */
-	private void checkMsgUser(SignMessage sm) throws TMSException {
-		int lvl = accessLevel(new Name(this, "msgUser"));
-		switch (lvl) {
-		case 2: // "Operate" access level
-			denyFreeForm(sm);
-			return;
-		case 3: // "Manage" access level
-			checkFreeFormBanned(sm);
-			return;
-		case 4: // "Configure" access level
-			// not checked
-			return;
-		default:
-			throw new ChangeVetoException("NOT PERMITTED");
-		}
-	}
-
-	/** Deny free-form text in a message */
-	private void denyFreeForm(SignMessage sm) throws TMSException {
-		if (SignMessageHelper.isBlank(sm))
-			return;
-		String msg = DMSHelper.validateFreeFormLines(this,
-			sm.getMulti());
-		if (msg != null)
-			throw new ChangeVetoException(msg);
-	}
-
-	/** Check for banned words in free-form text */
-	private void checkFreeFormBanned(SignMessage sm) throws TMSException {
-		if (SignMessageHelper.isBlank(sm))
-			return;
-		String msg = DMSHelper.validateFreeFormWords(this,
-			sm.getMulti());
-		if (msg != null)
-			throw new ChangeVetoException(msg);
-	}
-
-	/** Set the user selected sign message,
-	 *  without validating or sending anything to the sign. */
-	public void setMsgUserNotify(SignMessage sm) {
-		if (!objectEquals(msg_user, sm)) {
-			try {
-				store.update(this, "msg_user", sm);
-				setMsgUser(sm);
-				notifyAttribute("msgUser");
-			}
-			catch (TMSException e) {
-				logError("msg_user: " + e.getMessage());
-			}
-		}
+	/** Get the user lock message */
+	private SignMessage getMsgUser() {
+		DmsLock lk = new DmsLock(lock);
+		return SignMessageHelper.lookup(lk.optMessage());
 	}
 
 	/** Check if the current message is operator expiring */
@@ -723,22 +633,31 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Update scheduled message.
 	 *
-	 * This updates the message's expire time, so it should be called on
-	 * each polling period.  Also, if a scheduled message has just expired,
-	 * it will be replaced by the user message. */
+	 * This should be called on each polling period to update the message
+	 * duration.  Also, if a scheduled message has just expired, it will
+	 * be replaced by the user/lock message. */
 	private void updateSchedMsg() {
-		if (isMsgScheduled() || msg_sched != null) {
-			SignMessage usm = getMsgValidated();
-			if (isMsgSource(usm, SignMsgSource.schedule) ||
-			    isMsgScheduled())
-			{
-				SignMessage mc = msg_current;
-				String owner = (mc != null)
-					? mc.getMsgOwner()
-					: usm.getMsgOwner();
-				sendMsgSched(usm, owner);
+		SignMessage sm = getMsgSchedValidated();
+		if (sm != null) {
+			try {
+				sendMsg(sm, "schedule");
+			}
+			catch (TMSException e) {
+				logError("updateSchedMsg: " +
+					e.getMessage());
 			}
 		}
+	}
+
+	/** Get validated scheduled message */
+	private SignMessage getMsgSchedValidated() {
+		if (isMsgScheduled() || msg_sched != null) {
+			SignMessage sm = getMsgValidated();
+			if (isMsgSource(sm, SignMsgSource.schedule) ||
+			    isMsgScheduled())
+				return sm;
+		}
+		return null;
 	}
 
 	/** Tolling prices */
@@ -820,7 +739,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 		logEvent(new SignEvent(et, name, text, owner));
 		if (sent)
-			blank_owner = null;
+			setBlankOwner(null);
 	}
 
 	/** Next sign message (sending in process) */
@@ -854,7 +773,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return createMsgBlank(0);
 	}
 
-	/** Validate a sign message */
+	/** Validate whether a message can be displayed */
 	private void validateMsg(SignMessage sm) throws InvalidMsgException {
 		try {
 			SignMessageHelper.validate(sm, this);
@@ -870,11 +789,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
-	/** Get combined user / scheduled sign message.
+	/** Get combined lock / scheduled sign message.
 	 * @return The appropriate sign message, or null. */
 	private SignMessage getMsgCombined() {
-		SignMessage sched = msg_sched;	// Avoid race
-		SignMessage user = msg_user;	// Avoid race
+		SignMessage sched = msg_sched;   // Avoid race
+		SignMessage user = getMsgUser(); // Avoid race
 		SignMessage combined = tryCombine(sched, user);
 		if (combined != null)
 			return combined;
@@ -934,46 +853,33 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		        sm1.getMsgPriority() > sm2.getMsgPriority());
 	}
 
-	/** Send message to DMS, logging any exceptions.
-	 * @param sm Sign message (not null). */
-	private void sendMsgSched(SignMessage sm, String owner) {
-		try {
-			if (SignMessageHelper.isBlank(sm))
-				blank_owner = owner;
-			sendMsg(sm);
-		}
-		catch (TMSException e) {
-			logError("sendMsgSched: " + e.getMessage());
-		}
-	}
-
 	/** Send message to DMS.
-	 * @param sm Sign message (not null). */
-	private void sendMsg(SignMessage sm) throws TMSException {
+	 * @param sm Sign message (not null).
+	 * @param owner Owner name for blank message. */
+	private void sendMsg(SignMessage sm, String owner) throws TMSException {
 		DMSPoller p = getDMSPoller();
 		if (null == p) {
 			throw new ChangeVetoException(name +
 				": NO ACTIVE POLLER");
 		}
-		if (sm != null)
-			sendMsg(p, sm);
-	}
-
-	/** Set the next sign message.
-	 * @param p DMS poller.
-	 * @param sm Sign message (not null). */
-	private void sendMsg(DMSPoller p, SignMessage sm) {
-		if (isMsgSource(sm, SignMsgSource.tolling))
-		    logPriceMessages(EventType.PRICE_DEPLOYED);
-		p.sendMessage(this, sm);
+		if (sm != null) {
+			if (SignMessageHelper.isBlank(sm)) {
+				int src = SignMessageHelper.sourceBits(sm);
+				setBlankOwner(SignMessageHelper.makeMsgOwner(
+					src, owner));
+			}
+			if (isMsgSource(sm, SignMsgSource.tolling))
+			    logPriceMessages(EventType.PRICE_DEPLOYED);
+			p.sendMessage(this, sm);
+		}
 	}
 
 	/** Check if the sign has a reference to a sign message */
 	public boolean hasReference(final SignMessage sm) {
-		return sm == msg_user ||
+		return sm == msg_current ||
+		       sm == msg_next ||
 		       sm == msg_sched ||
-		       sm == msg_current ||
-		       sm == msg_next;
+		       sm == getMsgUser();
 	}
 
 	/** DMS lock (JSON) */
@@ -985,29 +891,103 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		lock = lk;
 	}
 
-	/** Set the lock as JSON */
+	/** Update the lock and styles */
+	private void updateLock(String lk) throws TMSException {
+		store.update(this, "lock", lk);
+		setLock(lk);
+		updateStyles();
+	}
+
+	/** Set the lock as JSON (called by client) */
 	public void doSetLock(String lk) throws TMSException {
 		if (!objectEquals(lk, lock)) {
 			if (lk != null)
 				checkLock(new DmsLock(lk));
-			setLockChecked(lk);
+			updateLock(lk);
+			sendMsg(getMsgValidated(), getProcUser());
 		}
 	}
 
-	/** Check a lock */
+	/** Check a lock sent by client */
 	private void checkLock(DmsLock lk) throws TMSException {
-		if (!getProcUser().equals(lk.optUser()))
+		String usr = getProcUser();
+		if (!usr.equals(lk.optUser()))
 			throw new ChangeVetoException("Bad user!");
 		String exp = lk.optExpires();
 		if (exp != null && TimeSteward.parse8601(exp) == null)
 			throw new ChangeVetoException("Bad expiration!");
+		String msg = lk.optMessage();
+		if (msg != null) {
+			SignMessage sm = SignMessageHelper.lookup(msg);
+			if (sm != null) {
+				String onm =
+					SignMessageHelper.getMsgOwnerName(sm);
+				if (!usr.equals(onm)) {
+					throw new ChangeVetoException(
+						"Bad owner!");
+				}
+				checkLockMsg(sm);
+			} else
+				throw new ChangeVetoException("Bad message!");
+		}
 	}
 
-	/** Set the lock as JSON */
-	private void setLockChecked(String lk) throws TMSException {
-		store.update(this, "lock", lk);
-		lock = lk;
-		updateStyles();
+	/** Check a message selected by client */
+	private void checkLockMsg(SignMessage sm) throws TMSException {
+		validateMsg(sm);
+		// Does the user have permission to send the message?
+		int lvl = accessLevel(new Name(this, "lock"));
+		switch (lvl) {
+		case 2: // "Operate" access level
+			denyFreeForm(sm);
+			return;
+		case 3: // "Manage" access level
+			checkFreeFormBanned(sm);
+			return;
+		case 4: // "Configure" access level
+			// not checked
+			return;
+		default:
+			throw new ChangeVetoException("NOT PERMITTED");
+		}
+	}
+
+	/** Deny free-form text in a message */
+	private void denyFreeForm(SignMessage sm) throws TMSException {
+		if (SignMessageHelper.isBlank(sm))
+			return;
+		String msg = DMSHelper.validateFreeFormLines(this,
+			sm.getMulti());
+		if (msg != null)
+			throw new ChangeVetoException(msg);
+	}
+
+	/** Check for banned words in free-form text */
+	private void checkFreeFormBanned(SignMessage sm) throws TMSException {
+		if (SignMessageHelper.isBlank(sm))
+			return;
+		String msg = DMSHelper.validateFreeFormWords(this,
+			sm.getMulti());
+		if (msg != null)
+			throw new ChangeVetoException(msg);
+	}
+
+	/** Set the lock from server and notify clients.
+	 * NOTE: message is *sent* only if lock is non-null. */
+	public void setLockNotify(String lk) {
+		if (!objectEquals(lk, lock)) {
+			try {
+				updateLock(lk);
+				notifyAttribute("lock");
+				if (lk != null) {
+					String usr = new DmsLock(lk).optUser();
+					sendMsg(getMsgValidated(), usr);
+				}
+			}
+			catch (TMSException e) {
+				logError("lock: " + e.getMessage());
+			}
+		}
 	}
 
 	/** Get the lock as JSON */
@@ -1279,10 +1259,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		Long dur_ms = getDurationMs();
 		if (dur_ms != null && dur_ms <= 0) {
 			try {
-				int src = SignMsgSource.expired.bit();
-				doSetMsgUser(createMsgBlank(src));
-				setLockChecked(null);
+				updateLock(null);
 				notifyAttribute("lock");
+				sendMsg(getMsgValidated(), "expired");
 			}
 			catch (TMSException ex) {
 				logError("checkLockExpired: " +

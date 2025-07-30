@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip;
 
+import us.mn.state.dot.tms.DmsLock;
 import us.mn.state.dot.tms.LcsHelper;
 import us.mn.state.dot.tms.LcsIndication;
 import us.mn.state.dot.tms.LcsLock;
@@ -143,12 +144,9 @@ public class OpSendLCSIndications extends OpLCS {
 
 	/** Send an indication to a DMS */
 	private void sendIndication(int ln, DMSImpl dms, SignMessage sm) {
-		try {
-			dms.doSetMsgUser(sm);
-			ind_after[ln] = indications[ln];
-		}
-		catch (TMSException e) {
-			logError("sendIndication: " + e.getMessage());
-		}
+		DmsLock lk = new DmsLock(lock.toString());
+		lk.setMessage(sm.getName());
+		dms.setLockNotify(lk.toString());
+		ind_after[ln] = indications[ln];
 	}
 }

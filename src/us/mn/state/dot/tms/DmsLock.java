@@ -53,6 +53,9 @@ public class DmsLock {
 		REASON_CONSTRUCTION,
 	};
 
+	/** SignMessage name */
+	static private final String MESSAGE = "message";
+
 	/** Incident name */
 	static private final String INCIDENT = "incident";
 
@@ -98,6 +101,7 @@ public class DmsLock {
 	private void clear() {
 		try {
 			lock.remove(REASON);
+			lock.remove(MESSAGE);
 			lock.remove(INCIDENT);
 			lock.remove(EXPIRES);
 			lock.remove(USER);
@@ -114,9 +118,13 @@ public class DmsLock {
 
 	/** Set the lock reason */
 	public void setReason(String r) {
-		if (r != null)
+		if (r != null) {
 			putReason(r);
-		else
+			if (!isReasonOn(r)) {
+				putMessage(null);
+				putExpires(null);
+			}
+		} else
 			clear();
 	}
 
@@ -130,15 +138,40 @@ public class DmsLock {
 		}
 	}
 
+	/** Check if the reason is "ON" */
+	private boolean isReasonOn(String reason) {
+		return REASON_INCIDENT.equals(reason) ||
+		       REASON_SITUATION.equals(reason) ||
+		       REASON_TESTING.equals(reason);
+	}
+
+	/** Get the lock message, or null */
+	public String optMessage() {
+		return lock.optString(MESSAGE, null);
+	}
+
+	/** Set the lock message */
+	public void setMessage(String msg) {
+		if (msg != null && !isReasonOn(optReason()))
+			putReason(REASON_TESTING);
+		if (msg == null)
+			putExpires(null);
+		putMessage(msg);
+	}
+
+	/** Put the lock message */
+	private void putMessage(String msg) {
+		try {
+			lock.put(MESSAGE, msg);
+		}
+		catch (JSONException e) {
+			System.err.println("putMessage: " + e.getMessage());
+		}
+	}
+
 	/** Get the lock incident, or null */
 	public String optIncident() {
 		return lock.optString(INCIDENT, null);
-	}
-
-	/** Get the lock incident */
-	public String getIncident() {
-		String inc = optIncident();
-		return (inc != null) ? inc : "NONE";
 	}
 
 	/** Set the lock incident */

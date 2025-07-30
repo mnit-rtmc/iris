@@ -143,7 +143,7 @@ public class Name {
 		{ "detector", "fieldLength" },
 		{ "detector", "forceFail" },
 		{ "dms", "deviceRequest" },
-		{ "dms", "msgUser" },
+		{ "dms", "lock" },
 		{ "gate_arm_array", "armStateNext" },
 		{ "gate_arm_array", "ownerNext" },
 		{ "lcs", "deviceRequest" },

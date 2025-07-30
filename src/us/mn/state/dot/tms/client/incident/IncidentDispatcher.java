@@ -718,20 +718,21 @@ public class IncidentDispatcher extends IPanel
 				SignMessage sm = sm_creator.createIncMsg(sc,
 					ms, mp);
 				if (sm != null) {
-					DmsLock lk = makeLock(inc_orig, cleared);
+					DmsLock lk = makeLock(inc_orig, sm,
+						cleared);
 					dms.setLock(lk.toString());
-					dms.setMsgUser(sm);
 				}
 			}
 		});
 	}
 
 	/** Make DMS lock */
-	private DmsLock makeLock(String inc, boolean cleared) {
+	private DmsLock makeLock(String inc, SignMessage sm, boolean cleared) {
 		DmsLock lk = new DmsLock(null);
 		lk.setUser(user);
 		lk.setReason(DmsLock.REASON_INCIDENT);
 		lk.setIncident(inc);
+		lk.setMessage(sm.getName());
 		if (cleared)
 			lk.setDuration(DURATION_CLEARED);
 		return lk;

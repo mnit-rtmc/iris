@@ -151,7 +151,9 @@ public class DMSHelper extends BaseHelper {
 	 * @param dms DMS to lookup. */
 	static public String getUserMulti(DMS dms) {
 		if (dms != null) {
-			SignMessage sm = dms.getMsgUser();
+			DmsLock lk = new DmsLock(dms.getLock());
+			SignMessage sm = SignMessageHelper.lookup(
+				lk.optMessage());
 			if (sm != null)
 				return sm.getMulti();
 		}

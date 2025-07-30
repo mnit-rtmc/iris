@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2024  Minnesota Department of Transportation
+ * Copyright (C) 2015-2025  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,6 +25,7 @@ public enum SignMsgSource {
 	unknown,        //  0 unknown source
 	reset,          //  1 sign reset
 	blank,          //  2 message blank
+	@Deprecated
 	expired,        //  3 message expired
 	external,       //  4 external system
 	operator,       //  5 IRIS operator

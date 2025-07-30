@@ -116,14 +116,7 @@ public class DMSDispatcher extends JPanel {
 	/** Blank all selected DMS */
 	private void sendBlankMessage() {
 		for (DMS dms: sel_mdl.getSelected()) {
-			SignConfig sc = dms.getSignConfig();
-			if (sc != null) {
-				SignMessage sm = creator.createMsgBlank(sc);
-				if (sm != null) {
-					dms.setLock(null);
-					dms.setMsgUser(sm);
-				}
-			}
+			dms.setLock(null);
 		}
 		selectPreview(false);
 		unlink_incident = false;
@@ -346,29 +339,31 @@ public class DMSDispatcher extends JPanel {
 	private void sendMessage(String ms) {
 		Set<DMS> signs = getValidSelected();
 		for (DMS dms: signs) {
-			SignConfig sc = dms.getSignConfig();
-			if (sc != null) {
-				DmsLock lk = makeLock(dms);
-				SignMessage sm = createMessage(sc, ms, lk);
-				if (sm != null) {
-					dms.setLock(lk.toString());
-					dms.setMsgUser(sm);
-				}
-			}
+			DmsLock lk = makeLock(dms, ms);
+			if (lk != null)
+				dms.setLock(lk.toString());
 		}
 		selectPreview(false);
 	}
 
 	/** Make DMS lock */
-	private DmsLock makeLock(DMS dms) {
-		DmsLock lk = (unlink_incident)
-			? new DmsLock(null)
-			: new DmsLock(dms.getLock());
-		lk.setUser(user);
-		if (lk.optReason() == null)
-			lk.setReason(DmsLock.REASON_SITUATION);
-		lk.setDuration(composer.getDuration());
-		return lk;
+	private DmsLock makeLock(DMS dms, String ms) {
+		SignConfig sc = dms.getSignConfig();
+		if (sc != null) {
+			DmsLock lk = (unlink_incident)
+				? new DmsLock(null)
+				: new DmsLock(dms.getLock());
+			lk.setUser(user);
+			if (lk.optReason() == null)
+				lk.setReason(DmsLock.REASON_SITUATION);
+			lk.setDuration(composer.getDuration());
+			SignMessage sm = createMessage(sc, ms, lk);
+			if (sm != null) {
+				lk.setMessage(sm.getName());
+				return lk;
+			}
+		}
+		return null;
 	}
 
 	/** Create a new message for a sign configuration.
@@ -452,7 +447,7 @@ public class DMSDispatcher extends JPanel {
 	/** Can a message be sent to the specified DMS? */
 	public boolean canSend(DMS dms) {
 		return creator.canCreate() &&
-		       isWritePermitted(dms, "msgUser");
+		       isWritePermitted(dms, "lock");
 	}
 
 	/** Is DMS attribute write permitted? */

@@ -130,14 +130,18 @@ public class OpQueryDMSMessage extends OpDMS {
 
 	/** Process a blank message source from the sign controller */
 	private Phase processMessageBlank() throws ControllerException {
-		int src = 0;
+		SignMessage sm = dms.createMsgBlank(0);
 		/* Maybe the current msg just expired */
 		if (dms.isOperatorExpiring()) {
-			src = SignMsgSource.expired.bit();
-			/* User msg just expired -- set it to null */
-			dms.setMsgUserNotify(null);
-		}
-		setMsgCurrent(dms.createMsgBlank(src));
+			/* Lock just expired -- set it to null */
+			dms.setLockNotify(null);
+			int src = SignMessageHelper.sourceBits(sm);
+			String owner = SignMessageHelper.makeMsgOwner(src,
+				"expired");
+			dms.setBlankOwner(owner);
+			setMsgCurrent(sm, true);
+		} else
+			setMsgCurrent(sm, false);
 		return null;
 	}
 
@@ -151,7 +155,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		 * CRC of the message IRIS knows about */
 		SignMessage sm = dms.getMsgCurrent();
 		if (checkMsgCrc(sm, true) || checkMsgCrc(sm, false)) {
-			setMsgCurrent(sm);
+			setMsgCurrent(sm, false);
 			return null;
 		} else {
 			String multi = lookupMulti(sm);
@@ -223,7 +227,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		boolean ps = (srv.getInteger() == 1);
 		SignMsgPriority mp = getMsgPriority();
 		SignMessage sm = dms.createMsg(ms, owner, st, fb, ps, mp);
-		setMsgCurrent(sm);
+		setMsgCurrent(sm, false);
 	}
 
 	/** Get the message priority of the current message */
@@ -234,9 +238,11 @@ public class OpQueryDMSMessage extends OpDMS {
 	}
 
 	/** Set the current message on the sign */
-	private void setMsgCurrent(SignMessage sm) throws ControllerException {
+	private void setMsgCurrent(SignMessage sm, boolean sent)
+		throws ControllerException
+	{
 		if (sm != null)
-			dms.setMsgCurrentNotify(sm, false);
+			dms.setMsgCurrentNotify(sm, sent);
 		else {
 			System.err.println("setMsgCurrent null: " + dms);
 			throw new ControllerException("MSG RENDER FAILED");
