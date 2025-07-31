@@ -231,7 +231,7 @@ fn make_meter_signal(state: MeterState) -> Raster<SRgb8> {
     let circle = Raster::<Matte8>::with_u8_buffer(
         32,
         32,
-        *include_bytes!("../static/circle.bin"),
+        *include_bytes!("../res/circle.bin"),
     );
     raster.composite_matte((8, 8, 32, 32), &circle, (), state.red(), SrcOver);
     raster.composite_matte(
