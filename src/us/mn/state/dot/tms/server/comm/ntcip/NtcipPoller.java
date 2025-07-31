@@ -138,10 +138,9 @@ public class NtcipPoller extends ThreadedPoller implements AlarmPoller,
 	@SuppressWarnings("unchecked")
 	@Override
 	public void sendMessage(DMSImpl dms, SignMessage sm) {
-		if (dms.getMsgCurrent() == sm) {
-			if (SignMessageHelper.isScheduledUnsticky(sm))
-				addOp(new OpUpdateDMSDuration(dms, sm));
-		} else
+		if (dms.getMsgCurrent() == sm)
+			addOp(new OpUpdateDMSDuration(dms, sm));
+		else
 			addOp(new OpSendDMSMessage(dms, sm));
 	}
 

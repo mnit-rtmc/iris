@@ -594,6 +594,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return false;
 	}
 
+	/** Check if the current message is scheduled and not sticky */
+	private boolean isScheduledUnsticky() {
+		SignMessage sm = msg_current;
+		return isMsgSource(sm, SignMsgSource.schedule) &&
+		      !sm.getSticky();
+	}
+
 	/** Scheduled sign message */
 	private SignMessage msg_sched;
 
@@ -1272,7 +1279,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Get remaining duration of current message (null for indefinite) */
 	public Long getDurationMs() {
-		if (SignMessageHelper.isScheduledUnsticky(msg_current)) {
+		if (isScheduledUnsticky()) {
 			int dur_min = getPollPeriodSec() *
 				SCHED_DURATION_PERIODS / 60;
 			dur_min = Math.max(1, dur_min);

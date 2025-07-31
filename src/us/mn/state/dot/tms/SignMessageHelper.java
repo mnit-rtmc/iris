@@ -206,14 +206,6 @@ public class SignMessageHelper extends BaseHelper {
 		}
 	}
 
-	/** Check if a message is scheduled and not sticky.
-	 * @param sm The sign message. */
-	static public boolean isScheduledUnsticky(SignMessage sm) {
-		int bits = sourceBits(sm);
-		return SignMsgSource.schedule.checkBit(bits) &&
-		      !sm.getSticky();
-	}
-
 	/** Check if a message came from RWIS subsystem.
 	 * @param sm The sign message. */
 	static public boolean isRwis(SignMessage sm) {
