@@ -93,6 +93,7 @@ pub struct PowerSupply {
 pub struct DmsLock {
     pub reason: String,
     pub message: Option<String>,
+    pub incident: Option<String>,
     pub expires: Option<String>,
     pub user_id: Option<String>,
 }
@@ -102,7 +103,7 @@ impl fmt::Display for DmsLock {
         // format as JSON for setting DMS lock
         write!(f, "{{\"reason\":\"{}\"", &self.reason)?;
         if let Some(message) = &self.message {
-            write!(f, ",\"message\":{message}")?;
+            write!(f, ",\"message\":\"{message}\"")?;
         }
         if let Some(expires) = &self.expires {
             write!(f, ",\"expires\":\"{expires}\"")?;
