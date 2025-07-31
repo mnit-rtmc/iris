@@ -34,7 +34,7 @@ use web_sys::{
 pub type JsResult<T> = std::result::Result<T, JsValue>;
 
 /// JavaScript imports
-#[wasm_bindgen(module = "/static/glue.js")]
+#[wasm_bindgen(module = "/res/glue.js")]
 extern "C" {
     /// Update station data
     fn update_stat_sample(data: &JsValue);
