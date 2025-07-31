@@ -1,5 +1,16 @@
 # IRIS 5.x Release Notes
 
+5.72.0 (31 Jul 2025)
+ - Replace DMS `msg_user` + `expire_time` with `lock` JSON value (`reason`,
+   `message`, `expires`, `user_id`)
+ - Move SignMessage `incident` to DMS `lock`
+ - Replace SignMessage `duration` with `sticky`
+ - Handle user updating DMS lock duration
+ - DROP sign event `duration`
+ - Constrain device action `msg_priority` (1-15)
+ - Skip camera device actions for incident cameras
+ - Fix ONVIF null pointer exceptions
+
 5.71.0 (7 Jul 2025)
  - Revert broken DMS composer change (displayed msg)
  - Improve logging of blank DMS messages (owner)
