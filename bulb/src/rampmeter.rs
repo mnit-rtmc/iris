@@ -24,6 +24,7 @@ use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
+use chrono::DateTime;
 use gift::block::DisposalMethod;
 use gift::{Encoder, Step};
 use hatmil::Html;
@@ -342,6 +343,16 @@ impl MeterLock {
             _ => Value::String(self.to_string()),
         }
     }
+
+    /// Format lock expire time
+    fn expires(&self) -> Option<String> {
+        if let Some(expires) = &self.expires {
+            if let Ok(dt) = DateTime::parse_from_rfc3339(expires) {
+                return Some(format!("⏲️ {}", &dt.format("%H:%M")));
+            }
+        }
+        None
+    }
 }
 
 impl RampMeter {
@@ -597,6 +608,13 @@ impl RampMeter {
         let mut html = self.title(View::Control);
         html.div().class("row fill");
         self.item_states(anc).tooltips(&mut html);
+        html.span();
+        if let Some(lock) = &self.lock {
+            if let Some(expires) = lock.expires() {
+                html.text(expires);
+            }
+        }
+        html.end(); /* span */
         html.end(); /* div */
         html.div().class("row");
         html.span()

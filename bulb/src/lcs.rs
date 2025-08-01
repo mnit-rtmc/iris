@@ -23,6 +23,7 @@ use crate::start::fly_map_item;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
+use chrono::DateTime;
 use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
@@ -133,6 +134,16 @@ impl LcsLock {
             LockReason::Unlocked => Value::Null,
             _ => Value::String(self.to_string()),
         }
+    }
+
+    /// Format lock expire time
+    fn expires(&self) -> Option<String> {
+        if let Some(expires) = &self.expires {
+            if let Ok(dt) = DateTime::parse_from_rfc3339(expires) {
+                return Some(format!("⏲️ {}", &dt.format("%H:%M")));
+            }
+        }
+        None
     }
 }
 
@@ -462,6 +473,13 @@ impl Lcs {
         let mut html = self.title(View::Control);
         html.div().class("row fill");
         self.item_states(anc).tooltips(&mut html);
+        html.span();
+        if let Some(lock) = &self.lock {
+            if let Some(expires) = lock.expires() {
+                html.text(expires);
+            }
+        }
+        html.end(); /* span */
         html.end(); /* div */
         html.div().class("row");
         html.span()
