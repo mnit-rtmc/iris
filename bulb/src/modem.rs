@@ -59,7 +59,7 @@ impl Modem {
             .text(self.name())
             .text(" ")
             .text(self.item_states().to_string());
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Setup HTML
@@ -97,7 +97,7 @@ impl Modem {
         if self.enabled {
             enabled.attr_bool("checked");
         }
-        html.into()
+        html.to_string()
     }
 }
 

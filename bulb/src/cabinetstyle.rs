@@ -60,7 +60,7 @@ impl CabinetStyle {
     fn to_html_compact(&self) -> String {
         let mut html = Html::new();
         html.div().text(self.name());
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Setup HTML
@@ -101,7 +101,7 @@ impl CabinetStyle {
             .value(opt_str(self.dip));
         html.end(); /* div */
         self.footer_html(true, &mut html);
-        html.into()
+        html.to_string()
     }
 }
 

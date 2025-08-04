@@ -116,7 +116,7 @@ impl User {
             .text(self.name())
             .text(" ")
             .text(self.item_state(anc).to_string());
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Setup HTML
@@ -150,7 +150,7 @@ impl User {
         }
         html.end(); /* div */
         self.footer_html(true, &mut html);
-        html.into()
+        html.to_string()
     }
 }
 

@@ -41,7 +41,7 @@ impl VideoMonitor {
             .text(anc.item_states(self).to_string())
             .end();
         html.div().class("info fill").text(self.mon_num.to_string());
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Status HTML
@@ -49,7 +49,7 @@ impl VideoMonitor {
         let mut html = self.title(View::Status);
         html.div().class("row");
         html.span().class("info").text(self.mon_num.to_string());
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Setup HTML
@@ -58,7 +58,7 @@ impl VideoMonitor {
         anc.controller_html(self, &mut html);
         anc.pin_html(self.pin, &mut html);
         self.footer_html(true, &mut html);
-        html.into()
+        html.to_string()
     }
 }
 

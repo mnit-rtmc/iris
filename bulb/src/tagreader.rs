@@ -150,7 +150,7 @@ impl TagReader {
         html.div()
             .class("info fill")
             .text_len(opt_ref(&self.location), 32);
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Status HTML
@@ -163,7 +163,7 @@ impl TagReader {
         html.span()
             .class("info")
             .text_len(opt_ref(&self.location), 64);
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Setup HTML
@@ -171,7 +171,7 @@ impl TagReader {
         let mut html = self.title(View::Setup);
         anc.cio.controller_html(self, &mut html);
         anc.cio.pin_html(self.pin, &mut html);
-        html.into()
+        html.to_string()
     }
 }
 

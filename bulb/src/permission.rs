@@ -182,7 +182,7 @@ impl Permission {
             .end();
         html.div().class("info fill").text(&self.base_resource);
         html.span().text(opt_ref(&self.hashtag)).end();
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Setup HTML
@@ -209,7 +209,7 @@ impl Permission {
         access_level_html(self.access_level, &mut html);
         html.end(); /* div */
         self.footer_html(true, &mut html);
-        html.into()
+        html.to_string()
     }
 }
 
@@ -274,7 +274,7 @@ impl Card for Permission {
         html.div().class("row");
         html.label().for_("base_resource").text("Resource").end();
         anc.resource_types_html(self, &mut html);
-        html.into()
+        html.to_string()
     }
 
     /// Convert to HTML view

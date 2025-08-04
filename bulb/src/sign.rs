@@ -82,5 +82,5 @@ pub fn render(
             Err(e) => console::log_1(&format!("render: {e:?}").into()),
         }
     }
-    html.into()
+    html.to_string()
 }

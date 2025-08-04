@@ -162,7 +162,7 @@ impl LcsState {
         html.span()
             .text(anc.indication(self).symbol().to_string())
             .end();
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Setup HTML
@@ -207,7 +207,7 @@ impl LcsState {
             .value(opt_str(self.msg_num));
         html.end(); /* div */
         self.footer_html(true, &mut html);
-        html.into()
+        html.to_string()
     }
 }
 

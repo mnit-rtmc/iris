@@ -743,7 +743,7 @@ impl Dms {
         }
         html.div().class("info fill");
         html.text_len(opt_ref(&self.location), 64);
-        html.into()
+        html.to_string()
     }
 
     /// Get user to display
@@ -784,7 +784,7 @@ impl Dms {
         html.text_len(opt_ref(&self.location), 64);
         html.end(); /* div */
         self.message_composer_html(anc, &mut html);
-        html.into()
+        html.to_string()
     }
 
     /// Build message composer HTML
@@ -1004,7 +1004,7 @@ impl Dms {
             .attr("rel", "noopener noreferrer")
             .text("🔗 ")
             .text(self.name());
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Setup HTML
@@ -1023,7 +1023,7 @@ impl Dms {
         anc.cio.controller_html(self, &mut html);
         anc.cio.pin_html(self.pin, &mut html);
         self.footer_html(true, &mut html);
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Status HTML
@@ -1041,7 +1041,7 @@ impl Dms {
         self.temp_html(&mut html);
         self.light_html(&mut html);
         self.power_html(&mut html);
-        html.into()
+        html.to_string()
     }
 
     /// Build temperature status HTML
@@ -1303,7 +1303,7 @@ impl Card for Dms {
             let mut html = Html::new();
             anc.make_lines_html(&sign, pat, "", &mut html);
             let mc_lines = Doc::get().elem::<HtmlElement>("mc_lines");
-            mc_lines.set_outer_html(&String::from(html));
+            mc_lines.set_outer_html(&html.to_string());
             Vec::new()
         } else {
             self.selected_lines()

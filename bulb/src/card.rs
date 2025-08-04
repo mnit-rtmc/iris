@@ -307,7 +307,7 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
             .maxlength("24")
             .size("24")
             .value(self.name());
-        html.into()
+        html.to_string()
     }
 
     /// Convert to HTML view
@@ -385,7 +385,7 @@ pub fn item_states_html(res: Res) -> String {
         }
         html.text(st.code()).text(" ").text(st.description()).end();
     }
-    html.into()
+    html.to_string()
 }
 
 /// Get slice of all item states for a resource
@@ -544,7 +544,7 @@ pub async fn fetch_resource(config: bool) -> Result<String> {
     }
     add_option::<VideoMonitor>(&access, &mut html);
     add_option::<WeatherSensor>(&access, &mut html);
-    Ok(html.into())
+    Ok(html.to_string())
 }
 
 /// Add option to access select
@@ -714,7 +714,7 @@ impl CardList {
         }
         html.end(); /* ul */
         self.states_main = item_states_main(&cards, &anc);
-        Ok(html.into())
+        Ok(html.to_string())
     }
 
     /// Get next suggested name
@@ -1131,5 +1131,5 @@ fn html_card_create(res: Res, create: &str) -> String {
         .type_("button")
         .text("🖍️ Save")
         .end();
-    html.into()
+    html.to_string()
 }

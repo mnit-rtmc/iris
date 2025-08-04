@@ -50,7 +50,7 @@ impl Detector {
             .text(anc.item_states(self).to_string())
             .end();
         html.div().class("info fill").text(opt_ref(&self.label));
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Status HTML
@@ -64,7 +64,7 @@ impl Detector {
             .class("info")
             .text_len(opt_ref(&self.label), 20)
             .end();
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Setup HTML
@@ -73,7 +73,7 @@ impl Detector {
         anc.controller_html(self, &mut html);
         anc.pin_html(self.pin, &mut html);
         self.footer_html(true, &mut html);
-        html.into()
+        html.to_string()
     }
 }
 

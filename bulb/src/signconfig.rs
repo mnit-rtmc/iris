@@ -140,7 +140,7 @@ fn to_html_compact(sc: &SignConfig) -> String {
         .text(&sc.name)
         .text(" ")
         .text(item_states(sc).to_string());
-    html.into()
+    html.to_string()
 }
 
 /// Get item states
@@ -215,7 +215,7 @@ fn to_html_setup(sc: &SignConfig, anc: &SignConfigAnc) -> String {
     anc.select_fonts_html(sc.default_font, &mut html);
     html.end(); /* div */
     sc.footer_html(true, &mut html);
-    html.into()
+    html.to_string()
 }
 
 /// Build monochrome color HTML

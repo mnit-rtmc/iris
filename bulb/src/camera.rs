@@ -151,7 +151,7 @@ impl Camera {
         html.div()
             .class("info fill")
             .text_len(opt_ref(&self.location), 32);
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Control HTML
@@ -167,7 +167,7 @@ impl Camera {
         html.span()
             .class("info")
             .text_len(opt_ref(&self.location), 64);
-        html.into()
+        html.to_string()
     }
 
     /// Create action to handle click on a device request button
@@ -188,7 +188,7 @@ impl Camera {
         html.div().class("row");
         html.span().text("Reset/Reboot").end();
         html.button().id("rq_reset").type_("button").text("Reboot");
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Setup HTML
@@ -280,7 +280,7 @@ impl Camera {
         }
         html.end(); /* div */
         self.footer_html(true, &mut html);
-        html.into()
+        html.to_string()
     }
 }
 

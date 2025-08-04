@@ -168,7 +168,7 @@ impl Beacon {
             .end();
         html.label().for_("ob_flashing").class("signal-housing");
         html.span().class(self.class_delayed()).text("🔆");
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Control HTML
@@ -202,7 +202,7 @@ impl Beacon {
         html.end(); /* div */
         html.div().class("row center");
         html.span().text(self.beacon_state(anc));
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Setup HTML
@@ -248,7 +248,7 @@ impl Beacon {
         }
         html.end(); /* div */
         self.footer_html(true, &mut html);
-        html.into()
+        html.to_string()
     }
 }
 

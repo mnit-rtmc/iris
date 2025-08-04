@@ -462,7 +462,7 @@ impl Lcs {
         html.div()
             .class("info fill")
             .text_len(opt_ref(&self.location), 32);
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Control HTML
@@ -488,7 +488,7 @@ impl Lcs {
             .end();
         html.end(); /* div */
         self.indications_html(anc, &mut html);
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Setup HTML
@@ -521,7 +521,7 @@ impl Lcs {
             .value(opt_str(self.shift));
         html.end(); /* div */
         self.footer_html(true, &mut html);
-        html.into()
+        html.to_string()
     }
 }
 

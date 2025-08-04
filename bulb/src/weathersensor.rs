@@ -733,7 +733,7 @@ impl WeatherSensor {
         html.div()
             .class("info fill")
             .text_len(opt_ref(&self.location), 32);
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Status HTML
@@ -764,7 +764,7 @@ impl WeatherSensor {
         if let Some(data) = &self.sample {
             data.build_html(self.settings.as_ref(), &mut html);
         }
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Setup HTML
@@ -799,7 +799,7 @@ impl WeatherSensor {
         anc.cio.controller_html(self, &mut html);
         anc.cio.pin_html(self.pin, &mut html);
         self.footer_html(true, &mut html);
-        html.into()
+        html.to_string()
     }
 }
 

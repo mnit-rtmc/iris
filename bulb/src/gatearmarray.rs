@@ -95,7 +95,7 @@ impl GateArmArray {
         html.div()
             .class("info fill")
             .text_len(opt_ref(&self.location), 32);
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Control HTML
@@ -107,7 +107,7 @@ impl GateArmArray {
         html.div()
             .class("info")
             .text_len(opt_ref(&self.location), 64);
-        html.into()
+        html.to_string()
     }
 }
 

@@ -191,7 +191,7 @@ fn sidebar_html() -> String {
     html.end(); /* div (form) */
     html.div().id("sb_shade").end();
     html.end(); /* div (sb_login) */
-    html.into()
+    html.to_string()
 }
 
 /// Finish initialization

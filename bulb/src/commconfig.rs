@@ -199,7 +199,7 @@ impl CommConfig {
         let mut html = Html::new();
         html.div().class("title row").text(self.name()).end();
         html.div().class("info fill").text(&self.description);
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Setup HTML
@@ -290,7 +290,7 @@ impl CommConfig {
         );
         html.end(); /* div */
         self.footer_html(true, &mut html);
-        html.into()
+        html.to_string()
     }
 }
 

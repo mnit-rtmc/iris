@@ -127,7 +127,7 @@ impl GateArm {
         html.div()
             .class("info fill")
             .text_len(opt_ref(&self.location), 32);
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Status HTML
@@ -139,7 +139,7 @@ impl GateArm {
         html.div()
             .class("info")
             .text_len(opt_ref(&self.location), 64);
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Setup HTML
@@ -148,7 +148,7 @@ impl GateArm {
         anc.cio.controller_html(self, &mut html);
         anc.cio.pin_html(self.pin, &mut html);
         self.footer_html(true, &mut html);
-        html.into()
+        html.to_string()
     }
 }
 

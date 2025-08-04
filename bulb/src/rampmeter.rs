@@ -597,7 +597,7 @@ impl RampMeter {
         html.div()
             .class("info fill")
             .text_len(opt_ref(&self.location), 32);
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Control HTML
@@ -631,7 +631,7 @@ impl RampMeter {
         self.queue_html(&mut html);
         html.end(); /* div */
         self.meter_image_html(2, &mut html);
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Request HTML
@@ -654,7 +654,7 @@ impl RampMeter {
             .attr("rel", "noopener noreferrer")
             .text("🔗 ")
             .text(self.name());
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Setup HTML
@@ -721,7 +721,7 @@ impl RampMeter {
             .value(opt_str(self.pm_target));
         html.end(); /* div */
         self.footer_html(true, &mut html);
-        html.into()
+        html.to_string()
     }
 }
 

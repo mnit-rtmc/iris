@@ -141,7 +141,7 @@ impl CommLink {
             .text(self.item_states().to_string())
             .end();
         html.div().class("info fill").text(&self.description);
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Status HTML
@@ -155,7 +155,7 @@ impl CommLink {
         html.span().text(anc.comm_config_desc(self)).end();
         html.end(); /* div */
         anc.controllers_html(&mut html);
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Setup HTML
@@ -189,7 +189,7 @@ impl CommLink {
         }
         html.end(); /* div */
         self.footer_html(true, &mut html);
-        html.into()
+        html.to_string()
     }
 }
 

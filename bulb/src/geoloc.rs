@@ -210,7 +210,7 @@ impl<L> LocAnc<L> {
             }
         };
         card.footer_html(false, &mut html);
-        html.into()
+        html.to_string()
     }
 
     /// Build Location HTML

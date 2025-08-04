@@ -314,7 +314,7 @@ impl Controller {
             .text(self.item_states().to_string())
             .end();
         html.div().class("info fill").text(self.link_drop());
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Status HTML
@@ -369,7 +369,7 @@ impl Controller {
             html.end(); /* div */
         }
         anc.io_pins_html(&mut html);
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Setup HTML
@@ -423,7 +423,7 @@ impl Controller {
             .value(opt_ref(&self.password));
         html.end(); /* div */
         self.footer_html(true, &mut html);
-        html.into()
+        html.to_string()
     }
 }
 

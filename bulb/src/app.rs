@@ -56,7 +56,7 @@ impl NotifyState {
         let mut html = Html::new();
         html.div().class("tooltip").text("⭮ ").text(self.symbol());
         html.span().class("right").text(self.description());
-        html.into()
+        html.to_string()
     }
 
     /// Get button disabled value for a state

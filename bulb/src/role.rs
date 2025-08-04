@@ -58,7 +58,7 @@ impl Role {
             .text(self.name())
             .text(" ")
             .text(self.item_state().to_string());
-        html.into()
+        html.to_string()
     }
 
     /// Convert to Setup HTML
@@ -72,7 +72,7 @@ impl Role {
         }
         html.end(); /* div */
         self.footer_html(true, &mut html);
-        html.into()
+        html.to_string()
     }
 }
 
