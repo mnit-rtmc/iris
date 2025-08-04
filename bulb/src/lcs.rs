@@ -138,10 +138,10 @@ impl LcsLock {
 
     /// Format lock expire time
     fn expires(&self) -> Option<String> {
-        if let Some(expires) = &self.expires {
-            if let Ok(dt) = DateTime::parse_from_rfc3339(expires) {
-                return Some(format!("⏲️ {}", &dt.format("%H:%M")));
-            }
+        if let Some(expires) = &self.expires
+            && let Ok(dt) = DateTime::parse_from_rfc3339(expires)
+        {
+            return Some(format!("⏲️ {}", &dt.format("%H:%M")));
         }
         None
     }
@@ -474,10 +474,10 @@ impl Lcs {
         html.div().class("row fill");
         self.item_states(anc).tooltips(&mut html);
         html.span();
-        if let Some(lock) = &self.lock {
-            if let Some(expires) = lock.expires() {
-                html.text(expires);
-            }
+        if let Some(lock) = &self.lock
+            && let Some(expires) = lock.expires()
+        {
+            html.text(expires);
         }
         html.end(); /* span */
         html.end(); /* div */
