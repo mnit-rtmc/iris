@@ -94,7 +94,8 @@ sign.  For example, a `[tt` *…* `]` tag will be replaced with the current
 estimated travel time.  These tags can be used only on DMS devices.
 
 **Condition** tags add a stipulation which activates the device only when the
-condition is met.  These tags can be used with any device type.
+condition is met.  These tags can be used with any device type, such as a
+flashing [beacon].
 
 Tag              | Description                      | Tag Mode            | Source
 -----------------|----------------------------------|---------------------|-------------

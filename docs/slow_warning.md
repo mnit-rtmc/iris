@@ -3,8 +3,8 @@
 Warning messages for slow traffic can be displayed on DMS using
 [device actions].  A `[slow` *…* `]` [action tag] in the [message pattern]
 will be replaced with the appropriate value.  Additionally, the entire message
-will be displayed **only in the presence of slow traffic**.  This tag has the
-following format:
+will be displayed **conditionally** in the presence of slow traffic.  This tag
+has the following format:
 
 `[slow` *speed,distance,mode* `]`
 
@@ -14,13 +14,13 @@ following format:
 2. `distance`: (tenths of mile) to search for slow traffic, relative to the DMS
    location.
 3. `mode`: Tag replacement mode (`none` if omitted)
-   - `none`: a blank string
+   - `none`: a blank string (**Condition** tag mode)
    - `dist`: distance rounded to nearest mile
    - `speed`: speed rounded to nearest 5 mph
 
 ## Examples
 
-Display message if traffic slower than 35 mph within 1 mile:
+Conditionally display message if traffic slower than 35 mph within 1 mile:
 ```
 [slow35,10]SLOW[nl]TRAFFIC[nl]AHEAD
 ```
