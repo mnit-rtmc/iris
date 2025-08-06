@@ -46,9 +46,11 @@ abstract public class OpDMS extends OpNtcip {
 	protected final DMSImpl dms;
 
 	/** Get message duration (valid for NTCIP) */
-	protected int getDuration() {
-		Long dur_ms = dms.getDurationMs();
+	protected int getDuration(SignMessage sm) {
+		Long dur_ms = dms.getDurationMs(sm);
 		if (dur_ms != null) {
+			// subtract 30 seconds (for rounding)
+			dur_ms -= 30 * 1000;
 			if (dur_ms <= 0)
 				return 0;
 			int dur_min = (int) (dur_ms / (60 * 1000));

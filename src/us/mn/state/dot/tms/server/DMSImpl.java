@@ -95,6 +95,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return src.checkBit(bits);
 	}
 
+	/** Check if a message is scheduled and not sticky */
+	static private boolean isScheduledUnsticky(SignMessage sm) {
+		return isMsgSource(sm, SignMsgSource.schedule) &&
+		      !sm.getSticky();
+	}
+
 	/** Comm loss threshold to blank user message */
 	static private final Interval COMM_LOSS_THRESHOLD =
 		new Interval(5, MINUTES);
@@ -592,13 +598,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			return lk.optExpires() != null;
 		}
 		return false;
-	}
-
-	/** Check if the current message is scheduled and not sticky */
-	private boolean isScheduledUnsticky() {
-		SignMessage sm = msg_current;
-		return isMsgSource(sm, SignMsgSource.schedule) &&
-		      !sm.getSticky();
 	}
 
 	/** Scheduled sign message */
@@ -1263,7 +1262,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Check if lock has expired */
 	public void checkLockExpired() {
-		Long dur_ms = getDurationMs();
+		Long dur_ms = getDurationMs(msg_current);
 		if (dur_ms != null && dur_ms <= 0) {
 			try {
 				updateLock(null);
@@ -1277,9 +1276,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
-	/** Get remaining duration of current message (null for indefinite) */
-	public Long getDurationMs() {
-		if (isScheduledUnsticky()) {
+	/** Get remaining duration of a message (null for indefinite) */
+	public Long getDurationMs(SignMessage sm) {
+		if (isScheduledUnsticky(sm)) {
 			int dur_min = getPollPeriodSec() *
 				SCHED_DURATION_PERIODS / 60;
 			dur_min = Math.max(1, dur_min);

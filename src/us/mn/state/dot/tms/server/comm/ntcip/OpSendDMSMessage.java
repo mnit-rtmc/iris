@@ -447,7 +447,7 @@ public class OpSendDMSMessage extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			MessageActivationCode act = new MessageActivationCode(
 				dmsActivateMessage.node);
-			act.setDuration(getDuration());
+			act.setDuration(getDuration(message));
 			act.setPriority(MAX_MESSAGE_PRIORITY);
 			act.setMemoryType(DmsMessageMemoryType.changeable);
 			act.setNumber(msg_num);
@@ -625,7 +625,7 @@ public class OpSendDMSMessage extends OpDMS {
 			//       done here -- probably to work around some
 			//       stupid sign bug.  It may no longer be needed.
 			ASN1Integer time = dmsMessageTimeRemaining.makeInt();
-			time.setInteger(getDuration());
+			time.setInteger(getDuration(message));
 			DmsMessageMemoryType memory = message.getSticky()
 			       ? DmsMessageMemoryType.currentBuffer
 			       : DmsMessageMemoryType.blank;

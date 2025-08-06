@@ -127,7 +127,7 @@ class OpMessage extends OpDms {
 
 	/** Calculate message off time, which is the start time + duration */
 	protected Calendar calcMsgOffTime(Calendar ontime) {
-		Long dur_ms = m_dms.getDurationMs();
+		Long dur_ms = m_dms.getDurationMs(m_sm);
 		if (dur_ms != null) {
 			Calendar offtime = (Calendar) ontime.clone();
 			int dur_s = (int) (dur_ms / 1000);
@@ -163,7 +163,7 @@ class OpMessage extends OpDms {
 		xrr.addReq("UseOnTime", true);
 		Calendar ontime = calcMsgOnTime();
 		xrr.addReq("OnTime", STime.CalendarToXML(ontime));
-		boolean useofftime = (m_dms.getDurationMs() != null);
+		boolean useofftime = (m_dms.getDurationMs(m_sm) != null);
 		xrr.addReq("UseOffTime", useofftime);
 		String offtime = (useofftime ?
 			STime.CalendarToXML(calcMsgOffTime(ontime)) : "");
