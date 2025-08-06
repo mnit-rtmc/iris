@@ -620,20 +620,12 @@ public class OpSendDMSMessage extends OpDMS {
 		/** Set the comm and power loss messages */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			// NOTE: setting dmsMessageTimeRemaining should not
-			//       be necessary.  I don't really know why it's
-			//       done here -- probably to work around some
-			//       stupid sign bug.  It may no longer be needed.
-			ASN1Integer time = dmsMessageTimeRemaining.makeInt();
-			time.setInteger(getDuration(message));
 			DmsMessageMemoryType memory = message.getSticky()
 			       ? DmsMessageMemoryType.currentBuffer
 			       : DmsMessageMemoryType.blank;
 			setCommAndPower(memory);
-			mess.add(time);
 			mess.add(comm_msg);
 			mess.add(long_msg);
-			logStore(time);
 			logStore(comm_msg);
 			logStore(long_msg);
 			try {
