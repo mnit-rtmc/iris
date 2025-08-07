@@ -71,6 +71,7 @@ public abstract class Service {
 			return null;
 		}
 
+		db.setErrorHandler(DOMUtils.errorHandler);
 		Document d = db.newDocument();
 		d.setXmlStandalone(true);
 		Element envelope = d.createElementNS("http://www.w3.org/2003/05/soap-envelope", "SOAP-ENV:Envelope");
