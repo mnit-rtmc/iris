@@ -1278,10 +1278,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Get remaining duration of a message (null for indefinite) */
 	public Long getDurationMs(SignMessage sm) {
-		if (isScheduledUnsticky(sm)) {
-			long s = getPollPeriodSec() * SCHED_DURATION_PERIODS;
-			return s * 1000;
-		}
 		DmsLock lk = new DmsLock(lock);
 		String exp = lk.optExpires();
 		if (exp != null) {
@@ -1290,6 +1286,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				long now = TimeSteward.currentTimeMillis();
 				return Math.max(e - now, 0);
 			}
+		}
+		if (isScheduledUnsticky(sm)) {
+			long s = getPollPeriodSec() * SCHED_DURATION_PERIODS;
+			return s * 1000;
 		}
 		return null;
 	}
