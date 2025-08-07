@@ -28,6 +28,8 @@ import org.w3c.dom.Document;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.ErrorHandler;
 
 /**
  * Class for XML document utilities
@@ -35,8 +37,31 @@ import org.xml.sax.SAXException;
  * @author Ethan Beauclaire
  */
 public class DOMUtils {
+
 	/** don't allow instantiation */
 	private DOMUtils() {}
+
+	protected static ErrorHandler errorHandler = new OnvifErrorHandler();
+
+	private static class OnvifErrorHandler implements ErrorHandler {
+		@Override
+		public void warning(SAXParseException e) {
+			OnvifPTZPoller.slog("DOMUtils.OEH Warning: " +
+				e.getMessage());
+		}
+
+		@Override
+		public void error(SAXParseException e) {
+			OnvifPTZPoller.slog("DOMUtils.OEH Error: " +
+				e.getMessage());
+		}
+
+		@Override
+		public void fatalError(SAXParseException e) {
+			OnvifPTZPoller.slog("DOMUtils.OEH FatalError: " +
+				e.getMessage());
+		}
+	}
 
 	/** Converts the Node to a string and returns it */
 	public static String getString(Node n) {
@@ -65,6 +90,7 @@ public class DOMUtils {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			dbf.setNamespaceAware(true);
 			DocumentBuilder db = dbf.newDocumentBuilder();
+			db.setErrorHandler(DOMUtils.errorHandler);
 			InputSource is = new InputSource();
 			is.setCharacterStream(new StringReader(s));
 			doc = db.parse(is);
