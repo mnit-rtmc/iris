@@ -49,13 +49,13 @@ abstract public class OpDMS extends OpNtcip {
 	protected int getDuration(SignMessage sm) {
 		Long dur_ms = dms.getDurationMs(sm);
 		if (dur_ms != null) {
-			// subtract 30 seconds (for rounding)
-			dur_ms -= 30 * 1000;
 			if (dur_ms <= 0)
 				return 0;
+			// add 30 seconds (for rounding)
+			dur_ms += 30 * 1000;
 			int dur_min = (int) (dur_ms / (60 * 1000));
 			if (dur_min < DURATION_INDEFINITE)
-				return dur_min + 1;
+				return Math.max(dur_min, 1);
 		}
 		return DURATION_INDEFINITE;
 	}

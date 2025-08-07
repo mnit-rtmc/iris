@@ -1279,10 +1279,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Get remaining duration of a message (null for indefinite) */
 	public Long getDurationMs(SignMessage sm) {
 		if (isScheduledUnsticky(sm)) {
-			int dur_min = getPollPeriodSec() *
-				SCHED_DURATION_PERIODS / 60;
-			dur_min = Math.max(1, dur_min);
-			return (long) dur_min * 60 * 1000;
+			long s = getPollPeriodSec() * SCHED_DURATION_PERIODS;
+			return s * 1000;
 		}
 		DmsLock lk = new DmsLock(lock);
 		String exp = lk.optExpires();
