@@ -35,6 +35,7 @@ use ntcip::dms::{Font, FontTable, GraphicTable, MessagePattern, tfon};
 use rendzina::{SignConfig, load_graphic};
 use resources::Res;
 use serde::Deserialize;
+use serde_json::Value;
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt;
@@ -154,6 +155,15 @@ impl DmsLock {
             return Some(format!("⏲️ {}", &dt.format("%H:%M")));
         }
         None
+    }
+
+    /// Encode into JSON Value
+    fn json(&self) -> Value {
+        let reason = LockReason::from(self.reason.as_str());
+        match reason {
+            LockReason::Unlocked => Value::Null,
+            _ => Value::String(self.to_string()),
+        }
     }
 }
 
@@ -637,7 +647,8 @@ impl DmsAnc {
         let lock = DmsLock::new(LockReason::Situation.as_str())
             .with_message(Some(&msg.name))
             .with_duration(duration)
-            .with_user(Some(&user));
+            .with_user(Some(&user))
+            .json();
         if self.find_sign_msg(&msg).is_none() {
             if let Ok(val) = serde_json::to_string(&msg) {
                 let post = Uri::from("/iris/api/sign_message");
@@ -645,6 +656,14 @@ impl DmsAnc {
             }
         }
         let val = format!("{{\"lock\":{lock}}}");
+        actions.push(Action::Patch(uri, val.into()));
+        actions
+    }
+
+    /// Create actions to blank a sign message
+    fn blank_actions(self, uri: Uri) -> Vec<Action> {
+        let mut actions = Vec::with_capacity(1);
+        let val = format!("{{\"lock\":{}}}", Value::Null);
         actions.push(Action::Patch(uri, val.into()));
         actions
     }
@@ -920,14 +939,7 @@ impl Dms {
 
     /// Create actions to handle click on "Blank" button
     fn blank_actions(&self, anc: DmsAnc) -> Vec<Action> {
-        match (&self.sign_config, sign_msg_owner(LOW_1)) {
-            (Some(cfg), Some(owner)) => anc.sign_msg_actions(
-                uri_one(Res::Dms, &self.name),
-                SignMessage::new(cfg, "", owner, LOW_1),
-                None,
-            ),
-            _ => Vec::new(),
-        }
+        anc.blank_actions(uri_one(Res::Dms, &self.name))
     }
 
     /// Create action to handle click on a device request button
