@@ -89,8 +89,11 @@ abstract public class OnvifProp extends ControllerProperty {
 		String mediaProfile = null, videoSource = null;
 
 		// Should contain all necessary tokens
-		Document getProfilesRes = DOMUtils.getDocument(media.getProfiles());
-		if (getProfilesRes == null) return "Error parsing ONVIF media profiles response";
+		String profilesString = media.getProfiles();
+		if (profilesString == null) return "Error parsing ONVIF media profiles response";
+		Document getProfilesRes = DOMUtils.getDocument(profilesString);
+		if (getProfilesRes == null) return "Error parsing ONVIF media profiles response as XML. Response string:\n"
+			+ profilesString;
 
 		NodeList profiles = getProfilesRes.getElementsByTagNameNS("*", "Profiles");
 		for (int i = 0; i < profiles.getLength(); i++) {
@@ -132,7 +135,8 @@ abstract public class OnvifProp extends ControllerProperty {
 			log("Set video source: " + videoSource);
 		}
 		if (mediaProfile == null || videoSource == null)
-			return "Could not retrieve profile tokens";
+			return "Could not retrieve profile tokens. Profiles response:\n"
+				+ profilesString;
 
 		return "Successfully retrieved service bindings and profile tokens";
 	}
