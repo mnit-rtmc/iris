@@ -50,6 +50,18 @@ abstract public class OpLCS extends OpNtcip {
 	/** DMS corresponsing to each lane in the array */
 	protected final DMSImpl[] dmss;
 
+	/** Check if all signs are valid */
+	protected final boolean checkSignsValid() {
+		if (dmss.length > 0 && dmss.length == ind_before.length) {
+			for (DMSImpl dms: dmss) {
+				if (dms == null)
+					return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
 	/** Create a new LCS operation */
 	protected OpLCS(PriorityLevel p, LcsImpl l) {
 		super(p, l);

@@ -44,9 +44,6 @@ public class OpSendLCSIndications extends OpLCS {
 	/** LCS indications to send */
 	private final int[] indications;
 
-	/** Sign messages for each DMS in the LCS array */
-	private final SignMessage[] msgs;
-
 	/** Create a new operation to send LCS indications */
 	public OpSendLCSIndications(LcsImpl l, String lk) {
 		super(PriorityLevel.COMMAND, l);
@@ -55,70 +52,12 @@ public class OpSendLCSIndications extends OpLCS {
 		indications = (ind != null)
 			? ind
 			: LcsHelper.makeIndications(l, LcsIndication.DARK);
-		msgs = new SignMessage[dmss.length];
 	}
 
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase phaseTwo() {
-		return (dmss.length > 0 && dmss.length == indications.length)
-		      ? new CreateSignMessages()
-		      : null;
-	}
-
-	/** Phase to create sign messages */
-	private class CreateSignMessages extends Phase {
-
-		/** Lane of DMS for sign message */
-		private int lane = 0;
-
-		/** Create a sign message */
-		protected Phase poll(CommMessage mess) {
-			msgs[lane] = createSignMessage(lane);
-			if (msgs[lane] == null) {
-				logError("createSignMessage: " + lane);
-				return null;
-			}
-			lane++;
-			return (lane < msgs.length) ? this : new SendMessages();
-		}
-	}
-
-	/** Create a sign message */
-	private SignMessage createSignMessage(int ln) {
-		int ind = indications[ln];
-		String ms = createIndicationMulti(ln, ind);
-		return (ms != null) ? createSignMessage(ln, ms) : null;
-	}
-
-	/** Create a MULTI string for an LCS indication */
-	private String createIndicationMulti(int ln, int ind) {
-		LcsState ls = LcsHelper.lookupState(lcs, ln, ind);
-		if (ls != null) {
-			MsgPattern pat = ls.getMsgPattern();
-			if (pat != null)
-				return pat.getMulti();
-		}
-		return (LcsIndication.DARK.ordinal() == ind) ? "" : null;
-	}
-
-	/** Create a sign message.
-	 * This is a *slow* operation, because it has to schedule a job on the
-	 * SONAR task processor thread, which might have a queue of tasks
-	 * already pending. */
-	private SignMessage createSignMessage(int ln, String ms) {
-		DMSImpl dms = dmss[ln];
-		MultiString multi = new MultiString(ms);
-		if (multi.isBlank())
-			return dms.createMsgBlank(SignMsgSource.lcs.bit());
-		else {
-			String owner = SignMessageHelper.makeMsgOwner(
-				SignMsgSource.lcs.bit(),
-				lock.getUser()
-			);
-			SignMsgPriority mp = SignMsgPriority.high_1;
-			return dms.createMsg(ms, owner, false, false, false, mp);
-		}
+		return checkSignsValid() ? new SendMessages() : null;
 	}
 
 	/** Phase to send all sign messages to DMS */
@@ -134,19 +73,36 @@ public class OpSendLCSIndications extends OpLCS {
 
 	/** Send an indication to a DMS */
 	private void sendIndication(int ln) {
+		DmsLock lk = makeDmsLock(ln);
 		DMSImpl dms = dmss[ln];
-		SignMessage sm = msgs[ln];
-		if (sm != null)
-			sendIndication(ln, dms, sm);
-		else
-			logError("sendIndication: no indication, lane " + ln);
+		dms.setLockNotify((lk != null) ? lk.toString() : null, true);
+		ind_after[ln] = indications[ln];
 	}
 
-	/** Send an indication to a DMS */
-	private void sendIndication(int ln, DMSImpl dms, SignMessage sm) {
-		DmsLock lk = new DmsLock(lock.toString());
-		lk.setMessage(sm.getName());
-		dms.setLockNotify(lk.toString());
-		ind_after[ln] = indications[ln];
+	/** Make a DMS lock for an indication */
+	private DmsLock makeDmsLock(int ln) {
+		int ind = indications[ln];
+		String multi = findIndicationMulti(ln, ind);
+		if (multi != null) {
+			DmsLock lk = new DmsLock(lock.toString());
+			lk.setMulti(multi);
+			return lk;
+		} else
+			return null;
+	}
+
+	/** Find MULTI string for an LCS indication */
+	private String findIndicationMulti(int ln, int ind) {
+		LcsState ls = LcsHelper.lookupState(lcs, ln, ind);
+		if (ls != null) {
+			MsgPattern pat = ls.getMsgPattern();
+			if (pat != null) {
+				MultiString multi =
+					new MultiString(pat.getMulti());
+				if (!multi.isBlank())
+					return multi.toString();
+			}
+		}
+		return null;
 	}
 }

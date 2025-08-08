@@ -134,7 +134,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		/* Maybe the current msg just expired */
 		if (dms.isOperatorExpiring()) {
 			/* Lock just expired -- set it to null */
-			dms.setLockNotify(null);
+			dms.setLockNotify(null, false);
 			int src = SignMessageHelper.sourceBits(sm);
 			String owner = SignMessageHelper.makeMsgOwner(src,
 				"expired");

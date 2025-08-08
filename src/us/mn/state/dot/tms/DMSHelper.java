@@ -136,7 +136,7 @@ public class DMSHelper extends BaseHelper {
 		return "";
 	}
 
-	/** Get the MULTI string currently on the specified dms.
+	/** Get the MULTI string currently on the specified DMS.
 	 * @param dms DMS to lookup. */
 	static public String getMultiString(DMS dms) {
 		if (dms != null) {
@@ -152,10 +152,9 @@ public class DMSHelper extends BaseHelper {
 	static public String getUserMulti(DMS dms) {
 		if (dms != null) {
 			DmsLock lk = new DmsLock(dms.getLock());
-			SignMessage sm = SignMessageHelper.lookup(
-				lk.optMessage());
-			if (sm != null)
-				return sm.getMulti();
+			String ms = lk.optMulti();
+			if (ms != null)
+				return ms;
 		}
 		return "";
 	}
