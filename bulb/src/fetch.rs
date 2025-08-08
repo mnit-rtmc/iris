@@ -37,6 +37,7 @@ pub struct Uri {
 #[derive(Debug)]
 pub enum Action {
     Patch(Uri, JsValue),
+    #[allow(dead_code)]
     Post(Uri, JsValue),
     #[allow(dead_code)]
     Delete(Uri),

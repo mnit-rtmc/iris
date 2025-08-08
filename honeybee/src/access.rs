@@ -162,7 +162,7 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
 fn required_post_operate(res: Res) -> bool {
     use Res::*;
     match res {
-        Incident | SignMessage => true,
+        Incident => true,
         _ => false,
     }
 }

@@ -10,7 +10,6 @@ after being unused for a few minutes.
 
 * `iris/sign_message` (primary)
 * `iris/img/{name}.gif`
-* `iris/api/sign_message` (`POST`)
 
 | Access  | Primary     |
 |---------|-------------|

@@ -12,13 +12,11 @@
 //
 use crate::item::{ItemState, ItemStates};
 use crate::util::ContainsLower;
-use fnv::FnvHasher;
 use ntcip::dms::multi::is_blank;
 use serde::{Deserialize, Serialize};
-use std::hash::{Hash, Hasher};
 
 /// Sign Message
-#[derive(Debug, Default, Hash, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct SignMessage {
     pub name: String,
     pub sign_config: String,
@@ -31,23 +29,6 @@ pub struct SignMessage {
 }
 
 impl SignMessage {
-    /// Make a sign message
-    pub fn new(cfg: &str, ms: &str, owner: String, priority: u32) -> Self {
-        let mut sign_message = SignMessage {
-            name: "usr_".to_string(),
-            sign_config: cfg.to_string(),
-            multi: ms.to_string(),
-            msg_owner: owner,
-            msg_priority: priority,
-            ..Default::default()
-        };
-        let mut hasher = FnvHasher::default();
-        sign_message.hash(&mut hasher);
-        let hash = hasher.finish() as u32;
-        sign_message.name = format!("usr_{hash:08X}");
-        sign_message
-    }
-
     /// Get message owner
     fn owner(&self) -> &str {
         &self.msg_owner
