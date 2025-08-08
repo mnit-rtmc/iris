@@ -26,14 +26,9 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DmsLock;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SignConfig;
-import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SignMessageHelper;
-import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
@@ -84,9 +79,6 @@ public class DMSDispatcher extends JPanel {
 			updateSelected();
 		}
 	};
-
-	/** Sign message creator */
-	private final SignMessageCreator creator;
 
 	/** Single sign tab */
 	private final SingleSignTab singleTab;
@@ -199,7 +191,6 @@ public class DMSDispatcher extends JPanel {
 		session = s;
 		user = session.getUser().getName();
 		DmsCache dms_cache = session.getSonarState().getDmsCache();
-		creator = new SignMessageCreator(s);
 		sel_mdl = manager.getSelectionModel();
 		singleTab = new SingleSignTab(session, this);
 		composer = new MessageComposer(session, this, manager);
@@ -346,38 +337,23 @@ public class DMSDispatcher extends JPanel {
 		selectPreview(false);
 	}
 
-	/** Make DMS lock */
+	/** Make DMS lock for a non-blank message */
 	private DmsLock makeLock(DMS dms, String ms) {
 		SignConfig sc = dms.getSignConfig();
 		if (sc != null) {
 			DmsLock lk = (unlink_incident)
 				? new DmsLock(null)
 				: new DmsLock(dms.getLock());
-			lk.setUser(user);
 			if (lk.optReason() == null)
 				lk.setReason(DmsLock.REASON_SITUATION);
+			lk.setMulti(ms);
 			lk.setDuration(composer.getDuration());
-			SignMessage sm = createMessage(sc, ms, lk);
-			if (sm != null) {
-				lk.setMessage(sm.getName());
-				return lk;
-			}
+			lk.setFlashBeacon(composer.getFlashBeacon());
+			lk.setPixelService(composer.getPixelService());
+			lk.setUser(user);
+			return lk;
 		}
 		return null;
-	}
-
-	/** Create a new message for a sign configuration.
-	 * @return A SignMessage from composer selection, or null on error. */
-	private SignMessage createMessage(SignConfig sc, String ms, DmsLock lk) {
-		Incident inc = IncidentHelper.lookupByOriginal(lk.optIncident());
-		if (inc != null) {
-			SignMsgPriority mp = IncidentHelper.getPriority(inc);
-			return creator.createIncMsg(sc, ms, mp);
-		} else {
-			boolean fb = composer.getFlashBeacon();
-			boolean ps = composer.getPixelService();
-			return creator.createMsg(sc, ms, fb, ps);
-		}
 	}
 
 	/** Update the selected sign(s) */
@@ -446,8 +422,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Can a message be sent to the specified DMS? */
 	public boolean canSend(DMS dms) {
-		return creator.canCreate() &&
-		       isWritePermitted(dms, "lock");
+		return isWritePermitted(dms, "lock");
 	}
 
 	/** Is DMS attribute write permitted? */

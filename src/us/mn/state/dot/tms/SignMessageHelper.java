@@ -124,20 +124,20 @@ public class SignMessageHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Validate a sign message for a DMS.
-	 * @param sm SignMessage to validate.
+	/** Validate MULTI text for a DMS.
 	 * @param dms Sign to validate message on.
-	 * @throws InvalidMsgException if message is not valid. */
-	static public void validate(SignMessage sm, DMS dms)
+	 * @param ms MULTI text to validate.
+	 * @throws InvalidMsgException if not valid. */
+	static public void validate(DMS dms, String ms)
 		throws InvalidMsgException
 	{
-		if (null == sm)
-			throw new InvalidMsgException("Sign message null");
-		MultiString multi = new MultiString(sm.getMulti());
+		if (null == ms)
+			throw new InvalidMsgException("MULTI null");
+		MultiString multi = new MultiString(ms);
 		if (!multi.isValid())
-			throw new InvalidMsgException("MULTI " + sm.getMulti());
+			throw new InvalidMsgException("MULTI " + ms);
 		try {
-			validateBitmaps(multi, dms);
+			validateBitmaps(dms, multi);
 		}
 		catch (IndexOutOfBoundsException e) {
 			throw new InvalidMsgException(e.getMessage());
@@ -145,10 +145,10 @@ public class SignMessageHelper extends BaseHelper {
 	}
 
 	/** Validate sign message bitmaps.
-	 * @param multi Message MULTI string.
 	 * @param dms Sign to check.
+	 * @param multi Message MULTI string.
 	 * @throws InvalidMsgException. */
-	static private void validateBitmaps(MultiString multi, DMS dms)
+	static private void validateBitmaps(DMS dms, MultiString multi)
 		throws InvalidMsgException
 	{
 		BitmapGraphic[] bmaps = DMSHelper.createBitmaps(dms,

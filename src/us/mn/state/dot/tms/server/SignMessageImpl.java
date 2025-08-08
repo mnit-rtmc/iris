@@ -47,7 +47,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	static private String makeName(SignConfig sc, String ms, String owner,
 		boolean st, boolean fb, boolean ps, SignMsgPriority mp)
 	{
-		return "sys_" + SignMessageHelper.makeHash(sc, ms, owner,
+		return "msg_" + SignMessageHelper.makeHash(sc, ms, owner,
 			st, fb, ps, mp);
 	}
 

@@ -53,11 +53,17 @@ public class DmsLock {
 		REASON_CONSTRUCTION,
 	};
 
-	/** SignMessage name */
-	static private final String MESSAGE = "message";
+	/** MULTI message */
+	static private final String MULTI = "multi";
 
 	/** Incident name */
 	static private final String INCIDENT = "incident";
+
+	/** Flash beacon */
+	static private final String FLASH_BEACON = "flash_beacon";
+
+	/** Pixel service */
+	static private final String PIXEL_SERVICE = "pixel_service";
 
 	/** Expires (ISO 8601 date) */
 	static private final String EXPIRES = "expires";
@@ -101,8 +107,10 @@ public class DmsLock {
 	private void clear() {
 		try {
 			lock.remove(REASON);
-			lock.remove(MESSAGE);
+			lock.remove(MULTI);
 			lock.remove(INCIDENT);
+			lock.remove(FLASH_BEACON);
+			lock.remove(PIXEL_SERVICE);
 			lock.remove(EXPIRES);
 			lock.remove(USER);
 		}
@@ -121,7 +129,7 @@ public class DmsLock {
 		if (r != null) {
 			putReason(r);
 			if (!isReasonOn(r)) {
-				putMessage(null);
+				putMulti(null);
 				putExpires(null);
 			}
 		} else
@@ -145,27 +153,27 @@ public class DmsLock {
 		       REASON_TESTING.equals(reason);
 	}
 
-	/** Get the lock message, or null */
-	public String optMessage() {
-		return lock.optString(MESSAGE, null);
+	/** Get the lock MULTI, or null */
+	public String optMulti() {
+		return lock.optString(MULTI, null);
 	}
 
-	/** Set the lock message */
-	public void setMessage(String msg) {
-		if (msg != null && !isReasonOn(optReason()))
+	/** Set the lock MULTI */
+	public void setMulti(String multi) {
+		if (multi != null && !isReasonOn(optReason()))
 			putReason(REASON_TESTING);
-		if (msg == null)
+		if (multi == null)
 			putExpires(null);
-		putMessage(msg);
+		putMulti(multi);
 	}
 
-	/** Put the lock message */
-	private void putMessage(String msg) {
+	/** Put the lock MULTI */
+	private void putMulti(String multi) {
 		try {
-			lock.put(MESSAGE, msg);
+			lock.put(MULTI, multi);
 		}
 		catch (JSONException e) {
-			System.err.println("putMessage: " + e.getMessage());
+			System.err.println("putMulti: " + e.getMessage());
 		}
 	}
 
@@ -181,6 +189,43 @@ public class DmsLock {
 		}
 		catch (JSONException e) {
 			System.err.println("setIncident: " + e.getMessage());
+		}
+	}
+
+	/** Get flash beacon flag, or false */
+	public boolean optFlashBeacon() {
+		return lock.optBoolean(FLASH_BEACON);
+	}
+
+	/** Set flash beacon flag */
+	public void setFlashBeacon(boolean fb) {
+		try {
+			if (fb)
+				lock.put(FLASH_BEACON, true);
+			else
+				lock.remove(FLASH_BEACON);
+		}
+		catch (JSONException e) {
+			System.err.println("setFlashBeacon: " + e.getMessage());
+		}
+	}
+
+	/** Get pixel service flag, or false */
+	public boolean optPixelService() {
+		return lock.optBoolean(PIXEL_SERVICE);
+	}
+
+	/** Set pixel service flag */
+	public void setPixelService(boolean ps) {
+		try {
+			if (ps)
+				lock.put(PIXEL_SERVICE, true);
+			else
+				lock.remove(PIXEL_SERVICE);
+		}
+		catch (JSONException e) {
+			System.err.println("setPixelService: " +
+				e.getMessage());
 		}
 	}
 
@@ -235,7 +280,7 @@ public class DmsLock {
 	/** Get the lock user */
 	public String getUser() {
 		String user = optUser();
-		return (user != null) ? user : "UNKNOWN";
+		return (user != null) ? user : BaseHelper.USER_AUTO;
 	}
 
 	/** Set the lock user */

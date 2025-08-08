@@ -53,12 +53,8 @@ import us.mn.state.dot.tms.IncSeverity;
 import us.mn.state.dot.tms.LaneConfiguration;
 import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.Lcs;
-import us.mn.state.dot.tms.SignConfig;
-import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.CameraSelectAction;
-import us.mn.state.dot.tms.client.dms.SignMessageCreator;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
@@ -100,9 +96,6 @@ public class IncidentDispatcher extends IPanel
 
 	/** Incident manager */
 	private final IncidentManager manager;
-
-	/** Sign message creator */
-	private final SignMessageCreator sm_creator;
 
 	/** Selection model */
 	private final ProxySelectionModel<Incident> sel_mdl;
@@ -226,7 +219,6 @@ public class IncidentDispatcher extends IPanel
 		manager = man;
 		sel_mdl = manager.getSelectionModel();
 		creator = ic;
-		sm_creator = new SignMessageCreator(s);
 		cache = s.getSonarState().getIncCache().getIncidents();
 		detail_mdl = new ProxyListModel<IncidentDetail>(
 			s.getSonarState().getIncCache().getIncidentDetails());
@@ -694,45 +686,33 @@ public class IncidentDispatcher extends IPanel
 	public void sendMessage(String dn, Incident inc, String ms,
 		boolean cleared)
 	{
-		SignMsgPriority mp = IncidentHelper.getPriority(inc);
 		String inc_orig = IncidentHelper.getOriginalName(inc);
-		if (ms != null && mp != null) {
+		if (ms != null) {
 			DMS dms = DMSHelper.lookup(dn);
-			if (dms != null) {
-				SignConfig sc = dms.getSignConfig();
-				if (sc != null) {
-					sendMessage(dms, sc, inc_orig, ms, mp,
-						cleared);
-				}
-			}
+			if (dms != null)
+				sendMessage(dms, inc_orig, ms, cleared);
 		}
 	}
 
 	/** Send new sign message to the specified DMS */
-	private void sendMessage(final DMS dms, final SignConfig sc,
-		final String inc_orig, final String ms,
-		final SignMsgPriority mp, final boolean cleared)
+	private void sendMessage(final DMS dms, final String inc_orig,
+		final String ms, final boolean cleared)
 	{
 		runSwing(new Runnable() {
 			public void run() {
-				SignMessage sm = sm_creator.createIncMsg(sc,
-					ms, mp);
-				if (sm != null) {
-					DmsLock lk = makeLock(inc_orig, sm,
-						cleared);
-					dms.setLock(lk.toString());
-				}
+				DmsLock lk = makeLock(inc_orig, ms, cleared);
+				dms.setLock(lk.toString());
 			}
 		});
 	}
 
 	/** Make DMS lock */
-	private DmsLock makeLock(String inc, SignMessage sm, boolean cleared) {
+	private DmsLock makeLock(String inc, String ms, boolean cleared) {
 		DmsLock lk = new DmsLock(null);
-		lk.setUser(user);
 		lk.setReason(DmsLock.REASON_INCIDENT);
 		lk.setIncident(inc);
-		lk.setMessage(sm.getName());
+		lk.setMulti(ms);
+		lk.setUser(user);
 		if (cleared)
 			lk.setDuration(DURATION_CLEARED);
 		return lk;

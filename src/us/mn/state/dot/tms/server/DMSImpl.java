@@ -50,6 +50,8 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Gps;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Hashtags;
+import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.MsgPattern;
@@ -273,16 +275,25 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Reset the user lock and log a reset sign event */
 	private void resetLock() {
-		SignMessage sm = getMsgUser();
-		if (sm != null) {
+		if (lock != null) {
+			DmsLock lk = new DmsLock(lock);
+			String ms = lk.optMulti();
+			if (ms == null)
+				ms = "";
+			int src = SignMsgSource.operator.bit();
+			if (lk.optIncident() != null)
+				src |= SignMsgSource.incident.bit();
+			String user = lk.getUser();
+			String owner =
+				SignMessageHelper.makeMsgOwner(src, user);
 			logEvent(new SignEvent(
 				EventType.DMS_MSG_RESET,
 				name,
-				sm.getMulti(),
-				sm.getMsgOwner()
+				ms,
+				owner
 			));
+			setLockNotify(null, false);
 		}
-		setLockNotify(null);
 	}
 
 	/** Get the configure flag.
@@ -585,7 +596,26 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Get the user lock message */
 	private SignMessage getMsgUser() {
 		DmsLock lk = new DmsLock(lock);
-		return SignMessageHelper.lookup(lk.optMessage());
+		String ms = lk.optMulti();
+		if (ms == null)
+			return null;
+		MultiString multi = new MultiString(ms);
+		if (multi.isBlank())
+			return null;
+		int src = SignMsgSource.operator.bit();
+		String user = lk.getUser();
+		SignMsgPriority mp = SignMsgPriority.high_1;
+		Incident inc = IncidentHelper.lookupByOriginal(
+			lk.optIncident());
+		if (inc != null) {
+			mp = IncidentHelper.getPriority(inc);
+			src |= SignMsgSource.incident.bit();
+		}
+		String owner = SignMessageHelper.makeMsgOwner(src, user);
+		boolean fb = lk.optFlashBeacon();
+		boolean ps = lk.optPixelService();
+		return SignMessageImpl.findOrCreate(sign_config, ms, owner,
+			false, fb, ps, mp);
 	}
 
 	/** Check if the current message is operator expiring */
@@ -766,33 +796,24 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private SignMessage getMsgValidated() {
 		SignMessage sm = getMsgCombined();
 		if (sm != null) {
+			String ms = sm.getMulti();
 			try {
-				validateMsg(sm);
+				SignMessageHelper.validate(this, ms);
 				return sm;
 			}
 			catch (InvalidMsgException e) {
 				// message can't be displayed,
 				// most likely due to pixel failures
+				logEvent(new SignEvent(
+					e.getEventType(),
+					name,
+					ms,
+					sm.getMsgOwner()
+				));
 			}
 		}
 		// no message, or invalid -- blank the sign
 		return createMsgBlank(0);
-	}
-
-	/** Validate whether a message can be displayed */
-	private void validateMsg(SignMessage sm) throws InvalidMsgException {
-		try {
-			SignMessageHelper.validate(sm, this);
-		}
-		catch (InvalidMsgException e) {
-			logEvent(new SignEvent(
-				e.getEventType(),
-				name,
-				sm.getMulti(),
-				sm.getMsgOwner()
-			));
-			throw e;
-		}
 	}
 
 	/** Get combined lock / scheduled sign message.
@@ -819,7 +840,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				// Check whether combined message can be
 				// displayed without too many pixel errors
 				try {
-					SignMessageHelper.validate(sm, this);
+					SignMessageHelper.validate(this, ms);
 					return sm;
 				}
 				catch (InvalidMsgException e) {
@@ -884,8 +905,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public boolean hasReference(final SignMessage sm) {
 		return sm == msg_current ||
 		       sm == msg_next ||
-		       sm == msg_sched ||
-		       sm == getMsgUser();
+		       sm == msg_sched;
 	}
 
 	/** DMS lock (JSON) */
@@ -922,33 +942,18 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		String exp = lk.optExpires();
 		if (exp != null && TimeSteward.parse8601(exp) == null)
 			throw new ChangeVetoException("Bad expiration!");
-		String msg = lk.optMessage();
-		if (msg != null) {
-			SignMessage sm = SignMessageHelper.lookup(msg);
-			if (sm != null) {
-				String onm =
-					SignMessageHelper.getMsgOwnerName(sm);
-				if (!usr.equals(onm)) {
-					throw new ChangeVetoException(
-						"Bad owner!");
-				}
-				checkLockMsg(sm);
-			} else
-				throw new ChangeVetoException("Bad message!");
-		}
-	}
-
-	/** Check a message selected by client */
-	private void checkLockMsg(SignMessage sm) throws TMSException {
-		validateMsg(sm);
+		String ms = lk.optMulti();
+		if (ms == null)
+			throw new ChangeVetoException("Bad MULTI!");
+		SignMessageHelper.validate(this, ms);
 		// Does the user have permission to send the message?
 		int lvl = accessLevel(new Name(this, "lock"));
 		switch (lvl) {
 		case 2: // "Operate" access level
-			denyFreeForm(sm);
+			denyFreeForm(ms);
 			return;
 		case 3: // "Manage" access level
-			checkFreeFormBanned(sm);
+			checkFreeFormBanned(ms);
 			return;
 		case 4: // "Configure" access level
 			// not checked
@@ -959,34 +964,33 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Deny free-form text in a message */
-	private void denyFreeForm(SignMessage sm) throws TMSException {
-		if (SignMessageHelper.isBlank(sm))
+	private void denyFreeForm(String ms) throws TMSException {
+		MultiString multi = new MultiString(ms);
+		if (multi.isBlank())
 			return;
-		String msg = DMSHelper.validateFreeFormLines(this,
-			sm.getMulti());
+		String msg = DMSHelper.validateFreeFormLines(this, ms);
 		if (msg != null)
 			throw new ChangeVetoException(msg);
 	}
 
 	/** Check for banned words in free-form text */
-	private void checkFreeFormBanned(SignMessage sm) throws TMSException {
-		if (SignMessageHelper.isBlank(sm))
+	private void checkFreeFormBanned(String ms) throws TMSException {
+		MultiString multi = new MultiString(ms);
+		if (multi.isBlank())
 			return;
-		String msg = DMSHelper.validateFreeFormWords(this,
-			sm.getMulti());
+		String msg = DMSHelper.validateFreeFormWords(this, ms);
 		if (msg != null)
 			throw new ChangeVetoException(msg);
 	}
 
-	/** Set the lock from server and notify clients.
-	 * NOTE: message is *sent* only if lock is non-null. */
-	public void setLockNotify(String lk) {
+	/** Set the lock from server and notify clients */
+	public void setLockNotify(String lk, boolean send) {
 		if (!objectEquals(lk, lock)) {
 			try {
 				updateLock(lk);
 				notifyAttribute("lock");
-				if (lk != null) {
-					String usr = new DmsLock(lk).optUser();
+				if (send) {
+					String usr = new DmsLock(lk).getUser();
 					sendMsg(getMsgValidated(), usr);
 				}
 			}
