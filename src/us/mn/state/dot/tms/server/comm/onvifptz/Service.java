@@ -208,11 +208,13 @@ public abstract class Service {
 			resp = in.lines().collect(Collectors.joining("\n"));
 			in.close();
 		} else {
+			log("Request failed. Response code: " + responseCode);
+
 			InputStream is = connection.getErrorStream();
 			if (is == null) return "HTTP error: " + responseCode + "; error reading stream";
+
 			BufferedReader err = new BufferedReader(new InputStreamReader(is));
-			resp = "Request failed. Response code: " + responseCode + " Response:\n"
-				+ err.lines().collect(Collectors.joining("\n"));
+			resp = err.lines().collect(Collectors.joining("\n"));
 			err.close();
 		}
 
