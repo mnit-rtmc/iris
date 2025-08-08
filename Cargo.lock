@@ -311,7 +311,6 @@ dependencies = [
  "chrono",
  "cidr",
  "console_error_panic_hook",
- "fnv",
  "futures",
  "gift",
  "hatmil",

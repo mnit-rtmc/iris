@@ -47,12 +47,6 @@ use web_sys::{HtmlElement, HtmlInputElement, HtmlSelectElement, console};
 /// Display Units
 type TempUnit = mag::temp::DegF;
 
-/// Low 1 message priority
-const LOW_1: u32 = 1;
-
-/// High 1 message priority
-const HIGH_1: u32 = 11;
-
 /// Expire select element
 const EXPIRE_SELECT: &str = "<select id='mc_expire'>\
 <option value=''>⏲️ \
@@ -93,24 +87,32 @@ pub struct PowerSupply {
 #[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct DmsLock {
     pub reason: String,
-    pub message: Option<String>,
+    pub multi: Option<String>,
     pub incident: Option<String>,
     pub expires: Option<String>,
     pub user_id: Option<String>,
+    pub flash_beacon: Option<bool>,
+    pub pixel_service: Option<bool>,
 }
 
 impl fmt::Display for DmsLock {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // format as JSON for setting DMS lock
         write!(f, "{{\"reason\":\"{}\"", &self.reason)?;
-        if let Some(message) = &self.message {
-            write!(f, ",\"message\":\"{message}\"")?;
+        if let Some(multi) = &self.multi {
+            write!(f, ",\"multi\":\"{multi}\"")?;
         }
         if let Some(expires) = &self.expires {
             write!(f, ",\"expires\":\"{expires}\"")?;
         }
         if let Some(user_id) = &self.user_id {
             write!(f, ",\"user_id\":\"{user_id}\"")?;
+        }
+        if let Some(true) = self.flash_beacon {
+            write!(f, ",\"flash_beacon\":true")?;
+        }
+        if let Some(true) = self.pixel_service {
+            write!(f, ",\"pixel_service\":true")?;
         }
         write!(f, "}}")
     }
@@ -125,9 +127,9 @@ impl DmsLock {
         }
     }
 
-    /// Set the sign message name
-    fn with_message(mut self, message: Option<&str>) -> Self {
-        self.message = message.map(|m| m.to_string());
+    /// Set the MULTI text
+    fn with_multi(mut self, multi: Option<&str>) -> Self {
+        self.multi = multi.map(|m| m.to_string());
         self
     }
 
@@ -456,19 +458,6 @@ impl AncillaryData for DmsAnc {
 }
 
 impl DmsAnc {
-    /// Find a sign message
-    fn find_sign_msg(&self, msg: &SignMessage) -> Option<&SignMessage> {
-        self.messages.iter().find(|m| {
-            m.sign_config == msg.sign_config
-                && m.multi == msg.multi
-                && m.msg_owner == msg.msg_owner
-                && m.sticky == msg.sticky
-                && m.flash_beacon == msg.flash_beacon
-                && m.pixel_service == msg.pixel_service
-                && m.msg_priority == msg.msg_priority
-        })
-    }
-
     /// Get a sign message by name
     fn sign_message(&self, msg: Option<&str>) -> Option<&SignMessage> {
         msg.and_then(|msg| self.messages.iter().find(|m| m.name == msg))
@@ -633,28 +622,22 @@ impl DmsAnc {
         }
     }
 
-    /// Create actions to activate a sign message
-    fn sign_msg_actions(
+    /// Create action to lock a sign
+    fn lock_action(
         self,
         uri: Uri,
-        msg: SignMessage,
+        multi: &str,
         duration: Option<u32>,
     ) -> Vec<Action> {
-        let mut actions = Vec::with_capacity(2);
+        let mut actions = Vec::with_capacity(1);
         let Some(user) = crate::app::user() else {
             return actions;
         };
         let lock = DmsLock::new(LockReason::Situation.as_str())
-            .with_message(Some(&msg.name))
+            .with_multi(Some(multi))
             .with_duration(duration)
             .with_user(Some(&user))
             .json();
-        if self.find_sign_msg(&msg).is_none() {
-            if let Ok(val) = serde_json::to_string(&msg) {
-                let post = Uri::from("/iris/api/sign_message");
-                actions.push(Action::Post(post, val.into()));
-            }
-        }
         let val = format!("{{\"lock\":{lock}}}");
         actions.push(Action::Patch(uri, val.into()));
         actions
@@ -919,22 +902,14 @@ impl Dms {
 
     /// Create actions to handle click on "Send" button
     fn send_actions(&self, anc: DmsAnc) -> Vec<Action> {
-        if let Some(cfg) = &self.sign_config {
-            if let Some(ms) = &self.selected_multi(&anc) {
-                match sign_msg_owner(HIGH_1) {
-                    Some(owner) => {
-                        let duration = self.selected_duration();
-                        return anc.sign_msg_actions(
-                            uri_one(Res::Dms, &self.name),
-                            SignMessage::new(cfg, ms, owner, HIGH_1),
-                            duration,
-                        );
-                    }
-                    None => console::log_1(&"no app user!".into()),
-                };
-            }
+        match &self.selected_multi(&anc) {
+            Some(ms) => anc.lock_action(
+                uri_one(Res::Dms, &self.name),
+                ms,
+                self.selected_duration(),
+            ),
+            None => Vec::new(),
         }
-        Vec::new()
     }
 
     /// Create actions to handle click on "Blank" button
@@ -1329,16 +1304,4 @@ impl Card for Dms {
         preview.set_outer_html(&html);
         Vec::new()
     }
-}
-
-/// Make sign message owner string
-fn sign_msg_owner(priority: u32) -> Option<String> {
-    crate::app::user().map(|user| {
-        let sources = if priority == LOW_1 {
-            "blank"
-        } else {
-            "operator"
-        };
-        format!("IRIS; {sources}; {user}")
-    })
 }

@@ -101,9 +101,9 @@ The selectors may also allow **free-form text** entry, depending on the
 * 🔧 **Configure**: Any free-form text permitted (no check)
 
 The message preview is updated as the user composes the message.  When the
-**Send** button is pressed, a [sign message] is created and set as the operator
-message.  The server then performs a validation check ensuring the user has
-[permissions] for any free-form text.
+**Send** button is pressed, it is set as the `lock` attribute.  The server
+performs a validation check ensuring the user has [permissions] for any
+free-form text before sending the message to the sign.
 
 
 [abbreviated]: words.html#abbreviation
