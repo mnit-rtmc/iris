@@ -464,7 +464,7 @@ impl DmsAnc {
     }
 
     /// Get message item states
-    fn msg_states(&self, msg: Option<&str>) -> ItemStates {
+    fn msg_states(&self, msg: Option<&str>) -> ItemStates<'_> {
         self.sign_message(msg).map(|m| m.item_states()).unwrap_or(
             ItemStates::default().with(ItemState::Fault, "message unknown"),
         )
@@ -1187,7 +1187,7 @@ impl Card for Dms {
     }
 
     /// Get the name
-    fn name(&self) -> Cow<str> {
+    fn name(&self) -> Cow<'_, str> {
         Cow::Borrowed(&self.name)
     }
 

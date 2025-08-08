@@ -123,7 +123,7 @@ impl CommLinkAnc {
 
 impl CommLink {
     /// Get item states
-    fn item_states(&self) -> ItemStates {
+    fn item_states(&self) -> ItemStates<'_> {
         match (self.poll_enabled, self.connected) {
             (true, true) => ItemState::Available.into(),
             (true, false) => ItemState::Offline.into(),
@@ -214,7 +214,7 @@ impl Card for CommLink {
     }
 
     /// Get the name
-    fn name(&self) -> Cow<str> {
+    fn name(&self) -> Cow<'_, str> {
         Cow::Borrowed(&self.name)
     }
 

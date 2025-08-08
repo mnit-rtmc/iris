@@ -144,7 +144,7 @@ fn to_html_compact(sc: &SignConfig) -> String {
 }
 
 /// Get item states
-fn item_states(sc: &SignConfig) -> ItemStates {
+fn item_states(sc: &SignConfig) -> ItemStates<'_> {
     if sc.sign_count > 0 {
         ItemState::Available.into()
     } else {
@@ -307,7 +307,7 @@ impl Card for SignConfig {
     }
 
     /// Get the name
-    fn name(&self) -> Cow<str> {
+    fn name(&self) -> Cow<'_, str> {
         Cow::Borrowed(&self.name)
     }
 

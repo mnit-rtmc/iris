@@ -1,6 +1,6 @@
 // traffic.rs
 //
-// Copyright (c) 2021-2024  Minnesota Department of Transportation
+// Copyright (c) 2021-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@ impl Traffic {
     }
 
     /// Get an archive entry by index
-    pub fn by_index(&mut self, i: usize) -> Result<ZipFile> {
+    pub fn by_index(&mut self, i: usize) -> Result<ZipFile<'_>> {
         Ok(self.archive.by_index(i)?)
     }
 

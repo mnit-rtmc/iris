@@ -43,7 +43,7 @@ impl AncillaryData for ModemAnc {
 
 impl Modem {
     /// Get item states
-    fn item_states(&self) -> ItemStates {
+    fn item_states(&self) -> ItemStates<'_> {
         if self.enabled {
             ItemState::Available.into()
         } else {
@@ -113,7 +113,7 @@ impl Card for Modem {
     }
 
     /// Get the name
-    fn name(&self) -> Cow<str> {
+    fn name(&self) -> Cow<'_, str> {
         Cow::Borrowed(&self.name)
     }
 

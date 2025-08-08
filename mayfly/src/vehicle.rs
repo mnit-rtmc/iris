@@ -440,7 +440,7 @@ impl VehLog {
         &self,
         period: usize,
         filter: VehicleFilter,
-    ) -> BinIter<T> {
+    ) -> BinIter<'_, T> {
         BinIter::new(period, self, filter)
     }
 }

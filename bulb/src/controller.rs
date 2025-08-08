@@ -252,7 +252,7 @@ impl Controller {
     }
 
     /// Get item states
-    pub fn item_states(&self) -> ItemStates {
+    pub fn item_states(&self) -> ItemStates<'_> {
         match (self.is_active(), self.fail_time.is_some()) {
             (true, true) => ItemStates::default()
                 .with(ItemState::Offline, "FIXME: since fail time"),
@@ -451,7 +451,7 @@ impl Card for Controller {
     }
 
     /// Get the name
-    fn name(&self) -> Cow<str> {
+    fn name(&self) -> Cow<'_, str> {
         Cow::Borrowed(&self.name)
     }
 

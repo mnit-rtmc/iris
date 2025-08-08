@@ -101,7 +101,7 @@ impl Database {
     }
 
     /// Get database client
-    pub async fn client(&self) -> error::Result<PooledConnection<Manager>> {
+    pub async fn client(&self) -> error::Result<PooledConnection<'_, Manager>> {
         Ok(self.pool.get().await?)
     }
 
