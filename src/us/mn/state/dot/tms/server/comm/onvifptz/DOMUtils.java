@@ -41,25 +41,33 @@ public class DOMUtils {
 	/** don't allow instantiation */
 	private DOMUtils() {}
 
-	protected static ErrorHandler errorHandler = new OnvifErrorHandler();
+	static class OnvifErrorHandler implements ErrorHandler {
+		private String messageString;
 
-	private static class OnvifErrorHandler implements ErrorHandler {
+		public OnvifErrorHandler(String msg) {
+			super();
+			messageString = msg;
+		}
+
 		@Override
 		public void warning(SAXParseException e) {
 			OnvifPTZPoller.slog("DOMUtils.OEH Warning: " +
 				e.getMessage());
+			OnvifPTZPoller.slog("XML String:\n" + messageString);
 		}
 
 		@Override
 		public void error(SAXParseException e) {
 			OnvifPTZPoller.slog("DOMUtils.OEH Error: " +
 				e.getMessage());
+			OnvifPTZPoller.slog("XML String:\n" + messageString);
 		}
 
 		@Override
 		public void fatalError(SAXParseException e) {
 			OnvifPTZPoller.slog("DOMUtils.OEH FatalError: " +
 				e.getMessage());
+			OnvifPTZPoller.slog("XML String:\n" + messageString);
 		}
 	}
 
@@ -90,7 +98,7 @@ public class DOMUtils {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			dbf.setNamespaceAware(true);
 			DocumentBuilder db = dbf.newDocumentBuilder();
-			db.setErrorHandler(DOMUtils.errorHandler);
+			db.setErrorHandler(new OnvifErrorHandler(s));
 			InputSource is = new InputSource();
 			is.setCharacterStream(new StringReader(s));
 			doc = db.parse(is);
