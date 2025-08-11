@@ -163,10 +163,10 @@ pub async fn patch_by_name(
         Some(Value::Null) => hashtag = None,
         _ => (),
     };
-    if let Some(Value::Number(a)) = obj.remove("access_level") {
-        if let Some(a) = a.as_i64() {
-            access_level = a as i32;
-        }
+    if let Some(Value::Number(a)) = obj.remove("access_level")
+        && let Some(a) = a.as_i64()
+    {
+        access_level = a as i32;
     }
     let rows = transaction
         .execute(

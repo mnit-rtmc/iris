@@ -116,17 +116,16 @@ pub async fn notify_events(
     let mut channels = HashSet::new();
     tokio::spawn(run_handler(conn, tx.clone()));
     for res in Resource::iter() {
-        if let Some(chan) = res.listen() {
-            if channels.insert(chan) {
-                if let Ok(nm) = Name::new(chan) {
-                    if !nm.res_type.is_lut() {
-                        log::debug!("LISTEN to '{chan}' for {res:?}");
-                        let listen = format!("LISTEN {chan}");
-                        client.execute(&listen, &[]).await?;
-                    }
-                    send_event(&tx, nm);
-                }
+        if let Some(chan) = res.listen()
+            && channels.insert(chan)
+            && let Ok(nm) = Name::new(chan)
+        {
+            if !nm.res_type.is_lut() {
+                log::debug!("LISTEN to '{chan}' for {res:?}");
+                let listen = format!("LISTEN {chan}");
+                client.execute(&listen, &[]).await?;
             }
+            send_event(&tx, nm);
         }
     }
     // leak client so that it's not dropped

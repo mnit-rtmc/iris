@@ -268,15 +268,15 @@ impl Honey {
         let mut map = self.notifiers.lock().unwrap();
         for (id, notifier) in map.iter_mut() {
             log::debug!("checking {nm} for {id}");
-            if let Some(tx) = &notifier.tx {
-                if notifier.is_listening(&nm) {
-                    notifier.activity = SystemTime::now();
-                    log::debug!("SSE notify: {nm} to {id}");
-                    let ev = Event::default().data(nm.to_string());
-                    if let Err(e) = tx.send(Ok(ev)) {
-                        log::warn!("SSE notification: {e}");
-                        notifier.tx = None;
-                    }
+            if let Some(tx) = &notifier.tx
+                && notifier.is_listening(&nm)
+            {
+                notifier.activity = SystemTime::now();
+                log::debug!("SSE notify: {nm} to {id}");
+                let ev = Event::default().data(nm.to_string());
+                if let Err(e) = tx.send(Ok(ev)) {
+                    log::warn!("SSE notification: {e}");
+                    notifier.tx = None;
                 }
             }
         }

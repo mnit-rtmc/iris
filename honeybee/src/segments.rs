@@ -957,10 +957,10 @@ impl SegmentState {
 
     /// Calculate normal vector for a location
     fn loc_normal(&self, loc: &GeoLoc) -> f64 {
-        if let Some(cid) = loc.cor_id() {
-            if let Some(cor) = self.corridors.get(&cid) {
-                return cor.loc_normal(loc);
-            }
+        if let Some(cid) = loc.cor_id()
+            && let Some(cor) = self.corridors.get(&cid)
+        {
+            return cor.loc_normal(loc);
         };
         loc.normal()
     }

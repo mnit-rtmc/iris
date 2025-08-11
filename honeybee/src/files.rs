@@ -35,10 +35,10 @@ impl AtomicFile {
         path.push(name);
         log::trace!("AtomicFile::new {path:?}");
         // Use parent in case name contains path separators
-        if let Some(dir) = path.parent() {
-            if !dir.is_dir() {
-                create_dir_all(dir).await?;
-            }
+        if let Some(dir) = path.parent()
+            && !dir.is_dir()
+        {
+            create_dir_all(dir).await?;
         }
         Ok(AtomicFile { path })
     }
@@ -96,10 +96,10 @@ impl Cache {
             while let Some(f) = rd.next_entry().await? {
                 if f.file_type().await?.is_file() {
                     let p = PathBuf::from(f.file_name());
-                    if let Some(e) = p.extension() {
-                        if e == ext {
-                            files.insert(p);
-                        }
+                    if let Some(e) = p.extension()
+                        && e == ext
+                    {
+                        files.insert(p);
                     }
                 }
             }

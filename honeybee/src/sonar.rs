@@ -210,10 +210,10 @@ enum Message<'a> {
 impl<'a> Message<'a> {
     /// Decode message in a buffer
     fn decode(buf: &'a [u8]) -> Option<(Self, usize)> {
-        if let Some(rec_sep) = buf.iter().position(|b| *b == b'\x1E') {
-            if let Some(msg) = Self::decode_one(&buf[..rec_sep]) {
-                return Some((msg, rec_sep));
-            }
+        if let Some(rec_sep) = buf.iter().position(|b| *b == b'\x1E')
+            && let Some(msg) = Self::decode_one(&buf[..rec_sep])
+        {
+            return Some((msg, rec_sep));
         }
         None
     }
