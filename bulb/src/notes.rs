@@ -20,13 +20,13 @@ fn is_tag_char(c: char) -> bool {
 pub fn contains_hashtag(notes: &str, tag: &str) -> bool {
     let mut start = None;
     for (i, c) in notes.char_indices() {
-        if let Some(s) = start {
-            if !is_tag_char(c) {
-                if tag.eq_ignore_ascii_case(&notes[s..i]) {
-                    return true;
-                }
-                start = None;
+        if let Some(s) = start
+            && !is_tag_char(c)
+        {
+            if tag.eq_ignore_ascii_case(&notes[s..i]) {
+                return true;
             }
+            start = None;
         }
         if c == '#' {
             start = Some(i);

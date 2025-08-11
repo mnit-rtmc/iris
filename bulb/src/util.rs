@@ -276,10 +276,10 @@ impl Fields {
 
 impl Input<&String> for Fields {
     fn changed_input(&mut self, id: &str, val: &String) {
-        if let Some(parsed) = self.doc.input_parse::<String>(id) {
-            if &parsed != val {
-                self.insert_str(id, &parsed);
-            }
+        if let Some(parsed) = self.doc.input_parse::<String>(id)
+            && &parsed != val
+        {
+            self.insert_str(id, &parsed);
         }
     }
 }
@@ -295,10 +295,10 @@ impl Input<&Option<String>> for Fields {
 
 impl Input<u16> for Fields {
     fn changed_input(&mut self, id: &str, val: u16) {
-        if let Some(parsed) = self.doc.input_parse::<u16>(id) {
-            if parsed != val {
-                self.insert(id, Value::Number(parsed.into()));
-            }
+        if let Some(parsed) = self.doc.input_parse::<u16>(id)
+            && parsed != val
+        {
+            self.insert(id, Value::Number(parsed.into()));
         }
     }
 }
@@ -350,10 +350,10 @@ impl Input<Option<f64>> for Fields {
 
 impl TextArea<&String> for Fields {
     fn changed_text_area(&mut self, id: &str, val: &String) {
-        if let Some(parsed) = self.doc.text_area_parse::<String>(id) {
-            if &parsed != val {
-                self.insert_str(id, &parsed);
-            }
+        if let Some(parsed) = self.doc.text_area_parse::<String>(id)
+            && &parsed != val
+        {
+            self.insert_str(id, &parsed);
         }
     }
 }
@@ -369,10 +369,10 @@ impl TextArea<&Option<String>> for Fields {
 
 impl Select<&String> for Fields {
     fn changed_select(&mut self, id: &str, val: &String) {
-        if let Some(parsed) = self.doc.select_parse::<String>(id) {
-            if &parsed != val {
-                self.insert_str(id, &parsed);
-            }
+        if let Some(parsed) = self.doc.select_parse::<String>(id)
+            && &parsed != val
+        {
+            self.insert_str(id, &parsed);
         }
     }
 }
@@ -388,30 +388,30 @@ impl Select<&Option<String>> for Fields {
 
 impl Select<u8> for Fields {
     fn changed_select(&mut self, id: &str, val: u8) {
-        if let Some(parsed) = self.doc.select_parse::<u8>(id) {
-            if parsed != val {
-                self.insert(id, Value::Number(parsed.into()));
-            }
+        if let Some(parsed) = self.doc.select_parse::<u8>(id)
+            && parsed != val
+        {
+            self.insert(id, Value::Number(parsed.into()));
         }
     }
 }
 
 impl Select<u16> for Fields {
     fn changed_select(&mut self, id: &str, val: u16) {
-        if let Some(parsed) = self.doc.select_parse::<u16>(id) {
-            if parsed != val {
-                self.insert(id, Value::Number(parsed.into()));
-            }
+        if let Some(parsed) = self.doc.select_parse::<u16>(id)
+            && parsed != val
+        {
+            self.insert(id, Value::Number(parsed.into()));
         }
     }
 }
 
 impl Select<u32> for Fields {
     fn changed_select(&mut self, id: &str, val: u32) {
-        if let Some(parsed) = self.doc.select_parse::<u32>(id) {
-            if parsed != val {
-                self.insert(id, Value::Number(parsed.into()));
-            }
+        if let Some(parsed) = self.doc.select_parse::<u32>(id)
+            && parsed != val
+        {
+            self.insert(id, Value::Number(parsed.into()));
         }
     }
 }

@@ -177,10 +177,10 @@ impl ControllerAnc {
         html.option().end(); /* empty */
         for cabinet_style in &self.cabinet_styles {
             let option = html.option();
-            if let Some(cab) = &pri.cabinet_style {
-                if cab == &cabinet_style.name {
-                    option.attr_bool("selected");
-                }
+            if let Some(cab) = &pri.cabinet_style
+                && cab == &cabinet_style.name
+            {
+                option.attr_bool("selected");
             }
             html.text(&cabinet_style.name).end();
         }
@@ -189,18 +189,15 @@ impl ControllerAnc {
 
     /// Get the comm config
     fn comm_config(&self, pri: &Controller) -> &str {
-        if let Some(comm_link) = &pri.comm_link {
-            if let Some(cl) =
+        if let Some(comm_link) = &pri.comm_link
+            && let Some(cl) =
                 &self.comm_links.iter().find(|cl| &cl.name == comm_link)
-            {
-                if let Some(comm_config) = &self
-                    .comm_configs
-                    .iter()
-                    .find(|cc| cc.name == cl.comm_config)
-                {
-                    return &comm_config.description[..];
-                }
-            }
+            && let Some(comm_config) = &self
+                .comm_configs
+                .iter()
+                .find(|cc| cc.name == cl.comm_config)
+        {
+            return &comm_config.description[..];
         }
         ""
     }

@@ -725,12 +725,11 @@ impl CardList {
         }
         let mut num = 1;
         for ob in obs {
-            if let Some((pre, suffix)) = ob.name().split_once('_') {
-                if pre == prefix {
-                    if let Ok(n) = suffix.parse::<u32>() {
-                        num = num.max(n + 1);
-                    }
-                }
+            if let Some((pre, suffix)) = ob.name().split_once('_')
+                && pre == prefix
+                && let Ok(n) = suffix.parse::<u32>()
+            {
+                num = num.max(n + 1);
             }
         }
         format!("{prefix}_{num}")
@@ -775,10 +774,10 @@ impl CardList {
         let mut changes = Vec::new();
         let mut views = Vec::with_capacity(self.views.len());
         let mut old_views = self.views.drain(..);
-        if self.config {
-            if let Some(cv) = old_views.next() {
-                views.push(cv);
-            }
+        if self.config
+            && let Some(cv) = old_views.next()
+        {
+            views.push(cv);
         }
         for pri in serde_json::from_str::<Vec<C>>(&self.json)? {
             let vv = old_views.next().unwrap_or(CardView::new(

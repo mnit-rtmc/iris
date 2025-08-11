@@ -348,11 +348,11 @@ fn search_value() -> String {
     let doc = Doc::get();
     let sb_search = doc.elem::<HtmlInputElement>("sb_search");
     let mut search = sb_search.value();
-    if let Some(istate) = doc.select_parse::<String>("sb_state") {
-        if ItemState::from_code(&istate).is_some() {
-            search.push(' ');
-            search.push_str(&istate);
-        }
+    if let Some(istate) = doc.select_parse::<String>("sb_state")
+        && ItemState::from_code(&istate).is_some()
+    {
+        search.push(' ');
+        search.push_str(&istate);
     }
     search
 }
@@ -430,10 +430,10 @@ fn handle_sb_resource_ev() {
 
 /// Handle an event from `ob_view` select element
 fn handle_ob_view_ev() {
-    if let Some(cv) = app::form() {
-        if let Some(view) = ob_view_value() {
-            spawn_local(do_future(replace_card(cv.view(view))));
-        }
+    if let Some(cv) = app::form()
+        && let Some(view) = ob_view_value()
+    {
+        spawn_local(do_future(replace_card(cv.view(view))));
     }
 }
 
@@ -572,12 +572,11 @@ async fn handle_button_cv(cv: CardView, id: String) {
 
 /// Handle a `click` event within a card element
 fn handle_card_click_ev(elem: &Element) {
-    if let Some(id) = elem.get_attribute("id") {
-        if let Some(name) = elem.get_attribute("name") {
-            if let Some(res) = resource_value() {
-                spawn_local(do_future(click_card(res, name, id)));
-            }
-        }
+    if let Some(id) = elem.get_attribute("id")
+        && let Some(name) = elem.get_attribute("name")
+        && let Some(res) = resource_value()
+    {
+        spawn_local(do_future(click_card(res, name, id)));
     }
 }
 
@@ -659,14 +658,13 @@ fn add_transition_listener(elem: &Element) -> JsResult<()> {
 
 /// Handle a `transition*` event from `sb_list` child element
 fn handle_transition_ev(ev: Event) {
-    if let Some(target) = ev.target() {
-        if let Ok(target) = target.dyn_into::<Element>() {
-            if let Ok(ev) = ev.dyn_into::<TransitionEvent>() {
-                // delete slider is a "left" property transition
-                if target.id() == "ob_delete" && ev.property_name() == "left" {
-                    app::set_delete_enabled(&ev.type_() == "transitionend");
-                }
-            }
+    if let Some(target) = ev.target()
+        && let Ok(target) = target.dyn_into::<Element>()
+        && let Ok(ev) = ev.dyn_into::<TransitionEvent>()
+    {
+        // delete slider is a "left" property transition
+        if target.id() == "ob_delete" && ev.property_name() == "left" {
+            app::set_delete_enabled(&ev.type_() == "transitionend");
         }
     }
 }

@@ -161,10 +161,10 @@ impl<L> LocAnc<L> {
         html.option().end(); /* empty */
         for road in &self.roads {
             let option = html.option();
-            if let Some(groad) = groad {
-                if groad == road.name {
-                    option.attr_bool("selected");
-                }
+            if let Some(groad) = groad
+                && groad == road.name
+            {
+                option.attr_bool("selected");
             }
             html.text(&road.name).end();
         }

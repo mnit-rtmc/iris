@@ -306,24 +306,24 @@ impl MsgPattern {
         // - the first value is a text rectangle
         // - the same text rectangle starts every page
         // - there are no other text rectangles
-        if let Some(first) = it.next() {
-            if first.starts_with("[tr") {
-                let mut tr_this_page = true;
-                for val in it {
-                    if tr_this_page {
-                        if val.starts_with("[tr") {
-                            return false;
-                        } else if val == "[np]" {
-                            tr_this_page = false;
-                        }
-                    } else if val == first {
-                        tr_this_page = true;
-                    } else {
+        if let Some(first) = it.next()
+            && first.starts_with("[tr")
+        {
+            let mut tr_this_page = true;
+            for val in it {
+                if tr_this_page {
+                    if val.starts_with("[tr") {
                         return false;
+                    } else if val == "[np]" {
+                        tr_this_page = false;
                     }
+                } else if val == first {
+                    tr_this_page = true;
+                } else {
+                    return false;
                 }
-                return tr_this_page;
             }
+            return tr_this_page;
         }
         false
     }
@@ -595,12 +595,12 @@ impl DmsAnc {
             // prefer to abbreviate longer words
             if sc > abbrev.name.len() {
                 for word in &self.words {
-                    if word.allowed && word.name == w {
-                        if let Some(ab) = &word.abbr {
-                            if ab != w {
-                                abbrev = word.clone();
-                            }
-                        }
+                    if word.allowed
+                        && word.name == w
+                        && let Some(ab) = &word.abbr
+                        && ab != w
+                    {
+                        abbrev = word.clone();
                     }
                 }
             }
@@ -702,10 +702,10 @@ impl Dms {
     /// Get faults, if any
     fn faults(&self) -> Option<&str> {
         if let Some(true) = self.has_faults {
-            if let Some(status) = &self.status {
-                if let Some(faults) = &status.faults {
-                    return Some(faults);
-                }
+            if let Some(status) = &self.status
+                && let Some(faults) = &status.faults
+            {
+                return Some(faults);
             }
             // secondary attribute doesn't match primary has_faults?!
             Some("has_faults")
@@ -811,10 +811,10 @@ impl Dms {
         html.select().id("mc_pattern");
         for pat in &anc.compose_patterns {
             let option = html.option();
-            if let Some(p) = pat_def {
-                if p.name == pat.name {
-                    option.attr_bool("selected");
-                }
+            if let Some(p) = pat_def
+                && p.name == pat.name
+            {
+                option.attr_bool("selected");
             }
             html.text(&pat.name).end();
         }
@@ -1088,33 +1088,33 @@ impl Dms {
 
     /// Build power supply status HTML
     fn power_html(&self, html: &mut Html) {
-        if let Some(status) = &self.status {
-            if let Some(power_supplies) = &status.power_supplies {
-                html.div().text("⚡ ").b().text("Power").end().end();
-                html.table();
-                for (i, supply) in power_supplies.iter().enumerate() {
-                    html.tr();
-                    html.td().text((i + 1).to_string()).end();
-                    html.td().text_len(&supply.description, 20).end();
-                    let td = html.td();
-                    let voltage = &supply.voltage;
-                    match voltage.parse::<f32>() {
-                        Ok(v) => {
-                            if v <= 0.0 {
-                                td.class("fault");
-                            }
-                            html.text(voltage).text("V");
+        if let Some(status) = &self.status
+            && let Some(power_supplies) = &status.power_supplies
+        {
+            html.div().text("⚡ ").b().text("Power").end().end();
+            html.table();
+            for (i, supply) in power_supplies.iter().enumerate() {
+                html.tr();
+                html.td().text((i + 1).to_string()).end();
+                html.td().text_len(&supply.description, 20).end();
+                let td = html.td();
+                let voltage = &supply.voltage;
+                match voltage.parse::<f32>() {
+                    Ok(v) => {
+                        if v <= 0.0 {
+                            td.class("fault");
                         }
-                        Err(_e) => {
-                            td.class("fault").text_len(voltage, 16);
-                        }
+                        html.text(voltage).text("V");
                     }
-                    html.end(); /* td */
-                    html.td().text_len(&supply.supply_type, 12).end();
-                    html.end(); /* tr */
+                    Err(_e) => {
+                        td.class("fault").text_len(voltage, 16);
+                    }
                 }
-                html.end(); /* table */
+                html.end(); /* td */
+                html.td().text_len(&supply.supply_type, 12).end();
+                html.end(); /* tr */
             }
+            html.end(); /* table */
         }
     }
 }

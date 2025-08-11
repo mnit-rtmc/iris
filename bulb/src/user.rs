@@ -100,10 +100,10 @@ impl UserAnc {
 impl User {
     /// Get item state
     fn item_state(&self, anc: &UserAnc) -> ItemState {
-        if self.enabled {
-            if let Some(role) = &self.role {
-                return anc.item_state(role);
-            }
+        if self.enabled
+            && let Some(role) = &self.role
+        {
+            return anc.item_state(role);
         }
         ItemState::Inactive
     }

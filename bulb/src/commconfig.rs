@@ -105,10 +105,10 @@ fn periods_html(
     for period in periods {
         let sec = period.seconds();
         let option = html.option().value(sec.to_string());
-        if let Some(s) = seconds {
-            if s == sec {
-                option.attr_bool("selected");
-            }
+        if let Some(s) = seconds
+            && s == sec
+        {
+            option.attr_bool("selected");
         }
         html.text(period.to_string()).end();
     }
@@ -181,10 +181,10 @@ impl CommConfigAnc {
         if let Some(protocols) = &self.protocols {
             for protocol in protocols {
                 let option = html.option().value(protocol.id.to_string());
-                if let Some(p) = pri.protocol {
-                    if p == protocol.id {
-                        option.attr_bool("selected");
-                    }
+                if let Some(p) = pri.protocol
+                    && p == protocol.id
+                {
+                    option.attr_bool("selected");
                 }
                 html.text(&protocol.description).end();
             }

@@ -375,15 +375,15 @@ impl WeatherData {
         }
         html.end(); /* summary */
         html.ul();
-        if let Some(sensor) = &self.temperature_sensor {
-            if sensor.len() > 1 {
-                for (i, temp) in sensor.iter().enumerate() {
-                    html.li().text("#").text(i.to_string()).text(" Air ");
-                    if let Some(temp) = temp.air_temp {
-                        html.text(format_temp(temp));
-                    }
-                    html.end(); /* li */
+        if let Some(sensor) = &self.temperature_sensor
+            && sensor.len() > 1
+        {
+            for (i, temp) in sensor.iter().enumerate() {
+                html.li().text("#").text(i.to_string()).text(" Air ");
+                if let Some(temp) = temp.air_temp {
+                    html.text(format_temp(temp));
                 }
+                html.end(); /* li */
             }
         }
         if let Some(temp) = self.min_air_temp {
@@ -572,10 +572,10 @@ impl WeatherData {
 fn pavement_settings(
     settings: Option<&WeatherSettings>,
 ) -> &[PavementSettings] {
-    if let Some(settings) = settings {
-        if let Some(settings) = &settings.pavement_sensor {
-            return settings;
-        }
+    if let Some(settings) = settings
+        && let Some(settings) = &settings.pavement_sensor
+    {
+        return settings;
     }
     &[]
 }
@@ -635,10 +635,10 @@ fn pavement_html(
             }
         }
         if let Some(ps) = settings.get(i) {
-            if let Some(loc) = &ps.location {
-                if !loc.trim().is_empty() {
-                    html.li().text(loc).end();
-                }
+            if let Some(loc) = &ps.location
+                && !loc.trim().is_empty()
+            {
+                html.li().text(loc).end();
             }
             if let Some(tp) = &ps.pavement_type {
                 html.li().text(tp).text(" pavement").end();
@@ -664,10 +664,10 @@ fn pavement_html(
 fn sub_surface_settings(
     settings: Option<&WeatherSettings>,
 ) -> &[SubSurfaceSettings] {
-    if let Some(settings) = settings {
-        if let Some(settings) = &settings.sub_surface_sensor {
-            return settings;
-        }
+    if let Some(settings) = settings
+        && let Some(settings) = &settings.sub_surface_sensor
+    {
+        return settings;
     }
     &[]
 }
@@ -684,10 +684,10 @@ fn sub_surface_html(
         if len > 1 {
             html.text(format!("#{i} "));
         };
-        if let Some(sd) = data.get(i) {
-            if let Some(temp) = sd.temp {
-                html.text(format_temp(temp));
-            }
+        if let Some(sd) = data.get(i)
+            && let Some(temp) = sd.temp
+        {
+            html.text(format_temp(temp));
         }
         html.end(); /* summary */
         html.ul();
