@@ -1202,20 +1202,20 @@ impl Card for Dms {
 
     /// Get the main item state
     fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
-        let item_states = self.item_states(anc);
-        if item_states.is_match(ItemState::Inactive.code()) {
+        let states = self.item_states(anc);
+        if states.contains(ItemState::Inactive) {
             ItemState::Inactive
-        } else if item_states.is_match(ItemState::Dedicated.code()) {
+        } else if states.contains(ItemState::Dedicated) {
             ItemState::Dedicated
-        } else if item_states.is_match(ItemState::Offline.code()) {
+        } else if states.contains(ItemState::Offline) {
             ItemState::Offline
-        } else if item_states.is_match(ItemState::Deployed.code()) {
+        } else if states.contains(ItemState::Deployed) {
             ItemState::Deployed
-        } else if item_states.is_match(ItemState::Planned.code()) {
+        } else if states.contains(ItemState::Planned) {
             ItemState::Planned
-        } else if item_states.is_match(ItemState::External.code()) {
+        } else if states.contains(ItemState::External) {
             ItemState::External
-        } else if item_states.is_match(ItemState::Fault.code()) {
+        } else if states.contains(ItemState::Fault) {
             ItemState::Fault
         } else {
             ItemState::Available

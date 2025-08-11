@@ -322,10 +322,10 @@ impl Card for Camera {
 
     /// Get the main item state
     fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
-        let item_states = anc.cio.item_states(self);
-        if item_states.is_match(ItemState::Inactive.code()) {
+        let states = anc.cio.item_states(self);
+        if states.contains(ItemState::Inactive) {
             ItemState::Inactive
-        } else if item_states.is_match(ItemState::Offline.code()) {
+        } else if states.contains(ItemState::Offline) {
             ItemState::Offline
         } else {
             ItemState::Available

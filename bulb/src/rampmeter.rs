@@ -780,19 +780,19 @@ impl Card for RampMeter {
 
     /// Get the main item state
     fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
-        let item_states = self.item_states(anc);
-        if item_states.is_match(ItemState::Inactive.code()) {
+        let states = self.item_states(anc);
+        if states.contains(ItemState::Inactive) {
             ItemState::Inactive
-        } else if item_states.is_match(ItemState::Offline.code()) {
+        } else if states.contains(ItemState::Offline) {
             ItemState::Offline
-        } else if item_states.is_match(ItemState::Deployed.code()) {
+        } else if states.contains(ItemState::Deployed) {
             ItemState::Deployed
-        } else if item_states.is_match(ItemState::Planned.code()) {
+        } else if states.contains(ItemState::Planned) {
             ItemState::Planned
-        } else if item_states.is_match(ItemState::Fault.code())
-            || item_states.is_match(ItemState::Locked.code())
-        {
+        } else if states.contains(ItemState::Fault) {
             ItemState::Fault
+        } else if states.contains(ItemState::Locked) {
+            ItemState::Locked
         } else {
             ItemState::Available
         }
