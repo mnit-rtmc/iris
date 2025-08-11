@@ -99,7 +99,7 @@ flashing [beacon].
 
 Tag              | Description                      | Tag Mode            | Source
 -----------------|----------------------------------|---------------------|-------------
-`[cg` *…* `]`    | [ClearGuide] data                | Replace             | `clearguide`
+`[cg` *…* `]`    | [ClearGuide] data                | Condition + Replace | `clearguide`
 `[exit` *…* `]`  | [Exit ramp backup]               | Condition           | `exit_warning`
 `[feed` *…* `]`  | [Msg-Feed] message               | Replace             | N/A
 `[pa` *…* `]`    | [Parking area] availability      | Replace             | `parking`
