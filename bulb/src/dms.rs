@@ -717,6 +717,9 @@ impl Dms {
     /// Get item states
     fn item_states<'a>(&'a self, anc: &'a DmsAnc) -> ItemStates<'a> {
         let mut states = anc.cio.item_states(self);
+        if states.contains(ItemState::Inactive) {
+            return states;
+        }
         if states.contains(ItemState::Available) {
             states = anc.msg_states(self.msg_current.as_deref());
         }
