@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2020  SRF Consulting Group
+ * Copyright (C) 2019-2025  SRF Consulting Group
  * Copyright (C) 2021-2024  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
@@ -232,8 +232,8 @@ public class WMultiParser implements Multi {
 	 * @see us.mn.state.dot.tms.utils.Multi#addClearGuideAdvisory()
 	 */
 	@Override
-	public void addClearGuideAdvisory(
-		String dms, int wid, int tsp, String mode, int ridx)
+	public void addClearGuideAdvisory(String dms, int wid,
+		int min, int max, String mode, int idx)
 	{
 		// TODO
 	}

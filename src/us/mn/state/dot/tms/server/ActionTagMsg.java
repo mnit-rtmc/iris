@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2024  Minnesota Department of Transportation
+ * Copyright (C) 2013-2025  Minnesota Department of Transportation
  * Copyright (C) 2021-2022  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -334,10 +334,10 @@ public class ActionTagMsg {
 		@Override public void addStandby() {
 			addSource(SignMsgSource.standby);
 		}
-		@Override public void addClearGuideAdvisory(
-			String dms, int rid, int tsp, String mode, int ridx)
+		@Override public void addClearGuideAdvisory(String dms,
+			int wid, int min, int max, String mode, int idx)
 		{
-			addSpan(clearGuideSpan(dms, rid, tsp, mode, ridx));
+			addSpan(clearGuideSpan(dms, wid, min, max, mode, idx));
 		}
 		@Override public void addRwis(String condition, int level) {
 			addSpan(rwisSpan(condition, level));
@@ -965,38 +965,46 @@ public class ActionTagMsg {
 
 	/** Calculate ClearGuide advisory span
 	 * @param dms DMS name
-	 * @param rid Route id
-	 * @param min Min statistic value, 0 to ignore.
-	 * @param mode Variable to use: tt, delay
-	 * @param ridx Route index, zero based */
-	private String clearGuideSpan(String dms, int rid, int min,
-		String mode, int ridx)
+	 * @param wid Workzone ID
+	 * @param min Minimum valid value
+	 * @param max Maximum valid value
+	 * @param mode Tag replacement mode: tt, delay, etc.
+	 * @param idx Workzone index, zero based */
+	private String clearGuideSpan(String dms, int wid, int min, int max,
+		String mode, int idx)
 	{
 		addSource(SignMsgSource.clearguide);
 		addSource(SignMsgSource.external);
-		return calcClearGuideAdvisory(dms, rid, min, mode, ridx);
+		return calcClearGuideAdvisory(dms, wid, min, max, mode, idx);
 	}
 
 	/** Calculate the span
 	 * @param dms DMS name
-	 * @param rid Route id
-	 * @param min Min statistic value, 0 to ignore.
-	 * @param mode Variable to use: tt, delay
-	 * @param ridx Route index, zero based
+	 * @param wid Workzone ID
+	 * @param min Minimum valid value
+	 * @param max Maximum valid value
+	 * @param mode Tag replacement mode: tt, delay, etc.
+	 * @param idx Workzone index, zero based
 	 * @return Span or empty string on error */
-	private String calcClearGuideAdvisory(
-		String dms, int rid, int min, String mode, int ridx)
+	private String calcClearGuideAdvisory(String dms, int wid, int min,
+		int max, String mode, int idx)
 	{
 		Integer stat = ClearGuidePoller.cg_dms.getStat(
-			dms, rid, min, mode, ridx);
+			dms, wid, mode, idx);
+		if (stat != null && (stat < min || stat > max))
+			stat = null;
 		if (dlog.isOpen()) {
 			dlog.log("calcClearGuideAdvisory:" +
-				" dms=" + dms + " rid=" + rid +
-				" min=" + min + " mode=" + mode +
-				" ridx=" + ridx + " stat=" + stat);
+				" dms=" + dms + " wid=" + wid +
+				" min=" + min + " max=" + max +
+				" mode=" + mode + " idx=" + idx +
+				" stat=" + stat);
 		}
 		if (stat != null) {
-			return Integer.toString(Math.round(stat));
+			if ("sp_cond".equals(mode))
+				return EMPTY_SPAN;
+			else
+				return Integer.toString(Math.round(stat));
 		} else {
 			String msg = "No match: does statistic, " + 
 				"route_id and index match?";

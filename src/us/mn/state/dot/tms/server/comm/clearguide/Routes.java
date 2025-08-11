@@ -62,20 +62,20 @@ public class Routes {
 	}
 
 	/** Get a statistic for the specified route.
-	 * @param rid ClearGuide route id, 0 to ignore.
-	 * @param min Min statistic value from [cg] tag, 0 to ignore.
+	 * @param wid ClearGuide workzone ID, 0 to ignore.
 	 * @param mode Statistic to retrieve as defined by [cg] tag.
-	 * @param ridx Route index, zero based.
+	 * @param idx Workzone index, zero based.
 	 * @return Specified statistic or null if not found */
-	protected Integer getStat(int rid, int min, String mode, int ridx) {
-		if (ridx >= 0 && ridx < cg_routes.size()) {
-			Route route = cg_routes.get(ridx);
-			return route.getStat(rid, min, mode);
+	protected Integer getStat(int wid, String mode, int idx) {
+		if (idx >= 0 && idx < cg_routes.size()) {
+			Route route = cg_routes.get(idx);
+			return route.getStat(wid, mode);
 		}
 		return null;
 	}
 
 	/** To string */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("(Routes:");

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2024  Minnesota Department of Transportation
+ * Copyright (C) 2006-2025  Minnesota Department of Transportation
  * Copyright (C) 2019-2020  SRF Consulting Group
  * Copyright (C) 2021  Iteris Inc.
  *
@@ -336,20 +336,24 @@ public class MultiBuilder implements Multi {
 
 	/** Add a ClearGuide advisory
 	 * @param dms DMS name
-	 * @param wid Workzone id
-	 * @param tsp Threshold speed
-	 * @param mode Variable to use: tt, delay
-	 * @param ridx Route index, zero based */
+	 * @param wid Workzone ID
+	 * @param min Minimum valid value
+	 * @param max Maximum valid value
+	 * @param mode Tag replacement mode: tt, delay, etc.
+	 * @param idx Workzone index, zero based */
 	@Override
-	public void addClearGuideAdvisory(
-		String dms, int wid, int tsp, String mode, int ridx)
+	public void addClearGuideAdvisory(String dms, int wid, int min,
+		int max, String mode, int idx)
 	{
+		String range = (max > min && max != Integer.MAX_VALUE)
+			? "" + min + '-' + max
+			: "" + min;
 		multi.append("[cg");
 		multi.append(dms).append(",");
 		multi.append(wid).append(",");
-		multi.append(tsp).append(",");
+		multi.append(range).append(",");
 		multi.append(mode).append(",");
-		multi.append(ridx);
+		multi.append(idx);
 		multi.append("]");
 	}
 

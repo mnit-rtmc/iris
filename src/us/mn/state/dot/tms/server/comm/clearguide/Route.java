@@ -105,47 +105,46 @@ public class Route {
 	}
 
 	/** Get ClearGuide calculated statistic by matching [cg] tag values.
- 	 * @param rid ClearGuide route id from [cg] tag.
- 	 * @param min Min statistic value from [cg] tag, 0 to ignore.
+ 	 * @param wid ClearGuide workzone ID from [cg] tag.
 	 * @param mode Statistic defined by [cg] tag.
 	 * @return Statistic from CG server or null for missing */
-	protected Integer getStat(int rid, int min, ModeEnum mode) {
+	protected Integer getStat(int wid, ModeEnum mode) {
 		final Integer stat;
 		if (getAgeSecs() > MAX_CG_DATA_AGE_SECS) {
 			stat = null;
 			log("getStat: CG data too old: age_s=" + getAgeSecs() +
 				" > " + MAX_CG_DATA_AGE_SECS);
-		} else if (mode == ModeEnum.UNKNOWN) {
+		} else if (wid != gcr_id) {
 			stat = null;
-		} else if (rid != gcr_id) {
-			stat = null;
-			log("getStat: cg tag route id " + rid + " no match");
+			log("getStat: cg tag route id " + wid + " no match");
 		} else if (mode == ModeEnum.DELAY) {
-			stat = (gcr_delay >= min ? gcr_delay : null);
+			stat = gcr_delay;
 		} else if (mode == ModeEnum.TRAVELTIME) {
-			final int tt = getTravelTime();
-			stat = (tt >= min ? tt : null);
+			stat = getTravelTime();
 		} else if (mode == ModeEnum.TRAVELTIME_ACTUAL) {
-			stat = (gcr_tta >= min ? gcr_tta: null);
+			stat = gcr_tta;
 		} else if (mode == ModeEnum.TRAVELTIME_SPEED_LIMIT) {
-			stat = (gcr_ttsl >= min ? gcr_ttsl : null);
+			stat = gcr_ttsl;
 		} else if (mode == ModeEnum.SPEED) {
-			stat = (gcr_speed >= min ? gcr_speed : null);
+			stat = gcr_speed;
+		} else if (mode == ModeEnum.SPEED_CONDITION) {
+			stat = gcr_speed;
 		} else {
 			stat = null;
 			log("getStat: unaccounted mode");
 		}
-		log("getStat: rid=" + rid + " mode=" + mode + " min=" + min +
+		log("getStat: wid=" + wid + " mode=" + mode +
 			" route=" + toString() + " --> stat=" + stat);
 		return stat;
 	}
 
 	/** Get statistic from string mode */
-	protected Integer getStat(int rid, int min, String mode) {
-		return getStat(rid, min, ModeEnum.fromValue(mode));
+	protected Integer getStat(int wid, String mode) {
+		return getStat(wid, ModeEnum.fromValue(mode));
 	}
 
 	/* To string */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("(Route: id=").append(gcr_id);

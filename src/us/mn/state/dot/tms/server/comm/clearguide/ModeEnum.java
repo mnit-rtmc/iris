@@ -27,7 +27,8 @@ public enum ModeEnum {
 	TRAVELTIME("tt"),               // TT adjusted w/ speed limit TT (mins)
 	TRAVELTIME_ACTUAL("tta"),       // actual TT
 	TRAVELTIME_SPEED_LIMIT("ttsl"), // TT at the speed limit
-	SPEED("sp");                    // speed
+	SPEED("sp"),                    // speed
+	SPEED_CONDITION("sp_cond");     // speed condition
 
 	/** Name of mode */
 	private final String name;

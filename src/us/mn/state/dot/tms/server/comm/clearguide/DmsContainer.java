@@ -93,25 +93,21 @@ public class DmsContainer {
 
 	/** Get the specified statistic for the specified dms.
 	 * @param dms DMS to retrieve statistic for.
-	 * @param rid Route id
-	 * @param min Min statistic value from [cg] tag, 0 to ignore.
+	 * @param wid Workzone ID
 	 * @param mode Statistic to retrieve as defined by [cg] tag or null.
-	 * @param ridx Route index, zero based.
+	 * @param idx Workzone index, zero based.
 	 * @return Specified statistic or null if not found */
-	public Integer getStat(
-		String dms, int rid, int min, String mode, int ridx)
-	{
-		log("getStat: dms=" + dms + " rid=" + rid + " min=" + min +
-			" mode=" + mode + " contains_dms=" +
-			dms_hash.containsKey(dms));
+	public Integer getStat(String dms, int wid, String mode, int idx) {
+		log("getStat: dms=" + dms + " wid=" + wid + " mode=" + mode +
+			" contains_dms=" + dms_hash.containsKey(dms));
 		Integer stat = null;
 		Routes routes = dms_hash.get(dms);
 		if (routes != null && routes.size() >= 1) {
 			if (routes.size() > 1)
 				log("getStat: dms n_routes=" + routes.size());
-			stat = routes.getStat(rid, min, mode, ridx);
+			stat = routes.getStat(wid, mode, idx);
 			if (stat == null) {
-				log("getStat: mismatch rid=" + rid +
+				log("getStat: mismatch wid=" + wid +
 				    " mode=" + mode);
 			}
 		}
@@ -119,6 +115,7 @@ public class DmsContainer {
 	}
 
 	/** To string */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("(dms_container:");

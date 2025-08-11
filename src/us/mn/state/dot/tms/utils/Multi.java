@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  * Copyright (C) 2009  AHMCT, University of California
  * Copyright (C) 2019-2020  SRF Consulting Group
  * Copyright (C) 2021  Iteris Inc.
@@ -168,12 +168,13 @@ public interface Multi {
 
 	/** Add a ClearGuide advisory.
 	 * @param dms DMS name
-	 * @param rid CG route id
-	 * @param tsp Threshold speed
-	 * @param mode Variable to use: e.g. tt, delay
-	 * @param ridx Route index, zero based */
-	void addClearGuideAdvisory(String dms, int rid, int tsp, String mode,
-		int ridx);
+	 * @param wid Workzone ID
+	 * @param min Minimum valid value
+	 * @param max Maximum valid value
+	 * @param mode Tag replacement mode to use: e.g. tt, delay
+	 * @param idx Workzone index, zero based */
+	void addClearGuideAdvisory(String dms, int wid, int min, int max,
+		String mode, int idx);
 
 	/** Add an exit backup warning.
 	 * @param did Exit detector ID.

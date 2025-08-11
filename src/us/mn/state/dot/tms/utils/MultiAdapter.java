@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  * Copyright (C) 2019-2020  SRF Consulting Group
  * Copyright (C) 2021  Iteris Inc.
  *
@@ -141,8 +141,8 @@ public class MultiAdapter implements Multi {
 
 	/** Add a ClearGuide advisory */
 	@Override
-	public void addClearGuideAdvisory(String dms, int wid, int tsp,
-		String mode, int ridx) {}
+	public void addClearGuideAdvisory(String dms, int wid, int min,
+		int max, String mode, int idx) {}
 
 	/** Add an exit backup warning.
 	 * @param did Exit detector ID.

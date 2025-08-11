@@ -83,8 +83,8 @@ public class MultiString {
 		public void setTextRectangle(int x, int y, int w, int h) {}
 		// action tags also not allowed in MsgText
 		@Override
-		public void addClearGuideAdvisory(String dms, int rid,
-			int tsp, String mode, int ridx) {}
+		public void addClearGuideAdvisory(String dms, int wid,
+			int min, int max, String mode, int idx) {}
 		@Override
 		public void addExitWarning(String did, int occ) {}
 		@Override
@@ -337,16 +337,21 @@ public class MultiString {
 	}
 
 	/** Parse ClearGuide advisory args from tag
-	 * @param v Tag [cg dms_name,cg_route_id,statistic_min,mode,route_num]
+	 * @param v Tag [cg dms,wid,range,mode,idx]
 	 * @param cb Callback to add tag */
 	static private void parseClearGuideAdvisory(String v, Multi cb) {
 		String[] args = v.split(",", 5);
 		String dms = safeGet(args, 0);
 		int wid = safeGetInt(args, 1);
-		int tsp = safeGetInt(args, 2);
+		String range = safeGet(args, 2);
+		String[] min_max = range.split("-", 2);
+		int min = safeGetInt(min_max, 0);
+		int max = safeGetInt(min_max, 1);
+		if (max < min)
+			max = Integer.MAX_VALUE;
 		String mode = safeGet(args, 3);
-		int ridx = safeGetInt(args, 4);  // optional, defaults to 0
-		cb.addClearGuideAdvisory(dms, wid, tsp, mode, ridx);
+		int idx = safeGetInt(args, 4);  // optional, defaults to 0
+		cb.addClearGuideAdvisory(dms, wid, min, max, mode, idx);
 	}
 
 	/** Get the nth (zero-based) element or empty string
@@ -551,8 +556,8 @@ public class MultiString {
 					valid[0] = false;
 			}
 			@Override public void addClearGuideAdvisory(
-				String dms, int rid, int tsp, String mode,
-				int ridx)
+				String dms, int wid, int min, int max,
+				String mode, int idx)
 			{
 				valid[0] = false;
 			}
