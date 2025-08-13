@@ -309,6 +309,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			Name name = new Name(this, "phase");
 			if (accessLevel(name) < name.accessWrite())
 				throw new ChangeVetoException("NOT PERMITTED");
+			checkDeviceActions(); // throws exception
 			if (getSyncActions())
 				validateDeviceActions(); // throws exception
 			store.update(this, "phase", p);
@@ -338,6 +339,77 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			logEvent(EventType.ACTION_PLAN_PHASE_CHANGED, p, uid);
 		}
 		return change;
+	}
+
+	/** Check device action access permissions */
+	private void checkDeviceActions() throws ChangeVetoException {
+		Iterator<DeviceAction> it = DeviceActionHelper.iterator();
+		while (it.hasNext()) {
+			DeviceAction da = it.next();
+			if (da.getActionPlan() == this && !isAccessOperate(da)) {
+				throw new ChangeVetoException("Device action " +
+					da.getName() + " not allowed");
+			}
+		}
+	}
+
+	/** Check if a device action access is operate */
+	private boolean isAccessOperate(DeviceAction da) {
+		String ht = da.getHashtag();
+		return areBeaconsOperatable(ht)
+		    && areDmsOperatable(ht)
+		    && areRampMetersOperatable(ht);
+	}
+
+	/** Check if beacons are operatable, or none have a hashtag */
+	private boolean areBeaconsOperatable(String ht) {
+		Name name = new Name(Beacon.SONAR_TYPE, "state");
+		if (accessLevel(name) >= name.accessWrite())
+			return true;
+		Iterator<Beacon> it = BeaconHelper.iterator();
+		while (it.hasNext()) {
+			Beacon b = it.next();
+			if (b instanceof BeaconImpl) {
+				BeaconImpl bi = (BeaconImpl) b;
+				if (new Hashtags(bi.getNotes()).contains(ht))
+					return false;
+			}
+		}
+		return true;
+	}
+
+	/** Check if DMS are operatable, or none have a hashtag */
+	private boolean areDmsOperatable(String ht) {
+		Name name = new Name(DMS.SONAR_TYPE, "lock");
+		if (accessLevel(name) >= name.accessWrite())
+			return true;
+		Iterator<DMS> it = DMSHelper.iterator();
+		while (it.hasNext()) {
+			DMS d = it.next();
+			if (d instanceof DMSImpl) {
+				DMSImpl dms = (DMSImpl) d;
+				if (new Hashtags(d.getNotes()).contains(ht))
+					return false;
+			}
+		}
+		return true;
+	}
+
+	/** Check if ramp meters are operatable, or none have a hashtag */
+	private boolean areRampMetersOperatable(String ht) {
+		Name name = new Name(RampMeter.SONAR_TYPE, "lock");
+		if (accessLevel(name) >= name.accessWrite())
+			return true;
+		Iterator<RampMeter> it = RampMeterHelper.iterator();
+		while (it.hasNext()) {
+			RampMeter rm = it.next();
+			if (rm instanceof RampMeterImpl) {
+				RampMeterImpl rmi = (RampMeterImpl) rm;
+				if (new Hashtags(rmi.getNotes()).contains(ht))
+					return false;
+			}
+		}
+		return true;
 	}
 
 	/**

@@ -230,15 +230,19 @@ be `NULL` for "any":
 
 ## Manual Control
 
-On the **Plan** tab of the client interface, users can manually change the phase
-of an action plan.  If the user is in the list specified by the
-`action_plan_alert_list` [system attribute], an email event will be logged
-to the `email_event` table.
+On the **Plan** tab of the client interface, users can manually change the
+phase of an action plan.  In addition to having "Operate" access [permission]
+for action plans, the user must have it for all associated device actions
+(every device using the matching hashtag).
 
 ## Events
 
 Whenever an action plan phase changes, a time-stamped [event] record can be
 stored in the `action_plan_event` table.
+
+When a user changes the phase, if they are in the list specified by the
+`action_plan_alert_list` [system attribute], an email event will be logged to
+the `email_event` table.
 
 
 [auto-fail]: vehicle_detection.html#auto-fail
