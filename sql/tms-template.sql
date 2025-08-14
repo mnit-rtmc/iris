@@ -3618,6 +3618,10 @@ ALTER TABLE iris._gate_arm ADD CONSTRAINT _gate_arm_fkey
 CREATE UNIQUE INDEX gate_arm_array_idx ON iris._gate_arm
     USING btree (ga_array, idx);
 
+CREATE TRIGGER gate_arm_hashtag_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris._gate_arm
+    FOR EACH ROW EXECUTE FUNCTION iris.hashtag_trig('gate_arm');
+
 CREATE TRIGGER gate_arm_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris._gate_arm
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
