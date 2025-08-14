@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2014       AHMCT, University of California
  * Copyright (C) 2022-2024  SRF Consulting Group
  *
@@ -330,21 +330,6 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	public void doSetNotes(String n) throws TMSException {
 		super.doSetNotes(n);
 		updateStyles();
-	}
-
-	/** Add a hashtag to the camera */
-	public synchronized void addHashtagNotify(String ht) {
-		ht = Hashtags.normalize(ht);
-		if (ht == null)
-			return;
-		if (new Hashtags(notes).contains(ht))
-			return;
-		try {
-			doSetNotes(Hashtags.add(notes, ht));
-		}
-		catch (TMSException e) {
-			logError("add hashtags: " + e.getMessage());
-		}
 	}
 
 	/** Flag to indicate video loss */
