@@ -359,7 +359,7 @@ impl Card for Camera {
     fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("cam_num", self.cam_num);
-        fields.changed_input("notes", &self.notes);
+        fields.changed_text_area("notes", &self.notes);
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
         fields.changed_select("encoder_type", &self.encoder_type);
