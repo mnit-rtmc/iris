@@ -163,7 +163,6 @@ public class Name {
 		{ "beacon", "message" },
 		{ "beacon", "preset" },
 		{ "camera", "publish" },
-		{ "camera", "storePreset" },
 		{ "comm_config", "timeoutMs" },
 		{ "comm_config", "retryThreshold" },
 		{ "comm_config", "idleDisconnectSec" },
