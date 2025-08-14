@@ -19,7 +19,9 @@ use crate::fetch::Action;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::ItemState;
 use crate::start::fly_map_item;
-use crate::util::{ContainsLower, Fields, Input, Select, opt_ref, opt_str};
+use crate::util::{
+    ContainsLower, Fields, Input, Select, TextArea, opt_ref, opt_str,
+};
 use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
