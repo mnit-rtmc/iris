@@ -9,7 +9,4 @@ CREATE TRIGGER gate_arm_hashtag_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris._gate_arm
     FOR EACH ROW EXECUTE FUNCTION iris.hashtag_trig('gate_arm');
 
--- Force trigger to execute
-UPDATE iris.gate_arm SET notes = notes;
-
 COMMIT;
