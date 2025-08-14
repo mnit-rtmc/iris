@@ -31,8 +31,8 @@ The following features are supported:
 |--------------|------------------------------------------|---------------|
 | 👁️  View      | name, location, msg\_current, has_faults | sign\_config, sign\_detail, geo\_loc, msg\_sched, status, pix\_failures |
 | 👉 Operate   | lock                                     | device\_request † |
-| 💡 Manage    | notes                                    | preset        |
-| 🔧 Configure | controller                               | pin, static\_graphic, beacon |
+| 💡 Manage    |                                          | preset        |
+| 🔧 Configure | controller, notes                        | pin, static\_graphic, beacon |
 
 † _Write only_
 

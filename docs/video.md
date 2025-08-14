@@ -47,12 +47,12 @@ a [switching](#switching) system.
 * `iris/api/video_monitor` (primary)
 * `iris/api/video_monitor/{name}`
 
-| Access       | Primary              | Secondary                  |
-|--------------|----------------------|----------------------------|
-| 👁️  View      | name                 |                            |
-| 👉 Operate   |                      | camera, device\_request †  |                    |
-| 💡 Manage    | notes                | restricted, monitor\_style |
-| 🔧 Configure | mon\_num, controller | pin                        |
+| Access       | Primary                     | Secondary                  |
+|--------------|-----------------------------|----------------------------|
+| 👁️  View      | name                        |                            |
+| 👉 Operate   |                             | camera, device\_request †  |                    |
+| 💡 Manage    |                             | restricted, monitor\_style |
+| 🔧 Configure | mon\_num, controller, notes | pin                        |
 
 † _Write only_
 

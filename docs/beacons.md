@@ -19,12 +19,12 @@ Beacons can be connected to controllers using one of these protocols:
 * `iris/api/beacon` (primary)
 * `iris/api/beacon/{name}`
 
-| Access       | Primary        | Secondary                   |
-|--------------|----------------|-----------------------------|
-| 👁️  View      | name, location | geo\_loc                    |
-| 👉 Operate   | state          |                             |
-| 💡 Manage    | message, notes | preset                      |
-| 🔧 Configure | controller     | pin, verify\_pin, ext\_mode |
+| Access       | Primary           | Secondary                   |
+|--------------|-------------------|-----------------------------|
+| 👁️  View      | name, location    | geo\_loc                    |
+| 👉 Operate   | state             |                             |
+| 💡 Manage    | message           | preset                      |
+| 🔧 Configure | controller, notes | pin, verify\_pin, ext\_mode |
 
 </details>
 

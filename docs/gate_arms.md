@@ -16,8 +16,7 @@ roadway.  They are commonly used for on-ramps or reversible lanes.
 | Access       | Primary                    | Secondary             |
 |--------------|----------------------------|-----------------------|
 | 👁️  View      | name, location, arm\_state | ga\_array, idx, fault |
-| 💡 Manage    | notes                      |                       |
-| 🔧 Configure | controller                 | pin                   |
+| 🔧 Configure | controller, notes          | pin                   |
 
 </details>
 
@@ -36,8 +35,7 @@ array controls **all** associated arms.
 |--------------|---------------------------|-----------------------------------|
 | 👁️  View      | name, location, interlock | geo\_loc                          |
 | 👉 Operate   | arm\_state                | arm\_state\_next †, owner\_next † |
-| 💡 Manage    | notes                     |                                   |
-| 🔧 Configure |                           | opposing, prereq, camera, approach, action\_plan |
+| 🔧 Configure | notes                     | opposing, prereq, camera, approach, action\_plan |
 
 † _Write only_
 

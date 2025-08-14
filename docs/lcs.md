@@ -33,8 +33,8 @@ as an array.  They can display standard **indications**:
 |--------------|------------------------|------------------------|
 | 👁️  View      | name, location, status | geo\_loc               |
 | 👉 Operate   | lock                   |                        |
-| 💡 Manage    | notes                  | shift                  |
-| 🔧 Configure | controller             | pin, lcs\_type, preset |
+| 💡 Manage    |                        | shift                  |
+| 🔧 Configure | controller, notes      | pin, lcs\_type, preset |
 
 </details>
 
