@@ -125,10 +125,10 @@ the specified phase.
 * `iris/api/time_action` (primary)
 * `iris/api/time_action/{name}`
 
-| Access       | Primary            | Secondary                             |
-|--------------|--------------------|---------------------------------------|
-| 👁️  View      | name, action\_plan | day\_plan, sched\_date, time\_of\_day |
-| 💡 Manage    |                    | phase                                 |
+| Access       | Primary                                                   |
+|--------------|-----------------------------------------------------------|
+| 👁️  View      | name, action\_plan, day\_plan, sched\_date, time\_of\_day |
+| 💡 Manage    | phase                                                     |
 
 </details>
 

@@ -929,7 +929,7 @@ pub const TAG_READER_ONE: &str = "\
 
 /// SQL query for all time actions (primary)
 pub const TIME_ACTION_ALL: &str = "\
-  SELECT name, action_plan \
+  SELECT name, action_plan, day_plan, sched_date, time_of_day, phase \
   FROM iris.time_action \
   ORDER BY action_plan, day_plan, sched_date, time_of_day, name";
 
