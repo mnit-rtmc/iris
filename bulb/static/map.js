@@ -228,7 +228,7 @@ function item_style(state) {
         case '🔶':
             style.fillColor = "#e78e0b";
             return style;
-        case '🗓️':
+        case '📋':
         case '👽':
             style.fillColor = "#ffca81";
             style.fillOpacity = 0.5;

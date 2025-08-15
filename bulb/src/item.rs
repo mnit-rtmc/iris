@@ -84,7 +84,7 @@ impl ItemState {
         match code {
             "🔹" => Some(Self::Available),
             "🔶" => Some(Self::Deployed),
-            "🗓️" => Some(Self::Planned),
+            "📋" => Some(Self::Planned),
             "🚨" => Some(Self::Incident),
             "🔒" => Some(Self::Locked),
             "👽" => Some(Self::External),
@@ -115,7 +115,7 @@ impl ItemState {
         match self {
             Self::Available => "🔹",
             Self::Deployed => "🔶",
-            Self::Planned => "🗓️",
+            Self::Planned => "📋",
             Self::Incident => "🚨",
             Self::Locked => "🔒",
             Self::External => "👽",
