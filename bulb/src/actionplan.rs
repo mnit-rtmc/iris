@@ -20,6 +20,7 @@ use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
+use std::collections::BTreeSet;
 use wasm_bindgen::JsValue;
 
 /// Plan phase
@@ -36,8 +37,8 @@ pub struct DeviceAction {
     pub name: String,
     pub action_plan: String,
     pub hashtag: String,
+    pub phase: String,
     // secondary attributes
-    pub phase: Option<String>,
     pub msg_pattern: Option<String>,
     pub msg_priority: Option<u8>,
 }
@@ -85,7 +86,7 @@ impl AncillaryData for ActionPlanAnc {
         {
             assets.push(Asset::DeviceActions);
         }
-        if let View::Setup = view {
+        if let View::Control | View::Setup = view {
             assets.push(Asset::PlanPhases);
         }
         let phases = Vec::new();
@@ -124,6 +125,23 @@ impl AncillaryData for ActionPlanAnc {
             _ => unreachable!(),
         }
         Ok(())
+    }
+}
+
+impl ActionPlanAnc {
+    /// Get action plan phases
+    fn phases<'a>(
+        &'a self,
+        pri: &'a ActionPlan,
+    ) -> impl Iterator<Item = &'a str> {
+        let mut phases = BTreeSet::new();
+        phases.insert(&pri.default_phase[..]);
+        for da in &self.device_actions {
+            if da.action_plan == pri.name {
+                phases.insert(&da.phase[..]);
+            }
+        }
+        phases.into_iter()
     }
 }
 
@@ -176,9 +194,22 @@ impl ActionPlan {
     }
 
     /// Convert to Control HTML
-    fn to_html_control(&self, _anc: &ActionPlanAnc) -> String {
+    fn to_html_control(&self, anc: &ActionPlanAnc) -> String {
         let mut html = self.title(View::Control);
-        html.div().class("row");
+        html.div().class("row fill");
+        self.item_states(anc).tooltips(&mut html);
+        html.end(); /* div */
+        html.div().class("row fill");
+        html.label().for_("phase").text("Phase").end();
+        html.select().id("phase");
+        for p in anc.phases(self) {
+            let option = html.option();
+            if p == self.phase {
+                option.attr_bool("selected");
+            }
+            html.text(p).end();
+        }
+        html.end(); /* select */
         html.end(); /* div */
         html.to_string()
     }

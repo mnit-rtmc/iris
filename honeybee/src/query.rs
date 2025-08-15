@@ -237,7 +237,7 @@ pub const DETECTOR_PUB: &str = "\
 
 /// SQL query for all device actions (primary)
 pub const DEVICE_ACTION_ALL: &str = "\
-  SELECT name, action_plan, hashtag \
+  SELECT name, action_plan, hashtag, phase \
   FROM iris.device_action \
   ORDER BY action_plan, name";
 
