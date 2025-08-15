@@ -47,7 +47,7 @@ resource, at the same access level.
 
 | Base Resource      | Dependent Resources                                   |
 |--------------------|-------------------------------------------------------|
-| [action plan]      | day matcher, [day plan], [device action], [plan phase], [time action] |
+| [action plan]      | day matcher, [day plan], [device action], [plan phase], [time action], hashtag |
 | [alert config]     | alert info, [alert message]                           |
 | [beacon]           |                                                       |
 | [camera]           | [camera preset], camera template, cam vid src ord, [encoder stream], [encoder type], vid source template |

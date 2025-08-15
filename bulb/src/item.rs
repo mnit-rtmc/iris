@@ -54,6 +54,14 @@ pub enum ItemState {
     Closing,
     /// Closed (gate arm)
     Closed,
+    /// Beacon device actions
+    Beacon,
+    /// Camera device actions
+    Camera,
+    /// DMS device actions
+    Dms,
+    /// Ramp meter device actions
+    RampMeter,
     /// State not known
     Unknown,
 }
@@ -93,6 +101,10 @@ impl ItemState {
             "‼️" => Some(Self::WarnClose),
             "↘️" => Some(Self::Closing),
             "⛔" => Some(Self::Closed),
+            "🔆" => Some(Self::Beacon),
+            "🎥" => Some(Self::Camera),
+            "⬛" => Some(Self::Dms),
+            "🚦" => Some(Self::RampMeter),
             "❓" => Some(Self::Unknown),
             _ => None,
         }
@@ -120,6 +132,10 @@ impl ItemState {
             Self::WarnClose => "‼️",
             Self::Closing => "↘️",
             Self::Closed => "⛔",
+            Self::Beacon => "🔆",
+            Self::Camera => "🎥",
+            Self::Dms => "⬛",
+            Self::RampMeter => "🚦",
             Self::Unknown => "❓",
         }
     }
@@ -146,6 +162,10 @@ impl ItemState {
             Self::WarnClose => "warn closing",
             Self::Closing => "closing",
             Self::Closed => "closed",
+            Self::Beacon => "beacons",
+            Self::Camera => "cameras",
+            Self::Dms => "dms",
+            Self::RampMeter => "ramp meters",
             Self::Unknown => "unknown",
         }
     }

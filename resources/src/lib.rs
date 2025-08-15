@@ -50,6 +50,7 @@ pub enum Res {
     GeoLoc,
     Gps,
     Graphic,
+    Hashtag,
     Incident,
     IncidentDetail,
     IncAdvice,
@@ -147,6 +148,7 @@ impl Res {
             GeoLoc,
             Gps,
             Graphic,
+            Hashtag,
             Incident,
             IncidentDetail,
             IncAdvice,
@@ -232,6 +234,7 @@ impl Res {
             GeoLoc => "geo_loc",
             Gps => "gps",
             Graphic => "graphic",
+            Hashtag => "hashtag",
             Incident => "incident",
             IncidentDetail => "incident_detail",
             IncAdvice => "inc_advice",
@@ -282,7 +285,7 @@ impl Res {
     pub const fn symbol(self) -> &'static str {
         use Res::*;
         match self {
-            ActionPlan => "🎬",
+            ActionPlan => "📋",
             Alarm => "📢",
             Beacon => "🔆",
             CabinetStyle => "🗄️ ",
@@ -354,13 +357,13 @@ impl Res {
             | CameraPreset | CommConfig | CommLink | Controller
             | DayMatcher | DayPlan | Detector | DeviceAction | Dms | Domain
             | EncoderStream | EncoderType | EventConfig | FlowStream
-            | GateArm | GateArmArray | Gps | Incident | IncidentDetail
-            | IncAdvice | IncDescriptor | IncLocator | Lcs | LcsState
-            | Modem | MonitorStyle | MsgLine | MsgPattern | ParkingArea
-            | Permission | PlanPhase | PlayList | RampMeter | Rnode | Road
-            | RoadAffix | Role | SignConfig | SignDetail | SignMessage
-            | SystemAttribute | TagReader | TimeAction | TollZone | User
-            | VideoMonitor | WeatherSensor | Word => true,
+            | GateArm | GateArmArray | Gps | Hashtag | Incident
+            | IncidentDetail | IncAdvice | IncDescriptor | IncLocator | Lcs
+            | LcsState | Modem | MonitorStyle | MsgLine | MsgPattern
+            | ParkingArea | Permission | PlanPhase | PlayList | RampMeter
+            | Rnode | Road | RoadAffix | Role | SignConfig | SignDetail
+            | SignMessage | SystemAttribute | TagReader | TimeAction
+            | TollZone | User | VideoMonitor | WeatherSensor | Word => true,
             _ => false,
         }
     }
@@ -370,9 +373,8 @@ impl Res {
         use Res::*;
         match self {
             // Action plan resources
-            DayMatcher | DayPlan | DeviceAction | PlanPhase | TimeAction => {
-                ActionPlan
-            }
+            DayMatcher | DayPlan | DeviceAction | Hashtag | PlanPhase
+            | TimeAction => ActionPlan,
             // Camera resources
             CameraPreset | EncoderStream | EncoderType => Camera,
             // Controller resources

@@ -10,6 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::actionplan::ActionPlan;
 use crate::alarm::Alarm;
 use crate::asset::Asset;
 use crate::beacon::Beacon;
@@ -391,6 +392,7 @@ pub fn item_states_html(res: Res) -> String {
 /// Get slice of all item states for a resource
 fn item_states_all(res: Res) -> &'static [ItemState] {
     match res {
+        Res::ActionPlan => ActionPlan::item_states_all(),
         Res::Alarm => Alarm::item_states_all(),
         Res::Beacon => Beacon::item_states_all(),
         Res::Camera => Camera::item_states_all(),
@@ -417,6 +419,7 @@ fn item_states_all(res: Res) -> &'static [ItemState] {
 /// Get available views for a resource type
 pub fn res_views(res: Res) -> &'static [View] {
     match res {
+        Res::ActionPlan => &[View::Compact, View::Control, View::Setup],
         Res::CabinetStyle
         | Res::CommConfig
         | Res::Domain
@@ -505,6 +508,7 @@ pub async fn fetch_resource(config: bool) -> Result<String> {
     let access: Vec<Permission> = serde_wasm_bindgen::from_value(json)?;
     let mut html = Html::new();
     html.option().end();
+    add_option::<ActionPlan>(&access, &mut html);
     if config {
         add_option::<Alarm>(&access, &mut html);
     }
@@ -652,6 +656,7 @@ impl CardList {
     /// Make HTML view of card list
     pub async fn make_html(&mut self) -> Result<String> {
         match self.res {
+            Res::ActionPlan => self.make_html_x::<ActionPlan>().await,
             Res::Alarm => self.make_html_x::<Alarm>().await,
             Res::Beacon => self.make_html_x::<Beacon>().await,
             Res::CabinetStyle => self.make_html_x::<CabinetStyle>().await,
@@ -738,6 +743,7 @@ impl CardList {
     /// Get a list of cards whose view has changed
     pub async fn view_change(&mut self) -> Result<Vec<CardView>> {
         match self.res {
+            Res::ActionPlan => self.view_change_x::<ActionPlan>().await,
             Res::Alarm => self.view_change_x::<Alarm>().await,
             Res::Beacon => self.view_change_x::<Beacon>().await,
             Res::CabinetStyle => self.view_change_x::<CabinetStyle>().await,
@@ -809,6 +815,7 @@ impl CardList {
         json: String,
     ) -> Result<Vec<(CardView, String)>> {
         match self.res {
+            Res::ActionPlan => self.changed::<ActionPlan>(json).await,
             Res::Alarm => self.changed::<Alarm>(json).await,
             Res::Beacon => self.changed::<Beacon>(json).await,
             Res::CabinetStyle => self.changed::<CabinetStyle>(json).await,
@@ -928,6 +935,7 @@ pub async fn fetch_one(cv: &CardView) -> Result<String> {
 /// Fetch a card view
 async fn fetch_one_res(cv: &CardView) -> Result<String> {
     match cv.res {
+        Res::ActionPlan => fetch_one_x::<ActionPlan>(cv).await,
         Res::Alarm => fetch_one_x::<Alarm>(cv).await,
         Res::Beacon => fetch_one_x::<Beacon>(cv).await,
         Res::CabinetStyle => fetch_one_x::<CabinetStyle>(cv).await,
@@ -987,6 +995,7 @@ pub async fn patch_changed(cv: &CardView) -> Result<()> {
 /// Patch changed fields from a Setup view
 async fn patch_setup(cv: &CardView) -> Result<()> {
     match cv.res {
+        Res::ActionPlan => patch_setup_x::<ActionPlan>(cv).await,
         Res::Alarm => patch_setup_x::<Alarm>(cv).await,
         Res::Beacon => patch_setup_x::<Beacon>(cv).await,
         Res::CabinetStyle => patch_setup_x::<CabinetStyle>(cv).await,

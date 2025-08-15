@@ -27,6 +27,7 @@ pub enum Asset {
     // For all CIO pins for one controller
     ControllerIo(String),
     Controllers,
+    DeviceActions,
     Directions,
     EncoderTypes,
     Font(String),
@@ -35,6 +36,7 @@ pub enum Asset {
     GeoLoc(String, Res),
     Graphic(String),
     Graphics,
+    HashtagResources,
     LcsIndications,
     LcsStates,
     LcsTypes,
@@ -42,6 +44,7 @@ pub enum Asset {
     MeterTypes,
     MsgLines,
     MsgPatterns,
+    PlanPhases,
     ResourceTypes,
     RoadModifiers,
     Roads,
@@ -68,6 +71,7 @@ impl Asset {
                 uri
             }
             Controllers => "/iris/api/controller".into(),
+            DeviceActions => "/iris/api/device_action".into(),
             Directions => "/iris/lut/direction".into(),
             EncoderTypes => "/iris/api/encoder_type".into(),
             Font(nm) => {
@@ -93,6 +97,7 @@ impl Asset {
                 uri
             }
             Graphics => "/iris/api/graphic".into(),
+            HashtagResources => "/iris/api/hashtag".into(),
             LcsIndications => "/iris/lut/lcs_indication".into(),
             LcsStates => "/iris/api/lcs_state".into(),
             LcsTypes => "/iris/lut/lcs_type".into(),
@@ -100,6 +105,7 @@ impl Asset {
             MeterTypes => "/iris/lut/meter_type".into(),
             MsgLines => "/iris/api/msg_line".into(),
             MsgPatterns => "/iris/api/msg_pattern".into(),
+            PlanPhases => "/iris/api/plan_phase".into(),
             ResourceTypes => "/iris/lut/resource_type".into(),
             RoadModifiers => "/iris/lut/road_modifier".into(),
             Roads => "/iris/api/road".into(),

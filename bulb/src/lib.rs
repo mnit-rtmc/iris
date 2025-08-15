@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 #![allow(clippy::match_like_matches_macro)]
+mod actionplan;
 mod alarm;
 mod app;
 mod asset;

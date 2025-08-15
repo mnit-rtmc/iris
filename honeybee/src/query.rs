@@ -15,7 +15,7 @@
 
 /// SQL query for all action plans (primary)
 pub const ACTION_PLAN_ALL: &str = "\
-  SELECT name, notes, active \
+  SELECT name, notes, active, default_phase, phase \
   FROM iris.action_plan \
   ORDER BY name";
 
@@ -447,6 +447,13 @@ pub const GRAPHIC_ONE: &str = "\
   SELECT g_number AS number, 'G' || g_number AS name \
   FROM iris.graphic \
   WHERE name = $1";
+
+/// SQL query for all hashtags
+pub const HASHTAG_ALL: &str = "\
+  SELECT hashtag, resource_n \
+  FROM hashtag_view \
+  GROUP BY hashtag, resource_n \
+  ORDER BY hashtag";
 
 /// SQL query for all active incidents (primary)
 pub const INCIDENT_ALL: &str = "\

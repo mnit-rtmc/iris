@@ -20,11 +20,11 @@ as [DMS]s and [ramp meter]s.
 * `iris/api/action_plan` (primary)
 * `iris/api/action_plan/{name}`
 
-| Access       | Primary       | Secondary     |
-|--------------|---------------|---------------|
-| 👁️  View      | name          |               |
-| 👉 Operate   |               | phase         |
-| 💡 Manage    | notes, active | sync\_actions, sticky, ignore\_auto\_fail, default\_phase |
+| Access       | Primary                       | Secondary |
+|--------------|-------------------------------|-----------|
+| 👁️  View      | name                          |           |
+| 👉 Operate   | phase                         |           |
+| 💡 Manage    | default\_phase, notes, active | sync\_actions, sticky, ignore\_auto\_fail |
 
 </details>
 
