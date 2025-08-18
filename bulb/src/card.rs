@@ -1098,6 +1098,7 @@ pub async fn handle_input(cv: &CardView, id: String) -> Result<()> {
         return Ok(());
     }
     match cv.res {
+        Res::ActionPlan => handle_input_x::<ActionPlan>(cv, id).await,
         Res::Dms => handle_input_x::<Dms>(cv, id).await,
         Res::Domain => handle_input_x::<Domain>(cv, id).await,
         Res::Lcs => handle_input_x::<Lcs>(cv, id).await,

@@ -11,17 +11,18 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card, View, uri_one};
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
-use crate::util::{ContainsLower, Fields, TextArea, opt_ref};
+use crate::util::{ContainsLower, Doc, Fields, TextArea, opt_ref};
 use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
 use std::collections::BTreeSet;
 use wasm_bindgen::JsValue;
+use web_sys::HtmlSelectElement;
 
 /// Plan phase
 #[derive(Debug, Default, Deserialize, PartialEq)]
@@ -356,6 +357,20 @@ impl Card for ActionPlan {
 
     /// Handle click event for a button on the card
     fn handle_click(&self, _anc: ActionPlanAnc, _id: String) -> Vec<Action> {
+        Vec::new()
+    }
+
+    /// Handle input event for an element on the card
+    fn handle_input(&self, _anc: ActionPlanAnc, id: String) -> Vec<Action> {
+        if &id == "phase" {
+            let doc = Doc::get();
+            let phase = doc.elem::<HtmlSelectElement>("phase").value();
+            let mut fields = Fields::new();
+            fields.insert_str("phase", &phase.to_string());
+            let uri = uri_one(Res::ActionPlan, &self.name);
+            let val = fields.into_value().to_string();
+            return vec![Action::Patch(uri, val.into())];
+        }
         Vec::new()
     }
 }
