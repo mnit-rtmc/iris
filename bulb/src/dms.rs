@@ -10,6 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::actionplan::{ActionPlan, DeviceAction};
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
@@ -38,6 +39,7 @@ use serde::Deserialize;
 use serde_json::Value;
 use std::borrow::Cow;
 use std::cmp::Ordering;
+use std::collections::BTreeSet;
 use std::fmt;
 use std::iter::repeat;
 use std::time::Duration;
@@ -264,6 +266,8 @@ pub struct DmsAnc {
     words: Vec<Word>,
     fonts: FontTable<256, 24>,
     graphics: GraphicTable<32>,
+    device_actions: Vec<DeviceAction>,
+    action_plans: Vec<ActionPlan>,
 }
 
 impl PartialOrd for MsgPattern {
@@ -349,6 +353,7 @@ impl AncillaryData for DmsAnc {
             cio.assets.push(Asset::Words);
             cio.assets.push(Asset::Fonts);
             cio.assets.push(Asset::Graphics);
+            cio.assets.push(Asset::DeviceActions);
         }
         let loc = LocAnc::new(pri, view);
         DmsAnc {
@@ -450,6 +455,26 @@ impl AncillaryData for DmsAnc {
                 } else {
                     console::log_1(&format!("invalid graphic: {nm}").into());
                 }
+            }
+            Asset::DeviceActions => {
+                let mut act: Vec<DeviceAction> =
+                    serde_wasm_bindgen::from_value(value)?;
+                act.retain(|da| pri.has_hashtag(&da.hashtag));
+                self.device_actions = act;
+                // now that we have device actions, let's fetch the plans
+                self.cio.assets.push(Asset::ActionPlans);
+            }
+            Asset::ActionPlans => {
+                let mut plans: Vec<ActionPlan> =
+                    serde_wasm_bindgen::from_value(value)?;
+                plans.retain(|p| {
+                    p.active
+                        && self
+                            .device_actions
+                            .iter()
+                            .any(|da| da.action_plan == p.name)
+                });
+                self.action_plans = plans;
             }
             _ => self.loc.set_asset(pri, asset, value)?,
         }
@@ -650,6 +675,21 @@ impl DmsAnc {
         actions.push(Action::Patch(uri, val.into()));
         actions
     }
+
+    /// Get action plan phases
+    fn phases<'a>(
+        &'a self,
+        plan: &'a ActionPlan,
+    ) -> impl Iterator<Item = &'a str> {
+        let mut phases = BTreeSet::new();
+        phases.insert(&plan.default_phase[..]);
+        for da in &self.device_actions {
+            if da.action_plan == plan.name {
+                phases.insert(&da.phase[..]);
+            }
+        }
+        phases.into_iter()
+    }
 }
 
 /// All hashtags for dedicated purpose
@@ -789,6 +829,7 @@ impl Dms {
         html.text_len(opt_ref(&self.location), 64);
         html.end(); /* div */
         self.message_composer_html(anc, &mut html);
+        self.action_plans_html(anc, &mut html);
         html.to_string()
     }
 
@@ -862,6 +903,33 @@ impl Dms {
         let cfg = anc.sign_config(self.sign_config.as_deref())?;
         NtcipSign::new(cfg, anc.fonts.clone(), anc.graphics.clone())
             .map(|sign| sign.with_id("mc_preview"))
+    }
+
+    /// Build action plans HTML
+    fn action_plans_html(&self, anc: &DmsAnc, html: &mut Html) {
+        if anc.action_plans.is_empty() {
+            return;
+        }
+        html.details().summary().text("📋 Action Plans").end();
+        html.div().class("row fill");
+        html.span().text("Name").end();
+        html.span().text("Phase").end();
+        html.end(); // div
+        for act in &anc.action_plans {
+            html.div().class("row fill");
+            html.span().class("info").text(&act.name).end();
+            html.span();
+            html.select().id("phase");
+            for p in anc.phases(act) {
+                let option = html.option();
+                if p == act.phase {
+                    option.attr_bool("selected");
+                }
+                html.text(p).end();
+            }
+            html.end().end().end(); // select, span, div
+        }
+        html.end(); // details
     }
 
     // Get selected message pattern
