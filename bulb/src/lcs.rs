@@ -383,10 +383,10 @@ impl Lcs {
         html.div().class("column");
         self.lock_reason_html(html);
         html.span();
-        let send = html.button().id("lk_send").type_("button");
+        let send = html.button().id("lk_send").r#type("button");
         send.attr_bool("disabled");
         html.text("Send").end();
-        let blank = html.button().id("lk_blank").type_("button");
+        let blank = html.button().id("lk_blank").r#type("button");
         if !enabled || !self.is_deployed() {
             blank.attr_bool("disabled");
         }
@@ -498,7 +498,7 @@ impl Lcs {
     fn to_html_setup(&self, anc: &LcsAnc) -> String {
         let mut html = self.title(View::Setup);
         html.div().class("row");
-        html.label().for_("notes").text("Notes").end();
+        html.label().r#for("notes").text("Notes").end();
         html.textarea()
             .id("notes")
             .maxlength("255")
@@ -510,14 +510,14 @@ impl Lcs {
         anc.cio.controller_html(self, &mut html);
         anc.cio.pin_html(self.pin, &mut html);
         html.div().class("row");
-        html.label().for_("lcs_type").text("LCS Type").end();
+        html.label().r#for("lcs_type").text("LCS Type").end();
         anc.lcs_types_html(self, &mut html);
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("shift").text("Lane Shift").end();
+        html.label().r#for("shift").text("Lane Shift").end();
         html.input()
             .id("shift")
-            .type_("number")
+            .r#type("number")
             .min("1")
             .max("9")
             .size("2")

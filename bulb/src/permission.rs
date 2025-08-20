@@ -189,15 +189,15 @@ impl Permission {
     fn to_html_setup(&self, anc: &PermissionAnc) -> String {
         let mut html = self.title(View::Setup);
         html.div().class("row");
-        html.label().for_("role").text("Role").end();
+        html.label().r#for("role").text("Role").end();
         anc.roles_html(self, &mut html);
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("base_resource").text("Resource").end();
+        html.label().r#for("base_resource").text("Resource").end();
         anc.resource_types_html(self, &mut html);
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("hashtag").text("Hashtag").end();
+        html.label().r#for("hashtag").text("Hashtag").end();
         html.input()
             .id("hashtag")
             .maxlength("16")
@@ -205,7 +205,7 @@ impl Permission {
             .value(opt_ref(&self.hashtag));
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("access_level").text("Access").end();
+        html.label().r#for("access_level").text("Access").end();
         access_level_html(self.access_level, &mut html);
         html.end(); /* div */
         self.footer_html(true, &mut html);
@@ -260,7 +260,7 @@ impl Card for Permission {
     fn to_html_create(&self, anc: &PermissionAnc) -> String {
         let mut html = Html::new();
         html.div().class("row");
-        html.label().for_("create_name").text("Name").end();
+        html.label().r#for("create_name").text("Name").end();
         html.input()
             .id("create_name")
             .maxlength("24")
@@ -268,11 +268,11 @@ impl Card for Permission {
             .value(self.name());
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("role").text("Role").end();
+        html.label().r#for("role").text("Role").end();
         anc.roles_html(self, &mut html);
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("base_resource").text("Resource").end();
+        html.label().r#for("base_resource").text("Resource").end();
         anc.resource_types_html(self, &mut html);
         html.to_string()
     }

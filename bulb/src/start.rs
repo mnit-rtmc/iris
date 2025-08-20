@@ -127,29 +127,29 @@ async fn add_sidebar() -> JsResult<()> {
 fn sidebar_html() -> String {
     let mut html = Html::new();
     html.div().class("sb_row");
-    html.label().for_("sb_resource").text("Resource").end();
+    html.label().r#for("sb_resource").text("Resource").end();
     html.select().id("sb_resource").end();
     html.input()
         .id("sb_config")
-        .type_("checkbox")
+        .r#type("checkbox")
         .class("toggle");
-    html.label().for_("sb_config").text("🧰").end();
+    html.label().r#for("sb_config").text("🧰").end();
     html.input()
         .id("sb_fullscreen")
-        .type_("checkbox")
+        .r#type("checkbox")
         .class("toggle");
-    html.label().for_("sb_fullscreen").text(" ⛶ ").end();
+    html.label().r#for("sb_fullscreen").text(" ⛶ ").end();
     html.end(); /* div */
     html.div().class("sb_row");
     html.input()
         .id("sb_search")
-        .type_("search")
+        .r#type("search")
         .size("16")
         .attr("placeholder", "🔍");
     html.select().id("sb_state").end();
     html.button()
         .id("sb_refresh")
-        .type_("button")
+        .r#type("button")
         .text("⭮ ⚪")
         .end();
     html.end(); /* div */
@@ -164,19 +164,19 @@ fn sidebar_html() -> String {
     html.span().text("IRIS authentication required").end();
     html.end(); /* div */
     html.div().class("row end");
-    html.label().for_("login_user").text("User name").end();
+    html.label().r#for("login_user").text("User name").end();
     html.input()
         .id("login_user")
-        .type_("text")
+        .r#type("text")
         .attr("name", "username")
         .attr("autocomplete", "username")
         .required();
     html.end(); /* div */
     html.div().class("row end");
-    html.label().for_("login_pass").text("Password").end();
+    html.label().r#for("login_pass").text("Password").end();
     html.input()
         .id("login_pass")
-        .type_("password")
+        .r#type("password")
         .attr("name", "password")
         .attr("autocomplete", "current-password")
         .required();
@@ -184,7 +184,7 @@ fn sidebar_html() -> String {
     html.div().class("row end");
     html.button()
         .id("ob_login")
-        .type_("button")
+        .r#type("button")
         .text("Login")
         .end();
     html.end(); /* div */

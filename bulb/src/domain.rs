@@ -69,7 +69,7 @@ impl Domain {
     fn to_html_setup(&self) -> String {
         let mut html = self.title(View::Setup);
         html.div().class("row");
-        html.label().for_("block").text("Block (CIDR)").end();
+        html.label().r#for("block").text("Block (CIDR)").end();
         html.input()
             .id("block")
             .maxlength("42")
@@ -77,8 +77,8 @@ impl Domain {
             .value(opt_ref(&self.block));
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("enabled").text("Enabled").end();
-        let input = html.input().id("enabled").type_("checkbox");
+        html.label().r#for("enabled").text("Enabled").end();
+        let input = html.input().id("enabled").r#type("checkbox");
         if self.enabled {
             input.checked();
         }

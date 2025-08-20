@@ -66,7 +66,7 @@ impl Modem {
     fn to_html_setup(&self) -> String {
         let mut html = self.title(View::Setup);
         html.div().class("row");
-        html.label().for_("uri").text("URI").end();
+        html.label().r#for("uri").text("URI").end();
         html.input()
             .id("uri")
             .maxlength("64")
@@ -74,7 +74,7 @@ impl Modem {
             .value(opt_ref(&self.uri));
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("config").text("Config").end();
+        html.label().r#for("config").text("Config").end();
         html.input()
             .id("config")
             .maxlength("64")
@@ -82,18 +82,18 @@ impl Modem {
             .value(opt_ref(&self.config));
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("timeout_ms").text("Timeout (ms)").end();
+        html.label().r#for("timeout_ms").text("Timeout (ms)").end();
         html.input()
             .id("timeout_ms")
-            .type_("number")
+            .r#type("number")
             .min("0")
             .max("90000")
             .size("8")
             .value(opt_str(self.timeout_ms));
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("enabled").text("Enabled").end();
-        let enabled = html.input().id("enabled").type_("checkbox");
+        html.label().r#for("enabled").text("Enabled").end();
+        let enabled = html.input().id("enabled").r#type("checkbox");
         if self.enabled {
             enabled.attr_bool("checked");
         }

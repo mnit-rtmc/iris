@@ -222,7 +222,7 @@ impl Io {
             html.span().text("#").text(self.pin.to_string()).end();
             html.span().text(res.symbol());
             html.button()
-                .type_("button")
+                .r#type("button")
                 .class("go_link")
                 .attr("data-link", &self.name)
                 .attr("data-type", res.as_str())
@@ -282,7 +282,7 @@ impl Controller {
     /// Build controller button HTML
     pub fn button_html(&self, html: &mut Html) {
         html.button()
-            .type_("button")
+            .r#type("button")
             .class("go_link")
             .attr("data-link", self.link_drop())
             .attr("data-type", Res::Controller.as_str())
@@ -324,7 +324,7 @@ impl Controller {
         html.span().text(anc.condition(self)).end();
         html.span();
         html.button()
-            .type_("button")
+            .r#type("button")
             .class("go_link")
             .attr("data-link", opt_ref(&self.comm_link))
             .attr("data-type", Res::CommLink.as_str())
@@ -373,7 +373,7 @@ impl Controller {
     fn to_html_setup(&self, anc: &ControllerAnc) -> String {
         let mut html = self.title(View::Setup);
         html.div().class("row");
-        html.label().for_("comm_link").text("Comm Link").end();
+        html.label().r#for("comm_link").text("Comm Link").end();
         html.input()
             .id("comm_link")
             .maxlength("20")
@@ -381,10 +381,10 @@ impl Controller {
             .value(opt_ref(&self.comm_link));
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("drop_id").text("Drop ID").end();
+        html.label().r#for("drop_id").text("Drop ID").end();
         html.input()
             .id("drop_id")
-            .type_("number")
+            .r#type("number")
             .min("0")
             .max("65535")
             .size("6")
@@ -392,17 +392,17 @@ impl Controller {
         html.end(); /* div */
         html.div().class("row");
         html.label()
-            .for_("cabinet_style")
+            .r#for("cabinet_style")
             .text("Cabinet Style")
             .end();
         anc.cabinet_styles_html(self, &mut html);
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("condition").text("Condition").end();
+        html.label().r#for("condition").text("Condition").end();
         anc.conditions_html(self, &mut html);
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("notes").text("Notes").end();
+        html.label().r#for("notes").text("Notes").end();
         html.textarea()
             .id("notes")
             .maxlength("128")
@@ -412,7 +412,7 @@ impl Controller {
             .end();
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("password").text("Password").end();
+        html.label().r#for("password").text("Password").end();
         html.input()
             .id("password")
             .maxlength("32")

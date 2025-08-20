@@ -48,7 +48,7 @@ impl Gps {
     fn to_html_setup(&self, anc: &GpsAnc) -> String {
         let mut html = self.title(View::Setup);
         html.div().class("row");
-        html.label().for_("notes").text("Notes").end();
+        html.label().r#for("notes").text("Notes").end();
         html.textarea()
             .id("notes")
             .maxlength("255")
@@ -58,7 +58,7 @@ impl Gps {
             .end();
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("geo_loc").text("Device Loc").end();
+        html.label().r#for("geo_loc").text("Device Loc").end();
         html.input()
             .id("geo_loc")
             .maxlength("20")

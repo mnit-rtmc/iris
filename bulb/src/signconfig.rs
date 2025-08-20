@@ -192,7 +192,10 @@ fn to_html_setup(sc: &SignConfig, anc: &SignConfigAnc) -> String {
         .end();
     html.end(); /* div */
     html.div().class("row");
-    html.label().for_("module_width").text("Module Width").end();
+    html.label()
+        .r#for("module_width")
+        .text("Module Width")
+        .end();
     select_factors_html(
         "module_width",
         sc.pixel_width,
@@ -200,7 +203,7 @@ fn to_html_setup(sc: &SignConfig, anc: &SignConfigAnc) -> String {
         &mut html,
     );
     html.label()
-        .for_("module_height")
+        .r#for("module_height")
         .text("Module Height")
         .end();
     select_factors_html(
@@ -211,7 +214,10 @@ fn to_html_setup(sc: &SignConfig, anc: &SignConfigAnc) -> String {
     );
     html.end(); /* div */
     html.div().class("row");
-    html.label().for_("default_font").text("Default Font").end();
+    html.label()
+        .r#for("default_font")
+        .text("Default Font")
+        .end();
     anc.select_fonts_html(sc.default_font, &mut html);
     html.end(); /* div */
     sc.footer_html(true, &mut html);

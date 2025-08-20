@@ -243,7 +243,7 @@ impl ActionPlan {
         html.div().class("row");
         html.span().end();
         html.span();
-        html.label().for_("phase").text("Phase").end();
+        html.label().r#for("phase").text("Phase").end();
         html.select().id("phase");
         for p in anc.phases(self) {
             let option = html.option();
@@ -270,7 +270,7 @@ impl ActionPlan {
     fn to_html_setup(&self, _anc: &ActionPlanAnc) -> String {
         let mut html = self.title(View::Setup);
         html.div().class("row");
-        html.label().for_("notes").text("Notes").end();
+        html.label().r#for("notes").text("Notes").end();
         html.textarea()
             .id("notes")
             .maxlength("128")

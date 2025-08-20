@@ -206,7 +206,7 @@ impl CommConfig {
     fn to_html_setup(&self, anc: &CommConfigAnc) -> String {
         let mut html = self.title(View::Setup);
         html.div().class("row");
-        html.label().for_("description").text("Description").end();
+        html.label().r#for("description").text("Description").end();
         html.input()
             .id("description")
             .maxlength("20")
@@ -214,14 +214,14 @@ impl CommConfig {
             .value(&self.description);
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("protocol").text("Protocol").end();
+        html.label().r#for("protocol").text("Protocol").end();
         anc.protocols_html(self, &mut html);
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("timeout_ms").text("Timeout (ms)").end();
+        html.label().r#for("timeout_ms").text("Timeout (ms)").end();
         html.input()
             .id("timeout_ms")
-            .type_("number")
+            .r#type("number")
             .min("0")
             .max("20000")
             .size("8")
@@ -230,12 +230,12 @@ impl CommConfig {
         html.end(); /* div */
         html.div().class("row");
         html.label()
-            .for_("retry_threshold")
+            .r#for("retry_threshold")
             .text("Retry Threshold")
             .end();
         html.input()
             .id("retry_threshold")
-            .type_("number")
+            .r#type("number")
             .min("0")
             .max("8")
             .size("2")
@@ -243,7 +243,7 @@ impl CommConfig {
         html.end(); /* div */
         html.div().class("row");
         html.label()
-            .for_("poll_period_sec")
+            .r#for("poll_period_sec")
             .text("Poll Period")
             .end();
         periods_html(
@@ -255,7 +255,7 @@ impl CommConfig {
         html.end(); /* div */
         html.div().class("row");
         html.label()
-            .for_("long_poll_period_sec")
+            .r#for("long_poll_period_sec")
             .text("Long Poll Period")
             .end();
         periods_html(
@@ -267,7 +267,7 @@ impl CommConfig {
         html.end(); /* div */
         html.div().class("row");
         html.label()
-            .for_("idle_disconnect_sec")
+            .r#for("idle_disconnect_sec")
             .text("Idle Disconnect")
             .end();
         periods_html(
@@ -279,7 +279,7 @@ impl CommConfig {
         html.end(); /* div */
         html.div().class("row");
         html.label()
-            .for_("no_response_disconnect_sec")
+            .r#for("no_response_disconnect_sec")
             .text("No Response Disconnect")
             .end();
         periods_html(

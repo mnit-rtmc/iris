@@ -548,12 +548,12 @@ impl RampMeter {
     /// Build shrink/grow buttons HTML
     fn shrink_grow_html(&self, html: &mut Html) {
         html.span();
-        let button = html.button().id("lk_shrink").type_("button");
+        let button = html.button().id("lk_shrink").r#type("button");
         if !self.is_shrink_allowed() {
             button.disabled();
         }
         html.text("Shrink ↩").end();
-        let button = html.button().id("lk_grow").type_("button");
+        let button = html.button().id("lk_grow").r#type("button");
         if !self.is_grow_allowed() {
             button.disabled();
         }
@@ -645,7 +645,7 @@ impl RampMeter {
         html.span().text("Settings").end();
         html.button()
             .id("rq_settings")
-            .type_("button")
+            .r#type("button")
             .text("Send")
             .end()
             .end(); /* div */
@@ -664,7 +664,7 @@ impl RampMeter {
     fn to_html_setup(&self, anc: &RampMeterAnc) -> String {
         let mut html = self.title(View::Setup);
         html.div().class("row");
-        html.label().for_("notes").text("Notes").end();
+        html.label().r#for("notes").text("Notes").end();
         html.textarea()
             .id("notes")
             .maxlength("255")
@@ -676,48 +676,48 @@ impl RampMeter {
         anc.cio.controller_html(self, &mut html);
         anc.cio.pin_html(self.pin, &mut html);
         html.div().class("row");
-        html.label().for_("meter_type").text("Type").end();
+        html.label().r#for("meter_type").text("Type").end();
         anc.meter_types_html(self, &mut html);
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("algorithm").text("Algorithm").end();
+        html.label().r#for("algorithm").text("Algorithm").end();
         anc.algorithms_html(self, &mut html);
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("storage").text("Storage (ft)").end();
+        html.label().r#for("storage").text("Storage (ft)").end();
         html.input()
             .id("storage")
-            .type_("number")
+            .r#type("number")
             .min("1")
             .max("5000")
             .size("8")
             .value(opt_str(self.storage));
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("max_wait").text("Max Wait (s)").end();
+        html.label().r#for("max_wait").text("Max Wait (s)").end();
         html.input()
             .id("max_wait")
-            .type_("number")
+            .r#type("number")
             .min("1")
             .max("600")
             .size("8")
             .value(opt_str(self.max_wait));
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("am_target").text("AM Target").end();
+        html.label().r#for("am_target").text("AM Target").end();
         html.input()
             .id("am_target")
-            .type_("number")
+            .r#type("number")
             .min("0")
             .max("2000")
             .size("8")
             .value(opt_str(self.am_target));
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("pm_target").text("PM Target").end();
+        html.label().r#for("pm_target").text("PM Target").end();
         html.input()
             .id("pm_target")
-            .type_("number")
+            .r#type("number")
             .min("0")
             .max("2000")
             .size("8")

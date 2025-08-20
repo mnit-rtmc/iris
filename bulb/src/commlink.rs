@@ -162,7 +162,7 @@ impl CommLink {
     fn to_html_setup(&self, anc: &CommLinkAnc) -> String {
         let mut html = self.title(View::Setup);
         html.div().class("row");
-        html.label().for_("description").text("Description").end();
+        html.label().r#for("description").text("Description").end();
         html.input()
             .id("description")
             .maxlength("32")
@@ -170,7 +170,7 @@ impl CommLink {
             .value(&self.description);
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("uri").text("URI").end();
+        html.label().r#for("uri").text("URI").end();
         html.input()
             .id("uri")
             .maxlength("256")
@@ -178,12 +178,15 @@ impl CommLink {
             .value(&self.uri);
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("comm_config").text("Comm Config").end();
+        html.label().r#for("comm_config").text("Comm Config").end();
         anc.comm_configs_html(self, &mut html);
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("poll_enabled").text("Poll Enabled").end();
-        let enabled = html.input().id("poll_enabled").type_("checkbox");
+        html.label()
+            .r#for("poll_enabled")
+            .text("Poll Enabled")
+            .end();
+        let enabled = html.input().id("poll_enabled").r#type("checkbox");
         if self.poll_enabled {
             enabled.checked();
         }

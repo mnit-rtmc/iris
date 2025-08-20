@@ -123,7 +123,7 @@ impl User {
     fn to_html_setup(&self, anc: &UserAnc) -> String {
         let mut html = self.title(View::Setup);
         html.div().class("row");
-        html.label().for_("full_name").text("Full Name").end();
+        html.label().r#for("full_name").text("Full Name").end();
         html.input()
             .id("full_name")
             .maxlength("31")
@@ -131,7 +131,7 @@ impl User {
             .value(&self.full_name);
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("dn").text("Dn").end();
+        html.label().r#for("dn").text("Dn").end();
         html.input()
             .id("dn")
             .maxlength("128")
@@ -139,12 +139,12 @@ impl User {
             .value(opt_ref(&self.dn));
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("role").text("Role").end();
+        html.label().r#for("role").text("Role").end();
         anc.roles_html(self, &mut html);
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("enabled").text("Enabled").end();
-        let enabled = html.input().id("enabled").type_("checkbox");
+        html.label().r#for("enabled").text("Enabled").end();
+        let enabled = html.input().id("enabled").r#type("checkbox");
         if self.enabled {
             enabled.checked();
         }

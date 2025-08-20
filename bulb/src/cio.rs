@@ -55,7 +55,7 @@ where
     /// Make controller row as HTML
     pub fn controller_html(&self, pri: &C, html: &mut Html) {
         html.div().class("row");
-        html.label().for_("controller").text("Controller").end();
+        html.label().r#for("controller").text("Controller").end();
         let input = html.input().id("controller").maxlength("20").size("20");
         match self.controller(pri) {
             Some(c) => {
@@ -72,10 +72,10 @@ where
     /// Make pin row as HTML
     pub fn pin_html(&self, pin: Option<u32>, html: &mut Html) {
         html.div().class("row");
-        html.label().for_("pin").text("Pin").end();
+        html.label().r#for("pin").text("Pin").end();
         html.input()
             .id("pin")
-            .type_("number")
+            .r#type("number")
             .min("1")
             .max("104")
             .size("8")

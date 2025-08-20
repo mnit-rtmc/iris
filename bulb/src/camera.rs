@@ -189,7 +189,7 @@ impl Camera {
         let mut html = self.title(View::Request);
         html.div().class("row");
         html.span().text("Reset/Reboot").end();
-        html.button().id("rq_reset").type_("button").text("Reboot");
+        html.button().id("rq_reset").r#type("button").text("Reboot");
         html.to_string()
     }
 
@@ -197,17 +197,17 @@ impl Camera {
     fn to_html_setup(&self, anc: &CameraAnc) -> String {
         let mut html = self.title(View::Setup);
         html.div().class("row");
-        html.label().for_("cam_num").text("Cam Num").end();
+        html.label().r#for("cam_num").text("Cam Num").end();
         html.input()
             .id("cam_num")
-            .type_("number")
+            .r#type("number")
             .min("1")
             .max("9999")
             .size("8")
             .value(opt_str(self.cam_num));
         html.end();
         html.div().class("row");
-        html.label().for_("notes").text("Notes").end();
+        html.label().r#for("notes").text("Notes").end();
         html.textarea()
             .id("notes")
             .maxlength("255")
@@ -219,53 +219,56 @@ impl Camera {
         anc.cio.controller_html(self, &mut html);
         anc.cio.pin_html(self.pin, &mut html);
         html.div().class("row");
-        html.label().for_("encoder_type").text("Encoder Type").end();
+        html.label()
+            .r#for("encoder_type")
+            .text("Encoder Type")
+            .end();
         anc.encoder_type_html(self, &mut html);
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("enc_address").text("Enc. Address").end();
+        html.label().r#for("enc_address").text("Enc. Address").end();
         html.input()
             .id("enc_address")
-            .type_("text")
+            .r#type("text")
             .value(opt_ref(&self.enc_address));
         html.end(); /* div */
         html.div().class("row");
         html.label()
-            .for_("enc_port")
+            .r#for("enc_port")
             .text("Enc. Port Override")
             .end();
         html.input()
             .id("enc_port")
-            .type_("number")
+            .r#type("number")
             .min("1")
             .size("4")
             .value(opt_str(self.enc_port));
         html.end(); /* div */
         html.div().class("row");
         html.label()
-            .for_("enc_mcast")
+            .r#for("enc_mcast")
             .text("Multicast Address")
             .end();
         html.input()
             .id("enc_mcast")
-            .type_("text")
+            .r#type("text")
             .value(opt_ref(&self.enc_mcast));
         html.end(); /* div */
         html.div().class("row");
         html.label()
-            .for_("enc_channel")
+            .r#for("enc_channel")
             .text("Encoder Channel")
             .end();
         html.input()
             .id("enc_channel")
-            .type_("number")
+            .r#type("number")
             .min("1")
             .size("8")
             .value(opt_str(self.enc_channel));
         html.end(); /* div */
         html.div().class("row");
         html.label()
-            .for_("cam_template")
+            .r#for("cam_template")
             .text("Camera Template")
             .end();
         html.span()
@@ -275,8 +278,8 @@ impl Camera {
             .end();
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("publish").text("Publish").end();
-        let publish = html.input().id("publish").type_("checkbox");
+        html.label().r#for("publish").text("Publish").end();
+        let publish = html.input().id("publish").r#type("checkbox");
         if self.publish {
             publish.checked();
         }

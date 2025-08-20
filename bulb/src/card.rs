@@ -302,7 +302,7 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     fn to_html_create(&self, _anc: &Self::Ancillary) -> String {
         let mut html = Html::new();
         html.div().class("row");
-        html.label().for_("create_name").text("Name").end();
+        html.label().r#for("create_name").text("Name").end();
         html.input()
             .id("create_name")
             .maxlength("24")
@@ -362,13 +362,13 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
         if delete {
             html.button()
                 .id("ob_delete")
-                .type_("button")
+                .r#type("button")
                 .text("🗑️ Delete")
                 .end();
         };
         html.button()
             .id("ob_save")
-            .type_("button")
+            .r#type("button")
             .text("🖍️ Save")
             .end();
         html.end(); /* div */
@@ -1137,7 +1137,7 @@ fn html_card_create(res: Res, create: &str) -> String {
     html.div().class("row end");
     html.button()
         .id("ob_save")
-        .type_("button")
+        .r#type("button")
         .text("🖍️ Save")
         .end();
     html.to_string()

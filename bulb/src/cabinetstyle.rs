@@ -44,10 +44,10 @@ impl AncillaryData for CabinetStyleAnc {
 /// Build pin row HTML
 fn pin_row_html(id: &str, name: &str, pin: Option<u32>, html: &mut Html) {
     html.div().class("row");
-    html.label().for_(id).text(name).end();
+    html.label().r#for(id).text(name).end();
     html.input()
         .id(id)
-        .type_("number")
+        .r#type("number")
         .min("1")
         .max("104")
         .size("8")
@@ -91,10 +91,10 @@ impl CabinetStyle {
             &mut html,
         );
         html.div().class("row");
-        html.label().for_("dip").text("Dip").end();
+        html.label().r#for("dip").text("Dip").end();
         html.input()
             .id("dip")
-            .type_("number")
+            .r#type("number")
             .min("0")
             .max("255")
             .size("8")

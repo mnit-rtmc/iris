@@ -175,21 +175,21 @@ impl LcsState {
         anc.cio.controller_html(self, &mut html);
         anc.cio.pin_html(self.pin, &mut html);
         html.div().class("row");
-        html.label().for_("lane").text("Lane").end();
+        html.label().r#for("lane").text("Lane").end();
         html.input()
             .id("lane")
-            .type_("number")
+            .r#type("number")
             .min("1")
             .max("9")
             .size("2")
             .value(self.lane.to_string());
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("indication").text("Indication").end();
+        html.label().r#for("indication").text("Indication").end();
         anc.indications_html(self, &mut html);
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("msg_pattern").text("Msg Pattern").end();
+        html.label().r#for("msg_pattern").text("Msg Pattern").end();
         html.input()
             .id("msg_pattern")
             .maxlength("20")
@@ -197,10 +197,10 @@ impl LcsState {
             .value(opt_ref(&self.msg_pattern));
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("msg_num").text("Msg #").end();
+        html.label().r#for("msg_num").text("Msg #").end();
         html.input()
             .id("msg_num")
-            .type_("number")
+            .r#type("number")
             .min("2")
             .max("65535")
             .size("5")

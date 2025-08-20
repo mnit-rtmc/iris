@@ -65,8 +65,8 @@ impl Role {
     fn to_html_setup(&self) -> String {
         let mut html = self.title(View::Setup);
         html.div().class("row");
-        html.label().for_("enabled").text("Enabled").end();
-        let input = html.input().id("enabled").type_("checkbox");
+        html.label().r#for("enabled").text("Enabled").end();
+        let input = html.input().id("enabled").r#type("checkbox");
         if self.enabled {
             input.checked();
         }

@@ -159,14 +159,14 @@ impl Beacon {
             .end();
         html.div().class("beacon-container row center");
         html.button().id("ob_flashing").disabled().end();
-        html.label().for_("ob_flashing").class("signal-housing");
+        html.label().r#for("ob_flashing").class("signal-housing");
         html.span().class(self.class_flash()).text("🔆").end();
         html.end(); /* label */
         html.span()
             .class("beacon-sign tiny")
             .text(&self.message)
             .end();
-        html.label().for_("ob_flashing").class("signal-housing");
+        html.label().r#for("ob_flashing").class("signal-housing");
         html.span().class(self.class_delayed()).text("🔆");
         html.to_string()
     }
@@ -189,13 +189,13 @@ impl Beacon {
         html.div().class("beacon-container row center");
         html.button().id("ob_flashing").end();
         html.label()
-            .for_("ob_flashing")
+            .r#for("ob_flashing")
             .class("beacon signal-housing");
         html.span().class(self.class_flash()).text("🔆").end();
         html.end(); /* label */
         html.span().class("beacon-sign").text(&self.message).end();
         html.label()
-            .for_("ob_flashing")
+            .r#for("ob_flashing")
             .class("beacon signal-housing");
         html.span().class(self.class_delayed()).text("🔆").end();
         html.end(); /* label */
@@ -209,7 +209,7 @@ impl Beacon {
     fn to_html_setup(&self, anc: &BeaconAnc) -> String {
         let mut html = self.title(View::Setup);
         html.div().class("row");
-        html.label().for_("message").text("Message").end();
+        html.label().r#for("message").text("Message").end();
         html.textarea()
             .id("message")
             .maxlength("128")
@@ -219,7 +219,7 @@ impl Beacon {
             .end();
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("notes").text("Notes").end();
+        html.label().r#for("notes").text("Notes").end();
         html.textarea()
             .id("notes")
             .maxlength("128")
@@ -231,18 +231,18 @@ impl Beacon {
         anc.cio.controller_html(self, &mut html);
         anc.cio.pin_html(self.pin, &mut html);
         html.div().class("row");
-        html.label().for_("verify_pin").text("Verify Pin").end();
+        html.label().r#for("verify_pin").text("Verify Pin").end();
         html.input()
             .id("verify_pin")
-            .type_("number")
+            .r#type("number")
             .min("1")
             .max("104")
             .size("8")
             .value(opt_str(self.verify_pin));
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("ext_mode").text("Ext Mode").end();
-        let ext_mode = html.input().id("ext_mode").type_("checkbox");
+        html.label().r#for("ext_mode").text("Ext Mode").end();
+        let ext_mode = html.input().id("ext_mode").r#type("checkbox");
         if let Some(true) = self.ext_mode {
             ext_mode.checked();
         }

@@ -831,12 +831,12 @@ impl Dms {
         html.raw(EXPIRE_SELECT);
         html.button()
             .id("mc_send")
-            .type_("button")
+            .r#type("button")
             .text("Send")
             .end();
         html.button()
             .id("mc_blank")
-            .type_("button")
+            .r#type("button")
             .text("Blank")
             .end();
         html.end(); /* div */
@@ -937,14 +937,14 @@ impl Dms {
         html.span().text("Current Message").end();
         html.button()
             .id("rq_msg_query")
-            .type_("button")
+            .r#type("button")
             .text("Query");
         html.end().end(); /* button, div */
         html.div().class("row");
         html.span().text("Current Status").end();
         html.button()
             .id("rq_status_query")
-            .type_("button")
+            .r#type("button")
             .text("Query");
         html.end().end(); /* button, div */
         html.div().class("row");
@@ -952,12 +952,12 @@ impl Dms {
         html.span();
         html.button()
             .id("rq_pixel_text")
-            .type_("button")
+            .r#type("button")
             .text("Test")
             .end();
         html.button()
             .id("rq_pixel_query")
-            .type_("button")
+            .r#type("button")
             .text("Query");
         html.end().end().end(); /* button, span, div */
         html.div().class("row");
@@ -965,12 +965,12 @@ impl Dms {
         html.span();
         html.button()
             .id("rq_settings_send")
-            .type_("button")
+            .r#type("button")
             .text("Send");
         html.end();
         html.button()
             .id("rq_settings_query")
-            .type_("button")
+            .r#type("button")
             .text("Query");
         html.end().end().end(); /* button, span, div */
         html.div().class("row");
@@ -978,12 +978,12 @@ impl Dms {
         html.span();
         html.button()
             .id("rq_config_reset")
-            .type_("button")
+            .r#type("button")
             .text("Reset");
         html.end();
         html.button()
             .id("rq_config_query")
-            .type_("button")
+            .r#type("button")
             .text("Query");
         html.end().end().end(); /* button, span, div */
         html.div().class("row");
@@ -1001,7 +1001,7 @@ impl Dms {
     fn to_html_setup(&self, anc: &DmsAnc) -> String {
         let mut html = self.title(View::Setup);
         html.div().class("row");
-        html.label().for_("notes").text("Notes").end();
+        html.label().r#for("notes").text("Notes").end();
         html.textarea()
             .id("notes")
             .maxlength("255")

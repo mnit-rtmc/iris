@@ -216,18 +216,18 @@ impl<L> LocAnc<L> {
     /// Build Location HTML
     fn location_html(&self, loc: &GeoLoc, html: &mut Html) {
         html.div().class("row");
-        html.label().for_("roadway").text("Roadway").end();
+        html.label().r#for("roadway").text("Roadway").end();
         self.roads_html("roadway", loc.roadway.as_deref(), html);
         self.directions_html("road_dir", loc.road_dir, html);
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("cross_street").text(" ").end();
+        html.label().r#for("cross_street").text(" ").end();
         self.modifiers_html(loc.cross_mod, html);
         self.roads_html("cross_street", loc.cross_street.as_deref(), html);
         self.directions_html("cross_dir", loc.cross_dir, html);
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("landmark").text("Landmark").end();
+        html.label().r#for("landmark").text("Landmark").end();
         html.input()
             .id("landmark")
             .maxlength("22")
@@ -235,19 +235,19 @@ impl<L> LocAnc<L> {
             .value(opt_ref(&loc.landmark));
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("lat").text("Latitude").end();
+        html.label().r#for("lat").text("Latitude").end();
         html.input()
             .id("lat")
-            .type_("number")
+            .r#type("number")
             .attr("step", "0.00001")
             .attr("inputmode", "decimal")
             .value(opt_str(loc.lat));
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("lon").text("Longitude").end();
+        html.label().r#for("lon").text("Longitude").end();
         html.input()
             .id("lon")
-            .type_("number")
+            .r#type("number")
             .attr("step", "0.00001")
             .attr("inputmode", "decimal")
             .value(opt_str(loc.lon));

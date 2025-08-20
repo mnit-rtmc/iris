@@ -78,7 +78,7 @@ impl Alarm {
     fn to_html_setup(&self, anc: &AlarmAnc) -> String {
         let mut html = self.title(View::Setup);
         html.div().class("row");
-        html.label().for_("description").text("Description").end();
+        html.label().r#for("description").text("Description").end();
         html.input()
             .id("description")
             .maxlength("24")

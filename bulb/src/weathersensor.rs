@@ -771,7 +771,7 @@ impl WeatherSensor {
     fn to_html_setup(&self, anc: &WeatherSensorAnc) -> String {
         let mut html = self.title(View::Setup);
         html.div().class("row");
-        html.label().for_("site_id").text("Site ID").end();
+        html.label().r#for("site_id").text("Site ID").end();
         html.input()
             .id("site_id")
             .maxlength("20")
@@ -779,7 +779,7 @@ impl WeatherSensor {
             .value(opt_ref(&self.site_id));
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("alt_id").text("Alt ID").end();
+        html.label().r#for("alt_id").text("Alt ID").end();
         html.input()
             .id("alt_id")
             .maxlength("20")
@@ -787,7 +787,7 @@ impl WeatherSensor {
             .value(opt_ref(&self.alt_id));
         html.end(); /* div */
         html.div().class("row");
-        html.label().for_("notes").text("Notes").end();
+        html.label().r#for("notes").text("Notes").end();
         html.textarea()
             .id("notes")
             .maxlength("64")
