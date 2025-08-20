@@ -184,6 +184,20 @@ impl ActionPlanAnc {
         }
         phases.into_iter()
     }
+
+    /// Get device hashtags
+    fn hashtags<'a>(
+        &'a self,
+        pri: &'a ActionPlan,
+    ) -> impl Iterator<Item = &'a str> {
+        let mut tags = BTreeSet::new();
+        for da in &self.device_actions {
+            if da.action_plan == pri.name {
+                tags.insert(&da.hashtag[..]);
+            }
+        }
+        tags.into_iter()
+    }
 }
 
 impl ActionPlan {
@@ -241,7 +255,8 @@ impl ActionPlan {
         self.item_states(anc).tooltips(&mut html);
         html.end(); /* div */
         html.div().class("row");
-        html.span().end();
+        let tags = anc.hashtags(self).collect::<Vec<_>>().join(" ");
+        html.span().class("info").text(tags).end();
         html.span();
         html.label().r#for("phase").text("Phase").end();
         html.select().id("phase");
