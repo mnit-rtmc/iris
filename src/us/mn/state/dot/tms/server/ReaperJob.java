@@ -14,12 +14,15 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.ActionPlanHelper;
 import us.mn.state.dot.tms.AlertInfo;
 import us.mn.state.dot.tms.AlertInfoHelper;
 import us.mn.state.dot.tms.AlertState;
@@ -86,7 +89,14 @@ public class ReaperJob extends Job {
 	public void perform() {
 		reapSignMessages();
 		reapIncidents();
-		reapAlerts();
+		try {
+			reapAlerts();
+			if (BaseObjectImpl.store != null)
+				purgeOldestAlert();
+		}
+		catch (TMSException e) {
+			e.printStackTrace();
+		}
 		FeedBucket.purgeExpired();
 	}
 
@@ -206,7 +216,7 @@ public class ReaperJob extends Job {
 	}
 
 	/** Reap alerts which have been cleared for awhile */
-	private void reapAlerts() {
+	private void reapAlerts() throws TMSException {
 		if (zombie_alerts.isEmpty())
 			findReapableAlerts();
 		else {
@@ -251,28 +261,51 @@ public class ReaperJob extends Job {
 	}
 
 	/** Reap an alert */
-	private void reapAlert(AlertInfoImpl ai) {
+	private void reapAlert(AlertInfoImpl ai) throws TMSException {
 		// Make sure the alert has not already been
 		// reaped by looking it up in the namespace.
 		// This is needed because objects are removed
 		// asynchronously from the namespace.
 		AlertInfo a = AlertInfoHelper.lookup(ai.getName());
 		if ((a == ai) && isReapable(ai)) {
-			if (ai.getAlertState() != AlertState.CLEARED.ordinal()){
-				try {
-					ai.clear();
-				}
-				catch (TMSException e) {
-					e.printStackTrace();
-				}
-			} else {
-				reapDmsHashtag(ai.getAllHashtag());
-				// Must delete action plan last, since
-				// AlertInfo has a foreign key to it
-				ActionPlan ap = ai.getActionPlan();
+			if (ai.getAlertState() != AlertState.CLEARED.ordinal())
+				ai.clear();
+			else
 				ai.notifyRemove();
-				reapActionPlan(ap);
+		}
+	}
+
+	/** Purge the oldest past alert */
+	private void purgeOldestAlert() throws TMSException {
+		final ArrayList<String> values = new ArrayList<String>();
+		BaseObjectImpl.store.query(
+			"SELECT name, all_hashtag, action_plan " +
+			"FROM cap.alert_info " +
+			"WHERE now() - end_date > '30 days' " +
+			"ORDER BY end_date LIMIT 1;", new ResultFactory()
+		{
+			@Override public void create(ResultSet row)
+				throws SQLException
+			{
+				values.add(row.getString(1));
+				values.add(row.getString(2));
+				values.add(row.getString(3));
 			}
+		});
+		if (values.size() == 3) {
+			String alert = values.get(0);
+			String all_hashtag = values.get(1);
+			String action_plan = values.get(2);
+			reapDmsHashtag(all_hashtag);
+			BaseObjectImpl.store.update(
+				"DELETE FROM cap.alert_info " +
+				" WHERE name = '" + alert + "';'"
+			);
+			// Must delete action plan last, since
+			// alert_info has a foreign key to it
+			ActionPlan ap = ActionPlanHelper.lookup(action_plan);
+			if (ap != null)
+				reapActionPlan(ap);
 		}
 	}
 
