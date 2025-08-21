@@ -15,7 +15,9 @@ use crate::card::{AncillaryData, Card, View, uri_one};
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
-use crate::util::{ContainsLower, Doc, Fields, TextArea, opt_ref};
+use crate::util::{
+    ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref,
+};
 use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
@@ -282,7 +284,7 @@ impl ActionPlan {
     }
 
     /// Convert to Setup HTML
-    fn to_html_setup(&self, _anc: &ActionPlanAnc) -> String {
+    fn to_html_setup(&self, anc: &ActionPlanAnc) -> String {
         let mut html = self.title(View::Setup);
         html.div().class("row");
         html.label().r#for("notes").text("Notes").end();
@@ -293,7 +295,56 @@ impl ActionPlan {
             .attr("cols", "24")
             .text(opt_ref(&self.notes))
             .end();
-        html.end(); /* div */
+        html.end(); // div
+        html.div().class("row");
+        html.label().r#for("active").text("Active").end();
+        let active = html.input().id("active").r#type("checkbox");
+        if self.active {
+            active.checked();
+        }
+        html.end(); // div
+        html.div().class("row");
+        html.label()
+            .r#for("default_phase")
+            .text("Default Phase")
+            .end();
+        html.select().id("default_phase");
+        for p in &anc.phases {
+            let option = html.option();
+            if p.name == self.default_phase {
+                option.attr_bool("selected");
+            }
+            html.text(&p.name).end();
+        }
+        html.end().end(); // select, div
+        html.div().class("row");
+        html.label()
+            .r#for("sync_actions")
+            .text("Sync Actions")
+            .end();
+        let sync_actions = html.input().id("sync_actions").r#type("checkbox");
+        if let Some(true) = self.sync_actions {
+            sync_actions.checked();
+        }
+        html.end(); // div
+        html.div().class("row");
+        html.label().r#for("sticky").text("Sticky").end();
+        let sticky = html.input().id("sticky").r#type("checkbox");
+        if let Some(true) = self.sticky {
+            sticky.checked();
+        }
+        html.end(); // div
+        html.div().class("row");
+        html.label()
+            .r#for("ignore_auto_fail")
+            .text("Ignore Auto-Fail")
+            .end();
+        let ignore_auto_fail =
+            html.input().id("ignore_auto_fail").r#type("checkbox");
+        if let Some(true) = self.ignore_auto_fail {
+            ignore_auto_fail.checked();
+        }
+        html.end(); // div
         self.footer_html(true, &mut html);
         html.to_string()
     }
@@ -367,6 +418,11 @@ impl Card for ActionPlan {
     fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_text_area("notes", &self.notes);
+        fields.changed_input("active", self.active);
+        fields.changed_select("default_phase", &self.default_phase);
+        fields.changed_input("sync_actions", self.sync_actions);
+        fields.changed_input("sticky", self.sticky);
+        fields.changed_input("ignore_auto_fail", self.ignore_auto_fail);
         fields.into_value().to_string()
     }
 
