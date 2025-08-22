@@ -88,6 +88,8 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Create a new action plan */
 	public ActionPlanImpl(String n) {
 		super(n);
+		default_phase = lookupPlanPhase(PlanPhase.UNDEPLOYED);
+		phase = default_phase;
 	}
 
 	/** Create an action plan */
