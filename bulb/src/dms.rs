@@ -919,7 +919,7 @@ impl Dms {
             html.div().class("row fill");
             html.span().class("info").text(&act.name).end();
             html.span();
-            html.select().id("phase");
+            html.select().id("phase").disabled();
             for p in anc.phases(act) {
                 let option = html.option();
                 if p == act.phase {
