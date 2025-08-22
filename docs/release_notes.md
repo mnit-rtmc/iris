@@ -1,5 +1,18 @@
 # IRIS 5.x Release Notes
 
+5.73.0 (22 Aug 2025)
+ - Fix DMS lock duration when combined with planned message
+ - Always build sign message on server (replace lock `message` w/ `multi`)
+ - ClearGuide: add `sp_cond` speed "condition" tag mode + change `min` to range
+ - Add "Action Plan" resource to web UI
+ - Add action plans to DMS control card (web UI)
+ - Require "Configure" access to store preset on cameras
+ - Require "Configure" access to change "notes" fields
+ - Add device permission check for changing action plan phase
+ - Add gate arm hashtag support
+ - Fixed logic to reap/purge old weather alerts
+ - onvif: Improve error logging / debugging
+
 5.72.0 (31 Jul 2025)
  - Replace DMS `msg_user` + `expire_time` with `lock` JSON value (`reason`,
    `message`, `expires`, `user_id`)
