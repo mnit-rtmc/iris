@@ -29,6 +29,12 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class SignMessageHelper extends BaseHelper {
 
+	/** Number of total stuck-off pixels allowed in a message */
+	static private final int PIXEL_OFF_LIMIT = 2;
+
+	/** Number of adjacent stuck-on pixels allowed in a message */
+	static private final int PIXEL_ON_LIMIT = 1;
+
 	/** Do not allow objects of this class */
 	private SignMessageHelper() {
 		assert false;
@@ -190,8 +196,7 @@ public class SignMessageHelper extends BaseHelper {
 		temp.setPixelData(bg.getPixelData());
 		temp.clearTransparent(stuck_off);
 		int n_off = temp.getLitCount();
-		int off_lim = SystemAttrEnum.DMS_PIXEL_OFF_LIMIT.getInt();
-		if (off_lim >= 0 && n_off > off_lim) {
+		if (n_off > PIXEL_OFF_LIMIT) {
 			throw new InvalidMsgException(
 				"Too many stuck off pixels: " + n_off, true);
 		}
@@ -199,8 +204,7 @@ public class SignMessageHelper extends BaseHelper {
 		temp.outlineLitPixels();
 		temp.clearTransparent(stuck_on);
 		int n_on = temp.getLitCount();
-		int on_lim = SystemAttrEnum.DMS_PIXEL_ON_LIMIT.getInt();
-		if (on_lim >= 0 && n_on > on_lim) {
+		if (n_on > PIXEL_ON_LIMIT) {
 			throw new InvalidMsgException(
 				"Too many stuck on pixels: " + n_on, true);
 		}
