@@ -45,8 +45,6 @@ System Attribute                 | Description
 `dms_message_tooltip_enable`     | Enable tooltip showing current posted DMS message and user
 `dms_page_on_max_secs`           | Maximum selectable [DMS] page on time (seconds)
 `dms_page_on_min_secs`           | Minimum selectable [DMS] page on time (seconds)
-`dms_pixel_off_limit`            | Number of stuck-off pixels allowed in a [DMS] message
-`dms_pixel_on_limit`             | Number of adjacent stuck-on pixels allowed in a [DMS] message
 `dms_send_confirmation_enable`   | Enable a confirmation dialog box when the [DMS] Send button is pressed
 `dms_update_font_table`          | Enable the updating of the [DMS] controller font table to match the font table in IRIS
 `email_rate_limit_hours`         | Hours to wait before sending duplicate emails
