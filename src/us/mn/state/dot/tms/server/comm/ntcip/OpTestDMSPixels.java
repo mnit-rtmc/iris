@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2024  Minnesota Department of Transportation
+ * Copyright (C) 2008-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ import java.io.IOException;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SignConfig;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.RleTable;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -36,6 +35,9 @@ import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
  * @author Douglas Lau
  */
 public class OpTestDMSPixels extends OpDMS {
+
+	/** Timeout before failing pixel test (ms) */
+	static private final long PIXEL_TEST_TIMEOUT_MS = 45 * 1000;
 
 	/** Flag to indicate whether a pixel test should be performed */
 	private final boolean perform_test;
@@ -116,7 +118,7 @@ public class OpTestDMSPixels extends OpDMS {
 
 		/** Time to stop checking if the test has completed */
 		private final long expire = TimeSteward.currentTimeMillis() +
-		       1000*SystemAttrEnum.DMS_PIXEL_TEST_TIMEOUT_SECS.getInt();
+			PIXEL_TEST_TIMEOUT_MS;
 
 		/** Check for test completion */
 		@SuppressWarnings("unchecked")
