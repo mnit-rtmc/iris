@@ -1024,12 +1024,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
-	/** Set a status value and notify clients of the change */
-	public void setStatusNotify(String key, Object value) {
-		String st = DMSHelper.putJson(status, key, value);
-		setStatusNotify(st);
-	}
-
 	/** Get the current status as JSON */
 	@Override
 	public String getStatus() {
