@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2023  Minnesota Department of Transportation
+ * Copyright (C) 2008-2025  Minnesota Department of Transportation
  * Copyright (C) 2010       AHMCT, University of California
  * Copyright (C) 2025       SRF Consulting Group
  *
@@ -36,6 +36,12 @@ import us.mn.state.dot.tms.utils.TextRect;
  */
 public class MsgPatternCBox extends JComboBox<MsgPattern> {
 
+	/** Get page count of a MULTI string */
+	static private Integer getPageCount(String ms) {
+		MultiString multi = new MultiString(ms);
+		return multi.isBlank() ? null : multi.getNumPages();
+	}
+
 	/** Populate the message pattern model, sorted */
 	public void populateModel(DMS dms) {
 		DefaultComboBoxModel<MsgPattern> mdl =
@@ -67,13 +73,13 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 	/** Find the best pattern for a MULTI string */
 	public MsgPattern findBestPattern(String ms, TextRect tr) {
 		assert tr != null;
-		int pageCnt = (new MultiString(ms)).getNumPages();
+		Integer pageCnt = getPageCount(ms);
 		MsgPattern best = null;
 		for (int i = 0; i < getItemCount(); i++) {
 			MsgPattern pat = getItemAt(i);
 			String multi = pat.getMulti();
 			// Make sure pattern has same number of pages
-			if (pageCnt != (new MultiString(multi)).getNumPages())
+			if (pageCnt != null && pageCnt != getPageCount(multi))
 				continue;
 			// check for perfect match
 			if (multi.length() > 0 && multi.equals(ms))
