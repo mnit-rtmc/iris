@@ -79,7 +79,6 @@ dms_page_on_max_secs	10.0
 dms_page_on_min_secs	0.5
 dms_pixel_off_limit	2
 dms_pixel_on_limit	1
-dms_pixel_test_timeout_secs	30
 dms_send_confirmation_enable	false
 dms_update_font_table	true
 email_rate_limit_hours	0
