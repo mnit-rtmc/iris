@@ -79,8 +79,11 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 			MsgPattern pat = getItemAt(i);
 			String multi = pat.getMulti();
 			// Make sure pattern has same number of pages
-			if (pageCnt != null && pageCnt != getPageCount(multi))
-				continue;
+			if (pageCnt != null) {
+				Integer pc = getPageCount(multi);
+				if (pc != null && pageCnt != pc)
+					continue;
+			}
 			// check for perfect match
 			if (multi.length() > 0 && multi.equals(ms))
 				return pat;
