@@ -32,7 +32,6 @@ import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
