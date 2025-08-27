@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.BeaconHelper;
 import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
+import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DeviceAction;
@@ -44,8 +45,8 @@ import us.mn.state.dot.tms.RampMeterHelper;
  */
 public class DeviceActionJob extends Job {
 
-	/** Schedule debug log */
-	static private final DebugLog SCHED_LOG = new DebugLog("sched");
+	/** Plan debug log */
+	static private final DebugLog PLAN_LOG = new DebugLog("plan");
 
 	/** Single action plan to process (null for all) */
 	private final ActionPlanImpl plan;
@@ -68,7 +69,7 @@ public class DeviceActionJob extends Job {
 	/** Create a new device action job */
 	public DeviceActionJob(ActionPlanImpl ap) {
 		super(0);
-		logger = SCHED_LOG;
+		logger = PLAN_LOG;
 		plan = ap;
 	}
 
@@ -77,9 +78,9 @@ public class DeviceActionJob extends Job {
 		this(null);
 	}
 
-	/** Log a DMS schedule message */
-	private void logSched(DMS dms, String msg) {
-		logger.log(dms.getName() + ": " + msg);
+	/** Log a device plan message */
+	private void logMsg(Device dev, String msg) {
+		logger.log(dev.getName() + ": " + msg);
 	}
 
 	/** Perform device actions */
@@ -132,13 +133,13 @@ public class DeviceActionJob extends Job {
 	private void checkAction(DeviceAction da, DMSImpl dms) {
 		if (shouldReplace(da, dms)) {
 			if (logger.isOpen())
-				logSched(dms, "checking " + da);
+				logMsg(dms, "checking " + da);
 			ActionTagMsg amsg = new ActionTagMsg(da, dms,
 				dms.getGeoLoc(), logger);
 			if (DMSHelper.isRasterizable(dms, amsg.getMulti()))
 				dms_actions.put(dms, amsg);
 		} else if (logger.isOpen())
-			logSched(dms, "dropping " + da);
+			logMsg(dms, "dropping " + da);
 	}
 
 	/** Check if an action should replace the current DMS action */
@@ -157,7 +158,7 @@ public class DeviceActionJob extends Job {
 				DMSImpl dmsi = (DMSImpl) dms;
 				ActionTagMsg amsg = dms_actions.get(dmsi);
 				if (logger.isOpen())
-					logSched(dms, "scheduling " + amsg);
+					logMsg(dms, "scheduling " + amsg);
 				dmsi.setActionMsg(amsg);
 			}
 		}
