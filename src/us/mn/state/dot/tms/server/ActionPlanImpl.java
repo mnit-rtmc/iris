@@ -24,8 +24,10 @@ import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.ActionPlanHelper;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.BeaconHelper;
+import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -218,7 +220,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	@Override
 	public void setActive(boolean a) {
 		active = a;
-		EventType et = (a ? EventType.ACTION_PLAN_ACTIVATED : 
+		EventType et = (a ? EventType.ACTION_PLAN_ACTIVATED :
 			EventType.ACTION_PLAN_DEACTIVATED);
 		String un = getProcUser();
 		logEvent(et, null, un);
@@ -311,7 +313,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			Name name = new Name(this, "phase");
 			if (accessLevel(name) < name.accessWrite())
 				throw new ChangeVetoException("NOT PERMITTED");
-			checkDeviceActions(); // throws exception
+			checkDeviceAccess(); // throws exception
 			if (getSyncActions())
 				validateDeviceActions(); // throws exception
 			store.update(this, "phase", p);
@@ -343,75 +345,52 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		return change;
 	}
 
-	/** Check device action access permissions */
-	private void checkDeviceActions() throws ChangeVetoException {
-		Iterator<DeviceAction> it = DeviceActionHelper.iterator(this);
-		while (it.hasNext()) {
-			DeviceAction da = it.next();
-			if (!isAccessOperate(da)) {
-				throw new ChangeVetoException("Device action " +
-					da.getName() + " not allowed");
-			}
+	/** Check plan device access permissions */
+	private void checkDeviceAccess() throws ChangeVetoException {
+		if (!areBeaconsOperatable()) {
+			throw new ChangeVetoException("Device action " +
+				"not allowed for beacons");
+		}
+		if (!areCamerasOperatable()) {
+			throw new ChangeVetoException("Device action " +
+				"not allowed for cameras");
+		}
+		if (!areDmsOperatable()) {
+			throw new ChangeVetoException("Device action " +
+				"not allowed for DMS");
+		}
+		if (!areRampMetersOperatable()) {
+			throw new ChangeVetoException("Device action " +
+				"not allowed for ramp meters");
 		}
 	}
 
-	/** Check if a device action access is "operate" (or higher) */
-	private boolean isAccessOperate(DeviceAction da) {
-		String ht = da.getHashtag();
-		return areBeaconsOperatable(ht)
-		    && areDmsOperatable(ht)
-		    && areRampMetersOperatable(ht);
-	}
-
-	/** Check if beacons are operatable, or none have a hashtag */
-	private boolean areBeaconsOperatable(String ht) {
+	/** Check if beacons are operatable, or none associated with plan */
+	private boolean areBeaconsOperatable() {
 		Name name = new Name(Beacon.SONAR_TYPE, "state");
-		if (accessLevel(name) >= name.accessWrite())
-			return true;
-		Iterator<Beacon> it = BeaconHelper.iterator();
-		while (it.hasNext()) {
-			Beacon b = it.next();
-			if (b instanceof BeaconImpl) {
-				BeaconImpl bi = (BeaconImpl) b;
-				if (new Hashtags(bi.getNotes()).contains(ht))
-					return false;
-			}
-		}
-		return true;
+		return (accessLevel(name) >= name.accessWrite()) ||
+			(ActionPlanHelper.countBeacons(this) == 0);
 	}
 
-	/** Check if DMS are operatable, or none have a hashtag */
-	private boolean areDmsOperatable(String ht) {
+	/** Check if cameras are operatable, or none associated with plan */
+	private boolean areCamerasOperatable() {
+		Name name = new Name(Camera.SONAR_TYPE, "recallPreset");
+		return (accessLevel(name) >= name.accessWrite()) ||
+			(ActionPlanHelper.countCameras(this) == 0);
+	}
+
+	/** Check if DMS are operatable, or none associated with plan */
+	private boolean areDmsOperatable() {
 		Name name = new Name(DMS.SONAR_TYPE, "lock");
-		if (accessLevel(name) >= name.accessWrite())
-			return true;
-		Iterator<DMS> it = DMSHelper.iterator();
-		while (it.hasNext()) {
-			DMS d = it.next();
-			if (d instanceof DMSImpl) {
-				DMSImpl dms = (DMSImpl) d;
-				if (new Hashtags(d.getNotes()).contains(ht))
-					return false;
-			}
-		}
-		return true;
+		return (accessLevel(name) >= name.accessWrite()) ||
+			(ActionPlanHelper.countDms(this) == 0);
 	}
 
-	/** Check if ramp meters are operatable, or none have a hashtag */
-	private boolean areRampMetersOperatable(String ht) {
+	/** Check if ramp meters are operatable, or none associated with plan */
+	private boolean areRampMetersOperatable() {
 		Name name = new Name(RampMeter.SONAR_TYPE, "lock");
-		if (accessLevel(name) >= name.accessWrite())
-			return true;
-		Iterator<RampMeter> it = RampMeterHelper.iterator();
-		while (it.hasNext()) {
-			RampMeter rm = it.next();
-			if (rm instanceof RampMeterImpl) {
-				RampMeterImpl rmi = (RampMeterImpl) rm;
-				if (new Hashtags(rmi.getNotes()).contains(ht))
-					return false;
-			}
-		}
-		return true;
+		return (accessLevel(name) >= name.accessWrite()) ||
+			(ActionPlanHelper.countRampMeters(this) == 0);
 	}
 
 	/**
@@ -433,7 +412,6 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Check if a device action is deployable */
 	private boolean isDeployable(DeviceAction da) {
 		String ht = da.getHashtag();
-		// FIXME: any way to validate camera actions?
 		return areBeaconsDeployable(ht)
 		    && areDmsDeployable(ht)
 		    && areRampMetersDeployable(ht);
