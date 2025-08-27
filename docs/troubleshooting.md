@@ -54,8 +54,8 @@ Filename               | Description
 `ntcip`                | [NTCIP] protocols
 `org815`               | [ORG-815] protocol
 `pelcod`               | [Pelco-D] protocol
-`polling`              | Generic operaton polling log
 `plan`                 | Action plan log
+`polling`              | Generic operaton polling log
 `prio`                 | Operation priority log
 `profile`              | System profiling log
 `slow`                 | DMS [slow traffic] warning system log

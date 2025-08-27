@@ -195,11 +195,10 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 	private TreeSet<PlanPhase> createPhaseSet(final ActionPlan ap) {
 		final TreeSet<PlanPhase> phases =
 			new TreeSet<PlanPhase>(comparator);
-		Iterator<DeviceAction> dit = DeviceActionHelper.iterator();
+		Iterator<DeviceAction> dit = DeviceActionHelper.iterator(ap);
 		while (dit.hasNext()) {
 			DeviceAction da = dit.next();
-			if (da.getActionPlan() == ap)
-				phases.add(da.getPhase());
+			phases.add(da.getPhase());
 		}
 		return phases;
 	}

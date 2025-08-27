@@ -345,10 +345,10 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Check device action access permissions */
 	private void checkDeviceActions() throws ChangeVetoException {
-		Iterator<DeviceAction> it = DeviceActionHelper.iterator();
+		Iterator<DeviceAction> it = DeviceActionHelper.iterator(this);
 		while (it.hasNext()) {
 			DeviceAction da = it.next();
-			if (da.getActionPlan() == this && !isAccessOperate(da)) {
+			if (!isAccessOperate(da)) {
 				throw new ChangeVetoException("Device action " +
 					da.getName() + " not allowed");
 			}
@@ -420,10 +420,10 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	 *         ActionPlan is not deployable.
 	 */
 	private void validateDeviceActions() throws ChangeVetoException {
-		Iterator<DeviceAction> it = DeviceActionHelper.iterator();
+		Iterator<DeviceAction> it = DeviceActionHelper.iterator(this);
 		while (it.hasNext()) {
 			DeviceAction da = it.next();
-			if (da.getActionPlan() == this && !isDeployable(da)) {
+			if (!isDeployable(da)) {
 				throw new ChangeVetoException("Device action " +
 					da.getName() + " not deployable");
 			}

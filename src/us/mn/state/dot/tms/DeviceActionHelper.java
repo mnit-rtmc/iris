@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +42,30 @@ public class DeviceActionHelper extends BaseHelper {
 	static public Iterator<DeviceAction> iterator() {
 		return new IteratorWrapper<DeviceAction>(namespace.iterator(
 			DeviceAction.SONAR_TYPE));
+	}
+
+	/** Get a device action iterator for an action plan */
+	static public Iterator<DeviceAction> iterator(final ActionPlan ap) {
+		return new Iterator<DeviceAction>() {
+			final Iterator<DeviceAction> it = iterator();
+			DeviceAction next = it.next();
+			@Override public boolean hasNext() {
+				while (next != null) {
+					if (next.getActionPlan() == ap)
+						break;
+					next = it.next();
+				}
+				return next != null;
+			}
+			@Override public DeviceAction next() {
+				DeviceAction da = next;
+				next = null;
+				return da;
+			}
+			@Override public void remove() {
+				throw new UnsupportedOperationException();
+			}
+		};
 	}
 
 	/** Get set of hashtags with an action using a given message pattern */
