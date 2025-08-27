@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
@@ -24,17 +23,12 @@ import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.BeaconHelper;
 import us.mn.state.dot.tms.BeaconState;
-import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceActionHelper;
-import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.Hashtags;
-import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
 
@@ -46,17 +40,13 @@ import us.mn.state.dot.tms.RampMeterHelper;
 public class DeviceActionJob extends Job {
 
 	/** Plan debug log */
-	static private final DebugLog PLAN_LOG = new DebugLog("plan");
+	static final DebugLog PLAN_LOG = new DebugLog("plan");
 
 	/** Single action plan to process (null for all) */
 	private final ActionPlanImpl plan;
 
 	/** Logger for debugging */
 	private final DebugLog logger;
-
-	/** Set of deployed device actions */
-	private final HashSet<DeviceAction> dep_actions =
-		new HashSet<DeviceAction>();
 
 	/** Mapping of DMS to action tag messages */
 	private final HashMap<DMSImpl, ActionTagMsg> dms_actions =
@@ -104,14 +94,6 @@ public class DeviceActionJob extends Job {
 			performDmsAction(da);
 		performBeaconAction(da, deploy);
 		performRampMeterAction(da, deploy);
-		if (deploy) {
-			// Only perform camera actions on change
-			if (!dep_actions.contains(da)) {
-				performCameraAction(da);
-				dep_actions.add(da);
-			}
-		} else
-			dep_actions.remove(da);
 	}
 
 	/** Perform an action for DMS */
@@ -187,48 +169,6 @@ public class DeviceActionJob extends Job {
 				: BeaconState.DARK_REQ;
 			b.setState(bs.ordinal());
 		}
-	}
-
-	/** Perform an action for cameras */
-	private void performCameraAction(DeviceAction da) {
-		Iterator<Camera> it = CameraHelper.iterator();
-		while (it.hasNext()) {
-			Camera c = it.next();
-			if (c instanceof CameraImpl)
-				performCameraAction(da, (CameraImpl) c);
-		}
-	}
-
-	/** Perform a camera action */
-	private void performCameraAction(DeviceAction da, CameraImpl cam) {
-		Hashtags tags = new Hashtags(cam.getNotes());
-		if (tags.contains(da.getHashtag())) {
-			ActionTagMsg amsg = new ActionTagMsg(da, cam,
-				cam.getGeoLoc(), logger);
-			if (amsg.isPassing()) {
-				int preset_num = da.getMsgPriority();
-				if (preset_num >= 1 && preset_num <= 12) {
-					if (!isIncidentCamera(cam))
-						cam.setRecallPreset(preset_num);
-				} else if (preset_num == 15) {
-					cam.setDeviceReq(DeviceRequest.
-						CAMERA_WIPER_ONESHOT);
-				} else {
-					// FIXME: save snapshot?
-				}
-			}
-		}
-	}
-
-	/** Check if a camera is associated with an incident */
-	private boolean isIncidentCamera(CameraImpl cam) {
-		Iterator<Incident> it = IncidentHelper.iterator();
-		while (it.hasNext()) {
-			Incident i = it.next();
-			if (cam == i.getCamera() && !i.getCleared())
-				return true;
-		}
-		return false;
 	}
 
 	/** Perform an action for ramp meters */

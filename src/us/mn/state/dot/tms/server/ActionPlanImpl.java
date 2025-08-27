@@ -41,6 +41,7 @@ import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
+import static us.mn.state.dot.tms.server.MainServer.TIMER;
 import us.mn.state.dot.tms.server.event.ActionPlanEvent;
 import static us.mn.state.dot.tms.server.ActionPlanSystem.sendEmailAlert;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
@@ -302,6 +303,8 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	public void setPhase(PlanPhase p) {
 		phase = p;
 		phase_time = TimeSteward.currentTimeMillis();
+		if (active)
+			TIMER.addJob(new PlanPhaseChangeJob(this, p));
 	}
 
 	/**

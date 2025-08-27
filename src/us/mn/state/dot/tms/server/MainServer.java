@@ -135,7 +135,6 @@ public class MainServer {
 		// > (MainServer or MainClient) > Arguments, and add
 		// "-DrunInEclipse=true" (without the quotes) to the
 		// VM arguments box.
-		
 		String inEclipseStr = System.getProperty("runInEclipse");
 		if (inEclipseStr == null)
 			inEclipseStr = DevelCfg.get("runInEclipse");
