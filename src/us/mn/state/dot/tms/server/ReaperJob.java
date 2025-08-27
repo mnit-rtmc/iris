@@ -335,16 +335,14 @@ public class ReaperJob extends Job {
 					tai.notifyRemove();
 			}
 		}
-		Iterator<DeviceAction> dit = DeviceActionHelper.iterator();
+		Iterator<DeviceAction> dit = DeviceActionHelper.iterator(ap);
 		while (dit.hasNext()) {
 			DeviceAction da = dit.next();
 			if (da instanceof DeviceActionImpl) {
 				DeviceActionImpl dai = (DeviceActionImpl) da;
-				if (dai.getActionPlan() == ap) {
-					String ht = dai.getHashtag();
-					reapDmsHashtag(ht);
-					dai.notifyRemove();
-				}
+				String ht = dai.getHashtag();
+				reapDmsHashtag(ht);
+				dai.notifyRemove();
 			}
 		}
 		if (ap instanceof ActionPlanImpl) {

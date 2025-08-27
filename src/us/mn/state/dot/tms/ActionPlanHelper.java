@@ -47,11 +47,10 @@ public class ActionPlanHelper extends BaseHelper {
 	/** Find all hashtags associated with an action plan */
 	static public Set<String> findHashtags(ActionPlan ap) {
 		HashSet<String> hashtags = new HashSet<String>();
-		Iterator<DeviceAction> it = DeviceActionHelper.iterator();
+		Iterator<DeviceAction> it = DeviceActionHelper.iterator(ap);
 		while (it.hasNext()) {
 			DeviceAction da = it.next();
-			if (da.getActionPlan() == ap)
-				hashtags.add(da.getHashtag());
+			hashtags.add(da.getHashtag());
 		}
 		return hashtags;
 	}

@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
- * Copyright (C) 2021-2024  Minnesota Department of Transportation
+ * Copyright (C) 2021-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,18 +48,16 @@ public class AlertInfoHelper extends BaseHelper {
 	static public Set<DMS> findActiveSigns(AlertInfo ai) {
 		HashSet<DMS> signs = new HashSet<DMS>();
 		ActionPlan ap = ai.getActionPlan();
-		Iterator<DeviceAction> it = DeviceActionHelper.iterator();
+		Iterator<DeviceAction> it = DeviceActionHelper.iterator(ap);
 		while (it.hasNext()) {
 			DeviceAction da = it.next();
-			if (da.getActionPlan() == ap) {
-				String ht = da.getHashtag();
-				Iterator<DMS> dit = DMSHelper.iterator();
-				while (dit.hasNext()) {
-					DMS d = dit.next();
-					String n = d.getNotes();
-					if (new Hashtags(n).contains(ht))
-						signs.add(d);
-				}
+			String ht = da.getHashtag();
+			Iterator<DMS> dit = DMSHelper.iterator();
+			while (dit.hasNext()) {
+				DMS d = dit.next();
+				String n = d.getNotes();
+				if (new Hashtags(n).contains(ht))
+					signs.add(d);
 			}
 		}
 		return signs;
