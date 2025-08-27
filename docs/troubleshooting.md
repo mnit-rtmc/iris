@@ -55,9 +55,9 @@ Filename               | Description
 `org815`               | [ORG-815] protocol
 `pelcod`               | [Pelco-D] protocol
 `polling`              | Generic operaton polling log
+`plan`                 | Action plan log
 `prio`                 | Operation priority log
 `profile`              | System profiling log
-`sched`                | DMS scheduled message log
 `slow`                 | DMS [slow traffic] warning system log
 `snmp`                 | SNMP error log
 `sonar`                | SONAR connection log

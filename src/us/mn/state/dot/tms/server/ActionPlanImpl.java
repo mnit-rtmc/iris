@@ -355,7 +355,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		}
 	}
 
-	/** Check if a device action access is operate */
+	/** Check if a device action access is "operate" (or higher) */
 	private boolean isAccessOperate(DeviceAction da) {
 		String ht = da.getHashtag();
 		return areBeaconsOperatable(ht)
