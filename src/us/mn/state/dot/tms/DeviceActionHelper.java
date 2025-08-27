@@ -48,18 +48,18 @@ public class DeviceActionHelper extends BaseHelper {
 	static public Iterator<DeviceAction> iterator(final ActionPlan ap) {
 		return new Iterator<DeviceAction>() {
 			final Iterator<DeviceAction> it = iterator();
-			DeviceAction next = it.next();
+			DeviceAction dan = it.next();
 			@Override public boolean hasNext() {
-				while (next != null) {
-					if (next.getActionPlan() == ap)
+				while (dan != null) {
+					if (dan.getActionPlan() == ap)
 						break;
-					next = it.next();
+					dan = it.next();
 				}
-				return next != null;
+				return dan != null;
 			}
 			@Override public DeviceAction next() {
-				DeviceAction da = next;
-				next = null;
+				DeviceAction da = dan;
+				dan = it.next();
 				return da;
 			}
 			@Override public void remove() {
