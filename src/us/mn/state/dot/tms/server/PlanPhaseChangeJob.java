@@ -86,7 +86,7 @@ public class PlanPhaseChangeJob extends Job {
 			logMsg(cam, "action " + da.getName());
 			ActionTagMsg amsg = new ActionTagMsg(da, cam,
 				cam.getGeoLoc(), DeviceActionJob.PLAN_LOG);
-			if (amsg.isPassing()) {
+			if (amsg.isCondition()) {
 				int preset_num = da.getMsgPriority();
 				if (preset_num >= 1 && preset_num <= 12) {
 					if (!isIncidentCamera(cam))
