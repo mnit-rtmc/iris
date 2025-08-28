@@ -117,7 +117,7 @@ public class DeviceActionJob extends Job {
 			if (logger.isOpen())
 				logMsg(dms, "checking " + da);
 			ActionTagMsg amsg = new ActionTagMsg(da, dms,
-				dms.getGeoLoc(), logger);
+				dms.getGeoLoc());
 			if (DMSHelper.isRasterizable(dms, amsg.getMulti()))
 				dms_actions.put(dms, amsg);
 		} else if (logger.isOpen())
@@ -163,7 +163,7 @@ public class DeviceActionJob extends Job {
 		Hashtags tags = new Hashtags(b.getNotes());
 		if (tags.contains(da.getHashtag())) {
 			ActionTagMsg amsg = new ActionTagMsg(da, b,
-				b.getGeoLoc(), logger);
+				b.getGeoLoc());
 			BeaconState bs = (amsg.isCondition() && deploy)
 				? BeaconState.FLASHING_REQ
 				: BeaconState.DARK_REQ;
@@ -190,7 +190,7 @@ public class DeviceActionJob extends Job {
 		Hashtags tags = new Hashtags(rm.getNotes());
 		if (tags.contains(da.getHashtag())) {
 			ActionTagMsg amsg = new ActionTagMsg(da, rm,
-				rm.getGeoLoc(), logger);
+				rm.getGeoLoc());
 			boolean operate = amsg.isCondition() && deploy;
 			if (meters.containsKey(rm))
 				operate |= meters.get(rm);
