@@ -48,10 +48,6 @@ public class DeviceActionJob extends Job {
 	/** Logger for debugging */
 	private final DebugLog logger;
 
-	/** Mapping of DMS to planned actions */
-	private final HashMap<DMSImpl, PlannedAction> dms_actions =
-		new HashMap<DMSImpl, PlannedAction>();
-
 	/** Mapping of ramp meters to operating states */
 	private final HashMap<RampMeterImpl, Boolean> meters =
 		new HashMap<RampMeterImpl, Boolean>();
@@ -76,6 +72,7 @@ public class DeviceActionJob extends Job {
 	/** Perform device actions */
 	@Override
 	public void perform() {
+		clearDmsActions();
 		Iterator<DeviceAction> it = DeviceActionHelper.iterator();
 		while (it.hasNext()) {
 			DeviceAction da = it.next();
@@ -83,8 +80,20 @@ public class DeviceActionJob extends Job {
 			if (ap.getActive() && (plan == null || plan == ap))
 				processAction(ap, da);
 		}
-		updateDmsMessages();
+		chooseDmsActions();
 		updateRampMeterStates();
+	}
+
+	/** Clear previous planned actions for all DMS */
+	private void clearDmsActions() {
+		Iterator<DMS> it = DMSHelper.iterator();
+		while (it.hasNext()) {
+			DMS dms = it.next();
+			if (dms instanceof DMSImpl) {
+				DMSImpl dmsi = (DMSImpl) dms;
+				dmsi.clearPlannedActions();
+			}
+		}
 	}
 
 	/** Process one device action */
@@ -113,36 +122,23 @@ public class DeviceActionJob extends Job {
 
 	/** Check an action for one DMS */
 	private void checkAction(DeviceAction da, DMSImpl dms) {
-		if (shouldReplace(da, dms)) {
-			if (logger.isOpen())
-				logMsg(dms, "checking " + da);
-			TagProcessor tag = new TagProcessor(da, dms,
-				dms.getGeoLoc());
-			PlannedAction pa = tag.process();
-			if (DMSHelper.isRasterizable(dms, pa.multi))
-				dms_actions.put(dms, pa);
-		} else if (logger.isOpen())
-			logMsg(dms, "dropping " + da);
+		if (logger.isOpen())
+			logMsg(dms, "checking " + da);
+		TagProcessor tag = new TagProcessor(da, dms, dms.getGeoLoc());
+		PlannedAction pa = tag.process();
+		dms.addPlannedAction(pa);
 	}
 
-	/** Check if an action should replace the current DMS action */
-	private boolean shouldReplace(DeviceAction da, DMSImpl dms) {
-		PlannedAction pa = dms_actions.get(dms);
-		DeviceAction o = (pa != null) ? pa.action : null;
-		return (null == o) || da.getMsgPriority() >= o.getMsgPriority();
-	}
-
-	/** Update the DMS messages */
-	private void updateDmsMessages() {
+	/** Choose the planned actions for all DMS */
+	private void chooseDmsActions() {
 		Iterator<DMS> it = DMSHelper.iterator();
 		while (it.hasNext()) {
 			DMS dms = it.next();
 			if (dms instanceof DMSImpl) {
 				DMSImpl dmsi = (DMSImpl) dms;
-				PlannedAction pa = dms_actions.get(dmsi);
+				PlannedAction pa = dmsi.choosePlannedAction();
 				if (logger.isOpen())
 					logMsg(dms, "planning " + pa);
-				dmsi.setPlannedAction(pa);
 			}
 		}
 	}

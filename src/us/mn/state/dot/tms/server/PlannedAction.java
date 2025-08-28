@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.event.PriceMessageEvent;
  *
  * @author Douglas Lau
  */
-public class PlannedAction {
+public class PlannedAction implements Comparable<PlannedAction> {
 
 	/** Device action */
 	public final DeviceAction action;
@@ -48,6 +48,22 @@ public class PlannedAction {
 	@Override
 	public String toString() {
 		return action.toString() + " on " + device;
+	}
+
+	/** Compare to another planned action */
+	@Override
+	public int compareTo(PlannedAction o) {
+		int p = action.getMsgPriority() - o.action.getMsgPriority();
+		return (p != 0)
+			? p
+			: action.getName().compareTo(o.action.getName());
+	}
+
+	/** Check actions for equality */
+	@Override
+	public boolean equals(Object o) {
+		return (o instanceof PlannedAction) &&
+			action.equals(((PlannedAction) o).action);
 	}
 
 	/** Create a new planned action */
