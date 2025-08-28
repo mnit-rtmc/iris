@@ -658,11 +658,14 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Choose the planned action */
 	public PlannedAction choosePlannedAction() {
 		PlannedAction pa = null;
-		for (PlannedAction a : planned_actions) {
+		Iterator<PlannedAction> it = planned_actions.iterator();
+		while (it.hasNext()) {
+			PlannedAction a = it.next();
 			if (DMSHelper.isRasterizable(this, a.multi)) {
 				pa = a;
 				break;
-			}
+			} else
+				it.remove();
 		}
 		SignMessage sm = (pa != null) ? createMsgSched(pa) : null;
 		setPrices(pa);
