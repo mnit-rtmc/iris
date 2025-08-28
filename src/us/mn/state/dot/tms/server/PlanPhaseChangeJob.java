@@ -85,7 +85,7 @@ public class PlanPhaseChangeJob extends Job {
 		if (tags.contains(da.getHashtag())) {
 			logMsg(cam, "action " + da.getName());
 			ActionTagMsg amsg = new ActionTagMsg(da, cam,
-				cam.getGeoLoc(), DeviceActionJob.PLAN_LOG);
+				cam.getGeoLoc());
 			if (amsg.isCondition()) {
 				int preset_num = da.getMsgPriority();
 				if (preset_num >= 1 && preset_num <= 12) {

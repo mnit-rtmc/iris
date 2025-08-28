@@ -65,7 +65,8 @@ import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Action tags are similar to MULTI tags, but processed before sending to the
- * sign.
+ * device.  They are also not limited to DMS, and can add conditions which
+ * trigger whether a device action is performed.
  *
  * @author Douglas Lau
  * @author Michael Darter
@@ -214,11 +215,16 @@ public class ActionTagMsg {
 	/** Device location */
 	private final GeoLoc loc;
 
-	/** Schedule debug log */
-	private final DebugLog dlog;
+	/** Plan debug log */
+	private final DebugLog logger;
 
 	/** MULTI string after processing action tags */
 	private final String multi;
+
+	/** Get the MULTI string */
+	public String getMulti() {
+		return multi;
+	}
 
 	/** Flag to indicate passing all action tag conditions */
 	private boolean condition;
@@ -271,33 +277,26 @@ public class ActionTagMsg {
 		return action.toString() + " on " + device;
 	}
 
-	/** Get the MULTI string */
-	public String getMulti() {
-		return multi;
-	}
-
 	/** Fail parsing message */
 	private String fail(String msg) {
 		condition = false;
-		if (dlog.isOpen()) {
-			dlog.log(toString() + " [fail]: " + msg +
+		if (logger.isOpen()) {
+			logger.log(toString() + " [fail]: " + msg +
 				" (" + getActionMulti() + ")");
 		}
 		return EMPTY_SPAN;
 	}
 
 	/** Create a new action tag message */
-	public ActionTagMsg(DeviceAction da, DeviceImpl d, GeoLoc gl,
-		DebugLog l)
-	{
+	public ActionTagMsg(DeviceAction da, DeviceImpl d, GeoLoc gl) {
 		action = da;
 		device = d;
 		loc = gl;
-		dlog = l;
+		logger = DeviceActionJob.PLAN_LOG;
 		condition = true;
 		multi = processAction();
-		if (condition && dlog.isOpen()) {
-			dlog.log(toString() + " [ok]: " + multi +
+		if (condition && logger.isOpen()) {
+			logger.log(toString() + " [ok]: " + multi +
 				" (" + getActionMulti() + ")");
 		}
 	}
@@ -471,8 +470,8 @@ public class ActionTagMsg {
 	private String calculateSpeedAdvisory(Corridor cor, float m) {
 		VSStationFinder vss_finder = new VSStationFinder(m);
 		cor.findStation(vss_finder);
-		if (dlog.isOpen())
-			vss_finder.debug(dlog);
+		if (logger.isOpen())
+			vss_finder.debug(logger);
 		if (!vss_finder.foundVSS())
 			return fail("Start station not found");
 		Integer lim = vss_finder.getSpeedLimit();
@@ -988,8 +987,8 @@ public class ActionTagMsg {
 			dms, wid, mode, idx);
 		if (stat != null && (stat < min || stat > max))
 			stat = null;
-		if (dlog.isOpen()) {
-			dlog.log("calcClearGuideAdvisory:" +
+		if (logger.isOpen()) {
+			logger.log("calcClearGuideAdvisory:" +
 				" dms=" + dms + " wid=" + wid +
 				" min=" + min + " max=" + max +
 				" mode=" + mode + " idx=" + idx +
@@ -1003,8 +1002,8 @@ public class ActionTagMsg {
 		} else {
 			String msg = "No match: does statistic, " + 
 				"route_id and index match?";
-			if (dlog.isOpen())
-				dlog.log("calcClearGuideAdvisory: " + msg);
+			if (logger.isOpen())
+				logger.log("calcClearGuideAdvisory: " + msg);
 			return fail(msg);
 		}
 	}
