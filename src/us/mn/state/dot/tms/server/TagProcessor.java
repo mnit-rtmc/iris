@@ -64,14 +64,14 @@ import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
- * Action tags are similar to MULTI tags, but processed before sending to the
- * device.  They are also not limited to DMS, and can add conditions which
- * trigger whether a device action is performed.
+ * Processor for action tags.  They are similar to regular MULTI tags, but
+ * processed before sending to the device.  They are also not limited to DMS,
+ * and can add conditions which trigger whether a device action is performed.
  *
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class ActionTagMsg {
+public class TagProcessor {
 
 	/** Empty text span */
 	static private final String EMPTY_SPAN = "";
@@ -207,7 +207,7 @@ public class ActionTagMsg {
 	}
 
 	/** Device action */
-	public final DeviceAction action;
+	private final DeviceAction action;
 
 	/** Device in question */
 	private final DeviceImpl device;
@@ -218,21 +218,8 @@ public class ActionTagMsg {
 	/** Plan debug log */
 	private final DebugLog logger;
 
-	/** MULTI string after processing action tags */
-	private final String multi;
-
-	/** Get the MULTI string */
-	public String getMulti() {
-		return multi;
-	}
-
 	/** Flag to indicate passing all action tag conditions */
 	private boolean condition;
-
-	/** Check flag passing all action tag conditions */
-	public boolean isCondition() {
-		return condition;
-	}
 
 	/** Sign message sources */
 	private int sources;
@@ -240,11 +227,6 @@ public class ActionTagMsg {
 	/** Add a message source */
 	private void addSource(SignMsgSource s) {
 		sources |= s.bit();
-	}
-
-	/** Get the message sources */
-	public int getSources() {
-		return sources;
 	}
 
 	/** Mapping of station IDs to travel times */
@@ -267,14 +249,8 @@ public class ActionTagMsg {
 	}
 
 	/** Get tolling prices */
-	public ArrayList<PriceMessageEvent> getPrices() {
+	private ArrayList<PriceMessageEvent> getPrices() {
 		return (condition && prices.size() > 0) ? prices : null;
-	}
-
-	/** Get a string representation */
-	@Override
-	public String toString() {
-		return action.toString() + " on " + device;
 	}
 
 	/** Fail parsing message */
@@ -287,18 +263,13 @@ public class ActionTagMsg {
 		return EMPTY_SPAN;
 	}
 
-	/** Create a new action tag message */
-	public ActionTagMsg(DeviceAction da, DeviceImpl d, GeoLoc gl) {
+	/** Create a new device action tag processor */
+	public TagProcessor(DeviceAction da, DeviceImpl d, GeoLoc gl) {
 		action = da;
 		device = d;
 		loc = gl;
 		logger = DeviceActionJob.PLAN_LOG;
 		condition = true;
-		multi = processAction();
-		if (condition && logger.isOpen()) {
-			logger.log(toString() + " [ok]: " + multi +
-				" (" + getActionMulti() + ")");
-		}
 	}
 
 	/** Get the MULTI string for the device action */
@@ -307,10 +278,31 @@ public class ActionTagMsg {
 		return (pat != null) ? pat.getMulti().trim() : EMPTY_SPAN;
 	}
 
-	/** Process a device action */
-	private String processAction() {
+	/** Process device action tags */
+	public PlannedAction process() {
 		String ms = getActionMulti();
-		return (ms.length() > 0) ? process(ms) : null;
+		String multi = (ms.length() > 0) ? process(ms) : null;
+		if (condition && logger.isOpen()) {
+			logger.log(toString() + " [ok]: " + multi +
+				" (" + getActionMulti() + ")");
+		}
+		return new PlannedAction(action, device, condition, multi,
+			sources, getPrices());
+	}
+
+	/** Process action tags */
+	private String process(String ms) {
+		addSource(SignMsgSource.schedule);
+		if (isGateArm())
+			addSource(SignMsgSource.gate_arm);
+		if (isAlert())
+			addSource(SignMsgSource.alert);
+		new MultiString(ms).parse(builder);
+		MultiString multi = builder.toMultiString();
+		if (isBlank(multi))
+			return (condition) ? feed_msg : null;
+		else
+			return postProcess(multi.toString());
 	}
 
 	/** MULTI string builder for parsing action tags */
@@ -333,8 +325,8 @@ public class ActionTagMsg {
 		{
 			addSpan(clearGuideSpan(dms, wid, min, max, mode, idx));
 		}
-		@Override public void addRwis(String condition, int level) {
-			addSpan(rwisSpan(condition, level));
+		@Override public void addRwis(String cond, int level) {
+			addSpan(rwisSpan(cond, level));
 		}
 		@Override public void addSlowWarning(int spd, int dist,
 			String mode)
@@ -360,21 +352,6 @@ public class ActionTagMsg {
 		}
 	};
 
-	/** Process action tags */
-	private String process(String ms) {
-		addSource(SignMsgSource.schedule);
-		if (isGateArm())
-			addSource(SignMsgSource.gate_arm);
-		if (isAlert())
-			addSource(SignMsgSource.alert);
-		new MultiString(ms).parse(builder);
-		MultiString _multi = builder.toMultiString();
-		if (isBlank(_multi))
-			return (condition) ? feed_msg : null;
-		else
-			return postProcess(_multi.toString());
-	}
-
 	/** Check if the action source is gate arm */
 	private boolean isGateArm() {
 		return PlanPhaseHelper.isGateArm(action.getPhase());
@@ -386,8 +363,8 @@ public class ActionTagMsg {
 	}
 
 	/** Check if message is blank */
-	private boolean isBlank(MultiString _multi) {
-		return _multi.isBlank() && travel.isEmpty();
+	private boolean isBlank(MultiString multi) {
+		return multi.isBlank() && travel.isEmpty();
 	}
 
 	/** Post-process action tags */
@@ -488,20 +465,20 @@ public class ActionTagMsg {
 	}
 
 	/** Make an RWIS warning span.
-	 * @param condition Weather condition.
+	 * @param cond Weather condition.
 	 * @param level Warning level. */
-	private String rwisSpan(String condition, int level) {
+	private String rwisSpan(String cond, int level) {
 		addSource(SignMsgSource.rwis);
-		if (condition.equals("slippery"))
+		if (cond.equals("slippery"))
 			return rwisSlipperySpan(level);
-		else if (condition.equals("windy"))
+		else if (cond.equals("windy"))
 			return rwisWindySpan(level);
-		else if (condition.equals("visibility"))
+		else if (cond.equals("visibility"))
 			return rwisVisibilitySpan(level);
-		else if (condition.equals("flooding"))
+		else if (cond.equals("flooding"))
 			return rwisFloodingSpan(level);
 		else
-			return fail("Invalid condition: " + condition);
+			return fail("Invalid condition: " + cond);
 	}
 
 	/** Get active RWIS weather sensors */

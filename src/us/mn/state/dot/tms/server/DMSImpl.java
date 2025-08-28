@@ -564,14 +564,14 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Create a scheduled message.
-	 * @param amsg Action tag message.
+	 * @param pa Planned action.
 	 * @return New sign message, or null on error. */
-	private SignMessage createMsgSched(ActionTagMsg amsg) {
-		assert (amsg != null);
-		DeviceAction da = amsg.action;
+	private SignMessage createMsgSched(PlannedAction pa) {
+		assert (pa != null);
+		DeviceAction da = pa.action;
 		ActionPlan ap = da.getActionPlan();
-		String ms = amsg.getMulti();
-		int src = amsg.getSources();
+		String ms = pa.multi;
+		int src = pa.sources;
 		String owner = SignMessageHelper.makeMsgOwner(src,
 			ap.getName());
 		MsgPattern pat = da.getMsgPattern();
@@ -640,10 +640,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return msg_sched;
 	}
 
-	/** Set the scheduled action tag message */
-	public void setActionMsg(ActionTagMsg amsg) {
-		SignMessage sm = (amsg != null) ? createMsgSched(amsg) : null;
-		setPrices(amsg);
+	/** Set the planned action */
+	public void setPlannedAction(PlannedAction pa) {
+		SignMessage sm = (pa != null) ? createMsgSched(pa) : null;
+		setPrices(pa);
 		if (setMsgSchedNotify(sm))
 			updateSchedMsg();
 	}
@@ -700,8 +700,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private transient ArrayList<PriceMessageEvent> prices;
 
 	/** Set tolling prices */
-	private void setPrices(ActionTagMsg amsg) {
-		prices = (amsg != null) ? amsg.getPrices() : null;
+	private void setPrices(PlannedAction pa) {
+		prices = (pa != null) ? pa.prices : null;
 	}
 
 	/** Log price (tolling) messages.
