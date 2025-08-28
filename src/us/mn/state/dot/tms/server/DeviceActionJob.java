@@ -48,9 +48,9 @@ public class DeviceActionJob extends Job {
 	/** Logger for debugging */
 	private final DebugLog logger;
 
-	/** Mapping of DMS to action tag messages */
-	private final HashMap<DMSImpl, ActionTagMsg> dms_actions =
-		new HashMap<DMSImpl, ActionTagMsg>();
+	/** Mapping of DMS to planned actions */
+	private final HashMap<DMSImpl, PlannedAction> dms_actions =
+		new HashMap<DMSImpl, PlannedAction>();
 
 	/** Mapping of ramp meters to operating states */
 	private final HashMap<RampMeterImpl, Boolean> meters =
@@ -116,18 +116,19 @@ public class DeviceActionJob extends Job {
 		if (shouldReplace(da, dms)) {
 			if (logger.isOpen())
 				logMsg(dms, "checking " + da);
-			ActionTagMsg amsg = new ActionTagMsg(da, dms,
+			TagProcessor tag = new TagProcessor(da, dms,
 				dms.getGeoLoc());
-			if (DMSHelper.isRasterizable(dms, amsg.getMulti()))
-				dms_actions.put(dms, amsg);
+			PlannedAction pa = tag.process();
+			if (DMSHelper.isRasterizable(dms, pa.multi))
+				dms_actions.put(dms, pa);
 		} else if (logger.isOpen())
 			logMsg(dms, "dropping " + da);
 	}
 
 	/** Check if an action should replace the current DMS action */
 	private boolean shouldReplace(DeviceAction da, DMSImpl dms) {
-		ActionTagMsg amsg = dms_actions.get(dms);
-		DeviceAction o = (amsg != null) ? amsg.action : null;
+		PlannedAction pa = dms_actions.get(dms);
+		DeviceAction o = (pa != null) ? pa.action : null;
 		return (null == o) || da.getMsgPriority() >= o.getMsgPriority();
 	}
 
@@ -138,10 +139,10 @@ public class DeviceActionJob extends Job {
 			DMS dms = it.next();
 			if (dms instanceof DMSImpl) {
 				DMSImpl dmsi = (DMSImpl) dms;
-				ActionTagMsg amsg = dms_actions.get(dmsi);
+				PlannedAction pa = dms_actions.get(dmsi);
 				if (logger.isOpen())
-					logMsg(dms, "scheduling " + amsg);
-				dmsi.setActionMsg(amsg);
+					logMsg(dms, "planning " + pa);
+				dmsi.setPlannedAction(pa);
 			}
 		}
 	}
@@ -162,9 +163,10 @@ public class DeviceActionJob extends Job {
 	{
 		Hashtags tags = new Hashtags(b.getNotes());
 		if (tags.contains(da.getHashtag())) {
-			ActionTagMsg amsg = new ActionTagMsg(da, b,
+			TagProcessor tag = new TagProcessor(da, b,
 				b.getGeoLoc());
-			BeaconState bs = (amsg.isCondition() && deploy)
+			PlannedAction pa = tag.process();
+			BeaconState bs = (pa.condition && deploy)
 				? BeaconState.FLASHING_REQ
 				: BeaconState.DARK_REQ;
 			b.setState(bs.ordinal());
@@ -189,9 +191,10 @@ public class DeviceActionJob extends Job {
 	{
 		Hashtags tags = new Hashtags(rm.getNotes());
 		if (tags.contains(da.getHashtag())) {
-			ActionTagMsg amsg = new ActionTagMsg(da, rm,
+			TagProcessor tag = new TagProcessor(da, rm,
 				rm.getGeoLoc());
-			boolean operate = amsg.isCondition() && deploy;
+			PlannedAction pa = tag.process();
+			boolean operate = pa.condition && deploy;
 			if (meters.containsKey(rm))
 				operate |= meters.get(rm);
 			meters.put(rm, operate);
