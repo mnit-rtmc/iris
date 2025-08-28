@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,9 +45,9 @@ public class ActionPlanJob extends Job {
 	/** Perform the action plan job */
 	@Override
 	public void perform() throws TMSException {
+		updateActionPlanPhases();
 		timer.addJob(new TimeActionJob());
 		timer.addJob(new DeviceActionJob());
-		updateActionPlanPhases();
 	}
 
 	/** Update the action plan phases */
