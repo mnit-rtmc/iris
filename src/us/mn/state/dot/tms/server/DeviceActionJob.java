@@ -164,7 +164,7 @@ public class DeviceActionJob extends Job {
 		if (tags.contains(da.getHashtag())) {
 			ActionTagMsg amsg = new ActionTagMsg(da, b,
 				b.getGeoLoc(), logger);
-			BeaconState bs = (amsg.isPassing() && deploy)
+			BeaconState bs = (amsg.isCondition() && deploy)
 				? BeaconState.FLASHING_REQ
 				: BeaconState.DARK_REQ;
 			b.setState(bs.ordinal());
@@ -191,7 +191,7 @@ public class DeviceActionJob extends Job {
 		if (tags.contains(da.getHashtag())) {
 			ActionTagMsg amsg = new ActionTagMsg(da, rm,
 				rm.getGeoLoc(), logger);
-			boolean operate = amsg.isPassing() && deploy;
+			boolean operate = amsg.isCondition() && deploy;
 			if (meters.containsKey(rm))
 				operate |= meters.get(rm);
 			meters.put(rm, operate);

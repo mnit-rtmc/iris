@@ -220,11 +220,13 @@ public class ActionTagMsg {
 	/** MULTI string after processing action tags */
 	private final String multi;
 
-	/** Valid message (successfully parsed) */
-	private boolean valid;
+	/** Flag to indicate passing all action tag conditions */
+	private boolean condition;
 
-	/** Passing all action tag conditions (stipulations) */
-	private boolean passing;
+	/** Check flag passing all action tag conditions */
+	public boolean isCondition() {
+		return condition;
+	}
 
 	/** Sign message sources */
 	private int sources;
@@ -260,18 +262,13 @@ public class ActionTagMsg {
 
 	/** Get tolling prices */
 	public ArrayList<PriceMessageEvent> getPrices() {
-		return (valid && prices.size() > 0) ? prices : null;
+		return (condition && prices.size() > 0) ? prices : null;
 	}
 
 	/** Get a string representation */
 	@Override
 	public String toString() {
 		return action.toString() + " on " + device;
-	}
-
-	/** Check if passing all action tag conditions (stipulations) */
-	public boolean isPassing() {
-		return passing;
 	}
 
 	/** Get the MULTI string */
@@ -281,8 +278,7 @@ public class ActionTagMsg {
 
 	/** Fail parsing message */
 	private String fail(String msg) {
-		valid = false;
-		passing = false;
+		condition = false;
 		if (dlog.isOpen()) {
 			dlog.log(toString() + " [fail]: " + msg +
 				" (" + getActionMulti() + ")");
@@ -298,10 +294,9 @@ public class ActionTagMsg {
 		device = d;
 		loc = gl;
 		dlog = l;
-		valid = true;
-		passing = true;
+		condition = true;
 		multi = processAction();
-		if (valid && dlog.isOpen()) {
+		if (condition && dlog.isOpen()) {
 			dlog.log(toString() + " [ok]: " + multi +
 				" (" + getActionMulti() + ")");
 		}
@@ -376,7 +371,7 @@ public class ActionTagMsg {
 		new MultiString(ms).parse(builder);
 		MultiString _multi = builder.toMultiString();
 		if (isBlank(_multi))
-			return (valid) ? feed_msg : null;
+			return (condition) ? feed_msg : null;
 		else
 			return postProcess(_multi.toString());
 	}
@@ -401,7 +396,7 @@ public class ActionTagMsg {
 		if (feed_msg != null)
 			fail("Malformed feed message");
 		ms = processTravelTimes(ms);
-		return (valid) ? ms : null;
+		return (condition) ? ms : null;
 	}
 
 	/** Process travel time tags */
