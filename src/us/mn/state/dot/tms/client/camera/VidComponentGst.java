@@ -167,8 +167,9 @@ public class VidComponentGst extends javax.swing.JComponent {
 	private ActionListener resourceReaper = new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
 			if (!frameRendered) {
-				if (volatileImage != null) {
-					volatileImage.flush();
+				VolatileImage vimg = volatileImage;
+				if (vimg != null) {
+					vimg.flush();
 					volatileImage = null;
 				}
 				// Stop the timer so we don't wakeup needlessly
@@ -231,26 +232,27 @@ public class VidComponentGst extends javax.swing.JComponent {
 		}
 	}
 
-	private void renderVolatileImage(BufferedImage bufferedImage) {
+	private VolatileImage renderVolatileImage(BufferedImage bufferedImage) {
+		VolatileImage vimg = volatileImage;
 		do {
 			int w = bufferedImage.getWidth(), h = bufferedImage.getHeight();
 			GraphicsConfiguration gc = getGraphicsConfiguration();
-			if (volatileImage == null
-				|| volatileImage.getWidth() != w
-				|| volatileImage.getHeight() != h
-				|| volatileImage.validate(gc) == VolatileImage.IMAGE_INCOMPATIBLE)
+			if (vimg == null
+				|| vimg.getWidth() != w
+				|| vimg.getHeight() != h
+				|| vimg.validate(gc) == VolatileImage.IMAGE_INCOMPATIBLE)
 			{
-				if (volatileImage != null) {
-					volatileImage.flush();
-				}
-				volatileImage = gc.createCompatibleVolatileImage(w, h);
-				volatileImage.setAccelerationPriority(1.0f);
+				if (vimg != null)
+					vimg.flush();
+				vimg = gc.createCompatibleVolatileImage(w, h);
+				vimg.setAccelerationPriority(1.0f);
 			}
 			// Now paint the BufferedImage into the accelerated image
-			Graphics2D g = volatileImage.createGraphics();
+			Graphics2D g = vimg.createGraphics();
 			g.drawImage(bufferedImage, 0, 0, null);
 			g.dispose();
-		} while (volatileImage.contentsLost());
+		} while (vimg.contentsLost());
+		return vimg;
 	}
 
 	/**
@@ -264,21 +266,23 @@ public class VidComponentGst extends javax.swing.JComponent {
 	 * @param h the height of the paint area
 	 */
 	private void volatileRender(Graphics g, int x, int y, int w, int h) {
+		VolatileImage vimg = volatileImage;
 		do {
 			if (updatePending
-				|| volatileImage == null
-				|| volatileImage.validate(getGraphicsConfiguration()) != VolatileImage.IMAGE_OK)
+				|| vimg  == null
+				|| vimg.validate(getGraphicsConfiguration()) != VolatileImage.IMAGE_OK)
 			{
 				bufferLock.lock();
 				try {
 					updatePending = false;
-					renderVolatileImage(currentImage);
+					vimg = renderVolatileImage(currentImage);
 				} finally {
 					bufferLock.unlock();
 				}
 			}
-			g.drawImage(volatileImage, x, y, w, h, null);
-		} while (volatileImage.contentsLost());
+			g.drawImage(vimg, x, y, w, h, null);
+		} while (vimg.contentsLost());
+		volatileImage = vimg;
 	}
 
 	/**
