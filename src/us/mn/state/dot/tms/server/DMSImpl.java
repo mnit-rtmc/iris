@@ -658,7 +658,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Choose the planned action */
 	public PlannedAction choosePlannedAction() {
 		PlannedAction pa = null;
-		Iterator<PlannedAction> it = planned_actions.iterator();
+		Iterator<PlannedAction> it =
+			planned_actions.descendingIterator();
 		while (it.hasNext()) {
 			PlannedAction a = it.next();
 			if (DMSHelper.isRasterizable(this, a.multi)) {
