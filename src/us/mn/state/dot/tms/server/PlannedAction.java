@@ -29,9 +29,6 @@ public class PlannedAction implements Comparable<PlannedAction> {
 	/** Device action */
 	public final DeviceAction action;
 
-	/** Device being controlled */
-	public final DeviceImpl device;
-
 	/** Flag to indicate passing all action tag conditions */
 	public final boolean condition;
 
@@ -47,7 +44,7 @@ public class PlannedAction implements Comparable<PlannedAction> {
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		return action.toString() + " on " + device;
+		return "" + action + " condition: " + condition;
 	}
 
 	/** Compare to another planned action */
@@ -67,11 +64,10 @@ public class PlannedAction implements Comparable<PlannedAction> {
 	}
 
 	/** Create a new planned action */
-	public PlannedAction(DeviceAction da, DeviceImpl d, boolean c,
-		String ms, int s, ArrayList<PriceMessageEvent> p)
+	public PlannedAction(DeviceAction da, boolean c, String ms, int s,
+		ArrayList<PriceMessageEvent> p)
 	{
 		action = da;
-		device = d;
 		condition = c;
 		multi = ms;
 		sources = s;
