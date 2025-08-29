@@ -304,7 +304,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		phase = p;
 		phase_time = TimeSteward.currentTimeMillis();
 		if (active)
-			TIMER.addJob(new PlanPhaseChangeJob(this, p));
+			TIMER.addJob(new DeviceActionJob(this));
 	}
 
 	/**

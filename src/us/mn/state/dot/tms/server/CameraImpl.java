@@ -21,6 +21,7 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
@@ -32,6 +33,8 @@ import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
@@ -576,5 +579,37 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	 *  Returns zero if no attempt has been made. */
 	public long getPtzTimestamp() {
 		return ptz_timestamp;
+	}
+
+	/** Choose the planned action */
+	@Override
+	public PlannedAction choosePlannedAction() {
+		PlannedAction pa = super.choosePlannedAction();
+		int preset_num = pa.action.getMsgPriority();
+		if (preset_num >= 1 && preset_num <= 12)
+			setRecallPreset(preset_num);
+		else if (preset_num == 15)
+			setDeviceReq(DeviceRequest.CAMERA_WIPER_ONESHOT);
+		else {
+			// FIXME: save snapshot?
+		}
+		return pa;
+	}
+
+	/** Check if a planned action is valid */
+	@Override
+	protected boolean checkPlannedAction(PlannedAction pa) {
+		return pa.condition && !isIncidentCamera();
+	}
+
+	/** Check if the camera is associated with an incident */
+	private boolean isIncidentCamera() {
+		Iterator<Incident> it = IncidentHelper.iterator();
+		while (it.hasNext()) {
+			Incident i = it.next();
+			if (this == i.getCamera() && !i.getCleared())
+				return true;
+		}
+		return false;
 	}
 }
