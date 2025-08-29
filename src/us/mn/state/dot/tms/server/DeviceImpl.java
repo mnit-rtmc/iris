@@ -15,6 +15,8 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.util.Iterator;
+import java.util.TreeSet;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Device;
@@ -241,5 +243,38 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 	@Override
 	public void periodicPoll(boolean is_long) {
 		sendDeviceRequest(DeviceRequest.QUERY_STATUS);
+	}
+
+	/** Current planned actions */
+	protected transient final TreeSet<PlannedAction> planned_actions =
+		new TreeSet<PlannedAction>();
+
+	/** Add a planned action */
+	public void addPlannedAction(PlannedAction pa) {
+		planned_actions.add(pa);
+	}
+
+	/** Choose the planned action */
+	public PlannedAction choosePlannedAction() {
+		Iterator<PlannedAction> it =
+			planned_actions.descendingIterator();
+		while (it.hasNext()) {
+			PlannedAction pa = it.next();
+			if (checkPlannedAction(pa))
+				return pa;
+			else
+				it.remove();
+		}
+		return null;
+	}
+
+	/** Check if a planned action is valid */
+	protected boolean checkPlannedAction(PlannedAction pa) {
+		return pa.condition;
+	}
+
+	/** Clear all existing planned actions */
+	public void clearPlannedActions() {
+		planned_actions.clear();
 	}
 }
