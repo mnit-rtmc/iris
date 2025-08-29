@@ -78,10 +78,8 @@ public class VidComponentGst extends javax.swing.JComponent {
 	private final boolean useVolatile;
 	private AppSinkListener listener;
 	private VidStreamMgr vsm;
-	
-	/**
-	 * Creates a new instance of VideoComponentGst
-	 */
+
+	/** Creates a new instance of VideoComponentGst */
 	public VidComponentGst(AppSink appsink, VidStreamMgr vsm) {
 		this.videosink = appsink;
 		this.vsm = vsm;
@@ -97,48 +95,39 @@ public class VidComponentGst extends javax.swing.JComponent {
 			caps.append("format=xRGB");
 		}
 		videosink.setCaps(new Caps(caps.toString()));
-
 		useVolatile = true;
-
 		// Kick off a timer to free up the volatile image if there have been no recent updates
 		// (e.g. the player is paused)
-		//
 		resourceTimer = new Timer(250, resourceReaper);
 
-		//
 		// Don't use a layout manager - the output component will positioned within this 
 		// component according to the aspect ratio and scaling mode
-		//
 		setLayout(null);
 		add(renderComponent);
 
-		//
 		// Listen for the child changing its preferred size to the size of the 
 		// video stream.
-		//
-		renderComponent.addPropertyChangeListener("preferredSize", new PropertyChangeListener() {
-
+		renderComponent.addPropertyChangeListener("preferredSize",
+			new PropertyChangeListener()
+		{
 			public void propertyChange(PropertyChangeEvent evt) {
 				setPreferredSize(renderComponent.getPreferredSize());
 				scaleVideoOutput();
 			}
 		});
-		//
-		// Scale the video output in response to this component being resized
-		//
-		addComponentListener(new ComponentAdapter() {
 
+		// Scale the video output in response to this component being resized
+		addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent arg0) {
 				scaleVideoOutput();
 			}
-
 		});
 		renderComponent.setBounds(getBounds());
 		setOpaque(true);
 		setBackground(Color.BLACK);
 	}
-	
+
 	/** Call this before nulling the last reference to
 	 *  this component to avoid a nasty memory leak. */
 	public void disconnectAll() {
@@ -149,9 +138,7 @@ public class VidComponentGst extends javax.swing.JComponent {
 		}
 	}
 
-	/**
-	 * Scales the video output component according to its aspect ratio
-	 */
+	/** Scale the video output component according to its aspect ratio */
 	private void scaleVideoOutput() {
 		final Component child = renderComponent;
 		final Dimension childSize = child.getPreferredSize();
@@ -159,21 +146,15 @@ public class VidComponentGst extends javax.swing.JComponent {
 		// Figure out the aspect ratio
 		double aspect = keepAspect ? (double) childSize.width / (double) childSize.height : 1.0f;
 
-		//
 		// Now scale and position the videoChild component to be in the correct position
 		// to keep the aspect ratio correct.
-		//
 		int scaledHeight = (int) ((double) width / aspect);
 		if (!keepAspect) {
-			//
 			// Just make the child match the parent
-			//
 			child.setBounds(0, 0, width, height);
 		} else if (scaledHeight < height) {
-			//
 			// Output window is taller than the image is when scaled, so move the 
 			// video component to sit vertically in the centre of the VideoComponent.
-			//
 			final int y = (height - scaledHeight) / 2;
 			child.setBounds(0, y, width, scaledHeight);
 		} else {
@@ -190,7 +171,6 @@ public class VidComponentGst extends javax.swing.JComponent {
 					volatileImage.flush();
 					volatileImage = null;
 				}
-
 				// Stop the timer so we don't wakeup needlessly
 				resourceTimer.stop();
 			}
@@ -230,7 +210,7 @@ public class VidComponentGst extends javax.swing.JComponent {
 			int width = getWidth(), height = getHeight();
 			Graphics2D g2d = (Graphics2D) g.create();
 			g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-					RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+				RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 			if (currentImage != null) {
 				render(g2d, 0, 0, width, height);
 			} else {
@@ -266,9 +246,7 @@ public class VidComponentGst extends javax.swing.JComponent {
 				volatileImage = gc.createCompatibleVolatileImage(w, h);
 				volatileImage.setAccelerationPriority(1.0f);
 			}
-			// 
 			// Now paint the BufferedImage into the accelerated image
-			//
 			Graphics2D g = volatileImage.createGraphics();
 			g.drawImage(bufferedImage, 0, 0, null);
 			g.dispose();
@@ -276,7 +254,7 @@ public class VidComponentGst extends javax.swing.JComponent {
 	}
 
 	/**
-	 * Renders to a volatile image, and then paints that to the screen. This
+	 * Render to a volatile image, and then paints that to the screen. This
 	 * helps with scaling performance on accelerated surfaces (e.g. OpenGL)
 	 *
 	 * @param g the graphics to paint the image to
@@ -304,7 +282,7 @@ public class VidComponentGst extends javax.swing.JComponent {
 	}
 
 	/**
-	 * Renders directly to the given <tt>Graphics</tt>. This is only really
+	 * Render directly to the given <tt>Graphics</tt>. This is only really
 	 * useful on MacOS where swing graphics are unaccelerated so using a
 	 * volatile just incurs an extra memcpy().
 	 *
@@ -325,7 +303,7 @@ public class VidComponentGst extends javax.swing.JComponent {
 	}
 
 	/**
-	 * Renders the current frame to the given <tt>Graphics</tt>.
+	 * Render the current frame to the given <tt>Graphics</tt>.
 	 *
 	 * @param g the graphics to paint the image to
 	 * @param x the left coordinate to start painting at.
@@ -339,9 +317,7 @@ public class VidComponentGst extends javax.swing.JComponent {
 		} else {
 			heapRender(g, x, y, w, h);
 		}
-		//
 		// Restart the resource reaper timer if neccessary
-		//
 		if (!frameRendered) {
 			frameRendered = true;
 			if (!resourceTimer.isRunning()) {
@@ -350,26 +326,25 @@ public class VidComponentGst extends javax.swing.JComponent {
 		}
 	}
 
-	private int imgWidth = 0, imgHeight = 0;
+	private int imgWidth = 0;
+	private int imgHeight = 0;
 
 	private final void update(final int width, final int height) {
-		SwingUtilities.invokeLater(new Runnable() {
-
+		SwingUtilities.invokeLater(new Runnable()
+		{
 			public void run() {
-				//
 				// If the image changed size, resize the component to fit
-				//
 				if (width != imgWidth || height != imgHeight) {
-					renderComponent.setPreferredSize(new Dimension(width, height));
+					renderComponent.setPreferredSize(
+						new Dimension(width, height));
 					imgWidth = width;
 					imgHeight = height;
 				}
-
 				if (renderComponent.isVisible()) {
 					renderComponent.paintImmediately(0, 0,
-							renderComponent.getWidth(), renderComponent.getHeight());
+						renderComponent.getWidth(),
+						renderComponent.getHeight());
 				}
-				
 				vsm.incReceivedFrameCount();
 			}
 		});
@@ -394,27 +369,23 @@ public class VidComponentGst extends javax.swing.JComponent {
 
 		public void rgbFrame(boolean isPrerollFrame, int width, int height, IntBuffer rgb) {
 			// If the EDT is still copying data from the buffer, just drop this frame
-			//
 			if (!bufferLock.tryLock()) {
 				return;
 			}
-
-			//
 			// If there is already a swing update pending, also drop this frame.
-			//
 			if (updatePending && !isPrerollFrame) {
 				bufferLock.unlock();
 				return;
 			}
 			try {
-				final BufferedImage renderImage = getBufferedImage(width, height);
+				final BufferedImage renderImage =
+					getBufferedImage(width, height);
 				int[] pixels = ((DataBufferInt) renderImage.getRaster().getDataBuffer()).getData();
 				rgb.get(pixels, 0, width * height);
 				updatePending = true;
 			} finally {
 				bufferLock.unlock();
 			}
-
 			// Tell swing to use the new buffer
 			update(currentImage.getWidth(), currentImage.getHeight());
 		}
@@ -450,6 +421,5 @@ public class VidComponentGst extends javax.swing.JComponent {
 			sample.dispose();
 			return FlowReturn.OK;
 		}
-
 	}
 }
