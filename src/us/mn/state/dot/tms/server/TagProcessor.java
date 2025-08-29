@@ -286,8 +286,8 @@ public class TagProcessor {
 			logger.log(toString() + " [ok]: " + multi +
 				" (" + getActionMulti() + ")");
 		}
-		return new PlannedAction(action, device, condition, multi,
-			sources, getPrices());
+		return new PlannedAction(action, condition, multi, sources,
+			getPrices());
 	}
 
 	/** Process action tags */
