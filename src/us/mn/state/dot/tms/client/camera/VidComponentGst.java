@@ -255,9 +255,11 @@ public class VidComponentGst extends javax.swing.JComponent {
 		do {
 			int w = bufferedImage.getWidth(), h = bufferedImage.getHeight();
 			GraphicsConfiguration gc = getGraphicsConfiguration();
-			if (volatileImage == null || volatileImage.getWidth() != w
-					|| volatileImage.getHeight() != h
-					|| volatileImage.validate(gc) == VolatileImage.IMAGE_INCOMPATIBLE) {
+			if (volatileImage == null
+				|| volatileImage.getWidth() != w
+				|| volatileImage.getHeight() != h
+				|| volatileImage.validate(gc) == VolatileImage.IMAGE_INCOMPATIBLE)
+			{
 				if (volatileImage != null) {
 					volatileImage.flush();
 				}
@@ -285,8 +287,10 @@ public class VidComponentGst extends javax.swing.JComponent {
 	 */
 	private void volatileRender(Graphics g, int x, int y, int w, int h) {
 		do {
-			if (updatePending || volatileImage == null
-					|| volatileImage.validate(getGraphicsConfiguration()) != VolatileImage.IMAGE_OK) {
+			if (updatePending
+				|| volatileImage == null
+				|| volatileImage.validate(getGraphicsConfiguration()) != VolatileImage.IMAGE_OK)
+			{
 				bufferLock.lock();
 				try {
 					updatePending = false;
@@ -372,8 +376,10 @@ public class VidComponentGst extends javax.swing.JComponent {
 	}
 
 	private BufferedImage getBufferedImage(int width, int height) {
-		if (currentImage != null && currentImage.getWidth() == width
-				&& currentImage.getHeight() == height) {
+		if (currentImage != null
+			&& currentImage.getWidth() == width
+			&& currentImage.getHeight() == height)
+		{
 			return currentImage;
 		}
 		if (currentImage != null) {
