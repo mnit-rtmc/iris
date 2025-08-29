@@ -251,6 +251,9 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 
 	/** Add a planned action */
 	public void addPlannedAction(PlannedAction pa) {
+		// NOTE: must remove first because `add` does not replace
+		//       this is required for action plan phase changes
+		planned_actions.remove(pa);
 		planned_actions.add(pa);
 	}
 
