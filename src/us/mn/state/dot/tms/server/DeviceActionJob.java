@@ -20,6 +20,8 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.BeaconHelper;
+import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -32,6 +34,10 @@ import us.mn.state.dot.tms.RampMeterHelper;
 
 /**
  * Job to perform device actions.
+ *
+ * All device actions are normally performed at regular 30-second intervals.
+ * When an action plan changes to a new phase, the planned actions are
+ * checked again for changes.
  *
  * @author Douglas Lau
  */
@@ -77,6 +83,9 @@ public class DeviceActionJob extends Job {
 		Iterator<Beacon> bit = BeaconHelper.iterator();
 		while (bit.hasNext())
 			clearActions(bit.next());
+		Iterator<Camera> cit = CameraHelper.iterator();
+		while (cit.hasNext())
+			clearActions(cit.next());
 		Iterator<DMS> dit = DMSHelper.iterator();
 		while (dit.hasNext())
 			clearActions(dit.next());
@@ -101,6 +110,7 @@ public class DeviceActionJob extends Job {
 			ActionPlan ap = da.getActionPlan();
 			if (ap.getActive() && (plan == null || plan == ap)) {
 				processActionBeacon(da);
+				processActionCamera(da);
 				processActionDms(da);
 				processActionMeter(da);
 			}
@@ -116,6 +126,18 @@ public class DeviceActionJob extends Job {
 			Hashtags tags = new Hashtags(b.getNotes());
 			if (tags.contains(ht))
 				checkAction(da, b, b.getGeoLoc());
+		}
+	}
+
+	/** Process an action for cameras */
+	private void processActionCamera(DeviceAction da) {
+		String ht = da.getHashtag();
+		Iterator<Camera> it = CameraHelper.iterator();
+		while (it.hasNext()) {
+			Camera c = it.next();
+			Hashtags tags = new Hashtags(c.getNotes());
+			if (tags.contains(ht))
+				checkAction(da, c, c.getGeoLoc());
 		}
 	}
 
@@ -160,6 +182,9 @@ public class DeviceActionJob extends Job {
 		Iterator<Beacon> bit = BeaconHelper.iterator();
 		while (bit.hasNext())
 			choosePlannedAction(bit.next());
+		Iterator<Camera> cit = CameraHelper.iterator();
+		while (cit.hasNext())
+			choosePlannedAction(cit.next());
 		Iterator<DMS> dit = DMSHelper.iterator();
 		while (dit.hasNext())
 			choosePlannedAction(dit.next());
