@@ -640,39 +640,22 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return msg_sched;
 	}
 
-	/** Current planned actions */
-	private transient final TreeSet<PlannedAction> planned_actions =
-		new TreeSet<PlannedAction>();
-
-	/** Clear the current planned actions */
-	public void clearPlannedActions() {
-		planned_actions.clear();
-	}
-
-	/** Add a planned action */
-	public void addPlannedAction(PlannedAction pa) {
-		if (pa.condition)
-			planned_actions.add(pa);
-	}
-
 	/** Choose the planned action */
+	@Override
 	public PlannedAction choosePlannedAction() {
-		PlannedAction pa = null;
-		Iterator<PlannedAction> it =
-			planned_actions.descendingIterator();
-		while (it.hasNext()) {
-			PlannedAction a = it.next();
-			if (DMSHelper.isRasterizable(this, a.multi)) {
-				pa = a;
-				break;
-			} else
-				it.remove();
-		}
+		PlannedAction pa = super.choosePlannedAction();
 		SignMessage sm = (pa != null) ? createMsgSched(pa) : null;
 		setPrices(pa);
 		if (setMsgSchedNotify(sm))
 			updateSchedMsg();
 		return pa;
+	}
+
+	/** Check if a planned action is valid */
+	@Override
+	protected boolean checkPlannedAction(PlannedAction pa) {
+		return pa.condition &&
+		       DMSHelper.isRasterizable(this, pa.multi);
 	}
 
 	/** Set the scheduled sign message.

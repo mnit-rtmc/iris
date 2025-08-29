@@ -14,20 +14,18 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.BeaconHelper;
-import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceActionHelper;
+import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
@@ -47,10 +45,6 @@ public class DeviceActionJob extends Job {
 
 	/** Logger for debugging */
 	private final DebugLog logger;
-
-	/** Mapping of ramp meters to operating states */
-	private final HashMap<RampMeterImpl, Boolean> meters =
-		new HashMap<RampMeterImpl, Boolean>();
 
 	/** Create a new device action job */
 	public DeviceActionJob(ActionPlanImpl ap) {
@@ -72,134 +66,115 @@ public class DeviceActionJob extends Job {
 	/** Perform device actions */
 	@Override
 	public void perform() {
-		clearDmsActions();
+		if (plan == null)
+			clearActions();
+		processActions();
+		chooseActions();
+	}
+
+	/** Clear all previous planned actions */
+	private void clearActions() {
+		Iterator<Beacon> bit = BeaconHelper.iterator();
+		while (bit.hasNext())
+			clearActions(bit.next());
+		Iterator<DMS> dit = DMSHelper.iterator();
+		while (dit.hasNext())
+			clearActions(dit.next());
+		Iterator<RampMeter> mit = RampMeterHelper.iterator();
+		while (mit.hasNext())
+			clearActions(mit.next());
+	}
+
+	/** Clear previous planned actions for one device */
+	private void clearActions(Device d) {
+		if (d instanceof DeviceImpl) {
+			DeviceImpl dev = (DeviceImpl) d;
+			dev.clearPlannedActions();
+		}
+	}
+
+	/** Process all device actions */
+	private void processActions() {
 		Iterator<DeviceAction> it = DeviceActionHelper.iterator();
 		while (it.hasNext()) {
 			DeviceAction da = it.next();
 			ActionPlan ap = da.getActionPlan();
-			if (ap.getActive() && (plan == null || plan == ap))
-				processAction(ap, da);
-		}
-		chooseDmsActions();
-		updateRampMeterStates();
-	}
-
-	/** Clear previous planned actions for all DMS */
-	private void clearDmsActions() {
-		Iterator<DMS> it = DMSHelper.iterator();
-		while (it.hasNext()) {
-			DMS dms = it.next();
-			if (dms instanceof DMSImpl) {
-				DMSImpl dmsi = (DMSImpl) dms;
-				dmsi.clearPlannedActions();
+			if (ap.getActive() && (plan == null || plan == ap)) {
+				processActionBeacon(da);
+				processActionDms(da);
+				processActionMeter(da);
 			}
 		}
 	}
 
-	/** Process one device action */
-	private void processAction(ActionPlan ap, DeviceAction da) {
-		boolean deploy = (ap.getPhase() == da.getPhase());
-		if (deploy)
-			performDmsAction(da);
-		performBeaconAction(da, deploy);
-		performRampMeterAction(da, deploy);
+	/** Process an action for beacons */
+	private void processActionBeacon(DeviceAction da) {
+		String ht = da.getHashtag();
+		Iterator<Beacon> it = BeaconHelper.iterator();
+		while (it.hasNext()) {
+			Beacon b = it.next();
+			Hashtags tags = new Hashtags(b.getNotes());
+			if (tags.contains(ht))
+				checkAction(da, b, b.getGeoLoc());
+		}
 	}
 
-	/** Perform an action for DMS */
-	private void performDmsAction(DeviceAction da) {
+	/** Process an action for DMS */
+	private void processActionDms(DeviceAction da) {
 		String ht = da.getHashtag();
 		Iterator<DMS> it = DMSHelper.iterator();
 		while (it.hasNext()) {
 			DMS d = it.next();
-			if (d instanceof DMSImpl) {
-				DMSImpl dms = (DMSImpl) d;
-				Hashtags tags = new Hashtags(dms.getNotes());
-				if (tags.contains(ht))
-					checkAction(da, dms);
-			}
+			Hashtags tags = new Hashtags(d.getNotes());
+			if (tags.contains(ht))
+				checkAction(da, d, d.getGeoLoc());
 		}
 	}
 
-	/** Check an action for one DMS */
-	private void checkAction(DeviceAction da, DMSImpl dms) {
-		if (logger.isOpen())
-			logMsg(dms, "checking " + da);
-		TagProcessor tag = new TagProcessor(da, dms, dms.getGeoLoc());
-		PlannedAction pa = tag.process();
-		dms.addPlannedAction(pa);
-	}
-
-	/** Choose the planned actions for all DMS */
-	private void chooseDmsActions() {
-		Iterator<DMS> it = DMSHelper.iterator();
-		while (it.hasNext()) {
-			DMS dms = it.next();
-			if (dms instanceof DMSImpl) {
-				DMSImpl dmsi = (DMSImpl) dms;
-				PlannedAction pa = dmsi.choosePlannedAction();
-				if (logger.isOpen())
-					logMsg(dms, "planning " + pa);
-			}
-		}
-	}
-
-	/** Perform an action for beacons */
-	private void performBeaconAction(DeviceAction da, boolean deploy) {
-		Iterator<Beacon> it = BeaconHelper.iterator();
-		while (it.hasNext()) {
-			Beacon b = it.next();
-			if (b instanceof BeaconImpl)
-				performBeaconAction(da, deploy, (BeaconImpl) b);
-		}
-	}
-
-	/** Perform a beacon action */
-	private void performBeaconAction(DeviceAction da, boolean deploy,
-		BeaconImpl b)
-	{
-		Hashtags tags = new Hashtags(b.getNotes());
-		if (tags.contains(da.getHashtag())) {
-			TagProcessor tag = new TagProcessor(da, b,
-				b.getGeoLoc());
-			PlannedAction pa = tag.process();
-			BeaconState bs = (pa.condition && deploy)
-				? BeaconState.FLASHING_REQ
-				: BeaconState.DARK_REQ;
-			b.setState(bs.ordinal());
-		}
-	}
-
-	/** Perform an action for ramp meters */
-	private void performRampMeterAction(DeviceAction da, boolean deploy) {
+	/** Process an action for ramp meters */
+	private void processActionMeter(DeviceAction da) {
+		String ht = da.getHashtag();
 		Iterator<RampMeter> it = RampMeterHelper.iterator();
 		while (it.hasNext()) {
 			RampMeter rm = it.next();
-			if (rm instanceof RampMeterImpl) {
-				performRampMeterAction(da, deploy,
-					(RampMeterImpl) rm);
-			}
+			Hashtags tags = new Hashtags(rm.getNotes());
+			if (tags.contains(ht))
+				checkAction(da, rm, rm.getGeoLoc());
 		}
 	}
 
-	/** Perform a ramp meter action */
-	private void performRampMeterAction(DeviceAction da, boolean deploy,
-		RampMeterImpl rm)
-	{
-		Hashtags tags = new Hashtags(rm.getNotes());
-		if (tags.contains(da.getHashtag())) {
-			TagProcessor tag = new TagProcessor(da, rm,
-				rm.getGeoLoc());
+	/** Check an action for one device */
+	private void checkAction(DeviceAction da, Device d, GeoLoc loc) {
+		if (d instanceof DeviceImpl) {
+			DeviceImpl dev = (DeviceImpl) d;
+			if (logger.isOpen())
+				logMsg(dev, "checking " + da);
+			TagProcessor tag = new TagProcessor(da, dev, loc);
 			PlannedAction pa = tag.process();
-			boolean operate = pa.condition && deploy;
-			if (meters.containsKey(rm))
-				operate |= meters.get(rm);
-			meters.put(rm, operate);
+			dev.addPlannedAction(pa);
 		}
 	}
 
-	/** Update the ramp meter states */
-	private void updateRampMeterStates() {
-		for (Map.Entry<RampMeterImpl, Boolean> e: meters.entrySet())
-			e.getKey().setOperating(e.getValue());
+	/** Choose the planned actions for all devices */
+	private void chooseActions() {
+		Iterator<Beacon> bit = BeaconHelper.iterator();
+		while (bit.hasNext())
+			choosePlannedAction(bit.next());
+		Iterator<DMS> dit = DMSHelper.iterator();
+		while (dit.hasNext())
+			choosePlannedAction(dit.next());
+		Iterator<RampMeter> mit = RampMeterHelper.iterator();
+		while (mit.hasNext())
+			choosePlannedAction(mit.next());
+	}
+
+	/** Choose planned action for one device */
+	private void choosePlannedAction(Device d) {
+		if (d instanceof DeviceImpl) {
+			DeviceImpl dev = (DeviceImpl) d;
+			PlannedAction pa = dev.choosePlannedAction();
+			if (logger.isOpen())
+				logMsg(dev, "chose " + pa);
+		}
 	}
 }

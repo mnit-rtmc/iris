@@ -594,8 +594,16 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Metering algorithm state */
 	private transient MeterAlgorithmState alg_state;
 
+	/** Choose the planned action */
+	@Override
+	public PlannedAction choosePlannedAction() {
+		PlannedAction pa = super.choosePlannedAction();
+		setOperating(pa != null);
+		return pa;
+	}
+
 	/** Set the algorithm operating state */
-	public void setOperating(boolean o) {
+	private void setOperating(boolean o) {
 		if (o) {
 			if (alg_state == null)
 				alg_state = createState();

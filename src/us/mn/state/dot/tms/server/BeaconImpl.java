@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2024  Minnesota Department of Transportation
+ * Copyright (C) 2004-2025  Minnesota Department of Transportation
  * Copyright (C) 2022       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -356,6 +356,19 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	@Override
 	public int getState() {
 		return state;
+	}
+
+	/** Choose the planned action */
+	@Override
+	public PlannedAction choosePlannedAction() {
+		PlannedAction pa = super.choosePlannedAction();
+		if (!planned_actions.isEmpty()) {
+			BeaconState bs = (pa != null)
+				? BeaconState.FLASHING_REQ
+				: BeaconState.DARK_REQ;
+			setState(bs.ordinal());
+		}
+		return pa;
 	}
 
 	/** Log a beacon event */

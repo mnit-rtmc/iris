@@ -257,7 +257,7 @@ public class TagProcessor {
 	private String fail(String msg) {
 		condition = false;
 		if (logger.isOpen()) {
-			logger.log(toString() + " [fail]: " + msg +
+			logger.log("" + action + " [fail]: " + msg +
 				" (" + getActionMulti() + ")");
 		}
 		return EMPTY_SPAN;
@@ -269,7 +269,8 @@ public class TagProcessor {
 		device = d;
 		loc = gl;
 		logger = DeviceActionJob.PLAN_LOG;
-		condition = true;
+		ActionPlan ap = da.getActionPlan();
+		condition = (da.getPhase() == ap.getPhase());
 	}
 
 	/** Get the MULTI string for the device action */
@@ -283,7 +284,7 @@ public class TagProcessor {
 		String ms = getActionMulti();
 		String multi = (ms.length() > 0) ? process(ms) : null;
 		if (condition && logger.isOpen()) {
-			logger.log(toString() + " [ok]: " + multi +
+			logger.log("" + action + " [ok]: " + multi +
 				" (" + getActionMulti() + ")");
 		}
 		return new PlannedAction(action, condition, multi, sources,
