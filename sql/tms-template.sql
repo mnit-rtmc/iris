@@ -3604,8 +3604,12 @@ CREATE TABLE iris._gate_arm (
     name VARCHAR(20) PRIMARY KEY,
     ga_array VARCHAR(20) NOT NULL REFERENCES iris._gate_arm_array,
     idx INTEGER NOT NULL,
+    geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc,
     notes VARCHAR CHECK (LENGTH(notes) < 256),
+    opposing BOOLEAN NOT NULL,
+    prereq VARCHAR(20) REFERENCES iris._gate_arm,
     arm_state INTEGER NOT NULL REFERENCES iris.gate_arm_state,
+    interlock INTEGER NOT NULL REFERENCES iris.gate_arm_interlock,
     fault VARCHAR(32)
 );
 
@@ -3624,19 +3628,25 @@ CREATE TRIGGER gate_arm_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.gate_arm AS
-    SELECT g.name, ga_array, idx, controller, pin, notes, arm_state, fault
+    SELECT g.name, ga_array, idx, geo_loc, controller, pin, preset, notes,
+           opposing, prereq, arm_state, interlock, fault
     FROM iris._gate_arm g
-    JOIN iris.controller_io cio ON g.name = cio.name;
+    JOIN iris.controller_io cio ON g.name = cio.name
+    JOIN iris.device_preset p ON g.name = p.name;
 
 CREATE FUNCTION iris.gate_arm_insert() RETURNS TRIGGER AS
     $gate_arm_insert$
 BEGIN
     INSERT INTO iris.controller_io (name, resource_n, controller, pin)
          VALUES (NEW.name, 'gate_arm', NEW.controller, NEW.pin);
+    INSERT INTO iris.device_preset (name, resource_n, preset)
+        VALUES (NEW.name, 'gate_arm', NEW.preset);
     INSERT INTO iris._gate_arm (
-        name, ga_array, idx, notes, arm_state, fault
+        name, ga_array, idx, geo_loc, notes, opposing, prereq,
+        arm_state, interlock, fault
     ) VALUES (
-        NEW.name, NEW.ga_array, NEW.idx, NEW.notes, NEW.arm_state, NEW.fault
+        NEW.name, NEW.ga_array, NEW.idx, NEW.geo_loc, NEW.notes, NEW.opposing,
+        NEW.prereq, NEW.arm_state, NEW.interlock, NEW.fault
     );
     RETURN NEW;
 END;
@@ -3652,11 +3662,18 @@ BEGIN
     UPDATE iris.controller_io
        SET controller = NEW.controller, pin = NEW.pin
      WHERE name = OLD.name;
+    UPDATE iris.device_preset
+       SET preset = NEW.preset
+     WHERE name = OLD.name;
     UPDATE iris._gate_arm
        SET ga_array = NEW.ga_array,
            idx = NEW.idx,
+           geo_loc = NEW.geo_loc,
            notes = NEW.notes,
+           opposing = NEW.opposing,
+           prereq = NEW.prereq,
            arm_state = NEW.arm_state,
+           interlock = NEW.interlock,
            fault = NEW.fault
      WHERE name = OLD.name;
     RETURN NEW;
@@ -3672,16 +3689,19 @@ CREATE TRIGGER gate_arm_delete_trig
     FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW gate_arm_view AS
-    SELECT g.name, g.ga_array, g.notes, ga.geo_loc, l.roadway, l.road_dir,
-           l.cross_mod, l.cross_street, l.cross_dir, l.landmark, l.lat, l.lon,
-           l.corridor, l.location, cio.controller, cio.pin, ctr.comm_link,
-           ctr.drop_id, ctr.condition, ga.opposing, ga.prereq, ga.camera,
-           ga.approach, gas.description AS arm_state, fault
+    SELECT g.name, g.ga_array, g.notes,
+           g.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
+           l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location,
+           cio.controller, cio.pin, ctr.comm_link, ctr.drop_id, ctr.condition,
+           cp.camera, cp.preset_num, g.opposing, g.prereq,
+           gas.description AS arm_state, gai.description AS interlock, fault
     FROM iris._gate_arm g
     JOIN iris.controller_io cio ON g.name = cio.name
+    LEFT JOIN iris.device_preset p ON g.name = p.name
+    LEFT JOIN iris.camera_preset cp ON cp.name = p.preset
     JOIN iris.gate_arm_state gas ON g.arm_state = gas.id
-    JOIN iris._gate_arm_array ga ON g.ga_array = ga.name
-    LEFT JOIN geo_loc_view l ON ga.geo_loc = l.name
+    JOIN iris.gate_arm_interlock gai ON g.interlock = gai.id
+    LEFT JOIN geo_loc_view l ON g.geo_loc = l.name
     LEFT JOIN controller_view ctr ON cio.controller = ctr.name;
 GRANT SELECT ON gate_arm_view TO PUBLIC;
 
@@ -5336,14 +5356,13 @@ CREATE VIEW iris.device_geo_loc_view AS
     SELECT name, geo_loc FROM iris._beacon UNION ALL
     SELECT name, geo_loc FROM iris._camera UNION ALL
     SELECT name, geo_loc FROM iris._dms UNION ALL
+    SELECT name, geo_loc FROM iris._gate_arm UNION ALL
     SELECT name, geo_loc FROM iris._lcs UNION ALL
     SELECT name, geo_loc FROM iris._ramp_meter UNION ALL
     SELECT name, geo_loc FROM iris._tag_reader UNION ALL
     SELECT name, geo_loc FROM iris._weather_sensor UNION ALL
     SELECT d.name, geo_loc FROM iris._detector d
-    JOIN iris.r_node rn ON d.r_node = rn.name UNION ALL
-    SELECT g.name, geo_loc FROM iris._gate_arm g
-    JOIN iris._gate_arm_array ga ON g.ga_array = ga.name;
+    JOIN iris.r_node rn ON d.r_node = rn.name;
 
 CREATE VIEW controller_device_view AS
     SELECT cio.name, cio.controller, cio.pin, g.geo_loc,
