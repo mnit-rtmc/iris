@@ -370,28 +370,28 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Check if beacons are operatable, or none associated with plan */
 	private boolean areBeaconsOperatable() {
-		Name name = new Name(Beacon.SONAR_TYPE, "state");
+		Name name = new Name(Beacon.SONAR_TYPE, "oname", "state");
 		return (accessLevel(name) >= name.accessWrite()) ||
 			(ActionPlanHelper.countBeacons(this) == 0);
 	}
 
 	/** Check if cameras are operatable, or none associated with plan */
 	private boolean areCamerasOperatable() {
-		Name name = new Name(Camera.SONAR_TYPE, "recallPreset");
+		Name name = new Name(Camera.SONAR_TYPE, "oname", "recallPreset");
 		return (accessLevel(name) >= name.accessWrite()) ||
 			(ActionPlanHelper.countCameras(this) == 0);
 	}
 
 	/** Check if DMS are operatable, or none associated with plan */
 	private boolean areDmsOperatable() {
-		Name name = new Name(DMS.SONAR_TYPE, "lock");
+		Name name = new Name(DMS.SONAR_TYPE, "oname", "lock");
 		return (accessLevel(name) >= name.accessWrite()) ||
 			(ActionPlanHelper.countDms(this) == 0);
 	}
 
 	/** Check if ramp meters are operatable, or none associated with plan */
 	private boolean areRampMetersOperatable() {
-		Name name = new Name(RampMeter.SONAR_TYPE, "lock");
+		Name name = new Name(RampMeter.SONAR_TYPE, "oname", "lock");
 		return (accessLevel(name) >= name.accessWrite()) ||
 			(ActionPlanHelper.countRampMeters(this) == 0);
 	}
