@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2018  Minnesota Department of Transportation
+ * Copyright (C) 2006-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -143,9 +144,11 @@ public final class SelectorThread {
 			handleDisconnect(skey, null, "No connection");
 			return;
 		}
+		String work = "write";
 		try {
 			if (skey.isWritable())
 				c.doWrite();
+			work = "read";
 			if (skey.isReadable())
 				c.doRead();
 		}
@@ -157,8 +160,13 @@ public final class SelectorThread {
 			/* Let the task processor perform the disconnect */
 			Thread.yield();
 		}
+		catch (SocketException e) {
+			handleDisconnect(skey, c, "Socket " + work + "; " +
+				e.getMessage());
+		}
 		catch (IOException e) {
-			handleDisconnect(skey, c, "I/O error " +e.getMessage());
+			handleDisconnect(skey, c, "I/O " + work + "; " +
+				e.getMessage());
 		}
 	}
 
