@@ -95,8 +95,6 @@ fn required_patch_operate(res: Res, att: &str) -> bool {
         | (Res::Dms, "lock")
         | (Res::Incident, "impact")
         | (Res::Incident, "cleared")
-        | (Res::GateArmArray, "arm_state_next")
-        | (Res::GateArmArray, "owner_next")
         | (Res::Lcs, "lock")
         | (Res::Modem, "enabled")
         | (Res::RampMeter, "device_request")
