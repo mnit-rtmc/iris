@@ -51,11 +51,11 @@ public interface GateArm extends Device {
 	/** Get the opposing traffic flag */
 	boolean getOpposing();
 
-	/** Set prerequisite gate arm */
-	void setPrereq(String pr);
+	/** Set downstream hashtag */
+	void setDownstream(String ds);
 
-	/** Get prerequisite gate arm */
-	String getPrereq();
+	/** Get downstream hashtag */
+	String getDownstream();
 
 	/** Get the version */
 	String getVersion();
