@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2024  Minnesota Department of Transportation
+ * Copyright (C) 2013-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,13 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArrayHelper;
+import us.mn.state.dot.tms.GateArmInterlock;
 import us.mn.state.dot.tms.GateArmState;
+import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.User;
@@ -44,9 +47,10 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Load all the gate arms */
 	static protected void loadAll() throws TMSException {
-		store.query("SELECT name, ga_array, idx, controller, pin, " +
-			"notes, arm_state, fault FROM iris." + SONAR_TYPE  +
-			";", new ResultFactory()
+		store.query("SELECT name, ga_array, idx, geo_loc, " +
+			"controller, pin, preset, notes, opposing, " +
+			"prereq, arm_state, interlock, fault " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new GateArmImpl(row));
@@ -61,10 +65,15 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		map.put("name", name);
 		map.put("ga_array", ga_array);
 		map.put("idx", idx);
+		map.put("geo_loc", geo_loc);
 		map.put("controller", controller);
 		map.put("pin", pin);
+		map.put("preset", preset);
 		map.put("notes", notes);
+		map.put("opposing", opposing);
+		map.put("prereq", prereq);
 		map.put("arm_state", getArmState());
+		map.put("interlock", interlock);
 		map.put("fault", fault);
 		return map;
 	}
@@ -72,31 +81,48 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Create a new gate arm with a string name */
 	public GateArmImpl(String n) throws TMSException, SonarException {
 		super(n);
+		GeoLocImpl g = new GeoLocImpl(name, SONAR_TYPE);
+		g.notifyCreate();
+		geo_loc = g;
+		opposing = true;
 		arm_state = GateArmState.UNKNOWN;
+		interlock = GateArmInterlock.NONE;
 		GateArmSystem.disable(n, "create gate arm");
 	}
 
 	/** Create a gate arm */
 	private GateArmImpl(ResultSet row) throws SQLException {
-		this(row.getString(1), // name
-		     row.getString(2), // ga_array
-		     row.getInt(3),    // idx
-		     row.getString(4), // controller
-		     row.getInt(5),    // pin
-		     row.getString(6), // notes
-		     row.getInt(7),    // arm_state
-		     row.getString(8)  // fault
+		this(row.getString(1),  // name
+		     row.getString(2),  // ga_array
+		     row.getInt(3),     // idx
+		     row.getString(4),  // geo_loc
+		     row.getString(5),  // controller
+		     row.getInt(6),     // pin
+		     row.getString(7),  // preset
+		     row.getString(8),  // notes
+		     row.getBoolean(9), // opposing
+		     row.getString(10), // prereq
+		     row.getInt(11),    // arm_state
+		     row.getInt(12),    // interlock
+		     row.getString(13)  // fault
 		);
 	}
 
 	/** Create a gate arm */
-	private GateArmImpl(String n, String a, int i, String c, int p,
-		String nt, int as, String flt)
+	private GateArmImpl(String n, String a, int i, String loc,
+		String c, int p, String cp, String nt, boolean o, String pr,
+		int as, int lk, String flt)
 	{
 		super(n, lookupController(c), p, nt);
 		ga_array = (GateArmArrayImpl) GateArmArrayHelper.lookup(a);
 		idx = i;
+		geo_loc = lookupGeoLoc(loc);
+		setPreset(lookupPreset(cp));
+		notes = nt;
+		opposing = o;
+		prereq = pr;
 		arm_state = GateArmState.fromOrdinal(as);
+		interlock = GateArmInterlock.fromOrdinal(lk);
 		fault = flt;
 		initTransients();
 	}
@@ -127,8 +153,9 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Destroy an object */
 	@Override
 	public void doDestroy() throws TMSException {
-		GateArmSystem.disable(name, "destroy gate arm");
 		super.doDestroy();
+		geo_loc.notifyRemove();
+		GateArmSystem.disable(name, "destroy gate arm");
 		setArrayIndex(null);
 	}
 
@@ -150,6 +177,15 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		return idx;
 	}
 
+	/** Device location */
+	private final GeoLocImpl geo_loc;
+
+	/** Get the device location */
+	@Override
+	public GeoLoc getGeoLoc() {
+		return geo_loc;
+	}
+
 	/** Update the controller and/or pin.
 	 * @param oc Old controller.
 	 * @param op Old pin.
@@ -161,6 +197,87 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	{
 		GateArmSystem.disable(name, "update controller/pin");
 		super.updateControllerPin(oc, op, nc, np);
+	}
+
+	/** Camera preset from which this can be seen */
+	private CameraPreset preset;
+
+	/** Set the verification camera preset */
+	@Override
+	public void setPreset(CameraPreset cp) {
+		GateArmSystem.disable(name, "set preset");
+		final CameraPreset ocp = preset;
+		if (cp instanceof CameraPresetImpl) {
+			CameraPresetImpl cpi = (CameraPresetImpl) cp;
+			cpi.setAssignedNotify(true);
+		}
+		preset = cp;
+		if (ocp instanceof CameraPresetImpl) {
+			CameraPresetImpl ocpi = (CameraPresetImpl) ocp;
+			ocpi.setAssignedNotify(false);
+		}
+	}
+
+	/** Set the verification camera preset */
+	public void doSetPreset(CameraPreset cp) throws TMSException {
+		if (!objectEquals(cp, preset)) {
+			store.update(this, "preset", cp);
+			setPreset(cp);
+		}
+	}
+
+	/** Get verification camera preset */
+	@Override
+	public CameraPreset getPreset() {
+		return preset;
+	}
+
+	/** Opposing traffic flag */
+	private boolean opposing;
+
+	/** Set the opposing traffic flag */
+	@Override
+	public void setOpposing(boolean ot) {
+		GateArmSystem.disable(name, "set opposing");
+		opposing = ot;
+	}
+
+	/** Set the opposing traffic flag */
+	public void doSetOpposing(boolean ot) throws TMSException {
+		if (ot != opposing) {
+			store.update(this, "opposing", ot);
+			setOpposing(ot);
+		}
+	}
+
+	/** Get the opposing traffic flag */
+	@Override
+	public boolean getOpposing() {
+		return opposing;
+	}
+
+	/** Prerequisite gate arm */
+	private String prereq;
+
+	/** Set the prerequisite gate arm */
+	@Override
+	public void setPrereq(String pr) {
+		GateArmSystem.disable(name, "set prereq");
+		prereq = pr;
+	}
+
+	/** Set the prerequisite gate arm */
+	public void doSetPrereq(String pr) throws TMSException {
+		if (!objectEquals(pr, prereq)) {
+			store.update(this, "prereq", pr);
+			setPrereq(pr);
+		}
+	}
+
+	/** Get prerequisite gate arm */
+	@Override
+	public String getPrereq() {
+		return prereq;
 	}
 
 	/** Software version */
@@ -206,6 +323,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Send gate arm interlock settings.  Do not test checkEnabled since
 	 * this is used to shut off interlocks when disabling gate arm system.*/
 	public void sendInterlocks() {
+		// FIXME: send interlocks to all gate arms in array
 		GateArmPoller p = getGateArmPoller();
 		if (p != null)
 			p.sendRequest(this, DeviceRequest.SEND_SETTINGS);
@@ -257,6 +375,55 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	@Override
 	public int getArmState() {
 		return getArmStateEnum().ordinal();
+	}
+
+	/** Gate arm interlock */
+	private GateArmInterlock interlock;
+
+	/** Get the interlock ordinal */
+	@Override
+	public int getInterlock() {
+		return interlock.ordinal();
+	}
+
+	/** Get the interlock enum */
+	public GateArmInterlock getInterlockEnum() {
+		return interlock;
+	}
+
+	/** Set the interlock flag */
+	private void setInterlockNotify() {
+		GateArmInterlock lk = lock_state.getInterlock();
+		if (lk != interlock) {
+			try {
+				store.update(this, "interlock", lk.ordinal());
+			}
+			catch (TMSException e) {
+				GateArmSystem.disable(name, "DB interlock");
+			}
+			interlock = lk;
+			notifyAttribute("interlock");
+			sendInterlocks();
+		}
+	}
+
+	/** Lock state for calculating interlock */
+	private transient GateArmLockState lock_state = new GateArmLockState();
+
+	/** Begin dependency transaction */
+	public void beginDependencies() {
+		lock_state.beginDependencies();
+	}
+
+	/** Check gate arm array dependencies */
+	public void checkDependencies() {
+		// FIXME: adapt from gate arm arrays
+	}
+
+	/** Commit dependcy transaction */
+	public void commitDependencies() {
+		lock_state.commitDependencies();
+		setInterlockNotify();
 	}
 
 	/** Check if gate arm open is locked */

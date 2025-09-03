@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2024  Minnesota Department of Transportation
+ * Copyright (C) 2013-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,11 +36,35 @@ public interface GateArm extends Device {
 	/** Get the index in array (1 to MAX_ARMS) */
 	int getIdx();
 
+	/** Get the device location */
+	GeoLoc getGeoLoc();
+
+	/** Set verification camera preset */
+	void setPreset(CameraPreset cp);
+
+	/** Get verification camera preset */
+	CameraPreset getPreset();
+
+	/** Set the opposing traffic flag */
+	void setOpposing(boolean ot);
+
+	/** Get the opposing traffic flag */
+	boolean getOpposing();
+
+	/** Set prerequisite gate arm */
+	void setPrereq(String pr);
+
+	/** Get prerequisite gate arm */
+	String getPrereq();
+
 	/** Get the version */
 	String getVersion();
 
 	/** Get the arm state */
 	int getArmState();
+
+	/** Get the interlock ordinal */
+	int getInterlock();
 
 	/** Get fault description (or null) */
 	String getFault();

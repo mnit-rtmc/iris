@@ -78,6 +78,8 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 	/** Set notes (including hashtags) */
 	@Override
 	public void setNotes(String n) {
+		if (this instanceof GateArmImpl)
+			GateArmSystem.disable(name, "set notes");
 		notes = n;
 	}
 

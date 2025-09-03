@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2024  Minnesota Department of Transportation
+ * Copyright (C) 2013-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@ import java.util.Iterator;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.GateArm;
+import us.mn.state.dot.tms.GateArmHelper;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GeoLoc;
@@ -224,15 +226,20 @@ public class GateArmSystem {
 	 * @param loc GeoLoc to check.
 	 * @param reason Reason for check. */
 	static public void checkDisable(GeoLoc loc, String reason) {
-		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
+		Iterator<GateArm> it = GateArmHelper.iterator();
 		while (it.hasNext()) {
-			GateArmArray g = it.next();
-			if (g instanceof GateArmArrayImpl) {
-				GateArmArrayImpl ga = (GateArmArrayImpl) g;
-				if (loc == ga.getGeoLoc()) {
-					disable(loc.getName(), reason);
-					break;
-				}
+			GateArm g = it.next();
+			if (loc == g.getGeoLoc()) {
+				disable(loc.getName(), reason);
+				return;
+			}
+		}
+		Iterator<GateArmArray> ait = GateArmArrayHelper.iterator();
+		while (ait.hasNext()) {
+			GateArmArray ga = ait.next();
+			if (loc == ga.getGeoLoc()) {
+				disable(loc.getName(), reason);
+				return;
 			}
 		}
 	}
