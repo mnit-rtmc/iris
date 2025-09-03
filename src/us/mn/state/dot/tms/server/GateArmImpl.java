@@ -49,7 +49,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, ga_array, idx, geo_loc, " +
 			"controller, pin, preset, notes, opposing, " +
-			"prereq, arm_state, interlock, fault " +
+			"downstream, arm_state, interlock, fault " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -71,7 +71,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		map.put("preset", preset);
 		map.put("notes", notes);
 		map.put("opposing", opposing);
-		map.put("prereq", prereq);
+		map.put("downstream", downstream);
 		map.put("arm_state", getArmState());
 		map.put("interlock", interlock);
 		map.put("fault", fault);
@@ -101,7 +101,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		     row.getString(7),  // preset
 		     row.getString(8),  // notes
 		     row.getBoolean(9), // opposing
-		     row.getString(10), // prereq
+		     row.getString(10), // downstream
 		     row.getInt(11),    // arm_state
 		     row.getInt(12),    // interlock
 		     row.getString(13)  // fault
@@ -110,7 +110,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Create a gate arm */
 	private GateArmImpl(String n, String a, int i, String loc,
-		String c, int p, String cp, String nt, boolean o, String pr,
+		String c, int p, String cp, String nt, boolean o, String ds,
 		int as, int lk, String flt)
 	{
 		super(n, lookupController(c), p, nt);
@@ -120,7 +120,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		setPreset(lookupPreset(cp));
 		notes = nt;
 		opposing = o;
-		prereq = pr;
+		downstream = ds;
 		arm_state = GateArmState.fromOrdinal(as);
 		interlock = GateArmInterlock.fromOrdinal(lk);
 		fault = flt;
@@ -256,28 +256,28 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		return opposing;
 	}
 
-	/** Prerequisite gate arm */
-	private String prereq;
+	/** Downstream hashtag */
+	private String downstream;
 
-	/** Set the prerequisite gate arm */
+	/** Set the downstream hashtag */
 	@Override
-	public void setPrereq(String pr) {
-		GateArmSystem.disable(name, "set prereq");
-		prereq = pr;
+	public void setDownstream(String ds) {
+		GateArmSystem.disable(name, "set downstream");
+		downstream = ds;
 	}
 
-	/** Set the prerequisite gate arm */
-	public void doSetPrereq(String pr) throws TMSException {
-		if (!objectEquals(pr, prereq)) {
-			store.update(this, "prereq", pr);
-			setPrereq(pr);
+	/** Set the downstream hashtag */
+	public void doSetDownstream(String ds) throws TMSException {
+		if (!objectEquals(ds, downstream)) {
+			store.update(this, "downstream", ds);
+			setDownstream(ds);
 		}
 	}
 
-	/** Get prerequisite gate arm */
+	/** Get downstream hashtag */
 	@Override
-	public String getPrereq() {
-		return prereq;
+	public String getDownstream() {
+		return downstream;
 	}
 
 	/** Software version */
@@ -418,6 +418,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Check gate arm array dependencies */
 	public void checkDependencies() {
 		// FIXME: adapt from gate arm arrays
+		// FIXME: also, check all gate arms with downstream hashtag
 	}
 
 	/** Commit dependcy transaction */
