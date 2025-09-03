@@ -14,6 +14,7 @@ use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
+use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, Input, opt_ref};
 use hatmil::Html;
@@ -38,7 +39,9 @@ pub struct GateArm {
     pub controller: Option<String>,
     pub notes: Option<String>,
     pub arm_state: u32,
+    pub interlock: u32,
     // secondary attributes
+    pub geo_loc: Option<String>,
     pub pin: Option<u32>,
 }
 
@@ -46,6 +49,7 @@ pub struct GateArm {
 #[derive(Debug, Default)]
 pub struct GateArmAnc {
     cio: ControllerIoAnc<GateArm>,
+    loc: LocAnc<GateArm>,
     pub states: Vec<GateArmState>,
 }
 
@@ -68,9 +72,13 @@ impl AncillaryData for GateArmAnc {
     /// Construct ancillary gate arm data
     fn new(pri: &GateArm, view: View) -> Self {
         let mut cio = ControllerIoAnc::new(pri, view);
-        cio.assets.push(Asset::GateArmStates);
+        if let View::Search | View::Control = view {
+            cio.assets.push(Asset::GateArmStates);
+        }
+        let loc = LocAnc::new(pri, view);
         GateArmAnc {
             cio,
+            loc,
             states: Vec::new(),
         }
     }
@@ -88,10 +96,11 @@ impl AncillaryData for GateArmAnc {
         value: JsValue,
     ) -> Result<()> {
         match asset {
+            Asset::Controllers => self.cio.set_asset(pri, asset, value)?,
             Asset::GateArmStates => {
                 self.states = serde_wasm_bindgen::from_value(value)?;
             }
-            _ => self.cio.set_asset(pri, asset, value)?,
+            _ => self.loc.set_asset(pri, asset, value)?,
         }
         Ok(())
     }
@@ -101,6 +110,13 @@ impl ControllerIo for GateArm {
     /// Get controller name
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
+    }
+}
+
+impl Loc for GateArm {
+    /// Get geo location name
+    fn geoloc(&self) -> Option<&str> {
+        self.geo_loc.as_deref()
     }
 }
 
@@ -127,6 +143,18 @@ impl GateArm {
         html.div()
             .class("info fill")
             .text_len(opt_ref(&self.location), 32);
+        html.to_string()
+    }
+
+    /// Convert to Control HTML
+    fn to_html_control(&self) -> String {
+        let mut html = self.title(View::Control);
+        html.div().class("row");
+        item_states(self.arm_state).tooltips(&mut html);
+        html.end(); /* div */
+        html.div()
+            .class("info")
+            .text_len(opt_ref(&self.location), 64);
         html.to_string()
     }
 
@@ -191,17 +219,25 @@ impl Card for GateArm {
     /// Check if a search string matches
     fn is_match(&self, search: &str, anc: &GateArmAnc) -> bool {
         self.name.contains_lower(search)
+            || self.location.contains_lower(search)
             || self.item_states(anc).is_match(search)
     }
 
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &GateArmAnc) -> String {
         match view {
+            View::Control => self.to_html_control(),
             View::Create => self.to_html_create(anc),
+            View::Location => anc.loc.to_html_loc(self),
             View::Status => self.to_html_status(anc),
             View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }
+    }
+
+    /// Get changed fields on Location view
+    fn changed_location(&self, anc: GateArmAnc) -> String {
+        anc.loc.changed_location()
     }
 
     /// Get changed fields from Setup form

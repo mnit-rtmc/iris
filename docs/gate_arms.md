@@ -13,10 +13,10 @@ roadway.  They are commonly used for on-ramps or reversible lanes.
 * `iris/api/gate_arm` (primary)
 * `iris/api/gate_arm/{name}`
 
-| Access       | Primary                    | Secondary             |
-|--------------|----------------------------|-----------------------|
-| 👁️  View      | name, location, arm\_state | ga\_array, idx, fault |
-| 🔧 Configure | controller, notes          | pin                   |
+| Access       | Primary                               | Secondary |
+|--------------|---------------------------------------|-----------|
+| 👁️  View      | name, location, arm\_state, interlock | geo\_loc, ga\_array, idx, fault |
+| 🔧 Configure | controller, notes                     | pin, preset, opposing, downstream |
 
 </details>
 
@@ -24,22 +24,6 @@ roadway.  They are commonly used for on-ramps or reversible lanes.
 
 Gate arms are grouped into **arrays** of 1-8 arms.  _Opening_ or _closing_ an
 array controls **all** associated arms.
-
-<details>
-<summary>API Resources 🕵️ </summary>
-
-* `iris/api/gate_arm_array` (primary)
-* `iris/api/gate_arm_array/{name}`
-
-| Access       | Primary                   | Secondary                         |
-|--------------|---------------------------|-----------------------------------|
-| 👁️  View      | name, location, interlock | geo\_loc                          |
-| 👉 Operate   | arm\_state                | arm\_state\_next †, owner\_next † |
-| 🔧 Configure | notes                     | opposing, prereq, camera, approach, action\_plan |
-
-† _Write only_
-
-</details>
 
 ## Verification Cameras
 

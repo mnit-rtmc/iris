@@ -44,7 +44,6 @@ pub enum Res {
     FlowStream,
     Font,
     GateArm,
-    GateArmArray,
     GateArmInterlock,
     GateArmState,
     GeoLoc,
@@ -142,7 +141,6 @@ impl Res {
             FlowStream,
             Font,
             GateArm,
-            GateArmArray,
             GateArmInterlock,
             GateArmState,
             GeoLoc,
@@ -228,7 +226,6 @@ impl Res {
             FlowStream => "flow_stream",
             Font => "font",
             GateArm => "gate_arm",
-            GateArmArray => "gate_arm_array",
             GateArmInterlock => "gate_arm_interlock",
             GateArmState => "gate_arm_state",
             GeoLoc => "geo_loc",
@@ -305,7 +302,6 @@ impl Res {
             EventConfig => "📜",
             FlowStream => "🎞️ ",
             GateArm => "⫬",
-            GateArmArray => "⫭⫬",
             GeoLoc => "🗺️ ",
             Gps => "🌐",
             Incident => "🚨",
@@ -357,13 +353,13 @@ impl Res {
             | CameraPreset | CommConfig | CommLink | Controller
             | DayMatcher | DayPlan | Detector | DeviceAction | Dms | Domain
             | EncoderStream | EncoderType | EventConfig | FlowStream
-            | GateArm | GateArmArray | Gps | Hashtag | Incident
-            | IncidentDetail | IncAdvice | IncDescriptor | IncLocator | Lcs
-            | LcsState | Modem | MonitorStyle | MsgLine | MsgPattern
-            | ParkingArea | Permission | PlanPhase | PlayList | RampMeter
-            | Rnode | Road | RoadAffix | Role | SignConfig | SignDetail
-            | SignMessage | SystemAttribute | TagReader | TimeAction
-            | TollZone | User | VideoMonitor | WeatherSensor | Word => true,
+            | GateArm | Gps | Hashtag | Incident | IncidentDetail
+            | IncAdvice | IncDescriptor | IncLocator | Lcs | LcsState
+            | Modem | MonitorStyle | MsgLine | MsgPattern | ParkingArea
+            | Permission | PlanPhase | PlayList | RampMeter | Rnode | Road
+            | RoadAffix | Role | SignConfig | SignDetail | SignMessage
+            | SystemAttribute | TagReader | TimeAction | TollZone | User
+            | VideoMonitor | WeatherSensor | Word => true,
             _ => false,
         }
     }
@@ -388,8 +384,6 @@ impl Res {
             // DMS resources
             Font | Graphic | MsgLine | MsgPattern | SignConfig | SignDetail
             | SignMessage | Word => Dms,
-            // Gate arm resources
-            GateArmArray => GateArm,
             // Incident resources
             IncidentDetail | IncAdvice | IncDescriptor | IncLocator
             | RoadAffix => Incident,

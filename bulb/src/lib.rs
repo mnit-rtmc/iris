@@ -32,7 +32,6 @@ mod factor;
 mod fetch;
 mod flowstream;
 mod gatearm;
-mod gatearmarray;
 mod geoloc;
 mod gps;
 mod item;

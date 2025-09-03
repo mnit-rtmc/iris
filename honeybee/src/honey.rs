@@ -871,7 +871,6 @@ const fn one_sql(res: Res) -> &'static str {
         FlowStream => query::FLOW_STREAM_ONE,
         Font => query::FONT_ONE,
         GateArm => query::GATE_ARM_ONE,
-        GateArmArray => query::GATE_ARM_ARRAY_ONE,
         GeoLoc => query::GEO_LOC_ONE,
         Gps => query::GPS_ONE,
         Graphic => query::GRAPHIC_ONE,

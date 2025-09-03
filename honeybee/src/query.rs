@@ -367,35 +367,18 @@ pub const FONT_ONE: &str = "\
 
 /// SQL query for all gate arms (primary)
 pub const GATE_ARM_ALL: &str = "\
-  SELECT g.name, location, g.controller, g.notes, g.arm_state \
+  SELECT g.name, location, controller, notes, arm_state, interlock \
   FROM iris.gate_arm g \
-  LEFT JOIN iris.gate_arm_array ga ON g.ga_array = ga.name \
-  LEFT JOIN geo_loc_view gl ON ga.geo_loc = gl.name \
+  LEFT JOIN geo_loc_view gl ON g.geo_loc = gl.name \
   ORDER BY name";
 
 /// SQL query for one gate arm (secondary)
 pub const GATE_ARM_ONE: &str = "\
-  SELECT g.name, location, g.ga_array, g.idx, g.controller, g.pin, g.notes, \
-         g.arm_state, g.fault \
+  SELECT g.name, location, geo_loc, ga_array, idx, controller, pin, preset, \
+         notes, opposing, downstream, arm_state, interlock, fault \
   FROM iris.gate_arm g \
-  LEFT JOIN iris.gate_arm_array ga ON g.ga_array = ga.name \
-  LEFT JOIN geo_loc_view gl ON ga.geo_loc = gl.name \
+  LEFT JOIN geo_loc_view gl ON g.geo_loc = gl.name \
   WHERE g.name = $1";
-
-/// SQL query for all gate arm arrays (primary)
-pub const GATE_ARM_ARRAY_ALL: &str = "\
-  SELECT ga.name, location, notes, arm_state, interlock \
-  FROM iris.gate_arm_array ga \
-  LEFT JOIN geo_loc_view gl ON ga.geo_loc = gl.name \
-  ORDER BY ga.name";
-
-/// SQL query for one gate arm array (secondary)
-pub const GATE_ARM_ARRAY_ONE: &str = "\
-  SELECT ga.name, location, geo_loc, notes, opposing, prereq, camera, \
-         approach, action_plan, arm_state, interlock \
-  FROM iris.gate_arm_array ga \
-  LEFT JOIN geo_loc_view gl ON ga.geo_loc = gl.name \
-  WHERE ga.name = $1";
 
 /// SQL query for gate arm interlocks (LUT)
 pub const GATE_ARM_INTERLOCK_LUT: &str = "\

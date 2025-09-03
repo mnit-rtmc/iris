@@ -26,7 +26,6 @@ use crate::error::{Error, Result};
 use crate::fetch::{Action, Uri};
 use crate::flowstream::FlowStream;
 use crate::gatearm::GateArm;
-use crate::gatearmarray::GateArmArray;
 use crate::geoloc::Loc;
 use crate::gps::Gps;
 use crate::item::ItemState;
@@ -401,7 +400,7 @@ fn item_states_all(res: Res) -> &'static [ItemState] {
         Res::Detector => Detector::item_states_all(),
         Res::Dms => Dms::item_states_all(),
         Res::Domain => Domain::item_states_all(),
-        Res::GateArm | Res::GateArmArray => GateArm::item_states_all(),
+        Res::GateArm => GateArm::item_states_all(),
         Res::Gps => Gps::item_states_all(),
         Res::Lcs => Lcs::item_states_all(),
         Res::Permission => Permission::item_states_all(),
@@ -431,7 +430,13 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::Role
         | Res::SignConfig
         | Res::User => &[View::Compact, View::Setup],
-        Res::GateArmArray => &[View::Compact, View::Control, View::Location],
+        Res::GateArm => &[
+            View::Compact,
+            View::Control,
+            View::Location,
+            View::Status,
+            View::Setup,
+        ],
         Res::Beacon | Res::Lcs => {
             &[View::Compact, View::Control, View::Location, View::Setup]
         }
@@ -453,7 +458,6 @@ pub fn res_views(res: Res) -> &'static [View] {
         Res::Alarm
         | Res::CommLink
         | Res::Detector
-        | Res::GateArm
         | Res::VideoMonitor => &[View::Compact, View::Status, View::Setup],
         Res::Controller | Res::TagReader | Res::WeatherSensor => {
             &[View::Compact, View::Status, View::Location, View::Setup]
@@ -527,9 +531,8 @@ pub async fn fetch_resource(config: bool) -> Result<String> {
     if config {
         add_option::<Domain>(&access, &mut html);
         add_option::<FlowStream>(&access, &mut html);
-        add_option::<GateArm>(&access, &mut html);
     }
-    add_option::<GateArmArray>(&access, &mut html);
+    add_option::<GateArm>(&access, &mut html);
     if config {
         add_option::<Gps>(&access, &mut html);
     }
@@ -669,7 +672,6 @@ impl CardList {
             Res::Domain => self.make_html_x::<Domain>().await,
             Res::FlowStream => self.make_html_x::<FlowStream>().await,
             Res::GateArm => self.make_html_x::<GateArm>().await,
-            Res::GateArmArray => self.make_html_x::<GateArmArray>().await,
             Res::Gps => self.make_html_x::<Gps>().await,
             Res::Lcs => self.make_html_x::<Lcs>().await,
             Res::LcsState => self.make_html_x::<LcsState>().await,
@@ -756,7 +758,6 @@ impl CardList {
             Res::Domain => self.view_change_x::<Domain>().await,
             Res::FlowStream => self.view_change_x::<FlowStream>().await,
             Res::GateArm => self.view_change_x::<GateArm>().await,
-            Res::GateArmArray => self.view_change_x::<GateArmArray>().await,
             Res::Gps => self.view_change_x::<Gps>().await,
             Res::Lcs => self.view_change_x::<Lcs>().await,
             Res::LcsState => self.view_change_x::<LcsState>().await,
@@ -828,7 +829,6 @@ impl CardList {
             Res::Domain => self.changed::<Domain>(json).await,
             Res::FlowStream => self.changed::<FlowStream>(json).await,
             Res::GateArm => self.changed::<GateArm>(json).await,
-            Res::GateArmArray => self.changed::<GateArmArray>(json).await,
             Res::Gps => self.changed::<Gps>(json).await,
             Res::Lcs => self.changed::<Lcs>(json).await,
             Res::LcsState => self.changed::<LcsState>(json).await,
@@ -948,7 +948,6 @@ async fn fetch_one_res(cv: &CardView) -> Result<String> {
         Res::Domain => fetch_one_x::<Domain>(cv).await,
         Res::FlowStream => fetch_one_x::<FlowStream>(cv).await,
         Res::GateArm => fetch_one_x::<GateArm>(cv).await,
-        Res::GateArmArray => fetch_one_x::<GateArmArray>(cv).await,
         Res::Gps => fetch_one_x::<Gps>(cv).await,
         Res::Lcs => fetch_one_x::<Lcs>(cv).await,
         Res::LcsState => fetch_one_x::<LcsState>(cv).await,
@@ -1008,7 +1007,6 @@ async fn patch_setup(cv: &CardView) -> Result<()> {
         Res::Domain => patch_setup_x::<Domain>(cv).await,
         Res::FlowStream => patch_setup_x::<FlowStream>(cv).await,
         Res::GateArm => patch_setup_x::<GateArm>(cv).await,
-        Res::GateArmArray => patch_setup_x::<GateArmArray>(cv).await,
         Res::Gps => patch_setup_x::<Gps>(cv).await,
         Res::Lcs => patch_setup_x::<Lcs>(cv).await,
         Res::LcsState => patch_setup_x::<LcsState>(cv).await,
@@ -1042,7 +1040,7 @@ async fn patch_loc(cv: &CardView) -> Result<()> {
         Res::Camera => patch_loc_x::<Camera>(cv).await,
         Res::Controller => patch_loc_x::<Controller>(cv).await,
         Res::Dms => patch_loc_x::<Dms>(cv).await,
-        Res::GateArmArray => patch_loc_x::<GateArmArray>(cv).await,
+        Res::GateArm => patch_loc_x::<GateArm>(cv).await,
         Res::RampMeter => patch_loc_x::<RampMeter>(cv).await,
         Res::TagReader => patch_loc_x::<TagReader>(cv).await,
         Res::WeatherSensor => patch_loc_x::<WeatherSensor>(cv).await,
