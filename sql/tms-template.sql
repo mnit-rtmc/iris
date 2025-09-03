@@ -3607,7 +3607,7 @@ CREATE TABLE iris._gate_arm (
     geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc,
     notes VARCHAR CHECK (LENGTH(notes) < 256),
     opposing BOOLEAN NOT NULL,
-    prereq VARCHAR(20) REFERENCES iris._gate_arm,
+    downstream VARCHAR(16),
     arm_state INTEGER NOT NULL REFERENCES iris.gate_arm_state,
     interlock INTEGER NOT NULL REFERENCES iris.gate_arm_interlock,
     fault VARCHAR(32)
@@ -3629,7 +3629,7 @@ CREATE TRIGGER gate_arm_notify_trig
 
 CREATE VIEW iris.gate_arm AS
     SELECT g.name, ga_array, idx, geo_loc, controller, pin, preset, notes,
-           opposing, prereq, arm_state, interlock, fault
+           opposing, downstream, arm_state, interlock, fault
     FROM iris._gate_arm g
     JOIN iris.controller_io cio ON g.name = cio.name
     JOIN iris.device_preset p ON g.name = p.name;
@@ -3642,11 +3642,11 @@ BEGIN
     INSERT INTO iris.device_preset (name, resource_n, preset)
         VALUES (NEW.name, 'gate_arm', NEW.preset);
     INSERT INTO iris._gate_arm (
-        name, ga_array, idx, geo_loc, notes, opposing, prereq,
-        arm_state, interlock, fault
+        name, ga_array, idx, geo_loc, notes, opposing,
+        downstream, arm_state, interlock, fault
     ) VALUES (
         NEW.name, NEW.ga_array, NEW.idx, NEW.geo_loc, NEW.notes, NEW.opposing,
-        NEW.prereq, NEW.arm_state, NEW.interlock, NEW.fault
+        NEW.downstream, NEW.arm_state, NEW.interlock, NEW.fault
     );
     RETURN NEW;
 END;
@@ -3671,7 +3671,7 @@ BEGIN
            geo_loc = NEW.geo_loc,
            notes = NEW.notes,
            opposing = NEW.opposing,
-           prereq = NEW.prereq,
+           downstream = NEW.downstream,
            arm_state = NEW.arm_state,
            interlock = NEW.interlock,
            fault = NEW.fault
@@ -3693,7 +3693,7 @@ CREATE VIEW gate_arm_view AS
            g.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
            l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location,
            cio.controller, cio.pin, ctr.comm_link, ctr.drop_id, ctr.condition,
-           cp.camera, cp.preset_num, g.opposing, g.prereq,
+           cp.camera, cp.preset_num, g.opposing, g.downstream,
            gas.description AS arm_state, gai.description AS interlock, fault
     FROM iris._gate_arm g
     JOIN iris.controller_io cio ON g.name = cio.name
