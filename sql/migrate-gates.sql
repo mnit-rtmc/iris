@@ -3,7 +3,7 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
--- Add geo_loc, preset, opposing, prereq, interlock to gate arms
+-- Add geo_loc, preset, opposing, downstream, interlock to gate arms
 DROP VIEW controller_report;
 DROP VIEW controller_device_view;
 DROP VIEW iris.device_geo_loc_view;
@@ -12,8 +12,7 @@ DROP VIEW iris.gate_arm;
 
 ALTER TABLE iris._gate_arm ADD COLUMN geo_loc VARCHAR(20);
 ALTER TABLE iris._gate_arm ADD COLUMN opposing BOOLEAN;
-ALTER TABLE iris._gate_arm ADD COLUMN prereq VARCHAR(20)
-    REFERENCES iris._gate_arm;
+ALTER TABLE iris._gate_arm ADD COLUMN downstream VARCHAR(16);
 ALTER TABLE iris._gate_arm ADD COLUMN interlock INTEGER
     REFERENCES iris.gate_arm_interlock;
 
@@ -34,10 +33,9 @@ UPDATE iris._gate_arm AS g
  WHERE g.ga_array = ga.name;
 
 UPDATE iris._gate_arm AS g
-   SET prereq = g1.name
+   SET downstream = '#' || ga.prereq
   FROM iris._gate_arm_array AS ga
-  JOIN iris._gate_arm AS g1 ON g1.ga_array = ga.prereq
- WHERE g.ga_array = ga.name AND g1.idx = 1;
+ WHERE g.ga_array = ga.name;
 
 ALTER TABLE iris._gate_arm ALTER COLUMN geo_loc SET NOT NULL;
 ALTER TABLE iris._gate_arm ALTER COLUMN opposing SET NOT NULL;
@@ -49,7 +47,7 @@ INSERT INTO iris.device_preset (name, resource_n, preset) (
 
 CREATE VIEW iris.gate_arm AS
     SELECT g.name, ga_array, idx, geo_loc, controller, pin, preset, notes,
-           opposing, prereq, arm_state, interlock, fault
+           opposing, downstream, arm_state, interlock, fault
     FROM iris._gate_arm g
     JOIN iris.controller_io cio ON g.name = cio.name
     JOIN iris.device_preset p ON g.name = p.name;
@@ -62,11 +60,11 @@ BEGIN
     INSERT INTO iris.device_preset (name, resource_n, preset)
         VALUES (NEW.name, 'gate_arm', NEW.preset);
     INSERT INTO iris._gate_arm (
-        name, ga_array, idx, geo_loc, notes, opposing, prereq,
-        arm_state, interlock, fault
+        name, ga_array, idx, geo_loc, notes, opposing,
+        downstream, arm_state, interlock, fault
     ) VALUES (
         NEW.name, NEW.ga_array, NEW.idx, NEW.geo_loc, NEW.notes, NEW.opposing,
-        NEW.prereq, NEW.arm_state, NEW.interlock, NEW.fault
+        NEW.downstream, NEW.arm_state, NEW.interlock, NEW.fault
     );
     RETURN NEW;
 END;
@@ -91,7 +89,7 @@ BEGIN
            geo_loc = NEW.geo_loc,
            notes = NEW.notes,
            opposing = NEW.opposing,
-           prereq = NEW.prereq,
+           downstream = NEW.downstream,
            arm_state = NEW.arm_state,
            interlock = NEW.interlock,
            fault = NEW.fault
@@ -113,7 +111,7 @@ CREATE VIEW gate_arm_view AS
            g.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
            l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location,
            cio.controller, cio.pin, ctr.comm_link, ctr.drop_id, ctr.condition,
-           cp.camera, cp.preset_num, g.opposing, g.prereq,
+           cp.camera, cp.preset_num, g.opposing, g.downstream,
            gas.description AS arm_state, gai.description AS interlock, fault
     FROM iris._gate_arm g
     JOIN iris.controller_io cio ON g.name = cio.name
