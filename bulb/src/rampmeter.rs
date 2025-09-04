@@ -802,10 +802,7 @@ impl Card for RampMeter {
     fn is_match(&self, search: &str, anc: &RampMeterAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || self
-                .notes
-                .as_ref()
-                .is_some_and(|n| n.contains_lower(search))
+            || self.notes.contains_lower(search)
             || self.item_states(anc).is_match(search)
     }
 

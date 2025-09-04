@@ -430,14 +430,7 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::Role
         | Res::SignConfig
         | Res::User => &[View::Compact, View::Setup],
-        Res::GateArm => &[
-            View::Compact,
-            View::Control,
-            View::Location,
-            View::Status,
-            View::Setup,
-        ],
-        Res::Beacon | Res::Lcs => {
+        Res::Beacon | Res::GateArm | Res::Lcs => {
             &[View::Compact, View::Control, View::Location, View::Setup]
         }
         Res::Camera | Res::RampMeter => &[
@@ -455,10 +448,9 @@ pub fn res_views(res: Res) -> &'static [View] {
             View::Setup,
             View::Status,
         ],
-        Res::Alarm
-        | Res::CommLink
-        | Res::Detector
-        | Res::VideoMonitor => &[View::Compact, View::Status, View::Setup],
+        Res::Alarm | Res::CommLink | Res::Detector | Res::VideoMonitor => {
+            &[View::Compact, View::Status, View::Setup]
+        }
         Res::Controller | Res::TagReader | Res::WeatherSensor => {
             &[View::Compact, View::Status, View::Location, View::Setup]
         }

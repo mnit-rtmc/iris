@@ -16,7 +16,7 @@ use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
-use crate::util::{ContainsLower, Fields, Input, opt_ref};
+use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref};
 use hatmil::Html;
 use resources::Res;
 use serde::Deserialize;
@@ -43,6 +43,9 @@ pub struct GateArm {
     // secondary attributes
     pub geo_loc: Option<String>,
     pub pin: Option<u32>,
+    pub preset: Option<String>,
+    pub opposing: Option<bool>,
+    pub downstream: Option<String>,
 }
 
 /// Ancillary gate arm data
@@ -85,7 +88,7 @@ impl AncillaryData for GateArmAnc {
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.cio.assets.pop()
+        self.cio.assets.pop().or_else(|| self.loc.assets.pop())
     }
 
     /// Set asset value
@@ -173,8 +176,36 @@ impl GateArm {
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &GateArmAnc) -> String {
         let mut html = self.title(View::Setup);
+        html.div().class("row");
+        html.label().r#for("notes").text("Notes").end();
+        html.textarea()
+            .id("notes")
+            .maxlength("255")
+            .attr("rows", "2")
+            .attr("cols", "24")
+            .text(opt_ref(&self.notes))
+            .end();
+        html.end(); /* div */
         anc.cio.controller_html(self, &mut html);
         anc.cio.pin_html(self.pin, &mut html);
+        html.div().class("row");
+        html.label().r#for("opposing").text("Opposing").end();
+        let opposing = html.input().id("opposing").r#type("checkbox");
+        if let Some(true) = self.opposing {
+            opposing.checked();
+        }
+        html.end(); /* div */
+        html.div().class("row");
+        html.label()
+            .r#for("downstream")
+            .text("Downstream (#tag)")
+            .end();
+        html.input()
+            .id("downstream")
+            .maxlength("16")
+            .size("16")
+            .value(opt_ref(&self.downstream));
+        html.end(); /* div */
         self.footer_html(true, &mut html);
         html.to_string()
     }
@@ -220,6 +251,7 @@ impl Card for GateArm {
     fn is_match(&self, search: &str, anc: &GateArmAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
+            || self.notes.contains_lower(search)
             || self.item_states(anc).is_match(search)
     }
 
@@ -243,8 +275,11 @@ impl Card for GateArm {
     /// Get changed fields from Setup form
     fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
+        fields.changed_text_area("notes", &self.notes);
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
+        fields.changed_input("opposing", self.opposing);
+        fields.changed_input("downstream", &self.downstream);
         fields.into_value().to_string()
     }
 }

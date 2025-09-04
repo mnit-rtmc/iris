@@ -30,6 +30,15 @@ impl ContainsLower for &str {
     }
 }
 
+impl ContainsLower for Option<&str> {
+    fn contains_lower(self, search: &str) -> bool {
+        self.as_deref()
+            .unwrap_or("")
+            .to_lowercase()
+            .contains(search)
+    }
+}
+
 impl ContainsLower for &Option<String> {
     fn contains_lower(self, search: &str) -> bool {
         self.as_deref()

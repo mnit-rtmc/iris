@@ -468,7 +468,7 @@ impl Card for Controller {
             || self.location.contains_lower(search)
             || self.notes.contains_lower(search)
             || self.cabinet_style.contains_lower(search)
-            || self.version().unwrap_or("").contains_lower(search)
+            || self.version().contains_lower(search)
     }
 
     /// Convert to HTML view
