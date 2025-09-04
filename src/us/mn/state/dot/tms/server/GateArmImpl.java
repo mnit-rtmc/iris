@@ -205,7 +205,6 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Set the verification camera preset */
 	@Override
 	public void setPreset(CameraPreset cp) {
-		GateArmSystem.disable(name, "set preset");
 		final CameraPreset ocp = preset;
 		if (cp instanceof CameraPresetImpl) {
 			CameraPresetImpl cpi = (CameraPresetImpl) cp;
@@ -221,6 +220,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Set the verification camera preset */
 	public void doSetPreset(CameraPreset cp) throws TMSException {
 		if (!objectEquals(cp, preset)) {
+			GateArmSystem.disable(name, "set preset");
 			store.update(this, "preset", cp);
 			setPreset(cp);
 		}
