@@ -50,19 +50,17 @@ public class DeviceActionHelper extends BaseHelper {
 		return new Iterator<DeviceAction>() {
 			final Iterator<DeviceAction> it = iterator();
 			boolean has_next;
-			DeviceAction next_da = seekNext();
-			private DeviceAction seekNext() {
-				DeviceAction this_da = next_da;
+			DeviceAction next_da = filterNext();
+			private DeviceAction filterNext() {
 				while (it.hasNext()) {
 					DeviceAction da = it.next();
 					if (da.getActionPlan() == ap) {
 						has_next = true;
-						next_da = da;
-						return this_da;
+						return da;
 					}
 				}
 				has_next = false;
-				return this_da;
+				return null;
 			}
 			@Override public boolean hasNext() {
 				return has_next;
@@ -70,7 +68,9 @@ public class DeviceActionHelper extends BaseHelper {
 			@Override public DeviceAction next() {
 				if (!has_next)
 					throw new NoSuchElementException();
-				return seekNext();
+				DeviceAction da = next_da;
+				next_da = filterNext();
+				return da;
 			}
 			@Override public void remove() {
 				throw new UnsupportedOperationException();
