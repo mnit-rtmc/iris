@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -48,19 +49,28 @@ public class DeviceActionHelper extends BaseHelper {
 	static public Iterator<DeviceAction> iterator(final ActionPlan ap) {
 		return new Iterator<DeviceAction>() {
 			final Iterator<DeviceAction> it = iterator();
-			DeviceAction dan = it.next();
-			@Override public boolean hasNext() {
-				while (dan != null) {
-					if (dan.getActionPlan() == ap)
-						break;
-					dan = it.next();
+			boolean has_next;
+			DeviceAction next_da = seekNext();
+			private DeviceAction seekNext() {
+				DeviceAction this_da = next_da;
+				while (it.hasNext()) {
+					DeviceAction da = it.next();
+					if (da.getActionPlan() == ap) {
+						has_next = true;
+						next_da = da;
+						return this_da;
+					}
 				}
-				return dan != null;
+				has_next = false;
+				return this_da;
+			}
+			@Override public boolean hasNext() {
+				return has_next;
 			}
 			@Override public DeviceAction next() {
-				DeviceAction da = dan;
-				dan = it.next();
-				return da;
+				if (!has_next)
+					throw new NoSuchElementException();
+				return seekNext();
 			}
 			@Override public void remove() {
 				throw new UnsupportedOperationException();
