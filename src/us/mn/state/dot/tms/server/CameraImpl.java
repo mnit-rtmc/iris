@@ -585,13 +585,15 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	@Override
 	public PlannedAction choosePlannedAction() {
 		PlannedAction pa = super.choosePlannedAction();
-		int preset_num = pa.action.getMsgPriority();
-		if (preset_num >= 1 && preset_num <= 12)
-			setRecallPreset(preset_num);
-		else if (preset_num == 15)
-			setDeviceReq(DeviceRequest.CAMERA_WIPER_ONESHOT);
-		else {
-			// FIXME: save snapshot?
+		if (pa != null) {
+			int preset_num = pa.action.getMsgPriority();
+			if (preset_num >= 1 && preset_num <= 12)
+				setRecallPreset(preset_num);
+			else if (preset_num == 15)
+				setDeviceReq(DeviceRequest.CAMERA_WIPER_ONESHOT);
+			else {
+				// FIXME: save snapshot?
+			}
 		}
 		return pa;
 	}
