@@ -1294,10 +1294,7 @@ impl Card for Dms {
     fn is_match(&self, search: &str, anc: &DmsAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
-            || self
-                .notes
-                .as_ref()
-                .is_some_and(|n| n.contains_lower(search))
+            || self.notes.contains_lower(search)
             || self.item_states(anc).is_match(search)
             || anc
                 .sign_message(self.msg_current.as_deref())
