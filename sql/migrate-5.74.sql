@@ -3,6 +3,15 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
+SELECT iris.update_version('5.73.0', '5.74.0');
+
+-- Delete DMS pixel system attributes
+DELETE FROM iris.system_attribute WHERE name IN (
+    'dms_pixel_off_limit',
+    'dms_pixel_on_limit',
+    'dms_pixel_test_timeout_secs'
+);
+
 -- Add geo_loc, preset, opposing, downstream, interlock to gate arms
 DROP VIEW controller_report;
 DROP VIEW controller_device_view;
