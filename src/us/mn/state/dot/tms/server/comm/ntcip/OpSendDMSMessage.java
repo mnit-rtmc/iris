@@ -489,8 +489,13 @@ public class OpSendDMSMessage extends OpDMS {
 			case syntaxMULTI:
 				return new QueryMultiSyntaxErr();
 			case other:
-				putCtrlFaults("other", error.toString());
-				return queryOtherError();
+				String m = error.toString();
+				if (isLedstar())
+					return new QueryLedstarActivateErr(m);
+				else {
+					putCtrlFaults("other", m);
+					return null;
+				}
 			case messageMemoryType:
 				// For original 1203v1, blank memory type was
 				// not defined.  This will cause a blank msg
@@ -587,15 +592,12 @@ public class OpSendDMSMessage extends OpDMS {
 		}
 	}
 
-	/** Create phase to query "other" activation errors */
-	private Phase queryOtherError() {
-		return isLedstar() ? new QueryLedstarActivateErr() : null;
-	}
-
 	/** Phase to query a ledstar activate message error */
-	protected class QueryLedstarActivateErr extends Phase {
-
-		/** Query a Ledstar activate message error */
+	private class QueryLedstarActivateErr extends Phase {
+		private final String err_msg;
+		private QueryLedstarActivateErr(String m) {
+			err_msg = m;
+		}
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Flags<LedActivateMsgError> error = new ASN1Flags<
@@ -607,10 +609,12 @@ public class OpSendDMSMessage extends OpDMS {
 			}
 			catch (NoSuchName e) {
 				// must not be a Ledstar sign ...
+				putCtrlFaults("other", err_msg);
 				return null;
 			}
 			logQuery(error);
-			throw new ControllerException(error.toString());
+			putCtrlFaults("other", error.toString());
+			return null;
 		}
 	}
 
