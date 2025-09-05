@@ -475,4 +475,10 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		// FIXME: request arm change
 		return pa;
 	}
+
+	/** Set the lock (JSON) */
+	@Override
+	public void setLock(String lk) {
+		// FIXME: adapt from gate arm array?
+	}
 }

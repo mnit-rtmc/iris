@@ -68,4 +68,7 @@ public interface GateArm extends Device {
 
 	/** Get fault description (or null) */
 	String getFault();
+
+	/** Set the lock (JSON) */
+	void setLock(String lk);
 }
