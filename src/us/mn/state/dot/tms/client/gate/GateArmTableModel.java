@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.GateArmState;
 import static us.mn.state.dot.tms.GateArmArray.MAX_ARMS;
 import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.camera.PresetComboRenderer;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -99,10 +100,13 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 				JComboBox<CameraPreset> cbx = new JComboBox
 					<CameraPreset>();
 				cbx.setModel(preset_mdl);
+				cbx.setRenderer(new PresetComboRenderer());
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<GateArm>("gate.arm.opposing", 100) {
+		cols.add(new ProxyColumn<GateArm>("gate.arm.opposing", 100,
+			Boolean.class)
+		{
 			public Object getValueAt(GateArm ga) {
 				return ga.getOpposing();
 			}
@@ -114,7 +118,7 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 					ga.setOpposing((Boolean) value);
 			}
 		});
-		cols.add(new ProxyColumn<GateArm>("gate.arm.downstream", 160) {
+		cols.add(new ProxyColumn<GateArm>("gate.arm.downstream", 140) {
 			public Object getValueAt(GateArm ga) {
 				return ga.getDownstream();
 			}
