@@ -1,10 +1,10 @@
 # IRIS 5.x Release Notes
 
-5.74.0 (5 Aug 2025)
- - Fixed action plan device permission checks
+5.74.0 (5 Sep 2025)
+ - Fix action plan device permission checks
  - Enhance gate arms to eventually replace arrays with action plans
  - Process action plans immediately after phase changes
- - Reworked action plan processing for devices
+ - Rework action plan processing for devices
  - Use hard-coded values instead of system attributes for DMS pixel checks
 
 5.73.0 (22 Aug 2025)
