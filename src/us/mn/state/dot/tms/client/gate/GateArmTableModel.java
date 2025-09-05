@@ -19,7 +19,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GateArm;
@@ -49,6 +51,21 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 			s.getSonarState().getGateArms(), true
 		);
 	}
+
+	/** Camera preset renderer */
+	static private final TableCellRenderer RENDERER =
+		new DefaultTableCellRenderer()
+	{
+		@Override protected void setValue(Object value) {
+			if (value instanceof CameraPreset) {
+				CameraPreset cp = (CameraPreset) value;
+				String v = cp.getCamera().getName() +
+					":" + cp.getPresetNum();
+				super.setValue(v);
+			} else
+				super.setValue(value);
+		}
+	};
 
 	/** Camera preset combo box model */
 	private final IComboBoxModel<CameraPreset> preset_mdl;
@@ -83,7 +100,7 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 				ga.setNotes((n.length() > 0) ? n : null);
 			}
 		});
-		cols.add(new ProxyColumn<GateArm>("camera.preset", 120) {
+		cols.add(new ProxyColumn<GateArm>("camera.preset", 100) {
 			public Object getValueAt(GateArm ga) {
 				return ga.getPreset();
 			}
@@ -95,6 +112,9 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 					ga.setPreset((CameraPreset) value);
 				else
 					ga.setPreset(null);
+			}
+			protected TableCellRenderer createCellRenderer() {
+				return RENDERER;
 			}
 			protected TableCellEditor createCellEditor() {
 				JComboBox<CameraPreset> cbx = new JComboBox
