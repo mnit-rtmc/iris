@@ -17,16 +17,22 @@ package us.mn.state.dot.tms.client.gate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
+import javax.swing.table.TableCellEditor;
+import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GateArmState;
 import static us.mn.state.dot.tms.GateArmArray.MAX_ARMS;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 
 /**
@@ -43,11 +49,14 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 		);
 	}
 
+	/** Camera preset combo box model */
+	private final IComboBoxModel<CameraPreset> preset_mdl;
+
 	/** Create the columns in the model */
 	@Override
 	protected ArrayList<ProxyColumn<GateArm>> createColumns() {
 		ArrayList<ProxyColumn<GateArm>> cols =
-			new ArrayList<ProxyColumn<GateArm>>(5);
+			new ArrayList<ProxyColumn<GateArm>>(6);
 		cols.add(new ProxyColumn<GateArm>("gate.arm.index", 36,
 			Integer.class)
 		{
@@ -73,15 +82,48 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 				ga.setNotes((n.length() > 0) ? n : null);
 			}
 		});
-		cols.add(new ProxyColumn<GateArm>("gate.arm.state", 100) {
+		cols.add(new ProxyColumn<GateArm>("camera.preset", 120) {
 			public Object getValueAt(GateArm ga) {
-				return GateArmState.fromOrdinal(
-					ga.getArmState());
+				return ga.getPreset();
+			}
+			public boolean isEditable(GateArm ga) {
+				return canWrite(ga, "preset");
+			}
+			public void setValueAt(GateArm ga, Object value) {
+				if (value instanceof CameraPreset)
+					ga.setPreset((CameraPreset) value);
+				else
+					ga.setPreset(null);
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox<CameraPreset> cbx = new JComboBox
+					<CameraPreset>();
+				cbx.setModel(preset_mdl);
+				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<GateArm>("gate.arm.fault", 160) {
+		cols.add(new ProxyColumn<GateArm>("gate.arm.opposing", 100) {
 			public Object getValueAt(GateArm ga) {
-				return ga.getFault();
+				return ga.getOpposing();
+			}
+			public boolean isEditable(GateArm ga) {
+				return canWrite(ga, "opposing");
+			}
+			public void setValueAt(GateArm ga, Object value) {
+				if (value instanceof Boolean)
+					ga.setOpposing((Boolean) value);
+			}
+		});
+		cols.add(new ProxyColumn<GateArm>("gate.arm.downstream", 160) {
+			public Object getValueAt(GateArm ga) {
+				return ga.getDownstream();
+			}
+			public boolean isEditable(GateArm ga) {
+				return canWrite(ga, "downstream");
+			}
+			public void setValueAt(GateArm ga, Object value) {
+				String ht = Hashtags.normalize(value.toString());
+				ga.setDownstream(ht);
 			}
 		});
 		return cols;
@@ -94,6 +136,8 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 	public GateArmTableModel(Session s, GateArmArray ga) {
 		super(s, descriptor(s), MAX_ARMS);
 		ga_array = ga;
+		preset_mdl = new IComboBoxModel<CameraPreset>(
+			s.getSonarState().getCamCache().getPresetModel());
 	}
 
 	/** Get a proxy comparator */
