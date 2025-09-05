@@ -97,19 +97,18 @@ public class ActionPlanHelper extends BaseHelper {
 		return n_count;
 	}
 
-	/** Get set of DMS controlled by an action plan */
-	static public TreeSet<DMS> findDms(ActionPlan ap) {
+	/** Get count of gate arms controlled by an action plan */
+	static public int countGateArms(ActionPlan ap) {
+		int n_count = 0;
 		Set<String> hashtags = findHashtags(ap);
-		TreeSet<DMS> signs = new TreeSet<DMS>(
-			new NumericAlphaComparator<DMS>());
-		Iterator<DMS> it = DMSHelper.iterator();
+		Iterator<GateArm> it = GateArmHelper.iterator();
 		while (it.hasNext()) {
-			DMS dms = it.next();
-			Hashtags tags = new Hashtags(dms.getNotes());
+			GateArm ga = it.next();
+			Hashtags tags = new Hashtags(ga.getNotes());
 			if (tags.containsAny(hashtags))
-				signs.add(dms);
+				n_count++;
 		}
-		return signs;
+		return n_count;
 	}
 
 	/** Get count of ramp meters controlled by an action plan */
@@ -124,5 +123,20 @@ public class ActionPlanHelper extends BaseHelper {
 				n_count++;
 		}
 		return n_count;
+	}
+
+	/** Get set of DMS controlled by an action plan */
+	static public TreeSet<DMS> findDms(ActionPlan ap) {
+		Set<String> hashtags = findHashtags(ap);
+		TreeSet<DMS> signs = new TreeSet<DMS>(
+			new NumericAlphaComparator<DMS>());
+		Iterator<DMS> it = DMSHelper.iterator();
+		while (it.hasNext()) {
+			DMS dms = it.next();
+			Hashtags tags = new Hashtags(dms.getNotes());
+			if (tags.containsAny(hashtags))
+				signs.add(dms);
+		}
+		return signs;
 	}
 }

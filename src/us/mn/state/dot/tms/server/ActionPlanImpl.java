@@ -34,6 +34,8 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.GateArm;
+import us.mn.state.dot.tms.GateArmHelper;
 import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
@@ -362,6 +364,10 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			throw new ChangeVetoException("Device action " +
 				"not allowed for DMS");
 		}
+		if (!areGateArmsOperatable()) {
+			throw new ChangeVetoException("Device action " +
+				"not allowed for gate arms");
+		}
 		if (!areRampMetersOperatable()) {
 			throw new ChangeVetoException("Device action " +
 				"not allowed for ramp meters");
@@ -387,6 +393,13 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		Name name = new Name(DMS.SONAR_TYPE, "oname", "lock");
 		return (accessLevel(name) >= name.accessWrite()) ||
 			(ActionPlanHelper.countDms(this) == 0);
+	}
+
+	/** Check if gate arms are operatable, or none associated with plan */
+	private boolean areGateArmsOperatable() {
+		Name name = new Name(GateArm.SONAR_TYPE, "oname", "lock");
+		return (accessLevel(name) >= name.accessWrite()) ||
+			(ActionPlanHelper.countGateArms(this) == 0);
 	}
 
 	/** Check if ramp meters are operatable, or none associated with plan */
@@ -417,6 +430,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		String ht = da.getHashtag();
 		return areBeaconsDeployable(ht)
 		    && areDmsDeployable(ht)
+		    && areGateArmsDeployable(ht)
 		    && areRampMetersDeployable(ht);
 	}
 
@@ -446,6 +460,23 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 				DMSImpl dms = (DMSImpl) d;
 				if (dms.hasError()) {
 					if (new Hashtags(d.getNotes())
+					   .contains(ht))
+						return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/** Check if all gate arms for a hashtag are deployable */
+	private boolean areGateArmsDeployable(String ht) {
+		Iterator<GateArm> it = GateArmHelper.iterator();
+		while (it.hasNext()) {
+			GateArm ga = it.next();
+			if (ga instanceof GateArmImpl) {
+				GateArmImpl gai = (GateArmImpl) ga;
+				if (gai.isOffline()) {
+					if (new Hashtags(gai.getNotes())
 					   .contains(ht))
 						return false;
 				}

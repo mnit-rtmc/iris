@@ -467,4 +467,12 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	public void updateStyles() {
 		ga_array.updateStyles();
 	}
+
+	/** Choose the planned action */
+	@Override
+	public PlannedAction choosePlannedAction() {
+		PlannedAction pa = super.choosePlannedAction();
+		// FIXME: request arm change
+		return pa;
+	}
 }

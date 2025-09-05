@@ -27,6 +27,8 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.DeviceActionHelper;
+import us.mn.state.dot.tms.GateArm;
+import us.mn.state.dot.tms.GateArmHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.RampMeter;
@@ -89,6 +91,9 @@ public class DeviceActionJob extends Job {
 		Iterator<DMS> dit = DMSHelper.iterator();
 		while (dit.hasNext())
 			clearActions(dit.next());
+		Iterator<GateArm> git = GateArmHelper.iterator();
+		while (git.hasNext())
+			clearActions(git.next());
 		Iterator<RampMeter> mit = RampMeterHelper.iterator();
 		while (mit.hasNext())
 			clearActions(mit.next());
@@ -112,6 +117,7 @@ public class DeviceActionJob extends Job {
 				processActionBeacon(da);
 				processActionCamera(da);
 				processActionDms(da);
+				processActionGateArm(da);
 				processActionMeter(da);
 			}
 		}
@@ -153,6 +159,18 @@ public class DeviceActionJob extends Job {
 		}
 	}
 
+	/** Process an action for gate arms */
+	private void processActionGateArm(DeviceAction da) {
+		String ht = da.getHashtag();
+		Iterator<GateArm> it = GateArmHelper.iterator();
+		while (it.hasNext()) {
+			GateArm g = it.next();
+			Hashtags tags = new Hashtags(g.getNotes());
+			if (tags.contains(ht))
+				checkAction(da, g, g.getGeoLoc());
+		}
+	}
+
 	/** Process an action for ramp meters */
 	private void processActionMeter(DeviceAction da) {
 		String ht = da.getHashtag();
@@ -188,6 +206,9 @@ public class DeviceActionJob extends Job {
 		Iterator<DMS> dit = DMSHelper.iterator();
 		while (dit.hasNext())
 			choosePlannedAction(dit.next());
+		Iterator<GateArm> git = GateArmHelper.iterator();
+		while (git.hasNext())
+			choosePlannedAction(git.next());
 		Iterator<RampMeter> mit = RampMeterHelper.iterator();
 		while (mit.hasNext())
 			choosePlannedAction(mit.next());
