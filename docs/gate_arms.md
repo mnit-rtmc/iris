@@ -16,7 +16,10 @@ roadway.  They are commonly used for on-ramps or reversible lanes.
 | Access       | Primary                               | Secondary |
 |--------------|---------------------------------------|-----------|
 | 👁️  View      | name, location, arm\_state, interlock | geo\_loc, ga\_array, idx, fault |
+| 👉 Operate   |                                       | lock †    |
 | 🔧 Configure | controller, notes                     | pin, preset, opposing, downstream |
+
+† _Write only_
 
 </details>
 

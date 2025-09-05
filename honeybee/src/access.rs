@@ -93,6 +93,7 @@ fn required_patch_operate(res: Res, att: &str) -> bool {
         | (Res::Detector, "force_fail")
         | (Res::Dms, "device_request")
         | (Res::Dms, "lock")
+        | (Res::GateArm, "lock")
         | (Res::Incident, "impact")
         | (Res::Incident, "cleared")
         | (Res::Lcs, "lock")
