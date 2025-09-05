@@ -57,9 +57,6 @@ public interface GateArm extends Device {
 	/** Get downstream hashtag */
 	String getDownstream();
 
-	/** Get the version */
-	String getVersion();
-
 	/** Get the arm state */
 	int getArmState();
 

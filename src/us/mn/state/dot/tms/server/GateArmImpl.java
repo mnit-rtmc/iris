@@ -280,26 +280,6 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		return downstream;
 	}
 
-	/** Software version */
-	private transient String version;
-
-	/** Set the version */
-	public void setVersionNotify(String v) {
-		ControllerImpl c = (ControllerImpl) getController();
-		if (c != null)
-			c.setVersionNotify(v);
-		if (!v.equals(version)) {
-			version = v;
-			notifyAttribute("version");
-		}
-	}
-
-	/** Get the version */
-	@Override
-	public String getVersion() {
-		return version;
-	}
-
 	/** Send a device request operation */
 	@Override
 	protected void sendDeviceRequest(DeviceRequest dr) {

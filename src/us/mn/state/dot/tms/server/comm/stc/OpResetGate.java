@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2018  Minnesota Department of Transportation
+ * Copyright (C) 2013-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ public class OpResetGate extends OpSTC {
 			mess.add(v);
 			try {
 				mess.queryProps();
-				gate_arm.setVersionNotify(v.getVersion());
+				controller.setVersionNotify(v.getVersion());
 				return null;
 			}
 			catch (SocketTimeoutException e) {
