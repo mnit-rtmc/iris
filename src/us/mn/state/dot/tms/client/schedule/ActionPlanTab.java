@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DeviceAction;
-import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;

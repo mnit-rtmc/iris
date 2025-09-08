@@ -506,8 +506,9 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	public void updatePhase() throws TMSException {
 		PlanPhase p = phase;
 		if (p != null) {
+			Integer ht = p.getHoldTime();
 			PlanPhase np = p.getNextPhase();
-			if (np != null && phaseSecs() >= p.getHoldTime())
+			if (ht != null && np != null && phaseSecs() >= ht)
 				setPhaseNotify(np, null);
 		}
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2024  Minnesota Department of Transportation
+ * Copyright (C) 2011-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,15 +53,21 @@ public interface PlanPhase extends SonarObject {
 	/** Gate arm closed phase name */
 	String GATE_ARM_CLOSED = "ga_closed";
 
-	/** Set the hold time (seconds) */
-	void setHoldTime(int s);
+	/** Set selectable flag */
+	void setSelectable(boolean s);
 
-	/** Get the hold time (seconds) */
-	int getHoldTime();
+	/** Get selectable flag */
+	boolean getSelectable();
 
-	/** Set the next phase */
+	/** Set hold time (s) before next phase */
+	void setHoldTime(Integer s);
+
+	/** Get hold time (s) before next phase */
+	Integer getHoldTime();
+
+	/** Set next phase after hold time expires */
 	void setNextPhase(PlanPhase np);
 
-	/** Get the next phase */
+	/** Get next phase after hold time expires */
 	PlanPhase getNextPhase();
 }

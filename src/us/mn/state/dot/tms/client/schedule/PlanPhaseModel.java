@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2017  Minnesota Department of Transportation
+ * Copyright (C) 2011-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,12 +44,26 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 	@Override
 	protected ArrayList<ProxyColumn<PlanPhase>> createColumns() {
 		ArrayList<ProxyColumn<PlanPhase>> cols =
-			new ArrayList<ProxyColumn<PlanPhase>>(3);
+			new ArrayList<ProxyColumn<PlanPhase>>(4);
 		cols.add(new ProxyColumn<PlanPhase>("action.plan.phase.name",
 			120)
 		{
 			public Object getValueAt(PlanPhase p) {
 				return p.getName();
+			}
+		});
+		cols.add(new ProxyColumn<PlanPhase>(
+			"action.plan.phase.selectable", 60, Boolean.class)
+		{
+			public Object getValueAt(PlanPhase p) {
+				return p.getSelectable();
+			}
+			public boolean isEditable(PlanPhase p) {
+				return canWrite(p);
+			}
+			public void setValueAt(PlanPhase p, Object value) {
+				if (value instanceof Boolean)
+					p.setSelectable((Boolean) value);
 			}
 		});
 		cols.add(new ProxyColumn<PlanPhase>("action.plan.phase.hold",
@@ -64,6 +78,8 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 			public void setValueAt(PlanPhase p, Object value) {
 				if (value instanceof Integer)
 					p.setHoldTime((Integer) value);
+				else
+					p.setHoldTime(null);
 			}
 		});
 		cols.add(new ProxyColumn<PlanPhase>("action.plan.phase.next",

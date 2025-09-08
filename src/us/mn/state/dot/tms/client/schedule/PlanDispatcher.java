@@ -180,7 +180,6 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 	/** Create a combo box model for plan phases */
 	private ComboBoxModel<PlanPhase> createPhaseModel(final ActionPlan ap) {
 		TreeSet<PlanPhase> phases = createPhaseSet(ap);
-		removeNextPhases(phases);
 		DefaultComboBoxModel<PlanPhase> mdl = new DefaultComboBoxModel
 			<PlanPhase>();
 		mdl.addElement(ap.getDefaultPhase());
@@ -198,7 +197,9 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		Iterator<DeviceAction> dit = DeviceActionHelper.iterator(ap);
 		while (dit.hasNext()) {
 			DeviceAction da = dit.next();
-			phases.add(da.getPhase());
+			PlanPhase p = da.getPhase();
+			if (p.getSelectable())
+				phases.add(p);
 		}
 		return phases;
 	}
@@ -213,18 +214,6 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 			return aa.compareTo(bb);
 		}
 	};
-
-	/** Remove phases which are "next" phases */
-	private void removeNextPhases(TreeSet<PlanPhase> phases) {
-		TreeSet<PlanPhase> n_phases =
-			new TreeSet<PlanPhase>(comparator);
-		for (PlanPhase p: phases) {
-			PlanPhase np = p.getNextPhase();
-			if (np != null)
-				n_phases.add(np);
-		}
-		phases.removeAll(n_phases);
-	}
 
 	/** Get a count a beacons controlled by an action plan */
 	private String countBeacons(ActionPlan ap) {
