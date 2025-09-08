@@ -30,17 +30,17 @@ as [DMS]s and [ramp meter]s.
 
 ## Plan Phases
 
-A plan phase is used to associate [device actions](#device-actions) with a plan.
-The current phase can be changed by an operator, or at specified times with
-[time actions](#time-actions).
-
-A phase can be associated with any number of device actions.  Advanced
-plans can have many phases, each with separate actions.
+The **phase** of an action plan represents its current state.  It can be
+changed manually by an operator or at specific dates/times using
+[time actions](#time-actions).  Advanced plans can have many phases, each with
+separate actions.
 
 The basic phases are **deployed** and **undeployed**.  Additional phases can be
 added on the **Plan Phases** tab.  Each phase must have a unique name.
-By specifying **Hold Time**, a *transient* phase will advance automatically to
-the **Next Phase**.  *Hold Time* must be a multiple of 30 seconds.
+
+By specifying **Hold Time**, a plan will switch to the **Next Phase**
+automatically after the time passes.  Only **selectable** phases can be chosen
+by an operator; otherwise they must be automatic.
 
 <details>
 <summary>API Resources 🕵️ </summary>
@@ -48,10 +48,10 @@ the **Next Phase**.  *Hold Time* must be a multiple of 30 seconds.
 * `iris/api/plan_phase` (primary)
 * `iris/api/plan_phase/{name}`
 
-| Access       | Primary                 |
-|--------------|-------------------------|
-| 👁️  View      | name                    |
-| 🔧 Configure | hold\_time, next\_phase |
+| Access       | Primary                             |
+|--------------|-------------------------------------|
+| 👁️  View      | name                                |
+| 🔧 Configure | selectable, hold\_time, next\_phase |
 
 </details>
 
@@ -63,6 +63,9 @@ plan.  These devices can be:
  - [ramp meter], enables metering operation
  - [beacon], activates flashing lights
  - [camera], recalls the specified camera [preset]
+
+Any number of device actions can be associated with each phase of an action
+plan.
 
 [Priority] determines the priority of messages created by the action.  For
 camera actions, instead this indicates:
