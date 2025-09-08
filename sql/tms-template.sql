@@ -1895,19 +1895,20 @@ GRANT SELECT ON detector_auto_fail_view TO PUBLIC;
 --
 CREATE TABLE iris.plan_phase (
     name VARCHAR(12) PRIMARY KEY,
-    hold_time INTEGER NOT NULL,
+    selectable BOOLEAN NOT NULL,
+    hold_time INTEGER CHECK (hold_time >= 1 AND hold_time <= 600),
     next_phase VARCHAR(12) REFERENCES iris.plan_phase
 );
 
-INSERT INTO iris.plan_phase (name, hold_time)
+INSERT INTO iris.plan_phase (name, selectable)
 VALUES
-    ('deployed', 0),
-    ('undeployed', 0),
-    ('alert_before', 0),
-    ('alert_during', 0),
-    ('alert_after', 0),
-    ('ga_open', 0),
-    ('ga_closed', 0);
+    ('deployed', true),
+    ('undeployed', true),
+    ('alert_before', true),
+    ('alert_during', true),
+    ('alert_after', true),
+    ('ga_open', true),
+    ('ga_closed', true);
 
 CREATE TRIGGER plan_phase_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.plan_phase
