@@ -268,8 +268,9 @@ public class MainServer {
 		TIMER.addJob(new SendSettingsJob(500));
 		TIMER.addJob(new TollZoneJob());
 		TIMER.addJob(new ParkingAreaJob());
+		TIMER.addJob(new TimeActionJob(TIMER));
+		TIMER.addJob(new ActionPlanPhaseJob());
 		TIMER.addJob(new ReaperJob());
-		TIMER.addJob(new ActionPlanJob(TIMER));
 	}
 
 	/** Schedule jobs on FLUSH thread */

@@ -16,42 +16,30 @@ package us.mn.state.dot.tms.server;
 
 import java.util.Calendar;
 import java.util.Iterator;
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanHelper;
-import us.mn.state.dot.tms.TMSException;
 
 /**
- * Job to update action plans
+ * Job to automatically update action plan phases
  *
  * @author Douglas Lau
  */
-public class ActionPlanJob extends Job {
+public class ActionPlanPhaseJob extends Job {
 
-	/** Seconds to offset each poll from start of interval */
-	static private final int OFFSET_SECS = 14;
-
-	/** TIMER Scheduler */
-	private final Scheduler timer;
-
-	/** Create a new action plan job */
-	public ActionPlanJob(Scheduler t) {
-		super(Calendar.SECOND, 30, Calendar.SECOND, OFFSET_SECS);
-		timer = t;
+	/** Create a new action plan phase update job */
+	public ActionPlanPhaseJob() {
+		super(Calendar.SECOND, 5);
 	}
 
 	/** Perform the action plan job */
 	@Override
-	public void perform() throws TMSException {
+	public void perform() {
 		updateActionPlanPhases();
-		timer.addJob(new TimeActionJob());
-		timer.addJob(new DeviceActionJob());
 	}
 
 	/** Update the action plan phases */
-	private void updateActionPlanPhases() throws TMSException {
+	private void updateActionPlanPhases() {
 		Iterator<ActionPlan> it = ActionPlanHelper.iterator();
 		while (it.hasNext()) {
 			ActionPlan ap = it.next();

@@ -239,7 +239,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	public void doSetActive(boolean a) throws TMSException {
 		if (a != active) {
 			if (a)
-				setPhaseNotify(default_phase, getProcUser());
+				setPhaseNotifyX(default_phase, getProcUser());
 			store.update(this, "active", a);
 			setActive(a);
 		}
@@ -248,7 +248,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Set active and schedule phase */
 	public void setActiveScheduledNotify(boolean a) throws TMSException {
 		if (a)
-			setPhaseNotify(getScheduledPhase(), null);
+			setPhaseNotifyX(getScheduledPhase(), null);
 		if (a != active) {
 			store.update(this, "active", a);
 			setActive(a);
@@ -335,7 +335,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/** Set the deployed phase (and notify clients) */
-	public boolean setPhaseNotify(PlanPhase p, String uid)
+	private boolean setPhaseNotifyX(PlanPhase p, String uid)
 		throws TMSException
 	{
 		boolean change = (p != phase);
@@ -348,6 +348,19 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			logEvent(EventType.ACTION_PLAN_PHASE_CHANGED, p, uid);
 		}
 		return change;
+	}
+
+	/** Set the deployed phase (and notify clients) */
+	public boolean setPhaseNotify(PlanPhase p, String uid) {
+		try {
+			return setPhaseNotifyX(p, uid);
+		}
+		catch (TMSException e) {
+			DeviceActionJob.PLAN_LOG.log(
+				"setPhaseNotify: " + e.getMessage()
+			);
+			return false;
+		}
 	}
 
 	/** Check plan device access permissions */
@@ -503,9 +516,9 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/** Update the plan phase */
-	public void updatePhase() throws TMSException {
-		PlanPhase p = phase;
-		if (p != null) {
+	public void updatePhase() {
+		PlanPhase p = getPhase();
+		if (p != null && getActive()) {
 			Integer ht = p.getHoldTime();
 			PlanPhase np = p.getNextPhase();
 			if (ht != null && np != null && phaseSecs() >= ht)
