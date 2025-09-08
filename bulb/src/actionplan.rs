@@ -30,7 +30,8 @@ use web_sys::HtmlSelectElement;
 #[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct PlanPhase {
     pub name: String,
-    pub hold_time: u32,
+    pub selectable: bool,
+    pub hold_time: Option<u32>,
     pub next_phase: Option<String>,
 }
 

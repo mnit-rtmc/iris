@@ -684,13 +684,13 @@ pub const PERMISSION_ONE: &str = "\
 
 /// SQL query for all plan phases (primary)
 pub const PLAN_PHASE_ALL: &str = "\
-  SELECT name, hold_time, next_phase \
+  SELECT name, selectable, hold_time, next_phase \
   FROM iris.plan_phase \
   ORDER BY name";
 
 /// SQL query for one plan phase (secondary)
 pub const PLAN_PHASE_ONE: &str = "\
-  SELECT name, hold_time, next_phase \
+  SELECT name, selectable, hold_time, next_phase \
   FROM iris.plan_phase \
   WHERE name = $1";
 
