@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2024  Minnesota Department of Transportation
+ * Copyright (C) 2016-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,16 +58,22 @@ public class DeviceService extends Service {
 	public String getServiceAddr(String name, String capabilitiesRes)
 		throws IOException
 	{
-		if (capabilitiesRes == null || capabilitiesRes.isEmpty()) {
+		if (capabilitiesRes == null || capabilitiesRes.isEmpty())
 			capabilitiesRes = getCapabilities();
-		}
 		Document capabilitiesDoc = DOMUtils.getDocument(capabilitiesRes);
-		if (capabilitiesDoc == null) return null;
-
-		Element capabilities = (Element) capabilitiesDoc.getElementsByTagNameNS("*", "Capabilities").item(0);
-		Element service = (Element) capabilities.getElementsByTagNameNS("*", name).item(0);
-		if (service == null) return null;
-		return ((Element) service.getElementsByTagNameNS("*", "XAddr").item(0)).getTextContent();
+		if (capabilitiesDoc == null)
+			return null;
+		Element capabilities = (Element) capabilitiesDoc
+			.getElementsByTagNameNS("*", "Capabilities").item(0);
+		if (capabilities == null)
+			return null;
+		Element service = (Element) capabilities
+			.getElementsByTagNameNS("*", name).item(0);
+		if (service == null)
+			return null;
+		Element addr = (Element) service
+			.getElementsByTagNameNS("*", "XAddr").item(0);
+		return (addr != null) ? addr.getTextContent() : null;
 	}
 
 	/** Get the PTZ binding address */
