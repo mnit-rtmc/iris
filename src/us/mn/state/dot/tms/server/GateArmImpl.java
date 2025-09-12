@@ -357,6 +357,20 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		return getArmStateEnum().ordinal();
 	}
 
+
+	/** Test if gate arm is deployable */
+	public boolean isDeployable(boolean open) {
+		if (open) {
+			return isOnline() &&
+			      interlock.isOpenAllowed() &&
+			      !hasFaults();
+		} else {
+			return isOnline() &&
+			      interlock.isCloseAllowed() &&
+			      !hasFaults();
+		}
+	}
+
 	/** Gate arm interlock */
 	private GateArmInterlock interlock;
 

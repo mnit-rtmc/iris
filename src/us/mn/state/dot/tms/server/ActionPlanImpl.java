@@ -365,61 +365,67 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Check plan device access permissions */
 	private void checkDeviceAccess() throws ChangeVetoException {
-		if (!areBeaconsOperatable()) {
-			throw new ChangeVetoException("Device action " +
-				"not allowed for beacons");
-		}
-		if (!areCamerasOperatable()) {
-			throw new ChangeVetoException("Device action " +
-				"not allowed for cameras");
-		}
-		if (!areDmsOperatable()) {
-			throw new ChangeVetoException("Device action " +
-				"not allowed for DMS");
-		}
-		if (!areGateArmsOperatable()) {
-			throw new ChangeVetoException("Device action " +
-				"not allowed for gate arms");
-		}
-		if (!areRampMetersOperatable()) {
-			throw new ChangeVetoException("Device action " +
-				"not allowed for ramp meters");
-		}
+		checkBeaconsOperatable();
+		checkCamerasOperatable();
+		checkDmsOperatable();
+		checkGateArmsOperatable();
+		checkRampMetersOperatable();
 	}
 
 	/** Check if beacons are operatable, or none associated with plan */
-	private boolean areBeaconsOperatable() {
+	private void checkBeaconsOperatable() throws ChangeVetoException {
 		Name name = new Name(Beacon.SONAR_TYPE, "oname", "state");
-		return (accessLevel(name) >= name.accessWrite()) ||
-			(ActionPlanHelper.countBeacons(this) == 0);
+		if (accessLevel(name) < name.accessWrite() ||
+		    ActionPlanHelper.countBeacons(this) > 0)
+		{
+			throw new ChangeVetoException("Device action " +
+				"not allowed for beacons");
+		}
 	}
 
 	/** Check if cameras are operatable, or none associated with plan */
-	private boolean areCamerasOperatable() {
+	private void checkCamerasOperatable() throws ChangeVetoException {
 		Name name = new Name(Camera.SONAR_TYPE, "oname", "recallPreset");
-		return (accessLevel(name) >= name.accessWrite()) ||
-			(ActionPlanHelper.countCameras(this) == 0);
+		if (accessLevel(name) < name.accessWrite() ||
+		    ActionPlanHelper.countCameras(this) > 0)
+		{
+			throw new ChangeVetoException("Device action " +
+				"not allowed for cameras");
+		}
 	}
 
 	/** Check if DMS are operatable, or none associated with plan */
-	private boolean areDmsOperatable() {
+	private void checkDmsOperatable() throws ChangeVetoException {
 		Name name = new Name(DMS.SONAR_TYPE, "oname", "lock");
-		return (accessLevel(name) >= name.accessWrite()) ||
-			(ActionPlanHelper.countDms(this) == 0);
+		if (accessLevel(name) < name.accessWrite() ||
+		    ActionPlanHelper.countDms(this) > 0)
+		{
+			throw new ChangeVetoException("Device action " +
+				"not allowed for DMS");
+		}
 	}
 
 	/** Check if gate arms are operatable, or none associated with plan */
-	private boolean areGateArmsOperatable() {
+	private void checkGateArmsOperatable() throws ChangeVetoException {
 		Name name = new Name(GateArm.SONAR_TYPE, "oname", "lock");
-		return (accessLevel(name) >= name.accessWrite()) ||
-			(ActionPlanHelper.countGateArms(this) == 0);
+		if (accessLevel(name) < name.accessWrite() ||
+		    ActionPlanHelper.countGateArms(this) > 0)
+		{
+			throw new ChangeVetoException("Device action " +
+				"not allowed for gate arms");
+		}
+		checkList(MainServer.server.getProcAddress());
 	}
 
 	/** Check if ramp meters are operatable, or none associated with plan */
-	private boolean areRampMetersOperatable() {
+	private void checkRampMetersOperatable() throws ChangeVetoException {
 		Name name = new Name(RampMeter.SONAR_TYPE, "oname", "lock");
-		return (accessLevel(name) >= name.accessWrite()) ||
-			(ActionPlanHelper.countRampMeters(this) == 0);
+		if (accessLevel(name) < name.accessWrite() ||
+		    ActionPlanHelper.countRampMeters(this) > 0)
+		{
+			throw new ChangeVetoException("Device action " +
+				"not allowed for ramp meters");
+		}
 	}
 
 	/**
@@ -443,7 +449,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		String ht = da.getHashtag();
 		return areBeaconsDeployable(ht)
 		    && areDmsDeployable(ht)
-		    && areGateArmsDeployable(ht)
+		    && areGateArmsDeployable(da, ht)
 		    && areRampMetersDeployable(ht);
 	}
 
@@ -454,7 +460,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			Beacon b = it.next();
 			if (b instanceof BeaconImpl) {
 				BeaconImpl bi = (BeaconImpl) b;
-				if (bi.isOffline()) {
+				if (bi.isActive() && bi.isOffline()) {
 					if (new Hashtags(bi.getNotes())
 					   .contains(ht))
 						return false;
@@ -471,7 +477,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			DMS d = it.next();
 			if (d instanceof DMSImpl) {
 				DMSImpl dms = (DMSImpl) d;
-				if (dms.hasError()) {
+				if (dms.isActive() && !dms.isDeployable()) {
 					if (new Hashtags(d.getNotes())
 					   .contains(ht))
 						return false;
@@ -482,13 +488,15 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/** Check if all gate arms for a hashtag are deployable */
-	private boolean areGateArmsDeployable(String ht) {
+	private boolean areGateArmsDeployable(DeviceAction da, String ht) {
+		PlanPhase pp = da.getPhase();
+		boolean open = !PlanPhase.GATE_ARM_CLOSED.equals(pp.getName());
 		Iterator<GateArm> it = GateArmHelper.iterator();
 		while (it.hasNext()) {
 			GateArm ga = it.next();
 			if (ga instanceof GateArmImpl) {
 				GateArmImpl gai = (GateArmImpl) ga;
-				if (gai.isOffline()) {
+				if (gai.isActive() && !gai.isDeployable(open)) {
 					if (new Hashtags(gai.getNotes())
 					   .contains(ht))
 						return false;
@@ -505,7 +513,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			RampMeter rm = it.next();
 			if (rm instanceof RampMeterImpl) {
 				RampMeterImpl rmi = (RampMeterImpl) rm;
-				if (rmi.isOffline()) {
+				if (rmi.isActive() && rmi.isOffline()) {
 					if (new Hashtags(rmi.getNotes())
 					   .contains(ht))
 						return false;

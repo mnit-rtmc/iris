@@ -1168,9 +1168,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return DMSHelper.hasFaults(this);
 	}
 
-	/** Check if the controller has an error */
-	public boolean hasError() {
-		return isOffline() || hasStatusError();
+	/** Check if the sign is deployable */
+	public boolean isDeployable() {
+		return isOnline() && !hasStatusError();
 	}
 
 	/** Check if the controller has a status error */
