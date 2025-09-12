@@ -48,8 +48,7 @@ update, and is caused by one of these conditions:
 `encoder_type`     |     |     |     |
 `event_config`     |     |     |     |
 `flow_stream`      |     | ✔️   |     |
-`gate_arm`         |     | ✔️   |     |
-`gate_arm_array`   | ✔️   | ✔️   |     |
+`gate_arm`         | ✔️   | ✔️   | ✔️   |
 `gps`              | ✔️   | ✔️   |     |
 `graphic`          |     |     |     |
 `incident`         |     |     |     |
