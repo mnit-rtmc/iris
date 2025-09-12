@@ -89,7 +89,7 @@ public class OpQueryGateStatus extends OpSTC {
 			putCtrlFaults(null, null);
 			gate_arm.setFaultNotify(null);
 		}
-		gate_arm.setArmStateNotify(status.getState(), null);
+		gate_arm.setArmStateNotify(status.getState());
 		updateCtrlStatus();
 		if (shouldUpdateOpCount()) {
 			controller.completeOperation(id, isSuccess());

@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2022  SRF Consulting Group
- * Copyright (C) 2021-2024  Minnesota Department of Transportation
+ * Copyright (C) 2021-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import java.io.IOException;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GateArmState;
-import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.server.GateArmImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.FutureOp;
@@ -51,10 +50,10 @@ public class OpCheckMoveStatus extends OpGateNdorV5 {
 
 	/** Create a new gate-arm motion-monitor operation */
 	@SuppressWarnings("unchecked")
-	public OpCheckMoveStatus(GateArmImpl d, User o,
-			GateArmState gas, int delaySec) {
+	public OpCheckMoveStatus(GateArmImpl d, GateArmState gas,
+		int delaySec)
+	{
 		super(PriorityLevel.POLL_LOW, d, false); // non-exclusive
-		user = o;
 		target_state = gas;
 		if (gas == GateArmState.CLOSED)
 			antitarget_state = GateArmState.OPEN;

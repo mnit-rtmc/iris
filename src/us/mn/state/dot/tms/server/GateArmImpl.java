@@ -297,53 +297,32 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Check for comm timeout to UNKNOWN status */
 	public void checkTimeout() {
 		if (getFailMillis() > failTimeoutMS())
-			setArmStateNotify(GateArmState.UNKNOWN, null);
-	}
-
-	/** Send gate arm interlock settings.  Do not test checkEnabled since
-	 * this is used to shut off interlocks when disabling gate arm system.*/
-	public void sendInterlocks() {
-		// FIXME: send interlocks to all gate arms in array
-		GateArmPoller p = getGateArmPoller();
-		if (p != null)
-			p.sendRequest(this, DeviceRequest.SEND_SETTINGS);
+			setArmStateNotify(GateArmState.UNKNOWN);
 	}
 
 	/** Gate arm state */
 	private GateArmState arm_state;
 
-	/** Request a change to the gate arm state.
-	 * @param gas Requested gate arm state.
-	 * @param o User requesting new state. */
-	public void requestArmState(GateArmState gas, User o) {
-		if (GateArmSystem.checkEnabled()) {
-			GateArmPoller p = getGateArmPoller();
-			if (p != null) {
-				if (gas == GateArmState.OPENING)
-					p.openGate(this, o);
-				if (gas == GateArmState.CLOSING)
-					p.closeGate(this, o);
-			}
+	/** Set the gate arm state and notify clients */
+	public void setArmStateNotify(GateArmState gas) {
+		if (gas == arm_state)
+			return;
+		logEvent(new GateArmEvent(gas, name, fault));
+		try {
+			store.update(this, "arm_state", gas.ordinal());
 		}
-	}
-
-	/** Set the gate arm state.
-	 * @param gas Gate arm state.
-	 * @param o User who requested new state, or null. */
-	public void setArmStateNotify(GateArmState gas, User o) {
-		if (gas != arm_state) {
-			String owner = (o != null) ? o.getName() : null;
-			logEvent(new GateArmEvent(gas, name, owner, fault));
-			try {
-				store.update(this, "arm_state", gas.ordinal());
-			}
-			catch (TMSException e) {
-				logError("setArmStateNotify: " +e.getMessage());
-			}
-			arm_state = gas;
-			notifyAttribute("armState");
+		catch (TMSException e) {
+			GateArmSystem.disable(name, "DB arm_state");
+			logError("setArmStateNotify: " + e.getMessage());
+			return;
 		}
-		ga_array.updateArmState(o);
+		arm_state = gas;
+		notifyAttribute("armState");
+		if (gas == GateArmState.UNKNOWN)
+			sendEmailAlert("COMMUNICATION FAILED: " + name);
+		if (gas == GateArmState.FAULT)
+			sendEmailAlert("FAULT: " + name);
+		updateStyles();
 	}
 
 	/** Get the arm state */
@@ -466,8 +445,32 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	@Override
 	public PlannedAction choosePlannedAction() {
 		PlannedAction pa = super.choosePlannedAction();
-		// FIXME: request arm change
+		GateArmInterlock gai = interlock;
+		if (pa != null && gai.isOpenAllowed())
+			requestArmState(GateArmState.OPENING);
+		if (pa == null && gai.isCloseAllowed())
+			requestArmState(GateArmState.CLOSING);
 		return pa;
+	}
+
+	/** Request a change to the gate arm state.
+	 * @param gas Requested gate arm state. */
+	private void requestArmState(GateArmState gas) {
+		if (GateArmSystem.checkEnabled()) {
+			if (gas != arm_state) {
+				GateArmPoller p = getGateArmPoller();
+				if (p != null)
+					requestArmState(p, gas);
+			}
+		}
+	}
+
+	/** Request a change to the gate arm state */
+	private void requestArmState(GateArmPoller p, GateArmState gas) {
+		if (gas == GateArmState.OPENING)
+			p.openGate(this);
+		if (gas == GateArmState.CLOSING)
+			p.closeGate(this);
 	}
 
 	/** Set the lock (JSON) */

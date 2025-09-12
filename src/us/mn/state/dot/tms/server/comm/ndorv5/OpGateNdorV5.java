@@ -35,9 +35,6 @@ import static us.mn.state.dot.tms.server.comm.ndorv5.GateNdorV5Poller.GATENDORv5
 abstract public class OpGateNdorV5<T extends ControllerProperty>
 	extends OpDevice<T>
 {
-	/** User who initiated control */
-	protected User user = null;
-
 	/** Log an error msg */
 	protected void logError(String msg) {
 		if (GATENDORv5_LOG.isOpen())
@@ -81,7 +78,7 @@ abstract public class OpGateNdorV5<T extends ControllerProperty>
 			controller.incrementControllerErr();
 		}
 		if (gate_arm.getArmStateEnum() != new_state)
-			gate_arm.setArmStateNotify(new_state, user);
+			gate_arm.setArmStateNotify(new_state);
 	}
 
 	/** Cleanup the operation */

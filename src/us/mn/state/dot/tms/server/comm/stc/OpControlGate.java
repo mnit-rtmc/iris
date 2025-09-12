@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2024  Minnesota Department of Transportation
+ * Copyright (C) 2013-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server.comm.stc;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.GateArmState;
-import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.server.GateArmImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -28,9 +27,6 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpControlGate extends OpSTC {
 
-	/** User who initiated control */
-	private final User user;
-
 	/** Control property */
 	private final ControlProperty control;
 
@@ -38,9 +34,8 @@ public class OpControlGate extends OpSTC {
 	private final GateArmState req_state;
 
 	/** Create a new gate arm control operation */
-	public OpControlGate(GateArmImpl d, User o, GateArmState gas) {
-		super(PriorityLevel.COMMAND, d);
-		user = o;
+	public OpControlGate(GateArmImpl g, GateArmState gas) {
+		super(PriorityLevel.COMMAND, g);
 		req_state = gas;
 		control = new ControlProperty(password());
 		control.setOpen(gas == GateArmState.OPENING);
@@ -49,8 +44,8 @@ public class OpControlGate extends OpSTC {
 	}
 
 	/** Create a new gate arm control operation (to set interlock only) */
-	public OpControlGate(GateArmImpl d) {
-		this(d, null, null);
+	public OpControlGate(GateArmImpl g) {
+		this(g, null);
 	}
 
 	/** Create the second phase of the operation */
@@ -69,7 +64,7 @@ public class OpControlGate extends OpSTC {
 			mess.add(control);
 			mess.storeProps();
 			if (req_state != null)
-				gate_arm.setArmStateNotify(req_state, user);
+				gate_arm.setArmStateNotify(req_state);
 			return null;
 		}
 	}

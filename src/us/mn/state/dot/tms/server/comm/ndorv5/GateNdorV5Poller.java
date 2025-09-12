@@ -18,7 +18,6 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArmState;
-import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.server.GateArmImpl;
 import us.mn.state.dot.tms.server.comm.GateArmPoller;
 import us.mn.state.dot.tms.server.comm.ThreadedPoller;
@@ -64,14 +63,14 @@ public class GateNdorV5Poller extends ThreadedPoller<GateNdorV5Property>
 	/** Open the gate arm */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void openGate(GateArmImpl ga, User o) {
-		addOp(new OpMoveGateArm(ga, o, GateArmState.OPENING));
+	public void openGate(GateArmImpl ga) {
+		addOp(new OpMoveGateArm(ga, GateArmState.OPENING));
 	}
 
 	/** Close the gate arm */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void closeGate(GateArmImpl ga, User o) {
-		addOp(new OpMoveGateArm(ga, o, GateArmState.CLOSING));
+	public void closeGate(GateArmImpl ga) {
+		addOp(new OpMoveGateArm(ga, GateArmState.CLOSING));
 	}
 }
