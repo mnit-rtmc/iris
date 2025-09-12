@@ -62,9 +62,11 @@ public class ActionPlanHelper extends BaseHelper {
 		Iterator<Beacon> it = BeaconHelper.iterator();
 		while (it.hasNext()) {
 			Beacon b = it.next();
-			Hashtags tags = new Hashtags(b.getNotes());
-			if (tags.containsAny(hashtags))
-				n_count++;
+			if (ControllerHelper.isActive(b.getController())) {
+				Hashtags tags = new Hashtags(b.getNotes());
+				if (tags.containsAny(hashtags))
+					n_count++;
+			}
 		}
 		return n_count;
 	}
@@ -76,9 +78,11 @@ public class ActionPlanHelper extends BaseHelper {
 		Iterator<Camera> it = CameraHelper.iterator();
 		while (it.hasNext()) {
 			Camera cam = it.next();
-			Hashtags tags = new Hashtags(cam.getNotes());
-			if (tags.containsAny(hashtags))
-				n_count++;
+			if (ControllerHelper.isActive(cam.getController())) {
+				Hashtags tags = new Hashtags(cam.getNotes());
+				if (tags.containsAny(hashtags))
+					n_count++;
+			}
 		}
 		return n_count;
 	}
@@ -90,9 +94,11 @@ public class ActionPlanHelper extends BaseHelper {
 		Iterator<DMS> it = DMSHelper.iterator();
 		while (it.hasNext()) {
 			DMS dms = it.next();
-			Hashtags tags = new Hashtags(dms.getNotes());
-			if (tags.containsAny(hashtags))
-				n_count++;
+			if (ControllerHelper.isActive(dms.getController())) {
+				Hashtags tags = new Hashtags(dms.getNotes());
+				if (tags.containsAny(hashtags))
+					n_count++;
+			}
 		}
 		return n_count;
 	}
@@ -104,9 +110,11 @@ public class ActionPlanHelper extends BaseHelper {
 		Iterator<GateArm> it = GateArmHelper.iterator();
 		while (it.hasNext()) {
 			GateArm ga = it.next();
-			Hashtags tags = new Hashtags(ga.getNotes());
-			if (tags.containsAny(hashtags))
-				n_count++;
+			if (ControllerHelper.isActive(ga.getController())) {
+				Hashtags tags = new Hashtags(ga.getNotes());
+				if (tags.containsAny(hashtags))
+					n_count++;
+			}
 		}
 		return n_count;
 	}
@@ -118,9 +126,11 @@ public class ActionPlanHelper extends BaseHelper {
 		Iterator<RampMeter> it = RampMeterHelper.iterator();
 		while (it.hasNext()) {
 			RampMeter rm = it.next();
-			Hashtags tags = new Hashtags(rm.getNotes());
-			if (tags.containsAny(hashtags))
-				n_count++;
+			if (ControllerHelper.isActive(rm.getController())) {
+				Hashtags tags = new Hashtags(rm.getNotes());
+				if (tags.containsAny(hashtags))
+					n_count++;
+			}
 		}
 		return n_count;
 	}
@@ -133,9 +143,11 @@ public class ActionPlanHelper extends BaseHelper {
 		Iterator<DMS> it = DMSHelper.iterator();
 		while (it.hasNext()) {
 			DMS dms = it.next();
-			Hashtags tags = new Hashtags(dms.getNotes());
-			if (tags.containsAny(hashtags))
-				signs.add(dms);
+			if (ControllerHelper.isActive(dms.getController())) {
+				Hashtags tags = new Hashtags(dms.getNotes());
+				if (tags.containsAny(hashtags))
+					signs.add(dms);
+			}
 		}
 		return signs;
 	}
