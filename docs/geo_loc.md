@@ -19,20 +19,20 @@ geographical feature.
 The `res={res}` query parameter is used for permission checks, and must match
 the value of `resource_n` in the record.  It can be one of these values:
 
-| Resource         | [Base Resource] |
-|------------------|-----------------|
-| alarm            | controller      |
-| beacon           |                 |
-| camera           |                 |
-| controller       |                 |
-| dms              |                 |
-| gate\_arm\_array | gate\_arm       |
-| gps              | controller      |
-| parking\_area    |                 |
-| ramp\_meter      |                 |
-| r\_node          | detector        |
-| tag\_reader      | toll\_zone      |
-| weather\_sensor  |                 |
+| Resource        | [Base Resource] |
+|-----------------|-----------------|
+| alarm           | controller      |
+| beacon          |                 |
+| camera          |                 |
+| controller      |                 |
+| dms             |                 |
+| gate\_arm       |                 |
+| gps             | controller      |
+| parking\_area   |                 |
+| r\_node         | detector        |
+| ramp\_meter     |                 |
+| tag\_reader     | toll\_zone      |
+| weather\_sensor |                 |
 
 
 [base resource]: permissions.html#base-resources

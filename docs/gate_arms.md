@@ -13,92 +13,92 @@ roadway.  They are commonly used for on-ramps or reversible lanes.
 * `iris/api/gate_arm` (primary)
 * `iris/api/gate_arm/{name}`
 
-| Access       | Primary                               | Secondary |
-|--------------|---------------------------------------|-----------|
-| 👁️  View      | name, location, arm\_state, interlock | geo\_loc, ga\_array, idx, fault |
-| 👉 Operate   |                                       | lock †    |
+| Access       | Primary                               | Secondary       |
+|--------------|---------------------------------------|-----------------|
+| 👁️  View      | name, location, arm\_state, interlock | geo\_loc, fault |
+| 👉 Operate   |                                       | lock †          |
 | 🔧 Configure | controller, notes                     | pin, preset, opposing, downstream |
 
 † _Write only_
 
 </details>
 
-## Arrays
+## Setup
 
-Gate arms are grouped into **arrays** of 1-8 arms.  _Opening_ or _closing_ an
-array controls **all** associated arms.
+The gate arm properties form has setup information.
 
-## Verification Cameras
+Field      | Description
+-----------|---------------------------------------------------
+Notes      | administrator notes, possibly including [hashtag]s
+Preset     | verification [camera] preset
+Opposing   | interlock check for gates on this road in another direction
+Downstream | [hashtag] for downstream gates which must open prior to this
 
-One or two [cameras] can be associated with a gate arm array.  This allows
-operators to check traffic conditions and verify the status before opening or
-closing the gates.  The second camera can be used to monitor approaching
-traffic.  The _Swap_ button allows the camera images to be swapped between
-larger and smaller views.
+A [hashtag] in the **notes** field is used to group arms that are controlled
+as a unit.
 
-## Warning Action Plan
+The verification [camera] preset allows operators to check traffic conditions
+before opening or closing the gates.  The _Swap_ button allows camera images
+from multiple gates to be swapped between larger and smaller views.
 
-An [action plan] can be associated with a gate arm array.  The plan's [phase]
-will be continuously updated according to the array state (see below).
+Gate arms are controlled by [action plan]s with three phases:
+- `ga_open`: gates and [DMS] both open
+- `ga_warn_cls`: gates open, but DMS displaying closed message
+- `ga_closed`: gates and DMS both closed
 
-Any number of [device actions] can be assigned to these phases to warn
-motorists of the gate arm state.  DMS messages for these are displayed to the
-right of the camera view, for up to two signs.
+[Device action]s must be assigned to these phases to control devices:
+- Gate arm hashtags should be assigned to `ga_open` and `ga_warn_cls`, but not
+  `ga_close`.
+- Different DMS messages can be displayed for each phase, as necessary.
 
-## Operating
+## States and Interlocks
 
-Gate arms can be in one of 7 states:
+Gate arms are continuously monitored, and can be in one of these states:
 
-State        | Description             | Plan Phase
--------------|-------------------------|------------
-`OPENING`    | opening in progress     | `ga_closed`
-`OPEN`       | gate open               | `ga_open`
-`WARN_CLOSE` | warn before closing     | `ga_closed`
-`CLOSING`    | closing in progress     | `ga_closed`
-`CLOSED`     | gate closed             | `ga_closed`
-`FAULT`      | fault in gate operation | `ga_closed`
-`UNKNOWN`    | no commnuication        | `ga_closed`
-
-![](images/gate_arm_dispatch.png)
-
-Depending on the current array state, one of the buttons will be enabled.  When
-an operator presses a button, its corresponding state will be requested:
-- `Open` ⇒ `OPENING`
-- `Warn Close` ⇒ `WARN_CLOSE` †
-- `Close` ⇒ `CLOSING`
-
-None of these three states can be requested automatically by the system -- an
-operator must **manually** request them.
-
-† `Warn Close` is only enabled if a [warning action plan] is configured.
-Operators should request this state to warn motorists when the gates will soon
-be closing.  After checking the verification cameras, the `CLOSING` state can be
-requested.
+State        | Description             | Possibly Open | Possibly Closed
+-------------|-------------------------|---------------|----------------
+`OPENING`    | opening in progress     | ✔️             | ✔️
+`OPEN`       | gate open               | ✔️             |
+`CLOSING`    | closing in progress     | ✔️             | ✔️
+`CLOSED`     | gate closed             |               | ✔️
+`FAULT`      | fault in gate operation | ✔️             | ✔️
+`UNKNOWN`    | no commnuication        | ✔️             | ✔️
 
 If communication is lost to a gate arm for longer than the value of
 `gate_arm_alert_timeout_secs` [system attribute], its state will be set to
 `UNKNOWN`.
 
-## Interlocks
+A gate arm **interlock** can prevent dangerous traffic conflicts:
+- **Deny Open** prevents opening the gate, due to opposing gates _possibly_
+  open or downstream gates _possibly_ closed.
+- **Deny Close** prevents closing the gate, due to upstream gates _possibly_
+  open.
+- **Deny All** prevents opening or closing the gate (both above conditions).
+- **System Disable** prevents operating any gates.
 
-Care must be taken to prevent traffic conflicts when operating gate arms.
-Two types of constraints are available for this purpose:
-- **Open interlock**: prevents opening the gate arm
-- **Close interlock**: prevents closing the gate arm
-
-When a gate arm is in any state other than `CLOSED`, it is considered _possibly
-open_.
-
-**Opposing Traffic** creates an _open interlock_ constraint -- if _any_ gate is
-possibly open in a different direction on the same roadway.
-
-**Prerequisites** prevent a sequence of gates from opening in the wrong order.
-If a dependent array's prerequisite is not `OPEN`, it will have an _open
-interlock_.  Once they are both open, the prerequisite will have a _close
-interlock_ until the dependent is closed.
-
-If a constraint is broken, IRIS will not automatically try to resolve it.
+If a constraint is broken, IRIS will never automatically try to resolve it.
 Instead, an _alert_ will logged in the `email_event` table.
+
+## Control
+
+![](images/gate_arm_dispatch.png)
+
+Depending on the current action plan phase, one of the buttons will be enabled.
+When an operator presses a button, its corresponding phase will be requested:
+- `Open` ⇒ `ga_open`
+- `Warn Close` ⇒ `ga_warn_cls` †
+- `Close` ⇒ `ga_closed`
+
+† `Warn Close` is only enabled if a [device action] is configured with the
+`ga_warn_cls` phase.  Operators should use this phase to warn motorists when
+the gates will soon be closing.  After checking the verification cameras, the
+`ga_close` phase can be selected.
+
+None of these phases can be requested automatically by the system -- an
+operator must **manually** request them.
+
+DMS messages for these are displayed to the right of the camera view, for up to
+two signs.
 
 ## Security
 
@@ -107,28 +107,30 @@ control.
 
 ### Allowlist
 
-There is a list of IP addresses from which clients are allowed to control gate
-arms.  It is specified as the `gate.arm.allowlist` property in the
-`/etc/iris/iris-server.properties` configuration file.  The property contains
-a list of addresses in [CIDR] notation (exact IP, or ranges specified such as
-`192.168.1.0/24`).
+There is a list of IP addresses from which clients are allowed to control a
+gate arm action plan.  It is specified as the `gate.arm.allowlist` property in
+the `/etc/iris/iris-server.properties` configuration file.  The property
+contains a list of addresses in [CIDR] notation (exact IP, or ranges specified
+such as `192.168.1.0/24`).
 
 ### System Disable
 
 Another security feature causes the entire _gate arm system_ to be disabled
 whenever a configuration change is made to any gate arm.  This includes any
-changes to a gate arm array, [controller] or associated [comm link].  IRIS will
-not send any command to open or close any gate arm while in this state.  The
-only way to re-enable gate arm control is to create a file in the server
-filesystem at `/var/lib/iris/gate_arm_enable` (using the touch command).
+changes to a gate arm, [controller] or associated [comm link] or [action plan].
+IRIS will not send any command to open or close any gate arm while in this
+state.  The only way to re-enable gate arm control is to create a file in the
+server filesystem at `/var/lib/iris/gate_arm_enable` (using the touch command).
 
 
 [action plan]: action_plans.html
-[cameras]: cameras.html
+[camera]: cameras.html
 [CIDR]: https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing
 [comm link]: comm_links.html
 [controller]: controllers.html
-[device actions]: action_plans.html#device-actions
+[device action]: action_plans.html#device-actions
+[DMS]: dms.html
+[hashtag]: hashtags.html
 [phase]: action_plans.html#plan-phases
 [system attribute]: system_attributes.html
 [warning action plan]: #warning-action-plan

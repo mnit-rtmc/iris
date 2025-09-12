@@ -54,7 +54,7 @@ resource, at the same access level.
 | [controller]       | [alarm], [comm link], [gps], [modem]                  |
 | [detector]         | [r_node], [road], station                             |
 | [dms]              | [font], glyph, [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
-| [gate arm]         | [gate arm array]                                      |
+| [gate arm]         |                                                       |
 | [incident]         | incident_detail, inc_advice, inc_descriptor, inc_locator, road_affix |
 | [lcs]              | [lcs state]                                           |
 | [parking area]     |                                                       |
@@ -99,7 +99,6 @@ resource.  These include:
 [flow stream]: flow_streams.html
 [font]: fonts.html
 [gate arm]: gate_arms.html
-[gate arm array]: gate_arms.html#arrays
 [geo loc]: geo_loc.html
 [gps]: gps.html
 [graphic]: graphics.html
