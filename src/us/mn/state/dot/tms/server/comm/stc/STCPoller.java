@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2024  Minnesota Department of Transportation
+ * Copyright (C) 2013-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArmState;
-import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.GateArmImpl;
 import us.mn.state.dot.tms.server.comm.GateArmPoller;
@@ -62,13 +61,13 @@ public class STCPoller extends ThreadedPoller<STCProperty>
 
 	/** Open the gate arm */
 	@Override
-	public void openGate(GateArmImpl ga, User o) {
-		addOp(new OpControlGate(ga, o, GateArmState.OPENING));
+	public void openGate(GateArmImpl ga) {
+		addOp(new OpControlGate(ga, GateArmState.OPENING));
 	}
 
 	/** Close the gate arm */
 	@Override
-	public void closeGate(GateArmImpl ga, User o) {
-		addOp(new OpControlGate(ga, o, GateArmState.CLOSING));
+	public void closeGate(GateArmImpl ga) {
+		addOp(new OpControlGate(ga, GateArmState.CLOSING));
 	}
 }

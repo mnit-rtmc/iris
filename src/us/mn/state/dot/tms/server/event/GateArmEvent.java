@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2024  Minnesota Department of Transportation
+ * Copyright (C) 2013-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ import java.util.Map;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.utils.SString;
 
 /**
  * This is a class for logging gate arm state change events to a database.
@@ -52,17 +51,13 @@ public class GateArmEvent extends BaseEvent {
 	/** Device ID (if device specific) */
 	private final String device_id;
 
-	/** User who initiated change */
-	private final String user_id;
-
 	/** Fault description (if any) */
 	private final String fault;
 
 	/** Create a new gate arm event */
-	public GateArmEvent(GateArmState gas, String d, String uid, String f) {
+	public GateArmEvent(GateArmState gas, String d, String f) {
 		super(gateArmStateEventType(gas));
 		device_id = d;
-		user_id = SString.truncate(uid, 15);
 		fault = f;
 	}
 
@@ -85,7 +80,6 @@ public class GateArmEvent extends BaseEvent {
 		map.put("event_desc", event_type.id);
 		map.put("event_date", new Timestamp(event_date.getTime()));
 		map.put("device_id", device_id);
-		map.put("user_id", user_id);
 		map.put("fault", fault);
 		return map;
 	}

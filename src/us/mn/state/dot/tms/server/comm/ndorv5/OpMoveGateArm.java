@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2022  SRF Consulting Group
- * Copyright (C) 2021-2024  Minnesota Department of Transportation
+ * Copyright (C) 2021-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.server.comm.ndorv5;
 import java.io.IOException;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GateArmState;
-import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.server.GateArmImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.FutureOp;
@@ -40,9 +39,8 @@ public class OpMoveGateArm extends OpGateNdorV5 {
 
 	/** Create a new gate arm control operation */
 	@SuppressWarnings("unchecked")
-	public OpMoveGateArm(GateArmImpl d, User o, GateArmState gas) {
+	public OpMoveGateArm(GateArmImpl d, GateArmState gas) {
 		super(PriorityLevel.COMMAND, d, false); // priority 1, non-exclusive
-		user = o;
 		if (sGateArm == null) {
 			prop = null;
 			return;
@@ -64,7 +62,7 @@ public class OpMoveGateArm extends OpGateNdorV5 {
 
 	/** Create a new gate arm control operation (to set interlock only) */
 	public OpMoveGateArm(GateArmImpl d) {
-		this(d, null, null);
+		this(d, null);
 	}
 
 	/** Create the second phase of the operation */
@@ -87,23 +85,34 @@ public class OpMoveGateArm extends OpGateNdorV5 {
 			if (!prop.gotValidResponse())
 				throw new ParsingException("NO RESPONSE");
 
-			// queue a lower priority op to monitor the operation
-			OpDevice op;
+			// queue a lower priority operation to monitor state
 			switch (target_state) {
 				case CLOSED:
-					int delay = prop.delay;
-					op = new OpCheckMoveStatus((GateArmImpl)device, user, target_state, delay);
-					FutureOp.queueOp(device, delay, op);
-					gate_arm.setArmStateNotify(GateArmState.CLOSING, user);
+					checkClosing();
 					break;
 				case OPEN:
-					op = new OpCheckMoveStatus((GateArmImpl)device, user, target_state, 0);
-					FutureOp.queueOp(device, 2, op);
-					gate_arm.setArmStateNotify(GateArmState.OPENING, user);
+					checkOpening();
 					break;
 			}
 			return null;
 		}
+	}
+
+	/** Queue op to check closing state */
+	private void checkClosing() {
+		int delay = prop.delay;
+		OpDevice op = new OpCheckMoveStatus((GateArmImpl) device,
+			target_state, delay);
+		FutureOp.queueOp(device, delay, op);
+		gate_arm.setArmStateNotify(GateArmState.CLOSING);
+	}
+
+	/** Queue op to check opening state */
+	private void checkOpening() {
+		OpDevice op = new OpCheckMoveStatus((GateArmImpl) device,
+			target_state, 0);
+		FutureOp.queueOp(device, 2, op);
+		gate_arm.setArmStateNotify(GateArmState.OPENING);
 	}
 
 	/** Cleanup the operation */
