@@ -48,8 +48,6 @@ pub enum ItemState {
     Opening,
     /// Open (gate arm)
     Open,
-    /// Warn close (gate arm)
-    WarnClose,
     /// Closing (gate arm)
     Closing,
     /// Closed (gate arm)
@@ -98,7 +96,6 @@ impl ItemState {
             "🔧" => Some(Self::Configure),
             "↗️" => Some(Self::Opening),
             "✔️" => Some(Self::Open),
-            "‼️" => Some(Self::WarnClose),
             "↘️" => Some(Self::Closing),
             "⛔" => Some(Self::Closed),
             "🔆" => Some(Self::Beacon),
@@ -129,7 +126,6 @@ impl ItemState {
             Self::Configure => "🔧",
             Self::Opening => "↗️",
             Self::Open => "✔️",
-            Self::WarnClose => "‼️",
             Self::Closing => "↘️",
             Self::Closed => "⛔",
             Self::Beacon => "🔆",
@@ -159,7 +155,6 @@ impl ItemState {
             Self::Configure => "configure",
             Self::Opening => "opening",
             Self::Open => "open",
-            Self::WarnClose => "warn closing",
             Self::Closing => "closing",
             Self::Closed => "closed",
             Self::Beacon => "beacons",
