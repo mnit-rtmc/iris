@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2021  Minnesota Department of Transportation
+ * Copyright (C) 2013-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,51 +24,48 @@ import us.mn.state.dot.tms.GateArmInterlock;
 public class GateArmLockState {
 
 	/** Flag to enable gate arm system */
-	private boolean system_enable = false;
+	private final boolean system_enable;
 
-	/** Set flag to enable gate arm system */
-	public void setSystemEnable(boolean enable) {
-		system_enable = enable;
+	/** Create gate arm lock state */
+	public GateArmLockState(boolean e) {
+		system_enable = e;
+		opposing_open = false;
+		downstream_closed = false;
+		upstream_open = false;
 	}
 
-	/** Flag to indicate opposing direction open */
-	private boolean opposing_open = false;
+	/** Flag to indicate opposing direction possibly open */
+	private boolean opposing_open;
 
-	/** Set flag to indicate opposing direction open */
-	public void setOpposingOpen(boolean open) {
-		opposing_open = open;
+	/** Set flag to indicate opposing direction possibly open */
+	public void setOpposingOpen() {
+		opposing_open = true;
 	}
 
-	/** Flag to indicate prerequisite gate arm closed (not fully open) */
-	private boolean prereq_closed = false;
+	/** Flag to indicate downstream gate arm possibly closed */
+	private boolean downstream_closed;
 
-	/** Set flag to indicate prerequisite arm closed (not fully open) */
-	public void setPrereqClosed(boolean closed) {
-		prereq_closed = closed;
+	/** Set flag to indicate downstream arm possibly closed */
+	public void setDownstreamClosed() {
+		downstream_closed = true;
 	}
 
-	/** Flag to indicate dependent gate arm open */
-	private boolean dependent_open = false;
+	/** Flag to indicate upstream gate arm possibly open */
+	private boolean upstream_open;
 
-	/** Dependency transaction flag.
-	 *
-	 * Used during dependency check transactions, between calls to
-	 * beginDependencies and commitDependencies */
-	private boolean dep_open_temp = false;
-
-	/** Begin dependency transaction */
-	public void beginDependencies() {
-		dep_open_temp = false;
+	/** Set flag indicating upstream arm possibly open */
+	public void setUpstreamOpen() {
+		upstream_open = true;
 	}
 
-	/** Set temp flag indicating dependent gate arm open */
-	public void setDependentOpen() {
-		dep_open_temp = true;
+	/** Check if gate open is denied */
+	private boolean isOpenDenied() {
+		return opposing_open || downstream_closed;
 	}
 
-	/** Commit dependcy transaction */
-	public void commitDependencies() {
-		dependent_open = dep_open_temp;
+	/** Check if gate close is denied */
+	private boolean isCloseDenied() {
+		return upstream_open;
 	}
 
 	/** Get the interlock enum */
@@ -83,15 +80,5 @@ public class GateArmLockState {
 			return GateArmInterlock.DENY_CLOSE;
 		else
 			return GateArmInterlock.NONE;
-	}
-
-	/** Check if gate open is denied */
-	private boolean isOpenDenied() {
-		return opposing_open || prereq_closed;
-	}
-
-	/** Check if gate close is denied */
-	private boolean isCloseDenied() {
-		return dependent_open;
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2021  Minnesota Department of Transportation
+ * Copyright (C) 2013-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@ package us.mn.state.dot.tms;
  * Gate Arm state enumeration.
  *
  * The ordinal values correspond to the records in the iris.gate_arm_state
- * look-up table.  These states are used for gate arm arrays as well as
- * individual gate arms.  The WARN_CLOSE state only applies to gate arm arrays.
+ * look-up table.
  *
  * @author Douglas Lau
  */
@@ -30,7 +29,7 @@ public enum GateArmState {
 	FAULT,      /* 1: fault in gate operation */
 	OPENING,    /* 2: open in progress */
 	OPEN,       /* 3: gate open, open msg on DMS */
-	WARN_CLOSE, /* 4: gate open, closed msg on DMS */
+	WARN_CLOSE, /* 4: -- obsolete -- */
 	CLOSING,    /* 5: close in progress */
 	CLOSED;     /* 6: gate closed */
 
@@ -42,7 +41,6 @@ public enum GateArmState {
 	/** Check if operator can request OPENING */
 	public boolean canRequestOpening() {
 		switch (this) {
-		case WARN_CLOSE:
 		case CLOSED:
 		case FAULT:
 			return true;
@@ -64,7 +62,6 @@ public enum GateArmState {
 	/** Check if operator can request CLOSING */
 	public boolean canRequestClosing(boolean has_signs) {
 		switch (this) {
-		case WARN_CLOSE:
 		case FAULT:
 			return true;
 		case OPEN:

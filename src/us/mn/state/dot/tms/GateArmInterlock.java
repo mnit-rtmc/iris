@@ -47,14 +47,14 @@ public enum GateArmInterlock {
 		}
 	}
 
-	/** Check if gate arm open is locked */
-	public boolean isOpenLocked() {
+	/** Check if gate arm open is denied */
+	public boolean isOpenDenied() {
 		switch (this) {
 		case DENY_OPEN:
 		case DENY_ALL:
 			return true;
 		default:
-			// NOTE: For SYSTEM_DISABLE, open is not locked
+			// NOTE: For SYSTEM_DISABLE, open is not denied
 			//       to allow manual front panel control
 			return false;
 		}
@@ -71,8 +71,8 @@ public enum GateArmInterlock {
 		}
 	}
 
-	/** Check if gate arm close is locked */
-	public boolean isCloseLocked() {
+	/** Check if gate arm close is denied */
+	public boolean isCloseDenied() {
 		switch (this) {
 		case DENY_CLOSE:
 		case DENY_ALL:

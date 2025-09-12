@@ -21,8 +21,6 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmHelper;
-import us.mn.state.dot.tms.GateArmArray;
-import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -70,12 +68,12 @@ public class GateArmSystem {
 	/** Enable or disable gate arm system */
 	static private void setEnabled(boolean e) {
 		ENABLED = e;
-		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
+		Iterator<GateArm> it = GateArmHelper.iterator();
 		while (it.hasNext()) {
-			GateArmArray g = it.next();
-			if (g instanceof GateArmArrayImpl) {
-				GateArmArrayImpl ga = (GateArmArrayImpl) g;
-				ga.setSystemEnable(e);
+			GateArm ga = it.next();
+			if (ga instanceof GateArmImpl) {
+				GateArmImpl gai = (GateArmImpl) ga;
+				gai.setSystemEnable(e);
 			}
 		}
 	}
@@ -132,111 +130,27 @@ public class GateArmSystem {
 			msg);
 	}
 
-	/** Check all gate arm open interlocks for one road.
-	 * @param r Road to check. */
-	static public void checkInterlocks(Road r) {
-		int d = openGateDirection(r);
-		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
+	/** Update all gate arm interlocks */
+	static public void updateInterlocks() {
+		boolean e = checkEnabled();
+		Iterator<GateArm> it = GateArmHelper.iterator();
 		while (it.hasNext()) {
-			GateArmArray g = it.next();
-			if (g instanceof GateArmArrayImpl) {
-				GateArmArrayImpl ga = (GateArmArrayImpl) g;
-				Road gr = ga.getRoad();
-				if (gr == r)
-					ga.setOpenDirection(d);
+			GateArm ga = it.next();
+			if (ga instanceof GateArmImpl) {
+				GateArmImpl gai = (GateArmImpl) ga;
+				gai.updateInterlock(e);
 			}
 		}
 	}
 
-	/** Get valid gate open direction for the specified road.  If gates are
-	 * open in more than one direction, then no direction is valid.
-	 * @param r Road to check.
-	 * @return Ordinal of valid gate Direction; 0 for any, -1 for none. */
-	static private int openGateDirection(Road r) {
-		int d = 0;
-		boolean found = false;
-		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
-		while (it.hasNext()) {
-			GateArmArray g = it.next();
-			if (g instanceof GateArmArrayImpl) {
-				GateArmArrayImpl ga = (GateArmArrayImpl) g;
-				if (ga.isPossiblyOpen()) {
-					Road gr = ga.getRoad();
-					if (gr == r) {
-						int gd = ga.getRoadDir();
-						if (found && d != gd)
-							return -1;
-						else {
-							found = true;
-							d = gd;
-						}
-					}
-				}
-			}
-		}
-		return d;
-	}
-
-	/** Update all gate arm array dependencies.
-	 * NOTE: this does three linear scans of all gate arm arrays */
-	static public void updateDependencies() {
-		beginDependencies();
-		checkDependencies();
-		commitDependencies();
-	}
-
-	/** Begin dependency transaction for all gate arm arrays */
-	static private void beginDependencies() {
-		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
-		while (it.hasNext()) {
-			GateArmArray g = it.next();
-			if (g instanceof GateArmArrayImpl) {
-				GateArmArrayImpl ga = (GateArmArrayImpl) g;
-				ga.beginDependencies();
-			}
-		}
-	}
-
-	/** Check dependencies for all gate arm arrays */
-	static private void checkDependencies() {
-		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
-		while (it.hasNext()) {
-			GateArmArray g = it.next();
-			if (g instanceof GateArmArrayImpl) {
-				GateArmArrayImpl ga = (GateArmArrayImpl) g;
-				ga.checkDependencies();
-			}
-		}
-	}
-
-	/** Commit dependency transaction for all gate arm arrays */
-	static private void commitDependencies() {
-		Iterator<GateArmArray> it = GateArmArrayHelper.iterator();
-		while (it.hasNext()) {
-			GateArmArray g = it.next();
-			if (g instanceof GateArmArrayImpl) {
-				GateArmArrayImpl ga = (GateArmArrayImpl) g;
-				ga.commitDependencies();
-			}
-		}
-	}
-
-	/** Check all gate arm arrays for a GeoLoc change.  This needs to be
-	 * fast, but the current algorithm is a linear scan...
+	/** Check all gate arms for a GeoLoc change.  This needs to be fast,
+	 * but the current algorithm is a linear scan...
 	 * @param loc GeoLoc to check.
 	 * @param reason Reason for check. */
 	static public void checkDisable(GeoLoc loc, String reason) {
 		Iterator<GateArm> it = GateArmHelper.iterator();
 		while (it.hasNext()) {
-			GateArm g = it.next();
-			if (loc == g.getGeoLoc()) {
-				disable(loc.getName(), reason);
-				return;
-			}
-		}
-		Iterator<GateArmArray> ait = GateArmArrayHelper.iterator();
-		while (ait.hasNext()) {
-			GateArmArray ga = ait.next();
+			GateArm ga = it.next();
 			if (loc == ga.getGeoLoc()) {
 				disable(loc.getName(), reason);
 				return;
