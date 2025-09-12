@@ -16,19 +16,25 @@ package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.CameraPreset;
+import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArm;
-import us.mn.state.dot.tms.GateArmArrayHelper;
+import us.mn.state.dot.tms.GateArmHelper;
 import us.mn.state.dot.tms.GateArmInterlock;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.Hashtags;
+import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.User;
+import static us.mn.state.dot.tms.server.GateArmSystem.sendEmailAlert;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.GateArmPoller;
 import us.mn.state.dot.tms.server.event.GateArmEvent;
@@ -47,10 +53,10 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Load all the gate arms */
 	static protected void loadAll() throws TMSException {
-		store.query("SELECT name, ga_array, idx, geo_loc, " +
-			"controller, pin, preset, notes, opposing, " +
-			"downstream, arm_state, interlock, fault " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, geo_loc, controller, pin, " +
+			"preset, notes, opposing, downstream, arm_state, " +
+			"interlock, fault FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new GateArmImpl(row));
@@ -63,8 +69,6 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("ga_array", ga_array);
-		map.put("idx", idx);
 		map.put("geo_loc", geo_loc);
 		map.put("controller", controller);
 		map.put("pin", pin);
@@ -93,29 +97,24 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Create a gate arm */
 	private GateArmImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name
-		     row.getString(2),  // ga_array
-		     row.getInt(3),     // idx
-		     row.getString(4),  // geo_loc
-		     row.getString(5),  // controller
-		     row.getInt(6),     // pin
-		     row.getString(7),  // preset
-		     row.getString(8),  // notes
-		     row.getBoolean(9), // opposing
-		     row.getString(10), // downstream
-		     row.getInt(11),    // arm_state
-		     row.getInt(12),    // interlock
-		     row.getString(13)  // fault
+		     row.getString(2),  // geo_loc
+		     row.getString(3),  // controller
+		     row.getInt(4),     // pin
+		     row.getString(5),  // preset
+		     row.getString(6),  // notes
+		     row.getBoolean(7), // opposing
+		     row.getString(8),  // downstream
+		     row.getInt(9),     // arm_state
+		     row.getInt(10),    // interlock
+		     row.getString(11)  // fault
 		);
 	}
 
 	/** Create a gate arm */
-	private GateArmImpl(String n, String a, int i, String loc,
-		String c, int p, String cp, String nt, boolean o, String ds,
-		int as, int lk, String flt)
+	private GateArmImpl(String n, String loc, String c, int p, String cp,
+		String nt, boolean o, String ds, int as, int lk, String flt)
 	{
 		super(n, lookupController(c), p, nt);
-		ga_array = (GateArmArrayImpl) GateArmArrayHelper.lookup(a);
-		idx = i;
 		geo_loc = lookupGeoLoc(loc);
 		setPreset(lookupPreset(cp));
 		notes = nt;
@@ -127,22 +126,9 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		initTransients();
 	}
 
-	/** Set gate arm array index */
-	private void setArrayIndex(GateArmImpl ga) {
-		try {
-			GateArmArrayImpl a = ga_array;
-			if (a != null)
-				a.setIndex(idx, ga);
-		}
-		catch (TMSException e) {
-			logError("setArrayIndex: " + e.getMessage());
-		}
-	}
-
 	/** Initialize the gate arm */
 	@Override
 	public void initTransients() {
-		setArrayIndex(this);
 		// calling updateControllerPin would disable GateArmSystem
 		ControllerImpl c = controller;
 		if (c != null)
@@ -156,25 +142,6 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		super.doDestroy();
 		geo_loc.notifyRemove();
 		GateArmSystem.disable(name, "destroy gate arm");
-		setArrayIndex(null);
-	}
-
-	/** Gate arm array */
-	private GateArmArrayImpl ga_array;
-
-	/** Get the gate arm array */
-	@Override
-	public GateArmArrayImpl getGaArray() {
-		return ga_array;
-	}
-
-	/** Index in array (1 to MAX_ARMS) */
-	private int idx;
-
-	/** Get the index in array (1 to MAX_ARMS) */
-	@Override
-	public int getIdx() {
-		return idx;
 	}
 
 	/** Device location */
@@ -199,7 +166,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		super.updateControllerPin(oc, op, nc, np);
 	}
 
-	/** Camera preset from which this can be seen */
+	/** Verification camera preset */
 	private CameraPreset preset;
 
 	/** Set the verification camera preset */
@@ -336,6 +303,37 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		return getArmStateEnum().ordinal();
 	}
 
+	/** Test if gate arm is closed */
+	private boolean isClosed() {
+		return isOnline() && arm_state == GateArmState.CLOSED;
+	}
+
+	/** Test if gate arm is possibly open */
+	private boolean isPossiblyOpen() {
+		return isActive() && (
+		       isOffline() || arm_state != GateArmState.CLOSED
+		);
+	}
+
+	/** Test if gate arm is open */
+	private boolean isOpen() {
+		return isOnline() && isPossiblyOpen();
+	}
+
+	/** Test if gate arm is possibly closed */
+	private boolean isPossiblyClosed() {
+		return isActive() && (
+		       isOffline() || arm_state != GateArmState.OPEN
+		);
+	}
+
+	/** Test if gate arm is moving */
+	private boolean isMoving() {
+		return isOnline() && (
+		       arm_state == GateArmState.OPENING ||
+		       arm_state == GateArmState.CLOSING
+		);
+	}
 
 	/** Test if gate arm is deployable */
 	public boolean isDeployable(boolean open) {
@@ -364,15 +362,16 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		return interlock;
 	}
 
-	/** Set the interlock flag */
-	private void setInterlockNotify() {
-		GateArmInterlock lk = lock_state.getInterlock();
+	/** Set the interlock enum */
+	private void setInterlockNotify(GateArmInterlock lk) {
 		if (lk != interlock) {
 			try {
 				store.update(this, "interlock", lk.ordinal());
 			}
 			catch (TMSException e) {
 				GateArmSystem.disable(name, "DB interlock");
+				logError("setInterlockNotify: " +
+					e.getMessage());
 			}
 			interlock = lk;
 			notifyAttribute("interlock");
@@ -380,29 +379,49 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		}
 	}
 
-	/** Lock state for calculating interlock */
-	private transient GateArmLockState lock_state = new GateArmLockState();
-
-	/** Begin dependency transaction */
-	public void beginDependencies() {
-		lock_state.beginDependencies();
+	/** Send gate arm interlock settings.
+	 *
+	 * Do not test checkEnabled since this is used to shut off interlocks
+	 * when disabling gate arm system.*/
+	private void sendInterlocks() {
+		GateArmPoller p = getGateArmPoller();
+		if (p != null)
+			p.sendRequest(this, DeviceRequest.SEND_SETTINGS);
 	}
 
-	/** Check gate arm array dependencies */
-	public void checkDependencies() {
-		// FIXME: adapt from gate arm arrays
-		// FIXME: also, check all gate arms with downstream hashtag
+	/** Opposing gate arm dependencies */
+	private transient ArrayList<GateArmImpl> opposing_arms =
+		new ArrayList<GateArmImpl>();
+
+	/** Downstream gate arm dependencies */
+	private transient ArrayList<GateArmImpl> downstream_arms =
+		new ArrayList<GateArmImpl>();
+
+	/** Upstream gate arm dependencies */
+	private transient ArrayList<GateArmImpl> upstream_arms =
+		new ArrayList<GateArmImpl>();
+
+	/** Update the interlock by checking dependencies */
+	public void updateInterlock(boolean e) {
+		GateArmLockState ls = new GateArmLockState(e && isActive());
+		for (GateArmImpl ga: opposing_arms) {
+			if (ga.isPossiblyOpen())
+				ls.setOpposingOpen();
+		}
+		for (GateArmImpl ga: downstream_arms) {
+			if (ga.isPossiblyClosed())
+				ls.setDownstreamClosed();
+		}
+		for (GateArmImpl ga: upstream_arms) {
+			if (ga.isPossiblyOpen())
+				ls.setUpstreamOpen();
+		}
+		setInterlockNotify(ls.getInterlock());
 	}
 
-	/** Commit dependcy transaction */
-	public void commitDependencies() {
-		lock_state.commitDependencies();
-		setInterlockNotify();
-	}
-
-	/** Check if gate arm open is locked */
-	public boolean isOpenLocked() {
-		return ga_array.getInterlockEnum().isOpenLocked();
+	/** Check if gate arm is denied from opening */
+	public boolean isOpenDenied() {
+		return getInterlockEnum().isOpenDenied();
 	}
 
 	/** Fault description */
@@ -429,6 +448,12 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		}
 	}
 
+	/** Test if gate arm has faults */
+	@Override
+	protected boolean hasFaults() {
+		return (fault != null) || (arm_state == GateArmState.FAULT);
+	}
+
 	/** Get the gate arm poller */
 	private GateArmPoller getGateArmPoller() {
 		DevicePoller dp = getPoller();
@@ -437,8 +462,108 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Update the gate arm styles.  This is called by the controller
 	 * when active or fail state changes. */
+	@Override
 	public void updateStyles() {
-		ga_array.updateStyles();
+		checkDependencies();
+		super.updateStyles();
+	}
+
+	/** Check dependencies */
+	private void checkDependencies() {
+		GateArmSystem.checkEnabled();
+		GateArmSystem.updateInterlocks();
+		setOpenConflict(interlock.isOpenDenied() && isPossiblyOpen());
+		setCloseConflict(interlock.isCloseDenied() && isClosed());
+	}
+
+	/** Open conflict detected flag.  This is initially set to true because
+	 * devices start in failed state after a server restart. */
+	private transient boolean open_conflict = true;
+
+	/** Set open conflict state */
+	private void setOpenConflict(boolean c) {
+		if (c != open_conflict) {
+			open_conflict = c;
+			if (c)
+				sendEmailAlert("OPEN CONFLICT: " + name);
+		}
+	}
+
+	/** Close conflict detected flag. */
+	private transient boolean close_conflict = false;
+
+	/** Set close conflict state */
+	private void setCloseConflict(boolean c) {
+		if (c != close_conflict) {
+			close_conflict = c;
+			if (c)
+				sendEmailAlert("CLOSE CONFLICT: " + name);
+		}
+	}
+
+	/** Set flag to enable gate arm system */
+	public void setSystemEnable(boolean e) {
+		opposing_arms.clear();
+		downstream_arms.clear();
+		upstream_arms.clear();
+		if (e && isActive())
+			initDependencyArrays();
+		checkDependencies();
+	}
+
+	/** Initialize opposing / downstream / upstream arrays */
+	private void initDependencyArrays() {
+		final Road road = getRoad();
+		final int dir = (opposing) ? getRoadDir() : 0;
+		Hashtags my_tags = new Hashtags(getNotes());
+		Iterator<GateArm> it = GateArmHelper.iterator();
+		while (it.hasNext()) {
+			GateArm ga = it.next();
+			if (!(ga instanceof GateArmImpl))
+				continue;
+			GateArmImpl gai = (GateArmImpl) ga;
+			if (gai.isActive()) {
+				if (my_tags.contains(gai.getDownstream()))
+					upstream_arms.add(gai);
+				Hashtags tags = new Hashtags(gai.getNotes());
+				if (tags.contains(downstream))
+					downstream_arms.add(gai);
+				int rd = gai.getRoadDir();
+				if (objectEquals(road, gai.getRoad()) &&
+				    (dir != rd) &&
+				    (dir != 0) &&
+				    (rd != 0))
+				{
+					opposing_arms.add(gai);
+				}
+			}
+		}
+	}
+
+	/** Get gate arm road */
+	private Road getRoad() {
+		GeoLoc gl = getGeoLoc();
+		return (gl != null) ? gl.getRoadway() : null;
+	}
+
+	/** Get gate arm road direction.
+	 * @return Index of road direction, or 0 for unknown */
+	private int getRoadDir() {
+		GeoLoc gl = getGeoLoc();
+		return (gl != null) ? gl.getRoadDir() : 0;
+	}
+
+	/** Calculate item styles */
+	@Override
+	protected long calculateStyles() {
+		long s = super.calculateStyles();
+		if (isClosed())
+			s |= ItemStyle.CLOSED.bit();
+		if (isOpen())
+			s |= ItemStyle.OPEN.bit();
+		if (isMoving())
+			s |= ItemStyle.MOVING.bit();
+		return s;
 	}
 
 	/** Choose the planned action */
@@ -476,6 +601,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Set the lock (JSON) */
 	@Override
 	public void setLock(String lk) {
-		// FIXME: adapt from gate arm array?
+		// NOTE: this attribute is only used for permission checks
+		//       on action plans, which control gate arm states
 	}
 }

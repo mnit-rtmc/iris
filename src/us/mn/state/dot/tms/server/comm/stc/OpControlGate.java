@@ -40,7 +40,7 @@ public class OpControlGate extends OpSTC {
 		control = new ControlProperty(password());
 		control.setOpen(gas == GateArmState.OPENING);
 		control.setClose(gas == GateArmState.CLOSING);
-		control.setInterlock(d.isOpenLocked());
+		control.setInterlock(g.isOpenDenied());
 	}
 
 	/** Create a new gate arm control operation (to set interlock only) */

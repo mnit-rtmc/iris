@@ -101,7 +101,7 @@ public class MainServer {
 			store = createStore(props);
 			BaseEvent.store = store;
 			I18N.initialize(props);
-			GateArmArrayImpl.initAllowList(props);
+			ActionPlanImpl.initAllowList(props);
 			ServerNamespace ns = createNamespace();
 			BaseObjectImpl.loadAll(store, ns);
 			scheduleTimerJobs();
@@ -240,7 +240,6 @@ public class MainServer {
 		ns.registerType(DMSImpl.class);
 		ns.registerType(MsgPatternImpl.class);
 		ns.registerType(MsgLineImpl.class);
-		ns.registerType(GateArmArrayImpl.class);
 		ns.registerType(GateArmImpl.class);
 		ns.registerType(TagReaderImpl.class);
 		ns.registerType(LcsImpl.class);

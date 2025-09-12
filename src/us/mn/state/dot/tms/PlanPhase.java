@@ -50,6 +50,9 @@ public interface PlanPhase extends SonarObject {
 	/** Gate arm open phase name */
 	String GATE_ARM_OPEN = "ga_open";
 
+	/** Gate arm warn close phase name */
+	String GATE_ARM_WARN_CLS = "ga_warn_cls";
+
 	/** Gate arm closed phase name */
 	String GATE_ARM_CLOSED = "ga_closed";
 

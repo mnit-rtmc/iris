@@ -15,12 +15,16 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.net.InetAddress;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.ActionPlan;
@@ -46,6 +50,7 @@ import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.MainServer.TIMER;
 import us.mn.state.dot.tms.server.event.ActionPlanEvent;
 import static us.mn.state.dot.tms.server.ActionPlanSystem.sendEmailAlert;
+import us.mn.state.dot.tms.utils.CidrBlock;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
@@ -55,6 +60,30 @@ import us.mn.state.dot.tms.utils.UniqueNameCreator;
  * @author Michael Darter
  */
 public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
+
+	/** Allow list of CIDR blocks */
+	static private final List<CidrBlock> ALLOWLIST =
+		new ArrayList<CidrBlock>();
+
+	/** Initialize the gate arm allow list */
+	static public void initAllowList(Properties props)
+		throws IllegalArgumentException
+	{
+		List<CidrBlock> allow = CidrBlock.parseList(props.getProperty(
+			"gate.arm.allowlist"));
+		ALLOWLIST.addAll(allow);
+	}
+
+	/** Check if IP address is in allow list */
+	static private boolean checkList(InetAddress a)
+		throws ChangeVetoException
+	{
+		for (CidrBlock block: ALLOWLIST) {
+			if (block.matches(a))
+				return true;
+		}
+		throw new ChangeVetoException("IP ADDRESS NOT ALLOWED: " + a);
+	}
 
 	/** Create a unique ActionPlan record name */
 	static public String createUniqueName(String template) {
