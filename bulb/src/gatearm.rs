@@ -45,7 +45,7 @@ pub struct GateArm {
     pub pin: Option<u32>,
     pub preset: Option<String>,
     pub opposing: Option<bool>,
-    pub downstream: Option<String>,
+    pub downstream_hashtag: Option<String>,
 }
 
 /// Ancillary gate arm data
@@ -203,7 +203,7 @@ impl GateArm {
             .id("downstream")
             .maxlength("16")
             .size("16")
-            .value(opt_ref(&self.downstream));
+            .value(opt_ref(&self.downstream_hashtag));
         html.end(); /* div */
         self.footer_html(true, &mut html);
         html.to_string()
@@ -277,7 +277,7 @@ impl Card for GateArm {
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
         fields.changed_input("opposing", self.opposing);
-        fields.changed_input("downstream", &self.downstream);
+        fields.changed_input("downstream_hashtag", &self.downstream_hashtag);
         fields.into_value().to_string()
     }
 }

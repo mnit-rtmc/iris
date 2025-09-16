@@ -17,7 +17,7 @@ roadway.  They are commonly used for on-ramps or reversible lanes.
 |--------------|---------------------------------------|-----------------|
 | 👁️  View      | name, location, arm\_state, interlock | geo\_loc, fault |
 | 👉 Operate   |                                       | lock †          |
-| 🔧 Configure | controller, notes                     | pin, preset, opposing, downstream |
+| 🔧 Configure | controller, notes                     | pin, preset, opposing, downstream_hashtag |
 
 † _Write only_
 

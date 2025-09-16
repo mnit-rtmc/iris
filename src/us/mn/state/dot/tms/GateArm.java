@@ -46,10 +46,10 @@ public interface GateArm extends Device {
 	boolean getOpposing();
 
 	/** Set downstream hashtag */
-	void setDownstream(String ds);
+	void setDownstreamHashtag(String ds);
 
 	/** Get downstream hashtag */
-	String getDownstream();
+	String getDownstreamHashtag();
 
 	/** Get the arm state */
 	int getArmState();

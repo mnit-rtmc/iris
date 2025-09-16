@@ -54,9 +54,9 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Load all the gate arms */
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, geo_loc, controller, pin, " +
-			"preset, notes, opposing, downstream, arm_state, " +
-			"interlock, fault FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+			"preset, notes, opposing, downstream_hashtag, " +
+			"arm_state, interlock, fault FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new GateArmImpl(row));
@@ -75,7 +75,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		map.put("preset", preset);
 		map.put("notes", notes);
 		map.put("opposing", opposing);
-		map.put("downstream", downstream);
+		map.put("downstream_hashtag", downstream_hashtag);
 		map.put("arm_state", getArmState());
 		map.put("interlock", interlock);
 		map.put("fault", fault);
@@ -103,7 +103,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		     row.getString(5),  // preset
 		     row.getString(6),  // notes
 		     row.getBoolean(7), // opposing
-		     row.getString(8),  // downstream
+		     row.getString(8),  // downstream_hashtag
 		     row.getInt(9),     // arm_state
 		     row.getInt(10),    // interlock
 		     row.getString(11)  // fault
@@ -119,7 +119,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		setPreset(lookupPreset(cp));
 		notes = nt;
 		opposing = o;
-		downstream = ds;
+		downstream_hashtag = ds;
 		arm_state = GateArmState.fromOrdinal(as);
 		interlock = GateArmInterlock.fromOrdinal(lk);
 		fault = flt;
@@ -224,27 +224,27 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	}
 
 	/** Downstream hashtag */
-	private String downstream;
+	private String downstream_hashtag;
 
 	/** Set the downstream hashtag */
 	@Override
-	public void setDownstream(String ds) {
-		GateArmSystem.disable(name, "set downstream");
-		downstream = ds;
+	public void setDownstreamHashtag(String ds) {
+		GateArmSystem.disable(name, "set downstream_hashtag");
+		downstream_hashtag = ds;
 	}
 
 	/** Set the downstream hashtag */
-	public void doSetDownstream(String ds) throws TMSException {
-		if (!objectEquals(ds, downstream)) {
-			store.update(this, "downstream", ds);
-			setDownstream(ds);
+	public void doSetDownstreamHashtag(String ds) throws TMSException {
+		if (!objectEquals(ds, downstream_hashtag)) {
+			store.update(this, "downstream_hashtag", ds);
+			setDownstreamHashtag(ds);
 		}
 	}
 
 	/** Get downstream hashtag */
 	@Override
-	public String getDownstream() {
-		return downstream;
+	public String getDownstreamHashtag() {
+		return downstream_hashtag;
 	}
 
 	/** Send a device request operation */
@@ -523,10 +523,10 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 				continue;
 			GateArmImpl gai = (GateArmImpl) ga;
 			if (gai.isActive()) {
-				if (my_tags.contains(gai.getDownstream()))
+				if (my_tags.contains(gai.getDownstreamHashtag()))
 					upstream_arms.add(gai);
 				Hashtags tags = new Hashtags(gai.getNotes());
-				if (tags.contains(downstream))
+				if (tags.contains(downstream_hashtag))
 					downstream_arms.add(gai);
 				int rd = gai.getRoadDir();
 				if (objectEquals(road, gai.getRoad()) &&
