@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,8 +91,8 @@ public class DeviceActionImpl extends BaseObjectImpl implements DeviceAction {
 	}
 
 	/** Create a device action */
-	public DeviceActionImpl(String n, ActionPlan a, PlanPhase p, String ht,
-		MsgPattern pat, int pr)
+	public DeviceActionImpl(String n, ActionPlanImpl a, PlanPhase p,
+		String ht, MsgPattern pat, int pr)
 	{
 		this(n);
 		action_plan = a;
@@ -103,7 +103,7 @@ public class DeviceActionImpl extends BaseObjectImpl implements DeviceAction {
 	}
 
 	/** Action plan */
-	private ActionPlan action_plan;
+	private ActionPlanImpl action_plan;
 
 	/** Get the action plan */
 	@Override
@@ -117,6 +117,7 @@ public class DeviceActionImpl extends BaseObjectImpl implements DeviceAction {
 	/** Set the plan phase to perform action */
 	@Override
 	public void setPhase(PlanPhase p) {
+		action_plan.testGateArmDisable(name, "phase");
 		phase = p;
 	}
 
@@ -140,6 +141,7 @@ public class DeviceActionImpl extends BaseObjectImpl implements DeviceAction {
 	/** Set the hashtag */
 	@Override
 	public void setHashtag(String ht) {
+		action_plan.testGateArmDisable(name, "hashtag");
 		hashtag = ht;
 	}
 
@@ -191,6 +193,7 @@ public class DeviceActionImpl extends BaseObjectImpl implements DeviceAction {
 	 * @see us.mn.state.dot.tms.SignMsgPriority */
 	@Override
 	public void setMsgPriority(int pr) {
+		action_plan.testGateArmDisable(name, "msg_priority");
 		msg_priority = pr;
 	}
 
