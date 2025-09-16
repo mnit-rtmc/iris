@@ -32,6 +32,7 @@ import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.comm.ControllerManager;
 import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.gate.GateArmManager;
+import us.mn.state.dot.tms.client.gate.GatePlanManager;
 import us.mn.state.dot.tms.client.incident.IncidentManager;
 import us.mn.state.dot.tms.client.lcs.LcsManager;
 import us.mn.state.dot.tms.client.map.MapBean;
@@ -171,6 +172,14 @@ public class Session {
 		return lcs_manager;
 	}
 
+	/** Gate arm plan manager */
+	private final GatePlanManager gp_manager;
+
+	/** Get the gate arm plan manager */
+	public GatePlanManager getGatePlanManager() {
+		return gp_manager;
+	}
+
 	/** Mapping of all tabs */
 	private final HashMap<String, MapTab> all_tabs =
 		new HashMap<String, MapTab>();
@@ -198,6 +207,7 @@ public class Session {
 		cam_manager = new CameraManager(this, loc_manager);
 		lcs_manager = new LcsManager(this, loc_manager);
 		alert_manager = new AlertManager(this, loc_manager);
+		gp_manager = new GatePlanManager(this, loc_manager);
 		managers = new LinkedList<ProxyManager<?>>();
 		managers.add(r_node_manager);
 		managers.add(new ControllerManager(this, loc_manager));
@@ -206,6 +216,7 @@ public class Session {
 		managers.add(lcs_manager);
 		managers.add(new MeterManager(this, loc_manager));
 		managers.add(new GateArmManager(this, loc_manager));
+		managers.add(gp_manager);
 		managers.add(new BeaconManager(this, loc_manager));
 		managers.add(new TagReaderManager(this, loc_manager));
 		managers.add(new WeatherSensorManager(this, loc_manager));

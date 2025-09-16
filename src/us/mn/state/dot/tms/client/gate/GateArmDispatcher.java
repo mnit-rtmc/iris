@@ -170,14 +170,14 @@ public class GateArmDispatcher extends IPanel {
 	};
 
 	/** Create a new gate arm dispatcher */
-	public GateArmDispatcher(Session s, GatePlanManager manager) {
+	public GateArmDispatcher(Session s) {
 		session = s;
 		TypeCache<ActionPlan> cache =
 			s.getSonarState().getActionPlans();
 		watcher = new ProxyWatcher<ActionPlan>(cache, plan_view, true);
 		warn_dms_1 = new WarningDms(session);
 		warn_dms_2 = new WarningDms(session);
-		sel_mdl = manager.getSelectionModel();
+		sel_mdl = s.getGatePlanManager().getSelectionModel();
 		stream_pnl = createStreamPanel(MEDIUM);
 		thumb_pnl = createStreamPanel(THUMBNAIL);
 		for (int i = 0; i < MAX_ARMS; i++) {
