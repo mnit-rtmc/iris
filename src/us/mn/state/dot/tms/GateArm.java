@@ -30,12 +30,6 @@ public interface GateArm extends Device {
 		return SONAR_TYPE;
 	}
 
-	/** Get the gate arm array */
-	GateArmArray getGaArray();
-
-	/** Get the index in array (1 to MAX_ARMS) */
-	int getIdx();
-
 	/** Get the device location */
 	GeoLoc getGeoLoc();
 

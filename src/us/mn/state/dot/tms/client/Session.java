@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.client.beacon.BeaconManager;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.comm.ControllerManager;
 import us.mn.state.dot.tms.client.dms.DMSManager;
-import us.mn.state.dot.tms.client.gate.GateArmArrayManager;
+import us.mn.state.dot.tms.client.gate.GateArmManager;
 import us.mn.state.dot.tms.client.incident.IncidentManager;
 import us.mn.state.dot.tms.client.lcs.LcsManager;
 import us.mn.state.dot.tms.client.map.MapBean;
@@ -205,7 +205,7 @@ public class Session {
 		managers.add(cam_manager);
 		managers.add(lcs_manager);
 		managers.add(new MeterManager(this, loc_manager));
-		managers.add(new GateArmArrayManager(this, loc_manager));
+		managers.add(new GateArmManager(this, loc_manager));
 		managers.add(new BeaconManager(this, loc_manager));
 		managers.add(new TagReaderManager(this, loc_manager));
 		managers.add(new WeatherSensorManager(this, loc_manager));

@@ -64,6 +64,7 @@ public enum ItemStyle {
 	DMS,
 	BEACON,
 	CAMERA,
+	GATE_ARM,
 	METER,
 	TIME,
 	/* Alert styles */

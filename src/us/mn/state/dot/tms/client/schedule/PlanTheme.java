@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2019  Minnesota Department of Transportation
+ * Copyright (C) 2011-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.beacon.BeaconMarker;
 import us.mn.state.dot.tms.client.camera.CameraMarker;
 import us.mn.state.dot.tms.client.dms.DmsMarker;
+import us.mn.state.dot.tms.client.gate.GateArmMarker;
 import us.mn.state.dot.tms.client.map.Style;
 import us.mn.state.dot.tms.client.map.VectorSymbol;
 import us.mn.state.dot.tms.client.meter.MeterMarker;
@@ -46,10 +47,6 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 	/** Color for undeployed plans */
 	static private final Color COLOR_UNDEPLOYED = new Color(255, 0, 0);
 
-	/** Symbol for DMS */
-	static private final VectorSymbol SYM_DMS = new VectorSymbol(
-		new DmsMarker());
-
 	/** Symbol for beacons */
 	static private final VectorSymbol SYM_BEACON = new VectorSymbol(
 		new BeaconMarker());
@@ -57,6 +54,14 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 	/** Symbol for cameras */
 	static private final VectorSymbol SYM_CAMERA = new VectorSymbol(
 		new CameraMarker());
+
+	/** Symbol for DMS */
+	static private final VectorSymbol SYM_DMS = new VectorSymbol(
+		new DmsMarker());
+
+	/** Symbol for gate arms */
+	static private final VectorSymbol SYM_GATE_ARM = new VectorSymbol(
+		new GateArmMarker());
 
 	/** Symbol for ramp meters */
 	static private final VectorSymbol SYM_METER = new VectorSymbol(
@@ -73,6 +78,7 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 		addStyle(ItemStyle.DMS, COLOR_SCHEDULED);
 		addStyle(ItemStyle.BEACON, COLOR_DEPLOYED);
 		addStyle(ItemStyle.CAMERA, COLOR_CAMERA);
+		addStyle(ItemStyle.GATE_ARM, COLOR_DEPLOYED);
 		addStyle(ItemStyle.METER, MeterTheme.COLOR_METERING);
 		addStyle(ItemStyle.TIME, COLOR_SCHEDULE);
 		addStyle(ItemStyle.ACTIVE, COLOR);
@@ -85,12 +91,14 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 	public Icon getLegend(Style sty) {
 		ItemStyle is = ItemStyle.lookupStyle(sty.toString());
 		switch (is) {
-		case DMS:
-			return SYM_DMS.getLegend(sty);
 		case BEACON:
 			return SYM_BEACON.getLegend(sty);
 		case CAMERA:
 			return SYM_CAMERA.getLegend(sty);
+		case DMS:
+			return SYM_DMS.getLegend(sty);
+		case GATE_ARM:
+			return SYM_GATE_ARM.getLegend(sty);
 		case METER:
 			return SYM_METER.getLegend(sty);
 		case TIME:

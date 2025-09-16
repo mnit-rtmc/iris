@@ -151,4 +151,21 @@ public class ActionPlanHelper extends BaseHelper {
 		}
 		return signs;
 	}
+
+	/** Get set of gate arms controlled by an action plan */
+	static public TreeSet<GateArm> findGateArms(ActionPlan ap) {
+		Set<String> hashtags = findHashtags(ap);
+		TreeSet<GateArm> arms = new TreeSet<GateArm>(
+			new NumericAlphaComparator<GateArm>());
+		Iterator<GateArm> it = GateArmHelper.iterator();
+		while (it.hasNext()) {
+			GateArm ga = it.next();
+			if (ControllerHelper.isActive(ga.getController())) {
+				Hashtags tags = new Hashtags(ga.getNotes());
+				if (tags.containsAny(hashtags))
+					arms.add(ga);
+			}
+		}
+		return arms;
+	}
 }

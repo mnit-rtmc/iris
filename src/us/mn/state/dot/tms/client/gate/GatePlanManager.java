@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2025  Minnesota Department of Transportation
+ * Copyright (C) 2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,30 +12,25 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.schedule;
+package us.mn.state.dot.tms.client.gate;
 
-import java.awt.Color;
-import java.util.Iterator;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanHelper;
-import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.PlanPhase;
-import us.mn.state.dot.tms.TimeAction;
-import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
+import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 
 /**
- * A plan manager is a container for SONAR action plan objects.
+ * A gate plan manager is a container for SONAR gate arm action plans.
  *
  * @author Douglas Lau
  */
-public class PlanManager extends ProxyManager<ActionPlan> {
+public class GatePlanManager extends ProxyManager<ActionPlan> {
 
 	/** Create a descriptor for action plans */
 	static private ProxyDescriptor<ActionPlan> descriptor(Session s) {
@@ -44,15 +39,9 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		);
 	}
 
-	/** Create a new action plan manager */
-	public PlanManager(Session s, GeoLocManager lm) {
-		super(s, lm, descriptor(s), 0, ItemStyle.ACTIVE);
-	}
-
-	/** Create a plan map tab */
-	@Override
-	public PlanTab createTab() {
-		return new PlanTab(session, this);
+	/** Create a new gate action plan manager */
+	public GatePlanManager(Session s, GeoLocManager lm) {
+		super(s, lm, descriptor(s), 0, ItemStyle.GATE_ARM);
 	}
 
 	/** Find the map geo location for a proxy */
@@ -61,10 +50,13 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		return null;
 	}
 
-	/** Create a theme for action plans */
+	/** Create a theme for gate arm action plans */
 	@Override
-	protected PlanTheme createTheme() {
-		return new PlanTheme(this);
+	protected ProxyTheme<ActionPlan> createTheme() {
+		ProxyTheme<ActionPlan> theme = new ProxyTheme<ActionPlan>(this,
+			new GateArmMarker());
+		theme.addStyle(ItemStyle.GATE_ARM, ProxyTheme.COLOR_AVAILABLE);
+		return theme;
 	}
 
 	/** Check the style of the specified proxy */
@@ -73,29 +65,9 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		if (!isWritePermitted(proxy))
 			return false;
 		switch (is) {
-		case BEACON:
-			return proxy.getActive() &&
-			       ActionPlanHelper.countBeacons(proxy) > 0;
-		case CAMERA:
-			return proxy.getActive() &&
-			       ActionPlanHelper.countCameras(proxy) > 0;
-		case DMS:
-			return proxy.getActive() &&
-			       ActionPlanHelper.countDms(proxy) > 0;
 		case GATE_ARM:
 			return proxy.getActive() &&
 			       ActionPlanHelper.countGateArms(proxy) > 0;
-		case METER:
-			return proxy.getActive() &&
-			       ActionPlanHelper.countRampMeters(proxy) > 0;
-		case TIME:
-			return proxy.getActive() && hasTimeAction(proxy);
-		case ACTIVE:
-			return proxy.getActive();
-		case UNDEPLOYED:
-			return proxy.getActive() && isUndeployed(proxy);
-		case ALL:
-			return true;
 		default:
 			return false;
 		}
@@ -104,22 +76,6 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	/** Check if the user is permitted to update the given action plan */
 	private boolean isWritePermitted(ActionPlan plan) {
 		return session.isWritePermitted(plan, "phase");
-	}
-
-	/** Test if an aciton plan is deployed */
-	private boolean isUndeployed(ActionPlan p) {
-		return PlanPhase.UNDEPLOYED.equals(p.getPhase().getName());
-	}
-
-	/** Test if an action plan has time actions */
-	private boolean hasTimeAction(ActionPlan p) {
-		Iterator<TimeAction> it = TimeActionHelper.iterator();
-		while (it.hasNext()) {
-			TimeAction ta = it.next();
-			if (ta.getActionPlan() == p)
-				return true;
-		}
-		return false;
 	}
 
 	/** Get the description of an action plan */

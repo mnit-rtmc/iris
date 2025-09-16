@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.client.gate;
 
 import java.awt.BorderLayout;
-import us.mn.state.dot.tms.GateArmArray;
+import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
@@ -25,16 +25,16 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
  *
  * @author Douglas Lau
  */
-public class GateArmTab extends MapTab<GateArmArray> {
+public class GateArmTab extends MapTab<GateArm> {
 
 	/** Gate Arm dispatch panel */
 	private final GateArmDispatcher dispatcher;
 
-	/** Summary of gate arm arrays of each status */
-	private final StyleSummary<GateArmArray> summary;
+	/** Summary of gate arm of each status */
+	private final StyleSummary<GateArm> summary;
 
 	/** Create a new gate arm tab */
-  	public GateArmTab(Session session, GateArmArrayManager man) {
+  	public GateArmTab(Session session, GateArmManager man) {
 		super(man);
 		dispatcher = new GateArmDispatcher(session, man);
 		summary = man.createStyleSummary(false);

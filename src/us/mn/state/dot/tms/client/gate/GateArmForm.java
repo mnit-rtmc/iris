@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2017  Minnesota Department of Transportation
+ * Copyright (C) 2013-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.client.gate;
 
-import us.mn.state.dot.tms.GateArmArray;
+import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.utils.I18N;
@@ -24,11 +24,10 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class GateArmArrayForm extends ProxyTableForm<GateArmArray> {
+public class GateArmForm extends ProxyTableForm<GateArm> {
 
-	/** Create a new gate arm array form */
-	public GateArmArrayForm(Session s) {
-		super(I18N.get("gate_arm_array.title"),
-			new GateArmArrayModel(s));
+	/** Create a new gate arm form */
+	public GateArmForm(Session s) {
+		super(I18N.get("gate_arm.title"), new GateArmModel(s));
 	}
 }
