@@ -37,38 +37,4 @@ public enum GateArmState {
 	static public GateArmState fromOrdinal(int o) {
 		return (o >= 0 && o < values().length) ? values()[o] : UNKNOWN;
 	}
-
-	/** Check if operator can request OPENING */
-	public boolean canRequestOpening() {
-		switch (this) {
-		case CLOSED:
-		case FAULT:
-			return true;
-		default:
-			return false;
-		}
-	}
-
-	/** Check if operator can request WARN_CLOSE */
-	public boolean canRequestWarnClose(boolean has_signs) {
-		switch (this) {
-		case OPEN:
-			return has_signs;
-		default:
-			return false;
-		}
-	}
-
-	/** Check if operator can request CLOSING */
-	public boolean canRequestClosing(boolean has_signs) {
-		switch (this) {
-		case FAULT:
-			return true;
-		case OPEN:
-			// only allow OPEN -> CLOSING if there are no signs
-			return !has_signs;
-		default:
-			return false;
-		}
-	}
 }

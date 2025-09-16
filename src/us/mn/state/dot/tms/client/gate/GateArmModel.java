@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2019  Minnesota Department of Transportation
+ * Copyright (C) 2013-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,39 +15,39 @@
 package us.mn.state.dot.tms.client.gate;
 
 import java.util.ArrayList;
-import us.mn.state.dot.tms.GateArmArray;
+import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
- * Table model for gate arm arrays.
+ * Table model for gate arms.
  *
  * @author Douglas Lau
  */
-public class GateArmArrayModel extends ProxyTableModel<GateArmArray> {
+public class GateArmModel extends ProxyTableModel<GateArm> {
 
 	/** Create the columns in the model */
 	@Override
-	protected ArrayList<ProxyColumn<GateArmArray>> createColumns() {
-		ArrayList<ProxyColumn<GateArmArray>> cols =
-			new ArrayList<ProxyColumn<GateArmArray>>(2);
-		cols.add(new ProxyColumn<GateArmArray>("gate_arm_array", 200) {
-			public Object getValueAt(GateArmArray ga) {
+	protected ArrayList<ProxyColumn<GateArm>> createColumns() {
+		ArrayList<ProxyColumn<GateArm>> cols =
+			new ArrayList<ProxyColumn<GateArm>>(2);
+		cols.add(new ProxyColumn<GateArm>("gate_arm", 200) {
+			public Object getValueAt(GateArm ga) {
 				return ga.getName();
 			}
 		});
-		cols.add(new ProxyColumn<GateArmArray>("location", 300) {
-			public Object getValueAt(GateArmArray ga) {
+		cols.add(new ProxyColumn<GateArm>("location", 300) {
+			public Object getValueAt(GateArm ga) {
 				return GeoLocHelper.getLocation(ga.getGeoLoc());
 			}
 		});
 		return cols;
 	}
 
-	/** Create a new gate arm array table model */
-	public GateArmArrayModel(Session s) {
-		super(s, GateArmArrayManager.descriptor(s), 16);
+	/** Create a new gate arm table model */
+	public GateArmModel(Session s) {
+		super(s, GateArmManager.descriptor(s), 16);
 	}
 }

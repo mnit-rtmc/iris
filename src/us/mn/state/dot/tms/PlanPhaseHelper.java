@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2023  Minnesota Department of Transportation
+ * Copyright (C) 2011-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,7 @@ public class PlanPhaseHelper extends BaseHelper {
 	static public boolean isGateArm(PlanPhase phase) {
 		return phase != null &&
 		      (PlanPhase.GATE_ARM_OPEN.equals(phase.getName()) ||
+		       PlanPhase.GATE_ARM_WARN_CLS.equals(phase.getName()) ||
 		       PlanPhase.GATE_ARM_CLOSED.equals(phase.getName()));
 	}
 }

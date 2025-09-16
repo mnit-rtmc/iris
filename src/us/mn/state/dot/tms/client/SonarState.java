@@ -43,7 +43,6 @@ import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.Domain;
 import us.mn.state.dot.tms.EventConfig;
 import us.mn.state.dot.tms.GateArm;
-import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Gps;
 import us.mn.state.dot.tms.Graphic;
@@ -338,23 +337,6 @@ public class SonarState extends Client {
 		return toll_zone_model;
 	}
 
-	/** Cache of gate arm arrays */
-	private final TypeCache<GateArmArray> gate_arm_arrays =
-		new TypeCache<GateArmArray>(GateArmArray.class, this);
-
-	/** Get the gate arm array cache */
-	public TypeCache<GateArmArray> getGateArmArrays() {
-		return gate_arm_arrays;
-	}
-
-	/** Gate arm array proxy list model */
-	private final ProxyListModel<GateArmArray> gate_arm_array_model;
-
-	/** Get the gate arm array list model */
-	public ProxyListModel<GateArmArray> getGateArmArrayModel() {
-		return gate_arm_array_model;
-	}
-
 	/** Cache of gate arms */
 	private final TypeCache<GateArm> gate_arms =
 		new TypeCache<GateArm>(GateArm.class, this);
@@ -362,6 +344,14 @@ public class SonarState extends Client {
 	/** Get the gate arm cache */
 	public TypeCache<GateArm> getGateArms() {
 		return gate_arms;
+	}
+
+	/** Gate arm proxy list model */
+	private final ProxyListModel<GateArm> gate_arm_model;
+
+	/** Get the gate arm list model */
+	public ProxyListModel<GateArm> getGateArmModel() {
+		return gate_arm_model;
 	}
 
 	/** Cache of parking areas */
@@ -528,9 +518,6 @@ public class SonarState extends Client {
 			this);
 		alert_infos = new TypeCache<AlertInfo>(AlertInfo.class,
 			this);
-		gate_arm_array_model = new ProxyListModel<GateArmArray>(
-			gate_arm_arrays);
-		gate_arm_array_model.initialize();
 		day_model = new ProxyListModel<DayPlan>(day_plans);
 		day_model.initialize();
 		phase_model = new ProxyListModel<PlanPhase>(plan_phases);
@@ -539,6 +526,8 @@ public class SonarState extends Client {
 		plan_model.initialize();
 		beacon_model = new ProxyListModel<Beacon>(beacons);
 		beacon_model.initialize();
+		gate_arm_model = new ProxyListModel<GateArm>(gate_arms);
+		gate_arm_model.initialize();
 		// FIXME: this is an ugly hack
 		BaseHelper.namespace = getNamespace();
 	}
@@ -636,9 +625,6 @@ public class SonarState extends Client {
 		populateReadable(tag_readers);
 		if (canRead(TagReader.SONAR_TYPE))
 			tag_readers.ignoreAttribute("operation");
-		populateReadable(gate_arm_arrays);
-		if (canRead(GateArmArray.SONAR_TYPE))
-			gate_arm_arrays.ignoreAttribute("armState");
 		populateReadable(gate_arms);
 		if (canRead(GateArm.SONAR_TYPE))
 			gate_arms.ignoreAttribute("operation");
@@ -646,9 +632,8 @@ public class SonarState extends Client {
 		populateReadable(time_actions);
 		populateReadable(device_actions);
 		populateReadable(gpses);
-		if (canRead(Gps.SONAR_TYPE)) {
+		if (canRead(Gps.SONAR_TYPE))
 			gpses.ignoreAttribute("operation");
-		}
 		populateReadable(cam_templates);
 		populateReadable(vid_src_templates);
 		populateReadable(cam_vid_src_order);
