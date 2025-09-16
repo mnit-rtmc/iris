@@ -155,7 +155,7 @@ public class GateArmProperties extends SonarObjectForm<GateArm> {
 		downstream_txt.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				proxy.setDownstream(Hashtags.normalize(
+				proxy.setDownstreamHashtag(Hashtags.normalize(
 					downstream_txt.getText()));
 			}
 		});
@@ -218,7 +218,7 @@ public class GateArmProperties extends SonarObjectForm<GateArm> {
 		if (null == a || a.equals("opposing"))
 			opposing_chk.setSelected(proxy.getOpposing());
 		if (null == a || a.equals("downstream")) {
-			String d = proxy.getDownstream();
+			String d = proxy.getDownstreamHashtag();
 			downstream_txt.setText((d != null) ? d : "");
 		}
 		if (null == a || a.equals("armState")) {

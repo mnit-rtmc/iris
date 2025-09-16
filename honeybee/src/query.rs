@@ -375,7 +375,7 @@ pub const GATE_ARM_ALL: &str = "\
 /// SQL query for one gate arm (secondary)
 pub const GATE_ARM_ONE: &str = "\
   SELECT g.name, location, geo_loc, controller, pin, preset, notes, \
-         opposing, downstream, arm_state, interlock, fault \
+         opposing, downstream_hashtag, arm_state, interlock, fault \
   FROM iris.gate_arm g \
   LEFT JOIN geo_loc_view gl ON g.geo_loc = gl.name \
   WHERE g.name = $1";
