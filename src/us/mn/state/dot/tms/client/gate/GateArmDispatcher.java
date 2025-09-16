@@ -46,6 +46,7 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
+import us.mn.state.dot.tms.client.proxy.SwingProxyAdapter;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -169,9 +170,29 @@ public class GateArmDispatcher extends IPanel {
 		}
 	};
 
+	/** Gate arm proxy listener */
+	private final SwingProxyAdapter<GateArm> ga_listener =
+		new SwingProxyAdapter<GateArm>()
+	{
+		@Override
+		protected void proxyChangedSwing(GateArm ga, String a) {
+			boolean ch = false;
+			for (int i = 0; i < MAX_ARMS; i++)
+				ch |= (ga == gate_arm[i]);
+			if (ch && (null == a ||
+			           "styles".equals(a) ||
+			           "interlock".equals(a))
+			) {
+				updateGateArms();
+			}
+		}
+	};
+
 	/** Create a new gate arm dispatcher */
-	public GateArmDispatcher(Session s) {
+	public GateArmDispatcher(Session s, GateArmManager man) {
 		session = s;
+		TypeCache<GateArm> c = s.getSonarState().getGateArms();
+		c.addProxyListener(ga_listener);
 		TypeCache<ActionPlan> cache =
 			s.getSonarState().getActionPlans();
 		watcher = new ProxyWatcher<ActionPlan>(cache, plan_view, true);
@@ -281,12 +302,6 @@ public class GateArmDispatcher extends IPanel {
 			updateButtons(ap);
 	}
 
-	/** Update one attribute on the form */
-	private void updateAttribute(GateArm ga, String a) {
-		if (null == a || a.equals("styles") || a.equals("interlock"))
-			updateGateArms();
-	}
-
 	/** Update the action plan */
 	private void updateActionPlan(ActionPlan ap) {
 		name_lbl.setText(ap.getName());
@@ -297,6 +312,7 @@ public class GateArmDispatcher extends IPanel {
 		gate_arm[3] = arms.pollFirst();
 		gate_arm[4] = arms.pollFirst();
 		gate_arm[5] = arms.pollFirst();
+		updateGateArms();
 		GateArm ga = gate_arm[0];
 		GeoLoc loc = (ga != null) ? ga.getGeoLoc() : null;
 		location_lbl.setText(
@@ -369,9 +385,8 @@ public class GateArmDispatcher extends IPanel {
 		location_lbl.setText("");
 		warn_dms_1.setSelected(null);
 		warn_dms_2.setSelected(null);
-		for (int i = 0; i < MAX_ARMS; i++) {
+		for (int i = 0; i < MAX_ARMS; i++)
 			gate_arm[i] = null;
-		}
 		updateGateArms();
 	}
 
@@ -385,11 +400,11 @@ public class GateArmDispatcher extends IPanel {
 			state_lbl[i].setText(ss.text());
 			if (ga != null) {
 				gate_lbl[i].setText(ga.getName());
-				InterlockStyle is = new InterlockStyle(
+				InterlockStyle st = new InterlockStyle(
 					ga.getInterlock());
-				ilock_lbl[i].setForeground(is.foreground());
-				ilock_lbl[i].setBackground(is.background());
-				ilock_lbl[i].setText(is.text());
+				ilock_lbl[i].setForeground(st.foreground());
+				ilock_lbl[i].setBackground(st.background());
+				ilock_lbl[i].setText(st.text());
 			} else {
 				gate_lbl[i].setText(" ");
 				ilock_lbl[i].setForeground(null);
@@ -397,10 +412,5 @@ public class GateArmDispatcher extends IPanel {
 				ilock_lbl[i].setText(" ");
 			}
 		}
-	}
-
-	/** Update the interlock label */
-	private void updateInterlock(GateArm ga) {
-		// FIXME: style interlock label + set text
 	}
 }

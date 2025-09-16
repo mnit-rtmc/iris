@@ -36,7 +36,7 @@ public class GateArmTab extends MapTab<GateArm> {
 	/** Create a new gate arm tab */
 	public GateArmTab(Session session, GateArmManager man) {
 		super(man);
-		dispatcher = new GateArmDispatcher(session);
+		dispatcher = new GateArmDispatcher(session, man);
 		summary = man.createStyleSummary(false);
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
