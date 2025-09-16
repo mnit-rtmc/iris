@@ -153,12 +153,21 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		phase = lookupPlanPhase(p);
 	}
 
+	/** Test whether gate arm system should be disabled.
+	 * @param name Object name.
+	 * @param reason Reason for disabling. */
+	public void testGateArmDisable(String name, String reason) {
+		if (ActionPlanHelper.countGateArms(this) > 0)
+			GateArmSystem.disable(name, reason);
+	}
+
 	/** Administrator notes */
 	private String notes;
 
 	/** Set administrator notes (including hashtags) */
 	@Override
 	public void setNotes(String n) {
+		testGateArmDisable(name, "set notes");
 		notes = n;
 	}
 
@@ -182,6 +191,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Set the sync actions flag */
 	@Override
 	public void setSyncActions(boolean s) {
+		testGateArmDisable(name, "set sync_actions");
 		sync_actions = s;
 	}
 
@@ -205,6 +215,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Set the sticky flag */
 	@Override
 	public void setSticky(boolean s) {
+		testGateArmDisable(name, "set sticky");
 		sticky = s;
 	}
 
@@ -251,6 +262,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Set the active status */
 	@Override
 	public void setActive(boolean a) {
+		testGateArmDisable(name, "set active");
 		active = a;
 		EventType et = (a ? EventType.ACTION_PLAN_ACTIVATED :
 			EventType.ACTION_PLAN_DEACTIVATED);
@@ -306,6 +318,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Set the default phase */
 	@Override
 	public void setDefaultPhase(PlanPhase dp) {
+		testGateArmDisable(name, "set default_phase");
 		default_phase = dp;
 	}
 
