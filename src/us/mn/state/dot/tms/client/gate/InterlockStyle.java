@@ -61,7 +61,7 @@ public class InterlockStyle {
 		case DENY_OPEN:
 		case DENY_ALL:
 			return Color.RED;
-		case SYSTEM_DISABLE:
+		default:
 			return Color.GRAY;
 		}
 	}
@@ -77,7 +77,7 @@ public class InterlockStyle {
 			return I18N.get("gate.arm.interlock.deny_close");
 		case DENY_ALL:
 			return I18N.get("gate.arm.interlock.deny_all");
-		case SYSTEM_DISABLE:
+		default:
 			return I18N.get("gate.arm.interlock.system_disable");
 		}
 	}
