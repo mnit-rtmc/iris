@@ -210,7 +210,6 @@ sign_detail	dms
 sign_message	dms
 word	dms
 gate_arm	\N
-gate_arm_array	gate_arm
 incident	\N
 incident_detail	incident
 inc_advice	incident
@@ -1908,6 +1907,7 @@ VALUES
     ('alert_during', true),
     ('alert_after', true),
     ('ga_open', true),
+    ('ga_warn_cls', true),
     ('ga_closed', true);
 
 CREATE TRIGGER plan_phase_notify_trig
@@ -3465,172 +3465,74 @@ CREATE TABLE iris.gate_arm_state (
     description VARCHAR(10) NOT NULL
 );
 
-COPY iris.gate_arm_state(id, description) FROM stdin;
-0	unknown
-1	fault
-2	opening
-3	open
-4	warn close
-5	closing
-6	closed
-\.
+INSERT INTO iris.gate_arm_state (id, description)
+VALUES
+    (0, 'unknown'),
+    (1, 'fault'),
+    (2, 'opening'),
+    (3, 'open'),
+    (5, 'closing'),
+    (6, 'closed');
 
 CREATE TABLE iris.gate_arm_interlock (
     id INTEGER PRIMARY KEY,
     description VARCHAR(16) NOT NULL
 );
 
-COPY iris.gate_arm_interlock(id, description) FROM stdin;
-0	none
-1	deny open
-2	deny close
-3	deny all
-4	system disable
-\.
-
-CREATE TABLE iris._gate_arm_array (
-    name VARCHAR(20) PRIMARY KEY,
-    geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc,
-    notes VARCHAR CHECK (LENGTH(notes) < 256),
-    opposing BOOLEAN NOT NULL,
-    prereq VARCHAR(20) REFERENCES iris._gate_arm_array,
-    camera VARCHAR(20) REFERENCES iris._camera,
-    approach VARCHAR(20) REFERENCES iris._camera,
-    action_plan VARCHAR(16) UNIQUE REFERENCES iris.action_plan,
-    arm_state INTEGER NOT NULL REFERENCES iris.gate_arm_state,
-    interlock INTEGER NOT NULL REFERENCES iris.gate_arm_interlock
-);
-
--- This constraint ensures that the name is unique among all devices
--- Gate arm arrays are *not* associated with controllers or pins
-ALTER TABLE iris._gate_arm_array ADD CONSTRAINT _gate_arm_array_fkey
-    FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
-
-CREATE TRIGGER gate_arm_array_hashtag_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris._gate_arm_array
-    FOR EACH ROW EXECUTE FUNCTION iris.hashtag_trig('gate_arm_array');
-
-CREATE FUNCTION iris.gate_arm_array_notify() RETURNS TRIGGER AS
-    $gate_arm_array_notify$
-BEGIN
-    IF (NEW.notes IS DISTINCT FROM OLD.notes) OR
-       (NEW.arm_state IS DISTINCT FROM OLD.arm_state) OR
-       (NEW.interlock IS DISTINCT FROM OLD.interlock)
-    THEN
-        NOTIFY gate_arm_array;
-    ELSE
-        PERFORM pg_notify('gate_arm_array', NEW.name);
-    END IF;
-    RETURN NULL; -- AFTER trigger return is ignored
-END;
-$gate_arm_array_notify$ LANGUAGE plpgsql;
-
-CREATE TRIGGER gate_arm_array_notify_trig
-    AFTER UPDATE ON iris._gate_arm_array
-    FOR EACH ROW EXECUTE FUNCTION iris.gate_arm_array_notify();
-
-CREATE TRIGGER gate_arm_array_table_notify_trig
-    AFTER INSERT OR DELETE ON iris._gate_arm_array
-    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
-
-CREATE VIEW iris.gate_arm_array AS
-    SELECT ga.name, geo_loc, controller, pin, notes, opposing, prereq, camera,
-           approach, action_plan, arm_state, interlock
-    FROM iris._gate_arm_array ga
-    JOIN iris.controller_io cio ON ga.name = cio.name;
-
-CREATE FUNCTION iris.gate_arm_array_insert() RETURNS TRIGGER AS
-    $gate_arm_array_insert$
-BEGIN
-    INSERT INTO iris.controller_io (name, resource_n, controller, pin)
-         VALUES (NEW.name, 'gate_arm_array', NEW.controller, NEW.pin);
-    INSERT INTO iris._gate_arm_array (
-        name, geo_loc, notes, opposing, prereq, camera, approach, action_plan,
-        arm_state, interlock
-    ) VALUES (
-        NEW.name, NEW.geo_loc, NEW.notes, NEW.opposing, NEW.prereq, NEW.camera,
-        NEW.approach, NEW.action_plan, NEW.arm_state, NEW.interlock
-    );
-    RETURN NEW;
-END;
-$gate_arm_array_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER gate_arm_array_insert_trig
-    INSTEAD OF INSERT ON iris.gate_arm_array
-    FOR EACH ROW EXECUTE FUNCTION iris.gate_arm_array_insert();
-
-CREATE FUNCTION iris.gate_arm_array_update() RETURNS TRIGGER AS
-    $gate_arm_array_update$
-BEGIN
-    UPDATE iris.controller_io SET controller = NEW.controller, pin = NEW.pin
-     WHERE name = OLD.name;
-    UPDATE iris._gate_arm_array
-       SET notes = NEW.notes,
-           opposing = NEW.opposing,
-           prereq = NEW.prereq,
-           camera = NEW.camera,
-           approach = NEW.approach,
-           action_plan = NEW.action_plan,
-           arm_state = NEW.arm_state,
-           interlock = NEW.interlock
-     WHERE name = OLD.name;
-    RETURN NEW;
-END;
-$gate_arm_array_update$ LANGUAGE plpgsql;
-
-CREATE TRIGGER gate_arm_array_update_trig
-    INSTEAD OF UPDATE ON iris.gate_arm_array
-    FOR EACH ROW EXECUTE FUNCTION iris.gate_arm_array_update();
-
-CREATE TRIGGER gate_arm_array_delete_trig
-    INSTEAD OF DELETE ON iris.gate_arm_array
-    FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
-
-CREATE VIEW gate_arm_array_view AS
-    SELECT ga.name, ga.notes, ga.geo_loc, l.roadway, l.road_dir, l.cross_mod,
-           l.cross_street, l.cross_dir, l.landmark, l.lat, l.lon, l.corridor,
-           l.location, cio.controller, cio.pin, ctr.comm_link, ctr.drop_id,
-           ctr.condition, ga.opposing, ga.prereq, ga.camera, ga.approach,
-           ga.action_plan, gas.description AS arm_state,
-           gai.description AS interlock
-    FROM iris._gate_arm_array ga
-    JOIN iris.controller_io cio ON ga.name = cio.name
-    JOIN iris.gate_arm_state gas ON ga.arm_state = gas.id
-    JOIN iris.gate_arm_interlock gai ON ga.interlock = gai.id
-    LEFT JOIN geo_loc_view l ON ga.geo_loc = l.name
-    LEFT JOIN controller_view ctr ON cio.controller = ctr.name;
-GRANT SELECT ON gate_arm_array_view TO PUBLIC;
+INSERT INTO iris.gate_arm_interlock (id, description)
+VALUES
+    (0, 'none'),
+    (1, 'deny open'),
+    (2, 'deny close'),
+    (3, 'deny all'),
+    (4, 'system disable');
 
 CREATE TABLE iris._gate_arm (
     name VARCHAR(20) PRIMARY KEY,
-    ga_array VARCHAR(20) NOT NULL REFERENCES iris._gate_arm_array,
-    idx INTEGER NOT NULL,
     geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc,
     notes VARCHAR CHECK (LENGTH(notes) < 256),
     opposing BOOLEAN NOT NULL,
-    downstream VARCHAR(16),
+    downstream_hashtag VARCHAR(16),
     arm_state INTEGER NOT NULL REFERENCES iris.gate_arm_state,
     interlock INTEGER NOT NULL REFERENCES iris.gate_arm_interlock,
-    fault VARCHAR(32)
+    fault VARCHAR(32),
+
+    CONSTRAINT hashtag_ck CHECK (downstream_hashtag ~ '^#[A-Za-z0-9]+$')
 );
 
 ALTER TABLE iris._gate_arm ADD CONSTRAINT _gate_arm_fkey
     FOREIGN KEY (name) REFERENCES iris.controller_io ON DELETE CASCADE;
 
-CREATE UNIQUE INDEX gate_arm_array_idx ON iris._gate_arm
-    USING btree (ga_array, idx);
-
 CREATE TRIGGER gate_arm_hashtag_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris._gate_arm
     FOR EACH ROW EXECUTE FUNCTION iris.hashtag_trig('gate_arm');
 
+CREATE FUNCTION iris.gate_arm_notify() RETURNS TRIGGER AS
+    $gate_arm_notify$
+BEGIN
+    IF (NEW.notes IS DISTINCT FROM OLD.notes) OR
+       (NEW.arm_state IS DISTINCT FROM OLD.arm_state) OR
+       (NEW.interlock IS DISTINCT FROM OLD.interlock)
+    THEN
+        NOTIFY gate_arm;
+    ELSE
+        PERFORM pg_notify('gate_arm', NEW.name);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$gate_arm_notify$ LANGUAGE plpgsql;
+
 CREATE TRIGGER gate_arm_notify_trig
+    AFTER UPDATE ON iris._gate_arm
+    FOR EACH ROW EXECUTE FUNCTION iris.gate_arm_notify();
+
+CREATE TRIGGER gate_arm_table_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris._gate_arm
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.gate_arm AS
-    SELECT g.name, ga_array, idx, geo_loc, controller, pin, preset, notes,
-           opposing, downstream, arm_state, interlock, fault
+    SELECT g.name, geo_loc, controller, pin, preset, notes, opposing,
+           downstream_hashtag, arm_state, interlock, fault
     FROM iris._gate_arm g
     JOIN iris.controller_io cio ON g.name = cio.name
     JOIN iris.device_preset p ON g.name = p.name;
@@ -3643,11 +3545,11 @@ BEGIN
     INSERT INTO iris.device_preset (name, resource_n, preset)
         VALUES (NEW.name, 'gate_arm', NEW.preset);
     INSERT INTO iris._gate_arm (
-        name, ga_array, idx, geo_loc, notes, opposing,
-        downstream, arm_state, interlock, fault
+        name, geo_loc, notes, opposing, downstream_hashtag,
+        arm_state, interlock, fault
     ) VALUES (
-        NEW.name, NEW.ga_array, NEW.idx, NEW.geo_loc, NEW.notes, NEW.opposing,
-        NEW.downstream, NEW.arm_state, NEW.interlock, NEW.fault
+        NEW.name, NEW.geo_loc, NEW.notes, NEW.opposing,
+        NEW.downstream_hashtag, NEW.arm_state, NEW.interlock, NEW.fault
     );
     RETURN NEW;
 END;
@@ -3667,12 +3569,10 @@ BEGIN
        SET preset = NEW.preset
      WHERE name = OLD.name;
     UPDATE iris._gate_arm
-       SET ga_array = NEW.ga_array,
-           idx = NEW.idx,
-           geo_loc = NEW.geo_loc,
+       SET geo_loc = NEW.geo_loc,
            notes = NEW.notes,
            opposing = NEW.opposing,
-           downstream = NEW.downstream,
+           downstream_hashtag = NEW.downstream_hashtag,
            arm_state = NEW.arm_state,
            interlock = NEW.interlock,
            fault = NEW.fault
@@ -3690,11 +3590,11 @@ CREATE TRIGGER gate_arm_delete_trig
     FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW gate_arm_view AS
-    SELECT g.name, g.ga_array, g.notes,
+    SELECT g.name, g.notes,
            g.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
            l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location,
            cio.controller, cio.pin, ctr.comm_link, ctr.drop_id, ctr.condition,
-           cp.camera, cp.preset_num, g.opposing, g.downstream,
+           cp.camera, cp.preset_num, g.opposing, g.downstream_hashtag,
            gas.description AS arm_state, gai.description AS interlock, fault
     FROM iris._gate_arm g
     JOIN iris.controller_io cio ON g.name = cio.name
@@ -3711,7 +3611,7 @@ CREATE TABLE event.gate_arm_event (
     event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
     event_desc INTEGER NOT NULL REFERENCES event.event_description,
     device_id VARCHAR(20),
-    user_id VARCHAR(15),
+    user_id VARCHAR(15), -- FIXME: remove (now in action_plan_event)
     fault VARCHAR(32)
 );
 
