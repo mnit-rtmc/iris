@@ -37,8 +37,6 @@ public class GateArmEvent extends BaseEvent {
 			return EventType.GATE_ARM_OPENING;
 		case OPEN:
 			return EventType.GATE_ARM_OPEN;
-		case WARN_CLOSE:
-			return EventType.GATE_ARM_WARN_CLOSE;
 		case CLOSING:
 			return EventType.GATE_ARM_CLOSING;
 		case CLOSED:

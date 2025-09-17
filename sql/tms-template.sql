@@ -382,7 +382,7 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 302	Gate Arm FAULT
 303	Gate Arm OPENING
 304	Gate Arm OPEN
-305	Gate Arm WARN CLOSE
+305	Gate Arm CHANGE
 306	Gate Arm CLOSING
 307	Gate Arm CLOSED
 308	Gate Arm SYSTEM
@@ -1907,7 +1907,7 @@ VALUES
     ('alert_during', true),
     ('alert_after', true),
     ('ga_open', true),
-    ('ga_warn_cls', true),
+    ('ga_change', true),
     ('ga_closed', true);
 
 CREATE TRIGGER plan_phase_notify_trig

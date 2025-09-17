@@ -43,11 +43,11 @@ from multiple gates to be swapped between larger and smaller views.
 
 Gate arms are controlled by [action plan]s with three phases:
 - `ga_open`: gates and [DMS] both open
-- `ga_warn_cls`: gates open, but DMS displaying closed message
+- `ga_change`: gates open, but DMS displaying closed message
 - `ga_closed`: gates and DMS both closed
 
 [Device action]s must be assigned to these phases to control devices:
-- Gate arm hashtags should be assigned to `ga_open` and `ga_warn_cls`, but not
+- Gate arm hashtags should be assigned to `ga_open` and `ga_change`, but not
   `ga_close`.
 - Different DMS messages can be displayed for each phase, as necessary.
 
@@ -86,13 +86,13 @@ Instead, an _alert_ will logged in the `email_event` table.
 Depending on the current action plan phase, one of the buttons will be enabled.
 When an operator presses a button, its corresponding phase will be requested:
 - `Open` ⇒ `ga_open`
-- `Warn Close` ⇒ `ga_warn_cls` †
+- `Change` ⇒ `ga_change` †
 - `Close` ⇒ `ga_closed`
 
-† `Warn Close` is only enabled if a [device action] is configured with the
-`ga_warn_cls` phase.  Operators should use this phase to warn motorists when
-the gates will soon be closing.  After checking the verification cameras, the
-`ga_close` phase can be selected.
+† `Change` is only enabled if a [device action] is configured with the
+`ga_change` phase.  Operators should use this phase to warn motorists when
+the gates will soon be closing or opening.  After checking the verification
+cameras, the next phase can be selected.
 
 None of these phases can be requested automatically by the system -- an
 operator must **manually** request them.
@@ -133,4 +133,3 @@ server filesystem at `/var/lib/iris/gate_arm_enable` (using the touch command).
 [hashtag]: hashtags.html
 [phase]: action_plans.html#plan-phases
 [system attribute]: system_attributes.html
-[warning action plan]: #warning-action-plan

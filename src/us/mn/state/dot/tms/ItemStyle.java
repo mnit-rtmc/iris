@@ -59,7 +59,7 @@ public enum ItemStyle {
 	/* Gate arm styles */
 	CLOSED,
 	OPEN,
-	MOVING,
+	CHANGE,
 	/* Plan styles */
 	DMS,
 	BEACON,

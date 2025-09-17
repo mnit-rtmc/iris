@@ -327,8 +327,8 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		);
 	}
 
-	/** Test if gate arm is moving */
-	private boolean isMoving() {
+	/** Test if gate arm is changing */
+	private boolean isChanging() {
 		return isOnline() && (
 		       arm_state == GateArmState.OPENING ||
 		       arm_state == GateArmState.CLOSING
@@ -561,8 +561,8 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 			s |= ItemStyle.CLOSED.bit();
 		if (isOpen())
 			s |= ItemStyle.OPEN.bit();
-		if (isMoving())
-			s |= ItemStyle.MOVING.bit();
+		if (isChanging())
+			s |= ItemStyle.CHANGE.bit();
 		return s;
 	}
 

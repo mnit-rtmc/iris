@@ -116,12 +116,12 @@ public class GateArmDispatcher extends IPanel {
 		}
 	};
 
-	/** Action to warn before closing gate arm */
-	private final IAction warn_close_act = new IAction(
-		"gate.arm.warn.close")
+	/** Action to set gate arm "change" */
+	private final IAction change_act = new IAction(
+		"gate.arm.change")
 	{
 		protected void doActionPerformed(ActionEvent e) {
-			setPhase(PlanPhase.GATE_ARM_WARN_CLS);
+			setPhase(PlanPhase.GATE_ARM_CHANGE);
 		}
 	};
 
@@ -234,7 +234,7 @@ public class GateArmDispatcher extends IPanel {
 		add(gate_lbl[4], Stretch.NONE);
 		add(state_lbl[4], Stretch.NONE);
 		add(ilock_lbl[4]);
-		add(new JButton(warn_close_act), Stretch.LAST);
+		add(new JButton(change_act), Stretch.LAST);
 		add(gate_lbl[2], Stretch.NONE);
 		add(state_lbl[2], Stretch.NONE);
 		add(ilock_lbl[2]);
@@ -360,23 +360,23 @@ public class GateArmDispatcher extends IPanel {
 		PlanPhase pp = ap.getPhase();
 		boolean is_open = (pp != null) &&
 			PlanPhase.GATE_ARM_OPEN.equals(pp.getName());
-		boolean is_warn_cls = (pp != null) &&
-			PlanPhase.GATE_ARM_WARN_CLS.equals(pp.getName());
+		boolean is_change = (pp != null) &&
+			PlanPhase.GATE_ARM_CHANGE.equals(pp.getName());
 		boolean is_closed = (pp != null) &&
 			PlanPhase.GATE_ARM_CLOSED.equals(pp.getName());
 		open_act.setEnabled(e &&
-			(is_warn_cls || (is_closed && !has_signs)));
-		warn_close_act.setEnabled(e &&
+			(is_change || (is_closed && !has_signs)));
+		change_act.setEnabled(e &&
 			(has_signs && (is_open || is_closed)));
 		close_act.setEnabled(e &&
- 			(is_warn_cls || (is_open && !has_signs)));
+			(is_change || (is_open && !has_signs)));
 	}
 
 	/** Clear selected action plan */
 	private void clearSelected() {
 		swap_act.setEnabled(false);
 		open_act.setEnabled(false);
-		warn_close_act.setEnabled(false);
+		change_act.setEnabled(false);
 		close_act.setEnabled(false);
 		swap_streams = false;
 		stream_pnl.setCamera(null);

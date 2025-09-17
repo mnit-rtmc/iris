@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2024  Minnesota Department of Transportation
+ * Copyright (C) 2008-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,8 +75,8 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 	/** Color for dedicated purpose devices */
 	static public final Color COLOR_PURPOSE = new Color(192, 16, 192);
 
-	/** Color to display moving gate devices */
-	static public final Color COLOR_MOVING = new Color(240, 128, 0);
+	/** Color to display changing gate devices */
+	static public final Color COLOR_CHANGE  = new Color(240, 128, 0);
 
 	/** Proxy manager */
 	protected final ProxyManager<T> manager;

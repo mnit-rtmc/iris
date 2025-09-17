@@ -29,7 +29,7 @@ public enum GateArmState {
 	FAULT,      /* 1: fault in gate operation */
 	OPENING,    /* 2: open in progress */
 	OPEN,       /* 3: gate open, open msg on DMS */
-	WARN_CLOSE, /* 4: -- obsolete -- */
+	OBSOLETE,   /* 4: -- obsolete -- */
 	CLOSING,    /* 5: close in progress */
 	CLOSED;     /* 6: gate closed */
 

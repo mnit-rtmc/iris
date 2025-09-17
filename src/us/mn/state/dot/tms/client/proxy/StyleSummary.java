@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2023  Minnesota Department of Transportation
+ * Copyright (C) 2004-2025  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -143,8 +143,8 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		sz_btns = enableCellSizeBtns ? createSizeButtons() : null;
 		buttons = createStyleButtons();
 		p_list = manager.createList();
- 		s_pane = new JScrollPane(p_list);
- 		style_rows = sr;
+		s_pane = new JScrollPane(p_list);
+		style_rows = sr;
 	}
 
 	/** Create a new style summary panel with 2 rows of style buttons.
@@ -152,7 +152,8 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	 * @param ds Default style.
 	 * @param enableCellSizeBtns Flag to enable cell size buttons. */
 	public StyleSummary(ProxyManager<T> m, ItemStyle ds,
-		boolean enableCellSizeBtns) {
+		boolean enableCellSizeBtns)
+	{
 		this(m, ds, enableCellSizeBtns, 2);
 	}
 
