@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,5 +24,10 @@ public class SonarShowException extends Exception {
 	/** Create a new SONAR SHOW exception */
 	public SonarShowException(String m) {
 		super(m);
+	}
+
+	/** Create a new SONAR SHOW exception */
+	public SonarShowException() {
+		super("Unknown error");
 	}
 }

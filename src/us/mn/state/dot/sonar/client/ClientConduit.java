@@ -364,6 +364,8 @@ class ClientConduit extends Conduit {
 		if (loggedIn && connection == null)
 			connection = m;
 		// NOTE: this is a bit fragile
+		else if (m == null)
+			handler.handle(new SonarShowException());
 		else if (m.contains("Authentication failed"))
 			handler.handle(new AuthenticationException(m));
 		else if (m.startsWith("Permission denied"))
