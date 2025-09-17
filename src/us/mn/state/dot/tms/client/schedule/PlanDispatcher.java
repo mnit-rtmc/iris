@@ -62,6 +62,9 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 	/** Camera count component */
 	private final JLabel camera_lbl = createValueLabel();
 
+	/** Gate arm count component */
+	private final JLabel gate_lbl = createValueLabel();
+
 	/** Meter count component */
 	private final JLabel meter_lbl = createValueLabel();
 
@@ -114,6 +117,8 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		add(beacon_lbl, Stretch.LAST);
 		add("camera.title");
 		add(camera_lbl, Stretch.LAST);
+		add("gate_arm.title");
+		add(gate_lbl, Stretch.LAST);
 		add("ramp_meter.title");
 		add(meter_lbl, Stretch.LAST);
 		add("action.plan.phase");
@@ -159,6 +164,7 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 			dms_lbl.setText(countDMS(ap));
 			beacon_lbl.setText(countBeacons(ap));
 			camera_lbl.setText(countCameras(ap));
+			gate_lbl.setText(countGateArms(ap));
 			meter_lbl.setText(countRampMeters(ap));
 		}
 		if (a == null || a.equals("phase")) {
@@ -230,6 +236,11 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		return Integer.toString(ActionPlanHelper.countDms(ap));
 	}
 
+	/** Get a count of gate arms controlled by an action plan */
+	private String countGateArms(ActionPlan ap) {
+		return Integer.toString(ActionPlanHelper.countGateArms(ap));
+	}
+
 	/** Get a count a ramp meters controlled by an action plan */
 	private String countRampMeters(ActionPlan ap) {
 		return Integer.toString(ActionPlanHelper.countRampMeters(ap));
@@ -248,6 +259,7 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		dms_lbl.setText("");
 		beacon_lbl.setText("");
 		camera_lbl.setText("");
+		gate_lbl.setText("");
 		meter_lbl.setText("");
 		phase_cbx.setAction(null);
 		phase_cbx.setModel(new DefaultComboBoxModel<PlanPhase>());
