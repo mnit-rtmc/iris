@@ -417,7 +417,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Check if beacons are operatable, or none associated with plan */
 	private void checkBeaconsOperatable() throws ChangeVetoException {
 		Name name = new Name(Beacon.SONAR_TYPE, "oname", "state");
-		if (accessLevel(name) < name.accessWrite() ||
+		if (accessLevel(name) < name.accessWrite() &&
 		    ActionPlanHelper.countBeacons(this) > 0)
 		{
 			throw new ChangeVetoException("Device action " +
@@ -428,7 +428,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Check if cameras are operatable, or none associated with plan */
 	private void checkCamerasOperatable() throws ChangeVetoException {
 		Name name = new Name(Camera.SONAR_TYPE, "oname", "recallPreset");
-		if (accessLevel(name) < name.accessWrite() ||
+		if (accessLevel(name) < name.accessWrite() &&
 		    ActionPlanHelper.countCameras(this) > 0)
 		{
 			throw new ChangeVetoException("Device action " +
@@ -439,7 +439,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Check if DMS are operatable, or none associated with plan */
 	private void checkDmsOperatable() throws ChangeVetoException {
 		Name name = new Name(DMS.SONAR_TYPE, "oname", "lock");
-		if (accessLevel(name) < name.accessWrite() ||
+		if (accessLevel(name) < name.accessWrite() &&
 		    ActionPlanHelper.countDms(this) > 0)
 		{
 			throw new ChangeVetoException("Device action " +
@@ -450,7 +450,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Check if gate arms are operatable, or none associated with plan */
 	private void checkGateArmsOperatable() throws ChangeVetoException {
 		Name name = new Name(GateArm.SONAR_TYPE, "oname", "lock");
-		if (accessLevel(name) < name.accessWrite() ||
+		if (accessLevel(name) < name.accessWrite() &&
 		    ActionPlanHelper.countGateArms(this) > 0)
 		{
 			throw new ChangeVetoException("Device action " +
@@ -462,7 +462,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Check if ramp meters are operatable, or none associated with plan */
 	private void checkRampMetersOperatable() throws ChangeVetoException {
 		Name name = new Name(RampMeter.SONAR_TYPE, "oname", "lock");
-		if (accessLevel(name) < name.accessWrite() ||
+		if (accessLevel(name) < name.accessWrite() &&
 		    ActionPlanHelper.countRampMeters(this) > 0)
 		{
 			throw new ChangeVetoException("Device action " +
