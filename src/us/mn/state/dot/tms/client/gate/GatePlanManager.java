@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -61,7 +62,9 @@ public class GatePlanManager extends ProxyManager<ActionPlan> {
 	protected ProxyTheme<ActionPlan> createTheme() {
 		ProxyTheme<ActionPlan> theme = new ProxyTheme<ActionPlan>(this,
 			new GateArmMarker());
-		theme.addStyle(ItemStyle.GATE_ARM, ProxyTheme.COLOR_AVAILABLE);
+		theme.addStyle(ItemStyle.CLOSED, ProxyTheme.COLOR_AVAILABLE);
+		theme.addStyle(ItemStyle.CHANGE, ProxyTheme.COLOR_CHANGE);
+		theme.addStyle(ItemStyle.OPEN, ProxyTheme.COLOR_DEPLOYED);
 		return theme;
 	}
 
@@ -70,10 +73,18 @@ public class GatePlanManager extends ProxyManager<ActionPlan> {
 	public boolean checkStyle(ItemStyle is, ActionPlan proxy) {
 		if (!isWritePermitted(proxy))
 			return false;
+		if (!proxy.getActive())
+			return false;
+		if (ActionPlanHelper.countGateArms(proxy) == 0)
+			return false;
+		String pp = proxy.getPhase().getName();
 		switch (is) {
-		case GATE_ARM:
-			return proxy.getActive() &&
-			       ActionPlanHelper.countGateArms(proxy) > 0;
+		case CLOSED:
+			return PlanPhase.GATE_ARM_CLOSED.equals(pp);
+		case CHANGE:
+			return PlanPhase.GATE_ARM_CHANGE.equals(pp);
+		case OPEN:
+			return PlanPhase.GATE_ARM_OPEN.equals(pp);
 		default:
 			return false;
 		}

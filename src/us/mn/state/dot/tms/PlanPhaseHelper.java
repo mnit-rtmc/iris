@@ -44,7 +44,7 @@ public class PlanPhaseHelper extends BaseHelper {
 	static public boolean isGateArm(PlanPhase phase) {
 		return phase != null &&
 		      (PlanPhase.GATE_ARM_OPEN.equals(phase.getName()) ||
-		       PlanPhase.GATE_ARM_WARN_CLS.equals(phase.getName()) ||
+		       PlanPhase.GATE_ARM_CHANGE.equals(phase.getName()) ||
 		       PlanPhase.GATE_ARM_CLOSED.equals(phase.getName()));
 	}
 }

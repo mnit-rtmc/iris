@@ -15,7 +15,7 @@ ALTER TABLE iris.plan_phase ADD CONSTRAINT plan_phase_hold_time_check
     CHECK (hold_time >= 1 AND hold_time <= 600);
 
 INSERT INTO iris.plan_phase (name, selectable)
-    VALUES ('ga_warn_cls', true);
+    VALUES ('ga_change', true) ON CONFLICT DO NOTHING;
 
 -- Drop ga_array, idx from gate arms, rename downstream to downstream_hashtag
 DROP VIEW gate_arm_view;
