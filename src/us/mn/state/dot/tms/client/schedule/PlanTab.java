@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2016  Minnesota Department of Transportation
+ * Copyright (C) 2011-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,12 @@ public class PlanTab extends MapTab<ActionPlan> {
 		add(summary, BorderLayout.CENTER);
 	}
 
+	/** Get tab number for ordering */
+	@Override
+	public int getTabNum() {
+		return 11;
+	}
+
 	/** Initialize the plan tab */
 	@Override
 	public void initialize() {
@@ -56,11 +62,5 @@ public class PlanTab extends MapTab<ActionPlan> {
 		super.dispose();
 		dispatcher.dispose();
 		summary.dispose();
-	}
-
-	/** Get the tab ID */
-	@Override
-	public String getTabId() {
-		return "action.plan";
 	}
 }

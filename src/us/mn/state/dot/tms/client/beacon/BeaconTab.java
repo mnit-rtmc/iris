@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,12 @@ public class BeaconTab extends MapTab<Beacon> {
 		super(man);
 		summary = man.createStyleSummary(false);
 		add(summary, BorderLayout.CENTER);
+	}
+
+	/** Get tab number for ordering */
+	@Override
+	public int getTabNum() {
+		return 9;
 	}
 
 	/** Initialize the beacon tab */

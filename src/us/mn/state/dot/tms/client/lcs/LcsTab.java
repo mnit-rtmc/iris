@@ -42,6 +42,12 @@ public class LcsTab extends MapTab<Lcs> {
 		add(summary, BorderLayout.CENTER);
 	}
 
+	/** Get tab number for ordering */
+	@Override
+	public int getTabNum() {
+		return 4;
+	}
+
 	/** Initialize the LCS tab */
 	@Override
 	public void initialize() {
@@ -55,11 +61,5 @@ public class LcsTab extends MapTab<Lcs> {
 		super.dispose();
 		dispatcher.dispose();
 		summary.dispose();
-	}
-
-	/** Get the tab ID */
-	@Override
-	public String getTabId() {
-		return "lcs";
 	}
 }

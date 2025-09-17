@@ -42,6 +42,18 @@ public class GateArmTab extends MapTab<GateArm> {
 		add(summary, BorderLayout.CENTER);
 	}
 
+	/** Get tab number for ordering */
+	@Override
+	public int getTabNum() {
+		return 6;
+	}
+
+	/** Get the tab ID */
+	@Override
+	public String getTabId() {
+		return "gate_arm";
+	}
+
 	/** Initialize the gate arm tab */
 	@Override
 	public void initialize() {
@@ -55,11 +67,5 @@ public class GateArmTab extends MapTab<GateArm> {
 		super.dispose();
 		summary.dispose();
 		dispatcher.dispose();
-	}
-
-	/** Get the tab ID */
-	@Override
-	public String getTabId() {
-		return "gate.arm";
 	}
 }
