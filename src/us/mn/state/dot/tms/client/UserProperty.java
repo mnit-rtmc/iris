@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2020  Minnesota Department of Transportation
+ * Copyright (C) 2012-2025  Minnesota Department of Transportation
  * Copyright (C) 2010-2014  AHMCT, University of California
  * Copyright (C) 2017       Iteris Inc.
  * Copyright (C) 2023       SRF Consulting Group
@@ -53,7 +53,6 @@ public enum UserProperty {
 	TAB_SEL_1	("tab.selected.1"),
 	TAB_SEL_2	("tab.selected.2"),
 	TAB_SEL_3	("tab.selected.3"),
-	TAB_LIST	("tab.list"),
 	SCALE		("scale"),
 	VIDEO_MONITOR	("video.monitor"),
 	STREAM_LNAME	("stream.layoutname"),
@@ -73,12 +72,6 @@ public enum UserProperty {
 	private UserProperty(String n) {
 		name = n;
 	}
-
-	/** Default values for use with unspecified properties */
-	static private final String TAB_LIST_DEF
-		= "incident, dms, camera, lcs, ramp.meter, gate.arm, "
-		+ "parking.area, r_node, beacon, tag.reader, action.plan, "
-		+ "comm, weather_sensor, alert";
 
 	/** Get the directory to store user properties */
 	static public File getDir() {
@@ -437,25 +430,6 @@ public enum UserProperty {
 			return s;
 		else
 			return 1f;
-	}
-
-	/**
-	 * Get the TAB_LIST property, or its default, as an ordered, trimmed
-	 * array.
-	 *
-	 * @return an ordered, trimmed array containing the entries specified
-	 *         in the TAB_LIST property, or if the property is not
-	 *         specified, the default value for TAB_LIST.
-	 */
-	static public String[] getTabList(Properties p) {
-		String val = getProp(p, TAB_LIST);
-		if ("".equals(val))
-			val = TAB_LIST_DEF;
-		String[] fields = val.split(",");
-		ArrayList<String> tl = new ArrayList<String>(fields.length);
-		for (String f : fields)
-			tl.add(f.trim());
-		return tl.toArray(new String[tl.size()]);
 	}
 
 	/** Get the video monitor string */

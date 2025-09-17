@@ -45,6 +45,12 @@ public class WeatherSensorTab extends MapTab<WeatherSensor> {
 		return new JPanel(new BorderLayout());
 	}
 
+	/** Get tab number for ordering */
+	@Override
+	public int getTabNum() {
+		return 13;
+	}
+
 	/** Initialize the tab */
 	@Override
 	public void initialize() {
@@ -56,11 +62,5 @@ public class WeatherSensorTab extends MapTab<WeatherSensor> {
 	public void dispose() {
 		super.dispose();
 		summary.dispose();
-	}
-
-	/** Get the tab ID */
-	@Override
-	public String getTabId() {
-		return "weather_sensor";
 	}
 }

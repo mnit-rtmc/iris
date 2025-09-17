@@ -16,8 +16,9 @@
  */
 package us.mn.state.dot.tms.client;
 
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import us.mn.state.dot.sonar.Connection;
@@ -122,7 +123,7 @@ public class Session {
 	}
 
 	/** List of proxy managers */
-	private final LinkedList<ProxyManager<?>> managers;
+	private final ArrayList<ProxyManager<?>> managers;
 
 	/** R_Node manager */
 	private final R_NodeManager r_node_manager;
@@ -188,8 +189,8 @@ public class Session {
 	private final TileLayer tile_layer;
 
 	/** Listeners for edit mode changes */
-	private final LinkedList<EditModeListener> listeners =
-		new LinkedList<EditModeListener>();
+	private final ArrayList<EditModeListener> listeners =
+		new ArrayList<EditModeListener>();
 
 	/** Create a new session */
 	public Session(SonarState st, SmartDesktop d, Properties p)
@@ -208,7 +209,7 @@ public class Session {
 		lcs_manager = new LcsManager(this, loc_manager);
 		alert_manager = new AlertManager(this, loc_manager);
 		gp_manager = new GatePlanManager(this, loc_manager);
-		managers = new LinkedList<ProxyManager<?>>();
+		managers = new ArrayList<ProxyManager<?>>();
 		managers.add(r_node_manager);
 		managers.add(new ControllerManager(this, loc_manager));
 		managers.add(dms_manager);
@@ -266,12 +267,19 @@ public class Session {
 
 	/** Get a list of tabs in the order specified by properties */
 	public List<MapTab> getTabs() {
-		LinkedList<MapTab> tabs = new LinkedList<MapTab>();
-		for (String t : UserProperty.getTabList(props)) {
-			MapTab tab = all_tabs.get(t);
-			if (tab != null)
-				tabs.add(tab);
-		}
+		ArrayList<MapTab> tabs = new ArrayList<MapTab>();
+		tabs.addAll(all_tabs.values());
+		tabs.sort(new Comparator<MapTab>() {
+			public int compare(MapTab m0, MapTab m1) {
+				int c = Integer.compare(
+					m0.getTabNum(),
+					m1.getTabNum()
+				);
+				return (c != 0)
+				      ? c
+				      : m0.getTabId().compareTo(m1.getTabId());
+			}
+		});
 		return tabs;
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2021  Minnesota Department of Transportation
+ * Copyright (C) 2007-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -119,7 +119,7 @@ public class SidePanel extends JPanel {
 		sel_layer = sel;
 	}
 
-	/** Add a tab to the screen pane */
+	/** Add a tab to the side panel */
 	public void addTab(MapTab<?> mt) {
 		tab_pane.addTab(mt.getName(), null, mt, mt.getTip());
 		mt.setSidePanel(this);

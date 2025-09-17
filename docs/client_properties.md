@@ -25,7 +25,6 @@ Property               | Description
 `video.port`           | TCP port number of video server/proxy
 `autologin.username`   | A username to be used for automatic login upon client startup.  Note: use of this property is a security risk
 `autologin.password`   | A password to be used for automatic login upon client startup.  Note: use of this property is a security risk
-`tab.list`             | List specifying the visibility and ordering of the primary UI tabs in the IRIS client.  The default value is: `incident, dms, camera, lcs, ramp.meter, gate.arm, r_node, action.plan, comm`
 `scale`                | User interface scaling factor (0.25 to 4.0) — useful for Hi-DPI screens
 
 ## User Properties

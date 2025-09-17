@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
- * Copyright (C) 2021  Minnesota Department of Transportation
+ * Copyright (C) 2021-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,12 @@ public class AlertTab extends MapTab<AlertInfo> {
 		dispatcher = new AlertDispatcher(session, man);
 	}
 
+	/** Get tab number for ordering */
+	@Override
+	public int getTabNum() {
+		return 14;
+	}
+
 	/** Initialize the alert tab */
 	@Override
 	public void initialize() {
@@ -58,12 +64,6 @@ public class AlertTab extends MapTab<AlertInfo> {
 		super.dispose();
 		dispatcher.dispose();
 		summary.dispose();
-	}
-
-	/** Get the alert tab ID */
-	@Override
-	public String getTabId() {
-		return "alert";
 	}
 
 	/** Get the AlertDispatcher */

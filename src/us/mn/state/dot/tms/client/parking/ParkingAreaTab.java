@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,12 +34,18 @@ public class ParkingAreaTab extends MapTab<ParkingArea> {
 	private final StyleSummary<ParkingArea> summary;
 
 	/** Create a new gate arm tab */
-  	public ParkingAreaTab(Session session, ParkingAreaManager man) {
+	public ParkingAreaTab(Session session, ParkingAreaManager man) {
 		super(man);
 		dispatcher = new ParkingAreaDispatcher(session, man);
 		summary = man.createStyleSummary(false);
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
+	}
+
+	/** Get tab number for ordering */
+	@Override
+	public int getTabNum() {
+		return 7;
 	}
 
 	/** Initialize the gate arm tab */
@@ -55,11 +61,5 @@ public class ParkingAreaTab extends MapTab<ParkingArea> {
 		super.dispose();
 		summary.dispose();
 		dispatcher.dispose();
-	}
-
-	/** Get the tab ID */
-	@Override
-	public String getTabId() {
-		return "parking.area";
 	}
 }
