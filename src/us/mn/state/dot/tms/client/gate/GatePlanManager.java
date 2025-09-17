@@ -44,6 +44,12 @@ public class GatePlanManager extends ProxyManager<ActionPlan> {
 		super(s, lm, descriptor(s), 0, ItemStyle.GATE_ARM);
 	}
 
+	/** Create a gate arm map tab */
+	@Override
+	public GateArmTab createTab() {
+		return new GateArmTab(session, this);
+	}
+
 	/** Find the map geo location for a proxy */
 	@Override
 	protected GeoLoc getGeoLoc(ActionPlan proxy) {

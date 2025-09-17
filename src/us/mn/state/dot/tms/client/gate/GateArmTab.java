@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.client.gate;
 
 import java.awt.BorderLayout;
-import us.mn.state.dot.tms.GateArm;
+import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
@@ -25,18 +25,18 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
  *
  * @author Douglas Lau
  */
-public class GateArmTab extends MapTab<GateArm> {
+public class GateArmTab extends MapTab<ActionPlan> {
 
 	/** Gate Arm dispatch panel */
 	private final GateArmDispatcher dispatcher;
 
-	/** Summary of gate arm of each status */
-	private final StyleSummary<GateArm> summary;
+	/** Summary of action plans of each status */
+	private final StyleSummary<ActionPlan> summary;
 
 	/** Create a new gate arm tab */
-	public GateArmTab(Session session, GateArmManager man) {
+	public GateArmTab(Session session, GatePlanManager man) {
 		super(man);
-		dispatcher = new GateArmDispatcher(session, man);
+		dispatcher = new GateArmDispatcher(session);
 		summary = man.createStyleSummary(false);
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
