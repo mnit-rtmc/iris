@@ -189,7 +189,7 @@ public class GateArmDispatcher extends IPanel {
 	};
 
 	/** Create a new gate arm dispatcher */
-	public GateArmDispatcher(Session s, GateArmManager man) {
+	public GateArmDispatcher(Session s) {
 		session = s;
 		TypeCache<GateArm> c = s.getSonarState().getGateArms();
 		c.addProxyListener(ga_listener);
@@ -208,8 +208,6 @@ public class GateArmDispatcher extends IPanel {
 			// Make labels opaque to allow setting background color
 			state_lbl[i].setOpaque(true);
 			ilock_lbl[i].setOpaque(true);
-			ilock_lbl[i].setBorder(
-				BorderFactory.createLineBorder(Color.BLACK));
 		}
 	}
 
@@ -218,30 +216,30 @@ public class GateArmDispatcher extends IPanel {
 	public void initialize() {
 		super.initialize();
 		setTitle(I18N.get("gate.arm.selected"));
-		add("plan.name");
+		add("action.plan.name");
 		add(name_lbl);
 		add("location");
 		add(location_lbl, Stretch.LAST);
 		add(createStreamsBox(), Stretch.FULL);
 		add(gate_lbl[0], Stretch.NONE);
-		add(state_lbl[0]);
+		add(state_lbl[0], Stretch.NONE);
 		add(ilock_lbl[0]);
 		add(gate_lbl[3], Stretch.NONE);
-		add(state_lbl[3]);
+		add(state_lbl[3], Stretch.NONE);
 		add(ilock_lbl[3]);
 		add(new JButton(open_act), Stretch.LAST);
 		add(gate_lbl[1], Stretch.NONE);
-		add(state_lbl[1]);
+		add(state_lbl[1], Stretch.NONE);
 		add(ilock_lbl[1]);
 		add(gate_lbl[4], Stretch.NONE);
-		add(state_lbl[4]);
+		add(state_lbl[4], Stretch.NONE);
 		add(ilock_lbl[4]);
 		add(new JButton(warn_close_act), Stretch.LAST);
 		add(gate_lbl[2], Stretch.NONE);
-		add(state_lbl[2]);
+		add(state_lbl[2], Stretch.NONE);
 		add(ilock_lbl[2]);
 		add(gate_lbl[5], Stretch.NONE);
-		add(state_lbl[5]);
+		add(state_lbl[5], Stretch.NONE);
 		add(ilock_lbl[5]);
 		add(new JButton(close_act), Stretch.LAST);
 		watcher.initialize();
@@ -332,13 +330,15 @@ public class GateArmDispatcher extends IPanel {
 			GateArm ga = gate_arm[i];
 			if (ga != null) {
 				CameraPreset cp = ga.getPreset();
-				Camera c = cp.getCamera();
-				if (c != null) {
-					if (c0 == null)
-						c0 = c;
-					else {
-						c1 = c;
-						break;
+				if (cp != null) {
+					Camera c = cp.getCamera();
+					if (c != null) {
+						if (c0 == null)
+							c0 = c;
+						else {
+							c1 = c;
+							break;
+						}
 					}
 				}
 			}
@@ -404,11 +404,14 @@ public class GateArmDispatcher extends IPanel {
 					ga.getInterlock());
 				ilock_lbl[i].setForeground(st.foreground());
 				ilock_lbl[i].setBackground(st.background());
+				ilock_lbl[i].setBorder(BorderFactory
+					.createLineBorder(Color.BLACK));
 				ilock_lbl[i].setText(st.text());
 			} else {
 				gate_lbl[i].setText(" ");
 				ilock_lbl[i].setForeground(null);
 				ilock_lbl[i].setBackground(null);
+				ilock_lbl[i].setBorder(null);
 				ilock_lbl[i].setText(" ");
 			}
 		}

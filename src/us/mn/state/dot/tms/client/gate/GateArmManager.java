@@ -62,12 +62,6 @@ public class GateArmManager extends DeviceManager<GateArm> {
 		super(s, lm, descriptor(s), 15);
 	}
 
-	/** Create a gate arm map tab */
-	@Override
-	public GateArmTab createTab() {
-		return new GateArmTab(session, this);
-	}
-
 	/** Check if user can read gate arms */
 	@Override
 	public boolean canRead() {
