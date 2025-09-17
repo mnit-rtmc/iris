@@ -77,7 +77,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		map.put("opposing", opposing);
 		map.put("downstream_hashtag", downstream_hashtag);
 		map.put("arm_state", getArmState());
-		map.put("interlock", interlock);
+		map.put("interlock", getInterlock());
 		map.put("fault", fault);
 		return map;
 	}
