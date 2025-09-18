@@ -9,32 +9,32 @@ _comm link_.
 
 Protocol        | Beacon | Camera | DMS | Detection | Gates | GPS | Weather
 ----------------|--------|--------|-----|-----------|-------|-----|--------
-ADEC TDC        |        |        |     | ✔️        |       |     |
-Axis PTZ        |        | ✔️     |     |           |       |     |
-Banner DXM      |        |        |     | ✔️        |       |     |
-Canoga          |        |        |     | ✔️        |       |     |
-CBW             | ✔️     |        |     |           |       |     |
-Central Park    |        |        |     | ✔️        |       |     |
-Cohu PTZ        |        | ✔️     |     |           |       |     |
-DLI DIN Relay   | ✔️     |        |     |           |       |     |
-DMS XML         |        |        | ✔️  |           |       |     |
-DR-500          |        |        |     | ✔️        |       |     |
-Gate NDORv5     |        |        |     |           | ✔️    |     |
-HySecurity STC  |        |        |     |           | ✔️    |     |
-Infinova PTZ    |        | ✔️     |     |           |       |     |
-Manchester PTZ  |        | ✔️     |     |           |       |     |
-MnDOT 170       | ✔️     |        |     | ✔️        |       |     |
-Natch           | ✔️     |        |     | ✔️        |       |     |
-NDOT Beacon     | ✔️     |        |     |           |       |     |
-NTCIP           |        |        | ✔️  | ✔️        |       |     | ✔️
-ONVIF PTZ       |        | ✔️     |     |           |       |     |
-OSi ORG-815     |        |        |     |           |       |     | ✔️
-Pelco D PTZ     |        | ✔️     |     |           |       |     |
-RedLion GPS     |        |        |     |           |       | ✔️  |
-RTMS G4         |        |        |     | ✔️        |       |     |
-SierraGX        |        |        |     |           |       | ✔️  |
-SmartSensor     |        |        |     | ✔️        |       |     |
-Vicon PTZ       |        | ✔️     |     |           |       |     |
+ADEC TDC        |        |        |     | ☑️        |       |     |
+Axis PTZ        |        | ☑️     |     |           |       |     |
+Banner DXM      |        |        |     | ☑️        |       |     |
+Canoga          |        |        |     | ☑️        |       |     |
+CBW             | ☑️     |        |     |           |       |     |
+Central Park    |        |        |     | ☑️        |       |     |
+Cohu PTZ        |        | ☑️     |     |           |       |     |
+DLI DIN Relay   | ☑️     |        |     |           |       |     |
+DMS XML         |        |        | ☑️  |           |       |     |
+DR-500          |        |        |     | ☑️        |       |     |
+Gate NDORv5     |        |        |     |           | ☑️    |     |
+HySecurity STC  |        |        |     |           | ☑️    |     |
+Infinova PTZ    |        | ☑️     |     |           |       |     |
+Manchester PTZ  |        | ☑️     |     |           |       |     |
+MnDOT 170       | ☑️     |        |     | ☑️        |       |     |
+Natch           | ☑️     |        |     | ☑️        |       |     |
+NDOT Beacon     | ☑️     |        |     |           |       |     |
+NTCIP           |        |        | ☑️  | ☑️        |       |     | ☑️
+ONVIF PTZ       |        | ☑️     |     |           |       |     |
+OSi ORG-815     |        |        |     |           |       |     | ☑️
+Pelco D PTZ     |        | ☑️     |     |           |       |     |
+RedLion GPS     |        |        |     |           |       | ☑️  |
+RTMS G4         |        |        |     | ☑️        |       |     |
+SierraGX        |        |        |     |           |       | ☑️  |
+SmartSensor     |        |        |     | ☑️        |       |     |
+Vicon PTZ       |        | ☑️     |     |           |       |     |
 
 ## ADEC TDC
 

@@ -54,12 +54,12 @@ Gate arms are continuously monitored, and can be in one of these states:
 
 State        | Description             | Possibly Open | Possibly Closed
 -------------|-------------------------|---------------|----------------
-`OPENING`    | opening in progress     | ✔️             | ✔️
-`OPEN`       | gate open               | ✔️             |
-`CLOSING`    | closing in progress     | ✔️             | ✔️
-`CLOSED`     | gate closed             |               | ✔️
-`FAULT`      | fault in gate operation | ✔️             | ✔️
-`UNKNOWN`    | no commnuication        | ✔️             | ✔️
+`OPENING`    | opening in progress     | ☑️             | ☑️
+`OPEN`       | gate open               | ☑️             |
+`CLOSING`    | closing in progress     | ☑️             | ☑️
+`CLOSED`     | gate closed             |               | ☑️
+`FAULT`      | fault in gate operation | ☑️             | ☑️
+`UNKNOWN`    | no commnuication        | ☑️             | ☑️
 
 If communication is lost to a gate arm for longer than the value of
 `gate_arm_alert_timeout_secs` [system attribute], its state will be set to

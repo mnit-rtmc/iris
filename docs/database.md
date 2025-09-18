@@ -30,57 +30,57 @@ update, and is caused by one of these conditions:
 *Notify Channel*   | (G) | (C) | (P) | (D)
 -------------------|-----|-----|-----|-----
 `action_plan`      |     |     |     |
-`alarm`            |     | ✔️   |     |
-`beacon`           | ✔️   | ✔️   | ✔️   |
+`alarm`            |     | ☑️   |     |
+`beacon`           | ☑️   | ☑️   | ☑️   |
 `cabinet_style`    |     |     |     |
-`camera`           | ✔️   | ✔️   |     |
+`camera`           | ☑️   | ☑️   |     |
 `camera_publish` † |     |     |     |
 `camera_preset`    |     |     |     |
 `comm_config`      |     |     |     |
 `comm_link`        |     |     |     |
-`controller`       | ✔️   |     |     |
+`controller`       | ☑️   |     |     |
 `day_plan`         |     |     |     |
-`detector`         |     | ✔️   |     |
+`detector`         |     | ☑️   |     |
 `device_action`    |     |     |     |
-`dms`              | ✔️   | ✔️   | ✔️   |
+`dms`              | ☑️   | ☑️   | ☑️   |
 `domain`           |     |     |     |
 `encoder_stream`   |     |     |     |
 `encoder_type`     |     |     |     |
 `event_config`     |     |     |     |
-`flow_stream`      |     | ✔️   |     |
-`gate_arm`         | ✔️   | ✔️   | ✔️   |
-`gps`              | ✔️   | ✔️   |     |
+`flow_stream`      |     | ☑️   |     |
+`gate_arm`         | ☑️   | ☑️   | ☑️   |
+`gps`              | ☑️   | ☑️   |     |
 `graphic`          |     |     |     |
 `incident`         |     |     |     |
 `incident_detail`  |     |     |     |
 `inc_advice`       |     |     |     |
 `inc_descriptor`   |     |     |     |
 `inc_locator`      |     |     |     |
-`lcs`              | ✔️   | ✔️   | ✔️   |
-`lcs_state`        |     | ✔️   |     |
+`lcs`              | ☑️   | ☑️   | ☑️   |
+`lcs_state`        |     | ☑️   |     |
 `modem`            |     |     |     |
 `monitor_style`    |     |     |     |
 `msg_pattern`      |     |     |     |
 `msg_line`         |     |     |     |
-`parking_area`     | ✔️   |     |     |
+`parking_area`     | ☑️   |     |     |
 `permission`       |     |     |     |
 `plan_phase`       |     |     |     |
 `play_list`        |     |     |     |
-`ramp_meter`       | ✔️   | ✔️   | ✔️   |
-`r_node`           | ✔️   |     |     |
+`ramp_meter`       | ☑️   | ☑️   | ☑️   |
+`r_node`           | ☑️   |     |     |
 `road`             |     |     |     |
 `road_affix`       |     |     |     |
-`role`             |     |     |     | ✔️ 
+`role`             |     |     |     | ☑️ 
 `sign_config`      |     |     |     |
 `sign_detail`      |     |     |     |
 `sign_message`     |     |     |     |
 `system_attribute` |     |     |     |
-`tag_reader`       | ✔️   | ✔️   |     |
+`tag_reader`       | ☑️   | ☑️   |     |
 `time_action`      |     |     |     |
 `toll_zone`        |     |     |     |
 `user_id`          |     |     |     |
-`video_monitor`    |     | ✔️   |     |
-`weather_sensor`   | ✔️   | ✔️   |     |
+`video_monitor`    |     | ☑️   |     |
+`weather_sensor`   | ☑️   | ☑️   |     |
 `word`             |     |     |     |
 
 † _Notifies only on `UPDATE` to 'publish' attribute, with camera name payload_
