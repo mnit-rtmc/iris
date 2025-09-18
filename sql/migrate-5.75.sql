@@ -3,6 +3,8 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
+SELECT iris.update_version('5.74.0', '5.75.0');
+
 -- Add selectable to plan phase table
 ALTER TABLE iris.plan_phase ADD COLUMN selectable BOOLEAN;
 UPDATE iris.plan_phase SET selectable = true;
