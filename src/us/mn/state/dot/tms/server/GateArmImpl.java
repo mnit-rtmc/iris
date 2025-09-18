@@ -372,10 +372,14 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 				GateArmSystem.disable(name, "DB interlock");
 				logError("setInterlockNotify: " +
 					e.getMessage());
+				return;
 			}
 			interlock = lk;
-			notifyAttribute("interlock");
 			sendInterlocks();
+			notifyAttribute("interlock");
+			// NOTE: call super here to prevent recursivee calls
+			//       thru checkDependencies
+			super.updateStyles();
 		}
 	}
 

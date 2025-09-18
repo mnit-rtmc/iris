@@ -179,12 +179,8 @@ public class GateArmDispatcher extends IPanel {
 			boolean ch = false;
 			for (int i = 0; i < MAX_ARMS; i++)
 				ch |= (ga == gate_arm[i]);
-			if (ch && (null == a ||
-			           "styles".equals(a) ||
-			           "interlock".equals(a))
-			) {
+			if (ch && (null == a || "styles".equals(a)))
 				updateGateArms();
-			}
 		}
 	};
 

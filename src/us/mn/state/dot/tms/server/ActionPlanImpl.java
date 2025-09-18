@@ -353,7 +353,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/**
 	 * Set the phase.  If sync actions are enabled, the phase is set only
-	 * only if all dms, beacon, lane, and meter actions are valid.
+	 * only if all dms, beacon, gate arm, lane, and meter actions are valid.
 	 */
 	public void doSetPhase(PlanPhase p) throws TMSException {
 		if (!objectEquals(p, phase)) {
