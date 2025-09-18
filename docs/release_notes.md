@@ -1,6 +1,6 @@
 # IRIS 5.x Release Notes
 
-5.75.0 (19 Sep 2025)
+5.75.0 (18 Sep 2025)
  - Remove gate arm arrays
  - Support gate arm device actions with action plans, with updated UI
  - **WARNING**: the migrate-5.75.sql script does not convert existing
