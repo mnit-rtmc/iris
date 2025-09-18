@@ -31,7 +31,7 @@ Field             | Description
 ------------------|---------------------------------------------------
 Notes             | administrator notes, possibly including [hashtag]s
 Preset            | verification [camera] preset
-Opposing          | interlock check for gates on this road in another direction
+Opposing          | enable check for gates on this road in another direction
 Downstream (#tag) | [hashtag] for downstream gates which must open prior to this
 
 The **notes** field may contain [hashtag]s to be referenced in [device action]s.
@@ -40,7 +40,8 @@ The verification [camera] preset allows operators to check traffic conditions
 before opening or closing the gates.  The _Swap_ button allows camera images
 from multiple gates to be swapped between larger and smaller views.
 
-An [action plan] is required to control gate arms.  It must have three phases:
+An [action plan] is required for each gate arm group to be controlled.  It
+must have three phases:
 - `ga_open`: gates open and optional [DMS] displaying "open" message
 - `ga_change`: gates open, with DMS displaying "closed"
 - `ga_closed`: gates closed and optional DMS displaying "closed"
@@ -67,11 +68,11 @@ If communication is lost to a gate arm for longer than the value of
 `gate_arm_alert_timeout_secs` [system attribute], its state will be set to
 `UNKNOWN`.
 
-A gate arm **interlock** can prevent dangerous traffic conflicts:
-- **Deny Open** prevents opening the gate, due to opposing gates _possibly_
-  open or downstream gates _possibly_ closed.
-- **Deny Close** prevents closing the gate, due to upstream gates _possibly_
-  open.
+An **interlock** can prevent dangerous traffic conflicts:
+- **Deny Open** prevents opening the gate, triggered by opposing gates
+  _possibly_ open or downstream gates _possibly_ closed.
+- **Deny Close** prevents closing the gate, triggered by upstream gates
+  _possibly_ open.
 - **Deny All** prevents opening or closing the gate (both above conditions).
 - **System Disable** prevents operating any gates.
 
@@ -87,9 +88,9 @@ When an operator presses a button, its corresponding phase will be requested:
 - `Close` ⇒ `ga_closed`
 
 † `Change` is only enabled if a [device action] is configured with the
-`ga_change` phase.  Operators should use this phase to warn motorists when
-the gates will soon be changing.  After checking the verification cameras,
-the next phase can be selected.
+`ga_change` phase.  Operators can use this to warn motorists when the gates
+will soon be changing.  After checking the verification cameras, the next
+phase can be selected.
 
 DMS messages for these are displayed to the right of the camera view, for up to
 two signs.
