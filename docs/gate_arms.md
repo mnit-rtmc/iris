@@ -1,6 +1,6 @@
 # Gate Arms
 
-Select `View ➔ Gate Arm Arrays` menu item
+Select `View ➔ Gate Arm` menu item
 
 Gate arms are traffic control devices which restrict access to a section of
 roadway.  They are commonly used for on-ramps or reversible lanes.

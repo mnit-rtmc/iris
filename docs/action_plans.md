@@ -61,6 +61,7 @@ Device actions use [hashtag]s to associate devices with one phase of an action
 plan.  These devices can be:
  - [DMS], displays the [message pattern] on the sign
  - [ramp meter], enables metering operation
+ - [gate arm], open and close gates
  - [beacon], activates flashing lights
  - [camera], recalls the specified camera [preset]
 
@@ -256,6 +257,7 @@ the `email_event` table.
 [DMS]: dms.html
 [event]: events.html
 [exit ramp backup]: exit_backup.html
+[gate arm]: gate_arms.html
 [hashtag]: hashtags.html
 [incident]: incidents.html
 [message pattern]: message_patterns.html
