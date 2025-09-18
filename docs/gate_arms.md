@@ -27,24 +27,23 @@ roadway.  They are commonly used for on-ramps or reversible lanes.
 
 The gate arm properties form has setup information.
 
-Field      | Description
------------|---------------------------------------------------
-Notes      | administrator notes, possibly including [hashtag]s
-Preset     | verification [camera] preset
-Opposing   | interlock check for gates on this road in another direction
-Downstream | [hashtag] for downstream gates which must open prior to this
+Field             | Description
+------------------|---------------------------------------------------
+Notes             | administrator notes, possibly including [hashtag]s
+Preset            | verification [camera] preset
+Opposing          | interlock check for gates on this road in another direction
+Downstream (#tag) | [hashtag] for downstream gates which must open prior to this
 
-A [hashtag] in the **notes** field is used to group arms that are controlled
-as a unit.
+The **notes** field may contain [hashtag]s to be referenced in [device action]s.
 
 The verification [camera] preset allows operators to check traffic conditions
 before opening or closing the gates.  The _Swap_ button allows camera images
 from multiple gates to be swapped between larger and smaller views.
 
-Gate arms are controlled by [action plan]s with three phases:
-- `ga_open`: gates and [DMS] both open
-- `ga_change`: gates open, but DMS displaying closed message
-- `ga_closed`: gates and DMS both closed
+An [action plan] is required to control gate arms.  It must have three phases:
+- `ga_open`: gates open and optional [DMS] displaying "open" message
+- `ga_change`: gates open, with DMS displaying "closed"
+- `ga_closed`: gates closed and optional DMS displaying "closed"
 
 [Device action]s must be assigned to these phases to control devices:
 - Gate arm hashtags should be assigned to `ga_open` and `ga_change`, but not
@@ -81,8 +80,6 @@ Instead, an _alert_ will logged in the `email_event` table.
 
 ## Control
 
-![](images/gate_arm_dispatch.png)
-
 Depending on the current action plan phase, one of the buttons will be enabled.
 When an operator presses a button, its corresponding phase will be requested:
 - `Open` ⇒ `ga_open`
@@ -91,11 +88,8 @@ When an operator presses a button, its corresponding phase will be requested:
 
 † `Change` is only enabled if a [device action] is configured with the
 `ga_change` phase.  Operators should use this phase to warn motorists when
-the gates will soon be closing or opening.  After checking the verification
-cameras, the next phase can be selected.
-
-None of these phases can be requested automatically by the system -- an
-operator must **manually** request them.
+the gates will soon be changing.  After checking the verification cameras,
+the next phase can be selected.
 
 DMS messages for these are displayed to the right of the camera view, for up to
 two signs.
