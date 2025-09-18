@@ -69,7 +69,7 @@ camera_stream_controls_enable	false
 cap_save_enable	true
 clearguide_key	
 client_units_si	true
-database_version	5.74.0
+database_version	5.75.0
 detector_auto_fail_enable	true
 detector_data_archive_enable	true
 detector_occ_spike_secs	60

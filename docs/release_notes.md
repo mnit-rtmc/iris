@@ -1,5 +1,16 @@
 # IRIS 5.x Release Notes
 
+5.75.0 (19 Sep 2025)
+ - Remove gate arm arrays
+ - Support gate arm device actions with action plans, with updated UI
+ - **WARNING**: the migrate-5.75.sql script does not convert existing
+   gate arm arrays to action plans -- manual
+   [configuration](gate_arms.html#setup) is required!
+ - Exclude inactive devices from action plan counts and checks
+ - Check action plan phase hold time every 5 seconds
+ - Add `selectable` column to allow non-selectable plan phases
+ - Remove `TAB_LIST` from `user.properties`
+
 5.74.0 (5 Sep 2025)
  - Fix action plan device permission checks
  - Enhance gate arms to eventually replace arrays with action plans
