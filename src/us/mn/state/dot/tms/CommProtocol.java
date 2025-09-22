@@ -164,6 +164,7 @@ public enum CommProtocol {
 	CLEARGUIDE("ClearGuide", false),
 
 	/** GPS using Digi WR-series modem (44) */
+	@Deprecated
 	GPS_DIGI_WR("GPS Digi WR", false),
 
 	/** ONVIF PTZ (45) */

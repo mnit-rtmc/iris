@@ -109,6 +109,7 @@ There are a few types of [vehicle detection] data:
 | SmartSensor 125 vlog | `tcp`          | 1-65534         | 1-8       | event     |
 
 † Backplane: 0-15, EEPROM: 128-255
+
 ‡ Use "Data per stall" endpoint (URI ending in `/integration/spot`)
 
 ## GPS Devices
