@@ -101,11 +101,11 @@ There are a few types of [vehicle detection] data:
 | Banner DXM           | `tcp`          | 1               | 11-86     | presence  |
 | Canoga               | `tcp`          | 0-15; 128-255 † | 1-4       | event     |
 | Central Park         | `https` ‡      | 1               | 1-64      | presence  |
-| DR-500               | `tcp`          | 1               | 1         | binned    |
-| RTMS G4              | `tcp`          | 0-65535         | 1-12      | binned    |
+| DR-500               | `tcp`          | 1               | 1         | [binned]  |
+| RTMS G4              | `tcp`          | 0-65535         | 1-12      | [binned]  |
 | RTMS G4 vlog         | `tcp`          | 0-65535         | 1-12      | event     |
-| SmartSensor 105      | `tcp`          | 1-9999          | 1-8       | binned    |
-| SmartSensor 125 HD   | `tcp`          | 1-65534         | 1-8       | binned    |
+| SmartSensor 105      | `tcp`          | 1-9999          | 1-8       | [binned]  |
+| SmartSensor 125 HD   | `tcp`          | 1-65534         | 1-8       | [binned]  |
 | SmartSensor 125 vlog | `tcp`          | 1-65534         | 1-8       | event     |
 
 † Backplane: 0-15, EEPROM: 128-255
@@ -114,11 +114,11 @@ There are a few types of [vehicle detection] data:
 
 ## GPS Devices
 
-| Protocol         | Default Scheme | Drops | [IO Pin]s |
-|------------------|----------------|-------|-----------|
-| RedLion          | `tcp`          | 1     | 1         |
-| SierraGX         | `tcp`          | 1     | 1         |
-| Sierra SSH       | `tcp`          | 1     | 1         |
+| Protocol   | Default Scheme | Drops | [IO Pin]s |
+|------------|----------------|-------|-----------|
+| RedLion    | `tcp`          | 1     | 1         |
+| SierraGX   | `tcp`          | 1     | 1         |
+| Sierra SSH | `tcp`          | 1     | 1         |
 
 ## Weather Data
 
@@ -127,86 +127,35 @@ Some protocols can be used to collect [weather sensor] data.
 | Protocol       | Default Scheme | Drops | [IO Pin]s | Notes
 |----------------|----------------|-------|-----------|--------------
 | OSi ORG-815    | `tcp`          | 1     | 1         | precipitation
-| Campbell Cloud | `tcp`          | 1     | 1         | separate service
+| Campbell Cloud | `http`         | 1     | 1         | separate service
 
-## CAP-IPAWS
+## External Systems
 
-This Common Alerting Protocol [CAP] is used for polling the Integrated Public
-Alert and Warning System [IPAWS].  [Alerts] can be used to automatically post
-weather and other messages to Dynamic Message Signs.  This requires an `HTTPS`
-URI provided by the Federal Emergency Management Agency and a [controller] set
-to `ACTIVE` condition.
+Some protocols allow IRIS to poll external systems periodically using `http`
+or `https`.  Typically, a single [controller] should be assigned and made
+`ACTIVE`, but no devices need to be connected to IO pins.
 
-## CAP-NWS
+| Protocol   | Description                         |
+|------------|-------------------------------------|
+| CAP-IPAWS  | [CAP] feed from Integrated Public Alert and Warning System [IPAWS].  [Alert]s can be used to automatically post weather and other messages to [DMS].  This requires an `https` URI provided by the Federal Emergency Management Agency. |
+| CAP-NWS    | [CAP] feed from National Weather Service.  [Alert]s can be used to automatically post weather messages to [DMS]. |
+| ClearGuide | [ClearGuide] external system feed   |
+| Inc-Feed   | External [incident feed]            |
+| Msg-Feed   | External [message feed]             |
+| DMS-XML    | Legacy [DMS] system (drops 0-65535) |
 
-This Common Alerting Protocol [CAP] is used for polling the National Weather
-Service weather feed.  [Alerts] can be used to automatically post weather
-messages to Dynamic Message Signs.  This requires a [controller] set to
-`ACTIVE` condition.
-
-## ClearGuide
-
-The `clearguide` protocol can be used for to connect with a [ClearGuide]
-external system feed.
-
-## DMS-XML
-
-`DMS-XML` is a protocol for legacy [DMS] control systems.  The _default scheme_
-is `tcp`, with multi-drop (0-65535).
-
-## E6
+## Tag Readers
 
 The `e6` protocol can be used for collecting data from Transcore [tag readers].
 The _default scheme_ is `udp`.  _Multi-drop_ is not supported.  One tag reader
 can be associated with each [controller], using [IO pin] 1.
 
-## Inc-Feed
 
-The `incfeed` protocol can be used to interface IRIS with an external system
-that generates [incidents].  Periodically, IRIS will poll the URI (using `http`)
-for incidents.
-
-[incident feed] FIXME
-
-## Msg-Feed
-
-The `msgfeed` protocol can be used to interface with an external system that
-generates [DMS] messages.  Periodically, IRIS will poll the URI (using `http`)
-for DMS messages.
-
-The external system should respond with an ASCII text file, with one line per
-message to be deployed.  Each line contains 3 fields: `dms`, `message` and
-`expire`, separated by tab characters `\t` (ASCII 0x09), and terminated with a
-single newline character `\n` (ASCII 0x0A).
-
-```
-V66E37\tSNOW PLOW[nl]AHEAD[nl]USE CAUTION\t2022-10-02 11:37:00-05:00
-```
-
-`dms`: Name of the sign to deploy, which must have the [hashtag] referenced
-by a [device action].  Additionally, that action must be associated with the
-current phase of an active [action plan].  The [message pattern] of the
-_device action_ must be a `feed` [action tag].  For example, if the `msgfeed`
-_Comm Link_ name is `XYZ`, then the pattern must be `[feedXYZ]`.
-
-`multi`: Message to deploy, using the [MULTI] markup language.  Each line of
-the message must exist in the pattern's library.  This check allows only
-"administrator-approved" messages, but it can be disabled by changing the
-`msg_feed_verify` [system attribute] to `false`.  **WARNING**: only disable
-this check if the message feed host is fully trusted, and there is no
-possibility of man-in-the-middle attacks.
-
-`expire`: Date/time when the message will expire, using [RFC 3339]
-`full-date` / `full-time` separated by a space.  The message will not be
-displayed after this time.  Leave `expire` blank to cancel a previous message.
-
-
-[action plan]: action_plans.html
-[action tag]: action_plans.html#action-tags
 [alarm]: alarms.html
+[alert]: alerts.html
 [Axis]: https://www.axis.com/products/network-cameras
 [beacon]: beacons.html
-[binned data]: vehicle_detection.html#binned-data
+[binned]: vehicle_detection.html#binned-data
 [camera]: cameras.html
 [CAP]: http://docs.oasis-open.org/emergency/cap/v1.2/CAP-v1.2.html
 [CBW]: https://controlbyweb.com/
@@ -215,24 +164,20 @@ displayed after this time.  Leave `expire` blank to cancel a previous message.
 [comm link]: comm_links.html
 [controller]: controllers.html
 [device]: controllers.html#devices
-[device action]: action_plans.html#device-actions
 [DLI]: https://dlidirect.com/
 [DMS]: dms.html
 [flow stream]: flow_streams.html
 [gate arm]: gate_arms.html
 [GPS]: gps.html
-[hashtag]: hashtags.html
 [HySecurity STC]: https://hysecurity.com/products/controllers/smart-touch-controller/
-[incidents]: incidents.html
-[indications]: lcs.html#indications
+[incident feed]: incident_feed.html
 [Infinova]: https://www.infinova.com/
 [IO pin]: controllers.html#io-pins
 [IPAWS]: https://www.fema.gov/emergency-managers/practitioners/integrated-public-alert-warning-system
 [keyboard]: cameras.html#camera-keyboards
 [LCS]: lcs.html
-[message pattern]: message_patterns.html
+[message feed]: msg_feed.html
 [monstream]: video.html#monstream
-[MULTI]: multi.html
 [Natch]: natch.html
 [NTCIP]: https://www.ntcip.org/
 [ONVIF]: https://en.wikipedia.org/wiki/ONVIF
@@ -240,9 +185,7 @@ displayed after this time.  Leave `expire` blank to cancel a previous message.
 [Pelco]: https://www.pelco.com/
 [PTZ]: cameras.html#pan-tilt-and-zoom
 [ramp meter]: ramp_meters.html
-[RFC 3339]: https://tools.ietf.org/html/rfc3339#section-5.6
 [streambed]: https://github.com/mnit-rtmc/streambed
-[system attribute]: system_attributes.html
 [tag readers]: tolling.html#tag-readers
 [vehicle detection]: vehicle_detection.html
 [vehicle logging]: vehicle_detection.html#vehicle-logging
