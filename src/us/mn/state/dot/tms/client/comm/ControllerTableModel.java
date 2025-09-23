@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2024  Minnesota Department of Transportation
+ * Copyright (C) 2008-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,7 +79,7 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 	}
 
 	/** Special value for unused drop */
-	static private final short DROP_UNUSED = -2;
+	static private final int DROP_UNUSED = -2;
 
 	/** Check if drop address is used for a controller */
 	static private boolean isDropUsed(Controller c) {
@@ -98,7 +98,7 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 			}
 		});
 		cols.add(new ProxyColumn<Controller>("controller.drop", 48,
-			Short.class)
+			Integer.class)
 		{
 			public Object getValueAt(Controller c) {
 				return isDropUsed(c) ? c.getDrop() :DROP_UNUSED;
@@ -108,7 +108,7 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 			}
 			public void setValueAt(Controller c, Object value) {
 				if (value instanceof Number)
-					c.setDrop(((Number)value).shortValue());
+					c.setDrop(((Number) value).intValue());
 			}
 			protected TableCellRenderer createCellRenderer() {
 				return new DropCellRenderer();
@@ -207,8 +207,8 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 	protected Comparator<Controller> comparator() {
 		return new Comparator<Controller>() {
 			public int compare(Controller a, Controller b) {
-				Short aa = Short.valueOf(a.getDrop());
-				Short bb = Short.valueOf(b.getDrop());
+				Integer aa = Integer.valueOf(a.getDrop());
+				Integer bb = Integer.valueOf(b.getDrop());
 				int c = aa.compareTo(bb);
 				if (c == 0) {
 					String an = a.getName();
