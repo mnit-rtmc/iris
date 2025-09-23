@@ -42,10 +42,10 @@ public interface Controller extends SonarObject {
 	CommLink getCommLink();
 
 	/** Set the drop address */
-	void setDrop(short d);
+	void setDrop(int d);
 
 	/** Get the drop address */
-	short getDrop();
+	int getDrop();
 
 	/** Set the cabinet style */
 	void setCabinetStyle(CabinetStyle s);

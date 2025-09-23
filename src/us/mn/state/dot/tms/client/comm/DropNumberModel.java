@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.Controller;
 public class DropNumberModel extends SpinnerNumberModel {
 
 	/** Maximum allowed drop address */
-	static private final short MAX_DROP_ID = 32767;
+	static private final int MAX_DROP_ID = 65535;
 
 	/** Comm link */
 	private final CommLink comm_link;
@@ -45,8 +45,8 @@ public class DropNumberModel extends SpinnerNumberModel {
 	}
 
 	/** Get a set of all used drops on the comm_link */
-	private Set<Short> getUsedDrops() {
-		TreeSet<Short> used = new TreeSet<Short>();
+	private Set<Integer> getUsedDrops() {
+		TreeSet<Integer> used = new TreeSet<Integer>();
 		for (Controller c: cache) {
 			if (c.getCommLink() == comm_link)
 				used.add(c.getDrop());
@@ -61,10 +61,10 @@ public class DropNumberModel extends SpinnerNumberModel {
 	}
 
 	/** Get the next drop */
-	private Short getNextDrop() {
-		Set<Short> used = getUsedDrops();
-		short value = getNumber().shortValue();
-		for (short d = ++value; d < MAX_DROP_ID; d++) {
+	private Integer getNextDrop() {
+		Set<Integer> used = getUsedDrops();
+		int value = getNumber().intValue();
+		for (int d = ++value; d < MAX_DROP_ID; d++) {
 			if (!used.contains(d))
 				return d;
 		}
@@ -78,10 +78,10 @@ public class DropNumberModel extends SpinnerNumberModel {
 	}
 
 	/** Get the previous drop */
-	private Short getPreviousDrop() {
-		Set<Short> used = getUsedDrops();
-		short value = getNumber().shortValue();
-		for (short d = --value; d > 0; d--) {
+	private Integer getPreviousDrop() {
+		Set<Integer> used = getUsedDrops();
+		int value = getNumber().intValue();
+		for (int d = --value; d > 0; d--) {
 			if (!used.contains(d))
 				return d;
 		}
@@ -89,9 +89,9 @@ public class DropNumberModel extends SpinnerNumberModel {
 	}
 
 	/** Get the next available value */
-	public Short getNextAvailable() {
-		Set<Short> used = getUsedDrops();
-		for (short d = 1; d < MAX_DROP_ID; d++) {
+	public Integer getNextAvailable() {
+		Set<Integer> used = getUsedDrops();
+		for (int d = 1; d < MAX_DROP_ID; d++) {
 			if (!used.contains(d))
 				return d;
 		}

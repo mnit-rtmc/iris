@@ -1415,7 +1415,7 @@ VALUES
 
 CREATE TABLE iris.controller (
     name VARCHAR(20) PRIMARY KEY,
-    drop_id SMALLINT NOT NULL,
+    drop_id INTEGER NOT NULL,
     comm_link VARCHAR(20) REFERENCES iris.comm_link(name),
     cabinet_style VARCHAR(20) REFERENCES iris.cabinet_style(name),
     geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),

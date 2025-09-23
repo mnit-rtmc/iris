@@ -128,7 +128,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 	private ControllerImpl(ResultSet row) throws SQLException, TMSException{
 		this(row.getString(1),    // name
 		     row.getString(2),    // comm_link
-		     row.getShort(3),     // drop_id
+		     row.getInt(3),       // drop_id
 		     row.getString(4),    // cabinet_style
 		     row.getString(5),    // geo_loc
 		     row.getInt(6),       // condition
@@ -141,7 +141,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 	}
 
 	/** Create a controller */
-	private ControllerImpl(String n, String cl, short d, String cs,
+	private ControllerImpl(String n, String cl, int d, String cs,
 		String gl, int cnd, String nt, String p, String s,
 		String st, Date ft) throws TMSException
 	{
@@ -242,16 +242,16 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 	}
 
 	/** Drop address */
-	private short drop_id;
+	private int drop_id;
 
 	/** Set the drop address */
 	@Override
-	public void setDrop(short d) {
+	public void setDrop(int d) {
 		drop_id = d;
 	}
 
 	/** Set the drop address */
-	public void doSetDrop(short d) throws TMSException {
+	public void doSetDrop(int d) throws TMSException {
 		if (d != drop_id) {
 			putCommLink(d, comm_link);
 			store.update(this, "drop_id", d);
@@ -262,7 +262,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 
 	/** Get the drop address */
 	@Override
-	public short getDrop() {
+	public int getDrop() {
 		return drop_id;
 	}
 
