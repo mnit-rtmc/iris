@@ -576,30 +576,46 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		PlannedAction pa = super.choosePlannedAction();
 		GateArmInterlock gai = interlock;
 		if (pa != null && gai.isOpenAllowed())
-			requestArmState(GateArmState.OPENING);
+			requestArmOpen();
 		if (pa == null && gai.isCloseAllowed())
-			requestArmState(GateArmState.CLOSING);
+			requestArmClose();
 		return pa;
+	}
+
+	/** Request to open the gate arm */
+	private void requestArmOpen() {
+		switch (arm_state) {
+			case OPENING:
+			case OPEN:
+				break;
+			default:
+				requestArmState(GateArmState.OPENING);
+		}
+	}
+
+	/** Request to close the gate arm */
+	private void requestArmClose() {
+		switch (arm_state) {
+			case CLOSING:
+			case CLOSED:
+				break;
+			default:
+				requestArmState(GateArmState.CLOSING);
+		}
 	}
 
 	/** Request a change to the gate arm state.
 	 * @param gas Requested gate arm state. */
 	private void requestArmState(GateArmState gas) {
 		if (GateArmSystem.checkEnabled()) {
-			if (gas != arm_state) {
-				GateArmPoller p = getGateArmPoller();
-				if (p != null)
-					requestArmState(p, gas);
+			GateArmPoller p = getGateArmPoller();
+			if (p != null) {
+				if (gas == GateArmState.OPENING)
+					p.openGate(this);
+				if (gas == GateArmState.CLOSING)
+					p.closeGate(this);
 			}
 		}
-	}
-
-	/** Request a change to the gate arm state */
-	private void requestArmState(GateArmPoller p, GateArmState gas) {
-		if (gas == GateArmState.OPENING)
-			p.openGate(this);
-		if (gas == GateArmState.CLOSING)
-			p.closeGate(this);
 	}
 
 	/** Set the lock (JSON) */
