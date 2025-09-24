@@ -2375,9 +2375,10 @@ CREATE TRIGGER device_preset_notify_trig
     FOR EACH ROW EXECUTE FUNCTION iris.device_preset_notify();
 
 CREATE VIEW camera_preset_view AS
-    SELECT cp.name, camera, preset_num, direction, p.name AS device
+    SELECT cp.name, camera, preset_num, d.direction, p.name AS device
     FROM iris.camera_preset cp
-    JOIN iris.device_preset p ON cp.name = p.preset;
+    LEFT JOIN iris.direction d ON d.id = cp.direction
+    LEFT JOIN iris.device_preset p ON cp.name = p.preset;
 GRANT SELECT ON camera_preset_view TO PUBLIC;
 
 --
