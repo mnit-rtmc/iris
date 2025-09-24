@@ -29,12 +29,6 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class SignMessageHelper extends BaseHelper {
 
-	/** Number of total stuck-off pixels allowed in a message */
-	static private final int PIXEL_OFF_LIMIT = 2;
-
-	/** Number of adjacent stuck-on pixels allowed in a message */
-	static private final int PIXEL_ON_LIMIT = 1;
-
 	/** Do not allow objects of this class */
 	private SignMessageHelper() {
 		assert false;
@@ -163,50 +157,65 @@ public class SignMessageHelper extends BaseHelper {
 			throw new InvalidMsgException("no sign config");
 		if (bmaps.length == 0)
 			throw new InvalidMsgException("no pages");
-		if (!multi.isBlank()) {
-			BitmapGraphic stuck_off = DMSHelper.createStuckBitmap(
-				dms, DMSHelper.STUCK_OFF);
-			BitmapGraphic stuck_on = DMSHelper.createStuckBitmap(
-				dms, DMSHelper.STUCK_ON);
-			if (stuck_off != null && stuck_on != null) {
-				for (BitmapGraphic bg : bmaps) {
-					validateBitmap(bg, stuck_off, stuck_on);
-				}
+		if (multi.isBlank())
+			return;
+		BitmapGraphic stuck_off = DMSHelper.createStuckBitmap(dms,
+			DMSHelper.STUCK_OFF);
+		if (stuck_off != null) {
+			for (BitmapGraphic bg : bmaps) {
+				validateStuckOff(bg, stuck_off);
+			}
+		}
+		BitmapGraphic stuck_on = DMSHelper.createStuckBitmap(dms,
+			DMSHelper.STUCK_ON);
+		if (stuck_on != null) {
+			for (BitmapGraphic bg : bmaps) {
+				validateStuckOn(bg, stuck_on);
 			}
 		}
 	}
 
-	/** Validate one message bitmap.
+	/** Validate message bitmap stuck off pixels.
 	 * @param bg Bitmap graphic to validate.
 	 * @param stuck_off Stuck off pixel bitmap.
-	 * @param stuck_on Stuck on pixel bitmap.
 	 * @throws InvalidMsgException. */
-	static private void validateBitmap(BitmapGraphic bg,
-		BitmapGraphic stuck_off, BitmapGraphic stuck_on)
-		throws InvalidMsgException
+	static private void validateStuckOff(BitmapGraphic bg,
+		BitmapGraphic stuck_off) throws InvalidMsgException
 	{
-		if (bg.length() == 0)
-			throw new InvalidMsgException("sign size");
-		// This should never happen
 		if (stuck_off.length() != bg.length())
 			throw new InvalidMsgException("stuck off size", true);
+		BitmapGraphic temp = bg.createBlankCopy();
+		temp.setPixelData(bg.getPixelData());
+		// only worry about stuck off pixels in the message
+		temp.intersection(stuck_off);
+		// clear "loner" stuck off pixels (leaving "clumps" only)
+		temp.clearNoLitNeighbors();
+		int n_off = temp.getLitCount();
+		if (n_off > 0) {
+			throw new InvalidMsgException(
+				"Adjacent stuck off pixels: " + n_off, true);
+		}
+	}
+
+	/** Validate message bitmap stuck on pixels.
+	 * @param bg Bitmap graphic to validate.
+	 * @param stuck_on Stuck on pixel bitmap.
+	 * @throws InvalidMsgException. */
+	static private void validateStuckOn(BitmapGraphic bg,
+		BitmapGraphic stuck_on) throws InvalidMsgException
+	{
 		if (stuck_on.length() != bg.length())
 			throw new InvalidMsgException("stuck on size", true);
 		BitmapGraphic temp = bg.createBlankCopy();
 		temp.setPixelData(bg.getPixelData());
-		temp.clearTransparent(stuck_off);
-		int n_off = temp.getLitCount();
-		if (n_off > PIXEL_OFF_LIMIT) {
-			throw new InvalidMsgException(
-				"Too many stuck off pixels: " + n_off, true);
-		}
-		temp.setPixelData(bg.getPixelData());
+		// set all pixels outlining the message
 		temp.outlineLitPixels();
-		temp.clearTransparent(stuck_on);
+		// count pixels in outline that are stuck on
+		temp.intersection(stuck_on);
 		int n_on = temp.getLitCount();
-		if (n_on > PIXEL_ON_LIMIT) {
+		if (n_on > 0) {
 			throw new InvalidMsgException(
-				"Too many stuck on pixels: " + n_on, true);
+				"Adjacent stuck on pixels: " + n_on, true);
 		}
 	}
 

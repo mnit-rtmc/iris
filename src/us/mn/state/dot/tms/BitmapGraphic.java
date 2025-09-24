@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2022  Minnesota Department of Transportation
+ * Copyright (C) 2006-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -110,8 +110,38 @@ public class BitmapGraphic extends RasterGraphic {
 		}
 	}
 
-	/** Update the bitmap by clearing pixels not in another bitmap */
-	public void clearTransparent(BitmapGraphic bg) {
+	/** Clear all pixels with no lit neighbor pixels */
+	public void clearNoLitNeighbors() {
+		BitmapGraphic bg = createBlankCopy();
+		bg.copy(this);
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (bg.countLitNeighbors(x, y) == 0)
+					setPixel(x, y, DmsColor.BLACK);
+			}
+		}
+	}
+
+	/** Count lit neighbors of a specified pixel */
+	private int countLitNeighbors(int x, int y) {
+		int lit = 0;
+		int xmin = Math.max(x - 1, 0);
+		int xmax = Math.min(x + 2, width);
+		int ymin = Math.max(y - 1, 0);
+		int ymax = Math.min(y + 2, height);
+		for (int xx = xmin; xx < xmax; xx++) {
+			for (int yy = ymin; yy < ymax; yy++) {
+				if (xx == x && yy == y)
+					continue;
+				if (!isTransparent(xx, yy))
+					lit++;
+			}
+		}
+		return lit;
+	}
+
+	/** Update by intersection with another graphic */
+	public void intersection(BitmapGraphic bg) {
 		if (width != bg.width)
 			throw new IndexOutOfBoundsException("width mismatch");
 		if (height != bg.height)
