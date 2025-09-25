@@ -457,11 +457,33 @@ public class MultiStringTest extends TestCase {
 		assertFalse(new MultiString("[pb0,1,2]").isBlank());
 	}
 
-	public void testStrip() {
+	public void testStripFonts() {
 		assertTrue(new MultiString("[fo3]ABC").stripFonts()
 			.equals("ABC"));
+	}
+
+	public void testStripPageTime() {
 		assertTrue(new MultiString("[pt50o0]ABC").stripPageTime()
 			.equals("ABC"));
+	}
+
+	public void testStripRectangles() {
+		assertTrue(new MultiString("[cb5][fo1]OPEN")
+			.stripRectangles().equals("[fo1]OPEN")
+		);
+		assertTrue(new MultiString(
+			"[pb0,40,0][jp3][jl3]Closed"
+			).stripRectangles().equals("[jp3][jl3]Closed")
+		);
+		assertTrue(new MultiString(
+			"[cr1,1,240,24,1,23,9][tr1,5,240,18][jl3]EXPRESS LANE[cr1,75,240,2,255,255,255][tr80,31,155,40][jl3]HOV 2+ FREE"
+			).stripRectangles().equals(
+			"[tr1,5,240,18][jl3]EXPRESS LANE[tr80,31,155,40][jl3]HOV 2+ FREE"
+			)
+		);
+	}
+
+	public void testStripWhitespace() {
 		assertTrue(new MultiString("[nl]").stripTrailingWhitespaceTags()
 			.equals(""));
 		assertTrue(new MultiString("ABC[nl]").stripTrailingWhitespaceTags()

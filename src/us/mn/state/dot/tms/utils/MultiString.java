@@ -730,6 +730,26 @@ public class MultiString {
 		return mb.toString();
 	}
 
+	/** Strip color rectangles and background colors */
+	public String stripRectangles() {
+		MultiBuilder mb = new MultiBuilder() {
+			@Override
+			public void setColorBackground(Integer x) {}
+			@Override
+			public void setPageBackground(Integer z) {}
+			@Override
+			public void setPageBackground(int r, int g, int b) {}
+			@Override
+			public void addColorRectangle(int x, int y, int w,
+				int h, int z) {}
+			@Override
+			public void addColorRectangle(int x, int y, int w,
+				int h, int r, int g, int b) {}
+		};
+		parse(mb);
+		return mb.toString();
+	}
+
 	/** Strip trailing whitespace tags */
 	public String stripTrailingWhitespaceTags() {
 		String ms = multi;
