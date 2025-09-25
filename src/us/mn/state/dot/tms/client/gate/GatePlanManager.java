@@ -65,6 +65,7 @@ public class GatePlanManager extends ProxyManager<ActionPlan> {
 		theme.addStyle(ItemStyle.CLOSED, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.CHANGE, ProxyTheme.COLOR_CHANGE);
 		theme.addStyle(ItemStyle.OPEN, ProxyTheme.COLOR_DEPLOYED);
+		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}
 

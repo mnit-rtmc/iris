@@ -318,7 +318,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	}
 
 	/** Update the count labels for each style status */
-	private void updateCounts() {
+	public final void updateCounts() {
 		if (startButtonUpdate()) {
 			IWorker<Void> worker = new IWorker<Void>() {
 				@Override
