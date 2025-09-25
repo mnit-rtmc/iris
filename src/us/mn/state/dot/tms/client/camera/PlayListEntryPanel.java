@@ -35,7 +35,6 @@ import us.mn.state.dot.tms.PlayList;
 import us.mn.state.dot.tms.PlayListHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
