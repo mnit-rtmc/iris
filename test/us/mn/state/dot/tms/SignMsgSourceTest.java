@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2023  Minnesota Department of Transportation
+ * Copyright (C) 2023-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,8 +25,8 @@ public class SignMsgSourceTest extends TestCase {
 
 	public void testToBits() {
 		int bits = SignMsgSource.toBits(SignMsgSource.blank,
-			SignMsgSource.expired);
-		assertTrue("blank+expired".equals(
+			SignMsgSource.external);
+		assertTrue("blank+external".equals(
 			SignMsgSource.toString(bits)));
 		bits = SignMsgSource.toBits(SignMsgSource.operator,
 			SignMsgSource.schedule, SignMsgSource.tolling);
@@ -36,9 +36,9 @@ public class SignMsgSourceTest extends TestCase {
 
 	public void testFromString() {
 		int bits = SignMsgSource.toBits(SignMsgSource.unknown,
-			SignMsgSource.reset, SignMsgSource.expired);
+			SignMsgSource.reset, SignMsgSource.blank);
 		assertTrue(bits == SignMsgSource.fromString(
-			"unknown+reset+expired"));
+			"unknown+reset+blank"));
 		bits = SignMsgSource.toBits(SignMsgSource.schedule,
 			SignMsgSource.clearguide, SignMsgSource.travel_time);
 		assertTrue(bits == SignMsgSource.fromString(
