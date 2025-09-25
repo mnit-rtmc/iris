@@ -151,13 +151,13 @@ public class SignMessageHelper extends BaseHelper {
 	static private void validateBitmaps(DMS dms, MultiString multi)
 		throws InvalidMsgException
 	{
-		BitmapGraphic[] bmaps = DMSHelper.createBitmaps(dms,
-			multi.toString());
+		String ms = multi.stripRectangles();
+		BitmapGraphic[] bmaps = DMSHelper.createBitmaps(dms, ms);
 		if (null == bmaps)
 			throw new InvalidMsgException("no sign config");
 		if (bmaps.length == 0)
 			throw new InvalidMsgException("no pages");
-		if (multi.isBlank())
+		if (new MultiString(ms).isBlank())
 			return;
 		BitmapGraphic stuck_off = DMSHelper.createStuckBitmap(dms,
 			DMSHelper.STUCK_OFF);
