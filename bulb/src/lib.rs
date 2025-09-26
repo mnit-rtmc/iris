@@ -42,6 +42,7 @@ mod modem;
 mod notes;
 mod permission;
 mod rampmeter;
+mod rle;
 mod role;
 mod sign;
 mod signconfig;
