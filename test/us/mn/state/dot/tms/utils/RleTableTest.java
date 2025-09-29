@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.utils;
 import java.io.IOException;
 import junit.framework.TestCase;
 
-/** 
+/**
  * RleTable test cases
  * @author Doug Lau
  */
