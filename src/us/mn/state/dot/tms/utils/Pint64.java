@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2024  Minnesota Department of Transportation
+ * Copyright (C) 2024-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,16 +23,16 @@ public class Pint64 {
 
 	/** Code points used for encoding */
 	static private final String CODE =
-		"0123456789;?ABCDEFGHIJKLMNOPQRST" +
+		"0123456789._ABCDEFGHIJKLMNOPQRST" +
 		"UVWXYZabcdefghijklmnopqrstuvwxyz";
 
 	/** Decode one character */
 	static int decodeChar(int c) {
 		if (c >= '0' && c <= '9')
 			return c - '0';
-		else if (c == ';')
+		else if (c == ';' || c == '.')
 			return 10;
-		else if (c == '?')
+		else if (c == '?' || c == '_')
 			return 11;
 		else if (c >= 'A' && c <= 'Z')
 			return 12 + c - 'A';
