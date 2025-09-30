@@ -390,9 +390,14 @@ label:has(+ #sb_resource) {
                        "pt bx bs bc";
 }
 #mc_preview {
+  filter: opacity(80%);
+}
+#mc_pixels {
+  z-index: 1;
+}
+.preview {
   grid-area: pv;
   justify-self: end;
-  filter: opacity(80%);
 }
 #mc_pattern {
   grid-area: pt;

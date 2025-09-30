@@ -15,8 +15,8 @@
 fn decode_char(c: char) -> Option<u32> {
     match c {
         '0'..='9' => Some(u32::from(c) - 48), // 0-9
-        ';' | '.' => Some(10), // '.' is URL-safe alternate
-        '?' | '_' => Some(11), // '_' is URL-safe alternate
+        ';' | '.' => Some(10),                // '.' is URL-safe alternate
+        '?' | '_' => Some(11),                // '_' is URL-safe alternate
         'A'..='Z' => Some(12 + u32::from(c) - 65), // 12-37
         'a'..='z' => Some(38 + u32::from(c) - 97), // 38-63
         _ => None,

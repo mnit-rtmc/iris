@@ -264,7 +264,7 @@ fn render_sign(sc: &SignConfig, anc: &SignConfigAnc, html: &mut Html) {
         }
         _ => None,
     };
-    html.raw(sign::render(&sign, "A1", 240, 80, mod_size));
+    html.raw(sign::render_multi(sign.as_ref(), "A1", 240, 80, mod_size));
     html.end(); /* td */
     html.td()
         .attr("style", "vertical-align: bottom;")

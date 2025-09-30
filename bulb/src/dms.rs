@@ -21,6 +21,7 @@ use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::lock::LockReason;
 use crate::notes::contains_hashtag;
+use crate::rle::Table;
 use crate::sign::{self, NtcipSign};
 use crate::signmessage::SignMessage;
 use crate::start::fly_map_item;
@@ -206,7 +207,7 @@ pub struct Dms {
     pub msg_sched: Option<String>,
     pub geo_loc: Option<String>,
     pub status: Option<SignStatus>,
-    pub pix_failures: Option<String>,
+    pub pixel_failures: Option<String>,
 }
 
 /// Message Pattern
@@ -844,11 +845,25 @@ impl Dms {
         let Some(sign) = self.make_sign(anc) else {
             return;
         };
-        let sign = Some(sign);
         let pat_def = self.pattern_default(anc);
         let multi = pat_def.map(|pat| &pat.multi[..]).unwrap_or("");
         html.div().id("mc_grid");
-        html.raw(sign::render(&sign, multi, 240, 80, None));
+        if let Some(pf) = &self.pixel_failures {
+            console::log_1(&format!("pixel_failures: {pf}").into());
+            if let Some(cfg) = anc.sign_config(self.sign_config.as_deref()) {
+                let rle = Table::new(String::from(pf));
+                let pix: Vec<_> = rle.iter().collect();
+                if pix.len() == (cfg.pixel_width * cfg.pixel_height) as usize {
+                    html.raw(sign::render_pixels(
+                        Some(&sign),
+                        &pix[..],
+                        240,
+                        80,
+                    ));
+                }
+            }
+        }
+        html.raw(sign::render_multi(Some(&sign), multi, 240, 80, None));
         html.select().id("mc_pattern");
         for pat in &anc.compose_patterns {
             let option = html.option();
@@ -863,7 +878,7 @@ impl Dms {
         if let Some(pat) = pat_def {
             anc.make_lines_html(
                 #[allow(clippy::unnecessary_literal_unwrap)]
-                &sign.unwrap(),
+                &sign,
                 pat,
                 self.current_multi(anc),
                 html,
@@ -902,7 +917,7 @@ impl Dms {
     fn make_sign(&self, anc: &DmsAnc) -> Option<NtcipSign> {
         let cfg = anc.sign_config(self.sign_config.as_deref())?;
         NtcipSign::new(cfg, anc.fonts.clone(), anc.graphics.clone())
-            .map(|sign| sign.with_id("mc_preview"))
+            .map(|sign| sign.with_id("mc_preview").with_class("preview"))
     }
 
     /// Build action plans HTML
@@ -1367,7 +1382,7 @@ impl Card for Dms {
             .fill(lines.iter().map(|l| &l[..]));
         let multi = multi_normalize(&multi);
         // update mc_preview image element
-        let html = sign::render(&Some(sign), &multi, 240, 80, None);
+        let html = sign::render_multi(Some(&sign), &multi, 240, 80, None);
         let preview = Doc::get().elem::<HtmlElement>("mc_preview");
         preview.set_outer_html(&html);
         Vec::new()

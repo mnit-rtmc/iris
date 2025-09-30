@@ -20,6 +20,7 @@ use web_sys::console;
 pub struct NtcipSign {
     pub dms: ntcip::dms::Dms<256, 24, 32>,
     id: Option<String>,
+    class: Option<String>,
 }
 
 impl NtcipSign {
@@ -37,7 +38,11 @@ impl NtcipSign {
             .with_multi_cfg(cfg.multi_cfg())
             .build()
         {
-            Ok(dms) => Some(NtcipSign { dms, id: None }),
+            Ok(dms) => Some(NtcipSign {
+                dms,
+                id: None,
+                class: None,
+            }),
             Err(e) => {
                 console::log_1(&format!("make_sign: {e:?}").into());
                 None
@@ -50,11 +55,17 @@ impl NtcipSign {
         self.id = Some(id.to_string());
         self
     }
+
+    /// Set the element class
+    pub fn with_class(mut self, class: &str) -> Self {
+        self.class = Some(class.to_string());
+        self
+    }
 }
 
-/// Render sign image
-pub fn render(
-    sign: &Option<NtcipSign>,
+/// Render sign MULTI to a GIF image
+pub fn render_multi(
+    sign: Option<&NtcipSign>,
     multi: &str,
     mut width: u16,
     mut height: u16,
@@ -62,16 +73,19 @@ pub fn render(
 ) -> String {
     let mut html = Html::new();
     let mut img = html.img();
-    if let Some(sign) = &sign {
+    if let Some(sign) = sign {
         (width, height) = rendzina::face_size(&sign.dms, width, height);
         if let Some(id) = &sign.id {
             img = img.id(id);
+        }
+        if let Some(class) = &sign.class {
+            img = img.class(class);
         }
     }
     img = img.width(width.to_string()).height(height.to_string());
     if let Some(sign) = &sign {
         let mut buf = Vec::with_capacity(4096);
-        match rendzina::render(
+        match rendzina::render_multi(
             &mut buf, &sign.dms, multi, width, height, mod_size,
         ) {
             Ok(()) => {
@@ -79,7 +93,38 @@ pub fn render(
                 b64enc.encode_string(buf, &mut src);
                 img.src(src);
             }
-            Err(e) => console::log_1(&format!("render: {e:?}").into()),
+            Err(e) => console::log_1(&format!("render_multi: {e:?}").into()),
+        }
+    }
+    html.to_string()
+}
+
+/// Render sign pixels to a GIF image
+pub fn render_pixels(
+    sign: Option<&NtcipSign>,
+    pix: &[u32],
+    mut width: u16,
+    mut height: u16,
+) -> String {
+    let mut html = Html::new();
+    let mut img = html.img();
+    if let Some(sign) = &sign {
+        (width, height) = rendzina::face_size(&sign.dms, width, height);
+        img = img.id("mc_pixels");
+        if let Some(class) = &sign.class {
+            img = img.class(class);
+        }
+    }
+    img = img.width(width.to_string()).height(height.to_string());
+    if let Some(sign) = &sign {
+        let mut buf = Vec::with_capacity(4096);
+        match rendzina::render_pixels(&mut buf, &sign.dms, pix, width, height) {
+            Ok(()) => {
+                let mut src = "data:image/gif;base64,".to_owned();
+                b64enc.encode_string(buf, &mut src);
+                img.src(src);
+            }
+            Err(e) => console::log_1(&format!("render_pixels: {e:?}").into()),
         }
     }
     html.to_string()

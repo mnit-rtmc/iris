@@ -163,7 +163,7 @@ pub fn load_graphic<R: Read>(reader: R, number: u8) -> Result<Graphic> {
 }
 
 /// Render a sign message to a .gif file
-pub fn render<W: Write>(
+pub fn render_multi<W: Write>(
     mut writer: W,
     dms: &Dms<256, 24, 32>,
     multi: &str,
@@ -203,6 +203,66 @@ pub fn render<W: Write>(
         }
     }
     Ok(())
+}
+
+/// Render sign pixels to a .gif file
+pub fn render_pixels<W: Write>(
+    mut writer: W,
+    dms: &Dms<256, 24, 32>,
+    pix: &[u32],
+    max_width: u16,
+    max_height: u16,
+) -> Result<()> {
+    let (width, height) = face_size(dms, max_width, max_height);
+    let width_pix = i32::from(dms.pixel_width());
+    let height_pix = i32::from(dms.pixel_height());
+    let w = u32::from(dms.pixel_width());
+    let h = u32::from(dms.pixel_height());
+    let mut stuck = Raster::with_clear(w, h);
+    let clear = Raster::with_clear(w, h);
+    let mut i = 0;
+    for y in 0..height_pix {
+        for x in 0..width_pix {
+            *stuck.pixel_mut(x, y) = pixel_failure_color(pix[i]);
+            i += 1;
+        }
+    }
+    let mut enc = Encoder::new(&mut writer).into_step_enc().with_loop_count(0);
+    let mut palette = make_palette(&stuck);
+    let face = make_face_raster(dms, stuck, width, height);
+    let indexed = palette.make_indexed(face);
+    let step = Step::with_indexed(indexed, palette)
+        .with_transparent_color(Some(0))
+        .with_delay_time_cs(Some(40))
+        .with_disposal_method(DisposalMethod::Background);
+    enc.encode_step(&step)?;
+    let mut palette = make_palette(&clear);
+    let face = make_face_raster(dms, clear, width, height);
+    let indexed = palette.make_indexed(face);
+    let step = Step::with_indexed(indexed, palette)
+        .with_transparent_color(Some(0))
+        .with_delay_time_cs(Some(20))
+        .with_disposal_method(DisposalMethod::Background);
+    enc.encode_step(&step)?;
+    Ok(())
+}
+
+/// Get pixel failure color
+fn pixel_failure_color(fail: u32) -> SRgb8 {
+    let bits = fail & 0x1F;
+    if bits & 0x10 > 0 {
+        SRgb8::new(255, 32, 255) // stuck off
+    } else if bits & 0x08 > 0 {
+        SRgb8::new(32, 255, 255) // mechanical error
+    } else if bits & 0x04 > 0 {
+        SRgb8::new(255, 255, 32) // electrical error
+    } else if bits & 0x02 > 0 {
+        SRgb8::new(32, 255, 32) // color error
+    } else if bits & 0x01 > 0 {
+        SRgb8::new(255, 255, 255) // stuck on
+    } else {
+        SRgb8::new(0, 0, 0) // no error (translucent)
+    }
 }
 
 /// Calculate size to render DMS "face"
