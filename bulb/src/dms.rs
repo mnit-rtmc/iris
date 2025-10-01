@@ -786,7 +786,10 @@ impl Dms {
         html.end(); /* div */
         if let Some(gif) = self.msg_current_gif() {
             // TODO: add width/height
-            html.img().class("sign_message").src(gif);
+            html.img()
+                .class("sign_message")
+                .alt(join_text(self.current_multi(anc), " "))
+                .src(gif);
         }
         html.div().class("info fill");
         html.text_len(opt_ref(&self.location), 64);
