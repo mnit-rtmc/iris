@@ -12,6 +12,7 @@
 //
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
 use hatmil::Html;
+use ntcip::dms::multi::join_text;
 use ntcip::dms::{FontTable, GraphicTable};
 use rendzina::SignConfig;
 use web_sys::console;
@@ -67,22 +68,25 @@ impl NtcipSign {
 pub fn render_multi(
     sign: Option<&NtcipSign>,
     multi: &str,
-    mut width: u16,
-    mut height: u16,
+    max_width: u16,
+    max_height: u16,
     mod_size: Option<(u32, u32)>,
 ) -> String {
+    let (width, height) = sign
+        .map(|s| rendzina::face_size(&s.dms, max_width, max_height))
+        .unwrap_or((max_width, max_height));
     let mut html = Html::new();
-    let mut img = html.img();
-    if let Some(sign) = sign {
-        (width, height) = rendzina::face_size(&sign.dms, width, height);
-        if let Some(id) = &sign.id {
-            img = img.id(id);
-        }
-        if let Some(class) = &sign.class {
-            img = img.class(class);
-        }
+    let mut img = html
+        .img()
+        .alt(join_text(multi, " "))
+        .width(width.to_string())
+        .height(height.to_string());
+    if let Some(id) = sign.and_then(|s| s.id.as_ref()) {
+        img = img.id(id);
     }
-    img = img.width(width.to_string()).height(height.to_string());
+    if let Some(class) = sign.and_then(|s| s.class.as_ref()) {
+        img = img.class(class);
+    }
     if let Some(sign) = &sign {
         let mut buf = Vec::with_capacity(4096);
         match rendzina::render_multi(
