@@ -1376,7 +1376,7 @@ impl Card for Dms {
         let Some(pat) = self.selected_pattern(&anc) else {
             return Vec::new();
         };
-        let Some(sign) = self.make_sign(&anc) else {
+        let Some(mut sign) = self.make_sign(&anc) else {
             return Vec::new();
         };
         let lines = if &id == "mc_pattern" {
@@ -1393,6 +1393,7 @@ impl Card for Dms {
             .fill(lines.iter().map(|l| &l[..]));
         let multi = multi_normalize(&multi);
         // update mc_preview image element
+        sign = sign.with_id("mc_preview").with_class("preview");
         let html = sign::render_multi(Some(&sign), &multi, 240, 80, None);
         let preview = Doc::get().elem::<HtmlElement>("mc_preview");
         preview.set_outer_html(&html);

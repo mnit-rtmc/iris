@@ -94,7 +94,7 @@ pub fn render_multi(
             Err(e) => console::log_1(&format!("render_multi: {e:?}").into()),
         }
     }
-    html.to_string()
+    String::from(html)
 }
 
 /// Encode an inline GIF image
