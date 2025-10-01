@@ -221,11 +221,12 @@ pub fn render_pixels<W: Write>(
     let w = u32::from(dms.pixel_width());
     let h = u32::from(dms.pixel_height());
     let mut stuck = Raster::with_clear(w, h);
-    let clear = Raster::with_clear(w, h);
+    let mut clear = Raster::with_clear(w, h);
     let mut i = 0;
     for y in 0..height_pix {
         for x in 0..width_pix {
             *stuck.pixel_mut(x, y) = pixel_failure_color(pix[i]);
+            *clear.pixel_mut(x, y) = pixel_failure_gray(pix[i]);
             i += 1;
         }
     }
@@ -235,7 +236,7 @@ pub fn render_pixels<W: Write>(
     let indexed = palette.make_indexed(face);
     let step = Step::with_indexed(indexed, palette)
         .with_transparent_color(Some(0))
-        .with_delay_time_cs(Some(40))
+        .with_delay_time_cs(Some(50))
         .with_disposal_method(DisposalMethod::Background);
     enc.encode_step(&step)?;
     let mut palette = make_palette(&clear);
@@ -243,7 +244,7 @@ pub fn render_pixels<W: Write>(
     let indexed = palette.make_indexed(face);
     let step = Step::with_indexed(indexed, palette)
         .with_transparent_color(Some(0))
-        .with_delay_time_cs(Some(20))
+        .with_delay_time_cs(Some(30))
         .with_disposal_method(DisposalMethod::Background);
     enc.encode_step(&step)?;
     Ok(())
@@ -262,6 +263,15 @@ fn pixel_failure_color(fail: u32) -> SRgb8 {
         SRgb8::new(32, 255, 32) // color error
     } else if bits & 0x01 > 0 {
         SRgb8::new(255, 255, 255) // stuck on
+    } else {
+        SRgb8::new(0, 0, 0) // no error (translucent)
+    }
+}
+
+/// Get pixel failure as gray
+fn pixel_failure_gray(fail: u32) -> SRgb8 {
+    if fail & 0x1F > 0 {
+        SRgb8::new(128, 128, 128) // some failure
     } else {
         SRgb8::new(0, 0, 0) // no error (translucent)
     }
