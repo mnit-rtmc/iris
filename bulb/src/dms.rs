@@ -785,7 +785,8 @@ impl Dms {
         html.span().class("info").text(self.user(anc)).end();
         html.end(); /* div */
         if let Some(gif) = self.msg_current_gif() {
-            html.img().class("message").src(gif);
+            // TODO: add width/height
+            html.img().class("sign_message").src(gif);
         }
         html.div().class("info fill");
         html.text_len(opt_ref(&self.location), 64);
@@ -823,9 +824,15 @@ impl Dms {
         }
         html.end(); /* span */
         html.end(); /* div */
+        html.div().id("sign_msg");
         if let Some(gif) = self.msg_current_gif() {
-            html.img().class("message").src(gif);
+            // TODO: add width/height
+            html.img().class("sign_message").src(gif);
         }
+        if let Some(pix_img) = self.render_pixels(anc, false) {
+            html.raw(pix_img);
+        }
+        html.end(); // div
         html.div().class("info fill");
         html.text_len(opt_ref(&self.location), 64);
         html.end(); /* div */
@@ -842,27 +849,16 @@ impl Dms {
             );
             return;
         }
-        let Some(sign) = self.make_sign(anc) else {
+        let Some(mut sign) = self.make_sign(anc) else {
             return;
         };
         let pat_def = self.pattern_default(anc);
         let multi = pat_def.map(|pat| &pat.multi[..]).unwrap_or("");
         html.div().id("mc_grid");
-        if let Some(pf) = &self.pixel_failures {
-            console::log_1(&format!("pixel_failures: {pf}").into());
-            if let Some(cfg) = anc.sign_config(self.sign_config.as_deref()) {
-                let rle = Table::new(String::from(pf));
-                let pix: Vec<_> = rle.iter().collect();
-                if pix.len() == (cfg.pixel_width * cfg.pixel_height) as usize {
-                    html.raw(sign::render_pixels(
-                        Some(&sign),
-                        &pix[..],
-                        240,
-                        80,
-                    ));
-                }
-            }
+        if let Some(pix_img) = self.render_pixels(anc, true) {
+            html.raw(pix_img);
         }
+        sign = sign.with_id("mc_preview").with_class("preview");
         html.raw(sign::render_multi(Some(&sign), multi, 240, 80, None));
         html.select().id("mc_pattern");
         for pat in &anc.compose_patterns {
@@ -876,13 +872,7 @@ impl Dms {
         }
         html.end(); /* select */
         if let Some(pat) = pat_def {
-            anc.make_lines_html(
-                #[allow(clippy::unnecessary_literal_unwrap)]
-                &sign,
-                pat,
-                self.current_multi(anc),
-                html,
-            );
+            anc.make_lines_html(&sign, pat, self.current_multi(anc), html);
         }
         html.raw(EXPIRE_SELECT);
         html.button()
@@ -896,6 +886,28 @@ impl Dms {
             .text("Blank")
             .end();
         html.end(); /* div */
+    }
+
+    /// Render pixel failure status
+    fn render_pixels(&self, anc: &DmsAnc, preview: bool) -> Option<String> {
+        let sign = if preview {
+            self.make_sign(anc)?
+                .with_id("mc_pixels")
+                .with_class("preview")
+        } else {
+            self.make_sign(anc)?.with_class("sign_message")
+        };
+        let width = if preview { 240 } else { 450 };
+        let height = if preview { 80 } else { 100 };
+        let pf = self.pixel_failures.as_ref()?;
+        let cfg = anc.sign_config(self.sign_config.as_deref())?;
+        let rle = Table::new(String::from(pf));
+        let pix: Vec<_> = rle.iter().collect();
+        if pix.len() == (cfg.pixel_width * cfg.pixel_height) as usize {
+            Some(sign::render_pixels(Some(&sign), &pix[..], width, height))
+        } else {
+            None
+        }
     }
 
     /// Get the pattern which should be selected by default
@@ -917,7 +929,6 @@ impl Dms {
     fn make_sign(&self, anc: &DmsAnc) -> Option<NtcipSign> {
         let cfg = anc.sign_config(self.sign_config.as_deref())?;
         NtcipSign::new(cfg, anc.fonts.clone(), anc.graphics.clone())
-            .map(|sign| sign.with_id("mc_preview").with_class("preview"))
     }
 
     /// Build action plans HTML

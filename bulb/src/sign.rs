@@ -89,14 +89,19 @@ pub fn render_multi(
             &mut buf, &sign.dms, multi, width, height, mod_size,
         ) {
             Ok(()) => {
-                let mut src = "data:image/gif;base64,".to_owned();
-                b64enc.encode_string(buf, &mut src);
-                img.src(src);
+                img.src(encode_gif(&buf[..]));
             }
             Err(e) => console::log_1(&format!("render_multi: {e:?}").into()),
         }
     }
     html.to_string()
+}
+
+/// Encode an inline GIF image
+fn encode_gif(buf: &[u8]) -> String {
+    let mut src = "data:image/gif;base64,".to_owned();
+    b64enc.encode_string(buf, &mut src);
+    src
 }
 
 /// Render sign pixels to a GIF image
@@ -110,7 +115,9 @@ pub fn render_pixels(
     let mut img = html.img();
     if let Some(sign) = &sign {
         (width, height) = rendzina::face_size(&sign.dms, width, height);
-        img = img.id("mc_pixels");
+        if let Some(id) = &sign.id {
+            img = img.id(id);
+        }
         if let Some(class) = &sign.class {
             img = img.class(class);
         }
@@ -120,9 +127,7 @@ pub fn render_pixels(
         let mut buf = Vec::with_capacity(4096);
         match rendzina::render_pixels(&mut buf, &sign.dms, pix, width, height) {
             Ok(()) => {
-                let mut src = "data:image/gif;base64,".to_owned();
-                b64enc.encode_string(buf, &mut src);
-                img.src(src);
+                img.src(encode_gif(&buf[..]));
             }
             Err(e) => console::log_1(&format!("render_pixels: {e:?}").into()),
         }

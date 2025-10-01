@@ -44,10 +44,18 @@ th, td {
   margin: 0;
 }
 
-.card-compact img.message {
+#sign_msg {
+  display: grid;
+  grid-template-areas: "ms";
+  justify-items: center;
+}
+.sign_message {
+  grid-area: ms;
+}
+.card-compact img.sign_message {
   max-height: 3rem;
 }
-.card-form img.message {
+.card-form img.sign_message {
   max-height: 6rem;
 }
 

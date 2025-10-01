@@ -178,7 +178,9 @@ pub fn render_multi<W: Write>(
             mut raster,
             duration_ds,
         } = page?;
-        render_modules(&mut raster, mod_size);
+        if let Some((sx, sy)) = mod_size {
+            render_modules(&mut raster, sx, sy);
+        }
         let delay_cs = duration_ds * 10;
         let mut palette = make_palette(&raster);
         palette.set_threshold_fn(palette_threshold_rgb8_256);
@@ -251,9 +253,9 @@ pub fn render_pixels<W: Write>(
 fn pixel_failure_color(fail: u32) -> SRgb8 {
     let bits = fail & 0x1F;
     if bits & 0x10 > 0 {
-        SRgb8::new(255, 32, 255) // stuck off
+        SRgb8::new(32, 255, 255) // stuck off
     } else if bits & 0x08 > 0 {
-        SRgb8::new(32, 255, 255) // mechanical error
+        SRgb8::new(255, 32, 255) // mechanical error
     } else if bits & 0x04 > 0 {
         SRgb8::new(255, 255, 32) // electrical error
     } else if bits & 0x02 > 0 {
@@ -303,13 +305,10 @@ fn make_palette(raster: &Raster<SRgb8>) -> Palette {
 }
 
 /// Render pixel modules onto sign raster
-fn render_modules(raster: &mut Raster<SRgb8>, mod_size: Option<(u32, u32)>) {
+fn render_modules(raster: &mut Raster<SRgb8>, sx: u32, sy: u32) {
     for y in 0..raster.height() {
         for x in 0..raster.width() {
-            let md = match mod_size {
-                Some((sx, sy)) => (x / sx + y / sy) % 2,
-                None => 0,
-            };
+            let md = (x / sx + y / sy) % 2;
             if md == 0 {
                 let clr = raster.pixel_mut(x as i32, y as i32);
                 if *clr == SRgb8::default() {
