@@ -213,7 +213,7 @@ public class SignMessageHelper extends BaseHelper {
 		// count pixels in outline that are stuck on
 		temp.intersection(stuck_on);
 		int n_on = temp.getLitCount();
-		if (n_on > 0) {
+		if (n_on > 1) {
 			throw new InvalidMsgException(
 				"Adjacent stuck on pixels: " + n_on, true);
 		}
