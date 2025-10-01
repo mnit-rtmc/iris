@@ -12,6 +12,7 @@
 //
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
+use crate::dms::FontName;
 use crate::error::Result;
 use crate::factor;
 use crate::item::{ItemState, ItemStates};
@@ -22,7 +23,6 @@ use mag::length::mm;
 use ntcip::dms::{FontTable, GraphicTable, tfon};
 pub use rendzina::SignConfig;
 use resources::Res;
-use serde::Deserialize;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
 
@@ -47,15 +47,6 @@ fn format_px(val: i32) -> String {
     } else {
         "variable".to_string()
     }
-}
-
-/// Font name
-/// FIXME: share with dms module
-#[derive(Debug, Default, Deserialize)]
-#[allow(dead_code)]
-pub struct FontName {
-    pub font_number: u8,
-    pub name: String,
 }
 
 /// Ancillary sign configuration
