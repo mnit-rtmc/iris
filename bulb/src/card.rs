@@ -51,9 +51,6 @@ use serde_json::map::Map;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
 
-/// Compact "Create" card
-const CREATE_COMPACT: &str = "<span class='create'>Create 🆕</span>";
-
 /// Card element view
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum View {
@@ -695,7 +692,7 @@ impl CardList {
                 View::CreateCompact,
             );
             cv.list_item_html(&mut html);
-            html.raw(CREATE_COMPACT);
+            html.span().class("create").text("Create 🆕").end();
             html.end(); /* li */
             self.views.push(cv);
         }
@@ -914,7 +911,11 @@ fn item_states_main<C: Card>(cards: &[C], anc: &C::Ancillary) -> String {
 /// Fetch a card for a given view
 pub async fn fetch_one(cv: &CardView) -> Result<String> {
     let html = match cv.view {
-        View::CreateCompact => CREATE_COMPACT.to_string(),
+        View::CreateCompact => {
+            let mut html = Html::new();
+            html.span().class("create").text("Create 🆕");
+            String::from(html)
+        }
         View::Create => {
             let html = fetch_one_res(cv).await?;
             html_card_create(cv.res, &html)

@@ -50,27 +50,6 @@ use web_sys::{HtmlElement, HtmlInputElement, HtmlSelectElement, console};
 /// Display Units
 type TempUnit = mag::temp::DegF;
 
-/// Expire select element
-const EXPIRE_SELECT: &str = "<select id='mc_expire'>\
-<option value=''>⏲️ \
-<option value='5'>5 m\
-<option value='10'>10 m\
-<option value='15'>15 m\
-<option value='30'>30 m\
-<option value='60'>60 m\
-<option value='90'>90 m\
-<option value='120'>2 h\
-<option value='180'>3 h\
-<option value='240'>4 h\
-<option value='300'>5 h\
-<option value='360'>6 h\
-<option value='480'>8 h\
-<option value='600'>10 h\
-<option value='720'>12 h\
-<option value='960'>16 h\
-<option value='1440'>24 h\
-</select>";
-
 /// Photocell status
 #[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct Photocell {
@@ -880,7 +859,7 @@ impl Dms {
         if let Some(pat) = pat_def {
             anc.make_lines_html(&sign, pat, self.current_multi(anc), html);
         }
-        html.raw(EXPIRE_SELECT);
+        make_expire_select(html);
         html.button()
             .id("mc_send")
             .r#type("button")
@@ -1217,6 +1196,81 @@ impl Dms {
             html.end(); /* table */
         }
     }
+}
+
+/// Make expire select element
+fn make_expire_select(html: &mut Html) {
+    html.select()
+        .id("mc_expire")
+        .option()
+        .value("")
+        .text("⏲️ ")
+        .end()
+        .option()
+        .value("5")
+        .text("5 m")
+        .end()
+        .option()
+        .value("10")
+        .text("10 m")
+        .end()
+        .option()
+        .value("15")
+        .text("15 m")
+        .end()
+        .option()
+        .value("30")
+        .text("30 m")
+        .end()
+        .option()
+        .value("60")
+        .text("60 m")
+        .end()
+        .option()
+        .value("90")
+        .text("90 m")
+        .end()
+        .option()
+        .value("120")
+        .text("2 h")
+        .end()
+        .option()
+        .value("180")
+        .text("3 h")
+        .end()
+        .option()
+        .value("240")
+        .text("4 h")
+        .end()
+        .option()
+        .value("300")
+        .text("5 h")
+        .end()
+        .option()
+        .value("360")
+        .text("6 h")
+        .end()
+        .option()
+        .value("480")
+        .text("8 h")
+        .end()
+        .option()
+        .value("600")
+        .text("10 h")
+        .end()
+        .option()
+        .value("720")
+        .text("12 h")
+        .end()
+        .option()
+        .value("960")
+        .text("16 h")
+        .end()
+        .option()
+        .value("1440")
+        .text("24 h")
+        .end()
+        .end(); // select
 }
 
 /// Build temperature range HTML
