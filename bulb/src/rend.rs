@@ -139,9 +139,16 @@ impl<'r> Renderer<'r> {
     /// Render sign pixels to a GIF image
     pub fn render_pixels(&mut self, pix: &[u32]) {
         let (width, height) = self.size();
+        // NOTE: the title attribute makes a tooltip on img elements
+        let failed_count = format!(
+            "{} failed pixels",
+            pix.iter().filter(|p| **p != 0).count()
+        );
         let mut img = self
             .html
             .img()
+            .attr("title", &failed_count)
+            .alt(failed_count)
             .width(width.to_string())
             .height(height.to_string());
         if let Some(id) = &self.id {

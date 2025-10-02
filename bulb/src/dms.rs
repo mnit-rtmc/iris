@@ -899,7 +899,9 @@ impl Dms {
         };
         let rle = Table::new(String::from(pf));
         let pix: Vec<_> = rle.iter().collect();
-        if pix.len() == (cfg.pixel_width * cfg.pixel_height) as usize {
+        if pix.len() == (cfg.pixel_width * cfg.pixel_height) as usize
+            && pix.iter().any(|p| *p != 0)
+        {
             rend.render_pixels(&pix[..]);
         }
     }
