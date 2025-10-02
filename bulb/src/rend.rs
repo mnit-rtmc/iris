@@ -141,7 +141,7 @@ impl<'r> Renderer<'r> {
         let (width, height) = self.size();
         // NOTE: the title attribute makes a tooltip on img elements
         let failed_count = format!(
-            "{} failed pixels",
+            "Failed pixels: {}",
             pix.iter().filter(|p| **p != 0).count()
         );
         let mut img = self
