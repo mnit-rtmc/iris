@@ -350,9 +350,8 @@ impl Card for SignConfig {
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &SignConfigAnc) -> String {
         match view {
-            View::Compact => to_html_compact(self),
             View::Setup => to_html_setup(self, anc),
-            _ => unreachable!(),
+            _ => to_html_compact(self),
         }
     }
 

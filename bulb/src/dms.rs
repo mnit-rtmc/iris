@@ -338,6 +338,9 @@ impl AncillaryData for DmsAnc {
             cio.assets.push(Asset::Graphics);
             cio.assets.push(Asset::DeviceActions);
         }
+        if let View::Setup = view {
+            cio.assets.push(Asset::SignConfigs);
+        }
         let loc = LocAnc::new(pri, view);
         DmsAnc {
             cio,
@@ -1110,9 +1113,31 @@ impl Dms {
         html.end(); /* div */
         anc.cio.controller_html(self, &mut html);
         anc.cio.pin_html(self.pin, &mut html);
-        // FIXME: add sign_config / sign_detail buttons
+        self.sign_config_html(anc, &mut html);
+        // FIXME: add sign_detail button
         self.footer_html(true, &mut html);
         html.to_string()
+    }
+
+    /// Make sign config row as HTML
+    fn sign_config_html(&self, anc: &DmsAnc, html: &mut Html) {
+        html.div().class("row");
+        html.label().text("Sign Config").end();
+        match anc.sign_config(self.sign_config.as_deref()) {
+            Some(cfg) => {
+                html.button()
+                    .r#type("button")
+                    .class("go_link")
+                    .attr("data-link", &cfg.name)
+                    .attr("data-type", Res::SignConfig.as_str())
+                    .text(&cfg.name)
+                    .end();
+            }
+            None => {
+                html.span().end(); /* empty */
+            }
+        }
+        html.end(); /* div */
     }
 
     /// Convert to Status HTML
