@@ -812,23 +812,20 @@ impl Dms {
         html.end(); /* span */
         html.end(); /* div */
         html.div().id("sign_msg");
-        if let Some(gif) = self.msg_current_gif() {
-            let multi = self.current_multi(anc);
-            let mut rend = Renderer::new(&mut html)
-                .with_class("sign_message")
-                .with_gif(&gif)
-                .with_max_width(412)
-                .with_max_height(100);
-            rend.render_multi(multi);
+        let mut rend = Renderer::new(&mut html)
+            .with_class("sign_message")
+            .with_max_width(450)
+            .with_max_height(100);
+        let gif = self.msg_current_gif();
+        let dms = self.make_dms(anc);
+        if let Some(gif) = &gif {
+            rend = rend.with_gif(&gif);
         }
-        if let Some(dms) = self.make_dms(anc) {
-            let mut rend = Renderer::new(&mut html)
-                .with_dms(&dms)
-                .with_class("sign_message")
-                .with_max_width(412)
-                .with_max_height(100);
-            self.render_pixels(anc, &mut rend);
+        if let Some(dms) = &dms {
+            rend = rend.with_dms(&dms)
         }
+        rend.render_multi(self.current_multi(anc));
+        self.render_pixels(anc, &mut rend);
         html.end(); // div
         html.div().class("info fill");
         html.text_len(opt_ref(&self.location), 64);
