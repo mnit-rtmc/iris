@@ -21,8 +21,8 @@ use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::lock::LockReason;
 use crate::notes::contains_hashtag;
+use crate::rend::Renderer;
 use crate::rle::Table;
-use crate::sign::{self, NtcipSign};
 use crate::signmessage::SignMessage;
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
@@ -46,6 +46,9 @@ use std::iter::repeat;
 use std::time::Duration;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{HtmlElement, HtmlInputElement, HtmlSelectElement, console};
+
+/// NTCIP sign
+type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
 
 /// Display Units
 type TempUnit = mag::temp::DegF;
@@ -488,7 +491,7 @@ impl DmsAnc {
     /// Make line select elements
     fn make_lines_html(
         &self,
-        sign: &NtcipSign,
+        dms: &NtcipDms,
         pat_def: &MsgPattern,
         ms_cur: &str,
         html: &mut Html,
@@ -497,14 +500,14 @@ impl DmsAnc {
         let mut pat = pat_def;
         if self.pat_lines(pat).count() == 0 {
             let n_lines =
-                MessagePattern::new(&sign.dms, &pat.multi).widths().count();
+                MessagePattern::new(&dms, &pat.multi).widths().count();
             match self.find_substitute(pat, n_lines) {
                 Some(sub) => pat = sub,
                 None => return,
             }
         }
-        let widths = MessagePattern::new(&sign.dms, &pat_def.multi).widths();
-        let cur_lines = MessagePattern::new(&sign.dms, &pat_def.multi)
+        let widths = MessagePattern::new(&dms, &pat_def.multi).widths();
+        let cur_lines = MessagePattern::new(&dms, &pat_def.multi)
             .lines(ms_cur)
             .chain(repeat(""));
         html.div().id("mc_lines").class("column");
@@ -521,7 +524,7 @@ impl DmsAnc {
                 rect_num = rn;
             }
             html.datalist().id(mc_choice);
-            if let Some(font) = sign.dms.font_definition().font(font_num) {
+            if let Some(font) = dms.font_definition().font(font_num) {
                 for ml in self.pat_lines(pat) {
                     if ml.line == ln {
                         self.line_html(&ml.multi, width, font, cur_line, html)
@@ -764,11 +767,13 @@ impl Dms {
         html.span().class("info").text(self.user(anc)).end();
         html.end(); /* div */
         if let Some(gif) = self.msg_current_gif() {
-            // TODO: add width/height
-            html.img()
-                .class("sign_message")
-                .alt(join_text(self.current_multi(anc), " "))
-                .src(gif);
+            let multi = self.current_multi(anc);
+            let rend = Renderer::new()
+                .with_class("sign_message")
+                .with_gif(&gif)
+                .with_max_width(240)
+                .with_max_height(80);
+            html.raw(rend.render_multi(multi, None));
         }
         html.div().class("info fill");
         html.text_len(opt_ref(&self.location), 64);
@@ -808,14 +813,23 @@ impl Dms {
         html.end(); /* div */
         html.div().id("sign_msg");
         if let Some(gif) = self.msg_current_gif() {
-            // TODO: add width/height
-            html.img()
-                .class("sign_message")
-                .alt(join_text(self.current_multi(anc), " "))
-                .src(gif);
+            let multi = self.current_multi(anc);
+            let rend = Renderer::new()
+                .with_class("sign_message")
+                .with_gif(&gif)
+                .with_max_width(450)
+                .with_max_height(100);
+            html.raw(rend.render_multi(multi, None));
         }
-        if let Some(pix_img) = self.render_pixels(anc, false) {
-            html.raw(pix_img);
+        if let Some(dms) = self.make_dms(anc) {
+            let rend = Renderer::new()
+                .with_dms(&dms)
+                .with_class("sign_message")
+                .with_max_width(450)
+                .with_max_height(100);
+            if let Some(pix_img) = self.render_pixels(anc, &rend) {
+                html.raw(pix_img);
+            }
         }
         html.end(); // div
         html.div().class("info fill");
@@ -834,17 +848,23 @@ impl Dms {
             );
             return;
         }
-        let Some(mut sign) = self.make_sign(anc) else {
+        let Some(dms) = self.make_dms(anc) else {
             return;
         };
         let pat_def = self.pattern_default(anc);
         let multi = pat_def.map(|pat| &pat.multi[..]).unwrap_or("");
         html.div().id("mc_grid");
-        if let Some(pix_img) = self.render_pixels(anc, true) {
+        let rend = Renderer::new()
+            .with_dms(&dms)
+            .with_id("mc_pixels")
+            .with_class("preview")
+            .with_max_width(240)
+            .with_max_height(80);
+        if let Some(pix_img) = self.render_pixels(anc, &rend) {
             html.raw(pix_img);
         }
-        sign = sign.with_id("mc_preview").with_class("preview");
-        html.raw(sign::render_multi(Some(&sign), multi, 240, 80, None));
+        let rend = rend.with_id("mc_preview");
+        html.raw(rend.render_multi(multi, None));
         html.select().id("mc_pattern");
         for pat in &anc.compose_patterns {
             let option = html.option();
@@ -857,7 +877,7 @@ impl Dms {
         }
         html.end(); /* select */
         if let Some(pat) = pat_def {
-            anc.make_lines_html(&sign, pat, self.current_multi(anc), html);
+            anc.make_lines_html(&dms, pat, self.current_multi(anc), html);
         }
         make_expire_select(html);
         html.button()
@@ -874,22 +894,13 @@ impl Dms {
     }
 
     /// Render pixel failure status
-    fn render_pixels(&self, anc: &DmsAnc, preview: bool) -> Option<String> {
-        let sign = if preview {
-            self.make_sign(anc)?
-                .with_id("mc_pixels")
-                .with_class("preview")
-        } else {
-            self.make_sign(anc)?.with_class("sign_message")
-        };
-        let width = if preview { 240 } else { 450 };
-        let height = if preview { 80 } else { 100 };
+    fn render_pixels(&self, anc: &DmsAnc, rend: &Renderer) -> Option<String> {
         let pf = self.pixel_failures.as_ref()?;
         let cfg = anc.sign_config(self.sign_config.as_deref())?;
         let rle = Table::new(String::from(pf));
         let pix: Vec<_> = rle.iter().collect();
         if pix.len() == (cfg.pixel_width * cfg.pixel_height) as usize {
-            Some(sign::render_pixels(Some(&sign), &pix[..], width, height))
+            Some(rend.render_pixels(&pix[..]))
         } else {
             None
         }
@@ -910,10 +921,23 @@ impl Dms {
         best
     }
 
-    /// Make an ntcip sign
-    fn make_sign(&self, anc: &DmsAnc) -> Option<NtcipSign> {
+    /// Make an NTCIP sign
+    fn make_dms(&self, anc: &DmsAnc) -> Option<NtcipDms> {
         let cfg = anc.sign_config(self.sign_config.as_deref())?;
-        NtcipSign::new(cfg, anc.fonts.clone(), anc.graphics.clone())
+        match NtcipDms::builder()
+            .with_font_definition(anc.fonts.clone())
+            .with_graphic_definition(anc.graphics.clone())
+            .with_sign_cfg(cfg.sign_cfg())
+            .with_vms_cfg(cfg.vms_cfg())
+            .with_multi_cfg(cfg.multi_cfg())
+            .build()
+        {
+            Ok(dms) => Some(dms),
+            Err(e) => {
+                console::log_1(&format!("make_dms: {e:?}").into());
+                None
+            }
+        }
     }
 
     /// Build action plans HTML
@@ -970,9 +994,9 @@ impl Dms {
     /// Get selected MULTI message
     fn selected_multi(&self, anc: &DmsAnc) -> Option<String> {
         let pat = self.selected_pattern(anc)?;
-        let sign = self.make_sign(anc)?;
+        let dms = self.make_dms(anc)?;
         let lines = self.selected_lines();
-        let multi = MessagePattern::new(&sign.dms, &pat.multi)
+        let multi = MessagePattern::new(&dms, &pat.multi)
             .fill(lines.iter().map(|l| &l[..]));
         Some(multi_normalize(&multi))
     }
@@ -1091,6 +1115,7 @@ impl Dms {
         html.end(); /* div */
         anc.cio.controller_html(self, &mut html);
         anc.cio.pin_html(self.pin, &mut html);
+        // FIXME: add sign_config / sign_detail buttons
         self.footer_html(true, &mut html);
         html.to_string()
     }
@@ -1436,25 +1461,30 @@ impl Card for Dms {
         let Some(pat) = self.selected_pattern(&anc) else {
             return Vec::new();
         };
-        let Some(mut sign) = self.make_sign(&anc) else {
+        let Some(dms) = self.make_dms(&anc) else {
             return Vec::new();
         };
         let lines = if &id == "mc_pattern" {
             // update mc_lines element
             let mut html = Html::new();
-            anc.make_lines_html(&sign, pat, "", &mut html);
+            anc.make_lines_html(&dms, pat, "", &mut html);
             let mc_lines = Doc::get().elem::<HtmlElement>("mc_lines");
             mc_lines.set_outer_html(&html.to_string());
             Vec::new()
         } else {
             self.selected_lines()
         };
-        let multi = MessagePattern::new(&sign.dms, &pat.multi)
+        let multi = MessagePattern::new(&dms, &pat.multi)
             .fill(lines.iter().map(|l| &l[..]));
         let multi = multi_normalize(&multi);
         // update mc_preview image element
-        sign = sign.with_id("mc_preview").with_class("preview");
-        let html = sign::render_multi(Some(&sign), &multi, 240, 80, None);
+        let rend = Renderer::new()
+            .with_dms(&dms)
+            .with_id("mc_preview")
+            .with_class("preview")
+            .with_max_width(240)
+            .with_max_height(80);
+        let html = rend.render_multi(&multi, None);
         let preview = Doc::get().elem::<HtmlElement>("mc_preview");
         preview.set_outer_html(&html);
         Vec::new()

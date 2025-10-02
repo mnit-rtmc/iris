@@ -16,15 +16,19 @@ use crate::dms::FontName;
 use crate::error::Result;
 use crate::factor;
 use crate::item::{ItemState, ItemStates};
-use crate::sign::{self, NtcipSign};
+use crate::rend::Renderer;
 use crate::util::{ContainsLower, Fields, Select, opt_str};
 use hatmil::Html;
 use mag::length::mm;
-use ntcip::dms::{FontTable, GraphicTable, tfon};
+use ntcip::dms::{FontTable, tfon};
 pub use rendzina::SignConfig;
 use resources::Res;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
+use web_sys::console;
+
+/// NTCIP sign
+type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
 
 /// Length display units
 type LenUnit = mag::length::ft;
@@ -120,6 +124,23 @@ impl SignConfigAnc {
             }
         }
         html.end(); /* select */
+    }
+
+    /// Make an NTCIP sign
+    fn make_dms(&self, sc: &SignConfig) -> Option<NtcipDms> {
+        match NtcipDms::builder()
+            .with_font_definition(self.fonts.clone())
+            .with_sign_cfg(sc.sign_cfg())
+            .with_vms_cfg(sc.vms_cfg())
+            .with_multi_cfg(sc.multi_cfg())
+            .build()
+        {
+            Ok(dms) => Some(dms),
+            Err(e) => {
+                console::log_1(&format!("make_dms: {e:?}").into());
+                None
+            }
+        }
     }
 }
 
@@ -231,7 +252,7 @@ fn monochrome_html(sc: &SignConfig, html: &mut Html) {
 
 /// Render the sign HTML
 fn render_sign(sc: &SignConfig, anc: &SignConfigAnc, html: &mut Html) {
-    let sign = NtcipSign::new(sc, anc.fonts.clone(), GraphicTable::default());
+    let dms = anc.make_dms(sc);
     html.table();
     html.tr().td().end();
     html.td()
@@ -239,7 +260,7 @@ fn render_sign(sc: &SignConfig, anc: &SignConfigAnc, html: &mut Html) {
         .text(format_len(sc.face_width))
         .end();
     let td = html.td();
-    if sign.is_none() {
+    if dms.is_none() {
         td.class("fault").text("Invalid");
     }
     html.end().end(); /* td; tr */
@@ -255,7 +276,13 @@ fn render_sign(sc: &SignConfig, anc: &SignConfigAnc, html: &mut Html) {
         }
         _ => None,
     };
-    html.raw(sign::render_multi(sign.as_ref(), "A1", 240, 80, mod_size));
+    if let Some(dms) = &dms {
+        let rend = Renderer::new()
+            .with_dms(dms)
+            .with_max_width(240)
+            .with_max_height(80);
+        html.raw(rend.render_multi("A1", mod_size));
+    }
     html.end(); /* td */
     html.td()
         .attr("style", "vertical-align: bottom;")
