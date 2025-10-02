@@ -277,11 +277,12 @@ fn render_sign(sc: &SignConfig, anc: &SignConfigAnc, html: &mut Html) {
         _ => None,
     };
     if let Some(dms) = &dms {
-        let rend = Renderer::new()
+        let mut rend = Renderer::new(html)
             .with_dms(dms)
             .with_max_width(240)
-            .with_max_height(80);
-        html.raw(rend.render_multi("A1", mod_size));
+            .with_max_height(80)
+            .with_mod_size(mod_size);
+        rend.render_multi("A1");
     }
     html.end(); /* td */
     html.td()

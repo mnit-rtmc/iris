@@ -768,12 +768,12 @@ impl Dms {
         html.end(); /* div */
         if let Some(gif) = self.msg_current_gif() {
             let multi = self.current_multi(anc);
-            let rend = Renderer::new()
+            let mut rend = Renderer::new(&mut html)
                 .with_class("sign_message")
                 .with_gif(&gif)
                 .with_max_width(240)
                 .with_max_height(80);
-            html.raw(rend.render_multi(multi, None));
+            rend.render_multi(multi);
         }
         html.div().class("info fill");
         html.text_len(opt_ref(&self.location), 64);
@@ -814,22 +814,20 @@ impl Dms {
         html.div().id("sign_msg");
         if let Some(gif) = self.msg_current_gif() {
             let multi = self.current_multi(anc);
-            let rend = Renderer::new()
+            let mut rend = Renderer::new(&mut html)
                 .with_class("sign_message")
                 .with_gif(&gif)
-                .with_max_width(450)
+                .with_max_width(412)
                 .with_max_height(100);
-            html.raw(rend.render_multi(multi, None));
+            rend.render_multi(multi);
         }
         if let Some(dms) = self.make_dms(anc) {
-            let rend = Renderer::new()
+            let mut rend = Renderer::new(&mut html)
                 .with_dms(&dms)
                 .with_class("sign_message")
-                .with_max_width(450)
+                .with_max_width(412)
                 .with_max_height(100);
-            if let Some(pix_img) = self.render_pixels(anc, &rend) {
-                html.raw(pix_img);
-            }
+            self.render_pixels(anc, &mut rend);
         }
         html.end(); // div
         html.div().class("info fill");
@@ -854,17 +852,15 @@ impl Dms {
         let pat_def = self.pattern_default(anc);
         let multi = pat_def.map(|pat| &pat.multi[..]).unwrap_or("");
         html.div().id("mc_grid");
-        let rend = Renderer::new()
+        let mut rend = Renderer::new(html)
             .with_dms(&dms)
             .with_id("mc_pixels")
             .with_class("preview")
             .with_max_width(240)
             .with_max_height(80);
-        if let Some(pix_img) = self.render_pixels(anc, &rend) {
-            html.raw(pix_img);
-        }
-        let rend = rend.with_id("mc_preview");
-        html.raw(rend.render_multi(multi, None));
+        self.render_pixels(anc, &mut rend);
+        let mut rend = rend.with_id("mc_preview");
+        rend.render_multi(multi);
         html.select().id("mc_pattern");
         for pat in &anc.compose_patterns {
             let option = html.option();
@@ -894,15 +890,17 @@ impl Dms {
     }
 
     /// Render pixel failure status
-    fn render_pixels(&self, anc: &DmsAnc, rend: &Renderer) -> Option<String> {
-        let pf = self.pixel_failures.as_ref()?;
-        let cfg = anc.sign_config(self.sign_config.as_deref())?;
+    fn render_pixels(&self, anc: &DmsAnc, rend: &mut Renderer) {
+        let Some(pf) = &self.pixel_failures else {
+            return;
+        };
+        let Some(cfg) = anc.sign_config(self.sign_config.as_deref()) else {
+            return;
+        };
         let rle = Table::new(String::from(pf));
         let pix: Vec<_> = rle.iter().collect();
         if pix.len() == (cfg.pixel_width * cfg.pixel_height) as usize {
-            Some(rend.render_pixels(&pix[..]))
-        } else {
-            None
+            rend.render_pixels(&pix[..]);
         }
     }
 
@@ -1478,15 +1476,16 @@ impl Card for Dms {
             .fill(lines.iter().map(|l| &l[..]));
         let multi = multi_normalize(&multi);
         // update mc_preview image element
-        let rend = Renderer::new()
+        let mut html = Html::new();
+        let mut rend = Renderer::new(&mut html)
             .with_dms(&dms)
             .with_id("mc_preview")
             .with_class("preview")
             .with_max_width(240)
             .with_max_height(80);
-        let html = rend.render_multi(&multi, None);
+        rend.render_multi(&multi);
         let preview = Doc::get().elem::<HtmlElement>("mc_preview");
-        preview.set_outer_html(&html);
+        preview.set_outer_html(&String::from(html));
         Vec::new()
     }
 }

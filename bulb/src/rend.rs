@@ -20,24 +20,28 @@ type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
 
 /// Ntcip DMS renderer
 pub struct Renderer<'r> {
+    html: &'r mut Html,
     dms: Option<&'r NtcipDms>,
     gif: Option<&'r str>,
     id: Option<&'r str>,
     class: Option<&'r str>,
     max_width: u16,
     max_height: u16,
+    mod_size: Option<(u32, u32)>,
 }
 
 impl<'r> Renderer<'r> {
     /// Make an NTCIP renderer
-    pub fn new() -> Self {
+    pub fn new(html: &'r mut Html) -> Self {
         Renderer {
+            html,
             dms: None,
             gif: None,
             id: None,
             class: None,
             max_width: u16::MAX,
             max_height: u16::MAX,
+            mod_size: None,
         }
     }
 
@@ -77,6 +81,12 @@ impl<'r> Renderer<'r> {
         self
     }
 
+    /// Set the module size
+    pub fn with_mod_size(mut self, mod_size: Option<(u32, u32)>) -> Self {
+        self.mod_size = mod_size;
+        self
+    }
+
     /// Calculate the image size
     pub fn size(&self) -> (u16, u16) {
         self.dms.map_or((self.max_width, self.max_height), |dms| {
@@ -85,14 +95,10 @@ impl<'r> Renderer<'r> {
     }
 
     /// Render sign MULTI to a GIF image
-    pub fn render_multi(
-        &self,
-        multi: &str,
-        mod_size: Option<(u32, u32)>,
-    ) -> String {
+    pub fn render_multi(&mut self, multi: &str) {
         let (width, height) = self.size();
-        let mut html = Html::new();
-        let mut img = html
+        let mut img = self
+            .html
             .img()
             .alt(join_text(multi, " "))
             .width(width.to_string())
@@ -105,15 +111,20 @@ impl<'r> Renderer<'r> {
         }
         match (&self.dms, &self.gif) {
             (_, Some(gif)) => {
-                img.src(gif);
+                img = img.src(gif);
             }
             (Some(dms), _) => {
                 let mut buf = Vec::with_capacity(4096);
                 match rendzina::render_multi(
-                    &mut buf, &dms, multi, width, height, mod_size,
+                    &mut buf,
+                    &dms,
+                    multi,
+                    width,
+                    height,
+                    self.mod_size,
                 ) {
                     Ok(()) => {
-                        img.src(encode_gif(&buf[..]));
+                        img = img.src(encode_gif(&buf[..]));
                     }
                     Err(e) => {
                         console::log_1(&format!("render_multi: {e:?}").into())
@@ -122,14 +133,14 @@ impl<'r> Renderer<'r> {
             }
             _ => console::log_1(&format!("render_multi: no image").into()),
         }
-        String::from(html)
+        img.end();
     }
 
     /// Render sign pixels to a GIF image
-    pub fn render_pixels(&self, pix: &[u32]) -> String {
+    pub fn render_pixels(&mut self, pix: &[u32]) {
         let (width, height) = self.size();
-        let mut html = Html::new();
-        let mut img = html
+        let mut img = self
+            .html
             .img()
             .width(width.to_string())
             .height(height.to_string());
@@ -143,14 +154,14 @@ impl<'r> Renderer<'r> {
             let mut buf = Vec::with_capacity(4096);
             match rendzina::render_pixels(&mut buf, &dms, pix, width, height) {
                 Ok(()) => {
-                    img.src(encode_gif(&buf[..]));
+                    img = img.src(encode_gif(&buf[..]));
                 }
                 Err(e) => {
                     console::log_1(&format!("render_pixels: {e:?}").into())
                 }
             }
         }
-        html.to_string()
+        img.end();
     }
 }
 
