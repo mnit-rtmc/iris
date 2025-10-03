@@ -159,9 +159,7 @@ impl LcsState {
             .end();
         html.div().class("info row").text(&self.lcs);
         html.span().text(self.lane).end();
-        html.span()
-            .text(anc.indication(self).symbol())
-            .end();
+        html.span().text(anc.indication(self).symbol()).end();
         html.to_string()
     }
 
