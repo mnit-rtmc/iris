@@ -1,5 +1,15 @@
 # IRIS 5.x Release Notes
 
+5.76.0 (3 Oct 2025)
+ - Changed controller `drop_id` from SMALLINT to INTEGER (32-bit)
+ - Improved checks for failed pixels within messages:
+   * Clumps of 2+ stuck off not allowed
+   * Any 2+ stuck on, adjacent to text not allowed
+   * Ignore rectangles / background color in checks
+ - Web UI: Add failed pixel overlay to DMS message preview
+ - Fixed gate arm UI quirks
+ - Improved `camera_preset_view` (include all presets)
+
 5.75.0 (18 Sep 2025)
  - Remove gate arm arrays
  - Support gate arm device actions with action plans, with updated UI

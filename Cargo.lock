@@ -295,7 +295,7 @@ dependencies = [
 
 [[package]]
 name = "bulb"
-version = "5.75.0"
+version = "5.76.0"
 dependencies = [
  "base64",
  "chrono",
@@ -860,7 +860,7 @@ dependencies = [
 
 [[package]]
 name = "honeybee"
-version = "5.75.0"
+version = "5.76.0"
 dependencies = [
  "anyhow",
  "argh",
@@ -1139,7 +1139,7 @@ checksum = "47e1ffaa40ddd1f3ed91f717a33c8c0ee23fff369e3aa8772b9605cc1d22f4c3"
 
 [[package]]
 name = "mayfly"
-version = "5.75.0"
+version = "5.76.0"
 dependencies = [
  "argh",
  "axum",
@@ -1585,7 +1585,7 @@ checksum = "caf4aa5b0f434c91fe5c7f1ecb6a5ece2130b02ad2a590589dda5146df959001"
 
 [[package]]
 name = "rendzina"
-version = "5.75.0"
+version = "5.76.0"
 dependencies = [
  "fstr",
  "gift",
@@ -1600,7 +1600,7 @@ dependencies = [
 
 [[package]]
 name = "resources"
-version = "5.75.0"
+version = "5.76.0"
 
 [[package]]
 name = "ring"
