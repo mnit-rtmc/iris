@@ -12,7 +12,7 @@ chrono = { workspace = true }
 cidr = { workspace = true }
 console_error_panic_hook = "0.1"
 gift = "0.11"
-hatmil = "0.8.0"
+hatmil = "0.9"
 humantime = "2.1"
 js-sys = "0.3"
 mag = "0.6"
