@@ -312,6 +312,16 @@ impl Input<u16> for Fields {
     }
 }
 
+impl Input<u32> for Fields {
+    fn changed_input(&mut self, id: &str, val: u32) {
+        if let Some(parsed) = self.doc.input_parse::<u32>(id)
+            && parsed != val
+        {
+            self.insert(id, Value::Number(parsed.into()));
+        }
+    }
+}
+
 impl Input<bool> for Fields {
     fn changed_input(&mut self, id: &str, val: bool) {
         let parsed = self.doc.input_bool(id);

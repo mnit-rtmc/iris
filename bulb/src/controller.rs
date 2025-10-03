@@ -60,7 +60,7 @@ pub struct Controller {
     pub name: String,
     pub location: Option<String>,
     pub comm_link: Option<String>,
-    pub drop_id: u16,
+    pub drop_id: u32,
     pub cabinet_style: Option<String>,
     pub condition: u32,
     pub notes: Option<String>,
