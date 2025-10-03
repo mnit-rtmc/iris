@@ -34,7 +34,6 @@ import us.mn.state.dot.tms.GateArmInterlock;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.PlanPhaseHelper;
 import us.mn.state.dot.tms.client.Session;

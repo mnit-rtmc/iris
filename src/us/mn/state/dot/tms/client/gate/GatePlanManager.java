@@ -86,6 +86,8 @@ public class GatePlanManager extends ProxyManager<ActionPlan> {
 			return PlanPhase.GATE_ARM_CHANGE.equals(pp);
 		case OPEN:
 			return PlanPhase.GATE_ARM_OPEN.equals(pp);
+		case ALL:
+			return true;
 		default:
 			return false;
 		}
