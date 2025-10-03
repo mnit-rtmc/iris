@@ -95,7 +95,7 @@ impl LcsStateAnc {
     fn indications_html(&self, pri: &LcsState, html: &mut Html) {
         html.select().id("indication");
         for ind in &self.indications {
-            let option = html.option().value(ind.id.to_string());
+            let option = html.option().value(ind.id);
             if ind.id == pri.indication {
                 option.attr_bool("selected");
             }
@@ -158,9 +158,9 @@ impl LcsState {
             .text(anc.cio.item_states(self).to_string())
             .end();
         html.div().class("info row").text(&self.lcs);
-        html.span().text(self.lane.to_string()).end();
+        html.span().text(self.lane).end();
         html.span()
-            .text(anc.indication(self).symbol().to_string())
+            .text(anc.indication(self).symbol())
             .end();
         html.to_string()
     }
@@ -179,10 +179,10 @@ impl LcsState {
         html.input()
             .id("lane")
             .r#type("number")
-            .min("1")
-            .max("9")
-            .size("2")
-            .value(self.lane.to_string());
+            .min(1)
+            .max(9)
+            .size(2)
+            .value(self.lane);
         html.end(); /* div */
         html.div().class("row");
         html.label().r#for("indication").text("Indication").end();
@@ -192,8 +192,8 @@ impl LcsState {
         html.label().r#for("msg_pattern").text("Msg Pattern").end();
         html.input()
             .id("msg_pattern")
-            .maxlength("20")
-            .size("20")
+            .maxlength(20)
+            .size(20)
             .value(opt_ref(&self.msg_pattern));
         html.end(); /* div */
         html.div().class("row");
@@ -201,9 +201,9 @@ impl LcsState {
         html.input()
             .id("msg_num")
             .r#type("number")
-            .min("2")
-            .max("65535")
-            .size("5")
+            .min(2)
+            .max(65535)
+            .size(5)
             .value(opt_str(self.msg_num));
         html.end(); /* div */
         self.footer_html(true, &mut html);

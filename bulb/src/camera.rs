@@ -201,18 +201,18 @@ impl Camera {
         html.input()
             .id("cam_num")
             .r#type("number")
-            .min("1")
-            .max("9999")
-            .size("8")
+            .min(1)
+            .max(9999)
+            .size(8)
             .value(opt_str(self.cam_num));
         html.end();
         html.div().class("row");
         html.label().r#for("notes").text("Notes").end();
         html.textarea()
             .id("notes")
-            .maxlength("255")
-            .attr("rows", "4")
-            .attr("cols", "24")
+            .maxlength(255)
+            .attr("rows", 4)
+            .attr("cols", 24)
             .text(opt_ref(&self.notes))
             .end();
         html.end(); /* div */
@@ -240,8 +240,8 @@ impl Camera {
         html.input()
             .id("enc_port")
             .r#type("number")
-            .min("1")
-            .size("4")
+            .min(1)
+            .size(4)
             .value(opt_str(self.enc_port));
         html.end(); /* div */
         html.div().class("row");
@@ -262,8 +262,8 @@ impl Camera {
         html.input()
             .id("enc_channel")
             .r#type("number")
-            .min("1")
-            .size("8")
+            .min(1)
+            .size(8)
             .value(opt_str(self.enc_channel));
         html.end(); /* div */
         html.div().class("row");

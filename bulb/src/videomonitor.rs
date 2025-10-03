@@ -40,7 +40,7 @@ impl VideoMonitor {
             .text(" ")
             .text(anc.item_states(self).to_string())
             .end();
-        html.div().class("info fill").text(self.mon_num.to_string());
+        html.div().class("info fill").text(self.mon_num);
         html.to_string()
     }
 
@@ -48,7 +48,7 @@ impl VideoMonitor {
     fn to_html_status(&self) -> String {
         let mut html = self.title(View::Status);
         html.div().class("row");
-        html.span().class("info").text(self.mon_num.to_string());
+        html.span().class("info").text(self.mon_num);
         html.to_string()
     }
 

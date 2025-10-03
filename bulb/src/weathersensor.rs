@@ -379,7 +379,7 @@ impl WeatherData {
             && sensor.len() > 1
         {
             for (i, temp) in sensor.iter().enumerate() {
-                html.li().text("#").text(i.to_string()).text(" Air ");
+                html.li().text("#").text(i).text(" Air ");
                 if let Some(temp) = temp.air_temp {
                     html.text(format_temp(temp));
                 }
@@ -415,7 +415,7 @@ impl WeatherData {
             html.li().text("Visibility ").text(format!("{v:.1}")).end();
         }
         if let Some(rh) = self.relative_humidity {
-            html.li().text("RH ").text(rh.to_string()).text("%").end();
+            html.li().text("RH ").text(rh).text("%").end();
         }
         if let Some(p) = self.atmospheric_pressure {
             let p = (p as f32) * PASCALS_TO_IN_HG;
@@ -444,20 +444,20 @@ impl WeatherData {
             html.li().text(d).text(" of sun").end();
         }
         if let Some(r) = &self.solar_radiation {
-            html.li().text("Solar radiation: ").text(r.to_string());
+            html.li().text("Solar radiation: ").text(*r);
             html.text(" J/m²").end();
         }
         if let Some(r) = &self.instantaneous_terrestrial_radiation {
             html.li().text("Instantaneous terrestrial: ");
-            html.text(r.to_string()).text(" W/m²").end();
+            html.text(*r).text(" W/m²").end();
         }
         if let Some(r) = &self.instantaneous_solar_radiation {
             html.li().text("Instantaneous solar: ");
-            html.text(r.to_string()).text(" W/m²").end();
+            html.text(*r).text(" W/m²").end();
         }
         if let Some(r) = &self.total_radiation {
             html.li().text("Total radiation: ");
-            html.text(r.to_string()).text(" W/m²").end();
+            html.text(*r).text(" W/m²").end();
             if let Some(p) = self.total_radiation_period {
                 let d =
                     format_duration(Duration::from_secs(p.into())).to_string();
@@ -623,15 +623,19 @@ fn pavement_html(
                 html.li().text("Water/ice depth ").text(d).end();
             }
             if let Some(salinity) = pd.salinity {
-                let sl = salinity.to_string();
+                let sl = salinity;
                 html.li().text("Salinity ").text(sl).text(" ppm").end();
             }
             if let Some(signal) = &pd.black_ice_signal {
                 html.li().text(signal).end();
             }
             if let Some(friction) = &pd.friction {
-                let f = friction.to_string();
-                html.li().text("Coef. of friction ").text(f).text("%").end();
+                let f = friction;
+                html.li()
+                    .text("Coef. of friction ")
+                    .text(*f)
+                    .text("%")
+                    .end();
             }
         }
         if let Some(ps) = settings.get(i) {
@@ -651,7 +655,7 @@ fn pavement_html(
                 html.li().text("Height ").text(h).text(" m").end();
             }
             if let Some(exposure) = ps.exposure {
-                let e = exposure.to_string();
+                let e = exposure;
                 html.li().text("Exposure ").text(e).text("%").end();
             }
         }
@@ -711,8 +715,8 @@ fn sub_surface_html(
                 html.li().text(err).text(" error").end();
             }
             if let Some(moisture) = &sd.moisture {
-                let mo = moisture.to_string();
-                html.li().text("Moisture ").text(mo).text("%").end();
+                let mo = moisture;
+                html.li().text("Moisture ").text(*mo).text("%").end();
             }
         }
         html.end(); /* ul */
@@ -774,25 +778,25 @@ impl WeatherSensor {
         html.label().r#for("site_id").text("Site ID").end();
         html.input()
             .id("site_id")
-            .maxlength("20")
-            .size("20")
+            .maxlength(20)
+            .size(20)
             .value(opt_ref(&self.site_id));
         html.end(); /* div */
         html.div().class("row");
         html.label().r#for("alt_id").text("Alt ID").end();
         html.input()
             .id("alt_id")
-            .maxlength("20")
-            .size("20")
+            .maxlength(20)
+            .size(20)
             .value(opt_ref(&self.alt_id));
         html.end(); /* div */
         html.div().class("row");
         html.label().r#for("notes").text("Notes").end();
         html.textarea()
             .id("notes")
-            .maxlength("64")
-            .attr("rows", "2")
-            .attr("cols", "26")
+            .maxlength(64)
+            .attr("rows", 2)
+            .attr("cols", 26)
             .text(opt_ref(&self.notes))
             .end();
         html.end(); /* div */

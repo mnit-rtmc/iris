@@ -162,7 +162,7 @@ impl ControllerAnc {
     fn conditions_html(&self, pri: &Controller, html: &mut Html) {
         html.select().id("condition");
         for condition in &self.conditions {
-            let option = html.option().value(condition.id.to_string());
+            let option = html.option().value(condition.id);
             if pri.condition == condition.id {
                 option.attr_bool("selected");
             }
@@ -219,7 +219,7 @@ impl Io {
     fn button_link_html(&self, html: &mut Html) {
         if let Ok(res) = Res::try_from(self.resource_n.as_str()) {
             html.li().class("row");
-            html.span().text("#").text(self.pin.to_string()).end();
+            html.span().text("#").text(self.pin).end();
             html.span().text(res.symbol());
             html.button()
                 .r#type("button")
@@ -330,7 +330,7 @@ impl Controller {
             .attr("data-type", Res::CommLink.as_str())
             .text(opt_ref(&self.comm_link))
             .end();
-        html.text(":").text(self.drop_id.to_string());
+        html.text(":").text(self.drop_id);
         html.end(); /* span */
         html.end(); /* div */
         html.div()
@@ -376,8 +376,8 @@ impl Controller {
         html.label().r#for("comm_link").text("Comm Link").end();
         html.input()
             .id("comm_link")
-            .maxlength("20")
-            .size("20")
+            .maxlength(20)
+            .size(20)
             .value(opt_ref(&self.comm_link));
         html.end(); /* div */
         html.div().class("row");
@@ -385,10 +385,10 @@ impl Controller {
         html.input()
             .id("drop_id")
             .r#type("number")
-            .min("0")
-            .max("65535")
-            .size("6")
-            .value(self.drop_id.to_string());
+            .min(0)
+            .max(65535)
+            .size(6)
+            .value(self.drop_id);
         html.end(); /* div */
         html.div().class("row");
         html.label()
@@ -405,9 +405,9 @@ impl Controller {
         html.label().r#for("notes").text("Notes").end();
         html.textarea()
             .id("notes")
-            .maxlength("128")
-            .attr("rows", "2")
-            .attr("cols", "26")
+            .maxlength(128)
+            .attr("rows", 2)
+            .attr("cols", 26)
             .text(opt_ref(&self.notes))
             .end();
         html.end(); /* div */
@@ -415,8 +415,8 @@ impl Controller {
         html.label().r#for("password").text("Password").end();
         html.input()
             .id("password")
-            .maxlength("32")
-            .size("26")
+            .maxlength(32)
+            .size(26)
             .value(opt_ref(&self.password));
         html.end(); /* div */
         self.footer_html(true, &mut html);

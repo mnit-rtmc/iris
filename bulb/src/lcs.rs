@@ -152,7 +152,7 @@ impl LcsAnc {
     fn lcs_types_html(&self, pri: &Lcs, html: &mut Html) {
         html.select().id("lcs_type");
         for tp in &self.lcs_types {
-            let option = html.option().value(tp.id.to_string());
+            let option = html.option().value(tp.id);
             if Some(tp.id) == pri.lcs_type {
                 option.attr_bool("selected");
             }
@@ -501,9 +501,9 @@ impl Lcs {
         html.label().r#for("notes").text("Notes").end();
         html.textarea()
             .id("notes")
-            .maxlength("255")
-            .attr("rows", "4")
-            .attr("cols", "24")
+            .maxlength(255)
+            .attr("rows", 4)
+            .attr("cols", 24)
             .text(opt_ref(&self.notes))
             .end();
         html.end(); /* div */
@@ -518,9 +518,9 @@ impl Lcs {
         html.input()
             .id("shift")
             .r#type("number")
-            .min("1")
-            .max("9")
-            .size("2")
+            .min(1)
+            .max(9)
+            .size(2)
             .value(opt_str(self.shift));
         html.end(); /* div */
         self.footer_html(true, &mut html);

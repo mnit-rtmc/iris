@@ -200,8 +200,8 @@ impl Permission {
         html.label().r#for("hashtag").text("Hashtag").end();
         html.input()
             .id("hashtag")
-            .maxlength("16")
-            .size("16")
+            .maxlength(16)
+            .size(16)
             .value(opt_ref(&self.hashtag));
         html.end(); /* div */
         html.div().class("row");
@@ -263,8 +263,8 @@ impl Card for Permission {
         html.label().r#for("create_name").text("Name").end();
         html.input()
             .id("create_name")
-            .maxlength("24")
-            .size("24")
+            .maxlength(24)
+            .size(24)
             .value(self.name());
         html.end(); /* div */
         html.div().class("row");

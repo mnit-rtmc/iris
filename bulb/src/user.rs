@@ -126,16 +126,16 @@ impl User {
         html.label().r#for("full_name").text("Full Name").end();
         html.input()
             .id("full_name")
-            .maxlength("31")
-            .size("20")
+            .maxlength(31)
+            .size(20)
             .value(&self.full_name);
         html.end(); /* div */
         html.div().class("row");
         html.label().r#for("dn").text("Dn").end();
         html.input()
             .id("dn")
-            .maxlength("128")
-            .size("32")
+            .maxlength(128)
+            .size(32)
             .value(opt_ref(&self.dn));
         html.end(); /* div */
         html.div().class("row");

@@ -179,9 +179,9 @@ impl GateArm {
         html.label().r#for("notes").text("Notes").end();
         html.textarea()
             .id("notes")
-            .maxlength("255")
-            .attr("rows", "2")
-            .attr("cols", "24")
+            .maxlength(255)
+            .attr("rows", 2)
+            .attr("cols", 24)
             .text(opt_ref(&self.notes))
             .end();
         html.end(); /* div */
@@ -201,8 +201,8 @@ impl GateArm {
             .end();
         html.input()
             .id("downstream")
-            .maxlength("16")
-            .size("16")
+            .maxlength(16)
+            .size(16)
             .value(opt_ref(&self.downstream_hashtag));
         html.end(); /* div */
         self.footer_html(true, &mut html);

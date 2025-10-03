@@ -301,8 +301,8 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
         html.label().r#for("create_name").text("Name").end();
         html.input()
             .id("create_name")
-            .maxlength("24")
-            .size("24")
+            .maxlength(24)
+            .size(24)
             .value(self.name());
         html.to_string()
     }

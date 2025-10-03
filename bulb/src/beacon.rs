@@ -212,9 +212,9 @@ impl Beacon {
         html.label().r#for("message").text("Message").end();
         html.textarea()
             .id("message")
-            .maxlength("128")
-            .attr("rows", "3")
-            .attr("cols", "24")
+            .maxlength(128)
+            .attr("rows", 3)
+            .attr("cols", 24)
             .text(&self.message)
             .end();
         html.end(); /* div */
@@ -222,9 +222,9 @@ impl Beacon {
         html.label().r#for("notes").text("Notes").end();
         html.textarea()
             .id("notes")
-            .maxlength("128")
-            .attr("rows", "2")
-            .attr("cols", "24")
+            .maxlength(128)
+            .attr("rows", 2)
+            .attr("cols", 24)
             .text(opt_ref(&self.notes))
             .end();
         html.end(); /* div */
@@ -235,9 +235,9 @@ impl Beacon {
         html.input()
             .id("verify_pin")
             .r#type("number")
-            .min("1")
-            .max("104")
-            .size("8")
+            .min(1)
+            .max(104)
+            .size(8)
             .value(opt_str(self.verify_pin));
         html.end(); /* div */
         html.div().class("row");

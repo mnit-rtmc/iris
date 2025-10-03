@@ -56,7 +56,7 @@ where
     pub fn controller_html(&self, pri: &C, html: &mut Html) {
         html.div().class("row");
         html.label().r#for("controller").text("Controller").end();
-        let input = html.input().id("controller").maxlength("20").size("20");
+        let input = html.input().id("controller").maxlength(20).size(20);
         match self.controller(pri) {
             Some(c) => {
                 input.value(c.name());
@@ -76,9 +76,9 @@ where
         html.input()
             .id("pin")
             .r#type("number")
-            .min("1")
-            .max("104")
-            .size("8")
+            .min(1)
+            .max(104)
+            .size(8)
             .value(opt_str(pin));
         html.end(); /* div */
     }

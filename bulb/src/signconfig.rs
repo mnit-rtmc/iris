@@ -120,7 +120,7 @@ impl SignConfigAnc {
                 if num == font_num {
                     option.attr_bool("selected");
                 }
-                html.text(num.to_string()).end();
+                html.text(num).end();
             }
         }
         html.end(); /* select */
@@ -174,9 +174,9 @@ fn to_html_setup(sc: &SignConfig, anc: &SignConfigAnc) -> String {
     monochrome_html(sc, &mut html);
     html.div()
         .class("center info")
-        .text(sc.pixel_width.to_string())
+        .text(sc.pixel_width)
         .text(" x ")
-        .text(sc.pixel_height.to_string())
+        .text(sc.pixel_height)
         .text(" px")
         .end();
     html.div().class("center");

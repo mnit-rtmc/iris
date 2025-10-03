@@ -1107,9 +1107,9 @@ impl Dms {
         html.label().r#for("notes").text("Notes").end();
         html.textarea()
             .id("notes")
-            .maxlength("255")
-            .attr("rows", "4")
-            .attr("cols", "24")
+            .maxlength(255)
+            .attr("rows", 4)
+            .attr("cols", 24)
             .text(opt_ref(&self.notes))
             .end();
         html.end(); /* div */
@@ -1183,22 +1183,21 @@ impl Dms {
         if let Some(status) = &self.status {
             html.div().text("🔅 ").b().text("Light Output").end();
             if let Some(light) = &status.light_output {
-                let light = light.to_string();
-                html.meter().max("100").value(&light).end();
-                html.text("🔆 ").text(light).text("%");
+                html.meter().max(100).value(*light).end();
+                html.text("🔆 ").text(*light).text("%");
             }
             html.end(); /* div */
             if let Some(photocells) = &status.photocells {
                 html.table();
                 for (i, photocell) in photocells.iter().enumerate() {
                     html.tr();
-                    html.td().text((i + 1).to_string()).end();
+                    html.td().text(i + 1).end();
                     html.td().text_len(&photocell.description, 20).end();
                     let td = html.td();
                     let reading = &photocell.reading;
                     match reading.parse::<f32>() {
                         Ok(_r) => {
-                            html.meter().max("100").value(reading).end();
+                            html.meter().max(100).value(reading).end();
                             html.text("☀️ ").text(reading).text("%");
                         }
                         Err(_e) => {
@@ -1221,7 +1220,7 @@ impl Dms {
             html.table();
             for (i, supply) in power_supplies.iter().enumerate() {
                 html.tr();
-                html.td().text((i + 1).to_string()).end();
+                html.td().text(i + 1).end();
                 html.td().text_len(&supply.description, 20).end();
                 let td = html.td();
                 let voltage = &supply.voltage;

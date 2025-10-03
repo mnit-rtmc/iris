@@ -165,16 +165,16 @@ impl CommLink {
         html.label().r#for("description").text("Description").end();
         html.input()
             .id("description")
-            .maxlength("32")
-            .size("24")
+            .maxlength(32)
+            .size(24)
             .value(&self.description);
         html.end(); /* div */
         html.div().class("row");
         html.label().r#for("uri").text("URI").end();
         html.input()
             .id("uri")
-            .maxlength("256")
-            .size("28")
+            .maxlength(256)
+            .size(28)
             .value(&self.uri);
         html.end(); /* div */
         html.div().class("row");

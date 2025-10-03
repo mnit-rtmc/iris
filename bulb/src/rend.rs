@@ -101,17 +101,17 @@ impl<'r> Renderer<'r> {
             .html
             .img()
             .alt(join_text(multi, " "))
-            .width(width.to_string())
-            .height(height.to_string());
+            .width(width)
+            .height(height);
         if let Some(id) = &self.id {
-            img = img.id(id);
+            img = img.id(*id);
         }
         if let Some(class) = &self.class {
-            img = img.class(class);
+            img = img.class(*class);
         }
         match (&self.dms, &self.gif) {
             (_, Some(gif)) => {
-                img = img.src(gif);
+                img = img.src(*gif);
             }
             (Some(dms), _) => {
                 let mut buf = Vec::with_capacity(4096);
@@ -149,13 +149,13 @@ impl<'r> Renderer<'r> {
             .img()
             .attr("title", &failed_count)
             .alt(failed_count)
-            .width(width.to_string())
-            .height(height.to_string());
+            .width(width)
+            .height(height);
         if let Some(id) = &self.id {
-            img = img.id(id);
+            img = img.id(*id);
         }
         if let Some(class) = &self.class {
-            img = img.class(class);
+            img = img.class(*class);
         }
         if let Some(dms) = &self.dms {
             let mut buf = Vec::with_capacity(4096);

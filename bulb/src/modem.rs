@@ -69,16 +69,16 @@ impl Modem {
         html.label().r#for("uri").text("URI").end();
         html.input()
             .id("uri")
-            .maxlength("64")
-            .size("30")
+            .maxlength(64)
+            .size(30)
             .value(opt_ref(&self.uri));
         html.end(); /* div */
         html.div().class("row");
         html.label().r#for("config").text("Config").end();
         html.input()
             .id("config")
-            .maxlength("64")
-            .size("28")
+            .maxlength(64)
+            .size(28)
             .value(opt_ref(&self.config));
         html.end(); /* div */
         html.div().class("row");
@@ -86,9 +86,9 @@ impl Modem {
         html.input()
             .id("timeout_ms")
             .r#type("number")
-            .min("0")
-            .max("90000")
-            .size("8")
+            .min(0)
+            .max(90000)
+            .size(8)
             .value(opt_str(self.timeout_ms));
         html.end(); /* div */
         html.div().class("row");

@@ -175,7 +175,7 @@ impl<L> LocAnc<L> {
     fn directions_html(&self, id: &str, dir: u16, html: &mut Html) {
         html.select().id(id);
         for direction in &self.directions {
-            let option = html.option().value(direction.id.to_string());
+            let option = html.option().value(direction.id);
             if dir == direction.id {
                 option.attr_bool("selected");
             }
@@ -188,7 +188,7 @@ impl<L> LocAnc<L> {
     fn modifiers_html(&self, md: u16, html: &mut Html) {
         html.select().id("cross_mod");
         for modifier in &self.modifiers {
-            let option = html.option().value(modifier.id.to_string());
+            let option = html.option().value(modifier.id);
             if md == modifier.id {
                 option.attr_bool("selected");
             }
@@ -230,8 +230,8 @@ impl<L> LocAnc<L> {
         html.label().r#for("landmark").text("Landmark").end();
         html.input()
             .id("landmark")
-            .maxlength("22")
-            .size("24")
+            .maxlength(22)
+            .size(24)
             .value(opt_ref(&loc.landmark));
         html.end(); /* div */
         html.div().class("row");

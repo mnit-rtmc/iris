@@ -51,9 +51,9 @@ impl Gps {
         html.label().r#for("notes").text("Notes").end();
         html.textarea()
             .id("notes")
-            .maxlength("255")
-            .attr("rows", "4")
-            .attr("cols", "24")
+            .maxlength(255)
+            .attr("rows", 4)
+            .attr("cols", 24)
             .text(opt_ref(&self.notes))
             .end();
         html.end(); /* div */
@@ -61,8 +61,8 @@ impl Gps {
         html.label().r#for("geo_loc").text("Device Loc").end();
         html.input()
             .id("geo_loc")
-            .maxlength("20")
-            .size("20")
+            .maxlength(20)
+            .size(20)
             .value(opt_ref(&self.geo_loc))
             .end();
         html.end(); /* div */

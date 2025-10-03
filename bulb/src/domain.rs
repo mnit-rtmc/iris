@@ -72,8 +72,8 @@ impl Domain {
         html.label().r#for("block").text("Block (CIDR)").end();
         html.input()
             .id("block")
-            .maxlength("42")
-            .size("24")
+            .maxlength(42)
+            .size(24)
             .value(opt_ref(&self.block));
         html.end(); /* div */
         html.div().class("row");

@@ -81,8 +81,8 @@ impl Alarm {
         html.label().r#for("description").text("Description").end();
         html.input()
             .id("description")
-            .maxlength("24")
-            .size("24")
+            .maxlength(24)
+            .size(24)
             .value(&self.description);
         html.end(); /* div */
         anc.controller_html(self, &mut html);

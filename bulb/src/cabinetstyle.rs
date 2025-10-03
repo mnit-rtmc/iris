@@ -48,9 +48,9 @@ fn pin_row_html(id: &str, name: &str, pin: Option<u32>, html: &mut Html) {
     html.input()
         .id(id)
         .r#type("number")
-        .min("1")
-        .max("104")
-        .size("8")
+        .min(1)
+        .max(104)
+        .size(8)
         .value(opt_str(pin));
     html.end(); /* div */
 }
@@ -95,9 +95,9 @@ impl CabinetStyle {
         html.input()
             .id("dip")
             .r#type("number")
-            .min("0")
-            .max("255")
-            .size("8")
+            .min(0)
+            .max(255)
+            .size(8)
             .value(opt_str(self.dip));
         html.end(); /* div */
         self.footer_html(true, &mut html);

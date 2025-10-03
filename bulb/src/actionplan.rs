@@ -291,9 +291,9 @@ impl ActionPlan {
         html.label().r#for("notes").text("Notes").end();
         html.textarea()
             .id("notes")
-            .maxlength("128")
-            .attr("rows", "3")
-            .attr("cols", "24")
+            .maxlength(128)
+            .attr("rows", 3)
+            .attr("cols", 24)
             .text(opt_ref(&self.notes))
             .end();
         html.end(); // div

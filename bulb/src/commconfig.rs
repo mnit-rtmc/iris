@@ -104,7 +104,7 @@ fn periods_html(
     html.select().id(id);
     for period in periods {
         let sec = period.seconds();
-        let option = html.option().value(sec.to_string());
+        let option = html.option().value(sec);
         if let Some(s) = seconds
             && s == sec
         {
@@ -180,7 +180,7 @@ impl CommConfigAnc {
         html.select().id("protocol");
         if let Some(protocols) = &self.protocols {
             for protocol in protocols {
-                let option = html.option().value(protocol.id.to_string());
+                let option = html.option().value(protocol.id);
                 if let Some(p) = pri.protocol
                     && p == protocol.id
                 {
@@ -209,8 +209,8 @@ impl CommConfig {
         html.label().r#for("description").text("Description").end();
         html.input()
             .id("description")
-            .maxlength("20")
-            .size("20")
+            .maxlength(20)
+            .size(20)
             .value(&self.description);
         html.end(); /* div */
         html.div().class("row");
@@ -222,9 +222,9 @@ impl CommConfig {
         html.input()
             .id("timeout_ms")
             .r#type("number")
-            .min("0")
-            .max("20000")
-            .size("8")
+            .min(0)
+            .max(20000)
+            .size(8)
             .attr("step", "50")
             .value(opt_str(self.timeout_ms));
         html.end(); /* div */
@@ -236,9 +236,9 @@ impl CommConfig {
         html.input()
             .id("retry_threshold")
             .r#type("number")
-            .min("0")
-            .max("8")
-            .size("2")
+            .min(0)
+            .max(8)
+            .size(2)
             .value(opt_str(self.retry_threshold));
         html.end(); /* div */
         html.div().class("row");

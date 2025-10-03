@@ -120,7 +120,7 @@ impl RampMeterAnc {
     fn meter_types_html(&self, pri: &RampMeter, html: &mut Html) {
         html.select().id("meter_type");
         for tp in &self.meter_types {
-            let option = html.option().value(tp.id.to_string());
+            let option = html.option().value(tp.id);
             if Some(tp.id) == pri.meter_type {
                 option.attr_bool("selected");
             }
@@ -133,7 +133,7 @@ impl RampMeterAnc {
     fn algorithms_html(&self, pri: &RampMeter, html: &mut Html) {
         html.select().id("algorithm");
         for alg in &self.algorithms {
-            let option = html.option().value(alg.id.to_string());
+            let option = html.option().value(alg.id);
             if Some(alg.id) == pri.algorithm {
                 option.attr_bool("selected");
             }
@@ -296,10 +296,7 @@ fn meter_html(buf: Vec<u8>, html: &mut Html) {
     const HEIGHT: u32 = 64;
     let mut src = "data:image/gif;base64,".to_owned();
     b64enc.encode_string(buf, &mut src);
-    html.img()
-        .width(WIDTH.to_string())
-        .height(HEIGHT.to_string())
-        .src(&src);
+    html.img().width(WIDTH).height(HEIGHT).src(&src);
 }
 
 impl fmt::Display for MeterLock {
@@ -576,14 +573,14 @@ impl RampMeter {
             elem.class("hidden");
         }
         html.text("🚗 queue ");
-        let value = value.unwrap_or(0).to_string();
+        let value = value.unwrap_or(0);
         html.meter()
-            .min("0")
-            .attr("optimum", "0")
-            .attr("low", "25")
-            .attr("high", "75")
-            .max("100")
-            .value(&value)
+            .min(0)
+            .attr("optimum", 0)
+            .attr("low", 25)
+            .attr("high", 75)
+            .max(100)
+            .value(value)
             .end();
         html.end(); /* span */
     }
@@ -667,9 +664,9 @@ impl RampMeter {
         html.label().r#for("notes").text("Notes").end();
         html.textarea()
             .id("notes")
-            .maxlength("255")
-            .attr("rows", "4")
-            .attr("cols", "24")
+            .maxlength(255)
+            .attr("rows", 4)
+            .attr("cols", 24)
             .text(opt_ref(&self.notes))
             .end();
         html.end(); /* div */
@@ -688,9 +685,9 @@ impl RampMeter {
         html.input()
             .id("storage")
             .r#type("number")
-            .min("1")
-            .max("5000")
-            .size("8")
+            .min(1)
+            .max(5000)
+            .size(8)
             .value(opt_str(self.storage));
         html.end(); /* div */
         html.div().class("row");
@@ -698,9 +695,9 @@ impl RampMeter {
         html.input()
             .id("max_wait")
             .r#type("number")
-            .min("1")
-            .max("600")
-            .size("8")
+            .min(1)
+            .max(600)
+            .size(8)
             .value(opt_str(self.max_wait));
         html.end(); /* div */
         html.div().class("row");
@@ -708,9 +705,9 @@ impl RampMeter {
         html.input()
             .id("am_target")
             .r#type("number")
-            .min("0")
-            .max("2000")
-            .size("8")
+            .min(0)
+            .max(2000)
+            .size(8)
             .value(opt_str(self.am_target));
         html.end(); /* div */
         html.div().class("row");
@@ -718,9 +715,9 @@ impl RampMeter {
         html.input()
             .id("pm_target")
             .r#type("number")
-            .min("0")
-            .max("2000")
-            .size("8")
+            .min(0)
+            .max(2000)
+            .size(8)
             .value(opt_str(self.pm_target));
         html.end(); /* div */
         self.footer_html(true, &mut html);

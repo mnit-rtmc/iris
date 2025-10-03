@@ -144,7 +144,7 @@ fn sidebar_html() -> String {
     html.input()
         .id("sb_search")
         .r#type("search")
-        .size("16")
+        .size(16)
         .attr("placeholder", "🔍");
     html.select().id("sb_state").end();
     html.button()

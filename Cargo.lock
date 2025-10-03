@@ -815,9 +815,9 @@ checksum = "5419bdc4f6a9207fbeba6d11b604d481addf78ecd10c11ad51e76c2f6482748d"
 
 [[package]]
 name = "hatmil"
-version = "0.7.2"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce4dba3e130c24ef13b250eb6eb5369f1bfbe615e90b9a4e400d172f82a7ca0c"
+checksum = "cc5fdff41786d3727a4bcf14f4be5416c2b1bbc07b95c25a166fef174293da05"
 
 [[package]]
 name = "headers"
