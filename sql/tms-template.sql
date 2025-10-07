@@ -581,25 +581,25 @@ CREATE TABLE iris.lane_code (
     description VARCHAR(12) NOT NULL
 );
 
-COPY iris.lane_code (lcode, description) FROM stdin;
-	Mainline
-A	Auxiliary
-B	Bypass
-C	CD Lane
-D	Shoulder
-G	Green
-H	HOV
-K	Parking
-M	Merge
-O	Omnibus
-P	Passage
-Q	Queue
-R	Reversible
-T	HOT
-V	Velocity
-X	Exit
-Y	Wrong Way
-\.
+INSERT INTO iris.lane_code (lcode, description)
+VALUES
+    ('', 'Mainline'),
+    ('A', 'Auxiliary'),
+    ('B', 'Bypass'),
+    ('C', 'CD Lane'),
+    ('D', 'Shoulder'),
+    ('G', 'Green'),
+    ('H', 'HOV'),
+    ('K', 'Parking'),
+    ('M', 'Merge'),
+    ('O', 'Omnibus'),
+    ('P', 'Passage'),
+    ('Q', 'Queue'),
+    ('R', 'Reversible'),
+    ('T', 'HOT'),
+    ('V', 'Velocity'),
+    ('X', 'Exit'),
+    ('Y', 'Wrong Way');
 
 CREATE VIEW lane_code_view AS
     SELECT lcode, description FROM iris.lane_code;
@@ -611,15 +611,15 @@ CREATE TABLE iris.direction (
     dir VARCHAR(4) NOT NULL
 );
 
-COPY iris.direction (id, direction, dir) FROM stdin;
-0		
-1	NB	N
-2	SB	S
-3	EB	E
-4	WB	W
-5	N-S	NS
-6	E-W	EW
-\.
+INSERT INTO iris.direction (id, direction, dir)
+VALUES
+    (0, '', ''),
+    (1, 'NB', 'N'),
+    (2, 'SB', 'S'),
+    (3, 'EB', 'E'),
+    (4, 'WB', 'W'),
+    (5, 'N-S', 'NS'),
+    (6, 'E-W', 'EW');
 
 CREATE TABLE iris.road_class (
     id INTEGER PRIMARY KEY,
@@ -628,16 +628,16 @@ CREATE TABLE iris.road_class (
     scale REAL NOT NULL
 );
 
-COPY iris.road_class (id, description, grade, scale) FROM stdin;
-0			1
-1	residential	A	2
-2	business	B	3
-3	collector	C	3
-4	arterial	D	4
-5	expressway	E	4
-6	freeway	F	6
-7	CD road		3.5
-\.
+INSERT INTO iris.road_class (id, description, grade, scale)
+VALUES
+    (0, '', '', 1),
+    (1, 'residential', 'A', 2),
+    (2, 'business', 'B', 3),
+    (3, 'collector', 'C', 3),
+    (4, 'arterial', 'D', 4),
+    (5, 'expressway', 'E', 4),
+    (6, 'freeway', 'F', 6),
+    (7, 'CD road', '', 3.5);
 
 CREATE TABLE iris.road_modifier (
     id SMALLINT PRIMARY KEY,
@@ -645,17 +645,17 @@ CREATE TABLE iris.road_modifier (
     mod VARCHAR(2) NOT NULL
 );
 
-COPY iris.road_modifier (id, modifier, mod) FROM stdin;
-0	@	
-1	N of	N
-2	S of	S
-3	E of	E
-4	W of	W
-5	N Jct	Nj
-6	S Jct	Sj
-7	E Jct	Ej
-8	W Jct	Wj
-\.
+INSERT INTO iris.road_modifier (id, modifier, mod)
+VALUES
+    (0, '@', ''),
+    (1, 'N of', 'N'),
+    (2, 'S of', 'S'),
+    (3, 'E of', 'E'),
+    (4, 'W of', 'W'),
+    (5, 'N Jct', 'Nj'),
+    (6, 'S Jct', 'Sj'),
+    (7, 'E Jct', 'Ej'),
+    (8, 'W Jct', 'Wj');
 
 CREATE TABLE iris.road (
     name VARCHAR(20) PRIMARY KEY,
@@ -955,65 +955,65 @@ CREATE VIEW inc_descriptor_view AS
     LEFT JOIN iris.lane_code lc ON id.lane_code = lc.lcode;
 GRANT SELECT ON inc_descriptor_view TO PUBLIC;
 
-COPY iris.inc_descriptor (name, event_desc_id, detail, lane_code, multi) FROM stdin;
-idsc_00001	21	\N		CRASH
-idsc_00002	21	\N	X	CRASH ON EXIT
-idsc_00003	22	\N		STALLED VEHICLE
-idsc_00004	23	\N		INCIDENT
-idsc_00005	23	animal		ANIMAL ON ROAD
-idsc_00006	23	debris		DEBRIS ON ROAD
-idsc_00007	23	emrg_veh		EMERGENCY VEHICLES
-idsc_00008	23	event		EVENT CONGESTION
-idsc_00009	23	event	X	CONGESTION ON RAMP
-idsc_00010	23	flooding		FLASH FLOODING
-idsc_00011	23	gr_fire		GRASS FIRE
-idsc_00012	23	ice		ICE
-idsc_00013	23	pavement		PAVEMENT FAILURE
-idsc_00014	23	ped		PEDESTRIAN ON ROAD
-idsc_00015	23	rollover		CRASH
-idsc_00016	23	snow_rmv		SNOW REMOVAL
-idsc_00017	23	spin_out		CRASH
-idsc_00018	23	spin_out	X	CRASH ON EXIT
-idsc_00019	23	test		TEST
-idsc_00020	23	veh_fire		VEHICLE FIRE
-idsc_00021	24	\N		ROAD WORK
-idsc_00022	24	\N	X	ROAD WORK ON RAMP
-\.
+INSERT INTO iris.inc_descriptor (name, event_desc_id, detail, lane_code, multi)
+VALUES
+    ('idsc_00001', 21, NULL, '', 'CRASH'),
+    ('idsc_00002', 21, NULL, 'X', 'CRASH ON EXIT'),
+    ('idsc_00003', 22, NULL, '', 'STALLED VEHICLE'),
+    ('idsc_00004', 23, NULL, '', 'INCIDENT'),
+    ('idsc_00005', 23, 'animal', '', 'ANIMAL ON ROAD'),
+    ('idsc_00006', 23, 'debris', '', 'DEBRIS ON ROAD'),
+    ('idsc_00007', 23, 'emrg_veh', '', 'EMERGENCY VEHICLES'),
+    ('idsc_00008', 23, 'event', '', 'EVENT CONGESTION'),
+    ('idsc_00009', 23, 'event', 'X', 'CONGESTION ON RAMP'),
+    ('idsc_00010', 23, 'flooding', '', 'FLASH FLOODING'),
+    ('idsc_00011', 23, 'gr_fire', '', 'GRASS FIRE'),
+    ('idsc_00012', 23, 'ice', '', 'ICE'),
+    ('idsc_00013', 23, 'pavement', '', 'PAVEMENT FAILURE'),
+    ('idsc_00014', 23, 'ped', '', 'PEDESTRIAN ON ROAD'),
+    ('idsc_00015', 23, 'rollover', '', 'CRASH'),
+    ('idsc_00016', 23, 'snow_rmv', '', 'SNOW REMOVAL'),
+    ('idsc_00017', 23, 'spin_out', '', 'CRASH'),
+    ('idsc_00018', 23, 'spin_out', 'X', 'CRASH ON EXIT'),
+    ('idsc_00019', 23, 'test', '', 'TEST'),
+    ('idsc_00020', 23, 'veh_fire', '', 'VEHICLE FIRE'),
+    ('idsc_00021', 24, NULL, '', 'ROAD WORK'),
+    ('idsc_00022', 24, NULL, 'X', 'ROAD WORK ON RAMP');
 
 CREATE TABLE iris.inc_impact (
     id INTEGER PRIMARY KEY,
     description VARCHAR(24) NOT NULL
 );
 
-COPY iris.inc_impact (id, description) FROM stdin;
-0	lanes blocked
-1	left lanes blocked
-2	right lanes blocked
-3	center lanes blocked
-4	lanes affected
-5	left lanes affected
-6	right lanes affected
-7	center lanes affected
-8	both shoulders blocked
-9	left shoulder blocked
-10	right shoulder blocked
-11	both shoulders affected
-12	left shoulder affected
-13	right shoulder affected
-14	free flowing
-\.
+INSERT INTO iris.inc_impact (id, description)
+VALUES
+    (0, 'lanes blocked'),
+    (1, 'left lanes blocked'),
+    (2, 'right lanes blocked'),
+    (3, 'center lanes blocked'),
+    (4, 'lanes affected'),
+    (5, 'left lanes affected'),
+    (6, 'right lanes affected'),
+    (7, 'center lanes affected'),
+    (8, 'both shoulders blocked'),
+    (9, 'left shoulder blocked'),
+    (10, 'right shoulder blocked'),
+    (11, 'both shoulders affected'),
+    (12, 'left shoulder affected'),
+    (13, 'right shoulder affected'),
+    (14, 'free flowing');
 
 CREATE TABLE iris.inc_range (
     id INTEGER PRIMARY KEY,
     description VARCHAR(10) NOT NULL
 );
 
-COPY iris.inc_range (id, description) FROM stdin;
-0	ahead
-1	near
-2	middle
-3	far
-\.
+INSERT INTO iris.inc_range (id, description)
+VALUES
+    (0, 'ahead'),
+    (1, 'near'),
+    (2, 'middle'),
+    (3, 'far');
 
 CREATE TABLE iris.inc_locator (
     name VARCHAR(10) PRIMARY KEY,
@@ -1033,24 +1033,24 @@ CREATE VIEW inc_locator_view AS
     LEFT JOIN iris.inc_range rng ON il.range = rng.id;
 GRANT SELECT ON inc_locator_view TO PUBLIC;
 
-COPY iris.inc_locator (name, range, branched, picked, multi) FROM stdin;
-iloc_00001	0	f	f	AHEAD
-iloc_00002	0	f	t	AHEAD
-iloc_00003	0	t	f	AHEAD
-iloc_00004	0	t	t	AHEAD
-iloc_00005	1	f	f	[locmi] MILES AHEAD
-iloc_00006	1	f	t	[locmd] [locxn]
-iloc_00007	1	t	f	ON [locrn] [locrd]
-iloc_00008	1	t	t	ON [locrn] [locrd]
-iloc_00009	2	f	f	[locmi] MILES AHEAD
-iloc_00010	2	f	t	[locmd] [locxn]
-iloc_00011	2	t	f	ON [locrn] [locrd]
-iloc_00012	2	t	t	ON [locrn] [locrd] [locmd] [locxn]
-iloc_00013	3	f	f	[locmi] MILES AHEAD
-iloc_00014	3	f	t	[locmd] [locxn]
-iloc_00015	3	t	f	ON [locrn] [locrd]
-iloc_00016	3	t	t	ON [locrn] [locrd] [locmd] [locxn]
-\.
+INSERT INTO iris.inc_locator (name, range, branched, picked, multi)
+VALUES
+    ('iloc_00001', 0, false, false, 'AHEAD'),
+    ('iloc_00002', 0, false, true, 'AHEAD'),
+    ('iloc_00003', 0, true, false, 'AHEAD'),
+    ('iloc_00004', 0, true, true, 'AHEAD'),
+    ('iloc_00005', 1, false, false, '[locmi] MILES AHEAD'),
+    ('iloc_00006', 1, false, true, '[locmd] [locxn]'),
+    ('iloc_00007', 1, true, false, 'ON [locrn] [locrd]'),
+    ('iloc_00008', 1, true, true, 'ON [locrn] [locrd]'),
+    ('iloc_00009', 2, false, false, '[locmi] MILES AHEAD'),
+    ('iloc_00010', 2, false, true, '[locmd] [locxn]'),
+    ('iloc_00011', 2, true, false, 'ON [locrn] [locrd]'),
+    ('iloc_00012', 2, true, true, 'ON [locrn] [locrd] [locmd] [locxn]'),
+    ('iloc_00013', 3, false, false, '[locmi] MILES AHEAD'),
+    ('iloc_00014', 3, false, true, '[locmd] [locxn]'),
+    ('iloc_00015', 3, true, false, 'ON [locrn] [locrd]'),
+    ('iloc_00016', 3, true, true, 'ON [locrn] [locrd] [locmd] [locxn]');
 
 CREATE TABLE iris.inc_advice (
     name VARCHAR(10) PRIMARY KEY,
@@ -1091,114 +1091,115 @@ CREATE VIEW inc_advice_view AS
     LEFT JOIN iris.lane_code lc ON a.lane_code = lc.lcode;
 GRANT SELECT ON inc_advice_view TO PUBLIC;
 
-COPY iris.inc_advice (name, impact, lane_code, range, open_lanes, impacted_lanes, multi) FROM stdin;
-iadv_00001	0		0	0	\N	ROAD CLOSED
-iadv_00002	0		0	\N	\N	LANES CLOSED
-iadv_00003	0		1	0	\N	ROAD CLOSED
-iadv_00004	0		1	\N	\N	LANES CLOSED
-iadv_00005	0		2	\N	1	1 LANE CLOSED
-iadv_00006	0		2	\N	2	2 LANES CLOSED
-iadv_00007	0		2	\N	3	3 LANES CLOSED
-iadv_00008	0		2	0	\N	ROAD CLOSED
-iadv_00009	0		2	1	\N	SINGLE LANE
-iadv_00010	0		2	\N	\N	LANES CLOSED
-iadv_00011	0		3	\N	1	1 LANE CLOSED
-iadv_00012	0		3	\N	2	2 LANES CLOSED
-iadv_00013	0		3	\N	3	3 LANES CLOSED
-iadv_00014	0		3	0	\N	ROAD CLOSED
-iadv_00015	0		3	1	\N	SINGLE LANE
-iadv_00016	0		3	\N	\N	LANES CLOSED
-iadv_00017	1		0	\N	1	LEFT LANE CLOSED
-iadv_00018	1		0	\N	2	LEFT 2 LANES CLOSED
-iadv_00019	1		0	\N	3	LEFT 3 LANES CLOSED
-iadv_00020	1		0	\N	\N	LEFT LANES CLOSED
-iadv_00021	1		1	\N	1	LEFT LANE CLOSED
-iadv_00022	1		1	\N	2	LEFT 2 LANES CLOSED
-iadv_00023	1		1	\N	3	LEFT 3 LANES CLOSED
-iadv_00024	1		1	\N	\N	LEFT LANES CLOSED
-iadv_00025	1		2	\N	1	LANE CLOSED
-iadv_00026	1		2	\N	2	2 LANES CLOSED
-iadv_00027	1		2	\N	3	3 LANES CLOSED
-iadv_00028	1		2	1	\N	SINGLE LANE
-iadv_00029	1		2	\N	\N	LANES CLOSED
-iadv_00030	1		3	\N	1	LANE CLOSED
-iadv_00031	1		3	\N	2	2 LANES CLOSED
-iadv_00032	1		3	\N	3	3 LANES CLOSED
-iadv_00033	1		3	1	\N	SINGLE LANE
-iadv_00034	1		3	\N	\N	LANES CLOSED
-iadv_00035	2		0	\N	1	RIGHT LANE CLOSED
-iadv_00036	2		0	\N	2	RIGHT 2 LANES CLOSED
-iadv_00037	2		0	\N	3	RIGHT 3 LANES CLOSED
-iadv_00038	2		0	\N	\N	RIGHT LANES CLOSED
-iadv_00039	2		1	\N	1	RIGHT LANE CLOSED
-iadv_00040	2		1	\N	2	RIGHT 2 LANES CLOSED
-iadv_00041	2		1	\N	3	RIGHT 3 LANES CLOSED
-iadv_00042	2		1	\N	\N	RIGHT LANES CLOSED
-iadv_00043	2		2	\N	1	LANE CLOSED
-iadv_00044	2		2	\N	2	2 LANES CLOSED
-iadv_00045	2		2	\N	3	3 LANES CLOSED
-iadv_00046	2		2	1	\N	SINGLE LANE
-iadv_00047	2		2	\N	\N	LANES CLOSED
-iadv_00048	2		3	\N	1	LANE CLOSED
-iadv_00049	2		3	\N	2	2 LANES CLOSED
-iadv_00050	2		3	\N	3	3 LANES CLOSED
-iadv_00051	2		3	1	\N	SINGLE LANE
-iadv_00052	2		3	\N	\N	LANES CLOSED
-iadv_00053	3		0	\N	1	CENTER LANE CLOSED
-iadv_00054	3		0	\N	\N	CENTER LANES CLOSED
-iadv_00055	3		1	\N	1	CENTER LANE CLOSED
-iadv_00056	3		1	\N	\N	CENTER LANES CLOSED
-iadv_00057	3		2	\N	1	LANE CLOSED
-iadv_00058	3		2	\N	2	2 LANES CLOSED
-iadv_00059	3		2	\N	3	3 LANES CLOSED
-iadv_00060	3		2	\N	\N	LANES CLOSED
-iadv_00061	3		3	\N	1	LANE CLOSED
-iadv_00062	3		3	\N	2	2 LANES CLOSED
-iadv_00063	3		3	\N	3	3 LANES CLOSED
-iadv_00064	3		3	\N	\N	LANES CLOSED
-iadv_00065	4		0	0	1	IN LANE
-iadv_00066	4		0	0	2	IN BOTH LANES
-iadv_00067	4		0	0	\N	IN ALL LANES
-iadv_00068	4		1	0	1	IN LANE
-iadv_00069	4		1	0	2	IN BOTH LANES
-iadv_00070	4		1	0	\N	IN ALL LANES
-iadv_00071	5		0	\N	1	IN LEFT LANE
-iadv_00072	5		0	\N	2	IN LEFT 2 LANES
-iadv_00073	5		0	\N	3	IN LEFT 3 LANES
-iadv_00074	5		0	\N	4	IN LEFT 4 LANES
-iadv_00075	5		0	\N	\N	IN LEFT LANES
-iadv_00076	5		1	\N	1	IN LEFT LANE
-iadv_00077	5		1	\N	2	IN LEFT 2 LANES
-iadv_00078	5		1	\N	3	IN LEFT 3 LANES
-iadv_00079	5		1	\N	4	IN LEFT 4 LANES
-iadv_00080	5		1	\N	\N	IN LEFT LANES
-iadv_00081	6		0	\N	1	IN RIGHT LANE
-iadv_00082	6		0	\N	2	IN RIGHT 2 LANES
-iadv_00083	6		0	\N	3	IN RIGHT 3 LANES
-iadv_00084	6		0	\N	4	IN RIGHT 4 LANES
-iadv_00085	6		0	\N	\N	IN RIGHT LANES
-iadv_00086	6		1	\N	1	IN RIGHT LANE
-iadv_00087	6		1	\N	2	IN RIGHT 2 LANES
-iadv_00088	6		1	\N	3	IN RIGHT 3 LANES
-iadv_00089	6		1	\N	4	IN RIGHT 4 LANES
-iadv_00090	6		1	\N	\N	IN RIGHT LANES
-iadv_00091	7		0	\N	1	IN CENTER LANE
-iadv_00092	7		0	\N	\N	IN CENTER LANES
-iadv_00093	7		1	\N	1	IN CENTER LANE
-iadv_00094	7		1	\N	\N	IN CENTER LANES
-iadv_00095	8		0	\N	\N	ON BOTH SHOULDERS
-iadv_00096	8		1	\N	\N	ON BOTH SHOULDERS
-iadv_00097	9		0	\N	\N	ON LEFT SHOULDER
-iadv_00098	9		1	\N	\N	ON LEFT SHOULDER
-iadv_00099	10		0	\N	\N	ON RIGHT SHOULDER
-iadv_00100	10		1	\N	\N	ON RIGHT SHOULDER
-iadv_00101	11		0	\N	\N	IN BOTH SHOULDERS
-iadv_00102	11		1	\N	\N	IN BOTH SHOULDERS
-iadv_00103	12		0	\N	\N	IN LEFT SHOULDER
-iadv_00104	12		1	\N	\N	IN LEFT SHOULDER
-iadv_00105	13		0	\N	\N	IN RIGHT SHOULDER
-iadv_00106	13		1	\N	\N	IN RIGHT SHOULDER
-\.
+INSERT INTO iris.inc_advice (name, impact, lane_code, range, open_lanes,
+                             impacted_lanes, multi)
+VALUES
+    ('iadv_00001', 0, '', 0, 0, NULL, 'ROAD CLOSED'),
+    ('iadv_00002', 0, '', 0, NULL, NULL, 'LANES CLOSED'),
+    ('iadv_00003', 0, '', 1, 0, NULL, 'ROAD CLOSED'),
+    ('iadv_00004', 0, '', 1, NULL, NULL, 'LANES CLOSED'),
+    ('iadv_00005', 0, '', 2, NULL, 1, '1 LANE CLOSED'),
+    ('iadv_00006', 0, '', 2, NULL, 2, '2 LANES CLOSED'),
+    ('iadv_00007', 0, '', 2, NULL, 3, '3 LANES CLOSED'),
+    ('iadv_00008', 0, '', 2, 0, NULL, 'ROAD CLOSED'),
+    ('iadv_00009', 0, '', 2, 1, NULL, 'SINGLE LANE'),
+    ('iadv_00010', 0, '', 2, NULL, NULL, 'LANES CLOSED'),
+    ('iadv_00011', 0, '', 3, NULL, 1, '1 LANE CLOSED'),
+    ('iadv_00012', 0, '', 3, NULL, 2, '2 LANES CLOSED'),
+    ('iadv_00013', 0, '', 3, NULL, 3, '3 LANES CLOSED'),
+    ('iadv_00014', 0, '', 3, 0, NULL, 'ROAD CLOSED'),
+    ('iadv_00015', 0, '', 3, 1, NULL, 'SINGLE LANE'),
+    ('iadv_00016', 0, '', 3, NULL, NULL, 'LANES CLOSED'),
+    ('iadv_00017', 1, '', 0, NULL, 1, 'LEFT LANE CLOSED'),
+    ('iadv_00018', 1, '', 0, NULL, 2, 'LEFT 2 LANES CLOSED'),
+    ('iadv_00019', 1, '', 0, NULL, 3, 'LEFT 3 LANES CLOSED'),
+    ('iadv_00020', 1, '', 0, NULL, NULL, 'LEFT LANES CLOSED'),
+    ('iadv_00021', 1, '', 1, NULL, 1, 'LEFT LANE CLOSED'),
+    ('iadv_00022', 1, '', 1, NULL, 2, 'LEFT 2 LANES CLOSED'),
+    ('iadv_00023', 1, '', 1, NULL, 3, 'LEFT 3 LANES CLOSED'),
+    ('iadv_00024', 1, '', 1, NULL, NULL, 'LEFT LANES CLOSED'),
+    ('iadv_00025', 1, '', 2, NULL, 1, 'LANE CLOSED'),
+    ('iadv_00026', 1, '', 2, NULL, 2, '2 LANES CLOSED'),
+    ('iadv_00027', 1, '', 2, NULL, 3, '3 LANES CLOSED'),
+    ('iadv_00028', 1, '', 2, 1, NULL, 'SINGLE LANE'),
+    ('iadv_00029', 1, '', 2, NULL, NULL, 'LANES CLOSED'),
+    ('iadv_00030', 1, '', 3, NULL, 1, 'LANE CLOSED'),
+    ('iadv_00031', 1, '', 3, NULL, 2, '2 LANES CLOSED'),
+    ('iadv_00032', 1, '', 3, NULL, 3, '3 LANES CLOSED'),
+    ('iadv_00033', 1, '', 3, 1, NULL, 'SINGLE LANE'),
+    ('iadv_00034', 1, '', 3, NULL, NULL, 'LANES CLOSED'),
+    ('iadv_00035', 2, '', 0, NULL, 1, 'RIGHT LANE CLOSED'),
+    ('iadv_00036', 2, '', 0, NULL, 2, 'RIGHT 2 LANES CLOSED'),
+    ('iadv_00037', 2, '', 0, NULL, 3, 'RIGHT 3 LANES CLOSED'),
+    ('iadv_00038', 2, '', 0, NULL, NULL, 'RIGHT LANES CLOSED'),
+    ('iadv_00039', 2, '', 1, NULL, 1, 'RIGHT LANE CLOSED'),
+    ('iadv_00040', 2, '', 1, NULL, 2, 'RIGHT 2 LANES CLOSED'),
+    ('iadv_00041', 2, '', 1, NULL, 3, 'RIGHT 3 LANES CLOSED'),
+    ('iadv_00042', 2, '', 1, NULL, NULL, 'RIGHT LANES CLOSED'),
+    ('iadv_00043', 2, '', 2, NULL, 1, 'LANE CLOSED'),
+    ('iadv_00044', 2, '', 2, NULL, 2, '2 LANES CLOSED'),
+    ('iadv_00045', 2, '', 2, NULL, 3, '3 LANES CLOSED'),
+    ('iadv_00046', 2, '', 2, 1, NULL, 'SINGLE LANE'),
+    ('iadv_00047', 2, '', 2, NULL, NULL, 'LANES CLOSED'),
+    ('iadv_00048', 2, '', 3, NULL, 1, 'LANE CLOSED'),
+    ('iadv_00049', 2, '', 3, NULL, 2, '2 LANES CLOSED'),
+    ('iadv_00050', 2, '', 3, NULL, 3, '3 LANES CLOSED'),
+    ('iadv_00051', 2, '', 3, 1, NULL, 'SINGLE LANE'),
+    ('iadv_00052', 2, '', 3, NULL, NULL, 'LANES CLOSED'),
+    ('iadv_00053', 3, '', 0, NULL, 1, 'CENTER LANE CLOSED'),
+    ('iadv_00054', 3, '', 0, NULL, NULL, 'CENTER LANES CLOSED'),
+    ('iadv_00055', 3, '', 1, NULL, 1, 'CENTER LANE CLOSED'),
+    ('iadv_00056', 3, '', 1, NULL, NULL, 'CENTER LANES CLOSED'),
+    ('iadv_00057', 3, '', 2, NULL, 1, 'LANE CLOSED'),
+    ('iadv_00058', 3, '', 2, NULL, 2, '2 LANES CLOSED'),
+    ('iadv_00059', 3, '', 2, NULL, 3, '3 LANES CLOSED'),
+    ('iadv_00060', 3, '', 2, NULL, NULL, 'LANES CLOSED'),
+    ('iadv_00061', 3, '', 3, NULL, 1, 'LANE CLOSED'),
+    ('iadv_00062', 3, '', 3, NULL, 2, '2 LANES CLOSED'),
+    ('iadv_00063', 3, '', 3, NULL, 3, '3 LANES CLOSED'),
+    ('iadv_00064', 3, '', 3, NULL, NULL, 'LANES CLOSED'),
+    ('iadv_00065', 4, '', 0, 0, 1, 'IN LANE'),
+    ('iadv_00066', 4, '', 0, 0, 2, 'IN BOTH LANES'),
+    ('iadv_00067', 4, '', 0, 0, NULL, 'IN ALL LANES'),
+    ('iadv_00068', 4, '', 1, 0, 1, 'IN LANE'),
+    ('iadv_00069', 4, '', 1, 0, 2, 'IN BOTH LANES'),
+    ('iadv_00070', 4, '', 1, 0, NULL, 'IN ALL LANES'),
+    ('iadv_00071', 5, '', 0, NULL, 1, 'IN LEFT LANE'),
+    ('iadv_00072', 5, '', 0, NULL, 2, 'IN LEFT 2 LANES'),
+    ('iadv_00073', 5, '', 0, NULL, 3, 'IN LEFT 3 LANES'),
+    ('iadv_00074', 5, '', 0, NULL, 4, 'IN LEFT 4 LANES'),
+    ('iadv_00075', 5, '', 0, NULL, NULL, 'IN LEFT LANES'),
+    ('iadv_00076', 5, '', 1, NULL, 1, 'IN LEFT LANE'),
+    ('iadv_00077', 5, '', 1, NULL, 2, 'IN LEFT 2 LANES'),
+    ('iadv_00078', 5, '', 1, NULL, 3, 'IN LEFT 3 LANES'),
+    ('iadv_00079', 5, '', 1, NULL, 4, 'IN LEFT 4 LANES'),
+    ('iadv_00080', 5, '', 1, NULL, NULL, 'IN LEFT LANES'),
+    ('iadv_00081', 6, '', 0, NULL, 1, 'IN RIGHT LANE'),
+    ('iadv_00082', 6, '', 0, NULL, 2, 'IN RIGHT 2 LANES'),
+    ('iadv_00083', 6, '', 0, NULL, 3, 'IN RIGHT 3 LANES'),
+    ('iadv_00084', 6, '', 0, NULL, 4, 'IN RIGHT 4 LANES'),
+    ('iadv_00085', 6, '', 0, NULL, NULL, 'IN RIGHT LANES'),
+    ('iadv_00086', 6, '', 1, NULL, 1, 'IN RIGHT LANE'),
+    ('iadv_00087', 6, '', 1, NULL, 2, 'IN RIGHT 2 LANES'),
+    ('iadv_00088', 6, '', 1, NULL, 3, 'IN RIGHT 3 LANES'),
+    ('iadv_00089', 6, '', 1, NULL, 4, 'IN RIGHT 4 LANES'),
+    ('iadv_00090', 6, '', 1, NULL, NULL, 'IN RIGHT LANES'),
+    ('iadv_00091', 7, '', 0, NULL, 1, 'IN CENTER LANE'),
+    ('iadv_00092', 7, '', 0, NULL, NULL, 'IN CENTER LANES'),
+    ('iadv_00093', 7, '', 1, NULL, 1, 'IN CENTER LANE'),
+    ('iadv_00094', 7, '', 1, NULL, NULL, 'IN CENTER LANES'),
+    ('iadv_00095', 8, '', 0, NULL, NULL, 'ON BOTH SHOULDERS'),
+    ('iadv_00096', 8, '', 1, NULL, NULL, 'ON BOTH SHOULDERS'),
+    ('iadv_00097', 9, '', 0, NULL, NULL, 'ON LEFT SHOULDER'),
+    ('iadv_00098', 9, '', 1, NULL, NULL, 'ON LEFT SHOULDER'),
+    ('iadv_00099', 10, '', 0, NULL, NULL, 'ON RIGHT SHOULDER'),
+    ('iadv_00100', 10, '', 1, NULL, NULL, 'ON RIGHT SHOULDER'),
+    ('iadv_00101', 11, '', 0, NULL, NULL, 'IN BOTH SHOULDERS'),
+    ('iadv_00102', 11, '', 1, NULL, NULL, 'IN BOTH SHOULDERS'),
+    ('iadv_00103', 12, '', 0, NULL, NULL, 'IN LEFT SHOULDER'),
+    ('iadv_00104', 12, '', 1, NULL, NULL, 'IN LEFT SHOULDER'),
+    ('iadv_00105', 13, '', 0, NULL, NULL, 'IN RIGHT SHOULDER'),
+    ('iadv_00106', 13, '', 1, NULL, NULL, 'IN RIGHT SHOULDER');
 
 CREATE TABLE iris.road_affix (
     name VARCHAR(12) PRIMARY KEY,
