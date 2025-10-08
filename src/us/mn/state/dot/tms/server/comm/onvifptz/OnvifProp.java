@@ -75,6 +75,9 @@ abstract public class OnvifProp extends ControllerProperty {
 		// First, get bindings:
 		DeviceService dev = DeviceService.getDeviceService(url + "/onvif/device_service", user, pass);
 		poller.dev = dev;
+		if (poller.dev == null)
+			return "initialize(): Missing Device Service for " + poller.name;
+
 
 		String capabilities = dev.getCapabilities();
 		poller.capabilities = capabilities;
@@ -169,14 +172,18 @@ abstract public class OnvifProp extends ControllerProperty {
 		if (needMedia && !haveMedia) return "Missing mediaProfile";
 		if (needVideo && !haveVideo) return "Missing videoSource";
 
-		// Check for services, and if needed (yes, except initialize())
-		boolean hasAllServices =
-			poller.dev != null
-			&& poller.ptz != null
-			&& poller.media != null
-			&& poller.img != null;
-		if (!cmd[0].equals("initialize") && !hasAllServices)
-			return "Missing ONVIF services";
+		// Check for services, if not initializing them
+		if (!cmd[0].equals("initialize")) {
+			if (poller.dev == null)
+				return "Missing Device Service for " + poller.name;
+			if (poller.ptz == null)
+				return "Missing PTZ Service for " + poller.name;
+			if (poller.media == null)
+				return "Missing Media Service for " + poller.name;
+			if (poller.img == null)
+				return "Missing Imaging Service for " + poller.name;
+
+		}
 
 		DeviceService dev = poller.dev;
 		PTZService ptz = poller.ptz;

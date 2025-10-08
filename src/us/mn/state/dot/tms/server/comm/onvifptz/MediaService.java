@@ -33,6 +33,8 @@ public class MediaService extends Service {
 	}
 
 	public static MediaService getMediaService(String mediaServiceAddress, String u, String p) {
+		if (mediaServiceAddress == null || mediaServiceAddress.isEmpty())
+			return null;
 		return new MediaService(mediaServiceAddress, u, p);
 	}
 

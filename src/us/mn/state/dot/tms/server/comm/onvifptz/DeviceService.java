@@ -34,6 +34,8 @@ public class DeviceService extends Service {
 	}
 
 	public static DeviceService getDeviceService(String deviceServiceAddress, String u, String p) {
+		if (deviceServiceAddress == null || deviceServiceAddress.isEmpty())
+			return null;
 		return new DeviceService(deviceServiceAddress, u, p);
 	}
 
