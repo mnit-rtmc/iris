@@ -29,7 +29,6 @@ import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -272,8 +271,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	private void createSetupJobs() {
 		drop_spn.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				Number n = (Number)drop_spn.getValue();
-				proxy.setDrop(n.shortValue());
+				Number n = (Number) drop_spn.getValue();
+				proxy.setDrop(n.intValue());
 			}
 		});
 		password.addFocusListener(new FocusAdapter() {
