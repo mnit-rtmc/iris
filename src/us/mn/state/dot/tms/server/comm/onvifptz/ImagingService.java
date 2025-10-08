@@ -33,6 +33,8 @@ public class ImagingService extends Service {
 	}
 
 	public static ImagingService getImagingService(String imagingServiceAddress, String u, String p) {
+		if (imagingServiceAddress == null || imagingServiceAddress.isEmpty())
+			return null;
 		return new ImagingService(imagingServiceAddress, u, p);
 	}
 

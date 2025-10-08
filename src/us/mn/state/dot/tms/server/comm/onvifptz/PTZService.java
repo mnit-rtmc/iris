@@ -35,6 +35,8 @@ public class PTZService extends Service {
 	}
 
 	public static PTZService getPTZService(String ptzServiceAddress, String u, String p) {
+		if (ptzServiceAddress == null || ptzServiceAddress.isEmpty())
+			return null;
 		return new PTZService(ptzServiceAddress, u, p);
 	}
 
