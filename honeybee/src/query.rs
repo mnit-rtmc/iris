@@ -339,6 +339,12 @@ pub const EVENT_CONFIG_ALL: &str = "\
   FROM iris.event_config \
   ORDER BY name";
 
+/// SQL query for event descriptions (LUT)
+pub const EVENT_DESCRIPTION_LUT: &str = "\
+  SELECT event_desc_id AS id, description \
+  FROM event.event_description \
+  ORDER BY event_desc_id";
+
 /// SQL query for all flow streams (primary)
 pub const FLOW_STREAM_ALL: &str = "\
   SELECT name, controller \

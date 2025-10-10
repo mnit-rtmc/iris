@@ -41,6 +41,7 @@ pub enum Res {
     EncoderType,
     Encoding,
     EventConfig,
+    EventDescription,
     FlowStream,
     Font,
     GateArm,
@@ -138,6 +139,7 @@ impl Res {
             EncoderType,
             Encoding,
             EventConfig,
+            EventDescription,
             FlowStream,
             Font,
             GateArm,
@@ -222,6 +224,7 @@ impl Res {
             EncoderStream => "encoder_stream",
             EncoderType => "encoder_type",
             EventConfig => "event_config",
+            EventDescription => "event_description",
             Encoding => "encoding",
             FlowStream => "flow_stream",
             Font => "font",
@@ -336,10 +339,10 @@ impl Res {
         #[allow(clippy::match_like_matches_macro)]
         match self {
             BeaconState | CommProtocol | Condition | Direction | Encoding
-            | Font | GateArmInterlock | GateArmState | Graphic | IncImpact
-            | IncRange | LaneCode | LcsIndication | LcsType
-            | MeterAlgorithm | MeterType | ResourceType | RnodeTransition
-            | RnodeType | RoadClass | RoadModifier => true,
+            | EventDescription | Font | GateArmInterlock | GateArmState
+            | Graphic | IncImpact | IncRange | LaneCode | LcsIndication
+            | LcsType | MeterAlgorithm | MeterType | ResourceType
+            | RnodeTransition | RnodeType | RoadClass | RoadModifier => true,
             _ => false,
         }
     }

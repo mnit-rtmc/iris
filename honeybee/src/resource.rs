@@ -55,6 +55,7 @@ pub enum Resource {
     EncoderType,
     Encoding,
     EventConfig,
+    EventDescription,
     FlowStream,
     Font,
     GateArm,
@@ -146,6 +147,7 @@ impl Resource {
             EncoderType,
             Encoding,
             EventConfig,
+            EventDescription,
             FlowStream,
             Font,
             GateArm,
@@ -235,6 +237,7 @@ impl Resource {
             EncoderType => Res::EncoderType,
             Encoding => Res::Encoding,
             EventConfig => Res::EventConfig,
+            EventDescription => Res::EventDescription,
             FlowStream => Res::FlowStream,
             Font => Res::Font,
             GateArm => Res::GateArm,
@@ -322,6 +325,7 @@ impl Resource {
             EncoderType => "api/encoder_type",
             Encoding => "lut/encoding",
             EventConfig => "api/event_config",
+            EventDescription => "lut/event_description",
             FlowStream => "api/flow_stream",
             Font => "api/font",
             GateArm => "api/gate_arm",
@@ -423,6 +427,7 @@ impl Resource {
             EncoderType => query::ENCODER_TYPE_ALL,
             Encoding => query::ENCODING_LUT,
             EventConfig => query::EVENT_CONFIG_ALL,
+            EventDescription => query::EVENT_DESCRIPTION_LUT,
             FlowStream => query::FLOW_STREAM_ALL,
             Font => query::FONT_ALL,
             GateArm => query::GATE_ARM_ALL,
@@ -642,7 +647,10 @@ impl Resource {
     /// Query geo locations for non-incident resource.
     ///
     /// * `client` The database connection.
-    async fn query_locs_other(self, client: &mut Client) -> Result<Vec<GeoLoc>> {
+    async fn query_locs_other(
+        self,
+        client: &mut Client,
+    ) -> Result<Vec<GeoLoc>> {
         log::trace!("query_locs_other: {}", self.res_type().as_str());
         let params = &[self.res_type().as_str()];
         let it = client.query_raw(query::GEO_LOC_MARKER, params).await?;
