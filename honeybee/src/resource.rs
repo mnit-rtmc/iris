@@ -553,9 +553,8 @@ impl Resource {
             Rnode => query_all_nodes(client, segments).await,
             RoadFull => query_all_roads(client, segments).await,
             SignMessage => self.query_sign_msgs(client).await,
-            Beacon | Camera | Dms | Lcs | RampMeter | WeatherSensor => {
-                self.query_all_locs(client, segments).await
-            }
+            Beacon | Camera | Dms | Incident | Lcs | RampMeter
+            | WeatherSensor => self.query_all_locs(client, segments).await,
             DayPlan => {
                 // there is no separate channel for DayMatcher
                 self.query_file(client, self.path()).await?;
@@ -617,7 +616,34 @@ impl Resource {
     ///
     /// * `client` The database connection.
     async fn query_locs(self, client: &mut Client) -> Result<Vec<GeoLoc>> {
-        log::trace!("query_locs: {}", self.res_type().as_str());
+        let locs = match self.res_type() {
+            Res::Incident => self.query_locs_inc(client).await?,
+            _ => self.query_locs_other(client).await?,
+        };
+        log::trace!("query_locs: {}, {}", self.res_type().as_str(), locs.len());
+        Ok(locs)
+    }
+
+    /// Query geo locations for incident resource.
+    ///
+    /// * `client` The database connection.
+    async fn query_locs_inc(self, client: &mut Client) -> Result<Vec<GeoLoc>> {
+        log::trace!("query_locs_inc");
+        let mut locs = Vec::new();
+        let params: &[&str] = &[];
+        let it = client.query_raw(query::INCIDENT_LOCS, params).await?;
+        pin_mut!(it);
+        while let Some(row) = it.try_next().await? {
+            locs.push(GeoLoc::from_row(row));
+        }
+        Ok(locs)
+    }
+
+    /// Query geo locations for non-incident resource.
+    ///
+    /// * `client` The database connection.
+    async fn query_locs_other(self, client: &mut Client) -> Result<Vec<GeoLoc>> {
+        log::trace!("query_locs_other: {}", self.res_type().as_str());
         let params = &[self.res_type().as_str()];
         let it = client.query_raw(query::GEO_LOC_MARKER, params).await?;
         pin_mut!(it);

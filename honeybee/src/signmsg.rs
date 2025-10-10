@@ -151,7 +151,8 @@ impl MsgData {
             .with_multi_cfg(cfg.multi_cfg())
             .build()?;
         let mut buf = Vec::with_capacity(1024);
-        match rendzina::render_multi(&mut buf, &dms, &msg.multi, 450, 100, None) {
+        match rendzina::render_multi(&mut buf, &dms, &msg.multi, 450, 100, None)
+        {
             Ok(()) => {
                 log::info!("{name} rendered in {:?}", t.elapsed());
                 Ok(Some(buf))

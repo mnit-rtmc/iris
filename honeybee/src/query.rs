@@ -439,9 +439,8 @@ pub const HASHTAG_ALL: &str = "\
 
 /// SQL query for all active incidents (primary)
 pub const INCIDENT_ALL: &str = "\
-  SELECT name, replaces, event_desc, road, dir, detail \
+  SELECT name, replaces, event_desc, road, dir, detail, cleared, confirmed \
   FROM event.incident \
-  WHERE cleared = false \
   ORDER BY event_date";
 
 /// SQL query for one active incident (secondary)
@@ -450,6 +449,11 @@ pub const INCIDENT_ONE: &str = "\
          impact, cleared, confirmed, camera, detail, lat, lon, user_id \
   FROM event.incident \
   WHERE name = $1";
+
+/// SQL query for incident locations
+pub const INCIDENT_LOCS: &str = "\
+  SELECT name, road, dir, lat, lon \
+  FROM event.incident";
 
 /// SQL query for all active incidents (public)
 pub const INCIDENT_PUB: &str = "\
