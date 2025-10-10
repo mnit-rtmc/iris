@@ -13,6 +13,7 @@
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
+use crate::geoloc::Direction;
 use crate::item::{ItemState, ItemStates};
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Fields};
@@ -28,6 +29,8 @@ pub struct Incident {
     pub name: String,
     pub replaces: Option<String>,
     pub event_desc: u32,
+    pub road: String,
+    pub dir: u16,
     pub cleared: bool,
     pub confirmed: bool,
     // secondary attributes
@@ -41,15 +44,24 @@ pub struct Incident {
 #[derive(Default)]
 pub struct IncidentAnc {
     assets: Vec<Asset>,
+    directions: Vec<Direction>,
 }
 
 impl AncillaryData for IncidentAnc {
     type Primary = Incident;
 
     /// Construct ancillary incident data
-    fn new(_pri: &Incident, _view: View) -> Self {
-        let assets = Vec::new();
-        IncidentAnc { assets }
+    fn new(_pri: &Incident, view: View) -> Self {
+        let mut assets = Vec::new();
+        match view {
+            View::Search => {
+                assets.push(Asset::Directions);
+                //assets.push(Asset::Roads);
+            }
+            _ => (),
+        }
+        let directions = Vec::new();
+        IncidentAnc { assets, directions }
     }
 
     /// Get next asset to fetch
@@ -62,11 +74,15 @@ impl AncillaryData for IncidentAnc {
         &mut self,
         _pri: &Incident,
         asset: Asset,
-        _value: JsValue,
+        value: JsValue,
     ) -> Result<()> {
         match asset {
-            _ => todo!(),
+            Asset::Directions => {
+                self.directions = serde_wasm_bindgen::from_value(value)?;
+            }
+            _ => unreachable!(),
         }
+        Ok(())
     }
 }
 
@@ -103,7 +119,6 @@ impl Incident {
         let mut html = self.title(View::Control);
         html.div().class("row");
         html.end(); /* div */
-        self.footer_html(true, &mut html);
         html.to_string()
     }
 
@@ -166,8 +181,11 @@ impl Card for Incident {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &IncidentAnc) -> bool {
+    fn is_match(&self, search: &str, anc: &IncidentAnc) -> bool {
         self.name.contains_lower(search)
+            || self.item_states(anc).is_match(search)
+            || self.road.contains_lower(search)
+        // FIXME: check direction
     }
 
     /// Convert to HTML view
