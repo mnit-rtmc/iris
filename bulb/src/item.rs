@@ -60,6 +60,14 @@ pub enum ItemState {
     Dms,
     /// Ramp meter device actions
     RampMeter,
+    /// Crash incident
+    Crash,
+    /// Stall incident
+    Stall,
+    /// Hazard incident
+    Hazard,
+    /// Roadwork incident
+    Roadwork,
     /// State not known
     Unknown,
 }
@@ -102,6 +110,10 @@ impl ItemState {
             "🎥" => Some(Self::Camera),
             "⬛" => Some(Self::Dms),
             "🚦" => Some(Self::RampMeter),
+            "💥" => Some(Self::Crash),
+            "⛽" => Some(Self::Stall),
+            "🪨" => Some(Self::Hazard),
+            "🚧" => Some(Self::Roadwork),
             "❓" => Some(Self::Unknown),
             _ => None,
         }
@@ -132,6 +144,10 @@ impl ItemState {
             Self::Camera => "🎥",
             Self::Dms => "⬛",
             Self::RampMeter => "🚦",
+            Self::Crash => "💥",
+            Self::Stall => "⛽",
+            Self::Hazard => "🪨",
+            Self::Roadwork => "🚧",
             Self::Unknown => "❓",
         }
     }
@@ -161,6 +177,10 @@ impl ItemState {
             Self::Camera => "cameras",
             Self::Dms => "dms",
             Self::RampMeter => "ramp meters",
+            Self::Crash => "crash",
+            Self::Stall => "stall",
+            Self::Hazard => "hazard",
+            Self::Roadwork => "road work",
             Self::Unknown => "unknown",
         }
     }

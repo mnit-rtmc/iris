@@ -159,6 +159,15 @@ function tms_styles() {
         dms_16: tms_style,
         dms_17: tms_style,
         dms_18: tms_style,
+        incident_10: tms_style,
+        incident_11: tms_style,
+        incident_12: tms_style,
+        incident_13: tms_style,
+        incident_14: tms_style,
+        incident_15: tms_style,
+        incident_16: tms_style,
+        incident_17: tms_style,
+        incident_18: tms_style,
         lcs_12: tms_style,
         lcs_13: tms_style,
         lcs_14: tms_style,
@@ -223,10 +232,23 @@ function item_style(state) {
     let style = tms_style_base();
     switch (state) {
         case '🔹':
+        case '🚨':
             style.fillColor = "#55acee";
             return style;
         case '🔶':
             style.fillColor = "#e78e0b";
+            return style;
+        case '💥':
+            style.fillColor = "#ff8080";
+            return style;
+        case '⛽':
+            style.fillColor = "#ff80ff";
+            return style;
+        case '🪨':
+            style.fillColor = "#ffff80";
+            return style;
+        case '🚧':
+            style.fillColor = "#ffd080";
             return style;
         case '📋':
         case '👽':

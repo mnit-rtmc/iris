@@ -387,7 +387,7 @@ impl Card for ActionPlan {
     }
 
     /// Get the main item state
-    fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
+    fn item_state_main(&self, anc: &ActionPlanAnc) -> ItemState {
         let states = self.item_states(anc);
         if states.contains(ItemState::Inactive) {
             ItemState::Inactive

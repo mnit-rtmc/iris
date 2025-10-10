@@ -276,6 +276,42 @@ layer_group: tms
     geom_type: polygon
     zoom: 18
     tags: ?name
+  layer: incident_10
+    geom_type: polygon
+    zoom: 10
+    tags: ?name
+  layer: incident_11
+    geom_type: polygon
+    zoom: 11
+    tags: ?name
+  layer: incident_12
+    geom_type: polygon
+    zoom: 12
+    tags: ?name
+  layer: incident_13
+    geom_type: polygon
+    zoom: 13
+    tags: ?name
+  layer: incident_14
+    geom_type: polygon
+    zoom: 14
+    tags: ?name
+  layer: incident_15
+    geom_type: polygon
+    zoom: 15
+    tags: ?name
+  layer: incident_16
+    geom_type: polygon
+    zoom: 16
+    tags: ?name
+  layer: incident_17
+    geom_type: polygon
+    zoom: 17
+    tags: ?name
+  layer: incident_18
+    geom_type: polygon
+    zoom: 18
+    tags: ?name
   layer: lcs_12
     geom_type: polygon
     zoom: 12

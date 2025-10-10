@@ -28,6 +28,7 @@ use crate::flowstream::FlowStream;
 use crate::gatearm::GateArm;
 use crate::geoloc::Loc;
 use crate::gps::Gps;
+use crate::incident::Incident;
 use crate::item::ItemState;
 use crate::lcs::Lcs;
 use crate::lcsstate::LcsState;
@@ -399,6 +400,7 @@ fn item_states_all(res: Res) -> &'static [ItemState] {
         Res::Domain => Domain::item_states_all(),
         Res::GateArm => GateArm::item_states_all(),
         Res::Gps => Gps::item_states_all(),
+        Res::Incident => Incident::item_states_all(),
         Res::Lcs => Lcs::item_states_all(),
         Res::Permission => Permission::item_states_all(),
         Res::RampMeter => RampMeter::item_states_all(),
@@ -415,7 +417,9 @@ fn item_states_all(res: Res) -> &'static [ItemState] {
 /// Get available views for a resource type
 pub fn res_views(res: Res) -> &'static [View] {
     match res {
-        Res::ActionPlan => &[View::Compact, View::Control, View::Setup],
+        Res::ActionPlan | Res::Incident => {
+            &[View::Compact, View::Control, View::Setup]
+        }
         Res::CabinetStyle
         | Res::CommConfig
         | Res::Domain
@@ -525,6 +529,7 @@ pub async fn fetch_resource(config: bool) -> Result<String> {
     if config {
         add_option::<Gps>(&access, &mut html);
     }
+    add_option::<Incident>(&access, &mut html);
     add_option::<Lcs>(&access, &mut html);
     if config {
         add_option::<LcsState>(&access, &mut html);
@@ -662,6 +667,7 @@ impl CardList {
             Res::FlowStream => self.make_html_x::<FlowStream>().await,
             Res::GateArm => self.make_html_x::<GateArm>().await,
             Res::Gps => self.make_html_x::<Gps>().await,
+            Res::Incident => self.make_html_x::<Incident>().await,
             Res::Lcs => self.make_html_x::<Lcs>().await,
             Res::LcsState => self.make_html_x::<LcsState>().await,
             Res::Modem => self.make_html_x::<Modem>().await,
@@ -748,6 +754,7 @@ impl CardList {
             Res::FlowStream => self.view_change_x::<FlowStream>().await,
             Res::GateArm => self.view_change_x::<GateArm>().await,
             Res::Gps => self.view_change_x::<Gps>().await,
+            Res::Incident => self.view_change_x::<Incident>().await,
             Res::Lcs => self.view_change_x::<Lcs>().await,
             Res::LcsState => self.view_change_x::<LcsState>().await,
             Res::Modem => self.view_change_x::<Modem>().await,
@@ -819,6 +826,7 @@ impl CardList {
             Res::FlowStream => self.changed::<FlowStream>(json).await,
             Res::GateArm => self.changed::<GateArm>(json).await,
             Res::Gps => self.changed::<Gps>(json).await,
+            Res::Incident => self.changed::<Incident>(json).await,
             Res::Lcs => self.changed::<Lcs>(json).await,
             Res::LcsState => self.changed::<LcsState>(json).await,
             Res::Modem => self.changed::<Modem>(json).await,
@@ -942,6 +950,7 @@ async fn fetch_one_res(cv: &CardView) -> Result<String> {
         Res::FlowStream => fetch_one_x::<FlowStream>(cv).await,
         Res::GateArm => fetch_one_x::<GateArm>(cv).await,
         Res::Gps => fetch_one_x::<Gps>(cv).await,
+        Res::Incident => fetch_one_x::<Incident>(cv).await,
         Res::Lcs => fetch_one_x::<Lcs>(cv).await,
         Res::LcsState => fetch_one_x::<LcsState>(cv).await,
         Res::Modem => fetch_one_x::<Modem>(cv).await,
@@ -1001,6 +1010,7 @@ async fn patch_setup(cv: &CardView) -> Result<()> {
         Res::FlowStream => patch_setup_x::<FlowStream>(cv).await,
         Res::GateArm => patch_setup_x::<GateArm>(cv).await,
         Res::Gps => patch_setup_x::<Gps>(cv).await,
+        Res::Incident => patch_setup_x::<Incident>(cv).await,
         Res::Lcs => patch_setup_x::<Lcs>(cv).await,
         Res::LcsState => patch_setup_x::<LcsState>(cv).await,
         Res::Modem => patch_setup_x::<Modem>(cv).await,
