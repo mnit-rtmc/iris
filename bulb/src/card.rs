@@ -340,6 +340,13 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
             .text(" ")
             .text(self.name())
             .end();
+        self.views_html(view, &mut html);
+        html.end(); // div
+        html
+    }
+
+    /// Build views select
+    fn views_html(&self, view: View, html: &mut Html) {
         html.select().id("ob_view");
         for v in res_views(Self::res()) {
             let option = html.option();
@@ -348,8 +355,7 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
             }
             html.text(v.as_str()).end();
         }
-        html.end().end();
-        html
+        html.end(); // select
     }
 
     /// Build card footer HTML

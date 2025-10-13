@@ -23,12 +23,22 @@ use serde::Deserialize;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
 
+/// Incident detail
+#[derive(Debug, Default, Deserialize, PartialEq)]
+pub struct IncidentDetail {
+    /// Detail name (short)
+    name: String,
+    /// Detail description (long)
+    description: String,
+}
+
 /// Incident
 #[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct Incident {
     pub name: String,
     pub replaces: Option<String>,
     pub event_desc: u32,
+    pub detail: Option<String>,
     pub road: String,
     pub dir: u16,
     pub cleared: bool,
@@ -45,6 +55,7 @@ pub struct Incident {
 pub struct IncidentAnc {
     assets: Vec<Asset>,
     directions: Vec<Direction>,
+    details: Vec<IncidentDetail>,
 }
 
 impl AncillaryData for IncidentAnc {
@@ -54,14 +65,20 @@ impl AncillaryData for IncidentAnc {
     fn new(_pri: &Incident, view: View) -> Self {
         let mut assets = Vec::new();
         match view {
-            View::Search => {
+            View::Search | View::Compact | View::Control => {
                 assets.push(Asset::Directions);
+                assets.push(Asset::IncDetails);
                 //assets.push(Asset::Roads);
             }
             _ => (),
         }
         let directions = Vec::new();
-        IncidentAnc { assets, directions }
+        let details = Vec::new();
+        IncidentAnc {
+            assets,
+            directions,
+            details,
+        }
     }
 
     /// Get next asset to fetch
@@ -79,6 +96,9 @@ impl AncillaryData for IncidentAnc {
         match asset {
             Asset::Directions => {
                 self.directions = serde_wasm_bindgen::from_value(value)?;
+            }
+            Asset::IncDetails => {
+                self.details = serde_wasm_bindgen::from_value(value)?;
             }
             _ => unreachable!(),
         }
@@ -100,25 +120,55 @@ impl Incident {
         }
     }
 
+    /// Get incident location
+    fn location(&self, anc: &IncidentAnc) -> String {
+        let dir = anc
+            .directions
+            .get(usize::from(self.dir))
+            .map(|d| &d.direction[..])
+            .unwrap_or("");
+        format!("{} {dir}", &self.road)
+    }
+
+    /// Get incident description
+    fn description(&self, anc: &IncidentAnc) -> String {
+        let st = self.item_state_main(anc);
+        let desc = st.description();
+        format!("{st} {desc} on {}", self.location(anc))
+    }
+
+    /// Get detail description
+    fn detail<'a>(&self, anc: &'a IncidentAnc) -> &'a str {
+        let st = self.item_state_main(anc);
+        match (st, &self.detail) {
+            (ItemState::Hazard, Some(dtl)) => anc
+                .details
+                .iter()
+                .find(|d| d.name.as_str() == dtl)
+                .map(|d| &d.description[..])
+                .unwrap_or(""),
+            _ => "",
+        }
+    }
+
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &IncidentAnc) -> String {
         let mut html = Html::new();
-        html.div()
-            .class("end")
-            .text(self.name())
-            .text(" ")
-            .text(self.item_states(anc).to_string());
+        html.div().class("title row").text(self.description(anc));
+        html.end(); /* div */
         html.to_string()
     }
 
     /// Convert to Control HTML
-    fn to_html_control(&self, _anc: &IncidentAnc) -> String {
+    fn to_html_control(&self, anc: &IncidentAnc) -> String {
         if let Some((lat, lon)) = self.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let mut html = self.title(View::Control);
-        html.div().class("row");
+        let mut html = Html::new();
+        html.div().class("title row").text(self.description(anc));
+        self.views_html(View::Control, &mut html);
         html.end(); /* div */
+        html.div().class("row info").text(self.detail(anc)).end();
         html.to_string()
     }
 
@@ -148,7 +198,6 @@ impl Card for Incident {
     /// Get all item states
     fn item_states_all() -> &'static [ItemState] {
         &[
-            ItemState::Incident,
             ItemState::Crash,
             ItemState::Stall,
             ItemState::Hazard,
@@ -184,8 +233,7 @@ impl Card for Incident {
     fn is_match(&self, search: &str, anc: &IncidentAnc) -> bool {
         self.name.contains_lower(search)
             || self.item_states(anc).is_match(search)
-            || self.road.contains_lower(search)
-        // FIXME: check direction
+            || self.description(anc).contains_lower(search)
     }
 
     /// Convert to HTML view
