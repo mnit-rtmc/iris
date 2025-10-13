@@ -32,10 +32,7 @@ impl ContainsLower for &str {
 
 impl ContainsLower for Option<&str> {
     fn contains_lower(self, search: &str) -> bool {
-        self.as_deref()
-            .unwrap_or("")
-            .to_lowercase()
-            .contains(search)
+        self.unwrap_or("").to_lowercase().contains(search)
     }
 }
 

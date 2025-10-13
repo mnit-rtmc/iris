@@ -117,7 +117,7 @@ impl<'r> Renderer<'r> {
                 let mut buf = Vec::with_capacity(4096);
                 match rendzina::render_multi(
                     &mut buf,
-                    &dms,
+                    dms,
                     multi,
                     width,
                     height,
@@ -131,7 +131,7 @@ impl<'r> Renderer<'r> {
                     }
                 }
             }
-            _ => console::log_1(&format!("render_multi: no image").into()),
+            _ => console::log_1(&"render_multi: no image".into()),
         }
         img.end();
     }
@@ -159,7 +159,7 @@ impl<'r> Renderer<'r> {
         }
         if let Some(dms) = &self.dms {
             let mut buf = Vec::with_capacity(4096);
-            match rendzina::render_pixels(&mut buf, &dms, pix, width, height) {
+            match rendzina::render_pixels(&mut buf, dms, pix, width, height) {
                 Ok(()) => {
                     img = img.src(encode_gif(&buf[..]));
                 }

@@ -502,15 +502,14 @@ impl DmsAnc {
         // NOTE: this prevents lifetime from escaping
         let mut pat = pat_def;
         if self.pat_lines(pat).count() == 0 {
-            let n_lines =
-                MessagePattern::new(&dms, &pat.multi).widths().count();
+            let n_lines = MessagePattern::new(dms, &pat.multi).widths().count();
             match self.find_substitute(pat, n_lines) {
                 Some(sub) => pat = sub,
                 None => return,
             }
         }
-        let widths = MessagePattern::new(&dms, &pat_def.multi).widths();
-        let cur_lines = MessagePattern::new(&dms, &pat_def.multi)
+        let widths = MessagePattern::new(dms, &pat_def.multi).widths();
+        let cur_lines = MessagePattern::new(dms, &pat_def.multi)
             .lines(ms_cur)
             .chain(repeat(""));
         html.div().id("mc_lines").class("column");
@@ -822,10 +821,10 @@ impl Dms {
         let gif = self.msg_current_gif();
         let dms = self.make_dms(anc);
         if let Some(gif) = &gif {
-            rend = rend.with_gif(&gif);
+            rend = rend.with_gif(gif);
         }
         if let Some(dms) = &dms {
-            rend = rend.with_dms(&dms)
+            rend = rend.with_dms(dms)
         }
         rend.render_multi(self.current_multi(anc));
         self.render_pixels(anc, &mut rend);
