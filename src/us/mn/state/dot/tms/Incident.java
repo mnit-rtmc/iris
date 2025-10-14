@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ public interface Incident extends SonarObject {
 	int getEventType();
 
 	/** Get the incident detail */
-	IncidentDetail getDetail();
+	IncDetail getDetail();
 
 	/** Get the event date (timestamp) */
 	long getEventDate();

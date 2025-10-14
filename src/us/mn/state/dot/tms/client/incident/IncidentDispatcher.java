@@ -47,8 +47,8 @@ import us.mn.state.dot.tms.DmsLock;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.IncidentHelper;
+import us.mn.state.dot.tms.IncDetail;
 import us.mn.state.dot.tms.IncSeverity;
 import us.mn.state.dot.tms.LaneConfiguration;
 import us.mn.state.dot.tms.LaneCode;
@@ -116,14 +116,14 @@ public class IncidentDispatcher extends IPanel
 	private final TypeCache<Incident> cache;
 
 	/** Incident detail proxy list model */
-	private final ProxyListModel<IncidentDetail> detail_mdl;
+	private final ProxyListModel<IncDetail> detail_mdl;
 
 	/** Type label */
 	private final JLabel type_lbl = createValueLabel();
 
 	/** Incident detail combo box */
-	private final JComboBox<IncidentDetail> detail_cbx =
-		new JComboBox<IncidentDetail>();
+	private final JComboBox<IncDetail> detail_cbx =
+		new JComboBox<IncDetail>();
 
 	/** Location of incident */
 	private final JLabel location_lbl = createValueLabel();
@@ -220,8 +220,8 @@ public class IncidentDispatcher extends IPanel
 		sel_mdl = manager.getSelectionModel();
 		creator = ic;
 		cache = s.getSonarState().getIncCache().getIncidents();
-		detail_mdl = new ProxyListModel<IncidentDetail>(
-			s.getSonarState().getIncCache().getIncidentDetails());
+		detail_mdl = new ProxyListModel<IncDetail>(
+			s.getSonarState().getIncCache().getIncDetails());
 	}
 
 	/** Initialize the widgets on the panel */
@@ -229,9 +229,8 @@ public class IncidentDispatcher extends IPanel
 	public void initialize() {
 		super.initialize();
 		detail_mdl.initialize();
-		detail_cbx.setRenderer(new IncidentDetailRenderer());
-		detail_cbx.setModel(new IComboBoxModel<IncidentDetail>(
-			detail_mdl));
+		detail_cbx.setRenderer(new IncDetailRenderer());
+		detail_cbx.setModel(new IComboBoxModel<IncDetail>(detail_mdl));
 		type_lbl.setHorizontalTextPosition(SwingConstants.TRAILING);
 		camera_cbx.setRenderer(new CameraCellRenderer());
 		cam_pnl.add(camera_cbx, CAMERA_CBOX);
@@ -315,7 +314,7 @@ public class IncidentDispatcher extends IPanel
 				destroyIncident(rpl);
 			}
 			attrs.put("event_desc", inc.getEventType());
-			IncidentDetail dtl = getSelectedDetail();
+			IncDetail dtl = getSelectedDetail();
 			if (dtl != null)
 				attrs.put("detail", dtl);
 			attrs.put("lane_code", inc.getLaneCode());
@@ -368,10 +367,10 @@ public class IncidentDispatcher extends IPanel
 	}
 
 	/** Get the selected incident detail */
-	private IncidentDetail getSelectedDetail() {
+	private IncDetail getSelectedDetail() {
 		Object detail = detail_cbx.getSelectedItem();
-		if (detail instanceof IncidentDetail)
-			return (IncidentDetail) detail;
+		if (detail instanceof IncDetail)
+			return (IncDetail) detail;
 		else
 			return null;
 	}

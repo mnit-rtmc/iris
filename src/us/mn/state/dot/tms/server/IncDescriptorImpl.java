@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2024  Minnesota Department of Transportation
+ * Copyright (C) 2016-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.IncDescriptor;
 import us.mn.state.dot.tms.IncDescriptorHelper;
-import us.mn.state.dot.tms.IncidentDetail;
+import us.mn.state.dot.tms.IncDetail;
 import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.TMSException;
 
@@ -122,16 +122,16 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 	}
 
 	/** Incident detail */
-	private IncidentDetail detail;
+	private IncDetail detail;
 
 	/** Set the incident detail */
 	@Override
-	public void setDetail(IncidentDetail dtl) {
+	public void setDetail(IncDetail dtl) {
 		detail = dtl;
 	}
 
 	/** Set the incident detail */
-	public void doSetDetail(IncidentDetail dtl) throws TMSException {
+	public void doSetDetail(IncDetail dtl) throws TMSException {
 		if (dtl != detail) {
 			store.update(this, "detail", dtl);
 			setDetail(dtl);
@@ -140,7 +140,7 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 
 	/** Get the incident detail */
 	@Override
-	public IncidentDetail getDetail() {
+	public IncDetail getDetail() {
 		return detail;
 	}
 

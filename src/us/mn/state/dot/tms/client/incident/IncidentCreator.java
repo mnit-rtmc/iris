@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2022  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.IncidentDetail;
+import us.mn.state.dot.tms.IncDetail;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneImpact;
 import us.mn.state.dot.tms.LaneCode;
@@ -211,7 +211,7 @@ public class IncidentCreator extends JPanel {
 	public void replaceIncident(Incident inc) {
 		final String replaces = inc.getName();
 		final EventType et = EventType.fromId(inc.getEventType());
-		final IncidentDetail dtl = inc.getDetail();
+		final IncDetail dtl = inc.getDetail();
 		final String lcode = inc.getLaneCode();
 		final LaneCode lc = LaneCode.fromCode(lcode);
 		client.setPointSelector(new PointSelector() {
@@ -236,7 +236,7 @@ public class IncidentCreator extends JPanel {
 		Object item = lcode_cbx.getSelectedItem();
 		if (item instanceof LaneCode) {
 			LaneCode lc = (LaneCode) item;
-			createIncident(replaces, et, (IncidentDetail) null,
+			createIncident(replaces, et, (IncDetail) null,
 				lc, smp);
 		}
 	}
@@ -248,7 +248,7 @@ public class IncidentCreator extends JPanel {
 	 * @param lc Lane code.
 	 * @param smp Position (lat / lon). */
 	private void createIncident(String replaces, EventType et,
-		IncidentDetail dtl, LaneCode lc, SphericalMercatorPosition smp)
+		IncDetail dtl, LaneCode lc, SphericalMercatorPosition smp)
 	{
 		GeoLoc loc = r_node_manager.snapGeoLoc(smp, lc, MAX_DIST);
 		if (loc != null)
@@ -262,7 +262,7 @@ public class IncidentCreator extends JPanel {
 	 * @param lc Lane code.
 	 * @param loc Incident location. */
 	private void createIncident(String replaces, EventType et,
-		IncidentDetail dtl, LaneCode lc, GeoLoc loc)
+		IncDetail dtl, LaneCode lc, GeoLoc loc)
 	{
 		Road road = loc.getRoadway();
 		short dir = loc.getRoadDir();

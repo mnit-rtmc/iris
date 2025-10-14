@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2016  Minnesota Department of Transportation
+ * Copyright (C) 2010-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
-import us.mn.state.dot.tms.IncidentDetail;
+import us.mn.state.dot.tms.IncDetail;
 import us.mn.state.dot.tms.client.widget.IListCellRenderer;
 
 /**
@@ -22,11 +22,11 @@ import us.mn.state.dot.tms.client.widget.IListCellRenderer;
  *
  * @author Douglas Lau
  */
-public class IncidentDetailRenderer extends IListCellRenderer<IncidentDetail> {
+public class IncDetailRenderer extends IListCellRenderer<IncDetail> {
 
 	/** Convert value to a string */
 	@Override
-	protected String valueToString(IncidentDetail value) {
+	protected String valueToString(IncDetail value) {
 		return value.getDescription();
 	}
 }

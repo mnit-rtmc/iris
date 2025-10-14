@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2022  Minnesota Department of Transportation
+ * Copyright (C) 2016-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.IncDescriptor;
-import us.mn.state.dot.tms.IncidentDetail;
+import us.mn.state.dot.tms.IncDetail;
 import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -87,7 +87,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 	}
 
 	/** Renderer for incident details in a table cell */
-	static private class IncidentDetailCellRenderer
+	static private class IncDetailCellRenderer
 		extends DefaultTableCellRenderer
 	{
 		public Component getTableCellRendererComponent(JTable table,
@@ -102,8 +102,8 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 
 	/** Get a string value of an incident detail */
 	static private Object detailDesc(Object value) {
-		if (value instanceof IncidentDetail) {
-			IncidentDetail dtl = (IncidentDetail) value;
+		if (value instanceof IncDetail) {
+			IncDetail dtl = (IncDetail) value;
 			return dtl.getDescription();
 		} else
 			return value;
@@ -146,19 +146,19 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				return canWrite(dsc);
 			}
 			public void setValueAt(IncDescriptor dsc, Object value){
-				if (value instanceof IncidentDetail)
-					dsc.setDetail((IncidentDetail) value);
+				if (value instanceof IncDetail)
+					dsc.setDetail((IncDetail) value);
 				else
 					dsc.setDetail(null);
 			}
 			protected TableCellRenderer createCellRenderer() {
-				return new IncidentDetailCellRenderer();
+				return new IncDetailCellRenderer();
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox<IncidentDetail> cbx =
-					new JComboBox<IncidentDetail>();
-				cbx.setRenderer(new IncidentDetailRenderer());
-				cbx.setModel(new IComboBoxModel<IncidentDetail>(
+				JComboBox<IncDetail> cbx =
+					new JComboBox<IncDetail>();
+				cbx.setRenderer(new IncDetailRenderer());
+				cbx.setModel(new IComboBoxModel<IncDetail>(
 					detail_mdl));
 				return new DefaultCellEditor(cbx);
 			}
@@ -200,14 +200,14 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 	}
 
 	/** Incident detail proxy list model */
-	private final ProxyListModel<IncidentDetail> detail_mdl;
+	private final ProxyListModel<IncDetail> detail_mdl;
 
 	/** Create a new table model.
 	 * @param s Session */
 	public IncDescriptorTableModel(Session s) {
 		super(s, descriptor(s), 12, 20);
-		detail_mdl = new ProxyListModel<IncidentDetail>(
-			s.getSonarState().getIncCache().getIncidentDetails());
+		detail_mdl = new ProxyListModel<IncDetail>(
+			s.getSonarState().getIncCache().getIncDetails());
 	}
 
 	/** Initialize the model */
@@ -235,8 +235,8 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				int et1 = dsc1.getEventType();
 				if (et0 != et1)
 					return et0 - et1;
-				IncidentDetail dt0 = dsc0.getDetail();
-				IncidentDetail dt1 = dsc1.getDetail();
+				IncDetail dt0 = dsc0.getDetail();
+				IncDetail dt1 = dsc1.getDetail();
 				if (dt0 != dt1) {
 					if (dt0 == null)
 						return -1;

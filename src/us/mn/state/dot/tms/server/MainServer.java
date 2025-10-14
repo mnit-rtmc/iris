@@ -205,7 +205,7 @@ public class MainServer {
 		ns.registerType(RoadAffixImpl.class);
 		ns.registerType(GeoLocImpl.class);
 		ns.registerType(MapExtentImpl.class);
-		ns.registerType(IncidentDetailImpl.class);
+		ns.registerType(IncDetailImpl.class);
 		ns.registerType(CommConfigImpl.class);
 		ns.registerType(CommLinkImpl.class);
 		ns.registerType(ModemImpl.class);

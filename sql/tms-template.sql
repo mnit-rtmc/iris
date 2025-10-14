@@ -211,9 +211,9 @@ sign_message	dms
 word	dms
 gate_arm	\N
 incident	\N
-incident_detail	incident
 inc_advice	incident
 inc_descriptor	incident
+inc_detail	incident
 inc_locator	incident
 road_affix	incident
 lcs	\N
@@ -771,12 +771,12 @@ GRANT SELECT ON geo_loc_view TO PUBLIC;
 --
 -- Incidents, descriptors, locators, advice, road affix
 --
-CREATE TABLE event.incident_detail (
+CREATE TABLE iris.inc_detail (
     name VARCHAR(8) PRIMARY KEY,
     description VARCHAR(32) NOT NULL
 );
 
-INSERT INTO event.incident_detail (name, description)
+INSERT INTO iris.inc_detail (name, description)
 VALUES
     ('animal', 'Animal on Road'),
     ('debris', 'Debris'),
@@ -797,8 +797,8 @@ VALUES
     ('test', 'Test Incident'),
     ('veh_fire', 'Vehicle Fire');
 
-CREATE TRIGGER incident_detail_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON event.incident_detail
+CREATE TRIGGER inc_detail_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.inc_detail
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE TABLE event.incident (
@@ -807,7 +807,7 @@ CREATE TABLE event.incident (
     replaces VARCHAR(16) REFERENCES event.incident(name),
     event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
     event_desc INTEGER NOT NULL REFERENCES event.event_description,
-    detail VARCHAR(8) REFERENCES event.incident_detail(name),
+    detail VARCHAR(8) REFERENCES iris.inc_detail,
     lane_code VARCHAR(1) NOT NULL REFERENCES iris.lane_code,
     road VARCHAR(20) NOT NULL,
     dir SMALLINT NOT NULL REFERENCES iris.direction(id),
@@ -918,7 +918,7 @@ CREATE TABLE iris.inc_descriptor (
     name VARCHAR(10) PRIMARY KEY,
     event_desc_id INTEGER NOT NULL
         REFERENCES event.event_description(event_desc_id),
-    detail VARCHAR(8) REFERENCES event.incident_detail(name),
+    detail VARCHAR(8) REFERENCES iris.inc_detail,
     lane_code VARCHAR(1) NOT NULL REFERENCES iris.lane_code,
     multi VARCHAR(64) NOT NULL
 );

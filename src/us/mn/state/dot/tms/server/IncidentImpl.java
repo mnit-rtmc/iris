@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.IncidentDetail;
+import us.mn.state.dot.tms.IncDetail;
 import us.mn.state.dot.tms.LaneImpact;
 import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.R_Node;
@@ -128,7 +128,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 
 	/** Create an incident */
 	public IncidentImpl(String n, String rpl, int et, Date ed,
-		IncidentDetail dtl, String lc, Road r, short d, double lt,
+		IncDetail dtl, String lc, Road r, short d, double lt,
 		double ln, Camera cam, String im, boolean clr, boolean cnf,
 		String uid)
 	{
@@ -186,11 +186,11 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	}
 
 	/** Incident detail */
-	private IncidentDetail detail;
+	private IncDetail detail;
 
 	/** Get the incident detail */
 	@Override
-	public IncidentDetail getDetail() {
+	public IncDetail getDetail() {
 		return detail;
 	}
 
@@ -383,7 +383,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 
 	/** Lookup the detail description */
 	private String lookupDetail() {
-		IncidentDetail dtl = detail;
+		IncDetail dtl = detail;
 		return (dtl != null) ? dtl.getDescription() : null;
 	}
 

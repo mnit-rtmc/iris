@@ -52,9 +52,9 @@ pub enum Res {
     Graphic,
     Hashtag,
     Incident,
-    IncidentDetail,
     IncAdvice,
     IncDescriptor,
+    IncDetail,
     IncImpact,
     IncLocator,
     IncRange,
@@ -150,9 +150,9 @@ impl Res {
             Graphic,
             Hashtag,
             Incident,
-            IncidentDetail,
             IncAdvice,
             IncDescriptor,
+            IncDetail,
             IncImpact,
             IncLocator,
             IncRange,
@@ -236,9 +236,9 @@ impl Res {
             Graphic => "graphic",
             Hashtag => "hashtag",
             Incident => "incident",
-            IncidentDetail => "incident_detail",
             IncAdvice => "inc_advice",
             IncDescriptor => "inc_descriptor",
+            IncDetail => "inc_detail",
             IncImpact => "inc_impact",
             IncLocator => "inc_locator",
             IncRange => "inc_range",
@@ -308,9 +308,9 @@ impl Res {
             GeoLoc => "🗺️ ",
             Gps => "🌐",
             Incident => "🚨",
-            IncidentDetail => "🚨➕",
             IncAdvice => "🚨❗",
             IncDescriptor => "🚨❓",
+            IncDetail => "🚨➕",
             IncLocator => "🚨🗺️",
             Lcs => "🠟✖🠟",
             LcsState => "🠟",
@@ -356,8 +356,8 @@ impl Res {
             | CameraPreset | CommConfig | CommLink | Controller
             | DayMatcher | DayPlan | Detector | DeviceAction | Dms | Domain
             | EncoderStream | EncoderType | EventConfig | FlowStream
-            | GateArm | Gps | Hashtag | Incident | IncidentDetail
-            | IncAdvice | IncDescriptor | IncLocator | Lcs | LcsState
+            | GateArm | Gps | Hashtag | Incident | IncAdvice
+            | IncDescriptor | IncDetail | IncLocator | Lcs | LcsState
             | Modem | MonitorStyle | MsgLine | MsgPattern | ParkingArea
             | Permission | PlanPhase | PlayList | RampMeter | Rnode | Road
             | RoadAffix | Role | SignConfig | SignDetail | SignMessage
@@ -388,8 +388,9 @@ impl Res {
             Font | Graphic | MsgLine | MsgPattern | SignConfig | SignDetail
             | SignMessage | Word => Dms,
             // Incident resources
-            IncidentDetail | IncAdvice | IncDescriptor | IncLocator
-            | RoadAffix => Incident,
+            IncAdvice | IncDescriptor | IncDetail | IncLocator | RoadAffix => {
+                Incident
+            }
             // LCS resources
             LcsState => Lcs,
             // Permission resources

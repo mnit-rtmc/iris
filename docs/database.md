@@ -52,9 +52,9 @@ update, and is caused by one of these conditions:
 `gps`              | ☑️   | ☑️   |     |
 `graphic`          |     |     |     |
 `incident`         |     |     |     |
-`incident_detail`  |     |     |     |
 `inc_advice`       |     |     |     |
 `inc_descriptor`   |     |     |     |
+`inc_detail`       |     |     |     |
 `inc_locator`      |     |     |     |
 `lcs`              | ☑️   | ☑️   | ☑️   |
 `lcs_state`        |     | ☑️   |     |

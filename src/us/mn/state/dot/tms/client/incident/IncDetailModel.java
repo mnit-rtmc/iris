@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2017  Minnesota Department of Transportation
+ * Copyright (C) 2010-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.client.incident;
 
 import java.util.ArrayList;
-import us.mn.state.dot.tms.IncidentDetail;
+import us.mn.state.dot.tms.IncDetail;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -26,38 +26,34 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  *
  * @author Douglas Lau
  */
-public class IncidentDetailModel extends ProxyTableModel<IncidentDetail> {
+public class IncDetailModel extends ProxyTableModel<IncDetail> {
 
 	/** Create a proxy descriptor */
-	static public ProxyDescriptor<IncidentDetail> descriptor(Session s) {
-		return new ProxyDescriptor<IncidentDetail>(
-			s.getSonarState().getIncCache().getIncidentDetails(),
+	static public ProxyDescriptor<IncDetail> descriptor(Session s) {
+		return new ProxyDescriptor<IncDetail>(
+			s.getSonarState().getIncCache().getIncDetails(),
 			false
 		);
 	}
 
 	/** Create the columns in the model */
 	@Override
-	protected ArrayList<ProxyColumn<IncidentDetail>> createColumns() {
-		ArrayList<ProxyColumn<IncidentDetail>> cols =
-			new ArrayList<ProxyColumn<IncidentDetail>>(2);
-		cols.add(new ProxyColumn<IncidentDetail>("device.name", 90) {
-			public Object getValueAt(IncidentDetail dtl) {
+	protected ArrayList<ProxyColumn<IncDetail>> createColumns() {
+		ArrayList<ProxyColumn<IncDetail>> cols =
+			new ArrayList<ProxyColumn<IncDetail>>(2);
+		cols.add(new ProxyColumn<IncDetail>("device.name", 90) {
+			public Object getValueAt(IncDetail dtl) {
 				return dtl.getName();
 			}
 		});
-		cols.add(new ProxyColumn<IncidentDetail>("device.description",
-			200)
-		{
-			public Object getValueAt(IncidentDetail dtl) {
+		cols.add(new ProxyColumn<IncDetail>("device.description", 200) {
+			public Object getValueAt(IncDetail dtl) {
 				return dtl.getDescription();
 			}
-			public boolean isEditable(IncidentDetail dtl) {
+			public boolean isEditable(IncDetail dtl) {
 				return canWrite(dtl);
 			}
-			public void setValueAt(IncidentDetail dtl,
-				Object value)
-			{
+			public void setValueAt(IncDetail dtl, Object value) {
 				dtl.setDescription(value.toString());
 			}
 		});
@@ -65,7 +61,7 @@ public class IncidentDetailModel extends ProxyTableModel<IncidentDetail> {
 	}
 
 	/** Create a new incident detail table model */
-	public IncidentDetailModel(Session s) {
+	public IncDetailModel(Session s) {
 		super(s, descriptor(s), 12);
 	}
 }

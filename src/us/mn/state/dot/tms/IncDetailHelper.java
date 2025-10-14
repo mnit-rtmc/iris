@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,16 +19,16 @@ package us.mn.state.dot.tms;
  *
  * @author Douglas Lau
  */
-public class IncidentDetailHelper extends BaseHelper {
+public class IncDetailHelper extends BaseHelper {
 
 	/** Don't allow instances to be created */
-	private IncidentDetailHelper() {
+	private IncDetailHelper() {
 		assert false;
 	}
 
 	/** Lookup incident detail with the specified name */
-	static public IncidentDetail lookup(String name) {
-		return (IncidentDetail) namespace.lookupObject(
-			IncidentDetail.SONAR_TYPE, name);
+	static public IncDetail lookup(String name) {
+		return (IncDetail) namespace.lookupObject(
+			IncDetail.SONAR_TYPE, name);
 	}
 }

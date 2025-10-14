@@ -102,7 +102,7 @@ impl Asset {
             }
             Graphics => "/iris/api/graphic".into(),
             HashtagResources => "/iris/api/hashtag".into(),
-            IncDetails => "/iris/api/incident_detail".into(),
+            IncDetails => "/iris/api/inc_detail".into(),
             LcsIndications => "/iris/lut/lcs_indication".into(),
             LcsStates => "/iris/api/lcs_state".into(),
             LcsTypes => "/iris/lut/lcs_type".into(),

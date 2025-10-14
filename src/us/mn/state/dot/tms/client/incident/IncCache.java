@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.IncAdvice;
 import us.mn.state.dot.tms.IncDescriptor;
 import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.IncidentDetail;
+import us.mn.state.dot.tms.IncDetail;
 import us.mn.state.dot.tms.IncLocator;
 import us.mn.state.dot.tms.client.SonarState;
 
@@ -30,10 +30,10 @@ import us.mn.state.dot.tms.client.SonarState;
 public class IncCache {
 
 	/** Cache of incident details */
-	private final TypeCache<IncidentDetail> inc_details;
+	private final TypeCache<IncDetail> inc_details;
 
 	/** Get the incident details object cache */
-	public TypeCache<IncidentDetail> getIncidentDetails() {
+	public TypeCache<IncDetail> getIncDetails() {
 		return inc_details;
 	}
 
@@ -73,8 +73,7 @@ public class IncCache {
 	public IncCache(SonarState client) throws IllegalAccessException,
 		NoSuchFieldException
 	{
-		inc_details = new TypeCache<IncidentDetail>(
-			IncidentDetail.class, client);
+		inc_details = new TypeCache<IncDetail>(IncDetail.class, client);
 		incidents = new TypeCache<Incident>(Incident.class, client);
 		inc_descriptors = new TypeCache<IncDescriptor>(
 			IncDescriptor.class, client);

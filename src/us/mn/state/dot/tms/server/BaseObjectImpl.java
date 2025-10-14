@@ -66,7 +66,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		RoadAffixImpl.loadAll();
 		GeoLocImpl.loadAll();
 		MapExtentImpl.loadAll();
-		IncidentDetailImpl.loadAll();
+		IncDetailImpl.loadAll();
 		CommConfigImpl.loadAll();
 		CommLinkImpl.loadAll();
 		ModemImpl.loadAll();
@@ -324,11 +324,10 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	}
 
 	/** Lookup an incident detail */
-	static protected IncidentDetailImpl lookupIncDetail(String name) {
-		SonarObject so = lookupObject(IncidentDetailImpl.SONAR_TYPE,
-			name);
-		return (so instanceof IncidentDetailImpl)
-		      ? (IncidentDetailImpl) so
+	static protected IncDetailImpl lookupIncDetail(String name) {
+		SonarObject so = lookupObject(IncDetailImpl.SONAR_TYPE, name);
+		return (so instanceof IncDetailImpl)
+		      ? (IncDetailImpl) so
 		      : null;
 	}
 

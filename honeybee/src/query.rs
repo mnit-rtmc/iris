@@ -469,15 +469,15 @@ pub const INCIDENT_PUB: &str = "\
   WHERE cleared = false";
 
 /// SQL query for all incident details (primary)
-pub const INCIDENT_DETAIL_ALL: &str = "\
+pub const INC_DETAIL_ALL: &str = "\
   SELECT name, description \
-  FROM event.incident_detail \
+  FROM iris.inc_detail \
   ORDER BY name";
 
 /// SQL query for one incident detail
-pub const INCIDENT_DETAIL_ONE: &str = "\
+pub const INC_DETAIL_ONE: &str = "\
   SELECT name, description \
-  FROM event.incident_detail \
+  FROM iris.inc_detail \
   WHERE name = $1";
 
 /// SQL query for all incident advice (primary)

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.incident;
 
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.IncidentDetail;
+import us.mn.state.dot.tms.IncDetail;
 import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.geo.Position;
@@ -32,7 +32,7 @@ public class ClientIncident implements Incident {
 	static public final String NAME = "client_incident";
 
 	/** Create a new client incident */
-	public ClientIncident(String rpl, int et, IncidentDetail id, String lc,
+	public ClientIncident(String rpl, int et, IncDetail id, String lc,
 		Road rd, short d, double lt, double ln, String i)
 	{
 		replaces = rpl;
@@ -86,11 +86,11 @@ public class ClientIncident implements Incident {
 	}
 
 	/** Incident detail */
-	private final IncidentDetail detail;
+	private final IncDetail detail;
 
 	/** Get the incident detail */
 	@Override
-	public IncidentDetail getDetail() {
+	public IncDetail getDetail() {
 		return detail;
 	}
 
