@@ -250,10 +250,11 @@ impl Controller {
 
     /// Get item states
     pub fn item_states(&self) -> ItemStates<'_> {
-        match (self.is_active(), self.fail_time.is_some()) {
-            (true, true) => ItemStates::default()
-                .with(ItemState::Offline, "FIXME: since fail time"),
-            (true, false) => ItemState::Available.into(),
+        match (self.is_active(), &self.fail_time) {
+            (true, Some(fail_time)) => {
+                ItemStates::default().with(ItemState::Offline, fail_time)
+            }
+            (true, None) => ItemState::Available.into(),
             (false, _) => ItemState::Inactive.into(),
         }
     }
