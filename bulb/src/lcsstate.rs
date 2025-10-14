@@ -27,6 +27,7 @@ use wasm_bindgen::JsValue;
 pub struct LcsIndication {
     pub id: u32,
     pub description: String,
+    pub symbol: String,
 }
 
 /// LCS State
@@ -52,28 +53,7 @@ pub struct LcsStateAnc {
 
 impl fmt::Display for LcsIndication {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{} {}", self.symbol(), self.description)
-    }
-}
-
-impl LcsIndication {
-    fn symbol(&self) -> char {
-        // FIXME: these should be in the LUT
-        match self.id {
-            1 => '⍽',
-            2 => '↓',
-            3 => '⇣',
-            4 => '✕',
-            5 => '✖',
-            6 => '》',
-            7 => '《',
-            8 => '⤷',
-            9 => '⤶',
-            10 => '◊',
-            11 => 'A',
-            12 => 'L',
-            _ => '?',
-        }
+        write!(f, "{} {}", self.symbol, self.description)
     }
 }
 
@@ -88,6 +68,7 @@ impl LcsStateAnc {
         LcsIndication {
             id: 0,
             description: "Unknown".to_string(),
+            symbol: "?".to_string(),
         }
     }
 
@@ -159,7 +140,7 @@ impl LcsState {
             .end();
         html.div().class("info row").text(&self.lcs);
         html.span().text(self.lane).end();
-        html.span().text(anc.indication(self).symbol()).end();
+        html.span().text(anc.indication(self).symbol).end();
         html.to_string()
     }
 

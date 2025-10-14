@@ -4046,24 +4046,25 @@ GRANT SELECT ON lcs_view TO PUBLIC;
 
 CREATE TABLE iris.lcs_indication (
     id INTEGER PRIMARY KEY,
-    description VARCHAR NOT NULL
+    description VARCHAR NOT NULL,
+    symbol VARCHAR NOT NULL
 );
 
 INSERT INTO iris.lcs_indication (id, description)
 VALUES
-    (0, 'Unknown'),
-    (1, 'Dark'),
-    (2, 'Lane open'),
-    (3, 'Use caution'),
-    (4, 'Lane closed ahead'),
-    (5, 'Lane closed'),
-    (6, 'Merge right'),
-    (7, 'Merge left'),
-    (8, 'Must exit right'),
-    (9, 'Must exit left'),
-    (10, 'HOV / HOT'),
-    (11, 'Variable speed advisory'),
-    (12, 'Variable speed limit');
+    (0, 'Unknown', '?'),
+    (1, 'Dark', '⍽'),
+    (2, 'Lane open', '↓'),
+    (3, 'Use caution', '⇣'),
+    (4, 'Lane closed ahead', '✕'),
+    (5, 'Lane closed', '✖'),
+    (6, 'Merge right', '》'),
+    (7, 'Merge left', '《'),
+    (8, 'Must exit right', '⤷'),
+    (9, 'Must exit left', '⤶'),
+    (10, 'HOV / HOT', '◊'),
+    (11, 'Variable speed advisory', 'A'),
+    (12, 'Variable speed limit', 'L');
 
 CREATE TABLE iris._lcs_state (
     name VARCHAR(20) PRIMARY KEY,

@@ -551,7 +551,7 @@ pub const LCS_ONE: &str = "\
 
 /// SQL query for LCS indications (LUT)
 pub const LCS_INDICATION_LUT: &str = "\
-  SELECT id, description \
+  SELECT id, description, symbol \
   FROM iris.lcs_indication \
   ORDER BY id";
 
