@@ -1,5 +1,11 @@
 # IRIS 5.x Release Notes
 
+5.77.0 (20 Oct 2025)
+ - Disallow negative controller `drop_id`
+ - Add incidents to web UI
+ - Minor database cleanups
+ - Add NULL-checks in ONVIF driver
+
 5.76.0 (3 Oct 2025)
  - Changed controller `drop_id` from SMALLINT to INTEGER (32-bit)
  - Improved checks for failed pixels within messages:
