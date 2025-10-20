@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2023       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -490,7 +490,7 @@ public class OpQueryDMSStatus extends OpDMS {
 		private final ASN1Integer potBase = ledLdcPotBase.makeInt();
 		private final ASN1Integer low = ledPixelLow.makeInt();
 		private final ASN1Integer high = ledPixelHigh.makeInt();
-		private final ASN1Integer bad = ledBadPixelLimit.makeInt();
+		private final ASN1Integer limit = ledBadPixelLimit.makeInt();
 
 		/** Query Ledstar-specific status */
 		@SuppressWarnings("unchecked")
@@ -498,7 +498,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(potBase);
 			mess.add(low);
 			mess.add(high);
-			mess.add(bad);
+			mess.add(limit);
 			try {
 				mess.queryProps();
 			}
@@ -509,7 +509,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			logQuery(potBase);
 			logQuery(low);
 			logQuery(high);
-			logQuery(bad);
+			logQuery(limit);
 			putStatus(DMS.LDC_POT_BASE, potBase.getInteger());
 			putStatus(DMS.PIXEL_CURRENT_LOW, low.getInteger());
 			putStatus(DMS.PIXEL_CURRENT_HIGH, high.getInteger());

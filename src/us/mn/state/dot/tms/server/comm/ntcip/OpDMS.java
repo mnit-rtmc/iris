@@ -19,6 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSType;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignDetail;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -84,6 +85,14 @@ abstract public class OpDMS extends OpNtcip {
 		return supportsPixelService() && (sm != null)
 		      ? sm.getPixelService()
 		      : false;
+	}
+
+	/** Get the number of pixels on the sign */
+	protected int getPixelCount() {
+		SignConfig sc = dms.getSignConfig();
+		return (sc != null)
+		      ? sc.getPixelWidth() * sc.getPixelHeight()
+		      : 0;
 	}
 
 	/** Create a new DMS operation */

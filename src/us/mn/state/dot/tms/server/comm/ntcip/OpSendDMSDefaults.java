@@ -273,7 +273,7 @@ public class OpSendDMSDefaults extends OpDMS {
 			ASN1Integer override = ledSignErrorOverride.makeInt();
 			ASN1Integer limit = ledBadPixelLimit.makeInt();
 			temp.setInteger(DMS_HIGH_TEMP_CUTOFF);
-			limit.setInteger(500);
+			limit.setInteger(getBadPixelLimit());
 			mess.add(temp);
 			mess.add(override);
 			mess.add(limit);
@@ -293,6 +293,12 @@ public class OpSendDMSDefaults extends OpDMS {
 			}
 			return null;
 		}
+	}
+
+	/** Get bad pixel limit (Ledstar-specific) */
+	private int getBadPixelLimit() {
+		int count = getPixelCount();
+		return (count >= 4) ? (count / 4) : 500;
 	}
 
 	/** Phase to set Skyline-specific object defaults */
