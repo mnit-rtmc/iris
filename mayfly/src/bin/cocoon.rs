@@ -1,6 +1,6 @@
 // cocoon.rs
 //
-// Copyright (c) 2021-2024  Minnesota Department of Transportation
+// Copyright (c) 2021-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -137,17 +137,14 @@ impl Binner {
     /// Check if a file is a vlog which needs binning
     fn vlog_det_id(&self, name: &str) -> Option<String> {
         let ent = Path::new(name);
-        if let (Some(stem), Some(ext)) = (ent.file_stem(), ent.extension()) {
-            if ext == "vlog" {
-                if let Some(det_id) = stem.to_str() {
-                    if !self.contains(&(det_id.to_owned() + ".c30"))
-                        && !self.contains(&(det_id.to_owned() + ".s30"))
-                        && !self.contains(&(det_id.to_owned() + ".v30"))
-                    {
-                        return Some(det_id.to_owned());
-                    }
-                }
-            }
+        if let (Some(stem), Some(ext)) = (ent.file_stem(), ent.extension())
+            && ext == "vlog"
+            && let Some(det_id) = stem.to_str()
+            && !self.contains(&(det_id.to_owned() + ".c30"))
+            && !self.contains(&(det_id.to_owned() + ".s30"))
+            && !self.contains(&(det_id.to_owned() + ".v30"))
+        {
+            return Some(det_id.to_owned());
         }
         None
     }
@@ -155,10 +152,10 @@ impl Binner {
     /// Check if archive contains a file
     fn contains(&self, name: &str) -> bool {
         let path = Path::new(name);
-        if let Some(name) = path.file_name() {
-            if let Some(name) = name.to_str() {
-                return self.files.iter().any(|n| n == name);
-            }
+        if let Some(name) = path.file_name()
+            && let Some(name) = name.to_str()
+        {
+            return self.files.iter().any(|n| n == name);
         }
         false
     }
@@ -188,17 +185,17 @@ impl Binner {
 /// Make backup path name
 fn backup_path(path: &Path) -> Result<PathBuf> {
     let mut backup = PathBuf::from(BACKUP_PATH);
-    if backup.is_dir() {
-        if let Some(name) = path.file_name() {
-            backup.push(name);
-            if !backup.exists() {
-                return Ok(backup);
-            }
-            Err(std::io::Error::new(
-                ErrorKind::AlreadyExists,
-                name.to_string_lossy(),
-            ))?;
+    if backup.is_dir()
+        && let Some(name) = path.file_name()
+    {
+        backup.push(name);
+        if !backup.exists() {
+            return Ok(backup);
         }
+        Err(std::io::Error::new(
+            ErrorKind::AlreadyExists,
+            name.to_string_lossy(),
+        ))?;
     }
     Err(std::io::Error::new(ErrorKind::NotFound, BACKUP_PATH))?
 }

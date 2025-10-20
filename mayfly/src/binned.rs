@@ -268,7 +268,7 @@ impl fmt::Display for OccupancyData {
         } else {
             // Ranges from 0 - 30_000 (100%)
             let val = self.duration;
-            if val % 300 == 0 {
+            if val.is_multiple_of(300) {
                 // Whole number; use integer to prevent .0 at end
                 write!(f, "{}", val / 300)
             } else {

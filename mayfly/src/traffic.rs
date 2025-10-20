@@ -17,8 +17,8 @@ use std::collections::HashSet;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
-use zip::read::ZipFile;
 use zip::ZipArchive;
+use zip::read::ZipFile;
 
 /// One daily traffic file
 pub struct Traffic {
@@ -53,18 +53,18 @@ impl Traffic {
         let mut det_ids = HashSet::new();
         for name in self.file_names() {
             let p = Path::new(name);
-            if let (Some(det_id), Some(ext)) = (p.file_stem(), p.extension()) {
-                if ext == "vlog" {
-                    det_ids.insert(det_id);
-                }
+            if let (Some(det_id), Some(ext)) = (p.file_stem(), p.extension())
+                && ext == "vlog"
+            {
+                det_ids.insert(det_id);
             }
         }
         for name in self.file_names() {
             let p = Path::new(name);
-            if let (Some(det_id), Some(ext)) = (p.file_stem(), p.extension()) {
-                if ext == "v30" {
-                    det_ids.remove(det_id);
-                }
+            if let (Some(det_id), Some(ext)) = (p.file_stem(), p.extension())
+                && ext == "v30"
+            {
+                det_ids.remove(det_id);
             }
         }
         !det_ids.is_empty()

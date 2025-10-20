@@ -17,7 +17,7 @@ use crate::error::{Error, Result};
 use std::io::BufRead as _;
 use std::io::Read as BlockingRead;
 use std::marker::PhantomData;
-use std::num::{NonZeroU16, NonZeroU32, NonZeroU8};
+use std::num::{NonZeroU8, NonZeroU16, NonZeroU32};
 use std::str::FromStr;
 use tokio::io::{AsyncBufReadExt, AsyncReadExt, BufReader};
 
@@ -215,20 +215,20 @@ impl VehicleEvent {
             }
             None => return Err(Error::InvalidData("headway")),
         }
-        if let Some(stamp) = val.next() {
-            if !stamp.is_empty() {
-                ev.stamp = stamp.parse()?;
-            }
+        if let Some(stamp) = val.next()
+            && !stamp.is_empty()
+        {
+            ev.stamp = stamp.parse()?;
         }
-        if let Some(speed) = val.next() {
-            if !speed.is_empty() {
-                ev.speed = speed.parse().ok();
-            }
+        if let Some(speed) = val.next()
+            && !speed.is_empty()
+        {
+            ev.speed = speed.parse().ok();
         }
-        if let Some(length) = val.next() {
-            if !length.is_empty() {
-                ev.length = length.parse().ok();
-            }
+        if let Some(length) = val.next()
+            && !length.is_empty()
+        {
+            ev.length = length.parse().ok();
         }
         Ok(ev)
     }
@@ -270,10 +270,10 @@ impl VehicleEvent {
 
     /// Get a (near) time stamp for the previous vehicle event
     fn previous(&self) -> Stamp {
-        if let (Some(headway), Some(stamp)) = (self.headway(), self.stamp()) {
-            if stamp >= headway {
-                return Stamp::new(stamp - headway);
-            }
+        if let (Some(headway), Some(stamp)) = (self.headway(), self.stamp())
+            && stamp >= headway
+        {
+            return Stamp::new(stamp - headway);
         }
         Stamp::default()
     }
@@ -293,10 +293,10 @@ impl VehicleEvent {
 
     /// Propogate time stamp from previous event
     fn propogate_stamp(&mut self, previous: Option<u32>) {
-        if !self.is_reset() {
-            if let Some(pr) = previous {
-                self.set_previous(pr);
-            }
+        if !self.is_reset()
+            && let Some(pr) = previous
+        {
+            self.set_previous(pr);
         }
     }
 
@@ -363,13 +363,12 @@ impl VehLog {
         let mut ev = VehicleEvent::new(line)?;
         ev.propogate_stamp(self.previous);
         // Add Reset if time stamp went backwards
-        if let Some(latest) = self.latest {
-            if let Some(stamp) = ev.stamp() {
-                if stamp < latest {
-                    self.events.push(VehicleEvent::new_reset());
-                    self.latest = Some(stamp);
-                }
-            }
+        if let Some(latest) = self.latest
+            && let Some(stamp) = ev.stamp()
+            && stamp < latest
+        {
+            self.events.push(VehicleEvent::new_reset());
+            self.latest = Some(stamp);
         }
         self.previous = ev.stamp();
         if self.previous.is_some() {

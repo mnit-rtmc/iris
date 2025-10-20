@@ -14,9 +14,9 @@
 //
 #![forbid(unsafe_code)]
 
+use axum::Router;
 use axum::response::IntoResponse;
 use axum::routing::get;
-use axum::Router;
 use http::header;
 use mayfly::error::Result;
 use mayfly::routes;

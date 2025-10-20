@@ -1,6 +1,6 @@
 // routes.rs
 //
-// Copyright (c) 2019-2024  Minnesota Department of Transportation
+// Copyright (c) 2019-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,10 +18,10 @@ use crate::binned::{
 use crate::error::{Error, Result};
 use crate::traffic::Traffic;
 use crate::vehicle::{VehLog, VehicleFilter};
+use axum::Router;
 use axum::extract::Query;
 use axum::response::IntoResponse;
 use axum::routing::get;
-use axum::Router;
 use chrono::{Local, NaiveDate, TimeDelta};
 use serde::Deserialize;
 use std::collections::HashSet;
@@ -29,7 +29,7 @@ use std::fmt::{Display, Write};
 use std::io::{ErrorKind, Read as _};
 use std::marker::PhantomData;
 use std::path::{Path, PathBuf};
-use tokio::fs::{read_dir, File};
+use tokio::fs::{File, read_dir};
 use tokio::io::AsyncReadExt;
 use tokio::task;
 use zip::result::ZipError;
@@ -225,14 +225,12 @@ where
     let mut names = HashSet::new();
     while let Some(entry) = entries.next_entry().await? {
         let tp = entry.file_type().await?;
-        if !tp.is_symlink() {
-            if let Some(nm) = entry.file_name().to_str() {
-                if check(nm, tp.is_dir()) {
-                    if let Some(stem) = file_stem(nm) {
-                        names.insert(stem.to_string());
-                    }
-                }
-            }
+        if !tp.is_symlink()
+            && let Some(nm) = entry.file_name().to_str()
+            && check(nm, tp.is_dir())
+            && let Some(stem) = file_stem(nm)
+        {
+            names.insert(stem.to_string());
         }
     }
     let mut json = JsonVec::new();
@@ -259,10 +257,10 @@ fn scan_zip_blocking(
     let traffic = Traffic::new(&path)?;
     let mut names = HashSet::new();
     for nm in traffic.file_names() {
-        if check(nm, false) {
-            if let Some(stem) = file_stem(nm) {
-                names.insert(stem.to_string());
-            }
+        if check(nm, false)
+            && let Some(stem) = file_stem(nm)
+        {
+            names.insert(stem.to_string());
         }
     }
     let mut json = JsonVec::new();
