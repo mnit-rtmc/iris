@@ -112,7 +112,7 @@ impl ItemState {
             "🚦" => Some(Self::RampMeter),
             "💥" => Some(Self::Crash),
             "⛽" => Some(Self::Stall),
-            "🪨" => Some(Self::Hazard),
+            "🪨" => Some(Self::Hazard), // 🫟  maybe?
             "🚧" => Some(Self::Roadwork),
             "❓" => Some(Self::Unknown),
             _ => None,
@@ -146,7 +146,7 @@ impl ItemState {
             Self::RampMeter => "🚦",
             Self::Crash => "💥",
             Self::Stall => "⛽",
-            Self::Hazard => "🪨",
+            Self::Hazard => "🪨", // 🫟  maybe?
             Self::Roadwork => "🚧",
             Self::Unknown => "❓",
         }
