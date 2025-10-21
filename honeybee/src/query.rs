@@ -460,7 +460,8 @@ pub const INCIDENT_ONE: &str = "\
 /// SQL query for incident locations
 pub const INCIDENT_LOCS: &str = "\
   SELECT name, road, dir, lat, lon \
-  FROM event.incident";
+  FROM event.incident \
+  WHERE cleared = false";
 
 /// SQL query for all active incidents (public)
 pub const INCIDENT_PUB: &str = "\
