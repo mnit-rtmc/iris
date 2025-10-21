@@ -447,6 +447,7 @@ pub const HASHTAG_ALL: &str = "\
 pub const INCIDENT_ALL: &str = "\
   SELECT name, replaces, event_desc, road, dir, detail, cleared, confirmed \
   FROM event.incident \
+  WHERE cleared = false \
   ORDER BY event_date";
 
 /// SQL query for one active incident (secondary)
