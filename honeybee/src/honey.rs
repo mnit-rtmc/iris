@@ -760,7 +760,7 @@ fn other_object(honey: Honey) -> Router {
         let ck_nm = check_name(&type_n, &obj_n, &params.0)?;
         // get precent-decoded object name
         let obj_n = nm.object_n().ok_or(Error::InvalidValue)?;
-        let sql = one_sql(nm.res_type);
+        let sql = one_sql(nm.res_type).ok_or(Error::InvalidValue)?;
         let cred = Credentials::load(&session).await?;
         honey.name_access(cred.user(), &ck_nm, Access::View).await?;
         let body = match nm.res_type {
@@ -847,9 +847,9 @@ fn other_object(honey: Honey) -> Router {
 }
 
 /// Get the SQL query one record of a given resource type
-const fn one_sql(res: Res) -> &'static str {
+const fn one_sql(res: Res) -> Option<&'static str> {
     use Res::*;
-    match res {
+    Some(match res {
         ActionPlan => query::ACTION_PLAN_ONE,
         Alarm => query::ALARM_ONE,
         Beacon => query::BEACON_ONE,
@@ -901,8 +901,8 @@ const fn one_sql(res: Res) -> &'static str {
         VideoMonitor => query::VIDEO_MONITOR_ONE,
         WeatherSensor => query::WEATHER_SENSOR_ONE,
         Word => query::WORD_ONE,
-        _ => unimplemented!(),
-    }
+        _ => return None,
+    })
 }
 
 /// Check if resource type / attribute should be patched first
