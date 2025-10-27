@@ -39,9 +39,12 @@ public class StateStyle {
 		    : GateArmState.CLOSED;
 		String t = "";
 		if (ga != null) {
-			t = (GateArmState.FAULT == gas)
-				? ga.getFault()
-				: gas.toString();
+			t = gas.toString();
+			if (GateArmState.FAULT == gas) {
+				String fault = ga.getFault();
+				if (fault != null)
+					t = fault;
+			}
 		}
 		text = t;
 	}
