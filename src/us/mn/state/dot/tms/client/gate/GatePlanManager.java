@@ -42,7 +42,7 @@ public class GatePlanManager extends ProxyManager<ActionPlan> {
 
 	/** Create a new gate action plan manager */
 	public GatePlanManager(Session s, GeoLocManager lm) {
-		super(s, lm, descriptor(s), 0, ItemStyle.GATE_ARM);
+		super(s, lm, descriptor(s), 0, ItemStyle.ALL);
 	}
 
 	/** Create a gate arm map tab */
