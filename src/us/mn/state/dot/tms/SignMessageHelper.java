@@ -191,7 +191,7 @@ public class SignMessageHelper extends BaseHelper {
 		// clear "loner" stuck off pixels (leaving "clumps" only)
 		temp.clearNoLitNeighbors();
 		int n_off = temp.getLitCount();
-		if (n_off > 0) {
+		if (n_off > 10) {
 			throw new InvalidMsgException(
 				"Adjacent stuck off pixels: " + n_off, true);
 		}
@@ -213,7 +213,7 @@ public class SignMessageHelper extends BaseHelper {
 		// count pixels in outline that are stuck on
 		temp.intersection(stuck_on);
 		int n_on = temp.getLitCount();
-		if (n_on > 1) {
+		if (n_on > 10) {
 			throw new InvalidMsgException(
 				"Adjacent stuck on pixels: " + n_on, true);
 		}
