@@ -186,7 +186,7 @@ public class GateArmDispatcher extends IPanel {
 				for (DeviceAction da:
 					 DeviceActionHelper.find(tags))
 				{
-					watcher.setProxy(da.getActionPlan());
+					sel_mdl.setSelected(da.getActionPlan());
 					break;
 				}
 			}
