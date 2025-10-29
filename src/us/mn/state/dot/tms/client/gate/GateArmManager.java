@@ -14,15 +14,12 @@
  */
 package us.mn.state.dot.tms.client.gate;
 
-import java.util.Iterator;
-import java.util.TreeSet;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.GateArm;
-import us.mn.state.dot.tms.GateArmHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
@@ -30,7 +27,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.WorkRequestAction;
 import us.mn.state.dot.tms.utils.I18N;
-import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * The GateArmManager class provides proxies for GateArm objects.
@@ -79,7 +75,6 @@ public class GateArmManager extends DeviceManager<GateArm> {
 		theme.addStyle(ItemStyle.OPEN, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(ItemStyle.FAULT, ProxyTheme.COLOR_FAULT);
 		theme.addStyle(ItemStyle.OFFLINE, ProxyTheme.COLOR_OFFLINE);
-		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}
 

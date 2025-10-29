@@ -27,6 +27,8 @@ import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanHelper;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraPreset;
+import us.mn.state.dot.tms.DeviceAction;
+import us.mn.state.dot.tms.DeviceActionHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmHelper;
@@ -34,6 +36,7 @@ import us.mn.state.dot.tms.GateArmInterlock;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.PlanPhaseHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -66,6 +69,9 @@ public class GateArmDispatcher extends IPanel {
 
 	/** Action plan selection model */
 	private final ProxySelectionModel<ActionPlan> sel_mdl;
+
+	/** Gate arm selection model */
+	private final ProxySelectionModel<GateArm> ga_sel_mdl;
 
 	/** Name label */
 	private final JLabel name_lbl = createValueLabel();
@@ -160,12 +166,30 @@ public class GateArmDispatcher extends IPanel {
 	/** Currently selected action plan */
 	private ActionPlan selected;
 
-	/** Selection listener */
+	/** Gate plan selection listener */
 	private final ProxySelectionListener sel_listener =
 		new ProxySelectionListener()
 	{
 		public void selectionChanged() {
 			watcher.setProxy(sel_mdl.getSingleSelection());
+		}
+	};
+
+	/** Gate arm selection listener */
+	private final ProxySelectionListener ga_sel_listener =
+		new ProxySelectionListener()
+	{
+		public void selectionChanged() {
+			GateArm ga = ga_sel_mdl.getSingleSelection();
+			if (ga != null) {
+				Hashtags tags = new Hashtags(ga.getNotes());
+				for (DeviceAction da:
+					 DeviceActionHelper.find(tags))
+				{
+					watcher.setProxy(da.getActionPlan());
+					break;
+				}
+			}
 		}
 	};
 
@@ -194,6 +218,7 @@ public class GateArmDispatcher extends IPanel {
 		warn_dms_1 = new WarningDms(session);
 		warn_dms_2 = new WarningDms(session);
 		sel_mdl = s.getGatePlanManager().getSelectionModel();
+		ga_sel_mdl = s.getGateArmManager().getSelectionModel();
 		stream_pnl = createStreamPanel(MEDIUM);
 		thumb_pnl = createStreamPanel(THUMBNAIL);
 		for (int i = 0; i < MAX_ARMS; i++) {
@@ -242,6 +267,7 @@ public class GateArmDispatcher extends IPanel {
 		warn_dms_2.initialize();
 		clearSelected();
 		sel_mdl.addProxySelectionListener(sel_listener);
+		ga_sel_mdl.addProxySelectionListener(ga_sel_listener);
 	}
 
 	/** Create streams box */
@@ -277,6 +303,7 @@ public class GateArmDispatcher extends IPanel {
 		warn_dms_2.dispose();
 		watcher.dispose();
 		sel_mdl.removeProxySelectionListener(sel_listener);
+		ga_sel_mdl.removeProxySelectionListener(ga_sel_listener);
 		stream_pnl.dispose();
 		thumb_pnl.dispose();
 		clearSelected();

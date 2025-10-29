@@ -173,6 +173,14 @@ public class Session {
 		return lcs_manager;
 	}
 
+	/** Gate arm manager */
+	private final GateArmManager ga_manager;
+
+	/** Get the gate arm manager */
+	public GateArmManager getGateArmManager() {
+		return ga_manager;
+	}
+
 	/** Gate arm plan manager */
 	private final GatePlanManager gp_manager;
 
@@ -208,6 +216,7 @@ public class Session {
 		cam_manager = new CameraManager(this, loc_manager);
 		lcs_manager = new LcsManager(this, loc_manager);
 		alert_manager = new AlertManager(this, loc_manager);
+		ga_manager = new GateArmManager(this, loc_manager);
 		gp_manager = new GatePlanManager(this, loc_manager);
 		managers = new ArrayList<ProxyManager<?>>();
 		managers.add(r_node_manager);
@@ -216,7 +225,7 @@ public class Session {
 		managers.add(cam_manager);
 		managers.add(lcs_manager);
 		managers.add(new MeterManager(this, loc_manager));
-		managers.add(new GateArmManager(this, loc_manager));
+		managers.add(ga_manager);
 		managers.add(gp_manager);
 		managers.add(new BeaconManager(this, loc_manager));
 		managers.add(new TagReaderManager(this, loc_manager));
