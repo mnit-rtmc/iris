@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.PlanPhaseHelper;
+import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.StreamPanel;
 import us.mn.state.dot.tms.client.camera.VideoRequest;
@@ -436,6 +437,11 @@ public class GateArmDispatcher extends IPanel {
 				ilock_lbl[i].setBorder(null);
 				ilock_lbl[i].setText(" ");
 			}
+		}
+		MapTab tab = session.lookupTab("gate_arm");
+		if (tab instanceof GateArmTab) {
+			GateArmTab ga_tab = (GateArmTab) tab;
+			ga_tab.updateCounts();
 		}
 	}
 }

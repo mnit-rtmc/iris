@@ -95,4 +95,9 @@ public class GateArmTab extends MapTab<ActionPlan> {
 		summary.dispose();
 		dispatcher.dispose();
 	}
+
+	/** Update style summary counts */
+	public void updateCounts() {
+		summary.updateCounts();
+	}
 }
