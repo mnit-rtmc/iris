@@ -14,9 +14,12 @@
  */
 package us.mn.state.dot.tms.client.gate;
 
+import java.util.Set;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanHelper;
+import us.mn.state.dot.tms.GateArm;
+import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.PlanPhase;
@@ -65,6 +68,8 @@ public class GatePlanManager extends ProxyManager<ActionPlan> {
 		theme.addStyle(ItemStyle.CLOSED, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.CHANGE, ProxyTheme.COLOR_CHANGE);
 		theme.addStyle(ItemStyle.OPEN, ProxyTheme.COLOR_DEPLOYED);
+		theme.addStyle(ItemStyle.FAULT, ProxyTheme.COLOR_FAULT);
+		theme.addStyle(ItemStyle.OFFLINE, ProxyTheme.COLOR_OFFLINE);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}
@@ -76,7 +81,8 @@ public class GatePlanManager extends ProxyManager<ActionPlan> {
 			return false;
 		if (!proxy.getActive())
 			return false;
-		if (ActionPlanHelper.countGateArms(proxy) == 0)
+		Set<GateArm> arms = ActionPlanHelper.findGateArms(proxy);
+		if (arms.size() == 0)
 			return false;
 		String pp = proxy.getPhase().getName();
 		switch (is) {
@@ -86,6 +92,20 @@ public class GatePlanManager extends ProxyManager<ActionPlan> {
 			return PlanPhase.GATE_ARM_CHANGE.equals(pp);
 		case OPEN:
 			return PlanPhase.GATE_ARM_OPEN.equals(pp);
+		case FAULT:
+			for (GateArm ga: arms) {
+				int s = ga.getArmState();
+				if (s == GateArmState.FAULT.ordinal())
+					return true;
+			}
+			return false;
+		case OFFLINE:
+			for (GateArm ga: arms) {
+				int s = ga.getArmState();
+				if (s == GateArmState.UNKNOWN.ordinal())
+					return true;
+			}
+			return false;
 		case ALL:
 			return true;
 		default:

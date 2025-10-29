@@ -61,7 +61,7 @@ public class GateArmTab extends MapTab<ActionPlan> {
 	public GateArmTab(Session s, GatePlanManager man) {
 		super(man);
 		dispatcher = new GateArmDispatcher(s);
-		summary = man.createStyleSummary(false, 1);
+		summary = man.createStyleSummary(false);
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
 		TypeCache<DeviceAction> c =
