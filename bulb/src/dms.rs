@@ -1414,8 +1414,6 @@ impl Card for Dms {
             ItemState::Planned
         } else if states.contains(ItemState::External) {
             ItemState::External
-        } else if states.contains(ItemState::Fault) {
-            ItemState::Fault
         } else {
             ItemState::Available
         }

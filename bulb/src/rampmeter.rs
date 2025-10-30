@@ -786,8 +786,6 @@ impl Card for RampMeter {
             ItemState::Deployed
         } else if states.contains(ItemState::Planned) {
             ItemState::Planned
-        } else if states.contains(ItemState::Fault) {
-            ItemState::Fault
         } else if states.contains(ItemState::Locked) {
             ItemState::Locked
         } else {

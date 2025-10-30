@@ -571,8 +571,6 @@ impl Card for Lcs {
             ItemState::Offline
         } else if states.contains(ItemState::Deployed) {
             ItemState::Deployed
-        } else if states.contains(ItemState::Fault) {
-            ItemState::Fault
         } else if states.contains(ItemState::Locked) {
             ItemState::Locked
         } else {
