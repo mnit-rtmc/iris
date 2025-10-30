@@ -68,12 +68,12 @@ public class MeterTheme extends ProxyTheme<RampMeter> {
 	/** Create a new meter theme */
 	public MeterTheme(MeterManager man) {
 		super(man, new MeterMarker());
+		addStyle(ItemStyle.FAULT, ProxyTheme.COLOR_FAULT);
 		addStyle(ItemStyle.AVAILABLE, COLOR_AVAILABLE);
 		addStyle(ItemStyle.QUEUE_FULL, COLOR_WARNING);
 		addStyle(ItemStyle.QUEUE_EXISTS, COLOR_DEPLOYED);
 		addStyle(ItemStyle.METERING, COLOR_METERING);
 		addStyle(ItemStyle.LOCKED, ProxyTheme.OUTLINE_LOCKED, null);
-		addStyle(ItemStyle.FAULT, ProxyTheme.COLOR_FAULT);
 		addStyle(ItemStyle.OFFLINE, ProxyTheme.COLOR_OFFLINE);
 		addStyle(ItemStyle.ALL);
 		addStyle(LCK_AVAILABLE);

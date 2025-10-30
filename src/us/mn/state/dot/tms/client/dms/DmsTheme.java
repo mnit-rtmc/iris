@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2024  Minnesota Department of Transportation
+ * Copyright (C) 2019-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,13 +59,13 @@ public class DmsTheme extends ProxyTheme<DMS> {
 		super(man, new DmsMarker());
 		// NOTE: the ordering of styles controls which color is used
 		//       to render the sign icon on the map
+		addStyle(ItemStyle.FAULT, COLOR_FAULT);
 		addStyle(ItemStyle.AVAILABLE, COLOR_AVAILABLE);
 		addStyle(ItemStyle.DEPLOYED, COLOR_DEPLOYED);
 		addStyle(ItemStyle.SCHEDULED, COLOR_SCHEDULED);
 		addStyle(ItemStyle.EXTERNAL, COLOR_EXTERNAL);
-		addStyle(ItemStyle.FAULT, COLOR_FAULT);
-		addStyle(ItemStyle.OFFLINE, COLOR_OFFLINE);
 		addStyle(ItemStyle.PURPOSE, COLOR_PURPOSE);
+		addStyle(ItemStyle.OFFLINE, COLOR_OFFLINE);
 		addStyle(ItemStyle.ALL);
 	}
 
